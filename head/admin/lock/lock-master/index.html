@@ -12,14 +12,14 @@
         <meta name="author" content="Janssen, Inc.">
       
       
-        <link rel="canonical" href="https://jans.io/docs/head/admin/lock/lock_pdp_plugin/">
+        <link rel="canonical" href="https://jans.io/docs/head/admin/lock/lock-master/">
       
       <link rel="icon" href="../../../assets/janssen_project_favicon_transparent_50px_50px.ico">
       <meta name="generator" content="mkdocs-1.4.1, mkdocs-material-8.5.7">
     
     
       
-        <title>Implement Lock PDP Plugin - Janssen Documentation</title>
+        <title>Lock Master - Janssen Documentation</title>
       
     
     
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#developer-guide-lock-pdp-client" class="md-skip">
+        <a href="#lock-master" class="md-skip">
           Skip to content
         </a>
       
@@ -128,7 +128,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Implement Lock PDP Plugin
+              Lock Master
             
           </span>
         </div>
@@ -225,15 +225,13 @@
         
   
   
-    
-  
 
 
   
   
   
     <li class="md-tabs__item">
-      <a href="../../" class="md-tabs__link md-tabs__link--active">
+      <a href="../../" class="md-tabs__link">
         Administration
       </a>
     </li>
@@ -359,14 +357,12 @@
 
   
   
-    
-  
   
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1" type="checkbox" id="__nav_1" checked>
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1" type="checkbox" id="__nav_1" >
       
       
       
@@ -6940,14 +6936,12 @@
               
   
   
-    
-  
   
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_16" type="checkbox" id="__nav_1_16" checked>
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_16" type="checkbox" id="__nav_1_16" >
       
       
       
@@ -6994,7 +6988,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../lock_installation/" class="md-nav__link">
+      <a href="../lock_installation.md" class="md-nav__link">
         Lock Installation
       </a>
     </li>
@@ -7008,7 +7002,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../lock_auth_server_config/" class="md-nav__link">
+      <a href="../lock_auth_server_config.md" class="md-nav__link">
         Auth Server Configuration
       </a>
     </li>
@@ -7022,7 +7016,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../lock_client_config/" class="md-nav__link">
+      <a href="../lock_client_config.md" class="md-nav__link">
         Lock Client Configuration
       </a>
     </li>
@@ -7034,59 +7028,11 @@
               
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          Implement Lock PDP Plugin
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../lock_pdp_plugin.md" class="md-nav__link">
         Implement Lock PDP Plugin
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#janc-core-messages-api" class="md-nav__link">
-    Janc core messages API
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#new-pdp-support" class="md-nav__link">
-    New PDP support
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -7098,7 +7044,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../lock_opa/" class="md-nav__link">
+      <a href="../lock_opa.md" class="md-nav__link">
         Policy Store Integration
       </a>
     </li>
@@ -8423,28 +8369,6 @@
     
   
   
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#janc-core-messages-api" class="md-nav__link">
-    Janc core messages API
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#new-pdp-support" class="md-nav__link">
-    New PDP support
-  </a>
-  
-</li>
-      
-    </ul>
-  
 </nav>
                   </div>
                 </div>
@@ -8458,119 +8382,26 @@
                   
   
 
-  <nav class="md-tags" >
-    
-      
-      
-        <span class="md-tag">administration</span>
-      
-    
-      
-      
-        <span class="md-tag">lock</span>
-      
-    
-      
-      
-        <span class="md-tag">opa</span>
-      
-    
-  </nav>
 
 
-
-  <a href="https://github.com/JanssenProject/jans/edit/main/docs/admin/lock/lock_pdp_plugin.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/JanssenProject/jans/edit/main/docs/admin/lock/lock-master.md" title="Edit this page" class="md-content__button md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
-<h1 id="developer-guide-lock-pdp-client">Developer Guide: Lock PDP Client<a class="headerlink" href="#developer-guide-lock-pdp-client" title="Permanent link">#</a></h1>
-<h2 id="janc-core-messages-api">Janc core messages API<a class="headerlink" href="#janc-core-messages-api" title="Permanent link">#</a></h2>
-<p>Jans provides <code>jans-core-message</code> library to work with PubSub servers. It has minimum dependencies and can be integrated in other projects. Current implementation supports 2 servers PostgreSQL and Redis.</p>
-<p>To work with PostgreSQL/Redis servers it has <a href="https://github.com/JanssenProject/jans/blob/main/jans-core/message/src/main/java/io/jans/service/message/provider/MessageInterface.java">MessageInterface</a>/<a href="https://github.com/JanssenProject/jans/blob/main/jans-core/message/src/main/java/io/jans/service/message/provider/MessageProvider.java">MessageProvider</a> implementations. It has methods to subscribe and publish messages defined in:</p>
-<div class="highlight"><pre><span></span><code>public abstract class MessageProvider&lt;T&gt; implements MessageInterface {
-
-    /*
-     * Delegate internal connection object
-     */
-    public abstract T getDelegate();
-
-    public abstract MessageProviderType getProviderType();
-
-    public abstract void shutdown();
-
-}
-
-public interface MessageInterface {
-
-    void subscribe(PubSubInterface pubSubAdapter, String... channels);
-
-    void unsubscribe(PubSubInterface pubSubAdapter);
-
-    boolean publish(String channel, String message);
-
-}
-</code></pre></div>
-<p>All methods defined in this interface <code>MessageInterface</code> are asynchronous.
-<code>MessageProvider</code> provides additional methods needed to determine it type and handle correct shutdown.</p>
-<p><a href="https://github.com/JanssenProject/jans/blob/main/jans-core/message/src/main/java/io/jans/service/message/pubsub/PubSubInterface.java">PubSubInterface</a> here defines call back class which API should call on messaging events:</p>
-<p>To add new PubSub support library should add new <code>MessageProvider</code> implementation.</p>
-<div class="highlight"><pre><span></span><code>public interface PubSubInterface {
-
-    void onMessage(String channel, String message);
-
-    void onSubscribe(String channel, int subscribedChannels);
-
-    void onUnsubscribe(String channel, int subscribedChannels);
-
-}
-</code></pre></div>
-<h2 id="new-pdp-support">New PDP support<a class="headerlink" href="#new-pdp-support" title="Permanent link">#</a></h2>
-<p>To add new PDP support jar file should has 2 classes implementation: <code>MessageConsumer</code> and <code>PolicyConsumer</code>. Lock has 2 implementations of these interfaces <a href="https://github.com/JanssenProject/jans/blob/main/jans-lock/service/src/main/java/io/jans/lock/service/consumer/message/opa/OpaMessageConsumer.java">OpaMessageConsumer</a> and <a href="https://github.com/JanssenProject/jans/blob/main/jans-lock/service/src/main/java/io/jans/lock/service/consumer/policy/opa/OpaPolicyConsumer.java">OpaPolicyConsumer</a>. After adding jar with new PDP support Lock should automatically find these implementations at startup.</p>
-<div class="highlight"><pre><span></span><code>public abstract class MessageConsumer implements MessageConsumerInterface {
-
-    public abstract String getMessageConsumerType();
-
-    public abstract void destroy();
-
-}
-
-public interface MessageConsumerInterface extends PubSubInterface {
-
-    public boolean putData(String message, JsonNode messageNode);
-
-}
-</code></pre></div>
-<p>Reference implementation for OPA is <a href="https://github.com/JanssenProject/jans/blob/main/jans-lock/service/src/main/java/io/jans/lock/service/consumer/message/opa/OpaMessageConsumer.java">OpaMessageConsumer</a>. It subscribes to message channels and send data to OPA through Rest API.</p>
-<div class="highlight"><pre><span></span><code>public abstract class PolicyConsumer implements MessagePolicyInterface {
-
-    public abstract String getPolicyConsumerType();
-
-    public abstract void destroy();
-
-}
-
-public interface MessagePolicyInterface {
-
-    public boolean putPolicies(String sourceUri, List&lt;String&gt; policies);
-
-    public boolean removePolicies(String sourceUri);
-
-}
-</code></pre></div>
-<p>Reference implementation for OPA is <a href="https://github.com/JanssenProject/jans/blob/main/jans-lock/service/src/main/java/io/jans/lock/service/consumer/policy/opa/OpaPolicyConsumer.java"><code>OpaPolicyConsumer</code></a>. <code>PolicyDownloadService</code> calls this service to send updates to OPA through Rest API.</p>
+<h1 id="lock-master">Lock Master<a class="headerlink" href="#lock-master" title="Permanent link">#</a></h1>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-03-04T15:48:01+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-03-04</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-07-02T14:37:31+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-07-02</span>
       
         <br>
         Created:
-        <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-12-12T06:57:26+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-12-12</span>
+        <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-07-02T14:37:31+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-07-02</span>
       
     
   </small>
@@ -8590,42 +8421,6 @@ public interface MessagePolicyInterface {
       </main>
       
         <footer class="md-footer">
-  
-    
-    <nav class="md-footer__inner md-grid" aria-label="Footer" >
-      
-        
-        <a href="../lock_client_config/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Lock Client Configuration" rel="prev">
-          <div class="md-footer__button md-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
-          </div>
-          <div class="md-footer__title">
-            <div class="md-ellipsis">
-              <span class="md-footer__direction">
-                Previous
-              </span>
-              Lock Client Configuration
-            </div>
-          </div>
-        </a>
-      
-      
-        
-        <a href="../lock_opa/" class="md-footer__link md-footer__link--next" aria-label="Next: Policy Store Integration" rel="next">
-          <div class="md-footer__title">
-            <div class="md-ellipsis">
-              <span class="md-footer__direction">
-                Next
-              </span>
-              Policy Store Integration
-            </div>
-          </div>
-          <div class="md-footer__button md-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
-          </div>
-        </a>
-      
-    </nav>
   
   <div class="md-footer-meta md-typeset">
     <div class="md-footer-meta__inner md-grid">

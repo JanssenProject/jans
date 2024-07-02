@@ -6994,7 +6994,7 @@
   
   
     <li class="md-nav__item">
-      <a href="lock_installation/" class="md-nav__link">
+      <a href="lock_installation.md" class="md-nav__link">
         Lock Installation
       </a>
     </li>
@@ -7008,7 +7008,7 @@
   
   
     <li class="md-nav__item">
-      <a href="lock_auth_server_config/" class="md-nav__link">
+      <a href="lock_auth_server_config.md" class="md-nav__link">
         Auth Server Configuration
       </a>
     </li>
@@ -7022,7 +7022,7 @@
   
   
     <li class="md-nav__item">
-      <a href="lock_client_config/" class="md-nav__link">
+      <a href="lock_client_config.md" class="md-nav__link">
         Lock Client Configuration
       </a>
     </li>
@@ -7036,7 +7036,7 @@
   
   
     <li class="md-nav__item">
-      <a href="lock_pdp_plugin/" class="md-nav__link">
+      <a href="lock_pdp_plugin.md" class="md-nav__link">
         Implement Lock PDP Plugin
       </a>
     </li>
@@ -7050,7 +7050,7 @@
   
   
     <li class="md-nav__item">
-      <a href="lock_opa/" class="md-nav__link">
+      <a href="lock_opa.md" class="md-nav__link">
         Policy Store Integration
       </a>
     </li>
@@ -8382,29 +8382,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#definitions-authz-components" class="md-nav__link">
-    Definitions: Authz Components
+  <a href="#background" class="md-nav__link">
+    Background
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#lock-design-goal" class="md-nav__link">
-    Lock Design Goal
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#choose-your-pdp-or-use-opa" class="md-nav__link">
-    Choose your PDP or use OPA
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#get-started" class="md-nav__link">
-    Get Started
+  <a href="#lock-design-goals" class="md-nav__link">
+    Lock Design Goals
   </a>
   
 </li>
@@ -8438,32 +8424,17 @@
     
       
       
-        <span class="md-tag">authorization</span>
+        <span class="md-tag">authorization / authz</span>
       
     
       
       
-        <span class="md-tag">OPA</span>
+        <span class="md-tag">Cedar</span>
       
     
       
       
-        <span class="md-tag">open policy agent</span>
-      
-    
-      
-      
-        <span class="md-tag">PDP</span>
-      
-    
-      
-      
-        <span class="md-tag">PEP</span>
-      
-    
-      
-      
-        <span class="md-tag">authz</span>
+        <span class="md-tag">Cedarling</span>
       
     
   </nav>
@@ -8477,132 +8448,133 @@
 
 
 <h1 id="jans-lock-overview">Jans Lock Overview<a class="headerlink" href="#jans-lock-overview" title="Permanent link">#</a></h1>
-<p>At a high level, Jans Lock enables domains to enforce security policies based on
-real time OAuth data.</p>
-<p>The PDP can make a blazingly fast decision if it has <strong>in RAM</strong> all the
-necessary data, policies, and keys. But how can we keep all that rapidly
-changing OAuth token data in RAM? This is especially challenging if we have a
-distributed network of APIs, with each microservice deploying the PDP as a
-encapsulated "sidecar". Lazy loading of token data by the PDP via OAuth
-introspection or database access is not performant enough for real-time
-transactional authorization.</p>
-<p>Like a messaging client, a Lock Client gets update messages from Auth Server
-for each OAuth token update event. A message contains the reference id of the
-token, which enables the Lock Client to retrieve the token data from the
-database, and push it into the PDP's memory or cache. You could say that Lock
-aggressively initializes the PDP with token data. A Lock Client can also push
-policies and keys into a PDP (if necessary).</p>
-<h2 id="definitions-authz-components">Definitions: Authz Components<a class="headerlink" href="#definitions-authz-components" title="Permanent link">#</a></h2>
-<p>Centralized policy management is a best practice for authorization for distributed
-networks. If security policies are buried in the code of numerous applications,
-they are hard to inventory and harder to update. For decades, application
-security architects have conceptualized distributed authorization in line with
+<p>Lock provides a centralized control plane for domains to use <a href="https://www.cedarpolicy.com/en">Cedar</a>
+to secure a network of distributed applications and audit the activity of both people and software. </p>
+<p>Using a declarative syntax like Cedar for authorization policies is a best practice for enterprise
+application security. Using a policy engine enables developers to define security in their 
+application without resorting to writing policies in the code. Cedar supports traditional access management strategies like RBAC, and more adaptive policies that consider a more nuanced model 
+of the context. The Cedar Engine does this without sacrificing the security benefit of a 
+deterministic policy engine.</p>
+<p>There are three key components in the Lock architecture: (1) Cedarling--a WebAssembly ("WASM") 
+component that runs the <a href="https://github.com/cedar-policy/cedar">Amazon Rust Cedar Engine</a> and
+performs JWT token validation; (2) Lock Master--a web service deployed by domains to manage a 
+network of distributed ephemeral Cedarlings; (3) <a href="https://cloud.gluu.org/agama-lab">Agama Lab</a>
+policy authoring tool for developers to easily design policies and publish their policy store
+in Github.</p>
+<p>The Cedarling makes sense to secure even a single browser-based application. A developer could 
+specify a local Cedarling policy store or retreive one from a Web URI (e.g. Github).</p>
+<p>Jans Lock offers organizational control over a network of Cedarlings used for different
+applications, each with their own policy store. It does this by providing central endpoints that
+publish configuration, collect audit logs, and push real time updates to Cedarlings. In addition to
+publishing the Policy Store, the Lock Master server enables Cedarlings to subscibe to real time 
+event notifications. A notification example is the latest OAuth Token Status List JWT from Jans 
+Auth Server, or an updated Policy Store.</p>
+<h2 id="background">Background<a class="headerlink" href="#background" title="Permanent link">#</a></h2>
+<p>For years, security architects have conceptualized distributed authorization model in line with
 <a href="https://datatracker.ietf.org/doc/html/rfc2904#section-4.4">RFC 2409</a>
 and <a href="https://docs.oasis-open.org/xacml/3.0/xacml-3.0-core-spec-cos01-en.html">XACML</a>,
-which describe several common components:</p>
+which describe several common roles:</p>
 <table>
 <thead>
 <tr>
-<th>Abbr.</th>
-<th align="center">Term</th>
+<th>Role</th>
+<th align="center">Acronym</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Policy Decision Point</td>
+<td align="center">PDP</td>
+<td>Service which evaluates access requests against authorization policies before issuing access decisions</td>
+</tr>
+<tr>
+<td>Policy Information Point</td>
+<td align="center">PIP</td>
+<td>The source of "data", e.g. about people, clients and resources</td>
+</tr>
+<tr>
+<td>Policy Enforcement Point</td>
+<td align="center">PEP</td>
+<td>Service, website or API which queries the PDP for authorization</td>
+</tr>
+<tr>
+<td>Policy Administration Point</td>
+<td align="center">PAP</td>
+<td>Where admins manage the authorization infrastructure</td>
+</tr>
+<tr>
+<td>Policy Retrieval Point</td>
+<td align="center">PRP</td>
+<td>Repository where policies are stored</td>
+</tr>
+</tbody>
+</table>
+<p>Jans Lock aligns with this model:</p>
+<table>
+<thead>
+<tr>
+<th>Role</th>
+<th align="center">Lock</th>
 <th>Description</th>
 </tr>
 </thead>
 <tbody>
 <tr>
 <td>PDP</td>
-<td align="center">Policy Decision Point</td>
-<td>Service which evaluates access requests against authorization policies before issuing access decisions</td>
-</tr>
-<tr>
-<td>PEP</td>
-<td align="center">Policy Enforcement Point</td>
-<td>Service, website or API which queries the PDP for authorization</td>
-</tr>
-<tr>
-<td>PAP</td>
-<td align="center">Policy Administration Point</td>
-<td>User interface where admins manage authorization policies</td>
+<td align="center">Cedarling</td>
+<td>Evaluates policies versus input data</td>
 </tr>
 <tr>
 <td>PIP</td>
-<td align="center">Policy Information Point</td>
-<td>The "data" about people, clients and resources</td>
+<td align="center">JWT tokens</td>
+<td>Contain data to instantiate entities</td>
+</tr>
+<tr>
+<td>PEP</td>
+<td align="center">Application</td>
+<td>Must rely on Cedarling for decision</td>
+</tr>
+<tr>
+<td>PAP</td>
+<td align="center">Jans Config API</td>
+<td>Endpoints for Lock admin configuration</td>
 </tr>
 <tr>
 <td>PRP</td>
-<td align="center">Policy Retrieval Point</td>
-<td>Repository where policies are stored</td>
+<td align="center">Lock Master</td>
+<td>Endpoints to publish Policy Store and other PDP configuration</td>
 </tr>
 </tbody>
 </table>
-<h2 id="lock-design-goal">Lock Design Goal<a class="headerlink" href="#lock-design-goal" title="Permanent link">#</a></h2>
-<p>In the old days of "WAM" (web access management), each web server would query
-a centralized PDP over the network. This is ok for course grain authorization.
-But for fine grain authorization, it is too slow--each decision requires a round
-trip HTTP request/response. A more performant design is to move the PDP to the
-edge of the network. Policy definition and administration is still a centralized
-activity. Once a policy is defined, it can be executed anywhere on the network.
-Although multiple PDP instances exist, they must provide the same access control
-decisions given the same inputs.</p>
-<p>Another critical optimization was to move the PIP to the edge, so the PDP
-has all the data it needs to make a decision. This aligns with a principle that
-each microservice has all logic and data encapsulated into a single
-deployment unit.</p>
-<p><img alt="1990s WAM v. 2020s Cloud Native" src="../../assets/lock-wam-v-cloud-native-authz.png" /></p>
-<h2 id="choose-your-pdp-or-use-opa">Choose your PDP or use OPA<a class="headerlink" href="#choose-your-pdp-or-use-opa" title="Permanent link">#</a></h2>
-<p>Lock has a plugin architecture to support different PDP solutions. Janssen
-provides a default PDP: <a href="https://openpolicyagent.org">OPA</a>, a
-<a href="https://cncf.io">CNCF</a> governed project. OPA is a popular PDP, whose adoption
-grew significantly in response to the need for granular policies for Kubernetes
-access control. If you have a different PDP, you can write a
-<a href="lock_pdp_plugin/">Lock PDP Plugin</a>.</p>
-<h2 id="get-started">Get Started<a class="headerlink" href="#get-started" title="Permanent link">#</a></h2>
-<p>The Jans Lock solution pushes OAuth token data from Auth Server to a PDP,
-enabling authorization based on real time information from the OAuth
-infrastructure. In order to use Lock, admins will have to do a few things:</p>
+<h2 id="lock-design-goals">Lock Design Goals<a class="headerlink" href="#lock-design-goals" title="Permanent link">#</a></h2>
+<p>Following are a list of goals that informed the design of Jans Lock and the Cedarling:</p>
 <ul>
-<li><a href="lock_auth_server_config/">Enable Lock in Auth Server</a></li>
-<li><a href="lock_client_config/">Configure a Lock Client instance</a></li>
-<li><a href="lock_opa/">Configure A PDP</a></li>
+<li>Move the PDP to the edge of the network--even into the browser itself.</li>
+<li>Make the PDP performant and deterministic (i.e. milliseond statup time and always return a 
+  PERMIT/DENY response).</li>
+<li>Empower application developers to author policies appropriate for the resources and actions 
+they need to protect.</li>
+<li>Centralilze audit and health data collection</li>
+<li>Publish centralized updates enabling the network to adapt in real time to attacks</li>
+<li>Push updates to enable near-realtime responses to attacks</li>
 </ul>
-<p>The Auth Server token stream contains only the reference ids of new, updated, or
-revoked tokens. Lock retrieves the data (i.e. token value) for a given token
-reference id from the database service. This design minimizes the traffic on the
-message queue and leverages cloud database topologies. Lock Clients can
-optionally retrieve policies from Github or public keys from one or more JWKS
-endpoints.</p>
-<p><img alt="Lock Data Flow Communication Overview" src="../../assets/lock-design-diagram-01.png" /></p>
-<p>This architecture results in the best of three worlds. First, authorization is<br />
-blazing fast, because OAuth access and transaction tokens are in OPA's memory--
-no introspection is needed. Second, admins can use their PDP to express
-complex policies based on any combination of data present in the token or
-context. Third, domains can publish central data for local decision making, for
-example information about how the end user authenticated.</p>
-<p>The Auth Server Lock token stream is highly confidential. Lock must present a
-valid OAuth access token to Auth Server in order subscribe to the token
-stream. Domains should only use Lock for trusted first party services with
-a private network. Each Lock Client instance uses OAuth dynamic client
-registration with a software statement to enable asymmetric client
-authentication and DPoP access tokens.</p>
-<p>The diagram below illustrates a Jans Lock topology where the OPA PDP is used to
-control course grain authorization in an API gateway, fine grain authorization
-in First Party API code, and the issuance of access token scopes.</p>
-<p><img alt="North-South API Gateway Authz with Lock" src="../../assets/lock-north-south-api-gateway-diagram.png" /></p>
-<p>This authorization model is also useful for East-West service mesh authorization
-because it avoids the "hairpin" inefficiency of routing all traffic through
-and API gateway (which is better for North-South web ingress). TLS is required
-to protect the bearer token. MTLS is better if the extra effort for additional
-transport security is justified.</p>
-<p><img alt="East-West Service Mesh Authz with Lock" src="../../assets/lock-east-west-service-mesh-diagram.png" /></p>
-<p><a href="lock_auth_server_config/">Next</a></p>
+<h1 id="more-information">More information<a class="headerlink" href="#more-information" title="Permanent link">#</a></h1>
+<ul>
+<li>Lock Master configuration and operation <a href="lock-master/">docs</a> </li>
+<li>Cedarling <a href=".">Readme</a></li>
+<li>RBAC Use Case</li>
+<li>API Access Management Use Case</li>
+<li>Real time token revocation Use Case</li>
+<li>Cedarling <a href=".">Training</a> (coming soon!)</li>
+</ul>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-12-13T13:46:17+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-12-13</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-07-02T14:37:31+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-07-02</span>
       
         <br>
         Created:
@@ -8647,13 +8619,13 @@ transport security is justified.</p>
       
       
         
-        <a href="lock_installation/" class="md-footer__link md-footer__link--next" aria-label="Next: Lock Installation" rel="next">
+        <a href="../recipes/" class="md-footer__link md-footer__link--next" aria-label="Next: Overview" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Lock Installation
+              Overview
             </div>
           </div>
           <div class="md-footer__button md-icon">
