@@ -15,6 +15,11 @@
 
 ![](./docs/authentication.png)
 
+### Prerequisite
+
+1. A Running Janssen Auth server and Janssen FIDO server.
+2. SSA generated from the Janssen Auth server with `authorization_code` `grant_types`.
+ 
 ### Auth Challenge Script
 
 Add following [Auth Challenge Script](./docs/authChallengeScript.java) in Jans Server (before using the App) with following details.
@@ -33,7 +38,8 @@ Add following [Auth Challenge Script](./docs/authChallengeScript.java) in Jans S
    ```
 2. Start Android Studio and open `{jans_monorep_path}\demos\jans-chip\android` of cloned jans monorepo. 
 3. Press `ctrl` key twice on Android Studio to open `Run Anything` dialog.
-4. Enter `gradle wrapper --gradle-version 8.0` and press enter key. This will generate gradle wrapper at `{jans_monorep_path}\demos\jans-chip\gradle\wrapper`. 
+4. Enter `gradle wrapper --gradle-version 8.0` and press enter key. This will generate gradle wrapper at `{jans_monorep_path}\demos\jans-chip\gradle\wrapper`.
+5. Add SSA from Janssen Auth server to SSA field in `demos/jans-chip/android/app/src/main/java/io/jans/chip/utils/AppConfig.kt`.
 5. Build and run project on an emmulator (in Android Studio).
 
 
