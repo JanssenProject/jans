@@ -272,15 +272,26 @@ class KC:
         comp_exists = False
 
         # check if component exists
-        out, err, code = exec_cmd(f"{self.kcadm_script} get components --fields 'name' -r {self.ctx['jans_idp_realm']} --config {self.config_file}")
+        out, err, code = exec_cmd(f"{self.kcadm_script} get components --fields 'name,providerId,id' -r {self.ctx['jans_idp_realm']} --config {self.config_file}")
 
         if code != 0:
             logger.warning(f"Unable to list userstorage components; reason={err.decode()}")
+
         else:
+            legacy_storage = {}
             for datum in json.loads(out.decode()):
                 if datum["name"] == "jans-user-federation":
-                    comp_exists = True
-                    break
+                    if datum["providerId"] == "kc-jans-storage":
+                        legacy_storage = datum
+
+                    if datum["providerId"] == "kc-jans-user-storage":
+                        comp_exists = True
+                        break
+
+            if legacy_storage:
+                _, err, code = exec_cmd(f"{self.kcadm_script} delete components/{legacy_storage['id']} -r {self.ctx['jans_idp_realm']} --config {self.config_file}")
+                if code != 0:
+                    logger.warning(f"Unable to delete legacy storage {legacy_storage['name']} (providerId={legacy_storage['providerId']}); reason={err.decode()}")
         return comp_exists
 
     def create_userstorage(self):
