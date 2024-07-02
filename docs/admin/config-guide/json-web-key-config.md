@@ -90,49 +90,127 @@ It will return all the jwk configuration information as below:
 {
   "keys": [
     {
-      "kid": "8627c7e1-0702-4103-9c28-28ff6a818da9_sig_rs256",
+      "descr": "Signature Key: RSA RSASSA-PKCS1-v1_5 using SHA-256",
       "kty": "RSA",
+      "e": "AQAB",
       "use": "sig",
+      "key_ops_type": [
+        "connect"
+      ],
+      "kid": "connect_e47fd367-51d6-4d17-811d-adb1f1a0b723_sig_rs256",
+      "x5c": [
+        "MIIDCjCCAfKgAwIBAgIhAInuAAbxL2O7H+/V0lm3bbEdCmdPdgJh+OqljtWpwi7wMA0GCSqGSIb3DQEBCwUAMCQxIjAgBgNVBAMMGUphbnMgQXV0aCBDQSBDZXJ0aWZpY2F0ZXMwHhcNMjQwNjIxMDg0ODE5WhcNMjQwNjIzMDg0ODI4WjAkMSIwIAYDVQQDDBlKYW5zIEF1dGggQ0EgQ2VydGlmaWNhdGVzMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1RCY0ZfJ/SHZ+jojCyStBjIh4upkLXuMgZLi6b7k0fQ8/oNmCBEsOKMPUubHFEHrDHZLbXj7w5gEdMPZOiLaBP8Pv0JD8IbOUtoSXEawE33LRldKiof296nlBJFsX00ipiLq3ANXuTDXtP4+pd+lvIufv1nBXpqqrN4MOsSsKuvKvxRPCg6JusHVU5hsiqbwh9y3X7sPFwqw4LJFa0U3Z4RoX7vCsS/axPPSyUi9x0zsF4S7ZGHclBReC6IipOnGyGeSEQdpuchhoZs382md+wejIf4hVtusRbEHz+wwZFhnrfh/nvHCvrWCcxBgeEntAin+ig1RlR8N4x9Ox9K01wIDAQABoycwJTAjBgNVHSUEHDAaBggrBgEFBQcDAQYIKwYBBQUHAwIGBFUdJQAwDQYJKoZIhvcNAQELBQADggEBACkrKROjAIf6n1PKpXFTRQVov32EFcwhi1YSao/MZHURV2ruYXjh/S6HuvHWWofV8R6muLnD938GytS2mRjr+X7DOZj/bsDT7amd810SDvFUCh6IoPt46FeXFZMV4XyL4DQKoNxOEGGDVnD41NVC6k5GLzPwcVBwX11+b7wRfy/KoPP9aoSXjyWnNbhwClFQ9oTJYkNtaNeh2kJZ2j1UIqO51vyhUjpSM9awqV2u+ouxDKCT4h9xRcDwkOUlVXtBwn+dfJHnG6riLzT59MiPtWeo037hESUxIvJxLQP6jV97eEi/CMhSb1y6YJPFjnTBmCpzeHRp5+DNu65KPaGntB8="
+      ],
+      "name": "Connect RS256 Sign Key",
+      "exp": 1719132508905,
       "alg": "RS256",
-      "crv": "",
-      "exp": 1622245655163,
-      "x5c": [
-        "MIIDCjCCAfKgAwIBAgIhAIi82XlGMTJRsn5djImvoD2wSLY1hkhPPUv2qaGjvC3IMA0GCSqGSIb3DQEBCwUAMCQxIjAgBgNVBAMMGUphbnMgQXV0aCBDQSBDZXJ0aWZpY2F0ZXMwHhcNMjEwNTI2MjM0NzI1WhcNMjEwNTI4MjM0NzM1WjAkMSIwIAYDVQQDDBlKYW5zIEF1dGggQ0EgQ2VydGlmaWNhdGVzMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqpU+2D0eQTszq3iq7qIHm3ryYGIDd4+3WUwMyCJoV0dYDDKZwFxaZD9auW/9wsqQZnwJcpYuDt+sAYVfei7+1nLKZhuo1eRLQxpHzDTmAoQcuWAGDg5f0sL24qaO9n1zSNAcEt8pyRJVZ1VcCEePryNSoustDZX36Eh/1pAOVjHzlVXSWCMtlS5uG6VcWoCzbrQU/z8ittfWqSpk/hM6z9KO95JofuFm5JG3U6qMFiZdG5qp3dY2zQ8clpqtV4yqaMTD6mv3IiH3TGxo1PGS2UHCRWh6TLVp15ElLlGiaaC6LlYxIdxMgV2AV80718ROKQT8OieVY5Q2T+198lPUWwIDAQABoycwJTAjBgNVHSUEHDAaBggrBgEFBQcDAQYIKwYBBQUHAwIGBFUdJQAwDQYJKoZIhvcNAQELBQADggEBAGGUO67E3UjQaaxGI2pIrau0A5qWF0SAMay2FI+o1xstud8+imkANjoqIQgWVpaZCR6I7q9rDHbaSHQy6uPHRBGVtV9izC+vr6+ohVjyFO/1K97FHQJxaR62X+qswFHot6RGFjQbMDEWQs/BMOfuojp7rvkRYjazdxqX2Obbp0cmHuaJV0iiZ71+k2VpoJrpdP/RI+3OdCWvV+fydNDrBXAi7JYNaqhx9wVoqVEeMAOCXbcjEe6YiYcU2WHPCD7DaeOzPgJimzc5ujyu30RFMVl5RYOMYgETt4g+fVKDuRcstQJaR5zowBUGaiXCjOfhfkWa2fFd9v4hg5Y7YCmOMtI="
-      ],
-      "n": "qpU-2D0eQTszq3iq7qIHm3ryYGIDd4-3WUwMyCJoV0dYDDKZwFxaZD9auW_9wsqQZnwJcpYuDt-sAYVfei7-1nLKZhuo1eRLQxpHzDTmAoQcuWAGDg5f0sL24qaO9n1zSNAcEt8pyRJVZ1VcCEePryNSoustDZX36Eh_1pAOVjHzlVXSWCMtlS5uG6VcWoCzbrQU_z8ittfWqSpk_hM6z9KO95JofuFm5JG3U6qMFiZdG5qp3dY2zQ8clpqtV4yqaMTD6mv3IiH3TGxo1PGS2UHCRWh6TLVp15ElLlGiaaC6LlYxIdxMgV2AV80718ROKQT8OieVY5Q2T-198lPUWw",
-      "e": "AQAB",
-      "x": null,
-      "y": null
+      "n": "1RCY0ZfJ_SHZ-jojCyStBjIh4upkLXuMgZLi6b7k0fQ8_oNmCBEsOKMPUubHFEHrDHZLbXj7w5gEdMPZOiLaBP8Pv0JD8IbOUtoSXEawE33LRldKiof296nlBJFsX00ipiLq3ANXuTDXtP4-pd-lvIufv1nBXpqqrN4MOsSsKuvKvxRPCg6JusHVU5hsiqbwh9y3X7sPFwqw4LJFa0U3Z4RoX7vCsS_axPPSyUi9x0zsF4S7ZGHclBReC6IipOnGyGeSEQdpuchhoZs382md-wejIf4hVtusRbEHz-wwZFhnrfh_nvHCvrWCcxBgeEntAin-ig1RlR8N4x9Ox9K01w"
     },
     {
-      "kid": "77e3dec8-8a3e-479b-bcfc-aa508e5d9825_sig_rs384",
+      "descr": "Signature Key: RSA RSASSA-PKCS1-v1_5 using SHA-384",
       "kty": "RSA",
+      "e": "AQAB",
       "use": "sig",
+      "key_ops_type": [
+        "connect"
+      ],
+      "kid": "connect_fed19dd0-7139-4ed8-ad43-43322b7eeaea_sig_rs384",
+      "x5c": [
+        "MIIDCjCCAfKgAwIBAgIhAKLBm5p06uGv/lXT4tKLgjsS5kosfHb1rgO50fdLAFRoMA0GCSqGSIb3DQEBDAUAMCQxIjAgBgNVBAMMGUphbnMgQXV0aCBDQSBDZXJ0aWZpY2F0ZXMwHhcNMjQwNjIxMDg0ODE5WhcNMjQwNjIzMDg0ODI4WjAkMSIwIAYDVQQDDBlKYW5zIEF1dGggQ0EgQ2VydGlmaWNhdGVzMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAkIt6G/MDIyfp1uTERxFYoY1nGuq3FhZG7xdPYi7eHoyM+PAbq+8rKeIRcJWJi37TazbqqLViGbejaD6rRxOihzoMPo1LtBuqGGw8m6fI1UJlvnt1NHd+du3Q6065WufL+nXn2Osmg962TF+gSvExgxr+HFeAgjP/kyG99dzSv4mUFbikegK8Dql1K36fZ427vDQ7mGRrR1vBsbMPqW5d9huXhl+iy11AOtYNNcfRDu47Hzae5Srzp32si36+Da/dEwntuMXnK7BwxDp/BGoOuWLPFoVctH6PDoIYzXUiTbj+XiQ8zFgPydt+x/2ZEGyq61Ewebjkpj9b0g+yHk/2aQIDAQABoycwJTAjBgNVHSUEHDAaBggrBgEFBQcDAQYIKwYBBQUHAwIGBFUdJQAwDQYJKoZIhvcNAQEMBQADggEBAHnfO3jItuXdSr5Js3kj/7kI1OElwcU4fco53ThSilbtq6FBOk5GzonaZOHFQayzjo3Qp5qe/uShSknFQ+sjEmhGTVPiQFssNTXxEnEw1WrTvEc/09I9oTNg9jitppn1z4/QT/wP0X3erRIjBQvFe4ov1wL/atjs5Mg8KRHqGttze5xN1pY3r0hrUiIxYiA7F5DUigGD4hYGGXKXymr0SgEoMZQx9Duxn8wxtX5l3fcC0FA53vn/4ZDd/ikhQRqTyz/C7ffHsVcOxnlWd3pm37+W9swGhkb9EaKRg2gJOdA5+Vw62tJA4Gp8WOIeMrRiXvtn2AVks5nyG7oiWt0ldYk="
+      ],
+      "name": "Connect RS384 Sign Key",
+      "exp": 1719132508905,
       "alg": "RS384",
-      "crv": "",
-      "exp": 1622245655163,
-      "x5c": [
-        "MIIDCjCCAfKgAwIBAgIhAPMrnxSwxnvlx7up5juXI8j52fQQwbmdLtcooIjv7pC3MA0GCSqGSIb3DQEBDAUAMCQxIjAgBgNVBAMMGUphbnMgQXV0aCBDQSBDZXJ0aWZpY2F0ZXMwHhcNMjEwNTI2MjM0NzI2WhcNMjEwNTI4MjM0NzM1WjAkMSIwIAYDVQQDDBlKYW5zIEF1dGggQ0EgQ2VydGlmaWNhdGVzMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAq415zmHRArQ9zD5YN44nG52yJI7FakkBUN/aYWNJSCk5Pq/0qc7tm3M6Jhqrz8XuOMfatqzOxG65i4s/kOwGmET+Mq+lJ416A9toUfGdZRHmint/spGOf5nUeWjXRxMOooVtafq0Ao2/WZnsBB4jfAI9F211pJv2MNcxJ1ZwLpNSoaJSrEgxQh3laIVBozEcikozSOVUj8CMfF+WJRo049nv+IazTwTg1ZS96WcAztIemqgjAoE80i9Y4DYNp1R97A9MtFcsLlEPjYyiGmt5SomRa1oo6gymMs3AHYBdYPY/U4iXMsNDBsG+8cbTz44fFTkWHeWSuTnP9z8aj32HFQIDAQABoycwJTAjBgNVHSUEHDAaBggrBgEFBQcDAQYIKwYBBQUHAwIGBFUdJQAwDQYJKoZIhvcNAQEMBQADggEBAKdot2Upc7jH4XfgqXFDCkD0ILB2Zu/HE1PG0UGetJiR0hHwQ64CebpBqa8ExCHxiCamGjck6mZOVQHphJ0bgG1svMBG4M/x//RZcFld9L+mlPVEeTDJY5K0cb1csbuziACF1MrZB4pvVIVZgywdGFm+EqJ0aHDr5ByP5foBwqR3e7nGbuu6xWJx1hbXOrnjOFUqlwtnq0Qy4ZNNKgAbVW7n1We44ceWhWb4UenM5Ee2+xy1y9hkETdyLfgSjRh75pAv/+BhLM98x8ozns5bZXMTMZXt49Pbr29x2axBObGwKpv7Suqqndaw09iwSDtzyNUMVnCU4C1ikrozC8KHGvE="
-      ],
-      "n": "q415zmHRArQ9zD5YN44nG52yJI7FakkBUN_aYWNJSCk5Pq_0qc7tm3M6Jhqrz8XuOMfatqzOxG65i4s_kOwGmET-Mq-lJ416A9toUfGdZRHmint_spGOf5nUeWjXRxMOooVtafq0Ao2_WZnsBB4jfAI9F211pJv2MNcxJ1ZwLpNSoaJSrEgxQh3laIVBozEcikozSOVUj8CMfF-WJRo049nv-IazTwTg1ZS96WcAztIemqgjAoE80i9Y4DYNp1R97A9MtFcsLlEPjYyiGmt5SomRa1oo6gymMs3AHYBdYPY_U4iXMsNDBsG-8cbTz44fFTkWHeWSuTnP9z8aj32HFQ",
-      "e": "AQAB",
-      "x": null,
-      "y": null
+      "n": "kIt6G_MDIyfp1uTERxFYoY1nGuq3FhZG7xdPYi7eHoyM-PAbq-8rKeIRcJWJi37TazbqqLViGbejaD6rRxOihzoMPo1LtBuqGGw8m6fI1UJlvnt1NHd-du3Q6065WufL-nXn2Osmg962TF-gSvExgxr-HFeAgjP_kyG99dzSv4mUFbikegK8Dql1K36fZ427vDQ7mGRrR1vBsbMPqW5d9huXhl-iy11AOtYNNcfRDu47Hzae5Srzp32si36-Da_dEwntuMXnK7BwxDp_BGoOuWLPFoVctH6PDoIYzXUiTbj-XiQ8zFgPydt-x_2ZEGyq61Ewebjkpj9b0g-yHk_2aQ"
     },
     {
-      "kid": "cb0b2d29-0d2f-411f-9d47-5885cffad6e2_sig_rs512",
+      "descr": "Signature Key: RSA RSASSA-PKCS1-v1_5 using SHA-512",
       "kty": "RSA",
-      "use": "sig",
-      "alg": "RS512",
-      "crv": "",
-      "exp": 1622245655163,
-      "x5c": [
-        "MIIDCTCCAfGgAwIBAgIgW10M3Wl7/TEDNK9DarGKNAFT+4E3HQfyJcVmh0e3s8gwDQYJKoZIhvcNAQENBQAwJDEiMCAGA1UEAwwZSmFucyBBdXRoIENBIENlcnRpZmljYXRlczAeFw0yMTA1MjYyMzQ3MjdaFw0yMTA1MjgyMzQ3MzVaMCQxIjAgBgNVBAMMGUphbnMgQXV0aCBDQSBDZXJ0aWZpY2F0ZXMwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDrEdrcsQGHM1T+7ZcpU46DbbxGTA2qM4T6FSFb2UEPyeD/zKnCcdOgM/598tSzsKZJrIR3ZQn1igzcJkm7gKqkn7Qbg3Thk+MZtX28S68YJSDonjdce1NkIn3fx3TsImBh2Le9iOJfkLRnwCFm1EnplahNZYmV6PyHZ9IChpC6XCoBa6+U6O/owL5iAS34XrRHKxJaECTJObI2Gydg1doEP8jSnU3EZChSwmRDCSE3IH7oiTIIISdhMhD5ZBWGZlPl73Mj8PzYUdWOU1ZqCDngCfBm+SGvXBJcSheJr4la9mnl0AtCnE3zwEGWLKBxhouDQvXYa6ELq8r3VbDBb+4VAgMBAAGjJzAlMCMGA1UdJQQcMBoGCCsGAQUFBwMBBggrBgEFBQcDAgYEVR0lADANBgkqhkiG9w0BAQ0FAAOCAQEAx8ykyU8CAE6IS+li9pRx/rStBNgvAyY8TiQDlpkBSPwA64KuKWZmSjmMqjZLtqCEIY5X9+GPAeEhFtBQYJVcxYAAWV7JnMrq6RuWmom1gHN8igOYEyBSwPWb9TS1kWrPYg/hD4p9kOlNAbbdEuid/NPWOZJ4uGA1+ViEY9D29dsYvPpPLBxf7XFVjXAkljefi3yREQzEpJ7/cerJW9WyYCeS0/Ahr8Yhn2txBwrniMwyMJPLb+KvLWfqPol0zsyHBwWIa2nygTHJ8mYftHGO26dxIef2kQAu5uUX7po4MXFUBkuUnrkqB2CfvjMq5cU5AATgtPDdmJjKMQ9ZjgGhNQ=="
-      ],
-      "n": "6xHa3LEBhzNU_u2XKVOOg228RkwNqjOE-hUhW9lBD8ng_8ypwnHToDP-ffLUs7CmSayEd2UJ9YoM3CZJu4CqpJ-0G4N04ZPjGbV9vEuvGCUg6J43XHtTZCJ938d07CJgYdi3vYjiX5C0Z8AhZtRJ6ZWoTWWJlej8h2fSAoaQulwqAWuvlOjv6MC-YgEt-F60RysSWhAkyTmyNhsnYNXaBD_I0p1NxGQoUsJkQwkhNyB-6IkyCCEnYTIQ-WQVhmZT5e9zI_D82FHVjlNWagg54AnwZvkhr1wSXEoXia-JWvZp5dALQpxN88BBliygcYaLg0L12GuhC6vK91WwwW_uFQ",
       "e": "AQAB",
-      "x": null,
-      "y": null
+      "use": "sig",
+      "key_ops_type": [
+        "connect"
+      ],
+      "kid": "connect_b14a8daa-bd0c-4e41-b067-eb96f2f7d09a_sig_rs512",
+      "x5c": [
+        "MIIDCTCCAfGgAwIBAgIgNR1DmshFLTSQ8VtMyIYdar+VTZS0tQvEbZQ4jaytwxMwDQYJKoZIhvcNAQENBQAwJDEiMCAGA1UEAwwZSmFucyBBdXRoIENBIENlcnRpZmljYXRlczAeFw0yNDA2MjEwODQ4MjBaFw0yNDA2MjMwODQ4MjhaMCQxIjAgBgNVBAMMGUphbnMgQXV0aCBDQSBDZXJ0aWZpY2F0ZXMwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCLbDRFT+RQEenWyAN06/q1bliMP5aR40Brr/HuLTKt5OM8c3vsICjo8n8h3OZZBCDaxvvKchVOAVkURuft1NqyYxY6tXOebEW76WbYYUTlJge6faRDY0vj7Qz2uO0E0kVynhL3dQM/9EMADJPiWb0kRp1MocccrBqw7zex7b8KXRPJWRfVbgsZWY4hbKAl3fjTGKz4xSwaGn6GBzaaogWtGdlwBPz0ThSNW47AvEnc+b321d/JPHHQU/n1I0+G5Sg5AVQwlbuddQxF1j2Ggwqyk92axTPWlaJ8kBgb+CNIoQLypX+cBI1muYh2hGEiVcdTTCvTE+SDSk7V7uxkJXjZAgMBAAGjJzAlMCMGA1UdJQQcMBoGCCsGAQUFBwMBBggrBgEFBQcDAgYEVR0lADANBgkqhkiG9w0BAQ0FAAOCAQEAQVx8z37viPVBAdWftHtH2FQbJGbOyCVJ+OYj8EhBo41IA6fhNGq5gi0U9MISOGUPsm6FHMfxK759muvyWb8m0ntZX6oh3LudkZTj8mUAERuR59LvWPTduuy32LFjHo5COYexKL9skRc4M+bO3RsajXeAAHBOsi3BVCXoqyPtgYcN5l1VuF2ABeUcFp+5B1tAM8y1CFPPJFn2ls1Go5FWR236/sfGLE2OIbb26RLnZ1sn7Luh2yooDk7jxZiC4Fjy3d6feWnAw0BA+wc723P/xcO00kja6ldnkvSBeNLuATGli9nww0HCr9n8a7oYPuIFjQPKESO8MuR7QOEt8iLmTA=="
+      ],
+      "name": "Connect RS512 Sign Key",
+      "exp": 1719132508905,
+      "alg": "RS512",
+      "n": "i2w0RU_kUBHp1sgDdOv6tW5YjD-WkeNAa6_x7i0yreTjPHN77CAo6PJ_IdzmWQQg2sb7ynIVTgFZFEbn7dTasmMWOrVznmxFu-lm2GFE5SYHun2kQ2NL4-0M9rjtBNJFcp4S93UDP_RDAAyT4lm9JEadTKHHHKwasO83se2_Cl0TyVkX1W4LGVmOIWygJd340xis-MUsGhp-hgc2mqIFrRnZcAT89E4UjVuOwLxJ3Pm99tXfyTxx0FP59SNPhuUoOQFUMJW7nXUMRdY9hoMKspPdmsUz1pWifJAYG_gjSKEC8qV_nASNZrmIdoRhIlXHU0wr0xPkg0pO1e7sZCV42Q"
+    },
+    {
+      "descr": "Signature Key: ECDSA using P-256 (secp256r1) and SHA-256",
+      "kty": "EC",
+      "use": "sig",
+      "key_ops_type": [
+        "connect"
+      ],
+      "crv": "P-256",
+      "kid": "connect_04458eea-e477-40ea-b20d-9b43a024ff86_sig_es256",
+      "x5c": [
+        "MIIBfTCCASOgAwIBAgIgNV5pu8XN50ogpNIXX17bPc587m76jr1//wgZUbxZO+wwCgYIKoZIzj0EAwIwJDEiMCAGA1UEAwwZSmFucyBBdXRoIENBIENlcnRpZmljYXRlczAeFw0yNDA2MjEwODQ4MjBaFw0yNDA2MjMwODQ4MjhaMCQxIjAgBgNVBAMMGUphbnMgQXV0aCBDQSBDZXJ0aWZpY2F0ZXMwWTATBgcqhkjOPQIBBggqhkjOPQMBBwNCAARxjUn0DDMRPA5PI2n41NEigto3HZ9jyX9v8TK5kASfSXRL3PCnLxv3fwfuLdK7RZV80Qr2+1+4ApTdkVBGuxmboycwJTAjBgNVHSUEHDAaBggrBgEFBQcDAQYIKwYBBQUHAwIGBFUdJQAwCgYIKoZIzj0EAwIDSAAwRQIgVydKFOLW2erlzfA0bzYdgoEQz88KyorBwkBCdSrdJf4CIQCfhMaAdGEdeyFDcAef+oCM5YjjGY343sa+VMMZ+xEuLg=="
+      ],
+      "name": "Connect ES256 Sign Key",
+      "x": "cY1J9AwzETwOTyNp-NTRIoLaNx2fY8l_b_EyuZAEn0k",
+      "y": "dEvc8KcvG_d_B-4t0rtFlXzRCvb7X7gClN2RUEa7GZs",
+      "exp": 1719132508905,
+      "alg": "ES256"
+    },
+    {
+      "descr": "Signature Key: ECDSA using secp256k1 and SHA-256",
+      "kty": "EC",
+      "use": "sig",
+      "key_ops_type": [
+        "connect"
+      ],
+      "crv": "P-256K",
+      "kid": "connect_64506150-5ac7-43f3-85b9-91d66dc8d64d_sig_es256k",
+      "x5c": [
+        "MIIBezCCASGgAwIBAgIhAJTUFmnWINo3/y2zHjbP4Y4so4b+KvKFQimYOpCkQFd4MAoGCCqGSM49BAMCMCQxIjAgBgNVBAMMGUphbnMgQXV0aCBDQSBDZXJ0aWZpY2F0ZXMwHhcNMjQwNjIxMDg0ODIwWhcNMjQwNjIzMDg0ODI4WjAkMSIwIAYDVQQDDBlKYW5zIEF1dGggQ0EgQ2VydGlmaWNhdGVzMFYwEAYHKoZIzj0CAQYFK4EEAAoDQgAEva9+dxrBuqAQZbUoH1JWP9e9Grsu4+QrFdZnIZhOFM+5iKP89N47usfwwN4wd8mWLTBSsEQ1S4OZX+f75m0JhKMnMCUwIwYDVR0lBBwwGgYIKwYBBQUHAwEGCCsGAQUFBwMCBgRVHSUAMAoGCCqGSM49BAMCA0gAMEUCIFCN2XingYoViNPd5MIo056Ft/z1nlDqIHARTtxOmLEiAiEAok795B5g+fNOawGUG8aAoL7/3XmSGTXmlZlOjx0Ulnk="
+      ],
+      "name": "Connect ES256K Sign Key",
+      "x": "va9-dxrBuqAQZbUoH1JWP9e9Grsu4-QrFdZnIZhOFM8",
+      "y": "uYij_PTeO7rH8MDeMHfJli0wUrBENUuDmV_n--ZtCYQ",
+      "exp": 1719132508905,
+      "alg": "ES256K"
+    },
+    {
+      "descr": "Signature Key: ECDSA using P-384 (secp384r1) and SHA-384",
+      "kty": "EC",
+      "use": "sig",
+      "key_ops_type": [
+        "connect"
+      ],
+      "crv": "P-384",
+      "kid": "connect_dd24642c-d981-44cc-88ad-d4964d55196b_sig_es384",
+      "x5c": [
+        "MIIBuTCCAUCgAwIBAgIgGiJxrwtpIUQOqTeeuFSsTSZQ/OnuMXZpRzMMh0VkrTowCgYIKoZIzj0EAwMwJDEiMCAGA1UEAwwZSmFucyBBdXRoIENBIENlcnRpZmljYXRlczAeFw0yNDA2MjEwODQ4MjBaFw0yNDA2MjMwODQ4MjhaMCQxIjAgBgNVBAMMGUphbnMgQXV0aCBDQSBDZXJ0aWZpY2F0ZXMwdjAQBgcqhkjOPQIBBgUrgQQAIgNiAASgEXufyTMaIu+pBihzdMIp1YhtPu4T65yy2P12hfAlajYBdUy6136+8WTzzF3ektSqJ6MsTLQI4wMmO+XhOqBEcLT5e9Egp3FsixGTy/c/Jtpq0Hr38nYkDdGWQgwQhjejJzAlMCMGA1UdJQQcMBoGCCsGAQUFBwMBBggrBgEFBQcDAgYEVR0lADAKBggqhkjOPQQDAwNnADBkAjBLG10rRee/EUjusZy6ZccvlP1n8jZDhDB6eUdDCf9vd2z03GhHj1McS4FFClbEP+ICMGi6Xty6cdFXBl/G6enkPW8jox5fhW5lJ2Kqw00rcSmNXFQaXQQgeQUMhXBEEhafJQ=="
+      ],
+      "name": "Connect ES384 Sign Key",
+      "x": "oBF7n8kzGiLvqQYoc3TCKdWIbT7uE-ucstj9doXwJWo2AXVMutd-vvFk88xd3pLU",
+      "y": "qiejLEy0COMDJjvl4TqgRHC0-XvRIKdxbIsRk8v3PybaatB69_J2JA3RlkIMEIY3",
+      "exp": 1719132508905,
+      "alg": "ES384"
+    },
+    {
+      "descr": "Signature Key: ECDSA using P-521 (secp521r1) and SHA-512",
+      "kty": "EC",
+      "use": "sig",
+      "key_ops_type": [
+        "connect"
+      ],
+      "crv": "P-521",
+      "kid": "connect_22b8535a-e8a6-4f5e-b21d-c1c79c63b09b_sig_es512",
+      "x5c": [
+        "MIICBTCCAWegAwIBAgIhAIJraHUmmv3uuzpaYybev98vK02Pym3VDxqI4tc8EdZLMAoGCCqGSM49BAMEMCQxIjAgBgNVBAMMGUphbnMgQXV0aCBDQSBDZXJ0aWZpY2F0ZXMwHhcNMjQwNjIxMDg0ODIxWhcNMjQwNjIzMDg0ODI4WjAkMSIwIAYDVQQDDBlKYW5zIEF1dGggQ0EgQ2VydGlmaWNhdGVzMIGbMBAGByqGSM49AgEGBSuBBAAjA4GGAAQBZsJTE4x+wqEgNmz4W7A15qSz/KnIEa2qZvs8Xy3CB/uXSguHO6+OhULneopb5WZC+5wzsqqj7ED2AIr+XLSZ3sIBbDrJRCMwbnrnLP9D6MPkgHdJy4tYwMAfo0Bn8mEc+AOfJkQ/jRApQDrtU9CRUYBMdiiiCEVZtmtDziL3RAMza6qjJzAlMCMGA1UdJQQcMBoGCCsGAQUFBwMBBggrBgEFBQcDAgYEVR0lADAKBggqhkjOPQQDBAOBiwAwgYcCQSD27PoA+OnE1Y55NzmnuRKL6yJyT2ZuSCxpKTsnbV/2bAxAGKzeDII6PwD9ClQcd5sW2JjmQyqZ6VTdTnfGSX++AkIBDeehHj8NjNgnaFF3vtidTquoXUNDpGb9+8YsxfdgMo4qr5ADXEdqh7oMdtaiS84ODF+IEAAkX2fuIOkGLiKJuwQ="
+      ],
+      "name": "Connect ES512 Sign Key",
+      "x": "AWbCUxOMfsKhIDZs-FuwNeaks_ypyBGtqmb7PF8twgf7l0oLhzuvjoVC53qKW-VmQvucM7Kqo-xA9gCK_ly0md7C",
+      "y": "AWw6yUQjMG565yz_Q-jD5IB3ScuLWMDAH6NAZ_JhHPgDnyZEP40QKUA67VPQkVGATHYooghFWbZrQ84i90QDM2uq",
+      "exp": 1719132508905,
+      "alg": "ES512"
     },
     ...
     ...
@@ -263,9 +341,6 @@ by running the aforementioned command without a file.
 keys   array
        description: 
 ```
-
-In the path-jwk.json, you will find an example.
-
 you can also use the following command for `WebKeysConfiguration` schema example.
 
 ```bash title="Command"
@@ -301,7 +376,7 @@ If you want to explore more, please go through the reference link.
 Let's update the json file to create a new key configuration.
 
 
-```json title="Key"
+```json title="Input Key"
 {
    "keys":
    [{
@@ -318,7 +393,27 @@ Let's update the json file to create a new key configuration.
       "e": "AQAB",
       "x": null,
       "y": null
-  }]
+  }, 
+  {
+     "descr": "Signature Key: RSA RSASSA-PKCS1-v1_5 using SHA-256",
+     "kty": "RSA",
+     "e": "AQAB",
+     "use": "sig",
+     "key_ops_type": [
+       "connect"
+       ],
+     "kid": "connect_e47fd367-51d6-4d17-811d-adb1f1a0b723_sig_rs256",
+     "x5c": [
+         "MIIDCjCCAfKgAwIBAgIhAInuAAbxL2O7H+/V0lm3bbEdCmdPdgJh+OqljtWpwi7wMA0GCSqGSIb3DQEBCwUAMCQxIjAgBgNVBAMMGUphbnMgQXV0aCBDQSBDZXJ0aWZpY2F0ZXMwHhcNMjQwNjIxMDg0ODE5WhcNMjQwNjIzMDg0ODI4WjAkMSIwIAYDVQQDDBlKYW5zIEF1dGggQ0EgQ2VydGlmaWNhdGVzMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1RCY0ZfJ/SHZ+jojCyStBjIh4upkLXuMgZLi6b7k0fQ8/oNmCBEsOKMPUubHFEHrDHZLbXj7w5gEdMPZOiLaBP8Pv0JD8IbOUtoSXEawE33LRldKiof296nlBJFsX00ipiLq3ANXuTDXtP4+pd+lvIufv1nBXpqqrN4MOsSsKuvKvxRPCg6JusHVU5hsiqbwh9y3X7sPFwqw4LJFa0U3Z4RoX7vCsS/axPPSyUi9x0zsF4S7ZGHclBReC6IipOnGyGeSEQdpuchhoZs382md+wejIf4hVtusRbEHz+wwZFhnrfh/nvHCvrWCcxBgeEntAin+ig1RlR8N4x9Ox9K01wIDAQABoycwJTAjBgNVHSUEHDAaBggrBgEFBQcDAQYIKwYBBQUHAwIGBFUdJQAwDQYJKoZIhvcNAQELBQADggEBACkrKROjAIf6n1PKpXFTRQVov32EFcwhi1YSao/MZHURV2ruYXjh/S6HuvHWWofV8R6muLnD938GytS2mRjr+X7DOZj/bsDT7amd810SDvFUCh6IoPt46FeXFZMV4XyL4DQKoNxOEGGDVnD41NVC6k5GLzPwcVBwX11+b7wRfy/KoPP9aoSXjyWnNbhwClFQ9oTJYkNtaNeh2kJZ2j1UIqO51vyhUjpSM9awqV2u+ouxDKCT4h9xRcDwkOUlVXtBwn+dfJHnG6riLzT59MiPtWeo037hESUxIvJxLQP6jV97eEi/CMhSb1y6YJPFjnTBmCpzeHRp5+DNu65KPaGntB8="
+         ],
+     "name": "Connect RS256 Sign Key",
+     "exp": 1719132508905,
+     "alg": "RS256",
+     "n": "1RCY0ZfJ_SHZ-jojCyStBjIh4upkLXuMgZLi6b7k0fQ8_oNmCBEsOKMPUubHFEHrDHZLbXj7w5gEdMPZOiLaBP8Pv0JD8IbOUtoSXEawE33LRldKiof296nlBJFsX00ipiLq3ANXuTDXtP4-pd-lvIufv1nBXpqqrN4MOsSsKuvKvxRPCg6JusHVU5hsiqbwh9y3X7sPFwqw4LJFa0U3Z4RoX7vCsS_axPPSyUi9x0zsF4S7ZGHclBReC6IipOnGyGeSEQdpuchhoZs382md-wejIf4hVtusRbEHz-wwZFhnrfh_nvHCvrWCcxBgeEntAin-ig1RlR8N4x9Ox9K01w"
+     }
+     
+     
+   ]
 }
 ```
 
@@ -332,30 +427,47 @@ Now let's put the updated data into the Janssen server.
  --data /tmp/path-jwk.json
 ```
 
+Please remember, This operation replaces all JWKs having in
+the Janssen server with new ones. So, In this case,
+if you want to keep olds JWKs, you have to put them as well in the schema file.
+
 ```json title="Output Sample"
 {
   "keys": [
     {
-      "kid": "dd550214-7969-41b9-b919-2a0cfa36047b_enc_rsa1_5",
       "kty": "RSA",
+      "e": "AQAB",
       "use": "enc",
-      "alg": "RSA-OAEP",
-      "crv": "",
-      "exp": 1622245655163,
+      "key_ops_type": [],
+      "kid": "dd550214-7969-41b9-b919-2a0cfa36047b_enc_rsa1_5",
       "x5c": [
         "MIIDCjCCAfKgAwIBAgIhANYLiviUTmgOsf9Bf+6N/pr6H4Mis5ku1VXNj7VW/CMbMA0GCSqGSIb3DQEBCwUAMCQxIjAgBgNVBAMMGUphbnMgQXV0aCBDQSBDZXJ0aWZpY2F0ZXMwHhcNMjEwNTI2MjM0NzI5WhcNMjEwNTI4MjM0NzM1WjAkMSIwIAYDVQQDDBlKYW5zIEF1dGggQ0EgQ2VydGlmaWNhdGVzMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArlD19ib3J2bKYr2iap1d/gCmbXocMJTk5o7o3h9jJKXbh9pdf2gd3ZOE6wc5XwGx/CfHSgdEmACCXMiG7sQt80DPM67dlbtv/pEnWrHk4fwwst83OF+HXTSi4Sd9QWhDtBvaUu8Rp8ir+x2D0RK8YNGs0prA+qGR8O/h6Y+ascz4VNbbDlbJ+w7DJYeWU1HVp/5Lt8O5i4Q6I8KZEAytwvspF5y8m8DCrfYXF6Kz14vXgqr08hj0l0Aj4O3y/9i8kf2pmznpu5QEDimj1yxEB+G5WEYuHD/+qRTV85OXDIQJz6fgNM4kEimv7pmspcDfk/KKB7/KT0rEOn7T2rXW9QIDAQABoycwJTAjBgNVHSUEHDAaBggrBgEFBQcDAQYIKwYBBQUHAwIGBFUdJQAwDQYJKoZIhvcNAQELBQADggEBAKrtlIPhvDBxBfcqS9Xy39QqE1WOPiNQooa/FVVOsCROdRZrHhFcP27HpxO9e6genQSJ6nBRaJ4ykEf0oM535Ker5jZcDWzCwPIyt+5Kc6qeacZI5FxEHRldYkSd4lF1OTzQNvGLOPKnNWnYnXwj48ZxO50lJUsRFspVbP79E6llVNOPexrZ2GOzWghyY1E74f4uGr6fzcXQk2aFaIfLusoJlvbROPTnDu68Jt+IW4WZcO4F0tl0JIcuaqSmLS6McJW0Mpmu4wqEPV6E45zRAuX0kJUkKDMzM/lYW1MZ8QaSTt/pCmlknX1+KTgb6Sf9zZJEya8AyKML/NCpc4sfn8g="
       ],
-      "n": "rlD19ib3J2bKYr2iap1d_gCmbXocMJTk5o7o3h9jJKXbh9pdf2gd3ZOE6wc5XwGx_CfHSgdEmACCXMiG7sQt80DPM67dlbtv_pEnWrHk4fwwst83OF-HXTSi4Sd9QWhDtBvaUu8Rp8ir-x2D0RK8YNGs0prA-qGR8O_h6Y-ascz4VNbbDlbJ-w7DJYeWU1HVp_5Lt8O5i4Q6I8KZEAytwvspF5y8m8DCrfYXF6Kz14vXgqr08hj0l0Aj4O3y_9i8kf2pmznpu5QEDimj1yxEB-G5WEYuHD_-qRTV85OXDIQJz6fgNM4kEimv7pmspcDfk_KKB7_KT0rEOn7T2rXW9Q",
+      "exp": 1622245655163,
+      "alg": "RSA-OAEP",
+      "n": "rlD19ib3J2bKYr2iap1d_gCmbXocMJTk5o7o3h9jJKXbh9pdf2gd3ZOE6wc5XwGx_CfHSgdEmACCXMiG7sQt80DPM67dlbtv_pEnWrHk4fwwst83OF-HXTSi4Sd9QWhDtBvaUu8Rp8ir-x2D0RK8YNGs0prA-qGR8O_h6Y-ascz4VNbbDlbJ-w7DJYeWU1HVp_5Lt8O5i4Q6I8KZEAytwvspF5y8m8DCrfYXF6Kz14vXgqr08hj0l0Aj4O3y_9i8kf2pmznpu5QEDimj1yxEB-G5WEYuHD_-qRTV85OXDIQJz6fgNM4kEimv7pmspcDfk_KKB7_KT0rEOn7T2rXW9Q"
+    },
+    {
+      "descr": "Signature Key: RSA RSASSA-PKCS1-v1_5 using SHA-256",
+      "kty": "RSA",
       "e": "AQAB",
-      "x": null,
-      "y": null
+      "use": "sig",
+      "key_ops_type": [
+        "connect"
+      ],
+      "kid": "connect_e47fd367-51d6-4d17-811d-adb1f1a0b723_sig_rs256",
+      "x5c": [
+        "MIIDCjCCAfKgAwIBAgIhAInuAAbxL2O7H+/V0lm3bbEdCmdPdgJh+OqljtWpwi7wMA0GCSqGSIb3DQEBCwUAMCQxIjAgBgNVBAMMGUphbnMgQXV0aCBDQSBDZXJ0aWZpY2F0ZXMwHhcNMjQwNjIxMDg0ODE5WhcNMjQwNjIzMDg0ODI4WjAkMSIwIAYDVQQDDBlKYW5zIEF1dGggQ0EgQ2VydGlmaWNhdGVzMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1RCY0ZfJ/SHZ+jojCyStBjIh4upkLXuMgZLi6b7k0fQ8/oNmCBEsOKMPUubHFEHrDHZLbXj7w5gEdMPZOiLaBP8Pv0JD8IbOUtoSXEawE33LRldKiof296nlBJFsX00ipiLq3ANXuTDXtP4+pd+lvIufv1nBXpqqrN4MOsSsKuvKvxRPCg6JusHVU5hsiqbwh9y3X7sPFwqw4LJFa0U3Z4RoX7vCsS/axPPSyUi9x0zsF4S7ZGHclBReC6IipOnGyGeSEQdpuchhoZs382md+wejIf4hVtusRbEHz+wwZFhnrfh/nvHCvrWCcxBgeEntAin+ig1RlR8N4x9Ox9K01wIDAQABoycwJTAjBgNVHSUEHDAaBggrBgEFBQcDAQYIKwYBBQUHAwIGBFUdJQAwDQYJKoZIhvcNAQELBQADggEBACkrKROjAIf6n1PKpXFTRQVov32EFcwhi1YSao/MZHURV2ruYXjh/S6HuvHWWofV8R6muLnD938GytS2mRjr+X7DOZj/bsDT7amd810SDvFUCh6IoPt46FeXFZMV4XyL4DQKoNxOEGGDVnD41NVC6k5GLzPwcVBwX11+b7wRfy/KoPP9aoSXjyWnNbhwClFQ9oTJYkNtaNeh2kJZ2j1UIqO51vyhUjpSM9awqV2u+ouxDKCT4h9xRcDwkOUlVXtBwn+dfJHnG6riLzT59MiPtWeo037hESUxIvJxLQP6jV97eEi/CMhSb1y6YJPFjnTBmCpzeHRp5+DNu65KPaGntB8="
+      ],
+      "name": "Connect RS256 Sign Key",
+      "exp": 1719132508905,
+      "alg": "RS256",
+      "n": "1RCY0ZfJ_SHZ-jojCyStBjIh4upkLXuMgZLi6b7k0fQ8_oNmCBEsOKMPUubHFEHrDHZLbXj7w5gEdMPZOiLaBP8Pv0JD8IbOUtoSXEawE33LRldKiof296nlBJFsX00ipiLq3ANXuTDXtP4-pd-lvIufv1nBXpqqrN4MOsSsKuvKvxRPCg6JusHVU5hsiqbwh9y3X7sPFwqw4LJFa0U3Z4RoX7vCsS_axPPSyUi9x0zsF4S7ZGHclBReC6IipOnGyGeSEQdpuchhoZs382md-wejIf4hVtusRbEHz-wwZFhnrfh_nvHCvrWCcxBgeEntAin-ig1RlR8N4x9Ox9K01w"
     }
   ]
 }
 ```
-
-Please remember, This operation replaces all JWKs having in the Janssen server with new ones. So,
-In this case, if you want to keep olds JWKs, you have to put them as well in the schema file.
+Now use the [Get Configurations list of JWKs](#get-configurations-list-of-jwks) to confirm the upgrade.
 
 ### Get a JSON Web Key Based on kid
 
@@ -371,26 +483,25 @@ kid: The unique identifier for the key [string]
 
 ```bash title="Command"
 /opt/jans/jans-cli/config-cli.py --operation-id get-jwk-by-kid \
---url-suffix kid:new-key-test-id
+--url-suffix kid:dd550214-7969-41b9-b919-2a0cfa36047b_enc_rsa1_5
+
 ```
 It returns the details as below:
 
 ```json title="Sample Output"
- {
-  "kid": "new-key-test-id",
+{
+  "kid": "dd550214-7969-41b9-b919-2a0cfa36047b_enc_rsa1_5",
   "kty": "RSA",
   "use": "enc",
   "alg": "RSA-OAEP",
-  "crv": "",
   "exp": 1622245655163,
   "x5c": [
     "MIIDCjCCAfKgAwIBAgIhANYLiviUTmgOsf9Bf+6N/pr6H4Mis5ku1VXNj7VW/CMbMA0GCSqGSIb3DQEBCwUAMCQxIjAgBgNVBAMMGUphbnMgQXV0aCBDQSBDZXJ0aWZpY2F0ZXMwHhcNMjEwNTI2MjM0NzI5WhcNMjEwNTI4MjM0NzM1WjAkMSIwIAYDVQQDDBlKYW5zIEF1dGggQ0EgQ2VydGlmaWNhdGVzMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArlD19ib3J2bKYr2iap1d/gCmbXocMJTk5o7o3h9jJKXbh9pdf2gd3ZOE6wc5XwGx/CfHSgdEmACCXMiG7sQt80DPM67dlbtv/pEnWrHk4fwwst83OF+HXTSi4Sd9QWhDtBvaUu8Rp8ir+x2D0RK8YNGs0prA+qGR8O/h6Y+ascz4VNbbDlbJ+w7DJYeWU1HVp/5Lt8O5i4Q6I8KZEAytwvspF5y8m8DCrfYXF6Kz14vXgqr08hj0l0Aj4O3y/9i8kf2pmznpu5QEDimj1yxEB+G5WEYuHD/+qRTV85OXDIQJz6fgNM4kEimv7pmspcDfk/KKB7/KT0rEOn7T2rXW9QIDAQABoycwJTAjBgNVHSUEHDAaBggrBgEFBQcDAQYIKwYBBQUHAwIGBFUdJQAwDQYJKoZIhvcNAQELBQADggEBAKrtlIPhvDBxBfcqS9Xy39QqE1WOPiNQooa/FVVOsCROdRZrHhFcP27HpxO9e6genQSJ6nBRaJ4ykEf0oM535Ker5jZcDWzCwPIyt+5Kc6qeacZI5FxEHRldYkSd4lF1OTzQNvGLOPKnNWnYnXwj48ZxO50lJUsRFspVbP79E6llVNOPexrZ2GOzWghyY1E74f4uGr6fzcXQk2aFaIfLusoJlvbROPTnDu68Jt+IW4WZcO4F0tl0JIcuaqSmLS6McJW0Mpmu4wqEPV6E45zRAuX0kJUkKDMzM/lYW1MZ8QaSTt/pCmlknX1+KTgb6Sf9zZJEya8AyKML/NCpc4sfn8g="
   ],
   "n": "rlD19ib3J2bKYr2iap1d_gCmbXocMJTk5o7o3h9jJKXbh9pdf2gd3ZOE6wc5XwGx_CfHSgdEmACCXMiG7sQt80DPM67dlbtv_pEnWrHk4fwwst83OF-HXTSi4Sd9QWhDtBvaUu8Rp8ir-x2D0RK8YNGs0prA-qGR8O_h6Y-ascz4VNbbDlbJ-w7DJYeWU1HVp_5Lt8O5i4Q6I8KZEAytwvspF5y8m8DCrfYXF6Kz14vXgqr08hj0l0Aj4O3y_9i8kf2pmznpu5QEDimj1yxEB-G5WEYuHD_-qRTV85OXDIQJz6fgNM4kEimv7pmspcDfk_KKB7_KT0rEOn7T2rXW9Q",
-  "e": "AQAB",
-  "x": null,
-  "y": null
- }
+  "e": "AQAB"
+}
+
 ```
 
 ### Patch JSON Web Key (JWK) by kid
@@ -403,25 +514,8 @@ Operation ID: patch-config-jwks
   Schema: Array of JsonPatch
 ```
 
-In this case, We are going to a test data JWK that already added in jwk list of the Janssen server.
+In this case, We are going to a test data JWK which we  [Get a JSON Web Key Based on kid](#get-a-json-web-key-based-on-kid)
 
-```json 
-{
-      "kid": "new-key-test-id",
-      "kty": "RSA",
-      "use": "enc",
-      "alg": "RSA-OAEP",
-      "crv": "",
-      "exp": 1622245655163,
-      "x5c": [
-        "MIIDCjCCAfKgAwIBAgIhANYLiviUTmgOsf9Bf+6N/pr6H4Mis5ku1VXNj7VW/CMbMA0GCSqGSIb3DQEBCwUAMCQxIjAgBgNVBAMMGUphbnMgQXV0aCBDQSBDZXJ0aWZpY2F0ZXMwHhcNMjEwNTI2MjM0NzI5WhcNMjEwNTI4MjM0NzM1WjAkMSIwIAYDVQQDDBlKYW5zIEF1dGggQ0EgQ2VydGlmaWNhdGVzMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArlD19ib3J2bKYr2iap1d/gCmbXocMJTk5o7o3h9jJKXbh9pdf2gd3ZOE6wc5XwGx/CfHSgdEmACCXMiG7sQt80DPM67dlbtv/pEnWrHk4fwwst83OF+HXTSi4Sd9QWhDtBvaUu8Rp8ir+x2D0RK8YNGs0prA+qGR8O/h6Y+ascz4VNbbDlbJ+w7DJYeWU1HVp/5Lt8O5i4Q6I8KZEAytwvspF5y8m8DCrfYXF6Kz14vXgqr08hj0l0Aj4O3y/9i8kf2pmznpu5QEDimj1yxEB+G5WEYuHD/+qRTV85OXDIQJz6fgNM4kEimv7pmspcDfk/KKB7/KT0rEOn7T2rXW9QIDAQABoycwJTAjBgNVHSUEHDAaBggrBgEFBQcDAQYIKwYBBQUHAwIGBFUdJQAwDQYJKoZIhvcNAQELBQADggEBAKrtlIPhvDBxBfcqS9Xy39QqE1WOPiNQooa/FVVOsCROdRZrHhFcP27HpxO9e6genQSJ6nBRaJ4ykEf0oM535Ker5jZcDWzCwPIyt+5Kc6qeacZI5FxEHRldYkSd4lF1OTzQNvGLOPKnNWnYnXwj48ZxO50lJUsRFspVbP79E6llVNOPexrZ2GOzWghyY1E74f4uGr6fzcXQk2aFaIfLusoJlvbROPTnDu68Jt+IW4WZcO4F0tl0JIcuaqSmLS6McJW0Mpmu4wqEPV6E45zRAuX0kJUkKDMzM/lYW1MZ8QaSTt/pCmlknX1+KTgb6Sf9zZJEya8AyKML/NCpc4sfn8g="
-      ],
-      "n": "rlD19ib3J2bKYr2iap1d_gCmbXocMJTk5o7o3h9jJKXbh9pdf2gd3ZOE6wc5XwGx_CfHSgdEmACCXMiG7sQt80DPM67dlbtv_pEnWrHk4fwwst83OF-HXTSi4Sd9QWhDtBvaUu8Rp8ir-x2D0RK8YNGs0prA-qGR8O_h6Y-ascz4VNbbDlbJ-w7DJYeWU1HVp_5Lt8O5i4Q6I8KZEAytwvspF5y8m8DCrfYXF6Kz14vXgqr08hj0l0Aj4O3y_9i8kf2pmznpu5QEDimj1yxEB-G5WEYuHD_-qRTV85OXDIQJz6fgNM4kEimv7pmspcDfk_KKB7_KT0rEOn7T2rXW9Q",
-      "e": "AQAB",
-      "x": null,
-      "y": null
-    }
-```
 
 The `patch-config-jwks` operation uses the [JSON Patch ](https://jsonpatch.com/#the-patch) schema to describe 
 the configuration change. Refer [here](https://docs.jans.io/vreplace-janssen-version/admin/config-guide/config-tools/jans-cli/#patch-request-schema) to know more about schema.
@@ -444,7 +538,7 @@ Now let's do the operation with below command line.
 
 ```bash title="Command"
 /opt/jans/jans-cli/config-cli.py --operation-id patch-config-jwk-kid \
---url-suffix kid:new-key-test-id --data /tmp/schema.json
+--url-suffix kid:dd550214-7969-41b9-b919-2a0cfa36047b_enc_rsa1_5 --data /tmp/schema.json
 ```
 
 You need to change `kid` and `data` path according to your own.
@@ -452,19 +546,16 @@ Updated Json Web Key:
 
 ```json title="Key"
 {
-  "kid": "new-key-test-id",
+  "kid": "dd550214-7969-41b9-b919-2a0cfa36047b_enc_rsa1_5",
   "kty": "RSA",
   "use": "sig",
   "alg": "RSA-OAEP",
-  "crv": null,
   "exp": 1622245655163,
   "x5c": [
     "MIIDCjCCAfKgAwIBAgIhANYLiviUTmgOsf9Bf+6N/pr6H4Mis5ku1VXNj7VW/CMbMA0GCSqGSIb3DQEBCwUAMCQxIjAgBgNVBAMMGUphbnMgQXV0aCBDQSBDZXJ0aWZpY2F0ZXMwHhcNMjEwNTI2MjM0NzI5WhcNMjEwNTI4MjM0NzM1WjAkMSIwIAYDVQQDDBlKYW5zIEF1dGggQ0EgQ2VydGlmaWNhdGVzMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArlD19ib3J2bKYr2iap1d/gCmbXocMJTk5o7o3h9jJKXbh9pdf2gd3ZOE6wc5XwGx/CfHSgdEmACCXMiG7sQt80DPM67dlbtv/pEnWrHk4fwwst83OF+HXTSi4Sd9QWhDtBvaUu8Rp8ir+x2D0RK8YNGs0prA+qGR8O/h6Y+ascz4VNbbDlbJ+w7DJYeWU1HVp/5Lt8O5i4Q6I8KZEAytwvspF5y8m8DCrfYXF6Kz14vXgqr08hj0l0Aj4O3y/9i8kf2pmznpu5QEDimj1yxEB+G5WEYuHD/+qRTV85OXDIQJz6fgNM4kEimv7pmspcDfk/KKB7/KT0rEOn7T2rXW9QIDAQABoycwJTAjBgNVHSUEHDAaBggrBgEFBQcDAQYIKwYBBQUHAwIGBFUdJQAwDQYJKoZIhvcNAQELBQADggEBAKrtlIPhvDBxBfcqS9Xy39QqE1WOPiNQooa/FVVOsCROdRZrHhFcP27HpxO9e6genQSJ6nBRaJ4ykEf0oM535Ker5jZcDWzCwPIyt+5Kc6qeacZI5FxEHRldYkSd4lF1OTzQNvGLOPKnNWnYnXwj48ZxO50lJUsRFspVbP79E6llVNOPexrZ2GOzWghyY1E74f4uGr6fzcXQk2aFaIfLusoJlvbROPTnDu68Jt+IW4WZcO4F0tl0JIcuaqSmLS6McJW0Mpmu4wqEPV6E45zRAuX0kJUkKDMzM/lYW1MZ8QaSTt/pCmlknX1+KTgb6Sf9zZJEya8AyKML/NCpc4sfn8g="
   ],
   "n": "rlD19ib3J2bKYr2iap1d_gCmbXocMJTk5o7o3h9jJKXbh9pdf2gd3ZOE6wc5XwGx_CfHSgdEmACCXMiG7sQt80DPM67dlbtv_pEnWrHk4fwwst83OF-HXTSi4Sd9QWhDtBvaUu8Rp8ir-x2D0RK8YNGs0prA-qGR8O_h6Y-ascz4VNbbDlbJ-w7DJYeWU1HVp_5Lt8O5i4Q6I8KZEAytwvspF5y8m8DCrfYXF6Kz14vXgqr08hj0l0Aj4O3y_9i8kf2pmznpu5QEDimj1yxEB-G5WEYuHD_-qRTV85OXDIQJz6fgNM4kEimv7pmspcDfk_KKB7_KT0rEOn7T2rXW9Q",
-  "e": "AQAB",
-  "x": null,
-  "y": null
+  "e": "AQAB"
 }
 
 ```
@@ -480,7 +571,7 @@ It's pretty simple to delete json web key using its `kid`. The command line is:
 
 ```bash title="Command"
 /opt/jans/jans-cli/config-cli.py --operation-id delete-config-jwk-kid \
---url-suffix kid:new-key-test-id
+--url-suffix kid:dd550214-7969-41b9-b919-2a0cfa36047b_enc_rsa1_5
 ```
 
 It will delete the jwk if it matches with the given `kid`.
