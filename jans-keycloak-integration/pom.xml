@@ -19,7 +19,7 @@
       <maven.min-version>3.3.9</maven.min-version>
       <maven.compiler.source>17</maven.compiler.source>
       <maven.compiler.target>17</maven.compiler.target>
-      <keycloak-server.version>24.0.3</keycloak-server.version>
+      <keycloak-server.version>25.0.1</keycloak-server.version>
       <nimbus.oauth-sdk.version>10.11</nimbus.oauth-sdk.version>
       <nimbus.oauth2-oidc-sdk.version>10.11</nimbus.oauth2-oidc-sdk.version>
       <jackson.coreutils.version>1.8</jackson.coreutils.version>
@@ -57,9 +57,8 @@
     </prerequisites>
 
     <modules>
-      <module>authenticator</module>
-      <module>storage-spi</module>
       <module>job-scheduler</module>
+      <module>spi</module>
     </modules>
 
     <repositories>
@@ -143,14 +142,6 @@
           <version>${nimbus.oauth2-oidc-sdk.version}</version>
         </dependency>
         <!-- end nimbus dependencies-->
-
-        <!-- janssen dependencies -->
-        <dependency>
-          <groupId>io.jans</groupId>
-          <artifactId>jans-scim-model</artifactId>
-          <version>${jans.version}</version>
-        </dependency>
-        <!-- end janssen dependencies-->
 
         <!-- jakarta dependencies -->
         <dependency>
@@ -282,7 +273,55 @@
         <dependency>
           <groupId>io.jans</groupId>
           <artifactId>jans-core-saml</artifactId>
-          <version>${project.version}</version>
+          <version>${jans.version}</version>
+        </dependency>
+
+        <dependency>
+          <groupId>io.jans</groupId>
+          <artifactId>jans-scim-model</artifactId>
+          <version>${jans.version}</version>
+        </dependency>
+
+        <dependency>
+          <groupId>io.jans</groupId>
+          <artifactId>jans-core-standalone</artifactId>
+          <version>${jans.version}</version>
+        </dependency>
+
+        <dependency>
+          <groupId>io.jans</groupId>
+          <artifactId>jans-orm-standalone</artifactId>
+          <version>${jans.version}</version>
+        </dependency>
+
+        <dependency>
+          <groupId>io.jans</groupId>
+          <artifactId>jans-orm-couchbase</artifactId>
+          <version>${jans.version}</version>
+        </dependency>
+
+        <dependency>
+          <groupId>io.jans</groupId>
+          <artifactId>jans-orm-hybrid</artifactId>
+          <version>${jans.version}</version>
+        </dependency>
+
+        <dependency>
+          <groupId>io.jans</groupId>
+          <artifactId>jans-orm-ldap</artifactId>
+          <version>${jans.version}</version>
+        </dependency>
+
+        <dependency>
+          <groupId>io.jans</groupId>
+          <artifactId>jans-orm-sql</artifactId>
+          <version>${jans.version}</version>
+        </dependency>
+
+        <dependency>
+          <groupId>io.jans</groupId>
+          <artifactId>jans-core-service</artifactId>
+          <version>${jans.version}</version>
         </dependency>
         <!-- end jans dependencies -->
       </dependencies>
@@ -335,14 +374,15 @@
                   com.fasterxml.jackson.core,
                   commons-codec,
                   commons-lang3,
-                  commons-lang,
                   commons-collections4,
                   commons-io,
                   commons-logging,
                   commons-text,
-                  org.apache.commons,
-                  commons-configuration
+                  jakarta.persistence
                 </excludeGroupIds>
+                <excludeArtifactIds>
+                  
+                </excludeArtifactIds>
               </configuration>
             </execution>
           </executions>

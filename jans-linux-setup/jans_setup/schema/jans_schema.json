@@ -299,6 +299,28 @@
       "x_origin": "Jans created attribute"
     },
     {
+      "desc": "Type of the entry",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansType"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Entry lock key",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "lockKey"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
       "desc": "exclude login page configuration",
       "equality": "caseIgnoreMatch",
       "names": [
@@ -1334,6 +1356,26 @@
       "oid": "jansAttr",
       "substr": "caseIgnoreSubstringsMatch",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Numeric identifier",
+      "equality": "integerMatch",
+      "names": [
+        "jansNum"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Numeric node identifier",
+      "equality": "integerMatch",
+      "names": [
+        "jansNodeId"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
       "x_origin": "Jans created attribute"
     },
     {
@@ -5221,6 +5263,49 @@
       ],
       "names": [
         "auiWebhooks"
+      ],
+      "oid": "jansObjClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Jans created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "jansNum",
+        "jansType",
+        "creationDate",
+        "jansLastUpd",
+        "lockKey"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "jansNode"
+      ],
+      "oid": "jansObjClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Jans created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "jansNum",
+        "jansNodeId",
+        "dat",
+        "jansLastUpd",
+        "exp",
+        "lockKey"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "jansStatusIdxPool"
       ],
       "oid": "jansObjClass",
       "sup": [

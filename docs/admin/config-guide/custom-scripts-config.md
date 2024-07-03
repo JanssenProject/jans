@@ -363,3 +363,8 @@ For example, in our case; the command line is:
 ```
 
 That's all for `Custom Script` management with `CLI` feature.
+
+!!! Note
+
+If a custom script that is set as *Default authentication method* is disabled or deleted then the default authentication value will be removed.
+

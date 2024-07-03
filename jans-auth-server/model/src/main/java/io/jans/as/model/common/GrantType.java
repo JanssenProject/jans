@@ -76,7 +76,7 @@ public enum GrantType implements HasParamName, AttributeEnum {
      * an OAuth 2.0 access token to gain access to a protected resource
      * asynchronously from the time a resource owner grants access.
      */
-    OXAUTH_UMA_TICKET("urn:ietf:params:oauth:grant-type:uma-ticket"),
+    UMA_TICKET("urn:ietf:params:oauth:grant-type:uma-ticket"),
 
     /**
      * Token exchange grant type for OAuth 2.0

@@ -906,7 +906,12 @@ public class SqlOperationServiceImpl implements SqlOperationService {
         }
 
         // Add ending Z if necessary
-        String dateZ = date.endsWith("Z") ? date : date + "Z";
+        String dateZ;
+        if (connectionProvider.isDisableTimeZone()) {
+        	dateZ = date.endsWith("Z") ? date.substring(0, date.length() - 1) : date;
+        } else {
+        	dateZ = date.endsWith("Z") ? date : date + "Z";
+        }
         try {
             return new Date(Instant.parse(dateZ).toEpochMilli());
         } catch (DateTimeParseException ex) {
