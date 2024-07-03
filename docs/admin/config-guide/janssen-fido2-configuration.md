@@ -57,7 +57,7 @@ To get sample schema type /opt/jans/jans-cli/config-cli.py --schema <schema>, fo
 
 ### Get The Current Fido2 Configuration
 
-To get the properties of Janssen Fido2 Configuration, run below command:
+To get the properties of Janssen Fido2 Configuration, run the command below:
 
 ```bash title="Command"
 /opt/jans/jans-cli/config-cli.py --operation-id get-properties-fido2
@@ -120,7 +120,7 @@ It will return the result as below:
 To update the configuration follow the steps below.
 
 1. [Get the current configuration](#get-the-current-fido2-configuration) and store it into a file for editing
-2. Edit and update the configuration values as needed in the file while keeping other properties and values unchanged. Updates must adhere to the `Fido2:AppConfiguration` schema as mentioned [here](#using-command-line). Schema details can be retrieved using the command below. Schema defines what values and datatypes are acceptable for each property value.
+2. Edit and update the desired configuration values in the file while keeping other properties and values unchanged. Updates must adhere to the `Fido2:AppConfiguration` schema as mentioned [here](#using-command-line). The schema details can be retrieved using the command below. The schema defines what values and datatypes are acceptable for each property value.
  ```text title="Command"
  /opt/jans/jans-cli/config-cli.py --schema Fido2:AppConfiguration
  ```
