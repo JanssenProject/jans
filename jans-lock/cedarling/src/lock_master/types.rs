@@ -11,7 +11,7 @@ pub(crate) struct OAuthDynamicClientRequest<'a> {
 	pub(crate) client_name: &'a str,
 	pub(crate) grant_types: &'a [&'a str],
 	pub(crate) application_type: &'static str,
-	pub(crate) redirect_uris: &'a [&'static str],
+	pub(crate) redirect_uris: &'a [&'a str],
 	pub(crate) token_endpoint_auth_method: &'static str,
 	pub(crate) software_statement: &'a str,
 	pub(crate) contacts: &'a [&'static str],
@@ -34,11 +34,14 @@ pub(crate) struct OAuthDynamicClient {
 
 #[derive(serde::Serialize, Debug)]
 pub(crate) struct OAuthGrantRequest<'a> {
-	pub(crate) scope: &'a str,
+	pub(crate) scope: &'a [&'a str],
 	pub(crate) grant_type: &'a str,
 }
 
 #[derive(serde::Deserialize, Debug)]
 pub(crate) struct OAuthGrantResponse {
 	pub(crate) access_token: String,
+	pub(crate) id_token: String,
+	pub(crate) refresh_token: Option<String>,
+	pub(crate) token_type: String,
 }

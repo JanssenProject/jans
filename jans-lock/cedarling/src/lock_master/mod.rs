@@ -3,6 +3,7 @@ use wasm_bindgen::{prelude::*, throw_val};
 use web_sys::*;
 
 use crate::{
+	crypto,
 	http::{self, ResponseEx},
 	startup::types::PolicyStoreConfig,
 };
@@ -56,6 +57,7 @@ pub(crate) async fn init<'a>(policy_store_config: &PolicyStoreConfig) -> Cow<'a,
 	// Get OAuthConfig
 	let res = http::get(&lock_master_config.oauth_as_well_known, &[]).await.expect_throw("Unable to fetch LockMasterConfig from URL");
 	let openid_config = res.into_json::<types::OAuthConfig>().await.unwrap_throw();
+	let iss = crypto::get_issuer(&ssa_jwt).expect_throw("SSA_JWT lacks `iss` field");
 
 	let client: types::OAuthDynamicClient = {
 		// OpenID dynamic client registration
@@ -63,7 +65,7 @@ pub(crate) async fn init<'a>(policy_store_config: &PolicyStoreConfig) -> Cow<'a,
 			client_name: application_name,
 			application_type: "web",
 			grant_types: &["client_credentials"],
-			redirect_uris: &[],
+			redirect_uris: &[&iss],
 			token_endpoint_auth_method: "client_secret_basic",
 			software_statement: ssa_jwt,
 			contacts: &["newton@gluu.org"],
@@ -86,8 +88,8 @@ pub(crate) async fn init<'a>(policy_store_config: &PolicyStoreConfig) -> Cow<'a,
 		};
 
 		let grant = types::OAuthGrantRequest {
-			scope: "cedarling",
-			grant_type: "client_credentials",
+			scope: &["https://jans.io/oauth/scopes/cedarling", "https://jans.io/oauth/scopes/lock_sse"],
+			grant_type: "client_credentials authorization_code",
 		};
 
 		// send
