@@ -2250,9 +2250,74 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          FIDO2 Configuration
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         FIDO2 Configuration
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#using-command-line" class="md-nav__link">
+    Using Command Line
+  </a>
+  
+    <nav class="md-nav" aria-label="Using Command Line">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#get-the-current-fido2-configuration" class="md-nav__link">
+    Get The Current Fido2 Configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#update-fido2-configuration-properties" class="md-nav__link">
+    Update FIDO2 Configuration Properties
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-text-based-ui" class="md-nav__link">
+    Using Text-based UI
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-configuration-rest-api" class="md-nav__link">
+    Using Configuration REST API
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -8385,6 +8450,55 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#using-command-line" class="md-nav__link">
+    Using Command Line
+  </a>
+  
+    <nav class="md-nav" aria-label="Using Command Line">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#get-the-current-fido2-configuration" class="md-nav__link">
+    Get The Current Fido2 Configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#update-fido2-configuration-properties" class="md-nav__link">
+    Update FIDO2 Configuration Properties
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-text-based-ui" class="md-nav__link">
+    Using Text-based UI
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-configuration-rest-api" class="md-nav__link">
+    Using Configuration REST API
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -8426,122 +8540,175 @@
 
 
 <h1 id="janssen-fido2-configuration">Janssen FIDO2 Configuration<a class="headerlink" href="#janssen-fido2-configuration" title="Permanent link">#</a></h1>
-<blockquote>
-<p>Prerequisite: Know how to use the Janssen CLI in <a href="../config-tools/jans-cli/">command-line mode</a></p>
-</blockquote>
-<p>Using Janssen CLI, You can <code>get/update</code> Fido2 properties.
-To get the information of Janssen Fido2 CLI, run the following command:</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --info ConfigurationFido2
-
-Operation ID: get-properties-fido2
-  Description: Gets Jans Authorization Server Fido2 configuration properties.
+<p>The Janssen Server provides multiple configuration tools to perform these 
+tasks.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Use Command-line</label><label for="__tabbed_1_2">Use Text-based UI</label><label for="__tabbed_1_3">Use REST API</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>Use the command line to perform actions from the terminal. Learn how to 
+use Jans CLI <a href="../config-tools/jans-cli/">here</a> or jump straight to 
+the <a href="#using-command-line">Using Command Line</a></p>
+</div>
+<div class="tabbed-block">
+<p>Use a fully functional text-based user interface from the terminal. 
+Learn how to use Jans Text-based UI (TUI) 
+<a href="../config-tools/jans-tui/">here</a> or jump straight to the
+<a href="#using-text-based-ui">Using Text-based UI</a></p>
+</div>
+<div class="tabbed-block">
+<p>Use REST API for programmatic access or invoke via tools like CURL or 
+Postman. Learn how to use Janssen Server Config API 
+<a href="../config-tools/config-api/">here</a> or Jump straight to the
+<a href="#using-configuration-rest-api">Using Configuration REST API</a></p>
+</div>
+</div>
+</div>
+<h2 id="using-command-line">Using Command Line<a class="headerlink" href="#using-command-line" title="Permanent link">#</a></h2>
+<p>In the Janssen Server, you can deploy and customize the FIDO2 Configuration using the
+command line. To get the details of Janssen command line operations relevant to
+FIDO2 Configuration, you can check the operations under <code>Fido2Configuration</code> task using the
+command below:</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --info Fido2Configuration
+</code></pre></div>
+<p>It will show the details of the available operation-ids for Fido2.</p>
+<div class="highlight"><span class="filename">Sample Output</span><pre><span></span><code>Operation ID: get-properties-fido2
+  Description: Gets Jans Authorization Server Fido2 configuration properties
 Operation ID: put-properties-fido2
-  Description: Updates Fido2 configuration properties.
-  Schema: /components/schemas/JansFido2DynConfiguration
+  Description: Updates Fido2 configuration properties
+  Schema: Fido2:AppConfiguration
 
-To get sample shema type /opt/jans/jans-cli/config-cli.py --schema &lt;schma&gt;, for example /opt/jans/jans-cli/config-cli.py --schema /components/schemas/JansFido2DynConfiguration
+To get sample schema type /opt/jans/jans-cli/config-cli.py --schema &lt;schema&gt;, for example /opt/jans/jans-cli/config-cli.py --schema Fido2:AppConfiguration
 </code></pre></div>
-<h1 id="table-of-contents">Table of Contents<a class="headerlink" href="#table-of-contents" title="Permanent link">#</a></h1>
-<ul>
-<li><a href="#janssen-fido2-configuration">Janssen FIDO2 Configuration</a></li>
-<li><a href="#find-fido2-configuration-properties">Find FIDO2 Configuration Properties</a></li>
-<li><a href="#update-fido2-configuration-properties">Update FIDO2 Configuration Properties</a></li>
-</ul>
-<h2 id="find-fido2-configuration-properties">Find FIDO2 Configuration Properties<a class="headerlink" href="#find-fido2-configuration-properties" title="Permanent link">#</a></h2>
-<p>To get the properties of Janssen Fido2 Configuration, run below command:
-<code>/opt/jans/jans-cli/config-cli.py --operation-id get-properties-fido2</code></p>
+<h3 id="get-the-current-fido2-configuration">Get The Current Fido2 Configuration<a class="headerlink" href="#get-the-current-fido2-configuration" title="Permanent link">#</a></h3>
+<p>To get the properties of Janssen Fido2 Configuration, run the command below:</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-properties-fido2
+</code></pre></div>
 <p>It will return the result as below:</p>
-<div class="highlight"><pre><span></span><code>Getting access token for scope https://jans.io/oauth/config/fido2.readonly
-{
-  &quot;issuer&quot;: &quot;https://testjans.gluu.com&quot;,
-  &quot;baseEndpoint&quot;: &quot;https://testjans.gluu.com/fido2/restv1&quot;,
-  &quot;cleanServiceInterval&quot;: 60,
-  &quot;cleanServiceBatchChunkSize&quot;: 10000,
-  &quot;useLocalCache&quot;: false,
-  &quot;disableJdkLogger&quot;: false,
-  &quot;loggingLevel&quot;: &quot;DEBUG&quot;,
-  &quot;loggingLayout&quot;: &quot;text&quot;,
-  &quot;externalLoggerConfiguration&quot;: null,
-  &quot;metricReporterInterval&quot;: 300,
-  &quot;metricReporterKeepDataDays&quot;: 15,
-  &quot;metricReporterEnabled&quot;: false,
-  &quot;personCustomObjectClassList&quot;: [
-    &quot;jansCustomPerson&quot;,
-    &quot;jansPerson&quot;
-  ],
-  &quot;fido2Configuration&quot;: {
-    &quot;authenticatorCertsFolder&quot;: null,
-    &quot;mdsCertsFolder&quot;: null,
-    &quot;mdsTocsFolder&quot;: null,
-    &quot;serverMetadataFolder&quot;: null,
-    &quot;requestedParties&quot;: [
-      {
-        &quot;name&quot;: null,
-        &quot;domains&quot;: []
-      }
-    ],
-    &quot;userAutoEnrollment&quot;: false,
-    &quot;unfinishedRequestExpiration&quot;: null,
-    &quot;authenticationHistoryExpiration&quot;: null,
-    &quot;requestedCredentialTypes&quot;: []
-  }
-}
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;issuer&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://jans-project.lxd&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;baseEndpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://jans-project.lxd/jans-fido2/restv1&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;cleanServiceInterval&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">60</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;cleanServiceBatchChunkSize&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10000</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;useLocalCache&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;disableJdkLogger&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;loggingLevel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;INFO&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;loggingLayout&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;text&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;metricReporterInterval&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">300</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;metricReporterKeepDataDays&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">15</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;metricReporterEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;personCustomObjectClassList&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;jansCustomPerson&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;jansPerson&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">],</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;superGluuEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;sessionIdPersistInCache&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;oldU2fMigrationEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;errorReasonEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;fido2Configuration&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;authenticatorCertsFolder&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/etc/jans/conf/fido2/authenticator_cert&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;mdsCertsFolder&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/etc/jans/conf/fido2/mds/cert&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;mdsTocsFolder&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/etc/jans/conf/fido2/mds/toc&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;checkU2fAttestations&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;userAutoEnrollment&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;unfinishedRequestExpiration&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">180</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;authenticationHistoryExpiration&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1296000</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;serverMetadataFolder&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/etc/jans/conf/fido2/server_metadata&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;requestedCredentialTypes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">      </span><span class="s2">&quot;RS256&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="s2">&quot;ES256&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;requestedParties&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">      </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://jans-project.lxd&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;domains&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">          </span><span class="s2">&quot;jans-project.lxd&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="p">]</span><span class="w"></span>
+<span class="w">      </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="p">],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;skipDownloadMdsEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;skipValidateMdsInAttestationEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;assertionOptionsGenerateEndpointEnabled&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div></td></tr></table></div>
+<h3 id="update-fido2-configuration-properties">Update FIDO2 Configuration Properties<a class="headerlink" href="#update-fido2-configuration-properties" title="Permanent link">#</a></h3>
+<p>To update the configuration follow the steps below.</p>
+<ol>
+<li><a href="#get-the-current-fido2-configuration">Get the current configuration</a> and store it into a file for editing</li>
+<li>Edit and update the desired configuration values in the file while keeping other properties and values unchanged. Updates must adhere to the <code>Fido2:AppConfiguration</code> schema as mentioned <a href="#using-command-line">here</a>. The schema details can be retrieved using the command below. The schema defines what values and datatypes are acceptable for each property value.
+ <div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --schema Fido2:AppConfiguration
+</code></pre></div></li>
+<li>Use the updated file to send the update to the Janssen Server using the command below
+ <div class="highlight"><span class="filename">Command</span><pre><span></span><code> /opt/jans/jans-cli/config-cli.py --operation-id put-properties-fido2 <span class="se">\</span>
+ --data /tmp/conf-data.json
 </code></pre></div>
-<h2 id="update-fido2-configuration-properties">Update FIDO2 Configuration Properties<a class="headerlink" href="#update-fido2-configuration-properties" title="Permanent link">#</a></h2>
-<p>To perform this operation, let's check the schema first.</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --schema /components/schemas/JansFido2DynConfiguration &gt; /tmp/fido2-schema.json
+ Upon successful execution of the update, the Janssen Server responds with updated configuration.</li>
+</ol>
+<h2 id="using-text-based-ui">Using Text-based UI<a class="headerlink" href="#using-text-based-ui" title="Permanent link">#</a></h2>
+<p>In the Janssen Server, You can manage FIDO2 Configuration using 
+the <a href="../config-tools/jans-tui/">Text-Based UI</a> also.</p>
+<p>You can start TUI using the command below:</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>sudo /opt/jans/jans-cli/jans_cli_tui.py
 </code></pre></div>
-<p>This command will create a fido2 schema file on <code>/tmp/</code>. You can edit this file depending on the requirements:</p>
-<p><img alt="janssen fido2 configuration" src="../../../assets/image-cl-fido2-update-03042021.png" /></p>
-<p>Now let's do the operation:</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id put-properties-fido2 --data /tmp/fido2-schema.json
-
-Getting access token for scope https://jans.io/oauth/config/fido2.write
-Server Response:
-{
-  &quot;issuer&quot;: &quot;https://server.example.com/&quot;,
-  &quot;baseEndpoint&quot;: &quot;https://server.example.com/fido2/restv1&quot;,
-  &quot;cleanServiceInterval&quot;: null,
-  &quot;cleanServiceBatchChunkSize&quot;: null,
-  &quot;useLocalCache&quot;: false,
-  &quot;disableJdkLogger&quot;: false,
-  &quot;loggingLevel&quot;: &quot;INFO&quot;,
-  &quot;loggingLayout&quot;: null,
-  &quot;externalLoggerConfiguration&quot;: null,
-  &quot;metricReporterInterval&quot;: null,
-  &quot;metricReporterKeepDataDays&quot;: null,
-  &quot;metricReporterEnabled&quot;: true,
-  &quot;personCustomObjectClassList&quot;: [],
-  &quot;fido2Configuration&quot;: {
-    &quot;authenticatorCertsFolder&quot;: null,
-    &quot;mdsCertsFolder&quot;: null,
-    &quot;mdsTocsFolder&quot;: null,
-    &quot;serverMetadataFolder&quot;: null,
-    &quot;requestedParties&quot;: [
-      {
-        &quot;name&quot;: null,
-        &quot;domains&quot;: null
-      },
-      {
-        &quot;name&quot;: null,
-        &quot;domains&quot;: null
-      }
-    ],
-    &quot;userAutoEnrollment&quot;: true,
-    &quot;unfinishedRequestExpiration&quot;: null,
-    &quot;authenticationHistoryExpiration&quot;: null,
-    &quot;requestedCredentialTypes&quot;: []
-  }
-}
-</code></pre></div>
-<p>You may find that I have updated to <code>logginglabel:INFO</code> from <code>NULL</code>.</p>
+<p>Navigate to <code>FIDO</code> section where administrators can update dynamic and static
+configurations.</p>
+<p><img alt="image" src="../../../assets/tui-fido2-dynamic-configuration.png" /></p>
+<h2 id="using-configuration-rest-api">Using Configuration REST API<a class="headerlink" href="#using-configuration-rest-api" title="Permanent link">#</a></h2>
+<p>Janssen Server Configuration REST API exposes relevant endpoints for 
+managing and configuring the FIDO2 Configuration. Endpoint details 
+are published in the <a href="../../reference/openapi/">Swagger document</a>.</p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-08-03T16:21:13+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-08-03</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-07-03T10:12:41+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-07-03</span>
       
         <br>
         Created:
