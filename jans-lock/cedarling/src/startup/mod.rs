@@ -13,10 +13,11 @@ pub(crate) static SCHEMA: OnceLock<Schema> = OnceLock::new();
 pub(crate) static POLICY_SET: OnceLock<PolicySet> = OnceLock::new();
 
 pub(crate) async fn init(config: &types::CedarlingConfig) {
-	init_policy_store(&config).await;
+	let policy_store = init_policy_store(&config).await;
+	crypto::init(config, policy_store);
 }
 
-pub(crate) async fn init_policy_store(config: &types::CedarlingConfig) {
+pub(crate) async fn init_policy_store(config: &types::CedarlingConfig) -> serde_json::Map<String, serde_json::Value> {
 	// Get PolicyStore JSON
 	let source = match &config.policy_store {
 		types::PolicyStoreConfig::Local => Cow::Borrowed(include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/policy-store/default.json")).as_slice()),
@@ -62,5 +63,6 @@ pub(crate) async fn init_policy_store(config: &types::CedarlingConfig) {
 	// Persist PolicyStore data
 	SCHEMA.set(schema).expect_throw("SCHEMA has already been initialized");
 	POLICY_SET.set(policies).expect_throw("POLICY_SET has already been initialized");
-	crypto::init(config, policy_store);
+
+	policy_store
 }

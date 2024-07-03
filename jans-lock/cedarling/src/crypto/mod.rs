@@ -30,10 +30,10 @@ pub(crate) static mut TRUST_STORE: OnceLock<BTreeMap<types::TrustedIssuer, (Stri
 
 fn init_trust_store(trusted_issuers: Rc<[types::TrustedIssuer]>, refresh_rate: Option<i32>) {
 	let refresh_trust_store = move || {
-		let clone = trusted_issuers.clone();
+		let issuers = trusted_issuers.clone();
 
 		wasm_bindgen_futures::spawn_local(async move {
-			for issuer in clone.as_ref() {
+			for issuer in issuers.as_ref() {
 				let req = http::get(&issuer.openid_configuration_endpoint, &[]).await;
 				let res = req.expect_throw("Unable to get OpenID config for TrustedIssuer");
 

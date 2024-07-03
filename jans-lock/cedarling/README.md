@@ -4,9 +4,11 @@ The `cedarling` is an embeddable Webassembly Component that runs a local Cedar E
 
 ### Setup 1️⃣
 
-Make sure you have the [Rust Toolchain](https://rustup.rs/), [wasm-bindgen](https://rustwasm.github.io/wasm-bindgen/reference/cli.html) and the `wasm32-unknown-unknown` Rust target triple installed. General setup follows the following flow:
+Make sure you have [the Rust Toolchain](https://rustup.rs/), [`wasm-bindgen`](https://rustwasm.github.io/wasm-bindgen/reference/cli.html), [`clang`](https://clang.llvm.org/) and the `wasm32-unknown-unknown` Rust target triple installed. General setup follows the following flow:
 
 ```bash
+# clang installation differs by OS and distribution
+
 $ rustup default stable # Install Rust stable
 $ rustup target add wasm32-unknown-unknown # Install wasm target
 
@@ -19,7 +21,7 @@ To build the `cedarling`, run the following commands, the appropriate Javascript
 
 
 ```bash
-$ cargo build --release wasm32-unknown-unknown
+$ cargo build --release --target wasm32-unknown-unknown
 $ wasm-bindgen --out-dir out ./target/wasm32-unknown-unknown/release/cedarling.wasm
 
 $ ls out
@@ -97,6 +99,8 @@ const lockMaster = {
 	// `ssaJwt`: Software Statement used by the cedarling during OAuth Dynamic Client registration
 	ssaJwt: "..."
 }
+
+/// END > config.policyStore options <
 
 // To initialize the cedarling, run init(config)
 init(config);

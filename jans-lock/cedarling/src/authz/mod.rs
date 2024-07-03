@@ -8,7 +8,7 @@ mod types;
 
 #[wasm_bindgen]
 pub async fn authz(req: JsValue) -> JsValue {
-	let _request = from_value::<types::Tokens>(req).unwrap();
+	let _request = from_value::<types::AuthzInput>(req).unwrap();
 	JsValue::NULL
 }
 
