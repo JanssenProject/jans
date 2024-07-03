@@ -22,7 +22,12 @@ To build the `cedarling`, run the following commands, the appropriate Javascript
 
 ```bash
 $ cargo build --release --target wasm32-unknown-unknown
+
+# For use in Node, Deno or the Edge
 $ wasm-bindgen --out-dir out ./target/wasm32-unknown-unknown/release/cedarling.wasm
+
+# To build for the Web you need
+$ wasm-bindgen --out-dir out ./target/wasm32-unknown-unknown/release/cedarling.wasm --target web
 
 $ ls out
 	out
