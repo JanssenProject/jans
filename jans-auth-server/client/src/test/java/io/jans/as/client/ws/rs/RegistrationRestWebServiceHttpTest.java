@@ -38,7 +38,7 @@ import static io.jans.as.client.client.Asserter.*;
 import static io.jans.as.model.common.GrantType.AUTHORIZATION_CODE;
 import static io.jans.as.model.common.GrantType.CLIENT_CREDENTIALS;
 import static io.jans.as.model.common.GrantType.IMPLICIT;
-import static io.jans.as.model.common.GrantType.OXAUTH_UMA_TICKET;
+import static io.jans.as.model.common.GrantType.UMA_TICKET;
 import static io.jans.as.model.common.GrantType.REFRESH_TOKEN;
 import static io.jans.as.model.common.GrantType.RESOURCE_OWNER_PASSWORD_CREDENTIALS;
 import static io.jans.as.model.common.ResponseType.CODE;
@@ -78,7 +78,7 @@ public class RegistrationRestWebServiceHttpTest extends BaseTest {
                 RESOURCE_OWNER_PASSWORD_CREDENTIALS,
                 CLIENT_CREDENTIALS,
                 REFRESH_TOKEN,
-                OXAUTH_UMA_TICKET));
+                UMA_TICKET));
         registerRequest.setResponseTypes(Arrays.asList(
                 CODE,
                 TOKEN,

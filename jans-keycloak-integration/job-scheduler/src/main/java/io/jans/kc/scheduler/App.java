@@ -87,7 +87,7 @@ public class App {
                     Thread.sleep(1000);
                 }
             }
-            log.info("Application shutthing down");
+            log.info("Application shutting down");
         }catch(StartupError e) {
             log.error("Application startup failed",e);
             if(jobScheduler != null) {
@@ -95,6 +95,15 @@ public class App {
             }
             System.exit(-1);
             return;
+        }catch(InterruptedException e) {
+            log.error("Application interrupted",e);
+            Thread.currentThread().interrupt();
+        }catch(Exception e) {
+            log.error("Fatal error starting application",e);
+            if(jobScheduler != null ) {
+                jobScheduler.stop();
+            }
+            System.exit(-1);
         }
 
     }
@@ -163,10 +172,8 @@ public class App {
 
     private static final void runCronJobs() {
 
-        log.debug("Running trust relationship sync cron job");
         TrustRelationshipSyncJob trsyncjob = new TrustRelationshipSyncJob();
         trsyncjob.run(null);
-        log.debug("Trust relationship sync cron job complete");
     }
 
     private static final void performPostStartupOperations() {
@@ -271,7 +278,7 @@ public class App {
         public void run() {
 
             try {
-                log.debug("Shutting down application");
+                log.info("Shutting down application");
                 if (jobScheduler != null) {
                     jobScheduler.stop();
                 }

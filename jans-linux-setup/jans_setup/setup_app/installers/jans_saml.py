@@ -26,6 +26,10 @@ Config.jans_idp_user_password = os.urandom(10).hex()
 Config.jans_idp_idp_root_dir = os.path.join(Config.jansOptFolder, 'idp')
 Config.jans_idp_ignore_validation = 'true'
 Config.jans_idp_idp_metadata_file = 'idp-metadata.xml'
+Config.kc_db_provider = 'postgresql'
+Config.kc_db_username = 'kcdbuser'
+Config.kc_db_password = 'kcdbuserpassword'
+Config.kc_jdbc_url = 'jdbc:postgresql:kcdbuser:kcdbuserpassword@//localhost:1122/kc_service'
 
 class JansSamlInstaller(JettyInstaller):
 

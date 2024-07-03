@@ -209,7 +209,7 @@ public class ClientAuthenticationByAccessTokenHttpTest extends BaseTest {
         try {
             tokenService.requestRpt(
                     "AccessToken " + userAccessToken,
-                    GrantType.OXAUTH_UMA_TICKET.getValue(),
+                    GrantType.UMA_TICKET.getValue(),
                     permissionFlowTest.ticket,
                     null, null, null, null, null);
         } catch (ClientErrorException ex) {

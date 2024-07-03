@@ -105,6 +105,8 @@ components:
       properties:
         baseDN:
           type: string
+        baseEndpoint:
+          type: string
         tokenChannels:
           type: array
           items:
