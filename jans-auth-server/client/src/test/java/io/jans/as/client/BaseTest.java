@@ -621,10 +621,15 @@ public abstract class BaseTest {
                 .pollingEvery(Duration.ofMillis(1000))
                 .ignoring(NoSuchElementException.class);
 
-        WebElement loginButton = wait.until(d -> {
-            return d.findElement(By.id(id));
-        });
-        return loginButton;
+        try {
+            WebElement loginButton = wait.until(d -> d.findElement(By.id(id)));
+            return loginButton;
+        } catch (TimeoutException e) {
+            System.out.println("PAGE URL: " + currentDriver.getCurrentUrl());
+            System.out.println("PAGE SOURCE: ");
+            System.out.println(currentDriver.getPageSource());
+            throw e;
+        }
     }
 
     protected String acceptAuthorization(WebDriver currentDriver, String redirectUri) {
