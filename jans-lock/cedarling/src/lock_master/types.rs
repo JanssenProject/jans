@@ -45,3 +45,9 @@ pub(crate) struct OAuthGrantResponse {
 	pub(crate) refresh_token: Option<String>,
 	pub(crate) token_type: String,
 }
+
+#[derive(serde::Deserialize, Debug)]
+#[non_exhaustive]
+pub(crate) enum SseUpdate {
+	StatusListUpdate { bits: u8, status_list: String },
+}

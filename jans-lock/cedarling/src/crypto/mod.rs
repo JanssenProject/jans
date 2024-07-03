@@ -1,4 +1,4 @@
-use std::{borrow::Cow, collections::BTreeMap, rc::Rc, str::FromStr, sync::OnceLock};
+use std::{collections::BTreeMap, rc::Rc, str::FromStr, sync::OnceLock};
 use wasm_bindgen::prelude::*;
 use web_sys::Window;
 
@@ -7,7 +7,11 @@ use crate::{
 	lock_master, startup,
 };
 
+pub(crate) mod decode;
 mod types;
+
+// Supported algorithms
+pub(crate) static SUPPORTED_ALGORITHMS: OnceLock<Vec<jsonwebtoken::Algorithm>> = OnceLock::new();
 
 pub(crate) fn init(config: &startup::types::CedarlingConfig, mut policy_store: serde_json::Map<String, serde_json::Value>) {
 	// insert supported jwt signature algorithms
@@ -70,70 +74,4 @@ fn init_trust_store(trusted_issuers: Rc<[types::TrustedIssuer]>, refresh_rate: O
 			.set_interval_with_callback_and_timeout_and_arguments_0(callback.into_js_value().unchecked_ref(), refresh_rate)
 			.unwrap_throw();
 	}
-}
-
-// JWT Validation
-pub(crate) static SUPPORTED_ALGORITHMS: OnceLock<Vec<jsonwebtoken::Algorithm>> = OnceLock::new();
-
-pub(crate) fn validation_options(jwt: &str) -> Result<(Option<jsonwebtoken::DecodingKey>, jsonwebtoken::Validation), Cow<'static, str>> {
-	let trust_store = unsafe { TRUST_STORE.get().expect_throw("TRUST_STORE not initialized") };
-	let supported = SUPPORTED_ALGORITHMS.get().expect_throw("SUPPORTED_ALGORITHMS not initialized").clone();
-
-	let header = jsonwebtoken::decode_header(jwt).unwrap_throw();
-
-	// extract JWK
-	let jwk = if let Some(jwk) = header.jwk {
-		Some(jwk)
-	} else {
-		match header.kid {
-			Some(kid) => {
-				let mut jwk = None;
-
-				for (_, (_, jwks)) in trust_store {
-					if let Some(found) = jwks.find(&kid) {
-						jwk = Some(found);
-						break;
-					}
-				}
-
-				jwk.cloned()
-			}
-			None => None,
-		}
-	};
-
-	// build decoding key
-	let decoding_key = jwk.as_ref().map(jsonwebtoken::DecodingKey::from_jwk).map(Result::unwrap);
-
-	// build validation
-	let mut validation = jsonwebtoken::Validation::new(jsonwebtoken::Algorithm::HS256);
-	let issuers = trust_store.values().map(|(issuer, _)| issuer).collect::<Vec<_>>();
-	validation.set_issuer(&issuers);
-	validation.algorithms = supported;
-
-	Ok((decoding_key, validation))
-}
-
-pub(crate) fn decode_jwt<T: serde::de::DeserializeOwned>(jwt: &str) -> T {
-	let (key, validation) = validation_options(jwt).unwrap_throw();
-	let key = &key.expect_throw("Unable to extract DecodingKey from JWT");
-	jsonwebtoken::decode(jwt, key, &validation).unwrap_throw().claims
-}
-
-#[wasm_bindgen]
-extern "C" {
-	#[wasm_bindgen(js_name = atob)]
-	pub fn js_atob(input: &str) -> String;
-}
-
-pub(crate) fn get_issuer(jwt: &str) -> Option<String> {
-	#[derive(serde::Deserialize)]
-	struct IssuerExtract {
-		iss: String,
-	}
-
-	let payload = jwt.split(".").nth(1)?;
-	let decoded: IssuerExtract = serde_json::from_str::<IssuerExtract>(&js_atob(payload)).ok()?;
-
-	Some(decoded.iss)
 }

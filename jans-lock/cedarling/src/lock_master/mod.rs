@@ -1,5 +1,5 @@
 use std::borrow::Cow;
-use wasm_bindgen::{prelude::*, throw_val};
+use wasm_bindgen::prelude::*;
 use web_sys::*;
 
 use crate::{
@@ -8,8 +8,8 @@ use crate::{
 	startup::types::PolicyStoreConfig,
 };
 
-pub(crate) mod types;
 mod sse;
+pub(crate) mod types;
 
 #[wasm_bindgen]
 extern "C" {
@@ -41,7 +41,7 @@ pub(crate) async fn init<'a>(policy_store_config: &PolicyStoreConfig) -> Cow<'a,
 	// Get OAuthConfig
 	let res = http::get(&lock_master_config.oauth_as_well_known, &[]).await.expect_throw("Unable to fetch LockMasterConfig from URL");
 	let openid_config = res.into_json::<types::OAuthConfig>().await.unwrap_throw();
-	let iss = crypto::get_issuer(&ssa_jwt).expect_throw("SSA_JWT lacks `iss` field");
+	let iss = crypto::decode::get_issuer(&ssa_jwt).expect_throw("SSA_JWT lacks `iss` field");
 
 	let client: types::OAuthDynamicClient = {
 		// OpenID dynamic client registration
