@@ -3919,7 +3919,6 @@
         "policyStats"
       ],
       "json": true,
-      "multivalued": true,
       "rdbm_json_column": true,
       "oid": "jansAttr",
       "substr": "caseIgnoreSubstringsMatch",
@@ -5297,6 +5296,33 @@
       ],
       "names": [
         "jansTrustedIdp"
+      ],
+      "oid": "jansObjClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Jans created objectclass"
+    },
+	{
+      "kind": "STRUCTURAL",
+      "may": [
+        "jansId",
+		"jansLastUpd",
+		"size",
+		"jansStatus",
+		"jansCounter",
+		"jansFailCounter",
+		"evaluationTimeNs",
+		"averageTimeNs",
+		"memoryUsage",
+        "requestCounter",
+        "policyStats"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "jansTelemetryEntry"
       ],
       "oid": "jansObjClass",
       "sup": [

@@ -36,68 +36,88 @@ public class AppConfiguration implements Configuration {
 
 	private String baseDN;
 	
-
-    @Schema(description = "Lock Client ID.")
+	@DocProperty(description = "Lock Client ID")
+    @Schema(description = "Lock Client ID")
     private String clientId;
 
-    @Schema(description = "Lock client password.")
+	@DocProperty(description = "Lock client password")
+    @Schema(description = "Lock client password")
     private String clientPassword;    
 
-    @Schema(description = "Jans URL of the OpenID Connect Provider's OAuth 2.0 Token Endpoint.")
+	@DocProperty(description = "Jans URL of the OpenID Connect Provider's OAuth 2.0 Token Endpoint")
+    @Schema(description = "Jans URL of the OpenID Connect Provider's OAuth 2.0 Token Endpoint")
     private String tokenUrl;
     
-    @Schema(description = "Jans URL and corresponding scope details")
+	@DocProperty(description = "Jans URL of config-api audit endpoints and corresponding scope details")
+    @Schema(description = "Jans URL of config-api audit endpoints and corresponding scope details")
     private Map<String, List<String>> endpointDetails;
 	
     @DocProperty(description = "Lock base endpoint URL")
+    @Schema(description = "Lock base endpoint URL")
     private String baseEndpoint;
 
     @DocProperty(description = "List of token channel names", defaultValue = "jans_token")
+    @Schema(description = "List of token channel names")
 	private List<String> tokenChannels;
 
 	@DocProperty(description = "Choose whether to disable JDK loggers", defaultValue = "true")
+	@Schema(description = "Choose whether to disable JDK loggers")
 	private Boolean disableJdkLogger = true;
 
     @DocProperty(description = "Specify the logging level of loggers")
+    @Schema(description = "Specify the logging level of loggers")
 	private String loggingLevel;
 
     @DocProperty(description = "Logging layout used for Jans Authorization Server loggers")
+    @Schema(description = "Logging layout used for Jans Authorization Server loggers")
     private String loggingLayout;
 
     @DocProperty(description = "The path to the external log4j2 logging configuration")
+    @Schema(description = "The path to the external log4j2 logging configuration")
     private String externalLoggerConfiguration;
 
     @DocProperty(description = "Channel for metric reports", defaultValue = "jans_pdp_metric")
+    @Schema(description = "Channel for metric reports")
 	private String metricChannel;
 
     @DocProperty(description = "The interval for metric reporter in seconds")
+    @Schema(description = "The interval for metric reporter in seconds")
 	private int metricReporterInterval;
 
     @DocProperty(description = "The days to keep metric reported data")
+    @Schema(description = "The days to keep metric reported data")
 	private int metricReporterKeepDataDays;
 
     @DocProperty(description = "Enable metric reporter")
+    @Schema(description = "Enable metric reporter")
 	private Boolean metricReporterEnabled;
 
 	// Period in seconds
     @DocProperty(description = "Time interval for the Clean Service in seconds")
+    @Schema(description = "Time interval for the Clean Service in seconds")
 	private int cleanServiceInterval;
 	
+    @Schema(description = "Opa Configuration")
 	private OpaConfiguration opaConfiguration;
 
     @DocProperty(description = "PDP type")
+    @Schema(description = "PDP type")
 	private String pdpType;
 
     @DocProperty(description = "Authorization token to access Json Uris")
+    @Schema(description = "Authorization token to access Json Uris")
 	private String policiesJsonUrisAuthorizationToken;
 
     @DocProperty(description = "List of Json Uris with link to Rego policies")
+    @Schema(description = "List of Json Uris with link to Rego policies")
 	private List<String> policiesJsonUris;
 
     @DocProperty(description = "Authorization token to access Zip Uris")
+    @Schema(description = "Authorization token to access Zip Uris")
 	private String policiesZipUrisAuthorizationToken;
 
     @DocProperty(description = "List of Zip Uris with policies")
+    @Schema(description = "List of Zip Uris with policies")
 	private List<String> policiesZipUris;
 
     public String getBaseDN() {
@@ -108,20 +128,20 @@ public class AppConfiguration implements Configuration {
         this.baseDN = baseDN;
     }
 
-    public String getApiClientId() {
-        return apiClientId;
+    public String getClientId() {
+        return clientId;
     }
 
-    public void setApiClientId(String apiClientId) {
-        this.apiClientId = apiClientId;
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
     }
 
-    public String getApiClientPassword() {
-        return apiClientPassword;
+    public String getClientPassword() {
+        return clientPassword;
     }
 
-    public void setApiClientPassword(String apiClientPassword) {
-        this.apiClientPassword = apiClientPassword;
+    public void setClientPassword(String clientPassword) {
+        this.clientPassword = clientPassword;
     }
 
     public String getTokenUrl() {
@@ -278,16 +298,18 @@ public class AppConfiguration implements Configuration {
 
     @Override
     public String toString() {
-        return "AppConfiguration [baseDN=" + baseDN + ", apiClientId=" + apiClientId + ", apiClientPassword="
-                + apiClientPassword + ", tokenUrl=" + tokenUrl + ", endpointDetails=" + endpointDetails
-                + ", baseEndpoint=" + baseEndpoint + ", tokenChannels=" + tokenChannels + ", disableJdkLogger="
-                + disableJdkLogger + ", loggingLevel=" + loggingLevel + ", loggingLayout=" + loggingLayout
-                + ", externalLoggerConfiguration=" + externalLoggerConfiguration + ", metricChannel=" + metricChannel
-                + ", metricReporterInterval=" + metricReporterInterval + ", metricReporterKeepDataDays="
-                + metricReporterKeepDataDays + ", metricReporterEnabled=" + metricReporterEnabled
-                + ", cleanServiceInterval=" + cleanServiceInterval + ", opaConfiguration=" + opaConfiguration
-                + ", pdpType=" + pdpType + ", policiesJsonUrisAuthorizationToken=" + policiesJsonUrisAuthorizationToken
-                + ", policiesJsonUris=" + policiesJsonUris + ", policiesZipUrisAuthorizationToken="
-                + policiesZipUrisAuthorizationToken + ", policiesZipUris=" + policiesZipUris + "]";
+        return "AppConfiguration [baseDN=" + baseDN + ", clientId=" + clientId + ", clientPassword=" + clientPassword
+                + ", tokenUrl=" + tokenUrl + ", endpointDetails=" + endpointDetails + ", baseEndpoint=" + baseEndpoint
+                + ", tokenChannels=" + tokenChannels + ", disableJdkLogger=" + disableJdkLogger + ", loggingLevel="
+                + loggingLevel + ", loggingLayout=" + loggingLayout + ", externalLoggerConfiguration="
+                + externalLoggerConfiguration + ", metricChannel=" + metricChannel + ", metricReporterInterval="
+                + metricReporterInterval + ", metricReporterKeepDataDays=" + metricReporterKeepDataDays
+                + ", metricReporterEnabled=" + metricReporterEnabled + ", cleanServiceInterval=" + cleanServiceInterval
+                + ", opaConfiguration=" + opaConfiguration + ", pdpType=" + pdpType
+                + ", policiesJsonUrisAuthorizationToken=" + policiesJsonUrisAuthorizationToken + ", policiesJsonUris="
+                + policiesJsonUris + ", policiesZipUrisAuthorizationToken=" + policiesZipUrisAuthorizationToken
+                + ", policiesZipUris=" + policiesZipUris + "]";
     }
+    
+    
 }
