@@ -8,6 +8,7 @@
       "introspection",
       "revoke_token",
       "revoke_session",
+      "global_token_revocation",
       "active_session",
       "end_session",
       "status_session",
@@ -17,7 +18,9 @@
       "metric",
       "stat",
       "par",
-      "ssa"
+      "ssa",
+      "global_token_revocation",
+      "status_list"
     ],
     "issuer":"${config.oxauth.issuer}",
     "loginPage":"${config.oxauth.contextPath}/login.htm",
@@ -77,8 +80,7 @@
         "urn:ietf:params:oauth:grant-type:uma-ticket",
         "urn:openid:params:grant-type:ciba",
         "urn:ietf:params:oauth:grant-type:device_code",
-        "urn:ietf:params:oauth:grant-type:token-exchange",
-        "tx_token"
+        "urn:ietf:params:oauth:grant-type:token-exchange"
     ],
     "subjectTypesSupported":[
         "public",
@@ -323,8 +325,7 @@
         "refresh_token",
         "urn:ietf:params:oauth:grant-type:uma-ticket",
         "urn:openid:params:grant-type:ciba",
-        "urn:ietf:params:oauth:grant-type:device_code",
-        "tx_token"
+        "urn:ietf:params:oauth:grant-type:device_code"
     ],
     "claimTypesSupported":[
         "normal"

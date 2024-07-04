@@ -80,8 +80,8 @@ class EditIdentityProvideDialog(JansGDialog, DialogUtils):
             file_browser_dialog = jans_file_browser_dialog(common_data.app, path=common_data.app.browse_path, browse_type=BrowseType.file, ok_handler=read_metadata_file)
             common_data.app.show_jans_dialog(file_browser_dialog)
 
-        def get_metadata_container(cb=None):
-            if getattr(cb, 'checked', False):
+        def get_metadata_container(value):
+            if value == 'file':
                 self.matadata_container = HSplit([
                 common_data.app.getTitledWidget(
                         _("Metadata File"),
@@ -134,8 +134,8 @@ class EditIdentityProvideDialog(JansGDialog, DialogUtils):
 
                     common_data.app.getTitledText(
                         title=_("Signing Certificate"),
-                        name='signingCertificates',
-                        value=self.data.get('signingCertificates', ''),
+                        name='signingCertificate',
+                        value=self.data.get('signingCertificate', ''),
                         height=3,
                         style=cli_style.edit_text,
                         jans_help=_("Signing Certificates"),
@@ -152,11 +152,29 @@ class EditIdentityProvideDialog(JansGDialog, DialogUtils):
                         widget_style=cli_style.white_bg_widget
                     ),
 
+                    common_data.app.getTitledText(
+                        title=_("Principal Attribute"),
+                        name='principalAttribute',
+                        value=self.data.get('principalAttribute', ''),
+                        style=cli_style.edit_text,
+                        jans_help=_("Principal Attribute"),
+                        widget_style=cli_style.white_bg_widget
+                    ),
+
+                    common_data.app.getTitledText(
+                        title=_("Principal Type"),
+                        name='principalType',
+                        value=self.data.get('principalType', ''),
+                        style=cli_style.edit_text,
+                        jans_help=_("Principal Type"),
+                        widget_style=cli_style.white_bg_widget
+                    )
+
                     ],
                     width=D()
                     )
 
-        get_metadata_container()
+        get_metadata_container('manual')
 
         edit_provider_container_widgets = [
                 common_data.app.getTitledText(
@@ -205,13 +223,15 @@ class EditIdentityProvideDialog(JansGDialog, DialogUtils):
                     widget_style=cli_style.white_bg_widget
                 ),
 
-                common_data.app.getTitledCheckBox(
-                    _("Import Metadata From File"),
-                    name='importMetadataFromFile',
-                    checked=False,
-                    on_selection_changed=get_metadata_container,
-                    jans_help=_("Check this to import metadata from file"),
-                    style=cli_style.check_box
+                common_data.app.getTitledWidget(
+                    _("Metadata Source Type"),
+                    name='idpMetaDataSourceType',
+                    widget=DropDownWidget(
+                        values=[(dsp, dsp) for dsp in ('file', 'manual')],
+                        value='manual',
+                        select_one_option = False,
+                        on_value_changed = get_metadata_container
+                    )
                 ),
 
                 DynamicContainer(lambda: self.matadata_container),
@@ -235,7 +255,7 @@ class EditIdentityProvideDialog(JansGDialog, DialogUtils):
 
         provider_data = copy.deepcopy(self.data)
         provider_data.update(new_data)
-        import_metadata_from_file = provider_data.pop('importMetadataFromFile', None)
+        import_metadata_from_file = provider_data.pop('idpMetaDataSourceType', None) == 'file'
 
         if import_metadata_from_file and not self.metadata_file_path:
             common_data.app.show_message(_(common_strings.error), _("Please browse metadata file."), tobefocused=self.edit_provider_container)

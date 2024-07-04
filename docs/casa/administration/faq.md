@@ -8,8 +8,6 @@ tags:
 
 # Frequently Asked Questions
 
-<!-- This page summarizes situations that may arise and their suggested solutions. -->
-
 ## Common administrative tasks
 
 ### Where are the logs?
@@ -60,7 +58,7 @@ Once fixed, please restart the application. You will have to see a "WEBAPP INITI
 
 ### Admin console is not shown 
 
-If you have logged in using an administrative account and cannot find any admin features in the UI ensure you have gone through these [steps](./quick-startd.md#finish-configuration).
+If you have logged in using an administrative account and cannot find any admin features in the UI ensure you have gone through these [steps](./quick-start.md#finish-configuration).
 
 ### A previously enabled method is not available anymore
 

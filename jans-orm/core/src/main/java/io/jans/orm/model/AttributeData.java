@@ -19,6 +19,7 @@ public class AttributeData {
     private final String name;
     private final Object[] values;
     private Boolean multiValued;
+    private Boolean jsonValue;
 
     public AttributeData(String name, Object[] values) {
     	this(name, values, null);
@@ -30,11 +31,26 @@ public class AttributeData {
         this.multiValued = multiValued;
     }
 
+    public AttributeData(String name, Object[] values, Boolean multiValued, Boolean jsonValue) {
+        this.name = name;
+        this.values = values;
+        this.multiValued = multiValued;
+        this.jsonValue = jsonValue;
+    }
+
     public AttributeData(String name, Object value) {
         this.name = name;
         this.values = new Object[1];
         this.values[0] = value;
         this.multiValued = null;
+    }
+
+    public AttributeData(String name, Object value, Boolean multiValued, Boolean jsonValue) {
+        this.name = name;
+        this.values = new Object[1];
+        this.values[0] = value;
+        this.multiValued = multiValued;
+        this.jsonValue = jsonValue;
     }
 
     public final String getName() {
@@ -65,11 +81,18 @@ public class AttributeData {
 		return multiValued;
 	}
 
+	public Boolean getJsonValue() {
+		return jsonValue;
+	}
+
+	public void setJsonValue(Boolean jsonValue) {
+		this.jsonValue = jsonValue;
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
-		result = prime * result + ((multiValued == null) ? 0 : multiValued.hashCode());
 		result = prime * result + ((name == null) ? 0 : name.hashCode());
 		result = prime * result + Arrays.deepHashCode(values);
 		return result;
@@ -82,10 +105,6 @@ public class AttributeData {
 		if (obj == null)
 			return false;
 		AttributeData other = (AttributeData) obj;
-		if ((multiValued != null) && (other.multiValued != null)) {
-			if (!multiValued.equals(other.multiValued))
-				return false;
-		}
 		if (name == null) {
 			if (other.name != null)
 				return false;
@@ -109,9 +128,11 @@ public class AttributeData {
 		return true;
 	}
 
+
     @Override
 	public String toString() {
-		return "AttributeData [name=" + name + ", values=" + Arrays.toString(values) + ", multiValued=" + multiValued + "]";
+		return "AttributeData [name=" + name + ", values=" + Arrays.toString(values) + ", multiValued=" + multiValued
+				+ ", jsonValue=" + jsonValue + "]";
 	}
 
 }

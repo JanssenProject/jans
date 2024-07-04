@@ -78,7 +78,7 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentSto
 		}
 		Document oxDocument = null;
 		try {
-			oxDocument = documentService.getDocumentByJansFilePath(path);
+			oxDocument = documentService.getDocumentByDisplayName(path);
 			if (oxDocument != null) {
 				return true;
 			}
@@ -96,14 +96,13 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentSto
 		Document oxDocument = new Document();
 		oxDocument.setDocument(documentContent);
 		oxDocument.setDisplayName(path);
-		oxDocument.setJansFilePath(path);
 		try {
 				oxDocument.setInum(documentService.generateInumForNewDocument());
 				String dn = "inum=" + oxDocument.getInum() + ",ou=document,o=jans";
 				oxDocument.setDn(dn);
 				oxDocument.setDescription(description);
 				oxDocument.setJansEnabled(true);
-				oxDocument.setJansModuleProperty(moduleList);
+				oxDocument.setJansService(moduleList);
 				documentService.addDocument(oxDocument);
 				return path;
 		} catch (Exception ex) {
@@ -117,7 +116,6 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentSto
 
 		Document oxDocument = new Document();
 		oxDocument.setDisplayName(path);
-		oxDocument.setJansFilePath(path);
 
 		try {
 			String documentContent = new String(documentStream.readAllBytes(), StandardCharsets.UTF_8);
@@ -128,7 +126,7 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentSto
 			oxDocument.setDn(dn);
 			oxDocument.setDescription(description);
 			oxDocument.setJansEnabled(true);
-			oxDocument.setJansModuleProperty(moduleList);
+			oxDocument.setJansService(moduleList);
 			documentService.addDocument(oxDocument);
 			return path;
 		} catch (Exception e) {
@@ -148,7 +146,7 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentSto
 		log.debug("Read document: '{}'", name);
 		Document oxDocument;
 		try {
-			oxDocument = documentService.getDocumentByJansFilePath(name);
+			oxDocument = documentService.getDocumentByDisplayName(name);
 			if (oxDocument != null) {
 				return oxDocument.getDocument();
 			}
@@ -182,15 +180,14 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentSto
 		log.debug("Rename document: '{}' -> '{}'", currentPath, destinationPath);
 		Document oxDocument;
 		try {
-			oxDocument = documentService.getDocumentByJansFilePath(currentPath);
+			oxDocument = documentService.getDocumentByDisplayName(currentPath);
 			if (oxDocument == null) {
 				log.error("Document doesn't Exist with the name  '{}'", currentPath);
 				return null;
 			}
 			oxDocument.setDisplayName(destinationPath);
-			oxDocument.setJansFilePath(destinationPath);
 			documentService.updateDocument(oxDocument);
-			Document oxDocumentDestination = documentService.getDocumentByJansFilePath(destinationPath);
+			Document oxDocumentDestination = documentService.getDocumentByDisplayName(destinationPath);
 			if (oxDocumentDestination == null) {
 				log.error("Failed to rename to destination file '{}'", destinationPath);
 				return null;
@@ -205,23 +202,6 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentSto
 
 	@Override
 	public boolean removeDocument(String path) {
-		log.debug("Remove document: '{}'", path);
-		Document oxDocument;
-		try {
-			oxDocument = documentService.getDocumentByJansFilePath(path);
-			if (oxDocument == null) {
-				log.error(" document not exist file '{}'", path);
-				return false;
-			}
-			documentService.removeDocument(oxDocument);
-			return true;
-		} catch (Exception e) {
-			log.error("Failed to remove document file '{}'", path, e);
-			throw new DocumentException(e);
-		}
-	}
-
-	public boolean removeDocumentByDisplayName(String path) {
 		log.debug("Remove document: '{}'", path);
 		Document oxDocument;
 		try {
@@ -248,7 +228,6 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentSto
 				return null;
 			}
 			oxDocument.setDisplayName(destinationPath);
-			oxDocument.setJansFilePath(destinationPath);
 			documentService.updateDocument(oxDocument);
 			Document oxDocumentDestination = documentService.getDocumentByDisplayName(destinationPath);
 			if (oxDocumentDestination == null) {

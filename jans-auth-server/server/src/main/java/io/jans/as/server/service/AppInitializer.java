@@ -15,6 +15,7 @@ import io.jans.as.server.model.config.ConfigurationFactory;
 import io.jans.as.server.service.cdi.event.AuthConfigurationEvent;
 import io.jans.as.server.service.cdi.event.ReloadAuthScript;
 import io.jans.as.server.service.ciba.CibaRequestsProcessorJob;
+import io.jans.as.server.service.cluster.ClusterNodeManager;
 import io.jans.as.server.service.expiration.ExpirationNotificatorTimer;
 import io.jans.as.server.service.external.ExternalAuthenticationService;
 import io.jans.as.server.service.logger.LoggerService;
@@ -138,6 +139,9 @@ public class AppInitializer {
 
     @Inject
     private PythonService pythonService;
+    
+    @Inject
+    private ClusterNodeManager clusterManager;
 
     @Inject
     private MetricService metricService;
@@ -248,6 +252,7 @@ public class AppInitializer {
         initSchedulerService();
 
         // Schedule timer tasks
+        clusterManager.initTimer();
         metricService.initTimer();
         configurationFactory.initTimer();
         loggerService.initTimer(true);
@@ -723,7 +728,7 @@ public class AppInitializer {
 
     public void destroy(@Observes @BeforeDestroyed(ApplicationScoped.class) ServletContext init) {
         log.info("Stopping services and closing DB connections at server shutdown...");
-        log.debug("Checking who intiated destory", new Throwable());
+        log.debug("Checking who intiated destroy", new Throwable());
 
         metricService.close();
 

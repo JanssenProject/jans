@@ -192,16 +192,8 @@ public class AppConfiguration {
     @Override
     public String toString() {
 
-        final String header = "+=======================================+";
-        final String footer = header;
-        final String newline = "\r\n";
-
         StringBuilder sb = new StringBuilder();
-        sb.append(newline);
-        sb.append(header+newline);
-        sb.append("+ Application version: " + appVersion()+" "+newline);
-        sb.append(footer);
-        
+        sb.append("Application version: " + appVersion()+" ");
         return sb.toString();
     }
 

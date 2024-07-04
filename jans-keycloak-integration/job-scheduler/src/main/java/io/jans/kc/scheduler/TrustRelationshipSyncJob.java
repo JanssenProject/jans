@@ -39,12 +39,7 @@ public class TrustRelationshipSyncJob extends RecurringJob {
         this.keycloakApi = App.keycloakApi();
         this.realm = App.configuration().keycloakResourcesRealm();
         this.samlUserAttributeMapperId = App.configuration().keycloakResourcesSamlUserAttributeMapper();
-        try {
-            this.authnBrowserFlow = keycloakApi.getAuthenticationFlowFromAlias(realm,App.configuration().keycloakResourcesBrowserFlowAlias());
-        }catch(Exception e) {
-            log.warn("Could not properly initialize sync job",e);
-            this.authnBrowserFlow = null;
-        }
+        this.authnBrowserFlow = keycloakApi.getAuthenticationFlowFromAlias(realm,App.configuration().keycloakResourcesBrowserFlowAlias());
     }
     
     @Override
@@ -57,17 +52,17 @@ public class TrustRelationshipSyncJob extends RecurringJob {
     private void performSyncTasks() {
 
         try {
-            log.debug("Performing Saml client housekeeping");
+            log.info("Performing Saml client housekeeping");
             performSamlClientsHousekeeping();
-            log.debug("Saml client housekeeping complete");
+            log.info("Saml client housekeeping complete");
 
-            log.debug("Creating new managed saml clients");
+            log.info("Creating new managed saml clients");
             createNewManagedSamlClients();
-            log.debug("Creating new managed saml clients complete");
+            log.info("Creating new managed saml clients complete");
             
-            log.debug("Updating existing managed saml clients");
+            log.info("Updating existing managed saml clients");
             updateExistingManagedSamlClients();
-            log.debug("Updating existing managed saml clients complete");
+            log.info("Updating existing managed saml clients complete");
         }catch(Exception e) {
             log.error("Error running tr sync job",e);
         }
@@ -213,13 +208,10 @@ public class TrustRelationshipSyncJob extends RecurringJob {
         List<ProtocolMapper> protmappers = releasedattributes.stream().map((r)-> {
             log.debug("Preparing to add released attribute {} to managed saml client with clientId {}",r.getName(),client.clientId());
             return ProtocolMapper
-                    .samlUserAttributeMapper(samlUserAttributeMapperId)
-                    .name(generateKeycloakUniqueProtocolMapperName(r))
-                    .userAttribute(r.getName())
-                    .friendlyName(r.getDisplayName()!=null?r.getDisplayName():r.getName())
-                    .attributeName(r.getSaml2Uri())
-                    .attributeNameFormatUriReference()
-                    .build();
+                   .samlUserAttributeMapper(samlUserAttributeMapperId)
+                   .name(generateKeycloakUniqueProtocolMapperName(r))
+                   .jansAttributeName(r.getName())
+                   .build();
         }).toList();
 
         keycloakApi.addProtocolMappersToManagedSamlClient(realm, client, protmappers);
@@ -230,10 +222,7 @@ public class TrustRelationshipSyncJob extends RecurringJob {
         log.debug("Updating managed client released attribute. Client id: {} / Attribute name: {}",client.clientId(),releasedattribute.getName());
         ProtocolMapper newmapper = ProtocolMapper
             .samlUserAttributeMapper(mapper)
-            .userAttribute(releasedattribute.getName())
-            .friendlyName(releasedattribute.getDisplayName()!=null?releasedattribute.getDisplayName():releasedattribute.getName())
-            .attributeName(releasedattribute.getSaml2Uri())
-            .attributeNameFormatUriReference()
+            .jansAttributeName(releasedattribute.getName())
             .build();
         keycloakApi.updateManagedSamlClientProtocolMapper(realm, client,newmapper);
     }

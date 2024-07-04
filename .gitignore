@@ -122,6 +122,9 @@ venv.bak/
 # mkdocs documentation
 /site
 
+bin/
+.pydevproject
+
 # mypy
 .mypy_cache/
 

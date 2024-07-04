@@ -29,6 +29,20 @@ public class Base64UtilTest extends BaseTest {
     }
 
     @Test
+    public void base64urlencode_validJson_correctStringBase64Encoded() {
+        showTitle("base64urlencode_validJson_correctStringBase64Encoded");
+        String result = Base64Util.base64urlencode("{ \"ip_address\": \"127.0.0.1\", \"client\": \"mobile-app\", \"client_version\": \"v11\" }");
+        assertEquals(result, "eyAiaXBfYWRkcmVzcyI6ICIxMjcuMC4wLjEiLCAiY2xpZW50IjogIm1vYmlsZS1hcHAiLCAiY2xpZW50X3ZlcnNpb24iOiAidjExIiB9");
+    }
+
+    @Test
+    public void base64urldecode_forEncodedRequestDetails_shouldDecodeCorrectly() {
+        showTitle("base64urldecode_forEncodedRequestDetails_shouldDecodeCorrectly");
+        String result = Base64Util.base64urldecodeToString("eyAiaXBfYWRkcmVzcyI6ICIxMjcuMC4wLjEiLCAiY2xpZW50IjogIm1vYmlsZS1hcHAiLCAiY2xpZW50X3ZlcnNpb24iOiAidjExIiB9");
+        assertEquals(result, "{ \"ip_address\": \"127.0.0.1\", \"client\": \"mobile-app\", \"client_version\": \"v11\" }", "Base64Util.base64urldecodeToString(byte[]) have returned an incorrect base64 String");
+    }
+
+    @Test
     public void base64urldecode_validUrlStringBase64Encoded_correctBytArray() {
         showTitle("base64urldecode_validUrlStringBase64Encoded_correctBytArray");
         byte[] byteArray = Base64Util.base64urldecode(TEXT_BASE64_URL_EXAMPLE);

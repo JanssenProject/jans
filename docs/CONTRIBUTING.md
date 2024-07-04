@@ -220,7 +220,7 @@ We often need to reference release numbers in the documentation. For example, [U
 In this guide, the following command is documented:
 
 ```
-wget https://github.com/JanssenProject/jans/releases/download/v1.0.5/jans_1.0.5.ubuntu20.04_amd64.deb -P /tmp
+wget https://github.com/JanssenProject/jans/releases/download/v1.1.3/jans_1.1.3.ubuntu20.04_amd64.deb -P /tmp
 ```
 
 Above command contains references to the release number at two places. `v1.0.5` in the URL and `1.0.5` as part of the file

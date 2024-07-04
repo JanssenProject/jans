@@ -1,8 +1,11 @@
 import copy
+import json
+import asyncio
+import threading
 
 from collections import OrderedDict
 from functools import partial
-from typing import Any
+from typing import Any, Optional, Sequence, Callable
 
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.layout.containers import (
@@ -22,36 +25,37 @@ from prompt_toolkit.layout import Window
 from prompt_toolkit.filters import Condition
 from prompt_toolkit.lexers import PygmentsLexer, DynamicLexer
 from prompt_toolkit.application.current import get_app
-from asyncio import Future, ensure_future
-from utils.static import DialogResult, cli_style
+from prompt_toolkit.buffer import Buffer
+from prompt_toolkit.formatted_text import AnyFormattedText
+from prompt_toolkit.eventloop import get_event_loop
+
+from utils.static import DialogResult, cli_style, ISOFORMAT
 from utils.multi_lang import _
-from utils.utils import common_data
+from utils.utils import common_data, fromisoformat, DialogUtils
 from wui_components.jans_dialog_with_nav import JansDialogWithNav
 from wui_components.jans_side_nav_bar import JansSideNavBar
 from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.jans_drop_down import DropDownWidget
 from wui_components.jans_date_picker import DateSelectWidget
-from utils.utils import DialogUtils
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from wui_components.jans_label_container import JansLabelContainer
 from wui_components.jans_label_widget import JansLabelWidget
 
 
-
 from view_uma_dialog import ViewUMADialog
-import threading
-from prompt_toolkit.buffer import Buffer
-from prompt_toolkit.formatted_text import AnyFormattedText
-from typing import Optional, Sequence
-from typing import Callable
-from prompt_toolkit.eventloop import get_event_loop
-import asyncio
 
-import json
+
 ERROR_GETTING_CLIENTS = _("Error getting clients")
 ATTRIBUTE_SCHEMA_PATH = '#/components/schemas/ClientAttributes'
 URL_SUFFIX_FORMATTER = 'inum:{}'
-INTROSPECTION_ALG_PROPERTIES = ('introspectionSignedResponseAlg', 'introspectionEncryptedResponseAlg', 'introspectionEncryptedResponseEnc')
+ATTRIBUTE_ALG_PROPERTIES = (
+    'introspectionSignedResponseAlg',
+    'introspectionEncryptedResponseAlg',
+    'introspectionEncryptedResponseEnc',
+    'txTokenSignedResponseAlg',
+    'txTokenEncryptedResponseAlg',
+    'txTokenEncryptedResponseEnc',
+    )
 APP = get_app()
 
 
@@ -162,7 +166,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
         self.data['displayName'] = self.data['clientName']
         self.data['attributes']['jansAuthorizedAcr'] = self.data.pop('jansAuthorizedAcr')
 
-        for intro_attr in INTROSPECTION_ALG_PROPERTIES:
+        for intro_attr in ATTRIBUTE_ALG_PROPERTIES:
             if intro_attr in self.data:
                 self.data['attributes'][intro_attr] = self.data.pop(intro_attr)
 
@@ -181,6 +185,10 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
         # remove authenticationMethod, it is read only
         self.data.pop('authenticationMethod', None)
+
+        exp_date = self.data.pop('expirationDate', None)
+        if exp_date:
+            self.data['expirationDate'] = exp_date.strftime(ISOFORMAT)
 
         if self.save_handler:
             self.save_handler(self)
@@ -751,10 +759,6 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
         self.drop_down_select_first = []
 
-        # keep this line until this issue is closed https://github.com/JanssenProject/jans/issues/2372
-        self.myparent.cli_object.openid_configuration['access_token_singing_alg_values_supported'] = [
-            'HS256', 'HS384', 'HS512', 'RS256', 'RS384', 'RS512', 'ES256', 'ES384', 'ES512', 'PS256', 'PS384', 'PS512']
-
         for title, swagger_key, openid_key in (
 
                 (_("ID Token Alg for Signing "), 'idTokenSignedResponseAlg',
@@ -764,7 +768,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
                 (_("ID Token Enc for Encryption"), 'idTokenEncryptedResponseEnc',
                  'id_token_encryption_enc_values_supported'),
                 (_("Access Token Alg for Signing "), 'accessTokenSigningAlg',
-                 'access_token_singing_alg_values_supported'),  # ?? openid key
+                 'access_token_signing_alg_values_supported'),
 
                 (_("User Info for Signing "), 'userInfoSignedResponseAlg',
                  'userinfo_signing_alg_values_supported'),
@@ -787,6 +791,14 @@ class EditClientDialog(JansGDialog, DialogUtils):
                 (_("Introspection Encrypted Response Enc"), 'introspectionEncryptedResponseEnc',
                  'id_token_encryption_enc_values_supported'),
 
+                 (_("Transaction Token Alg for Signing"), 'txTokenSignedResponseAlg',
+                 'tx_token_signing_alg_values_supported'),
+                (_("Transaction Token Alg for Encryption"), 'txTokenEncryptedResponseAlg',
+                 'tx_token_encryption_alg_values_supported'),
+                (_("Transaction Token Enc for Encryption"), 'txTokenEncryptedResponseEnc',
+                 'tx_token_encryption_enc_values_supported'),
+
+
         ):
 
             self.drop_down_select_first.append(swagger_key)
@@ -794,7 +806,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
             values = [(alg, alg) for alg in self.myparent.cli_object.openid_configuration.get(
                 openid_key, [])]
 
-            value = self.data.get('attributes', {}).get(swagger_key) if swagger_key in INTROSPECTION_ALG_PROPERTIES else self.data.get(swagger_key)
+            value = self.data.get('attributes', {}).get(swagger_key) if swagger_key in ATTRIBUTE_ALG_PROPERTIES else self.data.get(swagger_key)
 
             encryption_signing.append(self.myparent.getTitledWidget(
                 title,
@@ -931,9 +943,7 @@ class EditClientDialog(JansGDialog, DialogUtils):
             self.myparent.getTitledWidget(
                 _("Client Expiration Date"),
                 name='expirationDate',
-                widget=DateSelectWidget(
-                    value=self.data.get('expirationDate', ''), parent=self
-                ),
+                widget=DateSelectWidget(app=common_data.app, value=fromisoformat(self.data.get('expirationDate', ''))),
                 jans_help=self.myparent.get_help_from_schema(
                     schema, 'expirationDate'),
                 style='class:outh-client-widget'

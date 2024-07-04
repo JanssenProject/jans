@@ -105,6 +105,8 @@ components:
       properties:
         baseDN:
           type: string
+        baseEndpoint:
+          type: string
         tokenChannels:
           type: array
           items:
@@ -116,6 +118,8 @@ components:
         loggingLayout:
           type: string
         externalLoggerConfiguration:
+          type: string
+        metricChannel:
           type: string
         metricReporterInterval:
           type: integer
@@ -130,17 +134,15 @@ components:
           format: int32
         opaConfiguration:
           $ref: '#/components/schemas/OpaConfiguration'
-        messageConsumerType:
+        pdpType:
           type: string
-        policyConsumerType:
-          type: string
-        policiesJsonUrisAccessToken:
+        policiesJsonUrisAuthorizationToken:
           type: string
         policiesJsonUris:
           type: array
           items:
             type: string
-        policiesZipUrisAccessToken:
+        policiesZipUrisAuthorizationToken:
           type: string
         policiesZipUris:
           type: array

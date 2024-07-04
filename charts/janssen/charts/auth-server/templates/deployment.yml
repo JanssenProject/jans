@@ -46,8 +46,8 @@ spec:
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
         env:
-        - name: CN_AUTH_JAVA_OPTIONS
-          value: {{ include "auth-server.customJavaOptions" . | trim }}
+          - name: CN_AUTH_JAVA_OPTIONS
+            value: {{ include "auth-server.customJavaOptions" . | trim }}
           {{- include "auth-server.usr-envs" . | indent 12 }}
           {{- include "auth-server.usr-secret-envs" . | indent 12 }}
         securityContext:
@@ -209,7 +209,7 @@ spec:
           secret:
             secretName: {{ .Release.Name }}-cb-pass
             items:
-              # we are mostly need non-superuser couchbase password file here
+              # we mostly need non-superuser couchbase password file here
               - key: couchbase_password
                 path: couchbase_password
       {{- end }}

@@ -91,6 +91,8 @@ public class SqlConnectionProvider {
 	private Map<String, Map<String, AttributeType>> tableColumnsMap;
 	private Map<String, String> tableEnginesMap = new HashMap<>();
 	private Map<String, ArrayList<String>> tableJsonColumnsMap = new HashMap<>();
+	
+	private boolean disableTimeZone = false;
 
 	protected SqlConnectionProvider() {
 	}
@@ -142,6 +144,10 @@ public class SqlConnectionProvider {
 
 		connectionProperties.setProperty("user", userName);
 		connectionProperties.setProperty("password", userPassword);
+		
+		if (props.containsKey("db.disable.time-zone")) {
+			disableTimeZone = StringHelper.toBoolean(props.getProperty("db.disable.time-zone"), false);
+		}
 
 		this.objectPoolConfig = new GenericObjectPoolConfig<>();
 
@@ -509,6 +515,10 @@ public class SqlConnectionProvider {
 
 	public SupportedDbType getDbType() {
 		return dbType;
+	}
+
+	public boolean isDisableTimeZone() {
+		return disableTimeZone;
 	}
 
 }

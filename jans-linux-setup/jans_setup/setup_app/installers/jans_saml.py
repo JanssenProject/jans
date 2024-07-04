@@ -26,6 +26,10 @@ Config.jans_idp_user_password = os.urandom(10).hex()
 Config.jans_idp_idp_root_dir = os.path.join(Config.jansOptFolder, 'idp')
 Config.jans_idp_ignore_validation = 'true'
 Config.jans_idp_idp_metadata_file = 'idp-metadata.xml'
+Config.kc_db_provider = 'postgresql'
+Config.kc_db_username = 'kcdbuser'
+Config.kc_db_password = 'kcdbuserpassword'
+Config.kc_jdbc_url = 'jdbc:postgresql:kcdbuser:kcdbuserpassword@//localhost:1122/kc_service'
 
 class JansSamlInstaller(JettyInstaller):
 
@@ -80,7 +84,7 @@ class JansSamlInstaller(JettyInstaller):
         Config.scheduler_dir = os.path.join(Config.opt_dir, 'kc-scheduler')
 
         Config.idp_config_hostname = Config.hostname
-        Config.keycloack_hostname = Config.hostname
+        Config.keycloak_hostname = Config.hostname
 
         self.kc_admin_realm = 'master'
         self.kc_admin_username = 'admin'
@@ -88,7 +92,7 @@ class JansSamlInstaller(JettyInstaller):
     def install(self):
         """installation steps"""
         self.create_clients()
-        self.install_keycloack()
+        self.install_keycloak()
         self.install_keycloak_scheduler()
 
     def render_import_templates(self):
@@ -147,7 +151,7 @@ class JansSamlInstaller(JettyInstaller):
                         )
         self.dbUtils.import_ldif(client_ldif_fns)
 
-    def install_keycloack(self):
+    def install_keycloak(self):
         self.logIt("Installing KC", pbar=self.service_name)
         base.unpack_zip(self.source_files[3][0], self.idp_config_data_dir, with_par_dir=False)
 
@@ -156,17 +160,17 @@ class JansSamlInstaller(JettyInstaller):
         Config.templateRenderingDict['jans_auth_token_endpoint'] = jans_auth_config['tokenEndpoint']
 
         self.update_rendering_dict()
-        
+
         self.renderTemplateInOut(self.idp_config_fn, self.templates_folder, os.path.join(self.idp_config_data_dir, 'conf'))
         self.chown(self.idp_config_data_dir, Config.jetty_user, Config.jetty_group, recursive=True)
 
 
     def service_post_setup(self):
-        self.deploy_jans_keycloack_providers()
+        self.deploy_jans_keycloak_providers()
         self.config_api_idp_plugin_config()
 
 
-    def deploy_jans_keycloack_providers(self):
+    def deploy_jans_keycloak_providers(self):
         self.copyFile(self.source_files[0][0], self.idp_config_providers_dir)
         self.copyFile(self.source_files[1][0], self.idp_config_providers_dir)
         base.unpack_zip(self.source_files[2][0], self.idp_config_providers_dir)
@@ -317,3 +321,6 @@ class JansSamlInstaller(JettyInstaller):
 
         if not Config.installed_instance:
             self.restart(base.cron_service)
+
+    def installed(self):
+        return os.path.exists(self.idp_config_data_dir)
