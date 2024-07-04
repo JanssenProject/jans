@@ -230,6 +230,9 @@ class JansSamlInstaller(JettyInstaller):
             # create realm
             self.run([kcadm_cmd, 'create', 'realms', '-f', os.path.join(jans_api_output_dir, jans_api_realm_fn),'--config', kc_tmp_config], env=env)
 
+            # disable keycloak required action verify_profile
+            self.run([kcadm_cmd, 'update', 'authentication/required-actions/VERIFY_PROFILE', '-r', Config.jans_idp_realm,'-f', os.path.join(jans_api_output_dir, 'jans.disable-required-action-verify-profile.json'),'--config', kc_tmp_config], env=env)
+
             # create client
             self.run([kcadm_cmd, 'create', 'clients', '-r', Config.jans_idp_realm, '-f', os.path.join(jans_api_output_dir, jans_api_openid_client_fn), '--config', kc_tmp_config], env=env)
 
