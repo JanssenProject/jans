@@ -344,18 +344,6 @@ class SecretSchema(Schema):
         description="Pairwise calculation salt",
     )
 
-    saml_scim_client_encoded_pw = String(
-        load_default="",
-        dump_default="",
-        description="Encoded password for test client",
-    )
-
-    saml_scim_client_pw = String(
-        load_default="",
-        dump_default="",
-        description="Password for saml-scim client",
-    )
-
     scim_client_encoded_pw = String(
         load_default="",
         dump_default="",
@@ -606,12 +594,6 @@ class ConfigmapSchema(Schema):
         load_default="",
         dump_default="",
         description="Client ID of test app",
-    )
-
-    saml_scim_client_id = String(
-        load_default="",
-        dump_default="",
-        description="Client ID of saml-scim app",
     )
 
     kc_master_auth_client_id = String(
