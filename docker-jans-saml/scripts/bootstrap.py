@@ -145,7 +145,7 @@ class PersistenceSetup:
 
         ctx = {
             "hostname": hostname,
-            "keycloack_hostname": hostname,
+            "keycloak_hostname": hostname,
             "jans_idp_realm": "jans",
             "jans_idp_grant_type": "PASSWORD",
             "jans_idp_user_name": "jans",
