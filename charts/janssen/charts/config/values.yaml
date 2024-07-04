@@ -146,8 +146,6 @@ configmap:
   quarkusTransactionEnableRecovery: true
   # -- Keycloak logging level
   kcLogLevel: INFO
-  # -- Keycloak proxy mode (for most deployments, this doesn't need to be changed)
-  kcProxy: edge
   # -- Keycloak database vendor name (default to MySQL server). To use PostgreSQL server, change the value to postgres.
   kcDbVendor: mysql
   # -- Keycloak database username
