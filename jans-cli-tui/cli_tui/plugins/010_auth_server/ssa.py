@@ -210,7 +210,7 @@ class SSA(DialogUtils):
             if self.never_expire_cb.checked:
                 self.expire_widget = Window()
             else:
-                self.expire_widget = DateSelectWidget(self.app, value=data.get('exp', None))
+                self.expire_widget = DateSelectWidget(self.app, value=data.get('exp', None), min_date=datetime.now)
 
         self.never_expire_cb._handle_enter = hide_show_expire_widget
 
