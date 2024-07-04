@@ -308,6 +308,12 @@ class KC:
         if code != 0:
             logger.warning(f"Unable to create userstorage component specified in {storage_config}; reason={err.decode()}")
 
+    def disable_verify_profile(self):
+        profile_config = f"{self.base_dir}/jans.disable-required-action-verify-profile.json"
+        _, err, code = exec_cmd(f"{self.kcadm_script} update authentication/required-actions/VERIFY_PROFILE -r {self.ctx['jans_idp_realm']} -f {profile_config} --config {self.config_file}")
+        if code != 0:
+            logger.warning(f"Unable to disable VERIFY_PROFILE specified in {profile_config}; reason={err.decode()}")
+
 
 class MysqlKeycloak:
     def __init__(self):
@@ -401,8 +407,10 @@ def main():
             "jans.api-user.json",
             "jans.browser-auth-flow.json",
             "jans.userstorage-provider-component.json",
+            "jans.disable-required-action-verify-profile.json",
         ])
         kc.create_realm()
+        kc.disable_verify_profile()
         kc.create_client()
         kc.create_user()
         kc.create_userstorage()
