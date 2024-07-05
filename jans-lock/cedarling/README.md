@@ -26,9 +26,6 @@ $ cargo build --release --target wasm32-unknown-unknown
 # For use in Node, Deno or the Edge
 $ wasm-bindgen --out-dir out ./target/wasm32-unknown-unknown/release/cedarling.wasm
 
-# To build for the Web you need
-$ wasm-bindgen --out-dir out ./target/wasm32-unknown-unknown/release/cedarling.wasm --target web
-
 $ ls out
 	out
 	├── cedarling_bg.js
@@ -39,6 +36,25 @@ $ ls out
 ```
 
 To run the `cedarling`, you'll need to include the `cedarling.js`, `cedarling_bg.js` and `cedarling.wasm`. The other files in `out` are Typescript type definitions.
+
+### Special Instructions for the Web 🌍
+
+The Web requires the WASM binary to be loaded from the network, and thus requires some manual initialization. Luckily, it's not a complicated process. To build:
+
+```bash
+$ wasm-bindgen --out-dir out ./target/wasm32-unknown-unknown/release/cedarling.wasm --target web
+```
+
+To instantiate:
+
+```js
+import setup, { authz, init } from "cedarling.js";
+
+// The default export is the initialization function, here renamed to `setup`
+await setup();
+
+// ... use cedarling functions here
+```
 
 ### Testing 🧪
 
