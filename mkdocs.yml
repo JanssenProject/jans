@@ -151,8 +151,6 @@ nav:
     - LDAP Configuration: admin/config-guide/ldap-configuration.md
     - Couchbase Configuration: admin/config-guide/couchbase-configuration.md
     - UMA Management: admin/config-guide/oauth-umaresources-config.md
-    - Authentication via Device Flow: admin/config-guide/device-flow-config.md
-    - Password Validation: admin/config-guide/user-password-validation.md
   - Database Guide:
     - admin/reference/database/README.md
     - RDBMS Erwin Table: admin/reference/database/rdbms-erwin.md
@@ -412,6 +410,8 @@ nav:
     - Locking or Disabling Accounts: admin/recipes/locking-accounts.md
     - Stepped-up Authentication: admin/recipes/stepped-up-authn.md
     - User Journeys: admin/recipes/ACRouter.md
+    - Authentication via Device Flow: admin/recipes/device-flow-config.md
+    - Password Validation: admin/recipes/user-password-validation.md
   - User Management:
       - admin/usermgmt/README.md
       - Using SCIM: admin/usermgmt/usermgmt-scim.md
