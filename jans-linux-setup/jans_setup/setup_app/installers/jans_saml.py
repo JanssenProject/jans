@@ -5,6 +5,7 @@ import time
 import socket
 import tempfile
 import uuid
+import json
 
 from setup_app import paths
 from setup_app.utils import base
@@ -194,7 +195,7 @@ class JansSamlInstaller(JettyInstaller):
         jans_execution_config_jans_fn = 'jans.execution-config-jans.json'
         jans_userstorage_provider_component_fn = 'jans.userstorage-provider-component.json'
 
-        for tmp_fn in (jans_api_openid_client_fn, jans_api_realm_fn, jans_api_user_fn, jans_browser_auth_flow_fn, jans_userstorage_provider_component_fn):
+        for tmp_fn in (jans_api_openid_client_fn, jans_api_realm_fn, jans_api_user_fn, jans_browser_auth_flow_fn):
             self.renderTemplateInOut(os.path.join(jans_api_tmp_dir, tmp_fn), jans_api_tmp_dir, jans_api_output_dir, pystring=True)
 
         self.logIt("Starting KC for config api idp plugin configurations")
@@ -230,6 +231,11 @@ class JansSamlInstaller(JettyInstaller):
             # create realm
             self.run([kcadm_cmd, 'create', 'realms', '-f', os.path.join(jans_api_output_dir, jans_api_realm_fn),'--config', kc_tmp_config], env=env)
 
+            # get realm id
+            realm_result = self.run([kcadm_cmd, 'get', f'realms/{Config.jans_idp_realm}', '--fields', 'id', '--config', kc_tmp_config], env=env)
+            realm_data = json.loads(realm_result)
+            Config.jans_idp_realm_id = realm_data['id']
+
             # disable keycloak required action verify_profile
             self.run([kcadm_cmd, 'update', 'authentication/required-actions/VERIFY_PROFILE', '-r', Config.jans_idp_realm,'-f', os.path.join(jans_api_output_dir, 'jans.disable-required-action-verify-profile.json'),'--config', kc_tmp_config], env=env)
 
@@ -263,6 +269,7 @@ class JansSamlInstaller(JettyInstaller):
             self.run([kcadm_cmd, 'create', f'authentication/executions/{jans_execution_auth_jans_id}/config', '-r', Config.jans_idp_realm, '-f', os.path.join(jans_api_output_dir, jans_execution_config_jans_fn), '--config', kc_tmp_config], env=env)
 
             # create userstorage provider component
+            self.renderTemplateInOut(os.path.join(jans_api_tmp_dir, jans_userstorage_provider_component_fn), jans_api_tmp_dir, jans_api_output_dir, pystring=True)
             self.run([kcadm_cmd, 'create', 'components', '-r', Config.jans_idp_realm, '-f', os.path.join(jans_api_output_dir, jans_userstorage_provider_component_fn), '--config', kc_tmp_config], env=env)
 
     def install_keycloak_scheduler(self):
