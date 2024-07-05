@@ -144,11 +144,12 @@ nav:
       - SCIM User Resources: admin/config-guide/user-config.md
       - SCIM Group Management: admin/config-guide/scim-group-config.md  
     - Custom Scripts: admin/config-guide/custom-scripts-config.md
+    - SMTP Configuration: admin/config-guide/smtp-configuration.md
+    - Link Configuration: admin/config-guide/link-configuration.md
     - Cache Configuration: admin/config-guide/cache-configuration.md
     - LDAP Configuration: admin/config-guide/ldap-configuration.md
     - Couchbase Configuration: admin/config-guide/couchbase-configuration.md
     - UMA Management: admin/config-guide/oauth-umaresources-config.md
-    - SMTP Configuration: admin/config-guide/smtp-configuration.md
     - Authentication via Device Flow: admin/config-guide/device-flow-config.md
     - Password Validation: admin/config-guide/user-password-validation.md
   - Database Guide:
