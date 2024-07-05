@@ -128,23 +128,27 @@ nav:
         - Monitoring: admin/config-guide/config-tools/config-api/monitoring.md
         - Plugins: admin/config-guide/config-tools/config-api/plugins.md
       - CURL: admin/config-guide/config-tools/curl-guide.md
-    - Agama Project Configuration: admin/config-guide/agama-project-configuration.md
-    - Attribute: admin/config-guide/attribute-configuration.md
-    - Default Authentication: admin/config-guide/default-authentication-method-config.md
-    - Cache Configuration: admin/config-guide/cache-configuration.md
-    - Auth Server Configuration: admin/config-guide/jans-authorization-server-config.md
+    - Auth Server Configuration: 
+      - OpenID Connect Client Configuration: admin/config-guide/openid-connect-client-configuration.md
+      - OAuth Scope Management: admin/config-guide/oauth-scopes-config.md
+      - JSON Web Key: admin/config-guide/json-web-key-config.md
+      - Default Authentication: admin/config-guide/default-authentication-method-config.md
+      - Auth Server Property Configuration: admin/config-guide/jans-authorization-server-config.md
+      - Messaging Configuration: admin/config-guide/messaging-config.md
+      - Logging: admin/config-guide/logging-configuration.md
+      - SSA Configuration: admin/config-guide/ssa-config.md
+      - Agama Project Configuration: admin/config-guide/agama-project-configuration.md
+      - Attribute: admin/config-guide/attribute-configuration.md
     - FIDO2 Configuration: admin/config-guide/janssen-fido2-configuration.md
-    - Logging: admin/config-guide/logging-configuration.md
-    - JSON Web Key: admin/config-guide/json-web-key-config.md
+    - SCIM Configuration:
+      - SCIM User Resources: admin/config-guide/user-config.md
+      - SCIM Group Management: admin/config-guide/scim-group-config.md  
+    - Custom Scripts: admin/config-guide/custom-scripts-config.md
+    - Cache Configuration: admin/config-guide/cache-configuration.md
     - LDAP Configuration: admin/config-guide/ldap-configuration.md
     - Couchbase Configuration: admin/config-guide/couchbase-configuration.md
-    - OAuth Scope Management: admin/config-guide/oauth-scopes-config.md
     - UMA Management: admin/config-guide/oauth-umaresources-config.md
-    - OpenID Connect Client Configuration: admin/config-guide/openid-connect-client-configuration.md
     - SMTP Configuration: admin/config-guide/smtp-configuration.md
-    - Custom Scripts: admin/config-guide/custom-scripts-config.md
-    - SCIM User Resources: admin/config-guide/user-config.md
-    - SCIM Group Management: admin/config-guide/scim-group-config.md
     - Authentication via Device Flow: admin/config-guide/device-flow-config.md
     - Password Validation: admin/config-guide/user-password-validation.md
   - Database Guide:
@@ -468,9 +472,9 @@ plugins:
 - search
 - exclude-search:
     exclude_unreferenced: true
-- git-revision-date-localized:
-    enable_creation_date: true
-    type: timeago
+# - git-revision-date-localized:
+#     enable_creation_date: true
+#     type: timeago
 repo_name: GitHub
 repo_url: https://github.com/JanssenProject/jans/
 site_author: Janssen, Inc.
