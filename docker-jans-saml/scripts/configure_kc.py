@@ -406,13 +406,17 @@ def main():
             "jans.api-realm.json",
             "jans.api-user.json",
             "jans.browser-auth-flow.json",
-            "jans.userstorage-provider-component.json",
             "jans.disable-required-action-verify-profile.json",
         ])
         kc.create_realm()
         kc.disable_verify_profile()
         kc.create_client()
         kc.create_user()
+
+        kc.ctx["jans_idp_realm_id"] = kc.maybe_realm_exists()
+        kc.render_templates(templates=[
+            "jans.userstorage-provider-component.json",
+        ])
         kc.create_userstorage()
 
         if flow := kc.get_or_create_flow():
