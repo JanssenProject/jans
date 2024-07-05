@@ -146,6 +146,7 @@ nav:
     - Custom Scripts: admin/config-guide/custom-scripts-config.md
     - SMTP Configuration: admin/config-guide/smtp-configuration.md
     - Link Configuration: admin/config-guide/link-configuration.md
+    - Custom Assets Configuration: admin/config-guide/custom-assets-configuration.md
     - Cache Configuration: admin/config-guide/cache-configuration.md
     - LDAP Configuration: admin/config-guide/ldap-configuration.md
     - Couchbase Configuration: admin/config-guide/couchbase-configuration.md
