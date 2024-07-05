@@ -10,7 +10,6 @@
 		3003B0632AE69A7F0068F411 /* UserInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3003B0622AE69A7F0068F411 /* UserInfo.swift */; };
 		3004A9F92AEBDE79000CDB62 /* DPoPProofFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3004A9F82AEBDE79000CDB62 /* DPoPProofFactory.swift */; };
 		3004A9FC2AEBE414000CDB62 /* SwiftJWT in Frameworks */ = {isa = PBXBuildFile; productRef = 3004A9FB2AEBE414000CDB62 /* SwiftJWT */; };
-		3004AA012AEC4281000CDB62 /* JOSESwift in Frameworks */ = {isa = PBXBuildFile; productRef = 3004AA002AEC4281000CDB62 /* JOSESwift */; };
 		3004AA032AEC46F0000CDB62 /* SecKey+KeyPair.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3004AA022AEC46F0000CDB62 /* SecKey+KeyPair.swift */; };
 		3004AA0A2AEC59C8000CDB62 /* SecKey+KeyData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3004AA092AEC59C8000CDB62 /* SecKey+KeyData.swift */; };
 		304311F22ACC05E4006B8D40 /* Jans_ChipApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 304311F12ACC05E4006B8D40 /* Jans_ChipApp.swift */; };
@@ -56,6 +55,8 @@
 		306EA0DC2AF0F27400167E4C /* AfterLoginViewPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 306EA0D72AF0F27400167E4C /* AfterLoginViewPresenter.swift */; };
 		306EA0DD2AF0F27400167E4C /* AfterLoginViewAssembler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 306EA0D82AF0F27400167E4C /* AfterLoginViewAssembler.swift */; };
 		306EA0DE2AF0F27400167E4C /* AfterLoginViewState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 306EA0D92AF0F27400167E4C /* AfterLoginViewState.swift */; };
+		307176312B0E35D5001C19B1 /* JOSESwift in Frameworks */ = {isa = PBXBuildFile; productRef = 307176302B0E35D5001C19B1 /* JOSESwift */; };
+		307176332B0E3861001C19B1 /* Checksum.swift in Sources */ = {isa = PBXBuildFile; fileRef = 307176322B0E3861001C19B1 /* Checksum.swift */; };
 		3079EC482AE1532600ECA57C /* LoginResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3079EC472AE1532600ECA57C /* LoginResponse.swift */; };
 		30D0B7A52AF2793800322E90 /* CheckListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30D0B7A42AF2793800322E90 /* CheckListView.swift */; };
 /* End PBXBuildFile section */
@@ -107,6 +108,7 @@
 		306EA0D72AF0F27400167E4C /* AfterLoginViewPresenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AfterLoginViewPresenter.swift; sourceTree = "<group>"; };
 		306EA0D82AF0F27400167E4C /* AfterLoginViewAssembler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AfterLoginViewAssembler.swift; sourceTree = "<group>"; };
 		306EA0D92AF0F27400167E4C /* AfterLoginViewState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AfterLoginViewState.swift; sourceTree = "<group>"; };
+		307176322B0E3861001C19B1 /* Checksum.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Checksum.swift; sourceTree = "<group>"; };
 		3079EC472AE1532600ECA57C /* LoginResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginResponse.swift; sourceTree = "<group>"; };
 		30D0B7A42AF2793800322E90 /* CheckListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckListView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -119,7 +121,7 @@
 				3063E5A62AD410F9002B4879 /* RealmSwift in Frameworks */,
 				3063E5732ACD54C9002B4879 /* Alamofire in Frameworks */,
 				3004A9FC2AEBE414000CDB62 /* SwiftJWT in Frameworks */,
-				3004AA012AEC4281000CDB62 /* JOSESwift in Frameworks */,
+				307176312B0E35D5001C19B1 /* JOSESwift in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -177,6 +179,7 @@
 				3004A9F82AEBDE79000CDB62 /* DPoPProofFactory.swift */,
 				3004AA022AEC46F0000CDB62 /* SecKey+KeyPair.swift */,
 				3004AA092AEC59C8000CDB62 /* SecKey+KeyData.swift */,
+				307176322B0E3861001C19B1 /* Checksum.swift */,
 			);
 			path = Helper;
 			sourceTree = "<group>";
@@ -321,7 +324,7 @@
 				3063E5722ACD54C9002B4879 /* Alamofire */,
 				3063E5A52AD410F9002B4879 /* RealmSwift */,
 				3004A9FB2AEBE414000CDB62 /* SwiftJWT */,
-				3004AA002AEC4281000CDB62 /* JOSESwift */,
+				307176302B0E35D5001C19B1 /* JOSESwift */,
 			);
 			productName = "Jans-Chip";
 			productReference = 304311EE2ACC05E4006B8D40 /* Jans-Chip.app */;
@@ -355,7 +358,7 @@
 				3063E5712ACD54C9002B4879 /* XCRemoteSwiftPackageReference "Alamofire" */,
 				3063E5A42AD410F9002B4879 /* XCRemoteSwiftPackageReference "realm-swift" */,
 				3004A9FA2AEBE414000CDB62 /* XCRemoteSwiftPackageReference "Swift-JWT" */,
-				3004A9FF2AEC4281000CDB62 /* XCRemoteSwiftPackageReference "JOSESwift" */,
+				3071762F2B0E35D4001C19B1 /* XCRemoteSwiftPackageReference "JOSESwift" */,
 			);
 			productRefGroup = 304311EF2ACC05E4006B8D40 /* Products */;
 			projectDirPath = "";
@@ -395,6 +398,7 @@
 				3063E5AE2AD6BE05002B4879 /* UIApplication+Alert.swift in Sources */,
 				3063E59F2AD406D3002B4879 /* LoginViewAssembler.swift in Sources */,
 				3063E5922AD04A34002B4879 /* RegisterViewState.swift in Sources */,
+				307176332B0E3861001C19B1 /* Checksum.swift in Sources */,
 				3063E5972AD051D7002B4879 /* JansButton.swift in Sources */,
 				306EA0DC2AF0F27400167E4C /* AfterLoginViewPresenter.swift in Sources */,
 				3063E5872ACEB4F8002B4879 /* ServiceClient.swift in Sources */,
@@ -638,14 +642,6 @@
 				minimumVersion = 4.0.0;
 			};
 		};
-		3004A9FF2AEC4281000CDB62 /* XCRemoteSwiftPackageReference "JOSESwift" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/airsidemobile/JOSESwift.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 2.0.0;
-			};
-		};
 		3063E5712ACD54C9002B4879 /* XCRemoteSwiftPackageReference "Alamofire" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Alamofire/Alamofire";
@@ -662,6 +658,14 @@
 				minimumVersion = 10.43.0;
 			};
 		};
+		3071762F2B0E35D4001C19B1 /* XCRemoteSwiftPackageReference "JOSESwift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/airsidemobile/JOSESwift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.4.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -669,11 +673,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 3004A9FA2AEBE414000CDB62 /* XCRemoteSwiftPackageReference "Swift-JWT" */;
 			productName = SwiftJWT;
-		};
-		3004AA002AEC4281000CDB62 /* JOSESwift */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 3004A9FF2AEC4281000CDB62 /* XCRemoteSwiftPackageReference "JOSESwift" */;
-			productName = JOSESwift;
 		};
 		3063E5722ACD54C9002B4879 /* Alamofire */ = {
 			isa = XCSwiftPackageProductDependency;
@@ -684,6 +683,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 3063E5A42AD410F9002B4879 /* XCRemoteSwiftPackageReference "realm-swift" */;
 			productName = RealmSwift;
+		};
+		307176302B0E35D5001C19B1 /* JOSESwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 3071762F2B0E35D4001C19B1 /* XCRemoteSwiftPackageReference "JOSESwift" */;
+			productName = JOSESwift;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

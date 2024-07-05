@@ -26,7 +26,7 @@ final class DCRRepository {
         
         let scopes = scopeText.split(separator: ",").joined(separator: " ")
         
-        let dcRequest = DCRequest(
+        var dcRequest = DCRequest(
             issuer: issuer,
             redirectUris: [issuer],
             scope: scopes,
@@ -38,15 +38,30 @@ final class DCRRepository {
             tokenEndpointAuthMethod: "client_secret_basic"
         )
         
-//        var claims: [String: Any] = [
-//            "appName": AppConfig.APP_NAME,
-//            "seq": UUID().uuidString,
-//            "app_id": Bundle.main.bundleIdentifier ?? "Unknown"
-//        ]
+        var claims = JansIntegrityClaims(
+            appName: AppConfig.APP_NAME,
+            seq: UUID().uuidString,
+            app_id: Bundle.main.bundleIdentifier ?? "Unknown"
+        )
+        
+        if let appIntegrityEntityDeviceToken = UserDefaults.standard.string(forKey: "AppIntegrityEntityDeviceToken") {
+            claims.app_integrity_result = appIntegrityEntityDeviceToken
+        }
         
         // TODO: Get package check sum
-//        claims["app_checksum"] = "app_checksum"
-        // TODO: Get public JWK
+        let mainUrl = Bundle.main.bundleURL
+        do {
+            let ipaFileData = try mainUrl.bookmarkData()
+            
+            let checksum = ipaFileData.checksum()
+            claims.app_checksum = checksum.description
+        } catch(let error){
+            print("Error getting file data: \(error)")
+        }
+        
+//        let evidenceJwt = DPoPProofFactory.shared.issueJWTToken(claims: claims)
+//        dcRequest.evidence = evidenceJwt
+        
 //        dcRequest.jwks = ""
         
         serviceClient.doDCR(dcRequest: dcRequest, url: registrationUrl)
