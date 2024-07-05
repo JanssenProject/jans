@@ -4,7 +4,7 @@
   "trustedIdpDn": "ou=trusted-idp,o=jans",
   "enabled": "true",
   "selectedIdp": "keycloak",
-  "serverUrl": "https://${keycloack_hostname}/kc",
+  "serverUrl": "https://${keycloak_hostname}/kc",
   "realm": "${jans_idp_realm}",
   "clientId": "${jans_idp_client_id}",
   "clientSecret": "${jans_idp_client_secret}",

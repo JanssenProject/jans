@@ -209,7 +209,6 @@ data:
   {{- if .Values.saml.enabled }}
   QUARKUS_TRANSACTION_MANAGER_ENABLE_RECOVERY: {{ .Values.configmap.quarkusTransactionEnableRecovery | quote }}
   KC_LOG_LEVEL: {{ .Values.configmap.kcLogLevel | quote }}
-  KC_PROXY: {{ .Values.configmap.kcProxy | quote }}
   KC_DB: {{ .Values.configmap.kcDbVendor | quote }}
   KC_DB_USERNAME: {{ .Values.configmap.kcDbUsername | quote }}
   KC_DB_SCHEMA: {{ .Values.configmap.kcDbSchema | quote }}

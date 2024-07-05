@@ -207,7 +207,7 @@ class Config:
         self.install_casa = False
         self.installOxd = False
         self.install_jans_cli = True
-        self.install_jans_link = True
+        self.install_jans_link = False
         self.loadTestData = False
         self.allowPreReleasedFeatures = False
         self.install_jans_saml = False
@@ -280,7 +280,8 @@ class Config:
 
         self.jansScriptFiles = [
                             os.path.join(self.install_dir, 'static/scripts/logmanager.sh'),
-                            os.path.join(self.install_dir, 'static/scripts/testBind.py')
+                            os.path.join(self.install_dir, 'static/scripts/testBind.py'),
+                            os.path.join(self.install_dir, 'static/scripts/jans'),
                             ]
 
         self.redhat_services = ['httpd', 'rsyslog']

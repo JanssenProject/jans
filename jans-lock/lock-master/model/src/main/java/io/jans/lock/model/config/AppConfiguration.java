@@ -1,7 +1,17 @@
 /*
- * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * Copyright [2024] [Janssen Project]
  *
- * Copyright (c) 2023, Janssen Project
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package io.jans.lock.model.config;
@@ -24,11 +34,13 @@ import jakarta.enterprise.inject.Vetoed;
 public class AppConfiguration implements Configuration {
 
 	private String baseDN;
+	
+    @DocProperty(description = "Lock base endpoint URL")
+    private String baseEndpoint;
 
     @DocProperty(description = "List of token channel names", defaultValue = "jans_token")
 	private List<String> tokenChannels;
 
-    
 	@DocProperty(description = "Choose whether to disable JDK loggers", defaultValue = "true")
 	private Boolean disableJdkLogger = true;
 
@@ -80,6 +92,14 @@ public class AppConfiguration implements Configuration {
 
 	public void setBaseDN(String baseDN) {
 		this.baseDN = baseDN;
+	}
+
+	public String getBaseEndpoint() {
+		return baseEndpoint;
+	}
+
+	public void setBaseEndpoint(String baseEndpoint) {
+		this.baseEndpoint = baseEndpoint;
 	}
 
 	public List<String> getTokenChannels() {
