@@ -131,24 +131,6 @@ components:
       properties:
         baseDN:
           type: string
-        apiClientId:
-          type: string
-          description: Lock Client ID.
-        apiClientPassword:
-          type: string
-          description: Lock client password.
-        tokenUrl:
-          type: string
-          description: Jans URL of the OpenID Connect Provider's OAuth 2.0 Token Endpoint.
-        endpointDetails:
-          type: object
-          additionalProperties:
-            type: array
-            description: Jans URL and corresponding scope details
-            items:
-              type: string
-              description: Jans URL and corresponding scope details
-          description: Jans URL and corresponding scope details
         baseEndpoint:
           type: string
         tokenChannels:
