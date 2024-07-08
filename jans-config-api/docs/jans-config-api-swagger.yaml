@@ -8315,11 +8315,11 @@ components:
           type: boolean
         whitePagesCanView:
           type: boolean
-        userCanEdit:
+        adminCanView:
           type: boolean
         adminCanEdit:
           type: boolean
-        adminCanView:
+        userCanEdit:
           type: boolean
         userCanView:
           type: boolean
@@ -8455,6 +8455,17 @@ components:
         allowSpontaneousScopes:
           type: boolean
         spontaneousScopeLifetime:
+          type: integer
+          format: int32
+        statusListBitSize:
+          type: integer
+          format: int32
+        statusListResponseJwtSignatureAlgorithm:
+          type: string
+        statusListResponseJwtLifetime:
+          type: integer
+          format: int32
+        statusListIndexAllocationBlockSize:
           type: integer
           format: int32
         openidSubAttribute:
@@ -9105,6 +9116,7 @@ components:
             - REVOKE_TOKEN
             - REVOKE_SESSION
             - GLOBAL_TOKEN_REVOCATION
+            - STATUS_LIST
             - ACTIVE_SESSION
             - END_SESSION
             - STATUS_SESSION
@@ -9150,8 +9162,6 @@ components:
           type: boolean
         lockMessageConfig:
           $ref: '#/components/schemas/LockMessageConfig'
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -9161,6 +9171,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -10717,10 +10729,10 @@ components:
         ttl:
           type: integer
           format: int32
-        persisted:
-          type: boolean
         opbrowserState:
           type: string
+        persisted:
+          type: boolean
     SessionIdAccessMap:
       type: object
       properties:
