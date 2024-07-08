@@ -58,7 +58,7 @@ RUN apk update \
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=8a9340abc09b94982a1d015c5f57792d858ac96e
+ENV JANS_SOURCE_VERSION=6fca35b418bd5c511d688dcc4fd45d04cf5ec7bc
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the assets
