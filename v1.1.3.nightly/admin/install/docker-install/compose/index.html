@@ -8696,11 +8696,20 @@ This image is for testing and development purposes only. Use Janssen <a href="ht
 <p>Download the compose file </p>
 <div class="highlight"><pre><span></span><code>wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/jans-mysql-compose.yml 
 </code></pre></div>
-<p>This docker compose file runs two containers, the janssen monolith container and mysql container.</p>
-<div class="highlight"><pre><span></span><code>docker compose -f jans-mysql-compose.yml up -d
+<p>Download the the script files </p>
+<div class="highlight"><pre><span></span><code>wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/up.sh
+wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/down.sh
+wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/clean.sh
+</code></pre></div>
+<p>This docker compose file runs two containers, the janssen monolith container and mysql container.
+To start the containers.</p>
+<div class="highlight"><pre><span></span><code>./up.sh
 </code></pre></div>
 <p>To view the containers running</p>
 <div class="highlight"><pre><span></span><code>docker compose -f jans-mysql-compose.yml ps
+</code></pre></div>
+<p>To stop the containers.</p>
+<div class="highlight"><pre><span></span><code>./down.sh
 </code></pre></div>
 <h2 id="configure-janssen-server">Configure Janssen Server<a class="headerlink" href="#configure-janssen-server" title="Permanent link">#</a></h2>
 <div class="highlight"><pre><span></span><code>docker compose -f jans-mysql-compose.yml <span class="nb">exec</span> jans sh <span class="c1">#This opens a bash terminal in the running container</span>
@@ -8717,7 +8726,7 @@ This image is for testing and development purposes only. Use Janssen <a href="ht
 <p>After adding the record you can hit endpoints such as https://demoexample.jans.io/.well-known/openid-configuration</p>
 <h2 id="clean-up">Clean up<a class="headerlink" href="#clean-up" title="Permanent link">#</a></h2>
 <p>Remove setup and volumes</p>
-<div class="highlight"><pre><span></span><code>docker compose -f jans-mysql-compose.yml down
+<div class="highlight"><pre><span></span><code>./clean.sh
 </code></pre></div>
 
   <hr>
@@ -8725,7 +8734,7 @@ This image is for testing and development purposes only. Use Janssen <a href="ht
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-04-17T02:59:28+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-04-17</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-07-08T13:03:54+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-07-08</span>
       
         <br>
         Created:
