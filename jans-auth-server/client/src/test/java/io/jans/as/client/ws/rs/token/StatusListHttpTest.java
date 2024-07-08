@@ -1,6 +1,5 @@
 package io.jans.as.client.ws.rs.token;
 
-import com.google.common.collect.Lists;
 import io.jans.as.client.*;
 import io.jans.as.client.client.AssertBuilder;
 import io.jans.as.model.common.*;
@@ -63,17 +62,17 @@ public class StatusListHttpTest extends BaseTest {
         TokenResponse tokenResponse = tokenClient.exec();
 
         showClient(tokenClient);
-        System.out.println("ACCESS_TOKEN");
+        System.out.println("statusList - ACCESS_TOKEN");
         System.out.println(tokenResponse.getAccessToken());
         Jwt accessTokenJwt = Jwt.parseOrThrow(tokenResponse.getAccessToken());
         final int accessTokenIndex = accessTokenJwt.getClaims().getClaimAsJSON("status").getJSONObject("status_list").getInt("idx");
-        System.out.println("ACCESS_TOKEN idx: " + accessTokenIndex);
+        System.out.println("statusList - ACCESS_TOKEN idx: " + accessTokenIndex);
 
         assertEquals(TokenStatus.VALID, loadStatus(accessTokenIndex));
 
         revokeAccessToken(clientIdAndSecret, tokenResponse.getAccessToken());
 
-        System.out.println("ACCESS_TOKEN idx: " + accessTokenIndex);  // re-print for convenience
+        System.out.println("statusList - ACCESS_TOKEN idx: " + accessTokenIndex);  // re-print for convenience
         // give time to let status went to list
         Thread.sleep(2000);
         assertEquals(TokenStatus.INVALID, loadStatus(accessTokenIndex));
@@ -116,7 +115,6 @@ public class StatusListHttpTest extends BaseTest {
 
         AuthorizationRequest authorizationRequest = new AuthorizationRequest(responseTypes, clientId, scopes, redirectUri, nonce);
         authorizationRequest.setState(state);
-        authorizationRequest.setAcrValues(Lists.newArrayList("agama_basic"));
 
         AuthorizationResponse authorizationResponse = authenticateResourceOwnerAndGrantAccess(
                 authorizationEndpoint, authorizationRequest, userId, userSecret);

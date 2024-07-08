@@ -39,7 +39,7 @@ def _transform_lock_dynamic_config(conf, manager):
         ("policiesZipUris", []),
         ("policiesZipUrisAuthorizationToken", conf.pop("policiesZipUrisAccessToken", "")),
         ("pdpType", "OPA"),
-        ("baseEndpoint", f"https://{hostname}/jans-lock/v1"),
+        ("baseEndpoint", f"https://{hostname}/jans-auth/v1"),
     ]:
         if missing_key not in conf:
             conf[missing_key] = value
@@ -67,6 +67,11 @@ def _transform_lock_dynamic_config(conf, manager):
         if rm_attr in conf:
             conf.pop(rm_attr, None)
             should_update = True
+
+    # base endpoint is changed from jans-lock to jans-auth
+    if conf["baseEndpoint"] != f"https://{hostname}/jans-auth/v1":
+        conf["baseEndpoint"] = f"https://{hostname}/jans-auth/v1"
+        should_update = True
 
     # return modified config (if any) and update flag
     return conf, should_update
