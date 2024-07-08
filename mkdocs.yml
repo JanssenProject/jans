@@ -139,6 +139,10 @@ nav:
       - SSA Configuration: admin/config-guide/ssa-config.md
       - Agama Project Configuration: admin/config-guide/agama-project-configuration.md
       - Attribute: admin/config-guide/attribute-configuration.md
+      - Cache Configuration: admin/config-guide/cache-configuration.md
+      - LDAP Configuration: admin/config-guide/ldap-configuration.md
+      - Couchbase Configuration: admin/config-guide/couchbase-configuration.md
+      - UMA Management: admin/config-guide/oauth-umaresources-config.md
     - FIDO2 Configuration: admin/config-guide/janssen-fido2-configuration.md
     - SCIM Configuration:
       - SCIM User Resources: admin/config-guide/user-config.md
@@ -147,10 +151,6 @@ nav:
     - SMTP Configuration: admin/config-guide/smtp-configuration.md
     - Link Configuration: admin/config-guide/link-configuration.md
     - Custom Assets Configuration: admin/config-guide/custom-assets-configuration.md
-    - Cache Configuration: admin/config-guide/cache-configuration.md
-    - LDAP Configuration: admin/config-guide/ldap-configuration.md
-    - Couchbase Configuration: admin/config-guide/couchbase-configuration.md
-    - UMA Management: admin/config-guide/oauth-umaresources-config.md
   - Database Guide:
     - admin/reference/database/README.md
     - RDBMS Erwin Table: admin/reference/database/rdbms-erwin.md
@@ -474,9 +474,9 @@ plugins:
 - search
 - exclude-search:
     exclude_unreferenced: true
-# - git-revision-date-localized:
-#     enable_creation_date: true
-#     type: timeago
+- git-revision-date-localized:
+    enable_creation_date: true
+    type: timeago
 repo_name: GitHub
 repo_url: https://github.com/JanssenProject/jans/
 site_author: Janssen, Inc.
