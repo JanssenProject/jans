@@ -136,7 +136,7 @@ To generate initial config and secrets:
                 name: config-generate-params
           containers:
             - name: configurator-load
-              image: ghcr.io/janssenproject/jans/configurator:1.1.3_dev
+              image: ghcr.io/janssenproject/jans/configurator:1.1.3-1
               volumeMounts:
                 - mountPath: /app/db/generate.json
                   name: config-generate-params
@@ -176,7 +176,7 @@ To restore configuration and secrets from a backup of `/path/to/host/volume/conf
                 name: secret-params
           containers:
             - name: configurator-load
-              image: ghcr.io/janssenproject/jans/configurator:1.1.3_dev
+              image: ghcr.io/janssenproject/jans/configurator:1.1.3-1
               volumeMounts:
                 - mountPath: /app/db/config.json
                   name: config-params
@@ -206,7 +206,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: configurator-dump-job
-          image: ghcr.io/janssenproject/jans/configurator:1.1.3_dev
+          image: ghcr.io/janssenproject/jans/configurator:1.1.3-1
           command:
             - /bin/sh
             - -c
