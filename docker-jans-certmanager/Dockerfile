@@ -14,7 +14,7 @@ RUN apk update \
 # ===========
 
 # JAR files required to generate OpenID Connect keys
-ENV CN_VERSION=1.1.3-SNAPSHOT
+ENV CN_VERSION=1.1.3
 ENV CN_BUILD_DATE='2024-06-07 15:36'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-client/${CN_VERSION}/jans-auth-client-${CN_VERSION}-jar-with-dependencies.jar
