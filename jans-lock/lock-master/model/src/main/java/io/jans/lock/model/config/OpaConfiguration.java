@@ -21,6 +21,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.jans.doc.annotation.DocProperty;
 import jakarta.enterprise.inject.Vetoed;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * 
  * @author Yuriy Movchan Date: 12/12/2023
@@ -29,9 +31,11 @@ import jakarta.enterprise.inject.Vetoed;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class OpaConfiguration implements Configuration {
 
+    @Schema(description = "Base OPA URL")
     @DocProperty(description = "Base OPA URL")
 	private String baseUrl;
 
+    @Schema(description = "OPA access token")
     @DocProperty(description = "OPA access token")
 	private String accessToken;
 
