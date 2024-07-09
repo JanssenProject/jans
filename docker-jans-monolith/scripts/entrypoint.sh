@@ -145,6 +145,9 @@ start_services() {
   /opt/dist/scripts/jans-config-api start
   /opt/dist/scripts/jans-scim start
   /opt/dist/scripts/jans-fido2 start
+  /opt/dist/scripts/jans-casa start ||:  # no-op if script is missing
+  /opt/dist/scripts/jans-keycloak-link start ||:  # no-op if script is missing
+  /opt/dist/scripts/jans-link start ||:  # no-op if script is missing
 }
 
 check_installed_jans
