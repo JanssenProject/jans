@@ -6,6 +6,8 @@ JANS_PERSISTENCE=$2
 EXT_IP=$3
 # commit to build jans off
 JANS_BUILD_COMMIT=$4
+IS_FQDN_REGISTERED=""
+RUN_TESTS=""
 if [[ ! "$JANS_FQDN" ]]; then
   read -rp "Enter Hostname [demoexample.jans.io]:                           " JANS_FQDN
 fi
@@ -71,6 +73,12 @@ if [[ "$JANS_BUILD_COMMIT" ]]; then
   python3 -c "from pathlib import Path ; import ruamel.yaml ; compose = Path('/tmp/jans/docker-jans-monolith/jans-ldap-compose.yml') ; yaml = ruamel.yaml.YAML() ; data = yaml.load(compose) ; data['services']['jans']['build'] = '.' ; del data['services']['jans']['image'] ; yaml.dump(data, compose)"
 fi
 # --
+if [[ "$IS_FQDN_REGISTERED" ]]; then
+  python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('/tmp/jans/docker-jans-monolith') ; dfparser.envs['IS_FQDN_REGISTERED'] = 'true'"
+fi
+if [[ "$RUN_TESTS" ]]; then
+  python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('/tmp/jans/docker-jans-monolith') ; dfparser.envs['RUN_TESTS'] = 'true'"
+fi
 if [[ $JANS_PERSISTENCE == "MYSQL" ]]; then
   bash /tmp/jans/docker-jans-monolith/up.sh mysql
 elif [[ $JANS_PERSISTENCE == "PGSQL" ]]; then
