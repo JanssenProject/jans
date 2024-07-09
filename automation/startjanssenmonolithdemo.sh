@@ -62,6 +62,7 @@ sudo python3 -m pip install --upgrade pip
 pip3 install setuptools --upgrade
 pip3 install dockerfile-parse ruamel.yaml
 
+python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('/tmp/jans/docker-jans-monolith') ; dfparser.envs['CN_HOSTNAME'] = '$JANS_FQDN'"
 # switching to version defined by JANS_BUILD_COMMIT
 if [[ "$JANS_BUILD_COMMIT" ]]; then
   python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('/tmp/jans/docker-jans-monolith') ; dfparser.envs['JANS_SOURCE_VERSION'] = '$JANS_BUILD_COMMIT'"
