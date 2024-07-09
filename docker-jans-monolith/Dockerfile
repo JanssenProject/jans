@@ -17,6 +17,9 @@ RUN echo 'APT::Install-Suggests "0";' >> /etc/apt/apt.conf.d/00-docker \
 RUN DEBIAN_FRONTEND=noninteractive \
     apt-get update \
     && apt-get install -y python3 tini curl ca-certificates dbus systemd iproute2 gpg python3-pip python3-dev libpq-dev gcc python3-psycopg2 python3-ldap3 git maven \
+    # install certbot
+    && apt-get -y install libaugeas0 \
+    && pip install certbot certbot-apache \
     && apt-get clean \
     # Cleaning up package lists
     && rm -rf /var/lib/apt/lists/*
@@ -72,7 +75,9 @@ ENV CN_HOSTNAME="demoexample.jans.io" \
     RDBMS_DATABASE="jans" \
     RDBMS_USER="jans" \
     RDBMS_PASSWORD="" \
-    RDBMS_HOST=""
+    RDBMS_HOST="" \
+    IS_FQDN_REGISTERED="false" \
+    RUN_TESTS="false"
 
 # ==========
 # misc stuff

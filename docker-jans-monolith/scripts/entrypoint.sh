@@ -82,6 +82,12 @@ check_installed_jans() {
   fi
 }
 
+register_fqdn() {
+    if [[ "${IS_FQDN_REGISTERED}" == "true" ]]; then
+      certbot --apache -d "${CN_HOSTNAME}" -n --agree-tos --email "${CN_EMAIL}" || echo "FQDN was not registered with cerbot"
+    fi
+}
+
 prepare_auth_server_test() {
     WORKING_DIRECTORY=$PWD
     echo "*****   cloning jans auth server folder!!   *****"
@@ -119,10 +125,12 @@ prepare_auth_server_test() {
 }
 
 prepare_java_tests() {
-  echo "*****   Running Java tests!!   *****"
-  echo "*****   Running Auth server tests!!   *****"
-  prepare_auth_server_test
-  echo "*****   Java tests completed!!   *****"
+  if [[ "${RUN_TESTS}" == "true" ]]; then
+    echo "*****   Running Java tests!!   *****"
+    echo "*****   Running Auth server tests!!   *****"
+    prepare_auth_server_test
+    echo "*****   Java tests completed!!   *****"
+  fi
 }
 
 start_services() {
@@ -135,6 +143,7 @@ start_services() {
 
 check_installed_jans
 start_services
+register_fqdn
 prepare_java_tests || "Java test preparations failed!!"
 
 # use -F option to follow (and retry) logs
