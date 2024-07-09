@@ -1,25 +1,15 @@
 use serde_wasm_bindgen::from_value;
 use wasm_bindgen::prelude::*;
 
-#[derive(serde::Deserialize, serde::Serialize, Debug, Default)]
-pub struct Tokens {
-	// generates entities
-	#[serde(rename = "access_token")]
-	pub(crate) access: String,
-	#[serde(rename = "id_token")]
-	pub(crate) id: String,
+use crate::startup;
 
-	#[serde(rename = "userinfo_token")]
-	pub(crate) user_info: String,
-	#[serde(rename = "tx_token")]
-	pub(crate) tx: String,
-	#[serde(rename = "sse")]
-	pub(crate) sse_url: String,
-}
+mod token2entity;
+mod types;
 
 #[wasm_bindgen]
 pub async fn authz(req: JsValue) -> JsValue {
-	// TODO: Stub
-	let _request = from_value::<Tokens>(req).unwrap();
+	let _request = from_value::<types::AuthzInput>(req).unwrap();
 	JsValue::NULL
 }
+
+pub(crate) fn init(_: &startup::types::CedarlingConfig) {}
