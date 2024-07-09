@@ -6,8 +6,8 @@ JANS_PERSISTENCE=$2
 EXT_IP=$3
 # commit to build jans off
 JANS_BUILD_COMMIT=$4
-IS_FQDN_REGISTERED=""
-RUN_TESTS=""
+: "${IS_FQDN_REGISTERED:=}"
+: "${RUN_TESTS:=}"
 if [[ ! "$JANS_FQDN" ]]; then
   read -rp "Enter Hostname [demoexample.jans.io]:                           " JANS_FQDN
 fi
