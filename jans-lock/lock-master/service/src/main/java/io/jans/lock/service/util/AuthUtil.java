@@ -46,7 +46,7 @@ public class AuthUtil {
     
     public TokenResponse requestAccessToken(final String tokenUrl, final String clientId,
             final String clientSecret, final String scope) {
-        log.debug("Request for Access Token -  tokenUrl:{}, clientId:{}, clientSecret:{}, scope:{} ", tokenUrl,
+        log.error("Request for Access Token -  tokenUrl:{}, clientId:{}, clientSecret:{}, scope:{} ", tokenUrl,
                 clientId, clientSecret, scope);
         Response response = null;
         try {
@@ -79,17 +79,17 @@ public class AuthUtil {
     
     public String getToken() {
         log.error("\n\n Request for token \n\n");
-        String tokenUrl = "https://pujavs-probable-alpaca.gluu.info/jans-auth/restv1/token"; 
-        String clientId = "1800.59d18a30-51df-4f96-a83f-f31d413e9e5b";
+        String tokenUrl = this.appConfiguration.getTokenUrl(); 
+        String clientId =  this.appConfiguration.getClientId();
 
-        String clientSecret = "nfpc90t6ByZK";
+        String clientSecret = this.appConfiguration.getClientPassword();
         String scopes = "https://jans.io/oauth/lock/telemetry.write";
         String accessToken = null;
         Integer expiresIn = 0;
         TokenResponse tokenResponse = requestAccessToken(tokenUrl, clientId, clientSecret, scopes);
                 if (tokenResponse != null) {
 
-                    log.debug("Token Response - tokenScope: {}, tokenAccessToken: {} ", tokenResponse.getScope(),
+                    log.error("Token Response - tokenScope: {}, tokenAccessToken: {} ", tokenResponse.getScope(),
                             tokenResponse.getAccessToken());
                     accessToken = tokenResponse.getAccessToken();
                     expiresIn = tokenResponse.getExpiresIn();
@@ -101,9 +101,10 @@ public class AuthUtil {
     }
     
     public void postData(String postData) {
-        log.error("postData postData:{}", postData);
+        log.error("NEw postData postData:{}", postData);
         
-        String uri = "jans-config-api/lock/audit/telemetry";
+        //String uri = "jans-config-api/lock/audit/telemetry";
+        String uri = "https://pujavs-probable-alpaca.gluu.info/jans-config-api/lock/audit/telemetry";
         //String authData="459477ac-e162-499b-b918-847384aadfb9";
         String authData = getToken();
         String authType= "Bearer ";
@@ -120,8 +121,8 @@ public class AuthUtil {
     
     public void getAppConfiguration() {
         log.error("appConfiguration:{}", appConfiguration);
-        log.error("appConfiguration.getApiClientId():{}", appConfiguration.getApiClientId());
-        log.error("appConfiguration.getApiClientPassword():{}", appConfiguration.getApiClientPassword());
+        log.error("appConfiguration.getClientId():{}", appConfiguration.getClientId());
+        log.error("appConfiguration.getClientPassword():{}", appConfiguration.getClientPassword());
         log.error("appConfiguration.getTokenUrl():{}", appConfiguration.getTokenUrl());
         log.error(" appConfiguration.getEndpointDetails():{}", appConfiguration.getEndpointDetails());
     }
