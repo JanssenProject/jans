@@ -1,0 +1,57 @@
+name: Check documentation on PRs
+on:
+  workflow_dispatch:
+  pull_request:
+    types:
+      - opened
+      - edited
+
+permissions:
+  contents: read
+
+jobs:
+  check_pr_for_docs:
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
+        with:
+          egress-policy: audit
+
+      - name: Checkout code
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          fetch-depth: 0
+
+      - name: Install latest GH
+        continue-on-error: true
+        run: |
+          VERSION=`curl  "https://api.github.com/repos/cli/cli/releases/latest" | grep '"tag_name"' | sed -E 's/.*"([^"]+)".*/\1/' | cut -c2-` 
+          echo $VERSION
+          curl -sSL https://github.com/cli/cli/releases/download/v${VERSION}/gh_${VERSION}_linux_amd64.tar.gz -o gh_${VERSION}_linux_amd64.tar.gz
+          tar xvf gh_${VERSION}_linux_amd64.tar.gz
+          sudo cp gh_${VERSION}_linux_amd64/bin/gh /usr/local/bin/
+          gh version
+
+      - name: Check commit message
+        continue-on-error: false
+        id: check_message
+        run: |
+          PULL_NUMBER=${{ github.event.pull_request.number }}
+          echo "Parsing commits from PR $PULL_NUMBER"
+          MESSAGE=$(gh pr view "$PULL_NUMBER" --json commits | jq '.' | grep "messageHeadline" | cut -d: -f2- | grep "^docs" || echo "")
+          echo "$MESSAGE"
+          if [[ -z "$MESSAGE" ]]; then
+            echo "conventional commit starting with docs: does not exist. Checking if user confirmed no impact on docs in PR body"
+            pr_body=$(gh pr view https://github.com/${{ github.repository }}/pull/"$PULL_NUMBER" --json body -q '.body')
+            if [[ $pr_body == *"- [x] **I confirm that there is no impact on the docs due to the code changes in this PR.**"* ]]; then
+              echo "Checklist item is filled in PR body. Author confirmed no impact."
+              exit 0
+            else
+              echo "Author did not check the item that states: **I confirm that there is no impact on the docs due to the code changes in this PR.**"
+              exit 1
+            fi            
+          fi
+          exit 0

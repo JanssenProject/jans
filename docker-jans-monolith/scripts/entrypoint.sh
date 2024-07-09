@@ -38,6 +38,12 @@ install_jans() {
   echo "install_config_api=""$([[ ${CN_INSTALL_CONFIG_API} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
   echo "install_scim_server=""$([[ ${CN_INSTALL_SCIM} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
   echo "installFido2=""$([[ ${CN_INSTALL_FIDO2} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
+  echo "install_casa=""$([[ ${CN_INSTALL_CASA} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
+  echo "install_jans_keycloak_link=""$([[ ${CN_INSTALL_KC_LINK} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
+  echo "install_jans_link=""$([[ ${CN_INSTALL_LINK} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
+  echo "install_jans_lock=""$([[ ${CN_INSTALL_LOCK} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
+  echo "install_jans_saml=""$([[ ${CN_INSTALL_SAML} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
+  echo "install_opa=""$([[ ${CN_INSTALL_OPA} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
   echo "test_client_id=${TEST_CLIENT_ID}"| tee -a setup.properties > /dev/null
   echo "test_client_pw=${TEST_CLIENT_SECRET}" | tee -a setup.properties > /dev/null1
   echo "test_client_trusted=""$([[ ${TEST_CLIENT_TRUSTED} == true ]] && echo True || echo True)" | tee -a setup.properties > /dev/null
@@ -82,6 +88,12 @@ check_installed_jans() {
   fi
 }
 
+register_fqdn() {
+    if [[ "${IS_FQDN_REGISTERED}" == "true" ]]; then
+      certbot --apache -d "${CN_HOSTNAME}" -n --agree-tos --email "${CN_EMAIL}" || echo "FQDN was not registered with cerbot"
+    fi
+}
+
 prepare_auth_server_test() {
     WORKING_DIRECTORY=$PWD
     echo "*****   cloning jans auth server folder!!   *****"
@@ -119,10 +131,12 @@ prepare_auth_server_test() {
 }
 
 prepare_java_tests() {
-  echo "*****   Running Java tests!!   *****"
-  echo "*****   Running Auth server tests!!   *****"
-  prepare_auth_server_test
-  echo "*****   Java tests completed!!   *****"
+  if [[ "${RUN_TESTS}" == "true" ]]; then
+    echo "*****   Running Java tests!!   *****"
+    echo "*****   Running Auth server tests!!   *****"
+    prepare_auth_server_test
+    echo "*****   Java tests completed!!   *****"
+  fi
 }
 
 start_services() {
@@ -135,6 +149,7 @@ start_services() {
 
 check_installed_jans
 start_services
+register_fqdn
 prepare_java_tests || "Java test preparations failed!!"
 
 # use -F option to follow (and retry) logs

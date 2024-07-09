@@ -146,8 +146,6 @@ configmap:
   quarkusTransactionEnableRecovery: true
   # -- Keycloak logging level
   kcLogLevel: INFO
-  # -- Keycloak proxy mode (for most deployments, this doesn't need to be changed)
-  kcProxy: edge
   # -- Keycloak database vendor name (default to MySQL server). To use PostgreSQL server, change the value to postgres.
   kcDbVendor: mysql
   # -- Keycloak database username
@@ -176,7 +174,7 @@ image:
   # -- Image  to use for deploying.
   repository: janssenproject/configurator
   # -- Image  tag to use for deploying.
-  tag: 1.1.3_dev
+  tag: 1.1.4_dev
   # -- Image Pull Secrets
   pullSecrets: [ ]
 # -- LDAP admin password if OpennDJ is used for persistence.
