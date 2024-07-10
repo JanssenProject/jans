@@ -883,8 +883,8 @@ class ConfigmapSchema(Schema):
     )
 
     ldap_init_host = String(
-        load_default="ldap",
-        dump_default="ldap",
+        load_default="localhost",
+        dump_default="localhost",
         metadata={
             "description": "Initial hostname for LDAP (OpenDJ)",
         },
