@@ -6,6 +6,8 @@ JANS_PERSISTENCE=$2
 EXT_IP=$3
 # commit to build jans off
 JANS_BUILD_COMMIT=$4
+: "${IS_FQDN_REGISTERED:=}"
+: "${RUN_TESTS:=}"
 if [[ ! "$JANS_FQDN" ]]; then
   read -rp "Enter Hostname [demoexample.jans.io]:                           " JANS_FQDN
 fi
@@ -60,6 +62,7 @@ sudo python3 -m pip install --upgrade pip
 pip3 install setuptools --upgrade
 pip3 install dockerfile-parse ruamel.yaml
 
+python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('/tmp/jans/docker-jans-monolith') ; dfparser.envs['CN_HOSTNAME'] = '$JANS_FQDN'"
 # switching to version defined by JANS_BUILD_COMMIT
 if [[ "$JANS_BUILD_COMMIT" ]]; then
   python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('/tmp/jans/docker-jans-monolith') ; dfparser.envs['JANS_SOURCE_VERSION'] = '$JANS_BUILD_COMMIT'"
@@ -71,6 +74,12 @@ if [[ "$JANS_BUILD_COMMIT" ]]; then
   python3 -c "from pathlib import Path ; import ruamel.yaml ; compose = Path('/tmp/jans/docker-jans-monolith/jans-ldap-compose.yml') ; yaml = ruamel.yaml.YAML() ; data = yaml.load(compose) ; data['services']['jans']['build'] = '.' ; del data['services']['jans']['image'] ; yaml.dump(data, compose)"
 fi
 # --
+if [[ "$IS_FQDN_REGISTERED" ]]; then
+  python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('/tmp/jans/docker-jans-monolith') ; dfparser.envs['IS_FQDN_REGISTERED'] = 'true'"
+fi
+if [[ "$RUN_TESTS" ]]; then
+  python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('/tmp/jans/docker-jans-monolith') ; dfparser.envs['RUN_TESTS'] = 'true'"
+fi
 if [[ $JANS_PERSISTENCE == "MYSQL" ]]; then
   bash /tmp/jans/docker-jans-monolith/up.sh mysql
 elif [[ $JANS_PERSISTENCE == "PGSQL" ]]; then
