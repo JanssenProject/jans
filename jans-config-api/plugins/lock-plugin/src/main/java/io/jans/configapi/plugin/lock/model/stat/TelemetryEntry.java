@@ -15,14 +15,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @DataEntry
 @ObjectClass(value = "jansTelemetryEntry")
 public class TelemetryEntry implements Serializable {
- 
+
     private static final long serialVersionUID = 1L;
 
     @DN
     private String dn;
 
-    @AttributeName(name = "jansId")
-    private String id;
+    @JsonProperty("inum")
+    @AttributeName(name = "inum", ignoreDuringUpdate = true)
+    private String inum;
 
     @AttributeName(name = "jansLastUpd")
     private Date lastPolicyLoadTime;
@@ -40,10 +41,10 @@ public class TelemetryEntry implements Serializable {
     private long policyFailedLoadCounter;
 
     @AttributeName(name = "evaluationTimeNs")
-    private long lastPolicyEvaluationTimeNs;
+    private Date lastPolicyEvaluationTimeNs;
 
     @AttributeName(name = "averageTimeNs")
-    private long avgPolicyEvaluationTimeNs;
+    private Date avgPolicyEvaluationTimeNs;
 
     @JsonProperty("memoryUsage")
     private String memoryUsage;
@@ -63,12 +64,12 @@ public class TelemetryEntry implements Serializable {
         this.dn = dn;
     }
 
-    public String getId() {
-        return id;
+    public String getInum() {
+        return inum;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setInum(String inum) {
+        this.inum = inum;
     }
 
     public Date getLastPolicyLoadTime() {
@@ -111,19 +112,19 @@ public class TelemetryEntry implements Serializable {
         this.policyFailedLoadCounter = policyFailedLoadCounter;
     }
 
-    public long getLastPolicyEvaluationTimeNs() {
+    public Date getLastPolicyEvaluationTimeNs() {
         return lastPolicyEvaluationTimeNs;
     }
 
-    public void setLastPolicyEvaluationTimeNs(long lastPolicyEvaluationTimeNs) {
+    public void setLastPolicyEvaluationTimeNs(Date lastPolicyEvaluationTimeNs) {
         this.lastPolicyEvaluationTimeNs = lastPolicyEvaluationTimeNs;
     }
 
-    public long getAvgPolicyEvaluationTimeNs() {
+    public Date getAvgPolicyEvaluationTimeNs() {
         return avgPolicyEvaluationTimeNs;
     }
 
-    public void setAvgPolicyEvaluationTimeNs(long avgPolicyEvaluationTimeNs) {
+    public void setAvgPolicyEvaluationTimeNs(Date avgPolicyEvaluationTimeNs) {
         this.avgPolicyEvaluationTimeNs = avgPolicyEvaluationTimeNs;
     }
 
@@ -153,12 +154,12 @@ public class TelemetryEntry implements Serializable {
 
     @Override
     public String toString() {
-        return "TelemetryEntry [dn=" + dn + ", id=" + id + ", lastPolicyLoadTime=" + lastPolicyLoadTime
+        return "TelemetryEntry [dn=" + dn + ", inum=" + inum + ", lastPolicyLoadTime=" + lastPolicyLoadTime
                 + ", lastPolicyLoadSize=" + lastPolicyLoadSize + ", status=" + status + ", policySuccessLoadCounter="
                 + policySuccessLoadCounter + ", policyFailedLoadCounter=" + policyFailedLoadCounter
                 + ", lastPolicyEvaluationTimeNs=" + lastPolicyEvaluationTimeNs + ", avgPolicyEvaluationTimeNs="
                 + avgPolicyEvaluationTimeNs + ", memoryUsage=" + memoryUsage + ", evaluationRequestsCount="
                 + evaluationRequestsCount + ", policyStats=" + policyStats + "]";
     }
-
+    
 }

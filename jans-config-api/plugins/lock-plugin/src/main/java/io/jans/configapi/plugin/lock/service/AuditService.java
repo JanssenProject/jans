@@ -50,16 +50,16 @@ public class AuditService {
         if(telemetryEntry == null) {
             return telemetryEntry;
         }
-        String id = telemetryEntry.getId();
-        if(StringUtils.isBlank(id)) {
-            id = this.generateInumForNewTelemetryEntry();
-            telemetryEntry.setId(id);
+        String inum = telemetryEntry.getInum();
+        if(StringUtils.isBlank(inum)) {
+            inum = this.generateInumForNewTelemetryEntry();
+            telemetryEntry.setInum(inum);
             
-            telemetryEntry.setDn(this.getDnForTelemetryEntry(id)); 
+            telemetryEntry.setDn(this.getDnForTelemetryEntry(inum)); 
         }
         persistenceEntryManager.persist(telemetryEntry);
         
-        telemetryEntry = this.getTelemetryEntryByDn(this.getDnForTelemetryEntry(id));
+        telemetryEntry = this.getTelemetryEntryByDn(this.getDnForTelemetryEntry(inum));
         return telemetryEntry;
     }
 
