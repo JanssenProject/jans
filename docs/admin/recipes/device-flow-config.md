@@ -1,7 +1,7 @@
 ---
 tags:
   - administration
-  - configuration
+  - recipes
   - device flow
 ---
 

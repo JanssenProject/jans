@@ -11,7 +11,7 @@ tags:
 
 `jans-cli` module is a command line interface for configuring the Janssen 
 Server. This module interacts with Janssen Server via 
-[RESTful configuration APIs](./config-api/README.md)
+[RESTful configuration APIs](./../config-api/README.md)
 that server exposes. `jans-cli` can be used to retrieve and update configuration
 of Janssen Server.
 
@@ -260,7 +260,7 @@ and schemas are applicable to each operation.
 `Parameters` allow simple string based values to be passed to the operation, 
 while `schema` allows JSON structured data to be passed to the operation. 
 For examples of how operations can be used with parameters and schema, refer to
-[Attribute](../../attribute-configuration.md). Read more about schema in [this
+[Attribute](../../auth-server-config//attribute-configuration.md). Read more about schema in [this
 detail section](#about-schemas).
 
 ## Basic command-line switches
