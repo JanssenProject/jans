@@ -14,7 +14,7 @@ tasks.
 === "Use Command-line"
 
     Use the command line to perform actions from the terminal. Learn how to 
-    use Jans CLI [here](./config-tools/jans-cli/README.md) or jump straight to 
+    use Jans CLI [here](../config-tools/jans-cli/README.md) or jump straight to 
     the [Using Command Line](#using-command-line)
 
 
@@ -27,7 +27,7 @@ tasks.
 
     Use REST API for programmatic access or invoke via tools like CURL or 
     Postman. Learn how to use Janssen Server Config API 
-    [here](./config-tools/config-api/README.md) or Jump straight to the
+    [here](../config-tools/config-api/README.md) or Jump straight to the
     [Using Configuration REST API](#using-configuration-rest-api)
 
 ## Using Command Line
@@ -343,7 +343,7 @@ Operation ID: patch-config-database-ldap-by-name
 ```
 The `patch-config-database-ldap-by-name` uses the [JSON Patch](https://jsonpatch.com/#the-patch) 
 schema to describe the configuration change. Refer
-[here](config-tools/jans-cli/README.md#patch-request-schema) 
+[here](../config-tools/jans-cli/README.md#patch-request-schema) 
 to know more about schema.
 
 For example, let's say, we want to change the level of the `test_ldap` configuration. So, 
@@ -394,4 +394,4 @@ It will update the configuration and will show the updated result as below displ
 
 Janssen Server Configuration REST API exposes relevant endpoints for managing
 and configuring the Lightweight Directory Access Protocol. Endpoint details are published in the [Swagger
-document](./../reference/openapi.md).
+document](./../../reference/openapi.md).
