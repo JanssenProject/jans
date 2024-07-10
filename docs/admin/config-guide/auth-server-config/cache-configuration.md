@@ -15,7 +15,7 @@ tasks.
 === "Use Command-line"
 
     Use the command line to perform actions from the terminal. Learn how to 
-    use Jans CLI [here](./config-tools/jans-cli/README.md) or jump straight to 
+    use Jans CLI [here](../config-tools/jans-cli/README.md) or jump straight to 
     the [Using Command Line](#using-command-line)
 
 === "Use Text-based UI"
@@ -26,7 +26,7 @@ tasks.
 
     Use REST API for programmatic access or invoke via tools like CURL or 
     Postman. Learn how to use Janssen Server Config API 
-    [here](./config-tools/config-api/README.md) or Jump straight to the
+    [here](../config-tools/config-api/README.md) or Jump straight to the
     [Using Configuration REST API](#using-configuration-rest-api)
 
 
@@ -113,7 +113,7 @@ To get sample schema type /opt/jans/jans-cli/config-cli.py --schema <schema>, fo
 The `patch-config-cache` operation uses the
 [JSON Patch](https://jsonpatch.com/#the-patch) schema to describe
 the configuration change. Refer
-[here](config-tools/jans-cli/README.md#patch-request-schema) to know more about
+[here](../config-tools/jans-cli/README.md#patch-request-schema) to know more about
 schema.
 
 For instance, to perform a `replace` operation at
@@ -187,10 +187,10 @@ the following command line:
 ```
 
 It will change the value with the given one. There are few options to do
-such quick patch operations. Please check them out from [here](config-tools/jans-cli/README.md#quick-patch-operations).
+such quick patch operations. Please check them out from [here](../config-tools/jans-cli/README.md#quick-patch-operations).
 
 ## Using Configuration REST API
 
 Janssen Server Configuration REST API exposes relevant endpoints for managing
-and configuring Cache. Endpoint details are published in the [Swagger
-document](./../reference/openapi.md).
+and configuring Cache. Endpoint details are published in the 
+[Swagger document](./../../reference/openapi.md).
