@@ -474,9 +474,9 @@ plugins:
 - search
 - exclude-search:
     exclude_unreferenced: true
-# - git-revision-date-localized:
-#     enable_creation_date: true
-#     type: timeago
+- git-revision-date-localized:
+    enable_creation_date: true
+    type: timeago
 repo_name: GitHub
 repo_url: https://github.com/JanssenProject/jans/
 site_author: Janssen, Inc.
