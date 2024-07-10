@@ -18,7 +18,7 @@ The Janssen Server provides multiple configuration tools to perform these tasks.
     checks if the same authentication is available and active.
     
     See 
-    [script documentation](custom-scripts-config.md#update-an-existing-custom-script) 
+    [script documentation](../custom-scripts-config.md#update-an-existing-custom-script) 
     to know how to enable/disable authentication methods using custom scripts.
 
 
@@ -31,26 +31,27 @@ The Janssen Server provides multiple configuration tools to perform these tasks.
     }
     ```
 
-    Also, to understand how Janssen Server picks the authentication method *in absence* of default authentication method, refer to [ACR documentation](../auth-server/openid-features/acrs.md#flowchart---how-the-jans-as-derives-an-acr-value-for-a-user-session-)
+    Also, to understand how Janssen Server picks the authentication method *in absence* of default authentication method, refer to 
+    [ACR documentation](../../auth-server/openid-features/acrs.md#flowchart---how-the-jans-as-derives-an-acr-value-for-a-user-session-)
 
 === "Use Command-line"
 
     Use the command line to perform actions from the terminal. Learn how to
-    use Jans CLI [here](./config-tools/jans-cli/README.md) or jump straight to
+    use Jans CLI [here](../config-tools/jans-cli/README.md) or jump straight to
     the [Using Command Line](#using-command-line)
 
 === "Use Text-based UI"
 
     Use a fully functional text-based user interface from the terminal.
     Learn how to use Jans Text-based UI (TUI)
-    [here](./config-tools/jans-tui/README.md) or jump straight to the
+    [here](../config-tools/jans-tui/README.md) or jump straight to the
     [Using Text-based UI](#using-text-based-ui)
 
 === "Use REST API"
 
     Use REST API for programmatic access or invoke via tools like CURL or 
     Postman. Learn how to use Janssen Server Config API 
-    [here](./config-tools/config-api/README.md) or Jump straight to the
+    [here](../config-tools/config-api/README.md) or Jump straight to the
     [Using Configuration REST API](#using-configuration-rest-api)
 
 ##  Using Command Line
@@ -143,7 +144,7 @@ It will show the updated result.
 ##  Using Text-based UI
 
 In Janssen, You can manage default authentication method using
-the [Text-Based UI](./config-tools/jans-tui/README.md) also.
+the [Text-Based UI](../config-tools/jans-tui/README.md) also.
 
 You can start TUI using the command below:
 
@@ -157,7 +158,7 @@ Navigate to `Auth Server` -> `Authn` to open the `Authn` screen as shown
 in the image below. This screen lists the available authentication methods
 where the default method is marked with `x` under the `Default` column.
 
-![image](../../assets/tui-curr-authn-method.png)
+![image](../../../assets/tui-curr-authn-method.png)
 
 
 ### Update Default Authentication Method
@@ -172,5 +173,5 @@ authentication method.
 
 Janssen Server Configuration REST API exposes relevant endpoints for managing
 and configuring the Default Authentication Method. Endpoint details are published
-in the [Swagger document](./../reference/openapi.md).
+in the [Swagger document](./../../reference/openapi.md).
 

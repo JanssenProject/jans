@@ -18,21 +18,21 @@ tasks.
 === "Use Command-line"
 
     Use the command line to perform actions from the terminal. Learn how to 
-    use Jans CLI [here](./config-tools/jans-cli/README.md) or jump straight to 
+    use Jans CLI [here](../config-tools/jans-cli/README.md) or jump straight to 
     the [configuration steps](#using-command-line)
 
 === "Use Text-based UI"
 
     Use a fully functional text-based user interface from the terminal. 
     Learn how to use Jans Text-based UI (TUI) 
-    [here](./config-tools/jans-tui/README.md) or jump straight to the
+    [here](../config-tools/jans-tui/README.md) or jump straight to the
     [configuration steps](#using-text-based-ui)
 
 === "Use REST API"
 
     Use REST API for programmatic access or invoke via tools like CURL or 
     Postman. Learn how to use Janssen Server Config API 
-    [here](./config-tools/config-api/README.md) or Jump straight to the
+    [here](../config-tools/config-api/README.md) or Jump straight to the
     [configuration steps](#using-configuration-rest-api)
 
 
@@ -226,7 +226,7 @@ by the project name. The command line for this operation is as below:
 You can deploy the Agama project in the Janssen Server through the command line
 using the `post-agama-prj` operation. Here the `agama-project-file` is an
 archive file that holds the bundled Agama project and follows the
-[.gama](../../agama/gama-format.md) specification.
+[.gama](../../../agama/gama-format.md) specification.
 
 ```bash title="Sample Command"
 /opt/jans/jans-cli/config-cli.py --operation-id post-agama-prj \
@@ -350,7 +350,7 @@ DSL related errors, use the `agama-syntax-check` operation as below:
 ##  Using Text-based UI
 
 In Janssen, You can deploy and customize an Agama project using
-the [Text-Based UI](./config-tools/jans-tui/README.md) also.
+the [Text-Based UI](../config-tools/jans-tui/README.md) also.
 
 You can start TUI using the command below:
 
@@ -371,7 +371,7 @@ in the image below.
   dialogue. Using this dialogue, navigate the file system and select  
   the `.gama` archive for the new project.
 
-![image](../../assets/tui-agama-project-list.png)
+![image](../../../assets/tui-agama-project-list.png)
 
 ### Agama Project Help Menu
 
@@ -379,14 +379,14 @@ TUI provides key-press commands to open various dialogues that help manage and
 configure Agama projects. All the key-press commands are listed in the help menu.
 Press `F1` to bring up the help menu as shown in the screen below.
 
-![image](../../assets/tui-agama-project-help.png)
+![image](../../../assets/tui-agama-project-help.png)
 
 ### Agama Project Detail Screen
 
 Use the appropriate key-press command from [help screen](#agama-project-help-menu)
 to bring up the project detail screen which is shown in the image below.
 
-![image](../../assets/tui-agama-project-details.png)
+![image](../../../assets/tui-agama-project-details.png)
 
 The project details screen shows important details about the Agama project.
 In case the project deployment is facing an error, this screen also shows
@@ -398,7 +398,7 @@ Fully qualified names are useful when invoking flows.
 The project details screen also shows the JSON configuration by navigating to and
 pressing the `View Configuration` button.
 
-![image](../../assets/tui-agama-project-view-conf.png)
+![image](../../../assets/tui-agama-project-view-conf.png)
 
 ### Agama Project Configuration Screen
 
@@ -411,11 +411,11 @@ below.
   make the necessary changes to it and import it back to correctly
   configure the project.
 
-![image](../../assets/tui-agama-project-manage-conf.png)
+![image](../../../assets/tui-agama-project-manage-conf.png)
 
 
 ## Using Configuration REST API
 
 Janssen Server Configuration REST API exposes relevant endpoints for managing
 and configuring Agama projects. Endpoint details are published in the [Swagger
-document](./../reference/openapi.md).
+document](./../../reference/openapi.md).
