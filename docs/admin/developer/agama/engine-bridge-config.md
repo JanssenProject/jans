@@ -18,7 +18,7 @@ By default, the bridge is disabled. To activate it do the following:
 
 ## Engine configuration
 
-Some aspects of the engine are configurable and they are integral part of the Jans authentication server's JSON configuration - specifically the section labeled `agamaConfiguration`. To learn how to perform changes in the server's configuration click [here](../../config-guide/jans-authorization-server-config.md).
+Some aspects of the engine are configurable and they are integral part of the Jans authentication server's JSON configuration - specifically the section labeled `agamaConfiguration`. To learn how to perform changes in the server's configuration click [here](../../config-guide/auth-server-config/jans-authorization-server-config.md).
 
 The properties of Agama engine configuration are described in the following:
 

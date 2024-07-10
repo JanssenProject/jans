@@ -29,14 +29,14 @@ corresponding modules to update logging related properties. For instance:
 === "Use Command-line"
 
     Use the command line to perform actions from the terminal. Learn how to 
-    use Jans CLI [here](./config-tools/jans-cli/README.md) or jump straight to 
+    use Jans CLI [here](../config-tools/jans-cli/README.md) or jump straight to 
     the [Using Command Line](#using-command-line)
 
 === "Use Text-based UI"
 
     Use a fully functional text-based user interface from the terminal. 
     Learn how to use Jans Text-based UI (TUI) 
-    [here](./config-tools/jans-tui/README.md) or jump straight to the
+    [here](../config-tools/jans-tui/README.md) or jump straight to the
     [Using-text-based-ui](#using-text-based-ui)
 
 
@@ -44,7 +44,7 @@ corresponding modules to update logging related properties. For instance:
 
     Use REST API for programmatic access or invoke via tools like CURL or 
     Postman. Learn how to use Janssen Server Config API 
-    [here](./config-tools/config-api/README.md) or Jump straight to the
+    [here](../config-tools/config-api/README.md) or Jump straight to the
     [Using Configuration REST API](#using-configuration-rest-api)
 
 ##  Using Command Line
@@ -180,7 +180,7 @@ You will get the updated result as below:
 ## Using-text-based-ui
 
 In Janssen, You can manage Logging configuration using
-the [Text-Based UI](./config-tools/jans-tui/README.md) also.
+the [Text-Based UI](../config-tools/jans-tui/README.md) also.
 
 You can start TUI using the command below:
 
@@ -196,13 +196,13 @@ in the image below.
 the requirements.
 
 
-![image](../../assets/tui-logging-config.png)
+![image](../../../assets/tui-logging-config.png)
 
 ## Using Configuration REST API
 
 Janssen Server Configuration REST API exposes relevant endpoints for managing
 and configuring logging. Endpoint details are published in the [Swagger
-document](./../reference/openapi.md).
+document](./../../reference/openapi.md).
 
 ## Default Log Location
 
@@ -211,4 +211,4 @@ On a VM installation, logs for `jans-auth` module are generated at
 
 ## Cloud-Native Deployments
 
-Logging configuration for a cloud-native deployment is [detailed here](../kubernetes-ops/logs.md)
+Logging configuration for a cloud-native deployment is [detailed here](../../kubernetes-ops/logs.md)
