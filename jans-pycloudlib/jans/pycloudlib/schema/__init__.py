@@ -89,7 +89,7 @@ class SecretSchema(Schema):
     class Meta:
         unknown = EXCLUDE
 
-    admin_pw = String(
+    admin_password = String(
         required=True,
         metadata={
             "description": "Password for admin user",
@@ -564,6 +564,14 @@ class SecretSchema(Schema):
         },
     )
 
+    redis_password = String(
+        load_default="",
+        dump_default="",
+        metadata={
+            "description": "Password for Redis user",
+        },
+    )
+
     @post_load
     def transform_b64(self, in_data, **kwargs):
         # list of attrs that maybe base64 string and need to be decoded
@@ -585,7 +593,7 @@ class SecretSchema(Schema):
         if value and not value.isalnum():
             raise ValidationError("Only alphanumeric characters are allowed")
 
-    @validates("admin_pw")
+    @validates("admin_password")
     def validate_password(self, value, **kwargs):
         if not PASSWD_RGX.search(value):
             raise ValidationError(
