@@ -7,7 +7,7 @@ tags:
 
 # OAuth Scopes
 
-> Prerequisite: Know how to use the Janssen CLI in [command-line mode](config-tools/jans-cli/README.md)
+> Prerequisite: Know how to use the Janssen CLI in [command-line mode](../config-tools/jans-cli/README.md)
 
 Let's get information for a task **OAuthScopes**
 
@@ -165,7 +165,7 @@ Now edit file `tmp/scope.json` with an editor (like **nano**). As an example we 
 "description": "Test Scope created by jans-cli",
 ```
 
-![jans-cl Edit scope.json](../../assets/image-cl-oauthscope-json-03042021.png) 
+![jans-cl Edit scope.json](../../../assets/image-cl-oauthscope-json-03042021.png) 
 
 It is time to post the data:
 
