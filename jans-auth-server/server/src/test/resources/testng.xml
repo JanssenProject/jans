@@ -58,6 +58,9 @@
             <class name="io.jans.as.server.session.ws.rs.EndSessionRestWebServiceImplTest" />
             <class name="io.jans.as.server.session.ws.rs.EndSessionServiceTest" />
 
+            <!-- USER INFO -->
+            <class name="io.jans.as.server.userinfo.ws.rs.UserInfoServiceTest" />
+
             <!-- UTIL -->
             <class name="io.jans.as.server.util.ServerUtilTest" />
         </classes>

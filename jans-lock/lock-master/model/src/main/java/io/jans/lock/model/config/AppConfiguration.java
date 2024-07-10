@@ -22,6 +22,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import io.jans.doc.annotation.DocProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.enterprise.inject.Vetoed;
 
 /**
@@ -36,54 +37,71 @@ public class AppConfiguration implements Configuration {
 	private String baseDN;
 	
     @DocProperty(description = "Lock base endpoint URL")
+    @Schema(description = "Lock base endpoint URL")
     private String baseEndpoint;
 
     @DocProperty(description = "List of token channel names", defaultValue = "jans_token")
+    @Schema(description = "List of token channel names")
 	private List<String> tokenChannels;
 
 	@DocProperty(description = "Choose whether to disable JDK loggers", defaultValue = "true")
+	@Schema(description = "Choose whether to disable JDK loggers")
 	private Boolean disableJdkLogger = true;
 
     @DocProperty(description = "Specify the logging level of loggers")
+    @Schema(description = "Specify the logging level of loggers")
 	private String loggingLevel;
 
     @DocProperty(description = "Logging layout used for Jans Authorization Server loggers")
+    @Schema(description = "Logging layout used for Jans Authorization Server loggers")
     private String loggingLayout;
 
     @DocProperty(description = "The path to the external log4j2 logging configuration")
+    @Schema(description = "The path to the external log4j2 logging configuration")
     private String externalLoggerConfiguration;
 
     @DocProperty(description = "Channel for metric reports", defaultValue = "jans_pdp_metric")
+    @Schema(description = "Channel for metric reports")
 	private String metricChannel;
 
     @DocProperty(description = "The interval for metric reporter in seconds")
+    @Schema(description = "The interval for metric reporter in seconds")
 	private int metricReporterInterval;
 
     @DocProperty(description = "The days to keep metric reported data")
+    @Schema(description = "The days to keep metric reported data")
 	private int metricReporterKeepDataDays;
 
     @DocProperty(description = "Enable metric reporter")
+    @Schema(description = "Enable metric reporter")
 	private Boolean metricReporterEnabled;
 
 	// Period in seconds
     @DocProperty(description = "Time interval for the Clean Service in seconds")
+    @Schema(description = "Time interval for the Clean Service in seconds")
 	private int cleanServiceInterval;
 	
+    @Schema(description = "Opa Configuration")
 	private OpaConfiguration opaConfiguration;
 
     @DocProperty(description = "PDP type")
+    @Schema(description = "PDP type")
 	private String pdpType;
 
     @DocProperty(description = "Authorization token to access Json Uris")
+    @Schema(description = "Authorization token to access Json Uris")
 	private String policiesJsonUrisAuthorizationToken;
 
     @DocProperty(description = "List of Json Uris with link to Rego policies")
+    @Schema(description = "List of Json Uris with link to Rego policies")
 	private List<String> policiesJsonUris;
 
     @DocProperty(description = "Authorization token to access Zip Uris")
+    @Schema(description = "Authorization token to access Zip Uris")
 	private String policiesZipUrisAuthorizationToken;
 
     @DocProperty(description = "List of Zip Uris with policies")
+    @Schema(description = "List of Zip Uris with policies")
 	private List<String> policiesZipUris;
 
 	public String getBaseDN() {
