@@ -16,43 +16,20 @@
 
 package io.jans.lock.service.ws.rs.audit;
 
-import com.fasterxml.jackson.core.JacksonException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.http.entity.ContentType;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
-import io.jans.as.client.TokenRequest;
-import io.jans.as.client.TokenResponse;
-import io.jans.as.model.common.GrantType;
-import io.jans.as.model.common.ScopeType;
-import io.jans.as.model.uma.wrapper.Token;
-import io.jans.as.model.util.Util;
 import io.jans.lock.service.util.ServerUtil;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.Path;
-import jakarta.ws.rs.client.Entity;
-import jakarta.ws.rs.client.Invocation.Builder;
-import jakarta.ws.rs.container.ResourceInfo;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.SecurityContext;
 
-import java.util.HashMap;
 import io.jans.lock.service.util.AuthUtil;
 
 /**
@@ -114,13 +91,14 @@ public class AuditRestWebServiceImpl implements AuditRestWebService {
 	    if(json==null) {
 	        return;
 	    }
-	    log.error("Processing Telemetry request");
+
 	    this.authUtil.postData(json.toString());
 	   
 	    
 	}
 	
 	   private JSONObject getJSONObject(HttpServletRequest request) {
+	       log.error("getJSONObject() - request:{}", request);
 	        JSONObject jsonBody = null;
 	        if(request==null) {
 	            return jsonBody;
@@ -132,7 +110,7 @@ public class AuditRestWebServiceImpl implements AuditRestWebService {
 	            log.error(" jsonBody:{}",jsonBody);
 	        }catch(Exception ex) {
 	            ex.printStackTrace();
-	            log.error("Exception while retriving json from request is :{}",ex );
+	            log.error("Exception while retriving json from request is - ",ex );
 	        }
 	        return jsonBody;
 	    }

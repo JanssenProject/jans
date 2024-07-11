@@ -145,6 +145,8 @@ public abstract class BaseHttpService implements Serializable {
 	}
 
 	public HttpServiceResponse executePost(HttpClient httpClient, String uri, String authData, Map<String, String> headers, String postData, ContentType contentType, String authType) {
+	    
+	    log.error("Connection manager httpClient:{}, uri:{}, authData:{}, headers:{}, postData:{},contentType:{}, authType:{}", httpClient, uri, authData, headers, postData, contentType, authType);
         HttpPost httpPost = new HttpPost(uri);
 
         if(StringHelper.isEmpty(authType)) { 
@@ -165,12 +167,13 @@ public abstract class BaseHttpService implements Serializable {
 
         StringEntity stringEntity = new StringEntity(postData, contentType);
 		httpPost.setEntity(stringEntity);
-
+		log.error("Connection manager - stringEntity:{}", stringEntity);
         try {
         	HttpResponse httpResponse = httpClient.execute(httpPost);
 
         	return new HttpServiceResponse(httpPost, httpResponse);
 		} catch (IOException ex) {
+		    ex.printStackTrace();
 	    	log.error("Failed to execute post request", ex);
 		}
 
@@ -228,7 +231,7 @@ public abstract class BaseHttpService implements Serializable {
 		return null;
 	}
 
-	public HttpServiceResponse executeGet(HttpClient httpClient, String requestUri) throws ClientProtocolException, IOException {
+	public HttpServiceResponse executeGet(HttpClient httpClient, String requestUri)  {
 		return executeGet(httpClient, requestUri, null);
 	}
 
