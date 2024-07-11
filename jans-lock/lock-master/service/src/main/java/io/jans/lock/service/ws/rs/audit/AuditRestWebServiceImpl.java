@@ -21,11 +21,13 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.http.entity.ContentType;
+import org.apache.commons.io.IOUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
@@ -81,43 +83,60 @@ public class AuditRestWebServiceImpl implements AuditRestWebService {
 	}
 
 	@Override
-	public Response processLogRequest(HttpServletRequest request, HttpServletResponse response, SecurityContext sec) {
-		log.debug("Processing Log request");
+	public Response processLogRequest(HttpServletRequest request, HttpServletResponse response, SecurityContext sec) 
+	{
+		log.debug("Processing Log request - request:{}",request);
+		
+		JSONObject jsonBody = getJSONObject(request);
 		Response.ResponseBuilder builder = Response.ok();
-
 		builder.cacheControl(ServerUtil.cacheControlWithNoStoreTransformAndPrivate());
 		builder.header(ServerUtil.PRAGMA, ServerUtil.NO_CACHE);
 		builder.entity("{\"res\" : \"ok\"}");
-
-		return builder.build();
+		//return builder.build();
+		
+		return Response.status(Response.Status.OK).entity(jsonBody).build();
 	}
+	
 
 	@Override
 	public Response processTelemetryRequest(HttpServletRequest request, HttpServletResponse response, SecurityContext sec) {
-		log.error("Processing Telemetry request");
+		log.error("Processing Telemetry request - request:{}", request);
 		Response.ResponseBuilder builder = Response.ok();
 
-		builder.cacheControl(ServerUtil.cacheControlWithNoStoreTransformAndPrivate());
-		builder.header(ServerUtil.PRAGMA, ServerUtil.NO_CACHE);
-		builder.entity("{\"res\" : \"ok\"}");
-		
 		this.authUtil.getAppConfiguration();
 		
-		this.postData(null);
+		this.postData(this.getJSONObject(request));
 		return builder.build();
 	}
 	
-	private void postData(String postData) {
-	    ObjectMapper mapper = new ObjectMapper();
-	    ObjectNode node = mapper.createObjectNode();
-	    node.put("name", "value"); // repeat as needed
-	    String JSON_STRING = node.toString();
-
+	private void postData(JSONObject json) {
+	    log.error("Processing Telemetry request - json:{}", json);
+	    if(json==null) {
+	        return;
+	    }
 	    log.error("Processing Telemetry request");
-	    this.authUtil.postData(JSON_STRING);
+	    this.authUtil.postData(json.toString());
 	   
 	    
 	}
+	
+	   private JSONObject getJSONObject(HttpServletRequest request) {
+	        JSONObject jsonBody = null;
+	        if(request==null) {
+	            return jsonBody;
+	        }
+	        try {
+	            String jsonBodyStr = IOUtils.toString(request.getInputStream());
+	            log.error(" jsonBodyStr:{}",jsonBodyStr);
+	            jsonBody = new JSONObject(jsonBodyStr);
+	            log.error(" jsonBody:{}",jsonBody);
+	        }catch(Exception ex) {
+	            ex.printStackTrace();
+	            log.error("Exception while retriving json from request is :{}",ex );
+	        }
+	        return jsonBody;
+	    }
+
 	
 
 	

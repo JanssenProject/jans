@@ -105,7 +105,7 @@ public class AuthUtil {
         
         //String uri = "jans-config-api/lock/audit/telemetry";
         String uri = "https://pujavs-probable-alpaca.gluu.info/jans-config-api/lock/audit/telemetry";
-        //String authData="459477ac-e162-499b-b918-847384aadfb9";
+       
         String authData = getToken();
         String authType= "Bearer ";
         Map<String, String> headers = new HashMap<>();
