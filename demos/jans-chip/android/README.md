@@ -17,7 +17,7 @@
 1. The mobile application distribution includes the [SSA](https://docs.Janssen.io/v1.1.3/admin/auth-server/endpoints/ssa/#software-statement-assertion-ssa) (Software Statement Assertion) generated from the Janssen Auth Server. The application reads OpenID and FIDO issuers from the SSA.
 2. & 3. The application fetches OpenID and FIDO configurations to the mobile database.
 4. To mitigate the risk of app tampering and the use of fraudulent devices, the integrity of the app and device, for Android applications can be verified using the [Play Integrity API](https://developer.android.com/google/play/integrity).
-5. The application performs [DCR](https://docs.Janssen.io/v1.1.3/admin/auth-server/endpoints/client-registration/#dynamic-client-registration-dcr) (Dynamic Client Registration) against the Auth Server using the SSA. To use attestation in OAuth 2.0 Dynamic Client Registration, the app generates evidence in JWT format containing verifiable claims like app_id and app-checksum. The integrity verdict from the Play Integrity API can be added as a claim in the evidence JWT for attested DCR. This claim is then verified by the designated verifier to ensure the trustworthiness of both the app and the Android device. Based on this verification, the DCR is either approved or rejected.
+5. The application performs [DCR](https://docs.Janssen.io/v1.1.3/admin/auth-server/endpoints/client-registration/#dynamic-client-registration-dcr) (Dynamic Client Registration) against the Auth Server using the SSA. To [use attestation in OAuth 2.0 Dynamic Client Registration](https://www.ietf.org/id/draft-tschofenig-oauth-attested-dclient-reg-00.html), the app generates evidence in JWT format containing verifiable claims like app_id and app-checksum. The integrity verdict from the Play Integrity API can be added as a claim in the evidence JWT for attested DCR. This claim is then verified by the designated verifier to ensure the trustworthiness of both the app and the Android device. Based on this verification, the DCR is either approved or rejected.
 
 ##### Passkey Enrolment
 
@@ -72,3 +72,4 @@ Add following [Auth Challenge Script](./docs/authChallengeScript.java) in Jans S
 **Reference:**
 - https://github.com/JanssenProject/jans/wiki/Mobile-DPoP-FIDO-Authn
 - https://github.com/JanssenProject/jans/wiki/DPoP-Mobile-App-POC
+- Authenticator code from https://github.com/duo-labs/android-webauthn-authenticator/tree/master
