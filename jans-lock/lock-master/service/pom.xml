@@ -64,6 +64,11 @@
 			<artifactId>jans-core-service</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-auth-client</artifactId>
+		</dependency>
+
 		<!-- CDI -->
 		<dependency>
 			<groupId>org.jboss.weld</groupId>
@@ -112,6 +117,10 @@
 		</dependency>
 
 		<!-- RestEasy -->
+		<dependency>
+			<groupId>org.jboss.resteasy</groupId>
+			<artifactId>resteasy-servlet-initializer</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
 			<artifactId>resteasy-cdi</artifactId>

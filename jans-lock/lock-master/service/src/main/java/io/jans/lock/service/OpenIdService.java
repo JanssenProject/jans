@@ -1,0 +1,85 @@
+/*
+ * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ *
+ * Copyright (c) 2020, Janssen Project
+ */
+
+package io.jans.lock.service;
+
+import java.io.IOException;
+import java.io.Serializable;
+
+import org.slf4j.Logger;
+
+import io.jans.as.client.OpenIdConfigurationClient;
+import io.jans.as.client.OpenIdConfigurationResponse;
+import io.jans.lock.model.config.AppConfiguration;
+import io.jans.service.net.BaseHttpService;
+import io.jans.util.StringHelper;
+import io.jans.util.exception.ConfigurationException;
+import io.jans.util.init.Initializable;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
+
+/**
+ * Provides OpenId configuration
+ *
+ * @author Yuriy Movchan Date: 12/28/2016
+ */
+@ApplicationScoped
+@Named("openIdService")
+public class OpenIdService extends Initializable implements Serializable {
+
+    private static final long serialVersionUID = 7875838160379126796L;
+
+    @Inject
+    private Logger log;
+
+    @Inject
+    private AppConfiguration appConfiguration;
+
+    private OpenIdConfigurationResponse openIdConfiguration;
+
+    @Override
+    protected void initInternal() {
+        loadOpenIdConfiguration();
+    }
+
+	private void loadOpenIdConfiguration() {
+		String openIdIssuer = appConfiguration.getOpenIdIssuer();
+		if (StringHelper.isEmpty(openIdIssuer)) {
+			throw new ConfigurationException("OpenIdIssuer Url is invalid");
+		}
+
+		String openIdIssuerEndpoint = openIdIssuer + "/.well-known/openid-configuration";
+
+		OpenIdConfigurationClient client = new OpenIdConfigurationClient(openIdIssuerEndpoint);
+		openIdConfiguration = client.execOpenIdConfiguration();
+
+		if (openIdConfiguration == null) {
+			throw new ConfigurationException("Failed to load OpenID configuration!");
+		}
+
+
+		log.info("Successfully loaded OpenID configuration");
+	}
+
+    public OpenIdConfigurationResponse getOpenIdConfiguration() {
+        // Call each time to allows retry
+        init();
+
+        return openIdConfiguration;
+    }
+    
+    public static void main(String[] args) {
+    	String openIdIssuer = "https://localhost:8090";
+
+        String openIdIssuerEndpoint = openIdIssuer + "/.well-known/openid-configuration";
+
+        OpenIdConfigurationClient client = new OpenIdConfigurationClient(openIdIssuerEndpoint);
+        OpenIdConfigurationResponse openIdConfiguration = client.execOpenIdConfiguration();
+        System.out.println(openIdConfiguration);
+	}
+
+}

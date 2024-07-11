@@ -36,7 +36,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.service.consumer.policy.PolicyConsumer;
-import io.jans.lock.service.policy.event.PolicyDownloadEvent;
+import io.jans.lock.service.event.PolicyDownloadEvent;
 import io.jans.service.EncryptionService;
 import io.jans.service.cdi.async.Asynchronous;
 import io.jans.service.cdi.event.Scheduled;

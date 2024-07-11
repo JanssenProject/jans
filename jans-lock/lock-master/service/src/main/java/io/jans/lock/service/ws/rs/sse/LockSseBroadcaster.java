@@ -16,13 +16,20 @@
 
 package io.jans.lock.service.ws.rs.sse;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import org.slf4j.Logger;
 
-import io.jans.lock.service.policy.event.PolicyDownloadEvent;
+import io.jans.lock.service.TokenStsatusListService;
+import io.jans.lock.service.event.PolicyDownloadEvent;
+import io.jans.lock.service.event.TokenStatusListReloadEvent;
 import io.jans.service.cdi.async.Asynchronous;
 import io.jans.service.cdi.event.Scheduled;
+import io.jans.service.timer.event.TimerEvent;
+import io.jans.service.timer.schedule.TimerSchedule;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Event;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.sse.OutboundSseEvent;
@@ -35,19 +42,59 @@ import jakarta.ws.rs.sse.SseBroadcaster;
 @ApplicationScoped
 public class LockSseBroadcaster {
 
+	private static final int DEFAULT_INTERVAL = 15;
+
 	@Inject
 	private Logger log;
+
+	@Inject
+	private Event<TimerEvent> timerEvent;
+	
+	@Inject
+	private TokenStsatusListService tokenStsatusListService;
 
     private SseBroadcaster sseBroadcaster;
 	private Sse sse;
 
+	private AtomicBoolean isActive;
+
 	@PostConstruct
 	public void init() {
 		log.info("Initializing Token SSE broadcaster ...");
+		this.isActive = new AtomicBoolean(false);
+	}
+
+	public void initTimer() {
+		log.debug("Initializing Token Status List Timer");
+
+		final int delay = 30;
+		final int interval = DEFAULT_INTERVAL;
+
+		timerEvent.fire(new TimerEvent(new TimerSchedule(delay, interval), new TokenStatusListReloadEvent(),
+				Scheduled.Literal.INSTANCE));
 	}
 
 	@Asynchronous
-	public void reloadPoliciesTimerEvent(@Observes @Scheduled PolicyDownloadEvent policyDownloadEvent) {
+	public void reloadTokenStatusListTimerEvent(@Observes @Scheduled TokenStatusListReloadEvent tokenStatusListReloadEvent) {
+		if (this.isActive.get()) {
+			return;
+		}
+
+		if (!this.isActive.compareAndSet(false, true)) {
+			return;
+		}
+
+		try {
+			reloadTokenStatusList();
+		} catch (Throwable ex) {
+			log.error("Exception happened while reloading token status list", ex);
+		} finally {
+			this.isActive.set(false);
+		}
+	}
+
+	private void reloadTokenStatusList() {
+		tokenStsatusListService.loadTokenStatusList();
 		// test messages
 		broadcast("token_list", "{\"sample_data\" : \"data\"}");
 	}
