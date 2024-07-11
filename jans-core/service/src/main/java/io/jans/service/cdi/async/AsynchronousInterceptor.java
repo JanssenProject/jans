@@ -37,12 +37,17 @@ public class AsynchronousInterceptor implements Serializable {
         return CompletableFuture.supplyAsync(new Supplier<Object>() {
             @Override
             public Object get() {
+            	// Inherit context class loader
+        		ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
+        		Thread.currentThread().setContextClassLoader(getClass().getClassLoader());
                 try {
                     ASYNC_INVOCATION.set(Boolean.TRUE);
                     return localCtx.proceed();
                 } catch (Exception ex) {
                     ex.printStackTrace();
                 } finally {
+                	// Restore context class loader
+                    Thread.currentThread().setContextClassLoader(oldClassLoader);
                     ASYNC_INVOCATION.remove();
                 }
 
