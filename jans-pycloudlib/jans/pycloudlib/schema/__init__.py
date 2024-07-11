@@ -341,8 +341,8 @@ class SecretSchema(Schema):
     )
 
     kc_admin_password = String(
-        load_default="admin",
-        dump_default="admin",
+        load_default="",
+        dump_default="",
         metadata={
             "description": "Admin password of Keycloak",
         },
