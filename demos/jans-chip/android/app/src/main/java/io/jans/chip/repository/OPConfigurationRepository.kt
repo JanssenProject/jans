@@ -2,10 +2,13 @@ package io.jans.chip.repository
 
 import android.content.Context
 import android.util.Log
+import com.nimbusds.jwt.JWTClaimsSet
 import io.jans.chip.model.OPConfiguration
 import io.jans.chip.retrofit.ApiAdapter
 import io.jans.chip.utils.AppConfig
 import io.jans.chip.AppDatabase
+import io.jans.chip.factories.DPoPProofFactory
+import io.jans.chip.model.OIDCClient
 import retrofit2.Response
 
 class OPConfigurationRepository (context: Context){
@@ -13,10 +16,10 @@ class OPConfigurationRepository (context: Context){
     private val appDatabase = AppDatabase.getInstance(context);
     private var opConfiguration: OPConfiguration? =
         OPConfiguration("", null, null, null, null, null, null)
-    suspend fun fetchOPConfiguration(configurationUrl: String): OPConfiguration? {
+    private suspend fun fetchOPConfiguration(configurationUrl: String): OPConfiguration? {
         try {
             val issuer: String = configurationUrl.replace(AppConfig.OP_CONFIG_URL, "")
-            var response: Response<OPConfiguration> =
+            val response: Response<OPConfiguration> =
                 ApiAdapter.getInstance(issuer).getOPConfiguration(configurationUrl)
             if (response.code() != 200) {
                 opConfiguration?.isSuccessful = false
@@ -57,12 +60,17 @@ class OPConfigurationRepository (context: Context){
         return false
     }
 
-    suspend fun getOPConfigurationInDatabase(): OPConfiguration? {
-        var opConfigurations: List<OPConfiguration>? = appDatabase.opConfigurationDao().getAll()
+    suspend fun getOPConfiguration(): OPConfiguration? {
+        val opConfigurations: List<OPConfiguration>? = appDatabase.opConfigurationDao().getAll()
         var opConfiguration: OPConfiguration? = null
-        if(opConfigurations != null && !opConfigurations.isEmpty()) {
-            opConfiguration = opConfigurations?.let { it -> it.get(0) }
+        if(!opConfigurations.isNullOrEmpty()) {
+            opConfiguration = opConfigurations[0]
+            opConfiguration.isSuccessful = true
+            return opConfiguration
         }
+        val jwtClaimsSet: JWTClaimsSet = DPoPProofFactory.getClaimsFromSSA()
+        val issuer: String = jwtClaimsSet.getClaim("iss").toString()
+        opConfiguration = fetchOPConfiguration(issuer + AppConfig.OP_CONFIG_URL)
         return opConfiguration
     }
 

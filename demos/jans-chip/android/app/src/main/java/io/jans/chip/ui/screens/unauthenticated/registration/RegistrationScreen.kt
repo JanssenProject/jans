@@ -47,6 +47,7 @@ import io.jans.chip.model.TokenResponse
 import io.jans.chip.model.UserInfoResponse
 import io.jans.chip.model.fido.attestation.option.AttestationOptionResponse
 import io.jans.chip.model.fido.attestation.result.AttestationResultRequest
+import io.jans.chip.model.fido.config.FidoConfiguration
 import io.jans.chip.model.fido.config.FidoConfigurationResponse
 import io.jans.chip.ui.common.customComposableViews.MediumTitleText
 import io.jans.chip.ui.common.customComposableViews.SmallClickableWithIconAndText
@@ -210,7 +211,7 @@ fun RegistrationScreen(
                                     CoroutineScope(Dispatchers.Main).launch {
                                         registrationState = registrationState.copy(isLoading = true)
                                         val loginResponse: LoginResponse? = async {
-                                            mainViewModel.processlogin(
+                                            mainViewModel.processLogin(
                                                 mainViewModel.getUsername(),
                                                 mainViewModel.getPassword(),
                                                 "enroll",
@@ -257,8 +258,8 @@ fun RegistrationScreen(
                                             return@launch
                                         }
 
-                                        val fidoConfiguration: FidoConfigurationResponse? =
-                                            async { mainViewModel.fetchFidoConfiguration() }.await()
+                                        val fidoConfiguration: FidoConfiguration? =
+                                            async { mainViewModel.getFIDOConfiguration() }.await()
                                         if (fidoConfiguration?.isSuccessful == false) {
                                             shouldShowDialog.value = true
                                             dialogContent.value =
@@ -334,14 +335,12 @@ fun RegistrationScreen(
                                                             registrationState.copy(isLoading = false)
                                                         return@launch
                                                     }
-                                                    mainViewModel.attestationOptionResponse = true
+                                                    mainViewModel.mainState = mainViewModel.mainState.copy(attestationOptionSuccess = true)
+                                                    mainViewModel.mainState = mainViewModel.mainState.copy(attestationResultSuccess = true)
 
-                                                    registrationViewModel.onUiEvent(
-                                                        registrationUiEvent = RegistrationUiEvent.Submit
-                                                    )
+                                                    registrationViewModel.onUiEvent(registrationUiEvent = RegistrationUiEvent.Submit)
 
-                                                    registrationState =
-                                                        registrationState.copy(isLoading = false)
+                                                    registrationState = registrationState.copy(isLoading = false)
                                                 }
                                             })
                                     }
@@ -351,8 +350,7 @@ fun RegistrationScreen(
                                         "Biometric authentication is not available!",
                                         Toast.LENGTH_SHORT
                                     ).show()
-                                    registrationState =
-                                        registrationState.copy(isLoading = false)
+                                    registrationState = registrationState.copy(isLoading = false)
                                 }
                             }
                         )

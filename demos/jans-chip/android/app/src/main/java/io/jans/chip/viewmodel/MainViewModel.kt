@@ -22,7 +22,6 @@ import io.jans.chip.model.fido.attestation.option.AttestationOptionResponse
 import io.jans.chip.model.fido.attestation.result.AttestationResultRequest
 import io.jans.chip.model.fido.attestation.result.AttestationResultResponse
 import io.jans.chip.model.fido.config.FidoConfiguration
-import io.jans.chip.model.fido.config.FidoConfigurationResponse
 import io.jans.chip.repository.DCRRepository
 import io.jans.chip.repository.FidoAssertionRepository
 import io.jans.chip.repository.FidoAttestationRepository
@@ -33,6 +32,7 @@ import io.jans.chip.repository.OPConfigurationRepository
 import io.jans.chip.repository.PlayIntegrityRepository
 import io.jans.chip.repository.TokenResponseRepository
 import io.jans.chip.repository.UserInfoResponseRepository
+import io.jans.chip.viewmodel.state.MainState
 
 class MainViewModel : ViewModel() {
 
@@ -44,27 +44,18 @@ class MainViewModel : ViewModel() {
     private lateinit var password: String
     private lateinit var userInfoResponse: UserInfoResponse
 
-    var opConfigurationPresent by mutableStateOf(false)
-    var fidoConfigurationPresent by mutableStateOf(false)
-    var attestationOptionSuccess by mutableStateOf(false)
-    var attestationOptionResponse by mutableStateOf(false)
-    var clientRegistered by mutableStateOf(false)
-    var userIsAuthenticated by mutableStateOf(false)
-    var assertionOptionResponse by mutableStateOf(false)
-    var errorInLoading by mutableStateOf(false)
-    var loadingErrorMessage by mutableStateOf("")
+    var mainState by mutableStateOf(MainState())
 
-
-    lateinit var opConfigurationRepository: OPConfigurationRepository
-    lateinit var dcrRepository: DCRRepository
-    lateinit var fidoConfigurationRepository: FidoConfigurationRepository
-    lateinit var loginResponseRepository: LoginResponseRepository
-    lateinit var tokenResponseRepository: TokenResponseRepository
-    lateinit var userInfoResponseRepository: UserInfoResponseRepository
-    lateinit var logoutRepository: LogoutRepository
-    lateinit var fidoAttestationRepository: FidoAttestationRepository
-    lateinit var fidoAssertionRepository: FidoAssertionRepository
-    lateinit var playIntegrityRepository: PlayIntegrityRepository
+    private lateinit var opConfigurationRepository: OPConfigurationRepository
+    private lateinit var dcrRepository: DCRRepository
+    private lateinit var fidoConfigurationRepository: FidoConfigurationRepository
+    private lateinit var loginResponseRepository: LoginResponseRepository
+    private lateinit var tokenResponseRepository: TokenResponseRepository
+    private lateinit var userInfoResponseRepository: UserInfoResponseRepository
+    private lateinit var logoutRepository: LogoutRepository
+    private lateinit var fidoAttestationRepository: FidoAttestationRepository
+    private lateinit var fidoAssertionRepository: FidoAssertionRepository
+    private lateinit var playIntegrityRepository: PlayIntegrityRepository
 
     companion object {
 
@@ -146,70 +137,11 @@ class MainViewModel : ViewModel() {
         return userInfoResponse
     }
 
-    suspend fun fetchOPConfiguration(): OPConfiguration? {
-
-        val opConfiguration: OPConfiguration? =
-            opConfigurationRepository.fetchOPConfiguration(opConfigUrl)
-        if (opConfiguration?.isSuccessful == true) {
-            opConfigurationPresent = true
-        }
-        return opConfiguration
-    }
-
-    suspend fun doDCR(scopeText: String): OIDCClient? {
-        val oidcClient: OIDCClient? = dcrRepository.doDCR(scopeText)
-        clientRegistered = true
-        return oidcClient
-    }
-
-    suspend fun doDCRUsingSSA(ssa: String, scopeText: String): OIDCClient? {
-        val oidcClient: OIDCClient? = dcrRepository.doDCRUsingSSA(ssa, scopeText)
-        clientRegistered = true
-        return oidcClient
-    }
-
-    suspend fun fetchFidoConfiguration(): FidoConfigurationResponse? {
-        if (!(this::fidoConfigUrl.isInitialized)) {
-            val opConfiguration: OPConfiguration? =
-                opConfigurationRepository.getOPConfigurationInDatabase()
-            opConfiguration?.fidoUrl?.let { setFidoConfigUrl(it) }
-        }
-
-        val fidoConfigurationResponse: FidoConfigurationResponse? =
-            fidoConfigurationRepository.fetchFidoConfiguration(fidoConfigUrl)
-        if (fidoConfigurationResponse?.isSuccessful == true) {
-            fidoConfigurationPresent = true
-        }
-        return fidoConfigurationResponse
-    }
-
-    suspend fun getFidoConfigInDatabase(): FidoConfiguration? {
-        return fidoConfigurationRepository.getFidoConfigInDatabase()
-    }
-
-    suspend fun deleteOPConfigurationInDatabase() {
-        opConfigurationRepository.deleteOPConfigurationInDatabase()
-        opConfigurationPresent = false
-    }
-
-    suspend fun deleteClientInDatabase() {
-        dcrRepository.deleteClientInDatabase()
-        clientRegistered = false
-        userIsAuthenticated = false
-    }
-
-    suspend fun deleteFidoConfigurationInDatabase() {
-        fidoConfigurationRepository.deleteFidoConfigurationInDatabase()
-        fidoConfigurationPresent = false
-        attestationOptionSuccess = false
-        attestationOptionResponse = false
-    }
-
     suspend fun attestationOption(username: String): AttestationOptionResponse? {
         val attestationOptionResponse: AttestationOptionResponse? =
             fidoAttestationRepository.attestationOption(username)
         if (attestationOptionResponse?.isSuccessful == true) {
-            attestationOptionSuccess = true
+            mainState = mainState.copy(attestationOptionSuccess = true)
         }
         return attestationOptionResponse
     }
@@ -218,7 +150,7 @@ class MainViewModel : ViewModel() {
         val attestationResultResponse: AttestationResultResponse? =
             fidoAttestationRepository.attestationResult(attestationResultRequest)
         if (attestationResultResponse?.isSuccessful == true) {
-            attestationOptionResponse = true
+            mainState = mainState.copy(attestationResultSuccess = true)
         }
         return attestationResultResponse
     }
@@ -228,8 +160,9 @@ class MainViewModel : ViewModel() {
     }
 
     suspend fun checkAppIntegrityFromDatabase(): String? {
-        val appIntegrityEntity: AppIntegrityEntity = playIntegrityRepository.getAppIntegrityEntityInDatabase()
-            ?: return null
+        val appIntegrityEntity: AppIntegrityEntity =
+            playIntegrityRepository.getAppIntegrityEntityInDatabase()
+                ?: return null
 
         if (appIntegrityEntity.error != null) {
             return appIntegrityEntity.error
@@ -252,19 +185,20 @@ class MainViewModel : ViewModel() {
         val assertionResultResponse: AssertionResultResponse =
             fidoAssertionRepository.assertionResult(assertionResultRequest)
         if (assertionResultResponse.isSuccessful == true) {
-            assertionOptionResponse = true
+            mainState = mainState.copy(attestationOptionSuccess = true)
+            mainState = mainState.copy(attestationResultSuccess = true)
         }
         return assertionResultResponse
     }
 
-    suspend fun processlogin(
+    suspend fun processLogin(
         usernameText: String,
         passwordText: String?,
         authMethod: String,
         assertionResultRequest: String?
     ): LoginResponse? {
         //userIsAuthenticated = true
-        return loginResponseRepository.processlogin(
+        return loginResponseRepository.processLogin(
             usernameText,
             passwordText,
             authMethod,
@@ -278,44 +212,47 @@ class MainViewModel : ViewModel() {
         return tokenResponseRepository.getToken(authorizationCode)
     }
 
-    suspend fun getUserInfo(accessToken: String?): UserInfoResponse {
-        val userInfoResponse: UserInfoResponse =
-            userInfoResponseRepository.getUserInfo(accessToken)
-        if (userInfoResponse?.isSuccessful == true) {
-            userIsAuthenticated = true
-        }
-        return userInfoResponse
-    }
-
     suspend fun logout(): LogoutResponse {
         val logoutResponse: LogoutResponse = logoutRepository.logout()
         if (logoutResponse.isSuccessful == true) {
-            userIsAuthenticated = false
+            mainState = mainState.copy(isUserIsAuthenticated = false)
         }
         return logoutResponse
     }
 
-    suspend fun isOPConfigurationInDatabase(): Boolean {
-        return opConfigurationRepository.isOPConfigurationInDatabase()
-    }
-
-    suspend fun getOPConfigurationInDatabase(): OPConfiguration? {
-        return opConfigurationRepository.getOPConfigurationInDatabase()
-    }
-
-    suspend fun isClientInDatabase(): Boolean {
-        return dcrRepository.isClientInDatabase()
-    }
-
-    suspend fun getClientInDatabase(): OIDCClient? {
-        return dcrRepository.getClientInDatabase()
-    }
-
-    suspend fun isAuthenticated(accessToken: String?): Boolean {
-        return loginResponseRepository.isAuthenticated(accessToken)
-    }
-
     suspend fun getUserInfoWithAccessToken(accessToken: String?): UserInfoResponse? {
         return userInfoResponseRepository.getUserInfo(accessToken)
+    }
+
+    suspend fun getOIDCClient(): OIDCClient? {
+        val oidcClient: OIDCClient? = dcrRepository.getOIDCClient()
+        if (oidcClient?.isSuccessful == true) {
+            mainState = mainState.copy(isClientRegistered = true)
+        }
+        return oidcClient
+    }
+
+    suspend fun getOPConfiguration(): OPConfiguration? {
+        val opConfiguration: OPConfiguration? = opConfigurationRepository.getOPConfiguration()
+        if (opConfiguration?.isSuccessful == true) {
+            mainState = mainState.copy(opConfigurationPresent = true)
+        }
+        return opConfiguration
+    }
+
+    suspend fun getFIDOConfiguration(): FidoConfiguration? {
+        val fidoConfiguration: FidoConfiguration? = fidoConfigurationRepository.getFidoConfig()
+        if (fidoConfiguration?.isSuccessful == true) {
+            mainState = mainState.copy(fidoConfigurationPresent = true)
+        }
+        return fidoConfiguration
+    }
+
+    suspend fun getUserInfo(accessToken: String?): UserInfoResponse? {
+        val userInfoResponse: UserInfoResponse? =  userInfoResponseRepository.getUserInfo(accessToken)
+        if (userInfoResponse?.isSuccessful == true) {
+            mainState = mainState.copy(isUserIsAuthenticated = true)
+        }
+        return userInfoResponse
     }
 }

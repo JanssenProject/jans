@@ -58,8 +58,8 @@ fun DashboardScreen(
         verticalArrangement = Arrangement.Center,
     ) {
 
-        if (mainViewModel.clientRegistered && (mainViewModel.attestationOptionResponse || mainViewModel.assertionOptionResponse)) {
-            if (mainViewModel.userIsAuthenticated) {
+        if (mainViewModel.mainState.isClientRegistered && (mainViewModel.mainState.attestationResultSuccess || mainViewModel.mainState.assertionResultSuccess)) {
+            if (mainViewModel.mainState.isUserIsAuthenticated) {
                 TitleText(text = stringResource(id = R.string.dashboard_title_welcome) + " " + mainViewModel.getUsername())
                 if (mainViewModel.getUserInfoResponse().response != null) {
                     val userInfo = JSONObject(mainViewModel.getUserInfoResponse().response.toString())

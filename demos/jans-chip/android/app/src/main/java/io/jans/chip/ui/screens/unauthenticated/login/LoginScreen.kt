@@ -213,7 +213,7 @@ fun LoginScreen(
                                             CoroutineScope(Dispatchers.Main).launch {
                                                 loginState = loginState.copy(isLoading = true)
                                                 val fidoConfiguration =
-                                                    async { mainViewModel.fetchFidoConfiguration() }.await()
+                                                    async { mainViewModel.getFIDOConfiguration() }.await()
                                                 if (fidoConfiguration?.isSuccessful == false) {
                                                     shouldShowDialog.value = true
                                                     dialogContent.value =
@@ -273,7 +273,7 @@ fun LoginScreen(
 
                                                                 val loginResponse: LoginResponse? =
                                                                     async {
-                                                                        mainViewModel.processlogin(
+                                                                        mainViewModel.processLogin(
                                                                             ele.userDisplayName,
                                                                             null,
                                                                             "authenticate",
@@ -325,8 +325,8 @@ fun LoginScreen(
                                                                     return@launch
                                                                 }
                                                             }
-                                                            mainViewModel.assertionOptionResponse =
-                                                                true
+                                                            mainViewModel.mainState = mainViewModel.mainState.copy(assertionOptionSuccess = true)
+                                                            mainViewModel.mainState = mainViewModel.mainState.copy(assertionResultSuccess = true)
                                                             loginViewModel.onUiEvent(
                                                                 loginUiEvent = LoginUiEvent.Submit
                                                             )
