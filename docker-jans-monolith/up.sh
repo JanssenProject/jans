@@ -23,7 +23,7 @@ if [ -z "$INSTALLED_JANSSEN_NAME" ]; then
 fi
 
 if [ -z "$JANSSEN_VERSION" ]; then
-    JANSSEN_VERSION="1.1.3_dev"
+    JANSSEN_VERSION="1.1.4_dev"
 fi
 
 if [ -z "$DATABASE_VOLUME_NAME" ]; then
