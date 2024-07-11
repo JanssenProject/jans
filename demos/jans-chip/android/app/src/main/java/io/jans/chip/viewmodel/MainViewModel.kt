@@ -220,10 +220,6 @@ class MainViewModel : ViewModel() {
         return logoutResponse
     }
 
-    suspend fun getUserInfoWithAccessToken(accessToken: String?): UserInfoResponse? {
-        return userInfoResponseRepository.getUserInfo(accessToken)
-    }
-
     suspend fun getOIDCClient(): OIDCClient? {
         val oidcClient: OIDCClient? = dcrRepository.getOIDCClient()
         if (oidcClient?.isSuccessful == true) {
