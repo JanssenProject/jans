@@ -1,27 +1,26 @@
+use serde_wasm_bindgen::from_value;
 use wasm_bindgen::prelude::*;
 
-pub(crate) mod http;
+pub mod http;
 
 mod authz;
-mod sse;
 mod startup;
-
-static_toml::static_toml! {
-	pub(crate) static CONFIG = include_toml!("config.toml");
-}
+mod lock_master;
+mod crypto;
 
 #[wasm_bindgen(start)]
 pub(crate) async fn start() {
-	// TODO: setup panic hook, on production we should use wasm-bindgen::UnwrapThrowExt
+	// Extract information on unexpected panics
 	console_error_panic_hook::set_once();
+}
 
-	// load policy store
-	let config = startup::open_id_config(CONFIG.openid_config_url).await;
-	let policy_store = startup::get_policy_store(config).await;
+#[wasm_bindgen]
+pub async fn init(config: JsValue) {
+	let config = from_value::<startup::types::CedarlingConfig>(config).unwrap_throw();
 
-	// Persist Policy Store Data
-	startup::persist_policy_store_data(policy_store);
+	// Startup sequence
+	startup::init(&config).await;
 
-	// Enable Dynamic Updates via Server Sent Events
-	sse::install();
+	// Initialize authz module
+	authz::init(&config);
 }

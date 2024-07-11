@@ -16,7 +16,7 @@ in!
 The Configuration Server is a JSON/REST API that writes to the database,
 generates the keys, and does much of the other work you need to make your
 Janssen Project infrastructure solve your digital identity challenges.
-See the [Config API Guide](../config-guide/config-api/README.md) for more information.
+See the [Config API Guide](../config-guide/config-tools/config-api/README.md) for more information.
 
 ## Tools
 

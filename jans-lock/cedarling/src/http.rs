@@ -43,7 +43,7 @@ pub(crate) async fn post<'a, T: serde::Serialize>(url: &str, body: PostBody<'a, 
 	let mut opts = RequestInit::new();
 	let h = Headers::new().unwrap();
 
-	opts.method("POST");
+	opts.method("POST");	
 	opts.mode(RequestMode::NoCors);
 
 	// Set the body
