@@ -16,12 +16,10 @@
 
 package io.jans.lock.service.ws.rs.audit;
 
-
-import org.apache.commons.io.IOUtils;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-
+import io.jans.lock.service.util.AuthUtil;
 import io.jans.lock.service.util.ServerUtil;
+import io.jans.model.net.HttpServiceResponse;
+
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,7 +28,10 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.SecurityContext;
 
-import io.jans.lock.service.util.AuthUtil;
+import org.apache.commons.io.IOUtils;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+
 
 /**
  * Provides interface for audit REST web services
@@ -81,18 +82,23 @@ public class AuditRestWebServiceImpl implements AuditRestWebService {
 		Response.ResponseBuilder builder = Response.ok();
 
 		this.authUtil.getAppConfiguration();
+		String str = null;
+		HttpServiceResponse serviceResponse = this.postData(this.getJSONObject(request));
+		log.error("serviceResponse:{}", serviceResponse);
+		str = authUtil.getResponseEntityString(serviceResponse);
+		log.error("Processing Telemetry response - str:{}", str);
+		return Response.status(Response.Status.CREATED).entity(str).build();
 		
-		this.postData(this.getJSONObject(request));
-		return builder.build();
 	}
 	
-	private void postData(JSONObject json) {
+	private HttpServiceResponse postData(JSONObject json) {
 	    log.error("Processing Telemetry request - json:{}", json);
+	    HttpServiceResponse response = null;
 	    if(json==null) {
-	        return;
+	        return response;
 	    }
 
-	    this.authUtil.postData(json.toString());
+	    return this.authUtil.postData(json.toString());
 	   
 	    
 	}

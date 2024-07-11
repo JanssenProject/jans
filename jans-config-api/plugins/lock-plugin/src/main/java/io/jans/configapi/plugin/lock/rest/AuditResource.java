@@ -7,6 +7,7 @@
 package io.jans.configapi.plugin.lock.rest;
 
 
+import io.jans.configapi.core.model.ApiError;
 import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.core.util.Jackson;
@@ -15,6 +16,7 @@ import io.jans.configapi.plugin.lock.util.Constants;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.model.config.Conf;
+import io.jans.model.JansAttribute;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -57,17 +59,21 @@ public class AuditResource extends BaseResource {
             "Lock - Telemetry" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.LOCK_TELEMETRY_WRITE_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AppConfiguration.class))),
+            @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TelemetryEntry.class), examples = @ExampleObject(name = "Response example", value = "example/lock/audit/telemetry.json"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "BadRequestException"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "500", description = "InternalServerError") })
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))), })
     @POST
     @ProtectedApi(scopes = { Constants.LOCK_TELEMETRY_WRITE_ACCESS }, groupScopes = { })
     @Path(Constants.TELEMETRY)
     public Response getTelemetryData(@Valid TelemetryEntry telemetryEntry) {
        
-        logger.info("Post telemetryEntry():{}", telemetryEntry);
+        logger.error("Save telemetryEntry():{}", telemetryEntry);
         telemetryEntry =  auditService.addTelemetryData(telemetryEntry);
-        return Response.ok(telemetryEntry).build();
+        
+        logger.error("Afer saving telemetryEntry():{}", telemetryEntry);
+        return Response.status(Response.Status.CREATED).entity(telemetryEntry).build();  
         
     }
 

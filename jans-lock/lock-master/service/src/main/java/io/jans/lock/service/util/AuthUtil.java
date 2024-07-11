@@ -16,11 +16,14 @@ import jakarta.ws.rs.client.Invocation.Builder;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.http.entity.ContentType;
+import org.apache.http.HttpEntity;
+
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -100,7 +103,7 @@ public class AuthUtil {
         return accessToken;
     }
     
-    public void postData(String postData) {
+    public HttpServiceResponse postData(String postData) {
         log.error("NEw postData postData:{}", postData);
         
         //String uri = "jans-config-api/lock/audit/telemetry";
@@ -115,7 +118,25 @@ public class AuthUtil {
         HttpServiceResponse response = httpService.executePost(uri, authData, headers, postData, contentType,  authType);
 
         log.error("response:{}", response);
+        return response;
+    }
+    
+    public String getResponseEntityString(HttpServiceResponse serviceResponse) {
+        String jsonString = null;
         
+        if(serviceResponse == null) {
+            return jsonString;
+        }
+        
+        if (serviceResponse != null && serviceResponse.getHttpResponse()!=null && serviceResponse.getHttpResponse().getStatusLine()!=null && serviceResponse.getHttpResponse().getStatusLine().getStatusCode() == Status.OK.getStatusCode()) {
+            HttpEntity entity = serviceResponse.getHttpResponse().getEntity();
+            if (entity==null) {
+                return jsonString;
+            }
+            jsonString = entity.toString();
+
+        }
+        return jsonString;
     }
     
     
@@ -132,6 +153,7 @@ public class AuthUtil {
         return ClientBuilder.newClient().target(url).request();
     }
 
+   
     
     
     
