@@ -121,7 +121,7 @@ class SSA(DialogUtils):
             new_data['expiration'] = int(datetime.now().timestamp()) + 1576800000
         else:
             if self.expire_widget.value:
-                new_data['expiration'] = int(fromisoformat(self.expire_widget.value).timestamp())
+                new_data['expiration'] = int(self.expire_widget.value.timestamp())
 
         new_data['software_roles'] = new_data['software_roles'].splitlines()
 
@@ -200,10 +200,6 @@ class SSA(DialogUtils):
             data = {}
             title = _("Add new SSA")
 
-        
-            
-
-
         expiration_label = _("Expiration")
         never_expire_label = _("Never")
         self.never_expire_cb = Checkbox(never_expire_label)
@@ -214,13 +210,11 @@ class SSA(DialogUtils):
             if self.never_expire_cb.checked:
                 self.expire_widget = Window()
             else:
-                self.expire_widget = DateSelectWidget(value=expiration_iso, parent=self)
+                self.expire_widget = DateSelectWidget(self.app, value=data.get('exp', None), min_date=datetime.now)
 
         self.never_expire_cb._handle_enter = hide_show_expire_widget
 
         hide_show_expire_widget()
-
-        expiration_iso = datetime.fromtimestamp(data['exp']).isoformat() if 'exp' in data else ''
 
         custom_claims_title = _("Custom Claims: ")
         add_custom_claim_title = _("Add Claim")

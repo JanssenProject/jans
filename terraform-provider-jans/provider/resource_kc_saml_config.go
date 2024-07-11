@@ -101,6 +101,16 @@ func resourceKCSamlConfiguration() *schema.Resource {
 				Optional:    true,
 				Description: "IDP URL.",
 			},
+			"ext_idp_token_url": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Ext IDP Token URL.",
+			},
+			"ext_idp_redirect_url": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Ext IDP Redirect URL.",
+			},
 			"idp_metadata_import_url": {
 				Type:        schema.TypeString,
 				Optional:    true,

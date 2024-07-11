@@ -1,4 +1,6 @@
 {
+   "baseEndpoint" : "https://%(hostname)s/%(base_endpoint)s/v1",
+
    "tokenChannels":[
          "jans_token"
       ],
@@ -24,12 +26,11 @@
 
    "policiesJsonUris": [
    ],
-   "policiesJsonUrisAccessToken" : "",
+   "policiesJsonUrisAuthorizationToken" : "",
 
    "policiesZipUris": [
    ],
-   "policiesZipUrisAccessToken" : "",
+   "policiesZipUrisAuthorizationToken" : "",
 
-   "messageConsumerType": "OPA",
-   "policyConsumerType": "OPA"
+   "pdpType": "OPA"
 }

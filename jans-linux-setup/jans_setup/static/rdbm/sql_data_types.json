@@ -1039,19 +1039,5 @@
     "spanner": {
       "type": "STRING(MAX)"
     }
-  },
-  "jansFilePath": {
-    "mysql": {
-      "size": 128,
-      "type": "VARCHAR"
-    },
-    "pgsql": {
-      "size": 128,
-      "type": "VARCHAR"
-    },
-    "spanner": {
-      "size": 128,
-      "type": "STRING"
-    }
   }
 }

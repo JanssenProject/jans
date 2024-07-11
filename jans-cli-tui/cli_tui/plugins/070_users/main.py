@@ -19,6 +19,7 @@ from utils.static import DialogResult
 from utils.multi_lang import _
 from wui_components.jans_cli_dialog import JansGDialog
 from utils.static import DialogResult, cli_style, common_strings
+from utils.background_tasks import get_admin_ui_roles
 
 class Plugin(DialogUtils):
     """This is a general class for plugins 
@@ -42,6 +43,13 @@ class Plugin(DialogUtils):
 
     def process(self) -> None:
         pass
+
+    def init_plugin(self) -> None:
+        """The initialization for this plugin
+        """
+        if self.app.plugin_enabled('admin'):
+            self.app.create_background_task(get_admin_ui_roles())
+
 
     def set_center_frame(self) -> None:
         """center frame content

@@ -5,46 +5,23 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
-
 import io.jans.agama.antlr.AuthnFlowLexer;
 import io.jans.agama.antlr.AuthnFlowParser;
-import io.jans.agama.dsl.error.SyntaxException;
 import io.jans.agama.dsl.error.RecognitionErrorListener;
-
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
-import java.io.StringWriter;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
+import io.jans.agama.dsl.error.SyntaxException;
 import net.sf.saxon.dom.NodeOverNodeInfo;
-import net.sf.saxon.s9api.Processor;
-import net.sf.saxon.s9api.SaxonApiException;
-import net.sf.saxon.s9api.XPathCompiler;
-import net.sf.saxon.s9api.XdmItem;
-import net.sf.saxon.s9api.XdmNode;
+import net.sf.saxon.s9api.*;
 import net.sf.saxon.sapling.SaplingDocument;
-
-import org.antlr.v4.runtime.CharStream;
-import org.antlr.v4.runtime.CharStreams;
-import org.antlr.v4.runtime.CommonTokenStream;
-import org.antlr.v4.runtime.RecognitionException;
-import org.antlr.v4.runtime.Token;
+import org.antlr.v4.runtime.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
@@ -79,6 +56,8 @@ public class Transpiler {
             throw new RuntimeException("Unable to read utility script", e);
         }
 
+        //Using a value higher than 2.3.32 for "incompatible improvements version" gives trouble.
+        //Raising this value requires troubleshooting of this lib (agama-transpiler)
         FM_CONFIG = new Configuration(Configuration.VERSION_2_3_32);
         FM_CONFIG.setClassLoaderForTemplateLoading(CLS_LOADER, "/");
         FM_CONFIG.setDefaultEncoding(UTF_8.toString());

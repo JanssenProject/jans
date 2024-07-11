@@ -123,14 +123,6 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
     }
 
     @Override
-    public TxTokenGrant createTxTokenGrant(User user, Client client) {
-        TxTokenGrant grant = grantInstance.select(TxTokenGrant.class).get();
-        grant.init(user, client);
-
-        return grant;
-    }
-
-    @Override
     public ResourceOwnerPasswordCredentialsGrant createResourceOwnerPasswordCredentialsGrant(User user, Client client) {
         ResourceOwnerPasswordCredentialsGrant grant = grantInstance.select(ResourceOwnerPasswordCredentialsGrant.class).get();
         grant.init(user, client);
@@ -275,6 +267,18 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
         return null;
     }
 
+    @Override
+    public AuthorizationGrant getAuthorizationGrantByReferenceId(String referenceId) {
+        if (StringUtils.isBlank(referenceId)) {
+            return null;
+        }
+        final TokenEntity tokenEntity = grantService.getGrantByReferenceId(referenceId);
+        if (tokenEntity != null) {
+            return asGrant(tokenEntity);
+        }
+        return null;
+    }
+
     public AuthorizationGrant asGrant(TokenEntity tokenEntity) {
         if (tokenEntity != null) {
             final AuthorizationGrantType grantType = AuthorizationGrantType.fromString(tokenEntity.getGrantType());
@@ -326,17 +330,12 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
 
                         result = deviceCodeGrant;
                         break;
+                    case TX_TOKEN:
                     case TOKEN_EXCHANGE:
                         TokenExchangeGrant tokenExchangeGrant = grantInstance.select(TokenExchangeGrant.class).get();
                         tokenExchangeGrant.init(user, AuthorizationGrantType.TOKEN_EXCHANGE, client, tokenEntity.getCreationDate());
 
                         result = tokenExchangeGrant;
-                        break;
-                    case TX_TOKEN:
-                        TxTokenGrant txTokenGrant = grantInstance.select(TxTokenGrant.class).get();
-                        txTokenGrant.init(user, AuthorizationGrantType.TX_TOKEN, client, tokenEntity.getCreationDate());
-
-                        result = txTokenGrant;
                         break;
                     default:
                         return null;
@@ -353,6 +352,8 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
                 result.setX5ts256(tokenEntity.getAttributes().getX5cs256());
                 result.setDpopJkt(tokenEntity.getAttributes().getDpopJkt());
                 result.setTokenEntity(tokenEntity);
+                result.setReferenceId(tokenEntity.getReferenceId());
+                result.setStatusListIndex(tokenEntity.getAttributes().getStatusListIndex());
                 if (StringUtils.isNotBlank(grantId)) {
                     result.setGrantId(grantId);
                 }
@@ -381,34 +382,46 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
                                 final AuthorizationCode code = new AuthorizationCode(tokenEntity.getTokenCode(), tokenEntity.getCreationDate(), tokenEntity.getExpirationDate());
                                 final AuthorizationCodeGrant g = (AuthorizationCodeGrant) result;
                                 code.setX5ts256(g.getX5ts256());
+                                code.setReferenceId(tokenEntity.getReferenceId());
+                                code.setStatusListIndex(tokenEntity.getAttributes().getStatusListIndex());
                                 g.setAuthorizationCode(code);
                             }
                             break;
                         case REFRESH_TOKEN:
                             final RefreshToken refreshToken = new RefreshToken(tokenEntity.getTokenCode(), tokenEntity.getCreationDate(), tokenEntity.getExpirationDate());
                             refreshToken.setX5ts256(result.getX5ts256());
+                            refreshToken.setReferenceId(tokenEntity.getReferenceId());
+                            refreshToken.setStatusListIndex(tokenEntity.getAttributes().getStatusListIndex());
                             result.setRefreshTokens(Collections.singletonList(refreshToken));
                             break;
                         case ACCESS_TOKEN:
                             final AccessToken accessToken = new AccessToken(tokenEntity.getTokenCode(), tokenEntity.getCreationDate(), tokenEntity.getExpirationDate());
                             accessToken.setDpop(tokenEntity.getDpop());
                             accessToken.setX5ts256(result.getX5ts256());
+                            accessToken.setReferenceId(tokenEntity.getReferenceId());
+                            accessToken.setStatusListIndex(tokenEntity.getAttributes().getStatusListIndex());
                             result.setAccessTokens(Collections.singletonList(accessToken));
                             break;
                         case TX_TOKEN:
                             final TxToken txToken = new TxToken(tokenEntity.getTokenCode(), tokenEntity.getCreationDate(), tokenEntity.getExpirationDate());
                             txToken.setDpop(tokenEntity.getDpop());
                             txToken.setX5ts256(result.getX5ts256());
+                            txToken.setReferenceId(tokenEntity.getReferenceId());
+                            txToken.setStatusListIndex(tokenEntity.getAttributes().getStatusListIndex());
                             result.setTxTokens(Collections.singletonList(txToken));
                             break;
                         case ID_TOKEN:
                             final IdToken idToken = new IdToken(tokenEntity.getTokenCode(), tokenEntity.getCreationDate(), tokenEntity.getExpirationDate());
                             idToken.setX5ts256(result.getX5ts256());
+                            idToken.setReferenceId(tokenEntity.getReferenceId());
+                            idToken.setStatusListIndex(tokenEntity.getAttributes().getStatusListIndex());
                             result.setIdToken(idToken);
                             break;
                         case LONG_LIVED_ACCESS_TOKEN:
                             final AccessToken longLivedAccessToken = new AccessToken(tokenEntity.getTokenCode(), tokenEntity.getCreationDate(), tokenEntity.getExpirationDate());
                             longLivedAccessToken.setX5ts256(result.getX5ts256());
+                            longLivedAccessToken.setReferenceId(tokenEntity.getReferenceId());
+                            longLivedAccessToken.setStatusListIndex(tokenEntity.getAttributes().getStatusListIndex());
                             result.setLongLivedAccessToken(longLivedAccessToken);
                             break;
                     }

@@ -220,10 +220,10 @@ We often need to reference release numbers in the documentation. For example, [U
 In this guide, the following command is documented:
 
 ```
-wget https://github.com/JanssenProject/jans/releases/download/v1.0.5/jans_1.0.5.ubuntu20.04_amd64.deb -P /tmp
+wget https://github.com/JanssenProject/jans/releases/download/v1.1.4/jans_1.1.4.ubuntu20.04_amd64.deb -P /tmp
 ```
 
-Above command contains references to the release number at two places. `v1.0.5` in the URL and `1.0.5` as part of the file
+Above command contains references to the release number at two places. `v1.1.4` in the URL and `1.1.4` as part of the file
 name. There are many such places throughout the documentation when release numbers need to be mentioned. Whenever we
 make a new release, these numbers need to change as they point to the latest release number. This becomes a manual task.
 

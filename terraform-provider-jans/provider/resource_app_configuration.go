@@ -970,6 +970,16 @@ func resourceAppConfiguration() *schema.Resource {
 								service. Example: http://ox.gluu.org/doku.php?id=jans:tos`,
 				ValidateDiagFunc: validateURL,
 			},
+			"clean_up_inactive_client_after_hours_of_inactivity": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: `The time interval in hours after which the client is considered inactive.`,
+			},
+			"client_periodic_update_timer_interval": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: `The time interval in seconds for the client periodic update timer.`,
+			},
 			"authorization_code_lifetime": {
 				Type:        schema.TypeInt,
 				Optional:    true,
@@ -1187,6 +1197,14 @@ func resourceAppConfiguration() *schema.Resource {
 				Optional:    true,
 				Description: "Enable/Disable usage of highest level script in case ACR script does not exist.",
 			},
+			"acr_mappings": {
+				Type:        schema.TypeMap,
+				Optional:    true,
+				Description: `A map of ACR mappings. Example: { "acr1": "script1", "acr2": "script2" }`,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
 			"authentication_filters_enabled": {
 				Type:        schema.TypeBool,
 				Optional:    true,
@@ -1344,7 +1362,7 @@ func resourceAppConfiguration() *schema.Resource {
 				Optional:    true,
 				Description: "Boolean value to specify if client can update Grant Type values.",
 			},
-			"dynamic_grant_type_default": {
+			"grant_types_supported_by_dynamic_registration": {
 				Type:     schema.TypeList,
 				Optional: true,
 				Description: `List of the OAuth 2.0 Grant Type values that it's possible to set via client 
@@ -1488,6 +1506,11 @@ func resourceAppConfiguration() *schema.Resource {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Description: "Accept access token to call end_session endpoint.",
+			},
+			"disable_prompt_create": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Boolean value specifying whether to disable prompt create.",
 			},
 			"cookie_domain": {
 				Type:        schema.TypeString,
@@ -2157,16 +2180,20 @@ func resourceAppConfiguration() *schema.Resource {
 							Type:     schema.TypeString,
 							Optional: true,
 						},
-						"serialize_rules": {
-							Type:     schema.TypeMap,
-							Optional: true,
-							Elem: &schema.Schema{
-								Type: schema.TypeList,
+						// TODO: The serialize rules currently don't work because terraform
+						// doesn't support nested lists in maps.
+						/*
+							"serialize_rules": {
+								Type:     schema.TypeMap,
+								Optional: true,
 								Elem: &schema.Schema{
-									Type: schema.TypeString,
+									Type: schema.TypeList,
+									Elem: &schema.Schema{
+										Type: schema.TypeString,
+									},
 								},
 							},
-						},
+						*/
 						"default_response_headers": {
 							Type:     schema.TypeMap,
 							Optional: true,
@@ -2264,7 +2291,6 @@ func resourceAppConfiguration() *schema.Resource {
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 	}
-
 }
 
 func resourceAppConfigurationRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {

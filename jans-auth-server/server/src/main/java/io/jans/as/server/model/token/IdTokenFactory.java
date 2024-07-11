@@ -32,6 +32,7 @@ import io.jans.as.server.service.external.ExternalDynamicScopeService;
 import io.jans.as.server.service.external.ExternalUpdateTokenService;
 import io.jans.as.server.service.external.context.DynamicScopeExternalContext;
 import io.jans.as.server.service.external.context.ExternalUpdateTokenContext;
+import io.jans.as.server.service.token.StatusListService;
 import io.jans.model.JansAttribute;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.custom.script.type.auth.PersonAuthenticationType;
@@ -98,6 +99,9 @@ public class IdTokenFactory {
     @Inject
     private DateFormatterService dateFormatterService;
 
+    @Inject
+    private StatusListService statusListService;
+
     private void setAmrClaim(JsonWebResponse jwt, String acrValues) {
         List<String> amrList = Lists.newArrayList();
 
@@ -148,7 +152,7 @@ public class IdTokenFactory {
 
         jwr.getClaims().setExpirationTime(expiration);
         jwr.getClaims().setIssuedAt(issuedAt);
-        jwr.setClaim("random", UUID.randomUUID().toString()); // provided uniqueness of id_token for same RP requests, oxauth: 1493
+        jwr.setClaim("jti", executionContext.getTokenReferenceId()); // provided uniqueness of id_token for same RP requests, oxauth: 1493
 
         if (executionContext.getPreProcessing() != null) {
             executionContext.getPreProcessing().apply(jwr);
@@ -157,6 +161,8 @@ public class IdTokenFactory {
         if (session != null) {
             jwr.setClaim("sid", session.getOutsideSid());
         }
+
+        statusListService.addStatusClaimWithIndex(jwr, executionContext);
 
         addTokenExchangeClaims(jwr, executionContext, session);
 

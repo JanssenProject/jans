@@ -5,22 +5,18 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.Collection;
 import java.util.List;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AuditLogConf {
 
-    /**
-     * Flag to enable and disable audit log
-     */
+    @Schema(description = "Flag to enable and disable audit log.")
     private boolean enabled;
 
-    /**
-     * HTTP methods for which audit is disabled
-     */
+    @Schema(description = "HTTP methods for which audit is disabled.")
     private Collection<String> ignoreHttpMethod;
 
-    /**
-     * List of header HTTP attributes whose value is to be logged
-     */
+    @Schema(description = "List of header HTTP attributes whose value is to be logged.")
     private List<String> headerAttributes;
 
     public boolean isEnabled() {

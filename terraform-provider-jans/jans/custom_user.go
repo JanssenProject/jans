@@ -5,21 +5,34 @@ import (
 	"fmt"
 )
 
+type UserAuthenticator struct {
+	Id     string         `schema:"id" json:"id,omitempty"`
+	Type   string         `schema:"type" json:"type,omitempty"`
+	Custom map[string]any `schema:"custom" json:"custom,omitempty"`
+}
+
+type UserAuthenticatorList struct {
+	Authenticators []UserAuthenticator `schema:"authenticators" json:"authenticators,omitempty"`
+}
+
 type CustomUser struct {
-	Dn                  string            `schema:"dn" json:"dn,omitempty"`
-	BaseDn              string            `schema:"base_dn" json:"baseDn,omitempty"`
-	JansStatus          string            `schema:"jans_status" json:"jansStatus,omitempty"`
-	UserID              string            `schema:"user_id" json:"userId,omitempty"`
-	CreatedAt           string            `schema:"created_at" json:"createdAt,omitempty"`
-	UpdatedAt           string            `schema:"updated_at" json:"updatedAt,omitempty"`
-	OxAuthPersistentJwt []string          `schema:"ox_auth_persistent_jwt" json:"oxAuthPersistentJwt,omitempty"`
-	CustomAttributes    []CustomAttribute `schema:"custom_attributes" json:"customAttributes,omitempty"`
-	CustomObjectClasses []string          `schema:"custom_object_classes" json:"customObjectClasses,omitempty"`
-	Mail                string            `schema:"mail" json:"mail,omitempty"`
-	DisplayName         string            `schema:"display_name" json:"displayName,omitempty"`
-	GivenName           string            `schema:"given_name" json:"givenName,omitempty"`
-	UserPassword        string            `schema:"user_password" json:"userPassword,omitempty"`
-	Inum                string            `schema:"inum" json:"inum,omitempty"`
+	Dn                  string                `schema:"dn" json:"dn,omitempty"`
+	BaseDn              string                `schema:"base_dn" json:"baseDn,omitempty"`
+	JansStatus          string                `schema:"jans_status" json:"jansStatus,omitempty"`
+	UserID              string                `schema:"user_id" json:"userId,omitempty"`
+	CreatedAt           string                `schema:"created_at" json:"createdAt,omitempty"`
+	UpdatedAt           string                `schema:"updated_at" json:"updatedAt,omitempty"`
+	OxAuthPersistentJwt []string              `schema:"ox_auth_persistent_jwt" json:"oxAuthPersistentJwt,omitempty"`
+	ExternalUid         []string              `schema:"external_uid" json:"externalUid,omitempty"`
+	Authenticator       UserAuthenticatorList `schema:"authenticator" json:"authenticator,omitempty"`
+	Status              string                `schema:"status" json:"status,omitempty"`
+	CustomAttributes    []CustomAttribute     `schema:"custom_attributes" json:"customAttributes,omitempty"`
+	CustomObjectClasses []string              `schema:"custom_object_classes" json:"customObjectClasses,omitempty"`
+	Mail                string                `schema:"mail" json:"mail,omitempty"`
+	DisplayName         string                `schema:"display_name" json:"displayName,omitempty"`
+	GivenName           string                `schema:"given_name" json:"givenName,omitempty"`
+	UserPassword        string                `schema:"user_password" json:"userPassword,omitempty"`
+	Inum                string                `schema:"inum" json:"inum,omitempty"`
 }
 
 // GetCustomUsers returns all currently configured custom users.

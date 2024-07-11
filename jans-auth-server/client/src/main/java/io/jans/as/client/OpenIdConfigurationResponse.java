@@ -28,9 +28,11 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
     private String issuer;
     private String authorizationEndpoint;
     private String authorizationChallengeEndpoint;
+    private String statusListEndpoint;
     private String tokenEndpoint;
     private String revocationEndpoint;
     private String sessionRevocationEndpoint;
+    private String globalTokenRevocationEndpoint;
     private String userInfoEndpoint;
     private String clientInfoEndpoint;
     private String checkSessionIFrame;
@@ -239,6 +241,24 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
     }
 
     /**
+     * Gets status list
+     *
+     * @return status list
+     */
+    public String getStatusListEndpoint() {
+        return statusListEndpoint;
+    }
+
+    /**
+     * Sets status list
+     *
+     * @param statusListEndpoint status list
+     */
+    public void setStatusListEndpoint(String statusListEndpoint) {
+        this.statusListEndpoint = statusListEndpoint;
+    }
+
+    /**
      * Returns the URL of the Token endpoint.
      *
      * @return The URL of the Token endpoint.
@@ -262,6 +282,24 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
 
     public void setSessionRevocationEndpoint(String sessionRevocationEndpoint) {
         this.sessionRevocationEndpoint = sessionRevocationEndpoint;
+    }
+
+    /**
+     * Gets global token revocation endpoint
+     *
+     * @return global token revocation endpoint
+     */
+    public String getGlobalTokenRevocationEndpoint() {
+        return globalTokenRevocationEndpoint;
+    }
+
+    /**
+     * Sets global token revocation endpoint
+     *
+     * @param globalTokenRevocationEndpoint global token revocation endpoint
+     */
+    public void setGlobalTokenRevocationEndpoint(String globalTokenRevocationEndpoint) {
+        this.globalTokenRevocationEndpoint = globalTokenRevocationEndpoint;
     }
 
     /**
@@ -1281,6 +1319,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
                 "issuer='" + issuer + '\'' +
                 ", authorizationEndpoint='" + authorizationEndpoint + '\'' +
                 ", authorizationChallengeEndpoint='" + authorizationChallengeEndpoint + '\'' +
+                ", statusListEndpoint='" + statusListEndpoint + '\'' +
                 ", tokenEndpoint='" + tokenEndpoint + '\'' +
                 ", revocationEndpoint='" + revocationEndpoint + '\'' +
                 ", userInfoEndpoint='" + userInfoEndpoint + '\'' +

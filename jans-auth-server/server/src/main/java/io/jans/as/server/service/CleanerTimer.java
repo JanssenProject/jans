@@ -10,6 +10,7 @@ import com.google.common.base.Stopwatch;
 import com.google.common.collect.Maps;
 import io.jans.as.common.model.common.ArchivedJwk;
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.common.model.session.DeviceSession;
 import io.jans.as.common.model.session.SessionId;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
@@ -36,7 +37,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Event;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
-import jakarta.inject.Named;
 import org.apache.tika.utils.StringUtils;
 import org.slf4j.Logger;
 
@@ -51,7 +51,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 @ApplicationScoped
 @DependsOn("appInitializer")
-@Named
 public class CleanerTimer {
 
     public static final int BATCH_SIZE = 1000;
@@ -218,6 +217,7 @@ public class CleanerTimer {
         cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getAuthorizations(), ClientAuthorization.class);
         cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getScopes(), Scope.class);
         cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getSessions(), SessionId.class);
+        cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getSessions(), DeviceSession.class);
         cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getPar(), Par.class);
         cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getArchivedJwks(), ArchivedJwk.class);
 

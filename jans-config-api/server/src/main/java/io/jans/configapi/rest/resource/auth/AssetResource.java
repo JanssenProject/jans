@@ -22,6 +22,7 @@ import io.jans.service.document.store.service.Document;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -38,6 +39,7 @@ import jakarta.ws.rs.core.Response;
 import static io.jans.as.model.util.Util.escapeLog;
 
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.*;
 
@@ -60,6 +62,9 @@ public class AssetResource extends ConfigBaseResource {
     private static final String RESOURCE_NULL = "RESOURCE_NULL";
     private static final String RESOURCE_NULL_MSG = "%s is null";
 
+    private class DocumentPagedResult extends PagedResult<Document> {
+    };
+
     @Inject
     Logger log;
 
@@ -70,7 +75,7 @@ public class AssetResource extends ConfigBaseResource {
             "Jans Assets" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.JANS_ASSET_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PagedResult.class), examples = @ExampleObject(name = "Response example", value = "example/assets/get-all-asset.json"))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = DocumentPagedResult.class), examples = @ExampleObject(name = "Response example", value = "example/assets/get-all-asset.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))) })
     @GET
@@ -128,7 +133,7 @@ public class AssetResource extends ConfigBaseResource {
             "Jans Assets" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.JANS_ASSET_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PagedResult.class), examples = @ExampleObject(name = "Response example", value = "example/assets/get-asset-by-name.json"))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = DocumentPagedResult.class), examples = @ExampleObject(name = "Response example", value = "example/assets/get-asset-by-name.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
             @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))) })
@@ -143,13 +148,62 @@ public class AssetResource extends ConfigBaseResource {
             logger.info("Search Asset with name:{}", escapeLog(name));
         }
 
-        List<Document> assets = assetService.getAssetByName(name);
-        if (assets == null) {
+        SearchRequest searchReq = createSearchRequest(assetService.getDnForAsset(null), name, ApiConstants.INUM,
+                ApiConstants.ASCENDING, Integer.parseInt(ApiConstants.DEFAULT_LIST_START_INDEX),
+                Integer.parseInt(ApiConstants.DEFAULT_LIST_SIZE), null, null, this.getMaxCount(), null,
+                JansAttribute.class);
+
+        DocumentPagedResult documentPagedResult = searchByName(searchReq);
+
+        if (documentPagedResult == null || documentPagedResult.getEntriesCount() <= 0) {
             log.error("No asset found with the name:{}", name);
             throwNotFoundException(NOT_FOUND_ERROR, String.format(ASSET_NOT_FOUND, name));
         }
-        logger.info("Asset fetched based on name:{} are:{}", name, assets);
-        return Response.ok(assets).build();
+        logger.info("Asset fetched based on name are:{}", documentPagedResult);
+        return Response.ok(documentPagedResult).build();
+    }
+
+    @Operation(summary = "Gets asset services", description = "Gets asset services", operationId = "get-asset-services", tags = {
+            "Jans Assets" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    ApiAccessConstants.JANS_ASSET_READ_ACCESS }))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = String.class, type = "enum")))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))) })
+    @GET
+    @ProtectedApi(scopes = { ApiAccessConstants.JANS_ASSET_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.JANS_ASSET_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @Path(ApiConstants.SERVICES)
+    public Response getJansServices() {
+
+        List<String> services = assetService.getValidModuleName();
+        if(services == null) {
+            services = Collections.emptyList();
+        }
+
+        logger.info("Asset fetched based on services:{}", services);
+        return Response.ok(services).build();
+    }
+
+    @Operation(summary = "Get valid asset types", description = "Get valid asset types", operationId = "get-asset-types", tags = {
+            "Jans Assets" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    ApiAccessConstants.JANS_ASSET_READ_ACCESS }))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = String.class, type = "enum")))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))) })
+    @GET
+    @ProtectedApi(scopes = { ApiAccessConstants.JANS_ASSET_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.JANS_ASSET_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @Path(ApiConstants.ASSET_TYPE)
+    public Response getValidAssetTypes() {
+
+        List<String> validTypes = assetService.getValidFileExtension();
+
+        logger.info("validTypes:{}", validTypes);
+        return Response.ok(validTypes).build();
     }
 
     @Operation(summary = "Upload new asset", description = "Upload new asset", operationId = "post-new-asset", tags = {
@@ -213,7 +267,7 @@ public class AssetResource extends ConfigBaseResource {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Modified Asset", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, schema = @Schema(implementation = Document.class), examples = @ExampleObject(name = "Response json example", value = "example/assets/put-asset.json"))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "BadRequestException"))),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized" , content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "Unauthorized"))),
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
             @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))) })
     @Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -296,10 +350,10 @@ public class AssetResource extends ConfigBaseResource {
 
     }
 
-    private PagedResult<Document> doSearch(SearchRequest searchReq, String status) throws Exception {
+    private DocumentPagedResult doSearch(SearchRequest searchReq, String status) throws Exception {
 
         logger.debug("Asset search params - searchReq:{} , status:{} ", searchReq, status);
-
+        DocumentPagedResult documentPagedResult = null;
         PagedResult<Document> pagedResult = assetService.searchAsset(searchReq, status);
 
         logger.debug("PagedResult  - pagedResult:{}", pagedResult);
@@ -307,10 +361,42 @@ public class AssetResource extends ConfigBaseResource {
             logger.debug(
                     "Asset fetched  - pagedResult.getTotalEntriesCount():{}, pagedResult.getEntriesCount():{}, pagedResult.getEntries():{}",
                     pagedResult.getTotalEntriesCount(), pagedResult.getEntriesCount(), pagedResult.getEntries());
+            documentPagedResult = getDocumentPagedResult(pagedResult);
         }
 
-        logger.debug("Asset pagedResult:{} ", pagedResult);
-        return pagedResult;
+        logger.debug("Asset documentPagedResult:{} ", documentPagedResult);
+        return documentPagedResult;
+    }
+
+    private DocumentPagedResult searchByName(SearchRequest searchReq) throws Exception {
+
+        logger.debug("Search asset by name params - searchReq:{} ", searchReq);
+        DocumentPagedResult documentPagedResult = null;
+        PagedResult<Document> pagedResult = assetService.searchAssetByName(searchReq);
+
+        logger.debug("PagedResult  - pagedResult:{}", pagedResult);
+        if (pagedResult != null) {
+            logger.debug(
+                    "Asset fetched  - pagedResult.getTotalEntriesCount():{}, pagedResult.getEntriesCount():{}, pagedResult.getEntries():{}",
+                    pagedResult.getTotalEntriesCount(), pagedResult.getEntriesCount(), pagedResult.getEntries());
+            documentPagedResult = getDocumentPagedResult(pagedResult);
+        }
+
+        logger.debug("Asset documentPagedResult:{} ", documentPagedResult);
+        return documentPagedResult;
+    }
+
+    private DocumentPagedResult getDocumentPagedResult(PagedResult<Document> pagedResult) {
+        DocumentPagedResult documentPagedResult = null;
+        if (pagedResult != null) {
+            List<Document> identityProviderList = pagedResult.getEntries();
+            documentPagedResult = new DocumentPagedResult();
+            documentPagedResult.setStart(pagedResult.getStart());
+            documentPagedResult.setEntriesCount(pagedResult.getEntriesCount());
+            documentPagedResult.setTotalEntriesCount(pagedResult.getTotalEntriesCount());
+            documentPagedResult.setEntries(identityProviderList);
+        }
+        return documentPagedResult;
     }
 
 }

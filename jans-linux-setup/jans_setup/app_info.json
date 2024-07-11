@@ -1,5 +1,5 @@
 {
-  "JANS_APP_VERSION": "1.1.2",
+  "JANS_APP_VERSION": "1.1.4",
   "JANS_BUILD": "-SNAPSHOT",
   "JETTY_VERSION": "11.0.15",
   "AMAZON_CORRETTO_VERSION": "17",
@@ -17,6 +17,6 @@
   "CRYPTOGRAPHY": "https://files.pythonhosted.org/packages/20/8b/66600f5851ec7893ace9b74445d7eaf3499571b347e339d18c76c876b0f9/cryptography-37.0.4-cp36-abi3-manylinux_2_17_x86_64.manylinux2014_x86_64.whl",
   "TWILIO_MAVEN": "https://repo1.maven.org/maven2/com/twilio/sdk/twilio/",
   "TWILIO_VERSION": "7.17.0",
-  "KC_VERSION": "24.0.3",
+  "KC_VERSION": "25.0.1",
   "OPA_VERSION": "v0.60.0"
 }
