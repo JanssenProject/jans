@@ -7,7 +7,7 @@ tags:
 
 # User Resources
 
-> Prerequisite: Know how to use the Janssen CLI in [command-line mode](config-tools/jans-cli/README.md)
+> Prerequisite: Know how to use the Janssen CLI in [command-line mode](../config-tools/jans-cli/README.md)
 
 The first thing is to do, Let's get some information for the following task:
 
@@ -373,7 +373,7 @@ let's modify this schema:
 nano /tmp/create-user.json
 ```
 
-![](../../assets/image-cl-scim-create-user-03042021.png)
+![](../../../assets/image-cl-scim-create-user-03042021.png)
 
 Finally use below command line, to create an user resources.
 
