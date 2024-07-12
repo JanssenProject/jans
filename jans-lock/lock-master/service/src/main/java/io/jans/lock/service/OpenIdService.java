@@ -6,7 +6,6 @@
 
 package io.jans.lock.service;
 
-import java.io.IOException;
 import java.io.Serializable;
 
 import org.slf4j.Logger;
@@ -14,9 +13,9 @@ import org.slf4j.Logger;
 import io.jans.as.client.OpenIdConfigurationClient;
 import io.jans.as.client.OpenIdConfigurationResponse;
 import io.jans.lock.model.config.AppConfiguration;
-import io.jans.service.net.BaseHttpService;
 import io.jans.util.StringHelper;
-import io.jans.util.exception.ConfigurationException;
+import io.jans.util.exception.InvalidConfigurationException;
+import io.jans.util.exception.MissingResourceException;
 import io.jans.util.init.Initializable;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -49,7 +48,7 @@ public class OpenIdService extends Initializable implements Serializable {
 	private void loadOpenIdConfiguration() {
 		String openIdIssuer = appConfiguration.getOpenIdIssuer();
 		if (StringHelper.isEmpty(openIdIssuer)) {
-			throw new ConfigurationException("OpenIdIssuer Url is invalid");
+			throw new InvalidConfigurationException("OpenIdIssuer Url is invalid");
 		}
 
 		String openIdIssuerEndpoint = openIdIssuer + "/.well-known/openid-configuration";
@@ -58,7 +57,7 @@ public class OpenIdService extends Initializable implements Serializable {
 		openIdConfiguration = client.execOpenIdConfiguration();
 
 		if (openIdConfiguration == null) {
-			throw new ConfigurationException("Failed to load OpenID configuration!");
+			throw new MissingResourceException("Failed to load OpenID configuration!");
 		}
 
 
@@ -71,15 +70,5 @@ public class OpenIdService extends Initializable implements Serializable {
 
         return openIdConfiguration;
     }
-    
-    public static void main(String[] args) {
-    	String openIdIssuer = "https://localhost:8090";
-
-        String openIdIssuerEndpoint = openIdIssuer + "/.well-known/openid-configuration";
-
-        OpenIdConfigurationClient client = new OpenIdConfigurationClient(openIdIssuerEndpoint);
-        OpenIdConfigurationResponse openIdConfiguration = client.execOpenIdConfiguration();
-        System.out.println(openIdConfiguration);
-	}
 
 }

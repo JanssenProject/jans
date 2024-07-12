@@ -20,8 +20,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.slf4j.Logger;
 
+import io.jans.as.client.StatusListResponse;
 import io.jans.lock.service.TokenStsatusListService;
-import io.jans.lock.service.event.PolicyDownloadEvent;
 import io.jans.lock.service.event.TokenStatusListReloadEvent;
 import io.jans.service.cdi.async.Asynchronous;
 import io.jans.service.cdi.event.Scheduled;
@@ -43,6 +43,8 @@ import jakarta.ws.rs.sse.SseBroadcaster;
 public class LockSseBroadcaster {
 
 	private static final int DEFAULT_INTERVAL = 15;
+	
+	private static final String STATUS_LIST_MESSAGE = "STATUS_LIST";
 
 	@Inject
 	private Logger log;
@@ -94,9 +96,12 @@ public class LockSseBroadcaster {
 	}
 
 	private void reloadTokenStatusList() {
-		tokenStsatusListService.loadTokenStatusList();
-		// test messages
-		broadcast("token_list", "{\"sample_data\" : \"data\"}");
+		StatusListResponse statusListResponse = tokenStsatusListService.loadTokenStatusList();
+		if (statusListResponse == null) {
+			return;
+		}
+
+		broadcast(STATUS_LIST_MESSAGE, statusListResponse.getEntity());
 	}
 
 	public SseBroadcaster getSseBroadcaster() {
