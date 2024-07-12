@@ -2253,29 +2253,90 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#using-command-line" class="md-nav__link">
+    Using Command Line
+  </a>
+  
+    <nav class="md-nav" aria-label="Using Command Line">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#findview-oauth-scopes" class="md-nav__link">
     Find/View OAuth Scopes
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#create-an-oauth-scope" class="md-nav__link">
     Create an OAuth Scope
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#update-existing-oauth-scopes" class="md-nav__link">
     Update Existing OAuth Scopes
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#patch-oauth-scopes-by-inum" class="md-nav__link">
     Patch OAuth Scopes by inum
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#find-oauth-scopes-by-inum" class="md-nav__link">
+    Find OAuth Scopes by inum
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#delete-oauth-scopes-by-inum" class="md-nav__link">
+    Delete OAuth Scopes by inum
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-text-based-ui" class="md-nav__link">
+    Using Text-based UI
+  </a>
+  
+    <nav class="md-nav" aria-label="Using Text-based UI">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#scope-screen" class="md-nav__link">
+    Scope Screen
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#add-scope-screen" class="md-nav__link">
+    Add Scope screen
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-configuration-rest-api" class="md-nav__link">
+    Using Configuration REST API
   </a>
   
 </li>
@@ -8584,29 +8645,90 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#using-command-line" class="md-nav__link">
+    Using Command Line
+  </a>
+  
+    <nav class="md-nav" aria-label="Using Command Line">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#findview-oauth-scopes" class="md-nav__link">
     Find/View OAuth Scopes
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#create-an-oauth-scope" class="md-nav__link">
     Create an OAuth Scope
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#update-existing-oauth-scopes" class="md-nav__link">
     Update Existing OAuth Scopes
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#patch-oauth-scopes-by-inum" class="md-nav__link">
     Patch OAuth Scopes by inum
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#find-oauth-scopes-by-inum" class="md-nav__link">
+    Find OAuth Scopes by inum
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#delete-oauth-scopes-by-inum" class="md-nav__link">
+    Delete OAuth Scopes by inum
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-text-based-ui" class="md-nav__link">
+    Using Text-based UI
+  </a>
+  
+    <nav class="md-nav" aria-label="Using Text-based UI">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#scope-screen" class="md-nav__link">
+    Scope Screen
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#add-scope-screen" class="md-nav__link">
+    Add Scope screen
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-configuration-rest-api" class="md-nav__link">
+    Using Configuration REST API
   </a>
   
 </li>
@@ -8654,327 +8776,465 @@
 
 
 <h1 id="oauth-scopes">OAuth Scopes<a class="headerlink" href="#oauth-scopes" title="Permanent link">#</a></h1>
-<blockquote>
-<p>Prerequisite: Know how to use the Janssen CLI in <a href="../../config-tools/jans-cli/">command-line mode</a></p>
-</blockquote>
-<p>Let's get information for a task <strong>OAuthScopes</strong></p>
-<div class="highlight"><pre><span></span><code> /opt/jans/jans-cli/config-cli.py --info OAuthScopes
-
-Operation ID: get-oauth-scopes
-  Description: Gets list of Scopes. Optionally type to filter the scope, max-size of the result and pattern can be provided.
+<p>The Janssen Server provides multiple configuration tools to perform these
+tasks.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Use Command-line</label><label for="__tabbed_1_2">Use Text-based UI</label><label for="__tabbed_1_3">Use REST API</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>Use the command line to perform actions from the terminal. Learn how to 
+use Jans CLI <a href="./config-tools/jans-cli/README.md">here</a> or jump straight to 
+the <a href="#using-command-line">Using Command Line</a></p>
+</div>
+<div class="tabbed-block">
+<p>Use a fully functional text-based user interface from the terminal. 
+Learn how to use Jans Text-based UI (TUI) 
+<a href="./config-tools/jans-tui/README.md">here</a> or jump straight to the
+<a href="#using-text-based-ui">configuration steps</a></p>
+</div>
+<div class="tabbed-block">
+<p>Use REST API for programmatic access or invoke via tools like CURL or 
+Postman. Learn how to use Janssen Server Config API 
+<a href="./config-tools/config-api/README.md">here</a> or Jump straight to the
+<a href="#using-configuration-rest-api">Using Configuration REST API</a></p>
+</div>
+</div>
+</div>
+<h2 id="using-command-line">Using Command Line<a class="headerlink" href="#using-command-line" title="Permanent link">#</a></h2>
+<p>In the Janssen Server, you can deploy and customize the OAuth scopes using the
+command line. To get the details of Janssen command line operations relevant to
+OAuth Scope, you can check the operations under the <code>OauthScopes</code> task using the
+command below.</p>
+<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --info OauthScopes
+</code></pre></div>
+<div class="highlight"><span class="filename">Sample Output</span><pre><span></span><code>Operation ID: get-oauth-scopes
+  Description: Gets list of Scopes
   Parameters:
-  type: Scope type. [string]
-  limit: Search size - max size of the results to return. [integer]
-  pattern: Search pattern. [string]
-Operation ID: post-oauth-scopes
-  Description: Create Scope.
-  Schema: /components/schemas/Scope
+  type: Scope type [string]
+  limit: Search size - max size of the results to return [integer]
+  pattern: Search pattern [string]
+  startIndex: The 1-based index of the first query result [integer]
+  sortBy: Attribute whose value will be used to order the returned response [string]
+  sortOrder: Order in which the sortBy param is applied. Allowed values are &quot;ascending&quot; and &quot;descending&quot; [string]
+  withAssociatedClients: Boolean fag to indicate if clients associated with the scope are to be returned [boolean]
+  fieldValuePair: Field and value pair for seraching [string]
 Operation ID: put-oauth-scopes
-  Description: Updates existing Scope.
-  Schema: /components/schemas/Scope
+  Description: Update Scope
+  Schema: Scope
+Operation ID: post-oauth-scopes
+  Description: Create Scope
+  Schema: Scope
 Operation ID: get-oauth-scopes-by-inum
   Description: Get Scope by Inum
-  url-suffix: inum
+  Parameters:
+  inum: Scope identifier [string]
+  withAssociatedClients: No description is provided for this parameter [boolean]
 Operation ID: delete-oauth-scopes-by-inum
-  Description: Delete Scope.
-  url-suffix: inum
+  Description: Delete Scope
+  Parameters:
+  inum: Scope identifier [string]
 Operation ID: patch-oauth-scopes-by-id
-  Description: Update modified attributes of existing Scope by Inum.
-  url-suffix: inum
-  Schema: Array of /components/schemas/PatchRequest
+  Description: Patch Scope
+  Parameters:
+  inum: Scope identifier [string]
+  Schema: Array of JsonPatch
+Operation ID: get-scope-by-creator
+  Description: Get Scope by creatorId
+  Parameters:
+  creatorId: Id of the scope creator. If creator is client then client_id if user then user_id [string]
+Operation ID: get-scope-by-type
+  Description: Get Scope by type
+  Parameters:
+  type: Type of the scope [string]
 
-To get sample schema type /opt/jans/jans-cli/config-cli.py --schema &lt;schma&gt;, for example /opt/jans/jans-cli/config-cli.py --schema /components/schemas/PatchRequest
+To get sample schema type /opt/jans/jans-cli/config-cli.py --schema-sample &lt;schema&gt;, for example /opt/jans/jans-cli/config-cli.py --schema-sample JsonPatch
+</code></pre></div></p>
+<h3 id="findview-oauth-scopes">Find/View OAuth Scopes<a class="headerlink" href="#findview-oauth-scopes" title="Permanent link">#</a></h3>
+<p>Use the operation ID <code>get-oauth-scopes</code> to find and view the current scopes. Let's retrieve 3 scopes that
+contain <code>view</code> in the description and <code>openid</code> as the Type.</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code> /opt/jans/jans-cli/config-cli.py --operation-id get-oauth-scopes <span class="se">\</span>
+--endpoint-args limit:3,pattern:view,type:openid
 </code></pre></div>
-<h2 id="findview-oauth-scopes">Find/View OAuth Scopes<a class="headerlink" href="#findview-oauth-scopes" title="Permanent link">#</a></h2>
-<p>Operations will be done with <strong>Operation ID</strong>. Some operations may take parameters, let's retrieve <code>3</code> scopes (<strong>limit</strong>) that has <code>view</code> in it's description (<strong>pattern</strong>) and <strong>type</strong> <code>openid</code>:</p>
-<div class="highlight"><pre><span></span><code> /opt/jans/jans-cli/config-cli.py --operation-id get-oauth-scopes --endpoint-args limit:3,pattern:view,type:openid
- ```
-
-It will return:
-
- ```
- Getting access token for scope https://jans.io/oauth/config/scopes.readonly
-Calling with params limit=3&amp;pattern=view&amp;type=openid
-[
-  {
-    &quot;dn&quot;: &quot;inum=43F1,ou=scopes,o=jans&quot;,
-    &quot;id&quot;: &quot;profile&quot;,
-    &quot;inum&quot;: &quot;43F1&quot;,
-    &quot;displayName&quot;: null,
-    &quot;description&quot;: &quot;View your basic profile info.&quot;,
-    &quot;iconUrl&quot;: null,
-    &quot;authorizationPolicies&quot;: null,
-    &quot;defaultScope&quot;: false,
-    &quot;scopeType&quot;: &quot;openid&quot;,
-    &quot;claims&quot;: [
-      &quot;inum=2B29,ou=attributes,o=jans&quot;,
-      &quot;inum=0C85,ou=attributes,o=jans&quot;,
-      &quot;inum=B4B0,ou=attributes,o=jans&quot;,
-      &quot;inum=A0E8,ou=attributes,o=jans&quot;,
-      &quot;inum=5EC6,ou=attributes,o=jans&quot;,
-      &quot;inum=B52A,ou=attributes,o=jans&quot;,
-      &quot;inum=64A0,ou=attributes,o=jans&quot;,
-      &quot;inum=EC3A,ou=attributes,o=jans&quot;,
-      &quot;inum=3B47,ou=attributes,o=jans&quot;,
-      &quot;inum=3692,ou=attributes,o=jans&quot;,
-      &quot;inum=98FC,ou=attributes,o=jans&quot;,
-      &quot;inum=A901,ou=attributes,o=jans&quot;,
-      &quot;inum=36D9,ou=attributes,o=jans&quot;,
-      &quot;inum=BE64,ou=attributes,o=jans&quot;,
-      &quot;inum=6493,ou=attributes,o=jans&quot;
-    ],
-    &quot;umaType&quot;: false,
-    &quot;umaAuthorizationPolicies&quot;: null,
-    &quot;attributes&quot;: {
-      &quot;spontaneousClientId&quot;: null,
-      &quot;spontaneousClientScopes&quot;: null,
-      &quot;showInConfigurationEndpoint&quot;: true
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span>
+<span class="normal">74</span>
+<span class="normal">75</span>
+<span class="normal">76</span>
+<span class="normal">77</span>
+<span class="normal">78</span></pre></div></td><td class="code"><div><pre><span></span><code> {
+  &quot;start&quot;: 0,
+  &quot;totalEntriesCount&quot;: 7,
+  &quot;entriesCount&quot;: 3,
+  &quot;entries&quot;: [
+    {
+      &quot;dn&quot;: &quot;inum=10B2,ou=scopes,o=jans&quot;,
+      &quot;inum&quot;: &quot;10B2&quot;,
+      &quot;displayName&quot;: &quot;view_username&quot;,
+      &quot;id&quot;: &quot;user_name&quot;,
+      &quot;description&quot;: &quot;View your local username in the Janssen Server.&quot;,
+      &quot;scopeType&quot;: &quot;openid&quot;,
+      &quot;claims&quot;: [
+        &quot;inum=42E0,ou=attributes,o=jans&quot;
+      ],
+      &quot;defaultScope&quot;: false,
+      &quot;attributes&quot;: {
+        &quot;showInConfigurationEndpoint&quot;: true
+      },
+      &quot;creationDate&quot;: &quot;2024-06-25T09:02:25&quot;,
+      &quot;umaType&quot;: false,
+      &quot;baseDn&quot;: &quot;inum=10B2,ou=scopes,o=jans&quot;
+    },
+    {
+      &quot;dn&quot;: &quot;inum=341A,ou=scopes,o=jans&quot;,
+      &quot;inum&quot;: &quot;341A&quot;,
+      &quot;displayName&quot;: &quot;view_client&quot;,
+      &quot;id&quot;: &quot;clientinfo&quot;,
+      &quot;description&quot;: &quot;View the client info.&quot;,
+      &quot;scopeType&quot;: &quot;openid&quot;,
+      &quot;claims&quot;: [
+        &quot;inum=2B29,ou=attributes,o=jans&quot;,
+        &quot;inum=29DA,ou=attributes,o=jans&quot;
+      ],
+      &quot;defaultScope&quot;: false,
+      &quot;attributes&quot;: {
+        &quot;showInConfigurationEndpoint&quot;: true
+      },
+      &quot;creationDate&quot;: &quot;2024-06-25T09:02:25&quot;,
+      &quot;umaType&quot;: false,
+      &quot;baseDn&quot;: &quot;inum=341A,ou=scopes,o=jans&quot;
+    },
+    {
+      &quot;dn&quot;: &quot;inum=43F1,ou=scopes,o=jans&quot;,
+      &quot;inum&quot;: &quot;43F1&quot;,
+      &quot;displayName&quot;: &quot;view_profile&quot;,
+      &quot;id&quot;: &quot;profile&quot;,
+      &quot;description&quot;: &quot;View your basic profile info.&quot;,
+      &quot;scopeType&quot;: &quot;openid&quot;,
+      &quot;claims&quot;: [
+        &quot;inum=2B29,ou=attributes,o=jans&quot;,
+        &quot;inum=0C85,ou=attributes,o=jans&quot;,
+        &quot;inum=B4B0,ou=attributes,o=jans&quot;,
+        &quot;inum=A0E8,ou=attributes,o=jans&quot;,
+        &quot;inum=5EC6,ou=attributes,o=jans&quot;,
+        &quot;inum=B52A,ou=attributes,o=jans&quot;,
+        &quot;inum=64A0,ou=attributes,o=jans&quot;,
+        &quot;inum=EC3A,ou=attributes,o=jans&quot;,
+        &quot;inum=3B47,ou=attributes,o=jans&quot;,
+        &quot;inum=3692,ou=attributes,o=jans&quot;,
+        &quot;inum=98FC,ou=attributes,o=jans&quot;,
+        &quot;inum=A901,ou=attributes,o=jans&quot;,
+        &quot;inum=36D9,ou=attributes,o=jans&quot;,
+        &quot;inum=BE64,ou=attributes,o=jans&quot;,
+        &quot;inum=6493,ou=attributes,o=jans&quot;,
+        &quot;inum=4CF1,ou=attributes,o=jans&quot;,
+        &quot;inum=29DA,ou=attributes,o=jans&quot;
+      ],
+      &quot;defaultScope&quot;: false,
+      &quot;attributes&quot;: {
+        &quot;showInConfigurationEndpoint&quot;: true
+      },
+      &quot;creationDate&quot;: &quot;2024-06-25T09:02:25&quot;,
+      &quot;umaType&quot;: false,
+      &quot;baseDn&quot;: &quot;inum=43F1,ou=scopes,o=jans&quot;
     }
-  },
-  {
-    &quot;dn&quot;: &quot;inum=C17A,ou=scopes,o=jans&quot;,
-    &quot;id&quot;: &quot;address&quot;,
-    &quot;inum&quot;: &quot;C17A&quot;,
-    &quot;displayName&quot;: null,
-    &quot;description&quot;: &quot;View your address.&quot;,
-    &quot;iconUrl&quot;: null,
-    &quot;authorizationPolicies&quot;: null,
-    &quot;defaultScope&quot;: false,
-    &quot;scopeType&quot;: &quot;openid&quot;,
-    &quot;claims&quot;: [
-      &quot;inum=27DB,ou=attributes,o=jans&quot;,
-      &quot;inum=2A3D,ou=attributes,o=jans&quot;,
-      &quot;inum=6609,ou=attributes,o=jans&quot;,
-      &quot;inum=6EEB,ou=attributes,o=jans&quot;,
-      &quot;inum=BCE8,ou=attributes,o=jans&quot;,
-      &quot;inum=D90B,ou=attributes,o=jans&quot;,
-      &quot;inum=E6B8,ou=attributes,o=jans&quot;,
-      &quot;inum=E999,ou=attributes,o=jans&quot;
-    ],
-    &quot;umaType&quot;: false,
-    &quot;umaAuthorizationPolicies&quot;: null,
-    &quot;attributes&quot;: {
-      &quot;spontaneousClientId&quot;: null,
-      &quot;spontaneousClientScopes&quot;: null,
-      &quot;showInConfigurationEndpoint&quot;: true
-    }
-  },
-  {
-    &quot;dn&quot;: &quot;inum=764C,ou=scopes,o=jans&quot;,
-    &quot;id&quot;: &quot;email&quot;,
-    &quot;inum&quot;: &quot;764C&quot;,
-    &quot;displayName&quot;: null,
-    &quot;description&quot;: &quot;View your email address.&quot;,
-    &quot;iconUrl&quot;: null,
-    &quot;authorizationPolicies&quot;: null,
-    &quot;defaultScope&quot;: false,
-    &quot;scopeType&quot;: &quot;openid&quot;,
-    &quot;claims&quot;: [
-      &quot;inum=8F88,ou=attributes,o=jans&quot;,
-      &quot;inum=CAE3,ou=attributes,o=jans&quot;
-    ],
-    &quot;umaType&quot;: false,
-    &quot;umaAuthorizationPolicies&quot;: null,
-    &quot;attributes&quot;: {
-      &quot;spontaneousClientId&quot;: null,
-      &quot;spontaneousClientScopes&quot;: null,
-      &quot;showInConfigurationEndpoint&quot;: true
-    }
-  }
-]
-</code></pre></div>
-<h2 id="create-an-oauth-scope">Create an OAuth Scope<a class="headerlink" href="#create-an-oauth-scope" title="Permanent link">#</a></h2>
-<p>Let's create a scope. Remember when we queried info for a task <strong>OAuthScopes</strong> it printed:</p>
-<p><div class="highlight"><pre><span></span><code>Operation ID: post-oauth-scopes
-  Description: Create Scope.
-  Schema: /components/schemas/Scope
-</code></pre></div>
-Thus, we can get sample schema and use Operation ID <code>post-oauth-scopes</code>. Lets get sample schema:</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --schema /components/schemas/Scope &gt; /tmp/scope.json
-</code></pre></div>
-<p>Now edit file <code>tmp/scope.json</code> with an editor (like <strong>nano</strong>). As an example we just filled the following properties:</p>
-<div class="highlight"><pre><span></span><code>&quot;id&quot;: &quot;TestScopeID&quot;,
-&quot;displayName&quot;: &quot;TestScope&quot;,
-&quot;description&quot;: &quot;Test Scope created by jans-cli&quot;,
-</code></pre></div>
-<p><img alt="jans-cl Edit scope.json" src="../../../../assets/image-cl-oauthscope-json-03042021.png" /> </p>
-<p>It is time to post the data:</p>
-<div class="highlight"><pre><span></span><code> /opt/jans/jans-cli/config-cli.py --operation-id post-oauth-scopes --data /tmp/scope.json 
-
-Getting access token for scope https://jans.io/oauth/config/scopes.write
-Server Response:
-{
-  &quot;dn&quot;: &quot;inum=112116fd-257b-40d8-a2c9-0c23536680ed,ou=scopes,o=jans&quot;,
-  &quot;id&quot;: &quot;TestScopeID&quot;,
-  &quot;inum&quot;: &quot;112116fd-257b-40d8-a2c9-0c23536680ed&quot;,
-  &quot;displayName&quot;: &quot;TestScope&quot;,
-  &quot;description&quot;: &quot;Test Scope created by jans-cli&quot;,
-  &quot;iconUrl&quot;: null,
-  &quot;authorizationPolicies&quot;: null,
-  &quot;defaultScope&quot;: true,
-  &quot;scopeType&quot;: &quot;openid&quot;,
-  &quot;claims&quot;: null,
-  &quot;umaType&quot;: false,
-  &quot;umaAuthorizationPolicies&quot;: null,
-  &quot;attributes&quot;: {
-    &quot;spontaneousClientId&quot;: null,
-    &quot;spontaneousClientScopes&quot;: null,
-    &quot;showInConfigurationEndpoint&quot;: true
-  }
+  ]
 }
+</code></pre></div></td></tr></table></div>
+<h3 id="create-an-oauth-scope">Create an OAuth Scope<a class="headerlink" href="#create-an-oauth-scope" title="Permanent link">#</a></h3>
+<p>To create a new scope, we can use <code>post-oauth-scopes</code> operation id. As shown in the <a href="#using-command-line">output</a>
+for <code>--info</code> command, the <code>post-oauth-scopes</code> operation requires data to be sent according to <code>Scope</code> schema.</p>
+<p>To see the schema, use the command below:</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --schema Scope
 </code></pre></div>
-<p>It created scope with inum <code>112116fd-257b-40d8-a2c9-0c23536680ed</code> and returned current data. </p>
-<h2 id="update-existing-oauth-scopes">Update Existing OAuth Scopes<a class="headerlink" href="#update-existing-oauth-scopes" title="Permanent link">#</a></h2>
-<p>In case we need to update an existing OAuth Scope, we can do that as well.</p>
-<p>To update an existing OAuth Scope, we have to create a json file with updated details. You can get the schema file as well to understand the format of the OAuth Scope JSON file.</p>
-<p>This is an existing OAuth Scope we are going to update.
-<div class="highlight"><pre><span></span><code>{
-  &quot;dn&quot;: &quot;inum=5c3ba3f0-d2ce-4974-9efb-883697d929d1,ou=scopes,o=jans&quot;,
-  &quot;inum&quot;: &quot;5c3ba3f0-d2ce-4974-9efb-883697d929d1&quot;,
-  &quot;displayName&quot;: &quot;TestScope&quot;,
-  &quot;id&quot;: &quot;TestScopeID&quot;,
-  &quot;iconUrl&quot;: null,
-  &quot;description&quot;: &quot;TestScope for jans-cli&quot;,
-  &quot;scopeType&quot;: &quot;dynamic&quot;,
-  &quot;claims&quot;: null,
-  &quot;defaultScope&quot;: true,
-  &quot;groupClaims&quot;: true,
-  &quot;dynamicScopeScripts&quot;: null,
-  &quot;umaAuthorizationPolicies&quot;: null,
-  &quot;attributes&quot;: {
-    &quot;spontaneousClientId&quot;: null,
-    &quot;spontaneousClientScopes&quot;: null,
-    &quot;showInConfigurationEndpoint&quot;: false
-  },
-  &quot;umaType&quot;: false,
-  &quot;deletable&quot;: false,
-  &quot;expirationDate&quot;: null
-}
+<p>For better understanding, the Janssen Server also provides an sample of data to be sent to the server. 
+This sample conforms to the schema above. Use the command below to get the sample.</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --schema-sample Scope
 </code></pre></div>
-We have changed only the <code>scopeType</code> to <code>openid</code>.</p>
-<p>The updated data:</p>
-<div class="highlight"><pre><span></span><code>{
-  &quot;dn&quot;: &quot;inum=5c3ba3f0-d2ce-4974-9efb-883697d929d1,ou=scopes,o=jans&quot;,
-  &quot;inum&quot;: &quot;5c3ba3f0-d2ce-4974-9efb-883697d929d1&quot;,
-  &quot;displayName&quot;: &quot;TestScope&quot;,
-  &quot;id&quot;: &quot;TestScopeID&quot;,
-  &quot;iconUrl&quot;: null,
-  &quot;description&quot;: &quot;TestScope for jans-cli&quot;,
-  &quot;scopeType&quot;: &quot;openid&quot;,
-  &quot;claims&quot;: null,
-  &quot;defaultScope&quot;: true,
-  &quot;groupClaims&quot;: true,
-  &quot;dynamicScopeScripts&quot;: null,
-  &quot;umaAuthorizationPolicies&quot;: null,
-  &quot;attributes&quot;: {
-    &quot;spontaneousClientId&quot;: null,
-    &quot;spontaneousClientScopes&quot;: null,
-    &quot;showInConfigurationEndpoint&quot;: false
-  },
-  &quot;umaType&quot;: false,
-  &quot;deletable&quot;: false,
-  &quot;expirationDate&quot;: null
-}
+<p>Using the schema and the example above, we have added below key data to the file <code>/tmp/scope.json</code></p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Input</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;dn&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;TestScopeID&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;inum&quot;</span><span class="p">:</span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;displayName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;TestScope&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Test Scope created by jans-cli&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;iconUrl&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;authorizationPolicies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;defaultScope&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;scopeType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;openid&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;claims&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;umaType&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;umaAuthorizationPolicies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;attributes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;spontaneousClientId&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">null</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;spontaneousClientScopes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[],</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;showInConfigurationEndpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div></td></tr></table></div>
+<p>Now let's post this scope to the Janssen Server to be added to the existing set:</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code> /opt/jans/jans-cli/config-cli.py --operation-id post-oauth-scopes <span class="se">\</span>
+ --data /tmp/scope.json 
 </code></pre></div>
-<p>The command line is:</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id put-oauth-scopes --data /tmp/scope.json
+<h3 id="update-existing-oauth-scopes">Update Existing OAuth Scopes<a class="headerlink" href="#update-existing-oauth-scopes" title="Permanent link">#</a></h3>
+<p>To update the configuration follow the steps below.</p>
+<ol>
+<li>
+<p><a href="#find-oauth-scopes-by-inum">Get the existing OAuth Scope</a> and store it into a file for editing.
+  The following command will retrieve the existing OAuth Scope in the schema file.
+  <div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py -no-color --operation-id get-oauth-scopes-by-inum <span class="se">\</span>
+--url-suffix inum:8eb2b0c0-d1d9-453d-8364-e2809ce857f2 &gt; /tmp/scopdata.json
+</code></pre></div></p>
+</li>
+<li>
+<p>Edit and update the desired configuration values in the file while keeping other
+   properties and values unchanged. Updates must adhere to the <code>Scope</code>
+   schema as mentioned <a href="#using-command-line">here</a>.</p>
+</li>
+<li>
+<p>We have changed only the <code>scopeType</code> to <code>dynamic</code> in existing OAuth Scope.
+   Use the updated file to send the update to the Janssen Server using the command below
+   <div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id put-oauth-scopes <span class="se">\</span>
+--data /tmp/scope.json
 </code></pre></div>
-<p>This will updated the existing oauth scopes matched with inum value.</p>
-<h2 id="patch-oauth-scopes-by-inum">Patch OAuth Scopes by <code>inum</code><a class="headerlink" href="#patch-oauth-scopes-by-inum" title="Permanent link">#</a></h2>
-<p>Let's update <code>iconUrl</code> with patch method. So we need a schema for the patch method. Remember when we queried info for the task <strong>OAuthScopes</strong> it printed:</p>
+This will updated the existing oauth scopes matched with inum value.</p>
+</li>
+</ol>
+<h3 id="patch-oauth-scopes-by-inum">Patch OAuth Scopes by <code>inum</code><a class="headerlink" href="#patch-oauth-scopes-by-inum" title="Permanent link">#</a></h3>
+<p>Let's update <code>iconUrl</code> with patch method. So we need a schema for the patch method. 
+Remember when we queried info for the task <strong>OAuthScopes</strong> it printed:</p>
 <p><div class="highlight"><pre><span></span><code>Operation ID: patch-oauth-scopes-by-id
-  Description: Update modified attributes of existing Scope by Inum.
-  url-suffix: inum
-  Schema: Array of /components/schemas/PatchRequest
- ```
-
-This means we need schema `/components/schemas/PatchRequest`, be careful it states **Array of**, so we will make an array of this schema, in case you need multiple changes with patch method, you can put as many as of this schema into array. To know more about `PatchRequest` schema, please visit this [link](config-tools/jans-cli/README.md#patch-request-schema).
-
-Let&#39;s Get schema:
+  Description: Patch Scope
+  Parameters:
+  inum: Scope identifier [string]
+  Schema: Array of JsonPatch
 </code></pre></div>
-/opt/jans/jans-cli/config-cli.py --schema /components/schemas/PatchRequest &gt; /tmp/patch.json
-<div class="highlight"><pre><span></span><code>We can edit this json as follows (remember to make it an array):
-
-![jans-cl Edit patch.json](../../assets/image-cl-oauthscope-patch-json-03042021.png)
-
-Let&#39;s do the operation:
+The <code>patch-oauth-scopes-by-id</code> operation uses the <a href="https://jsonpatch.com/#the-patch">JSON Patch</a> schema to describe 
+the configuration change. Refer <a href="../../admin/config-guide/config-tools/jans-cli/README.md#patch-request-schema">here</a> 
+to know more about schema.</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --schema JsonPatch &gt; /tmp/patch.json
 </code></pre></div>
-/opt/jans/jans-cli/config-cli.py --operation-id patch-oauth-scopes-by-id --url-suffix inum:112116fd-257b-40d8-a2c9-0c23536680ed --data /tmp/patch.json </p>
-<p>Getting access token for scope https://jans.io/oauth/config/scopes.write
-Server Response:
-{
-  "dn": "inum=112116fd-257b-40d8-a2c9-0c23536680ed,ou=scopes,o=jans",
-  "id": "TestScopeID",
-  "inum": "112116fd-257b-40d8-a2c9-0c23536680ed",
-  "displayName": "TestScope",
-  "description": "Test Scope created by jans-cli",
-  "iconUrl": "https://www.jans.io/icon.png",
-  "authorizationPolicies": null,
-  "defaultScope": true,
-  "scopeType": "openid",
-  "claims": null,
-  "umaType": false,
-  "umaAuthorizationPolicies": null,
-  "attributes": {
-    "spontaneousClientId": null,
-    "spontaneousClientScopes": null,
-    "showInConfigurationEndpoint": true
-  }
-}
-<div class="highlight"><pre><span></span><code>## Find OAuth Scopes by `inum`
-
-In case We know the `inum` value of an OAuth Scope, We can get the details of that scope.
+<p>For instance, to perform a <code>replace</code> operation at <code>iconUrl</code> 
+and change it from <code>null</code> to <code>https://www.jans.io/icon.png</code>, 
+the JSON Patch data would look like below:</p>
+<p><div class="highlight"><span class="filename">Input</span><pre><span></span><code><span class="p">[</span><span class="w"></span>
+<span class="w">  </span><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;op&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;replace&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;iconUrl&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://www.jans.io/icon.png&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="p">]</span><span class="w"></span>
 </code></pre></div>
-Operation ID: get-oauth-scopes-by-inum
+Store the above JSON Patch data in a file, for instance, <code>/tmp/patch.json</code></p>
+<p>Let's do the operation:
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id patch-oauth-scopes-by-id <span class="se">\</span>
+--url-suffix inum:8eb2b0c0-d1d9-453d-8364-e2809ce857f2 --data /tmp/patch.json 
+</code></pre></div></p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;dn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=8eb2b0c0-d1d9-453d-8364-e2809ce857f2,ou=scopes,o=jans&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;inum&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;8eb2b0c0-d1d9-453d-8364-e2809ce857f2&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;displayName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;TestScope&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;TestScopeID&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;iconUrl&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://www.jans.io/icon.png&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Test Scope created by jans-cli&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;scopeType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dynamic&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;defaultScope&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;attributes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;showInConfigurationEndpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"></span>
+<span class="w">  </span><span class="p">},</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;creationDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-06-25T08:44:08&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;umaType&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;baseDn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=8eb2b0c0-d1d9-453d-8364-e2809ce857f2,ou=scopes,o=jans&quot;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div></td></tr></table></div>
+<h3 id="find-oauth-scopes-by-inum">Find OAuth Scopes by <code>inum</code><a class="headerlink" href="#find-oauth-scopes-by-inum" title="Permanent link">#</a></h3>
+<p>In case We know the <code>inum</code> value of an OAuth Scope, We can get the details of that scope.</p>
+<div class="highlight"><pre><span></span><code>Operation ID: get-oauth-scopes-by-inum
   Description: Get Scope by Inum
-  url-suffix: inum
-<div class="highlight"><pre><span></span><code>We can see that, the `url-suffix` here for `inum` value. And the command line is:
+  Parameters:
+  inum: Scope identifier [string]
+  withAssociatedClients: No description is provided for this parameter [boolean]
 </code></pre></div>
-/opt/jans/jans-cli/config-cli.py --operation-id get-oauth-scopes-by-inum --url-suffix inum:value
-<div class="highlight"><pre><span></span><code>For example:
+<p>We can use the <code>url-suffix</code> for the <code>inum</code> value.
+<div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-oauth-scopes-by-inum <span class="se">\</span>
+--url-suffix inum:value
+</code></pre></div></p>
+<p>For example:</p>
+<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-oauth-scopes-by-inum <span class="se">\</span>
+--url-suffix inum:8eb2b0c0-d1d9-453d-8364-e2809ce857f2
 </code></pre></div>
-/opt/jans/jans-cli/config-cli.py --operation-id get-oauth-scopes-by-inum --url-suffix inum:C4F6
-<div class="highlight"><pre><span></span><code>It returns the details of the scope matched with the `inum` value.
+It returns the details of the scope matched with the <code>inum</code> value.</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;dn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=8eb2b0c0-d1d9-453d-8364-e2809ce857f2,ou=scopes,o=jans&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;inum&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;8eb2b0c0-d1d9-453d-8364-e2809ce857f2&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;displayName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;TestScope&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;TestScopeID&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;iconUrl&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://www.jans.io/icon.png&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Test Scope created by jans-cli&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;scopeType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;dynamic&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;defaultScope&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;attributes&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;showInConfigurationEndpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"></span>
+<span class="w">  </span><span class="p">},</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;creationDate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-06-25T08:44:08&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;umaType&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;baseDn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;inum=8eb2b0c0-d1d9-453d-8364-e2809ce857f2,ou=scopes,o=jans&quot;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div></td></tr></table></div>
+<h3 id="delete-oauth-scopes-by-inum">Delete OAuth Scopes by <code>inum</code><a class="headerlink" href="#delete-oauth-scopes-by-inum" title="Permanent link">#</a></h3>
+<p>You can delete any OAuth Scopes by its <code>inum</code> value.</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id delete-oauth-scopes-by-inum --url-suffix inum:8eb2b0c0-d1d9-453d-8364-e2809ce857f2
 </code></pre></div>
-{
-  "dn": "inum=C4F6,ou=scopes,o=jans",
-  "inum": "C4F6",
-  "displayName": "refresh_token",
-  "id": "offline_access",
-  "iconUrl": null,
-  "description": "This scope value requests that an OAuth 2.0 Refresh Token be issued.",
-  "scopeType": "openid",
-  "claims": null,
-  "defaultScope": true,
-  "groupClaims": null,
-  "dynamicScopeScripts": null,
-  "umaAuthorizationPolicies": null,
-  "attributes": {
-    "spontaneousClientId": null,
-    "spontaneousClientScopes": null,
-    "showInConfigurationEndpoint": true
-  },
-  "umaType": false,
-  "deletable": false,
-  "expirationDate": null
-}</p>
-<p><div class="highlight"><pre><span></span><code>That&#39;s it.
-
-## Delete OAuth Scopes by `inum`
-
-You can delete any OAuth Scopes by its `inum` value.
-The command line is:
-</code></pre></div>
-/opt/jans/jans-cli/config-cli.py --operation-id delete-oauth-scopes-by-inum --url-suffix inum:f9a7add1-04ca-432c-84d4-cb127e84bd48
-```</p>
 <p>Just change the <code>inum</code> value to your own according to which one you want to delete.</p>
+<h2 id="using-text-based-ui">Using Text-based UI<a class="headerlink" href="#using-text-based-ui" title="Permanent link">#</a></h2>
+<p>In Janssen, You can deploy and customize an Scope using
+the <a href="./config-tools/jans-tui/README.md">Text-Based UI</a> also.</p>
+<p>You can start TUI using the command below:</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>sudo /opt/jans/jans-cli/jans_cli_tui.py
+</code></pre></div>
+<h3 id="scope-screen">Scope Screen<a class="headerlink" href="#scope-screen" title="Permanent link">#</a></h3>
+<p>Navigate to <code>Auth Server</code> -&gt; <code>Scopes</code> to open the scope screen as shown in the image below.</p>
+<ul>
+<li>To get the list of currently added Scope, bring the control to Search box (using the tab key),
+and press Enter. Type the search string to search for Scope with matching <code>id</code> and <code>inum</code>.</li>
+</ul>
+<p><img alt="image" src="../../../../assets/tui-scope-screen.png" /></p>
+<h3 id="add-scope-screen">Add Scope screen<a class="headerlink" href="#add-scope-screen" title="Permanent link">#</a></h3>
+<ul>
+<li>Use the <code>Add Scope</code> button to create a new scope. </li>
+<li>You can create several types of scopes in the screen below, 
+such as <code>oauth</code>, <code>OpenID</code>, <code>dynamic</code>, and <code>uma</code>, with the correct data.</li>
+<li>For example, below is the picture availability scope data.</li>
+</ul>
+<p><img alt="image" src="../../../../assets/tui-scope-data.png" /></p>
+<h2 id="using-configuration-rest-api">Using Configuration REST API<a class="headerlink" href="#using-configuration-rest-api" title="Permanent link">#</a></h2>
+<p>Janssen Server Configuration REST API exposes relevant endpoints for managing
+and configuring the OAuth Scope. Endpoint details are published in the <a href="./../reference/openapi.md">Swagger
+document</a>.</p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-07-10T09:34:30+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-07-10</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-07-12T11:03:13+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-07-12</span>
       
         <br>
         Created:
