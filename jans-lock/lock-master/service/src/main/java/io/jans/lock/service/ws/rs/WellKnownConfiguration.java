@@ -24,7 +24,7 @@ import jakarta.servlet.http.HttpServletResponse;
 /**
  * @author Yuriy Movchan Date: 07/10/2024
  */
-@WebServlet(urlPatterns = "/.well-known/lock-configuration", loadOnStartup = 10)
+@WebServlet(urlPatterns = "/.well-known/lock-master-configuration", loadOnStartup = 10)
 public class WellKnownConfiguration extends HttpServlet {
 
     private static final long serialVersionUID = -8224898157373678904L;
