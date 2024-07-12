@@ -258,52 +258,6 @@ fun AppAlertDialog(shouldShowDialog: MutableState<Boolean>, content: MutableStat
     }
 }
 
-@Composable
-fun AppLoaderDialog(shouldShowDialog: MutableState<Boolean>) {
-    if (shouldShowDialog.value) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .navigationBarsPadding()
-                .imePadding()
-                .height(400.dp)
-                .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Spacer(modifier = Modifier.height(40.dp))
-            LineScaleIndicator(
-                color = Color(0xFF134520),
-                rectCount = 5,
-                distanceOnXAxis = 30f,
-                lineHeight = 100,
-                animationDuration = 500,
-                minScale = 0.3f,
-                maxScale = 1.5f,
-                punchType = PunchType.RANDOM_PUNCH,
-                penThickness = 15f
-            )
-        }
-    }
-}
-
-@Composable
-fun Title(
-    // 1
-    text: String,
-    fontFamily: FontFamily,
-    fontWeight: FontWeight,
-    fontSize: TextUnit,
-) {
-    Text(  // 2
-        text = text,
-        style = TextStyle(
-            fontFamily = fontFamily,
-            fontWeight = fontWeight,
-            fontSize = fontSize,  // 3
-        )
-    )
-}
 
 @Composable
 fun LogButton(
