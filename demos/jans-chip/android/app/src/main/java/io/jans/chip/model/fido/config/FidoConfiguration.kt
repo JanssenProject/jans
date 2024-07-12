@@ -2,6 +2,7 @@ package io.jans.chip.model.fido.config
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Ignore
 import androidx.room.PrimaryKey
 import com.google.gson.annotations.SerializedName
 
@@ -26,4 +27,10 @@ data class FidoConfiguration(
 
     @ColumnInfo(name = "ASSERTION_RESULT_ENDPOINT")
     var assertionResultEndpoint: String? = null,
-)
+) {
+    @Ignore
+    var isSuccessful: Boolean = false
+
+    @Ignore
+    var errorMessage: String = ""
+}

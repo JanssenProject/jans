@@ -37,10 +37,10 @@ data class OPConfiguration(
 
 ) {
     @Ignore
-    var isSuccessful: Boolean? = true
+    var isSuccessful: Boolean = false
 
     @Ignore
-    var errorMessage: String? = null
+    var errorMessage: String = ""
 
     @ColumnInfo(name = "FIDO_URL")
     var fidoUrl: String? = null
