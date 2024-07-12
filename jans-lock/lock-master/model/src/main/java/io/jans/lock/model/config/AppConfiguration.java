@@ -34,8 +34,14 @@ import jakarta.enterprise.inject.Vetoed;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AppConfiguration implements Configuration {
 
+    @DocProperty(description = "Entry Base distinguished name (DN) that identifies the starting point of a search")
+    @Schema(description = "Entry Base distinguished name (DN) that identifies the starting point of a search")
 	private String baseDN;
-	
+    
+    @DocProperty(description = "Issuer Identifier of Jans OpenID Connect Provider")
+    @Schema(description = "Issuer Identifier of Jans OpenID Connect Provider.")
+    private String issuerUrl;
+    	
 	@DocProperty(description = "Lock Client ID")
     @Schema(description = "Lock Client ID")
     private String clientId;
@@ -126,6 +132,14 @@ public class AppConfiguration implements Configuration {
 
     public void setBaseDN(String baseDN) {
         this.baseDN = baseDN;
+    }
+
+    public String getIssuerUrl() {
+        return issuerUrl;
+    }
+
+    public void setIssuerUrl(String issuerUrl) {
+        this.issuerUrl = issuerUrl;
     }
 
     public String getClientId() {
@@ -298,18 +312,17 @@ public class AppConfiguration implements Configuration {
 
     @Override
     public String toString() {
-        return "AppConfiguration [baseDN=" + baseDN + ", clientId=" + clientId + ", clientPassword=" + clientPassword
-                + ", tokenUrl=" + tokenUrl + ", endpointDetails=" + endpointDetails + ", baseEndpoint=" + baseEndpoint
-                + ", tokenChannels=" + tokenChannels + ", disableJdkLogger=" + disableJdkLogger + ", loggingLevel="
-                + loggingLevel + ", loggingLayout=" + loggingLayout + ", externalLoggerConfiguration="
-                + externalLoggerConfiguration + ", metricChannel=" + metricChannel + ", metricReporterInterval="
-                + metricReporterInterval + ", metricReporterKeepDataDays=" + metricReporterKeepDataDays
-                + ", metricReporterEnabled=" + metricReporterEnabled + ", cleanServiceInterval=" + cleanServiceInterval
-                + ", opaConfiguration=" + opaConfiguration + ", pdpType=" + pdpType
-                + ", policiesJsonUrisAuthorizationToken=" + policiesJsonUrisAuthorizationToken + ", policiesJsonUris="
-                + policiesJsonUris + ", policiesZipUrisAuthorizationToken=" + policiesZipUrisAuthorizationToken
-                + ", policiesZipUris=" + policiesZipUris + "]";
+        return "AppConfiguration [baseDN=" + baseDN + ", issuerUrl=" + issuerUrl + ", clientId=" + clientId
+                + ", clientPassword=" + clientPassword + ", tokenUrl=" + tokenUrl + ", endpointDetails="
+                + endpointDetails + ", baseEndpoint=" + baseEndpoint + ", tokenChannels=" + tokenChannels
+                + ", disableJdkLogger=" + disableJdkLogger + ", loggingLevel=" + loggingLevel + ", loggingLayout="
+                + loggingLayout + ", externalLoggerConfiguration=" + externalLoggerConfiguration + ", metricChannel="
+                + metricChannel + ", metricReporterInterval=" + metricReporterInterval + ", metricReporterKeepDataDays="
+                + metricReporterKeepDataDays + ", metricReporterEnabled=" + metricReporterEnabled
+                + ", cleanServiceInterval=" + cleanServiceInterval + ", opaConfiguration=" + opaConfiguration
+                + ", pdpType=" + pdpType + ", policiesJsonUrisAuthorizationToken=" + policiesJsonUrisAuthorizationToken
+                + ", policiesJsonUris=" + policiesJsonUris + ", policiesZipUrisAuthorizationToken="
+                + policiesZipUrisAuthorizationToken + ", policiesZipUris=" + policiesZipUris + "]";
     }
-    
     
 }

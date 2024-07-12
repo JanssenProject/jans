@@ -32,7 +32,6 @@ import org.apache.commons.io.IOUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
-
 /**
  * Provides interface for audit REST web services
  *
@@ -42,88 +41,48 @@ import org.slf4j.Logger;
 @Path("/audit")
 public class AuditRestWebServiceImpl implements AuditRestWebService {
 
-	@Inject
-	private Logger log;
-	
-	@Inject
-	AuthUtil authUtil;
+    @Inject
+    private Logger log;
 
-	@Override
-	public Response processHealthRequest(HttpServletRequest request, HttpServletResponse response, SecurityContext sec) {
-		log.debug("Processing Health request");
-		Response.ResponseBuilder builder = Response.ok();
+    @Inject
+    AuthUtil authUtil;
 
-		builder.cacheControl(ServerUtil.cacheControlWithNoStoreTransformAndPrivate());
-		builder.header(ServerUtil.PRAGMA, ServerUtil.NO_CACHE);
-		builder.entity("{\"res\" : \"ok\"}");
+    @Override
+    public Response processHealthRequest(HttpServletRequest request, HttpServletResponse response,
+            SecurityContext sec) {
+        log.debug("Processing Health request");
+        Response.ResponseBuilder builder = Response.ok();
 
-		return builder.build();
-	}
+        builder.cacheControl(ServerUtil.cacheControlWithNoStoreTransformAndPrivate());
+        builder.header(ServerUtil.PRAGMA, ServerUtil.NO_CACHE);
+        builder.entity("{\"res\" : \"ok\"}");
 
-	@Override
-	public Response processLogRequest(HttpServletRequest request, HttpServletResponse response, SecurityContext sec) 
-	{
-		log.debug("Processing Log request - request:{}",request);
-		
-		JSONObject jsonBody = getJSONObject(request);
-		Response.ResponseBuilder builder = Response.ok();
-		builder.cacheControl(ServerUtil.cacheControlWithNoStoreTransformAndPrivate());
-		builder.header(ServerUtil.PRAGMA, ServerUtil.NO_CACHE);
-		builder.entity("{\"res\" : \"ok\"}");
-		//return builder.build();
-		
-		return Response.status(Response.Status.OK).entity(jsonBody).build();
-	}
-	
+        return builder.build();
+    }
 
-	@Override
-	public Response processTelemetryRequest(HttpServletRequest request, HttpServletResponse response, SecurityContext sec) {
-		log.error("Processing Telemetry request - request:{}", request);
-		Response.ResponseBuilder builder = Response.ok();
+    @Override
+    public Response processLogRequest(HttpServletRequest request, HttpServletResponse response, SecurityContext sec) {
+        log.debug("Processing Log request - request:{}", request);
+        Response.ResponseBuilder builder = Response.ok();
+        builder.cacheControl(ServerUtil.cacheControlWithNoStoreTransformAndPrivate());
+        builder.header(ServerUtil.PRAGMA, ServerUtil.NO_CACHE);
+        builder.entity("{\"res\" : \"ok\"}");
+        return builder.build();
 
-		this.authUtil.getAppConfiguration();
-		String str = null;
-		HttpServiceResponse serviceResponse = this.postData(this.getJSONObject(request));
-		log.error("serviceResponse:{}", serviceResponse);
-		str = authUtil.getResponseEntityString(serviceResponse);
-		log.error("Processing Telemetry response - str:{}", str);
-		return Response.status(Response.Status.CREATED).entity(str).build();
-		
-	}
-	
-	private HttpServiceResponse postData(JSONObject json) {
-	    log.error("Processing Telemetry request - json:{}", json);
-	    HttpServiceResponse response = null;
-	    if(json==null) {
-	        return response;
-	    }
+    }
 
-	    return this.authUtil.postData(json.toString());
-	   
-	    
-	}
-	
-	   private JSONObject getJSONObject(HttpServletRequest request) {
-	       log.error("getJSONObject() - request:{}", request);
-	        JSONObject jsonBody = null;
-	        if(request==null) {
-	            return jsonBody;
-	        }
-	        try {
-	            String jsonBodyStr = IOUtils.toString(request.getInputStream());
-	            log.error(" jsonBodyStr:{}",jsonBodyStr);
-	            jsonBody = new JSONObject(jsonBodyStr);
-	            log.error(" jsonBody:{}",jsonBody);
-	        }catch(Exception ex) {
-	            ex.printStackTrace();
-	            log.error("Exception while retriving json from request is - ",ex );
-	        }
-	        return jsonBody;
-	    }
+    @Override
+    public Response processTelemetryRequest(HttpServletRequest request, HttpServletResponse response,
+            SecurityContext sec) {
+        log.error("Processing Telemetry request - request:{}", request);
 
-	
+        JSONObject json = this.authUtil.getJSONObject(request);
+        HttpServiceResponse serviceResponse = this.authUtil.postData("telemetry", json.toString());
+        log.error("serviceResponse:{}", serviceResponse);
+        String str = authUtil.getResponseEntityString(serviceResponse);
+        log.error("Processing Telemetry response - str:{}", str);
+        return Response.status(Response.Status.CREATED).entity(str).build();
 
-	
-	
+    }
 
 }

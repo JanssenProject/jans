@@ -196,6 +196,11 @@ components:
       properties:
         baseDN:
           type: string
+          description: Entry Base distinguished name (DN) that identifies the starting
+            point of a search
+        issuerUrl:
+          type: string
+          description: Issuer Identifier of Jans OpenID Connect Provider.
         clientId:
           type: string
           description: Lock Client ID

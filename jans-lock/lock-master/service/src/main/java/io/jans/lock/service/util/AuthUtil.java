@@ -1,15 +1,18 @@
 package io.jans.lock.service.util;
 
-
 import io.jans.as.client.TokenRequest;
 import io.jans.as.client.TokenResponse;
 import io.jans.as.model.common.GrantType;
+import io.jans.as.model.common.ScopeType;
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.lock.service.net.HttpService;
 import io.jans.model.net.HttpServiceResponse;
+import io.jans.service.EncryptionService;
+import io.jans.util.security.StringEncrypter.EncryptionException;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.client.ClientBuilder;
 import jakarta.ws.rs.client.Entity;
 import jakarta.ws.rs.client.Invocation.Builder;
@@ -19,9 +22,14 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.http.entity.ContentType;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
 
 import org.json.JSONObject;
@@ -33,22 +41,35 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @ApplicationScoped
 public class AuthUtil {
-    
+
     private static final String CONTENT_TYPE = "Content-Type";
 
-    
     @Inject
     Logger log;
-    
+
     @Inject
     AppConfiguration appConfiguration;
 
-    @Inject 
+    @Inject
     HttpService httpService;
-    
-    
-    public TokenResponse requestAccessToken(final String tokenUrl, final String clientId,
-            final String clientSecret, final String scope) {
+
+    @Inject
+    EncryptionService encryptionService;
+
+    public String getToken(String endpoint) {
+
+        log.error("\n\n Request for token  for endpoint:{}", endpoint);
+        String tokenUrl = this.appConfiguration.getTokenUrl();
+        String clientId = this.appConfiguration.getClientId();
+
+        String clientSecret = this.getDecryptedPassword(appConfiguration.getClientPassword());
+        String scopes = this.getScopes(endpoint);
+
+        return this.getToken(tokenUrl, clientId, clientSecret, scopes);
+    }
+
+    public TokenResponse requestAccessToken(final String tokenUrl, final String clientId, final String clientSecret,
+            final String scope) {
         log.error("Request for Access Token -  tokenUrl:{}, clientId:{}, clientSecret:{}, scope:{} ", tokenUrl,
                 clientId, clientSecret, scope);
         Response response = null;
@@ -79,58 +100,61 @@ public class AuthUtil {
         }
         return null;
     }
-    
-    public String getToken() {
-        log.error("\n\n Request for token \n\n");
-        String tokenUrl = this.appConfiguration.getTokenUrl(); 
-        String clientId =  this.appConfiguration.getClientId();
 
-        String clientSecret = this.appConfiguration.getClientPassword();
-        String scopes = "https://jans.io/oauth/lock/telemetry.write";
+    public String getToken(String tokenUrl, String clientId, String clientSecret, String scopes) {
+        log.error("\n\n Request for token tokenUrl:{}, clientId:{}, clientSecret:{}, scopes:{}", tokenUrl, clientId,
+                clientSecret, scopes);
+
         String accessToken = null;
         Integer expiresIn = 0;
-        TokenResponse tokenResponse = requestAccessToken(tokenUrl, clientId, clientSecret, scopes);
-                if (tokenResponse != null) {
+        TokenResponse tokenResponse = this.requestAccessToken(tokenUrl, clientId, clientSecret, scopes);
+        if (tokenResponse != null) {
 
-                    log.error("Token Response - tokenScope: {}, tokenAccessToken: {} ", tokenResponse.getScope(),
-                            tokenResponse.getAccessToken());
-                    accessToken = tokenResponse.getAccessToken();
-                    expiresIn = tokenResponse.getExpiresIn();
-                   
-                }
-        log.error("getToken accessToken:{}", accessToken, expiresIn);
-        
+            log.error("Token Response - tokenScope: {}, tokenAccessToken: {} ", tokenResponse.getScope(),
+                    tokenResponse.getAccessToken());
+            accessToken = tokenResponse.getAccessToken();
+            expiresIn = tokenResponse.getExpiresIn();
+
+        }
+        log.error(" accessToken:{}, expiresIn:{}", accessToken, expiresIn);
+
         return accessToken;
     }
-    
-    public HttpServiceResponse postData(String postData) {
-        log.error("NEw postData postData:{}", postData);
-        
-        //String uri = "jans-config-api/lock/audit/telemetry";
-        String uri = "https://pujavs-probable-alpaca.gluu.info/jans-config-api/lock/audit/telemetry";
-       
-        String authData = getToken();
-        String authType= "Bearer ";
-        Map<String, String> headers = new HashMap<>();
-        headers.put("Content-Type", "application/json");
-        ContentType contentType = ContentType.APPLICATION_JSON;
-        
-        HttpServiceResponse response = httpService.executePost(uri, authData, headers, postData, contentType,  authType);
+
+    public HttpServiceResponse postData(String endpoint, String postData) {
+        log.error("postData - endpoint:{}, postData:{}", endpoint, postData);
+        String token = this.getToken(this.getEndpointUrl(endpoint));
+        return postData(this.getAuditEndpoint(endpoint), null, token, null, null, postData);
+    }
+
+    public HttpServiceResponse postData(String uri, String authType, String token, Map<String, String> headers,
+            ContentType contentType, String postData) {
+        log.error("postData - uri:{}, token:{}, data", uri, token);
+
+        if (StringUtils.isBlank(authType)) {
+            authType = "Bearer ";
+        }
+        if (contentType == null) {
+            contentType = ContentType.APPLICATION_JSON;
+        }
+
+        HttpServiceResponse response = httpService.executePost(uri, token, headers, postData, contentType, authType);
 
         log.error("response:{}", response);
         return response;
     }
-    
+
     public String getResponseEntityString(HttpServiceResponse serviceResponse) {
         String jsonString = null;
-        
-        if(serviceResponse == null) {
+
+        if (serviceResponse == null) {
             return jsonString;
         }
-        
-        if (serviceResponse != null && serviceResponse.getHttpResponse()!=null && serviceResponse.getHttpResponse().getStatusLine()!=null && serviceResponse.getHttpResponse().getStatusLine().getStatusCode() == Status.OK.getStatusCode()) {
+
+        if (serviceResponse.getHttpResponse() != null && serviceResponse.getHttpResponse().getStatusLine() != null
+                && serviceResponse.getHttpResponse().getStatusLine().getStatusCode() == Status.OK.getStatusCode()) {
             HttpEntity entity = serviceResponse.getHttpResponse().getEntity();
-            if (entity==null) {
+            if (entity == null) {
                 return jsonString;
             }
             jsonString = entity.toString();
@@ -138,24 +162,95 @@ public class AuthUtil {
         }
         return jsonString;
     }
-    
-    
-    public void getAppConfiguration() {
-        log.error("appConfiguration:{}", appConfiguration);
-        log.error("appConfiguration.getClientId():{}", appConfiguration.getClientId());
-        log.error("appConfiguration.getClientPassword():{}", appConfiguration.getClientPassword());
-        log.error("appConfiguration.getTokenUrl():{}", appConfiguration.getTokenUrl());
-        log.error(" appConfiguration.getEndpointDetails():{}", appConfiguration.getEndpointDetails());
+
+    public JSONObject getJSONObject(HttpServletRequest request) {
+        log.error("getJSONObject() - request:{}", request);
+        JSONObject jsonBody = null;
+        if (request == null) {
+            return jsonBody;
+        }
+        try {
+            String jsonBodyStr = IOUtils.toString(request.getInputStream());
+            log.error(" jsonBodyStr:{}", jsonBodyStr);
+            jsonBody = new JSONObject(jsonBodyStr);
+            log.error(" jsonBody:{}", jsonBody);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            log.error("Exception while retriving json from request is - ", ex);
+        }
+        return jsonBody;
     }
-    
-    
+
     private static Builder getClientBuilder(String url) {
         return ClientBuilder.newClient().target(url).request();
     }
 
-   
-    
-    
-    
+    public String getDecryptedPassword(String clientPassword) {
+        String decryptedPassword = null;
+        if (clientPassword != null) {
+            try {
+                decryptedPassword = encryptionService.decrypt(clientPassword);
+            } catch (EncryptionException ex) {
+                log.error("Failed to decrypt password", ex);
+            }
+        }
+        return decryptedPassword;
+    }
+
+    public String getScopes(String endpoint) {
+        log.error("Get scope for endpoint:{}", endpoint);
+        String scopes = null;
+        List<String> scopeList = null;
+        Map<String, List<String>> endpointMap = this.appConfiguration.getEndpointDetails();
+        log.error("Get scope for endpointMap:{}", endpointMap);
+
+        if (endpointMap == null || endpointMap.isEmpty()) {
+            return scopes;
+        }
+
+        scopeList = endpointMap.get(endpoint);
+
+        if (scopeList == null || scopeList.isEmpty()) {
+            return scopes;
+        }
+
+        Set<String> scopesSet = new HashSet<>(scopeList);
+
+        StringBuilder scope = new StringBuilder(ScopeType.OPENID.getValue());
+        for (String s : scopesSet) {
+            scope.append(" ").append(s);
+        }
+
+        return scopes;
+    }
+
+    private String getEndpointUrl(String endpoint) {
+        log.error("Get endpoint URL for endpoint:{}", endpoint);
+        Map<String, List<String>> endpointMap = this.appConfiguration.getEndpointDetails();
+        log.error("Get endpoint URL for endpointMap:{}", endpointMap);
+
+        if (endpointMap == null || endpointMap.isEmpty()) {
+            return endpoint;
+        }
+
+        Set<String> keys = endpointMap.keySet();
+        log.error("endpointMap keys:{}", keys);
+
+        String key = keys.stream().filter(e -> e.endsWith("/" + endpoint)).toString();
+        log.error("endpointMap key:{} for endpoint:{}", key, endpoint);
+        return key;
+    }
+
+    private String getAuditEndpoint(String endpoint) {
+        if (StringUtils.isBlank(endpoint)) {
+            return endpoint;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(appConfiguration.getIssuerUrl());
+        sb.append("/");
+        sb.append(endpoint);
+        return sb.toString();
+    }
 
 }
