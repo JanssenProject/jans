@@ -105,7 +105,7 @@ class DCRRepository(context: Context) {
         dcrRequest.jwks = jwks.toJsonString()
         Log.d(TAG, "Inside doDCR :: jwks :: " + jwks.toJsonString())
 
-        var response: Response<DCResponse> =
+        val response: Response<DCResponse> =
             ApiAdapter.getInstance(issuer).doDCR(dcrRequest, registrationUrl)
 
         if (response.code() != 200 && response.code() != 201) {
@@ -273,19 +273,15 @@ class DCRRepository(context: Context) {
 
     }
 
-    suspend fun isClientInDatabase(): Boolean {
-        var oidcClients: List<OIDCClient>? = appDatabase?.oidcClientDao()?.getAll()
-        var oidcClient: OIDCClient? = null
-        oidcClient = oidcClients?.let { it -> it[0] }
-        return oidcClient != null
-    }
-
-    suspend fun getClientInDatabase(): OIDCClient? {
+    suspend fun getOIDCClient(): OIDCClient? {
         val oidcClients: List<OIDCClient> = appDatabase.oidcClientDao().getAll()
         var oidcClient: OIDCClient? = null
-        if(oidcClients.isNotEmpty()) {
-            oidcClient = oidcClients?.let { it -> it.get(0) }
+        if(!oidcClients.isNullOrEmpty()) {
+            oidcClient = oidcClients[0]
+            oidcClient.isSuccessful = true
+            return oidcClient
         }
+        oidcClient = doDCRUsingSSA(AppConfig.SSA, AppConfig.ALLOWED_REGISTRATION_SCOPES)
         return oidcClient
     }
 

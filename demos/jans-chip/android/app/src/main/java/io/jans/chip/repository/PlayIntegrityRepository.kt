@@ -231,8 +231,8 @@ class PlayIntegrityRepository(context: Context) {
     suspend fun getAppIntegrityEntityInDatabase(): AppIntegrityEntity? {
         var appIntegrityEntities: List<AppIntegrityEntity>? = appDatabase.appIntegrityDao().getAll()
         var appIntegrityEntity: AppIntegrityEntity? = null
-        if(appIntegrityEntities != null && !appIntegrityEntities.isEmpty()) {
-            appIntegrityEntity = appIntegrityEntities?.let { it -> it.get(0) }
+        if(!appIntegrityEntities.isNullOrEmpty()) {
+            appIntegrityEntity = appIntegrityEntities[0]
         }
         return appIntegrityEntity
     }

@@ -47,6 +47,7 @@ import io.jans.chip.model.TokenResponse
 import io.jans.chip.model.UserInfoResponse
 import io.jans.chip.model.fido.attestation.option.AttestationOptionResponse
 import io.jans.chip.model.fido.attestation.result.AttestationResultRequest
+import io.jans.chip.model.fido.config.FidoConfiguration
 import io.jans.chip.model.fido.config.FidoConfigurationResponse
 import io.jans.chip.ui.common.customComposableViews.MediumTitleText
 import io.jans.chip.ui.common.customComposableViews.SmallClickableWithIconAndText
@@ -200,7 +201,9 @@ fun RegistrationScreen(
                             },
 
                             onSubmit = {
+                                //create authenticator instance
                                 val authAdaptor = AuthAdaptor(context)
+                                //check if selected  enrolled credential present in database
                                 if(authAdaptor.isCredentialsPresent(mainViewModel.getUsername())) {
                                     shouldShowDialog.value = true
                                     dialogContent.value = "Username already enrolled!"
@@ -209,8 +212,9 @@ fun RegistrationScreen(
                                 if (isBiometricAvailable) {
                                     CoroutineScope(Dispatchers.Main).launch {
                                         registrationState = registrationState.copy(isLoading = true)
+                                        //authenticate to get authorization code
                                         val loginResponse: LoginResponse? = async {
-                                            mainViewModel.processlogin(
+                                            mainViewModel.processLogin(
                                                 mainViewModel.getUsername(),
                                                 mainViewModel.getPassword(),
                                                 "enroll",
@@ -220,12 +224,11 @@ fun RegistrationScreen(
 
                                         if (loginResponse?.isSuccessful == false) {
                                             shouldShowDialog.value = true
-                                            dialogContent.value =
-                                                loginResponse.errorMessage.toString()
-                                            registrationState =
-                                                registrationState.copy(isLoading = false)
+                                            dialogContent.value = loginResponse.errorMessage.toString()
+                                            registrationState = registrationState.copy(isLoading = false)
                                             return@launch
                                         }
+                                        //exchange token for code
                                         val tokenResponse: TokenResponse? = async {
                                             mainViewModel.getToken(
                                                 loginResponse?.authorizationCode,
@@ -233,13 +236,12 @@ fun RegistrationScreen(
                                         }.await()
                                         if (tokenResponse?.isSuccessful == false) {
                                             shouldShowDialog.value = true
-                                            dialogContent.value =
-                                                tokenResponse.errorMessage.toString()
+                                            dialogContent.value = tokenResponse.errorMessage.toString()
 
-                                            registrationState =
-                                                registrationState.copy(isLoading = false)
+                                            registrationState = registrationState.copy(isLoading = false)
                                             return@launch
                                         }
+                                        //exchange user-info for token
                                         val userInfoResponse: UserInfoResponse? =
                                             async { mainViewModel.getUserInfo(tokenResponse?.accessToken) }.await()
                                         if (userInfoResponse != null) {
@@ -249,25 +251,22 @@ fun RegistrationScreen(
                                         }
                                         if (userInfoResponse?.isSuccessful == false) {
                                             shouldShowDialog.value = true
-                                            dialogContent.value =
-                                                userInfoResponse.errorMessage.toString()
+                                            dialogContent.value = userInfoResponse.errorMessage.toString()
 
-                                            registrationState =
-                                                registrationState.copy(isLoading = false)
+                                            registrationState = registrationState.copy(isLoading = false)
                                             return@launch
                                         }
-
-                                        val fidoConfiguration: FidoConfigurationResponse? =
-                                            async { mainViewModel.fetchFidoConfiguration() }.await()
+                                        //get fido configuration
+                                        val fidoConfiguration: FidoConfiguration? =
+                                            async { mainViewModel.getFIDOConfiguration() }.await()
                                         if (fidoConfiguration?.isSuccessful == false) {
                                             shouldShowDialog.value = true
-                                            dialogContent.value =
-                                                fidoConfiguration?.errorMessage.toString()
+                                            dialogContent.value = fidoConfiguration?.errorMessage.toString()
 
-                                            registrationState =
-                                                registrationState.copy(isLoading = false)
+                                            registrationState = registrationState.copy(isLoading = false)
                                             return@launch
                                         }
+                                        //call /attestation/option
                                         val attestationOptionResponse: AttestationOptionResponse? =
                                             async {
                                                 mainViewModel.attestationOption(
@@ -276,32 +275,31 @@ fun RegistrationScreen(
                                             }.await()
                                         if (attestationOptionResponse?.isSuccessful == false) {
                                             shouldShowDialog.value = true
-                                            dialogContent.value =
-                                                attestationOptionResponse?.errorMessage.toString()
+                                            dialogContent.value = attestationOptionResponse?.errorMessage.toString()
 
-                                            registrationState =
-                                                registrationState.copy(isLoading = false)
+                                            registrationState = registrationState.copy(isLoading = false)
                                             return@launch
                                         }
-
+                                        // Generate a new credential
                                         val publicKeyCredentialSource = async {
                                             authAdaptor.getPublicKeyCredentialSource(
                                                 attestationOptionResponse,
                                                 fidoConfiguration?.issuer
                                             )
                                         }.await()
+                                        //Generate a signature object
                                         val signature =
                                             async {
                                                 authAdaptor.generateSignature(
                                                     publicKeyCredentialSource
                                                 )
                                             }.await()
-
+                                        //show biometric prompt
                                         BiometricHelper.registerUserBiometrics(context,
                                             signature!!,
                                             onSuccess = { plainText ->
                                                 CoroutineScope(Dispatchers.Main).launch {
-
+                                                    //call authenticator register method to get attestationObject
                                                     val attestationResultRequest: AttestationResultRequest? =
                                                         async {
                                                             authAdaptor.register(
@@ -312,14 +310,12 @@ fun RegistrationScreen(
                                                         }.await()
                                                     if (attestationResultRequest?.isSuccessful == false) {
                                                         shouldShowDialog.value = true
-                                                        dialogContent.value =
-                                                            attestationResultRequest.errorMessage.toString()
+                                                        dialogContent.value = attestationResultRequest.errorMessage.toString()
 
-                                                        registrationState =
-                                                            registrationState.copy(isLoading = false)
+                                                        registrationState = registrationState.copy(isLoading = false)
                                                         return@launch
                                                     }
-
+                                                    //call /attestation/result
                                                     val attestationResultResponse = async {
                                                         mainViewModel.attestationResult(
                                                             attestationResultRequest
@@ -327,21 +323,17 @@ fun RegistrationScreen(
                                                     }.await()
                                                     if (attestationResultResponse?.isSuccessful == false) {
                                                         shouldShowDialog.value = true
-                                                        dialogContent.value =
-                                                            attestationResultResponse.errorMessage.toString()
+                                                        dialogContent.value = attestationResultResponse.errorMessage.toString()
 
-                                                        registrationState =
-                                                            registrationState.copy(isLoading = false)
+                                                        registrationState = registrationState.copy(isLoading = false)
                                                         return@launch
                                                     }
-                                                    mainViewModel.attestationOptionResponse = true
+                                                    mainViewModel.mainState = mainViewModel.mainState.copy(attestationOptionSuccess = true)
+                                                    mainViewModel.mainState = mainViewModel.mainState.copy(attestationResultSuccess = true)
 
-                                                    registrationViewModel.onUiEvent(
-                                                        registrationUiEvent = RegistrationUiEvent.Submit
-                                                    )
+                                                    registrationViewModel.onUiEvent(registrationUiEvent = RegistrationUiEvent.Submit)
 
-                                                    registrationState =
-                                                        registrationState.copy(isLoading = false)
+                                                    registrationState = registrationState.copy(isLoading = false)
                                                 }
                                             })
                                     }
@@ -351,8 +343,7 @@ fun RegistrationScreen(
                                         "Biometric authentication is not available!",
                                         Toast.LENGTH_SHORT
                                     ).show()
-                                    registrationState =
-                                        registrationState.copy(isLoading = false)
+                                    registrationState = registrationState.copy(isLoading = false)
                                 }
                             }
                         )
