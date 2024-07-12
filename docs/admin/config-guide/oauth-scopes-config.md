@@ -40,10 +40,11 @@ tasks.
 In the Janssen Server, you can deploy and customize the OAuth scopes using the
 command line. To get the details of Janssen command line operations relevant to
 OAuth Scope, you can check the operations under the `OauthScopes` task using the
+command below.
 
 
 ```bash title="Command"
-opt/jans/jans-cli/config-cli.py --info OauthScopes
+/opt/jans/jans-cli/config-cli.py --info OauthScopes
 ```
 ```text title="Sample Output"
 Operation ID: get-oauth-scopes
@@ -91,16 +92,15 @@ To get sample schema type /opt/jans/jans-cli/config-cli.py --schema-sample <sche
 
 ### Find/View OAuth Scopes
 
-Operations will be done with **Operation ID**. Some operations may take parameters, 
-let's retrieve `3` scopes (**limit**) that has `view` in it's description (**pattern**) 
-and **type** `openid`:
+Use the operation ID `get-oauth-scopes` to find and view the current scopes. Let's retrieve 3 scopes that
+contain `view` in the description and `openid` as the Type.
 
 ```bash title="Command"
  /opt/jans/jans-cli/config-cli.py --operation-id get-oauth-scopes \
 --endpoint-args limit:3,pattern:view,type:openid
 ```
  
-```text title="Sample Output"
+```text title="Sample Output" linenums="1"
  {
   "start": 0,
   "totalEntriesCount": 7,
@@ -179,111 +179,29 @@ and **type** `openid`:
     }
   ]
 }
-
 ```
 
 ### Create an OAuth Scope
 
-Let's create a scope. Remember when we queried info for a task **OAuthScopes** it printed:
+To create a new scope, we can use `post-oauth-scopes` operation id. As shown in the [output](#using-command-line)
+for `--info` command, the `post-oauth-scopes` operation requires data to be sent according to `Scope` schema.
 
-```text
-Operation ID: post-oauth-scopes
-  Description: Create Scope
-  Schema: Scope
-```
-
-Thus, we can get sample schema and use Operation ID `post-oauth-scopes`. 
-Lets get sample schema:
+To see the schema, use the command below:
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --schema Scope > /tmp/scope.json
-```
-For your information, you can obtain the format of the `Scope` schema by 
-running the aforementioned command without a file.
-
-```text title="Schema Format"
-dn                         string
-expirationDate             string
-                           format: date-time
-deletable                  boolean
-inum                       string
-displayName                string
-id                         string
-iconUrl                    string
-description                string
-scopeType                  string
-                           enum: ['openid', 'dynamic', 'uma', 'spontaneous', 'oauth']
-claims                     array of string
-defaultScope               boolean
-groupClaims                boolean
-dynamicScopeScripts        array of string
-umaAuthorizationPolicies   array of string
-attributes                 object
-                             spontaneousClientScopes: array of string
-                             showInConfigurationEndpoint: boolean
-creatorId                  string
-creatorType                string
-                           enum: ['none', 'client', 'user', 'auto']
-creationDate               string
-                           format: date-time
-creatorAttributes          object
-                           additionalProperties: ordereddict([('type', 'string')])
-umaType                    boolean
-baseDn                     string
+/opt/jans/jans-cli/config-cli.py --schema Scope
 ```
 
-You can also use the following command for `Scope` schema example:
+For better understanding, the Janssen Server also provides an sample of data to be sent to the server. 
+This sample conforms to the schema above. Use the command below to get the sample.
 
 ```bash title="Command"
 /opt/jans/jans-cli/config-cli.py --schema-sample Scope
 ```
-```json title="Schema Example"
-{
-  "dn": "string",
-  "expirationDate": "string",
-  "deletable": true,
-  "inum": "string",
-  "displayName": "string",
-  "id": "string",
-  "iconUrl": "string",
-  "description": "string",
-  "scopeType": "oauth",
-  "claims": [
-    "string"
-  ],
-  "defaultScope": false,
-  "groupClaims": false,
-  "dynamicScopeScripts": [
-    "string"
-  ],
-  "umaAuthorizationPolicies": [
-    "string"
-  ],
-  "attributes": {
-    "spontaneousClientScopes": [
-      "string"
-    ],
-    "showInConfigurationEndpoint": false
-  },
-  "creatorId": "string",
-  "creatorType": "user",
-  "creationDate": "string",
-  "creatorAttributes": {},
-  "umaType": true,
-  "baseDn": "string"
-}
 
-```
+Using the schema and the example above, we have added below key data to the file `/tmp/scope.json`
 
-Now edit file `tmp/scope.json`. As an example we just filled the following properties:
-
-```text
-"id": "TestScopeID",
-"displayName": "TestScope",
-"description": "Test Scope created by jans-cli",
-```
-
-```json title="Input"                                                                                                                                                           
+```json title="Input" linenums="1"                                                                                                                                                 
 {
   "dn": null,
   "id": "TestScopeID",
@@ -303,8 +221,10 @@ Now edit file `tmp/scope.json`. As an example we just filled the following prope
     "showInConfigurationEndpoint": true
   }
 }
+
 ```
-Now let's post the data using below command:
+
+Now let's post this scope to the Janssen Server to be added to the existing set:
 
 ```bash title="Command"
  /opt/jans/jans-cli/config-cli.py --operation-id post-oauth-scopes \
@@ -312,85 +232,27 @@ Now let's post the data using below command:
 ```
 
 
-```json title="Sample Output"
-{
-  "dn": "inum=8eb2b0c0-d1d9-453d-8364-e2809ce857f2,ou=scopes,o=jans",
-  "inum": "8eb2b0c0-d1d9-453d-8364-e2809ce857f2",
-  "displayName": "TestScope",
-  "id": "TestScopeID",
-  "description": "Test Scope created by jans-cli",
-  "scopeType": "openid",
-  "defaultScope": true,
-  "attributes": {
-    "showInConfigurationEndpoint": true
-  },
-  "creationDate": "2024-06-25T08:44:08",
-  "umaType": false,
-  "baseDn": "inum=8eb2b0c0-d1d9-453d-8364-e2809ce857f2,ou=scopes,o=jans"
-}
-```
-
-It created scope with inum `8eb2b0c0-d1d9-453d-8364-e2809ce857f2` and 
-returned current data. 
-
-
 ### Update Existing OAuth Scopes
 
-In case we need to update an existing OAuth Scope, we can do that as well.
+To update the configuration follow the steps below.
 
-To update an existing OAuth Scope, we have to create a json file 
-with updated details. You can get the schema file as well to
-understand the format of the OAuth Scope JSON file.
+1. [Get the existing OAuth Scope](#find-oauth-scopes-by-inum) and store it into a file for editing.
+  The following command will retrieve the existing OAuth Scope in the schema file.
+  ```bash title="Sample Command"
+  /opt/jans/jans-cli/config-cli.py -no-color --operation-id get-oauth-scopes-by-inum \
+  --url-suffix inum:8eb2b0c0-d1d9-453d-8364-e2809ce857f2 > /tmp/scopdata.json
+  ```
 
-This is an existing OAuth Scope we are going to update.
+2. Edit and update the desired configuration values in the file while keeping other
+   properties and values unchanged. Updates must adhere to the `Scope`
+   schema as mentioned [here](#using-command-line).
 
-```json 
-{
-  "dn": "inum=8eb2b0c0-d1d9-453d-8364-e2809ce857f2,ou=scopes,o=jans",
-  "inum": "8eb2b0c0-d1d9-453d-8364-e2809ce857f2",
-  "displayName": "TestScope",
-  "id": "TestScopeID",
-  "description": "Test Scope created by jans-cli",
-  "scopeType": "openid",
-  "defaultScope": true,
-  "attributes": {
-    "showInConfigurationEndpoint": true
-  },
-  "creationDate": "2024-06-25T08:44:08",
-  "umaType": false,
-  "baseDn": "inum=8eb2b0c0-d1d9-453d-8364-e2809ce857f2,ou=scopes,o=jans"
-}
-```
-We have changed only the `scopeType` to `dynamic`.
-
-Let's update using the below command:
-
-```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --operation-id put-oauth-scopes \
---data /tmp/scope.json
-```
-
-```json title="Sample output"
-{
-  "dn": "inum=8eb2b0c0-d1d9-453d-8364-e2809ce857f2,ou=scopes,o=jans",
-  "inum": "8eb2b0c0-d1d9-453d-8364-e2809ce857f2",
-  "displayName": "TestScope",
-  "id": "TestScopeID",
-  "description": "Test Scope created by jans-cli",
-  "scopeType": "dynamic",
-  "defaultScope": true,
-  "attributes": {
-    "showInConfigurationEndpoint": true
-  },
-  "creationDate": "2024-06-25T08:44:08",
-  "umaType": false,
-  "baseDn": "inum=8eb2b0c0-d1d9-453d-8364-e2809ce857f2,ou=scopes,o=jans"
-}
-
-```
-
-
-
+3. We have changed only the `scopeType` to `dynamic` in existing OAuth Scope.
+   Use the updated file to send the update to the Janssen Server using the command below
+   ```bash title="Command"
+   /opt/jans/jans-cli/config-cli.py --operation-id put-oauth-scopes \
+   --data /tmp/scope.json
+   ```
 This will updated the existing oauth scopes matched with inum value.
 
 ### Patch OAuth Scopes by `inum`
@@ -435,7 +297,7 @@ Let's do the operation:
 --url-suffix inum:8eb2b0c0-d1d9-453d-8364-e2809ce857f2 --data /tmp/patch.json 
 ```
 
-```json title="Sample Output"
+```json title="Sample Output" linenums="1"
 {
   "dn": "inum=8eb2b0c0-d1d9-453d-8364-e2809ce857f2,ou=scopes,o=jans",
   "inum": "8eb2b0c0-d1d9-453d-8364-e2809ce857f2",
@@ -482,7 +344,7 @@ For example:
 ```
 It returns the details of the scope matched with the `inum` value.
         
-```json title="Sample Output"
+```json title="Sample Output" linenums="1"
 {
   "dn": "inum=8eb2b0c0-d1d9-453d-8364-e2809ce857f2,ou=scopes,o=jans",
   "inum": "8eb2b0c0-d1d9-453d-8364-e2809ce857f2",
