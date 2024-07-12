@@ -8,6 +8,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import io.jans.jans_chip.R
 import java.security.Signature
+
 /*
  * BiometricHelper is a utility object that simplifies the implementation of biometric authentication
  * functionalities in Android apps. It provides methods to check biometric availability, register user
@@ -81,51 +82,13 @@ object BiometricHelper {
             .build()
     }
 
-    // Register user biometrics by encrypting a randomly generated token
-    /*fun registerUserBiometrics(
-        context: FragmentActivity,
-        prefBiometric: String,
-        onSuccess: (authResult: BiometricPrompt.AuthenticationResult) -> Unit = {},
-    ) {
-        val cryptoManager = CryptoManager()
-        val cipher = cryptoManager.initEncryptionCipher(SECRET_KEY)
-        val biometricPrompt = getBiometricPrompt(context) { authResult ->
-            authResult.cryptoObject?.cipher?.let { cipher ->
-                // Dummy token for now(in production app, generate a unique and genuine token
-                // for each user registration or consider using token received from authentication server)
-                val token = UUID.randomUUID().toString()
-                val encryptedToken = cryptoManager.encrypt(token, cipher)
-                cryptoManager.saveToPrefs(
-                    encryptedToken,
-                    context,
-                    ENCRYPTED_FILE_NAME,
-                    Context.MODE_PRIVATE,
-                    prefBiometric,
-                    *//*PREF_BIOMETRIC*//*
-                )
-                // Execute custom action on successful registration
-                onSuccess(authResult)
-            }
-        }
-        biometricPrompt.authenticate(
-            getPromptInfo(
-                context,
-                "Fido Enrolment",
-                "Enrol using your biometric credential",
-                "Touch the fingerprint sensor"
-            ),
-            BiometricPrompt.CryptoObject(cipher)
-        )
-    }*/
     fun registerUserBiometrics(
         context: FragmentActivity,
         signature: Signature,
         onSuccess: (authResult: BiometricPrompt.AuthenticationResult) -> Unit = {},
     ) {
-        //val cryptoManager = CryptoManager()
-        //val cipher = cryptoManager.initEncryptionCipher(SECRET_KEY)
-        val biometricPrompt = getBiometricPrompt(context) { authResult ->
 
+        val biometricPrompt = getBiometricPrompt(context) { authResult ->
             onSuccess(authResult)
         }
         biometricPrompt.authenticate(
@@ -145,31 +108,15 @@ object BiometricHelper {
         signature: Signature,
         onSuccess: (authResult: BiometricPrompt.AuthenticationResult) -> Unit,
     ) {
-        /*val cryptoManager = CryptoManager()
-        val encryptedData = cryptoManager.getFromPrefs(
+        val biometricPrompt = getBiometricPrompt(context) { authResult ->
+            onSuccess(authResult)
+        }
+        val promptInfo = getPromptInfo(
             context,
-            ENCRYPTED_FILE_NAME,
-            Context.MODE_PRIVATE,
-            prefBiometric*/
-            /*PREF_BIOMETRIC*/
-        //)
-        //encryptedData?.let { data ->
-        //    val cipher = cryptoManager.initDecryptionCipher(SECRET_KEY, data.initializationVector)
-            val biometricPrompt = getBiometricPrompt(context) { authResult ->
-                //authResult.cryptoObject?.cipher?.let { cipher ->
-                    //val plainText = cryptoManager.decrypt(data.ciphertext, cipher)
-                    // Execute custom action on successful authentication
-
-                //}
-                onSuccess(authResult)
-            }
-            val promptInfo = getPromptInfo(
-                context,
-                "Fido Authentication",
-                "Authenticate using your biometric credential",
-                "Touch the fingerprint sensor"
-            )
-            biometricPrompt.authenticate(promptInfo, BiometricPrompt.CryptoObject(signature))
-        //}
+            "Fido Authentication",
+            "Authenticate using your biometric credential",
+            "Touch the fingerprint sensor"
+        )
+        biometricPrompt.authenticate(promptInfo, BiometricPrompt.CryptoObject(signature))
     }
 }
