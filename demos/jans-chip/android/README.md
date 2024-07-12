@@ -1,7 +1,7 @@
 # Jans Chip
 
-## A  first party android mobile application that leverages dynamic client registration (DCR), DPoP access tokens.
-## Passkey authentication
+- A first party android mobile application that leverages dynamic client registration (DCR), DPoP access tokens.
+- Passkey authentication
 
 [Demo Video](https://www.loom.com/embed/66e145e3bba4406ebda53715168ca8f9?sid=e946f580-587e-4c55-8ea8-3845d6ae4ce9)
 

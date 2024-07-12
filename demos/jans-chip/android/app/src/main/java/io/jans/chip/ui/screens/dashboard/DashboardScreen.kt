@@ -75,8 +75,7 @@ fun DashboardScreen(
                     onClick = {
                         CoroutineScope(Dispatchers.Main).launch {
                             loading = true
-                            val logoutResponse: LogoutResponse =
-                                async { mainViewModel.logout() }.await()
+                            val logoutResponse: LogoutResponse = async { mainViewModel.logout() }.await()
                             if (logoutResponse.isSuccessful != true) {
                                 shouldShowDialog.value = true
                                 dialogContent.value = logoutResponse.errorMessage.toString()

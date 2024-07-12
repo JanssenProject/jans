@@ -42,13 +42,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
-import com.example.compose.AppTheme
+import io.jans.chip.theme.AppTheme
 import com.spr.jetpack_loading.components.indicators.lineScaleIndicator.LineScaleIndicator
 import com.spr.jetpack_loading.enums.PunchType
 import io.jans.chip.model.OIDCClient
@@ -82,7 +81,7 @@ class MainActivity : AppCompatActivity() {
                 ) {
                     val shouldShowDialog = remember { mutableStateOf(false) }
                     val dialogContent = remember { mutableStateOf("") }
-                    LandingScreen(shouldShowDialog, dialogContent, mainViewModel)
+                    LoadingAppTasks(shouldShowDialog, dialogContent, mainViewModel)
                     AppAlertDialog(
                         shouldShowDialog = shouldShowDialog,
                         content = dialogContent
@@ -121,7 +120,7 @@ class MainActivity : AppCompatActivity() {
 }
 
 @Composable
-fun LandingScreen(
+fun LoadingAppTasks(
     shouldShowDialog: MutableState<Boolean>,
     dialogContent: MutableState<String>,
     mainViewModel: MainViewModel
@@ -135,9 +134,8 @@ fun LandingScreen(
                     async { mainViewModel.getOPConfiguration() }.await()
                 if (opConfiguration?.isSuccessful == false) {
                     mainViewModel.mainState = mainViewModel.mainState.copy(errorInLoading = true)
-                    mainViewModel.mainState =
-                        mainViewModel.mainState.copy(loadingErrorMessage = "Error in fetching OP Configuration")
-                    throw Exception("Error in fetching OP Configuration")
+                    mainViewModel.mainState = mainViewModel.mainState.copy(loadingErrorMessage = "Error in fetching OP Configuration")
+                    //throw Exception("Error in fetching OP Configuration")
                 }
 
                 //get FIDO configuration
@@ -145,46 +143,41 @@ fun LandingScreen(
                     async { mainViewModel.getFIDOConfiguration() }.await()
                 if (fidoConfiguration?.isSuccessful == false) {
                     mainViewModel.mainState = mainViewModel.mainState.copy(errorInLoading = true)
-                    mainViewModel.mainState =
-                        mainViewModel.mainState.copy(loadingErrorMessage = "Error in fetching FIDO Configuration")
-                    throw Exception("Error in fetching FIDO Configuration")
+                    mainViewModel.mainState = mainViewModel.mainState.copy(loadingErrorMessage = "Error in fetching FIDO Configuration")
+                    //throw Exception("Error in fetching FIDO Configuration")
                 }
 
                 //check OIDC client
                 val oidcClient: OIDCClient? = async { mainViewModel.getOIDCClient() }.await()
                 if (oidcClient?.isSuccessful == false) {
                     mainViewModel.mainState = mainViewModel.mainState.copy(errorInLoading = true)
-                    mainViewModel.mainState =
-                        mainViewModel.mainState.copy(loadingErrorMessage = "Error in registering OIDC Client")
-                    throw Exception("Error in registering OIDC Client")
+                    mainViewModel.mainState = mainViewModel.mainState.copy(loadingErrorMessage = "Error in registering OIDC Client")
+                    //throw Exception("Error in registering OIDC Client")
                 }
-
+                //setting user-info
                 val userInfoResponse: UserInfoResponse? =
                     mainViewModel.getUserInfo(oidcClient?.recentGeneratedAccessToken)
                 if (userInfoResponse?.isSuccessful == true) {
                     mainViewModel.setUserInfoResponse(userInfoResponse)
                 }
-
+                //checking app integrity
                 val appIntegrityEntity: String? =
                     async { mainViewModel.checkAppIntegrityFromDatabase() }.await()
                 if (appIntegrityEntity == null) {
                     val appIntegrityResponse: AppIntegrityResponse? =
                         async { mainViewModel.checkAppIntegrity() }.await()
                     if (appIntegrityResponse != null) {
-                        mainViewModel.mainState =
-                            mainViewModel.mainState.copy(errorInLoading = true)
+                        mainViewModel.mainState = mainViewModel.mainState.copy(errorInLoading = true)
                         mainViewModel.mainState = mainViewModel.mainState.copy(
                             loadingErrorMessage = appIntegrityResponse.appIntegrity?.appRecognitionVerdict
                                 ?: "Unable to fetch App Integrity from Google Play Integrity"
                         )
                     }
                 } else {
-                    mainViewModel.mainState =
-                        mainViewModel.mainState.copy(errorInLoading = true)
-                    mainViewModel.mainState =
-                        mainViewModel.mainState.copy(loadingErrorMessage = "App Integrity: $appIntegrityEntity")
+                    mainViewModel.mainState = mainViewModel.mainState.copy(errorInLoading = true)
+                    mainViewModel.mainState = mainViewModel.mainState.copy(loadingErrorMessage = "App Integrity: $appIntegrityEntity")
                 }
-                shouldShowDialog.value =  mainViewModel.mainState.errorInLoading
+                shouldShowDialog.value = mainViewModel.mainState.errorInLoading
                 dialogContent.value = mainViewModel.mainState.loadingErrorMessage
 
                 mainViewModel.mainState = mainViewModel.mainState.copy(isLoading = false)
@@ -192,8 +185,7 @@ fun LandingScreen(
                 //catching exception
                 mainViewModel.mainState = mainViewModel.mainState.copy(isLoading = false)
                 mainViewModel.mainState = mainViewModel.mainState.copy(errorInLoading = true)
-                mainViewModel.mainState =
-                    mainViewModel.mainState.copy(loadingErrorMessage = "Error in loading app: ${e.message}")
+                mainViewModel.mainState = mainViewModel.mainState.copy(loadingErrorMessage = "Error in loading app: ${e.message}")
                 e.printStackTrace()
             }
         }

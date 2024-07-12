@@ -177,7 +177,6 @@ class MainViewModel : ViewModel() {
     }
 
     suspend fun assertionOption(username: String): AssertionOptionResponse? {
-
         return fidoAssertionRepository.assertionOption(username)
     }
 
