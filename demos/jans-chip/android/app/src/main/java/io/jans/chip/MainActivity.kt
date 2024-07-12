@@ -29,6 +29,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,31 +42,27 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
-import com.example.compose.AppTheme
-import com.nimbusds.jwt.JWTClaimsSet
+import io.jans.chip.theme.AppTheme
 import com.spr.jetpack_loading.components.indicators.lineScaleIndicator.LineScaleIndicator
 import com.spr.jetpack_loading.enums.PunchType
-import io.jans.chip.factories.DPoPProofFactory
 import io.jans.chip.model.OIDCClient
 import io.jans.chip.model.OPConfiguration
 import io.jans.chip.model.UserInfoResponse
 import io.jans.chip.model.appIntegrity.AppIntegrityResponse
+import io.jans.chip.model.fido.config.FidoConfiguration
 import io.jans.chip.ui.screens.NavigationRoutes
 import io.jans.chip.ui.screens.authenticatedGraph
 import io.jans.chip.ui.screens.unauthenticatedGraph
-import io.jans.chip.utils.AppConfig
 import io.jans.chip.viewmodel.MainViewModel
 import io.jans.jans_chip.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
@@ -74,103 +71,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val mainViewModel = MainViewModel.getInstance(this)
-        var loading = true
 
-        CoroutineScope(Dispatchers.IO).launch {
-
-            mainViewModel.opConfigurationPresent = false
-            mainViewModel.fidoConfigurationPresent = false
-            mainViewModel.attestationOptionSuccess = false
-            mainViewModel.attestationOptionResponse = false
-            mainViewModel.clientRegistered = false
-            mainViewModel.userIsAuthenticated = false
-
-            mainViewModel.errorInLoading = false
-
-            //get openid configuration
-            try {
-                val jwtClaimsSet: JWTClaimsSet = DPoPProofFactory.getClaimsFromSSA()
-                var opConfiguration: OPConfiguration? =
-                    async { mainViewModel.getOPConfigurationInDatabase() }.await()
-                if (opConfiguration != null) {
-                    mainViewModel.opConfigurationPresent = true
-                } else {
-                    val issuer: String = jwtClaimsSet.getClaim("iss").toString()
-                    mainViewModel.setOpConfigUrl(issuer + AppConfig.OP_CONFIG_URL)
-                    opConfiguration = async { mainViewModel.fetchOPConfiguration() }.await()
-                    if (opConfiguration == null || opConfiguration.isSuccessful == false) {
-                        mainViewModel.errorInLoading = true
-                        mainViewModel.loadingErrorMessage = "Error in fetching OP Configuration"
-                        throw Exception("Error in fetching OP Configuration")
-                    }
-                }
-
-                //get FIDO configuration
-                val fidoConfiguration = async { mainViewModel.getFidoConfigInDatabase() }.await()
-                if (fidoConfiguration != null) {
-                    mainViewModel.fidoConfigurationPresent = true
-                } else {
-                    val issuer: String = jwtClaimsSet.getClaim("iss").toString()
-                    mainViewModel.setFidoConfigUrl(issuer + AppConfig.FIDO_CONFIG_URL)
-                    val fidoConfigurationResponse =
-                        async { mainViewModel.fetchFidoConfiguration() }.await()
-
-                    if (fidoConfigurationResponse == null || fidoConfigurationResponse.isSuccessful == false) {
-                        mainViewModel.errorInLoading = true
-                        mainViewModel.loadingErrorMessage = "Error in fetching FIDO Configuration"
-                        throw Exception("Error in fetching FIDO Configuration")
-                    }
-                }
-                //check OIDC client
-                var oidcClient: OIDCClient? = async { mainViewModel.getClientInDatabase() }.await()
-
-                if (oidcClient != null) {
-                    mainViewModel.clientRegistered = true
-                } else {
-                    oidcClient = mainViewModel.doDCRUsingSSA(
-                        AppConfig.SSA,
-                        AppConfig.ALLOWED_REGISTRATION_SCOPES
-                    )
-                    mainViewModel.clientRegistered = oidcClient != null
-                    if (oidcClient == null || oidcClient.isSuccessful == false) {
-                        mainViewModel.errorInLoading = true
-                        mainViewModel.loadingErrorMessage = "Error in registering OIDC Client"
-                        throw Exception("Error in registering OIDC Client")
-                    }
-                }
-                val userInfoResponse: UserInfoResponse? =
-                    mainViewModel.getUserInfoWithAccessToken(oidcClient.recentGeneratedAccessToken)
-                if (userInfoResponse?.isSuccessful == true) {
-                    mainViewModel.setUserInfoResponse(userInfoResponse)
-                    mainViewModel.userIsAuthenticated = true
-                }
-
-
-                var appIntegrityEntity: String? =
-                    async { mainViewModel.checkAppIntegrityFromDatabase() }.await()
-                if (appIntegrityEntity == null) {
-                    val appIntegrityResponse: AppIntegrityResponse? =
-                        async { mainViewModel.checkAppIntegrity() }.await()
-                    if (appIntegrityResponse != null) {
-                        mainViewModel.errorInLoading = true
-                        mainViewModel.loadingErrorMessage =
-                            appIntegrityResponse.appIntegrity?.appRecognitionVerdict
-                                ?: "Unable to fetch App Integrity from Google Play Integrity"
-                    }
-                } else {
-                    mainViewModel.errorInLoading = true
-                    mainViewModel.loadingErrorMessage = "App Integrity: ${appIntegrityEntity}"
-                }
-                loading = false
-            } catch (e: Exception) {
-                //catching exception
-                loading = false
-                mainViewModel.errorInLoading = true
-                mainViewModel.loadingErrorMessage = "Error in loading app: ${e.message}"
-                e.printStackTrace()
-            }
-
-        }
         setContent {
             AppTheme {
                 // A surface container using the 'background' color from the theme
@@ -178,17 +79,14 @@ class MainActivity : AppCompatActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    val loadingApp = remember { mutableStateOf(loading) }
                     val shouldShowDialog = remember { mutableStateOf(false) }
                     val dialogContent = remember { mutableStateOf("") }
-
-                    shouldShowDialog.value = mainViewModel.errorInLoading
-                    dialogContent.value = mainViewModel.loadingErrorMessage
+                    LoadingAppTasks(shouldShowDialog, dialogContent, mainViewModel)
                     AppAlertDialog(
                         shouldShowDialog = shouldShowDialog,
                         content = dialogContent
                     )
-                    if (!loading) {
+                    if (!mainViewModel.mainState.isLoading) {
                         MainApp()
                     } else {
                         Column(
@@ -219,6 +117,81 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+}
+
+@Composable
+fun LoadingAppTasks(
+    shouldShowDialog: MutableState<Boolean>,
+    dialogContent: MutableState<String>,
+    mainViewModel: MainViewModel
+) {
+    LaunchedEffect(true) {
+        CoroutineScope(Dispatchers.IO).launch {
+            //get openid configuration
+            try {
+                mainViewModel.mainState = mainViewModel.mainState.copy(isLoading = true)
+                val opConfiguration: OPConfiguration? =
+                    async { mainViewModel.getOPConfiguration() }.await()
+                if (opConfiguration?.isSuccessful == false) {
+                    mainViewModel.mainState = mainViewModel.mainState.copy(errorInLoading = true)
+                    mainViewModel.mainState = mainViewModel.mainState.copy(loadingErrorMessage = "Error in fetching OP Configuration")
+                    //throw Exception("Error in fetching OP Configuration")
+                }
+
+                //get FIDO configuration
+                val fidoConfiguration: FidoConfiguration? =
+                    async { mainViewModel.getFIDOConfiguration() }.await()
+                if (fidoConfiguration?.isSuccessful == false) {
+                    mainViewModel.mainState = mainViewModel.mainState.copy(errorInLoading = true)
+                    mainViewModel.mainState = mainViewModel.mainState.copy(loadingErrorMessage = "Error in fetching FIDO Configuration")
+                    //throw Exception("Error in fetching FIDO Configuration")
+                }
+
+                //check OIDC client
+                val oidcClient: OIDCClient? = async { mainViewModel.getOIDCClient() }.await()
+                if (oidcClient?.isSuccessful == false) {
+                    mainViewModel.mainState = mainViewModel.mainState.copy(errorInLoading = true)
+                    mainViewModel.mainState = mainViewModel.mainState.copy(loadingErrorMessage = "Error in registering OIDC Client")
+                    //throw Exception("Error in registering OIDC Client")
+                }
+                //setting user-info
+                val userInfoResponse: UserInfoResponse? =
+                    mainViewModel.getUserInfo(oidcClient?.recentGeneratedAccessToken)
+                if (userInfoResponse?.isSuccessful == true) {
+                    mainViewModel.setUserInfoResponse(userInfoResponse)
+                }
+                //checking app integrity
+                val appIntegrityEntity: String? =
+                    async { mainViewModel.checkAppIntegrityFromDatabase() }.await()
+                if (appIntegrityEntity == null) {
+                    val appIntegrityResponse: AppIntegrityResponse? =
+                        async { mainViewModel.checkAppIntegrity() }.await()
+                    if (appIntegrityResponse != null) {
+                        mainViewModel.mainState = mainViewModel.mainState.copy(errorInLoading = true)
+                        mainViewModel.mainState = mainViewModel.mainState.copy(
+                            loadingErrorMessage = appIntegrityResponse.appIntegrity?.appRecognitionVerdict
+                                ?: "Unable to fetch App Integrity from Google Play Integrity"
+                        )
+                    }
+                } else {
+                    mainViewModel.mainState = mainViewModel.mainState.copy(errorInLoading = true)
+                    mainViewModel.mainState = mainViewModel.mainState.copy(loadingErrorMessage = "App Integrity: $appIntegrityEntity")
+                }
+                shouldShowDialog.value = mainViewModel.mainState.errorInLoading
+                dialogContent.value = mainViewModel.mainState.loadingErrorMessage
+
+                mainViewModel.mainState = mainViewModel.mainState.copy(isLoading = false)
+            } catch (e: Exception) {
+                //catching exception
+                mainViewModel.mainState = mainViewModel.mainState.copy(isLoading = false)
+                mainViewModel.mainState = mainViewModel.mainState.copy(errorInLoading = true)
+                mainViewModel.mainState = mainViewModel.mainState.copy(loadingErrorMessage = "Error in loading app: ${e.message}")
+                e.printStackTrace()
+            }
+        }
+    }
+
+    /* Landing screen content */
 }
 
 @Composable
@@ -277,52 +250,6 @@ fun AppAlertDialog(shouldShowDialog: MutableState<Boolean>, content: MutableStat
     }
 }
 
-@Composable
-fun AppLoaderDialog(shouldShowDialog: MutableState<Boolean>) {
-    if (shouldShowDialog.value) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .navigationBarsPadding()
-                .imePadding()
-                .height(400.dp)
-                .verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Spacer(modifier = Modifier.height(40.dp))
-            LineScaleIndicator(
-                color = Color(0xFF134520),
-                rectCount = 5,
-                distanceOnXAxis = 30f,
-                lineHeight = 100,
-                animationDuration = 500,
-                minScale = 0.3f,
-                maxScale = 1.5f,
-                punchType = PunchType.RANDOM_PUNCH,
-                penThickness = 15f
-            )
-        }
-    }
-}
-
-@Composable
-fun Title(
-    // 1
-    text: String,
-    fontFamily: FontFamily,
-    fontWeight: FontWeight,
-    fontSize: TextUnit,
-) {
-    Text(  // 2
-        text = text,
-        style = TextStyle(
-            fontFamily = fontFamily,
-            fontWeight = fontWeight,
-            fontSize = fontSize,  // 3
-        )
-    )
-}
 
 @Composable
 fun LogButton(
