@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Exchanger;
 
-import io.jans.webauthn.R;
 import io.jans.webauthn.models.PublicKeyCredentialSource;
 
 public class SelectCredentialDialogFragment extends DialogFragment implements CredentialSelector {
