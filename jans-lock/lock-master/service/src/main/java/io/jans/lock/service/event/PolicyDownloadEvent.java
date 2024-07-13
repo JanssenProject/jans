@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.jans.lock.service.policy.event;
+package io.jans.lock.service.event;
 
 /**
  * @author Yuriy Movchan Date: 12/30/2023
