@@ -50,7 +50,9 @@ public class AuthenticatorDataParser {
 
 	public static final int FLAG_USER_PRESENT = 0x01;
     public static final int FLAG_USER_VERIFIED = 0x04;
-	public static final int FLAG_ATTESTED_CREDENTIAL_DATA_INCLUDED = 0x40;
+    private static final int FLAG_BACKUP_ELIGIBILITY = 0x08;
+    public static final int FLAG_BACKUP_STATE = 0x10;
+    public static final int FLAG_ATTESTED_CREDENTIAL_DATA_INCLUDED = 0x40;
     public static final int FLAG_EXTENSION_DATA_INCLUDED = 0x80;
 
     @Inject
@@ -89,6 +91,8 @@ public class AuthenticatorDataParser {
 
         boolean hasAtFlag = verifyAtFlag(flagsBuffer);
         boolean hasEdFlag = verifyEdFlag(flagsBuffer);
+        boolean hasBEFlag = verifyBackupEligibility(flagsBuffer);
+        boolean hasBSFlag = verifyBackupState(flagsBuffer);
         log.debug("FLAGS hex {}", Hex.encodeHexString(flagsBuffer));
 
         byte[] counterBuffer = Arrays.copyOfRange(buffer, offset, offset += 4);
@@ -140,6 +144,12 @@ public class AuthenticatorDataParser {
             offset += extSize;
         }
 
+        if (hasBSFlag) {
+            if(!hasBEFlag) {
+                throw new Fido2RuntimeException("The BE=0 and BS=1 flags combination is not allowed.");
+            }
+        }
+
         byte[] leftovers = Arrays.copyOfRange(buffer, offset, buffer.length);
     	verifyNoLeftovers(leftovers);
 
@@ -187,6 +197,14 @@ public class AuthenticatorDataParser {
 
     public boolean verifyEdFlag(byte[] flags) {
         return (flags[0] & FLAG_EXTENSION_DATA_INCLUDED) == FLAG_EXTENSION_DATA_INCLUDED;
+    }
+
+    public boolean verifyBackupEligibility(byte[] flags) {
+        return (flags[0] & FLAG_BACKUP_ELIGIBILITY) == FLAG_BACKUP_ELIGIBILITY;
+    }
+
+    public boolean verifyBackupState(byte[] flags) {
+        return (flags[0] & FLAG_BACKUP_STATE) == FLAG_BACKUP_STATE;
     }
 
     public void verifyAttestationBuffer(byte[] attestationBuffer) {
