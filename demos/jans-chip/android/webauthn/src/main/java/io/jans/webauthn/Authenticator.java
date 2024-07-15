@@ -201,7 +201,7 @@ public class Authenticator {
         }
         return attestationObject;
     }*/
-
+   // 7. Generate a new credential
     public PublicKeyCredentialSource getPublicKeyCredentialSource(AuthenticatorMakeCredentialOptions options) {
         PublicKeyCredentialSource credentialSource;
         try {
@@ -217,6 +217,10 @@ public class Authenticator {
         }
     }
 
+    /**
+     * Generate a signature object to be unlocked via biometric prompt
+     * This signature object should be passed down to performSignature
+     **/
     public Signature generateSignature(PublicKeyCredentialSource credentialSource) throws VirgilException {
         PrivateKey privateKey = credentialSafe.getKeyPairByAlias(credentialSource.keyPairAlias).getPrivate();
         return WebAuthnCryptography.generateSignatureObject(privateKey);

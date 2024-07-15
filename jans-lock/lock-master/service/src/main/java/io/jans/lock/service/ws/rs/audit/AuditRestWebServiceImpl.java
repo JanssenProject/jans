@@ -17,7 +17,7 @@
 package io.jans.lock.service.ws.rs.audit;
 
 import io.jans.lock.service.util.AuthUtil;
-import io.jans.lock.service.util.ServerUtil;
+import io.jans.lock.util.ServerUtil;
 import io.jans.model.net.HttpServiceResponse;
 
 import jakarta.enterprise.context.Dependent;
@@ -25,10 +25,11 @@ import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.SecurityContext;
+import jakarta.ws.rs.core.Response.Status;
 
-import org.apache.commons.io.IOUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
@@ -76,12 +77,30 @@ public class AuditRestWebServiceImpl implements AuditRestWebService {
             SecurityContext sec) {
         log.error("Processing Telemetry request - request:{}", request);
 
+        Response.ResponseBuilder builder = Response.ok();
+        builder.cacheControl(ServerUtil.cacheControlWithNoStoreTransformAndPrivate());
+        builder.header(ServerUtil.PRAGMA, ServerUtil.NO_CACHE);
+
         JSONObject json = this.authUtil.getJSONObject(request);
         HttpServiceResponse serviceResponse = this.authUtil.postData("telemetry", json.toString());
         log.error("serviceResponse:{}", serviceResponse);
-        String str = authUtil.getResponseEntityString(serviceResponse);
-        log.error("Processing Telemetry response - str:{}", str);
-        return Response.status(Response.Status.CREATED).entity(str).build();
+
+        if (serviceResponse != null) {
+            String str = authUtil.getResponseEntityString(serviceResponse);
+            builder.entity(str);
+            
+            log.error(" Error while saving telemetry response - responseCode:{}, responseStr:{}",
+                    authUtil.getResponseStatus(serviceResponse), str);
+            if (Status.CREATED.equals(serviceResponse.getHttpResponse().getStatusLine().getStatusCode())) {
+                log.error("Processing Telemetry response - str:{}", str);
+                builder.status(Response.Status.CREATED);
+            } else {
+                builder.status(authUtil.getResponseStatus(serviceResponse));
+            }
+
+        }
+
+        return builder.build();
 
     }
 

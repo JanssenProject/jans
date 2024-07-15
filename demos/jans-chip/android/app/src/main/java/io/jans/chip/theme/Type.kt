@@ -1,4 +1,4 @@
-package io.jans.fidokot.ui.theme
+package io.jans.chip.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

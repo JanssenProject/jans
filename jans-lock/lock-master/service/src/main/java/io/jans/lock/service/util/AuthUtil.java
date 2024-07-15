@@ -124,7 +124,7 @@ public class AuthUtil {
     public HttpServiceResponse postData(String endpoint, String postData) {
         log.error("postData - endpoint:{}, postData:{}", endpoint, postData);
         String token = this.getToken(this.getEndpointUrl(endpoint));
-        return postData(this.getAuditEndpoint(endpoint), null, token, null, null, postData);
+        return postData(this.getEndpoint(endpoint), null, token, null, null, postData);
     }
 
     public HttpServiceResponse postData(String uri, String authType, String token, Map<String, String> headers,
@@ -144,7 +144,7 @@ public class AuthUtil {
         return response;
     }
 
-    public String getResponseEntityString(HttpServiceResponse serviceResponse) {
+    public String getResponseEntityString(HttpServiceResponse serviceResponse, Status status) {
         String jsonString = null;
 
         if (serviceResponse == null) {
@@ -152,7 +152,7 @@ public class AuthUtil {
         }
 
         if (serviceResponse.getHttpResponse() != null && serviceResponse.getHttpResponse().getStatusLine() != null
-                && serviceResponse.getHttpResponse().getStatusLine().getStatusCode() == Status.OK.getStatusCode()) {
+                && serviceResponse.getHttpResponse().getStatusLine().getStatusCode() == status.getStatusCode()) {
             HttpEntity entity = serviceResponse.getHttpResponse().getEntity();
             if (entity == null) {
                 return jsonString;
@@ -163,6 +163,38 @@ public class AuthUtil {
         return jsonString;
     }
 
+    public String getResponseEntityString(HttpServiceResponse serviceResponse) {
+        String jsonString = null;
+
+        if (serviceResponse == null || serviceResponse.getHttpResponse() == null) {
+            return jsonString;
+        }
+
+        HttpEntity entity = serviceResponse.getHttpResponse().getEntity();
+        if (entity == null) {
+            return jsonString;
+        }
+        jsonString = entity.toString();
+
+        return jsonString;
+    }
+
+    public Status getResponseStatus(HttpServiceResponse serviceResponse) {
+       Status status = Status.INTERNAL_SERVER_ERROR;
+
+        if (serviceResponse == null || serviceResponse.getHttpResponse() == null) {
+            return status;
+        }
+
+        int statusCode = serviceResponse.getHttpResponse().getStatusLine().getStatusCode();
+        
+        status = Status.fromStatusCode(statusCode);
+        if(status == null) {
+            status = Status.INTERNAL_SERVER_ERROR;
+        }
+        return status;
+    }
+    
     public JSONObject getJSONObject(HttpServletRequest request) {
         log.error("getJSONObject() - request:{}", request);
         JSONObject jsonBody = null;
@@ -241,15 +273,17 @@ public class AuthUtil {
         return key;
     }
 
-    private String getAuditEndpoint(String endpoint) {
+    private String getEndpoint(String endpoint) {
         if (StringUtils.isBlank(endpoint)) {
             return endpoint;
         }
 
         StringBuilder sb = new StringBuilder();
-        sb.append(appConfiguration.getIssuerUrl());
+        sb.append(appConfiguration.getOpenIdIssuer());
         sb.append("/");
         sb.append(endpoint);
+
+        log.error("Get Endpoint - sb:{}", sb);
         return sb.toString();
     }
 

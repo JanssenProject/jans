@@ -16,6 +16,7 @@
 
 package io.jans.lock.model.config;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -34,45 +35,43 @@ import jakarta.enterprise.inject.Vetoed;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AppConfiguration implements Configuration {
 
-    @DocProperty(description = "Entry Base distinguished name (DN) that identifies the starting point of a search")
-    @Schema(description = "Entry Base distinguished name (DN) that identifies the starting point of a search")
-	private String baseDN;
-    
-    @DocProperty(description = "Issuer Identifier of Jans OpenID Connect Provider")
-    @Schema(description = "Issuer Identifier of Jans OpenID Connect Provider.")
-    private String issuerUrl;
-    	
-	@DocProperty(description = "Lock Client ID")
-    @Schema(description = "Lock Client ID")
-    private String clientId;
+    private String baseDN;
 
-	@DocProperty(description = "Lock client password")
-    @Schema(description = "Lock client password")
-    private String clientPassword;    
-
-	@DocProperty(description = "Jans URL of the OpenID Connect Provider's OAuth 2.0 Token Endpoint")
-    @Schema(description = "Jans URL of the OpenID Connect Provider's OAuth 2.0 Token Endpoint")
-    private String tokenUrl;
-    
-	@DocProperty(description = "Jans URL of config-api audit endpoints and corresponding scope details")
-    @Schema(description = "Jans URL of config-api audit endpoints and corresponding scope details")
-    private Map<String, List<String>> endpointDetails;
-	
     @DocProperty(description = "Lock base endpoint URL")
     @Schema(description = "Lock base endpoint URL")
     private String baseEndpoint;
 
+    @DocProperty(description = "OpenID issuer URL")
+    @Schema(description = "OpenID issuer URL")
+    private String openIdIssuer;
+
     @DocProperty(description = "List of token channel names", defaultValue = "jans_token")
     @Schema(description = "List of token channel names")
-	private List<String> tokenChannels;
+    private List<String> tokenChannels;
 
-	@DocProperty(description = "Choose whether to disable JDK loggers", defaultValue = "true")
-	@Schema(description = "Choose whether to disable JDK loggers")
-	private Boolean disableJdkLogger = true;
+    @DocProperty(description = "Lock Client ID")
+    @Schema(description = "Lock Client ID")
+    private String clientId;
+
+    @DocProperty(description = "Lock client password")
+    @Schema(description = "Lock client password")
+    private String clientPassword;
+
+    @DocProperty(description = "Jans URL of the OpenID Connect Provider's OAuth 2.0 Token Endpoint")
+    @Schema(description = "Jans URL of the OpenID Connect Provider's OAuth 2.0 Token Endpoint")
+    private String tokenUrl;
+
+    @DocProperty(description = "Jans URL of config-api audit endpoints and corresponding scope details")
+    @Schema(description = "Jans URL of config-api audit endpoints and corresponding scope details")
+    private Map<String, List<String>> endpointDetails;
+
+    @DocProperty(description = "Choose whether to disable JDK loggers", defaultValue = "true")
+    @Schema(description = "Choose whether to disable JDK loggers")
+    private Boolean disableJdkLogger = true;
 
     @DocProperty(description = "Specify the logging level of loggers")
     @Schema(description = "Specify the logging level of loggers")
-	private String loggingLevel;
+    private String loggingLevel;
 
     @DocProperty(description = "Logging layout used for Jans Authorization Server loggers")
     @Schema(description = "Logging layout used for Jans Authorization Server loggers")
@@ -84,47 +83,47 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "Channel for metric reports", defaultValue = "jans_pdp_metric")
     @Schema(description = "Channel for metric reports")
-	private String metricChannel;
+    private String metricChannel;
 
     @DocProperty(description = "The interval for metric reporter in seconds")
     @Schema(description = "The interval for metric reporter in seconds")
-	private int metricReporterInterval;
+    private int metricReporterInterval;
 
     @DocProperty(description = "The days to keep metric reported data")
     @Schema(description = "The days to keep metric reported data")
-	private int metricReporterKeepDataDays;
+    private int metricReporterKeepDataDays;
 
     @DocProperty(description = "Enable metric reporter")
     @Schema(description = "Enable metric reporter")
-	private Boolean metricReporterEnabled;
+    private Boolean metricReporterEnabled;
 
-	// Period in seconds
+    // Period in seconds
     @DocProperty(description = "Time interval for the Clean Service in seconds")
     @Schema(description = "Time interval for the Clean Service in seconds")
-	private int cleanServiceInterval;
-	
+    private int cleanServiceInterval;
+
     @Schema(description = "Opa Configuration")
-	private OpaConfiguration opaConfiguration;
+    private OpaConfiguration opaConfiguration;
 
     @DocProperty(description = "PDP type")
     @Schema(description = "PDP type")
-	private String pdpType;
+    private String pdpType;
 
     @DocProperty(description = "Authorization token to access Json Uris")
     @Schema(description = "Authorization token to access Json Uris")
-	private String policiesJsonUrisAuthorizationToken;
+    private String policiesJsonUrisAuthorizationToken;
 
     @DocProperty(description = "List of Json Uris with link to Rego policies")
     @Schema(description = "List of Json Uris with link to Rego policies")
-	private List<String> policiesJsonUris;
+    private List<String> policiesJsonUris;
 
     @DocProperty(description = "Authorization token to access Zip Uris")
     @Schema(description = "Authorization token to access Zip Uris")
-	private String policiesZipUrisAuthorizationToken;
+    private String policiesZipUrisAuthorizationToken;
 
     @DocProperty(description = "List of Zip Uris with policies")
     @Schema(description = "List of Zip Uris with policies")
-	private List<String> policiesZipUris;
+    private List<String> policiesZipUris;
 
     public String getBaseDN() {
         return baseDN;
@@ -134,12 +133,28 @@ public class AppConfiguration implements Configuration {
         this.baseDN = baseDN;
     }
 
-    public String getIssuerUrl() {
-        return issuerUrl;
+    public String getBaseEndpoint() {
+        return baseEndpoint;
     }
 
-    public void setIssuerUrl(String issuerUrl) {
-        this.issuerUrl = issuerUrl;
+    public void setBaseEndpoint(String baseEndpoint) {
+        this.baseEndpoint = baseEndpoint;
+    }
+
+    public String getOpenIdIssuer() {
+        return openIdIssuer;
+    }
+
+    public void setOpenIdIssuer(String openIdIssuer) {
+        this.openIdIssuer = openIdIssuer;
+    }
+
+    public List<String> getTokenChannels() {
+        return tokenChannels;
+    }
+
+    public void setTokenChannels(List<String> tokenChannels) {
+        this.tokenChannels = tokenChannels;
     }
 
     public String getClientId() {
@@ -172,22 +187,6 @@ public class AppConfiguration implements Configuration {
 
     public void setEndpointDetails(Map<String, List<String>> endpointDetails) {
         this.endpointDetails = endpointDetails;
-    }
-
-    public String getBaseEndpoint() {
-        return baseEndpoint;
-    }
-
-    public void setBaseEndpoint(String baseEndpoint) {
-        this.baseEndpoint = baseEndpoint;
-    }
-
-    public List<String> getTokenChannels() {
-        return tokenChannels;
-    }
-
-    public void setTokenChannels(List<String> tokenChannels) {
-        this.tokenChannels = tokenChannels;
     }
 
     public Boolean getDisableJdkLogger() {
@@ -312,9 +311,9 @@ public class AppConfiguration implements Configuration {
 
     @Override
     public String toString() {
-        return "AppConfiguration [baseDN=" + baseDN + ", issuerUrl=" + issuerUrl + ", clientId=" + clientId
-                + ", clientPassword=" + clientPassword + ", tokenUrl=" + tokenUrl + ", endpointDetails="
-                + endpointDetails + ", baseEndpoint=" + baseEndpoint + ", tokenChannels=" + tokenChannels
+        return "AppConfiguration [baseDN=" + baseDN + ", baseEndpoint=" + baseEndpoint + ", openIdIssuer="
+                + openIdIssuer + ", tokenChannels=" + tokenChannels + ", clientId=" + clientId + ", clientPassword="
+                + clientPassword + ", tokenUrl=" + tokenUrl + ", endpointDetails=" + endpointDetails
                 + ", disableJdkLogger=" + disableJdkLogger + ", loggingLevel=" + loggingLevel + ", loggingLayout="
                 + loggingLayout + ", externalLoggerConfiguration=" + externalLoggerConfiguration + ", metricChannel="
                 + metricChannel + ", metricReporterInterval=" + metricReporterInterval + ", metricReporterKeepDataDays="
@@ -324,5 +323,5 @@ public class AppConfiguration implements Configuration {
                 + ", policiesJsonUris=" + policiesJsonUris + ", policiesZipUrisAuthorizationToken="
                 + policiesZipUrisAuthorizationToken + ", policiesZipUris=" + policiesZipUris + "]";
     }
-    
+
 }

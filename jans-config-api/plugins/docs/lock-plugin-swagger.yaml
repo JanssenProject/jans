@@ -196,11 +196,18 @@ components:
       properties:
         baseDN:
           type: string
-          description: Entry Base distinguished name (DN) that identifies the starting
-            point of a search
-        issuerUrl:
+        baseEndpoint:
           type: string
-          description: Issuer Identifier of Jans OpenID Connect Provider.
+          description: Lock base endpoint URL
+        openIdIssuer:
+          type: string
+          description: OpenID issuer URL
+        tokenChannels:
+          type: array
+          description: List of token channel names
+          items:
+            type: string
+            description: List of token channel names
         clientId:
           type: string
           description: Lock Client ID
@@ -222,15 +229,6 @@ components:
                 scope details
           description: Jans URL of config-api audit endpoints and corresponding scope
             details
-        baseEndpoint:
-          type: string
-          description: Lock base endpoint URL
-        tokenChannels:
-          type: array
-          description: List of token channel names
-          items:
-            type: string
-            description: List of token channel names
         disableJdkLogger:
           type: boolean
           description: Choose whether to disable JDK loggers

@@ -8315,17 +8315,17 @@ components:
           type: boolean
         whitePagesCanView:
           type: boolean
-        userCanView:
-          type: boolean
-        userCanEdit:
-          type: boolean
         adminCanEdit:
           type: boolean
         adminCanView:
           type: boolean
-        adminCanAccess:
+        userCanView:
+          type: boolean
+        userCanEdit:
           type: boolean
         userCanAccess:
+          type: boolean
+        adminCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -9939,10 +9939,10 @@ components:
           type: array
           items:
             type: object
-        value:
-          type: object
         displayValue:
           type: string
+        value:
+          type: object
     LocalizedString:
       type: object
       properties:
@@ -10293,14 +10293,14 @@ components:
           type: boolean
         internal:
           type: boolean
-        locationPath:
-          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
+        locationPath:
+          type: string
         baseDn:
           type: string
     ScriptError:

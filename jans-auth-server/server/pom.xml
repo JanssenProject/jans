@@ -749,6 +749,11 @@
 					<artifactId>jakarta.el-api</artifactId>
 					<scope>test</scope>
 				</dependency>
+				<dependency>
+				    <groupId>jakarta.servlet.jsp</groupId>
+				    <artifactId>jakarta.servlet.jsp-api</artifactId>
+				    <scope>provided</scope>
+				</dependency>
 
 				<dependency>
 					<groupId>org.jboss.weld.servlet</groupId>

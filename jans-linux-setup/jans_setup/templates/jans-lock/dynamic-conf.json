@@ -1,5 +1,9 @@
 {
   "baseEndpoint": "https://%(hostname)s/%(base_endpoint)s/v1",
+  "openIdIssuer": "https://%(hostname)s",
+  "tokenChannels": [
+    "jans_token"
+  ],
   "clientId": "${jca_client_id}",
   "clientPassword": "${jca_client_encoded_pw}",
   "tokenUrl": "${tokenEndpoint}",
@@ -17,9 +21,6 @@
       "https://jans.io/oauth/lock/health.write"
     ]
   },
-  "tokenChannels": [
-    "jans_token"
-  ],
   "cleanServiceInterval": 60,
   "cleanServiceBatchChunkSize": 10000,
   "disableJdkLogger": true,
