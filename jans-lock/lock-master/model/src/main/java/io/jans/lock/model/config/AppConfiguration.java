@@ -35,10 +35,14 @@ import jakarta.enterprise.inject.Vetoed;
 public class AppConfiguration implements Configuration {
 
 	private String baseDN;
-	
+
     @DocProperty(description = "Lock base endpoint URL")
     @Schema(description = "Lock base endpoint URL")
     private String baseEndpoint;
+
+    @DocProperty(description = "OpenID issuer URL")
+    @Schema(description = "OpenID issuer URL")
+    private String openIdIssuer;
 
     @DocProperty(description = "List of token channel names", defaultValue = "jans_token")
     @Schema(description = "List of token channel names")
@@ -118,6 +122,14 @@ public class AppConfiguration implements Configuration {
 
 	public void setBaseEndpoint(String baseEndpoint) {
 		this.baseEndpoint = baseEndpoint;
+	}
+
+	public String getOpenIdIssuer() {
+		return openIdIssuer;
+	}
+
+	public void setOpenIdIssuer(String openIdIssuer) {
+		this.openIdIssuer = openIdIssuer;
 	}
 
 	public List<String> getTokenChannels() {

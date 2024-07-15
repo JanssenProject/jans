@@ -1,11 +1,9 @@
 package io.jans.chip.ui.screens.unauthenticated.login
 
-import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -74,8 +72,7 @@ fun LoginScreen(
     val authAdaptor = AuthAdaptor(context)
     val shouldShowDialog = remember { mutableStateOf(false) }
     val dialogContent = remember { mutableStateOf("") }
-    val creds: List<PublicKeyCredentialSource>? =
-        authAdaptor.getAllCredentials()
+    val creds: List<PublicKeyCredentialSource>? = authAdaptor.getAllCredentials()
     var loginState by remember {
         loginViewModel.loginState
     }
@@ -184,7 +181,7 @@ fun LoginScreen(
                         )
                         // Heading Login
                         // Login Inputs Composable
-                        if (creds == null || creds.isEmpty()) {
+                        if (creds.isNullOrEmpty()) {
                             MediumTitleText(
                                 modifier = Modifier.padding(top = AppTheme.dimens.paddingLarge),
                                 text = stringResource(id = R.string.no_passkey_enrolled)
@@ -211,27 +208,29 @@ fun LoginScreen(
 
                                         if (isBiometricAvailable) {
                                             CoroutineScope(Dispatchers.Main).launch {
+                                                //show the loading screen
                                                 loginState = loginState.copy(isLoading = true)
+                                                //fetch FIDO configuration
                                                 val fidoConfiguration =
-                                                    async { mainViewModel.fetchFidoConfiguration() }.await()
+                                                    async { mainViewModel.getFIDOConfiguration() }.await()
                                                 if (fidoConfiguration?.isSuccessful == false) {
                                                     shouldShowDialog.value = true
-                                                    dialogContent.value =
-                                                        fidoConfiguration.errorMessage.toString()
+                                                    dialogContent.value = fidoConfiguration.errorMessage.toString()
                                                     loginState = loginState.copy(isLoading = false)
                                                     return@launch
                                                 }
+                                                //call /assertion/option
                                                 val assertionOptionResponse: AssertionOptionResponse? =
                                                     async { mainViewModel.assertionOption(ele.userDisplayName) }.await()
                                                 if (assertionOptionResponse?.isSuccessful == false) {
                                                     shouldShowDialog.value = true
-                                                    dialogContent.value =
-                                                        assertionOptionResponse.errorMessage.toString()
+                                                    dialogContent.value = assertionOptionResponse.errorMessage.toString()
                                                     loginState = loginState.copy(isLoading = false)
                                                     return@launch
                                                 }
+                                                //get authenticator wrapper instance
                                                 val authAdaptor = AuthAdaptor(context)
-
+                                                //select public key credential
                                                 val selectedPublicKeyCredentialSource = async {
                                                     authAdaptor.selectPublicKeyCredentialSource(
                                                         LocalCredentialSelector(),
@@ -239,109 +238,104 @@ fun LoginScreen(
                                                         fidoConfiguration?.issuer,
                                                     )
                                                 }.await()
-
-                                                val signature =
-                                                    async {
+                                                //Generate a signature object
+                                                val signature = async {
                                                         authAdaptor.generateSignature(
                                                             selectedPublicKeyCredentialSource
                                                         )
                                                     }.await()
-
+                                                //show biometric prompt
                                                 BiometricHelper.authenticateUser(context,
                                                     signature!!,
                                                     onSuccess = { plainText ->
                                                         CoroutineScope(Dispatchers.Main).launch {
                                                             mainViewModel.setUsername(ele.userDisplayName)
-                                                            if (assertionOptionResponse != null) {
-                                                                val assertionResultRequest: AssertionResultRequest =
-                                                                    async {
-                                                                        authAdaptor.authenticate(
-                                                                            assertionOptionResponse,
-                                                                            fidoConfiguration?.issuer,
-                                                                            selectedPublicKeyCredentialSource
-                                                                        )
-                                                                    }.await()
-                                                                if (assertionResultRequest.isSuccessful == false) {
-                                                                    shouldShowDialog.value =
-                                                                        true
-                                                                    dialogContent.value =
-                                                                        assertionResultRequest.errorMessage.toString()
-                                                                    loginState = loginState.copy(isLoading = false)
-                                                                    return@launch
-                                                                }
-
-
-                                                                val loginResponse: LoginResponse? =
-                                                                    async {
-                                                                        mainViewModel.processlogin(
-                                                                            ele.userDisplayName,
-                                                                            null,
-                                                                            "authenticate",
-                                                                            Gson().toJson(
-                                                                                assertionResultRequest
-                                                                            )
-                                                                        )
-                                                                    }.await()
-
-                                                                if (loginResponse?.isSuccessful == false) {
-                                                                    shouldShowDialog.value =
-                                                                        true
-                                                                    dialogContent.value =
-                                                                        loginResponse.errorMessage.toString()
-                                                                    loginState = loginState.copy(isLoading = false)
-                                                                    return@launch
-                                                                }
-                                                                val tokenResponse: TokenResponse? =
-                                                                    async {
-                                                                        mainViewModel.getToken(
-                                                                            loginResponse?.authorizationCode,
-                                                                        )
-                                                                    }.await()
-                                                                if (tokenResponse?.isSuccessful == false) {
-                                                                    shouldShowDialog.value =
-                                                                        true
-                                                                    dialogContent.value =
-                                                                        tokenResponse.errorMessage.toString()
-                                                                    loginState = loginState.copy(isLoading = false)
-                                                                    return@launch
-                                                                }
-                                                                val userInfoResponse: UserInfoResponse? =
-                                                                    async {
-                                                                        mainViewModel.getUserInfo(
-                                                                            tokenResponse?.accessToken
-                                                                        )
-                                                                    }.await()
-                                                                if (userInfoResponse != null) {
-                                                                    mainViewModel.setUserInfoResponse(
-                                                                        userInfoResponse
+                                                            //call authenticator authenticate method to get authenticatorData and assertion signature
+                                                            val assertionResultRequest: AssertionResultRequest =
+                                                                async {
+                                                                    authAdaptor.authenticate(
+                                                                        assertionOptionResponse!!,
+                                                                        fidoConfiguration?.issuer,
+                                                                        selectedPublicKeyCredentialSource
                                                                     )
-                                                                }
-                                                                if (userInfoResponse?.isSuccessful == false) {
-                                                                    shouldShowDialog.value =
-                                                                        true
-                                                                    dialogContent.value =
-                                                                        userInfoResponse.errorMessage.toString()
-                                                                    loginState = loginState.copy(isLoading = false)
-                                                                    return@launch
-                                                                }
+                                                                }.await()
+                                                            if (assertionResultRequest.isSuccessful == false) {
+                                                                shouldShowDialog.value = true
+                                                                dialogContent.value = assertionResultRequest.errorMessage.toString()
+                                                                loginState = loginState.copy(isLoading = false)
+                                                                return@launch
                                                             }
-                                                            mainViewModel.assertionOptionResponse =
-                                                                true
-                                                            loginViewModel.onUiEvent(
-                                                                loginUiEvent = LoginUiEvent.Submit
-                                                            )
-                                                            loginState = loginState.copy(isLoading = false)
-                                                            //Toast.makeText(context,"Biometric authentication successful!$plainText", Toast.LENGTH_SHORT).show()
+
+                                                            //process authentication to get authorization code
+                                                            val loginResponse: LoginResponse? =
+                                                                async {
+                                                                    mainViewModel.processLogin(
+                                                                        ele.userDisplayName,
+                                                                        null,
+                                                                        "authenticate",
+                                                                        Gson().toJson(
+                                                                            assertionResultRequest
+                                                                        )
+                                                                    )
+                                                                }.await()
+
+                                                            if (loginResponse?.isSuccessful == false) {
+                                                                shouldShowDialog.value = true
+                                                                dialogContent.value = loginResponse.errorMessage.toString()
+                                                                loginState = loginState.copy(isLoading = false)
+                                                                return@launch
+                                                            }
+                                                            //exchange token for code
+                                                            val tokenResponse: TokenResponse? =
+                                                                async {
+                                                                    mainViewModel.getToken(
+                                                                        loginResponse?.authorizationCode,
+                                                                    )
+                                                                }.await()
+                                                            if (tokenResponse?.isSuccessful == false) {
+                                                                shouldShowDialog.value = true
+                                                                dialogContent.value = tokenResponse.errorMessage.toString()
+                                                                loginState = loginState.copy(isLoading = false)
+                                                                return@launch
+                                                            }
+                                                            //exchange user-info for token
+                                                            val userInfoResponse: UserInfoResponse? =
+                                                                async {
+                                                                    mainViewModel.getUserInfo(
+                                                                        tokenResponse?.accessToken
+                                                                    )
+                                                                }.await()
+                                                            if (userInfoResponse != null) {
+                                                                mainViewModel.setUserInfoResponse(
+                                                                    userInfoResponse
+                                                                )
+                                                            }
+                                                            if (userInfoResponse?.isSuccessful == false) {
+                                                                shouldShowDialog.value = true
+                                                                dialogContent.value = userInfoResponse.errorMessage.toString()
+                                                                loginState = loginState.copy(isLoading = false)
+                                                                return@launch
+                                                            }
                                                         }
+                                                        mainViewModel.mainState =
+                                                            mainViewModel.mainState.copy(
+                                                                assertionOptionSuccess = true
+                                                            )
+                                                        mainViewModel.mainState =
+                                                            mainViewModel.mainState.copy(
+                                                                assertionResultSuccess = true
+                                                            )
+                                                        loginViewModel.onUiEvent(
+                                                            loginUiEvent = LoginUiEvent.Submit
+                                                        )
+                                                        loginState = loginState.copy(isLoading = false)
+                                                        //Toast.makeText(context,"Biometric authentication successful!$plainText", Toast.LENGTH_SHORT).show()
                                                     })
                                             }
                                             //end
                                         } else {
-                                            Toast.makeText(
-                                                context,
-                                                "Biometric authentication is not available!",
-                                                Toast.LENGTH_SHORT
-                                            ).show()
+                                            shouldShowDialog.value = true
+                                            dialogContent.value = "Biometric authentication is not available!"
                                             loginState = loginState.copy(isLoading = false)
                                         }
                                     })

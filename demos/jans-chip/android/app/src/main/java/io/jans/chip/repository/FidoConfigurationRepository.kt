@@ -2,9 +2,11 @@ package io.jans.chip.repository
 
 import android.content.Context
 import android.util.Log
+import com.nimbusds.jwt.JWTClaimsSet
 import io.jans.chip.retrofit.ApiAdapter
 import io.jans.chip.utils.AppConfig
 import io.jans.chip.AppDatabase
+import io.jans.chip.factories.DPoPProofFactory
 import io.jans.chip.model.OPConfiguration
 import io.jans.chip.model.fido.config.FidoConfiguration
 import io.jans.chip.model.fido.config.FidoConfigurationResponse
@@ -13,19 +15,18 @@ import retrofit2.Response
 class FidoConfigurationRepository(context: Context) {
     private val TAG = "FidoConfigurationRepository"
     private val appDatabase = AppDatabase.getInstance(context);
-    private var fidoConfigurationResponse: FidoConfigurationResponse? =
-        FidoConfigurationResponse(null, null, null)
+    private var fidoConfiguration: FidoConfiguration = FidoConfiguration("", null, null, null, null, null)
     var obtainedContext: Context = context
 
-    suspend fun fetchFidoConfiguration(configurationUrl: String): FidoConfigurationResponse? {
+    private suspend fun fetchFidoConfiguration(configurationUrl: String): FidoConfiguration? {
         val issuer: String = configurationUrl.replace(AppConfig.FIDO_CONFIG_URL, "")
         Log.d(TAG, "Inside fetchFIDOConfiguration :: configurationUrl ::$configurationUrl")
         try {
             val opConfigurationList: List<OPConfiguration> = appDatabase.opConfigurationDao().getAll()
             if (opConfigurationList.isEmpty()) {
-                fidoConfigurationResponse?.isSuccessful = false
-                fidoConfigurationResponse?.errorMessage = "OpenID configuration not found in database."
-                return fidoConfigurationResponse
+                fidoConfiguration.isSuccessful = false
+                fidoConfiguration.errorMessage = "OpenID configuration not found in database."
+                return fidoConfiguration
             }
             val opConfiguration: OPConfiguration = opConfigurationList[0]
 
@@ -33,55 +34,58 @@ class FidoConfigurationRepository(context: Context) {
                 ApiAdapter.getInstance(issuer).getFidoConfiguration(configurationUrl)
 
             if (response.code() != 200) {
-                fidoConfigurationResponse?.isSuccessful = false
-                fidoConfigurationResponse?.errorMessage =
+                fidoConfiguration.isSuccessful = false
+                fidoConfiguration.errorMessage =
                     "Error in fetching FIDO Configuration. Error message: ${response.message()}"
-                return fidoConfigurationResponse
+                return fidoConfiguration
             }
-            fidoConfigurationResponse = response.body()
+            val fidoConfigurationResponse: FidoConfigurationResponse? = response.body()
             if (!response.isSuccessful || fidoConfigurationResponse == null) {
-                fidoConfigurationResponse?.isSuccessful = false
-                fidoConfigurationResponse?.errorMessage =
+                fidoConfiguration.isSuccessful = false
+                fidoConfiguration.errorMessage =
                     "Error in fetching FIDO Configuration. Error message: ${response.message()}"
-                return fidoConfigurationResponse
+                return fidoConfiguration
             }
-            fidoConfigurationResponse?.isSuccessful = true
-            val fidoConfigDB = FidoConfiguration(
+            fidoConfiguration = FidoConfiguration(
                 AppConfig.DEFAULT_S_NO,
-                fidoConfigurationResponse?.issuer,
-                fidoConfigurationResponse?.attestation?.optionsEndpoint,
-                fidoConfigurationResponse?.attestation?.resultEndpoint,
-                fidoConfigurationResponse?.assertion?.optionsEndpoint,
-                fidoConfigurationResponse?.assertion?.resultEndpoint
+                fidoConfigurationResponse.issuer,
+                fidoConfigurationResponse.attestation?.optionsEndpoint,
+                fidoConfigurationResponse.attestation?.resultEndpoint,
+                fidoConfigurationResponse.assertion?.optionsEndpoint,
+                fidoConfigurationResponse.assertion?.resultEndpoint
             )
-
+            fidoConfiguration.isSuccessful = true
             Log.d(
                 TAG,
-                "Inside fetchOPConfiguration :: opConfiguration :: ${fidoConfigurationResponse?.issuer}"
+                "Inside fetchOPConfiguration :: ${fidoConfigurationResponse.issuer}"
             )
             appDatabase.fidoConfigurationDao().deleteAll()
-            appDatabase.fidoConfigurationDao().insert(fidoConfigDB)
+            appDatabase.fidoConfigurationDao().insert(fidoConfiguration)
 
             opConfiguration.fidoUrl = configurationUrl
             appDatabase.opConfigurationDao().update(opConfiguration)
 
-            return fidoConfigurationResponse
+            return fidoConfiguration
         } catch (e: Exception) {
             Log.e(TAG, "Error in  fetching OP Configuration. ${e.message}".trimIndent())
-            fidoConfigurationResponse?.isSuccessful = false
-            fidoConfigurationResponse?.errorMessage =
+            fidoConfiguration.isSuccessful = false
+            fidoConfiguration.errorMessage =
                 "Error in fetching FIDO Configuration. Error message: ${e.message}"
-            return fidoConfigurationResponse
+            return fidoConfiguration
         }
     }
 
-    suspend fun getFidoConfigInDatabase(): FidoConfiguration? {
-        val fidoConfigurationList: List<FidoConfiguration> = appDatabase.fidoConfigurationDao()
-            .getAll()
+    suspend fun getFidoConfig(): FidoConfiguration? {
+        val fidoConfigurationList: List<FidoConfiguration> = appDatabase.fidoConfigurationDao().getAll()
         var fidoConfiguration: FidoConfiguration? = null
-        if(fidoConfigurationList.isNotEmpty()) {
-            fidoConfiguration = fidoConfigurationList.let { it -> it[0] }
+        if(!fidoConfigurationList.isNullOrEmpty()) {
+            fidoConfiguration = fidoConfigurationList[0]
+            fidoConfiguration.isSuccessful = true
+            return fidoConfiguration
         }
+        val jwtClaimsSet: JWTClaimsSet = DPoPProofFactory.getClaimsFromSSA()
+        val issuer: String = jwtClaimsSet.getClaim("iss").toString()
+        fidoConfiguration = fetchFidoConfiguration(issuer + AppConfig.FIDO_CONFIG_URL)
         return fidoConfiguration
     }
 
