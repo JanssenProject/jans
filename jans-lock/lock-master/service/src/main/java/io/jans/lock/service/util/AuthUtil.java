@@ -68,6 +68,26 @@ public class AuthUtil {
         return this.getToken(tokenUrl, clientId, clientSecret, scopes);
     }
 
+    public String getToken(String tokenUrl, String clientId, String clientSecret, String scopes) {
+        log.error("\n\n Request for token tokenUrl:{}, clientId:{}, clientSecret:{}, scopes:{}", tokenUrl, clientId,
+                clientSecret, scopes);
+
+        String accessToken = null;
+        Integer expiresIn = 0;
+        TokenResponse tokenResponse = this.requestAccessToken(tokenUrl, clientId, clientSecret, scopes);
+        if (tokenResponse != null) {
+
+            log.error("Token Response - tokenScope: {}, tokenAccessToken: {} ", tokenResponse.getScope(),
+                    tokenResponse.getAccessToken());
+            accessToken = tokenResponse.getAccessToken();
+            expiresIn = tokenResponse.getExpiresIn();
+
+        }
+        log.error(" accessToken:{}, expiresIn:{}", accessToken, expiresIn);
+
+        return accessToken;
+    }
+    
     public TokenResponse requestAccessToken(final String tokenUrl, final String clientId, final String clientSecret,
             final String scope) {
         log.error("Request for Access Token -  tokenUrl:{}, clientId:{}, clientSecret:{}, scope:{} ", tokenUrl,
@@ -101,30 +121,11 @@ public class AuthUtil {
         return null;
     }
 
-    public String getToken(String tokenUrl, String clientId, String clientSecret, String scopes) {
-        log.error("\n\n Request for token tokenUrl:{}, clientId:{}, clientSecret:{}, scopes:{}", tokenUrl, clientId,
-                clientSecret, scopes);
-
-        String accessToken = null;
-        Integer expiresIn = 0;
-        TokenResponse tokenResponse = this.requestAccessToken(tokenUrl, clientId, clientSecret, scopes);
-        if (tokenResponse != null) {
-
-            log.error("Token Response - tokenScope: {}, tokenAccessToken: {} ", tokenResponse.getScope(),
-                    tokenResponse.getAccessToken());
-            accessToken = tokenResponse.getAccessToken();
-            expiresIn = tokenResponse.getExpiresIn();
-
-        }
-        log.error(" accessToken:{}, expiresIn:{}", accessToken, expiresIn);
-
-        return accessToken;
-    }
-
     public HttpServiceResponse postData(String endpoint, String postData) {
         log.error("postData - endpoint:{}, postData:{}", endpoint, postData);
-        String token = this.getToken(this.getEndpointUrl(endpoint));
-        return postData(this.getEndpoint(endpoint), null, token, null, null, postData);
+        String endpointPath = this.getEndpointPath(endpoint);
+        String token = this.getToken(endpointPath);
+        return postData(this.getEndpointUrl(endpointPath), null, token, null, null, postData);
     }
 
     public HttpServiceResponse postData(String uri, String authType, String token, Map<String, String> headers,
@@ -252,11 +253,11 @@ public class AuthUtil {
         for (String s : scopesSet) {
             scope.append(" ").append(s);
         }
-
-        return scopes;
+        log.error("scope:{}", scope);
+        return scope.toString();
     }
 
-    private String getEndpointUrl(String endpoint) {
+    private String getEndpointPath(String endpoint) {
         log.error("Get endpoint URL for endpoint:{}", endpoint);
         Map<String, List<String>> endpointMap = this.appConfiguration.getEndpointDetails();
         log.error("Get endpoint URL for endpointMap:{}", endpointMap);
@@ -268,12 +269,12 @@ public class AuthUtil {
         Set<String> keys = endpointMap.keySet();
         log.error("endpointMap keys:{}", keys);
 
-        String key = keys.stream().filter(e -> e.endsWith("/" + endpoint)).toString();
-        log.error("endpointMap key:{} for endpoint:{}", key, endpoint);
-        return key;
+        String endpointPath = keys.stream().filter(e -> e.endsWith("/" + endpoint)).findFirst().orElse(null);
+        log.error("Final endpoint:{}, endpointPath:{}", endpoint, endpointPath);
+        return endpointPath;
     }
 
-    private String getEndpoint(String endpoint) {
+    private String getEndpointUrl(String endpoint) {
         if (StringUtils.isBlank(endpoint)) {
             return endpoint;
         }

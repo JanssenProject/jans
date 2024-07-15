@@ -35,6 +35,8 @@ import jakarta.enterprise.inject.Vetoed;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AppConfiguration implements Configuration {
 
+    @DocProperty(description = "Entry Base distinguished name (DN) that identifies the starting point of a search")
+    @Schema(description = "Entry Base distinguished name (DN) that identifies the starting point of a search")
     private String baseDN;
 
     @DocProperty(description = "Lock base endpoint URL")

@@ -196,6 +196,8 @@ components:
       properties:
         baseDN:
           type: string
+          description: Entry Base distinguished name (DN) that identifies the starting
+            point of a search
         baseEndpoint:
           type: string
           description: Lock base endpoint URL
