@@ -23,13 +23,11 @@ from jans.pycloudlib.utils import generate_base64_contents
 from jans.pycloudlib.utils import safe_render
 from jans.pycloudlib.utils import ldap_encode
 from jans.pycloudlib.utils import get_server_certificate
-# from jans.pycloudlib.utils import generate_ssl_certkey
 from jans.pycloudlib.utils import generate_ssl_ca_certkey
 from jans.pycloudlib.utils import generate_signed_ssl_certkey
 from jans.pycloudlib.utils import as_boolean
 from jans.pycloudlib.schema import load_schema_from_file
 
-# from parameter import params_from_file
 from settings import LOGGING_CONFIG
 
 DEFAULT_SIG_KEYS = "RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512"
@@ -351,12 +349,14 @@ class CtxGenerator:
         self.set_secret("sql_password", self.secret_params["sql_password"])
 
     def transform_misc_ctx(self):
+        # pre-populate the rest of configmaps
         for k, v in self.configmap_params.items():
-            if v and k not in self.ctx["_configmap"]:
+            if k not in self.ctx["_configmap"]:
                 self.set_config(k, v)
 
+        # pre-populate the rest of secrets
         for k, v in self.secret_params.items():
-            if v and k not in self.ctx["_secret"]:
+            if k not in self.ctx["_secret"]:
                 self.set_secret(k, v)
 
     def transform(self):
@@ -380,7 +380,6 @@ class CtxGenerator:
             self.transform_sql_ctx()
 
         self.transform_misc_ctx()
-        # logger.info(self.ctx)
 
         # populated configuration
         return self.ctx
