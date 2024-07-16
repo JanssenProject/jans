@@ -351,12 +351,12 @@ class CtxGenerator:
     def transform_misc_ctx(self):
         # pre-populate the rest of configmaps
         for k, v in self.configmap_params.items():
-            if k not in self.ctx["_configmap"]:
+            if v and k not in self.ctx["_configmap"]:
                 self.set_config(k, v)
 
         # pre-populate the rest of secrets
         for k, v in self.secret_params.items():
-            if k not in self.ctx["_secret"]:
+            if v and k not in self.ctx["_secret"]:
                 self.set_secret(k, v)
 
     def transform(self):
