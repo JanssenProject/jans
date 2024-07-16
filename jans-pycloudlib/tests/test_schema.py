@@ -145,5 +145,5 @@ def test_load_schema_from_file_invalid(tmpdir, value, retcode):
     src = tmpdir.join("configuration.json")
     src.write(value)
 
-    _, err, code = load_schema_from_file(str(src))
+    _, _, code = load_schema_from_file(str(src))
     assert code == retcode
