@@ -145,7 +145,7 @@ public class AuthenticatorDataParser {
             offset += extSize;
         }
         /*
-         * If the Backup State (BS) flag is set (BS=1), the Backup Eligibility (BE) flag must also be set (BE=1). This means that a credential can only be in a backup state if it is eligible for backup.
+         * If the Backup State (BS) flag is set (BS=1), the Backup Eligibility (BE) flag must also be set (BE=1). This means that a credential can only be backed up if it is eligible for backup.
          */
         if (hasBSFlag) {
             if (!hasBEFlag) {
