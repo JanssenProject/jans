@@ -840,8 +840,8 @@ class ConfigmapSchema(Schema):
 
     # @TODO: change to HARDCODED value instead
     ldapTrustStoreFn = String(
-        load_default="/etc/certs/opendj.pkcs12",
-        dump_default="/etc/certs/opendj.pkcs12",
+        load_default="",
+        dump_default="",
         metadata={
             "description": "Path to keystore file used for connecting to LDAP (OpenDJ)",
         },
