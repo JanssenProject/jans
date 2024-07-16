@@ -8,7 +8,7 @@ tags:
 
 ## Overview
 
-Configuration manager is a special container used to load (generate/restore) and dump (backup) the configuration and secrets.
+Configurator is a tool to load (generate/restore) and/or dump (backup) the configuration (consists of configmaps and secrets).
 
 ## Versions
 
@@ -72,52 +72,62 @@ The following commands are supported by the container:
 
 ### load
 
-The load command can be used either to generate or restore config and secret for the cluster.
+The load command can be used either to generate/restore configmaps and secrets for the cluster.
 
-For fresh installation, generate the initial configuration and secret by creating `/path/to/host/volume/generate.json` similar to example below:
+For fresh installation, generate the initial configuration by creating `/path/to/host/volume/configuration.json` similar to example below:
+
 ```json
 {
-    "hostname": "demoexample.jans.io",
-    "country_code": "US",
-    "state": "TX",
-    "city": "Austin",
-    "admin_pw": "S3cr3t+pass",
-    "ldap_pw": "S3cr3t+pass",
-    "email": "s@jans.io",
-    "org_name": "Gluu Inc."
+    "_configmap": {
+        "hostname": "demoexample.jans.io",
+        "country_code": "US",
+        "state": "TX",
+        "city": "Austin",
+        "admin_email": "s@jans.io",
+        "orgName": "Gluu Inc."
+    },
+    "_secret": {
+        "admin_password": "S3cr3t+pass",
+        "ldap_password": "S3cr3t+pass"
+    }
 }
 ```
 
-**NOTE**: `generate.json` has optional attributes as seen below.
+**NOTE**: `configuration.json` has optional attributes as seen below.
 
-- `auth_sig_keys`: space-separated key algorithm for signing (default to `RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512`)
-- `auth_enc_keys`: space-separated key algorithm for encryption (default to `RSA1_5 RSA-OAEP`)
-- `optional_scopes`: list of scopes that will be used (supported scopes are `ldap`, `scim`, `fido2`, `couchbase`, `redis`, `sql`, `casa`; default to empty list)
-- `ldap_pw`: user's password to access LDAP database (only used if `optional_scopes` list contains `ldap` scope)
-- `sql_pw`: user's password to access SQL database (only used if `optional_scopes` list contains `sql` scope)
-- `couchbase_pw`: user's password to access Couchbase database (only used if `optional_scopes` list contains `couchbase` scope)
-- `couchbase_superuser_pw`: superusers password to access Couchbase database (only used if `optional_scopes` list contains `couchbase` scope)
-- `salt`: user-defined salt (24 characters length); if omitted, salt will be generated automatically
-- `init_keys_exp`: the initial keys expiration time in hours (default to `48`; extra 1 hour will be added for hard limit)
+1.  `_configmap`:
 
-Example of generating `salt` value:
+    - `auth_sig_keys`: space-separated key algorithm for signing (default to `RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512`)
+    - `auth_enc_keys`: space-separated key algorithm for encryption (default to `RSA1_5 RSA-OAEP`)
+    - `optional_scopes`: list of scopes that will be used (supported scopes are `ldap`, `scim`, `fido2`, `couchbase`, `redis`, `sql`, `casa`; default to empty list)
+    - `init_keys_exp`: the initial keys expiration time in hours (default to `48`; extra 1 hour will be added for hard limit)
 
-```
-# using shell script
-cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 24 | head -n 1
-# output: NFAG5g4R0NSkAZXHL8t2DScL
+2.  `_secret`:
 
-# using python oneliner
-python -c 'import random, string; print("".join(random.choices(string.ascii_letters + string.digits, k=24)))'
-# ouput: HsPzqiPkRzNySWlOVui8Ilmw
-```
+    - `ldap_password`: user's password to access LDAP database (only used if `optional_scopes` list contains `ldap` scope)
+    - `sql_password`: user's password to access SQL database (only used if `optional_scopes` list contains `sql` scope)
+    - `couchbase_password`: user's password to access Couchbase database (only used if `optional_scopes` list contains `couchbase` scope)
+    - `couchbase_superuser_password`: superusers password to access Couchbase database (only used if `optional_scopes` list contains `couchbase` scope)
+    - `encoded_salt`: user-defined salt (24 characters length); if omitted, salt will be generated automatically
 
-To generate initial config and secrets:
+    Example of generating `encoded_salt` value:
 
-1.  Create config map `config-generate-params` to store the contents of `generate.json`
+    ```
+    # using shell script
+    cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 24 | head -n 1
+    # output: NFAG5g4R0NSkAZXHL8t2DScL
+
+    # using python oneliner
+    python -c 'import random, string; print("".join(random.choices(string.ascii_letters + string.digits, k=24)))'
+    # ouput: HsPzqiPkRzNySWlOVui8Ilmw
+    ```
+
+To generate initial configmaps and secrets:
+
+1.  Create config map `config-generate-params` to store the contents of `configuration.json`
 
     ```sh
-    kubectl create cm config-generate-params --from-file=generate.json
+    kubectl create cm config-generate-params --from-file=configuration.json
     ```
 
 1.  Mount the configmap into container and apply the yaml:
@@ -139,22 +149,23 @@ To generate initial config and secrets:
             - name: configurator-load
               image: ghcr.io/janssenproject/jans/configurator:1.1.4_dev
               volumeMounts:
-                - mountPath: /app/db/generate.json
+                - mountPath: /app/db/configuration.json
                   name: config-generate-params
-                  subPath: generate.json
+                  subPath: configuration.json
               envFrom:
               - configMapRef:
                   name: config-cm
               args: ["load"]
     ```
 
-To restore configuration and secrets from a backup of `/path/to/host/volume/config.json` and `/path/to/host/volume/secret.json`: mount the directory as `/app/db` inside the container:
+A successful `load` command will dump the pre-populated configuration into `/app/db/configuration.out.json`.
 
-1.  Create config map `config-params` and `secret-params`:
+To restore configuration from `configuration.out.json` file:
+
+1.  Create config map `config-dump-params`:
 
     ```sh
-    kubectl create cm config-params --from-file=config.json
-    kubectl create cm secret-params --from-file=secret.json
+    kubectl create cm config-dump-params --from-file=configuration.out.json
     ```
 
 2.  Mount the configmap into container and apply the yaml:
@@ -169,32 +180,25 @@ To restore configuration and secrets from a backup of `/path/to/host/volume/conf
         spec:
           restartPolicy: Never
           volumes:
-            - name: config-params
+            - name: config-dump-params
               configMap:
-                name: config-params
-               - name: secret-params
-              configMap:
-                name: secret-params
+                name: config-dump-params
           containers:
             - name: configurator-load
               image: ghcr.io/janssenproject/jans/configurator:1.1.4_dev
               volumeMounts:
-                - mountPath: /app/db/config.json
-                  name: config-params
-                  subPath: config.json
-                - mountPath: /app/db/secret.json
-                  name: secret-params
-                  subPath: secret.json
+                - mountPath: /app/db/configuration.out.json
+                  name: config-dump-params
+                  subPath: configuration.out.json
               envFrom:
               - configMapRef:
                   name: config-cm
               args: ["load"]
     ```
 
-
 ### dump
 
-The dump command will dump all configuration and secrets from the backends saved into the `/app/db/config.json` and `/app/db/secret.json` files.
+The dump command will dump all configuration from the backends saved into the `/app/db/configuration.out.json` file.
 
 ```yaml
 apiVersion: batch/v1
@@ -221,4 +225,4 @@ spec:
 
 Copy over the files to host
 
-`kubectl cp config-init-load-job:/app/db .`
+`kubectl cp configurator-dump-job:/app/db .`
