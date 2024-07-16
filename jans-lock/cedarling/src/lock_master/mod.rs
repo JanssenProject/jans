@@ -1,4 +1,8 @@
-use std::borrow::Cow;
+use std::{
+	borrow::Cow,
+	collections::{BTreeMap, HashSet},
+	sync::OnceLock,
+};
 use wasm_bindgen::prelude::*;
 use web_sys::*;
 
@@ -17,6 +21,9 @@ extern "C" {
 	pub fn js_btoa(input: &str) -> String;
 }
 
+// Stores a status list referencing each JWT's `jti` claim
+pub(crate) static mut STATUS_LISTS: OnceLock<BTreeMap<String, (u8, HashSet<String>)>> = OnceLock::new();
+
 pub(crate) async fn init<'a>(policy_store_config: &PolicyStoreConfig) -> Cow<'a, [u8]> {
 	let PolicyStoreConfig::LockMaster {
 		url,
@@ -30,10 +37,9 @@ pub(crate) async fn init<'a>(policy_store_config: &PolicyStoreConfig) -> Cow<'a,
 	};
 
 	// Get LockMasterConfig
-	let res = http::get(&format!("{}/.well-known/lock-master-configuration", url), &[])
-		.await
-		.expect_throw("Unable to fetch LockMasterConfig from URL");
-	let lock_master_config: types::LockMasterConfig = res.into_json::<types::LockMasterConfig>().await.unwrap_throw();
+	let url = format!("{}/.well-known/lock-master-configuration", url);
+	let res = http::get(&url, &[]).await.expect_throw("Unable to fetch LockMasterConfig from URL");
+	let lock_master_config: types::LockMasterConfig = res.into_json().await.unwrap_throw();
 
 	// init sse updates
 	sse::init(*enable_dynamic_configuration, &lock_master_config.lock_sse_uri);

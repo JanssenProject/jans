@@ -4,9 +4,10 @@ use wasm_bindgen::prelude::*;
 pub mod http;
 
 mod authz;
-mod startup;
-mod lock_master;
 mod crypto;
+mod lock_master;
+mod startup;
+mod token2entity;
 
 #[wasm_bindgen(start)]
 pub(crate) async fn start() {
@@ -22,5 +23,5 @@ pub async fn init(config: JsValue) {
 	startup::init(&config).await;
 
 	// Initialize authz module
-	authz::init(&config);
+	token2entity::init(&config);
 }

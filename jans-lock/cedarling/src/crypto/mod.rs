@@ -1,4 +1,4 @@
-use std::{collections::BTreeMap, rc::Rc, str::FromStr, sync::OnceLock};
+use std::{collections::BTreeMap, str::FromStr, sync::OnceLock};
 use wasm_bindgen::prelude::*;
 use web_sys::Window;
 
@@ -13,6 +13,12 @@ mod types;
 // Supported algorithms
 pub(crate) static SUPPORTED_ALGORITHMS: OnceLock<Vec<jsonwebtoken::Algorithm>> = OnceLock::new();
 
+// Issuers allowed to author a JWT
+pub(crate) static mut TRUSTED_ISSUERS: &'static [types::TrustedIssuer] = &[];
+
+// Trust Store, iss -> { config: OAuthConfig, jwks: JsonWebKeySet }
+pub(crate) static mut TRUST_STORE: OnceLock<BTreeMap<String, types::TrustStoreEntry>> = OnceLock::new();
+
 pub(crate) fn init(config: &startup::types::CedarlingConfig, mut policy_store: serde_json::Map<String, serde_json::Value>) {
 	// insert supported jwt signature algorithms
 	let supported = config.supported_signature_algorithms.iter().map(|s| jsonwebtoken::Algorithm::from_str(s).unwrap_throw()).collect();
@@ -25,19 +31,16 @@ pub(crate) fn init(config: &startup::types::CedarlingConfig, mut policy_store: s
 		issuers.drain(..).map(|issuer| serde_json::from_value(issuer).unwrap_throw()).collect::<Vec<types::TrustedIssuer>>()
 	};
 
+	unsafe { TRUSTED_ISSUERS = trusted_issuers.leak() };
+
 	// Init trust store
-	init_trust_store(trusted_issuers.into(), config.trust_store_refresh_rate)
+	init_trust_store(config.trust_store_refresh_rate)
 }
 
-// Trust Store
-pub(crate) static mut TRUST_STORE: OnceLock<BTreeMap<types::TrustedIssuer, (String, jsonwebtoken::jwk::JwkSet)>> = OnceLock::new();
-
-fn init_trust_store(trusted_issuers: Rc<[types::TrustedIssuer]>, refresh_rate: Option<i32>) {
+fn init_trust_store(refresh_rate: Option<i32>) {
 	let refresh_trust_store = move || {
-		let issuers = trusted_issuers.clone();
-
 		wasm_bindgen_futures::spawn_local(async move {
-			for issuer in issuers.as_ref() {
+			for (idx, issuer) in unsafe { TRUSTED_ISSUERS }.iter().enumerate() {
 				let req = http::get(&issuer.openid_configuration_endpoint, &[]).await;
 				let res = req.expect_throw("Unable to get OpenID config for TrustedIssuer");
 
@@ -46,15 +49,18 @@ fn init_trust_store(trusted_issuers: Rc<[types::TrustedIssuer]>, refresh_rate: O
 					.await
 					.expect_throw("Unable to parse OpenID config from TrustedIssuer");
 
-				// update JWKS
+				// update JwkSet
 				let req = http::get(&config.jwks_uri, &[]).await;
 				let res = req.expect_throw("Unable to fetch JWKS from trusted issuer");
 
 				unsafe {
+					let iss = config.issuer.clone();
+
 					let jwks = res.into_json().await.expect_throw("Unable to parse JWKS from TrustedIssuer");
+					let entry = types::TrustStoreEntry { issuer: idx, config, jwks };
 
 					let store = TRUST_STORE.get_mut().unwrap_throw();
-					let _ = store.insert(issuer.clone(), (config.issuer, jwks));
+					let _ = store.insert(iss, entry);
 				}
 			}
 		})

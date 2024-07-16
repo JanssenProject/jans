@@ -3,6 +3,9 @@ use std::collections::BTreeSet;
 #[derive(serde::Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct CedarlingConfig {
+	pub(crate) application_name: Option<String>,
+	pub(crate) require_aud_validation: bool,
+
 	// policy store
 	pub(crate) policy_store: PolicyStoreConfig,
 	pub(crate) decompress_policy_store: bool,

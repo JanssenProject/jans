@@ -36,6 +36,7 @@ features = [
 	'RequestInit',
 	'EventSource',
 	'MessageEvent',
+	'Url',
 	'UrlSearchParams',
 ]
 

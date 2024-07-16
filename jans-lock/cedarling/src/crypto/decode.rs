@@ -1,50 +1,57 @@
 use std::borrow::Cow;
 use wasm_bindgen::prelude::*;
 
-// JWT Validation settings
-pub(crate) fn validation_options(jwt: &str) -> Result<(Option<jsonwebtoken::DecodingKey>, jsonwebtoken::Validation), Cow<'static, str>> {
+#[derive(Debug, Clone, Copy)]
+pub enum TokenType {
+	IdToken,
+	AccessToken,
+	UserInfoToken,
+}
+
+// extracts JWT Validation settings
+fn validation_options(jwt: &str, _type: TokenType) -> Result<(Option<jsonwebtoken::DecodingKey>, jsonwebtoken::Validation), Cow<'static, str>> {
 	let trust_store = unsafe { super::TRUST_STORE.get().expect_throw("TRUST_STORE not initialized") };
 	let supported = super::SUPPORTED_ALGORITHMS.get().expect_throw("SUPPORTED_ALGORITHMS not initialized").clone();
 
 	let header = jsonwebtoken::decode_header(jwt).unwrap_throw();
 
-	// extract JWK
-	let jwk = if let Some(jwk) = header.jwk {
-		Some(jwk)
-	} else {
-		match header.kid {
-			Some(kid) => {
-				let mut jwk = None;
+	// extract JWK from iss and trust_store
+	let iss = get_issuer(jwt).expect_throw("JWT must have an iss field");
+	let kid = header.kid.expect_throw("JWT must have a kid for validation purposes");
+	let entry = trust_store.get(&iss).expect_throw("Unknown issuer found on JWT");
+	let jwk = entry.jwks.find(&kid);
 
-				for (_, (_, jwks)) in trust_store {
-					if let Some(found) = jwks.find(&kid) {
-						jwk = Some(found);
-						break;
-					}
-				}
-
-				jwk.cloned()
-			}
-			None => None,
-		}
+	// ensure issuer can issue TokenType
+	let issuer = unsafe { super::TRUSTED_ISSUERS.get(entry.issuer).unwrap_throw() };
+	let can_issue = match _type {
+		TokenType::IdToken => issuer.id.trusted,
+		TokenType::AccessToken => issuer.access.trusted,
+		TokenType::UserInfoToken => issuer.user_info.trusted,
 	};
 
+	if !can_issue {
+		let msg = format!("Trusted Issuer: {} cannot issue tokens of type: {:?}", iss, _type);
+		return Err(Cow::Owned(msg));
+	}
+
+	// TODO: verify jti against status_list
+
 	// build decoding key
-	let decoding_key = jwk.as_ref().map(jsonwebtoken::DecodingKey::from_jwk).map(Result::unwrap);
+	let decoding_key = jwk.map(jsonwebtoken::DecodingKey::from_jwk).map(Result::unwrap);
 
 	// build validation
 	let mut validation = jsonwebtoken::Validation::new(jsonwebtoken::Algorithm::HS256);
-	let issuers = trust_store.values().map(|(issuer, _)| issuer).collect::<Vec<_>>();
+	let issuers = trust_store.keys().collect::<Vec<_>>();
 	validation.set_issuer(&issuers);
 	validation.algorithms = supported;
 
 	Ok((decoding_key, validation))
 }
 
-pub(crate) fn decode_jwt<T: serde::de::DeserializeOwned>(jwt: &str) -> T {
-	let (key, validation) = validation_options(jwt).unwrap_throw();
-	let key = &key.expect_throw("Unable to extract DecodingKey from JWT");
-	jsonwebtoken::decode(jwt, key, &validation).unwrap_throw().claims
+pub(crate) fn decode_jwt<T: serde::de::DeserializeOwned>(jwt: &str, _type: TokenType) -> T {
+	let (key, validation) = validation_options(jwt, _type).unwrap_throw();
+	let key = key.expect_throw("Unable to extract DecodingKey from JWT");
+	jsonwebtoken::decode(jwt, &key, &validation).unwrap_throw().claims
 }
 
 #[wasm_bindgen]
