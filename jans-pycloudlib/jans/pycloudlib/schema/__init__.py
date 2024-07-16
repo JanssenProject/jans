@@ -849,8 +849,8 @@ class ConfigmapSchema(Schema):
 
     # @TODO: change to HARDCODED value instead
     ldap_binddn = String(
-        load_default="cn=Directory Manager",
-        dump_default="cn=Directory Manager",
+        load_default="",
+        dump_default="",
         metadata={
             "description": "Bind DN for LDAP (OpenDJ)",
         },
@@ -858,8 +858,8 @@ class ConfigmapSchema(Schema):
 
     # @TODO: change to HARDCODED value instead
     ldap_site_binddn = String(
-        load_default="cn=Directory Manager",
-        dump_default="cn=Directory Manager",
+        load_default="",
+        dump_default="",
         metadata={
             "description": "Bind DN for LDAP (OpenDJ)",
         },
@@ -883,16 +883,16 @@ class ConfigmapSchema(Schema):
     )
 
     ldap_init_host = String(
-        load_default="localhost",
-        dump_default="localhost",
+        load_default="",
+        dump_default="",
         metadata={
             "description": "Initial hostname for LDAP (OpenDJ)",
         },
     )
 
     ldap_init_port = String(
-        load_default="1636",
-        dump_default="1636",
+        load_default="",
+        dump_default="",
         metadata={
             "description": "Initial port for LDAP (OpenDJ)",
         },
@@ -907,16 +907,16 @@ class ConfigmapSchema(Schema):
     )
 
     ldap_port = String(
-        load_default="1389",
-        dump_default="1389",
+        load_default="",
+        dump_default="",
         metadata={
             "description": "Port for LDAP (OpenDJ)",
         },
     )
 
     ldaps_port = String(
-        load_default="1636",
-        dump_default="1636",
+        load_default="",
+        dump_default="",
         metadata={
             "description": "Secure port for LDAP (OpenDJ)",
         },
