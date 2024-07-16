@@ -54,6 +54,8 @@ import io.jans.util.Util;
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
+import org.apache.commons.lang.StringUtils;
+import org.json.JSONObject;
 
 /**
  * Provides operations with http/https requests
@@ -145,7 +147,7 @@ public abstract class BaseHttpService implements Serializable {
 
 	public HttpServiceResponse executePost(HttpClient httpClient, String uri, String authData, Map<String, String> headers, String postData, ContentType contentType, String authType) {
 	    
-	    log.error("Connection manager httpClient:{}, uri:{}, authData:{}, headers:{}, postData:{},contentType:{}, authType:{}", httpClient, uri, authData, headers, postData, contentType, authType);
+	    log.error("executePost() - httpClient:{}, uri:{}, authData:{}, headers:{}, postData:{},contentType:{}, authType:{}", httpClient, uri, authData, headers, postData, contentType, authType);
         HttpPost httpPost = new HttpPost(uri);
 
         if(StringHelper.isEmpty(authType)) { 
@@ -166,9 +168,18 @@ public abstract class BaseHttpService implements Serializable {
 
         StringEntity stringEntity = new StringEntity(postData, contentType);
 		httpPost.setEntity(stringEntity);
-		log.error("Connection manager - stringEntity:{}", stringEntity);
+		log.error("executePost() - stringEntity:{}", stringEntity);
         try {
         	HttpResponse httpResponse = httpClient.execute(httpPost);
+        	log.error("executePost() - httpResponse:{}", httpResponse);
+        	if(httpResponse!=null) {
+        	    log.error("executePost() - httpResponse.getStatusLine():{}", httpResponse.getStatusLine());
+        	    log.error("executePost() - .httpResponse.getEntity():{}", httpResponse.getEntity());
+        	    if (httpResponse.getEntity()!=null) {
+                    JSONObject jsonObj = new JSONObject(httpResponse.getEntity());
+                    log.error("executePost() - .jsonObj:{}", jsonObj);
+        	    }
+        	}
 
         	return new HttpServiceResponse(httpPost, httpResponse);
 		} catch (IOException ex) {

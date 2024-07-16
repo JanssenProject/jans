@@ -31,6 +31,7 @@ import org.apache.http.entity.ContentType;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
 
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -87,7 +88,7 @@ public class AuthUtil {
 
         return accessToken;
     }
-    
+
     public TokenResponse requestAccessToken(final String tokenUrl, final String clientId, final String clientSecret,
             final String scope) {
         log.error("Request for Access Token -  tokenUrl:{}, clientId:{}, clientSecret:{}, scope:{} ", tokenUrl,
@@ -180,22 +181,41 @@ public class AuthUtil {
         return jsonString;
     }
 
+    public JSONObject getResponseJson(HttpServiceResponse serviceResponse) {
+        JSONObject jsonObj = null;
+        if (serviceResponse == null || serviceResponse.getHttpResponse() == null) {
+            return jsonObj;
+        }
+
+        HttpResponse httpResponse = serviceResponse.getHttpResponse();
+        if (httpResponse != null) {
+            log.error("getResponseJson() - httpResponse.getStatusLine():{}", httpResponse.getStatusLine());
+            log.error("getResponseJson() - .httpResponse.getEntity():{}", httpResponse.getEntity());
+            if (httpResponse.getEntity() != null) {
+                jsonObj = new JSONObject(httpResponse.getEntity());
+                log.error("getResponseJson() - .jsonObj:{}", jsonObj);
+            }
+        }
+
+        return jsonObj;
+    }
+
     public Status getResponseStatus(HttpServiceResponse serviceResponse) {
-       Status status = Status.INTERNAL_SERVER_ERROR;
+        Status status = Status.INTERNAL_SERVER_ERROR;
 
         if (serviceResponse == null || serviceResponse.getHttpResponse() == null) {
             return status;
         }
 
         int statusCode = serviceResponse.getHttpResponse().getStatusLine().getStatusCode();
-        
+
         status = Status.fromStatusCode(statusCode);
-        if(status == null) {
+        if (status == null) {
             status = Status.INTERNAL_SERVER_ERROR;
         }
         return status;
     }
-    
+
     public JSONObject getJSONObject(HttpServletRequest request) {
         log.error("getJSONObject() - request:{}", request);
         JSONObject jsonBody = null;
