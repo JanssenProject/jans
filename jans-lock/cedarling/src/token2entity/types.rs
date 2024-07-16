@@ -13,7 +13,7 @@ where
 	D: serde::Deserializer<'de>,
 {
 	let base = String::deserialize(deserializer)?;
-	Ok(base.split(" ").map(str::to_string).collect())
+	Ok(base.split(' ').map(str::to_string).collect())
 }
 
 #[derive(Debug)]
@@ -37,6 +37,11 @@ pub struct AccessToken {
 }
 
 impl AccessToken {
+	pub fn get_token_entity(&self) -> Entity {
+		// TODO: Implement
+		unimplemented!()
+	}
+
 	pub fn get_client_entity(&self) -> Entity {
 		if !self.active {
 			throw_str("Attempted to extract a Client entity from an inactive access token")
@@ -84,6 +89,13 @@ pub struct IdToken {
 	pub nonce: String,
 }
 
+impl IdToken {
+	pub fn get_token_entity(&self) -> Entity {
+		// TODO: Implement
+		unimplemented!()
+	}
+}
+
 #[derive(serde::Deserialize, Debug)]
 pub struct UserInfoToken {
 	pub jti: String,
@@ -115,12 +127,12 @@ impl UserInfoToken {
 			.collect()
 	}
 
-	pub fn get_info_entity(&self, roles: &HashMap<&String, Vec<Entity>>) -> Entity {
+	pub fn get_token_entity(&self, roles: &HashMap<&String, Vec<Entity>>) -> Entity {
 		let id = serde_json::json!({ "__entity": { "type": "UserInfo", "id": self.sub } });
 		let uid = EntityUid::from_json(id).unwrap_throw();
 
 		// create email dict
-		let mut iter = self.email.split("@");
+		let mut iter = self.email.split('@');
 		let record = [
 			("id".to_string(), RestrictedExpression::new_string(iter.next().expect_throw("Invalid Email Address").into())),
 			("domain".to_string(), RestrictedExpression::new_string(iter.next().expect_throw("Invalid Email Address").into())),
@@ -134,8 +146,8 @@ impl UserInfoToken {
 		let mut attrs = HashMap::from([
 			("aud".to_string(), RestrictedExpression::new_string(self.aud.clone())),
 			("email".to_string(), RestrictedExpression::new_record(record).unwrap_throw()),
-			("exp".to_string(), RestrictedExpression::new_long(self.exp.clone())),
-			("iat".to_string(), RestrictedExpression::new_long(self.iat.clone())),
+			("exp".to_string(), RestrictedExpression::new_long(self.exp)),
+			("iat".to_string(), RestrictedExpression::new_long(self.iat)),
 			("sub".to_string(), RestrictedExpression::new_string(self.sub.clone())),
 			("iss".to_string(), RestrictedExpression::new_entity_uid(entity.uid())),
 		]);
@@ -159,15 +171,16 @@ impl UserInfoToken {
 			}
 			None => Entity::new(uid, attrs, HashSet::with_capacity(0)),
 		}
-		.expect_throw("Unable to construct User entity from userinfo_token")
+		.expect_throw("Unable to construct UserInfo entity from userinfo_token")
 	}
 
-	pub fn get_user_entity(&self, roles: &HashMap<&String, Entity>) -> Entity {
-		let id = serde_json::json!({ "__entity": { "type": "User", "id": self.sub } });
+	pub fn get_user_entity(&self, roles: &HashMap<&String, Vec<Entity>>) -> Entity {
+		let entry = unsafe { TRUST_STORE.get(&self.iss) }.expect_throw("Can't get iss for User entity creation from userinfo_token");
+		let id = serde_json::json!({ "__entity": { "type": entry.issuer.id.principal_identifier, "id": self.sub } });
 		let uid = EntityUid::from_json(id).unwrap_throw();
 
 		// create email dict
-		let mut iter = self.email.split("@");
+		let mut iter = self.email.split('@');
 		let record = [
 			("id".to_string(), RestrictedExpression::new_string(iter.next().expect_throw("Invalid Email Address").into())),
 			("domain".to_string(), RestrictedExpression::new_string(iter.next().expect_throw("Invalid Email Address").into())),
@@ -189,7 +202,7 @@ impl UserInfoToken {
 
 		match roles.get(&self.sub) {
 			Some(e) => {
-				let parents = HashSet::from_iter(Some(e.uid()));
+				let parents = HashSet::from_iter(e.iter().map(|e| e.uid()));
 				Entity::new(uid, attrs, parents)
 			}
 			None => Entity::new(uid, attrs, HashSet::with_capacity(0)),

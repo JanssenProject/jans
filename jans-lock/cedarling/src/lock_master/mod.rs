@@ -47,7 +47,7 @@ pub(crate) async fn init<'a>(policy_store_config: &PolicyStoreConfig) -> Cow<'a,
 	// Get OAuthConfig
 	let res = http::get(&lock_master_config.oauth_as_well_known, &[]).await.expect_throw("Unable to fetch LockMasterConfig from URL");
 	let openid_config = res.into_json::<types::OAuthConfig>().await.unwrap_throw();
-	let iss = crypto::decode::get_issuer(&ssa_jwt).expect_throw("SSA_JWT lacks `iss` field");
+	let iss = crypto::decode::get_issuer(ssa_jwt).expect_throw("SSA_JWT lacks `iss` field");
 
 	let client: types::OAuthDynamicClient = {
 		// OpenID dynamic client registration

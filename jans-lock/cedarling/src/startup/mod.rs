@@ -13,7 +13,7 @@ pub(crate) static SCHEMA: OnceLock<Schema> = OnceLock::new();
 pub(crate) static POLICY_SET: OnceLock<PolicySet> = OnceLock::new();
 
 pub(crate) async fn init(config: &types::CedarlingConfig) {
-	let policy_store = init_policy_store(&config).await;
+	let policy_store = init_policy_store(config).await;
 	crypto::init(config, policy_store);
 }
 

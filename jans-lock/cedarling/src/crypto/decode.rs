@@ -2,6 +2,7 @@ use std::{borrow::Cow, ptr::addr_of};
 use wasm_bindgen::prelude::*;
 
 #[derive(Debug, Clone, Copy)]
+#[allow(clippy::enum_variant_names)]
 pub enum TokenType {
 	IdToken,
 	AccessToken,
@@ -63,7 +64,7 @@ pub(crate) fn get_issuer(jwt: &str) -> Option<String> {
 		iss: String,
 	}
 
-	let payload = jwt.split(".").nth(1)?;
+	let payload = jwt.split('.').nth(1)?;
 	let decoded: IssuerExtract = serde_json::from_str::<IssuerExtract>(&js_atob(payload)).ok()?;
 
 	Some(decoded.iss)

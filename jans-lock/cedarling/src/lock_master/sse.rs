@@ -8,7 +8,7 @@ pub fn init(enable_dynamic_configuration: bool, lock_sse_uri: &str) {
 
 	// Setup dynamic SSE updates for LockMaster
 	if enable_dynamic_configuration {
-		let sse = EventSource::new(&lock_sse_uri).unwrap_throw();
+		let sse = EventSource::new(lock_sse_uri).unwrap_throw();
 		let sse2 = sse.clone();
 
 		let onopen = Closure::once_into_js(move || {
@@ -19,6 +19,7 @@ pub fn init(enable_dynamic_configuration: bool, lock_sse_uri: &str) {
 				let json = data.as_string().expect_throw("Unable to convert event data to string");
 				let event: types::SseUpdate = serde_json::from_str(&json).unwrap_throw();
 
+				// TODO: discuss or refer SSE update format
 				match event {
 					types::SseUpdate::StatusListUpdate { bits, status_list } => {
 						let status_lists = unsafe { super::STATUS_LISTS.get_mut().expect_throw("STATUS_LIST not initialized") };

@@ -1,7 +1,7 @@
 use std::{collections::HashMap, sync::OnceLock};
 
 use crypto::{decode, TRUST_STORE};
-use web_sys::console;
+use wasm_bindgen::throw_str;
 
 use crate::*;
 pub mod types;
@@ -11,13 +11,13 @@ pub static REQUIRE_AUD_VALIDATION: OnceLock<bool> = OnceLock::new();
 
 pub(crate) fn init(config: &startup::types::CedarlingConfig) {
 	if let Some(application_name) = config.application_name.as_ref() {
-		APPLICATION_NAME.get_or_init(|| application_name.clone());
+		APPLICATION_NAME.set(application_name.clone()).unwrap_throw();
 	}
 
-	REQUIRE_AUD_VALIDATION.get_or_init(|| config.require_aud_validation);
+	REQUIRE_AUD_VALIDATION.set(config.require_aud_validation).unwrap_throw();
 }
 
-pub fn token2entities(input: &authz::types::AuthzInput) -> cedar_policy::Entities {
+pub fn token2entities(input: &authz::types::AuthzInput) -> (cedar_policy::EntityUid, cedar_policy::Entities) {
 	let mut entities = cedar_policy::Entities::empty();
 	let schema = startup::SCHEMA.get();
 
@@ -32,7 +32,7 @@ pub fn token2entities(input: &authz::types::AuthzInput) -> cedar_policy::Entitie
 
 	// create Client and Application Entities
 	for access_token in &input.access_tokens {
-		let access_token: types::AccessToken = decode::decode_jwt(&access_token, decode::TokenType::AccessToken);
+		let access_token: types::AccessToken = decode::decode_jwt(access_token, decode::TokenType::AccessToken);
 
 		// check if `aud` claim in id_token matches `client_id` in access token
 		if id_token.aud == access_token.client_id {
@@ -45,8 +45,8 @@ pub fn token2entities(input: &authz::types::AuthzInput) -> cedar_policy::Entitie
 		let application_entity = access_token.get_application_entity(application_name, client.uid());
 
 		entities = match application_entity {
-			Some(e) => entities.add_entities([e, client], schema).unwrap_throw(),
-			None => entities.add_entities(Some(client), schema).unwrap_throw(),
+			Some(e) => entities.add_entities([e, client, access_token.get_token_entity()], schema).unwrap_throw(),
+			None => entities.add_entities([client, access_token.get_token_entity()], schema).unwrap_throw(),
 		};
 	}
 
@@ -57,9 +57,7 @@ pub fn token2entities(input: &authz::types::AuthzInput) -> cedar_policy::Entitie
 
 	// skip further entities' creation if id_token is not valid
 	if !id_token_valid {
-		let msg = JsValue::from_str("id_token lacks a corresponding access_token with a matching client_id, skipping creation of any further Entities");
-		console::warn_1(&msg);
-		return entities;
+		throw_str("REQUIRE_AUD_VALIDATION = true: id_token lacks a corresponding access_token with a matching client_id")
 	}
 
 	// Join id_tokens and [userinfo_tokens]
@@ -68,12 +66,10 @@ pub fn token2entities(input: &authz::types::AuthzInput) -> cedar_policy::Entitie
 		.iter()
 		.filter_map(|userinfo_token| {
 			// dispose any userinfo_tokens that don't match the id_tokens, sub and iss
-			let userinfo: types::UserInfoToken = decode::decode_jwt(&userinfo_token, decode::TokenType::UserInfoToken);
+			let userinfo: types::UserInfoToken = decode::decode_jwt(userinfo_token, decode::TokenType::UserInfoToken);
 			(userinfo.sub != id_token.sub || userinfo.iss != id_token.iss).then_some(userinfo)
 		})
 		.collect::<Vec<_>>();
-
-	// TODO: create User entity
 
 	// create Roles entities
 	let mut roles = HashMap::new();
@@ -81,11 +77,18 @@ pub fn token2entities(input: &authz::types::AuthzInput) -> cedar_policy::Entitie
 		roles.insert(&userinfo.sub, userinfo.get_role_entities());
 	}
 
+	// create User and id_token entity
+	let userinfo = userinfo_list
+		.iter()
+		.find(|u| u.sub == id_token.sub)
+		.expect_throw("Unable to find UserInfoToken with sub matching IdToken");
+	let user_entity = userinfo.get_user_entity(&roles);
+	let principal = user_entity.uid();
+	entities = entities.add_entities([user_entity, id_token.get_token_entity()], schema).unwrap_throw();
+
 	// create UserInfo entities
-	entities = entities.add_entities(userinfo_list.iter().map(|i| i.get_info_entity(&roles)), schema).unwrap_throw();
+	entities = entities.add_entities(userinfo_list.iter().map(|i| i.get_token_entity(&roles)), schema).unwrap_throw();
 
-	// Add Role entities
-	entities.add_entities(roles.drain().map(|(_, entity)| entity.into_iter()).flatten(), schema).unwrap_throw()
-
-	// TODO: return eid of User entity as principal
+	// Add Role entities and return Uid of User entity as principal
+	(principal, entities.add_entities(roles.drain().flat_map(|(_, entity)| entity.into_iter()), schema).unwrap_throw())
 }
