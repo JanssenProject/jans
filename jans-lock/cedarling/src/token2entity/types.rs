@@ -6,6 +6,8 @@ use cedar_policy::*;
 use serde::Deserialize;
 use wasm_bindgen::{throw_str, UnwrapThrowExt};
 
+use crate::crypto::TRUST_STORE;
+
 fn space_separated_string_list<'de, D>(deserializer: D) -> Result<Vec<String>, D::Error>
 where
 	D: serde::Deserializer<'de>,
@@ -88,22 +90,79 @@ pub struct UserInfoToken {
 	pub iss: String,
 
 	pub sub: String,
-	pub email: String,
-	pub role: String,
+	pub aud: String,
+	// TODO: Parse multiple strings from UserInfo token?
+	#[serde(rename = "role")]
+	pub exp: i64,
+	pub iat: i64,
 
+	pub roles: HashSet<String>,
+	pub email: String,
+	pub name: Option<String>,
 	pub phone_number: Option<String>,
-	pub given_name: Option<String>,
+	pub birthdate: Option<String>,
 }
 
 impl UserInfoToken {
-	pub fn get_role_entity(&self) -> Entity {
-		let id = serde_json::json!({ "__entity": { "type": "Role", "id": self.role } });
-		let uid = EntityUid::from_json(id).unwrap_throw();
-
-		Entity::new_no_attrs(uid, HashSet::new())
+	pub fn get_role_entities(&self) -> Vec<Entity> {
+		self.roles
+			.iter()
+			.map(|role| {
+				let id = serde_json::json!({ "__entity": { "type": "Role", "id": role } });
+				let uid = EntityUid::from_json(id).unwrap_throw();
+				Entity::new_no_attrs(uid, HashSet::new())
+			})
+			.collect()
 	}
 
-	pub fn get_user_entity(&self, roles: &HashMap<&str, Entity>) -> Entity {
+	pub fn get_info_entity(&self, roles: &HashMap<&String, Vec<Entity>>) -> Entity {
+		let id = serde_json::json!({ "__entity": { "type": "UserInfo", "id": self.sub } });
+		let uid = EntityUid::from_json(id).unwrap_throw();
+
+		// create email dict
+		let mut iter = self.email.split("@");
+		let record = [
+			("id".to_string(), RestrictedExpression::new_string(iter.next().expect_throw("Invalid Email Address").into())),
+			("domain".to_string(), RestrictedExpression::new_string(iter.next().expect_throw("Invalid Email Address").into())),
+		];
+
+		// acquire TrustedIssuer eid
+		let entry = unsafe { TRUST_STORE.get(&self.iss) }.expect_throw("Unable to extract TrustedIssuer from UserInfo iss");
+		let entity = entry.issuer.get_entity();
+
+		// construct entity
+		let mut attrs = HashMap::from([
+			("aud".to_string(), RestrictedExpression::new_string(self.aud.clone())),
+			("email".to_string(), RestrictedExpression::new_record(record).unwrap_throw()),
+			("exp".to_string(), RestrictedExpression::new_long(self.exp.clone())),
+			("iat".to_string(), RestrictedExpression::new_long(self.iat.clone())),
+			("sub".to_string(), RestrictedExpression::new_string(self.sub.clone())),
+			("iss".to_string(), RestrictedExpression::new_entity_uid(entity.uid())),
+		]);
+
+		if let Some(birthdate) = self.birthdate.clone() {
+			attrs.insert("birthdate".to_string(), RestrictedExpression::new_string(birthdate));
+		}
+
+		if let Some(username) = self.name.clone() {
+			attrs.insert("name".to_string(), RestrictedExpression::new_string(username));
+		}
+
+		if let Some(number) = self.phone_number.clone() {
+			attrs.insert("phone_number".to_string(), RestrictedExpression::new_string(number));
+		}
+
+		match roles.get(&self.sub) {
+			Some(e) => {
+				let parents = HashSet::from_iter(e.iter().map(|e| e.uid()));
+				Entity::new(uid, attrs, parents)
+			}
+			None => Entity::new(uid, attrs, HashSet::with_capacity(0)),
+		}
+		.expect_throw("Unable to construct User entity from userinfo_token")
+	}
+
+	pub fn get_user_entity(&self, roles: &HashMap<&String, Entity>) -> Entity {
 		let id = serde_json::json!({ "__entity": { "type": "User", "id": self.sub } });
 		let uid = EntityUid::from_json(id).unwrap_throw();
 
@@ -120,7 +179,7 @@ impl UserInfoToken {
 			("email".to_string(), RestrictedExpression::new_record(record).unwrap_throw()),
 		]);
 
-		if let Some(given_name) = self.given_name.clone() {
+		if let Some(given_name) = self.name.clone() {
 			attrs.insert("username".to_string(), RestrictedExpression::new_string(given_name));
 		}
 
@@ -128,9 +187,9 @@ impl UserInfoToken {
 			attrs.insert("phone_number".to_string(), RestrictedExpression::new_string(number));
 		}
 
-		match roles.get(self.role.as_str()) {
+		match roles.get(&self.sub) {
 			Some(e) => {
-				let parents = HashSet::from_iter(std::iter::once(e.uid()));
+				let parents = HashSet::from_iter(Some(e.uid()));
 				Entity::new(uid, attrs, parents)
 			}
 			None => Entity::new(uid, attrs, HashSet::with_capacity(0)),

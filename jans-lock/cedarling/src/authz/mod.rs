@@ -9,12 +9,12 @@ pub mod types;
 pub async fn authz(req: JsValue) -> JsValue {
 	let input = from_value::<types::AuthzInput>(req).unwrap_throw();
 
-	// generate request
-	let context = cedar_policy::Context::from_json_value(input.context, None).expect_throw("Unable to generate context Object");
-
 	// generate extra parameters for cedar decision
 	let entities = token2entities(&input);
 	let policies = startup::POLICY_SET.get().expect_throw("POLICY_SET not initialized");
+
+	// generate request
+	let context = cedar_policy::Context::from_json_value(input.context, None).expect_throw("Unable to generate context Object");
 
 	JsValue::NULL
 }

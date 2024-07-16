@@ -1,6 +1,6 @@
 use std::{collections::HashMap, sync::OnceLock};
 
-use crypto::decode;
+use crypto::{decode, TRUST_STORE};
 use web_sys::console;
 
 use crate::*;
@@ -20,6 +20,11 @@ pub(crate) fn init(config: &startup::types::CedarlingConfig) {
 pub fn token2entities(input: &authz::types::AuthzInput) -> cedar_policy::Entities {
 	let mut entities = cedar_policy::Entities::empty();
 	let schema = startup::SCHEMA.get();
+
+	// create TrustedIssuer entities
+	let trust_store = unsafe { std::ptr::addr_of!(TRUST_STORE).as_ref().unwrap_throw() };
+	let issuers = trust_store.iter().map(|(_, entry)| (entry.issuer.get_entity()));
+	entities = entities.add_entities(issuers, schema).unwrap_throw();
 
 	// ensure iss can issue id_tokens according to trust store
 	let mut id_token_valid = false;
@@ -68,15 +73,19 @@ pub fn token2entities(input: &authz::types::AuthzInput) -> cedar_policy::Entitie
 		})
 		.collect::<Vec<_>>();
 
+	// TODO: create User entity
+
 	// create Roles entities
 	let mut roles = HashMap::new();
 	for userinfo in &userinfo_list {
-		roles.insert(userinfo.role.as_str(), userinfo.get_role_entity());
+		roles.insert(&userinfo.sub, userinfo.get_role_entities());
 	}
 
-	// create User entities
-	entities = entities.add_entities(userinfo_list.iter().map(|i| i.get_user_entity(&roles)), schema).unwrap_throw();
+	// create UserInfo entities
+	entities = entities.add_entities(userinfo_list.iter().map(|i| i.get_info_entity(&roles)), schema).unwrap_throw();
 
 	// Add Role entities
-	entities.add_entities(roles.drain().map(|(_, entity)| entity), schema).unwrap_throw()
+	entities.add_entities(roles.drain().map(|(_, entity)| entity.into_iter()).flatten(), schema).unwrap_throw()
+
+	// TODO: return eid of User entity as principal
 }

@@ -1,4 +1,4 @@
-use std::borrow::Cow;
+use std::{borrow::Cow, ptr::addr_of};
 use wasm_bindgen::prelude::*;
 
 #[derive(Debug, Clone, Copy)]
@@ -10,9 +10,7 @@ pub enum TokenType {
 
 // extracts JWT Validation settings
 fn validation_options(jwt: &str, _type: TokenType) -> Result<(Option<jsonwebtoken::DecodingKey>, jsonwebtoken::Validation), Cow<'static, str>> {
-	let trust_store = unsafe { super::TRUST_STORE.get().expect_throw("TRUST_STORE not initialized") };
-	let supported = super::SUPPORTED_ALGORITHMS.get().expect_throw("SUPPORTED_ALGORITHMS not initialized").clone();
-
+	let trust_store = unsafe { addr_of!(super::TRUST_STORE).as_ref().expect_throw("TRUST_STORE not initialized") };
 	let header = jsonwebtoken::decode_header(jwt).unwrap_throw();
 
 	// extract JWK from iss and trust_store
@@ -22,11 +20,10 @@ fn validation_options(jwt: &str, _type: TokenType) -> Result<(Option<jsonwebtoke
 	let jwk = entry.jwks.find(&kid);
 
 	// ensure issuer can issue TokenType
-	let issuer = unsafe { super::TRUSTED_ISSUERS.get(entry.issuer).unwrap_throw() };
 	let can_issue = match _type {
-		TokenType::IdToken => issuer.id.trusted,
-		TokenType::AccessToken => issuer.access.trusted,
-		TokenType::UserInfoToken => issuer.user_info.trusted,
+		TokenType::IdToken => entry.issuer.id.trusted,
+		TokenType::AccessToken => entry.issuer.access.trusted,
+		TokenType::UserInfoToken => entry.issuer.user_info.trusted,
 	};
 
 	if !can_issue {
@@ -43,7 +40,7 @@ fn validation_options(jwt: &str, _type: TokenType) -> Result<(Option<jsonwebtoke
 	let mut validation = jsonwebtoken::Validation::new(jsonwebtoken::Algorithm::HS256);
 	let issuers = trust_store.keys().collect::<Vec<_>>();
 	validation.set_issuer(&issuers);
-	validation.algorithms = supported;
+	validation.algorithms = unsafe { super::SUPPORTED_ALGORITHMS.clone() };
 
 	Ok((decoding_key, validation))
 }

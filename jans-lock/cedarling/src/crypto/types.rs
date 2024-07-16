@@ -11,9 +11,8 @@ use wasm_bindgen::UnwrapThrowExt;
 use crate::lock_master;
 
 pub struct TrustStoreEntry {
-	pub issuer: usize,
-	pub config: lock_master::types::OAuthConfig,
 	pub jwks: jsonwebtoken::jwk::JwkSet,
+	pub issuer: &'static TrustedIssuer,
 }
 
 #[derive(serde::Deserialize, Debug, Clone)]

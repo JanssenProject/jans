@@ -1,4 +1,5 @@
 use std::{collections::BTreeMap, str::FromStr, sync::OnceLock};
+use types::TrustedIssuer;
 use wasm_bindgen::prelude::*;
 use web_sys::Window;
 
@@ -11,18 +12,17 @@ pub(crate) mod decode;
 mod types;
 
 // Supported algorithms
-pub(crate) static SUPPORTED_ALGORITHMS: OnceLock<Vec<jsonwebtoken::Algorithm>> = OnceLock::new();
-
-// Issuers allowed to author a JWT
-pub(crate) static mut TRUSTED_ISSUERS: &'static [types::TrustedIssuer] = &[];
+pub(crate) static mut SUPPORTED_ALGORITHMS: Vec<jsonwebtoken::Algorithm> = Vec::new();
 
 // Trust Store, iss -> { config: OAuthConfig, jwks: JsonWebKeySet }
-pub(crate) static mut TRUST_STORE: OnceLock<BTreeMap<String, types::TrustStoreEntry>> = OnceLock::new();
+pub(crate) static mut TRUST_STORE: BTreeMap<String, types::TrustStoreEntry> = BTreeMap::new();
 
 pub(crate) fn init(config: &startup::types::CedarlingConfig, mut policy_store: serde_json::Map<String, serde_json::Value>) {
 	// insert supported jwt signature algorithms
 	let supported = config.supported_signature_algorithms.iter().map(|s| jsonwebtoken::Algorithm::from_str(s).unwrap_throw()).collect();
-	SUPPORTED_ALGORITHMS.set(supported).expect_throw("SUPPORTED_ALGORITHMS is already initialized");
+	unsafe {
+		SUPPORTED_ALGORITHMS = supported;
+	}
 
 	// Load trusted issuers
 	let trusted_issuers = {
@@ -31,16 +31,21 @@ pub(crate) fn init(config: &startup::types::CedarlingConfig, mut policy_store: s
 		issuers.drain(..).map(|issuer| serde_json::from_value(issuer).unwrap_throw()).collect::<Vec<types::TrustedIssuer>>()
 	};
 
-	unsafe { TRUSTED_ISSUERS = trusted_issuers.leak() };
-
 	// Init trust store
-	init_trust_store(config.trust_store_refresh_rate)
+	init_trust_store(config.trust_store_refresh_rate, trusted_issuers)
 }
 
-fn init_trust_store(refresh_rate: Option<i32>) {
+// A list of TrustedIssuers configured once during startup
+static TRUSTED_ISSUERS: OnceLock<Vec<TrustedIssuer>> = OnceLock::new();
+
+fn init_trust_store(refresh_rate: Option<i32>, trusted_issuers: Vec<TrustedIssuer>) {
+	TRUSTED_ISSUERS.set(trusted_issuers).expect_throw("TRUSTED_ISSUERS already initialized");
+
 	let refresh_trust_store = move || {
 		wasm_bindgen_futures::spawn_local(async move {
-			for (idx, issuer) in unsafe { TRUSTED_ISSUERS }.iter().enumerate() {
+			let trusted_issuers = TRUSTED_ISSUERS.get().expect_throw("TRUSTED_ISSUERS not initialized");
+
+			for (idx, issuer) in trusted_issuers.iter().enumerate() {
 				let req = http::get(&issuer.openid_configuration_endpoint, &[]).await;
 				let res = req.expect_throw("Unable to get OpenID config for TrustedIssuer");
 
@@ -57,10 +62,9 @@ fn init_trust_store(refresh_rate: Option<i32>) {
 					let iss = config.issuer.clone();
 
 					let jwks = res.into_json().await.expect_throw("Unable to parse JWKS from TrustedIssuer");
-					let entry = types::TrustStoreEntry { issuer: idx, config, jwks };
+					let entry = types::TrustStoreEntry { jwks, issuer };
 
-					let store = TRUST_STORE.get_mut().unwrap_throw();
-					let _ = store.insert(iss, entry);
+					let _ = unsafe { TRUST_STORE.insert(iss, entry) };
 				}
 			}
 		})
