@@ -22,32 +22,6 @@ class LoginViewModel : ViewModel() {
     fun onUiEvent(loginUiEvent: LoginUiEvent) {
         when (loginUiEvent) {
 
-            // Email/Mobile changed
-            /*is LoginUiEvent.EmailOrMobileChanged -> {
-                loginState.value = loginState.value.copy(
-                    emailOrMobile = loginUiEvent.inputValue,
-                    errorState = loginState.value.errorState.copy(
-                        emailOrMobileErrorState = if (loginUiEvent.inputValue.trim().isNotEmpty())
-                            ErrorState()
-                        else
-                            emailOrMobileEmptyErrorState
-                    )
-                )
-            }
-
-            // Password changed
-            is LoginUiEvent.PasswordChanged -> {
-                loginState.value = loginState.value.copy(
-                    password = loginUiEvent.inputValue,
-                    errorState = loginState.value.errorState.copy(
-                        passwordErrorState = if (loginUiEvent.inputValue.trim().isNotEmpty())
-                            ErrorState()
-                        else
-                            passwordEmptyErrorState
-                    )
-                )
-            }*/
-
             // Submit Login
             is LoginUiEvent.Submit -> {
                 //val inputsValidated = validateInputs()

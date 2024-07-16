@@ -18,7 +18,7 @@ package io.jans.lock.service.ws.rs.audit;
 
 import org.slf4j.Logger;
 
-import io.jans.lock.service.util.ServerUtil;
+import io.jans.lock.util.ServerUtil;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
