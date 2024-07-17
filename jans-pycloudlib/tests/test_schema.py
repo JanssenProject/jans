@@ -147,3 +147,21 @@ def test_load_schema_from_file_invalid(tmpdir, value, retcode):
 
     _, _, code = load_schema_from_file(str(src))
     assert code == retcode
+
+
+def test_valid_optional_scopes():
+    from jans.pycloudlib.schema import ConfigmapSchema
+    assert ConfigmapSchema().validate_optional_scopes('["ldap", "couchbase", "redis", "sql"]') is None
+
+
+@pytest.mark.parametrize("value", [
+    '["random"]',
+    "random",
+    '{"key": "value"}',
+])
+def test_random_optional_scopes(value):
+    from marshmallow import ValidationError
+    from jans.pycloudlib.schema import ConfigmapSchema
+
+    with pytest.raises(ValidationError):
+        ConfigmapSchema().validate_optional_scopes(value)

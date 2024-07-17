@@ -14,10 +14,8 @@ from marshmallow import validates
 from marshmallow import ValidationError
 from marshmallow.fields import Email
 from marshmallow.fields import Integer
-from marshmallow.fields import List
 from marshmallow.fields import Nested
 from marshmallow.fields import String
-from marshmallow.validate import ContainsOnly
 from marshmallow.validate import Length
 from marshmallow.validate import OneOf
 from marshmallow.validate import Predicate
@@ -656,13 +654,11 @@ class ConfigmapSchema(Schema):
         },
     )
 
-    # @TODO: change to string-based list
-    optional_scopes = List(
-        String(),
-        validate=ContainsOnly(OPTIONAL_SCOPES),
-        load_default=[],
+    optional_scopes = String(
+        load_default="",
+        dump_default="",
         metadata={
-            "description": "List of optional scopes of components",
+            "description": "List of optional scopes of components as string",
         },
     )
 
@@ -948,6 +944,27 @@ class ConfigmapSchema(Schema):
         in_data["auth_sig_keys"] = transform_auth_keys(in_data["auth_sig_keys"], AUTH_SIG_KEYS)
         in_data["auth_enc_keys"] = transform_auth_keys(in_data["auth_enc_keys"], AUTH_ENC_KEYS)
         return in_data
+
+    @validates("optional_scopes")
+    def validate_optional_scopes(self, value):
+        try:
+            scopes = json.loads(value)
+        except json.decoder.JSONDecodeError:
+            raise ValidationError("Invalid list type of optional scopes")
+
+        if not isinstance(scopes, list):
+            raise ValidationError("Unable to resolve optional scopes as list type")
+
+        # if contain unrecognized scopes, raise error
+        invalid_scopes = [
+            scope for scope in scopes
+            if scope not in OPTIONAL_SCOPES
+        ]
+        if invalid_scopes:
+            raise ValidationError(
+                f"Invalid optional scopes {','.join(invalid_scopes)}. "
+                f"Choose one or more optional scopes from the following list: {','.join(OPTIONAL_SCOPES)}"
+            )
 
 
 def transform_auth_keys(value, default_keys):
