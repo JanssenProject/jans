@@ -5,11 +5,12 @@ tags:
   - messaging
 ---
 
-There are three types of message configuration available.
+# Messaging Configuration
 
-1. Message Configuration
-2. Postgres Message Configuration
-3. Redis Message Configuration
+The Janssen server provides messaging infrastructure for publish-subscribe message flows. 
+Messaging infrastructure is configurable to the level where it can be enabled or disabled.
+When enabled, configuration also allows choice of providers and supplying configuration
+for those providers as well. 
 
 The Janssen Server provides multiple configuration tools
 to perform these tasks.
@@ -43,7 +44,7 @@ to perform these tasks.
 ### Message Configuration
 
 To get the details of Janssen command line operations relevant to
-the messaging configuration,you can check the operations under
+the messaging configuration, you can check the operations under
 `MessageConfiguration` using the command below:
 
 ```bash title="Command"
@@ -99,8 +100,8 @@ of your Janssen Server by performing this operation.
 
 #### Patch Message Configuration
 
-You may need to update Message configuration, In that case
-`patch-config-message` can be used to modify the cache configuration.
+You may need to update Message configuration, In that case, use 
+the `patch-config-message` operation.
 
 The `patch-config-message` operation uses the
 [JSON Patch](https://jsonpatch.com/#the-patch) schema to describe
@@ -132,7 +133,7 @@ Using the above file, perform the operation as below:
 
 ```bash title="Sample Command"
 /opt/jans/jans-cli/config-cli.py --operation-id patch-config-message \
---data /tmp/message-patch.jasn
+--data /tmp/message-patch.json
 ```
 
 ```bash title="Sample Output" linenums="1"
@@ -161,10 +162,11 @@ Using the above file, perform the operation as below:
 }
 ```
 
-### Message Configuration Postgres
+### Messaging Configuration For Postgres
 
-you can check the operations under
-`MessageConfigurationPostgres` using the command below:
+When the `Postgres` is being used as a messaging provider,
+use the operations under the task
+`MessageConfigurationPostgres` to configure and manage the provider.
 
 ```bash title="Command"
 /opt/jans/jans-cli/config-cli.py --info MessageConfigurationPostgres
@@ -225,7 +227,7 @@ To update the configuration follow the steps below.
 3. The Janssen Server also provides an example of data that adheres to the above schema.
    To fetch the example, use the command below.
    ```bash title="Command"
-   /opt/jans/jans-cli/config-cli.py --schema-semple PostgresMessageConfiguration
+   /opt/jans/jans-cli/config-cli.py --schema-sample PostgresMessageConfiguration
    ```
    
 4. Use the updated file to send the update to the Janssen Server using the command below
@@ -262,14 +264,14 @@ the JSON Patch data would look like below:
 ```
 
 Store the above JSON Patch data in a file, for instance,
-`/tmp/message-patch.json`
+`/tmp/patch-postgres.json`
 
 Using the above file, perform the operation as below:
 
 
 ```bash title="Sample Command"
 /opt/jans/jans-cli/config-cli.py --operation-id patch-config-message-postgres \
---data /tmp/patch-postgres.jasn
+--data /tmp/patch-postgres.json
 ```
 
 ```json title="Sample Output" linenums="1"
@@ -286,7 +288,7 @@ Using the above file, perform the operation as below:
 
 
 
-### Redis Message Configuration
+### Messaging Configuration For Redis
 
 you can check the operations under
 `MessageConfigurationRedis` using the command below:
@@ -345,7 +347,7 @@ To update the configuration follow the steps below.
    and store it into a file for editing
    ```bash
    /opt/jans/jans-cli/config-cli.py -no-color --operation-id get-config-message-redis >\
-    /tmp/Redis.json
+    /tmp/redis.json
    ```
 2. Edit and update the desired configuration values in the file while keeping 
    other properties and values unchanged. Updates must adhere to 
@@ -358,14 +360,14 @@ To update the configuration follow the steps below.
 3. The Janssen Server also provides an example of data that 
    adheres to the above schema.To fetch the example, use the command below.
    ```bash title="Command"
-   /opt/jans/jans-cli/config-cli.py --schema-semple RedisMessageConfiguration
+   /opt/jans/jans-cli/config-cli.py --schema-sample RedisMessageConfiguration
    ```
 
 4. Use the updated file to send the update to the Janssen 
    Server using the command below
  ```bash title="Command"
   /opt/jans/jans-cli/config-cli.py --operation-id put-config-message-redis \
-  --data /tmp/postgres.json
+  --data /tmp/redis.json
  ```
 
 
@@ -400,14 +402,14 @@ the JSON Patch data would look like below:
 ```
 
 Store the above JSON Patch data in a file, for instance,
-`/tmp/message-patch.json`
+`/tmp/patch-redis.json`
 
 Using the above file, perform the operation as below:
 
 
 ```bash title="Sample Command"
-/opt/jans/jans-cli/config-cli.py --operation-id patch-config-message-postgres \
---data /tmp/patch-postgres.jasn
+/opt/jans/jans-cli/config-cli.py --operation-id patch-config-message-redis \
+--data /tmp/patch-redis.json
 ```
 
 ```json title="Sample Output" linenums="1"
@@ -435,13 +437,9 @@ You can start TUI using the command below:
 sudo /opt/jans/jans-cli/jans_cli_tui.py
 ```
 
-### Message Screen
-
-Navigate to `Auth Server` -> `Message` to open the Message screen as shown
-in the image below.
-
-* There are three different message configuration options accessible on this screen.
-* You can update the detail of these messages.
+Navigate to `Auth Server` -> `Messages` to open the Message screen as shown
+in the image below. There are three different message configuration options 
+accessible on this screen. You can update the detail of these messages.
 
 ![image](../../../assets/tui-message-screen.png)
 
