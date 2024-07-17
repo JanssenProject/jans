@@ -8,6 +8,7 @@
 import Foundation
 import SwiftJWT
 import JOSESwift
+import JWTDecode
 
 struct JansIntegrityClaims: Claims {
     var appName: String = ""
@@ -108,5 +109,27 @@ final class DPoPProofFactory {
         }
         
         return tokenJWT
+    }
+    
+    public func getClaimsFromSSA() -> JWTClaimsSet? {
+        do {
+            let jwsObject = try decode(jwt: AppConfig.SSA)
+            let claims: JWTClaimsSet = JWTClaimsSet(
+                ISSUER: jwsObject.issuer,
+                SUBJECT: jwsObject.subject,
+                AUDIENCE: jwsObject.audience,
+                EXPIRATION_TIME: jwsObject.expiresAt,
+                NOT_BEFORE: jwsObject.notBefore,
+                ISSUED_AT: jwsObject.issuedAt,
+                JWT_ID: jwsObject.identifier
+            )
+            return claims
+        } catch let nsError as NSError {
+            print(nsError)
+        } catch let error as JWTDecodeError {
+            print(error)
+        }
+        
+        return nil
     }
 }

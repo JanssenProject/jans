@@ -43,7 +43,7 @@ final class RegisterViewInteractorImpl: RegisterViewInteractor {
         }
         
         presenter.onLoading(visible: true)
-        fetchOPConfiguration(configurationUrl: issuer, scopeText: scope)
+        fetchOPConfiguration(configurationUrl: issuer + AppConfig.OP_CONFIG_URL, scopeText: scope)
     }
     
     // Step 1: Get Configuration
@@ -52,7 +52,7 @@ final class RegisterViewInteractorImpl: RegisterViewInteractor {
             .sink { [weak self] result in
                 switch result {
                 case .success(let configurationResult):
-                    var configuration = configurationResult
+                    let configuration = configurationResult
                     configuration.isSuccessful = true
                     configuration.sno = AppConfig.DEFAULT_S_NO
                     
@@ -72,7 +72,7 @@ final class RegisterViewInteractorImpl: RegisterViewInteractor {
         if configuration.isSuccessful {
             // Save configuration into local DB
             RealmManager.shared.deleteAllConfiguration()
-            RealmManager.shared.save(object: configuration.opConfigurationObject)
+            RealmManager.shared.save(object: configuration)
             doDCR(scopeText: scopeText)
         } else {
             presenter.onError(message: "Error with fetching OPConfiguration")

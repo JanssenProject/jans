@@ -9,7 +9,7 @@ import SwiftUI
 
 final class RegisterViewState: ObservableObject {
     
-    @Published var issuer = "https://duttarnab-coherent-imp.gluu.info"
+    @Published var issuer = "https://admin-ui-test.gluu.org"
     @Published var loadingVisible = false
     
     let checkListData:[CheckListItem] = [

@@ -17,9 +17,9 @@ struct DCResponse: Codable {
         case endSessionEndpoint = "end_session_endpoint"
     }
     
-    var clientId: String
-    var clientSecret: String
-    var clientName: String
+    var clientId: String?
+    var clientSecret: String?
+    var clientName: String?
     var authorizationChallengeEndpoint: String?
     var endSessionEndpoint: String?
 }

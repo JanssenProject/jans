@@ -12,11 +12,14 @@ import Combine
 protocol ServiceClientProtocol: AnyObject {
     
     func getOPConfiguration(url: String, completion: @escaping (Result<OPConfiguration, AFError>) -> Void)
+    func getFidoConfiguration(url: String) -> AnyPublisher<Result<FidoConfiguration, AFError>, Never>
     func doDCR(dcRequest: DCRequest, url: String) -> AnyPublisher<Result<DCResponse, AFError>, Never>
     func getAuthorizationChallenge(clientId: String, username: String, password: String, authorizationChallengeEndpoint: String, url: String) -> AnyPublisher<Result<LoginResponse, AFError>, Never>
     func getToken(clientId: String, code: String, grantType: String, redirectUri: String, scope: String, authHeader: String, dpopJwt: String, url: String) -> AnyPublisher<Result<TokenResponse, AFError>, Never>
     func getUserInfo(accessToken: String, authHeader: String, url: String) -> AnyPublisher<Result<UserInfo, AFError>, Never>
     func logout(token: String, tokenTypeHint: String, authHeader: String, url: String) -> AnyPublisher<Result<String, AFError>, Never>
+    func attestationOption(attestationRequest: AttestationOptionRequest, url: String) -> AnyPublisher<Result<AttestationOptionResponse, AFError>, Never>
+    func attestationResult(request: AttestationResultRequest, url: String) -> AnyPublisher<Result<AttestationOptionResponse, AFError>, Never>
 }
 
 public final class ServiceClient {
@@ -47,6 +50,12 @@ extension ServiceClient: ServiceClientProtocol {
         return publisher
     }
     
+    func getFidoConfiguration(url: String) -> AnyPublisher<Result<FidoConfiguration, AFError>, Never> {
+        let jsonDecoder = JSONDecoder()
+        let publisher: AnyPublisher<Result<FidoConfiguration, AFError>, Never> = performRequest(route: .getFidoConfiguration(url), decoder: jsonDecoder)
+        return publisher
+    }
+    
     func doDCR(dcRequest: DCRequest, url: String) -> AnyPublisher<Result<DCResponse, AFError>, Never> {
         let jsonDecoder = JSONDecoder()
         let publisher: AnyPublisher<Result<DCResponse, AFError>, Never> = performRequest(route: .doDCR(dcRequest, url), decoder: jsonDecoder)
@@ -74,6 +83,18 @@ extension ServiceClient: ServiceClientProtocol {
     func logout(token: String, tokenTypeHint: String, authHeader: String, url: String) -> AnyPublisher<Result<String, AFError>, Never> {
         let jsonDecoder = JSONDecoder()
         let publisher: AnyPublisher<Result<String, AFError>, Never> = performRequest(route: .logout(token, tokenTypeHint, authHeader, url), decoder: jsonDecoder)
+        return publisher
+    }
+    
+    func attestationOption(attestationRequest: AttestationOptionRequest, url: String) -> AnyPublisher<Result<AttestationOptionResponse, AFError>, Never> {
+        let jsonDecoder = JSONDecoder()
+        let publisher: AnyPublisher<Result<AttestationOptionResponse, AFError>, Never> = performRequest(route: .attestationOption(attestationRequest, url), decoder: jsonDecoder)
+        return publisher
+    }
+    
+    func attestationResult(request: AttestationResultRequest, url: String) -> AnyPublisher<Result<AttestationOptionResponse, AFError>, Never> {
+        let jsonDecoder = JSONDecoder()
+        let publisher: AnyPublisher<Result<AttestationOptionResponse, AFError>, Never> = performRequest(route: .attestationResult(request, url), decoder: jsonDecoder)
         return publisher
     }
 }

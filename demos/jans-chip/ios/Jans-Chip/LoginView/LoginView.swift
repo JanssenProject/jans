@@ -39,6 +39,14 @@ struct LoginView: View {
                 ProgressView()
             }
             Spacer()
+            HStack(spacing: 24) {
+                Text("Need Enrol?")
+                JansButton(title: "Enroll",
+                           disabled: false,
+                           backgroundColor: Color.green) {
+                    interactor.goToEnrol()
+                }
+            }
         }
         .frame(width: 250, height: 500)
         .onAppear {

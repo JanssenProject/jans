@@ -16,7 +16,7 @@ final class DCRRepository {
     private var cancellableSet : Set<AnyCancellable> = []
     
     func doDCR(scopeText: String, callback: ((Bool, Error?) -> ())?) {
-        guard let configuration: OPConfigurationObject = RealmManager.shared.getObject() else {
+        guard let configuration: OPConfiguration = RealmManager.shared.getObject() else {
             print("OpenID configuration not found in database.")
             return
         }
@@ -26,17 +26,16 @@ final class DCRRepository {
         
         let scopes = scopeText.split(separator: ",").joined(separator: " ")
         
-        var dcRequest = DCRequest(
-            issuer: issuer,
-            redirectUris: [issuer],
-            scope: scopes,
-            responseTypes: ["code"],
-            postLogoutRedirectUris: [issuer],
-            grantTypes: ["authorization_code", "client_credentials"],
-            applicationType: "web",
+        let dcRequest = DCRequest(
             clientName: AppConfig.APP_NAME + UUID().uuidString,
-            tokenEndpointAuthMethod: "client_secret_basic"
-        )
+            evidence: nil,
+            jwks: nil,
+            scope: scopeText,
+            responseTypes: ["code"],
+            grantTypes: ["authorization_code", "client_credentials"],
+            ssa: "",
+            applicationType: "native",
+            redirectUris: [issuer])
         
         var claims = JansIntegrityClaims(
             appName: AppConfig.APP_NAME,
@@ -70,9 +69,9 @@ final class DCRRepository {
                 case .success(let dcResponse):
                     print("Inside doDCR :: DCResponse :: \(dcResponse)")
                     let oidcClient = OIDCClient()
-                    oidcClient.clientName = dcResponse.clientName
-                    oidcClient.clientId = dcResponse.clientId
-                    oidcClient.clientSecret = dcResponse.clientSecret
+                    oidcClient.clientName = dcResponse.clientName ?? ""
+                    oidcClient.clientId = dcResponse.clientId ?? ""
+                    oidcClient.clientSecret = dcResponse.clientSecret ?? ""
                     oidcClient.scope = scopes
                     
                     RealmManager.shared.save(object: oidcClient)
@@ -84,5 +83,44 @@ final class DCRRepository {
                 }
             }
             .store(in: &cancellableSet)
+    }
+    
+    func makeDCRRequestUsingSSA(configuration: OPConfiguration, ssa: String, scopeText: String) -> DCRequest? {
+        let issuer = configuration.issuer
+        
+        let dcRequest = DCRequest(
+            clientName: AppConfig.APP_NAME + UUID().uuidString,
+            evidence: nil,
+            jwks: nil,
+            scope: scopeText,
+            responseTypes: ["code"],
+            grantTypes: ["authorization_code", "client_credentials"],
+            ssa: ssa,
+            applicationType: "native",
+            redirectUris: [issuer]
+        )
+        
+        var claims = JansIntegrityClaims(
+            appName: AppConfig.APP_NAME,
+            seq: UUID().uuidString,
+            app_id: Bundle.main.bundleIdentifier ?? "Unknown"
+        )
+        
+        if let appIntegrityEntityDeviceToken = UserDefaults.standard.string(forKey: "AppIntegrityEntityDeviceToken") {
+            claims.app_integrity_result = appIntegrityEntityDeviceToken
+        }
+        
+        // TODO: Get package check sum
+        let mainUrl = Bundle.main.bundleURL
+        do {
+            let ipaFileData = try mainUrl.bookmarkData()
+            
+            let checksum = ipaFileData.checksum()
+            claims.app_checksum = checksum.description
+        } catch(let error){
+            print("Error getting file data: \(error)")
+        }
+        
+        return dcRequest
     }
 }

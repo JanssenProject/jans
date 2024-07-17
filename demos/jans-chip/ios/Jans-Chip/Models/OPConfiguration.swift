@@ -6,8 +6,13 @@
 //
 
 import Foundation
+import RealmSwift
 
-struct OPConfiguration: Codable {
+final class OPConfiguration: Object, Codable, ObjectKeyIdentifiable {
+    
+    override static func primaryKey() -> String? {
+        "sno"
+    }
     
     private enum CodingKeys: String, CodingKey {
         case sno
@@ -19,13 +24,13 @@ struct OPConfiguration: Codable {
         case revocationEndpoint = "revocation_endpoint"
     }
     
-    var sno: String?
-    var issuer: String
-    var registrationEndpoint: String
-    var tokenEndpoint: String
-    var userinfoEndpoint: String
-    var authorizationChallengeEndpoint: String
-    var revocationEndpoint: String
+    @Persisted var sno: String?
+    @Persisted var issuer: String
+    @Persisted var registrationEndpoint: String
+    @Persisted var tokenEndpoint: String
+    @Persisted var userinfoEndpoint: String
+    @Persisted var authorizationChallengeEndpoint: String
+    @Persisted var revocationEndpoint: String
     
     var isSuccessful: Bool = false
     
@@ -38,18 +43,5 @@ struct OPConfiguration: Codable {
         ", userinfoEndpoint='" + userinfoEndpoint + "'\n" +
         ", authorizationChallengeEndpoint='" + authorizationChallengeEndpoint + "'\n" +
         "}"
-    }
-    
-    var opConfigurationObject: OPConfigurationObject {
-        let opConfigurationObject = OPConfigurationObject()
-        opConfigurationObject.sno = sno ?? ""
-        opConfigurationObject.issuer = issuer
-        opConfigurationObject.registrationEndpoint = registrationEndpoint
-        opConfigurationObject.tokenEndpoint = tokenEndpoint
-        opConfigurationObject.userinfoEndpoint = userinfoEndpoint
-        opConfigurationObject.authorizationChallengeEndpoint = authorizationChallengeEndpoint
-        opConfigurationObject.revocationEndpoint = revocationEndpoint
-        
-        return opConfigurationObject
     }
 }

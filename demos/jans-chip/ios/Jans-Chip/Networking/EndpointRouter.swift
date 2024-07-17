@@ -11,52 +11,60 @@ import Alamofire
 public enum EndpointRouter: EndpointConfiguration {
     
     case getOPConfiguration(String)
+    case getFidoConfiguration(String)
     case doDCR(DCRequest, String)
     case getAuthorizationChallenge(String, String, String, String, String, String)
     case getToken(String, String, String, String, String, String, String, String)
     case getUserInfo(String, String, String)
     case logout(String, String, String, String)
+    case attestationOption(AttestationOptionRequest, String)
+    case attestationResult(AttestationResultRequest, String)
     case verifyIntegrityTokenOnAppServer(String)
     
     // MARK: - HTTPMethod
     public var method: HTTPMethod {
         
         switch self {
-        case .getOPConfiguration, .verifyIntegrityTokenOnAppServer:
+        case .getOPConfiguration, 
+                .getFidoConfiguration,
+                .verifyIntegrityTokenOnAppServer:
             return .get
-        case .doDCR, .getAuthorizationChallenge, .getToken, .getUserInfo, .logout:
+        case .doDCR, 
+                .getAuthorizationChallenge,
+                .getToken,
+                .getUserInfo,
+                .logout,
+                .attestationOption,
+                .attestationResult:
             return .post
         }
     }
     
     // MARK: - BaseURL
     public var baseURL: String {
-        switch self {
-        case .doDCR, .getAuthorizationChallenge, .getToken, .getUserInfo, .logout:
-            return ""
-        default:
-            return "https://duttarnab-coherent-imp.gluu.info/"
-        }
+         ""
     }
     
     // MARK: - Path
     public var path: String {
         switch self {
-        case .getOPConfiguration:
-            return ".well-known/openid-configuration"
-        case .doDCR(_, let url), .getAuthorizationChallenge(_, _, _, _, _, let url), .getToken(_, _, _, _, _, _, _, let url), .getUserInfo(_, _, let url), .logout(_, _, _, let url):
+        case .getOPConfiguration(let url),
+                .getFidoConfiguration(let url),
+                .doDCR(_, let url),
+                .getAuthorizationChallenge(_, _, _, _, _, let url),
+                .getToken(_, _, _, _, _, _, _, let url),
+                .getUserInfo(_, _, let url),
+                .logout(_, _, _, let url),
+                .verifyIntegrityTokenOnAppServer(let url),
+                .attestationOption(_, let url),
+                .attestationResult(_, let url):
             return url
-        default:
-            return ""
         }
     }
     
     // MARK: - Parameters
     public var parameters: Parameters? {
-        switch self {
-        case .doDCR, .getOPConfiguration, .getAuthorizationChallenge, .getToken, .getUserInfo, .logout, .verifyIntegrityTokenOnAppServer:
-            return nil
-        }
+        nil
     }
     
     // MARK: - Headers
@@ -79,7 +87,12 @@ public enum EndpointRouter: EndpointConfiguration {
                 HTTPHeader(name: "Content-Type", value: "application/x-www-form-urlencoded"),
                 HTTPHeader(name: "Authorization", value: authHeader)
             ]
-        case .getOPConfiguration, .doDCR, .verifyIntegrityTokenOnAppServer:
+        case .getOPConfiguration, 
+                .getFidoConfiguration,
+                .doDCR,
+                .verifyIntegrityTokenOnAppServer,
+                .attestationOption,
+                .attestationResult:
             return nil
         }
     }
@@ -95,7 +108,13 @@ public enum EndpointRouter: EndpointConfiguration {
         
         if let parameters = parameters {
             switch self {
-            case .doDCR, .getOPConfiguration, .getAuthorizationChallenge, .verifyIntegrityTokenOnAppServer:
+            case .doDCR,
+                    .getOPConfiguration,
+                    .getFidoConfiguration,
+                    .getAuthorizationChallenge,
+                    .verifyIntegrityTokenOnAppServer,
+                    .attestationOption,
+                    .attestationResult:
                 break
             case .getToken, .getUserInfo, .logout:
                 var urlComponents = URLComponents(string: urlWithPathValue)!
@@ -114,8 +133,8 @@ public enum EndpointRouter: EndpointConfiguration {
         }
         
         switch self {
-        case .doDCR(let dcRequest, _):
-            if let data = try? JSONSerialization.data(withJSONObject: dcRequest.asParameters, options: []) {
+        case .doDCR(let request, _):
+            if let data = try? JSONSerialization.data(withJSONObject: request.asParameters, options: []) {
                 urlRequest.httpBody = data
             }
         case let .getAuthorizationChallenge(clientId, username, password, state, nonce, _):
@@ -130,6 +149,15 @@ public enum EndpointRouter: EndpointConfiguration {
         case .logout(let token, let tokenTypeHint, _, _):
             let data : Data = "token=\(token)&token_type_hint=\(tokenTypeHint)".data(using: .utf8) ?? Data()
             urlRequest.httpBody = data
+        case .attestationOption(let request, _):
+            let parameters: [String: Any] = [
+                "username": request.username,
+                "displayName": request.username,
+                "attestation": request.attestation
+            ]
+            if let data = try? JSONSerialization.data(withJSONObject: parameters, options: []) {
+                urlRequest.httpBody = data
+            }
         default:
             break
         }

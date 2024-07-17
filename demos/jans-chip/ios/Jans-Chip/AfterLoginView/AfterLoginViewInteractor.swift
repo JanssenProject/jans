@@ -27,7 +27,7 @@ final class AfterLoginViewInteractorImpl: AfterLoginViewInteractor {
     private var cancellableSet : Set<AnyCancellable> = []
     
     @ObservedResults(OIDCClient.self) var oidcClient
-    @ObservedResults(OPConfigurationObject.self) var opConfiguration
+    @ObservedResults(OPConfiguration.self) var opConfiguration
     
     init(presenter: AfterLoginViewPresenterImpl) {
         self.presenter = presenter
@@ -39,7 +39,7 @@ final class AfterLoginViewInteractorImpl: AfterLoginViewInteractor {
     
     func onLogoutClick() {
         // Get OPConfiguration and OIDCClient
-        guard let oidcClient: OIDCClient = RealmManager.shared.getObject(), let opConfiguration: OPConfigurationObject = RealmManager.shared.getObject() else {
+        guard let oidcClient: OIDCClient = RealmManager.shared.getObject(), let opConfiguration: OPConfiguration = RealmManager.shared.getObject() else {
             return
         }
         

@@ -41,6 +41,21 @@ final class RealmManager {
         return result
     }
     
+    func getObjects<T: Object>() -> [T]? {
+        var result: [T]? = nil
+        do {
+            let realm = try Realm()
+            try realm.write {
+                let objects = realm.objects(T.self)
+                result = Array(objects)
+            }
+        } catch(let error) {
+            print("Error getting object, reason: \(error.localizedDescription)")
+        }
+        
+        return result
+    }
+    
     func updateOIDCClient(oidcCClient: OIDCClient, with recentGeneratedAccessToken: String, and recentGeneratedIdToken: String) {
         do {
             let realm = try Realm()
@@ -59,7 +74,7 @@ final class RealmManager {
         do {
             let realm = try Realm()
             try realm.write {
-                let configurations = realm.objects(OPConfigurationObject.self)
+                let configurations = realm.objects(OPConfiguration.self)
                 realm.delete(configurations)
             }
         } catch(let error) {
