@@ -655,8 +655,8 @@ class ConfigmapSchema(Schema):
     )
 
     optional_scopes = String(
-        load_default="",
-        dump_default="",
+        load_default="[]",
+        dump_default="[]",
         metadata={
             "description": "List of optional scopes of components as string",
         },
