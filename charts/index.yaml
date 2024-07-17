@@ -36,7 +36,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.1.4-dev
-    created: "2024-07-17T07:57:38.460580253Z"
+    created: "2024-07-17T08:46:52.44457291Z"
     dependencies:
     - condition: global.casa.enabled
       name: casa
@@ -96,7 +96,7 @@ entries:
       version: 1.1.4-dev
     description: Janssen Access and Identity Management Microservices Chart. This
       chart deploys each janssen microservice as a separate deployment.
-    digest: 43527ea212fe37c76c5845b71c50434e3692306a60b444e28a3fbede7bfd79a5
+    digest: 40e089a312ff603932ada2bfe913a55725c037c4757da369b1647a5a99ca8bc8
     home: https://jans.io
     icon: https://raw.githubusercontent.com/JanssenProject/jans/main/docs/assets/logo/janssen_project_favicon_transparent_50px_50px.png
     kubeVersion: '>=v1.22.0-0'
@@ -145,7 +145,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.1.3
-    created: "2024-07-17T07:57:38.451804361Z"
+    created: "2024-07-17T08:46:52.435675969Z"
     dependencies:
     - condition: global.casa.enabled
       name: casa
@@ -254,7 +254,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.1.3-dev
-    created: "2024-07-17T07:57:38.404524575Z"
+    created: "2024-07-17T08:46:52.426577765Z"
     dependencies:
     - condition: global.casa.enabled
       name: casa
@@ -363,7 +363,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.1.2
-    created: "2024-07-17T07:57:38.395287838Z"
+    created: "2024-07-17T08:46:52.417793692Z"
     dependencies:
     - condition: global.casa.enabled
       name: casa
@@ -472,7 +472,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.1.2-dev
-    created: "2024-07-17T07:57:38.386202725Z"
+    created: "2024-07-17T08:46:52.408465986Z"
     dependencies:
     - condition: global.casa.enabled
       name: casa
@@ -579,7 +579,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.1.1
-    created: "2024-07-17T07:57:38.377064712Z"
+    created: "2024-07-17T08:46:52.399468946Z"
     dependencies:
     - condition: global.casa.enabled
       name: casa
@@ -682,7 +682,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.1.1-dev
-    created: "2024-07-17T07:57:38.368308671Z"
+    created: "2024-07-17T08:46:52.390884822Z"
     dependencies:
     - condition: global.casa.enabled
       name: casa
@@ -785,7 +785,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.1.0
-    created: "2024-07-17T07:57:38.358895285Z"
+    created: "2024-07-17T08:46:52.382123173Z"
     dependencies:
     - condition: global.casa.enabled
       name: casa
@@ -888,7 +888,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.1.0-dev
-    created: "2024-07-17T07:57:38.351064108Z"
+    created: "2024-07-17T08:46:52.37321711Z"
     dependencies:
     - condition: global.casa.enabled
       name: casa
@@ -991,7 +991,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.23-dev
-    created: "2024-07-17T07:57:38.342211471Z"
+    created: "2024-07-17T08:46:52.36465916Z"
     dependencies:
     - condition: global.casa.enabled
       name: casa
@@ -1096,7 +1096,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.22
-    created: "2024-07-17T07:57:38.333501708Z"
+    created: "2024-07-17T08:46:52.356268248Z"
     dependencies:
     - condition: global.casa.enabled
       name: casa
@@ -1201,7 +1201,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.22-dev
-    created: "2024-07-17T07:57:38.324669547Z"
+    created: "2024-07-17T08:46:52.34855738Z"
     dependencies:
     - condition: global.casa.enabled
       name: casa
@@ -1302,7 +1302,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.22
-    created: "2024-07-17T07:57:38.316191832Z"
+    created: "2024-07-17T08:46:52.340025689Z"
     dependencies:
     - condition: global.casa.enabled
       name: casa
@@ -1403,7 +1403,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.21
-    created: "2024-07-17T07:57:38.307486286Z"
+    created: "2024-07-17T08:46:52.331415408Z"
     dependencies:
     - condition: global.casa.enabled
       name: casa
@@ -1496,7 +1496,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.21-dev
-    created: "2024-07-17T07:57:38.299543206Z"
+    created: "2024-07-17T08:46:52.323698198Z"
     dependencies:
     - condition: global.casa.enabled
       name: casa
@@ -1589,7 +1589,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.21
-    created: "2024-07-17T07:57:38.291891004Z"
+    created: "2024-07-17T08:46:52.315952485Z"
     dependencies:
     - condition: global.casa.enabled
       name: casa
@@ -1682,7 +1682,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.20
-    created: "2024-07-17T07:57:38.284348927Z"
+    created: "2024-07-17T08:46:52.3081411Z"
     dependencies:
     - condition: global.casa.enabled
       name: casa
@@ -1775,7 +1775,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.20-dev
-    created: "2024-07-17T07:57:38.277580836Z"
+    created: "2024-07-17T08:46:52.301331898Z"
     dependencies:
     - condition: global.casa.enabled
       name: casa
@@ -1867,7 +1867,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.19
-    created: "2024-07-17T07:57:38.269813872Z"
+    created: "2024-07-17T08:46:52.293500565Z"
     dependencies:
     - condition: global.casa.enabled
       name: casa
@@ -1958,7 +1958,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.19-dev
-    created: "2024-07-17T07:57:38.262159557Z"
+    created: "2024-07-17T08:46:52.285941459Z"
     dependencies:
     - condition: global.casa.enabled
       name: casa
@@ -2047,7 +2047,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.18
-    created: "2024-07-17T07:57:38.254319712Z"
+    created: "2024-07-17T08:46:52.278350682Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -2132,7 +2132,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.18-dev
-    created: "2024-07-17T07:57:38.245974931Z"
+    created: "2024-07-17T08:46:52.271346449Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -2217,7 +2217,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.17
-    created: "2024-07-17T07:57:38.238420737Z"
+    created: "2024-07-17T08:46:52.264352902Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -2302,7 +2302,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.17-dev
-    created: "2024-07-17T07:57:38.232402686Z"
+    created: "2024-07-17T08:46:52.257565572Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -2387,7 +2387,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.16
-    created: "2024-07-17T07:57:38.225575558Z"
+    created: "2024-07-17T08:46:52.251409672Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -2472,7 +2472,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.16-dev
-    created: "2024-07-17T07:57:38.218849868Z"
+    created: "2024-07-17T08:46:52.244408199Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -2557,7 +2557,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.15
-    created: "2024-07-17T07:57:38.212133373Z"
+    created: "2024-07-17T08:46:52.23765958Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -2638,7 +2638,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.15-dev
-    created: "2024-07-17T07:57:38.206368094Z"
+    created: "2024-07-17T08:46:52.23116903Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -2719,7 +2719,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.14
-    created: "2024-07-17T07:57:38.198898661Z"
+    created: "2024-07-17T08:46:52.225559431Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -2800,7 +2800,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.14-dev
-    created: "2024-07-17T07:57:38.1923611Z"
+    created: "2024-07-17T08:46:52.219089687Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -2881,7 +2881,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.13
-    created: "2024-07-17T07:57:38.18593003Z"
+    created: "2024-07-17T08:46:52.212591684Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -2962,7 +2962,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.13-dev
-    created: "2024-07-17T07:57:38.179611823Z"
+    created: "2024-07-17T08:46:52.207049982Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -3043,7 +3043,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.12
-    created: "2024-07-17T07:57:38.173333636Z"
+    created: "2024-07-17T08:46:52.200694097Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -3124,7 +3124,7 @@ entries:
       catalog.cattle.io/release-name: janssen
     apiVersion: v2
     appVersion: 1.0.12-dev
-    created: "2024-07-17T07:57:38.167602922Z"
+    created: "2024-07-17T08:46:52.194239483Z"
     dependencies:
     - condition: global.config.enabled
       name: config
@@ -3191,10 +3191,10 @@ entries:
       catalog.cattle.io/release-name: janssen-all-in-one
     apiVersion: v2
     appVersion: 1.1.4-dev
-    created: "2024-07-17T07:57:38.497160077Z"
+    created: "2024-07-17T08:46:52.481329789Z"
     description: Janssen Access and Identity Management All-in-One Chart. This chart
       deploys the selected janssen microservice all in one deployment.
-    digest: 837213883c4f7a175ac5baffaa9cd6b01d288fcf3fb4442cd52523a52d85b162
+    digest: a608a7b1bc663cacab204a26b90e3cf340a74aede2aa3ba267f3c0c79d0fd438
     home: https://jans.io
     icon: https://raw.githubusercontent.com/JanssenProject/jans/main/docs/assets/logo/janssen_project_favicon_transparent_50px_50px.png
     kubeVersion: '>=v1.22.0-0'
@@ -3221,7 +3221,7 @@ entries:
       catalog.cattle.io/release-name: janssen-all-in-one
     apiVersion: v2
     appVersion: 1.1.3
-    created: "2024-07-17T07:57:38.495180028Z"
+    created: "2024-07-17T08:46:52.479402265Z"
     description: Janssen Access and Identity Management All-in-One Chart. This chart
       deploys the selected janssen microservice all in one deployment.
     digest: a32fbbd3d08b73e0e08251f4f2c1c7b87db17295d598c2a7663a09dd8ca5c73b
@@ -3251,7 +3251,7 @@ entries:
       catalog.cattle.io/release-name: janssen-all-in-one
     apiVersion: v2
     appVersion: 1.1.3-dev
-    created: "2024-07-17T07:57:38.492677158Z"
+    created: "2024-07-17T08:46:52.477441519Z"
     description: Janssen Access and Identity Management All-in-One Chart. This chart
       deploys the selected janssen microservice all in one deployment.
     digest: 79ee4f14a9b1ff5bd95e6db115efde7fb38b0680e88ef685cbe1ae25f55e56e7
@@ -3281,7 +3281,7 @@ entries:
       catalog.cattle.io/release-name: janssen-all-in-one
     apiVersion: v2
     appVersion: 1.1.2
-    created: "2024-07-17T07:57:38.490722357Z"
+    created: "2024-07-17T08:46:52.474781991Z"
     description: Janssen Access and Identity Management All-in-One Chart. This chart
       deploys the selected janssen microservice all in one deployment.
     digest: 5bde43e468c1cfdcb3421fc193fd2a90af9b52c2c4d65f5ed239c8ac4f3a30a2
@@ -3311,7 +3311,7 @@ entries:
       catalog.cattle.io/release-name: janssen-all-in-one
     apiVersion: v2
     appVersion: 1.1.2-dev
-    created: "2024-07-17T07:57:38.488806037Z"
+    created: "2024-07-17T08:46:52.472882659Z"
     description: Janssen Access and Identity Management All-in-One Chart. This chart
       deploys the selected janssen microservice all in one deployment.
     digest: 525c84d881b5352a8f0342034c536617254bf75791f65572924f07568022bf3d
@@ -3341,7 +3341,7 @@ entries:
       catalog.cattle.io/release-name: janssen-all-in-one
     apiVersion: v2
     appVersion: 1.1.1
-    created: "2024-07-17T07:57:38.486792537Z"
+    created: "2024-07-17T08:46:52.47096859Z"
     description: Janssen Access and Identity Management All-in-One Chart. This chart
       deploys the selected janssen microservice all in one deployment.
     digest: df441c512f5a1fe9d32b3b5aab7f933f51a4a19bad74f1f486c520cbf680a1ea
@@ -3371,7 +3371,7 @@ entries:
       catalog.cattle.io/release-name: janssen-all-in-one
     apiVersion: v2
     appVersion: 1.1.1-dev
-    created: "2024-07-17T07:57:38.484129989Z"
+    created: "2024-07-17T08:46:52.469015549Z"
     description: Janssen Access and Identity Management All-in-One Chart. This chart
       deploys the selected janssen microservice all in one deployment.
     digest: 97bef6a933f784d307f8c60cd764b051662192d2b28926a4af35a711a429325d
@@ -3401,7 +3401,7 @@ entries:
       catalog.cattle.io/release-name: janssen-all-in-one
     apiVersion: v2
     appVersion: 1.1.0
-    created: "2024-07-17T07:57:38.482284402Z"
+    created: "2024-07-17T08:46:52.466253609Z"
     description: Janssen Access and Identity Management All-in-One Chart. This chart
       deploys the selected janssen microservice all in one deployment.
     digest: f0e6acb4e1e8f9b193447c63a7ad44ef6f0a60e3cc9acfd0fd8965b2e5b907d1
@@ -3431,7 +3431,7 @@ entries:
       catalog.cattle.io/release-name: janssen-all-in-one
     apiVersion: v2
     appVersion: 1.1.0-dev
-    created: "2024-07-17T07:57:38.480444856Z"
+    created: "2024-07-17T08:46:52.464424719Z"
     description: Janssen Access and Identity Management All-in-One Chart. This chart
       deploys the selected janssen microservice all in one deployment.
     digest: b04b36775e7d935c9422cf32c7930ad47f3c34dccdaa8226595ba9c0c22f38d5
@@ -3461,7 +3461,7 @@ entries:
       catalog.cattle.io/release-name: janssen-all-in-one
     apiVersion: v2
     appVersion: 1.0.23-dev
-    created: "2024-07-17T07:57:38.478540348Z"
+    created: "2024-07-17T08:46:52.462520379Z"
     description: Janssen Access and Identity Management All-in-One Chart. This chart
       deploys the selected janssen microservice all in one deployment.
     digest: 5a70e5e4496514cf1155e75e1b9871b42d0fd098dbc720729f9f1252b097b6ad
@@ -3493,7 +3493,7 @@ entries:
       catalog.cattle.io/release-name: janssen-all-in-one
     apiVersion: v2
     appVersion: 1.0.22
-    created: "2024-07-17T07:57:38.47592591Z"
+    created: "2024-07-17T08:46:52.460231734Z"
     description: Janssen Access and Identity Management All-in-One Chart. This chart
       deploys the selected janssen microservice all in one deployment.
     digest: b5b7b34fc3df11e4d8ad909274b294985ea06e53b0f25e55a7dd94ff01fd73d2
@@ -3525,7 +3525,7 @@ entries:
       catalog.cattle.io/release-name: janssen-all-in-one
     apiVersion: v2
     appVersion: 1.0.22-dev
-    created: "2024-07-17T07:57:38.474151356Z"
+    created: "2024-07-17T08:46:52.458299652Z"
     description: Janssen Access and Identity Management All-in-One Chart. This chart
       deploys the selected janssen microservice all in one deployment.
     digest: a76ecf79c5b275d08030b353de6c66453ecf3ef2afcd4ef100e62db2ab4b7839
@@ -3557,7 +3557,7 @@ entries:
       catalog.cattle.io/release-name: janssen-all-in-one
     apiVersion: v2
     appVersion: 1.0.22
-    created: "2024-07-17T07:57:38.472389555Z"
+    created: "2024-07-17T08:46:52.456545321Z"
     description: Janssen Access and Identity Management All-in-One Chart. This chart
       deploys the selected janssen microservice all in one deployment.
     digest: 883197b2adf12de4365970c152b6cb92857c0e007da27bd276629e28e9a8d21a
@@ -3589,7 +3589,7 @@ entries:
       catalog.cattle.io/release-name: janssen-all-in-one
     apiVersion: v2
     appVersion: 1.0.21
-    created: "2024-07-17T07:57:38.470472244Z"
+    created: "2024-07-17T08:46:52.454707475Z"
     description: Janssen Access and Identity Management All-in-One Chart. This chart
       deploys the selected janssen microservice all in one deployment.
     digest: 190069fd89796406c9756df62de9c94a48198fc2445cbfa59bcd0a91be2839ec
@@ -3621,7 +3621,7 @@ entries:
       catalog.cattle.io/release-name: janssen-all-in-one
     apiVersion: v2
     appVersion: 1.0.21-dev
-    created: "2024-07-17T07:57:38.468141634Z"
+    created: "2024-07-17T08:46:52.452217534Z"
     description: Janssen Access and Identity Management All-in-One Chart. This chart
       deploys the selected janssen microservice all in one deployment.
     digest: 11f4fb4b3f6f696a8a7aa7d8a839ddbd6b4700366c305600b6710ca0b6f75ddc
@@ -3653,7 +3653,7 @@ entries:
       catalog.cattle.io/release-name: janssen-all-in-one
     apiVersion: v2
     appVersion: 1.0.21
-    created: "2024-07-17T07:57:38.466343185Z"
+    created: "2024-07-17T08:46:52.450522946Z"
     description: Janssen Access and Identity Management All-in-One Chart. This chart
       deploys the selected janssen microservice all in one deployment.
     digest: 0935b65c6de300ec8d1612667abbc05045a58c8b3b038fccc7a6055c853b6b08
@@ -3685,7 +3685,7 @@ entries:
       catalog.cattle.io/release-name: janssen-all-in-one
     apiVersion: v2
     appVersion: 1.0.20
-    created: "2024-07-17T07:57:38.46468077Z"
+    created: "2024-07-17T08:46:52.448684418Z"
     description: Janssen Access and Identity Management All-in-One Chart. This chart
       deploys the selected janssen microservice all in one deployment.
     digest: 17270d9a1da9ce77e20c884a2f4bb2cb948d7f2876f2f962ca52784e0214f1bb
@@ -3717,7 +3717,7 @@ entries:
       catalog.cattle.io/release-name: janssen-all-in-one
     apiVersion: v2
     appVersion: 1.0.20-dev
-    created: "2024-07-17T07:57:38.462983951Z"
+    created: "2024-07-17T08:46:52.447024154Z"
     description: Janssen Access and Identity Management All-in-One Chart. This chart
       deploys the selected janssen microservice all in one deployment.
     digest: 95fd9ad733cb60532e5ddd4b5518890ff8cf11103297a0f0a8eb1fe9dc4edce1
@@ -3734,4 +3734,4 @@ entries:
     urls:
     - janssen-all-in-one-1.0.20-dev.tgz
     version: 1.0.20-dev
-generated: "2024-07-17T07:57:38.160228984Z"
+generated: "2024-07-17T08:46:52.187742193Z"
