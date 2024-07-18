@@ -6,7 +6,6 @@
 
 package io.jans.configapi.plugin.saml.configuration;
 
-import io.jans.configapi.plugin.saml.timer.MetadataValidationTimer;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.BeforeDestroyed;
@@ -28,16 +27,12 @@ public class SamlAppInitializer {
     @Inject
     SamlConfigurationFactory samlConfigurationFactory;
 
-    @Inject
-    MetadataValidationTimer metadataValidationTimer;
-
 
     public void onAppStart() {
         log.info("=============  Initializing SAML Plugin ========================");
 
         // configuration
         this.samlConfigurationFactory.create();
-        metadataValidationTimer.initTimer();
 
         log.info("==============  SAML Plugin IS UP AND RUNNING ===================");
     }
