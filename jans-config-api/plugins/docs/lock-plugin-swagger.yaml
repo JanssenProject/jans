@@ -14,6 +14,7 @@ servers:
   description: The Jans server
 tags:
 - name: Lock - Configuration
+- name: Lock - Audit
 paths:
   /lock/audit/health:
     post:
@@ -60,7 +61,7 @@ paths:
                 $ref: '#/components/schemas/ApiError'
       security:
       - oauth2:
-        - https://jans.io/oauth/lock/health.readonly
+        - https://jans.io/oauth/lock/health.write
   /lock/audit/log:
     post:
       tags:
@@ -438,13 +439,19 @@ components:
         clientCredentials:
           tokenUrl: "https://{op-hostname}/.../token"
           scopes:
+            https://jans.io/oauth/lock/read-all: View Lock related information
+            https://jans.io/oauth/lock/write-all: View Lock related information
             https://jans.io/oauth/lock-config.readonly: View Lock configuration related
               information
             https://jans.io/oauth/lock-config.write: Manage Lock configuration related
               information
+            https://jans.io/oauth/lock/audit.readonly: View Lock audit related information
+            https://jans.io/oauth/lock/audit.write: View Lock audit related information
+            https://jans.io/oauth/lock/health.readonly: View Lock health related information
+            https://jans.io/oauth/lock/health.write: Manage Lock health related information
+            https://jans.io/oauth/lock/log.readonly: View Lock log related information
+            https://jans.io/oauth/lock/log.write: Manage Lock log health related information
             https://jans.io/oauth/lock/telemetry.readonly: View Lock telemetry related
               information
             https://jans.io/oauth/lock/telemetry.write: Manage Lock telemetry related
               information
-            https://jans.io/oauth/lock/health.readonly: View Lock health related information
-            https://jans.io/oauth/lock/health.write: Manage Lock health related information

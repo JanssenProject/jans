@@ -6,7 +6,6 @@
 
 package io.jans.configapi.plugin.lock.rest;
 
-
 import io.jans.configapi.core.model.ApiError;
 import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
@@ -57,15 +56,15 @@ public class AuditResource extends BaseResource {
 
     @Operation(summary = "Save health data", description = "Save health data", operationId = "save-health-data", tags = {
             "Lock - Audit" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    Constants.LOCK_HEALTH_READ_ACCESS }))
+                    Constants.LOCK_HEALTH_WRITE_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = HealthEntry.class), examples = @ExampleObject(name = "Response example", value = "example/lock/audit/kealth.json"))),
+            @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = HealthEntry.class), examples = @ExampleObject(name = "Response example", value = "example/lock/audit/health.json"))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "BadRequestException"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
             @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))), })
     @POST
-    @ProtectedApi(scopes = { Constants.LOCK_HEALTH_READ_ACCESS }, groupScopes = {})
+    @ProtectedApi(scopes = { Constants.LOCK_HEALTH_WRITE_ACCESS }, groupScopes = {})
     @Path(Constants.HEALTH)
     public Response postHealthData(@Valid HealthEntry healthEntry) {
 
