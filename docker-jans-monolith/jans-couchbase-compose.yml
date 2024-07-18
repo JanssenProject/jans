@@ -7,7 +7,7 @@ services:
       - "8091-8096:8091-8096"
       - "11210-11211:11210-11211"
     volumes:
-      - $(pwd)/couchbase_demo:/opt/couchbase/var
+      - ./couchbase_demo:/opt/couchbase/var
     networks:
       - cloud_bridge
   jans:
