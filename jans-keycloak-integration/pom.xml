@@ -36,7 +36,7 @@
       <commons-lang.version>3.13.0</commons-lang.version>
       <commons-collection.version>4.1</commons-collection.version>
       <swagger.version>2.2.7</swagger.version>
-      <maven-clean-plugin.version>3.2.0</maven-clean-plugin.version>
+      <maven-clean-plugin.version>3.4.0</maven-clean-plugin.version>
       <maven-compiler-plugin.version>3.11.0</maven-compiler-plugin.version>
       <maven-deps-plugin.version>3.6.0</maven-deps-plugin.version>
       <maven-assembly-plugin.version>3.6.0</maven-assembly-plugin.version>
