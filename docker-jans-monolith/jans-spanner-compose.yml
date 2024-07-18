@@ -1,5 +1,14 @@
 version: "3.7"
 services:
+  spanner:
+      image: gcr.io/cloud-spanner-emulator/emulator:latest
+      restart: always
+      ports:
+      - "9010:9010"
+      - "9020:9020"
+      - "9030:9030"
+      networks:
+      - cloud_bridge
   jans:
     image: ${JANSSEN_IMAGE:-ghcr.io/janssenproject/jans/monolith:1.1.4_dev}
     restart: always
@@ -8,6 +17,8 @@ services:
       - "80:80"
     networks:
       - cloud_bridge
+    depends_on:
+      - spanner
     environment:
       #- CN_HOSTNAME=demoexample.jans.io
       - CN_ADMIN_PASS=1t5Fin3#security

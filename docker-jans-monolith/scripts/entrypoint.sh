@@ -74,7 +74,7 @@ install_jans() {
   elif [[ "${CN_INSTALL_SPANNER}" == "true" ]]; then
     echo "Installing with SPANNER"
     echo "rdbm_type=spanner" | tee -a setup.properties > /dev/null
-    echo "rdbm_install_type=0" | tee -a setup.properties > /dev/null
+    echo "rdbm_install_type=1" | tee -a setup.properties > /dev/null
   fi
 
 
