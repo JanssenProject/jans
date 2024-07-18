@@ -41,7 +41,7 @@ import org.slf4j.Logger;
 import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 
-import io.jans.configapi.plugin.lock.model.stat.TelemetryEntry;
+import io.jans.configapi.plugin.lock.model.stat.*;
 import io.jans.configapi.plugin.lock.service.AuditService;
 
 @Path(Constants.AUDIT)
@@ -55,8 +55,52 @@ public class AuditResource extends BaseResource {
     @Inject
     AuditService auditService;
 
+    @Operation(summary = "Save health data", description = "Save health data", operationId = "save-health-data", tags = {
+            "Lock - Audit" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    Constants.LOCK_HEALTH_READ_ACCESS }))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = HealthEntry.class), examples = @ExampleObject(name = "Response example", value = "example/lock/audit/kealth.json"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "BadRequestException"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))), })
+    @POST
+    @ProtectedApi(scopes = { Constants.LOCK_HEALTH_READ_ACCESS }, groupScopes = {})
+    @Path(Constants.HEALTH)
+    public Response postHealthData(@Valid HealthEntry healthEntry) {
+
+        logger.info("Save Health Data - healthEntry:{}", healthEntry);
+        healthEntry = auditService.addHealthEntry(healthEntry);
+
+        logger.info("Afer saving healthEntry():{}", healthEntry);
+        return Response.status(Response.Status.CREATED).entity(healthEntry).build();
+
+    }
+
+    @Operation(summary = "Save log data", description = "Save log data", operationId = "save-log-data", tags = {
+            "Lock - Audit" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    Constants.LOCK_LOG_WRITE_ACCESS }))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LogEntry.class), examples = @ExampleObject(name = "Response example", value = "example/lock/audit/log.json"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "BadRequestException"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))), })
+    @POST
+    @ProtectedApi(scopes = { Constants.LOCK_LOG_WRITE_ACCESS }, groupScopes = {})
+    @Path(Constants.LOG)
+    public Response postLogData(@Valid LogEntry logEntry) {
+
+        logger.info("Save - logEntry:{}", logEntry);
+        logEntry = auditService.addLogData(logEntry);
+
+        logger.info("Afer saving logEntry():{}", logEntry);
+        return Response.status(Response.Status.CREATED).entity(logEntry).build();
+
+    }
+
     @Operation(summary = "Save telemetry data", description = "Save telemetry data", operationId = "save-telemetry-data", tags = {
-            "Lock - Telemetry" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+            "Lock - Audit" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.LOCK_TELEMETRY_WRITE_ACCESS }))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TelemetryEntry.class), examples = @ExampleObject(name = "Response example", value = "example/lock/audit/telemetry.json"))),
@@ -65,17 +109,16 @@ public class AuditResource extends BaseResource {
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
             @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))), })
     @POST
-    @ProtectedApi(scopes = { Constants.LOCK_TELEMETRY_WRITE_ACCESS }, groupScopes = { })
+    @ProtectedApi(scopes = { Constants.LOCK_TELEMETRY_WRITE_ACCESS }, groupScopes = {})
     @Path(Constants.TELEMETRY)
-    public Response getTelemetryData(@Valid TelemetryEntry telemetryEntry) {
-       
-        logger.error("Save telemetryEntry():{}", telemetryEntry);
-        telemetryEntry =  auditService.addTelemetryData(telemetryEntry);
-        
-        logger.error("Afer saving telemetryEntry():{}", telemetryEntry);
-        return Response.status(Response.Status.CREATED).entity(telemetryEntry).build();  
-        
+    public Response postTelemetryData(@Valid TelemetryEntry telemetryEntry) {
+
+        logger.info("Save telemetryEntry():{}", telemetryEntry);
+        telemetryEntry = auditService.addTelemetryData(telemetryEntry);
+
+        logger.info("Afer saving telemetryEntry():{}", telemetryEntry);
+        return Response.status(Response.Status.CREATED).entity(telemetryEntry).build();
+
     }
 
-   
 }

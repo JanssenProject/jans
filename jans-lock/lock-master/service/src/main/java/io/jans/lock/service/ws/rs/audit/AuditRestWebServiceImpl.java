@@ -51,61 +51,52 @@ public class AuditRestWebServiceImpl implements AuditRestWebService {
     @Override
     public Response processHealthRequest(HttpServletRequest request, HttpServletResponse response,
             SecurityContext sec) {
-        log.debug("Processing Health request");
-        Response.ResponseBuilder builder = Response.ok();
-
-        builder.cacheControl(ServerUtil.cacheControlWithNoStoreTransformAndPrivate());
-        builder.header(ServerUtil.PRAGMA, ServerUtil.NO_CACHE);
-        builder.entity("{\"res\" : \"ok\"}");
-
-        return builder.build();
+        log.debug("Processing Health request - request:{}", request);
+        return processAuditRequest(request, "Health");
     }
 
     @Override
     public Response processLogRequest(HttpServletRequest request, HttpServletResponse response, SecurityContext sec) {
         log.debug("Processing Log request - request:{}", request);
-        Response.ResponseBuilder builder = Response.ok();
-        builder.cacheControl(ServerUtil.cacheControlWithNoStoreTransformAndPrivate());
-        builder.header(ServerUtil.PRAGMA, ServerUtil.NO_CACHE);
-        builder.entity("{\"res\" : \"ok\"}");
-        return builder.build();
+        return processAuditRequest(request, "log");
 
     }
 
     @Override
     public Response processTelemetryRequest(HttpServletRequest request, HttpServletResponse response,
             SecurityContext sec) {
-        log.error("Processing Telemetry request - request:{}", request);
-        /*
-         * Response.ResponseBuilder builder = Response.ok();
-         * builder.cacheControl(ServerUtil.cacheControlWithNoStoreTransformAndPrivate())
-         * ; builder.header(ServerUtil.PRAGMA, ServerUtil.NO_CACHE);
-         *             builder.entity(strResponse)
-         */
+        log.debug("Processing Telemetry request - request:{}", request);
+        return processAuditRequest(request, "telemetry");
+
+    }
+
+    private Response processAuditRequest(HttpServletRequest request, String requestType) {
+        log.debug("Processing request - request:{}, requestType:{}", request, requestType);
+
+        Response.ResponseBuilder builder = Response.ok();
+        builder.cacheControl(ServerUtil.cacheControlWithNoStoreTransformAndPrivate());
+        builder.header(ServerUtil.PRAGMA, ServerUtil.NO_CACHE);
 
         JSONObject json = this.authUtil.getJSONObject(request);
-        HttpServiceResponse serviceResponse = this.authUtil.postData("telemetry", json.toString(),
+        HttpServiceResponse serviceResponse = this.authUtil.postData(requestType, json.toString(),
                 ContentType.APPLICATION_JSON);
-        log.error("serviceResponse:{}", serviceResponse);
-        Response.Status status = Status.CREATED;
-        String strResponse = null;
+        log.debug("serviceResponse:{}", serviceResponse);
+
         if (serviceResponse != null) {
-            strResponse = this.authUtil.getResponseEntityString(serviceResponse);
-            status = this.authUtil.getResponseStatus(serviceResponse);
+            String strResponse = this.authUtil.getResponseEntityString(serviceResponse);
+            Status status = this.authUtil.getResponseStatus(serviceResponse);
+            log.debug(" Saved telemetry data  - responseCode:{}, strResponse:{}", status, strResponse);
 
-            log.error(" Saved telemetry data  - responseCode:{}, strResponse:{}", status, strResponse);
             if (Status.CREATED.equals(status)) {
-                log.error("\n\n Final Processing Telemetry response - json:{}", json);
-
+                builder.entity(json);
             } else {
-                log.error("Error while saving telemetry data");
+                log.error("Error while saving telemetry data - status{}, strResponse:{}", status, strResponse);
+                builder.status(status);
+                builder.entity(strResponse);
             }
-
         }
-        log.error("Final strResponse:{}, builder.toString():{}", strResponse, strResponse);
-        return Response.status(status).entity(json.toString()).build();
-        //return builder.build();
 
+        return builder.build();
     }
 
 }

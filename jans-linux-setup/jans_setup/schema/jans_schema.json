@@ -3987,6 +3987,127 @@
       "oid": "jansAttr",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
       "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "cedarEngineStatus",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "cedarEngineStatus"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "cedarPolicyStatus",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "cedarPolicyStatus"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "tokenDataStatus",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "tokenDataStatus"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "eventTime",
+      "equality": "generalizedTimeMatch",
+      "names": [
+        "eventTime"
+      ],
+      "oid": "jansAttr",
+      "ordering": "generalizedTimeOrderingMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.24",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "eventType",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "eventType"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "severetyLevel",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "severetyLevel"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "policyId",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "policyId"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "policyResult",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "policyResult"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "userAccountId",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "userAccountId"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "clientId",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "clientId"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "sourceInformation",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "sourceInformation"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
     }
   ],
   "objectClasses": [
@@ -5295,6 +5416,54 @@
       ],
       "names": [
         "jansTrustedIdp"
+      ],
+      "oid": "jansObjClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Jans created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "inum",
+        "jansLastUpd",
+        "jansStatus",
+        "cedarEngineStatus",
+        "cedarPolicyStatus",
+        "tokenDataStatus"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "jansHealthEntry"
+      ],
+      "oid": "jansObjClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Jans created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "inum",
+        "jansLastUpd",
+        "eventTime",
+        "eventType ",
+        "severetyLevel",
+        "policyId",
+        "policyResult",
+        "userAccountId",
+        "clientId",
+        "sourceInformation"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "jansLogEntry"
       ],
       "oid": "jansObjClass",
       "sup": [

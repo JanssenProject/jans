@@ -1,12 +1,11 @@
 package io.jans.configapi.plugin.lock.service;
 
-
 import io.jans.as.common.service.OrganizationService;
 import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.as.common.service.common.InumService;
 import io.jans.as.common.util.AttributeConstants;
 import io.jans.configapi.configuration.ConfigurationFactory;
-import io.jans.configapi.plugin.lock.model.stat.TelemetryEntry;
+import io.jans.configapi.plugin.lock.model.stat.*;
 
 import io.jans.model.SearchRequest;
 import io.jans.orm.PersistenceEntryManager;
@@ -39,26 +38,26 @@ public class AuditService {
 
     @Inject
     ConfigurationFactory configurationFactory;
-    
+
     @Inject
     OrganizationService organizationService;
-    
+
     @Inject
-    private transient InumService inumService;
-          
+    private InumService inumService;
+
     public TelemetryEntry addTelemetryData(TelemetryEntry telemetryEntry) {
-        if(telemetryEntry == null) {
+        if (telemetryEntry == null) {
             return telemetryEntry;
         }
         String inum = telemetryEntry.getInum();
-        if(StringUtils.isBlank(inum)) {
+        if (StringUtils.isBlank(inum)) {
             inum = this.generateInumForNewTelemetryEntry();
             telemetryEntry.setInum(inum);
-            
-            telemetryEntry.setDn(this.getDnForTelemetryEntry(inum)); 
+
+            telemetryEntry.setDn(this.getDnForTelemetryEntry(inum));
         }
         persistenceEntryManager.persist(telemetryEntry);
-        
+
         telemetryEntry = this.getTelemetryEntryByDn(this.getDnForTelemetryEntry(inum));
         return telemetryEntry;
     }
@@ -94,7 +93,8 @@ public class AuditService {
         Filter searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter, inumFilter);
 
         logger.debug("Search TelemetryEntrys with searchFilter:{}", searchFilter);
-        return persistenceEntryManager.findEntries(getDnForTelemetryEntry(null), TelemetryEntry.class, searchFilter, sizeLimit);
+        return persistenceEntryManager.findEntries(getDnForTelemetryEntry(null), TelemetryEntry.class, searchFilter,
+                sizeLimit);
     }
 
     public List<TelemetryEntry> getAllTelemetryEntrys(int sizeLimit) {
@@ -138,8 +138,8 @@ public class AuditService {
 
         logger.debug("TelemetryEntrys searchFilter:{}", searchFilter);
 
-        return persistenceEntryManager.findPagedEntries(getDnForTelemetryEntry(null), TelemetryEntry.class, searchFilter, null,
-                searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
+        return persistenceEntryManager.findPagedEntries(getDnForTelemetryEntry(null), TelemetryEntry.class,
+                searchFilter, null, searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
                 searchRequest.getStartIndex(), searchRequest.getCount(), searchRequest.getMaxCount());
 
     }
@@ -153,7 +153,6 @@ public class AuditService {
         }
     }
 
-    
     public String getDnForTelemetryEntry(String inum) {
         String orgDn = organizationService.getDnForOrganization();
         if (StringHelper.isEmpty(inum)) {
@@ -162,7 +161,6 @@ public class AuditService {
         return String.format("inum=%s,ou=lock-telemetry,%s", inum, orgDn);
     }
 
-    
     public String generateInumForNewTelemetryEntry() {
         String newInum = null;
         String newDn = null;
@@ -178,5 +176,105 @@ public class AuditService {
         } while (persistenceEntryManager.contains(newDn, TelemetryEntry.class));
         return newInum;
     }
-    
+
+    public HealthEntry addHealthEntry(HealthEntry healthEntry) {
+        if (healthEntry == null) {
+            return healthEntry;
+        }
+        String inum = healthEntry.getInum();
+        if (StringUtils.isBlank(inum)) {
+            inum = this.generateInumForHealthEntry();
+            healthEntry.setInum(inum);
+
+            healthEntry.setDn(this.getDnForHealthEntry(inum));
+        }
+        persistenceEntryManager.persist(healthEntry);
+
+        healthEntry = this.getHealthEntryByDn(this.getDnForHealthEntry(inum));
+        return healthEntry;
+    }
+
+    public String generateInumForHealthEntry() {
+        String newInum = null;
+        String newDn = null;
+        int trycount = 0;
+        do {
+            if (trycount < InumService.MAX_IDGEN_TRY_COUNT) {
+                newInum = inumService.generateId("health");
+                trycount++;
+            } else {
+                newInum = inumService.generateDefaultId();
+            }
+            newDn = getDnForHealthEntry(newInum);
+        } while (persistenceEntryManager.contains(newDn, HealthEntry.class));
+        return newInum;
+    }
+
+    public HealthEntry getHealthEntryByDn(String dn) {
+        try {
+            return persistenceEntryManager.find(HealthEntry.class, dn);
+        } catch (Exception e) {
+            logger.warn("", e);
+            return null;
+        }
+    }
+
+    public String getDnForHealthEntry(String inum) {
+        String orgDn = organizationService.getDnForOrganization();
+        if (StringHelper.isEmpty(inum)) {
+            return String.format("ou=lock-health,%s", orgDn);
+        }
+        return String.format("inum=%s,ou=lock-health,%s", inum, orgDn);
+    }
+
+    public LogEntry addLogData(LogEntry logEntry) {
+        if (logEntry == null) {
+            return logEntry;
+        }
+        String inum = logEntry.getInum();
+        if (StringUtils.isBlank(inum)) {
+            inum = this.generateInumForLogEntry();
+            logEntry.setInum(inum);
+
+            logEntry.setDn(this.getDnForLogEntry(inum));
+        }
+        persistenceEntryManager.persist(logEntry);
+
+        logEntry = this.getLogEntryByDn(this.getDnForLogEntry(inum));
+        return logEntry;
+    }
+
+    public String generateInumForLogEntry() {
+        String newInum = null;
+        String newDn = null;
+        int trycount = 0;
+        do {
+            if (trycount < InumService.MAX_IDGEN_TRY_COUNT) {
+                newInum = inumService.generateId("log");
+                trycount++;
+            } else {
+                newInum = inumService.generateDefaultId();
+            }
+            newDn = getDnForLogEntry(newInum);
+        } while (persistenceEntryManager.contains(newDn, LogEntry.class));
+        return newInum;
+    }
+
+    public LogEntry getLogEntryByDn(String dn) {
+        try {
+            return persistenceEntryManager.find(LogEntry.class, dn);
+        } catch (Exception e) {
+            logger.warn("", e);
+            return null;
+        }
+    }
+
+    public String getDnForLogEntry(String inum) {
+        String orgDn = organizationService.getDnForOrganization();
+        if (StringHelper.isEmpty(inum)) {
+            return String.format("ou=lock-log,%s", orgDn);
+        }
+        return String.format("inum=%s,ou=lock-log,%s", inum, orgDn);
+    }
+
 }

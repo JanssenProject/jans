@@ -29,6 +29,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.CookieSpecs;
 import org.apache.http.client.config.RequestConfig;
@@ -147,7 +148,6 @@ public abstract class BaseHttpService implements Serializable {
 
 	public HttpServiceResponse executePost(HttpClient httpClient, String uri, String authData, Map<String, String> headers, String postData, ContentType contentType, String authType) {
 	    
-	    log.error("executePost() - httpClient:{}, uri:{}, authData:{}, headers:{}, postData:{},contentType:{}, authType:{}", httpClient, uri, authData, headers, postData, contentType, authType);
         HttpPost httpPost = new HttpPost(uri);
 
         if(StringHelper.isEmpty(authType)) { 
@@ -168,22 +168,12 @@ public abstract class BaseHttpService implements Serializable {
 
         StringEntity stringEntity = new StringEntity(postData, contentType);
 		httpPost.setEntity(stringEntity);
-		log.error("executePost() - stringEntity:{}", stringEntity);
+
         try {
         	HttpResponse httpResponse = httpClient.execute(httpPost);
-        	log.error("executePost() - httpResponse:{}", httpResponse);
-        	if(httpResponse!=null) {
-        	    log.error("executePost() - httpResponse.getStatusLine():{}", httpResponse.getStatusLine());
-        	    log.error("executePost() - .httpResponse.getEntity():{}", httpResponse.getEntity());
-        	    if (httpResponse.getEntity()!=null) {
-                    JSONObject jsonObj = new JSONObject(httpResponse.getEntity());
-                    log.error("executePost() - .jsonObj:{}", jsonObj);
-        	    }
-        	}
 
         	return new HttpServiceResponse(httpPost, httpResponse);
 		} catch (IOException ex) {
-		    ex.printStackTrace();
 	    	log.error("Failed to execute post request", ex);
 		}
 
@@ -197,6 +187,7 @@ public abstract class BaseHttpService implements Serializable {
 	public HttpServiceResponse executePost(HttpClient httpClient, String uri, String authData, String postData, ContentType contentType) {
         return executePost(httpClient, uri, authData, null, postData, contentType, null);
 	}
+	
 	public HttpServiceResponse executePost(String uri, String authData, Map<String, String> headers, String postData, ContentType contentType, String authType) {
 	    return executePost(this.getHttpsClient(), uri, authData, null, postData, contentType, authType);
 	}
@@ -241,7 +232,7 @@ public abstract class BaseHttpService implements Serializable {
 		return null;
 	}
 
-	public HttpServiceResponse executeGet(HttpClient httpClient, String requestUri)  {
+	public HttpServiceResponse executeGet(HttpClient httpClient, String requestUri) throws ClientProtocolException, IOException {
 		return executeGet(httpClient, requestUri, null);
 	}
 
