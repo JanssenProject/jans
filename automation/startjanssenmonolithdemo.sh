@@ -80,6 +80,7 @@ if [[ "$IS_FQDN_REGISTERED" ]]; then
   python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('/tmp/jans/docker-jans-monolith') ; dfparser.envs['IS_FQDN_REGISTERED'] = 'true'"
 fi
 if [[ "$RUN_TESTS" ]]; then
+  echo "Activating RUN_TEST ENV.."
   python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('/tmp/jans/docker-jans-monolith') ; dfparser.envs['RUN_TESTS'] = 'true'"
 fi
 if [[ $JANS_PERSISTENCE == "MYSQL" ]]; then
