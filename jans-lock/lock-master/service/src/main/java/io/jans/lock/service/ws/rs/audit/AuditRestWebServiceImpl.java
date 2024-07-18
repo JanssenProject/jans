@@ -29,6 +29,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.SecurityContext;
 import jakarta.ws.rs.core.Response.Status;
 
+import org.apache.http.entity.ContentType;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
@@ -46,8 +47,8 @@ public class AuditRestWebServiceImpl implements AuditRestWebService {
 
     @Inject
     AuthUtil authUtil;
-    
-   @Override
+
+    @Override
     public Response processHealthRequest(HttpServletRequest request, HttpServletResponse response,
             SecurityContext sec) {
         log.debug("Processing Health request");
@@ -75,33 +76,35 @@ public class AuditRestWebServiceImpl implements AuditRestWebService {
     public Response processTelemetryRequest(HttpServletRequest request, HttpServletResponse response,
             SecurityContext sec) {
         log.error("Processing Telemetry request - request:{}", request);
-
-        Response.ResponseBuilder builder = Response.ok();
-        builder.cacheControl(ServerUtil.cacheControlWithNoStoreTransformAndPrivate());
-        builder.header(ServerUtil.PRAGMA, ServerUtil.NO_CACHE);
+        /*
+         * Response.ResponseBuilder builder = Response.ok();
+         * builder.cacheControl(ServerUtil.cacheControlWithNoStoreTransformAndPrivate())
+         * ; builder.header(ServerUtil.PRAGMA, ServerUtil.NO_CACHE);
+         *             builder.entity(strResponse)
+         */
 
         JSONObject json = this.authUtil.getJSONObject(request);
-        HttpServiceResponse serviceResponse = this.authUtil.postData("telemetry", json.toString());
+        HttpServiceResponse serviceResponse = this.authUtil.postData("telemetry", json.toString(),
+                ContentType.APPLICATION_JSON);
         log.error("serviceResponse:{}", serviceResponse);
         Response.Status status = Status.CREATED;
+        String strResponse = null;
         if (serviceResponse != null) {
-            json = this.authUtil.getResponseJson(serviceResponse);
-            builder.entity(json.toString());
+            strResponse = this.authUtil.getResponseEntityString(serviceResponse);
             status = this.authUtil.getResponseStatus(serviceResponse);
-            
-            log.error(" Error while saving telemetry response - responseCode:{}, json:{}",
-                    authUtil.getResponseStatus(serviceResponse), json);
-           /* if (Status.CREATED.equals(serviceResponse.getHttpResponse().getStatusLine().getStatusCode())) {
+
+            log.error(" Saved telemetry data  - responseCode:{}, strResponse:{}", status, strResponse);
+            if (Status.CREATED.equals(status)) {
                 log.error("\n\n Final Processing Telemetry response - json:{}", json);
-                return Response.status(Response.Status.CREATED).entity(json).build();
+
             } else {
-                status = Status.CREATED;
-                builder.status(authUtil.getResponseStatus(serviceResponse));
-            }*/
+                log.error("Error while saving telemetry data");
+            }
 
         }
-        log.error("Final jsonObj.toString():{}", json.toString());
+        log.error("Final strResponse:{}, builder.toString():{}", strResponse, strResponse);
         return Response.status(status).entity(json.toString()).build();
+        //return builder.build();
 
     }
 

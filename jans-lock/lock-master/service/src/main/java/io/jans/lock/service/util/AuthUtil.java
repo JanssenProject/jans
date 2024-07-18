@@ -44,6 +44,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class AuthUtil {
 
     private static final String CONTENT_TYPE = "Content-Type";
+    private static final String AUTHORIZATION = "Authorization";
 
     @Inject
     Logger log;
@@ -122,11 +123,12 @@ public class AuthUtil {
         return null;
     }
 
-    public HttpServiceResponse postData(String endpoint, String postData) {
+    public HttpServiceResponse postData(String endpoint, String postData, ContentType contentType) {
         log.error("postData - endpoint:{}, postData:{}", endpoint, postData);
         String endpointPath = this.getEndpointPath(endpoint);
         String token = this.getToken(endpointPath);
-        return postData(this.getEndpointUrl(endpointPath), null, token, null, null, postData);
+
+        return postData(this.getEndpointUrl(endpointPath), null, token, null, contentType, postData);
     }
 
     public HttpServiceResponse postData(String uri, String authType, String token, Map<String, String> headers,
@@ -139,6 +141,12 @@ public class AuthUtil {
         if (contentType == null) {
             contentType = ContentType.APPLICATION_JSON;
         }
+
+        if (headers == null) {
+            headers = new HashMap<>();
+        }
+        headers.put(CONTENT_TYPE, ContentType.APPLICATION_JSON.toString());
+        headers.put(AUTHORIZATION, authType + token);
 
         HttpServiceResponse response = httpService.executePost(uri, token, headers, postData, contentType, authType);
 

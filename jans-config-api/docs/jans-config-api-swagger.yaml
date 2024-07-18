@@ -8313,7 +8313,7 @@ components:
           type: string
         selected:
           type: boolean
-        whitePagesCanView:
+        userCanEdit:
           type: boolean
         adminCanView:
           type: boolean
@@ -8321,11 +8321,11 @@ components:
           type: boolean
         userCanView:
           type: boolean
-        userCanEdit:
+        adminCanAccess:
           type: boolean
         userCanAccess:
           type: boolean
-        adminCanAccess:
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -9162,6 +9162,8 @@ components:
           type: boolean
         lockMessageConfig:
           $ref: '#/components/schemas/LockMessageConfig'
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -9171,8 +9173,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
