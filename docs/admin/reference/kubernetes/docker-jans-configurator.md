@@ -99,7 +99,7 @@ For fresh installation, generate the initial configuration by creating `/path/to
 
     - `auth_sig_keys`: space-separated key algorithm for signing (default to `RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512`)
     - `auth_enc_keys`: space-separated key algorithm for encryption (default to `RSA1_5 RSA-OAEP`)
-    - `optional_scopes`: list of scopes that will be used (supported scopes are `ldap`, `scim`, `fido2`, `couchbase`, `redis`, `sql`, `casa`; default to empty list)
+    - `optional_scopes`: list of optional scopes (as JSON string) that will be used (supported scopes are `ldap`, `couchbase`, `redis`, `sql`; default to empty list)
     - `init_keys_exp`: the initial keys expiration time in hours (default to `48`; extra 1 hour will be added for hard limit)
 
 2.  `_secret`:
