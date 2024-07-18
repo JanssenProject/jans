@@ -13,7 +13,7 @@ use crate::{
 };
 
 mod sse;
-pub(crate) mod types;
+pub mod types;
 
 #[wasm_bindgen]
 extern "C" {
@@ -22,9 +22,9 @@ extern "C" {
 }
 
 // Stores a status list referencing each JWT's `jti` claim
-pub(crate) static mut STATUS_LISTS: OnceLock<BTreeMap<String, (u8, HashSet<String>)>> = OnceLock::new();
+pub static mut STATUS_LISTS: OnceLock<BTreeMap<String, (u8, HashSet<String>)>> = OnceLock::new();
 
-pub(crate) async fn init<'a>(policy_store_config: &PolicyStoreConfig) -> Cow<'a, [u8]> {
+pub async fn init<'a>(policy_store_config: &PolicyStoreConfig) -> Cow<'a, [u8]> {
 	let PolicyStoreConfig::LockMaster {
 		url,
 		policy_store_id,

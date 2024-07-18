@@ -8,16 +8,16 @@ use crate::{
 	lock_master, startup,
 };
 
-pub(crate) mod decode;
+pub mod decode;
 mod types;
 
 // Supported algorithms
-pub(crate) static mut SUPPORTED_ALGORITHMS: Vec<jsonwebtoken::Algorithm> = Vec::new();
+pub static mut SUPPORTED_ALGORITHMS: Vec<jsonwebtoken::Algorithm> = Vec::new();
 
 // Trust Store, iss -> { config: OAuthConfig, jwks: JsonWebKeySet }
-pub(crate) static mut TRUST_STORE: BTreeMap<String, types::TrustStoreEntry> = BTreeMap::new();
+pub static mut TRUST_STORE: BTreeMap<String, types::TrustStoreEntry> = BTreeMap::new();
 
-pub(crate) fn init(config: &startup::types::CedarlingConfig, mut policy_store: serde_json::Map<String, serde_json::Value>) {
+pub fn init(config: &startup::types::CedarlingConfig, mut policy_store: serde_json::Map<String, serde_json::Value>) {
 	// insert supported jwt signature algorithms
 	let supported = config.supported_signature_algorithms.iter().map(|s| jsonwebtoken::Algorithm::from_str(s).unwrap_throw()).collect();
 	unsafe {

@@ -10,7 +10,7 @@ mod startup;
 mod token2entity;
 
 #[wasm_bindgen(start)]
-pub(crate) async fn start() {
+pub async fn start() {
 	// Extract information on unexpected panics
 	console_error_panic_hook::set_once();
 }

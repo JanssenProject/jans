@@ -9,7 +9,7 @@ pub mod types;
 pub static APPLICATION_NAME: OnceLock<String> = OnceLock::new();
 pub static REQUIRE_AUD_VALIDATION: OnceLock<bool> = OnceLock::new();
 
-pub(crate) fn init(config: &startup::types::CedarlingConfig) {
+pub fn init(config: &startup::types::CedarlingConfig) {
 	if let Some(application_name) = config.application_name.as_ref() {
 		APPLICATION_NAME.set(application_name.clone()).unwrap_throw();
 	}

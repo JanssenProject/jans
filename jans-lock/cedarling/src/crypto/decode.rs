@@ -46,7 +46,7 @@ fn validation_options(jwt: &str, _type: TokenType) -> Result<(Option<jsonwebtoke
 	Ok((decoding_key, validation))
 }
 
-pub(crate) fn decode_jwt<T: serde::de::DeserializeOwned>(jwt: &str, _type: TokenType) -> T {
+pub fn decode_jwt<T: serde::de::DeserializeOwned>(jwt: &str, _type: TokenType) -> T {
 	let (key, validation) = validation_options(jwt, _type).unwrap_throw();
 	let key = key.expect_throw("Unable to extract DecodingKey from JWT");
 	jsonwebtoken::decode(jwt, &key, &validation).unwrap_throw().claims
@@ -58,7 +58,7 @@ extern "C" {
 	pub fn js_atob(input: &str) -> String;
 }
 
-pub(crate) fn get_issuer(jwt: &str) -> Option<String> {
+pub fn get_issuer(jwt: &str) -> Option<String> {
 	#[derive(serde::Deserialize)]
 	struct IssuerExtract {
 		iss: String,
