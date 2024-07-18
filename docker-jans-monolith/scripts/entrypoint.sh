@@ -75,10 +75,11 @@ install_jans() {
     echo "Installing with SPANNER"
     echo "rdbm_type=spanner" | tee -a setup.properties > /dev/null
     echo "rdbm_install_type=1" | tee -a setup.properties > /dev/null
+    echo "spanner_emulator_host=localhost" | tee -a setup.properties > /dev/null
     "$HOME"/google-cloud-sdk/bin/gcloud emulators spanner start --quiet &
     gcloud config configurations create emulator
     gcloud config set auth/disable_credentials true
-    gcloud config set project test-project
+    gcloud config set project jans-project
     gcloud config set api_endpoint_overrides/spanner http://localhost:9020/
   fi
 
