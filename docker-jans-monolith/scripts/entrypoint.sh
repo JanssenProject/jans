@@ -75,7 +75,11 @@ install_jans() {
     echo "Installing with SPANNER"
     echo "rdbm_type=spanner" | tee -a setup.properties > /dev/null
     echo "rdbm_install_type=1" | tee -a setup.properties > /dev/null
-    "$HOME"/google-cloud-sdk/bin/gcloud emulators spanner start &
+    "$HOME"/google-cloud-sdk/bin/gcloud emulators spanner start --quiet &
+    gcloud config configurations create emulator
+    gcloud config set auth/disable_credentials true
+    gcloud config set project test-project
+    gcloud config set api_endpoint_overrides/spanner http://localhost:9020/
   fi
 
   echo "*****   Running the setup script for ${CN_ORG_NAME}!!   *****"
@@ -84,7 +88,7 @@ install_jans() {
   curl https://raw.githubusercontent.com/JanssenProject/jans/"${JANS_SOURCE_VERSION}"/jans-linux-setup/jans_setup/install.py > install.py
   echo "Executing python3 install.py -yes --args=-f setup.properties -n"
   python3 install.py -yes --args="-f setup.properties -n"
-  cat /opt/jans/jans-setup/setup.properties.last
+  cat /opt/jans/jans-setup/setup.properties
   echo "*****   Setup script completed!!    *****"
 
 }
