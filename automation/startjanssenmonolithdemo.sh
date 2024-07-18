@@ -12,7 +12,7 @@ if [[ ! "$JANS_FQDN" ]]; then
   read -rp "Enter Hostname [demoexample.jans.io]:                           " JANS_FQDN
 fi
 if [[ ! "$JANS_PERSISTENCE" ]]; then
-  read -rp "Enter persistence type [LDAP|MYSQL|PGSQL]:                            " JANS_PERSISTENCE
+  read -rp "Enter persistence type [LDAP|MYSQL|PGSQL|COUCHBASE[TEST]|SPANNER[TEST]]:                            " JANS_PERSISTENCE
 fi
 
 if [[ -z $EXT_IP ]]; then
@@ -86,6 +86,10 @@ elif [[ $JANS_PERSISTENCE == "PGSQL" ]]; then
   bash /tmp/jans/docker-jans-monolith/up.sh postgres
 elif [[ $JANS_PERSISTENCE == "LDAP" ]]; then
   bash /tmp/jans/docker-jans-monolith/up.sh ldap
+elif [[ $JANS_PERSISTENCE == "COUCHBASE" ]]; then
+  bash /tmp/jans/docker-jans-monolith/up.sh couchbase
+elif [[ $JANS_PERSISTENCE == "SPANNER" ]]; then
+  bash /tmp/jans/docker-jans-monolith/up.sh spanner
 fi  
 echo "$EXT_IP $JANS_FQDN" | sudo tee -a /etc/hosts > /dev/null
 jans_status="unhealthy"

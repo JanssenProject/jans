@@ -65,6 +65,16 @@ install_jans() {
     echo "Installing with Postgres"
     echo "rdbm_type=pgsql" | tee -a setup.properties > /dev/null
     echo "rdbm_port=5432" | tee -a setup.properties > /dev/null
+  elif [[ "${CN_INSTALL_COUCHBASE}" == "true" ]]; then
+    echo "Installing with Couchbase"
+    echo "cb_install=2" | tee -a setup.properties > /dev/null
+    echo "cb_password=${COUCHBASE_PASSWORD}" | tee -a setup.properties > /dev/null
+    echo "couchbase_hostname=${COUCHBASE_HOSTNAME}" | tee -a setup.properties > /dev/null
+    echo "couchebaseClusterAdmin=${COUCHBASE_ADMIN}" | tee -a setup.properties > /dev/null
+  elif [[ "${CN_INSTALL_SPANNER}" == "true" ]]; then
+    echo "Installing with SPANNER"
+    echo "rdbm_type=spanner" | tee -a setup.properties > /dev/null
+    echo "rdbm_install_type=1" | tee -a setup.properties > /dev/null
   fi
 
 
