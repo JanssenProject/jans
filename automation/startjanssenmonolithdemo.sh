@@ -141,7 +141,9 @@ docker cp docker-jans-monolith-jans-1:/tmp/jans/jans-auth-server/test-model/targ
 docker cp docker-jans-monolith-jans-1:/tmp/jans/jans-auth-server/model/target/surefire-reports/testng-results.xml /tmp/reports/$JANS_PERSISTENCE-jans-auth-model-testng-results.xml
 
 EOF
-sudo bash testendpoints.sh
+if [[ "$RUN_TESTS" ]]; then
+  sudo bash testendpoints.sh
+fi
 echo -e "You may re-execute bash testendpoints.sh to do a quick test to check the configuration endpoints."
 echo -e "Add the following record to your local computers' hosts file to engage with the services $EXT_IP $JANS_FQDN"
 echo -e "To stop run:"
