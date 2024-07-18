@@ -191,7 +191,7 @@ class CtxGenerator:
         self.set_secret("encoded_admin_password", partial(ldap_encode, self.secret_params["admin_password"]))
 
         opt_scopes = self.configmap_params["optional_scopes"]
-        self.set_config("optional_scopes", list(set(opt_scopes)), False)
+        self.set_config("optional_scopes", opt_scopes, False)
 
     def transform_ldap_ctx(self):
         encoded_salt = self.get_secret("encoded_salt")
@@ -361,7 +361,7 @@ class CtxGenerator:
 
     def transform(self):
         """Transform configmaps and secrets (if needed)."""
-        opt_scopes = self.configmap_params["optional_scopes"]
+        opt_scopes = json.loads(self.configmap_params["optional_scopes"])
 
         self.transform_base_ctx()
         self.transform_auth_ctx()
