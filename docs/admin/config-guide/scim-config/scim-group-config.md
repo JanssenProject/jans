@@ -7,7 +7,7 @@ tags:
 
 # Group Resources
 
-> Prerequisite: Know how to use the Janssen CLI in [command-line mode](config-tools/jans-cli/README.md)
+> Prerequisite: Know how to use the Janssen CLI in [command-line mode](../config-tools/jans-cli/README.md)
 
 Group resources are used to manage user resources easily with some operations. 
 If you run the below command, then you will get a list of operations as below:
@@ -191,7 +191,7 @@ root@testjans:~# /opt/jans/jans-cli/scim-cli.py --schema /components/schemas/Gro
 ```
 The schema defines the properties of an attribute.Just Create a json file with each properties in schema filling by a value.
 
-![SCIM create group](../../assets/image-cl-scim-create-group-03042021.png)
+![SCIM create group](../../../assets/image-cl-scim-create-group-03042021.png)
 
 As you see, I have removed `members` from the schema. We will add members in this group later. Let's use the command to create the group with this data.
 
@@ -339,7 +339,7 @@ Let's get the schema first:
 
 let's modify this schema to add members into a selected group:
 
-![](../../assets/image-cl-scim-group-update-03042021.png)
+![](../../../assets/image-cl-scim-group-update-03042021.png)
 
 - displayName: It should be a group name
 - id: Selected group id which one you want to updae

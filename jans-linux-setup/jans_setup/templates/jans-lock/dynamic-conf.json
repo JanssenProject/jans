@@ -1,5 +1,6 @@
 {
    "baseEndpoint" : "https://%(hostname)s/%(base_endpoint)s/v1",
+   "openIdIssuer":"https://%(hostname)s",
 
    "tokenChannels":[
          "jans_token"

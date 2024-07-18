@@ -6,7 +6,7 @@ class UserInfoResponse (
     var response: Any? = null
 ) {
     @Ignore
-    var isSuccessful: Boolean? = true
+    var isSuccessful: Boolean? = false
 
     @Ignore
     var errorMessage: String? = null
