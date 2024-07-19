@@ -9,8 +9,9 @@ import Foundation
 
 final class CredentialSafe {
     
-    func generateCredential(rpEntityId: String, userHandle: Data, userDisplayName: String) -> PublicKeyCredentialSource {
+    func generateCredential(rpEntityId: String, userHandle: Data, userDisplayName: String, passwordText: String) -> PublicKeyCredentialSource {
         let credentialSource = PublicKeyCredentialSource(rpId: rpEntityId, userHandle: userHandle, userDisplayName: userDisplayName)
+        credentialSource.userPassword = passwordText
         RealmManager.shared.save(object: credentialSource)
 //        generateNewES256KeyPair(credentialSource.keyPairAlias); // return not captured -- will retrieve credential by alias
         

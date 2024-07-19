@@ -6,71 +6,79 @@
 //
 
 import SwiftUI
+import Combine
 
 struct RegisterView: View {
     
     @ObservedObject
     private var state: RegisterViewState
-
+    
+    @State private var userName: String = ""
+    @State private var password: String = ""
+    
     private let interactor: RegisterViewInteractor
-
+    
     init(state: RegisterViewState, interactor: RegisterViewInteractor) {
         self.state = state
         self.interactor = interactor
     }
     
     var body: some View {
-        VStack {
+        VStack(spacing: 24) {
             Image("janssen_logo")
                 .resizable()
                 .scaledToFit()
                 .frame(width: 250, height: 100)
-            VStack(spacing: 16) {
-                Text("Register OIDC Client")
-                VStack(alignment: .leading) {
-                    Text("Configuration Endpoint:")
-                    TextField("Configuration Endpoint", text: $state.issuer)
-                        .textFieldStyle(.roundedBorder)
-                }
-                VStack(alignment: .leading) {
-                    Text("Scopes:")
-                    CheckListView(
-                        checkListData: state.checkListData,
-                        onSelection: { value, selected in
-                            state.scopesChanged(scope: value.title, insert: selected)
-                        })
-                    .padding([.leading, .trailing], 0)
-                    .border(.gray, width: 2)
-                    .cornerRadius(4)
-                    .frame(height: 200)
-                }
+            Text("Enrol Account")
+            VStack(spacing: 12) {
+                TextField("User name", text: $userName)
+                    .onChange(of: userName) { newValue in
+                        userName = newValue
+                    }
+                    .autocapitalization(.none)
+                    .textFieldStyle(.roundedBorder)
+                    .frame(height: 50)
+                SecureField("Password", text: $password)
+                    .onChange(of: password) { newValue in
+                        password = newValue
+                    }
+                    .autocapitalization(.none)
+                    .textFieldStyle(.roundedBorder)
+                    .frame(height: 50)
             }
-            JansButton(title: "Register",
+            JansButton(title: "Enrol",
                        disabled: state.loadingVisible,
                        backgroundColor: Color.cyan) {
-                interactor.onRegisterClick(issuer: state.issuer, scope: state.scopes)
+                interactor.onLoginClick(username: userName, password: password)
             }.padding(.top)
             if state.loadingVisible {
                 ProgressView()
             }
             Spacer()
+            HStack(alignment: .firstTextBaseline, spacing: 12) {
+                Text("Already enrolled?")
+                Button("Login") {
+                    interactor.goToLogin()
+                }
+            }
         }
-        .frame(maxWidth: .infinity)
-        .padding()
+        .padding(.horizontal)
     }
 }
 
 struct RegisterView_Previews: PreviewProvider {
-
+    
     static var previews: some View {
         RegisterView(
             state: RegisterViewState(),
-            interactor: RegisterViewInteractorImpl(
-                presenter: RegisterViewPresenterImpl(
-                    state: RegisterViewState(),
-                    mainViewState: MainViewState()
+            interactor:
+                RegisterViewInteractorImpl(
+                    presenter: RegisterViewPresenterImpl(
+                        state: RegisterViewState(),
+                        mainViewState: MainViewState()
+                    )
                 )
-            )
         )
     }
 }
+

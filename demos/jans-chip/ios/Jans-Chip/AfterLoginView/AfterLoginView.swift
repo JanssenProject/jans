@@ -24,30 +24,12 @@ struct AfterLoginView: View {
                 .resizable()
                 .scaledToFit()
                 .frame(width: 250, height: 100)
-            Text("User Login Information:")
+            Text("Welcome " + state.name)
             VStack(alignment: .leading) {
-                Text("sub: " + state.sub).padding()
-                state.name.flatMap {
-                    Text("name: " + $0).padding()
+                List(state.userInfo) { info in
+                    Text("\(info.key): " + info.value).padding()
                 }
-                state.nickname.flatMap {
-                    Text("nickname: " + $0).padding()
-                }
-                state.givenName.flatMap {
-                    Text("givenName: " + $0).padding()
-                }
-                state.middleName.flatMap {
-                    Text("middleName: " + $0).padding()
-                }
-                state.inum.flatMap {
-                    Text("inum: " + $0).padding()
-                }
-                state.familyName.flatMap {
-                    Text("familyName: " + $0).padding()
-                }
-                state.jansAdminUIRole.flatMap {
-                    Text("jansAdminUIRole: " + $0).padding()
-                }
+                .listStyle(.plain)
             }
             .border(.gray, width: 2)
             Spacer()
@@ -68,11 +50,11 @@ struct AfterLoginView_Previews: PreviewProvider {
 
     static var previews: some View {
         AfterLoginView(
-            state: AfterLoginViewState(userInfo: UserInfo(sub: "sub: ")),
+            state: AfterLoginViewState(userInfo: [:]),
             interactor:
                 AfterLoginViewInteractorImpl(
                     presenter: AfterLoginViewPresenterImpl(
-                        state: AfterLoginViewState(userInfo: UserInfo(sub: "")),
+                        state: AfterLoginViewState(userInfo: [:]),
                         mainViewState: MainViewState()
                     )
                 )

@@ -13,7 +13,7 @@ public enum EndpointRouter: EndpointConfiguration {
     case getOPConfiguration(String)
     case getFidoConfiguration(String)
     case doDCR(DCRequest, String)
-    case getAuthorizationChallenge(String, String, String, String, String, String)
+    case getAuthorizationChallenge(String, String, String, String, String, Bool, String, String, String, String)
     case getToken(String, String, String, String, String, String, String, String)
     case getUserInfo(String, String, String)
     case logout(String, String, String, String)
@@ -51,7 +51,7 @@ public enum EndpointRouter: EndpointConfiguration {
         case .getOPConfiguration(let url),
                 .getFidoConfiguration(let url),
                 .doDCR(_, let url),
-                .getAuthorizationChallenge(_, _, _, _, _, let url),
+                .getAuthorizationChallenge(_, _, _, _, _,_, _, _, _, let url),
                 .getToken(_, _, _, _, _, _, _, let url),
                 .getUserInfo(_, _, let url),
                 .logout(_, _, _, let url),
@@ -137,8 +137,8 @@ public enum EndpointRouter: EndpointConfiguration {
             if let data = try? JSONSerialization.data(withJSONObject: request.asParameters, options: []) {
                 urlRequest.httpBody = data
             }
-        case let .getAuthorizationChallenge(clientId, username, password, state, nonce, _):
-            let data : Data = "client_id=\(clientId)&username=\(username)&password=\(password)&state=\(state)&nonce=\(nonce)".data(using: .utf8) ?? Data()
+        case let .getAuthorizationChallenge(clientId, username, password, state, nonce, use_device_session, acr_values, auth_method, assertion_result_request, _):
+            let data : Data = "client_id=\(clientId)&username=\(username)&password=\(password)&state=\(state)&nonce=\(nonce)&use_device_session=\(use_device_session)&acr_values=\(acr_values)&auth_method=\(auth_method)&assertion_result_request=\(assertion_result_request)".data(using: .utf8) ?? Data()
             urlRequest.httpBody = data
         case let .getToken(clientId, code, grantType, redirectUri, scope, _, _, _):
             let data : Data = "client_id=\(clientId)&code=\(code)&grant_type=\(grantType)&redirect_uri=\(redirectUri)&scope=\(scope)".data(using: .utf8) ?? Data()

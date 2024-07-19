@@ -7,7 +7,9 @@
 
 import Foundation
 
-struct TokenResponse: Codable {
+struct TokenResponse: Codable, ErrorHandler {
+    var errorMessage: String?
+    var isSuccess: Bool = true
     
     private enum CodingKeys: String, CodingKey {
         case accessToken = "access_token"

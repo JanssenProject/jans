@@ -12,6 +12,11 @@ import Combine
 protocol MainViewInteractor: AnyObject {
     
     func onAppear()
+    func fetchFidoConfiguration(issuer: String) async throws -> FidoConfiguration?
+    func processLogin(username: String, password: String, authMethod: String,
+                      assertionResultRequest: String?) async throws -> LoginResponse
+    func getToken(authorizationCode: String) async throws -> TokenResponse
+    func getUserInfo(accessToken: String) async throws -> UserInfo
 }
 
 final class MainViewInteractorImpl: MainViewInteractor {
@@ -51,8 +56,8 @@ final class MainViewInteractorImpl: MainViewInteractor {
                     // 4. Check application integrity
                     appIntegrity = try await checkAppIntegrity()
                     
-                    let viewState: ViewState = oidcClient == nil ? .register : .login
-                    presenter.onViewStateChanged(viewState: viewState)
+                    // 5. Show the UI
+                    presenter.onViewStateChanged(viewState: .register)
                 } catch {
                     print("Request failed with error: \(error)")
                 }
@@ -60,9 +65,7 @@ final class MainViewInteractorImpl: MainViewInteractor {
         }
     }
     
-    // MARK: - Private part
-    
-    private func fetchOPConfiguration(issuer: String) async throws -> OPConfiguration? {
+    func fetchOPConfiguration(issuer: String) async throws -> OPConfiguration? {
         if let configuration: OPConfiguration = RealmManager.shared.getObject() {
             return configuration
         }
@@ -84,7 +87,7 @@ final class MainViewInteractorImpl: MainViewInteractor {
         return opConfiguration
     }
     
-    private func fetchFidoConfiguration(issuer: String) async throws -> FidoConfiguration? {
+    func fetchFidoConfiguration(issuer: String) async throws -> FidoConfiguration? {
         if let fidoConfiguration: FidoConfiguration = RealmManager.shared.getObject() {
             return fidoConfiguration
         }
@@ -106,7 +109,7 @@ final class MainViewInteractorImpl: MainViewInteractor {
         return fidoConfiguration
     }
     
-    private func fetchOIDCClient() async throws -> OIDCClient? {
+    func fetchOIDCClient() async throws -> OIDCClient? {
         if let oidcClient: OIDCClient = RealmManager.shared.getObject() {
             return oidcClient
         }
@@ -141,7 +144,7 @@ final class MainViewInteractorImpl: MainViewInteractor {
         return oidcClient
     }
     
-    private func checkAppIntegrity() async throws -> AppIntegrityEntity? {
+    func checkAppIntegrity() async throws -> AppIntegrityEntity? {
         if let appIntegrity: AppIntegrityEntity = RealmManager.shared.getObject() {
             return appIntegrity
         }
@@ -150,5 +153,121 @@ final class MainViewInteractorImpl: MainViewInteractor {
         integrityRepository.checkAppIntegrity()
         
         return nil
+    }
+    
+    func processLogin(username: String, password: String, authMethod: String,
+                      assertionResultRequest: String?) async throws -> LoginResponse {
+        var loginResponse: LoginResponse = LoginResponse(authorizationCode: "")
+        guard let opConfiguration: OPConfiguration = RealmManager.shared.getObject() else {
+            loginResponse.isSuccess = false
+            loginResponse.errorMessage = "OpenID configuration not found in database."
+            return loginResponse
+        }
+        
+        guard let oidcClient: OIDCClient = RealmManager.shared.getObject() else {
+            loginResponse.isSuccess = false
+            loginResponse.errorMessage = "OpenID client not found in database."
+            return loginResponse
+        }
+        
+        loginResponse = await withCheckedContinuation { continuation in
+            serviceClient.getAuthorizationChallenge(
+                clientId: oidcClient.clientId,
+                username: username,
+                password: password,
+                useDeviceSession: true,
+                acrValues: "passkey",
+                authMethod: authMethod,
+                assertionResultRequest: assertionResultRequest ?? "",
+                authorizationChallengeEndpoint: opConfiguration.authorizationChallengeEndpoint
+            )
+                .sink { result in
+                    switch result {
+                    case .success(let configuration):
+                        print("configuration: \(configuration)")
+                        continuation.resume(returning: configuration)
+                    case .failure(let error):
+                        print("error: \(error)")
+                        loginResponse.isSuccess = false
+                        loginResponse.errorMessage = error.localizedDescription
+                        continuation.resume(returning: loginResponse)
+                    }
+                }
+                .store(in: &cancellableSet)
+        }
+        
+        return loginResponse
+    }
+    
+    func getToken(authorizationCode: String) async throws -> TokenResponse {
+        var tokenResponse: TokenResponse = TokenResponse(accessToken: "", tokenType: "")
+        guard let opConfiguration: OPConfiguration = RealmManager.shared.getObject() else {
+            tokenResponse.isSuccess = false
+            tokenResponse.errorMessage = "OpenID configuration not found in database."
+            return tokenResponse
+        }
+        
+        guard let oidcClient: OIDCClient = RealmManager.shared.getObject() else {
+            tokenResponse.isSuccess = false
+            tokenResponse.errorMessage = "OpenID client not found in database."
+            return tokenResponse
+        }
+        
+        tokenResponse = await withCheckedContinuation { continuation in
+            let authHeaderEncodedString = "\(oidcClient.clientId):\(oidcClient.clientSecret)".data(using: .utf8)?.base64EncodedString() ?? ""
+            serviceClient.getToken(
+                clientId: oidcClient.clientId,
+                code: authorizationCode,
+                grantType: "authorization_code",
+                redirectUri: opConfiguration.issuer,
+                scope: oidcClient.scope,
+                authHeader: "Basic \(authHeaderEncodedString)",
+                dpopJwt: DPoPProofFactory.shared.issueDPoPJWTToken(httpMethod: "POST", requestUrl: opConfiguration.issuer),
+                url: opConfiguration.tokenEndpoint)
+            .sink { result in
+                switch result {
+                case .success(let token):
+                    print("token: \(token)")
+                    continuation.resume(returning: token)
+                case .failure(let error):
+                    print("error: \(error)")
+                    tokenResponse.isSuccess = false
+                    tokenResponse.errorMessage = error.localizedDescription
+                    continuation.resume(returning: tokenResponse)
+                }
+            }
+            .store(in: &cancellableSet)
+        }
+        
+        return tokenResponse
+    }
+    
+    func getUserInfo(accessToken: String) async throws -> UserInfo {
+        var userInfo = UserInfo()
+        guard let opConfiguration: OPConfiguration = RealmManager.shared.getObject() else {
+            userInfo.isSuccess = false
+            userInfo.errorMessage = "OpenID configuration not found in database."
+            return userInfo
+        }
+        
+        userInfo = await withCheckedContinuation { continuation in
+            serviceClient.getUserInfo(accessToken: accessToken, authHeader: "Bearer \(accessToken)", url: opConfiguration.userinfoEndpoint)
+                .sink { result in
+                    switch result {
+                    case .success(let userAdditionalInfo):
+                        print("userInfo: \(userAdditionalInfo)")
+                        userInfo.additionalInfo = userAdditionalInfo
+                        continuation.resume(returning: userInfo)
+                    case .failure(let error):
+                        print("error: \(error)")
+                        userInfo.isSuccess = false
+                        userInfo.errorMessage = error.localizedDescription
+                        continuation.resume(returning: userInfo)
+                    }
+                }
+                .store(in: &cancellableSet)
+        }
+        
+        return userInfo
     }
 }

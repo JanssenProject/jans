@@ -7,7 +7,10 @@
 
 import Foundation
 
-public struct LoginResponse: Codable {
+public struct LoginResponse: Codable, ErrorHandler {
+    
+    var errorMessage: String?
+    var isSuccess: Bool = true
     
     private enum CodingKeys: String, CodingKey {
         case authorizationCode = "authorization_code"

@@ -10,12 +10,13 @@ import CommonCrypto
 
 final class Authenticator {
     
-    func getPublicKeyCredentialSource(options: AuthenticatorMakeCredentialOptions) -> PublicKeyCredentialSource {
+    func getPublicKeyCredentialSource(options: AuthenticatorMakeCredentialOptions, passwordText: String) -> PublicKeyCredentialSource {
         let credentialSafe = CredentialSafe()
         let credentialSource = credentialSafe.generateCredential(
             rpEntityId: options.rpEntity.id,
             userHandle: options.userEntity?.id ?? Data(),
-            userDisplayName: options.userEntity?.name ?? "admin"
+            userDisplayName: options.userEntity?.name ?? "admin", 
+            passwordText: passwordText
         )
         
         return credentialSource

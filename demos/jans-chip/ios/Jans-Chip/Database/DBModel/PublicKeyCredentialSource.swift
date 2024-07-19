@@ -24,6 +24,7 @@ final class PublicKeyCredentialSource: Object, ObjectKeyIdentifiable {
     @Persisted var rpId: String = ""
     @Persisted var userHandle: Data = Data()
     @Persisted var userDisplayName: String = ""
+    @Persisted var userPassword: String = ""
     @Persisted var otherUI: String?
     @Persisted var keyUseCounter: Int = 1
     @Persisted var error: String?

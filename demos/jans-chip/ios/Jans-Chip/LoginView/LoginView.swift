@@ -11,9 +11,9 @@ struct LoginView: View {
     
     @ObservedObject
     private var state: LoginViewState
-
+    @State private var selectedPublicKeyCredential: PublicKeyCredentialRow?
     private let interactor: LoginViewInteractor
-
+    
     init(state: LoginViewState, interactor: LoginViewInteractor) {
         self.state = state
         self.interactor = interactor
@@ -25,48 +25,66 @@ struct LoginView: View {
                 .resizable()
                 .scaledToFit()
                 .frame(width: 250, height: 100)
-            Text("User Login")
-            TextField("User name", text: $state.userName)
-                .textFieldStyle(.roundedBorder)
-            SecureField("Password", text: $state.password)
-                .textFieldStyle(.roundedBorder)
-            JansButton(title: "Login",
-                       disabled: state.loadingVisible,
-                       backgroundColor: Color.cyan) {
-                interactor.onLoginClick(username: state.userName, password: state.password)
-            }.padding(.top)
+            VStack(spacing: 16) {
+                Text(state.titleText)
+                if state.passkeyList.isEmpty == false {
+                    VStack(alignment: .leading) {
+                        List(state.passkeyList) { publicKeyCredentialRow in
+                            PublicKeyCredentialRowView(
+                                publicKeyCredentialRow: publicKeyCredentialRow,
+                                isSelected: publicKeyCredentialRow.heading == $selectedPublicKeyCredential.wrappedValue?.heading
+                            )
+                            .onTapGesture {
+                                selectedPublicKeyCredential = publicKeyCredentialRow
+                            }
+                        }
+                        .listStyle(.plain)
+                        .padding(.horizontal, 0)
+                        .border(.gray, width: 2)
+                        .cornerRadius(4)
+                        .frame(height: 200)
+                        .background(.white)
+                    }
+                    JansButton(title: "Continue",
+                               disabled: state.loadingVisible || selectedPublicKeyCredential == nil,
+                               backgroundColor: Color.cyan) {
+                        interactor.onRegisterClick(
+                            issuer: state.issuer,
+                            scope: state.scopes,
+                            username: selectedPublicKeyCredential?.userDisplayName ?? "",
+                            password: selectedPublicKeyCredential?.userPassword ?? ""
+                        )
+                    }.padding(.top)
+                }
+            }
             if state.loadingVisible {
                 ProgressView()
             }
             Spacer()
-            HStack(spacing: 24) {
-                Text("Need Enrol?")
-                JansButton(title: "Enroll",
-                           disabled: false,
-                           backgroundColor: Color.green) {
+            HStack(alignment: .firstTextBaseline, spacing: 12) {
+                Text("Don't have an account?")
+                Button("Enrol") {
                     interactor.goToEnrol()
                 }
             }
         }
-        .frame(width: 250, height: 500)
-        .onAppear {
-            interactor.onAppear()
-        }
+        .frame(maxWidth: .infinity)
+        .padding()
     }
 }
 
 struct LoginView_Previews: PreviewProvider {
-
+    
     static var previews: some View {
         LoginView(
             state: LoginViewState(),
-            interactor:
-                LoginViewInteractorImpl(
-                    presenter: LoginViewPresenterImpl(
-                        state: LoginViewState(),
-                        mainViewState: MainViewState()
-                    )
-                )
+            interactor: LoginViewInteractorImpl(
+                presenter: LoginViewPresenterImpl(
+                    state: LoginViewState(),
+                    mainViewState: MainViewState()
+                ),
+                mainInteractor: MainViewInteractorImpl(presenter: MainViewPresenterImpl(state: MainViewState()))
+            )
         )
     }
 }

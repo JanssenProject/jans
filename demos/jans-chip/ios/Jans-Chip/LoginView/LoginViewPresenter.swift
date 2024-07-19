@@ -9,8 +9,8 @@ import UIKit
 
 protocol LoginViewPresenter: AnyObject {
     
-    func onViewStateChanged(viewState: ViewState)
     func onError(message: String)
+    func onMainStateChanged(viewState: ViewState)
     func onLoading(visible: Bool)
 }
 
@@ -24,12 +24,15 @@ final class LoginViewPresenterImpl: LoginViewPresenter {
         self.mainViewState = mainViewState
     }
     
-    func onViewStateChanged(viewState: ViewState) {
-        mainViewState.viewState = viewState
+    func onError(message: String) {
+        state.loadingVisible = false
+        DispatchQueue.main.async {
+            UIApplication.showAlert(message: message)
+        }
     }
     
-    func onError(message: String) {
-        UIApplication.showAlert(message: message)
+    func onMainStateChanged(viewState: ViewState) {
+        mainViewState.viewState = viewState
     }
     
     func onLoading(visible: Bool) {

@@ -71,6 +71,10 @@
 		30A44AC12C4683EF00B71E8A /* CBOR.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30A44AC02C4683EF00B71E8A /* CBOR.swift */; };
 		30A44AC32C469A9300B71E8A /* AttestationResultResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30A44AC22C469A9300B71E8A /* AttestationResultResponse.swift */; };
 		30A44AC52C46A86A00B71E8A /* AuthAdaptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30A44AC42C46A86900B71E8A /* AuthAdaptor.swift */; };
+		30AED8FE2C47DE790079F4F8 /* PublicKeyCredential.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30AED8FD2C47DE790079F4F8 /* PublicKeyCredential.swift */; };
+		30AED9002C47E2800079F4F8 /* PublicKeyCredentialRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30AED8FF2C47E2800079F4F8 /* PublicKeyCredentialRow.swift */; };
+		30AED9022C47E4D20079F4F8 /* PublicKeyCredentialRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30AED9012C47E4D20079F4F8 /* PublicKeyCredentialRowView.swift */; };
+		30AED9042C48F3260079F4F8 /* ErrorHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30AED9032C48F3260079F4F8 /* ErrorHandler.swift */; };
 		30BA05422C3FE29A0081FF78 /* AttestationOptionRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30BA05412C3FE29A0081FF78 /* AttestationOptionRequest.swift */; };
 		30BA05442C3FE5B10081FF78 /* AttestationOptionResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30BA05432C3FE5B10081FF78 /* AttestationOptionResponse.swift */; };
 		30BA05462C3FE71B0081FF78 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30BA05452C3FE71B0081FF78 /* User.swift */; };
@@ -147,6 +151,10 @@
 		30A44AC02C4683EF00B71E8A /* CBOR.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CBOR.swift; sourceTree = "<group>"; };
 		30A44AC22C469A9300B71E8A /* AttestationResultResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttestationResultResponse.swift; sourceTree = "<group>"; };
 		30A44AC42C46A86900B71E8A /* AuthAdaptor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthAdaptor.swift; sourceTree = "<group>"; };
+		30AED8FD2C47DE790079F4F8 /* PublicKeyCredential.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublicKeyCredential.swift; sourceTree = "<group>"; };
+		30AED8FF2C47E2800079F4F8 /* PublicKeyCredentialRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublicKeyCredentialRow.swift; sourceTree = "<group>"; };
+		30AED9012C47E4D20079F4F8 /* PublicKeyCredentialRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublicKeyCredentialRowView.swift; sourceTree = "<group>"; };
+		30AED9032C48F3260079F4F8 /* ErrorHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorHandler.swift; sourceTree = "<group>"; };
 		30BA05412C3FE29A0081FF78 /* AttestationOptionRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttestationOptionRequest.swift; sourceTree = "<group>"; };
 		30BA05432C3FE5B10081FF78 /* AttestationOptionResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttestationOptionResponse.swift; sourceTree = "<group>"; };
 		30BA05452C3FE71B0081FF78 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
@@ -265,6 +273,7 @@
 				30CC3C222C3C0B3F00AFFD0D /* Assertion.swift */,
 				30BA05492C3FE7A60081FF78 /* AuthenticatorSelection.swift */,
 				30BA054B2C3FE8790081FF78 /* PubKeyCredParam.swift */,
+				30AED9032C48F3260079F4F8 /* ErrorHandler.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -296,6 +305,7 @@
 		3063E58A2AD04A34002B4879 /* RegisterView */ = {
 			isa = PBXGroup;
 			children = (
+				30AED8FC2C47DE630079F4F8 /* Row */,
 				3063E58B2AD04A34002B4879 /* RegisterViewPresenter.swift */,
 				3063E58C2AD04A34002B4879 /* RegisterViewAssembler.swift */,
 				3063E58D2AD04A34002B4879 /* RegisterViewState.swift */,
@@ -366,6 +376,16 @@
 			name = AfterLoginView;
 			path = "Jans-Chip/AfterLoginView";
 			sourceTree = SOURCE_ROOT;
+		};
+		30AED8FC2C47DE630079F4F8 /* Row */ = {
+			isa = PBXGroup;
+			children = (
+				30AED8FD2C47DE790079F4F8 /* PublicKeyCredential.swift */,
+				30AED8FF2C47E2800079F4F8 /* PublicKeyCredentialRow.swift */,
+				30AED9012C47E4D20079F4F8 /* PublicKeyCredentialRowView.swift */,
+			);
+			path = Row;
+			sourceTree = "<group>";
 		};
 		30BA05402C3FE28D0081FF78 /* Networking */ = {
 			isa = PBXGroup;
@@ -467,6 +487,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				30AED9042C48F3260079F4F8 /* ErrorHandler.swift in Sources */,
 				30BA05462C3FE71B0081FF78 /* User.swift in Sources */,
 				30CC3C182C3BEE3A00AFFD0D /* JWTClaimsSet.swift in Sources */,
 				3063E5B22AD6CAEB002B4879 /* DCResponse.swift in Sources */,
@@ -479,6 +500,7 @@
 				3063E5702ACC0CE9002B4879 /* MainView.swift in Sources */,
 				30BA05482C3FE76E0081FF78 /* RP.swift in Sources */,
 				3063E5A22AD406D3002B4879 /* LoginViewInteractor.swift in Sources */,
+				30AED9002C47E2800079F4F8 /* PublicKeyCredentialRow.swift in Sources */,
 				3063E5682ACC0890002B4879 /* MainViewInteractor.swift in Sources */,
 				30A44AC12C4683EF00B71E8A /* CBOR.swift in Sources */,
 				3063E5AB2AD41238002B4879 /* OIDCClient.swift in Sources */,
@@ -508,6 +530,7 @@
 				3063E56C2ACC0BAF002B4879 /* MainViewPresenter.swift in Sources */,
 				3049C20B2AD6D0BC00164883 /* AppConfig.swift in Sources */,
 				30A44AB52C417BFB00B71E8A /* UserEntity.swift in Sources */,
+				30AED9022C47E4D20079F4F8 /* PublicKeyCredentialRowView.swift in Sources */,
 				30A44AB32C417BBA00B71E8A /* RpEntity.swift in Sources */,
 				30CC3C1F2C3C072000AFFD0D /* FidoConfiguration.swift in Sources */,
 				3004A9F92AEBDE79000CDB62 /* DPoPProofFactory.swift in Sources */,
@@ -528,6 +551,7 @@
 				3049C2182AD8163A00164883 /* AppIntegrityResponse.swift in Sources */,
 				30A44AC52C46A86A00B71E8A /* AuthAdaptor.swift in Sources */,
 				3049C2102AD7F59600164883 /* DCRRepository.swift in Sources */,
+				30AED8FE2C47DE790079F4F8 /* PublicKeyCredential.swift in Sources */,
 				30A44ABB2C466CC300B71E8A /* Response.swift in Sources */,
 				3063E5912AD04A34002B4879 /* RegisterViewAssembler.swift in Sources */,
 				3004AA032AEC46F0000CDB62 /* SecKey+KeyPair.swift in Sources */,

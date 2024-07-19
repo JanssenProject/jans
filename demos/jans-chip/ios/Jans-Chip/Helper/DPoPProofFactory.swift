@@ -89,7 +89,7 @@ final class DPoPProofFactory {
         
         do {
             let (privateKey, publicKey) = try SecKey.generateKeyPair(ofSize: 3072)
-            let jwk = try RSAPublicKey(publicKey: publicKey)
+//            let jwk = try RSAPublicKey(publicKey: publicKey)
             
             let header = Header(typ: "dpop+jwt")
             claims.jti = UUID().uuidString

@@ -9,8 +9,8 @@ import UIKit
 
 protocol RegisterViewPresenter: AnyObject {
     
+    func onViewStateChanged(viewState: ViewState)
     func onError(message: String)
-    func onMainStateChanged(viewState: ViewState)
     func onLoading(visible: Bool)
 }
 
@@ -24,12 +24,15 @@ final class RegisterViewPresenterImpl: RegisterViewPresenter {
         self.mainViewState = mainViewState
     }
     
-    func onError(message: String) {
-        UIApplication.showAlert(message: message)
+    func onViewStateChanged(viewState: ViewState) {
+        mainViewState.viewState = viewState
     }
     
-    func onMainStateChanged(viewState: ViewState) {
-        mainViewState.viewState = viewState
+    func onError(message: String) {
+        onLoading(visible: false)
+        DispatchQueue.main.async {
+            UIApplication.showAlert(message: message)
+        }
     }
     
     func onLoading(visible: Bool) {
