@@ -82,6 +82,10 @@ From within your JS project, you'll need to import the exported `cedarling` func
 import { init } from "cedarling.js"
 
 const config = {
+	// [OPTIONAL] name that cedarling will use in DCR
+	applicationName: "test#docs",
+	// [DEFAULT = false] Controls if cedarling will discard id_token without an access token with the corresponding client_id.
+	requireAudValidation: false,
 	policyStore: {
 		// can be "local", "remote" or "lock-master",
 		// each strategy requires different parameters, see below

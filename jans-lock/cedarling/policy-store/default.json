@@ -387,21 +387,18 @@
 	"TrustedIssuers": [
 		{
 			"name": "Gluu",
-			"Description": "Consumer IDP",
-			"openid_configuration_endpoint": "https://account.gluu.org/.well-known/openid-configuration",
-			"access_tokens": {
+			"description": "Consumer IDP",
+			"openidConfigurationEndpoint": "https://account.gluu.org/.well-known/openid-configuration",
+			"accessTokens": {
 				"trusted": true
 			},
-			"id_tokens": {
+			"idTokens": {
 				"trusted": true,
-				"principal_identifier": "email"
+				"principalIdentifier": "email"
 			},
-			"userinfo_tokens": {
+			"userinfoTokens": {
 				"trusted": true,
-				"role_mapping": "role"
-			},
-			"tx_tokens": {
-				"trusted": true
+				"roleMapping": "role"
 			}
 		}
 	]

@@ -22,10 +22,9 @@ pub struct TrustedIssuer {
 	pub openid_configuration_endpoint: String,
 	pub description: String,
 
-	pub access: AccessTokenConfig,
-	pub id: IdTokenConfig,
-	#[serde(rename = "userinfo")]
-	pub user_info: UserInfoTokenConfig,
+	pub access_tokens: AccessTokenConfig,
+	pub id_tokens: IdTokenConfig,
+	pub userinfo_tokens: UserInfoTokenConfig,
 }
 
 impl TrustedIssuer {

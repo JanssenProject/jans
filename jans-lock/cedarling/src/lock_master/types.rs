@@ -34,8 +34,30 @@ pub struct OAuthDynamicClient {
 	pub client_secret: Option<String>,
 }
 
+fn space_separated<'a, S>(scopes: &'a [&'a str], s: S) -> Result<S::Ok, S::Error>
+where
+	S: serde::Serializer,
+{
+	let mut iter = scopes.into_iter();
+
+	// is scopes is empty, serialize ""
+	match iter.next() {
+		Some(first) => {
+			let res = iter.fold(first.to_string(), |mut acc, ntx| {
+				acc.push_str(" ");
+				acc.push_str(ntx);
+				acc
+			});
+
+			s.serialize_str(&res)
+		}
+		None => s.serialize_str(""),
+	}
+}
+
 #[derive(serde::Serialize, Debug)]
 pub struct OAuthGrantRequest<'a> {
+	#[serde(serialize_with = "space_separated")]
 	pub scope: &'a [&'a str],
 	pub grant_type: &'a str,
 }

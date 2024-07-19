@@ -103,11 +103,12 @@ pub struct UserInfoToken {
 
 	pub sub: String,
 	pub aud: String,
-	// TODO: Parse multiple strings from UserInfo token?
-	#[serde(rename = "role")]
+
 	pub exp: i64,
 	pub iat: i64,
 
+	// TODO: Parse multiple strings from UserInfo token?
+	#[serde(rename = "role")]
 	pub roles: HashSet<String>,
 	pub email: String,
 	pub name: Option<String>,
@@ -176,7 +177,7 @@ impl UserInfoToken {
 
 	pub fn get_user_entity(&self, roles: &HashMap<&String, Vec<Entity>>) -> Entity {
 		let entry = unsafe { TRUST_STORE.get(&self.iss) }.expect_throw("Can't get iss for User entity creation from userinfo_token");
-		let id = serde_json::json!({ "__entity": { "type": entry.issuer.id.principal_identifier, "id": self.sub } });
+		let id = serde_json::json!({ "__entity": { "type": entry.issuer.id_tokens.principal_identifier, "id": self.sub } });
 		let uid = EntityUid::from_json(id).unwrap_throw();
 
 		// create email dict

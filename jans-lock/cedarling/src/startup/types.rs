@@ -1,9 +1,10 @@
 use std::collections::BTreeSet;
 
-#[derive(serde::Deserialize, Debug)]
+#[derive(serde::Deserialize, serde::Serialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct CedarlingConfig {
 	pub application_name: Option<String>,
+	#[serde(default)]
 	pub require_aud_validation: bool,
 
 	// policy store
@@ -16,7 +17,7 @@ pub struct CedarlingConfig {
 	pub supported_signature_algorithms: BTreeSet<String>,
 }
 
-#[derive(serde::Deserialize, Debug)]
+#[derive(serde::Deserialize, serde::Serialize, Debug)]
 #[serde(tag = "strategy")]
 #[serde(rename_all = "kebab-case")]
 #[serde(rename_all_fields = "camelCase")]

@@ -19,7 +19,7 @@ pub async fn init(config: &types::CedarlingConfig) {
 
 pub async fn init_policy_store(config: &types::CedarlingConfig) -> serde_json::Map<String, serde_json::Value> {
 	// Get PolicyStore JSON
-	let source = match &config.policy_store {
+	let mut source = match &config.policy_store {
 		types::PolicyStoreConfig::Local => Cow::Borrowed(include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/policy-store/default.json")).as_slice()),
 		types::PolicyStoreConfig::Remote { url } => {
 			let res = http::get(url, &[]).await.expect_throw("Unable fetch Policy Store");
@@ -30,10 +30,9 @@ pub async fn init_policy_store(config: &types::CedarlingConfig) -> serde_json::M
 	};
 
 	// Decompress if necessary
-	let source = match config.decompress_policy_store {
-		true => Cow::Owned(miniz_oxide::inflate::decompress_to_vec_zlib(&source).unwrap_throw()),
-		false => source,
-	};
+	if config.decompress_policy_store {
+		source = Cow::Owned(miniz_oxide::inflate::decompress_to_vec_zlib(&source).unwrap_throw());
+	}
 
 	// Parse JSON
 	let policy_store = serde_json::from_slice::<serde_json::Value>(&source).unwrap_throw();

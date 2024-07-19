@@ -18,6 +18,7 @@ pub fn init(config: &startup::types::CedarlingConfig) {
 }
 
 pub fn token2entities(input: &authz::types::AuthzInput) -> (cedar_policy::EntityUid, cedar_policy::Entities) {
+	// TODO: enable returning Client as Principal
 	let mut entities = cedar_policy::Entities::empty();
 	let schema = startup::SCHEMA.get();
 

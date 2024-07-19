@@ -1,9 +1,9 @@
-use serde_wasm_bindgen::from_value;
+use serde_wasm_bindgen::{from_value, to_value};
 use wasm_bindgen::prelude::*;
 
 pub mod http;
 
-mod authz;
+pub mod authz;
 mod crypto;
 mod lock_master;
 mod startup;
@@ -17,11 +17,34 @@ pub async fn start() {
 
 #[wasm_bindgen]
 pub async fn init(config: JsValue) {
-	let config = from_value::<startup::types::CedarlingConfig>(config).unwrap_throw();
+	let config = from_value::<startup::types::CedarlingConfig>(config).unwrap();
 
 	// Startup sequence
 	startup::init(&config).await;
 
 	// Initialize authz module
 	token2entity::init(&config);
+}
+
+use wasm_bindgen_test::wasm_bindgen_test;
+
+wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
+
+#[wasm_bindgen_test]
+async fn remote() {
+	let config = startup::types::CedarlingConfig {
+		application_name: Some("test#docs".into()),
+		require_aud_validation: false,
+		policy_store: startup::types::PolicyStoreConfig::Remote {
+			url: "http://127.0.0.1:5000/policy-store/default.json".to_string(),
+		},
+		decompress_policy_store: false,
+		trust_store_refresh_rate: Some(5000),
+		supported_signature_algorithms: std::collections::BTreeSet::from_iter(["HS256".into(), "HS384".into(), "RS256".into()]),
+	};
+
+	let config = to_value(&config).unwrap_throw();
+	web_sys::console::log_1(&config);
+
+	init(config).await;
 }

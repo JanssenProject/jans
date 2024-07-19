@@ -13,7 +13,7 @@ extern "C" {
 pub async fn get(url: &str, headers: &[(&str, &str)]) -> Option<Response> {
 	let mut opts = RequestInit::new();
 	opts.method("GET");
-	opts.mode(RequestMode::NoCors);
+	opts.mode(RequestMode::Cors);
 
 	// insert headers
 	let h = Headers::new().unwrap();
@@ -44,7 +44,7 @@ pub async fn post<'a, T: serde::Serialize>(url: &str, body: PostBody<'a, T>, hea
 	let h = Headers::new().unwrap();
 
 	opts.method("POST");
-	opts.mode(RequestMode::NoCors);
+	opts.mode(RequestMode::Cors);
 
 	// Set the body
 	match body {

@@ -22,9 +22,9 @@ fn validation_options(jwt: &str, _type: TokenType) -> Result<(Option<jsonwebtoke
 
 	// ensure issuer can issue TokenType
 	let can_issue = match _type {
-		TokenType::IdToken => entry.issuer.id.trusted,
-		TokenType::AccessToken => entry.issuer.access.trusted,
-		TokenType::UserInfoToken => entry.issuer.user_info.trusted,
+		TokenType::IdToken => entry.issuer.id_tokens.trusted,
+		TokenType::AccessToken => entry.issuer.access_tokens.trusted,
+		TokenType::UserInfoToken => entry.issuer.userinfo_tokens.trusted,
 	};
 
 	if !can_issue {
