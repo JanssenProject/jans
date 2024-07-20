@@ -227,7 +227,7 @@ class Crypto64:
 
 
     def gen_openid_jwks_jks_keys(self, jks_path, jks_pwd, key_expiration=None, dn_name=None, key_algs=None, enc_keys=None):
-        self.logIt("Generating oxAuth OpenID Connect keys")
+        self.logIt("Generating Jans Auth OpenID Connect keys")
 
         if dn_name == None:
             dn_name = Config.default_openid_jks_dn_name
@@ -243,7 +243,7 @@ class Crypto64:
 
         args = [Config.cmd_java,
                 '-Dlog4j.defaultInitOverride=true',
-                "-cp", Config.non_setup_properties['oxauth_client_jar_fn'],
+                "-cp", Config.non_setup_properties['jans_auth_client_jar_fn'],
                 Config.non_setup_properties['key_gen_path'],
                 '-key_ops_type', 'ALL',
                 '-keystore', jks_path,
@@ -263,12 +263,12 @@ class Crypto64:
             return output.splitlines()
 
     def export_openid_key(self, jks_path, jks_pwd, cert_alias, cert_path):
-        self.logIt("Exporting oxAuth OpenID Connect keys")
+        self.logIt("Exporting Jans Auth OpenID Connect keys")
 
         cmd = " ".join([Config.cmd_java,
                         "-Dlog4j.defaultInitOverride=true",
                         "-cp",
-                        Config.non_setup_properties['oxauth_client_jar_fn'], 
+                        Config.non_setup_properties['jans_auth_client_jar_fn'], 
                         Config.non_setup_properties['key_export_path'],
                         '-key_ops_type', 'ALL',
                         "-keystore",
@@ -282,10 +282,10 @@ class Crypto64:
         self.run(['/bin/sh', '-c', cmd])
 
     def write_openid_keys(self, fn, jwks):
-        self.logIt("Writing oxAuth OpenID Connect keys")
+        self.logIt("Writing jans Auth OpenID Connect keys")
 
         if not jwks:
-            self.logIt("Failed to write oxAuth OpenID Connect key to %s" % fn)
+            self.logIt("Failed to write jans Auth OpenID Connect key to %s" % fn)
             return
 
         self.backupFile(fn)
@@ -295,7 +295,7 @@ class Crypto64:
             self.writeFile(fn, jwks_text)
             self.run([Config.cmd_chown, 'jetty:jetty', fn])
             self.run([Config.cmd_chmod, '600', fn])
-            self.logIt("Wrote oxAuth OpenID Connect key to %s" % fn)
+            self.logIt("Wrote jans Auth OpenID Connect key to %s" % fn)
         except:
             self.logIt("Error writing command : %s" % fn, True)
 
@@ -330,14 +330,14 @@ class Crypto64:
         self.logIt("Encoding test passwords")
         hostname = Config.hostname.split('.')[0]
         try:
-            Config.templateRenderingDict['oxauthClient_2_pw'] = Config.templateRenderingDict['oxauthClient_2_inum'] + '-' + hostname
-            Config.templateRenderingDict['oxauthClient_2_encoded_pw'] = self.obscure(Config.templateRenderingDict['oxauthClient_2_pw'])
+            Config.templateRenderingDict['jans_auth_client_2_pw'] = Config.templateRenderingDict['jans_auth_client_2_inum'] + '-' + hostname
+            Config.templateRenderingDict['jans_auth_client_2_encoded_pw'] = self.obscure(Config.templateRenderingDict['jans_auth_client_2_pw'])
 
-            Config.templateRenderingDict['oxauthClient_3_pw'] =  Config.templateRenderingDict['oxauthClient_3_inum'] + '-' + hostname
-            Config.templateRenderingDict['oxauthClient_3_encoded_pw'] = self.obscure(Config.templateRenderingDict['oxauthClient_3_pw'])
+            Config.templateRenderingDict['jans_auth_client_3_pw'] =  Config.templateRenderingDict['jans_auth_client_3_inum'] + '-' + hostname
+            Config.templateRenderingDict['jans_auth_client_3_encoded_pw'] = self.obscure(Config.templateRenderingDict['jans_auth_client_3_pw'])
 
-            Config.templateRenderingDict['oxauthClient_4_pw'] = Config.templateRenderingDict['oxauthClient_4_inum'] + '-' + hostname
-            Config.templateRenderingDict['oxauthClient_4_encoded_pw'] = self.obscure(Config.templateRenderingDict['oxauthClient_4_pw'])
+            Config.templateRenderingDict['jans_auth_client_4_pw'] = Config.templateRenderingDict['jans_auth_client_4_inum'] + '-' + hostname
+            Config.templateRenderingDict['jans_auth_client_4_encoded_pw'] = self.obscure(Config.templateRenderingDict['jans_auth_client_4_pw'])
         except:
             self.logIt("Error encoding test passwords", True)
 

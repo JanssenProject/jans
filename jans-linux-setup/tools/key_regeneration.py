@@ -195,7 +195,7 @@ class KeyRegenerator:
 
         # vendor specific definitions
         if _VENDOR_ == 'gluu':
-            self.conf_dyn = 'oxAuthConfDynamic'
+            self.conf_dyn = 'jans_auth_conf_dynamic'
             self.conf_web_keys = 'oxAuthConfWebKeys'
             self.conf_rev = 'oxRevision'
             self.conf_objc = 'oxAuthConfiguration'

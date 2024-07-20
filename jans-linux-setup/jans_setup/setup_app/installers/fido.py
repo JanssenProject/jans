@@ -24,7 +24,7 @@ class FidoInstaller(JettyInstaller):
         self.needdb = True
         self.app_type = AppType.SERVICE
         self.install_type = InstallOption.OPTONAL
-        self.install_var = 'installFido2'
+        self.install_var = 'install_fido2'
         self.register_progess()
 
         self.fido2ConfigFolder = os.path.join(Config.configFolder, 'fido2')
@@ -37,7 +37,7 @@ class FidoInstaller(JettyInstaller):
 
     def install(self):
 
-        self.installJettyService(self.jetty_app_configuration[self.service_name], True)
+        self.install_jettyService(self.jetty_app_configuration[self.service_name], True)
 
         self.logIt("Copying fido.war into jetty webapps folder...")
         jettyServiceWebapps = os.path.join(self.jetty_base, self.service_name, 'webapps')

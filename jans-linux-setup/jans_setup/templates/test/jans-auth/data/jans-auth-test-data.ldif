@@ -145,12 +145,12 @@ jansScopeTyp: openid
 objectClass: jansScope
 objectClass: top
 
-dn: inum=%(oxauthClient_4_inum)s,ou=clients,o=jans
+dn: inum=%(jans_auth_client_4_inum)s,ou=clients,o=jans
 displayName: Jans Test Client (don't remove)
-inum: %(oxauthClient_4_inum)s
+inum: %(jans_auth_client_4_inum)s
 jansAppTyp: web
 jansClaimRedirectURI: https://%(hostname)s/jans-auth/restv1/uma/gather_claims
-jansClntSecret: %(oxauthClient_4_encoded_pw)s
+jansClntSecret: %(jans_auth_client_4_encoded_pw)s
 jansGrantTyp: authorization_code
 jansGrantTyp: implicit
 jansGrantTyp: refresh_token
@@ -175,12 +175,12 @@ jansTrustedClnt: true
 objectClass: top
 objectClass: jansClnt
 
-dn: inum=%(oxauthClient_2_inum)s,ou=clients,o=jans
+dn: inum=%(jans_auth_client_2_inum)s,ou=clients,o=jans
 displayName: Jans Test Resource Server Client (don't remove)
-inum: %(oxauthClient_2_inum)s
+inum: %(jans_auth_client_2_inum)s
 jansAppTyp: web
 jansClaimRedirectURI: https://%(hostname)s/jans-auth/restv1/uma/gather_claims
-jansClntSecret: %(oxauthClient_2_encoded_pw)s
+jansClntSecret: %(jans_auth_client_2_encoded_pw)s
 jansGrantTyp: authorization_code
 jansGrantTyp: implicit
 jansGrantTyp: refresh_token
@@ -197,11 +197,11 @@ jansTrustedClnt: true
 objectClass: top
 objectClass: jansClnt
 
-dn: inum=%(oxauthClient_3_inum)s,ou=clients,o=jans
+dn: inum=%(jans_auth_client_3_inum)s,ou=clients,o=jans
 displayName: Jans Test Requesting Party Client (don't remove)
-inum: %(oxauthClient_3_inum)s
+inum: %(jans_auth_client_3_inum)s
 jansAppTyp: web
-jansClntSecret: %(oxauthClient_3_encoded_pw)s
+jansClntSecret: %(jans_auth_client_3_encoded_pw)s
 jansGrantTyp: authorization_code
 jansGrantTyp: implicit
 jansGrantTyp: refresh_token
