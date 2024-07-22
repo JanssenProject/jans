@@ -7,7 +7,9 @@ tags:
   - Cedarling
 ---
 
-## Cedarling Authorization
+# Authorization Using Cedarling
+
+## What Is Cedarling
 
 The Cedarling is a local, autonomous Policy Decision Point, or "PDP". It runs as a local 
 WebAssembly ("WASM") component--you can call it directly in the browser from a JavaScript 
