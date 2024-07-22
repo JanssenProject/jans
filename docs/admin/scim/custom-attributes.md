@@ -13,7 +13,7 @@ Although the schema covers many attributes one might think of, at times you will
 
 * Add an attribute to LDAP schema
 
-* Include the new attribute in an LDAP's objectclass such as jansPerson
+* Include the new attribute in an LDAP's object class such as jansPerson
 
 * Register and activate your new attribute through **Jans TUI**.
 
@@ -39,7 +39,7 @@ To customize the URI associated to the extension (whose default value is `urn:ie
 * Set a value in the field `User Extension Schema URI`
 * Save the changes
 
-![scim-extention](https://github.com/JanssenProject/jans/assets/43112579/fb5b9d5c-8b17-4be0-af6c-d36389de82d2)
+![scim-extension](https://github.com/JanssenProject/jans/assets/43112579/fb5b9d5c-8b17-4be0-af6c-d36389de82d2)
 
 
 
