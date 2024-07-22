@@ -19,7 +19,7 @@
     
     
       
-        <title>Overview - Janssen Documentation</title>
+        <title>Global Token Revocation - Janssen Documentation</title>
       
     
     
@@ -128,7 +128,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Overview
+              Global Token Revocation
             
           </span>
         </div>
@@ -225,13 +225,15 @@
         
   
   
+    
+  
 
 
   
   
   
     <li class="md-tabs__item">
-      <a href="../../../" class="md-tabs__link">
+      <a href="../../../" class="md-tabs__link md-tabs__link--active">
         Administration
       </a>
     </li>
@@ -357,12 +359,14 @@
 
   
   
+    
+  
   
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1" type="checkbox" id="__nav_1" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1" type="checkbox" id="__nav_1" checked>
       
       
       
@@ -3078,12 +3082,14 @@
               
   
   
+    
+  
   
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_9" type="checkbox" id="__nav_1_9" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_9" type="checkbox" id="__nav_1_9" checked>
       
       
       
@@ -3414,18 +3420,22 @@
               
   
   
+    
+  
   
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_9_7" type="checkbox" id="__nav_1_9_7" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_9_7" type="checkbox" id="__nav_1_9_7" checked>
       
       
       
         
           
             
+          
+        
           
         
           
@@ -3591,6 +3601,75 @@
       <a href="../token-revocation/" class="md-nav__link">
         Token Revocation
       </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Global Token Revocation
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Global Token Revocation
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#usage" class="md-nav__link">
+    Usage
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#disabling-the-endpoint-using-feature-flag" class="md-nav__link">
+    Disabling The Endpoint Using Feature Flag
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#required-scopes" class="md-nav__link">
+    Required Scopes
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -7066,6 +7145,10 @@
         
           
         
+          
+        
+          
+        
       
       
         
@@ -7152,6 +7235,34 @@
     <li class="md-nav__item">
       <a href="../../../lock/lock_opa.md" class="md-nav__link">
         Policy Store Integration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../lock/lock-master/" class="md-nav__link">
+        Lock Master
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../lock/cedarling/" class="md-nav__link">
+        Authorization Using Cedarling
       </a>
     </li>
   
@@ -8594,7 +8705,7 @@ looks like below:</p>
 <div class="highlight"><pre><span></span><code>https://janssen.server.host/jans-auth/restv1/global-token-revocation
 </code></pre></div>
 <p>More information about request and response of the global token revocation endpoint can be found in
-the OpenAPI specification of <a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/v1.1.4.nightly/jans-auth-server/docs/swagger.yaml">jans-auth-server module</a>.</p>
+the OpenAPI specification of <a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml">jans-auth-server module</a>.</p>
 <h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">#</a></h2>
 <p>A request to this endpoint can revoke all tokens and sessions of one particular user. Use the request parameters to specify 
 criteria to select the user. If there are multiple users matching the given criteria, the first found user will be affected.</p>
@@ -8642,6 +8753,42 @@ disable <code>GLOBAL_TOKEN_REVOCATION</code> flag as required.</p>
       </main>
       
         <footer class="md-footer">
+  
+    
+    <nav class="md-footer__inner md-grid" aria-label="Footer" >
+      
+        
+        <a href="../token-revocation/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Token Revocation" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Token Revocation
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="../session-revocation/" class="md-footer__link md-footer__link--next" aria-label="Next: Session Revocation" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              Session Revocation
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
   
   <div class="md-footer-meta md-typeset">
     <div class="md-footer-meta__inner md-grid">

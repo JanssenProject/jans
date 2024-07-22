@@ -3470,6 +3470,8 @@
         
           
         
+          
+        
       
       
         
@@ -3598,6 +3600,20 @@
     <li class="md-nav__item">
       <a href="../token-revocation/" class="md-nav__link">
         Token Revocation
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../global-token-revocation/" class="md-nav__link">
+        Global Token Revocation
       </a>
     </li>
   
@@ -7129,6 +7145,10 @@
         
           
         
+          
+        
+          
+        
       
       
         
@@ -7215,6 +7235,34 @@
     <li class="md-nav__item">
       <a href="../../../lock/lock_opa.md" class="md-nav__link">
         Policy Store Integration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../lock/lock-master/" class="md-nav__link">
+        Lock Master
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../lock/cedarling/" class="md-nav__link">
+        Authorization Using Cedarling
       </a>
     </li>
   
@@ -8657,7 +8705,7 @@ looks like below:</p>
 <div class="highlight"><pre><span></span><code>https://janssen.server.host/jans-auth/restv1/revoke_session
 </code></pre></div>
 <p>More information about request and response of the revocation endpoint can be found in
-the OpenAPI specification of <a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/v1.1.4.nightly/jans-auth-server/docs/swagger.yaml#/Session_Management/revoke-session">jans-auth-server module</a>.</p>
+the OpenAPI specification of <a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Session_Management/revoke-session">jans-auth-server module</a>.</p>
 <h2 id="usage">Usage<a class="headerlink" href="#usage" title="Permanent link">#</a></h2>
 <p>A request to this endpoint can revoke all sessions of one particular user. Use the request parameters to specify 
 criteria to select the user. If there are multiple users matching the given criteria, the first found user will be affected.</p>
@@ -8707,7 +8755,7 @@ disable <code>REVOKE_SESSION</code> flag as required.</p>
     <nav class="md-footer__inner md-grid" aria-label="Footer" >
       
         
-        <a href="../token-revocation/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Token Revocation" rel="prev">
+        <a href="../global-token-revocation/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Global Token Revocation" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
           </div>
@@ -8716,7 +8764,7 @@ disable <code>REVOKE_SESSION</code> flag as required.</p>
               <span class="md-footer__direction">
                 Previous
               </span>
-              Token Revocation
+              Global Token Revocation
             </div>
           </div>
         </a>
