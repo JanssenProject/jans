@@ -2,9 +2,9 @@ I. Install CE with `-t` option to load data
 
 II. Client keys deployment.
 - cd /var/www/html/
-- wget --no-check-certificate https://raw.githubusercontent.com/JansFederation/oxAuth/master/Client/src/test/resources/oxauth_test_client_keys.zip
-- unzip oxauth_test_client_keys.zip
-- rm -rf oxauth_test_client_keys.zip
+- wget --no-check-certificate https://raw.githubusercontent.com/JanssenProject/jans/main/jans-auth-server/client/src/test/resources/jans_test_client_keys.zip
+- unzip jans_test_client_keys.zip
+- rm -rf jans_test_client_keys.zip
 - chown -R root.www-data jans-auth-client
 
 III. These changes should be applied to oxAuth config.
@@ -58,7 +58,7 @@ V. Update system configuration
 VI. Restart oxAuth server
 
 VII. Update LDAP schema (this is not needed for Couchbase)
-1. cp ./output/test/oxauth/schema/102-oxauth_test.ldif /opt/opendj/config/schema/
+1. cp ./output/test/oxauth/schema/102-jans-auth_test.ldif /opt/opendj/config/schema/
 2. cp ./output/test/scim-client/schema/103-scim_test.ldif /opt/opendj/config/schema/
 3. Apply manual schema changes described in ./output/test/scim-client/schema/scim_test_manual_update.schema
 4. Create /home/ldap/.pw with LDAP admin user pwd

@@ -21,11 +21,12 @@ traditional access management strategies like RBAC and more adaptive capabilitie
 grain decisions based on contextal data. The Cedar Engine does this without sacrificing performance 
 or the security benefits of a deterministic policy engine.
 
-There are three key components in a Lock topology: (1) Cedarling--a WebAssembly ("WASM") 
-component that runs the [Amazon Rust Cedar Engine](https://github.com/cedar-policy/cedar) and
-performs JWT token validation; (2) Lock Master--a web service deployed by domains to manage a 
-network of distributed ephemeral Cedarlings; (3) [Agama Lab](https://cloud.gluu.org/agama-lab),
-a policy authoring tool for developers to design policies and publish their policy store in Github.
+There are three key components in a Lock topology: (1) [Cedarling](./cedarling.md)--a WebAssembly 
+("WASM") component that runs the [Amazon Rust Cedar Engine](https://github.com/cedar-policy/cedar) and
+performs JWT token validation; (2)[Lock Master](./lock-master.md)--a web service deployed by domains
+to manage a network of distributed ephemeral Cedarlings; (3) 
+[Agama Lab](https://cloud.gluu.org/agama-lab), a policy authoring tool for developers to design 
+policies and publish their policy store in Github.
 
 You don't need to deploy a Jans Lock Topology to derive utility from the Cedarling. Javascript 
 developers can use the Cedarling to secure even a single browser-based application, especially if 

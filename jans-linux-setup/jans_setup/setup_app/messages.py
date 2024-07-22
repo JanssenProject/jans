@@ -25,20 +25,15 @@ class msg:
     hosts_label = "Hosts"
     username_label = "Username"
 
-    installOxAuth_label = "Install OxAuth"
-    installOxTrust_label = "Install OxTrust"
+    install_jans_auth_label = "Install Jans Auth"
     backend_types_label = "Backend Types"
     java_type_label = "Java Type"
-    installHttpd_label = "Install Apache"
-    installSaml_label = "Install Saml"
-    installPassport_label = "Install Passport"
-    installJansRadius_label = "Install Radius"
+    install_httpd_label = "Install Apache"
     opendj_storages_label = "Store on OpenDJ"
     installing_label = "Current"
-    installOxd_label = "Install Oxd"
-    installCasa_label = "Install Casa"
+    install_casa_label = "Install Casa"
     install_scim_server_label = "Install Scim"
-    installFido2_label = "Install Fido2"
+    install_fido2_label = "Install Fido2"
 
     insufficient_free_disk_space = "Available free disk space was determined to be {1:0.1f} GB. This is less than the required disk space of {} GB."
     insufficient_mem_size = "RAM size was determined to be {:0.1f} GB. This is less than the suggested RAM size of {} GB"
@@ -71,35 +66,23 @@ class msg:
     enter_valid_countryCode = "Please enter two letter country code"
 
 
-    ask_installHttpd = "Install Apache HTTPD Server"
-    ask_installSaml = "Install Shibboleth SAML IDP"
-    ask_installOxAuthRP  = "Install oxAuth RP"
-    ask_installPassport  = "Install Passport"
-    ask_installJansRadius = "Install Janssen Radius"
-    ask_installCasa = "Install Casa"
-    ask_installOxd = "Install Oxd"
+    ask_install_httpd = "Install Apache HTTPD Server"
+    ask_install_casa = "Install Casa"
     ask_opendj_install = "Install OpenDJ"
     ask_install_scim_server = "Install Scim Server"
-    ask_installFido2 = "Install Fido2"
+    ask_install_fido2 = "Install Fido2"
 
     opendj_install_options = ["Don't Install","Install Locally","Use Remote OpenDJ"]
-    oxd_url_label = "oxd Server URL"
-    install_oxd_or_url_warning = "Please either enter oxd Server URL or check Install Oxd"
-    oxd_connection_error = "Can't connect to oxd-server with url {}. Reason: {}"
-    oxd_ssl_cert_error = "Hostname of oxd ssl certificate is {} which does not match {} casa won't start properly"
 
     ask_cb_install = "Couchbase Installation"
     cb_install_options = ["Don't Install","Install Locally","Use Remote Couchbase"]
-    
-    ask_use_jans_storage_oxd = "By default oxd uses its own db. Do you want to use Janssen Storage for Oxd?"
-    ask_use_jans_storage_oxd_title = "Use Janssen Storage for Oxd?"
-    
+
     notify_select_backend = "Please select one of the backends either local install or remote" 
     weak_password = "Password for {} must be at least 6 characters and include one uppercase letter, one lowercase letter, one digit, and one special character."
     unselected_storages = "Note: Unselected storages will go Couchbase Server"
 
     no_help = "No help is provided for this screen."
-    
+
     MainFromHelp = "Detected OS type, system init type, and Apache version is displayed. Inorder to continue to next step, you must check lisecnce acknowledgement."
     HostFromHelp = ("IP Address: ip address of this server. Detected ip address will be provided\n"
                    "Hostname: hostname of this server. Detected hostname will be provided.\n"
@@ -110,16 +93,12 @@ class msg:
 
     installation_description_java = "Corretto is a build of the Open Java Development Kit (OpenJDK) with long-term support from Amazon. Corretto is certified using the Java Technical Compatibility Kit (TCK) to ensure it meets the Java SE standard."
     installation_description_opendj = "OpenDJ is an LDAPv3 compliant directory service, which has been developed for the Java platform, providing a high performance, highly available, and secure store for the identities managed by your organization."
-    installation_description_oxauth = "oxAuth is an open source OpenID Connect Provider (OP) and UMA Authorization Server (AS). The project also includes OpenID Connect Client code which can be used by websites to validate tokens."
-    installation_description_oxtrust = "oxTrust is a Weld based web application for Janssen Server administration."
+    installation_description_jans_auth = "Jans Auth is an open source OpenID Connect Provider (OP) and UMA Authorization Server (AS). The project also includes OpenID Connect Client code which can be used by websites to validate tokens."
     installation_description_saml = "The Janssen Server acts as a SAML identity provider (IDP) to support outbound SAML single sign-on (SSO)."
-    installation_description_passport = "Janssen bundles the Passport.js authentication middleware project to support user authentication at external SAML, OAuth, and OpenID Connect providers "
-    installation_description_radius = "The Janssen Server now ships with a RADIUS server called Janssen Radius. It is based on the TinyRadius Java library."
     installation_description_jans = "Janssen Server is identity & access management (IAM) platform for web & mobile single sign-on (SSO), two-factor authentication (2FA) and API access management."
     installation_description_jetty = "Eclipse Jetty provides a Web server and jakarta.servlet container, plus support for HTTP/2, WebSocket, OSGi, JMX, JNDI, JAAS and many other integrations."
     installation_description_jython = "Jython is a Java implementation of Python that combines expressive power with clarity. Jython is freely available for both commercial and non-commercial use and is distributed with source code under the PSF License v2."
     installation_description_node = "As an asynchronous event-driven JavaScript runtime, Node.js is designed to build scalable network applications."
-    installation_description_oxd = "oxd exposes simple, static APIs web application developers can use to implement user authentication and authorization against an OAuth 2.0 authorization server like Janssen."
     installation_description_casa = "Janssen Casa is a self-service web portal for end-users to manage authentication and authorization preferences for their account in a Janssen Server."
     installation_description_scim = "The Janssen Server implements SCIM to offer standard REST APIs for performing CRUD operations (create, read, update and delete) against user data."
     installation_description_fido2 = "FIDO 2.0 (FIDO2) is an open authentication standard that enables people to leverage common devices to authenticate to online services in both mobile and desktop environments"

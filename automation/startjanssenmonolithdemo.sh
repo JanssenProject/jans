@@ -12,7 +12,7 @@ if [[ ! "$JANS_FQDN" ]]; then
   read -rp "Enter Hostname [demoexample.jans.io]:                           " JANS_FQDN
 fi
 if [[ ! "$JANS_PERSISTENCE" ]]; then
-  read -rp "Enter persistence type [LDAP|MYSQL|PGSQL]:                            " JANS_PERSISTENCE
+  read -rp "Enter persistence type [LDAP|MYSQL|PGSQL|COUCHBASE[TEST]|SPANNER[TEST]]:                            " JANS_PERSISTENCE
 fi
 
 if [[ -z $EXT_IP ]]; then
@@ -72,12 +72,15 @@ if [[ "$JANS_BUILD_COMMIT" ]]; then
   python3 -c "from pathlib import Path ; import ruamel.yaml ; compose = Path('/tmp/jans/docker-jans-monolith/jans-mysql-compose.yml') ; yaml = ruamel.yaml.YAML() ; data = yaml.load(compose) ; data['services']['jans']['build'] = '.' ; del data['services']['jans']['image'] ; yaml.dump(data, compose)"
   python3 -c "from pathlib import Path ; import ruamel.yaml ; compose = Path('/tmp/jans/docker-jans-monolith/jans-postgres-compose.yml') ; yaml = ruamel.yaml.YAML() ; data = yaml.load(compose) ; data['services']['jans']['build'] = '.' ; del data['services']['jans']['image'] ; yaml.dump(data, compose)"
   python3 -c "from pathlib import Path ; import ruamel.yaml ; compose = Path('/tmp/jans/docker-jans-monolith/jans-ldap-compose.yml') ; yaml = ruamel.yaml.YAML() ; data = yaml.load(compose) ; data['services']['jans']['build'] = '.' ; del data['services']['jans']['image'] ; yaml.dump(data, compose)"
+  python3 -c "from pathlib import Path ; import ruamel.yaml ; compose = Path('/tmp/jans/docker-jans-monolith/jans-couchbase-compose.yml') ; yaml = ruamel.yaml.YAML() ; data = yaml.load(compose) ; data['services']['jans']['build'] = '.' ; del data['services']['jans']['image'] ; yaml.dump(data, compose)"
+  python3 -c "from pathlib import Path ; import ruamel.yaml ; compose = Path('/tmp/jans/docker-jans-monolith/jans-spanner-compose.yml') ; yaml = ruamel.yaml.YAML() ; data = yaml.load(compose) ; data['services']['jans']['build'] = '.' ; del data['services']['jans']['image'] ; yaml.dump(data, compose)"
 fi
 # --
 if [[ "$IS_FQDN_REGISTERED" ]]; then
   python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('/tmp/jans/docker-jans-monolith') ; dfparser.envs['IS_FQDN_REGISTERED'] = 'true'"
 fi
-if [[ "$RUN_TESTS" ]]; then
+if [[ "$RUN_TESTS" == "true" ]]; then
+  echo "Activating RUN_TEST ENV.."
   python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('/tmp/jans/docker-jans-monolith') ; dfparser.envs['RUN_TESTS'] = 'true'"
 fi
 if [[ $JANS_PERSISTENCE == "MYSQL" ]]; then
@@ -86,6 +89,10 @@ elif [[ $JANS_PERSISTENCE == "PGSQL" ]]; then
   bash /tmp/jans/docker-jans-monolith/up.sh postgres
 elif [[ $JANS_PERSISTENCE == "LDAP" ]]; then
   bash /tmp/jans/docker-jans-monolith/up.sh ldap
+elif [[ $JANS_PERSISTENCE == "COUCHBASE" ]]; then
+  bash /tmp/jans/docker-jans-monolith/up.sh couchbase
+elif [[ $JANS_PERSISTENCE == "SPANNER" ]]; then
+  bash /tmp/jans/docker-jans-monolith/up.sh spanner
 fi  
 echo "$EXT_IP $JANS_FQDN" | sudo tee -a /etc/hosts > /dev/null
 jans_status="unhealthy"
@@ -119,9 +126,13 @@ docker exec docker-jans-monolith-jans-1 curl -f -k https://localhost/.well-known
 echo -e "Testing fido2-configuration endpoint.. \n"
 docker exec docker-jans-monolith-jans-1 curl -f -k https://localhost/.well-known/fido2-configuration
 mkdir -p /tmp/reports || echo "reports folder exists"
-while ! docker exec docker-jans-monolith-jans-1 test -f "/tmp/httpd.crt"; do
+end=$((SECONDS+180))
+while [ $SECONDS -lt $end ]; do
   echo "Waiting for the container to run java test preparations"
-  sleep 5
+  if docker exec docker-jans-monolith-jans-1 test -f "/tmp/httpd.crt"; then
+    break
+  fi
+  sleep 10
 done
 echo -e "Running build.. \n"
 docker exec -w /tmp/jans/jans-auth-server docker-jans-monolith-jans-1 mvn -Dcfg="$JANS_FQDN" -Dmaven.test.skip=true -fae clean compile install
@@ -134,7 +145,9 @@ docker cp docker-jans-monolith-jans-1:/tmp/jans/jans-auth-server/test-model/targ
 docker cp docker-jans-monolith-jans-1:/tmp/jans/jans-auth-server/model/target/surefire-reports/testng-results.xml /tmp/reports/$JANS_PERSISTENCE-jans-auth-model-testng-results.xml
 
 EOF
-sudo bash testendpoints.sh
+if [[ "$RUN_TESTS" == "true" ]]; then
+  sudo bash testendpoints.sh
+fi
 echo -e "You may re-execute bash testendpoints.sh to do a quick test to check the configuration endpoints."
 echo -e "Add the following record to your local computers' hosts file to engage with the services $EXT_IP $JANS_FQDN"
 echo -e "To stop run:"

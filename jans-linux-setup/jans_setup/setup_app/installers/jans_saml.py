@@ -156,7 +156,7 @@ class JansSamlInstaller(JettyInstaller):
         base.unpack_zip(self.source_files[1][0], self.idp_config_data_dir, with_par_dir=False)
 
         # retreive auth config
-        _, jans_auth_config = self.dbUtils.get_oxAuthConfDynamic()
+        _, jans_auth_config = self.dbUtils.get_jans_auth_conf_dynamic()
         Config.templateRenderingDict['jans_auth_token_endpoint'] = jans_auth_config['tokenEndpoint']
 
         self.update_rendering_dict()
@@ -290,7 +290,7 @@ class JansSamlInstaller(JettyInstaller):
         self.copyFile(self.source_files[4][0], os.path.join(Config.scheduler_dir, 'lib'))
 
         # configuration rendering identifiers
-        _, jans_auth_config = self.dbUtils.get_oxAuthConfDynamic()
+        _, jans_auth_config = self.dbUtils.get_jans_auth_conf_dynamic()
         self.check_clients([('kc_scheduler_api_client_id', '2102.')])
 
         rendering_dict = {
