@@ -194,13 +194,21 @@ class PropertiesUtils(SetupUtils):
         if p.get('cb_install') == '0':
            p['cb_install'] = InstallTypes.NONE
 
+        if p.get('cb_install'):
+            p['opendj_install'] = InstallTypes.NONE
+            p['rdbm_install'] = InstallTypes.NONE
+
         if p.get('opendj_install') == '0':
             p['opendj_install'] = InstallTypes.NONE
+
+        if base.as_bool(p.get('installLdap', False)):
+            p['opendj_install'] = InstallTypes.LOCAL
+            p['rdbm_install'] = InstallTypes.NONE
 
         if p.get('enable-script'):
             base.argsp.enable_script = p['enable-script'].split()
 
-        if p.get('loadTestData'):
+        if base.as_bool(p.get('loadTestData', False)):
             base.argsp.t = True
 
         if p.get('rdbm_type') == 'pgsql' and not p.get('rdbm_port'):
@@ -634,8 +642,6 @@ class PropertiesUtils(SetupUtils):
         prompt = self.getPrompt("Install Jans Lock?",
                                             self.getDefaultOption(Config.install_jans_lock)
                                             )[0].lower()
-
-        
 
         if prompt == 'y':
             prompt = self.getPrompt("  Install Jans Lock as Server?",
