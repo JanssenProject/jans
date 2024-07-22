@@ -1,5 +1,6 @@
 FROM ubuntu:22.04@sha256:e9569c25505f33ff72e88b2990887c9dcf230f23259da296eb814fc2b41af999
 
+
 # Don't start any optional services except for the few we need.
 RUN find /etc/systemd/system \
     /lib/systemd/system \
@@ -31,6 +32,9 @@ RUN systemctl set-default multi-user.target \
 # Workaround agetty high CPU. https://bugzilla.redhat.com/show_bug.cgi?id=1046469
 RUN rm -f /lib/systemd/system/systemd*udev* \
     && rm -f /lib/systemd/system/getty.target
+
+# Install google cloud client
+RUN curl https://sdk.cloud.google.com > install.sh && bash install.sh --disable-prompts
 
 HEALTHCHECK --interval=35s --timeout=4s CMD /opt/dist/scripts/jans-auth check | grep "Jetty running pid" || exit 1
 
@@ -66,6 +70,8 @@ ENV CN_HOSTNAME="demoexample.jans.io" \
     TEST_CLIENT_ID="9876baac-de39-4c23-8a78-674b59df8c09" \
     TEST_CLIENT_SECRET="" \
     TEST_CLIENT_TRUSTED="true" \
+    CN_INSTALL_COUCHBASE="false" \
+    CN_INSTALL_SPANNER="false" \
     CN_INSTALL_LDAP="false" \
     CN_INSTALL_MYSQL="false" \
     CN_INSTALL_PGSQL="false" \
@@ -76,7 +82,7 @@ ENV CN_HOSTNAME="demoexample.jans.io" \
     CN_INSTALL_KC_LINK="true" \
     CN_INSTALL_LINK="true" \
     CN_INSTALL_LOCK="true" \
-    CN_INSTALL_SAML="true" \
+    CN_INSTALL_SAML="false" \
     CN_INSTALL_OPA="true" \
     RDBMS_DATABASE="jans" \
     RDBMS_USER="jans" \
