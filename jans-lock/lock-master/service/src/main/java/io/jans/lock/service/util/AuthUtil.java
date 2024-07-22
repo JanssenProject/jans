@@ -290,14 +290,14 @@ public class AuthUtil {
         Map<String, List<String>> endpointMap = this.appConfiguration.getEndpointDetails();
         log.error("Get endpoint URL for endpointMap:{}", endpointMap);
 
-        if (endpointMap == null || endpointMap.isEmpty()) {
+        if (StringUtils.isBlank(endpoint) || endpointMap == null || endpointMap.isEmpty()) {
             return endpoint;
         }
 
         Set<String> keys = endpointMap.keySet();
         log.error("endpointMap keys:{}", keys);
 
-        String endpointPath = keys.stream().filter(e -> e.endsWith("/" + endpoint)).findFirst().orElse(null);
+        String endpointPath = keys.stream().filter(e -> e!=null && e.toLowerCase().endsWith("/" + endpoint.toLowerCase())).findFirst().orElse(null);
         log.error("Final endpoint:{}, endpointPath:{}", endpoint, endpointPath);
         return endpointPath;
     }
