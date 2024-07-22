@@ -4,7 +4,6 @@ from setup import getOpts
 
 def test_getOpts():
     """Options:
-        -r   Install oxAuth RP
         -c   Install CAS
         -d   specify the directory where community-edition-setup is located.
         -f   specify setup.properties file
@@ -21,20 +20,15 @@ def test_getOpts():
         'setup_properties': None,
         'noPrompt': False,
         'downloadWars': False,
-        'installOxAuth': True,
-        'installOxTrust': True,
-        'installLDAP': True,
-        'installHTTPD': True,
-        'installSaml': False,
-        'installCas': False,
-        'installOxAuthRP': False
+        'install_jans_auth': True,
+        'opendj_install': True,
+        'install_httpd': True,
+        'install_casa': False,
     }
 
     setupOptions = getOpts(['-r'], setupOptions)
-    assert_true(setupOptions['installOxAuthRP'])
-
     setupOptions = getOpts(['-c'], setupOptions)
-    assert_true(setupOptions['installCas'])
+    assert_true(setupOptions['install_casa'])
 
     # existing path
     setupOptions = getOpts(['-d', '/tmp'], setupOptions)
@@ -54,10 +48,7 @@ def test_getOpts():
     assert_true(setupOptions['noPrompt'])
 
     setupOptions = getOpts(['-N'], setupOptions)
-    assert_false(setupOptions['installHTTPD'])
-
-    setupOptions = getOpts(['-s'], setupOptions)
-    assert_true(setupOptions['installSaml'])
+    assert_false(setupOptions['install_httpd'])
 
     setupOptions = getOpts(['-w'], setupOptions)
     assert_true(setupOptions['downloadWars'])
