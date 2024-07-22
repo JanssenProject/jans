@@ -54,7 +54,7 @@ class ConfigApiInstaller(JettyInstaller):
     def install(self):
         self.copyFile(self.source_files[1][0], '/usr/sbin')
         self.run([paths.cmd_chmod, '+x', '/usr/sbin/facter'])
-        self.installJettyService(self.jetty_app_configuration[self.service_name], True)
+        self.install_jettyService(self.jetty_app_configuration[self.service_name], True)
         self.logIt("Copying fido.war into jetty webapps folder...")
         jettyServiceWebapps = os.path.join(self.jetty_base, self.service_name, 'webapps')
         self.copyFile(self.source_files[0][0], jettyServiceWebapps)
@@ -64,7 +64,7 @@ class ConfigApiInstaller(JettyInstaller):
         if Config.install_scim_server:
             self.install_plugin('scim-plugin')
 
-        if Config.installFido2:
+        if Config.install_fido2:
             self.install_plugin('fido2-plugin')
 
         if Config.install_jans_link:
@@ -177,9 +177,9 @@ class ConfigApiInstaller(JettyInstaller):
         Config.templateRenderingDict['configOauthEnabled'] = 'false' if base.argsp.disable_config_api_security else 'true'
         Config.templateRenderingDict['apiApprovedIssuer'] = base.argsp.approved_issuer or 'https://{}'.format(Config.hostname)
 
-        _, oxauth_config = self.dbUtils.get_oxAuthConfDynamic()
+        _, jans_auth_config = self.dbUtils.get_jans_auth_conf_dynamic()
         for param in ('issuer', 'openIdConfigurationEndpoint', 'introspectionEndpoint', 'tokenEndpoint', 'tokenRevocationEndpoint'):
-            Config.templateRenderingDict[param] = oxauth_config[param]
+            Config.templateRenderingDict[param] = jans_auth_config[param]
 
         Config.templateRenderingDict['apiProtectionType'] = 'oauth2'
         Config.templateRenderingDict['endpointInjectionEnabled'] = 'false'

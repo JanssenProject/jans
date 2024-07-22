@@ -12,7 +12,7 @@ OPENBANKING_PROFILE = 'openbanking'
 PROFILE = os.environ.get('JANS_PROFILE')
 
 parser_description='''Use this script to configure your Jans Server and to add initial data required for
-oxAuth and oxTrust to start. If setup.properties is found in this folder, these
+Jans Auth and other Jans services to start. If setup.properties is found in this folder, these
 properties will automatically be used instead of the interactive setup.
 '''
 
@@ -109,7 +109,6 @@ if PROFILE != OPENBANKING_PROFILE:
     parser.add_argument('--install-jans-lock', help="Install Jans Lock", action='store_true')
     parser.add_argument('--install-opa', help="Install OPA", action='store_true')
 
-    #parser.add_argument('--oxd-use-jans-storage', help="Use Jans Storage for Oxd Server", action='store_true')
     parser.add_argument('--load-config-api-test', help="Load Config Api Test Data", action='store_true')
 
     parser.add_argument('-config-patch-creds', help="password:username for downloading auto test ciba password")

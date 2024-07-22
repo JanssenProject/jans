@@ -11,12 +11,11 @@ def get_setup_options():
         'setup_properties': None,
         'noPrompt': False,
         'downloadWars': False,
-        'installOxAuth': True,
+        'install_jans_auth': True,
         'install_config_api': True,
-        'installHTTPD': True,
+        'install_httpd': True,
         'install_scim_server': True if base.current_app.profile == 'jans' else False,
-        'installOxd': False,
-        'installFido2': True,
+        'install_fido2': True,
         'install_jans_link': False,
         'install_jans_keycloak_link': False,
         'install_casa': False,
@@ -93,7 +92,7 @@ def get_setup_options():
             base.coucbase_bucket_dict[bucket]['memory_allocation'] = getattr(base.argsp, f'couchbase_{bucket}_mem')
 
         if base.argsp.no_jsauth:
-            setupOptions['installOxAuth'] = False
+            setupOptions['install_jans_auth'] = False
 
         if base.argsp.no_config_api:
             setupOptions['install_config_api'] = False
@@ -102,7 +101,7 @@ def get_setup_options():
             setupOptions['install_scim_server'] = False
 
         if base.argsp.no_fido2:
-            setupOptions['installFido2'] = False
+            setupOptions['install_fido2'] = False
 
         if base.argsp.install_jans_link:
             setupOptions['install_jans_link'] = True
@@ -200,7 +199,7 @@ def get_setup_options():
     setupOptions['noPrompt'] = base.argsp.n
 
     if base.argsp.no_httpd:
-        setupOptions['installHTTPD'] = False
+        setupOptions['install_httpd'] = False
 
 
     return setupOptions

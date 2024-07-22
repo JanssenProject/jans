@@ -132,24 +132,12 @@ class PropertiesUtils(SetupUtils):
             if not Config.opendj_p12_pass:
                 Config.opendj_p12_pass = self.getPW()
 
-            self.check_oxd_server_https()
-
         if not Config.encode_salt:
             Config.encode_salt = self.getPW() + self.getPW()
 
         if not Config.jans_max_mem:
             Config.jans_max_mem = int(base.current_mem_size * .83 * 1000) # 83% of physical memory
 
-
-    def check_oxd_server_https(self):
-
-        if Config.get('oxd_server_https'):
-            Config.templateRenderingDict['oxd_hostname'], Config.templateRenderingDict['oxd_port'] = self.parse_url(Config.oxd_server_https)
-            if not Config.templateRenderingDict['oxd_port']: 
-                Config.templateRenderingDict['oxd_port'] = 8443
-        else:
-            Config.templateRenderingDict['oxd_hostname'] = Config.hostname
-            Config.oxd_server_https = 'https://{}:8443'.format(Config.hostname)
 
     def decrypt_properties(self, fn, passwd):
         out_file = fn[:-4] + '.' + uuid.uuid4().hex[:8] + '-DEC~'
@@ -249,8 +237,6 @@ class PropertiesUtils(SetupUtils):
         if p.get('ldap_hostname') != 'localhost':
             if p.get('remoteLdap','').lower() == 'true':
                 Config.opendj_install = InstallTypes.REMOTE
-            elif p.get('installLdap','').lower() == 'true':
-                Config.opendj_install = InstallTypes.LOCAL
             elif p.get('opendj_install'):
                 Config.opendj_install = p['opendj_install']
             else:
@@ -443,45 +429,6 @@ class PropertiesUtils(SetupUtils):
 
         return result
 
-    def check_oxd_server(self, oxd_url, error_out=True, log_error=True):
-
-        oxd_url = os.path.join(oxd_url, 'health-check')
-
-        ctx = ssl.create_default_context()
-        ctx.check_hostname = True
-        ctx.verify_mode = ssl.CERT_NONE
-
-        try:
-            result = urllib.request.urlopen(
-                        oxd_url,
-                        timeout=2,
-                        context=ctx
-                    )
-            if result.code == 200:
-                oxd_status = json.loads(result.read().decode())
-                if oxd_status['status'] == 'running':
-                    return True
-        except Exception as e:
-            if log_error:
-                if Config.thread_queue:
-                    return str(e)
-                if error_out:
-                    print(colors.DANGER)
-                    print("Can't connect to oxd-server with url {}".format(oxd_url))
-                    print("Reason: ", e)
-                    print(colors.ENDC)
-
-    def check_oxd_ssl_cert(self, oxd_hostname, oxd_port):
-
-        oxd_cert = ssl.get_server_certificate((oxd_hostname, oxd_port))
-        with tempfile.TemporaryDirectory() as tmpdirname:
-            oxd_crt_fn = os.path.join(tmpdirname, 'oxd.crt')
-            self.writeFile(oxd_crt_fn, oxd_cert)
-            ssl_subjects = self.get_ssl_subject(oxd_crt_fn)
-
-            if ssl_subjects.get('commonName') != oxd_hostname:
-                return ssl_subjects
-
 
     def promptForBackendMappings(self):
 
@@ -530,17 +477,17 @@ class PropertiesUtils(SetupUtils):
 
 
     def promptForHTTPD(self):
-        if Config.installed_instance and Config.installHttpd:
+        if Config.installed_instance and Config.install_httpd:
             return
 
         prompt_for_httpd = self.getPrompt("Install Apache HTTPD Server", 
-                                        self.getDefaultOption(Config.installHTTPD)
+                                        self.getDefaultOption(Config.install_httpd)
                                         )[0].lower()
 
-        Config.installHttpd = prompt_for_httpd == 'y'
+        Config.install_httpd = prompt_for_httpd == 'y'
 
-        if Config.installed_instance and Config.installHttpd:
-            Config.addPostSetupService.append('installHttpd')
+        if Config.installed_instance and Config.install_httpd:
+            Config.addPostSetupService.append('install_httpd')
 
 
     def promptForScimServer(self):
@@ -557,37 +504,17 @@ class PropertiesUtils(SetupUtils):
             Config.addPostSetupService.append('install_scim_server')
 
     def promptForFido2Server(self):
-        if Config.installed_instance and Config.installFido2:
+        if Config.installed_instance and Config.install_fido2:
             return
 
         prompt_for_fido2_server = self.getPrompt("Install Fido2 Server?",
-                                            self.getDefaultOption(Config.installFido2)
+                                            self.getDefaultOption(Config.install_fido2)
                                             )[0].lower()
-        Config.installFido2 = prompt_for_fido2_server == 'y'
+        Config.install_fido2 = prompt_for_fido2_server == 'y'
 
-        if Config.installed_instance and Config.installFido2:
-            Config.addPostSetupService.append('installFido2')
+        if Config.installed_instance and Config.install_fido2:
+            Config.addPostSetupService.append('install_fido2')
 
-
-    def promptForOxd(self):
-
-        if Config.installed_instance and Config.installOxd:
-            return
-
-        prompt_for_oxd = self.getPrompt("Install Oxd?", 
-                                            self.getDefaultOption(Config.installOxd)
-                                            )[0].lower()
-        Config.installOxd = prompt_for_oxd == 'y'
-
-        if Config.installOxd:
-            use_jans_storage = self.getPrompt("  Use Janssen Storage for Oxd?",
-                                                self.getDefaultOption(Config.get('oxd_use_jans_storage'))
-                                                )[0].lower()
-            Config.oxd_use_jans_storage = use_jans_storage == 'y'
-
-
-        if Config.installed_instance and Config.installOxd:
-            Config.addPostSetupService.append('installOxd')
 
     def prompt_for_jans_link(self):
         if Config.installed_instance and Config.install_jans_link:
@@ -954,7 +881,7 @@ class PropertiesUtils(SetupUtils):
 
     def prompt_for_http_cert_info(self):
         # IP address needed only for Apache2 and hosts file update
-        if Config.installHttpd:
+        if Config.install_httpd:
             Config.ip = self.get_ip()
 
         if base.argsp.host_name:
@@ -975,8 +902,6 @@ class PropertiesUtils(SetupUtils):
                 break
             else:
                 print("Hostname can't be \033[;1mlocalhost\033[0;0m")
-
-        Config.oxd_server_https = 'https://{}:8443'.format(Config.hostname)
 
         # Get city and state|province code
         Config.city = self.getPrompt("Enter your city or locality", Config.city)

@@ -131,11 +131,10 @@ class Config:
 
         self.downloadWars = None
         self.templateRenderingDict = {
-                                        'oxauthClient_2_inum': 'AB77-1A2B',
-                                        'oxauthClient_3_inum': '3E20',
-                                        'oxauthClient_4_inum': 'FF81-2D39',
+                                        'jans_auth_client_2_inum': 'AB77-1A2B',
+                                        'jans_auth_client_3_inum': '3E20',
+                                        'jans_auth_client_4_inum': 'FF81-2D39',
                                         'idp_attribute_resolver_ldap.search_filter': '(|(uid=$requestContext.principalName)(mail=$requestContext.principalName))',
-                                        'oxd_port': '8443',
                                         'server_time_zone': 'UTC' + time.strftime("%z"),
                                      }
 
@@ -190,21 +189,16 @@ class Config:
 
         # Jans components installation status
         self.loadData = True
-        self.installJans = True
-        self.installJre = True
-        self.installJetty = True
-        self.installJython = True
-        self.installOxAuth = True
-        self.installOxTrust = True
-        self.installHttpd = True
-        self.installSaml = False
-        self.installPassport = False
-        self.installJansRadius = False
+        self.install_jans = True
+        self.install_jre = True
+        self.install_jetty = True
+        self.install_jython = True
+        self.install_jans_auth = True
+        self.install_httpd = True
         self.install_scim_server = True
-        self.installFido2 = True
+        self.install_fido2 = True
         self.install_config_api = True
         self.install_casa = False
-        self.installOxd = False
         self.install_jans_cli = True
         self.install_jans_link = False
         self.loadTestData = False
@@ -261,8 +255,6 @@ class Config:
 
         self.ldapCertFn = self.opendj_cert_fn = os.path.join(self.certFolder, 'opendj.crt')
         self.ldapTrustStoreFn = self.opendj_p12_fn = os.path.join(self.certFolder, 'opendj.pkcs12')
-
-        self.oxd_package = base.determine_package(os.path.join(self.dist_jans_dir, 'oxd-server*.tgz'))
 
         self.opendj_p12_pass = None
 
@@ -364,17 +356,15 @@ class Config:
                         'jans-scim': ['opendj jans-auth', 75],
                         'idp': ['opendj jans-auth', 76],
                         'casa': ['opendj jans-auth', 78],
-                        'oxd-server': ['opendj jans-auth', 80],
                         'passport': ['opendj jans-auth', 82],
                         'jans-auth-rp': ['opendj jans-auth', 84],
-                        'jans-radius': ['opendj jans-auth', 86],
                         'jans-config-api': ['opendj jans-auth', 85],
                         }
 
         self.install_time_ldap = None
 
         self.non_setup_properties = {
-            'oxauth_client_jar_fn': os.path.join(self.dist_jans_dir, 'jans-auth-client-jar-with-dependencies.jar')
+            'jans_auth_client_jar_fn': os.path.join(self.dist_jans_dir, 'jans-auth-client-jar-with-dependencies.jar')
                 }
 
         #re-map couchbase buckets ldif
