@@ -89,6 +89,9 @@ def get_setup_options():
         if base.argsp.couchbase_hostname:
             setupOptions['couchbase_hostname'] = base.argsp.couchbase_hostname
 
+        for bucket in base.coucbase_bucket_dict:
+            base.coucbase_bucket_dict[bucket]['memory_allocation'] = getattr(base.argsp, f'couchbase_{bucket}_mem')
+
         if base.argsp.no_jsauth:
             setupOptions['installOxAuth'] = False
 

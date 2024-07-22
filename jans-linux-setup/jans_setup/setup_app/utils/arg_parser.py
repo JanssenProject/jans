@@ -3,9 +3,10 @@ import sys
 import uuid
 import argparse
 
-from setup_app import static
+from setup_app import static, paths
 from setup_app.version import __version__
 from setup_app.utils import base
+from setup_app.config import Config
 
 OPENBANKING_PROFILE = 'openbanking'
 PROFILE = os.environ.get('JANS_PROFILE')
@@ -89,6 +90,9 @@ if PROFILE != OPENBANKING_PROFILE:
     parser.add_argument('-couchbase-admin-password', help="Couchbase admin user password")
     parser.add_argument('-couchbase-bucket-prefix', help="Set prefix for couchbase buckets", default='jans')
     parser.add_argument('-couchbase-hostname', help="Remote couchbase server hostname")
+
+    for bucket in base.coucbase_bucket_dict:
+        parser.add_argument(f'-couchbase-{bucket}-mem', help=f"Memory allocation in MB for Couchbase bucket {bucket}", default=base.coucbase_bucket_dict[bucket]['memory_allocation'], type=int)
 
     parser.add_argument('--no-data', help="Do not import any data to database backend, used for clustering", action='store_true')
     parser.add_argument('--no-jsauth', help="Do not install OAuth2 Authorization Server", action='store_true')
