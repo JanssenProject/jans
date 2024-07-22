@@ -7072,6 +7072,10 @@
         
           
         
+          
+        
+          
+        
       
       
         
@@ -7158,6 +7162,34 @@
     <li class="md-nav__item">
       <a href="lock_opa.md" class="md-nav__link">
         Policy Store Integration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="lock-master/" class="md-nav__link">
+        Lock Master
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="cedarling/" class="md-nav__link">
+        Authorization Using Cedarling
       </a>
     </li>
   
@@ -8637,11 +8669,12 @@ security rules without resorting to implementing such rules in their application
 traditional access management strategies like RBAC and more adaptive capabilities that offer fine 
 grain decisions based on contextal data. The Cedar Engine does this without sacrificing performance 
 or the security benefits of a deterministic policy engine.</p>
-<p>There are three key components in a Lock topology: (1) Cedarling--a WebAssembly ("WASM") 
-component that runs the <a href="https://github.com/cedar-policy/cedar">Amazon Rust Cedar Engine</a> and
-performs JWT token validation; (2) Lock Master--a web service deployed by domains to manage a 
-network of distributed ephemeral Cedarlings; (3) <a href="https://cloud.gluu.org/agama-lab">Agama Lab</a>,
-a policy authoring tool for developers to design policies and publish their policy store in Github.</p>
+<p>There are three key components in a Lock topology: (1) <a href="cedarling/">Cedarling</a>--a WebAssembly 
+("WASM") component that runs the <a href="https://github.com/cedar-policy/cedar">Amazon Rust Cedar Engine</a> and
+performs JWT token validation; (2)<a href="lock-master/">Lock Master</a>--a web service deployed by domains
+to manage a network of distributed ephemeral Cedarlings; (3) 
+<a href="https://cloud.gluu.org/agama-lab">Agama Lab</a>, a policy authoring tool for developers to design 
+policies and publish their policy store in Github.</p>
 <p>You don't need to deploy a Jans Lock Topology to derive utility from the Cedarling. Javascript 
 developers can use the Cedarling to secure even a single browser-based application, especially if 
 they are using OAuth or OpenID. The Cedarling evaluates a request to perform an action on a 
@@ -8815,7 +8848,7 @@ configuration:</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-07-10T14:23:38+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-07-10</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-07-22T08:29:54+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-07-22</span>
       
         <br>
         Created:
@@ -8860,13 +8893,13 @@ configuration:</p>
       
       
         
-        <a href="../recipes/" class="md-footer__link md-footer__link--next" aria-label="Next: Overview" rel="next">
+        <a href="lock-master/" class="md-footer__link md-footer__link--next" aria-label="Next: Lock Master" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Overview
+              Lock Master
             </div>
           </div>
           <div class="md-footer__button md-icon">
