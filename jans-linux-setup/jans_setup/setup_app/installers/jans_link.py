@@ -34,7 +34,7 @@ class JansLinkInstaller(JettyInstaller):
         self.snapshots_dir = os.path.join(self.vendor_dir, 'link-snapshots')
 
     def install(self):
-        self.installJettyService(self.jetty_app_configuration[self.service_name], True)
+        self.install_jettyService(self.jetty_app_configuration[self.service_name], True)
         self.copyFile(self.source_files[0][0], self.jetty_service_webapps)
 
         if Config.installed_instance and Config.install_config_api:

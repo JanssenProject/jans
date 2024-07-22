@@ -34,7 +34,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         setattr(base.current_app, self.__class__.__name__, self)
         self.service_name = 'jetty'
         self.needdb = False # we don't need backend connection in this class
-        self.install_var = 'installJetty'
+        self.install_var = 'install_jetty'
         self.app_type = AppType.APPLICATION
         self.install_type = InstallOption.MANDATORY
         if not base.snap:
@@ -152,7 +152,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
     def jetty_service_webapps(self):
         return os.path.join(self.jetty_service_dir, 'webapps')
 
-    def installJettyService(self, serviceConfiguration, supportCustomizations=False, supportOnlyPageCustomizations=False):
+    def install_jettyService(self, serviceConfiguration, supportCustomizations=False, supportOnlyPageCustomizations=False):
         service_name = serviceConfiguration['name']
         self.logIt("Installing jetty service %s..." % service_name)
         self.logIt("Deploying Jetty Service", pbar=service_name)
@@ -355,9 +355,9 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         installedComponents = []
 
         # Jetty apps
-        for config_var, service in [('installOxAuth', 'jans-auth'),
+        for config_var, service in [('install_jans_auth', 'jans-auth'),
                                     ('install_scim_server', 'jans-scim'),
-                                    ('installFido2', 'jans-fido2'),
+                                    ('install_fido2', 'jans-fido2'),
                                     ('install_config_api', 'jans-config-api'),
                                     ('install_jans_lock_as_server', 'jans-lock'),
                                     ]:
