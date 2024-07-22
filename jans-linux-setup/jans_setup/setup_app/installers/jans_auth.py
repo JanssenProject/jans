@@ -58,8 +58,8 @@ class JansAuthInstaller(JettyInstaller):
         self.make_pairwise_calculation_salt()
         self.installJettyService(self.jetty_app_configuration[self.service_name], True)
         self.copyFile(self.source_files[0][0], self.jetty_service_webapps)
-        self.external_libs()
         self.set_class_path([os.path.join(self.custom_lib_dir, '*')])
+        self.external_libs()
         self.setup_agama()
         self.enable()
 
@@ -197,14 +197,23 @@ class JansAuthInstaller(JettyInstaller):
             self.import_key_cert_into_keystore('obsigning', self.oxauth_openid_jks_fn, Config.oxauth_openid_jks_pass, Config.ob_key_fn, Config.ob_cert_fn, Config.ob_alias)
 
     def external_libs(self):
-        extra_libs = []
-
         for extra_lib in (self.source_files[2][0], self.source_files[3][0]):
             self.copyFile(extra_lib, self.custom_lib_dir)
             extra_lib_path = os.path.join(self.custom_lib_dir, os.path.basename(extra_lib))
-            extra_libs.append(extra_lib_path)
             self.chown(extra_lib_path, Config.jetty_user, Config.jetty_group)
 
+        # add custom libs if any
+        common_lib_dir = None
+        if Config.cb_install:
+            common_lib_dir = base.current_app.CouchbaseInstaller.common_lib_dir
+        elif Config.rdbm_install and Config.rdbm_type == 'spanner':
+            common_lib_dir = base.current_app.RDBMInstaller.common_lib_dir
+        if common_lib_dir:
+            class_path = os.path.join(common_lib_dir, '*')
+            current_plugins = self.get_plugins(paths=True)
+            if not class_path in current_plugins:
+                current_plugins.append(class_path)
+                self.set_class_path(current_plugins)
 
     def setup_agama(self):
         self.createDirs(self.agama_root)

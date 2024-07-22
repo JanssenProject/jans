@@ -282,7 +282,7 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
 
     def couchbaseSSL(self):
         self.logIt("Exporting Couchbase SSL certificate to " + self.couchebaseCert)
-        
+
         for cb_host in base.re_split_host.findall(Config.couchbase_hostname):
 
             cbm_ = CBM(cb_host.strip(), Config.couchebaseClusterAdmin, Config.cb_password)
@@ -410,6 +410,7 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
             self.createDirs(self.common_lib_dir)
         shutil.unpack_archive(self.source_files[0][0], self.common_lib_dir)
         self.chown(os.path.join(Config.jetty_base, 'common'), Config.jetty_user, Config.jetty_user, True)
+
 
     def installed(self):
 
