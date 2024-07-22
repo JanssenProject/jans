@@ -62,7 +62,7 @@ class JansLockInstaller(JettyInstaller):
             self.install_opa()
 
         if Config.persistence_type == 'sql' and Config.rdbm_type == 'pgsql':
-            self.dbUtils.set_oxAuthConfDynamic({'lockMessageConfig': {'enableTokenMessages': True, 'tokenMessagesChannel': 'jans_token'}})
+            self.dbUtils.set_jans_auth_conf_dynamic({'lockMessageConfig': {'enableTokenMessages': True, 'tokenMessagesChannel': 'jans_token'}})
             Config.lock_message_provider_type = 'POSTGRES'
 
         # we don't need to install lock-plugin to jans-config-api for remote client
@@ -74,7 +74,7 @@ class JansLockInstaller(JettyInstaller):
         self.apache_lock_config()
 
     def install_as_server(self):
-        self.installJettyService(self.jetty_app_configuration[self.service_name], True)
+        self.install_jettyService(self.jetty_app_configuration[self.service_name], True)
         self.logIt(f"Copying {self.source_files[0][0]} into jetty webapps folder...")
         self.copyFile(self.source_files[0][0], self.jetty_service_webapps)
         self.enable()

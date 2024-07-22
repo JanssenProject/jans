@@ -51,7 +51,7 @@ class CasaInstaller(JettyInstaller):
 
     def install(self):
 
-        self.installJettyService(self.jetty_app_configuration[self.service_name], True)
+        self.install_jettyService(self.jetty_app_configuration[self.service_name], True)
         self.copyFile(self.source_files[0][0], self.jetty_service_webapps)
 
         base.extract_subdir(base.current_app.jans_zip, 'jans-casa/extras', self.pylib_dir)
