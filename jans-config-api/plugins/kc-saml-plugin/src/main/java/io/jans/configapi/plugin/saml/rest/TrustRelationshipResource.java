@@ -213,11 +213,13 @@ public class TrustRelationshipResource extends BaseResource {
         logger.debug("metaDataFile for update is:{} ", metaDataFile);
         if (metaDataFile != null && metaDataFile.available() > 0) {
             logger.debug("For update metaDataFile.available():{}", metaDataFile.available());
-            validateSpMetaDataSourceType(trustRelationship, metaDataFile, true);
-        }else {
+            
+        }else  if(trustRelationship.getSpMetaDataSourceType().equals(MetadataSourceType.FILE)) {
+
             trustRelationship.setSpMetaDataFN(existingTrustRelationship.getSpMetaDataFN());
         }
         
+        validateSpMetaDataSourceType(trustRelationship, metaDataFile, true);
         // Update
         trustRelationship = samlService.updateTrustRelationship(trustRelationship, metaDataFile);
 
