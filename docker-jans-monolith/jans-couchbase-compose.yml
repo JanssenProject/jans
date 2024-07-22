@@ -35,7 +35,7 @@ services:
       - CN_INSTALL_CASA=true
       - CN_INSTALL_KC_LINK=true
       - CN_INSTALL_LOCK=true
-      - CN_INSTALL_SAML=true
+      - CN_INSTALL_SAML=false
       - CN_INSTALL_OPA=true
       - TEST_CLIENT_ID=9876baac-de39-4c23-8a78-674b59df8c09
       - TEST_CLIENT_TRUSTED=true
