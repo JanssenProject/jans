@@ -72,19 +72,3 @@ struct LoginView: View {
         .padding()
     }
 }
-
-struct LoginView_Previews: PreviewProvider {
-    
-    static var previews: some View {
-        LoginView(
-            state: LoginViewState(),
-            interactor: LoginViewInteractorImpl(
-                presenter: LoginViewPresenterImpl(
-                    state: LoginViewState(),
-                    mainViewState: MainViewState()
-                ),
-                mainInteractor: MainViewInteractorImpl(presenter: MainViewPresenterImpl(state: MainViewState()))
-            )
-        )
-    }
-}

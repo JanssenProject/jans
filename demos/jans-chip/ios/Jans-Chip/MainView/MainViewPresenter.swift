@@ -7,7 +7,7 @@
 
 import UIKit
 
-protocol MainViewPresenter: AnyObject {
+protocol MainViewPresenter {
     
     func onViewStateChanged(viewState: ViewState)
 }

@@ -7,7 +7,7 @@
 
 import UIKit
 
-protocol RegisterViewPresenter: AnyObject {
+protocol RegisterViewPresenter {
     
     func onViewStateChanged(viewState: ViewState)
     func onError(message: String)

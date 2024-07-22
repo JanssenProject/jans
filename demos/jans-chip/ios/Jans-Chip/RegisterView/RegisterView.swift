@@ -30,7 +30,7 @@ struct RegisterView: View {
                 .scaledToFit()
                 .frame(width: 250, height: 100)
             Text("Enrol Account")
-            VStack(spacing: 12) {
+            VStack {
                 TextField("User name", text: $userName)
                     .onChange(of: userName) { newValue in
                         userName = newValue
@@ -63,22 +63,6 @@ struct RegisterView: View {
             }
         }
         .padding(.horizontal)
-    }
-}
-
-struct RegisterView_Previews: PreviewProvider {
-    
-    static var previews: some View {
-        RegisterView(
-            state: RegisterViewState(),
-            interactor:
-                RegisterViewInteractorImpl(
-                    presenter: RegisterViewPresenterImpl(
-                        state: RegisterViewState(),
-                        mainViewState: MainViewState()
-                    )
-                )
-        )
     }
 }
 

@@ -45,19 +45,3 @@ struct AfterLoginView: View {
         }
     }
 }
-
-struct AfterLoginView_Previews: PreviewProvider {
-
-    static var previews: some View {
-        AfterLoginView(
-            state: AfterLoginViewState(userInfo: [:]),
-            interactor:
-                AfterLoginViewInteractorImpl(
-                    presenter: AfterLoginViewPresenterImpl(
-                        state: AfterLoginViewState(userInfo: [:]),
-                        mainViewState: MainViewState()
-                    )
-                )
-        )
-    }
-}

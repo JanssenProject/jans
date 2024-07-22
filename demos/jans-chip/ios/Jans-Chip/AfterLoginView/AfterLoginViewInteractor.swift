@@ -26,9 +26,6 @@ final class AfterLoginViewInteractorImpl: AfterLoginViewInteractor {
     
     private var cancellableSet : Set<AnyCancellable> = []
     
-    @ObservedResults(OIDCClient.self) var oidcClient
-    @ObservedResults(OPConfiguration.self) var opConfiguration
-    
     init(presenter: AfterLoginViewPresenterImpl) {
         self.presenter = presenter
     }

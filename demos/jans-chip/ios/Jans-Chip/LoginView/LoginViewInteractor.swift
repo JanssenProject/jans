@@ -54,7 +54,9 @@ final class LoginViewInteractorImpl: LoginViewInteractor {
                     authMethod: "authenticate",
                     assertionResultRequest: nil)
                 guard loginResponse.isSuccess == true else {
-                    presenter.onError(message: loginResponse.errorMessage ?? "")
+                    DispatchQueue.main.async { [weak self] in
+                        self?.presenter.onError(message: loginResponse.errorMessage ?? "")
+                    }
                     return
                 }
                 
@@ -62,7 +64,9 @@ final class LoginViewInteractorImpl: LoginViewInteractor {
                 let token = try await mainInteractor.getToken(
                     authorizationCode: loginResponse.authorizationCode)
                 guard token.isSuccess == true else {
-                    presenter.onError(message: token.errorMessage ?? "")
+                    DispatchQueue.main.async { [weak self] in
+                        self?.presenter.onError(message: token.errorMessage ?? "")
+                    }
                     return
                 }
                 
@@ -76,11 +80,15 @@ final class LoginViewInteractorImpl: LoginViewInteractor {
                 
                 let userInfo = try await mainInteractor.getUserInfo(accessToken: token.accessToken)
                 guard userInfo.isSuccess == true else {
-                    presenter.onError(message: userInfo.errorMessage ?? "")
+                    DispatchQueue.main.async { [weak self] in
+                        self?.presenter.onError(message: userInfo.errorMessage ?? "")
+                    }
                     return
                 }
                 
-                goToSuccessLoginView(userInfo: userInfo)
+                DispatchQueue.main.async { [weak self] in
+                    self?.goToSuccessLoginView(userInfo: userInfo)
+                }
             }
         }
     }

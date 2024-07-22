@@ -7,7 +7,9 @@
 
 import Foundation
 
-public struct AttestationOptionResponse: Codable {
+public struct AttestationOptionResponse: Codable, ErrorHandler {
+    var errorMessage: String?
+    var isSuccess: Bool = true
     
     private enum CodingKeys: String, CodingKey {
         case attestation
@@ -24,7 +26,4 @@ public struct AttestationOptionResponse: Codable {
     var pubKeyCredParams: [PubKeyCredParam]?
     var rp: RP?
     var user: User?
-    
-    var isSuccessful: Bool? = true
-    var errorMessage: String?
 }

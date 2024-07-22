@@ -96,61 +96,71 @@ final class RegisterViewInteractorImpl: RegisterViewInteractor {
                     return
                 }
                 
-                attestationOption(userName: username, passwordText: password, userInfo: userInfo)
+                let attestationOptionResponse = try await attestationOption(userName: username, passwordText: password, userInfo: userInfo)
+                let handledOptionResponse = try await handleAttestationOption(response: attestationOptionResponse, passwordText: password, userInfo: userInfo)
+                guard handledOptionResponse.isSuccess == true else {
+                    presenter.onError(message: handledOptionResponse.errorMessage ?? "")
+                    return
+                }
+                
+                presenter.onViewStateChanged(viewState: .afterLogin(userInfo))
+                presenter.onLoading(visible: false)
             }
         }
     }
     
     // TODO: server returns error 500
     
-    private func attestationOption(userName: String, passwordText: String, userInfo: UserInfo) {
+    private func attestationOption(userName: String, passwordText: String, userInfo: UserInfo) async throws -> AttestationOptionResponse {
+        var attestationResponse = AttestationOptionResponse()
         guard let fidoConfiguration: FidoConfiguration = RealmManager.shared.getObject(), let attestationOptionsEndpoint = fidoConfiguration.attestation?.optionsEndpoint else {
-            self.presenter.onViewStateChanged(viewState: .afterLogin(userInfo))
-            self.presenter.onLoading(visible: false)
-            return
+            attestationResponse.isSuccess = false
+            attestationResponse.errorMessage = "Fido configuration not found in database."
+            return attestationResponse
         }
         
         let request = AttestationOptionRequest(username: userName, attestation: "none")
-        serviceClient.attestationOption(attestationRequest: request, url: attestationOptionsEndpoint)
-            .sink { [weak self] result in
-                switch result {
-                case .success(let response):
-                    print("attestation option response: \(response)")
-                    self?.handleAttestationOption(response: response, origin: fidoConfiguration.issuer, passwordText: passwordText, userInfo: userInfo)
-                case .failure(let error):
-                    print("Error in fetching AttestationOptionResponse : \(error)")
-                    self?.presenter.onError(message: "Error in fetching AttestationOptionResponse : \(error.localizedDescription)")
-                    self?.presenter.onLoading(visible: false)
-                }
-            }
-            .store(in: &cancellableSet)
-    }
-    
-    private func handleAttestationOption(response: AttestationOptionResponse, origin: String?, passwordText: String, userInfo: UserInfo) {
-        var attestationOptionResponse = response
-        if response.challenge == nil {
-            let errorMessage = "Challenge field in attestationOptionResponse is null."
-            attestationOptionResponse.isSuccessful = false
-            attestationOptionResponse.errorMessage = errorMessage
-            presenter.onError(message: errorMessage)
-            presenter.onLoading(visible: false)
-        } else {
-            let publicKeyCredentialSource = getPublicKeyCredentialSource(responseFromAPI: attestationOptionResponse, passwordText: passwordText, origin: origin)
-            if let attestationResultRequest = authenticator.register(responseFromAPI: attestationOptionResponse, origin: origin, credentialSource: publicKeyCredentialSource) {
-                Task {
-                    do {
-                        let attestationResultResponse = try await attestationResult(attestationResultRequest: attestationResultRequest)
-                        print("attestationResultResponse -- \(String(describing: attestationResultResponse))")
-                        
-                        self.presenter.onViewStateChanged(viewState: .afterLogin(userInfo))
-                        self.presenter.onLoading(visible: false)
+        attestationResponse = await withCheckedContinuation { continuation in
+            serviceClient.attestationOption(attestationRequest: request, url: attestationOptionsEndpoint)
+                .sink { result in
+                    switch result {
+                    case .success(let response):
+                        print("attestation option response: \(response)")
+                        continuation.resume(returning: response)
+                    case .failure(let error):
+                        print("Error in fetching AttestationOptionResponse : \(error)")
+                        attestationResponse.isSuccess = false
+                        attestationResponse.errorMessage = error.localizedDescription
+                        continuation.resume(returning: attestationResponse)
                     }
                 }
-            } else {
-                self.presenter.onViewStateChanged(viewState: .afterLogin(userInfo))
-                self.presenter.onLoading(visible: false)
+                .store(in: &cancellableSet)
+        }
+        
+        return attestationResponse
+    }
+    
+    private func handleAttestationOption(response: AttestationOptionResponse, passwordText: String, userInfo: UserInfo) async throws -> AttestationOptionResponse {
+        var attestationOptionResponse = response
+        guard let fidoConfiguration: FidoConfiguration = RealmManager.shared.getObject() else {
+            attestationOptionResponse.isSuccess = false
+            attestationOptionResponse.errorMessage = "Fido configuration not found in database."
+            return attestationOptionResponse
+        }
+        
+        if response.challenge == nil {
+            let errorMessage = "Challenge field in attestationOptionResponse is null."
+            attestationOptionResponse.isSuccess = false
+            attestationOptionResponse.errorMessage = errorMessage
+            return attestationOptionResponse
+        } else {
+            let publicKeyCredentialSource = getPublicKeyCredentialSource(responseFromAPI: attestationOptionResponse, passwordText: passwordText, origin: fidoConfiguration.issuer)
+            if let attestationResultRequest = authenticator.register(responseFromAPI: attestationOptionResponse, origin: fidoConfiguration.issuer, credentialSource: publicKeyCredentialSource) {
+                    return try await attestationResult(attestationResultRequest: attestationResultRequest)
             }
         }
+        
+        return attestationOptionResponse
     }
     
     private func getPublicKeyCredentialSource(responseFromAPI: AttestationOptionResponse?, passwordText: String, origin: String?) -> PublicKeyCredentialSource? {
@@ -158,12 +168,15 @@ final class RegisterViewInteractorImpl: RegisterViewInteractor {
         return authenticator.getPublicKeyCredentialSource(options: options, passwordText: passwordText)
     }
     
-    private func attestationResult(attestationResultRequest: AttestationResultRequest) async throws -> AttestationOptionResponse? {
+    private func attestationResult(attestationResultRequest: AttestationResultRequest) async throws -> AttestationOptionResponse {
+        var attestationOptionResponse = AttestationOptionResponse()
         guard let fidoConfiguration: FidoConfiguration = RealmManager.shared.getObject(), let url = fidoConfiguration.issuer else {
-            presenter.onError(message: "Fido configuration not found in database.")
-            return nil
+            attestationOptionResponse.isSuccess = false
+            attestationOptionResponse.errorMessage = "Fido configuration not found in database."
+            return attestationOptionResponse
         }
-        let attestationResult: AttestationOptionResponse? = await withCheckedContinuation { continuation in
+        
+        attestationOptionResponse = await withCheckedContinuation { continuation in
             serviceClient.attestationResult(request: attestationResultRequest, url: url)
                 .sink { result in
                     switch result {
@@ -172,12 +185,14 @@ final class RegisterViewInteractorImpl: RegisterViewInteractor {
                         continuation.resume(returning: response)
                     case .failure(let error):
                         print("Error in fetching AttestationOptionResponse : \(error)")
-                        continuation.resume(returning: nil)
+                        attestationOptionResponse.isSuccess = false
+                        attestationOptionResponse.errorMessage = error.localizedDescription
+                        continuation.resume(returning: attestationOptionResponse)
                     }
                 }
                 .store(in: &cancellableSet)
         }
         
-        return attestationResult
+        return attestationOptionResponse
     }
 }

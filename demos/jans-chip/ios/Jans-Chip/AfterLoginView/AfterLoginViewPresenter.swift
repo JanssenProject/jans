@@ -7,7 +7,7 @@
 
 import UIKit
 
-protocol AfterLoginViewPresenter: AnyObject {
+protocol AfterLoginViewPresenter {
     
     func onViewStateChanged(viewState: ViewState)
     func onError(message: String)
@@ -15,11 +15,9 @@ protocol AfterLoginViewPresenter: AnyObject {
 
 final class AfterLoginViewPresenterImpl: AfterLoginViewPresenter {
     
-    private let state: AfterLoginViewState
     private let mainViewState: MainViewState
     
-    init(state: AfterLoginViewState, mainViewState: MainViewState) {
-        self.state = state
+    init(mainViewState: MainViewState) {
         self.mainViewState = mainViewState
     }
     
