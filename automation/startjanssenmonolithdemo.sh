@@ -126,9 +126,13 @@ docker exec docker-jans-monolith-jans-1 curl -f -k https://localhost/.well-known
 echo -e "Testing fido2-configuration endpoint.. \n"
 docker exec docker-jans-monolith-jans-1 curl -f -k https://localhost/.well-known/fido2-configuration
 mkdir -p /tmp/reports || echo "reports folder exists"
-while ! docker exec docker-jans-monolith-jans-1 test -f "/tmp/httpd.crt"; do
+end=$((SECONDS+180))
+while [ $SECONDS -lt $end ]; do
   echo "Waiting for the container to run java test preparations"
-  sleep 5
+  if docker exec docker-jans-monolith-jans-1 test -f "/tmp/httpd.crt"; then
+    break
+  fi
+  sleep 10
 done
 echo -e "Running build.. \n"
 docker exec -w /tmp/jans/jans-auth-server docker-jans-monolith-jans-1 mvn -Dcfg="$JANS_FQDN" -Dmaven.test.skip=true -fae clean compile install
