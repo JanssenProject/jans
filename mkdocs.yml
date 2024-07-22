@@ -400,6 +400,8 @@ nav:
       - Lock Client Configuration: admin/lock/lock_client_config.md
       - Implement Lock PDP Plugin: admin/lock/lock_pdp_plugin.md
       - Policy Store Integration: admin/lock/lock_opa.md
+      - Lock Master: admin/lock/lock-master.md
+      - Authorization Using Cedarling: admin/lock/cedarling.md
   - Janssen Recipes:
     - admin/recipes/README.md
     - Benchmark: admin/recipes/benchmark.md
