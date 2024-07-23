@@ -20,7 +20,7 @@ data class AppIntegrityResponse(
     var error: String? = null
 ) {
     @Ignore
-    var isSuccessful: Boolean? = true
+    var isSuccessful: Boolean? = false
 
     @Ignore
     var errorMessage: String? = null

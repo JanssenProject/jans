@@ -75,7 +75,7 @@ def create_new_certs():
 
     os.rename('/etc/certs/saml.pem.crt', '/etc/certs/saml.pem')
 
-    os.system('chown jetty:jetty /etc/certs/oxauth-keys.*')
+    os.system('chown jetty:jetty /etc/certs/jans-auth-keys.*')
 
 
 create_new_certs()

@@ -17,7 +17,7 @@ class HttpdInstaller(BaseInstaller, SetupUtils):
         self.pbar_text = "Configuring " + base.httpd_name
         self.app_type = AppType.SERVICE
         self.install_type = InstallOption.OPTONAL
-        self.install_var = 'installHttpd'
+        self.install_var = 'install_httpd'
         self.register_progess()
 
         self.needdb = False # we don't need backend connection in this class

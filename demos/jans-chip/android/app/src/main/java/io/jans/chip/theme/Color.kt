@@ -1,4 +1,4 @@
-package com.example.compose
+package io.jans.chip.theme
 import androidx.compose.ui.graphics.Color
 
 val md_theme_light_primary = Color(0xFF006D3D)
