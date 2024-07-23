@@ -29,6 +29,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.SecurityContext;
 import jakarta.ws.rs.core.Response.Status;
 
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.ContentType;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -51,13 +52,13 @@ public class AuditRestWebServiceImpl implements AuditRestWebService {
     @Override
     public Response processHealthRequest(HttpServletRequest request, HttpServletResponse response,
             SecurityContext sec) {
-        log.debug("Processing Health request - request:{}", request);
+        log.error("Processing Health request - request:{}", request);
         return processAuditRequest(request, "Health");
     }
 
     @Override
     public Response processLogRequest(HttpServletRequest request, HttpServletResponse response, SecurityContext sec) {
-        log.debug("Processing Log request - request:{}", request);
+        log.error("Processing Log request - request:{}", request);
         return processAuditRequest(request, "log");
 
     }
@@ -65,13 +66,13 @@ public class AuditRestWebServiceImpl implements AuditRestWebService {
     @Override
     public Response processTelemetryRequest(HttpServletRequest request, HttpServletResponse response,
             SecurityContext sec) {
-        log.debug("Processing Telemetry request - request:{}", request);
+        log.error("Processing Telemetry request - request:{}", request);
         return processAuditRequest(request, "telemetry");
 
     }
 
     private Response processAuditRequest(HttpServletRequest request, String requestType) {
-        log.debug("Processing request - request:{}, requestType:{}", request, requestType);
+        log.error("Processing request - request:{}, requestType:{}", request, requestType);
 
         Response.ResponseBuilder builder = Response.ok();
         builder.cacheControl(ServerUtil.cacheControlWithNoStoreTransformAndPrivate());
@@ -80,12 +81,13 @@ public class AuditRestWebServiceImpl implements AuditRestWebService {
         JSONObject json = this.authUtil.getJSONObject(request);
         HttpServiceResponse serviceResponse = this.authUtil.postData(requestType, json.toString(),
                 ContentType.APPLICATION_JSON);
-        log.debug("serviceResponse:{}", serviceResponse);
+        log.error("serviceResponse:{}", serviceResponse);
 
         if (serviceResponse != null) {
             String strResponse = this.authUtil.getResponseEntityString(serviceResponse);
             Status status = this.authUtil.getResponseStatus(serviceResponse);
-            log.debug(" Saved telemetry data  - responseCode:{}, strResponse:{}", status, strResponse);
+            HttpRequestBase httpRequest = serviceResponse.getHttpRequest();
+            log.error(" Saved telemetry data  - responseCode:{}, strResponse:{}, httpRequest:{}", status, strResponse, httpRequest);
 
             if (Status.CREATED.equals(status)) {
                 builder.entity(json);

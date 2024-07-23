@@ -68,10 +68,10 @@ public class AuditResource extends BaseResource {
     @Path(Constants.HEALTH)
     public Response postHealthData(@Valid HealthEntry healthEntry) {
 
-        logger.info("Save Health Data - healthEntry:{}", healthEntry);
+        logger.error("Save Health Data - healthEntry:{}", healthEntry);
         healthEntry = auditService.addHealthEntry(healthEntry);
 
-        logger.info("Afer saving healthEntry():{}", healthEntry);
+        logger.error("Afer saving healthEntry():{}", healthEntry);
         return Response.status(Response.Status.CREATED).entity(healthEntry).build();
 
     }
@@ -90,10 +90,10 @@ public class AuditResource extends BaseResource {
     @Path(Constants.LOG)
     public Response postLogData(@Valid LogEntry logEntry) {
 
-        logger.info("Save - logEntry:{}", logEntry);
+        logger.error("Save - logEntry:{}", logEntry);
         logEntry = auditService.addLogData(logEntry);
 
-        logger.info("Afer saving logEntry():{}", logEntry);
+        logger.error("Afer saving logEntry():{}", logEntry);
         return Response.status(Response.Status.CREATED).entity(logEntry).build();
 
     }
@@ -112,10 +112,10 @@ public class AuditResource extends BaseResource {
     @Path(Constants.TELEMETRY)
     public Response postTelemetryData(@Valid TelemetryEntry telemetryEntry) {
 
-        logger.info("Save telemetryEntry():{}", telemetryEntry);
+        logger.error("Save telemetryEntry():{}", telemetryEntry);
         telemetryEntry = auditService.addTelemetryData(telemetryEntry);
 
-        logger.info("Afer saving telemetryEntry():{}", telemetryEntry);
+        logger.error("Afer saving telemetryEntry():{}", telemetryEntry);
         return Response.status(Response.Status.CREATED).entity(telemetryEntry).build();
 
     }

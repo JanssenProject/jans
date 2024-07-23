@@ -32,6 +32,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.util.EntityUtils;
 
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -185,7 +186,15 @@ public class AuthUtil {
             return jsonString;
         }
         jsonString = entity.toString();
-
+        
+        try {
+        log.error("serviceResponse.getHttpResponse().getEntity():{}",serviceResponse.getHttpResponse().getEntity());
+         String responseMsg= EntityUtils.toString(serviceResponse.getHttpResponse().getEntity(),"UTF-8");
+         log.error("New responseMsg:{}", responseMsg);
+         log.error("serviceResponse.getHttpResponse().getAllHeaders():{}",serviceResponse.getHttpResponse().getAllHeaders());
+        }catch(Exception ex){
+            log.error("Error while getting entity using EntityUtils is ",ex);
+        }
         return jsonString;
     }
 

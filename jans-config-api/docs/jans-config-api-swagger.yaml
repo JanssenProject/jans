@@ -8315,17 +8315,17 @@ components:
           type: boolean
         whitePagesCanView:
           type: boolean
+        userCanEdit:
+          type: boolean
         adminCanEdit:
           type: boolean
         adminCanView:
           type: boolean
         userCanView:
           type: boolean
-        userCanEdit:
+        userCanAccess:
           type: boolean
         adminCanAccess:
-          type: boolean
-        userCanAccess:
           type: boolean
         baseDn:
           type: string
