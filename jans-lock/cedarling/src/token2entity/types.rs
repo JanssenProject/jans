@@ -128,7 +128,7 @@ impl UserInfoToken {
 			.collect()
 	}
 
-	pub fn get_token_entity(&self, roles: &HashMap<&String, Vec<Entity>>) -> Entity {
+	pub fn get_token_entity(&self, roles: &[Entity]) -> Entity {
 		let id = serde_json::json!({ "__entity": { "type": "UserInfo", "id": self.sub } });
 		let uid = EntityUid::from_json(id).unwrap_throw();
 
@@ -165,17 +165,11 @@ impl UserInfoToken {
 			attrs.insert("phone_number".to_string(), RestrictedExpression::new_string(number));
 		}
 
-		match roles.get(&self.sub) {
-			Some(e) => {
-				let parents = HashSet::from_iter(e.iter().map(|e| e.uid()));
-				Entity::new(uid, attrs, parents)
-			}
-			None => Entity::new(uid, attrs, HashSet::with_capacity(0)),
-		}
-		.expect_throw("Unable to construct UserInfo entity from userinfo_token")
+		let parents = HashSet::from_iter(roles.iter().map(|e| e.uid()));
+		Entity::new(uid, attrs, parents).expect_throw("Unable to construct UserInfo entity from userinfo_token")
 	}
 
-	pub fn get_user_entity(&self, roles: &HashMap<&String, Vec<Entity>>) -> Entity {
+	pub fn get_user_entity(&self, roles: &[Entity]) -> Entity {
 		let entry = unsafe { TRUST_STORE.get(&self.iss) }.expect_throw("Can't get iss for User entity creation from userinfo_token");
 		let id = serde_json::json!({ "__entity": { "type": entry.issuer.id_tokens.principal_identifier, "id": self.sub } });
 		let uid = EntityUid::from_json(id).unwrap_throw();
@@ -201,13 +195,7 @@ impl UserInfoToken {
 			attrs.insert("phone_number".to_string(), RestrictedExpression::new_string(number));
 		}
 
-		match roles.get(&self.sub) {
-			Some(e) => {
-				let parents = HashSet::from_iter(e.iter().map(|e| e.uid()));
-				Entity::new(uid, attrs, parents)
-			}
-			None => Entity::new(uid, attrs, HashSet::with_capacity(0)),
-		}
-		.expect_throw("Unable to construct User entity from userinfo_token")
+		let parents = HashSet::from_iter(roles.iter().map(|e| e.uid()));
+		Entity::new(uid, attrs, parents).expect_throw("Unable to construct User entity from userinfo_token")
 	}
 }

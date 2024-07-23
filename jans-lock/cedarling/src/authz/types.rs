@@ -2,8 +2,8 @@
 pub struct AuthzInput {
 	// generates entities
 	pub id_token: String,
-	pub userinfo_tokens: Vec<String>,
-	pub access_tokens: Vec<String>,
+	pub userinfo_token: String,
+	pub access_token: String,
 
 	// extra parameters for cedar decision resolution
 	pub action: String,
