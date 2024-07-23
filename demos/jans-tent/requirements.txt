@@ -116,4 +116,4 @@ wcwidth==0.2.5
 Werkzeug==2.2.2
 wrapt==1.14.1
 wsproto==1.2.0
-zipp==3.8.1
+zipp==3.19.1
