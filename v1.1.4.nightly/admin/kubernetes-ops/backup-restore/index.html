@@ -7184,7 +7184,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../lock/lock_installation.md" class="md-nav__link">
+      <a href="../../lock/lock-installation/" class="md-nav__link">
         Lock Installation
       </a>
     </li>
@@ -7198,7 +7198,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../lock/lock_auth_server_config.md" class="md-nav__link">
+      <a href="../../lock/lock-auth-server-config/" class="md-nav__link">
         Auth Server Configuration
       </a>
     </li>
@@ -7212,7 +7212,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../lock/lock_client_config.md" class="md-nav__link">
+      <a href="../../lock/lock-client-config/" class="md-nav__link">
         Lock Client Configuration
       </a>
     </li>
@@ -7226,7 +7226,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../lock/lock_pdp_plugin.md" class="md-nav__link">
+      <a href="../../lock/lock-pdp-plugin/" class="md-nav__link">
         Implement Lock PDP Plugin
       </a>
     </li>
@@ -7240,7 +7240,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../lock/lock_opa.md" class="md-nav__link">
+      <a href="../../lock/lock-opa/" class="md-nav__link">
         Policy Store Integration
       </a>
     </li>
@@ -8745,7 +8745,7 @@
 </code></pre></div></p>
 </li>
 </ol>
-<p>Keep note of the chart version. For example: <code>1.1.4.nightly</code></p>
+<p>Keep note of the chart version. For example: <code>replace-janssen-version</code></p>
 <h3 id="manual-restore">Manual Restore<a class="headerlink" href="#manual-restore" title="Permanent link">#</a></h3>
 <ol>
 <li>
@@ -8767,7 +8767,7 @@
 <p>Insall jans using the override or user supplied values with the same chart version:</p>
 </li>
 </ol>
-<div class="highlight"><pre><span></span><code>helm install &lt;release-name&gt; janssen/janssen -f values.yaml --version<span class="o">=</span>&lt;1.1.4.nightly&gt; -n &lt;namespace&gt;
+<div class="highlight"><pre><span></span><code>helm install &lt;release-name&gt; janssen/janssen -f values.yaml --version<span class="o">=</span>&lt;replace-janssen-version&gt; -n &lt;namespace&gt;
 </code></pre></div>
 <h2 id="automatic-backup-and-restore">Automatic Backup and Restore<a class="headerlink" href="#automatic-backup-and-restore" title="Permanent link">#</a></h2>
 <p>There are several tools that helps in automatic backups and restore, like <a href="https://www.kasten.io/kubernetes/use-cases/backup-restore">Kasten K10</a>.</p>

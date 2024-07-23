@@ -7202,7 +7202,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../lock/lock_installation.md" class="md-nav__link">
+      <a href="../../../lock/lock-installation/" class="md-nav__link">
         Lock Installation
       </a>
     </li>
@@ -7216,7 +7216,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../lock/lock_auth_server_config.md" class="md-nav__link">
+      <a href="../../../lock/lock-auth-server-config/" class="md-nav__link">
         Auth Server Configuration
       </a>
     </li>
@@ -7230,7 +7230,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../lock/lock_client_config.md" class="md-nav__link">
+      <a href="../../../lock/lock-client-config/" class="md-nav__link">
         Lock Client Configuration
       </a>
     </li>
@@ -7244,7 +7244,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../lock/lock_pdp_plugin.md" class="md-nav__link">
+      <a href="../../../lock/lock-pdp-plugin/" class="md-nav__link">
         Implement Lock PDP Plugin
       </a>
     </li>
@@ -7258,7 +7258,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../lock/lock_opa.md" class="md-nav__link">
+      <a href="../../../lock/lock-opa/" class="md-nav__link">
         Policy Store Integration
       </a>
     </li>
@@ -8745,7 +8745,7 @@
   <h1>Configurator</h1>
 
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">#</a></h2>
-<p>Configuration manager is a special container used to load (generate/restore) and dump (backup) the configuration and secrets.</p>
+<p>Configurator is a tool to load (generate/restore) and/or dump (backup) the configuration (consists of configmaps and secrets).</p>
 <h2 id="versions">Versions<a class="headerlink" href="#versions" title="Permanent link">#</a></h2>
 <p>See <a href="https://github.com/orgs/JanssenProject/packages/container/package/jans%2Fconfigurator">Packages</a> for available versions.</p>
 <h2 id="environment-variables">Environment Variables<a class="headerlink" href="#environment-variables" title="Permanent link">#</a></h2>
@@ -8803,32 +8803,44 @@
 <li><code>dump</code></li>
 </ul>
 <h3 id="load">load<a class="headerlink" href="#load" title="Permanent link">#</a></h3>
-<p>The load command can be used either to generate or restore config and secret for the cluster.</p>
-<p>For fresh installation, generate the initial configuration and secret by creating <code>/path/to/host/volume/generate.json</code> similar to example below:
+<p>The load command can be used either to generate/restore configmaps and secrets for the cluster.</p>
+<p>For fresh installation, generate the initial configuration by creating <code>/path/to/host/volume/configuration.json</code> similar to example below:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;hostname&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;demoexample.jans.io&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;country_code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;US&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;state&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;TX&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;city&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Austin&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;admin_pw&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;S3cr3t+pass&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;ldap_pw&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;S3cr3t+pass&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;s@jans.io&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;org_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Gluu Inc.&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;_configmap&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;hostname&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;demoexample.jans.io&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;country_code&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;US&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;state&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;TX&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;city&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Austin&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;admin_email&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;s@jans.io&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;orgName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Gluu Inc.&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">},</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;_secret&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;admin_password&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;S3cr3t+pass&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;ldap_password&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;S3cr3t+pass&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
 <span class="p">}</span><span class="w"></span>
-</code></pre></div></p>
-<p><strong>NOTE</strong>: <code>generate.json</code> has optional attributes as seen below.</p>
+</code></pre></div>
+<p><strong>NOTE</strong>: <code>configuration.json</code> has optional attributes as seen below.</p>
+<ol>
+<li>
+<p><code>_configmap</code>:</p>
 <ul>
 <li><code>auth_sig_keys</code>: space-separated key algorithm for signing (default to <code>RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512</code>)</li>
 <li><code>auth_enc_keys</code>: space-separated key algorithm for encryption (default to <code>RSA1_5 RSA-OAEP</code>)</li>
-<li><code>optional_scopes</code>: list of scopes that will be used (supported scopes are <code>ldap</code>, <code>scim</code>, <code>fido2</code>, <code>couchbase</code>, <code>redis</code>, <code>sql</code>, <code>casa</code>; default to empty list)</li>
-<li><code>ldap_pw</code>: user's password to access LDAP database (only used if <code>optional_scopes</code> list contains <code>ldap</code> scope)</li>
-<li><code>sql_pw</code>: user's password to access SQL database (only used if <code>optional_scopes</code> list contains <code>sql</code> scope)</li>
-<li><code>couchbase_pw</code>: user's password to access Couchbase database (only used if <code>optional_scopes</code> list contains <code>couchbase</code> scope)</li>
-<li><code>couchbase_superuser_pw</code>: superusers password to access Couchbase database (only used if <code>optional_scopes</code> list contains <code>couchbase</code> scope)</li>
-<li><code>salt</code>: user-defined salt (24 characters length); if omitted, salt will be generated automatically</li>
+<li><code>optional_scopes</code>: list of optional scopes (as JSON string) that will be used (supported scopes are <code>ldap</code>, <code>couchbase</code>, <code>redis</code>, <code>sql</code>; default to empty list)</li>
 <li><code>init_keys_exp</code>: the initial keys expiration time in hours (default to <code>48</code>; extra 1 hour will be added for hard limit)</li>
 </ul>
-<p>Example of generating <code>salt</code> value:</p>
+</li>
+<li>
+<p><code>_secret</code>:</p>
+<ul>
+<li><code>ldap_password</code>: user's password to access LDAP database (only used if <code>optional_scopes</code> list contains <code>ldap</code> scope)</li>
+<li><code>sql_password</code>: user's password to access SQL database (only used if <code>optional_scopes</code> list contains <code>sql</code> scope)</li>
+<li><code>couchbase_password</code>: user's password to access Couchbase database (only used if <code>optional_scopes</code> list contains <code>couchbase</code> scope)</li>
+<li><code>couchbase_superuser_password</code>: superusers password to access Couchbase database (only used if <code>optional_scopes</code> list contains <code>couchbase</code> scope)</li>
+<li><code>encoded_salt</code>: user-defined salt (24 characters length); if omitted, salt will be generated automatically</li>
+</ul>
+<p>Example of generating <code>encoded_salt</code> value:</p>
 <div class="highlight"><pre><span></span><code># using shell script
 cat /dev/urandom | tr -dc &#39;a-zA-Z0-9&#39; | fold -w 24 | head -n 1
 # output: NFAG5g4R0NSkAZXHL8t2DScL
@@ -8837,11 +8849,13 @@ cat /dev/urandom | tr -dc &#39;a-zA-Z0-9&#39; | fold -w 24 | head -n 1
 python -c &#39;import random, string; print(&quot;&quot;.join(random.choices(string.ascii_letters + string.digits, k=24)))&#39;
 # ouput: HsPzqiPkRzNySWlOVui8Ilmw
 </code></pre></div>
-<p>To generate initial config and secrets:</p>
+</li>
+</ol>
+<p>To generate initial configmaps and secrets:</p>
 <ol>
 <li>
-<p>Create config map <code>config-generate-params</code> to store the contents of <code>generate.json</code></p>
-<div class="highlight"><pre><span></span><code>kubectl create cm config-generate-params --from-file<span class="o">=</span>generate.json
+<p>Create config map <code>config-generate-params</code> to store the contents of <code>configuration.json</code></p>
+<div class="highlight"><pre><span></span><code>kubectl create cm config-generate-params --from-file<span class="o">=</span>configuration.json
 </code></pre></div>
 </li>
 <li>
@@ -8862,9 +8876,9 @@ python -c &#39;import random, string; print(&quot;&quot;.join(random.choices(str
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">configurator-load</span><span class="w"></span>
 <span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ghcr.io/janssenproject/jans/configurator:1.1.4_dev</span><span class="w"></span>
 <span class="w">          </span><span class="nt">volumeMounts</span><span class="p">:</span><span class="w"></span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/app/db/generate.json</span><span class="w"></span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/app/db/configuration.json</span><span class="w"></span>
 <span class="w">              </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">config-generate-params</span><span class="w"></span>
-<span class="w">              </span><span class="nt">subPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">generate.json</span><span class="w"></span>
+<span class="w">              </span><span class="nt">subPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">configuration.json</span><span class="w"></span>
 <span class="w">          </span><span class="nt">envFrom</span><span class="p">:</span><span class="w"></span>
 <span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">configMapRef</span><span class="p">:</span><span class="w"></span>
 <span class="w">              </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">config-cm</span><span class="w"></span>
@@ -8872,12 +8886,12 @@ python -c &#39;import random, string; print(&quot;&quot;.join(random.choices(str
 </code></pre></div>
 </li>
 </ol>
-<p>To restore configuration and secrets from a backup of <code>/path/to/host/volume/config.json</code> and <code>/path/to/host/volume/secret.json</code>: mount the directory as <code>/app/db</code> inside the container:</p>
+<p>A successful <code>load</code> command will dump the pre-populated configuration into <code>/app/db/configuration.out.json</code>.</p>
+<p>To restore configuration from <code>configuration.out.json</code> file:</p>
 <ol>
 <li>
-<p>Create config map <code>config-params</code> and <code>secret-params</code>:</p>
-<div class="highlight"><pre><span></span><code>kubectl create cm config-params --from-file<span class="o">=</span>config.json
-kubectl create cm secret-params --from-file<span class="o">=</span>secret.json
+<p>Create config map <code>config-dump-params</code>:</p>
+<div class="highlight"><pre><span></span><code>kubectl create cm config-dump-params --from-file<span class="o">=</span>configuration.out.json
 </code></pre></div>
 </li>
 <li>
@@ -8891,22 +8905,16 @@ kubectl create cm secret-params --from-file<span class="o">=</span>secret.json
 <span class="w">    </span><span class="nt">spec</span><span class="p">:</span><span class="w"></span>
 <span class="w">      </span><span class="nt">restartPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Never</span><span class="w"></span>
 <span class="w">      </span><span class="nt">volumes</span><span class="p">:</span><span class="w"></span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">config-params</span><span class="w"></span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">config-dump-params</span><span class="w"></span>
 <span class="w">          </span><span class="nt">configMap</span><span class="p">:</span><span class="w"></span>
-<span class="w">            </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">config-params</span><span class="w"></span>
-<span class="w">          </span><span class="w w-Error"> </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">secret-params</span><span class="w"></span>
-<span class="w">          </span><span class="nt">configMap</span><span class="p">:</span><span class="w"></span>
-<span class="w">            </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">secret-params</span><span class="w"></span>
+<span class="w">            </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">config-dump-params</span><span class="w"></span>
 <span class="w">      </span><span class="nt">containers</span><span class="p">:</span><span class="w"></span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">configurator-load</span><span class="w"></span>
 <span class="w">          </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ghcr.io/janssenproject/jans/configurator:1.1.4_dev</span><span class="w"></span>
 <span class="w">          </span><span class="nt">volumeMounts</span><span class="p">:</span><span class="w"></span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/app/db/config.json</span><span class="w"></span>
-<span class="w">              </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">config-params</span><span class="w"></span>
-<span class="w">              </span><span class="nt">subPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">config.json</span><span class="w"></span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/app/db/secret.json</span><span class="w"></span>
-<span class="w">              </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">secret-params</span><span class="w"></span>
-<span class="w">              </span><span class="nt">subPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">secret.json</span><span class="w"></span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">mountPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/app/db/configuration.out.json</span><span class="w"></span>
+<span class="w">              </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">config-dump-params</span><span class="w"></span>
+<span class="w">              </span><span class="nt">subPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">configuration.out.json</span><span class="w"></span>
 <span class="w">          </span><span class="nt">envFrom</span><span class="p">:</span><span class="w"></span>
 <span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">configMapRef</span><span class="p">:</span><span class="w"></span>
 <span class="w">              </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">config-cm</span><span class="w"></span>
@@ -8915,7 +8923,7 @@ kubectl create cm secret-params --from-file<span class="o">=</span>secret.json
 </li>
 </ol>
 <h3 id="dump">dump<a class="headerlink" href="#dump" title="Permanent link">#</a></h3>
-<p>The dump command will dump all configuration and secrets from the backends saved into the <code>/app/db/config.json</code> and <code>/app/db/secret.json</code> files.</p>
+<p>The dump command will dump all configuration from the backends saved into the <code>/app/db/configuration.out.json</code> file.</p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">batch/v1</span><span class="w"></span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Job</span><span class="w"></span>
 <span class="nt">metadata</span><span class="p">:</span><span class="w"></span>
@@ -8938,14 +8946,14 @@ kubectl create cm secret-params --from-file<span class="o">=</span>secret.json
 <span class="w">              </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">config-cm</span><span class="w"></span>
 </code></pre></div>
 <p>Copy over the files to host</p>
-<p><code>kubectl cp config-init-load-job:/app/db .</code></p>
+<p><code>kubectl cp configurator-dump-job:/app/db .</code></p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-07-09T10:06:54+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-07-09</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-07-23T19:04:20+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-07-23</span>
       
         <br>
         Created:
