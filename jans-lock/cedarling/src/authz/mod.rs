@@ -1,7 +1,10 @@
 use serde_wasm_bindgen::{from_value, to_value};
 use wasm_bindgen::prelude::*;
 
-use crate::{startup, token2entity::token2entities};
+use crate::{
+	startup,
+	token2entity::{json2entity, token2entities},
+};
 
 pub mod types;
 
@@ -15,10 +18,10 @@ pub async fn authz(req: JsValue) -> JsValue {
 
 	// generate request
 	let action = input.action.parse().expect_throw("Unable to parse action");
-	let resource = input.resource.parse().expect_throw("Unable to parse action");
+	let resource = json2entity(input.resource);
 	let context = cedar_policy::Context::from_json_value(input.context, None).expect_throw("Unable to generate context Object");
 
-	let request = cedar_policy::Request::new(Some(principal), Some(action), Some(resource), context, startup::SCHEMA.get()).unwrap_throw();
+	let request = cedar_policy::Request::new(Some(principal), Some(action), Some(resource.uid()), context, startup::SCHEMA.get()).unwrap_throw();
 
 	// create authorizer
 	let authorizer = cedar_policy::Authorizer::new();

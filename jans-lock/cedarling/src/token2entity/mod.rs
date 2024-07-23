@@ -1,4 +1,7 @@
-use std::sync::OnceLock;
+use std::{
+	collections::{HashMap, HashSet},
+	sync::OnceLock,
+};
 
 use crypto::{decode, TRUST_STORE};
 use wasm_bindgen::throw_str;
@@ -15,6 +18,50 @@ pub fn init(config: &startup::types::CedarlingConfig) {
 	}
 
 	REQUIRE_AUD_VALIDATION.set(config.require_aud_validation).unwrap_throw();
+}
+
+#[derive(Debug, serde::Deserialize)]
+struct EntityExtractor {
+	#[serde(rename = "type")]
+	type_name: String,
+	id: String,
+	#[serde(flatten)]
+	attributes: Vec<(String, serde_json::Value)>,
+}
+
+fn converter(_value: serde_json::Value) -> cedar_policy::RestrictedExpression {
+	match _value {
+		serde_json::Value::Bool(b) => cedar_policy::RestrictedExpression::new_bool(b),
+		serde_json::Value::Number(n) => {
+			if let Some(long) = n.as_i64() {
+				cedar_policy::RestrictedExpression::new_long(long)
+			} else if let Some(float) = n.as_f64() {
+				cedar_policy::RestrictedExpression::new_decimal(float.to_string())
+			} else if let Some(ulong) = n.as_u64() {
+				cedar_policy::RestrictedExpression::new_long(ulong as _)
+			} else {
+				throw_str("Unknown number format encountered")
+			}
+		}
+		serde_json::Value::String(s) => cedar_policy::RestrictedExpression::new_string(s),
+		serde_json::Value::Array(a) => cedar_policy::RestrictedExpression::new_set(a.into_iter().map(converter)),
+		serde_json::Value::Object(o) => cedar_policy::RestrictedExpression::new_record(o.into_iter().map(|(n, v)| (n, converter(v)))).unwrap_throw(),
+
+		// NULL not accepted
+		serde_json::Value::Null => throw_str("Encountered null in JSON to Entity converter"),
+	}
+}
+
+pub fn json2entity(value: serde_json::Value) -> cedar_policy::Entity {
+	let EntityExtractor { type_name, id, attributes } = serde_json::from_value(value).expect_throw("Expected Resource to contain 'type' and 'id' fields");
+
+	let id = serde_json::json!({ "__entity": { "type": type_name, "id": id } });
+	let id = cedar_policy::EntityUid::from_json(id).unwrap_throw();
+
+	let parents = HashSet::new();
+	let attrs = HashMap::from_iter(attributes.into_iter().map(|(n, value)| (n, converter(value))));
+
+	cedar_policy::Entity::new(id, attrs, parents).unwrap_throw()
 }
 
 pub fn token2entities(input: &authz::types::AuthzInput) -> (cedar_policy::EntityUid, cedar_policy::Entities) {

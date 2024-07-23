@@ -7,6 +7,6 @@ pub struct AuthzInput {
 
 	// extra parameters for cedar decision resolution
 	pub action: String,
-	pub resource: String,
+	pub resource: serde_json::Value,
 	pub context: serde_json::Value,
 }
