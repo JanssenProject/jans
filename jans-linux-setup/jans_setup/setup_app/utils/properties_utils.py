@@ -186,6 +186,11 @@ class PropertiesUtils(SetupUtils):
             p['opendj_install'] = InstallTypes.NONE
             p['rdbm_install'] = InstallTypes.NONE
 
+            for bucket in Config.couchbaseBucketDict:
+                if p.get(f'couchbase_{bucket}_mem'):
+                    Config.couchbaseBucketDict[bucket]['memory_allocation'] = int(p[f'couchbase_{bucket}_mem'])
+
+
         if p.get('opendj_install') == '0':
             p['opendj_install'] = InstallTypes.NONE
 
