@@ -7,11 +7,16 @@
 package io.jans.fido2.ws.rs.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import io.jans.fido2.model.attestation.AttestationOptions;
+import io.jans.fido2.model.attestation.AttestationResult;
+import io.jans.fido2.model.attestation.AttestationResultResponse;
+import io.jans.fido2.model.attestation.PublicKeyCredentialCreationOptions;
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.fido2.service.DataMapperService;
 import io.jans.fido2.service.operation.AttestationService;
 import io.jans.fido2.service.sg.converter.AttestationSuperGluuController;
+import io.jans.fido2.service.util.CommonUtilService;
 import io.jans.fido2.service.verifier.CommonVerifiers;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -20,6 +25,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
 import org.slf4j.Logger;
 
+import javax.validation.constraints.NotNull;
 import java.io.IOException;
 
 /**
@@ -57,23 +63,16 @@ public class AttestationController {
     @Consumes({"application/json"})
     @Produces({"application/json"})
     @Path("/options")
-    public Response register(String content) {
+    public Response register(@NotNull AttestationOptions attestationOptions) {
         try {
             if (appConfiguration.getFido2Configuration() == null) {
                 throw errorResponseFactory.forbiddenException();
             }
 
-            JsonNode params;
-            try {
-                params = dataMapperService.readTree(content);
-            } catch (IOException ex) {
-                throw errorResponseFactory.invalidRequest(ex.getMessage(), ex);
-            }
+            commonVerifiers.verifyNotUseGluuParameters(CommonUtilService.toJsonNode(attestationOptions));
+            PublicKeyCredentialCreationOptions result = attestationService.options(attestationOptions);
 
-            commonVerifiers.verifyNotUseGluuParameters(params);
-            JsonNode result = attestationService.options(params);
-
-            ResponseBuilder builder = Response.ok().entity(result.toString());
+            ResponseBuilder builder = Response.ok().entity(result);
             return builder.build();
 
         } catch (WebApplicationException e) {
@@ -88,23 +87,15 @@ public class AttestationController {
     @Consumes({"application/json"})
     @Produces({"application/json"})
     @Path("/result")
-    public Response verify(String content) {
+    public Response verify(@NotNull AttestationResult attestationResult) {
         try {
             if (appConfiguration.getFido2Configuration() == null) {
                 throw errorResponseFactory.forbiddenException();
             }
+            commonVerifiers.verifyNotUseGluuParameters(CommonUtilService.toJsonNode(attestationResult));
+            AttestationResultResponse result = attestationService.verify(attestationResult);
 
-            JsonNode params;
-            try {
-                params = dataMapperService.readTree(content);
-            } catch (IOException ex) {
-                throw errorResponseFactory.invalidRequest(ex.getMessage(), ex);
-            }
-
-            commonVerifiers.verifyNotUseGluuParameters(params);
-            JsonNode result = attestationService.verify(params);
-
-            ResponseBuilder builder = Response.ok().entity(result.toString());
+            ResponseBuilder builder = Response.ok().entity(result);
             return builder.build();
 
         } catch (WebApplicationException e) {
@@ -118,7 +109,10 @@ public class AttestationController {
     @GET
     @Produces({"application/json"})
     @Path("/registration")
-    public Response startRegistration(@QueryParam("username") String userName, @QueryParam("application") String appId, @QueryParam("session_id") String sessionId, @QueryParam("enrollment_code") String enrollmentCode) {
+    public Response startRegistration(@QueryParam("username") String userName,
+                                      @QueryParam("application") String appId,
+                                      @QueryParam("session_id") String sessionId,
+                                      @QueryParam("enrollment_code") String enrollmentCode) {
         try {
             if ((appConfiguration.getFido2Configuration() == null) && !appConfiguration.isSuperGluuEnabled()) {
                 throw errorResponseFactory.forbiddenException();

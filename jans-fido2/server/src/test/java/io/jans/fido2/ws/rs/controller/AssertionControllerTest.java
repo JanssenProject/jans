@@ -2,6 +2,7 @@ package io.jans.fido2.ws.rs.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.jans.fido2.model.assertion.*;
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.conf.Fido2Configuration;
 import io.jans.fido2.model.error.ErrorResponseFactory;
@@ -9,6 +10,7 @@ import io.jans.fido2.service.DataMapperService;
 import io.jans.fido2.service.operation.AssertionService;
 import io.jans.fido2.service.sg.converter.AssertionSuperGluuController;
 import io.jans.fido2.service.verifier.CommonVerifiers;
+import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.Test;
@@ -52,11 +54,10 @@ class AssertionControllerTest {
 
     @Test
     void authenticate_ifFido2ConfigurationIsNull_forbiddenException() {
-        String content = "test_content";
         when(appConfiguration.getFido2Configuration()).thenReturn(null);
         when(errorResponseFactory.forbiddenException()).thenReturn(new WebApplicationException(Response.status(500).entity("test exception").build()));
 
-        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> assertionController.authenticate(content));
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> assertionController.authenticate(mock(AssertionOptions.class)));
         assertNotNull(ex);
         assertNotNull(ex.getResponse());
         assertEquals(ex.getResponse().getStatus(), 500);
@@ -68,29 +69,26 @@ class AssertionControllerTest {
 
     @Test
     void authenticate_ifReadTreeThrownError_invalidRequest() throws IOException {
-        String content = "test_content";
         when(appConfiguration.getFido2Configuration()).thenReturn(mock(Fido2Configuration.class));
-        when(dataMapperService.readTree(anyString())).thenThrow(new IOException("IOException test error"));
-        when(errorResponseFactory.invalidRequest(any(), any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
+        when(assertionService.options(any())).thenThrow(new BadRequestException(Response.status(400).entity("test exception").build()));
 
-        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> assertionController.authenticate(content));
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> assertionController.authenticate(mock(AssertionOptions.class)));
         assertNotNull(ex);
         assertNotNull(ex.getResponse());
         assertEquals(ex.getResponse().getStatus(), 400);
         assertEquals(ex.getResponse().getEntity(), "test exception");
 
         verify(appConfiguration).getFido2Configuration();
-        verifyNoInteractions(commonVerifiers, assertionService, log);
+        verifyNoInteractions(log);
     }
 
     @Test
     void authenticate_ifThrownException_unknownError() throws IOException {
-        String content = "test_content";
         when(appConfiguration.getFido2Configuration()).thenReturn(mock(Fido2Configuration.class));
         when(assertionService.options(any())).thenThrow(new RuntimeException("test exception"));
         when(errorResponseFactory.unknownError(any())).thenReturn(new WebApplicationException(Response.status(500).entity("test exception").build()));
 
-        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> assertionController.authenticate(content));
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> assertionController.authenticate(mock(AssertionOptions.class)));
         assertNotNull(ex);
         assertNotNull(ex.getResponse());
         assertEquals(ex.getResponse().getStatus(), 500);
@@ -98,7 +96,6 @@ class AssertionControllerTest {
 
         verify(appConfiguration).getFido2Configuration();
         verify(log).error(contains("Unknown Error"), any(), any());
-        verify(dataMapperService).readTree(content);
         verify(commonVerifiers).verifyNotUseGluuParameters(any());
         verify(assertionService).options(any());
         verifyNoMoreInteractions(errorResponseFactory);
@@ -106,16 +103,14 @@ class AssertionControllerTest {
 
     @Test
     void authenticate_ifValidData_success() throws IOException {
-        String content = "test_content";
         when(appConfiguration.getFido2Configuration()).thenReturn(mock(Fido2Configuration.class));
-        when(assertionService.options(any())).thenReturn(mock(ObjectNode.class));
+        when(assertionService.options(any())).thenReturn(mock(AssertionOptionsResponse.class));
 
-        Response response = assertionController.authenticate(content);
+        Response response = assertionController.authenticate(mock(AssertionOptions.class));
         assertNotNull(response);
         assertEquals(response.getStatus(), 200);
 
         verify(appConfiguration).getFido2Configuration();
-        verify(dataMapperService).readTree(content);
         verify(commonVerifiers).verifyNotUseGluuParameters(any());
         verify(assertionService).options(any());
         verifyNoInteractions(log, errorResponseFactory);
@@ -123,11 +118,10 @@ class AssertionControllerTest {
 
     @Test
     void generateAuthenticate_ifFido2ConfigurationIsNull_forbiddenException() {
-        String content = "test_content";
         when(appConfiguration.getFido2Configuration()).thenReturn(null);
         when(errorResponseFactory.forbiddenException()).thenReturn(new WebApplicationException(Response.status(500).entity("test exception").build()));
 
-        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> assertionController.generateAuthenticate(content));
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> assertionController.generateAuthenticate(mock(AssertionOptionsGenerate.class)));
         assertNotNull(ex);
         assertNotNull(ex.getResponse());
         assertEquals(ex.getResponse().getStatus(), 500);
@@ -140,13 +134,12 @@ class AssertionControllerTest {
 
     @Test
     void generateAuthenticate_ifAssertionOptionsGenerateEndpointEnabledIsFalse_forbiddenException() {
-        String content = "test_content";
         Fido2Configuration fido2Configuration = mock(Fido2Configuration.class);
         when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
         when(fido2Configuration.isAssertionOptionsGenerateEndpointEnabled()).thenReturn(false);
         when(errorResponseFactory.forbiddenException()).thenReturn(new WebApplicationException(Response.status(500).entity("test exception").build()));
 
-        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> assertionController.generateAuthenticate(content));
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> assertionController.generateAuthenticate(mock(AssertionOptionsGenerate.class)));
         assertNotNull(ex);
         assertNotNull(ex.getResponse());
         assertEquals(ex.getResponse().getStatus(), 500);
@@ -156,38 +149,35 @@ class AssertionControllerTest {
         verifyNoInteractions(dataMapperService, assertionService, log);
         verifyNoMoreInteractions(errorResponseFactory);
     }
-
+//
     @Test
     void generateAuthenticate_ifReadTreeThrownError_invalidRequest() throws IOException {
-        String content = "test_content";
         Fido2Configuration fido2Configuration = mock(Fido2Configuration.class);
         when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
         when(fido2Configuration.isAssertionOptionsGenerateEndpointEnabled()).thenReturn(true);
-        when(dataMapperService.readTree(anyString())).thenThrow(new IOException("IOException test error"));
-        when(errorResponseFactory.invalidRequest(any(), any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
+        when(assertionService.generateOptions(any())).thenThrow(new BadRequestException(Response.status(400).entity("test exception").build()));
 
-        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> assertionController.generateAuthenticate(content));
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> assertionController.generateAuthenticate(mock(AssertionOptionsGenerate.class)));
         assertNotNull(ex);
         assertNotNull(ex.getResponse());
         assertEquals(ex.getResponse().getStatus(), 400);
         assertEquals(ex.getResponse().getEntity(), "test exception");
 
         verify(appConfiguration, times(2)).getFido2Configuration();
-        verifyNoInteractions(assertionService, log);
+        verifyNoInteractions(log);
         verifyNoMoreInteractions(errorResponseFactory);
     }
 
     @Test
     void generateAuthenticate_ifThrownException_unknownError() throws IOException {
-        String content = "test_content";
         Fido2Configuration fido2Configuration = mock(Fido2Configuration.class);
         when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
         when(fido2Configuration.isAssertionOptionsGenerateEndpointEnabled()).thenReturn(true);
-        when(dataMapperService.readTree(anyString())).thenReturn(mock(JsonNode.class));
+        //when(dataMapperService.readTree(anyString())).thenReturn(mock(JsonNode.class));
         when(assertionService.generateOptions(any())).thenThrow(new RuntimeException("test exception"));
         when(errorResponseFactory.unknownError(any())).thenReturn(new WebApplicationException(Response.status(500).entity("test exception").build()));
 
-        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> assertionController.generateAuthenticate(content));
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> assertionController.generateAuthenticate(mock(AssertionOptionsGenerate.class)));
         assertNotNull(ex);
         assertNotNull(ex.getResponse());
         assertEquals(ex.getResponse().getStatus(), 500);
@@ -195,23 +185,20 @@ class AssertionControllerTest {
 
         verify(appConfiguration, times(2)).getFido2Configuration();
         verify(log).error(contains("Unknown Error"), any(), any());
-        verify(dataMapperService).readTree(content);
         verify(assertionService).generateOptions(any());
         verifyNoMoreInteractions(errorResponseFactory, dataMapperService, assertionService, appConfiguration, log);
     }
 
     @Test
     void generateAuthenticate_ifValidData_success() throws IOException {
-        String content = "test_content";
         when(appConfiguration.getFido2Configuration()).thenReturn(mock(Fido2Configuration.class));
-        when(assertionService.options(any())).thenReturn(mock(ObjectNode.class));
+        when(assertionService.options(any())).thenReturn(mock(AssertionOptionsResponse.class));
 
-        Response response = assertionController.authenticate(content);
+        Response response = assertionController.authenticate(mock(AssertionOptions.class));
         assertNotNull(response);
         assertEquals(response.getStatus(), 200);
 
         verify(appConfiguration).getFido2Configuration();
-        verify(dataMapperService).readTree(content);
         verify(commonVerifiers).verifyNotUseGluuParameters(any());
         verify(assertionService).options(any());
         verifyNoInteractions(log, errorResponseFactory);
@@ -219,11 +206,10 @@ class AssertionControllerTest {
 
     @Test
     void verify_ifFido2ConfigurationIsNull_forbiddenException() {
-        String content = "test_content";
         when(appConfiguration.getFido2Configuration()).thenReturn(null);
         when(errorResponseFactory.forbiddenException()).thenReturn(new WebApplicationException(Response.status(500).entity("test exception").build()));
 
-        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> assertionController.verify(content));
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> assertionController.verify(mock(AssertionResult.class)));
         assertNotNull(ex);
         assertNotNull(ex.getResponse());
         assertEquals(ex.getResponse().getStatus(), 500);
@@ -235,29 +221,27 @@ class AssertionControllerTest {
 
     @Test
     void verify_ifReadTreeThrownError_invalidRequest() throws IOException {
-        String content = "test_content";
         when(appConfiguration.getFido2Configuration()).thenReturn(mock(Fido2Configuration.class));
-        when(dataMapperService.readTree(anyString())).thenThrow(new IOException("IOException test error"));
-        when(errorResponseFactory.invalidRequest(any(), any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
+        //when(assertionService.verify(any())).thenThrow(new RuntimeException("test exception"));
+        when(assertionService.verify(any())).thenThrow(new BadRequestException(Response.status(400).entity("test exception").build()));
 
-        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> assertionController.verify(content));
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> assertionController.verify(mock(AssertionResult.class)));
         assertNotNull(ex);
         assertNotNull(ex.getResponse());
         assertEquals(ex.getResponse().getStatus(), 400);
         assertEquals(ex.getResponse().getEntity(), "test exception");
 
         verify(appConfiguration).getFido2Configuration();
-        verifyNoInteractions(commonVerifiers, assertionService, log);
+        verifyNoInteractions(log);
     }
 
     @Test
     void verify_ifThrownException_unknownError() throws IOException {
-        String content = "test_content";
         when(appConfiguration.getFido2Configuration()).thenReturn(mock(Fido2Configuration.class));
         when(assertionService.verify(any())).thenThrow(new RuntimeException("test exception"));
         when(errorResponseFactory.unknownError(any())).thenReturn(new WebApplicationException(Response.status(500).entity("test exception").build()));
 
-        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> assertionController.verify(content));
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> assertionController.verify(mock(AssertionResult.class)));
         assertNotNull(ex);
         assertNotNull(ex.getResponse());
         assertEquals(ex.getResponse().getStatus(), 500);
@@ -265,7 +249,6 @@ class AssertionControllerTest {
 
         verify(appConfiguration).getFido2Configuration();
         verify(log).error(contains("Unknown Error"), any(), any());
-        verify(dataMapperService).readTree(content);
         verify(commonVerifiers).verifyNotUseGluuParameters(any());
         verify(assertionService).verify(any());
         verifyNoMoreInteractions(errorResponseFactory);
@@ -273,16 +256,14 @@ class AssertionControllerTest {
 
     @Test
     void verify_ifValidData_success() throws IOException {
-        String content = "test_content";
         when(appConfiguration.getFido2Configuration()).thenReturn(mock(Fido2Configuration.class));
-        when(assertionService.verify(any())).thenReturn(mock(ObjectNode.class));
+        when(assertionService.verify(any())).thenReturn(mock(AssertionResultResponse.class));
 
-        Response response = assertionController.verify(content);
+        Response response = assertionController.verify(mock(AssertionResult.class));
         assertNotNull(response);
         assertEquals(response.getStatus(), 200);
 
         verify(appConfiguration).getFido2Configuration();
-        verify(dataMapperService).readTree(content);
         verify(commonVerifiers).verifyNotUseGluuParameters(any());
         verify(assertionService).verify(any());
         verifyNoInteractions(log, errorResponseFactory);
@@ -362,6 +343,7 @@ class AssertionControllerTest {
         String authenticateResponseString = "test_authenticate_response_string";
         when(appConfiguration.getFido2Configuration()).thenReturn(null);
         when(appConfiguration.isSuperGluuEnabled()).thenReturn(false);
+
         when(errorResponseFactory.forbiddenException()).thenReturn(new WebApplicationException(Response.status(500).entity("test exception").build()));
 
         WebApplicationException ex = assertThrows(WebApplicationException.class, () -> assertionController.finishAuthentication(userName, authenticateResponseString));

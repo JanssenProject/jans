@@ -4,10 +4,12 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.fido2.model.auth;
+package io.jans.fido2.model.common;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+
+import java.util.Arrays;
 
 /**
  * PublicKeyCredentialDescriptor - https://www.w3.org/TR/webauthn-2/#enum-credentialType
@@ -46,4 +48,12 @@ public class PublicKeyCredentialDescriptor {
         return id;
     }
 
+    @Override
+    public String toString() {
+        return "PublicKeyCredentialDescriptor{" +
+                "type='" + type + '\'' +
+                ", transports=" + Arrays.toString(transports) +
+                ", id='" + id + '\'' +
+                '}';
+    }
 }

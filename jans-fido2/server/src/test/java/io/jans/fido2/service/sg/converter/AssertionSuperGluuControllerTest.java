@@ -4,8 +4,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.base.Strings;
+import com.google.common.collect.Lists;
 import io.jans.as.model.fido.u2f.message.RawAuthenticateResponse;
 import io.jans.as.model.fido.u2f.protocol.AuthenticateResponse;
+import io.jans.fido2.model.assertion.AssertionOptions;
+import io.jans.fido2.model.assertion.AssertionOptionsResponse;
+import io.jans.fido2.model.assertion.AssertionResult;
+import io.jans.fido2.model.assertion.AssertionResultResponse;
+import io.jans.fido2.model.common.PublicKeyCredentialDescriptor;
 import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.DataMapperService;
@@ -23,6 +30,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 
 import java.io.IOException;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -65,10 +73,12 @@ class AssertionSuperGluuControllerTest {
         String keyHandle = "test_key_handle";
         String appId = "test_app_id";
         String sessionId = "session_id";
-        ObjectNode resultNode = mapper.createObjectNode();
-        resultNode.put("challenge", "test_challenge");
-        resultNode.put("userVerification", "test_user_verification");
-        when(assertionService.options(any())).thenReturn(resultNode);
+
+        AssertionOptionsResponse assertionOptionsResponse =new AssertionOptionsResponse();
+        assertionOptionsResponse.setChallenge("test_challenge");
+        assertionOptionsResponse.setUserVerification("test_user_verification");
+
+        when(assertionService.options(any())).thenReturn(assertionOptionsResponse);
         when(dataMapperService.createObjectNode()).thenReturn(mapper.createObjectNode(), mapper.createObjectNode());
         when(userSessionIdService.isValidSessionId(sessionId, username)).thenReturn(true);
 
@@ -79,7 +89,7 @@ class AssertionSuperGluuControllerTest {
         assertTrue(authenticateRequestsNode.isEmpty());
 
         verify(assertionService, only()).options(any());
-        verify(dataMapperService, times(2)).createObjectNode();
+        verify(dataMapperService, times(1)).createObjectNode();
     }
 
     @Test
@@ -88,15 +98,18 @@ class AssertionSuperGluuControllerTest {
         String keyHandle = "test_key_handle";
         String appId = "test_app_id";
         String sessionId = "test_session_id";
-        ObjectNode resultNode = mapper.createObjectNode();
-        resultNode.put("challenge", "test_challenge");
-        resultNode.put("userVerification", "test_user_verification");
-        ArrayNode credentialsArraysNode = mapper.createArrayNode();
-        ObjectNode credentialsNode = mapper.createObjectNode();
-        credentialsNode.put("id", "test_id_1");
-        credentialsArraysNode.add(credentialsNode);
-        resultNode.set("allowCredentials", credentialsArraysNode);
-        when(assertionService.options(any())).thenReturn(resultNode);
+
+        AssertionOptionsResponse assertionOptionsResponse =new AssertionOptionsResponse();
+        assertionOptionsResponse.setChallenge("test_challenge");
+        assertionOptionsResponse.setUserVerification("test_user_verification");
+
+        String transports[] = new String[] { "internal" };
+        PublicKeyCredentialDescriptor publicKeyCredentialDescriptor = new PublicKeyCredentialDescriptor("public-key", transports, "test_id_1");
+        List<PublicKeyCredentialDescriptor> allowCredentials = Lists.newArrayList(publicKeyCredentialDescriptor);
+
+        assertionOptionsResponse.setAllowCredentials(allowCredentials);
+
+        when(assertionService.options(any())).thenReturn(assertionOptionsResponse);
         when(dataMapperService.createObjectNode()).thenReturn(mapper.createObjectNode(), mapper.createObjectNode());
         when(userSessionIdService.isValidSessionId(sessionId, username)).thenReturn(true);
 
@@ -167,28 +180,28 @@ class AssertionSuperGluuControllerTest {
         String appId = "test_app_id";
         String sessionId = "test_session_id";
         when(userSessionIdService.isValidSessionId(sessionId, username)).thenReturn(true);
-        when(dataMapperService.createObjectNode()).thenReturn(mapper.createObjectNode());
+        //when(dataMapperService.createObjectNode()).thenReturn(mapper.createObjectNode());
 
-        ObjectNode response = assertionSuperGluuController.buildFido2AssertionStartResponse(username, keyHandle, appId, sessionId);
+        AssertionOptions response = assertionSuperGluuController.buildFido2AssertionStartResponse(username, keyHandle, appId, sessionId);
         assertNotNull(response);
-        assertTrue(response.has("super_gluu_request"));
-        assertTrue(response.has("super_gluu_app_id"));
-        assertTrue(response.has("documentDomain"));
-        assertTrue(response.has("super_gluu_key_handle"));
-        assertTrue(response.has("super_gluu_request_mode"));
-        assertTrue(response.has("username"));
-        assertTrue(response.has("session_id"));
-        assertEquals(response.get("super_gluu_request").asText(), "true");
-        assertEquals(response.get("super_gluu_app_id").asText(), appId);
-        assertEquals(response.get("documentDomain").asText(), appId);
-        assertEquals(response.get("super_gluu_key_handle").asText(), keyHandle);
-        assertEquals(response.get("super_gluu_request_mode").asText(), "one_step");
-        assertEquals(response.get("username").asText(), "");
-        assertEquals(response.get("session_id").asText(), sessionId);
+        assertNotNull(response.getSuper_gluu_request());
+        assertNotNull(response.getSuper_gluu_app_id());
+        assertNotNull(response.getDocumentDomain());
+        assertNotNull(response.getSuper_gluu_key_handle());
+        assertNotNull(response.getSuper_gluu_request_mode());
+        assertNotNull(response.getUsername());
+        assertNotNull(response.getSession_id());
+        assertEquals((response.getSuper_gluu_request() == null ? "false" : response.getSuper_gluu_request().toString()),"true");
+        assertEquals(response.getSuper_gluu_app_id(), appId);
+        assertEquals(response.getDocumentDomain(), appId);
+        assertEquals(response.getSuper_gluu_key_handle(), keyHandle);
+        assertEquals(response.getSuper_gluu_request_mode(), "one_step");
+        assertEquals(response.getUsername(), "");
+        assertEquals(response.getSession_id(), sessionId);
 
         verify(userSessionIdService).isValidSessionId(sessionId, username);
-        verify(dataMapperService).createObjectNode();
-        verify(log).debug("Prepared U2F_V2 assertions options request: {}", response);
+//        verify(dataMapperService).createObjectNode();
+        verify(log).debug("Prepared U2F_V2 assertions options request: {}", response.toString());
     }
 
     @Test
@@ -198,28 +211,26 @@ class AssertionSuperGluuControllerTest {
         String appId = "test_app_id";
         String sessionId = "test_session_id";
         when(userSessionIdService.isValidSessionId(sessionId, username)).thenReturn(true);
-        when(dataMapperService.createObjectNode()).thenReturn(mapper.createObjectNode());
 
-        ObjectNode response = assertionSuperGluuController.buildFido2AssertionStartResponse(username, keyHandle, appId, sessionId);
+        AssertionOptions response = assertionSuperGluuController.buildFido2AssertionStartResponse(username, keyHandle, appId, sessionId);
         assertNotNull(response);
-        assertTrue(response.has("super_gluu_request"));
-        assertTrue(response.has("super_gluu_app_id"));
-        assertTrue(response.has("documentDomain"));
-        assertTrue(response.has("super_gluu_key_handle"));
-        assertTrue(response.has("super_gluu_request_mode"));
-        assertTrue(response.has("username"));
-        assertTrue(response.has("session_id"));
-        assertEquals(response.get("super_gluu_request").asText(), "true");
-        assertEquals(response.get("super_gluu_app_id").asText(), appId);
-        assertEquals(response.get("documentDomain").asText(), appId);
-        assertEquals(response.get("super_gluu_key_handle").asText(), keyHandle);
-        assertEquals(response.get("super_gluu_request_mode").asText(), "two_step");
-        assertEquals(response.get("username").asText(), username);
-        assertEquals(response.get("session_id").asText(), sessionId);
+        assertTrue(response.getSuper_gluu_request());
+        assertNotNull(response.getSuper_gluu_app_id());
+        assertNotNull(response.getDocumentDomain());
+        assertNotNull(response.getSuper_gluu_key_handle());
+        assertNotNull(response.getSuper_gluu_request_mode());
+        assertNotNull(response.getUsername());
+        assertNotNull(response.getSession_id());
+        assertEquals((response.getSuper_gluu_request() == null ? "false" : response.getSuper_gluu_request().toString()),"true");
+        assertEquals(response.getSuper_gluu_app_id(), appId);
+        assertEquals(response.getDocumentDomain(), appId);
+        assertEquals(response.getSuper_gluu_key_handle(), keyHandle);
+        assertEquals(response.getSuper_gluu_request_mode(), "two_step");
+        assertEquals(response.getUsername(), username);
+        assertEquals(response.getSession_id(), sessionId);
 
         verify(userSessionIdService).isValidSessionId(sessionId, username);
-        verify(dataMapperService).createObjectNode();
-        verify(log).debug("Prepared U2F_V2 assertions options request: {}", response);
+        verify(log).debug("Prepared U2F_V2 assertions options request: {}", response.toString());
     }
 
     @Test
@@ -232,6 +243,7 @@ class AssertionSuperGluuControllerTest {
         String deviceData = "test_device_data";
         AuthenticateResponse authenticateResponse = new AuthenticateResponse(clientData, signatureData, keyHandle, deviceData);
         when(dataMapperService.readValue(authenticateResponseString, AuthenticateResponse.class)).thenReturn(authenticateResponse);
+
         ObjectNode paramsNode = mapper.createObjectNode();
         ObjectNode clientDataNode = mapper.createObjectNode();
         ObjectNode responseNode = mapper.createObjectNode();
@@ -240,19 +252,20 @@ class AssertionSuperGluuControllerTest {
         when(base64Service.urlEncodeToString(any())).thenReturn("test_client_data_json", "test_signature", "test_authenticator_data", "test_attestation_object");
         when(digestService.hashSha256(anyString())).thenReturn("rp_id_hash".getBytes());
         when(dataMapperService.cborWriteAsBytes(attestationObjectNode)).thenReturn("dGVzdF9hdHRlc3RhdGlvbl9vYmplY3Q".getBytes());
-        when(assertionService.verify(paramsNode)).thenReturn(mapper.createObjectNode());
+        when(assertionService.verify(any())).thenReturn(mock(AssertionResultResponse.class));
+
 
         RawAuthenticateResponse rawAuthenticateResponse = new RawAuthenticateResponse((byte) 1, 0L, "test_signature".getBytes());
         when(rawAuthenticationService.parseRawAuthenticateResponse(authenticateResponse.getSignatureData())).thenReturn(rawAuthenticateResponse);
 
-        JsonNode response = assertionSuperGluuController.finishAuthentication(username, authenticateResponseString);
-        assertNotNull(response);
-        assertTrue(response.has("status"));
-        assertTrue(response.has("challenge"));
-        assertEquals(response.get("status").asText(), "success");
-        assertEquals(response.get("challenge").asText(), "test_challenge");
+        JsonNode result = assertionSuperGluuController.finishAuthentication(username, authenticateResponseString);
+        assertNotNull(result);
+        assertTrue(result.has("status"));
+        assertTrue(result.has("challenge"));
+        assertEquals(result.get("status").asText(), "success");
+        assertEquals(result.get("challenge").asText(), "test_challenge");
 
-        verify(assertionService).verify(paramsNode);
+        verify(assertionService, times(1)).verify(any());
     }
 
     @Test
@@ -302,7 +315,7 @@ class AssertionSuperGluuControllerTest {
         assertEquals(ex.getResponse().getStatus(), 400);
         assertEquals(ex.getResponse().getEntity(), "test exception");
 
-        verify(dataMapperService, times(4)).createObjectNode();
+        verify(dataMapperService, times(2)).createObjectNode();
         verify(base64Service, times(3)).urlEncodeToString(any());
         verify(rawAuthenticationService).parseRawAuthenticateResponse(any());
         verifyNoInteractions(log);
@@ -328,37 +341,37 @@ class AssertionSuperGluuControllerTest {
         when(base64Service.urlEncodeToString(any())).thenReturn("test_client_data_json", "test_signature", "test_authenticator_data", "test_attestation_object");
         when(digestService.hashSha256(anyString())).thenReturn("rp_id_hash".getBytes());
 
-        ObjectNode response = assertionSuperGluuController.buildFido2AuthenticationVerifyResponse(username, authenticateResponseString, authenticateResponse);
+        AssertionResult response = assertionSuperGluuController.buildFido2AuthenticationVerifyResponse(username, authenticateResponseString, authenticateResponse);
         assertNotNull(response);
-        assertTrue(response.has("super_gluu_request"));
-        assertTrue(response.has("super_gluu_request_mode"));
-        assertTrue(response.has("super_gluu_request_cancel"));
-        assertTrue(response.has("id"));
-        assertTrue(response.has("rawId"));
-        assertTrue(response.has("type"));
-        assertEquals(response.get("super_gluu_request").asText(), "true");
-        assertEquals(response.get("super_gluu_request_mode").asText(), "two_step");
-        assertEquals(response.get("super_gluu_request_cancel").asText(), "false");
-        assertEquals(response.get("id").asText(), "test_key_handle");
-        assertEquals(response.get("rawId").asText(), "test_authenticate_response_string");
-        assertEquals(response.get("type").asText(), "public-key");
+        assertNotNull(response.getSuper_gluu_request());
+        assertNotNull(response.getSuper_gluu_request_mode());
+        assertNotNull(response.getSuper_gluu_request_cancel());
+        assertNotNull(response.getId());
+        assertNotNull(response.getRawId());
+        assertNotNull(response.getType());
+        assertEquals((response.getSuper_gluu_request() == null ? "false" : response.getSuper_gluu_request().toString()),"true");
+        assertEquals(response.getSuper_gluu_request_mode(), "two_step");
+        assertEquals((response.getSuper_gluu_request_cancel() == null ? "false" : response.getSuper_gluu_request_cancel().toString()),"false");
+        assertEquals(response.getId(), "test_key_handle");
+        assertEquals(response.getRawId(), "test_authenticate_response_string");
+        assertEquals(response.getType(), "public-key");
 
-        assertTrue(response.has("response"));
-        JsonNode response1Node = response.get("response");
-        assertTrue(response1Node.has("clientDataJSON"));
-        assertTrue(response1Node.has("signature"));
-        assertTrue(response1Node.has("authenticatorData"));
-        assertTrue(response1Node.has("attestationObject"));
-        assertEquals(response1Node.get("clientDataJSON").asText(), "test_client_data_json");
-        assertEquals(response1Node.get("signature").asText(), "test_signature");
-        assertEquals(response1Node.get("authenticatorData").asText(), "test_authenticator_data");
-        assertEquals(response1Node.get("attestationObject").asText(), "test_attestation_object");
+        assertNotNull(response.getResponse());
+        io.jans.fido2.model.assertion.Response response1 = response.getResponse();
+        assertNotNull(response1.getClientDataJSON());
+        assertNotNull(response1.getSignature());
+        assertNotNull(response1.getAuthenticatorData());
+        assertNotNull(response1.getAttestationObject());
+        assertEquals(response1.getClientDataJSON(), "test_client_data_json");
+        assertEquals(response1.getSignature(), "test_signature");
+        assertEquals(response1.getAuthenticatorData(), "test_authenticator_data");
+        assertEquals(response1.getAttestationObject(), "test_attestation_object");
 
-        verify(dataMapperService, times(4)).createObjectNode();
+        verify(dataMapperService, times(2)).createObjectNode();
         verify(base64Service, times(4)).urlEncodeToString(any());
         verify(rawAuthenticationService).parseRawAuthenticateResponse(any());
         verify(dataMapperService).cborWriteAsBytes(any());
-        verify(log).debug("Prepared U2F_V2 assertion verify request: {}", response);
+        verify(log).debug("Prepared U2F_V2 assertion verify request: {}", response.toString());
     }
 
     @Test

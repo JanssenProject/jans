@@ -17,6 +17,14 @@ import static org.mockito.ArgumentMatchers.eq;
 import java.util.Arrays;
 import java.util.Optional;
 
+import io.jans.fido2.model.assertion.AssertionOptions;
+import io.jans.fido2.model.assertion.AssertionOptionsResponse;
+import io.jans.fido2.model.assertion.AssertionResult;
+import io.jans.fido2.model.assertion.AssertionResultResponse;
+import io.jans.fido2.model.attestation.AttestationOptions;
+import io.jans.fido2.model.attestation.AttestationResult;
+import io.jans.fido2.model.attestation.AttestationResultResponse;
+import io.jans.fido2.model.attestation.PublicKeyCredentialCreationOptions;
 import io.jans.fido2.model.error.ErrorResponseFactory;
 import org.jboss.weld.junit5.ExplicitParamInjection;
 import org.jboss.weld.junit5.auto.AddBeanClasses;
@@ -241,13 +249,13 @@ public class FullFlowAndroidTest {
 		this.issuer = issuer;
 		this.attestationChallenge = challenge;
 
-		JsonNode request = attestationSuperGluuController.buildFido2AttestationStartResponse(userName, applicationId, sessionId);
-		System.out.println(request);
-        assertEquals(true, request.get(CommonVerifiers.SUPER_GLUU_REQUEST).asBoolean());
-        assertEquals(SuperGluuMode.TWO_STEP.getMode(), request.get(CommonVerifiers.SUPER_GLUU_MODE).asText());
-        assertEquals(applicationId, request.get(CommonVerifiers.SUPER_GLUU_APP_ID).asText());
+		AttestationOptions attestationOptions = attestationSuperGluuController.buildFido2AttestationStartResponse(userName, applicationId, sessionId);
+		System.out.println(attestationOptions.toString());
+        assertEquals(true, attestationOptions.getSuper_gluu_request());
+        assertEquals(SuperGluuMode.TWO_STEP.getMode(), attestationOptions.getSuper_gluu_request_mode());
+        assertEquals(applicationId, attestationOptions.getSuper_gluu_app_id());
 
-		ObjectNode response = attestationService.options(request);
+		PublicKeyCredentialCreationOptions response = attestationService.options(attestationOptions);
 		
 		// Get saved entry for finish attestation test
         ArgumentCaptor<Fido2RegistrationEntry> captor = ArgumentCaptor.forClass(Fido2RegistrationEntry.class);
@@ -256,7 +264,7 @@ public class FullFlowAndroidTest {
 
         assertNotNull(registrationEntry);
         assertNotNull(response);
-        assertEquals(challenge, response.get("challenge").asText());
+        assertEquals(challenge, response.getChallenge());
 
         assertEquals(Fido2RegistrationStatus.pending, registrationEntry.getRegistrationStatus());
 	}
@@ -265,11 +273,11 @@ public class FullFlowAndroidTest {
 		// Parse register response
 		RegisterResponse registerResponse = attestationSuperGluuController.parseRegisterResponse(registerFinishResponse);
 
-		JsonNode request = attestationSuperGluuController.buildFido2AttestationVerifyResponse(userName, registerResponse);
-        assertEquals(true, request.get(CommonVerifiers.SUPER_GLUU_REQUEST).asBoolean());
-        assertEquals(SuperGluuMode.TWO_STEP.getMode(), request.get(CommonVerifiers.SUPER_GLUU_MODE).asText());
+		AttestationResult request = attestationSuperGluuController.buildFido2AttestationVerifyResponse(userName, registerResponse);
+        assertEquals(true, request.getSuper_gluu_request());
+        assertEquals(SuperGluuMode.TWO_STEP.getMode(), request.getSuper_gluu_request_mode());
 
-		ObjectNode response = attestationService.verify(request);
+		AttestationResultResponse response = attestationService.verify(request);
 
 		// Get updated entry for checks
 		ArgumentCaptor<Fido2RegistrationEntry> captor = ArgumentCaptor.forClass(Fido2RegistrationEntry.class);
@@ -277,8 +285,8 @@ public class FullFlowAndroidTest {
         registrationEntry = captor.getValue();
 
 		assertNotNull(response);
-        assertEquals("ok", response.get("status").asText());
-        assertEquals(registeredPublicKey, response.get("createdCredentials").get("id").asText());
+        assertEquals("ok", response.getStatus());
+        assertEquals(registeredPublicKey, response.getCreatedCredentials().getId());
 	}
 
 	public void testFinishAttestationTwoStepAndroidAuthenticatedRegistered(String userName, String registerFinishResponse, String registeredPublicKey) {
@@ -298,13 +306,13 @@ public class FullFlowAndroidTest {
 		this.issuer = issuer;
 		this.assertionChallenge = challenge;
 
-		JsonNode request = assertionSuperGluuController.buildFido2AssertionStartResponse(userName, registrationEntry.getPublicKeyId(), applicationId, sessionId);
-        assertEquals(true, request.get(CommonVerifiers.SUPER_GLUU_REQUEST).asBoolean());
-        assertEquals(SuperGluuMode.TWO_STEP.getMode(), request.get(CommonVerifiers.SUPER_GLUU_MODE).asText());
-        assertEquals(registrationEntry.getPublicKeyId(), request.get(CommonVerifiers.SUPER_GLUU_KEY_HANDLE).asText());
-        assertEquals(applicationId, request.get(CommonVerifiers.SUPER_GLUU_APP_ID).asText());
+		AssertionOptions request = assertionSuperGluuController.buildFido2AssertionStartResponse(userName, registrationEntry.getPublicKeyId(), applicationId, sessionId);
+        assertEquals(true, request.getSuper_gluu_request());
+        assertEquals(SuperGluuMode.TWO_STEP.getMode(), request.getSuper_gluu_request_mode());
+        assertEquals(registrationEntry.getPublicKeyId(), request.getSuper_gluu_key_handle());
+        assertEquals(applicationId, request.getSuper_gluu_app_id());
 
-		ObjectNode response = assertionService.options(request);
+		AssertionOptionsResponse response = assertionService.options(request);
 		
 		// Get saved entry for finish authentication test
         ArgumentCaptor<Fido2AuthenticationEntry> captor = ArgumentCaptor.forClass(Fido2AuthenticationEntry.class);
@@ -313,8 +321,8 @@ public class FullFlowAndroidTest {
 
         assertNotNull(authenticationEntry);
         assertNotNull(response);
-        assertTrue(response.get("allowCredentials").size() > 0);
-        assertEquals(registrationEntry.getPublicKeyId(), response.get("allowCredentials").get(0).get("id").asText());
+        assertTrue(response.getAllowCredentials().size() > 0);
+        assertEquals(registrationEntry.getPublicKeyId(), response.getAllowCredentials().get(0).getId());
 
         assertEquals(Fido2AuthenticationStatus.pending, authenticationEntry.getAuthenticationStatus());
 	}
@@ -323,11 +331,11 @@ public class FullFlowAndroidTest {
 		// Parse register response
 		AuthenticateResponse authenticateResponse = assertionSuperGluuController.parseAuthenticateResponse(authenticateFinishResponse);
 
-		JsonNode request = assertionSuperGluuController.buildFido2AuthenticationVerifyResponse(userName, authenticateFinishResponse, authenticateResponse);
-        assertEquals(true, request.get(CommonVerifiers.SUPER_GLUU_REQUEST).asBoolean());
-        assertEquals(SuperGluuMode.TWO_STEP.getMode(), request.get(CommonVerifiers.SUPER_GLUU_MODE).asText());
+		AssertionResult request = assertionSuperGluuController.buildFido2AuthenticationVerifyResponse(userName, authenticateFinishResponse, authenticateResponse);
+        assertEquals(true, request.getSuper_gluu_request());
+        assertEquals(SuperGluuMode.TWO_STEP.getMode(), request.getSuper_gluu_request_mode());
 
-		ObjectNode response = assertionService.verify(request);
+		AssertionResultResponse response = assertionService.verify(request);
 
 		// Get updated entry for checks
         ArgumentCaptor<Fido2AuthenticationEntry> captorAssertion = ArgumentCaptor.forClass(Fido2AuthenticationEntry.class);
@@ -339,8 +347,8 @@ public class FullFlowAndroidTest {
         registrationEntry = captorAttestation.getValue();
 
 		assertNotNull(response);
-        assertEquals("ok", response.get("status").asText());
-        assertEquals(registrationEntry.getPublicKeyId(), response.get("authenticatedCredentials").get("id").asText());
+        assertEquals("ok", response.getStatus());
+        assertEquals(registrationEntry.getPublicKeyId(), response.getAuthenticatedCredentials().getId());
 	}
 
 	public void testFinishAssertionTwoStepAndroidAuthenticated(String userName, String authenticateFinishResponse) {

@@ -7,11 +7,13 @@
 package io.jans.fido2.ws.rs.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import io.jans.fido2.model.assertion.*;
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.fido2.service.DataMapperService;
 import io.jans.fido2.service.operation.AssertionService;
 import io.jans.fido2.service.sg.converter.AssertionSuperGluuController;
+import io.jans.fido2.service.util.CommonUtilService;
 import io.jans.fido2.service.verifier.CommonVerifiers;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -20,6 +22,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
 import org.slf4j.Logger;
 
+import javax.validation.constraints.NotNull;
 import java.io.IOException;
 
 /**
@@ -57,21 +60,14 @@ public class AssertionController {
     @Consumes({"application/json"})
     @Produces({"application/json"})
     @Path("/options")
-    public Response authenticate(String content) {
+    public Response authenticate(@NotNull AssertionOptions assertionOptions) {
         try {
             if (appConfiguration.getFido2Configuration() == null) {
                 throw errorResponseFactory.forbiddenException();
             }
 
-            JsonNode params;
-            try {
-                params = dataMapperService.readTree(content);
-            } catch (IOException ex) {
-                throw errorResponseFactory.invalidRequest(ex.getMessage(), ex);
-            }
-
-            commonVerifiers.verifyNotUseGluuParameters(params);
-            JsonNode result = assertionService.options(params);
+            commonVerifiers.verifyNotUseGluuParameters(CommonUtilService.toJsonNode(assertionOptions));
+            AssertionOptionsResponse result = assertionService.options(assertionOptions);
 
             ResponseBuilder builder = Response.ok().entity(result.toString());
             return builder.build();
@@ -88,21 +84,15 @@ public class AssertionController {
     @Consumes({"application/json"})
     @Produces({"application/json"})
     @Path("/options/generate")
-    public Response generateAuthenticate(String content) {
+    public Response generateAuthenticate(@NotNull AssertionOptionsGenerate assertionOptionsGenerate) {
         try {
             if (appConfiguration.getFido2Configuration() == null || !appConfiguration.getFido2Configuration().isAssertionOptionsGenerateEndpointEnabled()) {
                 throw errorResponseFactory.forbiddenException();
             }
 
-            JsonNode params;
-            try {
-                params = dataMapperService.readTree(content);
-            } catch (IOException ex) {
-                throw errorResponseFactory.invalidRequest(ex.getMessage(), ex);
-            }
-            JsonNode result = assertionService.generateOptions(params);
+            AsserOptGenerateResponse result = assertionService.generateOptions(assertionOptionsGenerate);
 
-            ResponseBuilder builder = Response.ok().entity(result.toString());
+            ResponseBuilder builder = Response.ok().entity(result);
             return builder.build();
 
         } catch (WebApplicationException e) {
@@ -117,23 +107,15 @@ public class AssertionController {
     @Consumes({"application/json"})
     @Produces({"application/json"})
     @Path("/result")
-    public Response verify(String content) {
+    public Response verify(@NotNull AssertionResult assertionResult) {
         try {
             if (appConfiguration.getFido2Configuration() == null) {
                 throw errorResponseFactory.forbiddenException();
             }
+            commonVerifiers.verifyNotUseGluuParameters(CommonUtilService.toJsonNode(assertionResult));
+            AssertionResultResponse result = assertionService.verify(assertionResult);
 
-            JsonNode params;
-            try {
-                params = dataMapperService.readTree(content);
-            } catch (IOException ex) {
-                throw errorResponseFactory.invalidRequest(ex.getMessage(), ex);
-            }
-
-            commonVerifiers.verifyNotUseGluuParameters(params);
-            JsonNode result = assertionService.verify(params);
-
-            ResponseBuilder builder = Response.ok().entity(result.toString());
+            ResponseBuilder builder = Response.ok().entity(result);
             return builder.build();
 
         } catch (WebApplicationException e) {

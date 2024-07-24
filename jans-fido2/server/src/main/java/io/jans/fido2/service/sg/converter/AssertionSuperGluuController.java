@@ -10,8 +10,9 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
-import io.jans.fido2.model.assertion.AssertionErrorResponseType;
+import io.jans.fido2.model.assertion.*;
 import io.jans.fido2.model.error.ErrorResponseFactory;
+import io.jans.fido2.service.util.CommonUtilService;
 import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 
@@ -91,34 +92,33 @@ public class AssertionSuperGluuController {
      *             "keyHandle":"YJvWD9n40eIurInJvPKUoxpKzrleUMWgu9w3v_NUBu7BiGAclgkH_Zg88_T5y6Rh78imTxTh0djWFYG4jxOixw","version":"U2F_V2"}]}
      */
     public JsonNode startAuthentication(String userName, String keyHandle, String appId, String sessionId) {
-        ObjectNode params = buildFido2AssertionStartResponse(userName, keyHandle, appId, sessionId);
-
-        ObjectNode result = assertionService.options(params);
+        AssertionOptions assertionOptions = buildFido2AssertionStartResponse(userName, keyHandle, appId, sessionId);
+        AssertionOptionsResponse result = assertionService.options(assertionOptions);
 
         // Build start authentication response  
         ObjectNode superGluuResult = dataMapperService.createObjectNode();
         ArrayNode authenticateRequests = superGluuResult.putArray("authenticateRequests");
 
-        String challenge = result.get("challenge").asText();
-        String userVerification = result.get("userVerification").asText();
+        String challenge = result.getChallenge();
+        String userVerification = result.getUserVerification();
 
-        if (result.has("allowCredentials")) {
-            result.get("allowCredentials").forEach((f) -> {
-                ((ObjectNode) f).put("appId", appId);
-                ((ObjectNode) f).put("userVerification", userVerification);
-                ((ObjectNode) f).put("challenge", challenge);
-                ((ObjectNode) f).put("keyHandle", f.get("id").asText());
-                ((ObjectNode) f).remove("id");
-                ((ObjectNode) f).put("version", "U2F_V2");
+        if (result.getAllowCredentials() != null) {
+            result.getAllowCredentials().forEach((f) -> {
+                ObjectNode item = dataMapperService.createObjectNode();
+                item.put("appId", appId);
+                item.put("userVerification", userVerification);
+                item.put("challenge", challenge);
+                item.put("keyHandle", f.getId());
+                item.put("version", "U2F_V2");
 
-                authenticateRequests.add(f);
+                authenticateRequests.add(item);
             });
         }
 
         return superGluuResult;
     }
 
-    public ObjectNode buildFido2AssertionStartResponse(String userName, String keyHandle, String appId,
+    public AssertionOptions buildFido2AssertionStartResponse(String userName, String keyHandle, String appId,
                                                        String sessionId) {
         boolean oneStep = StringHelper.isEmpty(userName);
 
@@ -132,20 +132,19 @@ public class AssertionSuperGluuController {
             String reasonError = "invalid username or keyHandle";
             throw errorResponseFactory.badRequestException(AssertionErrorResponseType.INVALID_USERNAME_OR_KEY_HANDLE, reasonError);
         }
+        AssertionOptions assertionOptions = new AssertionOptions();
+        // Add all required parameters from request to allow process U2F request
+        assertionOptions.setSuper_gluu_request(true);
+        assertionOptions.setSuper_gluu_app_id(appId);
+        assertionOptions.setDocumentDomain(appId);
+        assertionOptions.setSuper_gluu_key_handle(keyHandle);
+        assertionOptions.setSuper_gluu_request_mode(oneStep ? SuperGluuMode.ONE_STEP.getMode() : SuperGluuMode.TWO_STEP.getMode());
 
-        ObjectNode params = dataMapperService.createObjectNode();
-        // Add all required parameters from request to allow process U2F request 
-        params.put(CommonVerifiers.SUPER_GLUU_REQUEST, true);
-        params.put(CommonVerifiers.SUPER_GLUU_APP_ID, appId);
-        params.put("documentDomain", appId);
-        params.put(CommonVerifiers.SUPER_GLUU_KEY_HANDLE, keyHandle);
-        params.put(CommonVerifiers.SUPER_GLUU_MODE, oneStep ? SuperGluuMode.ONE_STEP.getMode() : SuperGluuMode.TWO_STEP.getMode());
+        assertionOptions.setUsername(userName);
+        assertionOptions.setSession_id(sessionId);
 
-        params.put("username", userName);
-        params.put("session_id", sessionId);
-
-        log.debug("Prepared U2F_V2 assertions options request: {}", params);
-        return params;
+        log.debug("Prepared U2F_V2 assertions options request: {}", assertionOptions.toString());
+        return assertionOptions;
     }
 
     /* Example for one_step:
@@ -176,9 +175,10 @@ public class AssertionSuperGluuController {
     public JsonNode finishAuthentication(String userName, String authenticateResponseString) {
         AuthenticateResponse authenticateResponse = parseAuthenticateResponse(authenticateResponseString);
 
-        ObjectNode params = buildFido2AuthenticationVerifyResponse(userName, authenticateResponseString, authenticateResponse);
+        AssertionResult params = buildFido2AuthenticationVerifyResponse(userName, authenticateResponseString, authenticateResponse);
 
-        ObjectNode result = assertionService.verify(params);
+        AssertionResultResponse assertionResultResponse = assertionService.verify(params);
+        ObjectNode result = (ObjectNode)CommonUtilService.toJsonNode(assertionResultResponse);
 
         result.put("status", "success");
         result.put("challenge", authenticateResponse.getClientData().getChallenge());
@@ -186,24 +186,21 @@ public class AssertionSuperGluuController {
         return result;
     }
 
-    public ObjectNode buildFido2AuthenticationVerifyResponse(String userName, String authenticateResponseString, AuthenticateResponse authenticateResponse) {
+    public AssertionResult buildFido2AuthenticationVerifyResponse(String userName, String authenticateResponseString, AuthenticateResponse authenticateResponse) {
         if (!ArrayUtils.contains(RawAuthenticationService.SUPPORTED_AUTHENTICATE_TYPES, authenticateResponse.getClientData().getTyp())) {
             throw errorResponseFactory.badRequestException(AssertionErrorResponseType.UNSUPPORTED_AUTHENTICATION_TYPE, "Invalid options attestation request type");
         }
 
         boolean oneStep = StringHelper.isEmpty(userName);
 
-        ObjectNode params = dataMapperService.createObjectNode();
+        AssertionResult assertionResult = new AssertionResult();
+        //ObjectNode params = dataMapperService.createObjectNode();
         // Add all required parameters from request to allow process U2F request 
-        params.put(CommonVerifiers.SUPER_GLUU_REQUEST, true);
-        params.put(CommonVerifiers.SUPER_GLUU_MODE, oneStep ? SuperGluuMode.ONE_STEP.getMode() : SuperGluuMode.TWO_STEP.getMode());
-
-        // Manadatory parameter
-        params.put("type", "public-key");
-
-        params.put("id", authenticateResponse.getKeyHandle());
-
-        params.put("rawId", authenticateResponseString);
+        assertionResult.setSuper_gluu_request(true);
+        assertionResult.setSuper_gluu_request_mode(oneStep ? SuperGluuMode.ONE_STEP.getMode() : SuperGluuMode.TWO_STEP.getMode());
+        assertionResult.setType("public-key");
+        assertionResult.setId(authenticateResponse.getKeyHandle());
+        assertionResult.setRawId(authenticateResponseString);
 
         // Convert clientData node to new format
         ObjectNode clientData = dataMapperService.createObjectNode();
@@ -212,33 +209,40 @@ public class AssertionSuperGluuController {
         clientData.put("origin", authenticateResponse.getClientData().getOrigin());
 
         // Store cancel type
-        params.put(CommonVerifiers.SUPER_GLUU_REQUEST_CANCEL, StringHelper.equals(RawAuthenticationService.AUTHENTICATE_CANCEL_TYPE, authenticateResponse.getClientData().getTyp()));
-
+        assertionResult.setSuper_gluu_request_cancel(StringHelper.equals(RawAuthenticationService.AUTHENTICATE_CANCEL_TYPE, authenticateResponse.getClientData().getTyp()));
         // Add response node
-        ObjectNode response = dataMapperService.createObjectNode();
-        params.set("response", response);
-        response.put("deviceData", authenticateResponse.getDeviceData());
-
+        //ObjectNode response = dataMapperService.createObjectNode();
+        //params.set("response", response);
+        Response response = new Response();
+        response.setDeviceData(authenticateResponse.getDeviceData());
         // We have to quote URL to conform bug in Super Gluu
-        response.put("clientDataJSON", base64Service.urlEncodeToString(clientData.toString().replaceAll("/", "\\\\/").getBytes(StandardCharsets.UTF_8)));
-
+        response.setClientDataJSON(base64Service.urlEncodeToString(clientData.toString().replaceAll("/", "\\\\/").getBytes(StandardCharsets.UTF_8)));
         // Prepare attestationObject
         RawAuthenticateResponse rawAuthenticateResponse = rawAuthenticationService.parseRawAuthenticateResponse(authenticateResponse.getSignatureData());
+        response.setSignature(base64Service.urlEncodeToString(rawAuthenticateResponse.getSignature()));
 
-        response.put("signature", base64Service.urlEncodeToString(rawAuthenticateResponse.getSignature()));
+        //response.put("deviceData", authenticateResponse.getDeviceData());
+
+        // We have to quote URL to conform bug in Super Gluu
+        //response.put("clientDataJSON", base64Service.urlEncodeToString(clientData.toString().replaceAll("/", "\\\\/").getBytes(StandardCharsets.UTF_8)));
+
+        // Prepare attestationObject
+        //RawAuthenticateResponse rawAuthenticateResponse = rawAuthenticationService.parseRawAuthenticateResponse(authenticateResponse.getSignatureData());
+
+        //response.put("signature", base64Service.urlEncodeToString(rawAuthenticateResponse.getSignature()));
 
         ObjectNode attestationObject = dataMapperService.createObjectNode();
 
         try {
             byte[] authData = generateAuthData(authenticateResponse.getClientData(), rawAuthenticateResponse);
-            response.put("authenticatorData", base64Service.urlEncodeToString(authData));
-            response.put("attestationObject", base64Service.urlEncodeToString(dataMapperService.cborWriteAsBytes(attestationObject)));
+            response.setAuthenticatorData(base64Service.urlEncodeToString(authData));
+            response.setAttestationObject(base64Service.urlEncodeToString(dataMapperService.cborWriteAsBytes(attestationObject)));
         } catch (IOException e) {
             throw errorResponseFactory.invalidRequest("Failed to prepare attestationObject: " + e.getMessage(), e);
         }
-
-        log.debug("Prepared U2F_V2 assertion verify request: {}", params);
-        return params;
+        assertionResult.setResponse(response);
+        log.debug("Prepared U2F_V2 assertion verify request: {}", assertionResult.toString());
+        return assertionResult;
     }
 
     public AuthenticateResponse parseAuthenticateResponse(String authenticateResponseString) {
