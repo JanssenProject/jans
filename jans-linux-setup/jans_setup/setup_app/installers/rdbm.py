@@ -542,6 +542,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         shutil.unpack_archive(self.source_files[0][0], self.common_lib_dir)
         self.chown(os.path.join(Config.jetty_base, 'common'), Config.jetty_user, Config.jetty_user, True)
 
+
     def installed(self):
         # to be implemented
         return True

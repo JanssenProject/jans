@@ -525,23 +525,6 @@ paths:
       security:
       - oauth2:
         - https://jans.io/idp/saml.readonly
-  /kc/saml/idp/process-idp-meta-file:
-    post:
-      tags:
-      - SAML - Identity Broker
-      summary: Process unprocessed IDP metadata files
-      description: Process unprocessed IDP metadata files
-      operationId: post-idp-metadata-files
-      responses:
-        "200":
-          description: OK
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/idp/saml.write
   /kc/samlConfig:
     get:
       tags:
@@ -877,23 +860,6 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/saml.readonly
-  /kc/saml/trust-relationship/process-sp-meta-file:
-    post:
-      tags:
-      - SAML - Trust Relationship
-      summary: Process unprocessed metadata files
-      description: Process unprocessed metadata files
-      operationId: post-metadata-files
-      responses:
-        "200":
-          description: OK
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/saml.write
 components:
   schemas:
     BrokerIdentityProviderForm:

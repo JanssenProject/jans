@@ -81,15 +81,6 @@ Create optional scopes list
 {{ if eq .Values.cnPersistenceType "sql" }}
 {{ $newList = append $newList ("sql" | quote) }}
 {{- end }}
-{{- if .Values.fido2.enabled}}
-{{ $newList = append $newList ("fido2" | quote) }}
-{{- end}}
-{{- if .Values.casa.enabled}}
-{{ $newList = append $newList ("casa" | quote) }}
-{{- end}}
-{{- if .Values.scim.enabled}}
-{{ $newList = append $newList ("scim" | quote) }}
-{{- end}}
 {{ toJson $newList }}
 {{- end }}
 
