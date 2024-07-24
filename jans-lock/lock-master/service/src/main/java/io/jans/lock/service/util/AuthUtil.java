@@ -1,5 +1,8 @@
 package io.jans.lock.service.util;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.jans.as.client.TokenRequest;
 import io.jans.as.client.TokenResponse;
 import io.jans.as.model.common.GrantType;
@@ -20,12 +23,14 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
+import jakarta.ws.rs.WebApplicationException;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import org.apache.http.entity.ContentType;
 import org.apache.commons.io.IOUtils;
@@ -36,10 +41,7 @@ import org.apache.http.util.EntityUtils;
 
 import org.json.JSONObject;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 @ApplicationScoped
 public class AuthUtil {
@@ -102,7 +104,7 @@ public class AuthUtil {
             tokenRequest.setAuthUsername(clientId);
             tokenRequest.setAuthPassword(clientSecret);
             Builder request = getClientBuilder(tokenUrl);
-            request.header("Authorization", "Basic " + tokenRequest.getEncodedCredentials());
+            request.header(AUTHORIZATION, "Basic " + tokenRequest.getEncodedCredentials());
             request.header(CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED);
             final MultivaluedHashMap<String, String> multivaluedHashMap = new MultivaluedHashMap<>(
                     tokenRequest.getParameters());
@@ -186,14 +188,16 @@ public class AuthUtil {
             return jsonString;
         }
         jsonString = entity.toString();
-        
+
         try {
-        log.error("serviceResponse.getHttpResponse().getEntity():{}",serviceResponse.getHttpResponse().getEntity());
-         String responseMsg= EntityUtils.toString(serviceResponse.getHttpResponse().getEntity(),"UTF-8");
-         log.error("New responseMsg:{}", responseMsg);
-         log.error("serviceResponse.getHttpResponse().getAllHeaders():{}",serviceResponse.getHttpResponse().getAllHeaders());
-        }catch(Exception ex){
-            log.error("Error while getting entity using EntityUtils is ",ex);
+            log.error("serviceResponse.getHttpResponse().getEntity():{}",
+                    serviceResponse.getHttpResponse().getEntity());
+            String responseMsg = EntityUtils.toString(serviceResponse.getHttpResponse().getEntity(), "UTF-8");
+            log.error("New responseMsg:{}", responseMsg);
+            log.error("serviceResponse.getHttpResponse().getAllHeaders():{}",
+                    serviceResponse.getHttpResponse().getAllHeaders());
+        } catch (Exception ex) {
+            log.error("Error while getting entity using EntityUtils is ", ex);
         }
         return jsonString;
     }
@@ -251,10 +255,6 @@ public class AuthUtil {
         return jsonBody;
     }
 
-    private static Builder getClientBuilder(String url) {
-        return ClientBuilder.newClient().target(url).request();
-    }
-
     public String getDecryptedPassword(String clientPassword) {
         String decryptedPassword = null;
         if (clientPassword != null) {
@@ -306,7 +306,9 @@ public class AuthUtil {
         Set<String> keys = endpointMap.keySet();
         log.error("endpointMap keys:{}", keys);
 
-        String endpointPath = keys.stream().filter(e -> e!=null && e.toLowerCase().endsWith("/" + endpoint.toLowerCase())).findFirst().orElse(null);
+        String endpointPath = keys.stream()
+                .filter(e -> e != null && e.toLowerCase().endsWith("/" + endpoint.toLowerCase())).findFirst()
+                .orElse(null);
         log.error("Final endpoint:{}, endpointPath:{}", endpoint, endpointPath);
         return endpointPath;
     }
@@ -323,6 +325,49 @@ public class AuthUtil {
 
         log.error("Get Endpoint - sb:{}", sb);
         return sb.toString();
+    }
+
+    private static Builder getClientBuilder(String url) {
+        return ClientBuilder.newClient().target(url).request();
+    }
+    
+    
+    public Response post(String endpoint, String postData, ContentType contentType) {
+        log.error("postData - endpoint:{}, postData:{}", endpoint, postData);
+        String endpointPath = this.getEndpointPath(endpoint);
+        String token = this.getToken(endpointPath);
+
+        return post(this.getEndpointUrl(endpointPath), null, token, null, contentType, postData);
+    }
+
+    private Response post(String url, String authType, String token, Map<String, String> headers,
+            ContentType contentType, String postData) {
+        log.error("postData - url:{}, authType:{}, token:{}, headers:{}, contentType:{}, postData:{}", url, authType,
+                token, headers, contentType, postData);
+
+        if (StringUtils.isBlank(authType)) {
+            authType = "Bearer ";
+        }
+        if (contentType == null) {
+            contentType = ContentType.APPLICATION_JSON;
+        }
+
+        Builder request = getClientBuilder(url);
+        request.header(AUTHORIZATION, authType + token);
+        request.header(CONTENT_TYPE, contentType);
+
+        if (headers != null) {
+            for (Entry<String, String> headerEntry : headers.entrySet()) {
+                request.header(headerEntry.getKey(), headerEntry.getValue());
+            }
+        }
+        log.error(" \n\n\n request:{}, request.toString():{}", request, request.toString());
+        
+        Response response = request.post(Entity.entity(postData, MediaType.APPLICATION_JSON));
+        log.error(" \n\n\n response:{}", response);
+        
+       
+        return response;
     }
 
 }

@@ -67,7 +67,7 @@ public class AuditRestWebServiceImpl implements AuditRestWebService {
     public Response processTelemetryRequest(HttpServletRequest request, HttpServletResponse response,
             SecurityContext sec) {
         log.error("Processing Telemetry request - request:{}", request);
-        return processAuditRequest(request, "telemetry");
+        return processRequest(request, "telemetry");
 
     }
 
@@ -100,5 +100,39 @@ public class AuditRestWebServiceImpl implements AuditRestWebService {
 
         return builder.build();
     }
+    
+    private Response processRequest(HttpServletRequest request, String requestType) {
+        log.error("Processing request - request:{}, requestType:{}", request, requestType);
+
+        Response.ResponseBuilder builder = Response.ok();
+        builder.cacheControl(ServerUtil.cacheControlWithNoStoreTransformAndPrivate());
+        builder.header(ServerUtil.PRAGMA, ServerUtil.NO_CACHE);
+
+        JSONObject json = this.authUtil.getJSONObject(request);
+        Response response = this.authUtil.post(requestType, json.toString(),
+                ContentType.APPLICATION_JSON);
+        log.error("response:{}", response);
+
+        if (response != null) {
+            log.error(
+                    "Response for Access Token -  response.getStatus():{}, response.getStatusInfo():{}, response.getEntity().getClass():{}",
+                    response.getStatus(), response.getStatusInfo(), response.getEntity().getClass());
+            String entity = response.readEntity(String.class);
+            log.error(" entity:{}", entity);
+            builder.entity(entity);
+            
+            if (response.getStatusInfo().equals(Status.CREATED)) {
+              
+                log.error(" Status.CREATED:{}, entity:{}", Status.CREATED, entity);
+            } else {
+                log.error("Error while saving audit data - response.getStatusInfo():{}, entity:{}", response.getStatusInfo(), entity);
+                builder.status(response.getStatusInfo());
+            }
+        }
+
+
+        return builder.build();
+    }
+
 
 }
