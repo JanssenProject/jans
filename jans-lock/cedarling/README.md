@@ -76,7 +76,7 @@ $ wasm-pack test --chrome # --firefox or --safari
 From within your JS project, you'll need to import the exported `cedarling` functions from the `cedarling.js` file.
 
 ```js
-// Cedarling Initialization Flow
+// cedarling Initialization Flow
 // INFO: The cedarling must be initialized once and no more than once
 
 import { init } from "cedarling.js"
@@ -93,9 +93,9 @@ const config = {
 	},
 	// if policy-store.json is compressed using deflate-zlib
 	decompressPolicyStore: false,
-	// [OPTIONAL] How often, in milliseconds, will the cedarling refresh it's TrustStore. The cedarling won't refresh it's trust store if not omitted
+	// [OPTIONAL] How often, in milliseconds, will the cedarling refresh it's TrustStore. The cedarling won't refresh it's trust store if omitted
 	trustStoreRefreshRate: 2000,
-	// Set of jwt algorithms that the cedarling will allow, empty if omitted
+	// Set of jwt algorithms that the cedarling will allow
 	supportedAlgorithms: ["HS256", "HS384", "RS256"]
 };
 

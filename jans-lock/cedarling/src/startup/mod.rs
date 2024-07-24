@@ -11,6 +11,7 @@ pub mod types;
 
 pub static SCHEMA: OnceLock<Schema> = OnceLock::new();
 pub static POLICY_SET: OnceLock<PolicySet> = OnceLock::new();
+pub static DEFAULT_ENTITIES: OnceLock<Vec<serde_json::Value>> = OnceLock::new();
 
 pub async fn init(config: &types::CedarlingConfig) {
 	let policy_store = init_policy_store(config).await;
@@ -58,6 +59,12 @@ pub async fn init_policy_store(config: &types::CedarlingConfig) -> serde_json::M
 		let iter = policies.drain(..).map(|policy| Policy::from_json(None, policy).unwrap_throw());
 		PolicySet::from_policies(iter).unwrap_throw()
 	};
+
+	// Load Default Entities
+	if let Some(entities) = policy_store.remove("Entities") {
+		let entities: Vec<serde_json::Value> = serde_json::from_value(entities).expect_throw("Unable to parse default entities list");
+		DEFAULT_ENTITIES.set(entities).expect_throw("DEFAULT_ENTITIES has already been initialized");
+	}
 
 	// Persist PolicyStore data
 	SCHEMA.set(schema).expect_throw("SCHEMA has already been initialized");

@@ -1,18 +1,19 @@
 use serde_wasm_bindgen::{from_value, to_value};
 use wasm_bindgen::prelude::*;
 
-pub mod http;
-
 pub mod authz;
 mod crypto;
+pub mod http;
 mod lock_master;
 mod startup;
-mod token2entity;
 
 #[wasm_bindgen(start)]
 pub async fn start() {
 	// Extract information on unexpected panics
 	console_error_panic_hook::set_once();
+
+	let msg = JsValue::from_str(concat!("Jans Cedarling; v", env!("CARGO_PKG_VERSION")));
+	web_sys::console::log_1(&msg);
 }
 
 #[wasm_bindgen]
@@ -23,7 +24,7 @@ pub async fn init(config: JsValue) {
 	startup::init(&config).await;
 
 	// Initialize authz module
-	token2entity::init(&config);
+	authz::init(&config);
 }
 
 use wasm_bindgen_test::wasm_bindgen_test;

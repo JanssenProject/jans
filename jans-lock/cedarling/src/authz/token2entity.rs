@@ -1,37 +1,13 @@
-use std::{
-	collections::{HashMap, HashSet},
-	sync::OnceLock,
-};
+use std::collections::HashMap;
 
 use crypto::{decode, TRUST_STORE};
 use wasm_bindgen::throw_str;
 
+use super::{types, APPLICATION_NAME, REQUIRE_AUD_VALIDATION};
 use crate::*;
-pub mod types;
-
-pub static APPLICATION_NAME: OnceLock<String> = OnceLock::new();
-pub static REQUIRE_AUD_VALIDATION: OnceLock<bool> = OnceLock::new();
-
-pub fn init(config: &startup::types::CedarlingConfig) {
-	if let Some(application_name) = config.application_name.as_ref() {
-		APPLICATION_NAME.set(application_name.clone()).unwrap_throw();
-	}
-
-	REQUIRE_AUD_VALIDATION.set(config.require_aud_validation).unwrap_throw();
-}
-
-#[derive(Debug, serde::Deserialize)]
-struct EntityExtractor {
-	#[serde(rename = "type")]
-	type_name: String,
-	id: String,
-	#[serde(flatten)]
-	attributes: Vec<(String, serde_json::Value)>,
-}
 
 fn converter(_value: serde_json::Value) -> cedar_policy::RestrictedExpression {
 	match _value {
-		serde_json::Value::Bool(b) => cedar_policy::RestrictedExpression::new_bool(b),
 		serde_json::Value::Number(n) => {
 			if let Some(long) = n.as_i64() {
 				cedar_policy::RestrictedExpression::new_long(long)
@@ -43,6 +19,7 @@ fn converter(_value: serde_json::Value) -> cedar_policy::RestrictedExpression {
 				throw_str("Unknown number format encountered")
 			}
 		}
+		serde_json::Value::Bool(b) => cedar_policy::RestrictedExpression::new_bool(b),
 		serde_json::Value::String(s) => cedar_policy::RestrictedExpression::new_string(s),
 		serde_json::Value::Array(a) => cedar_policy::RestrictedExpression::new_set(a.into_iter().map(converter)),
 		serde_json::Value::Object(o) => cedar_policy::RestrictedExpression::new_record(o.into_iter().map(|(n, v)| (n, converter(v)))).unwrap_throw(),
@@ -53,14 +30,12 @@ fn converter(_value: serde_json::Value) -> cedar_policy::RestrictedExpression {
 }
 
 pub fn json2entity(value: serde_json::Value) -> cedar_policy::Entity {
-	let EntityExtractor { type_name, id, attributes } = serde_json::from_value(value).expect_throw("Expected Resource to contain 'type' and 'id' fields");
+	let types::DeferredEntity { _type, id, parents, attributes } = serde_json::from_value(value).expect_throw("Expected Resource to contain 'type' and 'id' fields");
 
-	let id = serde_json::json!({ "__entity": { "type": type_name, "id": id } });
+	let id = serde_json::json!({ "__entity": { "type": _type, "id": id } });
 	let id = cedar_policy::EntityUid::from_json(id).unwrap_throw();
 
-	let parents = HashSet::new();
 	let attrs = HashMap::from_iter(attributes.into_iter().map(|(n, value)| (n, converter(value))));
-
 	cedar_policy::Entity::new(id, attrs, parents).unwrap_throw()
 }
 
@@ -69,6 +44,11 @@ pub fn token2entities(input: &authz::types::AuthzInput) -> (cedar_policy::Entity
 	let principal;
 	let mut entities = cedar_policy::Entities::empty();
 	let schema = startup::SCHEMA.get();
+
+	// load default entities
+	if let Some(e) = startup::DEFAULT_ENTITIES.get() {
+		entities = entities.add_entities(e.iter().cloned().map(json2entity), schema).unwrap_throw();
+	}
 
 	// extract tokens
 	let id_token: types::IdToken = decode::decode_jwt(&input.id_token, decode::TokenType::IdToken);
