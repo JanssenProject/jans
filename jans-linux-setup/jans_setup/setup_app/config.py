@@ -40,7 +40,6 @@ class Config:
 
     installed_instance = False
 
-
     @classmethod
     def get(self, attr, default=None):
         return getattr(self, attr) if hasattr(self, attr) else default
@@ -364,57 +363,15 @@ class Config:
 
         self.install_time_ldap = None
 
-
-        self.couchbaseBucketDict = OrderedDict((
-                        ('default', { 'ldif':[
-                                            self.ldif_base, 
-                                            self.ldif_attributes,
-                                            self.ldif_scopes,
-                                            self.ldif_configuration,
-                                            self.ldif_metric,
-                                            self.ldif_agama,
-                                            ],
-                                      'memory_allocation': 100,
-                                      'mapping': '',
-                                      'document_key_prefix': []
-                                    }),
-
-                        ('user',     {   'ldif': [],
-                                        'memory_allocation': 300,
-                                        'mapping': 'people, groups, authorizations',
-                                        'document_key_prefix': ['groups_', 'people_', 'authorizations_'],
-                                    }),
-
-                        ('site',     {   'ldif': [self.ldif_site],
-                                        'memory_allocation': 100,
-                                        'mapping': 'jans-link',
-                                        'document_key_prefix': ['site_', 'jans-link_'],
-                                    }),
-
-                        ('cache',    {   'ldif': [],
-                                        'memory_allocation': 100,
-                                        'mapping': 'cache',
-                                        'document_key_prefix': ['cache_'],
-                                    }),
-
-                        ('token',   { 'ldif': [],
-                                      'memory_allocation': 300,
-                                      'mapping': 'tokens',
-                                      'document_key_prefix': ['tokens_'],
-                                    }),
-
-                        ('session',   { 'ldif': [],
-                                      'memory_allocation': 200,
-                                      'mapping': 'sessions',
-                                      'document_key_prefix': [],
-                                    }),
-
-                    ))
-
-        self.mapping_locations = { group: 'rdbm' for group in self.couchbaseBucketDict }
-
         self.non_setup_properties = {
             'jans_auth_client_jar_fn': os.path.join(self.dist_jans_dir, 'jans-auth-client-jar-with-dependencies.jar')
                 }
+
+        #re-map couchbase buckets ldif
+        for bucket in self.couchbaseBucketDict:
+            for i, ldifs in enumerate(self.couchbaseBucketDict[bucket]['ldif']):
+                self.couchbaseBucketDict[bucket]['ldif'][i] = getattr(self, ldifs)
+
+        self.mapping_locations = { group: 'rdbm' for group in self.couchbaseBucketDict }
 
         Config.addPostSetupService = []
