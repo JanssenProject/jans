@@ -61,7 +61,7 @@ pub async fn init_policy_store(config: &types::CedarlingConfig) -> serde_json::M
 	};
 
 	// Load Default Entities
-	if let Some(entities) = policy_store.remove("Entities") {
+	if let Some(entities) = policy_store.remove("DefaultEntities") {
 		let entities: Vec<serde_json::Value> = serde_json::from_value(entities).expect_throw("Unable to parse default entities list");
 		DEFAULT_ENTITIES.set(entities).expect_throw("DEFAULT_ENTITIES has already been initialized");
 	}

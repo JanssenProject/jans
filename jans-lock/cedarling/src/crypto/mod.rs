@@ -71,7 +71,7 @@ fn init_trust_store(refresh_rate: Option<i32>, trusted_issuers: Vec<TrustedIssue
 	#[wasm_bindgen]
 	extern "C" {
 		#[wasm_bindgen(js_name = setInterval)]
-		pub fn set_interval(callback: &web_sys::js_sys::Function, interval: i32) -> i32;
+		pub fn set_interval(callback: &web_sys::js_sys::Function, interval: i32);
 	}
 
 	// setup refresh loop

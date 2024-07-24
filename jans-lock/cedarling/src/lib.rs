@@ -27,11 +27,7 @@ pub async fn init(config: JsValue) {
 	authz::init(&config);
 }
 
-use wasm_bindgen_test::wasm_bindgen_test;
-
-wasm_bindgen_test::wasm_bindgen_test_configure!(run_in_browser);
-
-#[wasm_bindgen_test]
+#[wasm_bindgen_test::wasm_bindgen_test]
 async fn remote() {
 	let config = startup::types::CedarlingConfig {
 		application_name: Some("test#docs".into()),
