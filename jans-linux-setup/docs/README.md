@@ -48,7 +48,7 @@ All files related to SetupApp are saved under this directory and subdirectories.
   variables are defined as class variables, so the can be accesible without any construction. You need to call `init()` static
   method with argument installaltion directory. Since we don't create varbiles related to services/applications unless they are
   installed, you can query a variable with static method `get()` by providing variable name and default value if you need. 
-  For example if you code `Config.get('installJans', False)`, this will return value of variable `installJans` if defined, 
+  For example if you code `Config.get('install_jans', False)`, this will return value of variable `install_jans` if defined, 
   otherwise  returns `False`. This is the third file you need to import if you are going to write another application and sould
   be constructed by `init()`. You won't need initialize this class.
   
@@ -85,8 +85,8 @@ Collection of utilities used by SetupApp.
    
    - `import_lidf(ldif_files)`: imports to list of ldif files to database. It automatically determines database location 
      (ldap or couchbase) and which bucket to import according to `dn`
-   - `set_oxAuthConfDynamic(entries)`: takes entries as dctionary and updates `oxAuthConfDynamic` in database
-   - `set_oxAuthConfDynamic(entries)`: the same for `oxAuthConfDynamic`
+   - `set_jans_auth_conf_dynamic(entries)`: takes entries as dctionary and updates `jans_auth_conf_dynamic` in database
+   - `set_jans_auth_conf_dynamic(entries)`: the same for `jans_auth_conf_dynamic`
    - `enable_script(inum)`: enables script
    - `enable_service(service)`: enables jans service in oxtrust ui
    - `add_client2script(inum)`: adds client to script's allowed client property
@@ -120,7 +120,7 @@ desciribng base installers
       So include these code here,
    - `render_import_templates()`: template renderings are done under this function, then imported to database
    - `update_backend()`: if you need to update database (other than importing templates) write here. For example enabling script, 
-      updating oxauth and/or oxtrust configurations etc.
+      updating jans_auth and/or other service configurations etc.
    
    This module also contains start/stop/restart/enable linux services.
    
@@ -250,7 +250,7 @@ class SampleInstaller(JettyInstaller):
         # this is the first function called automatically after binding database
         
         # deploy jetty application
-        self.installJettyService(self.jetty_app_configuration[self.service_name], True)
+        self.install_jettyService(self.jetty_app_configuration[self.service_name], True)
         jettyServiceWebapps = os.path.join(self.jetty_base, self.service_name, 'webapps')
         src_war = os.path.join(Config.distGluuFolder, 'app.war')
         self.copyFile(src_war, jettyServiceWebapps)

@@ -204,6 +204,7 @@ nav:
       - SSA: admin/auth-server/endpoints/ssa.md
       - Userinfo: admin/auth-server/endpoints/userinfo.md
       - Token Revocation: admin/auth-server/endpoints/token-revocation.md
+      - Global Token Revocation: admin/auth-server/endpoints/global-token-revocation.md
       - Session Revocation: admin/auth-server/endpoints/session-revocation.md
       - End Session: admin/auth-server/endpoints/end-session.md
       - Clientinfo: admin/auth-server/endpoints/clientinfo.md
@@ -395,11 +396,13 @@ nav:
     - Jans Keycloak Link: admin/link/jans-keycloak-link.md
   - Lock Guide:
       - admin/lock/README.md
-      - Lock Installation: admin/lock/lock_installation.md
-      - Auth Server Configuration: admin/lock/lock_auth_server_config.md
-      - Lock Client Configuration: admin/lock/lock_client_config.md
-      - Implement Lock PDP Plugin: admin/lock/lock_pdp_plugin.md
-      - Policy Store Integration: admin/lock/lock_opa.md
+      - Lock Installation: admin/lock/lock-installation.md
+      - Auth Server Configuration: admin/lock/lock-auth-server-config.md
+      - Lock Client Configuration: admin/lock/lock-client-config.md
+      - Implement Lock PDP Plugin: admin/lock/lock-pdp-plugin.md
+      - Policy Store Integration: admin/lock/lock-opa.md
+      - Lock Master: admin/lock/lock-master.md
+      - Authorization Using Cedarling: admin/lock/cedarling.md
   - Janssen Recipes:
     - admin/recipes/README.md
     - Benchmark: admin/recipes/benchmark.md

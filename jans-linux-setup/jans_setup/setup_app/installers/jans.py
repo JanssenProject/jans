@@ -24,7 +24,7 @@ from setup_app.installers.base import BaseInstaller
 
 class JansInstaller(BaseInstaller, SetupUtils):
 
-    install_var = 'installJans'
+    install_var = 'install_jans'
 
     def __repr__(self):
         setattr(base.current_app, self.__class__.__name__, self)
@@ -73,12 +73,12 @@ class JansInstaller(BaseInstaller, SetupUtils):
                     return ''
                 return prefix.ljust(30) + repr(getattr(Config, install_var, False)).rjust(35) + (' *' if install_var in Config.addPostSetupService else '') + '\n'
 
-            txt += get_install_string('Install Apache 2 web server', 'installHttpd')
-            txt += get_install_string('Install Auth Server', 'installOxAuth')
+            txt += get_install_string('Install Apache 2 web server', 'install_httpd')
+            txt += get_install_string('Install Auth Server', 'install_jans_auth')
             txt += get_install_string('Install Jans Config API', 'install_config_api')
             if Config.profile == 'jans':
                 for prompt_str, install_var in (
-                        ('Install Fido2 Server', 'installFido2'),
+                        ('Install Fido2 Server', 'install_fido2'),
                         ('Install Scim Server', 'install_scim_server'),
                         ('Install Jans Link Server', 'install_jans_link'),
                         ('Install Jans KC Link Server', 'install_jans_keycloak_link'),
@@ -117,15 +117,15 @@ class JansInstaller(BaseInstaller, SetupUtils):
             sys.exit(1)
 
         #Download jans-auth-client-jar-with-dependencies
-        if not os.path.exists(Config.non_setup_properties['oxauth_client_jar_fn']):
-            oxauth_client_jar_url = os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-auth-client/{0}/jans-auth-client-{0}-jar-with-dependencies.jar').format(base.current_app.app_info['jans_version'])
-            self.logIt("Downloading {}".format(os.path.basename(oxauth_client_jar_url)))
-            base.download(oxauth_client_jar_url, Config.non_setup_properties['oxauth_client_jar_fn'])
+        if not os.path.exists(Config.non_setup_properties['jans_auth_client_jar_fn']):
+            jans_auth_client_jar_url = os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-auth-client/{0}/jans-auth-client-{0}-jar-with-dependencies.jar').format(base.current_app.app_info['jans_version'])
+            self.logIt("Downloading {}".format(os.path.basename(jans_auth_client_jar_url)))
+            base.download(jans_auth_client_jar_url, Config.non_setup_properties['jans_auth_client_jar_fn'])
 
         self.logIt("Determining key generator path")
-        oxauth_client_jar_zf = zipfile.ZipFile(Config.non_setup_properties['oxauth_client_jar_fn'])
+        jans_auth_client_jar_zf = zipfile.ZipFile(Config.non_setup_properties['jans_auth_client_jar_fn'])
 
-        for f in oxauth_client_jar_zf.namelist():
+        for f in jans_auth_client_jar_zf.namelist():
             if os.path.basename(f) == 'KeyGenerator.class':
                 p, e = os.path.splitext(f)
                 Config.non_setup_properties['key_gen_path'] = p.replace(os.path.sep, '.')
@@ -134,7 +134,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
                 Config.non_setup_properties['key_export_path'] = p.replace(os.path.sep, '.')
 
         if (not 'key_gen_path' in Config.non_setup_properties) or (not 'key_export_path' in Config.non_setup_properties):
-            self.logIt("Can't determine key generator and/or key exporter path form {}".format(Config.non_setup_properties['oxauth_client_jar_fn']), True, True)
+            self.logIt("Can't determine key generator and/or key exporter path form {}".format(Config.non_setup_properties['jans_auth_client_jar_fn']), True, True)
         else:
             self.logIt("Key generator path was determined as {}".format(Config.non_setup_properties['key_export_path']))
 
@@ -646,10 +646,10 @@ class JansInstaller(BaseInstaller, SetupUtils):
     def order_services(self):
 
         service_list = [
-                        ('jans-auth', 'installOxAuth'),
+                        ('jans-auth', 'install_jans_auth'),
                         ('jans-config-api', 'install_config_api'),
                         ('jans-casa', 'install_casa'),
-                        ('jans-fido2', 'installFido2'),
+                        ('jans-fido2', 'install_fido2'),
                         ('jans-link', 'install_jans_link'),
                         ('jans-scim', 'install_scim_server'),
                         ('jans-lock', 'install_jans_lock_as_server'),

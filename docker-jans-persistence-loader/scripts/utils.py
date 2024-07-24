@@ -50,7 +50,7 @@ def get_jackrabbit_rmi_url():
 
 
 def get_base_ctx(manager):
-    redis_pw = manager.secret.get("redis_pw") or ""
+    redis_pw = manager.secret.get("redis_password") or ""
     redis_pw_encoded = ""
 
     if redis_pw:

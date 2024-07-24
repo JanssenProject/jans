@@ -21,7 +21,7 @@ jobs:
       max-parallel: 6
       matrix:
         # add '"pgsql" when supported
-        persistence-backends: ["MYSQL", "PGSQL", "LDAP"]
+        persistence-backends: ["MYSQL", "PGSQL", "LDAP", "COUCHBASE", "SPANNER"]
         python-version: ["3.7"]
       fail-fast: false
     steps:

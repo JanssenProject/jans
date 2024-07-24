@@ -35,7 +35,7 @@ class JansKCLinkInstaller(JettyInstaller):
         self.snapshots_dir = os.path.join(self.vendor_dir, 'keycloak-link-snapshots')
 
     def install(self):
-        self.installJettyService(self.jetty_app_configuration[self.service_name], True)
+        self.install_jettyService(self.jetty_app_configuration[self.service_name], True)
         self.copyFile(self.source_files[0][0], self.jetty_service_webapps)
         base.current_app.ConfigApiInstaller.source_files.append(self.source_files[1])
         base.current_app.ConfigApiInstaller.install_plugin('kc-link-plugin')
