@@ -129,7 +129,7 @@ class AttestationSuperGluuControllerTest {
 
         assertEquals(response.getUsername(), "generate-userId");
         assertEquals(response.getDisplayName(), "generate-userId");
-        assertEquals(response.getSession_id(), sessionId);
+        assertEquals(response.getSessionId(), sessionId);
         assertEquals(response.getAttestation().getKeyName(), "direct");
         assertEquals(response.getSuperGluuRequest().toString(), "true");
         assertEquals(response.getSuperGluuRequestMode(), "one_step");
@@ -153,7 +153,7 @@ class AttestationSuperGluuControllerTest {
 
         assertEquals(response.getUsername(), "test-username");
         assertEquals(response.getDisplayName(), "test-username");
-        assertEquals(response.getSession_id(), sessionId);
+        assertEquals(response.getSessionId(), sessionId);
         assertEquals(response.getAttestation().getKeyName(), "direct");
         assertEquals(response.getSuperGluuRequest().toString(), "true");
         assertEquals(response.getSuperGluuRequestMode(), "two_step");

@@ -355,7 +355,7 @@ public class CommonVerifiers {
         }
 
         if (attestationConveyancePreference == null) {
-            attestationConveyancePreference = AttestationConveyancePreference.DIRECT;
+            attestationConveyancePreference = AttestationConveyancePreference.direct;
         }
         
         return attestationConveyancePreference;

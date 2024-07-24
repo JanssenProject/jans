@@ -197,8 +197,8 @@ public class AttestationService {
 
 		Fido2RegistrationEntry registrationEntry = registrationPersistenceService.buildFido2RegistrationEntry(entity, oneStep);
 		//if (params.hasNonNull("session_id")) {
-		if (attestationOptions.getSession_id() != null) {
-			registrationEntry.setSessionStateId(attestationOptions.getSession_id());
+		if (attestationOptions.getSessionId() != null) {
+			registrationEntry.setSessionStateId(attestationOptions.getSessionId());
 		}
 
 		// Set expiration

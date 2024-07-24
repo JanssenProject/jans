@@ -30,7 +30,7 @@ abstract public class SuperGluuSupport {
     }
 
     public void setSuperGluuRequestMode(String superGluuRequestMode) {
-        superGluuRequestMode = superGluuRequestMode;
+        this.superGluuRequestMode = superGluuRequestMode;
     }
 
     public Boolean getSuperGluuRequest() {
@@ -38,7 +38,7 @@ abstract public class SuperGluuSupport {
     }
 
     public void setSuperGluuRequest(Boolean superGluuRequest) {
-        superGluuRequest = superGluuRequest;
+        this.superGluuRequest = superGluuRequest;
     }
 
     public String getSuperGluuKeyHandle() {
@@ -46,7 +46,7 @@ abstract public class SuperGluuSupport {
     }
 
     public void setSuperGluuKeyHandle(String superGluuKeyHandle) {
-        superGluuKeyHandle = superGluuKeyHandle;
+        this.superGluuKeyHandle = superGluuKeyHandle;
     }
 
     public Boolean getSuperGluuRequestCancel() {
@@ -54,6 +54,6 @@ abstract public class SuperGluuSupport {
     }
 
     public void setSuperGluuRequestCancel(Boolean superGluuRequestCancel) {
-        superGluuRequestCancel = superGluuRequestCancel;
+        this.superGluuRequestCancel = superGluuRequestCancel;
     }
 }
