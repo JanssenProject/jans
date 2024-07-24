@@ -22,7 +22,7 @@ import java.util.Arrays;
 public class PublicKeyCredentialDescriptor {
 
     private String type;
-    private String transports[];
+    private String[] transports;
     private String id;
 
     public PublicKeyCredentialDescriptor(String type, String id) {
@@ -30,7 +30,7 @@ public class PublicKeyCredentialDescriptor {
         this.id = id;
     }
 
-    public PublicKeyCredentialDescriptor(String type, String transports[], String id) {
+    public PublicKeyCredentialDescriptor(String type, String[] transports, String id) {
         this.type = type;
         this.transports = transports;
         this.id = id;

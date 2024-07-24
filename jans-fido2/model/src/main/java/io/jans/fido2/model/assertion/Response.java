@@ -69,8 +69,7 @@ public class Response {
     }
 
     public static Response createResponse(String authenticatorData, String signature, String clientDataJSON, String userHandle, String deviceData, String attestationObject) {
-        Response instance = new Response(authenticatorData, signature, clientDataJSON, userHandle, deviceData, attestationObject);
-        return instance;
+        return new Response(authenticatorData, signature, clientDataJSON, userHandle, deviceData, attestationObject);
     }
 
     @Override

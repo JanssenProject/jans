@@ -1,10 +1,12 @@
 package io.jans.fido2.model.attestation;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.jans.fido2.ctap.AttestationConveyancePreference;
 import io.jans.fido2.ctap.AuthenticatorAttachment;
 import io.jans.fido2.model.common.SuperGluuSupport;
-
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class AttestationOptions extends SuperGluuSupport {
     private String username;
     private String displayName;
@@ -14,7 +16,8 @@ public class AttestationOptions extends SuperGluuSupport {
     private AuthenticatorSelection authenticatorSelection;
     private AuthenticatorAttachment authenticatorAttachment;
     private Long timeout;
-    private String session_id;
+    @JsonProperty(value = "session_id")
+    private String sessionId;
 
     public String getUsername() {
         return username;
@@ -80,12 +83,12 @@ public class AttestationOptions extends SuperGluuSupport {
         this.authenticatorAttachment = authenticatorAttachment;
     }
 
-    public String getSession_id() {
-        return session_id;
+    public String getSessionId() {
+        return sessionId;
     }
 
-    public void setSession_id(String session_id) {
-        this.session_id = session_id;
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
     }
 
     @Override

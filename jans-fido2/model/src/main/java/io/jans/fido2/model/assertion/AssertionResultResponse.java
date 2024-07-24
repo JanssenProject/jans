@@ -1,6 +1,5 @@
 package io.jans.fido2.model.assertion;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import io.jans.fido2.model.common.PublicKeyCredentialDescriptor;
 
 public class AssertionResultResponse {

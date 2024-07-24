@@ -128,7 +128,7 @@ public class AttestationSuperGluuController {
         attestationOptions.setUsername(useUserName);
         attestationOptions.setDisplayName(useUserName);
         attestationOptions.setSession_id(sessionId);
-        attestationOptions.setAttestation(AttestationConveyancePreference.direct);
+        attestationOptions.setAttestation(AttestationConveyancePreference.DIRECT);
 
         log.debug("Prepared U2F_V2 attestation options request: {}", CommonUtilService.toJsonNode(attestationOptions).toString());
 		return attestationOptions;

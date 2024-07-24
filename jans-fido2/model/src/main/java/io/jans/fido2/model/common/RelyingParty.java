@@ -26,8 +26,7 @@ public class RelyingParty implements PublicKeyCredentialEntity{
     }
 
     public static RelyingParty createRelyingParty(String id, String name) {
-        RelyingParty instance = new RelyingParty(id, name);
-        return instance;
+        return new RelyingParty(id, name);
     }
 
     @Override

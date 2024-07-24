@@ -9,13 +9,13 @@ abstract public class SuperGluuSupport {
     @JsonProperty(value = "super_gluu_app_id")
     private String superGluuAppId;
     @JsonProperty(value = "super_gluu_request_mode")
-    private String SuperGluuRequestMode;
+    private String superGluuRequestMode;
     @JsonProperty(value = "super_gluu_request")
-    private Boolean SuperGluuRequest;
+    private Boolean superGluuRequest;
     @JsonProperty(value = "super_gluu_key_handle")
-    private String SuperGluuKeyHandle;
+    private String superGluuKeyHandle;
     @JsonProperty(value = "super_gluu_request_cancel")
-    private Boolean SuperGluuRequestCancel;
+    private Boolean superGluuRequestCancel;
 
     public String getSuperGluuAppId() {
         return superGluuAppId;
@@ -26,34 +26,34 @@ abstract public class SuperGluuSupport {
     }
 
     public String getSuperGluuRequestMode() {
-        return SuperGluuRequestMode;
+        return superGluuRequestMode;
     }
 
     public void setSuperGluuRequestMode(String superGluuRequestMode) {
-        SuperGluuRequestMode = superGluuRequestMode;
+        superGluuRequestMode = superGluuRequestMode;
     }
 
     public Boolean getSuperGluuRequest() {
-        return SuperGluuRequest;
+        return superGluuRequest;
     }
 
     public void setSuperGluuRequest(Boolean superGluuRequest) {
-        SuperGluuRequest = superGluuRequest;
+        superGluuRequest = superGluuRequest;
     }
 
     public String getSuperGluuKeyHandle() {
-        return SuperGluuKeyHandle;
+        return superGluuKeyHandle;
     }
 
     public void setSuperGluuKeyHandle(String superGluuKeyHandle) {
-        SuperGluuKeyHandle = superGluuKeyHandle;
+        superGluuKeyHandle = superGluuKeyHandle;
     }
 
     public Boolean getSuperGluuRequestCancel() {
-        return SuperGluuRequestCancel;
+        return superGluuRequestCancel;
     }
 
     public void setSuperGluuRequestCancel(Boolean superGluuRequestCancel) {
-        SuperGluuRequestCancel = superGluuRequestCancel;
+        superGluuRequestCancel = superGluuRequestCancel;
     }
 }

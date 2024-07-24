@@ -29,8 +29,7 @@ public class PublicKeyCredentialParameters {
     }
 
     public static PublicKeyCredentialParameters createPublicKeyCredentialParameters(int alg, String type) {
-        PublicKeyCredentialParameters instance = new PublicKeyCredentialParameters(alg, type);
-        return instance;
+        return new PublicKeyCredentialParameters(alg, type);
     }
 
     @Override

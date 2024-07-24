@@ -36,8 +36,7 @@ public class User implements PublicKeyCredentialEntity {
     }
 
     public static User createUser(String id, String name, String displayName) {
-        User instance = new User(id, name, displayName);
-        return instance;
+        return new User(id, name, displayName);
     }
 
     @Override

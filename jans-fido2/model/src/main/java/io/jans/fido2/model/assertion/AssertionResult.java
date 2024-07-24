@@ -1,6 +1,5 @@
 package io.jans.fido2.model.assertion;
 
-import io.jans.fido2.model.common.PublicKeyCredentialParameters;
 import io.jans.fido2.model.common.SuperGluuSupport;
 
 public class AssertionResult extends SuperGluuSupport {
@@ -52,8 +51,7 @@ public class AssertionResult extends SuperGluuSupport {
     }
 
     public static AssertionResult createAssertionResult(String id, String type, String rawId, Response response) {
-        AssertionResult instance = new AssertionResult(id, type, rawId, response);
-        return instance;
+        return new AssertionResult(id, type, rawId, response);
     }
 
     @Override
