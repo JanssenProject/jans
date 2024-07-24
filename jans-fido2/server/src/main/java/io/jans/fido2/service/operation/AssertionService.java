@@ -155,13 +155,13 @@ public class AssertionService {
 
 
 		String applicationId = documentDomain;
-		if (superGluu && !Strings.isNullOrEmpty(assertionOptions.getSuper_gluu_app_id())) {
-			applicationId = assertionOptions.getSuper_gluu_app_id();
+		if (superGluu && !Strings.isNullOrEmpty(assertionOptions.getSuperGluuAppId())) {
+			applicationId = assertionOptions.getSuperGluuAppId();
 		}
 
 		String requestedKeyHandle = null;
-		if (superGluu && !Strings.isNullOrEmpty(assertionOptions.getSuper_gluu_key_handle())) {
-			requestedKeyHandle = assertionOptions.getSuper_gluu_key_handle();
+		if (superGluu && !Strings.isNullOrEmpty(assertionOptions.getSuperGluuKeyHandle())) {
+			requestedKeyHandle = assertionOptions.getSuperGluuKeyHandle();
 		}
 
 		// Put allowCredentials
@@ -205,8 +205,8 @@ public class AssertionService {
 		entity.setDomain(documentDomain);
 		entity.setUserVerificationOption(userVerification);
 		entity.setStatus(Fido2AuthenticationStatus.pending);
-		if (!Strings.isNullOrEmpty(assertionOptions.getSuper_gluu_app_id())) {
-			entity.setApplicationId(assertionOptions.getSuper_gluu_app_id());
+		if (!Strings.isNullOrEmpty(assertionOptions.getSuperGluuAppId())) {
+			entity.setApplicationId(assertionOptions.getSuperGluuAppId());
 		} else {
 			entity.setApplicationId(documentDomain);
 		}
@@ -215,8 +215,8 @@ public class AssertionService {
 		entity.setAssertionRequest(CommonUtilService.toJsonNode(assertionOptions).toString());
 
 		Fido2AuthenticationEntry authenticationEntity = authenticationPersistenceService.buildFido2AuthenticationEntry(entity, oneStep);
-		if (!Strings.isNullOrEmpty(assertionOptions.getSession_id())) {
-			authenticationEntity.setSessionStateId(assertionOptions.getSession_id());
+		if (!Strings.isNullOrEmpty(assertionOptions.getSessionId())) {
+			authenticationEntity.setSessionStateId(assertionOptions.getSessionId());
 		}
 
 		// Set expiration
@@ -277,8 +277,8 @@ public class AssertionService {
 		entity.setAssertionRequest(CommonUtilService.toJsonNode(assertionOptionsGenerate).toString());
 
 		Fido2AuthenticationEntry authenticationEntity = authenticationPersistenceService.buildFido2AuthenticationEntry(entity, true);
-		if (!Strings.isNullOrEmpty(assertionOptionsGenerate.getSession_id())) {
-			authenticationEntity.setSessionStateId(assertionOptionsGenerate.getSession_id());
+		if (!Strings.isNullOrEmpty(assertionOptionsGenerate.getSessionId())) {
+			authenticationEntity.setSessionStateId(assertionOptionsGenerate.getSessionId());
 		}
 
 		// Set expiration

@@ -1,14 +1,17 @@
 package io.jans.fido2.model.assertion;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.jans.orm.model.fido2.UserVerification;
-
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class AssertionOptionsGenerate {
     private UserVerification userVerification;
     private String documentDomain;
     private Long timeout;
     private JsonNode extensions;
-    private String session_id;
+    @JsonProperty(value = "session_id")
+    private String sessionId;
 
     public UserVerification getUserVerification() {
         return userVerification;
@@ -42,12 +45,12 @@ public class AssertionOptionsGenerate {
         this.extensions = extensions;
     }
 
-    public String getSession_id() {
-        return session_id;
+    public String getSessionId() {
+        return sessionId;
     }
 
-    public void setSession_id(String session_id) {
-        this.session_id = session_id;
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
     }
 
     @Override
@@ -57,7 +60,7 @@ public class AssertionOptionsGenerate {
                 ", documentDomain='" + documentDomain + '\'' +
                 ", timeout=" + timeout +
                 ", extensions=" + extensions +
-                ", session_id='" + session_id + '\'' +
+                ", sessionId='" + sessionId + '\'' +
                 '}';
     }
 }

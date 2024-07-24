@@ -131,9 +131,9 @@ class AttestationSuperGluuControllerTest {
         assertEquals(response.getDisplayName(), "generate-userId");
         assertEquals(response.getSession_id(), sessionId);
         assertEquals(response.getAttestation().getKeyName(), "direct");
-        assertEquals(response.getSuper_gluu_request().toString(), "true");
-        assertEquals(response.getSuper_gluu_request_mode(), "one_step");
-        assertEquals(response.getSuper_gluu_app_id(), appId);
+        assertEquals(response.getSuperGluuRequest().toString(), "true");
+        assertEquals(response.getSuperGluuRequestMode(), "one_step");
+        assertEquals(response.getSuperGluuAppId(), appId);
 
         verify(userSessionIdService).isValidSessionId(sessionId, username);
         //verify(dataMapperService).createObjectNode();
@@ -155,9 +155,9 @@ class AttestationSuperGluuControllerTest {
         assertEquals(response.getDisplayName(), "test-username");
         assertEquals(response.getSession_id(), sessionId);
         assertEquals(response.getAttestation().getKeyName(), "direct");
-        assertEquals(response.getSuper_gluu_request().toString(), "true");
-        assertEquals(response.getSuper_gluu_request_mode(), "two_step");
-        assertEquals(response.getSuper_gluu_app_id(), appId);
+        assertEquals(response.getSuperGluuRequest().toString(), "true");
+        assertEquals(response.getSuperGluuRequestMode(), "two_step");
+        assertEquals(response.getSuperGluuAppId(), appId);
 
         verify(userSessionIdService).isValidSessionId(sessionId, username);
         //verify(dataMapperService).createObjectNode();
@@ -346,15 +346,15 @@ class AttestationSuperGluuControllerTest {
 
         AttestationResult attestationResult = attestationSuperGluuController.buildFido2AttestationVerifyResponse(username, registerResponse);
         assertNotNull(attestationResult);
-        assertNotNull(attestationResult.getSuper_gluu_request());
-        assertFalse(Strings.isNullOrEmpty(attestationResult.getSuper_gluu_request_mode()));
-        assertNotNull(attestationResult.getSuper_gluu_request_cancel());
+        assertNotNull(attestationResult.getSuperGluuRequest());
+        assertFalse(Strings.isNullOrEmpty(attestationResult.getSuperGluuRequestMode()));
+        assertNotNull(attestationResult.getSuperGluuRequestCancel());
         assertNotNull(attestationResult.getId());
         assertNotNull(attestationResult.getType());
         assertNotNull(attestationResult.getResponse());
-        assertEquals(attestationResult.getSuper_gluu_request().toString(), "true");
-        assertEquals(attestationResult.getSuper_gluu_request_mode(), "two_step");
-        assertEquals(attestationResult.getSuper_gluu_request_cancel().toString(), "false");
+        assertEquals(attestationResult.getSuperGluuRequest().toString(), "true");
+        assertEquals(attestationResult.getSuperGluuRequestMode(), "two_step");
+        assertEquals(attestationResult.getSuperGluuRequestCancel().toString(), "false");
         assertEquals(attestationResult.getId(), "test_key_handle");
         assertEquals(attestationResult.getType(), "public-key");
         io.jans.fido2.model.attestation.Response response = attestationResult.getResponse();

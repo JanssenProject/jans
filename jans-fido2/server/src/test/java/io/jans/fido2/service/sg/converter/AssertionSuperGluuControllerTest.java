@@ -184,20 +184,20 @@ class AssertionSuperGluuControllerTest {
 
         AssertionOptions response = assertionSuperGluuController.buildFido2AssertionStartResponse(username, keyHandle, appId, sessionId);
         assertNotNull(response);
-        assertNotNull(response.getSuper_gluu_request());
-        assertNotNull(response.getSuper_gluu_app_id());
+        assertNotNull(response.getSuperGluuRequest());
+        assertNotNull(response.getSuperGluuAppId());
         assertNotNull(response.getDocumentDomain());
-        assertNotNull(response.getSuper_gluu_key_handle());
-        assertNotNull(response.getSuper_gluu_request_mode());
+        assertNotNull(response.getSuperGluuKeyHandle());
+        assertNotNull(response.getSuperGluuRequestMode());
         assertNotNull(response.getUsername());
-        assertNotNull(response.getSession_id());
-        assertEquals((response.getSuper_gluu_request() == null ? "false" : response.getSuper_gluu_request().toString()),"true");
-        assertEquals(response.getSuper_gluu_app_id(), appId);
+        assertNotNull(response.getSessionId());
+        assertEquals((response.getSuperGluuRequest() == null ? "false" : response.getSuperGluuRequest().toString()),"true");
+        assertEquals(response.getSuperGluuAppId(), appId);
         assertEquals(response.getDocumentDomain(), appId);
-        assertEquals(response.getSuper_gluu_key_handle(), keyHandle);
-        assertEquals(response.getSuper_gluu_request_mode(), "one_step");
+        assertEquals(response.getSuperGluuKeyHandle(), keyHandle);
+        assertEquals(response.getSuperGluuRequestMode(), "one_step");
         assertEquals(response.getUsername(), "");
-        assertEquals(response.getSession_id(), sessionId);
+        assertEquals(response.getSessionId(), sessionId);
 
         verify(userSessionIdService).isValidSessionId(sessionId, username);
 //        verify(dataMapperService).createObjectNode();
@@ -214,20 +214,20 @@ class AssertionSuperGluuControllerTest {
 
         AssertionOptions response = assertionSuperGluuController.buildFido2AssertionStartResponse(username, keyHandle, appId, sessionId);
         assertNotNull(response);
-        assertTrue(response.getSuper_gluu_request());
-        assertNotNull(response.getSuper_gluu_app_id());
+        assertTrue(response.getSuperGluuRequest());
+        assertNotNull(response.getSuperGluuAppId());
         assertNotNull(response.getDocumentDomain());
-        assertNotNull(response.getSuper_gluu_key_handle());
-        assertNotNull(response.getSuper_gluu_request_mode());
+        assertNotNull(response.getSuperGluuKeyHandle());
+        assertNotNull(response.getSuperGluuRequestMode());
         assertNotNull(response.getUsername());
-        assertNotNull(response.getSession_id());
-        assertEquals((response.getSuper_gluu_request() == null ? "false" : response.getSuper_gluu_request().toString()),"true");
-        assertEquals(response.getSuper_gluu_app_id(), appId);
+        assertNotNull(response.getSessionId());
+        assertEquals((response.getSuperGluuRequest() == null ? "false" : response.getSuperGluuRequest().toString()),"true");
+        assertEquals(response.getSuperGluuAppId(), appId);
         assertEquals(response.getDocumentDomain(), appId);
-        assertEquals(response.getSuper_gluu_key_handle(), keyHandle);
-        assertEquals(response.getSuper_gluu_request_mode(), "two_step");
+        assertEquals(response.getSuperGluuKeyHandle(), keyHandle);
+        assertEquals(response.getSuperGluuRequestMode(), "two_step");
         assertEquals(response.getUsername(), username);
-        assertEquals(response.getSession_id(), sessionId);
+        assertEquals(response.getSessionId(), sessionId);
 
         verify(userSessionIdService).isValidSessionId(sessionId, username);
         verify(log).debug("Prepared U2F_V2 assertions options request: {}", response.toString());
@@ -343,15 +343,15 @@ class AssertionSuperGluuControllerTest {
 
         AssertionResult response = assertionSuperGluuController.buildFido2AuthenticationVerifyResponse(username, authenticateResponseString, authenticateResponse);
         assertNotNull(response);
-        assertNotNull(response.getSuper_gluu_request());
-        assertNotNull(response.getSuper_gluu_request_mode());
-        assertNotNull(response.getSuper_gluu_request_cancel());
+        assertNotNull(response.getSuperGluuRequest());
+        assertNotNull(response.getSuperGluuRequestMode());
+        assertNotNull(response.getSuperGluuRequestCancel());
         assertNotNull(response.getId());
         assertNotNull(response.getRawId());
         assertNotNull(response.getType());
-        assertEquals((response.getSuper_gluu_request() == null ? "false" : response.getSuper_gluu_request().toString()),"true");
-        assertEquals(response.getSuper_gluu_request_mode(), "two_step");
-        assertEquals((response.getSuper_gluu_request_cancel() == null ? "false" : response.getSuper_gluu_request_cancel().toString()),"false");
+        assertEquals((response.getSuperGluuRequest() == null ? "false" : response.getSuperGluuRequest().toString()),"true");
+        assertEquals(response.getSuperGluuRequestMode(), "two_step");
+        assertEquals((response.getSuperGluuRequestCancel() == null ? "false" : response.getSuperGluuRequestCancel().toString()),"false");
         assertEquals(response.getId(), "test_key_handle");
         assertEquals(response.getRawId(), "test_authenticate_response_string");
         assertEquals(response.getType(), "public-key");

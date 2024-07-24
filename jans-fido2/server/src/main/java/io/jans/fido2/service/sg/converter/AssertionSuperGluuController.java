@@ -134,14 +134,14 @@ public class AssertionSuperGluuController {
         }
         AssertionOptions assertionOptions = new AssertionOptions();
         // Add all required parameters from request to allow process U2F request
-        assertionOptions.setSuper_gluu_request(true);
-        assertionOptions.setSuper_gluu_app_id(appId);
+        assertionOptions.setSuperGluuRequest(true);
+        assertionOptions.setSuperGluuAppId(appId);
         assertionOptions.setDocumentDomain(appId);
-        assertionOptions.setSuper_gluu_key_handle(keyHandle);
-        assertionOptions.setSuper_gluu_request_mode(oneStep ? SuperGluuMode.ONE_STEP.getMode() : SuperGluuMode.TWO_STEP.getMode());
+        assertionOptions.setSuperGluuKeyHandle(keyHandle);
+        assertionOptions.setSuperGluuRequestMode(oneStep ? SuperGluuMode.ONE_STEP.getMode() : SuperGluuMode.TWO_STEP.getMode());
 
         assertionOptions.setUsername(userName);
-        assertionOptions.setSession_id(sessionId);
+        assertionOptions.setSessionId(sessionId);
 
         log.debug("Prepared U2F_V2 assertions options request: {}", assertionOptions.toString());
         return assertionOptions;
@@ -194,10 +194,9 @@ public class AssertionSuperGluuController {
         boolean oneStep = StringHelper.isEmpty(userName);
 
         AssertionResult assertionResult = new AssertionResult();
-        //ObjectNode params = dataMapperService.createObjectNode();
         // Add all required parameters from request to allow process U2F request 
-        assertionResult.setSuper_gluu_request(true);
-        assertionResult.setSuper_gluu_request_mode(oneStep ? SuperGluuMode.ONE_STEP.getMode() : SuperGluuMode.TWO_STEP.getMode());
+        assertionResult.setSuperGluuRequest(true);
+        assertionResult.setSuperGluuRequestMode(oneStep ? SuperGluuMode.ONE_STEP.getMode() : SuperGluuMode.TWO_STEP.getMode());
         assertionResult.setType("public-key");
         assertionResult.setId(authenticateResponse.getKeyHandle());
         assertionResult.setRawId(authenticateResponseString);
@@ -209,10 +208,8 @@ public class AssertionSuperGluuController {
         clientData.put("origin", authenticateResponse.getClientData().getOrigin());
 
         // Store cancel type
-        assertionResult.setSuper_gluu_request_cancel(StringHelper.equals(RawAuthenticationService.AUTHENTICATE_CANCEL_TYPE, authenticateResponse.getClientData().getTyp()));
+        assertionResult.setSuperGluuRequestCancel(StringHelper.equals(RawAuthenticationService.AUTHENTICATE_CANCEL_TYPE, authenticateResponse.getClientData().getTyp()));
         // Add response node
-        //ObjectNode response = dataMapperService.createObjectNode();
-        //params.set("response", response);
         Response response = new Response();
         response.setDeviceData(authenticateResponse.getDeviceData());
         // We have to quote URL to conform bug in Super Gluu
@@ -220,16 +217,6 @@ public class AssertionSuperGluuController {
         // Prepare attestationObject
         RawAuthenticateResponse rawAuthenticateResponse = rawAuthenticationService.parseRawAuthenticateResponse(authenticateResponse.getSignatureData());
         response.setSignature(base64Service.urlEncodeToString(rawAuthenticateResponse.getSignature()));
-
-        //response.put("deviceData", authenticateResponse.getDeviceData());
-
-        // We have to quote URL to conform bug in Super Gluu
-        //response.put("clientDataJSON", base64Service.urlEncodeToString(clientData.toString().replaceAll("/", "\\\\/").getBytes(StandardCharsets.UTF_8)));
-
-        // Prepare attestationObject
-        //RawAuthenticateResponse rawAuthenticateResponse = rawAuthenticationService.parseRawAuthenticateResponse(authenticateResponse.getSignatureData());
-
-        //response.put("signature", base64Service.urlEncodeToString(rawAuthenticateResponse.getSignature()));
 
         ObjectNode attestationObject = dataMapperService.createObjectNode();
 

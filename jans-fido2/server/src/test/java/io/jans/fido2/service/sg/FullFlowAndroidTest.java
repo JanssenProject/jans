@@ -251,9 +251,9 @@ public class FullFlowAndroidTest {
 
 		AttestationOptions attestationOptions = attestationSuperGluuController.buildFido2AttestationStartResponse(userName, applicationId, sessionId);
 		System.out.println(attestationOptions.toString());
-        assertEquals(true, attestationOptions.getSuper_gluu_request());
-        assertEquals(SuperGluuMode.TWO_STEP.getMode(), attestationOptions.getSuper_gluu_request_mode());
-        assertEquals(applicationId, attestationOptions.getSuper_gluu_app_id());
+        assertEquals(true, attestationOptions.getSuperGluuRequest());
+        assertEquals(SuperGluuMode.TWO_STEP.getMode(), attestationOptions.getSuperGluuRequestMode());
+        assertEquals(applicationId, attestationOptions.getSuperGluuAppId());
 
 		PublicKeyCredentialCreationOptions response = attestationService.options(attestationOptions);
 		
@@ -274,8 +274,8 @@ public class FullFlowAndroidTest {
 		RegisterResponse registerResponse = attestationSuperGluuController.parseRegisterResponse(registerFinishResponse);
 
 		AttestationResult request = attestationSuperGluuController.buildFido2AttestationVerifyResponse(userName, registerResponse);
-        assertEquals(true, request.getSuper_gluu_request());
-        assertEquals(SuperGluuMode.TWO_STEP.getMode(), request.getSuper_gluu_request_mode());
+        assertEquals(true, request.getSuperGluuRequest());
+        assertEquals(SuperGluuMode.TWO_STEP.getMode(), request.getSuperGluuRequestMode());
 
 		AttestationResultResponse response = attestationService.verify(request);
 
@@ -307,10 +307,10 @@ public class FullFlowAndroidTest {
 		this.assertionChallenge = challenge;
 
 		AssertionOptions request = assertionSuperGluuController.buildFido2AssertionStartResponse(userName, registrationEntry.getPublicKeyId(), applicationId, sessionId);
-        assertEquals(true, request.getSuper_gluu_request());
-        assertEquals(SuperGluuMode.TWO_STEP.getMode(), request.getSuper_gluu_request_mode());
-        assertEquals(registrationEntry.getPublicKeyId(), request.getSuper_gluu_key_handle());
-        assertEquals(applicationId, request.getSuper_gluu_app_id());
+        assertEquals(true, request.getSuperGluuRequest());
+        assertEquals(SuperGluuMode.TWO_STEP.getMode(), request.getSuperGluuRequestMode());
+        assertEquals(registrationEntry.getPublicKeyId(), request.getSuperGluuKeyHandle());
+        assertEquals(applicationId, request.getSuperGluuAppId());
 
 		AssertionOptionsResponse response = assertionService.options(request);
 		
@@ -332,8 +332,8 @@ public class FullFlowAndroidTest {
 		AuthenticateResponse authenticateResponse = assertionSuperGluuController.parseAuthenticateResponse(authenticateFinishResponse);
 
 		AssertionResult request = assertionSuperGluuController.buildFido2AuthenticationVerifyResponse(userName, authenticateFinishResponse, authenticateResponse);
-        assertEquals(true, request.getSuper_gluu_request());
-        assertEquals(SuperGluuMode.TWO_STEP.getMode(), request.getSuper_gluu_request_mode());
+        assertEquals(true, request.getSuperGluuRequest());
+        assertEquals(SuperGluuMode.TWO_STEP.getMode(), request.getSuperGluuRequestMode());
 
 		AssertionResultResponse response = assertionService.verify(request);
 

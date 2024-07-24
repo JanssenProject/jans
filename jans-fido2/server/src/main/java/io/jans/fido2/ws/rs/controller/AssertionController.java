@@ -19,11 +19,9 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.Response.ResponseBuilder;
 import org.slf4j.Logger;
 
 import javax.validation.constraints.NotNull;
-import java.io.IOException;
 
 /**
  * serves request for /assertion endpoint exposed by FIDO2 sever
@@ -61,23 +59,14 @@ public class AssertionController {
     @Produces({"application/json"})
     @Path("/options")
     public Response authenticate(@NotNull AssertionOptions assertionOptions) {
-        try {
+        return processRequest(() -> {
             if (appConfiguration.getFido2Configuration() == null) {
                 throw errorResponseFactory.forbiddenException();
             }
-
             commonVerifiers.verifyNotUseGluuParameters(CommonUtilService.toJsonNode(assertionOptions));
             AssertionOptionsResponse result = assertionService.options(assertionOptions);
-
-            ResponseBuilder builder = Response.ok().entity(result.toString());
-            return builder.build();
-
-        } catch (WebApplicationException e) {
-            throw e;
-        } catch (Exception e) {
-            log.error("Unknown Error: {}", e.getMessage(), e);
-            throw errorResponseFactory.unknownError(e.getMessage());
-        }
+            return Response.ok().entity(result).build();
+        });
     }
 
     @POST
@@ -85,22 +74,13 @@ public class AssertionController {
     @Produces({"application/json"})
     @Path("/options/generate")
     public Response generateAuthenticate(@NotNull AssertionOptionsGenerate assertionOptionsGenerate) {
-        try {
+        return processRequest(() -> {
             if (appConfiguration.getFido2Configuration() == null || !appConfiguration.getFido2Configuration().isAssertionOptionsGenerateEndpointEnabled()) {
                 throw errorResponseFactory.forbiddenException();
             }
-
             AsserOptGenerateResponse result = assertionService.generateOptions(assertionOptionsGenerate);
-
-            ResponseBuilder builder = Response.ok().entity(result);
-            return builder.build();
-
-        } catch (WebApplicationException e) {
-            throw e;
-        } catch (Exception e) {
-            log.error("Unknown Error: {}", e.getMessage(), e);
-            throw errorResponseFactory.unknownError(e.getMessage());
-        }
+            return Response.ok().entity(result).build();
+        });
     }
 
     @POST
@@ -108,41 +88,49 @@ public class AssertionController {
     @Produces({"application/json"})
     @Path("/result")
     public Response verify(@NotNull AssertionResult assertionResult) {
-        try {
+        return processRequest(() -> {
             if (appConfiguration.getFido2Configuration() == null) {
                 throw errorResponseFactory.forbiddenException();
             }
             commonVerifiers.verifyNotUseGluuParameters(CommonUtilService.toJsonNode(assertionResult));
             AssertionResultResponse result = assertionService.verify(assertionResult);
-
-            ResponseBuilder builder = Response.ok().entity(result);
-            return builder.build();
-
-        } catch (WebApplicationException e) {
-            throw e;
-        } catch (Exception e) {
-            log.error("Unknown Error: {}", e.getMessage(), e);
-            throw errorResponseFactory.unknownError(e.getMessage());
-        }
+            return Response.ok().entity(result).build();
+        });
     }
 
     @GET
     @Produces({"application/json"})
     @Path("/authentication")
     public Response startAuthentication(@QueryParam("username") String userName, @QueryParam("keyhandle") String keyHandle, @QueryParam("application") String appId, @QueryParam("session_id") String sessionId) {
-        try {
+        return processRequest(() -> {
             if ((appConfiguration.getFido2Configuration() == null) && !appConfiguration.isSuperGluuEnabled()) {
                 throw errorResponseFactory.forbiddenException();
             }
             log.debug("Start authentication: username = {}, keyhandle = {}, application = {}, session_id = {}", userName, keyHandle, appId, sessionId);
-
             JsonNode result = assertionSuperGluuController.startAuthentication(userName, keyHandle, appId, sessionId);
-
             log.debug("Prepared U2F_V2 authentication options request: {}", result.toString());
+            return Response.ok().entity(result).build();
+        });
+    }
 
-            ResponseBuilder builder = Response.ok().entity(result.toString());
-            return builder.build();
+    @POST
+    @Produces({"application/json"})
+    @Path("/authentication")
+    public Response finishAuthentication(@FormParam("username") String userName, @FormParam("tokenResponse") String authenticateResponseString) {
+        return processRequest(() -> {
+            if ((appConfiguration.getFido2Configuration() == null) && !appConfiguration.isSuperGluuEnabled()) {
+                throw errorResponseFactory.forbiddenException();
+            }
+            log.debug("Finish authentication: username = {}, tokenResponse = {}", userName, authenticateResponseString);
+            JsonNode result = assertionSuperGluuController.finishAuthentication(userName, authenticateResponseString);
+            log.debug("Prepared U2F_V2 authentication verify request: {}", result.toString());
+            return Response.ok().entity(result).build();
+        });
+    }
 
+    private Response processRequest(RequestProcessor processor) {
+        try {
+            return processor.process();
         } catch (WebApplicationException e) {
             throw e;
         } catch (Exception e) {
@@ -151,28 +139,8 @@ public class AssertionController {
         }
     }
 
-    @POST
-    @Produces({"application/json"})
-    @Path("/authentication")
-    public Response finishAuthentication(@FormParam("username") String userName, @FormParam("tokenResponse") String authenticateResponseString) {
-        try {
-            if ((appConfiguration.getFido2Configuration() == null) && !appConfiguration.isSuperGluuEnabled()) {
-                throw errorResponseFactory.forbiddenException();
-            }
-            log.debug("Finish authentication: username = {}, tokenResponse = {}", userName, authenticateResponseString);
-
-            JsonNode result = assertionSuperGluuController.finishAuthentication(userName, authenticateResponseString);
-
-            log.debug("Prepared U2F_V2 authentication verify request: {}", result.toString());
-
-            ResponseBuilder builder = Response.ok().entity(result.toString());
-            return builder.build();
-
-        } catch (WebApplicationException e) {
-            throw e;
-        } catch (Exception e) {
-            log.error("Unknown Error: {}", e.getMessage(), e);
-            throw errorResponseFactory.unknownError(e.getMessage());
-        }
+    @FunctionalInterface
+    private interface RequestProcessor {
+        Response process() throws Exception;
     }
 }

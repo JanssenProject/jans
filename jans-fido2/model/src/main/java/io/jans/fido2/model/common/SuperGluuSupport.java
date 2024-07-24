@@ -1,49 +1,59 @@
 package io.jans.fido2.model.common;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 abstract public class SuperGluuSupport {
-    private String super_gluu_app_id;
-    private String super_gluu_request_mode;
-    private Boolean super_gluu_request;
-    private String super_gluu_key_handle;
-    private Boolean super_gluu_request_cancel;
 
-    public String getSuper_gluu_app_id() {
-        return super_gluu_app_id;
+    @JsonProperty(value = "super_gluu_app_id")
+    private String superGluuAppId;
+    @JsonProperty(value = "super_gluu_request_mode")
+    private String SuperGluuRequestMode;
+    @JsonProperty(value = "super_gluu_request")
+    private Boolean SuperGluuRequest;
+    @JsonProperty(value = "super_gluu_key_handle")
+    private String SuperGluuKeyHandle;
+    @JsonProperty(value = "super_gluu_request_cancel")
+    private Boolean SuperGluuRequestCancel;
+
+    public String getSuperGluuAppId() {
+        return superGluuAppId;
     }
 
-    public void setSuper_gluu_app_id(String super_gluu_app_id) {
-        this.super_gluu_app_id = super_gluu_app_id;
+    public void setSuperGluuAppId(String superGluuAppId) {
+        this.superGluuAppId = superGluuAppId;
     }
 
-    public String getSuper_gluu_request_mode() {
-        return super_gluu_request_mode;
+    public String getSuperGluuRequestMode() {
+        return SuperGluuRequestMode;
     }
 
-    public void setSuper_gluu_request_mode(String super_gluu_request_mode) {
-        this.super_gluu_request_mode = super_gluu_request_mode;
+    public void setSuperGluuRequestMode(String superGluuRequestMode) {
+        SuperGluuRequestMode = superGluuRequestMode;
     }
 
-    public Boolean getSuper_gluu_request() {
-        return super_gluu_request;
+    public Boolean getSuperGluuRequest() {
+        return SuperGluuRequest;
     }
 
-    public void setSuper_gluu_request(Boolean super_gluu_request) {
-        this.super_gluu_request = super_gluu_request;
+    public void setSuperGluuRequest(Boolean superGluuRequest) {
+        SuperGluuRequest = superGluuRequest;
     }
 
-    public String getSuper_gluu_key_handle() {
-        return super_gluu_key_handle;
+    public String getSuperGluuKeyHandle() {
+        return SuperGluuKeyHandle;
     }
 
-    public void setSuper_gluu_key_handle(String super_gluu_key_handle) {
-        this.super_gluu_key_handle = super_gluu_key_handle;
+    public void setSuperGluuKeyHandle(String superGluuKeyHandle) {
+        SuperGluuKeyHandle = superGluuKeyHandle;
     }
 
-    public Boolean getSuper_gluu_request_cancel() {
-        return super_gluu_request_cancel;
+    public Boolean getSuperGluuRequestCancel() {
+        return SuperGluuRequestCancel;
     }
 
-    public void setSuper_gluu_request_cancel(Boolean super_gluu_request_cancel) {
-        this.super_gluu_request_cancel = super_gluu_request_cancel;
+    public void setSuperGluuRequestCancel(Boolean superGluuRequestCancel) {
+        SuperGluuRequestCancel = superGluuRequestCancel;
     }
 }

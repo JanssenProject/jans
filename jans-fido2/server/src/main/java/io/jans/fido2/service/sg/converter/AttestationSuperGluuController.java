@@ -117,9 +117,9 @@ public class AttestationSuperGluuController {
         }
         AttestationOptions attestationOptions = new AttestationOptions();
         // Add all required parameters from request to allow process U2F request
-        attestationOptions.setSuper_gluu_request(true);
-        attestationOptions.setSuper_gluu_request_mode(oneStep ? SuperGluuMode.ONE_STEP.getMode() : SuperGluuMode.TWO_STEP.getMode());
-        attestationOptions.setSuper_gluu_app_id(appId);
+        attestationOptions.setSuperGluuRequest(true);
+        attestationOptions.setSuperGluuRequestMode(oneStep ? SuperGluuMode.ONE_STEP.getMode() : SuperGluuMode.TWO_STEP.getMode());
+        attestationOptions.setSuperGluuAppId(appId);
 
         String useUserName = userName;
         if (oneStep) {
@@ -207,11 +207,11 @@ public class AttestationSuperGluuController {
             throw errorResponseFactory.badRequestException(AttestationErrorResponseType.UNSUPPORTED_REGISTER_TYPE, "Invalid options attestation request type");
         }
         AttestationResult attestationResult = new AttestationResult();
-        attestationResult.setSuper_gluu_request(true);
+        attestationResult.setSuperGluuRequest(true);
 
         // Add all required parameters from request to allow process U2F request
         boolean oneStep = StringHelper.isEmpty(userName);
-        attestationResult.setSuper_gluu_request_mode(oneStep ? SuperGluuMode.ONE_STEP.getMode() : SuperGluuMode.TWO_STEP.getMode());
+        attestationResult.setSuperGluuRequestMode(oneStep ? SuperGluuMode.ONE_STEP.getMode() : SuperGluuMode.TWO_STEP.getMode());
 
         // Manadatory parameter
         attestationResult.setType(PublicKeyCredentialType.PUBLIC_KEY.getKeyName());
@@ -228,7 +228,7 @@ public class AttestationSuperGluuController {
         clientData.put("type", registerResponse.getClientData().getTyp());
         attestationResult.getResponse().setClientDataJSON(base64Service.urlEncodeToString(clientData.toString().getBytes(StandardCharsets.UTF_8)));
 		// Store cancel type
-        attestationResult.setSuper_gluu_request_cancel(StringHelper.equals(RawRegistrationService.REGISTER_CANCEL_TYPE, registerResponse.getClientData().getTyp()));
+        attestationResult.setSuperGluuRequestCancel(StringHelper.equals(RawRegistrationService.REGISTER_CANCEL_TYPE, registerResponse.getClientData().getTyp()));
 		// Prepare attestationObject
         RawRegisterResponse rawRegisterResponse = rawRegistrationService.parseRawRegisterResponse(registerResponse.getRegistrationData());
 

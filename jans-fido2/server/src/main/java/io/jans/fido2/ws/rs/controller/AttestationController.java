@@ -64,23 +64,14 @@ public class AttestationController {
     @Produces({"application/json"})
     @Path("/options")
     public Response register(@NotNull AttestationOptions attestationOptions) {
-        try {
+        return processRequest(() -> {
             if (appConfiguration.getFido2Configuration() == null) {
                 throw errorResponseFactory.forbiddenException();
             }
-
             commonVerifiers.verifyNotUseGluuParameters(CommonUtilService.toJsonNode(attestationOptions));
             PublicKeyCredentialCreationOptions result = attestationService.options(attestationOptions);
-
-            ResponseBuilder builder = Response.ok().entity(result);
-            return builder.build();
-
-        } catch (WebApplicationException e) {
-            throw e;
-        } catch (Exception e) {
-            log.error("Unknown Error: {}", e.getMessage(), e);
-            throw errorResponseFactory.unknownError(e.getMessage());
-        }
+            return Response.ok().entity(result).build();
+        });
     }
 
     @POST
@@ -88,22 +79,14 @@ public class AttestationController {
     @Produces({"application/json"})
     @Path("/result")
     public Response verify(@NotNull AttestationResult attestationResult) {
-        try {
+        return processRequest(() -> {
             if (appConfiguration.getFido2Configuration() == null) {
                 throw errorResponseFactory.forbiddenException();
             }
             commonVerifiers.verifyNotUseGluuParameters(CommonUtilService.toJsonNode(attestationResult));
             AttestationResultResponse result = attestationService.verify(attestationResult);
-
-            ResponseBuilder builder = Response.ok().entity(result);
-            return builder.build();
-
-        } catch (WebApplicationException e) {
-            throw e;
-        } catch (Exception e) {
-            log.error("Unknown Error: {}", e.getMessage(), e);
-            throw errorResponseFactory.unknownError(e.getMessage());
-        }
+            return Response.ok().entity(result).build();
+        });
     }
 
     @GET
@@ -113,20 +96,35 @@ public class AttestationController {
                                       @QueryParam("application") String appId,
                                       @QueryParam("session_id") String sessionId,
                                       @QueryParam("enrollment_code") String enrollmentCode) {
-        try {
+        return processRequest(() -> {
             if ((appConfiguration.getFido2Configuration() == null) && !appConfiguration.isSuperGluuEnabled()) {
                 throw errorResponseFactory.forbiddenException();
             }
-
             log.debug("Start registration: username = {}, application = {}, session_id = {}, enrollment_code = {}", userName, appId, sessionId, enrollmentCode);
-
             JsonNode result = attestationSuperGluuController.startRegistration(userName, appId, sessionId, enrollmentCode);
-
             log.debug("Prepared U2F_V2 registration options request: {}", result.toString());
+            return Response.ok().entity(result).build();
+        });
+    }
 
-            ResponseBuilder builder = Response.ok().entity(result.toString());
-            return builder.build();
+    @POST
+    @Produces({"application/json"})
+    @Path("/registration")
+    public Response finishRegistration(@FormParam("username") String userName, @FormParam("tokenResponse") String registerResponseString) {
+        return processRequest(() -> {
+            if ((appConfiguration.getFido2Configuration() == null) && !appConfiguration.isSuperGluuEnabled()) {
+                throw errorResponseFactory.forbiddenException();
+            }
+            log.debug("Finish registration: username = {}, tokenResponse = {}", userName, registerResponseString);
+            JsonNode result = attestationSuperGluuController.finishRegistration(userName, registerResponseString);
+            log.debug("Prepared U2F_V2 registration verify request: {}", result.toString());
+            return Response.ok().entity(result).build();
+        });
+    }
 
+    private Response processRequest(RequestProcessor processor) {
+        try {
+            return processor.process();
         } catch (WebApplicationException e) {
             throw e;
         } catch (Exception e) {
@@ -135,29 +133,8 @@ public class AttestationController {
         }
     }
 
-    @POST
-    @Produces({"application/json"})
-    @Path("/registration")
-    public Response finishRegistration(@FormParam("username") String userName, @FormParam("tokenResponse") String registerResponseString) {
-        try {
-            if ((appConfiguration.getFido2Configuration() == null) && !appConfiguration.isSuperGluuEnabled()) {
-                throw errorResponseFactory.forbiddenException();
-            }
-
-            log.debug("Finish registration: username = {}, tokenResponse = {}", userName, registerResponseString);
-
-            JsonNode result = attestationSuperGluuController.finishRegistration(userName, registerResponseString);
-
-            log.debug("Prepared U2F_V2 registration verify request: {}", result.toString());
-
-            ResponseBuilder builder = Response.ok().entity(result.toString());
-            return builder.build();
-
-        } catch (WebApplicationException e) {
-            throw e;
-        } catch (Exception e) {
-            log.error("Unknown Error: {}", e.getMessage(), e);
-            throw errorResponseFactory.unknownError(e.getMessage());
-        }
+    @FunctionalInterface
+    private interface RequestProcessor {
+        Response process() throws Exception;
     }
 }
