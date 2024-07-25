@@ -49,8 +49,6 @@ struct LoginView: View {
                                disabled: state.loadingVisible || selectedPublicKeyCredential == nil,
                                backgroundColor: Color.cyan) {
                         interactor.onRegisterClick(
-                            issuer: state.issuer,
-                            scope: state.scopes,
                             username: selectedPublicKeyCredential?.userDisplayName ?? "",
                             password: selectedPublicKeyCredential?.userPassword ?? ""
                         )

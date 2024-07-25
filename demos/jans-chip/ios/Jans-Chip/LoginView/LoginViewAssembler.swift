@@ -13,12 +13,7 @@ struct LoginViewAssembler {
 
         let state = LoginViewState()
         let presenter = LoginViewPresenterImpl(state: state, mainViewState: mainViewState)
-        
-        let mainState = MainViewState()
-        let mainPresenter = MainViewPresenterImpl(state: mainState)
-        let mainInteractor = MainViewInteractorImpl(presenter: mainPresenter)
-        
-        let interactor = LoginViewInteractorImpl(presenter: presenter, mainInteractor: mainInteractor)
+        let interactor = LoginViewInteractorImpl(presenter: presenter, mainViewModel: MainViewModelImpl())
         let view = LoginView(state: state, interactor: interactor)
         
         return view

@@ -27,5 +27,3 @@ final class FidoConfiguration: Object, Codable, ObjectKeyIdentifiable {
     @Persisted var isSuccessful: Bool?
     @Persisted var errorMessage: String?
 }
-
-//"{\"version\":\"1.1\",\"issuer\":\"https://admin-ui-test.gluu.org\",\"attestation\":{\"base_path\":\"https://admin-ui-test.gluu.org/jans-fido2/restv1/attestation\",\"options_endpoint\":\"https://admin-ui-test.gluu.org/jans-fido2/restv1/attestation/options\",\"result_endpoint\":\"https://admin-ui-test.gluu.org/jans-fido2/restv1/attestation/result\"},\"assertion\":{\"base_path\":\"https://admin-ui-test.gluu.org/jans-fido2/restv1/assertion\",\"options_endpoint\":\"https://admin-ui-test.gluu.org/jans-fido2/restv1/assertion/options\",\"options_generate_endpoint\":\"https://admin-ui-test.gluu.org/jans-fido2/restv1/assertion/options/generate\",\"result_endpoint\":\"https://admin-ui-test.gluu.org/jans-fido2/restv1/assertion/result\"},\"super_gluu_registration_endpoint\":\"https://admin-ui-test.gluu.org/jans-fido2/restv1/attestation/registration\",\"super_gluu_authentication_endpoint\":\"https://admin-ui-test.gluu.org/jans-fido2/restv1/assertion/authentication\"}"

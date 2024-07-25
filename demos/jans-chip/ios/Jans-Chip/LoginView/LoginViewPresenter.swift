@@ -25,8 +25,8 @@ final class LoginViewPresenterImpl: LoginViewPresenter {
     }
     
     func onError(message: String) {
-        state.loadingVisible = false
-        DispatchQueue.main.async {
+        DispatchQueue.main.async { [weak self] in
+            self?.state.loadingVisible = false
             UIApplication.showAlert(message: message)
         }
     }

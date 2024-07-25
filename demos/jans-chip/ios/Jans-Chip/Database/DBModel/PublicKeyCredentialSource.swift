@@ -11,6 +11,8 @@ import Security
 
 final class PublicKeyCredentialSource: Object, ObjectKeyIdentifiable {
     
+    override var hash: Int { hashValue }
+    
     public static let type = "public-key"
     
     override static func primaryKey() -> String? {

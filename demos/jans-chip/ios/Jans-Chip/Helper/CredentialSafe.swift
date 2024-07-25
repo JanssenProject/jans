@@ -22,4 +22,8 @@ final class CredentialSafe {
         let allCredentialSource : [PublicKeyCredentialSource]? = RealmManager.shared.getObjects()
         return allCredentialSource
     }
+    
+    func getKeysForEntity(rpEntityId: String) -> [PublicKeyCredentialSource] {
+        allCredentialSource()?.filter { $0.rpId == rpEntityId } ?? []
+    }
 }

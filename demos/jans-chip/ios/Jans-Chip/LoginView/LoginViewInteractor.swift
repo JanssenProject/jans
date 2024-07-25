@@ -10,87 +10,85 @@ import Combine
 
 protocol LoginViewInteractor: AnyObject {
     
-    func onRegisterClick(issuer: String, scope: String, username: String, password: String)
+    func onRegisterClick(username: String, password: String)
     func goToEnrol()
 }
 
 final class LoginViewInteractorImpl: LoginViewInteractor {
     
     private let presenter: LoginViewPresenter
-    private let mainInteractor: MainViewInteractor
+    private let mainViewModel: MainViewModel
     
-    private lazy var serviceClient = {
-        ServiceClient()
-    }()
+    private let biometricHelper = BiometricHelper.shared
     
-    private let dcrRepository = DCRRepository()
-    
-    private var cancellableSet : Set<AnyCancellable> = []
-    
-    init(presenter: LoginViewPresenter, mainInteractor: MainViewInteractor) {
-        self.presenter = presenter
-        self.mainInteractor = mainInteractor
+    var isBiometricAvailable: Bool {
+        guard Platform.isSimulator == false else {
+            return Platform.isSimulator
+        }
+        
+        return biometricHelper.canUseBiometricAuthentication()
     }
     
-    func onRegisterClick(issuer: String, scope: String, username: String, password: String) {
-        guard !issuer.isEmpty else {
-            presenter.onError(message: "'Issuer' value cannot be empty")
-            return
-        }
-        
-        guard !scope.isEmpty else {
-            presenter.onError(message: "'Scope' value cannot be empty")
-            return
-        }
-        
+    init(presenter: LoginViewPresenter, mainViewModel: MainViewModel) {
+        self.presenter = presenter
+        self.mainViewModel = mainViewModel
+    }
+    
+    func onRegisterClick(username: String, password: String) {
         presenter.onLoading(visible: true)
         
+        if isBiometricAvailable {
+            proceedAssertion(username: username)
+            biometricHelper.authenticateWithBiometrics { [weak self] success, error in
+                self?.proceedLoginFlow(username: username, password: password)
+            }
+        } else {
+            presenter.onError(message: "Biometric authentication is not available!")
+        }
+    }
+    
+    // MARK: - Private
+    
+    private func proceedAssertion(username: String) {
         Task {
             do {
-                // 1. get login response
-                let loginResponse = try await mainInteractor.processLogin(
-                    username: username,
-                    password: password,
-                    authMethod: "authenticate",
-                    assertionResultRequest: nil)
-                guard loginResponse.isSuccess == true else {
+                let assertion = try await mainViewModel.assertionOption(username: username)
+                guard assertion.isSuccess == true else {
                     DispatchQueue.main.async { [weak self] in
-                        self?.presenter.onError(message: loginResponse.errorMessage ?? "")
+                        self?.presenter.onError(message: assertion.errorMessage ?? "")
                     }
                     return
                 }
                 
-                // 2. get token
-                let token = try await mainInteractor.getToken(
-                    authorizationCode: loginResponse.authorizationCode)
-                guard token.isSuccess == true else {
-                    DispatchQueue.main.async { [weak self] in
-                        self?.presenter.onError(message: token.errorMessage ?? "")
-                    }
-                    return
-                }
+                let authAdaptor = AuthAdaptor()
                 
-                if let oidcClient: OIDCClient = RealmManager.shared.getObject() {
-                    let accessToken = token.accessToken
-                    let idToken = token.idToken ?? ""
-                    if !accessToken.isEmpty {
-                        RealmManager.shared.updateOIDCClient(oidcCClient: oidcClient, with: accessToken, and: idToken)
-                    }
-                }
-                
-                let userInfo = try await mainInteractor.getUserInfo(accessToken: token.accessToken)
-                guard userInfo.isSuccess == true else {
-                    DispatchQueue.main.async { [weak self] in
-                        self?.presenter.onError(message: userInfo.errorMessage ?? "")
-                    }
-                    return
-                }
-                
-                DispatchQueue.main.async { [weak self] in
-                    self?.goToSuccessLoginView(userInfo: userInfo)
+                if let fidoConfiguration: FidoConfiguration = RealmManager.shared.getObject() {
+                    let selectedPublicKeyCredentialSource = authAdaptor.selectPublicKeyCredentialSource(
+                        credentialSelector: LocalCredentialSelector(),
+                        assertionOptionResponse: assertion,
+                        origin: fidoConfiguration.issuer)
+                    authAdaptor.generateSignature(credentialSource: selectedPublicKeyCredentialSource)
                 }
             }
         }
+    }
+    
+    private func proceedLoginFlow(username: String, password: String) {
+        mainViewModel.proceedFlowGetUserInfo(
+            username: username, 
+            password: password,
+            authMethod: "authenticate") { [weak self] userInfo, errorMessage in
+                if let errorMessage {
+                    self?.presenter.onError(message: errorMessage)
+                    return
+                }
+                
+                if let userInfo {
+                    DispatchQueue.main.async {
+                        self?.goToSuccessLoginView(userInfo: userInfo)
+                    }
+                }
+            }
     }
     
     func goToEnrol() {

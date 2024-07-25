@@ -12,6 +12,11 @@
 		3004A9FC2AEBE414000CDB62 /* SwiftJWT in Frameworks */ = {isa = PBXBuildFile; productRef = 3004A9FB2AEBE414000CDB62 /* SwiftJWT */; };
 		3004AA032AEC46F0000CDB62 /* SecKey+KeyPair.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3004AA022AEC46F0000CDB62 /* SecKey+KeyPair.swift */; };
 		3004AA0A2AEC59C8000CDB62 /* SecKey+KeyData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3004AA092AEC59C8000CDB62 /* SecKey+KeyData.swift */; };
+		3016F7622C4E34ED00F8BD15 /* BiometricHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3016F7612C4E34ED00F8BD15 /* BiometricHelper.swift */; };
+		3016F7642C4E3C8300F8BD15 /* Platform.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3016F7632C4E3C8300F8BD15 /* Platform.swift */; };
+		3016F7662C4E3E4D00F8BD15 /* AssertionOptionResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3016F7652C4E3E4D00F8BD15 /* AssertionOptionResponse.swift */; };
+		3016F7682C4E3F7200F8BD15 /* AllowCredentials.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3016F7672C4E3F7200F8BD15 /* AllowCredentials.swift */; };
+		3016F76B2C4E411A00F8BD15 /* AssertionOptionRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3016F76A2C4E411A00F8BD15 /* AssertionOptionRequest.swift */; };
 		304311F22ACC05E4006B8D40 /* Jans_ChipApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 304311F12ACC05E4006B8D40 /* Jans_ChipApp.swift */; };
 		304311F62ACC05E5006B8D40 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 304311F52ACC05E5006B8D40 /* Assets.xcassets */; };
 		304311F92ACC05E5006B8D40 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 304311F82ACC05E5006B8D40 /* Preview Assets.xcassets */; };
@@ -21,6 +26,10 @@
 		3049C2142AD80D2F00164883 /* AppIntegrityEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3049C2132AD80D2F00164883 /* AppIntegrityEntity.swift */; };
 		3049C2162AD8151100164883 /* PlayIntegrityRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3049C2152AD8151100164883 /* PlayIntegrityRepository.swift */; };
 		3049C2182AD8163A00164883 /* AppIntegrityResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3049C2172AD8163A00164883 /* AppIntegrityResponse.swift */; };
+		304C944A2C4E59F000E689B0 /* AuthenticatorGetAssertionOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 304C94492C4E59F000E689B0 /* AuthenticatorGetAssertionOptions.swift */; };
+		304C944C2C4E6D0B00E689B0 /* CredentialSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 304C944B2C4E6D0B00E689B0 /* CredentialSelector.swift */; };
+		304C944E2C4E834C00E689B0 /* WebAuthnCryptography.swift in Sources */ = {isa = PBXBuildFile; fileRef = 304C944D2C4E834C00E689B0 /* WebAuthnCryptography.swift */; };
+		30535B9F2C4FB261007E6D9C /* MainViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30535B9E2C4FB261007E6D9C /* MainViewModel.swift */; };
 		3063E5682ACC0890002B4879 /* MainViewInteractor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3063E5672ACC0890002B4879 /* MainViewInteractor.swift */; };
 		3063E56A2ACC0973002B4879 /* MainViewState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3063E5692ACC0973002B4879 /* MainViewState.swift */; };
 		3063E56C2ACC0BAF002B4879 /* MainViewPresenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3063E56B2ACC0BAF002B4879 /* MainViewPresenter.swift */; };
@@ -94,6 +103,11 @@
 		3004A9F82AEBDE79000CDB62 /* DPoPProofFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DPoPProofFactory.swift; sourceTree = "<group>"; };
 		3004AA022AEC46F0000CDB62 /* SecKey+KeyPair.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SecKey+KeyPair.swift"; sourceTree = "<group>"; };
 		3004AA092AEC59C8000CDB62 /* SecKey+KeyData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SecKey+KeyData.swift"; sourceTree = "<group>"; };
+		3016F7612C4E34ED00F8BD15 /* BiometricHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BiometricHelper.swift; sourceTree = "<group>"; };
+		3016F7632C4E3C8300F8BD15 /* Platform.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Platform.swift; sourceTree = "<group>"; };
+		3016F7652C4E3E4D00F8BD15 /* AssertionOptionResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssertionOptionResponse.swift; sourceTree = "<group>"; };
+		3016F7672C4E3F7200F8BD15 /* AllowCredentials.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllowCredentials.swift; sourceTree = "<group>"; };
+		3016F76A2C4E411A00F8BD15 /* AssertionOptionRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssertionOptionRequest.swift; sourceTree = "<group>"; };
 		304311EE2ACC05E4006B8D40 /* Jans-Chip.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Jans-Chip.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		304311F12ACC05E4006B8D40 /* Jans_ChipApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Jans_ChipApp.swift; sourceTree = "<group>"; };
 		304311F52ACC05E5006B8D40 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -104,6 +118,10 @@
 		3049C2132AD80D2F00164883 /* AppIntegrityEntity.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIntegrityEntity.swift; sourceTree = "<group>"; };
 		3049C2152AD8151100164883 /* PlayIntegrityRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayIntegrityRepository.swift; sourceTree = "<group>"; };
 		3049C2172AD8163A00164883 /* AppIntegrityResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppIntegrityResponse.swift; sourceTree = "<group>"; };
+		304C94492C4E59F000E689B0 /* AuthenticatorGetAssertionOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticatorGetAssertionOptions.swift; sourceTree = "<group>"; };
+		304C944B2C4E6D0B00E689B0 /* CredentialSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialSelector.swift; sourceTree = "<group>"; };
+		304C944D2C4E834C00E689B0 /* WebAuthnCryptography.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebAuthnCryptography.swift; sourceTree = "<group>"; };
+		30535B9E2C4FB261007E6D9C /* MainViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewModel.swift; sourceTree = "<group>"; };
 		3063E5672ACC0890002B4879 /* MainViewInteractor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewInteractor.swift; sourceTree = "<group>"; };
 		3063E5692ACC0973002B4879 /* MainViewState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewState.swift; sourceTree = "<group>"; };
 		3063E56B2ACC0BAF002B4879 /* MainViewPresenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewPresenter.swift; sourceTree = "<group>"; };
@@ -240,6 +258,10 @@
 				30A44AAE2C41728000B71E8A /* CredentialSafe.swift */,
 				30A44ABC2C46738800B71E8A /* AttestationObject.swift */,
 				30A44AC42C46A86900B71E8A /* AuthAdaptor.swift */,
+				3016F7612C4E34ED00F8BD15 /* BiometricHelper.swift */,
+				3016F7632C4E3C8300F8BD15 /* Platform.swift */,
+				304C944B2C4E6D0B00E689B0 /* CredentialSelector.swift */,
+				304C944D2C4E834C00E689B0 /* WebAuthnCryptography.swift */,
 			);
 			path = Helper;
 			sourceTree = "<group>";
@@ -252,6 +274,7 @@
 				3063E56B2ACC0BAF002B4879 /* MainViewPresenter.swift */,
 				3063E56D2ACC0BFE002B4879 /* MainViewAssembler.swift */,
 				3063E56F2ACC0CE9002B4879 /* MainView.swift */,
+				30535B9E2C4FB261007E6D9C /* MainViewModel.swift */,
 			);
 			path = MainView;
 			sourceTree = "<group>";
@@ -399,6 +422,10 @@
 				30A44ABA2C466CC300B71E8A /* Response.swift */,
 				30A44ABE2C467FCD00B71E8A /* ClientData.swift */,
 				30A44AC02C4683EF00B71E8A /* CBOR.swift */,
+				3016F7652C4E3E4D00F8BD15 /* AssertionOptionResponse.swift */,
+				3016F7672C4E3F7200F8BD15 /* AllowCredentials.swift */,
+				3016F76A2C4E411A00F8BD15 /* AssertionOptionRequest.swift */,
+				304C94492C4E59F000E689B0 /* AuthenticatorGetAssertionOptions.swift */,
 			);
 			path = Networking;
 			sourceTree = "<group>";
@@ -507,6 +534,7 @@
 				3063E5792ACD60D7002B4879 /* TokenResponse.swift in Sources */,
 				30BA05442C3FE5B10081FF78 /* AttestationOptionResponse.swift in Sources */,
 				3063E5AE2AD6BE05002B4879 /* UIApplication+Alert.swift in Sources */,
+				3016F7662C4E3E4D00F8BD15 /* AssertionOptionResponse.swift in Sources */,
 				3063E59F2AD406D3002B4879 /* LoginViewAssembler.swift in Sources */,
 				3063E5922AD04A34002B4879 /* RegisterViewState.swift in Sources */,
 				307176332B0E3861001C19B1 /* Checksum.swift in Sources */,
@@ -517,22 +545,28 @@
 				30A44AB12C4178A700B71E8A /* AuthenticatorMakeCredentialOptions.swift in Sources */,
 				3063E5872ACEB4F8002B4879 /* ServiceClient.swift in Sources */,
 				30BA05422C3FE29A0081FF78 /* AttestationOptionRequest.swift in Sources */,
+				304C944C2C4E6D0B00E689B0 /* CredentialSelector.swift in Sources */,
+				3016F7642C4E3C8300F8BD15 /* Platform.swift in Sources */,
 				3063E5902AD04A34002B4879 /* RegisterViewPresenter.swift in Sources */,
 				3063E5B02AD6C623002B4879 /* RealmManager.swift in Sources */,
 				3063E56E2ACC0BFE002B4879 /* MainViewAssembler.swift in Sources */,
 				3004AA0A2AEC59C8000CDB62 /* SecKey+KeyData.swift in Sources */,
 				3003B0632AE69A7F0068F411 /* UserInfo.swift in Sources */,
 				30D0B7A52AF2793800322E90 /* CheckListView.swift in Sources */,
+				30535B9F2C4FB261007E6D9C /* MainViewModel.swift in Sources */,
 				306EA0DB2AF0F27400167E4C /* AfterLoginView.swift in Sources */,
 				306EA0DA2AF0F27400167E4C /* AfterLoginViewInteractor.swift in Sources */,
 				30A44AC32C469A9300B71E8A /* AttestationResultResponse.swift in Sources */,
+				304C944A2C4E59F000E689B0 /* AuthenticatorGetAssertionOptions.swift in Sources */,
 				3049C2142AD80D2F00164883 /* AppIntegrityEntity.swift in Sources */,
 				3063E56C2ACC0BAF002B4879 /* MainViewPresenter.swift in Sources */,
 				3049C20B2AD6D0BC00164883 /* AppConfig.swift in Sources */,
 				30A44AB52C417BFB00B71E8A /* UserEntity.swift in Sources */,
 				30AED9022C47E4D20079F4F8 /* PublicKeyCredentialRowView.swift in Sources */,
 				30A44AB32C417BBA00B71E8A /* RpEntity.swift in Sources */,
+				3016F76B2C4E411A00F8BD15 /* AssertionOptionRequest.swift in Sources */,
 				30CC3C1F2C3C072000AFFD0D /* FidoConfiguration.swift in Sources */,
+				304C944E2C4E834C00E689B0 /* WebAuthnCryptography.swift in Sources */,
 				3004A9F92AEBDE79000CDB62 /* DPoPProofFactory.swift in Sources */,
 				3063E5832ACD78DF002B4879 /* EndpointRouter.swift in Sources */,
 				3063E5812ACD7897002B4879 /* EndpointConfiguration.swift in Sources */,
@@ -543,9 +577,11 @@
 				30A44AB92C466C0900B71E8A /* AttestationResultRequest.swift in Sources */,
 				3063E5932AD04A34002B4879 /* RegisterView.swift in Sources */,
 				30BA054C2C3FE8790081FF78 /* PubKeyCredParam.swift in Sources */,
+				3016F7622C4E34ED00F8BD15 /* BiometricHelper.swift in Sources */,
 				3063E5A12AD406D3002B4879 /* LoginViewState.swift in Sources */,
 				30CC3C232C3C0B3F00AFFD0D /* Assertion.swift in Sources */,
 				30A44AB72C417C2900B71E8A /* PublicKeyCredentialDescriptor.swift in Sources */,
+				3016F7682C4E3F7200F8BD15 /* AllowCredentials.swift in Sources */,
 				3049C2122AD7F93100164883 /* DCRequest.swift in Sources */,
 				30A44AAB2C41655800B71E8A /* PublicKeyCredentialSource.swift in Sources */,
 				3049C2182AD8163A00164883 /* AppIntegrityResponse.swift in Sources */,

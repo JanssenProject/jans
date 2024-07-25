@@ -13,7 +13,7 @@ struct RegisterViewAssembler {
 
         let state = RegisterViewState()
         let presenter = RegisterViewPresenterImpl(state: state, mainViewState: mainViewState)
-        let interactor = RegisterViewInteractorImpl(presenter: presenter)
+        let interactor = RegisterViewInteractorImpl(presenter: presenter, mainViewModel: MainViewModelImpl())
         let view = RegisterView(state: state, interactor: interactor)
         
         return view

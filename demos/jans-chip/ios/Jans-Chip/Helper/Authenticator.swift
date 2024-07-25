@@ -10,12 +10,13 @@ import CommonCrypto
 
 final class Authenticator {
     
+    private let credentialSafe = CredentialSafe()
+    
     func getPublicKeyCredentialSource(options: AuthenticatorMakeCredentialOptions, passwordText: String) -> PublicKeyCredentialSource {
-        let credentialSafe = CredentialSafe()
         let credentialSource = credentialSafe.generateCredential(
             rpEntityId: options.rpEntity.id,
             userHandle: options.userEntity?.id ?? Data(),
-            userDisplayName: options.userEntity?.name ?? "admin", 
+            userDisplayName: options.userEntity?.name ?? "none", 
             passwordText: passwordText
         )
         
@@ -28,9 +29,9 @@ final class Authenticator {
         options.rpEntity.id = responseFromAPI?.rp?.id ?? ""
         options.rpEntity.name = responseFromAPI?.rp?.name ?? ""
         options.userEntity = UserEntity()
-        options.userEntity?.id = responseFromAPI?.user?.id.data(using: .utf8, allowLossyConversion: true) ?? Data() //"vScQ9Aec2Z8RKNvfZhpg375RWVIN1QMf8x_q9houJnc".getBytes();
-        options.userEntity?.name = responseFromAPI?.user?.name ?? "" //"admin";
-        options.userEntity?.displayName = responseFromAPI?.user?.displayName ?? "" //"admin";
+        options.userEntity?.id = responseFromAPI?.user?.id.data(using: .utf8, allowLossyConversion: true) ?? Data()
+        options.userEntity?.name = responseFromAPI?.user?.name ?? ""
+        options.userEntity?.displayName = responseFromAPI?.user?.displayName ?? ""
         options.clientDataHash = generateClientDataHash(
             challenge: responseFromAPI?.challenge,
             type: "webauthn.create",
@@ -40,8 +41,29 @@ final class Authenticator {
         options.requireUserPresence = true
         options.requireUserVerification = false
         options.excludeCredentialDescriptorList = [PublicKeyCredentialDescriptor()]
-        var credTypesAndPubKeyAlgs: [String: Int] = ["public-key": 7]
+        let credTypesAndPubKeyAlgs: [String: Int] = ["public-key": 7]
         options.credTypesAndPubKeyAlgs = credTypesAndPubKeyAlgs
+        return options
+    }
+    
+    func generateAuthenticatorGetAssertionOptions(assertionOptionResponse: AssertionOptionResponse?, origin: String?) -> AuthenticatorGetAssertionOptions {
+        var options = AuthenticatorGetAssertionOptions()
+        options.rpId = assertionOptionResponse?.rpId
+        options.requireUserVerification = false
+        options.requireUserPresence = true
+        options.clientDataHash = generateClientDataHash(
+            challenge: assertionOptionResponse?.challenge,
+            type: "webauthn.get",
+            origin: origin
+        ) ?? Data()
+        let allowCredentialDescriptorList = assertionOptionResponse?.allowCredentials?.map {
+            PublicKeyCredentialDescriptor(
+                id: $0.id.data(using: .utf8) ?? Data(),
+                type: $0.type,
+                transports: $0.transports
+            )
+        }
+        options.allowCredentialDescriptorList = allowCredentialDescriptorList
         return options
     }
     
@@ -56,6 +78,38 @@ final class Authenticator {
         let attestationResultRequest = AttestationResultRequest(type: "public-key", response: response)
         
         return attestationResultRequest
+    }
+    
+    func selectPublicKeyCredentialSource(credentialSelector: CredentialSelector, options: AuthenticatorGetAssertionOptions) -> PublicKeyCredentialSource? {
+        var credentials: [PublicKeyCredentialSource] = credentialSafe.getKeysForEntity(rpEntityId: options.rpId ?? "")
+        
+        if let allowCredentialDescriptorList = options.allowCredentialDescriptorList {
+            var filteredCredentials: [PublicKeyCredentialSource] = []
+            
+            allowCredentialDescriptorList.forEach { allowCredential in
+                credentials.forEach { credential in
+                    if credential.id == allowCredential.id {
+                        filteredCredentials.append(credential)
+                    }
+                }
+            }
+            
+            credentials = filteredCredentials
+        }
+        
+        if credentials.isEmpty {
+            return nil
+        }
+        
+        if credentials.count == 1 {
+            return credentials.first
+        }
+        
+        return credentialSelector.selectFrom(credentialList: credentials)
+    }
+    
+    func generateSignature(credentialSource: PublicKeyCredentialSource) {
+        WebAuthnCryptography().generateSignatureObject(alias: credentialSource.keyPairAlias)
     }
     
     // MARK: - Private

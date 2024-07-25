@@ -19,6 +19,7 @@ public enum EndpointRouter: EndpointConfiguration {
     case logout(String, String, String, String)
     case attestationOption(AttestationOptionRequest, String)
     case attestationResult(AttestationResultRequest, String)
+    case assertionOption(AssertionOptionRequest, String)
     case verifyIntegrityTokenOnAppServer(String)
     
     // MARK: - HTTPMethod
@@ -35,7 +36,8 @@ public enum EndpointRouter: EndpointConfiguration {
                 .getUserInfo,
                 .logout,
                 .attestationOption,
-                .attestationResult:
+                .attestationResult,
+                .assertionOption:
             return .post
         }
     }
@@ -57,7 +59,8 @@ public enum EndpointRouter: EndpointConfiguration {
                 .logout(_, _, _, let url),
                 .verifyIntegrityTokenOnAppServer(let url),
                 .attestationOption(_, let url),
-                .attestationResult(_, let url):
+                .attestationResult(_, let url),
+                .assertionOption(_, let url):
             return url
         }
     }
@@ -92,7 +95,8 @@ public enum EndpointRouter: EndpointConfiguration {
                 .doDCR,
                 .verifyIntegrityTokenOnAppServer,
                 .attestationOption,
-                .attestationResult:
+                .attestationResult,
+                .assertionOption:
             return nil
         }
     }
@@ -114,7 +118,8 @@ public enum EndpointRouter: EndpointConfiguration {
                     .getAuthorizationChallenge,
                     .verifyIntegrityTokenOnAppServer,
                     .attestationOption,
-                    .attestationResult:
+                    .attestationResult,
+                    .assertionOption:
                 break
             case .getToken, .getUserInfo, .logout:
                 var urlComponents = URLComponents(string: urlWithPathValue)!
@@ -154,6 +159,13 @@ public enum EndpointRouter: EndpointConfiguration {
                 "username": request.username,
                 "displayName": request.username,
                 "attestation": request.attestation
+            ]
+            if let data = try? JSONSerialization.data(withJSONObject: parameters, options: []) {
+                urlRequest.httpBody = data
+            }
+        case .assertionOption(let request, _):
+            let parameters: [String: Any] = [
+                "username": request.username
             ]
             if let data = try? JSONSerialization.data(withJSONObject: parameters, options: []) {
                 urlRequest.httpBody = data

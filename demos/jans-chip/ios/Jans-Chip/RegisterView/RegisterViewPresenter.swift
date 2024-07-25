@@ -25,6 +25,7 @@ final class RegisterViewPresenterImpl: RegisterViewPresenter {
     }
     
     func onViewStateChanged(viewState: ViewState) {
+        onLoading(visible: false)
         mainViewState.viewState = viewState
     }
     

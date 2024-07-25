@@ -8,13 +8,30 @@
 import Foundation
 import Alamofire
 
-struct NetworkError: Error {
-  let initialError: AFError
-  let backendError: BackendError?
+protocol NetworkErrorHandler {
+    var localizedDescription: String { get }
+}
+
+struct NetworkError: Error, NetworkErrorHandler {
+    let initialError: AFError
+    let backendError: BackendError?
+    
+    var localizedDescription: String {
+        if let backendError {
+            return backendError.error
+        }
+        
+        return initialError.localizedDescription
+    }
 }
 
 struct BackendError: Codable, Error {
-    var reason: String
-    var error_description: String
+    
+    private enum CodingKeys: String, CodingKey {
+        case error
+        case deviceSession = "device_session"
+    }
+    
     var error: String
+    var deviceSession: String?
 }

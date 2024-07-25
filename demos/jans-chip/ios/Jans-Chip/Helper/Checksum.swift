@@ -12,7 +12,7 @@ import CommonCrypto
 final class Checksum {
     
     public static func md5File(data: Data) -> Data? {
-        let bufferSize = 1024 * 1024
+//        let bufferSize = 1024 * 1024
         // Create and initialize MD5 context:
         var context = CC_MD5_CTX()
         CC_MD5_Init(&context)

@@ -65,8 +65,10 @@ final class DCRRepository {
         
         serviceClient.doDCR(dcRequest: dcRequest, url: registrationUrl)
             .sink { result in
-                switch result {
-                case .success(let dcResponse):
+                if let error = result.error {
+                    print("Error in DCR.\n Error:  \(error)")
+                    callback?(false, error)
+                } else if let dcResponse = result.value {
                     print("Inside doDCR :: DCResponse :: \(dcResponse)")
                     let oidcClient = OIDCClient()
                     oidcClient.clientName = dcResponse.clientName ?? ""
@@ -77,9 +79,6 @@ final class DCRRepository {
                     RealmManager.shared.save(object: oidcClient)
                     
                     callback?(true, nil)
-                case .failure(let error):
-                    print("Error in DCR.\n Error:  \(error)")
-                    callback?(false, error)
                 }
             }
             .store(in: &cancellableSet)
