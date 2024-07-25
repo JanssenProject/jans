@@ -398,8 +398,7 @@ public class AssertionService {
 		// Create result object
 		AssertionResultResponse assertionResultResponse = new AssertionResultResponse();
 
-		PublicKeyCredentialDescriptor credentialDescriptor = new PublicKeyCredentialDescriptor(registrationData.getType(),
-				registrationData.getPublicKeyId());
+		PublicKeyCredentialDescriptor credentialDescriptor = new PublicKeyCredentialDescriptor(registrationData.getPublicKeyId());
 		assertionResultResponse.setAuthenticatedCredentials(credentialDescriptor);
 		assertionResultResponse.setStatus("ok");
 		assertionResultResponse.setErrorMessage("");
@@ -468,7 +467,7 @@ public class AssertionService {
 						: new String[] { "usb", "ble", "nfc" };
 			}
 			PublicKeyCredentialDescriptor descriptor = new PublicKeyCredentialDescriptor(
-					f.getRegistrationData().getType(), transports, f.getRegistrationData().getPublicKeyId());
+					transports, f.getRegistrationData().getPublicKeyId());
 
 			allowedFido2Keys.add(descriptor);
 		});

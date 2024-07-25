@@ -9,9 +9,9 @@ public class PublicKeyCredentialParameters {
     public PublicKeyCredentialParameters() {
     }
 
-    public PublicKeyCredentialParameters(int alg, String type) {
+    public PublicKeyCredentialParameters(int alg) {
         this.alg = alg;
-        this.type = Strings.isNullOrEmpty(type) ? PublicKeyCredentialType.PUBLIC_KEY.getKeyName(): type;
+        this.type = PublicKeyCredentialType.PUBLIC_KEY.getKeyName();
     }
 
     public int getAlg() {
@@ -26,12 +26,8 @@ public class PublicKeyCredentialParameters {
         return type;
     }
 
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public static PublicKeyCredentialParameters createPublicKeyCredentialParameters(int alg, String type) {
-        return new PublicKeyCredentialParameters(alg, type);
+    public static PublicKeyCredentialParameters createPublicKeyCredentialParameters(int alg) {
+        return new PublicKeyCredentialParameters(alg);
     }
 
     @Override

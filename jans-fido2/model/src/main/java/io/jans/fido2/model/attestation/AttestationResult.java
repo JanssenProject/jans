@@ -5,7 +5,7 @@ import io.jans.fido2.model.common.SuperGluuSupport;
 
 public class AttestationResult extends SuperGluuSupport {
     private String id;
-    private final String type = PublicKeyCredentialType.PUBLIC_KEY.getKeyName();
+    private String type = PublicKeyCredentialType.PUBLIC_KEY.getKeyName();
     private Response response;
 
     public String getId() {

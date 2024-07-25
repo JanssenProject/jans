@@ -26,13 +26,13 @@ public class PublicKeyCredentialDescriptor {
     private String[] transports;
     private String id;
 
-    public PublicKeyCredentialDescriptor(String type, String id) {
-        this.type = Strings.isNullOrEmpty(type) ? PublicKeyCredentialType.PUBLIC_KEY.getKeyName(): type;
+    public PublicKeyCredentialDescriptor(String id) {
+        this.type = PublicKeyCredentialType.PUBLIC_KEY.getKeyName();
         this.id = id;
     }
 
-    public PublicKeyCredentialDescriptor(String type, String[] transports, String id) {
-        this.type = Strings.isNullOrEmpty(type) ? PublicKeyCredentialType.PUBLIC_KEY.getKeyName(): type;
+    public PublicKeyCredentialDescriptor(String[] transports, String id) {
+        this.type = PublicKeyCredentialType.PUBLIC_KEY.getKeyName();
         this.transports = transports;
         this.id = id;
     }

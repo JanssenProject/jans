@@ -104,7 +104,7 @@ class AssertionSuperGluuControllerTest {
         assertionOptionsResponse.setUserVerification("test_user_verification");
 
         String transports[] = new String[] { "internal" };
-        PublicKeyCredentialDescriptor publicKeyCredentialDescriptor = new PublicKeyCredentialDescriptor("public-key", transports, "test_id_1");
+        PublicKeyCredentialDescriptor publicKeyCredentialDescriptor = new PublicKeyCredentialDescriptor(transports, "test_id_1");
         List<PublicKeyCredentialDescriptor> allowCredentials = Lists.newArrayList(publicKeyCredentialDescriptor);
 
         assertionOptionsResponse.setAllowCredentials(allowCredentials);

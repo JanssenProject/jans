@@ -13,9 +13,9 @@ public class AssertionResult extends SuperGluuSupport {
     public AssertionResult() {
     }
 
-    public AssertionResult(String id, String type, String rawId, Response response) {
+    public AssertionResult(String id, String rawId, Response response) {
         this.id = id;
-        this.type = Strings.isNullOrEmpty(type) ? PublicKeyCredentialType.PUBLIC_KEY.getKeyName(): type;
+        this.type = PublicKeyCredentialType.PUBLIC_KEY.getKeyName();
         this.rawId = rawId;
         this.response = response;
     }
@@ -48,8 +48,8 @@ public class AssertionResult extends SuperGluuSupport {
         this.response = response;
     }
 
-    public static AssertionResult createAssertionResult(String id, String type, String rawId, Response response) {
-        return new AssertionResult(id, type, rawId, response);
+    public static AssertionResult createAssertionResult(String id, String rawId, Response response) {
+        return new AssertionResult(id, rawId, response);
     }
 
     @Override

@@ -321,7 +321,7 @@ public class AttestationService {
 		AttestationResultResponse attestationResultResponse = new AttestationResultResponse();
 
 		PublicKeyCredentialDescriptor credentialDescriptor = new PublicKeyCredentialDescriptor(
-				registrationData.getType(), registrationData.getPublicKeyId());
+				registrationData.getPublicKeyId());
 		attestationResultResponse.setCreatedCredentials(credentialDescriptor);
 		attestationResultResponse.setStatus("ok");
 		attestationResultResponse.setErrorMessage("");
@@ -356,11 +356,9 @@ public class AttestationService {
 		if ((requestedCredentialTypes == null) || requestedCredentialTypes.isEmpty()) {
 			// Add default requested credential types
 			// FIDO2 RS256
-			credentialParametersSets.add(PublicKeyCredentialParameters.createPublicKeyCredentialParameters(CoseRSAAlgorithm.RS256.getNumericValue(),
-					PublicKeyCredentialType.PUBLIC_KEY.getKeyName()));
+			credentialParametersSets.add(PublicKeyCredentialParameters.createPublicKeyCredentialParameters(CoseRSAAlgorithm.RS256.getNumericValue()));
 			// FIDO2 ES256
-			credentialParametersSets.add(PublicKeyCredentialParameters.createPublicKeyCredentialParameters(CoseEC2Algorithm.ES256.getNumericValue(),
-					PublicKeyCredentialType.PUBLIC_KEY.getKeyName()));
+			credentialParametersSets.add(PublicKeyCredentialParameters.createPublicKeyCredentialParameters(CoseEC2Algorithm.ES256.getNumericValue()));
 		} else {
 			for (String requestedCredentialType : requestedCredentialTypes) {
 				CoseRSAAlgorithm coseRSAAlgorithm = null;
@@ -370,8 +368,7 @@ public class AttestationService {
 				}
 
 				if (coseRSAAlgorithm != null) {
-					credentialParametersSets.add(PublicKeyCredentialParameters.createPublicKeyCredentialParameters(coseRSAAlgorithm.getNumericValue(),
-							PublicKeyCredentialType.PUBLIC_KEY.getKeyName()));
+					credentialParametersSets.add(PublicKeyCredentialParameters.createPublicKeyCredentialParameters(coseRSAAlgorithm.getNumericValue()));
 					break;
 				}
 			}
@@ -384,8 +381,7 @@ public class AttestationService {
 				}
 
 				if (coseEC2Algorithm != null) {
-					credentialParametersSets.add(PublicKeyCredentialParameters.createPublicKeyCredentialParameters(coseEC2Algorithm.getNumericValue(),
-							PublicKeyCredentialType.PUBLIC_KEY.getKeyName()));
+					credentialParametersSets.add(PublicKeyCredentialParameters.createPublicKeyCredentialParameters(coseEC2Algorithm.getNumericValue()));
 					break;
 				}
 			}
@@ -436,7 +432,7 @@ public class AttestationService {
 		Set<PublicKeyCredentialDescriptor> excludedKeys = existingRegistrations.parallelStream()
 				.filter(f -> StringHelper.isNotEmpty(f.getRegistrationData().getPublicKeyId()))
 				.map(f -> new PublicKeyCredentialDescriptor(
-						f.getRegistrationData().getType(), new String[] { "usb", "ble", "nfc", "internal", "net", "qr" },
+						new String[] { "usb", "ble", "nfc", "internal", "net", "qr" },
 						f.getRegistrationData().getPublicKeyId()))
 				.collect(Collectors.toSet());
 
