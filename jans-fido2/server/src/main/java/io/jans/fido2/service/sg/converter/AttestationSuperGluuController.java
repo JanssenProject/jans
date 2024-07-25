@@ -213,9 +213,6 @@ public class AttestationSuperGluuController {
         boolean oneStep = StringHelper.isEmpty(userName);
         attestationResult.setSuperGluuRequestMode(oneStep ? SuperGluuMode.ONE_STEP.getMode() : SuperGluuMode.TWO_STEP.getMode());
 
-        // Manadatory parameter
-        attestationResult.setType(PublicKeyCredentialType.PUBLIC_KEY.getKeyName());
-
         // Add response node
         Response response = new Response();
         attestationResult.setResponse(response);

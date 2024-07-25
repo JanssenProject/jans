@@ -197,7 +197,6 @@ public class AssertionSuperGluuController {
         // Add all required parameters from request to allow process U2F request 
         assertionResult.setSuperGluuRequest(true);
         assertionResult.setSuperGluuRequestMode(oneStep ? SuperGluuMode.ONE_STEP.getMode() : SuperGluuMode.TWO_STEP.getMode());
-        assertionResult.setType("public-key");
         assertionResult.setId(authenticateResponse.getKeyHandle());
         assertionResult.setRawId(authenticateResponseString);
 

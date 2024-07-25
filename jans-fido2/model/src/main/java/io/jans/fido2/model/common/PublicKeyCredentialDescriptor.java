@@ -8,6 +8,7 @@ package io.jans.fido2.model.common;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.google.common.base.Strings;
 
 import java.util.Arrays;
 
@@ -26,12 +27,12 @@ public class PublicKeyCredentialDescriptor {
     private String id;
 
     public PublicKeyCredentialDescriptor(String type, String id) {
-        this.type = type;
+        this.type = Strings.isNullOrEmpty(type) ? PublicKeyCredentialType.PUBLIC_KEY.getKeyName(): type;
         this.id = id;
     }
 
     public PublicKeyCredentialDescriptor(String type, String[] transports, String id) {
-        this.type = type;
+        this.type = Strings.isNullOrEmpty(type) ? PublicKeyCredentialType.PUBLIC_KEY.getKeyName(): type;
         this.transports = transports;
         this.id = id;
     }

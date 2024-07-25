@@ -1,5 +1,7 @@
 package io.jans.fido2.model.common;
 
+import com.google.common.base.Strings;
+
 public class PublicKeyCredentialParameters {
     private int alg;
     private String type = PublicKeyCredentialType.PUBLIC_KEY.getKeyName();
@@ -9,7 +11,7 @@ public class PublicKeyCredentialParameters {
 
     public PublicKeyCredentialParameters(int alg, String type) {
         this.alg = alg;
-        this.type = type;
+        this.type = Strings.isNullOrEmpty(type) ? PublicKeyCredentialType.PUBLIC_KEY.getKeyName(): type;
     }
 
     public int getAlg() {

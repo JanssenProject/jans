@@ -1,10 +1,12 @@
 package io.jans.fido2.model.assertion;
 
+import com.google.common.base.Strings;
+import io.jans.fido2.model.common.PublicKeyCredentialType;
 import io.jans.fido2.model.common.SuperGluuSupport;
 
 public class AssertionResult extends SuperGluuSupport {
     private String id;
-    private String type;
+    private String type = PublicKeyCredentialType.PUBLIC_KEY.getKeyName();
     private String rawId;
     private Response response;
 
@@ -13,7 +15,7 @@ public class AssertionResult extends SuperGluuSupport {
 
     public AssertionResult(String id, String type, String rawId, Response response) {
         this.id = id;
-        this.type = type;
+        this.type = Strings.isNullOrEmpty(type) ? PublicKeyCredentialType.PUBLIC_KEY.getKeyName(): type;
         this.rawId = rawId;
         this.response = response;
     }
@@ -28,10 +30,6 @@ public class AssertionResult extends SuperGluuSupport {
 
     public String getType() {
         return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
     }
 
     public String getRawId() {

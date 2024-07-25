@@ -313,14 +313,6 @@ public class AssertionService {
 		if(response == null) {
 			throw errorResponseFactory.invalidRequest("The response parameter is null.");
 		}
-		//JsonNode responseNode = params.get("response");
-
-		// Verify userHandle
-		/*if (!Strings.isNullOrEmpty(response.getUserHandle())) {
-			// This can be null for U2F authenticators
-			String userHandle = commonVerifiers.verifyThatFieldString(params.get("response"), "userHandle");
-		}*/
-
 		// Verify client data
 		JsonNode clientJsonNode = commonVerifiers.verifyClientJSON(response.getClientDataJSON());
 		if (!superGluu) {
@@ -366,7 +358,6 @@ public class AssertionService {
         } else {
         	authenticationData.setStatus(Fido2AuthenticationStatus.authenticated);
 
-        	//JsonNode responseDeviceData = responseNode.get("deviceData");
 			String deviceDataStr = response.getDeviceData();
     		if (!Strings.isNullOrEmpty(deviceDataStr)) {
                 try {
@@ -406,7 +397,6 @@ public class AssertionService {
 
 		// Create result object
 		AssertionResultResponse assertionResultResponse = new AssertionResultResponse();
-		//ObjectNode finishResponseNode = dataMapperService.createObjectNode();
 
 		PublicKeyCredentialDescriptor credentialDescriptor = new PublicKeyCredentialDescriptor(registrationData.getType(),
 				registrationData.getPublicKeyId());
@@ -480,7 +470,6 @@ public class AssertionService {
 			PublicKeyCredentialDescriptor descriptor = new PublicKeyCredentialDescriptor(
 					f.getRegistrationData().getType(), transports, f.getRegistrationData().getPublicKeyId());
 
-			//ObjectNode allowedFido2Key = dataMapperService.convertValue(descriptor, ObjectNode.class);
 			allowedFido2Keys.add(descriptor);
 		});
 
@@ -491,9 +480,6 @@ public class AssertionService {
 		if (fidoRegistration.isPresent() && superGluu) {
 			applicationId = fidoRegistration.get().getRegistrationData().getApplicationId();
 		}
-
-		//ArrayNode allowedCredentials = dataMapperService.createArrayNode();
-		//allowedCredentials.addAll(allowedFido2Keys);
 
 		return Pair.of(allowedFido2Keys, applicationId);
 	}
