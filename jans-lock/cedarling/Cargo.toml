@@ -14,6 +14,7 @@ cedar-policy = { version = "3.2.1", features = ["wasm"] }
 miniz_oxide = { version = "0.7.4", default-features = false, features = [
 	"with-alloc",
 ] }
+base64 = "0.22.1"
 
 # serde
 serde = { version = "1.0.204", features = ["derive"] }

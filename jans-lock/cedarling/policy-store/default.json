@@ -1,405 +1,399 @@
 {
-	"Schema": {
-		"Jans": {
-			"commonTypes": {
-				"Url": {
-					"type": "Record",
-					"attributes": {
-						"host": {
-							"type": "String"
-						},
-						"path": {
-							"type": "String"
-						},
-						"protocol": {
-							"type": "String"
-						}
-					}
-				},
-				"Context": {
-					"type": "Record",
-					"attributes": {
-						"browser": {
-							"type": "String"
-						},
-						"current_time": {
-							"type": "Long"
-						},
-						"device_health": {
-							"type": "Set",
-							"element": {
-								"type": "String"
-							}
-						},
-						"fraud_indicators": {
-							"type": "Set",
-							"element": {
-								"type": "String"
-							}
-						},
-						"geolocation": {
-							"type": "Set",
-							"element": {
-								"type": "String"
-							}
-						},
-						"network": {
-							"type": "Extension",
-							"name": "ipaddr"
-						},
-						"network_type": {
-							"type": "String"
-						},
-						"operating_system": {
-							"type": "String"
-						}
-					}
-				},
-				"email_address": {
-					"type": "Record",
-					"attributes": {
-						"domain": {
-							"type": "String"
-						},
-						"id": {
-							"type": "String"
-						}
-					}
-				}
-			},
-			"entityTypes": {
-				"Userinfo_token": {
-					"shape": {
-						"type": "Record",
-						"attributes": {
-							"aud": {
-								"type": "String"
-							},
-							"birthdate": {
-								"type": "String"
-							},
-							"email": {
-								"type": "email_address"
-							},
-							"exp": {
-								"type": "Long"
-							},
-							"iat": {
-								"type": "Long"
-							},
-							"iss": {
-								"type": "Entity",
-								"name": "TrustedIssuer"
-							},
-							"jti": {
-								"type": "String"
-							},
-							"name": {
-								"type": "String"
-							},
-							"phone_number": {
-								"type": "String"
-							},
-							"role": {
-								"type": "Set",
-								"element": {
-									"type": "String"
-								}
-							},
-							"sub": {
-								"type": "String"
-							}
-						}
-					}
-				},
-				"Access_token": {
-					"shape": {
-						"type": "Record",
-						"attributes": {
-							"aud": {
-								"type": "String"
-							},
-							"exp": {
-								"type": "Long"
-							},
-							"iat": {
-								"type": "Long"
-							},
-							"iss": {
-								"type": "Entity",
-								"name": "TrustedIssuer"
-							},
-							"jti": {
-								"type": "String"
-							},
-							"nbf": {
-								"type": "Long"
-							},
-							"scope": {
-								"type": "String"
-							}
-						}
-					}
-				},
-				"Application": {
-					"shape": {
-						"type": "Record",
-						"attributes": {
-							"client": {
-								"type": "Entity",
-								"name": "Client"
-							},
-							"name": {
-								"type": "String"
-							}
-						}
-					}
-				},
-				"Role": {},
-				"TrustedIssuer": {
-					"shape": {
-						"type": "Record",
-						"attributes": {
-							"issuer_entity_id": {
-								"type": "Url"
-							}
-						}
-					}
-				},
-				"Client": {
-					"shape": {
-						"type": "Record",
-						"attributes": {
-							"client_id": {
-								"type": "String"
-							},
-							"iss": {
-								"type": "Entity",
-								"name": "TrustedIssuer"
-							}
-						}
-					}
-				},
-				"id_token": {
-					"shape": {
-						"type": "Record",
-						"attributes": {
-							"acr": {
-								"type": "Set",
-								"element": {
-									"type": "String"
-								}
-							},
-							"amr": {
-								"type": "String"
-							},
-							"aud": {
-								"type": "String"
-							},
-							"azp": {
-								"type": "String"
-							},
-							"birthdate": {
-								"type": "String"
-							},
-							"email": {
-								"type": "email_address"
-							},
-							"exp": {
-								"type": "Long"
-							},
-							"iat": {
-								"type": "Long"
-							},
-							"iss": {
-								"type": "Entity",
-								"name": "TrustedIssuer"
-							},
-							"jti": {
-								"type": "String"
-							},
-							"name": {
-								"type": "String"
-							},
-							"phone_number": {
-								"type": "String"
-							},
-							"role": {
-								"type": "Set",
-								"element": {
-									"type": "String"
-								}
-							},
-							"sub": {
-								"type": "String"
-							}
-						}
-					}
-				},
-				"User": {
-					"memberOfTypes": [
-						"Role"
-					],
-					"shape": {
-						"type": "Record",
-						"attributes": {
-							"email": {
-								"type": "email_address"
-							},
-							"phone_number": {
-								"type": "String"
-							},
-							"role": {
-								"type": "Set",
-								"element": {
-									"type": "String"
-								}
-							},
-							"sub": {
-								"type": "String"
-							},
-							"username": {
-								"type": "String"
-							}
-						}
-					}
-				},
-				"HTTP_Request": {
-					"shape": {
-						"type": "Record",
-						"attributes": {
-							"accept": {
-								"type": "Set",
-								"element": {
-									"type": "String"
-								}
-							},
-							"header": {
-								"type": "Set",
-								"element": {
-									"type": "String"
-								}
-							},
-							"url": {
-								"type": "Url"
-							}
-						}
-					}
-				}
-			},
-			"actions": {
-				"GET": {
-					"appliesTo": {
-						"resourceTypes": [
-							"HTTP_Request"
-						],
-						"principalTypes": [
-							"Client"
-						],
-						"context": {
-							"type": "Context"
-						}
-					}
-				},
-				"DELETE": {
-					"appliesTo": {
-						"resourceTypes": [
-							"HTTP_Request"
-						],
-						"principalTypes": [
-							"Client"
-						],
-						"context": {
-							"type": "Context"
-						}
-					}
-				},
-				"POST": {
-					"appliesTo": {
-						"resourceTypes": [
-							"HTTP_Request"
-						],
-						"principalTypes": [
-							"Client"
-						],
-						"context": {
-							"type": "Context"
-						}
-					}
-				},
-				"HEAD": {
-					"appliesTo": {
-						"resourceTypes": [
-							"HTTP_Request"
-						],
-						"principalTypes": [
-							"Client"
-						],
-						"context": {
-							"type": "Context"
-						}
-					}
-				},
-				"PUT": {
-					"appliesTo": {
-						"resourceTypes": [
-							"HTTP_Request"
-						],
-						"principalTypes": [
-							"Client"
-						],
-						"context": {
-							"type": "Context"
-						}
-					}
-				},
-				"PATCH": {
-					"appliesTo": {
-						"resourceTypes": [
-							"HTTP_Request"
-						],
-						"principalTypes": [
-							"Client"
-						],
-						"context": {
-							"type": "Context"
-						}
-					}
-				},
-				"Access": {
-					"appliesTo": {
-						"resourceTypes": [
-							"Application"
-						],
-						"principalTypes": [
-							"User",
-							"Role"
-						],
-						"context": {
-							"type": "Context"
-						}
-					}
-				}
-			}
-		}
-	},
-	"PolicySet": [],
-	"TrustedIssuers": [
-		{
-			"name": "Gluu",
-			"description": "Consumer IDP",
-			"openidConfigurationEndpoint": "https://account.gluu.org/.well-known/openid-configuration",
-			"accessTokens": {
-				"trusted": true
-			},
-			"idTokens": {
-				"trusted": true,
-				"principalIdentifier": "email"
-			},
-			"userinfoTokens": {
-				"trusted": true,
-				"roleMapping": "role"
-			}
-		}
-	]
+  "fc2fee0253af46f3dce320484c42444ae0b24f7ec84a": {
+    "name": "gluuStore",
+    "description": "gluu store",
+    "policies": {
+      "b34fce229be0629e1e17baca42fbfe3621b70540598c": {
+        "description": "admin acccess",
+        "creation_date": "2024-07-19T08:52:00.363054",
+        "policy_content": "QGlkKCJwZXJtaXQgYWRtaW4gd3JpdGUgYWNjZXNzIHdoZW4gc2NvcGUgaGFzIHdyaXRlIikKcGVybWl0ICgKICBwcmluY2lwYWwgaW4gSmFuczo6Um9sZTo6ImFkbWluIiwKICBhY3Rpb24gPT0gSmFuczo6QWN0aW9uOjoiV3JpdGUiLAogIHJlc291cmNlID09IEphbnM6OkFwcGxpY2F0aW9uOjoiT25saW5lU2hvcDIwMCIKKQp3aGVuIHsKICAgIEphbnM6OkFjY2Vzc1Rva2VuOjoiYWNjZXNzdG9rZW4wMDAwMSIuc2NvcGUgPT0gWyJXcml0ZSJdCn07"
+      }
+    },
+    "identity_source": {},
+    "schema": {
+      "Jans": {
+        "commonTypes": {
+          "EmailAddress": {
+            "type": "Record",
+            "attributes": {
+              "domain": {
+                "type": "String"
+              },
+              "id": {
+                "type": "String"
+              }
+            }
+          },
+          "Url": {
+            "type": "Record",
+            "attributes": {
+              "host": {
+                "type": "String"
+              },
+              "path": {
+                "type": "String"
+              },
+              "protocol": {
+                "type": "String"
+              }
+            }
+          },
+          "Context": {
+            "type": "Record",
+            "attributes": {
+              "current_time": {
+                "type": "Long"
+              },
+              "device_health": {
+                "type": "Set",
+                "element": {
+                  "type": "String"
+                }
+              },
+              "fraud_indicators": {
+                "type": "Set",
+                "element": {
+                  "type": "String"
+                }
+              },
+              "geolocation": {
+                "type": "Set",
+                "element": {
+                  "type": "String"
+                }
+              },
+              "network": {
+                "type": "Extension",
+                "name": "ipaddr"
+              },
+              "network_type": {
+                "type": "String"
+              },
+              "operating_system": {
+                "type": "String"
+              },
+              "user_agent": {
+                "type": "String"
+              }
+            }
+          }
+        },
+        "entityTypes": {
+          "AccessToken": {
+            "shape": {
+              "type": "Record",
+              "attributes": {
+                "aud": {
+                  "type": "String"
+                },
+                "exp": {
+                  "type": "Long"
+                },
+                "iat": {
+                  "type": "Long"
+                },
+                "iss": {
+                  "type": "Entity",
+                  "name": "TrustedIssuer"
+                },
+                "jti": {
+                  "type": "String"
+                },
+                "nbf": {
+                  "type": "Long"
+                },
+                "scope": {
+                  "type": "Set",
+                  "element": {
+                    "type": "String"
+                  }
+                }
+              }
+            }
+          },
+          "IDToken": {
+            "shape": {
+              "type": "Record",
+              "attributes": {
+                "acr": {
+                  "type": "Set",
+                  "element": {
+                    "type": "String"
+                  }
+                },
+                "amr": {
+                  "type": "String"
+                },
+                "aud": {
+                  "type": "String"
+                },
+                "azp": {
+                  "type": "String"
+                },
+                "birthdate": {
+                  "type": "String"
+                },
+                "email": {
+                  "type": "EmailAddress"
+                },
+                "exp": {
+                  "type": "Long"
+                },
+                "iat": {
+                  "type": "Long"
+                },
+                "iss": {
+                  "type": "Entity",
+                  "name": "TrustedIssuer"
+                },
+                "jti": {
+                  "type": "String"
+                },
+                "name": {
+                  "type": "String"
+                },
+                "phone_number": {
+                  "type": "String"
+                },
+                "role": {
+                  "type": "Set",
+                  "element": {
+                    "type": "String"
+                  }
+                },
+                "sub": {
+                  "type": "String"
+                }
+              }
+            }
+          },
+          "Role": {},
+          "Client": {
+            "shape": {
+              "type": "Record",
+              "attributes": {
+                "client_id": {
+                  "type": "String"
+                },
+                "iss": {
+                  "type": "Entity",
+                  "name": "TrustedIssuer"
+                }
+              }
+            }
+          },
+          "TrustedIssuer": {
+            "shape": {
+              "type": "Record",
+              "attributes": {
+                "issuer_entity_id": {
+                  "type": "Url"
+                }
+              }
+            }
+          },
+          "User": {
+            "memberOfTypes": [
+              "Role"
+            ],
+            "shape": {
+              "type": "Record",
+              "attributes": {
+                "email": {
+                  "type": "EmailAddress"
+                },
+                "phone_number": {
+                  "type": "String"
+                },
+                "role": {
+                  "type": "Set",
+                  "element": {
+                    "type": "String"
+                  }
+                },
+                "sub": {
+                  "type": "String"
+                },
+                "username": {
+                  "type": "String"
+                }
+              }
+            }
+          },
+          "Application": {
+            "shape": {
+              "type": "Record",
+              "attributes": {
+                "client": {
+                  "type": "Entity",
+                  "name": "Client"
+                },
+                "name": {
+                  "type": "String"
+                }
+              }
+            }
+          },
+          "UserinfoToken": {
+            "shape": {
+              "type": "Record",
+              "attributes": {
+                "aud": {
+                  "type": "String"
+                },
+                "birthdate": {
+                  "type": "String"
+                },
+                "email": {
+                  "type": "EmailAddress"
+                },
+                "exp": {
+                  "type": "Long"
+                },
+                "iat": {
+                  "type": "Long"
+                },
+                "iss": {
+                  "type": "Entity",
+                  "name": "TrustedIssuer"
+                },
+                "jti": {
+                  "type": "String"
+                },
+                "name": {
+                  "type": "String"
+                },
+                "phone_number": {
+                  "type": "String"
+                },
+                "role": {
+                  "type": "Set",
+                  "element": {
+                    "type": "String"
+                  }
+                },
+                "sub": {
+                  "type": "String"
+                }
+              }
+            }
+          }
+        },
+        "actions": {
+          "Read": {
+            "appliesTo": {
+              "resourceTypes": [
+                "Application"
+              ],
+              "principalTypes": [
+                "User",
+                "Role"
+              ],
+              "context": {
+                "type": "Context"
+              }
+            }
+          },
+          "Share": {
+            "appliesTo": {
+              "resourceTypes": [
+                "Application"
+              ],
+              "principalTypes": [
+                "User",
+                "Role"
+              ],
+              "context": {
+                "type": "Context"
+              }
+            }
+          },
+          "Write": {
+            "appliesTo": {
+              "resourceTypes": [
+                "Application"
+              ],
+              "principalTypes": [
+                "User",
+                "Role"
+              ],
+              "context": {
+                "type": "Context"
+              }
+            }
+          },
+          "Compare": {
+            "appliesTo": {
+              "resourceTypes": [
+                "Application"
+              ],
+              "principalTypes": [
+                "User",
+                "Role"
+              ],
+              "context": {
+                "type": "Context"
+              }
+            }
+          },
+          "Monitor": {
+            "appliesTo": {
+              "resourceTypes": [
+                "Application"
+              ],
+              "principalTypes": [
+                "User",
+                "Role"
+              ],
+              "context": {
+                "type": "Context"
+              }
+            }
+          },
+          "Tag": {
+            "appliesTo": {
+              "resourceTypes": [
+                "Application"
+              ],
+              "principalTypes": [
+                "User",
+                "Role"
+              ],
+              "context": {
+                "type": "Context"
+              }
+            }
+          },
+          "Execute": {
+            "appliesTo": {
+              "resourceTypes": [
+                "Application"
+              ],
+              "principalTypes": [
+                "User",
+                "Role"
+              ],
+              "context": {
+                "type": "Context"
+              }
+            }
+          },
+          "Search": {
+            "appliesTo": {
+              "resourceTypes": [
+                "Application"
+              ],
+              "principalTypes": [
+                "User",
+                "Role"
+              ],
+              "context": {
+                "type": "Context"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 }

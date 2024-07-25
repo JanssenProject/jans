@@ -24,15 +24,33 @@ pub async fn authz(req: JsValue) -> JsValue {
 	let input = from_value::<types::AuthzInput>(req).unwrap_throw();
 
 	// generate extra parameters for cedar decision
-	let (principal, entities) = token2entity::token2entities(&input);
+	let (uids, mut entities) = token2entity::token2entities(&input);
 	let policies = startup::POLICY_SET.get().expect_throw("POLICY_SET not initialized");
+
+	// append resource entity
+	let r = serde_json::json!([input.resource]);
+	entities = entities.add_entities_from_json_value(r, startup::SCHEMA.get()).unwrap_throw();
 
 	// generate request
 	let action = input.action.parse().expect_throw("Unable to parse action");
-	let resource = token2entity::json2entity(input.resource);
+	let resource = {
+		#[derive(serde::Deserialize)]
+		struct Extract {
+			#[serde(rename = "type")]
+			pub _type: String,
+			pub id: String,
+		}
+
+		let uid = input.resource.get("uid").cloned().expect_throw("Can't find uid in Resource entity definition");
+		let uid: Extract = serde_json::from_value(uid).expect_throw("Resource uid is not a valid cedar UID");
+		let id = serde_json::json!({ "__entity": { "type": uid._type, "id": uid.id } });
+
+		cedar_policy::EntityUid::from_json(id).unwrap_throw()
+	};
 	let context = cedar_policy::Context::from_json_value(input.context, None).expect_throw("Unable to generate context Object");
 
-	let request = cedar_policy::Request::new(Some(principal), Some(action), Some(resource.uid()), context, startup::SCHEMA.get()).unwrap_throw();
+	// TODO: implement DSL to aggregate access for Client, Application and User
+	let request = cedar_policy::Request::new(Some(uids.user), Some(action), Some(resource), context, startup::SCHEMA.get()).unwrap_throw();
 
 	// create authorizer
 	let authorizer = cedar_policy::Authorizer::new();

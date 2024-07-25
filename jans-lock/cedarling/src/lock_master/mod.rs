@@ -24,7 +24,7 @@ extern "C" {
 // Stores a status list referencing each JWT's `jti` claim
 pub static mut STATUS_LISTS: OnceLock<BTreeMap<String, (u8, HashSet<String>)>> = OnceLock::new();
 
-pub async fn init<'a>(policy_store_config: &PolicyStoreConfig) -> Cow<'a, [u8]> {
+pub async fn init<'a, T: serde::de::DeserializeOwned>(policy_store_config: &PolicyStoreConfig, decompress: bool) -> T {
 	let PolicyStoreConfig::LockMaster {
 		url,
 		policy_store_id,
@@ -93,11 +93,17 @@ pub async fn init<'a>(policy_store_config: &PolicyStoreConfig) -> Cow<'a, [u8]> 
 	};
 
 	let buffer = {
-		let url = format!("{}?policy_store_format=json&id={}", lock_master_config.config_uri, policy_store_id);
+		let url = format!("{}?policy_store_format=json&policy_store_id={}", lock_master_config.config_uri, policy_store_id);
 		let auth = format!("Bearer {}", grant.access_token);
+
 		let res = http::get(&url, &[("Authorization", &auth)]).await.expect_throw("Unable to fetch policies from remote location");
-		Cow::Owned(res.into_bytes().await.expect_throw("Unable to convert response to bytes"))
+		let buffer = res.into_bytes().await.expect_throw("Unable to convert response to bytes");
+
+		match decompress {
+			true => Cow::Owned(miniz_oxide::inflate::decompress_to_vec_zlib(&buffer).unwrap_throw()),
+			false => Cow::Owned(buffer),
+		}
 	};
 
-	buffer
+	serde_json::from_slice(&buffer).unwrap_throw()
 }

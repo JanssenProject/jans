@@ -1,53 +1,16 @@
-use std::collections::HashMap;
-
 use crypto::{decode, TRUST_STORE};
 use wasm_bindgen::throw_str;
 
 use super::{types, APPLICATION_NAME, REQUIRE_AUD_VALIDATION};
 use crate::*;
 
-fn converter(_value: serde_json::Value) -> cedar_policy::RestrictedExpression {
-	match _value {
-		serde_json::Value::Number(n) => {
-			if let Some(long) = n.as_i64() {
-				cedar_policy::RestrictedExpression::new_long(long)
-			} else if let Some(float) = n.as_f64() {
-				cedar_policy::RestrictedExpression::new_decimal(float.to_string())
-			} else if let Some(ulong) = n.as_u64() {
-				cedar_policy::RestrictedExpression::new_long(ulong as _)
-			} else {
-				throw_str("Unknown number format encountered")
-			}
-		}
-		serde_json::Value::Bool(b) => cedar_policy::RestrictedExpression::new_bool(b),
-		serde_json::Value::String(s) => cedar_policy::RestrictedExpression::new_string(s),
-		serde_json::Value::Array(a) => cedar_policy::RestrictedExpression::new_set(a.into_iter().map(converter)),
-		serde_json::Value::Object(o) => cedar_policy::RestrictedExpression::new_record(o.into_iter().map(|(n, v)| (n, converter(v)))).unwrap_throw(),
-
-		// NULL not accepted
-		serde_json::Value::Null => throw_str("Encountered null in JSON to Entity converter"),
-	}
-}
-
-pub fn json2entity(value: serde_json::Value) -> cedar_policy::Entity {
-	let types::DeferredEntity { _type, id, parents, attributes } = serde_json::from_value(value).expect_throw("Expected Resource to contain 'type' and 'id' fields");
-
-	let id = serde_json::json!({ "__entity": { "type": _type, "id": id } });
-	let id = cedar_policy::EntityUid::from_json(id).unwrap_throw();
-
-	let attrs = HashMap::from_iter(attributes.into_iter().map(|(n, value)| (n, converter(value))));
-	cedar_policy::Entity::new(id, attrs, parents).unwrap_throw()
-}
-
-pub fn token2entities(input: &authz::types::AuthzInput) -> (cedar_policy::EntityUid, cedar_policy::Entities) {
-	// TODO: enable returning Client as Principal
-	let principal;
+pub fn token2entities(input: &authz::types::AuthzInput) -> (types::EntityUids, cedar_policy::Entities) {
 	let mut entities = cedar_policy::Entities::empty();
 	let schema = startup::SCHEMA.get();
 
 	// load default entities
 	if let Some(e) = startup::DEFAULT_ENTITIES.get() {
-		entities = entities.add_entities(e.iter().cloned().map(json2entity), schema).unwrap_throw();
+		entities = entities.add_entities_from_json_value(e.clone(), schema).unwrap_throw();
 	}
 
 	// extract tokens
@@ -70,14 +33,16 @@ pub fn token2entities(input: &authz::types::AuthzInput) -> (cedar_policy::Entity
 	entities = entities.add_entities(issuers, schema).unwrap_throw();
 
 	// create Client, Application and access_token Entities
-	let client = access_token.get_client_entity();
+	let client_entity = access_token.get_client_entity();
+	let client = client_entity.uid();
 
 	let application_name = APPLICATION_NAME.get().map(String::as_str);
-	let application_entity = access_token.get_application_entity(application_name, client.uid());
+	let application_entity = access_token.get_application_entity(application_name, client_entity.uid());
+	let application = application_entity.as_ref().map(|a| a.uid());
 
 	entities = match application_entity {
-		Some(a) => entities.add_entities([a, client, access_token.get_token_entity()], schema).unwrap_throw(),
-		None => entities.add_entities([client, access_token.get_token_entity()], schema).unwrap_throw(),
+		Some(a) => entities.add_entities([a, client_entity, access_token.get_token_entity()], schema).unwrap_throw(),
+		None => entities.add_entities([client_entity, access_token.get_token_entity()], schema).unwrap_throw(),
 	};
 
 	// extract UserInfo
@@ -87,15 +52,16 @@ pub fn token2entities(input: &authz::types::AuthzInput) -> (cedar_policy::Entity
 	}
 
 	// create Roles entities
-	let roles = userinfo.get_role_entities();
+	let role_entities = userinfo.get_role_entities();
 
 	// create User, userinfo_token and id_token entities
-	let user_entity = userinfo.get_user_entity(&roles);
-	principal = user_entity.uid();
+	let user_entity = userinfo.get_user_entity(&role_entities);
+	let user = user_entity.uid();
 	entities = entities
-		.add_entities([user_entity, userinfo.get_token_entity(&roles), id_token.get_token_entity()], schema)
+		.add_entities([user_entity, userinfo.get_token_entity(&role_entities), id_token.get_token_entity()], schema)
 		.unwrap_throw();
 
 	// Add Role entities and return Uid of User entity as principal
-	(principal, entities.add_entities(roles.into_iter(), schema).unwrap_throw())
+	let entities = entities.add_entities(role_entities.into_iter(), schema).unwrap_throw();
+	(types::EntityUids { application, client, user }, entities)
 }

@@ -1,4 +1,8 @@
-use std::collections::BTreeSet;
+use base64::Engine;
+use std::collections::{BTreeMap, BTreeSet};
+use wasm_bindgen::{JsValue, UnwrapThrowExt};
+
+use crate::*;
 
 #[derive(serde::Deserialize, serde::Serialize, Debug)]
 #[serde(rename_all = "camelCase")]
@@ -22,7 +26,9 @@ pub struct CedarlingConfig {
 #[serde(rename_all = "kebab-case")]
 #[serde(rename_all_fields = "camelCase")]
 pub enum PolicyStoreConfig {
-	Local,
+	Local {
+		id: String,
+	},
 	Remote {
 		url: String,
 	},
@@ -33,4 +39,45 @@ pub enum PolicyStoreConfig {
 		enable_dynamic_configuration: bool,
 		ssa_jwt: String,
 	},
+}
+
+#[derive(Debug, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PolicyStoreEntry {
+	#[serde(deserialize_with = "parse_schema")]
+	pub schema: cedar_policy::Schema,
+	pub trusted_issuers: Vec<crypto::types::TrustedIssuer>,
+	#[serde(deserialize_with = "parse_policies")]
+	pub policies: cedar_policy::PolicySet,
+	pub default_entities: Option<serde_json::Value>,
+}
+
+fn parse_schema<'de, D>(deserializer: D) -> Result<cedar_policy::Schema, D::Error>
+where
+	D: serde::Deserializer<'de>,
+{
+	let source = <String as serde::Deserialize>::deserialize(deserializer)?;
+	let decoded = base64::engine::general_purpose::STANDARD.decode(&source).expect_throw("Unable to parse Schema source as valid base64");
+
+	let (schema, warnings) = cedar_policy::Schema::from_file_natural(decoded.as_slice()).expect_throw("Unable to parse Schema in Human Readable cedar format");
+	for warning in warnings {
+		let msg = format!("Schema Parser generated warning: {:?}", warning);
+		web_sys::console::warn_1(&JsValue::from_str(&msg));
+	}
+
+	Ok(schema)
+}
+
+fn parse_policies<'de, D>(deserializer: D) -> Result<cedar_policy::PolicySet, D::Error>
+where
+	D: serde::Deserializer<'de>,
+{
+	let policies = <BTreeMap<String, String> as serde::Deserialize>::deserialize(deserializer)?;
+	let policies = policies
+		.into_iter()
+		.map(|(id, s)| (id, base64::engine::general_purpose::STANDARD.decode(&s).expect_throw("Unable to parse Policy source as valid base64")))
+		.map(|(id, b)| (id, String::from_utf8(b).unwrap_throw()))
+		.map(|(id, s)| cedar_policy::Policy::parse(Some(id), s).unwrap_throw());
+
+	Ok(cedar_policy::PolicySet::from_policies(policies).unwrap_throw())
 }

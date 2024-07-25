@@ -1,5 +1,4 @@
 use std::{collections::BTreeMap, str::FromStr, sync::OnceLock};
-use types::TrustedIssuer;
 use wasm_bindgen::prelude::*;
 
 use crate::{
@@ -8,7 +7,7 @@ use crate::{
 };
 
 pub mod decode;
-mod types;
+pub mod types;
 
 // Supported algorithms
 pub static mut SUPPORTED_ALGORITHMS: Vec<jsonwebtoken::Algorithm> = Vec::new();
@@ -16,28 +15,21 @@ pub static mut SUPPORTED_ALGORITHMS: Vec<jsonwebtoken::Algorithm> = Vec::new();
 // Trust Store, iss -> { config: OAuthConfig, jwks: JsonWebKeySet }
 pub static mut TRUST_STORE: BTreeMap<String, types::TrustStoreEntry> = BTreeMap::new();
 
-pub fn init(config: &startup::types::CedarlingConfig, mut policy_store: serde_json::Map<String, serde_json::Value>) {
+pub fn init(config: &startup::types::CedarlingConfig, trusted_issuers: Vec<types::TrustedIssuer>) {
 	// Insert supported jwt signature algorithms
 	let supported = config.supported_signature_algorithms.iter().map(|s| jsonwebtoken::Algorithm::from_str(s).unwrap_throw()).collect();
 	unsafe {
 		SUPPORTED_ALGORITHMS = supported;
 	}
 
-	// Load trusted issuers
-	let trusted_issuers = {
-		let mut issuers = policy_store.remove("TrustedIssuers").expect_throw("Can't find TrustedIssuers in policy store");
-		let issuers = issuers.as_array_mut().expect_throw("expect_throw TrustedIssuers to be an array");
-		issuers.drain(..).map(|issuer| serde_json::from_value(issuer).unwrap()).collect::<Vec<types::TrustedIssuer>>()
-	};
-
 	// Init trust store
 	init_trust_store(config.trust_store_refresh_rate, trusted_issuers)
 }
 
 // A list of TrustedIssuers configured once during startup
-static TRUSTED_ISSUERS: OnceLock<Vec<TrustedIssuer>> = OnceLock::new();
+static TRUSTED_ISSUERS: OnceLock<Vec<types::TrustedIssuer>> = OnceLock::new();
 
-fn init_trust_store(refresh_rate: Option<i32>, trusted_issuers: Vec<TrustedIssuer>) {
+fn init_trust_store(refresh_rate: Option<i32>, trusted_issuers: Vec<types::TrustedIssuer>) {
 	TRUSTED_ISSUERS.set(trusted_issuers).expect_throw("TRUSTED_ISSUERS already initialized");
 
 	let refresh_trust_store = move || {

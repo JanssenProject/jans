@@ -1,6 +1,6 @@
 #![allow(unused)]
 
-use std::collections::{BTreeMap, HashMap, HashSet};
+use std::collections::{HashMap, HashSet};
 
 use cedar_policy::*;
 use serde::Deserialize;
@@ -21,37 +21,11 @@ pub struct AuthzInput {
 	pub context: serde_json::Value,
 }
 
-#[derive(Debug, serde::Deserialize)]
-pub struct _EntityUid {
-	#[serde(rename = "type")]
-	pub _type: String,
-	pub id: String,
-}
-
-impl Into<EntityUid> for _EntityUid {
-	fn into(self) -> EntityUid {
-		let id = serde_json::json!({ "__entity": { "type": self._type, "id": self.id } });
-		EntityUid::from_json(id).unwrap_throw()
-	}
-}
-
-fn entity_uid_mapper<'de, D>(deserializer: D) -> Result<HashSet<EntityUid>, D::Error>
-where
-	D: serde::Deserializer<'de>,
-{
-	let ids: Vec<_EntityUid> = Deserialize::deserialize(deserializer)?;
-	Ok(HashSet::from_iter(ids.into_iter().map(Into::into)))
-}
-
-#[derive(Debug, serde::Deserialize)]
-pub struct DeferredEntity {
-	#[serde(rename = "type")]
-	pub _type: String,
-	pub id: String,
-	#[serde(deserialize_with = "entity_uid_mapper")]
-	pub parents: HashSet<EntityUid>,
-	#[serde(flatten)]
-	pub attributes: BTreeMap<String, serde_json::Value>,
+#[derive(Debug)]
+pub struct EntityUids {
+	pub application: Option<EntityUid>,
+	pub client: EntityUid,
+	pub user: EntityUid,
 }
 
 #[derive(Debug)]
@@ -132,7 +106,6 @@ pub struct IdToken {
 	pub iss: String,
 	pub aud: String,
 	pub sub: String,
-	pub nonce: String,
 }
 
 impl IdToken {

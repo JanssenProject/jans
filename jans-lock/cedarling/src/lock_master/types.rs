@@ -2,7 +2,7 @@
 
 #[derive(serde::Deserialize, Debug)]
 pub struct LockMasterConfig {
-	pub audit_uri: String,
+	pub audit_uri: String, // TODO: Discuss, implement audit features
 	pub config_uri: String,
 	pub lock_sse_uri: String,
 	pub oauth_as_well_known: String,
