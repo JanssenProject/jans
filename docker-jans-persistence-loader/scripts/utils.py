@@ -104,7 +104,7 @@ def get_base_ctx(manager):
         'hostname': manager.config.get('hostname'),
         'idp_client_id': manager.config.get('idp_client_id'),
         'idpClient_encoded_pw': manager.secret.get('idpClient_encoded_pw'),
-        'oxauth_openid_key_base64': manager.secret.get('auth_openid_key_base64'),
+        'jans_auth_openid_key_base64': manager.secret.get('auth_openid_key_base64'),
         "encoded_admin_password": manager.secret.get('encoded_admin_password'),
 
         'admin_email': manager.config.get('admin_email'),
@@ -121,7 +121,7 @@ def get_base_ctx(manager):
         "pairwiseCalculationSalt": manager.secret.get("pairwiseCalculationSalt"),
         "default_openid_jks_dn_name": manager.config.get("default_openid_jks_dn_name"),
         # maintain compatibility with upstream template
-        "oxauth_openid_jks_pass": manager.secret.get("auth_openid_jks_pass"),
+        "jans_auth_openid_jks_pass": manager.secret.get("auth_openid_jks_pass"),
         "auth_legacyIdTokenClaims": manager.config.get("auth_legacyIdTokenClaims"),
         "auth_openidScopeBackwardCompatibility": manager.config.get("auth_openidScopeBackwardCompatibility"),
 
@@ -160,9 +160,9 @@ def merge_auth_ctx(ctx):
 
     basedir = '/app/templates/jans-auth'
     file_mappings = {
-        'oxauth_static_conf_base64': 'jans-auth-static-conf.json',
-        'oxauth_error_base64': 'jans-auth-errors.json',
-        "oxauth_config_base64": "jans-auth-config.json",
+        'jans_auth_static_conf_base64': 'jans-auth-static-conf.json',
+        'jans_auth_error_base64': 'jans-auth-errors.json',
+        "jans_auth_config_base64": "jans-auth-config.json",
     }
 
     for key, file_ in file_mappings.items():
