@@ -8760,13 +8760,14 @@
   <h1>Authorization Using Cedarling</h1>
 
 <h2 id="cedarling-authorization">Cedarling Authorization<a class="headerlink" href="#cedarling-authorization" title="Permanent link">#</a></h2>
-<p>The Cedarling is a local, autonomous Policy Decision Point, or "PDP". It runs as a local 
-WebAssembly ("WASM") component--you can call it directly in the browser from a JavaScript 
-function. It can also run as a cloud function to provide authorization for server-side apps. 
-With each authorization call, the Cedarling has all the policies and data it 
-needs to make a fast, local decision. The Cedarling's authorization function is <em>deterministic</em>.
-The Cedarling always returns either <code>permit</code> or <code>forbid</code>. You will never get an error 
-indicating a network timeout, or a divide by zero error. It is also very fast.</p>
+<p>The Cedarling, as its name suggests, enables you to define the security rules for your application 
+in <a href="https://www.cedarpolicy.com/en">Cedar</a> policy syntax.</p>
+<p>The Cedarling is a local, autonomous Policy Decision Point, or "PDP", distributed as a 
+WebAssembly ("WASM") component.  WASM components can run directly in the browser or in a cloud 
+function. The Cedarling's main job is to <code>permit</code> or <code>forbid</code> requests based on enterprise-approved 
+policies. The input to the policies are JWT tokens (which provides the Principal), the requested 
+Action and Resource. The Cedarling rapidly evaluates authorization requests because it has all the 
+policies and data it needs to make a local decision. </p>
 <p><img alt="" src="../../../assets/lock-cedarling-diagram-1.jpg" /></p>
 <p>In a JavaScript browser framework, the Cedarling loads its Policy Store during initialization, as a 
 static JSON file or fetched via REST. Developers may consider the Cedarling Policy Store as part of 
@@ -8777,32 +8778,29 @@ creates an audit log of all decisions by an application to <code>permit</code> o
 enterprise deployment, this audit log is sent for central archiving.</p>
 <p>Where does the Cedarling get the data for policy evaluation? The data is contained in the 
 authorization request itself which has the OAuth and OpenID JWTs and details about the resource 
-and requested action. Most modern applications rely on a federated identity provider or "IDP". 
-Leveraing the JWT tokens to identify the person and software making the request</p>
+and requested action.</p>
 <p><img alt="" src="../../../assets/lock-cedarling-diagram-2.jpg" /></p>
 <p>Two JWT tokens in particular are typical: (1) an OpenID Connect id_token and (2) an OAuth access 
-token. The id_token represents a user authentication event, and the access token represents a 
+token. The id_token represents a user authentication event. The access token represents a 
 client authentication event. The Cedarling can trust the id_token and access token to extract the User, 
-Role and Client pricipals. The tokens also contain other interesting contextual data. An OpenID 
-Connect id_token JWT, as a record of an authentication event, tells you who authenticated, when 
-they authenticated, how they authenticatated, and other claims like the subject's Roles. An OAuth 
-Access Token JWT can tell you information about the software that obtained the JWT, its extent 
-of access as defined by the OAuth Authorization Server (<em>i.e.</em> the values of the <code>scope</code> claim), or 
-other claims--domains frequently enhance the access token to contain business specific data needed 
-for policy evaluation. If an OpenID Userinfo token is sent to the cedarling, it is combined with the
-id_token to paint a fuller picture of the User's claims. </p>
-<p>The Cedarling, as its name suggests, enables you to define the security rules for your application 
-in <a href="https://www.cedarpolicy.com/en">Cedar</a> policy syntax. Cedar was invented by Amazon for their 
+Role and Client Principals. These tokens also contain other interesting contextual data. An OpenID 
+Connect id_token JWT tells you who authenticated, when they authenticated, how they authenticatated, 
+and other claims like the User's roles. An OAuth Access Token JWT can tell you information about the 
+software that obtained the JWT, its extent of access as defined by the OAuth Authorization Server 
+(<em>i.e.</em> the values of the <code>scope</code> claim), or other claims--domains frequently enhance the access token to
+contain business specific data needed for policy evaluation. If an OpenID Userinfo token is sent to the 
+Cedarling, it is combined with the id_token to paint a fuller picture of the User's claims. </p>
+<p>Cedar was invented by Amazon for their 
 <a href="https://aws.amazon.com/verified-permissions/">Verified Permission</a> service. It uses the <strong>PARC</strong> 
 syntax: <strong>P</strong>rincipal, <strong>A</strong>ction, <strong>R</strong>esource, <strong>C</strong>ontext.  Principal-Action-Resource is typical
 for most authorization solutions. For example, you may have a policy that says <em>Admins</em> can <em>write</em>
 to the <em>config</em> folder. In this example, the <em>Admin</em> Role is the Principal, <em>write</em> is the Action,
 and the <em>config</em> folder is the Resource. The Context is used to specify information about the
 enivironment, like the time of day or network address.</p>
-<p>The Cedarling authorizes a person using a certain piece of software to do something. From 
-a logical perspective, <code>person_allowed AND client_allowed</code> must be <code>True</code>. While this seems pretty
-simple, a person may be either explicitly allowed, or have a role that enables access. For example, 
-<code>person_allowed</code> may be equal to <code>True</code> if <code>user=mike OR role=SuperUser</code>. </p>
+<p>The Cedarling authorizes a person using a certain piece of software. From a logical perspective, 
+<code>person_allowed AND client_allowed</code> must be <code>True</code>. A person may be either explicitly allowed, or 
+have a role that enables access. For example, <code>person_allowed</code> is <code>True</code> if 
+<code>user=mike OR role=SuperUser</code>. </p>
 <p><img alt="" src="../../../assets/lock-cedarling-diagram-3.jpg" /></p>
 <p>The JWT's, Action, Resource and Context is sent by the application in the authorization request. For 
 example, this is a sample request from a hypothetical JS application:</p>
@@ -8810,6 +8808,7 @@ example, this is a sample request from a hypothetical JS application:</p>
            &quot;access_token&quot;: &quot;eyJhbGc....&quot;, 
            &quot;id_token&quot;: &quot;eyJjbGc...&quot;, 
            &quot;userinfo_token&quot;: &quot;eyJjbGc...&quot;,
+           &quot;tx_token&quot;: &quot;eyJjbGc...&quot;,
            &quot;resource&quot;: {&quot;Ticket&quot;: {&quot;id&quot;: &quot;12345&quot;, &quot;creator&quot;: &quot;foo@bar.com&quot;, &quot;organization&quot;: &quot;Acme&quot;}},
            &quot;action&quot;: &quot;View&quot;,
            &quot;context&quot;: {
@@ -8938,7 +8937,7 @@ you want the Cederling to opine on a security RBAC decision.</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-07-23T09:07:25+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-07-23</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-07-25T20:10:56+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-07-25</span>
       
         <br>
         Created:
