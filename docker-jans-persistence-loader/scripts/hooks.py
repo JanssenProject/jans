@@ -13,7 +13,7 @@ from jans.pycloudlib.persistence.utils import PersistenceMapper
 
 def merge_auth_keystore_ctx_hook(manager, ctx: dict[str, _t.Any]) -> dict[str, _t.Any]:
     # maintain compatibility with upstream template
-    ctx["oxauth_openid_jks_fn"] = manager.config.get("auth_openid_jks_fn")
+    ctx["jans_auth_openid_jks_fn"] = manager.config.get("auth_openid_jks_fn")
     return ctx
 
 
