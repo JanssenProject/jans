@@ -62,9 +62,8 @@ pub async fn init<'a, T: serde::de::DeserializeOwned>(policy_store_config: &Poli
 		};
 
 		// send
-		let res = http::post(&openid_config.registration_endpoint, http::PostBody::Json(client_req), &[])
-			.await
-			.expect_throw("Unable to register client");
+		let url = openid_config.registration_endpoint.expect_throw("No registration endpoint found, issuer doesn't support DCR");
+		let res = http::post(&url, http::PostBody::Json(client_req), &[]).await.expect_throw("Unable to register client");
 		res.into_json().await.expect_throw("Unable to parse client registration response")
 	};
 

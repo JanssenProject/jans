@@ -22,7 +22,8 @@ pub struct OAuthDynamicClientRequest<'a> {
 #[derive(serde::Deserialize, Debug)]
 pub struct OAuthConfig {
 	pub issuer: String,
-	pub registration_endpoint: String,
+	// Might not support DCR
+	pub registration_endpoint: Option<String>,
 	pub token_endpoint: String,
 	pub jwks_uri: String,
 }

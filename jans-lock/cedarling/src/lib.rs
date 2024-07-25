@@ -32,8 +32,8 @@ async fn remote() {
 	let config = startup::types::CedarlingConfig {
 		application_name: Some("test#docs".into()),
 		require_aud_validation: false,
-		policy_store: startup::types::PolicyStoreConfig::Remote {
-			url: "http://127.0.0.1:5000/policy-store/default.json".to_string(),
+		policy_store: startup::types::PolicyStoreConfig::Local {
+			id: "fc2fee0253af46f3dce320484c42444ae0b24f7ec84a".into(),
 		},
 		decompress_policy_store: false,
 		trust_store_refresh_rate: Some(5000),
