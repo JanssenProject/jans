@@ -24,7 +24,7 @@ pub async fn init_policy_store(config: &types::CedarlingConfig) -> Vec<crypto::t
 		types::PolicyStoreConfig::Local { id } => {
 			let data = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/policy-store/default.json")).as_slice();
 			let decompressed = match config.decompress_policy_store {
-				true => Cow::Owned(miniz_oxide::inflate::decompress_to_vec_zlib(&data).unwrap_throw()),
+				true => Cow::Owned(miniz_oxide::inflate::decompress_to_vec_zlib(data).unwrap_throw()),
 				false => Cow::Borrowed(data),
 			};
 

@@ -1,5 +1,3 @@
-#![allow(unused)]
-
 use std::{
 	collections::{HashMap, HashSet},
 	str::FromStr,
@@ -7,8 +5,6 @@ use std::{
 
 use cedar_policy::*;
 use wasm_bindgen::UnwrapThrowExt;
-
-use crate::lock_master;
 
 pub struct TrustStoreEntry {
 	pub jwks: jsonwebtoken::jwk::JwkSet,
@@ -20,7 +16,6 @@ pub struct TrustStoreEntry {
 pub struct TrustedIssuer {
 	pub name: String,
 	pub openid_configuration_endpoint: String,
-	pub description: String,
 
 	pub access_tokens: AccessTokenConfig,
 	pub id_tokens: IdTokenConfig,
@@ -58,11 +53,12 @@ pub struct AccessTokenConfig {
 #[serde(rename_all = "camelCase")]
 pub struct IdTokenConfig {
 	pub trusted: bool,
-	pub principal_identifier: String,
+	pub principal_identifier: Option<String>,
 }
 
 #[derive(serde::Deserialize, Debug, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct UserInfoTokenConfig {
 	pub trusted: bool,
+	pub role_mapping: Option<String>,
 }

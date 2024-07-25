@@ -18,7 +18,7 @@ pub fn token2entities(input: &authz::types::AuthzInput) -> (types::EntityUids, c
 	let access_token: types::AccessToken = decode::decode_jwt(&input.access_token, decode::TokenType::AccessToken);
 
 	// check if `aud` claim in id_token matches `client_id` in access token
-	if !(id_token.aud == access_token.client_id) && !REQUIRE_AUD_VALIDATION.get().cloned().unwrap_or(false) {
+	if id_token.aud != access_token.client_id && REQUIRE_AUD_VALIDATION.get().cloned().unwrap_or(false) {
 		throw_str("id_token was not issued for this client: (id_token.aud != access_token.client_id)")
 	}
 
@@ -62,6 +62,6 @@ pub fn token2entities(input: &authz::types::AuthzInput) -> (types::EntityUids, c
 		.unwrap_throw();
 
 	// Add Role entities and return Uid of User entity as principal
-	let entities = entities.add_entities(role_entities.into_iter(), schema).unwrap_throw();
+	let entities = entities.add_entities(role_entities, schema).unwrap_throw();
 	(types::EntityUids { application, client, user }, entities)
 }

@@ -57,7 +57,7 @@ where
 	D: serde::Deserializer<'de>,
 {
 	let source = <String as serde::Deserialize>::deserialize(deserializer)?;
-	let decoded = base64::engine::general_purpose::STANDARD.decode(&source).expect_throw("Unable to parse Schema source as valid base64");
+	let decoded = base64::engine::general_purpose::STANDARD.decode(source).expect_throw("Unable to parse Schema source as valid base64");
 
 	let (schema, warnings) = cedar_policy::Schema::from_file_natural(decoded.as_slice()).expect_throw("Unable to parse Schema in Human Readable cedar format");
 	for warning in warnings {
@@ -75,7 +75,7 @@ where
 	let policies = <BTreeMap<String, String> as serde::Deserialize>::deserialize(deserializer)?;
 	let policies = policies
 		.into_iter()
-		.map(|(id, s)| (id, base64::engine::general_purpose::STANDARD.decode(&s).expect_throw("Unable to parse Policy source as valid base64")))
+		.map(|(id, s)| (id, base64::engine::general_purpose::STANDARD.decode(s).expect_throw("Unable to parse Policy source as valid base64")))
 		.map(|(id, b)| (id, String::from_utf8(b).unwrap_throw()))
 		.map(|(id, s)| cedar_policy::Policy::parse(Some(id), s).unwrap_throw());
 

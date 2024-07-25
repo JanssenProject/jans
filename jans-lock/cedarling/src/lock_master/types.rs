@@ -1,8 +1,8 @@
-#![allow(unused)]
-
 #[derive(serde::Deserialize, Debug)]
 pub struct LockMasterConfig {
-	pub audit_uri: String, // TODO: Discuss, implement audit features
+	// TODO: Discuss, implement audit features
+	#[allow(unused)]
+	pub audit_uri: String,
 	pub config_uri: String,
 	pub lock_sse_uri: String,
 	pub oauth_as_well_known: String,
@@ -22,7 +22,6 @@ pub struct OAuthDynamicClientRequest<'a> {
 #[derive(serde::Deserialize, Debug)]
 pub struct OAuthConfig {
 	pub issuer: String,
-	pub authorization_endpoint: String,
 	pub registration_endpoint: String,
 	pub token_endpoint: String,
 	pub jwks_uri: String,
@@ -38,13 +37,13 @@ fn space_separated<'a, S>(scopes: &'a [&'a str], s: S) -> Result<S::Ok, S::Error
 where
 	S: serde::Serializer,
 {
-	let mut iter = scopes.into_iter();
+	let mut iter = scopes.iter();
 
 	// is scopes is empty, serialize ""
 	match iter.next() {
 		Some(first) => {
 			let res = iter.fold(first.to_string(), |mut acc, ntx| {
-				acc.push_str(" ");
+				acc.push(' ');
 				acc.push_str(ntx);
 				acc
 			});

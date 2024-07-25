@@ -1,9 +1,6 @@
-#![allow(unused)]
-
 use std::collections::{HashMap, HashSet};
 
 use cedar_policy::*;
-use serde::Deserialize;
 use wasm_bindgen::{throw_str, UnwrapThrowExt};
 
 use crate::crypto::TRUST_STORE;
@@ -28,21 +25,6 @@ pub struct EntityUids {
 	pub user: EntityUid,
 }
 
-#[derive(Debug)]
-pub(super) enum Token<'a> {
-	Access(&'a AccessToken),
-	UserInfo(&'a UserInfoToken),
-	Id(&'a IdToken),
-}
-
-fn space_separated_string_list<'de, D>(deserializer: D) -> Result<Vec<String>, D::Error>
-where
-	D: serde::Deserializer<'de>,
-{
-	let base = String::deserialize(deserializer)?;
-	Ok(base.split(' ').map(str::to_string).collect())
-}
-
 #[derive(serde::Deserialize, Debug)]
 pub struct AccessToken {
 	pub jti: String,
@@ -51,9 +33,6 @@ pub struct AccessToken {
 	active: bool,
 	aud: String,
 	pub client_id: String,
-
-	#[serde(deserialize_with = "space_separated_string_list")]
-	scope: Vec<String>,
 }
 
 impl AccessToken {
@@ -137,10 +116,13 @@ pub struct UserInfoToken {
 
 impl UserInfoToken {
 	pub fn get_role_entities(&self) -> Vec<Entity> {
+		let entry = unsafe { TRUST_STORE.get(&self.iss) }.expect_throw("Can't get iss for User entity creation from userinfo_token");
+		let role_mapping = entry.issuer.userinfo_tokens.role_mapping.as_deref().unwrap_or("Role");
+
 		self.roles
 			.iter()
 			.map(|role| {
-				let id = serde_json::json!({ "__entity": { "type": "Role", "id": role } });
+				let id = serde_json::json!({ "__entity": { "type": role_mapping, "id": role } });
 				let uid = EntityUid::from_json(id).unwrap_throw();
 				Entity::new_no_attrs(uid, HashSet::new())
 			})
@@ -190,7 +172,8 @@ impl UserInfoToken {
 
 	pub fn get_user_entity(&self, roles: &[Entity]) -> Entity {
 		let entry = unsafe { TRUST_STORE.get(&self.iss) }.expect_throw("Can't get iss for User entity creation from userinfo_token");
-		let id = serde_json::json!({ "__entity": { "type": entry.issuer.id_tokens.principal_identifier, "id": self.sub } });
+		let identifier = entry.issuer.id_tokens.principal_identifier.as_deref().unwrap_or("User");
+		let id = serde_json::json!({ "__entity": { "type": identifier, "id": self.sub } });
 		let uid = EntityUid::from_json(id).unwrap_throw();
 
 		// create email dict
