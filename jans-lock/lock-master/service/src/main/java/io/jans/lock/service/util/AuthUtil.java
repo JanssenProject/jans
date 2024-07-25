@@ -1,8 +1,5 @@
 package io.jans.lock.service.util;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import io.jans.as.client.TokenRequest;
 import io.jans.as.client.TokenResponse;
 import io.jans.as.model.common.GrantType;
@@ -23,7 +20,6 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
-import jakarta.ws.rs.WebApplicationException;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -41,7 +37,6 @@ import org.apache.http.util.EntityUtils;
 
 import org.json.JSONObject;
 import org.slf4j.Logger;
-
 
 @ApplicationScoped
 public class AuthUtil {
@@ -63,7 +58,7 @@ public class AuthUtil {
 
     public String getToken(String endpoint) {
 
-        log.error("\n\n Request for token  for endpoint:{}", endpoint);
+        log.debug("Request for token  for endpoint:{}", endpoint);
         String tokenUrl = this.appConfiguration.getTokenUrl();
         String clientId = this.appConfiguration.getClientId();
 
@@ -74,29 +69,20 @@ public class AuthUtil {
     }
 
     public String getToken(String tokenUrl, String clientId, String clientSecret, String scopes) {
-        log.error("\n\n Request for token tokenUrl:{}, clientId:{}, clientSecret:{}, scopes:{}", tokenUrl, clientId,
-                clientSecret, scopes);
+        log.debug("Request for token tokenUrl:{}, clientId:{},scopes:{}", tokenUrl, clientId, scopes);
 
         String accessToken = null;
-        Integer expiresIn = 0;
         TokenResponse tokenResponse = this.requestAccessToken(tokenUrl, clientId, clientSecret, scopes);
         if (tokenResponse != null) {
-
-            log.error("Token Response - tokenScope: {}, tokenAccessToken: {} ", tokenResponse.getScope(),
-                    tokenResponse.getAccessToken());
             accessToken = tokenResponse.getAccessToken();
-            expiresIn = tokenResponse.getExpiresIn();
-
         }
-        log.error(" accessToken:{}, expiresIn:{}", accessToken, expiresIn);
 
         return accessToken;
     }
 
     public TokenResponse requestAccessToken(final String tokenUrl, final String clientId, final String clientSecret,
             final String scope) {
-        log.error("Request for Access Token -  tokenUrl:{}, clientId:{}, clientSecret:{}, scope:{} ", tokenUrl,
-                clientId, clientSecret, scope);
+
         Response response = null;
         try {
             TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
@@ -127,7 +113,7 @@ public class AuthUtil {
     }
 
     public HttpServiceResponse postData(String endpoint, String postData, ContentType contentType) {
-        log.error("postData - endpoint:{}, postData:{}", endpoint, postData);
+        log.debug("postData - endpoint:{}, postData:{}", endpoint, postData);
         String endpointPath = this.getEndpointPath(endpoint);
         String token = this.getToken(endpointPath);
 
@@ -136,7 +122,7 @@ public class AuthUtil {
 
     public HttpServiceResponse postData(String uri, String authType, String token, Map<String, String> headers,
             ContentType contentType, String postData) {
-        log.error("postData - uri:{}, token:{}, data", uri, token);
+        log.debug("postData - uri:{}, token:{}, data", uri, token);
 
         if (StringUtils.isBlank(authType)) {
             authType = "Bearer ";
@@ -153,7 +139,7 @@ public class AuthUtil {
 
         HttpServiceResponse response = httpService.executePost(uri, token, headers, postData, contentType, authType);
 
-        log.error("response:{}", response);
+        log.debug("response:{}", response);
         return response;
     }
 
@@ -190,12 +176,10 @@ public class AuthUtil {
         jsonString = entity.toString();
 
         try {
-            log.error("serviceResponse.getHttpResponse().getEntity():{}",
+            log.debug("serviceResponse.getHttpResponse().getEntity():{}",
                     serviceResponse.getHttpResponse().getEntity());
             String responseMsg = EntityUtils.toString(serviceResponse.getHttpResponse().getEntity(), "UTF-8");
-            log.error("New responseMsg:{}", responseMsg);
-            log.error("serviceResponse.getHttpResponse().getAllHeaders():{}",
-                    serviceResponse.getHttpResponse().getAllHeaders());
+            log.debug("New responseMsg:{}", responseMsg);
         } catch (Exception ex) {
             log.error("Error while getting entity using EntityUtils is ", ex);
         }
@@ -209,13 +193,9 @@ public class AuthUtil {
         }
 
         HttpResponse httpResponse = serviceResponse.getHttpResponse();
-        if (httpResponse != null) {
-            log.error("getResponseJson() - httpResponse.getStatusLine():{}", httpResponse.getStatusLine());
-            log.error("getResponseJson() - .httpResponse.getEntity():{}", httpResponse.getEntity());
-            if (httpResponse.getEntity() != null) {
-                jsonObj = new JSONObject(httpResponse.getEntity());
-                log.error("getResponseJson() - .jsonObj:{}", jsonObj);
-            }
+        if (httpResponse != null && httpResponse.getEntity() != null) {
+            jsonObj = new JSONObject(httpResponse.getEntity());
+            log.debug("getResponseJson() - .jsonObj:{}", jsonObj);
         }
 
         return jsonObj;
@@ -238,16 +218,14 @@ public class AuthUtil {
     }
 
     public JSONObject getJSONObject(HttpServletRequest request) {
-        log.error("getJSONObject() - request:{}", request);
         JSONObject jsonBody = null;
         if (request == null) {
             return jsonBody;
         }
         try {
             String jsonBodyStr = IOUtils.toString(request.getInputStream());
-            log.error(" jsonBodyStr:{}", jsonBodyStr);
             jsonBody = new JSONObject(jsonBodyStr);
-            log.error(" jsonBody:{}", jsonBody);
+            log.debug(" jsonBody:{}", jsonBody);
         } catch (Exception ex) {
             ex.printStackTrace();
             log.error("Exception while retriving json from request is - ", ex);
@@ -268,11 +246,10 @@ public class AuthUtil {
     }
 
     public String getScopes(String endpoint) {
-        log.error("Get scope for endpoint:{}", endpoint);
         String scopes = null;
         List<String> scopeList = null;
         Map<String, List<String>> endpointMap = this.appConfiguration.getEndpointDetails();
-        log.error("Get scope for endpointMap:{}", endpointMap);
+        log.debug("Get scope for endpoint:{} from endpointMap:{}", endpoint, endpointMap);
 
         if (endpointMap == null || endpointMap.isEmpty()) {
             return scopes;
@@ -290,26 +267,23 @@ public class AuthUtil {
         for (String s : scopesSet) {
             scope.append(" ").append(s);
         }
-        log.error("scope:{}", scope);
+        log.debug("endpoint:{}, endpointMap:{}, scope:{}", endpoint, endpointMap, scope);
         return scope.toString();
     }
 
     private String getEndpointPath(String endpoint) {
-        log.error("Get endpoint URL for endpoint:{}", endpoint);
         Map<String, List<String>> endpointMap = this.appConfiguration.getEndpointDetails();
-        log.error("Get endpoint URL for endpointMap:{}", endpointMap);
+        log.debug("Get endpoint URL for endpoint:{} from endpointMap:{}", endpoint, endpointMap);
 
         if (StringUtils.isBlank(endpoint) || endpointMap == null || endpointMap.isEmpty()) {
             return endpoint;
         }
 
         Set<String> keys = endpointMap.keySet();
-        log.error("endpointMap keys:{}", keys);
-
         String endpointPath = keys.stream()
                 .filter(e -> e != null && e.toLowerCase().endsWith("/" + endpoint.toLowerCase())).findFirst()
                 .orElse(null);
-        log.error("Final endpoint:{}, endpointPath:{}", endpoint, endpointPath);
+        log.debug("Final endpoint:{}, keys:{}, endpointPath:{}", endpoint, keys, endpointPath);
         return endpointPath;
     }
 
@@ -323,17 +297,16 @@ public class AuthUtil {
         sb.append("/");
         sb.append(endpoint);
 
-        log.error("Get Endpoint - sb:{}", sb);
+        log.debug("endpoint:{} url is  sb:{}", endpoint, sb);
         return sb.toString();
     }
 
     private static Builder getClientBuilder(String url) {
         return ClientBuilder.newClient().target(url).request();
     }
-    
-    
+
     public Response post(String endpoint, String postData, ContentType contentType) {
-        log.error("postData - endpoint:{}, postData:{}", endpoint, postData);
+        log.debug("postData - endpoint:{}, postData:{}", endpoint, postData);
         String endpointPath = this.getEndpointPath(endpoint);
         String token = this.getToken(endpointPath);
 
@@ -342,7 +315,7 @@ public class AuthUtil {
 
     private Response post(String url, String authType, String token, Map<String, String> headers,
             ContentType contentType, String postData) {
-        log.error("postData - url:{}, authType:{}, token:{}, headers:{}, contentType:{}, postData:{}", url, authType,
+        log.debug("postData - url:{}, authType:{}, token:{}, headers:{}, contentType:{}, postData:{}", url, authType,
                 token, headers, contentType, postData);
 
         if (StringUtils.isBlank(authType)) {
@@ -361,12 +334,12 @@ public class AuthUtil {
                 request.header(headerEntry.getKey(), headerEntry.getValue());
             }
         }
-        log.error(" \n\n\n request:{}, request.toString():{}", request, request.toString());
-        
+
+        log.debug(" request:{}}", request);
+
         Response response = request.post(Entity.entity(postData, MediaType.APPLICATION_JSON));
-        log.error(" \n\n\n response:{}", response);
-        
-       
+        log.debug(" response:{}", response);
+
         return response;
     }
 

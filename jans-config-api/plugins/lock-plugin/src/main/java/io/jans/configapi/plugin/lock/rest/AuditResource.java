@@ -67,11 +67,8 @@ public class AuditResource extends BaseResource {
     @ProtectedApi(scopes = { Constants.LOCK_HEALTH_WRITE_ACCESS }, groupScopes = {})
     @Path(Constants.HEALTH)
     public Response postHealthData(@Valid HealthEntry healthEntry) {
-
-        logger.error("Save Health Data - healthEntry:{}", healthEntry);
+        logger.debug("Save Health Data - healthEntry:{}", healthEntry);
         healthEntry = auditService.addHealthEntry(healthEntry);
-
-        logger.error("Afer saving healthEntry():{}", healthEntry);
         return Response.status(Response.Status.CREATED).entity(healthEntry).build();
 
     }
@@ -89,11 +86,8 @@ public class AuditResource extends BaseResource {
     @ProtectedApi(scopes = { Constants.LOCK_LOG_WRITE_ACCESS }, groupScopes = {})
     @Path(Constants.LOG)
     public Response postLogData(@Valid LogEntry logEntry) {
-
-        logger.error("Save - logEntry:{}", logEntry);
+        logger.debug("Save - logEntry:{}", logEntry);
         logEntry = auditService.addLogData(logEntry);
-
-        logger.error("Afer saving logEntry():{}", logEntry);
         return Response.status(Response.Status.CREATED).entity(logEntry).build();
 
     }
@@ -111,11 +105,8 @@ public class AuditResource extends BaseResource {
     @ProtectedApi(scopes = { Constants.LOCK_TELEMETRY_WRITE_ACCESS }, groupScopes = {})
     @Path(Constants.TELEMETRY)
     public Response postTelemetryData(@Valid TelemetryEntry telemetryEntry) {
-
-        logger.error("Save telemetryEntry():{}", telemetryEntry);
+        logger.debug("Save telemetryEntry():{}", telemetryEntry);
         telemetryEntry = auditService.addTelemetryData(telemetryEntry);
-
-        logger.error("Afer saving telemetryEntry():{}", telemetryEntry);
         return Response.status(Response.Status.CREATED).entity(telemetryEntry).build();
 
     }

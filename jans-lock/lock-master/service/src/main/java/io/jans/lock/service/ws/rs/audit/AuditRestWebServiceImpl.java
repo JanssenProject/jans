@@ -18,7 +18,6 @@ package io.jans.lock.service.ws.rs.audit;
 
 import io.jans.lock.service.util.AuthUtil;
 import io.jans.lock.util.ServerUtil;
-import io.jans.model.net.HttpServiceResponse;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
@@ -29,7 +28,6 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.SecurityContext;
 import jakarta.ws.rs.core.Response.Status;
 
-import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.ContentType;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -52,13 +50,13 @@ public class AuditRestWebServiceImpl implements AuditRestWebService {
     @Override
     public Response processHealthRequest(HttpServletRequest request, HttpServletResponse response,
             SecurityContext sec) {
-        log.error("Processing Health request - request:{}", request);
+        log.debug("Processing Health request - request:{}", request);
         return processAuditRequest(request, "Health");
     }
 
     @Override
     public Response processLogRequest(HttpServletRequest request, HttpServletResponse response, SecurityContext sec) {
-        log.error("Processing Log request - request:{}", request);
+        log.debug("Processing Log request - request:{}", request);
         return processAuditRequest(request, "log");
 
     }
@@ -66,73 +64,41 @@ public class AuditRestWebServiceImpl implements AuditRestWebService {
     @Override
     public Response processTelemetryRequest(HttpServletRequest request, HttpServletResponse response,
             SecurityContext sec) {
-        log.error("Processing Telemetry request - request:{}", request);
-        return processRequest(request, "telemetry");
+        log.debug("Processing Telemetry request - request:{}", request);
+        return processAuditRequest(request, "telemetry");
 
     }
 
     private Response processAuditRequest(HttpServletRequest request, String requestType) {
-        log.error("Processing request - request:{}, requestType:{}", request, requestType);
+        log.debug("Processing request - request:{}, requestType:{}", request, requestType);
 
         Response.ResponseBuilder builder = Response.ok();
         builder.cacheControl(ServerUtil.cacheControlWithNoStoreTransformAndPrivate());
         builder.header(ServerUtil.PRAGMA, ServerUtil.NO_CACHE);
 
         JSONObject json = this.authUtil.getJSONObject(request);
-        HttpServiceResponse serviceResponse = this.authUtil.postData(requestType, json.toString(),
-                ContentType.APPLICATION_JSON);
-        log.error("serviceResponse:{}", serviceResponse);
-
-        if (serviceResponse != null) {
-            String strResponse = this.authUtil.getResponseEntityString(serviceResponse);
-            Status status = this.authUtil.getResponseStatus(serviceResponse);
-            HttpRequestBase httpRequest = serviceResponse.getHttpRequest();
-            log.error(" Saved telemetry data  - responseCode:{}, strResponse:{}, httpRequest:{}", status, strResponse, httpRequest);
-
-            if (Status.CREATED.equals(status)) {
-                builder.entity(json);
-            } else {
-                log.error("Error while saving telemetry data - status{}, strResponse:{}", status, strResponse);
-                builder.status(status);
-                builder.entity(strResponse);
-            }
-        }
-
-        return builder.build();
-    }
-    
-    private Response processRequest(HttpServletRequest request, String requestType) {
-        log.error("Processing request - request:{}, requestType:{}", request, requestType);
-
-        Response.ResponseBuilder builder = Response.ok();
-        builder.cacheControl(ServerUtil.cacheControlWithNoStoreTransformAndPrivate());
-        builder.header(ServerUtil.PRAGMA, ServerUtil.NO_CACHE);
-
-        JSONObject json = this.authUtil.getJSONObject(request);
-        Response response = this.authUtil.post(requestType, json.toString(),
-                ContentType.APPLICATION_JSON);
-        log.error("response:{}", response);
+        Response response = this.authUtil.post(requestType, json.toString(), ContentType.APPLICATION_JSON);
+        log.debug("response:{}", response);
 
         if (response != null) {
-            log.error(
+            log.trace(
                     "Response for Access Token -  response.getStatus():{}, response.getStatusInfo():{}, response.getEntity().getClass():{}",
                     response.getStatus(), response.getStatusInfo(), response.getEntity().getClass());
             String entity = response.readEntity(String.class);
-            log.error(" entity:{}", entity);
+            log.debug(" entity:{}", entity);
             builder.entity(entity);
-            
+
             if (response.getStatusInfo().equals(Status.CREATED)) {
-              
-                log.error(" Status.CREATED:{}, entity:{}", Status.CREATED, entity);
+
+                log.debug(" Status.CREATED:{}, entity:{}", Status.CREATED, entity);
             } else {
-                log.error("Error while saving audit data - response.getStatusInfo():{}, entity:{}", response.getStatusInfo(), entity);
+                log.error("Error while saving audit data - response.getStatusInfo():{}, entity:{}",
+                        response.getStatusInfo(), entity);
                 builder.status(response.getStatusInfo());
             }
         }
 
-
         return builder.build();
     }
-
 
 }
