@@ -1,4 +1,4 @@
-use std::{borrow::Cow, sync::OnceLock};
+use std::{borrow::Cow, collections::BTreeMap, sync::OnceLock};
 
 use cedar_policy::*;
 use wasm_bindgen::prelude::*;
@@ -14,11 +14,11 @@ pub static POLICY_SET: OnceLock<PolicySet> = OnceLock::new();
 pub static DEFAULT_ENTITIES: OnceLock<serde_json::Value> = OnceLock::new();
 
 pub async fn init(config: &types::CedarlingConfig) {
-	let policy_store = init_policy_store(config).await;
-	crypto::init(config, policy_store);
+	let trusted_issuers = init_policy_store(config).await;
+	crypto::init(config, trusted_issuers);
 }
 
-pub async fn init_policy_store(config: &types::CedarlingConfig) -> Vec<crypto::types::TrustedIssuer> {
+pub async fn init_policy_store(config: &types::CedarlingConfig) -> BTreeMap<String, crypto::types::TrustedIssuer> {
 	// Get PolicyStore JSON
 	let mut policy_store: types::PolicyStoreEntry = match &config.policy_store {
 		types::PolicyStoreConfig::Local { id } => {

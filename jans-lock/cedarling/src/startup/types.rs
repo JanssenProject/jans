@@ -46,7 +46,7 @@ pub enum PolicyStoreConfig {
 pub struct PolicyStoreEntry {
 	#[serde(deserialize_with = "parse_schema")]
 	pub schema: cedar_policy::Schema,
-	pub trusted_issuers: Vec<crypto::types::TrustedIssuer>,
+	pub trusted_issuers: BTreeMap<String, crypto::types::TrustedIssuer>,
 	#[serde(deserialize_with = "parse_policies")]
 	pub policies: cedar_policy::PolicySet,
 	pub default_entities: Option<serde_json::Value>,

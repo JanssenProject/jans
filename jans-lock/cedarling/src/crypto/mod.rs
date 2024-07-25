@@ -15,15 +15,24 @@ pub static mut SUPPORTED_ALGORITHMS: Vec<jsonwebtoken::Algorithm> = Vec::new();
 // Trust Store, iss -> { config: OAuthConfig, jwks: JsonWebKeySet }
 pub static mut TRUST_STORE: BTreeMap<String, types::TrustStoreEntry> = BTreeMap::new();
 
-pub fn init(config: &startup::types::CedarlingConfig, trusted_issuers: Vec<types::TrustedIssuer>) {
+pub fn init(config: &startup::types::CedarlingConfig, trusted_issuers: BTreeMap<String, types::TrustedIssuer>) {
 	// Insert supported jwt signature algorithms
 	let supported = config.supported_signature_algorithms.iter().map(|s| jsonwebtoken::Algorithm::from_str(s).unwrap_throw()).collect();
 	unsafe {
 		SUPPORTED_ALGORITHMS = supported;
 	}
 
+	// insert id into issuer for token creation, map to Vector for easy sequential iteration
+	let issuers = trusted_issuers
+		.into_iter()
+		.map(|(name, mut issuer)| {
+			issuer.name = Some(name);
+			issuer
+		})
+		.collect();
+
 	// Init trust store
-	init_trust_store(config.trust_store_refresh_rate, trusted_issuers)
+	init_trust_store(config.trust_store_refresh_rate, issuers)
 }
 
 // A list of TrustedIssuers configured once during startup
