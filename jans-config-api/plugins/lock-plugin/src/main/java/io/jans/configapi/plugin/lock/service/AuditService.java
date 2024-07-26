@@ -51,7 +51,7 @@ public class AuditService {
         }
         String inum = telemetryEntry.getInum();
         if (StringUtils.isBlank(inum)) {
-            inum = this.generateInumForNewTelemetryEntry();
+            inum = this.generateInumForEntry("telemetry", TelemetryEntry.class);
             telemetryEntry.setInum(inum);
 
             telemetryEntry.setDn(this.getDnForTelemetryEntry(inum));
@@ -161,29 +161,13 @@ public class AuditService {
         return String.format("inum=%s,ou=lock-telemetry,%s", inum, orgDn);
     }
 
-    public String generateInumForNewTelemetryEntry() {
-        String newInum = null;
-        String newDn = null;
-        int trycount = 0;
-        do {
-            if (trycount < InumService.MAX_IDGEN_TRY_COUNT) {
-                newInum = inumService.generateId("telemetry");
-                trycount++;
-            } else {
-                newInum = inumService.generateDefaultId();
-            }
-            newDn = getDnForTelemetryEntry(newInum);
-        } while (persistenceEntryManager.contains(newDn, TelemetryEntry.class));
-        return newInum;
-    }
-
     public HealthEntry addHealthEntry(HealthEntry healthEntry) {
         if (healthEntry == null) {
             return healthEntry;
         }
         String inum = healthEntry.getInum();
         if (StringUtils.isBlank(inum)) {
-            inum = this.generateInumForHealthEntry();
+            inum = this.generateInumForEntry("health",HealthEntry.class);
             healthEntry.setInum(inum);
 
             healthEntry.setDn(this.getDnForHealthEntry(inum));
@@ -192,22 +176,6 @@ public class AuditService {
 
         healthEntry = this.getHealthEntryByDn(this.getDnForHealthEntry(inum));
         return healthEntry;
-    }
-
-    public String generateInumForHealthEntry() {
-        String newInum = null;
-        String newDn = null;
-        int trycount = 0;
-        do {
-            if (trycount < InumService.MAX_IDGEN_TRY_COUNT) {
-                newInum = inumService.generateId("health");
-                trycount++;
-            } else {
-                newInum = inumService.generateDefaultId();
-            }
-            newDn = getDnForHealthEntry(newInum);
-        } while (persistenceEntryManager.contains(newDn, HealthEntry.class));
-        return newInum;
     }
 
     public HealthEntry getHealthEntryByDn(String dn) {
@@ -233,7 +201,7 @@ public class AuditService {
         }
         String inum = logEntry.getInum();
         if (StringUtils.isBlank(inum)) {
-            inum = this.generateInumForLogEntry();
+            inum = this.generateInumForEntry("log", LogEntry.class);
             logEntry.setInum(inum);
 
             logEntry.setDn(this.getDnForLogEntry(inum));
@@ -244,22 +212,7 @@ public class AuditService {
         return logEntry;
     }
 
-    public String generateInumForLogEntry() {
-        String newInum = null;
-        String newDn = null;
-        int trycount = 0;
-        do {
-            if (trycount < InumService.MAX_IDGEN_TRY_COUNT) {
-                newInum = inumService.generateId("log");
-                trycount++;
-            } else {
-                newInum = inumService.generateDefaultId();
-            }
-            newDn = getDnForLogEntry(newInum);
-        } while (persistenceEntryManager.contains(newDn, LogEntry.class));
-        return newInum;
-    }
-
+   
     public LogEntry getLogEntryByDn(String dn) {
         try {
             return persistenceEntryManager.find(LogEntry.class, dn);
@@ -275,6 +228,22 @@ public class AuditService {
             return String.format("ou=lock-log,%s", orgDn);
         }
         return String.format("inum=%s,ou=lock-log,%s", inum, orgDn);
+    }
+    
+    public String generateInumForEntry(String entryName, Class classObj) {
+        String newInum = null;
+        String newDn = null;
+        int trycount = 0;
+        do {
+            if (trycount < InumService.MAX_IDGEN_TRY_COUNT) {
+                newInum = inumService.generateId(entryName);
+                trycount++;
+            } else {
+                newInum = inumService.generateDefaultId();
+            }
+            newDn = getDnForLogEntry(newInum);
+        } while (persistenceEntryManager.contains(newDn, classObj));
+        return newInum;
     }
 
 }

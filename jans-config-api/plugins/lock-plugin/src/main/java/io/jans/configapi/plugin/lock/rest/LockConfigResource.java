@@ -44,7 +44,7 @@ import com.github.fge.jsonpatch.JsonPatchException;
 @Produces(MediaType.APPLICATION_JSON)
 public class LockConfigResource extends BaseResource {
     
-    private final static String CONFIG_NULL_ERR_MSG = "It seems Lock module is not setup, kindly check."; 
+    private static final String CONFIG_NULL_ERR_MSG = "It seems Lock module is not setup, kindly check."; 
 
     @Inject
     Logger logger;
