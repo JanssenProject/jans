@@ -11,35 +11,15 @@ from jans.pycloudlib.config import ConsulConfig
 from jans.pycloudlib.config import KubernetesConfig
 from jans.pycloudlib.config import GoogleConfig
 from jans.pycloudlib.config import AwsConfig
+from jans.pycloudlib.config import FileConfig
 from jans.pycloudlib.secret import KubernetesSecret
 from jans.pycloudlib.secret import VaultSecret
 from jans.pycloudlib.secret import GoogleSecret
 from jans.pycloudlib.secret import AwsSecret
+from jans.pycloudlib.secret import FileSecret
 from jans.pycloudlib.utils import decode_text
 from jans.pycloudlib.utils import encode_text
 from jans.pycloudlib.lock import LockManager
-
-ConfigAdapter = _t.Union[ConsulConfig, KubernetesConfig, GoogleConfig, AwsConfig]
-"""Configs adapter type.
-
-Currently supports the following classes:
-
-* [ConsulConfig][jans.pycloudlib.config.consul_config.ConsulConfig]
-* [KubernetesConfig][jans.pycloudlib.config.kubernetes_config.KubernetesConfig]
-* [GoogleConfig][jans.pycloudlib.config.google_config.GoogleConfig]
-* [AwsConfig][jans.pycloudlib.config.aws_config.AwsConfig]
-"""
-
-SecretAdapter = _t.Union[VaultSecret, KubernetesSecret, GoogleSecret, AwsSecret]
-"""Secrets adapter type.
-
-Currently supports the following classes:
-
-* [VaultSecret][jans.pycloudlib.secret.vault_secret.VaultSecret]
-* [KubernetesSecret][jans.pycloudlib.secret.kubernetes_secret.KubernetesSecret]
-* [GoogleSecret][jans.pycloudlib.secret.google_secret.GoogleSecret]
-* [AwsSecret][jans.pycloudlib.secret.aws_secret.AwsSecret]
-"""
 
 
 class AdapterProtocol(_t.Protocol):  # pragma: no cover
@@ -135,92 +115,26 @@ class ConfigManager(BaseConfiguration):
     """This class manage configs and act as a proxy to specific config adapter class."""
 
     @cached_property
-    def adapter(self) -> ConfigAdapter:  # noqa: D412
+    def adapter(self) -> "ConfigAdapter":  # noqa: D412
         """Get an instance of config adapter class.
 
         Returns:
             An instance of config adapter class.
-
-        Raises:
-            ValueError: If the value of `CN_CONFIG_ADAPTER` environment variable is not supported.
-
-        Examples:
-
-        ```py
-        os.environ["CN_CONFIG_ADAPTER"] = "consul"
-        ConfigManager().adapter  # returns an instance of adapter class
-        ```
-
-        The adapter name is pre-populated from `CN_CONFIG_ADAPTER` environment variable.
-
-        Supported config adapter name:
-
-        - `consul`: returns an instance of [ConsulConfig][jans.pycloudlib.config.consul_config.ConsulConfig]
-        - `kubernetes`: returns an instance of [KubernetesConfig][jans.pycloudlib.config.kubernetes_config.KubernetesConfig]
-        - `google`: returns an instance of [GoogleConfig][jans.pycloudlib.config.google_config.GoogleConfig]
-        - `aws`: returns an instance of [AwsConfig][jans.pycloudlib.config.aws_config.AwsConfig]
         """
-        adapter = os.environ.get("CN_CONFIG_ADAPTER", "consul")
-
-        if adapter == "consul":
-            return ConsulConfig()
-
-        if adapter == "kubernetes":
-            return KubernetesConfig()
-
-        if adapter == "google":
-            return GoogleConfig()
-
-        if adapter == "aws":
-            return AwsConfig()
-
-        raise ValueError(f"Unsupported config adapter {adapter!r}")
+        return ConfigAdapter()
 
 
 class SecretManager(BaseConfiguration):
     """This class manage secrets and act as a proxy to specific secret adapter class."""
 
     @cached_property
-    def adapter(self) -> SecretAdapter:  # noqa: D412
+    def adapter(self) -> "SecretAdapter":  # noqa: D412
         """Get an instance of secret adapter class.
 
         Returns:
             An instance of secret adapter class.
-
-        Raises:
-            ValueError: If the value of `CN_SECRET_ADAPTER` environment variable is not supported.
-
-        Examples:
-
-        ```py
-        os.environ["CN_SECRET_ADAPTER"] = "vault"
-        SecretManager().adapter  # returns an instance of adapter class
-        ```
-
-        The adapter name is pre-populated from `CN_SECRET_ADAPTER` environment variable (i.e. `CN_SECRET_ADAPTER=vault`).
-
-        Supported config adapter name:
-
-        - `vault`: returns an instance of [VaultSecret][jans.pycloudlib.secret.vault_secret.VaultSecret]
-        - `kubernetes`: returns an instance of [KubernetesSecret][jans.pycloudlib.secret.kubernetes_secret.KubernetesSecret]
-        - `google`: returns an instance of [GoogleSecret][jans.pycloudlib.secret.google_secret.GoogleSecret]
-        - `aws`: returns an instance of [AwsSecret][jans.pycloudlib.secret.aws_secret.AwsSecret]
         """
-        adapter = os.environ.get("CN_SECRET_ADAPTER", "vault")
-
-        if adapter == "vault":
-            return VaultSecret()
-
-        if adapter == "kubernetes":
-            return KubernetesSecret()
-
-        if adapter == "google":
-            return GoogleSecret()
-
-        if adapter == "aws":
-            return AwsSecret()
-
-        raise ValueError(f"Unsupported secret adapter {adapter!r}")
+        return SecretAdapter()
 
     def to_file(
         self, key: str, dest: str, decode: bool = False, binary_mode: bool = False
@@ -359,3 +273,125 @@ def get_manager() -> Manager:  # noqa: D412
     secret_mgr = SecretManager()
     lock_mgr = LockManager()
     return Manager(config_mgr, secret_mgr, lock_mgr)
+
+
+class BaseAdapter:
+    @abstractproperty
+    def backend(self):
+        """Abstract attribute as a placeholder of backend adapter instance.
+
+        !!! important
+            Any subclass **MUST** returns an instance of backend adapter or raise exception.
+        """
+
+    @abstractproperty
+    def file_backend(self):
+        """Abstract attribute as a placeholder of local adapter instance.
+
+        !!! important
+            Any subclass **MUST** returns an instance of local adapter or raise exception.
+        """
+
+    def get(self, key: str, default: _t.Any = "") -> _t.Any:  # noqa: D102
+        value = self.file_backend.get(key, default)
+
+        # either value is empty or missing, pull from the remote backend instead
+        if not value:
+            value = self.backend.get(key, default)
+        return value  # noqa: R504
+
+    def set(self, key: str, value: _t.Any) -> bool:  # noqa: D102
+        try:
+            result = self.file_backend.set(key, value)
+        except NotImplementedError:
+            result = self.backend.set(key, value)
+        return result
+
+    def all(self) -> dict[str, _t.Any]:  # noqa: A003,D102
+        return self.get_all()
+
+    def get_all(self) -> dict[str, _t.Any]:  # noqa: D102
+        data = self.file_backend.get_all()
+
+        # pre-populate missing attribute in local data by merging from remote data
+        for k, v in self.backend.get_all().items():
+            if k not in data:
+                data[k] = v
+        return data
+
+    def set_all(self, data: dict[str, _t.Any]) -> bool:  # noqa: D102
+        try:
+            result = self.file_backend.set_all(data)
+        except NotImplementedError:
+            result = self.backend.set_all(data)
+        return result
+
+
+class ConfigAdapter(BaseAdapter):
+    @cached_property
+    def backend(self) -> _t.Union[ConsulConfig, KubernetesConfig, GoogleConfig, AwsConfig]:
+        """Backend for config.
+
+        Currently supports the following classes:
+
+        * [ConsulConfig][jans.pycloudlib.config.consul_config.ConsulConfig]
+        * [KubernetesConfig][jans.pycloudlib.config.kubernetes_config.KubernetesConfig]
+        * [GoogleConfig][jans.pycloudlib.config.google_config.GoogleConfig]
+        * [AwsConfig][jans.pycloudlib.config.aws_config.AwsConfig]
+        """
+        adapter = os.environ.get("CN_CONFIG_ADAPTER", "consul")
+
+        match adapter:
+            case "consul":
+                _backend = ConsulConfig()
+            case "kubernetes":
+                _backend = KubernetesConfig()
+            case "google":
+                _backend = GoogleConfig()
+            case "aws":
+                _backend = AwsConfig()
+            case _:
+                _backend = None
+
+        if not _backend:
+            raise ValueError(f"Unsupported config adapter {adapter!r}")
+        return _backend
+
+    @cached_property
+    def file_backend(self) -> FileConfig:
+        return FileConfig()
+
+
+class SecretAdapter(BaseAdapter):
+    @cached_property
+    def backend(self) -> _t.Union[VaultSecret, KubernetesSecret, GoogleSecret, AwsSecret]:
+        """Backend for secret.
+
+        Currently supports the following classes:
+
+        * [VaultSecret][jans.pycloudlib.secret.vault_secret.VaultSecret]
+        * [KubernetesSecret][jans.pycloudlib.secret.kubernetes_secret.KubernetesSecret]
+        * [GoogleSecret][jans.pycloudlib.secret.google_secret.GoogleSecret]
+        * [AwsSecret][jans.pycloudlib.secret.aws_secret.AwsSecret]
+        """
+        adapter = os.environ.get("CN_SECRET_ADAPTER", "vault")
+
+        match adapter:
+            case "vault":
+                _backend = VaultSecret()
+            case "kubernetes":
+                _backend = KubernetesSecret()
+            case "google":
+                _backend = GoogleSecret()
+            case "aws":
+                _backend = AwsSecret()
+            case _:
+                _backend = None
+
+        if not _backend:
+            raise ValueError(f"Unsupported secret adapter {adapter!r}")
+        return _backend
+
+    @cached_property
+    def file_backend(self) -> FileSecret:
+        return FileSecret()

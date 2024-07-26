@@ -992,7 +992,7 @@ class ConfigurationSchema(Schema):
     _configmap = Nested(ConfigmapSchema, required=True)
 
 
-def load_schema_from_file(path):
+def load_schema_from_file(path, exclude_configmap=False, exclude_secret=False):
     """Loads schema from file."""
     out = {}
     err = {}
@@ -1006,8 +1006,23 @@ def load_schema_from_file(path):
         code = 1
         return out, err, code
 
+    # dont exclude attributes
+    exclude_attrs = False
+
+    # exclude configmap from loading mechanism
+    if exclude_configmap:
+        key = "_configmap"
+        exclude_attrs = [key]
+        docs.pop(key, None)
+
+    # exclude secret from loading mechanism
+    if exclude_secret:
+        key = "_secret"
+        exclude_attrs = [key]
+        docs.pop(key, None)
+
     try:
-        out = ConfigurationSchema().load(docs)
+        out = ConfigurationSchema().load(docs, partial=exclude_attrs)
     except ValidationError as exc:
         err = exc.messages
         code = 1
