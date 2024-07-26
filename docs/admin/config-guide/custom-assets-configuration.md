@@ -30,12 +30,12 @@ assets.
  [here](../config-guide/config-tools/config-api/README.md) or Jump straight to the
  [Using Configuration REST API](#using-configuration-rest-api)
 
-##  Using Command Line
+##  Using The Command Line
 
 
-In the Janssen Server, you can deploy and customize the Assets using the
+In the Janssen Server, you can deploy custom assets using the
 command line. To get the details of Janssen command line operations relevant to
-Asset, you can check the operations under the `JansAssets` task using the
+the custom assets, check the operations under the `JansAssets` task using the
 command below.
 
 ```bash title="Command"
@@ -79,9 +79,10 @@ Operation ID: post-new-asset
 To get sample schema type /opt/jans/jans-cli/config-cli.py --schema-sample <schema>, for example /opt/jans/jans-cli/config-cli.py --schema-sample AssetForm
 ```
 
-### Gets all Jans assets
+### Get All Current Custom Assets
 
-You can get all the currently configured custom assets on your Janssen Server by performing this operation.
+Get all the currently configured custom assets on the Janssen Server by 
+performing this operation.
 
 ```bash title="Command"
 /opt/jans/jans-cli/config-cli.py --operation-id get-all-assets
@@ -124,10 +125,10 @@ You can get all the currently configured custom assets on your Janssen Server by
 }
 ```
 
-### Gets an asset by inum
+### Get Custom Asset By inum
 
-With `get-all-assets` operation-id, we can get any specific asset matched with `inum`.
- If we know the `inum`, we can simply use the below command:
+With `get-all-assets` operation-id, we can get any specific asset matched 
+with `inum`. If we know the `inum`, we can simply use the below command:
 
 ```bash title="Command"
 /opt/jans/jans-cli/config-cli.py --operation-id get-asset-by-inum \
@@ -154,7 +155,7 @@ It returns the details as below:
 ```
 
 
-### Gets an asset by name
+### Get Custom Asset By Name
 
 With `get-asset-by-name` operation-id, we can get any specific asset matched with `name`.
  If we know the `name`, we can simply use the below command:
@@ -189,10 +190,11 @@ It returns the details as below:
 }
 ```
 
-### Gets asset services
+### Get Services
 
 
-You can get the asset services of your Janssen Server by performing `get-asset-services` operation.
+Get the list of Janssen Server services that support custom assets
+ by performing `get-asset-services` operation.
 
 ```bash title="Command"
 /opt/jans/jans-cli/config-cli.py --operation-id get-asset-services
@@ -212,9 +214,10 @@ You can get the asset services of your Janssen Server by performing `get-asset-s
 ```
 
 
-### Get valid asset types
+### Get Valid Asset Types
 
-You can get the  asset types of your Janssen Server by performing `get-asset-types` operation.
+Get the asset types of your Janssen Server by performing `get-asset-types` 
+operation.
 
 ```bash title="Command"
 /opt/jans/jans-cli/config-cli.py --operation-id get-asset-types
@@ -234,9 +237,9 @@ You can get the  asset types of your Janssen Server by performing `get-asset-typ
 ]
 ```
 
-TO DO
+### Add New Custom Asset
 
-### Add New Asset
+<!-- TODO: Need to test -->
 
 To create a new asset, we can use `post-new-asset` operation id. As shown in
 the [output](#using-command-line) for `--info` command, the `post-new-asset` 
@@ -264,9 +267,10 @@ file `/tmp/add-asset.json`
 
 ```
 
-TO DO
 
-### Update Existing Asset
+### Update Existing Custom Assets
+
+<!-- TODO: Need to test -->
 
 To update the configuration follow the steps below.
 
@@ -289,22 +293,18 @@ To update the configuration follow the steps below.
 This will update the existing asset matched with inum value.
 
 
-### Delete Asset
+### Delete Custom Asset
 
-You can delete any Asset by its `inum` value.
+You can delete any custom asset by its `inum` value.
 
 ```bash title="Command"
 /opt/jans/jans-cli/config-cli.py --operation-id delete-asset --url-suffix inum:36014ca4-0978-4d95-8858-964b815ea770
 ```
 
-Just change the `inum` value to your own according to which one you want to delete.
-
-
-
 ## Using Text-based UI
 
 
-In Janssen, You can deploy and customize an Asset using
+In Janssen, You can deploy custom asset using
 the [Text-Based UI](./config-tools/jans-tui/README.md) also.
 
 You can start TUI using the command below:
@@ -315,18 +315,19 @@ sudo /opt/jans/jans-cli/jans_cli_tui.py
 
 ### Asset Screen
 
-Navigate to `Assest` to open the Asset screen as shown in the image below.
+Navigate to `Assets` tab to open the Assets screen as shown in the image below.
 
-* To get the list of currently added Assets, bring the control to the Search box (using the tab key),
-and press Enter. Type the search string to search for Asset with matching `Display Name` and `inum`.
+* To get the list of currently added Assets, bring the control to the Search 
+box (using the tab key), and press Enter. Type the search string to search 
+for Asset with matching `Display Name` and `inum`.
 
 
 ![Image](../../assets/tui-asset-screen.png)
 
 
 * Use the `Add Asset` button to create a new asset. 
-* You can add several types of services in the screen below
-* For example, below is the picture of the availability of asset data.
+* From the screen below, select the custom asset that needs to be uploaded
+and select the Janssen Server service to which the asset will be uploaded.
 
 ![Image](../../assets/tui-asset-data.png)
 
