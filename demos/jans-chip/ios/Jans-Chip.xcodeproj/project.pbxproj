@@ -66,6 +66,9 @@
 		307176312B0E35D5001C19B1 /* JOSESwift in Frameworks */ = {isa = PBXBuildFile; productRef = 307176302B0E35D5001C19B1 /* JOSESwift */; };
 		307176332B0E3861001C19B1 /* Checksum.swift in Sources */ = {isa = PBXBuildFile; fileRef = 307176322B0E3861001C19B1 /* Checksum.swift */; };
 		3079EC482AE1532600ECA57C /* LoginResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3079EC472AE1532600ECA57C /* LoginResponse.swift */; };
+		307BFF472C536EF600B85B80 /* SSARegRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 307BFF462C536EF600B85B80 /* SSARegRequest.swift */; };
+		3090C0AB2C52330600FBEC81 /* AssertionResultRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3090C0AA2C52330600FBEC81 /* AssertionResultRequest.swift */; };
+		3090C0AD2C5242C800FBEC81 /* AuthenticatorGetAssertionResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3090C0AC2C5242C800FBEC81 /* AuthenticatorGetAssertionResult.swift */; };
 		30A44AAB2C41655800B71E8A /* PublicKeyCredentialSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30A44AAA2C41655800B71E8A /* PublicKeyCredentialSource.swift */; };
 		30A44AAD2C416E4200B71E8A /* Authenticator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30A44AAC2C416E4200B71E8A /* Authenticator.swift */; };
 		30A44AAF2C41728000B71E8A /* CredentialSafe.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30A44AAE2C41728000B71E8A /* CredentialSafe.swift */; };
@@ -155,6 +158,9 @@
 		306EA0D92AF0F27400167E4C /* AfterLoginViewState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AfterLoginViewState.swift; sourceTree = "<group>"; };
 		307176322B0E3861001C19B1 /* Checksum.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Checksum.swift; sourceTree = "<group>"; };
 		3079EC472AE1532600ECA57C /* LoginResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginResponse.swift; sourceTree = "<group>"; };
+		307BFF462C536EF600B85B80 /* SSARegRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SSARegRequest.swift; sourceTree = "<group>"; };
+		3090C0AA2C52330600FBEC81 /* AssertionResultRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssertionResultRequest.swift; sourceTree = "<group>"; };
+		3090C0AC2C5242C800FBEC81 /* AuthenticatorGetAssertionResult.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticatorGetAssertionResult.swift; sourceTree = "<group>"; };
 		30A44AAA2C41655800B71E8A /* PublicKeyCredentialSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublicKeyCredentialSource.swift; sourceTree = "<group>"; };
 		30A44AAC2C416E4200B71E8A /* Authenticator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Authenticator.swift; sourceTree = "<group>"; };
 		30A44AAE2C41728000B71E8A /* CredentialSafe.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialSafe.swift; sourceTree = "<group>"; };
@@ -297,6 +303,7 @@
 				30BA05492C3FE7A60081FF78 /* AuthenticatorSelection.swift */,
 				30BA054B2C3FE8790081FF78 /* PubKeyCredParam.swift */,
 				30AED9032C48F3260079F4F8 /* ErrorHandler.swift */,
+				307BFF462C536EF600B85B80 /* SSARegRequest.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -426,6 +433,8 @@
 				3016F7672C4E3F7200F8BD15 /* AllowCredentials.swift */,
 				3016F76A2C4E411A00F8BD15 /* AssertionOptionRequest.swift */,
 				304C94492C4E59F000E689B0 /* AuthenticatorGetAssertionOptions.swift */,
+				3090C0AA2C52330600FBEC81 /* AssertionResultRequest.swift */,
+				3090C0AC2C5242C800FBEC81 /* AuthenticatorGetAssertionResult.swift */,
 			);
 			path = Networking;
 			sourceTree = "<group>";
@@ -532,6 +541,7 @@
 				30A44AC12C4683EF00B71E8A /* CBOR.swift in Sources */,
 				3063E5AB2AD41238002B4879 /* OIDCClient.swift in Sources */,
 				3063E5792ACD60D7002B4879 /* TokenResponse.swift in Sources */,
+				307BFF472C536EF600B85B80 /* SSARegRequest.swift in Sources */,
 				30BA05442C3FE5B10081FF78 /* AttestationOptionResponse.swift in Sources */,
 				3063E5AE2AD6BE05002B4879 /* UIApplication+Alert.swift in Sources */,
 				3016F7662C4E3E4D00F8BD15 /* AssertionOptionResponse.swift in Sources */,
@@ -550,6 +560,7 @@
 				3063E5902AD04A34002B4879 /* RegisterViewPresenter.swift in Sources */,
 				3063E5B02AD6C623002B4879 /* RealmManager.swift in Sources */,
 				3063E56E2ACC0BFE002B4879 /* MainViewAssembler.swift in Sources */,
+				3090C0AB2C52330600FBEC81 /* AssertionResultRequest.swift in Sources */,
 				3004AA0A2AEC59C8000CDB62 /* SecKey+KeyData.swift in Sources */,
 				3003B0632AE69A7F0068F411 /* UserInfo.swift in Sources */,
 				30D0B7A52AF2793800322E90 /* CheckListView.swift in Sources */,
@@ -567,6 +578,7 @@
 				3016F76B2C4E411A00F8BD15 /* AssertionOptionRequest.swift in Sources */,
 				30CC3C1F2C3C072000AFFD0D /* FidoConfiguration.swift in Sources */,
 				304C944E2C4E834C00E689B0 /* WebAuthnCryptography.swift in Sources */,
+				3090C0AD2C5242C800FBEC81 /* AuthenticatorGetAssertionResult.swift in Sources */,
 				3004A9F92AEBDE79000CDB62 /* DPoPProofFactory.swift in Sources */,
 				3063E5832ACD78DF002B4879 /* EndpointRouter.swift in Sources */,
 				3063E5812ACD7897002B4879 /* EndpointConfiguration.swift in Sources */,

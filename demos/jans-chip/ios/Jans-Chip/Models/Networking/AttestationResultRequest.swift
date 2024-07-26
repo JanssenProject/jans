@@ -17,5 +17,5 @@ public struct AttestationResultRequest: Codable {
     
     var id: String?
     var type: String?
-    var response: Response
+    var response: AttestationDataResponse
 }

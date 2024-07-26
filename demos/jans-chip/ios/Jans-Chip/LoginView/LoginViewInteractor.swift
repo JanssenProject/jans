@@ -68,6 +68,11 @@ final class LoginViewInteractorImpl: LoginViewInteractor {
                         assertionOptionResponse: assertion,
                         origin: fidoConfiguration.issuer)
                     authAdaptor.generateSignature(credentialSource: selectedPublicKeyCredentialSource)
+                    
+                    let assertionResultRequest = authAdaptor.authenticate(
+                        assertionOptionResponse: assertion,
+                        origin: fidoConfiguration.issuer,
+                        selectedCredential: selectedPublicKeyCredentialSource)
                 }
             }
         }

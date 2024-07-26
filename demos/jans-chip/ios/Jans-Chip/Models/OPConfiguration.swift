@@ -8,7 +8,10 @@
 import Foundation
 import RealmSwift
 
-final class OPConfiguration: Object, Codable, ObjectKeyIdentifiable {
+final class OPConfiguration: Object, Codable, ObjectKeyIdentifiable, ErrorHandler {
+    
+    var errorMessage: String?
+    var isSuccess: Bool = true
     
     override static func primaryKey() -> String? {
         "sno"
@@ -31,8 +34,6 @@ final class OPConfiguration: Object, Codable, ObjectKeyIdentifiable {
     @Persisted var userinfoEndpoint: String
     @Persisted var authorizationChallengeEndpoint: String
     @Persisted var revocationEndpoint: String
-    
-    var isSuccessful: Bool = false
     
     var toString: String {
         "OPConfiguration{" +

@@ -22,4 +22,20 @@ public struct AuthenticatorGetAssertionOptions: Codable {
     var allowCredentialDescriptorList: [PublicKeyCredentialDescriptor]?
     var requireUserPresence: Bool?
     var requireUserVerification: Bool?
+    
+    func areWellFormed() -> Bool {
+        if let rpId, rpId.isEmpty {
+            return false
+        }
+                
+        if clientDataHash?.count != 32 {
+            return false
+        }
+        
+        if !(requireUserPresence == true || requireUserVerification == true) { // only one may be set
+            return false
+        }
+        
+        return true
+    }
 }

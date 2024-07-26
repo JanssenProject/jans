@@ -14,15 +14,17 @@ typealias ServiceResult = (Bool, Error?) -> Void
 protocol ServiceClientProtocol: AnyObject {
     
     func getOPConfiguration(url: String) -> AnyPublisher<DataResponse<OPConfiguration, NetworkError>, Never>
-    func getFidoConfiguration(url: String) -> AnyPublisher<DataResponse<FidoConfiguration, NetworkError>, Never>
     func doDCR(dcRequest: DCRequest, url: String) -> AnyPublisher<DataResponse<DCResponse, NetworkError>, Never>
+    func doDCR(dcRequest: SSARegRequest, url: String) -> AnyPublisher<DataResponse<DCResponse, NetworkError>, Never>
     func getAuthorizationChallenge(clientId: String, username: String, password: String, useDeviceSession: Bool, acrValues: String, authMethod: String, assertionResultRequest: String, authorizationChallengeEndpoint: String) -> AnyPublisher<DataResponse<LoginResponse, NetworkError>, Never>
-    func getToken(clientId: String, code: String, grantType: String, redirectUri: String, scope: String, authHeader: String, dpopJwt: String, url: String) -> AnyPublisher<DataResponse<TokenResponse, NetworkError>, Never>
     func getUserInfo(accessToken: String, authHeader: String, url: String) -> AnyPublisher<DataResponse<[String: String], NetworkError>, Never>
+    func getToken(clientId: String, code: String, grantType: String, redirectUri: String, scope: String, authHeader: String, dpopJwt: String, url: String) -> AnyPublisher<DataResponse<TokenResponse, NetworkError>, Never>
     func logout(token: String, tokenTypeHint: String, authHeader: String, url: String) -> AnyPublisher<DataResponse<String, NetworkError>, Never>
+    func getFidoConfiguration(url: String) -> AnyPublisher<DataResponse<FidoConfiguration, NetworkError>, Never>
     func attestationOption(attestationRequest: AttestationOptionRequest, url: String) -> AnyPublisher<DataResponse<AttestationOptionResponse, NetworkError>, Never>
     func attestationResult(request: AttestationResultRequest, url: String, completion: ((String) -> Void)?)
     func assertionOption(request: AssertionOptionRequest, url: String) -> AnyPublisher<DataResponse<AssertionOptionResponse, NetworkError>, Never>
+    func verifyIntegrityTokenOnAppServer(url: String) -> AnyPublisher<DataResponse<AppIntegrityResponse, NetworkError>, Never>
 }
 
 public final class ServiceClient {
@@ -52,28 +54,32 @@ extension ServiceClient: ServiceClientProtocol {
         performRequest(route: .getOPConfiguration(url), decoder: jsonDecoder)
     }
     
-    func getFidoConfiguration(url: String) -> AnyPublisher<DataResponse<FidoConfiguration, NetworkError>, Never> {
-        performRequest(route: .getFidoConfiguration(url), decoder: jsonDecoder)
-    }
-    
     func doDCR(dcRequest: DCRequest, url: String) -> AnyPublisher<DataResponse<DCResponse, NetworkError>, Never> {
         performRequest(route: .doDCR(dcRequest, url), decoder: jsonDecoder)
+    }
+    
+    func doDCR(dcRequest: SSARegRequest, url: String) -> AnyPublisher<DataResponse<DCResponse, NetworkError>, Never> {
+        performRequest(route: .doDCRSSA(dcRequest, url), decoder: jsonDecoder)
     }
     
     func getAuthorizationChallenge(clientId: String, username: String, password: String, useDeviceSession: Bool, acrValues: String, authMethod: String, assertionResultRequest: String, authorizationChallengeEndpoint: String) -> AnyPublisher<DataResponse<LoginResponse, NetworkError>, Never> {
         performRequest(route: .getAuthorizationChallenge(clientId, username, password, UUID().uuidString, UUID().uuidString, useDeviceSession, acrValues, authMethod, assertionResultRequest, authorizationChallengeEndpoint), decoder: jsonDecoder)
     }
     
-    func getToken(clientId: String, code: String, grantType: String, redirectUri: String, scope: String, authHeader: String, dpopJwt: String, url: String) -> AnyPublisher<DataResponse<TokenResponse, NetworkError>, Never> {
-        performRequest(route: .getToken(clientId, code, grantType, redirectUri, scope, authHeader, dpopJwt, url), decoder: jsonDecoder)
-    }
-    
     func getUserInfo(accessToken: String, authHeader: String, url: String) -> AnyPublisher<DataResponse<[String: String], NetworkError>, Never> {
         performRequest(route: .getUserInfo(accessToken, authHeader, url), decoder: jsonDecoder)
     }
     
+    func getToken(clientId: String, code: String, grantType: String, redirectUri: String, scope: String, authHeader: String, dpopJwt: String, url: String) -> AnyPublisher<DataResponse<TokenResponse, NetworkError>, Never> {
+        performRequest(route: .getToken(clientId, code, grantType, redirectUri, scope, authHeader, dpopJwt, url), decoder: jsonDecoder)
+    }
+    
     func logout(token: String, tokenTypeHint: String, authHeader: String, url: String) -> AnyPublisher<DataResponse<String, NetworkError>, Never> {
         performRequest(route: .logout(token, tokenTypeHint, authHeader, url), decoder: jsonDecoder)
+    }
+    
+    func getFidoConfiguration(url: String) -> AnyPublisher<DataResponse<FidoConfiguration, NetworkError>, Never> {
+        performRequest(route: .getFidoConfiguration(url), decoder: jsonDecoder)
     }
     
     func attestationOption(attestationRequest: AttestationOptionRequest, url: String) -> AnyPublisher<DataResponse<AttestationOptionResponse, NetworkError>, Never> {
@@ -97,5 +103,9 @@ extension ServiceClient: ServiceClientProtocol {
     
     func assertionOption(request: AssertionOptionRequest, url: String) -> AnyPublisher<DataResponse<AssertionOptionResponse, NetworkError>, Never> {
         performRequest(route: .assertionOption(request, url), decoder: jsonDecoder)
+    }
+    
+    func verifyIntegrityTokenOnAppServer(url: String) -> AnyPublisher<DataResponse<AppIntegrityResponse, NetworkError>, Never> {
+        performRequest(route: .verifyIntegrityTokenOnAppServer(url), decoder: jsonDecoder)
     }
 }

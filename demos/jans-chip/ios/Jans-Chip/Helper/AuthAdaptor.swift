@@ -33,4 +33,11 @@ final class AuthAdaptor {
             authenticator.generateSignature(credentialSource: credentialSource)
         }
     }
+    
+    func authenticate(assertionOptionResponse: AssertionOptionResponse, origin: String?, selectedCredential: PublicKeyCredentialSource?) -> AssertionResultRequest {
+        authenticator.authenticate(
+            assertionOptionResponse: assertionOptionResponse,
+            origin: origin,
+            selectedCredential: selectedCredential)
+    }
 }

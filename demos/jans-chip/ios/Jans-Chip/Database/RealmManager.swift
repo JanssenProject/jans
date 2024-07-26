@@ -106,4 +106,27 @@ final class RealmManager {
             print("Error deleting object, reason: \(error.localizedDescription)")
         }
     }
+    
+    func incrementUseCounter(credential: PublicKeyCredentialSource) -> Int {
+        if let publicKeyCredentialSources: [PublicKeyCredentialSource] = getObjects(), let publicKeyCredentialSource = publicKeyCredentialSources.first(where: { $0.rpId == credential.rpId }) {
+            do {
+                let realm = try Realm()
+                
+                try realm.write {
+                    var keyUseCounter = publicKeyCredentialSource.keyUseCounter
+                    keyUseCounter += 1
+                    publicKeyCredentialSource.keyUseCounter = keyUseCounter
+                    
+                    return keyUseCounter
+                }
+            } catch(let error) {
+                print("Error saving object, reason: \(error.localizedDescription)")
+                return credential.keyUseCounter
+            }
+        } else {
+            return credential.keyUseCounter
+        }
+        
+        return credential.keyUseCounter
+    }
 }

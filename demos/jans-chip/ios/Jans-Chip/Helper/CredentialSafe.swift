@@ -26,4 +26,12 @@ final class CredentialSafe {
     func getKeysForEntity(rpEntityId: String) -> [PublicKeyCredentialSource] {
         allCredentialSource()?.filter { $0.rpId == rpEntityId } ?? []
     }
+    
+    func keyRequiresVerification(alias: String) -> Bool {
+        WebAuthnCryptography().isUserAuthenticationRequired(alias: alias)
+    }
+    
+    func incrementCredentialUseCounter(credential: PublicKeyCredentialSource) -> Int {
+        RealmManager.shared.incrementUseCounter(credential: credential)
+    }
 }

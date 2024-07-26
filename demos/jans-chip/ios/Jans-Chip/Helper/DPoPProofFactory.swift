@@ -111,6 +111,35 @@ final class DPoPProofFactory {
         return tokenJWT
     }
     
+    public func issueJWTToken(claims: [String: String]) -> String {
+        var tokenJWT = ""
+        var claims = claims
+        
+        do {
+            let (privateKey, _) = try SecKey.generateKeyPair(ofSize: 3072)
+//            let jwk = try RSAPublicKey(publicKey: publicKey)
+            
+            let header = Header(typ: "jwt")
+//            header["alg"] = "RS256"
+            claims["jti"] = UUID().uuidString
+            claims["iat"] = Date().description.string
+            
+            var objectJWT = JWT(header: header, claims: JansIntegrityClaims())
+            
+            guard let privateKeyData = privateKey.keyData else {
+                return tokenJWT
+            }
+            
+            let jwtSigner = JWTSigner.rs256(privateKey: Data(privateKeyData))
+            
+            tokenJWT = try objectJWT.sign(using: jwtSigner)
+        } catch(let error) {
+            print("Error generating JWT, reason: \(error.localizedDescription)")
+        }
+        
+        return tokenJWT
+    }
+    
     public func getClaimsFromSSA() -> JWTClaimsSet? {
         do {
             let jwsObject = try decode(jwt: AppConfig.SSA)

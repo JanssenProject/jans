@@ -7,7 +7,9 @@
 
 import RealmSwift
 
-final class OIDCClient: Object, ObjectKeyIdentifiable {
+final class OIDCClient: Object, ObjectKeyIdentifiable, ErrorHandler {
+    var errorMessage: String?
+    var isSuccess: Bool = true
     
     override static func primaryKey() -> String? {
         "id"

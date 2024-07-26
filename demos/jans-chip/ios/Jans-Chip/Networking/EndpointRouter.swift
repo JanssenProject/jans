@@ -11,8 +11,9 @@ import Alamofire
 public enum EndpointRouter: EndpointConfiguration {
     
     case getOPConfiguration(String)
-    case getFidoConfiguration(String)
     case doDCR(DCRequest, String)
+    case doDCRSSA(SSARegRequest, String)
+    case getFidoConfiguration(String)
     case getAuthorizationChallenge(String, String, String, String, String, Bool, String, String, String, String)
     case getToken(String, String, String, String, String, String, String, String)
     case getUserInfo(String, String, String)
@@ -30,7 +31,8 @@ public enum EndpointRouter: EndpointConfiguration {
                 .getFidoConfiguration,
                 .verifyIntegrityTokenOnAppServer:
             return .get
-        case .doDCR, 
+        case .doDCR,
+                .doDCRSSA, 
                 .getAuthorizationChallenge,
                 .getToken,
                 .getUserInfo,
@@ -53,6 +55,7 @@ public enum EndpointRouter: EndpointConfiguration {
         case .getOPConfiguration(let url),
                 .getFidoConfiguration(let url),
                 .doDCR(_, let url),
+                .doDCRSSA(_, let url),
                 .getAuthorizationChallenge(_, _, _, _, _,_, _, _, _, let url),
                 .getToken(_, _, _, _, _, _, _, let url),
                 .getUserInfo(_, _, let url),
@@ -93,6 +96,7 @@ public enum EndpointRouter: EndpointConfiguration {
         case .getOPConfiguration, 
                 .getFidoConfiguration,
                 .doDCR,
+                .doDCRSSA,
                 .verifyIntegrityTokenOnAppServer,
                 .attestationOption,
                 .attestationResult,
@@ -113,6 +117,7 @@ public enum EndpointRouter: EndpointConfiguration {
         if let parameters = parameters {
             switch self {
             case .doDCR,
+                    .doDCRSSA,
                     .getOPConfiguration,
                     .getFidoConfiguration,
                     .getAuthorizationChallenge,

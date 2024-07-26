@@ -11,6 +11,7 @@ import CommonCrypto
 final class Authenticator {
     
     private let credentialSafe = CredentialSafe()
+    private let cryptoProvider = WebAuthnCryptography()
     
     func getPublicKeyCredentialSource(options: AuthenticatorMakeCredentialOptions, passwordText: String) -> PublicKeyCredentialSource {
         let credentialSource = credentialSafe.generateCredential(
@@ -74,10 +75,39 @@ final class Authenticator {
         
         let clientDataJSON = generateClientDataJSON(challenge: responseFromAPI?.challenge, type: "webauthn.create", origin: origin) ?? ""
         let attestationObjectBytes = attestationObject.asCBOR
-        let response = Response(attestationObject: attestationObjectBytes.base64EncodedString(), clientDataJSON: clientDataJSON)
+        let response = AttestationDataResponse(attestationObject: attestationObjectBytes.base64EncodedString(), clientDataJSON: clientDataJSON)
         let attestationResultRequest = AttestationResultRequest(type: "public-key", response: response)
         
         return attestationResultRequest
+    }
+    
+    func authenticate(assertionOptionResponse: AssertionOptionResponse, origin: String?, selectedCredential: PublicKeyCredentialSource?) -> AssertionResultRequest {
+        var options: AuthenticatorGetAssertionOptions = generateAuthenticatorGetAssertionOptions(assertionOptionResponse: assertionOptionResponse, origin: origin)
+        var assertionResultRequest = AssertionResultRequest()
+        
+        guard let selectedCredential else {
+            return assertionResultRequest
+        }
+        
+        var assertionObject: AuthenticatorGetAssertionResult? = getAssertion(options: options, selectedCredential: selectedCredential, credentialSelector: LocalCredentialSelector())
+
+        assertionResultRequest.id = assertionObject?.selectedCredentialId?.base64EncodedString().replacingOccurrences(of: "\n", with: "").replacingOccurrences(of: "=", with: "")
+        assertionResultRequest.type = "public-key"
+        assertionResultRequest.rawId = assertionObject?.selectedCredentialId?.base64EncodedString().replacingOccurrences(of: "\n", with: "")
+
+        var response = Response()
+        response.clientDataJSON = generateClientDataJSON(
+            challenge: assertionOptionResponse.challenge,
+            type: "webauthn.get",
+            origin: origin)
+
+        response.authenticatorData = assertionObject?.authenticatorData?.base64EncodedString().replacingOccurrences(of: "\n", with: "")
+        
+        response.signature = assertionObject?.signature?.base64EncodedString().replacingOccurrences(of: "\n", with: "")
+        
+        assertionResultRequest.response = response
+        
+        return assertionResultRequest
     }
     
     func selectPublicKeyCredentialSource(credentialSelector: CredentialSelector, options: AuthenticatorGetAssertionOptions) -> PublicKeyCredentialSource? {
@@ -112,7 +142,51 @@ final class Authenticator {
         WebAuthnCryptography().generateSignatureObject(alias: credentialSource.keyPairAlias)
     }
     
+    func getAssertion(options: AuthenticatorGetAssertionOptions, selectedCredential: PublicKeyCredentialSource, credentialSelector: CredentialSelector) -> AuthenticatorGetAssertionResult? {
+        
+        // 1. Check if all supplied parameters are well-formed
+        if !options.areWellFormed() {
+            return nil
+        }
+
+        // 2-3. Parse allowCredentialDescriptorList
+        // we do this slightly out of order, see below.
+
+        // 4-5. Get keys that match this relying party ID
+
+        // get verification, if necessary
+        var result = AuthenticatorGetAssertionResult()
+        let keyNeedsUnlocking: Bool = credentialSafe.keyRequiresVerification(alias: selectedCredential.keyPairAlias)
+        if options.requireUserVerification == true || keyNeedsUnlocking {
+            result = getInternalAssertion(options: options, selectedCredential: selectedCredential)
+        } else { // no biometric
+            // steps 8-13
+            result = getInternalAssertion(options: options, selectedCredential: selectedCredential)
+        }
+        return result;
+    }
+    
     // MARK: - Private
+    
+    private func getInternalAssertion(options: AuthenticatorGetAssertionOptions, selectedCredential: PublicKeyCredentialSource) -> AuthenticatorGetAssertionResult {
+        var authenticatorData = Data()
+        var signatureBytes = Data()
+        
+        // 9. Increment signature counter
+        let authCounter = credentialSafe.incrementCredentialUseCounter(credential: selectedCredential)
+        if let rpId = options.rpId {
+            let rpIdHash = cryptoProvider.sha256(string: rpId)
+            authenticatorData = constructAuthenticatorData(rpIdHash: rpIdHash, attestedCredentialData: nil, authCounter: authCounter) ?? Data()
+        }
+        
+        let result = AuthenticatorGetAssertionResult(
+            selectedCredentialId: selectedCredential.id,
+            authenticatorData: authenticatorData,
+            signature: signatureBytes,
+            selectedCredentialUserHandle: selectedCredential.userHandle)
+        
+        return result
+    }
     
     private func generateClientDataHash(challenge: String?, type: String?, origin: String?) -> Data? {
         // Convert clientDataJson to JSON string
@@ -124,6 +198,37 @@ final class Authenticator {
         }
         
         return nil
+    }
+    
+    private func constructAuthenticatorData(rpIdHash: Data, attestedCredentialData: Data?, authCounter: Int) -> Data? {
+        if rpIdHash.count != 32 {
+            print("rpIdHash must be a 32-byte SHA-256 hash")
+            return nil
+        }
+
+        //            byte flags = 0x00;
+        //            flags |= 0x01; // user present
+        //            if (this.credentialSafe.supportsUserVerification()) {
+        //                flags |= (0x01 << 2); // user verified
+        //            }
+        //            if (attestedCredentialData != null) {
+        //                flags |= (0x01 << 6); // attested credential data included
+        //            }
+        //
+        //            // 32-byte hash + 1-byte flags + 4 bytes signCount = 37 bytes
+        //            ByteBuffer authData = ByteBuffer.allocate(37 +
+        //                    (attestedCredentialData == null ? 0 : attestedCredentialData.length));
+        var authData = Data()
+        authData.append(rpIdHash)
+        //        authData.put(flags);
+        authCounter.description.data(using: .utf8).flatMap {
+            authData.append($0)
+        }
+        attestedCredentialData.flatMap {
+            authData.append($0)
+        }
+        
+        return authData
     }
     
     private func sha256(data: Data) -> Data {
