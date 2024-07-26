@@ -111,9 +111,9 @@ spec:
             mountPath: /etc/certs/vault_secret_id
             subPath: vault_secret_id
         {{- end }}
-          - mountPath: /opt/jans/configurator/db/generate.json
+          - mountPath: /opt/jans/configurator/db/configuration.json
             name: {{ include "janssen-all-in-one.name" . }}-mount-gen-file
-            subPath: generate.json
+            subPath: configuration.json
           - mountPath: /scripts/tls_generator.py
             name: {{ include "janssen-all-in-one.name" . }}-tls-script
             subPath: tls_generator.py
