@@ -1,33 +1,34 @@
 ---
 tags:
-
-subtitle: Learn how to manage and change Agama project configuration 
+ - administration
+ - configuration
+ - custom assets
 ---
 
-# Custom Assrts
+# Custom Assets Configuration
 
-The Janssen Server provides multiple configuration tools to perform these
-tasks.
+The Janssen Server provides multiple configuration tools to configure custom
+assets.
 
 === "Use Command-line"
 
-    Use the command line to perform actions from the terminal. Learn how to 
-    use Jans CLI [here](../config-guide/config-tools/jans-cli/README.md) or jump straight to 
-    the [Using Command Line](#using-command-line)
+ Use the command line to perform actions from the terminal. Learn how to 
+ use Jans CLI [here](../config-guide/config-tools/jans-cli/README.md) or jump straight to 
+ the [Using Command Line](#using-command-line)
 
 === "Use Text-based UI"
 
-    Use a fully functional text-based user interface from the terminal. 
-    Learn how to use Jans Text-based UI (TUI) 
-    [here](../config-guide/config-tools/jans-tui/README.md) or jump straight to the
-    [Using Text-based UI](#using-text-based-ui)
+ Use a fully functional text-based user interface from the terminal. 
+ Learn how to use Jans Text-based UI (TUI) 
+ [here](../config-guide/config-tools/jans-tui/README.md) or jump straight to the
+ [Using Text-based UI](#using-text-based-ui)
 
 === "Use REST API"
 
-    Use REST API for programmatic access or invoke via tools like CURL or 
-    Postman. Learn how to use Janssen Server Config API 
-    [here](../config-guide/config-tools/config-api/README.md) or Jump straight to the
-    [Using Configuration REST API](#using-configuration-rest-api)
+ Use REST API for programmatic access or invoke via tools like CURL or 
+ Postman. Learn how to use Janssen Server Config API 
+ [here](../config-guide/config-tools/config-api/README.md) or Jump straight to the
+ [Using Configuration REST API](#using-configuration-rest-api)
 
 ##  Using Command Line
 
@@ -43,44 +44,44 @@ command below.
 
 ```test title="Sample Output" linenums="1"
 Operation ID: get-asset-by-inum
-  Description: Gets an asset by inum - unique identifier
-  Parameters:
-  inum: Asset Inum [string]
+ Description: Gets an asset by inum - unique identifier
+ Parameters:
+ inum: Asset Inum [string]
 Operation ID: delete-asset
-  Description: Delete an asset
-  Parameters:
-  inum: Asset identifier [string]
+ Description: Delete an asset
+ Parameters:
+ inum: Asset identifier [string]
 Operation ID: get-asset-by-name
-  Description: Fetch asset by name.
-  Parameters:
-  name: Asset Name [string]
+ Description: Fetch asset by name.
+ Parameters:
+ name: Asset Name [string]
 Operation ID: get-all-assets
-  Description: Gets all Jans assets.
-  Parameters:
-  limit: Search size - max size of the results to return [integer]
-  pattern: Search pattern [string]
-  status: Status of the attribute [string]
-  startIndex: The 1-based index of the first query result [integer]
-  sortBy: Attribute whose value will be used to order the returned response [string]
-  sortOrder: Order in which the sortBy param is applied. Allowed values are "ascending" and "descending" [string]
-  fieldValuePair: Field and value pair for seraching [string]
+ Description: Gets all Jans assets.
+ Parameters:
+ limit: Search size - max size of the results to return [integer]
+ pattern: Search pattern [string]
+ status: Status of the attribute [string]
+ startIndex: The 1-based index of the first query result [integer]
+ sortBy: Attribute whose value will be used to order the returned response [string]
+ sortOrder: Order in which the sortBy param is applied. Allowed values are "ascending" and "descending" [string]
+ fieldValuePair: Field and value pair for searching [string]
 Operation ID: get-asset-services
-  Description: Gets asset services
+ Description: Gets asset services
 Operation ID: get-asset-types
-  Description: Get valid asset types
+ Description: Get valid asset types
 Operation ID: put-asset
-  Description: Update existing asset
-  Schema: AssetForm
+ Description: Update existing asset
+ Schema: AssetForm
 Operation ID: post-new-asset
-  Description: Upload new asset
-  Schema: AssetForm
+ Description: Upload new asset
+ Schema: AssetForm
 
 To get sample schema type /opt/jans/jans-cli/config-cli.py --schema-sample <schema>, for example /opt/jans/jans-cli/config-cli.py --schema-sample AssetForm
 ```
 
 ### Gets all Jans assets
 
-You can get the all Custom Assets  of your Janssen Server by performing this operation.
+You can get all the currently configured custom assets on your Janssen Server by performing this operation.
 
 ```bash title="Command"
 /opt/jans/jans-cli/config-cli.py --operation-id get-all-assets
@@ -91,7 +92,7 @@ You can get the all Custom Assets  of your Janssen Server by performing this ope
   "totalEntriesCount": 2,
   "entriesCount": 2,
   "entries": [
-    {
+ {
       "dn": "inum=36014ca4-0978-4d95-8858-964b815ea770,ou=document,o=jans",
       "inum": "36014ca4-0978-4d95-8858-964b815ea770",
       "displayName": "custom.xhtml",
@@ -100,12 +101,12 @@ You can get the all Custom Assets  of your Janssen Server by performing this ope
       "creationDate": "2024-07-25T11:40:17",
       "jansService": [
         "jans-auth"
-      ],
+ ],
       "jansLevel": 1,
       "jansEnabled": true,
       "baseDn": "inum=36014ca4-0978-4d95-8858-964b815ea770,ou=document,o=jans"
-    },
-    {
+ },
+ {
       "dn": "inum=b5ab08e4-17b2-487d-845a-bdc6b48fd5b4,ou=document,o=jans",
       "inum": "b5ab08e4-17b2-487d-845a-bdc6b48fd5b4",
       "displayName": "a.png",
@@ -114,12 +115,12 @@ You can get the all Custom Assets  of your Janssen Server by performing this ope
       "creationDate": "2024-07-25T11:44:38",
       "jansService": [
         "jans-auth"
-      ],
+ ],
       "jansLevel": 2,
       "jansEnabled": true,
       "baseDn": "inum=b5ab08e4-17b2-487d-845a-bdc6b48fd5b4,ou=document,o=jans"
-    }
-  ]
+ }
+ ]
 }
 ```
 
@@ -145,7 +146,7 @@ It returns the details as below:
   "creationDate": "2024-07-25T11:40:17",
   "jansService": [
     "jans-auth"
-  ],
+ ],
   "jansLevel": 1,
   "jansEnabled": true,
   "baseDn": "inum=36014ca4-0978-4d95-8858-964b815ea770,ou=document,o=jans"
@@ -170,7 +171,7 @@ It returns the details as below:
   "totalEntriesCount": 1,
   "entriesCount": 1,
   "entries": [
-    {
+ {
       "dn": "inum=b5ab08e4-17b2-487d-845a-bdc6b48fd5b4,ou=document,o=jans",
       "inum": "b5ab08e4-17b2-487d-845a-bdc6b48fd5b4",
       "displayName": "a.png",
@@ -179,19 +180,19 @@ It returns the details as below:
       "creationDate": "2024-07-25T11:44:38",
       "jansService": [
         "jans-auth"
-      ],
+ ],
       "jansLevel": 2,
       "jansEnabled": true,
       "baseDn": "inum=b5ab08e4-17b2-487d-845a-bdc6b48fd5b4,ou=document,o=jans"
-    }
-  ]
+ }
+ ]
 }
 ```
 
 ### Gets asset services
 
 
-You can get the asset services  of your Janssen Server by performing `get-asset-services` operation.
+You can get the asset services of your Janssen Server by performing `get-asset-services` operation.
 
 ```bash title="Command"
 /opt/jans/jans-cli/config-cli.py --operation-id get-asset-services
@@ -199,14 +200,14 @@ You can get the asset services  of your Janssen Server by performing `get-asset-
 
 ```text title="Sample Output" linenums="1"
 [
-  "jans-auth",
-  "jans-casa",
-  "jans-config-api",
-  "jans-fido2",
-  "jans-link",
-  "jans-lock",
-  "jans-scim",
-  "jans-keycloak-link"
+ "jans-auth",
+ "jans-casa",
+ "jans-config-api",
+ "jans-fido2",
+ "jans-link",
+ "jans-lock",
+ "jans-scim",
+ "jans-keycloak-link"
 ]
 ```
 
@@ -221,15 +222,15 @@ You can get the  asset types of your Janssen Server by performing `get-asset-typ
 
 ```text title="Sample Output" linenums="1"
 [
-  "properties",
-  "jar",
-  "xhtml",
-  "js",
-  "css",
-  "png",
-  "gif",
-  "jpg",
-  "jpeg"
+ "properties",
+ "jar",
+ "xhtml",
+ "js",
+ "css",
+ "png",
+ "gif",
+ "jpg",
+ "jpeg"
 ]
 ```
 
@@ -237,7 +238,7 @@ TO DO
 
 ### Add New Asset
 
-To create a new ssset, we can use `post-new-asset` operation id. As shown in
+To create a new asset, we can use `post-new-asset` operation id. As shown in
 the [output](#using-command-line) for `--info` command, the `post-new-asset` 
 operation requires data to be sent according to `AssetForm` schema.
 
@@ -248,8 +249,8 @@ To see the schema, use the command below:
 /opt/jans/jans-cli/config-cli.py --schema AssetForm
 ```
 
-For better understanding, the Janssen Server also provides an sample of data to 
-be sent to the server.This sample conforms to the schema above. Use the command 
+For better understanding, the Janssen Server also provides a sample of data to 
+be sent to the server. This sample conforms to the schema above. Use the command 
 below to get the sample.
 
 ```bash title="Command"
@@ -270,22 +271,22 @@ TO DO
 To update the configuration follow the steps below.
 
 1. [Gets the asset by inum](#gets-an-asset-by-inum) and store it into a file for editing.
-   The following command will retrieve the existing asset in the schema file.
-  ```bash title="Sample Command"
+ The following command will retrieve the existing asset in the schema file.
+ ```bash title="Sample Command"
   /opt/jans/jans-cli/config-cli.py -no-color --operation-id put-asset \
   --url-suffix inum:36014ca4-0978-4d95-8858-964b815ea770 > /tmp/update-asset.json
-  ```
+ ```
 2. Edit and update the desired configuration values in the file while keeping other
-   properties and values unchanged. Updates must adhere to the `AssetForm`
-   schema as mentioned [here](#using-command-line).
+ properties and values unchanged. Updates must adhere to the `AssetForm`
+ schema as mentioned [here](#using-command-line).
 
-3. We have changed only the `` to ` ` in existing asset.
-   Use the updated file to send the update to the Janssen Server using the command below
-   ```bash title="Command"
+3. We have changed only the `` to ` ` in the existing asset.
+ Use the updated file to send the update to the Janssen Server using the command below
+ ```bash title="Command"
    /opt/jans/jans-cli/config-cli.py --operation-id put-asset \
    --data /tmp/update-asset.json
-   ```
-This will updated the existing asset matched with inum value.
+ ```
+This will update the existing asset matched with inum value.
 
 
 ### Delete Asset
@@ -316,7 +317,7 @@ sudo /opt/jans/jans-cli/jans_cli_tui.py
 
 Navigate to `Assest` to open the Asset screen as shown in the image below.
 
-* To get the list of currently added Asset, bring the control to Search box (using the tab key),
+* To get the list of currently added Assets, bring the control to the Search box (using the tab key),
 and press Enter. Type the search string to search for Asset with matching `Display Name` and `inum`.
 
 
@@ -324,8 +325,8 @@ and press Enter. Type the search string to search for Asset with matching `Displ
 
 
 * Use the `Add Asset` button to create a new asset. 
-* You can add several types of srvices in the screen below
-* For example, below is the picture availability Asset data.
+* You can add several types of services in the screen below
+* For example, below is the picture of the availability of asset data.
 
 ![Image](../../assets/tui-asset-data.png)
 
