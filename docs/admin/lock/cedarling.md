@@ -9,13 +9,15 @@ tags:
 
 ## Cedarling Authorization
 
-The Cedarling is a local, autonomous Policy Decision Point, or "PDP". It runs as a local 
-WebAssembly ("WASM") component--you can call it directly in the browser from a JavaScript 
-function. It can also run as a cloud function to provide authorization for server-side apps. 
-With each authorization call, the Cedarling has all the policies and data it 
-needs to make a fast, local decision. The Cedarling's authorization function is *deterministic*.
-The Cedarling always returns either `permit` or `forbid`. You will never get an error 
-indicating a network timeout, or a divide by zero error. It is also very fast.
+The Cedarling, as its name suggests, enables you to define the security rules for your application 
+in [Cedar](https://www.cedarpolicy.com/en) policy syntax.
+
+The Cedarling is a local, autonomous Policy Decision Point, or "PDP", distributed as a 
+WebAssembly ("WASM") component.  WASM components can run directly in the browser or in a cloud 
+function. The Cedarling's main job is to `permit` or `forbid` requests based on enterprise-approved 
+policies. The input to the policies are JWT tokens (which provides the Principal), the requested 
+Action and Resource. The Cedarling rapidly evaluates authorization requests because it has all the 
+policies and data it needs to make a local decision. 
 
 ![](../../assets/lock-cedarling-diagram-1.jpg)
 
@@ -29,25 +31,22 @@ enterprise deployment, this audit log is sent for central archiving.
 
 Where does the Cedarling get the data for policy evaluation? The data is contained in the 
 authorization request itself which has the OAuth and OpenID JWTs and details about the resource 
-and requested action. Most modern applications rely on a federated identity provider or "IDP". 
-Leveraing the JWT tokens to identify the person and software making the request
+and requested action.
 
 ![](../../assets/lock-cedarling-diagram-2.jpg)
 
 Two JWT tokens in particular are typical: (1) an OpenID Connect id_token and (2) an OAuth access 
-token. The id_token represents a user authentication event, and the access token represents a 
+token. The id_token represents a user authentication event. The access token represents a 
 client authentication event. The Cedarling can trust the id_token and access token to extract the User, 
-Role and Client pricipals. The tokens also contain other interesting contextual data. An OpenID 
-Connect id_token JWT, as a record of an authentication event, tells you who authenticated, when 
-they authenticated, how they authenticatated, and other claims like the subject's Roles. An OAuth 
-Access Token JWT can tell you information about the software that obtained the JWT, its extent 
-of access as defined by the OAuth Authorization Server (*i.e.* the values of the `scope` claim), or 
-other claims--domains frequently enhance the access token to contain business specific data needed 
-for policy evaluation. If an OpenID Userinfo token is sent to the cedarling, it is combined with the
-id_token to paint a fuller picture of the User's claims. 
+Role and Client Principals. These tokens also contain other interesting contextual data. An OpenID 
+Connect id_token JWT tells you who authenticated, when they authenticated, how they authenticatated, 
+and other claims like the User's roles. An OAuth Access Token JWT can tell you information about the 
+software that obtained the JWT, its extent of access as defined by the OAuth Authorization Server 
+(*i.e.* the values of the `scope` claim), or other claims--domains frequently enhance the access token to
+contain business specific data needed for policy evaluation. If an OpenID Userinfo token is sent to the 
+Cedarling, it is combined with the id_token to paint a fuller picture of the User's claims. 
 
-The Cedarling, as its name suggests, enables you to define the security rules for your application 
-in [Cedar](https://www.cedarpolicy.com/en) policy syntax. Cedar was invented by Amazon for their 
+Cedar was invented by Amazon for their 
 [Verified Permission](https://aws.amazon.com/verified-permissions/) service. It uses the **PARC** 
 syntax: **P**rincipal, **A**ction, **R**esource, **C**ontext.  Principal-Action-Resource is typical
 for most authorization solutions. For example, you may have a policy that says *Admins* can *write*
@@ -55,10 +54,10 @@ to the *config* folder. In this example, the *Admin* Role is the Principal, *wri
 and the *config* folder is the Resource. The Context is used to specify information about the
 enivironment, like the time of day or network address.
 
-The Cedarling authorizes a person using a certain piece of software to do something. From 
-a logical perspective, `person_allowed AND client_allowed` must be `True`. While this seems pretty
-simple, a person may be either explicitly allowed, or have a role that enables access. For example, 
-`person_allowed` may be equal to `True` if `user=mike OR role=SuperUser`. 
+The Cedarling authorizes a person using a certain piece of software. From a logical perspective, 
+`person_allowed AND client_allowed` must be `True`. A person may be either explicitly allowed, or 
+have a role that enables access. For example, `person_allowed` is `True` if 
+`user=mike OR role=SuperUser`. 
 
 ![](../../assets/lock-cedarling-diagram-3.jpg)
 
@@ -70,6 +69,7 @@ input = {
            "access_token": "eyJhbGc....", 
            "id_token": "eyJjbGc...", 
            "userinfo_token": "eyJjbGc...",
+           "tx_token": "eyJjbGc...",
            "resource": {"Ticket": {"id": "12345", "creator": "foo@bar.com", "organization": "Acme"}},
            "action": "View",
            "context": {
