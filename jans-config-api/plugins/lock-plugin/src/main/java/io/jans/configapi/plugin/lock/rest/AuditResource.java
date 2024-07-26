@@ -9,39 +9,26 @@ package io.jans.configapi.plugin.lock.rest;
 import io.jans.configapi.core.model.ApiError;
 import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
-import io.jans.configapi.core.util.Jackson;
-import io.jans.configapi.plugin.lock.service.LockConfigService;
+import io.jans.configapi.plugin.lock.model.stat.*;
+import io.jans.configapi.plugin.lock.service.AuditService;
 import io.jans.configapi.plugin.lock.util.Constants;
-import io.jans.configapi.util.ApiAccessConstants;
-import io.jans.lock.model.config.AppConfiguration;
-import io.jans.lock.model.config.Conf;
-import io.jans.model.JansAttribute;
+
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.*;
 
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-import java.io.IOException;
-
 import org.slf4j.Logger;
 
-import com.github.fge.jsonpatch.JsonPatch;
-import com.github.fge.jsonpatch.JsonPatchException;
-
-import io.jans.configapi.plugin.lock.model.stat.*;
-import io.jans.configapi.plugin.lock.service.AuditService;
 
 @Path(Constants.AUDIT)
 @Consumes(MediaType.APPLICATION_JSON)

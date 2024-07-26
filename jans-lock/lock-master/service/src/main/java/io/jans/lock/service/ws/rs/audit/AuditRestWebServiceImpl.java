@@ -16,7 +16,7 @@
 
 package io.jans.lock.service.ws.rs.audit;
 
-import io.jans.lock.service.util.AuthUtil;
+import io.jans.lock.util.LockUtil;
 import io.jans.lock.util.ServerUtil;
 
 import jakarta.enterprise.context.Dependent;
@@ -45,7 +45,7 @@ public class AuditRestWebServiceImpl implements AuditRestWebService {
     private Logger log;
 
     @Inject
-    AuthUtil authUtil;
+    LockUtil lockUtil;
 
     @Override
     public Response processHealthRequest(HttpServletRequest request, HttpServletResponse response,
@@ -76,8 +76,8 @@ public class AuditRestWebServiceImpl implements AuditRestWebService {
         builder.cacheControl(ServerUtil.cacheControlWithNoStoreTransformAndPrivate());
         builder.header(ServerUtil.PRAGMA, ServerUtil.NO_CACHE);
 
-        JSONObject json = this.authUtil.getJSONObject(request);
-        Response response = this.authUtil.post(requestType, json.toString(), ContentType.APPLICATION_JSON);
+        JSONObject json = this.lockUtil.getJSONObject(request);
+        Response response = this.lockUtil.post(requestType, json.toString(), ContentType.APPLICATION_JSON);
         log.debug("response:{}", response);
 
         if (response != null) {

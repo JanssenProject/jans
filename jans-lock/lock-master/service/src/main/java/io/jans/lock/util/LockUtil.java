@@ -1,4 +1,4 @@
-package io.jans.lock.service.util;
+package io.jans.lock.util;
 
 import io.jans.as.client.TokenRequest;
 import io.jans.as.client.TokenResponse;
@@ -39,7 +39,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 
 @ApplicationScoped
-public class AuthUtil {
+public class LockUtil {
 
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String AUTHORIZATION = "Authorization";
