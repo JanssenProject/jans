@@ -2,6 +2,10 @@
    "baseEndpoint" : "https://%(hostname)s/%(base_endpoint)s/v1",
    "openIdIssuer":"https://%(hostname)s",
 
+   "openIdIssuer": "https://%(hostname)s",
+   "clientId": "%(lock_client_id)",
+   "tokenUrl": "%(jans_auth_token_endpoint)s",
+
    "tokenChannels":[
          "jans_token"
       ],
