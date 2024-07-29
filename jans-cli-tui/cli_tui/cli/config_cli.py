@@ -884,7 +884,7 @@ class JCA_CLI:
         mime_type = self.get_mime_for_endpoint(endpoint)
 
         if mime_type == 'multipart/form-data':
-            data_js = json.loads(data) if isinstance(data, str) else copy.deepcopy(data)
+            data_js = json.loads(data) if (isinstance(data, str) or isinstance(data, bytes)) else copy.deepcopy(data)
             schema_ref = endpoint.info['requestBody']['content'][mime_type]['schema']['$ref']
             schema = self.get_schema_from_reference(endpoint.info['__plugin__'], schema_ref)
             multi_part_fields = {}
