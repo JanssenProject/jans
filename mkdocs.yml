@@ -198,6 +198,7 @@ nav:
       - admin/auth-server/endpoints/README.md
       - OpenID Configuration: admin/auth-server/endpoints/configuration.md
       - Client Registration: admin/auth-server/endpoints/client-registration.md
+      - Client Authentication: admin/auth-server/endpoints/client-authn.md
       - Authorization: admin/auth-server/endpoints/authorization.md
       - Authorization Challenge: admin/auth-server/endpoints/authorization-challenge.md
       - Token: admin/auth-server/endpoints/token.md
