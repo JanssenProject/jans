@@ -4,6 +4,7 @@ import click
 
 from jans.pycloudlib.cli.encoding import decode_file
 from jans.pycloudlib.cli.encoding import decode_string
+from jans.pycloudlib.cli.spec import configuration_spec
 
 
 @click.group(
@@ -16,3 +17,4 @@ def cli() -> None:  # pragma: no cover
 
 cli.add_command(decode_file)
 cli.add_command(decode_string)
+cli.add_command(configuration_spec)
