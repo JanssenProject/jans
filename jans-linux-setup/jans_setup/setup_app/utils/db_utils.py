@@ -43,7 +43,7 @@ class DBUtils:
     cbm = None
     mariadb = False
     rdbm_json_types = MappingProxyType({ 'mysql': {'type': 'JSON'}, 'pgsql': {'type': 'JSONB'}, 'spanner': {'type': 'ARRAY<STRING(MAX)>'} })
-
+    jans_scopes = None
 
     def bind(self, use_ssl=True, force=False):
 
@@ -1251,6 +1251,24 @@ class DBUtils:
 
         return True, None
 
+
+    def get_scopes(self):
+        result = self.search(
+                    search_base='ou=scopes,o=jans',
+                    search_filter='(objectClass=jansScope)',
+                    search_scope=ldap3.LEVEL,
+                    fetchmany=True)
+        sopes = [ sope for _, sope in result ]
+
+        return sopes
+
+    def get_scope_by_jansid(self, jansid):
+        if not self.jans_scopes:
+            self.jans_scopes = self.get_scopes()
+
+        for jans_scope in self.jans_scopes:
+            if jans_scope['jansId'] == jansid:
+                return jans_scope
 
     def __del__(self):
         try:
