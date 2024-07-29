@@ -50,11 +50,11 @@ pub async fn authz(req: JsValue) -> JsValue {
 	let context = cedar_policy::Context::from_json_value(input.context, None).expect_throw("Unable to generate context Object");
 
 	// TODO: implement DSL to aggregate access for Client, Application and User
-	let request = cedar_policy::Request::new(Some(uids.user), Some(action), Some(resource), context, startup::SCHEMA.get()).unwrap_throw();
+	let user_response = cedar_policy::Request::new(Some(uids.user), Some(action), Some(resource), context, startup::SCHEMA.get()).unwrap_throw();
 
 	// create authorizer
 	let authorizer = cedar_policy::Authorizer::new();
-	let answer = authorizer.is_authorized(&request, policies, &entities);
+	let answer = authorizer.is_authorized(&user_response, policies, &entities);
 
 	to_value(&answer.decision()).unwrap_throw()
 }
