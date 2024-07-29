@@ -1,69 +1,84 @@
 ---
 tags:
-  - administration
-  - lock
-  - authorization / authz
-  - Cedar
-  - Cedarling
+ - administration
+ - lock
+ - authorization / authz
+ - Cedar
+ - Cedarling
 ---
 
 ## Janssen Lock Overview
 
-Janssen Lock (or just "Lock") provides a centralized control plane for domains to use [Cedar](https://www.cedarpolicy.com/en) to secure a network of distributed applications and audit the activity of both people and software. 
+Janssen Lock (or just "Lock") provides a centralized control plane for domains 
+to use [Cedar](https://www.cedarpolicy.com/en) to secure a network of 
+distributed applications and audit the activity of both people and software. 
 
-A Lock topology has three software components: (1) the [Cedarling](./cedarling.md)--a WebAssembly 
-("WASM") application that runs the [Amazon Rust Cedar Engine](https://github.com/cedar-policy/cedar) and 
-validates JWTs; (2) [Lock Master](./lock-master.md)--a Java Weld application that connects ephemeral 
-Cedarlings to the enterprise; (3) Jans Auth Server--which provides the OAuth and OpenID services. 
+A Lock topology has three software components: 
+
+1. [Cedarling](./cedarling.md): a WebAssembly 
+("WASM") application that runs the 
+[Amazon Rust Cedar Engine](https://github.com/cedar-policy/cedar) and 
+validates JWTs
+2. [Lock Master](./lock-master.md): a Java Weld application that connects 
+ephemeral Cedarlings to the enterprise
+3. Jans Auth Server: which provides the OAuth and OpenID services
 
 ![](../../assets/lock-wasm-master-OP.jpg)
 
-Lock is designed for domains that deploy a **network of Cedarlings**. Communication in this Lock topology 
-is bi-directional. Cedarlings can send information to the Lock Master, and the Lock Master can push 
-updates to the Cedarlings. Notifications from the Lock Master to the Cedarlings are connectionless--
+Lock is designed for domains that deploy a **network of Cedarlings**. 
+Communication in this Lock topology 
+is bi-directional. Cedarlings can send information to the Lock Master, and 
+the Lock Master can push 
+updates to the Cedarlings. Notifications from the Lock Master to the Cedarlings
+ are connectionless--
 a Cedarling subscibes to event notifications using 
 [Server Sent Events](https://html.spec.whatwg.org/multipage/server-sent-events.html#server-sent-events) 
-or "SSE". Requests from the Cedarling to the Lock Master are sent via HTTP Post to OAuth protected 
-endpoints. 
+or "SSE". Requests from the Cedarling to the Lock Master are sent via HTTP Post
+ to OAuth protected endpoints. 
 
 ## Authz Theoretical Background
 
-For years, security architects have conceptualized distributed authorization model in line with
+For years, security architects have conceptualized a distributed authorization 
+model in line with
 [RFC 2409](https://datatracker.ietf.org/doc/html/rfc2904#section-4.4)
 and [XACML](https://docs.oasis-open.org/xacml/3.0/xacml-3.0-core-spec-cos01-en.html),
 which describe several common roles:
 
-| Role	| Acronym | Description |
+| Role  | Acronym | Description |
 | ----- | :--: | ----------- |
-| Policy Decision Point	| PDP |  Service which evaluates access requests against authorization policies before issuing access decisions |
-| Policy Information Point	| PIP | The source of "data", e.g. about people, clients and resources |
-| Policy Enforcement Point	| PEP | Service, website or API which queries the PDP for authorization |
-| Policy Administration Point	| PAP |  Where admins manage the authorization infrastructure |
-| Policy Retrieval Point	| PRP | Repository where policies are stored |
+| Policy Decision Point | PDP |  Service which evaluates access requests against authorization policies before issuing access decisions |
+| Policy Information Point  | PIP | The source of "data", e.g. about people, clients, and resources |
+| Policy Enforcement Point  | PEP | Service, website, or API that queries the PDP for authorization |
+| Policy Administration Point | PAP |  Where admins manage the authorization infrastructure |
+| Policy Retrieval Point  | PRP | Repository where policies are stored |
 
 Jans Lock aligns with this model:
 
-| Role	| Lock | Description |
+| Role  | Lock | Description |
 | ----- | :--: | ----------- |
-| PDP	| Cedarling	| Evaluates policies versus input data |
-| PIP	| JWT tokens | Contain data to instantiate entities |
-| PEP	| Application | Must rely on Cedarling for decision |
-| PAP	| Jans Config API | Endpoints for Lock admin configuration |
-| PRP	| Lock Master | Endpoints to publish Policy Store and other PDP configuration |
+| PDP | Cedarling | Evaluates policies versus input data |
+| PIP | JWT tokens | Contain data to instantiate entities |
+| PEP | Application | Must rely on Cedarling for decision |
+| PAP | Jans Config API | Endpoints for Lock admin configuration |
+| PRP | Lock Master | Endpoints to publish Policy Store and other PDP configuration |
 
 ## Policy Store
 
-By convention the filename of the Cedarling Policy Store is `cedarling_store.json`. It is a JSON 
-file that contains all the data the Cedarling needs to evaluate policies and verify JWT tokens.
+By convention, the filename of the Cedarling Policy Store is 
+`cedarling_store.json`. It is a JSON 
+file that contains all the data Cedarling needs to evaluate policies and verify
+ JWT tokens.
 The Policy Store contains three things:
 
-1. [Cedar Schema](https://docs.cedarpolicy.com/schema/schema.html) - Cedar schema file (base64 encoded human readible format). Developers can extend the schema to align with the application model, especially for Resources. 
-2. [Cedar Policies](https://docs.cedarpolicy.com/policies/syntax-policy.html) - Cedar Policy Set file (base64 encoded human readible format).
-3. [Trusted Issuers](.) - List of which domains are authorized to issue tokens.
+1. [Cedar Schema](https://docs.cedarpolicy.com/schema/schema.html): Cedar 
+schema file (base64 encoded human readible format). Developers can extend the 
+schema to align with the application model, especially for Resources. 
+2. [Cedar Policies](https://docs.cedarpolicy.com/policies/syntax-policy.html): Cedar Policy Set file (base64 encoded human readible format).
+3. [Trusted Issuers](.): A list of domains are authorized to issue tokens.
 
 In JSON it looks like this: 
 
-```
+```json
 {
     "policies": "...",
     "schema": "...",
@@ -73,13 +88,15 @@ In JSON it looks like this:
 
 ### Trusted Issuer Schema
 
-At initialization, the Cedarling iterates the list of Trusted IDPs and fetches the current public
-keys. The trusted issuer schema provides guidance on how to uniquely identify a person, and how
+At initialization, the Cedarling iterates the list of Trusted IDPs and fetches 
+the current public
+keys. The trusted issuer schema provides guidance on how to uniquely identify a 
+person, and how
 to build the roles based on a user claim.
 
 Here is a non-normative example: 
 
-```
+```json
 [
 {"name": "Google", 
  "Description": "Consumer IDP", 
@@ -95,9 +112,10 @@ Here is a non-normative example:
 
 ### Entity Mapping 
 
-A Cedar Entity is an instance of the object defined in the Cedar Schema.  Without entities, there 
-is no data for the policies to evaluate. The Cedarling creates the Resource and tokens sent in the 
-authz request. 
+A Cedar Entity is an instance of the object defined in the Cedar Schema.  
+Without entities, there 
+is no data for the policies to evaluate. The Cedarling creates the Resource and
+ tokens sent in the authz request. 
 
 * **Client**: Created from access token 
 * **Application**: Created if input supplies an Application name
