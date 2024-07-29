@@ -29,6 +29,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @DataEntry(sortBy = { "displayName" })
 @ObjectClass(value = "jansTrustRelationship")
@@ -38,9 +39,11 @@ public class TrustRelationship extends Entry implements Serializable {
     private static final long serialVersionUID = 7912166229997681502L;
 
     @AttributeName(ignoreDuringUpdate = true)
+    @Schema(description = "Unique indetifier")
     private String inum;
 
     @AttributeName
+    @Schema(description = "")
     private String owner;
 
     @AttributeName(name = "name")
