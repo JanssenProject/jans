@@ -35,48 +35,66 @@ def test_base_configuration():
     assert config.set_all({"foo": "bar"}) is True
 
 
-@pytest.mark.parametrize("adapter, adapter_cls", [
+@pytest.mark.parametrize("adapter_name, adapter_cls", [
     ("consul", "ConsulConfig"),
     ("kubernetes", "KubernetesConfig"),
     ("google", "GoogleConfig"),
+    ("aws", "AwsConfig"),
 ])
-def test_config_manager(monkeypatch, adapter, adapter_cls):
-    from jans.pycloudlib.manager import ConfigManager
+def test_config_adapter_backend(monkeypatch, adapter_name, adapter_cls):
+    from jans.pycloudlib.manager import ConfigAdapter
 
-    monkeypatch.setenv("CN_CONFIG_ADAPTER", adapter)
-    manager = ConfigManager()
-    assert manager.adapter.__class__.__name__ == adapter_cls
+    monkeypatch.setenv("CN_CONFIG_ADAPTER", adapter_name)
+    adapter = ConfigAdapter()
+    assert adapter.backend.__class__.__name__ == adapter_cls
 
 
-def test_config_manager_invalid_adapter(monkeypatch):
-    from jans.pycloudlib.manager import ConfigManager
+def test_config_adapter_invalid_backend(monkeypatch):
+    from jans.pycloudlib.manager import ConfigAdapter
 
     monkeypatch.setenv("CN_CONFIG_ADAPTER", "random")
     with pytest.raises(ValueError) as exc:
-        _ = ConfigManager().get("config1")
+        _ = ConfigAdapter().get("config1")
     assert "Unsupported config adapter" in str(exc.value)
 
 
-@pytest.mark.parametrize("adapter, adapter_cls", [
+def test_config_manager_adapter():
+    from jans.pycloudlib.manager import ConfigManager
+    from jans.pycloudlib.manager import ConfigAdapter
+
+    config_manager = ConfigManager()
+    assert isinstance(config_manager.adapter, ConfigAdapter)
+
+
+@pytest.mark.parametrize("adapter_name, adapter_cls", [
     ("vault", "VaultSecret"),
     ("kubernetes", "KubernetesSecret"),
-    ("google", "GoogleSecret")
+    ("google", "GoogleSecret"),
+    ("aws", "AwsSecret"),
 ])
-def test_secret_manager(monkeypatch, adapter, adapter_cls):
-    from jans.pycloudlib.manager import SecretManager
+def test_secret_adapter_backend(monkeypatch, adapter_name, adapter_cls):
+    from jans.pycloudlib.manager import SecretAdapter
 
-    monkeypatch.setenv("CN_SECRET_ADAPTER", adapter)
-    manager = SecretManager()
-    assert manager.adapter.__class__.__name__ == adapter_cls
+    monkeypatch.setenv("CN_SECRET_ADAPTER", adapter_name)
+    adapter = SecretAdapter()
+    assert adapter.backend.__class__.__name__ == adapter_cls
 
 
-def test_secret_manager_invalid_adapter(monkeypatch):
-    from jans.pycloudlib.manager import SecretManager
+def test_secret_adapter_invalid_backend(monkeypatch):
+    from jans.pycloudlib.manager import SecretAdapter
 
     monkeypatch.setenv("CN_SECRET_ADAPTER", "random")
     with pytest.raises(ValueError) as exc:
-        _ = SecretManager().get("secret1")
+        _ = SecretAdapter().get("secret1")
     assert "Unsupported secret adapter" in str(exc.value)
+
+
+def test_secret_manager_adapter():
+    from jans.pycloudlib.manager import SecretManager
+    from jans.pycloudlib.manager import SecretAdapter
+
+    secret_manager = SecretManager()
+    assert isinstance(secret_manager.adapter, SecretAdapter)
 
 
 @pytest.mark.parametrize("key, expected, decode, binary_mode", [
