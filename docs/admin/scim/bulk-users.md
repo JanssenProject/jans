@@ -70,10 +70,9 @@ An operation is a JSON document with the following:
     }
   ]
 }
-}
 ```
 
-The above paylod illustrates how to insert three users with different details each.
+The above payload illustrates how to insert three users with different details each.
 
 ## Bulk response
 
