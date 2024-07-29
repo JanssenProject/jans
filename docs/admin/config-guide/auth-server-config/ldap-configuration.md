@@ -80,7 +80,7 @@ To find the existing ldap configurations, let's run the following command:
 /opt/jans/jans-cli/config-cli.py --operation-id get-config-database-ldap
 ```
 
-```json title="Sample Output"
+```json title="Sample Output" linenums="1"
 [
   {
     "configId": "auth_ldap_server",
@@ -108,82 +108,30 @@ To find the existing ldap configurations, let's run the following command:
 
 ### Adds a new LDAP Configuration
 
-At first, we have checked the existing ldap database configurations the janssen server have.
-Indeed we can create a new ldap configuration as well. 
 
+To add a new ldap configuration, we can use `post-config-database-ldap`
+operation id. As shown in the [output](#using-command-line) for
+`--info` command, the `post-config-database-ldap` operation
+requires data to be sent according to `GluuLdapConfiguration` schema.
 
-```text
-Operation ID: post-config-database-ldap
-  Description: Adds a new LDAP configuration
-  Schema: GluuLdapConfiguration
-```
-
-
-Let's get the schema file and update it to push into the server.
+To see the schema, use the command below:
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --schema GluuLdapConfiguration > /tmp/ldap.json
-```
-The `post-config-database-ldap` operation uses the `GluuLdapConfiguration` schema to
-describe the configuration change.
-
-For your information, you can obtain the format of the `GluuLdapConfiguration`
-schema by running the aforementioned command without a file.
-
-```text title="Schema Format"
-configId           string
-bindDN             string
-bindPassword       string
-servers            array of string
-maxConnections     integer
-                   format: int32
-useSSL             boolean
-baseDNs            array of string
-primaryKey         string
-localPrimaryKey    string
-useAnonymousBind   boolean
-enabled            boolean
-version            integer
-                   format: int32
-level              integer
-                   format: int32
+/opt/jans/jans-cli/config-cli.py --schema GluuLdapConfiguration
 ```
 
-An example of the schema is provided in the ldap.json file.
-
-you can also use the following command for `GluuLdapConfiguration` schema example.
+The Janssen Server also provides an example of data that adheres
+to the above schema. To fetch the example, use the command below.
 
 ```bash title="Command"
 /opt/jans/jans-cli/config-cli.py --schema-sample GluuLdapConfiguration
 ```
 
-```json title="Schema Example"
-{
-  "configId": "string",
-  "bindDN": "string",
-  "bindPassword": "string",
-  "servers": [
-    "string"
-  ],
-  "maxConnections": 117,
-  "useSSL": false,
-  "baseDNs": [
-    "string"
-  ],
-  "primaryKey": "string",
-  "localPrimaryKey": "string",
-  "useAnonymousBind": false,
-  "enabled": false,
-  "version": 116,
-  "level": 179
-}
+Using the schema and the example above, we have added below data to the
+file `/tmp/ldap.json`.
 
-```
 
-You need to modify `ldap.json` file with valid information. In our case,
-I have modified as below for testing only:
-
-```json title="Input"
+```json title="Input" linenums="1"
 {
   "configId": "test_ldap",
   "bindDN": "cn=directory manager",
@@ -202,36 +150,12 @@ I have modified as below for testing only:
   "level": 0
 }
 ```
-
-Now, lets post this configuration into the database.
+Now let's post this ldap to the Janssen Server to be added to the existing set:
 
 ```bash title="Command"
 /opt/jans/jans-cli/config-cli.py --operation-id post-config-database-ldap\
  --data /tmp/ldap.json
 ```
-
-```json title="Sample Output"
-{
-  "configId": "test_ldap",
-  "bindDN": "cn=directory manager",
-  "bindPassword": "m+OTwmlCEho=",
-  "servers": [
-    "localhost:1636"
-  ],
-  "maxConnections": 1000,
-  "useSSL": true,
-  "baseDNs": [
-    "ou=people,o=jans"
-  ],
-  "primaryKey": "uid",
-  "localPrimaryKey": "uid",
-  "useAnonymousBind": false,
-  "enabled": false,
-  "version": 0,
-  "level": 0
-}
-```
-
 
 Please note that `configId` should be a unique identifier name for each configuration. 
 Otherwise you will get error while going to post duplicate configuration into the server. 
@@ -240,22 +164,20 @@ In that case, you can go through the next option to replace instead of adding a 
 
 ### Updating LDAP Database Configurations
 
-With this operation, we can update any ldap database configuration.
+To update ldap database configuration, we can use `put-config-database-ldap`
+operation id. As shown in the [output](#using-command-line) for `--info` command,
+the `put-config-database-ldap` operation requires data to be sent according to
+`GluuLdapConfiguration` schema.
 
-```text
-Operation ID: put-config-database-ldap
-  Description: Updates LDAP configuration
-  Schema: GluuLdapConfiguration
-```
-
-For example, let say we are going to change to `maxConnections` for `1000` to `100` in the above `test_ldap` configuration.
-So lets modify the `/tmp/ldap.json` file as below:
+For example, let say we are going to change to `maxConnections` for `1000` to `100`
+in the above `test_ldap` configuration. So lets modify the `/tmp/ldap.json` file as below:
 
 ```bash title="Comaand"
 /opt/jans/jans-cli/config-cli.py --operation-id put-config-database-ldap \
 --data /tmp/ldap.json
 ```
-```json title="Sample Command"
+
+```json title="Sample Output" linenums="1"
 {
   "configId": "test_ldap",
   "bindDN": "cn=directory manager",
@@ -290,7 +212,7 @@ with this operation by calling its name id.
 Here name is the `configId` of the configuration. If we run this command, it returns the 
 configuration details matched with configId.
 
-```json title="Sample Output"
+```json title="Sample Output" linenums="1"
 {
   "configId": "test_ldap",
   "bindDN": "cn=directory manager",
@@ -327,8 +249,9 @@ Now you check with `get-config-database-ldap` operation
 
 ### Patch LDAP Database Configurations
 
-If required, We can patch single information of a ldap database configuration by using its name id. 
-In that case, we have to make an array of operations in schema file. So, let's get the schema file first.
+If required, We can patch single information of a ldap database configuration
+by using its name id. In that case, we have to make an array of operations
+in schema file. So, let's get the schema file first.
 
 ```text
 Operation ID: patch-config-database-ldap-by-name
@@ -368,7 +291,7 @@ To patch data, the command looks like for this:
 
 It will update the configuration and will show the updated result as below display.
 
-```json title="Sample Output"
+```json title="Sample Output" linenums="1"
 {
   "configId": "test_ldap",
   "bindDN": "cn=directory manager",
@@ -389,7 +312,6 @@ It will update the configuration and will show the updated result as below displ
   "level": 100
 }
 ```
-
 ## Using Configuration REST API
 
 Janssen Server Configuration REST API exposes relevant endpoints for managing
