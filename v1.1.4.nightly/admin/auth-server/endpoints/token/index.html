@@ -3472,6 +3472,8 @@
         
           
         
+          
+        
       
       
         
@@ -3516,6 +3518,20 @@
     <li class="md-nav__item">
       <a href="../client-registration/" class="md-nav__link">
         Client Registration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../client-authn.md" class="md-nav__link">
+        Client Authentication
       </a>
     </li>
   
@@ -7146,16 +7162,6 @@
         
           
         
-          
-        
-          
-        
-          
-        
-          
-        
-          
-        
       
       
         
@@ -7176,76 +7182,6 @@
         </label>
         <ul class="md-nav__list" data-md-scrollfix>
           
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../lock/lock-installation/" class="md-nav__link">
-        Lock Installation
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../lock/lock-auth-server-config/" class="md-nav__link">
-        Auth Server Configuration
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../lock/lock-client-config/" class="md-nav__link">
-        Lock Client Configuration
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../lock/lock-pdp-plugin/" class="md-nav__link">
-        Implement Lock PDP Plugin
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../lock/lock-opa/" class="md-nav__link">
-        Policy Store Integration
-      </a>
-    </li>
-  
-
             
           
             
@@ -8753,7 +8689,7 @@ sample response. Actual response can greatly vary in its contents based on reque
   }
 </code></pre></div>
 <p>More information about request and response of the token endpoint can be found in
-the OpenAPI specification of <a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/v1.1.4.nightly/jans-auth-server/docs/swagger.yaml#/Token/post-token">jans-auth-server module</a>.</p>
+the OpenAPI specification of <a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Token/post-token">jans-auth-server module</a>.</p>
 <h2 id="configuration-properties">Configuration Properties<a class="headerlink" href="#configuration-properties" title="Permanent link">#</a></h2>
 <p>Token endpoint and tokens issued by token endpoint can be further configured using Janssen Server configuration properties listed below. When using
 <a href="../../../config-guide/config-tools/jans-tui/">Janssen Text-based UI(TUI)</a> to configure the properties,
@@ -8796,6 +8732,7 @@ authentication method listed below:</p>
 </ul>
 <p>Refer to <a href="https://openid.net/specs/openid-connect-core-1_0.html#ClientAuthentication">Client Authentication</a> section of OpenID
 Connect core specification for more details on these authentication methods.</p>
+<p>AS provides ability to customer Client Authentication behavior via <a href="../../../developer/scripts/client-authn/">Client Authentication custom script</a></p>
 <p>Client can specify the default authentication method. To set default authentication method using
 <a href="../../../config-guide/config-tools/jans-tui/">Janssen Text-based UI(TUI)</a>,
 navigate via <code>Auth Server</code>-&gt;<code>Clients</code>-&gt;<code>Add Client</code>-&gt;<code>Basic</code>-&gt; <code>Authn Method Token Endpoint</code>.</p>
@@ -8834,7 +8771,7 @@ Following interception scripts are relevant to token endpoint:</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-03-29T12:27:52+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-03-29</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-07-29T08:51:30+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-07-29</span>
       
         <br>
         Created:

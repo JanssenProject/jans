@@ -3464,6 +3464,8 @@
         
           
         
+          
+        
       
       
         
@@ -3508,6 +3510,20 @@
     <li class="md-nav__item">
       <a href="../../../admin/auth-server/endpoints/client-registration/" class="md-nav__link">
         Client Registration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../admin/auth-server/endpoints/client-authn.md" class="md-nav__link">
+        Client Authentication
       </a>
     </li>
   
@@ -7076,16 +7092,6 @@
         
           
         
-          
-        
-          
-        
-          
-        
-          
-        
-          
-        
       
       
         
@@ -7106,76 +7112,6 @@
         </label>
         <ul class="md-nav__list" data-md-scrollfix>
           
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../admin/lock/lock-installation/" class="md-nav__link">
-        Lock Installation
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../admin/lock/lock-auth-server-config/" class="md-nav__link">
-        Auth Server Configuration
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../admin/lock/lock-client-config/" class="md-nav__link">
-        Lock Client Configuration
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../admin/lock/lock-pdp-plugin/" class="md-nav__link">
-        Implement Lock PDP Plugin
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../admin/lock/lock-opa/" class="md-nav__link">
-        Policy Store Integration
-      </a>
-    </li>
-  
-
             
           
             
@@ -8661,7 +8597,7 @@
   <h1>Index</h1>
 
 <h2 id="integrating-duos-universal-prompt-as-an-authentication-method-in-janssen-server">Integrating DUO's Universal Prompt as an authentication method in Janssen server<a class="headerlink" href="#integrating-duos-universal-prompt-as-an-authentication-method-in-janssen-server" title="Permanent link">#</a></h2>
-<p><a href="https://duosecurity.com">Duo Security</a> is a SaaS authentication provider. This document will explain how to use Janssen's <a href="https://github.com/JanssenProject/jans/blob/v1.1.4.nightly/docs/script-catalog/person_authentication/duo-external-authenticator/DuoExternalAuthenticator.py">Duo interception script</a> to configure the Janssen Server for a two-step authentication process with username and password as the first step, and Duo as the second step. The script invokes the Universal Prompt which is a redesign of Duo’s traditional authentication prompt. </p>
+<p><a href="https://duosecurity.com">Duo Security</a> is a SaaS authentication provider. This document will explain how to use Janssen's <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/script-catalog/person_authentication/duo-external-authenticator/DuoExternalAuthenticator.py">Duo interception script</a> to configure the Janssen Server for a two-step authentication process with username and password as the first step, and Duo as the second step. The script invokes the Universal Prompt which is a redesign of Duo’s traditional authentication prompt. </p>
 <h2 id="authentication-flow">Authentication flow<a class="headerlink" href="#authentication-flow" title="Permanent link">#</a></h2>
 <pre class="mermaid"><code>sequenceDiagram
 title Integrating DUO's Universal Prompt as an authentication method in Janssen server
@@ -8685,7 +8621,7 @@ end
 Jans AS-&gt;&gt;RP: 10. write Jans session cookie</code></pre>
 <h2 id="administrator-prerequisites">Administrator prerequisites<a class="headerlink" href="#administrator-prerequisites" title="Permanent link">#</a></h2>
 <ul>
-<li><a href="https://github.com/JanssenProject/jans/blob/v1.1.4.nightly/docs/script-catalog/person_authentication/duo-external-authenticator/DuoExternalAuthenticator.py">Duo interception script</a> (included in the default Janssen Server distribution);</li>
+<li><a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/script-catalog/person_authentication/duo-external-authenticator/DuoExternalAuthenticator.py">Duo interception script</a> (included in the default Janssen Server distribution);</li>
 <li>An account with <a href="https://duo.com/">Duo Security</a>.   </li>
 </ul>
 <h2 id="user-prerequisites">User prerequisites<a class="headerlink" href="#user-prerequisites" title="Permanent link">#</a></h2>
@@ -8800,7 +8736,7 @@ Jans AS-&gt;&gt;RP: 10. write Jans session cookie</code></pre>
 <p>To make sure Duo has been enabled successfully, you can check your Janssen Server's OpenID Connect configuration by navigating to the following URL: <code>https://&lt;hostname&gt;/.well-known/openid-configuration</code>. Find <code>"acr_values_supported":</code> and you should see <code>"duo"</code>. </p>
 </div>
 <h2 id="make-duo-the-default-authentication-mechanism">Make Duo the Default Authentication Mechanism<a class="headerlink" href="#make-duo-the-default-authentication-mechanism" title="Permanent link">#</a></h2>
-<p>For CURL commands, use this <a href="https://github.com/JanssenProject/jans/blob/v1.1.4.nightly/docs/admin/config-guide/curl.md#2-enable-an-authentication-script">link</a> as a reference.</p>
+<p>For CURL commands, use this <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/admin/config-guide/curl.md#2-enable-an-authentication-script">link</a> as a reference.</p>
 <p>Steps:
 1. Create a file say <code>duo-auth-default.json</code> with the following contents
 <div class="highlight"><pre><span></span><code>{

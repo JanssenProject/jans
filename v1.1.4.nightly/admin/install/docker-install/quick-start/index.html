@@ -3544,6 +3544,8 @@
         
           
         
+          
+        
       
       
         
@@ -3588,6 +3590,20 @@
     <li class="md-nav__item">
       <a href="../../../auth-server/endpoints/client-registration/" class="md-nav__link">
         Client Registration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../auth-server/endpoints/client-authn.md" class="md-nav__link">
+        Client Authentication
       </a>
     </li>
   
@@ -7156,16 +7172,6 @@
         
           
         
-          
-        
-          
-        
-          
-        
-          
-        
-          
-        
       
       
         
@@ -7186,76 +7192,6 @@
         </label>
         <ul class="md-nav__list" data-md-scrollfix>
           
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../lock/lock-installation/" class="md-nav__link">
-        Lock Installation
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../lock/lock-auth-server-config/" class="md-nav__link">
-        Auth Server Configuration
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../lock/lock-client-config/" class="md-nav__link">
-        Lock Client Configuration
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../lock/lock-pdp-plugin/" class="md-nav__link">
-        Implement Lock PDP Plugin
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../lock/lock-opa/" class="md-nav__link">
-        Policy Store Integration
-      </a>
-    </li>
-  
-
             
           
             
@@ -8742,7 +8678,7 @@
 <p>Installation depends on a <a href="https://github.com/JanssenProject/jans/tree/main/docker-jans-monolith#environment-variables">set of environment variables</a>.
 These environment variables can be set to customize installation as per the need. If not set, the installer uses default values.</p>
 <p>Run this command to start the installation:</p>
-<div class="highlight"><pre><span></span><code>wget https://raw.githubusercontent.com/JanssenProject/jans/v1.1.4.nightly/automation/startjanssenmonolithdemo.sh <span class="o">&amp;&amp;</span> chmod u+x startjanssenmonolithdemo.sh <span class="o">&amp;&amp;</span> sudo bash startjanssenmonolithdemo.sh demoexample.jans.io MYSQL <span class="s2">&quot;&quot;</span> main
+<div class="highlight"><pre><span></span><code>wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/startjanssenmonolithdemo.sh <span class="o">&amp;&amp;</span> chmod u+x startjanssenmonolithdemo.sh <span class="o">&amp;&amp;</span> sudo bash startjanssenmonolithdemo.sh demoexample.jans.io MYSQL <span class="s2">&quot;&quot;</span> main
 </code></pre></div>
 <p>Console messages like below confirms the successful installation:</p>
 <div class="highlight"><pre><span></span><code>[+] Running 3/3
