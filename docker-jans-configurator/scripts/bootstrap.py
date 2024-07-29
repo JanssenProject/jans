@@ -38,8 +38,8 @@ DB_DIR = os.environ.get("CN_CONFIGURATOR_DB_DIR", f"{CONFIGURATOR_DIR}/db")
 CERTS_DIR = os.environ.get("CN_CONFIGURATOR_CERTS_DIR", f"{CONFIGURATOR_DIR}/certs")
 JAVALIBS_DIR = f"{CONFIGURATOR_DIR}/javalibs"
 
-DEFAULT_CONFIGURATION_FILE = os.environ.get("CN_CONFIGURATOR_CONFIGURATION_FILE", f"{DB_DIR}/configuration.json")
-DEFAULT_DUMP_FILE = os.environ.get("CN_CONFIGURATOR_DUMP_FILE", f"{DB_DIR}/configuration.out.json")
+DEFAULT_CONFIGURATION_FILE = os.environ.get("CN_CONFIGURATOR_CONFIGURATION_FILE", "/etc/jans/conf/configuration.json")
+DEFAULT_DUMP_FILE = os.environ.get("CN_CONFIGURATOR_DUMP_FILE", "/etc/jans/conf/configuration.dump.json")
 
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("configurator")
@@ -176,8 +176,8 @@ class CtxGenerator:
         return self.ctx_manager.get_secret(key, default)
 
     def transform_base_ctx(self):
-        if self.secret_params["encoded_salt"]:
-            self.set_secret("encoded_salt", self.secret_params["encoded_salt"])
+        if self.secret_params.get("encoded_salt"):
+            self.set_secret("encoded_salt", self.secret_params.get("encoded_salt"))
         else:
             self.set_secret("encoded_salt", partial(get_random_chars, 24))
 
@@ -198,11 +198,11 @@ class CtxGenerator:
 
         self.set_secret(
             "encoded_ox_ldap_pw",
-            partial(encode_text, self.secret_params["ldap_password"], encoded_salt),
+            partial(encode_text, self.secret_params.get("ldap_password", ""), encoded_salt),
         )
 
     def transform_redis_ctx(self):
-        self.set_secret("redis_password", self.secret_params["redis_password"])
+        self.set_secret("redis_password", self.secret_params.get("redis_password", ""))
 
     def transform_auth_ctx(self):
         encoded_salt = self.get_secret("encoded_salt")
@@ -342,11 +342,11 @@ class CtxGenerator:
         # TODO: move this to persistence-loader?
         self.set_config("couchbaseTrustStoreFn", "/etc/certs/couchbase.pkcs12")
         self.set_secret("couchbase_shib_user_password", get_random_chars)
-        self.set_secret("couchbase_password", self.secret_params["couchbase_password"])
-        self.set_secret("couchbase_superuser_password", self.secret_params["couchbase_superuser_password"])
+        self.set_secret("couchbase_password", self.secret_params.get("couchbase_password", ""))
+        self.set_secret("couchbase_superuser_password", self.secret_params.get("couchbase_superuser_password", ""))
 
     def transform_sql_ctx(self):
-        self.set_secret("sql_password", self.secret_params["sql_password"])
+        self.set_secret("sql_password", self.secret_params.get("sql_password", ""))
 
     def transform_misc_ctx(self):
         # pre-populate the rest of configmaps
