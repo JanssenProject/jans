@@ -4,9 +4,9 @@
   "tokenChannels": [
     "jans_token"
   ],
-  "clientId": "${jca_client_id}",
-  "clientPassword": "${jca_client_encoded_pw}",
-  "tokenUrl": "${tokenEndpoint}",
+  "clientId": "%(lock_client_id)s",
+  "clientPassword": "%(lock_client_encoded_pw)s",
+  "tokenUrl": "%(tokenEndpoint)s",
   "endpointDetails": {
     "jans-config-api/lock/audit/telemetry": [
       "https://jans.io/oauth/lock/telemetry.readonly",
