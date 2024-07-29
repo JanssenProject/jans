@@ -7,6 +7,8 @@ use crate::crypto::TRUST_STORE;
 
 #[derive(serde::Deserialize, Debug)]
 pub struct AuthzInput {
+	pub statement: Option<String>,
+
 	// generates entities
 	pub id_token: String,
 	pub userinfo_token: String,

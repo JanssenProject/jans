@@ -5,6 +5,7 @@ use wasm_bindgen::prelude::*;
 
 use crate::*;
 
+pub mod statement;
 pub mod token2entity;
 pub mod types;
 
