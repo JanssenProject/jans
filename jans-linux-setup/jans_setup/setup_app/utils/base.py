@@ -365,7 +365,9 @@ def download(url, dst, verbose=False, headers=None):
     urllib.request.install_opener(None)
 
 def extract_file(zip_file, source, target, ren=False):
+    fn = None
     zip_obj = zipfile.ZipFile(zip_file, "r")
+
     for member in zip_obj.infolist():
         if not member.is_dir() and member.filename.endswith(source):
             if ren:
@@ -377,8 +379,12 @@ def extract_file(zip_file, source, target, ren=False):
                     target_p.parent.mkdir(parents=True)
             logIt(f"Extracting {source} from {zip_file} to {target}")
             target_p.write_bytes(zip_obj.read(member))
+            fn = target_p.as_posix()
             break
+
     zip_obj.close()
+
+    return fn
 
 
 def extract_from_zip(zip_file, sub_dir, target_dir, remove_target_dir=False):
