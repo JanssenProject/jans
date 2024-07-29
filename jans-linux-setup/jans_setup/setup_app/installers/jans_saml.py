@@ -147,8 +147,10 @@ class JansSamlInstaller(JettyInstaller):
                         grant_types=client_info['grant_types'],
                         authorization_methods=client_info['authorization_methods'],
                         application_type=client_info['application_type'],
-                        response_types=client_info['response_types']
+                        response_types=client_info['response_types'],
+                        trusted_client=client_info['trusted_client']
                         )
+
         self.dbUtils.import_ldif(client_ldif_fns)
 
     def install_keycloak(self):
