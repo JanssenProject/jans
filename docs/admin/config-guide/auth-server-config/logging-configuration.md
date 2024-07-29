@@ -49,9 +49,9 @@ corresponding modules to update logging related properties. For instance:
 
 ##  Using Command Line
 
-In the Janssen Server, you can deploy and customize the Logging Configuration using the
-command line. To get the details of Janssen command line operations relevant to
-Logging configuration, you can check the operations under 
+In the Janssen Server, you can deploy and customize the Logging Configuration 
+using the command line. To get the details of Janssen command line operations 
+relevant to Logging configuration, you can check the operations under 
 `ConfigurationLogging` task using the
 command below:
 
@@ -93,89 +93,29 @@ To get sample schema type /opt/jans/jans-cli/config-cli.py --schema <schema>, fo
 
 ### Update Logging Configuration
 
-To update logging configuration, get the schema first:
-```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --schema Logging > /tmp/log-config.json
-```
-The schema can now be found in the log-config.json file.
+To update the configuration follow the steps below.
 
-For your information, you can obtain the format of the `Logging`
-schema by running the aforementioned command without a file.
-
-```text title="Schema Format"
-loggingLevel                  string
-loggingLayout                 string
-httpLoggingEnabled            boolean
-disableJdkLogger              boolean
-enabledOAuthAuditLogging      boolean
-externalLoggerConfiguration   string
-httpLoggingExcludePaths       array of string
-                              uniqueItems: True
-```
-
-you can also use the following command for `Logging` schema example.
-
-```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --schema-sample Logging
-```
-```text title="Schema Example"
-{
-  "loggingLevel": "string",
-  "loggingLayout": "string",
-  "httpLoggingEnabled": true,
-  "disableJdkLogger": false,
-  "enabledOAuthAuditLogging": true,
-  "externalLoggerConfiguration": "string",
-  "httpLoggingExcludePaths": [
-    "string"
-  ]
-}
-```
-
-let's update the schema:
-```bash title="Command"
-nano /tmp/log-config.json
-```
-
-As seen below, I have added `loggingLevel` for the value `INFO` 
-and `enabledOAuditLogging` for the value `false`.
-
-```json title="Input"
-{
-  "loggingLevel": "INFO",
-  "loggingLayout": "string",
-  "httpLoggingEnabled": true,
-  "disableJdkLogger": true,
-  "enabledOAuthAuditLogging": false,
-  "externalLoggerConfiguration": "string",
-  "httpLoggingExcludePaths": [
-    "string"
-  ]
-}
-```
-
-Let's do the operation:
-
-```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --operation-id put-config-logging \
- --data /tmp/log-config.json
-```
-
-You will get the updated result as below:
-
-```json  title="Sample Output" linenums="1"
-{
-  "loggingLevel": "INFO",
-  "loggingLayout": "string",
-  "httpLoggingEnabled": true,
-  "disableJdkLogger": true,
-  "enabledOAuthAuditLogging": false,
-  "externalLoggerConfiguration": "string",
-  "httpLoggingExcludePaths": [
-    "string"
-  ]
-}
-```
+1. Get the current logging and store it into a file for editing
+   The following command will retrieve the current logging in the schema file.
+   ```bash title="Command"
+   /opt/jans/jans-cli/config-cli.py -no-color --operation-id get-config-logging \
+   > /tmp/log-config.json
+   ```
+2. Edit and update the desired configuration values in the file while keeping other
+      properties and values unchanged. Updates must adhere to the
+      `Logging` schema as mentioned [here](#using-command-line).
+      The schema details can be retrieved using the command below.
+      The schema defines what values and datatypes are acceptable for each property value.
+   ```bash title="Command"
+   /opt/jans/jans-cli/config-cli.py --schema Logging 
+   ```
+3. Use the updated file to send the update to the Janssen Server using the command below
+   ```bash title="Command"
+   /opt/jans/jans-cli/config-cli.py --operation-id put-config-logging \
+   --data /tmp/log-config.json
+   ```
+   Upon successful execution of the update, the Janssen Server responds with 
+   updated configuration.
 
 ## Using-text-based-ui
 
