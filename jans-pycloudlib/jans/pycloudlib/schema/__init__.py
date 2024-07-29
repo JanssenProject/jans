@@ -571,7 +571,7 @@ class SecretSchema(Schema):
     )
 
     @post_load
-    def transform_b64(self, in_data, **kwargs):
+    def transform_data(self, in_data, **kwargs):
         # list of attrs that maybe base64 string and need to be decoded
         for attr in [
             "google_credentials",
@@ -581,7 +581,7 @@ class SecretSchema(Schema):
         ]:
             with contextlib.suppress(UnicodeDecodeError, binascii.Error):
                 in_data[attr] = b64decode(in_data.get(attr, "")).decode()
-        return in_data
+        return {k: v for k, v in in_data.items() if v}
 
     @validates("encoded_salt")
     def validate_salt(self, value):
@@ -943,7 +943,7 @@ class ConfigmapSchema(Schema):
     def transform_data(self, in_data, **kwargs):
         in_data["auth_sig_keys"] = transform_auth_keys(in_data["auth_sig_keys"], AUTH_SIG_KEYS)
         in_data["auth_enc_keys"] = transform_auth_keys(in_data["auth_enc_keys"], AUTH_ENC_KEYS)
-        return in_data
+        return {k: v for k, v in in_data.items() if v}
 
     @validates("optional_scopes")
     def validate_optional_scopes(self, value):
