@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#cedarling-authorization" class="md-skip">
+        <a href="#what-is-cedar" class="md-skip">
           Skip to content
         </a>
       
@@ -7098,16 +7098,6 @@
         
           
         
-          
-        
-          
-        
-          
-        
-          
-        
-          
-        
       
       
         
@@ -7128,76 +7118,6 @@
         </label>
         <ul class="md-nav__list" data-md-scrollfix>
           
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../lock-installation/" class="md-nav__link">
-        Lock Installation
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../lock-auth-server-config/" class="md-nav__link">
-        Auth Server Configuration
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../lock-client-config/" class="md-nav__link">
-        Lock Client Configuration
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../lock-pdp-plugin/" class="md-nav__link">
-        Implement Lock PDP Plugin
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../lock-opa/" class="md-nav__link">
-        Policy Store Integration
-      </a>
-    </li>
-  
-
             
           
             
@@ -7250,8 +7170,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#cedarling-authorization" class="md-nav__link">
-    Cedarling Authorization
+  <a href="#what-is-cedar" class="md-nav__link">
+    What is Cedar
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-the-cedarling" class="md-nav__link">
+    What is the Cedarling
   </a>
   
 </li>
@@ -7259,20 +7186,6 @@
         <li class="md-nav__item">
   <a href="#cedarling-token-validation" class="md-nav__link">
     Cedarling Token Validation
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#policy-authoring" class="md-nav__link">
-    Policy Authoring
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#testing-the-cedarling" class="md-nav__link">
-    Testing the Cedarling
   </a>
   
 </li>
@@ -7288,6 +7201,13 @@
           <li class="md-nav__item">
   <a href="#trusted-issuer-schema" class="md-nav__link">
     Trusted Issuer Schema
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#policy-and-schema-authoring" class="md-nav__link">
+    Policy and Schema Authoring
   </a>
   
 </li>
@@ -8667,8 +8587,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#cedarling-authorization" class="md-nav__link">
-    Cedarling Authorization
+  <a href="#what-is-cedar" class="md-nav__link">
+    What is Cedar
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-the-cedarling" class="md-nav__link">
+    What is the Cedarling
   </a>
   
 </li>
@@ -8676,20 +8603,6 @@
         <li class="md-nav__item">
   <a href="#cedarling-token-validation" class="md-nav__link">
     Cedarling Token Validation
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#policy-authoring" class="md-nav__link">
-    Policy Authoring
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#testing-the-cedarling" class="md-nav__link">
-    Testing the Cedarling
   </a>
   
 </li>
@@ -8705,6 +8618,13 @@
           <li class="md-nav__item">
   <a href="#trusted-issuer-schema" class="md-nav__link">
     Trusted Issuer Schema
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#policy-and-schema-authoring" class="md-nav__link">
+    Policy and Schema Authoring
   </a>
   
 </li>
@@ -8775,49 +8695,61 @@
 
   <h1>Authorization Using Cedarling</h1>
 
-<h2 id="cedarling-authorization">Cedarling Authorization<a class="headerlink" href="#cedarling-authorization" title="Permanent link">#</a></h2>
+<h2 id="what-is-cedar">What is Cedar<a class="headerlink" href="#what-is-cedar" title="Permanent link">#</a></h2>
+<p><a href="https://www.cedarpolicy.com/en">Cedar</a> was invented by Amazon for their 
+<a href="https://aws.amazon.com/verified-permissions/">Verified Permission</a> service. 
+Cedar enables developers to create complex, contextual policies without cluttering application code 
+with lots of <code>if</code> - <code>then</code> statements. Externalizing policies makes it easier to audit the security 
+controls of an application.  Cedar is a deterministic policy engine--if the schema
+and policies are validated, the engine will always return <code>permit</code> or <code>forbid</code>.</p>
+<p>Cedar uses the <strong>PARC</strong> syntax: <strong>P</strong>rincipal, <strong>A</strong>ction, <strong>R</strong>esource, <strong>C</strong>ontext. For example, 
+you may have a policy that says <em>Admins</em> can <em>write</em> to the <em>config</em> folder. In this example, the 
+<em>Admin</em> Role is the Principal, <em>write</em> is the Action, and the <em>config</em> folder is the Resource. The 
+Context is used to specify information about the enivironment, like the time of day or network address. 
+Like RBAC, Cedar is deterministic. But it's also less reductive then RBAC, and in fact enables 
+security admins to express quite powerful policies.</p>
+<p><img alt="" src="../../../assets/lock-cedarling-diagram-3.jpg" /></p>
+<h2 id="what-is-the-cedarling">What is the Cedarling<a class="headerlink" href="#what-is-the-cedarling" title="Permanent link">#</a></h2>
 <p>The Cedarling, as its name suggests, enables you to define the security rules for your application 
-in <a href="https://www.cedarpolicy.com/en">Cedar</a> policy syntax.</p>
-<p>The Cedarling is a local, autonomous Policy Decision Point, or "PDP", distributed as a 
-WebAssembly ("WASM") component.  WASM components can run directly in the browser or in a cloud 
-function. The Cedarling's main job is to <code>permit</code> or <code>forbid</code> requests based on enterprise-approved 
-policies. The input to the policies are JWT tokens (which provides the Principal), the requested 
-Action and Resource. The Cedarling rapidly evaluates authorization requests because it has all the 
-policies and data it needs to make a local decision. </p>
+in Cedar policy syntax. Optionally, the Cedarling can validate JWTs from a list of trusted IDPs--
+both the JWT signature and the current status. The Cedarling rapidly evaluates authorization requests
+because it has all the policies and data it needs to make a local decision.</p>
+<p>Architecturally, the Cedarling is a local, autonomous Policy Decision Point, or "PDP", distributed 
+as a WebAssembly ("WASM") component. WASM components run directly in a browser. They can also run 
+as a cloud native function. </p>
+<p>A key feature of the Cedarling is to log all <code>permit</code> or <code>forbid</code> decisions returned to the 
+application. It can also log the validation of tokens. In an enterprise deployment, this audit
+log is sent for central archiving.</p>
+<p>For developers, the Cedarling is a more productive and flexible way to handle authz. The Cedarling maps
+Roles, and provides RBAC out-of-the-box. But developers can also express a variety of policies beyond
+the limitations of "person with role has access". For example, what if you want to allow access only 
+to people who use a certain type of passkey? Or what if you want to incorporate a fraud score, and 
+elevate security for riskier transactions. Or maybe, partners can view tickets for the customers 
+they serve? These policies are easily and rapidly evaluated by a Cedar policy engine.</p>
 <p><img alt="" src="../../../assets/lock-cedarling-diagram-1.jpg" /></p>
-<p>In a JavaScript browser framework, the Cedarling loads its Policy Store during initialization, as a 
-static JSON file or fetched via REST. Developers may consider the Cedarling Policy Store as part of 
-the code. Externalizing the policies makes it easier to audit the security features and 
-controls of an application. The Cedarling enables developers to create complex, contextual policies
-without cluttering application code with lots of <code>if</code> - <code>then</code> statements. Importantly, the Cedarling
-creates an audit log of all decisions by an application to <code>permit</code> or <code>forbid</code> actions. In an 
-enterprise deployment, this audit log is sent for central archiving.</p>
-<p>Where does the Cedarling get the data for policy evaluation? The data is contained in the 
-authorization request itself which has the OAuth and OpenID JWTs and details about the resource 
-and requested action.</p>
+<p>The Cedarling loads its Policy Store during initialization, as a static JSON file or fetched via REST. 
+The Policy Store contains the Cedar Policies, Cedar Schema, and optionally, a list of the Trusted IDPs. 
+Developers may consider the Cedarling Policy Store as part of the code. The Cedar schema for resources 
+aligns with the application model. The policies control the expected functionality, and
+need to be unit tested--including both positive and negative tests. </p>
+<p>Where does the Cedarling get the data for policy evaluation? First, the request includes the resource
+details. Based on this, the Cedarling creates the Resource entity. The Principal entities 
+are derived from the JWTs--the combined OpenID id_token and Userinfo tokens enable the Cedarling to 
+create a User and Role entities; the OAuth access token is used to create a Client entity. 
+Hypothetically, you could also pass the roles in an access token claim. But a user claim for roles 
+is preferred.</p>
 <p><img alt="" src="../../../assets/lock-cedarling-diagram-2.jpg" /></p>
-<p>Two JWT tokens in particular are typical: (1) an OpenID Connect id_token and (2) an OAuth access 
-token. The id_token represents a user authentication event. The access token represents a 
-client authentication event. The Cedarling can trust the id_token and access token to extract the User, 
-Role and Client Principals. These tokens also contain other interesting contextual data. An OpenID 
+<p>The id_token represents a user authentication event. The access token represents a 
+client authentication event. These tokens contain other interesting contextual data. An OpenID 
 Connect id_token JWT tells you who authenticated, when they authenticated, how they authenticatated, 
-and other claims like the User's roles. An OAuth Access Token JWT can tell you information about the 
-software that obtained the JWT, its extent of access as defined by the OAuth Authorization Server 
+and optionally other claims like the User's roles. An OAuth Access Token JWT can tell you information 
+about the software that obtained the JWT, its extent of access as defined by the OAuth Authorization Server 
 (<em>i.e.</em> the values of the <code>scope</code> claim), or other claims--domains frequently enhance the access token to
-contain business specific data needed for policy evaluation. If an OpenID Userinfo token is sent to the 
-Cedarling, it is combined with the id_token to paint a fuller picture of the User's claims. </p>
-<p>Cedar was invented by Amazon for their 
-<a href="https://aws.amazon.com/verified-permissions/">Verified Permission</a> service. It uses the <strong>PARC</strong> 
-syntax: <strong>P</strong>rincipal, <strong>A</strong>ction, <strong>R</strong>esource, <strong>C</strong>ontext.  Principal-Action-Resource is typical
-for most authorization solutions. For example, you may have a policy that says <em>Admins</em> can <em>write</em>
-to the <em>config</em> folder. In this example, the <em>Admin</em> Role is the Principal, <em>write</em> is the Action,
-and the <em>config</em> folder is the Resource. The Context is used to specify information about the
-enivironment, like the time of day or network address.</p>
+contain business specific data needed for policy evaluation.</p>
 <p>The Cedarling authorizes a person using a certain piece of software. From a logical perspective, 
 <code>person_allowed AND client_allowed</code> must be <code>True</code>. A person may be either explicitly allowed, or 
 have a role that enables access. For example, <code>person_allowed</code> is <code>True</code> if 
-<code>user=mike OR role=SuperUser</code>. </p>
-<p><img alt="" src="../../../assets/lock-cedarling-diagram-3.jpg" /></p>
+<code>user=mike OR role=SuperUser</code> and application is from <code>org_id=Acme</code>. </p>
 <p>The JWT's, Action, Resource and Context is sent by the application in the authorization request. For 
 example, this is a sample request from a hypothetical JS application:</p>
 <div class="highlight"><pre><span></span><code>input = { 
@@ -8825,8 +8757,13 @@ example, this is a sample request from a hypothetical JS application:</p>
            &quot;id_token&quot;: &quot;eyJjbGc...&quot;, 
            &quot;userinfo_token&quot;: &quot;eyJjbGc...&quot;,
            &quot;tx_token&quot;: &quot;eyJjbGc...&quot;,
-           &quot;resource&quot;: {&quot;Ticket&quot;: {&quot;id&quot;: &quot;12345&quot;, &quot;creator&quot;: &quot;foo@bar.com&quot;, &quot;organization&quot;: &quot;Acme&quot;}},
            &quot;action&quot;: &quot;View&quot;,
+           &quot;resource&quot;: {&quot;Ticket&quot;: {
+                                  &quot;id&quot;: &quot;ticket-10101&quot;, 
+                                  &quot;owner&quot;: &quot;bob@acme.com&quot;, 
+                                  &quot;org_id&quot;: &quot;Acme&quot;
+                                  }
+                        },
            &quot;context&quot;: {
                        &quot;ip_address&quot;: &quot;54.9.21.201&quot;,
                        &quot;network_type&quot;: &quot;VPN&quot;,
@@ -8838,19 +8775,20 @@ example, this is a sample request from a hypothetical JS application:</p>
 decision_result = authz(input)
 </code></pre></div>
 <h2 id="cedarling-token-validation">Cedarling Token Validation<a class="headerlink" href="#cedarling-token-validation" title="Permanent link">#</a></h2>
-<p>The Cedarling can validate the signatures of the JWTs for developers, by setting the 
-<code>CEDARLING_JWT_VALIDATION</code> environment variable to <code>True</code>. For testing, developers can set this
-property to <code>False</code> and submit an unsigned JWT, for example one you generate with 
-<a href="https://jwt.io">JWT.io</a>. Or developers may prefer to validate the signatures in code--that's ok.</p>
-<p>On initiatilization, the Cedarling downloads the public keys of the Trusted IDPs specified in the 
-Cedarling policy store. Because all JWT's have an <code>iss</code> claim, this is used to determine which keys 
-to use for token signature validation. </p>
+<p>Optionally, the Cedarling can validate the signatures of the JWTs for developers. To enable this, 
+set the <code>CEDARLING_JWT_VALIDATION</code> bootstrap property to <code>True</code>. For testing, developers can set 
+this property to <code>False</code> and submit an unsigned JWT, for example one you generate with 
+<a href="https://jwt.io">JWT.io</a>. </p>
+<p>If token validation is enabled, on initiatilization the Cedarling downloads the public keys of 
+the Trusted IDPs specified in the Cedarling policy store. The Cedarling uses the JWT <code>iss</code> 
+claim to determine the right keys for validation.</p>
 <p>In an enterprise deployment, the Cedarling can also check if a JWT has been revoked. The Cedarling
-uses a mechanism described in the 
+checks the status following a mechanism described in the 
 <a href="https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/">OAuth Status Lists</a>
-draft. This might be handy for use cases where a token revocation needs to be communicated 
-immediately, such as an account takeover situation, or an implementation of a one-time transactions
-in a cluster of web servers. Jans Auth Server supports the <a href="https://datatracker.ietf.org/doc/draft-parecki-oauth-global-token-revocation/">Global Token Revocation</a> OAuth draft. This is how a client can inform the OAuth Server that a given token should be revoked. </p>
+draft. Enforcing the status of tokens helps limit the damage of account takeover--i.e. to immediately 
+recursively revoke all the tokens issued to an attacker. Domains may want to use Token Status also to 
+implement single-transaction tokens; for example, a token that is good for one and only one wire 
+transfer.</p>
 <p>Here is a summary of the ways the Cedarling may validate a JWT, depending on your bootstrap properties:
 * Validate signature from Trusted Issuer 
 * Discard id_token if <code>aud</code> does not match access_token <code>client_id</code> 
@@ -8858,45 +8796,62 @@ in a cluster of web servers. Jans Auth Server supports the <a href="https://data
 * If Cedarling is Locked, check token status
 * Check access token and id_token <code>exp</code> and <code>nbf</code> claims if time sent in Context</p>
 <p><img alt="" src="../../../assets/lock-cedarling-diagram-4.jpg" /></p>
-<h2 id="policy-authoring">Policy Authoring<a class="headerlink" href="#policy-authoring" title="Permanent link">#</a></h2>
-<p>The eaisest way to author your policy store is to use the Policy Designer in <a href="https://cloud.gluu.org/agama-lab">Agama Lab</a>. This tool helps you define the policies, schema and trusted IDPs and
-to publish a policy store to any Github repository to which you have access.</p>
-<h2 id="testing-the-cedarling">Testing the Cedarling<a class="headerlink" href="#testing-the-cedarling" title="Permanent link">#</a></h2>
-<p>You can perform end to end testing by running the Cedarling in your JS browser application. If
-you are using a server side application (e.g. a Wordpress application), you'll need to deploy
-the Cedarling as a cloud function. Remember to run the Cedarling init function when your application 
-starts. This is necessary to load the policy store and to download the current public keys from 
-an IDP if you are using the Cedarling for token validation. If you want to use roles, make sure to 
-populate the User.role claim in your id_token or Userinfo token. Call the authz function when 
-you want the Cederling to opine on a security RBAC decision.</p>
 <h2 id="cedarling-policy-store">Cedarling Policy Store<a class="headerlink" href="#cedarling-policy-store" title="Permanent link">#</a></h2>
-<p>The Cedarling Policy Store is a JSON file that contains all the data the Cedarling needs to verify JWT tokens and evaluate policies:</p>
+<p>By convention, the filename is <code>cedarling_store.json</code>. It contains all the data the 
+Cedarling needs to evaluate policies and verify JWT tokens:</p>
 <ol>
-<li>Cedar Schema - JSON formatted Schema file</li>
-<li>Cedar Policies - JSON formatted Policy Set file </li>
-<li>Trusted Issuers - JSON file with below syntax</li>
+<li>Cedar Schema - Base64 encoded human format</li>
+<li>Cedar Policies - Base64 encoded human format</li>
+<li>Trusted Issuers - See below syntax</li>
 </ol>
-<p>By convention, the filename is <code>cedarling_store.json</code>. The JSON schema looks like this:</p>
+<p>The JSON schema looks like this:</p>
 <div class="highlight"><pre><span></span><code>{
-    &quot;policies&quot;: {...},
-    &quot;schema&quot;: {...},
-    &quot;trusted_idps&quot;: []
+    &quot;policies&quot;: &quot;...&quot;,
+    &quot;schema&quot;: &quot;...&quot;,
+    &quot;trusted_idps&quot;: [...]
 }
 </code></pre></div>
 <h3 id="trusted-issuer-schema">Trusted Issuer Schema<a class="headerlink" href="#trusted-issuer-schema" title="Permanent link">#</a></h3>
-<p>This is a hypothetical example.</p>
+<ul>
+<li><strong><code>name</code></strong> : String, no spaces</li>
+<li><strong><code>description</code></strong> : String</li>
+<li><strong><code>openid_configuration_endpoint</code></strong> : String with <code>https</code> url of <code>.well-known</code> for domain.</li>
+<li><strong><code>access_tokens</code></strong> : Object with claims:</li>
+<li><code>trusted</code>: <code>True | False</code> </li>
+<li><strong><code>id_tokens</code></strong> : Object with claims: </li>
+<li><code>trusted</code>: <code>True | False</code></li>
+<li><code>principal_identifier</code>: the token claim used to identify the User entity (in SAML jargon it's
+  the "NameID format"). This claim is optional--it may be present in the Userinfo token. Defaults to <code>sub</code>. </li>
+<li><code>role_mapping</code>: A list of the User's roles</li>
+<li><strong><code>userinfo_tokens</code></strong> :</li>
+<li><code>trusted</code>: <code>True | False</code></li>
+<li><code>principal_identifier</code>: the token claim used to identify the User entity (in SAML jargon it's
+  the "NameID format"). This claim is optional--it may be present in the Userinfo token. Defaults to <code>sub</code>. </li>
+<li><code>role_mapping</code>: A list of the User's roles</li>
+<li><strong><code>tx_tokens</code></strong> :</li>
+<li><code>trusted</code>: <code>True | False</code></li>
+</ul>
+<p>Non-normative example:
 <div class="highlight"><pre><span></span><code>[
-{&quot;name&quot;: &quot;Acme&quot;, 
- &quot;Description&quot;: &quot;Acme IDP&quot;, 
+{&quot;name&quot;: &quot;IDP1&quot;, 
+ &quot;description&quot;: &quot;Acme IDP&quot;, 
  &quot;openid_configuration_endpoint&quot;: &quot;https://acme.com/.well-known/openid-configuration&quot;,
  &quot;access_tokens&quot;: {&quot;trusted&quot;: True}, 
  &quot;id_tokens&quot;: {&quot;trusted&quot;:True, &quot;principal_identifier&quot;: &quot;email&quot;},
- &quot;userinfo_tokens&quot;: {&quot;trusted&quot;: True, &quot;role_mapping&quot;: &quot;role&quot;}
+ &quot;userinfo_tokens&quot;: {&quot;trusted&quot;: True, &quot;role_mapping&quot;: [&quot;hr-admin&quot;, &quot;staff&quot;]},
+ &quot;tx_tokens&quot;: {&quot;trusted&quot;: True}
 },
-...
+{IDP-2},
+{IDP-3}...
 ]
-</code></pre></div>
+</code></pre></div></p>
+<h3 id="policy-and-schema-authoring">Policy and Schema Authoring<a class="headerlink" href="#policy-and-schema-authoring" title="Permanent link">#</a></h3>
+<p>You can hand create your Cedar policies and schema in <a href="https://marketplace.visualstudio.com/items?itemName=cedar-policy.vscode-cedar">Visual Studio</a>. Make sure you run the cedar command line tool to validate both your 
+schema and policies. The eaisest way to author your policy store is to use the Policy Designer in 
+<a href="https://cloud.gluu.org/agama-lab">Agama Lab</a>. This tool helps you define the policies, schema and
+trusted IDPs and to publish a policy store to a Github repository.</p>
 <h2 id="cedarling-bootstrap-properties">Cedarling Bootstrap Properties<a class="headerlink" href="#cedarling-bootstrap-properties" title="Permanent link">#</a></h2>
+<p>These Bootstrap Properties control default application level behavior.</p>
 <ul>
 <li>
 <p><strong><code>CEDARLING_APPLICATION_NAME</code></strong> : Human friendly identifier for this application</p>
@@ -8912,6 +8867,9 @@ you want the Cederling to opine on a security RBAC decision.</p>
 </li>
 <li>
 <p><strong><code>CEDARLING_REQUIRE_AUD_VALIDATION</code></strong> : Enabled | Disabled. Controls if Cedarling will discard id_token without an access token with the corresponding client_id.</p>
+</li>
+<li>
+<p><strong><code>CEDARLING_ROLE_MAPPING</code></strong> : Default: <code>{"id_token": "role", "userinfo_token": "role"}</code> but the role may be sent as an access token, or with a different identifier. For example, for Ping Identity, you might see <code>{"userinfo_token": "memberOf"}</code>.</p>
 </li>
 <li>
 <p><strong><code>CEDARLING_LOG_LEVEL</code></strong> : Controls the verbosity of Cedar logging.</p>
@@ -8953,7 +8911,7 @@ you want the Cederling to opine on a security RBAC decision.</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-07-25T20:10:56+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-07-25</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-07-29T11:41:35+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-07-29</span>
       
         <br>
         Created:
