@@ -5,9 +5,9 @@ import io.jans.as.client.TokenResponse;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ScopeType;
 import io.jans.lock.model.config.AppConfiguration;
-import io.jans.lock.service.net.HttpService;
 import io.jans.model.net.HttpServiceResponse;
 import io.jans.service.EncryptionService;
+import io.jans.service.net.BaseHttpService;
 import io.jans.util.security.StringEncrypter.EncryptionException;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -48,10 +48,10 @@ public class LockUtil {
     Logger log;
 
     @Inject
-    AppConfiguration appConfiguration;
+    private AppConfiguration appConfiguration;
 
     @Inject
-    HttpService httpService;
+    private BaseHttpService httpService;
 
     @Inject
     EncryptionService encryptionService;
