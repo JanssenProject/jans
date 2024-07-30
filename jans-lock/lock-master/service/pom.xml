@@ -63,6 +63,18 @@
 			<groupId>io.jans</groupId>
 			<artifactId>jans-core-service</artifactId>
 		</dependency>
+		
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-auth-client</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-auth-model</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 
 		<dependency>
 			<groupId>io.jans</groupId>

@@ -16,9 +16,9 @@
 
 package io.jans.lock.service.ws.rs.audit;
 
-import org.slf4j.Logger;
-
+import io.jans.lock.util.LockUtil;
 import io.jans.lock.util.ServerUtil;
+
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,6 +26,11 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.SecurityContext;
+import jakarta.ws.rs.core.Response.Status;
+
+import org.apache.http.entity.ContentType;
+import org.json.JSONObject;
+import org.slf4j.Logger;
 
 /**
  * Provides interface for audit REST web services
@@ -36,43 +41,64 @@ import jakarta.ws.rs.core.SecurityContext;
 @Path("/audit")
 public class AuditRestWebServiceImpl implements AuditRestWebService {
 
-	@Inject
-	private Logger log;
+    @Inject
+    private Logger log;
 
-	@Override
-	public Response processHealthRequest(HttpServletRequest request, HttpServletResponse response, SecurityContext sec) {
-		log.debug("Processing Health request");
-		Response.ResponseBuilder builder = Response.ok();
+    @Inject
+    LockUtil lockUtil;
 
-		builder.cacheControl(ServerUtil.cacheControlWithNoStoreTransformAndPrivate());
-		builder.header(ServerUtil.PRAGMA, ServerUtil.NO_CACHE);
-		builder.entity("{\"res\" : \"ok\"}");
+    @Override
+    public Response processHealthRequest(HttpServletRequest request, HttpServletResponse response,
+            SecurityContext sec) {
+        log.debug("Processing Health request - request:{}", request);
+        return processAuditRequest(request, "Health");
+    }
 
-		return builder.build();
-	}
+    @Override
+    public Response processLogRequest(HttpServletRequest request, HttpServletResponse response, SecurityContext sec) {
+        log.debug("Processing Log request - request:{}", request);
+        return processAuditRequest(request, "log");
 
-	@Override
-	public Response processLogRequest(HttpServletRequest request, HttpServletResponse response, SecurityContext sec) {
-		log.debug("Processing Log request");
-		Response.ResponseBuilder builder = Response.ok();
+    }
 
-		builder.cacheControl(ServerUtil.cacheControlWithNoStoreTransformAndPrivate());
-		builder.header(ServerUtil.PRAGMA, ServerUtil.NO_CACHE);
-		builder.entity("{\"res\" : \"ok\"}");
+    @Override
+    public Response processTelemetryRequest(HttpServletRequest request, HttpServletResponse response,
+            SecurityContext sec) {
+        log.debug("Processing Telemetry request - request:{}", request);
+        return processAuditRequest(request, "telemetry");
 
-		return builder.build();
-	}
+    }
 
-	@Override
-	public Response processTelemetryRequest(HttpServletRequest request, HttpServletResponse response, SecurityContext sec) {
-		log.debug("Processing Telemetry request");
-		Response.ResponseBuilder builder = Response.ok();
+    private Response processAuditRequest(HttpServletRequest request, String requestType) {
+        log.debug("Processing request - request:{}, requestType:{}", request, requestType);
 
-		builder.cacheControl(ServerUtil.cacheControlWithNoStoreTransformAndPrivate());
-		builder.header(ServerUtil.PRAGMA, ServerUtil.NO_CACHE);
-		builder.entity("{\"res\" : \"ok\"}");
+        Response.ResponseBuilder builder = Response.ok();
+        builder.cacheControl(ServerUtil.cacheControlWithNoStoreTransformAndPrivate());
+        builder.header(ServerUtil.PRAGMA, ServerUtil.NO_CACHE);
 
-		return builder.build();
-	}
+        JSONObject json = this.lockUtil.getJSONObject(request);
+        Response response = this.lockUtil.post(requestType, json.toString(), ContentType.APPLICATION_JSON);
+        log.debug("response:{}", response);
+
+        if (response != null) {
+            log.trace(
+                    "Response for Access Token -  response.getStatus():{}, response.getStatusInfo():{}, response.getEntity().getClass():{}",
+                    response.getStatus(), response.getStatusInfo(), response.getEntity().getClass());
+            String entity = response.readEntity(String.class);
+            log.debug(" entity:{}", entity);
+            builder.entity(entity);
+
+            if (response.getStatusInfo().equals(Status.CREATED)) {
+
+                log.debug(" Status.CREATED:{}, entity:{}", Status.CREATED, entity);
+            } else {
+                log.error("Error while saving audit data - response.getStatusInfo():{}, entity:{}",
+                        response.getStatusInfo(), entity);
+                builder.status(response.getStatusInfo());
+            }
+        }
+
+        return builder.build();
+    }
 
 }
