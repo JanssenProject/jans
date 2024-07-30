@@ -38,9 +38,6 @@ DB_DIR = os.environ.get("CN_CONFIGURATOR_DB_DIR", f"{CONFIGURATOR_DIR}/db")
 CERTS_DIR = os.environ.get("CN_CONFIGURATOR_CERTS_DIR", f"{CONFIGURATOR_DIR}/certs")
 JAVALIBS_DIR = f"{CONFIGURATOR_DIR}/javalibs"
 
-DEFAULT_CONFIGURATION_FILE = os.environ.get("CN_CONFIGURATOR_CONFIGURATION_FILE", "/etc/jans/conf/configuration.json")
-DEFAULT_DUMP_FILE = os.environ.get("CN_CONFIGURATOR_DUMP_FILE", "/etc/jans/conf/configuration.dump.json")
-
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("configurator")
 
@@ -480,6 +477,30 @@ def parse_cert(certfile, dns):
     return False
 
 
+def get_configuration_file():
+    path = os.environ.get("CN_CONFIGURATOR_CONFIGURATION_FILE", "/etc/jans/conf/configuration.json")
+
+    # @TODO: remove the backward-compat after updating the chart
+    if not os.path.isfile(path):
+        for alt_path in [f"{DB_DIR}/configuration.json", f"{DB_DIR}/generate.json"]:
+            if os.path.isfile(alt_path):
+                path = alt_path
+                break
+    return path
+
+
+def get_dump_file():
+    path = os.environ.get("CN_CONFIGURATOR_DUMP_FILE", "/etc/jans/conf/configuration.dump.json")
+
+    # @TODO: remove the backward-compat after updating the chart
+    if not os.path.isfile(path):
+        for alt_path in [f"{DB_DIR}/configuration.out.json"]:
+            if os.path.isfile(alt_path):
+                path = alt_path
+                break
+    return path
+
+
 # ============
 # CLI commands
 # ============
@@ -495,14 +516,14 @@ def cli():
     "--configuration-file",
     type=click.Path(exists=False),
     help="Absolute path to file contains configmaps and secrets",
-    default=DEFAULT_CONFIGURATION_FILE,
+    default=get_configuration_file(),
     show_default=True,
 )
 @click.option(
     "--dump-file",
     type=click.Path(exists=False),
     help="Absolute path to file contains dumped configmaps and secrets",
-    default=DEFAULT_DUMP_FILE,
+    default=get_dump_file(),
     show_default=True,
 )
 def load(configuration_file, dump_file):
@@ -539,7 +560,7 @@ def load(configuration_file, dump_file):
     "--dump-file",
     type=click.Path(exists=False),
     help="Absolute path to file contains dumped configmaps and secrets",
-    default=DEFAULT_DUMP_FILE,
+    default=get_dump_file(),
     show_default=True,
 )
 def dump(dump_file):
