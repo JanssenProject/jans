@@ -56,7 +56,7 @@ class SSA(DialogUtils):
 
     def init_cli_object(self):
         self.cli_object = config_cli.JCA_CLI(
-                host=self.app.cli_object.idp_host,
+                endpoints=self.app.cli_object.endpoints,
                 client_id=self.app.cli_object.client_id,
                 client_secret=self.app.cli_object.client_secret,
                 access_token=self.app.cli_object.access_token,
