@@ -116,6 +116,7 @@ RUN git clone --depth 500 --filter blob:none --no-checkout https://github.com/ja
     && git sparse-checkout add jans-linux-setup/jans_setup \
     && git sparse-checkout add jans-casa/extras \
     && git sparse-checkout add jans-pycloudlib \
+    && git sparse-checkout add jans-config-api/plugins/docs \
     && cp ${JANS_SETUP_DIR}/static/rdbm/sql_data_types.json /app/static/rdbm/ \
     && cp ${JANS_SETUP_DIR}/static/rdbm/ldap_sql_data_type_mapping.json /app/static/rdbm/ \
     && cp ${JANS_SETUP_DIR}/static/rdbm/opendj_attributes_syntax.json /app/static/rdbm/ \
@@ -130,7 +131,8 @@ RUN git clone --depth 500 --filter blob:none --no-checkout https://github.com/ja
     && cp -R ${JANS_SETUP_DIR}/templates/jans-lock /app/templates/ \
     && mkdir -p org/eclipse/jetty \
     && cp ${JANS_SETUP_DIR}/static/favicon.ico org/eclipse/jetty/favicon.ico \
-    && zip -r ${JETTY_HOME}/lib/jetty-server-${JETTY_VERSION}.jar org/eclipse/jetty/favicon.ico
+    && zip -r ${JETTY_HOME}/lib/jetty-server-${JETTY_VERSION}.jar org/eclipse/jetty/favicon.ico \
+    && cp jans-config-api/plugins/docs/lock-plugin-swagger.yaml /app/templates/jans-lock/
 
 # ======
 # Python
