@@ -239,8 +239,6 @@ operation.
 
 ### Add New Custom Asset
 
-<!-- TODO: Need to test -->
-
 To create a new asset, we can use `post-new-asset` operation id. As shown in
 the [output](#using-command-line) for `--info` command, the `post-new-asset` 
 operation requires data to be sent according to `AssetForm` schema.
@@ -261,28 +259,90 @@ below to get the sample.
 ```
 
 Using the schema and the example above, we have added below data to the 
-file `/tmp/add-asset.json`
+file `/tmp/add-asset.json`. Example below will load `p.properties` file as
+a custom asset to the `jans-auth` service.
 
 ```json title="Input" linenums="1" 
+{
+  "document": {
+    "displayName": "p.properties",
+    "description": "Valid text description",
+    "jansService": [
+      "jans-auth"
+    ],
+    "jansLevel": 142,
+    "jansEnabled": true
+  },
+  "assetFile": "/tmp/p.properties"
+}
 
 ```
+Now let's post this Assert to the Janssen Server to be added to the existing set:
+
+```bash title="Command"
+ /opt/jans/jans-cli/config-cli.py --operation-id post-new-asset \
+ --data /tmp/add-asset.json
+```
+
 
 
 ### Update Existing Custom Assets
 
-<!-- TODO: Need to test -->
+Use the `put-asset` operation to update an existing asset. This operation uses
+same schema as [add new asset](#add-new-custom-asset) operation. For example,
+assuming that there is an existing asset as show below:
 
-To update the configuration follow the steps below.
+```json title="Existing Asset"
+    {
+      "dn": "inum=48f2e07b-b879-4db2-816b-36bc4d69701f,ou=document,o=jans",
+      "inum": "48f2e07b-b879-4db2-816b-36bc4d69701f",
+      "displayName": "p.properties",
+      "description": "Valid text description",
+      "document": "cHJvcGVydGllcyBoZXJlLiAK\r\n",
+      "creationDate": "2024-07-31T06:24:55",
+      "jansService": [
+        "jans-auth"
+      ],
+      "jansLevel": 142,
+      "jansEnabled": true,
+      "baseDn": "inum=48f2e07b-b879-4db2-816b-36bc4d69701f,ou=document,o=jans"
+    }
+```
 
-1. [Gets the asset by inum](#gets-an-asset-by-inum) and store it into a file for editing.
- The following command will retrieve the existing asset in the schema file.
- ```bash title="Sample Command"
-  /opt/jans/jans-cli/config-cli.py -no-color --operation-id put-asset \
-  --url-suffix inum:36014ca4-0978-4d95-8858-964b815ea770 > /tmp/update-asset.json
- ```
-2. Edit and update the desired configuration values in the file while keeping other
- properties and values unchanged. Updates must adhere to the `AssetForm`
- schema as mentioned [here](#using-command-line).
+Now to update level of this asset to 6, create a text file with following
+content in it. Let's name this text file as `/tmp/update-asset.json`
+
+```json 
+{
+  "document": {
+      "dn": "inum=48f2e07b-b879-4db2-816b-36bc4d69701f,ou=document,o=jans",
+      "inum": "48f2e07b-b879-4db2-816b-36bc4d69701f",
+      "displayName": "p.properties",
+      "description": "Valid text description",
+      "document": "cHJvcGVydGllcyBoZXJlLiAK\r\n",
+      "creationDate": "2024-07-31T06:24:55",
+      "jansService": [
+        "jans-auth"
+      ],
+      "jansLevel": 6,
+      "jansEnabled": true
+   },
+  "assetFile": "/tmp/p.properties"
+}
+```
+
+Now use the command below to update the asset with new value for level.
+
+```bash title="Sample Command"
+/opt/jans/jans-cli/config-cli.py --operation-id put-asset \
+--data /tmp/update-asset.json
+```
+
+Upon successful execution, this command will return with updated asset values.
+
+```json title="Return values"
+
+```
 
 3. We have changed only the `` to ` ` in the existing asset.
  Use the updated file to send the update to the Janssen Server using the command below
@@ -298,7 +358,8 @@ This will update the existing asset matched with inum value.
 You can delete any custom asset by its `inum` value.
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --operation-id delete-asset --url-suffix inum:36014ca4-0978-4d95-8858-964b815ea770
+/opt/jans/jans-cli/config-cli.py --operation-id delete-asset \
+--url-suffix inum:36014ca4-0978-4d95-8858-964b815ea770
 ```
 
 ## Using Text-based UI
