@@ -1,4 +1,4 @@
-use std::collections::BTreeMap;
+use crate::startup;
 use wasm_bindgen::{throw_str, UnwrapThrowExt};
 
 #[repr(u8)]
@@ -15,19 +15,59 @@ pub enum Statement {
 	Operation(fn(&[cedar_policy::Decision]) -> cedar_policy::Decision, Vec<Statement>),
 }
 
-// TODO: Replace context with lighter map type
-fn evaluate(statement: &Statement, context: &BTreeMap<Binding, cedar_policy::Decision>) -> cedar_policy::Decision {
+#[derive(Debug, Default)]
+pub struct ExecCache {
+	client: Option<cedar_policy::Decision>,
+	user: Option<cedar_policy::Decision>,
+	application: Option<cedar_policy::Decision>,
+}
+
+pub fn evaluate(
+	// Lord have mercy on the number of parameters this takes
+	statement: Statement,
+	uids: &super::types::EntityUids,
+	entities: &cedar_policy::Entities,
+	input: &(cedar_policy::EntityUid, cedar_policy::EntityUid, cedar_policy::Context),
+	cache: &mut ExecCache,
+) -> cedar_policy::Decision {
+	let schema = startup::SCHEMA.get();
+	let policies = startup::POLICY_SET.get().expect_throw("POLICY_SET not initialized");
+
 	match statement {
-		Statement::Binding(s) => context.get(s).unwrap_throw().clone(),
+		Statement::Binding(s) => {
+			// check cache
+			if let Some(c) = match s {
+				Binding::Client => cache.client,
+				Binding::Application => cache.application,
+				Binding::User => cache.user,
+			} {
+				return c;
+			}
+
+			// calculate result
+			let (action, resource, context) = input;
+			let principal = match s {
+				Binding::Client => Some(uids.user.clone()),
+				Binding::Application => uids.application.clone(),
+				Binding::User => Some(uids.user.clone()),
+			};
+
+			let decision = cedar_policy::Request::new(principal, Some(action.clone()), Some(resource.clone()), context.clone(), schema).unwrap_throw();
+
+			// create authorizer
+			let authorizer = cedar_policy::Authorizer::new();
+			authorizer.is_authorized(&decision, policies, &entities).decision()
+		}
 		Statement::Operation(function, arguments) => {
-			let arguments: Vec<_> = arguments.into_iter().map(|s| evaluate(s, context)).collect();
+			let cb = |s| evaluate(s, uids, entities, input, cache);
+			let arguments: Vec<_> = arguments.into_iter().map(cb).collect();
 			function(&arguments)
 		}
 	}
 }
 
 // supported tokens: Client, Application, User, Role, !, |, &, (, )
-fn parse(tokens: &str) -> Statement {
+pub fn parse(tokens: &str) -> Statement {
 	let mut start = 0;
 	let mut o_stack: Vec<fn(&[cedar_policy::Decision]) -> cedar_policy::Decision> = vec![];
 
