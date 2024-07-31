@@ -32,6 +32,7 @@ async fn remote() {
 	let config = startup::types::CedarlingConfig {
 		application_name: Some("test#docs".into()),
 		require_aud_validation: false,
+		jwt_validation: false,
 		policy_store: startup::types::PolicyStoreConfig::Local {
 			id: "fc2fee0253af46f3dce320484c42444ae0b24f7ec84a".into(),
 		},

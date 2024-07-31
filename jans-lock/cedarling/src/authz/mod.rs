@@ -32,7 +32,7 @@ pub async fn authz(req: JsValue) -> JsValue {
 	let r = serde_json::json!([input.resource]);
 	entities = entities.add_entities_from_json_value(r, startup::SCHEMA.get()).unwrap_throw();
 
-	// generate request
+	// prepare request
 	let action = input.action.parse().expect_throw("Unable to parse action");
 	let resource = {
 		#[derive(serde::Deserialize)]

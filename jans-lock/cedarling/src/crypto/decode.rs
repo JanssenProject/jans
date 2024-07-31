@@ -1,16 +1,12 @@
-use std::{borrow::Cow, ptr::addr_of};
+use std::{borrow::Cow, ptr::addr_of, sync::OnceLock};
 use wasm_bindgen::prelude::*;
 
-#[derive(Debug, Clone, Copy)]
-#[allow(clippy::enum_variant_names)]
-pub enum TokenType {
-	IdToken,
-	AccessToken,
-	UserInfoToken,
-}
+use super::types;
+
+pub(super) static JWT_VALIDATION_ENABLED: OnceLock<bool> = OnceLock::new();
 
 // extracts JWT Validation settings
-fn validation_options(jwt: &str, _type: TokenType) -> Result<(Option<jsonwebtoken::DecodingKey>, jsonwebtoken::Validation), Cow<'static, str>> {
+fn validation_options(jwt: &str, _type: types::TokenType) -> Result<(Option<jsonwebtoken::DecodingKey>, jsonwebtoken::Validation), Cow<'static, str>> {
 	let trust_store = unsafe { addr_of!(super::TRUST_STORE).as_ref().expect_throw("TRUST_STORE not initialized") };
 	let header = jsonwebtoken::decode_header(jwt).unwrap_throw();
 
@@ -22,9 +18,9 @@ fn validation_options(jwt: &str, _type: TokenType) -> Result<(Option<jsonwebtoke
 
 	// ensure issuer can issue TokenType
 	let can_issue = match _type {
-		TokenType::IdToken => entry.issuer.id_tokens.trusted,
-		TokenType::AccessToken => entry.issuer.access_tokens.trusted,
-		TokenType::UserInfoToken => entry.issuer.userinfo_tokens.trusted,
+		types::TokenType::IdToken => entry.issuer.id_tokens.trusted,
+		types::TokenType::AccessToken => entry.issuer.access_tokens.trusted,
+		types::TokenType::UserInfoToken => entry.issuer.userinfo_tokens.trusted,
 	};
 
 	if !can_issue {
@@ -46,10 +42,19 @@ fn validation_options(jwt: &str, _type: TokenType) -> Result<(Option<jsonwebtoke
 	Ok((decoding_key, validation))
 }
 
-pub fn decode_jwt<T: serde::de::DeserializeOwned>(jwt: &str, _type: TokenType) -> T {
-	let (key, validation) = validation_options(jwt, _type).unwrap_throw();
-	let key = key.expect_throw("Unable to extract DecodingKey from JWT");
-	jsonwebtoken::decode(jwt, &key, &validation).unwrap_throw().claims
+pub fn decode_jwt<T: serde::de::DeserializeOwned>(jwt: &str, _type: types::TokenType) -> T {
+	// secure by default
+	match JWT_VALIDATION_ENABLED.get().cloned().unwrap_or(true) {
+		true => {
+			let (key, validation) = validation_options(jwt, _type).unwrap_throw();
+			let key = key.expect_throw("Unable to extract DecodingKey from JWT");
+			jsonwebtoken::decode(jwt, &key, &validation).unwrap_throw().claims
+		}
+		false => {
+			let payload = jwt.split('.').nth(1).expect_throw("Malformed JWT provided");
+			serde_json::from_str(&js_atob(payload)).expect_throw("Unable to parse JWT as valid base64 encoded JSON")
+		}
+	}
 }
 
 #[wasm_bindgen]

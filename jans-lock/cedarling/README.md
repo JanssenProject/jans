@@ -76,8 +76,8 @@ $ wasm-pack test --chrome # --firefox or --safari
 From within your JS project, you'll need to import the exported `cedarling` functions from the `cedarling.js` file.
 
 ```js
-// cedarling Initialization Flow
-// INFO: The cedarling must be initialized once and no more than once
+// cedarling initialization flow
+// INFO: The cedarling must be initialized only once, any further attempts will throw errors
 
 import { init } from "cedarling.js"
 
@@ -86,6 +86,9 @@ const config = {
 	applicationName: "test#docs",
 	// [DEFAULT = false] Controls if cedarling will discard id_token without an access token with the corresponding client_id.
 	requireAudValidation: false,
+	// [DEFAULT = true] If any token claims are checked, set to false with caution
+	jwtValidation: true,
+	// Configure how the cedarling acquires it's Policy Store during startup
 	policyStore: {
 		// can be "local", "remote" or "lock-master",
 		// each strategy requires different parameters, see below
@@ -93,14 +96,14 @@ const config = {
 	},
 	// if policy-store.json is compressed using deflate-zlib
 	decompressPolicyStore: false,
-	// [OPTIONAL] How often, in milliseconds, will the cedarling refresh it's TrustStore. The cedarling won't refresh it's trust store if omitted
+	// [OPTIONAL] How often, in milliseconds, will the cedarling refresh it's TrustStore. The trust store won't refresh if omitted
 	trustStoreRefreshRate: 2000,
 	// Set of jwt algorithms that the cedarling will allow
 	supportedAlgorithms: ["HS256", "HS384", "RS256"]
 };
 
 /// > config.policyStore options <
-
+****
 // the "local" strategy is a fallback option. the cedarling will use a statically embedded policy store, located in `/policy-store/default.json`
 const local = {
 	strategy: "local"

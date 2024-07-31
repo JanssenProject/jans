@@ -6,6 +6,14 @@ use std::{
 use cedar_policy::*;
 use wasm_bindgen::UnwrapThrowExt;
 
+#[derive(Debug, Clone, Copy)]
+#[allow(clippy::enum_variant_names)]
+pub enum TokenType {
+	IdToken,
+	AccessToken,
+	UserInfoToken,
+}
+
 pub struct TrustStoreEntry {
 	pub jwks: jsonwebtoken::jwk::JwkSet,
 	pub issuer: &'static TrustedIssuer,

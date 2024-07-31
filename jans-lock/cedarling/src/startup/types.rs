@@ -8,8 +8,12 @@ use crate::*;
 #[serde(rename_all = "camelCase")]
 pub struct CedarlingConfig {
 	pub application_name: Option<String>,
+
+	// JWT validation
 	#[serde(default)]
 	pub require_aud_validation: bool,
+	#[serde(default = "true_default")]
+	pub jwt_validation: bool,
 
 	// policy store
 	pub policy_store: PolicyStoreConfig,
@@ -50,6 +54,10 @@ pub struct PolicyStoreEntry {
 	#[serde(deserialize_with = "parse_policies")]
 	pub policies: cedar_policy::PolicySet,
 	pub default_entities: Option<serde_json::Value>,
+}
+
+const fn true_default() -> bool {
+	true
 }
 
 fn parse_schema<'de, D>(deserializer: D) -> Result<cedar_policy::Schema, D::Error>

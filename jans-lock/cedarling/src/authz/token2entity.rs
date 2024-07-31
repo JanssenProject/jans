@@ -1,7 +1,6 @@
-use crypto::{decode, TRUST_STORE};
 use wasm_bindgen::throw_str;
 
-use super::{types, APPLICATION_NAME, REQUIRE_AUD_VALIDATION};
+use super::types;
 use crate::*;
 
 pub fn token2entities(input: &authz::types::AuthzInput) -> (types::EntityUids, cedar_policy::Entities) {
@@ -14,11 +13,11 @@ pub fn token2entities(input: &authz::types::AuthzInput) -> (types::EntityUids, c
 	}
 
 	// extract tokens
-	let id_token: types::IdToken = decode::decode_jwt(&input.id_token, decode::TokenType::IdToken);
-	let access_token: types::AccessToken = decode::decode_jwt(&input.access_token, decode::TokenType::AccessToken);
+	let id_token: types::IdToken = crypto::decode::decode_jwt(&input.id_token, crypto::types::TokenType::IdToken);
+	let access_token: types::AccessToken = crypto::decode::decode_jwt(&input.access_token, crypto::types::TokenType::AccessToken);
 
 	// check if `aud` claim in id_token matches `client_id` in access token
-	if id_token.aud != access_token.client_id && REQUIRE_AUD_VALIDATION.get().cloned().unwrap_or(false) {
+	if id_token.aud != access_token.client_id && super::REQUIRE_AUD_VALIDATION.get().cloned().unwrap_or(false) {
 		throw_str("id_token was not issued for this client: (id_token.aud != access_token.client_id)")
 	}
 
@@ -28,7 +27,7 @@ pub fn token2entities(input: &authz::types::AuthzInput) -> (types::EntityUids, c
 	}
 
 	// create TrustedIssuer entities
-	let trust_store = unsafe { std::ptr::addr_of!(TRUST_STORE).as_ref().unwrap_throw() };
+	let trust_store = unsafe { std::ptr::addr_of!(crypto::TRUST_STORE).as_ref().unwrap_throw() };
 	let issuers = trust_store.iter().map(|(_, entry)| (entry.issuer.get_entity()));
 	entities = entities.add_entities(issuers, schema).unwrap_throw();
 
@@ -36,7 +35,7 @@ pub fn token2entities(input: &authz::types::AuthzInput) -> (types::EntityUids, c
 	let client_entity = access_token.get_client_entity();
 	let client = client_entity.uid();
 
-	let application_name = APPLICATION_NAME.get().map(String::as_str);
+	let application_name = super::APPLICATION_NAME.get().map(String::as_str);
 	let application_entity = access_token.get_application_entity(application_name, client_entity.uid());
 	let application = application_entity.as_ref().map(|a| a.uid());
 
@@ -46,7 +45,7 @@ pub fn token2entities(input: &authz::types::AuthzInput) -> (types::EntityUids, c
 	};
 
 	// extract UserInfo
-	let userinfo: types::UserInfoToken = decode::decode_jwt(&input.userinfo_token, decode::TokenType::UserInfoToken);
+	let userinfo: types::UserInfoToken = crypto::decode::decode_jwt(&input.userinfo_token, crypto::types::TokenType::UserInfoToken);
 	if userinfo.sub != id_token.sub || userinfo.iss != id_token.iss {
 		throw_str("userinfo token invalid: either sub or iss doesn't match id_token")
 	}

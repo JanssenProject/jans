@@ -16,6 +16,8 @@ pub static mut SUPPORTED_ALGORITHMS: Vec<jsonwebtoken::Algorithm> = Vec::new();
 pub static mut TRUST_STORE: BTreeMap<String, types::TrustStoreEntry> = BTreeMap::new();
 
 pub fn init(config: &startup::types::CedarlingConfig, trusted_issuers: BTreeMap<String, types::TrustedIssuer>) {
+	decode::JWT_VALIDATION_ENABLED.set(config.jwt_validation).expect_throw("JWT_VALIDATION_ENABLED already initialized");
+
 	// Insert supported jwt signature algorithms
 	let supported = config.supported_signature_algorithms.iter().map(|s| jsonwebtoken::Algorithm::from_str(s).unwrap_throw()).collect();
 	unsafe {

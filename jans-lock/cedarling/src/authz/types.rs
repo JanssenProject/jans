@@ -119,8 +119,8 @@ pub struct IdToken {
 	pub iat: i64,
 	pub exp: i64,
 
-	pub azp: Option<String>,
 	pub acr: Option<String>,
+	pub azp: Option<String>,
 	#[serde(default)]
 	pub amr: BTreeSet<String>,
 }
