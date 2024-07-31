@@ -25,4 +25,4 @@ jansLogoutSessRequired: false
 jansPersistClntAuthzs: true
 jansRptAsJwt: false
 jansTrustedClnt: false
-jansRedirectURI: https://%(hostname)s/jans-auth
+jansRedirectURI: https://%(hostname)s/jans-lock
