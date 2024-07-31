@@ -4475,6 +4475,7 @@ paths:
                   - spontaneous_scope
                   - end_session
                   - post_authn
+                  - client_authn
                   - select_account
                   - create_user
                   - scim
@@ -8311,21 +8312,21 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        selected:
-          type: boolean
-        whitePagesCanView:
-          type: boolean
         adminCanView:
-          type: boolean
-        userCanView:
           type: boolean
         adminCanEdit:
           type: boolean
+        whitePagesCanView:
+          type: boolean
+        selected:
+          type: boolean
         userCanEdit:
           type: boolean
-        userCanAccess:
+        userCanView:
           type: boolean
         adminCanAccess:
+          type: boolean
+        userCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -9939,10 +9940,10 @@ components:
           type: array
           items:
             type: object
-        value:
-          type: object
         displayValue:
           type: string
+        value:
+          type: object
     LocalizedString:
       type: object
       properties:
@@ -10251,6 +10252,7 @@ components:
           - spontaneous_scope
           - end_session
           - post_authn
+          - client_authn
           - select_account
           - create_user
           - scim

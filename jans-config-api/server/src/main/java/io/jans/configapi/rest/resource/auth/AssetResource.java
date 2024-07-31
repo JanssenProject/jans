@@ -249,7 +249,7 @@ public class AssetResource extends ConfigBaseResource {
 
         // save asset
         try {
-            asset = assetService.saveAsset(asset, assetStream);
+            asset = assetService.saveAsset(asset, assetStream, false);
             log.debug("Saved asset:{} ", asset);
         } catch (Exception ex) {
             log.error("Application Error while creating asset is - status:{}", ex.getMessage());
@@ -309,7 +309,7 @@ public class AssetResource extends ConfigBaseResource {
 
         // update asset
         try {
-            asset = assetService.saveAsset(asset, assetFile);
+            asset = assetService.saveAsset(asset, assetFile, true);
             log.debug(" Updated asset:{} ", asset);
         } catch (Exception ex) {
             log.error("Application Error while updated asset is:{}", ex.getMessage());

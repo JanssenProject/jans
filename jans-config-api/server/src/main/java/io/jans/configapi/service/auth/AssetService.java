@@ -155,27 +155,31 @@ public class AssetService {
                 searchRequest.getStartIndex(), searchRequest.getCount(), searchRequest.getMaxCount());
     }
 
-    public Document saveAsset(Document asset, InputStream documentStream) throws Exception {
-        log.info("Save asset - asset:{}, documentStream:{}", asset, documentStream);
+    public Document saveAsset(Document asset, InputStream documentStream, boolean isUpdate) throws Exception {
+        log.info("Save asset - asset:{}, documentStream:{}, isUpdate:{}", asset, documentStream, isUpdate);
 
         if (asset == null) {
             throw new InvalidAttributeException("Asset object is null!!!");
         }
 
-        if (documentStream == null) {
+        // For update asset file is optional.
+        if (!isUpdate && documentStream == null) {
             throw new InvalidAttributeException(" Document data stream object is null!!!");
         }
 
         // validation
-        validateFileExtension(asset);
         validateModules(asset);
+        ByteArrayOutputStream bos = null;
+        if (documentStream != null) {
+            validateFileExtension(asset);
 
-        ByteArrayOutputStream bos = getByteArrayOutputStream(documentStream);
-        log.trace("Asset ByteArrayOutputStream :{}", bos);
+            bos = getByteArrayOutputStream(documentStream);
+            log.trace("Asset ByteArrayOutputStream :{}", bos);
 
-        // get asset
-        try (InputStream is = new Base64InputStream(getInputStream(bos), true)) {
-            asset = setAssetContent(asset, is);
+            // get asset
+            try (InputStream is = new Base64InputStream(getInputStream(bos), true)) {
+                asset = setAssetContent(asset, is, isUpdate);
+            }
         }
 
         // save asset in DB store
@@ -194,7 +198,7 @@ public class AssetService {
         }
 
         // copy asset on jans-server
-        if (isAssetServerUploadEnabled()) {
+        if (documentStream != null && isAssetServerUploadEnabled()) {
             String result = copyAssetOnServer(asset, bos);
             log.info("Result of asset saved on server :{}", result);
 
@@ -255,17 +259,27 @@ public class AssetService {
         return validFileExtension;
     }
 
-    private Document setAssetContent(Document asset, InputStream documentStream) throws IOException {
+    private Document setAssetContent(Document asset, InputStream documentStream, boolean isUpdate)
+            throws Exception {
         log.info(" Set asset content - asset:{}, documentStream:{}", asset, documentStream);
         if (asset == null) {
             throw new InvalidAttributeException(" Asset object is null!!!");
         }
 
-        if (documentStream == null) {
+        if (!isUpdate && documentStream == null) {
             throw new InvalidAttributeException(" Asset data stream is null!!!");
         }
 
-        String documentContent = new String(documentStream.readAllBytes(), StandardCharsets.UTF_8);
+        String documentContent = null;
+        if (documentStream != null) {
+            documentContent = new String(documentStream.readAllBytes(), StandardCharsets.UTF_8);
+        } else {
+            // since update get the existing document
+            Document existingDoc = getAssetByInum(asset.getInum());
+            if (existingDoc != null) {
+                asset.setDocument(existingDoc.getDocument());
+            }
+        }
         asset.setDocument(documentContent);
 
         // update asset revision

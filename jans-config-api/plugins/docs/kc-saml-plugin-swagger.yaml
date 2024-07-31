@@ -1062,6 +1062,7 @@ components:
           type: string
         signResponses:
           type: string
+      description: List of profile configuration.
     SAMLMetadata:
       type: object
       properties:
@@ -1075,6 +1076,7 @@ components:
           type: string
         jansAssertionConsumerServicePostURL:
           type: string
+      description: SAML entity metadata.
     TrustRelationship:
       required:
       - description
@@ -1087,36 +1089,51 @@ components:
           type: string
         inum:
           type: string
+          description: Unique indetifier
         owner:
           type: string
+          description: Trust Relationship manger
         name:
           maxLength: 60
           minLength: 0
           type: string
+          description: The alphanumeric ID string that is used to identify the Trust
+            Relationship.
         displayName:
           maxLength: 60
           minLength: 0
           type: string
+          description: Trust Relationship display name.
         description:
           maxLength: 4000
           minLength: 0
           type: string
+          description: The description of the Trust Relationship.
         baseUrl:
           type: string
+          description: URL to use when the auth server needs to redirect.
         enabled:
           type: boolean
+          description: Status of Trust Relationship.
         alwaysDisplayInConsole:
           type: boolean
+          description: Boolean flag to indicate if Trust Relationship should always
+            be listed in the UI.
         clientAuthenticatorType:
           type: string
+          description: Preferred Authenticator Type.
         secret:
           type: string
+          description: Client secret.
         registrationAccessToken:
           type: string
+          description: Registration Access Token.
         consentRequired:
           type: boolean
+          description: Boolean value if consent is required.
         spMetaDataSourceType:
           type: string
+          description: "Trust Relationship SP metadata type - file, URI."
           enum:
           - file
           - manual
@@ -1124,21 +1141,31 @@ components:
           $ref: '#/components/schemas/SAMLMetadata'
         redirectUris:
           type: array
+          description: List of valid Redirect URI.
           items:
             type: string
+            description: List of valid Redirect URI.
         spMetaDataURL:
           type: string
+          description: SAML entity metadata file URL.
         metaLocation:
           type: string
+          description: Trust Relationship metadata file location.
         releasedAttributes:
           type: array
+          description: Trust Relationship attributes that will be relased to SAML
+            server.
           items:
             type: string
+            description: Trust Relationship attributes that will be relased to SAML
+              server.
         spLogoutURL:
           pattern: "^$|(^(https?|http)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|])"
           type: string
+          description: URL that will be used to for logout requests.
         status:
           type: string
+          description: Status of Trust Relationship setup.
           enum:
           - active
           - inactive
@@ -1146,6 +1173,7 @@ components:
           - register
         validationStatus:
           type: string
+          description: Trust Relationship validation status.
           enum:
           - In Progress
           - Success
@@ -1153,12 +1181,15 @@ components:
           - Failed
         validationLog:
           type: array
+          description: List of validation log.
           items:
             type: string
+            description: List of validation log.
         profileConfigurations:
           type: object
           additionalProperties:
             $ref: '#/components/schemas/ProfileConfiguration'
+          description: List of profile configuration.
         baseDn:
           type: string
     TrustRelationshipForm:

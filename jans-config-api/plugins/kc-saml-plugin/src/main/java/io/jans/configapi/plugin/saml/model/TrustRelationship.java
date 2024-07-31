@@ -43,96 +43,104 @@ public class TrustRelationship extends Entry implements Serializable {
     private String inum;
 
     @AttributeName
-    @Schema(description = "")
+    @Schema(description = "Trust Relationship manger")
     private String owner;
 
     @AttributeName(name = "name")
     @NotNull
     @Size(min = 0, max = 60, message = "Length of the name should not exceed 60")
+    @Schema(description = "The alphanumeric ID string that is used to identify the Trust Relationship.")
     private String name;
 
     @NotNull
     @Size(min = 0, max = 60, message = "Length of the Display Name should not exceed 60")
     @AttributeName
+    @Schema(description = "Trust Relationship display name.")
     private String displayName;
 
     @NotNull
     @Size(min = 0, max = 4000, message = "Length of the Description should not exceed 4000")
     @AttributeName
+    @Schema(description = "The description of the Trust Relationship.")
     private String description;
     
-    /**
-     * Default URL, Home URL to use when the auth server needs to redirect or link
-     * back to the client.
-     * 
-     */
+    @Schema(description = "URL to use when the auth server needs to redirect.")
     @AttributeName
     private String baseUrl;
 
     @AttributeName(name = "jansEnabled")
+    @Schema(description = "Status of Trust Relationship.")
     private boolean enabled;
 
-    /**
-     * Always list this in the Account UI, even if the user does not have an
-     * active session.
-     */
     @AttributeName(name = "displayInConsole")
+    @Schema(description = "Boolean flag to indicate if Trust Relationship should always be listed in the UI.")
     private boolean alwaysDisplayInConsole;
 
     @AttributeName(name = "jansPreferredMethod")
+    @Schema(description = "Preferred Authenticator Type.")
     private String clientAuthenticatorType;
 
     @AttributeName(name = "jansClntSecret")
+    @Schema(description = "Client secret.")
     private String secret;
 
     @AttributeName(name = "jansRegistrationAccessTkn")
+    @Schema(description = "Registration Access Token.")
     private String registrationAccessToken;
 
+    @Schema(description = "Boolean value if consent is required.")
     private Boolean consentRequired;
 
-    /**
-     * Trust Relationship SP metadata type - file, URI, federation
-     */
     @NotNull
     @AttributeName(name = "jansSAMLspMetaDataSourceTyp")
+    @Schema(description = "Trust Relationship SP metadata type - file, URI.")
     private MetadataSourceType spMetaDataSourceType;
 
     @JsonObject
     @AttributeName(name = "samlMetadata")
+    @Schema(description = "SAML entity metadata.")
     private SAMLMetadata samlMetadata;
 
     @AttributeName(name = "jansRedirectURI")
+    @Schema(description = "List of valid Redirect URI.")
     private String[] redirectUris;
 
-    /**
-     * Trust Relationship file location of metadata
-     */
+
     @AttributeName(name = "jansSAMLspMetaDataFN")
     @Hidden
+    @Schema(description = "Trust Relationship metadata file location.")
     private String spMetaDataFN;
 
     @AttributeName(name = "jansSAMLspMetaDataURL")
+    @Schema(description = "SAML entity metadata file URL.")
     private String spMetaDataURL;
 
     @AttributeName(name = "jansMetaLocation")
+    @Schema(description = "Trust Relationship metadata file location.")
     private String metaLocation;
 
     @AttributeName(name = "jansReleasedAttr")
+    @Schema(description = "Trust Relationship attributes that will be relased to SAML server.")
     private List<String> releasedAttributes;
 
     @Pattern(regexp = "^$|(^(https?|http)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|])", message = "Please enter a valid url, including protocol (http/https)")
     @AttributeName(name = "jansPostLogoutRedirectURI")
+    @Schema(description = "URL that will be used to for logout requests.")
     private String spLogoutURL;
 
     @AttributeName(name = "jansStatus")
+    @Schema(description = "Status of Trust Relationship setup.")
     private GluuStatus status;
 
     @AttributeName(name = "jansValidationStatus")
+    @Schema(description = "Trust Relationship validation status.")
     private ValidationStatus validationStatus;
 
     @AttributeName(name = "jansValidationLog")
+    @Schema(description = "List of validation log.")
     private List<String> validationLog;
 
+    @Schema(description = "List of profile configuration.")
     private Map<String, ProfileConfiguration> profileConfigurations = new HashMap<String, ProfileConfiguration>();
 
     public String getInum() {
