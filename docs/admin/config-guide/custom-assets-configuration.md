@@ -300,27 +300,27 @@ Use the `put-asset` operation to update an existing asset. This operation uses
 same schema as [add new asset](#add-new-custom-asset) operation. For example,
 assuming that there is an existing asset as show below:
 
-```json title="Existing Asset"
-    {
-      "dn": "inum=fd67d07b-c874-4bc1-a9f0-860fc4f7a091,ou=document,o=jans",
-      "inum": "fd67d07b-c874-4bc1-a9f0-860fc4f7a091",
-      "displayName": "p.properties",
-      "description": "Valid text description",
-      "document": "cHJvcGVydGllcyBoZXJlLiAK\r\n",
-      "creationDate": "2024-07-31T07:40:03",
-      "jansService": [
-        "jans-auth"
-      ],
-      "jansLevel": 142,
-      "jansEnabled": true,
-      "baseDn": "inum=fd67d07b-c874-4bc1-a9f0-860fc4f7a091,ou=document,o=jans"
-    }
+```json title="Existing Asset" linenums="1"
+{
+  "dn": "inum=fd67d07b-c874-4bc1-a9f0-860fc4f7a091,ou=document,o=jans",
+  "inum": "fd67d07b-c874-4bc1-a9f0-860fc4f7a091",
+  "displayName": "p.properties",
+  "description": "Valid text description",
+  "document": "cHJvcGVydGllcyBoZXJlLiAK\r\n",
+  "creationDate": "2024-07-31T07:40:03",
+  "jansService": [
+    "jans-auth"
+  ],
+  "jansLevel": 142,
+  "jansEnabled": true,
+  "baseDn": "inum=fd67d07b-c874-4bc1-a9f0-860fc4f7a091,ou=document,o=jans"
+}
 ```
 
 Now to update level of this asset to 6, create a text file with following
 content in it. Let's name this text file as `/tmp/update-asset.json`
 
-```json 
+```json title="Input" linenums="1"
 {
   "document": {
       "dn": "inum=fd67d07b-c874-4bc1-a9f0-860fc4f7a091,ou=document,o=jans",
@@ -348,7 +348,7 @@ Now use the command below to update the asset with new value for level.
 
 Upon successful execution, this command will return with updated asset values.
 
-```json title="Return values"
+```json title="Return values" linenums="1"
 {
   "dn": "inum=fd67d07b-c874-4bc1-a9f0-860fc4f7a091,ou=document,o=jans",
   "inum": "fd67d07b-c874-4bc1-a9f0-860fc4f7a091",
