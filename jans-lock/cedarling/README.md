@@ -103,7 +103,7 @@ const config = {
 };
 
 /// > config.policyStore options <
-****
+
 // the "local" strategy is a fallback option. the cedarling will use a statically embedded policy store, located in `/policy-store/default.json`
 const local = {
 	strategy: "local"
@@ -134,7 +134,7 @@ const lockMaster = {
 init(config);
 ```
 
----
+### `authz` Usage
 
 ```js
 // Cedarling Authorization Flow
@@ -149,4 +149,4 @@ init(..);
 
 ### Lock Master SSE Interface 🚧
 
-> A specification for Policy Updates is in incubation
+> Status List updates are in incubation

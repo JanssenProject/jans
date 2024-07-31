@@ -113,7 +113,6 @@ pub fn parse(tokens: &str) -> Statement {
 	}
 
 	// statements should have length of 1, since it's either an operation or a simple binding
-	wasm_bindgen_test::console_log!("Statements: {:?}", statements);
 	if statements.len() != 1 {
 		throw_str("multiple statements found, possible syntax error")
 	}
@@ -151,7 +150,7 @@ mod operators {
 
 #[wasm_bindgen_test::wasm_bindgen_test]
 fn boolean_parser() {
-	let _ = parse("&(Application, |(Client, Role))");
+	let _ = parse("&(Application, |(Client, User))");
 	let _ = parse("&(!(Client), Application, !(Application))");
 	let _ = parse("&(Client, Application, User)");
 	let _ = parse("Client");

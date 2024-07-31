@@ -37,7 +37,7 @@ async fn remote() {
 			id: "fc2fee0253af46f3dce320484c42444ae0b24f7ec84a".into(),
 		},
 		decompress_policy_store: false,
-		trust_store_refresh_rate: Some(5000),
+		trust_store_refresh_rate: None,
 		supported_signature_algorithms: std::collections::BTreeSet::from_iter(["HS256".into(), "HS384".into(), "RS256".into()]),
 	};
 
