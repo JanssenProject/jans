@@ -162,7 +162,7 @@ public class AssetService {
             throw new InvalidAttributeException("Asset object is null!!!");
         }
 
-        // For update asset file is optional.
+        // For update request, asset file is optional.
         if (!isUpdate && documentStream == null) {
             throw new InvalidAttributeException(" Document data stream object is null!!!");
         }
@@ -178,9 +178,22 @@ public class AssetService {
 
             // get asset
             try (InputStream is = new Base64InputStream(getInputStream(bos), true)) {
-                asset = setAssetContent(asset, is, isUpdate);
+                asset = setAssetContent(asset, is);
             }
         }
+
+        if (isUpdate && documentStream == null) {
+            // update request without asset file, get the existing asset content from DB
+            Document existingDoc = getAssetByInum(asset.getInum());
+            if (existingDoc == null) {
+                throw new InvalidAttributeException("Asset with inum '" + asset.getInum() + "' does not exist!!!");
+            } else {
+                asset.setDocument(existingDoc.getDocument());
+            }
+        }
+
+        // update asset revision
+        updateRevision(asset);
 
         // save asset in DB store
         String inum = asset.getInum();
@@ -259,31 +272,18 @@ public class AssetService {
         return validFileExtension;
     }
 
-    private Document setAssetContent(Document asset, InputStream documentStream, boolean isUpdate)
-            throws Exception {
+    private Document setAssetContent(Document asset, InputStream documentStream) throws IOException {
         log.info(" Set asset content - asset:{}, documentStream:{}", asset, documentStream);
         if (asset == null) {
             throw new InvalidAttributeException(" Asset object is null!!!");
         }
 
-        if (!isUpdate && documentStream == null) {
+        if (documentStream == null) {
             throw new InvalidAttributeException(" Asset data stream is null!!!");
         }
 
-        String documentContent = null;
-        if (documentStream != null) {
-            documentContent = new String(documentStream.readAllBytes(), StandardCharsets.UTF_8);
-        } else {
-            // since update get the existing document
-            Document existingDoc = getAssetByInum(asset.getInum());
-            if (existingDoc != null) {
-                asset.setDocument(existingDoc.getDocument());
-            }
-        }
+        String documentContent = new String(documentStream.readAllBytes(), StandardCharsets.UTF_8);
         asset.setDocument(documentContent);
-
-        // update asset revision
-        updateRevision(asset);
 
         log.info("Successfully updated asset");
         return asset;
@@ -338,6 +338,13 @@ public class AssetService {
 
             if (StringUtils.isBlank(serviceDirectory)) {
                 throw new InvalidConfigurationException("Service directory to save asset is null!");
+            }
+
+            // check if the asset directory exist
+            boolean serviceDirectoryExist = isServiceDirectoryExist(serviceDirectory);
+            if (!serviceDirectoryExist) {
+                throw new InvalidConfigurationException(
+                        "Cannot save asset as service directory '" + serviceDirectory + "' does not exist!");
             }
 
             String filePath = serviceDirectory + File.separator + assetFileName;
@@ -442,6 +449,7 @@ public class AssetService {
             return path;
         }
         path = String.format(assetDir, serviceName);
+        log.info("Service directory assetDir:{}, serviceName:{}, path:{}", assetDir, serviceName, path);
 
         return path;
 
@@ -538,6 +546,13 @@ public class AssetService {
 
         }
 
+    }
+
+    private boolean isServiceDirectoryExist(String serviceDirectory) {
+        File dir = new File(serviceDirectory);
+        boolean serviceDirectoryExist = dir.exists();
+        log.error("Check if serviceDirectory:{} - exist:{}", serviceDirectory, serviceDirectoryExist);
+        return serviceDirectoryExist;
     }
 
 }

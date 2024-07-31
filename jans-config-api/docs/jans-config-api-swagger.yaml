@@ -8312,17 +8312,17 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        adminCanView:
-          type: boolean
-        adminCanEdit:
+        selected:
           type: boolean
         whitePagesCanView:
           type: boolean
-        selected:
-          type: boolean
         userCanEdit:
           type: boolean
+        adminCanEdit:
+          type: boolean
         userCanView:
+          type: boolean
+        adminCanView:
           type: boolean
         adminCanAccess:
           type: boolean
@@ -9163,6 +9163,8 @@ components:
           type: boolean
         lockMessageConfig:
           $ref: '#/components/schemas/LockMessageConfig'
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -9172,8 +9174,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -9940,10 +9940,10 @@ components:
           type: array
           items:
             type: object
-        displayValue:
-          type: string
         value:
           type: object
+        displayValue:
+          type: string
     LocalizedString:
       type: object
       properties:
@@ -10731,10 +10731,10 @@ components:
         ttl:
           type: integer
           format: int32
-        persisted:
-          type: boolean
         opbrowserState:
           type: string
+        persisted:
+          type: boolean
     SessionIdAccessMap:
       type: object
       properties:

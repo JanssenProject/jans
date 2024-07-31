@@ -1089,10 +1089,10 @@ components:
           type: string
         inum:
           type: string
-          description: Unique indetifier
+          description: Unique identifier
         owner:
           type: string
-          description: Trust Relationship manger
+          description: Creator of Trust Relationship.
         name:
           maxLength: 60
           minLength: 0
@@ -1108,17 +1108,17 @@ components:
           maxLength: 4000
           minLength: 0
           type: string
-          description: The description of the Trust Relationship.
+          description: Description of the Trust Relationship.
         baseUrl:
           type: string
           description: URL to use when the auth server needs to redirect.
         enabled:
           type: boolean
-          description: Status of Trust Relationship.
+          description: Indicates if Trust Relationship is enabled.
         alwaysDisplayInConsole:
           type: boolean
-          description: Boolean flag to indicate if Trust Relationship should always
-            be listed in the UI.
+          description: Indicates if Trust Relationship should always be listed in
+            the UI.
         clientAuthenticatorType:
           type: string
           description: Preferred Authenticator Type.
@@ -1127,7 +1127,7 @@ components:
           description: Client secret.
         registrationAccessToken:
           type: string
-          description: Registration Access Token.
+          description: Registration access token.
         consentRequired:
           type: boolean
           description: Boolean value if consent is required.
@@ -1153,19 +1153,19 @@ components:
           description: Trust Relationship metadata file location.
         releasedAttributes:
           type: array
-          description: Trust Relationship attributes that will be relased to SAML
+          description: Trust Relationship attributes that will be released to SAML
             server.
           items:
             type: string
-            description: Trust Relationship attributes that will be relased to SAML
+            description: Trust Relationship attributes that will be released to SAML
               server.
         spLogoutURL:
           pattern: "^$|(^(https?|http)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|])"
           type: string
-          description: URL that will be used to for logout requests.
+          description: Logout request URL.
         status:
           type: string
-          description: Status of Trust Relationship setup.
+          description: Trust Relationship setup status.
           enum:
           - active
           - inactive
@@ -1181,10 +1181,10 @@ components:
           - Failed
         validationLog:
           type: array
-          description: List of validation log.
+          description: Validation log.
           items:
             type: string
-            description: List of validation log.
+            description: Validation log.
         profileConfigurations:
           type: object
           additionalProperties:

@@ -39,11 +39,11 @@ public class TrustRelationship extends Entry implements Serializable {
     private static final long serialVersionUID = 7912166229997681502L;
 
     @AttributeName(ignoreDuringUpdate = true)
-    @Schema(description = "Unique indetifier")
+    @Schema(description = "Unique identifier")
     private String inum;
 
     @AttributeName
-    @Schema(description = "Trust Relationship manger")
+    @Schema(description = "Creator of Trust Relationship.")
     private String owner;
 
     @AttributeName(name = "name")
@@ -61,7 +61,7 @@ public class TrustRelationship extends Entry implements Serializable {
     @NotNull
     @Size(min = 0, max = 4000, message = "Length of the Description should not exceed 4000")
     @AttributeName
-    @Schema(description = "The description of the Trust Relationship.")
+    @Schema(description = "Description of the Trust Relationship.")
     private String description;
     
     @Schema(description = "URL to use when the auth server needs to redirect.")
@@ -69,11 +69,11 @@ public class TrustRelationship extends Entry implements Serializable {
     private String baseUrl;
 
     @AttributeName(name = "jansEnabled")
-    @Schema(description = "Status of Trust Relationship.")
+    @Schema(description = "Indicates if Trust Relationship is enabled.")
     private boolean enabled;
 
     @AttributeName(name = "displayInConsole")
-    @Schema(description = "Boolean flag to indicate if Trust Relationship should always be listed in the UI.")
+    @Schema(description = "Indicates if Trust Relationship should always be listed in the UI.")
     private boolean alwaysDisplayInConsole;
 
     @AttributeName(name = "jansPreferredMethod")
@@ -85,7 +85,7 @@ public class TrustRelationship extends Entry implements Serializable {
     private String secret;
 
     @AttributeName(name = "jansRegistrationAccessTkn")
-    @Schema(description = "Registration Access Token.")
+    @Schema(description = "Registration access token.")
     private String registrationAccessToken;
 
     @Schema(description = "Boolean value if consent is required.")
@@ -108,7 +108,7 @@ public class TrustRelationship extends Entry implements Serializable {
 
     @AttributeName(name = "jansSAMLspMetaDataFN")
     @Hidden
-    @Schema(description = "Trust Relationship metadata file location.")
+    @Schema(description = "Trust Relationship metadata file name.")
     private String spMetaDataFN;
 
     @AttributeName(name = "jansSAMLspMetaDataURL")
@@ -120,16 +120,16 @@ public class TrustRelationship extends Entry implements Serializable {
     private String metaLocation;
 
     @AttributeName(name = "jansReleasedAttr")
-    @Schema(description = "Trust Relationship attributes that will be relased to SAML server.")
+    @Schema(description = "Trust Relationship attributes that will be released to SAML server.")
     private List<String> releasedAttributes;
 
     @Pattern(regexp = "^$|(^(https?|http)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|])", message = "Please enter a valid url, including protocol (http/https)")
     @AttributeName(name = "jansPostLogoutRedirectURI")
-    @Schema(description = "URL that will be used to for logout requests.")
+    @Schema(description = "Logout request URL.")
     private String spLogoutURL;
 
     @AttributeName(name = "jansStatus")
-    @Schema(description = "Status of Trust Relationship setup.")
+    @Schema(description = "Trust Relationship setup status.")
     private GluuStatus status;
 
     @AttributeName(name = "jansValidationStatus")
@@ -137,7 +137,7 @@ public class TrustRelationship extends Entry implements Serializable {
     private ValidationStatus validationStatus;
 
     @AttributeName(name = "jansValidationLog")
-    @Schema(description = "List of validation log.")
+    @Schema(description = "Validation log.")
     private List<String> validationLog;
 
     @Schema(description = "List of profile configuration.")
