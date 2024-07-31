@@ -12,23 +12,23 @@ assets.
 
 === "Use Command-line"
 
- Use the command line to perform actions from the terminal. Learn how to 
- use Jans CLI [here](../config-guide/config-tools/jans-cli/README.md) or jump straight to 
- the [Using Command Line](#using-command-line)
+    Use the command line to perform actions from the terminal. Learn how to 
+    use Jans CLI [here](../config-guide/config-tools/jans-cli/README.md) or jump straight to 
+    the [Using Command Line](#using-command-line)
 
 === "Use Text-based UI"
 
- Use a fully functional text-based user interface from the terminal. 
- Learn how to use Jans Text-based UI (TUI) 
- [here](../config-guide/config-tools/jans-tui/README.md) or jump straight to the
- [Using Text-based UI](#using-text-based-ui)
+    Use a fully functional text-based user interface from the terminal. 
+    Learn how to use Jans Text-based UI (TUI) 
+    [here](../config-guide/config-tools/jans-tui/README.md) or jump straight to the
+    [Using Text-based UI](#using-text-based-ui)
 
 === "Use REST API"
 
- Use REST API for programmatic access or invoke via tools like CURL or 
- Postman. Learn how to use Janssen Server Config API 
- [here](../config-guide/config-tools/config-api/README.md) or Jump straight to the
- [Using Configuration REST API](#using-configuration-rest-api)
+    Use REST API for programmatic access or invoke via tools like CURL or 
+    Postman. Learn how to use Janssen Server Config API 
+    [here](../config-guide/config-tools/config-api/README.md) or Jump straight to the
+    [Using Configuration REST API](#using-configuration-rest-api)
 
 ##  Using The Command Line
 
@@ -263,7 +263,7 @@ below to get the sample.
 Using the schema and the example above, we have added below data to the 
 file `/tmp/add-asset.json`
 
-```json title="Sample Output" linenums="1" 
+```json title="Input" linenums="1" 
 
 ```
 
