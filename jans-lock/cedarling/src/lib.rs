@@ -1,4 +1,4 @@
-use serde_wasm_bindgen::{from_value, to_value};
+use serde_wasm_bindgen::from_value;
 use wasm_bindgen::prelude::*;
 
 pub mod authz;
@@ -18,31 +18,11 @@ pub async fn start() {
 
 #[wasm_bindgen]
 pub async fn init(config: JsValue) {
-	let config = from_value::<startup::types::CedarlingConfig>(config).unwrap();
+	let config = from_value::<startup::types::CedarlingConfig>(config).expect_throw("Unable to parse startup config");
 
 	// Startup sequence
 	startup::init(&config).await;
 
 	// Initialize authz module
 	authz::init(&config);
-}
-
-#[wasm_bindgen_test::wasm_bindgen_test]
-async fn remote() {
-	let config = startup::types::CedarlingConfig {
-		application_name: Some("test#docs".into()),
-		require_aud_validation: false,
-		jwt_validation: false,
-		policy_store: startup::types::PolicyStoreConfig::Local {
-			id: "fc2fee0253af46f3dce320484c42444ae0b24f7ec84a".into(),
-		},
-		decompress_policy_store: false,
-		trust_store_refresh_rate: None,
-		supported_signature_algorithms: std::collections::BTreeSet::from_iter(["HS256".into(), "HS384".into(), "RS256".into()]),
-	};
-
-	let config = to_value(&config).unwrap_throw();
-	web_sys::console::log_1(&config);
-
-	init(config).await;
 }

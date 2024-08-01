@@ -17,6 +17,7 @@ pub struct CedarlingConfig {
 
 	// policy store
 	pub policy_store: PolicyStoreConfig,
+	#[serde(default)]
 	pub decompress_policy_store: bool,
 	pub trust_store_refresh_rate: Option<i32>,
 

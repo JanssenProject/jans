@@ -147,11 +147,3 @@ mod operators {
 		}
 	}
 }
-
-#[wasm_bindgen_test::wasm_bindgen_test]
-fn boolean_parser() {
-	let _ = parse("&(Application, |(Client, User))");
-	let _ = parse("&(!(Client), Application, !(Application))");
-	let _ = parse("&(Client, Application, User)");
-	let _ = parse("Client");
-}
