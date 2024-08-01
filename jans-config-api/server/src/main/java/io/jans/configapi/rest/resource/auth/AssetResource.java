@@ -252,7 +252,7 @@ public class AssetResource extends ConfigBaseResource {
             asset = assetService.saveAsset(asset, assetStream, false);
             log.debug("Saved asset:{} ", asset);
         } catch (Exception ex) {
-            log.error("Application Error while creating asset is - status:{}", ex.getMessage());
+            log.error("Application Error while creating asset is - {}", ex.getMessage());
             throwInternalServerException(APPLICATION_ERROR, ex);
         }
 
