@@ -511,7 +511,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
             #write post-install.py script
             self.logIt("Writing snap-post-setup.py", pbar='post-setup')
             post_setup_script = self.readFile(os.path.join(Config.templateFolder, 'snap-post-setup.py'))
-            
+
             for key, val in (('{{SNAP_NAME}}', os.environ['SNAP_NAME']),
                              ('{{SNAP_PY3}}', paths.cmd_py3),
                              ('{{SNAP}}', base.snap),
@@ -559,6 +559,9 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
         # write default Lock Configuration to DB
         base.current_app.JansLockInstaller.configure_message_conf()
+
+        # Update jansServiceModule for config-api on DB
+        base.current_app.ConfigApiInstaller.update_jansservicemodule()
 
     def secure_files(self):
         self.run([paths.cmd_chown, '-R', 'jetty:root', Config.certFolder])
