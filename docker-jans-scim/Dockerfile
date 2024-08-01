@@ -60,7 +60,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-scim/webapps \
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=649c747ac3da6bf59b5e07f0f022aa14b319abe1
+ENV JANS_SOURCE_VERSION=f01c038e218d454d0bfbd128cef2e8290020919d
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCIM_RESOURCE_DIR=jans-scim/server/src/main/resources
 
