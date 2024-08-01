@@ -81,8 +81,8 @@ To get sample schema type /opt/jans/jans-cli/config-cli.py --schema-sample <sche
 
 ### Get All Current Custom Assets
 
-Get all the currently configured custom assets on the Janssen Server by 
-performing this operation.
+Use the operation ID `get-all-assets` to get all the currently configured 
+custom assets on the Janssen Server.
 
 ```bash title="Command"
 /opt/jans/jans-cli/config-cli.py --operation-id get-all-assets
@@ -90,67 +90,80 @@ performing this operation.
 ```json title="Sample Output" linenums="1"
 {
   "start": 0,
-  "totalEntriesCount": 2,
-  "entriesCount": 2,
+  "totalEntriesCount": 3,
+  "entriesCount": 3,
   "entries": [
- {
-      "dn": "inum=36014ca4-0978-4d95-8858-964b815ea770,ou=document,o=jans",
-      "inum": "36014ca4-0978-4d95-8858-964b815ea770",
-      "displayName": "custom.xhtml",
-      "description": "custom page",
-      "document": "",
-      "creationDate": "2024-07-25T11:40:17",
+    {
+      "dn": "inum=61edc29d-45f8-4ab9-8c9a-7b39e4cbe440,ou=document,o=jans",
+      "inum": "61edc29d-45f8-4ab9-8c9a-7b39e4cbe440",
+      "displayName": "p2.properties",
+      "description": "Valid text description",
+      "document": "cHJvcGVydGllcyBoZXJlLiAK\r\n",
+      "creationDate": "2024-07-31T07:36:08",
       "jansService": [
         "jans-auth"
- ],
-      "jansLevel": 1,
+      ],
+      "jansLevel": 142,
       "jansEnabled": true,
-      "baseDn": "inum=36014ca4-0978-4d95-8858-964b815ea770,ou=document,o=jans"
- },
- {
-      "dn": "inum=b5ab08e4-17b2-487d-845a-bdc6b48fd5b4,ou=document,o=jans",
-      "inum": "b5ab08e4-17b2-487d-845a-bdc6b48fd5b4",
-      "displayName": "a.png",
-      "description": "custom image",
-      "document": "",
-      "creationDate": "2024-07-25T11:44:38",
+      "baseDn": "inum=61edc29d-45f8-4ab9-8c9a-7b39e4cbe440,ou=document,o=jans"
+    },
+    {
+      "dn": "inum=835c7a68-57b1-4e39-8d2a-2a3963f2a92f,ou=document,o=jans",
+      "inum": "835c7a68-57b1-4e39-8d2a-2a3963f2a92f",
+      "displayName": "p1.properties",
+      "description": "updated thrice Valid text description",
+      "document": "cHJvcGVydGllcwo=\r\n",
       "jansService": [
         "jans-auth"
- ],
-      "jansLevel": 2,
+      ],
+      "jansEnabled": false,
+      "baseDn": "inum=835c7a68-57b1-4e39-8d2a-2a3963f2a92f,ou=document,o=jans"
+    },
+    {
+      "dn": "inum=fd67d07b-c874-4bc1-a9f0-860fc4f7a091,ou=document,o=jans",
+      "inum": "fd67d07b-c874-4bc1-a9f0-860fc4f7a091",
+      "displayName": "p.properties",
+      "description": "Valid text description",
+      "document": "cHJvcGVydGllcyBoZXJlLiAK\r\n",
+      "creationDate": "2024-07-31T07:40:03",
+      "jansService": [
+        "jans-auth"
+      ],
+      "jansLevel": 142,
       "jansEnabled": true,
-      "baseDn": "inum=b5ab08e4-17b2-487d-845a-bdc6b48fd5b4,ou=document,o=jans"
- }
- ]
+      "baseDn": "inum=fd67d07b-c874-4bc1-a9f0-860fc4f7a091,ou=document,o=jans"
+    }
+  ]
 }
+
 ```
 
 ### Get Custom Asset By inum
 
-With `get-all-assets` operation-id, we can get any specific asset matched 
+With `get-asset-by-inum` operation-id, we can get any specific asset matched 
 with `inum`. If we know the `inum`, we can simply use the below command:
 
 ```bash title="Command"
 /opt/jans/jans-cli/config-cli.py --operation-id get-asset-by-inum \
---url-suffix inum:36014ca4-0978-4d95-8858-964b815ea770
+--url-suffix inum:61edc29d-45f8-4ab9-8c9a-7b39e4cbe440
 ```
 It returns the details as below:
 
 
 ```json title="Sample Output" linenums="1"
- {
-  "dn": "inum=36014ca4-0978-4d95-8858-964b815ea770,ou=document,o=jans",
-  "inum": "36014ca4-0978-4d95-8858-964b815ea770",
-  "displayName": "custom.xhtml",
-  "description": "custom page",
-  "document": "",
-  "creationDate": "2024-07-25T11:40:17",
+{
+  "dn": "inum=61edc29d-45f8-4ab9-8c9a-7b39e4cbe440,ou=document,o=jans",
+  "inum": "61edc29d-45f8-4ab9-8c9a-7b39e4cbe440",
+  "displayName": "p2.properties",
+  "description": "Valid text description",
+  "document": "cHJvcGVydGllcyBoZXJlLiAK\r\n",
+  "creationDate": "2024-07-31T07:36:08",
   "jansService": [
     "jans-auth"
- ],
-  "jansLevel": 1,
+  ],
+  "jansLevel": 142,
   "jansEnabled": true,
-  "baseDn": "inum=36014ca4-0978-4d95-8858-964b815ea770,ou=document,o=jans"
+  "baseDn": "inum=61edc29d-45f8-4ab9-8c9a-7b39e4cbe440,ou=document,o=jans"
 }
 ```
 
@@ -162,7 +175,7 @@ With `get-asset-by-name` operation-id, we can get any specific asset matched wit
 
 ```bash title="Command"
 /opt/jans/jans-cli/config-cli.py --operation-id get-asset-by-name \
---url-suffix name:a.png
+--url-suffix name:p1.properties
 ```
 It returns the details as below:
 
@@ -172,29 +185,27 @@ It returns the details as below:
   "totalEntriesCount": 1,
   "entriesCount": 1,
   "entries": [
- {
-      "dn": "inum=b5ab08e4-17b2-487d-845a-bdc6b48fd5b4,ou=document,o=jans",
-      "inum": "b5ab08e4-17b2-487d-845a-bdc6b48fd5b4",
-      "displayName": "a.png",
-      "description": "custom image",
-      "document": "",
-      "creationDate": "2024-07-25T11:44:38",
+    {
+      "dn": "inum=835c7a68-57b1-4e39-8d2a-2a3963f2a92f,ou=document,o=jans",
+      "inum": "835c7a68-57b1-4e39-8d2a-2a3963f2a92f",
+      "displayName": "p1.properties",
+      "description": "updated thrice Valid text description",
+      "document": "cHJvcGVydGllcwo=\r\n",
       "jansService": [
         "jans-auth"
- ],
-      "jansLevel": 2,
-      "jansEnabled": true,
-      "baseDn": "inum=b5ab08e4-17b2-487d-845a-bdc6b48fd5b4,ou=document,o=jans"
- }
- ]
+      ],
+      "jansEnabled": false,
+      "baseDn": "inum=835c7a68-57b1-4e39-8d2a-2a3963f2a92f,ou=document,o=jans"
+    }
+  ]
 }
 ```
 
 ### Get Services
 
 
-Get the list of Janssen Server services that support custom assets
- by performing `get-asset-services` operation.
+Get the list of Janssen Server services that support custom assets 
+by performing `get-asset-services` operation.
 
 ```bash title="Command"
 /opt/jans/jans-cli/config-cli.py --operation-id get-asset-services
@@ -240,7 +251,7 @@ operation.
 ### Add New Custom Asset
 
 To create a new asset, we can use `post-new-asset` operation id. As shown in
-the [output](#using-command-line) for `--info` command, the `post-new-asset` 
+the [output](#using-the-command-line) for `--info` command, the `post-new-asset` 
 operation requires data to be sent according to `AssetForm` schema.
 
 
@@ -259,23 +270,22 @@ below to get the sample.
 ```
 
 Using the schema and the example above, we have added below data to the 
-file `/tmp/add-asset.json`. Example below will load `p.properties` file as
+file `/tmp/add-asset.json`. Example below will load `p3.properties` file as
 a custom asset to the `jans-auth` service.
 
 ```json title="Input" linenums="1" 
 {
   "document": {
-    "displayName": "p.properties",
-    "description": "Valid text description",
+    "displayName": "p3.properties",
+    "description": "text description",
     "jansService": [
       "jans-auth"
     ],
-    "jansLevel": 142,
+    "jansLevel": 144,
     "jansEnabled": true
   },
-  "assetFile": "/tmp/p.properties"
+  "assetFile": "/tmp/p3.properties"
 }
-
 ```
 Now let's post this Assert to the Janssen Server to be added to the existing set:
 
@@ -284,48 +294,46 @@ Now let's post this Assert to the Janssen Server to be added to the existing set
  --data /tmp/add-asset.json
 ```
 
-
-
 ### Update Existing Custom Assets
 
 Use the `put-asset` operation to update an existing asset. This operation uses
 same schema as [add new asset](#add-new-custom-asset) operation. For example,
 assuming that there is an existing asset as show below:
 
-```json title="Existing Asset"
-    {
-      "dn": "inum=48f2e07b-b879-4db2-816b-36bc4d69701f,ou=document,o=jans",
-      "inum": "48f2e07b-b879-4db2-816b-36bc4d69701f",
-      "displayName": "p.properties",
-      "description": "Valid text description",
-      "document": "cHJvcGVydGllcyBoZXJlLiAK\r\n",
-      "creationDate": "2024-07-31T06:24:55",
-      "jansService": [
-        "jans-auth"
-      ],
-      "jansLevel": 142,
-      "jansEnabled": true,
-      "baseDn": "inum=48f2e07b-b879-4db2-816b-36bc4d69701f,ou=document,o=jans"
-    }
+```json title="Existing Asset" linenums="1"
+{
+  "dn": "inum=fd67d07b-c874-4bc1-a9f0-860fc4f7a091,ou=document,o=jans",
+  "inum": "fd67d07b-c874-4bc1-a9f0-860fc4f7a091",
+  "displayName": "p.properties",
+  "description": "Valid text description",
+  "document": "cHJvcGVydGllcyBoZXJlLiAK\r\n",
+  "creationDate": "2024-07-31T07:40:03",
+  "jansService": [
+    "jans-auth"
+  ],
+  "jansLevel": 142,
+  "jansEnabled": true,
+  "baseDn": "inum=fd67d07b-c874-4bc1-a9f0-860fc4f7a091,ou=document,o=jans"
+}
 ```
 
 Now to update level of this asset to 6, create a text file with following
 content in it. Let's name this text file as `/tmp/update-asset.json`
 
-```json 
+```json title="Input" linenums="1"
 {
   "document": {
-      "dn": "inum=48f2e07b-b879-4db2-816b-36bc4d69701f,ou=document,o=jans",
-      "inum": "48f2e07b-b879-4db2-816b-36bc4d69701f",
+      "dn": "inum=fd67d07b-c874-4bc1-a9f0-860fc4f7a091,ou=document,o=jans",
+      "inum": "fd67d07b-c874-4bc1-a9f0-860fc4f7a091",
       "displayName": "p.properties",
       "description": "Valid text description",
       "document": "cHJvcGVydGllcyBoZXJlLiAK\r\n",
-      "creationDate": "2024-07-31T06:24:55",
+      "creationDate": "2024-07-31T07:40:03",
       "jansService": [
         "jans-auth"
       ],
       "jansLevel": 6,
-      "jansEnabled": true
+      "jansEnabled": true,
    },
   "assetFile": "/tmp/p.properties"
 }
@@ -340,18 +348,22 @@ Now use the command below to update the asset with new value for level.
 
 Upon successful execution, this command will return with updated asset values.
 
-```json title="Return values"
-
+```json title="Return values" linenums="1"
+{
+  "dn": "inum=fd67d07b-c874-4bc1-a9f0-860fc4f7a091,ou=document,o=jans",
+  "inum": "fd67d07b-c874-4bc1-a9f0-860fc4f7a091",
+  "displayName": "p.properties",
+  "description": "Valid text description",
+  "document": "cHJvcGVydGllcyBoZXJlLiAK\r\n",
+  "creationDate": "2024-07-31T07:40:03",
+  "jansService": [
+    "jans-auth"
+  ],
+  "jansLevel": 6,
+  "jansEnabled": true,
+  "baseDn": "inum=fd67d07b-c874-4bc1-a9f0-860fc4f7a091,ou=document,o=jans"
+}
 ```
-
-3. We have changed only the `` to ` ` in the existing asset.
- Use the updated file to send the update to the Janssen Server using the command below
- ```bash title="Command"
-   /opt/jans/jans-cli/config-cli.py --operation-id put-asset \
-   --data /tmp/update-asset.json
- ```
-This will update the existing asset matched with inum value.
-
 
 ### Delete Custom Asset
 
@@ -359,7 +371,7 @@ You can delete any custom asset by its `inum` value.
 
 ```bash title="Command"
 /opt/jans/jans-cli/config-cli.py --operation-id delete-asset \
---url-suffix inum:36014ca4-0978-4d95-8858-964b815ea770
+--url-suffix inum:61edc29d-45f8-4ab9-8c9a-7b39e4cbe440
 ```
 
 ## Using Text-based UI
