@@ -12,7 +12,8 @@ from setup_app.utils import base
 from setup_app.utils.package_utils import packageUtils
 from setup_app.static import AppType, InstallOption
 from setup_app.config import Config
-from setup_app.installers.jetty import JettyInstaller
+from setup_app.utils.setup_utils import SetupUtils
+from setup_app.installers.base import BaseInstaller
 from setup_app.utils.ldif_utils import create_client_ldif
 
 # Config
@@ -32,7 +33,7 @@ Config.kc_db_username = 'kcdbuser'
 Config.kc_db_password = 'kcdbuserpassword'
 Config.kc_jdbc_url = 'jdbc:postgresql:kcdbuser:kcdbuserpassword@//localhost:1122/kc_service'
 
-class JansSamlInstaller(JettyInstaller):
+class JansSamlInstaller(BaseInstaller, SetupUtils):
 
     install_var = 'install_jans_saml'
 
