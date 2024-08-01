@@ -1,8 +1,8 @@
 ---
 tags:
-  - administration
-  - configuration
-  - openid-connect
+ - administration
+ - configuration
+ - openid-connect
 ---
 
 # OpenID Connect Configuration
@@ -40,47 +40,46 @@ command Line. To get the details of Janssen command line operations relevant to
 OpenID Connect Client, you can check the operations under `OauthOpenidConnectClients` 
 task using the command below:
 
-Let's get the information of OpenID Connect Client Configuration:
+Let's get the information about OpenID Connect Client Configuration:
 ```bash title="Command"
 /opt/jans/jans-cli/config-cli.py --info OauthOpenidConnectClients
 ```
 ```text title="Sample Output" linenums="1"
 Operation ID: get-oauth-openid-clients
-  Description: Gets list of OpenID Connect clients
-  Parameters:
-  limit: Search size - max size of the results to return [integer]
-  pattern: Search pattern [string]
-  startIndex: The 1-based index of the first query result [integer]
-  sortBy: Attribute whose value will be used to order the returned response [string]
-  sortOrder: Order in which the sortBy param is applied. Allowed values are "ascending" and "descending" [string]
-  fieldValuePair: Field and value pair for seraching [string]
+ Description: Gets list of OpenID Connect clients
+ Parameters:
+ limit: Search size - max size of the results to return [integer]
+ pattern: Search pattern [string]
+ startIndex: The 1-based index of the first query result [integer]
+ sortBy: Attribute whose value will be used to order the returned response [string]
+ sortOrder: Order in which the sortBy param is applied. Allowed values are "ascending" and "descending" [string]
+ fieldValuePair: Field and value pair for seraching [string]
 Operation ID: put-oauth-openid-client
-  Description: Update OpenId Connect client
-  Schema: Client
+ Description: Update OpenId Connect client
+ Schema: Client
 Operation ID: post-oauth-openid-client
-  Description: Create new OpenId Connect client
-  Schema: Client
+ Description: Create new OpenId Connect client
+ Schema: Client
 Operation ID: get-oauth-openid-clients-by-inum
-  Description: Get OpenId Connect Client by Inum
-  Parameters:
-  inum: Client identifier [string]
+ Description: Get OpenId Connect Client by Inum
+ Parameters:
+ inum: Client identifier [string]
 Operation ID: delete-oauth-openid-client-by-inum
-  Description: Delete OpenId Connect client
-  Parameters:
-  inum: Client identifier [string]
+ Description: Delete OpenId Connect client
+ Parameters:
+ inum: Client identifier [string]
 Operation ID: patch-oauth-openid-client-by-inum
-  Description: Patch OpenId Connect client
-  Parameters:
-  inum: Client identifier [string]
-  Schema: Array of JsonPatch
+ Description: Patch OpenId Connect client
+ Parameters:
+ inum: Client identifier [string]
+ Schema: Array of JsonPatch
 
 To get sample schema type /opt/jans/jans-cli/config-cli.py --schema-sample <schema>, for example /opt/jans/jans-cli/config-cli.py --schema-sample JsonPatch
 ```
 
-### Get List of OpenID Clients
+### Get List of OpenID Connect Clients
 
-To get the openid clients, run the following command:
-We can get list of all configurations of the openid clients using a command like this:
+To get the list of OpenID Connect clients, run the following command:
 
 ```bash title="Command"
 /opt/jans/jans-cli/config-cli.py --operation-id get-oauth-openid-clients
@@ -88,29 +87,29 @@ We can get list of all configurations of the openid clients using a command like
 
 ```json title="Sample Output" linenums="1"
 {
+  {
   "start": 0,
-  "totalEntriesCount": 1,
-  "entriesCount": 1,
+  "totalEntriesCount": 3,
+  "entriesCount": 3,
   "entries": [
-    {
+ {
       "dn": "inum=1800.ca57f8f8-e163-4cdc-96f2-e2760e627bfe,ou=clients,o=jans",
       "deletable": false,
-      "clientSecret": "ixwyNVC8ZB8m",
+      "clientSecret": "qAnnHv5Yxw6I+xHXJI6kj6f4pogINrnw7Z/sDPXSW10=",
       "frontChannelLogoutUri": "null",
       "frontChannelLogoutSessionRequired": false,
       "redirectUris": [
-        "https://jans-project.lxd/admin-ui",
-        "http://localhost:4100"
-      ],
+        "https://www.google.com/"
+ ],
       "claimRedirectUris": [],
       "responseTypes": [
         "code"
-      ],
+ ],
       "grantTypes": [
         "authorization_code",
         "refresh_token",
         "client_credentials"
-      ],
+ ],
       "applicationType": "web",
       "contacts": [],
       "clientName": "Jans Config Api Client",
@@ -132,186 +131,72 @@ We can get list of all configurations of the openid clients using a command like
         "inum=1800.01.78,ou=scopes,o=jans",
         "inum=1800.01.71,ou=scopes,o=jans",
         "inum=1800.01.72,ou=scopes,o=jans",
-        "inum=1800.01.73,ou=scopes,o=jans",
-        "inum=1800.01.74,ou=scopes,o=jans",
-        "inum=1800.01.79,ou=scopes,o=jans",
-        "inum=1800.01.067,ou=scopes,o=jans",
-        "inum=1800.01.80,ou=scopes,o=jans",
-        "inum=1800.01.81,ou=scopes,o=jans",
-        "inum=1800.01.64,ou=scopes,o=jans",
-        "inum=1800.03.1,ou=scopes,o=jans",
-        "inum=1800.01.65,ou=scopes,o=jans",
-        "inum=1800.01.66,ou=scopes,o=jans",
-        "inum=1800.03.3,ou=scopes,o=jans",
-        "inum=1800.01.67,ou=scopes,o=jans",
-        "inum=1800.03.2,ou=scopes,o=jans",
-        "inum=1800.01.60,ou=scopes,o=jans",
-        "inum=1800.01.61,ou=scopes,o=jans",
-        "inum=1800.01.62,ou=scopes,o=jans",
-        "inum=1800.01.63,ou=scopes,o=jans",
-        "inum=1800.01.68,ou=scopes,o=jans",
-        "inum=1800.01.69,ou=scopes,o=jans",
-        "inum=1800.01.70,ou=scopes,o=jans",
-        "inum=1800.03.5,ou=scopes,o=jans",
-        "inum=1800.03.4,ou=scopes,o=jans",
-        "inum=1800.03.7,ou=scopes,o=jans",
-        "inum=1800.03.6,ou=scopes,o=jans",
-        "inum=1800.01.10,ou=scopes,o=jans",
-        "inum=1800.01.11,ou=scopes,o=jans",
-        "inum=1800.01.12,ou=scopes,o=jans",
-        "inum=1800.01.17,ou=scopes,o=jans",
-        "inum=1800.01.18,ou=scopes,o=jans",
-        "inum=1800.01.19,ou=scopes,o=jans",
-        "inum=1800.01.13,ou=scopes,o=jans",
-        "inum=1800.01.14,ou=scopes,o=jans",
-        "inum=1800.01.15,ou=scopes,o=jans",
-        "inum=1800.01.16,ou=scopes,o=jans",
-        "inum=1800.02.2,ou=scopes,o=jans",
-        "inum=1800.02.1,ou=scopes,o=jans",
-        "inum=1800.02.4,ou=scopes,o=jans",
-        "inum=1800.02.3,ou=scopes,o=jans",
-        "inum=1800.01.82,ou=scopes,o=jans",
-        "inum=1800.01.83,ou=scopes,o=jans",
-        "inum=1800.01.84,ou=scopes,o=jans",
-        "inum=1800.01.85,ou=scopes,o=jans",
-        "inum=1800.02.6,ou=scopes,o=jans",
-        "inum=1800.02.5,ou=scopes,o=jans",
-        "inum=1800.01.31,ou=scopes,o=jans",
-        "inum=1800.01.32,ou=scopes,o=jans",
-        "inum=1800.01.33,ou=scopes,o=jans",
-        "inum=1800.01.34,ou=scopes,o=jans",
-        "inum=1800.01.30,ou=scopes,o=jans",
-        "inum=1800.01.39,ou=scopes,o=jans",
-        "inum=1800.01.35,ou=scopes,o=jans",
-        "inum=1800.01.36,ou=scopes,o=jans",
-        "inum=1800.01.37,ou=scopes,o=jans",
-        "inum=1800.01.38,ou=scopes,o=jans",
-        "inum=1800.01.3,ou=scopes,o=jans",
-        "inum=1800.01.20,ou=scopes,o=jans",
-        "inum=1800.04.14,ou=scopes,o=jans",
-        "inum=1800.01.21,ou=scopes,o=jans",
-        "inum=1800.01.2,ou=scopes,o=jans",
-        "inum=1800.01.22,ou=scopes,o=jans",
-        "inum=1800.01.5,ou=scopes,o=jans",
-        "inum=1800.04.12,ou=scopes,o=jans",
-        "inum=1800.01.23,ou=scopes,o=jans",
-        "inum=1800.01.4,ou=scopes,o=jans",
-        "inum=1800.04.13,ou=scopes,o=jans",
-        "inum=1800.04.10,ou=scopes,o=jans",
-        "inum=1800.04.11,ou=scopes,o=jans",
-        "inum=1800.01.1,ou=scopes,o=jans",
-        "inum=1800.01.28,ou=scopes,o=jans",
-        "inum=1800.01.29,ou=scopes,o=jans",
-        "inum=1800.01.24,ou=scopes,o=jans",
-        "inum=1800.01.25,ou=scopes,o=jans",
-        "inum=1800.01.26,ou=scopes,o=jans",
-        "inum=1800.01.27,ou=scopes,o=jans",
-        "inum=1800.01.7,ou=scopes,o=jans",
-        "inum=1800.01.6,ou=scopes,o=jans",
-        "inum=1800.01.9,ou=scopes,o=jans",
-        "inum=1800.01.8,ou=scopes,o=jans",
-        "inum=1800.01.53,ou=scopes,o=jans",
-        "inum=1800.01.54,ou=scopes,o=jans",
-        "inum=1800.01.55,ou=scopes,o=jans",
-        "inum=1800.01.56,ou=scopes,o=jans",
-        "inum=1800.01.50,ou=scopes,o=jans",
-        "inum=1800.01.51,ou=scopes,o=jans",
-        "inum=1800.01.52,ou=scopes,o=jans",
-        "inum=1800.01.57,ou=scopes,o=jans",
-        "inum=1800.01.58,ou=scopes,o=jans",
-        "inum=1800.01.59,ou=scopes,o=jans",
-        "inum=1800.01.42,ou=scopes,o=jans",
-        "inum=1800.01.43,ou=scopes,o=jans",
-        "inum=1800.01.44,ou=scopes,o=jans",
-        "inum=1800.04.2,ou=scopes,o=jans",
-        "inum=1800.01.45,ou=scopes,o=jans",
-        "inum=1800.04.1,ou=scopes,o=jans",
-        "inum=1800.01.40,ou=scopes,o=jans",
-        "inum=1800.01.41,ou=scopes,o=jans",
-        "inum=1800.01.46,ou=scopes,o=jans",
-        "inum=1800.01.47,ou=scopes,o=jans",
-        "inum=1800.01.49,ou=scopes,o=jans",
-        "inum=1800.04.8,ou=scopes,o=jans",
-        "inum=1800.04.7,ou=scopes,o=jans",
-        "inum=1800.04.9,ou=scopes,o=jans",
-        "inum=1800.04.4,ou=scopes,o=jans",
-        "inum=1800.04.3,ou=scopes,o=jans",
-        "inum=1800.04.6,ou=scopes,o=jans",
-        "inum=1800.04.5,ou=scopes,o=jans",
-        "inum=C4F7,ou=scopes,o=jans",
-        "inum=1200.D3BDE7,ou=scopes,o=jans",
-        "inum=1200.BEBC85,ou=scopes,o=jans"
-      ],
+ ],
       "claims": [],
       "trustedClient": false,
-      "persistClientAuthorizations": true,
-      "includeClaimsInIdToken": false,
-      "customAttributes": [
-        {
-          "name": "displayNameLocalized",
-          "multiValued": true
-        },
-        {
-          "name": "jansClntURILocalized",
-          "multiValued": true
-        },
-        {
-          "name": "jansLogoURILocalized",
-          "multiValued": true,
-          "values": [
-            "{}"
-          ],
-          "value": "{}",
-          "displayValue": "{}"
-        },
-        {
-          "name": "jansPolicyURILocalized",
-          "multiValued": true,
-          "values": [
-            "{}"
-          ],
-          "value": "{}",
-          "displayValue": "{}"
-        },
-        {
-          "name": "jansTosURILocalized",
-          "multiValued": true,
-          "values": [
-            "{}"
-          ],
-          "value": "{}",
-          "displayValue": "{}"
-        }
-      ],
-      "rptAsJwt": false,
-      "accessTokenAsJwt": false,
-      "accessTokenSigningAlg": "RS256",
-      "disabled": false,
-      "authorizedOrigins": [],
-      "attributes": {
-        "runIntrospectionScriptBeforeJwtCreation": false,
-        "keepClientAuthorizationAfterExpiration": false,
-        "allowSpontaneousScopes": false,
-        "backchannelLogoutSessionRequired": false,
-        "parLifetime": 600,
-        "requirePar": false,
-        "dpopBoundAccessToken": false,
-        "jansDefaultPromptLogin": false,
-        "minimumAcrLevel": -1
-      },
-      "displayName": "Jans Config Api Client",
-      "authenticationMethod": "client_secret_basic",
-      "allAuthenticationMethods": [
-        "client_secret_basic"
-      ],
+   ....
+   ....
+   ....
+  
       "baseDn": "inum=1800.ca57f8f8-e163-4cdc-96f2-e2760e627bfe,ou=clients,o=jans",
       "inum": "1800.ca57f8f8-e163-4cdc-96f2-e2760e627bfe"
-    }
-  ]
+ },
+ {
+      "dn": "inum=478049e2-210d-4b64-bc16-10440c973f65,ou=clients,o=jans",
+      "deletable": false,
+      "clientSecret": "37983639-0586-4ed3-8644-b5bc41c4ce49",
+      "frontChannelLogoutSessionRequired": false,
+      "redirectUris": [
+        "https://www.google.com/"
+ ],
+      "grantTypes": [],
+      "applicationType": "web",
+      "clientNameLocalized": {},
+      "logoUriLocalized": {},
+      "clientUriLocalized": {},
+      "policyUriLocalized": {},
+      "tosUriLocalized": {},
+      "subjectType": "public",
+      "tokenEndpointAuthMethod": "client_secret_basic",
+      "trustedClient": false,
+     .....
+     .....
+     .....
+      ],
+      "baseDn": "inum=478049e2-210d-4b64-bc16-10440c973f65,ou=clients,o=jans",
+      "inum": "478049e2-210d-4b64-bc16-10440c973f65"
+ },
+ {
+      "dn": "inum=ec53d411-5243-4c76-b91c-661b35853cd0,ou=clients,o=jans",
+      "deletable": false,
+      "clientSecret": "456e1c1e-796d-4dc0-9f16-7b54c9e4eb5b",
+      "frontChannelLogoutSessionRequired": false,
+      "redirectUris": [
+        "https://docs.jans.io/"
+ ],
+      "grantTypes": [],
+      "applicationType": "web",
+      "clientNameLocalized": {},
+      "logoUriLocalized": {},
+      "clientUriLocalized": {},
+      "policyUriLocalized": {},
+      "tosUriLocalized": {},
+      "subjectType": "public",
+      "tokenEndpointAuthMethod": "client_secret_basic",
+      "trustedClient": false,
+      .....
+      .....
+      .....
+      
+      "baseDn": "inum=ec53d411-5243-4c76-b91c-661b35853cd0,ou=clients,o=jans",
+      "inum": "ec53d411-5243-4c76-b91c-661b35853cd0"
+ }
+ ]
 }
+
 ```
 
-It will show all the openid clients together. To search using parameters:
+To search using parameters, use the command below:
 
 ```bash title="Command"
 /opt/jans/jans-cli/config-cli.py --operation-id get-oauth-openid-clients \
@@ -319,9 +204,9 @@ It will show all the openid clients together. To search using parameters:
 ```
 
 
-### Creating a New OpenID Clients
+### Creating a New OpenID Connect Clients
 
-To add a openid client, we can use `post-oauth-openid-client` operation id.
+To add an OpenID Connect client, we can use `post-oauth-openid-client` operation id.
 As shown in the [output](#using-command-line) for `--info` command, the
 `post-oauth-openid-client` operation requires data to be sent
 according to `Client` schema.
@@ -339,20 +224,17 @@ the above schema. To fetch the example, use the command below.
 /opt/jans/jans-cli/config-cli.py --schema-sample Client
 ```
 
-Using the schema and the example above, we have added below openid 
-client data to the file `/tmp/openid-connect.json`.
-
-It contains a lot of properties. But, It's not important to
-fill each of these properties. We are going to fill required propertie:
+Using the schema and the example above, we have added OpenID Connect 
+client data to the file `/tmp/openid-connect.json`. An OpenID Connect client may have many properties, but we are going to fill only the required properties as shown below:
 
 ```json title="Input" 
 {
   "redirectUris": [
     "https://www.google.com/"
-  ]
+ ]
 }
 ```
-Now let's post openid client to the Janssen Server to be 
+Now let's post an OpenID Connect client to the Janssen Server to be 
 added to the existing set:
 
 ```bash title="Command"
@@ -364,18 +246,18 @@ added to the existing set:
 
 To update the configuration follow the steps below.
 
-1. [Get the existing OpenID Client](#get-openid-connect-client-by-inum) and store 
+1. [Get the existing OpenID Connect Client](#get-openid-connect-client-by-inum) and store 
 it into a file for editing. The following command will retrieve the existing 
-OpenID Client in the schema file.
+OpenID Connect Client in the schema file.
 ```bash title="Command"
 /opt/jans/jans-cli/config-cli.py -no-color \
 --operation-id get-oauth-openid-clients-by-inum \
 --url-suffix inum:1800.ca57f8f8-e163-4cdc-96f2-e2760e627bfe > /tmp/update-client.json
 ```
 2. Edit and update the desired configuration values in the file while keeping
-   other properties and values unchanged. Updates must adhere to the `Client`
-   schema as mentioned [here](#using-command-line).
-3. We have changed in `parLifetime` only the `600` to `700`.Use the updated file 
+ other properties and values unchanged. Updates must adhere to the `Client`
+ schema as mentioned [here](#using-command-line).
+3. We have changed in `parLifetime` only the `600` to `700`. Use the updated file 
 to send the update to the Janssen Server using the command below
 ```bash title="Command"
 /opt/jans/jans-cli/config-cli.py --operation-id put-oauth-openid-client \
@@ -386,12 +268,12 @@ Upon successful execution of the update, the Janssen Server responds with
 updated configuration
 
 
-### Patch OpenID Client by inum  
+### Patch OpenID Connect Client by inum  
 
-Using `patch-oauth-openid-client-by-inum`, we can modify OpenID Clients 
+Using `patch-oauth-openid-client-by-inum`, we can modify OpenID Connect Clients 
 partially for its properties.
 
-To use this operation, specify the inum of the client that needs to be updated 
+To use this operation, specify the `inum` of the OpenID Connect Client that needs to be updated 
 using the `--url-suffix` and the property and the new value using the 
 [JSON Patch](https://jsonpatch.com/#the-patch). Refer [here](../../config-guide/config-tools/jans-cli/README.md#patch-request-schema) 
 to know more about schema.
@@ -417,10 +299,10 @@ Now let's do the operation with the command line.
 --url-suffix inum:1800.ca57f8f8-e163-4cdc-96f2-e2760e627bfe --data /tmp/schema.json
 ```
 
-### Get OpenId Connect Client by Inum
+### Get OpenID Connect Client by Inum
 
 With `get-oauth-openid-clients-by-inum` operation-id, we can get any specific 
-Client matched with `Inum`. If we know the `Inum`, we can simply use the 
+OpenID Connect Client matched with `Inum`. If we know the `inum`, we can use the 
 below command:
 
 
@@ -429,24 +311,22 @@ below command:
 --operation-id get-oauth-openid-clients-by-inum \
 --url-suffix inum:1800.ca57f8f8-e163-4cdc-96f2-e2760e627bfe
 ```
-The result will only show this `inum:1800.ca57f8f8-e163-4cdc-96f2-e2760e627bfe`.
+The result will only show details of client with 
+`inum:1800.ca57f8f8-e163-4cdc-96f2-e2760e627bfe`.
 
 
-### Delete OpenId Connect client
+### Delete OpenID Connect client
 
-Delete the json openid client using its `inum`. The command line is:
+Delete the OpenID Connect client using its `inum`. The command line is:
 
 ```bash title="Command"
 /opt/jans/jans-cli/config-cli.py \
 --operation-id delete-oauth-openid-client-by-inum \
 --url-suffix inum:a89b5c29-2a91-48b5-bf27-1bf786954a06
 ```
-It will delete the openid client if it matches with the given `inum`.
+It will delete the OpenID Connect client if it matches with the given `inum`.
 
-## Using-text-based-ui
-
-In Janssen, Use the [Text-Based UI](../config-tools/jans-tui/README.md) 
-to manage the Logging configuration
+## Using Text Based UI
 
 Start TUI using the command below:
 
@@ -461,23 +341,33 @@ in the image below.
 
 ![image](../../../assets/tui-client-screen.png)
 
-* This screen shows the openid Clients list. 
-* To get the list of currently added client, bring the control to Search box 
-(using the tab key),and press Enter. Type the search string to search for Client 
-with matching Client name.
+* This screen shows the OpenID Connect Clients list. 
+* To get the list of currently added clients, bring the control to `Search` box 
+(using the tab key), and press the `Enter` key. Type the search string to search 
+for the client with the matching client name.
 
 
-### Add Client screen
+### Add-Update Client screen
 
 * Use the `Add Client` button to create a new client.
-* After adding the valid data using the `Save` button, add a new openid client.
-* Update the openid client as well.
+* After adding the valid data using the `Save` button, add a new OpenID Connect client.
+
+* Update the OpenID Connect client as well.
+* To update the client, bring the control to the Specific `Client` row and press the
+`Enter` key, then it will show the edit client screen. 
 
 ![image](../../../assets/tui-add-client-screen.png)
+
+### Delete Screen
+
+* To delete the client, bring the control to the Specific `Client` row and press the `Delete` key.
+Then it will show the Delete confirmation box.
+
+![image](../../../assets/tui-openid-delete.png)
 
 
 ## Using Configuration REST API
 
 Janssen Server Configuration REST API exposes relevant endpoints for managing
-and configuring the Openid Client. Endpoint details are published in the [Swagger
+and configuring the OpenID Connect Client. Endpoint details are published in the [Swagger
 document](../../reference/openapi.md).
