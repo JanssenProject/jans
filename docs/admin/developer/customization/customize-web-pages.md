@@ -31,10 +31,11 @@ update and delete custom assets. Refer to the
 [custom assets configuration guide](../../config-guide/custom-assets-configuration.md)
 to learn how to manage custom assets.
 
-<!-- 
+ 
 
 #### Directory structure for customization
-```
+
+
 
 | Directory                      | Asset Type                      | Description                         |
 |--------------------------------|-------------------------------------|-------------------------------------|
@@ -43,7 +44,7 @@ to learn how to manage custom assets.
 | /opt/jans/jetty/`<service-name>`/custom/pages | xhtml                              | Web pages                           |
 | /opt/jans/jetty/`<service-name>`/custom/static | js, css, png, gif , jpg, jpeg | Static resources like Java-script, style-sheet and images |
 
-
+<!-- 
 ### Customizing Web Pages
 
 All web pages are **xhtml** files.
@@ -66,7 +67,7 @@ Put a modified `login.xhtml` or `authorize.xhtml` or `error.xhtml` or `logout.xh
     def getPageForStep(self, configurationAttributes, step):
         # Used to specify the page you want to return for a given step
         if (step == 1):
-          return "/auth/login.xhtml"
+          return "/auth/login.xhtml"  
         if (step == 2)
           return "/auth/enterOTP.xhtml"
 ```
