@@ -11,7 +11,7 @@ from string import Template
 from setup_app import paths
 from setup_app.static import AppType, InstallOption
 from setup_app.utils import base
-from setup_app.utils.ldif_utils import create_client_ldif
+from setup_app.utils.ldif_utils import myLdifParser, create_client_ldif
 from setup_app.config import Config
 from setup_app.installers.jetty import JettyInstaller
 from setup_app.pylib.ldif4.ldif import LDIFWriter
@@ -55,7 +55,7 @@ class ConfigApiInstaller(JettyInstaller):
         self.copyFile(self.source_files[1][0], '/usr/sbin')
         self.run([paths.cmd_chmod, '+x', '/usr/sbin/facter'])
         self.install_jettyService(self.jetty_app_configuration[self.service_name], True)
-        self.logIt("Copying fido.war into jetty webapps folder...")
+        self.logIt("Copying jans-config-api.war into jetty webapps folder...")
         jettyServiceWebapps = os.path.join(self.jetty_base, self.service_name, 'webapps')
         self.copyFile(self.source_files[0][0], jettyServiceWebapps)
 
@@ -246,4 +246,30 @@ class ConfigApiInstaller(JettyInstaller):
         out_fn = os.path.join(self.output_folder, os.path.basename(template_fn))
         self.writeFile(out_fn, rendered_text)
         self.dbUtils.import_ldif([out_fn])
+
+    def update_jansservicemodule(self):
+        # this function is called by jans.py: JansInstaller.post_install_tasks()
+        self.logIt("Updating jansServiceModule for Config Api")
+
+        # find configuration dn
+        ldif_parser = myLdifParser(self.config_ldif_fn)
+        ldif_parser.parse()
+        for dn, _ in ldif_parser.entries:
+            if 'ou=configuration' in dn:
+                config_api_config_dn = dn
+                break
+
+        jans_service_modules = []
+
+        for jans_service_dir in os.listdir(Config.jetty_base):
+            if os.path.exists(os.path.join(Config.jetty_base, jans_service_dir, f'webapps/{jans_service_dir}.war')):
+                jans_service_modules.append(jans_service_dir)
+
+        self.logIt(f"Config Api jansConfDyn.assetMgtConfiguration.jansServiceModule list: {jans_service_modules}")
+
+        configuration = self.dbUtils.dn_exists(config_api_config_dn)
+        dynamic_configuration = json.loads(configuration['jansConfDyn'])
+        dynamic_configuration['assetMgtConfiguration']['jansServiceModule'] = sorted(jans_service_modules)
+        self.dbUtils.set_configuration('jansConfDyn', json.dumps(dynamic_configuration, indent=2), config_api_config_dn)
+
 
