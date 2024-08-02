@@ -38,8 +38,8 @@ tasks.
 
 In the Janssen Server, you can deploy and customize the SMTP using the
 command line. To get the details of Janssen command line operations relevant to
-SMTP Configuration, you can check the operations under `ConfigurationSmtp` task using the
-command below:
+SMTP Configuration, you can check the operations under `ConfigurationSmtp` 
+task using the command below:
 
 ```bash title="Command"
 /opt/jans/jans-cli/config-cli.py --info ConfigurationSmtp
@@ -71,7 +71,7 @@ To view the current SMTP server configuration, run the following command line:
 /opt/jans/jans-cli/config-cli.py --operation-id get-config-smtp
 ```
 
-It will show your SMTP server configuration as below:
+It will show the SMTP server configuration as below:
 
 ```json title="Sample Output" linenums="1"
 {
@@ -130,7 +130,7 @@ Using the schema and the example above, we have added below  data to the file
 }
 ```
 
-To set up a new SMTP server configuration, Run the following command:
+To setup a new SMTP server configuration, Run the following command:
 
 ```bash title="Command"
 /opt/jans/jans-cli/config-cli.py --operation-id post-config-smtp\
@@ -170,6 +170,18 @@ In that file, update the value `false` to `true` of the `trust_host` field.
 --data /tmp/smtp.json
 ```
 It will update the information.
+
+
+
+### Delete SMTP Sever Configuration
+
+To delete the SMTP Sever Configuration using `delete-config-smtp` Operation id, 
+use the command below.
+
+```bash title="Command"
+/opt/jans/jans-cli/config-cli.py --operation-id delete-config-smtp
+```
+
 
 ### Test SMTP Server Configuration
 
