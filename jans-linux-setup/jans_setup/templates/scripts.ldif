@@ -636,7 +636,7 @@ jansLevel: 1
 jansModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
 jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansRevision: 1
-jansScr::%(fido2_fido2extensionSample)s
+jansScr::%(fido2_fido2extensionsample)s
 jansScrTyp: fido2_extension
 objectClass: top
 objectClass: jansCustomScr
