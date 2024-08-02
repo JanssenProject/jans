@@ -98,8 +98,8 @@ To update the configuration follow the steps below.
 1. Get the current logging and store it into a file for editing
    The following command will retrieve the current logging in the schema file.
    ```bash title="Command"
-   /opt/jans/jans-cli/config-cli.py -no-color --operation-id get-config-logging \
-   > /tmp/log-config.json
+   /opt/jans/jans-cli/config-cli.py -no-color \
+   --operation-id get-config-logging > /tmp/log-config.json
    ```
 2. Edit and update the desired configuration values in the file while keeping other
       properties and values unchanged. Updates must adhere to the
@@ -119,10 +119,7 @@ To update the configuration follow the steps below.
 
 ## Using-text-based-ui
 
-In Janssen, You can manage Logging configuration using
-the [Text-Based UI](../config-tools/jans-tui/README.md) also.
-
-You can start TUI using the command below:
+Start TUI using the command below:
 
 ```bash title="Command"
 sudo /opt/jans/jans-cli/jans_cli_tui.py
