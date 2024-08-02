@@ -130,11 +130,11 @@ Using the schema and the example above, we have added below  data to the file
 }
 ```
 
-To setup a new SMTP server configuration, Run the following command:
+To setup a new SMTP server configuration, run the following command:
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --operation-id post-config-smtp\
- --data /tmp/smtp.json
+/opt/jans/jans-cli/config-cli.py --operation-id post-config-smtp \
+--data /tmp/smtp.json
 ```
 
 
@@ -160,8 +160,9 @@ To setup a new SMTP server configuration, Run the following command:
 
 ### Update SMTP Server Configuration
 
-To update `SMTP Server`, simply change any information on `/tmp/smtp.json`
-file and run the following command:
+To update the SMTP server, we can use the `put-config-smtp` operation id. 
+simply change any information on `/tmp/smtp.json`file and run the following 
+command:
 
 In that file, update the value `false` to `true` of the `trust_host` field.
 
@@ -175,8 +176,8 @@ It will update the information.
 
 ### Delete SMTP Sever Configuration
 
-To delete the SMTP Sever Configuration using `delete-config-smtp` Operation id, 
-use the command below.
+To delete the SMTP Sever, we can use the `delete-config-smtp` operation id.
+run the following command
 
 ```bash title="Command"
 /opt/jans/jans-cli/config-cli.py --operation-id delete-config-smtp
