@@ -8,6 +8,9 @@ edition = "2021"
 [lib]
 crate-type = ["cdylib"]
 
+[features]
+direct_startup_strategy = []
+
 [dependencies]
 jsonwebtoken = "9.3.0"
 cedar-policy = { version = "3.2.1", features = ["wasm"] }

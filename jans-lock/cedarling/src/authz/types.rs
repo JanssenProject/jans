@@ -3,7 +3,7 @@ use std::collections::{BTreeSet, HashMap, HashSet};
 use cedar_policy::*;
 use wasm_bindgen::{throw_str, UnwrapThrowExt};
 
-use crate::crypto::TRUST_STORE;
+use crate::crypto;
 
 #[derive(serde::Deserialize, Debug)]
 pub struct AuthzInput {
@@ -51,7 +51,8 @@ impl AccessToken {
 		let id = serde_json::json!({ "__entity": { "type": "AccessToken", "id": self.jti } });
 		let id = EntityUid::from_json(id).unwrap_throw();
 
-		let entry = unsafe { TRUST_STORE.get(&self.iss) }.expect_throw("Unable to extract TrustedIssuer from UserInfo iss");
+		let trust_store = unsafe { crypto::TRUST_STORE.get().expect_throw("TRUST_STORE not initialized") };
+		let entry = trust_store.get(&self.iss).expect_throw("Unable to extract TrustedIssuer from UserInfo iss");
 		let issuer = entry.issuer.get_entity();
 
 		let mut attrs = HashMap::from([
@@ -130,7 +131,8 @@ impl IdToken {
 		let id = serde_json::json!({ "__entity": { "type": "IdToken", "id": self.jti } });
 		let uid = EntityUid::from_json(id).unwrap_throw();
 
-		let entry = unsafe { TRUST_STORE.get(&self.iss) }.expect_throw("Unable to extract TrustedIssuer from UserInfo iss");
+		let trust_store = unsafe { crypto::TRUST_STORE.get().expect_throw("TRUST_STORE not initialized") };
+		let entry = trust_store.get(&self.iss).expect_throw("Unable to extract TrustedIssuer from UserInfo iss");
 		let issuer = entry.issuer.get_entity();
 
 		let amr = self.amr.into_iter().map(RestrictedExpression::new_string);
@@ -180,7 +182,9 @@ pub struct UserInfoToken {
 
 impl UserInfoToken {
 	pub fn get_role_entities(&self) -> Vec<Entity> {
-		let entry = unsafe { TRUST_STORE.get(&self.iss) }.expect_throw("Can't get iss for User entity creation from userinfo_token");
+		let trust_store = unsafe { crypto::TRUST_STORE.get().expect_throw("TRUST_STORE not initialized") };
+		let entry = trust_store.get(&self.iss).expect_throw("Unable to extract TrustedIssuer from UserInfo iss");
+
 		let role_mapping = entry.issuer.userinfo_tokens.role_mapping.as_deref().unwrap_or("Role");
 
 		self.roles
@@ -205,7 +209,8 @@ impl UserInfoToken {
 		];
 
 		// acquire TrustedIssuer eid
-		let entry = unsafe { TRUST_STORE.get(&self.iss) }.expect_throw("Unable to extract TrustedIssuer from UserInfo iss");
+		let trust_store = unsafe { crypto::TRUST_STORE.get().expect_throw("TRUST_STORE not initialized") };
+		let entry = trust_store.get(&self.iss).expect_throw("Unable to extract TrustedIssuer from UserInfo iss");
 		let entity = entry.issuer.get_entity();
 
 		// construct entity
@@ -235,7 +240,9 @@ impl UserInfoToken {
 	}
 
 	pub fn get_user_entity(&self, roles: &[Entity]) -> Entity {
-		let entry = unsafe { TRUST_STORE.get(&self.iss) }.expect_throw("Can't get iss for User entity creation from userinfo_token");
+		let trust_store = unsafe { crypto::TRUST_STORE.get().expect_throw("TRUST_STORE not initialized") };
+		let entry = trust_store.get(&self.iss).expect_throw("Unable to extract TrustedIssuer from UserInfo iss");
+
 		let identifier = entry.issuer.id_tokens.principal_identifier.as_deref().unwrap_or("User");
 		let id = serde_json::json!({ "__entity": { "type": identifier, "id": self.sub } });
 		let uid = EntityUid::from_json(id).unwrap_throw();

@@ -13,14 +13,16 @@ pub static SCHEMA: OnceLock<Schema> = OnceLock::new();
 pub static POLICY_SET: OnceLock<PolicySet> = OnceLock::new();
 pub static DEFAULT_ENTITIES: OnceLock<serde_json::Value> = OnceLock::new();
 
-pub async fn init(config: &types::CedarlingConfig) {
+pub async fn init(config: &mut types::CedarlingConfig) {
 	let trusted_issuers = init_policy_store(config).await;
 	crypto::init(config, trusted_issuers);
 }
 
-pub async fn init_policy_store(config: &types::CedarlingConfig) -> BTreeMap<String, crypto::types::TrustedIssuer> {
+pub async fn init_policy_store(config: &mut types::CedarlingConfig) -> BTreeMap<String, crypto::types::TrustedIssuer> {
 	// Get PolicyStore JSON
-	let mut policy_store: types::PolicyStoreEntry = match &config.policy_store {
+	let mut policy_store: types::PolicyStoreEntry = match &mut config.policy_store {
+		#[cfg(feature = "direct_startup_strategy")]
+		types::PolicyStoreConfig::Direct { value } => serde_json::from_value(value.take()).unwrap_throw(),
 		types::PolicyStoreConfig::Local { id } => {
 			let data = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/policy-store/default.json")).as_slice();
 			let decompressed = match config.decompress_policy_store {
@@ -29,7 +31,7 @@ pub async fn init_policy_store(config: &types::CedarlingConfig) -> BTreeMap<Stri
 			};
 
 			let source = serde_json::from_slice::<serde_json::Value>(&decompressed).unwrap_throw();
-			let entry = source.get(id).cloned().expect_throw("Can't find PolicyStore with given id in Local Store");
+			let entry = source.get(id.as_str()).cloned().expect_throw("Can't find PolicyStore with given id in Local Store");
 
 			serde_json::from_value(entry).unwrap_throw()
 		}
@@ -45,7 +47,7 @@ pub async fn init_policy_store(config: &types::CedarlingConfig) -> BTreeMap<Stri
 
 			serde_json::from_slice(&bytes).unwrap_throw()
 		}
-		policy_store_config => lock_master::init(policy_store_config, config.decompress_policy_store).await,
+		policy_store_config => lock_master::init(policy_store_config, &config.application_name, config.decompress_policy_store).await,
 	};
 
 	// Persist PolicyStore data

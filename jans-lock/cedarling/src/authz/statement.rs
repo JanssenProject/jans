@@ -1,5 +1,8 @@
+use std::collections::BTreeSet;
+
 use crate::startup;
-use wasm_bindgen::{throw_str, UnwrapThrowExt};
+use wasm_bindgen::{throw_str, JsValue, UnwrapThrowExt};
+use web_sys::*;
 
 #[repr(u8)]
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
@@ -13,57 +16,6 @@ pub enum Binding {
 pub enum Statement {
 	Binding(Binding),
 	Operation(fn(&[cedar_policy::Decision]) -> cedar_policy::Decision, Vec<Statement>),
-}
-
-#[derive(Debug, Default)]
-pub struct ExecCache {
-	client: Option<cedar_policy::Decision>,
-	user: Option<cedar_policy::Decision>,
-	application: Option<cedar_policy::Decision>,
-}
-
-pub fn evaluate(
-	// Lord have mercy on the number of parameters this takes
-	statement: Statement,
-	uids: &super::types::EntityUids,
-	entities: &cedar_policy::Entities,
-	input: &(cedar_policy::EntityUid, cedar_policy::EntityUid, cedar_policy::Context),
-	cache: &mut ExecCache,
-) -> cedar_policy::Decision {
-	let schema = startup::SCHEMA.get();
-	let policies = startup::POLICY_SET.get().expect_throw("POLICY_SET not initialized");
-
-	match statement {
-		Statement::Binding(s) => {
-			// check cache
-			if let Some(c) = match s {
-				Binding::Client => cache.client,
-				Binding::Application => cache.application,
-				Binding::User => cache.user,
-			} {
-				return c;
-			}
-
-			// calculate result
-			let (action, resource, context) = input;
-			let principal = match s {
-				Binding::Client => Some(uids.user.clone()),
-				Binding::Application => uids.application.clone(),
-				Binding::User => Some(uids.user.clone()),
-			};
-
-			let decision = cedar_policy::Request::new(principal, Some(action.clone()), Some(resource.clone()), context.clone(), schema).unwrap_throw();
-
-			// create authorizer
-			let authorizer = cedar_policy::Authorizer::new();
-			authorizer.is_authorized(&decision, policies, &entities).decision()
-		}
-		Statement::Operation(function, arguments) => {
-			let cb = |s| evaluate(s, uids, entities, input, cache);
-			let arguments: Vec<_> = arguments.into_iter().map(cb).collect();
-			function(&arguments)
-		}
-	}
 }
 
 // supported tokens: Client, Application, User, !, |, &, (, )
@@ -144,6 +96,74 @@ mod operators {
 		match input.iter().all(|i| *i == cedar_policy::Decision::Allow) {
 			true => cedar_policy::Decision::Allow,
 			false => cedar_policy::Decision::Deny,
+		}
+	}
+}
+
+#[derive(Debug, Default)]
+pub struct ExecCtx {
+	client: Option<cedar_policy::Decision>,
+	user: Option<cedar_policy::Decision>,
+	application: Option<cedar_policy::Decision>,
+	pub(crate) policies: BTreeSet<String>,
+}
+
+pub fn evaluate(
+	// Lord have mercy on the number of parameters this takes
+	statement: Statement,
+	uids: &super::types::EntityUids,
+	entities: &cedar_policy::Entities,
+	input: &(cedar_policy::EntityUid, cedar_policy::EntityUid, cedar_policy::Context),
+	ctx: &mut ExecCtx,
+) -> cedar_policy::Decision {
+	let schema = startup::SCHEMA.get();
+	let policies = startup::POLICY_SET.get().expect_throw("POLICY_SET not initialized");
+
+	match statement {
+		Statement::Binding(s) => {
+			let decision = match s {
+				Binding::Client => &mut ctx.client,
+				Binding::Application => &mut ctx.application,
+				Binding::User => &mut ctx.user,
+			};
+
+			// check cache
+			decision
+				.get_or_insert_with(|| {
+					// calculate result
+					let (action, resource, context) = input;
+					let principal = match s {
+						Binding::Client => Some(uids.user.clone()),
+						Binding::Application => uids.application.clone(),
+						Binding::User => Some(uids.user.clone()),
+					};
+
+					let decision = cedar_policy::Request::new(principal, Some(action.clone()), Some(resource.clone()), context.clone(), schema).unwrap_throw();
+
+					// create authorizer
+					let authorizer = cedar_policy::Authorizer::new();
+					let response = authorizer.is_authorized(&decision, policies, entities);
+
+					// log errors
+					for err in response.diagnostics().errors() {
+						let msg = format!("[Principal={:?}] Encountered Error during Policy Evaluation: {:?}", s, err);
+						let msg = JsValue::from_str(&msg);
+
+						console::error_1(&msg)
+					}
+
+					// insert affecting policies
+					let iter = response.diagnostics().reason().map(ToString::to_string);
+					ctx.policies.extend(iter);
+
+					response.decision()
+				})
+				.clone()
+		}
+		Statement::Operation(function, arguments) => {
+			let cb = |s| evaluate(s, uids, entities, input, ctx);
+			let arguments: Vec<_> = arguments.into_iter().map(cb).collect();
+			function(&arguments)
 		}
 	}
 }

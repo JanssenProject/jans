@@ -10,19 +10,17 @@ pub mod decode;
 pub mod types;
 
 // Supported algorithms
-pub static mut SUPPORTED_ALGORITHMS: Vec<jsonwebtoken::Algorithm> = Vec::new();
+pub static SUPPORTED_ALGORITHMS: OnceLock<Vec<jsonwebtoken::Algorithm>> = OnceLock::new();
 
 // Trust Store, iss -> { config: OAuthConfig, jwks: JsonWebKeySet }
-pub static mut TRUST_STORE: BTreeMap<String, types::TrustStoreEntry> = BTreeMap::new();
+pub static mut TRUST_STORE: OnceLock<BTreeMap<String, types::TrustStoreEntry>> = OnceLock::new();
 
 pub fn init(config: &startup::types::CedarlingConfig, trusted_issuers: BTreeMap<String, types::TrustedIssuer>) {
 	decode::JWT_VALIDATION_ENABLED.set(config.jwt_validation).expect_throw("JWT_VALIDATION_ENABLED already initialized");
 
 	// Insert supported jwt signature algorithms
 	let supported = config.supported_signature_algorithms.iter().map(|s| jsonwebtoken::Algorithm::from_str(s).unwrap_throw()).collect();
-	unsafe {
-		SUPPORTED_ALGORITHMS = supported;
-	}
+	SUPPORTED_ALGORITHMS.set(supported).expect_throw("SUPPORTED_ALGORITHMS already initialized");
 
 	// insert id into issuer for token creation, map to Vector for easy sequential iteration
 	let issuers = trusted_issuers
@@ -63,7 +61,8 @@ fn init_trust_store(refresh_rate: Option<i32>, trusted_issuers: Vec<types::Trust
 				let jwks = res.into_json().await.expect_throw("Unable to parse jwks from TrustedIssuer");
 				let entry = types::TrustStoreEntry { jwks, issuer };
 
-				let _ = unsafe { TRUST_STORE.insert(iss, entry) };
+				let trust_store = unsafe { TRUST_STORE.get_mut().unwrap_throw() };
+				let _ = trust_store.insert(iss, entry);
 			}
 		})
 	};

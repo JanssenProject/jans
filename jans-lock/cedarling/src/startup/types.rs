@@ -7,7 +7,7 @@ use crate::*;
 #[derive(serde::Deserialize, serde::Serialize, Debug)]
 #[serde(rename_all = "camelCase")]
 pub struct CedarlingConfig {
-	pub application_name: Option<String>,
+	pub application_name: String,
 
 	// JWT validation
 	#[serde(default)]
@@ -31,6 +31,10 @@ pub struct CedarlingConfig {
 #[serde(rename_all = "kebab-case")]
 #[serde(rename_all_fields = "camelCase")]
 pub enum PolicyStoreConfig {
+	#[cfg(feature = "direct_startup_strategy")]
+	Direct {
+		value: serde_json::Value,
+	},
 	Local {
 		id: String,
 	},
@@ -39,7 +43,6 @@ pub enum PolicyStoreConfig {
 	},
 	LockMaster {
 		url: String,
-		application_name: String,
 		policy_store_id: String,
 		enable_dynamic_configuration: bool,
 		ssa_jwt: String,
@@ -57,7 +60,8 @@ pub struct PolicyStoreEntry {
 	pub default_entities: Option<serde_json::Value>,
 }
 
-const fn true_default() -> bool {
+#[inline(always)]
+fn true_default() -> bool {
 	true
 }
 

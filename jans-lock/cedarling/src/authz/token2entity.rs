@@ -27,7 +27,7 @@ pub fn token2entities(input: &authz::types::AuthzInput) -> (types::EntityUids, c
 	}
 
 	// create TrustedIssuer entities
-	let trust_store = unsafe { std::ptr::addr_of!(crypto::TRUST_STORE).as_ref().unwrap_throw() };
+	let trust_store = unsafe { crypto::TRUST_STORE.get().unwrap_throw() };
 	let issuers = trust_store.iter().map(|(_, entry)| (entry.issuer.get_entity()));
 	entities = entities.add_entities(issuers, schema).unwrap_throw();
 

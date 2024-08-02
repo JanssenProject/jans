@@ -24,13 +24,12 @@ extern "C" {
 // Stores a status list referencing each JWT's `jti` claim
 pub static mut STATUS_LISTS: OnceLock<BTreeMap<String, (u8, HashSet<String>)>> = OnceLock::new();
 
-pub async fn init<'a, T: serde::de::DeserializeOwned>(policy_store_config: &PolicyStoreConfig, decompress: bool) -> T {
+pub async fn init<'a, T: serde::de::DeserializeOwned>(policy_store_config: &PolicyStoreConfig, application_name: &str, decompress: bool) -> T {
 	let PolicyStoreConfig::LockMaster {
 		url,
 		policy_store_id,
 		enable_dynamic_configuration,
 		ssa_jwt,
-		application_name,
 	} = policy_store_config
 	else {
 		unreachable!("We arrive here from the PolicyStoreConfig::LockMaster")
@@ -42,7 +41,9 @@ pub async fn init<'a, T: serde::de::DeserializeOwned>(policy_store_config: &Poli
 	let lock_master_config: types::LockMasterConfig = res.into_json().await.unwrap_throw();
 
 	// init sse updates
-	sse::init(*enable_dynamic_configuration, &lock_master_config.lock_sse_uri);
+	if *enable_dynamic_configuration {
+		sse::init(&lock_master_config.lock_sse_uri);
+	}
 
 	// Get OAuthConfig
 	let res = http::get(&lock_master_config.oauth_as_well_known, &[]).await.expect_throw("Unable to fetch LockMasterConfig from URL");

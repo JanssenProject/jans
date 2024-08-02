@@ -1,4 +1,4 @@
-use std::{borrow::Cow, ptr::addr_of, sync::OnceLock};
+use std::{borrow::Cow, sync::OnceLock};
 use wasm_bindgen::prelude::*;
 
 use super::types;
@@ -7,7 +7,7 @@ pub(super) static JWT_VALIDATION_ENABLED: OnceLock<bool> = OnceLock::new();
 
 // extracts JWT Validation settings
 fn validation_options(jwt: &str, _type: types::TokenType) -> Result<(Option<jsonwebtoken::DecodingKey>, jsonwebtoken::Validation), Cow<'static, str>> {
-	let trust_store = unsafe { addr_of!(super::TRUST_STORE).as_ref().expect_throw("TRUST_STORE not initialized") };
+	let trust_store = unsafe { super::TRUST_STORE.get().expect_throw("TRUST_STORE not initialized") };
 	let header = jsonwebtoken::decode_header(jwt).unwrap_throw();
 
 	// extract JWK from iss and trust_store
@@ -37,7 +37,7 @@ fn validation_options(jwt: &str, _type: types::TokenType) -> Result<(Option<json
 	let mut validation = jsonwebtoken::Validation::new(jsonwebtoken::Algorithm::HS256);
 	let issuers = trust_store.keys().collect::<Vec<_>>();
 	validation.set_issuer(&issuers);
-	validation.algorithms = unsafe { super::SUPPORTED_ALGORITHMS.clone() };
+	validation.algorithms = super::SUPPORTED_ALGORITHMS.get().cloned().expect_throw("SUPPORTED_ALGORITHMS not initialized");
 
 	Ok((decoding_key, validation))
 }

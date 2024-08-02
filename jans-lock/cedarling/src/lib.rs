@@ -18,10 +18,10 @@ pub async fn start() {
 
 #[wasm_bindgen]
 pub async fn init(config: JsValue) {
-	let config = from_value::<startup::types::CedarlingConfig>(config).expect_throw("Unable to parse startup config");
+	let mut config = from_value::<startup::types::CedarlingConfig>(config).expect_throw("Unable to parse startup config");
 
 	// Startup sequence
-	startup::init(&config).await;
+	startup::init(&mut config).await;
 
 	// Initialize authz module
 	authz::init(&config);
