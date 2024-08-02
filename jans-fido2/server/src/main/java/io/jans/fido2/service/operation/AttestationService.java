@@ -385,12 +385,6 @@ public class AttestationService {
 			credentialParametersNodeRS256.put("type", "public-key");
 			credentialParametersNodeRS256.put("alg", CoseRSAAlgorithm.RS256.getNumericValue());
 
-			// FIDO2 RS1
-			ObjectNode credentialParametersNodeRS1 = credentialParametersNode.addObject();
-			credentialParametersNodeRS1.arrayNode().addObject();
-			credentialParametersNodeRS1.put("type", "public-key");
-			credentialParametersNodeRS1.put("alg", CoseRSAAlgorithm.RS1.getNumericValue());
-
 			// FIDO2 ES256
 			ObjectNode credentialParametersNodeES256 = credentialParametersNode.addObject();
 			credentialParametersNodeES256.arrayNode().addObject();

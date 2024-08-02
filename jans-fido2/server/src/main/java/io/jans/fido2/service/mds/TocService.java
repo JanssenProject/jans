@@ -5,50 +5,6 @@
  */
 
 package io.jans.fido2.service.mds;
-import java.nio.file.StandardCopyOption;
-import java.io.InputStream;
-import static java.time.format.DateTimeFormatter.ISO_DATE;
-import java.net.URL;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.nio.file.DirectoryStream;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.security.MessageDigest;
-import java.security.cert.X509Certificate;
-import java.security.interfaces.ECPublicKey;
-
-import java.security.interfaces.RSAPublicKey;
-import java.text.ParseException;
-import java.time.LocalDate;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import com.nimbusds.jose.crypto.Ed25519Verifier;
-import com.nimbusds.jose.jwk.Curve;
-import com.nimbusds.jose.jwk.OctetKeyPair;
-import io.jans.fido2.ctap.CoseEdDSAAlgorithm;
-import io.jans.fido2.exception.mds.MdsClientException;
-import io.jans.fido2.model.mds.MdsGetEndpointResponse;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.event.Observes;
-import jakarta.inject.Inject;
-
-import org.apache.commons.codec.digest.DigestUtils;
-import io.jans.fido2.exception.Fido2RuntimeException;
-import io.jans.fido2.model.conf.AppConfiguration;
-import io.jans.fido2.model.conf.Fido2Configuration;
-import io.jans.fido2.service.Base64Service;
-import io.jans.fido2.service.CertificateService;
-import io.jans.fido2.service.DataMapperService;
-import io.jans.fido2.service.verifier.CertificateVerifier;
-import io.jans.service.cdi.event.ApplicationInitialized;
-import io.jans.util.Pair;
-import io.jans.util.StringHelper;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.nimbusds.jose.JOSEException;
@@ -56,7 +12,45 @@ import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSObject;
 import com.nimbusds.jose.JWSVerifier;
 import com.nimbusds.jose.crypto.ECDSAVerifier;
+import com.nimbusds.jose.crypto.Ed25519Verifier;
 import com.nimbusds.jose.crypto.RSASSAVerifier;
+import com.nimbusds.jose.jwk.Curve;
+import com.nimbusds.jose.jwk.OctetKeyPair;
+import io.jans.fido2.exception.Fido2RuntimeException;
+import io.jans.fido2.exception.mds.MdsClientException;
+import io.jans.fido2.model.conf.AppConfiguration;
+import io.jans.fido2.model.conf.Fido2Configuration;
+import io.jans.fido2.model.mds.MdsGetEndpointResponse;
+import io.jans.fido2.service.Base64Service;
+import io.jans.fido2.service.CertificateService;
+import io.jans.fido2.service.DataMapperService;
+import io.jans.fido2.service.verifier.CertificateVerifier;
+import io.jans.service.cdi.event.ApplicationInitialized;
+import io.jans.util.Pair;
+import io.jans.util.StringHelper;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.event.Observes;
+import jakarta.inject.Inject;
+import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.nio.file.*;
+import java.security.MessageDigest;
+import java.security.cert.X509Certificate;
+import java.security.interfaces.ECPublicKey;
+import java.security.interfaces.RSAPublicKey;
+import java.text.ParseException;
+import java.time.LocalDate;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static java.time.format.DateTimeFormatter.ISO_DATE;
 
 /**
  * TOC is parsed and Hashmap containing JSON object of individual Authenticators is created.
@@ -193,7 +187,7 @@ public class TocService {
         	log.debug("resolveVerifier : RS256");
                 return new RSASSAVerifier((RSAPublicKey) verifiedCert.getPublicKey());
         }
-		else if (JWSAlgorithm.EdDSA.equals(algorithm) && ((OctetKeyPair) verifiedCert.getPublicKey()).getCurve().equals(Curve.Ed25519)/*getName().equals("Ed25519")*/) {
+		else if (JWSAlgorithm.EdDSA.equals(algorithm) && ((OctetKeyPair) verifiedCert.getPublicKey()).getCurve().equals(Curve.Ed25519)) {
 			log.debug("resolveVerifier : Ed25519");
 			try {
 					return new Ed25519Verifier((OctetKeyPair) verifiedCert.getPublicKey());
