@@ -44,25 +44,39 @@ to learn how to manage custom assets.
 | /opt/jans/jetty/`<service-name>`/custom/pages | xhtml                              | Web pages                           |
 | /opt/jans/jetty/`<service-name>`/custom/static | js, css, png, gif , jpg, jpeg | Static resources like Java-script, style-sheet and images |
 
-<!-- 
-### Customizing Web Pages
+## Customizing Web Pages
 
-All web pages are **xhtml** files.
+Janssen Server uses [xhtml pages](https://github.com/JanssenProject/jans/tree/main/jans-auth-server/server/src/main/webapp) to render the web interface needed in 
+interactive web-flows, for example, password authentication flow. 
 
-Default pages bundled in the `jans-auth.war` are:
+### Customizing Built-in Web Pages
 
-* Login page: [login.xhtml](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/webapp/login.xhtml)
-* Authorization page: [authorize.xhtml](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/webapp/authorize.xhtml)
-* Logout page: [logout.xhtml](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/webapp/logout.xhtml)
-* Error page: [error.xhtml](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/webapp/error.xhtml)
+In order to customize built-in web pages, follow the steps below:
 
-#### To override default pages listed above:
-Put a modified `login.xhtml` or `authorize.xhtml` or `error.xhtml` or `logout.xhtml` under `/opt/jans/jetty/jans-auth/custom/pages/`
+- Create a copy of the relevant built-in xhtml page
+- Change according to the need 
+- Override the built-in page with the new page
+
+To override the built-in page by the new page, add the new page as 
+a [custom asset](../../config-guide/custom-assets-configuration.md) 
+and make sure that the 
+new page has the same name and extension as the built-in page. 
+The Janssen Server will automatically use the custom page instead of the 
+built-in page. For example, the default login web-page is rendered using 
+[login.xhtml](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/webapp/login.xhtml), just add a new custom `login.xhtml`. Same can be done 
+for other built-in pages like [authorization page](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/webapp/authorize.xhtml), [logout page](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/webapp/logout.xhtml), [error page](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/webapp/error.xhtml).
 
 
-#### Adding a new web page for Person Authentication scripts
-1. If `enterOTP.xhtml` is your webpage for step 2 of authentication, place under `/opt/jans/jetty/jans-auth/custom/pages/auth/enterOTP.xhtml`
-2. Reference it in the custom script as follows:
+### Adding New Web Pages
+
+If the authentication/authorization flow requires new web pages, same can be 
+added as [custom asset](../../config-guide/custom-assets-configuration.md) and
+then can be referenced using relative path.
+
+For instance, if `enterOTP.xhtml` is your webpage for step 2 of authentication, 
+then upload it as a custom asset under relevant Janssen service and then 
+reference it in the custom script as follows:
+
 ```
     def getPageForStep(self, configurationAttributes, step):
         # Used to specify the page you want to return for a given step
@@ -74,6 +88,8 @@ Put a modified `login.xhtml` or `authorize.xhtml` or `error.xhtml` or `logout.xh
 #### Reference login pages:
 
 [Here](https://github.com/JanssenProject/jans/tree/main/jans-auth-server/server/src/main/webapp/auth) you will find several login pages for different authentication methods.
+
+<!-- 
 
 #### Customized resource bundles:
 1. Resource bundles that are present in the jans-auth.war are present in this [folder](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/resources/)
@@ -91,6 +107,8 @@ Resource bundle names to support other languages should be placed under the same
 
 3. To add translation for a language that is not yet supported, create new properties file in resource folder and name it jans-auth_[language_code].properties, then add language code as supported-locale to the [faces-config.xml](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/resources/faces-config.xml) present in the same folder.
 
+-->
+
 #### Custom CSS files:
 
 1. Place the file in `/opt/jans/jetty/jans-auth/custom/static/stylesheet/theme.css`
@@ -107,4 +125,4 @@ Templates refers to the common interface layout and style. For example, a banner
 1. `mkdir -p /opt/jans/jetty/jans-auth/custom/pages/WEB-INF/incl/layout/`    
 2. Place a modified `template.xhtml` in the above location which will override the [default template file](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/webapp/WEB-INF/incl/layout/template.xhtml) from the war
 
- -->
+ 
