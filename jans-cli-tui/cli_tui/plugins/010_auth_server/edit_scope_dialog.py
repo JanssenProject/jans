@@ -58,8 +58,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
         self.prepare_attributes_data()
         self.prepare_tabs()
         self.create_window()
-        self.sope_type = self.data.get('scopeType') or 'oauth'
-
+        self.sope_type = self.data.get('scopeType') or 'openid'
 
     def prepare_attributes_data(self):
         self.jans_attributes_data = []
@@ -132,7 +131,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                 self.app.getTitledRadioButton(
                                 _("Scope Type"),
                                 name='scopeType',
-                                current_value=self.data.get('scopeType'),
+                                current_value=self.data.get('scopeType') or 'openid',
                                 values=scope_types,
                                 on_selection_changed=self.scope_selection_changed,
                                 jans_help=self.app.get_help_from_schema(self.schema, 'scopeType'),
