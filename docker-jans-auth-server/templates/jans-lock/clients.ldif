@@ -2,7 +2,6 @@ dn: inum=%(lock_client_id)s,ou=clients,o=jans
 displayName: Jans Lock Config Api Client
 inum: %(lock_client_id)s
 jansAccessTknSigAlg: RS256
-jansAttrs: {}
 jansClntSecret: %(lock_client_encoded_pw)s
 jansGrantTyp: authorization_code
 jansGrantTyp: refresh_token
