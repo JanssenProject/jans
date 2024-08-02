@@ -130,6 +130,7 @@ public class SignatureVerifier {
     public MessageDigest getDigest(int signatureAlgorithm) {
         // https://www.iana.org/assignments/cose/cose.xhtml#algorithms
         switch (signatureAlgorithm) {
+            case -8:
             case -257: {
                 return DigestUtils.getSha256Digest();
             }
