@@ -18,7 +18,7 @@ import io.jans.model.JansAttribute;
 import io.jans.model.SearchRequest;
 import io.jans.orm.model.PagedResult;
 import io.jans.service.document.store.service.Document;
-
+import io.jans.util.exception.InvalidAttributeException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -56,7 +56,7 @@ public class AssetResource extends ConfigBaseResource {
     private static final String ASSET_DATA = "Asset Data";
     private static final String ASSET_DATA_FORM = "Asset Data From";
     private static final String ASSET_NAME_CONFLICT = "NAME_CONFLICT";
-    private static final String ASSET_NAME_CONFLICT_MSG = "Asset with same name %s already exists!";
+    private static final String ASSET_NAME_CONFLICT_MSG = "Asset with same name %s already exist!";
     private static final String ASSET_NOT_FOUND = "Asset identified by %s not found!";
     private static final String ASSET_INUM = "Asset Identifier Inum";
     private static final String RESOURCE_NULL = "RESOURCE_NULL";
@@ -178,7 +178,7 @@ public class AssetResource extends ConfigBaseResource {
     public Response getJansServices() {
 
         List<String> services = assetService.getValidModuleName();
-        if(services == null) {
+        if (services == null) {
             services = Collections.emptyList();
         }
 
@@ -232,7 +232,7 @@ public class AssetResource extends ConfigBaseResource {
         checkResourceNotNull(asset, ASSET_DATA);
         checkNotNull(asset.getDisplayName(), AttributeNames.DISPLAY_NAME);
 
-        // check if asset with same name already exists
+        // check if asset with same name already exist
         List<Document> assets = assetService.getAssetByName(asset.getDisplayName());
         if (assets != null && !assets.isEmpty()) {
             asset.setInum(assets.get(0).getInum());
@@ -249,10 +249,10 @@ public class AssetResource extends ConfigBaseResource {
 
         // save asset
         try {
-            asset = assetService.saveAsset(asset, assetStream);
+            asset = assetService.saveAsset(asset, assetStream, false);
             log.debug("Saved asset:{} ", asset);
         } catch (Exception ex) {
-            log.error("Application Error while creating asset is - status:{}", ex.getMessage());
+            log.error("Application Error while creating asset is - {}", ex.getMessage());
             throwInternalServerException(APPLICATION_ERROR, ex);
         }
 
@@ -267,7 +267,7 @@ public class AssetResource extends ConfigBaseResource {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Modified Asset", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, schema = @Schema(implementation = Document.class), examples = @ExampleObject(name = "Response json example", value = "example/assets/put-asset.json"))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "BadRequestException"))),
-            @ApiResponse(responseCode = "401", description = "Unauthorized" , content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "Unauthorized"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "Unauthorized"))),
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
             @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))) })
     @Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -288,10 +288,16 @@ public class AssetResource extends ConfigBaseResource {
         checkResourceNotNull(inum, ASSET_INUM);
         checkNotNull(asset.getDisplayName(), AttributeNames.DISPLAY_NAME);
 
-        // check if asset with same name already exists
+        // validate if asset exist
+        Document existingDoc = assetService.getAssetByInum(asset.getInum());
+        if (existingDoc == null) {
+            throw new InvalidAttributeException("Asset with inum '" + asset.getInum() + "' does not exist!!!");
+        }
+
+        // check if asset with same name already exist
         List<Document> assets = assetService.getAssetByName(asset.getDisplayName());
         log.info(
-                "Check if asset with inum different then:{} but with same name exists - asset.getDisplayName():{}, assets:{}",
+                "Check if asset with inum different then:{} but with same name exist - asset.getDisplayName():{}, assets:{}",
                 inum, asset.getDisplayName(), assets);
         if (assets != null && !assets.isEmpty()) {
             List<Document> list = assets.stream().filter(e -> !e.getInum().equalsIgnoreCase(inum))
@@ -309,7 +315,7 @@ public class AssetResource extends ConfigBaseResource {
 
         // update asset
         try {
-            asset = assetService.saveAsset(asset, assetFile);
+            asset = assetService.saveAsset(asset, assetFile, true);
             log.debug(" Updated asset:{} ", asset);
         } catch (Exception ex) {
             log.error("Application Error while updated asset is:{}", ex.getMessage());
