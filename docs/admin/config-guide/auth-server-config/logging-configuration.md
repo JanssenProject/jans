@@ -12,18 +12,6 @@ Meaning there is no single switch or configuration that will enable or disable
 logs for all modules. Each module can be individually configured and can be
 configured differently when it comes to logging.
 
-Logging for `jans-auth` service is what we are going to discuss in detail 
-in this document.
-Logging for other modules is configured by changing the module's 
-property values. Use the documentation on how to update configuration 
-properties for 
-corresponding modules to update logging related properties. For instance:
-
-[//]: # (TODO: not sure if the sections below exist in respective docs. But)
-[//]: # (if not then we need to add this content and link it here)
-- [Updating properties for Fido2 module]()
-- [Updating properties for SCIM module]()
-
 ## Log Configuration For jans-auth
 
 === "Use Command-line"
@@ -95,21 +83,24 @@ To get sample schema type /opt/jans/jans-cli/config-cli.py --schema <schema>, fo
 
 To update the configuration follow the steps below.
 
-1. Get the current logging and store it into a file for editing
-   The following command will retrieve the current logging in the schema file.
+1. Get the current logging configuration and store it in a file for editing.
+   The following command will retrieve the current logging configuration and 
+   store it in a file.
    ```bash title="Command"
    /opt/jans/jans-cli/config-cli.py -no-color \
    --operation-id get-config-logging > /tmp/log-config.json
    ```
-2. Edit and update the desired configuration values in the file while keeping other
-      properties and values unchanged. Updates must adhere to the
+2. Update the configuration with desired value in the file while 
+      keeping other properties and values unchanged. Updates must adhere to the
       `Logging` schema as mentioned [here](#using-command-line).
       The schema details can be retrieved using the command below.
-      The schema defines what values and datatypes are acceptable for each property value.
+      The schema defines what values and datatypes are acceptable for each 
+      property value.
    ```bash title="Command"
    /opt/jans/jans-cli/config-cli.py --schema Logging 
    ```
-3. Use the updated file to send the update to the Janssen Server using the command below
+3. Use the updated file to send the update to the Janssen Server using the 
+    command below
    ```bash title="Command"
    /opt/jans/jans-cli/config-cli.py --operation-id put-config-logging \
    --data /tmp/log-config.json
@@ -124,16 +115,26 @@ Start TUI using the command below:
 ```bash title="Command"
 sudo /opt/jans/jans-cli/jans_cli_tui.py
 ```
-### Logging Screen
+### Logging Configuration for Auth Server
 
 * Navigate to `Auth Server` -> `Logging` to open the Logging screen as shown
-in the image below.
-
-* Logging screen allows the administrator to set logging parameters as per
-the requirements.
-
+in the image below to change the logging properties configuration.
 
 ![image](../../../assets/tui-logging-config.png)
+
+### Logging Configuration for FIDO
+
+* Navigate to `FIDO` to open the Logging screen as shown
+in the image below to change the logging properties configuration.
+
+![image](../../../assets/tui-FIDO-logging-use.jpg)
+
+### Logging Configuration for SCIM
+
+* Navigate to `SCIM` to open the Logging screen as shown
+in the image below to change the logging properties configuration.
+
+![image](../../../assets/tui-scim-logging-use.jpg)
 
 ## Using Configuration REST API
 
@@ -144,8 +145,11 @@ document](./../../reference/openapi.md).
 ## Default Log Location
 
 On a VM installation, logs for `jans-auth` module are generated at
-`/opt/jans/jetty/jans-auth/logs/`.
+`/opt/jans/jetty/jans-auth/logs/`. Similarly, logs for FIDO2 and SCIM modules
+are generated under `/opt/jans/jetty/jans-fido2/logs/` and 
+`/opt/jans/jetty/jans-scim/logs/` respectively.
 
 ## Cloud-Native Deployments
 
-Logging configuration for a cloud-native deployment is [detailed here](../../kubernetes-ops/logs.md)
+Logging configuration for a cloud-native deployment is 
+[detailed here](../../kubernetes-ops/logs.md)
