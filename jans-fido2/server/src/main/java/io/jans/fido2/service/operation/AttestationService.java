@@ -9,10 +9,7 @@ package io.jans.fido2.service.operation;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import io.jans.fido2.ctap.AttestationConveyancePreference;
-import io.jans.fido2.ctap.AuthenticatorAttachment;
-import io.jans.fido2.ctap.CoseEC2Algorithm;
-import io.jans.fido2.ctap.CoseRSAAlgorithm;
+import io.jans.fido2.ctap.*;
 import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.attestation.AttestationErrorResponseType;
 import io.jans.fido2.model.auth.CredAndCounterData;
@@ -37,6 +34,7 @@ import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.core.Context;
+import org.python.jline.internal.Log;
 import org.slf4j.Logger;
 
 import java.nio.charset.StandardCharsets;
@@ -378,9 +376,9 @@ public class AttestationService {
 		List<String> requestedCredentialTypes = appConfiguration.getFido2Configuration().getRequestedCredentialTypes();
 
 		ArrayNode credentialParametersNode = dataMapperService.createArrayNode();
+
 		if ((requestedCredentialTypes == null) || requestedCredentialTypes.isEmpty()) {
 			// Add default requested credential types
-
 			// FIDO2 RS256
 			ObjectNode credentialParametersNodeRS256 = credentialParametersNode.addObject();
 			credentialParametersNodeRS256.arrayNode().addObject();
@@ -392,20 +390,26 @@ public class AttestationService {
 			credentialParametersNodeES256.arrayNode().addObject();
 			credentialParametersNodeES256.put("type", "public-key");
 			credentialParametersNodeES256.put("alg", CoseEC2Algorithm.ES256.getNumericValue());
+
+			// FIDO2 Ed25519
+			ObjectNode credentialParametersNodEd25519 = credentialParametersNode.addObject();
+			credentialParametersNodEd25519.arrayNode().addObject();
+			credentialParametersNodEd25519.put("type", "public-key");
+			credentialParametersNodEd25519.put("alg", CoseEdDSAAlgorithm.Ed25519.getNumericValue());
 		} else {
 			for (String requestedCredentialType : requestedCredentialTypes) {
 				CoseRSAAlgorithm coseRSAAlgorithm = null;
 				try {
 					coseRSAAlgorithm = CoseRSAAlgorithm.valueOf(requestedCredentialType);
+
 				} catch (IllegalArgumentException ex) {
 				}
-
 				if (coseRSAAlgorithm != null) {
-					ObjectNode credentialParametersNodeRS256 = credentialParametersNode.addObject();
-					credentialParametersNodeRS256.arrayNode().addObject();
-					credentialParametersNodeRS256.put("type", "public-key");
-					credentialParametersNodeRS256.put("alg", coseRSAAlgorithm.getNumericValue());
-					break;
+					ObjectNode credentialParametersObjNode = credentialParametersNode.addObject();
+					credentialParametersObjNode.arrayNode().addObject();
+					credentialParametersObjNode.put("type", "public-key");
+					credentialParametersObjNode.put("alg", coseRSAAlgorithm.getNumericValue());
+					continue;
 				}
 			}
 
@@ -424,8 +428,22 @@ public class AttestationService {
 					break;
 				}
 			}
-		}
+			for (String requestedCredentialType : requestedCredentialTypes) {
+				CoseEdDSAAlgorithm coseEdDSAAlgorithm = null;
+				try {
+					coseEdDSAAlgorithm = CoseEdDSAAlgorithm.valueOf(requestedCredentialType);
+				} catch (IllegalArgumentException ex) {
+				}
 
+				if (coseEdDSAAlgorithm != null) {
+					ObjectNode credentialParametersNodeRS256 = credentialParametersNode.addObject();
+					credentialParametersNodeRS256.arrayNode().addObject();
+					credentialParametersNodeRS256.put("type", "public-key");
+					credentialParametersNodeRS256.put("alg", coseEdDSAAlgorithm.getNumericValue());
+					break;
+				}
+			}
+		}
 		return credentialParametersNode;
 	}
 
