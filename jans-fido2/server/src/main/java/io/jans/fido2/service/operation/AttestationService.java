@@ -6,18 +6,17 @@
 
 package io.jans.fido2.service.operation;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Strings;
 import io.jans.fido2.ctap.AttestationConveyancePreference;
 import io.jans.fido2.ctap.AuthenticatorAttachment;
 import io.jans.fido2.ctap.CoseEC2Algorithm;
 import io.jans.fido2.ctap.CoseRSAAlgorithm;
+import io.jans.fido2.ctap.CoseEdDSAAlgorithm;
 import io.jans.fido2.model.attestation.*;
-import io.jans.fido2.model.common.*;
 import io.jans.fido2.model.auth.CredAndCounterData;
+import io.jans.fido2.model.common.*;
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.conf.RequestedParty;
 import io.jans.fido2.model.error.ErrorResponseFactory;
@@ -359,6 +358,8 @@ public class AttestationService {
 			credentialParametersSets.add(PublicKeyCredentialParameters.createPublicKeyCredentialParameters(CoseRSAAlgorithm.RS256.getNumericValue()));
 			// FIDO2 ES256
 			credentialParametersSets.add(PublicKeyCredentialParameters.createPublicKeyCredentialParameters(CoseEC2Algorithm.ES256.getNumericValue()));
+			// FIDO2 Ed25519
+			credentialParametersSets.add(PublicKeyCredentialParameters.createPublicKeyCredentialParameters(CoseEdDSAAlgorithm.Ed25519.getNumericValue()));
 		} else {
 			for (String requestedCredentialType : requestedCredentialTypes) {
 				CoseRSAAlgorithm coseRSAAlgorithm = null;
@@ -382,6 +383,19 @@ public class AttestationService {
 
 				if (coseEC2Algorithm != null) {
 					credentialParametersSets.add(PublicKeyCredentialParameters.createPublicKeyCredentialParameters(coseEC2Algorithm.getNumericValue()));
+					break;
+				}
+			}
+
+			for (String requestedCredentialType : requestedCredentialTypes) {
+				CoseEdDSAAlgorithm coseEdDSAAlgorithm = null;
+				try {
+					coseEdDSAAlgorithm = CoseEdDSAAlgorithm.valueOf(requestedCredentialType);
+				} catch (IllegalArgumentException ex) {
+				}
+
+				if (coseEdDSAAlgorithm != null) {
+					credentialParametersSets.add(PublicKeyCredentialParameters.createPublicKeyCredentialParameters(coseEdDSAAlgorithm.getNumericValue()));
 					break;
 				}
 			}
