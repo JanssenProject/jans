@@ -11,8 +11,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 
+import com.google.common.base.Strings;
 import io.jans.fido2.model.assertion.AssertionErrorResponseType;
+import io.jans.fido2.model.assertion.AssertionOptions;
+import io.jans.fido2.model.assertion.AssertionResult;
 import io.jans.fido2.model.attestation.AttestationErrorResponseType;
+import io.jans.fido2.model.attestation.AttestationOptions;
+import io.jans.fido2.model.attestation.AttestationResult;
+import io.jans.fido2.model.attestation.Response;
 import io.jans.fido2.model.error.ErrorResponseFactory;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -22,7 +28,6 @@ import org.slf4j.Logger;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.jans.fido2.ctap.AttestationConveyancePreference;
-import io.jans.fido2.ctap.AuthenticatorAttachment;
 import io.jans.fido2.ctap.TokenBindingSupport;
 import io.jans.fido2.exception.Fido2CompromisedDevice;
 import io.jans.fido2.exception.Fido2RuntimeException;
@@ -87,11 +92,8 @@ public class CommonVerifiers {
         }
     }
 
-    public String verifyRpDomain(JsonNode params) {
-        String documentDomain;
-        if (params.hasNonNull("documentDomain")) {
-            documentDomain = params.get("documentDomain").asText();
-        } else {
+    public String verifyRpDomain(String documentDomain) {
+        if (Strings.isNullOrEmpty(documentDomain)) {
             documentDomain = appConfiguration.getIssuer();
         }
         documentDomain = networkService.getHost(documentDomain);
@@ -114,28 +116,38 @@ public class CommonVerifiers {
         }
     }
 
-    public void verifyAttestationOptions(JsonNode params) {
-        long count = Arrays.asList(params.hasNonNull("username"),
-                        params.hasNonNull("displayName"),
-                        params.hasNonNull("attestation"))
-                .parallelStream().filter(f -> !f).count();
+    public void verifyAttestationOptions(AttestationOptions params) {
+        long count = Arrays.asList(!Strings.isNullOrEmpty(params.getUsername()),
+                !Strings.isNullOrEmpty(params.getDisplayName()),
+                params.getAttestation() != null)
+                        .parallelStream().filter(f -> !f).count();
         if (count != 0) {
             throw new Fido2RuntimeException("Invalid parameters");
         }
     }
 
-    public void verifyAssertionOptions(JsonNode params) {
-        long count = Collections.singletonList(params.hasNonNull("username"))
+    public void verifyAssertionOptions(AssertionOptions assertionOptions) {
+        long count = Collections.singletonList(!Strings.isNullOrEmpty(assertionOptions.getUsername()))
                 .parallelStream().filter(f -> !f).count();
         if (count != 0) {
             throw errorResponseFactory.invalidRequest("Invalid parameters");
         }
     }
 
-    public void verifyBasicPayload(JsonNode params) {
-        long count = Arrays.asList(params.hasNonNull("response"),
-                params.hasNonNull("type"),
-                params.hasNonNull("id")
+    public void verifyBasicPayload(AssertionResult assertionResult) {
+        long count = Arrays.asList(assertionResult.getResponse() != null,
+                !Strings.isNullOrEmpty(assertionResult.getType()),
+                !Strings.isNullOrEmpty(assertionResult.getId())
+        ).parallelStream().filter(f -> !f).count();
+        if (count != 0) {
+            throw errorResponseFactory.invalidRequest("Invalid parameters");
+        }
+    }
+
+    public void verifyBasicAttestationResultRequest(AttestationResult attestationResult) {
+        long count = Arrays.asList(attestationResult.getResponse() != null,
+                !Strings.isNullOrEmpty(attestationResult.getType()),
+                !Strings.isNullOrEmpty(attestationResult.getId())
         ).parallelStream().filter(f -> !f).count();
         if (count != 0) {
             throw errorResponseFactory.invalidRequest("Invalid parameters");
@@ -247,8 +259,21 @@ public class CommonVerifiers {
         }
     }
 
-    public void verifyClientJSONTypeIsGet(JsonNode clientJsonNode) {
-            verifyClientJSONType(clientJsonNode, "webauthn.get");
+    public JsonNode verifyClientDataJSON(String clientDataJson) {
+        if(Strings.isNullOrEmpty(clientDataJson)) {
+            throw errorResponseFactory.invalidRequest("Invalid clientDataJson Null or Empty");
+        }
+        try {
+            JsonNode clientJsonNode = dataMapperService.readTree(clientDataJson);
+            return clientJsonNode;
+        } catch (IOException e) {
+            throw errorResponseFactory.invalidRequest("Can't parse message");
+        }
+    }
+
+    public JsonNode verifyClientJSONTypeIsGet(JsonNode clientJsonNode) {
+        verifyClientJSONType(clientJsonNode, "webauthn.get");
+        return clientJsonNode;
     }
 
     void verifyClientJSONType(JsonNode clientJsonNode, String type) {
@@ -263,14 +288,14 @@ public class CommonVerifiers {
         verifyClientJSONType(clientJsonNode, "webauthn.create");
     }
 
-    public JsonNode verifyClientJSON(JsonNode responseNode) {
+    public JsonNode verifyClientJSON(String clientDataJSON) {
         JsonNode clientJsonNode = null;
         try {
-            if (!responseNode.hasNonNull("clientDataJSON")) {
+            if (Strings.isNullOrEmpty(clientDataJSON)) {
                 throw errorResponseFactory.invalidRequest("Client data JSON is missing");
             }
             clientJsonNode = dataMapperService
-                    .readTree(new String(base64Service.urlDecode(responseNode.get("clientDataJSON").asText()), StandardCharsets.UTF_8));
+                    .readTree(new String(base64Service.urlDecode(clientDataJSON), StandardCharsets.UTF_8));
             if (clientJsonNode == null) {
                 throw errorResponseFactory.invalidRequest("Client data JSON is empty");
             }
@@ -321,11 +346,12 @@ public class CommonVerifiers {
         }
     }
 
-    public AttestationConveyancePreference verifyAttestationConveyanceType(JsonNode params) {
+    public AttestationConveyancePreference verifyAttestationConveyanceType(AttestationOptions attestationOptions) {
         AttestationConveyancePreference attestationConveyancePreference = null;
-        if (params.has("attestation")) {
-            String type = verifyThatFieldString(params, "attestation");
-            attestationConveyancePreference = AttestationConveyancePreference.valueOf(type);
+
+        if (attestationOptions.getAttestation() != null) {
+                String type = attestationOptions.getAttestation().getKeyName();
+                attestationConveyancePreference = AttestationConveyancePreference.valueOf(type);
         }
 
         if (attestationConveyancePreference == null) {
@@ -348,63 +374,31 @@ public class CommonVerifiers {
         }
     }
 
-    public AuthenticatorAttachment verifyAuthenticatorAttachment(JsonNode authenticatorAttachment) {
-        if (authenticatorAttachment == null) {
-            return null;
-        }
+    public UserVerification prepareUserVerification(UserVerification userVerification) {
 
-        AuthenticatorAttachment authenticatorAttachmentEnum = AuthenticatorAttachment.fromAttachmentValue(authenticatorAttachment.asText());
-        if (authenticatorAttachmentEnum == null) {
-            throw new Fido2RuntimeException("Wrong authenticator attachment parameter " + authenticatorAttachment);
-        } else {
-            return authenticatorAttachmentEnum;
-        }
-    }
-
-    public UserVerification verifyUserVerification(JsonNode userVerification) {
         if (userVerification == null) {
-            return null;
+            userVerification = UserVerification.preferred;
         }
-
-        try {
-            return UserVerification.valueOf(userVerification.asText());
-        } catch (Exception e) {
-            throw new Fido2RuntimeException("Wrong user verification parameter " + userVerification);
-        }
-    }
-
-    public UserVerification prepareUserVerification(JsonNode params) {
-        UserVerification userVerification = UserVerification.preferred;
-
-        if (params.hasNonNull("userVerification")) {
-            userVerification = verifyUserVerification(params.get("userVerification"));
-        }
-
         return userVerification;
     }
 
-    public Boolean verifyRequireResidentKey(JsonNode requireResidentKey) {
-        if (requireResidentKey == null) {
-            return null;
-        }
-
-        try {
-            return requireResidentKey.asBoolean();
-        } catch (Exception e) {
-            throw new Fido2RuntimeException("Wrong authenticator attachment parameter " + e.getMessage(), e);
-        }
-    }
-
-    public String verifyAssertionType(JsonNode typeNode, String fieldName) {
-        String type = verifyThatFieldString(typeNode, fieldName);
+    public String verifyAssertionType(String type) {
+        verifyNullOrEmptyString(type);
         if (!"public-key".equals(type)) {
             throw errorResponseFactory.invalidRequest("Invalid type");
         }
         return type;
     }
 
-    public String verifyCredentialId(CredAndCounterData attestationData, JsonNode params) {
-        String paramsKeyId = verifyBase64UrlString(params, "id");
+    public String verifyNullOrEmptyString(String input) {
+        if (Strings.isNullOrEmpty(input)) {
+            throw errorResponseFactory.invalidRequest("Invalid data, value is null");
+        }
+        return input;
+    }
+
+    public String verifyCredentialId(CredAndCounterData attestationData, AttestationResult attestationResult) {
+        String paramsKeyId = attestationResult.getId();
         
         if (StringHelper.isEmpty(paramsKeyId)) {
             throw errorResponseFactory.invalidRequest("Credential id attestationObject and response id mismatch");
@@ -418,10 +412,10 @@ public class CommonVerifiers {
         return paramsKeyId;
     }
 
-    public String getChallenge(JsonNode clientDataJSONNode) {
+    public String getChallenge(JsonNode clientJsonNode) {
         try {
             String clientDataChallenge = base64Service
-                    .urlEncodeToStringWithoutPadding(base64Service.urlDecode(clientDataJSONNode.get("challenge").asText()));
+                    .urlEncodeToStringWithoutPadding(base64Service.urlDecode(clientJsonNode.get("challenge").asText()));
 
             return clientDataChallenge;
         } catch (Exception ex) {
@@ -429,12 +423,10 @@ public class CommonVerifiers {
         }
     }
 
-    public int verifyTimeout(JsonNode params) {
-        int timeout = 90;
-        if (params.hasNonNull("timeout")) {
-            timeout = params.get("timeout").asInt(timeout);
+    public long verifyTimeout(Long timeout) {
+        if (timeout == null) {
+            timeout = 90L;
         }
-
         return timeout;
     }
 

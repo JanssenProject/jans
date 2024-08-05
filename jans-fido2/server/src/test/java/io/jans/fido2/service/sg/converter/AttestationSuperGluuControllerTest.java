@@ -4,8 +4,14 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.google.common.base.Strings;
 import io.jans.as.model.fido.u2f.message.RawRegisterResponse;
 import io.jans.as.model.fido.u2f.protocol.RegisterResponse;
+import io.jans.fido2.model.attestation.AttestationOptions;
+import io.jans.fido2.model.attestation.AttestationResult;
+import io.jans.fido2.model.attestation.AttestationResultResponse;
+import io.jans.fido2.model.attestation.PublicKeyCredentialCreationOptions;
+import io.jans.fido2.model.conf.Fido2Configuration;
 import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.CoseService;
@@ -14,6 +20,7 @@ import io.jans.fido2.service.DigestService;
 import io.jans.fido2.service.operation.AttestationService;
 import io.jans.fido2.service.persist.UserSessionIdService;
 import io.jans.fido2.service.sg.RawRegistrationService;
+import io.jans.fido2.service.util.CommonUtilService;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 import org.junit.jupiter.api.Test;
@@ -71,9 +78,10 @@ class AttestationSuperGluuControllerTest {
         String appId = "test-appId";
         String sessionId = "test-sessionId";
         String enrollmentCode = "test-enrollmentCode";
+
         when(userSessionIdService.isValidSessionId(sessionId, username)).thenReturn(true);
         when(dataMapperService.createObjectNode()).thenReturn(mapper.createObjectNode());
-        when(attestationService.options(any())).thenReturn(mapper.createObjectNode());
+        when(attestationService.options(any())).thenReturn(mock(PublicKeyCredentialCreationOptions.class));
 
         JsonNode response = attestationSuperGluuController.startRegistration(username, appId, sessionId, enrollmentCode);
         assertNotNull(response);
@@ -88,7 +96,7 @@ class AttestationSuperGluuControllerTest {
             assertEquals(itemNode.get("version").asText(), "U2F_V2");
         }
         verify(attestationService).options(any());
-        verify(dataMapperService, times(2)).createObjectNode();
+        verify(dataMapperService, times(1)).createObjectNode();
     }
 
     @Test
@@ -114,30 +122,23 @@ class AttestationSuperGluuControllerTest {
         String appId = "test-appId";
         String sessionId = "test-sessionId";
         when(userSessionIdService.isValidSessionId(sessionId, username)).thenReturn(true);
-        when(dataMapperService.createObjectNode()).thenReturn(mapper.createObjectNode());
         when(attestationService.generateUserId()).thenReturn("generate-userId");
 
-        ObjectNode response = attestationSuperGluuController.buildFido2AttestationStartResponse(username, appId, sessionId);
+        AttestationOptions response = attestationSuperGluuController.buildFido2AttestationStartResponse(username, appId, sessionId);
         assertNotNull(response);
-        assertTrue(response.has("username"));
-        assertTrue(response.has("displayName"));
-        assertTrue(response.has("session_id"));
-        assertTrue(response.has("attestation"));
-        assertTrue(response.has("super_gluu_request"));
-        assertTrue(response.has("super_gluu_request_mode"));
-        assertTrue(response.has("super_gluu_app_id"));
-        assertEquals(response.get("username").asText(), "generate-userId");
-        assertEquals(response.get("displayName").asText(), "generate-userId");
-        assertEquals(response.get("session_id").asText(), sessionId);
-        assertEquals(response.get("attestation").asText(), "direct");
-        assertEquals(response.get("super_gluu_request").asText(), "true");
-        assertEquals(response.get("super_gluu_request_mode").asText(), "one_step");
-        assertEquals(response.get("super_gluu_app_id").asText(), appId);
+
+        assertEquals(response.getUsername(), "generate-userId");
+        assertEquals(response.getDisplayName(), "generate-userId");
+        assertEquals(response.getSessionId(), sessionId);
+        assertEquals(response.getAttestation().getKeyName(), "direct");
+        assertEquals(response.getSuperGluuRequest().toString(), "true");
+        assertEquals(response.getSuperGluuRequestMode(), "one_step");
+        assertEquals(response.getSuperGluuAppId(), appId);
 
         verify(userSessionIdService).isValidSessionId(sessionId, username);
-        verify(dataMapperService).createObjectNode();
+        //verify(dataMapperService).createObjectNode();
         verify(attestationService).generateUserId();
-        verify(log).debug("Prepared U2F_V2 attestation options request: {}", response);
+        verify(log).debug("Prepared U2F_V2 attestation options request: {}", CommonUtilService.toJsonNode(response).toString());
     }
 
     @Test
@@ -146,29 +147,22 @@ class AttestationSuperGluuControllerTest {
         String appId = "test-appId";
         String sessionId = "test-sessionId";
         when(userSessionIdService.isValidSessionId(sessionId, username)).thenReturn(true);
-        when(dataMapperService.createObjectNode()).thenReturn(mapper.createObjectNode());
 
-        ObjectNode response = attestationSuperGluuController.buildFido2AttestationStartResponse(username, appId, sessionId);
+        AttestationOptions response = attestationSuperGluuController.buildFido2AttestationStartResponse(username, appId, sessionId);
         assertNotNull(response);
-        assertTrue(response.has("username"));
-        assertTrue(response.has("displayName"));
-        assertTrue(response.has("session_id"));
-        assertTrue(response.has("attestation"));
-        assertTrue(response.has("super_gluu_request"));
-        assertTrue(response.has("super_gluu_request_mode"));
-        assertTrue(response.has("super_gluu_app_id"));
-        assertEquals(response.get("username").asText(), "test-username");
-        assertEquals(response.get("displayName").asText(), "test-username");
-        assertEquals(response.get("session_id").asText(), sessionId);
-        assertEquals(response.get("attestation").asText(), "direct");
-        assertEquals(response.get("super_gluu_request").asText(), "true");
-        assertEquals(response.get("super_gluu_request_mode").asText(), "two_step");
-        assertEquals(response.get("super_gluu_app_id").asText(), appId);
+
+        assertEquals(response.getUsername(), "test-username");
+        assertEquals(response.getDisplayName(), "test-username");
+        assertEquals(response.getSessionId(), sessionId);
+        assertEquals(response.getAttestation().getKeyName(), "direct");
+        assertEquals(response.getSuperGluuRequest().toString(), "true");
+        assertEquals(response.getSuperGluuRequestMode(), "two_step");
+        assertEquals(response.getSuperGluuAppId(), appId);
 
         verify(userSessionIdService).isValidSessionId(sessionId, username);
-        verify(dataMapperService).createObjectNode();
+        //verify(dataMapperService).createObjectNode();
         verify(attestationService, never()).generateUserId();
-        verify(log).debug("Prepared U2F_V2 attestation options request: {}", response);
+        verify(log).debug("Prepared U2F_V2 attestation options request: {}", CommonUtilService.toJsonNode(response).toString());
     }
 
     @Test
@@ -192,12 +186,13 @@ class AttestationSuperGluuControllerTest {
                 mock(X509Certificate.class),
                 "test_signature".getBytes()
         );
+        AttestationResultResponse attestationResultResponse = new AttestationResultResponse();
         when(rawRegistrationService.parseRawRegisterResponse(registerResponse.getRegistrationData())).thenReturn(rawRegisterResponse);
         when(base64Service.urlEncodeToString(any())).thenReturn("test_key_handle");
         when(digestService.hashSha256(anyString())).thenReturn("test_rp_id_hash".getBytes());
         when(coseService.convertECKeyToUncompressedPoint(any())).thenReturn(mapper.createObjectNode());
         when(dataMapperService.cborWriteAsBytes(any())).thenReturn("test_cose_public_key".getBytes());
-        when(attestationService.verify(any())).thenReturn(mapper.createObjectNode());
+        when(attestationService.verify(any())).thenReturn(mock(AttestationResultResponse.class));
 
         JsonNode response = attestationSuperGluuController.finishRegistration(username, registerResponseString);
         assertNotNull(response);
@@ -206,7 +201,7 @@ class AttestationSuperGluuControllerTest {
         assertEquals(response.get("status").asText(), "success");
         assertEquals(response.get("challenge").asText(), "test_challenge");
 
-        verify(attestationService).verify(paramsNode);
+        verify(attestationService, times(1)).verify(any());
     }
 
     @Test
@@ -349,32 +344,32 @@ class AttestationSuperGluuControllerTest {
         when(digestService.hashSha256(anyString())).thenReturn("test_rp_id_hash".getBytes());
         when(coseService.convertECKeyToUncompressedPoint(any())).thenReturn(mapper.createObjectNode());
 
-        ObjectNode response = attestationSuperGluuController.buildFido2AttestationVerifyResponse(username, registerResponse);
-        assertNotNull(response);
-        assertTrue(response.has("super_gluu_request"));
-        assertTrue(response.has("super_gluu_request_mode"));
-        assertTrue(response.has("super_gluu_request_cancel"));
-        assertTrue(response.has("id"));
-        assertTrue(response.has("type"));
-        assertTrue(response.has("response"));
-        assertEquals(response.get("super_gluu_request").asText(), "true");
-        assertEquals(response.get("super_gluu_request_mode").asText(), "two_step");
-        assertEquals(response.get("super_gluu_request_cancel").asText(), "false");
-        assertEquals(response.get("id").asText(), "test_key_handle");
-        assertEquals(response.get("type").asText(), "public-key");
-        JsonNode response1Node = response.get("response");
-        assertTrue(response1Node.has("deviceData"));
-        assertTrue(response1Node.has("clientDataJSON"));
-        assertTrue(response1Node.has("attestationObject"));
-        assertEquals(response1Node.get("deviceData").asText(), "test_device_data");
-        assertEquals(response1Node.get("clientDataJSON").asText(), "test_client_data");
-        assertEquals(response1Node.get("attestationObject").asText(), "test_key_handle");
+        AttestationResult attestationResult = attestationSuperGluuController.buildFido2AttestationVerifyResponse(username, registerResponse);
+        assertNotNull(attestationResult);
+        assertNotNull(attestationResult.getSuperGluuRequest());
+        assertFalse(Strings.isNullOrEmpty(attestationResult.getSuperGluuRequestMode()));
+        assertNotNull(attestationResult.getSuperGluuRequestCancel());
+        assertNotNull(attestationResult.getId());
+        assertNotNull(attestationResult.getType());
+        assertNotNull(attestationResult.getResponse());
+        assertEquals(attestationResult.getSuperGluuRequest().toString(), "true");
+        assertEquals(attestationResult.getSuperGluuRequestMode(), "two_step");
+        assertEquals(attestationResult.getSuperGluuRequestCancel().toString(), "false");
+        assertEquals(attestationResult.getId(), "test_key_handle");
+        assertEquals(attestationResult.getType(), "public-key");
+        io.jans.fido2.model.attestation.Response response = attestationResult.getResponse();
+        assertNotNull(response.getDeviceData());
+        assertNotNull(response.getClientDataJSON());
+        assertNotNull(response.getAttestationObject());
+        assertEquals(response.getDeviceData(), "test_device_data");
+        assertEquals(response.getClientDataJSON(), "test_client_data");
+        assertEquals(response.getAttestationObject(), "test_key_handle");
 
-        verify(dataMapperService, times(5)).createObjectNode();
+        verify(dataMapperService, times(3)).createObjectNode();
         verify(dataMapperService, times(2)).cborWriteAsBytes(any());
         verify(base64Service, times(3)).urlEncodeToString(any());
         verify(base64Service).encodeToString(any());
-        verify(log).debug("Prepared U2F_V2 attestation verify request: {}", response);
+        verify(log).debug("Prepared U2F_V2 attestation verify request: {}", attestationResult.toString());
         verify(rawRegistrationService).parseRawRegisterResponse(any());
     }
 }

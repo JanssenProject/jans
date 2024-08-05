@@ -3,6 +3,7 @@ package io.jans.fido2.service.verifier;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.jans.fido2.exception.Fido2RuntimeException;
+import io.jans.fido2.model.assertion.Response;
 import io.jans.fido2.service.processor.assertion.AssertionProcessorFactory;
 import io.jans.fido2.service.processors.AssertionFormatProcessor;
 import io.jans.orm.model.fido2.Fido2AuthenticationData;
@@ -33,9 +34,9 @@ class AssertionVerifierTest {
 
     @Test
     void verifyAuthenticatorAssertionResponse_authenticatorDataIsNull_fido2RuntimeException() {
-        ObjectNode response = mapper.createObjectNode();
-        response.put("clientDataJSON", "TEST-clientDataJSON");
-        response.put("signature", "TEST-signature");
+        Response response = new Response();
+        response.setClientDataJSON("TEST-clientDataJSON");
+        response.setSignature("TEST-signature");
         Fido2RegistrationData registration = new Fido2RegistrationData();
         Fido2AuthenticationData authenticationEntity = new Fido2AuthenticationData();
 
@@ -47,9 +48,10 @@ class AssertionVerifierTest {
 
     @Test
     void verifyAuthenticatorAssertionResponse_clientDataJSONIsNull_fido2RuntimeException() {
-        ObjectNode response = mapper.createObjectNode();
-        response.put("authenticatorData", "TEST-authenticatorData");
-        response.put("signature", "TEST-signature");
+        Response response = new Response();
+        response.setAuthenticatorData("TEST-authenticatorData");
+        response.setSignature("TEST-signature");
+
         Fido2RegistrationData registration = new Fido2RegistrationData();
         Fido2AuthenticationData authenticationEntity = new Fido2AuthenticationData();
 
@@ -61,9 +63,9 @@ class AssertionVerifierTest {
 
     @Test
     void verifyAuthenticatorAssertionResponse_signatureIsNull_fido2RuntimeException() {
-        ObjectNode response = mapper.createObjectNode();
-        response.put("authenticatorData", "TEST-authenticatorData");
-        response.put("clientDataJSON", "TEST-clientDataJSON");
+        Response response = new Response();
+        response.setAuthenticatorData("TEST-authenticatorData");
+        response.setSignature("TEST-signature");
         Fido2RegistrationData registration = new Fido2RegistrationData();
         Fido2AuthenticationData authenticationEntity = new Fido2AuthenticationData();
 
@@ -75,13 +77,14 @@ class AssertionVerifierTest {
 
     @Test
     void verifyAuthenticatorAssertionResponse_validValues_valid() {
-        ObjectNode response = mapper.createObjectNode();
         String authenticatorDataValue = "TEST-authenticatorData";
         String clientDataJSONValue = "TEST-clientDataJSON";
         String signatureValue = "TEST-signature";
-        response.put("authenticatorData", authenticatorDataValue);
-        response.put("clientDataJSON", clientDataJSONValue);
-        response.put("signature", signatureValue);
+        Response response = new Response();
+        response.setAuthenticatorData(authenticatorDataValue);
+        response.setSignature(signatureValue);
+        response.setClientDataJSON(clientDataJSONValue);
+
         Fido2RegistrationData registration = new Fido2RegistrationData();
         Fido2AuthenticationData authenticationEntity = new Fido2AuthenticationData();
         AssertionFormatProcessor assertionProcessor = mock(AssertionFormatProcessor.class);
