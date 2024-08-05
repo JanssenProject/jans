@@ -2535,29 +2535,76 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#using-command-line" class="md-nav__link">
+    Using Command Line
+  </a>
+  
+    <nav class="md-nav" aria-label="Using Command Line">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#find-smtp-server-configuration" class="md-nav__link">
     Find SMTP Server Configuration
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#setup-new-smtp-server-configuration" class="md-nav__link">
     Setup New SMTP Server Configuration
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#update-smtp-server-configuration" class="md-nav__link">
     Update SMTP Server Configuration
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
+  <a href="#delete-smtp-sever-configuration" class="md-nav__link">
+    Delete SMTP Sever Configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#test-smtp-server-configuration" class="md-nav__link">
     Test SMTP Server Configuration
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-text-based-ui" class="md-nav__link">
+    Using Text-based UI
+  </a>
+  
+    <nav class="md-nav" aria-label="Using Text-based UI">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#smpt-screen" class="md-nav__link">
+    SMPT Screen
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-configuration-rest-api" class="md-nav__link">
+    Using Configuration REST API
   </a>
   
 </li>
@@ -8566,29 +8613,76 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#using-command-line" class="md-nav__link">
+    Using Command Line
+  </a>
+  
+    <nav class="md-nav" aria-label="Using Command Line">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#find-smtp-server-configuration" class="md-nav__link">
     Find SMTP Server Configuration
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#setup-new-smtp-server-configuration" class="md-nav__link">
     Setup New SMTP Server Configuration
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
   <a href="#update-smtp-server-configuration" class="md-nav__link">
     Update SMTP Server Configuration
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
+        
+          <li class="md-nav__item">
+  <a href="#delete-smtp-sever-configuration" class="md-nav__link">
+    Delete SMTP Sever Configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#test-smtp-server-configuration" class="md-nav__link">
     Test SMTP Server Configuration
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-text-based-ui" class="md-nav__link">
+    Using Text-based UI
+  </a>
+  
+    <nav class="md-nav" aria-label="Using Text-based UI">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#smpt-screen" class="md-nav__link">
+    SMPT Screen
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-configuration-rest-api" class="md-nav__link">
+    Using Configuration REST API
   </a>
   
 </li>
@@ -8636,93 +8730,207 @@
 
 
 <h1 id="smtp-configuration">SMTP Configuration<a class="headerlink" href="#smtp-configuration" title="Permanent link">#</a></h1>
-<blockquote>
-<p>Prerequisite: Know how to use the Janssen CLI in <a href="../config-tools/jans-cli/">command-line mode</a></p>
-</blockquote>
-<p>Let's get the information of <strong>SMTP Configuration</strong> using Janssen CLI.</p>
-<p><div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --info ConfigurationSMTP
-
-
-Operation ID: get-config-smtp
-  Description: Returns SMTP server configuration.
-Operation ID: post-config-smtp
-  Description: Adds SMTP server configuration.
-  Schema: /components/schemas/SmtpConfiguration
+<p>The Janssen Server provides multiple configuration tools to perform these
+tasks.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Use Command-line</label><label for="__tabbed_1_2">Use Text-based UI</label><label for="__tabbed_1_3">Use REST API</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>Use the command line to perform actions from the terminal. Learn how to 
+use Jans CLI <a href="../config-tools/jans-cli/">here</a> or jump straight to 
+the <a href="#using-command-line">Using Command Line</a></p>
+</div>
+<div class="tabbed-block">
+<p>Use a fully functional text-based user interface from the terminal. 
+Learn how to use Jans Text-based UI (TUI) 
+<a href="../config-tools/jans-tui/">here</a> or jump straight to the
+<a href="#using-text-based-ui">Using Text-based UI</a></p>
+</div>
+<div class="tabbed-block">
+<p>Use REST API for programmatic access or invoke via tools like CURL or 
+Postman. Learn how to use Janssen Server Config API 
+<a href="../config-tools/config-api/">here</a> or Jump straight to the
+<a href="#using-configuration-rest-api">Using Configuration REST API</a></p>
+</div>
+</div>
+</div>
+<h2 id="using-command-line">Using Command Line<a class="headerlink" href="#using-command-line" title="Permanent link">#</a></h2>
+<p>In the Janssen Server, you can deploy and customize the SMTP using the
+command line. To get the details of Janssen command line operations relevant to
+SMTP Configuration, you can check the operations under <code>ConfigurationSmtp</code> 
+task using the command below:</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --info ConfigurationSmtp
+</code></pre></div>
+<div class="highlight"><span class="filename">Sample Output</span><pre><span></span><code>Operation ID: get-config-smtp
+ Description: Returns SMTP server configuration
 Operation ID: put-config-smtp
-  Description: Updates SMTP server configuration.
-  Schema: /components/schemas/SmtpConfiguration
+ Description: Updates SMTP server configuration
+ Schema: SmtpConfiguration
+Operation ID: post-config-smtp
+ Description: Adds SMTP server configuration
+ Schema: SmtpConfiguration
 Operation ID: delete-config-smtp
-  Description: Deletes SMTP server configuration.
+ Description: Deletes SMTP server configuration
 Operation ID: test-config-smtp
-  Description: Test SMTP server configuration.
-
-To get sample schema type /opt/jans/jans-cli/config-cli.py --schema &lt;schema&gt;, for example /opt/jans/jans-cli/config-cli.py --schema /components/schemas/SmtpConfiguration
+ Description: Signing Test SMTP server configuration
+ Schema: SmtpTest
 </code></pre></div>
-As we see, we can perform many operations such as <code>update</code>, <code>delete</code>, <code>test</code>, <code>post</code>, etc. Let's do some operations.</p>
-<h2 id="find-smtp-server-configuration">Find SMTP Server Configuration<a class="headerlink" href="#find-smtp-server-configuration" title="Permanent link">#</a></h2>
+<h3 id="find-smtp-server-configuration">Find SMTP Server Configuration<a class="headerlink" href="#find-smtp-server-configuration" title="Permanent link">#</a></h3>
 <p>To view the current SMTP server configuration, run the following command line:</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-config-smtp
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-config-smtp
 </code></pre></div>
-<p>It will show your SMTP server configuration as below:</p>
-<div class="highlight"><pre><span></span><code>Getting access token for scope https://jans.io/oauth/config/smtp.readonly
-{
-  &quot;host&quot;: &quot;webmail.gluu.org&quot;,
-  &quot;port&quot;: 587,
-  &quot;requiresSsl&quot;: null,
-  &quot;serverTrust&quot;: null,
-  &quot;fromName&quot;: null,
-  &quot;fromEmailAddress&quot;: null,
-  &quot;requiresAuthentication&quot;: null,
-  &quot;userName&quot;: null,
-  &quot;password&quot;: &quot;fHze8OEMs1MzkGhWw/29eg==&quot;
-}
+<p>It will show the SMTP server configuration as below:</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;valid&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;port&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;trust_host&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;requires_authentication&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;key_store&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;/etc/certs/smtp-keys.pkcs12&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;key_store_password&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;kb5JITTrmCyX1LNEp8uorA==&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;key_store_alias&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;smtp_sig_ec256&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;signing_algorithm&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;SHA256withECDSA&quot;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div></td></tr></table></div>
+<h3 id="setup-new-smtp-server-configuration">Setup New SMTP Server Configuration<a class="headerlink" href="#setup-new-smtp-server-configuration" title="Permanent link">#</a></h3>
+<p>To add a new SMTP Server, we can use <code>post-config-smtp</code> operation id.
+As shown in the <a href="#using-command-line">output</a> for<code>--info</code> 
+command, the <code>post-config-smtp</code> operation requires data to be sent 
+according to the <code>SmtpConfiguration</code> schema.</p>
+<p>To see the schema, use the command below:
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --schema SmtpConfiguration 
+</code></pre></div></p>
+<p>The Janssen Server also provides an example of data that adheres to the above schema.
+To fetch the example, use the command below.</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --schema-sample SmtpConfiguration 
 </code></pre></div>
-<h2 id="setup-new-smtp-server-configuration">Setup New SMTP Server Configuration<a class="headerlink" href="#setup-new-smtp-server-configuration" title="Permanent link">#</a></h2>
-<p>This operation can be performed to update/post a new SMTP configuration on your Janssen server.
-Let's see the schema first:</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --schema /components/schemas/SmtpConfiguration &gt; /tmp/smtp.json
+<p>Using the schema and the example above, we have added below  data to the file 
+<code>/tmp/smtp.json</code>.</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Input</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;valid&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;host&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;port&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;connect_protection&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;StartTls&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;trust_host&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;from_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jans&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;from_email_address&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;requires_authentication&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;smtp_authentication_account_username&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;smtp_authentication_account_password&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;key_store&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;key_store_password&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;key_store_alias&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;signing_algorithm&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div></td></tr></table></div>
+<p>To setup a new SMTP server configuration, run the following command:</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id post-config-smtp <span class="se">\</span>
+--data /tmp/smtp.json
 </code></pre></div>
-<p>It will create a <code>.json</code> file. Let's modify this file:</p>
-<div class="highlight"><pre><span></span><code>nano /tmp/smtp.json
-</code></pre></div>
-<p><img alt="smtp update configuration" src="../../../assets/image-cl-update-smtp-03042021.png" /></p>
-<p>You can update each of its properties. To perform this operation, run the following command:</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id post-config-smtp --data /tmp/smtp.json
-</code></pre></div>
-<p>If you run the following command, it will update your janssen smtp server and print on the screen as below.</p>
-<div class="highlight"><pre><span></span><code>Getting access token for scope https://jans.io/oauth/config/smtp.write
-Server Response:
-{
-  &quot;host&quot;: &quot;webmail.gluu.org&quot;,
-  &quot;port&quot;: 587,
-  &quot;requiresSsl&quot;: null,
-  &quot;serverTrust&quot;: null,
-  &quot;fromName&quot;: null,
-  &quot;fromEmailAddress&quot;: null,
-  &quot;requiresAuthentication&quot;: null,
-  &quot;userName&quot;: null,
-  &quot;password&quot;: &quot;fHze8OEMs1MzkGhWw/29eg==&quot;
-}
-</code></pre></div>
-<h2 id="update-smtp-server-configuration">Update SMTP Server Configuration<a class="headerlink" href="#update-smtp-server-configuration" title="Permanent link">#</a></h2>
-<p>To update smtp server, simply change any information on <code>/tmp/smtp.json</code> file and run the following command:</p>
-<p><div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id put-config-smtp --data /tmp/smtp.json
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;valid&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;host&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;port&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;connect_protection&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;StartTls&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;trust_host&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;from_name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jans&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;from_email_address&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;requires_authentication&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;smtp_authentication_account_username&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;smtp_authentication_account_password&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CGmVqM6v4Hs=&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;key_store&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;key_store_password&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;CGmVqM6v4Hs=&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;key_store_alias&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;signing_algorithm&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div></td></tr></table></div>
+<h3 id="update-smtp-server-configuration">Update SMTP Server Configuration<a class="headerlink" href="#update-smtp-server-configuration" title="Permanent link">#</a></h3>
+<p>To update the SMTP server, we can use the <code>put-config-smtp</code> operation id. 
+simply change any information on <code>/tmp/smtp.json</code>file and run the following 
+command:</p>
+<p>In that file, update the value <code>false</code> to <code>true</code> of the <code>trust_host</code> field.</p>
+<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id put-config-smtp <span class="se">\</span>
+--data /tmp/smtp.json
 </code></pre></div>
 It will update the information.</p>
-<h2 id="test-smtp-server-configuration">Test SMTP Server Configuration<a class="headerlink" href="#test-smtp-server-configuration" title="Permanent link">#</a></h2>
-<p>Testing SMTP configuration token with <code>https://jans.io/oauth/config/smtp.write</code> scope is required.
-To test SMTP configuration update, change any information on <code>/tmp/smtp.json</code> file with test data and run the following command:</p>
-<p><div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id test-config-smtp --data /tmp/smtp.json
+<h3 id="delete-smtp-sever-configuration">Delete SMTP Sever Configuration<a class="headerlink" href="#delete-smtp-sever-configuration" title="Permanent link">#</a></h3>
+<p>To delete the SMTP Sever, we can use the <code>delete-config-smtp</code> operation id.
+run the following command</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id delete-config-smtp
 </code></pre></div>
-This will be return status code 200 with response as true or false based on the SMTP test result.
-Note:  <code>SMTP Password</code> should be App password and not web login password.</p>
+<h3 id="test-smtp-server-configuration">Test SMTP Server Configuration<a class="headerlink" href="#test-smtp-server-configuration" title="Permanent link">#</a></h3>
+<p>Testing SMTP Server configuration token with <code>https://jans.io/oauth/config/smtp.write</code> 
+scope is required. To test the SMTP server configuration update, change any information 
+on the <code>/tmp/smtp.json</code> file with test data and run the following command:</p>
+<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id test-config-smtp <span class="se">\</span>
+--data /tmp/smtp.json
+</code></pre></div>
+This will return status code 200 with a response as true or false based on the 
+SMTP test result.
+Note:  <code>SMTP Password</code> should be an App password and not a web login password.</p>
+<h2 id="using-text-based-ui">Using Text-based UI<a class="headerlink" href="#using-text-based-ui" title="Permanent link">#</a></h2>
+<p>Start TUI using the command below:</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>sudo /opt/jans/jans-cli/jans_cli_tui.py
+</code></pre></div>
+<h3 id="smpt-screen">SMPT Screen<a class="headerlink" href="#smpt-screen" title="Permanent link">#</a></h3>
+<p>Navigate to <code>Auth Server</code> -&gt; <code>SMPT</code> to open the SMPT screen as shown
+in the image below.</p>
+<p><img alt="image" src="../../../assets/tui-smtp.png" /></p>
+<ul>
+<li>This screen shows the current SMTP server configuration.</li>
+<li>After changing the SMPT data, update the SMPT server using the <code>Save</code> button.</li>
+<li>Test the SMPTS server using the <code>Test</code> button, and the result will be displayed.</li>
+</ul>
+<p>The test result image is shown below.</p>
+<p><img alt="image" src="../../../assets/tui-smtp-result.png" /></p>
+<h2 id="using-configuration-rest-api">Using Configuration REST API<a class="headerlink" href="#using-configuration-rest-api" title="Permanent link">#</a></h2>
+<p>Janssen Server Configuration REST API exposes relevant endpoints for managing
+and configuring the SMTP. Endpoint details are published in the <a href="../../reference/openapi/">Swagger
+document</a>.</p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-08-03T16:21:13+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-08-03</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-08-05T08:12:16+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-08-05</span>
       
         <br>
         Created:
