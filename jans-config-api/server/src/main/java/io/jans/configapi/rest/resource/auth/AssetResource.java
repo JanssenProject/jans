@@ -240,7 +240,6 @@ public class AssetResource extends ConfigBaseResource {
         }
 
         InputStream assetStream = assetForm.getAssetFile();
-        log.info("New assetStream:{} ", assetStream);
 
         if (assetStream == null || assetStream.available() <= 0) {
             log.error("No asset file provided");

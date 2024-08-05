@@ -23,6 +23,7 @@ import io.jans.orm.model.SortOrder;
 import io.jans.orm.search.filter.Filter;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.service.document.store.provider.DBDocumentStoreProvider;
+import io.jans.service.document.store.provider.LocalDocumentStoreProvider;
 import io.jans.service.document.store.service.DBDocumentService;
 import io.jans.service.document.store.service.Document;
 import io.jans.util.exception.InvalidAttributeException;
@@ -67,6 +68,9 @@ public class AssetService {
 
     @Inject
     DBDocumentService dbDocumentService;
+    
+    @Inject
+    LocalDocumentStoreProvider localDocumentStoreProvider;
 
     @Inject
     private ApiAppConfiguration appConfiguration;
@@ -583,7 +587,10 @@ public class AssetService {
     private boolean isServiceDirectoryExist(String serviceDirectory) {
         File dir = new File(serviceDirectory);
         boolean serviceDirectoryExist = dir.exists();
-        log.info("Check if serviceDirectory:{} - exist:{}", serviceDirectory, serviceDirectoryExist);
+        log.info("Check using File API serviceDirectory:{} - exist:{}", serviceDirectory, serviceDirectoryExist);
+        
+        serviceDirectoryExist = localDocumentStoreProvider.hasDocument(serviceDirectory);
+        log.info("Check if serviceDirectory:{} - exist:{} using localDocumentStoreProvider ", serviceDirectory, serviceDirectoryExist);
         return serviceDirectoryExist;
     }
     
