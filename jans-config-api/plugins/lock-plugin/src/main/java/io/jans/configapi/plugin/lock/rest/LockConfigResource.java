@@ -43,6 +43,8 @@ import com.github.fge.jsonpatch.JsonPatchException;
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class LockConfigResource extends BaseResource {
+    
+    private static final String CONFIG_NULL_ERR_MSG = "It seems Lock module is not setup, kindly check."; 
 
     @Inject
     Logger logger;
@@ -66,7 +68,7 @@ public class LockConfigResource extends BaseResource {
         AppConfiguration lockConfiguration = lockConfigService.find();
         logger.info("Lock details lockConfiguration():{}", lockConfiguration);
         if(lockConfiguration==null) {
-            throwInternalServerException("It seems Lock module is not setup, kindly check.");
+            throwInternalServerException(CONFIG_NULL_ERR_MSG);
         }
         return Response.ok(lockConfiguration).build();
         
@@ -87,7 +89,7 @@ public class LockConfigResource extends BaseResource {
         Conf conf = lockConfigService.findLockConf();
         logger.info("Lock conf:{} ", conf);
         if(conf==null) {
-            throwInternalServerException("It seems Lock module is not setup, kindly check.");
+            throwInternalServerException(CONFIG_NULL_ERR_MSG);
         }
        
         conf.setDynamic(lockAppConf);
@@ -115,7 +117,7 @@ public class LockConfigResource extends BaseResource {
         Conf conf = lockConfigService.findLockConf();
         logger.info("Lock conf:{} ", conf);
         if(conf==null) {
-            throwInternalServerException("It seems Lock module is not setup, kindly check.");
+            throwInternalServerException(CONFIG_NULL_ERR_MSG);
         }
        
         AppConfiguration lockAppConf = Jackson.applyPatch(jsonPatchString, conf.getDynamic());

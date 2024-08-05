@@ -363,9 +363,11 @@ class PersistenceSetup:
         hostname = self.manager.config.get("hostname")
         approved_issuer = [hostname]
 
-        token_server_hostname = os.environ.get("CN_TOKEN_SERVER_BASE_HOSTNAME")
-        if token_server_hostname and token_server_hostname not in approved_issuer:
-            approved_issuer.append(token_server_hostname)
+        if token_server_url := os.environ.get("CN_TOKEN_SERVER_BASE_URL"):
+            token_server_hostname = urlparse(token_server_url).hostname
+
+            if token_server_hostname and token_server_hostname not in approved_issuer:
+                approved_issuer.append(token_server_hostname)
 
         ctx = {
             "hostname": hostname,

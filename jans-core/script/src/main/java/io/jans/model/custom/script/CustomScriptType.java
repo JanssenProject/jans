@@ -19,7 +19,9 @@ import io.jans.model.custom.script.type.authzdetails.AuthzDetailType;
 import io.jans.model.custom.script.type.authzdetails.DummyAuthzDetail;
 import io.jans.model.custom.script.type.ciba.DummyEndUserNotificationType;
 import io.jans.model.custom.script.type.ciba.EndUserNotificationType;
+import io.jans.model.custom.script.type.client.ClientAuthnType;
 import io.jans.model.custom.script.type.client.ClientRegistrationType;
+import io.jans.model.custom.script.type.client.DummyClientAuthnType;
 import io.jans.model.custom.script.type.client.DummyClientRegistrationType;
 import io.jans.model.custom.script.type.configapi.ConfigApiType;
 import io.jans.model.custom.script.type.configapi.DummyConfigApiType;
@@ -103,6 +105,7 @@ public enum CustomScriptType implements AttributeEnum {
     SPONTANEOUS_SCOPE("spontaneous_scope", "Spontaneous Scopes", SpontaneousScopeType.class, CustomScript.class, "SpontaneousScope", new DummySpontaneousScopeType()),
     END_SESSION("end_session", "End Session", EndSessionType.class, CustomScript.class, "EndSession", new DummyEndSessionType()),
     POST_AUTHN("post_authn", "Post Authentication", PostAuthnType.class, CustomScript.class, "PostAuthn", new DummyPostAuthnType()),
+    CLIENT_AUTHN("client_authn", "Client Authentication", ClientAuthnType.class, CustomScript.class, "ClientAuthn", new DummyClientAuthnType()),
     SELECT_ACCOUNT("select_account", "Select Account", SelectAccountType.class, CustomScript.class, "SelectAccount", new DummySelectAccountType()),
     CREATE_USER("create_user", "Create User", CreateUserType.class, CustomScript.class, "CreateUser", new DummyCreateUserType()),
     SCIM("scim", "SCIM", ScimType.class, CustomScript.class, "ScimEventHandler", new DummyScimType()),
