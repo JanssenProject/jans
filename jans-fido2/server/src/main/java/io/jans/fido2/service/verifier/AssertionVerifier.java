@@ -18,6 +18,8 @@
 
 package io.jans.fido2.service.verifier;
 
+import com.google.common.base.Strings;
+import io.jans.fido2.model.assertion.Response;
 import io.jans.orm.model.fido2.Fido2AuthenticationData;
 import io.jans.orm.model.fido2.Fido2RegistrationData;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -39,15 +41,17 @@ public class AssertionVerifier {
     @Inject
     private AssertionProcessorFactory assertionProcessorFactory;
 
-    public void verifyAuthenticatorAssertionResponse(JsonNode response, Fido2RegistrationData registration,
-            Fido2AuthenticationData authenticationEntity) {
-        if (!(response.hasNonNull("authenticatorData") && response.hasNonNull("clientDataJSON") && response.hasNonNull("signature"))) {
+    public void verifyAuthenticatorAssertionResponse(Response response, Fido2RegistrationData registration,
+                                                     Fido2AuthenticationData authenticationEntity) {
+        if (Strings.isNullOrEmpty(response.getAuthenticatorData()) ||
+                Strings.isNullOrEmpty(response.getClientDataJSON()) ||
+                Strings.isNullOrEmpty(response.getSignature())) {
             throw new Fido2RuntimeException("Authenticator data is invalid");
         }
 
-        String base64AuthenticatorData = response.get("authenticatorData").asText();
-        String clientDataJson = response.get("clientDataJSON").asText();
-        String signature = response.get("signature").asText();
+        String base64AuthenticatorData = response.getAuthenticatorData();
+        String clientDataJson = response.getClientDataJSON();
+        String signature = response.getSignature();
 
         log.debug("Authenticator data {}", base64AuthenticatorData);
         AssertionFormatProcessor assertionProcessor = assertionProcessorFactory.getCommandProcessor(registration.getAttestationType());

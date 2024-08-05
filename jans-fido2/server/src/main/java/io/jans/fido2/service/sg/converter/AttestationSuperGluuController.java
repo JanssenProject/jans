@@ -6,41 +6,33 @@
 
 package io.jans.fido2.service.sg.converter;
 
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
-import java.security.cert.CertificateEncodingException;
-
-import io.jans.fido2.model.attestation.AttestationErrorResponseType;
-import io.jans.fido2.model.error.ErrorResponseFactory;
-import io.jans.fido2.model.assertion.AssertionErrorResponseType;
-import org.apache.commons.lang3.ArrayUtils;
-import org.slf4j.Logger;
-
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import io.jans.as.model.fido.u2f.message.RawRegisterResponse;
 import io.jans.as.model.fido.u2f.protocol.ClientData;
 import io.jans.as.model.fido.u2f.protocol.RegisterResponse;
+import io.jans.fido2.ctap.AttestationConveyancePreference;
 import io.jans.fido2.ctap.AttestationFormat;
-import io.jans.fido2.exception.Fido2RpRuntimeException;
-import io.jans.fido2.exception.Fido2RuntimeException;
-import io.jans.fido2.service.AuthenticatorDataParser;
-import io.jans.fido2.service.Base64Service;
-import io.jans.fido2.service.CoseService;
-import io.jans.fido2.service.DataMapperService;
-import io.jans.fido2.service.DigestService;
+import io.jans.fido2.model.attestation.*;
+import io.jans.fido2.model.common.PublicKeyCredentialType;
+import io.jans.fido2.model.error.ErrorResponseFactory;
+import io.jans.fido2.service.*;
 import io.jans.fido2.service.operation.AttestationService;
 import io.jans.fido2.service.persist.UserSessionIdService;
 import io.jans.fido2.service.sg.RawRegistrationService;
-import io.jans.fido2.service.verifier.CommonVerifiers;
+import io.jans.fido2.service.util.CommonUtilService;
 import io.jans.fido2.sg.SuperGluuMode;
 import io.jans.util.StringHelper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import org.apache.commons.lang3.ArrayUtils;
+import org.slf4j.Logger;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
+import java.security.cert.CertificateEncodingException;
 
 /**
  * Converters Super Gluu registration request to U2F V2 request
@@ -98,15 +90,16 @@ public class AttestationSuperGluuController {
      *             "appId":"https://yurem-emerging-pig.gluu.info/identity/authcode.htm","version":"U2F_V2"}]}
      */
     public JsonNode startRegistration(String userName, String appId, String sessionId, String enrollmentCode) {
-        ObjectNode params = buildFido2AttestationStartResponse(userName, appId, sessionId);
+        AttestationOptions attestationOptions = buildFido2AttestationStartResponse(userName, appId, sessionId);
 
-        ObjectNode result = attestationService.options(params);
+        PublicKeyCredentialCreationOptions fromPublicKeyCredentialCreationOptions = attestationService.options(attestationOptions);
 
-        // Build start registration response  
+        ObjectNode result = (ObjectNode)CommonUtilService.toJsonNode(fromPublicKeyCredentialCreationOptions);
+        // Build start registration response
         ObjectNode superGluuResult = dataMapperService.createObjectNode();
         ArrayNode registerRequests = superGluuResult.putArray("registerRequests");
 
-    	result.put("appId", appId);
+        result.put("appId", appId);
         registerRequests.add(result);
 
         result.put("version", "U2F_V2");
@@ -114,7 +107,7 @@ public class AttestationSuperGluuController {
         return superGluuResult;
     }
 
-	public ObjectNode buildFido2AttestationStartResponse(String userName, String appId, String sessionId) {
+    public AttestationOptions buildFido2AttestationStartResponse(String userName, String appId, String sessionId) {
 		boolean oneStep = StringHelper.isEmpty(userName);
 
         boolean valid = userSessionIdService.isValidSessionId(sessionId, userName);
@@ -122,28 +115,23 @@ public class AttestationSuperGluuController {
             String reasonError = String.format("session_id '%s' is invalid", sessionId);
             throw errorResponseFactory.badRequestException(AttestationErrorResponseType.INVALID_SESSION_ID, reasonError);
         }
-
-        ObjectNode params = dataMapperService.createObjectNode();
-        // Add all required parameters from request to allow process U2F request 
-        params.put(CommonVerifiers.SUPER_GLUU_REQUEST, true);
-        params.put(CommonVerifiers.SUPER_GLUU_MODE, oneStep ? SuperGluuMode.ONE_STEP.getMode() : SuperGluuMode.TWO_STEP.getMode());
-        params.put(CommonVerifiers.SUPER_GLUU_APP_ID, appId);
+        AttestationOptions attestationOptions = new AttestationOptions();
+        // Add all required parameters from request to allow process U2F request
+        attestationOptions.setSuperGluuRequest(true);
+        attestationOptions.setSuperGluuRequestMode(oneStep ? SuperGluuMode.ONE_STEP.getMode() : SuperGluuMode.TWO_STEP.getMode());
+        attestationOptions.setSuperGluuAppId(appId);
 
         String useUserName = userName;
         if (oneStep) {
         	useUserName = attestationService.generateUserId();
         }
+        attestationOptions.setUsername(useUserName);
+        attestationOptions.setDisplayName(useUserName);
+        attestationOptions.setSessionId(sessionId);
+        attestationOptions.setAttestation(AttestationConveyancePreference.direct);
 
-        params.put("username", useUserName);
-        params.put("displayName", useUserName);
-
-        params.put("session_id", sessionId);
-
-        // Required parameters
-        params.put("attestation", "direct");
-
-        log.debug("Prepared U2F_V2 attestation options request: {}", params);
-		return params;
+        log.debug("Prepared U2F_V2 attestation options request: {}", CommonUtilService.toJsonNode(attestationOptions).toString());
+		return attestationOptions;
 	}
 
     /* Example for one_step:
@@ -192,9 +180,10 @@ public class AttestationSuperGluuController {
     public JsonNode finishRegistration(String userName, String registerResponseString) {
         RegisterResponse registerResponse = parseRegisterResponse(registerResponseString);
 
-        ObjectNode params = buildFido2AttestationVerifyResponse(userName, registerResponse);
-
-        ObjectNode result = attestationService.verify(params);
+        //ObjectNode params = buildFido2AttestationVerifyResponse(userName, registerResponse);
+        AttestationResult attestationResult = buildFido2AttestationVerifyResponse(userName, registerResponse);
+        AttestationResultResponse attestationResultResponse = attestationService.verify(attestationResult);
+        ObjectNode result = (ObjectNode)CommonUtilService.toJsonNode(attestationResultResponse);
 
         result.put("status", "success");
         result.put("challenge", registerResponse.getClientData().getChallenge());
@@ -213,40 +202,34 @@ public class AttestationSuperGluuController {
         return registerResponse;
 	}
 
-	public ObjectNode buildFido2AttestationVerifyResponse(String userName, RegisterResponse registerResponse) {
+	public AttestationResult buildFido2AttestationVerifyResponse(String userName, RegisterResponse registerResponse) {
 		if (!ArrayUtils.contains(RawRegistrationService.SUPPORTED_REGISTER_TYPES, registerResponse.getClientData().getTyp())) {
             throw errorResponseFactory.badRequestException(AttestationErrorResponseType.UNSUPPORTED_REGISTER_TYPE, "Invalid options attestation request type");
         }
+        AttestationResult attestationResult = new AttestationResult();
+        attestationResult.setSuperGluuRequest(true);
 
-        ObjectNode params = dataMapperService.createObjectNode();
-        // Add all required parameters from request to allow process U2F request 
-        params.put(CommonVerifiers.SUPER_GLUU_REQUEST, true);
+        // Add all required parameters from request to allow process U2F request
         boolean oneStep = StringHelper.isEmpty(userName);
-        params.put(CommonVerifiers.SUPER_GLUU_MODE, oneStep ? SuperGluuMode.ONE_STEP.getMode() : SuperGluuMode.TWO_STEP.getMode());
-
-        // Manadatory parameter
-        params.put("type", "public-key");
+        attestationResult.setSuperGluuRequestMode(oneStep ? SuperGluuMode.ONE_STEP.getMode() : SuperGluuMode.TWO_STEP.getMode());
 
         // Add response node
-        ObjectNode response = dataMapperService.createObjectNode();
-        params.set("response", response);
-        response.put("deviceData", registerResponse.getDeviceData());
+        Response response = new Response();
+        attestationResult.setResponse(response);
+        attestationResult.getResponse().setDeviceData(registerResponse.getDeviceData());
 
         // Convert clientData node to new format
         ObjectNode clientData = dataMapperService.createObjectNode();
         clientData.put("challenge", registerResponse.getClientData().getChallenge());
         clientData.put("origin", registerResponse.getClientData().getOrigin());
         clientData.put("type", registerResponse.getClientData().getTyp());
-		response.put("clientDataJSON", base64Service.urlEncodeToString(clientData.toString().getBytes(StandardCharsets.UTF_8)));
-
+        attestationResult.getResponse().setClientDataJSON(base64Service.urlEncodeToString(clientData.toString().getBytes(StandardCharsets.UTF_8)));
 		// Store cancel type
-		params.put(CommonVerifiers.SUPER_GLUU_REQUEST_CANCEL, StringHelper.equals(RawRegistrationService.REGISTER_CANCEL_TYPE, registerResponse.getClientData().getTyp()));
-
+        attestationResult.setSuperGluuRequestCancel(StringHelper.equals(RawRegistrationService.REGISTER_CANCEL_TYPE, registerResponse.getClientData().getTyp()));
 		// Prepare attestationObject
         RawRegisterResponse rawRegisterResponse = rawRegistrationService.parseRawRegisterResponse(registerResponse.getRegistrationData());
 
-        params.put("id", base64Service.urlEncodeToString(rawRegisterResponse.getKeyHandle()));
-
+        attestationResult.setId(base64Service.urlEncodeToString(rawRegisterResponse.getKeyHandle()));
         ObjectNode attestationObject = dataMapperService.createObjectNode();
         ObjectNode attStmt = dataMapperService.createObjectNode();
 
@@ -261,15 +244,15 @@ public class AttestationSuperGluuController {
 	        byte[] authData = generateAuthData(registerResponse.getClientData(), rawRegisterResponse);
 	        attestationObject.put("authData", authData);
 
-	        response.put("attestationObject", base64Service.urlEncodeToString(dataMapperService.cborWriteAsBytes(attestationObject)));
+            attestationResult.getResponse().setAttestationObject(base64Service.urlEncodeToString(dataMapperService.cborWriteAsBytes(attestationObject)));
 		} catch (CertificateEncodingException e) {
             throw errorResponseFactory.invalidRequest("Failed during encoding attestationCertificate", e);
 		} catch (IOException e) {
             throw errorResponseFactory.invalidRequest("Failed to prepare attestationObject", e);
 		}
 
-        log.debug("Prepared U2F_V2 attestation verify request: {}", params);
-		return params;
+        log.debug("Prepared U2F_V2 attestation verify request: {}", attestationResult.toString());
+		return attestationResult;
 	}
 
     private byte[] generateAuthData(ClientData clientData, RawRegisterResponse rawRegisterResponse) throws IOException {
