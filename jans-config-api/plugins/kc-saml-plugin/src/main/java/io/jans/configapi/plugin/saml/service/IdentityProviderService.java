@@ -25,7 +25,6 @@ import io.jans.as.common.service.common.InumService;
 import io.jans.as.common.util.AttributeConstants;
 import io.jans.configapi.configuration.ConfigurationFactory;
 import io.jans.configapi.plugin.saml.model.IdentityProvider;
-import io.jans.configapi.plugin.saml.timer.MetadataValidationTimer;
 import io.jans.configapi.plugin.saml.util.Constants;
 import io.jans.model.GluuStatus;
 import io.jans.model.SearchRequest;
@@ -61,9 +60,6 @@ public class IdentityProviderService {
 
     @Inject
     SamlIdpService samlIdpService;
-
-    @Inject
-    MetadataValidationTimer metadataValidationTimer;
 
     public boolean containsIdentityProvider(String dn) {
         return persistenceEntryManager.contains(dn, IdentityProvider.class);
@@ -275,36 +271,31 @@ public class IdentityProviderService {
     }
 
     private boolean saveIdpMetaDataFileSourceTypeFile(IdentityProvider identityProvider, InputStream file) {
-        log.info("Saving file identityProvider:{}, file:{}", identityProvider, file);
-        boolean status = false;
-        if(identityProvider==null || file==null) {
-            return status;
+        
+        log.debug("Saving idp {} metadata file : {}",identityProvider.getInum(),file);
+
+        if(identityProvider == null || file == null) {
+            return false;
         }
 
-        String idpMetaDataFN = getIdpNewMetadataFileName(identityProvider);
-        log.debug("Final idpMetaDataFN:{}", idpMetaDataFN);
+        final String idpMetaDataFN = getIdpNewMetadataFileName(identityProvider);
         identityProvider.setIdpMetaDataFN(idpMetaDataFN);
         identityProvider.setIdpMetaDataLocation(getIdpMetadataTempDirFilePath());
 
-        InputStream targetStream = file;
-        log.debug("targetStream:{}, idpMetaDataFN:{}", targetStream, idpMetaDataFN);
+        final InputStream targetStream = file;
+        log.debug("targetStream: {}, idpMetaDataFN: {}", targetStream,idpMetaDataFN);
 
-        String result = samlIdpService.saveMetadataFile(getIdpMetadataTempDirFilePath(), idpMetaDataFN,
-                Constants.IDP_MODULE, targetStream);
+        final String result = samlIdpService.saveMetadataFile(getIdpMetadataTempDirFilePath(), idpMetaDataFN,
+            Constants.IDP_MODULE, targetStream);
         log.debug("targetStream:{}, idpMetaDataFN:{}, result:{}", targetStream, idpMetaDataFN, result);
-        
-        if (StringHelper.isNotEmpty(result)) {
-            metadataValidationTimer.idpQueue(result);
-            // process files in temp that were not processed earlier
-            processUnprocessedIdpMetadataFiles();
-            status = true;
-        } else {
-            log.error("Failed to save IDP meta-data file. Please check if you provide correct file");
-        }
-        
-        log.info("Successfully saved IDP Metadata file - idpMetaDataFN:{}, status:{}", idpMetaDataFN, status);
-        return status;
 
+        if(StringHelper.isNotEmpty(result)) {
+            log.info("IDP metadata file saved inum: {} , filename: {}",identityProvider.getInum(),idpMetaDataFN);
+            return true;
+        }else {
+            log.error("Failed to save IDP metadata file for IdentityProvider {}. filename: {}",identityProvider.getInum(),idpMetaDataFN);
+            return false;
+        }
     }
 
     private String getIdpNewMetadataFileName(IdentityProvider identityProvider) {
@@ -333,27 +324,6 @@ public class IdentityProviderService {
 
     private String getIdpMetadataTempDirFilePath() {
         return samlConfigService.getIdpMetadataTempDir();
-    }
-
-    public void processUnprocessedIdpMetadataFiles() {
-        log.info("Processing unprocessed IDP Metadata files ");
-        String directory = samlConfigService.getIdpMetadataTempDir();
-        log.info("IDP Metadata directory:{}, Files.exists(Paths.get(directory):{}", directory,
-                Files.exists(Paths.get(directory)));
-
-        if (Files.exists(Paths.get(directory))) {
-            log.info("IDP Metadata directory:{} does exists)", directory);
-            File folder = new File(directory);
-            File[] files = folder.listFiles();
-            if (files != null && files.length > 0) {
-
-                for (File file : files) {
-                    log.info("IDPMetadatafile:{}, file.getName():{}", file, file.getName());
-                    metadataValidationTimer.idpQueue(file.getName());
-                }
-            }
-
-        }
     }
 
 }

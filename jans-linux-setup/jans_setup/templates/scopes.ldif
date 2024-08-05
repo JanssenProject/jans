@@ -203,7 +203,7 @@ displayName: view_user_permissions_roles
 inum: C4F5
 jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
 jansDefScope: true
-jansId: permission
+jansId: role
 jansScopeTyp: dynamic
 jansScrDn: inum=CB5B-3211,ou=scripts,o=jans
 objectClass: top

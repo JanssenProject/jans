@@ -1,19 +1,5 @@
 [
   {
-    "client_prefix": "2100.",
-    "client_var": "saml_scim_client_id",
-    "client_id": "saml_scim_client", 
-    "display_name": "Jans SCIM Client for SAML",
-    "description": "Jans SCIM Client for SAML",
-    "scopes_dns": ["inum=F0C4,ou=scopes,o=jans"],
-    "scopes_ids": ["https://jans.io/scim/users.write", "https://jans.io/scim/users.read"],
-    "redirect_uri": ["https://%(hostname)s/admin-ui", "http://localhost:4100"],
-    "grant_types": ["client_credentials"],
-    "authorization_methods": ["client_secret_basic", "client_secret_post"],
-    "response_types": null,
-    "application_type": "web"
-  },
-  {
     "client_prefix": "2101.",
     "client_var": "kc_saml_openid_client_id",
     "client_id": "kc_saml_openid",
@@ -25,7 +11,8 @@
     "grant_types": ["authorization_code"],
     "authorization_methods": ["client_secret_basic"],
     "response_types": ["code", "token"],
-    "application_type": "native"
+    "application_type": "native",
+    "trusted_client": "true"
   },
   {
     "client_prefix": "2102.",
@@ -39,7 +26,8 @@
     "grant_types": ["client_credentials"],
     "authorization_methods": ["client_secret_basic"],
     "response_types": ["token"],
-    "application_type": "native"
+    "application_type": "native",
+    "trusted_client": "false"
   },
   {
     "client_prefix": "2103.",
@@ -53,6 +41,7 @@
     "grant_types": ["authorization_code"],
     "authorization_methods": ["client_secret_basic"],
     "response_types": ["code", "token"],
-    "application_type": "web"
+    "application_type": "web",
+    "trusted_client": "false"
   }
 ]

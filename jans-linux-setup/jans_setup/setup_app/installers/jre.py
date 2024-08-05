@@ -23,7 +23,7 @@ class JreInstaller(BaseInstaller, SetupUtils):
         setattr(base.current_app, self.__class__.__name__, self)
         self.service_name = 'jre'
         self.needdb = False # we don't need backend connection in this class
-        self.install_var = 'installJre'
+        self.install_var = 'install_jre'
         self.app_type = AppType.APPLICATION
         self.install_type = InstallOption.MANDATORY
         if not base.snap:

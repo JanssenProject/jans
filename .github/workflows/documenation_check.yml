@@ -41,7 +41,7 @@ jobs:
         run: |
           PULL_NUMBER=${{ github.event.pull_request.number }}
           echo "Parsing commits from PR $PULL_NUMBER"
-          MESSAGE=$(gh pr view "$PULL_NUMBER" --json commits | jq '.' | grep "messageHeadline" | cut -d: -f2- | grep "^docs" || echo "")
+          MESSAGE=$(gh pr view "$PULL_NUMBER" --json commits | jq -r '.commits[].messageHeadline' | grep "^docs" || echo "")
           echo "$MESSAGE"
           if [[ -z "$MESSAGE" ]]; then
             echo "conventional commit starting with docs: does not exist. Checking if user confirmed no impact on docs in PR body"

@@ -58,13 +58,12 @@ application_max_ram=
 install_config_api=
 
 ### If you want to install Fido2 Server, set this to True
-installFido2=
+install_fido2=
 
 ### If you want to install Scim Server, set this to True
 install_scim_server=
 
 ### To use remote MySQL as backend
-# installLdap=False
 # rdbm_install=2
 # rdbm_db = gluudb
 # rdbm_user = gluu

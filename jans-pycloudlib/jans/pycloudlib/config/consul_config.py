@@ -142,8 +142,7 @@ class ConsulConfig(BaseConfig):
         _, result = self.client.kv.get(self._merge_path(key))
         if not result:
             return default
-        # this is a bytes
-        return result["Value"].decode()
+        return _transform_item_value(result["Value"])
 
     def set(self, key: str, value: _t.Any) -> bool:
         """Set key with given value.
@@ -186,8 +185,7 @@ class ConsulConfig(BaseConfig):
             return ""
 
         with open(path) as fr:
-            token = fr.read().strip()
-        return token
+            return fr.read().strip()
 
     def _verify_cert(
         self,
@@ -246,6 +244,11 @@ class ConsulConfig(BaseConfig):
             return {}
 
         return {
-            self._unmerge_path(item["Key"]): item["Value"].decode()
+            self._unmerge_path(item["Key"]): _transform_item_value(item["Value"])
             for item in resultset
         }
+
+
+def _transform_item_value(maybe_bytes):
+    value = maybe_bytes or b""
+    return value.decode()

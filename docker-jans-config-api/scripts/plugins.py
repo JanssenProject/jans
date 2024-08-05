@@ -1,8 +1,10 @@
 import logging.config
 import os
 import shutil
+from urllib.parse import urlparse
 
 from jans.pycloudlib.utils import cert_to_truststore
+from jans.pycloudlib.utils import get_server_certificate
 
 from settings import LOGGING_CONFIG
 
@@ -61,8 +63,16 @@ class AdminUiPlugin:
 
     def import_token_server_cert(self):
         cert_file = os.environ.get("CN_TOKEN_SERVER_CERT_FILE", "/etc/certs/token_server.crt")
+
         if not os.path.isfile(cert_file):
-            self.manager.secret.to_file("ssl_cert", cert_file)
+            # check if token server is not the fqdn
+            base_url = os.environ.get("CN_TOKEN_SERVER_BASE_URL")
+
+            if base_url:
+                # download from given URL
+                self.pull_token_server_cert(base_url, cert_file)
+            else:
+                self.manager.secret.to_file("ssl_cert", cert_file)
 
         cert_to_truststore(
             "token_server",
@@ -70,3 +80,28 @@ class AdminUiPlugin:
             "/opt/java/lib/security/cacerts",
             "changeit",
         )
+
+    def pull_token_server_cert(self, base_url, cert_file):
+        logger.info(f"Downloading certificate from {base_url}")
+
+        parsed_url = urlparse(base_url)
+        host = parsed_url.hostname
+        port = parsed_url.port
+
+        # port might not be defined in the given URL
+        if not port:
+            # resolve port as last segment of netloc
+            port = parsed_url.netloc.split(":")[-1]
+
+            # possible edge-cases while parsing netloc:
+            #
+            # - empty port, e.g. `localhost:`
+            # - missing port, e.g. `localhost`
+            if (not port or port == host):
+                if parsed_url.scheme == "https":
+                    port = 443
+                else:
+                    port = 80
+
+        # download the cert (if possible)
+        get_server_certificate(host, port, cert_file)
