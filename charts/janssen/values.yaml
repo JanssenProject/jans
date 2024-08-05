@@ -786,6 +786,8 @@ global:
       u2fConfigEnabled: true
       # -- Enable endpoint /.well-known/lock-master-configuration
       lockConfigEnabled: false
+      # -- Enable endpoint /jans-lock
+      lockEnabled: false
     # -- Enable jans-lock as service running inside auth-server
     lockEnabled: false
 
@@ -1143,6 +1145,10 @@ nginx-ingress:
     lockConfigLabels: { }
     # -- Lock config ingress resource additional annotations.
     lockConfigAdditionalAnnotations: { }
+    # -- Lock ingress resource labels. key app is taken
+    lockLabels: { }
+    # -- Lock ingress resource additional annotations.
+    lockAdditionalAnnotations: { }
     # -- Additional labels that will be added across all ingress definitions in the format of {mylabel: "myapp"}
     additionalLabels: { }
     # -- Additional annotations that will be added across all ingress definitions in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
