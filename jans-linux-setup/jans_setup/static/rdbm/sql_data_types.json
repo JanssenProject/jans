@@ -444,6 +444,12 @@
       "type": "STRING"
     }
   },
+  "jansToken:acr": {
+    "mysql": {
+      "size": 1024,
+      "type": "VARCHAR"
+    }
+  },
   "jansJwks": {
     "mysql": {
       "type": "TEXT"

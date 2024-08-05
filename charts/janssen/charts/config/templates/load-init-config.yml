@@ -125,9 +125,9 @@ spec:
             name: aws-secrets-replica-regions
             subPath: aws_secrets_replica_regions
         {{- end }}
-          - mountPath: /app/db/generate.json
+          - mountPath: /app/db/configuration.json
             name: {{ include "config.fullname" . }}-mount-gen-file
-            subPath: generate.json
+            subPath: configuration.json
           - mountPath: /scripts/tls_generator.py
             name: {{ include "config.fullname" . }}-tls-script
             subPath: tls_generator.py

@@ -4475,6 +4475,7 @@ paths:
                   - spontaneous_scope
                   - end_session
                   - post_authn
+                  - client_authn
                   - select_account
                   - create_user
                   - scim
@@ -8313,19 +8314,19 @@ components:
           type: string
         selected:
           type: boolean
-        adminCanAccess:
-          type: boolean
         adminCanView:
-          type: boolean
-        adminCanEdit:
-          type: boolean
-        userCanAccess:
           type: boolean
         userCanView:
           type: boolean
-        whitePagesCanView:
-          type: boolean
         userCanEdit:
+          type: boolean
+        adminCanEdit:
+          type: boolean
+        adminCanAccess:
+          type: boolean
+        userCanAccess:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -10251,6 +10252,7 @@ components:
           - spontaneous_scope
           - end_session
           - post_authn
+          - client_authn
           - select_account
           - create_user
           - scim
@@ -10729,10 +10731,10 @@ components:
         ttl:
           type: integer
           format: int32
-        opbrowserState:
-          type: string
         persisted:
           type: boolean
+        opbrowserState:
+          type: string
     SessionIdAccessMap:
       type: object
       properties:
