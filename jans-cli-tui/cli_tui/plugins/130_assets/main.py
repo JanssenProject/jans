@@ -276,7 +276,7 @@ class Plugin(DialogUtils):
             self.assets_list_box.clear()
             self.assets_list_box.all_data = self.data['entries']
             for asset_info in self.data['entries']:
-                self.assets_list_box.add_item((asset_info['inum'], asset_info['displayName'], asset_info['jansEnabled'], asset_info['creationDate']))
+                self.assets_list_box.add_item((asset_info['inum'], asset_info['displayName'], asset_info['jansEnabled'], asset_info.get('creationDate', '---')))
 
             self.assets_container = self.assets_list_box
 

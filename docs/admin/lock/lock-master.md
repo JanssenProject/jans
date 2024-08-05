@@ -11,14 +11,38 @@ tags:
 
 ## Jans Lock Overview
 
-This content is in progress
+Lock Master is a Java Weld application that connects ephemeral Cedarlings to the enterprise by 
+providing a number of [endpoints](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/main/jans-lock/lock-master.yaml)
 
-The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.
+## Installation 
 
-## Have questions in the meantime?
+Admins can deploy Lock Master as part of Jans Auth Server or as a stanalone 
+web server.
 
-While this documentation is in progress, you can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussions) or the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). Any questions you have will help determine what information our documentation should cover.
+## Configuration 
 
-## Want to contribute?
+A list of server-level configuration properties.
 
-If you have content you'd like to contribute to this page in the meantime, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).
+## Logs 
+
+Lock Master creates the following logs:
+
+* lock_master_config.log
+* lock_master_audit.log -- RDBMS option
+* lock_master_jwt_status.log 
+
+## CLI / TUI 
+
+Admins can manage Lock Master runtime configuration and see activity using the 
+Jans CLI or TUI.
+
+- Create/Read/Update/Delete Policy Stores
+- Total Number of Authz requests per day
+- View/Search current Cedarling clients by searching for username
+    - View authz activity for this Cedarling client
+
+## OAuth Security
+
+Cedarling should present an SSA during client registration. This will enable 
+Cedarlings to obtain access tokens with scopes for OAuth protected Lock Master 
+endpoints.
