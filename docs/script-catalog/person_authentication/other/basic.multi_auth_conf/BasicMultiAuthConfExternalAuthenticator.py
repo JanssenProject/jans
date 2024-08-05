@@ -7,9 +7,10 @@
 from io.jans.service.cdi.util import CdiUtil
 from io.jans.as.server.security import Identity
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
-from io.jans.as.server.service import UserService, AuthenticationService, AppInitializer
+from io.jans.as.server.service import AuthenticationService, AppInitializer
+from io.jans.as.common.service.common import UserService
 from io.jans.as.server.service import MetricService
-from io.jans.as.server.service.common import EncryptionService
+from io.jans.service import EncryptionService
 from io.jans.model.metric import MetricType
 from io.jans.util import StringHelper
 from io.jans.util import ArrayHelper
@@ -237,10 +238,10 @@ class PersonAuthentication(PersonAuthenticationType):
                 else:
                     value_string = str(value)
 
-                ldapProperties.setProperty(persistenceType + "." + key, value_string)
+                ldapProperties.setProperty(persistenceType + "#" + key, value_string)
 
             if StringHelper.isNotEmptyString(ldapConfiguration.getBindPassword()):
-                ldapProperties.setProperty(persistenceType + ".bindPassword", ldapConfiguration.getBindPassword())
+                ldapProperties.setProperty(persistenceType + "#bindPassword", ldapConfiguration.getBindPassword())
 
             ldapEntryManager = ldapEntryManagerFactory.createEntryManager(ldapProperties)
 
