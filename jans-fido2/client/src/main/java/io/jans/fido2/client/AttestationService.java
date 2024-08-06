@@ -6,6 +6,8 @@
 
 package io.jans.fido2.client;
 
+import io.jans.fido2.model.attestation.AttestationOptions;
+import io.jans.fido2.model.attestation.AttestationResult;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -24,12 +26,12 @@ public interface AttestationService {
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @Path("/options")
-    public Response register(String content);
+    public Response register(AttestationOptions attestationOptions);
 
     @POST
     @Consumes({ "application/json" })
     @Produces({ "application/json" })
     @Path("/result")
-    public Response verify(String content);
+    public Response verify(AttestationResult attestationResult);
 
 }

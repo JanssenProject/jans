@@ -62,6 +62,9 @@ public class DocumentStoreProviderFactory {
             case WEB_DAV:
             	documentStoreProvider = instance.select(WebDavDocumentStoreProvider.class).get();
                 break;
+            case DB:
+            	documentStoreProvider = instance.select(DBDocumentStoreProvider.class).get();
+                break;
         }
 
         if (documentStoreProvider == null) {
