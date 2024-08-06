@@ -11,7 +11,6 @@ import io.jans.as.common.service.OrganizationService;
 import io.jans.as.common.util.AttributeConstants;
 import io.jans.util.exception.InvalidConfigurationException;
 import io.jans.configapi.configuration.ConfigurationFactory;
-import io.jans.configapi.plugin.saml.timer.MetadataValidationTimer;
 import io.jans.configapi.plugin.saml.util.Constants;
 import io.jans.configapi.plugin.saml.model.TrustRelationship;
 
@@ -62,9 +61,6 @@ public class SamlService {
 
     @Inject
     SamlIdpService samlIdpService;
-
-    @Inject
-    MetadataValidationTimer metadataValidationTimer;
 
     public String getTrustRelationshipDn() {
         return samlConfigService.getTrustRelationshipDn();
@@ -249,8 +245,6 @@ public class SamlService {
         
         if (file != null && file.available() > 0) {
             saveSpMetaDataFileSourceTypeFile(trustRelationship, file);
-        }else {
-            trustRelationship.setSpMetaDataFN(null);
         }
         
         persistenceEntryManager.merge(trustRelationship);
@@ -289,29 +283,23 @@ public class SamlService {
     }
 
     private boolean saveSpMetaDataFileSourceTypeFile(TrustRelationship trustRelationship, InputStream file) {
-        log.info("trustRelationship:{}, file:{}", trustRelationship, file);
-        boolean status = false;
-        
-        String spMetadataFileName = this.getSpNewMetadataFileName(trustRelationship);
-        log.info("***spMetadataFileName:{}***", spMetadataFileName);        
+
+        log.debug("saveSpMetadataFileSourceTypeFile(). trustRelationship: {} . file: {}",trustRelationship,file);
+    
+        final String spMetadataFileName = getSpNewMetadataFileName(trustRelationship);
         trustRelationship.setSpMetaDataFN(spMetadataFileName);
         InputStream targetStream = file;
-        log.info("targetStream:{}, samlConfigService.getSpMetadataDir():{}, spMetadataFileName:{}", targetStream, samlConfigService.getSpMetadataDir(), spMetadataFileName);
-
-        String metadataFilePath = samlIdpService.saveMetadataFile(samlConfigService.getSpMetadataDir(), spMetadataFileName, Constants.SP_MODULE, targetStream);
-        log.info("targetStream:{}, spMetadataFileName:{}, metadataFilePath:{}, trustRelationship.getSpMetaDataFN():{}", targetStream, spMetadataFileName, metadataFilePath, trustRelationship.getSpMetaDataFN());
-        if (StringHelper.isNotEmpty(metadataFilePath)) {
+        final String metadataFilePath  = samlIdpService.saveMetadataFile(
+                samlConfigService.getSpMetadataDir(),spMetadataFileName,Constants.SP_MODULE,targetStream);
+        log.debug("targetStream: {}, spMetadataDir: {}, spMetadataFileName: {}",targetStream,samlConfigService.getSpMetadataDir(),spMetadataFileName);
+        if(StringHelper.isNotEmpty(metadataFilePath)) {
             trustRelationship.setSpMetaDataFN(metadataFilePath);
-            metadataValidationTimer.spQueue(metadataFilePath);
-            //process files in temp that were not processed earlier
-            processUnprocessedSpMetadataFiles();
-            status = true;
-        } else {
-            log.error("Failed to save SP meta-data file. Please check if you provide correct file");
+            log.debug("SP Metadata file ' {} ' saved.",spMetadataFileName);
+            return true;
+        }else {
+            log.error("Failed to save SP metadata file for TrustRelationship ' {} '",trustRelationship.getInum());
+            return false;
         }
-        log.info("Successfully saved SP Metadata file - spMetadataFileName:{}, status:{}", spMetadataFileName, status);
-        return status;
-
     }
     
     public String getSpMetadataFilePath(String spMetaDataFN) {
@@ -339,26 +327,6 @@ public class SamlService {
         return String.format(samlConfigService.getSpMetadataFilePattern(), relationshipInum);
     }
 
-    public void processUnprocessedSpMetadataFiles() {
-        log.info("Processing unprocessed SP Metadata files ");
-        String directory = samlConfigService.getSpMetadataTempDir();
-        log.debug("Check SP Metadata file in directory:{}, Files.exists(Paths.get(directory):{}", directory, Files.exists(Paths.get(directory)));
-
-        if (Files.exists(Paths.get(directory))) {
-            log.debug("SP Metadata Temp directory:{} does exists)", directory);
-            File folder = new File(directory);
-            File[] files = folder.listFiles();
-            log.debug("SP Metadata files:{}", files);
-            if (files != null && files.length > 0) {
-
-                for (File file : files) {
-                    log.debug("SP MetadataFile:{}, file.getName():{}", file, file.getName());
-                    metadataValidationTimer.spQueue(file.getName());
-                }
-            }
-
-        }
-    }
     
     public InputStream getTrustRelationshipMetadataFile(TrustRelationship trustrelationship) {
 

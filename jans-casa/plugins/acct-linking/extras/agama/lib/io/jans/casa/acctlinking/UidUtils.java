@@ -17,22 +17,24 @@ public class UidUtils {
     
     public static String lookupUid(String uidRef, String uid, String extUid, String jansExtAttrName,
             String jansExtUid) throws IOException {
-        
-        if (uidRef == null) {            
-            boolean uidPassed = uid != null;
-            
-            if (uidPassed) {
-                logger.debug("Using uid passed: {}", uid);
-                return uid;
-            }
-            
+
+        if (uidRef == null) {
             //Find if the external account is already linked to a local one
             User user = CdiUtil.bean(UserService.class).getUserByAttribute(jansExtAttrName, jansExtUid, true);
+
             if (user == null) {
+                boolean uidPassed = uid != null;
+
+                if (uidPassed) {
+                    logger.debug("Using uid passed: {}", uid);
+                    return uid;
+                }
+
                 logger.info("Building a uid based on external id {}", extUid);
                 return extUid + "-" + randSuffix(3);
             }
-            logger.info("Using uid of the account already linked to {}", extUid); 
+
+            logger.info("Using uid of the account already linked to {}", jansExtUid); 
             return user.getUserId();
         }
         

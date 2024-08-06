@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import jakarta.annotation.PostConstruct;
@@ -30,7 +31,9 @@ import org.slf4j.Logger;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.jans.scim.model.conf.AppConfiguration;
+import io.jans.model.attribute.AttributeValidation;
 import io.jans.model.GluuStatus;
+import io.jans.model.JansAttribute;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;
@@ -619,6 +622,42 @@ public class Scim2UserService implements Serializable {
 			log.error(e.getMessage(), e);
 		}
 	}
+	
+    public boolean passwordValidationPassed(String password) {
+        
+		try {
+		    Filter filter =  Filter.createEqualityFilter("jansAttrName", "userPassword");
+		    List<JansAttribute> attrs = ldapEntryManager.findEntries("ou=attributes,o=jans",
+		            JansAttribute.class, filter, new String[] { "jansValidation" }, 1);
+		    
+		    AttributeValidation av = attrs.get(0).getAttributeValidation();
+		    
+		    if (av == null) return true;
+		    
+		    int len = Optional.ofNullable(av.getMinLength()).orElse(0);
+		    if (len > 0 && password.length() < len) {
+		        log.error("Password is required to have at least {} characters", len);
+		        return false;
+		    }
+		    
+		    len = Optional.ofNullable(av.getMaxLength()).orElse(0);
+		    if (len > 0 && password.length() > len) {
+		        log.error("Password is required to have at most {} characters", len);
+		        return false;
+		    }
+		    
+		    String regex = av.getRegexp();
+		    if (regex != null && !Pattern.matches(regex, password)) {
+		        log.error("Provided password does not match the regular expression {}", regex);
+		        return false;
+		    }
+		    
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+		}
+		return true;
+         
+    }
 
 	@PostConstruct
     private void init() {

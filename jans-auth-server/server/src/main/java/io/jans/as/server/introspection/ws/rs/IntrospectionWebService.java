@@ -126,8 +126,18 @@ public class IntrospectionWebService {
             final Pair<AuthorizationGrant, Boolean> pair = getAuthorizationGrant(authorization, token);
             final AuthorizationGrant authorizationGrant = pair.getFirst();
             if (authorizationGrant == null) {
-                log.error("Authorization grant is null.");
-                throw new WebApplicationException(Response.status(Response.Status.UNAUTHORIZED).type(MediaType.APPLICATION_JSON_TYPE).entity(errorResponseFactory.errorAsJson(AuthorizeErrorResponseType.ACCESS_DENIED, "Authorization grant is null.")).build());
+                log.debug("Authorization grant is null.");
+                if (isTrue(pair.getSecond())) {
+                    log.debug("Returned {\"active\":false.");
+                    throw new WebApplicationException(Response.status(Response.Status.OK)
+                            .entity("{\"active\":false")
+                            .type(MediaType.APPLICATION_JSON_TYPE)
+                            .build());
+                }
+                throw new WebApplicationException(Response.status(Response.Status.UNAUTHORIZED)
+                        .type(MediaType.APPLICATION_JSON_TYPE)
+                        .entity(errorResponseFactory.errorAsJson(AuthorizeErrorResponseType.ACCESS_DENIED, "Authorization grant is null."))
+                        .build());
             }
 
             final AbstractToken authorizationAccessToken = authorizationGrant.getAccessToken(tokenService.getToken(authorization));
@@ -334,8 +344,9 @@ public class IntrospectionWebService {
             }
             return new Pair<>(grant, true);
         } else {
-            if (log.isTraceEnabled())
+            if (log.isTraceEnabled()) {
                 log.trace("Failed to perform basic authentication for client: {}", clientId);
+            }
         }
         return EMPTY;
     }

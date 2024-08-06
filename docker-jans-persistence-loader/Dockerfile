@@ -16,7 +16,7 @@ RUN apk update \
 # ===========
 
 # janssenproject/jans SHA commit
-ENV JANS_SOURCE_VERSION=02b462b9c72a27a00646c09f9995eee1a75c7ad7
+ENV JANS_SOURCE_VERSION=e157cd4c8ff92c04e400fea29c51ae54f842a678
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCRIPT_CATALOG_DIR=docs/script-catalog
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
@@ -40,7 +40,7 @@ RUN cd /tmp/jans \
     && cp ${JANS_SETUP_DIR}/static/couchbase/index.json /app/static/couchbase/index.json \
     && cp ${JANS_SETUP_DIR}/schema/opendj_types.json /app/schema/opendj_types.json \
     && cp -R ${JANS_SETUP_DIR}/static/rdbm /app/static/rdbm \
-    && cp ${JANS_SETUP_DIR}/schema/jans_schema.json /app/schema/jans_schema.json \
+    && cp ${JANS_SETUP_DIR}/schema/jans_schema.json /app/schema/ \
     && cp ${JANS_SETUP_DIR}/schema/custom_schema.json /app/schema/custom_schema.json \
     && cp ${JANS_SETUP_DIR}/static/opendj/index.json /app/static/opendj/index.json \
     && cp -R ${JANS_SCRIPT_CATALOG_DIR} /app/script-catalog \
@@ -168,7 +168,7 @@ ENV CN_CACHE_TYPE=NATIVE_PERSISTENCE \
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/persistence-loader" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.1.3" \
+    org.opencontainers.image.version="1.1.4" \
     org.opencontainers.image.title="Janssen Authorization Server Persistence loader" \
     org.opencontainers.image.description="Generate initial data for persistence layer"
 

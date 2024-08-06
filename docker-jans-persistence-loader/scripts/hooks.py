@@ -13,7 +13,7 @@ from jans.pycloudlib.persistence.utils import PersistenceMapper
 
 def merge_auth_keystore_ctx_hook(manager, ctx: dict[str, _t.Any]) -> dict[str, _t.Any]:
     # maintain compatibility with upstream template
-    ctx["oxauth_openid_jks_fn"] = manager.config.get("auth_openid_jks_fn")
+    ctx["jans_auth_openid_jks_fn"] = manager.config.get("auth_openid_jks_fn")
     return ctx
 
 
@@ -129,6 +129,8 @@ def transform_auth_dynamic_config_hook(conf, manager):
         ]),
         ("txTokenLifetime", 180),
         ("sessionIdCookieLifetime", 86400),
+        ("tokenIndexAllocationBlockSize", 10),
+        ("tokenIndexLimit", 10000000),
     ]:
         if missing_key not in conf:
             conf[missing_key] = value
@@ -287,6 +289,7 @@ def transform_auth_dynamic_config_hook(conf, manager):
         "par",
         "ssa",
         "global_token_revocation",
+        "status_list",
     ]:
         if flag not in conf["featureFlags"]:
             conf["featureFlags"].append(flag)

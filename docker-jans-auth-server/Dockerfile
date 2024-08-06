@@ -50,8 +50,8 @@ RUN /opt/jython/bin/pip uninstall -y pip setuptools
 # Auth server
 # ===========
 
-ENV CN_VERSION=1.1.3-SNAPSHOT
-ENV CN_BUILD_DATE='2024-05-29 11:39'
+ENV CN_VERSION=1.1.4-SNAPSHOT
+ENV CN_BUILD_DATE='2024-07-08 07:26'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-server/${CN_VERSION}/jans-auth-server-${CN_VERSION}.war
 
@@ -103,7 +103,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/agama/fl \
     /app/static/rdbm \
     /app/schema
 
-ENV JANS_SOURCE_VERSION=02b462b9c72a27a00646c09f9995eee1a75c7ad7
+ENV JANS_SOURCE_VERSION=e157cd4c8ff92c04e400fea29c51ae54f842a678
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -116,6 +116,7 @@ RUN git clone --depth 500 --filter blob:none --no-checkout https://github.com/ja
     && git sparse-checkout add jans-linux-setup/jans_setup \
     && git sparse-checkout add jans-casa/extras \
     && git sparse-checkout add jans-pycloudlib \
+    && git sparse-checkout add jans-config-api/plugins/docs \
     && cp ${JANS_SETUP_DIR}/static/rdbm/sql_data_types.json /app/static/rdbm/ \
     && cp ${JANS_SETUP_DIR}/static/rdbm/ldap_sql_data_type_mapping.json /app/static/rdbm/ \
     && cp ${JANS_SETUP_DIR}/static/rdbm/opendj_attributes_syntax.json /app/static/rdbm/ \
@@ -130,7 +131,8 @@ RUN git clone --depth 500 --filter blob:none --no-checkout https://github.com/ja
     && cp -R ${JANS_SETUP_DIR}/templates/jans-lock /app/templates/ \
     && mkdir -p org/eclipse/jetty \
     && cp ${JANS_SETUP_DIR}/static/favicon.ico org/eclipse/jetty/favicon.ico \
-    && zip -r ${JETTY_HOME}/lib/jetty-server-${JETTY_VERSION}.jar org/eclipse/jetty/favicon.ico
+    && zip -r ${JETTY_HOME}/lib/jetty-server-${JETTY_VERSION}.jar org/eclipse/jetty/favicon.ico \
+    && cp jans-config-api/plugins/docs/lock-plugin-swagger.yaml /app/templates/jans-lock/
 
 # ======
 # Python
@@ -267,7 +269,7 @@ EXPOSE $CN_AUTH_JETTY_PORT
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/auth-server" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.1.3" \
+    org.opencontainers.image.version="1.1.4" \
     org.opencontainers.image.title="Janssen Authorization Server" \
     org.opencontainers.image.description="OAuth 2.0 server and client; OpenID Connect Provider (OP) & UMA Authorization Server (AS)"
 

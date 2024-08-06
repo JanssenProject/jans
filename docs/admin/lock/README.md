@@ -1,125 +1,137 @@
 ---
 tags:
-  - administration
-  - lock
-  - authorization
-  - OPA
-  - open policy agent
-  - PDP
-  - PEP
-  - authz
+ - administration
+ - lock
+ - authorization / authz
+ - Cedar
+ - Cedarling
 ---
 
-# Jans Lock Overview
+## Janssen Lock Overview
 
-At a high level, Jans Lock enables domains to enforce security policies based on
-real time OAuth data.
+Janssen Lock (or just "Lock") provides a centralized control plane for domains 
+to use [Cedar](https://www.cedarpolicy.com/en) to secure a network of 
+distributed applications and audit the activity of both people and software. 
 
-The PDP can make a blazingly fast decision if it has **in RAM** all the
-necessary data, policies, and keys. But how can we keep all that rapidly
-changing OAuth token data in RAM? This is especially challenging if we have a
-distributed network of APIs, with each microservice deploying the PDP as a
-encapsulated "sidecar". Lazy loading of token data by the PDP via OAuth
-introspection or database access is not performant enough for real-time
-transactional authorization.
+A Lock topology has three software components: 
 
-Like a messaging client, a Lock Client gets update messages from Auth Server
-for each OAuth token update event. A message contains the reference id of the
-token, which enables the Lock Client to retrieve the token data from the
-database, and push it into the PDP's memory or cache. You could say that Lock
-aggressively initializes the PDP with token data. A Lock Client can also push
-policies and keys into a PDP (if necessary).
+1. [Cedarling](./cedarling.md): a WebAssembly 
+("WASM") application that runs the 
+[Amazon Rust Cedar Engine](https://github.com/cedar-policy/cedar) and 
+validates JWTs
+2. [Lock Master](./lock-master.md): a Java Weld application that connects 
+ephemeral Cedarlings to the enterprise
+3. Jans Auth Server: which provides the OAuth and OpenID services
 
-## Definitions: Authz Components
+![](../../assets/lock-wasm-master-OP.jpg)
 
-Centralized policy management is a best practice for authorization for distributed
-networks. If security policies are buried in the code of numerous applications,
-they are hard to inventory and harder to update. For decades, application
-security architects have conceptualized distributed authorization in line with
+Lock is designed for domains that deploy a **network of Cedarlings**. 
+Communication in this Lock topology 
+is bi-directional. Cedarlings can send information to the Lock Master, and 
+the Lock Master can push 
+updates to the Cedarlings. Notifications from the Lock Master to the Cedarlings
+ are connectionless--
+a Cedarling subscibes to event notifications using 
+[Server Sent Events](https://html.spec.whatwg.org/multipage/server-sent-events.html#server-sent-events) 
+or "SSE". Requests from the Cedarling to the Lock Master are sent via HTTP Post
+ to OAuth protected endpoints. 
+
+## Authz Theoretical Background
+
+For years, security architects have conceptualized a distributed authorization 
+model in line with
 [RFC 2409](https://datatracker.ietf.org/doc/html/rfc2904#section-4.4)
 and [XACML](https://docs.oasis-open.org/xacml/3.0/xacml-3.0-core-spec-cos01-en.html),
-which describe several common components:
+which describe several common roles:
 
-|Abbr.	| Term | Description |
+| Role  | Acronym | Description |
 | ----- | :--: | ----------- |
-| PDP	| Policy Decision Point	|  Service which evaluates access requests against authorization policies before issuing access decisions |
-| PEP	| Policy Enforcement Point | Service, website or API which queries the PDP for authorization |
-| PAP	| Policy Administration Point	|  User interface where admins manage authorization policies |
-| PIP	| Policy Information Point | The "data" about people, clients and resources |
-| PRP	| Policy Retrieval Point | Repository where policies are stored |
+| Policy Decision Point | PDP |  Service which evaluates access requests against authorization policies before issuing access decisions |
+| Policy Information Point  | PIP | The source of "data", e.g. about people, clients, and resources |
+| Policy Enforcement Point  | PEP | Service, website, or API that queries the PDP for authorization |
+| Policy Administration Point | PAP |  Where admins manage the authorization infrastructure |
+| Policy Retrieval Point  | PRP | Repository where policies are stored |
 
-## Lock Design Goal
+Jans Lock aligns with this model:
 
-In the old days of "WAM" (web access management), each web server would query
-a centralized PDP over the network. This is ok for course grain authorization.
-But for fine grain authorization, it is too slow--each decision requires a round
-trip HTTP request/response. A more performant design is to move the PDP to the
-edge of the network. Policy definition and administration is still a centralized
-activity. Once a policy is defined, it can be executed anywhere on the network.
-Although multiple PDP instances exist, they must provide the same access control
-decisions given the same inputs.
+| Role  | Lock | Description |
+| ----- | :--: | ----------- |
+| PDP | Cedarling | Evaluates policies versus input data |
+| PIP | JWT tokens | Contain data to instantiate entities |
+| PEP | Application | Must rely on Cedarling for decision |
+| PAP | Jans Config API | Endpoints for Lock admin configuration |
+| PRP | Lock Master | Endpoints to publish Policy Store and other PDP configuration |
 
-Another critical optimization was to move the PIP to the edge, so the PDP
-has all the data it needs to make a decision. This aligns with a principle that
-each microservice has all logic and data encapsulated into a single
-deployment unit.
+## Policy Store
 
-![1990s WAM v. 2020s Cloud Native](../../assets/lock-wam-v-cloud-native-authz.png)
+By convention, the filename of the Cedarling Policy Store is 
+`cedarling_store.json`. It is a JSON 
+file that contains all the data Cedarling needs to evaluate policies and verify
+ JWT tokens.
+The Policy Store contains three things:
 
-## Choose your PDP or use OPA
+1. [Cedar Schema](https://docs.cedarpolicy.com/schema/schema.html): Cedar 
+schema file (base64 encoded human readible format). Developers can extend the 
+schema to align with the application model, especially for Resources. 
+2. [Cedar Policies](https://docs.cedarpolicy.com/policies/syntax-policy.html): Cedar Policy Set file (base64 encoded human readible format).
+3. [Trusted Issuers](.): A list of domains are authorized to issue tokens.
 
-Lock has a plugin architecture to support different PDP solutions. Janssen
-provides a default PDP: [OPA](https://openpolicyagent.org), a
-[CNCF](https://cncf.io) governed project. OPA is a popular PDP, whose adoption
-grew significantly in response to the need for granular policies for Kubernetes
-access control. If you have a different PDP, you can write a
-[Lock PDP Plugin](./lock_pdp_plugin.md).
+In JSON it looks like this: 
 
-## Get Started
+```json
+{
+    "policies": "...",
+    "schema": "...",
+    "trusted_idps": []
+}
+```
 
-The Jans Lock solution pushes OAuth token data from Auth Server to a PDP,
-enabling authorization based on real time information from the OAuth
-infrastructure. In order to use Lock, admins will have to do a few things:
+### Trusted Issuer Schema
 
-  * [Enable Lock in Auth Server](./lock_auth_server_config.md)
-  * [Configure a Lock Client instance](./lock_client_config.md)
-  * [Configure A PDP](./lock_opa.md)
+At initialization, the Cedarling iterates the list of Trusted IDPs and fetches 
+the current public
+keys. The trusted issuer schema provides guidance on how to uniquely identify a 
+person, and how
+to build the roles based on a user claim.
 
-The Auth Server token stream contains only the reference ids of new, updated, or
-revoked tokens. Lock retrieves the data (i.e. token value) for a given token
-reference id from the database service. This design minimizes the traffic on the
-message queue and leverages cloud database topologies. Lock Clients can
-optionally retrieve policies from Github or public keys from one or more JWKS
-endpoints.
+Here is a non-normative example: 
 
-![Lock Data Flow Communication Overview](../../assets/lock-design-diagram-01.png)
+```json
+[
+{"name": "Google", 
+ "Description": "Consumer IDP", 
+ "openid_configuration_endpoint": "https://accounts.google.com/.well-known/openid-configuration",
+ "access_tokens": {"trusted": True}, 
+ "id_tokens": {"trusted":True, "principal_identifier": "email"},
+ "userinfo_tokens": {"trusted": True, "role_mapping": "role"},  
+ "tx_tokens": {"trusted": True}
+},
+...
+]
+```
 
-This architecture results in the best of three worlds. First, authorization is  
-blazing fast, because OAuth access and transaction tokens are in OPA's memory--
-no introspection is needed. Second, admins can use their PDP to express
-complex policies based on any combination of data present in the token or
-context. Third, domains can publish central data for local decision making, for
-example information about how the end user authenticated.
+### Entity Mapping 
 
-The Auth Server Lock token stream is highly confidential. Lock must present a
-valid OAuth access token to Auth Server in order subscribe to the token
-stream. Domains should only use Lock for trusted first party services with
-a private network. Each Lock Client instance uses OAuth dynamic client
-registration with a software statement to enable asymmetric client
-authentication and DPoP access tokens.
+A Cedar Entity is an instance of the object defined in the Cedar Schema.  
+Without entities, there 
+is no data for the policies to evaluate. The Cedarling creates the Resource and
+ tokens sent in the authz request. 
 
-The diagram below illustrates a Jans Lock topology where the OPA PDP is used to
-control course grain authorization in an API gateway, fine grain authorization
-in First Party API code, and the issuance of access token scopes.
+* **Client**: Created from access token 
+* **Application**: Created if input supplies an Application name
+* **Role**: Created for each `role` claim value in the joined id_token and userinfo token
+* **User**: Created based on the joined id_token and userinfo token. `sub` is the entity identifier
+* **Access_token**: 1:1 mapping from claims in token
+* **id_token**: 1:1 mapping from claims in token
+* **Userinfo_token**: 1:1 mapping from claims in token
+* **TrustedIssuer**: Created if Policy Store contains trusted IDPs
+* **Application**: 
 
-![North-South API Gateway Authz with Lock](../../assets/lock-north-south-api-gateway-diagram.png)
+## More information
 
-This authorization model is also useful for East-West service mesh authorization
-because it avoids the "hairpin" inefficiency of routing all traffic through
-and API gateway (which is better for North-South web ingress). TLS is required
-to protect the bearer token. MTLS is better if the extra effort for additional
-transport security is justified.
+* Lock Master configuration and operation [docs](./lock-master.md) 
+* Cedarling [docs](./cedarling.md)
+* Cedarling [Readme](https://github.com/JanssenProject/jans/blob/main/jans-lock/cedarling/README.md)
+* Cedarling [Training](.) (coming soon)
 
-![East-West Service Mesh Authz with Lock](../../assets/lock-east-west-service-mesh-diagram.png)
 
-[Next](./lock_auth_server_config.md)

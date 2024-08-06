@@ -113,6 +113,8 @@ authentication method listed below:
 Refer to [Client Authentication](https://openid.net/specs/openid-connect-core-1_0.html#ClientAuthentication) section of OpenID
 Connect core specification for more details on these authentication methods.
 
+AS provides ability to customer Client Authentication behavior via [Client Authentication custom script](../../../admin/developer/scripts/client-authn.md)
+
 Client can specify the default authentication method. To set default authentication method using
 [Janssen Text-based UI(TUI)](../../config-guide/config-tools/jans-tui/README.md),
 navigate via `Auth Server`->`Clients`->`Add Client`->`Basic`-> `Authn Method Token Endpoint`.

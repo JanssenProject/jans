@@ -708,4 +708,101 @@ spec:
                 port:
                   number: 8080
 {{- end }}
+
+---
+
+{{ if and (index .Values "auth-server" "lockEnabled") (index .Values "auth-server" "ingress" "lockConfigEnabled") -}}
+{{ $fullName := include "janssen-all-in-one.fullname" . -}}
+{{- $ingressPath := index .Values "nginx-ingress" "ingress" "path" -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $fullName }}-lock-config
+  labels:
+    app: {{ $fullName }}-lock-config
+{{- if index .Values "nginx-ingress" "ingress" "additionalLabels" }}
+{{ toYaml index .Values "nginx-ingress" "ingress" "additionalLabels" | indent 4 }}
+{{- end }}
+{{- if index .Values "nginx-ingress" "ingress" "lockConfigLabels" }}
+{{ toYaml index .Values "nginx-ingress" "ingress" "lockConfigLabels" | indent 4 }}
+{{- end }}
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/rewrite-target: /jans-auth/v1/configuration
+{{- if index .Values "nginx-ingress" "ingress" "lockConfigAdditionalAnnotations" }}
+{{ toYaml index .Values "nginx-ingress" "ingress" "lockConfigAdditionalAnnotations" | indent 4 }}
+{{- end }}
+{{- if index .Values "nginx-ingress" "ingress" "additionalAnnotations" }}
+{{ toYaml index .Values "nginx-ingress" "ingress" "additionalAnnotations" | indent 4 }}
+{{- end }}
+spec:
+  ingressClassName: {{ index .Values "nginx-ingress" "ingress" "ingressClassName" }}
+{{- if index .Values "nginx-ingress" "ingress" "tlsSecretName" }}
+  tls:
+    - hosts:
+        - {{ .Values.fqdn | quote }}
+      secretName: {{ index .Values "nginx-ingress" "ingress" "tlsSecretName" }}
+{{- end }}
+  rules:
+    - host: {{ .Values.fqdn | quote }}
+      http:
+        paths:
+          - path: /.well-known/lock-master-configuration
+            pathType: Exact
+            backend:
+              service:
+                name: {{ .Values.service.name }}
+                port:
+                  number: 8080
+{{- end }}
+
+---
+
+{{ if and (index .Values "auth-server" "lockEnabled") (index .Values "auth-server" "ingress" "lockEnabled") -}}
+{{ $fullName := include "janssen-all-in-one.fullname" . -}}
+{{- $ingressPath := index .Values "nginx-ingress" "ingress" "path" -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $fullName }}-lock
+  labels:
+    app: {{ $fullName }}-lock
+{{- if index .Values "nginx-ingress" "ingress" "additionalLabels" }}
+{{ toYaml index .Values "nginx-ingress" "ingress" "additionalLabels" | indent 4 }}
+{{- end }}
+{{- if index .Values "nginx-ingress" "ingress" "lockLabels" }}
+{{ toYaml index .Values "nginx-ingress" "ingress" "lockLabels" | indent 4 }}
+{{- end }}
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/rewrite-target: /jans-auth
+{{- if index .Values "nginx-ingress" "ingress" "lockAdditionalAnnotations" }}
+{{ toYaml index .Values "nginx-ingress" "ingress" "lockAdditionalAnnotations" | indent 4 }}
+{{- end }}
+{{- if index .Values "nginx-ingress" "ingress" "additionalAnnotations" }}
+{{ toYaml index .Values "nginx-ingress" "ingress" "additionalAnnotations" | indent 4 }}
+{{- end }}
+spec:
+  ingressClassName: {{ index .Values "nginx-ingress" "ingress" "ingressClassName" }}
+{{- if index .Values "nginx-ingress" "ingress" "tlsSecretName" }}
+  tls:
+    - hosts:
+        - {{ .Values.fqdn | quote }}
+      secretName: {{ index .Values "nginx-ingress" "ingress" "tlsSecretName" }}
+{{- end }}
+  rules:
+    - host: {{ .Values.fqdn | quote }}
+      http:
+        paths:
+          - path: /jans-lock
+            pathType: Exact
+            backend:
+              service:
+                name: {{ .Values.service.name }}
+                port:
+                  number: 8080
+{{- end }}
+
 {{- end }}

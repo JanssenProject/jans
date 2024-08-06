@@ -13,42 +13,45 @@ public class ApiAppConfiguration implements Configuration {
 
     @Schema(description = "OAuth authentication enable/disable flag. Default value `true`.")
     private boolean configOauthEnabled;
-    
+
     @Schema(description = "Flag to enable/disable timer to dynamically reflect log configuration changes. Default value `true`Default value `false`.")
     private boolean disableLoggerTimer;
-    
+
     @Schema(description = "Flag to enable/disable request audit. Default value `false`.")
     private boolean disableAuditLogger;
-    
+
     @Schema(description = "Flag to enable/disable check if custom attribue is declared in schema. Default value `true`.")
     private boolean customAttributeValidationEnabled;
-    
+
+    @Schema(description = "Flag to enable/disable check if acr customScript is enabled. Default value `true`.")
+    private boolean acrValidationEnabled;
+
     @Schema(description = "List of approved external Auth server to validate token.")
     private List<String> apiApprovedIssuer;
-    
+
     @Schema(description = "Name of supported API protection mechansim. Supported type is `OAuth2`.")
     private String apiProtectionType;
-    
+
     @Schema(description = "Config-API client ID.")
     private String apiClientId;
-    
+
     @Schema(description = "Config-API client password.")
     private String apiClientPassword;
-  
+
     private boolean endpointInjectionEnabled;
-    
+
     @Schema(description = "Issuer Identifier of Jans OpenID Connect Provider.")
     private String authIssuerUrl;
-    
+
     @Schema(description = "Jans OpenID Connect Provider Well-Known Configuration URL.")
     private String authOpenidConfigurationUrl;
-    
+
     @Schema(description = "Jans URL of the OpenID Connect Provider's OAuth 2.0 Authorization Endpoint.")
     private String authOpenidIntrospectionUrl;
-    
+
     @Schema(description = "Jans URL of the OpenID Connect Provider's OAuth 2.0 Token Endpoint.")
     private String authOpenidTokenUrl;
-    
+
     @Schema(description = "Jans URL of the OpenID Connect Provider's OAuth 2.0 Revoke Token Endpoint.")
     private String authOpenidRevokeUrl;
 
@@ -60,37 +63,37 @@ public class ApiAppConfiguration implements Configuration {
 
     @Schema(description = "Specify logging level of Loggers. Default level is `INFO`.")
     private String loggingLevel;
-    
+
     @Schema(description = "Log4j logging layout. Default value `TEXT`.")
     private String loggingLayout;
-    
+
     @Schema(description = "The path to the external log4j2 logging configuration.")
     private String externalLoggerConfiguration;
-    
+
     @Schema(description = "Choose whether to disable JDK loggers.")
     private Boolean disableJdkLogger = true;
-    
+
     @Schema(description = "Maximum number of results per page in search endpoints.")
     private int maxCount;
-    
+
     @Schema(description = "User attribute that should not be returned in response.")
     private List<String> userExclusionAttributes;
-    
+
     @Schema(description = "List of User mandatory attribute for user creation request.")
     private List<String> userMandatoryAttributes;
-    
+
     @Schema(description = "Agama configuration details.")
     private AgamaConfiguration agamaConfiguration;
-    
+
     @Schema(description = "Audit Log configuration details.")
     private AuditLogConf auditLogConf;
-    
+
     @Schema(description = "Configuration for data-type converstion.")
     private DataFormatConversionConf dataFormatConversionConf;
-    
+
     @Schema(description = "Details of enabled plugins.")
     private List<PluginConf> plugins;
-    
+
     @Schema(description = "Asset management configuration details.")
     private AssetMgtConfiguration assetMgtConfiguration;
 
@@ -124,6 +127,14 @@ public class ApiAppConfiguration implements Configuration {
 
     public void setCustomAttributeValidationEnabled(boolean customAttributeValidationEnabled) {
         this.customAttributeValidationEnabled = customAttributeValidationEnabled;
+    }
+
+    public boolean isAcrValidationEnabled() {
+        return acrValidationEnabled;
+    }
+
+    public void setAcrValidationEnabled(boolean acrValidationEnabled) {
+        this.acrValidationEnabled = acrValidationEnabled;
     }
 
     public List<String> getApiApprovedIssuer() {
@@ -325,21 +336,18 @@ public class ApiAppConfiguration implements Configuration {
     public String toString() {
         return "ApiAppConfiguration [configOauthEnabled=" + configOauthEnabled + ", disableLoggerTimer="
                 + disableLoggerTimer + ", disableAuditLogger=" + disableAuditLogger
-                + ", customAttributeValidationEnabled=" + customAttributeValidationEnabled + ", apiApprovedIssuer="
-                + apiApprovedIssuer + ", apiProtectionType=" + apiProtectionType + ", apiClientId=" + apiClientId
-                + ", apiClientPassword=" + apiClientPassword + ", endpointInjectionEnabled=" + endpointInjectionEnabled
-                + ", authIssuerUrl=" + authIssuerUrl + ", authOpenidConfigurationUrl=" + authOpenidConfigurationUrl
-                + ", authOpenidIntrospectionUrl=" + authOpenidIntrospectionUrl + ", authOpenidTokenUrl="
-                + authOpenidTokenUrl + ", authOpenidRevokeUrl=" + authOpenidRevokeUrl 
-                + ", exclusiveAuthScopes=" + exclusiveAuthScopes
-                + ", corsConfigurationFilters=" + corsConfigurationFilters + ", loggingLevel=" + loggingLevel
-                + ", loggingLayout=" + loggingLayout + ", externalLoggerConfiguration=" + externalLoggerConfiguration
-                + ", disableJdkLogger=" + disableJdkLogger + ", maxCount=" + maxCount + ", userExclusionAttributes="
-                + userExclusionAttributes + ", userMandatoryAttributes=" + userMandatoryAttributes
-                + ", agamaConfiguration=" + agamaConfiguration + ", auditLogConf=" + auditLogConf
-                + ", dataFormatConversionConf=" + dataFormatConversionConf + ", plugins=" + plugins
-                + ", assetMgtConfiguration=" + assetMgtConfiguration + "]";
+                + ", customAttributeValidationEnabled=" + customAttributeValidationEnabled + ", acrValidationEnabled="
+                + acrValidationEnabled + ", apiApprovedIssuer=" + apiApprovedIssuer + ", apiProtectionType="
+                + apiProtectionType + ", apiClientId=" + apiClientId + ", endpointInjectionEnabled="
+                + endpointInjectionEnabled + ", authIssuerUrl=" + authIssuerUrl + ", authOpenidConfigurationUrl="
+                + authOpenidConfigurationUrl + ", authOpenidIntrospectionUrl=" + authOpenidIntrospectionUrl
+                + ", authOpenidTokenUrl=" + authOpenidTokenUrl + ", authOpenidRevokeUrl=" + authOpenidRevokeUrl
+                + ", exclusiveAuthScopes=" + exclusiveAuthScopes + ", corsConfigurationFilters="
+                + corsConfigurationFilters + ", loggingLevel=" + loggingLevel + ", loggingLayout=" + loggingLayout
+                + ", externalLoggerConfiguration=" + externalLoggerConfiguration + ", disableJdkLogger="
+                + disableJdkLogger + ", maxCount=" + maxCount + ", userExclusionAttributes=" + userExclusionAttributes
+                + ", userMandatoryAttributes=" + userMandatoryAttributes + ", agamaConfiguration=" + agamaConfiguration
+                + ", auditLogConf=" + auditLogConf + ", dataFormatConversionConf=" + dataFormatConversionConf
+                + ", plugins=" + plugins + ", assetMgtConfiguration=" + assetMgtConfiguration + "]";
     }
-        
 }
-

@@ -94,6 +94,7 @@ public abstract class BaseTest {
     protected String gluuConfigurationEndpoint;
     protected String tokenEndpoint;
     protected String tokenRevocationEndpoint;
+    protected String statusListEndpoint;
     protected String userInfoEndpoint;
     protected String clientInfoEndpoint;
     protected String checkSessionIFrame;
@@ -302,6 +303,14 @@ public abstract class BaseTest {
 
     public void setAuthorizationChallengeEndpoint(String authorizationChallengeEndpoint) {
         this.authorizationChallengeEndpoint = authorizationChallengeEndpoint;
+    }
+
+    public String getStatusListEndpoint() {
+        return statusListEndpoint;
+    }
+
+    public void setStatusListEndpoint(String statusListEndpoint) {
+        this.statusListEndpoint = statusListEndpoint;
     }
 
     public String getTokenEndpoint() {
@@ -612,10 +621,15 @@ public abstract class BaseTest {
                 .pollingEvery(Duration.ofMillis(1000))
                 .ignoring(NoSuchElementException.class);
 
-        WebElement loginButton = wait.until(d -> {
-            return d.findElement(By.id(id));
-        });
-        return loginButton;
+        try {
+            WebElement loginButton = wait.until(d -> d.findElement(By.id(id)));
+            return loginButton;
+        } catch (TimeoutException e) {
+            System.out.println("PAGE URL: " + currentDriver.getCurrentUrl());
+            System.out.println("PAGE SOURCE: ");
+            System.out.println(currentDriver.getPageSource());
+            throw e;
+        }
     }
 
     protected String acceptAuthorization(WebDriver currentDriver, String redirectUri) {
@@ -1000,6 +1014,7 @@ public abstract class BaseTest {
 
             authorizationEndpoint = response.getAuthorizationEndpoint();
             authorizationChallengeEndpoint = response.getAuthorizationChallengeEndpoint();
+            statusListEndpoint = response.getStatusListEndpoint();
             tokenEndpoint = response.getTokenEndpoint();
             tokenRevocationEndpoint = response.getRevocationEndpoint();
             userInfoEndpoint = response.getUserInfoEndpoint();
@@ -1024,6 +1039,7 @@ public abstract class BaseTest {
 
             authorizationEndpoint = context.getCurrentXmlTest().getParameter("authorizationEndpoint");
             authorizationChallengeEndpoint = context.getCurrentXmlTest().getParameter("authorizationChallengeEndpoint");
+            statusListEndpoint = context.getCurrentXmlTest().getParameter("statusListEndpoint");
             tokenEndpoint = context.getCurrentXmlTest().getParameter("tokenEndpoint");
             tokenRevocationEndpoint = context.getCurrentXmlTest().getParameter("tokenRevocationEndpoint");
             userInfoEndpoint = context.getCurrentXmlTest().getParameter("userInfoEndpoint");

@@ -48,7 +48,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         self.run(' '.join(args), shell=True)
 
         args = [Config.cmd_java, '-Dlog4j.defaultInitOverride=true',
-                '-cp', Config.non_setup_properties['oxauth_client_jar_fn'], Config.non_setup_properties['key_gen_path'],
+                '-cp', Config.non_setup_properties['jans_auth_client_jar_fn'], Config.non_setup_properties['key_gen_path'],
                 '-key_ops_type', 'ALL',
                 '-keystore', client_keystore_fn,
                 '-keypasswd', 'secret',
@@ -96,11 +96,11 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         prop_src_fn = os.path.join(agama_out_dir, 'config-agama-test.properties')
         self.renderTemplateInOut(prop_src_fn, agama_temp_dir, os.path.join(Config.output_dir, 'test/jans-auth'))
 
-        dn, oxauth_conf_dynamic = self.dbUtils.get_oxAuthConfDynamic()
-        agama_config=oxauth_conf_dynamic["agamaConfiguration"].copy()
+        dn, jans_auth_conf_dynamic = self.dbUtils.get_jans_auth_conf_dynamic()
+        agama_config=jans_auth_conf_dynamic["agamaConfiguration"].copy()
         agama_config['disableTCHV'] = True
         agama_config['enabled'] = True
-        self.dbUtils.set_oxAuthConfDynamic({'agamaConfiguration': agama_config})
+        self.dbUtils.set_jans_auth_conf_dynamic({'agamaConfiguration': agama_config})
         self.dbUtils.enable_script('BADA-BADA')
 
     def load_test_data(self):
@@ -130,43 +130,43 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         if Config.rdbm_type == 'spanner':
             Config.rdbm_password_enc = ''
 
-        Config.templateRenderingDict['config_oxauth_test_ldap'] = '# Not available'
-        Config.templateRenderingDict['config_oxauth_test_couchbase'] = '# Not available'
+        Config.templateRenderingDict['config_jans_auth_test_ldap'] = '# Not available'
+        Config.templateRenderingDict['config_jans_auth_test_couchbase'] = '# Not available'
 
 
-        config_oxauth_test_properties = self.fomatWithDict(
+        config_jans_auth_test_properties = self.fomatWithDict(
             'server.name=%(hostname)s\nconfig.oxauth.issuer=http://localhost:80\nconfig.oxauth.contextPath=http://localhost:80\nconfig.oxauth.salt=%(encode_salt)s\nconfig.persistence.type=%(persistence_type)s\n\n',
             self.merge_dicts(Config.__dict__, Config.templateRenderingDict)
             )
 
         if self.getMappingType('ldap'):
-            template_text = self.readFile(os.path.join(self.template_base, 'jans-auth/server/config-oxauth-test-ldap.properties.nrnd'))
-            rendered_text = self.fomatWithDict(template_text, self.merge_dicts(Config.__dict__, Config.templateRenderingDict))            
-            config_oxauth_test_properties += '#ldap\n' +  rendered_text
+            template_text = self.readFile(os.path.join(self.template_base, 'jans-auth/server/config-jans-auth-test-ldap.properties.nrnd'))
+            rendered_text = self.fomatWithDict(template_text, self.merge_dicts(Config.__dict__, Config.templateRenderingDict))
+            config_jans_auth_test_properties += '#ldap\n' +  rendered_text
 
         if self.getMappingType('couchbase'):
             couchbaseDict = base.current_app.CouchbaseInstaller.couchbaseDict()
-            template_text = self.readFile(os.path.join(self.template_base, 'jans-auth/server/config-oxauth-test-couchbase.properties.nrnd'))
+            template_text = self.readFile(os.path.join(self.template_base, 'jans-auth/server/config-jans-auth-test-couchbase.properties.nrnd'))
             rendered_text = self.fomatWithDict(template_text, self.merge_dicts(Config.__dict__, Config.templateRenderingDict, couchbaseDict))
-            config_oxauth_test_properties += '\n#couchbase\n' +  rendered_text
+            config_jans_auth_test_properties += '\n#couchbase\n' +  rendered_text
 
 
         if self.getMappingType('rdbm'):
 
             if Config.rdbm_type == 'spanner': 
-                template_text = self.readFile(os.path.join(self.template_base, 'jans-auth/server/config-oxauth-test-spanner.properties.nrnd'))
+                template_text = self.readFile(os.path.join(self.template_base, 'jans-auth/server/config-jans-auth-test-spanner.properties.nrnd'))
                 rendered_text = self.fomatWithDict(template_text, self.merge_dicts(Config.__dict__, Config.templateRenderingDict))
-                config_oxauth_test_properties += '\n#spanner\n' +  rendered_text
+                config_jans_auth_test_properties += '\n#spanner\n' +  rendered_text
 
             else:
-                template_text = self.readFile(os.path.join(self.template_base, 'jans-auth/server/config-oxauth-test-sql.properties.nrnd'))
+                template_text = self.readFile(os.path.join(self.template_base, 'jans-auth/server/config-jans-auth-test-sql.properties.nrnd'))
                 rendered_text = self.fomatWithDict(template_text, self.merge_dicts(Config.__dict__, Config.templateRenderingDict))
-                config_oxauth_test_properties += '\n#sql\n' +  rendered_text
+                config_jans_auth_test_properties += '\n#sql\n' +  rendered_text
 
             self.logIt("Adding custom attributs and indexes")
 
             schema2json(
-                    os.path.join(Config.templateFolder, 'test/jans-auth/schema/102-oxauth_test.ldif'),
+                    os.path.join(Config.templateFolder, 'test/jans-auth/schema/102-jans-auth_test.ldif'),
                     os.path.join(Config.output_dir, 'test/jans-auth/schema/')
                     )
             schema2json(
@@ -174,9 +174,9 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                     os.path.join(Config.output_dir, 'test/scim-client/schema/'),
                     )
 
-            oxauth_json_schema_fn =os.path.join(Config.output_dir, 'test/jans-auth/schema/102-oxauth_test.json')
+            jans_auth_json_schema_fn =os.path.join(Config.output_dir, 'test/jans-auth/schema/102-jans-auth_test.json')
             scim_json_schema_fn = os.path.join(Config.output_dir, 'test/scim-client/schema/103-scim_test.json')
-            jans_schema_json_files = [ oxauth_json_schema_fn, scim_json_schema_fn ]
+            jans_schema_json_files = [ jans_auth_json_schema_fn, scim_json_schema_fn ]
 
             scim_schema = base.readJsonFile(scim_json_schema_fn)
             may_list = []
@@ -206,8 +206,8 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                 self.dbUtils.rdm_automapper(force=True)
 
         self.writeFile(
-            os.path.join(Config.output_dir, 'test/jans-auth/server/config-oxauth-test.properties'),
-            config_oxauth_test_properties
+            os.path.join(Config.output_dir, 'test/jans-auth/server/config-jans-auth-test.properties'),
+            config_jans_auth_test_properties
             )
 
         ignoredirs = []
@@ -218,13 +218,13 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         self.render_templates_folder(self.template_base, ignoredirs=ignoredirs)
 
         if Config.get('jca_client_id') or Config.get('jca_test_client_id'):
-            config_oxauth_test_data_server_properties_fn = os.path.join(Config.output_dir, 'test/jans-auth/server/config-oxauth-test-data.properties')
-            config_oxauth_test_data_server_properties = Properties()
+            jans_auth_test_data_server_properties_fn = os.path.join(Config.output_dir, 'test/jans-auth/server/config-jans-auth-test-data.properties')
+            jans_auth_test_data_server_properties = Properties()
 
-            with open(config_oxauth_test_data_server_properties_fn, 'rb') as f:
-                config_oxauth_test_data_server_properties.load(f, 'utf-8')
+            with open(jans_auth_test_data_server_properties_fn, 'rb') as f:
+                jans_auth_test_data_server_properties.load(f, 'utf-8')
 
-            keep_clients = config_oxauth_test_data_server_properties["test.keep.clients"].data.split(',')
+            keep_clients = jans_auth_test_data_server_properties["test.keep.clients"].data.split(',')
             keep_clients = [client_id.strip() for client_id in keep_clients]
 
             if Config.get('jca_client_id'):
@@ -232,16 +232,16 @@ class TestDataLoader(BaseInstaller, SetupUtils):
             if Config.get('jca_test_client_id'):
                 keep_clients.append(Config.jca_test_client_id)
 
-            config_oxauth_test_data_server_properties["test.keep.clients"] = ', '.join(keep_clients)
+            jans_auth_test_data_server_properties["test.keep.clients"] = ', '.join(keep_clients)
 
-            with open(config_oxauth_test_data_server_properties_fn, 'wb') as w:
-                config_oxauth_test_data_server_properties.store(w)
+            with open(jans_auth_test_data_server_properties_fn, 'wb') as w:
+                jans_auth_test_data_server_properties.store(w)
 
         self.logIt("Loading test ldif files")
         Config.pbar.progress(self.service_name, "Importing ldif files", False)
 
-        ox_auth_test_ldif = os.path.join(Config.output_dir, 'test/jans-auth/data/oxauth-test-data.ldif')
-        ox_auth_test_user_ldif = os.path.join(Config.output_dir, 'test/jans-auth/data/oxauth-test-data-user.ldif')
+        ox_auth_test_ldif = os.path.join(Config.output_dir, 'test/jans-auth/data/jans-auth-test-data.ldif')
+        ox_auth_test_user_ldif = os.path.join(Config.output_dir, 'test/jans-auth/data/jans-auth-test-data-user.ldif')
 
         scim_test_ldif = os.path.join(Config.output_dir, 'test/scim-client/data/scim-test-data.ldif')
         scim_test_user_ldif = os.path.join(Config.output_dir, 'test/scim-client/data/scim-test-data-user.ldif')
@@ -258,8 +258,8 @@ class TestDataLoader(BaseInstaller, SetupUtils):
 
         self.chown(os.path.join(base.current_app.HttpdInstaller.server_root, 'jans-auth-client'), base.current_app.HttpdInstaller.apache_user, base.current_app.HttpdInstaller.apache_group, recursive=True)
 
-        Config.pbar.progress(self.service_name, "Updating oxauth config", False)
-        oxAuthConfDynamic_changes = {
+        Config.pbar.progress(self.service_name, "Updating jans auth config", False)
+        jans_auth_conf_dynamic_changes = {
                                     'dynamicRegistrationCustomObjectClass':  'jansClntCustomAttributes',
                                     'dynamicRegistrationCustomAttributes': [ "jansTrustedClnt", "myCustomAttr1", "myCustomAttr2", "jansInclClaimsInIdTkn" ],
                                     'dynamicRegistrationExpirationTime': 86400,
@@ -298,7 +298,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                                     'tokenEndpointAuthMethodsSupported': [ 'client_secret_basic', 'client_secret_post', 'client_secret_jwt', 'private_key_jwt', 'tls_client_auth', 'self_signed_tls_client_auth', 'none' ],
                                     'sessionIdRequestParameterEnabled': True,
                                     'skipRefreshTokenDuringRefreshing': False,
-                                    'featureFlags': ['unknown', 'health_check', 'userinfo', 'clientinfo', 'id_generation', 'registration', 'introspection', 'revoke_token', 'revoke_session', 'global_token_revocation', 'end_session', 'status_session', 'jans_configuration', 'ciba', 'uma', 'u2f', 'device_authz', 'stat', 'par', 'ssa'],
+                                    'featureFlags': ['unknown', 'health_check', 'userinfo', 'clientinfo', 'id_generation', 'registration', 'introspection', 'revoke_token', 'revoke_session', 'global_token_revocation', 'end_session', 'status_session', 'jans_configuration', 'ciba', 'uma', 'u2f', 'device_authz', 'stat', 'par', 'ssa', 'status_list'],
                                     'cleanServiceInterval':7200,
                                     'loggingLevel': 'TRACE',
                                     }
@@ -327,10 +327,10 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                     self.logIt("Can't decode json for auto test ciba patch", True)
 
             if datajs:
-                oxAuthConfDynamic_changes.update(datajs)
-                self.logIt("oxAuthConfDynamic was updated with auto test ciba patch")
+                jans_auth_conf_dynamic_changes.update(datajs)
+                self.logIt("jans_auth_conf_dynamic was updated with auto test ciba patch")
 
-        self.dbUtils.set_oxAuthConfDynamic(oxAuthConfDynamic_changes)
+        self.dbUtils.set_jans_auth_conf_dynamic(jans_auth_conf_dynamic_changes)
 
         self.enable_cusom_scripts()
 
@@ -341,7 +341,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
             # Update LDAP schema
             Config.pbar.progress(self.service_name, "Updating schema", False)
             openDjSchemaFolder = os.path.join(Config.ldap_base_dir, 'config/schema/')
-            self.copyFile(os.path.join(Config.output_dir, 'test/jans-auth/schema/102-oxauth_test.ldif'), openDjSchemaFolder)
+            self.copyFile(os.path.join(Config.output_dir, 'test/jans-auth/schema/102-jans-auth_test.ldif'), openDjSchemaFolder)
             self.copyFile(os.path.join(Config.output_dir, 'test/scim-client/schema/103-scim_test.ldif'), openDjSchemaFolder)
 
             schema_fn = os.path.join(openDjSchemaFolder, '77-customAttributes.ldif')
@@ -440,6 +440,8 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         self.writeFile(super_gluu_creds_fn, json.dumps(super_gluu_creds, indent=2), backup=False)
         self.chown(super_gluu_creds_fn, Config.jetty_user, Config.root_user)
 
+        Config.pbar.progress(self.service_name, "Restarting Services", False)
+
         # Disable token binding module
         if base.os_name in ('ubuntu18', 'ubuntu20'):
             self.run(['a2dismod', 'mod_token_binding'])
@@ -450,7 +452,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         if Config.install_scim_server:
             self.restart('jans-scim')
 
-        if Config.installFido2:
+        if Config.install_fido2:
             self.restart('jans-fido2')
 
         if Config.install_config_api:

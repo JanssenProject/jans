@@ -189,10 +189,7 @@ public class IdpService {
         }
     }
 
-    public void processUnprocessedIdpMetadataFiles() {
-        identityProviderService.processUnprocessedIdpMetadataFiles();
-    }
-
+    
     public String getSpMetadata(IdentityProvider identityProvider) throws JsonProcessingException {
 
         if (identityProvider == null) {

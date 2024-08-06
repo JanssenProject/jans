@@ -1,7 +1,17 @@
 /*
- * Janssen Project software is available under the MIT License (2008). See http://opensource.org/licenses/MIT for full text.
+ * Copyright [2024] [Janssen Project]
  *
- * Copyright (c) 2023, Janssen Project
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package io.jans.lock.service;
@@ -11,6 +21,7 @@ import org.slf4j.Logger;
 import io.jans.lock.service.config.ConfigurationFactory;
 import io.jans.lock.service.message.TokenSubService;
 import io.jans.lock.service.policy.PolicyDownloadService;
+import io.jans.lock.service.ws.rs.sse.LockSseBroadcaster;
 import io.jans.service.cdi.event.ApplicationInitializedEvent;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
@@ -36,6 +47,9 @@ public class ServiceInitializer {
 
     @Inject
     private PolicyDownloadService policyDownloadService;
+    
+    @Inject
+    private LockSseBroadcaster lockSseBroadcaster;
 
 	public void applicationInitialized(@Observes ApplicationInitializedEvent applicationInitializedEvent) {
 		log.info("Initializing Lock service module services");
@@ -43,6 +57,7 @@ public class ServiceInitializer {
 		configurationFactory.initTimer();
 		tokenSubService.subscribe();
 		policyDownloadService.initTimer();
+		lockSseBroadcaster.initTimer();
 
 		log.debug("Initializing Lock service module services complete");
 	}

@@ -191,10 +191,22 @@ paths:
                 $ref: '#/components/schemas/AuthenticationMethod'
         "400":
           description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
         "401":
           description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
         "500":
           description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
       security:
       - oauth2:
         - https://jans.io/oauth/config/acrs.write
@@ -836,6 +848,10 @@ paths:
                 $ref: '#/components/schemas/ApiError'
         "401":
           description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
         "404":
           description: Not Found
           content:
@@ -4459,6 +4475,7 @@ paths:
                   - spontaneous_scope
                   - end_session
                   - post_authn
+                  - client_authn
                   - select_account
                   - create_user
                   - scim
@@ -8037,6 +8054,15 @@ components:
       properties:
         defaultAcr:
           type: string
+    ApiError:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        description:
+          type: string
     Deployment:
       type: object
       properties:
@@ -8118,15 +8144,6 @@ components:
           type: array
           items:
             type: object
-    ApiError:
-      type: object
-      properties:
-        code:
-          type: string
-        message:
-          type: string
-        description:
-          type: string
     Document:
       type: object
       properties:
@@ -8297,13 +8314,13 @@ components:
           type: string
         selected:
           type: boolean
-        adminCanEdit:
-          type: boolean
-        userCanEdit:
-          type: boolean
         adminCanView:
           type: boolean
         userCanView:
+          type: boolean
+        userCanEdit:
+          type: boolean
+        adminCanEdit:
           type: boolean
         adminCanAccess:
           type: boolean
@@ -8439,6 +8456,17 @@ components:
         allowSpontaneousScopes:
           type: boolean
         spontaneousScopeLifetime:
+          type: integer
+          format: int32
+        statusListBitSize:
+          type: integer
+          format: int32
+        statusListResponseJwtSignatureAlgorithm:
+          type: string
+        statusListResponseJwtLifetime:
+          type: integer
+          format: int32
+        statusListIndexAllocationBlockSize:
           type: integer
           format: int32
         openidSubAttribute:
@@ -9089,6 +9117,7 @@ components:
             - REVOKE_TOKEN
             - REVOKE_SESSION
             - GLOBAL_TOKEN_REVOCATION
+            - STATUS_LIST
             - ACTIVE_SESSION
             - END_SESSION
             - STATUS_SESSION
@@ -9911,10 +9940,10 @@ components:
           type: array
           items:
             type: object
-        value:
-          type: object
         displayValue:
           type: string
+        value:
+          type: object
     LocalizedString:
       type: object
       properties:
@@ -9955,6 +9984,10 @@ components:
           type: boolean
           description: Flag to enable/disable check if custom attribue is declared
             in schema. Default value `true`.
+        acrValidationEnabled:
+          type: boolean
+          description: Flag to enable/disable check if acr customScript is enabled.
+            Default value `true`.
         apiApprovedIssuer:
           type: array
           description: List of approved external Auth server to validate token.
@@ -10219,6 +10252,7 @@ components:
           - spontaneous_scope
           - end_session
           - post_authn
+          - client_authn
           - select_account
           - create_user
           - scim

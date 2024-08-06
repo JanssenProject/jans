@@ -3,7 +3,7 @@
 # ==============
 
 # original Janssen base version (without suffix)
-ARG BASE_VERSION=1.1.3
+ARG BASE_VERSION=1.1.4
 
 # the following ARGs set default base images
 # they can be overriden in build process via --build-arg option
@@ -58,7 +58,7 @@ RUN apk update \
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=02b462b9c72a27a00646c09f9995eee1a75c7ad7
+ENV JANS_SOURCE_VERSION=e157cd4c8ff92c04e400fea29c51ae54f842a678
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the assets
@@ -176,7 +176,7 @@ RUN mkdir -p /opt/jans/configurator/db \
 COPY app /app
 
 # CN version as env var (with suffix if any, i.e. SNAPSHOT)
-ENV CN_VERSION=1.1.3-SNAPSHOT
+ENV CN_VERSION=1.1.4-SNAPSHOT
 
 # set directory contains installer code that will be added to Python sys.path
 ENV PYTHONPATH=/app
@@ -224,10 +224,7 @@ ENV JETTY_BASE=/opt/jans/jetty \
     CN_SAML_JAVA_OPTIONS="" \
     CN_SAML_KC_ADMIN_CREDENTIALS_FILE=/etc/jans/conf/kc_admin_creds \
     CN_SAML_KC_DB_PASSWORD_FILE=/etc/jans/conf/kc_db_password \
-    KC_HEALTH_ENABLED=true \
-    KC_METRICS_ENABLED=true \
     KC_LOG_LEVEL=INFO \
-    KC_PROXY=edge \
     KC_DB=mysql \
     KC_DB_USERNAME=keycloak \
     KC_DB_SCHEMA=keycloak \
@@ -240,7 +237,7 @@ ENV JETTY_BASE=/opt/jans/jetty \
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/all-in-one" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.1.3" \
+    org.opencontainers.image.version="1.1.4" \
     org.opencontainers.image.title="Janssen All-in-One" \
     org.opencontainers.image.description=""
 

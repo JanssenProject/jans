@@ -38,6 +38,12 @@ install_jans() {
   echo "install_config_api=""$([[ ${CN_INSTALL_CONFIG_API} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
   echo "install_scim_server=""$([[ ${CN_INSTALL_SCIM} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
   echo "installFido2=""$([[ ${CN_INSTALL_FIDO2} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
+  echo "install_casa=""$([[ ${CN_INSTALL_CASA} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
+  echo "install_jans_keycloak_link=""$([[ ${CN_INSTALL_KC_LINK} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
+  echo "install_jans_link=""$([[ ${CN_INSTALL_LINK} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
+  echo "install_jans_lock=""$([[ ${CN_INSTALL_LOCK} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
+  echo "install_jans_saml=""$([[ ${CN_INSTALL_SAML} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
+  echo "install_opa=""$([[ ${CN_INSTALL_OPA} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
   echo "test_client_id=${TEST_CLIENT_ID}"| tee -a setup.properties > /dev/null
   echo "test_client_pw=${TEST_CLIENT_SECRET}" | tee -a setup.properties > /dev/null1
   echo "test_client_trusted=""$([[ ${TEST_CLIENT_TRUSTED} == true ]] && echo True || echo True)" | tee -a setup.properties > /dev/null
@@ -59,8 +65,26 @@ install_jans() {
     echo "Installing with Postgres"
     echo "rdbm_type=pgsql" | tee -a setup.properties > /dev/null
     echo "rdbm_port=5432" | tee -a setup.properties > /dev/null
+  elif [[ "${CN_INSTALL_COUCHBASE}" == "true" ]]; then
+    echo "Installing with Couchbase"
+    echo "cb_install=2" | tee -a setup.properties > /dev/null
+    echo "cb_password=${COUCHBASE_PASSWORD}" | tee -a setup.properties > /dev/null
+    echo "couchbase_hostname=${COUCHBASE_HOSTNAME}" | tee -a setup.properties > /dev/null
+    echo "couchebaseClusterAdmin=${COUCHBASE_ADMIN}" | tee -a setup.properties > /dev/null
+  elif [[ "${CN_INSTALL_SPANNER}" == "true" ]]; then
+    echo "Installing with SPANNER"
+    echo "rdbm_type=spanner" | tee -a setup.properties > /dev/null
+    echo "rdbm_install_type=2" | tee -a setup.properties > /dev/null
+    echo "spanner_emulator_host=localhost" | tee -a setup.properties > /dev/null
+    echo "spanner_project=jans-project" | tee -a setup.properties > /dev/null
+    echo "spanner_instance=jans-instance" | tee -a setup.properties > /dev/null
+    echo "spanner_database=jansdb" | tee -a setup.properties > /dev/null
+    "$HOME"/google-cloud-sdk/bin/gcloud emulators spanner start --quiet &
+    gcloud config configurations create emulator
+    gcloud config set auth/disable_credentials true
+    gcloud config set project jans-project
+    gcloud config set api_endpoint_overrides/spanner http://localhost:9020/
   fi
-
 
   echo "*****   Running the setup script for ${CN_ORG_NAME}!!   *****"
   echo "*****   PLEASE NOTE THAT THIS MAY TAKE A WHILE TO FINISH. PLEASE BE PATIENT!!   *****"
@@ -80,6 +104,12 @@ check_installed_jans() {
     mkdir janssen
     touch "$IS_JANS_DEPLOYED"
   fi
+}
+
+register_fqdn() {
+    if [[ "${IS_FQDN_REGISTERED}" == "true" ]]; then
+      certbot --apache -d "${CN_HOSTNAME}" -n --agree-tos --email "${CN_EMAIL}" || echo "FQDN was not registered with cerbot"
+    fi
 }
 
 prepare_auth_server_test() {
@@ -119,10 +149,12 @@ prepare_auth_server_test() {
 }
 
 prepare_java_tests() {
-  echo "*****   Running Java tests!!   *****"
-  echo "*****   Running Auth server tests!!   *****"
-  prepare_auth_server_test
-  echo "*****   Java tests completed!!   *****"
+  if [[ "${RUN_TESTS}" == "true" ]]; then
+    echo "*****   Running Java tests!!   *****"
+    echo "*****   Running Auth server tests!!   *****"
+    prepare_auth_server_test
+    echo "*****   Java tests completed!!   *****"
+  fi
 }
 
 start_services() {
@@ -131,10 +163,14 @@ start_services() {
   /opt/dist/scripts/jans-config-api start
   /opt/dist/scripts/jans-scim start
   /opt/dist/scripts/jans-fido2 start
+  /opt/dist/scripts/jans-casa start ||:  # no-op if script is missing
+  /opt/dist/scripts/jans-keycloak-link start ||:  # no-op if script is missing
+  /opt/dist/scripts/jans-link start ||:  # no-op if script is missing
 }
 
 check_installed_jans
 start_services
+register_fqdn
 prepare_java_tests || "Java test preparations failed!!"
 
 # use -F option to follow (and retry) logs
