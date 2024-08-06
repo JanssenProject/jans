@@ -42,6 +42,7 @@ import io.jans.model.ldap.GluuLdapConfiguration;
 import io.jans.model.metric.MetricType;
 import io.jans.model.security.Credentials;
 import io.jans.model.security.SimplePrincipal;
+import io.jans.model.user.SimpleUser;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.AuthenticationException;
 import io.jans.orm.exception.EntryPersistenceException;
@@ -578,7 +579,7 @@ public class AuthenticationService {
             return null;
         }
 
-        User user = new User();
+        SimpleUser user = new SimpleUser();
         user.setDn(baseDn);
 
         List<CustomObjectAttribute> customAttributes = new ArrayList<CustomObjectAttribute>();
