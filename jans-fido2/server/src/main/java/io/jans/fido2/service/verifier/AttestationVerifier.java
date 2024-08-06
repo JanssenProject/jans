@@ -103,6 +103,11 @@ public class AttestationVerifier {
             AttestationFormatProcessor attestationProcessor = attestationProcessorFactory.getCommandProcessor(fmt);
             attestationProcessor.process(attStmt, authData, credential, clientDataHash, credIdAndCounters);
 
+            //get flags buffer
+            byte[] flagsBuffer = authData.getFlags();
+            credIdAndCounters.setBackupEligibilityFlag(authenticatorDataParser.verifyBackupEligibility(flagsBuffer));
+            credIdAndCounters.setBackupStateFlag(authenticatorDataParser.verifyBackupState(flagsBuffer));
+
             return credIdAndCounters;
         } catch (IOException ex) {
             throw errorResponseFactory.invalidRequest("Failed to parse and verify authenticator attestation response data", ex);

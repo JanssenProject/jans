@@ -24,6 +24,8 @@ public class CredAndCounterData {
     private String attestationType;
     private String uncompressedEcPoint;
     private int signatureAlgorithm;
+    private boolean backupStateFlag;
+    private boolean backupEligibilityFlag;
 
     public String getCredId() {
         return credId;
@@ -67,5 +69,21 @@ public class CredAndCounterData {
 
     public void setSignatureAlgorithm(int signatureAlgorithm) {
         this.signatureAlgorithm = signatureAlgorithm;
+    }
+
+    public boolean getBackupStateFlag() {
+        return backupStateFlag;
+    }
+
+    public void setBackupStateFlag(boolean backupStateFlag) {
+        this.backupStateFlag = backupStateFlag;
+    }
+
+    public boolean getBackupEligibilityFlag() {
+        return backupEligibilityFlag;
+    }
+
+    public void setBackupEligibilityFlag(boolean backupEligibilityFlag) {
+        this.backupEligibilityFlag = backupEligibilityFlag;
     }
 }
