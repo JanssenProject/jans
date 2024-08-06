@@ -804,7 +804,7 @@ paths:
       - Jans Assets
       summary: Load assets on server for a service
       description: Load assets on server for a service
-      operationId: post-new-asset
+      operationId: load-service-asset
       requestBody:
         description: String multipart form.
         content:
@@ -919,7 +919,7 @@ paths:
       - Jans Assets
       summary: Upload new asset
       description: Upload new asset
-      operationId: post-new-asset_1
+      operationId: post-new-asset
       requestBody:
         description: String multipart form.
         content:
@@ -8359,21 +8359,21 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        selected:
-          type: boolean
-        whitePagesCanView:
+        adminCanEdit:
           type: boolean
         userCanView:
-          type: boolean
-        adminCanEdit:
           type: boolean
         userCanEdit:
           type: boolean
         adminCanView:
           type: boolean
+        adminCanAccess:
+          type: boolean
         userCanAccess:
           type: boolean
-        adminCanAccess:
+        whitePagesCanView:
+          type: boolean
+        selected:
           type: boolean
         baseDn:
           type: string
@@ -9210,8 +9210,6 @@ components:
           type: boolean
         lockMessageConfig:
           $ref: '#/components/schemas/LockMessageConfig'
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -9221,6 +9219,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -10781,10 +10781,10 @@ components:
         ttl:
           type: integer
           format: int32
-        opbrowserState:
-          type: string
         persisted:
           type: boolean
+        opbrowserState:
+          type: string
     SessionIdAccessMap:
       type: object
       properties:

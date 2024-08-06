@@ -325,7 +325,7 @@ public class AssetResource extends ConfigBaseResource {
         return Response.status(Response.Status.OK).entity(asset).build();
     }
 
-    @Operation(summary = "Load assets on server for a service", description = "Load assets on server for a service", operationId = "post-new-asset", tags = {
+    @Operation(summary = "Load assets on server for a service", description = "Load assets on server for a service", operationId = "load-service-asset", tags = {
             "Jans Assets" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.JANS_ASSET_WRITE_ACCESS }))
     @RequestBody(description = "String multipart form.", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = String.class)))
