@@ -8,7 +8,7 @@ tags:
 ---
 
 
-## Jans Lock Overview
+# Jans Lock Overview
 
 Lock Server is a Java Weld application that connects ephemeral Cedarlings to the enterprise by 
 providing a number of [endpoints](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/main/jans-lock/lock-master.yaml)
