@@ -12,7 +12,7 @@
         <meta name="author" content="Janssen, Inc.">
       
       
-        <link rel="canonical" href="https://jans.io/docs/head/admin/lock/lock-master/">
+        <link rel="canonical" href="https://jans.io/docs/head/admin/lock/lock-server/">
       
       <link rel="icon" href="../../../assets/janssen_project_favicon_transparent_50px_50px.ico">
       <meta name="generator" content="mkdocs-1.4.1, mkdocs-material-8.5.7">
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#lock-master" class="md-skip">
+        <a href="#jans-lock-overview" class="md-skip">
           Skip to content
         </a>
       
@@ -7160,13 +7160,6 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#jans-lock-overview" class="md-nav__link">
-    Jans Lock Overview
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#installation" class="md-nav__link">
     Installation
   </a>
@@ -8580,13 +8573,6 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#jans-lock-overview" class="md-nav__link">
-    Jans Lock Overview
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#installation" class="md-nav__link">
     Installation
   </a>
@@ -8667,30 +8653,29 @@
 
 
 
-  <a href="https://github.com/JanssenProject/jans/edit/main/docs/admin/lock/lock-master.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/JanssenProject/jans/edit/main/docs/admin/lock/lock-server.md" title="Edit this page" class="md-content__button md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
-<h1 id="lock-master">Lock Master<a class="headerlink" href="#lock-master" title="Permanent link">#</a></h1>
-<h2 id="jans-lock-overview">Jans Lock Overview<a class="headerlink" href="#jans-lock-overview" title="Permanent link">#</a></h2>
-<p>Lock Master is a Java Weld application that connects ephemeral Cedarlings to the enterprise by 
+<h1 id="jans-lock-overview">Jans Lock Overview<a class="headerlink" href="#jans-lock-overview" title="Permanent link">#</a></h1>
+<p>Lock Server is a Java Weld application that connects ephemeral Cedarlings to the enterprise by 
 providing a number of <a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/main/jans-lock/lock-master.yaml">endpoints</a></p>
 <h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">#</a></h2>
-<p>Admins can deploy Lock Master as part of Jans Auth Server or as a stanalone 
+<p>Admins can deploy Lock Server as part of Jans Auth Server or as a stanalone 
 web server.</p>
 <h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">#</a></h2>
 <p>A list of server-level configuration properties.</p>
 <h2 id="logs">Logs<a class="headerlink" href="#logs" title="Permanent link">#</a></h2>
-<p>Lock Master creates the following logs:</p>
+<p>Lock Server creates the following logs:</p>
 <ul>
-<li>lock_master_config.log</li>
-<li>lock_master_audit.log -- RDBMS option</li>
-<li>lock_master_jwt_status.log </li>
+<li>lock_server_config.log</li>
+<li>lock_server_audit.log -- RDBMS option</li>
+<li>lock_server_jwt_status.log </li>
 </ul>
 <h2 id="cli-tui">CLI / TUI<a class="headerlink" href="#cli-tui" title="Permanent link">#</a></h2>
-<p>Admins can manage Lock Master runtime configuration and see activity using the 
+<p>Admins can manage Lock Server runtime configuration and see activity using the 
 Jans CLI or TUI.</p>
 <ul>
 <li>Create/Read/Update/Delete Policy Stores</li>
@@ -8702,7 +8687,7 @@ Jans CLI or TUI.</p>
 </ul>
 <h2 id="oauth-security">OAuth Security<a class="headerlink" href="#oauth-security" title="Permanent link">#</a></h2>
 <p>Cedarling should present an SSA during client registration. This will enable 
-Cedarlings to obtain access tokens with scopes for OAuth protected Lock Master 
+Cedarlings to obtain access tokens with scopes for OAuth protected Lock Server 
 endpoints.</p>
 
   <hr>
@@ -8710,7 +8695,7 @@ endpoints.</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-07-29T11:41:35+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-07-29</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-08-06T20:23:05+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-08-06</span>
       
         <br>
         Created:
