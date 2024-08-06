@@ -10,6 +10,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ApiAppConfiguration implements Configuration {
+    
+    @Schema(description = "Config API service name.")
+    private String serviceName;
 
     @Schema(description = "OAuth authentication enable/disable flag. Default value `true`.")
     private boolean configOauthEnabled;
@@ -96,6 +99,14 @@ public class ApiAppConfiguration implements Configuration {
 
     @Schema(description = "Asset management configuration details.")
     private AssetMgtConfiguration assetMgtConfiguration;
+    
+    public String getServiceName() {
+        return serviceName;
+    }
+
+    public void setServiceName(String serviceName) {
+        this.serviceName = serviceName;
+    }
 
     public boolean isConfigOauthEnabled() {
         return configOauthEnabled;
@@ -334,7 +345,7 @@ public class ApiAppConfiguration implements Configuration {
 
     @Override
     public String toString() {
-        return "ApiAppConfiguration [configOauthEnabled=" + configOauthEnabled + ", disableLoggerTimer="
+        return "ApiAppConfiguration [serviceName="+serviceName+", configOauthEnabled=" + configOauthEnabled + ", disableLoggerTimer="
                 + disableLoggerTimer + ", disableAuditLogger=" + disableAuditLogger
                 + ", customAttributeValidationEnabled=" + customAttributeValidationEnabled + ", acrValidationEnabled="
                 + acrValidationEnabled + ", apiApprovedIssuer=" + apiApprovedIssuer + ", apiProtectionType="
