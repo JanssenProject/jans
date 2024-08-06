@@ -54,8 +54,8 @@ spec:
         env:
           - name: CN_AUTH_JAVA_OPTIONS
             value: {{ include "auth-server.customJavaOptions" . | trim }}
-          {{- include "auth-server.usr-envs" . | indent 12 }}
-          {{- include "auth-server.usr-secret-envs" . | indent 12 }}
+          {{- include "auth-server.usr-envs" . | indent 10 }}
+          {{- include "auth-server.usr-secret-envs" . | indent 10 }}
         securityContext:
           runAsUser: 1000
           runAsNonRoot: true

@@ -313,24 +313,7 @@ public class IdpResource extends BaseResource {
         return Response.noContent().build();
     }
 
-    @Operation(summary = "Process unprocessed IDP metadata files", description = "Process unprocessed IDP metadata files", operationId = "post-idp-metadata-files", tags = {
-            "SAML - Identity Broker" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    Constants.JANS_IDP_SAML_WRITE_ACCESS }))
-    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "OK"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "500", description = "InternalServerError") })
-    @Path(Constants.PROCESS_IDP_META_FILE)
-    @ProtectedApi(scopes = { Constants.JANS_IDP_SAML_WRITE_ACCESS })
-    @POST
-    public Response processMetadataFiles() {
-
-        log.info("process metadata files");
-
-        idpService.processUnprocessedIdpMetadataFiles();
-
-        return Response.ok().build();
-    }
-
+    
     private IdentityProviderPagedResult doSearch(SearchRequest searchReq) {
 
         if (log.isInfoEnabled()) {

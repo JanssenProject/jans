@@ -831,6 +831,8 @@ global:
       authServerLabels: { }
       # -- Auth server ingress resource additional annotations.
       authServerAdditionalAnnotations: { }
+      # -- Enable endpoint /jans-lock
+      lockEnabled: false
     # -- Enable jans-lock as service running inside auth-server
     lockEnabled: false
 

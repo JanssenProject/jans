@@ -18,6 +18,7 @@ package io.jans.lock.model.config;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
@@ -34,23 +35,45 @@ import jakarta.enterprise.inject.Vetoed;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AppConfiguration implements Configuration {
 
-	private String baseDN;
-	
+    @DocProperty(description = "Entry Base distinguished name (DN) that identifies the starting point of a search")
+    @Schema(description = "Entry Base distinguished name (DN) that identifies the starting point of a search")
+    private String baseDN;
+
     @DocProperty(description = "Lock base endpoint URL")
     @Schema(description = "Lock base endpoint URL")
     private String baseEndpoint;
 
+    @DocProperty(description = "OpenID issuer URL")
+    @Schema(description = "OpenID issuer URL")
+    private String openIdIssuer;
+
     @DocProperty(description = "List of token channel names", defaultValue = "jans_token")
     @Schema(description = "List of token channel names")
-	private List<String> tokenChannels;
+    private List<String> tokenChannels;
 
-	@DocProperty(description = "Choose whether to disable JDK loggers", defaultValue = "true")
-	@Schema(description = "Choose whether to disable JDK loggers")
-	private Boolean disableJdkLogger = true;
+    @DocProperty(description = "Lock Client ID")
+    @Schema(description = "Lock Client ID")
+    private String clientId;
+
+    @DocProperty(description = "Lock client password")
+    @Schema(description = "Lock client password")
+    private String clientPassword;
+
+    @DocProperty(description = "Jans URL of the OpenID Connect Provider's OAuth 2.0 Token Endpoint")
+    @Schema(description = "Jans URL of the OpenID Connect Provider's OAuth 2.0 Token Endpoint")
+    private String tokenUrl;
+
+    @DocProperty(description = "Jans URL of config-api audit endpoints and corresponding scope details")
+    @Schema(description = "Jans URL of config-api audit endpoints and corresponding scope details")
+    private Map<String, List<String>> endpointDetails;
+
+    @DocProperty(description = "Choose whether to disable JDK loggers", defaultValue = "true")
+    @Schema(description = "Choose whether to disable JDK loggers")
+    private Boolean disableJdkLogger = true;
 
     @DocProperty(description = "Specify the logging level of loggers")
     @Schema(description = "Specify the logging level of loggers")
-	private String loggingLevel;
+    private String loggingLevel;
 
     @DocProperty(description = "Logging layout used for Jans Authorization Server loggers")
     @Schema(description = "Logging layout used for Jans Authorization Server loggers")
@@ -62,194 +85,245 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "Channel for metric reports", defaultValue = "jans_pdp_metric")
     @Schema(description = "Channel for metric reports")
-	private String metricChannel;
+    private String metricChannel;
 
     @DocProperty(description = "The interval for metric reporter in seconds")
     @Schema(description = "The interval for metric reporter in seconds")
-	private int metricReporterInterval;
+    private int metricReporterInterval;
 
     @DocProperty(description = "The days to keep metric reported data")
     @Schema(description = "The days to keep metric reported data")
-	private int metricReporterKeepDataDays;
+    private int metricReporterKeepDataDays;
 
     @DocProperty(description = "Enable metric reporter")
     @Schema(description = "Enable metric reporter")
-	private Boolean metricReporterEnabled;
+    private Boolean metricReporterEnabled;
 
-	// Period in seconds
+    // Period in seconds
     @DocProperty(description = "Time interval for the Clean Service in seconds")
     @Schema(description = "Time interval for the Clean Service in seconds")
-	private int cleanServiceInterval;
-	
+    private int cleanServiceInterval;
+
     @Schema(description = "Opa Configuration")
-	private OpaConfiguration opaConfiguration;
+    private OpaConfiguration opaConfiguration;
 
     @DocProperty(description = "PDP type")
     @Schema(description = "PDP type")
-	private String pdpType;
+    private String pdpType;
 
     @DocProperty(description = "Authorization token to access Json Uris")
     @Schema(description = "Authorization token to access Json Uris")
-	private String policiesJsonUrisAuthorizationToken;
+    private String policiesJsonUrisAuthorizationToken;
 
     @DocProperty(description = "List of Json Uris with link to Rego policies")
     @Schema(description = "List of Json Uris with link to Rego policies")
-	private List<String> policiesJsonUris;
+    private List<String> policiesJsonUris;
 
     @DocProperty(description = "Authorization token to access Zip Uris")
     @Schema(description = "Authorization token to access Zip Uris")
-	private String policiesZipUrisAuthorizationToken;
+    private String policiesZipUrisAuthorizationToken;
 
     @DocProperty(description = "List of Zip Uris with policies")
     @Schema(description = "List of Zip Uris with policies")
-	private List<String> policiesZipUris;
+    private List<String> policiesZipUris;
 
-	public String getBaseDN() {
-		return baseDN;
-	}
+    public String getBaseDN() {
+        return baseDN;
+    }
 
-	public void setBaseDN(String baseDN) {
-		this.baseDN = baseDN;
-	}
+    public void setBaseDN(String baseDN) {
+        this.baseDN = baseDN;
+    }
 
-	public String getBaseEndpoint() {
-		return baseEndpoint;
-	}
+    public String getBaseEndpoint() {
+        return baseEndpoint;
+    }
 
-	public void setBaseEndpoint(String baseEndpoint) {
-		this.baseEndpoint = baseEndpoint;
-	}
+    public void setBaseEndpoint(String baseEndpoint) {
+        this.baseEndpoint = baseEndpoint;
+    }
 
-	public List<String> getTokenChannels() {
-		if (tokenChannels == null) {
-			tokenChannels = new ArrayList<>();
-		}
+    public String getOpenIdIssuer() {
+        return openIdIssuer;
+    }
 
-		return tokenChannels;
-	}
+    public void setOpenIdIssuer(String openIdIssuer) {
+        this.openIdIssuer = openIdIssuer;
+    }
 
-	public void setTokenChannels(List<String> tokenChannels) {
-		this.tokenChannels = tokenChannels;
-	}
+    public List<String> getTokenChannels() {
+        return tokenChannels;
+    }
 
-	public Boolean getDisableJdkLogger() {
-		return disableJdkLogger;
-	}
+    public void setTokenChannels(List<String> tokenChannels) {
+        this.tokenChannels = tokenChannels;
+    }
 
-	public void setDisableJdkLogger(Boolean disableJdkLogger) {
-		this.disableJdkLogger = disableJdkLogger;
-	}
+    public String getClientId() {
+        return clientId;
+    }
 
-	public String getLoggingLevel() {
-		return loggingLevel;
-	}
+    public void setClientId(String clientId) {
+        this.clientId = clientId;
+    }
 
-	public void setLoggingLevel(String loggingLevel) {
-		this.loggingLevel = loggingLevel;
-	}
+    public String getClientPassword() {
+        return clientPassword;
+    }
 
-	public String getLoggingLayout() {
-		return loggingLayout;
-	}
+    public void setClientPassword(String clientPassword) {
+        this.clientPassword = clientPassword;
+    }
 
-	public void setLoggingLayout(String loggingLayout) {
-		this.loggingLayout = loggingLayout;
-	}
+    public String getTokenUrl() {
+        return tokenUrl;
+    }
 
-	public String getExternalLoggerConfiguration() {
-		return externalLoggerConfiguration;
-	}
+    public void setTokenUrl(String tokenUrl) {
+        this.tokenUrl = tokenUrl;
+    }
 
-	public void setExternalLoggerConfiguration(String externalLoggerConfiguration) {
-		this.externalLoggerConfiguration = externalLoggerConfiguration;
-	}
+    public Map<String, List<String>> getEndpointDetails() {
+        return endpointDetails;
+    }
 
-	public String getMetricChannel() {
-		return metricChannel;
-	}
+    public void setEndpointDetails(Map<String, List<String>> endpointDetails) {
+        this.endpointDetails = endpointDetails;
+    }
 
-	public void setMetricChannel(String metricChannel) {
-		this.metricChannel = metricChannel;
-	}
+    public Boolean getDisableJdkLogger() {
+        return disableJdkLogger;
+    }
 
-	public int getMetricReporterInterval() {
-		return metricReporterInterval;
-	}
+    public void setDisableJdkLogger(Boolean disableJdkLogger) {
+        this.disableJdkLogger = disableJdkLogger;
+    }
 
-	public void setMetricReporterInterval(int metricReporterInterval) {
-		this.metricReporterInterval = metricReporterInterval;
-	}
+    public String getLoggingLevel() {
+        return loggingLevel;
+    }
 
-	public int getMetricReporterKeepDataDays() {
-		return metricReporterKeepDataDays;
-	}
+    public void setLoggingLevel(String loggingLevel) {
+        this.loggingLevel = loggingLevel;
+    }
 
-	public void setMetricReporterKeepDataDays(int metricReporterKeepDataDays) {
-		this.metricReporterKeepDataDays = metricReporterKeepDataDays;
-	}
+    public String getLoggingLayout() {
+        return loggingLayout;
+    }
 
-	public Boolean getMetricReporterEnabled() {
-		return metricReporterEnabled;
-	}
+    public void setLoggingLayout(String loggingLayout) {
+        this.loggingLayout = loggingLayout;
+    }
 
-	public void setMetricReporterEnabled(Boolean metricReporterEnabled) {
-		this.metricReporterEnabled = metricReporterEnabled;
-	}
+    public String getExternalLoggerConfiguration() {
+        return externalLoggerConfiguration;
+    }
 
-	public int getCleanServiceInterval() {
-		return cleanServiceInterval;
-	}
+    public void setExternalLoggerConfiguration(String externalLoggerConfiguration) {
+        this.externalLoggerConfiguration = externalLoggerConfiguration;
+    }
 
-	public void setCleanServiceInterval(int cleanServiceInterval) {
-		this.cleanServiceInterval = cleanServiceInterval;
-	}
+    public String getMetricChannel() {
+        return metricChannel;
+    }
 
-	public OpaConfiguration getOpaConfiguration() {
-		return opaConfiguration;
-	}
+    public void setMetricChannel(String metricChannel) {
+        this.metricChannel = metricChannel;
+    }
 
-	public void setOpaConfiguration(OpaConfiguration opaConfiguration) {
-		this.opaConfiguration = opaConfiguration;
-	}
+    public int getMetricReporterInterval() {
+        return metricReporterInterval;
+    }
 
-	public String getPdpType() {
-		return pdpType;
-	}
+    public void setMetricReporterInterval(int metricReporterInterval) {
+        this.metricReporterInterval = metricReporterInterval;
+    }
 
-	public void setPdpType(String pdpType) {
-		this.pdpType = pdpType;
-	}
+    public int getMetricReporterKeepDataDays() {
+        return metricReporterKeepDataDays;
+    }
 
-	public String getPoliciesJsonUrisAuthorizationToken() {
-		return policiesJsonUrisAuthorizationToken;
-	}
+    public void setMetricReporterKeepDataDays(int metricReporterKeepDataDays) {
+        this.metricReporterKeepDataDays = metricReporterKeepDataDays;
+    }
 
-	public void setPoliciesJsonUrisAuthorizationToken(String policiesJsonUrisAuthorizationToken) {
-		this.policiesJsonUrisAuthorizationToken = policiesJsonUrisAuthorizationToken;
-	}
+    public Boolean getMetricReporterEnabled() {
+        return metricReporterEnabled;
+    }
 
-	public List<String> getPoliciesJsonUris() {
-		return policiesJsonUris;
-	}
+    public void setMetricReporterEnabled(Boolean metricReporterEnabled) {
+        this.metricReporterEnabled = metricReporterEnabled;
+    }
 
-	public void setPoliciesJsonUris(List<String> policiesJsonUris) {
-		this.policiesJsonUris = policiesJsonUris;
-	}
+    public int getCleanServiceInterval() {
+        return cleanServiceInterval;
+    }
 
-	public String getPoliciesZipUrisAuthorizationToken() {
-		return policiesZipUrisAuthorizationToken;
-	}
+    public void setCleanServiceInterval(int cleanServiceInterval) {
+        this.cleanServiceInterval = cleanServiceInterval;
+    }
 
-	public void setPoliciesZipUrisAuthorizationToken(String policiesZipUrisAuthorizationToken) {
-		this.policiesZipUrisAuthorizationToken = policiesZipUrisAuthorizationToken;
-	}
+    public OpaConfiguration getOpaConfiguration() {
+        return opaConfiguration;
+    }
 
-	public List<String> getPoliciesZipUris() {
-		return policiesZipUris;
-	}
+    public void setOpaConfiguration(OpaConfiguration opaConfiguration) {
+        this.opaConfiguration = opaConfiguration;
+    }
 
-	public void setPoliciesZipUris(List<String> policiesZipUris) {
-		this.policiesZipUris = policiesZipUris;
-	}
+    public String getPdpType() {
+        return pdpType;
+    }
+
+    public void setPdpType(String pdpType) {
+        this.pdpType = pdpType;
+    }
+
+    public String getPoliciesJsonUrisAuthorizationToken() {
+        return policiesJsonUrisAuthorizationToken;
+    }
+
+    public void setPoliciesJsonUrisAuthorizationToken(String policiesJsonUrisAuthorizationToken) {
+        this.policiesJsonUrisAuthorizationToken = policiesJsonUrisAuthorizationToken;
+    }
+
+    public List<String> getPoliciesJsonUris() {
+        return policiesJsonUris;
+    }
+
+    public void setPoliciesJsonUris(List<String> policiesJsonUris) {
+        this.policiesJsonUris = policiesJsonUris;
+    }
+
+    public String getPoliciesZipUrisAuthorizationToken() {
+        return policiesZipUrisAuthorizationToken;
+    }
+
+    public void setPoliciesZipUrisAuthorizationToken(String policiesZipUrisAuthorizationToken) {
+        this.policiesZipUrisAuthorizationToken = policiesZipUrisAuthorizationToken;
+    }
+
+    public List<String> getPoliciesZipUris() {
+        return policiesZipUris;
+    }
+
+    public void setPoliciesZipUris(List<String> policiesZipUris) {
+        this.policiesZipUris = policiesZipUris;
+    }
+
+    @Override
+    public String toString() {
+        return "AppConfiguration [baseDN=" + baseDN + ", baseEndpoint=" + baseEndpoint + ", openIdIssuer="
+                + openIdIssuer + ", tokenChannels=" + tokenChannels + ", clientId=" + clientId + ", clientPassword="
+                + clientPassword + ", tokenUrl=" + tokenUrl + ", endpointDetails=" + endpointDetails
+                + ", disableJdkLogger=" + disableJdkLogger + ", loggingLevel=" + loggingLevel + ", loggingLayout="
+                + loggingLayout + ", externalLoggerConfiguration=" + externalLoggerConfiguration + ", metricChannel="
+                + metricChannel + ", metricReporterInterval=" + metricReporterInterval + ", metricReporterKeepDataDays="
+                + metricReporterKeepDataDays + ", metricReporterEnabled=" + metricReporterEnabled
+                + ", cleanServiceInterval=" + cleanServiceInterval + ", opaConfiguration=" + opaConfiguration
+                + ", pdpType=" + pdpType + ", policiesJsonUrisAuthorizationToken=" + policiesJsonUrisAuthorizationToken
+                + ", policiesJsonUris=" + policiesJsonUris + ", policiesZipUrisAuthorizationToken="
+                + policiesZipUrisAuthorizationToken + ", policiesZipUris=" + policiesZipUris + "]";
+    }
 
 }

@@ -31,7 +31,7 @@ class JansAuthInstaller(JettyInstaller):
         self.service_name = 'jans-auth'
         self.app_type = AppType.SERVICE
         self.install_type = InstallOption.OPTONAL
-        self.install_var = 'installOxAuth'
+        self.install_var = 'install_jans_auth'
         self.register_progess()
 
         self.templates_folder = os.path.join(Config.templateFolder, self.service_name)
@@ -39,11 +39,11 @@ class JansAuthInstaller(JettyInstaller):
 
         self.ldif_config = os.path.join(self.output_folder, 'configuration.ldif')
         self.ldif_role_scope_mappings = os.path.join(self.output_folder, 'role-scope-mappings.ldif')
-        self.oxauth_config_json = os.path.join(self.output_folder, 'jans-auth-config.json')
-        self.oxauth_static_conf_json = os.path.join(self.templates_folder, 'jans-auth-static-conf.json')
-        self.oxauth_error_json = os.path.join(self.templates_folder, 'jans-auth-errors.json')
-        self.oxauth_openid_jwks_fn = os.path.join(self.output_folder, 'jans-auth-keys.json')
-        self.oxauth_openid_jks_fn = os.path.join(Config.certFolder, 'jans-auth-keys.' + Config.default_store_type.lower())
+        self.jans_auth_config_json = os.path.join(self.output_folder, 'jans-auth-config.json')
+        self.jans_auth_static_conf_json = os.path.join(self.templates_folder, 'jans-auth-static-conf.json')
+        self.jans_auth_error_json = os.path.join(self.templates_folder, 'jans-auth-errors.json')
+        self.jans_auth_openid_jwks_fn = os.path.join(self.output_folder, 'jans-auth-keys.json')
+        self.jans_auth_openid_jks_fn = os.path.join(Config.certFolder, 'jans-auth-keys.' + Config.default_store_type.lower())
         self.ldif_people = os.path.join(self.output_folder, 'people.ldif')
         self.ldif_groups = os.path.join(self.output_folder, 'groups.ldif')
         self.agama_root = os.path.join(self.jetty_base, self.service_name, 'agama')
@@ -56,16 +56,16 @@ class JansAuthInstaller(JettyInstaller):
     def install(self):
         self.logIt("Copying auth.war into jetty webapps folder...")
         self.make_pairwise_calculation_salt()
-        self.installJettyService(self.jetty_app_configuration[self.service_name], True)
+        self.install_jettyService(self.jetty_app_configuration[self.service_name], True)
         self.copyFile(self.source_files[0][0], self.jetty_service_webapps)
-        self.external_libs()
         self.set_class_path([os.path.join(self.custom_lib_dir, '*')])
+        self.external_libs()
         self.setup_agama()
         self.enable()
 
     def generate_configuration(self):
-        if not Config.get('oxauth_openid_jks_pass'):
-            Config.oxauth_openid_jks_pass = self.getPW()
+        if not Config.get('jans_auth_openid_jks_pass'):
+            Config.jans_auth_openid_jks_pass = self.getPW()
 
         if not Config.get('admin_inum'):
             Config.admin_inum = str(uuid.uuid4())
@@ -75,13 +75,13 @@ class JansAuthInstaller(JettyInstaller):
         self.logIt("Generating OAuth openid keys", pbar=self.service_name)
 
         jwks = self.gen_openid_jwks_jks_keys(
-                    jks_path=self.oxauth_openid_jks_fn,
-                    jks_pwd=Config.oxauth_openid_jks_pass,
+                    jks_path=self.jans_auth_openid_jks_fn,
+                    jks_pwd=Config.jans_auth_openid_jks_pass,
                     key_expiration=2,
                     key_algs=Config.default_sig_key_algs,
                     enc_keys=Config.default_enc_key_algs
                     )
-        self.write_openid_keys(self.oxauth_openid_jwks_fn, jwks)
+        self.write_openid_keys(self.jans_auth_openid_jwks_fn, jwks)
 
         if Config.get('use_external_key'):
             self.import_openbanking_key()
@@ -125,7 +125,7 @@ class JansAuthInstaller(JettyInstaller):
 
         Config.templateRenderingDict['person_custom_object_class_list'] = '[]' if Config.mapping_locations['default'] == 'rdbm' else '["jansCustomPerson", "jansPerson"]'
 
-        templates = [self.oxauth_config_json, self.ldif_people, self.ldif_groups]
+        templates = [self.jans_auth_config_json, self.ldif_people, self.ldif_groups]
 
         for tmp in templates:
             self.renderTemplateInOut(tmp, self.templates_folder, self.output_folder)
@@ -139,10 +139,10 @@ class JansAuthInstaller(JettyInstaller):
 
         self.prepare_base64_extension_scripts()
 
-        Config.templateRenderingDict['oxauth_config_base64'] = self.generate_base64_ldap_file(self.oxauth_config_json)
-        Config.templateRenderingDict['oxauth_static_conf_base64'] = self.generate_base64_ldap_file(self.oxauth_static_conf_json)
-        Config.templateRenderingDict['oxauth_error_base64'] = self.generate_base64_ldap_file(self.oxauth_error_json)
-        Config.templateRenderingDict['oxauth_openid_key_base64'] = self.generate_base64_ldap_file(self.oxauth_openid_jwks_fn)
+        Config.templateRenderingDict['jans_auth_config_base64'] = self.generate_base64_ldap_file(self.jans_auth_config_json)
+        Config.templateRenderingDict['jans_auth_static_conf_base64'] = self.generate_base64_ldap_file(self.jans_auth_static_conf_json)
+        Config.templateRenderingDict['jans_auth_error_base64'] = self.generate_base64_ldap_file(self.jans_auth_error_json)
+        Config.templateRenderingDict['jans_auth_openid_key_base64'] = self.generate_base64_ldap_file(self.jans_auth_openid_jwks_fn)
 
         self.ldif_scripts = os.path.join(Config.output_dir, 'scripts.ldif')
         self.renderTemplateInOut(self.ldif_scripts, Config.templateFolder, Config.output_dir)
@@ -174,8 +174,8 @@ class JansAuthInstaller(JettyInstaller):
 
     def import_openbanking_certificate(self):
         self.logIt("Importing openbanking ssl certificate")
-        oxauth_config_json = base.readJsonFile(self.oxauth_config_json)
-        jwks_uri = oxauth_config_json['jwksUri']
+        jans_auth_config_json = base.readJsonFile(self.jans_auth_config_json)
+        jwks_uri = jans_auth_config_json['jwksUri']
         o = urlparse(jwks_uri)
         jwks_addr = o.netloc
         open_banking_cert = self.get_server_certificate(jwks_addr)
@@ -194,17 +194,26 @@ class JansAuthInstaller(JettyInstaller):
             self.download_ob_cert(Config.ob_cert_fn)
 
         if os.path.isfile(Config.ob_key_fn) and os.path.isfile(Config.ob_cert_fn):
-            self.import_key_cert_into_keystore('obsigning', self.oxauth_openid_jks_fn, Config.oxauth_openid_jks_pass, Config.ob_key_fn, Config.ob_cert_fn, Config.ob_alias)
+            self.import_key_cert_into_keystore('obsigning', self.jans_auth_openid_jks_fn, Config.jans_auth_openid_jks_pass, Config.ob_key_fn, Config.ob_cert_fn, Config.ob_alias)
 
     def external_libs(self):
-        extra_libs = []
-
         for extra_lib in (self.source_files[2][0], self.source_files[3][0]):
             self.copyFile(extra_lib, self.custom_lib_dir)
             extra_lib_path = os.path.join(self.custom_lib_dir, os.path.basename(extra_lib))
-            extra_libs.append(extra_lib_path)
             self.chown(extra_lib_path, Config.jetty_user, Config.jetty_group)
 
+        # add custom libs if any
+        common_lib_dir = None
+        if Config.cb_install:
+            common_lib_dir = base.current_app.CouchbaseInstaller.common_lib_dir
+        elif Config.rdbm_install and Config.rdbm_type == 'spanner':
+            common_lib_dir = base.current_app.RDBMInstaller.common_lib_dir
+        if common_lib_dir:
+            class_path = os.path.join(common_lib_dir, '*')
+            current_plugins = self.get_plugins(paths=True)
+            if not class_path in current_plugins:
+                current_plugins.append(class_path)
+                self.set_class_path(current_plugins)
 
     def setup_agama(self):
         self.createDirs(self.agama_root)

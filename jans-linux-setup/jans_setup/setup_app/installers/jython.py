@@ -19,7 +19,7 @@ class JythonInstaller(BaseInstaller, SetupUtils):
     def __init__(self):
         setattr(base.current_app, self.__class__.__name__, self)
         self.service_name = 'jython'
-        self.install_var = 'installJython'
+        self.install_var = 'install_jython'
         self.app_type = AppType.APPLICATION
         self.install_type = InstallOption.MANDATORY
         if not base.snap:

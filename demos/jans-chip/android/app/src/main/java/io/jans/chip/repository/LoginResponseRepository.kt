@@ -15,7 +15,7 @@ class LoginResponseRepository(context: Context) {
     private val appDatabase = AppDatabase.getInstance(context);
     var obtainedContext: Context = context
     private var loginResponse: LoginResponse? = LoginResponse(null)
-    suspend fun processlogin(
+    suspend fun processLogin(
         usernameText: String,
         passwordText: String?,
         authMethod: String,
