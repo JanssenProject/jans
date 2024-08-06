@@ -4,6 +4,8 @@ from utils.utils import common_data
 from utils.static import common_strings
 from utils.multi_lang import _
 
+common_data.background_tasks_feeds['attributes'] = []
+
 
 async def get_attributes_coroutine(app) -> None:
 
@@ -33,6 +35,8 @@ async def get_attributes_coroutine(app) -> None:
         else:
             break
 
+    for feed in common_data.background_tasks_feeds['attributes']:
+        feed()
 
 async def retrieve_enabled_scripts() -> None:
     'Coroutine for retreiving enabled scripts'

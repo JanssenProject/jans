@@ -200,10 +200,6 @@ class SSA(DialogUtils):
             data = {}
             title = _("Add new SSA")
 
-        
-            
-
-
         expiration_label = _("Expiration")
         never_expire_label = _("Never")
         self.never_expire_cb = Checkbox(never_expire_label)
