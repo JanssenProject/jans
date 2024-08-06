@@ -102,6 +102,11 @@ public class AppleAssertionFormatProcessor implements AssertionFormatProcessor {
 			commonVerifiers.verifyCounter(registration.getCounter(), counter);
 			registration.setCounter(counter);
 
+			//get flags buffer
+			byte[] flagsBuffer = authData.getFlags();
+			registration.setBackupEligibilityFlag(authenticatorDataParser.verifyBackupEligibility(flagsBuffer));
+			registration.setBackupStateFlag(authenticatorDataParser.verifyBackupState(flagsBuffer));
+
 			JsonNode uncompressedECPointNode = dataMapperService.cborReadTree(base64Service.urlDecode(registration.getUncompressedECPoint()));
 			PublicKey publicKey = coseService.createUncompressedPointFromCOSEPublicKey(uncompressedECPointNode);
 
