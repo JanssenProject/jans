@@ -3,9 +3,13 @@ from __future__ import annotations
 import base64
 import logging.config
 import os
+import re
 import shutil
+import sys
 import typing as _t
+from zipfile import ZipFile
 from functools import cached_property
+from pathlib import Path
 from string import Template
 from uuid import uuid4
 
@@ -27,6 +31,8 @@ from jans.pycloudlib.persistence.utils import PersistenceMapper
 from jans.pycloudlib.utils import generate_base64_contents
 from jans.pycloudlib.utils import encode_text
 from jans.pycloudlib.utils import get_random_chars
+from jans.pycloudlib.utils import exec_cmd
+
 from settings import LOGGING_CONFIG
 from utils import get_kc_db_password
 
@@ -40,6 +46,8 @@ logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("jans-saml")
 
 manager = get_manager()
+
+LIB_METADATA_RE = re.compile(r"(?P<name>.*)-(?P<version>\d+.*)(?P<ext>\.jar)")
 
 
 def render_keycloak_conf():
@@ -91,6 +99,7 @@ def main():
         )
         # need to resolve whether we're using default or user-defined couchbase cert
         sync_couchbase_truststore(manager)
+        # extract_common_libs("couchbase")
 
     if "sql" in persistence_groups:
         db_dialect = os.environ.get("CN_SQL_DB_DIALECT", "mysql")
@@ -107,6 +116,7 @@ def main():
             "/app/templates/jans-spanner.properties",
             "/etc/jans/conf/jans-spanner.properties",
         )
+        # extract_common_libs("spanner")
 
     shutil.copyfile(
         "/app/templates/jans-saml/quarkus.properties",
@@ -245,6 +255,41 @@ def render_keycloak_creds():
             password = manager.secret.get("kc_admin_password")
             creds_bytes = f"{username}:{password}".encode()
             f.write(base64.b64encode(creds_bytes).decode())
+
+
+def extract_common_libs(persistence_type):
+    dist_file = f"/usr/share/java/{persistence_type}-libs.zip"
+
+    # download if file is missing
+    if not os.path.exists(dist_file):
+        version = os.environ.get("CN_VERSION")
+        download_url = f"https://jenkins.jans.io/maven/io/jans/jans-orm-{persistence_type}-libs/{version}/jans-orm-{persistence_type}-libs-{version}-distribution.zip"
+        basename = os.path.basename(download_url)
+
+        logger.info(f"Downloading {basename} as {dist_file}")
+
+        out, err, code = exec_cmd(f"wget -q {download_url} -O {dist_file}")
+
+        if code != 0:
+            err = out or err
+            logger.error(f"Unable to download {basename}; reason={err.decode()}")
+            sys.exit(1)
+
+    # list existing providers libs (these libs should not be overwritten)
+    provider_libs = [
+        LIB_METADATA_RE.search(path.name).groupdict()["name"]
+        for path in Path("/opt/keycloak/providers").glob("*.jar")
+    ]
+
+    # extract common libs where it does not exist (basename-based) in providers directory
+    with ZipFile(dist_file) as zf:
+        extracted_members = [
+            member for member in zf.namelist()
+            if LIB_METADATA_RE.search(member).groupdict()["name"] not in provider_libs
+        ]
+
+        logger.info(f"Extracting {dist_file}")
+        zf.extractall("/opt/keycloak/providers/", members=extracted_members)
 
 
 if __name__ == "__main__":
