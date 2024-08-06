@@ -24,7 +24,7 @@ jansScope: inum=764C,ou=scopes,o=jans
 jansScope: inum=10B2,ou=scopes,o=jans
 jansSubjectTyp: pairwise
 jansTknEndpointAuthMethod: client_secret_basic
-jansTrustedClnt: false
+jansTrustedClnt: true
 jansRedirectURI: https://%(hostname)s/kc/realms/jans/kc-jans-authn-rest-bridge/auth-complete
 
 dn: inum=%(kc_scheduler_api_client_id)s,ou=clients,o=jans
