@@ -234,7 +234,9 @@ public class AppInitializer {
             }
 
             log.info("Loading Custom Asset serviceName:{} ", serviceName);
-            this.assetService.loadServiceAsset(serviceName);
+            String loadServiceResult = this.assetService.loadServiceAsset(serviceName);
+            log.info("Loading Custom Asset serviceName:{}, loadServiceResult:{}", serviceName, loadServiceResult);
+            
         } catch (Exception ex) {
             log.error("Error while loadCustomAsset is - ", ex);
         }
