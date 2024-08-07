@@ -771,15 +771,15 @@ metadata:
 {{- if index .Values "nginx-ingress" "ingress" "additionalLabels" }}
 {{ toYaml index .Values "nginx-ingress" "ingress" "additionalLabels" | indent 4 }}
 {{- end }}
-{{- if index .Values "nginx-ingress" "ingress" "lockLabels" }}
-{{ toYaml index .Values "nginx-ingress" "ingress" "lockLabels" | indent 4 }}
+{{- if index .Values "auth-server" "ingress" "lockLabels" }}
+{{ toYaml index .Values "auth-server" "ingress" "lockLabels" | indent 4 }}
 {{- end }}
   annotations:
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
     nginx.ingress.kubernetes.io/rewrite-target: /jans-auth
-{{- if index .Values "nginx-ingress" "ingress" "lockAdditionalAnnotations" }}
-{{ toYaml index .Values "nginx-ingress" "ingress" "lockAdditionalAnnotations" | indent 4 }}
+{{- if index .Values "auth-server" "ingress" "lockAdditionalAnnotations" }}
+{{ toYaml index .Values "auth-server" "ingress" "lockAdditionalAnnotations" | indent 4 }}
 {{- end }}
 {{- if index .Values "nginx-ingress" "ingress" "additionalAnnotations" }}
 {{ toYaml index .Values "nginx-ingress" "ingress" "additionalAnnotations" | indent 4 }}

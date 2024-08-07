@@ -257,7 +257,11 @@ auth-server:
     # -- Lock config ingress resource labels. key app is taken
     lockConfigLabels: {}
     # -- Lock config ingress resource additional annotations.
-    lockConfigAdditionalAnnotations: {}    
+    lockConfigAdditionalAnnotations: {}
+    # -- Lock ingress resource labels. key app is taken
+    lockLabels: { }
+    # -- Lock ingress resource additional annotations.
+    lockAdditionalAnnotations: { }        
     # -- openid-configuration ingress resource labels. key app is taken
     openidConfigLabels: { }
     # -- openid-configuration ingress resource additional annotations.
