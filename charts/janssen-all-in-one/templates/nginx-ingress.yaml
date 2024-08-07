@@ -769,20 +769,20 @@ metadata:
   labels:
     app: {{ $fullName }}-lock
 {{- if index .Values "nginx-ingress" "ingress" "additionalLabels" }}
-{{ toYaml index .Values "nginx-ingress" "ingress" "additionalLabels" | indent 4 }}
+{{ toYaml (index .Values "nginx-ingress" "ingress" "additionalLabels") | indent 4 }}
 {{- end }}
 {{- if index .Values "auth-server" "ingress" "lockLabels" }}
-{{ toYaml index .Values "auth-server" "ingress" "lockLabels" | indent 4 }}
+{{ toYaml (index .Values "auth-server" "ingress" "lockLabels") | indent 4 }}
 {{- end }}
   annotations:
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
     nginx.ingress.kubernetes.io/rewrite-target: /jans-auth
 {{- if index .Values "auth-server" "ingress" "lockAdditionalAnnotations" }}
-{{ toYaml index .Values "auth-server" "ingress" "lockAdditionalAnnotations" | indent 4 }}
+{{ toYaml (index .Values "auth-server" "ingress" "lockAdditionalAnnotations") | indent 4 }}
 {{- end }}
 {{- if index .Values "nginx-ingress" "ingress" "additionalAnnotations" }}
-{{ toYaml index .Values "nginx-ingress" "ingress" "additionalAnnotations" | indent 4 }}
+{{ toYaml (index .Values "nginx-ingress" "ingress" "additionalAnnotations") | indent 4 }}
 {{- end }}
 spec:
   ingressClassName: {{ index .Values "nginx-ingress" "ingress" "ingressClassName" }}
