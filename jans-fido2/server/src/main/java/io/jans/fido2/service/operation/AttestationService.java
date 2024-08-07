@@ -266,6 +266,9 @@ public class AttestationService {
 		registrationData.setType(PublicKeyCredentialType.PUBLIC_KEY.getKeyName());
 		registrationData.setAttestationType(attestationData.getAttestationType());
 
+		registrationData.setBackupEligibilityFlag(attestationData.getBackupEligibilityFlag());
+		registrationData.setBackupStateFlag(attestationData.getBackupStateFlag());
+
         // Support cancel request
         if (cancelRequest) {
         	registrationData.setStatus(Fido2RegistrationStatus.canceled);
