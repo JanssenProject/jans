@@ -8502,13 +8502,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#configuration" class="md-nav__link">
-    Configuration
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -8534,98 +8527,98 @@
 
   <h1>Index</h1>
 
-<p>This is person authentication module for oxAuth which allows to specify multiple authentication configurations.</p>
+<p>This is person authentication module for Jans-Auth which allows Jans/Flex to use multiple backends for user authentication.</p>
 <h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">#</a></h2>
 <p>This list of steps needed to do to enable Basic Multi person authentication module.</p>
-<ol>
-<li>
-<p>This module depends on python libraries. In order to use it we need to install Jython. Please use next articles to proper Jython installation:</p>
+<!--
+1. This module depends on python libraries. In order to use it we need to install Jython. Please use next articles to proper Jython installation:
+    - Installation notest: http://ox.gluu.org/doku.php?id=oxtauth:customauthscript#jython_installation_optional
+    - Jython integration: http://ox.gluu.org/doku.php?id=oxtauth:customauthscript#jython_python_integration
+
+2. Copy shared required python libraries from ../shared_libs folder to $CATALINA_HOME/conf/python folder.
+-->
+<p>1. Prepare authentication configuration file <code>/etc/certs/multi_auth_conf.json</code>. There is format description and sample configuration below. Make sure to keep permission "jetty:root" for this file. </p>
 <ul>
-<li>Installation notest: http://ox.gluu.org/doku.php?id=oxtauth:customauthscript#jython_installation_optional</li>
-<li>Jython integration: http://ox.gluu.org/doku.php?id=oxtauth:customauthscript#jython_python_integration</li>
+<li>servers: hostname/IP address with port of LDAP/AD servers.</li>
+<li>bindDN: bindDN username</li>
+<li>bindPassword: password for bindDN<ul>
+<li>'bindPassword' should be the base64 encoded of password text</li>
+<li>You can take the advantage of 'encode.py' script to encode/decode your password.</li>
+<li>'encode.py' is available inside Jans ( location: /opt/jans/bin/ )  </li>
 </ul>
 </li>
-<li>
-<p>Copy shared required python libraries from ../shared_libs folder to $CATALINA_HOME/conf/python folder.</p>
-</li>
-<li>
-<p>Prepare authentication configuration file /etc/certs/multi_auth_conf.json. There is format description and sample configuration in README.txt.  </p>
-</li>
-<li>
-<p>Confire new custom module in oxTrust:</p>
-<ul>
-<li>Log into oxTrust with administrative permissions.</li>
-<li>Open "Configuration→Manage Custom Scripts" page.</li>
-<li>Select "Person Authentication" tab.</li>
-<li>Click on "Add custom script configuration" link.</li>
-<li>Enter name = basic_multi_auth_conf</li>
-<li>Enter level = 0-100 (priority of this method).</li>
-<li>Select usage type "Interactive".</li>
-<li>Add custom required and optional properties which specified in README.txt</li>
-<li>Copy/paste script from BasicMultiAuthConfExternalAuthenticator.py.</li>
-<li>Activate it via "Enabled" checkbox.</li>
-<li>Click "Update" button at the bottom of this page.</li>
+<li>useSSL: for 1636/636, it will be "true", otherwise "false"</li>
+<li>maxConnections: total number of concurrent connection to LDAP/AD servers.</li>
+<li>baseDN: where users are located.</li>
+<li>loginAttributes: Primary attribute of remote LDAP/AD server or localhost:1636</li>
+<li>localLoginAttributes: Primary attribute of Jans/Flex.</li>
 </ul>
-</li>
-<li>
-<p>Configure oxAuth to use Basic Multi authentication by default:</p>
-<ul>
-<li>Log into oxTrust with administrative permissions.</li>
-<li>Open "Configuration→Manage Authentication" page.</li>
-<li>Scroll to "Default Authentication Method" panel. Select "basic_multi_auth_conf" authentication mode.</li>
-<li>Click "Update" button at the bottom of this page.</li>
-</ul>
-</li>
-<li>
-<p>Try to log in using Basic Multi authentication method:</p>
-<ul>
-<li>Wait 30 seconds and try to log in again. During this time oxAuth reload list of available person authentication modules.</li>
-<li>Open second browser or second browsing session and try to log in again. It's better to try to do that from another browser session because we can return back to previous authentication method if something will go wrong.</li>
-</ul>
-</li>
-</ol>
-<p>There are log messages in this custom authentication script. In order to debug this module we can use command like this:
-tail -f /opt/tomcat/logs/wrapper.log | grep "Basic (multi auth conf)"</p>
-<h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">#</a></h2>
-<p>This module has only one property:
-1) auth_configuration_file - It's path to file which contains AD LDAP authentication connection details and list of attributes which user can use in order to log in.
-   Example: /etc/certs/multi_auth_conf.json
-   Example content of this file [ 'bindPassword' should be the base64 encoded of password text. You can take the advantage of 'encode.py' script to encode/decode your password. 'encode.py' is available inside Gluu server container ( location: /opt/gluu/bin/ ) ]:</p>
-<p>{
-  "ldap_configuration":
+<div class="highlight"><pre><span></span><code>{
+  &quot;ldap_configuration&quot;:
   [
      {
-        "configId":"ad_1",
-        "servers":["localhost:1389"],
-        "bindDN":"cn=directory manager",
-        "bindPassword":"encoded_pass",
-        "useSSL":false,
-        "maxConnections":3,
-        "baseDNs":["ou=people,o=gluu"],
-        "loginAttributes":["uid"],
-        "localLoginAttributes":["uid"]
+        &quot;configId&quot;:&quot;ad_1&quot;,
+        &quot;servers&quot;:[&quot;localhost:1636&quot;],
+        &quot;bindDN&quot;:&quot;cn=directory manager&quot;,
+        &quot;bindPassword&quot;:&quot;encoded_pass&quot;,
+        &quot;useSSL&quot;:true,
+        &quot;maxConnections&quot;:3,
+        &quot;baseDNs&quot;:[&quot;ou=people,o=jans&quot;],
+        &quot;loginAttributes&quot;:[&quot;uid&quot;],
+        &quot;localLoginAttributes&quot;:[&quot;uid&quot;]
      },
      {
-        "configId":"ad_2",
-        "servers":["localhost:2389"],
-        "bindDN":"cn=directory manager",
-        "bindPassword":"encoded_pass",
-        "useSSL":false,
-        "maxConnections":3,
-        "baseDNs":["ou=people,o=gluu"],
-        "loginAttributes":["mail"],
-        "localLoginAttributes":["mail"]
+        &quot;configId&quot;:&quot;ad_2&quot;,
+        &quot;servers&quot;:[&quot;sample.ad.test:636&quot;],
+        &quot;bindDN&quot;:&quot;cn=directory manager&quot;,
+        &quot;bindPassword&quot;:&quot;encoded_pass&quot;,
+        &quot;useSSL&quot;:true,
+        &quot;maxConnections&quot;:3,
+        &quot;baseDNs&quot;:[&quot;ou=people,o=gluu&quot;],
+        &quot;loginAttributes&quot;:[&quot;sAMAccountName&quot;],
+        &quot;localLoginAttributes&quot;:[&quot;uid&quot;]
      }
   ]
-}</p>
-<p>The names/values of properties are similar to oxAuth/oxTrust ldap configuration files.</p>
+}
+</code></pre></div>
+<ol>
+<li>
+<p>Enable 'basic_multi_auth' in Admin-UI: </p>
+</li>
+<li>
+<p>Log into Admin-UI as admin user</p>
+</li>
+<li><code>Admin</code> &gt; <code>Scripts</code></li>
+<li>Click on "+" sign to add new script ( to right corner )</li>
+<li>Add new script:</li>
+<li>Name: basic_multi_auth</li>
+<li>Description: Basic Multi Auth</li>
+<li>Select SAML ACRS: nothing special to select for testing purpose</li>
+<li>Script Type: Person Authentication</li>
+<li>Programming Lanugage: Jython</li>
+<li>Location Type: Database</li>
+<li>Interactive: nothing special to select for testing purpose.</li>
+<li>Level: nothing special to add for testing purpose.</li>
+<li>Custom Properties:<ul>
+<li>auth_configuration_file: /etc/certs/multi_auth_conf.json</li>
+</ul>
+</li>
+<li>Module Propertiest: db</li>
+<li>
+<p>Script: get script and paste it here.  </p>
+</li>
+<li>
+<p>Test</p>
+</li>
+</ol>
+<p>Jans Tarp can be easily used to test new ACR. Here is a howto video: https://www.loom.com/share/6bfe8c5556a94abea05467e3deead8a2?sid=b65c81d9-c1a1-475c-b89b-c105887d31ad</p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2022-07-22T19:56:11+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2022-07-22</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-08-07T11:30:19+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-08-07</span>
       
         <br>
         Created:
