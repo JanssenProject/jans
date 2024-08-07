@@ -24,7 +24,7 @@
       "mdsCertsFolder":"%(fido2ConfigFolder)s/mds/cert",
       "mdsTocsFolder":"%(fido2ConfigFolder)s/mds/toc",
       "serverMetadataFolder":"%(fido2ConfigFolder)s/server_metadata",
-      "requestedCredentialTypes":[
+      "enabledFidoAlgorithms":[
          "RS256",
          "ES256"
       ],
@@ -36,11 +36,11 @@
             ]
          }
       ],
-      "userAutoEnrollment":false,
+      "debugUserAutoEnrollment":false,
       "unfinishedRequestExpiration":180,
       "authenticationHistoryExpiration":1296000,
       "metadataUrlsProvider":"",
-      "skipDownloadMdsEnabled":false,
+      "disableMetadataService":false,
       "skipValidateMdsInAttestationEnabled":false,
       "assertionOptionsGenerateEndpointEnabled":true
    }

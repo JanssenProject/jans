@@ -354,10 +354,10 @@ public class AttestationService {
 	}
 
 	private Set<PublicKeyCredentialParameters> preparePublicKeyCredentialSelection() {
-		List<String> requestedCredentialTypes = appConfiguration.getFido2Configuration().getRequestedCredentialTypes();
+		List<String> enabledFidoAlgorithms = appConfiguration.getFido2Configuration().getEnabledFidoAlgorithms();
 
 		Set<PublicKeyCredentialParameters> credentialParametersSets = new HashSet<>();
-		if ((requestedCredentialTypes == null) || requestedCredentialTypes.isEmpty()) {
+		if ((enabledFidoAlgorithms == null) || enabledFidoAlgorithms.isEmpty()) {
 			// Add default requested credential types
 			// FIDO2 RS256
 			credentialParametersSets.add(PublicKeyCredentialParameters.createPublicKeyCredentialParameters(CoseRSAAlgorithm.RS256.getNumericValue()));
@@ -366,10 +366,10 @@ public class AttestationService {
 			// FIDO2 Ed25519
 			credentialParametersSets.add(PublicKeyCredentialParameters.createPublicKeyCredentialParameters(CoseEdDSAAlgorithm.Ed25519.getNumericValue()));
 		} else {
-			for (String requestedCredentialType : requestedCredentialTypes) {
+			for (String enabledFidoAlgorithm : enabledFidoAlgorithms) {
 				CoseRSAAlgorithm coseRSAAlgorithm = null;
 				try {
-					coseRSAAlgorithm = CoseRSAAlgorithm.valueOf(requestedCredentialType);
+					coseRSAAlgorithm = CoseRSAAlgorithm.valueOf(enabledFidoAlgorithm);
 				} catch (IllegalArgumentException ex) {
 				}
 
@@ -379,10 +379,10 @@ public class AttestationService {
 				}
 			}
 
-			for (String requestedCredentialType : requestedCredentialTypes) {
+			for (String enabledFidoAlgorithm : enabledFidoAlgorithms) {
 				CoseEC2Algorithm coseEC2Algorithm = null;
 				try {
-					coseEC2Algorithm = CoseEC2Algorithm.valueOf(requestedCredentialType);
+					coseEC2Algorithm = CoseEC2Algorithm.valueOf(enabledFidoAlgorithm);
 				} catch (IllegalArgumentException ex) {
 				}
 
@@ -392,10 +392,10 @@ public class AttestationService {
 				}
 			}
 
-			for (String requestedCredentialType : requestedCredentialTypes) {
+			for (String enabledFidoAlgorithm : enabledFidoAlgorithms) {
 				CoseEdDSAAlgorithm coseEdDSAAlgorithm = null;
 				try {
-					coseEdDSAAlgorithm = CoseEdDSAAlgorithm.valueOf(requestedCredentialType);
+					coseEdDSAAlgorithm = CoseEdDSAAlgorithm.valueOf(enabledFidoAlgorithm);
 				} catch (IllegalArgumentException ex) {
 				}
 

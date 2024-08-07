@@ -31,22 +31,26 @@ public class Fido2Configuration {
     @DocProperty(description = "Boolean value indicating if U2f attestation needs to be checked")
     private boolean checkU2fAttestations = false;
     @DocProperty(description = "Allow to enroll users on enrollment/authentication requests")
-    private boolean userAutoEnrollment = false;
+    private boolean debugUserAutoEnrollment = false;
 
     @DocProperty(description = "Expiration time in seconds for pending enrollment/authentication requests")
     private int unfinishedRequestExpiration = 120; // 120 seconds
     @DocProperty(description = "Expiration time in seconds for approved authentication requests")
     private int authenticationHistoryExpiration = 15 * 24 * 3600; // 15 days
+
+    @DocProperty(description = "Expiration time in seconds for approved authentication requests")
+    private int metadataRefreshInterval= 15 * 24 * 3600; // 15 days
     @DocProperty(description = "Authenticators metadata in json format")
     private String serverMetadataFolder;
     @DocProperty(description = "List of Requested Credential Types")
-    private List<String> requestedCredentialTypes = new ArrayList<String>();
+    private List<String> enabledFidoAlgorithms = new ArrayList<String>();
     @DocProperty(description = "Authenticators metadata in json format")
     private List<RequestedParty> requestedParties = new ArrayList<RequestedParty>();
+
     @DocProperty(description = "String value to provide source of URLs with external metadata")
     private String metadataUrlsProvider;
     @DocProperty(description = "Boolean value indicating whether the MDS download should be omitted")
-    private boolean skipDownloadMdsEnabled = false;
+    private boolean disableMetadataService = false;
     @DocProperty(description = "Boolean value indicating whether MDS validation should be omitted during attestation")
     private boolean skipValidateMdsInAttestationEnabled = false;
     @DocProperty(description = "Boolean value indicating whether the assertion custom endpoint (used especially in passkey) is enabled.")
@@ -92,14 +96,6 @@ public class Fido2Configuration {
 		this.checkU2fAttestations = checkU2fAttestations;
 	}
 
-	public boolean isUserAutoEnrollment() {
-        return userAutoEnrollment;
-    }
-
-    public void setUserAutoEnrollment(boolean userAutoEnrollment) {
-        this.userAutoEnrollment = userAutoEnrollment;
-    }
-
     public int getUnfinishedRequestExpiration() {
         return unfinishedRequestExpiration;
     }
@@ -123,15 +119,6 @@ public class Fido2Configuration {
     public void setServerMetadataFolder(String serverMetadataFolder) {
         this.serverMetadataFolder = serverMetadataFolder;
     }
-
-    public List<String> getRequestedCredentialTypes() {
-		return requestedCredentialTypes;
-	}
-
-	public void setRequestedCredentialTypes(List<String> requestedCredentialTypes) {
-		this.requestedCredentialTypes = requestedCredentialTypes;
-	}
-
 	public List<RequestedParty> getRequestedParties() {
 		return requestedParties;
 	}
@@ -148,14 +135,6 @@ public class Fido2Configuration {
         this.metadataUrlsProvider = metadataUrlsProvider;
     }
 
-    public boolean isSkipDownloadMdsEnabled() {
-        return skipDownloadMdsEnabled;
-    }
-
-    public void setSkipDownloadMdsEnabled(boolean skipDownloadMdsEnabled) {
-        this.skipDownloadMdsEnabled = skipDownloadMdsEnabled;
-    }
-
     public boolean isSkipValidateMdsInAttestationEnabled() {
         return skipValidateMdsInAttestationEnabled;
     }
@@ -170,5 +149,37 @@ public class Fido2Configuration {
 
     public void setAssertionOptionsGenerateEndpointEnabled(boolean assertionOptionsGenerateEndpointEnabled) {
         this.assertionOptionsGenerateEndpointEnabled = assertionOptionsGenerateEndpointEnabled;
+    }
+
+    public int getMetadataRefreshInterval() {
+        return metadataRefreshInterval;
+    }
+
+    public void setMetadataRefreshInterval(int metadataRefreshInterval) {
+        this.metadataRefreshInterval = metadataRefreshInterval;
+    }
+
+    public boolean isDebugUserAutoEnrollment() {
+        return debugUserAutoEnrollment;
+    }
+
+    public void setDebugUserAutoEnrollment(boolean debugUserAutoEnrollment) {
+        this.debugUserAutoEnrollment = debugUserAutoEnrollment;
+    }
+
+    public List<String> getEnabledFidoAlgorithms() {
+        return enabledFidoAlgorithms;
+    }
+
+    public void setEnabledFidoAlgorithms(List<String> enabledFidoAlgorithms) {
+        this.enabledFidoAlgorithms = enabledFidoAlgorithms;
+    }
+
+    public boolean isDisableMetadataService() {
+        return disableMetadataService;
+    }
+
+    public void setDisableMetadataService(boolean disableMetadataService) {
+        this.disableMetadataService = disableMetadataService;
     }
 }
