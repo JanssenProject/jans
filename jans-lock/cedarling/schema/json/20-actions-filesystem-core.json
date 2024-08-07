@@ -1,0 +1,118 @@
+{
+    "Jans": {
+        "actions": {
+            "Execute": {
+                "appliesTo": {
+                    "resourceTypes": [
+                        "Application"
+                    ],
+                    "principalTypes": [
+                        "User",
+                        "Role"
+                    ],
+                    "context": {
+                        "type": "Context"
+                    }
+                }
+            },
+            "Search": {
+                "appliesTo": {
+                    "resourceTypes": [
+                        "Application"
+                    ],
+                    "principalTypes": [
+                        "User",
+                        "Role"
+                    ],
+                    "context": {
+                        "type": "Context"
+                    }
+                }
+            },
+            "Compare": {
+                "appliesTo": {
+                    "resourceTypes": [
+                        "Application"
+                    ],
+                    "principalTypes": [
+                        "User",
+                        "Role"
+                    ],
+                    "context": {
+                        "type": "Context"
+                    }
+                }
+            },
+            "Monitor": {
+                "appliesTo": {
+                    "resourceTypes": [
+                        "Application"
+                    ],
+                    "principalTypes": [
+                        "User",
+                        "Role"
+                    ],
+                    "context": {
+                        "type": "Context"
+                    }
+                }
+            },
+            "Tag": {
+                "appliesTo": {
+                    "resourceTypes": [
+                        "Application"
+                    ],
+                    "principalTypes": [
+                        "User",
+                        "Role"
+                    ],
+                    "context": {
+                        "type": "Context"
+                    }
+                }
+            },
+            "Read": {
+                "appliesTo": {
+                    "resourceTypes": [
+                        "Application"
+                    ],
+                    "principalTypes": [
+                        "User",
+                        "Role"
+                    ],
+                    "context": {
+                        "type": "Context"
+                    }
+                }
+            },
+            "Share": {
+                "appliesTo": {
+                    "resourceTypes": [
+                        "Application"
+                    ],
+                    "principalTypes": [
+                        "User",
+                        "Role"
+                    ],
+                    "context": {
+                        "type": "Context"
+                    }
+                }
+            },
+            "Write": {
+                "appliesTo": {
+                    "resourceTypes": [
+                        "Application"
+                    ],
+                    "principalTypes": [
+                        "User",
+                        "Role"
+                    ],
+                    "context": {
+                        "type": "Context"
+                    }
+                }
+            }
+        }
+    }
+}
