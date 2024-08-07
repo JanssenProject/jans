@@ -185,11 +185,13 @@ public class AttestationService {
 		entity.setDomain(documentDomain);
 		entity.setStatus(Fido2RegistrationStatus.pending);
 		//if (params.hasNonNull(CommonVerifiers.SUPER_GLUU_APP_ID)) {
-		if (!Strings.isNullOrEmpty(attestationOptions.getSuperGluuAppId())) {
-			entity.setApplicationId(attestationOptions.getSuperGluuAppId());
-		} else {
+		/*
+		 * if (!Strings.isNullOrEmpty(attestationOptions.getSuperGluuAppId())) {
+		 * entity.setApplicationId(attestationOptions.getSuperGluuAppId()); } else {
+		 */
+		// TODO: this can be removed out in the future
 			entity.setApplicationId(documentDomain);
-		}
+		//}
 
 		// Store original requests
 		entity.setAttenstationRequest(CommonUtilService.toJsonNode(attestationOptions).toString());
