@@ -798,6 +798,53 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/jans_asset-read
+  /api/v1/jans-assets/service/{service-name}:
+    post:
+      tags:
+      - Jans Assets
+      summary: Load assets on server for a service
+      description: Load assets on server for a service
+      operationId: load-service-asset
+      requestBody:
+        description: String multipart form.
+        content:
+          multipart/form-data:
+            schema:
+              type: string
+      responses:
+        "200":
+          description: Asset file loaded
+          content:
+            application/json:
+              schema:
+                type: string
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: ""
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/jans_asset-write
   /api/v1/jans-assets/upload:
     put:
       tags:
@@ -4475,6 +4522,7 @@ paths:
                   - spontaneous_scope
                   - end_session
                   - post_authn
+                  - client_authn
                   - select_account
                   - create_user
                   - scim
@@ -8311,21 +8359,21 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        selected:
-          type: boolean
-        adminCanAccess:
-          type: boolean
-        adminCanView:
-          type: boolean
         adminCanEdit:
-          type: boolean
-        userCanAccess:
           type: boolean
         userCanView:
           type: boolean
+        userCanEdit:
+          type: boolean
+        adminCanView:
+          type: boolean
+        adminCanAccess:
+          type: boolean
+        userCanAccess:
+          type: boolean
         whitePagesCanView:
           type: boolean
-        userCanEdit:
+        selected:
           type: boolean
         baseDn:
           type: string
@@ -9162,8 +9210,6 @@ components:
           type: boolean
         lockMessageConfig:
           $ref: '#/components/schemas/LockMessageConfig'
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -9173,6 +9219,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -9939,10 +9987,10 @@ components:
           type: array
           items:
             type: object
-        displayValue:
-          type: string
         value:
           type: object
+        displayValue:
+          type: string
     LocalizedString:
       type: object
       properties:
@@ -9969,6 +10017,9 @@ components:
     ApiAppConfiguration:
       type: object
       properties:
+        serviceName:
+          type: string
+          description: Config API service name.
         configOauthEnabled:
           type: boolean
           description: OAuth authentication enable/disable flag. Default value `true`.
@@ -10251,6 +10302,7 @@ components:
           - spontaneous_scope
           - end_session
           - post_authn
+          - client_authn
           - select_account
           - create_user
           - scim
@@ -10729,10 +10781,10 @@ components:
         ttl:
           type: integer
           format: int32
-        opbrowserState:
-          type: string
         persisted:
           type: boolean
+        opbrowserState:
+          type: string
     SessionIdAccessMap:
       type: object
       properties:

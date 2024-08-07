@@ -198,6 +198,7 @@ nav:
       - admin/auth-server/endpoints/README.md
       - OpenID Configuration: admin/auth-server/endpoints/configuration.md
       - Client Registration: admin/auth-server/endpoints/client-registration.md
+      - Client Authentication: admin/auth-server/endpoints/client-authn.md
       - Authorization: admin/auth-server/endpoints/authorization.md
       - Authorization Challenge: admin/auth-server/endpoints/authorization-challenge.md
       - Token: admin/auth-server/endpoints/token.md
@@ -396,12 +397,7 @@ nav:
     - Jans Keycloak Link: admin/link/jans-keycloak-link.md
   - Lock Guide:
       - admin/lock/README.md
-      - Lock Installation: admin/lock/lock-installation.md
-      - Auth Server Configuration: admin/lock/lock-auth-server-config.md
-      - Lock Client Configuration: admin/lock/lock-client-config.md
-      - Implement Lock PDP Plugin: admin/lock/lock-pdp-plugin.md
-      - Policy Store Integration: admin/lock/lock-opa.md
-      - Lock Master: admin/lock/lock-master.md
+      - Lock Master: admin/lock/lock-server.md
       - Authorization Using Cedarling: admin/lock/cedarling.md
   - Janssen Recipes:
     - admin/recipes/README.md

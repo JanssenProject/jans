@@ -24,7 +24,7 @@ RUN mkdir -p /opt/keycloak/logs \
 # ==============
 
 ENV CN_VERSION=1.1.4-SNAPSHOT
-ENV CN_BUILD_DATE='2024-06-26 09:02'
+ENV CN_BUILD_DATE='2024-08-06 19:16'
 
 RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-spi/${CN_VERSION}/kc-jans-spi-${CN_VERSION}.jar -P /opt/keycloak/providers \
     && wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-spi/${CN_VERSION}/kc-jans-spi-${CN_VERSION}-deps.zip -O /tmp/kc-jans-spi.zip \
@@ -35,7 +35,7 @@ RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-spi/${CN_VERSION}/kc-j
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=0538d19e269bb26ddbd81c7971251d6375d389c3
+ENV JANS_SOURCE_VERSION=e157cd4c8ff92c04e400fea29c51ae54f842a678
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
