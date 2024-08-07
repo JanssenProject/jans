@@ -138,7 +138,7 @@ public class Document extends Entry implements Serializable {
     @Override
     public String toString() {
         return "Document [inum=" + inum + ", displayName=" + displayName + ", description=" + description
-                + ", document=" + document + ", creationDate=" + creationDate + ", jansService=" + jansService
+                + ", creationDate=" + creationDate + ", jansService=" + jansService
                 + ", jansLevel=" + jansLevel + ", jansRevision=" + jansRevision + ", jansEnabled=" + jansEnabled
                 + ", jansAlias=" + jansAlias + "]";
     }
