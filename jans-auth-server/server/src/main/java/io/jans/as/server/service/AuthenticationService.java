@@ -445,7 +445,7 @@ public class AuthenticationService {
                         baseDn = baseDnProperty.toString();
                     }
 
-                    User user = getUserByAttribute(ldapAuthEntryManager, baseDn, primaryKey, keyValue);
+                    SimpleUser user = getUserByAttribute(ldapAuthEntryManager, baseDn, primaryKey, keyValue);
                     if (user != null) {
                         String userDn = user.getDn();
                         log.debug("Attempting to authenticate userDN: {}", userDn);
@@ -570,7 +570,7 @@ public class AuthenticationService {
         return authenticated;
     }
 
-    private User getUserByAttribute(PersistenceEntryManager ldapAuthEntryManager, String baseDn, String attributeName,
+    private SimpleUser getUserByAttribute(PersistenceEntryManager ldapAuthEntryManager, String baseDn, String attributeName,
                                     String attributeValue) {
         log.debug("Getting user information from LDAP: attributeName = '{}', attributeValue = '{}'", attributeName,
                 attributeValue);
@@ -588,13 +588,13 @@ public class AuthenticationService {
         user.setCustomAttributes(customAttributes);
 
         log.debug("Searching user by attributes: '{}', baseDn: '{}'", customAttributes, baseDn);
-        List<User> entries = ldapAuthEntryManager.findEntries(user, 1);
+        List<SimpleUser> entries = ldapAuthEntryManager.findEntries(user, 1);
         log.debug("Found '{}' entries", entries.size());
 
         if (entries.size() > 0) {
-            User foundUser = entries.get(0);
+        	SimpleUser foundUser = entries.get(0);
 
-            return ldapAuthEntryManager.find(User.class, foundUser.getDn());
+            return ldapAuthEntryManager.find(SimpleUser.class, foundUser.getDn());
         } else {
             return null;
         }
