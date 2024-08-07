@@ -10,12 +10,12 @@
     }
   ],
   "mdsTocsFolder": "/etc/gluu/conf/fido2/mds/toc",
-  "requestedCredentialTypes": [
+  "enabledFidoAlgorithms": [
     "RS256",
     "ES256"
   ],
   "authenticatorCertsFolder": "/etc/gluu/conf/fido2/authenticator_cert",
-  "userAutoEnrollment": false,
+  "debugUserAutoEnrollment": false,
   "unfinishedRequestExpiration": 180,
   "mdsCertsFolder": "/etc/gluu/conf/fido2/mds/cert"
 }

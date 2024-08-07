@@ -91,11 +91,11 @@ It will return the result as below:
     "mdsCertsFolder": "/etc/jans/conf/fido2/mds/cert",
     "mdsTocsFolder": "/etc/jans/conf/fido2/mds/toc",
     "checkU2fAttestations": false,
-    "userAutoEnrollment": false,
+    "debugUserAutoEnrollment": false,
     "unfinishedRequestExpiration": 180,
     "authenticationHistoryExpiration": 1296000,
     "serverMetadataFolder": "/etc/jans/conf/fido2/server_metadata",
-    "requestedCredentialTypes": [
+    "enabledFidoAlgorithms": [
       "RS256",
       "ES256"
     ],
@@ -107,7 +107,7 @@ It will return the result as below:
         ]
       }
     ],
-    "skipDownloadMdsEnabled": false,
+    "disableMetadataService": false,
     "skipValidateMdsInAttestationEnabled": false,
     "assertionOptionsGenerateEndpointEnabled": true
   }

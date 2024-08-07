@@ -30,14 +30,14 @@ tags:
 | metricReporterKeepDataDays | The days to keep report data | [Details](#metricreporterkeepdatadays) |
 | oldU2fMigrationEnabled | Boolean value to enable disable old oxAuth U2F enrollments migration | [Details](#oldu2fmigrationenabled) |
 | personCustomObjectClassList | Custom object class list for dynamic person enrolment | [Details](#personcustomobjectclasslist) |
-| requestedCredentialTypes | List of Requested Credential Types | [Details](#requestedcredentialtypes) |
+| enabledFidoAlgorithms | List of Requested Credential Types | [Details](#enabledFidoAlgorithms) |
 | requestedParties | Authenticators metadata in json format | [Details](#requestedparties) |
 | serverMetadataFolder | Authenticators metadata in json format | [Details](#servermetadatafolder) |
 | sessionIdPersistInCache | Boolean value specifying whether to persist session_id in cache | [Details](#sessionidpersistincache) |
 | superGluuEnabled | Boolean value to enable disable Super Gluu extension | [Details](#supergluuenabled) |
 | unfinishedRequestExpiration | Expiration time in seconds for pending enrollment/authentication requests | [Details](#unfinishedrequestexpiration) |
 | useLocalCache | Boolean value to indicate if Local Cache is to be used | [Details](#uselocalcache) |
-| userAutoEnrollment | Allow to enroll users on enrollment/authentication requests | [Details](#userautoenrollment) |
+| debugUserAutoEnrollment | Allow to enroll users on enrollment/authentication requests | [Details](#userautoenrollment) |
 
 
 ### authenticationHistoryExpiration
@@ -220,7 +220,7 @@ tags:
 - Default value: None
 
 
-### requestedCredentialTypes
+### enabledFidoAlgorithms
 
 - Description: List of Requested Credential Types
 
@@ -282,7 +282,7 @@ tags:
 - Default value: None
 
 
-### userAutoEnrollment
+### debugUserAutoEnrollment
 
 - Description: Allow to enroll users on enrollment/authentication requests
 

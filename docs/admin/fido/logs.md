@@ -41,7 +41,7 @@ Response:
       "mdsCertsFolder":"/etc/jans/conf/fido2/mds/cert",
       "mdsTocsFolder":"/etc/jans/conf/fido2/mds/toc",
       "serverMetadataFolder":"/etc/jans/conf/fido2/server_metadata",
-      "requestedCredentialTypes":[
+      "enabledFidoAlgorithms":[
          "RS256",
          "ES256"
       ],
@@ -53,7 +53,7 @@ Response:
             ]
          }
       ],
-      "userAutoEnrollment":false,
+      "debugUserAutoEnrollment":false,
       "unfinishedRequestExpiration":180,
       "authenticationHistoryExpiration":1296000
    }

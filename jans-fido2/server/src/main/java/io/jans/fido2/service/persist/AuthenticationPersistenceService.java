@@ -82,7 +82,7 @@ public class AuthenticationPersistenceService {
     	if (!oneStep) {
 	        User user = userService.getUser(userName, "inum");
 	        if (user == null) {
-	            if (appConfiguration.getFido2Configuration().isUserAutoEnrollment()) {
+	            if (appConfiguration.getFido2Configuration().isDebugUserAutoEnrollment()) {
 	                user = userService.addDefaultUser(userName);
 	            } else {
 	                throw errorResponseFactory.badRequestException(AttestationErrorResponseType.USER_AUTO_ENROLLMENT_IS_DISABLED, "Auto user enrollment was disabled. User not exists!");

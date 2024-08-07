@@ -97,7 +97,7 @@ public class TocService {
 
     public void refresh() {
 		this.tocEntries = Collections.synchronizedMap(new HashMap<String, JsonNode>());
-		if (appConfiguration.getFido2Configuration().isSkipDownloadMdsEnabled()) {
+		if (appConfiguration.getFido2Configuration().isDisableMetadataService()) {
 			log.debug("SkipDownloadMds is enabled");
 		}  else {
 			tocEntries.putAll(parseTOCs());
@@ -165,13 +165,13 @@ public class TocService {
     private JWSVerifier resolveVerifier(JWSAlgorithm algorithm, String mdsTocRootCertsFolder, List<String> certificateChain) {
         List<X509Certificate> x509CertificateChain = certificateService.getCertificates(certificateChain);
         List<X509Certificate> x509TrustedCertificates = certificateService.getCertificates(mdsTocRootCertsFolder);
-		List<String> requestedCredentialTypes = appConfiguration.getFido2Configuration().getRequestedCredentialTypes();
+		List<String> enabledFidoAlgorithms = appConfiguration.getFido2Configuration().getEnabledFidoAlgorithms();
 
         X509Certificate verifiedCert = certificateVerifier.verifyAttestationCertificates(x509CertificateChain, x509TrustedCertificates);
         //possible set of algos are : ES256, RS256, PS256, ED256, ED25519
         // no support for ED256 in JOSE library
 
-		if(!(requestedCredentialTypes.contains(algorithm.getName()) || requestedCredentialTypes.contains(Curve.Ed25519.getName()))) {
+		if(!(enabledFidoAlgorithms.contains(algorithm.getName()) || enabledFidoAlgorithms.contains(Curve.Ed25519.getName()))) {
 			throw new Fido2RuntimeException("Unable to create a verifier for algorithm " + algorithm + " as it is not supported. Add this algorithm in the FIDO2 configuration to support it.");
 		}
         
