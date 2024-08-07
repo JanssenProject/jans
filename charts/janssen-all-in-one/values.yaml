@@ -254,6 +254,8 @@ auth-server:
     u2fConfigEnabled: true
     # -- Enable endpoint /.well-known/lock-master-configuration
     lockConfigEnabled: false
+    # -- Enable endpoint /jans-lock
+    lockEnabled: false
     # -- Lock config ingress resource labels. key app is taken
     lockConfigLabels: {}
     # -- Lock config ingress resource additional annotations.
@@ -294,8 +296,7 @@ auth-server:
     authServerLabels: { }
     # -- Auth server ingress resource additional annotations.
     authServerAdditionalAnnotations: { }
-    # -- Enable endpoint /jans-lock
-    lockEnabled: false
+
   # -- Enable jans-lock as service running inside auth-server
   lockEnabled: false
 # -- Responsible for regenerating auth-keys per x hours
