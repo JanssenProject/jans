@@ -30,8 +30,6 @@ Kubernetes: `>=v1.22.0-0`
 | ingress.additionalAnnotations | object | `{}` | Additional annotations that will be added across all ingress definitions in the format of {cert-manager.io/issuer: "letsencrypt-prod"}. key app is taken Enable client certificate authentication nginx.ingress.kubernetes.io/auth-tls-verify-client: "optional" Create the secret containing the trusted ca certificates nginx.ingress.kubernetes.io/auth-tls-secret: "janssen/tls-certificate" Specify the verification depth in the client certificates chain nginx.ingress.kubernetes.io/auth-tls-verify-depth: "1" Specify if certificates are passed to upstream server nginx.ingress.kubernetes.io/auth-tls-pass-certificate-to-upstream: "true" |
 | ingress.additionalLabels | object | `{}` | Additional labels that will be added across all ingress definitions in the format of {mylabel: "myapp"} |
 | ingress.legacy | bool | `false` | Enable use of legacy API version networking.k8s.io/v1beta1 to support kubernetes 1.18. This flag should be removed next version release along with nginx-ingress/templates/ingress-legacy.yaml. |
-<<<<<<< HEAD
-=======
 | ingress.lockAdditionalAnnotations | object | `{}` | Lock ingress resource additional annotations. |
 | ingress.lockConfigAdditionalAnnotations | object | `{}` | Lock config ingress resource additional annotations. |
 | ingress.lockConfigLabels | object | `{}` | Lock config ingress resource labels. key app is taken |
@@ -52,7 +50,6 @@ Kubernetes: `>=v1.22.0-0`
 | ingress.webdiscoveryLabels | object | `{}` | webdiscovery ingress resource labels. key app is taken |
 | ingress.webfingerAdditionalAnnotations | object | `{}` | webfinger ingress resource additional annotations. |
 | ingress.webfingerLabels | object | `{}` | webfinger ingress resource labels. key app is taken |
->>>>>>> main
 | nameOverride | string | `""` |  |
 
 ----------------------------------------------
