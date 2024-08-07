@@ -24,7 +24,7 @@ RUN mkdir -p /opt/keycloak/logs \
 # ==============
 
 ENV CN_VERSION=1.1.4-SNAPSHOT
-ENV CN_BUILD_DATE='2024-08-06 09:16'
+ENV CN_BUILD_DATE='2024-08-06 19:16'
 
 RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-spi/${CN_VERSION}/kc-jans-spi-${CN_VERSION}.jar -P /opt/keycloak/providers \
     && wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-spi/${CN_VERSION}/kc-jans-spi-${CN_VERSION}-deps.zip -O /tmp/kc-jans-spi.zip \

@@ -99,7 +99,7 @@ def main():
         )
         # need to resolve whether we're using default or user-defined couchbase cert
         sync_couchbase_truststore(manager)
-        # extract_common_libs("couchbase")
+        extract_common_libs("couchbase")
 
     if "sql" in persistence_groups:
         db_dialect = os.environ.get("CN_SQL_DB_DIALECT", "mysql")
@@ -116,7 +116,7 @@ def main():
             "/app/templates/jans-spanner.properties",
             "/etc/jans/conf/jans-spanner.properties",
         )
-        # extract_common_libs("spanner")
+        extract_common_libs("spanner")
 
     shutil.copyfile(
         "/app/templates/jans-saml/quarkus.properties",
