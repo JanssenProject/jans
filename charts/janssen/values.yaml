@@ -799,6 +799,10 @@ global:
       lockConfigLabels: { }
       # -- Lock config ingress resource additional annotations.
       lockConfigAdditionalAnnotations: { }
+      # -- Lock ingress resource labels. key app is taken
+      lockLabels: { }
+      # -- Lock ingress resource additional annotations.
+      lockAdditionalAnnotations: { }
       # -- openid-configuration ingress resource labels. key app is taken
       openidConfigLabels: { }
       # -- openid-configuration ingress resource additional annotations.
@@ -833,6 +837,7 @@ global:
       authServerAdditionalAnnotations: { }
       # -- Enable endpoint /jans-lock
       lockEnabled: false
+
     # -- Enable jans-lock as service running inside auth-server
     lockEnabled: false
 

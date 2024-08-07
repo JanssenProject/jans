@@ -913,15 +913,15 @@ metadata:
 {{- if .Values.ingress.additionalLabels }}
 {{ toYaml .Values.ingress.additionalLabels | indent 4 }}
 {{- end }}
-{{- if .Values.ingress.lockLabels }}
-{{ toYaml .Values.ingress.lockLabels | indent 4 }}
+{{- if index .Values.global "auth-server" "ingress" "lockLabels" }}
+{{ toYaml (index .Values.global "auth-server" "ingress" "lockLabels") | indent 4 }}
 {{- end }}
   annotations:
     nginx.ingress.kubernetes.io/ssl-redirect: "false"
     nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
     nginx.ingress.kubernetes.io/rewrite-target: /jans-auth/
-{{- if .Values.ingress.lockAdditionalAnnotations }}
-{{ toYaml .Values.ingress.lockAdditionalAnnotations | indent 4 }}
+{{- if index .Values.global "auth-server" "ingress" "lockAdditionalAnnotations" }}
+{{ toYaml (index .Values.global "auth-server" "ingress" "lockAdditionalAnnotations") | indent 4 }}
 {{- end }}
 {{- if .Values.ingress.additionalAnnotations }}
 {{ toYaml .Values.ingress.additionalAnnotations | indent 4 }}
