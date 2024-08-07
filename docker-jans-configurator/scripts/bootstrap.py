@@ -38,9 +38,6 @@ DB_DIR = os.environ.get("CN_CONFIGURATOR_DB_DIR", f"{CONFIGURATOR_DIR}/db")
 CERTS_DIR = os.environ.get("CN_CONFIGURATOR_CERTS_DIR", f"{CONFIGURATOR_DIR}/certs")
 JAVALIBS_DIR = f"{CONFIGURATOR_DIR}/javalibs"
 
-DEFAULT_CONFIGURATION_FILE = os.environ.get("CN_CONFIGURATOR_CONFIGURATION_FILE", f"{DB_DIR}/configuration.json")
-DEFAULT_DUMP_FILE = os.environ.get("CN_CONFIGURATOR_DUMP_FILE", f"{DB_DIR}/configuration.out.json")
-
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("configurator")
 
@@ -176,8 +173,8 @@ class CtxGenerator:
         return self.ctx_manager.get_secret(key, default)
 
     def transform_base_ctx(self):
-        if self.secret_params["encoded_salt"]:
-            self.set_secret("encoded_salt", self.secret_params["encoded_salt"])
+        if self.secret_params.get("encoded_salt"):
+            self.set_secret("encoded_salt", self.secret_params.get("encoded_salt"))
         else:
             self.set_secret("encoded_salt", partial(get_random_chars, 24))
 
@@ -198,11 +195,11 @@ class CtxGenerator:
 
         self.set_secret(
             "encoded_ox_ldap_pw",
-            partial(encode_text, self.secret_params["ldap_password"], encoded_salt),
+            partial(encode_text, self.secret_params.get("ldap_password", ""), encoded_salt),
         )
 
     def transform_redis_ctx(self):
-        self.set_secret("redis_password", self.secret_params["redis_password"])
+        self.set_secret("redis_password", self.secret_params.get("redis_password", ""))
 
     def transform_auth_ctx(self):
         encoded_salt = self.get_secret("encoded_salt")
@@ -342,11 +339,11 @@ class CtxGenerator:
         # TODO: move this to persistence-loader?
         self.set_config("couchbaseTrustStoreFn", "/etc/certs/couchbase.pkcs12")
         self.set_secret("couchbase_shib_user_password", get_random_chars)
-        self.set_secret("couchbase_password", self.secret_params["couchbase_password"])
-        self.set_secret("couchbase_superuser_password", self.secret_params["couchbase_superuser_password"])
+        self.set_secret("couchbase_password", self.secret_params.get("couchbase_password", ""))
+        self.set_secret("couchbase_superuser_password", self.secret_params.get("couchbase_superuser_password", ""))
 
     def transform_sql_ctx(self):
-        self.set_secret("sql_password", self.secret_params["sql_password"])
+        self.set_secret("sql_password", self.secret_params.get("sql_password", ""))
 
     def transform_misc_ctx(self):
         # pre-populate the rest of configmaps
@@ -480,6 +477,30 @@ def parse_cert(certfile, dns):
     return False
 
 
+def get_configuration_file():
+    path = os.environ.get("CN_CONFIGURATOR_CONFIGURATION_FILE", "/etc/jans/conf/configuration.json")
+
+    # @TODO: remove the backward-compat after updating the chart
+    if not os.path.isfile(path):
+        for alt_path in [f"{DB_DIR}/configuration.json", f"{DB_DIR}/generate.json"]:
+            if os.path.isfile(alt_path):
+                path = alt_path
+                break
+    return path
+
+
+def get_dump_file():
+    path = os.environ.get("CN_CONFIGURATOR_DUMP_FILE", "/etc/jans/conf/configuration.dump.json")
+
+    # @TODO: remove the backward-compat after updating the chart
+    if not os.path.isfile(path):
+        for alt_path in [f"{DB_DIR}/configuration.out.json"]:
+            if os.path.isfile(alt_path):
+                path = alt_path
+                break
+    return path
+
+
 # ============
 # CLI commands
 # ============
@@ -495,14 +516,14 @@ def cli():
     "--configuration-file",
     type=click.Path(exists=False),
     help="Absolute path to file contains configmaps and secrets",
-    default=DEFAULT_CONFIGURATION_FILE,
+    default=get_configuration_file(),
     show_default=True,
 )
 @click.option(
     "--dump-file",
     type=click.Path(exists=False),
     help="Absolute path to file contains dumped configmaps and secrets",
-    default=DEFAULT_DUMP_FILE,
+    default=get_dump_file(),
     show_default=True,
 )
 def load(configuration_file, dump_file):
@@ -539,7 +560,7 @@ def load(configuration_file, dump_file):
     "--dump-file",
     type=click.Path(exists=False),
     help="Absolute path to file contains dumped configmaps and secrets",
-    default=DEFAULT_DUMP_FILE,
+    default=get_dump_file(),
     show_default=True,
 )
 def dump(dump_file):

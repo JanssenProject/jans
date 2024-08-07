@@ -82,17 +82,16 @@ def gmanager(gconsul_config, gvault_secret):
         return ctx.get(key) or default
 
     def set_secret(key, value):
-        return
+        return True
 
     gmanager = get_manager()
 
     gconsul_config.get = get_config
-    gmanager.config.adapter = gconsul_config
+    gmanager.config.remote_adapter = gconsul_config
 
     gvault_secret.get = get_secret
     gvault_secret.set = set_secret
-    gmanager.secret.adapter = gvault_secret
-
+    gmanager.secret.remote_adapter = gvault_secret
     yield gmanager
 
 
