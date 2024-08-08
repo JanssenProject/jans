@@ -19,6 +19,7 @@ import jakarta.inject.Inject;
 import jakarta.inject.Named;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -156,9 +157,9 @@ public class AuditService {
     public String getDnForTelemetryEntry(String inum) {
         String orgDn = organizationService.getDnForOrganization();
         if (StringHelper.isEmpty(inum)) {
-            return String.format("ou=lock-telemetry,%s", orgDn);
+            return String.format("ou=telemetry,ou=lock,%s", orgDn);
         }
-        return String.format("inum=%s,ou=lock-telemetry,%s", inum, orgDn);
+        return String.format("inum=%s,ou=telemetry,ou=lock,%s", inum, orgDn);
     }
 
     public HealthEntry addHealthEntry(HealthEntry healthEntry) {
@@ -190,9 +191,9 @@ public class AuditService {
     public String getDnForHealthEntry(String inum) {
         String orgDn = organizationService.getDnForOrganization();
         if (StringHelper.isEmpty(inum)) {
-            return String.format("ou=lock-health,%s", orgDn);
+            return String.format("ou=health,ou=lock,%s", orgDn);
         }
-        return String.format("inum=%s,ou=lock-health,%s", inum, orgDn);
+        return String.format("inum=%s,ou=health,ou=lock,%s", inum, orgDn);
     }
 
     public LogEntry addLogData(LogEntry logEntry) {
@@ -225,9 +226,9 @@ public class AuditService {
     public String getDnForLogEntry(String inum) {
         String orgDn = organizationService.getDnForOrganization();
         if (StringHelper.isEmpty(inum)) {
-            return String.format("ou=lock-log,%s", orgDn);
+            return String.format("ou=log,ou=lock,%s", orgDn);
         }
-        return String.format("inum=%s,ou=lock-log,%s", inum, orgDn);
+        return String.format("inum=%s,ou=log,ou=lock,%s", inum, orgDn);
     }
     
     public String generateInumForEntry(String entryName, Class classObj) {
@@ -245,5 +246,7 @@ public class AuditService {
         } while (persistenceEntryManager.contains(newDn, classObj));
         return newInum;
     }
+    
+   
 
 }

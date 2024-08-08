@@ -4,6 +4,8 @@ import io.jans.as.client.TokenRequest;
 import io.jans.as.client.TokenResponse;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ScopeType;
+import io.jans.as.model.uma.wrapper.Token;
+import io.jans.as.model.util.Util;
 import io.jans.lock.model.config.AppConfiguration;
 import io.jans.model.net.HttpServiceResponse;
 import io.jans.service.EncryptionService;
@@ -21,6 +23,7 @@ import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -34,6 +37,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
+
+import org.apache.commons.lang3.time.DateUtils;
 
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -56,7 +61,24 @@ public class LockUtil {
     @Inject
     EncryptionService encryptionService;
 
-    public String getToken(String endpoint) {
+    public Token getAccessToken(String endpoint, boolean forGroupScopes) {
+
+        log.debug("Request for token  for endpoint:{}, forGroupScopes:{}", endpoint, forGroupScopes);
+        String tokenUrl = this.appConfiguration.getTokenUrl();
+        String clientId = this.appConfiguration.getClientId();
+
+        String clientSecret = this.getDecryptedPassword(appConfiguration.getClientPassword());
+        String scopes =  null;
+        if(forGroupScopes) {
+            scopes = this.getAllGroupScope(endpoint);
+        }else {
+            scopes = this.getScopes(endpoint);
+        }
+        log.debug("Scope  for endpoint:{}, forGroupScopes:{}, scopes:{}", endpoint, forGroupScopes, scopes);
+        return this.getToken(tokenUrl, clientId, clientSecret, scopes);
+    }
+    
+    public String getAccessToken(String endpoint) {
 
         log.debug("Request for token  for endpoint:{}", endpoint);
         String tokenUrl = this.appConfiguration.getTokenUrl();
@@ -65,10 +87,11 @@ public class LockUtil {
         String clientSecret = this.getDecryptedPassword(appConfiguration.getClientPassword());
         String scopes = this.getScopes(endpoint);
 
-        return this.getToken(tokenUrl, clientId, clientSecret, scopes);
+        return this.getAccessToken(tokenUrl, clientId, clientSecret, scopes);
     }
 
-    public String getToken(String tokenUrl, String clientId, String clientSecret, String scopes) {
+
+    public String getAccessToken(String tokenUrl, String clientId, String clientSecret, String scopes) {
         log.debug("Request for token tokenUrl:{}, clientId:{},scopes:{}", tokenUrl, clientId, scopes);
 
         String accessToken = null;
@@ -78,6 +101,21 @@ public class LockUtil {
         }
 
         return accessToken;
+    }
+
+    public Token getToken(String tokenUrl, String clientId, String clientSecret, String scopes) {
+        log.debug("Request for token tokenUrl:{}, clientId:{},scopes:{}", tokenUrl, clientId, scopes);
+        Token token = null;
+        TokenResponse tokenResponse = this.requestAccessToken(tokenUrl, clientId, clientSecret, scopes);
+        if (tokenResponse != null) {
+            final String accessToken = tokenResponse.getAccessToken();
+            final Integer expiresIn = tokenResponse.getExpiresIn();
+            if (Util.allNotBlank(accessToken)) {
+                return new Token(null, null, accessToken, ScopeType.OPENID.getValue(), expiresIn);
+            }
+        }
+
+        return token;
     }
 
     public TokenResponse requestAccessToken(final String tokenUrl, final String clientId, final String clientSecret,
@@ -115,7 +153,7 @@ public class LockUtil {
     public HttpServiceResponse postData(String endpoint, String postData, ContentType contentType) {
         log.debug("postData - endpoint:{}, postData:{}", endpoint, postData);
         String endpointPath = this.getEndpointPath(endpoint);
-        String token = this.getToken(endpointPath);
+        String token = this.getAccessToken(endpointPath);
 
         return postData(this.getEndpointUrl(endpointPath), null, token, null, contentType, postData);
     }
@@ -301,6 +339,41 @@ public class LockUtil {
         return sb.toString();
     }
 
+    private String getAuditEndpointAccessToken() {
+        return this.getAllGroupScope("audit");
+    }
+
+
+
+    private String getAllGroupScope(String groupName) {
+        log.debug(" Get all scope for groupName:{}", groupName);
+        StringBuilder sb = new StringBuilder();
+        String scopes = null;
+
+        Map<String, List<String>> endpointGroups = this.appConfiguration.getEndpointGroups();
+        log.debug(" Get all auditScope endpointGroups:{}", endpointGroups);
+
+        if (endpointGroups == null || endpointGroups.isEmpty()) {
+            return scopes;
+        }
+
+        List<String> endpoints = endpointGroups.get(groupName);
+        log.debug("groupName:{}, endpoints:{}", groupName, endpoints);
+
+        if (endpoints == null || endpoints.isEmpty()) {
+            return scopes;
+        }
+
+        for (String endpoint : endpoints) {
+            scopes = this.getScopes(endpoint);
+            sb.append(scopes);
+        }
+        log.debug("groupName:{}, sb:{}", groupName, sb);
+
+        return sb.toString();
+
+    }
+
     private static Builder getClientBuilder(String url) {
         return ClientBuilder.newClient().target(url).request();
     }
@@ -308,7 +381,7 @@ public class LockUtil {
     public Response post(String endpoint, String postData, ContentType contentType) {
         log.debug("postData - endpoint:{}, postData:{}", endpoint, postData);
         String endpointPath = this.getEndpointPath(endpoint);
-        String token = this.getToken(endpointPath);
+        String token = this.getAccessToken(endpointPath);
 
         return post(this.getEndpointUrl(endpointPath), null, token, null, contentType, postData);
     }
@@ -341,6 +414,19 @@ public class LockUtil {
         log.debug(" response:{}", response);
 
         return response;
+    }
+
+    public boolean isTokenValid(Date expiryDate) {
+        Date currDate = new Date();
+        return expiryDate.after(currDate);
+    }
+
+    public Date computeTokenExpiryTime(Integer expiresIn) {
+        log.debug("expiresIn:{}", expiresIn);
+        Date currDate = new Date();
+        Date expiryDate = DateUtils.addSeconds(currDate, expiresIn);
+        log.debug("currDate:{}, expiresIn:{}, expiryDate:{}", currDate, expiresIn, expiryDate);
+        return expiryDate;
     }
 
 }

@@ -100,5 +100,10 @@ public class AuditRestWebServiceImpl implements AuditRestWebService {
 
         return builder.build();
     }
+    
+    
+    private String getAuditAccessToken() {
+        this.lock
+    }
 
 }
