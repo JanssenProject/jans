@@ -33,7 +33,7 @@
       <logback.version>1.4.14</logback.version>
       <jboss-logging.version>3.5.1.Final</jboss-logging.version>
       <fasterxml-jackson.version>2.16.0</fasterxml-jackson.version>
-      <commons-lang.version>3.13.0</commons-lang.version>
+      <commons-lang.version>3.16.0</commons-lang.version>
       <commons-collection.version>4.1</commons-collection.version>
       <swagger.version>2.2.7</swagger.version>
       <maven-clean-plugin.version>3.2.0</maven-clean-plugin.version>
