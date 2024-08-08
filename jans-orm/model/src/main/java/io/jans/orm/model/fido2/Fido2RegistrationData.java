@@ -35,6 +35,10 @@ public class Fido2RegistrationData extends Fido2Data {
     private int signatureAlgorithm;
 
     private String applicationId;
+    //Credential backup eligibility and current backup state is conveyed by the backupStateFlag and backupEligibilityFlag flags in the authenticator data. See https://w3c.github.io/webauthn/#sctn-authenticator-data
+    private boolean backupStateFlag;
+
+    private boolean backupEligibilityFlag;
 
     public String getUsername() {
         return username;
@@ -148,6 +152,21 @@ public class Fido2RegistrationData extends Fido2Data {
 		this.applicationId = applicationId;
 	}
 
+    public boolean getBackupStateFlag() {
+        return this.backupStateFlag;
+    }
+
+    public void setBackupStateFlag(boolean backupStateFlag) {
+        this.backupStateFlag = backupStateFlag;
+    }
+
+    public boolean getBackupEligibilityFlag() {
+        return this.backupEligibilityFlag;
+    }
+
+    public void setBackupEligibilityFlag(boolean backupEligibilityFlag) {
+        this.backupEligibilityFlag = backupEligibilityFlag;
+    }
 	@Override
 	public String toString() {
 		return "Fido2RegistrationData [username=" + username + ", domain=" + domain + ", userId=" + userId + ", challenge=" + challenge

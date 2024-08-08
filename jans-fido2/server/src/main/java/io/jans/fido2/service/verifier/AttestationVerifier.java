@@ -20,6 +20,8 @@ package io.jans.fido2.service.verifier;
 
 import java.io.IOException;
 
+import com.google.common.base.Strings;
+import io.jans.fido2.model.attestation.Response;
 import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.orm.model.fido2.Fido2RegistrationData;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -62,13 +64,13 @@ public class AttestationVerifier {
     @Inject
     private ErrorResponseFactory errorResponseFactory;
 
-    public CredAndCounterData verifyAuthenticatorAttestationResponse(JsonNode authenticatorResponse, Fido2RegistrationData credential) {
-        if (!(authenticatorResponse.hasNonNull("attestationObject") && authenticatorResponse.hasNonNull("clientDataJSON"))) {
+    public CredAndCounterData verifyAuthenticatorAttestationResponse(Response response, Fido2RegistrationData credential) {
+        if (Strings.isNullOrEmpty(response.getAttestationObject()) || Strings.isNullOrEmpty(response.getClientDataJSON())) {
             throw errorResponseFactory.invalidRequest("Authenticator data is invalid");
         }
 
-        String base64AuthenticatorData = authenticatorResponse.get("attestationObject").asText();
-        String clientDataJson = authenticatorResponse.get("clientDataJSON").asText();
+        String base64AuthenticatorData = response.getAttestationObject();
+        String clientDataJson = response.getClientDataJSON();
         byte[] authenticatorDataBuffer = base64Service.urlDecode(base64AuthenticatorData);
 
         CredAndCounterData credIdAndCounters = new CredAndCounterData();
@@ -100,6 +102,11 @@ public class AttestationVerifier {
             byte[] clientDataHash = DigestUtils.getSha256Digest().digest(base64Service.urlDecode(clientDataJson));
             AttestationFormatProcessor attestationProcessor = attestationProcessorFactory.getCommandProcessor(fmt);
             attestationProcessor.process(attStmt, authData, credential, clientDataHash, credIdAndCounters);
+
+            //get flags buffer
+            byte[] flagsBuffer = authData.getFlags();
+            credIdAndCounters.setBackupEligibilityFlag(authenticatorDataParser.verifyBackupEligibility(flagsBuffer));
+            credIdAndCounters.setBackupStateFlag(authenticatorDataParser.verifyBackupState(flagsBuffer));
 
             return credIdAndCounters;
         } catch (IOException ex) {
