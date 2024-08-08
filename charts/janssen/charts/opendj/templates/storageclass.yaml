@@ -17,6 +17,9 @@ metadata:
 {{- if .Values.additionalAnnotations }}
 {{ toYaml .Values.additionalAnnotations | indent 4 }}
 {{- end }}
+{{- if .Values.global.opendj.customAnnotations.storageClass }}
+{{ toYaml .Values.global.opendj.customAnnotations.storageClass | indent 4 }}
+{{- end }}
     # Annotation below is to keep the storage class during upgrade. Otherwise, due to the flag at line 1 which is needed, this resource will be deleted.
     helm.sh/resource-policy: keep
     storageclass.beta.kubernetes.io/is-default-class: "false"

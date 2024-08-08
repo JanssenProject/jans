@@ -75,7 +75,7 @@ tags:
 
     - FQDN/domain is registered:
 
-        Add the following yaml snippet to your `override.yaml` file`:
+        Add the following yaml snippet to your `override.yaml` file:
 
         ```yaml
         global:
