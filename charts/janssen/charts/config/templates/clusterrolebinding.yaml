@@ -8,9 +8,14 @@ metadata:
 {{- if .Values.additionalLabels }}
 {{ toYaml .Values.additionalLabels | indent 4 }}
 {{- end }}
-{{- if .Values.additionalAnnotations }}
+{{- if or (.Values.additionalAnnotations) (.Values.global.config.customAnnotations.clusterRoleBinding) }}
   annotations:
+{{- if .Values.additionalAnnotations }}
 {{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.global.config.customAnnotations.clusterRoleBinding }}
+{{ toYaml .Values.global.config.customAnnotations.clusterRoleBinding | indent 4 }}
+{{- end }}
 {{- end }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -41,5 +46,5 @@ roleRef:
   name: edit
 subjects:
 - kind: ServiceAccount
-  name: default
+  name: {{ .Values.global.serviceAccountName }}
   namespace: {{ .Release.Namespace }}
