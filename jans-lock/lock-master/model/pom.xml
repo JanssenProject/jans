@@ -8,7 +8,7 @@
 	<name>Jans lock model</name>
 
 	<parent>
-		<artifactId>jans-lock-master-parent</artifactId>
+		<artifactId>jans-lock-server-parent</artifactId>
 		<groupId>io.jans</groupId>
 		<version>1.1.4-SNAPSHOT</version>
 	</parent>
