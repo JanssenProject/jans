@@ -157,7 +157,7 @@ class JansLockInstaller(JettyInstaller):
             proxy_port = Config.jans_auth_port
             proxy_context = 'jans-auth'
 
-        jans_lock_well_known_proxy_pass = f'    ProxyPass   /.well-known/lock-master-configuration http://localhost:{proxy_port}/{proxy_context}/v1/configuration'
+        jans_lock_well_known_proxy_pass = f'    ProxyPass   /.well-known/lock-server-configuration http://localhost:{proxy_port}/{proxy_context}/v1/configuration'
         jans_lock_well_known_proxy_pass += f'\n\n    <Location /jans-lock>\n     Header edit Set-Cookie ^((?!opbs|session_state).*)$ $1;HttpOnly\n     ProxyPass http://localhost:{proxy_port}/{proxy_context} retry=5 connectiontimeout=60 timeout=60\n     Order deny,allow\n     Allow from all\n    </Location>\n'
 
 
