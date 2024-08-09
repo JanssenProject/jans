@@ -35,7 +35,7 @@ class Plugin():
         """
         self.app = app
         self.pid = 'admin'
-        self.name = 'Co[n]fig-API'
+        self.name = 'A[d]min-UI'
         self.server_side_plugin = True
         self.page_entered = False
         self.role_type = 'api-viewer'
