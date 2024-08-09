@@ -237,23 +237,14 @@ public class AssetService {
         }
         String[] targetArray = new String[] { serviceName };
 
-        Filter serviceNameFilter = Filter.createSubstringFilter("jansService", null, targetArray, null);
+        Filter serviceNameFilter = Filter.createEqualityFilter("jansService", "serviceName");
         List<Document> assets = persistenceEntryManager.findEntries(getDnForAsset(null), Document.class,
                 serviceNameFilter);
-
+        log.info(" serviceNameFilter:{}, assets:{}", serviceNameFilter, assets);
         if (assets == null || !assets.isEmpty()) {
-            sb.append("1 No asset found for service{" + serviceName + "}");
-            log.info("1 No asset found for service:{}", serviceName);
-
-            serviceNameFilter = Filter.createApproximateMatchFilter("jansService", serviceName);
-            assets = persistenceEntryManager.findEntries(getDnForAsset(null), Document.class, serviceNameFilter);
-
-            if (assets == null || !assets.isEmpty()) {
-                sb.append("2 No asset found for service{" + serviceName + "}");
-                log.info("2 No asset found for service:{}", serviceName);
-                return sb.toString();
-            }
-
+            sb.append(" No asset found for service{" + serviceName + "}");
+            log.info(" No asset found for service:{}", serviceName);
+            return sb.toString();
         }
 
         // copy assets on server
