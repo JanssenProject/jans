@@ -61,6 +61,7 @@ def _transform_api_dynamic_config(conf):
         ("assetMgtConfiguration", {}),
         ("maxCount", 200),
         ("acrValidationEnabled", True),
+        ("serviceName", "jans-config-api"),
     ]:
         if missing_key not in conf:
             conf[missing_key] = value
