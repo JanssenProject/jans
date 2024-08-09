@@ -31,7 +31,6 @@ def _transform_fido2_dynamic_config(conf):
         ("oldU2fMigrationEnabled", True),
         ("metadataUrlsProvider", ""),
         ("errorReasonEnabled", False),
-        ("skipDownloadMdsEnabled", False),
         ("skipValidateMdsInAttestationEnabled", False),
         ("sessionIdPersistInCache", False),
         ("assertionOptionsGenerateEndpointEnabled", True),
@@ -41,6 +40,20 @@ def _transform_fido2_dynamic_config(conf):
             continue
 
         conf[k] = v
+        should_update = True
+
+    # some of the attributes are renamed
+    renamed_attrs = [
+        # mapping of new name, old name, default value
+        ("enabledFidoAlgorithms", "requestedCredentialTypes", ["RS256", "ES256"]),
+        ("debugUserAutoEnrollment", "userAutoEnrollment", False),
+        ("disableMetadataService", "skipDownloadMdsEnabled", False),
+    ]
+    for new_name, old_name, default_value in renamed_attrs:
+        if new_name in conf:
+            continue
+
+        conf[new_name] = conf.pop(old_name, default_value) or default_value
         should_update = True
 
     # return modified config (if any) and update flag
