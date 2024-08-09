@@ -10,9 +10,14 @@ metadata:
 {{- if .Values.additionalLabels }}
 {{ toYaml .Values.additionalLabels | indent 4 }}
 {{- end }}
-{{- if .Values.additionalAnnotations }}
+{{- if or (.Values.additionalAnnotations) (.Values.customAnnotations.deployment) }}
   annotations:
+{{- if .Values.additionalAnnotations }}
 {{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.customAnnotations.deployment }}
+{{ toYaml .Values.customAnnotations.deployment | indent 4 }}
+{{- end }}
 {{- end }}
 spec:
   replicas: {{ .Values.replicas }}
@@ -42,6 +47,7 @@ spec:
       topologySpreadConstraints:
         {{- include "janssen-all-in-one.topology-spread-constraints" . | indent 8 }}
       {{- end }}
+      serviceAccountName: {{ .Values.serviceAccountName }}
       containers:
       - name: {{ include "janssen-all-in-one.name" . }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}

@@ -309,6 +309,7 @@ nav:
       - Authorization Challenge: admin/developer/scripts/authorization-challenge.md
       - CIBA End User Notification: admin/developer/scripts/ciba.md
       - Client Registration: admin/developer/scripts/client-registration.md
+      - Client Authentication: admin/developer/scripts/client-authn.md
       - Config API: admin/developer/scripts/config-api.md
       - Consent Gathering: admin/developer/scripts/consent-gathering.md
       - Dynamic Scope: admin/developer/scripts/dynamic-scope.md
@@ -397,7 +398,7 @@ nav:
     - Jans Keycloak Link: admin/link/jans-keycloak-link.md
   - Lock Guide:
       - admin/lock/README.md
-      - Lock Master: admin/lock/lock-master.md
+      - Lock Master: admin/lock/lock-server.md
       - Authorization Using Cedarling: admin/lock/cedarling.md
   - Janssen Recipes:
     - admin/recipes/README.md
