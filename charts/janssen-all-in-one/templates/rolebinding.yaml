@@ -9,13 +9,18 @@ metadata:
 {{- if .Values.additionalLabels }}
 {{ toYaml .Values.additionalLabels | indent 4 }}
 {{- end }}
-{{- if .Values.additionalAnnotations }}
+{{- if or (.Values.additionalAnnotations) (.Values.customAnnotations.roleBinding) }}
   annotations:
+{{- if .Values.additionalAnnotations }}
 {{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.customAnnotations.roleBinding }}
+{{ toYaml .Values.customAnnotations.roleBinding | indent 4 }}
+{{- end }}
 {{- end }}
 subjects:
 - kind: User
-  name: system:serviceaccount:{{ .Release.Namespace }}:default # Name is case sensitive
+  name: system:serviceaccount:{{ .Release.Namespace }}:{{ .Values.serviceAccountName }} # Name is case sensitive
   apiGroup: rbac.authorization.k8s.io
 roleRef:
   kind: Role # this must be Role or ClusterRole
