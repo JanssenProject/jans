@@ -29,16 +29,8 @@ paths:
             schema:
               $ref: '#/components/schemas/HealthEntry'
       responses:
-        "201":
-          description: Created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HealthEntry'
-              examples:
-                Response example:
-                  description: Response example
-                  value: ""
+        "200":
+          description: Ok
         "400":
           description: Bad Request
           content:
@@ -75,16 +67,8 @@ paths:
             schema:
               $ref: '#/components/schemas/LogEntry'
       responses:
-        "201":
-          description: Created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/LogEntry'
-              examples:
-                Response example:
-                  description: Response example
-                  value: ""
+        "200":
+          description: Ok
         "400":
           description: Bad Request
           content:
@@ -121,16 +105,8 @@ paths:
             schema:
               $ref: '#/components/schemas/TelemetryEntry'
       responses:
-        "201":
-          description: Created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/TelemetryEntry'
-              examples:
-                Response example:
-                  description: Response example
-                  value: ""
+        "200":
+          description: Ok
         "400":
           description: Bad Request
           content:
@@ -239,6 +215,15 @@ paths:
         - https://jans.io/oauth/lock-config.write
 components:
   schemas:
+    ApiError:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        description:
+          type: string
     HealthEntry:
       type: object
       properties:
@@ -256,15 +241,6 @@ components:
         tokenDataStatus:
           type: string
         inum:
-          type: string
-    ApiError:
-      type: object
-      properties:
-        code:
-          type: string
-        message:
-          type: string
-        description:
           type: string
     LogEntry:
       type: object
@@ -355,6 +331,15 @@ components:
         tokenUrl:
           type: string
           description: Jans URL of the OpenID Connect Provider's OAuth 2.0 Token Endpoint
+        endpointGroups:
+          type: object
+          additionalProperties:
+            type: array
+            description: Endpoint groups
+            items:
+              type: string
+              description: Endpoint groups
+          description: Endpoint groups
         endpointDetails:
           type: object
           additionalProperties:

@@ -15,7 +15,6 @@ import io.jans.configapi.plugin.lock.util.Constants;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -28,7 +27,6 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 import org.slf4j.Logger;
-
 
 @Path(Constants.AUDIT)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -44,8 +42,7 @@ public class AuditResource extends BaseResource {
     @Operation(summary = "Save health data", description = "Save health data", operationId = "save-health-data", tags = {
             "Lock - Audit" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.LOCK_HEALTH_WRITE_ACCESS }))
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = HealthEntry.class), examples = @ExampleObject(name = "Response example", value = "example/lock/audit/health.json"))),
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Ok"),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "BadRequestException"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
@@ -55,16 +52,15 @@ public class AuditResource extends BaseResource {
     @Path(Constants.HEALTH)
     public Response postHealthData(@Valid HealthEntry healthEntry) {
         logger.debug("Save Health Data - healthEntry:{}", healthEntry);
-        healthEntry = auditService.addHealthEntry(healthEntry);
-        return Response.status(Response.Status.CREATED).entity(healthEntry).build();
+        auditService.addHealthEntry(healthEntry);
+        return Response.status(Response.Status.OK).build();
 
     }
 
     @Operation(summary = "Save log data", description = "Save log data", operationId = "save-log-data", tags = {
             "Lock - Audit" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.LOCK_LOG_WRITE_ACCESS }))
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = LogEntry.class), examples = @ExampleObject(name = "Response example", value = "example/lock/audit/log.json"))),
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Ok"),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "BadRequestException"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
@@ -74,16 +70,15 @@ public class AuditResource extends BaseResource {
     @Path(Constants.LOG)
     public Response postLogData(@Valid LogEntry logEntry) {
         logger.debug("Save - logEntry:{}", logEntry);
-        logEntry = auditService.addLogData(logEntry);
-        return Response.status(Response.Status.CREATED).entity(logEntry).build();
+        auditService.addLogData(logEntry);
+        return Response.status(Response.Status.OK).build();
 
     }
 
     @Operation(summary = "Save telemetry data", description = "Save telemetry data", operationId = "save-telemetry-data", tags = {
             "Lock - Audit" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.LOCK_TELEMETRY_WRITE_ACCESS }))
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TelemetryEntry.class), examples = @ExampleObject(name = "Response example", value = "example/lock/audit/telemetry.json"))),
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Ok"),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "BadRequestException"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
@@ -93,8 +88,8 @@ public class AuditResource extends BaseResource {
     @Path(Constants.TELEMETRY)
     public Response postTelemetryData(@Valid TelemetryEntry telemetryEntry) {
         logger.debug("Save telemetryEntry():{}", telemetryEntry);
-        telemetryEntry = auditService.addTelemetryData(telemetryEntry);
-        return Response.status(Response.Status.CREATED).entity(telemetryEntry).build();
+        auditService.addTelemetryData(telemetryEntry);
+        return Response.status(Response.Status.OK).build();
 
     }
 

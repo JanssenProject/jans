@@ -23,7 +23,6 @@ import io.jans.orm.model.SortOrder;
 import io.jans.orm.search.filter.Filter;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.service.document.store.provider.DBDocumentStoreProvider;
-import io.jans.service.document.store.provider.LocalDocumentStoreProvider;
 import io.jans.service.document.store.service.DBDocumentService;
 import io.jans.service.document.store.service.Document;
 import io.jans.util.exception.InvalidAttributeException;
@@ -69,9 +68,6 @@ public class AssetService {
 
     @Inject
     DBDocumentService dbDocumentService;
-
-    @Inject
-    LocalDocumentStoreProvider localDocumentStoreProvider;
 
     @Inject
     private ApiAppConfiguration appConfiguration;
@@ -239,14 +235,13 @@ public class AssetService {
         if (StringUtils.isBlank(serviceName)) {
             throw new InvalidAttributeException("Service name is null!!!");
         }
-        String[] targetArray = new String[] { serviceName };
-
-        Filter serviceNameFilter = Filter.createSubstringFilter("jansService", null, targetArray, null);
+        Filter serviceNameFilter = Filter.createEqualityFilter("jansService", serviceName);
         List<Document> assets = persistenceEntryManager.findEntries(getDnForAsset(null), Document.class,
                 serviceNameFilter);
-
+        log.info(" serviceNameFilter:{}, assets:{}", serviceNameFilter, assets);
         if (assets == null || !assets.isEmpty()) {
-            sb.append("No asset found for service{" + serviceName + "}");
+            sb.append(" No asset found for service{" + serviceName + "}");
+            log.info(" No asset found for service:{}", serviceName);
             return sb.toString();
         }
 
@@ -609,7 +604,7 @@ public class AssetService {
     private void validateServiceDirectory(String assetFileName, String assetDir, List<String> serviceModules) {
         log.info("validate service directory details - assetFileName,:{}, assetDir:{}, serviceModules:{}", assetDir,
                 assetFileName, serviceModules);
-        List<String> invalidServiceDirList = new ArrayList<>();
+        StringBuilder invalidServiceDirList = new StringBuilder();
         StringBuilder missingMapping = new StringBuilder();
         StringBuilder errorMsg = new StringBuilder();
         for (String serviceName : serviceModules) {
@@ -622,19 +617,21 @@ public class AssetService {
             // check if the asset directory exist
             boolean serviceDirectoryExist = isServiceDirectoryExist(serviceDirectory);
             if (!serviceDirectoryExist) {
-                serviceModules.add(serviceName);
+                invalidServiceDirList.append(serviceName);
             }
 
         }
-        log.debug("missingMapping:{}, invalidServiceDirList:{}", invalidServiceDirList, missingMapping);
-        if (!invalidServiceDirList.isEmpty()) {
+
+        log.debug("missingMapping:{}, invalidServiceDirList:{}", missingMapping, invalidServiceDirList);
+        if (StringUtils.isNotBlank(missingMapping.toString())) {
+            errorMsg.append("Cannot save asset as service directory mapping for [" + missingMapping + "] is null!");
+        }
+
+        if (StringUtils.isNotBlank(invalidServiceDirList.toString())) {
             errorMsg.append("Service directory to save asset [" + invalidServiceDirList + "] does not exist!");
         }
 
-        if (StringUtils.isNotBlank(missingMapping.toString())) {
-            errorMsg.append("Cannot save asset as service directory [" + missingMapping + "] is null!");
-        }
-
+        log.info("errorMsg:{}", errorMsg);
         if (StringUtils.isNotBlank(errorMsg.toString())) {
             throw new InvalidConfigurationException(errorMsg.toString());
         }
@@ -644,10 +641,6 @@ public class AssetService {
         File dir = new File(serviceDirectory);
         boolean serviceDirectoryExist = dir.exists();
         log.info("Check using File API serviceDirectory:{} - exist:{}", serviceDirectory, serviceDirectoryExist);
-
-        serviceDirectoryExist = localDocumentStoreProvider.hasDocument(serviceDirectory);
-        log.info("Check if serviceDirectory:{} - exist:{} using localDocumentStoreProvider ", serviceDirectory,
-                serviceDirectoryExist);
         return serviceDirectoryExist;
     }
 

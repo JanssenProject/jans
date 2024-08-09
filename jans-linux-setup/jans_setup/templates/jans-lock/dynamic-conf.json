@@ -7,6 +7,13 @@
   "clientId": "%(lock_client_id)s",
   "clientPassword": "%(lock_client_encoded_pw)s",
   "tokenUrl": "%(tokenEndpoint)s",
+  "endpointGroups": {
+    "audit": [
+      "telemetry",
+      "health",
+      "log"
+    ]
+  },
   "endpointDetails": {
     "jans-config-api/lock/audit/telemetry": [
       "https://jans.io/oauth/lock/telemetry.readonly",
