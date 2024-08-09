@@ -67,4 +67,4 @@ helm install <release-name> janssen/janssen -f values.yaml --version=<replace-ja
 
 There are several tools that helps in automatic backups and restore, like [Kasten K10](https://www.kasten.io/kubernetes/use-cases/backup-restore).
 
-You can follow online [guides](https://medium.com/geekculture/kubernetes-backup-restore-is-now-effortless-e788fccd8cde) to deploy it and using it to configure automatic backups.
+You can follow online [guides](https://medium.com/geekculture/kubernetes-backup-restore-is-now-effortless-e788fccd8cde) to deploy it and use it to configure automatic backups.

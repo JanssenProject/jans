@@ -9,7 +9,7 @@ tags:
 ## Overview
 
 Container image to manage X.509 certificates and crypto keys in Janssen Server.
-The container designed to run as one-time command (or Job in kubernetes world).
+The container is designed to run as a one-time command (or Job in Kubernetes world).
 
 ## Versions
 
