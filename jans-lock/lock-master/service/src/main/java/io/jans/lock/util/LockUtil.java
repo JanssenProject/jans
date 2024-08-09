@@ -61,23 +61,23 @@ public class LockUtil {
     @Inject
     EncryptionService encryptionService;
 
-    public Token getAccessToken(String endpoint, boolean forGroupScopes) {
+    public Token getAccessToken(String endpoint, boolean allGroupScopes) {
 
-        log.debug("Request for token  for endpoint:{}, forGroupScopes:{}", endpoint, forGroupScopes);
+        log.debug("Request for token  for endpoint:{}, allGroupScopes:{}", endpoint, allGroupScopes);
         String tokenUrl = this.appConfiguration.getTokenUrl();
         String clientId = this.appConfiguration.getClientId();
 
         String clientSecret = this.getDecryptedPassword(appConfiguration.getClientPassword());
-        String scopes =  null;
-        if(forGroupScopes) {
+        String scopes = null;
+        if (allGroupScopes) {
             scopes = this.getAllGroupScope(endpoint);
-        }else {
+        } else {
             scopes = this.getScopes(endpoint);
         }
-        log.debug("Scope  for endpoint:{}, forGroupScopes:{}, scopes:{}", endpoint, forGroupScopes, scopes);
+        log.debug("Scope  for endpoint:{}, allGroupScopes:{}, scopes:{}", endpoint, allGroupScopes, scopes);
         return this.getToken(tokenUrl, clientId, clientSecret, scopes);
     }
-    
+
     public String getAccessToken(String endpoint) {
 
         log.debug("Request for token  for endpoint:{}", endpoint);
@@ -89,7 +89,6 @@ public class LockUtil {
 
         return this.getAccessToken(tokenUrl, clientId, clientSecret, scopes);
     }
-
 
     public String getAccessToken(String tokenUrl, String clientId, String clientSecret, String scopes) {
         log.debug("Request for token tokenUrl:{}, clientId:{},scopes:{}", tokenUrl, clientId, scopes);
@@ -150,10 +149,12 @@ public class LockUtil {
         return null;
     }
 
-    public HttpServiceResponse postData(String endpoint, String postData, ContentType contentType) {
-        log.debug("postData - endpoint:{}, postData:{}", endpoint, postData);
+    public HttpServiceResponse postData(String endpoint, String postData, ContentType contentType, String token) {
+        log.debug("postData - endpoint:{}, postData:{}, contentType:{}", endpoint, postData, contentType);
         String endpointPath = this.getEndpointPath(endpoint);
-        String token = this.getAccessToken(endpointPath);
+        if (StringUtils.isBlank(token)) {
+            token = this.getAccessToken(endpointPath);
+        }
 
         return postData(this.getEndpointUrl(endpointPath), null, token, null, contentType, postData);
     }
@@ -339,12 +340,6 @@ public class LockUtil {
         return sb.toString();
     }
 
-    private String getAuditEndpointAccessToken() {
-        return this.getAllGroupScope("audit");
-    }
-
-
-
     private String getAllGroupScope(String groupName) {
         log.debug(" Get all scope for groupName:{}", groupName);
         StringBuilder sb = new StringBuilder();
@@ -378,11 +373,13 @@ public class LockUtil {
         return ClientBuilder.newClient().target(url).request();
     }
 
-    public Response post(String endpoint, String postData, ContentType contentType) {
+    public Response post(String endpoint, String postData, ContentType contentType, String token) {
         log.debug("postData - endpoint:{}, postData:{}", endpoint, postData);
         String endpointPath = this.getEndpointPath(endpoint);
-        String token = this.getAccessToken(endpointPath);
 
+        if (StringUtils.isBlank(token)) {
+            token = this.getAccessToken(endpointPath);
+        }
         return post(this.getEndpointUrl(endpointPath), null, token, null, contentType, postData);
     }
 

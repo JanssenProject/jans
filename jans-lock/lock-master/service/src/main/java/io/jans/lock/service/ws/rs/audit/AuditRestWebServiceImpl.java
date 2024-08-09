@@ -16,7 +16,7 @@
 
 package io.jans.lock.service.ws.rs.audit;
 
-import io.jans.lock.util.LockUtil;
+import io.jans.lock.util.AuditService;
 import io.jans.lock.util.ServerUtil;
 
 import jakarta.enterprise.context.Dependent;
@@ -45,7 +45,7 @@ public class AuditRestWebServiceImpl implements AuditRestWebService {
     private Logger log;
 
     @Inject
-    LockUtil lockUtil;
+    AuditService auditService;
 
     @Override
     public Response processHealthRequest(HttpServletRequest request, HttpServletResponse response,
@@ -76,8 +76,8 @@ public class AuditRestWebServiceImpl implements AuditRestWebService {
         builder.cacheControl(ServerUtil.cacheControlWithNoStoreTransformAndPrivate());
         builder.header(ServerUtil.PRAGMA, ServerUtil.NO_CACHE);
 
-        JSONObject json = this.lockUtil.getJSONObject(request);
-        Response response = this.lockUtil.post(requestType, json.toString(), ContentType.APPLICATION_JSON);
+        JSONObject json = this.auditService.getJSONObject(request);
+        Response response = this.auditService.post(requestType, json.toString(), ContentType.APPLICATION_JSON);
         log.debug("response:{}", response);
 
         if (response != null) {
@@ -88,9 +88,9 @@ public class AuditRestWebServiceImpl implements AuditRestWebService {
             log.debug(" entity:{}", entity);
             builder.entity(entity);
 
-            if (response.getStatusInfo().equals(Status.CREATED)) {
+            if (response.getStatusInfo().equals(Status.OK)) {
 
-                log.debug(" Status.CREATED:{}, entity:{}", Status.CREATED, entity);
+                log.debug(" Status.CREATED:{}, entity:{}", Status.OK, entity);
             } else {
                 log.error("Error while saving audit data - response.getStatusInfo():{}, entity:{}",
                         response.getStatusInfo(), entity);
@@ -99,11 +99,6 @@ public class AuditRestWebServiceImpl implements AuditRestWebService {
         }
 
         return builder.build();
-    }
-    
-    
-    private String getAuditAccessToken() {
-        this.lock
     }
 
 }
