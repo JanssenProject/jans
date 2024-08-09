@@ -9,10 +9,10 @@ Make sure you have [the Rust Toolchain](https://rustup.rs/), [`wasm-bindgen`](ht
 ```bash
 # clang installation differs by OS and distribution
 
-$ rustup default stable # Install Rust stable
-$ rustup target add wasm32-unknown-unknown # Install wasm target
+rustup default stable # Install Rust stable
+rustup target add wasm32-unknown-unknown # Install wasm target
 
-$ cargo install -f wasm-bindgen-cli # Install wasm-bindgen CLI
+cargo install -f wasm-bindgen-cli # Install wasm-bindgen CLI
 ```
 
 ### Building ⚒️
@@ -21,12 +21,12 @@ To build the `cedarling`, run the following commands, the appropriate Javascript
 
 
 ```bash
-$ cargo build --release --target wasm32-unknown-unknown
+cargo build --release --target wasm32-unknown-unknown
 
 # For use in Node, Deno or the Edge
-$ wasm-bindgen --out-dir out ./target/wasm32-unknown-unknown/release/cedarling.wasm
+wasm-bindgen --out-dir out ./target/wasm32-unknown-unknown/release/cedarling.wasm
 
-$ ls out
+ls out
 	out
 	├── cedarling_bg.js
 	├── cedarling_bg.wasm
@@ -42,7 +42,7 @@ To run the `cedarling`, you'll need to include the `cedarling.js`, `cedarling_bg
 The Web requires the WASM binary to be loaded from the network, and thus requires some manual initialization. Luckily, it's not a complicated process. To build:
 
 ```bash
-$ wasm-bindgen --out-dir out ./target/wasm32-unknown-unknown/release/cedarling.wasm --target web
+wasm-bindgen --out-dir out ./target/wasm32-unknown-unknown/release/cedarling.wasm --target web
 ```
 
 To instantiate:
@@ -58,17 +58,17 @@ await setup();
 
 ### Testing 🧪
 
-To test, you'll need the `wasm-pack` test utility. To install `wasm-pack` refer [here](https://rustwasm.github.io/wasm-pack/installer/), or run:
+To test, you'll need Node.js installed. First, build the cedarling by running:
 
-```bash
-$ curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
-```
+```sh
+# `--features direct_startup_strategy` enables sending in the policy store directly from JS, useful for testing
+cargo build --release --target wasm32-unknown-unknown --features direct_startup_strategy
 
-The tests simulate a JS environment, therefore there's no need to write any actual JS tests. To run tests, run:
+# Note --target nodejs
+wasm-bindgen --target nodejs --out-dir out ./target/wasm32-unknown-unknown/release/cedarling.wasm
 
-```bash
-$ wasm-pack test --node
-$ wasm-pack test --chrome # --firefox or --safari
+# Execute tests, "local" "remote" or "lock-master" for alternate startup strategies
+node tests/main.mjs local
 ```
 
 ### Usage 🔧
@@ -76,12 +76,19 @@ $ wasm-pack test --chrome # --firefox or --safari
 From within your JS project, you'll need to import the exported `cedarling` functions from the `cedarling.js` file.
 
 ```js
-// Cedarling Initialization Flow
-// INFO: The cedarling must be initialized once and no more than once
+// cedarling initialization flow
+// INFO: The cedarling must be initialized only once, any further attempts will throw errors
 
 import { init } from "cedarling.js"
 
 const config = {
+	// [REQUIRED] name that cedarling will use for DCR
+	applicationName: "test#docs",
+	// [DEFAULT = false] Controls if cedarling will discard id_token without an access token with the corresponding client_id.
+	requireAudValidation: false,
+	// [DEFAULT = true] If any token claims are checked, set to false with caution
+	jwtValidation: true,
+	// Configure how the cedarling acquires it's Policy Store during startup
 	policyStore: {
 		// can be "local", "remote" or "lock-master",
 		// each strategy requires different parameters, see below
@@ -89,9 +96,9 @@ const config = {
 	},
 	// if policy-store.json is compressed using deflate-zlib
 	decompressPolicyStore: false,
-	// [OPTIONAL] How often, in milliseconds, will the cedarling refresh it's TrustStore. The cedarling won't refresh it's trust store if not omitted
+	// [OPTIONAL] How often, in milliseconds, will the cedarling refresh it's TrustStore. The trust store won't refresh if omitted
 	trustStoreRefreshRate: 2000,
-	// Set of jwt algorithms that the cedarling will allow, empty if omitted
+	// Set of jwt algorithms that the cedarling will allow
 	supportedAlgorithms: ["HS256", "HS384", "RS256"]
 };
 
@@ -127,7 +134,7 @@ const lockMaster = {
 init(config);
 ```
 
----
+### `authz` Usage
 
 ```js
 // Cedarling Authorization Flow
@@ -142,4 +149,4 @@ init(..);
 
 ### Lock Master SSE Interface 🚧
 
-> A specification for Policy Updates is in incubation
+> Status List updates are in incubation
