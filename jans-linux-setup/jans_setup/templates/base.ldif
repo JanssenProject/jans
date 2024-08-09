@@ -163,6 +163,11 @@ objectClass: top
 objectClass: organizationalUnit
 ou: document
 
+dn: ou=lock,o=jans
+objectClass: top
+objectClass: organizationalunit
+ou: lock
+
 dn: ou=health,ou=lock,o=jans
 objectClass: top
 objectClass: organizationalUnit

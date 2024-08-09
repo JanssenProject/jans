@@ -414,8 +414,10 @@ public class LockUtil {
     }
 
     public boolean isTokenValid(Date expiryDate) {
-        Date currDate = new Date();
-        return expiryDate.after(currDate);
+        if(expiryDate==null) {
+            return false;
+        }
+        return expiryDate.after(new Date());
     }
 
     public Date computeTokenExpiryTime(Integer expiresIn) {
