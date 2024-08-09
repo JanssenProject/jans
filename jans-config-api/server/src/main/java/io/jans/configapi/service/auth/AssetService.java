@@ -235,9 +235,7 @@ public class AssetService {
         if (StringUtils.isBlank(serviceName)) {
             throw new InvalidAttributeException("Service name is null!!!");
         }
-        String[] targetArray = new String[] { serviceName };
-
-        Filter serviceNameFilter = Filter.createEqualityFilter("jansService", "serviceName");
+        Filter serviceNameFilter = Filter.createEqualityFilter("jansService", serviceName);
         List<Document> assets = persistenceEntryManager.findEntries(getDnForAsset(null), Document.class,
                 serviceNameFilter);
         log.info(" serviceNameFilter:{}, assets:{}", serviceNameFilter, assets);

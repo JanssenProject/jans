@@ -34,7 +34,7 @@ import org.slf4j.Logger;
 
 /**
  * Provides interface for audit REST web services
- *
+ *  
  * @author Yuriy Movchan Date: 06/06/2024
  */
 @Dependent
