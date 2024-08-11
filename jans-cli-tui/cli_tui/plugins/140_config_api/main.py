@@ -26,7 +26,7 @@ from wui_components.jans_label_widget import JansLabelWidget
 
 from utils.multi_lang import _
 from utils.utils import DialogUtils, common_data
-from utils.static import cli_style
+from utils.static import cli_style, common_strings
 
 class Plugin(DialogUtils):
     """This is a general class for plugins 
@@ -407,8 +407,6 @@ class Plugin(DialogUtils):
         """Method to display the edit plugin dialog
         """
 
-        open('/tmp/kwargs.txt','w').write(str(kwargs))
-
         if kwargs:
             data = kwargs.get('data', {})
         else:
@@ -616,19 +614,21 @@ class Plugin(DialogUtils):
 
         patches = [{'op': 'replace', 'path': path, 'value': val} for path, val in changes ]
 
-        open("/tmp/patches.json","w").write(json.dumps(patches, indent=2))
+        #open("/tmp/patches.json","w").write(json.dumps(patches, indent=2))
 
         async def coroutine():
             cli_args = {'operation_id': 'patch-config-api-properties', 'data': patches}
             self.app.start_progressing(_("Saving Config API Configuration changes..."))
             response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+            self.app.stop_progressing()
             if response.status_code == 200:
-                self.app.stop_progressing(_("Config API Configuration changes were saved."))
+                self.app.show_message(_(common_strings.info), _("Config API Configuration changes were saved."), tobefocused=self.main_container)
                 self.data = response.json()
             else:
-                self.app.show_message(_('Error Saving Config API Configuration changes'), response.text + '\n' + response.reason)
+                self.app.show_message(_('Error Saving Config API Configuration changes'), response.text + '\n' + response.reason, tobefocused=self.main_container)
 
         if patches:
             asyncio.ensure_future(coroutine())
         else:
-            self.app.stop_progressing(_("No changes were done to save Config API Configuration."))
+            self.app.show_message(_(common_strings.info), _("No changes were done to save Config API Configuration."), tobefocused=self.main_container)
+
