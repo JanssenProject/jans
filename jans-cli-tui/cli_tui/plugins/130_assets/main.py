@@ -94,10 +94,13 @@ class Plugin(DialogUtils):
     def edit_asset(self, **kwargs: Any) -> None:
         """Method to display the edit asset dialog
         """
+
         if kwargs:
             data = kwargs.get('data', {})
         else:
             data = {}
+
+        new_asset = True if data else False
 
         title = _("Edit Asset") if data else _("Add Asset")
 
@@ -120,7 +123,7 @@ class Plugin(DialogUtils):
             data.pop('document', None)
             form_data = {'assetFile': self.asset_file_path, 'document': data}
 
-            operation_id = 'put-asset' if data else 'post-new-asset'
+            operation_id = 'put-asset' if new_asset else 'post-new-asset'
             cli_args = {'operation_id': operation_id, 'data': form_data}
 
             async def coroutine():
