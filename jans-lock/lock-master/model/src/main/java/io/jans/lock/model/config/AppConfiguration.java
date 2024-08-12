@@ -63,6 +63,10 @@ public class AppConfiguration implements Configuration {
     @Schema(description = "Jans URL of the OpenID Connect Provider's OAuth 2.0 Token Endpoint")
     private String tokenUrl;
 
+    @DocProperty(description = "Endpoint groups")
+    @Schema(description = "Endpoint groups")
+    private Map<String, List<String>> endpointGroups;
+
     @DocProperty(description = "Jans URL of config-api audit endpoints and corresponding scope details")
     @Schema(description = "Jans URL of config-api audit endpoints and corresponding scope details")
     private Map<String, List<String>> endpointDetails;
@@ -181,6 +185,14 @@ public class AppConfiguration implements Configuration {
 
     public void setTokenUrl(String tokenUrl) {
         this.tokenUrl = tokenUrl;
+    }
+
+    public Map<String, List<String>> getEndpointGroups() {
+        return endpointGroups;
+    }
+
+    public void setEndpointGroups(Map<String, List<String>> endpointGroups) {
+        this.endpointGroups = endpointGroups;
     }
 
     public Map<String, List<String>> getEndpointDetails() {
@@ -314,8 +326,8 @@ public class AppConfiguration implements Configuration {
     @Override
     public String toString() {
         return "AppConfiguration [baseDN=" + baseDN + ", baseEndpoint=" + baseEndpoint + ", openIdIssuer="
-                + openIdIssuer + ", tokenChannels=" + tokenChannels + ", clientId=" + clientId + ", clientPassword="
-                + clientPassword + ", tokenUrl=" + tokenUrl + ", endpointDetails=" + endpointDetails
+                + openIdIssuer + ", tokenChannels=" + tokenChannels + ", clientId=" + clientId + ", tokenUrl="
+                + tokenUrl + ", endpointGroups=" + endpointGroups + ", endpointDetails=" + endpointDetails
                 + ", disableJdkLogger=" + disableJdkLogger + ", loggingLevel=" + loggingLevel + ", loggingLayout="
                 + loggingLayout + ", externalLoggerConfiguration=" + externalLoggerConfiguration + ", metricChannel="
                 + metricChannel + ", metricReporterInterval=" + metricReporterInterval + ", metricReporterKeepDataDays="
