@@ -413,8 +413,11 @@ class Authn(DialogUtils):
             # save default acr
             cli_args = {'operation_id': 'put-acrs', 'data': {'defaultAcr': acr}}
             self.app.start_progressing(_("Saving default ACR..."))
-            await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+            response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
             self.app.stop_progressing()
+            if response.status_code != 200:
+                self.app.show_message(_(common_strings.error), _("Save failed: Status {} - {}\n").format(response.status_code, response.text), tobefocused=self.acr_container)
+                return
             await self.get_default_acr()
             self.on_page_enter(focus_container=True)
 
