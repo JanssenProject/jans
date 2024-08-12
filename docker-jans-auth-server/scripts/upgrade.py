@@ -58,6 +58,13 @@ def _transform_lock_dynamic_config(conf, manager):
                 "https://jans.io/oauth/lock/health.write"
             ],
         }),
+        ("endpointGroups", {
+            "audit": [
+                "telemetry",
+                "health",
+                "log"
+            ],
+        }),
     ]:
         if missing_key not in conf:
             conf[missing_key] = value
