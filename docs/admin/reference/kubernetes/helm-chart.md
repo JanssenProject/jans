@@ -308,7 +308,7 @@ Kubernetes: `>=v1.22.0-0`
 | global.auth-server.ingress.authServerEnabled | bool | `true` | Enable Auth server endpoints /jans-auth |
 | global.auth-server.ingress.deviceCodeEnabled | bool | `true` | Enable endpoint /device-code |
 | global.auth-server.ingress.firebaseMessagingEnabled | bool | `true` | Enable endpoint /firebase-messaging-sw.js |
-| global.auth-server.ingress.lockConfigEnabled | bool | `false` | Enable endpoint /.well-known/lock-master-configuration |
+| global.auth-server.ingress.lockConfigEnabled | bool | `false` | Enable endpoint /.well-known/lock-server-configuration |
 | global.auth-server.ingress.openidConfigEnabled | bool | `true` | Enable endpoint /.well-known/openid-configuration |
 | global.auth-server.ingress.u2fConfigEnabled | bool | `true` | Enable endpoint /.well-known/fido-configuration |
 | global.auth-server.ingress.uma2ConfigEnabled | bool | `true` | Enable endpoint /.well-known/uma2-configuration |
