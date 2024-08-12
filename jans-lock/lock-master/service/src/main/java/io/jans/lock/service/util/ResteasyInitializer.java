@@ -19,6 +19,7 @@ package io.jans.lock.service.util;
 import java.util.HashSet;
 import java.util.Set;
 
+import io.jans.lock.service.filter.AuthorizationProcessingFilter;
 import io.jans.lock.service.ws.rs.ConfigurationRestWebService;
 import io.jans.lock.service.ws.rs.audit.AuditRestWebServiceImpl;
 import io.jans.lock.service.ws.rs.config.ConfigRestWebServiceImpl;
@@ -44,6 +45,8 @@ public class ResteasyInitializer extends Application {
         classes.add(ConfigRestWebServiceImpl.class);
 
         classes.add(SseRestWebServiceImpl.class);
+        
+        classes.add(AuthorizationProcessingFilter.class);
 
         return classes;
     }
