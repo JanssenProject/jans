@@ -793,7 +793,7 @@ global:
       webdiscoveryEnabled: true
       # -- Enable endpoint /.well-known/fido-configuration
       u2fConfigEnabled: true
-      # -- Enable endpoint /.well-known/lock-master-configuration
+      # -- Enable endpoint /.well-known/lock-server-configuration
       lockConfigEnabled: false
       # -- Enable endpoint /jans-lock
       lockEnabled: false
