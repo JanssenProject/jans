@@ -16,6 +16,7 @@
 
 package io.jans.lock.service.ws.rs.audit;
 
+import io.jans.service.security.api.ProtectedApi;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.POST;
@@ -37,16 +38,19 @@ public interface AuditRestWebService {
 	@POST
 	@Path("/health")
 	@Produces({ MediaType.APPLICATION_JSON })
+	@ProtectedApi(scopes = {"https://jans.io/lock-server/audit.write"})
 	Response processHealthRequest(@Context HttpServletRequest request, @Context HttpServletResponse response, @Context SecurityContext sec);
 
 	@POST
 	@Path("/log")
 	@Produces({ MediaType.APPLICATION_JSON })
+	@ProtectedApi(scopes = {"https://jans.io/lock-server/audit.write"})
 	Response processLogRequest(@Context HttpServletRequest request, @Context HttpServletResponse response, @Context SecurityContext sec);
 
 	@POST
 	@Path("/telemetry")
 	@Produces({ MediaType.APPLICATION_JSON })
+	@ProtectedApi(scopes = {"https://jans.io/lock-server/audit.write"})
 	Response processTelemetryRequest(@Context HttpServletRequest request, @Context HttpServletResponse response,
 			@Context SecurityContext sec);
 
