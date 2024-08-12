@@ -229,6 +229,7 @@ class Plugin(DialogUtils):
                     self.app.show_message(_("Error"), _("Deletion was not completed {}".format(response)))
                 else:
                     await self.get_assets()
+                self.app.layout.focus(self.main_container)
 
             asyncio.ensure_future(coroutine())
 
@@ -238,7 +239,7 @@ class Plugin(DialogUtils):
                 title=_("Confirm"),
                 message=HTML(_("Are you sure you want to delete asset <b>{}</b>?")).format(kwargs['selected'][1]),
                 buttons=buttons,
-                tobefocused=self.assets_container
+                tobefocused=self.main_container
                 )
 
 
