@@ -748,7 +748,7 @@ spec:
     - host: {{ .Values.fqdn | quote }}
       http:
         paths:
-          - path: /.well-known/lock-master-configuration
+          - path: /.well-known/lock-server-configuration
             pathType: Exact
             backend:
               service:
