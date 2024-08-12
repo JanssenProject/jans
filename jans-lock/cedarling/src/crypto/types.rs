@@ -14,6 +14,7 @@ pub enum TokenType {
 	UserInfoToken,
 }
 
+#[derive(Debug)]
 pub struct TrustStoreEntry {
 	pub jwks: jsonwebtoken::jwk::JwkSet,
 	pub issuer: &'static TrustedIssuer,
