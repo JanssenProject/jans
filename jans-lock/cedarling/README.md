@@ -71,6 +71,10 @@ wasm-bindgen --target nodejs --out-dir out ./target/wasm32-unknown-unknown/relea
 node tests/main.mjs local
 ```
 
+### Policy Store Format 📐
+
+The base policy store format can be read in the `policy-store/remote.json` file. The format changes when the local strategy is used, as several entries can be used. Thus `policy-store/local.json` contains an Object with several entries differentiated by their ID's.
+
 ### Usage 🔧
 
 From within your JS project, you'll need to import the exported `cedarling` functions from the `cedarling.js` file.
@@ -104,7 +108,7 @@ const config = {
 
 /// > config.policyStore options <
 
-// the "local" strategy is a fallback option. the cedarling will use a statically embedded policy store, located in `/policy-store/default.json`
+// the "local" strategy is a fallback option. the cedarling will use a statically embedded policy store, located in `/policy-store/local.json`
 const local = {
 	strategy: "local"
 };
@@ -112,7 +116,7 @@ const local = {
 // the "remote" strategy is only slightly more complex than "local", with the only difference being you provide a http `url` from which a simple GET request is used to acquire the Policy Store
 const remote = {
 	strategy: "remote",
-	url: "https://raw.githubusercontent.com/JanssenProject/jans/main/jans-lock/cedarling/policy-store/default.json"
+	url: "https://raw.githubusercontent.com/JanssenProject/jans/main/jans-lock/cedarling/policy-store/**remote**.json"
 }
 
 // the "lock-master" strategy is a more complicated, authenticated strategy employing OAuth.

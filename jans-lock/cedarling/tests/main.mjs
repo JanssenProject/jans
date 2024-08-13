@@ -28,7 +28,7 @@ test("Cedarling Tests", async t => {
 					jwtValidation: false,
 					policyStore: {
 						strategy: "remote",
-						url: "http://localhost:5000/policy-store/default.json",
+						url: "http://localhost:5000/policy-store/remote.json",
 					},
 					supportedSignatureAlgorithms: ["HS256", "HS384", "RS256"],
 				})

@@ -24,7 +24,7 @@ pub async fn init_policy_store(config: &mut types::CedarlingConfig) -> BTreeMap<
 		#[cfg(feature = "direct_startup_strategy")]
 		types::PolicyStoreConfig::Direct { value } => serde_json::from_value(value.take()).unwrap_throw(),
 		types::PolicyStoreConfig::Local { id } => {
-			let data = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/policy-store/default.json")).as_slice();
+			let data = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/policy-store/local.json")).as_slice();
 			let decompressed = match config.decompress_policy_store {
 				true => Cow::Owned(miniz_oxide::inflate::decompress_to_vec_zlib(data).unwrap_throw()),
 				false => Cow::Borrowed(data),
