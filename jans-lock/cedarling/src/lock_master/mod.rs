@@ -40,6 +40,7 @@ pub async fn init<'a, T: serde::de::DeserializeOwned>(policy_store_config: &Poli
 	let res = http::get(&url, &[]).await.expect_throw("Unable to fetch LockMasterConfig from URL");
 	let lock_master_config: types::LockMasterConfig = res.into_json().await.unwrap_throw();
 
+
 	// init sse updates
 	if *enable_dynamic_configuration {
 		sse::init(&lock_master_config.lock_sse_uri);

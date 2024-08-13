@@ -12,9 +12,14 @@ metadata:
 {{- if .Values.additionalLabels }}
 {{ toYaml .Values.additionalLabels | indent 4 }}
 {{- end }}
-{{- if .Values.additionalAnnotations }}
+{{- if or (.Values.additionalAnnotations) (.Values.global.config.customAnnotations.service) }}
   annotations:
+{{- if .Values.additionalAnnotations }}
 {{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.global.config.customAnnotations.service }}
+{{ toYaml .Values.global.config.customAnnotations.service | indent 4 }}
+{{- end }}
 {{- end }}
 spec:
     ports:

@@ -94,7 +94,7 @@ const config = {
 	jwtValidation: true,
 	// Configure how the cedarling acquires it's Policy Store during startup
 	policyStore: {
-		// can be "local", "remote" or "lock-master",
+		// can be "local", "remote" or "lock-server",
 		// each strategy requires different parameters, see below
 		strategy: "local",
 	},
@@ -119,9 +119,9 @@ const remote = {
 	url: "https://raw.githubusercontent.com/JanssenProject/jans/main/jans-lock/cedarling/policy-store/**remote**.json"
 }
 
-// the "lock-master" strategy is a more complicated, authenticated strategy employing OAuth.
+// the "lock-server" strategy is a more complicated, authenticated strategy employing OAuth.
 const lockMaster = {
-	strategy: "lock-master",
+	strategy: "lock-server",
 	// `url` a http URL to a Jans Lock Master instance
 	url: "https://lock.master.gluu.cloud",
 	// `policyStoreId` acquire a specific Policy Store from the Lock Master

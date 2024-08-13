@@ -128,25 +128,29 @@ nav:
         - Monitoring: admin/config-guide/config-tools/config-api/monitoring.md
         - Plugins: admin/config-guide/config-tools/config-api/plugins.md
       - CURL: admin/config-guide/config-tools/curl-guide.md
-    - Agama Project Configuration: admin/config-guide/agama-project-configuration.md
-    - Attribute: admin/config-guide/attribute-configuration.md
-    - Default Authentication: admin/config-guide/default-authentication-method-config.md
-    - Cache Configuration: admin/config-guide/cache-configuration.md
-    - Auth Server Configuration: admin/config-guide/jans-authorization-server-config.md
-    - FIDO2 Configuration: admin/config-guide/janssen-fido2-configuration.md
-    - Logging: admin/config-guide/logging-configuration.md
-    - JSON Web Key: admin/config-guide/json-web-key-config.md
-    - LDAP Configuration: admin/config-guide/ldap-configuration.md
-    - Couchbase Configuration: admin/config-guide/couchbase-configuration.md
-    - OAuth Scope Management: admin/config-guide/oauth-scopes-config.md
-    - UMA Management: admin/config-guide/oauth-umaresources-config.md
-    - OpenID Connect Client Configuration: admin/config-guide/openid-connect-client-configuration.md
-    - SMTP Configuration: admin/config-guide/smtp-configuration.md
+    - Auth Server Configuration: 
+      - OpenID Connect Client Configuration: admin/config-guide/auth-server-config/openid-connect-client-configuration.md
+      - OAuth Scope Management: admin/config-guide/auth-server-config/oauth-scopes-config.md
+      - JSON Web Key: admin/config-guide/auth-server-config/json-web-key-config.md
+      - Default Authentication: admin/config-guide/auth-server-config/default-authentication-method-config.md
+      - Auth Server Property Configuration: admin/config-guide/auth-server-config/jans-authorization-server-config.md
+      - Messaging Configuration: admin/config-guide/auth-server-config/messaging-config.md
+      - Logging: admin/config-guide/auth-server-config/logging-configuration.md
+      - SSA Configuration: admin/config-guide/auth-server-config/ssa-config.md
+      - Agama Project Configuration: admin/config-guide/auth-server-config/agama-project-configuration.md
+      - Attribute: admin/config-guide/auth-server-config/attribute-configuration.md
+      - Cache Configuration: admin/config-guide/auth-server-config/cache-configuration.md
+      - LDAP Configuration: admin/config-guide/auth-server-config/ldap-configuration.md
+      - Couchbase Configuration: admin/config-guide/auth-server-config/couchbase-configuration.md
+      - UMA Management: admin/config-guide/auth-server-config/oauth-umaresources-config.md
+    - FIDO2 Configuration: admin/config-guide/fido2-config/janssen-fido2-configuration.md
+    - SCIM Configuration:
+      - SCIM User Resources: admin/config-guide/scim-config/user-config.md
+      - SCIM Group Management: admin/config-guide/scim-config/scim-group-config.md  
     - Custom Scripts: admin/config-guide/custom-scripts-config.md
-    - SCIM User Resources: admin/config-guide/user-config.md
-    - SCIM Group Management: admin/config-guide/scim-group-config.md
-    - Authentication via Device Flow: admin/config-guide/device-flow-config.md
-    - Password Validation: admin/config-guide/user-password-validation.md
+    - SMTP Configuration: admin/config-guide/smtp-configuration.md
+    - Link Configuration: admin/config-guide/link-configuration.md
+    - Custom Assets Configuration: admin/config-guide/custom-assets-configuration.md
   - Database Guide:
     - admin/reference/database/README.md
     - RDBMS Erwin Table: admin/reference/database/rdbms-erwin.md
@@ -194,12 +198,14 @@ nav:
       - admin/auth-server/endpoints/README.md
       - OpenID Configuration: admin/auth-server/endpoints/configuration.md
       - Client Registration: admin/auth-server/endpoints/client-registration.md
+      - Client Authentication: admin/auth-server/endpoints/client-authn.md
       - Authorization: admin/auth-server/endpoints/authorization.md
       - Authorization Challenge: admin/auth-server/endpoints/authorization-challenge.md
       - Token: admin/auth-server/endpoints/token.md
       - SSA: admin/auth-server/endpoints/ssa.md
       - Userinfo: admin/auth-server/endpoints/userinfo.md
       - Token Revocation: admin/auth-server/endpoints/token-revocation.md
+      - Global Token Revocation: admin/auth-server/endpoints/global-token-revocation.md
       - Session Revocation: admin/auth-server/endpoints/session-revocation.md
       - End Session: admin/auth-server/endpoints/end-session.md
       - Clientinfo: admin/auth-server/endpoints/clientinfo.md
@@ -303,6 +309,7 @@ nav:
       - Authorization Challenge: admin/developer/scripts/authorization-challenge.md
       - CIBA End User Notification: admin/developer/scripts/ciba.md
       - Client Registration: admin/developer/scripts/client-registration.md
+      - Client Authentication: admin/developer/scripts/client-authn.md
       - Config API: admin/developer/scripts/config-api.md
       - Consent Gathering: admin/developer/scripts/consent-gathering.md
       - Dynamic Scope: admin/developer/scripts/dynamic-scope.md
@@ -391,11 +398,8 @@ nav:
     - Jans Keycloak Link: admin/link/jans-keycloak-link.md
   - Lock Guide:
       - admin/lock/README.md
-      - Lock Installation: admin/lock/lock_installation.md
-      - Auth Server Configuration: admin/lock/lock_auth_server_config.md
-      - Lock Client Configuration: admin/lock/lock_client_config.md
-      - Implement Lock PDP Plugin: admin/lock/lock_pdp_plugin.md
-      - Policy Store Integration: admin/lock/lock_opa.md
+      - Lock Master: admin/lock/lock-server.md
+      - Authorization Using Cedarling: admin/lock/cedarling.md
   - Janssen Recipes:
     - admin/recipes/README.md
     - Benchmark: admin/recipes/benchmark.md
@@ -406,6 +410,8 @@ nav:
     - Locking or Disabling Accounts: admin/recipes/locking-accounts.md
     - Stepped-up Authentication: admin/recipes/stepped-up-authn.md
     - User Journeys: admin/recipes/ACRouter.md
+    - Authentication via Device Flow: admin/recipes/device-flow-config.md
+    - Password Validation: admin/recipes/user-password-validation.md
   - User Management:
       - admin/usermgmt/README.md
       - Using SCIM: admin/usermgmt/usermgmt-scim.md

@@ -365,7 +365,9 @@ def download(url, dst, verbose=False, headers=None):
     urllib.request.install_opener(None)
 
 def extract_file(zip_file, source, target, ren=False):
+    fn = None
     zip_obj = zipfile.ZipFile(zip_file, "r")
+
     for member in zip_obj.infolist():
         if not member.is_dir() and member.filename.endswith(source):
             if ren:
@@ -377,8 +379,12 @@ def extract_file(zip_file, source, target, ren=False):
                     target_p.parent.mkdir(parents=True)
             logIt(f"Extracting {source} from {zip_file} to {target}")
             target_p.write_bytes(zip_obj.read(member))
+            fn = target_p.as_posix()
             break
+
     zip_obj.close()
+
+    return fn
 
 
 def extract_from_zip(zip_file, sub_dir, target_dir, remove_target_dir=False):
@@ -454,6 +460,8 @@ def unpack_zip(zip_fn, extract_dir, with_par_dir=True):
 app_info_fn = os.environ.get('JANS_APP_INFO') or os.path.join(par_dir, 'app_info.json')
 current_app.app_info = readJsonFile(app_info_fn)
 current_app.jans_zip = os.path.join(Config.distFolder, 'jans/jans.zip')
+coucbase_bucket_dict = readJsonFile(os.path.join(paths.APP_ROOT, 'data/couchbase_buckets.json'), ordered=True)
+Config.couchbaseBucketDict = coucbase_bucket_dict
 
 def as_bool(val):
     return str(val).lower() in ('t', 'true', 'y', 'yes', 'on', 'ok', '1')

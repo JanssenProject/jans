@@ -3911,6 +3911,203 @@
       "substr": "caseIgnoreSubstringsMatch",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
       "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Policy stats details",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "policyStats"
+      ],
+      "json": true,
+      "rdbm_json_column": true,
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Request load size",
+      "equality": "integerMatch",
+      "names": [
+        "size"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "jansFailCounter",
+      "equality": "integerMatch",
+      "names": [
+        "jansFailCounter"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Time information. Seconds from 1970-01-01T0:0:0Z",
+      "equality": "generalizedTimeMatch",
+      "names": [
+        "evaluationTimeNs"
+      ],
+      "oid": "jansAttr",
+      "ordering": "generalizedTimeOrderingMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.24",
+      "x_origin": "OpenID Connect 1.0 Standard Claim"
+    },
+    {
+      "desc": "Time information. Seconds from 1970-01-01T0:0:0Z",
+      "equality": "generalizedTimeMatch",
+      "names": [
+        "averageTimeNs"
+      ],
+      "oid": "jansAttr",
+      "ordering": "generalizedTimeOrderingMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.24",
+      "x_origin": "OpenID Connect 1.0 Standard Claim"
+    },
+    {
+      "desc": "memoryUsage",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "memoryUsage"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "requestCounter",
+      "equality": "integerMatch",
+      "names": [
+        "requestCounter"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "cedarEngineStatus",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "cedarEngineStatus"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "cedarPolicyStatus",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "cedarPolicyStatus"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "tokenDataStatus",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "tokenDataStatus"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "eventTime",
+      "equality": "generalizedTimeMatch",
+      "names": [
+        "eventTime"
+      ],
+      "oid": "jansAttr",
+      "ordering": "generalizedTimeOrderingMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.24",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "eventType",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "eventType"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "severetyLevel",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "severetyLevel"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "policyId",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "policyId"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "policyResult",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "policyResult"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "userAccountId",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "userAccountId"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "clientId",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "clientId"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "sourceInformation",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "sourceInformation"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
     }
   ],
   "objectClasses": [
@@ -5219,6 +5416,81 @@
       ],
       "names": [
         "jansTrustedIdp"
+      ],
+      "oid": "jansObjClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Jans created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "inum",
+        "jansLastUpd",
+        "jansStatus",
+        "cedarEngineStatus",
+        "cedarPolicyStatus",
+        "tokenDataStatus"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "jansHealthEntry"
+      ],
+      "oid": "jansObjClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Jans created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "inum",
+        "jansLastUpd",
+        "eventTime",
+        "eventType",
+        "severetyLevel",
+        "policyId",
+        "policyResult",
+        "userAccountId",
+        "clientId",
+        "sourceInformation"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "jansLogEntry"
+      ],
+      "oid": "jansObjClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Jans created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "inum",
+        "jansLastUpd",
+        "size",
+        "jansStatus",
+        "jansCounter",
+        "jansFailCounter",
+        "evaluationTimeNs",
+        "averageTimeNs",
+        "memoryUsage",
+        "requestCounter",
+        "policyStats"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "jansTelemetryEntry"
       ],
       "oid": "jansObjClass",
       "sup": [

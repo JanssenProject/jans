@@ -58,8 +58,8 @@ fun DashboardScreen(
         verticalArrangement = Arrangement.Center,
     ) {
 
-        if (mainViewModel.clientRegistered && (mainViewModel.attestationOptionResponse || mainViewModel.assertionOptionResponse)) {
-            if (mainViewModel.userIsAuthenticated) {
+        if (mainViewModel.mainState.isClientRegistered && (mainViewModel.mainState.attestationResultSuccess || mainViewModel.mainState.assertionResultSuccess)) {
+            if (mainViewModel.mainState.isUserIsAuthenticated) {
                 TitleText(text = stringResource(id = R.string.dashboard_title_welcome) + " " + mainViewModel.getUsername())
                 if (mainViewModel.getUserInfoResponse().response != null) {
                     val userInfo = JSONObject(mainViewModel.getUserInfoResponse().response.toString())
@@ -75,8 +75,7 @@ fun DashboardScreen(
                     onClick = {
                         CoroutineScope(Dispatchers.Main).launch {
                             loading = true
-                            val logoutResponse: LogoutResponse =
-                                async { mainViewModel.logout() }.await()
+                            val logoutResponse: LogoutResponse = async { mainViewModel.logout() }.await()
                             if (logoutResponse.isSuccessful != true) {
                                 shouldShowDialog.value = true
                                 dialogContent.value = logoutResponse.errorMessage.toString()

@@ -5,68 +5,6 @@ ingress:
   # -- Enable use of legacy API version networking.k8s.io/v1beta1 to support kubernetes 1.18. This flag should be removed next version release along with nginx-ingress/templates/ingress-legacy.yaml.
   legacy: false
   path: /
-  # -- openid-configuration ingress resource labels. key app is taken
-  openidConfigLabels: { }
-  # -- openid-configuration ingress resource additional annotations.
-  openidAdditionalAnnotations: { }
-  # -- device-code ingress resource labels. key app is taken
-  deviceCodeLabels: { }
-  # -- device-code ingress resource additional annotations.
-  deviceCodeAdditionalAnnotations: { }
-  # -- Firebase Messaging ingress resource labels. key app is taken
-  firebaseMessagingLabels: { }
-  # -- Firebase Messaging ingress resource additional annotations.
-  firebaseMessagingAdditionalAnnotations: { }
-  # -- uma 2 config ingress resource labels. key app is taken
-  uma2ConfigLabels: { }
-  # -- uma2 config ingress resource additional annotations.
-  uma2AdditionalAnnotations: { }
-  # -- webfinger ingress resource labels. key app is taken
-  webfingerLabels: { }
-  # -- webfinger ingress resource additional annotations.
-  webfingerAdditionalAnnotations: { }
-  # -- webdiscovery ingress resource labels. key app is taken
-  webdiscoveryLabels: { }
-  # -- webdiscovery ingress resource additional annotations.
-  webdiscoveryAdditionalAnnotations: { }
-  # -- webdiscovery ingress resource labels. key app is taken
-  scimConfigLabels: { }
-  # -- SCIM config ingress resource additional annotations.
-  scimConfigAdditionalAnnotations: { }
-  # -- scim config ingress resource labels. key app is taken
-  scimLabels: { }
-  # -- SCIM ingress resource additional annotations.
-  scimAdditionalAnnotations: { }
-  # -- u2f config ingress resource labels. key app is taken
-  u2fConfigLabels: { }
-  # -- u2f config ingress resource additional annotations.
-  u2fAdditionalAnnotations: { }
-  # -- fido2 config ingress resource labels. key app is taken
-  fido2ConfigLabels: { }
-  # -- fido2 config ingress resource additional annotations.
-  fido2ConfigAdditionalAnnotations: { }
-  # -- Enable all fido2 endpoints
-  fido2Enabled: false
-  # -- fido2 ingress resource labels. key app is taken
-  fido2Labels: { }
-  # -- fido2 ingress resource additional annotations.
-  fido2AdditionalAnnotations: { }
-  # -- Auth server config ingress resource labels. key app is taken
-  authServerLabels: { }
-  # -- Auth server ingress resource additional annotations.
-  authServerAdditionalAnnotations: { }
-  # -- Casa ingress resource labels. key app is taken
-  casaLabels: { }
-  # -- Casa ingress resource additional annotations.
-  casaAdditionalAnnotations: { }
-  # -- SAML config ingress resource labels. key app is taken
-  samlLabels: { }
-  # -- SAML ingress resource additional annotations.
-  samlAdditionalAnnotations: { }
-  # -- Lock config ingress resource labels. key app is taken
-  lockConfigLabels: { }
-  # -- Lock config ingress resource additional annotations.
-  lockConfigAdditionalAnnotations: { }
   # -- Additional labels that will be added across all ingress definitions in the format of {mylabel: "myapp"}
   additionalLabels: { }
   # -- Additional annotations that will be added across all ingress definitions in the format of {cert-manager.io/issuer: "letsencrypt-prod"}. key app is taken

@@ -18,6 +18,21 @@ state: TX
 cnPersistenceType: sql
 # -- Salt. Used for encoding/decoding sensitive data. If omitted or set to empty string, the value will be self-generated. Otherwise, a 24 alphanumeric characters are allowed as its value.
 salt: ""
+# -- service account used by Kubernetes resources
+serviceAccountName: default
+# — Add custom annotations for kubernetes resources for the service
+customAnnotations:
+  certificate: {}
+  clusterRoleBinding: {}
+  configMap: {}
+  cronjob: {}
+  deployment: {}
+  destinationRule: {}
+  horizontalPodAutoscaler: {}
+  podDisruptionBudget: {}
+  role: {}
+  roleBinding: {}
+  secret: {}
 configmap:
   # -- Jetty header size in bytes in the auth server
   cnJettyRequestHeaderSize: 8192
@@ -237,8 +252,51 @@ auth-server:
     webdiscoveryEnabled: true
     # -- Enable endpoint /.well-known/fido-configuration
     u2fConfigEnabled: true
-    # -- Enable endpoint /.well-known/lock-master-configuration
+    # -- Enable endpoint /.well-known/lock-server-configuration
     lockConfigEnabled: false
+    # -- Enable endpoint /jans-lock
+    lockEnabled: false
+    # -- Lock config ingress resource labels. key app is taken
+    lockConfigLabels: {}
+    # -- Lock config ingress resource additional annotations.
+    lockConfigAdditionalAnnotations: {}
+    # -- Lock ingress resource labels. key app is taken
+    lockLabels: { }
+    # -- Lock ingress resource additional annotations.
+    lockAdditionalAnnotations: { }        
+    # -- openid-configuration ingress resource labels. key app is taken
+    openidConfigLabels: { }
+    # -- openid-configuration ingress resource additional annotations.
+    openidAdditionalAnnotations: { }
+    # -- device-code ingress resource labels. key app is taken
+    deviceCodeLabels: { }
+    # -- device-code ingress resource additional annotations.
+    deviceCodeAdditionalAnnotations: { }
+    # -- Firebase Messaging ingress resource labels. key app is taken
+    firebaseMessagingLabels: { }
+    # -- Firebase Messaging ingress resource additional annotations.
+    firebaseMessagingAdditionalAnnotations: { }
+    # -- uma2 config ingress resource labels. key app is taken
+    uma2ConfigLabels: { }
+    # -- uma2 config ingress resource additional annotations.
+    uma2AdditionalAnnotations: { }
+    # -- webfinger ingress resource labels. key app is taken
+    webfingerLabels: { }
+    # -- webfinger ingress resource additional annotations.
+    webfingerAdditionalAnnotations: { }
+    # -- webdiscovery ingress resource labels. key app is taken
+    webdiscoveryLabels: { }
+    # -- webdiscovery ingress resource additional annotations.
+    webdiscoveryAdditionalAnnotations: { }
+    # -- u2f config ingress resource labels. key app is taken
+    u2fConfigLabels: { }
+    # -- u2f config ingress resource additional annotations.
+    u2fAdditionalAnnotations: { }
+    # -- Auth server ingress resource labels. key app is taken
+    authServerLabels: { }
+    # -- Auth server ingress resource additional annotations.
+    authServerAdditionalAnnotations: { }
+
   # -- Enable jans-lock as service running inside auth-server
   lockEnabled: false
 # -- Responsible for regenerating auth-keys per x hours
@@ -329,6 +387,10 @@ casa:
   ingress:
     # -- Enable casa endpoints /casa
     casaEnabled: false
+    # -- Casa ingress resource labels. key app is taken
+    casaLabels: { }
+    # -- Casa ingress resource additional annotations.
+    casaAdditionalAnnotations: { }     
 config-api:
   # -- Name of the config-api service. Please keep it as default.
   configApiServerServiceName: config-api
@@ -362,6 +424,10 @@ config-api:
   ingress:
     # Enable config API endpoints /jans-config-api
     configApiEnabled: true
+    # -- configAPI ingress resource labels. key app is taken
+    configApiLabels: { }
+    # -- ConfigAPI ingress resource additional annotations.
+    configApiAdditionalAnnotations: { }  
   # -- Comma-separated values of enabled plugins (supported plugins are "admin-ui","fido2","scim","user-mgt","jans-link","kc-saml")
   plugins: "admin-ui,fido2,scim,user-mgt"
 fido2:
@@ -395,6 +461,14 @@ fido2:
     fido2ConfigEnabled: false
     # -- Enable endpoint /jans-fido2
     fido2Enabled: false
+    # -- fido2 config ingress resource labels. key app is taken
+    fido2ConfigLabels: { }
+    # -- fido2 config ingress resource additional annotations.
+    fido2ConfigAdditionalAnnotations: { }
+    # -- fido2 ingress resource labels. key app is taken
+    fido2Labels: { }
+    # -- fido2 ingress resource additional annotations.
+    fido2AdditionalAnnotations: { }
 scim:
   # -- Name of the scim service. Please keep it as default.
   scimServiceName: scim
@@ -430,6 +504,14 @@ scim:
     scimConfigEnabled: false
     # -- Enable SCIM endpoints /jans-scim
     scimEnabled: false
+    # -- SCIM config ingress resource labels. key app is taken
+    scimConfigLabels: { }
+    # -- SCIM config ingress resource additional annotations.
+    scimConfigAdditionalAnnotations: { }
+    # -- SCIM config ingress resource labels. key app is taken
+    scimLabels: { }
+    # -- SCIM ingress resource additional annotations.
+    scimAdditionalAnnotations: { }    
 link:
   # -- Name of the link service. Please keep it as default.
   linkServiceName: link
@@ -472,7 +554,10 @@ saml:
   ingress:
     # Enable saml endpoints /kc
     samlEnabled: false
-
+    # -- SAML config ingress resource labels. key app is taken
+    samlLabels: { }
+    # -- SAML ingress resource additional annotations.
+    samlAdditionalAnnotations: { }
 
 # Global properties
 # -- Boolean flag to enable mapping lbIp  to fqdn inside pods on clouds that provide static ip for load balancers. On cloud that provide only addresses to the LB this flag will enable a script to actively scan config.configmap.lbAddr and update the hosts file inside the pods automatically.
@@ -536,70 +621,6 @@ nginx-ingress:
   # -- Boolean flag to enable/disable the nginx-ingress definitions chart.
   enabled: true
   ingress:
-    # -- openid-configuration ingress resource labels. key app is taken
-    openidConfigLabels: { }
-    # -- openid-configuration ingress resource additional annotations.
-    openidAdditionalAnnotations: { }
-    # -- device-code ingress resource labels. key app is taken
-    deviceCodeLabels: { }
-    # -- device-code ingress resource additional annotations.
-    deviceCodeAdditionalAnnotations: { }
-    # -- Firebase Messaging ingress resource labels. key app is taken
-    firebaseMessagingLabels: { }
-    # -- Firebase Messaging ingress resource additional annotations.
-    firebaseMessagingAdditionalAnnotations: { }
-    # -- uma2 config ingress resource labels. key app is taken
-    uma2ConfigLabels: { }
-    # -- uma2 config ingress resource additional annotations.
-    uma2AdditionalAnnotations: { }
-    # -- webfinger ingress resource labels. key app is taken
-    webfingerLabels: { }
-    # -- webfinger ingress resource additional annotations.
-    webfingerAdditionalAnnotations: { }
-    # -- webdiscovery ingress resource labels. key app is taken
-    webdiscoveryLabels: { }
-    # -- webdiscovery ingress resource additional annotations.
-    webdiscoveryAdditionalAnnotations: { }
-    # -- SCIM config ingress resource labels. key app is taken
-    scimConfigLabels: { }
-    # -- SCIM config ingress resource additional annotations.
-    scimConfigAdditionalAnnotations: { }
-    # -- SCIM config ingress resource labels. key app is taken
-    scimLabels: { }
-    # -- SCIM ingress resource additional annotations.
-    scimAdditionalAnnotations: { }
-    # -- configAPI ingress resource labels. key app is taken
-    configApiLabels: { }
-    # -- ConfigAPI ingress resource additional annotations.
-    configApiAdditionalAnnotations: { }
-    # -- u2f config ingress resource labels. key app is taken
-    u2fConfigLabels: { }
-    # -- u2f config ingress resource additional annotations.
-    u2fAdditionalAnnotations: { }
-    # -- fido2 config ingress resource labels. key app is taken
-    fido2ConfigLabels: { }
-    # -- fido2 config ingress resource additional annotations.
-    fido2ConfigAdditionalAnnotations: { }
-    # -- fido2 ingress resource labels. key app is taken
-    fido2Labels: { }
-    # -- fido2 ingress resource additional annotations.
-    fido2AdditionalAnnotations: { }
-    # -- Auth server ingress resource labels. key app is taken
-    authServerLabels: { }
-    # -- Auth server ingress resource additional annotations.
-    authServerAdditionalAnnotations: { }
-    # -- Casa ingress resource labels. key app is taken
-    casaLabels: { }
-    # -- Casa ingress resource additional annotations.
-    casaAdditionalAnnotations: { }
-    # -- SAML config ingress resource labels. key app is taken
-    samlLabels: { }
-    # -- SAML ingress resource additional annotations.
-    samlAdditionalAnnotations: { }
-    # -- Lock config ingress resource labels. key app is taken
-    lockConfigLabels: {}
-    # -- Lock config ingress resource additional annotations.
-    lockConfigAdditionalAnnotations: {}
     # -- Additional labels that will be added across all ingress definitions in the format of {mylabel: "myapp"}
     additionalLabels: { }
     # -- Additional annotations that will be added across all ingress definitions in the format of {cert-manager.io/issuer: "letsencrypt-prod"}

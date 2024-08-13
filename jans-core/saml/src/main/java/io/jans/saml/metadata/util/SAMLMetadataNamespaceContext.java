@@ -17,6 +17,7 @@ public class SAMLMetadataNamespaceContext implements NamespaceContext {
         prefixes.put("ds","http://www.w3.org/2000/09/xmldsig#");
         prefixes.put("xenc","http://www.w3.org/2001/04/xmlenc#");
         prefixes.put("saml","urn:oasis:names:tc:SAML:2.0:assertion");
+        prefixes.put("xml","http://www.w3.org/XML/1998/namespace");
     }
 
     @Override
