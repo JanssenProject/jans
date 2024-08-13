@@ -1,4 +1,8 @@
-use std::borrow::Cow;
+use std::{
+	borrow::Cow,
+	collections::{BTreeMap, HashSet},
+	sync::OnceLock,
+};
 use wasm_bindgen::prelude::*;
 use web_sys::*;
 
@@ -9,7 +13,7 @@ use crate::{
 };
 
 mod sse;
-pub(crate) mod types;
+pub mod types;
 
 #[wasm_bindgen]
 extern "C" {
@@ -17,31 +21,35 @@ extern "C" {
 	pub fn js_btoa(input: &str) -> String;
 }
 
-pub(crate) async fn init<'a>(policy_store_config: &PolicyStoreConfig) -> Cow<'a, [u8]> {
+// Stores a status list referencing each JWT's `jti` claim
+pub static mut STATUS_LISTS: OnceLock<BTreeMap<String, (u8, HashSet<String>)>> = OnceLock::new();
+
+pub async fn init<'a, T: serde::de::DeserializeOwned>(policy_store_config: &PolicyStoreConfig, application_name: &str, decompress: bool) -> T {
 	let PolicyStoreConfig::LockMaster {
 		url,
 		policy_store_id,
 		enable_dynamic_configuration,
 		ssa_jwt,
-		application_name,
 	} = policy_store_config
 	else {
 		unreachable!("We arrive here from the PolicyStoreConfig::LockMaster")
 	};
 
 	// Get LockMasterConfig
-	let res = http::get(&format!("{}/.well-known/lock-server-configuration", url), &[])
-		.await
-		.expect_throw("Unable to fetch LockMasterConfig from URL");
-	let lock_master_config: types::LockMasterConfig = res.into_json::<types::LockMasterConfig>().await.unwrap_throw();
+	let url = format!("{}/.well-known/lock-master-configuration", url);
+	let res = http::get(&url, &[]).await.expect_throw("Unable to fetch LockMasterConfig from URL");
+	let lock_master_config: types::LockMasterConfig = res.into_json().await.unwrap_throw();
+
 
 	// init sse updates
-	sse::init(*enable_dynamic_configuration, &lock_master_config.lock_sse_uri);
+	if *enable_dynamic_configuration {
+		sse::init(&lock_master_config.lock_sse_uri);
+	}
 
 	// Get OAuthConfig
 	let res = http::get(&lock_master_config.oauth_as_well_known, &[]).await.expect_throw("Unable to fetch LockMasterConfig from URL");
 	let openid_config = res.into_json::<types::OAuthConfig>().await.unwrap_throw();
-	let iss = crypto::decode::get_issuer(&ssa_jwt).expect_throw("SSA_JWT lacks `iss` field");
+	let iss = crypto::decode::get_issuer(ssa_jwt).expect_throw("SSA_JWT lacks `iss` field");
 
 	let client: types::OAuthDynamicClient = {
 		// OpenID dynamic client registration
@@ -56,9 +64,8 @@ pub(crate) async fn init<'a>(policy_store_config: &PolicyStoreConfig) -> Cow<'a,
 		};
 
 		// send
-		let res = http::post(&openid_config.registration_endpoint, http::PostBody::Json(client_req), &[])
-			.await
-			.expect_throw("Unable to register client");
+		let url = openid_config.registration_endpoint.expect_throw("No registration endpoint found, issuer doesn't support DCR");
+		let res = http::post(&url, http::PostBody::Json(client_req), &[]).await.expect_throw("Unable to register client");
 		res.into_json().await.expect_throw("Unable to parse client registration response")
 	};
 
@@ -87,11 +94,17 @@ pub(crate) async fn init<'a>(policy_store_config: &PolicyStoreConfig) -> Cow<'a,
 	};
 
 	let buffer = {
-		let url = format!("{}?policy_store_format=json&id={}", lock_master_config.config_uri, policy_store_id);
+		let url = format!("{}?policy_store_format=json&policy_store_id={}", lock_master_config.config_uri, policy_store_id);
 		let auth = format!("Bearer {}", grant.access_token);
+
 		let res = http::get(&url, &[("Authorization", &auth)]).await.expect_throw("Unable to fetch policies from remote location");
-		Cow::Owned(res.into_bytes().await.expect_throw("Unable to convert response to bytes"))
+		let buffer = res.into_bytes().await.expect_throw("Unable to convert response to bytes");
+
+		match decompress {
+			true => Cow::Owned(miniz_oxide::inflate::decompress_to_vec_zlib(&buffer).unwrap_throw()),
+			false => Cow::Owned(buffer),
+		}
 	};
 
-	buffer
+	serde_json::from_slice(&buffer).unwrap_throw()
 }
