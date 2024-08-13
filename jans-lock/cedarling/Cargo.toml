@@ -8,20 +8,24 @@ edition = "2021"
 [lib]
 crate-type = ["cdylib"]
 
+[features]
+direct_startup_strategy = []
+
 [dependencies]
 jsonwebtoken = "9.3.0"
-cedar-policy = { version = "3.2.0", features = ["wasm"] }
+cedar-policy = { version = "3.2.1", features = ["wasm"] }
 miniz_oxide = { version = "0.7.4", default-features = false, features = [
 	"with-alloc",
 ] }
+base64 = "0.22.1"
 
 # serde
-serde = { version = "1.0.203", features = ["derive"] }
-serde_json = "1.0.118"
+serde = { version = "1.0.204", features = ["derive"] }
+serde_json = "1.0.120"
+serde-wasm-bindgen = "0.6.5"
 
 # Environment Dependencies
 console_error_panic_hook = "0.1.7"
-serde-wasm-bindgen = "0.6.5"
 wasm-bindgen = "0.2.92"
 wasm-bindgen-futures = "0.4.42"
 
@@ -36,8 +40,13 @@ features = [
 	'RequestInit',
 	'EventSource',
 	'MessageEvent',
+	'Url',
 	'UrlSearchParams',
 ]
 
-[dev-dependencies]
-wasm-bindgen-test = "0.3.0"
+[profile.release]
+strip = "symbols"
+debug-assertions = true
+lto = "thin"
+opt-level = "s"
+codegen-units = 1
