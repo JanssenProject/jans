@@ -1,5 +1,5 @@
 # pinned to py3-grpcio version to avoid failure on native extension build
-grpcio==1.59.3
+grpcio==1.62.1
 click==8.1.7
 marshmallow==3.21.2
 fqdn==1.5.1

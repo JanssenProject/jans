@@ -1,4 +1,5 @@
 {
+  "serviceName": "jans-config-api",
   "configOauthEnabled": ${configOauthEnabled},
   "disableLoggerTimer": false,
   "disableAuditLogger": false,

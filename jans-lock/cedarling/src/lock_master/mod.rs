@@ -30,7 +30,7 @@ pub(crate) async fn init<'a>(policy_store_config: &PolicyStoreConfig) -> Cow<'a,
 	};
 
 	// Get LockMasterConfig
-	let res = http::get(&format!("{}/.well-known/lock-master-configuration", url), &[])
+	let res = http::get(&format!("{}/.well-known/lock-server-configuration", url), &[])
 		.await
 		.expect_throw("Unable to fetch LockMasterConfig from URL");
 	let lock_master_config: types::LockMasterConfig = res.into_json::<types::LockMasterConfig>().await.unwrap_throw();
