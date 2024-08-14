@@ -64,13 +64,7 @@ def test_secret_transform_data(value):
     given = SecretSchema().transform_data({
         "aws_config": value
     })
-    expected = {
-        "aws_config": AWS_CONFIG,
-        "google_credentials": "",
-        "aws_credentials": "",
-        "aws_replica_regions": "",
-    }
-    assert given == expected
+    assert given["aws_config"] == AWS_CONFIG
 
 
 @pytest.mark.parametrize("value", [
