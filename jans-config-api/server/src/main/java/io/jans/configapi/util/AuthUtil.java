@@ -454,7 +454,6 @@ public class AuthUtil {
     
     public ByteArrayOutputStream getByteArrayOutputStream(InputStream input) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        log.debug("input:{} ", input);
         if(input ==null) {
             return baos;
         }
@@ -469,15 +468,12 @@ public class AuthUtil {
     }
     
     public InputStream getInputStream(ByteArrayOutputStream output) {
-        log.debug("Get InputStream for output:{}", output);
         InputStream input = null;
         if (output == null) {
             return input;
         }
 
-        input = new ByteArrayInputStream(output.toByteArray());
-        log.debug("From ByteArrayOutputStream InputStream is:{}", input);
-        return input;
+        return new ByteArrayInputStream(output.toByteArray());  
     }
     
     

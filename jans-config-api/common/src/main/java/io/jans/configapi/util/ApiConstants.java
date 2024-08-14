@@ -84,7 +84,7 @@ public class ApiConstants {
     public static final String SERVICES = "/services";
     public static final String ASSET_TYPE = "/asset-type";
     public static final String SERVICE = "/service";
-    
+        
     public static final String APP_VERSION = "/app-version";
     public static final String SERVER_STAT = "/server-stat";
     public static final String USERNAME_PATH = "/{username}";
@@ -127,6 +127,7 @@ public class ApiConstants {
     public static final String SESSIONID = "sessionId";
     public static final String USERDN = "userDn";
     public static final String PLUGIN_NAME = "pluginName";
+    public static final String SERVICE_NAME = "service-name";
     
 
     public static final String ALL = "all";

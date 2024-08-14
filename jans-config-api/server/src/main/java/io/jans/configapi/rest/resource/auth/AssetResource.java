@@ -339,15 +339,17 @@ public class AssetResource extends ConfigBaseResource {
     @POST
     @Path(ApiConstants.SERVICE + ApiConstants.SERVICE_NAME_PARAM_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_ASSET_WRITE_ACCESS })
-    public Response loadServiceAsset(String serviceName) throws Exception {
+    public Response loadServiceAsset(
+            @Parameter(description = "Service Name") @PathParam(ApiConstants.SERVICE_NAME) @NotNull String serviceName)
+            throws Exception {
         if (log.isInfoEnabled()) {
             log.info("Create Asset details serviceName:{}", serviceName);
         }
 
-// validation
+        // validation
         checkResourceNotNull(serviceName, "Service Name");
         String result = null;
-// save asset
+        // save asset
         try {
             result = assetService.loadServiceAsset(serviceName);
 

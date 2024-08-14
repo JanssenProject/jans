@@ -87,7 +87,7 @@ Kubernetes: `>=v1.22.0-0`
 | auth-server.ingress.firebaseMessagingLabels | object | `{}` | Firebase Messaging ingress resource labels. key app is taken |
 | auth-server.ingress.lockAdditionalAnnotations | object | `{}` | Lock ingress resource additional annotations. |
 | auth-server.ingress.lockConfigAdditionalAnnotations | object | `{}` | Lock config ingress resource additional annotations. |
-| auth-server.ingress.lockConfigEnabled | bool | `false` | Enable endpoint /.well-known/lock-master-configuration |
+| auth-server.ingress.lockConfigEnabled | bool | `false` | Enable endpoint /.well-known/lock-server-configuration |
 | auth-server.ingress.lockConfigLabels | object | `{}` | Lock config ingress resource labels. key app is taken |
 | auth-server.ingress.lockEnabled | bool | `false` | Enable endpoint /jans-lock |
 | auth-server.ingress.lockLabels | object | `{}` | Lock ingress resource labels. key app is taken |

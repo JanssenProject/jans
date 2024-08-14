@@ -628,8 +628,8 @@ jansScr::%(introspection_introspection_github_claims_introspection_github_claims
 jansScrTyp: introspection
 
 dn: inum=9BAF-90D7,ou=scripts,o=jans
-description: Fido2 authentication module
-displayName: fido2
+description: Fido2 Extension module
+displayName: fido2 extension
 inum: 9BAF-90D7
 jansConfProperty: {"value1":"fido2_server_uri","value2":"https://%(hostname)s","description":""}
 jansLevel: 1
