@@ -8,6 +8,8 @@
 
     <test name="Unit Tests" enabled="true">
         <classes>
+            <class name="io.jans.as.server.filter.HeadersFilterTest" />
+
             <class name="io.jans.as.server.model.CIBAGrantTest" />
             <class name="io.jans.as.server.model.authorize.JwtAuthorizationRequestTest" />
             <class name="io.jans.as.server.model.registration.RegisterParamsValidatorTest" />
