@@ -42,6 +42,7 @@ import io.jans.model.ldap.GluuLdapConfiguration;
 import io.jans.model.metric.MetricType;
 import io.jans.model.security.Credentials;
 import io.jans.model.security.SimplePrincipal;
+import io.jans.model.user.SimpleUser;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.AuthenticationException;
 import io.jans.orm.exception.EntryPersistenceException;
@@ -444,7 +445,7 @@ public class AuthenticationService {
                         baseDn = baseDnProperty.toString();
                     }
 
-                    User user = getUserByAttribute(ldapAuthEntryManager, baseDn, primaryKey, keyValue);
+                    SimpleUser user = getUserByAttribute(ldapAuthEntryManager, baseDn, primaryKey, keyValue);
                     if (user != null) {
                         String userDn = user.getDn();
                         log.debug("Attempting to authenticate userDN: {}", userDn);
@@ -569,7 +570,7 @@ public class AuthenticationService {
         return authenticated;
     }
 
-    private User getUserByAttribute(PersistenceEntryManager ldapAuthEntryManager, String baseDn, String attributeName,
+    private SimpleUser getUserByAttribute(PersistenceEntryManager ldapAuthEntryManager, String baseDn, String attributeName,
                                     String attributeValue) {
         log.debug("Getting user information from LDAP: attributeName = '{}', attributeValue = '{}'", attributeName,
                 attributeValue);
@@ -578,7 +579,7 @@ public class AuthenticationService {
             return null;
         }
 
-        User user = new User();
+        SimpleUser user = new SimpleUser();
         user.setDn(baseDn);
 
         List<CustomObjectAttribute> customAttributes = new ArrayList<CustomObjectAttribute>();
@@ -587,13 +588,13 @@ public class AuthenticationService {
         user.setCustomAttributes(customAttributes);
 
         log.debug("Searching user by attributes: '{}', baseDn: '{}'", customAttributes, baseDn);
-        List<User> entries = ldapAuthEntryManager.findEntries(user, 1);
+        List<SimpleUser> entries = ldapAuthEntryManager.findEntries(user, 1);
         log.debug("Found '{}' entries", entries.size());
 
         if (entries.size() > 0) {
-            User foundUser = entries.get(0);
+        	SimpleUser foundUser = entries.get(0);
 
-            return ldapAuthEntryManager.find(User.class, foundUser.getDn());
+            return ldapAuthEntryManager.find(SimpleUser.class, foundUser.getDn());
         } else {
             return null;
         }

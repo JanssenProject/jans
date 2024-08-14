@@ -83,6 +83,7 @@ public class ApiConstants {
     public static final String STREAM = "/stream";
     public static final String SERVICES = "/services";
     public static final String ASSET_TYPE = "/asset-type";
+    public static final String SERVICE = "/service";
     
     public static final String APP_VERSION = "/app-version";
     public static final String SERVER_STAT = "/server-stat";
@@ -102,9 +103,10 @@ public class ApiConstants {
     public static final String PLUGIN_NAME_PATH = "{pluginName}";
     public static final String AUTHORIZATIONS = "/authorizations";
     public static final String USERID_PATH = "{userId}";
+    public static final String SERVICE_NAME_PARAM_PATH = "/{service-name}";
+    
     public static final String USERID = "userId";
     public static final String USERNAME = "username";
-
     public static final String LIMIT = "limit";
     public static final String START_INDEX = "startIndex";
     public static final String PATTERN = "pattern";
