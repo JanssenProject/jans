@@ -10,9 +10,14 @@ metadata:
 {{- if (index .Values "auth-server-key-rotation" "additionalLabels") }}
 {{ toYaml (index .Values "auth-server-key-rotation" "additionalLabels") | indent 4 }}
 {{- end }}
-{{- if (index .Values "auth-server-key-rotation" "additionalAnnotations") }}
+{{- if or (index .Values "auth-server-key-rotation" "additionalAnnotations") (.Values.customAnnotations.cronjob) }}
   annotations:
+{{- if index .Values "auth-server-key-rotation" "additionalAnnotations" }}
 {{ toYaml (index .Values "auth-server-key-rotation" "additionalAnnotations") | indent 4 }}
+{{- end }}
+{{- if .Values.customAnnotations.cronjob }}
+{{ toYaml .Values.customAnnotations.cronjob | indent 4 }}
+{{- end }}
 {{- end }}
 spec:
   schedule: "@every {{ index .Values "auth-server-key-rotation" "keysLife" }}h"
@@ -33,6 +38,7 @@ spec:
           dnsConfig:
 {{ toYaml . | indent 12 }}
         {{- end }}
+          serviceAccountName: {{ .Values.serviceAccountName }}
           containers:
             - name: {{ include "janssen-all-in-one.name" . }}-as-key-rotation
               {{- if (index .Values "auth-server-key-rotation" "customScripts") }}
