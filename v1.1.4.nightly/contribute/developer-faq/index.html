@@ -5102,6 +5102,8 @@
         
           
         
+          
+        
       
       
         
@@ -5321,6 +5323,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../../admin/developer/xframe/" class="md-nav__link">
+        X-Frame-Options
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../admin/developer/managed-beans/" class="md-nav__link">
         Managed Beans
       </a>
@@ -5338,7 +5354,7 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_11_6" type="checkbox" id="__nav_1_11_6" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_11_7" type="checkbox" id="__nav_1_11_7" >
       
       
       
@@ -5358,14 +5374,14 @@
         <div class="md-nav__link md-nav__link--index ">
           <a href="../../admin/developer/customization/">Customization</a>
           
-            <label for="__nav_1_11_6">
+            <label for="__nav_1_11_7">
               <span class="md-nav__icon md-icon"></span>
             </label>
           
         </div>
       
       <nav class="md-nav" aria-label="Customization" data-md-level="3">
-        <label class="md-nav__title" for="__nav_1_11_6">
+        <label class="md-nav__title" for="__nav_1_11_7">
           <span class="md-nav__icon md-icon"></span>
           Customization
         </label>
@@ -5417,7 +5433,7 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_11_7" type="checkbox" id="__nav_1_11_7" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_11_8" type="checkbox" id="__nav_1_11_8" >
       
       
       
@@ -5483,14 +5499,14 @@
         <div class="md-nav__link md-nav__link--index ">
           <a href="../../admin/developer/scripts/">Interception Scripts</a>
           
-            <label for="__nav_1_11_7">
+            <label for="__nav_1_11_8">
               <span class="md-nav__icon md-icon"></span>
             </label>
           
         </div>
       
       <nav class="md-nav" aria-label="Interception Scripts" data-md-level="3">
-        <label class="md-nav__title" for="__nav_1_11_7">
+        <label class="md-nav__title" for="__nav_1_11_8">
           <span class="md-nav__icon md-icon"></span>
           Interception Scripts
         </label>
@@ -8858,7 +8874,7 @@ you as a quick reference to generate Let's Encrypt CA certificates.</p>
 </div>
 <p>This installation uses Gluu Testing certificate.</p>
 <h3 id="download-installer">Download Installer<a class="headerlink" href="#download-installer" title="Permanent link">#</a></h3>
-<div class="highlight"><pre><span></span><code>wget https://raw.githubusercontent.com/JanssenProject/jans/v1.1.4.nightly/jans-linux-setup/jans_setup/install.py -O install.py
+<div class="highlight"><pre><span></span><code>wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-linux-setup/jans_setup/install.py -O install.py
 </code></pre></div>
 <h3 id="execute-installer">Execute Installer<a class="headerlink" href="#execute-installer" title="Permanent link">#</a></h3>
 <div class="highlight"><pre><span></span><code>python3 install.py --profile=openbanking --args=&quot;-ob-key-fn=/opt/jans/jans-setup/openbanking/static/ob-gluu-test.key -static-kid=ob-gluu-test -jwks-uri=https://ox.gluu.org/icrby8xcvbcv/ob/ob-gluu-test.jwks --disable-ob-auth-script -ob-alias=ob-gluu-test&quot;

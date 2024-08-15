@@ -5106,6 +5106,8 @@
         
           
         
+          
+        
       
       
         
@@ -5325,6 +5327,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../../xframe/" class="md-nav__link">
+        X-Frame-Options
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../managed-beans/" class="md-nav__link">
         Managed Beans
       </a>
@@ -5342,7 +5358,7 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_11_6" type="checkbox" id="__nav_1_11_6" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_11_7" type="checkbox" id="__nav_1_11_7" >
       
       
       
@@ -5362,14 +5378,14 @@
         <div class="md-nav__link md-nav__link--index ">
           <a href="../../customization/">Customization</a>
           
-            <label for="__nav_1_11_6">
+            <label for="__nav_1_11_7">
               <span class="md-nav__icon md-icon"></span>
             </label>
           
         </div>
       
       <nav class="md-nav" aria-label="Customization" data-md-level="3">
-        <label class="md-nav__title" for="__nav_1_11_6">
+        <label class="md-nav__title" for="__nav_1_11_7">
           <span class="md-nav__icon md-icon"></span>
           Customization
         </label>
@@ -5423,7 +5439,7 @@
     <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_11_7" type="checkbox" id="__nav_1_11_7" checked>
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_11_8" type="checkbox" id="__nav_1_11_8" checked>
       
       
       
@@ -5489,14 +5505,14 @@
         <div class="md-nav__link md-nav__link--index ">
           <a href="../">Interception Scripts</a>
           
-            <label for="__nav_1_11_7">
+            <label for="__nav_1_11_8">
               <span class="md-nav__icon md-icon"></span>
             </label>
           
         </div>
       
       <nav class="md-nav" aria-label="Interception Scripts" data-md-level="3">
-        <label class="md-nav__title" for="__nav_1_11_7">
+        <label class="md-nav__title" for="__nav_1_11_8">
           <span class="md-nav__icon md-icon"></span>
           Interception Scripts
         </label>
@@ -8752,7 +8768,7 @@
 <p>Resource Owner Password Credentials script allows modifying the behavior of Resource Owner Password Credentials Grant (<a href="https://www.rfc-editor.org/rfc/rfc6749#section-4.3">RFC 6749</a>).</p>
 <p>The script is invoked after normal authentication and can either leave current result or change it - authenticate if not authenticated - it should return True and optionally set user (via <code>context.setUser(user)</code>).</p>
 <h2 id="interface">Interface<a class="headerlink" href="#interface" title="Permanent link">#</a></h2>
-<p>The ROPC script implements the <a href="https://github.com/JanssenProject/jans/blob/v1.1.4.nightly/jans-core/script/src/main/java/io/jans/model/custom/script/type/owner/ResourceOwnerPasswordCredentialsType.java">ResourceOwnerPasswordCredentialsType</a> interface. This extends methods from the base script type in addition to adding new method:</p>
+<p>The ROPC script implements the <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-core/script/src/main/java/io/jans/model/custom/script/type/owner/ResourceOwnerPasswordCredentialsType.java">ResourceOwnerPasswordCredentialsType</a> interface. This extends methods from the base script type in addition to adding new method:</p>
 <h3 id="inherited-methods">Inherited Methods<a class="headerlink" href="#inherited-methods" title="Permanent link">#</a></h3>
 <table>
 <thead>
@@ -8802,7 +8818,7 @@
 <tbody>
 <tr>
 <td align="left"><code>customScript</code></td>
-<td align="left">The custom script object. <a href="https://github.com/JanssenProject/jans/blob/v1.1.4.nightly/jans-core/script/src/main/java/io/jans/model/custom/script/model/CustomScript.java">Reference</a></td>
+<td align="left">The custom script object. <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-core/script/src/main/java/io/jans/model/custom/script/model/CustomScript.java">Reference</a></td>
 </tr>
 <tr>
 <td align="left"><code>configurationAttributes</code></td>
@@ -8810,11 +8826,11 @@
 </tr>
 <tr>
 <td align="left"><code>SimpleCustomProperty</code></td>
-<td align="left">Map of configuration properties. <a href="https://github.com/JanssenProject/jans/blob/v1.1.4.nightly/jans-core/util/src/main/java/io/jans/model/SimpleCustomProperty.java">Reference</a></td>
+<td align="left">Map of configuration properties. <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-core/util/src/main/java/io/jans/model/SimpleCustomProperty.java">Reference</a></td>
 </tr>
 <tr>
 <td align="left"><code>context</code></td>
-<td align="left"><a href="https://github.com/JanssenProject/jans/blob/v1.1.4.nightly/jans-auth-server/server/src/main/java/io/jans/as/server/service/external/context/ExternalResourceOwnerPasswordCredentialsContext.java">Reference</a></td>
+<td align="left"><a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/jans-auth-server/server/src/main/java/io/jans/as/server/service/external/context/ExternalResourceOwnerPasswordCredentialsContext.java">Reference</a></td>
 </tr>
 </tbody>
 </table>

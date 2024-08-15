@@ -5100,6 +5100,8 @@
         
           
         
+          
+        
       
       
         
@@ -5319,6 +5321,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../admin/developer/xframe/" class="md-nav__link">
+        X-Frame-Options
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../admin/developer/managed-beans/" class="md-nav__link">
         Managed Beans
       </a>
@@ -5336,7 +5352,7 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_11_6" type="checkbox" id="__nav_1_11_6" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_11_7" type="checkbox" id="__nav_1_11_7" >
       
       
       
@@ -5356,14 +5372,14 @@
         <div class="md-nav__link md-nav__link--index ">
           <a href="../../../admin/developer/customization/">Customization</a>
           
-            <label for="__nav_1_11_6">
+            <label for="__nav_1_11_7">
               <span class="md-nav__icon md-icon"></span>
             </label>
           
         </div>
       
       <nav class="md-nav" aria-label="Customization" data-md-level="3">
-        <label class="md-nav__title" for="__nav_1_11_6">
+        <label class="md-nav__title" for="__nav_1_11_7">
           <span class="md-nav__icon md-icon"></span>
           Customization
         </label>
@@ -5415,7 +5431,7 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_11_7" type="checkbox" id="__nav_1_11_7" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_11_8" type="checkbox" id="__nav_1_11_8" >
       
       
       
@@ -5481,14 +5497,14 @@
         <div class="md-nav__link md-nav__link--index ">
           <a href="../../../admin/developer/scripts/">Interception Scripts</a>
           
-            <label for="__nav_1_11_7">
+            <label for="__nav_1_11_8">
               <span class="md-nav__icon md-icon"></span>
             </label>
           
         </div>
       
       <nav class="md-nav" aria-label="Interception Scripts" data-md-level="3">
-        <label class="md-nav__title" for="__nav_1_11_7">
+        <label class="md-nav__title" for="__nav_1_11_8">
           <span class="md-nav__icon md-icon"></span>
           Interception Scripts
         </label>
@@ -8652,7 +8668,7 @@
 </tr>
 </tbody>
 </table>
-<p>To update this setting in Jans persistence, follow this <a href="https://github.com/JanssenProject/jans-cli-tui/blob/v1.1.4.nightly/docs/cli/cli-custom-scripts.md#update-an-existing-custom-script">link</a></p>
+<p>To update this setting in Jans persistence, follow this <a href="https://github.com/JanssenProject/jans-cli-tui/blob/vreplace-janssen-version/docs/cli/cli-custom-scripts.md#update-an-existing-custom-script">link</a></p>
 <h3 id="enable-sign-in-with-apple-authentication-script">Enable Sign-in with Apple Authentication script<a class="headerlink" href="#enable-sign-in-with-apple-authentication-script" title="Permanent link">#</a></h3>
 <p>By default, users will get the default authentication mechanism as specified above. However, using the OpenID Connect acr_values parameter, web and mobile clients can request any enabled authentication mechanism.</p>
 <p>Obtain the json contents of <code>apple</code> custom script by using a jans-cli command like get-config-scripts-by-type, get-config-scripts-by-inum etc.
@@ -8662,7 +8678,7 @@ Update the custom script and change the enabled attribute to <code>true</code>
 Now Sign-in with Apple is an available authentication mechanism for your Janssen Server. This means that, using OpenID Connect acr_values, applications can now request Apple authentication for users.</p>
 <p>!!! Note To make sure <code>apple</code> has been enabled successfully, you can check your Janssen's Auth Server OpenID Connect configuration by navigating to the following URL: https://<hostname>/.well-known/openid-configuration. Find "acr_values_supported": and you should see "apple".</p>
 <h3 id="make-sign-in-with-apple-script-as-default-authentication-script">Make Sign-in with Apple Script as default authentication script:<a class="headerlink" href="#make-sign-in-with-apple-script-as-default-authentication-script" title="Permanent link">#</a></h3>
-<p>Use this <a href="https://github.com/JanssenProject/jans-cli-tui/blob/v1.1.4.nightly/docs/cli/cli-default-authentication-method.md">link</a> as a reference.</p>
+<p>Use this <a href="https://github.com/JanssenProject/jans-cli-tui/blob/vreplace-janssen-version/docs/cli/cli-default-authentication-method.md">link</a> as a reference.</p>
 <p>Steps:
 1. Create a file say <code>apple-auth-default.json</code> with the following contents
 <div class="highlight"><pre><span></span><code>{

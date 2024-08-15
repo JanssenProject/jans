@@ -5163,6 +5163,8 @@
         
           
         
+          
+        
       
       
         
@@ -5382,6 +5384,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../developer/xframe/" class="md-nav__link">
+        X-Frame-Options
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../developer/managed-beans/" class="md-nav__link">
         Managed Beans
       </a>
@@ -5399,7 +5415,7 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_11_6" type="checkbox" id="__nav_1_11_6" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_11_7" type="checkbox" id="__nav_1_11_7" >
       
       
       
@@ -5419,14 +5435,14 @@
         <div class="md-nav__link md-nav__link--index ">
           <a href="../../../developer/customization/">Customization</a>
           
-            <label for="__nav_1_11_6">
+            <label for="__nav_1_11_7">
               <span class="md-nav__icon md-icon"></span>
             </label>
           
         </div>
       
       <nav class="md-nav" aria-label="Customization" data-md-level="3">
-        <label class="md-nav__title" for="__nav_1_11_6">
+        <label class="md-nav__title" for="__nav_1_11_7">
           <span class="md-nav__icon md-icon"></span>
           Customization
         </label>
@@ -5478,7 +5494,7 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_11_7" type="checkbox" id="__nav_1_11_7" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_11_8" type="checkbox" id="__nav_1_11_8" >
       
       
       
@@ -5544,14 +5560,14 @@
         <div class="md-nav__link md-nav__link--index ">
           <a href="../../../developer/scripts/">Interception Scripts</a>
           
-            <label for="__nav_1_11_7">
+            <label for="__nav_1_11_8">
               <span class="md-nav__icon md-icon"></span>
             </label>
           
         </div>
       
       <nav class="md-nav" aria-label="Interception Scripts" data-md-level="3">
-        <label class="md-nav__title" for="__nav_1_11_7">
+        <label class="md-nav__title" for="__nav_1_11_8">
           <span class="md-nav__icon md-icon"></span>
           Interception Scripts
         </label>
@@ -8763,7 +8779,7 @@
 <p>Start a fresh Ubuntu <code>18.04</code>/<code>20.04</code>/<code>22.04</code> VM with ports <code>443</code> and <code>80</code> open. Then execute the following:</p>
 <p><div class="highlight"><pre><span></span><code>sudo su -
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>wget https://raw.githubusercontent.com/JanssenProject/jans/v1.1.4.nightly/automation/startjanssendemo.sh <span class="o">&amp;&amp;</span> chmod u+x startjanssendemo.sh <span class="o">&amp;&amp;</span> ./startjanssendemo.sh
+<div class="highlight"><pre><span></span><code>wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/startjanssendemo.sh <span class="o">&amp;&amp;</span> chmod u+x startjanssendemo.sh <span class="o">&amp;&amp;</span> ./startjanssendemo.sh
 </code></pre></div></p>
 <p>This will install Docker, Microk8s, Helm and Janssen with the default settings that can be found inside <a href="https://github.com/JanssenProject/jans/blob/main/charts/janssen/values.yaml">values.yaml</a>.  </p>
 <p>The installer will automatically add a record to your hosts record in the VM but if you want to access the endpoints outside the VM you must map the <code>ip</code> of the instance running Ubuntu to the FQDN you provided and then access the endpoints at your browser such in the example in the table below.</p>

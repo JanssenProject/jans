@@ -5191,6 +5191,8 @@
         
           
         
+          
+        
       
       
         
@@ -5410,6 +5412,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../../../developer/xframe/" class="md-nav__link">
+        X-Frame-Options
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../../developer/managed-beans/" class="md-nav__link">
         Managed Beans
       </a>
@@ -5427,7 +5443,7 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_11_6" type="checkbox" id="__nav_1_11_6" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_11_7" type="checkbox" id="__nav_1_11_7" >
       
       
       
@@ -5447,14 +5463,14 @@
         <div class="md-nav__link md-nav__link--index ">
           <a href="../../../developer/customization/">Customization</a>
           
-            <label for="__nav_1_11_6">
+            <label for="__nav_1_11_7">
               <span class="md-nav__icon md-icon"></span>
             </label>
           
         </div>
       
       <nav class="md-nav" aria-label="Customization" data-md-level="3">
-        <label class="md-nav__title" for="__nav_1_11_6">
+        <label class="md-nav__title" for="__nav_1_11_7">
           <span class="md-nav__icon md-icon"></span>
           Customization
         </label>
@@ -5506,7 +5522,7 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_11_7" type="checkbox" id="__nav_1_11_7" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_11_8" type="checkbox" id="__nav_1_11_8" >
       
       
       
@@ -5572,14 +5588,14 @@
         <div class="md-nav__link md-nav__link--index ">
           <a href="../../../developer/scripts/">Interception Scripts</a>
           
-            <label for="__nav_1_11_7">
+            <label for="__nav_1_11_8">
               <span class="md-nav__icon md-icon"></span>
             </label>
           
         </div>
       
       <nav class="md-nav" aria-label="Interception Scripts" data-md-level="3">
-        <label class="md-nav__title" for="__nav_1_11_7">
+        <label class="md-nav__title" for="__nav_1_11_8">
           <span class="md-nav__icon md-icon"></span>
           Interception Scripts
         </label>
@@ -8726,26 +8742,26 @@ sudo yum -y module enable mod_auth_openidc
 <li>Download the release package from the Github Janssen Project
   <a href="https://github.com/JanssenProject/jans/releases">Releases</a></li>
 </ul>
-<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/v1.1.4.nightly/jans-1.1.4.nightly-el8.x86_64.rpm -P ~/
+<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-el8.x86_64.rpm -P ~/
 </code></pre></div>
 <ul>
 <li>
 <p>Verify integrity of the downloaded package using published <code>sha256sum</code>.</p>
 <p>Download <code>sha256sum</code> file for the package</p>
-<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/v1.1.4.nightly/jans-1.1.4.nightly-el8.x86_64.rpm.sha256sum -P ~/
+<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-el8.x86_64.rpm.sha256sum -P ~/
 </code></pre></div>
 <p>Check the hash if it is matching.</p>
-<div class="highlight"><pre><span></span><code>sha256sum -c jans-1.1.4.nightly-el8.x86_64.rpm.sha256sum
+<div class="highlight"><pre><span></span><code>sha256sum -c jans-replace-janssen-version-el8.x86_64.rpm.sha256sum
 </code></pre></div>
 <p>Output similar to below should confirm the integrity of the downloaded package.</p>
-<div class="highlight"><pre><span></span><code>jans-1.1.4.nightly-el8.x86_64.rpm: OK
+<div class="highlight"><pre><span></span><code>jans-replace-janssen-version-el8.x86_64.rpm: OK
 </code></pre></div>
 </li>
 <li>
 <p>Install the package</p>
 </li>
 </ul>
-<div class="highlight"><pre><span></span><code>sudo yum install ~/jans-1.1.4.nightly-el8.x86_64.rpm
+<div class="highlight"><pre><span></span><code>sudo yum install ~/jans-replace-janssen-version-el8.x86_64.rpm
 </code></pre></div>
 <h2 id="run-the-setup-script">Run the setup script<a class="headerlink" href="#run-the-setup-script" title="Permanent link">#</a></h2>
 <ul>
