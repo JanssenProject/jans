@@ -19,7 +19,7 @@
 		<finalName>jans-auth-client</finalName>
 
 		<filters>
-			<filter>${basedir}/profiles/${cfg}/config-oxauth-test-data.properties</filter>
+			<filter>${basedir}/profiles/${cfg}/config-jans-auth-test-data.properties</filter>
 		</filters>
 
 		<testResources>
