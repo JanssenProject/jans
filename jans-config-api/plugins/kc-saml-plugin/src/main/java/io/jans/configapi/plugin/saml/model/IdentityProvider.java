@@ -22,6 +22,8 @@ import java.io.Serializable;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 @DataEntry(sortBy = { "displayName" })
 @ObjectClass(value = "jansTrustedIdp")
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -29,82 +31,105 @@ import jakarta.validation.constraints.Size;
 public class IdentityProvider extends Entry implements Serializable {
 
     @AttributeName(ignoreDuringUpdate = true)
+    @Schema(description = "Unique identifier.")
     private String inum;
 
     @NotNull
     @AttributeName
+    @Schema(description = "Creator of IDP.")
     private String creatorId;
 
     @NotNull
     @AttributeName(name = "name")
+    @Schema(description = "Name uniquely identifies an identity provider.")
     private String name;
 
     @NotNull
     @Size(min = 0, max = 60, message = "Length of the Display Name should not exceed 60")
     @AttributeName
+    @Schema(description = "Identity provider display name.")
     private String displayName;
 
     @NotNull
     @Size(min = 0, max = 500, message = "Length of the Description should not exceed 500")
     @AttributeName
+    @Schema(description = "Description of Identity provider.")
     private String description;
         
     @NotNull
     @AttributeName(name = "realm")
+    @Schema(description = "Realm in which Identity provider is created.")
     private String realm;
 
     @AttributeName(name = "jansEnabled")
+    @Schema(description = "Indicates if Identity provider is enabled.")
     private boolean enabled;
     
     @AttributeName(name = "signingCertificate")
+    @Schema(description = "Digital certificate used to verify the authenticity of the request.")
     private String signingCertificate;
     
     @AttributeName(name = "validateSignature")
     private String validateSignature;
        
     @AttributeName(name = "singleLogoutServiceUrl")
+    @Schema(description = "Url used to send logout requests.")
     private String singleLogoutServiceUrl;  
     
     @AttributeName(name = "nameIDPolicyFormat")
+    @Schema(description = " URI reference corresponding to a name identifier format.")
     private String nameIDPolicyFormat;
     
     @AttributeName(name = "principalAttribute")
+    @Schema(description = " Name or Friendly Name of the attribute used to identify external users.")
     private String principalAttribute;
     
     @AttributeName(name = "principalType")
+    @Schema(description = "Way to identify and track external users from the assertion.")
     private String principalType;
     
     @AttributeName(name = "entityId")
+    @Schema(description = "Entity ID that will be used to uniquely identify this SAML Service Provider.")
     private String idpEntityId;
     
     @AttributeName(name = "singleSignOnServiceUrl")
+    @Schema(description = "Url used to send SAML authentication requests.")
     private String singleSignOnServiceUrl;
     
     @AttributeName(name = "encryptionPublicKey")
+    @Schema(description = "Public key to use to encrypt the message.")
     private String encryptionPublicKey;
     
     @AttributeName
+    @Schema(description = "IDP provider, should be SAML.")
     private String providerId;
 
    @AttributeName
+   @Schema(description = "If enabled, email provided by this provider is not verified even if verification is enabled for the realm.")
     private boolean trustEmail;
 
     @AttributeName
+    @Schema(description = "Enable/disable if tokens must be stored after authenticating users.")
     private boolean storeToken;
 
     @AttributeName
+    @Schema(description = "Enable/disable if new users can read any stored tokens.")
     private boolean addReadTokenRoleOnCreate;
 
     @AttributeName
+    @Deprecated
     private boolean authenticateByDefault;
 
     @AttributeName
+    @Schema(description = "If true, users cannot log in through this provider. They can only link to this provider.")
     private boolean linkOnly;
 
     @AttributeName
+    @Schema(description = "Alias of authentication flow, which is triggered after first login with this identity provider. Term 'First Login' means that no Keycloak account is currently linked to the authenticated identity provider account.")
     private String firstBrokerLoginFlowAlias;
 
     @AttributeName
+    @Schema(description = "Alias of authentication flow, which is triggered after each login with this identity provider.")
     private String postBrokerLoginFlowAlias;
 
     @AttributeName(name = "jansSAMLspMetaDataFN")
@@ -112,9 +137,11 @@ public class IdentityProvider extends Entry implements Serializable {
     private String spMetaDataFN;
 
     @AttributeName(name = "jansSAMLspMetaDataURL")
+    @Schema(description = "SAML SP metadata file URL.")
     private String spMetaDataURL;
     
     @AttributeName(name = "jansSAMLspMetaLocation")
+    @Schema(description = "SP metadata file location.")
     private String spMetaDataLocation;
 
     @AttributeName(name = "jansSAMLidpMetaDataFN")
@@ -122,18 +149,23 @@ public class IdentityProvider extends Entry implements Serializable {
     private String idpMetaDataFN;
 
     @AttributeName(name = "jansSAMLidpMetaDataURL")
+    @Schema(description = "SAML IDP metadata file URL.")
     private String idpMetaDataURL;
     
     @AttributeName(name = "jansSAMLidpMetaLocation")
+    @Schema(description = "SAML IDP metadata file location.")
     private String idpMetaDataLocation;
 
     @AttributeName(name = "jansStatus")
+    @Schema(description = "IDP setup status.")
     private GluuStatus status;
 
     @AttributeName(name = "jansValidationStatus")
+    @Schema(description = "IDP validation status.")
     private ValidationStatus validationStatus;
 
     @AttributeName(name = "jansValidationLog")
+    @Schema(description = "IDP validation log.")
     private List<String> validationLog;
 
     public String getInum() {
