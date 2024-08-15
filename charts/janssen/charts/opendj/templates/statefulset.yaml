@@ -9,9 +9,14 @@ metadata:
 {{- if $.Values.additionalLabels }}
 {{ toYaml $.Values.additionalLabels | indent 4 }}
 {{- end }}
-{{- if $.Values.additionalAnnotations }}
+{{- if or (.Values.additionalAnnotations) (.Values.global.opendj.customAnnotations.statefulset) }}
   annotations:
-{{ toYaml $.Values.additionalAnnotations | indent 4 }}
+{{- if .Values.additionalAnnotations }}
+{{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.global.opendj.customAnnotations.statefulset }}
+{{ toYaml .Values.global.opendj.customAnnotations.statefulset | indent 4 }}
+{{- end }}
 {{- end }}
 spec:
   selector:
@@ -33,6 +38,7 @@ spec:
         runAsUser: 1000
         runAsGroup: 1000
         fsGroup: 1000
+      serviceAccountName: {{ .Values.global.serviceAccountName }}  
       containers:
       - name: {{ include "opendj.name" $ }}
         {{- if .Values.customScripts }}
