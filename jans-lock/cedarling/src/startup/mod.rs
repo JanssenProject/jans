@@ -1,68 +1,62 @@
-use std::{borrow::Cow, sync::OnceLock};
+use std::{borrow::Cow, collections::BTreeMap, sync::OnceLock};
 
 use cedar_policy::*;
-use wasm_bindgen::{prelude::*, throw_str};
+use wasm_bindgen::prelude::*;
 use web_sys::*;
 
 use crate::{crypto, http, lock_master};
 use http::ResponseEx;
 
-pub(crate) mod types;
+pub mod types;
 
-pub(crate) static SCHEMA: OnceLock<Schema> = OnceLock::new();
-pub(crate) static POLICY_SET: OnceLock<PolicySet> = OnceLock::new();
+pub static SCHEMA: OnceLock<Schema> = OnceLock::new();
+pub static POLICY_SET: OnceLock<PolicySet> = OnceLock::new();
+pub static DEFAULT_ENTITIES: OnceLock<serde_json::Value> = OnceLock::new();
 
-pub(crate) async fn init(config: &types::CedarlingConfig) {
-	let policy_store = init_policy_store(&config).await;
-	crypto::init(config, policy_store);
+pub async fn init(config: &mut types::CedarlingConfig) {
+	let trusted_issuers = init_policy_store(config).await;
+	crypto::init(config, trusted_issuers);
 }
 
-pub(crate) async fn init_policy_store(config: &types::CedarlingConfig) -> serde_json::Map<String, serde_json::Value> {
+pub async fn init_policy_store(config: &mut types::CedarlingConfig) -> BTreeMap<String, crypto::types::TrustedIssuer> {
 	// Get PolicyStore JSON
-	let source = match &config.policy_store {
-		types::PolicyStoreConfig::Local => Cow::Borrowed(include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/policy-store/default.json")).as_slice()),
+	let mut policy_store: types::PolicyStoreEntry = match &mut config.policy_store {
+		#[cfg(feature = "direct_startup_strategy")]
+		types::PolicyStoreConfig::Direct { value } => serde_json::from_value(value.take()).unwrap_throw(),
+		types::PolicyStoreConfig::Local { id } => {
+			let data = include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/policy-store/local.json")).as_slice();
+			let decompressed = match config.decompress_policy_store {
+				true => Cow::Owned(miniz_oxide::inflate::decompress_to_vec_zlib(data).unwrap_throw()),
+				false => Cow::Borrowed(data),
+			};
+
+			let source = serde_json::from_slice::<serde_json::Value>(&decompressed).unwrap_throw();
+			let entry = source.get(id.as_str()).cloned().expect_throw("Can't find PolicyStore with given id in Local Store");
+
+			serde_json::from_value(entry).unwrap_throw()
+		}
 		types::PolicyStoreConfig::Remote { url } => {
 			let res = http::get(url, &[]).await.expect_throw("Unable fetch Policy Store");
 			let bytes = res.into_bytes().await.expect_throw("Can't convert Policy Store response to String");
-			Cow::Owned(bytes)
+
+			// decompress if necessary
+			let bytes = match config.decompress_policy_store {
+				true => Cow::Owned(miniz_oxide::inflate::decompress_to_vec_zlib(&bytes).unwrap_throw()),
+				false => Cow::Owned(bytes),
+			};
+
+			serde_json::from_slice(&bytes).unwrap_throw()
 		}
-		policy_store_config => lock_master::init(policy_store_config).await,
-	};
-
-	// Decompress if necessary
-	let source = match config.decompress_policy_store {
-		true => Cow::Owned(miniz_oxide::inflate::decompress_to_vec_zlib(&source).unwrap_throw()),
-		false => source,
-	};
-
-	// Parse JSON
-	let policy_store = serde_json::from_slice::<serde_json::Value>(&source).unwrap_throw();
-	let mut policy_store = match policy_store {
-		serde_json::Value::Object(map) => map,
-		p => {
-			let error = format!("Expected top-level policy store to be an Object. Found: {:?}", p);
-			throw_str(&error)
-		}
-	};
-
-	// Load Schema
-	let schema = {
-		let schema = policy_store.remove("Schema").expect_throw("Can't find Schema in policy store");
-		Schema::from_json_value(schema).unwrap_throw()
-	};
-
-	// Load PolicySet
-	let policies = {
-		let mut policies = policy_store.remove("PolicySet").expect_throw("Can't find PolicySet in policy store");
-		let policies = policies.as_array_mut().expect_throw("expect_throw PolicySet to be an array");
-
-		let iter = policies.drain(..).map(|policy| Policy::from_json(None, policy).unwrap_throw());
-		PolicySet::from_policies(iter).unwrap_throw()
+		policy_store_config => lock_master::init(policy_store_config, &config.application_name, config.decompress_policy_store).await,
 	};
 
 	// Persist PolicyStore data
-	SCHEMA.set(schema).expect_throw("SCHEMA has already been initialized");
-	POLICY_SET.set(policies).expect_throw("POLICY_SET has already been initialized");
+	SCHEMA.set(policy_store.schema).expect_throw("SCHEMA already initialized");
+	POLICY_SET.set(policy_store.policies).expect_throw("POLICY_SET already initialized");
 
-	policy_store
+	if let Some(entities) = policy_store.default_entities.take() {
+		DEFAULT_ENTITIES.set(entities).expect_throw("DEFAULT_ENTITIES already initialized");
+	}
+
+	policy_store.trusted_issuers
 }
