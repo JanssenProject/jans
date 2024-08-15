@@ -40,7 +40,7 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # SCIM
 # ====
 
-ENV CN_VERSION=1.1.4-SNAPSHOT
+ENV CN_VERSION=1.1.4
 ENV CN_BUILD_DATE='2024-08-08 08:49'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-scim-server/${CN_VERSION}/jans-scim-server-${CN_VERSION}.war
