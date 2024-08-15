@@ -95,13 +95,13 @@ public class AcrsResource extends ConfigBaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.ACRS_WRITE_ACCESS }, superScopes = {
             ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response updateDefaultAuthenticationMethod(@NotNull AuthenticationMethod authenticationMethod) {
-        log.debug("ACRS details to  update - authenticationMethod:{}", authenticationMethod);
+        log.info("ACRS details to  update - authenticationMethod:{}", authenticationMethod);
 
         if (authenticationMethod == null || StringUtils.isBlank(authenticationMethod.getDefaultAcr())) {
             throwBadRequestException("Default authentication method should not be null or empty !");
         }
 
-        if (authenticationMethod != null) {
+        if (authenticationMethod != null && StringUtils.isNotBlank(authenticationMethod.getDefaultAcr())) {
             validateAuthenticationMethod(authenticationMethod.getDefaultAcr());
 
             final GluuConfiguration gluuConfiguration = configurationService.findGluuConfiguration();
@@ -116,16 +116,18 @@ public class AcrsResource extends ConfigBaseResource {
                 appConfiguration.isAcrValidationEnabled());
 
         // if authentication validation check is enabled then validate
-        if (appConfiguration.isAcrValidationEnabled() && (!isAcrValid(authenticationMode))) {
+        boolean isAcrValid = isAcrValid(authenticationMode);
+        log.debug("isAcrValid:{}",isAcrValid);
+        if (appConfiguration.isAcrValidationEnabled() && (!isAcrValid)) {
             throwBadRequestException("INVALID_ACR",
-                    String.format("Authentication script {%s} is not active", authenticationMode));
+                    String.format("Authentication script {%s} is not valid", authenticationMode));
 
         }
     }
 
     private boolean isAcrValid(String authenticationMode) {
         boolean isValid = false;
-        log.debug(" authenticationMethod:{}, appConfiguration.getAcrExclusionList():{}", authenticationMode,
+        log.debug(" Validate ACR being set - authenticationMethod:{}, appConfiguration.getAcrExclusionList():{}", authenticationMode,
                 appConfiguration.getAcrExclusionList());
 
         if (appConfiguration.getAcrExclusionList() != null

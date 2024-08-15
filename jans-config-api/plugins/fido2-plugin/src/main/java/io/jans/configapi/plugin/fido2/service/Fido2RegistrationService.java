@@ -109,12 +109,14 @@ public class Fido2RegistrationService {
         Fido2DeviceData fido2DeviceData = null;
         try {
             String dn = getDnForFido2Device(userId, uid);
+            log.debug("Get Fido2DeviceData identified by dn:{}", dn);
             if (StringHelper.isNotEmpty(userId)) {
                 fido2DeviceData = persistenceEntryManager.find(Fido2DeviceData.class, dn);
             } else {
                 Filter filter = Filter.createEqualityFilter("jansId", uid);
                 fido2DeviceData = persistenceEntryManager.findEntries(dn, Fido2DeviceData.class, filter).get(0);
             }
+            log.debug("Fido2DeviceData identified by dn:{} is:{}", dn , fido2DeviceData);
         } catch (Exception e) {
             log.error("Failed to find Fido2DeviceData with id: " + fido2DeviceData, e);
         }
