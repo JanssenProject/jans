@@ -20,7 +20,7 @@
 
 		<filters>
 			<filter>profiles/${cfg}/config-build.properties</filter>
-			<filter>${basedir}/profiles/${cfg}/config-jans-auth.propertiess</filter>
+			<filter>${basedir}/profiles/${cfg}/config-jans-auth.properties</filter>
 
 			<filter>${basedir}/profiles/${cfg}/config-jans-auth-test.properties</filter>
 			<filter>profiles/${cfg}/config-jans-auth-test-data.properties</filter>
