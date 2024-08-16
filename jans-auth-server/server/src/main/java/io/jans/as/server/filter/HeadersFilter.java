@@ -32,6 +32,8 @@ public class HeadersFilter implements Filter {
         HttpServletResponse httpResponse = (HttpServletResponse) response;
 
         addXFrameOptionsResponseHeader(httpRequest, httpResponse, configurationFactory.getAppConfiguration());
+
+        chain.doFilter(request, response);
     }
 
     public static void addXFrameOptionsResponseHeader(HttpServletRequest httpRequest, HttpServletResponse httpResponse, AppConfiguration appConfiguration) {
