@@ -8754,7 +8754,7 @@
 <p>Casa's authentication is backed by a main custom script that determines which authentication methods are currently supported, dynamically imports relevant custom scripts, and orchestrates the general flow while delegating specific implementation details to some of those scripts.</p>
 <p>The main script supports backtracking: if a user is asked to present a specific credential and that credential isn't currently available, he can choose an alternative credential by visiting a different page corresponding to the alternative authentication method. Users can backtrack any number of times.</p>
 <h3 id="script-requisites">Script requisites<a class="headerlink" href="#script-requisites" title="Permanent link">#</a></h3>
-<p>To code the script corresponding to the authentication method to add, use the <code>.py</code> script found <a href="https://github.com/JanssenProject/jans/tree/v1.1.4.nightly/jans-casa/plugins/samples/sample-cred">here</a> as a canvas. Ensure the following conditions are met so that it properly integrates in the main Casa flow:</p>
+<p>To code the script corresponding to the authentication method to add, use the <code>.py</code> script found <a href="https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-casa/plugins/samples/sample-cred">here</a> as a canvas. Ensure the following conditions are met so that it properly integrates in the main Casa flow:</p>
 <ul>
 <li>For step 1, <code>prepareForStep</code> must only return <code>True</code>  </li>
 <li>For step 1, <code>getExtraParametersForStep</code> must only return <code>None</code>  </li>
@@ -8784,7 +8784,7 @@
 </ul>
 <p>Depending on the answers, you may like to start instead with plugin development first. This is not always the case though, however, getting your hands on the plugin might help unclutter the path. </p>
 <h2 id="enrollment-plugin">Enrollment plugin<a class="headerlink" href="#enrollment-plugin" title="Permanent link">#</a></h2>
-<p>Coding a Casa plugin is mainly a Java development task. You can use the "Sample credential" <a href="https://github.com/JanssenProject/jans/tree/v1.1.4.nightly/jans-casa/plugins/samples/sample-cred">plugin</a> as a template to start the work. Ensure you have a development environment with:</p>
+<p>Coding a Casa plugin is mainly a Java development task. You can use the "Sample credential" <a href="https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-casa/plugins/samples/sample-cred">plugin</a> as a template to start the work. Ensure you have a development environment with:</p>
 <ul>
 <li>Java 11 or higher</li>
 <li>Maven 3.8</li>
@@ -8794,7 +8794,7 @@
 <h3 id="plugin-deployment">Plugin deployment<a class="headerlink" href="#plugin-deployment" title="Permanent link">#</a></h3>
 <p>Start with deploying the plugin to get acquainted with the process:</p>
 <ol>
-<li>Download the <code>sample-cred</code> project folder to the local development machine and <code>cd</code> to it. You can download the jans repository <a href="https://github.com/JanssenProject/jans/archive/refs/heads/v1.1.4.nightly.zip">here</a></li>
+<li>Download the <code>sample-cred</code> project folder to the local development machine and <code>cd</code> to it. You can download the jans repository <a href="https://github.com/JanssenProject/jans/archive/refs/heads/vreplace-janssen-version.zip">here</a></li>
 <li>Run <code>mvn -o -Dmaven.test.skip package</code></li>
 <li>This will generate a <code>target</code> folder with a couple of jar files in it</li>
 </ol>
