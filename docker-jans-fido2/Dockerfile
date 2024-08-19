@@ -41,7 +41,7 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # =====
 
 
-ENV CN_VERSION=1.1.4
+ENV CN_VERSION=1.1.5-SNAPSHOT
 ENV CN_BUILD_DATE='2024-08-19 09:46'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-fido2-server/${CN_VERSION}/jans-fido2-server-${CN_VERSION}.war
@@ -223,7 +223,7 @@ EXPOSE $CN_FIDO2_JETTY_PORT
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/fido2" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.1.4" \
+    org.opencontainers.image.version="1.1.5" \
     org.opencontainers.image.title="Janssen FIDO2" \
     org.opencontainers.image.description="FIDO2 server"
 
