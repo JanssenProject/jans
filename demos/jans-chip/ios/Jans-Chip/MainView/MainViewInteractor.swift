@@ -24,6 +24,7 @@ final class MainViewInteractorImpl: MainViewInteractor {
         ServiceClient()
     }()
     private var cancellableSet : Set<AnyCancellable> = []
+    private let mainViewModel = MainViewModelImpl()
     
     private var configuration: OPConfiguration?
     private var fidoConfiguration: FidoConfiguration?
@@ -114,6 +115,8 @@ private extension MainViewInteractorImpl {
         guard let configuration: OPConfiguration = RealmManager.shared.getObject(), let dcRequest = DCRRepository().makeDCRRequestUsingSSA(configuration: configuration, ssa: AppConfig.SSA, scopeText: AppConfig.ALLOWED_REGISTRATION_SCOPES) else {
             return nil
         }
+        
+//        let oidcClientRSA: OIDCClient? = try await mainViewModel.doDCRUsingSSA(ssa: AppConfig.SSA, scopeText: AppConfig.ALLOWED_REGISTRATION_SCOPES)
         
         let oidcClient: OIDCClient? = await withCheckedContinuation { continuation in
             serviceClient.doDCR(dcRequest: dcRequest, url: configuration.registrationEndpoint)

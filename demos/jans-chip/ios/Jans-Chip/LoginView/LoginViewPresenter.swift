@@ -12,6 +12,8 @@ protocol LoginViewPresenter: AnyObject {
     func onError(message: String)
     func onMainStateChanged(viewState: ViewState)
     func onLoading(visible: Bool)
+    func onReloadList()
+    func showAlert(message: String, onAction: @escaping (AlertAction) -> Void)
 }
 
 final class LoginViewPresenterImpl: LoginViewPresenter {
@@ -37,5 +39,16 @@ final class LoginViewPresenterImpl: LoginViewPresenter {
     
     func onLoading(visible: Bool) {
         state.loadingVisible = visible
+    }
+    
+    func showAlert(message: String, onAction: @escaping (AlertAction) -> Void) {
+        DispatchQueue.main.async { [weak self] in
+            self?.state.loadingVisible = false
+            UIApplication.showAlert(message: message, onAction: onAction)
+        }
+    }
+    
+    func onReloadList() {
+        state.loadPasskeyList()
     }
 }

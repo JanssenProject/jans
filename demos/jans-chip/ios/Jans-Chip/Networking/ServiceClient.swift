@@ -39,7 +39,8 @@ public final class ServiceClient {
             .map { response in
                 response.mapError { error in
                     let backendError = response.data.flatMap { try? JSONDecoder().decode(BackendError.self, from: $0)}
-                    return NetworkError(initialError: error, backendError: backendError)
+                    let generalError = response.data.flatMap { try? JSONDecoder().decode(GeneralError.self, from: $0)}
+                    return NetworkError(initialError: error, backendError: backendError, generalError: generalError)
                 }
             }
             .receive(on: DispatchQueue.main)

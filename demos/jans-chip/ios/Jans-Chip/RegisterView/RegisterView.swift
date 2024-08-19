@@ -38,7 +38,7 @@ struct RegisterView: View {
                     .autocapitalization(.none)
                     .textFieldStyle(.roundedBorder)
                     .frame(height: 50)
-                SecureField("Password", text: $password)
+                SecureInputView(titleKey: "Password", inputValue: $password)
                     .onChange(of: password) { newValue in
                         password = newValue
                     }

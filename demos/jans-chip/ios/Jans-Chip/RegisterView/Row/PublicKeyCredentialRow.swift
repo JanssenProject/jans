@@ -14,6 +14,7 @@ struct PublicKeyCredentialRow: Identifiable {
     var subheading: String { publicKeyCredential.rpId }
     var userDisplayName: String { publicKeyCredential.userDisplayName }
     var userPassword: String { publicKeyCredential.userPassword }
+    var rpId: String { publicKeyCredential.rpId }
     
     var id = UUID()
     let icon = "passkey_icon"

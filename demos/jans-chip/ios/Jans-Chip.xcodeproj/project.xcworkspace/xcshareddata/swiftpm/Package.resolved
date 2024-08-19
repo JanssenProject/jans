@@ -1,4 +1,5 @@
 {
+  "originHash" : "d6cdd77770a42a46204608fd1ba93c76645b4069004dc1dc8b68c6fafcbbd8ef",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -7,6 +8,15 @@
       "state" : {
         "revision" : "b2fa556e4e48cbf06cf8c63def138c98f4b811fa",
         "version" : "5.8.0"
+      }
+    },
+    {
+      "identity" : "alamofirenetworkactivitylogger",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/konkab/AlamofireNetworkActivityLogger.git",
+      "state" : {
+        "revision" : "8db9d4e27176905298e7215e3d800e349cdfa30b",
+        "version" : "3.4.0"
       }
     },
     {
@@ -109,5 +119,5 @@
       }
     }
   ],
-  "version" : 2
+  "version" : 3
 }

@@ -107,6 +107,19 @@ final class RealmManager {
         }
     }
     
+    func delete<T: Object>(objectToDelete: T, onResult: ((Bool) -> Void)?) {
+        do {
+            let realm = try Realm()
+            try realm.write {
+                realm.delete(objectToDelete)
+            }
+            onResult?(true)
+        } catch(let error) {
+            print("Error deleting object, reason: \(error.localizedDescription)")
+            onResult?(false)
+        }
+    }
+    
     func incrementUseCounter(credential: PublicKeyCredentialSource) -> Int {
         if let publicKeyCredentialSources: [PublicKeyCredentialSource] = getObjects(), let publicKeyCredentialSource = publicKeyCredentialSources.first(where: { $0.rpId == credential.rpId }) {
             do {

@@ -76,12 +76,6 @@ public enum EndpointRouter: EndpointConfiguration {
     // MARK: - Headers
     public var headers: HTTPHeaders? {
         switch self {
-        case .getAuthorizationChallenge:
-            return [
-                HTTPHeader(name: "Content-Type", value: "application/x-www-form-urlencoded"),
-                HTTPHeader(name: "Cache-Control", value: "no-transform, no-store"),
-                HTTPHeader(name: "Connection", value: "Keep-Alive")
-            ]
         case .getToken(_, _, _, _, _, let authHeader, let dpoP, _):
             return [
                 HTTPHeader(name: "Content-Type", value: "application/x-www-form-urlencoded"),
@@ -93,7 +87,11 @@ public enum EndpointRouter: EndpointConfiguration {
                 HTTPHeader(name: "Content-Type", value: "application/x-www-form-urlencoded"),
                 HTTPHeader(name: "Authorization", value: authHeader)
             ]
-        case .getOPConfiguration, 
+        case .getAuthorizationChallenge:
+            return [
+                HTTPHeader(name: "Content-Type", value: "application/x-www-form-urlencoded"),
+            ]
+        case .getOPConfiguration,
                 .getFidoConfiguration,
                 .doDCR,
                 .doDCRSSA,
@@ -110,7 +108,13 @@ public enum EndpointRouter: EndpointConfiguration {
         let urlWithPathValue = baseURL + path
         var url = try urlWithPathValue.asURL()
         var urlRequest = URLRequest(url: url)
-        urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        switch self {
+        case .getAuthorizationChallenge:
+            urlRequest.addValue("application/x-www-form-urlencoded", forHTTPHeaderField: "Content-Type")
+        default:
+            urlRequest.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        }
         
         urlRequest.httpMethod = method.rawValue
         
@@ -120,13 +124,12 @@ public enum EndpointRouter: EndpointConfiguration {
                     .doDCRSSA,
                     .getOPConfiguration,
                     .getFidoConfiguration,
-                    .getAuthorizationChallenge,
                     .verifyIntegrityTokenOnAppServer,
                     .attestationOption,
                     .attestationResult,
                     .assertionOption:
                 break
-            case .getToken, .getUserInfo, .logout:
+            case .getToken, .getAuthorizationChallenge, .getUserInfo, .logout:
                 var urlComponents = URLComponents(string: urlWithPathValue)!
                 urlComponents.queryItems = []
                 
@@ -148,7 +151,10 @@ public enum EndpointRouter: EndpointConfiguration {
                 urlRequest.httpBody = data
             }
         case let .getAuthorizationChallenge(clientId, username, password, state, nonce, use_device_session, acr_values, auth_method, assertion_result_request, _):
-            let data : Data = "client_id=\(clientId)&username=\(username)&password=\(password)&state=\(state)&nonce=\(nonce)&use_device_session=\(use_device_session)&acr_values=\(acr_values)&auth_method=\(auth_method)&assertion_result_request=\(assertion_result_request)".data(using: .utf8) ?? Data()
+//            let data : Data =
+//                        "client_id=\(clientId)&username=\(username)&password=\(password)&state=\(state)&nonce=\(nonce)&use_device_session=\(use_device_session)&acr_values=\(acr_values)&auth_method=\(auth_method)&assertion_result_request=\(assertion_result_request)".data(using: .utf8) ?? Data()
+            let data : Data =
+                        "client_id=\(clientId)&username=\(username)&password=\("Gluu1234.")".data(using: .utf8) ?? Data()
             urlRequest.httpBody = data
         case let .getToken(clientId, code, grantType, redirectUri, scope, _, _, _):
             let data : Data = "client_id=\(clientId)&code=\(code)&grant_type=\(grantType)&redirect_uri=\(redirectUri)&scope=\(scope)".data(using: .utf8) ?? Data()

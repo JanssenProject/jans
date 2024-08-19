@@ -43,23 +43,24 @@ final class AfterLoginViewInteractorImpl: AfterLoginViewInteractor {
         let authHeaderEncodedString = "\(oidcClient.clientId):\(oidcClient.clientSecret)".data(using: .utf8)?.base64EncodedString() ?? ""
         serviceClient.logout(token: oidcClient.recentGeneratedAccessToken, tokenTypeHint: "access_token", authHeader: "Basic \(authHeaderEncodedString)", url: opConfiguration.revocationEndpoint)
             .sink { [weak self] result in
-                if let error = result.error {
-                    print("error: \(error)")
-//                    switch error {
-//                    case .responseSerializationFailed(let reason):
-//                        if case .invalidEmptyResponse = reason  {
-                            self?.handleSuccessLogout(oidcClient: oidcClient)
-//                            return
-//                        }
-//                        break
-//                    default:
-//                        break
-//                    }
-//                    print("error: \(error)")
-//                    self?.presenter.onError(message: "Error in logout flow. Erorr: \(error.localizedDescription)")
-                } else if let result = result.value {
+                
+                switch result.result {
+                case .success(let logoutResult):
                     print("logout result: \(result)")
                     self?.handleSuccessLogout(oidcClient: oidcClient)
+                case .failure(let error):
+                    switch error.initialError {
+                    case .responseSerializationFailed(let reason):
+                        if case .invalidEmptyResponse = reason  {
+                            self?.handleSuccessLogout(oidcClient: oidcClient)
+                            return
+                        }
+                        break
+                    default:
+                        break
+                    }
+                    print("error: \(error)")
+                    self?.presenter.onError(message: "Error in logout flow. Erorr: \(error.localizedDescription)")
                 }
             }
             .store(in: &cancellableSet)

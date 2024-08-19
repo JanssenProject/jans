@@ -16,6 +16,7 @@ struct AssertionResultRequest: Codable, ErrorHandler {
         case id
         case type
         case rawId
+        case response
     }
     
     var id: String?

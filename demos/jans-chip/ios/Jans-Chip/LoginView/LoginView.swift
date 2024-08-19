@@ -11,7 +11,9 @@ struct LoginView: View {
     
     @ObservedObject
     private var state: LoginViewState
+    
     @State private var selectedPublicKeyCredential: PublicKeyCredentialRow?
+    
     private let interactor: LoginViewInteractor
     
     init(state: LoginViewState, interactor: LoginViewInteractor) {
@@ -27,15 +29,32 @@ struct LoginView: View {
                 .frame(width: 250, height: 100)
             VStack(spacing: 16) {
                 Text(state.titleText)
-                if state.passkeyList.isEmpty == false {
+                if $state.passkeyList.isEmpty == false {
                     VStack(alignment: .leading) {
-                        List(state.passkeyList) { publicKeyCredentialRow in
+                        List($state.passkeyList, id: \.id) { publicKeyCredentialRow in
                             PublicKeyCredentialRowView(
-                                publicKeyCredentialRow: publicKeyCredentialRow,
-                                isSelected: publicKeyCredentialRow.heading == $selectedPublicKeyCredential.wrappedValue?.heading
+                                publicKeyCredentialRow: publicKeyCredentialRow.wrappedValue,
+                                isSelected: publicKeyCredentialRow.wrappedValue.heading == $selectedPublicKeyCredential.wrappedValue?.heading
                             )
+                            .swipeActions(edge: .trailing) {
+                                Button {
+                                    interactor.onShowAlert(message: "Delete this passkey?") { action in
+                                        switch action {
+                                        case .approve:
+                                            selectedPublicKeyCredentialSource(selectedPublicKeyCredential: publicKeyCredentialRow.wrappedValue).flatMap {
+                                                interactor.onKeypassDelete(publicKeyCredentialSource: $0)
+                                            }
+                                        case .deny:
+                                            print("on deny - nothing to do here")
+                                        }
+                                    }
+                                } label: {
+                                    Label("Delete", systemImage: "eraser")
+                                }
+                                .tint(.red)
+                            }
                             .onTapGesture {
-                                selectedPublicKeyCredential = publicKeyCredentialRow
+                                selectedPublicKeyCredential = publicKeyCredentialRow.wrappedValue
                             }
                         }
                         .listStyle(.plain)
@@ -68,5 +87,14 @@ struct LoginView: View {
         }
         .frame(maxWidth: .infinity)
         .padding()
+        .onAppear {
+            state.loadPasskeyList()
+        }
+    }
+    
+    // MARK: - Private
+    
+    private func selectedPublicKeyCredentialSource(selectedPublicKeyCredential: PublicKeyCredentialRow) -> PublicKeyCredentialSource? {
+        state.creds.first(where: { $0.rpId == selectedPublicKeyCredential.subheading })
     }
 }

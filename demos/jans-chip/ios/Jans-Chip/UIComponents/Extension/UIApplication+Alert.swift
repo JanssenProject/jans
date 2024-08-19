@@ -7,6 +7,10 @@
 
 import UIKit
 
+public enum AlertAction {
+    case approve, deny
+}
+
 extension UIApplication {
 
     class func getTopViewController(base: UIViewController? = UIApplication.shared.keyWindow?.rootViewController) -> UIViewController? {
@@ -30,6 +34,21 @@ extension UIApplication {
             print("Alert dissmissed")
         })
         alert.addAction(ok)
+        
+        UIApplication.getTopViewController()?.present(alert, animated: true)
+    }
+    
+    class func showAlert(message: String, onAction: @escaping (AlertAction) -> Void) {
+        let alert = UIAlertController(title: "", message: message, preferredStyle: .alert)
+        let okAction = UIAlertAction(title: "Yes", style: .default, handler: { (action) -> Void in
+            onAction(.approve)
+        })
+        alert.addAction(okAction)
+        
+        let noAction = UIAlertAction(title: "No", style: .default, handler: { (action) -> Void in
+            onAction(.deny)
+        })
+        alert.addAction(noAction)
         
         UIApplication.getTopViewController()?.present(alert, animated: true)
     }

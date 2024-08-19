@@ -20,6 +20,8 @@
 		304311F22ACC05E4006B8D40 /* Jans_ChipApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 304311F12ACC05E4006B8D40 /* Jans_ChipApp.swift */; };
 		304311F62ACC05E5006B8D40 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 304311F52ACC05E5006B8D40 /* Assets.xcassets */; };
 		304311F92ACC05E5006B8D40 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 304311F82ACC05E5006B8D40 /* Preview Assets.xcassets */; };
+		3047ED622C5796EA00D4EBC9 /* SecureInputView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3047ED612C5796EA00D4EBC9 /* SecureInputView.swift */; };
+		3047ED642C579DEA00D4EBC9 /* Binding+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3047ED632C579DEA00D4EBC9 /* Binding+Extension.swift */; };
 		3049C20B2AD6D0BC00164883 /* AppConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3049C20A2AD6D0BC00164883 /* AppConfig.swift */; };
 		3049C2102AD7F59600164883 /* DCRRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3049C20F2AD7F59600164883 /* DCRRepository.swift */; };
 		3049C2122AD7F93100164883 /* DCRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3049C2112AD7F93100164883 /* DCRequest.swift */; };
@@ -83,10 +85,13 @@
 		30A44AC12C4683EF00B71E8A /* CBOR.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30A44AC02C4683EF00B71E8A /* CBOR.swift */; };
 		30A44AC32C469A9300B71E8A /* AttestationResultResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30A44AC22C469A9300B71E8A /* AttestationResultResponse.swift */; };
 		30A44AC52C46A86A00B71E8A /* AuthAdaptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30A44AC42C46A86900B71E8A /* AuthAdaptor.swift */; };
+		30AD9F702C733BDB003A489E /* AlamofireNetworkActivityLogger in Frameworks */ = {isa = PBXBuildFile; productRef = 30AD9F6F2C733BDB003A489E /* AlamofireNetworkActivityLogger */; };
 		30AED8FE2C47DE790079F4F8 /* PublicKeyCredential.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30AED8FD2C47DE790079F4F8 /* PublicKeyCredential.swift */; };
 		30AED9002C47E2800079F4F8 /* PublicKeyCredentialRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30AED8FF2C47E2800079F4F8 /* PublicKeyCredentialRow.swift */; };
 		30AED9022C47E4D20079F4F8 /* PublicKeyCredentialRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30AED9012C47E4D20079F4F8 /* PublicKeyCredentialRowView.swift */; };
 		30AED9042C48F3260079F4F8 /* ErrorHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30AED9032C48F3260079F4F8 /* ErrorHandler.swift */; };
+		30B4314E2C5A30AD0066CE3F /* LoginFlowProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30B4314D2C5A30AD0066CE3F /* LoginFlowProvider.swift */; };
+		30B431502C5A38A00066CE3F /* JSONDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30B4314F2C5A38A00066CE3F /* JSONDecoder.swift */; };
 		30BA05422C3FE29A0081FF78 /* AttestationOptionRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30BA05412C3FE29A0081FF78 /* AttestationOptionRequest.swift */; };
 		30BA05442C3FE5B10081FF78 /* AttestationOptionResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30BA05432C3FE5B10081FF78 /* AttestationOptionResponse.swift */; };
 		30BA05462C3FE71B0081FF78 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30BA05452C3FE71B0081FF78 /* User.swift */; };
@@ -115,6 +120,8 @@
 		304311F12ACC05E4006B8D40 /* Jans_ChipApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Jans_ChipApp.swift; sourceTree = "<group>"; };
 		304311F52ACC05E5006B8D40 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		304311F82ACC05E5006B8D40 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		3047ED612C5796EA00D4EBC9 /* SecureInputView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecureInputView.swift; sourceTree = "<group>"; };
+		3047ED632C579DEA00D4EBC9 /* Binding+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Binding+Extension.swift"; sourceTree = "<group>"; };
 		3049C20A2AD6D0BC00164883 /* AppConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppConfig.swift; sourceTree = "<group>"; };
 		3049C20F2AD7F59600164883 /* DCRRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DCRRepository.swift; sourceTree = "<group>"; };
 		3049C2112AD7F93100164883 /* DCRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DCRequest.swift; sourceTree = "<group>"; };
@@ -179,6 +186,8 @@
 		30AED8FF2C47E2800079F4F8 /* PublicKeyCredentialRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublicKeyCredentialRow.swift; sourceTree = "<group>"; };
 		30AED9012C47E4D20079F4F8 /* PublicKeyCredentialRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublicKeyCredentialRowView.swift; sourceTree = "<group>"; };
 		30AED9032C48F3260079F4F8 /* ErrorHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorHandler.swift; sourceTree = "<group>"; };
+		30B4314D2C5A30AD0066CE3F /* LoginFlowProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginFlowProvider.swift; sourceTree = "<group>"; };
+		30B4314F2C5A38A00066CE3F /* JSONDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONDecoder.swift; sourceTree = "<group>"; };
 		30BA05412C3FE29A0081FF78 /* AttestationOptionRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttestationOptionRequest.swift; sourceTree = "<group>"; };
 		30BA05432C3FE5B10081FF78 /* AttestationOptionResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AttestationOptionResponse.swift; sourceTree = "<group>"; };
 		30BA05452C3FE71B0081FF78 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
@@ -200,6 +209,7 @@
 				3063E5A62AD410F9002B4879 /* RealmSwift in Frameworks */,
 				3063E5732ACD54C9002B4879 /* Alamofire in Frameworks */,
 				3004A9FC2AEBE414000CDB62 /* SwiftJWT in Frameworks */,
+				30AD9F702C733BDB003A489E /* AlamofireNetworkActivityLogger in Frameworks */,
 				30CC3C1B2C3BF02800AFFD0D /* JWTDecode in Frameworks */,
 				307176312B0E35D5001C19B1 /* JOSESwift in Frameworks */,
 			);
@@ -268,6 +278,8 @@
 				3016F7632C4E3C8300F8BD15 /* Platform.swift */,
 				304C944B2C4E6D0B00E689B0 /* CredentialSelector.swift */,
 				304C944D2C4E834C00E689B0 /* WebAuthnCryptography.swift */,
+				30B4314D2C5A30AD0066CE3F /* LoginFlowProvider.swift */,
+				30B4314F2C5A38A00066CE3F /* JSONDecoder.swift */,
 			);
 			path = Helper;
 			sourceTree = "<group>";
@@ -351,6 +363,7 @@
 				3063E5AC2AD6BDED002B4879 /* Extension */,
 				3063E5962AD051D7002B4879 /* JansButton.swift */,
 				30D0B7A42AF2793800322E90 /* CheckListView.swift */,
+				3047ED612C5796EA00D4EBC9 /* SecureInputView.swift */,
 			);
 			path = UIComponents;
 			sourceTree = "<group>";
@@ -390,6 +403,7 @@
 			isa = PBXGroup;
 			children = (
 				3063E5AD2AD6BE05002B4879 /* UIApplication+Alert.swift */,
+				3047ED632C579DEA00D4EBC9 /* Binding+Extension.swift */,
 			);
 			path = Extension;
 			sourceTree = "<group>";
@@ -461,6 +475,7 @@
 				3004A9FB2AEBE414000CDB62 /* SwiftJWT */,
 				307176302B0E35D5001C19B1 /* JOSESwift */,
 				30CC3C1A2C3BF02800AFFD0D /* JWTDecode */,
+				30AD9F6F2C733BDB003A489E /* AlamofireNetworkActivityLogger */,
 			);
 			productName = "Jans-Chip";
 			productReference = 304311EE2ACC05E4006B8D40 /* Jans-Chip.app */;
@@ -496,6 +511,7 @@
 				3004A9FA2AEBE414000CDB62 /* XCRemoteSwiftPackageReference "Swift-JWT" */,
 				3071762F2B0E35D4001C19B1 /* XCRemoteSwiftPackageReference "JOSESwift" */,
 				30CC3C192C3BF02800AFFD0D /* XCRemoteSwiftPackageReference "JWTDecode" */,
+				30AD9F6E2C733BDB003A489E /* XCRemoteSwiftPackageReference "AlamofireNetworkActivityLogger" */,
 			);
 			productRefGroup = 304311EF2ACC05E4006B8D40 /* Products */;
 			projectDirPath = "";
@@ -539,6 +555,7 @@
 				30AED9002C47E2800079F4F8 /* PublicKeyCredentialRow.swift in Sources */,
 				3063E5682ACC0890002B4879 /* MainViewInteractor.swift in Sources */,
 				30A44AC12C4683EF00B71E8A /* CBOR.swift in Sources */,
+				3047ED642C579DEA00D4EBC9 /* Binding+Extension.swift in Sources */,
 				3063E5AB2AD41238002B4879 /* OIDCClient.swift in Sources */,
 				3063E5792ACD60D7002B4879 /* TokenResponse.swift in Sources */,
 				307BFF472C536EF600B85B80 /* SSARegRequest.swift in Sources */,
@@ -549,6 +566,7 @@
 				3063E5922AD04A34002B4879 /* RegisterViewState.swift in Sources */,
 				307176332B0E3861001C19B1 /* Checksum.swift in Sources */,
 				3063E5972AD051D7002B4879 /* JansButton.swift in Sources */,
+				3047ED622C5796EA00D4EBC9 /* SecureInputView.swift in Sources */,
 				306EA0DC2AF0F27400167E4C /* AfterLoginViewPresenter.swift in Sources */,
 				30A44AAD2C416E4200B71E8A /* Authenticator.swift in Sources */,
 				30A44AAF2C41728000B71E8A /* CredentialSafe.swift in Sources */,
@@ -579,10 +597,12 @@
 				30CC3C1F2C3C072000AFFD0D /* FidoConfiguration.swift in Sources */,
 				304C944E2C4E834C00E689B0 /* WebAuthnCryptography.swift in Sources */,
 				3090C0AD2C5242C800FBEC81 /* AuthenticatorGetAssertionResult.swift in Sources */,
+				30B431502C5A38A00066CE3F /* JSONDecoder.swift in Sources */,
 				3004A9F92AEBDE79000CDB62 /* DPoPProofFactory.swift in Sources */,
 				3063E5832ACD78DF002B4879 /* EndpointRouter.swift in Sources */,
 				3063E5812ACD7897002B4879 /* EndpointConfiguration.swift in Sources */,
 				304311F22ACC05E4006B8D40 /* Jans_ChipApp.swift in Sources */,
+				30B4314E2C5A30AD0066CE3F /* LoginFlowProvider.swift in Sources */,
 				3063E5A02AD406D3002B4879 /* LoginView.swift in Sources */,
 				3063E56A2ACC0973002B4879 /* MainViewState.swift in Sources */,
 				3049C2162AD8151100164883 /* PlayIntegrityRepository.swift in Sources */,
@@ -842,6 +862,14 @@
 				minimumVersion = 2.4.0;
 			};
 		};
+		30AD9F6E2C733BDB003A489E /* XCRemoteSwiftPackageReference "AlamofireNetworkActivityLogger" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/konkab/AlamofireNetworkActivityLogger.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.4.0;
+			};
+		};
 		30CC3C192C3BF02800AFFD0D /* XCRemoteSwiftPackageReference "JWTDecode" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/auth0/JWTDecode.swift";
@@ -872,6 +900,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 3071762F2B0E35D4001C19B1 /* XCRemoteSwiftPackageReference "JOSESwift" */;
 			productName = JOSESwift;
+		};
+		30AD9F6F2C733BDB003A489E /* AlamofireNetworkActivityLogger */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 30AD9F6E2C733BDB003A489E /* XCRemoteSwiftPackageReference "AlamofireNetworkActivityLogger" */;
+			productName = AlamofireNetworkActivityLogger;
 		};
 		30CC3C1A2C3BF02800AFFD0D /* JWTDecode */ = {
 			isa = XCSwiftPackageProductDependency;

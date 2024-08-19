@@ -15,7 +15,7 @@ protocol RegisterViewInteractor: AnyObject {
     func goToLogin()
 }
 
-final class RegisterViewInteractorImpl: RegisterViewInteractor {
+final class RegisterViewInteractorImpl: RegisterViewInteractor, LoginFlowProvider {
     
     private let presenter: RegisterViewPresenter
     private let mainViewModel: MainViewModel
@@ -28,6 +28,8 @@ final class RegisterViewInteractorImpl: RegisterViewInteractor {
     }()
     
     private var cancellableSet : Set<AnyCancellable> = []
+    
+    var authMethod: String { "enroll" }
     
     @ObservedResults(OIDCClient.self) var oidcClient
     @ObservedResults(OPConfiguration.self) var opConfiguration
@@ -64,7 +66,8 @@ final class RegisterViewInteractorImpl: RegisterViewInteractor {
         mainViewModel.proceedFlowGetUserInfo(
             username: username,
             password: password,
-            authMethod: "passkey") { [weak self] userInfo, errorMessage in
+            authMethod: authMethod,
+            assertionResultRequest: nil) { [weak self] userInfo, errorMessage in
                 if let errorMessage {
                     self?.presenter.onError(message: errorMessage)
                     return

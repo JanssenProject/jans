@@ -15,14 +15,18 @@ final class FidoConfiguration: Object, Codable, ObjectKeyIdentifiable {
     }
     
     private enum CodingKeys: String, CodingKey {
+        case version
         case sno
         case issuer
         case attestation
+        case assertion
     }
     
+    @Persisted var version: String?
     @Persisted var sno: String?
     @Persisted var issuer: String?
     @Persisted var attestation: Attestation?
+    @Persisted var assertion: Attestation?
     
     @Persisted var isSuccessful: Bool?
     @Persisted var errorMessage: String?

@@ -82,14 +82,14 @@ final class Authenticator {
     }
     
     func authenticate(assertionOptionResponse: AssertionOptionResponse, origin: String?, selectedCredential: PublicKeyCredentialSource?) -> AssertionResultRequest {
-        var options: AuthenticatorGetAssertionOptions = generateAuthenticatorGetAssertionOptions(assertionOptionResponse: assertionOptionResponse, origin: origin)
+        let options: AuthenticatorGetAssertionOptions = generateAuthenticatorGetAssertionOptions(assertionOptionResponse: assertionOptionResponse, origin: origin)
         var assertionResultRequest = AssertionResultRequest()
         
         guard let selectedCredential else {
             return assertionResultRequest
         }
         
-        var assertionObject: AuthenticatorGetAssertionResult? = getAssertion(options: options, selectedCredential: selectedCredential, credentialSelector: LocalCredentialSelector())
+        let assertionObject: AuthenticatorGetAssertionResult? = getAssertion(options: options, selectedCredential: selectedCredential, credentialSelector: LocalCredentialSelector())
 
         assertionResultRequest.id = assertionObject?.selectedCredentialId?.base64EncodedString().replacingOccurrences(of: "\n", with: "").replacingOccurrences(of: "=", with: "")
         assertionResultRequest.type = "public-key"
@@ -124,11 +124,9 @@ final class Authenticator {
                 }
             }
             
-            credentials = filteredCredentials
-        }
-        
-        if credentials.isEmpty {
-            return nil
+            if !filteredCredentials.isEmpty {
+                credentials = filteredCredentials
+            }
         }
         
         if credentials.count == 1 {

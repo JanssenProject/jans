@@ -6,10 +6,13 @@
 //
 
 import SwiftUI
+import AlamofireNetworkActivityLogger
 
 struct MainViewAssembler {
 
     static func assembleNavigationWrapped() -> MainView {
+        
+        mainSetup()
 
         let state = MainViewState()
         let presenter = MainViewPresenterImpl(state: state)
@@ -17,5 +20,9 @@ struct MainViewAssembler {
         let view = MainView(state: state, interactor: interactor)
         
         return view
+    }
+    
+    private static func mainSetup() {
+        NetworkActivityLogger.shared.startLogging()
     }
 }

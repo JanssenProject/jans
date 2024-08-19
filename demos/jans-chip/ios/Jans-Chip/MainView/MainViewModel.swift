@@ -10,28 +10,37 @@ import Combine
 
 protocol MainViewModel {
     
-    func proceedFlowGetUserInfo(username: String, password: String, authMethod: String, completion: @escaping ((UserInfo?, String?) -> Void))
+    func proceedFlowGetUserInfo(username: String, password: String, authMethod: String, assertionResultRequest: String?, completion: @escaping ((UserInfo?, String?) -> Void))
     func assertionOption(username: String) async throws -> AssertionOptionResponse
     func attestationOption(userName: String, passwordText: String, userInfo: UserInfo) async throws -> AttestationOptionResponse
     func attestationResult(attestationResultRequest: AttestationResultRequest) async throws -> AttestationOptionResponse
+    func doDCRUsingSSA(ssa: String, scopeText: String) async throws -> OIDCClient?
 }
 
 final class MainViewModelImpl: MainViewModel {
+    private let acrValues = "passkey"
     
+    private let dcrRepository = DCRRepository()
     private var cancellableSet : Set<AnyCancellable> = []
     
     private lazy var serviceClient = {
         ServiceClient()
     }()
     
-    func proceedFlowGetUserInfo(username: String, password: String, authMethod: String, completion: @escaping ((UserInfo?, String?) -> Void)) {
+    func proceedFlowGetUserInfo(
+        username: String,
+        password: String,
+        authMethod: String,
+        assertionResultRequest: String?,
+        completion: @escaping ((UserInfo?, String?) -> Void)
+    ) {
         Task {
             // 1. Get login response
             let loginResponse = try await processLogin(
                 username: username,
                 password: password,
                 authMethod: authMethod,
-                assertionResultRequest: nil
+                assertionResultRequest: assertionResultRequest
             )
             guard loginResponse.isSuccess else {
                 completion(nil, loginResponse.errorMessage ?? "")
@@ -66,18 +75,18 @@ final class MainViewModelImpl: MainViewModel {
     
     func assertionOption(username: String) async throws -> AssertionOptionResponse {
         var optionResponse: AssertionOptionResponse = AssertionOptionResponse(isSuccess: false)
-        guard let fidoConfiguration: FidoConfiguration = RealmManager.shared.getObject(), let assertionOptionsEndpoint = fidoConfiguration.attestation?.optionsEndpoint else {
+        guard let fidoConfiguration: FidoConfiguration = RealmManager.shared.getObject(), let assertionOptionsEndpoint = fidoConfiguration.assertion?.optionsEndpoint else {
             optionResponse.isSuccess = false
             optionResponse.errorMessage = "Fido configuration not found in database."
             return optionResponse
         }
         
-        let assertionOptiorequest = AssertionOptionRequest(username: username)
+        let assertionOptioRequest = AssertionOptionRequest(username: username)
         optionResponse = await withCheckedContinuation { continuation in
-            serviceClient.assertionOption(request: assertionOptiorequest, url: assertionOptionsEndpoint)
+            serviceClient.assertionOption(request: assertionOptioRequest, url: assertionOptionsEndpoint)
                 .sink { result in
                     if let error = result.error {
-                        print("error: \(error)")
+                        print("assertionOption method gets an error: \(error)")
                         optionResponse.isSuccess = false
                         optionResponse.errorMessage = error.localizedDescription
                         continuation.resume(returning: optionResponse)
@@ -106,7 +115,7 @@ final class MainViewModelImpl: MainViewModel {
             serviceClient.attestationOption(attestationRequest: request, url: attestationOptionsEndpoint)
                 .sink { result in
                     if let error = result.error {
-                        print("Error in fetching AttestationOptionResponse : \(error)")
+                        print("attestationOption method gets an error : \(error)")
                         attestationResponse.isSuccess = false
                         attestationResponse.errorMessage = error.localizedDescription
                         continuation.resume(returning: attestationResponse)
@@ -145,6 +154,10 @@ final class MainViewModelImpl: MainViewModel {
         
         return attestationOptionResponse
     }
+    
+    func doDCRUsingSSA(ssa: String, scopeText: String) async throws -> OIDCClient? {
+        try? await dcrRepository.doDCRUsingSSA(ssaJwt: ssa, scopeText: scopeText)
+    }
 }
 
 private extension MainViewModelImpl {
@@ -170,14 +183,14 @@ private extension MainViewModelImpl {
                 username: username,
                 password: password,
                 useDeviceSession: true,
-                acrValues: "passkey",
+                acrValues: acrValues,
                 authMethod: authMethod,
                 assertionResultRequest: assertionResultRequest ?? "",
                 authorizationChallengeEndpoint: opConfiguration.authorizationChallengeEndpoint
             )
                 .sink { result in
                     if let error = result.error {
-                        print("error: \(error)")
+                        print("getAuthorizationChallenge method gets an error: \(error)")
                         loginResponse.isSuccess = false
                         loginResponse.errorMessage = error.localizedDescription
                         continuation.resume(returning: loginResponse)
@@ -211,7 +224,7 @@ private extension MainViewModelImpl {
             serviceClient.getToken(
                 clientId: oidcClient.clientId,
                 code: authorizationCode,
-                grantType: "authorization_code",
+                grantType: AppConfig.GRAND_TYPE,
                 redirectUri: opConfiguration.issuer,
                 scope: oidcClient.scope,
                 authHeader: "Basic \(authHeaderEncodedString)",
@@ -219,7 +232,7 @@ private extension MainViewModelImpl {
                 url: opConfiguration.tokenEndpoint)
             .sink { result in
                 if let error = result.error {
-                    print("error: \(error)")
+                    print("getToken method gets an error: \(error)")
                     tokenResponse.isSuccess = false
                     tokenResponse.errorMessage = error.localizedDescription
                     continuation.resume(returning: tokenResponse)
@@ -246,7 +259,7 @@ private extension MainViewModelImpl {
             serviceClient.getUserInfo(accessToken: accessToken, authHeader: "Bearer \(accessToken)", url: opConfiguration.userinfoEndpoint)
                 .sink { result in
                     if let error = result.error {
-                        print("error: \(error)")
+                        print("getUserInfo method gets an error: \(error)")
                         userInfo.isSuccess = false
                         userInfo.errorMessage = error.localizedDescription
                         continuation.resume(returning: userInfo)

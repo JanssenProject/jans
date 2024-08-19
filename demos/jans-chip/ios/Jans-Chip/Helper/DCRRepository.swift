@@ -123,8 +123,8 @@ final class DCRRepository {
         return dcRequest
     }
     
-    func doDCRUsingSSA(ssaJwt: String?, scopeText: String?) -> OIDCClient {
-        let oidcClient = OIDCClient()
+    func doDCRUsingSSA(ssaJwt: String?, scopeText: String?) async throws -> OIDCClient {
+        var oidcClient = OIDCClient()
         
         guard let opConfiguration: OPConfiguration = RealmManager.shared.getObject() else {
             print("OpenID configuration not found in database.")
@@ -172,28 +172,33 @@ final class DCRRepository {
         
         dcrRequest.jwks = ""
         
-        serviceClient.doDCR(dcRequest: dcrRequest, url: registrationUrl)
-            .sink { result in
-                if let error = result.error {
-                    print("Error in DCR.\n Error:  \(error)")
-                    oidcClient.isSuccess = false
-                    oidcClient.errorMessage = "Error in DCR.\n Error:  \(error)"
-                } else if let dcrResponse = result.value {
-                    print("Inside doDCR :: DCResponse :: \(dcrResponse)")
-                    
-                    oidcClient.sno = AppConfig.DEFAULT_S_NO
-                    oidcClient.clientName = dcrResponse.clientName ?? ""
-                    oidcClient.clientId = dcrResponse.clientId ?? ""
-                    oidcClient.clientSecret = dcrResponse.clientSecret ?? ""
-                    oidcClient.scope = scopeText ?? ""
-                    oidcClient.clientName = dcrResponse.clientName ?? ""
-                    oidcClient.isSuccess = true
-                    
-                    RealmManager.shared.deleteAllOIDCClient()
-                    RealmManager.shared.save(object: oidcClient)
+        oidcClient = await withCheckedContinuation { continuation in
+            serviceClient.doDCR(dcRequest: dcrRequest, url: registrationUrl)
+                .sink { result in
+                    if let error = result.error {
+                        print("Error in DCR.\n Error:  \(error)")
+                        oidcClient.isSuccess = false
+                        oidcClient.errorMessage = "Error in DCR.\n Error:  \(error)"
+                        continuation.resume(returning: oidcClient)
+                    } else if let dcrResponse = result.value {
+                        print("Inside doDCR :: DCResponse :: \(dcrResponse)")
+                        
+                        oidcClient.sno = AppConfig.DEFAULT_S_NO
+                        oidcClient.clientName = dcrResponse.clientName ?? ""
+                        oidcClient.clientId = dcrResponse.clientId ?? ""
+                        oidcClient.clientSecret = dcrResponse.clientSecret ?? ""
+                        oidcClient.scope = scopeText ?? ""
+                        oidcClient.clientName = dcrResponse.clientName ?? ""
+                        oidcClient.isSuccess = true
+                        
+                        RealmManager.shared.deleteAllOIDCClient()
+                        RealmManager.shared.save(object: oidcClient)
+                        
+                        continuation.resume(returning: oidcClient)
+                    }
                 }
-            }
-            .store(in: &cancellableSet)
+                .store(in: &cancellableSet)
+        }
         
         return oidcClient
     }
