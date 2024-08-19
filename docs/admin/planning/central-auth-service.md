@@ -5,7 +5,7 @@ tags:
   - integration
 ---
 
-Older monolithic web access management platforms from the 2000's had
+Older monolithic web access management platforms from the 2000s had
 features to allow central policy management--what users can access what
 resources. But modern federated digital identity platforms generally do not.
 That's true for two reasons. First implementing all the OAuth and OpenID
