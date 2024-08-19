@@ -13,7 +13,7 @@ RUN apk update \
 # KC scheduler
 # ============
 
-ENV CN_VERSION=1.1.4-SNAPSHOT
+ENV CN_VERSION=1.1.4
 ENV CN_BUILD_DATE='2024-08-06 19:16'
 ENV SCHEDULER_HOME=/opt/kc-scheduler
 
@@ -38,7 +38,7 @@ RUN wget -q https://repo1.maven.org/maven2/org/codehaus/janino/janino/3.1.9/jani
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=e157cd4c8ff92c04e400fea29c51ae54f842a678
+ENV JANS_SOURCE_VERSION=433e684ea14140098002dd7ca08ecb2d50fd2c70
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the assets
