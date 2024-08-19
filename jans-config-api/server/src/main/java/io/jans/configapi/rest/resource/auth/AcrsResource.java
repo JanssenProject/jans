@@ -120,7 +120,7 @@ public class AcrsResource extends ConfigBaseResource {
         log.debug("isAcrValid:{}",isAcrValid);
         if (appConfiguration.isAcrValidationEnabled() && (!isAcrValid)) {
             throwBadRequestException("INVALID_ACR",
-                    String.format("Authentication script {%s} is not valid", authenticationMode));
+                    String.format("Authentication script {%s} is not valid/active", authenticationMode));
 
         }
     }

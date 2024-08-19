@@ -15,8 +15,13 @@ import io.jans.orm.model.fido2.Fido2RegistrationEntry;
 import io.jans.orm.model.fido2.Fido2RegistrationStatus;
 import io.jans.orm.search.filter.Filter;
 import io.jans.util.StringHelper;
+import io.jans.util.exception.InvalidAttributeException;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.WebApplicationException;
+
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
 import java.util.Collections;
@@ -46,11 +51,13 @@ public class Fido2RegistrationService {
 
     public List<Fido2RegistrationEntry> findAllByUsername(String username) {
         String userInum = userFido2Srv.getUserInum(username);
+        log.error("\n\n userInum:{} based on username:{}", userInum, username);
         if (userInum == null) {
             return Collections.emptyList();
         }
 
         String baseDn = getBaseDnForFido2RegistrationEntries(userInum);
+        log.error("\n\n baseDn:{} for userInum:{}, username:{}", baseDn, userInum, username);
         if (persistenceEntryManager.hasBranchesSupport(baseDn) && !containsBranch(baseDn)) {
             return Collections.emptyList();
         }
@@ -101,22 +108,106 @@ public class Fido2RegistrationService {
         return persistenceEntryManager.contains(baseDn, SimpleBranch.class);
     }
 
-    public void removeFido2DeviceData(String userId, String uid) {
-        persistenceEntryManager.removeRecursively(getDnForFido2Device(userId, uid), Fido2DeviceData.class);
+    public String getFido2DnForUSer(String userName) {
+        String userInum = userFido2Srv.getUserInum(userName);
+        log.error("\n\n userInum:{} based on userName:{}", userInum, userName);
+        if (userInum == null) {
+            throw new InvalidAttributeException("No user found with userName:{" + userName + "}!!!");
+        }
+
+        String baseDn = getBaseDnForFido2RegistrationEntries(userInum);
+        log.error("\n\n baseDn:{} for userInum:{}, userName:{}", baseDn, userInum, userName);
+        return baseDn;
+    }
+
+    public void removeFido2DeviceData(String userName, String deviceUid) {
+        log.error("\n\n Remove Fido2 device for userName:{} and deviceUid:{}", userName, deviceUid);
+        if (StringUtils.isBlank(userName)) {
+            throw new InvalidAttributeException("User name is null!");
+        }
+
+        if (StringUtils.isBlank(deviceUid)) {
+            throw new InvalidAttributeException("Device uid is null!");
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("Fido2DeviceData for userName:{");
+        sb.append(userName);
+        sb.append("} and device uid:{");
+        sb.append(deviceUid);
+        sb.append("}");
+
+        String userInum = userFido2Srv.getUserInum(userName);
+        log.error("\n\n userInum:{} for userName:{}", userInum, userName);
+        if (StringUtils.isBlank(userInum)) {
+            throw new InvalidAttributeException("No user found with username:{" + userName + "}!");
+        }
+
+        Fido2DeviceData fido2DeviceData = this.getFido2DeviceById(userInum, deviceUid);
+        if (fido2DeviceData == null) {
+            throw new WebApplicationException("No " + sb + " found!");
+        }
+
+        String dn = getDnForFido2Device(userInum, deviceUid);
+        log.error("\n\n DN for Fido2Device to be deleted is:{}", dn);
+
+        persistenceEntryManager.removeRecursively(dn, Fido2DeviceData.class);
+        fido2DeviceData = this.getFido2DeviceById(userInum, deviceUid);
+        if (fido2DeviceData != null) {
+            throw new WebApplicationException(sb + " could not be deleted!");
+        }
+        log.error("\n\n Successfully deleted {}", sb);
+    }
+
+    public void removeFido2DeviceData(String deviceUid) {
+        log.error("\n\n Remove Fido2 device with uid:{}", deviceUid);
+
+        if (StringUtils.isBlank(deviceUid)) {
+            throw new InvalidAttributeException("Device uid is null!");
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("Fido2DeviceData ");
+        sb.append(" with uid:{");
+        sb.append(deviceUid);
+        sb.append("}");
+
+        Fido2DeviceData fido2DeviceData = this.getFido2DeviceById(null, deviceUid);
+        if (fido2DeviceData == null) {
+            throw new WebApplicationException("No " + sb + " found!");
+        }
+
+        String dn = getDnForFido2Device(null, deviceUid);
+        log.error("\n\n DN for Fido2Device to be deleted is:{}", dn);
+
+        persistenceEntryManager.removeRecursively(dn, Fido2DeviceData.class);
+        fido2DeviceData = this.getFido2DeviceById(null, deviceUid);
+
+        if (fido2DeviceData != null) {
+            throw new WebApplicationException(sb + " could not be deleted!");
+        }
+        log.error("\n\n Successfully deleted {}", sb);
     }
 
     public Fido2DeviceData getFido2DeviceById(String userId, String uid) {
+        log.debug("Get Fido2DeviceData for userId:{} - uid:{}", userId, uid);
+
+        if (StringUtils.isBlank(uid)) {
+            throw new InvalidAttributeException("Device uid is null!");
+        }
+
         Fido2DeviceData fido2DeviceData = null;
         try {
             String dn = getDnForFido2Device(userId, uid);
             log.debug("Get Fido2DeviceData identified by dn:{}", dn);
+
             if (StringHelper.isNotEmpty(userId)) {
                 fido2DeviceData = persistenceEntryManager.find(Fido2DeviceData.class, dn);
             } else {
                 Filter filter = Filter.createEqualityFilter("jansId", uid);
                 fido2DeviceData = persistenceEntryManager.findEntries(dn, Fido2DeviceData.class, filter).get(0);
             }
-            log.debug("Fido2DeviceData identified by dn:{} is:{}", dn , fido2DeviceData);
+            log.error("\n\n Fido2DeviceData identified by dn:{} is:{}", dn, fido2DeviceData);
         } catch (Exception e) {
             log.error("Failed to find Fido2DeviceData with id: " + fido2DeviceData, e);
         }
