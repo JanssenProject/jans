@@ -11,7 +11,7 @@ services:
     networks:
       - cloud_bridge
   jans:
-    image: ${JANSSEN_IMAGE:-ghcr.io/janssenproject/jans/monolith:1.1.4_dev}
+    image: ${JANSSEN_IMAGE:-ghcr.io/janssenproject/jans/monolith:1.1.4-1}
     restart: always
     ports:
       - "443:443"
