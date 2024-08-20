@@ -28,7 +28,7 @@ image:
   # -- Image  to use for deploying.
   repository: janssenproject/scim
   # -- Image  tag to use for deploying.
-  tag: 1.1.4-1
+  tag: 1.1.5_dev
   # -- Image Pull Secrets
   pullSecrets: [ ]
 # -- Service replica number.
