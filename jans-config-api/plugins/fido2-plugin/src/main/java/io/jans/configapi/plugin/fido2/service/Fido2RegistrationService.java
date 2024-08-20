@@ -287,8 +287,8 @@ public class Fido2RegistrationService {
 
         Fido2RegistrationEntry fido2RegistrationEntry = null;
         try {
-            //Filter uuidFilter = Filter.createEqualityFilter("uuid", uuid);
-            Filter filter = Filter.createEqualityFilter("jansDeviceData", uuid);
+            String[] targetArray = new String[]{uuid};
+            Filter filter = Filter.createSubstringFilter("jansDeviceData", null, targetArray, null);
             log.info("Find device filter filter:{}", filter);
 
             List<Fido2RegistrationEntry> fido2List = persistenceEntryManager
