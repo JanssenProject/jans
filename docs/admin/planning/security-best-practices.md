@@ -144,5 +144,5 @@ are defined for the related scopes; though it simplifies initial testing, we
 recommend disabling this feature in production setups
 
 * `umaRestrictResourceToAssociatedClient` won't allow any other client except
-the one which registered the resource initially to acquire a RPT for it; it's
+the one that registered the resource initially to acquire a RPT for it; it's
 recommended to have it enabled for production setups
