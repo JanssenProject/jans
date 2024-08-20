@@ -23,7 +23,7 @@ RUN mkdir -p /opt/keycloak/logs \
 # KC integration
 # ==============
 
-ENV CN_VERSION=1.1.4
+ENV CN_VERSION=1.1.5-SNAPSHOT
 ENV CN_BUILD_DATE='2024-08-06 19:16'
 
 RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-spi/${CN_VERSION}/kc-jans-spi-${CN_VERSION}.jar -P /opt/keycloak/providers \
@@ -184,7 +184,7 @@ EXPOSE $CN_SAML_HTTP_PORT
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/saml" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.1.4" \
+    org.opencontainers.image.version="1.1.5" \
     org.opencontainers.image.title="Janssen SAML" \
     org.opencontainers.image.description=""
 

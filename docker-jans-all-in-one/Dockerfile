@@ -3,7 +3,7 @@
 # ==============
 
 # original Janssen base version (without suffix)
-ARG BASE_VERSION=1.1.4
+ARG BASE_VERSION=1.1.5
 
 # the following ARGs set default base images
 # they can be overriden in build process via --build-arg option
@@ -176,7 +176,7 @@ RUN mkdir -p /opt/jans/configurator/db \
 COPY app /app
 
 # CN version as env var (with suffix if any, i.e. SNAPSHOT)
-ENV CN_VERSION=1.1.4
+ENV CN_VERSION=1.1.5-SNAPSHOT
 
 # set directory contains installer code that will be added to Python sys.path
 ENV PYTHONPATH=/app
@@ -237,7 +237,7 @@ ENV JETTY_BASE=/opt/jans/jetty \
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/all-in-one" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.1.4" \
+    org.opencontainers.image.version="1.1.5" \
     org.opencontainers.image.title="Janssen All-in-One" \
     org.opencontainers.image.description=""
 
