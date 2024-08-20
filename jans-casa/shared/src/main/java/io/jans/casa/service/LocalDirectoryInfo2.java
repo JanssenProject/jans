@@ -19,7 +19,6 @@ public interface LocalDirectoryInfo2 extends LocalDirectoryInfo {
      * @param acr ACR (display Name) value that identifies the custom script
      * @return A map. Null if no script is found associated with the acr passed
      */
-    @Deprecated
     Map<String, String> getCustScriptConfigProperties(String acr);
 
     /**
