@@ -1,11 +1,33 @@
 package io.jans.fido2.ws.rs.controller;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.contains;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
+
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import io.jans.fido2.exception.Fido2RuntimeException;
+
 import io.jans.fido2.model.attestation.AttestationOptions;
 import io.jans.fido2.model.attestation.AttestationResult;
-import io.jans.fido2.model.attestation.AttestationResultResponse;
 import io.jans.fido2.model.attestation.PublicKeyCredentialCreationOptions;
+import io.jans.fido2.model.common.AttestationOrAssertionResponse;
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.conf.Fido2Configuration;
 import io.jans.fido2.model.error.ErrorResponseFactory;
@@ -14,23 +36,8 @@ import io.jans.fido2.service.operation.AttestationService;
 import io.jans.fido2.service.sg.converter.AttestationSuperGluuController;
 import io.jans.fido2.service.verifier.CommonVerifiers;
 import jakarta.ws.rs.BadRequestException;
-import jakarta.ws.rs.InternalServerErrorException;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
-import org.apache.logging.log4j.util.InternalException;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.Logger;
-
-import java.io.IOException;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class AttestationControllerTest {
@@ -176,7 +183,7 @@ class AttestationControllerTest {
     @Test
     void verify_ifValidData_success() throws IOException {
         when(appConfiguration.getFido2Configuration()).thenReturn(mock(Fido2Configuration.class));
-        when(attestationService.verify(any())).thenReturn(mock(AttestationResultResponse.class));
+        when(attestationService.verify(any())).thenReturn(mock(AttestationOrAssertionResponse.class));
 
         Response response = attestationController.verify(mock(AttestationResult.class));
         assertNotNull(response);

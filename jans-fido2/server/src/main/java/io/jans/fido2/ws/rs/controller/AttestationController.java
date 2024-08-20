@@ -9,8 +9,8 @@ package io.jans.fido2.ws.rs.controller;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.jans.fido2.model.attestation.AttestationOptions;
 import io.jans.fido2.model.attestation.AttestationResult;
-import io.jans.fido2.model.attestation.AttestationResultResponse;
 import io.jans.fido2.model.attestation.PublicKeyCredentialCreationOptions;
+import io.jans.fido2.model.common.AttestationOrAssertionResponse;
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.fido2.service.DataMapperService;
@@ -84,7 +84,7 @@ public class AttestationController {
                 throw errorResponseFactory.forbiddenException();
             }
             commonVerifiers.verifyNotUseGluuParameters(CommonUtilService.toJsonNode(attestationResult));
-            AttestationResultResponse result = attestationService.verify(attestationResult);
+            AttestationOrAssertionResponse result = attestationService.verify(attestationResult);
             return Response.ok().entity(result).build();
         });
     }

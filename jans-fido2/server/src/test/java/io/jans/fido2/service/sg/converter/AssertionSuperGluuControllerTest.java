@@ -11,7 +11,7 @@ import io.jans.as.model.fido.u2f.protocol.AuthenticateResponse;
 import io.jans.fido2.model.assertion.AssertionOptions;
 import io.jans.fido2.model.assertion.AssertionOptionsResponse;
 import io.jans.fido2.model.assertion.AssertionResult;
-import io.jans.fido2.model.assertion.AssertionResultResponse;
+import io.jans.fido2.model.common.AttestationOrAssertionResponse;
 import io.jans.fido2.model.common.PublicKeyCredentialDescriptor;
 import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.fido2.service.Base64Service;
@@ -252,7 +252,7 @@ class AssertionSuperGluuControllerTest {
         when(base64Service.urlEncodeToString(any())).thenReturn("test_client_data_json", "test_signature", "test_authenticator_data", "test_attestation_object");
         when(digestService.hashSha256(anyString())).thenReturn("rp_id_hash".getBytes());
         when(dataMapperService.cborWriteAsBytes(attestationObjectNode)).thenReturn("dGVzdF9hdHRlc3RhdGlvbl9vYmplY3Q".getBytes());
-        when(assertionService.verify(any())).thenReturn(mock(AssertionResultResponse.class));
+        when(assertionService.verify(any())).thenReturn(mock(AttestationOrAssertionResponse.class));
 
 
         RawAuthenticateResponse rawAuthenticateResponse = new RawAuthenticateResponse((byte) 1, 0L, "test_signature".getBytes());

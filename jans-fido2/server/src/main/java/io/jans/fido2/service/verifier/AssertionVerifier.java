@@ -111,7 +111,7 @@ public class AssertionVerifier {
             log.debug("Uncompressed ECpoint node {}", uncompressedECPointNode);
             log.debug("EC Public key hex {}", hexUtilService.encodeHexString(publicKey.getEncoded()));
             log.debug("registration.getSignatureAlgorithm(): "+registration.getSignatureAlgorithm());
-            log.debug("Platform authenticator: "+ registration.getSignatureAlgorithm());
+            
             authenticatorDataVerifier.verifyAssertionSignature(authData, clientDataHash, signature, publicKey,  registration.getSignatureAlgorithm());
            
         } catch (Fido2CompromisedDevice ex) {
