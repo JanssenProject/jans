@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 
+import io.jans.entry.PublicKeyCredentialHints;
 import io.jans.fido2.model.assertion.AssertionErrorResponseType;
 import io.jans.fido2.model.attestation.AttestationErrorResponseType;
 import io.jans.fido2.model.error.ErrorResponseFactory;
@@ -97,6 +98,18 @@ public class CommonVerifiers {
         documentDomain = networkService.getHost(documentDomain);
 
         return documentDomain;
+    }
+
+    public PublicKeyCredentialHints verifyHints(JsonNode params) {
+        String documentDomain;
+        PublicKeyCredentialHints hints = null;
+        if (params.hasNonNull("user-agent")) {
+            documentDomain = params.get("user-agent").asText();
+            hints = PublicKeyCredentialHints.getByValue(documentDomain);
+        }else{
+            hints = PublicKeyCredentialHints.getByValue("");
+        }
+        return hints;
     }
 
     public void verifyCounter(int oldCounter, int newCounter) {
