@@ -5,17 +5,21 @@ import io.jans.casa.core.model.JansOrganization;
 import java.util.Set;
 import java.util.Map;
 
+import org.json.JSONObject;
 /**
  * Provides access to extra information in the local database. See {@link LocalDirectoryInfo} interface.
  */
 public interface LocalDirectoryInfo2 extends LocalDirectoryInfo {
 
+    JSONObject getAgamaFlowConfigProperties(String qname);
+    
     /**
      * Returns a map with name/value pairs of the configuration properties belonging to a Gluu Server interception script
      * identified by an <code>acr</code> value.
      * @param acr ACR (display Name) value that identifies the custom script
      * @return A map. Null if no script is found associated with the acr passed
      */
+    @Deprecated
     Map<String, String> getCustScriptConfigProperties(String acr);
 
     /**

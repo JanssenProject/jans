@@ -31,7 +31,7 @@ public class PolicyViewModel {
     private Set<String> enforcementPoliciesCopy;
     private List<TrustedDevice> trustedDevices;
 
-    private StrongAuthSettingsService sass;;
+    private StrongAuthSettingsService sass;
     private User user;
     private ISessionContext sessionContext;
 
