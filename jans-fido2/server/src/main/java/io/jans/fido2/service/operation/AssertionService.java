@@ -16,6 +16,7 @@ import io.jans.fido2.ctap.AuthenticatorAttachment;
 import io.jans.fido2.exception.Fido2CompromisedDevice;
 import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.assertion.*;
+import io.jans.fido2.model.common.AttestationOrAssertionResponse;
 import io.jans.fido2.model.common.PublicKeyCredentialDescriptor;
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.error.ErrorResponseFactory;
@@ -290,7 +291,7 @@ public class AssertionService {
 		return asserOptGenerateResponse;
 	}
 
-	public AssertionResultResponse verify(AssertionResult assertionResult) {
+	public AttestationOrAssertionResponse verify(AssertionResult assertionResult) {
 		log.debug("authenticateResponse {}", CommonUtilService.toJsonNode(assertionResult));
 
         // Apply external custom scripts
@@ -396,10 +397,10 @@ public class AssertionService {
         }
 
 		// Create result object
-		AssertionResultResponse assertionResultResponse = new AssertionResultResponse();
+        AttestationOrAssertionResponse assertionResultResponse = new AttestationOrAssertionResponse();
 
 		PublicKeyCredentialDescriptor credentialDescriptor = new PublicKeyCredentialDescriptor(registrationData.getPublicKeyId());
-		assertionResultResponse.setAuthenticatedCredentials(credentialDescriptor);
+		assertionResultResponse.setCredentials(credentialDescriptor);
 		assertionResultResponse.setStatus("ok");
 		assertionResultResponse.setErrorMessage("");
 		assertionResultResponse.setUsername(registrationData.getUsername());

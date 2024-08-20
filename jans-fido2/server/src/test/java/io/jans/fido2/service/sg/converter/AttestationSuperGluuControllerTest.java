@@ -1,17 +1,43 @@
 package io.jans.fido2.service.sg.converter;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+import java.security.cert.CertificateEncodingException;
+import java.security.cert.X509Certificate;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Strings;
+
 import io.jans.as.model.fido.u2f.message.RawRegisterResponse;
 import io.jans.as.model.fido.u2f.protocol.RegisterResponse;
 import io.jans.fido2.model.attestation.AttestationOptions;
 import io.jans.fido2.model.attestation.AttestationResult;
-import io.jans.fido2.model.attestation.AttestationResultResponse;
 import io.jans.fido2.model.attestation.PublicKeyCredentialCreationOptions;
-import io.jans.fido2.model.conf.Fido2Configuration;
+import io.jans.fido2.model.common.AttestationOrAssertionResponse;
 import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.CoseService;
@@ -23,19 +49,6 @@ import io.jans.fido2.service.sg.RawRegistrationService;
 import io.jans.fido2.service.util.CommonUtilService;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.Logger;
-
-import java.io.IOException;
-import java.security.cert.CertificateEncodingException;
-import java.security.cert.X509Certificate;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class AttestationSuperGluuControllerTest {
@@ -186,13 +199,13 @@ class AttestationSuperGluuControllerTest {
                 mock(X509Certificate.class),
                 "test_signature".getBytes()
         );
-        AttestationResultResponse attestationResultResponse = new AttestationResultResponse();
+        AttestationOrAssertionResponse attestationResultResponse = new AttestationOrAssertionResponse();
         when(rawRegistrationService.parseRawRegisterResponse(registerResponse.getRegistrationData())).thenReturn(rawRegisterResponse);
         when(base64Service.urlEncodeToString(any())).thenReturn("test_key_handle");
         when(digestService.hashSha256(anyString())).thenReturn("test_rp_id_hash".getBytes());
         when(coseService.convertECKeyToUncompressedPoint(any())).thenReturn(mapper.createObjectNode());
         when(dataMapperService.cborWriteAsBytes(any())).thenReturn("test_cose_public_key".getBytes());
-        when(attestationService.verify(any())).thenReturn(mock(AttestationResultResponse.class));
+        when(attestationService.verify(any())).thenReturn(mock(AttestationOrAssertionResponse.class));
 
         JsonNode response = attestationSuperGluuController.finishRegistration(username, registerResponseString);
         assertNotNull(response);

@@ -216,7 +216,7 @@ public class AttestationService {
 		return credentialCreationOptions;
 	}
 
-	public AttestationResultResponse verify(AttestationResult attestationResult) {
+	public AttestationOrAssertionResponse verify(AttestationResult attestationResult) {
 		log.debug("Attestation verify {}", CommonUtilService.toJsonNode(attestationResult));
 
         // Apply external custom scripts
@@ -322,11 +322,11 @@ public class AttestationService {
         }
 
 		// Create result object
-		AttestationResultResponse attestationResultResponse = new AttestationResultResponse();
+        AttestationOrAssertionResponse attestationResultResponse = new AttestationOrAssertionResponse();
 
 		PublicKeyCredentialDescriptor credentialDescriptor = new PublicKeyCredentialDescriptor(
 				registrationData.getPublicKeyId());
-		attestationResultResponse.setCreatedCredentials(credentialDescriptor);
+		attestationResultResponse.setCredentials(credentialDescriptor);
 		attestationResultResponse.setStatus("ok");
 		attestationResultResponse.setErrorMessage("");
 

@@ -15,6 +15,7 @@ import io.jans.as.model.fido.u2f.protocol.RegisterResponse;
 import io.jans.fido2.ctap.AttestationConveyancePreference;
 import io.jans.fido2.ctap.AttestationFormat;
 import io.jans.fido2.model.attestation.*;
+import io.jans.fido2.model.common.AttestationOrAssertionResponse;
 import io.jans.fido2.model.common.PublicKeyCredentialType;
 import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.fido2.service.*;
@@ -182,7 +183,7 @@ public class AttestationSuperGluuController {
 
         //ObjectNode params = buildFido2AttestationVerifyResponse(userName, registerResponse);
         AttestationResult attestationResult = buildFido2AttestationVerifyResponse(userName, registerResponse);
-        AttestationResultResponse attestationResultResponse = attestationService.verify(attestationResult);
+        AttestationOrAssertionResponse attestationResultResponse = attestationService.verify(attestationResult);
         ObjectNode result = (ObjectNode)CommonUtilService.toJsonNode(attestationResultResponse);
 
         result.put("status", "success");

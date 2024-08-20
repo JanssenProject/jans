@@ -26,8 +26,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -41,16 +39,13 @@ import io.jans.as.model.config.BaseDnConfiguration;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.fido.u2f.protocol.AuthenticateResponse;
 import io.jans.as.model.fido.u2f.protocol.RegisterResponse;
-import io.jans.fido2.exception.Fido2CompromisedDevice;
-import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.assertion.AssertionOptions;
 import io.jans.fido2.model.assertion.AssertionOptionsResponse;
 import io.jans.fido2.model.assertion.AssertionResult;
-import io.jans.fido2.model.assertion.AssertionResultResponse;
 import io.jans.fido2.model.attestation.AttestationOptions;
 import io.jans.fido2.model.attestation.AttestationResult;
-import io.jans.fido2.model.attestation.AttestationResultResponse;
 import io.jans.fido2.model.attestation.PublicKeyCredentialCreationOptions;
+import io.jans.fido2.model.common.AttestationOrAssertionResponse;
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.conf.Fido2Configuration;
 import io.jans.fido2.model.error.ErrorResponseFactory;
@@ -67,8 +62,6 @@ import io.jans.fido2.service.shared.CustomScriptService;
 import io.jans.fido2.service.shared.UserService;
 import io.jans.fido2.service.verifier.AssertionVerifier;
 import io.jans.fido2.sg.SuperGluuMode;
-import io.jans.junit.extension.FileParameterExtension;
-import io.jans.junit.extension.Name;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.fido2.Fido2AuthenticationEntry;
 import io.jans.orm.model.fido2.Fido2AuthenticationStatus;
@@ -272,7 +265,7 @@ public class FullFlowAppleTest {
         assertEquals(true, request.getSuperGluuRequest());
         assertEquals(SuperGluuMode.TWO_STEP.getMode(), request.getSuperGluuRequestMode());
 
-		AttestationResultResponse response = attestationService.verify(request);
+        AttestationOrAssertionResponse response = attestationService.verify(request);
 
 		// Get updated entry for checks
 		ArgumentCaptor<Fido2RegistrationEntry> captor = ArgumentCaptor.forClass(Fido2RegistrationEntry.class);
@@ -281,7 +274,7 @@ public class FullFlowAppleTest {
 
 		assertNotNull(response);
         assertEquals("ok", response.getStatus());
-        assertEquals(registeredPublicKey, response.getCreatedCredentials().getId());
+        assertEquals(registeredPublicKey, response.getCredentials().getId());
 	}
 
 	public void testFinishAttestationTwoStepAppleAuthenticatedRegistered(String userName, String registerFinishResponse, String registeredPublicKey) {
@@ -330,7 +323,7 @@ public class FullFlowAppleTest {
         assertEquals(true, request.getSuperGluuRequest());
         assertEquals(SuperGluuMode.TWO_STEP.getMode(), request.getSuperGluuRequestMode());
 
-		AssertionResultResponse response = assertionService.verify(request);
+        AttestationOrAssertionResponse response = assertionService.verify(request);
 
 		// Get updated entry for checks
         ArgumentCaptor<Fido2AuthenticationEntry> captorAssertion = ArgumentCaptor.forClass(Fido2AuthenticationEntry.class);
@@ -343,7 +336,7 @@ public class FullFlowAppleTest {
 
 		assertNotNull(response);
         assertEquals("ok", response.getStatus());
-        assertEquals(registrationEntry.getPublicKeyId(), response.getAuthenticatedCredentials().getId());
+        assertEquals(registrationEntry.getPublicKeyId(), response.getCredentials().getId());
 	}
 
 	public void testFinishAssertionTwoStepAppleAuthenticated(String userName, String authenticateFinishResponse) {

@@ -11,6 +11,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
 import io.jans.fido2.model.assertion.*;
+import io.jans.fido2.model.common.AttestationOrAssertionResponse;
 import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.fido2.service.util.CommonUtilService;
 import org.apache.commons.lang3.ArrayUtils;
@@ -177,7 +178,7 @@ public class AssertionSuperGluuController {
 
         AssertionResult params = buildFido2AuthenticationVerifyResponse(userName, authenticateResponseString, authenticateResponse);
 
-        AssertionResultResponse assertionResultResponse = assertionService.verify(params);
+        AttestationOrAssertionResponse assertionResultResponse = assertionService.verify(params);
         ObjectNode result = (ObjectNode)CommonUtilService.toJsonNode(assertionResultResponse);
 
         result.put("status", "success");

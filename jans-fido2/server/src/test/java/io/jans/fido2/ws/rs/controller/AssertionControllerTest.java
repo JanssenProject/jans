@@ -3,6 +3,7 @@ package io.jans.fido2.ws.rs.controller;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.jans.fido2.model.assertion.*;
+import io.jans.fido2.model.common.AttestationOrAssertionResponse;
 import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.conf.Fido2Configuration;
 import io.jans.fido2.model.error.ErrorResponseFactory;
@@ -257,7 +258,7 @@ class AssertionControllerTest {
     @Test
     void verify_ifValidData_success() throws IOException {
         when(appConfiguration.getFido2Configuration()).thenReturn(mock(Fido2Configuration.class));
-        when(assertionService.verify(any())).thenReturn(mock(AssertionResultResponse.class));
+        when(assertionService.verify(any())).thenReturn(mock(AttestationOrAssertionResponse.class));
 
         Response response = assertionController.verify(mock(AssertionResult.class));
         assertNotNull(response);
