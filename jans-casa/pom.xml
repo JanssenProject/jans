@@ -5,7 +5,7 @@
 
     <groupId>io.jans</groupId>
     <artifactId>casa-base</artifactId>
-	<version>1.1.4</version>
+	<version>1.1.5-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <prerequisites>
@@ -57,6 +57,7 @@
     </scm>
 
     <modules>
+        <module>agama</module>
         <module>config</module>
         <module>shared</module>
         <module>app</module>
