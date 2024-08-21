@@ -8135,8 +8135,6 @@
         
           
         
-          
-        
       
       
         <label class="md-nav__link" for="__nav_5_2">
@@ -8199,20 +8197,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../credentials-stored/" class="md-nav__link">
-        Credentials storage
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../custom-branding/" class="md-nav__link">
         Custom branding
       </a>
@@ -8258,7 +8242,7 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_2_8" type="checkbox" id="__nav_5_2_8" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_2_7" type="checkbox" id="__nav_5_2_7" >
       
       
       
@@ -8275,13 +8259,13 @@
         
       
       
-        <label class="md-nav__link" for="__nav_5_2_8">
+        <label class="md-nav__link" for="__nav_5_2_7">
           Plugins
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <nav class="md-nav" aria-label="Plugins" data-md-level="3">
-        <label class="md-nav__title" for="__nav_5_2_8">
+        <label class="md-nav__title" for="__nav_5_2_7">
           <span class="md-nav__icon md-icon"></span>
           Plugins
         </label>
@@ -8310,7 +8294,7 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_2_8_2" type="checkbox" id="__nav_5_2_8_2" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_2_7_2" type="checkbox" id="__nav_5_2_7_2" >
       
       
       
@@ -8321,13 +8305,13 @@
         
       
       
-        <label class="md-nav__link" for="__nav_5_2_8_2">
+        <label class="md-nav__link" for="__nav_5_2_7_2">
           Accounts Linking
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <nav class="md-nav" aria-label="Accounts Linking" data-md-level="4">
-        <label class="md-nav__title" for="__nav_5_2_8_2">
+        <label class="md-nav__title" for="__nav_5_2_7_2">
           <span class="md-nav__icon md-icon"></span>
           Accounts Linking
         </label>
@@ -8591,13 +8575,6 @@
           <li class="md-nav__item">
   <a href="#a-user-cannot-turn-2fa-on" class="md-nav__link">
     A user cannot turn 2FA on
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#the-log-shows-an-error-related-to-obtaining-acr_values_supported-from-server" class="md-nav__link">
-    The log shows an error related to Obtaining "acr_values_supported" from server
   </a>
   
 </li>
@@ -8866,13 +8843,6 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#the-log-shows-an-error-related-to-obtaining-acr_values_supported-from-server" class="md-nav__link">
-    The log shows an error related to Obtaining "acr_values_supported" from server
-  </a>
-  
-</li>
-        
       </ul>
     </nav>
   
@@ -8939,7 +8909,7 @@
 <p>If a user has been locked out for any reason (e.g. lost devices), you can reset his "authentication method" to password by accessing the admin console and choosing the menu item labelled "Reset users preference". Type the username (or part of) in the text field and then press search. Once you locate the user in the result grid, click the corresponding row and then hit "Change to password". The row will become disabled, and you'll see a success message.</p>
 <p>If you've followed the steps as described above, next time he attempts to log in, he won't be asked to present any credentials other than password to enter.</p>
 <h3 id="how-to-adjust-the-issuer-for-otp-tokens">How to adjust the issuer for OTP tokens<a class="headerlink" href="#how-to-adjust-the-issuer-for-otp-tokens" title="Permanent link">#</a></h3>
-<p>When people add OTP mobile apps, the enrollment appears in the device associated with an "issuer", so it is easy to recognize where the OTPs generated can be used. To keep track of which OTPs are valid for which IDPs, the issuer property can be adjusted in the Janssen Server OTP script. For example, you might want to set the <code>issuer</code> property to <code>ACME Dev</code> on your dev server, and <code>ACME, Inc.</code> on your production server. </p>
+<p>When people add OTP mobile apps, the enrollment appears in the device associated with an "issuer", so it is easy to recognize where the OTPs generated can be used. To keep track of which OTPs are valid for which IDPs, the issuer property can be adjusted in flow <code>io.jans.casa.authn.otp</code> part of Casa Agama project - you can use <a href="../../admin/config-guide/auth-server-config/agama-project-configuration/#agama-project-configuration-screen">TUI</a> for this purpose. For example, you might want to set the <code>issuer</code> property to <code>ACME Dev</code> on your dev server, and <code>ACME, Inc.</code> on your production server. </p>
 <h2 id="errors-shown-in-the-ui">Errors shown in the UI<a class="headerlink" href="#errors-shown-in-the-ui" title="Permanent link">#</a></h2>
 <h3 id="a-page-with-a-service-temporarily-unavailable-message-appears-when-accessing-the-application">A page with a "Service Temporarily Unavailable" message appears when accessing the application<a class="headerlink" href="#a-page-with-a-service-temporarily-unavailable-message-appears-when-accessing-the-application" title="Permanent link">#</a></h3>
 <p>This is the 503 HTTP error. There is an Apache server in front of the application and this means the reverse proxy couldn't establish a communication internally with the app. This usually happens when Casa hasn't started completely, so it's usually a matter of waiting a few seconds.</p>
@@ -8955,28 +8925,18 @@
 <h3 id="admin-console-is-not-shown">Admin console is not shown<a class="headerlink" href="#admin-console-is-not-shown" title="Permanent link">#</a></h3>
 <p>If you have logged in using an administrative account and cannot find any admin features in the UI ensure you have gone through these <a href="../quick-start/#finish-configuration">steps</a>.</p>
 <h3 id="a-previously-enabled-method-is-not-available-anymore">A previously enabled method is not available anymore<a class="headerlink" href="#a-previously-enabled-method-is-not-available-anymore" title="Permanent link">#</a></h3>
-<p>If for some reason you disabled the custom script of an authentication method used by Casa, such method will not be available for enrollment or authentication until you enable both the custom script and the method (in Casa admin dashboard).</p>
+<p>Check if the plugin that contributed the given authentication method was removed. The out-of-the-box methods will always appear listed.</p>
 <h3 id="what-kind-of-totphotp-devices-are-supported">What kind of TOTP/HOTP devices are supported?<a class="headerlink" href="#what-kind-of-totphotp-devices-are-supported" title="Permanent link">#</a></h3>
 <p>Both soft (mobile apps) or hard tokens (keyfobs, cards, etc.) are supported. Supported algorithms are <code>HmacSHA1</code>, <code>HmacSHA256</code>, and <code>HmacSHA512</code>.</p>
 <h3 id="authentication-fails-when-using-totp-or-hotp-with-no-apparent-reason">Authentication fails when using TOTP or HOTP with no apparent reason<a class="headerlink" href="#authentication-fails-when-using-totp-or-hotp-with-no-apparent-reason" title="Permanent link">#</a></h3>
 <p>For Time-based OTP, ensure the time of your server is correctly synchronized (use NTP for instance). The time lag of the authentication device used (for instance, a mobile phone) with respect to server time should not be representative. </p>
 <p>Big time differences can cause unsuccessful attempts to enroll TOTP credentials in Casa.</p>
-<p>For Event-based OTP (HOTP), ensure you are using a suitable value for <code>look ahead window</code> (we suggest at least 10). Check contents of file <code>/etc/certs/otp_configuration.json</code>. If you apply editions, it is recommended to wait a couple of minutes before retrying..</p>
+<p>For Event-based OTP (HOTP), ensure you are using a suitable value for <code>look ahead window</code> (we suggest at least 10). Check the configuration of flow <code>io.jans.casa.authn.otp</code> part of Casa Agama project - you can use <a href="../../admin/config-guide/auth-server-config/agama-project-configuration/#agama-project-configuration-screen">TUI</a> for this purpose.</p>
 <h3 id="the-user-interface-is-not-showing-any-means-to-enroll-credentials">The user interface is not showing any means to enroll credentials<a class="headerlink" href="#the-user-interface-is-not-showing-any-means-to-enroll-credentials" title="Permanent link">#</a></h3>
-<p>Ensure the following are met:</p>
-<ul>
-<li>
-<p>You have enabled custom scripts as needed. For instance, if you want to offer users the ability to authenticate using Google Authenticator, you have to enable the script "HOTP/TOPT authentication module". Whenever you enable or disable scripts, please wait a couple of minutes for oxAuth to pick the changes.</p>
-</li>
-<li>
-<p>In the administration console, you can see which methods are already enabled in the server, and modify those you want to offer.</p>
-</li>
-</ul>
+<p>In the administration console, ensure one or more authentication methods have been enabled.</p>
 <h3 id="a-user-cannot-turn-2fa-on">A user cannot turn 2FA on<a class="headerlink" href="#a-user-cannot-turn-2fa-on" title="Permanent link">#</a></h3>
 <p>To turn 2FA on, the user has to have enrolled at least a certain number of credentials through the app. Only after this is met, he will be able to perform this action. </p>
 <p>In the administration console you can specify the minimum number of enrolled credentials needed to enable second factor authentication for users. Please check the <a href="../../plugins/2fa-settings/">2FA Settings plugin</a> for more details.</p>
-<h3 id="the-log-shows-an-error-related-to-obtaining-acr_values_supported-from-server">The log shows an error related to <em>Obtaining "acr_values_supported" from server</em><a class="headerlink" href="#the-log-shows-an-error-related-to-obtaining-acr_values_supported-from-server" title="Permanent link">#</a></h3>
-<p>Upon startup, the application needs to query the OpenID metadata URL of oxAuth to build the list of available authentication mechanisms.  This warning is shown when the URL is not yet accessible or the list hasn't loaded fully. However, the application does several (around 15) evenly timed attempts in order to gather the required info. These messages are not a sign of a malfunction.</p>
 <h2 id="my-problem-is-not-listed-here">My problem is not listed here<a class="headerlink" href="#my-problem-is-not-listed-here" title="Permanent link">#</a></h2>
 <p>Feel free to <a href="https://github.com/JanssenProject/jans/discussions">ask Janssen Server community</a>.</p>
 
@@ -8985,7 +8945,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-05-09T11:38:47+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-05-09</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-08-21T13:40:12+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-08-21</span>
       
         <br>
         Created:

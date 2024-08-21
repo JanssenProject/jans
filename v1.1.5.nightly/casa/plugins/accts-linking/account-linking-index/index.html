@@ -8135,8 +8135,6 @@
         
           
         
-          
-        
       
       
         <label class="md-nav__link" for="__nav_5_2">
@@ -8199,20 +8197,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../administration/credentials-stored/" class="md-nav__link">
-        Credentials storage
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../../../administration/custom-branding/" class="md-nav__link">
         Custom branding
       </a>
@@ -8260,7 +8244,7 @@
     <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_2_8" type="checkbox" id="__nav_5_2_8" checked>
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_2_7" type="checkbox" id="__nav_5_2_7" checked>
       
       
       
@@ -8277,13 +8261,13 @@
         
       
       
-        <label class="md-nav__link" for="__nav_5_2_8">
+        <label class="md-nav__link" for="__nav_5_2_7">
           Plugins
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <nav class="md-nav" aria-label="Plugins" data-md-level="3">
-        <label class="md-nav__title" for="__nav_5_2_8">
+        <label class="md-nav__title" for="__nav_5_2_7">
           <span class="md-nav__icon md-icon"></span>
           Plugins
         </label>
@@ -8314,7 +8298,7 @@
     <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_2_8_2" type="checkbox" id="__nav_5_2_8_2" checked>
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_2_7_2" type="checkbox" id="__nav_5_2_7_2" checked>
       
       
       
@@ -8325,13 +8309,13 @@
         
       
       
-        <label class="md-nav__link" for="__nav_5_2_8_2">
+        <label class="md-nav__link" for="__nav_5_2_7_2">
           Accounts Linking
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <nav class="md-nav" aria-label="Accounts Linking" data-md-level="4">
-        <label class="md-nav__title" for="__nav_5_2_8_2">
+        <label class="md-nav__title" for="__nav_5_2_7_2">
           <span class="md-nav__icon md-icon"></span>
           Accounts Linking
         </label>
@@ -8682,19 +8666,19 @@
 <p>In the following, it is assumed you have a VM-based installation of Jans Server (or Gluu Flex) available with Casa installed. In a separate machine, ensure you have SSH/SCP/SFTP access to such server and <code>git</code> installed. </p>
 <ol>
 <li>
-<p>Download the plugin jar file <code>https://maven.jans.io/maven/io/jans/casa/plugins/acct-linking/1.1.5.nightly/acct-linking-1.1.5.nightly-jar-with-dependencies.jar</code> and copy to your server's <code>/opt/jans/jetty/jans-casa/plugins</code></p>
+<p>Download the plugin jar file <code>https://maven.jans.io/maven/io/jans/casa/plugins/acct-linking/replace-janssen-version/acct-linking-replace-janssen-version-jar-with-dependencies.jar</code> and copy to your server's <code>/opt/jans/jetty/jans-casa/plugins</code></p>
 </li>
 <li>
-<p>Download the utility jar file <code>https://maven.jans.io/maven/io/jans/agama-inbound/1.1.5.nightly/agama-inbound-1.1.5.nightly.jar</code> and copy to your server's <code>/opt/jans/jetty/jans-auth/custom/libs</code></p>
+<p>Download the utility jar file <code>https://maven.jans.io/maven/io/jans/agama-inbound/replace-janssen-version/agama-inbound-replace-janssen-version.jar</code> and copy to your server's <code>/opt/jans/jetty/jans-auth/custom/libs</code></p>
 </li>
 <li>
 <p>In the server, create a <code>casa</code> directory inside <code>/opt/jans/jetty/jans-auth/custom/pages</code></p>
 </li>
 <li>
-<p>Download the file <code>https://github.com/JanssenProject/jans/raw/v1.1.5.nightly/jans-casa/plugins/acct-linking/extras/login.xhtml</code> and copy it to the previously created folder  </p>
+<p>Download the file <code>https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/plugins/acct-linking/extras/login.xhtml</code> and copy it to the previously created folder  </p>
 </li>
 <li>
-<p>Download the file <code>https://github.com/JanssenProject/jans/raw/v1.1.5.nightly/jans-casa/plugins/acct-linking/extras/Casa.py</code>. Open TUI or the admin UI (for Flex), and locate the custom script whose name is <code>casa</code>. Update the contents of the script with the contents of the file </p>
+<p>Download the file <code>https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/plugins/acct-linking/extras/Casa.py</code>. Open TUI or the admin UI (for Flex), and locate the custom script whose name is <code>casa</code>. Update the contents of the script with the contents of the file </p>
 </li>
 <li>
 <p>In TUI, ensure the custom script named <code>agama</code> is enabled</p>

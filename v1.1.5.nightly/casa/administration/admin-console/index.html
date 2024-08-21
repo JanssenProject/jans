@@ -8135,8 +8135,6 @@
         
           
         
-          
-        
       
       
         <label class="md-nav__link" for="__nav_5_2">
@@ -8205,22 +8203,9 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#enabled-authentication-methods" class="md-nav__link">
-    Enabled authentication methods
+  <a href="#authentication-methods" class="md-nav__link">
+    Authentication methods
   </a>
-  
-    <nav class="md-nav" aria-label="Enabled authentication methods">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#testing" class="md-nav__link">
-    Testing
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -8302,20 +8287,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../credentials-stored/" class="md-nav__link">
-        Credentials storage
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../custom-branding/" class="md-nav__link">
         Custom branding
       </a>
@@ -8361,7 +8332,7 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_2_8" type="checkbox" id="__nav_5_2_8" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_2_7" type="checkbox" id="__nav_5_2_7" >
       
       
       
@@ -8378,13 +8349,13 @@
         
       
       
-        <label class="md-nav__link" for="__nav_5_2_8">
+        <label class="md-nav__link" for="__nav_5_2_7">
           Plugins
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <nav class="md-nav" aria-label="Plugins" data-md-level="3">
-        <label class="md-nav__title" for="__nav_5_2_8">
+        <label class="md-nav__title" for="__nav_5_2_7">
           <span class="md-nav__icon md-icon"></span>
           Plugins
         </label>
@@ -8413,7 +8384,7 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_2_8_2" type="checkbox" id="__nav_5_2_8_2" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_2_7_2" type="checkbox" id="__nav_5_2_7_2" >
       
       
       
@@ -8424,13 +8395,13 @@
         
       
       
-        <label class="md-nav__link" for="__nav_5_2_8_2">
+        <label class="md-nav__link" for="__nav_5_2_7_2">
           Accounts Linking
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <nav class="md-nav" aria-label="Accounts Linking" data-md-level="4">
-        <label class="md-nav__title" for="__nav_5_2_8_2">
+        <label class="md-nav__title" for="__nav_5_2_7_2">
           <span class="md-nav__icon md-icon"></span>
           Accounts Linking
         </label>
@@ -8639,22 +8610,9 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#enabled-authentication-methods" class="md-nav__link">
-    Enabled authentication methods
+  <a href="#authentication-methods" class="md-nav__link">
+    Authentication methods
   </a>
-  
-    <nav class="md-nav" aria-label="Enabled authentication methods">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#testing" class="md-nav__link">
-    Testing
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
@@ -8751,24 +8709,25 @@
 
 <h1 id="admin-console">Admin Console<a class="headerlink" href="#admin-console" title="Permanent link">#</a></h1>
 <p>This document reviews the available options for configuring Casa. All configuration changes applied via the admin console take effect immediately with no restart or other actions required.</p>
-<h2 id="enabled-authentication-methods">Enabled authentication methods<a class="headerlink" href="#enabled-authentication-methods" title="Permanent link">#</a></h2>
-<p>Here you can choose the type of 2FA credentials you want to support in Casa. This may require you to <a href="../quick-start/#enable-scripts">enable</a> the applicable interception scripts in your Janssen Server beforehand.</p>
-<p>Check the boxes as desired. You can assign the handler <a href="#plugins">plugin</a> for each method to be supported. Choose "System" to use the default implementation provided by the application.</p>
+<h2 id="authentication-methods">Authentication methods<a class="headerlink" href="#authentication-methods" title="Permanent link">#</a></h2>
+<p>Here you can choose the type of 2FA credentials you want to support in Casa. Every authentication method is represented by a widget you can enable or disable. Administrators can arrange widgets according to perceived "strength" order, that is, methods considered safer than others can be placed on top of the list. This ordering has two practical consequences:</p>
+<ul>
+<li>
+<p>When a user has 2FA turned on, he will be prompted safer methods first when authenticating. However, if the user has already chosen a preferred method in his dashboard, the prompt favors his choice</p>
+</li>
+<li>
+<p>In the user's dashboard enrolling options are presented following the defined order</p>
+</li>
+</ul>
 <p><img alt="enabled-2fa-methods" src="../../../assets/casa/admin-console/enabled-2FA-methods.png" /></p>
-<p>The "System" plugin supports several authentication methods out-of-the-box:</p>
+<p>Widgets shown vary according to plugins installed. In a fresh installation, the following are supported out-of-the-box:</p>
 <ul>
 <li>OTP via SMS</li>
-<li>OTP (handles mobile apps and hard tokens)</li>
+<li>OTP (mobile apps and hard tokens)</li>
 <li>FIDO devices</li>
 <li><a href="https://docs.gluu.org/head/supergluu/">Super Gluu</a></li>
 </ul>
-<p>In their home page, users will see widgets for every available method. These widgets are listed in decreasing order of
-ACR level. That is, the first method shown will be that with the highest level assigned in its corresponding
-interception script, and therefore the most secure.</p>
-<h3 id="testing">Testing<a class="headerlink" href="#testing" title="Permanent link">#</a></h3>
-<p>A recommended practice is to enable one script in the Janssen Server (like OTP), enable the associated method in Jans Casa, and then test and confirm that enrollment and authentication is working as expected. Then continue adding other methods one by one.</p>
-<p>In an incognito browser, employ a user other than <code>admin</code> to test enrollments each time a new method is enabled.
-This will prevent the <code>admin</code> user from being accidentally locked out.</p>
+<p>To add more authentication methods, please check the developer <a href="../../developer/add-authn-methods/">guide</a>.</p>
 <h2 id="pass-reset-config">Pass reset config<a class="headerlink" href="#pass-reset-config" title="Permanent link">#</a></h2>
 <p>An admin
 can give users the ability to reset their password from inside Casa. To enable the password reset functionality,
@@ -8825,7 +8784,7 @@ the <a href="../../user-guide/#2fa-settings--trusted-devices">user guide</a>.</p
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-01-05T14:38:35+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-01-05</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-08-21T13:40:12+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-08-21</span>
       
         <br>
         Created:
