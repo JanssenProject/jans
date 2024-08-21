@@ -851,16 +851,21 @@ class JansCliApp(Application):
     def getButtonWithHandler(
                 self, 
                 text: AnyFormattedText,
-                name: AnyFormattedText,
-                jans_help: AnyFormattedText,
-                handler: Callable= None, 
+                name: Optional[AnyFormattedText] = '',
+                jans_help: Optional[AnyFormattedText] = '',
+                handler: Optional[Callable] = None,
+                centered: Optional[bool] = False,
                 ) -> Button:
-
-        b = Button(text=text, width=len(text)+2)
-        b.window.jans_name = name
-        b.window.jans_help = jans_help
+        text_ = _(text)
+        b = Button(text=text_, width=len(text_)+4)
+        if name:
+            b.window.jans_name = name
+        if jans_help:
+            b.window.jans_help = jans_help
         if handler:
             b.handler = lambda:handler(name)
+        if centered:
+            return VSplit([b], align=HorizontalAlign.CENTER)
         return b
 
     def update_status_bar(self) -> None:
