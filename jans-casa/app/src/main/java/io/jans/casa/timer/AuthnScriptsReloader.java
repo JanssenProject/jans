@@ -37,7 +37,7 @@ public class AuthnScriptsReloader extends JobListenerSupport {
     private static final String LOCATION_PATH_PROPERTY = "location_path";
     private static final String FILENAME_TEMPLATE = "casa-external_{0}.py";
     private static final List<String> NOT_REPLACEABLE_SCRIPTS = Arrays.asList(SecurityKey2Extension.ACR,
-            OTPExtension.ACR, SuperGluuExtension.ACR, OTPTwilioExtension.ACR, OTPSmppExtension.ACR);
+            OTPExtension.ACR, SuperGluuExtension.ACR, OTPTwilioExtension.ACR);
 
     @Inject
     private Logger logger;
