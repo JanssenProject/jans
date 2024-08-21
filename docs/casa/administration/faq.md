@@ -30,8 +30,7 @@ If you've followed the steps as described above, next time he attempts to log in
 
 ### How to adjust the issuer for OTP tokens
 
-When people add OTP mobile apps, the enrollment appears in the device associated with an "issuer", so it is easy to recognize where the OTPs generated can be used. To keep track of which OTPs are valid for which IDPs, the issuer property can be adjusted in the Janssen Server OTP script. For example, you might want to set the `issuer` property to `ACME Dev` on your dev server, and `ACME, Inc.` on your production server. 
-
+When people add OTP mobile apps, the enrollment appears in the device associated with an "issuer", so it is easy to recognize where the OTPs generated can be used. To keep track of which OTPs are valid for which IDPs, the issuer property can be adjusted in flow `io.jans.casa.authn.otp` part of Casa Agama project - you can use [TUI](../../admin/config-guide/auth-server-config/agama-project-configuration/#agama-project-configuration-screen) for this purpose. For example, you might want to set the `issuer` property to `ACME Dev` on your dev server, and `ACME, Inc.` on your production server. 
 
 ## Errors shown in the UI
 
@@ -62,7 +61,7 @@ If you have logged in using an administrative account and cannot find any admin 
 
 ### A previously enabled method is not available anymore
 
-If for some reason you disabled the custom script of an authentication method used by Casa, such method will not be available for enrollment or authentication until you enable both the custom script and the method (in Casa admin dashboard).
+Check if the plugin that contributed the given authentication method was removed. The out-of-the-box methods will always appear listed.
 
 ### What kind of TOTP/HOTP devices are supported?
 
@@ -74,25 +73,17 @@ For Time-based OTP, ensure the time of your server is correctly synchronized (us
 
 Big time differences can cause unsuccessful attempts to enroll TOTP credentials in Casa.
 
-For Event-based OTP (HOTP), ensure you are using a suitable value for `look ahead window` (we suggest at least 10). Check contents of file `/etc/certs/otp_configuration.json`. If you apply editions, it is recommended to wait a couple of minutes before retrying..
+For Event-based OTP (HOTP), ensure you are using a suitable value for `look ahead window` (we suggest at least 10). Check the configuration of flow `io.jans.casa.authn.otp` part of Casa Agama project - you can use [TUI](../../admin/config-guide/auth-server-config/agama-project-configuration/#agama-project-configuration-screen) for this purpose.
 
 ### The user interface is not showing any means to enroll credentials
 
-Ensure the following are met:
-
-* You have enabled custom scripts as needed. For instance, if you want to offer users the ability to authenticate using Google Authenticator, you have to enable the script "HOTP/TOPT authentication module". Whenever you enable or disable scripts, please wait a couple of minutes for oxAuth to pick the changes.
-
-* In the administration console, you can see which methods are already enabled in the server, and modify those you want to offer.
+In the administration console, ensure one or more authentication methods have been enabled.
 
 ### A user cannot turn 2FA on
 
 To turn 2FA on, the user has to have enrolled at least a certain number of credentials through the app. Only after this is met, he will be able to perform this action. 
 
 In the administration console you can specify the minimum number of enrolled credentials needed to enable second factor authentication for users. Please check the [2FA Settings plugin](../plugins/2fa-settings.md) for more details.
-
-### The log shows an error related to *Obtaining "acr_values_supported" from server*
-
-Upon startup, the application needs to query the OpenID metadata URL of oxAuth to build the list of available authentication mechanisms.  This warning is shown when the URL is not yet accessible or the list hasn't loaded fully. However, the application does several (around 15) evenly timed attempts in order to gather the required info. These messages are not a sign of a malfunction.
 
 ## My problem is not listed here
 
