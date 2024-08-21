@@ -117,8 +117,6 @@ public class CommonVerifiers {
     public List<PublicKeyCredentialHints> verifyHints(JsonNode params) {
         JsonNode userAgent;
         List<PublicKeyCredentialHints> publicKeyCredentialHints = new ArrayList<PublicKeyCredentialHints>();
-
-        PublicKeyCredentialHints hints = PublicKeyCredentialHints.getByValue("");
         if (params.hasNonNull("user-agent")) {
             userAgent = params.get("user-agent");
             for (int i = 0; i < userAgent.size(); i++) {
