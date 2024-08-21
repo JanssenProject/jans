@@ -1,53 +1,74 @@
 #[derive(serde::Deserialize, Debug)]
-pub(crate) struct LockMasterConfig {
-	pub(crate) audit_uri: String,
-	pub(crate) config_uri: String,
-	pub(crate) lock_sse_uri: String,
-	pub(crate) oauth_as_well_known: String,
+pub struct LockMasterConfig {
+	// TODO: Discuss, implement audit features
+	#[allow(unused)]
+	pub audit_uri: String,
+	pub config_uri: String,
+	pub lock_sse_uri: String,
+	pub oauth_as_well_known: String,
 }
 
 #[derive(serde::Serialize, Debug)]
-pub(crate) struct OAuthDynamicClientRequest<'a> {
-	pub(crate) client_name: &'a str,
-	pub(crate) grant_types: &'a [&'a str],
-	pub(crate) application_type: &'static str,
-	pub(crate) redirect_uris: &'a [&'a str],
-	pub(crate) token_endpoint_auth_method: &'static str,
-	pub(crate) software_statement: &'a str,
-	pub(crate) contacts: &'a [&'static str],
+pub struct OAuthDynamicClientRequest<'a> {
+	pub client_name: &'a str,
+	pub grant_types: &'a [&'a str],
+	pub application_type: &'a str,
+	pub redirect_uris: &'a [&'a str],
+	pub token_endpoint_auth_method: &'a str,
+	pub software_statement: &'a str,
+	pub contacts: &'a [&'a str],
 }
 
 #[derive(serde::Deserialize, Debug)]
 pub struct OAuthConfig {
-	pub(crate) issuer: String,
-	pub(crate) authorization_endpoint: String,
-	pub(crate) registration_endpoint: String,
-	pub(crate) token_endpoint: String,
-	pub(crate) jwks_uri: String,
+	pub issuer: String,
+	// Might not support DCR
+	pub registration_endpoint: Option<String>,
+	pub token_endpoint: String,
+	pub jwks_uri: String,
 }
 
 #[derive(serde::Deserialize, Debug)]
-pub(crate) struct OAuthDynamicClient {
-	pub(crate) client_id: String,
-	pub(crate) client_secret: Option<String>,
+pub struct OAuthDynamicClient {
+	pub client_id: String,
+	pub client_secret: Option<String>,
+}
+
+fn space_separated<'a, S>(scopes: &'a [&'a str], s: S) -> Result<S::Ok, S::Error>
+where
+	S: serde::Serializer,
+{
+	let mut iter = scopes.iter();
+
+	// is scopes is empty, serialize ""
+	match iter.next() {
+		Some(first) => {
+			let res = iter.fold(first.to_string(), |mut acc, ntx| {
+				acc.push(' ');
+				acc.push_str(ntx);
+				acc
+			});
+
+			s.serialize_str(&res)
+		}
+		None => s.serialize_str(""),
+	}
 }
 
 #[derive(serde::Serialize, Debug)]
-pub(crate) struct OAuthGrantRequest<'a> {
-	pub(crate) scope: &'a [&'a str],
-	pub(crate) grant_type: &'a str,
+pub struct OAuthGrantRequest<'a> {
+	#[serde(serialize_with = "space_separated")]
+	pub scope: &'a [&'a str],
+	pub grant_type: &'a str,
 }
 
 #[derive(serde::Deserialize, Debug)]
-pub(crate) struct OAuthGrantResponse {
-	pub(crate) access_token: String,
-	pub(crate) id_token: String,
-	pub(crate) refresh_token: Option<String>,
-	pub(crate) token_type: String,
+pub struct OAuthGrantResponse {
+	pub access_token: String,
 }
 
 #[derive(serde::Deserialize, Debug)]
 #[non_exhaustive]
-pub(crate) enum SseUpdate {
+pub enum SseUpdate {
 	StatusListUpdate { bits: u8, status_list: String },
 }

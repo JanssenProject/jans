@@ -96,7 +96,7 @@ info:
   version: 0.1
 openapi: 3.0.2
 paths:
-  /.well-known/lock-master-configuration:
+  /.well-known/lock-server-configuration:
     get:
       responses:
         '200':

@@ -10,11 +10,13 @@ import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 
 import io.jans.agama.engine.service.WebContext;
+import io.jans.service.CacheService;
 
 @RequestScoped
 public class Page {
     
     private static final String WEB_CTX_KEY = "webCtx";
+    private static final String CACHE_KEY = "cache";
     
     @Inject
     private WebContext webContext;
@@ -24,6 +26,9 @@ public class Page {
     
     @Inject
     private Labels labels;
+
+    @Inject
+    private CacheService cache;
     
     private String templatePath;
     private Map<String, Object> dataModel;
@@ -44,6 +49,7 @@ public class Page {
 
                 dataModel.putIfAbsent(WEB_CTX_KEY, webContext);
                 dataModel.putIfAbsent(Labels.BUNDLE_ID, labels);
+                dataModel.putIfAbsent(CACHE_KEY, cache);
                 labels.useLocale(webContext.getLocale());
                 return dataModel;
 
