@@ -9,6 +9,7 @@ package io.jans.fido2.service.operation;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Strings;
+import io.jans.entry.PublicKeyCredentialHints;
 import io.jans.fido2.ctap.AttestationConveyancePreference;
 import io.jans.fido2.ctap.AuthenticatorAttachment;
 import io.jans.fido2.ctap.CoseEC2Algorithm;
@@ -156,6 +157,13 @@ public class AttestationService {
 			Set<PublicKeyCredentialDescriptor> excludedCredentials = prepareExcludeCredentials(documentDomain, attestationOptions.getUsername());
 			credentialCreationOptions.setExcludeCredentials(excludedCredentials);
 			excludedCredentials.stream().forEach(ele -> log.debug("Put excludeCredentials {}", ele.toString()));
+		}
+
+		//put hints
+		if(null != attestationOptions.getExtensions()) {
+			List<PublicKeyCredentialHints> hints = commonVerifiers.verifyHints(attestationOptions.getExtensions());
+			credentialCreationOptions.setPublicKeyCredentialHints(hints);
+			log.debug("puts hints {}", hints);
 		}
 
 		// Copy extensions
