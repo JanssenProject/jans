@@ -57,6 +57,7 @@
     </scm>
 
     <modules>
+        <module>agama</module>
         <module>config</module>
         <module>shared</module>
         <module>app</module>
