@@ -71,9 +71,10 @@ public class Fido2RegistrationResource extends BaseResource {
                     escapeLog(sortOrder), escapeLog(fieldValuePair));
         }
 
-        SearchRequest searchReq = createSearchRequest(fido2RegistrationService.getBaseDnForFido2RegistrationEntries(null),
-                pattern, sortBy, sortOrder, startIndex, limit, null, null, fido2RegistrationService.getRecordMaxCount(),
-                fieldValuePair, Fido2RegistrationEntry.class);
+        SearchRequest searchReq = createSearchRequest(
+                fido2RegistrationService.getBaseDnForFido2RegistrationEntries(null), pattern, sortBy, sortOrder,
+                startIndex, limit, null, null, fido2RegistrationService.getRecordMaxCount(), fieldValuePair,
+                Fido2RegistrationEntry.class);
 
         return Response.ok(this.doSearch(searchReq)).build();
     }
@@ -108,7 +109,7 @@ public class Fido2RegistrationResource extends BaseResource {
     @ProtectedApi(scopes = { Constants.FIDO2_CONFIG_DELETE_ACCESS })
     public Response deleteFido2DeviceData(
             @Parameter(description = "Unique identifier string (UUID) assigned to device.") @PathParam("uuid") @NotNull String uuid) {
-        logger.debug("Request to delete Fido2 device identified by uuid:{}", uuid);
+        logger.info("Request to delete Fido2 device identified by uuid:{}", uuid);
 
         try {
             // delete device

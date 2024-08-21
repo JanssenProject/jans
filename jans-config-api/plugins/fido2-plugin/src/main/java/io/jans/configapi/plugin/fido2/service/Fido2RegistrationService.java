@@ -7,7 +7,6 @@
 package io.jans.configapi.plugin.fido2.service;
 
 import io.jans.as.common.service.OrganizationService;
-import io.jans.as.common.util.AttributeConstants;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.configapi.configuration.ConfigurationFactory;
 import io.jans.configapi.util.ApiConstants;
@@ -68,7 +67,7 @@ public class Fido2RegistrationService {
     }
 
     public PagedResult<Fido2RegistrationEntry> searchFido2Registration(SearchRequest searchRequest) {
-        log.debug("Search Fido2Registration with searchRequest:{}", searchRequest);
+        log.info("Search Fido2Registration with searchRequest:{}", searchRequest);
 
         Filter searchFilter = null;
         List<Filter> filters = new ArrayList<>();
@@ -77,23 +76,24 @@ public class Fido2RegistrationService {
             for (String assertionValue : searchRequest.getFilterAssertionValue()) {
                 String[] targetArray = new String[] { assertionValue };
 
-                Filter displayNameFilter = Filter.createSubstringFilter("displayName", null,targetArray, null);
-               //Filter descriptionFilter = Filter.createSubstringFilter("jansRegistrationData", null, targetArray,
-               //         null);
-               // Filter statusFilter = Filter.createSubstringFilter("jansStatus", null, targetArray, null);
-               // Filter notificationConfFilter = Filter.createSubstringFilter("jansDeviceNotificationConf", null,
-              //          targetArray, null);
-              //  Filter deviceDataFilter = Filter.createSubstringFilter("jansDeviceData", null, targetArray, null);
-               Filter inumFilter = Filter.createSubstringFilter("jansId", null, targetArray, null);
+                Filter displayNameFilter = Filter.createSubstringFilter("displayName", null, targetArray, null);
+                Filter descriptionFilter = Filter.createSubstringFilter("jansRegistrationData", null, targetArray,
+                        null);
+                Filter statusFilter = Filter.createSubstringFilter("jansStatus", null, targetArray, null);
+                Filter notificationConfFilter = Filter.createSubstringFilter("jansDeviceNotificationConf", null,
+                        targetArray, null);
+                Filter deviceDataFilter = Filter.createSubstringFilter("jansDeviceData", null, targetArray, null);
+                Filter personInumFilter = Filter.createSubstringFilter("personInum", null, targetArray, null);
+                Filter inumFilter = Filter.createSubstringFilter("jansId", null, targetArray, null);
 
-               // filters.add(Filter.createORFilter(displayNameFilter, descriptionFilter, statusFilter,
-                        //notificationConfFilter, deviceDataFilter, inumFilter));
-                filters.add(Filter.createORFilter(displayNameFilter, inumFilter));
+                filters.add(Filter.createORFilter(displayNameFilter, descriptionFilter, statusFilter,
+                        notificationConfFilter, deviceDataFilter, personInumFilter, inumFilter));
+
             }
             searchFilter = Filter.createORFilter(filters);
         }
 
-        log.trace("Fido2Registration pattern searchFilter:{}", searchFilter);
+        log.debug("Fido2Registration pattern searchFilter:{}", searchFilter);
 
         List<Filter> fieldValueFilters = new ArrayList<>();
         if (searchRequest.getFieldValueMap() != null && !searchRequest.getFieldValueMap().isEmpty()) {
@@ -155,7 +155,7 @@ public class Fido2RegistrationService {
     }
 
     public void removeFido2RegistrationEntry(String uuid) {
-        log.error("\n\n Remove Fido2RegistrationEntry request for device with uuid:{}", uuid);
+        log.info("Remove Fido2RegistrationEntry request for device with uuid:{}", uuid);
 
         if (StringUtils.isBlank(uuid)) {
             throw new InvalidAttributeException("Device uuid is null!");
@@ -168,7 +168,7 @@ public class Fido2RegistrationService {
         }
 
         String dn = this.getDnFido2RegistrationEntry(fido2RegistrationEntry.getId());
-        log.error("\n\n Remove Fido2RegistrationEntry with dn:{}", dn);
+        log.info("Remove Fido2RegistrationEntry with dn:{}", dn);
 
         // delete entry
         persistenceEntryManager.removeRecursively(dn, Fido2RegistrationEntry.class);
@@ -179,11 +179,11 @@ public class Fido2RegistrationService {
             throw new WebApplicationException(
                     "Fido2RegistrationEntry device with uuid:{" + uuid + "} could not be deleted!");
         }
-        log.error("\n\n Successfully deleted Fido2RegistrationEntry device with uuid:{}", uuid);
+        log.info("Successfully deleted Fido2RegistrationEntry device with uuid:{}", uuid);
     }
-    
+
     public Fido2RegistrationEntry getFido2RegistrationEntryByDeviceId(String uuid) {
-        log.debug("Get Fido2RegistrationEntry with device uuid:{}", uuid);
+        log.info("Get Fido2RegistrationEntry with device uuid:{}", uuid);
 
         if (StringUtils.isBlank(uuid)) {
             throw new InvalidAttributeException("Device uuid is null!");
@@ -193,11 +193,11 @@ public class Fido2RegistrationService {
         try {
             String[] targetArray = new String[] { uuid };
             Filter filter = Filter.createSubstringFilter("jansDeviceData", null, targetArray, null);
-            log.error("Find device filter:{}", filter);
+            log.debug("Find device filter:{}", filter);
 
             List<Fido2RegistrationEntry> fido2List = persistenceEntryManager
                     .findEntries(getDnFido2RegistrationEntry(null), Fido2RegistrationEntry.class, filter);
-            log.error("Fetched Fido2RegistrationEntry by uuid:{} are fido2List:{}", uuid, fido2List);
+            log.debug("Fetched Fido2RegistrationEntry by uuid:{} are fido2List:{}", uuid, fido2List);
 
             if (fido2List != null && !fido2List.isEmpty()) {
                 fido2RegistrationEntry = fido2List.get(0);
