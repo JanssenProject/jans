@@ -166,7 +166,7 @@ paths:
         description: Data whose value will be used to order the returned response
         schema:
           type: string
-          default: inum
+          default: jansId
       - name: sortOrder
         in: query
         description: Order in which the sortBy param is applied. Allowed values are

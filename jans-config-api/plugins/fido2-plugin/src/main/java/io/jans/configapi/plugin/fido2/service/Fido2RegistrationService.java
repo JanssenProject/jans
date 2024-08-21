@@ -77,15 +77,14 @@ public class Fido2RegistrationService {
             for (String assertionValue : searchRequest.getFilterAssertionValue()) {
                 String[] targetArray = new String[] { assertionValue };
 
-                Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.DISPLAY_NAME, null,
-                        targetArray, null);
+                Filter displayNameFilter = Filter.createSubstringFilter("displayName", null,targetArray, null);
                //Filter descriptionFilter = Filter.createSubstringFilter("jansRegistrationData", null, targetArray,
                //         null);
                // Filter statusFilter = Filter.createSubstringFilter("jansStatus", null, targetArray, null);
                // Filter notificationConfFilter = Filter.createSubstringFilter("jansDeviceNotificationConf", null,
               //          targetArray, null);
               //  Filter deviceDataFilter = Filter.createSubstringFilter("jansDeviceData", null, targetArray, null);
-               Filter inumFilter = Filter.createSubstringFilter(AttributeConstants.INUM, null, targetArray, null);
+               Filter inumFilter = Filter.createSubstringFilter("jansId", null, targetArray, null);
 
                // filters.add(Filter.createORFilter(displayNameFilter, descriptionFilter, statusFilter,
                         //notificationConfFilter, deviceDataFilter, inumFilter));
@@ -112,26 +111,6 @@ public class Fido2RegistrationService {
         return persistenceEntryManager.findPagedEntries(getDnFido2RegistrationEntry(null), Fido2RegistrationEntry.class,
                 searchFilter, null, searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
                 searchRequest.getStartIndex(), searchRequest.getCount(), searchRequest.getMaxCount());
-
-    }
-
-    public List<Fido2RegistrationEntry> findAllByUsername(String username) {
-        String userInum = userFido2Srv.getUserInum(username);
-        log.error("\n\n userInum:{} based on username:{}", userInum, username);
-        if (userInum == null) {
-            return Collections.emptyList();
-        }
-
-        String baseDn = getBaseDnForFido2RegistrationEntries(userInum);
-        log.error("\n\n baseDn:{} for userInum:{}, username:{}", baseDn, userInum, username);
-        
-        if (persistenceEntryManager.hasBranchesSupport(baseDn) && !containsBranch(baseDn)) {
-            return Collections.emptyList();
-        }
-
-        Filter userFilter = Filter.createEqualityFilter("personInum", userInum);
-
-        return persistenceEntryManager.findEntries(baseDn, Fido2RegistrationEntry.class, userFilter);
 
     }
 
@@ -174,19 +153,6 @@ public class Fido2RegistrationService {
     public boolean containsBranch(final String baseDn) {
         return persistenceEntryManager.contains(baseDn, SimpleBranch.class);
     }
-
-    public String getFido2DnForUSer(String userName) {
-        String userInum = userFido2Srv.getUserInum(userName);
-        log.error("\n\n userInum:{} based on userName:{}", userInum, userName);
-        if (userInum == null) {
-            throw new InvalidAttributeException("No user found with userName:{" + userName + "}!!!");
-        }
-
-        String baseDn = getBaseDnForFido2RegistrationEntries(userInum);
-        log.error("\n\n baseDn:{} for userInum:{}, userName:{}", baseDn, userInum, userName);
-        return baseDn;
-    }
-
 
     public void removeFido2RegistrationEntry(String uuid) {
         log.error("\n\n Remove Fido2RegistrationEntry request for device with uuid:{}", uuid);

@@ -60,7 +60,7 @@ public class Fido2RegistrationResource extends BaseResource {
             @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
             @Parameter(description = "Search pattern") @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
             @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
-            @Parameter(description = "Data whose value will be used to order the returned response") @DefaultValue(ApiConstants.INUM) @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
+            @Parameter(description = "Data whose value will be used to order the returned response") @DefaultValue(Constants.JANSID) @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
             @Parameter(description = "Order in which the sortBy param is applied. Allowed values are \"ascending\" and \"descending\"") @DefaultValue(ApiConstants.ASCENDING) @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder,
             @Parameter(description = "Field and value pair for seraching", examples = @ExampleObject(name = "Field value example", value = "mail=abc@mail.com,jansStatus=true")) @DefaultValue("") @QueryParam(value = ApiConstants.FIELD_VALUE_PAIR) String fieldValuePair) {
 
@@ -71,7 +71,7 @@ public class Fido2RegistrationResource extends BaseResource {
                     escapeLog(sortOrder), escapeLog(fieldValuePair));
         }
 
-        SearchRequest searchReq = createSearchRequest(fido2RegistrationService.getDnFido2RegistrationEntry(null),
+        SearchRequest searchReq = createSearchRequest(fido2RegistrationService.getBaseDnForFido2RegistrationEntries(null),
                 pattern, sortBy, sortOrder, startIndex, limit, null, null, fido2RegistrationService.getRecordMaxCount(),
                 fieldValuePair, Fido2RegistrationEntry.class);
 

@@ -19,6 +19,7 @@ public class Constants {
     public static final String USERNAME_PATH = "/{username}";
     public static final String UUID_PATH  = "/{uuid}";
     
+    public static final String JANSID = "jansId";
     
     public static final String FIDO2_CONFIG_READ_ACCESS = "https://jans.io/oauth/config/fido2.readonly";
     public static final String FIDO2_CONFIG_WRITE_ACCESS = "https://jans.io/oauth/config/fido2.write";
