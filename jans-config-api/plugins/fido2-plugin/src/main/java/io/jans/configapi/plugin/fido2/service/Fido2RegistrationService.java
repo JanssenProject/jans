@@ -16,7 +16,6 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;
 import io.jans.orm.model.base.SimpleBranch;
-import io.jans.orm.model.fido2.Fido2DeviceData;
 import io.jans.orm.model.fido2.Fido2RegistrationEntry;
 import io.jans.orm.model.fido2.Fido2RegistrationStatus;
 import io.jans.orm.search.filter.Filter;
@@ -80,15 +79,17 @@ public class Fido2RegistrationService {
 
                 Filter displayNameFilter = Filter.createSubstringFilter(AttributeConstants.DISPLAY_NAME, null,
                         targetArray, null);
-                Filter descriptionFilter = Filter.createSubstringFilter("jansRegistrationData", null, targetArray,
-                        null);
-                Filter statusFilter = Filter.createSubstringFilter("jansStatus", null, targetArray, null);
-                Filter notificationConfFilter = Filter.createSubstringFilter("jansDeviceNotificationConf", null,
-                        targetArray, null);
-                Filter deviceDataFilter = Filter.createSubstringFilter("jansDeviceData", null, targetArray, null);
-                Filter inumFilter = Filter.createSubstringFilter(AttributeConstants.INUM, null, targetArray, null);
-                filters.add(Filter.createORFilter(displayNameFilter, descriptionFilter, statusFilter,
-                        notificationConfFilter, deviceDataFilter, inumFilter));
+               //Filter descriptionFilter = Filter.createSubstringFilter("jansRegistrationData", null, targetArray,
+               //         null);
+               // Filter statusFilter = Filter.createSubstringFilter("jansStatus", null, targetArray, null);
+               // Filter notificationConfFilter = Filter.createSubstringFilter("jansDeviceNotificationConf", null,
+              //          targetArray, null);
+              //  Filter deviceDataFilter = Filter.createSubstringFilter("jansDeviceData", null, targetArray, null);
+               Filter inumFilter = Filter.createSubstringFilter(AttributeConstants.INUM, null, targetArray, null);
+
+               // filters.add(Filter.createORFilter(displayNameFilter, descriptionFilter, statusFilter,
+                        //notificationConfFilter, deviceDataFilter, inumFilter));
+                filters.add(Filter.createORFilter(displayNameFilter, inumFilter));
             }
             searchFilter = Filter.createORFilter(filters);
         }
@@ -123,6 +124,7 @@ public class Fido2RegistrationService {
 
         String baseDn = getBaseDnForFido2RegistrationEntries(userInum);
         log.error("\n\n baseDn:{} for userInum:{}, username:{}", baseDn, userInum, username);
+        
         if (persistenceEntryManager.hasBranchesSupport(baseDn) && !containsBranch(baseDn)) {
             return Collections.emptyList();
         }
@@ -185,45 +187,6 @@ public class Fido2RegistrationService {
         return baseDn;
     }
 
-    public void removeFido2RegistrationEntry(String userName, String deviceUid) {
-        log.error("\n\n Remove Fido2 device for userName:{} and deviceUid:{}", userName, deviceUid);
-        if (StringUtils.isBlank(userName)) {
-            throw new InvalidAttributeException("User name is null!");
-        }
-
-        if (StringUtils.isBlank(deviceUid)) {
-            throw new InvalidAttributeException("Device uid is null!");
-        }
-
-        StringBuilder sb = new StringBuilder();
-        sb.append("Fido2DeviceData for userName:{");
-        sb.append(userName);
-        sb.append("} and device uid:{");
-        sb.append(deviceUid);
-        sb.append("}");
-
-        String userInum = userFido2Srv.getUserInum(userName);
-
-        log.error("\n\n userInum:{} for userName:{}", userInum, userName);
-        if (StringUtils.isBlank(userInum)) {
-            throw new InvalidAttributeException("No user found with username:{" + userName + "}!");
-        }
-
-        Fido2DeviceData fido2DeviceData = this.getFido2DeviceById(userInum, deviceUid);
-        if (fido2DeviceData == null) {
-            throw new WebApplicationException("No " + sb + " found!");
-        }
-
-        String dn = getDnFido2RegistrationEntry(userInum, deviceUid);
-        log.error("\n\n DN for Fido2Device to be deleted is:{}", dn);
-
-        persistenceEntryManager.removeRecursively(dn, Fido2DeviceData.class);
-        fido2DeviceData = this.getFido2DeviceById(userInum, deviceUid);
-        if (fido2DeviceData != null) {
-            throw new WebApplicationException(sb + " could not be deleted!");
-        }
-        log.error("\n\n Successfully deleted {}", sb);
-    }
 
     public void removeFido2RegistrationEntry(String uuid) {
         log.error("\n\n Remove Fido2RegistrationEntry request for device with uuid:{}", uuid);
@@ -235,7 +198,7 @@ public class Fido2RegistrationService {
         Fido2RegistrationEntry fido2RegistrationEntry = this.getFido2RegistrationEntryByDeviceId(uuid);
         log.debug("Fido2RegistrationEntry identified by uuid:{} is:{}", uuid, fido2RegistrationEntry);
         if (fido2RegistrationEntry == null) {
-            throw new WebApplicationException("No device found with uuid:{" + uuid + "}");
+            throw new InvalidAttributeException("No device found with uuid:{" + uuid + "}");
         }
 
         String dn = this.getDnFido2RegistrationEntry(fido2RegistrationEntry.getId());
@@ -252,32 +215,7 @@ public class Fido2RegistrationService {
         }
         log.error("\n\n Successfully deleted Fido2RegistrationEntry device with uuid:{}", uuid);
     }
-
-    public Fido2DeviceData getFido2DeviceById(String userId, String uid) {
-        log.debug("Get Fido2DeviceData for userId:{} - uid:{}", userId, uid);
-
-        if (StringUtils.isBlank(uid)) {
-            throw new InvalidAttributeException("Device uid is null!");
-        }
-
-        Fido2DeviceData fido2DeviceData = null;
-        try {
-            String dn = getDnFido2RegistrationEntry(userId, uid);
-            log.debug("Get Fido2DeviceData identified by dn:{}", dn);
-
-            if (StringHelper.isNotEmpty(userId)) {
-                fido2DeviceData = persistenceEntryManager.find(Fido2DeviceData.class, dn);
-            } else {
-                Filter filter = Filter.createEqualityFilter("jansId", uid);
-                fido2DeviceData = persistenceEntryManager.findEntries(dn, Fido2DeviceData.class, filter).get(0);
-            }
-            log.error("\n\n Fido2DeviceData identified by dn:{} is:{}", dn, fido2DeviceData);
-        } catch (Exception e) {
-            log.error("Failed to find Fido2DeviceData with id: " + fido2DeviceData, e);
-        }
-        return fido2DeviceData;
-    }
-
+    
     public Fido2RegistrationEntry getFido2RegistrationEntryByDeviceId(String uuid) {
         log.debug("Get Fido2RegistrationEntry with device uuid:{}", uuid);
 
@@ -287,13 +225,13 @@ public class Fido2RegistrationService {
 
         Fido2RegistrationEntry fido2RegistrationEntry = null;
         try {
-            String[] targetArray = new String[]{uuid};
+            String[] targetArray = new String[] { uuid };
             Filter filter = Filter.createSubstringFilter("jansDeviceData", null, targetArray, null);
-            log.info("Find device filter filter:{}", filter);
+            log.error("Find device filter:{}", filter);
 
             List<Fido2RegistrationEntry> fido2List = persistenceEntryManager
                     .findEntries(getDnFido2RegistrationEntry(null), Fido2RegistrationEntry.class, filter);
-            log.info("Fetched Fido2RegistrationEntry by uuid:{} are fido2List:{}", uuid, fido2List);
+            log.error("Fetched Fido2RegistrationEntry by uuid:{} are fido2List:{}", uuid, fido2List);
 
             if (fido2List != null && !fido2List.isEmpty()) {
                 fido2RegistrationEntry = fido2List.get(0);
@@ -307,23 +245,12 @@ public class Fido2RegistrationService {
         return fido2RegistrationEntry;
     }
 
-    public String getDnFido2RegistrationEntry(String id, String userId) {
-        String orgDn = organizationService.getDnForOrganization();
-        if (!StringHelper.isEmpty(userId) && StringHelper.isEmpty(id)) {
-            return String.format("ou=fido2_register,inum=%s,ou=people,%s", userId, orgDn);
-        }
-        if (!StringHelper.isEmpty(id) && !StringHelper.isEmpty(userId)) {
-            return String.format("id=%s,ou=fido2_register,inum=%s,ou=people,%s", id, userId, orgDn);
-        }
-        return String.format("ou=people,%s", orgDn);
-    }
-
     public String getDnFido2RegistrationEntry(String inum) {
         String orgDn = organizationService.getDnForOrganization();
         if (StringHelper.isEmpty(inum)) {
             return String.format("ou=fido2_register,%s", orgDn);
         }
-        return String.format("inum=%s,ou=fido2_register,%s", inum, orgDn);
+        return String.format("jansId=%s,ou=fido2_register,%s", inum, orgDn);
     }
 
 }

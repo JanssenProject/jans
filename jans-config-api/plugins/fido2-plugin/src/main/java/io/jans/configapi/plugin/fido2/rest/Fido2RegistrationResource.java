@@ -1,6 +1,6 @@
 package io.jans.configapi.plugin.fido2.rest;
 
-import io.jans.as.common.model.common.User;
+import static io.jans.as.model.util.Util.escapeLog;
 import io.jans.configapi.core.model.ApiError;
 import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
@@ -8,11 +8,10 @@ import io.jans.configapi.plugin.fido2.service.Fido2RegistrationService;
 import io.jans.configapi.plugin.fido2.util.Constants;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
-import io.jans.model.JansAttribute;
 import io.jans.model.SearchRequest;
 import io.jans.orm.model.PagedResult;
-import io.jans.orm.model.fido2.Fido2DeviceData;
 import io.jans.orm.model.fido2.Fido2RegistrationEntry;
+import io.jans.util.exception.InvalidAttributeException;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -29,12 +28,9 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import org.slf4j.Logger;
-
-import static io.jans.as.model.util.Util.escapeLog;
-
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+
+import org.slf4j.Logger;
 
 @Path(Constants.REGISTRATION)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -108,16 +104,23 @@ public class Fido2RegistrationResource extends BaseResource {
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
             @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))), })
     @DELETE
-    @Path(Constants.DEVICE + Constants.UID_PATH)
+    @Path(Constants.DEVICE + Constants.UUID_PATH)
     @ProtectedApi(scopes = { Constants.FIDO2_CONFIG_DELETE_ACCESS })
     public Response deleteFido2DeviceData(
             @Parameter(description = "Unique identifier string (UUID) assigned to device.") @PathParam("uuid") @NotNull String uuid) {
         logger.debug("Request to delete Fido2 device identified by uuid:{}", uuid);
 
-        // delete device
-        fido2RegistrationService.removeFido2RegistrationEntry(uuid);
+        try {
+            // delete device
+            fido2RegistrationService.removeFido2RegistrationEntry(uuid);
 
-        logger.info("Successfully deleted Fido2 Device with uuid:{}", uuid);
+            logger.info("Successfully deleted Fido2 Device with uuid:{}", uuid);
+
+        } catch (InvalidAttributeException iae) {
+            throwNotFoundException("Not Found", iae.getMessage());
+        } catch (Exception ex) {
+            throwInternalServerException(ex);
+        }
         return Response.noContent().build();
     }
 
