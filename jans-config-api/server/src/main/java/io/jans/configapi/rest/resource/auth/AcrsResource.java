@@ -101,7 +101,7 @@ public class AcrsResource extends ConfigBaseResource {
             throwBadRequestException("Default authentication method should not be null or empty !");
         }
 
-        if (authenticationMethod != null && StringUtils.isNotBlank(authenticationMethod.getDefaultAcr())) {
+        if (StringUtils.isNotBlank(authenticationMethod.getDefaultAcr())) {
             validateAuthenticationMethod(authenticationMethod.getDefaultAcr());
 
             final GluuConfiguration gluuConfiguration = configurationService.findGluuConfiguration();

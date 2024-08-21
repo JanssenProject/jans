@@ -117,7 +117,6 @@ public class IdentityProvider extends Entry implements Serializable {
     private boolean addReadTokenRoleOnCreate;
 
     @AttributeName
-    @Deprecated
     private boolean authenticateByDefault;
 
     @AttributeName
