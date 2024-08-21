@@ -8135,8 +8135,6 @@
         
           
         
-          
-        
       
       
         <label class="md-nav__link" for="__nav_5_2">
@@ -8275,20 +8273,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../credentials-stored/" class="md-nav__link">
-        Credentials storage
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../custom-branding/" class="md-nav__link">
         Custom branding
       </a>
@@ -8334,7 +8318,7 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_2_8" type="checkbox" id="__nav_5_2_8" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_2_7" type="checkbox" id="__nav_5_2_7" >
       
       
       
@@ -8351,13 +8335,13 @@
         
       
       
-        <label class="md-nav__link" for="__nav_5_2_8">
+        <label class="md-nav__link" for="__nav_5_2_7">
           Plugins
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <nav class="md-nav" aria-label="Plugins" data-md-level="3">
-        <label class="md-nav__title" for="__nav_5_2_8">
+        <label class="md-nav__title" for="__nav_5_2_7">
           <span class="md-nav__icon md-icon"></span>
           Plugins
         </label>
@@ -8386,7 +8370,7 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_2_8_2" type="checkbox" id="__nav_5_2_8_2" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_2_7_2" type="checkbox" id="__nav_5_2_7_2" >
       
       
       
@@ -8397,13 +8381,13 @@
         
       
       
-        <label class="md-nav__link" for="__nav_5_2_8_2">
+        <label class="md-nav__link" for="__nav_5_2_7_2">
           Accounts Linking
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <nav class="md-nav" aria-label="Accounts Linking" data-md-level="4">
-        <label class="md-nav__title" for="__nav_5_2_8_2">
+        <label class="md-nav__title" for="__nav_5_2_7_2">
           <span class="md-nav__icon md-icon"></span>
           Accounts Linking
         </label>
@@ -8728,39 +8712,31 @@ all the following authentication methods are supported:</p>
 <p>In the event a user loses access to his account, admins can revert the user's authentication method to "password only" 
 by following the steps shown in the <a href="../faq/">troubleshooting guide</a>.</p>
 <h2 id="associated-strength-of-credentials">Associated "strength" of credentials<a class="headerlink" href="#associated-strength-of-credentials" title="Permanent link">#</a></h2>
-<p>When authenticating, a user with 2FA turned on, will be challenged to present the credential matching the "strongest" 
-authentication method. The strength is a numerical value assigned via the "level" property of the custom script that 
-is tied to the authentication method. The higher the value, the stronger it is considered. Thus, if a user has several 
-credentials enrolled, he will be asked to present the one of them having the highest strength associated. </p>
-<p>Particularly, if the device used to access is a mobile browser, only the methods listed in the property 
-"mobile_methods" of casa script will be accounted to determine the strongest credential. Admins can modify this 
-property at will if the default value does not meet their expectations.</p>
-<p>Note there are ways to override the rule of the "strongest" method; see the docs of 
-the <a href="../../plugins/2fa-settings/">Strong authentication settings plugin</a>.</p>
+<p>When authenticating, a user with 2FA turned on, will be challenged to present the credential having the "strongest" 
+authentication method (from his already available enrolled credentials). The relative strength of methods can be assigned in the <a href="../admin-console/#authentication-methods">authentication methods</a> screen of the admin console.</p>
 <h2 id="forcing-users-to-enroll-a-specific-credential-before-2fa-is-available">Forcing users to enroll a specific credential before 2FA is available<a class="headerlink" href="#forcing-users-to-enroll-a-specific-credential-before-2fa-is-available" title="Permanent link">#</a></h2>
 <p>To further reduce the likelihood of lockouts, you can force users to initially enroll, for instance, one OTP 
-credential before any other. OTP credentials are generally more accessible than their counterparts (like Fido 2) since 
+credential before any other. OTP credentials are generally more accessible than their counterparts (like Fido) since 
 they normally don't demand special conditions from the device used to access, like having a USB port.</p>
-<p>To do so, just add a new configuration property named <code>2fa_requisite</code> to the custom interception script corresponding 
-to the authentication method, and assign <code>true</code> as its value. It may take more than one minute for Casa to pick up the 
-changes. To add the property to a custom interception script, open 
-<a href="../../../admin/config-guide/config-tools/jans-tui/">the text-based UI (TUI)</a> 
-and 
-navigate to 
-<code>Scripts</code>. Select and open the script. Use <code>Config properties</code> section to 
-add the new property.</p>
+<p>To do so, add a property named <code>2fa_requisite</code> to the configuration of the Agama flow that backs the given authentication method, and assign <code>true</code> as its value. You can do this via <a href="../../admin/config-guide/auth-server-config/agama-project-configuration/#agama-project-configuration-screen">TUI</a>.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This mechanism is applicable for the out-of-the box authentication methods supported by Casa. For other methods contributed via plugins, consult their respective documentation.</p>
+</div>
 <p>You can flag more than one method as requisite. In this case users will be encouraged to enroll one credential 
 associated to any of the flagged methods.</p>
-<p>If you are using an authentication method you added your own (via plugin), ensure the corresponding plugin 
-implements the <code>mayBe2faActivationRequisite</code> method.</p>
 <p>If a user attempts to delete their only available credential matching the requisite method, a prompt will appear 
 warning that doing so will disable 2FA, that is, resetting to password authentication.</p>
 <h2 id="enrolling-credentials-upon-registration-or-first-login">Enrolling credentials upon registration or first login<a class="headerlink" href="#enrolling-credentials-upon-registration-or-first-login" title="Permanent link">#</a></h2>
 <p>If the previous scenario is not enough for your needs, you can force users to enroll credentials and turn 2FA on 
 before the first usage of the application. This can be done in two ways:</p>
 <ul>
-<li>Altering the login flow to check for presence of credentials and then redirect to custom pages that implement enrollment</li>
-<li>Making enrollments occur at registration time (through the application you use for this purpose)</li>
+<li>
+<p>Creating a new Agama project that takes charge of credentials enrollment and then reuses the flows bundled with the standard Agama project which performs the actual authentication. Learn more about this in the developer pages</p>
+</li>
+<li>
+<p>Making enrollments occur at registration time (through the application you use for this purpose)</p>
+</li>
 </ul>
 
   <hr>
@@ -8768,7 +8744,7 @@ before the first usage of the application. This can be done in two ways:</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-01-17T10:12:36+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-01-17</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-08-21T13:40:12+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-08-21</span>
       
         <br>
         Created:
@@ -8813,13 +8789,13 @@ before the first usage of the application. This can be done in two ways:</p>
       
       
         
-        <a href="../credentials-stored/" class="md-footer__link md-footer__link--next" aria-label="Next: Credentials storage" rel="next">
+        <a href="../custom-branding/" class="md-footer__link md-footer__link--next" aria-label="Next: Custom branding" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Credentials storage
+              Custom branding
             </div>
           </div>
           <div class="md-footer__button md-icon">

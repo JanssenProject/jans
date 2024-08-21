@@ -8135,8 +8135,6 @@
         
           
         
-          
-        
       
       
         <label class="md-nav__link" for="__nav_5_2">
@@ -8206,15 +8204,8 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#enable-scripts" class="md-nav__link">
-    Enable scripts
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#enable-methods-in-casa" class="md-nav__link">
-    Enable methods in Casa
+  <a href="#enable-authentication-methods" class="md-nav__link">
+    Enable authentication methods
   </a>
   
 </li>
@@ -8295,20 +8286,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../credentials-stored/" class="md-nav__link">
-        Credentials storage
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../custom-branding/" class="md-nav__link">
         Custom branding
       </a>
@@ -8354,7 +8331,7 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_2_8" type="checkbox" id="__nav_5_2_8" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_2_7" type="checkbox" id="__nav_5_2_7" >
       
       
       
@@ -8371,13 +8348,13 @@
         
       
       
-        <label class="md-nav__link" for="__nav_5_2_8">
+        <label class="md-nav__link" for="__nav_5_2_7">
           Plugins
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <nav class="md-nav" aria-label="Plugins" data-md-level="3">
-        <label class="md-nav__title" for="__nav_5_2_8">
+        <label class="md-nav__title" for="__nav_5_2_7">
           <span class="md-nav__icon md-icon"></span>
           Plugins
         </label>
@@ -8406,7 +8383,7 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_2_8_2" type="checkbox" id="__nav_5_2_8_2" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_5_2_7_2" type="checkbox" id="__nav_5_2_7_2" >
       
       
       
@@ -8417,13 +8394,13 @@
         
       
       
-        <label class="md-nav__link" for="__nav_5_2_8_2">
+        <label class="md-nav__link" for="__nav_5_2_7_2">
           Accounts Linking
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <nav class="md-nav" aria-label="Accounts Linking" data-md-level="4">
-        <label class="md-nav__title" for="__nav_5_2_8_2">
+        <label class="md-nav__title" for="__nav_5_2_7_2">
           <span class="md-nav__icon md-icon"></span>
           Accounts Linking
         </label>
@@ -8647,15 +8624,8 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#enable-scripts" class="md-nav__link">
-    Enable scripts
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#enable-methods-in-casa" class="md-nav__link">
-    Enable methods in Casa
+  <a href="#enable-authentication-methods" class="md-nav__link">
+    Enable authentication methods
   </a>
   
 </li>
@@ -8746,44 +8716,19 @@
 <li>FIDO devices</li>
 <li><a href="https://docs.gluu.org/head/supergluu/">Super Gluu</a> mobile notifications</li>
 </ul>
-<p>You can choose one or more of these, or create plugins to support more authentication mechanisms. </p>
-<h3 id="enable-scripts">Enable scripts<a class="headerlink" href="#enable-scripts" title="Permanent link">#</a></h3>
-<p>First, the custom authentication scripts corresponding to the authentication methods of your preference must be enabled in the server. For this purpose you can use <a href="../../../admin/config-guide/config-tools/jans-tui/">TUI</a> or the <a href="https://docs.gluu.org/head/admin/admin-ui/introduction/">Admin UI</a> if you have Gluu Flex Server installed.</p>
-<p>Scripts can be more easily looked up by display name. The below table shows the display names of the scripts previously listed:</p>
-<table>
-<thead>
-<tr>
-<th>Script</th>
-<th>Display name</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>OTP (SMS)</td>
-<td>twilio_sms</td>
-</tr>
-<tr>
-<td>OTP (apps or hardware)</td>
-<td>otp</td>
-</tr>
-<tr>
-<td>FIDO devices</td>
-<td>fido2</td>
-</tr>
-<tr>
-<td>Super gluu</td>
-<td>super_gluu</td>
-</tr>
-</tbody>
-</table>
-<p>As an example, connect to your server and run <code>python3 /opt/jans/jans-cli/jans_cli_tui.py</code>), follow the prompts, and navigate to the <em>scripts</em> tab. There, search for the  script matching the type of 2FA credential you want to support, e.g. <code>fido2</code>, <code>otp</code>, etc. Press enter to open the script details page. Select the "Enabled" field and press space (an asterisk will be displayed). Finally, press the "save" button.</p>
+<p>You can choose one or more of these, or create plugins to support more authentication mechanisms.</p>
+<h3 id="enable-authentication-methods">Enable authentication methods<a class="headerlink" href="#enable-authentication-methods" title="Permanent link">#</a></h3>
+<p>Login to Casa with an administrative account (visit <code>https://&lt;your-server-name&gt;/jans-casa</code>) and activate the <a href="../admin-console/#authentication-methods">methods</a> you want to offer Casa users.</p>
 <p><strong>Important notes</strong>:</p>
 <ul>
-<li>Usage of OTP via SMS requires the setup of a <a href="https://twilio.com">Twilio</a> account and extra configuration of the custom script. Check <a href="https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/script-catalog/person_authentication/twilio-2fa/README.md">this</a> document for reference</li>
-<li>Usage of Super Gluu has some <a href="https://docs.gluu.org/head/supergluu/admin-guide/">preliminar requisites</a> and requires extra configuration of the custom script </li>
+<li>
+<p>Usage of OTP via SMS requires the setup of a <a href="https://twilio.com">Twilio</a> account and populating configuration properties of 
+flow <code>io.jans.casa.authn.twilio_sms</code> found in Casa Agama project. You can do the latter via <a href="../../admin/config-guide/auth-server-config/agama-project-configuration/#agama-project-configuration-screen">TUI</a>. You are encouraged to use the online Twilio testing tools beforehand to ensure you can send SMS to the countries you are targetting</p>
+</li>
+<li>
+<p>Usage of Super Gluu has some preliminar requisites described <a href="https://docs.gluu.org/head/supergluu/admin-guide/">here</a></p>
+</li>
 </ul>
-<h3 id="enable-methods-in-casa">Enable methods in Casa<a class="headerlink" href="#enable-methods-in-casa" title="Permanent link">#</a></h3>
-<p>Once scripts are enabled and configured, login to Casa as administrator (visit <code>https://&lt;your-server-name&gt;/jans-casa</code>) and <a href="../admin-console/#enabled-authentication-methods">enable the methods</a> you want to offer Casa users.</p>
 <h3 id="add-the-strong-authentication-settings-plugin">Add the strong authentication settings plugin<a class="headerlink" href="#add-the-strong-authentication-settings-plugin" title="Permanent link">#</a></h3>
 <p>This step is optional. Check <a href="../../plugins/2fa-settings/">this</a> page for more information. Use this plugin if you need to exercise an advanced control on how 2FA behaves in your Casa deployment.</p>
 <h3 id="test-enrollment-and-2fa">Test enrollment and 2FA<a class="headerlink" href="#test-enrollment-and-2fa" title="Permanent link">#</a></h3>
@@ -8819,7 +8764,7 @@ Janssen Server using <a href="../../../admin/config-guide/config-tools/jans-tui/
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-05-01T16:04:27+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-05-01</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-08-21T13:40:12+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-08-21</span>
       
         <br>
         Created:
