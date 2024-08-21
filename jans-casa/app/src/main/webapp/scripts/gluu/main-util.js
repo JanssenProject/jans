@@ -32,18 +32,6 @@ function sendToServer(data) {
     zAu.send(new zk.Event(widget, "onData", data, {toServer:true}));
 }
 
-function sendBrowserData() {
-
-    if (platform) {
-        platform['ua'] = null;
-        platform['offset'] = -60 * new Date().getTimezoneOffset();
-        platform['screenWidth'] = screen.width;
-        //Sends some browser metadata
-        sendToServer(platform);
-    }
-
-}
-
 //Maps a ZK notification constant with a bootstrap alert class
 function alertClassForType(type) {
 

@@ -9,31 +9,24 @@ tags:
 
 This document reviews the available options for configuring Casa. All configuration changes applied via the admin console take effect immediately with no restart or other actions required.
 
-## Enabled authentication methods
+## Authentication methods
 
-Here you can choose the type of 2FA credentials you want to support in Casa. This may require you to [enable](./quick-start.md#enable-scripts) the applicable interception scripts in your Janssen Server beforehand.
+Here you can choose the type of 2FA credentials you want to support in Casa. Every authentication method is represented by a widget you can enable or disable. Administrators can arrange widgets according to perceived "strength" order, that is, methods considered safer than others can be placed on top of the list. This ordering has two practical consequences:
 
-Check the boxes as desired. You can assign the handler [plugin](#plugins) for each method to be supported. Choose "System" to use the default implementation provided by the application.
+- When a user has 2FA turned on, he will be prompted safer methods first when authenticating. However, if the user has already chosen a preferred method in his dashboard, the prompt favors his choice
+
+- In the user's dashboard enrolling options are presented following the defined order
 
 ![enabled-2fa-methods](../../assets/casa/admin-console/enabled-2FA-methods.png)
 
-The "System" plugin supports several authentication methods out-of-the-box:
+Widgets shown vary according to plugins installed. In a fresh installation, the following are supported out-of-the-box:
 
 - OTP via SMS
-- OTP (handles mobile apps and hard tokens)
+- OTP (mobile apps and hard tokens)
 - FIDO devices
 - [Super Gluu](https://docs.gluu.org/head/supergluu/)
 
-In their home page, users will see widgets for every available method. These widgets are listed in decreasing order of
-ACR level. That is, the first method shown will be that with the highest level assigned in its corresponding
-interception script, and therefore the most secure.
-
-### Testing
-
-A recommended practice is to enable one script in the Janssen Server (like OTP), enable the associated method in Jans Casa, and then test and confirm that enrollment and authentication is working as expected. Then continue adding other methods one by one.
-
-In an incognito browser, employ a user other than `admin` to test enrollments each time a new method is enabled.
-This will prevent the `admin` user from being accidentally locked out.
+To add more authentication methods, please check the developer [guide](../developer/add-authn-methods.md).
 
 ## Pass reset config
 
