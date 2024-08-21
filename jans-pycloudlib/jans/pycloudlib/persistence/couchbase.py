@@ -901,7 +901,9 @@ def get_couchbase_superuser_password_file():
 def _sync_cb_password(manager, password_file, secret_name):
     if os.path.isfile(password_file):
         manager.secret.set(secret_name, get_password_from_file(password_file))
-    else:
+
+    # make sure password file always exists
+    if not os.path.isfile(password_file):
         manager.secret.to_file(secret_name, password_file)
 
 
