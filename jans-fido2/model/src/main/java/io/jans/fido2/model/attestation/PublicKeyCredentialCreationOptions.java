@@ -1,9 +1,11 @@
 package io.jans.fido2.model.attestation;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import io.jans.entry.PublicKeyCredentialHints;
 import io.jans.fido2.ctap.AttestationConveyancePreference;
 import io.jans.fido2.model.common.*;
 
+import java.util.List;
 import java.util.Set;
 
 public class PublicKeyCredentialCreationOptions {
@@ -20,6 +22,8 @@ public class PublicKeyCredentialCreationOptions {
     private JsonNode extensions;
     private String status;
     private String errorMessage;
+
+    private List<PublicKeyCredentialHints> publicKeyCredentialHints;
 
     public AttestationConveyancePreference getAttestation() {
         return attestation;
@@ -137,10 +141,19 @@ public class PublicKeyCredentialCreationOptions {
                 ", username='" + username + '\'' +
                 ", displayName='" + displayName + '\'' +
                 ", excludeCredentials=" + excludeCredentials +
+                ", publicKeyCredentialHints=" + publicKeyCredentialHints +
                 ", timeout=" + timeout +
                 ", extensions=" + extensions +
                 ", status='" + status + '\'' +
                 ", errorMessage='" + errorMessage + '\'' +
                 '}';
+    }
+
+    public List<PublicKeyCredentialHints> getPublicKeyCredentialHints() {
+        return publicKeyCredentialHints;
+    }
+
+    public void setPublicKeyCredentialHints(List<PublicKeyCredentialHints> publicKeyCredentialHints) {
+        this.publicKeyCredentialHints = publicKeyCredentialHints;
     }
 }
