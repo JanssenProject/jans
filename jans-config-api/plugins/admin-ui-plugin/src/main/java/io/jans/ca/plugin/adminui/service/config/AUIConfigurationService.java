@@ -119,6 +119,7 @@ public class AUIConfigurationService extends BaseService {
 
         auiConfig.setSessionTimeoutInMins(appConf.getMainSettings().getUiConfig().getSessionTimeoutInMins());
         auiConfig.setAdditionalParameters(appConf.getMainSettings().getOidcConfig().getAuiWebClient().getAdditionalParameters());
+        auiConfig.setConfigApiHost(appConf.getMainSettings().getUiConfig().getConfigApiHost());
         return auiConfig;
     }
 

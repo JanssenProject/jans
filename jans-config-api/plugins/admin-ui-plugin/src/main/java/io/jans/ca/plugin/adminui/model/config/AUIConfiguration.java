@@ -39,6 +39,7 @@ public class AUIConfiguration {
     private LicenseConfiguration licenseConfiguration;
     //UI session timeout
     private Integer sessionTimeoutInMins;
+    private String configApiHost;
     private List<KeyValuePair> additionalParameters;
 
     public List<KeyValuePair> getAdditionalParameters() {
@@ -55,6 +56,14 @@ public class AUIConfiguration {
 
     public void setSessionTimeoutInMins(Integer sessionTimeoutInMins) {
         this.sessionTimeoutInMins = sessionTimeoutInMins;
+    }
+
+    public String getConfigApiHost() {
+        return configApiHost;
+    }
+
+    public void setConfigApiHost(String configApiHost) {
+        this.configApiHost = configApiHost;
     }
 
     public String getAppType() {

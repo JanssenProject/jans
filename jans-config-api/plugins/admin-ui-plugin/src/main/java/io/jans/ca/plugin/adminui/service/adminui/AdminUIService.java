@@ -35,7 +35,7 @@ public class AdminUIService {
     @Inject
     AUIConfigurationService auiConfigurationService;
 
-    public AppConfigResponse getAdminUIEditableConfiguration() throws ApplicationException {
+    public AppConfigResponse getAdminUIConfiguration() throws ApplicationException {
         try {
             AUIConfiguration auiConfiguration = auiConfigurationService.getAUIConfiguration();
 
@@ -52,6 +52,7 @@ public class AdminUIService {
             appConfigResponse.setEndSessionEndpoint(auiConfiguration.getAuiWebServerEndSessionEndpoint());
             appConfigResponse.setSessionTimeoutInMins(auiConfiguration.getSessionTimeoutInMins());
             appConfigResponse.setAdditionalParameters(auiConfiguration.getAdditionalParameters());
+            appConfigResponse.setConfigApiHost(auiConfiguration.getConfigApiHost());
 
             return appConfigResponse;
         } catch (Exception e) {
@@ -76,7 +77,7 @@ public class AdminUIService {
                 auiConfigurationService.getAUIConfiguration().setAdditionalParameters(appConfigResponse.getAdditionalParameters());
             }
             entryManager.merge(adminConf);
-            return getAdminUIEditableConfiguration();
+            return getAdminUIConfiguration();
         } catch (Exception e) {
             log.error(ErrorResponse.SAVE_ADMIUI_CONFIG_ERROR.getDescription(), e);
             throw new ApplicationException(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode(), ErrorResponse.SAVE_ADMIUI_CONFIG_ERROR.getDescription());

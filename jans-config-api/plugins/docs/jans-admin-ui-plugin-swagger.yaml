@@ -1585,6 +1585,10 @@ components:
           description: Additional Authentication Parameters
           items:
             $ref: '#/components/schemas/KeyValuePair'
+        configApiHost:
+          type: string
+          description: Config API hostname
+          readOnly: true
     KeyValuePair:
       type: object
       properties:

@@ -73,7 +73,7 @@ public class AdminUIResource {
     public Response getConf() {
         try {
             log.info("Get Admin UI editable configuration.");
-            AppConfigResponse appConf = adminUIService.getAdminUIEditableConfiguration();
+            AppConfigResponse appConf = adminUIService.getAdminUIConfiguration();
             log.info("Configuration received.");
             return Response.ok(appConf).build();
         } catch (ApplicationException e) {
