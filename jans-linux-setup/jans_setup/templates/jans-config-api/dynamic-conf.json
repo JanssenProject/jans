@@ -20,6 +20,9 @@
   "loggingLayout":"text",
   "externalLoggerConfiguration":"",
   "maxCount": 200,
+  "acrExclusionList": [
+    "simple_password_auth"
+  ],
   "exclusiveAuthScopes": [
     "jans_stat",
     "https://jans.io/scim/users.read",
