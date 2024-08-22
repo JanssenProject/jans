@@ -6,6 +6,7 @@
 
 package io.jans.configapi.plugin.fido2.service;
 
+import static io.jans.as.model.util.Util.escapeLog;
 import io.jans.as.common.service.OrganizationService;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.configapi.configuration.ConfigurationFactory;
@@ -155,7 +156,9 @@ public class Fido2RegistrationService {
     }
 
     public void removeFido2RegistrationEntry(String uuid) {
-        log.info("Remove Fido2RegistrationEntry request for device with uuid:{}", uuid);
+        if (log.isInfoEnabled()) {
+            log.info("Remove Fido2RegistrationEntry request for device with uuid:{}", escapeLog(uuid));
+        }
 
         if (StringUtils.isBlank(uuid)) {
             throw new InvalidAttributeException("Device uuid is null!");

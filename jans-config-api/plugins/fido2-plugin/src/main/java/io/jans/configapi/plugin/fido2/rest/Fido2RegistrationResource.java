@@ -109,13 +109,17 @@ public class Fido2RegistrationResource extends BaseResource {
     @ProtectedApi(scopes = { Constants.FIDO2_CONFIG_DELETE_ACCESS })
     public Response deleteFido2DeviceData(
             @Parameter(description = "Unique identifier string (UUID) assigned to device.") @PathParam("uuid") @NotNull String uuid) {
-        logger.info("Request to delete Fido2 device identified by uuid:{}", uuid);
+        if (logger.isInfoEnabled()) {
+            logger.info("Request to delete Fido2 device identified by uuid:{}", escapeLog(uuid));
+        }
 
         try {
             // delete device
             fido2RegistrationService.removeFido2RegistrationEntry(uuid);
 
-            logger.info("Successfully deleted Fido2 Device with uuid:{}", uuid);
+            if (logger.isInfoEnabled()) {
+                logger.info("Successfully deleted Fido2 Device with uuid:{}", escapeLog(uuid));
+            }
 
         } catch (InvalidAttributeException iae) {
             throwNotFoundException("Not Found", iae.getMessage());
