@@ -8,10 +8,13 @@ package io.jans.fido2.service.verifier;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
 import com.google.common.base.Strings;
+import io.jans.entry.PublicKeyCredentialHints;
 import io.jans.fido2.model.assertion.AssertionErrorResponseType;
 import io.jans.fido2.model.assertion.AssertionOptions;
 import io.jans.fido2.model.assertion.AssertionResult;
@@ -109,6 +112,24 @@ public class CommonVerifiers {
             throw new Fido2CompromisedDevice("Counter did not increase");
         }
     }
+
+
+    public List<PublicKeyCredentialHints> verifyHints(JsonNode params) {
+        JsonNode userAgent;
+        List<PublicKeyCredentialHints> publicKeyCredentialHints = new ArrayList<PublicKeyCredentialHints>();
+        if (params.hasNonNull("user-agent")) {
+            userAgent = params.get("user-agent");
+            for (int i = 0; i < userAgent.size(); i++) {
+                // accessing each element of userAgent
+                log.debug(" user-agent " + i +  " " + userAgent.get(i).asText());
+                publicKeyCredentialHints.add(PublicKeyCredentialHints.getByValue(userAgent.get(i).asText()));
+            }
+        }else{
+            publicKeyCredentialHints.add(PublicKeyCredentialHints.getByValue(""));
+        }
+        return publicKeyCredentialHints;
+    }
+
 
     public void verifyCounter(int counter) {
         if (counter < 0) {
