@@ -4,22 +4,21 @@ import io.jans.casa.credential.BasicCredential;
 import io.jans.casa.extension.AuthnMethod;
 import io.jans.casa.misc.Utils;
 import io.jans.casa.plugins.authnmethod.service.TwilioMobilePhoneService;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
 import org.pf4j.Extension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-
 /**
  * Note: No injection can take place at extensions because instances are handled by p4fj
- * @author jgomer
  */
 @Extension
 public class OTPTwilioExtension implements AuthnMethod {
 
-    public static final String ACR = "twilio_sms";
+    public static final String ACR = "io.jans.casa.authn.twilio_sms";
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -71,7 +70,7 @@ public class OTPTwilioExtension implements AuthnMethod {
     }
 
     public boolean mayBe2faActivationRequisite() {
-        return Boolean.parseBoolean(mobService.getScriptPropertyValue("2fa_requisite"));
+        return Boolean.parseBoolean(mobService.getPropertyValue("2fa_requisite"));
     }
 
     public void reloadConfiguration() {
