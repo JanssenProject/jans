@@ -5,12 +5,7 @@ import io.jans.fido2.client.AttestationService;
 import io.jans.orm.model.fido2.Fido2RegistrationStatus;
 
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -25,6 +20,8 @@ import io.jans.casa.misc.Utils;
 import io.jans.casa.plugins.authnmethod.SecurityKey2Extension;
 import io.jans.casa.rest.RSUtils;
 import io.jans.casa.core.model.Fido2RegistrationEntry;
+
+import org.json.JSONObject;
 import org.slf4j.Logger;
 
 @Named
@@ -33,6 +30,8 @@ public class Fido2Service extends BaseService {
 
     @Inject
     private Logger logger;
+    
+    private String appId;
 
     private AttestationService attestationService;
 
@@ -45,23 +44,19 @@ public class Fido2Service extends BaseService {
 
     public void reloadConfiguration() {
 
-        props = persistenceService.getCustScriptConfigProperties(SecurityKey2Extension.ACR);
-        String tmp = getScriptPropertyValue("fido2_server_uri");
+        props = new JSONObject();
+        String issuerUrl = persistenceService.getIssuerUrl();
+        String tmp = issuerUrl + "/.well-known/fido2-configuration";
+        try {
+            appId = new URL(issuerUrl).getHost();
+        
+            logger.info("Retrieving contents of URL {}", tmp);
+            String attestationURL = mapper.readTree(new URL(tmp)).get("attestation").get("base_path").asText();
 
-        if (tmp == null) {
-            logger.error("No fido2_server_uri param found in fido2 script");
-            logger.info("Fido 2 integration will not work properly");
-        } else {
-            try {
-                tmp += "/.well-known/fido2-configuration";
-                logger.info("Retrieving contents of URL {}", tmp);
-                String attestationURL = mapper.readTree(new URL(tmp)).get("attestation").get("base_path").asText();
-
-                logger.info("Base path is {}", attestationURL);
-                attestationService = RSUtils.getClient().target(attestationURL).proxy(AttestationService.class);
-            } catch (Exception e) {
-                logger.error(e.getMessage(), e);
-            }
+            logger.info("Base path is {}", attestationURL);
+            attestationService = RSUtils.getClient().target(attestationURL).proxy(AttestationService.class);
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
         }
 
     }
@@ -156,6 +151,10 @@ public class Fido2Service extends BaseService {
         return success;
 
     }
+    
+    public String appId() {
+        return appId;
+    }
 
     private Fido2RegistrationEntry getDeviceRegistrationFor(FidoDevice device) {
 
@@ -222,7 +221,7 @@ public class Fido2Service extends BaseService {
 
     	FidoDevice sk = null;
         try {
-            List<FidoDevice> list = getDevices(userId, new java.net.URI(getScriptPropertyValue("fido2_server_uri")).getHost(), true);
+            List<FidoDevice> list = getDevices(userId, appId(), true);
             sk = FidoService.getRecentlyCreatedDevice(list, time);
             if (sk != null && sk.getNickName() != null) {
                 sk = null;    //should have no name
