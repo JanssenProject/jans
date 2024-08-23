@@ -1027,72 +1027,110 @@ components:
       properties:
         applicationName:
           type: string
+          description: Name of application.
         samlTrustRelationshipDn:
           type: string
+          description: Trust relationship organizational unit.
         trustedIdpDn:
           type: string
+          description: Identity provider organizational unit.
         enabled:
           type: boolean
+          description: SAML functionality enabled.
         selectedIdp:
           type: string
+          description: Selected SAML server.
         serverUrl:
           type: string
+          description: SAML server URL.
         realm:
           type: string
+          description: "SAML server realm, default is `jans`."
         clientId:
           type: string
+          description: Jans auth SAML client ID.
         clientSecret:
           type: string
+          description: Jans auth SAML client password.
         grantType:
           type: string
+          description: Grant type to get access token.
         scope:
           type: string
+          description: Oauth2 scope to get access token.
         username:
           type: string
+          description: SAML server username.
         password:
           type: string
+          description: SAML server user credentails.
         spMetadataUrl:
           type: string
+          description: Relative SAML server SP Metadata Url.
         tokenUrl:
           type: string
+          description: Relative SAML server Token Url.
         idpUrl:
           type: string
+          description: Relative SAML server IDP Url.
         extIDPTokenUrl:
           type: string
+          description: Relative SAML server IDP Token Url.
         extIDPRedirectUrl:
           type: string
+          description: Relative IDP redirect Url.
         idpMetadataImportUrl:
           type: string
+          description: Relative SAML server Metadata import Url.
         idpRootDir:
           type: string
+          description: Jans Auth server root SAML directory.
         idpMetadataDir:
           type: string
+          description: Jans Auth server relative SAML directory to store IDP Metadata
+            files.
         idpMetadataTempDir:
           type: string
+          description: Jans Auth server relative SAML temp directory to store IDP
+            Metadata files.
         idpMetadataFile:
           type: string
+          description: IDP Metadata file name format.
         spMetadataDir:
           type: string
+          description: Jans Auth server relative SAML directory to store SP Metadata
+            files.
         spMetadataTempDir:
           type: string
+          description: Jans Auth server relative SAML temp directory to store SP Metadata
+            files.
         spMetadataFile:
           type: string
+          description: SP Metadata file name format.
         ignoreValidation:
           type: boolean
+          description: Boolean value to enable/disable SAML validation.
         setConfigDefaultValue:
           type: boolean
+          description: Boolean value `true` to set the default values for an IDP.
         idpMetadataMandatoryAttributes:
           type: array
+          description: List of mandatory IDP Metadata attributes.
           items:
             type: string
+            description: List of mandatory IDP Metadata attributes.
         kcAttributes:
           type: array
+          description: Keycloak SAML attribute names.
           items:
             type: string
+            description: Keycloak SAML attribute names.
         kcSamlConfig:
           type: array
+          description: Keycloak SAML config attribute names.
           items:
             type: string
+            description: Keycloak SAML config attribute names.
     JsonPatch:
       type: object
     ProfileConfiguration:
@@ -1108,14 +1146,22 @@ components:
       properties:
         nameIDPolicyFormat:
           type: string
+          description: ' URI reference corresponding to a name identifier format.'
         entityId:
           type: string
+          description: Entity ID that will be used to uniquely identify this SAML
+            Service Provider.
         singleLogoutServiceUrl:
           type: string
+          description: Url used to send logout requests.
         jansAssertionConsumerServiceGetURL:
           type: string
+          description: GET URL the Identity provider (IdP) will send the SAML Response
+            containing the assertions.
         jansAssertionConsumerServicePostURL:
           type: string
+          description: POST URL the Identity provider (IdP) will send the SAML Response
+            containing the assertions.
       description: SAML entity metadata.
     TrustRelationship:
       required:
