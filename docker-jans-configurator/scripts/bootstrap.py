@@ -203,6 +203,9 @@ class CtxGenerator:
             partial(encode_text, self.secret_params.get("ldap_password", ""), encoded_salt),
         )
 
+        self.set_config("ldap_binddn", "cn=Directory Manager")
+        self.set_config("ldap_site_binddn", "cn=Directory Manager")
+
     def transform_redis_ctx(self):
         self.set_secret("redis_password", self.secret_params.get("redis_password", ""))
 
