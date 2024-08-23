@@ -1,35 +1,24 @@
 package io.jans.casa.core;
 
+import io.jans.casa.conf.MainSettings;
+import io.jans.casa.misc.AppStateEnum;
+import io.jans.casa.model.ApplicationConfiguration;
+import io.jans.casa.timer.*;
+import io.jans.orm.exception.operation.PersistenceException;
+import io.jans.util.security.SecurityProviderUtility;
+
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Inject;
 import java.util.*;
-import java.util.stream.Collectors;
 
-import io.jans.orm.exception.operation.PersistenceException;
-import io.jans.util.security.SecurityProviderUtility;
-
-import io.jans.casa.conf.MainSettings;
-import io.jans.casa.model.ApplicationConfiguration;
-import io.jans.casa.core.model.CustomScript;
-import io.jans.casa.misc.AppStateEnum;
-import io.jans.casa.timer.*;
-
-import org.quartz.JobExecutionContext;
-import org.quartz.listeners.JobListenerSupport;
 import org.slf4j.Logger;
 
-/**
- * @author jgomer
- */
 @ApplicationScoped
-public class ConfigurationHandler extends JobListenerSupport {
+public class ConfigurationHandler {
 
-    public static final String DEFAULT_ACR = "casa";
-
-    private static final int RETRIES = 15;
-    private static final int RETRY_INTERVAL = 20;
+    public static final String AGAMA_FLOW_ACR = System.getProperty("acr");
 
     @Inject
     private Logger logger;
@@ -42,9 +31,6 @@ public class ConfigurationHandler extends JobListenerSupport {
 
     @Inject
     private ExtensionsManager extManager;
-
-    @Inject
-    private TimerService timerService;
 
     @Inject
     private LogService logService;
@@ -62,17 +48,12 @@ public class ConfigurationHandler extends JobListenerSupport {
 
     private MainSettings settings;
 
-    private String acrQuartzJobName;
-
     private AppStateEnum appState;
-
-    private boolean acrsRetrieved;
 
     @PostConstruct
     private void inited() {
         setAppState(AppStateEnum.LOADING);
         logger.info("ConfigurationHandler inited");
-        acrQuartzJobName = getClass().getSimpleName() + "_acr";
         SecurityProviderUtility.installBCProvider();
     }
 
@@ -86,21 +67,36 @@ public class ConfigurationHandler extends JobListenerSupport {
     void init() {
 
         try {
-            //Check DB access to proceed with acr timer
+            //Check DB access to proceed with the rest of initialization
             if (persistenceService.initialize() && initializeSettings()) {
                 //Update log level ASAP
                 computeLoggingLevel();
                 //Force early initialization of assets service before it is used in zul templates
                 assetsService.reloadUrls();
 
-                //This is a trick so the timer event logic can be coded inside this managed bean
-                timerService.addListener(this, acrQuartzJobName);
-                /*
-                 A gap of 5 seconds is enough for the RestEasy scanning process to take place (in case AS is already up and running)
-                 RETRIES*RETRY_INTERVAL seconds gives room to recover the acr list. This big amount of time may be required
-                 in cases where casa service starts too soon (even before AS itself)
-                */
-                timerService.schedule(acrQuartzJobName, 5, RETRIES, RETRY_INTERVAL);
+                extManager.scan();
+                computeAcrPluginMapping();
+                computeCorsOrigins();
+                saveSettings();
+                
+                setAppState(AppStateEnum.OPERATING);
+                
+                try {
+                    logger.info("=== WEBAPP INITIALIZED SUCCESSFULLY ===");
+        
+                    //Add some random seconds to gaps. This reduces the chance of timers running at the same time
+                    //in a multi node environment, which IMO it's somewhat safer
+                    int gap = Double.valueOf(Math.random() * 7).intValue();
+                    scriptsReloader.init(1 + gap);
+                    syncSettingsTimer.activate(60 + gap);
+                    //plugin checker is not shared-state related
+                    pluginChecker.activate(5);
+                    
+                } catch (Exception e) {
+                    logger.error(e.getMessage(), e);
+                }
+        
+                
             } else {
                 setAppState(AppStateEnum.FAIL);
             }
@@ -123,82 +119,8 @@ public class ConfigurationHandler extends JobListenerSupport {
         }
     }
 
-    @Override
-    public String getName() {
-        return acrQuartzJobName;
-    }
-
-    @Override
-    public void jobToBeExecuted(JobExecutionContext context) {
-
-        if (!acrsRetrieved) {
-            //Do an attempt to retrieve acrs
-            Set<String> serverAcrs = retrieveAcrs();
-            acrsRetrieved = serverAcrs != null;
-
-            try {
-                if (!acrsRetrieved) {
-                    Date nextJobExecutionAt = context.getNextFireTime();
-
-                    if (nextJobExecutionAt == null) {     //Run out of attempts!
-                        logger.warn("The list of supported acrs could not be obtained.");
-                        setAppState(AppStateEnum.FAIL);
-                    } else {
-                        logger.warn("Retrying in {} seconds", RETRY_INTERVAL);
-                    }
-                } else {                    
-                    extManager.scan();
-                    computeAcrPluginMapping();
-                    computeCorsOrigins();
-
-                    try {
-                        saveSettings();
-                        setAppState(AppStateEnum.OPERATING);
-                    } catch (Exception e) {
-                        logger.error(e.getMessage());
-                        setAppState(AppStateEnum.FAIL);
-                    }
-                    if (appState.equals(AppStateEnum.OPERATING)) {
-                        logger.info("=== WEBAPP INITIALIZED SUCCESSFULLY ===");
-                        //Add some random seconds to gaps. This reduces the chance of timers running at the same time
-                        //in a multi node environment, which IMO it's somewhat safer
-                        int gap = Double.valueOf(Math.random() * 7).intValue();
-                        scriptsReloader.init(1 + gap);
-                        syncSettingsTimer.activate(60 + gap);
-                        //plugin checker is not shared-state related
-                        pluginChecker.activate(5);
-                    }
-                }
-
-            } catch (Exception e) {
-                if (!appState.equals(AppStateEnum.OPERATING)) {
-                    logger.error(e.getMessage(), e);
-                }
-            }
-        }
-
-    }
-
     public AppStateEnum getAppState() {
         return appState;
-    }
-
-    private List<CustomScript> getEnabledScripts() {
-        CustomScript sample = new CustomScript();
-        sample.setBaseDn(persistenceService.getCustomScriptsDn());
-        sample.setEnabled(true);
-        return persistenceService.find(sample);        
-    }
-    
-    public Map<String, Integer> getAcrLevelMapping() {
-    	Map<String, Integer> map = getEnabledScripts().stream()
-    	    .collect(Collectors.toMap(CustomScript::getDisplayName, CustomScript::getLevel));
-    	logger.trace("ACR/Level mapping is: {}", map);
-    	return map;
-    }
-
-    public Set<String> retrieveAcrs() {
-        return getEnabledScripts().stream().map(CustomScript::getDisplayName).collect(Collectors.toSet());
     }
 
     private void setAppState(AppStateEnum state) {
@@ -216,9 +138,20 @@ public class ConfigurationHandler extends JobListenerSupport {
     }
 
     private void computeAcrPluginMapping() {
-        if (settings.getAcrPluginMap() == null) {
-            settings.setAcrPluginMap(new HashMap<>());
+        
+        Map<String, String> map = settings.getAcrPluginMap();
+        if (map == null) {
+            settings.setAcrPluginMap(new LinkedHashMap<>());
+        } else {
+            //migrate from installations older than 1.1.4
+            List.of("fido2", "super_gluu", "otp", "twilio_sms").forEach(old -> {
+                    if (map.remove(old, null)) {
+                        //it was an OOTB method
+                        map.put("io.jans.casa.authn." + old, null);
+                    }
+            });
         }
+        
     }
 
     private void computeCorsOrigins() {

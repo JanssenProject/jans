@@ -98,7 +98,7 @@ public class HomeInitiator extends CommonInitiator implements Initiator {
         flowContext.setStage(INITIAL);
         logger.debug("Starting authorization flow");
         //do Authz Redirect
-        Pair<String, String> pair = oidcFlowService.getAuthnRequestUrl(ConfigurationHandler.DEFAULT_ACR);
+        Pair<String, String> pair = oidcFlowService.getAuthnRequestUrl(ConfigurationHandler.AGAMA_FLOW_ACR);
         flowContext.setState(pair.getY());
         WebUtils.execRedirect(pair.getX());
     }

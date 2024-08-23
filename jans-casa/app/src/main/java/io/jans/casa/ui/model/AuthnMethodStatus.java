@@ -1,27 +1,21 @@
 package io.jans.casa.ui.model;
 
-import org.zkoss.util.Pair;
-
 import java.util.List;
 
-/**
- * @author jgomer
- */
+import org.zkoss.util.Pair;
+
 public class AuthnMethodStatus {
 
     private boolean enabled;
-    private boolean deactivable;
     private String acr;
     private String name;
+    private String className; 
     private String selectedPlugin;
+    private String description;
     private List<Pair<String, String>> plugins;
 
     public boolean isEnabled() {
         return enabled;
-    }
-
-    public boolean isDeactivable() {
-        return deactivable;
     }
 
     public String getAcr() {
@@ -32,20 +26,24 @@ public class AuthnMethodStatus {
         return name;
     }
 
+    public String getClassName() {
+        return className;
+    }
+
     public String getSelectedPlugin() {
         return selectedPlugin;
+    }
+
+    public String getDescription() {
+        return description;
     }
 
     public List<Pair<String, String>> getPlugins() {
         return plugins;
     }
 
-    public void setEnabled(boolean enabled) {
+    public void setEnabled(boolean enabled) {      
         this.enabled = enabled;
-    }
-
-    public void setDeactivable(boolean deactivable) {
-        this.deactivable = deactivable;
     }
 
     public void setAcr(String acr) {
@@ -56,8 +54,16 @@ public class AuthnMethodStatus {
         this.name = name;
     }
 
+    public void setClassName(String className) {
+        this.className = className;
+    }
+
     public void setSelectedPlugin(String selectedPlugin) {
         this.selectedPlugin = selectedPlugin;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public void setPlugins(List<Pair<String, String>> plugins) {

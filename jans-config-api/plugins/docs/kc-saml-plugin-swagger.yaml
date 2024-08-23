@@ -886,66 +886,103 @@ components:
           type: string
         inum:
           type: string
+          description: Unique identifier.
         creatorId:
           type: string
+          description: Creator of IDP.
         name:
           type: string
+          description: Name uniquely identifies an identity provider.
         displayName:
           maxLength: 60
           minLength: 0
           type: string
+          description: Identity provider display name.
         description:
           maxLength: 500
           minLength: 0
           type: string
+          description: Description of Identity provider.
         realm:
           type: string
+          description: Realm in which Identity provider is created.
         enabled:
           type: boolean
+          description: Indicates if Identity provider is enabled.
         signingCertificate:
           type: string
+          description: Digital certificate used to verify the authenticity of the
+            request.
         validateSignature:
           type: string
         singleLogoutServiceUrl:
           type: string
+          description: Url used to send logout requests.
         nameIDPolicyFormat:
           type: string
+          description: ' URI reference corresponding to a name identifier format.'
         principalAttribute:
           type: string
+          description: ' Name or Friendly Name of the attribute used to identify external
+            users.'
         principalType:
           type: string
+          description: Way to identify and track external users from the assertion.
         idpEntityId:
           type: string
+          description: Entity ID that will be used to uniquely identify this SAML
+            Service Provider.
         singleSignOnServiceUrl:
           type: string
+          description: Url used to send SAML authentication requests.
         encryptionPublicKey:
           type: string
+          description: Public key to use to encrypt the message.
         providerId:
           type: string
+          description: "IDP provider, should be SAML."
         trustEmail:
           type: boolean
+          description: "If enabled, email provided by this provider is not verified\
+            \ even if verification is enabled for the realm."
         storeToken:
           type: boolean
+          description: Enable/disable if tokens must be stored after authenticating
+            users.
         addReadTokenRoleOnCreate:
           type: boolean
+          description: Enable/disable if new users can read any stored tokens.
         authenticateByDefault:
           type: boolean
         linkOnly:
           type: boolean
+          description: "If true, users cannot log in through this provider. They can\
+            \ only link to this provider."
         firstBrokerLoginFlowAlias:
           type: string
+          description: "Alias of authentication flow, which is triggered after first\
+            \ login with this identity provider. Term 'First Login' means that no\
+            \ Keycloak account is currently linked to the authenticated identity provider\
+            \ account."
         postBrokerLoginFlowAlias:
           type: string
+          description: "Alias of authentication flow, which is triggered after each\
+            \ login with this identity provider."
         spMetaDataURL:
           type: string
+          description: SAML SP metadata file URL.
         spMetaDataLocation:
           type: string
+          description: SP metadata file location.
         idpMetaDataURL:
           type: string
+          description: SAML IDP metadata file URL.
         idpMetaDataLocation:
           type: string
+          description: SAML IDP metadata file location.
         status:
           type: string
+          description: IDP setup status.
           enum:
           - active
           - inactive
@@ -953,6 +990,7 @@ components:
           - register
         validationStatus:
           type: string
+          description: IDP validation status.
           enum:
           - In Progress
           - Success
@@ -960,8 +998,10 @@ components:
           - Failed
         validationLog:
           type: array
+          description: IDP validation log.
           items:
             type: string
+            description: IDP validation log.
         baseDn:
           type: string
     IdentityProviderPagedResult:

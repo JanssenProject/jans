@@ -453,7 +453,6 @@ nav:
         - 'Quick Start': 'casa/administration/quick-start.md'
         - 'Admin console': 'casa/administration/admin-console.md'
         - 'About 2FA': 'casa/administration/2fa-basics.md'
-        - 'Credentials storage': 'casa/administration/credentials-stored.md'
         - 'Custom branding': 'casa/administration/custom-branding.md'
         - 'URL path customization': 'casa/administration/change-context-path.md'
         - 'Localization': 'casa/administration/localization.md'

@@ -79,6 +79,9 @@ public class ApiAppConfiguration implements Configuration {
     @Schema(description = "Maximum number of results per page in search endpoints.")
     private int maxCount;
 
+    @Schema(description = "List of ACR values that should be excluded from active validation check.")
+    private List<String> acrExclusionList;
+    
     @Schema(description = "User attribute that should not be returned in response.")
     private List<String> userExclusionAttributes;
 
@@ -99,7 +102,7 @@ public class ApiAppConfiguration implements Configuration {
 
     @Schema(description = "Asset management configuration details.")
     private AssetMgtConfiguration assetMgtConfiguration;
-    
+
     public String getServiceName() {
         return serviceName;
     }
@@ -287,6 +290,14 @@ public class ApiAppConfiguration implements Configuration {
         }
     }
 
+    public List<String> getAcrExclusionList() {
+        return acrExclusionList;
+    }
+
+    public void setAcrExclusionList(List<String> acrExclusionList) {
+        this.acrExclusionList = acrExclusionList;
+    }
+
     public List<String> getUserExclusionAttributes() {
         return userExclusionAttributes;
     }
@@ -345,20 +356,22 @@ public class ApiAppConfiguration implements Configuration {
 
     @Override
     public String toString() {
-        return "ApiAppConfiguration [serviceName="+serviceName+", configOauthEnabled=" + configOauthEnabled + ", disableLoggerTimer="
-                + disableLoggerTimer + ", disableAuditLogger=" + disableAuditLogger
+        return "ApiAppConfiguration [serviceName=" + serviceName + ", configOauthEnabled=" + configOauthEnabled
+                + ", disableLoggerTimer=" + disableLoggerTimer + ", disableAuditLogger=" + disableAuditLogger
                 + ", customAttributeValidationEnabled=" + customAttributeValidationEnabled + ", acrValidationEnabled="
                 + acrValidationEnabled + ", apiApprovedIssuer=" + apiApprovedIssuer + ", apiProtectionType="
-                + apiProtectionType + ", apiClientId=" + apiClientId + ", endpointInjectionEnabled="
-                + endpointInjectionEnabled + ", authIssuerUrl=" + authIssuerUrl + ", authOpenidConfigurationUrl="
-                + authOpenidConfigurationUrl + ", authOpenidIntrospectionUrl=" + authOpenidIntrospectionUrl
-                + ", authOpenidTokenUrl=" + authOpenidTokenUrl + ", authOpenidRevokeUrl=" + authOpenidRevokeUrl
-                + ", exclusiveAuthScopes=" + exclusiveAuthScopes + ", corsConfigurationFilters="
+                + apiProtectionType + ", apiClientId=" + apiClientId 
+                + ", endpointInjectionEnabled=" + endpointInjectionEnabled + ", authIssuerUrl=" + authIssuerUrl
+                + ", authOpenidConfigurationUrl=" + authOpenidConfigurationUrl + ", authOpenidIntrospectionUrl="
+                + authOpenidIntrospectionUrl + ", authOpenidTokenUrl=" + authOpenidTokenUrl + ", authOpenidRevokeUrl="
+                + authOpenidRevokeUrl + ", exclusiveAuthScopes=" + exclusiveAuthScopes + ", corsConfigurationFilters="
                 + corsConfigurationFilters + ", loggingLevel=" + loggingLevel + ", loggingLayout=" + loggingLayout
                 + ", externalLoggerConfiguration=" + externalLoggerConfiguration + ", disableJdkLogger="
-                + disableJdkLogger + ", maxCount=" + maxCount + ", userExclusionAttributes=" + userExclusionAttributes
-                + ", userMandatoryAttributes=" + userMandatoryAttributes + ", agamaConfiguration=" + agamaConfiguration
-                + ", auditLogConf=" + auditLogConf + ", dataFormatConversionConf=" + dataFormatConversionConf
-                + ", plugins=" + plugins + ", assetMgtConfiguration=" + assetMgtConfiguration + "]";
-    }
+                + disableJdkLogger + ", maxCount=" + maxCount + ", acrExclusionList=" + acrExclusionList
+                + ", userExclusionAttributes=" + userExclusionAttributes + ", userMandatoryAttributes="
+                + userMandatoryAttributes + ", agamaConfiguration=" + agamaConfiguration + ", auditLogConf="
+                + auditLogConf + ", dataFormatConversionConf=" + dataFormatConversionConf + ", plugins=" + plugins
+                + ", assetMgtConfiguration=" + assetMgtConfiguration + "]";
+    }    
+    
 }

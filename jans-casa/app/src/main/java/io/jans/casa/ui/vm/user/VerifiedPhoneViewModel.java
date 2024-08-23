@@ -1,12 +1,15 @@
 package io.jans.casa.ui.vm.user;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import io.jans.casa.core.pojo.VerifiedMobile;
 import io.jans.casa.ui.UIUtils;
 import io.jans.casa.misc.Utils;
 import io.jans.casa.plugins.authnmethod.service.SMSDeliveryStatus;
 import io.jans.casa.plugins.authnmethod.service.MobilePhoneService;
+
+import java.util.*;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.zkoss.bind.BindUtils;
 import org.zkoss.bind.annotation.Init;
 import org.zkoss.bind.annotation.NotifyChange;
@@ -19,16 +22,12 @@ import org.zkoss.zk.ui.event.Events;
 import org.zkoss.zk.ui.util.Clients;
 import org.zkoss.zul.Messagebox;
 
-import java.util.Date;
-import java.util.List;
-
 /**
- * Created by jgomer on 2018-06-18.
  * This is the ViewModel of page phone-detail-shared.zul. It controls the CRUD of verified phones
  */
 public class VerifiedPhoneViewModel extends UserViewModel {
 
-    private Logger logger = LogManager.getLogger(getClass());
+    private Logger logger = LoggerFactory.getLogger(getClass());
 
     String ACR;
     MobilePhoneService mpService;

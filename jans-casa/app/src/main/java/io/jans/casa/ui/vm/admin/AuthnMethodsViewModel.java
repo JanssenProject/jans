@@ -6,106 +6,166 @@ import io.jans.casa.core.UserService;
 import io.jans.casa.extension.AuthnMethod;
 import io.jans.casa.misc.Utils;
 import io.jans.casa.ui.model.AuthnMethodStatus;
+
+import java.util.*;
+import java.util.stream.Stream;
+import java.util.stream.Collectors;
+
 import org.pf4j.DefaultPluginDescriptor;
 import org.pf4j.PluginDescriptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.zkoss.bind.annotation.Init;
+import org.zkoss.bind.annotation.*;
 import org.zkoss.util.Pair;
 import org.zkoss.util.resource.Labels;
-import org.zkoss.zk.ui.select.annotation.WireVariable;
+import org.zkoss.zk.ui.Component;
+import org.zkoss.zk.ui.event.Event;
+import org.zkoss.zk.ui.event.Events;
+import org.zkoss.zk.ui.select.annotation.*;
+import org.zkoss.zk.ui.select.Selectors;
+import org.zkoss.zul.Messagebox;
 
-import java.util.*;
-import java.util.stream.Collectors;
-
-/**
- * @author jgomer
- */
 public class AuthnMethodsViewModel extends MainViewModel {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     @WireVariable("extensionsManager")
     private ExtensionsManager extManager;
-
-    @WireVariable
-    private UserService userService;
-
+    
     private List<AuthnMethodStatus> methods;
-
+    
+    private AuthnMethodStatus currentAms;
+    
     public List<AuthnMethodStatus> getMethods() {
         return methods;
+    }
+    
+    public AuthnMethodStatus getCurrentAms() {
+        return currentAms;
     }
 
     @Init
     public void init() {
 
-        List<PluginDescriptor> currentPlugins = extManager.authnMethodPluginImplementers();
-        //Add "null" (allows to account for system extensions)
-        currentPlugins.add(0, new DefaultPluginDescriptor(null, null, null, "1.0", null, null, null));
-
         Map<String, String> mappedAcrs = getSettings().getAcrPluginMap();
-
-        //This set contains entries associated to active acr methods in AS
-        Set<String> serverAcrs = Optional.ofNullable(Utils.managedBean(ConfigurationHandler.class).retrieveAcrs())
-                .orElse(Collections.emptySet());
-
-        //These are authn methods belonging to a started plugin or system extension with a corresponding custom script enabled
-        Set<String> uniqueAcrs = extManager.getAuthnMethodExts(currentPlugins.stream().map(PluginDescriptor::getPluginId).collect(Collectors.toSet()))
-                .stream().map(AuthnMethod::getAcr).distinct().filter(serverAcrs::contains).collect(Collectors.toSet());
-
-        logger.info("The following acrs have a corresponding plugin or system extension: {}", uniqueAcrs);
+        List<Pair<AuthnMethod, PluginDescriptor>> pairs = extManager.getAuthnMethodExts();
         methods = new ArrayList<>();
-
-        for (String acr : uniqueAcrs) {
+        
+        for (Pair<AuthnMethod, PluginDescriptor> p : pairs) {
+            AuthnMethod aMethod = p.getX();
+            PluginDescriptor pd = p.getY();
+            
+            String plug = pd.getPluginId();
+            boolean isSystem = plug == null;
+            String acr = aMethod.getAcr();
+            
             AuthnMethodStatus ams = new AuthnMethodStatus();
+            
+            if (mappedAcrs.containsKey(acr)) {
+                String mappedPlugin = mappedAcrs.get(acr);
+                ams.setEnabled(mappedPlugin == null && isSystem || mappedPlugin.equals(plug));
+            }            
+            
             ams.setAcr(acr);
-            ams.setEnabled(mappedAcrs.keySet().contains(acr));
-
-            List<Pair<String, String>> plugins = new ArrayList<>();
-            //After this loop, plugins variable should not be empty
-            for (PluginDescriptor de : currentPlugins) {
-                String id = de.getPluginId();
-
-                if (extManager.pluginImplementsAuthnMethod(acr, id)) {
-                    String displayName = id == null ? Labels.getLabel("adm.method_sysextension")
-                            : Labels.getLabel("adm.method_plugin_template", new String[] {id, de.getVersion()});
-                    plugins.add(new Pair<>(id, displayName));
-                }
-            }
-
-            ams.setPlugins(plugins);
-            //Use as selected the one already in the acr/plugin mapping, or if missing, the first plugin known to
-            //implement the behavior
-            ams.setSelectedPlugin(mappedAcrs.getOrDefault(acr, plugins.get(0).getX()));
-
-            //Pick the name for it
-            AuthnMethod aMethod = extManager.getAuthnMethodExts(Collections.singleton(ams.getSelectedPlugin()))
-                    .stream().filter(am -> am.getAcr().equals(acr)).findFirst().get();
             ams.setName(Labels.getLabel(aMethod.getUINameKey()));
+            ams.setSelectedPlugin(plug);
 
+            plug = isSystem ? Labels.getLabel("adm.method_sysextension") :
+                    Labels.getLabel("adm.method_plugin_template", new String[]{ plug, pd.getVersion() });
+
+            ams.setDescription(plug);
+            ams.setClassName(aMethod.getClass().getName());
             methods.add(ams);
         }
-
+        
+        List<String> pr = getSettings().getAcrPriority();
+        
+        if (Utils.isNotEmpty(pr)) {
+            logger.debug("acr priority list is {}", pr);
+            
+            //sort as per reverse priority
+            methods.sort((ams1, ams2) -> {
+                int i = pr.indexOf(ams1.getAcr());
+                int j = pr.indexOf(ams2.getAcr());
+                
+                if (i == -1) {
+                    return j == -1 ? 0 : 1;    //for simplicity, both unknown are considered "equal"
+                } else if (j == -1) return -1;
+    
+                //if both are known, it wins the one appearing first
+                return i < j ? -1 : 1;
+            });
+        }
+       
     }
 
-    public void selectionChanged(String acr, int index) {
-        //Finds the right entry in methods and update selectedPlugin member
-        AuthnMethodStatus authnMethodStatus = methods.stream().filter(ams -> ams.getAcr().equals(acr)).findAny().get();
-        Pair<String, String> pair = authnMethodStatus.getPlugins().get(index);
-        logger.trace("Plugin '{}' has been selected for handling acr '{}'", pair.getY(), acr);
-        authnMethodStatus.setSelectedPlugin(pair.getX());
-    }
+	@AfterCompose
+	public void afterCompose(@ContextParam(ContextType.VIEW) Component view) {
+		Selectors.wireEventListeners(view, this);
+	}
+	
+	@Listen("onData=#meme")
+	public void save(Event event) {
+	    
+	    if (!checkUniqueAcrs()) return;
+	    
+	    List<Integer> ordering = new ArrayList<>();
+        Object[] numbers = (Object[]) event.getData();
+        Stream.of(numbers).map(Object::toString).map(Integer::valueOf).forEach(ordering::add);
+		
+		List<String> pr = new ArrayList<>();
+		ordering.forEach(i -> pr.add(methods.get(i).getAcr()));
+		logger.info("New acr priority will be {}", pr);
+		
+		getSettings().setAcrPriority(pr);		
+		
+		Map<String, String> mapping = new LinkedHashMap<>();    //insertion order is relevant
+		for (String acr : pr) {
+		    for (AuthnMethodStatus ams : methods) {
+		         if (ams.isEnabled() && ams.getAcr().equals(acr)) {
+		             mapping.put(acr, ams.getSelectedPlugin());
+		             break;
+		         }
+		    }
+		}
+		
+		logger.info("New plugin mapping will be: {}", mapping);
+		getSettings().setAcrPluginMap(mapping);
 
-    public void save() {
-
-        Map<String, String> pluginMapping = new HashMap<>();
-        methods.stream().filter(AuthnMethodStatus::isEnabled).forEach(ams -> pluginMapping.put(ams.getAcr(), ams.getSelectedPlugin()));
-
-        logger.info("New plugin mapping will be: {}", pluginMapping);
-        getSettings().setAcrPluginMap(pluginMapping);
         updateMainSettings();
 
+	}
+
+    @NotifyChange({ "currentAms" })
+    public void showDialog(AuthnMethodStatus ams) {
+        currentAms = ams;
     }
 
+    @NotifyChange({ "currentAms" })
+	public void closeDialog(Event event) {	    
+	    currentAms = null;
+	    if (event != null && event.getName().equals(Events.ON_CLOSE)) {
+			event.stopPropagation();
+		}
+	}
+	
+	private boolean checkUniqueAcrs() {
+	    
+	    Set<String> acrs = new HashSet<>();
+	    String acr = null;
+	    
+	    for (AuthnMethodStatus ams : methods) {
+	        if (ams.isEnabled() && !acrs.add(ams.getAcr())) {
+	            acr = ams.getAcr();
+	            break;
+	        }
+	    }
+	    if (acr == null) return true;
+	    
+	    Messagebox.show(Labels.getLabel("adm.methods_acr_conflict", new String[]{ acr }),
+	                null, Messagebox.OK, Messagebox.EXCLAMATION);
+	    return false;
+	    
+	}
+	
 }

@@ -3,9 +3,6 @@ package io.jans.casa.ui.vm.user;
 import java.util.List;
 import java.util.Optional;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import io.jans.casa.core.pojo.BrowserInfo;
 import io.jans.casa.core.pojo.FidoDevice;
 import io.jans.casa.core.pojo.PlatformAuthenticator;
 import io.jans.casa.core.pojo.SecurityKey;
@@ -13,6 +10,9 @@ import io.jans.casa.misc.Utils;
 import io.jans.casa.plugins.authnmethod.SecurityKey2Extension;
 import io.jans.casa.plugins.authnmethod.service.Fido2Service;
 import io.jans.casa.ui.UIUtils;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.zkoss.bind.BindUtils;
 import org.zkoss.bind.annotation.AfterCompose;
 import org.zkoss.bind.annotation.ContextParam;
@@ -43,7 +43,7 @@ public class SecurityKey2ViewModel extends UserViewModel {
 
 	private static final int REGISTRATION_TIMEOUT = 8000;
 
-	private Logger logger = LogManager.getLogger(getClass());
+    private Logger logger = LoggerFactory.getLogger(getClass());
 
 	@WireVariable
 	private Fido2Service fido2Service;
@@ -51,7 +51,6 @@ public class SecurityKey2ViewModel extends UserViewModel {
 	private FidoDevice newDevice;
 	private FidoDevice newTouchId;
 	private List<FidoDevice> devices;
-	private String fido2SupportMessage;
 
 	private String editingId;
 	private boolean uiAwaiting;
@@ -81,10 +80,6 @@ public class SecurityKey2ViewModel extends UserViewModel {
 
 	public List<FidoDevice> getDevices() {
 		return devices;
-	}
-
-	public String getFido2SupportMessage() {
-		return fido2SupportMessage;
 	}
 
 	public boolean getPlatformAuthenticator() {
@@ -137,8 +132,7 @@ public class SecurityKey2ViewModel extends UserViewModel {
 		mapper = new ObjectMapper();
 		newDevice = new SecurityKey();
 		newTouchId = new PlatformAuthenticator();
-		devices = fido2Service.getDevices(user.getId(),new java.net.URI(fido2Service.getScriptPropertyValue("fido2_server_uri")).getHost(), true);
-		checkFido2Support();
+		devices = fido2Service.getDevices(user.getId(), fido2Service.appId(), true);
 
 	}
 
@@ -149,8 +143,7 @@ public class SecurityKey2ViewModel extends UserViewModel {
 
 	}
 
-	public void triggerAttestationRequestPlatformAuthenticator()
-	{
+	public void triggerAttestationRequestPlatformAuthenticator() {
 		platformAuthenticator = true;
 		triggerAttestationRequest();
 	}
@@ -381,7 +374,7 @@ public class SecurityKey2ViewModel extends UserViewModel {
 						try {
 							devices.remove(device);
 							boolean success = fido2Service.removeDevice(device, user.getId(),
-									new java.net.URI(fido2Service.getScriptPropertyValue("fido2_server_uri")).getHost(), true);		
+									    fido2Service.appId(), true);		
 							if (success) {
 								if (reset) {
 									userService.turn2faOff(user);
@@ -406,27 +399,6 @@ public class SecurityKey2ViewModel extends UserViewModel {
 		uiEnrolledPlatformAuthenticator = false;
 		newDevice = new SecurityKey();
 		newTouchId = new PlatformAuthenticator();
-	}
-
-	private void checkFido2Support() {
-		logger.debug("checkFido2Support");
-		boolean probablySupported = false;
-		try {
-			BrowserInfo binfo = getBrowserInfo();
-			String name = binfo.getName().toLowerCase();
-			int browserVer = binfo.getMainVersion();
-
-			probablySupported = (name.contains("edge") && browserVer >= 18)
-					|| (name.contains("firefox") && browserVer >= 64) || (name.contains("chrome") && browserVer >= 71)
-					|| (name.contains("opera") && browserVer >= 54);
-
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
-		}
-		if (!probablySupported) {
-			fido2SupportMessage = Labels.getLabel("usr.fido2_unsupported_browser");
-		}
-
 	}
 
 	@Listen("onData=#platformAuthenticator")

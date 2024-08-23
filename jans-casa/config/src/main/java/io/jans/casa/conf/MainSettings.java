@@ -1,12 +1,8 @@
 package io.jans.casa.conf;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.*;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class MainSettings {
@@ -22,6 +18,9 @@ public class MainSettings {
 
     @JsonProperty("acr_plugin_mapping")
     private Map<String, String> acrPluginMap;
+    
+    @JsonProperty("acr_priority")
+    private List<String> acrPriority;
 
     @JsonProperty("extra_css")
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
@@ -37,7 +36,7 @@ public class MainSettings {
     private Basic2FASettings basic2FASettings = new Basic2FASettings();
     
     @JsonProperty("plugins_settings")
-    private Map<String, Map<String,Object>> pluginSettings = new HashMap<>();
+    private Map<String, Map<String, Object>> pluginSettings = new HashMap<>();
 
     public boolean isEnablePassReset() {
         return enablePassReset;
@@ -53,6 +52,10 @@ public class MainSettings {
 
     public Map<String, String> getAcrPluginMap() {
         return acrPluginMap;
+    }
+
+    public List<String> getAcrPriority() {
+        return acrPriority;
     }
 
     public String getExtraCssSnippet() {
@@ -89,6 +92,10 @@ public class MainSettings {
 
     public void setAcrPluginMap(Map<String, String> acrPluginMap) {
         this.acrPluginMap = acrPluginMap;
+    }
+
+    public void setAcrPriority(List<String> acrPriority) {
+        this.acrPriority = acrPriority;
     }
 
     public void setExtraCssSnippet(String extraCssSnippet) {

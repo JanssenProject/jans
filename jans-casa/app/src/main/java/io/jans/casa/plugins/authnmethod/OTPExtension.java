@@ -4,22 +4,21 @@ import io.jans.casa.credential.BasicCredential;
 import io.jans.casa.extension.AuthnMethod;
 import io.jans.casa.misc.Utils;
 import io.jans.casa.plugins.authnmethod.service.OTPService;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
 import org.pf4j.Extension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-
 /**
  * Note: No injection can take place at extensions because instances are handled by p4fj
- * @author jgomer
  */
 @Extension
 public class OTPExtension implements AuthnMethod {
 
-    public static final String ACR = "otp";
+    public static final String ACR = "io.jans.casa.authn.otp";
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -73,7 +72,7 @@ public class OTPExtension implements AuthnMethod {
     }
 
     public boolean mayBe2faActivationRequisite() {
-        return Boolean.parseBoolean(otpService.getScriptPropertyValue("2fa_requisite"));
+        return Boolean.parseBoolean(otpService.getPropertyValue("2fa_requisite"));
     }
 
     public void reloadConfiguration() {

@@ -2,7 +2,6 @@ package io.jans.casa.ui.vm.user;
 
 import io.jans.casa.conf.MainSettings;
 import io.jans.casa.core.*;
-import io.jans.casa.core.pojo.BrowserInfo;
 import io.jans.casa.core.pojo.User;
 import io.jans.casa.extension.AuthnMethod;
 import io.jans.casa.misc.Utils;
@@ -56,10 +55,6 @@ public class UserViewModel {
 
     int getScreenWidth() {
         return sessionContext.getScreenWidth();
-    }
-
-    BrowserInfo getBrowserInfo() {
-        return sessionContext.getBrowser();
     }
 
     Pair<String, String> getDeleteMessages(String nick, String extraMessage){
