@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+import java.util.HashMap;
 import java.util.UUID;
 
 /**
@@ -192,5 +193,10 @@ public class AuthorizationChallenge implements AuthorizationChallengeType {
     @Override
     public int getApiVersion() {
         return 11;
+    }
+
+    @Override
+    public Map<String, String> getAuthenticationMethodClaims(Object context) {
+        return new HashMap<>();
     }
 }

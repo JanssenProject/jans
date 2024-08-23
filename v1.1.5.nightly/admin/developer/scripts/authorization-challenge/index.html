@@ -8839,6 +8839,10 @@ client_id=999e13b8-f4a2-4fed-ad3c-6c88bd2c92ea&amp;scope=openid+profile+address+
 <td align="left"><code>def authorize(self, context)</code></td>
 <td align="left">Called when the request is received.</td>
 </tr>
+<tr>
+<td align="left"><code>def getAuthenticationMethodClaims(self, context)</code></td>
+<td align="left">Called to get authn method claims. It is injected into <code>id_token</code>. Returns key-value map.</td>
+</tr>
 </tbody>
 </table>
 <p><code>authorize</code> method returns true/false which indicates to server whether to issue <code>authorization_code</code> in response or not.</p>
@@ -8881,6 +8885,7 @@ If all is good script has to return <code>true</code> and it's strongly recommen
 <span class="kn">import</span><span class="w"> </span><span class="nn">org.slf4j.LoggerFactory</span><span class="p">;</span><span class="w"></span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">java.util.Map</span><span class="p">;</span><span class="w"></span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">java.util.HashMap</span><span class="p">;</span><span class="w"></span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">java.util.UUID</span><span class="p">;</span><span class="w"></span>
 
 <span class="cm">/**</span>
@@ -9051,6 +9056,11 @@ If all is good script has to return <code>true</code> and it's strongly recommen
 <span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="kt">int</span><span class="w"> </span><span class="nf">getApiVersion</span><span class="p">()</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="mi">11</span><span class="p">;</span><span class="w"></span>
 <span class="w">    </span><span class="p">}</span><span class="w"></span>
+
+<span class="w">    </span><span class="nd">@Override</span><span class="w"></span>
+<span class="w">    </span><span class="kd">public</span><span class="w"> </span><span class="n">Map</span><span class="o">&lt;</span><span class="n">String</span><span class="p">,</span><span class="w"> </span><span class="n">String</span><span class="o">&gt;</span><span class="w"> </span><span class="nf">getAuthenticationMethodClaims</span><span class="p">(</span><span class="n">Object</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="k">new</span><span class="w"> </span><span class="n">HashMap</span><span class="o">&lt;&gt;</span><span class="p">();</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
 <span class="p">}</span><span class="w"></span>
 </code></pre></div>
 <h2 id="multi-step-authorization-by-username-and-otp">Multi-step authorization by username and OTP<a class="headerlink" href="#multi-step-authorization-by-username-and-otp" title="Permanent link">#</a></h2>
@@ -9071,6 +9081,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+import java.util.HashMap;
 import java.util.UUID;
 
 /**
@@ -9250,6 +9261,11 @@ public class AuthorizationChallenge implements AuthorizationChallengeType {
     public int getApiVersion() {
         return 11;
     }
+
+    @Override
+    public Map&lt;String, String&gt; getAuthenticationMethodClaims(Object context) {
+        return new HashMap&lt;&gt;();
+    }
 }
 </code></pre></div>
 <h2 id="sample-scripts">Sample Scripts<a class="headerlink" href="#sample-scripts" title="Permanent link">#</a></h2>
@@ -9263,7 +9279,7 @@ public class AuthorizationChallenge implements AuthorizationChallengeType {
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-02-13T11:24:52+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-02-13</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-08-23T12:05:06+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-08-23</span>
       
         <br>
         Created:
