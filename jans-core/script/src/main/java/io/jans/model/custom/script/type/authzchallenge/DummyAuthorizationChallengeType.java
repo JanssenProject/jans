@@ -3,6 +3,7 @@ package io.jans.model.custom.script.type.authzchallenge;
 import io.jans.model.SimpleCustomProperty;
 import io.jans.model.custom.script.model.CustomScript;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -13,6 +14,11 @@ public class DummyAuthorizationChallengeType implements AuthorizationChallengeTy
     @Override
     public boolean authorize(Object context) {
         return false;
+    }
+
+    @Override
+    public Map<String, String> getAuthenticationMethodClaims(Object context) {
+        return new HashMap<>();
     }
 
     @Override

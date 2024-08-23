@@ -25,6 +25,8 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.service.document.store.model.Document;
 import io.jans.service.document.store.provider.DBDocumentStoreProvider;
 import io.jans.service.document.store.service.DBDocumentService;
+import io.jans.service.document.store.conf.DocumentStoreType;
+
 import io.jans.util.exception.InvalidAttributeException;
 import io.jans.util.exception.InvalidConfigurationException;
 import io.jans.service.document.store.service.DocumentStoreService;
@@ -194,14 +196,18 @@ public class AssetService {
         }
 
         // update asset revision
-        updateRevision(asset);
+        updateRevision(asset, isUpdate);
 
         // copy asset on jans-server
         if (documentStream != null && isAssetServerUploadEnabled()) {
 
             try (InputStream is = new Base64InputStream(getInputStream(bos), true)) {
-                String result = copyAssetOnServer(asset, is);
-                log.info("Result of asset saved on server :{}", result);
+                DocumentStoreType documentStoreProvider = this.getDocumentStoreType();
+                log.info("Copy asset on server documentStoreProvider is:{}", documentStoreProvider);
+                if (documentStoreProvider == DocumentStoreType.LOCAL) {
+                    String result = copyAssetOnServer(asset, is);
+                    log.info("Result of asset saved on server :{}", result);
+                }
             }
 
         }
@@ -337,8 +343,8 @@ public class AssetService {
         return asset;
     }
 
-    private Document updateRevision(Document asset) {
-        log.debug("Update asset revision - asset:{}", asset);
+    private Document updateRevision(Document asset, boolean isUpdate) {
+        log.debug("Update asset revision - asset:{}, isUpdate:{}", asset, isUpdate);
         try {
             if (asset == null) {
                 return asset;
@@ -346,7 +352,11 @@ public class AssetService {
 
             int intRevision = asset.getRevision();
             log.debug(" Current asset intRevision is:{}", intRevision);
-            asset.setRevision(++intRevision);
+
+            if (isUpdate) {
+                intRevision = intRevision + intRevision;
+            }
+            asset.setRevision(intRevision);
             log.info("Updated asset revision to asset.getJansRevision():{}", asset.getRevision());
         } catch (Exception ex) {
             log.error("Exception while updating asset revision is - ", ex);
@@ -653,6 +663,10 @@ public class AssetService {
         }
 
         return new ByteArrayInputStream(assetContent.getBytes());
+    }
+
+    private DocumentStoreType getDocumentStoreType() {
+        return documentStoreService.getProviderType();
     }
 
 }

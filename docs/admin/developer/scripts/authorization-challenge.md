@@ -43,6 +43,7 @@ The Authorization Challenage script implements the [AuthorizationChallenageType]
 | Method header | Method description |
 |:-----|:------|
 |`def authorize(self, context)`| Called when the request is received. |
+|`def getAuthenticationMethodClaims(self, context)`| Called to get authn method claims. It is injected into `id_token`. Returns key-value map. |
 
 `authorize` method returns true/false which indicates to server whether to issue `authorization_code` in response or not.
 
@@ -78,6 +79,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+import java.util.HashMap;
 import java.util.UUID;
 
 /**
@@ -248,6 +250,11 @@ public class AuthorizationChallenge implements AuthorizationChallengeType {
     public int getApiVersion() {
         return 11;
     }
+    
+    @Override
+    public Map<String, String> getAuthenticationMethodClaims(Object context) {
+        return new HashMap<>();
+    }
 }
 
 ```
@@ -273,6 +280,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+import java.util.HashMap;
 import java.util.UUID;
 
 /**
@@ -451,6 +459,11 @@ public class AuthorizationChallenge implements AuthorizationChallengeType {
     @Override
     public int getApiVersion() {
         return 11;
+    }
+    
+    @Override
+    public Map<String, String> getAuthenticationMethodClaims(Object context) {
+        return new HashMap<>();
     }
 }
 

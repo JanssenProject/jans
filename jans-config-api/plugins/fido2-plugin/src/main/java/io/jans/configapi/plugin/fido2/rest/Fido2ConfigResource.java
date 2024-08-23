@@ -10,7 +10,6 @@ import io.jans.configapi.core.rest.BaseResource;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.plugin.fido2.service.Fido2Service;
 import io.jans.configapi.plugin.fido2.util.Fido2Util;
-import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.plugin.fido2.util.Constants;
 import io.jans.fido2.model.conf.AppConfiguration;
 
@@ -48,13 +47,13 @@ public class Fido2ConfigResource extends BaseResource {
 
     @Operation(summary = "Gets Jans Authorization Server Fido2 configuration properties", description = "Gets Jans Authorization Server Fido2 configuration properties", operationId = "get-properties-fido2", tags = {
             "Fido2 - Configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.FIDO2_CONFIG_READ_ACCESS }))
+                    Constants.FIDO2_CONFIG_READ_ACCESS }))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AppConfiguration.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
-    @ProtectedApi(scopes = { ApiAccessConstants.FIDO2_CONFIG_READ_ACCESS })
+    @ProtectedApi(scopes = { Constants.FIDO2_CONFIG_READ_ACCESS })
     public Response getFido2Configuration() {
         AppConfiguration appConfiguration = this.fido2Service.find();
         logger.debug("FIDO2 details appConfiguration():{}", appConfiguration);
@@ -63,14 +62,14 @@ public class Fido2ConfigResource extends BaseResource {
 
     @Operation(summary = "Updates Fido2 configuration properties", description = "Updates Fido2 configuration properties", operationId = "put-properties-fido2", tags = {
             "Fido2 - Configuration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    ApiAccessConstants.FIDO2_CONFIG_WRITE_ACCESS }))
+                    Constants.FIDO2_CONFIG_WRITE_ACCESS }))
     @RequestBody(description = "Fido2Config", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AppConfiguration.class)))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Fido2Config", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = AppConfiguration.class))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PUT
-    @ProtectedApi(scopes = { ApiAccessConstants.FIDO2_CONFIG_WRITE_ACCESS })
+    @ProtectedApi(scopes = { Constants.FIDO2_CONFIG_WRITE_ACCESS })
     public Response updateFido2Configuration(@NotNull AppConfiguration appConfiguration) {
         logger.debug("FIDO2 details to be updated - appConfiguration:{} ", appConfiguration);
         checkResourceNotNull(appConfiguration, FIDO2_CONFIGURATION);

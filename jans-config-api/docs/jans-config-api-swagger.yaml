@@ -8366,21 +8366,21 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
+        selected:
+          type: boolean
+        whitePagesCanView:
+          type: boolean
+        adminCanEdit:
+          type: boolean
+        adminCanView:
+          type: boolean
         userCanView:
           type: boolean
         userCanEdit:
           type: boolean
-        adminCanView:
-          type: boolean
-        adminCanEdit:
-          type: boolean
         adminCanAccess:
           type: boolean
         userCanAccess:
-          type: boolean
-        selected:
-          type: boolean
-        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -8531,6 +8531,15 @@ components:
           type: array
           items:
             type: string
+        applyXFrameOptionsHeaderIfUriContainsAny:
+          type: array
+          items:
+            type: string
+        xframeOptionsHeaderValue:
+          type: string
+          enum:
+          - SAMEORIGIN
+          - DENY
         responseTypesSupported:
           uniqueItems: true
           type: array
@@ -9994,10 +10003,10 @@ components:
           type: array
           items:
             type: object
-        displayValue:
-          type: string
         value:
           type: object
+        displayValue:
+          type: string
     LocalizedString:
       type: object
       properties:
@@ -10109,6 +10118,14 @@ components:
           type: integer
           description: Maximum number of results per page in search endpoints.
           format: int32
+        acrExclusionList:
+          type: array
+          description: List of ACR values that should be excluded from active validation
+            check.
+          items:
+            type: string
+            description: List of ACR values that should be excluded from active validation
+              check.
         userExclusionAttributes:
           type: array
           description: User attribute that should not be returned in response.
@@ -10788,10 +10805,10 @@ components:
         ttl:
           type: integer
           format: int32
-        persisted:
-          type: boolean
         opbrowserState:
           type: string
+        persisted:
+          type: boolean
     SessionIdAccessMap:
       type: object
       properties:

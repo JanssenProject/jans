@@ -15,7 +15,7 @@ tags:
 Janssen uses keys for signing and encryption, primarily concerning
 JSON documents. There are six IETF RFCs that provide considerable detail:
 
-* [RFC 7515 JSON Web Signing (JWE)](https://www.rfc-editor.org/rfc/rfc7515)
+* [RFC 7515 JSON Web Signing (JWS)](https://www.rfc-editor.org/rfc/rfc7515)
 * [RFC 7516 JSON Web Encryption (JWE)](https://www.rfc-editor.org/rfc/rfc7516)
 * [RFC 7517 JSON Web Key (JWK)](https://www.rfc-editor.org/rfc/rfc7517)
 * [RFC 7518 JSON Web Algorithms (JWA)](https://www.rfc-editor.org/rfc/rfc7518)
