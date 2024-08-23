@@ -5,44 +5,102 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.jans.as.model.configuration.Configuration;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class SamlAppConfiguration implements Configuration {
 
+    @Schema(description = "Name of application.")
     private String applicationName;
+    
+    @Schema(description = "Trust relationship organizational unit.")
     private String samlTrustRelationshipDn;
+    
+    @Schema(description = "Identity provider organizational unit.")
     private String trustedIdpDn;
+    
+    @Schema(description = "SAML functionality enabled.")
     private boolean enabled;
+    
+    @Schema(description = "Selected SAML server.")
     private String selectedIdp;
 
+    @Schema(description = "SAML server URL.")
     private String serverUrl;
+    
+    @Schema(description = "SAML server realm, default is `jans`.")
     private String realm;
+    
+    @Schema(description = "Jans auth SAML client ID.")
     private String clientId;
+    
+    @Schema(description = "Jans auth SAML client password.")
     private String clientSecret;
+    
+    @Schema(description = "Grant type to get access token.")
     private String grantType;
+    
+    @Schema(description = "Oauth2 scope to get access token.")
     private String scope;
+    
+    @Schema(description = "SAML server username.")
     private String username;
+    
+    @Schema(description = "SAML server user credentails.")
     private String password;
+    
+    @Schema(description = "Relative SAML server SP Metadata Url.")
     private String spMetadataUrl;
+    
+    @Schema(description = "Relative SAML server Token Url.")
     private String tokenUrl;
+    
+    @Schema(description = "Relative SAML server IDP Url.")
     private String idpUrl;
+    
+    @Schema(description = "Relative SAML server IDP Token Url.")
     private String extIDPTokenUrl;
+    
+    @Schema(description = "Relative IDP redirect Url.")
     private String extIDPRedirectUrl;
+    
+    @Schema(description = "Relative SAML server Metadata import Url.")
     private String idpMetadataImportUrl;
 
+    @Schema(description = "Jans Auth server root SAML directory.")
     private String idpRootDir;
+    
+    @Schema(description = "Jans Auth server relative SAML directory to store IDP Metadata files.")
     private String idpMetadataDir;
+    
+    @Schema(description = "Jans Auth server relative SAML temp directory to store IDP Metadata files.")
     private String idpMetadataTempDir;
+    
+    @Schema(description = "IDP Metadata file name format.")
     private String idpMetadataFile;
 
+    @Schema(description = "Jans Auth server relative SAML directory to store SP Metadata files.")
     private String spMetadataDir;
+    
+    @Schema(description = "Jans Auth server relative SAML temp directory to store SP Metadata files.")
     private String spMetadataTempDir;
+    
+    @Schema(description = "SP Metadata file name format.")
     private String spMetadataFile;
 
+    @Schema(description = "Boolean value to enable/disable SAML validation.")
     private boolean ignoreValidation;
+    
+    @Schema(description = "Boolean value `true` to set the default values for an IDP.")
     private boolean setConfigDefaultValue;
 
+    @Schema(description = "List of mandatory IDP Metadata attributes.")
     private List<String> idpMetadataMandatoryAttributes;
+    
+    @Schema(description = "Keycloak SAML attribute names.")
     private List<String> kcAttributes;
+    
+    @Schema(description = "Keycloak SAML config attribute names.")
     private List<String> kcSamlConfig;
     
     public String getApplicationName() {
