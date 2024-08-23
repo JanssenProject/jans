@@ -98,14 +98,6 @@ ssl.trustStorePin: {gmanager.secret.get("encoded_ldapTrustStorePass")}
     assert dest.read() == expected
 
 
-def test_sync_ldap_truststore(tmpdir, gmanager):
-    from jans.pycloudlib.persistence.ldap import sync_ldap_truststore
-
-    dest = tmpdir.join("opendj.pkcs12")
-    sync_ldap_truststore(gmanager, str(dest))
-    assert dest.read()
-
-
 @pytest.mark.parametrize("url, host", [
     ("localhost", "localhost"),
     ("localhost:1636", "localhost"),
