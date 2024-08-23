@@ -15,7 +15,7 @@ class FileConfig(BaseConfig):
 
         out, err, code = load_schema_from_file(filepath, exclude_secret=True)
         if code != 0:
-            logger.warning(f"Unable to load configmaps from file {filepath}; error={err}; configmaps will be excluded")
+            logger.warning(f"Unable to load configmaps from file {filepath}; error={err}; local configmaps will be excluded")
 
         # set the data as immutable
         data = out.get("_configmap") or {}
