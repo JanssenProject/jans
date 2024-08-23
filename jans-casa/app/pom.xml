@@ -9,7 +9,7 @@
     <parent>
         <groupId>io.jans</groupId>
         <artifactId>casa-base</artifactId>
-        <version>1.1.4-SNAPSHOT</version>
+        <version>1.1.5-SNAPSHOT</version>
     </parent>
 
     <dependencies>
@@ -25,6 +25,11 @@
         </dependency>
 
         <!-- JANS-->
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>agama-model</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>io.jans</groupId>
             <artifactId>jans-orm-model</artifactId>

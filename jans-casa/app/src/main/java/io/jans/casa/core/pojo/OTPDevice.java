@@ -78,25 +78,30 @@ public class OTPDevice extends RegisteredCredential implements Comparable<OTPDev
     public void setSoft(Boolean soft) {
         this.soft = soft;
     }
-
-    private void updateHash() {
-
-        if (uid == null) {
-            id = 0;
-        } else {
-            String str = uid.replaceFirst("hotp:", "").replaceFirst("totp:", "");
-            int idx = str.indexOf(";");
-            if (idx > 0) {
-                str = str.substring(0, idx);
-            }
-            id = str.hashCode();
+    
+    public String getKey() {
+        
+        String str = uid.replaceFirst("hotp:", "").replaceFirst("totp:", "");
+        int idx = str.lastIndexOf(";");
+        if (idx > 0) {
+            str = str.substring(0, idx);
         }
+        return str;
+        
     }
 
     public int compareTo(OTPDevice d2) {
         long date1 = getAddedOn();
         long date2 = d2.getAddedOn();
         return date1 < date2 ? -1 : ((date1 > date2) ? 1 : 0);
+    }
+
+    public int currentMovingFactor() {       
+        return timeBased ? -1 : Integer.valueOf(uid.substring(uid.lastIndexOf(";") + 1));        
+    }
+    
+    private void updateHash() {
+        id = uid == null ? 0 : getKey().hashCode();
     }
 
 }
