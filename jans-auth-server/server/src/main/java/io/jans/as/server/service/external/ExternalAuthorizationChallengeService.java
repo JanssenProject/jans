@@ -14,7 +14,9 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Authorization Challenge service responsible for external script interaction.
@@ -32,6 +34,42 @@ public class ExternalAuthorizationChallengeService extends ExternalScriptService
 
     public ExternalAuthorizationChallengeService() {
         super(CustomScriptType.AUTHORIZATION_CHALLENGE);
+    }
+
+    public Map<String, String> getAuthenticationMethodClaims(ExecutionContext executionContext) {
+        final List<String> acrValues = executionContext.getAuthzRequest().getAcrValuesList();
+        final CustomScriptConfiguration script = identifyScript(acrValues);
+        if (script == null) {
+            String msg = String.format("Unable to identify script by acr_values %s.", acrValues);
+            log.debug(msg);
+            return new HashMap<>();
+        }
+
+        log.trace("Executing python 'getAuthenticationMethodClaims' method, script name: {}, clientId: {}",
+                script.getName(), executionContext.getAuthzRequest().getClientId());
+
+        executionContext.setScript(script);
+
+        Map<String, String> result = new HashMap<>();
+        try {
+            AuthorizationChallengeType authorizationChallengeType = (AuthorizationChallengeType) script.getExternalType();
+            final ExternalScriptContext scriptContext = new ExternalScriptContext(executionContext);
+            result = authorizationChallengeType.getAuthenticationMethodClaims(scriptContext);
+
+            scriptContext.throwWebApplicationExceptionIfSet();
+        } catch (WebApplicationException e) {
+            if (log.isTraceEnabled()) {
+                log.trace("WebApplicationException from script", e);
+            }
+            throw e;
+        } catch (Exception ex) {
+            log.error(ex.getMessage(), ex);
+            saveScriptError(script.getCustomScript(), ex);
+        }
+
+        log.trace("Finished 'getAuthenticationMethodClaims' method, script name: {}, clientId: {}, result: {}", script.getName(), executionContext.getAuthzRequest().getClientId(), result);
+
+        return result;
     }
 
     public boolean externalAuthorize(ExecutionContext executionContext) {
