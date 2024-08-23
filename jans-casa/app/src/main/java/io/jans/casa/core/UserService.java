@@ -82,16 +82,8 @@ public class UserService implements SndFactorAuthenticationUtils {
 
     }
 
-    public List<AuthnMethod> getLiveAuthnMethods() {
-        return getLiveAuthnMethods(true);
-    }
-
-    public List<AuthnMethod> get2FARequisiteMethods() {
-        return getLiveAuthnMethods(false).stream().filter(AuthnMethod::mayBe2faActivationRequisite).collect(Collectors.toList());
-    }
-
     public List<Pair<AuthnMethod, Integer>> getUserMethodsCount(String userId) {
-        return getLiveAuthnMethods(false).stream()
+        return getLiveAuthnMethods().stream()
                 .map(aMethod -> new Pair<>(aMethod, aMethod.getTotalUserCreds(userId)))
                 .filter(pair -> pair.getY() > 0).collect(Collectors.toList());
     }
@@ -124,7 +116,8 @@ public class UserService implements SndFactorAuthenticationUtils {
             logger.debug("Total number of user creds is {}", totalCreds);
 
             if (nCredsOfType == 1) {
-                List<AuthnMethod> methods = get2FARequisiteMethods();
+                List<AuthnMethod> methods = getLiveAuthnMethods().stream()
+                        .filter(AuthnMethod::mayBe2faActivationRequisite).collect(Collectors.toList());
                 boolean typeOfCredIs2FARequisite = methods.stream().map(AuthnMethod::getAcr).anyMatch(acr -> acr.equals(credentialType));
 
                 if (typeOfCredIs2FARequisite) {
@@ -265,7 +258,7 @@ public class UserService implements SndFactorAuthenticationUtils {
         }
     }
 
-    private List<AuthnMethod> getLiveAuthnMethods(boolean sorted) {
+    public List<AuthnMethod> getLiveAuthnMethods() {
 
         List<AuthnMethod> methods = new ArrayList<>();
         Map<String, String> acrPluginMap = mainSettings.getAcrPluginMap();
@@ -273,13 +266,6 @@ public class UserService implements SndFactorAuthenticationUtils {
         for (String acr : acrPluginMap.keySet()) {
             extManager.getAuthnMethodExts(Collections.singleton(acrPluginMap.get(acr)))
                     .stream().filter(am -> am.getAcr().equals(acr)).findFirst().ifPresent(methods::add);
-        }
-
-        if (sorted) {
-            //An important invariant is that mappedAcrs set is fully contained in authnMethodLevels.keySet()
-            Map<String, Integer> authnMethodLevels = confHandler.getAcrLevelMapping();
-            methods = methods.stream().sorted(Comparator.comparing(aMethod -> -authnMethodLevels.get(aMethod.getAcr())))
-                    .collect(Collectors.toList());
         }
         return methods;
 

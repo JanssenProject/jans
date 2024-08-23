@@ -19,7 +19,6 @@ import io.jans.casa.core.model.Person;
 import io.jans.casa.core.pojo.FidoDevice;
 import io.jans.casa.core.pojo.SecurityKey;
 import io.jans.casa.misc.Utils;
-import io.jans.casa.plugins.authnmethod.SecurityKey2Extension;
 import io.jans.casa.plugins.authnmethod.rs.status.u2f.FinishCode;
 import io.jans.casa.plugins.authnmethod.rs.status.u2f.RegisterMessageCode;
 import io.jans.casa.plugins.authnmethod.rs.status.u2f.RegistrationCode;
@@ -27,12 +26,9 @@ import io.jans.casa.plugins.authnmethod.service.Fido2Service;
 import io.jans.casa.rest.ProtectedApi;
 import org.slf4j.Logger;
 
-/**
- * @author jgomer
- */
 @ApplicationScoped
 @ProtectedApi(scopes = "https://jans.io/casa.enroll")
-@Path("/enrollment/" + SecurityKey2Extension.ACR)
+@Path("/enrollment/fido2")
 @Produces(MediaType.APPLICATION_JSON)
 public class SecurityKey2EnrollingWS {
 
