@@ -163,17 +163,17 @@ class Plugin():
 
         if self.data['start'] > 1:
             handler_partial = partial(
-                self.get_scripts, self.data['start']-self.app.entries_per_page-1, pattern)
+                self.get_scripts, self.data['start']-self.app.entries_per_page, pattern)
             prev_button = Button(_("Prev"), handler=handler_partial)
             prev_button.window.jans_help = _(
                 "Retreives previous %d entries") % self.app.entries_per_page
             buttons.append(prev_button)
         if self.data['totalEntriesCount'] > self.data['start'] + self.data['entriesCount']:
             handler_partial = partial(
-                self.get_scripts, self.data['start']+self.app.entries_per_page+1, pattern)
+                self.get_scripts, self.data['start']+self.app.entries_per_page, pattern)
             next_button = Button(_("Next"), handler=handler_partial)
             next_button.window.jans_help = _(
-                "Retreives previous %d entries") % self.app.entries_per_page
+                "Retreives next %d entries") % self.app.entries_per_page
             buttons.append(next_button)
 
         self.scripts_list_container = HSplit([
