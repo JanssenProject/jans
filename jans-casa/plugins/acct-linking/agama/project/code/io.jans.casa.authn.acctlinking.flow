@@ -1,8 +1,23 @@
-Flow io.jans.casa.acctlinking.Launcher
+Flow io.jans.casa.authn.acctlinking
     Basepath ""
     Configs providers
     Inputs providerId uidRef
+
+When providerId is null
+    //Store a list with minimal info about providers in the cache. This allows to re-use main casa
+    //flow and still have means to access dynamic info from the overriding template acctlinking.ftlh
+    Call io.jans.casa.acctlinking.ProvidersCacher#store "acctlinking_providers" 60 providers
+    
+    obj = Trigger io.jans.casa.authn.main
+        Override templates "kz1vc3/main.ftlh" "acctlinking.ftlh"
+    
+    Log obj
+    
+    When obj.aborted is null    //User took usual Casa authentication, terminate as such
+        Finish obj
         
+    providerId = obj.data.providerId
+
 provider = providers.$providerId
 //See class io.jans.inbound.Provider for reference
 
