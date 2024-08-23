@@ -12,9 +12,11 @@ import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.model.configuration.ApiAppConfiguration;
 import io.jans.configapi.rest.model.AuthenticationMethod;
 import io.jans.configapi.service.auth.ConfigurationService;
+import io.jans.configapi.service.auth.LdapConfigurationService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.model.custom.script.model.CustomScript;
+import io.jans.model.ldap.GluuLdapConfiguration;
 import io.jans.service.custom.CustomScriptService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -26,6 +28,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.*;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.commons.lang.StringUtils;
 
@@ -56,6 +59,9 @@ public class AcrsResource extends ConfigBaseResource {
 
     @Inject
     CustomScriptService customScriptService;
+
+    @Inject
+    LdapConfigurationService ldapConfigurationService;
 
     @Operation(summary = "Gets default authentication method.", description = "Gets default authentication method.", operationId = "get-acrs", tags = {
             "Default Authentication Method" }, security = @SecurityRequirement(name = "oauth2", scopes = {
@@ -89,13 +95,13 @@ public class AcrsResource extends ConfigBaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.ACRS_WRITE_ACCESS }, superScopes = {
             ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response updateDefaultAuthenticationMethod(@NotNull AuthenticationMethod authenticationMethod) {
-        log.debug("ACRS details to  update - authenticationMethod:{}", authenticationMethod);
+        log.info("ACRS details to  update - authenticationMethod:{}", authenticationMethod);
 
         if (authenticationMethod == null || StringUtils.isBlank(authenticationMethod.getDefaultAcr())) {
             throwBadRequestException("Default authentication method should not be null or empty !");
         }
 
-        if (authenticationMethod != null) {
+        if (StringUtils.isNotBlank(authenticationMethod.getDefaultAcr())) {
             validateAuthenticationMethod(authenticationMethod.getDefaultAcr());
 
             final GluuConfiguration gluuConfiguration = configurationService.findGluuConfiguration();
@@ -106,25 +112,54 @@ public class AcrsResource extends ConfigBaseResource {
     }
 
     private void validateAuthenticationMethod(String authenticationMode) {
-        log.debug("\n\n\n authenticationMethod:{}, appConfiguration.isAcrValidationEnabled():{}", authenticationMode,
+        log.debug("authenticationMethod:{}, appConfiguration.isAcrValidationEnabled():{}", authenticationMode,
                 appConfiguration.isAcrValidationEnabled());
-        List<CustomScript> activeScripts = customScriptService.findActiveCustomScripts();
-        log.debug("\n\n\n activeScripts:{}", activeScripts);
 
-        if (!appConfiguration.isAcrValidationEnabled() || StringUtils.isBlank(authenticationMode)
-                || activeScripts == null || activeScripts.isEmpty()) {
-            return;
+        // if authentication validation check is enabled then validate
+        boolean isAcrValid = isAcrValid(authenticationMode);
+        log.debug("isAcrValid:{}",isAcrValid);
+        if (appConfiguration.isAcrValidationEnabled() && (!isAcrValid)) {
+            throwBadRequestException("INVALID_ACR",
+                    String.format("Authentication script {%s} is not valid/active", authenticationMode));
+
+        }
+    }
+
+    private boolean isAcrValid(String authenticationMode) {
+        boolean isValid = false;
+        log.debug(" Validate ACR being set - authenticationMethod:{}, appConfiguration.getAcrExclusionList():{}", authenticationMode,
+                appConfiguration.getAcrExclusionList());
+
+        if (appConfiguration.getAcrExclusionList() != null
+                && appConfiguration.getAcrExclusionList().contains(authenticationMode)) {
+            return true;
         }
 
-        // if authentication validation check is enabled and acr being set is not active
-        // then throw error
-        if (appConfiguration.isAcrValidationEnabled()) {
-            final String authMethod = authenticationMode;
-            if (activeScripts.stream().noneMatch(e -> e.getName().equalsIgnoreCase(authMethod))) {
-                throwBadRequestException("INVALID_ACR",
-                        String.format("Authentication script {%s} is not active", authenticationMode));
+        List<GluuLdapConfiguration> ldapConfigurations = ldapConfigurationService.findLdapConfigurations();
+        log.debug(" ldapConfigurations:{}", ldapConfigurations);
+        if (ldapConfigurations != null && !ldapConfigurations.isEmpty()) {
+            Optional<GluuLdapConfiguration> matchingLdapConfiguration = ldapConfigurations.stream()
+                    .filter(d -> d.getConfigId().equals(authenticationMode)).findFirst();
+
+            if (matchingLdapConfiguration.isPresent()) {
+                GluuLdapConfiguration ldap = matchingLdapConfiguration.get();
+                if (ldap != null) {
+                    return true;
+                }
             }
+
         }
+
+        // if ACR being set is a script then it should be active
+        CustomScript script = customScriptService.getScriptByDisplayName(authenticationMode);
+        log.debug(" script:{}", script);
+        if (script != null && script.isEnabled()) {
+            log.debug(" script:{}, script.isEnabled():{}", script, script.isEnabled());
+            return true;
+        }
+        log.debug(" isValid:{}", isValid);
+
+        return isValid;
     }
 
 }
