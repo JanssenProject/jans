@@ -10,7 +10,7 @@
             <p class="w5 dark-red tc pv2 ph0 ma0 f6">${message}</p>
         </#if>
         
-        <form method="post" enctype="application/x-www-form-urlencoded" class="pt2">
+        <form name="login" method="post" enctype="application/x-www-form-urlencoded" class="pt2">
             <div class="relative w5 mt4 pb2">
                 <input name="username" value="${username!}" type="text" class="focused-text w-100 pb1 dark-gray" required>
                 <label class="focused-label-big">${msgs['login.username']}</label>
@@ -28,101 +28,101 @@
             <#if grabLocation>
                 <input name="location" type="hidden">
             </#if>
-
-            <script src="${assets.contextPath}/scripts/ua-parser.pack-2.0.0.js"></script>
-            <script>
-                function attachHeaders(xhr, headers) {
-                    for (var i = 0; i < headers.length; i++) {
-                        xhr.setRequestHeader(headers[i].name, headers[i].value)
-                    }
-                }
-                
-                function attachEvents(xhr, res, rej) {
-                
-                    xhr.onload = () => {
-                        if (xhr.status < 300) {
-                            return res(xhr.responseText)
-                        } else {
-                            return rej(xhr.responseText)
-                        }
-                    }
-                    xhr.onerror = () => rej(xhr.statusText)
-                
-                }
-                
-                function genericGET(url, headers) {
-                
-                  return new Promise((resolve, reject) => {
-                    const xhr = new XMLHttpRequest()
-                    xhr.open("GET", url)
-                    if (headers) {
-                        attachHeaders(xhr, headers)
-                    }
-                    attachEvents(xhr, resolve, reject)
-                    xhr.send()
-                  })
-                
-                }
-                
-                function processLocation(obj, zoneProp, cityProp, stateProp, countryProp) {
-                    
-                    let country = obj[countryProp], state = obj[stateProp], city = obj[cityProp], zone = obj[zoneProp]
-                    
-                    if (!country) country = null
-                    if (!state) state = null
-                    if (!city) city = null
-                    if (!zone) zone = null
-                    
-                    return { country, state, city, zone } 
-                    
-                }
-            
-                function fillLocationData(field) {
-
-                    genericGET("https://api.ipapi.is", [])
-                        .then(result => {
-                
-                                let obj = JSON.parse(result)
-                                if (!obj.location) throw new Error("ipapi - no location object")
-                                    
-                                obj = processLocation(obj.location, "timezone", "city", "state", "country")   //"countryCode"
-                                field.value = JSON.stringify(obj)
-                                //console.log(field.value)
-                            })
-                        .catch(err => {
-                                console.log("IPAPI call failed:" + err)
-                                
-                                genericGET("https://freeipapi.com/api/json/", [])
-                                    .then(result => {
-                                            let obj = JSON.parse(result)
-                                            
-                                            obj = processLocation(obj, "timeZone", "cityName", "regionName", "countryName")   //"country_code"
-                                            field.value = JSON.stringify(obj)
-                                    })
-                                    .catch(err => console.log("FREEIPAPI call failed:" + err))                
-                            }) 
-                }
-
-                function fillPlatformData(field) {
-        
-                    let uapr = (new UAParser()).getResult()
-                    let platform = { name: uapr.browser.name, version: uapr.browser.version, 
-                            osName: uapr.os.name, osVersion: uapr.os.version }                        
-                    field.value = JSON.stringify(platform)
-                    console.log(field.value)
-
-                }
-
-                window.onload = (event) => { 
-                    
-                    let f = document.forms[0]                    
-                    if (${grabLocation?c}) fillLocationData(f.location)
-                    fillPlatformData(f.device)
-
-                }
-            </script>
         </form>
     </section>
+
+    <script src="${assets.contextPath}/scripts/ua-parser.pack-2.0.0.js"></script>
+    <script>
+        function attachHeaders(xhr, headers) {
+            for (var i = 0; i < headers.length; i++) {
+                xhr.setRequestHeader(headers[i].name, headers[i].value)
+            }
+        }
+        
+        function attachEvents(xhr, res, rej) {
+        
+            xhr.onload = () => {
+                if (xhr.status < 300) {
+                    return res(xhr.responseText)
+                } else {
+                    return rej(xhr.responseText)
+                }
+            }
+            xhr.onerror = () => rej(xhr.statusText)
+        
+        }
+        
+        function genericGET(url, headers) {
+        
+          return new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest()
+            xhr.open("GET", url)
+            if (headers) {
+                attachHeaders(xhr, headers)
+            }
+            attachEvents(xhr, resolve, reject)
+            xhr.send()
+          })
+        
+        }
+        
+        function processLocation(obj, zoneProp, cityProp, stateProp, countryProp) {
+            
+            let country = obj[countryProp], state = obj[stateProp], city = obj[cityProp], zone = obj[zoneProp]
+            
+            if (!country) country = null
+            if (!state) state = null
+            if (!city) city = null
+            if (!zone) zone = null
+            
+            return { country, state, city, zone } 
+            
+        }
+    
+        function fillLocationData(field) {
+
+            genericGET("https://api.ipapi.is", [])
+                .then(result => {
+        
+                        let obj = JSON.parse(result)
+                        if (!obj.location) throw new Error("ipapi - no location object")
+                            
+                        obj = processLocation(obj.location, "timezone", "city", "state", "country")   //"countryCode"
+                        field.value = JSON.stringify(obj)
+                        //console.log(field.value)
+                    })
+                .catch(err => {
+                        console.log("IPAPI call failed:" + err)
+                        
+                        genericGET("https://freeipapi.com/api/json/", [])
+                            .then(result => {
+                                    let obj = JSON.parse(result)
+                                    
+                                    obj = processLocation(obj, "timeZone", "cityName", "regionName", "countryName")   //"country_code"
+                                    field.value = JSON.stringify(obj)
+                            })
+                            .catch(err => console.log("FREEIPAPI call failed:" + err))                
+                    }) 
+        }
+
+        function fillPlatformData(field) {
+
+            let uapr = (new UAParser()).getResult()
+            let platform = { name: uapr.browser.name, version: uapr.browser.version, 
+                    osName: uapr.os.name, osVersion: uapr.os.version }                        
+            field.value = JSON.stringify(platform)
+            console.log(field.value)
+
+        }
+
+        window.onload = (event) => { 
+            
+            let f = document.forms.login                    
+            if (${grabLocation?c}) fillLocationData(f.location)
+            fillPlatformData(f.device)
+
+        }
+    </script>
 
     <#-- "preload" font awesome used later in selector.ftlh -->
     <script src="${assets.contextPath}/scripts/font-awesome-5.12.1.all.min.js" defer></script>
