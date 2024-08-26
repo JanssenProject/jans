@@ -1,3 +1,11 @@
+//This flow reuses project https://github.com/JanssenProject/jans/tree/main/docs/agama-catalog/jans/inboundID 
+//and Casa project (https://github.com/JanssenProject/jans/tree/main/jans-casa/agama/project) to offer
+//either a local 2FA experience or external site login
+//If parameter providerId is passed, the initial prompt screen is skipped and authentication is directly
+//launched against the authentication provider referenced. Note available providers are preliminarly 
+//supplied in the flow configuration. Additionally, if parameter uidRef is passed, the incoming identity  
+//is linked to the user whose uid is currently stored in the Jans Cache by using the given uidRef as
+//lookup key. This makes possible to do account linking from within Casa app, for instance
 Flow io.jans.casa.authn.acctlinking
     Basepath ""
     Configs providers
@@ -10,8 +18,6 @@ When providerId is null
     
     obj = Trigger io.jans.casa.authn.main
         Override templates "kz1vc3/main.ftlh" "acctlinking.ftlh"
-    
-    Log obj
     
     When obj.aborted is null    //User took usual Casa authentication, terminate as such
         Finish obj
