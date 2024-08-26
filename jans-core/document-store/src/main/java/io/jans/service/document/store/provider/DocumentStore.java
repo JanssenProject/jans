@@ -45,12 +45,12 @@ public interface DocumentStore<T> {
 	/**
 	 * Load document from store as stream
 	 */
-	public InputStream readDocumentAsStream(String path) ;
+	InputStream readDocumentAsStream(String path) ;
 
 	/**
 	 * Load binary document from store as stream
 	 */
-	public InputStream readBinaryDocumentAsStream(String path);
+	InputStream readBinaryDocumentAsStream(String path);
 
 	/**
 	 * Removes an object document from store
@@ -62,6 +62,11 @@ public interface DocumentStore<T> {
 	 */
 	String renameDocument(String currentPath, String destinationPath);
 
-	public abstract DocumentStoreType getProviderType();
+	/**
+	 * Find documents by modules list
+	 */
+	List<T> findDocumentsByModules(List<String> moduleList, String ... attributes);
+
+	DocumentStoreType getProviderType();
 
 }

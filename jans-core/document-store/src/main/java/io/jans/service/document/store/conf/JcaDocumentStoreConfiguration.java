@@ -6,9 +6,9 @@
 
 package io.jans.service.document.store.conf;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import java.io.Serializable;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 /**
  * @author Yuriy Movchan on 04/10/2020
