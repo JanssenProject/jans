@@ -46,7 +46,7 @@ public class Fido2Configuration {
     private List<RequestedParty> requestedParties = new ArrayList<RequestedParty>();
 
     @DocProperty(description = "String value to provide source of URLs with external metadata")
-    private String metadataUrlsProvider;
+    private List<MetadataServer> metadataServers = new ArrayList<MetadataServer>();
     @DocProperty(description = "Boolean value indicating whether the MDS download should be omitted")
     private boolean disableMetadataService = false;
     @DocProperty(description = "Boolean value indicating whether MDS validation should be omitted during attestation")
@@ -117,14 +117,6 @@ public class Fido2Configuration {
 		this.requestedParties = requestedParties;
 	}
 
-    public String getMetadataUrlsProvider() {
-        return metadataUrlsProvider;
-    }
-
-    public void setMetadataUrlsProvider(String metadataUrlsProvider) {
-        this.metadataUrlsProvider = metadataUrlsProvider;
-    }
-
     public boolean isSkipValidateMdsInAttestationEnabled() {
         return skipValidateMdsInAttestationEnabled;
     }
@@ -171,5 +163,13 @@ public class Fido2Configuration {
 
     public void setDisableMetadataService(boolean disableMetadataService) {
         this.disableMetadataService = disableMetadataService;
+    }
+
+    public List<MetadataServer> getMetadataServers() {
+        return metadataServers;
+    }
+
+    public void setMetadataServers(List<MetadataServer> metadataServers) {
+        this.metadataServers = metadataServers;
     }
 }
