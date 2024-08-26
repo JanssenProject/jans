@@ -69,10 +69,23 @@ the Janssen Server instance.
 #### Data preparation
 
 Get the following files and directories from Janssen Server instance to your 
-local environment.
+local environment. Assuming the local directory under which you'll store these
+artifacts is `D:\Developement\jans\jans_1.1.3-2024-07-08`,
 
-1. Install Jans CE into VM with all required components. During install select LDAP server. It's most easier way to copy data developer workstation
-2. Copy folders to local disk to tree like this:
+From Janssen Server path `/etc/certs/*` and `/etc/jans/*` to local environment's
+`D:\Developement\jans\jans_1.1.3-2024-07-08\etc\certs\` and 
+`D:\Developement\jans\jans_1.1.3-2024-07-08\etc\jans\` respectively.
+
+From Janssen Server path `/opt/jans/jans-setup/*` to local environment's
+`D:\Developement\jans\jans_1.1.3-2024-07-08\jans-setup\`.
+
+From Janssen Server path `/opt/jython-2.7.3/*` to local environment's
+`D:\Developement\jans\jans_1.1.3-2024-07-08\jython-2.7.3\`.
+
+From Janssen Server path `/opt/opendj/*` to local environment's
+`D:\Developement\jans\jans_1.1.3-2024-07-08\opendj\`.
+
+This should result in a directory structure like this:
 
 ```
   D:\Developement\jans\jans_1.1.3-2024-07-08
