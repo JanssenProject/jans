@@ -488,25 +488,21 @@ def parse_cert(certfile, dns):
 def get_configuration_file():
     path = os.environ.get("CN_CONFIGURATOR_CONFIGURATION_FILE", "/etc/jans/conf/configuration.json")
 
-    # @TODO: remove the backward-compat after updating the chart
-    if not os.path.isfile(path):
-        for alt_path in [f"{DB_DIR}/configuration.json", f"{DB_DIR}/generate.json"]:
-            if os.path.isfile(alt_path):
-                path = alt_path
-                break
-    return path
+    if os.path.isfile(path):
+        return path
+
+    # backward-compat
+    return f"{DB_DIR}/configuration.json"
 
 
 def get_dump_file():
-    path = os.environ.get("CN_CONFIGURATOR_DUMP_FILE", "/etc/jans/conf/configuration.dump.json")
+    path = os.environ.get("CN_CONFIGURATOR_DUMP_FILE", "/etc/jans/conf/configuration.out.json")
 
-    # @TODO: remove the backward-compat after updating the chart
-    if not os.path.isfile(path):
-        for alt_path in [f"{DB_DIR}/configuration.out.json"]:
-            if os.path.isfile(alt_path):
-                path = alt_path
-                break
-    return path
+    if os.path.isfile(path):
+        return path
+
+    # backward-compat
+    return f"{DB_DIR}/configuration.out.json"
 
 
 # ============
