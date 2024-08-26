@@ -49,6 +49,73 @@ debugger can be attached. The steps below will show how to configure
 
    ![](../assets/image-jans-remote-debug-intellij.png)
 
+## Running Janssen Server Modules From An IDE
+
+It is possible to run Janssen Server modules from an IDE like Eclipse or 
+VSCode or IntelliJ. In this section, we are going to see steps required 
+to run modules from Eclipse IDE. 
+
+### Pre-requisite
+
+A running instance of Janssen Server(with OpenDJ LDAP as datastore) will be 
+required to complete the local
+setup. You should be able to transfer/download files from this Janssen Server
+to your local environment. This is due to modules requiring certain files and 
+programs to be available on your local machine that are readily available on 
+the Janssen Server instance.
+
+### Runnng Fido2 Module
+
+#### Data preparation
+
+Get the following files and directories from Janssen Server instance to your 
+local environment.
+
+1. Install Jans CE into VM with all required components. During install select LDAP server. It's most easier way to copy data developer workstation
+2. Copy folders to local disk to tree like this:
+
+```
+  D:\Developement\jans\jans_1.1.3-2024-07-08
+   |-etc
+     |- certs\*
+     |- jans\*
+   |-jans-setup
+   |-jython-2.7.3
+   |-opendj
+```
+
+#### Eclipse plugins
+
+Install next Eclipse plugins:
+
+* Apache Directory Studio (select browser part only)
+* Eclipse jetty 7.0.0
+
+#### Run server locally
+
+This section shows how to run Fido2 server, for example
+
+1. Start OpenDJ from local folder.
+2. Connect to OpenDJ with Apache DS plugin and update config
+![step-1](../assets/local-run-IDE-configuration-step-1.png)
+
+
+3. Configure new Jetty Webapp run configuration. Here are screenshots:
+![Config webapp](../assets/local-run-IDE-config-webapp.png)
+![Config args](../assets/local-run-IDE-config-args.png)
+![Config options](../assets/local-run-IDE-config-options.png)
+![Config dependencies](../assets/local-run-IDE-config-dependencies.png)
+![Config JRE](../assets/local-run-IDE-config-jre.png)
+![Config classpath](../assets/local-run-IDE-config-classpath.png)
+![Config source](../assets/local-run-IDE-config-source.png)
+
+
+#### Expected result
+![Console output](../assets/local-run-IDE-result-console.png)
+
+![Web output](../assets/local-run-IDE-result-web.png)
+
+
 ## Run Integration Tests with a Janssen Server VM
 
 In this guide, we will look at steps to run the Janssen integration test suite 
