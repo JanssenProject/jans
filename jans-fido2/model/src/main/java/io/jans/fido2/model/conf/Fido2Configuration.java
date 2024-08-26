@@ -35,8 +35,6 @@ public class Fido2Configuration {
 
     @DocProperty(description = "Expiration time in seconds for pending enrollment/authentication requests")
     private int unfinishedRequestExpiration = 120; // 120 seconds
-    @DocProperty(description = "Expiration time in seconds for approved authentication requests")
-    private int authenticationHistoryExpiration = 15 * 24 * 3600; // 15 days
 
     @DocProperty(description = "Expiration time in seconds for approved authentication requests")
     private int metadataRefreshInterval= 15 * 24 * 3600; // 15 days
@@ -102,14 +100,6 @@ public class Fido2Configuration {
 
     public void setUnfinishedRequestExpiration(int unfinishedRequestExpiration) {
         this.unfinishedRequestExpiration = unfinishedRequestExpiration;
-    }
-
-    public int getAuthenticationHistoryExpiration() {
-        return authenticationHistoryExpiration;
-    }
-
-    public void setAuthenticationHistoryExpiration(int authenticationHistoryExpiration) {
-        this.authenticationHistoryExpiration = authenticationHistoryExpiration;
     }
 
     public String getServerMetadataFolder() {
