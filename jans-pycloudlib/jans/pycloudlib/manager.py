@@ -341,6 +341,19 @@ class SecretManager(BaseConfiguration):
             value = encode_text(value, salt).decode()
         self.set(key, value)
 
+    def bootstrap(self):
+        """Bootstrap the secret adapter, e.g. miscellanous setup.
+        """
+        if isinstance(self.remote_adapter, VaultSecret):
+            # vault secret requires RoleID and SecretID
+            for setting_name, secret_name in [
+                ("CN_SECRET_VAULT_ROLE_ID_FILE", "vault_role_id"),
+                ("CN_SECRET_VAULT_SECRET_ID_FILE", "vault_secret_id"),
+            ]:
+                if os.path.isfile(self.remote_adapter.settings[setting_name]):
+                    continue
+                self.to_file(secret_name, self.remote_adapter.settings[setting_name])
+
 
 @dataclass
 class Manager:
@@ -382,5 +395,6 @@ def get_manager() -> Manager:  # noqa: D412
     """
     config_mgr = ConfigManager()
     secret_mgr = SecretManager()
+    secret_mgr.bootstrap()
     lock_mgr = LockManager()
     return Manager(config_mgr, secret_mgr, lock_mgr)

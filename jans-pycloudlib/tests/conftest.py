@@ -25,7 +25,7 @@ def gk8s_config():
 
 
 @pytest.fixture()
-def gvault_secret(tmpdir):
+def gvault_secret(tmpdir, monkeypatch):
     from jans.pycloudlib.secret import VaultSecret
 
     role_id_file = tmpdir.join("vault_role_id")
@@ -33,12 +33,11 @@ def gvault_secret(tmpdir):
     secret_id_file = tmpdir.join("vault_secret_id")
     secret_id_file.write("")
 
-    secret = VaultSecret()
-    secret.settings["CN_SECRET_VAULT_NAMESPACE"] = "testing"
-    secret.settings["CN_SECRET_VAULT_KV_PATH"] = "secret"
-    secret.settings["CN_SECRET_VAULT_ROLE_ID_FILE"] = str(role_id_file)
-    secret.settings["CN_SECRET_VAULT_SECRET_ID_FILE"] = str(secret_id_file)
-    yield secret
+    monkeypatch.setenv("CN_SECRET_VAULT_ROLE_ID_FILE", str(role_id_file))
+    monkeypatch.setenv("CN_SECRET_VAULT_SECRET_ID_FILE", str(secret_id_file))
+    monkeypatch.setenv("CN_SECRET_VAULT_NAMESPACE", "testing")
+    monkeypatch.setenv("CN_SECRET_VAULT_KV_PATH", "secret")
+    yield VaultSecret()
 
 
 @pytest.fixture()
