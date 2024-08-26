@@ -241,7 +241,7 @@ public class DBDocumentService implements Serializable {
 			return baseDn;
 		}
 
-		return String.format("inum=%s%s", inum, baseDn);
+		return String.format("inum=%s,%s", inum, baseDn);
 	}
 
 	public String baseDn() {
