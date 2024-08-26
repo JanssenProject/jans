@@ -51,7 +51,7 @@ RUN /opt/jython/bin/pip uninstall -y pip setuptools
 # ===========
 
 ENV CN_VERSION=1.1.5-SNAPSHOT
-ENV CN_BUILD_DATE='2024-08-23 11:41'
+ENV CN_BUILD_DATE='2024-08-26 16:00'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-server/${CN_VERSION}/jans-auth-server-${CN_VERSION}.war
 
@@ -103,7 +103,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/agama/fl \
     /app/static/rdbm \
     /app/schema
 
-ENV JANS_SOURCE_VERSION=71a68b3512f06e29ab8479479a4533c035326ecb
+ENV JANS_SOURCE_VERSION=74089549832425a100ad25ddd4aee5f223309c2e
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -114,7 +114,6 @@ RUN git clone --depth 500 --filter blob:none --no-checkout https://github.com/ja
     && git checkout ${JANS_SOURCE_VERSION} \
     && git sparse-checkout add agama/misc \
     && git sparse-checkout add jans-linux-setup/jans_setup \
-    && git sparse-checkout add jans-casa/extras \
     && git sparse-checkout add jans-pycloudlib \
     && git sparse-checkout add jans-config-api/plugins/docs \
     && cp ${JANS_SETUP_DIR}/static/rdbm/sql_data_types.json /app/static/rdbm/ \
@@ -127,7 +126,6 @@ RUN git clone --depth 500 --filter blob:none --no-checkout https://github.com/ja
     && cp -R agama/misc/* ${JETTY_BASE}/jans-auth/agama/ \
     && cp -R ${JANS_SETUP_DIR}/static/auth/conf /etc/certs \
     && mkdir -p /opt/jans/python/libs \
-    && cp jans-casa/extras/casa-external_* /opt/jans/python/libs \
     && cp -R ${JANS_SETUP_DIR}/templates/jans-lock /app/templates/ \
     && mkdir -p org/eclipse/jetty \
     && cp ${JANS_SETUP_DIR}/static/favicon.ico org/eclipse/jetty/favicon.ico \
