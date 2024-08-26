@@ -118,7 +118,7 @@ class Plugin(DialogUtils):
                 self.app.show_message(common_strings.error, HTML(_("Please fill <b>Description</b> and <b>Display Name</b>")), tobefocused=dialog)
                 return
 
-            data['jansService'] = [data.pop('jansService')]
+            data['service'] = [data.pop('jansService')]
 
             data.pop('document', None)
             form_data = {'assetFile': self.asset_file_path, 'document': data}
@@ -169,13 +169,13 @@ class Plugin(DialogUtils):
         inum_widget = common_data.app.getTitledText(_("inum"), name='inum', value=data.get('inum'), read_only=True, style=cli_style.read_only)
         jans_level_widget =  common_data.app.getTitledWidget(
                                 _("Level"),
-                                name='jansLevel',
+                                name='level',
                                 widget=Spinner(
-                                    value=int(data.get('jansLevel', 0))
+                                    value=int(data.get('level', 0))
                                     ),
                                 style=cli_style.drop_down
                             )
-        enabled_widget = common_data.app.getTitledCheckBox(_("Enabled"), name='jansEnabled', checked=data.get('jansEnabled'), style=cli_style.check_box)
+        enabled_widget = common_data.app.getTitledCheckBox(_("Enabled"), name='enabled', checked=data.get('enabled'), style=cli_style.check_box)
         description_widget = common_data.app.getTitledText(_("Description"), name='description', value=data.get('description', ''), style=cli_style.edit_text_required)
 
         jans_serice_widget = self.app.getTitledWidget(
@@ -280,7 +280,7 @@ class Plugin(DialogUtils):
             self.assets_list_box.clear()
             self.assets_list_box.all_data = self.data['entries']
             for asset_info in self.data['entries']:
-                self.assets_list_box.add_item((asset_info['inum'], asset_info['displayName'], asset_info['jansEnabled'], asset_info.get('creationDate', '---')))
+                self.assets_list_box.add_item((asset_info['inum'], asset_info['displayName'], asset_info['enabled'], asset_info.get('creationDate', '---')))
 
             self.assets_container = self.assets_list_box
 
