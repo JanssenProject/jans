@@ -63,3 +63,14 @@ async def get_admin_ui_roles() -> None:
     common_data.app.stop_progressing()
     common_data.admin_ui_roles = response.json()
 
+
+async def get_persistence_type() -> None:
+    'Coroutine for getting persistence type'
+
+    common_data.app.logger.info("Backrgound Task: retreiving persistence type")
+    cli_args = {'operation_id': 'get-properties-persistence'}
+    common_data.app.start_progressing(_("Retreiving persistence type from server..."))
+    response = await get_event_loop().run_in_executor(common_data.app.executor, common_data.app.cli_requests, cli_args)
+    common_data.app.stop_progressing()
+    result = response.json()
+    common_data.server_persistence_type = result['persistenceType']

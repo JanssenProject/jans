@@ -155,18 +155,66 @@ sudo /opt/jans/jans-cli/jans_cli_tui.py
 ### Find Current Authentication Method
 
 Navigate to `Auth Server` -> `Authn` to open the `Authn` screen as shown
-in the image below. This screen lists the available authentication methods
-where the default method is marked with `x` under the `Default` column.
+in the image below. In **Default ACR** sub-tab, available authentication methods are listed
+as raido buttons.
 
-![image](../../../assets/tui-curr-authn-method.png)
+![image](../../../assets/tui-authn-dafault-acr.png)
 
+To update default authentication method, bring the tab focus to the authentication method,
+and navigate to new default method with **Up** and **Down** keys. To chose hit **Space** key.
+Navigate to **Save** button and hit **Enter** key
 
-### Update Default Authentication Method
+#### Basic sub-tab
 
-Bring the tab focus to the authentication method that should be the new default
-method. Hit `Enter` to open the dialog as shown above. Using the checkbox for
-`Default Authen Method` the current method can be made the default 
-authentication method.
+This tab displays basic, the builtin, authentication method as shown in the image below.
+
+![image](../../../assets/tui-authn-basic.png)
+
+You can set basic as default authentication method by selecting **Default Authn Method**,
+navigate to **Save** button and hit **Enter** key
+
+#### LDAP Servers sub-tab
+
+In this tab you can add modify LDAP Servers to be used as default authentication method. See below image
+
+![image](../../../assets/tui-authn-ldap-servers.png)
+
+To add new LDAP server, navigate to **Add Source LDAP Server** button and hit **Enter**. A popup screen will
+be displayed as shown in the image below.
+
+![image](../../../assets/tui-authn-ldap-servers-add.png)
+
+Fill the fields provided in the popup. Before saving LDAP server, it is recommended to test it by navigating 
+**Test** button and hitting **Enter**. If test is successfull, chose **Save** button and hit **Enter**. If
+you want the current edited LDAP server is default authentication method, select **Default Authn Method** before saving.
+
+#### Scripts sub-tab
+
+All enabled **Person Authentication** are listed in this tab as below
+
+![image](../../../assets/tui-authn-scripts.png)
+
+To edit **Level** and/or **Properties** of authentication script, navigate to the script in the list by hitting **tab** key
+and hit **Enter**. You will see a popup like in the image below
+
+![image](../../../assets/tui-authn-scripts-edit.png)
+
+If the script you want to use as default authentication method is not in the list, you should enable the script by
+navitaing **Scripts** in the main tab. Find the script you want to enable and hit **Enter**, you will get a popop where
+you can select **Enabled** checkbox and **Save** it as shown in the image below:
+
+![image](../../../assets/tui-authn-scripts-enable.png)
+
+#### Aliases sub-tab
+
+Authentication aliases are listed in this tab. You can modify aliases by navitaing to the list and hit **Enter**.
+If you want to add a new alias, chose **Add Alias** button and hit **Enter**
+
+#### Agama Flows sub-tab
+
+If you deployed an Agama project, ACR values for the project are displayed in this tab as shown below:
+
+![image](../../../assets/tui-authn-agama.png)
 
 
 ## Using Configuration REST API

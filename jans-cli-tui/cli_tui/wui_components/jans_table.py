@@ -99,7 +99,7 @@ class JansTableWidget():
                     c = textwrap.fill(c, self.preferred_size[i]-1)
 
                 m = c.splitlines()
-                row_widgets.append(TextArea(c, width=self.preferred_size[i], read_only=True, height=len(m), style=self.data_style, focusable=False))
+                row_widgets.append(TextArea(c, width=self.preferred_size[i], read_only=True, height=len(m), style=self.data_style))
                 table_height += len(m) +1
             table_widgets.append(VSplit(row_widgets, width=D(), padding=self.padding))
 

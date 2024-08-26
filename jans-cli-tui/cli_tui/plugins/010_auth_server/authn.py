@@ -1,3 +1,4 @@
+import copy
 import asyncio
 from typing import Any
 from functools import partial
@@ -11,7 +12,7 @@ from prompt_toolkit.widgets import Button, Label, Dialog, Frame, VerticalLine, R
 from prompt_toolkit.formatted_text import HTML
 
 from utils.multi_lang import _
-from utils.utils import DialogUtils
+from utils.utils import DialogUtils, common_data
 from utils.static import cli_style, common_strings
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from wui_components.jans_side_nav_bar import JansSideNavBar
@@ -33,11 +34,12 @@ class Authn(DialogUtils):
         self.default_acr = None
         self.auth_scripts = []
         self.tabs = OrderedDict()
-
+        self.agama_acr_values = []
         self.acr_radio_list_widget = RadioList(values=[(BUILTIN_AUTHN, BUILTIN_AUTHN)])
 
         self.tabs["Default ACR"] = HSplit([
                         self.acr_radio_list_widget,
+                         Window(height=1),
                         self.app.getButtonWithHandler(text="Save", handler=self.save_default_acr, centered=True)
                         ],
                         width=D()
@@ -152,26 +154,29 @@ class Authn(DialogUtils):
 
     def on_page_enter(self) -> None:
 
+        if common_data.server_persistence_type != 'ldap':
+            self.side_nav_bar.navbar_entries.remove('LDAP Servers')
 
         def populate_acr_list():
 
             acr_values = [(BUILTIN_AUTHN, BUILTIN_AUTHN + ' [builtin]')]
 
             # LDAP Servers
-            self.ldap_servers_container.clear()
-            for i, ldap_server in enumerate(self.ldap_servers):
-                acr_values.append((ldap_server['configId'], ldap_server['configId'] + ' [ldap]'))
-                if self.default_acr == ldap_server['configId']:
-                    self.acr_radio_list_widget.current_value = ldap_server['configId']
-                    self.ldap_servers_container.italic_line = i
+            if common_data.server_persistence_type == 'ldap':
+                self.ldap_servers_container.clear()
+                for i, ldap_server in enumerate(self.ldap_servers):
+                    acr_values.append((ldap_server['configId'], ldap_server['configId'] + ' [ldap]'))
+                    if self.default_acr == ldap_server['configId']:
+                        self.acr_radio_list_widget.current_value = ldap_server['configId']
+                        self.ldap_servers_container.italic_line = i
 
-                self.ldap_servers_container.add_item((
-                        ldap_server['configId'],
-                        BUILTIN_SAML,
-                        str(ldap_server['level']).rjust(3),
-                    ))
+                    self.ldap_servers_container.add_item((
+                            ldap_server['configId'],
+                            BUILTIN_SAML,
+                            str(ldap_server['level']).rjust(3),
+                        ))
 
-            self.ldap_servers_container.all_data = self.ldap_servers[:]
+                self.ldap_servers_container.all_data = self.ldap_servers[:]
 
 
             # Custom scripts
@@ -189,6 +194,13 @@ class Authn(DialogUtils):
                     ))
 
             self.scripts_container.all_data = self.auth_scripts[:]
+
+
+            # agama flows
+            for agama_acr in self.agama_acr_values:
+                if self.default_acr == agama_acr:
+                    self.acr_radio_list_widget.current_value = agama_acr
+                acr_values.append((agama_acr, agama_acr + ' [agama]'))
 
 
             self.acr_radio_list_widget.values = acr_values
@@ -224,11 +236,11 @@ class Authn(DialogUtils):
                 result = response.json()
                 if result.get('entriesCount', 0) > 0:
                     self.auth_scripts = result['entries']
-            populate_acr_list()
 
             # agama flows ACR
             await self.app.agama_module.get_projects_coroutine(update_container=False)
             agama_flows_acrs = []
+            self.agama_acr_values.clear()
 
             for agama_flow in self.app.agama_module.data.get('entries',[]):
                 project_metadata = agama_flow.get('details', {}).get('projectMetadata', {})
@@ -242,8 +254,15 @@ class Authn(DialogUtils):
                     if e in flows_error_keys:
                         flows_error_keys.remove(e)
 
-                acr_values = [ f'agama_{e}' for e in flows_error_keys ]
-                agama_flows_acrs.append((project_metadata.get('projectName', 'NA'), '\n'.join(acr_values)))
+                flow_acr_values = []
+                for e in flows_error_keys:
+                    acr = f'agama_{e}'
+                    self.agama_acr_values.append(acr)
+                    if self.default_acr == acr:
+                        acr = '*' + acr
+                    flow_acr_values.append(acr)
+
+                agama_flows_acrs.append((project_metadata.get('projectName', 'NA'), '\n'.join(flow_acr_values)))
 
             if agama_flows_acrs:
                 self.agama_acr_container = JansTableWidget(
@@ -254,6 +273,9 @@ class Authn(DialogUtils):
                                 )
             else:
                 self.agama_acr_container = HSplit([Label(_("No agama project deployed on this server"))])
+
+            populate_acr_list()
+
         asyncio.ensure_future(coroutine())
 
 
@@ -516,7 +538,7 @@ class Authn(DialogUtils):
             acr = self.acr_radio_list_widget.current_value
             for val in self.acr_radio_list_widget.values:
                 if val[0] == acr:
-                    for t_ in ('ldap', 'script'):
+                    for t_ in ('ldap', 'script', 'agama'):
                         if val[1].endswith(f'{t_}'):
                             acr_type = t_
                             break
@@ -548,6 +570,22 @@ class Authn(DialogUtils):
 
         asyncio.ensure_future(coroutine())
 
+    async def save_acr_mappings_coroutine(self, mappings, dialog=None):
+
+        op = 'replace' if 'acrMappings' in self.app.app_configuration else 'add'
+        patch_data = [{'op':op, 'path': 'acrMappings', 'value': mappings}]
+        cli_args = {'operation_id': 'patch-properties', 'data': patch_data}
+        self.app.start_progressing("Saving Mappings ...")
+        response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+        self.app.stop_progressing()
+        if response.status_code == 200:
+            self.app.show_message(_(common_strings.success), _("ACR mappings were saved successfully"), tobefocused=self.aliases_container)
+            if dialog:
+                dialog.future.set_result(True)
+        else:
+            self.app.show_message(_(common_strings.error), _("An error ocurred while saving ACR mappings:\n {}".format(response.text)), tobefocused=self.aliases_container)
+
+
 
     def edit_alias_dialog(self, *positional: str, **kwargs: Any) -> None:
 
@@ -564,23 +602,7 @@ class Authn(DialogUtils):
                 self.aliases_container.replace_item(kwargs['selected'], mapping)
 
             mappings = {source: mapping for source, mapping in self.aliases_container.data}
-            op = 'replace' if 'acrMappings' in self.app.app_configuration else 'add'
-
-            patch_data = [{'op':op, 'path': 'acrMappings', 'value': mappings}]
-
-            async def coroutine():
-                cli_args = {'operation_id': 'patch-properties', 'data': patch_data}
-                self.app.start_progressing("Saving Mappings ...")
-                response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-                self.app.stop_progressing()
-                if response.status_code == 200:
-                    self.app.show_message(_(common_strings.success), _("ACR mappings were saved successfully"), tobefocused=self.aliases_container)
-                    dialog.future.set_result(True)
-                else:
-                    self.app.show_message(_(common_strings.error), _("An error ocurred while saving ACR mappings:\n {}".format(response.text)), tobefocused=self.aliases_container)
-
-
-            asyncio.ensure_future(coroutine())
+            asyncio.ensure_future(self.save_acr_mappings_coroutine(mappings, dialog))
 
 
         body = HSplit([
@@ -589,7 +611,6 @@ class Authn(DialogUtils):
                 ],
                 width=D()
                 )
-
 
         title = _("New Mapping") if positional else _("Edit Mapping")
         save_button = Button(_("Save"), handler=save_alias)
@@ -600,4 +621,16 @@ class Authn(DialogUtils):
         self.app.show_jans_dialog(dialog)
 
     def delete_alias(self, **kwargs):
-        pass
+
+        def confirm_handler(dialog) -> None:
+            self.aliases_container.remove_item(kwargs['selected'])
+            mappings = {source: mapping for source, mapping in self.aliases_container.data}
+            asyncio.ensure_future(self.save_acr_mappings_coroutine(mappings))
+
+        confirm_dialog = self.app.get_confirm_dialog(
+                        HTML(_("Are you sure want to delete ACR Mapping <b>{}</b>?").format(kwargs['selected'][0])),
+                        confirm_handler=confirm_handler
+                        )
+
+        self.app.show_jans_dialog(confirm_dialog)
+

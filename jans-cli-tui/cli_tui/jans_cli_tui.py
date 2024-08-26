@@ -413,6 +413,7 @@ class JansCliApp(Application):
 
         if self.cli_object_ok:
             self.create_background_task(background_tasks.get_attributes_coroutine(self))
+            self.create_background_task(background_tasks.get_persistence_type())
             response = self.cli_requests({'operation_id': 'get-plugins'})
             if response.ok:
                 plugins = response.json()
