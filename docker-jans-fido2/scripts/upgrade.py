@@ -31,7 +31,7 @@ def _transform_fido2_dynamic_config(conf):
         ("oldU2fMigrationEnabled", True),
         ("metadataUrlsProvider", ""),
         ("errorReasonEnabled", False),
-        ("disableMetadataService", False),
+        ("skipDownloadMdsEnabled", False),
         ("skipValidateMdsInAttestationEnabled", False),
         ("sessionIdPersistInCache", False),
         ("assertionOptionsGenerateEndpointEnabled", True),
