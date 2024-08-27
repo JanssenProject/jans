@@ -51,9 +51,7 @@ class SqlLock(BaseLock):
 
         user = os.environ.get("CN_SQL_DB_USER", "jans")
 
-        password_file = os.environ.get("CN_OCI_LOCK_PASSWORD_FILE", "/etc/jans/conf/oci_lock_password")
-        if not os.path.isfile(password_file):
-            password_file = os.environ.get("CN_SQL_PASSWORD_FILE", "/etc/jans/conf/sql_password")
+        password_file = os.environ.get("CN_SQL_PASSWORD_FILE", "/etc/jans/conf/sql_password")
 
         password = get_password_from_file(password_file)
 
