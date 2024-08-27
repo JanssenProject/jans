@@ -583,7 +583,7 @@ components:
           type: string
         checkU2fAttestations:
           type: boolean
-        userAutoEnrollment:
+        debugUserAutoEnrollment:
           type: boolean
         unfinishedRequestExpiration:
           type: integer
@@ -593,7 +593,7 @@ components:
           format: int32
         serverMetadataFolder:
           type: string
-        requestedCredentialTypes:
+        enabledFidoAlgorithms:
           type: array
           items:
             type: string
@@ -603,7 +603,7 @@ components:
             $ref: '#/components/schemas/RequestedParty'
         metadataUrlsProvider:
           type: string
-        skipDownloadMdsEnabled:
+        disableMetadataService:
           type: boolean
         skipValidateMdsInAttestationEnabled:
           type: boolean
