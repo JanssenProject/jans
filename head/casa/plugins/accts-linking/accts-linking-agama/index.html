@@ -8645,7 +8645,7 @@
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">#</a></h2>
 <p>The accounts linking Agama project must be configured in order to integrate third-party identity providers. The configuration of this project is supplied in a JSON file whose structure is like:</p>
 <div class="highlight"><pre><span></span><code>{
-&quot;io.jans.casa.acctlinking.Launcher&quot;: {
+&quot;io.jans.casa.authn.acctlinking&quot;: {
 
     &quot;providerID_1&quot;: { ... },
     &quot;providerID_2&quot;: { ... },
@@ -8653,7 +8653,7 @@
 }
 }
 </code></pre></div>
-<p>Each property part of the JSON object <code>io.jans.casa.acctlinking.Launcher</code> holds the configuration of a different identity provider. Here's a how a typical configuration of a provider looks like:</p>
+<p>Each property part of the JSON object <code>io.jans.casa.auth.acctlinking</code> holds the configuration of a different identity provider. Here's a how a typical configuration of a provider looks like:</p>
 <div class="highlight"><pre><span></span><code>{
     &quot;displayName&quot;: &quot;Goooogle&quot;,
     &quot;flowQname&quot;: &quot;io.jans.inbound.GenericProvider&quot;,
@@ -8709,7 +8709,7 @@
 <h2 id="user-provisioning">User provisioning<a class="headerlink" href="#user-provisioning" title="Permanent link">#</a></h2>
 <p>After attribute mapping occurs, the local database is checked to determine if the incoming user is known (based on the <code>ID</code> in the mapping and the ID of the provider in question). If no match is found, the user is onboarded: a new entry is created in the database using the information found in the resulting mapping. Otherwise, the exact behavior varies depending on the provider configuration as follows:</p>
 <ul>
-<li>If <code>skipProfileUpdate</code> is set to <code>false</code>, the existing database entry is left untouched, otherwise</li>
+<li>If <code>skipProfileUpdate</code> is set to <code>false</code>, the existing database entry is left untouched, otherwise:</li>
 <li>If <code>cumulativeUpdate</code> is set to <code>false</code>, the existing attributes in the entry which are part of the mapping are overwritten</li>
 <li>If <code>cumulativeUpdate</code> is set to <code>true</code>, the existing attribute values in the entry are preserved and new values are added if present in the mapping</li>
 </ul>
@@ -8720,7 +8720,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-05-01T16:04:27+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-05-01</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-08-27T05:36:25+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-08-27</span>
       
         <br>
         Created:

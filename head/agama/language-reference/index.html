@@ -9699,7 +9699,7 @@ result = RRF &quot;survey.htm&quot; obj
 <ul>
 <li>The template location must be specified with a string literal only (not a variable)</li>
 <li>Where and how to store templates is an engine-specific detail as well as the file formats supported. See <a href="../execution-rules/#assets-management">Assets management</a>.</li>
-<li>Use <em>map</em> variables - not literals _map_s - for the second argument of <code>RRF</code></li>
+<li>Use <em>map</em> variables - not literal <em>maps</em> - for the second argument of <code>RRF</code></li>
 </ul>
 <h2 id="looping">Looping<a class="headerlink" href="#looping" title="Permanent link">#</a></h2>
 <p>There are two constructs available for looping in Agama: <code>Repeat</code> and <code>Iterate over</code>.</p>
@@ -9890,12 +9890,16 @@ Trigger $flow
 Log &quot;subflow returned with success?&quot; outcome.success
 </code></pre></div>
 <p>In an indented block using the <code>Override templates</code> keyword, several string literals can be provided. They specify the paths of the (subflows) templates that will be overriden by the parent and the corresponding new paths. In the example above, templates <code>path/basic.htm</code> and <code>path2/dir/detail.htm</code> rendered by flow <code>PersonalInfoGathering</code> (or its subflows) won't be picked from these locations but from the base path of the current (parent) flow using names <code>basic.htm</code> and <code>tmp/mydetail.htm</code> respectively. Usage of empty string denotes reusing the same file name than the original file.</p>
-<p>Alternatively, every pair of original vs. overriden path can be specified in a single line for more clarity, like this:</p>
+<p>Alternatively, every pair of original vs. new path can be specified in a single line for more clarity, like this:</p>
 <div class="highlight"><pre><span></span><code>outcome = Trigger jo.jo.PersonalInfoGathering
     Override templates &quot;path/basic.htm&quot; &quot;&quot; 
     &quot;path2/dir/detail.htm&quot; &quot;tmp/mydetail.htm&quot;
     ...
 </code></pre></div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The new (overriding) templates will be injected with the same data original templates would receive. In other words, this directive only "modifies" the first parameter of <code>RRF</code> instructions.  </p>
+</div>
 <h2 id="foreign-routines">Foreign routines<a class="headerlink" href="#foreign-routines" title="Permanent link">#</a></h2>
 <p>Business logic implemented in languages other than Agama can be re-used by means of the <code>Call</code> instruction. <code>Call</code> plays a key role because Agama code serves fundamentally as a depiction of a flow hiding most of the internal details and low-level computations which are in turn delegated to foreign routines.</p>
 <p>The syntax of this directive is very general and actual semantics are left to the concrete engine. Roughly, here is how a <code>Call</code> can be structured:</p>
@@ -10157,7 +10161,7 @@ x[2] = &quot;polo&quot;    //adds the key/value pair &quot;2&quot; / &quot;polo&
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-06-06T14:28:50+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-06-06</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-08-27T05:36:25+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-08-27</span>
       
         <br>
         Created:
