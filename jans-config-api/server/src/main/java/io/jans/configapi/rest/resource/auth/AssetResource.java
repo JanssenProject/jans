@@ -17,7 +17,7 @@ import io.jans.configapi.util.AttributeNames;
 import io.jans.model.JansAttribute;
 import io.jans.model.SearchRequest;
 import io.jans.orm.model.PagedResult;
-import io.jans.service.document.store.service.Document;
+import io.jans.service.document.store.model.Document;
 import io.jans.util.exception.InvalidAttributeException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
