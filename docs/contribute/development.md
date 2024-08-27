@@ -109,7 +109,8 @@ Install next Eclipse plugins:
 This section shows how to run Fido2 server, for example
 
 1. Start OpenDJ from local folder.
-2. Connect to OpenDJ with Apache DS plugin and update config
+2. Connect to OpenDJ with Apache DS plugin and update config under `JansConfDyn`
+   `issuer`, `baseEndpoint`, `fido2Configuration`, `requestedParties`
 ![step-1](../assets/local-run-IDE-configuration-step-1.png)
 
 
