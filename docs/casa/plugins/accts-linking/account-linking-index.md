@@ -32,13 +32,11 @@ The pieces that allow materialization of the experience summarized above are the
 
 a) The Casa plugin jar file
 
-b) A custom XHTML page and jython script
+b) The Agama inbound identity project
 
-c) The Agama inbound identity project
+c) The Casa accounts linking Agama project
 
-d) The Casa accounts linking Agama project
-
-Most of work is demanded on setting up project _d_, where configuration of identity providers and attribute mapping tuning takes place. 
+Most of work is demanded on setting up project _c_, where configuration of identity providers and attribute mapping tuning takes place. 
 
 In the following, it is assumed you have a VM-based installation of Jans Server (or Gluu Flex) available with Casa installed. In a separate machine, ensure you have SSH/SCP/SFTP access to such server and `git` installed. 
 
@@ -46,17 +44,9 @@ In the following, it is assumed you have a VM-based installation of Jans Server 
 
 1. Download the utility jar file `https://maven.jans.io/maven/io/jans/agama-inbound/replace-janssen-version/agama-inbound-replace-janssen-version.jar` and copy to your server's `/opt/jans/jetty/jans-auth/custom/libs`
 
-1. In the server, create a `casa` directory inside `/opt/jans/jetty/jans-auth/custom/pages`
+1. In TUI, visit the Clients screen, locate the client labeled "Client for Casa". Add the following redirect URI to the list: `https://<your-jans-host>/jans-casa/pl/acct-linking/user/interlude.zul`. Replace the name of your Jans server accordingly 
 
-1. Download the file `https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/plugins/acct-linking/extras/login.xhtml` and copy it to the previously created folder  
-
-1. Download the file `https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/plugins/acct-linking/extras/Casa.py`. Open TUI or the admin UI (for Flex), and locate the custom script whose name is `casa`. Update the contents of the script with the contents of the file 
-
-1. In TUI, ensure the custom script named `agama` is enabled
-
-1. Still in TUI, visit the Clients screen, locate the client labeled "Client for Casa". Add the following redirect URI to the list: `https://<your-jans-host>/jans-casa/pl/acct-linking/user/interlude.zul`. Replace the name of your Jans server accordingly 
-
-1. Run the following commands to generate the archives of the Agama projects
+1. Run the following commands to generate the archive of the Agama inbound identity project
     
     ```
     git clone --depth 1 --branch main --no-checkout https://github.com/JanssenProject/jans.git
@@ -67,18 +57,15 @@ In the following, it is assumed you have a VM-based installation of Jans Server 
     git checkout main
     cd docs/agama-catalog/jans/inboundID/project
     zip -r inbound.zip *
-    cd ../../../../..
-    cd jans-casa/plugins/acct-linking/extras/agama
-    zip -r acctlinking.zip *
     ```
+    
+1. Download the Casa accounts linking Agama project `https://maven.jans.io/maven/io/jans/casa/plugins/acct-linking-agama/replace-janssen-version/acct-linking-agama-replace-janssen-version-SNAPSHOT-project.zip`
 
-1. Transfer the zip files to a location in the server, deploy both archives using TUI (Agama menu)
+1. Transfer the two zip files to a location in the server, deploy both archives using TUI (Agama menu)
 
 1. Finally restart the authentication server
 
 ## Configuration
-
-So far all components required for the Casa inbound identity solution are loaded in the server. When logging to casa, the form presented looks like usual, and once in, the "Accounts linking" menu takes to a page which hints about missing configuration.  
 
 The first step is figuring out the external sites to support. Keep in mind only OpenID or OAuth 2.0 based providers can be onboarded. There is not support for SAML IDPs.
 
@@ -103,4 +90,8 @@ Now it's time to supply the settings grabbed. The component these configurations
 1. In TUI, open the Agama tab and scroll through the list of projects until the `casa-account-linking` is highlighted
 1. Open the configuration management dialog (press `c`) and choose to export the sample configuration to a file on disk
 1. Apply changes as needed - this is covered in a separate doc page [here](./accts-linking-agama.md). Note you can add or remove sections in the file at will, and that providers can also be disabled so they are not listed in the login page or in Casa app
-1. Still in TUI, choose to import the file you have edited. Then conduct your testing
+1. Still in TUI, choose to import the file you have edited
+
+For VM-based installations, update the file `/etc/default/jans-casa`. Locate a segment that reads `-Dacr=` and assign  `io.jans.casa.authn.acctlinking` as new value. This will make Casa use the flow found in the accounts linking project - not the flow bundled out-of-the-box. 
+
+Finally restart Casa and conduct your testing. You will now see the login page contains a list of links to the configured identity providers.

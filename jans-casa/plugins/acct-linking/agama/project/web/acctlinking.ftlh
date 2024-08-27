@@ -1,7 +1,7 @@
-<#import "commons.ftlh" as com>
+<#import "../kz1vc3/commons.ftlh" as com>
 <@com.main>
 
-    <#assign assets=cache.casa_assets grabLocation=(captureLocation!false)>
+    <#assign assets=cache.casa_assets grabLocation=(captureLocation!false) providers=cache.acctlinking_providers>
 
     <section class="pa4 shadow-4 bg-blank gray cust-section">
         <h2 class="f3 dark-blue2">${msgs['casa.login.panel_title']}</h2>
@@ -19,18 +19,51 @@
                 <input name="password" type="password" class="focused-text w-100 pb1 dark-gray" required>
                 <label class="focused-label-big">${msgs['login.password']}</label>
             </div>
-            <div class="mt5">
+            <div class="mt4 flex justify-between items-center">
                 <input type="submit" value="${msgs['login.login']}"
                     class="f7-cust bw0 br1 ph4 pv2 bg-bsgreen-success white hover-bsgreen-success hover-white btn cust-primary-button">
-            </div>
 
+                <#if providers?size gt 0>
+                    <p class="f7 lh-title tc w4 ma0">OR use an external service to sign in:</p>
+                </#if>
+            </div>
+            <div class="pt4 ph2 flex justify-center dn">
+                <table class="table table-hover table-sm">
+                    <tbody class="table-striped">
+                    
+                        <#list providers as p>
+                            <tr class="pointer" onClick="javascript:idp_redirect('${p.id}')">
+                                <td class="w2 tc">
+                                    <img style="max-width:2rem" alt="${p.displayName!""}"
+                                        src="${p.logoImg!"none.png"}" />
+                                </td>
+                                <td class="f7-cust w4 v-mid">${p.displayName!""}</td>
+                            </tr>
+                        </#list>
+
+                    </tbody>
+                </table>
+            </div>
+				
             <input name="device" type="hidden">
             <#if grabLocation>
                 <input name="location" type="hidden">
             </#if>
         </form>
     </section>
-
+    
+    <form name="externalLogin" method="post" enctype="application/x-www-form-urlencoded">
+        <input type="hidden" name="_abort">
+        <input type="hidden" name="providerId">
+    </form>
+    <script>
+        function idp_redirect(id) {
+            let form = document.forms.externalLogin
+			form.providerId.value = id
+			form.submit()
+		}
+    </script>
+    
     <script src="${assets.contextPath}/scripts/ua-parser.pack-2.0.0.js"></script>
     <script>
         function attachHeaders(xhr, headers) {
