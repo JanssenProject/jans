@@ -72,6 +72,7 @@ exec java \
     -Dpython.home=/opt/jython \
     -Dadmin.lock=${CN_CASA_ADMIN_LOCK_FILE} \
     -Dcom.nimbusds.jose.jwk.source.RemoteJWKSet.defaultHttpSizeLimit=${CN_CASA_JWKS_SIZE_LIMIT} \
+    -Dacr=agama_io.jans.casa.authn.main \
     $(get_max_ram_percentage) \
     $(get_prometheus_opt) \
     $(get_java_options) \
