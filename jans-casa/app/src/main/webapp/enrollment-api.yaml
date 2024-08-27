@@ -1,11 +1,11 @@
 swagger: '2.0'
 
 info:
-  version: "5.0.0"
-  title: Gluu casa credentials enrollment
+  version: "1.0.0"
+  title: Jans casa credentials enrollment
   description: Facilitates the process of credentials enrollment in the Gluu Server.
   license:
-    name: Gluu Casa
+    name: Jans Casa
     url: https://github.com/JanssenProject/jans/blob/main/LICENSE
 
 #Demo server host
