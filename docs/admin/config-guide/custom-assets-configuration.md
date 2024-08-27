@@ -319,8 +319,9 @@ assuming that there is an existing asset as show below:
 
 !!! Note
 
- `assetFile` attribute is optional for update operation as there may be scenario where only metadata of an asset is to be updated.
- 
+    `assetFile` attribute is optional for update operation as there may be scenario where only metadata of an asset is to be updated.
+    
+
 Now to update level of this asset to 6, create a text file with following
 content in it. Let's name this text file as `/tmp/update-asset.json`
 
