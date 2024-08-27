@@ -18,10 +18,8 @@
                 <#assign idx = phone?index>
                 
                 <li class="list-group-item hover-bg-light-gray gray hover-dark-gray pv1">
-                    <!--label-->
                         <input type="radio" name="phoneIdx" class="mr1" value="${idx}" <#if idx == 0>checked</#if>>
                         <span class="mb1">${phone}</span>
-                    <!--/label--> 
                 </li>
             </#list>
         </ul>
