@@ -62,6 +62,7 @@ def _transform_api_dynamic_config(conf):
         ("maxCount", 200),
         ("acrValidationEnabled", True),
         ("serviceName", "jans-config-api"),
+        ("acrExclusionList", ["simple_password_auth"]),
     ]:
         if missing_key not in conf:
             conf[missing_key] = value
