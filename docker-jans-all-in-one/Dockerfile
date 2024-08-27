@@ -58,7 +58,7 @@ RUN apk update \
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=71a68b3512f06e29ab8479479a4533c035326ecb
+ENV JANS_SOURCE_VERSION=fc9f04fe3b3d3d168f3090214b22ee80be371d92
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the assets
@@ -141,7 +141,6 @@ RUN ln -sf /app/jans_aio/jans_scim/entrypoint.sh /app/bin/jans-scim-entrypoint.s
 COPY --from=jans-casa-src /opt/jans/jetty/jans-casa /opt/jans/jetty/jans-casa
 COPY --from=jans-casa-src /app/templates/jans-casa /app/templates/jans-casa
 COPY --from=jans-casa-src /app/scripts /app/jans_aio/jans_casa
-COPY --from=jans-casa-src /app/static/extension/person_authentication/Casa.py /app/static/extension/person_authentication/Casa.py
 RUN ln -sf /app/jans_aio/jans_casa/entrypoint.sh /app/bin/jans-casa-entrypoint.sh
 
 COPY --from=jans-link-src /opt/jans/jetty/jans-link /opt/jans/jetty/jans-link
