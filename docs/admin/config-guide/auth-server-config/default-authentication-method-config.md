@@ -164,6 +164,8 @@ To update default authentication method, bring the tab focus to the authenticati
 and navigate to new default method with **Up** and **Down** keys. To chose hit **Space** key.
 Navigate to **Save** button and hit **Enter** key
 
+Note ! If your backend database is not LDAP, you won't see any LDAP servers releated tab/items.
+
 #### Basic sub-tab
 
 This tab displays basic, the builtin, authentication method as shown in the image below.
@@ -175,7 +177,8 @@ navigate to **Save** button and hit **Enter** key
 
 #### LDAP Servers sub-tab
 
-In this tab you can add modify LDAP Servers to be used as default authentication method. See below image
+If your backend database is LDAP, you will have this tab where you can add modify
+LDAP Servers to be used as default authentication method. See below image
 
 ![image](../../../assets/tui-authn-ldap-servers.png)
 
@@ -190,7 +193,7 @@ you want the current edited LDAP server is default authentication method, select
 
 #### Scripts sub-tab
 
-All enabled **Person Authentication** are listed in this tab as below
+All enabled **Person Authentication** scripts are listed in this tab as below
 
 ![image](../../../assets/tui-authn-scripts.png)
 
@@ -200,7 +203,7 @@ and hit **Enter**. You will see a popup like in the image below
 ![image](../../../assets/tui-authn-scripts-edit.png)
 
 If the script you want to use as default authentication method is not in the list, you should enable the script by
-navitaing **Scripts** in the main tab. Find the script you want to enable and hit **Enter**, you will get a popop where
+navigating **Scripts** in the main tab. Find the script you want to enable and hit **Enter**, you will get a popop where
 you can select **Enabled** checkbox and **Save** it as shown in the image below:
 
 ![image](../../../assets/tui-authn-scripts-enable.png)
