@@ -8659,35 +8659,22 @@
 </div>
 <p>The pieces that allow materialization of the experience summarized above are the following:</p>
 <p>a) The Casa plugin jar file</p>
-<p>b) A custom XHTML page and jython script</p>
-<p>c) The Agama inbound identity project</p>
-<p>d) The Casa accounts linking Agama project</p>
-<p>Most of work is demanded on setting up project <em>d</em>, where configuration of identity providers and attribute mapping tuning takes place. </p>
+<p>b) The Agama inbound identity project</p>
+<p>c) The Casa accounts linking Agama project</p>
+<p>Most of work is demanded on setting up project <em>c</em>, where configuration of identity providers and attribute mapping tuning takes place. </p>
 <p>In the following, it is assumed you have a VM-based installation of Jans Server (or Gluu Flex) available with Casa installed. In a separate machine, ensure you have SSH/SCP/SFTP access to such server and <code>git</code> installed. </p>
 <ol>
 <li>
-<p>Download the plugin jar file <code>https://maven.jans.io/maven/io/jans/casa/plugins/acct-linking/1.1.5.nightly/acct-linking-1.1.5.nightly-jar-with-dependencies.jar</code> and copy to your server's <code>/opt/jans/jetty/jans-casa/plugins</code></p>
+<p>Download the plugin jar file <code>https://maven.jans.io/maven/io/jans/casa/plugins/acct-linking/replace-janssen-version/acct-linking-replace-janssen-version-jar-with-dependencies.jar</code> and copy to your server's <code>/opt/jans/jetty/jans-casa/plugins</code></p>
 </li>
 <li>
-<p>Download the utility jar file <code>https://maven.jans.io/maven/io/jans/agama-inbound/1.1.5.nightly/agama-inbound-1.1.5.nightly.jar</code> and copy to your server's <code>/opt/jans/jetty/jans-auth/custom/libs</code></p>
+<p>Download the utility jar file <code>https://maven.jans.io/maven/io/jans/agama-inbound/replace-janssen-version/agama-inbound-replace-janssen-version.jar</code> and copy to your server's <code>/opt/jans/jetty/jans-auth/custom/libs</code></p>
 </li>
 <li>
-<p>In the server, create a <code>casa</code> directory inside <code>/opt/jans/jetty/jans-auth/custom/pages</code></p>
+<p>In TUI, visit the Clients screen, locate the client labeled "Client for Casa". Add the following redirect URI to the list: <code>https://&lt;your-jans-host&gt;/jans-casa/pl/acct-linking/user/interlude.zul</code>. Replace the name of your Jans server accordingly </p>
 </li>
 <li>
-<p>Download the file <code>https://github.com/JanssenProject/jans/raw/v1.1.5.nightly/jans-casa/plugins/acct-linking/extras/login.xhtml</code> and copy it to the previously created folder  </p>
-</li>
-<li>
-<p>Download the file <code>https://github.com/JanssenProject/jans/raw/v1.1.5.nightly/jans-casa/plugins/acct-linking/extras/Casa.py</code>. Open TUI or the admin UI (for Flex), and locate the custom script whose name is <code>casa</code>. Update the contents of the script with the contents of the file </p>
-</li>
-<li>
-<p>In TUI, ensure the custom script named <code>agama</code> is enabled</p>
-</li>
-<li>
-<p>Still in TUI, visit the Clients screen, locate the client labeled "Client for Casa". Add the following redirect URI to the list: <code>https://&lt;your-jans-host&gt;/jans-casa/pl/acct-linking/user/interlude.zul</code>. Replace the name of your Jans server accordingly </p>
-</li>
-<li>
-<p>Run the following commands to generate the archives of the Agama projects</p>
+<p>Run the following commands to generate the archive of the Agama inbound identity project</p>
 <div class="highlight"><pre><span></span><code>git clone --depth 1 --branch main --no-checkout https://github.com/JanssenProject/jans.git
 cd jans
 git sparse-checkout init --cone
@@ -8696,20 +8683,19 @@ git sparse-checkout set jans-casa/plugins/acct-linking/extras/agama
 git checkout main
 cd docs/agama-catalog/jans/inboundID/project
 zip -r inbound.zip *
-cd ../../../../..
-cd jans-casa/plugins/acct-linking/extras/agama
-zip -r acctlinking.zip *
 </code></pre></div>
 </li>
 <li>
-<p>Transfer the zip files to a location in the server, deploy both archives using TUI (Agama menu)</p>
+<p>Download the Casa accounts linking Agama project <code>https://maven.jans.io/maven/io/jans/casa/plugins/acct-linking-agama/replace-janssen-version/acct-linking-agama-replace-janssen-version-SNAPSHOT-project.zip</code></p>
+</li>
+<li>
+<p>Transfer the two zip files to a location in the server, deploy both archives using TUI (Agama menu)</p>
 </li>
 <li>
 <p>Finally restart the authentication server</p>
 </li>
 </ol>
 <h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">#</a></h2>
-<p>So far all components required for the Casa inbound identity solution are loaded in the server. When logging to casa, the form presented looks like usual, and once in, the "Accounts linking" menu takes to a page which hints about missing configuration.  </p>
 <p>The first step is figuring out the external sites to support. Keep in mind only OpenID or OAuth 2.0 based providers can be onboarded. There is not support for SAML IDPs.</p>
 <p>The procedures for getting configuration settings in order to integrate third party providers vary widely. Here, only basic guidelines are given:</p>
 <ul>
@@ -8736,15 +8722,17 @@ zip -r acctlinking.zip *
 <li>In TUI, open the Agama tab and scroll through the list of projects until the <code>casa-account-linking</code> is highlighted</li>
 <li>Open the configuration management dialog (press <code>c</code>) and choose to export the sample configuration to a file on disk</li>
 <li>Apply changes as needed - this is covered in a separate doc page <a href="../accts-linking-agama/">here</a>. Note you can add or remove sections in the file at will, and that providers can also be disabled so they are not listed in the login page or in Casa app</li>
-<li>Still in TUI, choose to import the file you have edited. Then conduct your testing</li>
+<li>Still in TUI, choose to import the file you have edited</li>
 </ol>
+<p>For VM-based installations, update the file <code>/etc/default/jans-casa</code>. Locate a segment that reads <code>-Dacr=</code> and assign  <code>io.jans.casa.authn.acctlinking</code> as new value. This will make Casa use the flow found in the accounts linking project - not the flow bundled out-of-the-box. </p>
+<p>Finally restart Casa and conduct your testing. You will now see the login page contains a list of links to the configured identity providers.</p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-05-01T16:04:27+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-05-01</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-08-27T05:36:25+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-08-27</span>
       
         <br>
         Created:

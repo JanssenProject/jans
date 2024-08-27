@@ -8747,7 +8747,7 @@ ALTER TABLE jansdb.jansPerson ADD INDEX `jansPerson_CustomIdx2` ((lower(`mail`))
 <li><code>use jansdb; select * from jansGrp\G;</code> </li>
 <li>Add specific user in this group</li>
 <li>Get <code>DN</code> of user<ul>
-<li>`use jansdb; select * from jansPerson where uid='testUser'\G;</li>
+<li><code>use jansdb; select * from jansPerson where uid='testUser'\G</code>;</li>
 <li>Copy <code>DN</code> of this user. i.e. <code>inum=83d43a5d-3311-4c93-ae26-df80c320557a,ou=people,o=jans</code> </li>
 </ul>
 </li>
@@ -8764,10 +8764,11 @@ ALTER TABLE jansdb.jansPerson ADD INDEX `jansPerson_CustomIdx2` ((lower(`mail`))
 <li><code>use jansdb; select * from jansPerson where uid='admin'\G;</code></li>
 </ul>
 <h3 id="add-custom-attribute">Add custom attribute<a class="headerlink" href="#add-custom-attribute" title="Permanent link">#</a></h3>
-<p>There are two steps here: </p>
+<p>There are three steps here: </p>
 <ul>
-<li>Create attribute in MySQL database: <code>ALTER TABLE</code>jansdb<code>.</code>jansPerson<code>ADD COLUMN</code>cmdAttr<code>VARCHAR(64) NULL;</code> </li>
-<li>Create attribute from TUI: <img alt="tui_custom_attribute" src="../../../../assets/TUI_CustomAttribute.png" /></li>
+<li>Create attribute in MySQL database: <code>ALTER TABLE jansdb.jansPerson ADD COLUMN cmdAttr VARCHAR(64) NULL;</code> </li>
+<li>Create attribute using the terraform provider, curl commands, or  TUI: <img alt="tui_custom_attribute" src="../../../../assets/TUI_CustomAttribute.png" /></li>
+<li>Restart the ConfgiApi service</li>
 </ul>
 <h3 id="ldap-to-mysql-migration-script">LDAP to MySQL Migration Script<a class="headerlink" href="#ldap-to-mysql-migration-script" title="Permanent link">#</a></h3>
 <p>Please refer to <a href="../converting-data/#ldap-to-mysql-migration-script">these steps</a>.</p>
@@ -8781,7 +8782,7 @@ ALTER TABLE jansdb.jansPerson ADD INDEX `jansPerson_CustomIdx2` ((lower(`mail`))
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-08-16T10:16:58+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-08-16</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-08-27T09:45:30+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-08-27</span>
       
         <br>
         Created:
