@@ -14,6 +14,7 @@ from jans.pycloudlib.persistence.spanner import SpannerClient
 from jans.pycloudlib.persistence.sql import SqlClient
 from jans.pycloudlib.persistence.sql import doc_id_from_dn
 from jans.pycloudlib.persistence.utils import PersistenceMapper
+from jans.pycloudlib.utils import as_boolean
 
 from settings import LOGGING_CONFIG
 
@@ -173,6 +174,7 @@ class Upgrade:
         self.update_client_scopes()
         self.update_client_uris()
         self.update_conf_app()
+        self.update_agama_script()
 
     def update_client_scopes(self):
         kwargs = {}
@@ -301,6 +303,25 @@ class Upgrade:
                 should_update = True
 
         if should_update:
+            self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
+
+    def update_agama_script(self):
+        kwargs = {}
+        agama_id = "inum=BADA-BADA,ou=scripts,o=jans"
+
+        if self.backend.type in ("sql", "spanner"):
+            kwargs = {"table_name": "jansCustomScr"}
+            agama_id = doc_id_from_dn(agama_id)
+        elif self.backend.type == "couchbase":
+            kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
+            agama_id = id_from_dn(agama_id)
+
+        # enable agama script
+        entry = self.backend.get_entry(agama_id, **kwargs)
+
+        if entry and as_boolean(entry.attrs["jansEnabled"]) is False:
+            entry.attrs["jansEnabled"] = True
+            entry.attrs["jansRevision"] += 1
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
 
 

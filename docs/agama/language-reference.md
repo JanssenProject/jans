@@ -483,7 +483,7 @@ result = RRF "survey.htm" obj
 
 - The template location must be specified with a string literal only (not a variable)
 - Where and how to store templates is an engine-specific detail as well as the file formats supported. See [Assets management](./execution-rules.md#assets-management).
-- Use _map_ variables - not literals _map_s - for the second argument of `RRF`
+- Use _map_ variables - not literal _maps_ - for the second argument of `RRF`
 
 ## Looping
 
@@ -699,7 +699,7 @@ Log "subflow returned with success?" outcome.success
 
 In an indented block using the `Override templates` keyword, several string literals can be provided. They specify the paths of the (subflows) templates that will be overriden by the parent and the corresponding new paths. In the example above, templates `path/basic.htm` and `path2/dir/detail.htm` rendered by flow `PersonalInfoGathering` (or its subflows) won't be picked from these locations but from the base path of the current (parent) flow using names `basic.htm` and `tmp/mydetail.htm` respectively. Usage of empty string denotes reusing the same file name than the original file.
 
-Alternatively, every pair of original vs. overriden path can be specified in a single line for more clarity, like this:
+Alternatively, every pair of original vs. new path can be specified in a single line for more clarity, like this:
 
 ```
 outcome = Trigger jo.jo.PersonalInfoGathering
@@ -707,6 +707,9 @@ outcome = Trigger jo.jo.PersonalInfoGathering
     "path2/dir/detail.htm" "tmp/mydetail.htm"
     ...
 ```
+
+!!! Note
+    The new (overriding) templates will be injected with the same data original templates would receive. In other words, this directive only "modifies" the first parameter of `RRF` instructions.  
 
 ## Foreign routines
 
