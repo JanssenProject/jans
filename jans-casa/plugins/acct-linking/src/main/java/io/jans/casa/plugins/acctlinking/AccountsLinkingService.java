@@ -25,7 +25,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class AccountsLinkingService {
     
-    public static final String CASA_AGAMA_FLOW = "io.jans.casa.acctlinking.Launcher";
+    public static final String CASA_AGAMA_FLOW = "io.jans.casa.authn.acctlinking";
 
     public static final String READ_SCOPE = "https://jans.io/oauth/config/agama.readonly";
     

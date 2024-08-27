@@ -1,6 +1,8 @@
 import json
 import logging.config
+import math
 import os
+import time
 from uuid import uuid4
 from string import Template
 from functools import cached_property
@@ -216,10 +218,8 @@ class PersistenceSetup:
             "casa_redirect_uri": f"https://{hostname}/jans-casa",
             "casa_redirect_logout_uri": f"https://{hostname}/jans-casa/bye.zul",
             "casa_frontchannel_logout_uri": f"https://{hostname}/jans-casa/autologout",
+            "casa_agama_deployment_id": "202447d5-d44c-3125-b1f7-207cb33b6bf7",
         }
-
-        with open("/app/static/extension/person_authentication/Casa.py") as f:
-            ctx["casa_person_authentication_script"] = generate_base64_contents(f.read())
 
         # Casa client
         ctx["casa_client_id"] = self.manager.config.get("casa_client_id")
@@ -242,16 +242,22 @@ class PersistenceSetup:
         with open("/app/templates/jans-casa/casa-config.json") as f:
             ctx["casa_config_base64"] = generate_base64_contents(f.read() % ctx)
 
+        # calculate start date
+        ts = time.time()
+        microseconds, _ = math.modf(ts)
+        gm_ts = time.gmtime(ts)
+        ctx["jans_start_date"] = time.strftime("%Y%m%d%H%M%S", gm_ts) + f"{microseconds:.3f}Z"[1:]
+
+        # casa agama project (requires agama script to be enabled)
+        with open("/usr/share/java/casa-agama-project.zip", "rb") as f:
+            ctx["ads_prj_assets_base64"] = generate_base64_contents(f.read())
+
         # finalized contexts
         return ctx
 
     @cached_property
     def ldif_files(self):
         filenames = ["configuration.ldif", "client.ldif"]
-        # add casa_person_authentication_script.ldif if there's no existing casa script in persistence to avoid error
-        # java.lang.IllegalStateException: Duplicate key casa (attempted merging values 1 and 1)
-        if not self._deprecated_script_exists():
-            filenames.append("person_authentication_script.ldif")
 
         # generate extra scopes
         self.generate_scopes_ldif()

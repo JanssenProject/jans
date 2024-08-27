@@ -1,4 +1,4 @@
-package io.jans.service.document.store.service;
+package io.jans.service.document.store.model;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -13,7 +13,7 @@ import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.model.base.Entry;
 
 /**
- * oxDocument
+ * jansDocument
  * 
  * @author Shekhar L. Date: 01.10.2022
  */
@@ -41,19 +41,19 @@ public class Document extends Entry implements Serializable {
     private Date creationDate;
 
     @AttributeName(name = "jansService")
-    private List<String> jansService;
+    private List<String> service;
 
-    @AttributeName
-    private Integer jansLevel;
+    @AttributeName(name = "jansLevel")
+    private Integer level;
 
-    @AttributeName
-    private Integer jansRevision;
+    @AttributeName(name = "jansRevision")
+    private Integer revision;
 
-    @AttributeName
-    private boolean jansEnabled;
+    @AttributeName(name = "jansEnabled")
+    private boolean enabled;
 
-    @AttributeName
-    private String jansAlias;
+    @AttributeName(name = "jansAlias")
+    private String alias;
 
     public String getInum() {
         return inum;
@@ -95,51 +95,50 @@ public class Document extends Entry implements Serializable {
         this.creationDate = creationDate;
     }
 
-    public Integer getJansLevel() {
-        return jansLevel;
-    }
+    public List<String> getService() {
+		return service;
+	}
 
-    public void setJansLevel(Integer jansLevel) {
-        this.jansLevel = jansLevel;
-    }
+	public void setService(List<String> service) {
+		this.service = service;
+	}
 
-    public Integer getJansRevision() {
-        return jansRevision;
-    }
+	public Integer getLevel() {
+		return level;
+	}
 
-    public void setJansRevision(Integer jansRevision) {
-        this.jansRevision = jansRevision;
-    }
+	public void setLevel(Integer level) {
+		this.level = level;
+	}
 
-    public boolean isJansEnabled() {
-        return jansEnabled;
-    }
+	public Integer getRevision() {
+		return revision;
+	}
 
-    public void setJansEnabled(boolean jansEnabled) {
-        this.jansEnabled = jansEnabled;
-    }
+	public void setRevision(Integer revision) {
+		this.revision = revision;
+	}
 
-    public String getJansAlias() {
-        return jansAlias;
-    }
+	public boolean isEnabled() {
+		return enabled;
+	}
 
-    public void setJansAlias(String jansAlias) {
-        this.jansAlias = jansAlias;
-    }
-    
-    public List<String> getJansService() {
-        return jansService;
-    }
+	public void setEnabled(boolean enabled) {
+		this.enabled = enabled;
+	}
 
-    public void setJansService(List<String> jansService) {
-        this.jansService = jansService;
-    }
+	public String getAlias() {
+		return alias;
+	}
 
-    @Override
-    public String toString() {
-        return "Document [inum=" + inum + ", displayName=" + displayName + ", description=" + description
-                + ", creationDate=" + creationDate + ", jansService=" + jansService
-                + ", jansLevel=" + jansLevel + ", jansRevision=" + jansRevision + ", jansEnabled=" + jansEnabled
-                + ", jansAlias=" + jansAlias + "]";
-    }
+	public void setAlias(String alias) {
+		this.alias = alias;
+	}
+
+	@Override
+	public String toString() {
+		return "Document [inum=" + inum + ", displayName=" + displayName + ", description=" + description
+				+ ", document=" + document + ", creationDate=" + creationDate + ", service=" + service + ", level="
+				+ level + ", revision=" + revision + ", enabled=" + enabled + ", alias=" + alias + "]";
+	}
 }

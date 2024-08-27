@@ -1,12 +1,12 @@
 swagger: '2.0'
 
 info:
-  version: "5.0.0"
-  title: Gluu casa admin API
+  version: "1.0.0"
+  title: Jans casa admin API
   description: Allows to configure Casa programmatically. Note that plugins may also expose endpoints to
     apply configurations relevant to their topics. Check plugins' docs for more information
   license:
-    name: Gluu Casa
+    name: Jans Casa
     url: https://github.com/JanssenProject/jans/blob/main/LICENSE
 
 #Demo server host
@@ -30,9 +30,6 @@ paths:
   /authn-methods/available:
     get:
       description: Returns the authentication methods that can be used in Casa whether enabled or not.
-        Note that for any method to be reported here, there has to be an enabled custom script in the
-        underlying Gluu installation and a plugin implementing its enrollment logic (unless it is a 
-        method supported out-of-the-box, where no plugin is required)
       produces:
         - application/json 
 
