@@ -7,7 +7,7 @@ import java.util.Optional;
 
 /**
  * Fields of this class can be referenced in the config properties of flow 
- * io.jans.casa.acctlinking.Launcher
+ * io.jans.casa.authn.acctlinking
  */
 public final class Mappings {
 

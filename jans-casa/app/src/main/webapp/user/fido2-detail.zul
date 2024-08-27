@@ -64,7 +64,6 @@
                 <div class="${css.panel} bg-near-white">
                     <h2 class="f5 dark-blue2 pt1">${labels.usr.fido2_add}</h2>
                     <div class="alert alert-success dn" id="feedback-key" role="alert" />
-					<h:p unless="${empty vm.fido2SupportMessage}">${vm.fido2SupportMessage}</h:p>
 
                     <div class="pb2">
                         <span class="mr2">${labels.usr.fido2_pressready}</span>

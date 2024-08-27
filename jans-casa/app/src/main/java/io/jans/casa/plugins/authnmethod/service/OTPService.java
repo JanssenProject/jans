@@ -9,10 +9,7 @@ import io.jans.casa.plugins.authnmethod.OTPExtension;
 import io.jans.casa.plugins.authnmethod.conf.OTPConfig;
 import io.jans.casa.plugins.authnmethod.conf.otp.HOTPConfig;
 import io.jans.casa.plugins.authnmethod.conf.otp.TOTPConfig;
-import io.jans.casa.plugins.authnmethod.service.otp.HOTPAlgorithmService;
-import io.jans.casa.plugins.authnmethod.service.otp.IOTPAlgorithm;
-import io.jans.casa.plugins.authnmethod.service.otp.TOTPAlgorithmService;
-import org.slf4j.Logger;
+import io.jans.casa.plugins.authnmethod.service.otp.*;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -24,9 +21,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-/**
- * @author jgomer
- */
+import org.slf4j.Logger;
+
 @Named
 @ApplicationScoped
 public class OTPService extends BaseService {
@@ -57,12 +53,13 @@ public class OTPService extends BaseService {
     public void reloadConfiguration() {
 
         String acr = OTPExtension.ACR;
-        props = persistenceService.getCustScriptConfigProperties(acr);
+        props = persistenceService.getAgamaFlowConfigProperties(acr);
         if (props == null) {
-            logger.warn("Config. properties for custom script '{}' could not be read. Features related to {} will not be accessible",
-                    acr, acr.toUpperCase());
+            logger.warn("Config. properties for flow '{}' could not be read", acr);
         } else {
             conf = OTPConfig.get(props);
+            hAS.init((HOTPConfig) Utils.cloneObject(conf.getHotp()), conf.getIssuer());            
+            tAS.init((TOTPConfig) Utils.cloneObject(conf.getTotp()), conf.getIssuer());
         }
 
     }
@@ -137,6 +134,34 @@ public class OTPService extends BaseService {
     public boolean addDevice(String userId, OTPDevice newDevice) {
         return updateDevicesAdd(userId, getDevices(userId), newDevice);
     }
+    
+    public void updateMovingFactor(String userId, OTPDevice device, int movingFactor) {
+    
+        int cmf = device.currentMovingFactor();
+        if (cmf == -1) return;
+        
+        logger.debug("Updating hotp device for user '{}'", userId);
+        String uid = device.getUid();
+        PersonOTP person = persistenceService.get(PersonOTP.class, persistenceService.getPersonDn(userId));
+        
+        List<String> uids = person.getExternalUids();//new ArrayList<>(); 
+        int i = uids.indexOf(uid);
+        if (i == -1) {
+            logger.warn("Device {} not found", uid);
+        } else {
+            int j = uid.lastIndexOf("" + cmf);
+
+            if (j != -1) {
+                uids.set(i, uid.substring(0, j) + movingFactor);
+                //person.setExternalUids(uids);
+
+                if (!persistenceService.modify(person)) {                
+                    logger.error("Unable to update moving factor for device {}", uid);
+                }
+            }
+        }
+            
+    }
 
     /**
      * Creates an instance of OTPDevice by looking up in the list of OTPDevices passed. If the item is not found in the
@@ -167,11 +192,9 @@ public class OTPService extends BaseService {
     public IOTPAlgorithm getAlgorithmService(OTPKey.OTPType type) {
 
         switch (type) {
-            case HOTP:
-                hAS.init((HOTPConfig) Utils.cloneObject(conf.getHotp()), conf.getIssuer());
+            case HOTP:                
                 return hAS;
             case TOTP:
-                tAS.init((TOTPConfig) Utils.cloneObject(conf.getTotp()), conf.getIssuer());
                 return tAS;
             default:
                 return null;
