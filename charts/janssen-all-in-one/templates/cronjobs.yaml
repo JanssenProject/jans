@@ -86,16 +86,6 @@ spec:
               {{- with (index .Values "auth-server-key-rotation" "volumeMounts") }}
 {{- toYaml . | nindent 16 }}
               {{- end }}
-              {{- if or (eq .Values.cnPersistenceType "couchbase") (eq .Values.cnPersistenceType "hybrid") }}
-                {{- if not .Values.istio.enabled }}
-                - name: cb-crt
-                  mountPath: "/etc/certs/couchbase.crt"
-                  subPath: couchbase.crt
-                {{- end }}
-                - name: cb-pass
-                  mountPath: {{ .Values.cnCouchbasePasswordFile }}
-                  subPath: couchbase_password
-              {{- end }}
               envFrom:
                 - configMapRef:
                     name: {{ .Release.Name }}-config-cm
@@ -152,13 +142,6 @@ spec:
                   path: vault_role_id
                 - key: vault_secret_id
                   path: vault_secret_id
-          {{- end }}
-          {{- if or (eq .Values.cnPersistenceType "couchbase") (eq .Values.cnPersistenceType "hybrid") }}
-            {{- if not .Values.istio.enabled }}
-            - name: cb-crt
-              secret:
-                secretName: {{ .Release.Name }}-cb-crt
-            {{- end }}
           {{- end }}
           restartPolicy: Never
 {{- end }}
@@ -247,16 +230,6 @@ spec:
               {{- with (index .Values "kc-scheduler" "volumeMounts") }}
 {{- toYaml . | nindent 16 }}
               {{- end }}
-              {{- if or (eq .Values.cnPersistenceType "couchbase") (eq .Values.cnPersistenceType "hybrid") }}
-                {{- if not .Values.istio.enabled }}
-                - name: cb-crt
-                  mountPath: "/etc/certs/couchbase.crt"
-                  subPath: couchbase.crt
-                {{- end }}
-                - name: cb-pass
-                  mountPath: {{ .Values.cnCouchbasePasswordFile }}
-                  subPath: couchbase_password
-              {{- end }}
               envFrom:
                 - configMapRef:
                     name: {{ .Release.Name }}-config-cm
@@ -312,13 +285,6 @@ spec:
                   path: vault_role_id
                 - key: vault_secret_id
                   path: vault_secret_id
-          {{- end }}
-          {{- if or (eq .Values.cnPersistenceType "couchbase") (eq .Values.cnPersistenceType "hybrid") }}
-            {{- if not .Values.istio.enabled }}
-            - name: cb-crt
-              secret:
-                secretName: {{ .Release.Name }}-cb-crt
-            {{- end }}
           {{- end }}
           restartPolicy: Never
           {{- if not .Values.isFqdnRegistered  }}

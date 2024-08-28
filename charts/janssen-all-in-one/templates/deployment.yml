@@ -128,19 +128,6 @@ spec:
             mountPath: /scripts/updatelbip.py
             subPath: updatelbip.py
         {{- end }}
-        {{- if or (eq .Values.cnPersistenceType "couchbase") (eq .Values.cnPersistenceType "hybrid") }}
-          {{- if not .Values.istio.enabled }}
-          - name: cb-crt
-            mountPath: "/etc/certs/couchbase.crt"
-            subPath: couchbase.crt
-          {{- end }}
-          - name: cb-pass
-            mountPath: {{ .Values.cnCouchbasePasswordFile }}
-            subPath: couchbase_password
-          - name: cb-pass
-            mountPath: {{ .Values.cnCouchbaseSuperuserPasswordFile }}
-            subPath: couchbase_superuser_password
-        {{- end }}
         {{- if .Values.saml.enabled }}
           - name: kc-db-pass
             mountPath: {{ .Values.kcDbPasswordFile }}
@@ -207,22 +194,6 @@ spec:
         - name: {{ include "janssen-all-in-one.name" . }}-tls-script
           configMap:
             name: {{ include "janssen-all-in-one.fullname" . }}-tls-script
-      {{- if or (eq .Values.cnPersistenceType "couchbase") (eq .Values.cnPersistenceType "hybrid") }}
-
-        {{- if not .Values.istio.enabled }}
-        - name: cb-crt
-          secret:
-            secretName: {{ .Release.Name }}-cb-crt
-        {{- end }}
-        - name: cb-pass
-          secret:
-            secretName: {{ .Release.Name }}-cb-pass
-            items:
-              - key: couchbase_password
-                path: couchbase_password
-              - key: couchbase_superuser_password
-                path: couchbase_superuser_password
-      {{- end }}
       {{- if not .Values.isFqdnRegistered }}
         - name: {{ include "janssen-all-in-one.fullname" . }}-updatelbip
           configMap:

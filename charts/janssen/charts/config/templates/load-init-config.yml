@@ -81,16 +81,6 @@ spec:
             - key: vault_secret_id
               path: vault_secret_id
         {{- end }}
-        {{- if or (eq .Values.global.cnPersistenceType "couchbase") (eq .Values.global.cnPersistenceType "hybrid") }}
-        - name: cb-pass
-          secret:
-            secretName: {{ .Release.Name }}-cb-pass
-            items:
-              - key: couchbase_password
-                path: couchbase_password
-              - key: couchbase_superuser_password
-                path: couchbase_superuser_password
-        {{- end }}
         {{- if or (eq .Values.global.cnPersistenceType "ldap") (eq .Values.global.cnPersistenceType "hybrid") }}
         - name: ldap-pass
           secret:
@@ -144,14 +134,6 @@ spec:
           - name: vault
             mountPath: /etc/certs/vault_secret_id
             subPath: vault_secret_id
-          {{- end }}
-          {{- if or (eq .Values.global.cnPersistenceType "couchbase") (eq .Values.global.cnPersistenceType "hybrid") }}
-          - name: cb-pass
-            mountPath: {{ .Values.global.cnCouchbasePasswordFile }}
-            subPath: couchbase_password
-          - name: cb-pass
-            mountPath: {{ .Values.global.cnCouchbaseSuperuserPasswordFile }}
-            subPath: couchbase_superuser_password
           {{- end }}
           {{- if or (eq .Values.global.cnPersistenceType "ldap") (eq .Values.global.cnPersistenceType "hybrid") }}
           - name: ldap-pass

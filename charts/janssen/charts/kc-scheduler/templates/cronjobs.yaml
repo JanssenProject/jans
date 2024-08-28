@@ -81,16 +81,6 @@ spec:
               {{- with .Values.volumeMounts }}
 {{- toYaml . | nindent 16 }}
               {{- end }}
-              {{- if or (eq .Values.global.cnPersistenceType "couchbase") (eq .Values.global.cnPersistenceType "hybrid") }}
-                {{- if not .Values.global.istio.enabled }}
-                - name: cb-crt
-                  mountPath: "/etc/certs/couchbase.crt"
-                  subPath: couchbase.crt
-                {{- end }}
-                - name: cb-pass
-                  mountPath: {{ .Values.global.cnCouchbasePasswordFile }}
-                  subPath: couchbase_password
-              {{- end }}
                 {{- if or (eq .Values.global.cnPersistenceType "ldap") (eq .Values.global.cnPersistenceType "hybrid") }}
                 - name: ldap-pass
                   mountPath: {{ .Values.global.cnLdapPasswordFile }}
@@ -153,20 +143,6 @@ spec:
                   path: vault_role_id
                 - key: vault_secret_id
                   path: vault_secret_id
-          {{- end }}
-          {{- if or (eq .Values.global.cnPersistenceType "couchbase") (eq .Values.global.cnPersistenceType "hybrid") }}
-            {{- if not .Values.global.istio.enabled }}
-            - name: cb-crt
-              secret:
-                secretName: {{ .Release.Name }}-cb-crt
-            {{- end }}
-            - name: cb-pass
-              secret:
-                secretName: {{ .Release.Name }}-cb-pass
-                items:
-                  # we are mostly need non-superuser couchbase password file here
-                  - key: couchbase_password
-                    path: couchbase_password
           {{- end }}
           {{- if or (eq .Values.global.cnPersistenceType "ldap") (eq .Values.global.cnPersistenceType "hybrid") }}
             - name: ldap-pass
