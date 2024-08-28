@@ -2,6 +2,7 @@ package io.jans.casa.plugins.sample.service;
 
 import io.jans.casa.credential.BasicCredential;
 import io.jans.casa.misc.Utils;
+import io.jans.casa.plugins.sample.model.PersonColor;
 import io.jans.casa.service.IPersistenceService;
 
 import java.util.*;
@@ -14,12 +15,11 @@ import org.slf4j.LoggerFactory;
  */
 public class SampleCredentialService {
     
-    public static String ACR = "sample_cred_acr";
+    public static String AGAMA_FLOW = "com.acme.authn.color";
     
 	private IPersistenceService persistenceService;
     private Logger logger = LoggerFactory.getLogger(getClass());    
     
-    private Map<String, String> properties;
 	private static SampleCredentialService SINGLE_INSTANCE = null;
 
     private SampleCredentialService() {
@@ -37,26 +37,25 @@ public class SampleCredentialService {
 	}
 	
 	public void reloadConfiguration() {
-	    //Retrieve configuration properties of the script, if any
-		properties = persistenceService.getCustScriptConfigProperties(ACR);
+	    //Retrieve configuration properties of the script, not necessary in this case 
+		//persistenceService.getAgamaFlowConfigProperties(AGAMA_FLOW);
         //Put other initialization stuff here
-	}
-        
-	public List<BasicCredential> getEnrolledCreds(String id) {
-	    //Code the logic required to build a list of the credentials already enrolled
-	    //by the user whose unique identifier is id
-	    
-	    return Collections.emptyList();
-	}
-	
-	public int getTotalUserCreds(String id) {
-	    //Code the logic required to compute the number of the credentials already enrolled
-	    //by the user whose unique identifier is id. Calling size over the returned value of
-	    //method getEnrolledCreds is an option
-	    return 0;
 	}
 	
 	//Likely, other methods for credential manipulation will go here.
 	//These would be called from class SampleCredentialVM which handles UI interaction 
 
+	public String getUserColor(String id) {
+	    //retrieve the user from DB using PersonColor as object representation
+	    PersonColor person = persistenceService.get(PersonColor.class, persistenceService.getPersonDn(id));
+	    logger.debug("User's color is {}", person.getColor());
+	    return person.getColor();
+	}
+	
+	public boolean storeUserColor(String id, String newColor) {
+	    PersonColor person = persistenceService.get(PersonColor.class, persistenceService.getPersonDn(id));
+	    person.setColor(newColor);
+	    return persistenceService.modify(person);
+	}
+	
 }
