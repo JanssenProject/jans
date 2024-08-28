@@ -135,11 +135,6 @@ spec:
             mountPath: {{ .Values.global.cnCouchbasePasswordFile }}
             subPath: couchbase_password
         {{- end }}
-        {{- if or (eq .Values.global.cnPersistenceType "sql") (eq .Values.global.cnPersistenceType "hybrid") }}
-          - name: sql-pass
-            mountPath: {{ .Values.global.cnSqlPasswordFile }}
-            subPath: sql_password
-        {{- end }}
         {{- if or (eq .Values.global.cnPersistenceType "ldap") (eq .Values.global.cnPersistenceType "hybrid") }}
           - name: ldap-pass
             mountPath: {{ .Values.global.cnLdapPasswordFile }}
@@ -224,11 +219,6 @@ spec:
         - name: {{ include "fido2.fullname" . }}-updatelbip
           configMap:
             name: {{ .Release.Name }}-updatelbip
-      {{- end }}
-      {{- if or (eq .Values.global.cnPersistenceType "sql") (eq .Values.global.cnPersistenceType "hybrid") }}
-        - name: sql-pass
-          secret:
-            secretName: {{ .Release.Name }}-sql-pass
       {{- end }}
       {{- if or (eq .Values.global.cnPersistenceType "ldap") (eq .Values.global.cnPersistenceType "hybrid") }}
         - name: ldap-pass

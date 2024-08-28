@@ -115,7 +115,7 @@ spec:
             - name: vault
               mountPath: /etc/certs/vault_secret_id
               subPath: vault_secret_id
-          {{- end }}  
+          {{- end }}
           {{- if or (eq .Values.global.cnPersistenceType "couchbase") (eq .Values.global.cnPersistenceType "hybrid") }}
             {{- if not .Values.global.istio.enabled }}
             - name: cb-crt
@@ -126,11 +126,6 @@ spec:
               mountPath: {{ .Values.global.cnCouchbasePasswordFile }}
               subPath: couchbase_password
           {{- end }}
-            {{- if or (eq .Values.global.cnPersistenceType "sql") (eq .Values.global.cnPersistenceType "hybrid") }}
-            - name: sql-pass
-              mountPath: {{ .Values.global.cnSqlPasswordFile }}
-              subPath: sql_password
-            {{- end }}
             {{- if or (eq .Values.global.cnPersistenceType "ldap") (eq .Values.global.cnPersistenceType "hybrid") }}
             - name: ldap-pass
               mountPath: {{ .Values.global.cnLdapPasswordFile }}
@@ -210,11 +205,6 @@ spec:
           configMap:
             name: {{ .Release.Name }}-updatelbip
         {{- end }}
-      {{- if or (eq .Values.global.cnPersistenceType "sql") (eq .Values.global.cnPersistenceType "hybrid") }}
-        - name: sql-pass
-          secret:
-            secretName: {{ .Release.Name }}-sql-pass
-      {{- end }}
       {{- if or (eq .Values.global.cnPersistenceType "ldap") (eq .Values.global.cnPersistenceType "hybrid") }}
         - name: ldap-pass
           secret:
