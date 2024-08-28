@@ -8497,6 +8497,8 @@
         
           
         
+          
+        
       
       
         <label class="md-nav__link" for="__nav_5_3">
@@ -8510,6 +8512,20 @@
           Developer Guide
         </label>
         <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../developer/overview/" class="md-nav__link">
+        Overview
+      </a>
+    </li>
+  
+
+            
           
             
               
@@ -8653,10 +8669,10 @@
 <li>If an account has no password assigned, removal of linked accounts is not allowed. However, a functionality for the user to assign himself a password is provided</li>
 </ul>
 <h2 id="components-deployment">Components deployment<a class="headerlink" href="#components-deployment" title="Permanent link">#</a></h2>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Ensure you are running at least version 1.1.1 of Jans Authentication Server and Casa</p>
-</div>
+<!--
+!!! Note
+    Ensure you are running at least version 1.1.1 of Jans Authentication Server and Casa
+-->
 <p>The pieces that allow materialization of the experience summarized above are the following:</p>
 <p>a) The Casa plugin jar file</p>
 <p>b) The Agama inbound identity project</p>
@@ -8679,14 +8695,13 @@
 cd jans
 git sparse-checkout init --cone
 git sparse-checkout set docs/agama-catalog/jans/inboundID/project
-git sparse-checkout set jans-casa/plugins/acct-linking/extras/agama
 git checkout main
 cd docs/agama-catalog/jans/inboundID/project
 zip -r inbound.zip *
 </code></pre></div>
 </li>
 <li>
-<p>Download the Casa accounts linking Agama project <code>https://maven.jans.io/maven/io/jans/casa/plugins/acct-linking-agama/replace-janssen-version/acct-linking-agama-replace-janssen-version-SNAPSHOT-project.zip</code></p>
+<p>Download the Casa accounts linking Agama project <code>https://maven.jans.io/maven/io/jans/casa/plugins/acct-linking-agama/replace-janssen-version/acct-linking-agama-replace-janssen-version-project.zip</code></p>
 </li>
 <li>
 <p>Transfer the two zip files to a location in the server, deploy both archives using TUI (Agama menu)</p>
@@ -8732,7 +8747,7 @@ zip -r inbound.zip *
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-08-27T05:36:25+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-08-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-08-28T08:03:05+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-08-28</span>
       
         <br>
         Created:
