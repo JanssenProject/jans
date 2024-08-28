@@ -33,7 +33,7 @@ Login to Casa with an administrative account (visit `https://<your-server-name>/
 **Important notes**:
 
 - Usage of OTP via SMS requires the setup of a [Twilio](https://twilio.com) account and populating configuration properties of 
-flow `io.jans.casa.authn.twilio_sms` found in Casa Agama project. You can do the latter via [TUI](../../admin/config-guide/auth-server-config/agama-project-configuration/#agama-project-configuration-screen). You are encouraged to use the online Twilio testing tools beforehand to ensure you can send SMS to the countries you are targetting
+flow `io.jans.casa.authn.twilio_sms` found in Casa Agama project. You can do the latter via [TUI](../../admin/config-guide/auth-server-config/agama-project-configuration/#agama-project-configuration-screen). We encourage you to use the online Twilio testing tools beforehand to ensure you can send SMS to the countries you are targetting
 
 - Usage of Super Gluu has some preliminar requisites described [here](https://docs.gluu.org/head/supergluu/admin-guide/)
 

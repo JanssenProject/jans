@@ -466,6 +466,7 @@ nav:
             - 'Custom Branding': 'casa/plugins/custom-branding.md'
         - 'FAQ': 'casa/administration/faq.md'
     - Developer Guide:
+        - 'Overview': 'casa/developer/overview.md'
         - 'Adding authentication methods': 'casa/developer/add-authn-methods.md'
     - User Guide: 'casa/user-guide.md'
 plugins:

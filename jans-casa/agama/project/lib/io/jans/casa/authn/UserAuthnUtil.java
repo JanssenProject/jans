@@ -99,12 +99,15 @@ public class UserAuthnUtil {
         
     }
     
-    public List<String> computeUserMethods(Set<String> supportedMethods) {
-        
-        //Reduce the supported methods to those actually installed
+    //Here I do not simply use Set<String> in the method signature. Apparently Groovy creates a
+    //hashSet despite the incoming value is actually a LinkedHashSet when called from the flow
+    public List<String> computeUserMethods(LinkedHashSet<String> supportedMethods) {
+
+        logger.trace("Supported methods: {}", supportedMethods);
         Set<String> methods = new LinkedHashSet<>();    //preserve insertion order
         List<String> empty = Collections.emptyList();
-        
+
+        //Reduce the supported methods to those actually installed
         supportedMethods.forEach(meh -> {
             try {
                 String dn = String.format("%s=%s,ou=flows,ou=agama,o=jans", Flow.ATTR_NAMES.QNAME, meh);
@@ -116,7 +119,8 @@ public class UserAuthnUtil {
                 logger.error(e.getMessage());
             }
         });
-            
+        logger.trace("List of methods: {}", methods);
+
         if (methods.isEmpty()) {
             logger.info("None of {} exist as agama flows", supportedMethods);
             return empty;
@@ -126,7 +130,8 @@ public class UserAuthnUtil {
         List<String> enrolled = mfaInfo.methodsEnrolled(inum);
         logger.info("User has enrollments for {}", enrolled);
         methods.retainAll(enrolled);
-        
+        logger.trace("Updated list of methods: {}", methods);  
+
         List<String> result = new ArrayList<>();
         if (methods.remove(preferredMethod)) {
             //Put the preferred on top

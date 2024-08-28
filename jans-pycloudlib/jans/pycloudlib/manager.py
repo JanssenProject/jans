@@ -11,35 +11,15 @@ from jans.pycloudlib.config import ConsulConfig
 from jans.pycloudlib.config import KubernetesConfig
 from jans.pycloudlib.config import GoogleConfig
 from jans.pycloudlib.config import AwsConfig
+from jans.pycloudlib.config import FileConfig
 from jans.pycloudlib.secret import KubernetesSecret
 from jans.pycloudlib.secret import VaultSecret
 from jans.pycloudlib.secret import GoogleSecret
 from jans.pycloudlib.secret import AwsSecret
+from jans.pycloudlib.secret import FileSecret
 from jans.pycloudlib.utils import decode_text
 from jans.pycloudlib.utils import encode_text
 from jans.pycloudlib.lock import LockManager
-
-ConfigAdapter = _t.Union[ConsulConfig, KubernetesConfig, GoogleConfig, AwsConfig]
-"""Configs adapter type.
-
-Currently supports the following classes:
-
-* [ConsulConfig][jans.pycloudlib.config.consul_config.ConsulConfig]
-* [KubernetesConfig][jans.pycloudlib.config.kubernetes_config.KubernetesConfig]
-* [GoogleConfig][jans.pycloudlib.config.google_config.GoogleConfig]
-* [AwsConfig][jans.pycloudlib.config.aws_config.AwsConfig]
-"""
-
-SecretAdapter = _t.Union[VaultSecret, KubernetesSecret, GoogleSecret, AwsSecret]
-"""Secrets adapter type.
-
-Currently supports the following classes:
-
-* [VaultSecret][jans.pycloudlib.secret.vault_secret.VaultSecret]
-* [KubernetesSecret][jans.pycloudlib.secret.kubernetes_secret.KubernetesSecret]
-* [GoogleSecret][jans.pycloudlib.secret.google_secret.GoogleSecret]
-* [AwsSecret][jans.pycloudlib.secret.aws_secret.AwsSecret]
-"""
 
 
 class AdapterProtocol(_t.Protocol):  # pragma: no cover
@@ -65,7 +45,7 @@ class BaseConfiguration(ABC):
     """Base class to provide contracts for managing configuration (configs or secrets)."""
 
     @abstractproperty
-    def adapter(self) -> AdapterProtocol:  # pragma: no cover
+    def remote_adapter(self) -> AdapterProtocol:  # pragma: no cover
         """Abstract attribute as a container of adapter instance.
 
         The adapter is used in the following public methods:
@@ -76,7 +56,22 @@ class BaseConfiguration(ABC):
         - `set_all`
 
         !!! important
-            Any subclass **MUST** returns an instance of adapter or raise exception.
+            Any subclass **MUST** returns an instance of remote adapter or raise exception.
+        """
+
+    @abstractproperty
+    def local_adapter(self) -> AdapterProtocol:  # pragma: no cover
+        """Abstract attribute as a container of local adapter instance.
+
+        The adapter is used in the following public methods:
+
+        - `get`
+        - `get_all`
+        - `set`
+        - `set_all`
+
+        !!! important
+            Any subclass **MUST** returns an instance of local adapter or raise exception.
         """
 
     def get(self, key: str, default: _t.Any = "") -> _t.Any:
@@ -89,7 +84,12 @@ class BaseConfiguration(ABC):
         Returns:
             Value based on given key or default one.
         """
-        return self.adapter.get(key, default)
+        value = self.local_adapter.get(key, default)
+
+        # either value is empty or missing, pull from the remote adapter instead
+        if not value:
+            value = self.remote_adapter.get(key, default)
+        return value  # noqa: R504
 
     def set(self, key: str, value: _t.Any) -> bool:
         """Set key with given value.
@@ -101,7 +101,11 @@ class BaseConfiguration(ABC):
         Returns:
             A boolean to mark whether configuration is set or not.
         """
-        return self.adapter.set(key, value)
+        try:
+            result = self.local_adapter.set(key, value)
+        except NotImplementedError:
+            result = self.remote_adapter.set(key, value)
+        return result  # noqa: R504
 
     def all(self) -> dict[str, _t.Any]:  # noqa: A003
         """Get all key-value pairs (deprecated in favor of [get_all][jans.pycloudlib.manager.BaseConfiguration.get_all]).
@@ -117,7 +121,13 @@ class BaseConfiguration(ABC):
         Returns:
             A mapping of configuration (if any).
         """
-        return self.adapter.get_all()
+        data = self.local_adapter.get_all()
+
+        # pre-populate missing attribute in local data by merging from remote data
+        for k, v in self.remote_adapter.get_all().items():
+            if not v or k not in data:
+                data[k] = v
+        return data
 
     def set_all(self, data: dict[str, _t.Any]) -> bool:
         """Set all key-value pairs.
@@ -128,15 +138,19 @@ class BaseConfiguration(ABC):
         Returns:
             A boolean to mark whether configuration is set or not.
         """
-        return self.adapter.set_all(data)
+        try:
+            result = self.local_adapter.set_all(data)
+        except NotImplementedError:
+            result = self.remote_adapter.set_all(data)
+        return result  # noqa: R504
 
 
 class ConfigManager(BaseConfiguration):
     """This class manage configs and act as a proxy to specific config adapter class."""
 
     @cached_property
-    def adapter(self) -> ConfigAdapter:  # noqa: D412
-        """Get an instance of config adapter class.
+    def remote_adapter(self) -> AdapterProtocol:  # noqa: D412
+        """Get an instance of remote config adapter class.
 
         Returns:
             An instance of config adapter class.
@@ -174,14 +188,19 @@ class ConfigManager(BaseConfiguration):
         if adapter == "aws":
             return AwsConfig()
 
+        # unsupported adapter
         raise ValueError(f"Unsupported config adapter {adapter!r}")
+
+    @cached_property
+    def local_adapter(self) -> AdapterProtocol:
+        return FileConfig()
 
 
 class SecretManager(BaseConfiguration):
     """This class manage secrets and act as a proxy to specific secret adapter class."""
 
     @cached_property
-    def adapter(self) -> SecretAdapter:  # noqa: D412
+    def remote_adapter(self) -> AdapterProtocol:  # noqa: D412
         """Get an instance of secret adapter class.
 
         Returns:
@@ -220,7 +239,12 @@ class SecretManager(BaseConfiguration):
         if adapter == "aws":
             return AwsSecret()
 
+        # unsupported adapter
         raise ValueError(f"Unsupported secret adapter {adapter!r}")
+
+    @cached_property
+    def local_adapter(self) -> AdapterProtocol:
+        return FileSecret()
 
     def to_file(
         self, key: str, dest: str, decode: bool = False, binary_mode: bool = False
@@ -258,9 +282,9 @@ class SecretManager(BaseConfiguration):
             # always decodes the bytes
             decode = True
 
-        value = self.adapter.get(key)
+        value = self.get(key)
         if decode:
-            salt = self.adapter.get("encoded_salt")
+            salt = self.get("encoded_salt")
             try:
                 value = decode_text(value, salt).decode()
             except UnicodeDecodeError:
@@ -313,9 +337,22 @@ class SecretManager(BaseConfiguration):
                 raise ValueError(f"Looks like you're trying to read binary file {src}")
 
         if encode:
-            salt = self.adapter.get("encoded_salt")
+            salt = self.get("encoded_salt")
             value = encode_text(value, salt).decode()
-        self.adapter.set(key, value)
+        self.set(key, value)
+
+    def bootstrap(self):
+        """Bootstrap the secret adapter, e.g. miscellanous setup.
+        """
+        if isinstance(self.remote_adapter, VaultSecret):
+            # vault secret requires RoleID and SecretID
+            for setting_name, secret_name in [
+                ("CN_SECRET_VAULT_ROLE_ID_FILE", "vault_role_id"),
+                ("CN_SECRET_VAULT_SECRET_ID_FILE", "vault_secret_id"),
+            ]:
+                if os.path.isfile(self.remote_adapter.settings[setting_name]):
+                    continue
+                self.to_file(secret_name, self.remote_adapter.settings[setting_name])
 
 
 @dataclass
@@ -335,6 +372,7 @@ class Manager:
     #: An instance of :class:`~jans.pycloudlib.manager.SecretManager`
     secret: SecretManager
 
+    #: An instance of :class:`~jans.pycloudlib.lock.LockManager`
     lock: LockManager
 
 
@@ -357,5 +395,6 @@ def get_manager() -> Manager:  # noqa: D412
     """
     config_mgr = ConfigManager()
     secret_mgr = SecretManager()
+    secret_mgr.bootstrap()
     lock_mgr = LockManager()
     return Manager(config_mgr, secret_mgr, lock_mgr)
