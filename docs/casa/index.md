@@ -84,3 +84,8 @@ Use the following links to get started with Casa:
 ### User Guide
 
 - [Home](./user-guide.md)
+
+### Developer guide
+
+- [Home](./developer/overview.md)
+- [Adding authentication methods](./developer/add-authn-methods.md)
