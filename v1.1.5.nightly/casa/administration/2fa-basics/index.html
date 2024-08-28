@@ -8514,6 +8514,8 @@
         
           
         
+          
+        
       
       
         <label class="md-nav__link" for="__nav_5_3">
@@ -8527,6 +8529,20 @@
           Developer Guide
         </label>
         <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../developer/overview/" class="md-nav__link">
+        Overview
+      </a>
+    </li>
+  
+
+            
           
             
               
@@ -8718,15 +8734,13 @@ authentication method (from his already available enrolled credentials). The rel
 <p>To further reduce the likelihood of lockouts, you can force users to initially enroll, for instance, one OTP 
 credential before any other. OTP credentials are generally more accessible than their counterparts (like Fido) since 
 they normally don't demand special conditions from the device used to access, like having a USB port.</p>
-<p>To do so, add a property named <code>2fa_requisite</code> to the configuration of the Agama flow that backs the given authentication method, and assign <code>true</code> as its value. You can do this via <a href="../../admin/config-guide/auth-server-config/agama-project-configuration/#agama-project-configuration-screen">TUI</a>.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>This mechanism is applicable for the out-of-the box authentication methods supported by Casa. For other methods contributed via plugins, consult their respective documentation.</p>
-</div>
+<p>To do so, add a property named <code>2fa_requisite</code> to the configuration of the Agama flow that backs the given authentication method, and assign <code>true</code> as its value. You can do this via <a href="../../admin/config-guide/auth-server-config/agama-project-configuration/#agama-project-configuration-screen">TUI</a>. Note
+this mechanism is applicable for the out-of-the box authentication methods supported by Casa. For other methods contributed via plugins, consult their respective documentation.</p>
 <p>You can flag more than one method as requisite. In this case users will be encouraged to enroll one credential 
 associated to any of the flagged methods.</p>
 <p>If a user attempts to delete their only available credential matching the requisite method, a prompt will appear 
 warning that doing so will disable 2FA, that is, resetting to password authentication.</p>
+<p>If you are a developer coding a plugin that adds an authentication method, you can make the method a requisite by properly implementing method <code>mayBe2faActivationRequisite</code> part of interface <code>AuthnMethod</code>.</p>
 <h2 id="enrolling-credentials-upon-registration-or-first-login">Enrolling credentials upon registration or first login<a class="headerlink" href="#enrolling-credentials-upon-registration-or-first-login" title="Permanent link">#</a></h2>
 <p>If the previous scenario is not enough for your needs, you can force users to enroll credentials and turn 2FA on 
 before the first usage of the application. This can be done in two ways:</p>
@@ -8744,7 +8758,7 @@ before the first usage of the application. This can be done in two ways:</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-08-21T13:40:12+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-08-21</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-08-28T08:03:05+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-08-28</span>
       
         <br>
         Created:
