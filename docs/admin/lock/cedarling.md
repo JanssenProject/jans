@@ -10,64 +10,72 @@ tags:
 ## What is Cedar
 
 [Cedar](https://www.cedarpolicy.com/en) was invented by Amazon for their 
-[Verified Permission](https://aws.amazon.com/verified-permissions/) service. 
-Cedar enables developers to create complex, contextual policies without cluttering application code 
-with lots of `if` - `then` statements. Externalizing policies makes it easier to audit the security 
-controls of an application.  Cedar is a deterministic policy engine--if the schema
-and policies are validated, the engine will always return `permit` or `forbid`.
+[Verified Permission](https://aws.amazon.com/verified-permissions/) service. Cedar enables 
+developers to create complex, contextual policies without cluttering application code with lots 
+of `if` - `then` statements. Externalizing policies also makes it easier to audit the security 
+controls and decisions of an application.  
 
-Cedar uses the **PARC** syntax: **P**rincipal, **A**ction, **R**esource, **C**ontext. For example, 
-you may have a policy that says *Admins* can *write* to the *config* folder. In this example, the 
-*Admin* Role is the Principal, *write* is the Action, and the *config* folder is the Resource. The 
-Context is used to specify information about the enivironment, like the time of day or network address. 
-Like RBAC, Cedar is deterministic. But it's also less reductive then RBAC, and in fact enables 
-security admins to express quite powerful policies.
+Cedar is a deterministic policy engine--if the schema and policies are validated, the engine will 
+always return `allow` or `deny` for an authorization request. Cedar uses the **PARC** syntax: 
+**P**rincipal, **A**ction, **R**esource, **C**ontext. For example, you may have a policy that says
+*Admins* can *write* to the */config* folder. The *Admin* Role is the Principal, *write* is the 
+Action, and the */config* folder is the Resource. The Context is used to specify information about
+the enivironment, like the time of day or network address. Cedar is a compromise: it's less reductive 
+then RBAC but still deterministic; at the same time, it's less flexible then a full programming 
+language, but still expressive.
 
 ![](../../assets/lock-cedarling-diagram-3.jpg)
 
 ## What is the Cedarling
 
-The Cedarling, as its name suggests, enables you to define the security rules for your application 
-in Cedar policy syntax. Optionally, the Cedarling can validate JWTs from a list of trusted IDPs--
-both the JWT signature and the current status. The Cedarling rapidly evaluates authorization requests
-because it has all the policies and data it needs to make a local decision.
+The Cedarling is a performant local authorization service that runs the Rust Cedar Engine. 
+Cedar policies and schema are loaded at startup from a locally cached "Policy Store". In simple 
+terms, the Cedarling returns the answer: should the application allow this action on this resource
+given these JWT tokens. "Fit for purpose" policies help developers build a better user experience. 
+For example, why display form fields that a user is not authorized to see? The Cedarling is a more 
+productive and flexible way to handle authorization. 
 
-Architecturally, the Cedarling is a local, autonomous Policy Decision Point, or "PDP", distributed 
-as a WebAssembly ("WASM") component. WASM components run directly in a browser. They can also run 
-as a cloud native function. 
+In addition to authorization, the Cedarling can perform two more important jobs: (1) it can 
+validate JWT tokens; (2) it can create an audit log of all authorizations permitted and denied.
 
-A key feature of the Cedarling is to log all `permit` or `forbid` decisions returned to the 
-application. It can also log the validation of tokens. In an enterprise deployment, this audit
-log is sent for central archiving.
+### Authorization 
 
-For developers, the Cedarling is a more productive and flexible way to handle authz. The Cedarling maps
-Roles, and provides RBAC out-of-the-box. But developers can also express a variety of policies beyond
-the limitations of "person with role has access". For example, what if you want to allow access only 
-to people who use a certain type of passkey? Or what if you want to incorporate a fraud score, and 
-elevate security for riskier transactions. Or maybe, partners can view tickets for the customers 
-they serve? These policies are easily and rapidly evaluated by a Cedar policy engine.
+The Cedarling runs in the browser as a WebAssembly ("WASM") component, in a mobile application, 
+or in the cloud. Although it runs at the edge--even embedded in a JavaScript browser application--
+the Cedarling is not just for front end security. Developers can use it for backend applications
+and even API gateways--multilayered security is best.
+
+The Cedarling provides RBAC out-of-the-box. Developers can also express a variety of policies 
+beyond the limitations of "person with role has access". For example, you can allow access only to
+users who authenticate with a certain type of passkey or incorporate a fraud score to elevate 
+security for riskier transaction. These policies are easily and rapidly evaluated by the Cedarling.
+
+Architecturally, the Cedarling is an autonomous Policy Decision Point, or "PDP". The Cedarling 
+rapidly evaluates authorization requests because it has all the policies and data it needs to make
+a local decision. A key feature of the Cedarling is to log all `allow` or `deny` decisions returned
+to the application. In an enterprise deployment, this audit log is sent for central archiving.
 
 ![](../../assets/lock-cedarling-diagram-1.jpg)
 
-The Cedarling loads its Policy Store during initialization, as a static JSON file or fetched via REST. 
+The Cedarling loads its Policy Store during initialization as a static JSON file or fetched via HTTPS. 
 The Policy Store contains the Cedar Policies, Cedar Schema, and optionally, a list of the Trusted IDPs. 
-Developers may consider the Cedarling Policy Store as part of the code. The Cedar schema for resources 
-aligns with the application model. The policies control the expected functionality, and
-need to be unit tested--including both positive and negative tests. 
+Developers may consider the Cedarling Policy Store as part of the code. While there is some core schema,
+developers will frequently need to add actions and resources that are specific for their application. 
+For example, a developer writing a support ticket application might want to define an action called 
+"Close" or "Reply", and an entity type called "Ticket". 
 
-Where does the Cedarling get the data for policy evaluation? First, the request includes the resource
-details. Based on this, the Cedarling creates the Resource entity. The Principal entities 
-are derived from the JWTs--the combined OpenID id_token and Userinfo tokens enable the Cedarling to 
-create a User and Role entities; the OAuth access token is used to create a Client entity. 
-Hypothetically, you could also pass the roles in an access token claim. But a user claim for roles 
-is preferred.
+Where does the Cedarling get the data for policy evaluation? Or in Cedar jargon, where do the 
+entities come from? The application request includes the Resource data--remember the application 
+is asking if it can perform a certain action on a certain resource. The Principal entities are 
+derived from the JWTs--the combined OpenID id_token and  Userinfo tokens enable the Cedarling to 
+create a User and Role entities; the OAuth access token is used to create a Client entity.
 
 ![](../../assets/lock-cedarling-diagram-2.jpg)
 
-The id_token represents a user authentication event. The access token represents a 
+The id_token JWT represents a user authentication event. The access token JWT represents a 
 client authentication event. These tokens contain other interesting contextual data. An OpenID 
-Connect id_token JWT tells you who authenticated, when they authenticated, how they authenticatated, 
-and optionally other claims like the User's roles. An OAuth Access Token JWT can tell you information 
+Connect id_token tells you who authenticated, when they authenticated, how they authenticatated, 
+and optionally other claims like the User's roles. An OAuth access token  can tell you information 
 about the software that obtained the JWT, its extent of access as defined by the OAuth Authorization Server 
 (*i.e.* the values of the `scope` claim), or other claims--domains frequently enhance the access token to
 contain business specific data needed for policy evaluation.
@@ -104,7 +112,7 @@ input = {
 decision_result = authz(input)
 ```
 
-## Cedarling Token Validation
+### JWT Validation
 
 Optionally, the Cedarling can validate the signatures of the JWTs for developers. To enable this, 
 set the `CEDARLING_JWT_VALIDATION` bootstrap property to `True`. For testing, developers can set 
@@ -132,6 +140,10 @@ Here is a summary of the ways the Cedarling may validate a JWT, depending on you
 
 ![](../../assets/lock-cedarling-diagram-4.jpg)
 
+### Audit Logs
+
+The audit log contain a record of all a Cedarling's decisions and token validations. In an enterprise
+deployment, logs are sent to the Lock Server `/audit` endpoint for central archiving.
 
 ## Cedarling Policy Store
 
@@ -146,6 +158,7 @@ The JSON schema looks like this:
 
 ```
 {
+    "app_id": "...",
     "policies": "...",
     "schema": "...",
     "trusted_idps": [...]
@@ -196,7 +209,7 @@ schema and policies. The eaisest way to author your policy store is to use the P
 trusted IDPs and to publish a policy store to a Github repository.
 
 
-## Cedarling Bootstrap Properties
+## Cedarling Properties
 
 These Bootstrap Properties control default application level behavior.
 
@@ -218,7 +231,7 @@ The following bootstrap properties are only needed for enterprise deployments.
 
 * **`CEDARLING_LOCK`** : Enabled | Disabled. If Enabled, the Cedarling will connect to the Lock Master for policies, and subscribe for SSE events. 
 
-* **`CEDARLING_LOCK_MASTER_CONFIGURATION_URI`** : Required if `LOCK` == `Enabled`. URI where Cedarling can get JSON file with all required metadata about Lock Master, i.e. `.well-known/lock-master-configuration`.
+* **`CEDARLING_LOCK_MASTER_CONFIGURATION_URI`** : Required if `LOCK` == `Enabled`. URI where Cedarling can get JSON file with all required metadata about Lock Master, i.e. `.well-known/lock-server-configuration`.
 
 * **`CEDARLING_LOCK_SSA_JWT`** : SSA for DCR in a Lock Master deployment. The Cedarling will validate this SSA JWT prior to DCR.
 

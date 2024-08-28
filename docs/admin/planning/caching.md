@@ -35,5 +35,5 @@ supports TLS, which is a good option if you need secure communication.
 run for other applications. We have observed a slightly higher cache miss
 rate under high load, which is fairly atypical for most login applications.
 
-1. **Cloud Cache** Amazon ElastiCache or Google Memorystore offer both Redis
+1. **Cloud Cache** Amazon ElastiCache or Google Memorystore offers both Redis
 and Memcached managed services. They work fine.

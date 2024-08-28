@@ -5,12 +5,9 @@ import io.jans.casa.core.PersistenceService;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.inject.Inject;
-import java.util.Map;
-import java.util.Optional;
 
-/**
- * @author jgomer
- */
+import org.json.JSONObject;
+
 class BaseService {
 
     @Inject
@@ -18,15 +15,15 @@ class BaseService {
 
     ObjectMapper mapper;
 
-    Map<String, String> props;
+    JSONObject props;
 
     @PostConstruct
     private void inited() {
         mapper = new ObjectMapper();
     }
 
-    public String getScriptPropertyValue(String key) {
-        return Optional.ofNullable(props).flatMap(m -> Optional.ofNullable(m.get(key))).orElse(null);
+    public String getPropertyValue(String key) {
+        return props.optString(key, null);
     }
 
 }

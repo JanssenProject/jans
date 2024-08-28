@@ -46,9 +46,8 @@ public class SampleCredentialAuthnMethod implements AuthnMethod {
 	}
 
 	public String getAcr() {
-	    //ACR associated to this type of credential. A custom script has to exist in the server
-	    //and must use this acr as display name
-	    return credService.ACR;
+	    //The flow associated to this type of credential
+	    return credService.AGAMA_FLOW;
 	}
 
 	public void reloadConfiguration() {
@@ -59,19 +58,22 @@ public class SampleCredentialAuthnMethod implements AuthnMethod {
 	}
 
 	public List<BasicCredential> getEnrolledCreds(String id) {
-	    //See javadocs of method getEnrolledCreds in
-	    //https://github.com/JanssenProject/jans/blob/main/jans-casa/shared/src/main/java/io/jans/casa/extension/AuthnMethod.java
+	    //Code the logic required to build a list of the credentials already enrolled
+	    //by the user whose unique identifier is id
 
-	    //return credService.getEnrolledCreds(id);
-	    return Collections.emptyList();
+	    if (credService.getUserColor(id) == null) {
+	        return Collections.emptyList();
+	    }
+        //In practice you should create instances of BasicCredential and fill them with data appropriately 
+	    return Collections.singletonList(new BasicCredential("My color", 0L));
+
 	}
 
 	public int getTotalUserCreds(String id) {
-	    //See javadocs of method getTotalUserCreds in
-	    //https://github.com/JanssenProject/jans/blob/main/jans-casa/shared/src/main/java/io/jans/casa/extension/AuthnMethod.java
-	    
-	    //return credService.getTotalUserCreds(id);
-	    return 0;
+	    //Code the logic required to compute the number of the credentials already enrolled
+	    //by the user whose unique identifier is id. Calling size over the returned value of
+	    //method getEnrolledCreds is an option
+	    return getEnrolledCreds(id).size();
 	}
 
 }

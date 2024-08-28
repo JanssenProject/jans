@@ -9,9 +9,14 @@ metadata:
 {{- if .Values.additionalLabels }}
 {{ toYaml .Values.additionalLabels | indent 4 }}
 {{- end }}
-{{- if .Values.additionalAnnotations }}
+{{- if or (.Values.additionalAnnotations) (.Values.global.casa.customAnnotations.service) }}
   annotations:
+{{- if .Values.additionalAnnotations }}
 {{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.global.casa.customAnnotations.service }}
+{{ toYaml .Values.global.casa.customAnnotations.service | indent 4 }}
+{{- end }}
 {{- end }}
 spec:
   {{- if .Values.global.alb.ingress }}

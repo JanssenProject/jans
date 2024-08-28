@@ -24,31 +24,18 @@ The "out-of-the-box" login experience in Casa consists of the usual username and
 - FIDO devices
 - [Super Gluu](https://docs.gluu.org/head/supergluu/) mobile notifications
 
-You can choose one or more of these, or create plugins to support more authentication mechanisms. 
+You can choose one or more of these, or create plugins to support more authentication mechanisms.
 
-### Enable scripts
+### Enable authentication methods
 
-First, the custom authentication scripts corresponding to the authentication methods of your preference must be enabled in the server. For this purpose you can use [TUI](../../admin/config-guide/config-tools/jans-tui/README.md) or the [Admin UI](https://docs.gluu.org/head/admin/admin-ui/introduction/) if you have Gluu Flex Server installed.
+Login to Casa with an administrative account (visit `https://<your-server-name>/jans-casa`) and activate the [methods](./admin-console.md#authentication-methods) you want to offer Casa users.
 
-Scripts can be more easily looked up by display name. The below table shows the display names of the scripts previously listed:
-
-|Script|Display name|
-|-|-|
-|OTP (SMS)|twilio_sms|
-|OTP (apps or hardware)|otp|
-|FIDO devices|fido2|
-|Super gluu|super_gluu|
-
-As an example, connect to your server and run `python3 /opt/jans/jans-cli/jans_cli_tui.py`), follow the prompts, and navigate to the _scripts_ tab. There, search for the  script matching the type of 2FA credential you want to support, e.g. `fido2`, `otp`, etc. Press enter to open the script details page. Select the "Enabled" field and press space (an asterisk will be displayed). Finally, press the "save" button.
- 
 **Important notes**:
 
-- Usage of OTP via SMS requires the setup of a [Twilio](https://twilio.com) account and extra configuration of the custom script. Check [this](https://github.com/JanssenProject/jans/blob/vreplace-janssen-version/docs/script-catalog/person_authentication/twilio-2fa/README.md) document for reference
-- Usage of Super Gluu has some [preliminar requisites](https://docs.gluu.org/head/supergluu/admin-guide/) and requires extra configuration of the custom script 
+- Usage of OTP via SMS requires the setup of a [Twilio](https://twilio.com) account and populating configuration properties of 
+flow `io.jans.casa.authn.twilio_sms` found in Casa Agama project. You can do the latter via [TUI](../../admin/config-guide/auth-server-config/agama-project-configuration/#agama-project-configuration-screen). We encourage you to use the online Twilio testing tools beforehand to ensure you can send SMS to the countries you are targetting
 
-### Enable methods in Casa
-
-Once scripts are enabled and configured, login to Casa as administrator (visit `https://<your-server-name>/jans-casa`) and [enable the methods](./admin-console.md#enabled-authentication-methods) you want to offer Casa users.
+- Usage of Super Gluu has some preliminar requisites described [here](https://docs.gluu.org/head/supergluu/admin-guide/)
 
 ### Add the strong authentication settings plugin
 

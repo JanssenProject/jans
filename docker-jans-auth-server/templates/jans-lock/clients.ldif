@@ -14,7 +14,6 @@ objectClass: top
 objectClass: jansClnt
 del: false
 jansAccessTknAsJwt: false
-jansAccessTknSigAlg: RS256
 jansAppTyp: web
 jansAttrs: {"tlsClientAuthSubjectDn":"","runIntrospectionScriptBeforeJwtCreation":false,"keepClientAuthorizationAfterExpiration":false,"allowSpontaneousScopes":false,"spontaneousScopes":[],"spontaneousScopeScriptDns":[],"backchannelLogoutUri":[],"backchannelLogoutSessionRequired":false,"additionalAudience":[],"postAuthnScripts":[],"consentGatheringScripts":[],"introspectionScripts":[],"rptClaimsScripts":[]}
 jansDisabled: false

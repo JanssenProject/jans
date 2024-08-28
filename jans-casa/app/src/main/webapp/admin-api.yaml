@@ -1,12 +1,12 @@
 swagger: '2.0'
 
 info:
-  version: "5.0.0"
-  title: Gluu casa admin API
+  version: "1.0.0"
+  title: Jans casa admin API
   description: Allows to configure Casa programmatically. Note that plugins may also expose endpoints to
     apply configurations relevant to their topics. Check plugins' docs for more information
   license:
-    name: Gluu Casa
+    name: Jans Casa
     url: https://github.com/JanssenProject/jans/blob/main/LICENSE
 
 #Demo server host
@@ -30,9 +30,6 @@ paths:
   /authn-methods/available:
     get:
       description: Returns the authentication methods that can be used in Casa whether enabled or not.
-        Note that for any method to be reported here, there has to be an enabled custom script in the
-        underlying Gluu installation and a plugin implementing its enrollment logic (unless it is a 
-        method supported out-of-the-box, where no plugin is required)
       produces:
         - application/json 
 
@@ -87,42 +84,6 @@ paths:
           description: Successful operation. Empty response
         404:
           description: acr is not known or method is not found in the list of enabled methods. Empty response
-        500:
-          description: There was a failure executing the operation. Error description in response body
-          schema:
-            type: string
-
-  /authn-methods/assign-plugin:
-    post:
-      description: Assigns the responsible plugin for a given authentication method (in terms of enrollment).
-        Responsibility can also be delegated to an internal (default) plugin implementation if available for
-        the method in question
-      consumes:
-        - application/x-www-form-urlencoded
-      
-      parameters:
-        -
-          name: acr
-          in: formData
-          description: Identifier of the authentication method
-          required: true
-          type: string
-        -
-          name: plugin
-          in: formData
-          description: Identifier of the plugin to assign. If this param is missing or empty, the default
-            implementation is assigned (if existing) 
-          required: false
-          type: string
-          
-      responses:
-        200:
-          description: Successful operation. Empty response
-        400:
-          description: Inconsistent parameters, eg. acr is missing/empty, the plugin does not actully implement
-            the method designated by the acr, the custom script corresponding to the acr is not enabled            
-          schema:
-            type: string
         500:
           description: There was a failure executing the operation. Error description in response body
           schema:
