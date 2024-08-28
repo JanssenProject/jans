@@ -614,8 +614,6 @@ class Plugin(DialogUtils):
 
         patches = [{'op': 'replace', 'path': path, 'value': val} for path, val in changes ]
 
-        #open("/tmp/patches.json","w").write(json.dumps(patches, indent=2))
-
         async def coroutine():
             cli_args = {'operation_id': 'patch-config-api-properties', 'data': patches}
             self.app.start_progressing(_("Saving Config API Configuration changes..."))
