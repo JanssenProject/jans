@@ -118,7 +118,7 @@ spec:
             subPath: vault_secret_id
         {{- end }}
           - mountPath: /etc/jans/conf/configuration.json
-            name: {{ include "janssen-all-in-one.name" . }}-mount-gen-file
+            name: {{ .Release.Name }}-configuration-file
             subPath: configuration.json
           - mountPath: /scripts/tls_generator.py
             name: {{ include "janssen-all-in-one.name" . }}-tls-script
@@ -188,9 +188,9 @@ spec:
             - key: vault_secret_id
               path: vault_secret_id
       {{- end }}
-        - name: {{ include "janssen-all-in-one.name" . }}-mount-gen-file
+        - name: {{ .Release.Name }}-configuration-file
           secret:
-            secretName: {{ include "janssen-all-in-one.fullname" . }}-gen-json-file
+            secretName: {{ .Release.Name }}-configuration-file
         - name: {{ include "janssen-all-in-one.name" . }}-tls-script
           configMap:
             name: {{ include "janssen-all-in-one.fullname" . }}-tls-script

@@ -60,9 +60,9 @@ spec:
               - key: aws_secrets_replica_regions
                 path: aws_secrets_replica_regions
       {{- end }}
-        - name: {{ include "config.fullname" . }}-mount-gen-file
+        - name: {{ .Release.Name }}-configuration-file
           secret:
-            secretName: {{ include "config.fullname" . }}-gen-json-file
+            secretName: {{ .Release.Name }}-configuration-file
         - name: {{ include "config.fullname" . }}-tls-script
           configMap:
             name: {{ include "config.fullname" . }}-tls-script
@@ -80,14 +80,6 @@ spec:
               path: vault_role_id
             - key: vault_secret_id
               path: vault_secret_id
-        {{- end }}
-        {{- if or (eq .Values.global.cnPersistenceType "ldap") (eq .Values.global.cnPersistenceType "hybrid") }}
-        - name: ldap-pass
-          secret:
-            secretName: {{ .Release.Name }}-ldap-pass
-            items:
-              - key: ldap_password
-                path: ldap_password
         {{- end }}
       serviceAccountName: {{ .Values.global.serviceAccountName }}
       containers:
@@ -117,7 +109,7 @@ spec:
             subPath: aws_secrets_replica_regions
         {{- end }}
           - mountPath: /etc/jans/conf/configuration.json
-            name: {{ include "config.fullname" . }}-mount-gen-file
+            name: {{ .Release.Name }}-configuration-file
             subPath: configuration.json
           - mountPath: /scripts/tls_generator.py
             name: {{ include "config.fullname" . }}-tls-script
@@ -134,11 +126,6 @@ spec:
           - name: vault
             mountPath: /etc/certs/vault_secret_id
             subPath: vault_secret_id
-          {{- end }}
-          {{- if or (eq .Values.global.cnPersistenceType "ldap") (eq .Values.global.cnPersistenceType "hybrid") }}
-          - name: ldap-pass
-            mountPath: {{ .Values.global.cnLdapPasswordFile }}
-            subPath: ldap_password
           {{- end }}
         envFrom:
         - configMapRef:

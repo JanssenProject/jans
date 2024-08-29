@@ -129,14 +129,6 @@ spec:
             - name: {{ include "casa.fullname" .}}-updatelbip
               mountPath: "/scripts"
           {{- end }}
-         {{- if or (eq .Values.global.cnPersistenceType "ldap") (eq .Values.global.cnPersistenceType "hybrid") }}
-            - name: ldap-pass
-              mountPath: {{ .Values.global.cnLdapPasswordFile }}
-              subPath: ldap_password
-            - name: ldap-pass
-              mountPath: {{ .Values.global.cnLdapTruststorePasswordFile }}
-              subPath: ldap_truststore_password
-          {{- end }}
           livenessProbe:
 {{- toYaml .Values.livenessProbe | nindent 12 }}
           readinessProbe:
@@ -192,16 +184,6 @@ spec:
         - name: {{ include "casa.fullname" . }}-updatelbip
           configMap:
             name: {{ .Release.Name }}-updatelbip
-      {{- end }}
-      {{- if or (eq .Values.global.cnPersistenceType "ldap") (eq .Values.global.cnPersistenceType "hybrid") }}
-        - name: ldap-pass
-          secret:
-            secretName: {{ .Release.Name }}-ldap-pass
-            items:
-              - key: ldap_password
-                path: ldap_password
-              - key: ldap_truststore_password
-                path: ldap_truststore_password
       {{- end }}
       {{- if not .Values.global.isFqdnRegistered }}
       hostAliases:

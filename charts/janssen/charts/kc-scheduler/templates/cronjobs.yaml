@@ -81,11 +81,6 @@ spec:
               {{- with .Values.volumeMounts }}
 {{- toYaml . | nindent 16 }}
               {{- end }}
-                {{- if or (eq .Values.global.cnPersistenceType "ldap") (eq .Values.global.cnPersistenceType "hybrid") }}
-                - name: ldap-pass
-                  mountPath: {{ .Values.global.cnLdapPasswordFile }}
-                  subPath: ldap_password
-                {{- end }}
               envFrom:
                 - configMapRef:
                     name: {{ .Release.Name }}-config-cm
@@ -143,14 +138,6 @@ spec:
                   path: vault_role_id
                 - key: vault_secret_id
                   path: vault_secret_id
-          {{- end }}
-          {{- if or (eq .Values.global.cnPersistenceType "ldap") (eq .Values.global.cnPersistenceType "hybrid") }}
-            - name: ldap-pass
-              secret:
-                secretName: {{ .Release.Name }}-ldap-pass
-                items:
-                - key: ldap_password
-                  path: ldap_password
           {{- end }}
           restartPolicy: Never
           {{- if not .Values.global.isFqdnRegistered }}

@@ -17,7 +17,7 @@ metadata:
 {{- if .Values.global.opendj.customAnnotations.cronjob }}
 {{ toYaml .Values.global.opendj.customAnnotations.cronjob | indent 4 }}
 {{- end }}
-{{- end }}  
+{{- end }}
 spec:
   schedule: {{ .Values.backup.cronJobSchedule | quote }}
   concurrencyPolicy: Forbid
@@ -103,24 +103,12 @@ spec:
                 LDAP_BACKUP_FILE=backup-$RANDOM_NUM.ldif
                 /opt/opendj/bin/export-ldif --hostname "$LDAP_HOST" --port 4444 --bindDN "$LDAP_BIND_DN" --bindPassword "$LDAP_PASSWORD" --backendID userRoot --ldifFile /opt/opendj/ldif/$LDAP_BACKUP_FILE --trustAll
               volumeMounts:
-              - name: ldap-certkey
-                mountPath: {{ .Values.global.cnLdapCertFile }}
-                subPath: opendj.crt
-              - name: ldap-certkey
-                mountPath: {{ .Values.global.cnLdapKeyFile }}
-                subPath: opendj.key
-              - name: ldap-pass
-                mountPath: {{ .Values.global.cnLdapPasswordFile }}
-                subPath: ldap_password
-              - name: ldap-pass
-                mountPath: {{ .Values.global.cnLdapTruststorePasswordFile }}
-                subPath: ldap_truststore_password
+              - mountPath: /etc/jans/conf/configuration.json
+                name: {{ .Release.Name }}-configuration-file
+                subPath: configuration.json
           restartPolicy: Never
           volumes:
-          - name: ldap-pass
+          - name: {{ .Release.Name }}-configuration-file
             secret:
-              secretName: {{ .Release.Name }}-ldap-pass
-          - name: ldap-certkey
-            secret:
-              secretName: {{ .Release.Name }}-ldap-certkey
+              secretName: {{ .Release.Name }}-configuration-file
 {{- end }}

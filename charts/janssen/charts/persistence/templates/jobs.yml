@@ -104,11 +104,6 @@ spec:
             mountPath: /etc/certs/vault_secret_id
             subPath: vault_secret_id
         {{- end }}
-        {{- if or (eq .Values.global.cnPersistenceType "ldap") (eq .Values.global.cnPersistenceType "hybrid") }}
-          - name: ldap-pass
-            mountPath: {{ .Values.global.cnLdapPasswordFile }}
-            subPath: ldap_password
-        {{- end }}
         resources:
 {{- toYaml .Values.resources | nindent 10 }}
       volumes:
@@ -149,12 +144,4 @@ spec:
               path: vault_role_id
             - key: vault_secret_id
               path: vault_secret_id
-      {{- end }}
-      {{- if or (eq .Values.global.cnPersistenceType "ldap") (eq .Values.global.cnPersistenceType "hybrid") }}
-        - name: ldap-pass
-          secret:
-            secretName: {{ .Release.Name }}-ldap-pass
-            items:
-              - key: ldap_password
-                path: ldap_password
       {{- end }}
