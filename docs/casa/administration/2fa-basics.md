@@ -21,22 +21,10 @@ available. Avoiding user lockout is important because it prevents a serious burd
 There is no limit to the number of credentials a user can enroll, and credentials do not need to be of the same type: 
 any combination is valid. 
 
-!!! Note
-    The number of credentials required for two-factor authentication (2FA) can be customized with 
-    the [Strong authentication settings plugin](../plugins/2fa-settings.md)
-
 ## Supported types of 2FA
 
 Users will only be able to add credentials with a type matching one of the already enabled authentication methods in 
-the admin console. See the [Admin console page](./admin-console.md#enabled-methods) to learn more. Out of the box, 
-all the following authentication methods are supported:
-
-- FIDO 2 security keys
-- [Super Gluu](https://docs.gluu.org/head/supergluu/) for push notifications 
-- HOTP/TOTP apps, cards, "dongles", etc
-- OTP via SMS (using Twilio)
-
-Other methods may be supported via [plugins](../index.md#existing-plugins).
+the [admin console](./admin-console.md#enabled-methods). Other methods may be supported via [plugins](../index.md#existing-plugins).
 
 ## Resetting a user's 2FA availability
 
