@@ -13,22 +13,13 @@ Use this guide to install and configure your Casa deployment.
 
 ## Installation
 
-Jans Casa can be used with [Janssen Server](https://jans.io) or [Gluu Flex Server](https://gluu.org). At [installation](https://docs.jans.io/head/admin/install/) time (applies to any of these two products), you will be prompted if you desire to include Casa. If you want to add Casa post-installation, you will simply have to re-run the installer and ensure to select Casa.
+Jans Casa can be used with [Janssen Server](https://jans.io) or [Gluu Flex Server](https://gluu.org). At [installation](https://docs.jans.io/vreplace-janssen-version/admin/install/) time (applies to any of these two products), you will be prompted if you desire to include Casa. If you want to add Casa post-installation, you will simply have to re-run the installer and ensure to select Casa.
 
 ## Configuration
 
-The "out-of-the-box" login experience in Casa consists of the usual username and password prompt. To start leveraging a stronger authentication, consider the authentication methods you would like to support, for instance:
-
-- One Time Passcodes (OTP) sent via SMS
-- One Time Passcodes (OTP) obtained through physical OTP devices or apps  
-- FIDO devices
-- [Super Gluu](https://docs.gluu.org/head/supergluu/) mobile notifications
-
-You can choose one or more of these, or create plugins to support more authentication mechanisms.
-
 ### Enable authentication methods
 
-Login to Casa with an administrative account (visit `https://<your-server-name>/jans-casa`) and activate the [methods](./admin-console.md#authentication-methods) you want to offer Casa users.
+The "out-of-the-box" login experience in Casa consists of the usual username and password prompt. To start leveraging a stronger authentication login to Casa with an administrative account (visit `https://<your-server-name>/jans-casa`) and activate the [methods](./admin-console.md#authentication-methods) you want to offer Casa users.
 
 **Important notes**:
 
