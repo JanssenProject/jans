@@ -9,9 +9,14 @@ metadata:
 {{- if .Values.additionalLabels }}
 {{ toYaml .Values.additionalLabels | indent 4 }}
 {{- end }}
-{{- if .Values.additionalAnnotations }}
+{{- if or (.Values.additionalAnnotations) (index .Values.global "config-api" "customAnnotations" "deployment") }}
   annotations:
+{{- if .Values.additionalAnnotations }}
 {{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+{{- if index .Values.global "config-api" "customAnnotations" "deployment" }}
+{{ toYaml (index .Values.global "config-api" "customAnnotations" "deployment") | indent 4 }}
+{{- end }}
 {{- end }}
 spec:
   replicas: {{ .Values.replicas }}
@@ -41,6 +46,7 @@ spec:
       topologySpreadConstraints:
         {{- include "config-api.topology-spread-constraints" . | indent 8 }}
       {{- end }}
+      serviceAccountName: {{ .Values.global.serviceAccountName }}
       containers:
         - name: {{ include "config-api.name" . }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"

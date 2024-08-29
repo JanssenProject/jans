@@ -1,6 +1,6 @@
 # config
 
-![Version: 1.1.4-dev](https://img.shields.io/badge/Version-1.1.4--dev-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.1.4-dev](https://img.shields.io/badge/AppVersion-1.1.4--dev-informational?style=flat-square)
+![Version: 1.1.5-dev](https://img.shields.io/badge/Version-1.1.5--dev-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.1.5](https://img.shields.io/badge/AppVersion-1.1.5-informational?style=flat-square)
 
 Configuration parameters for setup and initial configuration secret and config layers used by Janssen services.
 
@@ -103,7 +103,7 @@ Kubernetes: `>=v1.22.0-0`
 | fullNameOverride | string | `""` |  |
 | image.pullSecrets | list | `[]` | Image Pull Secrets |
 | image.repository | string | `"janssenproject/configurator"` | Image  to use for deploying. |
-| image.tag | string | `"1.1.4_dev"` | Image  tag to use for deploying. |
+| image.tag | string | `"1.1.5_dev"` | Image  tag to use for deploying. |
 | ldapPassword | string | `"P@ssw0rds"` | LDAP admin password if OpennDJ is used for persistence. |
 | ldapTruststorePassword | string | `"changeit"` | LDAP truststore password if OpenDJ is used for persistence |
 | lifecycle | object | `{}` |  |

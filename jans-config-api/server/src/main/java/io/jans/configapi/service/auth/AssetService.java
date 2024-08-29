@@ -22,13 +22,16 @@ import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;
 import io.jans.orm.search.filter.Filter;
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.service.document.store.model.Document;
 import io.jans.service.document.store.provider.DBDocumentStoreProvider;
 import io.jans.service.document.store.service.DBDocumentService;
-import io.jans.service.document.store.service.Document;
+import io.jans.service.document.store.conf.DocumentStoreType;
+
 import io.jans.util.exception.InvalidAttributeException;
 import io.jans.util.exception.InvalidConfigurationException;
 import io.jans.service.document.store.service.DocumentStoreService;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -155,27 +158,58 @@ public class AssetService {
                 searchRequest.getStartIndex(), searchRequest.getCount(), searchRequest.getMaxCount());
     }
 
-    public Document saveAsset(Document asset, InputStream documentStream) throws Exception {
-        log.info("Save asset - asset:{}, documentStream:{}", asset, documentStream);
+    public Document saveAsset(Document asset, InputStream documentStream, boolean isUpdate) throws Exception {
+        log.info("Save asset - asset:{}, documentStream:{}, isUpdate:{}", asset, documentStream, isUpdate);
 
         if (asset == null) {
             throw new InvalidAttributeException("Asset object is null!!!");
         }
 
-        if (documentStream == null) {
+        // For update request, asset file is optional.
+        if (!isUpdate && documentStream == null) {
             throw new InvalidAttributeException(" Document data stream object is null!!!");
         }
 
         // validation
-        validateFileExtension(asset);
         validateModules(asset);
+        ByteArrayOutputStream bos = null;
+        if (documentStream != null) {
+            validateFileExtension(asset);
 
-        ByteArrayOutputStream bos = getByteArrayOutputStream(documentStream);
-        log.trace("Asset ByteArrayOutputStream :{}", bos);
+            bos = getByteArrayOutputStream(documentStream);
+            log.trace("Asset ByteArrayOutputStream :{}", bos);
 
-        // get asset
-        try (InputStream is = new Base64InputStream(getInputStream(bos), true)) {
-            asset = setAssetContent(asset, is);
+            // get asset
+            try (InputStream is = new Base64InputStream(getInputStream(bos), true)) {
+                asset = setAssetContent(asset, is);
+            }
+        }
+
+        if (isUpdate && documentStream == null) {
+            // update request without asset file, get the existing asset content from DB
+            Document existingDoc = getAssetByInum(asset.getInum());
+            if (existingDoc == null) {
+                throw new InvalidAttributeException("Asset with inum '" + asset.getInum() + "' does not exist!!!");
+            } else {
+                asset.setDocument(existingDoc.getDocument());
+            }
+        }
+
+        // update asset revision
+        updateRevision(asset, isUpdate);
+
+        // copy asset on jans-server
+        if (documentStream != null && isAssetServerUploadEnabled()) {
+
+            try (InputStream is = new Base64InputStream(getInputStream(bos), true)) {
+                DocumentStoreType documentStoreProvider = this.getDocumentStoreType();
+                log.info("Copy asset on server documentStoreProvider is:{}", documentStoreProvider);
+                if (documentStoreProvider == DocumentStoreType.LOCAL) {
+                    String result = copyAssetOnServer(asset, is);
+                    log.info("Result of asset saved on server :{}", result);
+                }
+            }
+
         }
 
         // save asset in DB store
@@ -193,18 +227,46 @@ public class AssetService {
             dbDocumentService.updateDocument(asset);
         }
 
-        // copy asset on jans-server
-        if (isAssetServerUploadEnabled()) {
-            String result = copyAssetOnServer(asset, bos);
-            log.info("Result of asset saved on server :{}", result);
-
-        }
-
         // Get final asset
         asset = this.getAssetByInum(asset.getInum());
 
         log.info("\n * Asset successfully saved :{}", asset);
         return asset;
+    }
+
+    public String loadServiceAsset(String serviceName) throws Exception {
+        log.info("Fetch and load asset for serviceName:{}", serviceName);
+
+        StringBuilder sb = new StringBuilder();
+        if (StringUtils.isBlank(serviceName)) {
+            throw new InvalidAttributeException("Service name is null!!!");
+        }
+        Filter serviceNameFilter = Filter.createEqualityFilter("jansService", serviceName);
+        List<Document> assets = persistenceEntryManager.findEntries(getDnForAsset(null), Document.class,
+                serviceNameFilter);
+        log.info(" serviceNameFilter:{}, assets:{}", serviceNameFilter, assets);
+        if (assets == null || !assets.isEmpty()) {
+            sb.append(" No asset found for service{" + serviceName + "}");
+            log.info(" No asset found for service:{}", serviceName);
+            return sb.toString();
+        }
+
+        // copy assets on server
+        for (Document asset : assets) {
+            InputStream in = this.readDocumentAsStream(asset.getDisplayName(), asset.getDocument());
+            if (in == null) {
+                sb.append("Asset file for service{" + serviceName + "} is blank");
+            }
+
+            // save on server
+            String result = copyAssetOnServer(asset, in);
+            log.info("Asset file:{} load result for serviceName:{} is:{}", asset.getDisplayName(), serviceName, result);
+            sb.append("Asset file:{" + asset.getDisplayName() + "} load result for service:{" + serviceName + "} is:{"
+                    + result + "}");
+
+        }
+
+        return sb.toString();
     }
 
     public boolean removeAsset(String inum) throws Exception {
@@ -255,6 +317,15 @@ public class AssetService {
         return validFileExtension;
     }
 
+    public InputStream readDocumentAsStream(Document asset) {
+        log.info(" Asset to fetch file - asset:{}", asset);
+        if (asset == null) {
+            throw new InvalidAttributeException(" Asset object is null!!!");
+        }
+        return readDocumentAsStream(asset.getDisplayName(), asset.getDocument());
+
+    }
+
     private Document setAssetContent(Document asset, InputStream documentStream) throws IOException {
         log.info(" Set asset content - asset:{}, documentStream:{}", asset, documentStream);
         if (asset == null) {
@@ -268,24 +339,25 @@ public class AssetService {
         String documentContent = new String(documentStream.readAllBytes(), StandardCharsets.UTF_8);
         asset.setDocument(documentContent);
 
-        // update asset revision
-        updateRevision(asset);
-
         log.info("Successfully updated asset");
         return asset;
     }
 
-    private Document updateRevision(Document asset) {
-        log.debug("Update asset revision - asset:{}", asset);
+    private Document updateRevision(Document asset, boolean isUpdate) {
+        log.debug("Update asset revision - asset:{}, isUpdate:{}", asset, isUpdate);
         try {
             if (asset == null) {
                 return asset;
             }
 
-            int intRevision = asset.getJansRevision();
+            int intRevision = asset.getRevision();
             log.debug(" Current asset intRevision is:{}", intRevision);
-            asset.setJansRevision(++intRevision);
-            log.info("Updated asset revision to asset.getJansRevision():{}", asset.getJansRevision());
+
+            if (isUpdate) {
+                intRevision = intRevision + intRevision;
+            }
+            asset.setRevision(intRevision);
+            log.info("Updated asset revision to asset.getJansRevision():{}", asset.getRevision());
         } catch (Exception ex) {
             log.error("Exception while updating asset revision is - ", ex);
             return asset;
@@ -293,7 +365,7 @@ public class AssetService {
         return asset;
     }
 
-    private String copyAssetOnServer(Document asset, ByteArrayOutputStream stream) throws IOException {
+    private String copyAssetOnServer(Document asset, InputStream stream) throws IOException {
         log.info("Copy asset on server - asset:{}, stream:{}", asset, stream);
         String result = null;
 
@@ -305,11 +377,9 @@ public class AssetService {
             throw new InvalidConfigurationException("Asset stream is null!");
         }
 
-        List<String> serviceModules = asset.getJansService();
+        List<String> serviceModules = asset.getService();
         String assetFileName = asset.getDisplayName();
-        String documentStoreModuleName = assetFileName;
-        log.info("Save asset for - serviceModules:{}, assetFileName:{}", serviceModules, assetFileName);
-
+        log.info("Copy assetFileName:{} for serviceModules:{}", asset, serviceModules);
         if (StringUtils.isBlank(assetFileName)) {
             throw new InvalidConfigurationException("Asset name is null!");
         }
@@ -317,26 +387,31 @@ public class AssetService {
         String assetDir = this.getAssetDir(assetFileName);
         log.info("For saving assetFileName:{} assetDir:{}", assetFileName, assetDir);
 
+        // validate service directory
+        validateServiceDirectory(assetFileName, assetDir, serviceModules);
+
         for (String serviceName : serviceModules) {
-
-            String serviceDirectory = this.getServiceDirectory(assetDir, serviceName);
-            log.info("Save asset for - serviceName:{} in serviceDirectory:{}", serviceName, serviceDirectory);
-
-            if (StringUtils.isBlank(serviceDirectory)) {
-                throw new InvalidConfigurationException("Service directory to save asset is null!");
-            }
-
-            String filePath = serviceDirectory + File.separator + assetFileName;
-            log.info("To save asset - documentStoreService:{}, filePath:{} ", documentStoreService, filePath);
-
-            try (InputStream ins = getInputStream(stream)) {
-                result = documentStoreService.saveDocumentStream(filePath, null, ins, List.of(documentStoreModuleName));
-                log.info("Result of asset saved on server :{}", result);
-            }
-
+            result = copyAsset(assetFileName, assetDir, serviceName, stream);
         }
         return result;
 
+    }
+
+    private String copyAsset(String assetFileName, String assetDir, String serviceName, InputStream stream)
+            throws IOException {
+        String result = null;
+
+        String serviceDirectory = this.getServiceDirectory(assetDir, serviceName);
+        log.info("Save asset for - serviceName:{} in serviceDirectory:{}", serviceName, serviceDirectory);
+        String filePath = serviceDirectory + File.separator + assetFileName;
+        log.info("To save asset - documentStoreService:{}, filePath:{} ", documentStoreService, filePath);
+
+        try (stream) {
+            result = documentStoreService.saveDocumentStream(filePath, null, stream, List.of(assetFileName));
+            log.info("Result of asset saved on server :{}", result);
+        }
+
+        return result;
     }
 
     private boolean deleteAssetFromServer(Document asset) {
@@ -346,7 +421,7 @@ public class AssetService {
             return deleteStatus;
         }
 
-        List<String> serviceModules = asset.getJansService();
+        List<String> serviceModules = asset.getService();
         String assetFileName = asset.getDisplayName();
 
         log.info("Asset to be deleted for serviceModules:{}, assetFileName:{}", serviceModules, assetFileName);
@@ -407,10 +482,20 @@ public class AssetService {
         }
 
         AssetMgtConfiguration assetMgtConfiguration = this.appConfiguration.getAssetMgtConfiguration();
+
+        if (assetMgtConfiguration == null || StringUtils.isBlank(assetMgtConfiguration.getAssetBaseDirectory())) {
+            throw new InvalidConfigurationException("Config for asset management is not defined!");
+        }
+
         sb.append(assetMgtConfiguration.getAssetBaseDirectory());
         String assetDir = getAssetDirectory(assetFileName);
-
         log.info("assetMgtConfiguration:{}, sb:{}, assetDir:{}", assetMgtConfiguration, sb, assetDir);
+
+        if (StringUtils.isBlank(assetDir)) {
+            throw new InvalidConfigurationException(
+                    "Directory to upload asset [" + assetFileName + "] is not defined in config!");
+        }
+
         if (StringUtils.isNotBlank(assetDir)) {
             sb.append(File.separator);
             sb.append(assetDir);
@@ -428,6 +513,7 @@ public class AssetService {
             return path;
         }
         path = String.format(assetDir, serviceName);
+        log.info("Service directory assetDir:{}, serviceName:{}, path:{}", assetDir, serviceName, path);
 
         return path;
 
@@ -448,7 +534,7 @@ public class AssetService {
             return directory;
         }
         String fileExtension = this.getFileExtension(assetFileName);
-        log.info("Get asset Directory - fileExtension:{}", fileExtension);
+        log.info("Get asset Directory for fileExtension:{}", fileExtension);
 
         Optional<AssetDirMapping> assetDirMapping = dirMapping.stream().filter(e -> e.getType().contains(fileExtension))
                 .findFirst();
@@ -504,26 +590,83 @@ public class AssetService {
 
     private void validateModules(Document asset) {
 
-        if (asset == null || asset.getJansService() == null || asset.getJansService().isEmpty()) {
-            throw new InvalidConfigurationException("Service module list is null or empty!");
+        if (asset == null || asset.getService() == null || asset.getService().isEmpty()) {
+            throw new InvalidConfigurationException("Service module to save asset is not provided in request!");
         }
 
         List<String> validModules = getValidModuleName();
         log.info("validModules:{} ", validModules);
 
         if (validModules == null || validModules.isEmpty() || !isModuleNameValidationEnabled()) {
-            return;
+            throw new InvalidConfigurationException("Service module not configured in system! ");
         }
 
-        List<String> invalidModuleList = authUtil.findMissingElements(asset.getJansService(), validModules);
+        List<String> invalidModuleList = authUtil.findMissingElements(asset.getService(), validModules);
         log.info("invalidModuleList:{}", invalidModuleList);
 
         if (invalidModuleList != null && !invalidModuleList.isEmpty()) {
             throw new InvalidConfigurationException(
                     "Valid modules are '{" + validModules + "}', '{" + invalidModuleList + "}' not supported!");
+        }
+
+    }
+
+    private void validateServiceDirectory(String assetFileName, String assetDir, List<String> serviceModules) {
+        log.info("validate service directory details - assetFileName,:{}, assetDir:{}, serviceModules:{}", assetDir,
+                assetFileName, serviceModules);
+        StringBuilder invalidServiceDirList = new StringBuilder();
+        StringBuilder missingMapping = new StringBuilder();
+        StringBuilder errorMsg = new StringBuilder();
+        for (String serviceName : serviceModules) {
+
+            String serviceDirectory = this.getServiceDirectory(assetDir, serviceName);
+            if (StringUtils.isBlank(serviceDirectory)) {
+                missingMapping.append(serviceName);
+            }
+
+            // check if the asset directory exist
+            boolean serviceDirectoryExist = isServiceDirectoryExist(serviceDirectory);
+            if (!serviceDirectoryExist) {
+                invalidServiceDirList.append(serviceName);
+            }
 
         }
 
+        log.debug("missingMapping:{}, invalidServiceDirList:{}", missingMapping, invalidServiceDirList);
+        if (StringUtils.isNotBlank(missingMapping.toString())) {
+            errorMsg.append("Cannot save asset as service directory mapping for [" + missingMapping + "] is null!");
+        }
+
+        if (StringUtils.isNotBlank(invalidServiceDirList.toString())) {
+            errorMsg.append("Service directory to save asset [" + invalidServiceDirList + "] does not exist!");
+        }
+
+        log.info("errorMsg:{}", errorMsg);
+        if (StringUtils.isNotBlank(errorMsg.toString())) {
+            throw new InvalidConfigurationException(errorMsg.toString());
+        }
+    }
+
+    private boolean isServiceDirectoryExist(String serviceDirectory) {
+        File dir = new File(serviceDirectory);
+        boolean serviceDirectoryExist = dir.exists();
+        log.info("Check using File API serviceDirectory:{} - exist:{}", serviceDirectory, serviceDirectoryExist);
+        return serviceDirectoryExist;
+    }
+
+    private InputStream readDocumentAsStream(String name, String assetContent) {
+        log.debug("Asset name:{} assetContent: '{}'", name, assetContent);
+
+        if (StringUtils.isBlank(assetContent)) {
+            log.error("Asset file name '{}' is empty", name);
+            return null;
+        }
+
+        return new ByteArrayInputStream(assetContent.getBytes());
+    }
+
+    private DocumentStoreType getDocumentStoreType() {
+        return documentStoreService.getProviderType();
     }
 
 }

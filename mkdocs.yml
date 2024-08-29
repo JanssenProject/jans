@@ -198,12 +198,14 @@ nav:
       - admin/auth-server/endpoints/README.md
       - OpenID Configuration: admin/auth-server/endpoints/configuration.md
       - Client Registration: admin/auth-server/endpoints/client-registration.md
+      - Client Authentication: admin/auth-server/endpoints/client-authn.md
       - Authorization: admin/auth-server/endpoints/authorization.md
       - Authorization Challenge: admin/auth-server/endpoints/authorization-challenge.md
       - Token: admin/auth-server/endpoints/token.md
       - SSA: admin/auth-server/endpoints/ssa.md
       - Userinfo: admin/auth-server/endpoints/userinfo.md
       - Token Revocation: admin/auth-server/endpoints/token-revocation.md
+      - Global Token Revocation: admin/auth-server/endpoints/global-token-revocation.md
       - Session Revocation: admin/auth-server/endpoints/session-revocation.md
       - End Session: admin/auth-server/endpoints/end-session.md
       - Clientinfo: admin/auth-server/endpoints/clientinfo.md
@@ -296,6 +298,7 @@ nav:
       - Quick Start Using Agama Lab: admin/developer/agama/quick-start-using-agama-lab.md
     - External Libraries: admin/developer/external-libraries.md
     - CORS: admin/developer/cors.md
+    - X-Frame-Options: admin/developer/xframe.md
     - Managed Beans: admin/developer/managed-beans.md
     - Customization:
       - admin/developer/customization/README.md
@@ -307,6 +310,7 @@ nav:
       - Authorization Challenge: admin/developer/scripts/authorization-challenge.md
       - CIBA End User Notification: admin/developer/scripts/ciba.md
       - Client Registration: admin/developer/scripts/client-registration.md
+      - Client Authentication: admin/developer/scripts/client-authn.md
       - Config API: admin/developer/scripts/config-api.md
       - Consent Gathering: admin/developer/scripts/consent-gathering.md
       - Dynamic Scope: admin/developer/scripts/dynamic-scope.md
@@ -395,11 +399,8 @@ nav:
     - Jans Keycloak Link: admin/link/jans-keycloak-link.md
   - Lock Guide:
       - admin/lock/README.md
-      - Lock Installation: admin/lock/lock_installation.md
-      - Auth Server Configuration: admin/lock/lock_auth_server_config.md
-      - Lock Client Configuration: admin/lock/lock_client_config.md
-      - Implement Lock PDP Plugin: admin/lock/lock_pdp_plugin.md
-      - Policy Store Integration: admin/lock/lock_opa.md
+      - Lock Master: admin/lock/lock-server.md
+      - Authorization Using Cedarling: admin/lock/cedarling.md
   - Janssen Recipes:
     - admin/recipes/README.md
     - Benchmark: admin/recipes/benchmark.md
@@ -452,7 +453,6 @@ nav:
         - 'Quick Start': 'casa/administration/quick-start.md'
         - 'Admin console': 'casa/administration/admin-console.md'
         - 'About 2FA': 'casa/administration/2fa-basics.md'
-        - 'Credentials storage': 'casa/administration/credentials-stored.md'
         - 'Custom branding': 'casa/administration/custom-branding.md'
         - 'URL path customization': 'casa/administration/change-context-path.md'
         - 'Localization': 'casa/administration/localization.md'
@@ -466,6 +466,7 @@ nav:
             - 'Custom Branding': 'casa/plugins/custom-branding.md'
         - 'FAQ': 'casa/administration/faq.md'
     - Developer Guide:
+        - 'Overview': 'casa/developer/overview.md'
         - 'Adding authentication methods': 'casa/developer/add-authn-methods.md'
     - User Guide: 'casa/user-guide.md'
 plugins:

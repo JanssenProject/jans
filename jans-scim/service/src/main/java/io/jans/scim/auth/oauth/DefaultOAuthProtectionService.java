@@ -32,7 +32,6 @@ public class DefaultOAuthProtectionService extends BaseOAuthProtectionService {
             response = IProtectionService.simpleResponse(Response.Status.FORBIDDEN, msg);
         }
         return response;
-
     }
 
 }

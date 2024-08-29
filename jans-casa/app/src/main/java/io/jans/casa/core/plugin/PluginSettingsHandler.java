@@ -34,8 +34,10 @@ public class PluginSettingsHandler<T> implements IPluginSettingsHandler<T> {
         try {
             if (pluginKey.equals("strong-authn-settings")) {
             	
-            	Basic2FASettings b2s = mapper.convertValue(
-            		getSettingsMap().get("basic_2fa_settings"), new TypeReference<Basic2FASettings>(){});
+                //getSettingsMap() can return null if this call is caused by the plugin being removed 
+                Object obj = Optional.ofNullable(getSettingsMap()).map(m -> m.get("basic_2fa_settings")).orElse(null);
+            	Basic2FASettings b2s = obj == null ? new Basic2FASettings() :
+            	       mapper.convertValue(obj, new TypeReference<Basic2FASettings>(){});
                 configurationHandler.getSettings().setBasic2FASettings(b2s);
             }
         } catch (Exception e) {

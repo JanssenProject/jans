@@ -32,6 +32,7 @@ import io.jans.as.server.model.common.AuthorizationGrantList;
 import io.jans.as.server.model.token.ClientAssertion;
 import io.jans.as.server.model.token.HttpAuthTokenType;
 import io.jans.as.server.service.*;
+import io.jans.as.server.service.external.ExternalClientAuthnService;
 import io.jans.as.server.service.token.TokenService;
 import io.jans.as.server.token.ws.rs.TxTokenValidator;
 import io.jans.as.server.util.ServerUtil;
@@ -143,6 +144,9 @@ public class AuthenticationFilter implements Filter {
     @Inject
     private TxTokenValidator txTokenValidator;
 
+    @Inject
+    private ExternalClientAuthnService externalClientAuthnService;
+
     private String realm;
 
     @Override
@@ -163,6 +167,13 @@ public class AuthenticationFilter implements Filter {
             if (appConfiguration.isSkipAuthenticationFilterOptionsMethod() && "OPTIONS".equals(method)) {
                 log.trace("Ignoring '{}' request to to: '{}'", method, requestUrl);
                 filterChain.doFilter(httpRequest, httpResponse);
+                return;
+            }
+
+            final Client client = externalClientAuthnService.externalAuthenticateClient(httpRequest, httpResponse);
+            if (client != null) {
+                log.debug("Client {} is authenticated by external script.", client.getClientId());
+                filterChain.doFilter(servletRequest, servletResponse);
                 return;
             }
 

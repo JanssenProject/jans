@@ -44,7 +44,7 @@ class ScimInstaller(JettyInstaller):
 
     def install(self):
         self.logIt("Copying scim.war into jetty webapps folder...")
-        self.installJettyService(self.jetty_app_configuration[self.service_name], True)
+        self.install_jettyService(self.jetty_app_configuration[self.service_name], True)
         jettyServiceWebapps = os.path.join(self.jetty_base, self.service_name,  'webapps')
         self.copyFile(self.source_files[0][0], jettyServiceWebapps)
 

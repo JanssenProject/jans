@@ -162,3 +162,23 @@ dn: ou=document,o=jans
 objectClass: top
 objectClass: organizationalUnit
 ou: document
+
+dn: ou=lock,o=jans
+objectClass: top
+objectClass: organizationalunit
+ou: lock
+
+dn: ou=health,ou=lock,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: health
+
+dn: ou=log,ou=lock,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: log
+
+dn: ou=telemetry,ou=lock,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: telemetry

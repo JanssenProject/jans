@@ -174,7 +174,7 @@ public class MethodInvoker {
         List<SimpleEntry<LMethod, List<paramTransformation>>> entries = new ArrayList<>();
 
         while (current != null) {            
-            logger.debug("Looking up candidate methods in class {}", current.getClass().getName());
+            logger.debug("Looking up candidate methods in class {}", current.getName());
             
             for (Method m : current.getDeclaredMethods()) {
                 if (m.getName().equals(methodName) && acceptableExecutable(m, arity, isStatic)) {

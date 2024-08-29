@@ -1,6 +1,7 @@
 import os
 import glob
 import shutil
+import ruamel.yaml
 from pathlib import Path
 
 from setup_app import paths
@@ -8,7 +9,7 @@ from setup_app.utils import base
 from setup_app.static import AppType, InstallOption
 from setup_app.config import Config
 from setup_app.installers.jetty import JettyInstaller
-from setup_app.utils.ldif_utils import myLdifParser
+from setup_app.utils.ldif_utils import myLdifParser, create_client_ldif
 
 Config.jans_lock_port = '8076'
 Config.jans_opa_host = 'localhost'
@@ -50,6 +51,7 @@ class JansLockInstaller(JettyInstaller):
         self.opa_bin_dir = os.path.join(self.opa_dir, 'bin')
         self.opa_log_dir = os.path.join(self.opa_dir, 'logs')
         self.base_endpoint = 'jans-lock' if Config.get('install_jans_lock_as_server') else 'jans-auth'
+        self.clients_ldif_fn = os.path.join(self.output_dir, 'clients.ldif')
 
     def install(self):
         if Config.get('install_jans_lock_as_server'):
@@ -61,8 +63,10 @@ class JansLockInstaller(JettyInstaller):
         if Config.get('install_opa'):
             self.install_opa()
 
+        self.create_client()
+
         if Config.persistence_type == 'sql' and Config.rdbm_type == 'pgsql':
-            self.dbUtils.set_oxAuthConfDynamic({'lockMessageConfig': {'enableTokenMessages': True, 'tokenMessagesChannel': 'jans_token'}})
+            self.dbUtils.set_jans_auth_conf_dynamic({'lockMessageConfig': {'enableTokenMessages': True, 'tokenMessagesChannel': 'jans_token'}})
             Config.lock_message_provider_type = 'POSTGRES'
 
         # we don't need to install lock-plugin to jans-config-api for remote client
@@ -73,8 +77,41 @@ class JansLockInstaller(JettyInstaller):
 
         self.apache_lock_config()
 
+    def create_client(self):
+
+        _, jans_auth_config = self.dbUtils.get_jans_auth_conf_dynamic()
+        Config.templateRenderingDict['jans_auth_token_endpoint'] = jans_auth_config['tokenEndpoint']
+
+        jans_scopes = self.dbUtils.get_scopes()
+        scope_openid = self.dbUtils.get_scope_by_jansid('openid')
+        scopes = [ scope_openid['dn'] ]
+
+        swagger_yaml_fn = base.extract_file(base.current_app.jans_zip, 'jans-config-api/plugins/docs/lock-plugin-swagger.yaml', Config.data_dir)
+        swagger_yaml_str = self.readFile(swagger_yaml_fn)
+        swagger_yml = ruamel.yaml.load(swagger_yaml_str, ruamel.yaml.RoundTripLoader)
+        config_scopes = swagger_yml['components']['securitySchemes']['oauth2']['flows']['clientCredentials']['scopes']
+
+        for config_scope_id in config_scopes:
+            config_scope = self.dbUtils.get_scope_by_jansid(config_scope_id)
+            if config_scope:
+                scopes.append(config_scope['dn'])
+
+        lock_client_prefix = '2200.'
+        check_result = self.check_clients([('lock_client_id', lock_client_prefix)])
+        if check_result.get(lock_client_prefix) == -1:
+            create_client_ldif(
+                ldif_fn=self.clients_ldif_fn,
+                client_id=Config.lock_client_id,
+                encoded_pw=Config.lock_client_encoded_pw,
+                scopes=scopes,
+                redirect_uri=[f'https://{Config.hostname}/jans-lock'],
+                display_name="Jans Lock Config Api Client"
+                )
+
+        self.dbUtils.import_ldif([self.clients_ldif_fn])
+
     def install_as_server(self):
-        self.installJettyService(self.jetty_app_configuration[self.service_name], True)
+        self.install_jettyService(self.jetty_app_configuration[self.service_name], True)
         self.logIt(f"Copying {self.source_files[0][0]} into jetty webapps folder...")
         self.copyFile(self.source_files[0][0], self.jetty_service_webapps)
         self.enable()
@@ -120,7 +157,7 @@ class JansLockInstaller(JettyInstaller):
             proxy_port = Config.jans_auth_port
             proxy_context = 'jans-auth'
 
-        jans_lock_well_known_proxy_pass = f'    ProxyPass   /.well-known/lock-master-configuration http://localhost:{proxy_port}/{proxy_context}/v1/configuration'
+        jans_lock_well_known_proxy_pass = f'    ProxyPass   /.well-known/lock-server-configuration http://localhost:{proxy_port}/{proxy_context}/v1/configuration'
         jans_lock_well_known_proxy_pass += f'\n\n    <Location /jans-lock>\n     Header edit Set-Cookie ^((?!opbs|session_state).*)$ $1;HttpOnly\n     ProxyPass http://localhost:{proxy_port}/{proxy_context} retry=5 connectiontimeout=60 timeout=60\n     Order deny,allow\n     Allow from all\n    </Location>\n'
 
 

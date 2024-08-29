@@ -65,8 +65,26 @@ install_jans() {
     echo "Installing with Postgres"
     echo "rdbm_type=pgsql" | tee -a setup.properties > /dev/null
     echo "rdbm_port=5432" | tee -a setup.properties > /dev/null
+  elif [[ "${CN_INSTALL_COUCHBASE}" == "true" ]]; then
+    echo "Installing with Couchbase"
+    echo "cb_install=2" | tee -a setup.properties > /dev/null
+    echo "cb_password=${COUCHBASE_PASSWORD}" | tee -a setup.properties > /dev/null
+    echo "couchbase_hostname=${COUCHBASE_HOSTNAME}" | tee -a setup.properties > /dev/null
+    echo "couchebaseClusterAdmin=${COUCHBASE_ADMIN}" | tee -a setup.properties > /dev/null
+  elif [[ "${CN_INSTALL_SPANNER}" == "true" ]]; then
+    echo "Installing with SPANNER"
+    echo "rdbm_type=spanner" | tee -a setup.properties > /dev/null
+    echo "rdbm_install_type=2" | tee -a setup.properties > /dev/null
+    echo "spanner_emulator_host=localhost" | tee -a setup.properties > /dev/null
+    echo "spanner_project=jans-project" | tee -a setup.properties > /dev/null
+    echo "spanner_instance=jans-instance" | tee -a setup.properties > /dev/null
+    echo "spanner_database=jansdb" | tee -a setup.properties > /dev/null
+    "$HOME"/google-cloud-sdk/bin/gcloud emulators spanner start --quiet &
+    gcloud config configurations create emulator
+    gcloud config set auth/disable_credentials true
+    gcloud config set project jans-project
+    gcloud config set api_endpoint_overrides/spanner http://localhost:9020/
   fi
-
 
   echo "*****   Running the setup script for ${CN_ORG_NAME}!!   *****"
   echo "*****   PLEASE NOTE THAT THIS MAY TAKE A WHILE TO FINISH. PLEASE BE PATIENT!!   *****"
