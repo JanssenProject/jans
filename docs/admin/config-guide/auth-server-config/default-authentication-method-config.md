@@ -1,8 +1,8 @@
 ---
 tags:
-  - administration
-  - configuration
-  - default authentication
+ - administration
+ - configuration
+ - default authentication
 ---
 
 # Default Authentication Method
@@ -13,46 +13,46 @@ The Janssen Server provides multiple configuration tools to perform these tasks.
 
 !!! Note
 
-    Only one of the available authentication methods can be set as the default.
-    While setting the Default authentication method, the Janssen Server 
-    checks if the same authentication is available and active.
+ Only one of the available authentication methods can be set as the default.
+ While setting the Default authentication method, the Janssen Server 
+ checks if the same authentication is available and active.
     
-    See 
-    [script documentation](../custom-scripts-config.md#update-an-existing-custom-script) 
-    to know how to enable/disable authentication methods using custom scripts.
+ See 
+ [script documentation](../custom-scripts-config.md#update-an-existing-custom-script) 
+ to know how to enable/disable authentication methods using custom scripts.
 
 
-    If the script is not active then the following error notification is 
-    returned by API.
-    ```{
-        "code": "400",
-        "message": "INVALID_ACR",
-        "description": "Authentication script {acr} is not active"
-    }
-    ```
+ If the script is not active then the following error notification is 
+ returned by API.
+ ```{
+ "code": "400",
+ "message": "INVALID_ACR",
+ "description": "Authentication script {acr} is not active"
+ }
+ ```
 
-    Also, to understand how Janssen Server picks the authentication method *in absence* of default authentication method, refer to 
-    [ACR documentation](../../auth-server/openid-features/acrs.md#flowchart---how-the-jans-as-derives-an-acr-value-for-a-user-session-)
+ Also, to understand how Janssen Server picks the authentication method *in the absence* of the default authentication method, refer to 
+ [ACR documentation](../../auth-server/openid-features/acrs.md#flowchart---how-the-jans-as-derives-an-acr-value-for-a-user-session-)
 
 === "Use Command-line"
 
-    Use the command line to perform actions from the terminal. Learn how to
-    use Jans CLI [here](../config-tools/jans-cli/README.md) or jump straight to
-    the [Using Command Line](#using-command-line)
+ Use the command line to perform actions from the terminal. Learn how to
+ use Jans CLI [here](../config-tools/jans-cli/README.md) or jump straight to
+ the [Using Command Line](#using-command-line)
 
 === "Use Text-based UI"
 
-    Use a fully functional text-based user interface from the terminal.
-    Learn how to use Jans Text-based UI (TUI)
-    [here](../config-tools/jans-tui/README.md) or jump straight to the
-    [Using Text-based UI](#using-text-based-ui)
+ Use a fully functional text-based user interface from the terminal.
+ Learn how to use Jans Text-based UI (TUI)
+ [here](../config-tools/jans-tui/README.md) or jump straight to the
+ [Using Text-based UI](#using-text-based-ui)
 
 === "Use REST API"
 
-    Use REST API for programmatic access or invoke via tools like CURL or 
-    Postman. Learn how to use Janssen Server Config API 
-    [here](../config-tools/config-api/README.md) or Jump straight to the
-    [Using Configuration REST API](#using-configuration-rest-api)
+ Use REST API for programmatic access or invoke via tools like CURL or 
+ Postman. Learn how to use Janssen Server Config API 
+ [here](../config-tools/config-api/README.md) or Jump straight to the
+ [Using Configuration REST API](#using-configuration-rest-api)
 
 ##  Using Command Line
 
@@ -65,10 +65,10 @@ use the command below.
 ```
 ```text title="Output"
 Operation ID: get-acrs
-  Description: Gets default authentication method.
+ Description: Gets default authentication method.
 Operation ID: put-acrs
-  Description: Updates default authentication method.
-  Schema: AuthenticationMethod
+ Description: Updates default authentication method.
+ Schema: AuthenticationMethod
 
 To get sample schema type /opt/jans/jans-cli/config-cli.py --schema <schma>, for example /opt/jans/jans-cli/config-cli.py --schema /components/schemas/AuthenticationMethod
 ```
@@ -87,7 +87,7 @@ To get the current default authentication method use the command below.
 
 ### Update Default Authentication Method
 
-Let's update the _Default Authentication Method_ using the janssen CLI command line.
+Let's update the _Default Authentication Method_ using the Janssen CLI command line.
 To perform the _put-acrs_ operation, we have to use its schema.
 To get its schema:
 
@@ -143,7 +143,7 @@ It will show the updated result.
 
 ##  Using Text-based UI
 
-In Janssen, You can manage default authentication method using
+In Janssen, You can manage the default authentication method using
 the [Text-Based UI](../config-tools/jans-tui/README.md) also.
 
 You can start TUI using the command below:
@@ -156,40 +156,41 @@ sudo /opt/jans/jans-cli/jans_cli_tui.py
 
 Navigate to `Auth Server` -> `Authn` to open the `Authn` screen as shown
 in the image below. In **Default ACR** sub-tab, available authentication methods are listed
-as raido buttons.
+as radio buttons.
 
 ![image](../../../assets/tui-authn-dafault-acr.png)
 
-To update default authentication method, bring the tab focus to the authentication method,
-and navigate to new default method with **Up** and **Down** keys. To chose hit **Space** key.
+To update the default authentication method, bring the tab focus to the authentication method,
+and navigate to the new default method with **Up** and **Down** keys. To choose hit **Space** key.
 Navigate to **Save** button and hit **Enter** key
 
-Note ! If your backend database is not LDAP, you won't see any LDAP servers releated tab/items.
+!!! Note 
+If your backend database is not LDAP, you won't see any LDAP servers related tab/items.
 
 #### Basic sub-tab
 
-This tab displays basic, the builtin, authentication method as shown in the image below.
+This tab displays the basic, builtin, authentication method as shown in the image below.
 
 ![image](../../../assets/tui-authn-basic.png)
 
-You can set basic as default authentication method by selecting **Default Authn Method**,
+You can set basic as the default authentication method by selecting **Default Authn Method**,
 navigate to **Save** button and hit **Enter** key
 
 #### LDAP Servers sub-tab
 
-If your backend database is LDAP, you will have this tab where you can add modify
-LDAP Servers to be used as default authentication method. See below image
+If your backend database is LDAP, you will have this tab where you can add and modify
+LDAP Servers are to be used as the default authentication method. See below image
 
 ![image](../../../assets/tui-authn-ldap-servers.png)
 
-To add new LDAP server, navigate to **Add Source LDAP Server** button and hit **Enter**. A popup screen will
+To add a new LDAP server, navigate to **Add Source LDAP Server** button and hit **Enter**. A popup screen will
 be displayed as shown in the image below.
 
 ![image](../../../assets/tui-authn-ldap-servers-add.png)
 
-Fill the fields provided in the popup. Before saving LDAP server, it is recommended to test it by navigating 
-**Test** button and hitting **Enter**. If test is successfull, chose **Save** button and hit **Enter**. If
-you want the current edited LDAP server is default authentication method, select **Default Authn Method** before saving.
+Fill in the fields provided in the popup. Before saving LDAP server, it is recommended to test it by navigating 
+**Test** button and hitting **Enter**. If the test is successful, chose **Save** button and hit **Enter**. If
+you want the current edited LDAP server as the default authentication method, select **Default Authn Method** before saving.
 
 #### Scripts sub-tab
 
@@ -197,21 +198,21 @@ All enabled **Person Authentication** scripts are listed in this tab as below
 
 ![image](../../../assets/tui-authn-scripts.png)
 
-To edit **Level** and/or **Properties** of authentication script, navigate to the script in the list by hitting **tab** key
+To edit **Level** and/or **Properties** of the authentication script, navigate to the script in the list by hitting **tab** key
 and hit **Enter**. You will see a popup like in the image below
 
 ![image](../../../assets/tui-authn-scripts-edit.png)
 
-If the script you want to use as default authentication method is not in the list, you should enable the script by
-navigating **Scripts** in the main tab. Find the script you want to enable and hit **Enter**, you will get a popop where
+If the script you want to use as the default authentication method is not in the list, you should enable the script by
+navigating **Scripts** in the main tab. Find the script you want to enable and hit **Enter**, you will get a popup where
 you can select **Enabled** checkbox and **Save** it as shown in the image below:
 
 ![image](../../../assets/tui-authn-scripts-enable.png)
 
 #### Aliases sub-tab
 
-Authentication aliases are listed in this tab. You can modify aliases by navitaing to the list and hit **Enter**.
-If you want to add a new alias, chose **Add Alias** button and hit **Enter**
+Authentication aliases are listed in this tab. You can modify aliases by navigating to the list and hitting **Enter**.
+If you want to add a new alias, choose **Add Alias** button and hit **Enter**
 
 #### Agama Flows sub-tab
 
