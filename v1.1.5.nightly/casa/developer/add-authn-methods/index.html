@@ -8856,15 +8856,15 @@
 <h2 id="agama-flow">Agama flow<a class="headerlink" href="#agama-flow" title="Permanent link">#</a></h2>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Acquaintance with Agama <a href="../../../agama/introduction/">framework</a> and Agama project <a href="../admin/config-guide/auth-server-config/agama-project-configuration.md">management</a> is required</p>
+<p>Acquaintance with Agama <a href="../../../agama/introduction/">framework</a> and Agama project <a href="../../../admin/config-guide/auth-server-config/agama-project-configuration/">management</a> is required</p>
 </div>
 <h3 id="about-casa-authentication-flow">About Casa authentication flow<a class="headerlink" href="#about-casa-authentication-flow" title="Permanent link">#</a></h3>
 <p>Authentication in Casa is implemented through an Agama project called <em>casa</em> - in TUI you can see it listed in the Agama management screen. As a first step, the user is requested to enter the username and password combination, then depending on how the application is configured, personal user settings,  and access policies defined, a second factor may be requested.</p>
 <p>The <em>casa</em> project allows to onboard new types of second factors (authentication mechanisms) and also provides a user experience that supports backtracking: if a user is asked to present a specific credential and that credential is not currently available or is not working, he can choose an alternative method for authentication where a different type of credential will be prompted. Users can backtrack several times.</p>
 <h3 id="flow-requisites">Flow requisites<a class="headerlink" href="#flow-requisites" title="Permanent link">#</a></h3>
-<p>To code the flow corresponding to the authentication method to add, you can use the Agama project found  <a href="https://github.com/JanssenProject/jans/tree/v1.1.5.nightly/jans-casa/plugins/samples/sample-cred/agama#readme">here</a> as a canvas. Ensure the following conditions are met so that it properly integrates in the main Casa flow:</p>
+<p>To code the flow corresponding to the authentication method to add, you can use the Agama project found  <a href="https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-casa/plugins/samples/sample-cred/agama#readme">here</a> as a canvas. Ensure the following conditions are met so that it properly integrates in the main Casa flow:</p>
 <p>The flow will be passed an Agama <em>map</em> containing information of the person attempting the authentication. This input parameter will contain at least three keys: <code>uid</code>, <code>inum</code>, and <code>name</code>. <code>uid</code> and <code>inum</code> map directly to attributes stored in the user's profile and are never empty, <code>name</code> is a displayable name which may come from attribute <code>givenName</code> or <code>displayName</code>. All values are <em>strings</em>.</p>
-<p>The flow should terminate with a <code>true</code> outcome if the user successfully passes the challenge, presents the expected credential, etc. In any other case, <code>false</code> must be returned. While you can attach additional data in the <code>Finish</code> instruction, the caller flow, namely <code>io.jans.casa.authn.main</code>, will not process any extra information. If for some reason your flow crashes, the caller will continue running, an error will be shown and the browser will be taken to the <a href="#selector-page">selector page</a>.</p>
+<p>The flow should terminate with a <code>true</code> outcome if the user successfully passes the challenge, presents the expected credential, etc. In any other case, <code>false</code> must be returned. While you can attach additional data in the <code>Finish</code> instruction, the caller flow, namely <code>io.jans.casa.authn.main</code>, will not process any extra information. If for some reason your flow crashes, the caller will continue running, an error will be shown and the browser will be taken to the <a href="#the-selector-page">selector page</a>.</p>
 <p>Note your project may contain more flows to serve as utilitarians or simply to break down the authentication flow into smaller, more manageable pieces.</p>
 <h3 id="about-templates">About templates<a class="headerlink" href="#about-templates" title="Permanent link">#</a></h3>
 <p>Regarding UI templates, it is recommended to re-use a couple of Freemarker macros available in the <em>casa</em> project. This will allow your flow's UI to have the same look-and-feel of flows bundled out-of-the box, like OTP and fido. Additionally this will allow to properly incorporate backtracking. Import the <code>commons</code> template in your UI page:</p>
@@ -8931,7 +8931,7 @@ JSONObject p = ips.getAgamaFlowConfigProperties(&quot;flow qname&quot;);
 </ul>
 <p>Depending on the answers, you may like to start instead with plugin development first. This is not always the case though, however, getting your hands on the plugin might help unclutter the path.</p>
 <h2 id="enrollment-plugin">Enrollment plugin<a class="headerlink" href="#enrollment-plugin" title="Permanent link">#</a></h2>
-<p>Coding a Casa plugin is mainly a Java development task. You can use the "Sample credential" <a href="https://github.com/JanssenProject/jans/tree/v1.1.5.nightly/jans-casa/plugins/samples/sample-cred#readme">plugin</a> as a template to start the work. Ensure you have:</p>
+<p>Coding a Casa plugin is mainly a Java development task. You can use the "Sample credential" <a href="https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-casa/plugins/samples/sample-cred#readme">plugin</a> as a template to start the work. Ensure you have:</p>
 <ul>
 <li>
 <p>A Jans Server installation that includes Jans Casa - prefer a VM environment over the CN edition for development purposes. Also, you'll need a way to connect to your server via SSH</p>
@@ -8982,7 +8982,7 @@ JSONObject p = ips.getAgamaFlowConfigProperties(&quot;flow qname&quot;);
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-08-28T08:03:05+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-08-28</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-08-29T15:56:50+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-08-29</span>
       
         <br>
         Created:

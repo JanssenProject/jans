@@ -8689,7 +8689,7 @@
 </ul>
 <h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">#</a></h2>
 <ol>
-<li><a href="https://maven.jans.io/maven/io/jans/casa/plugins/bioid-plugin/1.1.5.nightly/bioid-plugin-1.1.5.nightly-jar-with-dependencies.jar">Download</a> the plugin jar.</li>
+<li><a href="https://maven.jans.io/maven/io/jans/casa/plugins/bioid-plugin/replace-janssen-version/bioid-plugin-replace-janssen-version-jar-with-dependencies.jar">Download</a> the plugin jar.</li>
 <li>Log into Casa as an administrator, navigate to <code>Administration Console &gt; Casa plugins</code> and add the plugin jar</li>
 <li>Restart the casa service: <code>sudo systemctl restart jans-casa</code></li>
 <li>Using the TUI, enable the <code>agama</code> custom script</li>
@@ -8703,7 +8703,7 @@ zip -r casa-bioid.gama ./*
 1. Transfer the <code>casa-bioid.gama</code> file to the server, and deploy it using the TUI
 1. Using the TUI, export the sample configuration, edit it according to the specification below and import it back in</p>
 <h2 id="agama-configuration">Agama Configuration<a class="headerlink" href="#agama-configuration" title="Permanent link">#</a></h2>
-<p><div class="highlight"><pre><span></span><code>{
+<div class="highlight"><pre><span></span><code>{
   &quot;io.jans.agama.bioid.enroll&quot;: {
     &quot;host&quot;: &quot;https://&lt;HOSTNAME&gt;/jans-auth/fl/callback&quot;,
     &quot;endpoint&quot;: &quot;https://bws.bioid.com/extension/&quot;,
@@ -8714,12 +8714,14 @@ zip -r casa-bioid.gama ./*
   }
 }
 </code></pre></div>
-- <code>host</code>: Replace <code>&lt;HOSTNAME&gt;</code> with the hostname of your server
-- <code>endpoint</code>: BioID API endpoint. Leave as default
-- <code>appIdentifier</code>: The app identifier string from BWS Portal - Configuration
-- <code>appSecret</code>: The app secret from BWS Portal - Configuration
-- <code>storage</code>: Storage value from BWS Portal - Configuration
-- <code>partition</code>: Partition value from BWS Portal - Configuration</p>
+<ul>
+<li><code>host</code>: Replace <code>&lt;HOSTNAME&gt;</code> with the hostname of your server</li>
+<li><code>endpoint</code>: BioID API endpoint. Leave as default</li>
+<li><code>appIdentifier</code>: The app identifier string from BWS Portal - Configuration</li>
+<li><code>appSecret</code>: The app secret from BWS Portal - Configuration</li>
+<li><code>storage</code>: Storage value from BWS Portal - Configuration</li>
+<li><code>partition</code>: Partition value from BWS Portal - Configuration</li>
+</ul>
 <h2 id="how-to-use">How to use<a class="headerlink" href="#how-to-use" title="Permanent link">#</a></h2>
 <p>The plugin provides a user menu. When clicking the <code>Click to Enroll</code> button, Casa launches the <code>io.jans.agama.bioid.enroll</code> flow on the authorization server. This flow queries the BioID database for existing enrollments for the user. If the user has not enrolled, the flow presents the BWS GUI for enrollment. Upon success, the flow redirects back to a Casa landing page. Deletion of credentials is not supported as of now because Casa is unaware of enrollment status of a user.</p>
 
@@ -8728,7 +8730,7 @@ zip -r casa-bioid.gama ./*
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-05-09T11:38:47+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-05-09</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-08-29T15:56:50+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-08-29</span>
       
         <br>
         Created:

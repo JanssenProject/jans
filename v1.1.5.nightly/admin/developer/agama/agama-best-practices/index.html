@@ -5258,6 +5258,13 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#project-reuse-and-customizations" class="md-nav__link">
+    Project reuse and customizations
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#about-flow-design" class="md-nav__link">
     About flow design
   </a>
@@ -8607,6 +8614,13 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#project-reuse-and-customizations" class="md-nav__link">
+    Project reuse and customizations
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#about-flow-design" class="md-nav__link">
     About flow design
   </a>
@@ -8684,6 +8698,15 @@
 
 
 <h1 id="recommended-practices-in-agama-development">Recommended practices in Agama development<a class="headerlink" href="#recommended-practices-in-agama-development" title="Permanent link">#</a></h1>
+<h2 id="project-reuse-and-customizations">Project reuse and customizations<a class="headerlink" href="#project-reuse-and-customizations" title="Permanent link">#</a></h2>
+<p>Agama was designed with reusability in mind. If a project provides functionalities of your interest but you find it does not quite achieve what you want, do not try to modify the project. Instead, create a new separate project reusing the flows and code found in the original project.</p>
+<p>It might be tempting to just take an Agama project archive, apply some editions, add files to it, repack, and redeploy it. This practice is not recommended. Think of a project as a library used to develop software. In normal situations you will not to hack or patch a library but use wrapper code to override or tailor its behavior.</p>
+<p>Agama provides a couple of vehicles to manipulate behavior and appearance:</p>
+<ul>
+<li><a href="../advanced-usages/#template-overrides">Template overrides</a></li>
+<li><a href="../advanced-usages/#cancellation">Flow cancellation</a></li>
+</ul>
+<p>These allow you to preserve encapsulation and keep project intrusiveness controlled.</p>
 <h2 id="about-flow-design">About flow design<a class="headerlink" href="#about-flow-design" title="Permanent link">#</a></h2>
 <p>It is up to developers how to design a flow. This will normally require identifying the several "steps" that make up the "journey" and the conditions upon which "branching" takes place. Also it is important to check already existing flows in the server that may be reused for the purpose.</p>
 <p>Agama language was made to structure flows only, not for doing general purpose programming. This means developers have to use Java for doing low-level computations in the Janssen engine. This way, the resulting implementation (in DSL) serves as a depiction of the flow itself, hiding most of the internal details.</p>
@@ -8713,7 +8736,7 @@ Call x methodD … z …
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-02-08T19:03:01+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-02-08</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-08-29T15:56:50+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-08-29</span>
       
         <br>
         Created:
