@@ -1,7 +1,7 @@
-package io.jans.casa.plugins.sample.vm;
+package io.jans.casa.plugins.sampleauthn.vm;
 
 import io.jans.casa.core.pojo.User;
-import io.jans.casa.plugins.sample.service.SampleCredentialService;
+import io.jans.casa.plugins.sampleauthn.service.SampleCredentialService;
 import io.jans.casa.service.ISessionContext;
 
 import java.util.*;
