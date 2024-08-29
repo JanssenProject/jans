@@ -1,4 +1,4 @@
-package io.jans.casa.plugins.sample.model;
+package io.jans.casa.plugins.sampleauthn.model;
 
 import io.jans.casa.core.model.BasePerson;
 import io.jans.orm.annotation.*;

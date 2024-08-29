@@ -1,4 +1,4 @@
-package io.jans.casa.plugins;
+package io.jans.casa.plugins.sampleauthn;
 
 import org.pf4j.Plugin;
 import org.pf4j.PluginWrapper;

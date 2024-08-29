@@ -1,8 +1,8 @@
-package io.jans.casa.plugins.sample.extension;
+package io.jans.casa.plugins.sampleauthn.extension;
 
 import io.jans.casa.credential.BasicCredential;
 import io.jans.casa.extension.AuthnMethod;
-import io.jans.casa.plugins.sample.service.SampleCredentialService;
+import io.jans.casa.plugins.sampleauthn.service.SampleCredentialService;
 
 import java.util.*;
 
