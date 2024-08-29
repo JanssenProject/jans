@@ -453,6 +453,9 @@ class EditTRDialog(JansGDialog, DialogUtils):
         elif sp_meta_data_source_type == 'manual':
             new_data['samlMetadata'] = matadata_type_container_data
 
+        if not self.new_tr:
+            new_data.pop('spMetaDataLocation', None)
+
         data = {'trustRelationship': new_data}
         if sp_meta_data_source_type == 'file':
             if self.new_tr and not self.metadata_file_path:
@@ -462,12 +465,10 @@ class EditTRDialog(JansGDialog, DialogUtils):
 
             if self.metadata_file_path:
                 data['metaDataFile'] = self.metadata_file_path
-            elif 'spMetaDataFN' in self.data:
-                data['trustRelationship']['spMetaDataFN'] = self.data['spMetaDataFN']
-
 
         async def coroutine():
             operation_id = 'post-trust-relationship-metadata-file' if self.new_tr else 'put-trust-relationship'
+
             cli_args = {'operation_id': operation_id, 'data': data}
             self.app.start_progressing()
             response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
