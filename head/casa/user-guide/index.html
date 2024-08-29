@@ -8851,10 +8851,8 @@
 <p>After the minimum number of credentials have been enrolled (as specified by the system admin), 2FA can be turned on by clicking the switch in the Second Factor Authentication widget: </p>
 <p><img alt="preferred-2fa" src="../../assets/casa/preferred.png" /></p>
 <p>If the switch is not visible, your administrator may have configured the system so that 2FA is turned on automatically when enough credentials are available.</p>
-<p>When prompted for 2FA, a combination of credential strength and the type of device being used to access the protected resource will be used to determine which type of strong credential is prompted first. Depending on settings specified by your admin, you can actually choose the type of credential yourself. </p>
-<p>As an example, if you're accessing a 2FA protected application from a laptop, and you've enrolled FIDO keys and OTP apps to secure your account, FIDO will be presented as the first option for 2FA. Alternatively, if you're accessing the protected resource from a mobile device, OTP will be presented first. The exact ranking and order will be determined by the administrator. </p>
-<p>If at any time the credential prompted is unavailable, you can choose to present any other previously enrolled 2FA credential type. </p>
-<p><img alt="u2f-auth-plus-options" src="../../assets/casa/gluu-u2f-authentication.png" /> </p>
+<p>When prompted for 2FA, the specific credential to be prompted first varies depending on the priority of credentials established by the administrator and the user's preferred method, if set.</p>
+<p>If at any time the credential prompted is unavailable, you have the option to present any other previously enrolled 2FA credential type.</p>
 <p>To turn off 2FA, click again the switch. </p>
 <h3 id="2fa-settings-trusted-devices">2FA settings &amp; trusted devices<a class="headerlink" href="#2fa-settings-trusted-devices" title="Permanent link">#</a></h3>
 <p>If enabled by the system administrator, you can set your own policy for when 2FA is enforced. To manage your settings, after enrolling credentials and turning on 2FA, click the <code>Manage your 2FA settings</code> button in the Preferred Authentication Mechanism widget. </p>
@@ -8868,10 +8866,10 @@
 <p>If you opt for 2FA based on location, device, or both, a new widget will appear to display your trusted devices. </p>
 <p><img alt="2fa-settings-and-trusted-devices" src="../../assets/casa/2fa-settings-trusted-devices.png" /></p>
 <h3 id="2fa-best-practices">2FA best practices<a class="headerlink" href="#2fa-best-practices" title="Permanent link">#</a></h3>
-<p>The context of an authentication attempt can determine which type of credential is most convenient to use. For instance, security keys may not be compatible with mobile phones or certain browsers. </p>
+<p>Depending on the device used to get access, some credentials are more convenient to use than others. For instance, security keys may not be compatible with mobile phones or certain browsers.</p>
 <p><strong>To reduce the chance of account lockout</strong>, enroll at least two different <em>types</em> of 2FA credentials -- e.g. one security key and one OTP app; or one OTP app and one SMS phone number, etc. This way, regardless which device you're using to access a protected resource, you will have a usable option for passing strong authentication. </p>
 <h2 id="2fa-credential-details-enrollment">2FA credential details &amp; enrollment<a class="headerlink" href="#2fa-credential-details-enrollment" title="Permanent link">#</a></h2>
-<p>The details page provides additional details about each enrolled credential, for instance last used, mobile operating system, and device name. Nicknames can be edited, credentials can be deleted and new credentials can be enrolled and nicknamed. </p>
+<p>The details page provides additional information about each enrolled credential, for instance its name and date of enrollment. Nicknames can be edited, credentials can be deleted and new credentials can be enrolled and nicknamed. </p>
 <p>Depending on administrator configurations, some of the below sections may nor may not be available, or sections not listed here may appear.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
@@ -8920,7 +8918,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-04-17T19:12:38+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-04-17</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-08-29T15:56:50+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-08-29</span>
       
         <br>
         Created:
