@@ -1,8 +1,8 @@
-package io.jans.casa.plugins.sample.service;
+package io.jans.casa.plugins.sampleauthn.service;
 
 import io.jans.casa.credential.BasicCredential;
 import io.jans.casa.misc.Utils;
-import io.jans.casa.plugins.sample.model.PersonColor;
+import io.jans.casa.plugins.sampleauthn.model.PersonColor;
 import io.jans.casa.service.IPersistenceService;
 
 import java.util.*;
