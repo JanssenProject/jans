@@ -2,7 +2,7 @@ package io.jans.casa.authn;
 
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 
-import io.jans.agamalab.CasaWSBase;
+import io.jans.casa.CasaWSBase;
 
 import java.util.*;
 import java.net.*;
