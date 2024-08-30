@@ -224,7 +224,7 @@ nav:
       - admin/auth-server/openid-features/README.md
       - Pairwise/Public Subject Identifiers: admin/auth-server/openid-features/subject-identifiers.md
       - id_token: admin/auth-server/openid-features/id-token.md
-      - Default: admin/auth-server/openid-features/default.md
+      - ACRs: admin/auth-server/openid-features/acrs.md
       - Request Objects: admin/auth-server/openid-features/request-objects.md
       - Prompt Parameter: admin/auth-server/openid-features/prompt-parameter.md
       - Consent:

@@ -4,7 +4,7 @@ tags:
   - auth-server
   - openidc
   - feature
-  - default
+  - acr
 ---
 
 # ACR
