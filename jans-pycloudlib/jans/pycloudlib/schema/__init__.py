@@ -571,7 +571,7 @@ class SecretSchema(Schema):
     )
 
     @post_load
-    def transform_b64(self, in_data, **kwargs):
+    def transform_data(self, in_data, **kwargs):
         # list of attrs that maybe base64 string and need to be decoded
         for attr in [
             "google_credentials",
@@ -581,7 +581,7 @@ class SecretSchema(Schema):
         ]:
             with contextlib.suppress(UnicodeDecodeError, binascii.Error):
                 in_data[attr] = b64decode(in_data.get(attr, "")).decode()
-        return in_data
+        return {k: v for k, v in in_data.items() if v}
 
     @validates("encoded_salt")
     def validate_salt(self, value):
@@ -943,7 +943,7 @@ class ConfigmapSchema(Schema):
     def transform_data(self, in_data, **kwargs):
         in_data["auth_sig_keys"] = transform_auth_keys(in_data["auth_sig_keys"], AUTH_SIG_KEYS)
         in_data["auth_enc_keys"] = transform_auth_keys(in_data["auth_enc_keys"], AUTH_ENC_KEYS)
-        return in_data
+        return {k: v for k, v in in_data.items() if v}
 
     @validates("optional_scopes")
     def validate_optional_scopes(self, value):
@@ -992,7 +992,7 @@ class ConfigurationSchema(Schema):
     _configmap = Nested(ConfigmapSchema, required=True)
 
 
-def load_schema_from_file(path):
+def load_schema_from_file(path, exclude_configmap=False, exclude_secret=False):
     """Loads schema from file."""
     out = {}
     err = {}
@@ -1006,8 +1006,23 @@ def load_schema_from_file(path):
         code = 1
         return out, err, code
 
+    # dont exclude attributes
+    exclude_attrs = False
+
+    # exclude configmap from loading mechanism
+    if exclude_configmap:
+        key = "_configmap"
+        exclude_attrs = [key]
+        docs.pop(key, None)
+
+    # exclude secret from loading mechanism
+    if exclude_secret:
+        key = "_secret"
+        exclude_attrs = [key]
+        docs.pop(key, None)
+
     try:
-        out = ConfigurationSchema().load(docs)
+        out = ConfigurationSchema().load(docs, partial=exclude_attrs)
     except ValidationError as exc:
         err = exc.messages
         code = 1

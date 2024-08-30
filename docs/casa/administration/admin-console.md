@@ -22,9 +22,9 @@ Here you can choose the type of 2FA credentials you want to support in Casa. Eve
 Widgets shown vary according to plugins installed. In a fresh installation, the following are supported out-of-the-box:
 
 - OTP via SMS
-- OTP (mobile apps and hard tokens)
+- TOTP/HOTP: mobile OTP apps and hard tokens (cards, key fobs, dongles, etc.)
 - FIDO devices
-- [Super Gluu](https://docs.gluu.org/head/supergluu/)
+- [Super Gluu](https://docs.gluu.org/head/supergluu/) for push notifications 
 
 To add more authentication methods, please check the developer [guide](../developer/add-authn-methods.md).
 

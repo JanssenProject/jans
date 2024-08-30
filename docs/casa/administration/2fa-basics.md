@@ -21,22 +21,10 @@ available. Avoiding user lockout is important because it prevents a serious burd
 There is no limit to the number of credentials a user can enroll, and credentials do not need to be of the same type: 
 any combination is valid. 
 
-!!! Note
-    The number of credentials required for two-factor authentication (2FA) can be customized with 
-    the [Strong authentication settings plugin](../plugins/2fa-settings.md)
-
 ## Supported types of 2FA
 
 Users will only be able to add credentials with a type matching one of the already enabled authentication methods in 
-the admin console. See the [Admin console page](./admin-console.md#enabled-methods) to learn more. Out of the box, 
-all the following authentication methods are supported:
-
-- FIDO 2 security keys
-- [Super Gluu](https://docs.gluu.org/head/supergluu/) for push notifications 
-- HOTP/TOTP apps, cards, "dongles", etc
-- OTP via SMS (using Twilio)
-
-Other methods may be supported via [plugins](../index.md#existing-plugins).
+the [admin console](./admin-console.md#enabled-methods). Other methods may be supported via [plugins](../index.md#existing-plugins).
 
 ## Resetting a user's 2FA availability
 
@@ -54,16 +42,16 @@ To further reduce the likelihood of lockouts, you can force users to initially e
 credential before any other. OTP credentials are generally more accessible than their counterparts (like Fido) since 
 they normally don't demand special conditions from the device used to access, like having a USB port.
 
-To do so, add a property named `2fa_requisite` to the configuration of the Agama flow that backs the given authentication method, and assign `true` as its value. You can do this via [TUI](../../admin/config-guide/auth-server-config/agama-project-configuration/#agama-project-configuration-screen).
-
-!!! Note
-    This mechanism is applicable for the out-of-the box authentication methods supported by Casa. For other methods contributed via plugins, consult their respective documentation.
+To do so, add a property named `2fa_requisite` to the configuration of the Agama flow that backs the given authentication method, and assign `true` as its value. You can do this via [TUI](../../admin/config-guide/auth-server-config/agama-project-configuration/#agama-project-configuration-screen). Note
+this mechanism is applicable for the out-of-the box authentication methods supported by Casa. For other methods contributed via plugins, consult their respective documentation.
 
 You can flag more than one method as requisite. In this case users will be encouraged to enroll one credential 
 associated to any of the flagged methods.
 
 If a user attempts to delete their only available credential matching the requisite method, a prompt will appear 
 warning that doing so will disable 2FA, that is, resetting to password authentication.
+
+If you are a developer coding a plugin that adds an authentication method, you can make the method a requisite by properly implementing method `mayBe2faActivationRequisite` part of interface `AuthnMethod`.
 
 ## Enrolling credentials upon registration or first login
 
