@@ -13,7 +13,7 @@ Supporting a new authentication mechanisms consists of two tasks: coding an Agam
 ## Agama flow
 
 !!! Note
-    Acquaintance with Agama [framework](../../agama/introduction.md) and Agama project [management](../admin/config-guide/auth-server-config/agama-project-configuration.md) is required
+    Acquaintance with Agama [framework](../../agama/introduction.md) and Agama project [management](../../admin/config-guide/auth-server-config/agama-project-configuration.md) is required
 
 ### About Casa authentication flow
 
@@ -27,7 +27,9 @@ To code the flow corresponding to the authentication method to add, you can use 
 
 The flow will be passed an Agama _map_ containing information of the person attempting the authentication. This input parameter will contain at least three keys: `uid`, `inum`, and `name`. `uid` and `inum` map directly to attributes stored in the user's profile and are never empty, `name` is a displayable name which may come from attribute `givenName` or `displayName`. All values are _strings_.
 
-The flow should terminate with a `true` outcome if the user successfully passes the challenge, presents the expected credential, etc. In any other case, `false` must be returned. While you can attach additional data in the `Finish` instruction, the caller flow, namely `io.jans.casa.authn.main`, will not process any extra information. If for some reason your flow crashes, the caller will continue running, an error will be shown and the browser will be taken to the [selector page](#selector-page).
+The flow should terminate with a `true` outcome if the user successfully passes the challenge, presents the expected credential, etc. In any other case, `false` must be returned and an optional error message can be included for the caller flow (`io.jans.casa.authn.main`) to show it in the screen. Any additional data attached in the `Finish` instruction will not be processed. 
+
+If for some reason your flow crashes, the corresponding exception will be printed to the logs, the caller will continue running, and the browser taken to the [selector page](#the-selector-page) where an error message will be displayed.
 
 Note your project may contain more flows to serve as utilitarians or simply to break down the authentication flow into smaller, more manageable pieces.
 

@@ -52,7 +52,7 @@ Most aspects of Casa that are configurable through the admin console UI can be p
 Casa has enrollment capabilities built-in but there are use cases where credential enrollment needs to happen elsewhere in your app ecosystem. A typical scenario is in a user registration application, where users are asked to enroll strong authentication credentials during account creation. To facilitate these tasks, Casa exposes [APIs](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/app/src/main/webapp/enrollment-api.yaml)  for enrolling the following types of authenticators:   
 
 - Phone numbers for SMS OTP
-- OTP apps, cards, or dongles  
+- OTP apps or tokens  
 - FIDO2 security keys
 
 !!! Note
@@ -87,7 +87,7 @@ Given the warning above, there has to be a way to launch a different Agama flow 
 
 ### Requisites
 
-Regardless of the customization required, it is desirable to get acquaintance with Agama [framework](../../agama/introduction.md). This is a good time to go through the Agama developer guide pages found in the [Admin](../../admin/) section of Jans docs. Specifically, several of the Agama [advanced usages](../../admin/developer/agama/advanced-usages/#advanced-usages) will help you materialize your requirements.
+Regardless of the customization required, it is desirable to get acquaintance with Agama [framework](../../agama/introduction.md). This is a good time to go through the Agama developer guide pages found in the [Admin](../../admin/) section of Jans docs. Specifically, several of the Agama [advanced usages](../../admin/developer/agama/advanced-usages.md#advanced-usages) will help you materialize your requirements.
 
 Extract [the Agama project](https://maven.jans.io/maven/io/jans/casa-agama/replace-janssen-version/casa-agama-vreplace-janssen-version-project.zip) to your development machine. It is useful to get an idea of how and what the out-of-the-box project does. Also, keep the [Freemarker](https://freemarker.apache.org/docs/index.html) manual at hand.
 
