@@ -3,7 +3,7 @@ package io.jans.casa.authn;
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 
-import io.jans.agamalab.CasaWSBase;
+import io.jans.casa.CasaWSBase;
 import io.jans.as.common.model.common.User;
 import io.jans.as.server.service.*;
 import io.jans.service.cdi.util.CdiUtil;

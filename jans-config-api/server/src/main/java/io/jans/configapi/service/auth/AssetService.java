@@ -22,9 +22,11 @@ import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;
 import io.jans.orm.search.filter.Filter;
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.service.document.store.model.Document;
 import io.jans.service.document.store.provider.DBDocumentStoreProvider;
 import io.jans.service.document.store.service.DBDocumentService;
-import io.jans.service.document.store.service.Document;
+import io.jans.service.document.store.conf.DocumentStoreType;
+
 import io.jans.util.exception.InvalidAttributeException;
 import io.jans.util.exception.InvalidConfigurationException;
 import io.jans.service.document.store.service.DocumentStoreService;
@@ -194,14 +196,18 @@ public class AssetService {
         }
 
         // update asset revision
-        updateRevision(asset);
+        updateRevision(asset, isUpdate);
 
         // copy asset on jans-server
         if (documentStream != null && isAssetServerUploadEnabled()) {
 
             try (InputStream is = new Base64InputStream(getInputStream(bos), true)) {
-                String result = copyAssetOnServer(asset, is);
-                log.info("Result of asset saved on server :{}", result);
+                DocumentStoreType documentStoreProvider = this.getDocumentStoreType();
+                log.info("Copy asset on server documentStoreProvider is:{}", documentStoreProvider);
+                if (documentStoreProvider == DocumentStoreType.LOCAL) {
+                    String result = copyAssetOnServer(asset, is);
+                    log.info("Result of asset saved on server :{}", result);
+                }
             }
 
         }
@@ -337,17 +343,21 @@ public class AssetService {
         return asset;
     }
 
-    private Document updateRevision(Document asset) {
-        log.debug("Update asset revision - asset:{}", asset);
+    private Document updateRevision(Document asset, boolean isUpdate) {
+        log.debug("Update asset revision - asset:{}, isUpdate:{}", asset, isUpdate);
         try {
             if (asset == null) {
                 return asset;
             }
 
-            int intRevision = asset.getJansRevision();
+            int intRevision = asset.getRevision();
             log.debug(" Current asset intRevision is:{}", intRevision);
-            asset.setJansRevision(++intRevision);
-            log.info("Updated asset revision to asset.getJansRevision():{}", asset.getJansRevision());
+
+            if (isUpdate) {
+                intRevision = intRevision + intRevision;
+            }
+            asset.setRevision(intRevision);
+            log.info("Updated asset revision to asset.getJansRevision():{}", asset.getRevision());
         } catch (Exception ex) {
             log.error("Exception while updating asset revision is - ", ex);
             return asset;
@@ -367,7 +377,7 @@ public class AssetService {
             throw new InvalidConfigurationException("Asset stream is null!");
         }
 
-        List<String> serviceModules = asset.getJansService();
+        List<String> serviceModules = asset.getService();
         String assetFileName = asset.getDisplayName();
         log.info("Copy assetFileName:{} for serviceModules:{}", asset, serviceModules);
         if (StringUtils.isBlank(assetFileName)) {
@@ -411,7 +421,7 @@ public class AssetService {
             return deleteStatus;
         }
 
-        List<String> serviceModules = asset.getJansService();
+        List<String> serviceModules = asset.getService();
         String assetFileName = asset.getDisplayName();
 
         log.info("Asset to be deleted for serviceModules:{}, assetFileName:{}", serviceModules, assetFileName);
@@ -580,7 +590,7 @@ public class AssetService {
 
     private void validateModules(Document asset) {
 
-        if (asset == null || asset.getJansService() == null || asset.getJansService().isEmpty()) {
+        if (asset == null || asset.getService() == null || asset.getService().isEmpty()) {
             throw new InvalidConfigurationException("Service module to save asset is not provided in request!");
         }
 
@@ -591,7 +601,7 @@ public class AssetService {
             throw new InvalidConfigurationException("Service module not configured in system! ");
         }
 
-        List<String> invalidModuleList = authUtil.findMissingElements(asset.getJansService(), validModules);
+        List<String> invalidModuleList = authUtil.findMissingElements(asset.getService(), validModules);
         log.info("invalidModuleList:{}", invalidModuleList);
 
         if (invalidModuleList != null && !invalidModuleList.isEmpty()) {
@@ -653,6 +663,10 @@ public class AssetService {
         }
 
         return new ByteArrayInputStream(assetContent.getBytes());
+    }
+
+    private DocumentStoreType getDocumentStoreType() {
+        return documentStoreService.getProviderType();
     }
 
 }

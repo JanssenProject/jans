@@ -5,13 +5,13 @@ import os
 from collections import namedtuple
 
 from jans.pycloudlib import get_manager
-from jans.pycloudlib.persistence import CouchbaseClient
-from jans.pycloudlib.persistence import LdapClient
-from jans.pycloudlib.persistence import SpannerClient
-from jans.pycloudlib.persistence import SqlClient
-from jans.pycloudlib.persistence import PersistenceMapper
-from jans.pycloudlib.persistence import doc_id_from_dn
-from jans.pycloudlib.persistence import id_from_dn
+from jans.pycloudlib.persistence.couchbase import CouchbaseClient
+from jans.pycloudlib.persistence.ldap import LdapClient
+from jans.pycloudlib.persistence.spanner import SpannerClient
+from jans.pycloudlib.persistence.sql import SqlClient
+from jans.pycloudlib.persistence.utils import PersistenceMapper
+from jans.pycloudlib.persistence.sql import doc_id_from_dn
+from jans.pycloudlib.persistence.couchbase import id_from_dn
 
 from settings import LOGGING_CONFIG
 from utils import get_config_api_scope_mapping
@@ -62,6 +62,7 @@ def _transform_api_dynamic_config(conf):
         ("maxCount", 200),
         ("acrValidationEnabled", True),
         ("serviceName", "jans-config-api"),
+        ("acrExclusionList", ["simple_password_auth"]),
     ]:
         if missing_key not in conf:
             conf[missing_key] = value

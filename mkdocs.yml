@@ -132,7 +132,7 @@ nav:
       - OpenID Connect Client Configuration: admin/config-guide/auth-server-config/openid-connect-client-configuration.md
       - OAuth Scope Management: admin/config-guide/auth-server-config/oauth-scopes-config.md
       - JSON Web Key: admin/config-guide/auth-server-config/json-web-key-config.md
-      - Default Authentication: admin/config-guide/auth-server-config/default-authentication-method-config.md
+      - Authentication Method Configuration: admin/config-guide/auth-server-config/authentication-method-config.md
       - Auth Server Property Configuration: admin/config-guide/auth-server-config/jans-authorization-server-config.md
       - Messaging Configuration: admin/config-guide/auth-server-config/messaging-config.md
       - Logging: admin/config-guide/auth-server-config/logging-configuration.md
@@ -453,7 +453,6 @@ nav:
         - 'Quick Start': 'casa/administration/quick-start.md'
         - 'Admin console': 'casa/administration/admin-console.md'
         - 'About 2FA': 'casa/administration/2fa-basics.md'
-        - 'Credentials storage': 'casa/administration/credentials-stored.md'
         - 'Custom branding': 'casa/administration/custom-branding.md'
         - 'URL path customization': 'casa/administration/change-context-path.md'
         - 'Localization': 'casa/administration/localization.md'
@@ -467,6 +466,7 @@ nav:
             - 'Custom Branding': 'casa/plugins/custom-branding.md'
         - 'FAQ': 'casa/administration/faq.md'
     - Developer Guide:
+        - 'Overview': 'casa/developer/overview.md'
         - 'Adding authentication methods': 'casa/developer/add-authn-methods.md'
     - User Guide: 'casa/user-guide.md'
 plugins:

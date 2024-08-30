@@ -60,16 +60,18 @@ public class TOTPAlgorithmService implements IOTPAlgorithm {
     }
 
     public String getExternalUid(String secretKey, String code) {
-
-        return validateKey(Base64.getUrlDecoder().decode(secretKey), code)
+        return validateKey(secretKey, code)
                 ? String.format("%s:%s", OTPType.TOTP.getName().toLowerCase(), secretKey)
                 : null;
     }
 
-    private boolean validateKey(byte[] secretKey, String otpCode) {
-        TOTPBuilder builder = TOTP.key(secretKey).digits(conf.getDigits()).hmacSha(hmacShaAlgorithm);
+    public boolean validateKey(String secretKey, String otpCode) {
+        
+        byte[] bsecret = Base64.getUrlDecoder().decode(secretKey);
+        TOTPBuilder builder = TOTP.key(bsecret).digits(conf.getDigits()).hmacSha(hmacShaAlgorithm);
         String localTotpKey = builder.timeStep(TimeUnit.SECONDS.toMillis(conf.getTimeStep())).build().value();
         return otpCode.equals(localTotpKey);
+        
     }
 
 }

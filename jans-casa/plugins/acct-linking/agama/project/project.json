@@ -1,0 +1,58 @@
+{
+    "projectName": "casa-account-linking",
+    "author": "jgomer2001",
+    "type": "Community",
+    "version": "1.1.5",
+    "description": "A helper project for Jans Casa accounts linking plugin",
+    "noDirectLaunch": [ ],
+    "configs": {
+        "io.jans.casa.authn.acctlinking": {
+            
+            "facebook": {
+              "flowQname": "io.jans.inbound.GenericProvider",
+              "displayName": "Facebook",
+              "mappingClassField": "io.jans.casa.acctlinking.Mappings.FACEBOOK",
+              "logoImg": "facebook.png",
+            "oauthParams": {
+                "authzEndpoint": "https://www.facebook.com/v14.0/dialog/oauth",
+                "tokenEndpoint": "https://graph.facebook.com/v14.0/oauth/access_token",
+                "userInfoEndpoint": "https://graph.facebook.com/v14.0/me",
+                "clientId": "<APP-ID>",
+                "clientSecret": "<APP-SECRET>",
+                "scopes": ["email", "public_profile"]
+            }  
+            },
+            
+            "github": {
+              "flowQname": "io.jans.inbound.GenericProvider",
+              "displayName": "Github",
+              "mappingClassField": "io.jans.casa.acctlinking.Mappings.GITHUB",
+            "oauthParams": {
+                "authzEndpoint": "https://github.com/login/oauth/authorize",
+                "tokenEndpoint": "https://github.com/login/oauth/access_token",
+                "userInfoEndpoint": "https://api.github.com/user",
+                "clientId": "<APP-ID>",
+                "clientSecret": "<APP-SECRET>",
+                "scopes": ["user"]
+            }  
+            },
+            
+            "google": {
+              "flowQname": "io.jans.inbound.GenericProvider",
+              "displayName": "Google",
+              "mappingClassField": "io.jans.casa.acctlinking.Mappings.GOOGLE",
+              "enabled": false,
+              "skipProfileUpdate": true,    
+            "oauthParams": {
+                "authzEndpoint": "https://accounts.google.com/o/oauth2/v2/auth",
+                "tokenEndpoint": "https://oauth2.googleapis.com/token",
+                "userInfoEndpoint": "https://www.googleapis.com/oauth2/v3/userinfo",
+                "clientId": "<APP-ID>",
+                "clientSecret": "<APP-SECRET>",
+                "scopes": ["email", "profile"]
+            }
+            }
+        
+        }
+    }
+}

@@ -3,7 +3,6 @@ import os
 
 from jans.pycloudlib import get_manager
 from jans.pycloudlib import wait_for
-from jans.pycloudlib import wait_for_persistence
 from jans.pycloudlib.validators import validate_persistence_type
 from jans.pycloudlib.validators import validate_persistence_hybrid_mapping
 from jans.pycloudlib.validators import validate_persistence_sql_dialect
@@ -27,7 +26,6 @@ def main():
     manager = get_manager()
     deps = ["config", "secret"]
     wait_for(manager, deps)
-    wait_for_persistence(manager)
 
 
 if __name__ == "__main__":

@@ -8,10 +8,8 @@
 
     <h2 class="f3 dark-blue2">${msgs['casa.alternative']}</h2>
 
-    <#if error>
-        <p id="alert" class="w5 dark-red pv2 ph0 ma0 f7-cust">
-            We had trouble authenticating you. Try another option from the below list.
-        </p>
+    <#if message??>
+        <p id="alert" class="w5 dark-red pv2 ph0 ma0 f7-cust">${message}</p>
     </#if>
 
     <div class="pt3 mw6-ns">

@@ -30,7 +30,7 @@ RUN wget -q https://repo1.maven.org/maven2/org/eclipse/jetty/jetty-home/${JETTY_
 # ====
 
 ENV CN_VERSION=1.1.5-SNAPSHOT
-ENV CN_BUILD_DATE='2024-08-19 07:39'
+ENV CN_BUILD_DATE='2024-08-26 14:01'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/casa/${CN_VERSION}/casa-${CN_VERSION}.war
 
@@ -52,13 +52,16 @@ RUN mkdir -p ${JETTY_BASE}/jans-casa/plugins \
         wget -nv "https://jenkins.jans.io/maven/io/jans/casa/plugins/${casa_plugin}/${CN_VERSION}/${casa_plugin}-${CN_VERSION}-jar-with-dependencies.jar" -O "${JETTY_BASE}/jans-casa/plugins/${casa_plugin}-${CN_VERSION}.jar"; \
     done
 
+# casa agama
+RUN mkdir -p /usr/share/java \
+    && wget -q https://maven.jans.io/maven/io/jans/casa-agama/${CN_VERSION}/casa-agama-${CN_VERSION}-project.zip -O /usr/share/java/casa-agama-project.zip
+
 # ===========
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=433e684ea14140098002dd7ca08ecb2d50fd2c70
+ENV JANS_SOURCE_VERSION=fc9f04fe3b3d3d168f3090214b22ee80be371d92
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
-ARG JANS_CASA_EXTRAS_DIR=jans-casa/extras
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the assets
@@ -67,13 +70,11 @@ RUN git clone --depth 500 --filter blob:none --no-checkout https://github.com/ja
     && git sparse-checkout init --cone \
     && git checkout ${JANS_SOURCE_VERSION} \
     && git sparse-checkout add ${JANS_SETUP_DIR} \
-    && git sparse-checkout add ${JANS_CASA_EXTRAS_DIR} \
     && git sparse-checkout add jans-pycloudlib
 
 RUN mkdir -p /app/static/rdbm \
     /app/schema \
-    /app/templates/jans-casa \
-    /app/static/extension/person_authentication
+    /app/templates/jans-casa
 
 # sync static files from linux-setup
 RUN cd /tmp/jans \
@@ -85,7 +86,6 @@ RUN cd /tmp/jans \
     && cp ${JANS_SETUP_DIR}/schema/custom_schema.json /app/schema/ \
     && cp ${JANS_SETUP_DIR}/schema/opendj_types.json /app/schema/ \
     && cp -R ${JANS_SETUP_DIR}/templates/jans-casa/* /app/templates/jans-casa/ \
-    && cp ${JANS_CASA_EXTRAS_DIR}/Casa.py /app/static/extension/person_authentication/ \
     && mkdir -p org/eclipse/jetty \
     && cp ${JANS_SETUP_DIR}/static/favicon.ico org/eclipse/jetty/favicon.ico \
     && zip -r ${JETTY_HOME}/lib/jetty-server-${JETTY_VERSION}.jar org/eclipse/jetty/favicon.ico
@@ -231,8 +231,7 @@ RUN mkdir -p /opt/jans/python/libs \
     ${JETTY_BASE}/common/libs/couchbase \
     ${JETTY_HOME}/temp \
     /etc/jans/conf/casa \
-    /etc/certs \
-    /usr/share/java
+    /etc/certs
 
 COPY templates /app/templates/
 RUN cp /app/templates/jans-casa/jans-casa.xml ${JETTY_BASE}/jans-casa/webapps/ \

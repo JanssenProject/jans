@@ -58,7 +58,7 @@ RUN apk update \
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=433e684ea14140098002dd7ca08ecb2d50fd2c70
+ENV JANS_SOURCE_VERSION=fc9f04fe3b3d3d168f3090214b22ee80be371d92
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the assets
@@ -96,7 +96,7 @@ COPY LICENSE /licenses/LICENSE
 # assets sync
 # -----------
 
-RUN mkdir -p /app/bin
+RUN mkdir -p /app/bin /usr/share/java
 
 COPY --from=jans-configurator-src /opt/jans/configurator/javalibs /opt/jans/configurator/javalibs
 COPY --from=jans-configurator-src /app/scripts /app/jans_aio/configurator
@@ -141,7 +141,7 @@ RUN ln -sf /app/jans_aio/jans_scim/entrypoint.sh /app/bin/jans-scim-entrypoint.s
 COPY --from=jans-casa-src /opt/jans/jetty/jans-casa /opt/jans/jetty/jans-casa
 COPY --from=jans-casa-src /app/templates/jans-casa /app/templates/jans-casa
 COPY --from=jans-casa-src /app/scripts /app/jans_aio/jans_casa
-COPY --from=jans-casa-src /app/static/extension/person_authentication/Casa.py /app/static/extension/person_authentication/Casa.py
+COPY --from=jans-casa-src /usr/share/java/casa-agama-project.zip /usr/share/java
 RUN ln -sf /app/jans_aio/jans_casa/entrypoint.sh /app/bin/jans-casa-entrypoint.sh
 
 COPY --from=jans-link-src /opt/jans/jetty/jans-link /opt/jans/jetty/jans-link
@@ -170,8 +170,7 @@ RUN ln -sf /usr/lib/jvm/jdk /opt/java
 RUN mkdir -p /opt/jans/configurator/db \
     /opt/jans/configurator/certs \
     /opt/jetty/temp \
-    /etc/nginx/jans-aio \
-    /usr/share/java
+    /etc/nginx/jans-aio
 
 COPY app /app
 

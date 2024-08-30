@@ -10,18 +10,18 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.List;
 
-import jakarta.inject.Inject;
+import org.slf4j.Logger;
 
 import io.jans.service.document.store.conf.DocumentStoreType;
 import io.jans.service.document.store.provider.DocumentStore;
 import io.jans.service.document.store.provider.DocumentStoreProvider;
-import org.slf4j.Logger;
+import jakarta.inject.Inject;
 
 /**
  * @author Yuriy Movchan on 04/10/2020
  */
 @SuppressWarnings("rawtypes")
-public abstract class BaseDocumentStoreService implements DocumentStore {
+public abstract class BaseDocumentStoreService<T> implements DocumentStore<T> {
 
 	@Inject
     private Logger log;
@@ -68,7 +68,9 @@ public abstract class BaseDocumentStoreService implements DocumentStore {
 
 	@Override
 	public InputStream readBinaryDocumentAsStream(String path) {
-		return readDocumentAsStream(path);
+    	DocumentStoreProvider documentStoreProvider = getDocumentStoreProvider();
+
+		return documentStoreProvider.readBinaryDocumentAsStream(path);
 	}
 
 	@Override
@@ -83,6 +85,13 @@ public abstract class BaseDocumentStoreService implements DocumentStore {
     	DocumentStoreProvider documentStoreProvider = getDocumentStoreProvider();
 
 		return documentStoreProvider.removeDocument(path);
+	}
+
+	@Override
+	public List<T> findDocumentsByModules(List moduleList, String ... attributes) {
+    	DocumentStoreProvider documentStoreProvider = getDocumentStoreProvider();
+
+		return documentStoreProvider.findDocumentsByModules(moduleList, attributes);
 	}
 
 	@Override
