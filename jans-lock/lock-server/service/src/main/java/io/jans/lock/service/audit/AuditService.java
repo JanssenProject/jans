@@ -1,7 +1,7 @@
 package io.jans.lock.service.audit;
 
 import io.jans.as.model.uma.wrapper.Token;
-import io.jans.lock.service.LockUtil;
+import io.jans.lock.service.TokenEndpointService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,7 +26,7 @@ public class AuditService {
     private Logger log;
 
     @Inject
-    LockUtil lockUtil;
+    TokenEndpointService tokenEndpointService;
 
     private Map<String, Date> tokenDetails = new HashMap<>();
 
@@ -37,7 +37,7 @@ public class AuditService {
 
         Date tokenExpiryDate = this.getTokenExpiryDate();
         log.debug("postData - tokenExpiryDate:{}", tokenExpiryDate);
-        boolean isTokenValid = this.lockUtil.isTokenValid(tokenExpiryDate);
+        boolean isTokenValid = this.tokenEndpointService.isTokenValid(tokenExpiryDate);
         log.debug("postData - tokenDetails:{}, tokenExpiryDate:{}, isTokenValid:{}", tokenDetails, tokenExpiryDate,
                 isTokenValid);
         if (tokenDetails != null && !tokenDetails.isEmpty() && isTokenValid) {
@@ -47,17 +47,17 @@ public class AuditService {
             log.debug("Generating new token !");
             accessToken = this.getAccessTokenForAudit(endpoint);
         }
-        return this.lockUtil.post(endpoint, postData, contentType, accessToken);
+        return this.tokenEndpointService.post(endpoint, postData, contentType, accessToken);
     }
 
     public JSONObject getJSONObject(HttpServletRequest request) {
-        return this.lockUtil.getJSONObject(request);
+        return this.tokenEndpointService.getJSONObject(request);
     }
 
     private String getAccessTokenForAudit(String endpoint) {
         log.debug("Get Access Token For Audit endpoint:{}", endpoint);
         String accessToken = null;
-        Token token = this.lockUtil.getAccessToken(endpoint, true);
+        Token token = this.tokenEndpointService.getAccessToken(endpoint, true);
         log.debug("Get Access Token For Audit endpoint:{}, token:{}", endpoint, token);
 
         if (token != null) {
@@ -65,7 +65,7 @@ public class AuditService {
             Integer expiresIn = token.getExpiresIn();
             log.debug("Get Access Token For Audit endpoint:{}, accessToken:{}, expiresIn", endpoint, accessToken);
 
-            tokenDetails.put(accessToken, this.lockUtil.computeTokenExpiryTime(expiresIn));
+            tokenDetails.put(accessToken, this.tokenEndpointService.computeTokenExpiryTime(expiresIn));
         }
         return accessToken;
     }

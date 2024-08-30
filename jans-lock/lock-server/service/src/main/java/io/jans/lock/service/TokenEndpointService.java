@@ -44,7 +44,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 
 @ApplicationScoped
-public class LockUtil {
+public class TokenEndpointService {
 
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String AUTHORIZATION = "Authorization";
