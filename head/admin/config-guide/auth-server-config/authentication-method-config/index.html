@@ -12,14 +12,14 @@
         <meta name="author" content="Janssen, Inc.">
       
       
-        <link rel="canonical" href="https://jans.io/docs/head/admin/config-guide/auth-server-config/default-authentication-method-config/">
+        <link rel="canonical" href="https://jans.io/docs/head/admin/config-guide/auth-server-config/authentication-method-config/">
       
       <link rel="icon" href="../../../../assets/janssen_project_favicon_transparent_50px_50px.ico">
       <meta name="generator" content="mkdocs-1.4.1, mkdocs-material-8.5.7">
     
     
       
-        <title>Default Authentication - Janssen Documentation</title>
+        <title>Authentication Method Configuration - Janssen Documentation</title>
       
     
     
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#default-authentication-method" class="md-skip">
+        <a href="#authentication-method-configuration" class="md-skip">
           Skip to content
         </a>
       
@@ -128,7 +128,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Default Authentication
+              Authentication Method Configuration
             
           </span>
         </div>
@@ -2257,12 +2257,12 @@
       
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
-          Default Authentication
+          Authentication Method Configuration
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <a href="./" class="md-nav__link md-nav__link--active">
-        Default Authentication
+        Authentication Method Configuration
       </a>
       
         
@@ -2316,15 +2316,43 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#find-current-authentication-method_1" class="md-nav__link">
-    Find Current Authentication Method
+  <a href="#find-current-default-authentication-method" class="md-nav__link">
+    Find Current Default Authentication Method
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#update-default-authentication-method_1" class="md-nav__link">
-    Update Default Authentication Method
+  <a href="#basic-authentication-method" class="md-nav__link">
+    Basic Authentication Method
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ldap-servers-as-authentication-method" class="md-nav__link">
+    LDAP Servers As Authentication Method
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#authentication-methods-enabled-by-scripts" class="md-nav__link">
+    Authentication Methods Enabled By Scripts
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configure-aliases-for-authencation-methods" class="md-nav__link">
+    Configure Aliases For Authencation Methods
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#authentication-methods-enabled-by-agama-flows" class="md-nav__link">
+    Authentication Methods Enabled by Agama Flows
   </a>
   
 </li>
@@ -8668,15 +8696,43 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#find-current-authentication-method_1" class="md-nav__link">
-    Find Current Authentication Method
+  <a href="#find-current-default-authentication-method" class="md-nav__link">
+    Find Current Default Authentication Method
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#update-default-authentication-method_1" class="md-nav__link">
-    Update Default Authentication Method
+  <a href="#basic-authentication-method" class="md-nav__link">
+    Basic Authentication Method
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ldap-servers-as-authentication-method" class="md-nav__link">
+    LDAP Servers As Authentication Method
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#authentication-methods-enabled-by-scripts" class="md-nav__link">
+    Authentication Methods Enabled By Scripts
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#configure-aliases-for-authencation-methods" class="md-nav__link">
+    Configure Aliases For Authencation Methods
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#authentication-methods-enabled-by-agama-flows" class="md-nav__link">
+    Authentication Methods Enabled by Agama Flows
   </a>
   
 </li>
@@ -8725,17 +8781,27 @@
         <span class="md-tag">default authentication</span>
       
     
+      
+      
+        <span class="md-tag">ACR</span>
+      
+    
+      
+      
+        <span class="md-tag">authentication method</span>
+      
+    
   </nav>
 
 
 
-  <a href="https://github.com/JanssenProject/jans/edit/main/docs/admin/config-guide/auth-server-config/default-authentication-method-config.md" title="Edit this page" class="md-content__button md-icon">
+  <a href="https://github.com/JanssenProject/jans/edit/main/docs/admin/config-guide/auth-server-config/authentication-method-config.md" title="Edit this page" class="md-content__button md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
   </a>
 
 
-<h1 id="default-authentication-method">Default Authentication Method<a class="headerlink" href="#default-authentication-method" title="Permanent link">#</a></h1>
+<h1 id="authentication-method-configuration">Authentication Method Configuration<a class="headerlink" href="#authentication-method-configuration" title="Permanent link">#</a></h1>
 <p>The Janssen Server allows administrators to set and manage the default
 authentication method for the authentication server.
 The Janssen Server provides multiple configuration tools to perform these tasks.</p>
@@ -8744,37 +8810,37 @@ The Janssen Server provides multiple configuration tools to perform these tasks.
 <p>Only one of the available authentication methods can be set as the default.
 While setting the Default authentication method, the Janssen Server 
 checks if the same authentication is available and active.</p>
-<p>See 
-<a href="../../custom-scripts-config/#update-an-existing-custom-script">script documentation</a> 
-to know how to enable/disable authentication methods using custom scripts.</p>
-<p>If the script is not active then the following error notification is 
-returned by API.
-<code>{
-    "code": "400",
-    "message": "INVALID_ACR",
-    "description": "Authentication script {acr} is not active"
-}</code></p>
-<p>Also, to understand how Janssen Server picks the authentication method <em>in absence</em> of default authentication method, refer to 
-<a href="../../../auth-server/openid-features/acrs/#flowchart---how-the-jans-as-derives-an-acr-value-for-a-user-session-">ACR documentation</a></p>
 </div>
+<p>See 
+ <a href="../../custom-scripts-config/#update-an-existing-custom-script">script documentation</a> 
+ to know how to enable/disable authentication methods using custom scripts.</p>
+<p>If the script is not active then the following error notification is 
+ returned by API.
+ <code>{
+ "code": "400",
+ "message": "INVALID_ACR",
+ "description": "Authentication script {acr} is not active"
+ }</code></p>
+<p>Also, to understand how Janssen Server picks the authentication method <em>in the absence</em> of the default authentication method, refer to 
+ <a href="../../../auth-server/openid-features/acrs/#flowchart---how-the-jans-as-derives-an-acr-value-for-a-user-session-">ACR documentation</a></p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Use Command-line</label><label for="__tabbed_1_2">Use Text-based UI</label><label for="__tabbed_1_3">Use REST API</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Use the command line to perform actions from the terminal. Learn how to
-use Jans CLI <a href="../../config-tools/jans-cli/">here</a> or jump straight to
-the <a href="#using-command-line">Using Command Line</a></p>
+  use Jans CLI <a href="../../config-tools/jans-cli/">here</a> or jump straight to
+  the <a href="#using-command-line">Using Command Line</a></p>
 </div>
 <div class="tabbed-block">
 <p>Use a fully functional text-based user interface from the terminal.
-Learn how to use Jans Text-based UI (TUI)
-<a href="../../config-tools/jans-tui/">here</a> or jump straight to the
-<a href="#using-text-based-ui">Using Text-based UI</a></p>
+  Learn how to use Jans Text-based UI (TUI)
+  <a href="../../config-tools/jans-tui/">here</a> or jump straight to the
+  <a href="#using-text-based-ui">Using Text-based UI</a></p>
 </div>
 <div class="tabbed-block">
 <p>Use REST API for programmatic access or invoke via tools like CURL or 
-Postman. Learn how to use Janssen Server Config API 
-<a href="../../config-tools/config-api/">here</a> or Jump straight to the
-<a href="#using-configuration-rest-api">Using Configuration REST API</a></p>
+  Postman. Learn how to use Janssen Server Config API 
+  <a href="../../config-tools/config-api/">here</a> or Jump straight to the
+  <a href="#using-configuration-rest-api">Using Configuration REST API</a></p>
 </div>
 </div>
 </div>
@@ -8785,10 +8851,10 @@ use the command below.</p>
 <p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --info DefaultAuthenticationMethod
 </code></pre></div>
 <div class="highlight"><span class="filename">Output</span><pre><span></span><code>Operation ID: get-acrs
-  Description: Gets default authentication method.
+ Description: Gets default authentication method.
 Operation ID: put-acrs
-  Description: Updates default authentication method.
-  Schema: AuthenticationMethod
+ Description: Updates default authentication method.
+ Schema: AuthenticationMethod
 
 To get sample schema type /opt/jans/jans-cli/config-cli.py --schema &lt;schma&gt;, for example /opt/jans/jans-cli/config-cli.py --schema /components/schemas/AuthenticationMethod
 </code></pre></div></p>
@@ -8801,7 +8867,7 @@ To get sample schema type /opt/jans/jans-cli/config-cli.py --schema &lt;schma&gt
 <span class="p">}</span><span class="w"></span>
 </code></pre></div></p>
 <h3 id="update-default-authentication-method">Update Default Authentication Method<a class="headerlink" href="#update-default-authentication-method" title="Permanent link">#</a></h3>
-<p>Let's update the <em>Default Authentication Method</em> using the janssen CLI command line.
+<p>Let's update the <em>Default Authentication Method</em> using the Janssen CLI command line.
 To perform the <em>put-acrs</em> operation, we have to use its schema.
 To get its schema:</p>
 <p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --schema AuthenticationMethod <span class="se">\</span>
@@ -8836,21 +8902,67 @@ We are going to update it with <code>passport_saml</code> authentication method.
 <span class="p">}</span><span class="w"></span>
 </code></pre></div>
 <h2 id="using-text-based-ui">Using Text-based UI<a class="headerlink" href="#using-text-based-ui" title="Permanent link">#</a></h2>
-<p>In Janssen, You can manage default authentication method using
+<p>In Janssen, You can manage the default authentication method using
 the <a href="../../config-tools/jans-tui/">Text-Based UI</a> also.</p>
 <p>You can start TUI using the command below:</p>
 <div class="highlight"><span class="filename">Command</span><pre><span></span><code>sudo /opt/jans/jans-cli/jans_cli_tui.py
 </code></pre></div>
-<h3 id="find-current-authentication-method_1">Find Current Authentication Method<a class="headerlink" href="#find-current-authentication-method_1" title="Permanent link">#</a></h3>
+<h3 id="find-current-default-authentication-method">Find Current Default Authentication Method<a class="headerlink" href="#find-current-default-authentication-method" title="Permanent link">#</a></h3>
 <p>Navigate to <code>Auth Server</code> -&gt; <code>Authn</code> to open the <code>Authn</code> screen as shown
-in the image below. This screen lists the available authentication methods
-where the default method is marked with <code>x</code> under the <code>Default</code> column.</p>
-<p><img alt="image" src="../../../../assets/tui-curr-authn-method.png" /></p>
-<h3 id="update-default-authentication-method_1">Update Default Authentication Method<a class="headerlink" href="#update-default-authentication-method_1" title="Permanent link">#</a></h3>
-<p>Bring the tab focus to the authentication method that should be the new default
-method. Hit <code>Enter</code> to open the dialog as shown above. Using the checkbox for
-<code>Default Authen Method</code> the current method can be made the default 
-authentication method.</p>
+in the image below. In <strong>Default ACR</strong> sub-tab, available authentication 
+methods are listed
+as radio buttons.</p>
+<p><img alt="image" src="../../../../assets/tui-authn-dafault-acr.png" /></p>
+<p>To update the default authentication method, bring the tab focus to the 
+authentication method,
+and navigate to the new default method with <strong>Up</strong> and <strong>Down</strong> keys. 
+To choose hit <strong>Space</strong> key.
+Navigate to <strong>Save</strong> button and hit <strong>Enter</strong> key</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If your backend database is not LDAP, you won't see any LDAP servers 
+related tab/items.</p>
+</div>
+<h3 id="basic-authentication-method">Basic Authentication Method<a class="headerlink" href="#basic-authentication-method" title="Permanent link">#</a></h3>
+<p>This tab displays the basic, builtin, authentication method as shown in the image below.</p>
+<p><img alt="image" src="../../../../assets/tui-authn-basic.png" /></p>
+<p>You can set basic as the default authentication method by selecting 
+<strong>Default Authn Method</strong>,
+navigate to <strong>Save</strong> button and hit <strong>Enter</strong> key</p>
+<h3 id="ldap-servers-as-authentication-method">LDAP Servers As Authentication Method<a class="headerlink" href="#ldap-servers-as-authentication-method" title="Permanent link">#</a></h3>
+<p>If your backend database is LDAP, you will have this tab where you can add and 
+modify LDAP Servers are to be used as the default authentication method. 
+See below image</p>
+<p><img alt="image" src="../../../../assets/tui-authn-ldap-servers.png" /></p>
+<p>To add a new LDAP server, navigate to <strong>Add Source LDAP Server</strong> button and 
+hit <strong>Enter</strong>. A popup screen will
+be displayed as shown in the image below.</p>
+<p><img alt="image" src="../../../../assets/tui-authn-ldap-servers-add.png" /></p>
+<p>Fill in the fields provided in the popup. Before saving LDAP server, it is 
+recommended to test it by navigating 
+<strong>Test</strong> button and hitting <strong>Enter</strong>. If the test is successful, chose 
+<strong>Save</strong> button and hit <strong>Enter</strong>. If you want the current edited LDAP server 
+as the default authentication method, select <strong>Default Authn Method</strong> before 
+saving.</p>
+<h3 id="authentication-methods-enabled-by-scripts">Authentication Methods Enabled By Scripts<a class="headerlink" href="#authentication-methods-enabled-by-scripts" title="Permanent link">#</a></h3>
+<p>All enabled <strong>Person Authentication</strong> scripts are listed in this tab as below</p>
+<p><img alt="image" src="../../../../assets/tui-authn-scripts.png" /></p>
+<p>To edit <strong>Level</strong> and/or <strong>Properties</strong> of the authentication script, 
+navigate to the script in the list by hitting <strong>tab</strong> key
+and hit <strong>Enter</strong>. You will see a popup like in the image below</p>
+<p><img alt="image" src="../../../../assets/tui-authn-scripts-edit.png" /></p>
+<p>If the script you want to use as the default authentication method is not in 
+the list, you should enable the script by
+navigating <strong>Scripts</strong> in the main tab. Find the script you want to 
+enable and hit <strong>Enter</strong>, you will get a popup where
+you can select <strong>Enabled</strong> checkbox and <strong>Save</strong> it as shown in the image below:</p>
+<p><img alt="image" src="../../../../assets/tui-authn-scripts-enable.png" /></p>
+<h3 id="configure-aliases-for-authencation-methods">Configure Aliases For Authencation Methods<a class="headerlink" href="#configure-aliases-for-authencation-methods" title="Permanent link">#</a></h3>
+<p>Authentication aliases are listed in this tab. You can modify aliases by navigating to the list and hitting <strong>Enter</strong>.
+If you want to add a new alias, choose <strong>Add Alias</strong> button and hit <strong>Enter</strong></p>
+<h3 id="authentication-methods-enabled-by-agama-flows">Authentication Methods Enabled by Agama Flows<a class="headerlink" href="#authentication-methods-enabled-by-agama-flows" title="Permanent link">#</a></h3>
+<p>If you deployed an Agama project, ACR values for the project are displayed in this tab as shown below:</p>
+<p><img alt="image" src="../../../../assets/tui-authn-agama.png" /></p>
 <h2 id="using-configuration-rest-api">Using Configuration REST API<a class="headerlink" href="#using-configuration-rest-api" title="Permanent link">#</a></h2>
 <p>Janssen Server Configuration REST API exposes relevant endpoints for managing
 and configuring the Default Authentication Method. Endpoint details are published
@@ -8861,11 +8973,11 @@ in the <a href="../../../reference/openapi/">Swagger document</a>.</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-07-10T09:34:30+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-07-10</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-08-30T09:00:17+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-08-30</span>
       
         <br>
         Created:
-        <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2021-04-22T19:22:51+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2021-04-22</span>
+        <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-08-30T09:00:17+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-08-30</span>
       
     
   </small>
