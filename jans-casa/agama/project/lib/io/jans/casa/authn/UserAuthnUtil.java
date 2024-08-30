@@ -98,9 +98,7 @@ public class UserAuthnUtil {
         return prompt;
         
     }
-    
-    //Here I do not simply use Set<String> in the method signature. Apparently Groovy creates a
-    //hashSet despite the incoming value is actually a LinkedHashSet when called from the flow
+
     public List<String> computeUserMethods(LinkedHashSet<String> supportedMethods) {
 
         logger.trace("Supported methods: {}", supportedMethods);
@@ -165,7 +163,7 @@ public class UserAuthnUtil {
             String[] policiesArr = usrPolicy == null ? new String[]{ "EVERY_LOGIN" } : usrPolicy.split(",\\s*");
             policies = List.of(policiesArr);
         }
-        
+
     }
 
     private String translate(String oldAcr) {
