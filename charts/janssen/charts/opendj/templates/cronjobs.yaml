@@ -67,8 +67,8 @@ spec:
                 - name: LDAP_PASSWORD
                   valueFrom:
                     secretKeyRef:
-                      name: {{ .Release.Name }}-ldap-cron-pass
-                      key: password
+                      name: cn
+                      key: ldap_password
               #  while true; do sleep 60; ldaplog=$(cat /opt/opendj/logs/server.out); startedstr="The Directory Server has started successfully";  if [ -z "${ldaplog##*$startedstr*}" ]; then break; fi; echo "Waiting for opendj server to start"; done
               command:
               - /bin/sh
