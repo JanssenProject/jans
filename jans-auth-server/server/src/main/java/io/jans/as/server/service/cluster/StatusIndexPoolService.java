@@ -13,6 +13,7 @@ import io.jans.model.token.StatusIndexPool;
 import io.jans.model.tokenstatus.TokenStatus;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
+import io.jans.orm.exception.operation.DuplicateEntryException;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;
 import io.jans.orm.search.filter.Filter;
@@ -261,7 +262,23 @@ public class StatusIndexPoolService {
                 expirationDate = new Date(System.currentTimeMillis() + 2 * appConfiguration.getAccessTokenLifetime() * 1000);
                 pool.setExpirationDate(expirationDate);
 
-                persist(pool);
+                try {
+                    log.debug("Trying to persist index {} for node {}", lastPoolIndex, nodeId);
+
+                    persist(pool);
+                } catch (EntryPersistenceException e) {
+                    if (e.getCause() instanceof DuplicateEntryException) {
+                        lastPoolIndex = lastPoolIndex + 1;
+                        log.debug("Detected duplicate entry, increased index to {}", lastPoolIndex);
+
+                        pool.setId(lastPoolIndex);
+                        pool.setDn(createDn(lastPoolIndex));
+
+                        persist(pool);
+                    } else {
+                        throw e;
+                    }
+                }
 
                 // Load pool after update
                 StatusIndexPool lockedPool = getPoolByDn(pool.getDn());
