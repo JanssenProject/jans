@@ -151,6 +151,7 @@ style = Style.from_dict(
         "table-white-header": "nounderline bold fg:ansiblack bg:White",
         "table-white-data": "nounderline fg:ansiblack bg:LightGray",
         "table-white-bg": "nounderline bg:ansiwhite",
+        "table-black-bg": "nounderline bg:black",
 
         # dialog
         'dialog':             'bg:#4444ff',

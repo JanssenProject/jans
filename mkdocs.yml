@@ -132,7 +132,7 @@ nav:
       - OpenID Connect Client Configuration: admin/config-guide/auth-server-config/openid-connect-client-configuration.md
       - OAuth Scope Management: admin/config-guide/auth-server-config/oauth-scopes-config.md
       - JSON Web Key: admin/config-guide/auth-server-config/json-web-key-config.md
-      - Default Authentication: admin/config-guide/auth-server-config/default-authentication-method-config.md
+      - Authentication Method Configuration: admin/config-guide/auth-server-config/authentication-method-config.md
       - Auth Server Property Configuration: admin/config-guide/auth-server-config/jans-authorization-server-config.md
       - Messaging Configuration: admin/config-guide/auth-server-config/messaging-config.md
       - Logging: admin/config-guide/auth-server-config/logging-configuration.md
