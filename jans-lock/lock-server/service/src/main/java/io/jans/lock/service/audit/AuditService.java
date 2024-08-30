@@ -1,7 +1,7 @@
-package io.jans.lock.util;
+package io.jans.lock.service.audit;
 
 import io.jans.as.model.uma.wrapper.Token;
-
+import io.jans.lock.service.LockUtil;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;

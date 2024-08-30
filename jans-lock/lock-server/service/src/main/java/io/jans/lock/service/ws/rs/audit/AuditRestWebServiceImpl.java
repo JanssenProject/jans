@@ -16,9 +16,8 @@
 
 package io.jans.lock.service.ws.rs.audit;
 
-import io.jans.lock.util.AuditService;
+import io.jans.lock.service.audit.AuditService;
 import io.jans.lock.util.ServerUtil;
-import io.jans.service.security.api.ProtectedApi;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;

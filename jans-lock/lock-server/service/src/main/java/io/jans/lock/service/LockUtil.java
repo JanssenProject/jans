@@ -1,4 +1,4 @@
-package io.jans.lock.util;
+package io.jans.lock.service;
 
 import io.jans.as.client.TokenRequest;
 import io.jans.as.client.TokenResponse;
