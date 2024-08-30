@@ -453,19 +453,22 @@ class EditTRDialog(JansGDialog, DialogUtils):
         elif sp_meta_data_source_type == 'manual':
             new_data['samlMetadata'] = matadata_type_container_data
 
+        if not self.new_tr:
+            new_data.pop('spMetaDataLocation', None)
+
         data = {'trustRelationship': new_data}
         if sp_meta_data_source_type == 'file':
-            if not self.metadata_file_path:
+            if self.new_tr and not self.metadata_file_path:
                 self.app.show_message(_(common_strings.error), _("Please browse a metadata source file"), tobefocused=self.edit_tr_container)
+                self.app.stop_progressing(_("Failed to save Trust Relationship."))
                 return
 
-                self.app.stop_progressing(_("Failed to save Trust Relationship."))
-
-            data['metaDataFile'] = self.metadata_file_path
-
+            if self.metadata_file_path:
+                data['metaDataFile'] = self.metadata_file_path
 
         async def coroutine():
             operation_id = 'post-trust-relationship-metadata-file' if self.new_tr else 'put-trust-relationship'
+
             cli_args = {'operation_id': operation_id, 'data': data}
             self.app.start_progressing()
             response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
