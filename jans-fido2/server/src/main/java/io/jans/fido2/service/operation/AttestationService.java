@@ -425,10 +425,10 @@ public class AttestationService {
 			return RelyingParty.createRelyingParty(documentDomain, appConfiguration.getIssuer());
 		} else {
 			for (RequestedParty requestedParty : requestedParties) {
-				for (String domain : requestedParty.getDomains()) {
+				for (String domain : requestedParty.getOrigins()) {
 					if (StringHelper.equalsIgnoreCase(documentDomain, domain)) {
 						// Add entry for supported RP
-						return RelyingParty.createRelyingParty(documentDomain, requestedParty.getName());
+						return RelyingParty.createRelyingParty(documentDomain, requestedParty.getId());
 					}
 				}
 			}
