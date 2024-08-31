@@ -1,0 +1,83 @@
+namespace Jans {
+    // ******  TYPES  ******
+    type Url = {
+        protocol: String,
+        host: String,
+        path: String,
+    };
+    type email_address = {
+        id: String, 
+        domain: String,
+    };
+    type Context = {
+            network: ipaddr,
+            network_type: String,
+            user_agent: String, 
+            operating_system: String,
+            device_health: Set<String>,
+            current_time: Long,
+            geolocation: Set<String>,
+            fraud_indicators: Set<String>,
+    };
+
+    // ******  Entities  ******
+    entity TrustedIssuer = {
+        issuer_entity_id: Url,
+    };
+    entity Client  = {
+        client_id: String,
+        iss: TrustedIssuer,
+    };
+    entity Application = {
+        name: String,
+        client: Client,
+    };
+    entity Role;
+    entity User in [Role] {
+        sub: String,
+        username: String,
+        email: email_address,
+        phone_number: String,
+        role: Set<String>,
+    };
+
+    entity Access_token  = {
+        aud: String,
+        exp: Long,
+        iat: Long,
+        iss: TrustedIssuer,
+        jti: String,
+        scope: Set<String>,
+    };
+    entity id_token  = {
+        acr: String,
+        amr: Set<String>,
+        aud: String,
+        birthdate: String,
+        email: email_address,
+        exp: Long,
+        iat: Long,
+        iss: TrustedIssuer,
+        jti: String,        
+        name: String,
+        phone_number: String,
+        sub: String,
+    };
+    entity Userinfo_token  = {
+        aud: String,
+        birthdate: String,
+        email: email_address,
+        iss: TrustedIssuer,
+        jti: String,
+        name: String,
+        phone_number: String,
+        sub: String,
+    };
+
+    // ******  Actions  ******
+    action Execute appliesTo {
+        principal: [User, Role],
+        resource: Application,
+        context: Context,
+    };
+}

@@ -1,5 +1,43 @@
 ## cedarling ⚙️
 
+To execute example (`authz_run`)
+
+```
+cargo run
+```
+
+Path to local policy store:
+
+```
+policy-store/local.json
+```
+
+Path to input data:
+
+```
+cedar_files/input.json
+```
+
+The schema for demo was modified and placed in
+
+```
+schema/human/cedarling_demo_schema.schema
+```
+
+and policy was modified and placed in
+
+```
+cedar_files/policies_1.cedar
+```
+
+also local policy store was modified according to files above.
+
+---
+
+Other files has no influence how code execute.
+
+# current code do not support next notes
+
 The `cedarling` is an embeddable Webassembly Component that runs a local Cedar Engine, enabling fine grained and responsive Policy Management on the Web (or any JS environment). The `cedarling` allows for dynamic updates to it's internal Policy Store via Server Sent events, enabling sub-second Access Management.
 
 ### Setup 1️⃣
@@ -18,7 +56,6 @@ cargo install -f wasm-bindgen-cli # Install wasm-bindgen CLI
 ### Building ⚒️
 
 To build the `cedarling`, run the following commands, the appropriate Javascript bindings will be generated in the `out` directory.
-
 
 ```bash
 cargo build --release --target wasm32-unknown-unknown
@@ -83,54 +120,54 @@ From within your JS project, you'll need to import the exported `cedarling` func
 // cedarling initialization flow
 // INFO: The cedarling must be initialized only once, any further attempts will throw errors
 
-import { init } from "cedarling.js"
+import { init } from "cedarling.js";
 
 const config = {
-	// [REQUIRED] name that cedarling will use for DCR
-	applicationName: "test#docs",
-	// [DEFAULT = false] Controls if cedarling will discard id_token without an access token with the corresponding client_id.
-	requireAudValidation: false,
-	// [DEFAULT = true] If any token claims are checked, set to false with caution
-	jwtValidation: true,
-	// Configure how the cedarling acquires it's Policy Store during startup
-	policyStore: {
-		// can be "local", "remote" or "lock-server",
-		// each strategy requires different parameters, see below
-		strategy: "local",
-	},
-	// if policy-store.json is compressed using deflate-zlib
-	decompressPolicyStore: false,
-	// [OPTIONAL] How often, in milliseconds, will the cedarling refresh it's TrustStore. The trust store won't refresh if omitted
-	trustStoreRefreshRate: 2000,
-	// Set of jwt algorithms that the cedarling will allow
-	supportedAlgorithms: ["HS256", "HS384", "RS256"]
+  // [REQUIRED] name that cedarling will use for DCR
+  applicationName: "test#docs",
+  // [DEFAULT = false] Controls if cedarling will discard id_token without an access token with the corresponding client_id.
+  requireAudValidation: false,
+  // [DEFAULT = true] If any token claims are checked, set to false with caution
+  jwtValidation: true,
+  // Configure how the cedarling acquires it's Policy Store during startup
+  policyStore: {
+    // can be "local", "remote" or "lock-server",
+    // each strategy requires different parameters, see below
+    strategy: "local",
+  },
+  // if policy-store.json is compressed using deflate-zlib
+  decompressPolicyStore: false,
+  // [OPTIONAL] How often, in milliseconds, will the cedarling refresh it's TrustStore. The trust store won't refresh if omitted
+  trustStoreRefreshRate: 2000,
+  // Set of jwt algorithms that the cedarling will allow
+  supportedAlgorithms: ["HS256", "HS384", "RS256"],
 };
 
 /// > config.policyStore options <
 
 // the "local" strategy is a fallback option. the cedarling will use a statically embedded policy store, located in `/policy-store/local.json`
 const local = {
-	strategy: "local"
+  strategy: "local",
 };
 
 // the "remote" strategy is only slightly more complex than "local", with the only difference being you provide a http `url` from which a simple GET request is used to acquire the Policy Store
 const remote = {
-	strategy: "remote",
-	url: "https://raw.githubusercontent.com/JanssenProject/jans/main/jans-lock/cedarling/policy-store/**remote**.json"
-}
+  strategy: "remote",
+  url: "https://raw.githubusercontent.com/JanssenProject/jans/main/jans-lock/cedarling/policy-store/**remote**.json",
+};
 
 // the "lock-server" strategy is a more complicated, authenticated strategy employing OAuth.
 const lockMaster = {
-	strategy: "lock-server",
-	// `url` a http URL to a Jans Lock Master instance
-	url: "https://lock.master.gluu.cloud",
-	// `policyStoreId` acquire a specific Policy Store from the Lock Master
-	policyStoreId: "#83J5KF9U2KAKtO2J",
-	// `enableDynamicConfiguration` if the cedarling should subscribe to Policy Updates via the Lock Master's SSE endpoint
-	enableDynamicConfiguration: true,
-	// `ssaJwt`: Software Statement used by the cedarling during OAuth Dynamic Client registration
-	ssaJwt: "..."
-}
+  strategy: "lock-server",
+  // `url` a http URL to a Jans Lock Master instance
+  url: "https://lock.master.gluu.cloud",
+  // `policyStoreId` acquire a specific Policy Store from the Lock Master
+  policyStoreId: "#83J5KF9U2KAKtO2J",
+  // `enableDynamicConfiguration` if the cedarling should subscribe to Policy Updates via the Lock Master's SSE endpoint
+  enableDynamicConfiguration: true,
+  // `ssaJwt`: Software Statement used by the cedarling during OAuth Dynamic Client registration
+  ssaJwt: "...",
+};
 
 /// END > config.policyStore options <
 
