@@ -80,8 +80,7 @@
         }
     
         function fillLocationData(field) {
-            field.value = JSON.stringify({ country:"col", state:"", city:"ano", zone:"t" })
-            /*
+
             genericGET("https://api.ipapi.is", [])
                 .then(result => {
         
@@ -90,7 +89,7 @@
                             
                         obj = processLocation(obj.location, "timezone", "city", "state", "country")   //"countryCode"
                         field.value = JSON.stringify(obj)
-                        console.log(field.value)
+                        //console.log(field.value)
                     })
                 .catch(err => {
                         console.log("IPAPI call failed:" + err)
@@ -103,7 +102,7 @@
                                     field.value = JSON.stringify(obj)
                             })
                             .catch(err => console.log("FREEIPAPI call failed:" + err))                
-                    }) */
+                    })
         }
 
         function fillPlatformData(field) {
