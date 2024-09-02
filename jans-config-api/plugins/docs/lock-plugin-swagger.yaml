@@ -257,11 +257,11 @@ components:
           type: string
         severetyLevel:
           type: string
+        clientId:
+          type: string
         policyResult:
           type: string
         userAccountId:
-          type: string
-        clientId:
           type: string
         sourceInformation:
           type: string
