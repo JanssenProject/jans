@@ -40,7 +40,7 @@ To facilitate 2FA device enrollment during account registration, or elsewhere in
 
 - Phone numbers for SMS OTP
 - OTP apps, cards, or dongles  
-- FIDO2 security keys
+- FIDO security keys
 
 ## Configuration via APIs
 
@@ -50,10 +50,10 @@ Besides a comprehensive graphical [admin console](./administration/admin-console
 
 Casa is a plugin-oriented, Java web application. Existing functionality can be extended and new functionality and APIs can be introduced through plugins. Currently, there are plugins available for the following:
 
-- [Accounts linking](./plugins/accts-linking/account-linking-index.md)
-- [Consent management](./plugins/consent-management.md) 
-- [Custom branding](./plugins/custom-branding.md)  
 - [2FA settings](./plugins/2fa-settings.md)
+- [Accounts linking](./plugins/accts-linking/account-linking-index.md)
+- [Consent management](./plugins/consent-management.md)
+- [Custom branding](./plugins/custom-branding.md)
 - [BioID](./plugins/bioid.md)
 
 If you are interested in onboarding additional authentication methods to Casa, read this [guide](./developer/add-authn-methods.md).
