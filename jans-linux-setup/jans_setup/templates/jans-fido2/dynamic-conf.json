@@ -28,10 +28,10 @@
          "RS256",
          "ES256"
       ],
-      "requestedParties":[
+      "rp":[
          {
-            "name":"https://%(hostname)s",
-            "domains":[
+            "id":"https://%(hostname)s",
+            "origins":[
                "%(hostname)s"
             ]
          }

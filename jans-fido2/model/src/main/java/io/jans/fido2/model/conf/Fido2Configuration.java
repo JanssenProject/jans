@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import io.jans.doc.annotation.DocProperty;
 
 /**
@@ -43,6 +44,7 @@ public class Fido2Configuration {
     @DocProperty(description = "List of Requested Credential Types")
     private List<String> enabledFidoAlgorithms = new ArrayList<String>();
     @DocProperty(description = "Authenticators metadata in json format")
+    @JsonProperty(value = "rp")
     private List<RequestedParty> requestedParties = new ArrayList<RequestedParty>();
 
     @DocProperty(description = "String value to provide source of URLs with external metadata")
