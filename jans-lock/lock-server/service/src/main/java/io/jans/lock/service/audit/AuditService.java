@@ -31,20 +31,21 @@ public class AuditService {
     private Map<String, Date> tokenDetails = new HashMap<>();
 
     public Response post(String endpoint, String postData, ContentType contentType) {
-        log.debug("postData - endpoint:{}, postData:{}", endpoint, postData);
+        log.error("postData - endpoint:{}, postData:{}", endpoint, postData);
 
         String accessToken = null;
 
         Date tokenExpiryDate = this.getTokenExpiryDate();
-        log.debug("postData - tokenExpiryDate:{}", tokenExpiryDate);
+        log.error("postData - tokenExpiryDate:{}", tokenExpiryDate);
         boolean isTokenValid = this.tokenEndpointService.isTokenValid(tokenExpiryDate);
-        log.debug("postData - tokenDetails:{}, tokenExpiryDate:{}, isTokenValid:{}", tokenDetails, tokenExpiryDate,
+        log.error("postData - tokenDetails:{}, tokenExpiryDate:{}, isTokenValid:{}", tokenDetails, tokenExpiryDate,
                 isTokenValid);
+        
         if (tokenDetails != null && !tokenDetails.isEmpty() && isTokenValid) {
-            log.debug("Reusing token as still valid!");
+            log.error("Reusing token as still valid!");
             accessToken = this.getToken();
         } else {
-            log.debug("Generating new token !");
+            log.error("Generating new token !");
             accessToken = this.getAccessTokenForAudit(endpoint);
         }
         return this.tokenEndpointService.post(endpoint, postData, contentType, accessToken);
@@ -55,15 +56,15 @@ public class AuditService {
     }
 
     private String getAccessTokenForAudit(String endpoint) {
-        log.debug("Get Access Token For Audit endpoint:{}", endpoint);
+        log.error("Get Access Token For Audit endpoint:{}", endpoint);
         String accessToken = null;
         Token token = this.tokenEndpointService.getAccessToken(endpoint, true);
-        log.debug("Get Access Token For Audit endpoint:{}, token:{}", endpoint, token);
+        log.error("Get Access Token For Audit endpoint:{}, token:{}", endpoint, token);
 
         if (token != null) {
             accessToken = token.getAccessToken();
             Integer expiresIn = token.getExpiresIn();
-            log.debug("Get Access Token For Audit endpoint:{}, accessToken:{}, expiresIn", endpoint, accessToken);
+            log.error("Get Access Token For Audit endpoint:{}, accessToken:{}, expiresIn", endpoint, accessToken);
 
             tokenDetails.put(accessToken, this.tokenEndpointService.computeTokenExpiryTime(expiresIn));
         }
@@ -85,6 +86,7 @@ public class AuditService {
     }
 
     private String getToken() {
+        log.error("tokenDetails:{}", tokenDetails);
         String accessToken = null;
         if (tokenDetails != null && !tokenDetails.isEmpty() && tokenDetails.keySet() != null
                 && !tokenDetails.keySet().isEmpty()) {
@@ -92,9 +94,9 @@ public class AuditService {
 
             if (token.isPresent() && StringUtils.isNotBlank(token.get())) {
                 accessToken = token.get();
-            }
-            log.debug("accessToken:{}", accessToken);
+            }            
         }
+        log.error("accessToken:{}", accessToken);
         return accessToken;
     }
 }
