@@ -13,3 +13,6 @@
 
 # Mac
 .DS_Store
+
+#Allow Agama lib
+!lib/
