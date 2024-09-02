@@ -48,6 +48,7 @@ pub struct Authz {
 	jwt_dec: JWTDecoder,
 	policy: PolicySet,
 	schema: cedar_policy::Schema,
+	#[allow(dead_code)] // it will be fixed after adding handling the trusted store
 	trusted_issuers: TrustedIssuers,
 }
 
@@ -148,7 +149,7 @@ impl Authz {
 
 		let entities = Entities::empty().add_entities(jwt_entities.entities, Some(&self.schema))?;
 		Ok(EntitiesBox {
-			entities: entities,
+			entities,
 			user_entity_uid: jwt_entities.user_entity_uid,
 		})
 	}

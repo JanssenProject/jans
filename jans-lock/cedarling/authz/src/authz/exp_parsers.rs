@@ -105,7 +105,7 @@ pub fn trusted_issuer_entity(url_raw: &str) -> Result<Entity, TrustedIssuerEntit
 
 pub fn roles_entities(roles: &[String]) -> Vec<Entity> {
 	roles
-		.into_iter()
+		.iter()
 		.map(|role| {
 			Entity::with_uid(EntityUid::from_type_name_and_id(
 				// it should newer panic

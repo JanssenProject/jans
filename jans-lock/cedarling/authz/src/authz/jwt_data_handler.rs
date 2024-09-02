@@ -171,8 +171,6 @@ impl JWTData {
 
 fn deduplicate_entities(list: Vec<Entity>) -> Vec<Entity> {
 	// use Btree to not implement hash
-	BTreeMap::from_iter(list.into_iter().map(|e| (e.uid(), e)))
-		.into_iter()
-		.map(|(_k, v)| v)
+	BTreeMap::from_iter(list.into_iter().map(|e| (e.uid(), e))).into_values()
 		.collect()
 }

@@ -39,7 +39,7 @@ fn real_demo_case() -> Result<(), Box<dyn std::error::Error>> {
 		}
 	}
 
-	let v = authz.handle_raw_input(&input_json)?;
+	let v = authz.handle_raw_input(input_json)?;
 	let decision = v.decision();
 	println!("decision: {decision:#?}");
 	Ok(())

@@ -24,7 +24,7 @@ where
 		BASE64_STANDARD.decode(source.as_str()).map_err(|err| {
 			serde::de::Error::custom(format!(
 				"unable to parse Schema source as valid base64: {}, data: {}",
-				err.to_string(),
+				err,
 				&source,
 			))
 		});
@@ -40,7 +40,7 @@ where
 		.map_err(|err| {
 			serde::de::Error::custom(format!(
 				"unable to parse Schema in Human Readable cedar format: {}",
-				err.to_string()
+				err
 			))
 		})?;
 

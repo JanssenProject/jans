@@ -46,6 +46,6 @@ pub fn decode_jwt_without_validation<T: serde::de::DeserializeOwned>(
 		.map_err(|err| DecodeError::UnableToDecodeBase64(err, payload_base64.to_owned()))?;
 
 	let payload_json = String::from_utf8(payload_json)?;
-	Ok(serde_json::from_str(payload_json.as_str())
-		.map_err(|err| DecodeError::UnableToParseJson(err, payload_json.to_owned()))?)
+	serde_json::from_str(payload_json.as_str())
+		.map_err(|err| DecodeError::UnableToParseJson(err, payload_json.to_owned()))
 }

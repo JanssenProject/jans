@@ -186,16 +186,12 @@ fn json_to_expression(value: serde_json::Value) -> Option<RestrictedExpression> 
 		serde_json::Value::Number(v) => {
 			if let Option::Some(i) = v.as_i64() {
 				Some(RestrictedExpression::new_long(i))
-			} else if let Option::Some(f) = v.as_f64() {
-				Some(RestrictedExpression::new_decimal(f.to_string()))
-			} else {
-				None
-			}
+			} else { v.as_f64().map(|f| RestrictedExpression::new_decimal(f.to_string())) }
 		}
 		serde_json::Value::String(v) => Some(RestrictedExpression::new_string(v)),
 		serde_json::Value::Array(v) => Some(RestrictedExpression::new_set(
 			v.into_iter()
-				.filter_map(|v| json_to_expression(v))
+				.filter_map(json_to_expression)
 				.collect::<Vec<RestrictedExpression>>(),
 		)),
 		serde_json::Value::Object(_) => None,
@@ -311,7 +307,7 @@ impl UserInfoToken {
 		let mut entities = roles_entities;
 		entities.push(user_entity);
 		Ok(UserInfoTokenEntityBox {
-			entities: entities,
+			entities,
 			user_entry_uid,
 		})
 	}
