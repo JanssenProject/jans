@@ -1,9 +1,9 @@
 ---
 tags:
-  - administration
-  - tools
-  - configuration
-  - config-api
+ - administration
+ - tools
+ - configuration
+ - config-api
 ---
 
 
@@ -54,17 +54,17 @@ It will show the details of the available operation-ids for Config-API.
 ```text title="Sample Output"
 /opt/jans/jans-cli/config-cli.py --info ConfigurationConfigApi
 Operation ID: get-config-api-properties
-  Description: Gets config-api configuration properties.
+ Description: Gets config-api configuration properties.
 Operation ID: patch-config-api-properties
-  Description: Partially modifies config-api Configuration properties.
-  Schema: Array of JsonPatch
+ Description: Partially modifies config-api Configuration properties.
+ Schema: Array of JsonPatch
 
 To get sample schema type /opt/jans/jans-cli/config-cli.py --schema-sample <schema>, for example /opt/jans/jans-cli/config-cli.py --schema-sample JsonPatch
 ```
 
 ### Get The Current Config-API Configuration
 
-Configuration for Config-API is a set of key-value pairs, called properties. When we retrieve the configuration, these properties and thier current values are returned as a JSON document. To get the properties of Janssen Config-API Configuration, run the command below:
+Configuration for Config-API is a set of key-value pairs, called properties. When we retrieve the configuration, these properties and their current values are returned as a JSON document. To get the properties of Janssen Config-API Configuration, run the command below:
 
 ```bash title="Command"
 /opt/jans/jans-cli/config-cli.py --operation-id=get-config-api-properties
@@ -82,7 +82,7 @@ It will return the result as below:
   "acrValidationEnabled": true,
   "apiApprovedIssuer": [
     "https://example.jans.io"
-  ],
+ ],
   "apiProtectionType": "oauth2",
   "apiClientId": "1800.b62cb614-a09d-4163-a6bc-32e38a51c4d2",
   "apiClientPassword": "CN8ggRUhMkw9K0ocQ+LXbA==",
@@ -96,9 +96,9 @@ It will return the result as below:
     "jans_stat",
     "https://jans.io/scim/users.read",
     "https://jans.io/scim/users.write"
-  ],
+ ],
   "corsConfigurationFilters": [
-    {
+ {
       "filterName": "CorsFilter",
       "corsEnabled": true,
       "corsAllowedOrigins": "*",
@@ -107,89 +107,89 @@ It will return the result as below:
       "corsLoggingEnabled": false,
       "corsPreflightMaxAge": 1800,
       "corsRequestDecorate": true
-    }
-  ],
+ }
+ ],
   "loggingLevel": "INFO",
   "loggingLayout": "text",
   "disableJdkLogger": true,
   "maxCount": 200,
   "acrExclusionList": [
     "simple_password_auth"
-  ],
+ ],
   "userExclusionAttributes": [
     "userPassword"
-  ],
+ ],
   "userMandatoryAttributes": [
     "mail",
     "displayName",
     "status",
     "userPassword",
     "givenName"
-  ],
+ ],
   "agamaConfiguration": {
     "mandatoryAttributes": [
       "qname",
       "source"
-    ],
+ ],
     "optionalAttributes": [
       "serialVersionUID",
       "enabled"
-    ]
-  },
+ ]
+ },
   "auditLogConf": {
     "enabled": true,
     "headerAttributes": [
       "User-inum"
-    ]
-  },
+ ]
+ },
   "dataFormatConversionConf": {
     "enabled": true,
     "ignoreHttpMethod": [
       "@jakarta.ws.rs.GET()"
-    ]
-  },
+ ]
+ },
   "plugins": [
-    {
+ {
       "name": "admin",
       "description": "admin-ui plugin",
       "className": "io.jans.ca.plugin.adminui.rest.ApiApplication"
-    },
-    {
+ },
+ {
       "name": "fido2",
       "description": "fido2 plugin",
       "className": "io.jans.configapi.plugin.fido2.rest.ApiApplication"
-    },
-    {
+ },
+ {
       "name": "scim",
       "description": "scim plugin",
       "className": "io.jans.configapi.plugin.scim.rest.ApiApplication"
-    },
-    {
+ },
+ {
       "name": "user-management",
       "description": "user-management plugin",
       "className": "io.jans.configapi.plugin.mgt.rest.ApiApplication"
-    },
-    {
+ },
+ {
       "name": "jans-link",
       "description": "jans-link plugin",
       "className": "io.jans.configapi.plugin.link.rest.ApiApplication"
-    },
-    {
+ },
+ {
       "name": "saml",
       "description": "saml plugin",
       "className": "io.jans.configapi.plugin.saml.rest.ApiApplication"
-    },
-    {
+ },
+ {
       "name": "kc-link",
       "description": "kc-link plugin",
       "className": "io.jans.configapi.plugin.kc.link.rest.ApiApplication"
-    },
-    {
+ },
+ {
       "name": "lock",
       "description": "lock plugin",
       "className": "io.jans.configapi.plugin.lock.rest.ApiApplication"
-    }
-  ],
+ }
+ ],
   "assetMgtConfiguration": {
     "assetMgtEnabled": true,
     "assetServerUploadEnabled": true,
@@ -201,31 +201,31 @@ It will return the result as below:
       "jans-config-api",
       "jans-fido2",
       "jans-scim"
-    ],
+ ],
     "assetDirMapping": [
-      {
+ {
         "directory": "i18n",
         "type": [
           "properties"
-        ],
+ ],
         "description": "Resource bundle file."
-      },
-      {
+ },
+ {
         "directory": "libs",
         "type": [
           "jar"/opt/jans/jans-cli/config-cli.py --info ConfigurationConfigApi
 
-        ],
+ ],
         "description": "java archive library."
-      },
-      {
+ },
+ {
         "directory": "pages",
         "type": [
           "xhtml"
-        ],
+ ],
         "description": "Web pages."
-      },
-      {
+ },
+ {
         "directory": "static",
         "type": [
           "js",
@@ -234,37 +234,37 @@ It will return the result as below:
           "gif",
           "jpg",
           "jpeg"
-        ],
+ ],
         "description": "Static resources like Java-script, style-sheet and images."
-      }
-    ]
-  }
+ }
+ ]
+ }
 }
 ```
 
 ### Update Config-API Configuration Properties
 
-To update the configuration, we will be using [JSON patch](https://datatracker.ietf.org/doc/html/rfc6902) schema as shown below. 
+To update the configuration, we will use [JSON patch](https://datatracker.ietf.org/doc/html/rfc6902) schema as shown below. 
 
-Let say we want to stop the file extension validation done
+Let's say we want to stop the file extension validation done
 by config-api's asset management module. This can be done by
 setting the `fileExtensionValidationEnabled` property to 
 `false`. To do that, write a text file (`config-api-assetmgt-patch.json`) with the content that follows the JSON patch schema.
 
 ```json title="config-api-assetmgt-patch.json" linenums="1"
 [
-  {
+ {
     "op": "replace",
     "path": "/assetMgtConfiguration/fileExtensionValidationEnabled",
     "value": false
-  }
+ }
 ]
 ```
 
 Now, execute the following command to apply this patch:
  ```bash title="Command"
   /opt/jans/jans-cli/config-cli.py \
-  --operation-id=patch-config-api-properties --data ./config-api-assetmgt-patch.json
+ --operation-id=patch-config-api-properties --data ./config-api-assetmgt-patch.json
  ```
  Upon successful execution of the update, the Janssen Server responds with 
  updated configuration.
@@ -272,16 +272,16 @@ Now, execute the following command to apply this patch:
 #### Updating multi-valued property
 
 Let's say we want to 
-update the configuration property  **userMandatoryAttributes**. This property's value is a list of attributes. We want to remove an attribute from the list. For this we will have to create a JSON patch file which 
+update the configuration property  **userMandatoryAttributes**. This property's value is a list of attributes. We want to remove an attribute from the list. For this, we will have to create a JSON patch file that 
 contains the new list and then run a command to push the update
-to the Janssen Server. Let do this step-by-step:
+to the Janssen Server. Let's do this step-by-step:
 
 1. Get the current value list for **userMandatoryAttributes** property using steps mentioned in [Get the current configuration](#get-the-current-config-api-configuration) section
-2. Using the current list of values as starting point,  create a JSON patch  file `config-api-patch.json` as below. Update the list as desired by adding or removing items from the list:
+2. Using the current list of values as a starting point,  create a JSON patch  file `config-api-patch.json` as below. Update the list as desired by adding or removing items from the list:
 
  ```json title="Sample Contents" linenums="1"
  [
-  {
+ {
     "op": "replace",
     "path": "/userMandatoryAttributes",
     "value": [
@@ -291,15 +291,15 @@ to the Janssen Server. Let do this step-by-step:
       "userPassword",
       "givenName",
       "gender"
-    ]
-  }
+ ]
+ }
  ]
  ```
  
 Now, execute the following command to apply this patch:
  ```bash title="Command"
   /opt/jans/jans-cli/config-cli.py \
-  --operation-id=patch-config-api-properties --data ./config-api-patch.json
+ --operation-id=patch-config-api-properties --data ./config-api-patch.json
  ```
 
 ### Config API Configuration Parameters:
@@ -310,15 +310,15 @@ OAuth2, security, endpoints, logging, and plugin management.
 
 | Field named | Example | Description|
 |--|--|--|
-|configOauthEnabled| true | property can be used to enable or disable the oAuth2 authorization. By default, its set to true.|
-|apiApprovedIssuer| ["https://<jans.auth.server>,https://<gluu.server>,https://<anyAuth.server>"] | Enables to set more than one authorization servers. By default, the current auth-server is set. You can add more server separated by comma. |
-|apiProtectionType | oauth2| Currently support mechanisms is OAuth 2.0 tokens. |
+|configOauthEnabled| true | property can be used to enable or disable the oAuth2 authorization. By default, it is set to true.|
+|apiApprovedIssuer| ["https://<jans.auth.server>,https://<gluu.server>,https://<anyAuth.server>"] | Enables to set more than one authorization servers. By default, the current auth-server is set. You can add more servers separated by commas. |
+|apiProtectionType | oauth2| Currently support mechanism is OAuth 2.0 tokens. |
 |apiClientId | 1800.52eb1bed-ab5c-4ba6-b87e-90aad26058d0| Jans Config API Client. |
 |apiClientPassword | lwI/8mcMkF63mvueYTZ0mQ==| Encrypted secret of Jans Config API Client|
-|endpointInjectionEnabled |false| To be used in-case endpoint needs to be injected. |
+|endpointInjectionEnabled |false| To be used if the endpoint needs to be injected. |
 |authIssuerUrl| https://my-jans-server.jans.io  | URL of underlying auth-server.|
-|authOpenidConfigurationUrl| https://my-jans-server.jans.io/.well-known/openid-configuration | Metadata url of the authorization server.|
-|authOpenidIntrospectionUrl| https://my-jans-server.jans.io/jans-auth/restv1/introspection | Authorization server endpoint ro check the state of an OAuth 2.0 token and to determine meta-information about token.|
+|authOpenidConfigurationUrl| https://my-jans-server.jans.io/.well-known/openid-configuration | Metadata URL of the authorization server.|
+|authOpenidIntrospectionUrl| https://my-jans-server.jans.io/jans-auth/restv1/introspection | Authorization server endpoint to check the state of an OAuth 2.0 token and to determine meta-information about the token.|
 |authOpenidTokenUrl| https://my-jans-server.jans.io/jans-auth/restv1/token | Authorization server endpoint to obtain an Access Token, an ID Token, and optionally a Refresh Token.|
 |authOpenidRevokeUrl| https://my-jans-server.jans.io/jans-auth/restv1/token | Authorization server endpoint to notify an OAuth 2.0 authorization server that a previously obtained refresh or access token is no longer needed, allowing the server to clean up security credentials.|
 |smallryeHealthRootPath| /health-check | Deprecated param for health-check|
@@ -344,7 +344,7 @@ OAuth2, security, endpoints, logging, and plugin management.
 the application. The timer job will detect the change and fetch the latest 
 configuration from the DB.
 
-### Locating Config API configuration in Persistence Layer
+### Locating Config API configuration in the Persistence Layer
 
 While it is not recommended that an administrator directly edits a configuration 
 at the persistence layer, it may be useful information for a developer.
@@ -352,11 +352,11 @@ at the persistence layer, it may be useful information for a developer.
 #### A. MySQL
 ```mermaid
 erDiagram
-    jansAppConf {
-        string doc_id PK ""
-        string ou  "jans-config-api"
-        string jansConfDyn "json configuration for the app"
-    }
+ jansAppConf {
+ string doc_id PK ""
+ string ou  "jans-config-api"
+ string jansConfDyn "json configuration for the app"
+ }
 ```
 
 #### B. LDAP
@@ -364,7 +364,7 @@ erDiagram
 ```mermaid
 graph LR
 A[ou=jans] --> V(ou=configuration)
-     V --> V5[ou=jans-config-api]
+ V --> V5[ou=jans-config-api]
 ```
 
 
@@ -373,7 +373,7 @@ A[ou=jans] --> V(ou=configuration)
 #### OAuth authorization
 
 `configOauthEnabled` property can be used to enable or disable the oAuth2 
-authorization. By default, its set to true.
+authorization. By default, it is set to true.
 
 ```javascript
   
@@ -384,7 +384,7 @@ authorization. By default, its set to true.
 #### Api protection 
 
 `apiProtectionType` property states the protocol used for API authorization. 
-Currently supported value is `oauth2`.
+The currently supported value is `oauth2`.
 
 ```javascript
   
@@ -397,8 +397,8 @@ Currently supported value is `oauth2`.
 ### Api protection auth server
 
 `apiApprovedIssuer` property enables to set more than one authorization servers. 
-By default, the current auth-server is set. You can add more server separated 
-by comma.
+By default, the current auth-server is set. You can add more servers separated 
+by commas.
 
 ```javascript
  apiApprovedIssuer": ["https://<jans.auth.server>,https://<gluu.server>,https://<anyAuth.server>"]
@@ -407,7 +407,7 @@ by comma.
 
 ### Logging level 
 
-`loggingLevel` property can be used to the change the logging level to the 
+`loggingLevel` property can be used to change the logging level to the 
 desired values `(TRACE, DEBUG, INFO, WARN, ERROR)`. By default, the level is 
 set to `INFO`
 
@@ -420,13 +420,13 @@ set to `INFO`
 
 ### Scopes other than the one defined by config-api
 
-Config API endpoints are oAuth2 protected. These scopes are created while 
-installation. However, there are few endpoints that require scopes defined 
+Config API endpoints are oAuth2 protected. These scopes are created during 
+installation. However, few endpoints require scopes defined 
 by other modules like auth-server. 
 
-A list of these scopes is maintained in configuration in order to avoid 
-creation of these scopes during Config API start-up. `exclusiveAuthScopes` 
-property can be used to the change the logging level to the desired value 
+A list of these scopes is maintained in the configuration in order to avoid 
+the creation of these scopes during Config API start-up. `exclusiveAuthScopes` 
+property can be used to change the logging level to the desired value 
 `(TRACE, DEBUG, INFO, WARN, ERROR)`. By default, the level is set to `INFO`
 
  ```javascript
@@ -435,7 +435,7 @@ property can be used to the change the logging level to the desired value
     "jans_stat",
     "https://jans.io/scim/users.read",
     "https://jans.io/scim/users.write"
-  ],
+ ],
   
  ```
 
@@ -445,7 +445,7 @@ property can be used to the change the logging level to the desired value
 #### MandatoryAttributes 
 
 `userMandatoryAttributes` can be used to define mandatory attributes 
-for User while creation and update.
+for User while creating and updating.
 
  ```javascript
   
@@ -455,32 +455,32 @@ for User while creation and update.
   "jansStatus",
   "userPassword",
   "givenName"
-  ],
+ ],
   
  ```
 
 #### Exclusion attributes
 
 `userExclusionAttributes` can be used to define User attributes that are not 
-to be returned  in API response. More attributes that are to be skipped in 
+to be returned in the API response. More attributes that are to be skipped in 
 response can be added to the list.
 
 ```javascript
   
   "userExclusionAttributes": [
     "userPassword"
-  ],
+ ],
 ```
 
 
 ### Agama flow configuration
 
-`agamaConfiguration` stores Agama related configuration used in Agama related 
+`agamaConfiguration` stores Agama-related configuration used in Agama related 
 endpoints.
 
-`mandatoryAttributes` list defines required attributes for Agama flow creation 
+`mandatoryAttributes` list defines the required attributes for Agama flow creation 
 and update.
-`optionalAttributes` list specify the optional attributes.
+`optionalAttributes` list specifies the optional attributes.
 
 ```javascript
   
@@ -488,12 +488,12 @@ and update.
      "mandatoryAttributes": [
    "qname",
    "source"
-     ],
+ ],
    "optionalAttributes": [
    "serialVersionUID",
    "enabled"
-     ]
-  }
+ ]
+ }
   
 ```
 
