@@ -44,12 +44,12 @@ impl PolicyStoreConfig {
 }
 
 pub struct Authz {
-	app_name: Option<String>,
 	jwt_dec: JWTDecoder,
 	policy: PolicySet,
 	schema: cedar_policy::Schema,
 	#[allow(dead_code)] // it will be fixed after adding handling the trusted store
 	trusted_issuers: TrustedIssuers,
+	bootstrap_config: BootstrapConfig,
 }
 
 #[derive(thiserror::Error, Debug)]
@@ -60,10 +60,32 @@ pub enum AuthzNewError {
 	Entities(#[from] EntitiesError),
 }
 
+/// represent mapping tokens and role field
+/// for CEDARLING_ROLE_MAPPING value in BootstrapConfig
+/// for `id_token` default value `role`
+/// for `userinfo_token` default value `role`
+#[derive(Debug, derivative::Derivative, serde::Serialize, serde::Deserialize)]
+#[derivative(Default, Clone)]
+pub struct RoleMapping {
+	#[derivative(Default(value = "Some(\"role\".into())"))]
+	pub id_token: Option<String>,
+	#[derivative(Default(value = "Some(\"role\".into())"))]
+	pub userinfo_token: Option<String>,
+	pub access_token: Option<String>,
+}
+
+/// Bootstrap properties of application [link](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties)
+#[allow(non_snake_case)]
+#[derive(Debug, serde::Serialize, serde::Deserialize)]
+pub struct BootstrapConfig {
+	pub CEDARLING_APPLICATION_NAME: Option<String>,
+	pub CEDARLING_ROLE_MAPPING: RoleMapping,
+}
+
 pub struct AuthzConfig {
-	pub app_name: Option<String>,
 	pub decoder: JWTDecoder,
 	pub policy: PolicyStoreConfig,
+	pub bootstrap_config: BootstrapConfig,
 }
 
 impl Authz {
@@ -71,11 +93,11 @@ impl Authz {
 		let policy_store = config.policy.get_policy()?;
 
 		Ok(Authz {
-			app_name: config.app_name,
 			jwt_dec: config.decoder,
 			policy: policy_store.policies,
 			schema: policy_store.schema,
 			trusted_issuers: policy_store.trusted_issuers,
+			bootstrap_config: config.bootstrap_config,
 		})
 	}
 }
@@ -119,7 +141,10 @@ impl Authz {
 			.entity_uid()
 			.map_err(HandleError::Resource)?;
 
-		let entities_box = self.get_entities(decoded_input.jwt)?;
+		let entities_box = self.get_entities(
+			decoded_input.jwt,
+			&self.bootstrap_config.CEDARLING_ROLE_MAPPING,
+		)?;
 
 		let principal = entities_box.user_entity_uid;
 
@@ -142,10 +167,17 @@ impl Authz {
 		Ok(decision)
 	}
 
-	pub fn get_entities(&self, data: JWTData) -> Result<EntitiesBox, HandleError> {
+	pub fn get_entities(
+		&self,
+		data: JWTData,
+		role_mapping: &RoleMapping,
+	) -> Result<EntitiesBox, HandleError> {
 		// TODO: add entities from trust store about issuers (like in cedarling)
 
-		let jwt_entities = data.entities(self.app_name.as_deref())?;
+		let jwt_entities = data.entities(
+			self.bootstrap_config.CEDARLING_APPLICATION_NAME.as_deref(),
+			role_mapping,
+		)?;
 
 		let entities = Entities::empty().add_entities(jwt_entities.entities, Some(&self.schema))?;
 		Ok(EntitiesBox {

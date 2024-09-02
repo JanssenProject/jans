@@ -19,6 +19,7 @@ namespace Jans {
             geolocation: Set<String>,
             fraud_indicators: Set<String>,
     };
+     type EmptyContext = {};
 
     // ******  Entities  ******
     entity TrustedIssuer = {
@@ -78,6 +79,6 @@ namespace Jans {
     action Execute appliesTo {
         principal: [User, Role],
         resource: Application,
-        context: Context,
+        context: EmptyContext,
     };
 }

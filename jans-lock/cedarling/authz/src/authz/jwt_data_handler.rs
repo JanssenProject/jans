@@ -1,9 +1,12 @@
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
 use std::str::FromStr;
 
 use cedar_policy::{Entity, EntityId, EntityTypeName, EntityUid, ParseErrors};
 
-use super::jwt_tokens::{AccessToken, EntityCreatingError, IdToken, UserInfoToken, UserMissedInfo};
+use super::{
+	jwt_tokens::{AccessToken, EntityCreatingError, IdToken, UserInfoToken, UserMissedInfo},
+	RoleMapping,
+};
 
 #[derive(serde::Deserialize, Debug)]
 pub struct AuthzInputRaw {
@@ -119,9 +122,62 @@ pub struct JWTDataEntities {
 }
 
 impl JWTData {
+	fn roles(&self, role_mapping: &RoleMapping) -> Vec<String> {
+		// if serde_json::Value is string  return Vec with string
+		// if serde_json::Value is array of string return Vec with strings
+		fn parse_roles(
+			key_val: &Option<String>,
+			dict: &HashMap<String, serde_json::Value>,
+		) -> Vec<String> {
+			key_val
+				.as_deref()
+				.and_then(|key| dict.get(key))
+				.and_then(|value| match value {
+					serde_json::Value::String(role) => Some(vec![role.clone()]),
+					serde_json::Value::Array(array) => Some(
+						array
+							.iter()
+							.filter_map(|value| {
+								if let serde_json::Value::String(role) = value {
+									Some(role.clone())
+								} else {
+									log::warn!("could not parse role value in json array");
+									None
+								}
+							})
+							.collect(),
+					),
+					serde_json::Value::Null => None,
+					_ => {
+						log::warn!(
+							"could not parse role, it should be an array of strings or a string"
+						);
+						None
+					}
+				})
+				.unwrap_or_default()
+		}
+
+		let mut result = Vec::new();
+		result.extend(parse_roles(&role_mapping.id_token, &self.id_token.extra));
+
+		result.extend(parse_roles(
+			&role_mapping.userinfo_token,
+			&self.userinfo_token.extra,
+		));
+
+		result.extend(parse_roles(
+			&role_mapping.access_token,
+			&self.access_token.extra,
+		));
+
+		result
+	}
+
 	pub fn entities(
 		self,
 		application_name: Option<&str>,
+		role_mapping: &RoleMapping,
 	) -> Result<JWTDataEntities, AuthzInputEntitiesError> {
 		// TODO: implement check of token correctness
 		// // check if `aud` claim in id_token matches `client_id` in access token
@@ -137,6 +193,8 @@ impl JWTData {
 		// 	throw_str("userinfo token invalid: either sub or iss doesn't match id_token")
 		// }
 
+		let roles = self.roles(role_mapping);
+
 		let id_token_entities = self
 			.id_token
 			.entities()
@@ -145,7 +203,7 @@ impl JWTData {
 		let user_info_entities = self
 			.userinfo_token
 			.entities(UserMissedInfo {
-				roles: &[], //TODO: add roles after adding to jwts
+				roles: &roles,
 				// according to doc
 				// User: Created based on the joined id_token and userinfo token. sub is the entity identifier
 				// but username only has in access_token
@@ -171,6 +229,7 @@ impl JWTData {
 
 fn deduplicate_entities(list: Vec<Entity>) -> Vec<Entity> {
 	// use Btree to not implement hash
-	BTreeMap::from_iter(list.into_iter().map(|e| (e.uid(), e))).into_values()
+	BTreeMap::from_iter(list.into_iter().map(|e| (e.uid(), e)))
+		.into_values()
 		.collect()
 }

@@ -36,6 +36,10 @@ pub struct IdToken {
 	#[serde(rename = "phone_number")]
 	pub phone_number: String,
 	pub sub: String,
+
+	// is used to map role filed from config
+	#[serde(flatten)]
+	pub extra: HashMap<String, serde_json::Value>,
 	// next fields is unused for now
 	// #[serde(rename = "at_hash")]
 	// pub at_hash: String,
@@ -148,6 +152,10 @@ pub struct UserInfoToken {
 	pub sub: String,
 	// id of user
 	pub inum: String,
+
+	// is used to map role filed from config
+	#[serde(flatten)]
+	pub extra: HashMap<String, serde_json::Value>,
 	// next fields is unused
 	// pub country: String,
 	// #[serde(rename = "user_name")]
@@ -186,7 +194,10 @@ fn json_to_expression(value: serde_json::Value) -> Option<RestrictedExpression> 
 		serde_json::Value::Number(v) => {
 			if let Option::Some(i) = v.as_i64() {
 				Some(RestrictedExpression::new_long(i))
-			} else { v.as_f64().map(|f| RestrictedExpression::new_decimal(f.to_string())) }
+			} else {
+				v.as_f64()
+					.map(|f| RestrictedExpression::new_decimal(f.to_string()))
+			}
 		}
 		serde_json::Value::String(v) => Some(RestrictedExpression::new_string(v)),
 		serde_json::Value::Array(v) => Some(RestrictedExpression::new_set(
@@ -325,6 +336,10 @@ pub struct AccessToken {
 	#[serde(rename = "client_id")]
 	pub client_id: String,
 	pub username: String,
+
+	// is used to map role filed from config
+	#[serde(flatten)]
+	pub extra: HashMap<String, serde_json::Value>,
 	// next fields don't used
 	// pub sub: String,
 	// pub code: String,

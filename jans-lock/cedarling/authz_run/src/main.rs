@@ -17,17 +17,24 @@ fn real_demo_case() -> Result<(), Box<dyn std::error::Error>> {
 
 	let input_json = include_str!("../../cedar_files/input.json");
 
+	let role_mapping = authz::RoleMapping {
+		..Default::default()
+	};
+
 	let authz = Authz::new(AuthzConfig {
-		app_name: Some("Demo_App".to_owned()),
 		decoder: jwt::JWTDecoder::new_without_validation(),
 		policy: authz::PolicyStoreConfig::Local,
+		bootstrap_config: authz::BootstrapConfig {
+			CEDARLING_APPLICATION_NAME: Some("Demo_App".to_owned()),
+			CEDARLING_ROLE_MAPPING: role_mapping.clone(),
+		},
 	})?;
 
 	// only show entities for debug
 	{
 		let q = authz::AuthzInputRaw::parse_raw(input_json)?;
 		let decoded_input = q.decode_tokens(&jwt::JWTDecoder::new_without_validation())?;
-		let entites_box = authz.get_entities(decoded_input.jwt)?;
+		let entites_box = authz.get_entities(decoded_input.jwt, &role_mapping)?;
 
 		let stdout = std::io::stdout();
 		let mut handle = stdout.lock();
