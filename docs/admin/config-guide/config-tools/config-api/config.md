@@ -41,7 +41,7 @@ tasks.
 
 In the Janssen Server, you can deploy and customize the Config-API Configuration 
 using the command line. To get the details of Janssen command line operations 
-relevant to Aonfig-API Configuration, you can check the operations under 
+relevant to Config-API Configuration, you can check the operations under 
 `ConfigurationConfigApi` task using the command below:
 
 
@@ -64,7 +64,7 @@ To get sample schema type /opt/jans/jans-cli/config-cli.py --schema-sample <sche
 
 ### Get The Current Config-API Configuration
 
-To get the properties of Janssen Config-API Configuration, run the command below:
+Configuration for Config-API is a set of key-value pairs, called properties. When we retrieve the configuration, these properties and thier current values are returned as a JSON document. To get the properties of Janssen Config-API Configuration, run the command below:
 
 ```bash title="Command"
 /opt/jans/jans-cli/config-cli.py --operation-id=get-config-api-properties
@@ -244,15 +244,42 @@ It will return the result as below:
 
 ### Update Config-API Configuration Properties
 
-To update the configuration follow the steps below.
+To update the configuration, we will be using [JSON patch](https://datatracker.ietf.org/doc/html/rfc6902) schema as shown below. 
 
-1. [Get the current configuration](#get-the-current-config-api-configuration) 
-and store it into a file for getting property to configure
-2. Copy the property you want to modify, for example, let say we want to 
-add attribute to **userMandatoryAttributes**,
- so prepare a json patch file in such a way that get current values, 
- add the desired attribute as follows in file `config-api-patch.json`:
- ```json title="Sample Output" linenums="1"
+Let say we want to stop the file extension validation done
+by config-api's asset management module. This can be done by
+setting the `fileExtensionValidationEnabled` property to 
+`false`. To do that, write a text file (`config-api-assetmgt-patch.json`) with the content that follows the JSON patch schema.
+
+```json title="config-api-assetmgt-patch.json" linenums="1"
+[
+  {
+    "op": "replace",
+    "path": "/assetMgtConfiguration/fileExtensionValidationEnabled",
+    "value": false
+  }
+]
+```
+
+Now, execute the following command to apply this patch:
+ ```bash title="Command"
+  /opt/jans/jans-cli/config-cli.py \
+  --operation-id=patch-config-api-properties --data ./config-api-assetmgt-patch.json
+ ```
+ Upon successful execution of the update, the Janssen Server responds with 
+ updated configuration.
+
+#### Updating multi-valued property
+
+Let's say we want to 
+update the configuration property  **userMandatoryAttributes**. This property's value is a list of attributes. We want to remove an attribute from the list. For this we will have to create a JSON patch file which 
+contains the new list and then run a command to push the update
+to the Janssen Server. Let do this step-by-step:
+
+1. Get the current value list for **userMandatoryAttributes** property using steps mentioned in [Get the current configuration](#get-the-current-config-api-configuration) section
+2. Using the current list of values as starting point,  create a JSON patch  file `config-api-patch.json` as below. Update the list as desired by adding or removing items from the list:
+
+ ```json title="Sample Contents" linenums="1"
  [
   {
     "op": "replace",
@@ -268,28 +295,12 @@ add attribute to **userMandatoryAttributes**,
   }
  ]
  ```
- See  [RFC 6902](https://datatracker.ietf.org/doc/html/rfc6902) for details.
-3. Execute the following command to apply this patch:
+ 
+Now, execute the following command to apply this patch:
  ```bash title="Command"
   /opt/jans/jans-cli/config-cli.py \
   --operation-id=patch-config-api-properties --data ./config-api-patch.json
  ```
- Upon successful execution of the update, the Janssen Server responds with 
- updated configuration.
-
-As an another example, let us disable file extension validation in asset management, 
-so our `config-api--assetmgt-patch.json` will be as follows:
-
-```json title="Sample Output" linenums="1"
-[
-  {
-    "op": "replace",
-    "path": "/assetMgtConfiguration/fileExtensionValidationEnabled",
-    "value": false
-  }
-]
-```
-
 
 ### Config API Configuration Parameters:
 
