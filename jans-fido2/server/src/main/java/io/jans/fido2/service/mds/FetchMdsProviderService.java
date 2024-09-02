@@ -42,6 +42,7 @@ public class FetchMdsProviderService {
                 throw new MdsClientException(String.format("Error getting endpoints from mds test, status: %s, errorMessage: '%s'", response.getStatus(), response.getStatusInfo().getReasonPhrase()));
             }
             String responseBody = response.readEntity(String.class);
+            log.debug("Fetch mds getEndpoints response, body: {}", responseBody);
             return responseBody;
         } finally {
             client.close();

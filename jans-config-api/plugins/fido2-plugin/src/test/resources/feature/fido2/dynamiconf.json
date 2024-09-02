@@ -17,10 +17,10 @@
   ],
   "fido2Configuration": {
     "serverMetadataFolder": "/etc/gluu/conf/fido2/server_metadata",
-    "requestedParties": [
+    "rp": [
       {
-        "name": "https://pujavs4.2.gluu.server",
-        "domains": [
+        "id": "https://pujavs4.2.gluu.server",
+        "origins": [
           "pujavs4.2.gluu.server"
         ]
       }

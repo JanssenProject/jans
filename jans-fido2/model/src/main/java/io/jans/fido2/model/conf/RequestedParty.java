@@ -19,24 +19,24 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class RequestedParty {
 
-    private String name;
+    private String id;
 
-    private List<String> domains = new ArrayList<String>();
+    private List<String> origins = new ArrayList<String>();
 
-	public String getName() {
-		return name;
+
+	public String getId() {
+		return id;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setId(String id) {
+		this.id = id;
 	}
 
-	public List<String> getDomains() {
-		return domains;
+	public List<String> getOrigins() {
+		return origins;
 	}
 
-	public void setDomains(List<String> domains) {
-		this.domains = domains;
+	public void setOrigins(List<String> origins) {
+		this.origins = origins;
 	}
-
 }

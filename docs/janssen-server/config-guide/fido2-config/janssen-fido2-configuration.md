@@ -99,10 +99,10 @@ It will return the result as below:
       "RS256",
       "ES256"
     ],
-    "requestedParties": [
+    "rp": [
       {
-        "name": "https://jans-project.lxd",
-        "domains": [
+        "id": "https://jans-project.lxd",
+        "origins": [
           "jans-project.lxd"
         ]
       }

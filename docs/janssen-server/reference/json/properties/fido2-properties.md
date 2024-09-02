@@ -8,36 +8,36 @@ tags:
 
 # Fido2 Configuration Properties
 
-| Property Name | Description |  | 
-|-----|-----|-----|
-| authenticationHistoryExpiration | Expiration time in seconds for approved authentication requests | [Details](#authenticationhistoryexpiration) |
-| authenticatorCertsFolder | Authenticators certificates folder | [Details](#authenticatorcertsfolder) |
-| baseEndpoint | The base URL for Fido2 endpoints | [Details](#baseendpoint) |
-| checkU2fAttestations | Boolean value indicating if U2f attestation needs to be checked | [Details](#checku2fattestations) |
-| cleanServiceBatchChunkSize | Each clean up iteration fetches chunk of expired data per base dn and removes it from storage | [Details](#cleanservicebatchchunksize) |
-| cleanServiceInterval | Time interval for the Clean Service in seconds | [Details](#cleanserviceinterval) |
-| disableJdkLogger | Boolean value specifying whether to enable JDK Loggers | [Details](#disablejdklogger) |
-| externalLoggerConfiguration | Path to external Fido2 logging configuration | [Details](#externalloggerconfiguration) |
-| issuer | URL using the https scheme for Issuer identifier | [Details](#issuer) |
-| loggingLayout | Logging layout used for Fido2 | [Details](#logginglayout) |
-| loggingLevel | Logging level for Fido2 logger | [Details](#logginglevel) |
-| mdsAccessToken | MDS access token | [Details](#mdsaccesstoken) |
-| mdsCertsFolder | MDS TOC root certificates folder | [Details](#mdscertsfolder) |
-| mdsTocsFolder | MDS TOC files folder | [Details](#mdstocsfolder) |
-| metadataUrlsProvider | String value to provide source of URLs with external metadata | [Details](#metadataurlsprovider) |
-| metricReporterEnabled | Boolean value specifying whether metric reporter is enabled | [Details](#metricreporterenabled) |
-| metricReporterInterval | The interval for metric reporter in seconds | [Details](#metricreporterinterval) |
-| metricReporterKeepDataDays | The days to keep report data | [Details](#metricreporterkeepdatadays) |
-| oldU2fMigrationEnabled | Boolean value to enable disable old oxAuth U2F enrollments migration | [Details](#oldu2fmigrationenabled) |
-| personCustomObjectClassList | Custom object class list for dynamic person enrolment | [Details](#personcustomobjectclasslist) |
-| enabledFidoAlgorithms | List of Requested Credential Types | [Details](#enabledFidoAlgorithms) |
-| requestedParties | Authenticators metadata in json format | [Details](#requestedparties) |
-| serverMetadataFolder | Authenticators metadata in json format | [Details](#servermetadatafolder) |
-| sessionIdPersistInCache | Boolean value specifying whether to persist session_id in cache | [Details](#sessionidpersistincache) |
-| superGluuEnabled | Boolean value to enable disable Super Gluu extension | [Details](#supergluuenabled) |
-| unfinishedRequestExpiration | Expiration time in seconds for pending enrollment/authentication requests | [Details](#unfinishedrequestexpiration) |
-| useLocalCache | Boolean value to indicate if Local Cache is to be used | [Details](#uselocalcache) |
-| debugUserAutoEnrollment | Allow to enroll users on enrollment/authentication requests | [Details](#userautoenrollment) |
+| Property Name                   | Description                                                                                   |                                             | 
+|---------------------------------|-----------------------------------------------------------------------------------------------|---------------------------------------------|
+| authenticationHistoryExpiration | Expiration time in seconds for approved authentication requests                               | [Details](#authenticationhistoryexpiration) |
+| authenticatorCertsFolder        | Authenticators certificates folder                                                            | [Details](#authenticatorcertsfolder)        |
+| baseEndpoint                    | The base URL for Fido2 endpoints                                                              | [Details](#baseendpoint)                    |
+| checkU2fAttestations            | Boolean value indicating if U2f attestation needs to be checked                               | [Details](#checku2fattestations)            |
+| cleanServiceBatchChunkSize      | Each clean up iteration fetches chunk of expired data per base dn and removes it from storage | [Details](#cleanservicebatchchunksize)      |
+| cleanServiceInterval            | Time interval for the Clean Service in seconds                                                | [Details](#cleanserviceinterval)            |
+| disableJdkLogger                | Boolean value specifying whether to enable JDK Loggers                                        | [Details](#disablejdklogger)                |
+| externalLoggerConfiguration     | Path to external Fido2 logging configuration                                                  | [Details](#externalloggerconfiguration)     |
+| issuer                          | URL using the https scheme for Issuer identifier                                              | [Details](#issuer)                          |
+| loggingLayout                   | Logging layout used for Fido2                                                                 | [Details](#logginglayout)                   |
+| loggingLevel                    | Logging level for Fido2 logger                                                                | [Details](#logginglevel)                    |
+| mdsAccessToken                  | MDS access token                                                                              | [Details](#mdsaccesstoken)                  |
+| mdsCertsFolder                  | MDS TOC root certificates folder                                                              | [Details](#mdscertsfolder)                  |
+| mdsTocsFolder                   | MDS TOC files folder                                                                          | [Details](#mdstocsfolder)                   |
+| metadataUrlsProvider            | String value to provide source of URLs with external metadata                                 | [Details](#metadataurlsprovider)            |
+| metricReporterEnabled           | Boolean value specifying whether metric reporter is enabled                                   | [Details](#metricreporterenabled)           |
+| metricReporterInterval          | The interval for metric reporter in seconds                                                   | [Details](#metricreporterinterval)          |
+| metricReporterKeepDataDays      | The days to keep report data                                                                  | [Details](#metricreporterkeepdatadays)      |
+| oldU2fMigrationEnabled          | Boolean value to enable disable old oxAuth U2F enrollments migration                          | [Details](#oldu2fmigrationenabled)          |
+| personCustomObjectClassList     | Custom object class list for dynamic person enrolment                                         | [Details](#personcustomobjectclasslist)     |
+| enabledFidoAlgorithms           | List of Requested Credential Types                                                            | [Details](#enabledFidoAlgorithms)           |
+| rp                              | Requested Parties Authenticators metadata in json format                                      | [Details](#rp)                              |
+| serverMetadataFolder            | Authenticators metadata in json format                                                        | [Details](#servermetadatafolder)            |
+| sessionIdPersistInCache         | Boolean value specifying whether to persist session_id in cache                               | [Details](#sessionidpersistincache)         |
+| superGluuEnabled                | Boolean value to enable disable Super Gluu extension                                          | [Details](#supergluuenabled)                |
+| unfinishedRequestExpiration     | Expiration time in seconds for pending enrollment/authentication requests                     | [Details](#unfinishedrequestexpiration)     |
+| useLocalCache                   | Boolean value to indicate if Local Cache is to be used                                        | [Details](#uselocalcache)                   |
+| debugUserAutoEnrollment         | Allow to enroll users on enrollment/authentication requests                                   | [Details](#userautoenrollment)              |
 
 
 ### authenticationHistoryExpiration
@@ -229,9 +229,9 @@ tags:
 - Default value: None
 
 
-### requestedParties
+### rp
 
-- Description: Authenticators metadata in json format
+- Description: Requested Parties Authenticators metadata in json format
 
 - Required: No
 

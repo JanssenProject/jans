@@ -45,10 +45,10 @@ Response:
          "RS256",
          "ES256"
       ],
-      "requestedParties":[
+      "rp":[
          {
-            "name":"https://my-jans-server.jans.io",
-            "domains":[
+            "id":"https://my-jans-server.jans.io",
+            "origins":[
                "my-jans-server.jans.io"
             ]
          }

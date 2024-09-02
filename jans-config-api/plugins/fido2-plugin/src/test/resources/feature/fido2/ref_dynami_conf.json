@@ -28,10 +28,10 @@
          "RS256",
          "ES256"
       ],
-      "requestedParties":[
+      "rp":[
          {
-            "name":"https://u184.gluu.info",
-            "domains":[
+            "id":"https://u184.gluu.info",
+            "origins":[
                "u184.gluu.info"
             ]
          }

@@ -1,10 +1,10 @@
 {
   "serverMetadataFolder": "/etc/gluu/conf/fido2/server_metadata",
   "authenticationHistoryExpiration": 1296000,
-  "requestedParties": [
+  "rp": [
     {
-      "name": "https://pujavs3.infinity.com",
-      "domains": [
+      "id": "https://pujavs3.infinity.com",
+      "origins": [
         "pujavs3.infinity.com"
       ]
     }
