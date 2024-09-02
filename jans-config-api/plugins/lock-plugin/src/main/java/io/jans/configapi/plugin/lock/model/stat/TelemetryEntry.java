@@ -24,7 +24,10 @@ public class TelemetryEntry extends BaseEntry implements Serializable {
 
     @AttributeName(name = "creationDate")
     private Date creationDate;
-    
+
+    @AttributeName(name = "eventTime")
+    private Date eventTime;
+
     @AttributeName(name = "jansService")
     private String service;
 
@@ -73,6 +76,14 @@ public class TelemetryEntry extends BaseEntry implements Serializable {
 
 	public void setCreationDate(Date creationDate) {
 		this.creationDate = creationDate;
+	}
+
+	public Date getEventTime() {
+		return eventTime;
+	}
+
+	public void setEventTime(Date eventTime) {
+		this.eventTime = eventTime;
 	}
 
 	public String getService() {
@@ -165,13 +176,13 @@ public class TelemetryEntry extends BaseEntry implements Serializable {
 
 	@Override
 	public String toString() {
-		return "TelemetryEntry [inum=" + inum + ", creationDate=" + creationDate + ", service=" + service + ", nodeId="
-				+ nodeId + ", status=" + status + ", lastPolicyLoadSize=" + lastPolicyLoadSize
-				+ ", policySuccessLoadCounter=" + policySuccessLoadCounter + ", policyFailedLoadCounter="
-				+ policyFailedLoadCounter + ", lastPolicyEvaluationTimeNs=" + lastPolicyEvaluationTimeNs
-				+ ", avgPolicyEvaluationTimeNs=" + avgPolicyEvaluationTimeNs + ", memoryUsage=" + memoryUsage
-				+ ", evaluationRequestsCount=" + evaluationRequestsCount + ", policyStats=" + policyStats
-				+ ", toString()=" + super.toString() + "]";
+		return "TelemetryEntry [inum=" + inum + ", creationDate=" + creationDate + ", eventTime=" + eventTime
+				+ ", service=" + service + ", nodeId=" + nodeId + ", status=" + status + ", lastPolicyLoadSize="
+				+ lastPolicyLoadSize + ", policySuccessLoadCounter=" + policySuccessLoadCounter
+				+ ", policyFailedLoadCounter=" + policyFailedLoadCounter + ", lastPolicyEvaluationTimeNs="
+				+ lastPolicyEvaluationTimeNs + ", avgPolicyEvaluationTimeNs=" + avgPolicyEvaluationTimeNs
+				+ ", memoryUsage=" + memoryUsage + ", evaluationRequestsCount=" + evaluationRequestsCount
+				+ ", policyStats=" + policyStats + ", toString()=" + super.toString() + "]";
 	}
     
 }

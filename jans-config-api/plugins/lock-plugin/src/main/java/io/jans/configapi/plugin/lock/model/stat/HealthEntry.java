@@ -24,6 +24,9 @@ public class HealthEntry extends BaseEntry implements Serializable {
 	@AttributeName(name = "creationDate")
 	private Date creationDate;
 
+    @AttributeName(name = "eventTime")
+    private Date eventTime;
+
 	@AttributeName(name = "jansService")
 	private String service;
 
@@ -48,6 +51,14 @@ public class HealthEntry extends BaseEntry implements Serializable {
 
 	public Date getCreationDate() {
 		return creationDate;
+	}
+
+	public Date getEventTime() {
+		return eventTime;
+	}
+
+	public void setEventTime(Date eventTime) {
+		this.eventTime = eventTime;
 	}
 
 	public void setCreationDate(Date creationDate) {
@@ -88,9 +99,9 @@ public class HealthEntry extends BaseEntry implements Serializable {
 
 	@Override
 	public String toString() {
-		return "HealthEntry [inum=" + inum + ", creationDate=" + creationDate + ", service=" + service + ", nodeId="
-				+ nodeId + ", status=" + status + ", engineStatus=" + engineStatus + ", toString()=" + super.toString()
-				+ "]";
+		return "HealthEntry [inum=" + inum + ", creationDate=" + creationDate + ", eventTime=" + eventTime
+				+ ", service=" + service + ", nodeId=" + nodeId + ", status=" + status + ", engineStatus="
+				+ engineStatus + ", toString()=" + super.toString() + "]";
 	}
 
 }

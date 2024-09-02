@@ -5431,6 +5431,7 @@
       "may": [
         "inum",
         "creationDate",
+        "eventTime",
         "jansService",
         "jansNodeId",
         "jansStatus",
@@ -5482,6 +5483,7 @@
       "may": [
         "inum",
         "creationDate",
+        "eventTime",
         "jansService",
         "jansNodeId",
         "jansStatus",
