@@ -166,7 +166,7 @@ components:
           type: array
           items:
             type: string
-        requestedParties:
+        rp:
           type: array
           items:
             $ref: '#/components/schemas/RequestedParty'
