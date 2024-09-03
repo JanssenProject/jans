@@ -229,16 +229,21 @@ components:
       properties:
         dn:
           type: string
-        lastPolicyLoadTime:
+        creationDate:
           type: string
           format: date-time
+        eventTime:
+          type: string
+          format: date-time
+        service:
+          type: string
+        nodeId:
+          type: string
         status:
           type: string
-        cedarEngineStatus:
+        engineStatus:
           type: string
-        cedarPolicyStatus:
-          type: string
-        tokenDataStatus:
+        baseDn:
           type: string
         inum:
           type: string
@@ -247,23 +252,35 @@ components:
       properties:
         dn:
           type: string
-        lastUpdate:
+        creationDate:
           type: string
           format: date-time
         eventTime:
           type: string
           format: date-time
+        service:
+          type: string
+        nodeId:
+          type: string
         eventType:
           type: string
         severetyLevel:
           type: string
+        action:
+          type: string
+        decisionResult:
+          type: string
+        requestedResource:
+          type: string
+        princiaplId:
+          type: string
         clientId:
           type: string
-        policyResult:
-          type: string
-        userAccountId:
-          type: string
-        sourceInformation:
+        contextInformation:
+          type: object
+          additionalProperties:
+            type: string
+        baseDn:
           type: string
         inum:
           type: string
@@ -272,14 +289,21 @@ components:
       properties:
         dn:
           type: string
-        lastPolicyLoadTime:
+        creationDate:
           type: string
           format: date-time
+        eventTime:
+          type: string
+          format: date-time
+        service:
+          type: string
+        nodeId:
+          type: string
+        status:
+          type: string
         lastPolicyLoadSize:
           type: integer
           format: int32
-        status:
-          type: string
         policySuccessLoadCounter:
           type: integer
           format: int64
@@ -299,6 +323,8 @@ components:
           type: object
           additionalProperties:
             type: string
+        baseDn:
+          type: string
         inum:
           type: string
         memoryUsage:

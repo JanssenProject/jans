@@ -51,7 +51,7 @@ public class AuditResource extends BaseResource {
     @ProtectedApi(scopes = { Constants.LOCK_HEALTH_WRITE_ACCESS }, groupScopes = {})
     @Path(Constants.HEALTH)
     public Response postHealthData(@Valid HealthEntry healthEntry) {
-        logger.debug("Save Health Data - healthEntry:{}", healthEntry);
+        logger.error("\n\n\n Save Health Data - healthEntry:{}", healthEntry);
         auditService.addHealthEntry(healthEntry);
         return Response.status(Response.Status.OK).build();
 
@@ -69,7 +69,7 @@ public class AuditResource extends BaseResource {
     @ProtectedApi(scopes = { Constants.LOCK_LOG_WRITE_ACCESS }, groupScopes = {})
     @Path(Constants.LOG)
     public Response postLogData(@Valid LogEntry logEntry) {
-        logger.debug("Save - logEntry:{}", logEntry);
+        logger.error("\n\n\n Save - logEntry:{}", logEntry);
         auditService.addLogData(logEntry);
         return Response.status(Response.Status.OK).build();
 
@@ -87,7 +87,7 @@ public class AuditResource extends BaseResource {
     @ProtectedApi(scopes = { Constants.LOCK_TELEMETRY_WRITE_ACCESS }, groupScopes = {})
     @Path(Constants.TELEMETRY)
     public Response postTelemetryData(@Valid TelemetryEntry telemetryEntry) {
-        logger.debug("Save telemetryEntry():{}", telemetryEntry);
+        logger.error("\n\n\n Save telemetryEntry():{}", telemetryEntry);
         auditService.addTelemetryData(telemetryEntry);
         return Response.status(Response.Status.OK).build();
 
