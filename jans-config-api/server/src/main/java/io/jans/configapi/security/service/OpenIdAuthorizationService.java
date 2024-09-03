@@ -206,50 +206,40 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
     }
 
     private List<String> findMissingScopes(Map<ProtectionScopeType, List<String>> scopeMap, List<String> tokenScopes) {
-        logger.debug("Check scopeMap:{}, tokenScopes:{}", scopeMap, tokenScopes);
+        logger.error("\n\n\n *** Check scopeMap:{}, tokenScopes:{}", scopeMap, tokenScopes);
+        
         List<String> scopeList = new ArrayList<>();
-        if (tokenScopes == null || tokenScopes.isEmpty() || scopeMap == null || scopeMap.isEmpty()) {
+        List<String> missingScopes = null;
+        if (scopeMap == null || scopeMap.isEmpty()) {
             return scopeList;
         }
 
         // Super scope
-        scopeList = scopeMap.get(ProtectionScopeType.SUPER);
+        scopeList.addAll(scopeMap.get(ProtectionScopeType.SUPER));
         logger.debug("SUPER Scopes:{}", scopeList);
-        List<String> missingScopes = null;
-        boolean containsScope = false;
-        if (scopeList != null && !scopeList.isEmpty()) {
-            // check if token contains any of the super scopes
-            containsScope = containsAnyElement(scopeList, tokenScopes);
-            logger.debug("Token contains SUPER scopes?:{}", containsScope);
-
-            // Super scope present so no need to check other types of scope
-            if (containsScope) {
-                return missingScopes;
-            }
-        }
+        
+        
 
         // Group scope present so no need to check normal scope presence
-        scopeList = scopeMap.get(ProtectionScopeType.GROUP);
+        scopeList.addAll(scopeMap.get(ProtectionScopeType.GROUP));
         logger.debug("GROUP Scopes:{}", scopeList);
-        if (scopeList != null && !scopeList.isEmpty()) {
-            // check if token contains any of the group scopes
-            containsScope = containsAnyElement(scopeList, tokenScopes);
-            logger.debug("Token contains GROUP scopes?:{}", containsScope);
-
-			// Group scope present so no need to check normal scope
-            if (containsScope) {
-                return missingScopes;
-            }
-        }
-
+       
         // Normal scope
-        scopeList = scopeMap.get(ProtectionScopeType.SCOPE);
+        scopeList.addAll(scopeMap.get(ProtectionScopeType.SCOPE));
         logger.debug("SCOPE Scopes:{}", scopeList);
-        if (scopeList != null && !scopeList.isEmpty()) {
-            // check if token contains all the required scopes
-            missingScopes = findMissingElements(scopeList, tokenScopes);
-            logger.debug("SCOPE Missing Scopes:{}", missingScopes);
+        if(scopeList.isEmpty()) {
+            return missingScopes;
         }
+        
+        //scopeList not empty but token scope is null 
+        if(tokenScopes==null || tokenScopes.isEmpty()) {
+            return scopeMap.get(ProtectionScopeType.SCOPE);
+        }
+       
+        // check if token contains all the required scopes
+        missingScopes = findMissingElements(scopeList, tokenScopes);
+        logger.debug("SCOPE Missing Scopes:{}", missingScopes);
+       
         return missingScopes;
     }
 

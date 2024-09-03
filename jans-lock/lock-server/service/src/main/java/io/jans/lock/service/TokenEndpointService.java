@@ -109,6 +109,7 @@ public class TokenEndpointService {
         if (tokenResponse != null) {
             final String accessToken = tokenResponse.getAccessToken();
             final Integer expiresIn = tokenResponse.getExpiresIn();
+            log.error("accessToken:{}, expiresIn:{}", accessToken, expiresIn);
             if (Util.allNotBlank(accessToken)) {
                 return new Token(null, null, accessToken, ScopeType.OPENID.getValue(), expiresIn);
             }
@@ -380,7 +381,7 @@ public class TokenEndpointService {
         log.error("postData - endpoint:{}, postData:{}", endpoint, postData);
         String endpointPath = this.getEndpointPath(endpoint);
 
-        log.error("Posting data for - endpoint:{}, endpointPath:{}", endpoint, endpointPath);
+        log.error("Posting data for - endpoint:{}, endpointPath:{},this.getEndpointUrl(endpointPath):{}", endpoint, endpointPath,this.getEndpointUrl(endpointPath));
         return post(this.getEndpointUrl(endpointPath), null, token, null, contentType, postData);
     }
 
