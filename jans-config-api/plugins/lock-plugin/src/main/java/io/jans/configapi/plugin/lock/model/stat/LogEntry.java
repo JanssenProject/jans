@@ -1,33 +1,38 @@
 package io.jans.configapi.plugin.lock.model.stat;
 
-import io.jans.orm.annotation.AttributeName;
-import io.jans.orm.annotation.DN;
-import io.jans.orm.annotation.DataEntry;
-import io.jans.orm.annotation.ObjectClass;
-
 import java.io.Serializable;
 import java.util.Date;
+import java.util.HashMap;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import io.jans.orm.annotation.AttributeName;
+import io.jans.orm.annotation.DataEntry;
+import io.jans.orm.annotation.JsonObject;
+import io.jans.orm.annotation.ObjectClass;
+import io.jans.orm.model.base.BaseEntry;
+
 @DataEntry
 @ObjectClass(value = "jansLogEntry")
-public class LogEntry implements Serializable {
+public class LogEntry extends BaseEntry implements Serializable {
 
-    private static final long serialVersionUID = 1L;
-
-    @DN
-    private String dn;
+	private static final long serialVersionUID = -7086771090254438974L;
 
     @JsonProperty("inum")
     @AttributeName(name = "inum", ignoreDuringUpdate = true)
     private String inum;
 
-    @AttributeName(name = "jansLastUpd")
-    private Date lastUpdate;
+    @AttributeName(name = "creationDate")
+    private Date creationDate;
 
     @AttributeName(name = "eventTime")
     private Date eventTime;
+
+    @AttributeName(name = "jansService")
+    private String service;
+
+    @AttributeName(name = "jansNodeId")
+    private String nodeId;
 
     @AttributeName(name = "eventType")
     private String eventType;
@@ -35,104 +40,136 @@ public class LogEntry implements Serializable {
     @AttributeName(name = "severetyLevel")
     private String severetyLevel;
 
-    @AttributeName(name = "policyResult")
-    private String policyResult;
+    @AttributeName(name = "actionName")
+    private String action;
 
-    @AttributeName(name = "userAccountId")
-    private String userAccountId;
+    @AttributeName(name = "decisionResult")
+    private String decisionResult;
+
+    @AttributeName(name = "requestedResource")
+    private String requestedResource;
+
+    @AttributeName(name = "principalId")
+    private String princiaplId;
 
     @AttributeName(name = "clientId")
     private String clientId;
 
-    @AttributeName(name = "sourceInformation")
-    private String sourceInformation;
+    @JsonObject
+    @AttributeName(name = "contextInformation")
+    private HashMap<String, String> contextInformation;
 
-    public String getDn() {
-        return dn;
-    }
+	public String getInum() {
+		return inum;
+	}
 
-    public void setDn(String dn) {
-        this.dn = dn;
-    }
+	public void setInum(String inum) {
+		this.inum = inum;
+	}
 
-    public String getInum() {
-        return inum;
-    }
+	public Date getCreationDate() {
+		return creationDate;
+	}
 
-    public void setInum(String inum) {
-        this.inum = inum;
-    }
+	public void setCreationDate(Date creationDate) {
+		this.creationDate = creationDate;
+	}
 
-    public Date getLastUpdate() {
-        return lastUpdate;
-    }
+	public Date getEventTime() {
+		return eventTime;
+	}
 
-    public void setLastUpdate(Date lastUpdate) {
-        this.lastUpdate = lastUpdate;
-    }
+	public void setEventTime(Date eventTime) {
+		this.eventTime = eventTime;
+	}
 
-    public Date getEventTime() {
-        return eventTime;
-    }
+	public String getService() {
+		return service;
+	}
 
-    public void setEventTime(Date eventTime) {
-        this.eventTime = eventTime;
-    }
+	public void setService(String service) {
+		this.service = service;
+	}
 
-    public String getEventType() {
-        return eventType;
-    }
+	public String getNodeId() {
+		return nodeId;
+	}
 
-    public void setEventType(String eventType) {
-        this.eventType = eventType;
-    }
+	public void setNodeId(String nodeId) {
+		this.nodeId = nodeId;
+	}
 
-    public String getSeveretyLevel() {
-        return severetyLevel;
-    }
+	public String getEventType() {
+		return eventType;
+	}
 
-    public void setSeveretyLevel(String severetyLevel) {
-        this.severetyLevel = severetyLevel;
-    }
+	public void setEventType(String eventType) {
+		this.eventType = eventType;
+	}
 
-    public String getPolicyResult() {
-        return policyResult;
-    }
+	public String getSeveretyLevel() {
+		return severetyLevel;
+	}
 
-    public void setPolicyResult(String policyResult) {
-        this.policyResult = policyResult;
-    }
+	public void setSeveretyLevel(String severetyLevel) {
+		this.severetyLevel = severetyLevel;
+	}
 
-    public String getUserAccountId() {
-        return userAccountId;
-    }
+	public String getAction() {
+		return action;
+	}
 
-    public void setUserAccountId(String userAccountId) {
-        this.userAccountId = userAccountId;
-    }
+	public void setAction(String action) {
+		this.action = action;
+	}
 
-    public String getClientId() {
-        return clientId;
-    }
+	public String getDecisionResult() {
+		return decisionResult;
+	}
 
-    public void setClientId(String clientId) {
-        this.clientId = clientId;
-    }
+	public void setDecisionResult(String decisionResult) {
+		this.decisionResult = decisionResult;
+	}
 
-    public String getSourceInformation() {
-        return sourceInformation;
-    }
+	public String getRequestedResource() {
+		return requestedResource;
+	}
 
-    public void setSourceInformation(String sourceInformation) {
-        this.sourceInformation = sourceInformation;
-    }
+	public void setRequestedResource(String requestedResource) {
+		this.requestedResource = requestedResource;
+	}
 
-    @Override
-    public String toString() {
-        return "LogEntry [dn=" + dn + ", inum=" + inum + ", lastUpdate=" + lastUpdate + ", eventTime=" + eventTime
-                + ", eventType=" + eventType + ", severetyLevel=" + severetyLevel + ", policyResult=" + policyResult
-                + ", userAccountId=" + userAccountId + ", clientId=" + clientId + ", sourceInformation="
-                + sourceInformation + "]";
-    }
+	public String getPrinciaplId() {
+		return princiaplId;
+	}
+
+	public void setPrinciaplId(String princiaplId) {
+		this.princiaplId = princiaplId;
+	}
+
+	public String getClientId() {
+		return clientId;
+	}
+
+	public void setClientId(String clientId) {
+		this.clientId = clientId;
+	}
+
+	public HashMap<String, String> getContextInformation() {
+		return contextInformation;
+	}
+
+	public void setContextInformation(HashMap<String, String> contextInformation) {
+		this.contextInformation = contextInformation;
+	}
+
+	@Override
+	public String toString() {
+		return "LogEntry [inum=" + inum + ", creationDate=" + creationDate + ", eventTime=" + eventTime + ", service="
+				+ service + ", nodeId=" + nodeId + ", eventType=" + eventType + ", severetyLevel=" + severetyLevel
+				+ ", action=" + action + ", decisionResult=" + decisionResult + ", requestedResource="
+				+ requestedResource + ", princiaplId=" + princiaplId + ", clientId=" + clientId
+				+ ", contextInformation=" + contextInformation + ", toString()=" + super.toString() + "]";
+	}
 
 }

@@ -1,104 +1,107 @@
 package io.jans.configapi.plugin.lock.model.stat;
 
-import io.jans.orm.annotation.AttributeName;
-import io.jans.orm.annotation.DN;
-import io.jans.orm.annotation.DataEntry;
-import io.jans.orm.annotation.ObjectClass;
-
 import java.io.Serializable;
 import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import io.jans.orm.annotation.AttributeName;
+import io.jans.orm.annotation.DataEntry;
+import io.jans.orm.annotation.JsonObject;
+import io.jans.orm.annotation.ObjectClass;
+import io.jans.orm.model.base.BaseEntry;
+
 @DataEntry
 @ObjectClass(value = "jansHealthEntry")
-public class HealthEntry implements Serializable {
+public class HealthEntry extends BaseEntry implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = -5080284664895065766L;
 
-    @DN
-    private String dn;
+	@JsonProperty("inum")
+	@AttributeName(name = "inum", ignoreDuringUpdate = true)
+	private String inum;
 
-    @JsonProperty("inum")
-    @AttributeName(name = "inum", ignoreDuringUpdate = true)
-    private String inum;
+	@AttributeName(name = "creationDate")
+	private Date creationDate;
 
-    @AttributeName(name = "jansLastUpd")
-    private Date lastPolicyLoadTime;
+    @AttributeName(name = "eventTime")
+    private Date eventTime;
 
-    @AttributeName(name = "jansStatus")
-    private String status;
+	@AttributeName(name = "jansService")
+	private String service;
 
-    @AttributeName(name = "cedarEngineStatus")
-    private String cedarEngineStatus;
+	@AttributeName(name = "jansNodeId")
+	private String nodeId;
 
-    @AttributeName(name = "cedarPolicyStatus")
-    private String cedarPolicyStatus;
+	@AttributeName(name = "jansStatus")
+	private String status;
 
-    @AttributeName(name = "tokenDataStatus")
-    private String tokenDataStatus;
+	// Details: cedarEngineStatus, cedarPolicyStatus, tokenDataStatus. etc..
+	@JsonObject
+	@AttributeName(name = "engineStatus")
+	private String engineStatus;
 
-    public String getDn() {
-        return dn;
-    }
+	public String getInum() {
+		return inum;
+	}
 
-    public void setDn(String dn) {
-        this.dn = dn;
-    }
+	public void setInum(String inum) {
+		this.inum = inum;
+	}
 
-    public String getInum() {
-        return inum;
-    }
+	public Date getCreationDate() {
+		return creationDate;
+	}
 
-    public void setInum(String inum) {
-        this.inum = inum;
-    }
+	public Date getEventTime() {
+		return eventTime;
+	}
 
-    public Date getLastPolicyLoadTime() {
-        return lastPolicyLoadTime;
-    }
+	public void setEventTime(Date eventTime) {
+		this.eventTime = eventTime;
+	}
 
-    public void setLastPolicyLoadTime(Date lastPolicyLoadTime) {
-        this.lastPolicyLoadTime = lastPolicyLoadTime;
-    }
+	public void setCreationDate(Date creationDate) {
+		this.creationDate = creationDate;
+	}
 
-    public String getStatus() {
-        return status;
-    }
+	public String getService() {
+		return service;
+	}
 
-    public void setStatus(String status) {
-        this.status = status;
-    }
+	public void setService(String service) {
+		this.service = service;
+	}
 
-    public String getCedarEngineStatus() {
-        return cedarEngineStatus;
-    }
+	public String getNodeId() {
+		return nodeId;
+	}
 
-    public void setCedarEngineStatus(String cedarEngineStatus) {
-        this.cedarEngineStatus = cedarEngineStatus;
-    }
+	public void setNodeId(String nodeId) {
+		this.nodeId = nodeId;
+	}
 
-    public String getCedarPolicyStatus() {
-        return cedarPolicyStatus;
-    }
+	public String getStatus() {
+		return status;
+	}
 
-    public void setCedarPolicyStatus(String cedarPolicyStatus) {
-        this.cedarPolicyStatus = cedarPolicyStatus;
-    }
+	public void setStatus(String status) {
+		this.status = status;
+	}
 
-    public String getTokenDataStatus() {
-        return tokenDataStatus;
-    }
+	public String getEngineStatus() {
+		return engineStatus;
+	}
 
-    public void setTokenDataStatus(String tokenDataStatus) {
-        this.tokenDataStatus = tokenDataStatus;
-    }
+	public void setEngineStatus(String engineStatus) {
+		this.engineStatus = engineStatus;
+	}
 
-    @Override
-    public String toString() {
-        return "HealthEntry [dn=" + dn + ", inum=" + inum + ", lastPolicyLoadTime=" + lastPolicyLoadTime + ", status="
-                + status + ", cedarEngineStatus=" + cedarEngineStatus + ", cedarPolicyStatus=" + cedarPolicyStatus
-                + ", tokenDataStatus=" + tokenDataStatus + "]";
-    }
+	@Override
+	public String toString() {
+		return "HealthEntry [inum=" + inum + ", creationDate=" + creationDate + ", eventTime=" + eventTime
+				+ ", service=" + service + ", nodeId=" + nodeId + ", status=" + status + ", engineStatus="
+				+ engineStatus + ", toString()=" + super.toString() + "]";
+	}
 
 }

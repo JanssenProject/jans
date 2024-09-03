@@ -8,6 +8,7 @@ import io.jans.service.cache.CacheProvider;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.concurrent.TimeUnit;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -188,14 +189,14 @@ public class AssetsService implements IBrandingManager {
 
     private void updateAssetsCache() {
 
-        //Store changes in cache: this data is needed in Casa custom script
+        //Store changes in cache: this data is read by Casa authn flow
         try {
             Map<String, Object> map = new HashMap<>();
             map.putAll(mapper.convertValue(this, new TypeReference<Map<String, Object>>(){}));
             map.put("contextPath", zkService.getContextPath());
 
-            //it should not expire
-            cacheProvider.put(Integer.MAX_VALUE, ASSETS_CACHE_KEY, map);
+            //In theory, object stored will never expire because this method is being constantly called
+            cacheProvider.put((int) TimeUnit.HOURS.toSeconds(1), ASSETS_CACHE_KEY, map);
             logger.trace("Cache updated with Casa UI assets data");
         } catch (Exception e) {
             logger.error(e.getMessage(), e);

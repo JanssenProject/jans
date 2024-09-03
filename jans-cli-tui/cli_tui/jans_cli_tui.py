@@ -413,6 +413,7 @@ class JansCliApp(Application):
 
         if self.cli_object_ok:
             self.create_background_task(background_tasks.get_attributes_coroutine(self))
+            self.create_background_task(background_tasks.get_persistence_type())
             response = self.cli_requests({'operation_id': 'get-plugins'})
             if response.ok:
                 plugins = response.json()
@@ -675,6 +676,9 @@ class JansCliApp(Application):
         if value is None:
             value = ''
 
+        if jans_list_type and isinstance(value, list):
+            value = '\n'.join(value)
+
         ta = TextArea(
                 text=str(value),
                 multiline=height > 1,
@@ -729,11 +733,12 @@ class JansCliApp(Application):
         if values and not (isinstance(values[0], tuple) or isinstance(values[0], list)):
             values = [(o,o) for o in values]
         cbl = CheckboxList(values=values)
+        cbl.default_style=widget_style
         cbl.current_values = current_values
         cbl.window.jans_name = name
         cbl.window.jans_help = jans_help
 
-        v = VSplit([Window(FormattedTextControl(title), width=len(title)+1, style=style,), cbl], style=widget_style)
+        v = VSplit([Window(FormattedTextControl(title), width=len(title)+1, style=style), cbl], style=widget_style)
         v.me = cbl
 
         return v
@@ -851,16 +856,21 @@ class JansCliApp(Application):
     def getButtonWithHandler(
                 self, 
                 text: AnyFormattedText,
-                name: AnyFormattedText,
-                jans_help: AnyFormattedText,
-                handler: Callable= None, 
+                name: Optional[AnyFormattedText] = '',
+                jans_help: Optional[AnyFormattedText] = '',
+                handler: Optional[Callable] = None,
+                centered: Optional[bool] = False,
                 ) -> Button:
-
-        b = Button(text=text, width=len(text)+2)
-        b.window.jans_name = name
-        b.window.jans_help = jans_help
+        text_ = _(text)
+        b = Button(text=text_, width=len(text_)+4)
+        if name:
+            b.window.jans_name = name
+        if jans_help:
+            b.window.jans_help = jans_help
         if handler:
             b.handler = lambda:handler(name)
+        if centered:
+            return VSplit([b], align=HorizontalAlign.CENTER)
         return b
 
     def update_status_bar(self) -> None:
