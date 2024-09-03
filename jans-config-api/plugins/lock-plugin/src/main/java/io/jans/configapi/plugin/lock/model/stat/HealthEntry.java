@@ -11,7 +11,7 @@ import io.jans.orm.annotation.JsonObject;
 import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.model.base.BaseEntry;
 
-@DataEntry
+@DataEntry(sortByName = "eventTime")
 @ObjectClass(value = "jansHealthEntry")
 public class HealthEntry extends BaseEntry implements Serializable {
 
