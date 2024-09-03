@@ -3,6 +3,7 @@ package io.jans.as.server.service;
 import io.jans.as.common.service.AttributeService;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.configuration.ConfigurationResponseClaim;
+import io.jans.as.model.util.Util;
 import io.jans.as.server.ciba.CIBAConfigurationService;
 import io.jans.as.server.service.external.ExternalAuthenticationService;
 import io.jans.as.server.service.external.ExternalAuthzDetailTypeService;
@@ -16,11 +17,12 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.apache.tika.utils.StringUtils.isBlank;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -59,6 +61,21 @@ public class DiscoveryServiceTest {
 
     @Mock
     private transient AttributeService attributeService;
+
+    @Test
+    public void process_whenAcrMappingsArePresent_shouldReturnInJson() {
+        Map<String, String> acrMappings = new HashMap<>();
+        acrMappings.put("alias1", "acr1");
+
+        when(appConfiguration.isFeatureEnabled(any())).thenReturn(true);
+        when(appConfiguration.getEndSessionEndpoint()).thenReturn("https://as.com/end_session");
+        when(appConfiguration.getAcrMappings()).thenReturn(acrMappings);
+
+        final JSONObject json = discoveryService.process();
+        final Map<String, String> acrMappingsFromJson = Util.toSerializableMapOfStrings(json.optJSONObject(ConfigurationResponseClaim.ACR_MAPPINGS).toMap());
+        assertNotNull(acrMappingsFromJson);
+        assertEquals("acr1", acrMappingsFromJson.get("alias1"));
+    }
 
     @Test
     public void process_whenEndSessionFlagIsEnabled_shouldSetEndSessionFieldsToFalse() {
