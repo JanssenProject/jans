@@ -1,4 +1,4 @@
-package io.jans.agamalab.authn;
+package io.jans.casa.authn;
 
 import io.jans.fido2.client.AssertionService;
 import io.jans.fido2.client.Fido2ClientFactory;

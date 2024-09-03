@@ -1,9 +1,9 @@
-package io.jans.agamalab.authn;
+package io.jans.casa.authn;
 
 import com.nimbusds.oauth2.sdk.http.HTTPRequest;
 import com.nimbusds.oauth2.sdk.http.HTTPResponse;
 
-import io.jans.agamalab.CasaWSBase;
+import io.jans.casa.CasaWSBase;
 
 import java.io.IOException;
 import java.net.URL;
