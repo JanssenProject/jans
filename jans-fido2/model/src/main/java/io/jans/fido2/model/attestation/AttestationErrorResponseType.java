@@ -46,16 +46,6 @@ public enum AttestationErrorResponseType implements IErrorType {
     TPM_ERROR("tpm_error"),
 
     /**
-     * Android key validation error
-     */
-    ANDROID_KEY_ERROR("android_key_error"),
-
-    /**
-     * Android safetynet validation error
-     */
-    ANDROID_SAFETYNET_ERROR("android_safetynet_error"),
-
-    /**
      * Apple validation error
      */
     APPLE_ERROR("apple_error"),
