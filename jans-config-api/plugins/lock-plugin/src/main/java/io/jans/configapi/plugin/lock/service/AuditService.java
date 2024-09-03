@@ -1,30 +1,30 @@
 package io.jans.configapi.plugin.lock.service;
 
-import io.jans.as.common.service.OrganizationService;
-import io.jans.as.common.service.common.ApplicationFactory;
-import io.jans.as.common.service.common.InumService;
-import io.jans.as.common.util.AttributeConstants;
-import io.jans.configapi.configuration.ConfigurationFactory;
-import io.jans.configapi.plugin.lock.model.stat.*;
-
-import io.jans.model.SearchRequest;
-import io.jans.orm.PersistenceEntryManager;
-import io.jans.orm.model.PagedResult;
-import io.jans.orm.model.SortOrder;
-import io.jans.orm.search.filter.Filter;
-
-import io.jans.util.StringHelper;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import jakarta.inject.Named;
-
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
+
+import io.jans.as.common.service.OrganizationService;
+import io.jans.as.common.service.common.ApplicationFactory;
+import io.jans.as.common.service.common.InumService;
+import io.jans.as.common.util.AttributeConstants;
+import io.jans.configapi.configuration.ConfigurationFactory;
+import io.jans.configapi.plugin.lock.model.stat.HealthEntry;
+import io.jans.configapi.plugin.lock.model.stat.LogEntry;
+import io.jans.configapi.plugin.lock.model.stat.TelemetryEntry;
+import io.jans.model.SearchRequest;
+import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.model.PagedResult;
+import io.jans.orm.model.SortOrder;
+import io.jans.orm.search.filter.Filter;
+import io.jans.util.StringHelper;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.inject.Named;
 
 
 @ApplicationScoped
@@ -145,6 +145,19 @@ public class AuditService {
 
     }
 
+    public List<TelemetryEntry> getTelemetryEntrysByRange(Date eventStartDate, Date eventEndDate, int sizeLimit) {
+        logger.debug("Search TelemetryEntrys by event range: [{}, {}], sizeLimit:{}", eventStartDate, eventEndDate, sizeLimit);
+        
+        Filter eventStartDateFilter = Filter.createGreaterOrEqualFilter(AttributeConstants.EVENT_TIME, eventStartDate);
+        Filter eventEndDateFilter = Filter.createLessOrEqualFilter(AttributeConstants.EVENT_TIME, eventEndDate);
+        
+        Filter searchFilter = Filter.createANDFilter(eventStartDateFilter, eventEndDateFilter);
+
+        logger.debug("Search TelemetryEntrys with searchFilter: {}", searchFilter);
+        return persistenceEntryManager.findEntries(getDnForTelemetryEntry(null), TelemetryEntry.class, searchFilter,
+                sizeLimit);
+    }
+
     public TelemetryEntry getTelemetryEntryByDn(String dn) {
         try {
             return persistenceEntryManager.find(TelemetryEntry.class, dn);
@@ -177,6 +190,19 @@ public class AuditService {
 
         healthEntry = this.getHealthEntryByDn(this.getDnForHealthEntry(inum));
         return healthEntry;
+    }
+
+    public List<HealthEntry> getHealthEntrysByRange(Date eventDateStart, Date eventDateEnd, int sizeLimit) {
+        logger.debug("Search HealthEntrys by event range: [{}, {}], sizeLimit:{}", eventDateStart, eventDateEnd, sizeLimit);
+        
+        Filter eventDateStartFilter = Filter.createGreaterOrEqualFilter(AttributeConstants.EVENT_TIME, eventDateStart);
+        Filter eventDateEndFilter = Filter.createLessOrEqualFilter(AttributeConstants.EVENT_TIME, eventDateEnd);
+        
+        Filter searchFilter = Filter.createANDFilter(eventDateStartFilter, eventDateEndFilter);
+
+        logger.debug("Search HealthEntrys with searchFilter: {}", searchFilter);
+        return persistenceEntryManager.findEntries(getDnForTelemetryEntry(null), HealthEntry.class, searchFilter,
+                sizeLimit);
     }
 
     public HealthEntry getHealthEntryByDn(String dn) {
@@ -213,6 +239,18 @@ public class AuditService {
         return logEntry;
     }
 
+    public List<LogEntry> getLogEntrysByRange(Date eventDateStart, Date eventDateEnd, int sizeLimit) {
+        logger.debug("Search LogEntrys by event range: [{}, {}], sizeLimit:{}", eventDateStart, eventDateEnd, sizeLimit);
+        
+        Filter eventDateStartFilter = Filter.createGreaterOrEqualFilter(AttributeConstants.EVENT_TIME, eventDateStart);
+        Filter eventDateEndFilter = Filter.createLessOrEqualFilter(AttributeConstants.EVENT_TIME, eventDateEnd);
+        
+        Filter searchFilter = Filter.createANDFilter(eventDateStartFilter, eventDateEndFilter);
+
+        logger.debug("Search LogEntrys with searchFilter: {}", searchFilter);
+        return persistenceEntryManager.findEntries(getDnForTelemetryEntry(null), LogEntry.class, searchFilter,
+                sizeLimit);
+    }
    
     public LogEntry getLogEntryByDn(String dn) {
         try {

@@ -102,7 +102,7 @@
                                     field.value = JSON.stringify(obj)
                             })
                             .catch(err => console.log("FREEIPAPI call failed:" + err))                
-                    }) 
+                    })
         }
 
         function fillPlatformData(field) {
