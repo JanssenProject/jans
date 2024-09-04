@@ -34,7 +34,7 @@ python3 -m venv venv
 4. with activated enviroment move to the folder
 
 ```
-cd authz_python
+cd cedarling_python
 ```
 
 5. install dependency for maurin
