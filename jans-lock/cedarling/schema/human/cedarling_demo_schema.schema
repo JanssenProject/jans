@@ -47,7 +47,7 @@ namespace Jans {
         exp: Long,
         iat: Long,
         iss: TrustedIssuer,
-        jti: String,
+        jti?: String,
         scope: Set<String>,
     };
     entity id_token  = {
@@ -59,7 +59,7 @@ namespace Jans {
         exp: Long,
         iat: Long,
         iss: TrustedIssuer,
-        jti: String,        
+        jti?: String,        
         name: String,
         phone_number: String,
         sub: String,
@@ -69,7 +69,7 @@ namespace Jans {
         birthdate: String,
         email: email_address,
         iss: TrustedIssuer,
-        jti: String,
+        jti?: String,
         name: String,
         phone_number: String,
         sub: String,

@@ -31,7 +31,7 @@ pub struct IdToken {
 	pub exp: i64,
 	pub iat: i64,
 	pub iss: String,
-	pub jti: String,
+	pub jti: Option<String>,
 	pub name: String,
 	#[serde(rename = "phone_number")]
 	pub phone_number: String,
@@ -94,7 +94,16 @@ pub struct StatusList {
 
 impl IdToken {
 	pub fn entities(self) -> Result<Vec<Entity>, EntityCreatingError> {
-		let id = serde_json::json!({ "__entity": { "type": "Jans::id_token", "id": self.jti } });
+		let jti = match self.jti {
+			Some(jti) => jti,
+			None => {
+				log::warn!(
+					"id token does not have jti field, so Jans::id_token entity is not created",
+				);
+				return Ok(Vec::new());
+			}
+		};
+		let id = serde_json::json!({ "__entity": { "type": "Jans::id_token", "id": jti.clone() } });
 		let uid = EntityUid::from_json(id)
 			.map_err(|err| EntityCreatingError::CreateFromJson(err.to_string()))?;
 
@@ -102,9 +111,6 @@ impl IdToken {
 			.amr
 			.iter()
 			.map(|v| RestrictedExpression::new_string(v.to_owned()));
-
-		// TODO: add
-		//         iss: TrustedIssuer,
 
 		let mut attrs = HashMap::from([
 			("acr".into(), RestrictedExpression::new_string(self.acr)),
@@ -117,7 +123,7 @@ impl IdToken {
 			("email".into(), exp_parsers::email_exp(&self.email)?),
 			("exp".into(), RestrictedExpression::new_long(self.exp)),
 			("iat".into(), RestrictedExpression::new_long(self.iat)),
-			("jti".into(), RestrictedExpression::new_string(self.jti)),
+			("jti".into(), RestrictedExpression::new_string(jti)),
 			("name".into(), RestrictedExpression::new_string(self.name)),
 			(
 				"phone_number".into(),
@@ -145,7 +151,7 @@ pub struct UserInfoToken {
 	pub birthdate: String,
 	pub email: String,
 	pub iss: String,
-	pub jti: String,
+	pub jti: Option<String>,
 	pub name: String,
 	#[serde(rename = "phone_number")]
 	pub phone_number: String,
@@ -232,7 +238,16 @@ impl UserInfoToken {
 	}
 
 	fn get_user_info_tokens_entity(&self) -> Result<Vec<Entity>, EntityCreatingError> {
-		let id = serde_json::json!({ "__entity": { "type": "Jans::Userinfo_token", "id": self.jti.to_owned() } });
+		let jti = match &self.jti {
+			Some(jti) => jti,
+			None => {
+				log::warn!(
+					"user info token does not have jti field, so Jans::Userinfo_token entity is not created",
+				);
+				return Ok(Vec::new());
+			}
+		};
+		let id = serde_json::json!({ "__entity": { "type": "Jans::Userinfo_token", "id": jti.to_owned() } });
 		let uid = EntityUid::from_json(id)
 			.map_err(|err| EntityCreatingError::CreateFromJson(err.to_string()))?;
 
@@ -255,7 +270,7 @@ impl UserInfoToken {
 			),
 			(
 				"jti".to_string(),
-				RestrictedExpression::new_string(self.jti.clone()),
+				RestrictedExpression::new_string(jti.to_owned()),
 			),
 			(
 				"name".to_string(),
@@ -331,7 +346,7 @@ pub struct AccessToken {
 	pub exp: i64,
 	pub iat: i64,
 	pub iss: String,
-	pub jti: String,
+	pub jti: Option<String>,
 	pub scope: Vec<String>,
 	#[serde(rename = "client_id")]
 	pub client_id: String,
@@ -436,7 +451,7 @@ impl AccessToken {
 		let trusted_issuer_entity = exp_parsers::trusted_issuer_entity(&self.iss)?;
 
 		let parents = HashSet::new();
-		let attrs = HashMap::from([
+		let mut attrs = HashMap::from([
 			(
 				"aud".to_owned(),
 				RestrictedExpression::new_string(self.aud.to_owned()),
@@ -446,10 +461,6 @@ impl AccessToken {
 			(
 				"iss".to_owned(),
 				RestrictedExpression::new_entity_uid(trusted_issuer_entity.uid()),
-			),
-			(
-				"jti".to_owned(),
-				RestrictedExpression::new_string(self.jti.to_owned()),
 			),
 			("iat".to_owned(), RestrictedExpression::new_long(self.iat)),
 			(
@@ -461,6 +472,9 @@ impl AccessToken {
 				),
 			),
 		]);
+		if let Option::Some(jti) = self.jti.to_owned() {
+			attrs.insert("jti".into(), RestrictedExpression::new_string(jti));
+		}
 
 		let access_token_entity = Entity::new(id, attrs, parents)?;
 		Ok(vec![access_token_entity])
