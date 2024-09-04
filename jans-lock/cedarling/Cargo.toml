@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["authz", "authz_run", "jwt"]
+members = ["authz", "authz_run", "cedarling_python", "jwt"]
 
 [workspace.dependencies]
 authz = { path = "authz" }

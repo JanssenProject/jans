@@ -47,3 +47,7 @@ cedar_files/policies_1.cedar
 ```
 
 also local policy store was modified according to files above.
+
+# Python binding
+
+To build the python binding you need move to the `cedarling_python` folder and follow steps written in `Readme.md`

@@ -5,8 +5,8 @@ use cedar_policy::{
 use jwt::JWTDecoder;
 
 mod jwt_data_handler;
-pub use jwt_data_handler::AuthzInputRaw;
 use jwt_data_handler::{AuthzInputEntitiesError, DecodeTokensError, JWTData};
+pub use jwt_data_handler::{AuthzInputRaw, ResourceData};
 pub(crate) mod jwt_tokens;
 mod policy_store;
 use policy_store::{PolicyStoreEntry, TrustedIssuers};
@@ -15,11 +15,12 @@ pub(crate) mod exp_parsers;
 
 use std::str::FromStr;
 
-#[derive(serde::Deserialize, serde::Serialize, Debug)]
+#[derive(serde::Deserialize, serde::Serialize, Debug, Default)]
 #[serde(tag = "strategy")]
 #[serde(rename_all = "kebab-case")]
 #[serde(rename_all_fields = "camelCase")]
 pub enum PolicyStoreConfig {
+	#[default] //it will be changed in future
 	Local,
 }
 
@@ -76,12 +77,13 @@ pub struct RoleMapping {
 
 /// Bootstrap properties of application [link](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties)
 #[allow(non_snake_case)]
-#[derive(Debug, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Default, serde::Serialize, serde::Deserialize)]
 pub struct BootstrapConfig {
 	pub CEDARLING_APPLICATION_NAME: Option<String>,
 	pub CEDARLING_ROLE_MAPPING: RoleMapping,
 }
 
+#[derive(Default)]
 pub struct AuthzConfig {
 	pub decoder: JWTDecoder,
 	pub policy: PolicyStoreConfig,
@@ -165,6 +167,14 @@ impl Authz {
 		let authorizer = Authorizer::new();
 		let decision = authorizer.is_authorized(&request, &self.policy, &entities_box.entities);
 		Ok(decision)
+	}
+
+	pub fn is_authorized(&self, input: AuthzInputRaw) -> Result<bool, HandleError> {
+		let decision = self.handle(input)?;
+		Ok(match decision.decision() {
+			cedar_policy::Decision::Allow => true,
+			cedar_policy::Decision::Deny => false,
+		})
 	}
 
 	pub fn get_entities(

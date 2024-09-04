@@ -5,8 +5,10 @@ use base64::prelude::*;
 // TODO: implement
 pub struct JWTValidationConfig {}
 
+#[derive(Default)]
 pub enum JWTDecoder {
 	WithValidation(JWTValidationConfig),
+	#[default]
 	WithoutValidation,
 }
 
