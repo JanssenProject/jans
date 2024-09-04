@@ -17,7 +17,7 @@ result = authz.is_authorized({
     "action": "Jans::Action::\"Execute\"",
     "resource": {
         "type": "Jans::Application",
-        "id": "33d8c020-5c91-4fa6-8041-484eaae39926"
+        "id": "Support Portal" # ID is illustrative in our example
     },
     "context": {}
 })
