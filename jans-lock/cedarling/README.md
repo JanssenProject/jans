@@ -5,10 +5,10 @@
 1. Ensure you have installed [Rust](https://www.rust-lang.org/tools/install) installed.
 2. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/cedarling.git
-   cd cedarling
+   git clone https://github.com/JanssenProject/jans.git
+   cd jans/jans-lock/cedarling/
    ```
-3. Install dependencies:
+3. Install dependencies and build:
    ```bash
    cargo build --release
    ```
