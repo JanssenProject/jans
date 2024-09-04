@@ -155,7 +155,8 @@ export default function RegisterClient({ isOpen, handleDialog }) {
           client_name: 'jans-tarp-' + uuidv4(),
           token_endpoint_auth_method: 'client_secret_basic',
           access_token_as_jwt: true,
-          userinfo_signed_response_alg: "RS256"
+          userinfo_signed_response_alg: "RS256",
+          jansInclClaimsInIdTkn: "true"
         };
 
         if (!!expireAt) {
