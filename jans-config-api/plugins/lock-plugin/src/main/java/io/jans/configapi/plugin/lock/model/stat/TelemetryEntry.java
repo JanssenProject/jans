@@ -12,7 +12,7 @@ import io.jans.orm.annotation.JsonObject;
 import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.model.base.BaseEntry;
 
-@DataEntry
+@DataEntry(sortByName = "eventTime")
 @ObjectClass(value = "jansTelemetryEntry")
 public class TelemetryEntry extends BaseEntry implements Serializable {
 

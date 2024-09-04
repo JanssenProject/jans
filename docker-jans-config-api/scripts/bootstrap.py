@@ -68,7 +68,9 @@ def main():
             "/app/templates/jans-ldap.properties",
             "/etc/jans/conf/jans-ldap.properties",
         )
-        sync_ldap_truststore(manager)
+
+        if as_boolean(os.environ.get("CN_LDAP_USE_SSL", "true")):
+            sync_ldap_truststore(manager)
         sync_ldap_password(manager)
 
     if "couchbase" in persistence_groups:
@@ -78,8 +80,10 @@ def main():
             "/app/templates/jans-couchbase.properties",
             "/etc/jans/conf/jans-couchbase.properties",
         )
-        sync_couchbase_cert(manager)
-        sync_couchbase_truststore(manager)
+
+        if as_boolean(os.environ.get("CN_COUCHBASE_TRUSTSTORE_ENABLE", "true")):
+            sync_couchbase_cert(manager)
+            sync_couchbase_truststore(manager)
 
     if "sql" in persistence_groups:
         sync_sql_password(manager)
