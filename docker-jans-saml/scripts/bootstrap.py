@@ -33,6 +33,7 @@ from jans.pycloudlib.persistence.sql import sync_sql_password
 from jans.pycloudlib.persistence.utils import PersistenceMapper
 from jans.pycloudlib.persistence.utils import render_base_properties
 from jans.pycloudlib.persistence.utils import render_salt
+from jans.pycloudlib.utils import as_boolean
 from jans.pycloudlib.utils import generate_base64_contents
 from jans.pycloudlib.utils import encode_text
 from jans.pycloudlib.utils import get_random_chars
@@ -94,7 +95,9 @@ def main():
             "/app/templates/jans-ldap.properties",
             "/etc/jans/conf/jans-ldap.properties",
         )
-        sync_ldap_truststore(manager)
+
+        if as_boolean(os.environ.get("CN_LDAP_USE_SSL", "true")):
+            sync_ldap_truststore(manager)
         sync_ldap_password(manager)
 
     if "couchbase" in persistence_groups:
@@ -104,8 +107,10 @@ def main():
             "/app/templates/jans-couchbase.properties",
             "/etc/jans/conf/jans-couchbase.properties",
         )
-        sync_couchbase_cert(manager)
-        sync_couchbase_truststore(manager)
+
+        if as_boolean(os.environ.get("CN_COUCHBASE_TRUSTSTORE_ENABLE", "true")):
+            sync_couchbase_cert(manager)
+            sync_couchbase_truststore(manager)
         extract_common_libs("couchbase")
 
     if "sql" in persistence_groups:

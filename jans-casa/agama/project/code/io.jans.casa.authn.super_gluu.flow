@@ -1,0 +1,7 @@
+Flow io.jans.casa.authn.super_gluu
+    Basepath "authn"
+    Configs conf
+    Inputs userData withEscape
+
+//TODO
+Finish false
