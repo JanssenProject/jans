@@ -2,6 +2,11 @@ import os
 import json
 import asyncio
 import zipfile
+import requests
+import tempfile
+import shutil
+
+from urllib import request
 
 from datetime import datetime
 from typing import Any
@@ -15,7 +20,7 @@ from prompt_toolkit.lexers import PygmentsLexer, DynamicLexer
 from prompt_toolkit.layout.containers import HSplit, VSplit, DynamicContainer, Window
 from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.formatted_text import HTML
-from prompt_toolkit.widgets import Button, Label, TextArea, Box, Frame
+from prompt_toolkit.widgets import Button, Label, TextArea, Box, Frame, RadioList
 
 from utils.multi_lang import _
 from utils.utils import DialogUtils, fromisoformat, get_help_with
@@ -27,11 +32,11 @@ from wui_components.jans_table import JansTableWidget
 
 class Agama(DialogUtils):
     def __init__(
-        self, 
+        self,
         app: Application
         ) -> None:
 
-        
+
         self.app = app
         self.data = []
         self.first_enter = False
@@ -60,6 +65,7 @@ class Agama(DialogUtils):
                     VSplit([
                         self.app.getTitledText(_("Search"), name='oauth:agama:search', jans_help=_(common_strings.enter_to_search), accept_handler=self.search_agama_project, style=cli_style.edit_text),
                         self.app.getButton(text=_("Upload Project"), name='oauth:agama:add', jans_help=_("To add a new Agama project press this button"), handler=self.upload_project),
+                        self.app.getButton(text=_("Communitiy Projects"), name='oauth:agama:community-projects', jans_help=_("Deploy Agama Lab community projects"), handler=self.deploy_agama_lab_community_projects),
                         ],
                         padding=3,
                         width=D(),
@@ -155,7 +161,6 @@ class Agama(DialogUtils):
                     self.app.show_message(_(common_strings.info), _("File {} was successfully saved").format(path), tobefocused=fdata.main_dialog)
                 except Exception as e:
                     self.app.show_message(_(common_strings.error), _("An error ocurred while saving") + ":\n{}".format(str(e)), tobefocused=fdata.main_dialog)
-
 
 
             async def get_current_config_coroutine():
@@ -298,7 +303,7 @@ class Agama(DialogUtils):
     def get_agama_projects(self, search_str=''):
         asyncio.ensure_future(self.get_projects_coroutine(search_str))
 
-    def upload_project(self):
+    def upload_project(self, file_path=None):
         agama_status = self.app.app_configuration.get('agamaConfiguration',{}).get('enabled')
 
         def project_uploader(path, project_name):
@@ -307,6 +312,8 @@ class Agama(DialogUtils):
                 self.app.start_progressing(_("Uploading agama project..."))
                 await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
                 self.app.stop_progressing()
+                if file_path:
+                    shutil.rmtree(os.path.dirname(file_path))
                 self.get_agama_projects()
 
             asyncio.ensure_future(coroutine())
@@ -359,7 +366,10 @@ class Agama(DialogUtils):
             self.app.show_jans_dialog(file_browser_dialog)
 
         if agama_status:
-            continue_upload()
+            if file_path:
+                do_upload_project(file_path)
+            else:
+                continue_upload()
         else:
             continue_button = Button(_("Continue!"), handler=continue_upload)
             buttons = [Button('Back'), continue_button] 
@@ -480,5 +490,98 @@ class Agama(DialogUtils):
             if params['selected'][3] == _("Pending"):
                 asyncio.ensure_future(self.get_projects_coroutine())
             asyncio.ensure_future(coroutine())
-            
+
+
+    def deploy_agama_lab_community_projects(self):
+
+
+        def get_projects():
+
+            response = requests.get("https://github.com/orgs/GluuFederation/repositories?q=agama-", headers={"Accept":"application/json"})
+            result = response.json()
+            downloads = []
+            for repo in result["payload"]["repositories"]:
+                repo_name = repo["name"]
+                response = requests.get(f'https://api.github.com/repos/GluuFederation/{repo_name}/releases/latest', headers={'Accept': 'application/json'})
+                if response.ok:
+                    result = response.json()
+                    for asset in result['assets']:
+                        if asset['name'].endswith('.gama'):
+                            downloads.append((repo_name, repo['description'], asset['browser_download_url']))
+
+            return downloads
+
+
+        async def download_project_coroutine(download_project_dialog, download_url, download_fn):
+
+            download_path = os.path.join(tempfile.mkdtemp(), download_fn)
+
+            def download_project():
+                request.urlretrieve(download_url, download_path)
+
+            await get_event_loop().run_in_executor(self.app.executor, download_project)
+
+            download_project_dialog.deploy_msg_label.text = _("Deploying {}").format(download_fn)
+
+            await asyncio.sleep(1)
+
+            try:
+                download_project_dialog.future.set_result(True)
+            except Exception:
+                pass
+
+            self.upload_project(download_path)
+
+
+        async def get_projects_coroutine(get_projects_dialog):
+            self.app.start_progressing(_("Retrieving Agama Lab community projects..."))
+            downloads = await get_event_loop().run_in_executor(self.app.executor, get_projects)
+            self.app.stop_progressing()
+            get_projects_dialog.future.set_result(True)
+
+            projects = [ (dl, name + "\n    " + desc) for name, desc, dl in downloads ]
+
+            projects_radio_list = RadioList(values=projects)
+
+            def deploy(select_project_dialog):
+                download_url = select_project_dialog.projects_radio_list.current_value
+                download_fn = os.path.split(download_url)[-1]
+                self.app.start_progressing(_("Downloading {}").format(download_fn))
+
+                deploy_msg_label = Label(_("Downloading {}").format(download_url))
+                download_project_dialog = JansGDialog(
+                        self.app,
+                        title=_("Downloading"),
+                        body=HSplit([deploy_msg_label]),
+                        buttons=[]
+                        )
+                download_project_dialog.deploy_msg_label = deploy_msg_label
+                self.app.show_jans_dialog(download_project_dialog, focus=self.main_container)
+
+                asyncio.ensure_future(download_project_coroutine(download_project_dialog, download_url, download_fn))
+
+
+            buttons = [Button(_("Cancel")), Button(_("Deploy"), handler=deploy)]
+
+            select_project_dialog = JansGDialog(
+                    self.app,
+                    title=_("Select Project to Deploy"),
+                    body=HSplit([projects_radio_list]),
+                    buttons=buttons
+                    )
+            select_project_dialog.projects_radio_list = projects_radio_list
+            self.app.show_jans_dialog(select_project_dialog)
+
+
+        buttons = [Button(_("Cancel"))]
+
+        get_projects_dialog = JansGDialog(
+                self.app,
+                title=_("Getting Projects"),
+                body=HSplit([Label(_("Please wait while retreiving Agama Lab community projects"))]),
+                buttons=buttons
+                )
+        self.app.show_jans_dialog(get_projects_dialog)
+
+        asyncio.ensure_future(get_projects_coroutine(get_projects_dialog))
 
