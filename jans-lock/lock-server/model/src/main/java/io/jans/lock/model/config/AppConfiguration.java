@@ -65,7 +65,7 @@ public class AppConfiguration implements Configuration {
     
     @DocProperty(description = "Group scope enabled")
     @Schema(description = "Group scope enabled")
-    private Boolean groupScopeEnabled;
+    private boolean groupScopeEnabled;
 
     @DocProperty(description = "Endpoint groups")
     @Schema(description = "Endpoint groups")
@@ -191,11 +191,11 @@ public class AppConfiguration implements Configuration {
         this.tokenUrl = tokenUrl;
     }
     
-    public Boolean getGroupScopeEnabled() {
+    public boolean isGroupScopeEnabled() {
         return groupScopeEnabled;
     }
 
-    public void setGroupScopeEnabled(Boolean groupScopeEnabled) {
+    public void setGroupScopeEnabled(boolean groupScopeEnabled) {
         this.groupScopeEnabled = groupScopeEnabled;
     }
 

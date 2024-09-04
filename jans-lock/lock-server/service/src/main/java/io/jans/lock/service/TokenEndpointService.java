@@ -62,14 +62,14 @@ public class TokenEndpointService {
     EncryptionService encryptionService;
 
     public Token getAccessToken(String endpoint, boolean allGroupScopes) {
-        log.error("Request for token  for endpoint:{}, allGroupScopes:{}", endpoint, allGroupScopes);
-        
+        log.error("Request for token  for endpoint:{}, allGroupScopes:{}, appConfiguration.isGroupScopeEnabled():{}", endpoint, allGroupScopes, appConfiguration.isGroupScopeEnabled());
+
         String tokenUrl = this.appConfiguration.getTokenUrl();
         String clientId = this.appConfiguration.getClientId();
-
+        boolean groupScopeEnabled = this.appConfiguration.isGroupScopeEnabled();
         String clientSecret = this.getDecryptedPassword(appConfiguration.getClientPassword());
         String scopes = null;
-        if (allGroupScopes) {
+        if (allGroupScopes && groupScopeEnabled) {
             scopes = this.getAllGroupScope(endpoint);
         } else {
             scopes = this.getScopes(endpoint);
@@ -287,30 +287,35 @@ public class TokenEndpointService {
 
     public String getScopes(String endpoint) {
         log.error("Get scope for endpoint:{} ", endpoint);
-        
-        String scopes = null;
+
+        StringBuilder scope = new StringBuilder(ScopeType.OPENID.getValue());
         List<String> scopeList = null;
         Map<String, List<String>> endpointMap = this.appConfiguration.getEndpointDetails();
         log.error("Get scope for endpoint:{} from endpointMap:{}", endpoint, endpointMap);
 
         if (endpointMap == null || endpointMap.isEmpty()) {
-            return scopes;
+            return scope.toString();
         }
 
-        scopeList = endpointMap.get(endpoint);
-        log.error("Scope for endpoint:{} scopeList:{} ", endpoint, scopeList);
+        for (Map.Entry<String, List<String>> entry : endpointMap.entrySet()) {
+            log.error(" entry.getKey():{}, entry.getValue():{}", entry.getKey(), entry.getValue());
+            if (entry.getKey() != null && entry.getKey().toLowerCase().endsWith(endpoint)) {
+                scopeList = entry.getValue();
+                break;
+            }
+        }
         
+        log.error("Scope for endpoint:{} scopeList:{} ", endpoint, scopeList);
         if (scopeList == null || scopeList.isEmpty()) {
-            return scopes;
+            return scope.toString();
         }
 
         Set<String> scopesSet = new HashSet<>(scopeList);
 
-        StringBuilder scope = new StringBuilder(ScopeType.OPENID.getValue());
         for (String s : scopesSet) {
             scope.append(" ").append(s);
         }
-        log.error("endpoint:{}, endpointMap:{}, scope:{}", endpoint, endpointMap, scope);
+        log.error("Final endpoint:{}, endpointMap:{}, scope:{}", endpoint, endpointMap, scope);
         return scope.toString();
     }
 
@@ -344,33 +349,57 @@ public class TokenEndpointService {
         return sb.toString();
     }
 
-    private String getAllGroupScope(String groupName) {
-        log.error(" Get all scope for groupName:{}", groupName);
+    private String getAllGroupScope(String endpoint) {
+        log.error(" Get group scopes for String endpoint:{}", endpoint);
         StringBuilder sb = new StringBuilder();
-        String scopes = null;
-
+        String groupName = this.getEndpointGroup(endpoint);
         Map<String, List<String>> endpointGroups = this.appConfiguration.getEndpointGroups();
-        log.error(" Get all auditScope endpointGroups:{}", endpointGroups);
+        log.error(" groupName for endpoint:{} is {}", endpoint, groupName);
 
-        if (endpointGroups == null || endpointGroups.isEmpty()) {
-            return scopes;
+        if (StringUtils.isBlank(groupName)) {
+            // since group is null get scope for endpoint itself
+            sb.append(this.getScopes(endpoint));
         }
 
         List<String> endpoints = endpointGroups.get(groupName);
         log.error("groupName:{}, endpoints:{}", groupName, endpoints);
 
         if (endpoints == null || endpoints.isEmpty()) {
-            return scopes;
+            return sb.toString();
         }
 
-        for (String endpoint : endpoints) {
-            scopes = this.getScopes(endpoint);
-            sb.append(scopes);
+        for (String url : endpoints) {
+            sb.append(" ").append(this.getScopes(url));
         }
-        log.error("groupName:{}, sb:{}", groupName, sb);
+
+        log.error("groupName:{}, scopes:{}", groupName, sb);
 
         return sb.toString();
 
+    }
+
+    private String getEndpointGroup(String endpoint) {
+        log.debug("Get groupName for  endpoint:{}", endpoint);
+        String groupName = null;
+        if (StringUtils.isBlank(endpoint)) {
+            return groupName;
+        }
+        Map<String, List<String>> endpointGroups = this.appConfiguration.getEndpointGroups();
+        log.error(" endpointGroups:{}", endpointGroups);
+
+        if (endpointGroups == null || endpointGroups.isEmpty()) {
+            return groupName;
+        }
+
+        for (Map.Entry<String, List<String>> entry : endpointGroups.entrySet()) {
+            log.error(" entry.getKey():{}, entry.getValue():{}", entry.getKey(), entry.getValue());
+            if (entry.getValue() != null && entry.getValue().contains(endpoint)) {
+                groupName = entry.getKey();
+                break;
+            }
+        }
+        log.error(" endpoint:{} groupName:{}", endpoint, groupName);
+        return groupName;
     }
 
     private static Builder getClientBuilder(String url) {
@@ -381,7 +410,8 @@ public class TokenEndpointService {
         log.error("postData - endpoint:{}, postData:{}", endpoint, postData);
         String endpointPath = this.getEndpointPath(endpoint);
 
-        log.error("Posting data for - endpoint:{}, endpointPath:{},this.getEndpointUrl(endpointPath):{}", endpoint, endpointPath,this.getEndpointUrl(endpointPath));
+        log.error("Posting data for - endpoint:{}, endpointPath:{},this.getEndpointUrl(endpointPath):{}", endpoint,
+                endpointPath, this.getEndpointUrl(endpointPath));
         return post(this.getEndpointUrl(endpointPath), null, token, null, contentType, postData);
     }
 
@@ -416,7 +446,7 @@ public class TokenEndpointService {
     }
 
     public boolean isTokenValid(Date expiryDate) {
-        if(expiryDate==null) {
+        if (expiryDate == null) {
             return false;
         }
         return expiryDate.after(new Date());

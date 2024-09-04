@@ -16,7 +16,7 @@ tags:
 - name: Lock - Configuration
 - name: Lock - Audit
 paths:
-  /lock/audit/health/{eventStartDate-eventEndDate}:
+  /lock/audit/health/{eventStartDate}-{eventEndDate}:
     get:
       tags:
       - Lock - Audit
@@ -61,7 +61,7 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/lock/health.readonly
-  /lock/audit/log/{eventStartDate-eventEndDate}:
+  /lock/audit/log/{eventStartDate}-{eventEndDate}:
     get:
       tags:
       - Lock - Log
@@ -106,7 +106,7 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/lock/log.readonly
-  /lock/audit/telemetry/{eventStartDate-eventEndDate}:
+  /lock/audit/telemetry/{eventStartDate}-{eventEndDate}:
     get:
       tags:
       - Lock - Audit
