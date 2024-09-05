@@ -43,7 +43,7 @@ public class TelemetryEntry extends BaseEntry implements Serializable {
     @AttributeName(name = "jansSuccessLoadCounter")
     private long policySuccessLoadCounter;
 
-    @AttributeName(name = "jansFaiedlLoadCounter")
+    @AttributeName(name = "jansFailedLoadCounter")
     private long policyFailedLoadCounter;
 
     @AttributeName(name = "evaluationTimeNs")

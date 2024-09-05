@@ -1,7 +1,7 @@
-package io.jans.lock.util;
+package io.jans.lock.service.audit;
 
 import io.jans.as.model.uma.wrapper.Token;
-
+import io.jans.lock.service.TokenEndpointService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,38 +26,37 @@ public class AuditService {
     private Logger log;
 
     @Inject
-    LockUtil lockUtil;
+    TokenEndpointService tokenEndpointService;
 
     private Map<String, Date> tokenDetails = new HashMap<>();
 
     public Response post(String endpoint, String postData, ContentType contentType) {
-        log.debug("postData - endpoint:{}, postData:{}", endpoint, postData);
-
-        String accessToken = null;
+        log.info("postData - endpoint:{}, postData:{}, contentType:{}", endpoint, postData, contentType);
 
         Date tokenExpiryDate = this.getTokenExpiryDate();
         log.debug("postData - tokenExpiryDate:{}", tokenExpiryDate);
-        boolean isTokenValid = this.lockUtil.isTokenValid(tokenExpiryDate);
-        log.debug("postData - tokenDetails:{}, tokenExpiryDate:{}, isTokenValid:{}", tokenDetails, tokenExpiryDate,
+        boolean isTokenValid = this.tokenEndpointService.isTokenValid(tokenExpiryDate);
+        log.debug(" postData - tokenDetails:{}, tokenExpiryDate:{}, isTokenValid:{}", tokenDetails, tokenExpiryDate,
                 isTokenValid);
+        String accessToken = null;
         if (tokenDetails != null && !tokenDetails.isEmpty() && isTokenValid) {
-            log.debug("Reusing token as still valid!");
+            log.info("Reusing token as still valid!");
             accessToken = this.getToken();
         } else {
-            log.debug("Generating new token !");
+            log.info("Generating new token !");
             accessToken = this.getAccessTokenForAudit(endpoint);
         }
-        return this.lockUtil.post(endpoint, postData, contentType, accessToken);
+        return this.tokenEndpointService.post(endpoint, postData, contentType, accessToken);
     }
 
     public JSONObject getJSONObject(HttpServletRequest request) {
-        return this.lockUtil.getJSONObject(request);
+        return this.tokenEndpointService.getJSONObject(request);
     }
 
     private String getAccessTokenForAudit(String endpoint) {
-        log.debug("Get Access Token For Audit endpoint:{}", endpoint);
+        log.info("Get Access Token For Audit endpoint:{}", endpoint);
         String accessToken = null;
-        Token token = this.lockUtil.getAccessToken(endpoint, true);
+        Token token = this.tokenEndpointService.getAccessToken(endpoint, true);
         log.debug("Get Access Token For Audit endpoint:{}, token:{}", endpoint, token);
 
         if (token != null) {
@@ -65,7 +64,7 @@ public class AuditService {
             Integer expiresIn = token.getExpiresIn();
             log.debug("Get Access Token For Audit endpoint:{}, accessToken:{}, expiresIn", endpoint, accessToken);
 
-            tokenDetails.put(accessToken, this.lockUtil.computeTokenExpiryTime(expiresIn));
+            tokenDetails.put(accessToken, this.tokenEndpointService.computeTokenExpiryTime(expiresIn));
         }
         return accessToken;
     }
@@ -85,6 +84,7 @@ public class AuditService {
     }
 
     private String getToken() {
+        log.debug("tokenDetails:{}", tokenDetails);
         String accessToken = null;
         if (tokenDetails != null && !tokenDetails.isEmpty() && tokenDetails.keySet() != null
                 && !tokenDetails.keySet().isEmpty()) {
@@ -92,9 +92,9 @@ public class AuditService {
 
             if (token.isPresent() && StringUtils.isNotBlank(token.get())) {
                 accessToken = token.get();
-            }
-            log.debug("accessToken:{}", accessToken);
+            }            
         }
+        log.debug("accessToken:{}", accessToken);
         return accessToken;
     }
 }
