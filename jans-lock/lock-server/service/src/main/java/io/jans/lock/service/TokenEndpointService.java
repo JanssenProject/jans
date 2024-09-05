@@ -62,54 +62,26 @@ public class TokenEndpointService {
     EncryptionService encryptionService;
 
     public Token getAccessToken(String endpoint, boolean allGroupScopes) {
-        log.error("Request for token  for endpoint:{}, allGroupScopes:{}, appConfiguration.isGroupScopeEnabled():{}", endpoint, allGroupScopes, appConfiguration.isGroupScopeEnabled());
+        log.info("Request for token  for endpoint:{}, allGroupScopes:{}", endpoint, allGroupScopes);
 
         String tokenUrl = this.appConfiguration.getTokenUrl();
         String clientId = this.appConfiguration.getClientId();
-        boolean groupScopeEnabled = this.appConfiguration.isGroupScopeEnabled();
+
         String clientSecret = this.getDecryptedPassword(appConfiguration.getClientPassword());
-        String scopes = null;
-        if (allGroupScopes && groupScopeEnabled) {
-            scopes = this.getAllGroupScope(endpoint);
-        } else {
-            scopes = this.getScopes(endpoint);
-        }
-        log.error("\n\n\n Scope  for endpoint:{}, allGroupScopes:{}, scopes:{}", endpoint, allGroupScopes, scopes);
+        String scopes = this.getScopeForToken(endpoint, allGroupScopes);
+
+        log.info("Scope  for endpoint:{}, allGroupScopes:{}, scopes:{}", endpoint, allGroupScopes, scopes);
         return this.getToken(tokenUrl, clientId, clientSecret, scopes);
     }
 
-    public String getAccessToken(String endpoint) {
-
-        log.debug("Request for token  for endpoint:{}", endpoint);
-        String tokenUrl = this.appConfiguration.getTokenUrl();
-        String clientId = this.appConfiguration.getClientId();
-
-        String clientSecret = this.getDecryptedPassword(appConfiguration.getClientPassword());
-        String scopes = this.getScopes(endpoint);
-
-        return this.getAccessToken(tokenUrl, clientId, clientSecret, scopes);
-    }
-
-    public String getAccessToken(String tokenUrl, String clientId, String clientSecret, String scopes) {
-        log.debug("Request for token tokenUrl:{}, clientId:{},scopes:{}", tokenUrl, clientId, scopes);
-
-        String accessToken = null;
-        TokenResponse tokenResponse = this.requestAccessToken(tokenUrl, clientId, clientSecret, scopes);
-        if (tokenResponse != null) {
-            accessToken = tokenResponse.getAccessToken();
-        }
-
-        return accessToken;
-    }
-
     public Token getToken(String tokenUrl, String clientId, String clientSecret, String scopes) {
-        log.error("Request for token tokenUrl:{}, clientId:{},scopes:{}", tokenUrl, clientId, scopes);
+        log.info("Request for token tokenUrl:{}, clientId:{},scopes:{}", tokenUrl, clientId, scopes);
         Token token = null;
         TokenResponse tokenResponse = this.requestAccessToken(tokenUrl, clientId, clientSecret, scopes);
         if (tokenResponse != null) {
             final String accessToken = tokenResponse.getAccessToken();
             final Integer expiresIn = tokenResponse.getExpiresIn();
-            log.error("accessToken:{}, expiresIn:{}", accessToken, expiresIn);
+            log.trace("accessToken:{}, expiresIn:{}", accessToken, expiresIn);
             if (Util.allNotBlank(accessToken)) {
                 return new Token(null, null, accessToken, ScopeType.OPENID.getValue(), expiresIn);
             }
@@ -120,7 +92,7 @@ public class TokenEndpointService {
 
     public TokenResponse requestAccessToken(final String tokenUrl, final String clientId, final String clientSecret,
             final String scope) {
-        log.error("Request for access token tokenUrl:{}, clientId:{},scope:{}", tokenUrl, clientId, scope);
+        log.info("Request for access token tokenUrl:{}, clientId:{},scope:{}", tokenUrl, clientId, scope);
         Response response = null;
         try {
             TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
@@ -133,7 +105,7 @@ public class TokenEndpointService {
             final MultivaluedHashMap<String, String> multivaluedHashMap = new MultivaluedHashMap<>(
                     tokenRequest.getParameters());
             response = request.post(Entity.form(multivaluedHashMap));
-            log.error("Response for Access Token -  response:{}", response);
+            log.trace("Response for Access Token -  response:{}", response);
             if (response.getStatus() == 200) {
                 String entity = response.readEntity(String.class);
                 TokenResponse tokenResponse = new TokenResponse();
@@ -148,16 +120,6 @@ public class TokenEndpointService {
             }
         }
         return null;
-    }
-
-    public HttpServiceResponse postData(String endpoint, String postData, ContentType contentType, String token) {
-        log.debug("postData - endpoint:{}, postData:{}, contentType:{}", endpoint, postData, contentType);
-        String endpointPath = this.getEndpointPath(endpoint);
-        if (StringUtils.isBlank(token)) {
-            token = this.getAccessToken(endpointPath);
-        }
-
-        return postData(this.getEndpointUrl(endpointPath), null, token, null, contentType, postData);
     }
 
     public HttpServiceResponse postData(String uri, String authType, String token, Map<String, String> headers,
@@ -285,38 +247,27 @@ public class TokenEndpointService {
         return decryptedPassword;
     }
 
-    public String getScopes(String endpoint) {
-        log.error("Get scope for endpoint:{} ", endpoint);
-
-        StringBuilder scope = new StringBuilder(ScopeType.OPENID.getValue());
+    public List<String> getScopes(String endpoint) {
+        log.info("Get scope for endpoint:{} ", endpoint);
         List<String> scopeList = null;
         Map<String, List<String>> endpointMap = this.appConfiguration.getEndpointDetails();
-        log.error("Get scope for endpoint:{} from endpointMap:{}", endpoint, endpointMap);
+        log.debug("Get scope for endpoint:{} from endpointMap:{}", endpoint, endpointMap);
 
         if (endpointMap == null || endpointMap.isEmpty()) {
-            return scope.toString();
+            return scopeList;
         }
 
         for (Map.Entry<String, List<String>> entry : endpointMap.entrySet()) {
-            log.error(" entry.getKey():{}, entry.getValue():{}", entry.getKey(), entry.getValue());
+            log.info(" entry.getKey():{}, entry.getValue():{}", entry.getKey(), entry.getValue());
             if (entry.getKey() != null && entry.getKey().toLowerCase().endsWith(endpoint)) {
                 scopeList = entry.getValue();
                 break;
             }
         }
-        
-        log.error("Scope for endpoint:{} scopeList:{} ", endpoint, scopeList);
-        if (scopeList == null || scopeList.isEmpty()) {
-            return scope.toString();
-        }
 
-        Set<String> scopesSet = new HashSet<>(scopeList);
+        log.info("Scope for endpoint:{} scopeList:{} ", endpoint, scopeList);
 
-        for (String s : scopesSet) {
-            scope.append(" ").append(s);
-        }
-        log.error("Final endpoint:{}, endpointMap:{}, scope:{}", endpoint, endpointMap, scope);
-        return scope.toString();
+        return scopeList;
     }
 
     private String getEndpointPath(String endpoint) {
@@ -349,56 +300,87 @@ public class TokenEndpointService {
         return sb.toString();
     }
 
-    private String getAllGroupScope(String endpoint) {
-        log.error(" Get group scopes for String endpoint:{}", endpoint);
+    private String getScopeForToken(String endpoint, boolean allGroupScopes) {
+        log.info("Request for token  for endpoint:{}, allGroupScopes:{}, appConfiguration.isGroupScopeEnabled():{}",
+                endpoint, allGroupScopes, appConfiguration.isGroupScopeEnabled());
         StringBuilder sb = new StringBuilder();
+        sb.append(ScopeType.OPENID.getValue());
+        List<String> scopeList = null;
+
+        boolean groupScopeEnabled = this.appConfiguration.isGroupScopeEnabled();
+
+        if (allGroupScopes && groupScopeEnabled) {
+            scopeList = this.getAllGroupScope(endpoint);
+        } else {
+            scopeList = this.getScopes(endpoint);
+        }
+        log.debug("Scope  for endpoint:{}, allGroupScopes:{}, scopeList:{}", endpoint, allGroupScopes,
+                scopeList);
+        
+        if(scopeList==null || scopeList.isEmpty()) {
+            return sb.toString();
+        }
+        
+        HashSet<String> scopeSet = new HashSet(scopeList);
+        for (String scope : scopeSet) {
+            sb.append(" ").append(scope);
+        }
+
+        return sb.toString();
+    }
+
+    private List<String> getAllGroupScope(String endpoint) {
+        log.info(" Get group scopes for String endpoint:{}", endpoint);
+        List<String> scopeList = null;
         String groupName = this.getEndpointGroup(endpoint);
         Map<String, List<String>> endpointGroups = this.appConfiguration.getEndpointGroups();
-        log.error(" groupName for endpoint:{} is {}", endpoint, groupName);
+        log.debug(" groupName for endpoint:{} is {}", endpoint, groupName);
+        scopeList = this.getScopes(endpoint);
 
         if (StringUtils.isBlank(groupName)) {
             // since group is null get scope for endpoint itself
-            sb.append(this.getScopes(endpoint));
+            return scopeList;
         }
 
         List<String> endpoints = endpointGroups.get(groupName);
-        log.error("groupName:{}, endpoints:{}", groupName, endpoints);
+        log.debug("groupName:{}, endpoints:{}", groupName, endpoints);
 
         if (endpoints == null || endpoints.isEmpty()) {
-            return sb.toString();
+            return scopeList;
         }
 
         for (String url : endpoints) {
-            sb.append(" ").append(this.getScopes(url));
+            scopeList.addAll(this.getScopes(url));
         }
 
-        log.error("groupName:{}, scopes:{}", groupName, sb);
+        log.info("Scope for groupName:{}, scopeList:{}", groupName, scopeList);
 
-        return sb.toString();
+        return scopeList;
 
     }
 
     private String getEndpointGroup(String endpoint) {
-        log.debug("Get groupName for  endpoint:{}", endpoint);
+        log.info("Get groupName for  endpoint:{}", endpoint);
         String groupName = null;
         if (StringUtils.isBlank(endpoint)) {
             return groupName;
         }
         Map<String, List<String>> endpointGroups = this.appConfiguration.getEndpointGroups();
-        log.error(" endpointGroups:{}", endpointGroups);
+        log.debug(" endpointGroups:{}", endpointGroups);
 
         if (endpointGroups == null || endpointGroups.isEmpty()) {
             return groupName;
         }
 
         for (Map.Entry<String, List<String>> entry : endpointGroups.entrySet()) {
-            log.error(" entry.getKey():{}, entry.getValue():{}", entry.getKey(), entry.getValue());
-            if (entry.getValue() != null && entry.getValue().contains(endpoint)) {
+            log.debug(" entry.getKey():{}, entry.getValue():{}", entry.getKey(), entry.getValue());
+            
+            if (entry.getValue() != null && entry.getValue().contains(endpoint.toLowerCase())) {
                 groupName = entry.getKey();
                 break;
             }
         }
-        log.error(" endpoint:{} groupName:{}", endpoint, groupName);
+        log.info(" endpoint:{} groupName:{}", endpoint, groupName);
         return groupName;
     }
 
@@ -407,17 +389,17 @@ public class TokenEndpointService {
     }
 
     public Response post(String endpoint, String postData, ContentType contentType, String token) {
-        log.error("postData - endpoint:{}, postData:{}", endpoint, postData);
+        log.info("postData - endpoint:{}, postData:{}", endpoint, postData);
         String endpointPath = this.getEndpointPath(endpoint);
 
-        log.error("Posting data for - endpoint:{}, endpointPath:{},this.getEndpointUrl(endpointPath):{}", endpoint,
+        log.debug("Posting data for - endpoint:{}, endpointPath:{},this.getEndpointUrl(endpointPath):{}", endpoint,
                 endpointPath, this.getEndpointUrl(endpointPath));
         return post(this.getEndpointUrl(endpointPath), null, token, null, contentType, postData);
     }
 
     private Response post(String url, String authType, String token, Map<String, String> headers,
             ContentType contentType, String postData) {
-        log.debug("postData - url:{}, authType:{}, token:{}, headers:{}, contentType:{}, postData:{}", url, authType,
+        log.info("postData - url:{}, authType:{}, token:{}, headers:{}, contentType:{}, postData:{}", url, authType,
                 token, headers, contentType, postData);
 
         if (StringUtils.isBlank(authType)) {

@@ -49,13 +49,13 @@ public class AuditRestWebServiceImpl implements AuditRestWebService {
     @Override
     public Response processHealthRequest(HttpServletRequest request, HttpServletResponse response,
             SecurityContext sec) {
-        log.error("\n\n\n ***********  Processing Health request - request:{}", request);
-        return processAuditRequest(request, "Health");
+        log.info("Processing Health request - request:{}", request);
+        return processAuditRequest(request, "health");
     }
 
     @Override
     public Response processLogRequest(HttpServletRequest request, HttpServletResponse response, SecurityContext sec) {
-        log.error("\n\n\n ***********  Processing Log request - request:{}", request);
+        log.info("Processing Log request - request:{}", request);
         return processAuditRequest(request, "log");
 
     }
@@ -63,13 +63,13 @@ public class AuditRestWebServiceImpl implements AuditRestWebService {
     @Override
     public Response processTelemetryRequest(HttpServletRequest request, HttpServletResponse response,
             SecurityContext sec) {
-        log.error("\n\n\n ***********  Processing Telemetry request - request:{}", request);
+        log.info("Processing Telemetry request - request:{}", request);
         return processAuditRequest(request, "telemetry");
 
     }
 
     private Response processAuditRequest(HttpServletRequest request, String requestType) {
-        log.error("\n\n\n *********** Processing request - request:{}, requestType:{}", request, requestType);
+        log.info("Processing request - request:{}, requestType:{}", request, requestType);
 
         Response.ResponseBuilder builder = Response.ok();
         builder.cacheControl(ServerUtil.cacheControlWithNoStoreTransformAndPrivate());
@@ -77,19 +77,19 @@ public class AuditRestWebServiceImpl implements AuditRestWebService {
 
         JSONObject json = this.auditService.getJSONObject(request);
         Response response = this.auditService.post(requestType, json.toString(), ContentType.APPLICATION_JSON);
-        log.error(" \n\n\n\n *********** response:{}", response);
+        log.debug("response:{}", response);
 
         if (response != null) {
-            log.trace(
+            log.debug(
                     "Response for Access Token -  response.getStatus():{}, response.getStatusInfo():{}, response.getEntity().getClass():{}",
                     response.getStatus(), response.getStatusInfo(), response.getEntity().getClass());
             String entity = response.readEntity(String.class);
-            log.error(" \n\n\n\n *********** entity:{}", entity);
+            log.debug(" entity:{}", entity);
             builder.entity(entity);
 
             if (response.getStatusInfo().equals(Status.OK)) {
 
-                log.error(" Status.CREATED:{}, entity:{}", Status.OK, entity);
+                log.debug(" Status.CREATED:{}, entity:{}", Status.OK, entity);
             } else {
                 log.error("Error while saving audit data - response.getStatusInfo():{}, entity:{}",
                         response.getStatusInfo(), entity);

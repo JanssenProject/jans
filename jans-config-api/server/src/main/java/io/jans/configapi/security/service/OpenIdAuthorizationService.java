@@ -206,7 +206,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
     }
 
     private List<String> findMissingScopes(Map<ProtectionScopeType, List<String>> scopeMap, List<String> tokenScopes) {
-        logger.error("\n\n\n *** Check scopeMap:{}, tokenScopes:{}", scopeMap, tokenScopes);
+        logger.info("Check scopeMap:{}, tokenScopes:{}", scopeMap, tokenScopes);
 
         List<String> scopeList = new ArrayList<>();
         List<String> missingScopes = null;
@@ -236,7 +236,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
 
         // check if token contains all the required scopes
         missingScopes = findMissingElements(scopeList, tokenScopes);
-        logger.debug("\n\n\n SCOPE Missing Scopes:{}", missingScopes);
+        logger.debug("SCOPE Missing Scopes:{}", missingScopes);
 
         return missingScopes;
     }
