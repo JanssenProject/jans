@@ -1,6 +1,6 @@
 use std::io::Write;
 
-use authz::{jwt, Authz, AuthzConfig};
+use authz::{jwt, Authz, PolicyStoreConfig};
 use simplelog::*;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -15,26 +15,24 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 fn real_demo_case() -> Result<(), Box<dyn std::error::Error>> {
 	println!("start real_demo_case");
 
-	let input_json = include_str!("../../cedar_files/input.json");
+	let policy_json = include_str!("../../demo/policy-store/local.json");
+	let input_json = include_str!("../../demo/input.json");
 
-	let role_mapping = authz::TokenMapper {
+	let token_mapper = authz::TokenMapper {
 		..Default::default()
 	};
 
-	let authz = Authz::new(AuthzConfig {
-		decoder: jwt::JWTDecoder::new_without_validation(),
-		policy: authz::PolicyStoreConfig::Local,
-		bootstrap_config: authz::BootstrapConfig {
-			CEDARLING_APPLICATION_NAME: Some("Demo_App".to_owned()),
-			CEDARLING_ROLE_MAPPING: role_mapping.clone(),
-		},
+	let authz = Authz::new(authz::BootstrapConfig {
+		application_name: Some("Demo_App".to_owned()),
+		policy_store: PolicyStoreConfig::LocalJson(policy_json.to_owned()).get_policy()?,
+		token_mapper,
 	})?;
 
 	// only show entities for debug
 	{
 		let q = authz::AuthzInputRaw::parse_raw(input_json)?;
 		let decoded_input = q.decode_tokens(&jwt::JWTDecoder::new_without_validation())?;
-		let entites_box = authz.get_entities(decoded_input.jwt, &role_mapping)?;
+		let entites_box = authz.get_entities(decoded_input.jwt)?;
 
 		let stdout = std::io::stdout();
 		let mut handle = stdout.lock();

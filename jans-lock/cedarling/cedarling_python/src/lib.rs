@@ -6,6 +6,9 @@ use serde_pyobject::from_pyobject;
 mod config;
 use config::{BootstrapConfig, TokenMapper};
 
+mod policy_store;
+use policy_store::PolicyStore;
+
 #[pyclass]
 pub struct Authz {
 	inner: authz::Authz,
@@ -16,11 +19,8 @@ impl Authz {
 	#[new]
 	fn new(bootstrap_config: BootstrapConfig) -> PyResult<Self> {
 		Ok(Authz {
-			inner: authz::Authz::new(authz::AuthzConfig {
-				bootstrap_config: bootstrap_config.into(),
-				..Default::default()
-			})
-			.map_err(|err| PyValueError::new_err(err.to_string()))?,
+			inner: authz::Authz::new(bootstrap_config.try_into()?)
+				.map_err(|err| PyValueError::new_err(err.to_string()))?,
 		})
 	}
 
@@ -38,6 +38,7 @@ fn cedarling_python(m: &Bound<'_, PyModule>) -> PyResult<()> {
 	m.add_class::<BootstrapConfig>()?;
 	m.add_class::<TokenMapper>()?;
 	m.add_class::<Authz>()?;
+	m.add_class::<PolicyStore>()?;
 
 	Ok(())
 }

@@ -5,7 +5,7 @@ use std::collections::BTreeMap;
 
 pub(crate) type TrustedIssuers = BTreeMap<String, TrustedIssuer>;
 
-#[derive(Debug, serde::Deserialize)]
+#[derive(Debug, Clone, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct PolicyStoreEntry {
 	#[serde(deserialize_with = "parse_schema")]
@@ -24,8 +24,7 @@ where
 		BASE64_STANDARD.decode(source.as_str()).map_err(|err| {
 			serde::de::Error::custom(format!(
 				"unable to parse Schema source as valid base64: {}, data: {}",
-				err,
-				&source,
+				err, &source,
 			))
 		});
 	let decoded = match decoded_result {

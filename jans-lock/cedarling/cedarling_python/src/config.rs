@@ -1,9 +1,10 @@
-use pyo3::prelude::*;
+use pyo3::{exceptions::PyValueError, prelude::*};
 
 use authz;
 
+use crate::policy_store::PolicyStore;
 // The config structs should match those in the authz module.
-// The key idea is to keep authz independent of the Python bindings.
+// The key idea is to keep authz independent from the Python bindings.
 // Therefore, we map the Python binding structs to pure Rust equivalents.
 
 // TODO: investigate how to create macros for automatic `Into` implementation
@@ -59,46 +60,45 @@ impl Into<authz::TokenMapper> for TokenMapper {
 	}
 }
 
-#[allow(non_snake_case)]
 #[pyclass]
 #[derive(Default, Clone)]
 pub struct BootstrapConfig {
 	#[pyo3(get, set)]
-	pub CEDARLING_APPLICATION_NAME: Option<String>,
+	pub application_name: Option<String>,
 	#[pyo3(get, set)]
-	pub CEDARLING_ROLE_MAPPING: TokenMapper,
+	pub token_mapper: TokenMapper,
+	#[pyo3(get, set)]
+	pub policy_store: Option<PolicyStore>,
 }
 
 #[allow(non_snake_case)]
 #[pymethods]
 impl BootstrapConfig {
 	#[new]
-	#[pyo3(signature = (CEDARLING_APPLICATION_NAME=None, CEDARLING_ROLE_MAPPING=None))]
+	#[pyo3(signature = (application_name=None, token_mapper=None,policy_store=None))]
 	fn new(
-		CEDARLING_APPLICATION_NAME: Option<String>,
-		CEDARLING_ROLE_MAPPING: Option<TokenMapper>,
+		application_name: Option<String>,
+		token_mapper: Option<TokenMapper>,
+		policy_store: Option<PolicyStore>,
 	) -> Self {
 		BootstrapConfig {
-			CEDARLING_APPLICATION_NAME,
-			CEDARLING_ROLE_MAPPING: CEDARLING_ROLE_MAPPING.unwrap_or_default(),
+			application_name,
+			token_mapper: token_mapper.unwrap_or_default(),
+			policy_store,
 		}
 	}
 }
 
-impl Into<authz::BootstrapConfig> for BootstrapConfig {
-	fn into(self) -> authz::BootstrapConfig {
-		authz::BootstrapConfig {
-			CEDARLING_APPLICATION_NAME: self.CEDARLING_APPLICATION_NAME,
-			CEDARLING_ROLE_MAPPING: self.CEDARLING_ROLE_MAPPING.into(),
-		}
-	}
-}
+impl TryInto<authz::BootstrapConfig> for BootstrapConfig {
+	type Error = PyErr;
 
-impl From<&BootstrapConfig> for authz::BootstrapConfig {
-	fn from(value: &BootstrapConfig) -> Self {
-		authz::BootstrapConfig {
-			CEDARLING_APPLICATION_NAME: value.CEDARLING_APPLICATION_NAME.to_owned(),
-			CEDARLING_ROLE_MAPPING: value.CEDARLING_ROLE_MAPPING.to_owned().into(),
-		}
+	fn try_into(self) -> Result<authz::BootstrapConfig, Self::Error> {
+		Ok(authz::BootstrapConfig {
+			application_name: self.application_name,
+			token_mapper: self.token_mapper.into(),
+			policy_store: self.policy_store.map(|store| store.inner).ok_or(
+				PyValueError::new_err("in BootstrapConfig field policy_store is none"),
+			)?,
+		})
 	}
 }

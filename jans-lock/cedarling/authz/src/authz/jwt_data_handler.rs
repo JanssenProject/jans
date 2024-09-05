@@ -122,7 +122,7 @@ pub struct JWTDataEntities {
 }
 
 impl JWTData {
-	fn roles(&self, role_mapping: &TokenMapper) -> Vec<String> {
+	fn roles(&self, token_mapper: &TokenMapper) -> Vec<String> {
 		// if serde_json::Value is string  return Vec with string
 		// if serde_json::Value is array of string return Vec with strings
 		fn parse_roles(
@@ -159,15 +159,15 @@ impl JWTData {
 		}
 
 		let mut result = Vec::new();
-		result.extend(parse_roles(&role_mapping.id_token, &self.id_token.extra));
+		result.extend(parse_roles(&token_mapper.id_token, &self.id_token.extra));
 
 		result.extend(parse_roles(
-			&role_mapping.userinfo_token,
+			&token_mapper.userinfo_token,
 			&self.userinfo_token.extra,
 		));
 
 		result.extend(parse_roles(
-			&role_mapping.access_token,
+			&token_mapper.access_token,
 			&self.access_token.extra,
 		));
 
@@ -177,7 +177,7 @@ impl JWTData {
 	pub fn entities(
 		self,
 		application_name: Option<&str>,
-		role_mapping: &TokenMapper,
+		token_mapping: &TokenMapper,
 	) -> Result<JWTDataEntities, AuthzInputEntitiesError> {
 		// TODO: implement check of token correctness
 		// // check if `aud` claim in id_token matches `client_id` in access token
@@ -193,7 +193,7 @@ impl JWTData {
 		// 	throw_str("userinfo token invalid: either sub or iss doesn't match id_token")
 		// }
 
-		let roles = self.roles(role_mapping);
+		let roles = self.roles(token_mapping);
 
 		let id_token_entities = self
 			.id_token

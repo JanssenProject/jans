@@ -9,48 +9,52 @@ use jwt_data_handler::{AuthzInputEntitiesError, DecodeTokensError, JWTData};
 pub use jwt_data_handler::{AuthzInputRaw, ResourceData};
 pub(crate) mod jwt_tokens;
 mod policy_store;
-use policy_store::{PolicyStoreEntry, TrustedIssuers};
+pub use policy_store::PolicyStoreEntry;
+use policy_store::TrustedIssuers;
 
 pub(crate) mod exp_parsers;
 
 use std::str::FromStr;
 
-#[derive(serde::Deserialize, serde::Serialize, Debug, Default)]
+#[derive(serde::Deserialize, serde::Serialize, Debug)]
 #[serde(tag = "strategy")]
 #[serde(rename_all = "kebab-case")]
 #[serde(rename_all_fields = "camelCase")]
 pub enum PolicyStoreConfig {
-	#[default] //it will be changed in future
-	Local,
+	LocalJson(String),
+	RemoteURI(String),
 }
 
 #[derive(thiserror::Error, Debug)]
 pub enum GetPolicyError {
-	#[error("could not parse policy form json: {0}")]
+	#[error("could not parse policy from json: {0}")]
 	ParseJson(#[from] serde_json::Error),
 }
 
 impl PolicyStoreConfig {
-	fn get_policy(self) -> Result<PolicyStoreEntry, GetPolicyError> {
+	pub fn get_policy(self) -> Result<PolicyStoreEntry, GetPolicyError> {
 		match self {
-			Self::Local => Self::get_local_policy(),
+			Self::LocalJson(policy_raw_json) => Self::get_local_policy(policy_raw_json.as_str()),
+			Self::RemoteURI(_uri) => todo!(),
 		}
 	}
 
-	fn get_local_policy() -> Result<PolicyStoreEntry, GetPolicyError> {
-		let policy_raw = include_str!("../../policy-store/local.json");
-		let policy: PolicyStoreEntry = serde_json::from_str(policy_raw)?;
+	pub fn get_local_policy(policy_raw_json: &str) -> Result<PolicyStoreEntry, GetPolicyError> {
+		let policy: PolicyStoreEntry = serde_json::from_str(policy_raw_json)?;
 		Ok(policy)
 	}
 }
 
 pub struct Authz {
+	application_name: Option<String>,
+	token_mapper: TokenMapper,
+
 	jwt_dec: JWTDecoder,
 	policy: PolicySet,
 	schema: cedar_policy::Schema,
+
 	#[allow(dead_code)] // it will be fixed after adding handling the trusted store
 	trusted_issuers: TrustedIssuers,
-	bootstrap_config: BootstrapConfig,
 }
 
 #[derive(thiserror::Error, Debug)]
@@ -76,30 +80,32 @@ pub struct TokenMapper {
 }
 
 /// Bootstrap properties of application [link](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties)
-#[allow(non_snake_case)]
-#[derive(Debug, Default, serde::Serialize, serde::Deserialize)]
+#[derive(Debug)]
 pub struct BootstrapConfig {
-	pub CEDARLING_APPLICATION_NAME: Option<String>,
-	pub CEDARLING_ROLE_MAPPING: TokenMapper,
+	pub application_name: Option<String>,
+	pub token_mapper: TokenMapper,
+	pub policy_store: PolicyStoreEntry,
 }
 
-#[derive(Default)]
-pub struct AuthzConfig {
-	pub decoder: JWTDecoder,
-	pub policy: PolicyStoreConfig,
-	pub bootstrap_config: BootstrapConfig,
+impl BootstrapConfig {
+	fn get_jwt_decoder(&self) -> JWTDecoder {
+		JWTDecoder::WithoutValidation
+	}
 }
 
 impl Authz {
-	pub fn new(config: AuthzConfig) -> Result<Authz, AuthzNewError> {
-		let policy_store = config.policy.get_policy()?;
+	pub fn new(config: BootstrapConfig) -> Result<Authz, AuthzNewError> {
+		let jwt_decoder = config.get_jwt_decoder();
+		let policy_store = config.policy_store;
 
 		Ok(Authz {
-			jwt_dec: config.decoder,
+			jwt_dec: jwt_decoder,
 			policy: policy_store.policies,
 			schema: policy_store.schema,
 			trusted_issuers: policy_store.trusted_issuers,
-			bootstrap_config: config.bootstrap_config,
+
+			application_name: config.application_name,
+			token_mapper: config.token_mapper,
 		})
 	}
 }
@@ -143,10 +149,7 @@ impl Authz {
 			.entity_uid()
 			.map_err(HandleError::Resource)?;
 
-		let entities_box = self.get_entities(
-			decoded_input.jwt,
-			&self.bootstrap_config.CEDARLING_ROLE_MAPPING,
-		)?;
+		let entities_box = self.get_entities(decoded_input.jwt)?;
 
 		let principal = entities_box.user_entity_uid;
 
@@ -177,17 +180,10 @@ impl Authz {
 		})
 	}
 
-	pub fn get_entities(
-		&self,
-		data: JWTData,
-		role_mapping: &TokenMapper,
-	) -> Result<EntitiesBox, HandleError> {
+	pub fn get_entities(&self, data: JWTData) -> Result<EntitiesBox, HandleError> {
 		// TODO: add entities from trust store about issuers (like in cedarling)
 
-		let jwt_entities = data.entities(
-			self.bootstrap_config.CEDARLING_APPLICATION_NAME.as_deref(),
-			role_mapping,
-		)?;
+		let jwt_entities = data.entities(self.application_name.as_deref(), &self.token_mapper)?;
 
 		let entities = Entities::empty().add_entities(jwt_entities.entities, Some(&self.schema))?;
 		Ok(EntitiesBox {
