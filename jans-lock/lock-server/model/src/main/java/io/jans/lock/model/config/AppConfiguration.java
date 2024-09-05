@@ -62,6 +62,10 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Jans URL of the OpenID Connect Provider's OAuth 2.0 Token Endpoint")
     @Schema(description = "Jans URL of the OpenID Connect Provider's OAuth 2.0 Token Endpoint")
     private String tokenUrl;
+    
+    @DocProperty(description = "Group scope enabled")
+    @Schema(description = "Group scope enabled")
+    private boolean groupScopeEnabled;
 
     @DocProperty(description = "Endpoint groups")
     @Schema(description = "Endpoint groups")
@@ -185,6 +189,14 @@ public class AppConfiguration implements Configuration {
 
     public void setTokenUrl(String tokenUrl) {
         this.tokenUrl = tokenUrl;
+    }
+    
+    public boolean isGroupScopeEnabled() {
+        return groupScopeEnabled;
+    }
+
+    public void setGroupScopeEnabled(boolean groupScopeEnabled) {
+        this.groupScopeEnabled = groupScopeEnabled;
     }
 
     public Map<String, List<String>> getEndpointGroups() {
@@ -327,7 +339,7 @@ public class AppConfiguration implements Configuration {
     public String toString() {
         return "AppConfiguration [baseDN=" + baseDN + ", baseEndpoint=" + baseEndpoint + ", openIdIssuer="
                 + openIdIssuer + ", tokenChannels=" + tokenChannels + ", clientId=" + clientId + ", tokenUrl="
-                + tokenUrl + ", endpointGroups=" + endpointGroups + ", endpointDetails=" + endpointDetails
+                + tokenUrl + ", groupScopeEnabled=" + groupScopeEnabled+ ", endpointGroups=" + endpointGroups + ", endpointDetails=" + endpointDetails
                 + ", disableJdkLogger=" + disableJdkLogger + ", loggingLevel=" + loggingLevel + ", loggingLayout="
                 + loggingLayout + ", externalLoggerConfiguration=" + externalLoggerConfiguration + ", metricChannel="
                 + metricChannel + ", metricReporterInterval=" + metricReporterInterval + ", metricReporterKeepDataDays="
