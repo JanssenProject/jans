@@ -154,7 +154,7 @@ class Authn(DialogUtils):
 
     def on_page_enter(self) -> None:
 
-        if common_data.server_persistence_type != 'ldap':
+        if common_data.server_persistence_type != 'ldap' and 'LDAP Servers' in self.side_nav_bar.navbar_entries:
             self.side_nav_bar.navbar_entries.remove('LDAP Servers')
 
         def populate_acr_list():

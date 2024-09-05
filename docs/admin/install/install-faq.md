@@ -64,6 +64,7 @@ specification. Sample below:
   "backchannel_logout_session_supported" : true,
   "token_endpoint" : "https://janssen-host-name/jans-auth/restv1/token",
   "response_types_supported" : [ "id_token token", "id_token", "code", "code token", "id_token code token", "id_token code", "token" ],
+  "acr_mappings" : {"alias1": "acr1"},
   "authorization_encryption_enc_values_supported" : [ "A128CBC+HS256", "A256CBC+HS512", "A128GCM", "A256GCM" ],
   "backchannel_token_delivery_modes_supported" : [ "poll", "ping", "push" ],
   "dpop_signing_alg_values_supported" : [ "RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "ES512", "PS256", "PS384", "PS512" ],
