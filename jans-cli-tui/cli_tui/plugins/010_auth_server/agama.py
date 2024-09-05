@@ -65,7 +65,7 @@ class Agama(DialogUtils):
                     VSplit([
                         self.app.getTitledText(_("Search"), name='oauth:agama:search', jans_help=_(common_strings.enter_to_search), accept_handler=self.search_agama_project, style=cli_style.edit_text),
                         self.app.getButton(text=_("Upload Project"), name='oauth:agama:add', jans_help=_("To add a new Agama project press this button"), handler=self.upload_project),
-                        self.app.getButton(text=_("Communitiy Projects"), name='oauth:agama:community-projects', jans_help=_("Deploy Agama Lab community projects"), handler=self.deploy_agama_lab_community_projects),
+                        self.app.getButton(text=_("Community Projects"), name='oauth:agama:community-projects', jans_help=_("Deploy Agama Lab community projects"), handler=self.deploy_agama_lab_community_projects),
                         ],
                         padding=3,
                         width=D(),
