@@ -18,6 +18,8 @@ store = PolicyStore.from_raw_json(LOCAL_POLICY_STORE)
 mapper=TokenMapper(id_token=None, userinfo_token=None, access_token=None)
 config = BootstrapConfig(application_name="DemoApp",token_mapper=mapper,policy_store=store)
 
+# also fields support setters and getter
+config.policy_store = store
 
 authz = Authz(config)
 
