@@ -14,4 +14,6 @@ Repeat 3 times max
         Finish true
         
 Log "User did not pass color validation :("
-Finish false
+
+obj = { success: false, message: "Too many failed attempts for color validation" }
+Finish obj

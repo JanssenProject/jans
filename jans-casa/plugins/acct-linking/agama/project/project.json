@@ -11,8 +11,8 @@
             "facebook": {
               "flowQname": "io.jans.inbound.GenericProvider",
               "displayName": "Facebook",
+              "logoImg": "../t505fp/inboundID/facebook.png",
               "mappingClassField": "io.jans.casa.acctlinking.Mappings.FACEBOOK",
-              "logoImg": "facebook.png",
             "oauthParams": {
                 "authzEndpoint": "https://www.facebook.com/v14.0/dialog/oauth",
                 "tokenEndpoint": "https://graph.facebook.com/v14.0/oauth/access_token",
@@ -26,6 +26,7 @@
             "github": {
               "flowQname": "io.jans.inbound.GenericProvider",
               "displayName": "Github",
+              "logoImg": "../t505fp/inboundID/github.png",
               "mappingClassField": "io.jans.casa.acctlinking.Mappings.GITHUB",
             "oauthParams": {
                 "authzEndpoint": "https://github.com/login/oauth/authorize",
@@ -40,6 +41,7 @@
             "google": {
               "flowQname": "io.jans.inbound.GenericProvider",
               "displayName": "Google",
+              "logoImg": "../t505fp/inboundID/google.png",
               "mappingClassField": "io.jans.casa.acctlinking.Mappings.GOOGLE",
               "enabled": false,
               "skipProfileUpdate": true,    

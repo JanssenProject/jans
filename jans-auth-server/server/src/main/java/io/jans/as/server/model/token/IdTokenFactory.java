@@ -171,7 +171,8 @@ public class IdTokenFactory {
         Date expiration = calendar.getTime();
 
         jwr.getClaims().setExpirationTime(expiration);
-        jwr.getClaims().setIssuedAt(issuedAt);
+        jwr.getClaims().setIat(issuedAt);
+        jwr.getClaims().setNbf(issuedAt);
         jwr.setClaim("jti", executionContext.getTokenReferenceId()); // provided uniqueness of id_token for same RP requests, oxauth: 1493
 
         if (executionContext.getPreProcessing() != null) {
