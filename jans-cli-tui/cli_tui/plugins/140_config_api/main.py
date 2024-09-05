@@ -166,7 +166,7 @@ class Plugin(DialogUtils):
                         )
 
         self.agama_configuration_optional_attributes_widget = JansLabelWidget(
-                        title = _("Optioanl Attributes"),
+                        title = _("Optional Attributes"),
                         values = copy.deepcopy(self.data.get('agamaConfiguration', {}).get('optionalAttributes', [])),
                         data = [('serialVersionUID', 'serialVersionUID'), ('enabled', 'enabled')],
                         label_width=label_widget_width
