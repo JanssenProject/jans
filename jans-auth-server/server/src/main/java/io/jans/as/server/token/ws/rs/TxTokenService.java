@@ -152,7 +152,8 @@ public class TxTokenService {
 
         jwr.getClaims().setIssuer(appConfiguration.getIssuer());
         jwr.getClaims().setExpirationTime(expiration);
-        jwr.getClaims().setIssuedAt(issuedAt);
+        jwr.getClaims().setIat(issuedAt);
+        jwr.getClaims().setNbf(issuedAt);
         jwr.setClaim("txn", UUID.randomUUID().toString());
         jwr.setClaim("sub", UUID.randomUUID().toString());
         jwr.setClaim("purp", JwtType.TX_TOKEN.toString());
