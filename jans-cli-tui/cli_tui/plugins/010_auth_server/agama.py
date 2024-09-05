@@ -279,7 +279,7 @@ class Agama(DialogUtils):
 
     async def get_projects_coroutine(self, search_str='', update_container=True):
         cli_args = {'operation_id': 'get-agama-prj'}
-        self.app.start_progressing(_("Retreiving agama projects..."))
+        self.app.start_progressing(_("Retrieving agama projects..."))
         response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
         self.app.stop_progressing()
 
@@ -578,7 +578,7 @@ class Agama(DialogUtils):
         get_projects_dialog = JansGDialog(
                 self.app,
                 title=_("Getting Projects"),
-                body=HSplit([Label(_("Please wait while retreiving Agama Lab community projects"))]),
+                body=HSplit([Label(_("Please wait while retrieving Agama Lab community projects"))]),
                 buttons=buttons
                 )
         self.app.show_jans_dialog(get_projects_dialog)
