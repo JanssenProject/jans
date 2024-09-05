@@ -17,11 +17,7 @@ import io.jans.as.common.model.session.SessionIdState;
 import io.jans.as.server.model.config.Constants;
 import io.jans.as.server.model.exception.InvalidSessionStateException;
 import io.jans.as.server.security.Identity;
-import io.jans.as.server.service.AuthenticationService;
-import io.jans.as.server.service.ClientService;
-import io.jans.as.server.service.ErrorHandlerService;
-import io.jans.as.server.service.RequestParameterService;
-import io.jans.as.server.service.SessionIdService;
+import io.jans.as.server.service.*;
 import io.jans.as.server.service.external.ExternalAuthenticationService;
 import io.jans.jsf2.message.FacesMessages;
 import io.jans.jsf2.service.FacesService;
@@ -763,6 +759,9 @@ public class Authenticator {
 
         this.authStep = StringHelper.toInteger(sessionIdAttributes.get(AUTH_STEP), null);
         this.authAcr = sessionIdAttributes.get(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE);
+        if (AcrService.isAgama(this.authAcr)) {
+            this.authAcr = AcrService.AGAMA;
+        }
     }
 
     private boolean authenticationFailed(SessionId sessionId) {

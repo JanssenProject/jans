@@ -20,21 +20,20 @@ import MenuItem from '@mui/material/MenuItem';
 import { IOption } from './IOption';
 import Alert from '@mui/material/Alert';
 import { ILooseObject } from './ILooseObject';
-
+import Autocomplete, { createFilterOptions } from '@mui/material/Autocomplete';
 const createOption = (label: string) => ({
-  label,
-  value: label,
+  name: label,
 });
-
+const filter = createFilterOptions();
 export default function AuthFlowInputs({ isOpen, handleDialog, client }) {
   const [open, setOpen] = React.useState(isOpen);
   const [errorMessage, setErrorMessage] = React.useState("")
   const [additionalParamError, setAdditionalParamError] = React.useState("")
   const [displayToken, setDisplayToken] = React.useState(false);
-  const [acrValues, setAcrValues] = React.useState<readonly IOption[]>([]);
-  const [acrValueOption, setAcrValueOption] = React.useState("");
   const [additionalParams, setAdditionalParams] = React.useState("");
   const [loading, setLoading] = React.useState(false);
+  const [acrValueOption, setAcrValueOption] = React.useState([]);
+  const [selectedAcr, setSelectedAcr] = React.useState([])
   
 
   React.useEffect(() => {
@@ -47,13 +46,9 @@ export default function AuthFlowInputs({ isOpen, handleDialog, client }) {
 
   React.useEffect(() => {
     (async () => {
-      setAcrValues(client.acrValuesSupported.map((ele) => createOption(ele)));
+      setAcrValueOption(client.acrValuesSupported.map((ele) => createOption(ele)));
     })();
   }, [])
-
-  const handleAcrChange = (event) => {
-    setAcrValueOption(event.target.value);
-  };
 
   const handleClose = () => {
     handleDialog(false)
@@ -94,8 +89,8 @@ export default function AuthFlowInputs({ isOpen, handleDialog, client }) {
       nonce: uuidv4(),
     };
 
-    if (!!acrValueOption) {
-      options.acr_values = acrValueOption;
+    if (!!selectedAcr && selectedAcr.length > 0) {
+      options.acr_values = selectedAcr[0].name;
     }
 
     let authzUrl = `${client?.authorizationEndpoint}?${qs.stringify(options)}`;
@@ -314,15 +309,59 @@ export default function AuthFlowInputs({ isOpen, handleDialog, client }) {
             />
 
             <InputLabel id="acr-value-label">Acr Value</InputLabel>
-            <Select
-              labelId="acr-value-label"
+            <Autocomplete
+              value={selectedAcr}
+              multiple
+              defaultValue={[acrValueOption[0]]}
+              onChange={(event, newValue, reason, details) => {
+                if (reason === 'removeOption') {
+                  setSelectedAcr([]);  
+                } else if (reason === 'selectOption') {
+                  setSelectedAcr([{id: undefined, name: details.option.name}]);
+                } else if(reason === 'createOption') {
+                  setSelectedAcr([{id: undefined, name: details.option}]);
+                }
+              }}
+              filterSelectedOptions
+              filterOptions={(options, params) => {
+                const filtered = filter(options, params);
+
+                const { inputValue } = params;
+                // Suggest the creation of a new value
+                const isExisting = options.some((option) => inputValue === option.name);
+                if (inputValue !== '' && !isExisting) {
+                  filtered.push({
+                    name: inputValue,
+                    label: `Add "${inputValue}"`,
+                    create: true
+                  });
+                }
+
+                return filtered;
+              }}
+              //selectOnFocus
+              clearOnBlur
+              handleHomeEndKeys
               id="acrValue"
-              onChange={handleAcrChange}
-            >
-              {acrValues.map((ele) => (
-                <MenuItem value={ele.label}>{ele.label}</MenuItem>
-              ))}
-            </Select>
+              options={acrValueOption}
+              getOptionLabel={(option) => {
+                // Value selected with enter, right from the input
+                if (typeof option === 'string') {
+                  return option;
+                }
+                // Add "xxx" option created dynamically
+                if (option.label) {
+                  return option.name;
+                }
+                // Regular option
+                return option.name;
+              }}
+              renderOption={(props, option) => <li {...props}>{option.create ? option.label : option.name}</li>}
+              freeSolo
+              renderInput={(params) => (
+                <TextField {...params} label="Acr Values" />
+              )}
+            />
             <FormControlLabel control={<Checkbox color="success" onChange={() => setDisplayToken(!displayToken)}/>} label="Display Access Token and ID Token after authentication" />
           </Stack>
         </DialogContent>

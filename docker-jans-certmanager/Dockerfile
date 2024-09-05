@@ -1,4 +1,4 @@
-FROM bellsoft/liberica-openjre-alpine:17.0.11@sha256:7d9240b84e806f9759560536bac1ca545fc31c02465a4b1ca7131def4f4ab130
+FROM bellsoft/liberica-openjre-alpine:17.0.12@sha256:a39e3fb3c96ae89e936a2e50c0a597a91d2357a1ec19096c05e851f54f3a9715
 
 # ===============
 # Alpine packages
@@ -14,8 +14,8 @@ RUN apk update \
 # ===========
 
 # JAR files required to generate OpenID Connect keys
-ENV CN_VERSION=1.1.3-SNAPSHOT
-ENV CN_BUILD_DATE='2024-05-29 11:37'
+ENV CN_VERSION=1.1.5-SNAPSHOT
+ENV CN_BUILD_DATE='2024-08-23 11:41'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-client/${CN_VERSION}/jans-auth-client-${CN_VERSION}-jar-with-dependencies.jar
 
@@ -25,7 +25,7 @@ RUN wget -q ${CN_SOURCE_URL} -P /app/javalibs/
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=02b462b9c72a27a00646c09f9995eee1a75c7ad7
+ENV JANS_SOURCE_VERSION=fc9f04fe3b3d3d168f3090214b22ee80be371d92
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the assets
@@ -40,7 +40,7 @@ RUN git clone --depth 500 --filter blob:none --no-checkout https://github.com/ja
 # ======
 
 COPY requirements.txt /app/requirements.txt
-RUN mv /usr/lib/python3.11/EXTERNALLY-MANAGED /usr/lib/python3.11/EXTERNALLY-MANAGED.disabled \
+RUN mv /usr/lib/python3.12/EXTERNALLY-MANAGED /usr/lib/python3.12/EXTERNALLY-MANAGED.disabled \
     && python3 -m ensurepip \
     && pip3 install --no-cache-dir -U pip wheel setuptools \
     && pip3 install --no-cache-dir -r /app/requirements.txt \
@@ -142,7 +142,7 @@ ENV CN_WAIT_MAX_TIME=300 \
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/certmanager" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.1.3" \
+    org.opencontainers.image.version="1.1.5" \
     org.opencontainers.image.title="Janssen Certmanager" \
     org.opencontainers.image.description="Manage certs and crypto keys for Janssen Server"
 

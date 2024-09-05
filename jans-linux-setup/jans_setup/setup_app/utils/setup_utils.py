@@ -5,12 +5,12 @@ import subprocess
 import re
 import socket
 import shutil
-import uuid
 import base64
 import json
 import string
 import random
 import hashlib
+import math
 import grp
 
 from pathlib import Path
@@ -556,3 +556,10 @@ class SetupUtils(Crypto64):
         usr_grp = '{}:{}'.format(user, group) if group else user
         cmd += [usr_grp, fn]
         self.run(cmd)
+
+    def get_ldap_time(self, timestamp=None):
+        if not timestamp:
+            timestamp = time.time()
+        microseconds, _ = math.modf(timestamp)
+        gm_time = time.gmtime(timestamp)
+        return time.strftime('%Y%m%d%H%M%S', gm_time) + f'{microseconds:.3f}Z'[1:]

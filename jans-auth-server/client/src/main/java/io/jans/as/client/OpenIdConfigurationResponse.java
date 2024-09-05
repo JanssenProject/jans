@@ -28,6 +28,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
     private String issuer;
     private String authorizationEndpoint;
     private String authorizationChallengeEndpoint;
+    private String statusListEndpoint;
     private String tokenEndpoint;
     private String revocationEndpoint;
     private String sessionRevocationEndpoint;
@@ -87,6 +88,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
     private String opTosUri;
     private Map<String, List<String>> scopeToClaimsMapping = new HashMap<>();
     private Map<String, Serializable> mltsAliases = new HashMap<>();
+    private Map<String, String> acrMappings = new HashMap<>();
 
     // CIBA
     private String backchannelAuthenticationEndpoint;
@@ -237,6 +239,24 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
      */
     public void setAuthorizationChallengeEndpoint(String authorizationChallengeEndpoint) {
         this.authorizationChallengeEndpoint = authorizationChallengeEndpoint;
+    }
+
+    /**
+     * Gets status list
+     *
+     * @return status list
+     */
+    public String getStatusListEndpoint() {
+        return statusListEndpoint;
+    }
+
+    /**
+     * Sets status list
+     *
+     * @param statusListEndpoint status list
+     */
+    public void setStatusListEndpoint(String statusListEndpoint) {
+        this.statusListEndpoint = statusListEndpoint;
     }
 
     /**
@@ -1286,6 +1306,14 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
         this.mltsAliases = mltsAliases;
     }
 
+    public Map<String, String> getAcrMappings() {
+        return acrMappings;
+    }
+
+    public void setAcrMappings(Map<String, String> acrMappings) {
+        this.acrMappings = acrMappings;
+    }
+
     public String getSsaEndpoint() {
         return ssaEndpoint;
     }
@@ -1300,6 +1328,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
                 "issuer='" + issuer + '\'' +
                 ", authorizationEndpoint='" + authorizationEndpoint + '\'' +
                 ", authorizationChallengeEndpoint='" + authorizationChallengeEndpoint + '\'' +
+                ", statusListEndpoint='" + statusListEndpoint + '\'' +
                 ", tokenEndpoint='" + tokenEndpoint + '\'' +
                 ", revocationEndpoint='" + revocationEndpoint + '\'' +
                 ", userInfoEndpoint='" + userInfoEndpoint + '\'' +
@@ -1358,6 +1387,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
                 ", backchannelAuthenticationRequestSigningAlgValuesSupported=" + backchannelAuthenticationRequestSigningAlgValuesSupported + '\'' +
                 ", backchannelUserCodeParameterSupported=" + backchannelUserCodeParameterSupported + '\'' +
                 ", mltsAliases=" + mltsAliases + '\'' +
+                ", acrMappings=" + acrMappings + '\'' +
                 ", ssaEndpoint=" + ssaEndpoint + '\'' +
                 '}';
     }

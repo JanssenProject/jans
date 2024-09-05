@@ -4,21 +4,18 @@ import io.jans.casa.credential.BasicCredential;
 import io.jans.casa.extension.AuthnMethod;
 import io.jans.casa.misc.Utils;
 import io.jans.casa.plugins.authnmethod.service.SGService;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
 import org.pf4j.Extension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.stream.Collectors;
-
-/**
- * @author jgomer
- */
-@Extension
+//@Extension
 public class SuperGluuExtension implements AuthnMethod {
 
-    public static final String ACR = "super_gluu";
+    public static final String ACR = "io.jans.casa.authn.super_gluu";
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -76,7 +73,7 @@ public class SuperGluuExtension implements AuthnMethod {
     }
 
     public boolean mayBe2faActivationRequisite() {
-        return Boolean.parseBoolean(sgService.getScriptPropertyValue("2fa_requisite"));
+        return Boolean.parseBoolean(sgService.getPropertyValue("2fa_requisite"));
     }
 
 }

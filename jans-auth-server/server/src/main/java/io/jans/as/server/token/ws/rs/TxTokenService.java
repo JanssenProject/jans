@@ -44,6 +44,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang3.StringUtils;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
@@ -151,7 +152,8 @@ public class TxTokenService {
 
         jwr.getClaims().setIssuer(appConfiguration.getIssuer());
         jwr.getClaims().setExpirationTime(expiration);
-        jwr.getClaims().setIssuedAt(issuedAt);
+        jwr.getClaims().setIat(issuedAt);
+        jwr.getClaims().setNbf(issuedAt);
         jwr.setClaim("txn", UUID.randomUUID().toString());
         jwr.setClaim("sub", UUID.randomUUID().toString());
         jwr.setClaim("purp", JwtType.TX_TOKEN.toString());
@@ -161,23 +163,34 @@ public class TxTokenService {
             jwr.getClaims().addAudience(audience);
         }
 
-        if (StringUtils.isNotBlank(requestContext)) {
-            requestContext = Base64Util.base64urldecodeToString(requestContext);
-            jwr.getClaims().setClaim("rctx", new JSONObject(requestContext));
+        JSONObject requestContextObj = decodeJson(requestContext);
+        if (requestContextObj != null) {
+            jwr.getClaims().setClaim("rctx", requestContextObj);
         }
 
         if (authorizationGrant != null) {
             jwr.setClaim("sub", authorizationGrant.getSub());
         }
 
-        JSONObject azd = new JSONObject();
-        if (StringUtils.isNotBlank(requestDetails)) {
-            requestDetails = Base64Util.base64urldecodeToString(requestDetails);
-            azd = new JSONObject(requestDetails);
+        JSONObject azd = decodeJson(requestDetails);
+        if (azd == null) {
+            azd = new JSONObject();
         }
         azd.put("client_id", client.getClientId());
 
         jwr.getClaims().setClaim("azd", azd);
+    }
+
+    private static JSONObject decodeJson(String jsonString) {
+        if (StringUtils.isBlank(jsonString)) {
+            return null;
+        }
+        try {
+           return new JSONObject(jsonString);
+        } catch (JSONException e) {
+            String decoded = Base64Util.base64urldecodeToString(jsonString);
+            return new JSONObject(decoded);
+        }
     }
 
     private int getTxTokenLifetime(Client client) {

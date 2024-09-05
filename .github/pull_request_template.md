@@ -23,3 +23,7 @@ closes #issue-number-here
 - [ ] Relevant unit and integration tests have been added/updated
 - [ ] Relevant documentation has been updated if any (i.e. user guides, installation and configuration guides, technical design docs etc)
 
+
+
+Please check the below before submitting your PR. The PR will not be merged if there are no commits that start with `docs:` to indicate documentation changes or if the below checklist is not selected.
+- [ ] **I confirm that there is no impact on the docs due to the code changes in this PR.**

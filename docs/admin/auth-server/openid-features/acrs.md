@@ -47,7 +47,7 @@ All Janssen Server deployments have `default_ldap_server` ACR which can be enabl
 remote LDAP-based IDP (e.g. ActiveDirectory). By default, this ACR is disabled. This ACR can only authenticate against
 LDAP-based IDP or a local LDAP.
 
-Use the instructions provided in jans-cli [LDAP configuration options](../../config-guide/ldap-configuration.md) documentation to learn how to enable and configure ACRs that use external LDAP as IDP.
+Use the instructions provided in jans-cli [LDAP configuration options](../../config-guide/auth-server-config/ldap-configuration.md) documentation to learn how to enable and configure ACRs that use external LDAP as IDP.
 
 ### 3. Script-based ACRs
 
@@ -83,9 +83,9 @@ determined using client-level configuration. This is the default authentication 
 that send end-users to the Janssen Server for sign-in.
 
 To configure this parameter using Janssen Text base UI (TUI) configuration
-tool, navigate to `Auth Server`->`Defaults` as shown below:
+tool, navigate to `Auth Server`->`Authn`->`Default ACR` as shown below:
 
-![](../../../assets/jans-tui-auth-server-default.png)
+![](../../../assets/tui-authn-dafault-acr.png)
 
 ## ACR Precedence Levels
 

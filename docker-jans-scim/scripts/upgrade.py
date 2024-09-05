@@ -1,16 +1,17 @@
+import contextlib
 import json
 import logging.config
 import os
 from collections import namedtuple
 
 from jans.pycloudlib import get_manager
-from jans.pycloudlib.persistence import CouchbaseClient
-from jans.pycloudlib.persistence import LdapClient
-from jans.pycloudlib.persistence import SpannerClient
-from jans.pycloudlib.persistence import SqlClient
-from jans.pycloudlib.persistence import PersistenceMapper
-from jans.pycloudlib.persistence import doc_id_from_dn
-from jans.pycloudlib.persistence import id_from_dn
+from jans.pycloudlib.persistence.couchbase import CouchbaseClient
+from jans.pycloudlib.persistence.couchbase import id_from_dn
+from jans.pycloudlib.persistence.ldap import LdapClient
+from jans.pycloudlib.persistence.spanner import SpannerClient
+from jans.pycloudlib.persistence.sql import doc_id_from_dn
+from jans.pycloudlib.persistence.sql import SqlClient
+from jans.pycloudlib.persistence.utils import PersistenceMapper
 
 from settings import LOGGING_CONFIG
 from utils import parse_swagger_file
@@ -208,6 +209,7 @@ class Upgrade:
     def invoke(self):
         logger.info("Running upgrade process (if required)")
         self.update_client_scopes()
+        self.update_scim_dynamic_config()
 
     def get_all_scopes(self):
         if self.backend.type in ("sql", "spanner"):
@@ -279,6 +281,35 @@ class Upgrade:
                 entry.attrs["jansScope"] = client_scopes + diff
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
 
+    def update_scim_dynamic_config(self):
+        kwargs = {}
+        id_ = "ou=jans-scim,ou=configuration,o=jans"
+
+        if self.backend.type in ("sql", "spanner"):
+            kwargs = {"table_name": "jansAppConf"}
+            id_ = doc_id_from_dn(id_)
+        elif self.backend.type == "couchbase":
+            kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
+            id_ = id_from_dn(id_)
+
+        entry = self.backend.get_entry(id_, **kwargs)
+
+        if not entry:
+            return
+
+        if self.backend.type != "couchbase":
+            with contextlib.suppress(json.decoder.JSONDecodeError):
+                entry.attrs["jansConfDyn"] = json.loads(entry.attrs["jansConfDyn"])
+
+        conf, should_update = _transform_scim_dynamic_config(entry.attrs["jansConfDyn"])
+
+        if should_update:
+            if self.backend.type != "couchbase":
+                entry.attrs["jansConfDyn"] = json.dumps(conf)
+
+            entry.attrs["jansRevision"] += 1
+            self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
+
 
 def main():
     manager = get_manager()
@@ -286,6 +317,21 @@ def main():
     with manager.lock.create_lock("scim-upgrade"):
         upgrade = Upgrade(manager)
         upgrade.invoke()
+
+
+def _transform_scim_dynamic_config(conf):
+    should_update = False
+
+    # top-level config that need to be added (if missing)
+    for missing_key, value in [
+        ("skipDefinedPasswordValidation", False),
+    ]:
+        if missing_key not in conf:
+            conf[missing_key] = value
+            should_update = True
+
+    # finalized conf and flag to determine update process
+    return conf, should_update
 
 
 if __name__ == "__main__":

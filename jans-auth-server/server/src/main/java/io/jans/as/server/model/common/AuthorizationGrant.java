@@ -12,6 +12,7 @@ import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.AttributeService;
 import io.jans.as.model.authzdetails.AuthzDetails;
+import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.common.ScopeConstants;
 import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
@@ -34,6 +35,8 @@ import io.jans.as.server.service.external.ExternalUpdateTokenService;
 import io.jans.as.server.service.external.context.ExternalIntrospectionContext;
 import io.jans.as.server.service.external.context.ExternalUpdateTokenContext;
 import io.jans.as.server.service.stat.StatService;
+import io.jans.as.server.service.token.StatusListIndexService;
+import io.jans.as.server.service.token.StatusListService;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.as.server.util.TokenHashUtil;
 import io.jans.model.metric.MetricType;
@@ -102,6 +105,12 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
     @Inject
     private ErrorResponseFactory errorResponseFactory;
 
+    @Inject
+    private StatusListService statusListService;
+
+    @Inject
+    private StatusListIndexService statusListIndexService;
+
     private boolean isCachedWithNoPersistence = false;
 
     protected AuthorizationGrant() {
@@ -119,10 +128,17 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
     private IdToken createIdTokenInternal(AuthorizationCode authorizationCode, AccessToken accessToken, RefreshToken refreshToken, ExecutionContext executionContext) throws Exception {
         executionContext.initFromGrantIfNeeded(this);
 
+        Integer statusListIndex = null;
+        if (errorResponseFactory.isFeatureFlagEnabled(FeatureFlagType.STATUS_LIST)) {
+            statusListIndex = statusListIndexService.next();
+            executionContext.setStatusListIndex(statusListIndex);
+        }
+
         JsonWebResponse jwr = idTokenFactory.createJwr(this, authorizationCode, accessToken, refreshToken, executionContext);
         final IdToken idToken = new IdToken(jwr.toString(), jwr.getClaims().getClaimAsDate(JwtClaimName.ISSUED_AT),
                 jwr.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME));
         idToken.setReferenceId(executionContext.getTokenReferenceId());
+        idToken.setStatusListIndex(statusListIndex);
         if (log.isTraceEnabled())
             log.trace("Created id_token: {}", idToken.getCode());
         return idToken;
@@ -206,6 +222,14 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
             context.generateRandomTokenReferenceId();
 
             final AccessToken accessToken = super.createAccessToken(context);
+
+            Integer statusListIndex = null;
+            if (errorResponseFactory.isFeatureFlagEnabled(FeatureFlagType.STATUS_LIST)) {
+                statusListIndex = statusListIndexService.next();
+                context.setStatusListIndex(statusListIndex);
+                accessToken.setStatusListIndex(statusListIndex);
+            }
+
             if (accessToken.getExpiresIn() < 0) {
                 log.trace("Failed to create access token with negative expiration time");
                 return null;
@@ -281,7 +305,8 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
         jwt.getClaims().setClaim("acr", getAcrValues());
         jwt.getClaims().setClaim("auth_time", ServerUtil.dateToSeconds(getAuthenticationTime()));
         jwt.getClaims().setExpirationTime(accessToken.getExpirationDate());
-        jwt.getClaims().setIssuedAt(accessToken.getCreationDate());
+        jwt.getClaims().setIat(accessToken.getCreationDate());
+        jwt.getClaims().setNbf(accessToken.getCreationDate());
         jwt.getClaims().setSubjectIdentifier(getSub());
         jwt.getClaims().setClaim("x5t#S256", accessToken.getX5ts256());
         jwt.getClaims().setClaim("jti", context.getTokenReferenceId());
@@ -301,6 +326,7 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
         }
 
         Audience.setAudience(jwt.getClaims(), getClient());
+        statusListService.addStatusClaimWithIndex(jwt, context);
 
         if (isTrue(client.getAttributes().getRunIntrospectionScriptBeforeJwtCreation())) {
             runIntrospectionScriptAndInjectValuesIntoJwt(jwt, context);
@@ -494,6 +520,7 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
         result.setClientId(getClientId());
         result.setReferenceId(token.getReferenceId());
 
+        result.getAttributes().setStatusListIndex(token.getStatusListIndex());
         result.getAttributes().setX5cs256(token.getX5ts256());
         result.getAttributes().setDpopJkt(getDpopJkt());
 

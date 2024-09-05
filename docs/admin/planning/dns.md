@@ -8,7 +8,7 @@ tags:
   - X.509
 ---
 
-Trust on the Internet is largely derived from TLS. Like it or not, we are highly
+Trust in the Internet is largely derived from TLS. Like it or not, we are highly
 reliant on making a secure connection from a web browser using X.509
 security to ensure that we are connecting to a trusted web server. The `cn` of
 that web server certificate is the hostname of the server. There is no guarantee

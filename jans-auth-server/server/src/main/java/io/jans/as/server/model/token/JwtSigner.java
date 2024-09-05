@@ -80,7 +80,7 @@ public class JwtSigner {
         return new JwtSigner(appConfiguration, webKeys, signatureAlgorithm, client.getClientId(), decryptedSecret);
     }
 
-    public Jwt newJwt() throws Exception {
+    public Jwt newJwt() throws CryptoProviderException {
         jwt = new Jwt();
 
         // Header
@@ -93,7 +93,9 @@ public class JwtSigner {
 
         // Claims
         jwt.getClaims().setIssuer(appConfiguration.getIssuer());
-        jwt.getClaims().setAudience(audience);
+        if (StringUtils.isNotBlank(audience)) {
+            jwt.getClaims().setAudience(audience);
+        }
         return jwt;
     }
 

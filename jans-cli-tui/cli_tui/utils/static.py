@@ -1,6 +1,8 @@
 from utils.multi_lang import _
 from enum import Enum
 
+ISOFORMAT = '%Y-%m-%dT%H:%M:%S'
+
 class DialogResult(Enum):
     CANCEL = 0
     ACCEPT = 1
@@ -33,6 +35,8 @@ class common_strings:
     error = "Error!"
     info = "Info"
     oops = "Oops"
+    success = "Success"
+    warning = "Warning!"
 
     help_enter      = f'<Enter>          {_("Confirm or Edit current selection")}'
     help_esc        = f'<Esc>            {_("Close the current dialog")}'

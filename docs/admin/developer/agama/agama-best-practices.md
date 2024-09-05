@@ -7,6 +7,19 @@ tags:
 
 # Recommended practices in Agama development
 
+## Project reuse and customizations
+
+Agama was designed with reusability in mind. If a project provides functionalities of your interest but you find it does not quite achieve what you want, do not try to modify the project. Instead, create a new separate project reusing the flows and code found in the original project.
+
+It might be tempting to just take an Agama project archive, apply some editions, add files to it, repack, and redeploy it. This practice is not recommended. Think of a project as a library used to develop software. In normal situations you will not to hack or patch a library but use wrapper code to override or tailor its behavior.
+
+Agama provides a couple of vehicles to manipulate behavior and appearance:
+
+- [Template overrides](./advanced-usages.md#template-overrides)
+- [Flow cancellation](./advanced-usages.md#cancellation)
+
+These allow you to preserve encapsulation and keep project intrusiveness controlled.
+
 ## About flow design
 
 It is up to developers how to design a flow. This will normally require identifying the several "steps" that make up the "journey" and the conditions upon which "branching" takes place. Also it is important to check already existing flows in the server that may be reused for the purpose.

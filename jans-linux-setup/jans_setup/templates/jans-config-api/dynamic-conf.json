@@ -1,8 +1,10 @@
 {
+  "serviceName": "jans-config-api",
   "configOauthEnabled": ${configOauthEnabled},
   "disableLoggerTimer": false,
   "disableAuditLogger": false,
   "customAttributeValidationEnabled": true,
+  "acrValidationEnabled": true,
   "apiApprovedIssuer": ["${apiApprovedIssuer}"],
   "apiProtectionType": "${apiProtectionType}",
   "apiClientId": "${jca_client_id}",
@@ -17,6 +19,10 @@
   "loggingLevel":"INFO",
   "loggingLayout":"text",
   "externalLoggerConfiguration":"",
+  "maxCount": 200,
+  "acrExclusionList": [
+    "simple_password_auth"
+  ],
   "exclusiveAuthScopes": [
     "jans_stat",
     "https://jans.io/scim/users.read",
@@ -75,14 +81,15 @@
     "fileExtensionValidationEnabled":true,
     "moduleNameValidationEnabled":true,
     "assetBaseDirectory":"/opt/jans/jetty/%s/custom",
-    "jansModules":[
+    "jansServiceModule":[
       "jans-auth",
       "jans-casa",
       "jans-config-api",
       "jans-fido2",
       "jans-link",
       "jans-lock",
-      "jans-scim"
+      "jans-scim",
+      "jans-keycloak-link"
     ],
     "assetDirMapping":[
       {
@@ -161,7 +168,7 @@
       "description": "lock plugin",
       "className": "io.jans.configapi.plugin.lock.rest.ApiApplication"
     }
-	
+
   ]
 }
 

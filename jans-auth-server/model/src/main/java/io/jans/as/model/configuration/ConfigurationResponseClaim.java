@@ -18,6 +18,7 @@ public final class ConfigurationResponseClaim {
     public static final String ISSUER = "issuer";
     public static final String AUTHORIZATION_ENDPOINT = "authorization_endpoint";
     public static final String AUTHORIZATION_CHALLENGE_ENDPOINT = "authorization_challenge_endpoint";
+    public static final String STATUS_LIST_ENDPOINT = "status_list_endpoint";
     public static final String TOKEN_ENDPOINT = "token_endpoint";
     public static final String REVOCATION_ENDPOINT = "revocation_endpoint";
     public static final String SESSION_REVOCATION_ENDPOINT = "session_revocation_endpoint";
@@ -88,6 +89,7 @@ public final class ConfigurationResponseClaim {
     public static final String BACKCHANNEL_LOGOUT_SUPPORTED = "backchannel_logout_supported";
     public static final String BACKCHANNEL_LOGOUT_SESSION_SUPPORTED = "backchannel_logout_session_supported";
     public static final String MTLS_ENDPOINT_ALIASES = "mtls_endpoint_aliases";
+    public static final String ACR_MAPPINGS = "acr_mappings";
 
     // CIBA
     public static final String BACKCHANNEL_AUTHENTICATION_ENDPOINT = "backchannel_authentication_endpoint";

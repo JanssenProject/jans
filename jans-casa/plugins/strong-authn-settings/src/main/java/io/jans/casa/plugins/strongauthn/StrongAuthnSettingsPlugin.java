@@ -86,12 +86,8 @@ public class StrongAuthnSettingsPlugin extends Plugin implements ITrackable {
                 scheduler.deleteJob(jobKey);
             }
 
-            logger.warn("Resetting strong authentication settings...");
-            Configuration currentConfig = settingsHandler.getSettings();
-            currentConfig.setBasic2FASettings(new Basic2FASettings());
-            currentConfig.setTrustedDevicesSettings(null);
-            currentConfig.setEnforcement2FA(Collections.singletonList(EnforcementPolicy.EVERY_LOGIN));
-
+            logger.warn("Flushing strong authentication settings...");
+            settingsHandler.setSettings(null);
             settingsHandler.save();
             logger.info("Done.");
         } catch (Exception e) {

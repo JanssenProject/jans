@@ -197,7 +197,8 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
             if table in type_.get('tables', {}):
                 type_ = type_['tables'][table]
             if 'size' in type_:
-                data_type = '{}({})'.format(type_['type'], type_['size'])
+                dtype = 'STRING' if type_['type'] and Config.rdbm_type == 'spanner' else type_['type']
+                data_type = '{}({})'.format(dtype, type_['size'])
             else:
                 data_type = type_['type']
 
@@ -541,6 +542,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
             self.createDirs(self.common_lib_dir)
         shutil.unpack_archive(self.source_files[0][0], self.common_lib_dir)
         self.chown(os.path.join(Config.jetty_base, 'common'), Config.jetty_user, Config.jetty_user, True)
+
 
     def installed(self):
         # to be implemented

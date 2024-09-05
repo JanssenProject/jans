@@ -193,7 +193,7 @@ class CouchbaseLock(BaseLock):
             user = os.environ.get("CN_COUCHBASE_SUPERUSER", "admin")
             password = get_password_from_file(superuser_password_file)
         elif os.path.isfile(password_file):
-            user = os.environ.get("CN_COUCHBASE_USER", "admin")
+            user = os.environ.get("CN_COUCHBASE_USER", "jans")
             password = get_password_from_file(password_file)
         else:
             user = ""

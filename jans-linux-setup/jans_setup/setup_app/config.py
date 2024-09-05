@@ -40,7 +40,6 @@ class Config:
 
     installed_instance = False
 
-
     @classmethod
     def get(self, attr, default=None):
         return getattr(self, attr) if hasattr(self, attr) else default
@@ -132,11 +131,10 @@ class Config:
 
         self.downloadWars = None
         self.templateRenderingDict = {
-                                        'oxauthClient_2_inum': 'AB77-1A2B',
-                                        'oxauthClient_3_inum': '3E20',
-                                        'oxauthClient_4_inum': 'FF81-2D39',
+                                        'jans_auth_client_2_inum': 'AB77-1A2B',
+                                        'jans_auth_client_3_inum': '3E20',
+                                        'jans_auth_client_4_inum': 'FF81-2D39',
                                         'idp_attribute_resolver_ldap.search_filter': '(|(uid=$requestContext.principalName)(mail=$requestContext.principalName))',
-                                        'oxd_port': '8443',
                                         'server_time_zone': 'UTC' + time.strftime("%z"),
                                      }
 
@@ -191,23 +189,18 @@ class Config:
 
         # Jans components installation status
         self.loadData = True
-        self.installJans = True
-        self.installJre = True
-        self.installJetty = True
-        self.installJython = True
-        self.installOxAuth = True
-        self.installOxTrust = True
-        self.installHttpd = True
-        self.installSaml = False
-        self.installPassport = False
-        self.installJansRadius = False
+        self.install_jans = True
+        self.install_jre = True
+        self.install_jetty = True
+        self.install_jython = True
+        self.install_jans_auth = True
+        self.install_httpd = True
         self.install_scim_server = True
-        self.installFido2 = True
+        self.install_fido2 = True
         self.install_config_api = True
         self.install_casa = False
-        self.installOxd = False
         self.install_jans_cli = True
-        self.install_jans_link = True
+        self.install_jans_link = False
         self.loadTestData = False
         self.allowPreReleasedFeatures = False
         self.install_jans_saml = False
@@ -263,8 +256,6 @@ class Config:
         self.ldapCertFn = self.opendj_cert_fn = os.path.join(self.certFolder, 'opendj.crt')
         self.ldapTrustStoreFn = self.opendj_p12_fn = os.path.join(self.certFolder, 'opendj.pkcs12')
 
-        self.oxd_package = base.determine_package(os.path.join(self.dist_jans_dir, 'oxd-server*.tgz'))
-
         self.opendj_p12_pass = None
 
         self.ldap_binddn = 'cn=directory manager'
@@ -280,7 +271,8 @@ class Config:
 
         self.jansScriptFiles = [
                             os.path.join(self.install_dir, 'static/scripts/logmanager.sh'),
-                            os.path.join(self.install_dir, 'static/scripts/testBind.py')
+                            os.path.join(self.install_dir, 'static/scripts/testBind.py'),
+                            os.path.join(self.install_dir, 'static/scripts/jans'),
                             ]
 
         self.redhat_services = ['httpd', 'rsyslog']
@@ -364,66 +356,22 @@ class Config:
                         'jans-scim': ['opendj jans-auth', 75],
                         'idp': ['opendj jans-auth', 76],
                         'casa': ['opendj jans-auth', 78],
-                        'oxd-server': ['opendj jans-auth', 80],
                         'passport': ['opendj jans-auth', 82],
                         'jans-auth-rp': ['opendj jans-auth', 84],
-                        'jans-radius': ['opendj jans-auth', 86],
                         'jans-config-api': ['opendj jans-auth', 85],
                         }
 
         self.install_time_ldap = None
 
+        self.non_setup_properties = {
+            'jans_auth_client_jar_fn': os.path.join(self.dist_jans_dir, 'jans-auth-client-jar-with-dependencies.jar')
+                }
 
-        self.couchbaseBucketDict = OrderedDict((
-                        ('default', { 'ldif':[
-                                            self.ldif_base, 
-                                            self.ldif_attributes,
-                                            self.ldif_scopes,
-                                            self.ldif_configuration,
-                                            self.ldif_metric,
-                                            self.ldif_agama,
-                                            ],
-                                      'memory_allocation': 100,
-                                      'mapping': '',
-                                      'document_key_prefix': []
-                                    }),
-
-                        ('user',     {   'ldif': [],
-                                        'memory_allocation': 300,
-                                        'mapping': 'people, groups, authorizations',
-                                        'document_key_prefix': ['groups_', 'people_', 'authorizations_'],
-                                    }),
-
-                        ('site',     {   'ldif': [self.ldif_site],
-                                        'memory_allocation': 100,
-                                        'mapping': 'jans-link',
-                                        'document_key_prefix': ['site_', 'jans-link_'],
-                                    }),
-
-                        ('cache',    {   'ldif': [],
-                                        'memory_allocation': 100,
-                                        'mapping': 'cache',
-                                        'document_key_prefix': ['cache_'],
-                                    }),
-
-                        ('token',   { 'ldif': [],
-                                      'memory_allocation': 300,
-                                      'mapping': 'tokens',
-                                      'document_key_prefix': ['tokens_'],
-                                    }),
-
-                        ('session',   { 'ldif': [],
-                                      'memory_allocation': 200,
-                                      'mapping': 'sessions',
-                                      'document_key_prefix': [],
-                                    }),
-
-                    ))
+        #re-map couchbase buckets ldif
+        for bucket in self.couchbaseBucketDict:
+            for i, ldifs in enumerate(self.couchbaseBucketDict[bucket]['ldif']):
+                self.couchbaseBucketDict[bucket]['ldif'][i] = getattr(self, ldifs)
 
         self.mapping_locations = { group: 'rdbm' for group in self.couchbaseBucketDict }
-
-        self.non_setup_properties = {
-            'oxauth_client_jar_fn': os.path.join(self.dist_jans_dir, 'jans-auth-client-jar-with-dependencies.jar')
-                }
 
         Config.addPostSetupService = []

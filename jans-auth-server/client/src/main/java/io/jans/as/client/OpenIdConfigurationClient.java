@@ -105,6 +105,7 @@ public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationReq
         response.setIssuer(jsonObj.optString(ISSUER, null));
         response.setAuthorizationEndpoint(jsonObj.optString(AUTHORIZATION_ENDPOINT, null));
         response.setAuthorizationChallengeEndpoint(jsonObj.optString(AUTHORIZATION_CHALLENGE_ENDPOINT, null));
+        response.setStatusListEndpoint(jsonObj.optString(STATUS_LIST_ENDPOINT, null));
         response.setTokenEndpoint(jsonObj.optString(TOKEN_ENDPOINT, null));
         response.setRevocationEndpoint(jsonObj.optString(REVOCATION_ENDPOINT, null));
         response.setSessionRevocationEndpoint(jsonObj.optString(SESSION_REVOCATION_ENDPOINT, null));
@@ -129,6 +130,12 @@ public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationReq
             final JSONObject mtlsAliases = jsonObj.optJSONObject(MTLS_ENDPOINT_ALIASES);
             if (mtlsAliases != null) {
                 response.setMltsAliases(Util.toSerializableMap(mtlsAliases.toMap()));
+            }
+        }
+        if (jsonObj.has(ACR_MAPPINGS)) {
+            final JSONObject acrMappings = jsonObj.optJSONObject(ACR_MAPPINGS);
+            if (acrMappings != null) {
+                response.setAcrMappings(Util.toSerializableMapOfStrings(acrMappings.toMap()));
             }
         }
         Util.addToListIfHas(response.getScopesSupported(), jsonObj, SCOPES_SUPPORTED);

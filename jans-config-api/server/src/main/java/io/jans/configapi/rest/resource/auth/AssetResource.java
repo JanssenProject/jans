@@ -17,11 +17,12 @@ import io.jans.configapi.util.AttributeNames;
 import io.jans.model.JansAttribute;
 import io.jans.model.SearchRequest;
 import io.jans.orm.model.PagedResult;
-import io.jans.service.document.store.service.Document;
-
+import io.jans.service.document.store.model.Document;
+import io.jans.util.exception.InvalidAttributeException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -38,6 +39,7 @@ import jakarta.ws.rs.core.Response;
 import static io.jans.as.model.util.Util.escapeLog;
 
 import java.io.InputStream;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.*;
 
@@ -54,7 +56,7 @@ public class AssetResource extends ConfigBaseResource {
     private static final String ASSET_DATA = "Asset Data";
     private static final String ASSET_DATA_FORM = "Asset Data From";
     private static final String ASSET_NAME_CONFLICT = "NAME_CONFLICT";
-    private static final String ASSET_NAME_CONFLICT_MSG = "Asset with same name %s already exists!";
+    private static final String ASSET_NAME_CONFLICT_MSG = "Asset with same name %s already exist!";
     private static final String ASSET_NOT_FOUND = "Asset identified by %s not found!";
     private static final String ASSET_INUM = "Asset Identifier Inum";
     private static final String RESOURCE_NULL = "RESOURCE_NULL";
@@ -161,6 +163,49 @@ public class AssetResource extends ConfigBaseResource {
         return Response.ok(documentPagedResult).build();
     }
 
+    @Operation(summary = "Gets asset services", description = "Gets asset services", operationId = "get-asset-services", tags = {
+            "Jans Assets" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    ApiAccessConstants.JANS_ASSET_READ_ACCESS }))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = String.class, type = "enum")))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))) })
+    @GET
+    @ProtectedApi(scopes = { ApiAccessConstants.JANS_ASSET_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.JANS_ASSET_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @Path(ApiConstants.SERVICES)
+    public Response getJansServices() {
+
+        List<String> services = assetService.getValidModuleName();
+        if (services == null) {
+            services = Collections.emptyList();
+        }
+
+        logger.info("Asset fetched based on services:{}", services);
+        return Response.ok(services).build();
+    }
+
+    @Operation(summary = "Get valid asset types", description = "Get valid asset types", operationId = "get-asset-types", tags = {
+            "Jans Assets" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    ApiAccessConstants.JANS_ASSET_READ_ACCESS }))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = String.class, type = "enum")))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))) })
+    @GET
+    @ProtectedApi(scopes = { ApiAccessConstants.JANS_ASSET_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.JANS_ASSET_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @Path(ApiConstants.ASSET_TYPE)
+    public Response getValidAssetTypes() {
+
+        List<String> validTypes = assetService.getValidFileExtension();
+
+        logger.info("validTypes:{}", validTypes);
+        return Response.ok(validTypes).build();
+    }
+
     @Operation(summary = "Upload new asset", description = "Upload new asset", operationId = "post-new-asset", tags = {
             "Jans Assets" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.JANS_ASSET_WRITE_ACCESS }))
@@ -187,7 +232,7 @@ public class AssetResource extends ConfigBaseResource {
         checkResourceNotNull(asset, ASSET_DATA);
         checkNotNull(asset.getDisplayName(), AttributeNames.DISPLAY_NAME);
 
-        // check if asset with same name already exists
+        // check if asset with same name already exist
         List<Document> assets = assetService.getAssetByName(asset.getDisplayName());
         if (assets != null && !assets.isEmpty()) {
             asset.setInum(assets.get(0).getInum());
@@ -195,7 +240,6 @@ public class AssetResource extends ConfigBaseResource {
         }
 
         InputStream assetStream = assetForm.getAssetFile();
-        log.info("New assetStream:{} ", assetStream);
 
         if (assetStream == null || assetStream.available() <= 0) {
             log.error("No asset file provided");
@@ -204,10 +248,10 @@ public class AssetResource extends ConfigBaseResource {
 
         // save asset
         try {
-            asset = assetService.saveAsset(asset, assetStream);
+            asset = assetService.saveAsset(asset, assetStream, false);
             log.debug("Saved asset:{} ", asset);
         } catch (Exception ex) {
-            log.error("Application Error while creating asset is - status:{}", ex.getMessage());
+            log.error("Application Error while creating asset is - {}", ex.getMessage());
             throwInternalServerException(APPLICATION_ERROR, ex);
         }
 
@@ -222,7 +266,7 @@ public class AssetResource extends ConfigBaseResource {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Modified Asset", content = @Content(mediaType = MediaType.APPLICATION_JSON_PATCH_JSON, schema = @Schema(implementation = Document.class), examples = @ExampleObject(name = "Response json example", value = "example/assets/put-asset.json"))),
             @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "BadRequestException"))),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "Unauthorized"))),
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
             @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))) })
     @Consumes(MediaType.MULTIPART_FORM_DATA)
@@ -243,10 +287,16 @@ public class AssetResource extends ConfigBaseResource {
         checkResourceNotNull(inum, ASSET_INUM);
         checkNotNull(asset.getDisplayName(), AttributeNames.DISPLAY_NAME);
 
-        // check if asset with same name already exists
+        // validate if asset exist
+        Document existingDoc = assetService.getAssetByInum(asset.getInum());
+        if (existingDoc == null) {
+            throw new InvalidAttributeException("Asset with inum '" + asset.getInum() + "' does not exist!!!");
+        }
+
+        // check if asset with same name already exist
         List<Document> assets = assetService.getAssetByName(asset.getDisplayName());
         log.info(
-                "Check if asset with inum different then:{} but with same name exists - asset.getDisplayName():{}, assets:{}",
+                "Check if asset with inum different then:{} but with same name exist - asset.getDisplayName():{}, assets:{}",
                 inum, asset.getDisplayName(), assets);
         if (assets != null && !assets.isEmpty()) {
             List<Document> list = assets.stream().filter(e -> !e.getInum().equalsIgnoreCase(inum))
@@ -264,7 +314,7 @@ public class AssetResource extends ConfigBaseResource {
 
         // update asset
         try {
-            asset = assetService.saveAsset(asset, assetFile);
+            asset = assetService.saveAsset(asset, assetFile, true);
             log.debug(" Updated asset:{} ", asset);
         } catch (Exception ex) {
             log.error("Application Error while updated asset is:{}", ex.getMessage());
@@ -273,6 +323,43 @@ public class AssetResource extends ConfigBaseResource {
 
         log.info("Updated asset:{}", asset);
         return Response.status(Response.Status.OK).entity(asset).build();
+    }
+
+    @Operation(summary = "Load assets on server for a service", description = "Load assets on server for a service", operationId = "load-service-asset", tags = {
+            "Jans Assets" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    ApiAccessConstants.JANS_ASSET_WRITE_ACCESS }))
+    @RequestBody(description = "String multipart form.", content = @Content(mediaType = MediaType.MULTIPART_FORM_DATA, schema = @Schema(implementation = String.class)))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Asset file loaded", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = String.class), examples = @ExampleObject(name = "Response json example", value = "example/assets/load-service-assets.json"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "BadRequestException"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))) })
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @POST
+    @Path(ApiConstants.SERVICE + ApiConstants.SERVICE_NAME_PARAM_PATH)
+    @ProtectedApi(scopes = { ApiAccessConstants.JANS_ASSET_WRITE_ACCESS })
+    public Response loadServiceAsset(
+            @Parameter(description = "Service Name") @PathParam(ApiConstants.SERVICE_NAME) @NotNull String serviceName)
+            throws Exception {
+        if (log.isInfoEnabled()) {
+            log.info("Create Asset details serviceName:{}", serviceName);
+        }
+
+        // validation
+        checkResourceNotNull(serviceName, "Service Name");
+        String result = null;
+        // save asset
+        try {
+            result = assetService.loadServiceAsset(serviceName);
+
+        } catch (Exception ex) {
+            log.error("Application Error while loading asset is - {}", ex.getMessage());
+            throwInternalServerException(APPLICATION_ERROR, ex);
+        }
+
+        log.debug("Load asset for:{}, result is:{} ", serviceName, result);
+        return Response.status(Response.Status.OK).entity(result).build();
     }
 
     @Operation(summary = "Delete an asset", description = "Delete an asset", operationId = "delete-asset", tags = {

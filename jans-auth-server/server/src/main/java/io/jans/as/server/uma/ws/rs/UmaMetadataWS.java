@@ -56,7 +56,7 @@ public class UmaMetadataWS {
                     GrantType.AUTHORIZATION_CODE.getValue(),
                     GrantType.IMPLICIT.getValue(),
                     GrantType.CLIENT_CREDENTIALS.getValue(),
-                    GrantType.OXAUTH_UMA_TICKET.getValue()
+                    GrantType.UMA_TICKET.getValue()
             });
             c.setResponseTypesSupported(new String[]{
                     ResponseType.CODE.getValue(), ResponseType.ID_TOKEN.getValue(), ResponseType.TOKEN.getValue()

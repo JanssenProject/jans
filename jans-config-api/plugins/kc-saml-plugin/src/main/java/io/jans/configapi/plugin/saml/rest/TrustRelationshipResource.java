@@ -213,6 +213,10 @@ public class TrustRelationshipResource extends BaseResource {
         logger.debug("metaDataFile for update is:{} ", metaDataFile);
         if (metaDataFile != null && metaDataFile.available() > 0) {
             logger.debug("For update metaDataFile.available():{}", metaDataFile.available());
+            
+        }else  if(trustRelationship.getSpMetaDataSourceType().equals(MetadataSourceType.FILE)) {
+
+            trustRelationship.setSpMetaDataFN(existingTrustRelationship.getSpMetaDataFN());
         }
         
         validateSpMetaDataSourceType(trustRelationship, metaDataFile, true);
@@ -279,23 +283,6 @@ public class TrustRelationshipResource extends BaseResource {
         return Response.ok(fs,MediaType.APPLICATION_XML).build();
     }
 
-    @Operation(summary = "Process unprocessed metadata files", description = "Process unprocessed metadata files", operationId = "post-metadata-files", tags = {
-            "SAML - Trust Relationship" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-                    Constants.SAML_WRITE_ACCESS }))
-    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "OK"),
-            @ApiResponse(responseCode = "401", description = "Unauthorized"),
-            @ApiResponse(responseCode = "500", description = "InternalServerError") })
-    @Path(Constants.PROCESS_SP_META_FILE)
-    @ProtectedApi(scopes = { Constants.SAML_WRITE_ACCESS })
-    @POST
-    public Response processMetadataFiles() {
-
-        logger.info("process metadata files");
-
-        samlService.processUnprocessedSpMetadataFiles();
-
-        return Response.ok().build();
-    }
     
     private void validateSpMetaDataSourceType(TrustRelationship trustRelationship, InputStream metaDataFile, boolean isUpdate)
             throws IOException {

@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
 import io.jans.agama.model.EngineConfig;
 import io.jans.as.model.common.*;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.error.ErrorHandlingMethod;
 import io.jans.as.model.jwk.KeySelectionStrategy;
 import io.jans.as.model.ssa.SsaConfiguration;
@@ -36,6 +37,11 @@ public class AppConfiguration implements Configuration {
     public static final KeySelectionStrategy DEFAULT_KEY_SELECTION_STRATEGY = KeySelectionStrategy.OLDER;
     public static final String DEFAULT_STAT_SCOPE = "jans_stat";
     public static final String DEFAULT_AUTHORIZATION_CHALLENGE_ACR = "default_challenge";
+
+    public static final int DEFAULT_STATUS_LIST_RESPONSE_JWT_LIFETIME = 600; // 10min
+    public static final int DEFAULT_STATUS_LIST_BIT_SIZE = 2;
+    public static final int DEFAULT_STATUS_LIST_INDEX_ALLOCATION_BLOCK_SIZE = 100;
+    public static final XFrameOptions DEFAULT_X_FRAME_ORIGINS_VALUE = XFrameOptions.SAMEORIGIN;
 
     @DocProperty(description = "URL using the https scheme that OP asserts as Issuer identifier")
     private String issuer;
@@ -199,6 +205,18 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "The lifetime of spontaneous scope in seconds")
     private int spontaneousScopeLifetime;
 
+    @DocProperty(description = "Specifies status list bit size. (2 bits - 4 statuses, 4 bits - 16 statuses). Defaults to 2.")
+    private int statusListBitSize = DEFAULT_STATUS_LIST_BIT_SIZE;
+
+    @DocProperty(description = "The status list signature algorithm to sign response JWT. Defaults to RS256.")
+    private String statusListResponseJwtSignatureAlgorithm = SignatureAlgorithm.RS256.getName();
+
+    @DocProperty(description = "The status list response JWT lifetime (used to set exp claim in JWT).")
+    private int statusListResponseJwtLifetime = DEFAULT_STATUS_LIST_RESPONSE_JWT_LIFETIME;
+
+    @DocProperty(description = "Specifies how many status list indexes AS can reserve at once within pool (when status_list feature flag is enabled). Defaults to 100.")
+    private int statusListIndexAllocationBlockSize = DEFAULT_STATUS_LIST_INDEX_ALLOCATION_BLOCK_SIZE;
+
     @DocProperty(description = "Specifies which LDAP attribute is used for the subject identifier claim")
     private String openidSubAttribute;
 
@@ -207,6 +225,12 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "A list of the subject identifiers supported per client")
     private List<String> subjectIdentifiersPerClientSupported;
+
+    @DocProperty(description = "Add X-Frame-Options header to response if any string in the list is contained by request uri.")
+    private List<String> applyXFrameOptionsHeaderIfUriContainsAny;
+
+    @DocProperty(description = "Add X-Frame-Options header to response if any string in the list is contained by request uri.", defaultValue = "SAMEORIGIN")
+    private XFrameOptions xframeOptionsHeaderValue = DEFAULT_X_FRAME_ORIGINS_VALUE;
 
     @DocProperty(description = "This list details which OAuth 2.0 response_type values are supported by this OP.", defaultValue = "By default, every combination of code, token and id_token is supported.")
     private Set<Set<ResponseType>> responseTypesSupported;
@@ -1894,6 +1918,28 @@ public class AppConfiguration implements Configuration {
         this.openIdConfigurationEndpoint = openIdConfigurationEndpoint;
     }
 
+    public List<String> getApplyXFrameOptionsHeaderIfUriContainsAny() {
+        if (applyXFrameOptionsHeaderIfUriContainsAny == null) {
+            applyXFrameOptionsHeaderIfUriContainsAny = new ArrayList<>();
+        }
+        return applyXFrameOptionsHeaderIfUriContainsAny;
+    }
+
+    public void setApplyXFrameOptionsHeaderIfUriContainsAny(List<String> applyXFrameOptionsHeaderIfUriContainsAny) {
+        this.applyXFrameOptionsHeaderIfUriContainsAny = applyXFrameOptionsHeaderIfUriContainsAny;
+    }
+
+    public XFrameOptions getXframeOptionsHeaderValue() {
+        if (xframeOptionsHeaderValue == null) {
+            xframeOptionsHeaderValue = DEFAULT_X_FRAME_ORIGINS_VALUE;
+        }
+        return xframeOptionsHeaderValue;
+    }
+
+    public void setXframeOptionsHeaderValue(XFrameOptions xframeOptionsHeaderValue) {
+        this.xframeOptionsHeaderValue = xframeOptionsHeaderValue;
+    }
+
     public Set<Set<ResponseType>> getResponseTypesSupported() {
         return responseTypesSupported;
     }
@@ -2392,6 +2438,38 @@ public class AppConfiguration implements Configuration {
 
     public void setSpontaneousScopeLifetime(int spontaneousScopeLifetime) {
         this.spontaneousScopeLifetime = spontaneousScopeLifetime;
+    }
+
+    public int getStatusListResponseJwtLifetime() {
+        return statusListResponseJwtLifetime;
+    }
+
+    public void setStatusListResponseJwtLifetime(int statusListResponseJwtLifetime) {
+        this.statusListResponseJwtLifetime = statusListResponseJwtLifetime;
+    }
+
+    public String getStatusListResponseJwtSignatureAlgorithm() {
+        return statusListResponseJwtSignatureAlgorithm;
+    }
+
+    public void setStatusListResponseJwtSignatureAlgorithm(String statusListResponseJwtSignatureAlgorithm) {
+        this.statusListResponseJwtSignatureAlgorithm = statusListResponseJwtSignatureAlgorithm;
+    }
+
+    public int getStatusListBitSize() {
+        return statusListBitSize;
+    }
+
+    public void setStatusListBitSize(int statusListBitSize) {
+        this.statusListBitSize = statusListBitSize;
+    }
+
+    public int getStatusListIndexAllocationBlockSize() {
+        return statusListIndexAllocationBlockSize;
+    }
+
+    public void setStatusListIndexAllocationBlockSize(int statusListIndexAllocationBlockSize) {
+        this.statusListIndexAllocationBlockSize = statusListIndexAllocationBlockSize;
     }
 
     public int getCleanServiceInterval() {
