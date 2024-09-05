@@ -4,7 +4,7 @@ use pyo3::{types::PyAny, Bound};
 use serde_pyobject::from_pyobject;
 
 mod config;
-use config::{BootstrapConfig, RoleMapping};
+use config::{BootstrapConfig, TokenMapper};
 
 #[pyclass]
 pub struct Authz {
@@ -36,7 +36,7 @@ impl Authz {
 #[pymodule]
 fn cedarling_python(m: &Bound<'_, PyModule>) -> PyResult<()> {
 	m.add_class::<BootstrapConfig>()?;
-	m.add_class::<RoleMapping>()?;
+	m.add_class::<TokenMapper>()?;
 	m.add_class::<Authz>()?;
 
 	Ok(())

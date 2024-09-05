@@ -10,7 +10,7 @@ use authz;
 
 #[pyclass]
 #[derive(Debug, Clone)]
-pub struct RoleMapping {
+pub struct TokenMapper {
 	#[pyo3(get, set)]
 	pub id_token: Option<String>,
 	#[pyo3(get, set)]
@@ -20,7 +20,7 @@ pub struct RoleMapping {
 }
 
 #[pymethods]
-impl RoleMapping {
+impl TokenMapper {
 	#[new]
 	#[pyo3(signature = (id_token=None, userinfo_token=None, access_token=None))]
 	fn new(
@@ -28,9 +28,9 @@ impl RoleMapping {
 		userinfo_token: Option<String>,
 		access_token: Option<String>,
 	) -> Self {
-		let default_val = RoleMapping::default();
+		let default_val = TokenMapper::default();
 
-		RoleMapping {
+		TokenMapper {
 			id_token: id_token.or(default_val.id_token),
 			userinfo_token: userinfo_token.or(default_val.userinfo_token),
 			access_token: access_token.or(default_val.access_token),
@@ -38,9 +38,9 @@ impl RoleMapping {
 	}
 }
 
-impl Default for RoleMapping {
+impl Default for TokenMapper {
 	fn default() -> Self {
-		let role: authz::RoleMapping = <_>::default();
+		let role: authz::TokenMapper = <_>::default();
 		Self {
 			id_token: role.id_token,
 			userinfo_token: role.userinfo_token,
@@ -49,9 +49,9 @@ impl Default for RoleMapping {
 	}
 }
 
-impl Into<authz::RoleMapping> for RoleMapping {
-	fn into(self) -> authz::RoleMapping {
-		authz::RoleMapping {
+impl Into<authz::TokenMapper> for TokenMapper {
+	fn into(self) -> authz::TokenMapper {
+		authz::TokenMapper {
 			id_token: self.id_token,
 			userinfo_token: self.userinfo_token,
 			access_token: self.access_token,
@@ -66,7 +66,7 @@ pub struct BootstrapConfig {
 	#[pyo3(get, set)]
 	pub CEDARLING_APPLICATION_NAME: Option<String>,
 	#[pyo3(get, set)]
-	pub CEDARLING_ROLE_MAPPING: RoleMapping,
+	pub CEDARLING_ROLE_MAPPING: TokenMapper,
 }
 
 #[allow(non_snake_case)]
@@ -76,7 +76,7 @@ impl BootstrapConfig {
 	#[pyo3(signature = (CEDARLING_APPLICATION_NAME=None, CEDARLING_ROLE_MAPPING=None))]
 	fn new(
 		CEDARLING_APPLICATION_NAME: Option<String>,
-		CEDARLING_ROLE_MAPPING: Option<RoleMapping>,
+		CEDARLING_ROLE_MAPPING: Option<TokenMapper>,
 	) -> Self {
 		BootstrapConfig {
 			CEDARLING_APPLICATION_NAME,

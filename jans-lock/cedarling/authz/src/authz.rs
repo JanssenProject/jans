@@ -67,7 +67,7 @@ pub enum AuthzNewError {
 /// for `userinfo_token` default value `role`
 #[derive(Debug, derivative::Derivative, serde::Serialize, serde::Deserialize)]
 #[derivative(Default, Clone)]
-pub struct RoleMapping {
+pub struct TokenMapper {
 	#[derivative(Default(value = "Some(\"role\".into())"))]
 	pub id_token: Option<String>,
 	#[derivative(Default(value = "Some(\"role\".into())"))]
@@ -80,7 +80,7 @@ pub struct RoleMapping {
 #[derive(Debug, Default, serde::Serialize, serde::Deserialize)]
 pub struct BootstrapConfig {
 	pub CEDARLING_APPLICATION_NAME: Option<String>,
-	pub CEDARLING_ROLE_MAPPING: RoleMapping,
+	pub CEDARLING_ROLE_MAPPING: TokenMapper,
 }
 
 #[derive(Default)]
@@ -180,7 +180,7 @@ impl Authz {
 	pub fn get_entities(
 		&self,
 		data: JWTData,
-		role_mapping: &RoleMapping,
+		role_mapping: &TokenMapper,
 	) -> Result<EntitiesBox, HandleError> {
 		// TODO: add entities from trust store about issuers (like in cedarling)
 

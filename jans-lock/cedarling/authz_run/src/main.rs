@@ -17,7 +17,7 @@ fn real_demo_case() -> Result<(), Box<dyn std::error::Error>> {
 
 	let input_json = include_str!("../../cedar_files/input.json");
 
-	let role_mapping = authz::RoleMapping {
+	let role_mapping = authz::TokenMapper {
 		..Default::default()
 	};
 

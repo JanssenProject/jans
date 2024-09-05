@@ -5,7 +5,7 @@ use cedar_policy::{Entity, EntityId, EntityTypeName, EntityUid, ParseErrors};
 
 use super::{
 	jwt_tokens::{AccessToken, EntityCreatingError, IdToken, UserInfoToken, UserMissedInfo},
-	RoleMapping,
+	TokenMapper,
 };
 
 #[derive(serde::Deserialize, Debug)]
@@ -122,7 +122,7 @@ pub struct JWTDataEntities {
 }
 
 impl JWTData {
-	fn roles(&self, role_mapping: &RoleMapping) -> Vec<String> {
+	fn roles(&self, role_mapping: &TokenMapper) -> Vec<String> {
 		// if serde_json::Value is string  return Vec with string
 		// if serde_json::Value is array of string return Vec with strings
 		fn parse_roles(
@@ -177,7 +177,7 @@ impl JWTData {
 	pub fn entities(
 		self,
 		application_name: Option<&str>,
-		role_mapping: &RoleMapping,
+		role_mapping: &TokenMapper,
 	) -> Result<JWTDataEntities, AuthzInputEntitiesError> {
 		// TODO: implement check of token correctness
 		// // check if `aud` claim in id_token matches `client_id` in access token

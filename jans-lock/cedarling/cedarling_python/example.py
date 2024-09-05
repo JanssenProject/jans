@@ -1,7 +1,7 @@
-from cedarling_python import Authz, BootstrapConfig, RoleMapping
+from cedarling_python import Authz, BootstrapConfig, TokenMapper
 
 # none means default mapping
-mapping=RoleMapping(id_token=None, userinfo_token=None, access_token=None)
+mapping=TokenMapper(id_token=None, userinfo_token=None, access_token=None)
 config = BootstrapConfig("DemoApp",mapping)
 
 # also we can avoid fields during initialization
