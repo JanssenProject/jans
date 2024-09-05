@@ -184,7 +184,8 @@ public class StatusListService {
         final Date expiration = calendar.getTime();
 
         jwr.getClaims().setExpirationTime(expiration);
-        jwr.getClaims().setIssuedAt(issuedAt);
+        jwr.getClaims().setIat(issuedAt);
+        jwr.getClaims().setNbf(issuedAt);
         jwr.getClaims().setClaim("ttl", lifetime);
         jwr.getClaims().setClaim("sub", getSub());
 
