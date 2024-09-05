@@ -9,6 +9,7 @@ import urllib3
 
 from jans.pycloudlib.lock.base_lock import BaseLock
 from jans.pycloudlib.utils import as_boolean
+from jans.pycloudlib.utils import get_password_from_file
 
 logger = logging.getLogger(__name__)
 
@@ -22,40 +23,6 @@ def _handle_failed_request(resp) -> None:
             logger.warning(f"Error while sending request to {resp.url}; status_code={resp.status_code}, reason={err}")
         case _:
             resp.raise_for_status()
-
-
-def _resolve_auth():
-    # list of possible password files
-    password_files = [
-        os.environ.get("CN_LOCK_PASSWORD_FILE", "/etc/jans/conf/lock_password")
-    ]
-
-    # check which user is accessing couchbase
-    user = os.environ.get("CN_COUCHBASE_SUPERUSER", "")
-
-    if user:
-        password_files.append(
-            os.environ.get("CN_COUCHBASE_SUPERUSER_PASSWORD_FILE", "/etc/jans/conf/couchbase_superuser_password")
-        )
-    else:
-        user = os.environ.get("CN_COUCHBASE_USER", "admin")
-        password_files.append(
-            os.environ.get("CN_COUCHBASE_PASSWORD_FILE", "/etc/jans/conf/couchbase_password")
-        )
-
-    # password of the running user
-    password = ""  # nosec: B105
-
-    for password_file in password_files:
-        if not os.path.isfile(password_file):
-            continue
-
-        with open(password_file) as f:
-            password = f.read().strip()
-            break
-
-    # auth credentials
-    return user, password
 
 
 class CouchbaseLock(BaseLock):
@@ -93,7 +60,7 @@ class CouchbaseLock(BaseLock):
 
         sess = requests.Session()
         sess.verify = False
-        sess.auth = _resolve_auth()
+        sess.auth = self._resolve_auth()
 
         # return the cached session
         return sess
@@ -217,3 +184,20 @@ class CouchbaseLock(BaseLock):
                 logger.warning(f"Unable to create required bucket {self.bucket}; status_code={resp.status_code}")
             case _:
                 resp.raise_for_status()
+
+    def _resolve_auth(self):
+        superuser_password_file = os.environ.get("CN_COUCHBASE_SUPERUSER_PASSWORD_FILE", "/etc/jans/conf/couchbase_superuser_password")
+        password_file = os.environ.get("CN_COUCHBASE_PASSWORD_FILE", "/etc/jans/conf/couchbase_password")
+
+        if os.path.isfile(superuser_password_file):
+            user = os.environ.get("CN_COUCHBASE_SUPERUSER", "admin")
+            password = get_password_from_file(superuser_password_file)
+        elif os.path.isfile(password_file):
+            user = os.environ.get("CN_COUCHBASE_USER", "jans")
+            password = get_password_from_file(password_file)
+        else:
+            user = ""
+            password = ""  # nosec: B105
+
+        # auth credentials
+        return user, password

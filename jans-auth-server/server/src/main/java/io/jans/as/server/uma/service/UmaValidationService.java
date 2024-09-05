@@ -41,7 +41,7 @@ import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.util.StringHelper;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringUtils;
-import org.python.google.common.collect.Iterables;
+import com.google.common.collect.Iterables;
 import org.slf4j.Logger;
 
 import jakarta.ejb.Stateless;
@@ -230,8 +230,8 @@ public class UmaValidationService {
     public void validateGrantType(String grantType) {
         log.trace("Validate grantType: {}", grantType);
 
-        if (!GrantType.OXAUTH_UMA_TICKET.getValue().equals(grantType)) {
-            throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, INVALID_RESOURCE_ID, "No required grant_type: " + GrantType.OXAUTH_UMA_TICKET.getValue());
+        if (!GrantType.UMA_TICKET.getValue().equals(grantType)) {
+            throw errorResponseFactory.createWebApplicationException(BAD_REQUEST, INVALID_RESOURCE_ID, "No required grant_type: " + GrantType.UMA_TICKET.getValue());
         }
     }
 

@@ -14,46 +14,72 @@ import java.util.Set;
 public enum FeatureFlagType {
 
     UNKNOWN("unknown"),
-    @DocFeatureFlag(description = "Enable/Disable health-check endpoint")
+    @DocFeatureFlag(description = "Enable/Disable health-check endpoint",
+            defaultValue = "Enabled")
     HEALTH_CHECK("health_check"),
-    @DocFeatureFlag(description = "Enable/Disable OpenID Connect [userinfo endpoint](https://openid.net/specs/openid-connect-core-1_0.html#UserInfo)")
+    @DocFeatureFlag(description = "Enable/Disable OpenID Connect [userinfo endpoint](https://openid.net/specs/openid-connect-core-1_0.html#UserInfo)",
+            defaultValue = "Enabled")
     USERINFO("userinfo"),
 
-    @DocFeatureFlag(description = "Enable/Disable client info endpoint")
+    @DocFeatureFlag(description = "Enable/Disable client info endpoint",
+            defaultValue = "Enabled")
     CLIENTINFO("clientinfo"),
-    @DocFeatureFlag(description = "Enable/Disable ID Generation endpoint")
+    @DocFeatureFlag(description = "Enable/Disable ID Generation endpoint",
+            defaultValue = "Enabled")
     ID_GENERATION("id_generation"),
-    @DocFeatureFlag(description = "Enable/Disable client registration endpoint")
+    @DocFeatureFlag(description = "Enable/Disable client registration endpoint",
+            defaultValue = "Enabled")
     REGISTRATION("registration"),
-    @DocFeatureFlag(description = "Enable/Disable token introspection endpoint")
+    @DocFeatureFlag(description = "Enable/Disable token introspection endpoint",
+            defaultValue = "Enabled")
     INTROSPECTION("introspection"),
-    @DocFeatureFlag(description = "Enable/Disable token revocation endpoint")
+    @DocFeatureFlag(description = "Enable/Disable token revocation endpoint",
+            defaultValue = "Enabled")
     REVOKE_TOKEN("revoke_token"),
-    @DocFeatureFlag(description = "Enable/Disable session revocation endpoint")
+    @DocFeatureFlag(description = "Enable/Disable session revocation endpoint",
+            defaultValue = "Enabled")
     REVOKE_SESSION("revoke_session"),
-    @DocFeatureFlag(description = "Enable/Disable active session endpoint")
+    @DocFeatureFlag(description = "Enable/Disable global token revocation endpoint",
+            defaultValue = "Enabled")
+    GLOBAL_TOKEN_REVOCATION("global_token_revocation"),
+    @DocFeatureFlag(description = "Enable/Disable status list endpoint",
+            defaultValue = "Enabled")
+    STATUS_LIST("status_list"),
+    @DocFeatureFlag(description = "Enable/Disable active session endpoint",
+            defaultValue = "Enabled")
     ACTIVE_SESSION("active_session"),
-    @DocFeatureFlag(description = "Enable/Disable end session endpoint")
+    @DocFeatureFlag(description = "Enable/Disable end session endpoint",
+            defaultValue = "Enabled")
     END_SESSION("end_session"),
-    @DocFeatureFlag(description = "Enable/Disable session status check endpoint")
+    @DocFeatureFlag(description = "Enable/Disable session status check endpoint",
+            defaultValue = "Enabled")
     STATUS_SESSION("status_session"),
-    @DocFeatureFlag(description = "Enable/Disable *.well-known* configuration endpoint")
+    @DocFeatureFlag(description = "Enable/Disable *.well-known* configuration endpoint",
+            defaultValue = "Enabled")
     JANS_CONFIGURATION("jans_configuration"), // /.well-known/jans-configuration
-    @DocFeatureFlag(description = "Enable/Disable OpenID Connect Client Initiated Backchannel Authentication Flow(CIBA) flow support")
+    @DocFeatureFlag(description = "Enable/Disable OpenID Connect Client Initiated Backchannel Authentication Flow(CIBA) flow support",
+            defaultValue = "Enabled")
     CIBA("ciba"),
-    @DocFeatureFlag(description = "Enable/Disable support for User-Managed Access (UMA)")
+    @DocFeatureFlag(description = "Enable/Disable support for User-Managed Access (UMA)",
+            defaultValue = "Disabled")
     UMA("uma"),
-    @DocFeatureFlag(description = "Enable/Disable support for Universal 2nd Factor(U2F) protocol")
+    @DocFeatureFlag(description = "Enable/Disable support for Universal 2nd Factor(U2F) protocol",
+            defaultValue = "Disabled")
     U2F("u2f"),
-    @DocFeatureFlag(description = "Enable/Disable support for device authorization")
+    @DocFeatureFlag(description = "Enable/Disable support for device authorization",
+            defaultValue = "Enabled")
     DEVICE_AUTHZ("device_authz"),
-    @DocFeatureFlag(description = "Enable/Disable metric reporter feature")
+    @DocFeatureFlag(description = "Enable/Disable metric reporter feature",
+            defaultValue = "Enabled")
     METRIC("metric"),
-    @DocFeatureFlag(description = "Enable/Disable Stat service")
+    @DocFeatureFlag(description = "Enable/Disable Stat service",
+            defaultValue = "Enabled")
     STAT("stat"),
-    @DocFeatureFlag(description = "Enable/Disable Pushed Authorization Requests(PAR) feature")
+    @DocFeatureFlag(description = "Enable/Disable Pushed Authorization Requests(PAR) feature",
+            defaultValue = "Enabled")
     PAR("par"),
-    @DocFeatureFlag(description = "Enable/Disable Software Statement Assertion(SSA) feature")
+    @DocFeatureFlag(description = "Enable/Disable Software Statement Assertion(SSA) feature",
+            defaultValue = "Enabled")
     SSA("ssa");
 
     private final String value;

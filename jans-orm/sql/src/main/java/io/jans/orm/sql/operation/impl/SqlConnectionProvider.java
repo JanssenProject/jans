@@ -91,6 +91,8 @@ public class SqlConnectionProvider {
 	private Map<String, Map<String, AttributeType>> tableColumnsMap;
 	private Map<String, String> tableEnginesMap = new HashMap<>();
 	private Map<String, ArrayList<String>> tableJsonColumnsMap = new HashMap<>();
+	
+	private boolean disableTimeZone = false;
 
 	protected SqlConnectionProvider() {
 	}
@@ -142,6 +144,10 @@ public class SqlConnectionProvider {
 
 		connectionProperties.setProperty("user", userName);
 		connectionProperties.setProperty("password", userPassword);
+		
+		if (props.containsKey("db.disable.time-zone")) {
+			disableTimeZone = StringHelper.toBoolean(props.getProperty("db.disable.time-zone"), false);
+		}
 
 		this.objectPoolConfig = new GenericObjectPoolConfig<>();
 
@@ -283,7 +289,8 @@ public class SqlConnectionProvider {
 				LOG.debug("Found table: '{}'.", tableName);
 				try (ResultSet columnResultSet = databaseMetaData.getColumns(null, schemaName, tableName, null)) {
 					while (columnResultSet.next()) {
-						String columnName = columnResultSet.getString("COLUMN_NAME").toLowerCase();
+						String defColumnName = columnResultSet.getString("COLUMN_NAME");
+						String columnName = defColumnName.toLowerCase();
 						String columnTypeName = columnResultSet.getString("TYPE_NAME").toLowerCase();
 
 						if ((SupportedDbType.MARIADB == dbType) && SqlOperationService.LONGTEXT_TYPE_NAME.equalsIgnoreCase(columnTypeName)) {
@@ -300,7 +307,7 @@ public class SqlConnectionProvider {
 						boolean multiValued = SqlOperationService.JSON_TYPE_NAME.equals(columnTypeName)
 								|| SqlOperationService.JSONB_TYPE_NAME.equals(columnTypeName);
 
-						AttributeType attributeType = new AttributeType(columnName, columnTypeName, multiValued);
+						AttributeType attributeType = new AttributeType(defColumnName, columnName, columnTypeName, multiValued);
 						tableColumns.put(columnName, attributeType);
 					}
 				}
@@ -502,8 +509,16 @@ public class SqlConnectionProvider {
 		}
 	}
 
+	public Map<String, Map<String, AttributeType>> getTableColumnsMap() {
+		return tableColumnsMap;
+	}
+
 	public SupportedDbType getDbType() {
 		return dbType;
+	}
+
+	public boolean isDisableTimeZone() {
+		return disableTimeZone;
 	}
 
 }

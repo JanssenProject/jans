@@ -15,8 +15,6 @@ import io.jans.as.model.exception.CryptoProviderException;
 import io.jans.as.model.exception.InvalidParameterException;
 import io.jans.as.model.jwk.*;
 import io.jans.as.model.util.Base64Util;
-import io.jans.eleven.model.JwksRequestParam;
-import io.jans.eleven.model.KeyRequestParam;
 import org.apache.log4j.Logger;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -79,28 +77,6 @@ public abstract class AbstractCryptoProvider {
         }
 
         return null;
-    }
-
-    public JwksRequestParam getJwksRequestParam(JSONObject jwkJsonObject) {
-        JwksRequestParam jwks = new JwksRequestParam();
-        jwks.setKeyRequestParams(new ArrayList<>());
-
-        KeyRequestParam key = new KeyRequestParam();
-        key.setAlg(jwkJsonObject.getString(JWKParameter.ALGORITHM));
-        key.setKid(jwkJsonObject.getString(JWKParameter.KEY_ID));
-        key.setUse(jwkJsonObject.getString(JWKParameter.KEY_USE));
-        key.setKty(jwkJsonObject.getString(JWKParameter.KEY_TYPE));
-
-        key.setN(jwkJsonObject.optString(JWKParameter.MODULUS));
-        key.setE(jwkJsonObject.optString(JWKParameter.EXPONENT));
-
-        key.setCrv(jwkJsonObject.optString(JWKParameter.CURVE));
-        key.setX(jwkJsonObject.optString(JWKParameter.X));
-        key.setY(jwkJsonObject.optString(JWKParameter.Y));
-
-        jwks.getKeyRequestParams().add(key);
-
-        return jwks;
     }
 
     public static JSONObject generateJwks(AbstractCryptoProvider cryptoProvider, AppConfiguration configuration) {

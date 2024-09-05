@@ -1,5 +1,4 @@
 # pinned to py3-grpcio version to avoid failure on native extension build
-grpcio==1.54.2
-click==6.7
-libcst<0.4
-git+https://github.com/JanssenProject/jans@9dd82da5c87ee829c73a1135ce8740b8353f8ab5#egg=jans-pycloudlib&subdirectory=jans-pycloudlib
+grpcio==1.62.1
+click==8.1.7
+/tmp/jans/jans-pycloudlib

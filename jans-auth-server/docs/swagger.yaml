@@ -6,16 +6,17 @@ info:
   title: Janssen Authorization Server
   description: Janssen Authorization Server - OAuth 2.0 server; OpenID Connect Provider (OP) & UMA Authorization Server (AS)
   contact:
-    email: yuriyz@gluu.org
+    name: Contact
+    url: https://github.com/JanssenProject/jans/discussions
   license:
     name: License
-    url: https://github.com/JanssenProject/jans/jans-auth-server/blob/master/LICENSE
-  version: "5.0"
+    url: https://github.com/JanssenProject/jans/blob/main/LICENSE
+  version: "OAS Version"
 servers:
   - url: https://jans.local.io/jans-auth
 tags:
-  - name: developers
-    description: Janssen Authorization Server is an open source OpenID Connect Provider (OP) and UMA Authorization Server (AS). The project also includes OpenID Connect Client code which can be used by websites to validate tokens. Server currently implements all required aspects of the OpenID Connect stack, including an OAuth 2.0 authorization server, Simple Web Discovery, Dynamic Client Registration, JSON Web Tokens, JSON Web Keys, and User Info Endpoint. Server is tightly coupled with Gluu Admin UI.
+  - name: About
+    description: Janssen Authorization Server is an open source OpenID Connect Provider (OP) and UMA Authorization Server (AS). The project also includes OpenID Connect Client code which can be used by websites to validate tokens. Server currently implements all required aspects of the OpenID Connect stack, including an OAuth 2.0 authorization server, Simple Web Discovery, Dynamic Client Registration, JSON Web Tokens, JSON Web Keys, and User Info Endpoint.
 
 paths:
   /authorization_challenge:
@@ -261,6 +262,12 @@ paths:
           description: The JSON Web Key (JWK) Thumbprint [RFC7638] of the proof-of-possession public key using the SHA-256 hash function
           schema:
             type: string
+        - name: authorization_details
+          in: query
+          required: false
+          description: The request parameter authorization_details contains, in JSON notation, an array of objects. Each JSON object contains the data to specify the authorization requirements for a certain type of resource. The type of resource or access requirement is determined by the type field.
+          schema:
+            type: string
       responses:
         200:
           description: OK
@@ -290,10 +297,13 @@ paths:
                       - server_error
                       - temporarily_unavailable
                       - invalid_request_redirect_uri
+                      - invalid_authorization_details
                       - login_required
                       - session_selection_required
                       - consent_required
                       - user_mismatched
+                      - request_not_supported
+                      - request_uri_not_supported
                       - invalid_request_uri
                       - invalid_request_object
                       - authentication_session_invalid
@@ -405,6 +415,9 @@ paths:
                 dpop_jkt:
                   type: string
                   description: The JSON Web Key (JWK) Thumbprint [RFC7638] of the proof-of-possession public key using the SHA-256 hash function
+                authorization_details:
+                  type: string
+                  description: The request parameter authorization_details contains, in JSON notation, an array of objects. Each JSON object contains the data to specify the authorization requirements for a certain type of resource. The type of resource or access requirement is determined by the type field.
 
       responses:
         200:
@@ -435,10 +448,13 @@ paths:
                       - server_error
                       - temporarily_unavailable
                       - invalid_request_redirect_uri
+                      - invalid_authorization_details
                       - login_required
                       - session_selection_required
                       - consent_required
                       - user_mismatched
+                      - request_not_supported
+                      - request_uri_not_supported
                       - invalid_request_uri
                       - invalid_request_object
                       - authentication_session_invalid
@@ -906,12 +922,12 @@ paths:
                     type: string
                   details:
                     type: string
-  /.well-known/gluu-configuration:
+  /.well-known/openid-configuration:
     post:
       tags:
         - Server Configuration
-      summary:  Gets GluuServer configuration data that contains non-standard OpenID Connect discovery metadata.
-      description: Gets GluuServer configuration data that contains non-standard OpenID Connect discovery metadata.
+      summary:  Gets Janssen Server configuration data that contains non-standard OpenID Connect discovery metadata.
+      description: Gets Janssen Server configuration data that contains non-standard OpenID Connect discovery metadata.
       operationId: well-known-gluu-configuration
       responses:
         200:
@@ -922,7 +938,6 @@ paths:
                 title: GluuConfigurationResponse
                 description: Client GluuAttribute by Dn(Distinguished Name) based on Authorization Scope.
                 required:
-                  - id_generation_endpoint
                   - introspection_endpoint
                 type: object
                 properties:
@@ -940,6 +955,11 @@ paths:
                     additionalProperties:
                       type: string
                       description: Scope map object
+                  authorization_details_types_supported:
+                    type: array
+                    description: Array of string. Each string represents supported type of authorization details.
+                    items:
+                      type: string
         500:
           $ref: '#/components/responses/InternalServerError'
   /introspection:
@@ -1059,6 +1079,7 @@ paths:
                       - server_error
                       - temporarily_unavailable
                       - invalid_request_redirect_uri
+                      - invalid_authorization_details
                       - login_required
                       - session_selection_required
                       - consent_required
@@ -1185,6 +1206,7 @@ paths:
                       - server_error
                       - temporarily_unavailable
                       - invalid_request_redirect_uri
+                      - invalid_authorization_details
                       - login_required
                       - session_selection_required
                       - consent_required
@@ -1225,6 +1247,51 @@ paths:
                     description: List of JSON Web Key (JWK) - A JSON object that represents a cryptographic key. The members of the object represent properties of the key, including its value.
                     items:
                       $ref: '#/components/schemas/JsonWebKey'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+  /jwks/archived:
+    get:
+      tags:
+        - Archived JWK - Archived JSON Web Key (JWK)
+      summary: An archived JSON Web Key (JWK) used by server. JWK is a JSON data structure that represents a set of public keys as a JSON object [RFC4627].
+      description: Provides archived JWK used by server.
+      operationId: archived-jwk
+      parameters:
+        - name: kid
+          in: query
+          description: Key ID.
+          schema:
+            type: string
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                title: JsonWebKey
+                type: object
+                description: JSON Web Key (JWK) - A JSON object that represents a JWK.
+                $ref: '#/components/schemas/JsonWebKey'
+        400:
+          description: Error codes for archived jwk endpoint.
+          content:
+            application/json:
+              schema:
+                title: Error
+                type: object
+                required:
+                  - error
+                  - error_description
+                properties:
+                  error:
+                    type: string
+                    format: enum
+                    example:
+                      - invalid_request
+                  error_description:
+                    type: string
+                  details:
+                    type: string
         500:
           $ref: '#/components/responses/InternalServerError'
   /register:
@@ -1276,6 +1343,11 @@ paths:
                 client_name:
                   type: string
                   description: Name of the Client to be presented to the user.
+                authorization_details_types:
+                  type: array
+                  description: authorization details types (RFC9396). Fine-graned access.
+                  items:
+                    type: string
                 logo_uri:
                   type: string
                   description: URL that references a logo for the Client application
@@ -1336,6 +1408,24 @@ paths:
                 userinfo_encrypted_response_enc:
                   type: string
                   description: JWE enc algorithm (JWA) required for encrypting UserInfo Responses.
+                introspection_signed_response_alg:
+                  type: string
+                  description: JWS alg algorithm (JWA) required for signing Introspection Responses.
+                introspection_encrypted_response_alg:
+                  type: string
+                  description: JWE alg algorithm (JWA) required for encrypting Introspection Responses.
+                introspection_encrypted_response_enc:
+                  type: string
+                  description: JWE enc algorithm (JWA) required for encrypting Introspection Responses.
+                tx_token_signed_response_alg:
+                  type: string
+                  description: JWS alg algorithm (JWA) required for signing Transaction Token Responses.
+                tx_token_encrypted_response_alg:
+                  type: string
+                  description: JWE alg algorithm (JWA) required for encrypting Transaction Token Responses.
+                tx_token_encrypted_response_enc:
+                  type: string
+                  description: JWE enc algorithm (JWA) required for encrypting Transaction Token Responses.
                 request_object_signing_alg:
                   type: string
                   description: JWS alg algorithm (JWA) that must be used for signing Request Objects sent to the OP.
@@ -1467,8 +1557,16 @@ paths:
                     type: string
                 access_token_lifetime:
                   type: integer
-                  description: Specifies the Client-specific access token expiration.
-                  example: 100000000
+                  description: Specifies the Client-specific access token expiration in seconds.
+                  example: 600
+                id_token_lifetime:
+                  type: integer
+                  description: Specifies the Client-specific id_token expiration in seconds.
+                  example: 600
+                tx_token_lifetime:
+                  type: integer
+                  description: Specifies the Client-specific tx_token expiration in seconds.
+                  example: 600
                 par_lifetime:
                   type: integer
                   description: Specifies the Client-specific PAR expiration in seconds.
@@ -1687,6 +1785,11 @@ paths:
                   description: e-mail addresses of people responsible for this Client.
                   items:
                     type: string
+                authorization_details_types:
+                  type: array
+                  description: authorization details types (RFC9396). Fine-graned access.
+                  items:
+                    type: string
                 client_name:
                   type: string
                   description: Name of the Client to be presented to the user.
@@ -1750,6 +1853,24 @@ paths:
                 userinfo_encrypted_response_enc:
                   type: string
                   description: JWE enc algorithm (JWA) required for encrypting UserInfo Responses.
+                introspection_signed_response_alg:
+                  type: string
+                  description: JWS alg algorithm (JWA) required for signing Introspection Responses.
+                introspection_encrypted_response_alg:
+                  type: string
+                  description: JWE alg algorithm (JWA) required for encrypting Introspection Responses.
+                introspection_encrypted_response_enc:
+                  type: string
+                  description: JWE enc algorithm (JWA) required for encrypting Introspection Responses.
+                tx_token_signed_response_alg:
+                  type: string
+                  description: JWS alg algorithm (JWA) required for signing Transaction Token Responses.
+                tx_token_encrypted_response_alg:
+                  type: string
+                  description: JWE alg algorithm (JWA) required for encrypting Transaction Token Responses.
+                tx_token_encrypted_response_enc:
+                  type: string
+                  description: JWE enc algorithm (JWA) required for encrypting Transaction Token Responses.
                 request_object_signing_alg:
                   type: string
                   description: JWS alg algorithm (JWA) that must be used for signing Request Objects sent to the OP.
@@ -1881,8 +2002,16 @@ paths:
                     type: string
                 access_token_lifetime:
                   type: integer
-                  description: Specifies the Client-specific access token expiration.
-                  example: 100000000
+                  description: Specifies the Client-specific access token expiration in seconds.
+                  example: 600
+                id_token_lifetime:
+                  type: integer
+                  description: Specifies the Client-specific id_token expiration in seconds.
+                  example: 600
+                tx_token_lifetime:
+                  type: integer
+                  description: Specifies the Client-specific tx_token expiration in seconds.
+                  example: 600
                 par_lifetime:
                   type: integer
                   description: Specifies the Client-specific PAR expiration in seconds.
@@ -2074,6 +2203,11 @@ paths:
                     description: e-mail addresses of people responsible for this Client.
                     items:
                       type: string
+                  authorization_details_types:
+                    type: array
+                    description: authorization details types (RFC9396). Fine-graned access.
+                    items:
+                      type: string
                   client_name:
                     type: string
                     description: Name of the Client to be presented to the user.
@@ -2144,6 +2278,24 @@ paths:
                   userinfo_encrypted_response_enc:
                     type: string
                     description: JWE enc algorithm (JWA) required for encrypting UserInfo Responses.
+                  introspection_signed_response_alg:
+                    type: string
+                    description: JWS alg algorithm (JWA) required for signing Introspection Responses.
+                  introspection_encrypted_response_alg:
+                    type: string
+                    description: JWE alg algorithm (JWA) required for encrypting Introspection Responses.
+                  introspection_encrypted_response_enc:
+                    type: string
+                    description: JWE enc algorithm (JWA) required for encrypting Introspection Responses.
+                  tx_token_signed_response_alg:
+                    type: string
+                    description: JWS alg algorithm (JWA) required for signing Transaction Token Responses.
+                  tx_token_encrypted_response_alg:
+                    type: string
+                    description: JWE alg algorithm (JWA) required for encrypting Transaction Token Responses.
+                  tx_token_encrypted_response_enc:
+                    type: string
+                    description: JWE enc algorithm (JWA) required for encrypting Transaction Token Responses.
                   request_object_signing_alg:
                     type: string
                     description: JWS alg algorithm (JWA) that must be used for signing Request Objects sent to the OP.
@@ -2276,7 +2428,15 @@ paths:
                   access_token_lifetime:
                     type: integer
                     description: Specifies the Client-specific access token expiration.
-                    example: 100000000
+                    example: 100
+                  id_token_lifetime:
+                    type: integer
+                    description: Specifies the Client-specific id_token expiration in seconds.
+                    example: 600
+                  tx_token_lifetime:
+                    type: integer
+                    description: Specifies the Client-specific tx_token expiration in seconds.
+                    example: 600
                   par_lifetime:
                     type: integer
                     description: Specifies the Client-specific PAR expiration in seconds.
@@ -2510,6 +2670,87 @@ paths:
       responses:
         200:
           description: OK - Returned if request was processed successfully. Means it will return in case sessions are found as well as in case sessions are not found (error is not returned to not disclose internal information).
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+
+  /status_list:
+    get:
+      tags:
+        - Status List
+      summary: The Status List Endpoint.
+      description: The Status List Endpoint.
+      operationId: get-status-list
+      parameters:
+        - name: Accept
+          in: header
+          required: true
+          description: Indicates the requested response type. Possible values are application/statuslist+json and application/statuslist+jwt. Defaults to application/statuslist+jwt if not specified.
+          schema:
+            type: string
+          example: application/statuslist+jwt or application/statuslist+json
+      responses:
+        200:
+          description: OK
+          content:
+            application/statuslist+json:
+              schema:
+                title: StatusListResponseJson
+                description: Status list response as JSON (depending on request's "Accept" header value).
+                type: object
+                required:
+                  - bits
+                  - lst
+                properties:
+                  bits:
+                    type: integer
+                    description: JSON Integer specifying the number of bits per Referenced Token in the Status List (lst). The allowed values for bits are 1,2,4 and 8.
+                    example: 2
+                  lst:
+                    type: string
+                    description:  JSON String that contains the status values for all the Referenced Tokens it conveys statuses for. The value MUST be the base64url-encoded
+                    example: eNrbuRgAAhcBXQ
+            application/statuslist+jwt:
+              schema:
+                title: StatusListResponseJwt
+                description: Status list response as JWT.
+                type: object
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        500:
+          $ref: '#/components/responses/InternalServerError'
+
+  /global-token-revocation:
+    post:
+      tags:
+        - Global Token Revocation
+      summary: Global Token Revocation
+      description: Revoke all tokens for user (requires global_token_revocation scope).
+      operationId: global-token-revocation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                sub_id:
+                  type: object
+                  properties:
+                    format:
+                      type: string
+                      description: any user attribute that identifies user. E.g. uid or mail.
+                      example: uid
+                    id:
+                      type: string
+                      example: 46dkfde5
+                  required:
+                    - format
+                    - id
+      responses:
+        204:
+          description: OK - Returned if request was processed successfully. Means user is correctly idendified and AS cleared tokens and sessions associated with it.
         401:
           $ref: '#/components/responses/Unauthorized'
         500:
@@ -2875,7 +3116,7 @@ paths:
                     example: https://sample.com
                   authorization_endpoint:
                     type: string
-                    description: "URL of the authorization server's authorization endpoint.
+                    description: "URL of the authorization server's authorization endpoint."
                     example: https://sample.com/jans-auth/restv1/authorize
                   token_endpoint:
                     type: string
@@ -4142,7 +4383,7 @@ paths:
                   default: true
                 lifetime:
                   type: integer
-                  description: SSA lifetime in milliseconds.
+                  description: SSA lifetime in seconds.
                   example: 86400
       responses:
         201:
@@ -4265,29 +4506,6 @@ paths:
           $ref: '#/components/responses/UnauthorizedSSA'
         500:
           $ref: '#/components/responses/InternalServerErrorSSA'
-    head:
-      tags:
-        - SSA
-      summary: Validate SSA
-      description: |-
-        # Validates that a given SSA `jti` exists and is valid
-        ----
-        
-        This endpoint does not have any security, it is an open endpoint.
-      parameters:
-        - schema:
-            type: string
-          in: header
-          name: jti
-          description: Unique Identifier
-          required: true
-      responses:
-        200:
-          description: The API returns `200` status code, when token is valid.
-        422:
-          description: Not found.
-        500:
-          $ref: '#/components/responses/InternalServerErrorSSA'
     delete:
       tags:
         - SSA
@@ -4332,6 +4550,40 @@ paths:
           description: Not Acceptable. Check the query params. (When `jti` or `org_id` is not sent in the query param)
         422:
           description: Not found.
+        500:
+          $ref: '#/components/responses/InternalServerErrorSSA'
+
+  /ssa/validation:
+    post:
+      tags:
+        - SSA
+      summary: Validate SSA
+      description: |-
+        # Validates that a given SSA `jti` exists and is valid
+        ----
+
+        This endpoint does not have any security, it is an open endpoint.
+      parameters:
+        - schema:
+            type: string
+          in: header
+          name: jti
+          description: Unique Identifier
+          required: true
+      responses:
+        200:
+          description: The API returns `200` status code, when token is valid.
+        400:
+          description: When jti does not exist, is invalid or state is in (expired, used or revoked),
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalida_jti:
+                  value:
+                    error: invalid_jti
+                    error_description: Invalid JTI or not exists.
         500:
           $ref: '#/components/responses/InternalServerErrorSSA'
 

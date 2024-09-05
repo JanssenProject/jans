@@ -1,9 +1,9 @@
 package io.jans.inbound.oauth2;
 
-import java.util.List;
-import java.util.Map;
+import java.io.Serializable;
+import java.util.*;
 
-public class OAuthParams {
+public class OAuthParams implements Serializable {
     
     private String authzEndpoint;
     private String tokenEndpoint;

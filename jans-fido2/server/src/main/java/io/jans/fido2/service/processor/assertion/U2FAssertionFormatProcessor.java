@@ -20,13 +20,13 @@ package io.jans.fido2.service.processor.assertion;
 
 import java.security.PublicKey;
 
+import io.jans.fido2.service.util.DigestUtilService;
+import io.jans.fido2.service.util.HexUtilService;
 import io.jans.orm.model.fido2.Fido2AuthenticationData;
 import io.jans.orm.model.fido2.Fido2RegistrationData;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
-import org.apache.commons.codec.binary.Hex;
-import org.apache.commons.codec.digest.DigestUtils;
 import io.jans.fido2.ctap.AttestationFormat;
 import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.auth.AuthData;
@@ -73,6 +73,12 @@ public class U2FAssertionFormatProcessor implements AssertionFormatProcessor {
     @Inject
     private Base64Service base64Service;
 
+    @Inject
+    private DigestUtilService digestUtilService;
+
+    @Inject
+    private HexUtilService hexUtilService;
+
     @Override
     public AttestationFormat getAttestationFormat() {
         return AttestationFormat.fido_u2f;
@@ -85,7 +91,7 @@ public class U2FAssertionFormatProcessor implements AssertionFormatProcessor {
 
         userVerificationVerifier.verifyUserPresent(authData);
 
-        byte[] clientDataHash = DigestUtils.getSha256Digest().digest(base64Service.urlDecode(clientDataJson));
+        byte[] clientDataHash = digestUtilService.sha256Digest(base64Service.urlDecode(clientDataJson));
 
         try {
             int counter = authenticatorDataParser.parseCounter(authData.getCounters());
@@ -95,8 +101,8 @@ public class U2FAssertionFormatProcessor implements AssertionFormatProcessor {
             JsonNode uncompressedECPointNode = dataMapperService.cborReadTree(base64Service.urlDecode(registration.getUncompressedECPoint()));
             PublicKey publicKey = coseService.createUncompressedPointFromCOSEPublicKey(uncompressedECPointNode);
             int coseCurveCode = coseService.getCodeCurve(uncompressedECPointNode);
-            log.debug("Uncompressed ECpoint node {}", uncompressedECPointNode.toString());
-            log.debug("Public key hex {}", Hex.encodeHexString(publicKey.getEncoded()));
+            log.debug("Uncompressed ECpoint node {}", uncompressedECPointNode);
+            log.debug("Public key hex {}", hexUtilService.encodeHexString(publicKey.getEncoded()));
 
             authenticatorDataVerifier.verifyAssertionSignature(authData, clientDataHash, signature, publicKey, registration.getSignatureAlgorithm());
         } catch (Exception ex) {

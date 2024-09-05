@@ -15,7 +15,7 @@ import org.slf4j.Logger;
 
 import io.jans.scim.model.GluuConfiguration;
 import io.jans.scim.model.GluuOxTrustStat;
-
+import io.jans.service.EncryptionService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.faces.context.FacesContext;
 import jakarta.inject.Inject;

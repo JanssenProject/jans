@@ -103,7 +103,7 @@ If client is created successfully, response similar to below will be received:
     "scope": "openid profile permission https://jans.io/auth/ssa.portal uma_protection work_phone phone address test https://jans.io/auth/ssa.admin user_name email clientinfo device_sso org_name https://jans.io/auth/ssa.developer offline_access",
     "client_secret": "da4c17de-b6bc-4f25-b642-4c7b887c7860",
     "client_id_issued_at": 1672221633,
-    "backchannel_logout_uri": [],
+    "backchannel_logout_uri": "",
     "backchannel_logout_session_required": false,
     "par_lifetime": 600,
     "spontaneous_scopes": [],

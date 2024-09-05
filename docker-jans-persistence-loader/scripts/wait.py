@@ -3,7 +3,6 @@ import os
 
 from jans.pycloudlib import get_manager
 from jans.pycloudlib import wait_for
-from jans.pycloudlib import wait_for_persistence_conn
 from jans.pycloudlib.validators import validate_persistence_type
 from jans.pycloudlib.validators import validate_persistence_hybrid_mapping
 from jans.pycloudlib.validators import validate_persistence_sql_dialect
@@ -11,6 +10,13 @@ from jans.pycloudlib.validators import validate_persistence_sql_dialect
 from settings import LOGGING_CONFIG
 
 logging.config.dictConfig(LOGGING_CONFIG)
+
+
+def validate_doc_store_type(value):
+    supported_types = ("DB", "LOCAL")
+
+    if value not in supported_types:
+        raise ValueError(f"Unsupported document store type {value!r}; please choose one of {','.join(supported_types)}")
 
 
 def main():
@@ -24,10 +30,12 @@ def main():
     if persistence_type == "hybrid":
         validate_persistence_hybrid_mapping()
 
+    doc_store_type = os.environ.get("CN_DOCUMENT_STORE_TYPE", "DB")
+    validate_doc_store_type(doc_store_type)
+
     manager = get_manager()
     deps = ["config", "secret"]
     wait_for(manager, deps)
-    wait_for_persistence_conn(manager)
 
 
 if __name__ == "__main__":

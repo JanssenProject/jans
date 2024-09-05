@@ -6,23 +6,25 @@
 
 package io.jans.scim.service;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.context.RequestScoped;
-import jakarta.enterprise.inject.Produces;
-import jakarta.inject.Inject;
+import org.slf4j.Logger;
 
-import io.jans.scim.model.conf.AppConfiguration;
 import io.jans.model.SmtpConfiguration;
 import io.jans.orm.PersistenceEntryManagerFactory;
 import io.jans.orm.model.PersistenceConfiguration;
 import io.jans.orm.service.PersistanceFactoryService;
+import io.jans.scim.model.GluuConfiguration;
+import io.jans.scim.model.conf.AppConfiguration;
 import io.jans.service.cache.CacheConfiguration;
 import io.jans.service.cache.InMemoryConfiguration;
 import io.jans.service.document.store.conf.DocumentStoreConfiguration;
 import io.jans.service.document.store.conf.LocalDocumentStoreConfiguration;
-import org.slf4j.Logger;
-
-import io.jans.scim.model.GluuConfiguration;
+import io.jans.service.message.model.config.MessageConfiguration;
+import io.jans.service.message.model.config.MessageProviderType;
+import io.jans.service.message.model.config.NullMessageConfiguration;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.RequestScoped;
+import jakarta.enterprise.inject.Produces;
+import jakarta.inject.Inject;
 
 /**
  * Holds factory methods to create services
@@ -74,6 +76,26 @@ public class ApplicationFactory {
    		log.info("Cache configuration: " + cacheConfiguration);
    		return cacheConfiguration;
    	}
+
+    @Produces
+    @ApplicationScoped
+    public MessageConfiguration getMessageConfiguration() {
+    	MessageConfiguration messageConfiguration = configurationService.getConfiguration().getMessageConfiguration();
+        if (messageConfiguration == null || messageConfiguration.getMessageProviderType() == null) {
+            log.error("Failed to read message configuration from DB. Please check configuration jsMessageConf attribute " +
+                    "that must contain message configuration JSON represented by MessageConfiguration.class. Appliance DN: " + configurationService.getConfiguration().getDn());
+            log.info("Creating fallback Null message configuration ... ");
+
+            messageConfiguration = new MessageConfiguration();
+            messageConfiguration.setMessageProviderType(MessageProviderType.DISABLED);
+            messageConfiguration.setNullConfiguration(new NullMessageConfiguration());
+
+            log.info("NULL message configuration is created.");
+        }
+
+        log.info("Message configuration: " + messageConfiguration);
+        return messageConfiguration;
+    }
 
     @Produces @ApplicationScoped
    	public DocumentStoreConfiguration getDocumentStoreConfiguration() {

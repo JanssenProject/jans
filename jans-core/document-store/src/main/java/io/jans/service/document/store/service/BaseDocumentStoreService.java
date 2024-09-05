@@ -10,18 +10,18 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.List;
 
-import jakarta.inject.Inject;
+import org.slf4j.Logger;
 
 import io.jans.service.document.store.conf.DocumentStoreType;
 import io.jans.service.document.store.provider.DocumentStore;
 import io.jans.service.document.store.provider.DocumentStoreProvider;
-import org.slf4j.Logger;
+import jakarta.inject.Inject;
 
 /**
  * @author Yuriy Movchan on 04/10/2020
  */
 @SuppressWarnings("rawtypes")
-public abstract class BaseDocumentStoreService implements DocumentStore {
+public abstract class BaseDocumentStoreService<T> implements DocumentStore<T> {
 
 	@Inject
     private Logger log;
@@ -33,17 +33,23 @@ public abstract class BaseDocumentStoreService implements DocumentStore {
 	}
 
 	@Override
-	public boolean saveDocument(String path, String documentContent, Charset charset, List moduleList) {
-    	DocumentStoreProvider documentStoreProvider = getDocumentStoreProvider();
+	public String saveDocument(String path, String description, String documentContent, Charset charset, List moduleList) {
+    	DocumentStoreProvider<?> documentStoreProvider = getDocumentStoreProvider();
 
-		return documentStoreProvider.saveDocument(path, documentContent, charset, moduleList);
+		return documentStoreProvider.saveDocument(path, description, documentContent, charset, moduleList);
 	}
 
 	@Override
-	public boolean saveDocumentStream(String path, InputStream documentStream, List moduleList) {
-    	DocumentStoreProvider documentStoreProvider = getDocumentStoreProvider();
+	public String saveDocumentStream(String path, String description, InputStream documentStream, List moduleList) {
+    	DocumentStoreProvider<?> documentStoreProvider = getDocumentStoreProvider();
 
-		return documentStoreProvider.saveDocumentStream(path, documentStream, moduleList);
+		return documentStoreProvider.saveDocumentStream(path, description, documentStream, moduleList);
+	}
+
+    @Override
+	public String saveBinaryDocumentStream(String path, String description, InputStream documentStream,
+			List moduleList) {
+		return saveDocumentStream(path, description, documentStream, moduleList);
 	}
 
 	@Override
@@ -61,7 +67,14 @@ public abstract class BaseDocumentStoreService implements DocumentStore {
 	}
 
 	@Override
-	public boolean renameDocument(String currentPath, String destinationPath) {
+	public InputStream readBinaryDocumentAsStream(String path) {
+    	DocumentStoreProvider documentStoreProvider = getDocumentStoreProvider();
+
+		return documentStoreProvider.readBinaryDocumentAsStream(path);
+	}
+
+	@Override
+	public String renameDocument(String currentPath, String destinationPath) {
     	DocumentStoreProvider documentStoreProvider = getDocumentStoreProvider();
 
 		return documentStoreProvider.renameDocument(currentPath, destinationPath);
@@ -72,6 +85,13 @@ public abstract class BaseDocumentStoreService implements DocumentStore {
     	DocumentStoreProvider documentStoreProvider = getDocumentStoreProvider();
 
 		return documentStoreProvider.removeDocument(path);
+	}
+
+	@Override
+	public List<T> findDocumentsByModules(List moduleList, String ... attributes) {
+    	DocumentStoreProvider documentStoreProvider = getDocumentStoreProvider();
+
+		return documentStoreProvider.findDocumentsByModules(moduleList, attributes);
 	}
 
 	@Override

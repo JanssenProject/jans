@@ -32,15 +32,17 @@ The following environment variables are supported by the container:
 - `CN_CONFIG_KUBERNETES_CONFIGMAP`: Kubernetes configmaps name (default to `jans`).
 - `CN_CONFIG_KUBERNETES_USE_KUBE_CONFIG`: Load credentials from `$HOME/.kube/config`, only useful for non-container environment (default to `false`).
 - `CN_SECRET_ADAPTER`: The secrets' adapter, can be `vault` (default), `kubernetes`, `google`, or `aws`.
-- `CN_SECRET_VAULT_SCHEME`: supported Vault scheme (`http` or `https`).
-- `CN_SECRET_VAULT_HOST`: hostname or IP of Vault (default to `localhost`).
-- `CN_SECRET_VAULT_PORT`: port of Vault (default to `8200`).
 - `CN_SECRET_VAULT_VERIFY`: whether to verify cert or not (default to `false`).
 - `CN_SECRET_VAULT_ROLE_ID_FILE`: path to file contains Vault AppRole role ID (default to `/etc/certs/vault_role_id`).
 - `CN_SECRET_VAULT_SECRET_ID_FILE`: path to file contains Vault AppRole secret ID (default to `/etc/certs/vault_secret_id`).
 - `CN_SECRET_VAULT_CERT_FILE`: path to Vault cert file (default to `/etc/certs/vault_client.crt`).
 - `CN_SECRET_VAULT_KEY_FILE`: path to Vault key file (default to `/etc/certs/vault_client.key`).
 - `CN_SECRET_VAULT_CACERT_FILE`: path to Vault CA cert file (default to `/etc/certs/vault_ca.crt`). This file will be used if it exists and `CN_SECRET_VAULT_VERIFY` set to `true`.
+- `CN_SECRET_VAULT_ADDR`: URL of Vault (default to `http://localhost:8200`).
+- `CN_SECRET_VAULT_NAMESPACE`: Namespace used to access secrets (default to empty string).
+- `CN_SECRET_VAULT_KV_PATH`: Path to KV secrets engine (default to `secret`).
+- `CN_SECRET_VAULT_PREFIX`: Base prefix name used to build secret path (default to `jans`).
+- `CN_SECRET_VAULT_APPROLE_PATH`: Path to AppRole (default to `approle`).
 - `CN_SECRET_KUBERNETES_NAMESPACE`: Kubernetes namespace (default to `default`).
 - `CN_SECRET_KUBERNETES_SECRET`: Kubernetes secrets name (default to `jans`).
 - `CN_SECRET_KUBERNETES_USE_KUBE_CONFIG`: Load credentials from `$HOME/.kube/config`, only useful for non-container environment (default to `false`).
@@ -64,7 +66,7 @@ The following environment variables are supported by the container:
 - `CN_COUCHBASE_KEEPALIVE_INTERVAL`: Keep-alive interval for Couchbase connection (default to `30000` milliseconds).
 - `CN_COUCHBASE_KEEPALIVE_TIMEOUT`: Keep-alive timeout for Couchbase connection (default to `2500` milliseconds).
 - `CN_AUTH_JAVA_OPTIONS`: Java options passed to entrypoint, i.e. `-Xmx1024m` (default to empty-string).
-- `CN_DOCUMENT_STORE_TYPE`: Document store type (one of `LOCAL` or `JCA`; default to `LOCAL`).
+- `CN_DOCUMENT_STORE_TYPE`: Document store type (one of `LOCAL` or `DB`; default to `DB`).
 - `CN_JACKRABBIT_URL`: URL to remote repository (default to `http://localhost:8080`).
 - `CN_JACKRABBIT_SYNC_INTERVAL`: Interval between files sync (default to `300` seconds).
 - `CN_JACKRABBIT_ADMIN_ID`: Admin username (default to `admin`).
@@ -95,6 +97,9 @@ The following environment variables are supported by the container:
 - `AWS_SHARED_CREDENTIALS_FILE`: The location of the shared credentials file used by the client (see https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html).
 - `AWS_CONFIG_FILE`: The location of the config file used by the client (see https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html).
 - `AWS_PROFILE`: The default profile to use, if any.
+- `CN_LOCK_ENABLED`: Enable `jans-lock` as part of `jans-auth`.
+- `CN_OPA_URL`: URL to OPA server (default to `http://localhost:8181/v1`).
+- `CN_SSL_CERT_FROM_SECRETS`: Determine whether to get SSL cert from secrets backend (default to `true`). Note that the flag will take effect only if there's no mounted `/etc/certs/web_https.crt` file.
 
 ### Configure app loggers
 
@@ -141,6 +146,39 @@ To enable prefix on `STDOUT` logging, set the `enable_stdout_log_prefix` key. Ex
 {"auth_log_target":"STDOUT","script_log_target":"STDOUT","enable_stdout_log_prefix":true}
 ```
 
+### Configure plugin loggers
+
+Plugin loggers can be configured to define where the logs will be redirected and what is the level the logs should be displayed.
+
+Supported redirect target:
+
+- `STDOUT`
+- `FILE`
+
+Supported level:
+
+- `FATAL`
+- `ERROR`
+- `WARN`
+- `INFO`
+- `DEBUG`
+- `TRACE`
+
+The following key-value pairs are the defaults:
+
+```json
+{
+    "lock_log_target": "STDOUT",
+    "lock_log_level": "INFO"
+}
+```
+
+To enable prefix on `STDOUT` logging, set the `enable_stdout_log_prefix` key. Example:
+
+```
+{"lock_log_target":"STDOUT","enable_stdout_log_prefix":true}
+```
+
 ### Hybrid mapping
 
 As per v1.0.1, hybrid persistence supports all available persistence types. To configure hybrid persistence and its data mapping, follow steps below:
@@ -182,3 +220,4 @@ i.e. `http://container:9093/metrics`.
 
 Note that Prometheus JMX exporter uses pre-defined config file (see `conf/prometheus-config.yaml`).
 To customize the config, mount custom config file to `/opt/prometheus/prometheus-config.yaml` inside the container.
+

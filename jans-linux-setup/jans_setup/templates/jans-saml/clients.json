@@ -1,0 +1,47 @@
+[
+  {
+    "client_prefix": "2101.",
+    "client_var": "kc_saml_openid_client_id",
+    "client_id": "kc_saml_openid",
+    "display_name": "kc_saml_openid",
+    "description": "Keycloak OpenID client used for SAML authentication",
+    "scopes_dns": [],
+    "scopes_ids": ["email" , "user_name" , "openid"],
+    "redirect_uri": ["https://%(hostname)s/kc/realms/%(jans_idp_realm)s/kc-jans-authn-rest-bridge/auth-complete"],
+    "grant_types": ["authorization_code"],
+    "authorization_methods": ["client_secret_basic"],
+    "response_types": ["code", "token"],
+    "application_type": "native",
+    "trusted_client": "true"
+  },
+  {
+    "client_prefix": "2102.",
+    "client_var": "kc_scheduler_api_client_id",
+    "client_id": "kc_scheduler_api",
+    "display_name": "kc_scheduler_api",
+    "description": "keycloak scheduler openid client used to obtain API keys to invoke the config-api",
+    "scopes_dns": [],
+    "scopes_ids": ["https://jans.io/idp/saml.write", "https://jans.io/idp/saml.readonly", "https://jans.io/oauth/config/saml.readonly", "https://jans.io/oauth/config/saml.write", "https://jans.io/oauth/config/attributes.readonly"],
+    "redirect_uri": ["https://%(hostname)s/kc/realms/%(jans_idp_realm)s/dev/null"],
+    "grant_types": ["client_credentials"],
+    "authorization_methods": ["client_secret_basic"],
+    "response_types": ["token"],
+    "application_type": "native",
+    "trusted_client": "false"
+  },
+  {
+    "client_prefix": "2103.",
+    "client_var": "kc_master_auth_client_id",
+    "client_id": "kc_master_auth",
+    "display_name": "kc_master_auth",
+    "description": "keycloak master realm client used to authenticate administrators",
+    "scopes_dns": [],
+    "scopes_ids": ["email" , "user_name" , "openid"],
+    "redirect_uri": ["https://%(hostname)s/kc/realms/master/kc-jans-authn-rest-bridge/auth-complete"],
+    "grant_types": ["authorization_code"],
+    "authorization_methods": ["client_secret_basic"],
+    "response_types": ["code", "token"],
+    "application_type": "web",
+    "trusted_client": "false"
+  }
+]

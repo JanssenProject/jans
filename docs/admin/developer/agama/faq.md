@@ -9,13 +9,13 @@ tags:
 
 ## Common errors
 
-### Unable to find a constructor with arity ... in class ...
+### Unable to find a suitable constructor with arity ... in class ...
 
-A Java invocation of the form `Call package.className#new ...` is passing a number of parameters that does not match any of the existing constructors for that class. 
+A Java invocation of the form `Call package.className#new ...` is passing an incorrect number of arguments or their data types do not match the signature of any of the constructors for that class. 
 
-### Unable to find a method called ... with arity ... in class ...
+### Unable to find a suitable method called ... with arity ... in class ...
 
-A java invocation is attempting to call a method that is not part of the given class or the number of parameters passed for the method is not correct.
+A java invocation is attempting to call a method that is not part of the given class, the number of arguments passed for the method is not correct, or the arguments could not be converted to make a successful call.
 
 ### No Finish instruction was reached
 
@@ -23,16 +23,29 @@ This occurs when no `Finish` statement has been found in the execution of a flow
 
 ### Serialization errors
 
-Agama engine saves the state of a flow every time an [RRF](../../../agama/language-reference.md#rrf) or [RFAC](../../../agama/language-reference.md#rfac) instruction is reached. For this purpose the [KRYO](https://github.com/EsotericSoftware/kryo) library is employed. If kryo is unable to serialize a variable in use by your flow, a serialization error will appear in the screen or in the logs. Normally the problematic (Java) class is logged and this helps reveal the variable that is causing the issue. Note variables that hold "native" Agama values like strings or maps are never troublesome; the problems may originate from values obtained via [Call](../../../agama/language-reference.md#foreign-routines).
+Agama engine saves the state of a flow every time an [RRF](../../../agama/language-reference.md#rrf) or [RFAC](../../../agama/language-reference.md#rfac) instruction is reached. The _State_ can be understood as the set of all variables defined in a flow and their associated values up to certain point. 
 
-To fix a serialization problem, try some of the following:
+Most of times, variables hold basic Agama [values](../../../agama/language-reference.md#data-types) like strings, booleans, numbers, lists or maps, however, more complex values may appear due to Java `Call`s. The engine does its best  to properly serialize these Java objects, nonetheless, this is not always possible. In these cases, the flow crashes and errors will appear on screen as well as in the server logs.
 
-- Check if the value held by the variable is needed for RRF/RFAC or some upcoming statement. If that's not the case, simply set it to `null` before RRF/RFAC occurs
-- Adjust the given class so it is "serialization" friendlier. With kryo, classes are not required to implement the `java.io.Serializable` interface 
-- Find a replacement for the problematic class
-- As a last resort, set `serializerType` property of the [engine](./engine-bridge-config.md#engine-configuration) to `null`. Note this will switch to standard Java serialization. This setting applies globally for all your flows
+Use the information in the logs to detect the problematic Java class. This would normally allow you to identify the variable that is causing the issue. Now you have several options to proceed:
 
-## Classes added on the fly
+- Check if the value held by the variable is needed for the given RRF/RFAC or some upcoming statement. If that's not the case, simply set it to `null` before RRF/RFAC occurs
+- Extract only the necessary pieces from the variable, that is, grab only the fields from the object which are of use for the rest of the flow. If they are simple values like strings or numbers, serialization will succeed. Ensure to nullify or overwrite the original variable
+- Adjust the given class so it is "serialization" friendlier. Sometimes, adding a no-args constructor fixes the problem. In other cases, making the class implement the `java.io.Serializable` interface will make it work. The error in the log should provide a hint 
+- Tweak the engine serialization [rules](./engine-bridge-config.md#serialization-rules) so an alternative type of serialization can be used for this particular object 
+- Modify your Java code so an alternative class is used instead
+
+In general, a good practice is to avoid handling complex variables in flows. Letting big object graphs live in the state has a negative impact on performance and also increases the risk of serialization issues.   
+
+## Libraries and classes added on the fly
+
+### What Groovy and Java versions are supported?
+
+Groovy 4.0 and Java 8 or higher. The runtime is Amazon Corretto 17.
+
+### How to add third party libraries?
+
+You can include jar files in the `lib` directory of a [project](../../../agama/gama-format.md#anatomy-of-a-project). This applies only for VM-based installation of Janssen. Onboarding the jar files require a restart of the authentication server.
 
 <!--
 ### A class does not "see" other classes in its own package
@@ -43,13 +56,44 @@ This is a limitation of the scripting engine. Here, classes have to be imported 
 
 This is because the JVM does not support unloading: even if a given source file is removed, its corresponding class will still be accessible - it remains in the classpath. The classpath will be clean again after a service restart.
 
+### How to add log statements?
+
+The Jans server uses [slf4j](https://slf4j.org) and [log4j2](https://logging.apache.org/log4j/2.x/) logging frameworks. Below is a simple usage example for Java/Groovy code:
+
+```
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+...
+Logger logger = LoggerFactory.getLogger(your.class);
+logger.info("ahoy, ahoy");
+```
+
+!!! Note
+    The logging descriptor used by the server can be found [here](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/resources/log4j2.xml)
+
+Depending on the package `your` class belongs to, the message may not appear in the server log. In this case, you have two choices:
+
+- Supply a [custom log4j](../../auth-server/logging/custom-logs.md) descriptor
+- Use a class in package `io.jans` when calling `getLogger`. A good example would be using `io.jans.agama.model.Flow`
+
 ### How to append data to a flow's log directly?
 
 Call method `log` of class `io.jans.agama.engine.script.LogUtils`. This method receives a variable number of arguments as DSL's `Log` does. Thus you can do `LogUtils.log("@w Today is Friday %th", 13)`, as in the logging [examples](../../../agama/language-reference.md#logging).
 
-### What Groovy and Java versions are supported?
+### How to use Contexts and Dependency Injection (CDI)?
 
-Groovy 4.0 and Java 11. The runtime is Amazon Corretto 11.
+Jans server uses Weld (a CDI reference implementation), and as such makes heavy use of managed beans, scopes, dependency injection, events, etc. Unless the code added is part of a jar [library](#how-to-add-third-party-libraries), annotations related to scopes or dependency injection won't take any effect in your code. This is because the Java container does a thorough scanning of classes upon start, but the source code files in `lib` directory are compiled upon use and modification, as expected in a scripting scenario.
+
+Java/Groovy files can however reuse any of the (application-scoped) managed beans available in the server's classpath. To obtain a reference to a bean, use a call like:
+
+```
+import io.jans.service.cdi.util.CdiUtil;
+...
+ref = CdiUtil.bean(managedBean.class);
+```
+
+More advanced bean lookup capabilities are provided by method `instance` of [this](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/agama/engine/src/main/java/io/jans/agama/engine/service/ManagedBeanService.java) class where you can supply qualifiers.
 
 ## Templates
 
@@ -105,7 +149,7 @@ This can be configured in the project's [metadata file](../../../agama/gama-form
 
 ### Updates in a flow's code are not reflected in its execution
 
-When a project is re-deployed, a flow remains unchanged if it comes with errors in the provided `.gama` file. The response obtained by the deployment API will let you know which flows have errors and their descriptions. 
+When a project is re-deployed, a flow remains unchanged if it comes with errors in the provided `.gama` file. The tool used for deployment will let you know which flows have errors and their descriptions. 
 
 ### Why are the contents of a list or map logged partially?
 
@@ -113,9 +157,9 @@ This is to avoid traversing big structures fully. You can increase the value of 
 
 ### How to add two numbers or compare numeric values in Agama?
 
-Agama only provides operators for equality check in conditional statements. The structure of an authentication flow will rarely have to deal with computations/comparisons of numbers, strings, etc. In case this is needed, developers have to resort to Java.
+Agama only provides operators for equality/inequality check in conditional statements. Comparisons like "less-than", "greater-than-or-equal", etc. require Java usage, however, the structure of an authentication flow will rarely have to deal with this kind of computations.
 
-_Hint_: some methods like `addExact`, `incrementExact`, etc. in `java.lang.Math` might help.  
+_Hint_: methods like `addExact`, `incrementExact`, etc. in `java.lang.Math` may help you to do some arithmetic.  
 
 ### How to concatenate strings in Agama?
 
@@ -136,4 +180,4 @@ You can assign this value to a variable at the top of your loop declaration. See
 
 ### Can Agama code be called from Java?
 
-No. These two languages are supposed to play roles that should not be mixed, check [here](./recommended-practices.md#about-flow-design).
+No. These two languages are supposed to play roles that should not be mixed, check [here](./agama-best-practices#about-flow-design).

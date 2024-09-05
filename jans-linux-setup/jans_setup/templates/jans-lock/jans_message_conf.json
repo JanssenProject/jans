@@ -1,0 +1,14 @@
+{
+  "messageProviderType": "%(lock_message_provider_type)s",
+  "postgresConfiguration": {
+    "connectionUri": "jdbc:postgresql://%(rdbm_host)s:%(rdbm_port)s/%(rdbm_db)s",
+    "dbSchemaName": "public",
+    "authUserName": "%(rdbm_user)s",
+    "authUserPassword": "%(rdbm_password_enc)s",
+    "messageWaitMillis": 100,
+    "messageSleepThreadTime": 200
+  },
+  "redisConfiguration": {
+    "servers": "%(lock_redis_host)s:%(lock_redis_port)s"
+  }
+}

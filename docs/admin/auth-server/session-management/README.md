@@ -33,10 +33,8 @@ The Auth Server session can have one of two states:
 
 The following Auth Server configuration properties are related to sessions:
 
-- **sessionIdLifetime** - lifetime of the OP session in seconds. It sets both the `session_id` cookie expiration property as well as the OP session object expiration (if `serverSessionIdLifetime` is not set or equals 0 which is default behavior) in the persistence. Upi cam set the value to 0 or -1, which means that expiration is not set. In this case, the sesion is valid until the browser
-session ends. Default value is `86400`.
-- **serverSessionIdLifetime** - dedicated property to control lifetime of the server side OP session object in seconds. Overrides `sessionIdLifetime`. By default value is `0`, so object lifetime equals `sessionIdLifetime` (which sets both cookie and object expiration). It can be useful if goal is to keep
-different values for client cookie and server object. Default value is `86400`.
+- **sessionIdCookieLifetime** - The lifetime of `session_id` cookie in seconds. If 0 or -1 then expiration is not set. session_id cookie expires when browser session ends. Default value is `86400`.
+- **sessionIdLifetime** - lifetime of the OP session in seconds (server side object). If not set, falls back to `session_id` cookie expiration set by `sessionIdCookieLifetime` configuration property.
 - **sessionIdUnusedLifetime** - unused OP session lifetime in seconds. If an OP session is not used for a given amount of time, the OP session is removed.
 Default value is `86400`.
 - **sessionIdUnauthenticatedUnusedLifetime** - lifetime in seconds of `unauthenticated` OP session. This determines how long the user can be on the login page while unauthenticated. Default value is `120`.
@@ -63,7 +61,7 @@ Jans Auth Server updates `lastUsedAt` property of the session object:
 The [End Session endpoint](../endpoints/end-session.md) (`/end_session`)
 is where the user can end their own session. See [OpenID Logout](../openid-features/logout/README.md) for more information.
 
-To end another person's session, Jans Auth Server has a [Session Revocation Endpoint](../endpoints/session-revocation.md) (`/revoke_session`).
+To end another person's session, Jans Auth Server supports both [Session Revocation Endpoint](../endpoints/session-revocation.md) (`/revoke_session`) and [Global Session Revocation Endpoint](../endpoints/global-token-revocation.md) (`/global-token-revocation`').
 
 ## Session Event Interception Scripts
 

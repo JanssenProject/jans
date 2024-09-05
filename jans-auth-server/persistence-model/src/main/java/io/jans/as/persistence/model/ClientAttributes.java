@@ -104,6 +104,9 @@ public class ClientAttributes implements Serializable {
     @JsonProperty("jansDefaultPromptLogin")
     private Boolean defaultPromptLogin = false;
 
+    @JsonProperty("txTokenLifetime")
+    private Integer txTokenLifetime;
+
     @JsonProperty("idTokenLifetime")
     private Integer idTokenLifetime;
 
@@ -127,6 +130,84 @@ public class ClientAttributes implements Serializable {
 
     @JsonProperty("evidence")
     private String evidence;
+
+    @JsonProperty("introspectionSignedResponseAlg")
+    private String introspectionSignedResponseAlg;
+
+    @JsonProperty("introspectionEncryptedResponseAlg")
+    private String introspectionEncryptedResponseAlg;
+
+    @JsonProperty("introspectionEncryptedResponseEnc")
+    private String introspectionEncryptedResponseEnc;
+
+    @JsonProperty("txTokenSignedResponseAlg")
+    private String txTokenSignedResponseAlg;
+
+    @JsonProperty("txTokenEncryptedResponseAlg")
+    private String txTokenEncryptedResponseAlg;
+
+    @JsonProperty("txTokenEncryptedResponseEnc")
+    private String txTokenEncryptedResponseEnc;
+
+    @JsonProperty("authorizationDetailsTypes")
+    private List<String> authorizationDetailsTypes;
+
+    public List<String> getAuthorizationDetailsTypes() {
+        if (authorizationDetailsTypes == null) authorizationDetailsTypes = new ArrayList<>();
+        return authorizationDetailsTypes;
+    }
+
+    public void setAuthorizationDetailsTypes(List<String> authorizationDetailsTypes) {
+        this.authorizationDetailsTypes = authorizationDetailsTypes;
+    }
+
+    public String getTxTokenSignedResponseAlg() {
+        return txTokenSignedResponseAlg;
+    }
+
+    public void setTxTokenSignedResponseAlg(String txTokenSignedResponseAlg) {
+        this.txTokenSignedResponseAlg = txTokenSignedResponseAlg;
+    }
+
+    public String getTxTokenEncryptedResponseAlg() {
+        return txTokenEncryptedResponseAlg;
+    }
+
+    public void setTxTokenEncryptedResponseAlg(String txTokenEncryptedResponseAlg) {
+        this.txTokenEncryptedResponseAlg = txTokenEncryptedResponseAlg;
+    }
+
+    public String getTxTokenEncryptedResponseEnc() {
+        return txTokenEncryptedResponseEnc;
+    }
+
+    public void setTxTokenEncryptedResponseEnc(String txTokenEncryptedResponseEnc) {
+        this.txTokenEncryptedResponseEnc = txTokenEncryptedResponseEnc;
+    }
+
+    public String getIntrospectionSignedResponseAlg() {
+        return introspectionSignedResponseAlg;
+    }
+
+    public void setIntrospectionSignedResponseAlg(String introspectionSignedResponseAlg) {
+        this.introspectionSignedResponseAlg = introspectionSignedResponseAlg;
+    }
+
+    public String getIntrospectionEncryptedResponseAlg() {
+        return introspectionEncryptedResponseAlg;
+    }
+
+    public void setIntrospectionEncryptedResponseAlg(String introspectionEncryptedResponseAlg) {
+        this.introspectionEncryptedResponseAlg = introspectionEncryptedResponseAlg;
+    }
+
+    public String getIntrospectionEncryptedResponseEnc() {
+        return introspectionEncryptedResponseEnc;
+    }
+
+    public void setIntrospectionEncryptedResponseEnc(String introspectionEncryptedResponseEnc) {
+        this.introspectionEncryptedResponseEnc = introspectionEncryptedResponseEnc;
+    }
 
     public String getEvidence() {
         return evidence;
@@ -194,6 +275,14 @@ public class ClientAttributes implements Serializable {
 
     public void setAllowOfflineAccessWithoutConsent(Boolean allowOfflineAccessWithoutConsent) {
         this.allowOfflineAccessWithoutConsent = allowOfflineAccessWithoutConsent;
+    }
+
+    public Integer getTxTokenLifetime() {
+        return txTokenLifetime;
+    }
+
+    public void setTxTokenLifetime(Integer txTokenLifetime) {
+        this.txTokenLifetime = txTokenLifetime;
     }
 
     public Integer getIdTokenLifetime() {
@@ -467,7 +556,16 @@ public class ClientAttributes implements Serializable {
                 ", requestedLifetime=" + requestedLifetime +
                 ", requirePar=" + requirePar +
                 ", evidence=" + evidence +
+                ", idTokenLifetime=" + idTokenLifetime +
+                ", txTokenLifetime=" + txTokenLifetime +
                 ", dpopBoundAccessToken=" + dpopBoundAccessToken +
+                ", introspectionSignedResponseAlg=" + introspectionSignedResponseAlg +
+                ", introspectionEncryptedResponseAlg=" + introspectionEncryptedResponseAlg +
+                ", introspectionEncryptedResponseEnc=" + introspectionEncryptedResponseEnc +
+                ", txTokenSignedResponseAlg=" + txTokenSignedResponseAlg +
+                ", txTokenEncryptedResponseAlg=" + txTokenEncryptedResponseAlg +
+                ", txTokenEncryptedResponseEnc=" + txTokenEncryptedResponseEnc +
+                ", authorizationDetailsTypes=" + authorizationDetailsTypes +
                 '}';
     }
 }

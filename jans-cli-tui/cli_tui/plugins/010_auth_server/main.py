@@ -23,22 +23,26 @@ from prompt_toolkit.widgets import (
 from prompt_toolkit.lexers import PygmentsLexer, DynamicLexer
 from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.application import Application
+from prompt_toolkit.formatted_text import HTML
 
 from utils.static import DialogResult, cli_style, common_strings
-from utils.utils import DialogUtils
-from utils.utils import common_data
+from utils.background_tasks import retrieve_enabled_scripts
+from utils.utils import DialogUtils, common_data, get_help_with
 from utils.multi_lang import _
 
+from wui_components.jans_path_browser import jans_file_browser_dialog, BrowseType
 from wui_components.jans_nav_bar import JansNavBar
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from wui_components.jans_drop_down import DropDownWidget
 from wui_components.jans_cli_dialog import JansGDialog
+from wui_components.widget_collections import get_logging_level_widget
 from view_property import ViewProperty
-from edit_client_dialog import EditClientDialog
+from edit_client_dialog import EditClientDialog, get_scope_by_inum
 from edit_scope_dialog import EditScopeDialog
 from ssa import SSA
 from agama import Agama
 from authn import Authn
+from message import Message
 from attributes import Attributes
 
 from prompt_toolkit.widgets import (
@@ -67,6 +71,7 @@ class Plugin(DialogUtils):
         self.ssa = SSA(app)
         self.agama = Agama(app)
         self.authn = Authn(app)
+        self.message = Message()
         self.attributes = Attributes(app)
         self.oauth_containers = {}
 
@@ -85,6 +90,8 @@ class Plugin(DialogUtils):
             self.app.create_background_task(self.retrieve_sopes())
 
         self.ssa.init_cli_object()
+        self.app.create_background_task(retrieve_enabled_scripts())
+
 
     async def get_appconfiguration(self) -> None:
         'Coroutine for getting application configuration.'
@@ -101,11 +108,11 @@ class Plugin(DialogUtils):
 
     def help(self):
         current_tab = self.nav_bar.navbar_entries[self.nav_bar.cur_navbar_selection][0]
-        tap_help = getattr(getattr(self, current_tab, None), 'jans_help', None)
-        if tap_help:
-            help_message = tap_help
+        if hasattr(self.oauth_containers[current_tab], 'jans_help'):
+            help_message = self.oauth_containers[current_tab].jans_help
         else:
             help_message = self.app.jans_help
+
         self.app.show_message(_("Help "),help_message,tobefocused=self.app.center_container)
 
     async def retrieve_sopes(self) -> None:
@@ -163,6 +170,20 @@ class Plugin(DialogUtils):
 
         self.oauth_main_area = HSplit([],width=D())
 
+        self.scopes_container = JansVerticalNav(
+                myparent=self.app,
+                headers=['id', 'Description', 'Type','inum'],
+                preferred_size=[30,40,8,12],
+                on_enter=self.edit_scope_dialog,
+                on_display=self.app.data_display_dialog,
+                on_delete=self.delete_scope,
+                get_help=(self.get_help,'Scope'),
+                selectes=0,
+                headerColor=cli_style.navbar_headcolor,
+                entriesColor=cli_style.navbar_entriescolor,
+            )
+        self.scopes_container_buttons = VSplit([])
+
         self.oauth_containers['scopes'] = HSplit([
                     VSplit([
                         self.app.getTitledText(_("Search"), name='oauth:scopes:search', jans_help=_(common_strings.enter_to_search), accept_handler=self.search_scope,style='class:outh_containers_scopes.text'),
@@ -171,8 +192,24 @@ class Plugin(DialogUtils):
                         padding=3,
                         width=D(),
                     ),
-                    DynamicContainer(lambda: self.oauth_data_container['scopes'])
-                    ],style='class:outh_containers_scopes')
+                    self.scopes_container,
+                    DynamicContainer(lambda: self.scopes_container_buttons)
+                    ],cli_style.container)
+
+
+        self.clients_container = JansVerticalNav(
+                        myparent=self.app,
+                        headers=['Client ID', 'Client Name', 'Grant Types', 'Subject Type'],
+                        preferred_size= [0,0,30,0],
+                        on_enter=self.edit_client,
+                        on_display=self.app.data_display_dialog,
+                        on_delete=self.delete_client,
+                        jans_help=HTML(_("Press key <b>s</b> to save client summary, <b>v</b> to display configurations")),
+                        custom_key_bindings=[('s', self.save_client_summary)],
+                        headerColor=cli_style.navbar_headcolor,
+                        entriesColor=cli_style.navbar_entriescolor,
+                    )
+        self.clients_container_buttons = VSplit([])
 
         self.oauth_containers['clients'] = HSplit([
                     VSplit([
@@ -183,8 +220,11 @@ class Plugin(DialogUtils):
                         padding=3,
                         width=D(),
                         ),
-                        DynamicContainer(lambda: self.oauth_data_container['clients'])
+                        self.clients_container,
+                        DynamicContainer(lambda: self.clients_container_buttons)
                      ],style=cli_style.container)
+
+        self.oauth_containers['clients'].jans_help = get_help_with(f'<s>              {_("Save client summary")}\n')
 
 
         self.oauth_containers['keys'] = HSplit([
@@ -224,6 +264,7 @@ class Plugin(DialogUtils):
         self.oauth_containers['authn'] = self.authn.main_container
         self.oauth_containers['attributes'] = self.attributes.main_container
         self.oauth_containers['logging'] = DynamicContainer(lambda: self.oauth_data_container['logging'])
+        self.oauth_containers['message'] = self.message.main_container
 
         self.oauth_main_container = HSplit([
                                         Box(self.nav_bar.nav_window, style='class:sub-navbar', height=1),
@@ -238,7 +279,18 @@ class Plugin(DialogUtils):
         """
         self.nav_bar = JansNavBar(
                     self.app,
-                    entries=[('clients', 'C[l]ients'), ('scopes', 'Sc[o]pes'), ('keys', '[K]eys'), ('authn', 'Au[t]hn'), ('properties', 'Properti[e]s'), ('logging', 'Lo[g]ging'), ('ssa', '[S]SA'), ('agama', 'Aga[m]a'), ('attributes', 'Attri[b]utes')],
+                    entries=[
+                        ('clients', 'C[l]ients'),
+                        ('scopes', 'Sc[o]pes'),
+                        ('keys', 'Ke[y]s'),
+                        ('authn', 'Au[t]hn'),
+                        ('properties', 'Properti[e]s'),
+                        ('message', 'Messa[g]es'),
+                        ('logging', 'Lo[g]ging'),
+                        ('ssa', '[S]SA'),
+                        ('agama', 'Aga[m]a'),
+                        ('attributes', 'Attri[b]utes'),
+                        ],
                     selection_changed=self.oauth_nav_selection_changed,
                     select=0,
                     jans_name='oauth:nav_bar'
@@ -268,9 +320,34 @@ class Plugin(DialogUtils):
 
             self.oauth_main_area = set_area
 
+    def save_client_summary(self, event):
+
+        def do_save(path):
+            try:
+                with open(path, "w") as w:
+                    client_data = self.clients_container.all_data[self.clients_container.selectes]
+                    for key in client_data:
+                        if key in ('clientSecret',):
+                            continue
+                        val = client_data[key]
+                        if key == 'scopes':
+                            val = [get_scope_by_inum(scope).get('id') for scope in val]
+                        val = json.dumps(val)
+                        w.write(f'{key}: {val}\n')
+
+                self.app.pbar_text = _("File {} was saved".format(path))
+                self.app.show_message(_("Info"), _("File {} was successfully saved").format(path), tobefocused=self.clients_container)
+            except Exception as e:
+                self.app.show_message(_("Error!"), _("An error ocurred while saving") + ":\n{}".format(str(e)), tobefocused=self.clients_container)
+
+        file_browser_dialog = jans_file_browser_dialog(self.app, path=self.app.browse_path, browse_type=BrowseType.save_as, ok_handler=do_save)
+        self.app.show_jans_dialog(file_browser_dialog)
+
+
+
     def oauth_update_clients(
         self,
-        start_index: Optional[int]= 0, 
+        start_index: Optional[int]= 0,
         pattern: Optional[str]= '',
         ) -> None:
         """update the current clients data to server
@@ -279,6 +356,7 @@ class Plugin(DialogUtils):
             start_index (Optional[int], optional): This is flag for the clients page. Defaults to 0.
             pattern (Optional[str], optional):endpoint arguments for the client data. Defaults to ''.
         """
+
 
         async def coroutine():
             endpoint_args ='limit:{},startIndex:{}'.format(self.app.entries_per_page, start_index)
@@ -299,58 +377,36 @@ class Plugin(DialogUtils):
                 self.app.show_message(_("Error getting clients"), str(response.text),tobefocused=self.oauth_containers['clients'])
                 return
 
-            data =[]
+            all_data = result.get('entries', [])
+            self.clients_container.clear()
 
-            for d in result.get('entries', []):
-                data.append(
-                    [
+            for d in all_data:
+                self.clients_container.add_item([
                     d['inum'],
                     d.get('clientName', ''),
                     ','.join(d.get('grantTypes', [])),
                     d.get('subjectType', '') 
-                    ]
-                )
+                    ])
 
-            if data:
-                clients = VSplit([
-                    Label(text=" ",width=1),
-                    JansVerticalNav(
-                        myparent=self.app,
-                        headers=['Client ID', 'Client Name', 'Grant Types', 'Subject Type'],
-                        preferred_size= [0,0,30,0],
-                        data=data,
-                        on_enter=self.edit_client,
-                        on_display=self.app.data_display_dialog,
-                        on_delete=self.delete_client,
-                        get_help=(self.get_help,'Client'),
-                        selectes=0,
-                        headerColor=cli_style.navbar_headcolor,
-                        entriesColor=cli_style.navbar_entriescolor,
-                        all_data=result['entries']
-                    )
-                ])
-                buttons = []
-                if start_index > 0:
-                    handler_partial = partial(self.oauth_update_clients, start_index-self.app.entries_per_page, pattern)
-                    prev_button = Button(_("Prev"), handler=handler_partial)
-                    prev_button.window.jans_help = _("Retreives previous %d entries") % self.app.entries_per_page
-                    buttons.append(prev_button)
-                if  result['start'] + self.app.entries_per_page <  result['totalEntriesCount']:
-                    handler_partial = partial(self.oauth_update_clients, start_index+self.app.entries_per_page, pattern)
-                    next_button = Button(_("Next"), handler=handler_partial)
-                    next_button.window.jans_help = _("Retreives next %d entries") % self.app.entries_per_page
-                    buttons.append(next_button)
+            self.clients_container.all_data = all_data
 
-                self.app.layout.focus(clients)
-                self.oauth_data_container['clients'] = HSplit([
-                    clients,
-                    VSplit(buttons, padding=5, align=HorizontalAlign.CENTER)
-                ])
+            buttons = []
+            if start_index > 0:
+                handler_partial = partial(self.oauth_update_clients, start_index-self.app.entries_per_page, pattern)
+                prev_button = Button(_("Prev"), handler=handler_partial)
+                prev_button.window.jans_help = _("Retreives previous %d entries") % self.app.entries_per_page
+                buttons.append(prev_button)
+            if  result['start'] + self.app.entries_per_page < result['totalEntriesCount']:
+                handler_partial = partial(self.oauth_update_clients, start_index+self.app.entries_per_page, pattern)
+                next_button = Button(_("Next"), handler=handler_partial)
+                next_button.window.jans_help = _("Retreives next %d entries") % self.app.entries_per_page
+                buttons.append(next_button)
 
-                get_app().invalidate()
-                self.app.layout.focus(clients)  ### it fix focuse on the last item deletion >> try on UMA-res >> edit_client_dialog >> oauth_update_uma_resources
+            self.clients_container_buttons = VSplit(buttons, padding=3, width=D(), align=HorizontalAlign.CENTER)
 
-            else:
+            self.app.layout.focus(self.clients_container)
+
+            if not all_data:
                 self.app.show_message(_("Oops"), _(common_strings.no_matching_result),tobefocused = self.oauth_containers['clients'])
 
         asyncio.ensure_future(coroutine())
@@ -380,8 +436,6 @@ class Plugin(DialogUtils):
             for d in result.get('entries', []):
                 data_display_name.append(d.get('displayName',d.get('baseDn')))
                 data_base_dn.append(d.get('baseDn'))
-
-
 
             for client_num in range(len(client_data)):
 
@@ -450,12 +504,12 @@ class Plugin(DialogUtils):
 
             endpoint_args ='withAssociatedClients:true,limit:{},startIndex:{}'.format(self.app.entries_per_page, start_index)
             if pattern:
-                endpoint_args +=',pattern:'+pattern
+                endpoint_args += ',pattern:' + pattern
 
             cli_args = {'operation_id': 'get-oauth-scopes', 'endpoint_args':endpoint_args}
             self.app.start_progressing(_("Retreiving scopes from server..."))
             response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-            self.app.stop_progressing(_("Retreived"))
+            self.app.stop_progressing()
 
             try:
                 result = response.json()
@@ -463,61 +517,35 @@ class Plugin(DialogUtils):
                 self.app.show_message(_("Error getting response"), str(response))
                 return
 
-            data =[]
+            all_data = result.get('entries', [])
+            self.scopes_container.clear()
+            self.scopes_container.all_data = all_data
 
-            for d in result.get('entries', []): 
-                data.append(
+            for d in all_data: 
+                self.scopes_container.add_item(
                     [
                     d['id'],
                     d.get('description', ''),
-                    d.get('scopeType',''),   ## some scopes have no scopetypr
+                    d.get('scopeType',''),
                     d['inum']
                     ]
                 )
 
-            if data:
+            buttons = []
+            if start_index > 0:
+                handler_partial = partial(self.oauth_get_scopes, start_index-self.app.entries_per_page, pattern)
+                prev_button = Button(_("Prev"), handler=handler_partial)
+                prev_button.window.jans_help = _("Retreives previous %d entries") % self.app.entries_per_page
+                buttons.append(prev_button)
+            if  result['start'] + self.app.entries_per_page <  result['totalEntriesCount']:
+                handler_partial = partial(self.oauth_get_scopes, start_index+self.app.entries_per_page, pattern)
+                next_button = Button(_("Next"), handler=handler_partial)
+                next_button.window.jans_help = _("Retreives next %d entries") % self.app.entries_per_page
+                buttons.append(next_button)
 
-                scopes =VSplit([
-                    Label(text=" ",width=1),
-                    JansVerticalNav(
-                            myparent=self.app,
-                            headers=['id', 'Description', 'Type','inum'],
-                            preferred_size= [30,40,8,12],
-                            data=data,
-                            on_enter=self.edit_scope_dialog,
-                            on_display=self.app.data_display_dialog,
-                            on_delete=self.delete_scope,
-                            get_help=(self.get_help,'Scope'),
-                            selectes=0,
-                            headerColor=cli_style.navbar_headcolor,
-                            entriesColor=cli_style.navbar_entriescolor,
-                            all_data=result['entries']
-                        )
-                ])
+            self.app.layout.focus(self.scopes_container)
+            self.scopes_container_buttons = VSplit(buttons, padding=3, width=D(), align=HorizontalAlign.CENTER)
 
-                buttons = []
-                if start_index > 0:
-                    handler_partial = partial(self.oauth_get_scopes, start_index-self.app.entries_per_page, pattern)
-                    prev_button = Button(_("Prev"), handler=handler_partial)
-                    prev_button.window.jans_help = _("Retreives previous %d entries") % self.app.entries_per_page
-                    buttons.append(prev_button)
-                if  result['start'] + self.app.entries_per_page <  result['totalEntriesCount']:
-                    handler_partial = partial(self.oauth_get_scopes, start_index+self.app.entries_per_page, pattern)
-                    next_button = Button(_("Next"), handler=handler_partial)
-                    next_button.window.jans_help = _("Retreives next %d entries") % self.app.entries_per_page
-                    buttons.append(next_button)
-
-                self.app.layout.focus(scopes)   # clients.focuse..!? TODO >> DONE
-                self.oauth_data_container['scopes'] = HSplit([
-                    scopes,
-                    VSplit(buttons, padding=5, align=HorizontalAlign.CENTER)
-                ])
-
-                get_app().invalidate()
-                self.app.layout.focus(scopes)  ### it fix focuse on the last item deletion >> try on UMA-res >> edit_client_dialog >> oauth_update_uma_resources
-
-            else:
-                self.app.show_message(_("Oops"), _(common_strings.no_matching_result),tobefocused = self.oauth_containers['scopes'])
 
         asyncio.ensure_future(coroutine())
 
@@ -557,7 +585,8 @@ class Plugin(DialogUtils):
                         selectes=0,
                         headerColor=cli_style.navbar_headcolor,
                         entriesColor=cli_style.navbar_entriescolor,
-                        all_data=missing_properties
+                        all_data=missing_properties,
+                        on_display=lambda **params: None
                     )
         ])
 
@@ -940,15 +969,8 @@ class Plugin(DialogUtils):
         """This method for the Auth Login
         """
         self.oauth_data_container['logging'] = HSplit([
-                        self.app.getTitledWidget(
-                                _('Log Level'),
-                                name='loggingLevel',
-                                widget=DropDownWidget(
-                                    values=[('TRACE', 'TRACE'), ('DEBUG', 'DEBUG'), ('INFO', 'INFO'), ('WARN', 'WARN'), ('ERROR', 'ERROR'), ('FATAL', 'FATAL'), ('OFF', 'OFF')],
-                                    value=self.app.app_configuration.get('loggingLevel')
-                                    ),
-                                jans_help=self.app.get_help_from_schema(self.schema, 'loggingLevel'),
-                                ),
+
+                        get_logging_level_widget(self.app.app_configuration.get('loggingLevel', 'INFO')),
                         self.app.getTitledWidget(
                                 _('Log Layout'),
                                 name='loggingLayout',
@@ -980,14 +1002,14 @@ class Plugin(DialogUtils):
                             style=cli_style.check_box
                             ),
                         Window(height=1),
-                        HSplit([
+                        VSplit([
                             self.app.getButton(text=_("Save Logging"), name='oauth:logging:save', jans_help=_("Save Auth Server logging configuration"), handler=self.save_logging),
-                            Window(width=100),
-                            ])
+                            ],
+                            align=HorizontalAlign.CENTER)
                      ], style=cli_style.container, width=D())
 
     def save_logging(self) -> None:
-        """This method to Save the Auth Login to server
+        """This method to Save the Auth Loggin to server
         """
         mod_data = self.make_data_from_dialog({'logging':self.oauth_data_container['logging']})
         pathches = []
@@ -1003,7 +1025,8 @@ class Plugin(DialogUtils):
                 data_fn=None,
                 data=pathches
                 )
-            self.schema = response
+            self.app.app_configuration = response.json()
+
             body = HSplit([Label(_("Jans authorization server application configuration logging properties were saved."))])
 
             buttons = [Button(_("Ok"))]

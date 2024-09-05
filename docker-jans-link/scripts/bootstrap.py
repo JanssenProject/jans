@@ -8,23 +8,30 @@ from functools import cached_property
 from string import Template
 
 from jans.pycloudlib import get_manager
-from jans.pycloudlib.persistence import render_couchbase_properties
-from jans.pycloudlib.persistence import render_base_properties
-from jans.pycloudlib.persistence import render_hybrid_properties
-from jans.pycloudlib.persistence import render_ldap_properties
-from jans.pycloudlib.persistence import render_salt
-from jans.pycloudlib.persistence import sync_couchbase_truststore
-from jans.pycloudlib.persistence import sync_ldap_truststore
-from jans.pycloudlib.persistence import render_sql_properties
-from jans.pycloudlib.persistence import render_spanner_properties
+from jans.pycloudlib import wait_for_persistence
 from jans.pycloudlib.persistence.couchbase import CouchbaseClient
+from jans.pycloudlib.persistence.couchbase import render_couchbase_properties
+from jans.pycloudlib.persistence.couchbase import sync_couchbase_cert
+from jans.pycloudlib.persistence.couchbase import sync_couchbase_password
+from jans.pycloudlib.persistence.couchbase import sync_couchbase_truststore
+from jans.pycloudlib.persistence.hybrid import render_hybrid_properties
 from jans.pycloudlib.persistence.ldap import LdapClient
+from jans.pycloudlib.persistence.ldap import render_ldap_properties
+from jans.pycloudlib.persistence.ldap import sync_ldap_password
+from jans.pycloudlib.persistence.ldap import sync_ldap_truststore
+from jans.pycloudlib.persistence.spanner import render_spanner_properties
 from jans.pycloudlib.persistence.spanner import SpannerClient
+from jans.pycloudlib.persistence.sql import render_sql_properties
 from jans.pycloudlib.persistence.sql import SqlClient
+from jans.pycloudlib.persistence.sql import sync_sql_password
 from jans.pycloudlib.persistence.utils import PersistenceMapper
+from jans.pycloudlib.persistence.utils import render_base_properties
+from jans.pycloudlib.persistence.utils import render_salt
 from jans.pycloudlib.utils import cert_to_truststore
 from jans.pycloudlib.utils import generate_base64_contents
 from jans.pycloudlib.utils import as_boolean
+from jans.pycloudlib.utils import encode_text
+from jans.pycloudlib.utils import get_server_certificate
 
 from settings import LOGGING_CONFIG
 
@@ -35,7 +42,7 @@ if _t.TYPE_CHECKING:  # pragma: no cover
 
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("link")
+logger = logging.getLogger("jans-link")
 
 manager = get_manager()
 
@@ -60,19 +67,26 @@ def main():
             "/app/templates/jans-ldap.properties",
             "/etc/jans/conf/jans-ldap.properties",
         )
-        sync_ldap_truststore(manager)
+
+        if as_boolean(os.environ.get("CN_LDAP_USE_SSL", "true")):
+            sync_ldap_truststore(manager)
+        sync_ldap_password(manager)
 
     if "couchbase" in persistence_groups:
+        sync_couchbase_password(manager)
         render_couchbase_properties(
             manager,
             "/app/templates/jans-couchbase.properties",
             "/etc/jans/conf/jans-couchbase.properties",
         )
-        sync_couchbase_truststore(manager)
+
+        if as_boolean(os.environ.get("CN_COUCHBASE_TRUSTSTORE_ENABLE", "true")):
+            sync_couchbase_cert(manager)
+            sync_couchbase_truststore(manager)
 
     if "sql" in persistence_groups:
+        sync_sql_password(manager)
         db_dialect = os.environ.get("CN_SQL_DB_DIALECT", "mysql")
-
         render_sql_properties(
             manager,
             f"/app/templates/jans-{db_dialect}.properties",
@@ -86,8 +100,15 @@ def main():
             "/etc/jans/conf/jans-spanner.properties",
         )
 
+    wait_for_persistence(manager)
+
     if not os.path.isfile("/etc/certs/web_https.crt"):
-        manager.secret.to_file("ssl_cert", "/etc/certs/web_https.crt")
+        if as_boolean(os.environ.get("CN_SSL_CERT_FROM_SECRETS", "true")):
+            manager.secret.to_file("ssl_cert", "/etc/certs/web_https.crt")
+        else:
+            hostname = manager.config.get("hostname")
+            logger.info(f"Pulling SSL certificate from {hostname}")
+            get_server_certificate(hostname, 443, "/etc/certs/web_https.crt")
 
     cert_to_truststore(
         "web_https",
@@ -155,10 +176,10 @@ def configure_logging():
     # mapping between the ``log_target`` value and their appenders
     file_aliases = {
         "link_log_target": "FILE",
-        "persistence_log_target": "JANS_CACHEREFRESH_PERSISTENCE_FILE",
-        "persistence_duration_log_target": "JANS_CACHEREFRESH_PERSISTENCE_DURATION_FILE",
-        "ldap_stats_log_target": "JANS_CACHEREFRESH_PERSISTENCE_LDAP_STATISTICS_FILE",
-        "script_log_target": "JANS_CACHEREFRESH_SCRIPT_LOG_FILE",
+        "persistence_log_target": "JANS_LINK_PERSISTENCE_FILE",
+        "persistence_duration_log_target": "JANS_LINK_PERSISTENCE_DURATION_FILE",
+        "ldap_stats_log_target": "JANS_LINK_PERSISTENCE_LDAP_STATISTICS_FILE",
+        "script_log_target": "JANS_LINK_SCRIPT_LOG_FILE",
     }
     for key, value in file_aliases.items():
         if config[key] == "FILE":
@@ -200,19 +221,29 @@ class PersistenceSetup:
 
     @cached_property
     def ctx(self) -> dict[str, _t.Any]:
+        host, port = os.environ.get("CN_LDAP_URL", "localhost:1636").split(":")
+
+        password = self.manager.secret.get("encoded_ox_ldap_pw")
+        salt = self.manager.secret.get("encoded_salt")
+        password_file = os.environ.get("CN_LDAP_PASSWORD_FILE", "/etc/jans/conf/ldap_password")
+
+        if not password and os.path.isfile(password_file):
+            with open(password_file) as f:
+                password = encode_text(f.read().strip(), salt).decode()
+
         ctx = {
-            "ldap_binddn": self.manager.config.get("ldap_binddn"),
-            "ldap_hostname": self.manager.config.get("ldap_init_host"),
-            "ldaps_port": self.manager.config.get("ldap_init_port"),
-            "encoded_ox_ldap_pw": self.manager.secret.get("encoded_ox_ldap_pw"),
-            "snapshots_dir": "/var/jans/cr-snapshots",
+            "ldap_binddn": self.manager.config.get("ldap_binddn") or "cn=Directory Manager",
+            "ldap_hostname": self.manager.config.get("ldap_init_host") or host,
+            "ldaps_port": self.manager.config.get("ldap_init_port") or port,
+            "ldap_bind_encoded_pw": password,
+            "snapshots_dir": "/var/jans/link-snapshots",
         }
 
-        # pre-populate jans_cacherefresh_config_base64
+        # pre-populate jans_link_config_base64
         with open("/app/templates/jans-link/jans-link-config.json") as f:
             ctx["jans_link_config_base64"] = generate_base64_contents(f.read() % ctx)
 
-        # pre-populate jans_cacherefresh_static_conf_base64
+        # pre-populate jans_link_static_conf_base64
         with open("/app/templates/jans-link/jans-link-static-config.json") as f:
             ctx["jans_link_static_conf_base64"] = generate_base64_contents(f.read())
 

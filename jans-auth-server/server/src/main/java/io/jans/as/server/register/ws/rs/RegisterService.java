@@ -137,7 +137,7 @@ public class RegisterService {
         }
 
         result.retainAll(appConfiguration.getGrantTypesSupported());
-        result.retainAll(appConfiguration.getDynamicGrantTypeDefault());
+        result.retainAll(appConfiguration.getGrantTypesSupportedByDynamicRegistration());
 
         return result;
     }
@@ -194,6 +194,11 @@ public class RegisterService {
         List<String> contacts = requestObject.getContacts();
         if (contacts != null && !contacts.isEmpty()) {
             client.setContacts(listAsArrayWithoutDuplicates(contacts));
+        }
+
+        List<String> authorizationDetailsTypes = requestObject.getAuthorizationDetailsTypes();
+        if (authorizationDetailsTypes != null && !authorizationDetailsTypes.isEmpty()) {
+            client.getAttributes().setAuthorizationDetailsTypes(authorizationDetailsTypes);
         }
 
         for (String key : requestObject.getClientNameLanguageTags()) {
@@ -299,6 +304,24 @@ public class RegisterService {
         if (requestObject.getUserInfoEncryptedResponseEnc() != null) {
             client.setUserInfoEncryptedResponseEnc(requestObject.getUserInfoEncryptedResponseEnc().toString());
         }
+        if (requestObject.getIntrospectionSignedResponseAlg() != null) {
+            client.getAttributes().setIntrospectionSignedResponseAlg(requestObject.getIntrospectionSignedResponseAlg().toString());
+        }
+        if (requestObject.getIntrospectionEncryptedResponseAlg() != null) {
+            client.getAttributes().setIntrospectionEncryptedResponseAlg(requestObject.getIntrospectionEncryptedResponseAlg().toString());
+        }
+        if (requestObject.getIntrospectionEncryptedResponseEnc() != null) {
+            client.getAttributes().setIntrospectionEncryptedResponseEnc(requestObject.getIntrospectionEncryptedResponseEnc().toString());
+        }
+        if (requestObject.getTxTokenSignedResponseAlg() != null) {
+            client.getAttributes().setTxTokenSignedResponseAlg(requestObject.getTxTokenSignedResponseAlg().toString());
+        }
+        if (requestObject.getTxTokenEncryptedResponseAlg() != null) {
+            client.getAttributes().setTxTokenEncryptedResponseAlg(requestObject.getTxTokenEncryptedResponseAlg().toString());
+        }
+        if (requestObject.getTxTokenEncryptedResponseEnc() != null) {
+            client.getAttributes().setTxTokenEncryptedResponseEnc(requestObject.getTxTokenEncryptedResponseEnc().toString());
+        }
         if (requestObject.getRequestObjectSigningAlg() != null) {
             client.setRequestObjectSigningAlg(requestObject.getRequestObjectSigningAlg().toString());
         }
@@ -365,8 +388,8 @@ public class RegisterService {
         }
         client.setFrontChannelLogoutSessionRequired(requestObject.getFrontChannelLogoutSessionRequired());
 
-        if (requestObject.getBackchannelLogoutUris() != null && !requestObject.getBackchannelLogoutUris().isEmpty()) {
-            client.getAttributes().setBackchannelLogoutUri(requestObject.getBackchannelLogoutUris());
+        if (requestObject.getBackchannelLogoutUri() != null && !requestObject.getBackchannelLogoutUri().isEmpty()) {
+            client.getAttributes().setBackchannelLogoutUri(Lists.newArrayList(requestObject.getBackchannelLogoutUri()));
         }
         client.getAttributes().setBackchannelLogoutSessionRequired(requestObject.getBackchannelLogoutSessionRequired());
 

@@ -3,6 +3,7 @@ package io.jans.as.server.authorize.ws.rs;
 import com.google.common.collect.Maps;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.common.model.session.DeviceSession;
 import io.jans.as.common.model.session.SessionId;
 import io.jans.as.model.authorize.AuthorizationChallengeResponse;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
@@ -114,7 +115,25 @@ public class AuthorizationChallengeService {
         authzRequest.setScope(ServerUtil.urlDecode(authzRequest.getScope()));
 
         if (StringUtils.isNotBlank(authzRequest.getDeviceSession())) {
-            authzRequest.setDeviceSessionObject(deviceSessionService.getDeviceSession(authzRequest.getDeviceSession()));
+            final DeviceSession deviceSession = deviceSessionService.getDeviceSession(authzRequest.getDeviceSession());
+
+            authzRequest.setDeviceSessionObject(deviceSession);
+            if (deviceSession != null) {
+                final Map<String, String> deviceSessionAttributes = deviceSession.getAttributes().getAttributes();
+
+                final String clientId = deviceSessionAttributes.get("client_id");
+                if (StringUtils.isNotBlank(clientId) && StringUtils.isBlank(authzRequest.getClientId())) {
+                    authzRequest.setClientId(clientId);
+                }
+
+                String acrValues = deviceSession.getAttributes().getAcrValues();
+                if (StringUtils.isBlank(acrValues)) {
+                    acrValues = deviceSessionAttributes.get("acr_values");
+                }
+                if (StringUtils.isNotBlank(acrValues) && StringUtils.isBlank(authzRequest.getAcrValues())) {
+                    authzRequest.setAcrValues(acrValues);
+                }
+            }
         }
     }
 
@@ -131,8 +150,10 @@ public class AuthorizationChallengeService {
         authorizationChallengeValidator.validateGrantType(client, state);
         authorizationChallengeValidator.validateAccess(client);
         Set<String> scopes = scopeChecker.checkScopesPolicy(client, authzRequest.getScope());
+        authorizeRestWebServiceValidator.validateAuthorizationDetails(authzRequest, client);
 
         final ExecutionContext executionContext = ExecutionContext.of(authzRequest);
+        executionContext.setSessionId(sessionUser);
 
         if (user == null) {
             log.trace("Executing external authentication challenge");
@@ -148,9 +169,9 @@ public class AuthorizationChallengeService {
 
             user = executionContext.getUser() != null ? executionContext.getUser() : new User();
 
-            // generate session if not exist and if allowed by config
-            if (sessionUser == null) {
-                sessionUser = generateAuthenticateSessionWithCookie(authzRequest, user);
+            // generate session if not exist and if allowed by config (or if session is prepared by script)
+            if (sessionUser == null || executionContext.getAuthorizationChallengeSessionId() != null) {
+                sessionUser = generateAuthenticateSessionWithCookieIfNeeded(authzRequest, user, executionContext.getAuthorizationChallengeSessionId());
             }
         }
 
@@ -161,6 +182,7 @@ public class AuthorizationChallengeService {
         authorizationGrant.setJwtAuthorizationRequest(authzRequest.getJwtRequest());
         authorizationGrant.setTokenBindingHash(TokenBindingMessage.getTokenBindingIdHashFromTokenBindingMessage(tokenBindingHeader, client.getIdTokenTokenBindingCnf()));
         authorizationGrant.setScopes(scopes);
+        authorizationGrant.setAuthzDetails(authzRequest.getAuthzDetails());
         authorizationGrant.setCodeChallenge(authzRequest.getCodeChallenge());
         authorizationGrant.setCodeChallengeMethod(authzRequest.getCodeChallengeMethod());
         authorizationGrant.setClaims(authzRequest.getClaims());
@@ -173,14 +195,22 @@ public class AuthorizationChallengeService {
         return createSuccessfulResponse(authorizationCode);
     }
 
-    private SessionId generateAuthenticateSessionWithCookie(AuthzRequest authzRequest, User user) {
+    private SessionId generateAuthenticateSessionWithCookieIfNeeded(AuthzRequest authzRequest, User user, SessionId scriptGeneratedSession) {
         if (user == null) {
             log.trace("Skip session_id generation because user is null");
             return null;
         }
+
         if (isFalse(appConfiguration.getAuthorizationChallengeShouldGenerateSession())) {
             log.trace("Skip session_id generation because it's not allowed by AS configuration ('authorizationChallengeShouldGenerateSession=false')");
             return null;
+        }
+
+        if (scriptGeneratedSession != null) {
+            log.trace("Authorization Challenge script generated session: {}.", scriptGeneratedSession.getId());
+            cookieService.createSessionIdCookie(scriptGeneratedSession, authzRequest.getHttpRequest(), authzRequest.getHttpResponse(), false);
+            log.trace("Created cookie for authorization Challenge script generated session: {}.", scriptGeneratedSession.getId());
+            return scriptGeneratedSession;
         }
 
         Map<String, String> genericRequestMap = getGenericRequestMap(authzRequest.getHttpRequest());
@@ -189,10 +219,16 @@ public class AuthorizationChallengeService {
         Map<String, String> requestParameterMap = requestParameterService.getAllowedParameters(parameterMap);
 
         SessionId sessionUser = sessionIdService.generateAuthenticatedSessionId(authzRequest.getHttpRequest(), user.getDn(), authzRequest.getPrompt());
-        sessionUser.setSessionAttributes(requestParameterMap);
+        final Set<String> sessionAttributesKeySet = sessionUser.getSessionAttributes().keySet();
+        requestParameterMap.forEach((key, value) -> {
+            if (!sessionAttributesKeySet.contains(key)) {
+                sessionUser.getSessionAttributes().put(key, value);
+            }
+        });
 
         cookieService.createSessionIdCookie(sessionUser, authzRequest.getHttpRequest(), authzRequest.getHttpResponse(), false);
         sessionIdService.updateSessionId(sessionUser);
+        log.trace("Session updated with {}", sessionUser);
 
         return sessionUser;
     }

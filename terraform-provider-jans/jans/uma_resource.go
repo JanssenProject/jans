@@ -38,7 +38,9 @@ func (c *Client) GetUMAResources(ctx context.Context) ([]UMAResource, error) {
 	}
 	ret := response{}
 
-	if err := c.get(ctx, "/jans-config-api/api/v1/uma/resources", token, &ret); err != nil {
+	if err := c.get(ctx, "/jans-config-api/api/v1/uma/resources", token, &ret, map[string]string{
+		"limit": "5",
+	}); err != nil {
 		return nil, fmt.Errorf("get request failed: %w", err)
 	}
 

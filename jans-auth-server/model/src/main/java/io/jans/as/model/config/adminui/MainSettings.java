@@ -8,6 +8,7 @@ public class MainSettings {
 
     private OIDCSettings oidcConfig;
     private LicenseConfig licenseConfig;
+    private UIConfiguration uiConfig;
 
     public OIDCSettings getOidcConfig() {
         return oidcConfig;
@@ -23,5 +24,13 @@ public class MainSettings {
 
     public void setLicenseConfig(LicenseConfig licenseConfig) {
         this.licenseConfig = licenseConfig;
+    }
+
+    public UIConfiguration getUiConfig() {
+        return uiConfig;
+    }
+
+    public void setUiConfig(UIConfiguration uiConfig) {
+        this.uiConfig = uiConfig;
     }
 }

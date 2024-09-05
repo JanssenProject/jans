@@ -1,5 +1,57 @@
 # Changelog
 
+## [1.0.21](https://github.com/JanssenProject/jans/compare/jans-auth-server-v1.0.20...jans-auth-server-v1.0.21) (2023-12-14)
+
+
+### Features
+
+* add Jans lock ([#7074](https://github.com/JanssenProject/jans/issues/7074)) ([ff3e904](https://github.com/JanssenProject/jans/commit/ff3e9044aa29ca32219b40eccab5c27e47233e15))
+* add message configuration api to config-api [#6982](https://github.com/JanssenProject/jans/issues/6982) ([#6983](https://github.com/JanssenProject/jans/issues/6983)) ([945ba76](https://github.com/JanssenProject/jans/commit/945ba767da90d2c6c376b5b6cca6313c0851bbca))
+* **agama:** use a mixed strategy for serialization ([#6883](https://github.com/JanssenProject/jans/issues/6883)) ([00aee0c](https://github.com/JanssenProject/jans/commit/00aee0c26565e8b0b574370610a75139c2155568))
+* **jans-auth-server:** adapted test code after testng upgrade 6.14.3 -&gt; 7.8.0 [#6791](https://github.com/JanssenProject/jans/issues/6791) ([#6792](https://github.com/JanssenProject/jans/issues/6792)) ([99377e4](https://github.com/JanssenProject/jans/commit/99377e424a8cf8b5c3144810c9575682bd468c97))
+* **jans-auth-server:** archived jwks ([#6503](https://github.com/JanssenProject/jans/issues/6503)) ([c86ae0a](https://github.com/JanssenProject/jans/commit/c86ae0a5a703ff96fd1e69fddcc110b5b754ad71))
+* **jans-auth-server:** set feature flags state according to list discussed in [#6611](https://github.com/JanssenProject/jans/issues/6611) ([#6769](https://github.com/JanssenProject/jans/issues/6769)) ([fa98c32](https://github.com/JanssenProject/jans/commit/fa98c326cb8d8a51c36053e44363fdf6ddcef4b9))
+* **jans-auth-server:** upgraded org.json lib [#6926](https://github.com/JanssenProject/jans/issues/6926) ([#6928](https://github.com/JanssenProject/jans/issues/6928)) ([d461661](https://github.com/JanssenProject/jans/commit/d46166177fdaeef239bf9127d89fa98364daf198))
+* replace jwt token with reference token to access config-api (admin ui plugin) [#6562](https://github.com/JanssenProject/jans/issues/6562) ([#6587](https://github.com/JanssenProject/jans/issues/6587)) ([7f82250](https://github.com/JanssenProject/jans/commit/7f82250ca36d05ae3c0ab8f5ea13ba0d0dc3f4b7))
+
+
+### Bug Fixes
+
+* API spec metadata ([#6473](https://github.com/JanssenProject/jans/issues/6473)) ([3922ddb](https://github.com/JanssenProject/jans/commit/3922ddb509db422d9a0f2c88df9f0d2e3fd05f46))
+* **config-api:** hide authenticationMethod client model utility method [#7061](https://github.com/JanssenProject/jans/issues/7061) ([#7063](https://github.com/JanssenProject/jans/issues/7063)) ([66cea41](https://github.com/JanssenProject/jans/commit/66cea4102d2c8b05ea11559f85627305b9dee96d))
+* feature flag default values ([#6857](https://github.com/JanssenProject/jans/issues/6857)) ([75b49be](https://github.com/JanssenProject/jans/commit/75b49be719d64c81a11805ee1c8d9562027c22e8))
+* **jans-auth-server:** authz challenge session attributes are overwritten after external script run [#6933](https://github.com/JanssenProject/jans/issues/6933) ([#6936](https://github.com/JanssenProject/jans/issues/6936)) ([20bf1ce](https://github.com/JanssenProject/jans/commit/20bf1ce2eea18efd0782d3b227ad9f964f34b9e9))
+* **jans-auth-server:** ClassNotFoundException: javax.xml.bind.annotation.XmlElement [#6798](https://github.com/JanssenProject/jans/issues/6798) ([#6799](https://github.com/JanssenProject/jans/issues/6799)) ([3addc8b](https://github.com/JanssenProject/jans/commit/3addc8bbd9322bcde2ed958c3a32264cb9db79ca))
+* **jans-auth-server:** UpdateToken script is not invoked during Implicit Flow [#6561](https://github.com/JanssenProject/jans/issues/6561) ([#6573](https://github.com/JanssenProject/jans/issues/6573)) ([3ca1b24](https://github.com/JanssenProject/jans/commit/3ca1b24ecca8dacc2b9a53e862c49291c5c20c2c))
+* openapi spec version element ([#6780](https://github.com/JanssenProject/jans/issues/6780)) ([e4aca8c](https://github.com/JanssenProject/jans/commit/e4aca8ce1b39cd89764b3c852418a8ed879b3925))
+* permission not getting added successfully [#6519](https://github.com/JanssenProject/jans/issues/6519) ([#6520](https://github.com/JanssenProject/jans/issues/6520)) ([690fa33](https://github.com/JanssenProject/jans/commit/690fa33d511ce5c5ca31ba838ce30ad26c84652b))
+* prepare for 1.0.21 release ([#7008](https://github.com/JanssenProject/jans/issues/7008)) ([2132de6](https://github.com/JanssenProject/jans/commit/2132de6683f67bf22d5a863b149770d657073a83))
+* serialization of undesired content when a flow crashes ([#6609](https://github.com/JanssenProject/jans/issues/6609)) ([93fdc02](https://github.com/JanssenProject/jans/commit/93fdc0214755a9b70582bdd55caddc07a302f508))
+* support boolean jdbc data type ([#6957](https://github.com/JanssenProject/jans/issues/6957)) ([efb5d48](https://github.com/JanssenProject/jans/commit/efb5d483337bba3a5037919bd15171b596b71e76))
+
+
+### Documentation
+
+* **config-api:** auth featureFlags should be described as enum in spec ([#6590](https://github.com/JanssenProject/jans/issues/6590)) ([fdf33c1](https://github.com/JanssenProject/jans/commit/fdf33c1b886ac981b8ad95015a8d338160220872))
+
+## [1.0.20](https://github.com/JanssenProject/jans/compare/jans-auth-server-v1.0.19...jans-auth-server-v1.0.20) (2023-11-08)
+
+
+### Features
+
+* adding scopes in config-api endpoint access token based on tags (admin-ui) [#6413](https://github.com/JanssenProject/jans/issues/6413) ([#6414](https://github.com/JanssenProject/jans/issues/6414)) ([643ba07](https://github.com/JanssenProject/jans/commit/643ba0780b5bf9f7383357075adb505774a39a27))
+* changing names of clients used in admin-ui [#1375](https://github.com/JanssenProject/jans/issues/1375) ([#6326](https://github.com/JanssenProject/jans/issues/6326)) ([9e63acb](https://github.com/JanssenProject/jans/commit/9e63acb28ee4354e361b6b8d3d7aabe0f5f94610))
+* **jans-auth-server:** add configuration property to AS which will allow to bypass basic client authentication restriction to query only own tokens [#6307](https://github.com/JanssenProject/jans/issues/6307) ([#6317](https://github.com/JanssenProject/jans/issues/6317)) ([d44a820](https://github.com/JanssenProject/jans/commit/d44a8206f7bd75ed659b1832f0a67d30ec43076c))
+* **jans-auth-server:** added PKCE support to authz challenge endpoint [#6180](https://github.com/JanssenProject/jans/issues/6180) ([#6339](https://github.com/JanssenProject/jans/issues/6339)) ([d9a24bc](https://github.com/JanssenProject/jans/commit/d9a24bc4399f656915923395858ea085ca3dccfa))
+* **jans-auth-server:** allow revoke any token - explicitly allow by config and scope [#6381](https://github.com/JanssenProject/jans/issues/6381) ([#6412](https://github.com/JanssenProject/jans/issues/6412)) ([47cbee9](https://github.com/JanssenProject/jans/commit/47cbee9cf917f0f79c53e9e0cfe1e2beab3108bc))
+* **jans-auth-server:** enabled JWT response at introspection endpoint configured by AS and client config ([#6433](https://github.com/JanssenProject/jans/issues/6433)) ([06210a9](https://github.com/JanssenProject/jans/commit/06210a9b6e916fd5c06cc463949be9855f4d2909))
+
+
+### Bug Fixes
+
+* **jans-auth-server:** cnf introspection response is null even when valid cert is send during MTLS [#6343](https://github.com/JanssenProject/jans/issues/6343) ([#6363](https://github.com/JanssenProject/jans/issues/6363)) ([6fb2a34](https://github.com/JanssenProject/jans/commit/6fb2a342d61d5e293a44dc7e385e072d3beefecb))
+* prepare for 1.0.20 release ([c6e806e](https://github.com/JanssenProject/jans/commit/c6e806eb31fed998d52cbef7a7d94c231d913102))
+
 ## [1.0.19](https://github.com/JanssenProject/jans/compare/jans-auth-server-v1.0.18...jans-auth-server-v1.0.19) (2023-10-11)
 
 

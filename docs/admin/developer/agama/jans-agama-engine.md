@@ -26,17 +26,13 @@ The rest of this document describes implementation-specific details of the engin
 
 ## Launching flows
 
-Flows can be launched by sending an (OpenId Connect) authentication request to the user's browser. This usually boils down to make a redirection to a URL looking like `https://<jans-server-name>/jans-auth/restv1/authorize?acr_values=agama&agama_flow=flow-qname&scope=...&response_type=...&redirect_uri=https...&client_id=...&state=...`. Check the OpenId Connect [spec](https://openid.net/specs/openid-connect-core-1_0.html) for more details. Note Jans Server is spec-compliant.
+Flows can be launched by sending an (OpenId Connect) authentication request to the user's browser. This usually boils down to making a redirection to a URL looking like `https://<jans-server-name>/jans-auth/restv1/authorize?acr_values=agama_flowQname&scope=...&response_type=...&redirect_uri=https...&client_id=...&state=...`. Check the OpenId Connect [spec](https://openid.net/specs/openid-connect-core-1_0.html) for more details. Note Jans Server is spec-compliant.
 
 Things to highlight:
 
-- The `acr_values` parameter must be equal to `agama`
+- The `acr_values` parameter carries the qualified name (identifier) of the flow to launch prefixed with the string `agama_`, for example `acr_values=agama_test.acme.co`
 
-- The qualified name (identifier) of the flow to launch is passed using the parameter referenced in property `cust_param_name` of the Agama [bridge](./engine-bridge-config.md#bridge-configuration) script. `agama_flow` will most likely work since this is the default value employed by the Jans installer, e.g. `agama_flow=test.acme.co`
-
-- If the flow to call receives input parameters, their values can be passed in the custom parameter as well. Use a hyphen to separate the flow name and the parameters expressed in JSON object format. For example, if the flow had inputs  `height` and `color`, you can use `test.acme.co-{"height": 190, "color": "blue"}` for the value of `agama_flow`. Ensure to apply proper URL-encoding beforehand. In this case, the actual value would be `test-%7B%22height%22%3A+190%2C+%22color%22%3A+%22blue%22%7D`. If certain inputs are not provided, `null` values will be assigned for them
-
-- If for some reason you are not able to set the given custom parameter in the authorization request, you can set its value in the configuration property `default_flow_name` of the [bridge](./engine-bridge-config.md#bridge-configuration) script. Note this will launch the same fixed flow at all times
+- If the flow to call receives input parameters, this data can be appended to the `acr_values` parameter: use a hyphen to separate the flow name and the parameters expressed in Base64 URL encoded format. For example, if the flow had inputs  `height` and `color`, you would encode the string `{"height": 190, "color": "blue"}` and the resulting value would be `agama_test.acme.co-eyJoZWlnaHQiOiAxOTAsICJjb2xvciI6ICJibHVlIn0`. When a given input variable is not provided, the engine will assign a `null` value automatically
 
 ## Authentication and `Finish`
 
@@ -61,7 +57,7 @@ When the authentication succeeds, the whole contents of `data` are stored in the
 
 ### How timeouts work
 
-Authentication flows are normally short-lived. They usually span no more than a few minutes. In Agama, the maximum amount of time an end-user can take to fully complete a flow is driven by the [configuration of the authentication server](../../config-guide/jans-authorization-server-config.md), specifically the `sessionIdUnauthenticatedUnusedLifetime` property which is measured in seconds. As an example, if this value is 120, any attempt to authenticate taking more than two minutes will throw the given error page.
+Authentication flows are normally short-lived. They usually span no more than a few minutes. In Agama, the maximum amount of time an end-user can take to fully complete a flow is driven by the [configuration of the authentication server](../../config-guide/auth-server-config/jans-authorization-server-config.md), specifically the `sessionIdUnauthenticatedUnusedLifetime` property which is measured in seconds. As an example, if this value is 120, any attempt to authenticate taking more than two minutes will throw the given error page.
 
 Moreover, when a flow specifies its own timeout in the [header](../../../agama/language-reference.md#header-basics) the effective timeout is the smallest value between `sessionIdUnauthenticatedUnusedLifetime` and the value in the header.
 
@@ -73,17 +69,17 @@ There are three relevant sources of log data:
 
 - The engine. It emits information related to flows transpilation, projects deployment, and flow crashes - generally low-level information
 - [Log](../../../agama/language-reference.md#logging) instructions. These are statements originated directly from the Agama code
-- [Call](#foreign-calls) directives. Foreign code can issue logging statements as well as any other code a `Call` may depend on
+- [Call](#foreign-calls) directives. Foreign code can issue logging statements as well as any other code a `Call` may depend on. See the [FAQ](./faq.md#how-to-add-log-statements)
 
 The following table details the location of log data. Paths are relative to directory `/opt/jans/jetty/jans-auth/log`:
 
-|Source|Destination file|Notes|
-|-|-|-|
-|Engine|`jans-auth.log`||
-|`Log` instructions|`jans-auth_script.log`|This log also contains the output of `print` statements used in standard Jython custom scripts of Jans Server|
-|Foreign code|`jans-auth.log`|Usage of [slf4j](https://slf4j.org) recommended. Proper visualization of logging statements may require customization of the server [loggers](../../auth-server/logging/log4j2.md) (Log4j2 descriptor)|
+|Source|Destination file|
+|-|-|
+|Engine|`jans-auth.log`|
+|`Log` instructions|`jans-auth_script.log`|
+|Foreign code|`jans-auth.log`|
 
-Depending on the specificity required, you may have to change the logging level so more or less details appear in the logs. This can be done by altering the `loggingLevel` property of the [auth server configuration](../../config-guide/jans-authorization-server-config.md). `DEBUG` usually suffices for troubleshooting.
+Depending on the specificity required, you may have to change the logging level so more or less details appear in the logs. This can be done by altering the `loggingLevel` property of the [auth server configuration](../../config-guide/auth-server-config/jans-authorization-server-config.md). `DEBUG` usually suffices for troubleshooting.
 
 The available levels for statements issued with the `Log` instruction are:
 
@@ -97,7 +93,7 @@ The available levels for statements issued with the `Log` instruction are:
 
 For instance, these two instructions are equivalent: `Log "@e Universe collapsed"` and `Log "@error Universe collapsed"`
 
-The engine will use `info` when the level is not specified explicitly, as in `Log "ahoy, ahoy"`.
+The engine will use `info` when the level is not specified explicitly, as in `Log "Look ma!"`.
 
 ## RFAC and Callback URL
 
@@ -232,9 +228,11 @@ The usage of a hash sign (or spaces) before a method name helps disambiguate whe
 
 Any method that meets the conditions mentioned (public or interface static) and that is reachable in the JVM [classpath](#classpath) can be called; developers are not restricted solely to `java.*` packages. 
 
-When using `Call`, the method to execute is picked based on the name (e.g. after the `#` sign) and the number of arguments supplied. If a class/interface exhibits several methods with the same name and arity (number of parameters), there is **no way to know** which of the available variants will be called. The `java.util.Arrays` class has several methods of this kind for instance.
+When using `Call`, the method to execute is picked based on the name (e.g. after the `#` sign) and the number of arguments supplied. If a class/interface exhibits several methods with the same name and arity (number of parameters), the method that best matches the dataypes of the arguments with respect to its signature is selected. Sometimes this requires to perform arguments [conversions](#arguments-conversion) and they may fail. In such case, the second best suited method is tried and so on. 
 
-For non-static method invocations, i.e. no hash sign, the class used for method lookup is that of the instance passed (the first parameter in the `Call` directive). When the instance does not hold a Java but an Agama value, the following is used to pick a class:
+When all attempts fail or there are no candidate methods to choose from, the `Call` simply throws a `NoSuchMethodException`.
+
+For non-static method invocations, i.e. no hash sign, the class used for method lookup is that of the instance passed (the first parameter in the `Call` directive). This includes all associated superclasses too, as expected. When the instance does not hold a Java but an Agama value, the following is used to pick a class:
 
 |Agama type|Java class for method lookup|
 |-|-|
@@ -243,9 +241,6 @@ For non-static method invocations, i.e. no hash sign, the class used for method 
 |`number`|`Double`|
 |`list`|`java.util.List`|
 |`map`|`java.util.Map`|
-
-Once a concrete method is selected, a best effort is made to convert (if required) the values passed as arguments so that they match the expected parameter types in the method signature. If a conversion fails, this will degenerate in an `IllegalArgumentException`. More on conversions [here](#arguments-conversion).
-
 
 **Limitations:**
 
@@ -261,7 +256,7 @@ As seen in the examples Agama engine can deal with Java exceptions, however, thi
 
 [Agama types](../../../agama/language-reference.md#data-types) do not match Java types. This means passing a "native" Agama value as parameter in a method `Call` requires some form of compatibility with the target (Java) type in the method signature.
 
-An argument (Agama value) is compatible with a method parameter if it can be "converted" successfully. As we'll see, conversion feels pretty natural in practice. If this process fails a `java.lang.IllegalArgumentException` is thrown and the flow will crash unless the exception is caught. Note however the recommended practice is to let flows [crash](./recommended-practices.md#about-crashes).
+An argument (Agama value) is compatible with a method parameter if it can be "converted" successfully. As we'll see, conversion feels pretty natural in practice. If this process fails a `java.lang.IllegalArgumentException` is thrown and the flow will crash unless the exception is caught. Note however the recommended practice is to let flows [crash](./agama-best-practices#about-crashes).
 
 The following lists some of the most common successful conversions:
 
@@ -354,4 +349,4 @@ We consider the following to be remarkable:
 
 ### OOP prose warning
 
-See the recommended [practices](./recommended-practices.md#oop-prose-warning) to learn more about this topic.
+See the recommended [practices](./agama-best-practices#oop-prose-warning) to learn more about this topic.

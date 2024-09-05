@@ -28,14 +28,17 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
     private String issuer;
     private String authorizationEndpoint;
     private String authorizationChallengeEndpoint;
+    private String statusListEndpoint;
     private String tokenEndpoint;
     private String revocationEndpoint;
     private String sessionRevocationEndpoint;
+    private String globalTokenRevocationEndpoint;
     private String userInfoEndpoint;
     private String clientInfoEndpoint;
     private String checkSessionIFrame;
     private String endSessionEndpoint;
     private String jwksUri;
+    private String archivedJwksUri;
     private String registrationEndpoint;
     private String introspectionEndpoint;
     private String parEndpoint;
@@ -44,8 +47,10 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
     private List<String> scopesSupported;
     private List<String> responseTypesSupported;
     private List<String> responseModesSupported;
+    private List<String> promptValuesSupported;
     private List<String> grantTypesSupported;
     private List<String> acrValuesSupported;
+    private List<String> authorizationDetailsTypesSupported;
     private List<String> subjectTypesSupported;
     private List<String> authorizationSigningAlgValuesSupported;
     private List<String> authorizationEncryptionAlgValuesSupported;
@@ -83,6 +88,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
     private String opTosUri;
     private Map<String, List<String>> scopeToClaimsMapping = new HashMap<>();
     private Map<String, Serializable> mltsAliases = new HashMap<>();
+    private Map<String, String> acrMappings = new HashMap<>();
 
     // CIBA
     private String backchannelAuthenticationEndpoint;
@@ -107,8 +113,10 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
         scopesSupported = new ArrayList<>();
         responseTypesSupported = new ArrayList<>();
         responseModesSupported = new ArrayList<>();
+        promptValuesSupported = new ArrayList<>();
         grantTypesSupported = new ArrayList<>();
         acrValuesSupported = new ArrayList<>();
+        authorizationDetailsTypesSupported = new ArrayList<>();
         subjectTypesSupported = new ArrayList<>();
         authorizationSigningAlgValuesSupported = new ArrayList<>();
         authorizationEncryptionAlgValuesSupported = new ArrayList<>();
@@ -234,6 +242,24 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
     }
 
     /**
+     * Gets status list
+     *
+     * @return status list
+     */
+    public String getStatusListEndpoint() {
+        return statusListEndpoint;
+    }
+
+    /**
+     * Sets status list
+     *
+     * @param statusListEndpoint status list
+     */
+    public void setStatusListEndpoint(String statusListEndpoint) {
+        this.statusListEndpoint = statusListEndpoint;
+    }
+
+    /**
      * Returns the URL of the Token endpoint.
      *
      * @return The URL of the Token endpoint.
@@ -257,6 +283,24 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
 
     public void setSessionRevocationEndpoint(String sessionRevocationEndpoint) {
         this.sessionRevocationEndpoint = sessionRevocationEndpoint;
+    }
+
+    /**
+     * Gets global token revocation endpoint
+     *
+     * @return global token revocation endpoint
+     */
+    public String getGlobalTokenRevocationEndpoint() {
+        return globalTokenRevocationEndpoint;
+    }
+
+    /**
+     * Sets global token revocation endpoint
+     *
+     * @param globalTokenRevocationEndpoint global token revocation endpoint
+     */
+    public void setGlobalTokenRevocationEndpoint(String globalTokenRevocationEndpoint) {
+        this.globalTokenRevocationEndpoint = globalTokenRevocationEndpoint;
     }
 
     /**
@@ -378,6 +422,24 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
     }
 
     /**
+     * Gets the URL of the OP's Archived JSON Web Key Set (JWK) document.
+     *
+     * @return The URL of the OP's Archived JSON Web Key Set (JWK) document.
+     */
+    public String getArchivedJwksUri() {
+        return archivedJwksUri;
+    }
+
+    /**
+     * Sets the URL of the OP's Archived JSON Web Key Set (JWK) document.
+     *
+     * @param archivedJwksUri The URL of the OP's Archived JSON Web Key Set (JWK) document.
+     */
+    public void setArchivedJwksUri(String archivedJwksUri) {
+        this.archivedJwksUri = archivedJwksUri;
+    }
+
+    /**
      * Returns the URL of the Dynamic Client Registration endpoint.
      *
      * @return The URL of the Dynamic Client Registration endpoint.
@@ -455,6 +517,24 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
         this.responseTypesSupported = responseTypesSupported;
     }
 
+    /**
+     * Gets prompt values supported
+     *
+     * @return prompt values supported
+     */
+    public List<String> getPromptValuesSupported() {
+        return promptValuesSupported;
+    }
+
+    /**
+     * Sets prompt values supported
+     *
+     * @param promptValuesSupported prompt values supported
+     */
+    public void setPromptValuesSupported(List<String> promptValuesSupported) {
+        this.promptValuesSupported = promptValuesSupported;
+    }
+
     public List<String> getResponseModesSupported() {
         return responseModesSupported;
     }
@@ -502,6 +582,24 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
      */
     public void setAcrValuesSupported(List<String> acrValuesSupported) {
         this.acrValuesSupported = acrValuesSupported;
+    }
+
+    /**
+     * Gets authorization details types supported.
+     *
+     * @return authorization details types supported.
+     */
+    public List<String> getAuthorizationDetailsTypesSupported() {
+        return authorizationDetailsTypesSupported;
+    }
+
+    /**
+     * Sets authorization details types supported.
+     *
+     * @param authorizationDetailsTypesSupported authorization details types supported.
+     */
+    public void setAuthorizationDetailsTypesSupported(List<String> authorizationDetailsTypesSupported) {
+        this.authorizationDetailsTypesSupported = authorizationDetailsTypesSupported;
     }
 
     /**
@@ -1208,6 +1306,14 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
         this.mltsAliases = mltsAliases;
     }
 
+    public Map<String, String> getAcrMappings() {
+        return acrMappings;
+    }
+
+    public void setAcrMappings(Map<String, String> acrMappings) {
+        this.acrMappings = acrMappings;
+    }
+
     public String getSsaEndpoint() {
         return ssaEndpoint;
     }
@@ -1222,6 +1328,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
                 "issuer='" + issuer + '\'' +
                 ", authorizationEndpoint='" + authorizationEndpoint + '\'' +
                 ", authorizationChallengeEndpoint='" + authorizationChallengeEndpoint + '\'' +
+                ", statusListEndpoint='" + statusListEndpoint + '\'' +
                 ", tokenEndpoint='" + tokenEndpoint + '\'' +
                 ", revocationEndpoint='" + revocationEndpoint + '\'' +
                 ", userInfoEndpoint='" + userInfoEndpoint + '\'' +
@@ -1229,14 +1336,17 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
                 ", checkSessionIFrame='" + checkSessionIFrame + '\'' +
                 ", endSessionEndpoint='" + endSessionEndpoint + '\'' +
                 ", jwksUri='" + jwksUri + '\'' +
+                ", archivedJwksUri='" + archivedJwksUri + '\'' +
                 ", registrationEndpoint='" + registrationEndpoint + '\'' +
                 ", introspectionEndpoint='" + introspectionEndpoint + '\'' +
                 ", deviceAuthzEndpoint='" + deviceAuthzEndpoint + '\'' +
                 ", scopesSupported=" + scopesSupported +
                 ", responseTypesSupported=" + responseTypesSupported +
                 ", responseModesSupported=" + responseModesSupported +
+                ", promptValuesSupported=" + promptValuesSupported +
                 ", grantTypesSupported=" + grantTypesSupported +
                 ", acrValuesSupported=" + acrValuesSupported +
+                ", authorizationDetailsTypesSupported=" + authorizationDetailsTypesSupported +
                 ", subjectTypesSupported=" + subjectTypesSupported +
                 ", authorizationSigningAlgValuesSupported=" + authorizationSigningAlgValuesSupported +
                 ", authorizationEncryptionAlgValuesSupported=" + authorizationEncryptionAlgValuesSupported +
@@ -1277,6 +1387,7 @@ public class OpenIdConfigurationResponse extends BaseResponse implements Seriali
                 ", backchannelAuthenticationRequestSigningAlgValuesSupported=" + backchannelAuthenticationRequestSigningAlgValuesSupported + '\'' +
                 ", backchannelUserCodeParameterSupported=" + backchannelUserCodeParameterSupported + '\'' +
                 ", mltsAliases=" + mltsAliases + '\'' +
+                ", acrMappings=" + acrMappings + '\'' +
                 ", ssaEndpoint=" + ssaEndpoint + '\'' +
                 '}';
     }

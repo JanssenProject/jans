@@ -66,7 +66,6 @@ import org.slf4j.Logger;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.security.PublicKey;
-import java.text.ParseException;
 import java.util.*;
 
 /**
@@ -119,6 +118,9 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
 
     @Inject
     private DateFormatterService dateFormatterService;
+
+    @Inject
+    private UserInfoService userInfoService;
 
     @Override
     public Response requestUserInfoGet(String accessToken, String authorization, HttpServletRequest request, SecurityContext securityContext) {
@@ -259,7 +261,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         return jwt.toString();
     }
 
-    private JwtClaims createJwtClaims(User user, AuthorizationGrant authorizationGrant, Collection<String> scopes) throws ParseException, InvalidClaimException {
+    private JwtClaims createJwtClaims(User user, AuthorizationGrant authorizationGrant, Collection<String> scopes) throws InvalidClaimException {
         String claimsString = getJSonResponse(user, authorizationGrant, scopes);
         JwtClaims claims = new JwtClaims(new JSONObject(claimsString));
 
@@ -271,7 +273,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
     public String getJweResponse(
             KeyEncryptionAlgorithm keyEncryptionAlgorithm, BlockEncryptionAlgorithm blockEncryptionAlgorithm,
             User user, AuthorizationGrant authorizationGrant, Collection<String> scopes) throws Exception {
-        log.trace("Building JWE reponse with next scopes {0} for user {1} and user custom attributes {0}", scopes, user.getUserId(), user.getCustomAttributes());
+        log.trace("Building JWE reponse with next scopes {} for user {} and user custom attributes {}", scopes, user.getUserId(), user.getCustomAttributes());
 
         Jwe jwe = new Jwe();
 
@@ -315,10 +317,12 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
     /**
      * Builds a JSon String with the response parameters.
      */
-    public String getJSonResponse(User user, AuthorizationGrant authorizationGrant, Collection<String> scopes) throws InvalidClaimException, ParseException {
+    public String getJSonResponse(User user, AuthorizationGrant authorizationGrant, Collection<String> scopes) throws InvalidClaimException {
         log.trace("Building JSON reponse with next scopes {} for user {} and user custom attributes {}", scopes, user.getUserId(), user.getCustomAttributes());
 
-        JsonWebResponse jsonWebResponse = new JsonWebResponse();
+        JsonWebResponse jwr = new JsonWebResponse();
+
+        userInfoService.fillJwr(jwr, authorizationGrant);
 
         // Claims
         List<Scope> dynamicScopes = new ArrayList<>();
@@ -351,21 +355,21 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                     }
                 }
 
-                jsonWebResponse.getClaims().setClaim(scope.getId(), groupClaim);
+                jwr.getClaims().setClaim(scope.getId(), groupClaim);
             } else {
                 for (Map.Entry<String, Object> entry : claims.entrySet()) {
                     String key = entry.getKey();
                     Object value = entry.getValue();
 
                     if (value instanceof List) {
-                        jsonWebResponse.getClaims().setClaim(key, (List<String>) value);
+                        jwr.getClaims().setClaim(key, (List<String>) value);
                     } else if (value instanceof Boolean) {
-                        jsonWebResponse.getClaims().setClaim(key, (Boolean) value);
+                        jwr.getClaims().setClaim(key, (Boolean) value);
                     } else if (value instanceof Date) {
                         Serializable formattedValue = dateFormatterService.formatClaim((Date) value, key);
-                        jsonWebResponse.getClaims().setClaimObject(key, formattedValue, true);
+                        jwr.getClaims().setClaimObject(key, formattedValue, true);
                     } else {
-                        jsonWebResponse.getClaims().setClaim(key, String.valueOf(value));
+                        jwr.getClaims().setClaim(key, String.valueOf(value));
                     }
                 }
             }
@@ -384,7 +388,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                         String ldapClaimName = jansAttribute.getName();
 
                         Object attribute = user.getAttribute(ldapClaimName, optional, jansAttribute.getOxMultiValuedAttribute());
-                        jsonWebResponse.getClaims().setClaimFromJsonObject(claimName, attribute);
+                        jwr.getClaims().setClaimFromJsonObject(claimName, attribute);
                     }
                 }
             }
@@ -402,21 +406,21 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
                     if (validateRequesteClaim(jansAttribute, client.getClaims(), scopes)) {
                         String ldapClaimName = jansAttribute.getName();
                         Object attribute = user.getAttribute(ldapClaimName, optional, jansAttribute.getOxMultiValuedAttribute());
-                        jsonWebResponse.getClaims().setClaimFromJsonObject(claim.getName(), attribute);
+                        jwr.getClaims().setClaimFromJsonObject(claim.getName(), attribute);
                     }
                 }
             }
         }
 
-        jsonWebResponse.getClaims().setSubjectIdentifier(authorizationGrant.getSub());
+        jwr.getClaims().setSubjectIdentifier(authorizationGrant.getSub());
 
         if ((dynamicScopes.size() > 0) && externalDynamicScopeService.isEnabled()) {
             final UnmodifiableAuthorizationGrant unmodifiableAuthorizationGrant = new UnmodifiableAuthorizationGrant(authorizationGrant);
-            DynamicScopeExternalContext dynamicScopeContext = new DynamicScopeExternalContext(dynamicScopes, jsonWebResponse, unmodifiableAuthorizationGrant);
+            DynamicScopeExternalContext dynamicScopeContext = new DynamicScopeExternalContext(dynamicScopes, jwr, unmodifiableAuthorizationGrant);
             externalDynamicScopeService.executeExternalUpdateMethods(dynamicScopeContext);
         }
 
-        return jsonWebResponse.toString();
+        return jwr.toString();
     }
 
     public boolean validateRequesteClaim(JansAttribute jansAttribute, String[] clientAllowedClaims, Collection<String> scopes) {

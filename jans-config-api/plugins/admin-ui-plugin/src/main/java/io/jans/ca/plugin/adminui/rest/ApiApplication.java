@@ -6,11 +6,12 @@
 
 package io.jans.ca.plugin.adminui.rest;
 
+import io.jans.ca.plugin.adminui.rest.adminui.AdminUIResource;
 import io.jans.ca.plugin.adminui.rest.auth.OAuth2Resource;
-import io.jans.ca.plugin.adminui.rest.user.UserManagementResource;
 import io.jans.ca.plugin.adminui.rest.license.LicenseResource;
 import io.jans.ca.plugin.adminui.rest.logging.AuditLoggerResource;
 
+import io.jans.ca.plugin.adminui.rest.webhook.WebhookResource;
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
 import io.swagger.v3.oas.annotations.info.*;
@@ -35,7 +36,8 @@ license = @License(name = "Apache 2.0", url = "https://github.com/JanssenProject
 tags = { @Tag(name = "Admin UI - Role"),
         @Tag(name = "Admin UI - Permission"),
         @Tag(name = "Admin UI - Role-Permissions Mapping"),
-        @Tag(name = "Admin UI - License") },
+        @Tag(name = "Admin UI - License"),
+        @Tag(name = "Admin UI - Webhooks")},
 
 servers = { @Server(url = "https://jans.io/", description = "The Jans server") })
 
@@ -59,7 +61,8 @@ public class ApiApplication extends Application {
         classes.add(OAuth2Resource.class);
         classes.add(AuditLoggerResource.class);
         classes.add(LicenseResource.class);
-        classes.add(UserManagementResource.class);
+        classes.add(AdminUIResource.class);
+        classes.add(WebhookResource.class);
         return classes;
     }
 }

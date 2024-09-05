@@ -8,9 +8,6 @@ public class ApiAccessConstants {
     public static final String JANS_AUTH_CONFIG_READ_ACCESS = "https://jans.io/oauth/jans-auth-server/config/properties.readonly";
     public static final String JANS_AUTH_CONFIG_WRITE_ACCESS = "https://jans.io/oauth/jans-auth-server/config/properties.write";
 
-    public static final String FIDO2_CONFIG_READ_ACCESS = "https://jans.io/oauth/config/fido2.readonly";
-    public static final String FIDO2_CONFIG_WRITE_ACCESS = "https://jans.io/oauth/config/fido2.write";
-
     public static final String ATTRIBUTES_READ_ACCESS = "https://jans.io/oauth/config/attributes.readonly";
     public static final String ATTRIBUTES_WRITE_ACCESS = "https://jans.io/oauth/config/attributes.write";
     public static final String ATTRIBUTES_DELETE_ACCESS = "https://jans.io/oauth/config/attributes.delete";
@@ -28,6 +25,9 @@ public class ApiAccessConstants {
 
     public static final String CACHE_READ_ACCESS = "https://jans.io/oauth/config/cache.readonly";
     public static final String CACHE_WRITE_ACCESS = "https://jans.io/oauth/config/cache.write";
+
+    public static final String MESSAGE_READ_ACCESS = "https://jans.io/oauth/config/message.readonly";
+    public static final String MESSAGE_WRITE_ACCESS = "https://jans.io/oauth/config/message.write";
 
     public static final String SMTP_READ_ACCESS = "https://jans.io/oauth/config/smtp.readonly";
     public static final String SMTP_WRITE_ACCESS = "https://jans.io/oauth/config/smtp.write";
@@ -92,5 +92,11 @@ public class ApiAccessConstants {
     public static final String CLIENT_AUTHORIZATIONS_READ_ACCESS = "https://jans.io/oauth/client/authorizations.readonly";
     public static final String CLIENT_AUTHORIZATIONS_DELETE_ACCESS = "https://jans.io/oauth/client/authorizations.delete";
 
+    public static final String APP_VERSION_READ_ACCESS = "https://jans.io/oauth/config/app-version.readonly";
+    
+    public static final String JANS_ASSET_READ_ACCESS  = "https://jans.io/oauth/config/jans_asset-read";
+    public static final String JANS_ASSET_WRITE_ACCESS = "https://jans.io/oauth/config/jans_asset-write";
+    public static final String JANS_ASSET_DELETE_ACCESS = "https://jans.io/oauth/config/jans_asset-delete";
+    
     
 }

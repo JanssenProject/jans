@@ -71,6 +71,7 @@ public class ParClient extends BaseClient<ParRequest, ParResponse> {
         addReqParam(AuthorizeRequestParam.UI_LOCALES, uiLocalesAsString);
         addReqParam(AuthorizeRequestParam.CLAIMS_LOCALES, claimLocalesAsString);
         addReqParam(AuthorizeRequestParam.ID_TOKEN_HINT, getRequest().getAuthorizationRequest().getIdTokenHint());
+        addReqParam(AuthorizeRequestParam.AUTHORIZATION_DETAILS, getRequest().getAuthorizationRequest().getAuthorizationDetails());
         addReqParam(AuthorizeRequestParam.LOGIN_HINT, getRequest().getAuthorizationRequest().getLoginHint());
         addReqParam(AuthorizeRequestParam.ACR_VALUES, acrValuesAsString);
         addReqParam(AuthorizeRequestParam.CLAIMS, claimsAsString);

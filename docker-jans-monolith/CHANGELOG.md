@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.0.22-1](https://github.com/JanssenProject/jans/compare/docker-jans-monolith-v1.0.21-1...docker-jans-monolith-v1.0.22-1) (2024-01-22)
+
+
+### Bug Fixes
+
+* prepare for 1.0.22 release ([#7455](https://github.com/JanssenProject/jans/issues/7455)) ([4bf2562](https://github.com/JanssenProject/jans/commit/4bf2562050c86317658259c72bb641780a283579))
+
+## [1.0.21-1](https://github.com/JanssenProject/jans/compare/docker-jans-monolith-v1.0.20-1...docker-jans-monolith-v1.0.21-1) (2023-12-14)
+
+
+### Bug Fixes
+
+* prepare for 1.0.21 release ([#7008](https://github.com/JanssenProject/jans/issues/7008)) ([2132de6](https://github.com/JanssenProject/jans/commit/2132de6683f67bf22d5a863b149770d657073a83))
+
+## [1.0.20-1](https://github.com/JanssenProject/jans/compare/docker-jans-monolith-v1.0.19-1...docker-jans-monolith-v1.0.20-1) (2023-11-08)
+
+
+### Bug Fixes
+
+* **jans-pycloudlib:** incorrect persistence entry check for ldap and couchbase ([#6297](https://github.com/JanssenProject/jans/issues/6297)) ([87ac453](https://github.com/JanssenProject/jans/commit/87ac453c121b9bdd2dfd7cb4ebb7b8628f322474))
+* prepare for 1.0.20 release ([c6e806e](https://github.com/JanssenProject/jans/commit/c6e806eb31fed998d52cbef7a7d94c231d913102))
+
 ## [1.0.19-1](https://github.com/JanssenProject/jans/compare/docker-jans-monolith-v1.0.18-1...docker-jans-monolith-v1.0.19-1) (2023-10-11)
 
 

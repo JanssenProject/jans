@@ -21,7 +21,12 @@ Rotating Certificates and Keys in Kubernetes setup
 | -------------------------------- |
 | /etc/certs/web_https.crt         |
 | /etc/certs/web_https.key         |
-        
+
+!!! Note
+    During fresh installation, the config-job checks if SSL certificates and keys are mounted as files. 
+    If no mounted files are found, it attempts to download SSL certificates from the FQDN supplied. If the download is successful, an empty key file is generated.
+    If no mounted or downloaded files are found, it generates self-signed SSL certificates, CA certificates, and keys.
+
 ### Rotate
         
 1.  Create a file named `web-key-rotation.yaml` with the following contents :
@@ -130,7 +135,8 @@ kubectl apply -f load-web-key-rotation.yaml -n <jans-namespace>
     metadata:
       name: auth-key-rotation
     spec:
-      schedule: "0 */48 * * *"
+      # runs the job every 48 hours
+      schedule: "@every 48h"
       concurrencyPolicy: Forbid
       jobTemplate:
         spec:
@@ -164,42 +170,50 @@ kubectl apply -f load-web-key-rotation.yaml -n <jans-namespace>
     ```
 
 ## LDAP
-    
-!!! Note
-    Subject Alt Name must match opendj service.
-    
+
+!!! Warning
+    Starting from `1.0.20`, the `ghcr.io/janssenproject/jans/certmanager` image is no longer handle LDAP certificate and key rotation in favor of re-generating them manually.
+
 | Associated certificates and keys    |
 | ----------------------------------- |
 | /etc/certs/opendj.crt               |
 | /etc/certs/opendj.key               |   
-| /etc/certs/opendj.pem               |   
-| /etc/certs/opendj.pkcs12            |   
 
-1.  Create a file named `ldap-key-rotation.yaml` with the following contents :
+1.  Prepare cert and key for OpenDJ, for example:
 
-    ```yaml
-    apiVersion: batch/v1
-    kind: Job
-    metadata:
-      name: ldap-key-rotation
-    spec:
-      template:
-        metadata:
-          annotations:
-            sidecar.istio.io/inject: "false"              
-        spec:
-          restartPolicy: Never
-          containers:
-            - name: ldap-key-rotation
-              image: ghcr.io/janssenproject/jans/certmanager:replace-janssen-version-1
-              envFrom:
-              - configMapRef:
-                  name: janssen-config-cm
-              args: ["patch", "ldap", "--opts", "subj-alt-name:opendj", "--opts", "valid-to:365"] 
+    ```
+    openssl req -x509 -newkey rsa:2048 -sha256 -days 365 -nodes -keyout opendj.key -out opendj.crt -subj '/CN=demoexample.jans.io' -addext 'subjectAltName=DNS:ldap,DNS:opendj'
     ```
 
-2.  Apply job
+1.  Extract the contents of OpenDJ cert and key files as base64 string:
 
-    ```bash
-    kubectl apply -f ldap-key-rotation.yaml -n <jans-namespace>
-    ``` 
+    ```
+    OPENDJ_CERT_B64=$(base64 opendj.crt -w0)
+    OPENDJ_KEY_B64=$(base64 opendj.key -w0)
+    ```
+
+1.  Add the following yaml snippet to your `override.yaml` file, for example:
+
+    ```yaml
+    global:
+      cnPersistenceType: ldap
+      storageClass:
+        provisioner: kubernetes.io/aws-ebs
+      opendj:
+        enabled: true
+    config:
+      configmap:
+        # -- contents of OpenDJ cert file in base64-string
+        cnLdapCrt: <OPENDJ_CERT_B64>
+        # -- contents of OpenDJ key file in base64-string
+        cnLdapKey: <OPENDJ_KEY_B64>
+    ```
+
+1.  Rollout restart OpenDJ statefulset:
+
+    ```
+    kubectl -n <jans-namespace> rollout restart sts <opendj-statefulset-name>
+    ```
+
+    Wait until pods are re-deployed successfully (this will update OpenDJ certificate and key in Kubernetes secrets).
+    Afterwards, do rollout restart for other deployments/statefulsets to ensure latest OpenDJ certificate and key are pulled into pods.

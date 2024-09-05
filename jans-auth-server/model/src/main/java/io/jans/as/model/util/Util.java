@@ -6,25 +6,15 @@
 
 package io.jans.as.model.util;
 
-import java.io.IOException;
-import java.io.Serializable;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
-
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.AnnotationIntrospector;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
+import io.jans.as.model.common.HasParamName;
+import io.jans.orm.annotation.AttributeEnum;
+import io.jans.orm.model.base.LocalizedString;
+import io.jans.util.OxConstants;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -32,16 +22,14 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.databind.AnnotationIntrospector;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
-
-import io.jans.as.model.common.HasParamName;
-import io.jans.orm.annotation.AttributeEnum;
-import io.jans.orm.model.base.LocalizedString;
-import io.jans.util.OxConstants;
+import java.io.IOException;
+import java.io.Serializable;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.*;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -372,6 +360,19 @@ public class Util {
         for (Map.Entry<String, Object> entry : map.entrySet()) {
             if (entry.getValue() instanceof Serializable) {
                 result.put(entry.getKey(), (Serializable) entry.getValue());
+            }
+        }
+        return result;
+    }
+
+    public static Map<String, String> toSerializableMapOfStrings(Map<String, Object> map) {
+        Map<String, String> result = new HashMap<>();
+        if (map == null || map.isEmpty()) {
+            return result;
+        }
+        for (Map.Entry<String, Object> entry : map.entrySet()) {
+            if (entry.getValue() instanceof String) {
+                result.put(entry.getKey(), (String) entry.getValue());
             }
         }
         return result;

@@ -50,5 +50,3 @@ resource "jans_organization" "global" {
 - `base_dn` (String)
 - `dn` (String)
 - `id` (String) The ID of this resource.
-
-

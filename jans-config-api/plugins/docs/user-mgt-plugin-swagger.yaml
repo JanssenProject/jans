@@ -12,7 +12,6 @@ info:
 servers:
 - url: https://jans.io/
   description: The Jans server
-  variables: {}
 tags:
 - name: Configuration – User Management
 paths:
@@ -325,12 +324,24 @@ paths:
                     }
         "400":
           description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
         "401":
           description: Unauthorized
         "404":
           description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
         "500":
           description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
       security:
       - oauth2:
         - https://jans.io/oauth/config/user.write
@@ -529,10 +540,24 @@ paths:
                     }
         "400":
           description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
         "401":
           description: Unauthorized
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
         "500":
           description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
       security:
       - oauth2:
         - https://jans.io/oauth/config/user.write
@@ -859,6 +884,19 @@ components:
           type: array
           items:
             type: string
+        externalUid:
+          type: array
+          items:
+            type: string
+        authenticator:
+          $ref: '#/components/schemas/UserAuthenticatorList'
+        status:
+          type: string
+          enum:
+          - active
+          - inactive
+          - expired
+          - register
         customAttributes:
           type: array
           items:
@@ -873,15 +911,38 @@ components:
           type: string
         displayName:
           type: string
-        jansStatus:
-          type: string
         givenName:
           type: string
         userPassword:
           type: string
-        status:
-          type: string
         baseDn:
+          type: string
+    UserAuthenticator:
+      type: object
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        custom:
+          type: object
+          additionalProperties:
+            type: object
+    UserAuthenticatorList:
+      type: object
+      properties:
+        authenticators:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserAuthenticator'
+    ApiError:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        description:
           type: string
     UserPagedResult:
       type: object

@@ -8,18 +8,19 @@ import (
 // EngineConfiguration enables an alternative way to build authentication
 // flows in the Janssen server.
 type EngineConfiguration struct {
-	Enabled                     bool              `schema:"enabled" json:"enabled"`
-	RootDir                     string            `schema:"root_dir" json:"rootDir"`
-	TemplatesPath               string            `schema:"templates_path" json:"templatesPath"`
-	ScriptsPath                 string            `schema:"scripts_path" json:"scriptsPath"`
-	SerializerType              string            `schema:"serializer_type" json:"serializerType"`
-	MaxItemsLoggedInCollections int               `schema:"max_items_logged_in_collections" json:"maxItemsLoggedInCollections"`
-	PageMismatchErrorPage       string            `schema:"page_mismatch_error_page" json:"pageMismatchErrorPage"`
-	InterruptionErrorPage       string            `schema:"interruption_error_page" json:"interruptionErrorPage"`
-	CrashErrorPage              string            `schema:"crash_error_page" json:"crashErrorPage"`
-	FinishedFlowPage            string            `schema:"finished_flow_page" json:"finishedFlowPage"`
-	BridgeScriptPage            string            `schema:"bridge_script_page" json:"bridgeScriptPage"`
-	DefaultResponseHeaders      map[string]string `schema:"default_response_headers" json:"defaultResponseHeaders"`
+	Enabled                     bool   `schema:"enabled" json:"enabled"`
+	RootDir                     string `schema:"root_dir" json:"rootDir"`
+	TemplatesPath               string `schema:"templates_path" json:"templatesPath"`
+	ScriptsPath                 string `schema:"scripts_path" json:"scriptsPath"`
+	MaxItemsLoggedInCollections int    `schema:"max_items_logged_in_collections" json:"maxItemsLoggedInCollections"`
+	PageMismatchErrorPage       string `schema:"page_mismatch_error_page" json:"pageMismatchErrorPage"`
+	InterruptionErrorPage       string `schema:"interruption_error_page" json:"interruptionErrorPage"`
+	CrashErrorPage              string `schema:"crash_error_page" json:"crashErrorPage"`
+	FinishedFlowPage            string `schema:"finished_flow_page" json:"finishedFlowPage"`
+	BridgeScriptPage            string `schema:"bridge_script_page" json:"bridgeScriptPage"`
+	// TODO: we have to figure out a way to support this in the terraform schema
+	// SerializeRules              map[string][]string `schema:"serialize_rules" json:"serializeRules"`
+	DefaultResponseHeaders map[string]string `schema:"default_response_headers" json:"defaultResponseHeaders"`
 }
 
 // CibaEndUserNotificationConfig represents the configuration properties for
@@ -100,6 +101,11 @@ type TrustedIssuerConfig struct {
 	AutomaticallyGrantedScopes []string `schema:"automatically_granted_scopes" json:"automatically_granted_scopes"`
 }
 
+type LockMessageConfig struct {
+	EnableIDTokenMessages  bool   `schema:"enable_id_token_messages" json:"enableIDTokenMessages"`
+	IDTokenMessagesChannel string `schema:"id_token_messages_channel" json:"idTokenMessagesChannel"`
+}
+
 // AppConfiguration represents the Janssen authorization server
 // configuration properties
 type AppConfiguration struct {
@@ -115,6 +121,7 @@ type AppConfiguration struct {
 	EndSessionEndpoint                                        string                                `schema:"end_session_endpoint" json:"endSessionEndpoint"`
 	RegistrationEndpoint                                      string                                `schema:"registration_endpoint" json:"registrationEndpoint"`
 	JwksUri                                                   string                                `schema:"jwks_uri" json:"jwksUri"`
+	ArchivedJwksUri                                           string                                `schema:"archived_jwks_uri" json:"archivedJwksUri"`
 	OpenIDDiscoveryEndpoint                                   string                                `schema:"openid_discovery_endpoint" json:"openIdDiscoveryEndpoint"`
 	OpenIDConfigurationEndpoint                               string                                `schema:"openid_configuration_endpoint" json:"openIdConfigurationEndpoint"`
 	IDGenerationEndpoint                                      string                                `schema:"id_generation_endpoint" json:"idGenerationEndpoint"`
@@ -139,7 +146,9 @@ type AppConfiguration struct {
 	RequireRequestObjectEncryption                            bool                                  `schema:"require_request_object_encryption" json:"requireRequestObjectEncryption"`
 	RequirePkce                                               bool                                  `schema:"require_pkce" json:"requirePkce"`
 	AllowAllValueForRevokeEndpoint                            bool                                  `schema:"allow_all_value_for_revoke_endpoint" json:"allowAllValueForRevokeEndpoint"`
+	AllowRevokeForOtherClients                                bool                                  `schema:"allow_revoke_for_other_clients" json:"allowRevokeForOtherClients"`
 	SectorIdentifierCacheLifetimeInMinutes                    int                                   `schema:"sector_identifier_cache_lifetime_in_minutes" json:"sectorIdentifierCacheLifetimeInMinutes"`
+	ArchivedJwkLifetimeInSeconds                              int                                   `schema:"archived_jwk_lifetime_in_seconds" json:"archivedJwkLifetimeInSeconds"`
 	UmaConfigurationEndpoint                                  string                                `schema:"uma_configuration_endpoint" json:"umaConfigurationEndpoint"`
 	UmaRptAsJwt                                               bool                                  `schema:"uma_rpt_as_jwt" json:"umaRptAsJwt"`
 	UmaRptLifetime                                            int                                   `schema:"uma_rpt_lifetime" json:"umaRptLifetime"`
@@ -168,6 +177,12 @@ type AppConfiguration struct {
 	UserInfoSigningAlgValuesSupported                         []string                              `schema:"user_info_signing_alg_values_supported" json:"userInfoSigningAlgValuesSupported"`
 	UserInfoEncryptionAlgValuesSupported                      []string                              `schema:"user_info_encryption_alg_values_supported" json:"userInfoEncryptionAlgValuesSupported"`
 	UserInfoEncryptionEncValuesSupported                      []string                              `schema:"user_info_encryption_enc_values_supported" json:"userInfoEncryptionEncValuesSupported"`
+	IntrospectionSigningAlgValuesSupported                    []string                              `schema:"introspection_signing_alg_values_supported" json:"introspectionSigningAlgValuesSupported"`
+	IntrospectionEncryptionAlgValuesSupported                 []string                              `schema:"introspection_encryption_alg_values_supported" json:"introspectionEncryptionAlgValuesSupported"`
+	IntrospectionEncryptionEncValuesSupported                 []string                              `schema:"introspection_encryption_enc_values_supported" json:"introspectionEncryptionEncValuesSupported"`
+	TxTokenSigningAlgValuesSupported                          []string                              `schema:"tx_token_signing_alg_values_supported" json:"txTokenSigningAlgValuesSupported"`
+	TxTokenEncryptionAlgValuesSupported                       []string                              `schema:"tx_token_encryption_alg_values_supported" json:"txTokenEncryptionAlgValuesSupported"`
+	TxTokenEncryptionEncValuesSupported                       []string                              `schema:"tx_token_encryption_enc_values_supported" json:"txTokenEncryptionEncValuesSupported"`
 	IDTokenSigningAlgValuesSupported                          []string                              `schema:"id_token_signing_alg_values_supported" json:"idTokenSigningAlgValuesSupported"`
 	IDTokenEncryptionAlgValuesSupported                       []string                              `schema:"id_token_encryption_alg_values_supported" json:"idTokenEncryptionAlgValuesSupported"`
 	IDTokenEncryptionEncValuesSupported                       []string                              `schema:"id_token_encryption_enc_values_supported" json:"idTokenEncryptionEncValuesSupported"`
@@ -193,10 +208,15 @@ type AppConfiguration struct {
 	RequestUriBlockList                                       []string                              `schema:"request_uri_block_list" json:"requestUriBlockList"`
 	OpPolicyUri                                               string                                `schema:"op_policy_uri" json:"opPolicyUri"`
 	OpTosUri                                                  string                                `schema:"op_tos_uri" json:"opTosUri"`
+	CleanUpInactiveClientAfterHoursOfInactivity               int                                   `schema:"clean_up_inactive_client_after_hours_of_inactivity" json:"cleanUpInactiveClientAfterHoursOfInactivity"`
+	ClientPeriodicUpdateTimerInterval                         int                                   `schema:"client_periodic_update_timer_interval" json:"clientPeriodicUpdateTimerInterval"`
 	AuthorizationCodeLifetime                                 int                                   `schema:"authorization_code_lifetime" json:"authorizationCodeLifetime"`
 	RefreshTokenLifetime                                      int                                   `schema:"refresh_token_lifetime" json:"refreshTokenLifetime"`
+	TxTokenLifetime                                           int                                   `schema:"tx_token_lifetime" json:"txTokenLifetime"`
 	IDTokenLifetime                                           int                                   `schema:"id_token_lifetime" json:"idTokenLifetime"`
 	IDTokenFilterClaimsBasedOnAccessToken                     bool                                  `schema:"id_token_filter_claims_based_on_access_token" json:"idTokenFilterClaimsBasedOnAccessToken"`
+	SaveTokensInCache                                         bool                                  `schema:"save_tokens_in_cache" json:"saveTokensInCache"`
+	SaveTokensInCacheAndDontSaveInPersistence                 bool                                  `schema:"save_tokens_in_cache_and_dont_save_in_persistence" json:"saveTokensInCacheAndDontSaveInPersistence"`
 	AccessTokenLifetime                                       int                                   `schema:"access_token_lifetime" json:"accessTokenLifetime"`
 	CleanServiceInterval                                      int                                   `schema:"clean_service_interval" json:"cleanServiceInterval"`
 	CleanServiceBatchChunkSize                                int                                   `schema:"clean_service_batch_chunk_size" json:"cleanServiceBatchChunkSize"`
@@ -229,6 +249,7 @@ type AppConfiguration struct {
 	ExpirationNotificatorIntervalInSeconds                    int                                   `schema:"expiration_notificator_interval_in_seconds" json:"expirationNotificatorIntervalInSeconds"`
 	RedirectUrisRegexEnabled                                  bool                                  `schema:"redirect_uris_regex_enabled" json:"redirectUrisRegexEnabled"`
 	UseHighestLevelScriptIfAcrScriptNotFound                  bool                                  `schema:"use_highest_level_script_if_acr_script_not_found" json:"useHighestLevelScriptIfAcrScriptNotFound"`
+	AcrMappings                                               map[string]string                     `schema:"acr_mappings" json:"acrMappings"`
 	AuthenticationFiltersEnabled                              bool                                  `schema:"authentication_filters_enabled" json:"authenticationFiltersEnabled"`
 	ClientAuthenticationFiltersEnabled                        bool                                  `schema:"client_authentication_filters_enabled" json:"clientAuthenticationFiltersEnabled"`
 	ClientRegDefaultToCodeFlowWithRefresh                     bool                                  `schema:"client_reg_default_to_code_flow_with_refresh" json:"clientRegDefaultToCodeFlowWithRefresh"`
@@ -246,12 +267,12 @@ type AppConfiguration struct {
 	DisablePromptLogin                                        bool                                  `schema:"disable_prompt_login" json:"disablePromptLogin"`
 	DisablePromptConsent                                      bool                                  `schema:"disable_prompt_consent" json:"disablePromptConsent"`
 	SessionIdLifetime                                         int                                   `schema:"session_id_lifetime" json:"sessionIdLifetime"`
-	ServerSessionIdLifetime                                   int                                   `schema:"server_session_id_lifetime" json:"serverSessionIdLifetime"`
+	SessionIdCookieLifetime                                   int                                   `schema:"session_id_cookie_lifetime" json:"sessionIdCookieLifetime"`
 	ActiveSessionAuthorizationScope                           string                                `schema:"active_session_authorization_scope" json:"activeSessionAuthorizationScope"`
 	ConfigurationUpdateInterval                               int                                   `schema:"configuration_update_interval" json:"configurationUpdateInterval"`
 	LogNotFoundEntityAsError                                  bool                                  `schema:"log_not_found_entity_as_error" json:"logNotFoundEntityAsError"`
 	EnableClientGrantTypeUpdate                               bool                                  `schema:"enable_client_grant_type_update" json:"enableClientGrantTypeUpdate"`
-	DynamicGrantTypeDefault                                   []string                              `schema:"dynamic_grant_type_default" json:"dynamicGrantTypeDefault"`
+	GrantTypesSupportedByDynamicRegistration                  []string                              `schema:"grant_types_supported_by_dynamic_registration" json:"grantTypesSupportedByDynamicRegistration"`
 	CssLocation                                               string                                `schema:"css_location" json:"cssLocation"`
 	JsLocation                                                string                                `schema:"js_location" json:"jsLocation"`
 	ImgLocation                                               string                                `schema:"img_location" json:"imgLocation"`
@@ -270,15 +291,12 @@ type AppConfiguration struct {
 	KeyAlgsAllowedForGeneration                               []string                              `schema:"key_algs_allowed_for_generation" json:"keyAlgsAllowedForGeneration"`
 	StaticKid                                                 string                                `schema:"static_kid" json:"staticKid"`
 	StaticDecryptionKid                                       string                                `schema:"static_decryption_kid" json:"staticDecryptionKid"`
-	JansElevenTestModeToken                                   string                                `schema:"jans_eleven_test_mode_token" json:"jansElevenTestModeToken"`
-	JansElevenGenerateKeyEndpoint                             string                                `schema:"jans_eleven_generate_key_endpoint" json:"jansElevenGenerateKeyEndpoint"`
-	JansElevenSignEndpoint                                    string                                `schema:"jans_eleven_sign_endpoint" json:"jansElevenSignEndpoint"`
-	JansElevenVerifySignatureEndpoint                         string                                `schema:"jans_eleven_verify_signature_endpoint" json:"jansElevenVerifySignatureEndpoint"`
-	JansElevenDeleteKeyEndpoint                               string                                `schema:"jans_eleven_delete_key_endpoint" json:"jansElevenDeleteKeyEndpoint"`
 	IntrospectionAccessTokenMustHaveUmaProtectionScope        bool                                  `schema:"introspection_access_token_must_have_uma_protection_scope" json:"introspectionAccessTokenMustHaveUmaProtectionScope"`
 	IntrospectionAccessTokenMustHaveIntrospectionScope        bool                                  `schema:"introspection_access_token_must_have_introspection_scope" json:"introspectionAccessTokenMustHaveIntrospectionScope"`
 	IntrospectionSkipAuthorization                            bool                                  `schema:"introspection_skip_authorization" json:"introspectionSkipAuthorization"`
+	IntrospectionRestrictBasicAuthnToOwnTokens                bool                                  `schema:"introspection_restrict_basic_authn_to_own_tokens" json:"introspectionRestrictBasicAuthnToOwnTokens"`
 	EndSessionWithAccessToken                                 bool                                  `schema:"end_session_with_access_token" json:"endSessionWithAccessToken"`
+	DisablePromptCreate                                       bool                                  `schema:"disable_prompt_create" json:"disablePromptCreate"`
 	CookieDomain                                              string                                `schema:"cookie_domain" json:"cookieDomain"`
 	EnabledOAuthAuditLogging                                  bool                                  `schema:"enabled_oauth_audit_logging" json:"enabledOAuthAuditLogging"`
 	JmsBrokerUriSet                                           []string                              `schema:"jms_broker_uri_set" json:"jmsBrokerUriSet"`
@@ -359,7 +377,9 @@ type AppConfiguration struct {
 	DpopJtiCacheTime                                          int                                   `schema:"dpop_jti_cache_time" json:"dpopJtiCacheTime"`
 	DpopUseNonce                                              bool                                  `schema:"dpop_use_nonce" json:"dpopUseNonce"`
 	DpopNonceCacheTime                                        int                                   `schema:"dpop_nonce_cache_time" json:"dpopNonceCacheTime"`
+	DpopJktForceForAuthorizationCode                          bool                                  `schema:"dpop_jkt_force_for_authorization_code" json:"dpopJktForceForAuthorizationCode"`
 	AllowIdTokenWithoutImplicitGrantType                      bool                                  `schema:"allow_id_token_without_implicit_grant_type" json:"allowIdTokenWithoutImplicitGrantType"`
+	ForceRopcInAuthorizationEndpoint                          bool                                  `schema:"force_ropc_in_authorization_endpoint" json:"forceRopcInAuthorizationEndpoint"`
 	DiscoveryCacheLifetimeInMinutes                           int                                   `schema:"discovery_cache_lifetime_in_minutes" json:"discoveryCacheLifetimeInMinutes"`
 	DiscoveryAllowedKeys                                      []string                              `schema:"discovery_allowed_keys" json:"discoveryAllowedKeys"`
 	DiscoveryDenyKeys                                         []string                              `schema:"discovery_deny_keys" json:"discoveryDenyKeys"`
@@ -378,6 +398,7 @@ type AppConfiguration struct {
 	HttpLoggingResponseBodyContent                            bool                                  `schema:"http_logging_response_body_content" json:"httpLoggingResponseBodyContent"`
 	Fapi                                                      bool                                  `schema:"fapi" json:"fapi"`
 	SkipAuthenticationFilterOptionsMethod                     bool                                  `schema:"skip_authentication_filter_options_method" json:"skipAuthenticationFilterOptionsMethod"`
+	LockMessageConfig                                         LockMessageConfig                     `schema:"lock_message_config" json:"lockMessageConfig"`
 }
 
 // GetAppConfiguration returns all Janssen authorization server configuration

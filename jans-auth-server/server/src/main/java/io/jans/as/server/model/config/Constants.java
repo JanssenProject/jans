@@ -28,7 +28,9 @@ public final class Constants {
 
     public static final String OX_AUTH_SCOPE_TYPE_OPENID = "openid";
     public static final String REVOKE_SESSION_SCOPE = "revoke_session";
+    public static final String GLOBAL_TOKEN_REVOCATION_SCOPE = "global_token_revocation";
     public static final String AUTHORIZATION_CHALLENGE_SCOPE = "authorization_challenge";
+    public static final String REVOKE_ANY_TOKEN_SCOPE = "revoke_any_token";
 
     public static final String REMOTE_IP = "remote_ip";
     public static final String AUTHENTICATED_USER = "auth_user";

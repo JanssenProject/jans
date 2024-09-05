@@ -24,20 +24,18 @@ When provider is null or provider.enabled is false
 
 //Launch matching flow and retrieve profile
 Log "Initiating external authentication for identity provider '%'" providerId
-obj = Trigger $provider.flowQname
+obj = Trigger $provider.flowQname provider
 
 When obj.success is false
     Finish obj
 
+field = Call io.jans.inbound.Utils#getMappingField provider.mappingClassField
 idProc = Call io.jans.inbound.IdentityProcessor#new provider
-temp = Call io.jans.agama.engine.service.ActionService#class
-temp = Call io.jans.service.cdi.util.CdiUtil#bean temp
-temp = Call temp getClassLoader
+profile = Call idProc applyMapping obj.data field
 
-profile = Call idProc applyMapping obj.data temp
+field = null
 //In profile, every key is associated to a list
 Log "@d Mapped profile is\n" profile
-temp = null
 
 When profile.uid is null or profile.uid.empty is true
     obj = { success: false, error: "Mapped profile misses attribute value for 'uid'" }

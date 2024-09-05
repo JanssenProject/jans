@@ -13,7 +13,6 @@
     "name": "qaattribute",
     "origin": "jansPerson",
     "jansMultivaluedAttr": false,
-    "requred": false,
     "status": "active",
     "urn": "urn:mace:dir:attribute-def:qaattribute",
     "userCanAccess": true,

@@ -1,5 +1,43 @@
 # Changelog
 
+## [1.1.2](https://github.com/JanssenProject/terraform-provider-jans/compare/v1.1.0...v1.1.2) (2024-05-29)
+
+
+### Bug Fixes
+
+* update API and sync with jans updates 
+* update docs 
+
+## [1.1.0](https://github.com/JanssenProject/terraform-provider-jans/compare/v0.8.2...v1.1.0) (2024-03-12)
+
+
+### Features
+
+* add KC and sync with upstream APIs 
+
+
+### Bug Fixes
+
+* oidc backchannel_user_code_parameter schema type 
+* sync with upstream 
+* update readme 
+
+## [0.8.2](https://github.com/JanssenProject/terraform-provider-jans/compare/v0.8.1...v0.8.2) (2023-11-09)
+
+
+### Bug Fixes
+
+* oidc backchannel_user_code_parameter schema type 
+
+## [0.8.1](https://github.com/JanssenProject/terraform-provider-jans/compare/v0.8.0...v0.8.1) (2023-10-26)
+
+
+### Bug Fixes
+
+* properly handle agama deployment autoconfigure 
+* update provider to match latest API 
+* updates in accordance to latest API changes 
+
 ## [0.8.0](https://github.com/JanssenProject/terraform-provider-jans/compare/v0.7.3...v0.8.0) (2023-09-27)
 
 

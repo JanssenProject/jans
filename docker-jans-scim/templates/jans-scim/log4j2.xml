@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="ERROR">
     <Properties>
-        <Property name="scim.log.console.prefix" value="scim" />
+        <Property name="scim.log.console.prefix" value="jans-scim" />
     </Properties>
     <Appenders>
         <Console name="STDOUT" target="SYSTEM_OUT">

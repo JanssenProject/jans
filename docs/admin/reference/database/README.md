@@ -19,31 +19,133 @@ Jans has next persistence modules out-of-the-box:
 -  [Couchbase](./cb-config.md)
 -  [Spanner](./spanner-config.md)
 -  [MySQL](./mysql-config.md)
--  [PostreSQL](./pgsql-config.md)
--  [MariaDB](./mariadb.md)
+-  [PostgreSQL](./pgsql-config.md)
 -  [Hybrid](./pgsql-config.md). This is virtual DB layer which allows to combine few DB types based on record type.
 
 ## Configuration
 
-Type of DB layer is specified in */etc/jans/conf/*:
+On a Janssen Server instance 
+the type of persistence(DB) used is specified 
+in `/etc/jans/conf/jans.properties` using the entry as show below:
 
 ```
 persistence.type=ldap
 ```
 
-The list of allowed property values is next: **ldap, couchbase, sql, spanner, hybrid**. It's defined in this [list](https://github.com/JanssenProject/jans/blob/main/jans-orm/core/src/main/java/io/jans/orm/PersistenceEntryManager.java#L48).
+Values for property `persistence.type` is set during the installation and based
+on choice of persistence(DB) type, it can be one of these supported values:
 
-The corresponding list of configuration files for these persistence types are:
+- `ldap`
+- `couchbase`
+- `sql` 
+- `spanner` 
+- `hybrid`. 
 
-- **jans-ldap.properties**
-- **jans-couchbase.properties**
-- **jans-spanner.properties**
-- **jans-sql.properties**
-- **jans-hybrid.properties**
+!!! abstract "Code Connect"
+     
+     In Janssen Server code base, the list of supported persistence types can be
+     found [here](https://github.com/JanssenProject/jans/blob/main/jans-orm/core/src/main/java/io/jans/orm/PersistenceEntryManager.java#L48).
 
-These files contains DB specific properties and format of them is specified in the relevant sections of this documentation.
+Based on persistent type in use, the corresponding properties file with relevant
+configuration properties will be available on Janssen Server instance under
+the directory `/etc/jans/conf/`. List of configuration files for these 
+persistence types are:
 
-The applications reloads configuration from these files after start up or on files date time modification after initialization.
+- `jans-ldap.properties`
+- `jans-couchbase.properties`
+- `jans-spanner.properties`
+- `jans-sql.properties`
+- `jans-hybrid.properties`
+
+The application reloads configuration from these files after start up or on 
+files date time modification after initialization.
+
+### Overriding DB Configuration Properties
+
+Configuration properties and the values specified under `.properties` files
+discussed in [above](#configuration) section, can be overridden by dynamically
+passing them as a JVM parameter or as an environment variable.
+
+#### Cloud-native Installations
+
+For Janssen Server installations using Helm, Docker, or local Kubernetes,
+dynamically passing DB configuration properties can be done by
+specifying environment variables.
+
+For example:
+
+- Override connection URI for one specific component. For instance,
+  `jans-auth` component
+  ```shell
+  CN_AUTH_JAVA_OPTIONS=-Dconnection.uri=new-mysql-uri
+  ```
+- Override connection URI globally for all Janssen Server modules
+  ```shell
+  CN_JAVA_OPTIONS=-Dconnection.uri=new-mysql-uri
+  ```
+  or by exporting system-level environment variable as below
+  ```shell
+  CONNECTION_URI=new-mysql-uri
+  ```
+For a Helm installation you can globally override hte URI in the `values.yaml`
+
+```yaml
+global:
+  usrEnvs:
+    normal:
+      CN_JAVA_OPTIONS: -Dconnection.uri=jdbc:postgresql://postgresql.sql.svc.cluster.local:5432/jansdb
+```
+
+Or for a specific component like the auth server:
+
+```yaml
+auth-server:
+  usrEnvs:
+    normal:
+      CN_JAVA_OPTIONS: -Dconnection.uri=jdbc:postgresql://postgresql.sql.svc.cluster.local:5432/jansdb
+```
+
+#### VM Installations
+
+For the Janssen Server installed on a VM, a new parameter or parameters with override
+values can be added either at the global level for all modules or specific to
+certain modules only. The steps
+below show how to override the DB connection URI:
+
+##### Globally For All Modules
+
+Define environment variable at the VM level, such as shown in the example below:
+
+```shell
+export CONNECTION_URI=jdbc:postgresql://localhost:5432/jansdb
+```
+
+This will affect all Janssen Server modules, where properties like
+`connection.uri` or `connection-uri` will be overridden with the new value.
+
+##### Module Specific
+
+Properties can also be added/overridden at the module level as well. To do this,
+pass new values either as JVM parameters or as environment variables at
+the module level.
+
+Janssen Server module level configuration is stored under `/etc/default/`
+directory which contains config files for Janssen modules. For example
+`/etc/default/jans-auth` file contains configuration for `jans-auth` module.
+
+- Update the `JAVA_OPTIONS` parameter to add the value of the new connection
+  URI against the `connection.uri` parameter.
+  For example:
+  ```shell
+  -Dconnection.uri=jdbc:postgresql://localhost:5432/jansdb`
+  ```
+- Using the environment variable, export a new variable, as shown in the example
+  below:
+  ```shell
+  export CONNECTION_URI=jdbc:postgresql://localhost:5432/jansdb
+  ```
+  The exported variable above, `CONNECTION_URI`, will override the value
+  provided by `connection.uri` or `connection-uri` parameters.
 
 ## Architecture
 

@@ -35,18 +35,6 @@
     "installed": false,
     "name": "jans-scim"
   },
-  "jans-eleven": {
-    "memory": {
-      "max_allowed_mb": 1024,
-      "jvm_heap_ration": 0.7,
-      "ratio": 0.10
-    },
-    "jetty": {
-      "modules": "server,deploy,resources,http,http-forwarded,console-capture,jsp,websocket"
-    },
-    "installed": false,
-    "name": "jans-eleven"
-  },
   "jans-config-api": {
     "memory": {
       "max_allowed_mb": 1024,
@@ -95,5 +83,17 @@
     },
     "installed": false,
     "name": "jans-keycloak-link"
+  },
+  "jans-lock": {
+    "memory": {
+      "max_allowed_mb": 1024,
+      "jvm_heap_ration": 0.7,
+      "ratio": 0.10
+    },
+    "jetty": {
+      "modules": "server,deploy,resources,http,http-forwarded,console-capture,jsp,websocket"
+    },
+    "installed": false,
+    "name": "jans-lock"
   }
 }

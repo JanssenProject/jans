@@ -5,7 +5,7 @@
 	<groupId>io.jans</groupId>
 	<artifactId>jans-config-api-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>1.0.20-SNAPSHOT</version>
+	<version>1.1.5-SNAPSHOT</version>
 	<name>jans-config-api-parent</name>
 
 	<distributionManagement>
@@ -26,18 +26,17 @@
 		<surefire-plugin.version>3.0.0-M5</surefire-plugin.version>
 
 		<jans.version>${project.version}</jans.version>
-
+		
 		<resteasy.version>6.0.3.Final</resteasy.version>
 		<jackson.version>2.13.2</jackson.version>
 		<jetty.version>11.0.15</jetty.version>
 		<weld.version>4.0.3.Final</weld.version>	
 
-		<microprofile.config.version>3.0.1</microprofile.config.version>
+		<microprofile.config.version>3.1</microprofile.config.version>
 		<microprofile.health.version>4.0</microprofile.health.version>
 		<microprofile.metrics.version>4.0</microprofile.metrics.version>
 		<microprofile.rest.client.version>3.0</microprofile.rest.client.version>
 		<smallrye.config.version>3.0.0-RC1</smallrye.config.version>
-		<smallrye.health.version>3.0.1</smallrye.health.version>
 		<smallrye.metrics.version>4.0.0-RC1</smallrye.metrics.version>
 		<org.jboss.resteasy.client.microprofile.version>4.7.5.Final</org.jboss.resteasy.client.microprofile.version>
 
@@ -47,6 +46,7 @@
 		<jupiter.version>5.7.0</jupiter.version>
 		<cucumber.version>3.8.0</cucumber.version>
 		<jacoco.version>0.8.10</jacoco.version>
+		<mapstruct.version>1.5.3.Final</mapstruct.version>
 		<swagger.version>2.2.7</swagger.version>
 
 		<sonar.projectKey>JanssenProject_jans-config-api</sonar.projectKey>
@@ -54,10 +54,10 @@
 		<sonar.organization>janssenproject</sonar.organization>
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 
-		<swagger-maven-plugin-jakarta>2.2.7</swagger-maven-plugin-jakarta>
+		<swagger-maven-plugin-jakarta>2.2.19</swagger-maven-plugin-jakarta>
 		<swagger-models-jakarta>2.2.7</swagger-models-jakarta>
 		
-        <apache.james.version>0.8.3</apache.james.version>
+        <apache.james.version>0.8.10</apache.james.version>
 	</properties>
 
 	<prerequisites>
@@ -244,21 +244,6 @@
 
 			<!-- Security -->
 			<dependency>
-				<groupId>org.bouncycastle</groupId>
-				<artifactId>bcprov-jdk15on</artifactId>
-				<version>1.70</version>
-			</dependency>
-			<dependency>
-				<groupId>org.bouncycastle</groupId>
-				<artifactId>bcpkix-jdk15on</artifactId>
-				<version>1.70</version>
-			</dependency>
-			<dependency>
-				<groupId>com.nimbusds</groupId>
-				<artifactId>nimbus-jose-jwt</artifactId>
-				<version>9.28</version>
-			</dependency>
-			<dependency>
 				<groupId>org.bitbucket.b_c</groupId>
 				<artifactId>jose4j</artifactId>
 				<version>0.9.3</version>
@@ -390,11 +375,6 @@
 				<artifactId>commons-collections4</artifactId>
 				<version>4.1</version>
 			</dependency>
-			<dependency>
-				<groupId>org.json</groupId>
-				<artifactId>json</artifactId>
-				<version>20230227</version>
-			</dependency>
 			
             <!-- apache james -->
             <dependency>
@@ -411,7 +391,15 @@
             	<groupId>org.apache.james</groupId>
             	<artifactId>apache-mime4j-core</artifactId>
             	<version>${apache.james.version}</version>
-            </dependency>      			
+            </dependency>  
+			
+            <!-- mapstruct-->
+            <dependency>
+            	<groupId>org.mapstruct</groupId>
+            	<artifactId>mapstruct</artifactId>
+				<version>${mapstruct.version}</version> 
+            </dependency>
+  			
 
 			<!-- Swagger -->
 			<dependency>
@@ -437,6 +425,13 @@
 					<version>${compiler-plugin.version}</version>
 					<configuration>
 						<forceJavacCompilerUse>true</forceJavacCompilerUse>
+						<annotationProcessorPaths>  
+				            <path>  
+				                <groupId>org.mapstruct</groupId>  
+				                <artifactId>mapstruct-processor</artifactId>  
+				                <version>${mapstruct.version}</version>  
+				            </path>  
+                        </annotationProcessorPaths>  
 					</configuration>
 				</plugin>
 				<plugin>
@@ -470,7 +465,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-site-plugin</artifactId>
-					<version>4.0.0-M7</version>
+					<version>4.0.0-M16</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -508,6 +503,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
+					<version>3.8.0</version>
 					<configuration>
 						<failOnError>false</failOnError>
 					</configuration>

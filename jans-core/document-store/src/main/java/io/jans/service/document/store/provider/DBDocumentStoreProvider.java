@@ -1,36 +1,44 @@
 package io.jans.service.document.store.provider;
 
-import io.jans.orm.PersistenceEntryManager;
-import io.jans.service.document.store.conf.DBDocumentStoreConfiguration;
-import io.jans.service.document.store.conf.DocumentStoreConfiguration;
-import io.jans.service.document.store.conf.DocumentStoreType;
-import io.jans.service.document.store.service.DBDocumentService;
-import io.jans.service.document.store.service.Document;
-import io.jans.util.StringHelper;
-import jakarta.annotation.PostConstruct;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import org.apache.commons.codec.binary.Base64InputStream;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.jans.orm.PersistenceEntryManager;
+import io.jans.service.document.store.conf.DBDocumentStoreConfiguration;
+import io.jans.service.document.store.conf.DocumentStoreConfiguration;
+import io.jans.service.document.store.conf.DocumentStoreType;
+import io.jans.service.document.store.exception.DocumentException;
+import io.jans.service.document.store.exception.WriteDocumentException;
+import io.jans.service.document.store.model.Document;
+import io.jans.service.document.store.service.DBDocumentService;
+import io.jans.util.StringHelper;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+
 /**
  * @author Shekhar L. on 29/10/2022
  */
 @ApplicationScoped
-public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentStoreProvider> {
+public class DBDocumentStoreProvider extends DocumentStoreProvider<Document> {
+
+	protected static final String[] FIND_DOCUMENT_CHECK_ATTRIBUTES = { "dn", "inum", "jansRevision", "displayName",
+			"jansHash", "jansEnabled" };
 
 	@Inject
 	private Logger log;
 
 	@Inject
 	private DBDocumentService documentService;
-	
+
 	@Inject
 	private DocumentStoreConfiguration documentStoreConfiguration;
 
@@ -39,172 +47,228 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentSto
 	public DocumentStoreType getProviderType() {
 		return DocumentStoreType.DB;
 	}
-	
+
 	@PostConstruct
 	public void init() {
 		this.dbDocumentStoreConfiguration = documentStoreConfiguration.getDbConfiguration();
 	}
-	
-	public void configure(DocumentStoreConfiguration documentStoreConfiguration, PersistenceEntryManager persistenceEntryManager) {
+
+	public void configure(DocumentStoreConfiguration documentStoreConfiguration,
+			PersistenceEntryManager persistenceEntryManager) {
 		this.log = LoggerFactory.getLogger(DBDocumentStoreProvider.class);
 		this.documentStoreConfiguration = documentStoreConfiguration;
-		if(documentService == null) {
+		if (documentService == null) {
 			this.documentService = new DBDocumentService(persistenceEntryManager);
 		}
 	}
 
 	@Override
 	public void create() {
-		
+
 	}
 
 	@Override
 	public void destroy() {
-		
+
 	}
 
 	@Override
-	public boolean hasDocument(String DisplayName) {
-		log.debug("Has document: '{}'", DisplayName);
-		if (StringHelper.isEmpty(DisplayName)) {
+	public boolean hasDocument(String path) {
+		log.debug("Has document: '{}'", path);
+		if (StringHelper.isEmpty(path)) {
 			throw new IllegalArgumentException("Specified path should not be empty!");
-		}		
+		}
 		Document oxDocument = null;
 		try {
-			oxDocument = documentService.getDocumentByDisplayName(DisplayName);
-			if(oxDocument != null) {
+			oxDocument = documentService.getDocumentByDisplayName(path);
+			if (oxDocument != null) {
 				return true;
 			}
 		} catch (Exception e) {
-			log.error("Failed to check if path '" + DisplayName + "' exists in repository", e);
+			log.error("Failed to check if path '" + path + "' exists in repository", e);
+			throw new DocumentException(e);
 		}
 
 		return false;
 	}
 
 	@Override
-	public boolean saveDocument(String name, String documentContent, Charset charset, List<String> moduleList) {
-		log.debug("Save document: '{}'", name);
+	public String saveDocument(String path, String description, String documentContent, Charset charset, List<String> moduleList) {
+		log.debug("Save document: '{}'", path);
 		Document oxDocument = new Document();
 		oxDocument.setDocument(documentContent);
-		oxDocument.setDisplayName(name);		
+		oxDocument.setDisplayName(path);
 		try {
-			try {
-				oxDocument.setInum(documentService.generateInumForNewDocument());	
-				String dn = "inum="+ oxDocument.getInum() +",ou=document,o=gluu";
+				oxDocument.setInum(documentService.generateInumForNewDocument());
+				String dn = "inum=" + oxDocument.getInum() + ",ou=document,o=jans";
 				oxDocument.setDn(dn);
-				oxDocument.setDescription(name);
-				oxDocument.setJansEnabled("true");
-				oxDocument.setJansModuleProperty(moduleList);	  
+				oxDocument.setDescription(description);
+				oxDocument.setEnabled(true);
+				oxDocument.setService(moduleList);
 				documentService.addDocument(oxDocument);
-				return true;
-			} finally {
-			}
+				return path;
 		} catch (Exception ex) {
-			log.error("Failed to write document to file '{}'", name, ex);
+			log.error("Failed to write document to file '{}'", path, ex);
+			throw new WriteDocumentException(ex);
 		}
-
-		return false;
 	}
 
 	@Override
-	public boolean saveDocumentStream(String name, InputStream documentStream, List <String> moduleList) {
-		
+	public String saveDocumentStream(String path, String description, InputStream documentStream, List<String> moduleList) {
+
 		Document oxDocument = new Document();
-		oxDocument.setDisplayName(name);
-		
-		 try {
+		oxDocument.setDisplayName(path);
+
+		try {
 			String documentContent = new String(documentStream.readAllBytes(), StandardCharsets.UTF_8);
 			oxDocument.setDocument(documentContent);
 			String inum = documentService.generateInumForNewDocument();
-			oxDocument.setInum(inum);	
-			String dn = "inum="+ oxDocument.getInum() +",ou=document,o=gluu";
+			oxDocument.setInum(inum);
+			String dn = "inum=" + oxDocument.getInum() + ",ou=document,o=jans";
 			oxDocument.setDn(dn);
-			oxDocument.setDescription(name);
-			oxDocument.setJansEnabled("true");
-			oxDocument.setJansModuleProperty(moduleList);
+			oxDocument.setDescription(description);
+			oxDocument.setEnabled(true);
+			oxDocument.setService(moduleList);
 			documentService.addDocument(oxDocument);
-			return true;
+			return path;
 		} catch (Exception e) {
-			log.error("Failed to write document from stream to file '{}'", name, e);
-		}	
-
-		return false;
+			log.error("Failed to write document from stream to file '{}'", path, e);
+			throw new WriteDocumentException(e);
+		}
 	}
 
+	@Override
+	public String saveBinaryDocumentStream(String path, String description, InputStream documentStream,
+			List<String> moduleList) {
+		return saveDocumentStream(path, description, new Base64InputStream(documentStream, true), moduleList);
+	}
 
 	@Override
 	public String readDocument(String name, Charset charset) {
-		log.debug("Read document: '{}'", name);		
+		log.debug("Read document: '{}'", name);
 		Document oxDocument;
 		try {
 			oxDocument = documentService.getDocumentByDisplayName(name);
-			if(oxDocument != null) {
+			if (oxDocument != null) {
 				return oxDocument.getDocument();
 			}
 		} catch (Exception e) {
 			log.error("Failed to read document as stream from file '{}'", name, e);
+			throw new DocumentException(e);
 		}
-		return null;		
+		return null;
 	}
 
 	@Override
 	public InputStream readDocumentAsStream(String name) {
 		log.debug("Read document as stream: '{}'", name);
-		String filecontecnt = readDocument(name, null);
-		if (filecontecnt == null) {
-			log.error("Document file '{}' isn't exist", name);
+		String fileData = readDocument(name, null);
+		if (fileData == null) {
+			log.error("Document file '{}' isn't empty", name);
 			return null;
 		}
 
-		InputStream InputStream = new ByteArrayInputStream(filecontecnt.getBytes());
-		return InputStream;
+		return new ByteArrayInputStream(fileData.getBytes());     
 	}
 
 	@Override
-	public boolean renameDocument(String currentDisplayName, String destinationDisplayName) {
-		log.debug("Rename document: '{}' -> '{}'", currentDisplayName, destinationDisplayName);
+	public InputStream readBinaryDocumentAsStream(String path) {
+		return new Base64InputStream(readDocumentAsStream(path), false);
+	}
+
+	@Override
+	public String renameDocument(String currentPath, String destinationPath) {
+		log.debug("Rename document: '{}' -> '{}'", currentPath, destinationPath);
 		Document oxDocument;
 		try {
-			oxDocument = documentService.getDocumentByDisplayName(currentDisplayName);
+			oxDocument = documentService.getDocumentByDisplayName(currentPath);
 			if (oxDocument == null) {
-				log.error("Document doesn't Exist with the name  '{}'", currentDisplayName);
-				return false;
+				log.error("Document doesn't Exist with the name  '{}'", currentPath);
+				return null;
 			}
-			oxDocument.setDisplayName(destinationDisplayName);
+			oxDocument.setDisplayName(destinationPath);
 			documentService.updateDocument(oxDocument);
-			Document oxDocumentDestination = documentService.getDocumentByDisplayName(destinationDisplayName);
-			if(oxDocumentDestination == null) {
-				log.error("Failed to rename to destination file '{}'", destinationDisplayName);
-				return false;
+			Document oxDocumentDestination = documentService.getDocumentByDisplayName(destinationPath);
+			if (oxDocumentDestination == null) {
+				log.error("Failed to rename to destination file '{}'", destinationPath);
+				return null;
 			}
 		} catch (Exception e) {
-			log.error("Failed to rename to destination file '{}'", destinationDisplayName);
+			log.error("Failed to rename to destination file '{}'", destinationPath);
+			throw new WriteDocumentException(e);
 		}
-		return true;
+
+		return destinationPath;
 	}
 
 	@Override
-	public boolean removeDocument(String inum) {
-		log.debug("Remove document: '{}'", inum);
+	public boolean removeDocument(String path) {
+		log.debug("Remove document: '{}'", path);
 		Document oxDocument;
 		try {
-			oxDocument = documentService.getDocumentByInum(inum);
-			if(oxDocument == null) {
-				log.error(" document not exist file '{}'", inum);
+			oxDocument = documentService.getDocumentByDisplayName(path);
+			if (oxDocument == null) {
+				log.error(" document not exist file '{}'", path);
 				return false;
 			}
-			
 			documentService.removeDocument(oxDocument);
-			Document checkDocument = documentService.getDocumentByInum(inum);
-			if(checkDocument == null) {
-				return true;
-			}
-			return false;
+			return true;
 		} catch (Exception e) {
-			log.error("Failed to remove document file '{}'", inum, e);
+			log.error("Failed to remove document file '{}'", path, e);
+			throw new DocumentException(e);
 		}
-		return false;
+	}
+
+	public String renameDocumentByDisplayName(String currentPath, String destinationPath) {
+		log.debug("Rename document: '{}' -> '{}'", currentPath, destinationPath);
+		Document oxDocument;
+		try {
+			oxDocument = documentService.getDocumentByDisplayName(currentPath);
+			if (oxDocument == null) {
+				log.error("Document doesn't Exist with the name  '{}'", currentPath);
+				return null;
+			}
+			oxDocument.setDisplayName(destinationPath);
+			documentService.updateDocument(oxDocument);
+			Document oxDocumentDestination = documentService.getDocumentByDisplayName(destinationPath);
+			if (oxDocumentDestination == null) {
+				log.error("Failed to rename to destination file '{}'", destinationPath);
+				return null;
+			}
+		} catch (Exception e) {
+			log.error("Failed to rename to destination file '{}'", destinationPath);
+			throw new WriteDocumentException(e);
+		}
+
+		return destinationPath;
+	}
+
+	public String readDocumentByDisplayName(String filePath) {
+		log.debug("Read document: '{}'", filePath);
+		Document oxDocument;
+		try {
+			oxDocument = documentService.getDocumentByDisplayName(filePath);
+			if (oxDocument != null) {
+				return oxDocument.getDocument();
+			}
+		} catch (Exception e) {
+			log.error("Failed to location of document as stream from file path'{}'", filePath, e);
+			throw new DocumentException(e);
+		}
+		return null;
+	}
+
+	@Override
+	public List<Document> findDocumentsByModules(List<String> moduleList, String ... attributes) {
+		log.debug("Find documents for modules: '{}'", moduleList);
+		List<Document> oxDocuments;
+		try {
+			oxDocuments = documentService.findDocumentsListByModules(moduleList, attributes);
+			return oxDocuments;
+		} catch (Exception e) {
+			log.error("Failed to find documents for modules '{}'", moduleList, e);
+			throw new DocumentException(e);
+		}
 	}
 
 }

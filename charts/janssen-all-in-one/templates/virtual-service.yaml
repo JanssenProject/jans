@@ -1,0 +1,42 @@
+{{- if .Values.istio.ingress }}
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ .Release.Name }}-istio-aio
+  namespace: {{.Release.Namespace}}
+  labels:
+    app: {{ .Release.Name }}-{{ include "janssen-all-in-one.name" . }}-aio
+{{ include "janssen-all-in-one.labels" . | indent 4 }}
+{{- if .Values.additionalLabels }}
+{{ toYaml .Values.additionalLabels | indent 4 }}
+{{- end }}
+{{- if or (.Values.additionalAnnotations) (.Values.customAnnotations.virtualService) }}
+  annotations:
+{{- if .Values.additionalAnnotations }}
+{{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.customAnnotations.virtualService }}
+{{ toYaml .Values.customAnnotations.virtualService | indent 4 }}
+{{- end }}
+{{- end }}
+spec:
+  hosts:
+  - {{ .Values.fqdn }}
+{{- if .Values.istio.gateways }}
+  gateways:
+{{ toYaml .Values.istio.gateways | indent 2 }}
+{{- else }}
+  gateways:
+  - {{ .Release.Name }}-global-gtw
+{{- end }}
+  http:
+  - name: "{{ .Release.Name }}-aio"
+    match:
+    - uri:
+        prefix: /
+    route:
+      - destination:
+          host: {{ .Values.service.name }}.{{ .Release.Namespace }}.svc.cluster.local
+          port:
+            number: 8080
+{{- end }}

@@ -13,7 +13,8 @@ from setup_app.installers.jetty import JettyInstaller
 class JansKCLinkInstaller(JettyInstaller):
 
     source_files = [
-            (os.path.join(Config.dist_jans_dir, 'jans-keycloak-link.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-keycloak-link-server/{0}/jans-keycloak-link-server-{0}.war').format(base.current_app.app_info['jans_version']))
+            (os.path.join(Config.dist_jans_dir, 'jans-keycloak-link.war'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-keycloak-link-server/{0}/jans-keycloak-link-server-{0}.war').format(base.current_app.app_info['jans_version'])),
+            (os.path.join(Config.dist_jans_dir, 'kc-link-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/kc-link-plugin/{0}/kc-link-plugin-{0}-distribution.jar').format(base.current_app.app_info['jans_version'])),
             ]
 
     def __init__(self):
@@ -34,8 +35,10 @@ class JansKCLinkInstaller(JettyInstaller):
         self.snapshots_dir = os.path.join(self.vendor_dir, 'keycloak-link-snapshots')
 
     def install(self):
-        self.installJettyService(self.jetty_app_configuration[self.service_name], True)
+        self.install_jettyService(self.jetty_app_configuration[self.service_name], True)
         self.copyFile(self.source_files[0][0], self.jetty_service_webapps)
+        base.current_app.ConfigApiInstaller.source_files.append(self.source_files[1])
+        base.current_app.ConfigApiInstaller.install_plugin('kc-link-plugin')
         self.enable()
 
     def render_import_templates(self):

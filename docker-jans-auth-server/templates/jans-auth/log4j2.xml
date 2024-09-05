@@ -2,7 +2,7 @@
 
 <Configuration packages="io.jans.log">
     <Properties>
-        <Property name="auth.log.console.prefix" value="auth" />
+        <Property name="auth.log.console.prefix" value="jans-auth" />
     </Properties>
 	<Appenders>
 		<Console name="STDOUT" target="SYSTEM_OUT">

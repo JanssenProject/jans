@@ -21,22 +21,10 @@ available. Avoiding user lockout is important because it prevents a serious burd
 There is no limit to the number of credentials a user can enroll, and credentials do not need to be of the same type: 
 any combination is valid. 
 
-!!! Note
-    The number of credentials required for two-factor authentication (2FA) can be customized with 
-    the [Strong authentication settings plugin](../plugins/2fa-settings.md)
-
 ## Supported types of 2FA
 
 Users will only be able to add credentials with a type matching one of the already enabled authentication methods in 
-the admin console. See the [Admin console page](./admin-console.md#enabled-methods) to learn more. Out of the box, 
-all the following authentication methods are supported:
-
-- FIDO 2 security keys
-- [Super Gluu](https://super.gluu.org/) for push notifications 
-- HOTP/TOTP apps, cards, "dongles"
-- OTP via SMS (using Twilio or an SMPP server)
-
-Other methods may be supported via [plugins](../index.md#existing-plugins).
+the [admin console](./admin-console.md#enabled-methods). Other methods may be supported via [plugins](../index.md#existing-plugins).
 
 ## Resetting a user's 2FA availability
 
@@ -45,42 +33,31 @@ by following the steps shown in the [troubleshooting guide](./faq.md).
 
 ## Associated "strength" of credentials
 
-When authenticating, a user with 2FA turned on, will be challenged to present the credential matching the "strongest" 
-authentication method. The strength is a numerical value assigned via the "level" property of the custom script that 
-is tied to the authentication method. The higher the value, the stronger it is considered. Thus, if a user has several 
-credentials enrolled, he will be asked to present the one of them having the highest strength associated. 
-
-Particularly, if the device used to access is a mobile browser, only the methods listed in the property 
-"mobile_methods" of casa script will be accounted to determine the strongest credential. Admins can modify this 
-property at will if the default value does not meet their expectations.
-
-Note there are ways to override the rule of the "strongest" method; see the docs of 
-the [Strong authentication settings plugin](../plugins/2fa-settings.md).
+When authenticating, a user with 2FA turned on, will be challenged to present the credential having the "strongest" 
+authentication method (from his already available enrolled credentials). The relative strength of methods can be assigned in the [authentication methods](./admin-console.md#authentication-methods) screen of the admin console.
 
 ## Forcing users to enroll a specific credential before 2FA is available
 
 To further reduce the likelihood of lockouts, you can force users to initially enroll, for instance, one OTP 
-credential before any other. OTP credentials are generally more accessible than their counterparts (like Fido 2) since 
+credential before any other. OTP credentials are generally more accessible than their counterparts (like Fido) since 
 they normally don't demand special conditions from the device used to access, like having a USB port.
 
-To do so, just add a new configuration property named `2fa_requisite` to the custom interception script corresponding 
-to the authentication method, and assign `true` as its value. It may take more than one minute for Casa to pick up the 
-changes. To add the property, open oxTrust web console and navigate to `Configuration` > `Manage custom scripts`, 
-collapse the method you want to set as requisite for 2FA, and click on `Add new property`.
+To do so, add a property named `2fa_requisite` to the configuration of the Agama flow that backs the given authentication method, and assign `true` as its value. You can do this via [TUI](../../admin/config-guide/auth-server-config/agama-project-configuration/#agama-project-configuration-screen). Note
+this mechanism is applicable for the out-of-the box authentication methods supported by Casa. For other methods contributed via plugins, consult their respective documentation.
 
 You can flag more than one method as requisite. In this case users will be encouraged to enroll one credential 
 associated to any of the flagged methods.
 
-If you are using an authentication method you added your own (via plugin), ensure the corresponding plugin 
-implements the `mayBe2faActivationRequisite` method.
-
 If a user attempts to delete their only available credential matching the requisite method, a prompt will appear 
 warning that doing so will disable 2FA, that is, resetting to password authentication.
+
+If you are a developer coding a plugin that adds an authentication method, you can make the method a requisite by properly implementing method `mayBe2faActivationRequisite` part of interface `AuthnMethod`.
 
 ## Enrolling credentials upon registration or first login
 
 If the previous scenario is not enough for your needs, you can force users to enroll credentials and turn 2FA on 
 before the first usage of the application. This can be done in two ways:
 
-- Altering the login flow to check for presence of credentials and then redirect to custom pages that implement enrollment
+- Creating a new Agama project that takes charge of credentials enrollment and then reuses the flows bundled with the standard Agama project which performs the actual authentication. Learn more about this in the developer pages
+
 - Making enrollments occur at registration time (through the application you use for this purpose)

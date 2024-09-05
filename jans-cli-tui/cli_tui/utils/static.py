@@ -1,4 +1,7 @@
+from utils.multi_lang import _
 from enum import Enum
+
+ISOFORMAT = '%Y-%m-%dT%H:%M:%S'
 
 class DialogResult(Enum):
     CANCEL = 0
@@ -23,6 +26,8 @@ class cli_style:
     black_bg = 'class:plugin-black-bg'
     textarea = 'class:textarea'
     drop_down = 'class:plugin-dropdown'
+    sub_navbar = 'class:sub-navbar'
+    read_only = 'class:textarea-readonly'
 
 class common_strings:
     enter_to_search = "Press enter to perform search"
@@ -30,3 +35,12 @@ class common_strings:
     error = "Error!"
     info = "Info"
     oops = "Oops"
+    success = "Success"
+    warning = "Warning!"
+
+    help_enter      = f'<Enter>          {_("Confirm or Edit current selection")}'
+    help_esc        = f'<Esc>            {_("Close the current dialog")}'
+    help_alt_letter = f'<Alt + letter>   {_("Navigate to an other tab")}'
+    help_v          = f'<v>              {_("View current item in JSON format if possible")}'
+    help_delete     = f'<d> <Delete>     {_("Delete current item project if possible")}'
+    help_link_str   = f'{_("For More Visit")} https://docs.jans.io/head/admin/config-guide/config-tools/jans-tui/'

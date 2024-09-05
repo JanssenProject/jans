@@ -28,5 +28,3 @@ Read-Only:
 - `class_name` (String)
 - `description` (String)
 - `name` (String)
-
-

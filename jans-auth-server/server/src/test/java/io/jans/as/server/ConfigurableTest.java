@@ -9,13 +9,9 @@ package io.jans.as.server;
 import io.jans.as.server.util.Deployments;
 import io.jans.util.StringHelper;
 import io.jans.util.properties.FileConfiguration;
-import jakarta.servlet.Servlet;
-import jakarta.servlet.ServletContext;
-import jakarta.servlet.ServletException;
 import org.apache.commons.io.IOUtils;
 import org.eu.ingwar.tools.arquillian.extension.suite.annotations.ArquillianSuiteDeployment;
 import org.jboss.arquillian.container.test.api.Deployment;
-import org.jboss.arquillian.container.test.api.OverProtocol;
 import org.jboss.arquillian.testng.Arquillian;
 import org.jboss.shrinkwrap.api.Archive;
 import org.testng.ITestContext;
@@ -24,13 +20,10 @@ import org.testng.annotations.BeforeSuite;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Properties;
-
-import static org.omnifaces.util.Faces.getServletContext;
 
 /**
  * Base class for all seam test which require external configuration
@@ -56,6 +49,7 @@ public abstract class ConfigurableTest extends Arquillian {
         if (initialized) {
             return;
         }
+        System.setProperty("testng.ignore.callback.skip", "true");
 
         Reporter.log("Invoked init test suite method", true);
 

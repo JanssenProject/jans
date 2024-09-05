@@ -4,29 +4,30 @@
 # These owners will be the default owners for everything in this branch of
 # the repo. Unless a later match takes precedence
 
-/keycloak-integration/ @uprightech
+/jans-keycloak-integration/ @uprightech
+/jans-keycloak-link/ @shekhar16
 /docker-jans-*/ @moabu @iromli
-/automation/ @moabu
-/charts/ @moabu
+/automation/ @moabu @iromli
+/charts/ @moabu @iromli
 /.github/ @moabu
-/jans-*/version.txt @moabu
-/jans-*/CHANGELOG.md @moabu
+/jans-*/version.txt @moabu @mo-auto
+/jans-*/CHANGELOG.md @moabu @mo-auto
 /jans-pycloudlib/ @moabu
-/docker-jans-*/requirments.txt @mo-auto
-/jans-bom/ @yurem @yuriyz
-/jans-core/ @yurem @yuriyz
+/docker-jans-*/requirments.txt @iromli @mo-auto
+/jans-bom/ @yurem @yuriyz @yuriyzz
+/jans-core/ @yurem @yuriyz @yuriyzz
 /jans-orm/ @yurem @yuriyz
-/jans-eleven/ @yuriyz
-/jans-auth-server/ @yurem @yuriyz
-/jans-fido2/ @yurem
+/jans-auth-server/ @yurem @yuriyz @yuriyzz
+/jans-fido2/ @yurem @yackermann
+/jans-lock/ @yurem
 /jans-scim/ @jgomer2001
 /jans-config-api/ @pujavs @yuriyz @yurem
 /jans-cli-tui/ @devrimyatar
-/jans-linux-setup/ @devrimyatar @yuriyz @yurem
-/jans-linux-setup/jans_setup/setup_app/version.py @moabu
+/jans-linux-setup/ @devrimyatar @yuriyz @yurem @yuriyzz
+/jans-linux-setup/jans_setup/setup_app/version.py @moabu @mo-auto
 /jans-linux-setup/static/scripts/admin_ui_plugin.py @devrimyatar @duttarnab
 /jans-cache-refresh/ @yurem @shekhar16
-/jans-link/ @shekhar16
+/jans-link/ @yurem @yuriyz
 /agama/ @jgomer2001
 /jans-casa/ @jgomer2001 @maduvena
 /demos/jans-tarp/ @duttarnab

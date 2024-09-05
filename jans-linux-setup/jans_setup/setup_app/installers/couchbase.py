@@ -45,7 +45,7 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
 
         if not Config.get('couchebaseClusterAdmin'):
             Config.couchebaseClusterAdmin = 'admin'
-            
+
         if Config.cb_install == InstallTypes.LOCAL:
             Config.isCouchbaseUserAdmin = True
 
@@ -71,6 +71,20 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
             self.couchebaseCreateCluster()
 
         self.couchbaseSSL()
+
+        cbm_ready = False
+        for i in range(10):
+            time.sleep(3)
+            self.logIt("Checking if couchbase server is ready Try %d ..." % (i+1))
+            isready = self.dbUtils.cbm.check_readiness()
+            if isready:
+                self.logIt("Couchbase server is ready")
+                cbm_ready = True
+                break
+
+        if not cbm_ready:
+            print("Couchbase server was not ready in 60 seconds. Giving up")    
+            sys.exit(1)
 
         self.create_couchbase_buckets()
 
@@ -116,7 +130,7 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
 
 
     def couchebaseCreateCluster(self):
-        
+
         self.logIt("Initializing Couchbase Node")
         result = self.dbUtils.cbm.initialize_node()
         if result.ok:
@@ -186,9 +200,9 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
 
     def couchbaseExecQuery(self, queryFile):
         self.logIt("Running Couchbase query from file " + queryFile)
-        
+
         query_file = open(queryFile)
-        
+
         for line in query_file:
             query = line.strip()
             if query:
@@ -207,10 +221,10 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
                     attrquoted.append(a)
 
             attrquoteds = ', '.join(attrquoted)
-            
+
             index_name = '{0}_static_{1}'.format(bucket, str(uuid.uuid4()).split('-')[1])
             cmd = 'CREATE INDEX `{0}` ON `{1}`({2}) WHERE ({3})'.format(index_name, bucket, attrquoteds, wherec)
-        
+
         else:
             if '(' in ''.join(ind):
                 attr_ = ind[0]
@@ -228,7 +242,7 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
 
 
     def couchebaseCreateIndexes(self, bucket):
-        
+
         Config.couchbase_buckets.append(bucket)
         couchbase_index_str = self.readFile(self.couchbaseIndexJson)
         couchbase_index_str = couchbase_index_str.replace('!bucket_prefix!', Config.couchbase_bucket_prefix)
@@ -268,7 +282,7 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
 
     def couchbaseSSL(self):
         self.logIt("Exporting Couchbase SSL certificate to " + self.couchebaseCert)
-        
+
         for cb_host in base.re_split_host.findall(Config.couchbase_hostname):
 
             cbm_ = CBM(cb_host.strip(), Config.couchebaseClusterAdmin, Config.cb_password)
@@ -317,7 +331,7 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
         prop_dict['couchbase_test_mappings'] = '\n'.join(couchbase_test_mappings)
 
         return prop_dict
-        
+
     def couchbaseProperties(self):
         prop_file = os.path.basename(Config.jansCouchebaseProperties)
         prop = open(os.path.join(Config.templateFolder, prop_file)).read()
@@ -335,10 +349,10 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
         couchbase_mappings = self.getMappingType('couchbase')
 
         min_cb_ram = 0
-        
+
         for group in couchbase_mappings:
              min_cb_ram += Config.couchbaseBucketDict[group]['memory_allocation']
-        
+
         min_cb_ram += Config.couchbaseBucketDict['default']['memory_allocation']
 
         if couchbaseClusterRamsize < min_cb_ram:
@@ -396,6 +410,7 @@ class CouchbaseInstaller(PackageUtils, BaseInstaller):
             self.createDirs(self.common_lib_dir)
         shutil.unpack_archive(self.source_files[0][0], self.common_lib_dir)
         self.chown(os.path.join(Config.jetty_base, 'common'), Config.jetty_user, Config.jetty_user, True)
+
 
     def installed(self):
 

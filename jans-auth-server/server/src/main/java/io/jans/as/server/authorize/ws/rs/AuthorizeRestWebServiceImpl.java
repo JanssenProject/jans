@@ -15,6 +15,7 @@ import io.jans.as.common.util.RedirectUri;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.authorize.AuthorizeRequestParam;
 import io.jans.as.model.authorize.AuthorizeResponseParam;
+import io.jans.as.model.authzdetails.AuthzDetails;
 import io.jans.as.model.common.*;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.binding.TokenBindingMessage;
@@ -40,10 +41,7 @@ import io.jans.as.server.model.token.JwrService;
 import io.jans.as.server.security.Identity;
 import io.jans.as.server.service.*;
 import io.jans.as.server.service.ciba.CibaRequestService;
-import io.jans.as.server.service.external.ExternalPostAuthnService;
-import io.jans.as.server.service.external.ExternalResourceOwnerPasswordCredentialsService;
-import io.jans.as.server.service.external.ExternalSelectAccountService;
-import io.jans.as.server.service.external.ExternalUpdateTokenService;
+import io.jans.as.server.service.external.*;
 import io.jans.as.server.service.external.context.ExternalPostAuthnContext;
 import io.jans.as.server.service.external.context.ExternalResourceOwnerPasswordCredentialsContext;
 import io.jans.as.server.service.external.context.ExternalUpdateTokenContext;
@@ -67,6 +65,7 @@ import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
 import jakarta.ws.rs.core.SecurityContext;
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.jboss.resteasy.spi.NoLogWebApplicationException;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -140,6 +139,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     private AuthorizeRestWebServiceValidator authorizeRestWebServiceValidator;
 
     @Inject
+    private AcrService acrService;
+
+    @Inject
     private CIBAPushTokenDeliveryService cibaPushTokenDeliveryService;
 
     @Inject
@@ -167,6 +169,9 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     private ExternalSelectAccountService externalSelectAccountService;
 
     @Inject
+    private ExternalCreateUserService externalCreateUserService;
+
+    @Inject
     private ExternalResourceOwnerPasswordCredentialsService externalResourceOwnerPasswordCredentialsService;
 
     @Inject
@@ -182,7 +187,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             String loginHint, String acrValues, String amrValues, String request, String requestUri,
             String sessionId, String originHeaders,
             String codeChallenge, String codeChallengeMethod, String customResponseHeaders, String claims, String authReqId,
-            String dpopJkt,
+            String dpopJkt, String authorizationDetails,
             HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext securityContext) {
 
         AuthzRequest authzRequest = new AuthzRequest();
@@ -203,6 +208,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         authzRequest.setAcrValues(acrValues);
         authzRequest.setAmrValues(amrValues);
         authzRequest.setDpopJkt(dpopJkt);
+        authzRequest.setAuthzDetailsString(authorizationDetails);
         authzRequest.setRequest(request);
         authzRequest.setRequestUri(requestUri);
         authzRequest.setSessionId(sessionId);
@@ -226,7 +232,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             String loginHint, String acrValues, String amrValues, String request, String requestUri,
             String sessionId, String originHeaders,
             String codeChallenge, String codeChallengeMethod, String customResponseHeaders, String claims, String authReqId,
-            String dpopJkt,
+            String dpopJkt, String authorizationDetails,
             HttpServletRequest httpRequest, HttpServletResponse httpResponse, SecurityContext securityContext) {
 
         AuthzRequest authzRequest = new AuthzRequest();
@@ -249,6 +255,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         authzRequest.setRequest(request);
         authzRequest.setRequestUri(requestUri);
         authzRequest.setDpopJkt(dpopJkt);
+        authzRequest.setAuthzDetailsString(authorizationDetails);
         authzRequest.setSessionId(sessionId);
         authzRequest.setOriginHeaders(originHeaders);
         authzRequest.setCodeChallenge(codeChallenge);
@@ -281,12 +288,12 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             builder = authorize(authzRequest);
         } catch (WebApplicationException e) {
             applicationAuditLogger.sendMessage(authzRequest.getAuditLog());
-            if (log.isErrorEnabled() && canLogWebApplicationException(e))
-                log.error(e.getMessage(), e);
+            if (log.isTraceEnabled() && canLogWebApplicationException(e))
+                log.trace(e.getMessage(), e);
             throw e;
         } catch (AcrChangedException e) { // Acr changed
-            log.error("ACR is changed, please provide a supported and enabled acr value");
-            log.error(e.getMessage(), e);
+            log.debug("ACR is changed, please provide a supported and enabled acr value");
+            log.debug(e.getMessage(), e);
 
             RedirectUri redirectUriResponse = new RedirectUri(authzRequest.getRedirectUri(), authzRequest.getResponseTypeList(), authzRequest.getResponseModeEnum());
             redirectUriResponse.parseQueryString(errorResponseFactory.getErrorAsQueryString(
@@ -332,7 +339,11 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         authzRequest.setRedirectUri(authorizeRestWebServiceValidator.validateRedirectUri(client, authzRequest.getRedirectUri(), authzRequest.getState(), deviceAuthzUserCode, authzRequest.getHttpRequest()));
         authzRequestService.createRedirectUriResponse(authzRequest);
 
-        authorizeRestWebServiceValidator.validateAcrs(authzRequest, client);
+        acrService.validateAcrs(authzRequest, client);
+
+        authorizeRestWebServiceValidator.validateAuthorizationDetails(authzRequest, client);
+        authorizeRestWebServiceValidator.validateRequestParameterSupported(authzRequest);
+        authorizeRestWebServiceValidator.validateRequestUriParameterSupported(authzRequest);
 
         Set<String> scopes = scopeChecker.checkScopesPolicy(client, authzRequest.getScope());
 
@@ -357,6 +368,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             user = ropcUser;
             sessionUser = generatedAuthenticatedSessionForRopc(authzRequest, sessionUser, user);
         }
+
+        checkPromptCreate(authzRequest); // must be run before ifUserIsNull() which can redirect to authorize.xhtml
 
         AuthorizationGrant authorizationGrant = null;
 
@@ -396,6 +409,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             authorizationGrant.setJwtAuthorizationRequest(authzRequest.getJwtRequest());
             authorizationGrant.setTokenBindingHash(TokenBindingMessage.getTokenBindingIdHashFromTokenBindingMessage(tokenBindingHeader, client.getIdTokenTokenBindingCnf()));
             authorizationGrant.setScopes(scopes);
+            authorizationGrant.setAuthzDetails(authzRequest.getAuthzDetails());
             authorizationGrant.setCodeChallenge(authzRequest.getCodeChallenge());
             authorizationGrant.setCodeChallengeMethod(authzRequest.getCodeChallengeMethod());
             authorizationGrant.setClaims(authzRequest.getClaims());
@@ -419,6 +433,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 authorizationGrant.setNonce(authzRequest.getNonce());
                 authorizationGrant.setJwtAuthorizationRequest(authzRequest.getJwtRequest());
                 authorizationGrant.setScopes(scopes);
+                authorizationGrant.setAuthzDetails(authzRequest.getAuthzDetails());
                 authorizationGrant.setClaims(authzRequest.getClaims());
 
                 // Store acr_values
@@ -445,6 +460,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 authorizationGrant.setNonce(authzRequest.getNonce());
                 authorizationGrant.setJwtAuthorizationRequest(authzRequest.getJwtRequest());
                 authorizationGrant.setScopes(scopes);
+                authorizationGrant.setAuthzDetails(authzRequest.getAuthzDetails());
                 authorizationGrant.setClaims(authzRequest.getClaims());
 
                 // Store authentication acr values
@@ -569,6 +585,18 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         }
     }
 
+    public void checkPromptCreate(AuthzRequest authzRequest) {
+        if (authzRequest.getPromptList().contains(Prompt.CREATE)) {
+            if (BooleanUtils.isTrue(appConfiguration.getDisablePromptCreate())) {
+                log.debug("Skipped prompt=create handling. config disablePromptConsent=true.");
+                return;
+            }
+
+            log.debug("Redirecting to Create User, prompt=create");
+            throw new NoLogWebApplicationException(redirectToCreateUserPage(authzRequest));
+        }
+    }
+
     private void checkPromptConsent(AuthzRequest authzRequest, SessionId sessionUser, User user, ClientAuthorization clientAuthorization, boolean clientAuthorizationFetched) {
         if (isTrue(appConfiguration.getDisablePromptConsent())) {
             log.trace("Disabled prompt=consent (because disablePromptConsent=true).");
@@ -583,7 +611,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             clientAuthorizationsService.clearAuthorizations(clientAuthorization, authzRequest.getClient().getPersistClientAuthorizations());
 
             authzRequest.removePrompt(Prompt.CONSENT);
-            log.debug("Redirect to authorization page on prompt=consent, request {}", authzRequest);
+            log.debug("prompt=consent, redirect to authorization page on prompt=consent, request {}", authzRequest);
 
             throw new NoLogWebApplicationException(redirectToAuthorizationPage(authzRequest));
         }
@@ -604,7 +632,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             authzRequest.setSessionId(null);
             authzRequest.removePrompt(Prompt.LOGIN);
 
-            log.debug("Redirect to authorization page, request {}", authzRequest);
+            log.debug("prompt=login, redirect to authorization page, request {}", authzRequest);
             throw new NoLogWebApplicationException(redirectToAuthorizationPage(authzRequest));
         }
     }
@@ -625,8 +653,14 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         final List<Prompt> prompts = authzRequest.getPromptList();
 
         if (prompts.contains(Prompt.CONSENT)) {
-            log.debug("Redirect to authorization page, request {}", authzRequest);
+            log.debug("prompt=consent - redirect to authorization page, request {}", authzRequest);
             throw new NoLogWebApplicationException(redirectToAuthorizationPage(authzRequest));
+        }
+
+        // when authorization_details are present we do not allow to use persisted client authorization
+        final AuthzDetails authzDetails = authzRequest.getAuthzDetails();
+        if (authzDetails != null && authzDetails.getDetails() != null && !authzDetails.getDetails().isEmpty()) {
+            return new Pair<>(clientAuthorization, clientAuthorizationFetched);
         }
 
         // There is no need to present the consent page:
@@ -647,7 +681,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             clientAuthorizationFetched = true;
 
             if (clientAuthorization == null || clientAuthorization.getScopes() == null || clientAuthorization.getScopes().length == 0) {
-                log.trace("Redirect to authorization page, no appropriate clientAuthorization, clientId: {}", client.getClientId());
+                log.trace("no client authorizations - redirect to authorization page, no appropriate clientAuthorization, clientId: {}", client.getClientId());
                 throw new NoLogWebApplicationException(redirectToAuthorizationPage(authzRequest));
             }
 
@@ -659,7 +693,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 sessionUser.addPermission(authzRequest.getClientId(), true);
                 sessionIdService.updateSessionId(sessionUser);
             } else {
-                log.debug("Redirect to authorization page, request {}", authzRequest);
+                log.debug("no required scopes in client authz - redirect to authorization page, request {}", authzRequest);
                 throw new NoLogWebApplicationException(redirectToAuthorizationPage(authzRequest));
             }
         }
@@ -698,7 +732,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
     private void checkForceAuthorization(AuthzRequest authzRequest, Client client, ExternalPostAuthnContext postAuthnContext) {
         final boolean forceAuthorization = externalPostAuthnService.externalForceAuthorization(client, postAuthnContext);
         if (forceAuthorization) {
-            log.debug("Redirect to authorization page, request {}", authzRequest);
+            log.debug("Force authz - redirect to authorization page, request {}", authzRequest);
             throw new NoLogWebApplicationException(redirectToAuthorizationPage(authzRequest));
         }
     }
@@ -709,7 +743,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             unauthenticateSession(authzRequest.getSessionId(), authzRequest.getHttpRequest());
             authzRequest.setSessionId(null);
 
-            log.debug("Redirect to authorization page, request {}", authzRequest);
+            log.debug("forceReAuthentication - redirect to authorization page, request {}", authzRequest);
             throw new NoLogWebApplicationException(redirectToAuthorizationPage(authzRequest));
         }
     }
@@ -720,7 +754,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
             unauthenticateSession(authzRequest.getSessionId(), authzRequest.getHttpRequest());
             authzRequest.setSessionId(null);
 
-            log.debug("Redirect to authorization page, request {}", authzRequest);
+            log.debug("validateMaxAge - redirect to authorization page, request {}", authzRequest);
             throw new NoLogWebApplicationException(redirectToAuthorizationPage(authzRequest));
         }
     }
@@ -780,7 +814,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
                 authzRequest.removePrompt(Prompt.LOGIN);
             }
 
-            log.debug("Redirect to authorization page, request {}", authzRequest);
+            log.debug("prompt=login, redirect to authorization page, request {}", authzRequest);
             throw new NoLogWebApplicationException(redirectToAuthorizationPage(authzRequest));
         }
     }
@@ -813,6 +847,8 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         executionContext.setClient(client);
         executionContext.setCertAsPem(authzRequest.getHttpRequest().getHeader("X-ClientCert"));
         executionContext.setScopes(StringUtils.isNotBlank(authzRequest.getScope()) ? new HashSet<>(Arrays.asList(authzRequest.getScope().split(" "))) : new HashSet<>());
+        executionContext.setAuthzRequest(authzRequest);
+        executionContext.setAuthzDetails(authzRequest.getAuthzDetails());
 
         AccessToken accessToken = cibaGrant.createAccessToken(executionContext);
         log.debug("Issuing access token: {}", accessToken.getCode());
@@ -913,6 +949,25 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         return redirectTo(page, authzRequest);
     }
 
+    private Response redirectToCreateUserPage(AuthzRequest authzRequest) {
+        ExecutionContext executionContext = ExecutionContext.of(authzRequest);
+        executionContext.setAppConfiguration(appConfiguration);
+        executionContext.setAttributeService(attributeService);
+
+        String page = "/createUser";
+
+        String pageFromScript = externalCreateUserService.externalGetCreateUserPage(executionContext);
+        if (StringUtils.isNotBlank(pageFromScript)) {
+            if (pageFromScript.endsWith(".xhtml")) {
+                pageFromScript = StringUtils.removeEnd(pageFromScript, ".xhtml");
+            }
+            page = pageFromScript;
+        }
+
+        authzRequest.setPrompt(""); // drop prompt=create to not get into registration form again
+        return redirectTo(page, authzRequest);
+    }
+
     private Response redirectTo(String pathToRedirect, AuthzRequest authzRequest) {
 
         final URI contextUri = URI.create(appConfiguration.getIssuer()).resolve(servletRequest.getContextPath() + pathToRedirect + configurationFactory.getFacesMapping());
@@ -947,6 +1002,7 @@ public class AuthorizeRestWebServiceImpl implements AuthorizeRestWebService {
         redirect.addResponseParameterIfNotBlank(AuthorizeRequestParam.CODE_CHALLENGE_METHOD, authzRequest.getCodeChallengeMethod());
         redirect.addResponseParameterIfNotBlank(AuthorizeRequestParam.SESSION_ID, authzRequest.getSessionId());
         redirect.addResponseParameterIfNotBlank(AuthorizeRequestParam.CLAIMS, authzRequest.getClaims());
+        redirect.addResponseParameterIfNotBlank(AuthorizeRequestParam.AUTHORIZATION_DETAILS, authzRequest.getAuthzDetailsString());
 
         // CIBA param
         redirect.addResponseParameterIfNotBlank(AuthorizeRequestParam.AUTH_REQ_ID, authzRequest.getAuthReqId());

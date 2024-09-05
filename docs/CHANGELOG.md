@@ -1,5 +1,63 @@
 # Changelog
 
+## [1.0.22](https://github.com/JanssenProject/jans/compare/docs-v1.0.21...docs-v1.0.22) (2024-01-22)
+
+
+### Features
+
+* **docs:** ssa lifetime docs updated ([#7172](https://github.com/JanssenProject/jans/issues/7172)) ([be59efe](https://github.com/JanssenProject/jans/commit/be59efe027235157be3ccaec78397163e40bf094))
+* **jans-auth-server:** support for OAuth 2.0 Rich Authorization Requests ([#7145](https://github.com/JanssenProject/jans/issues/7145)) ([c7d99c8](https://github.com/JanssenProject/jans/commit/c7d99c81efbaffd31b1b7d2963cd4f77768fd40e))
+* use Bearer token if OPA started with it ([#7353](https://github.com/JanssenProject/jans/issues/7353)) ([4c47afd](https://github.com/JanssenProject/jans/commit/4c47afde485406c283abea7c82b1854672bd1124))
+
+
+### Bug Fixes
+
+* **docs:** add section for schema setup ([#7231](https://github.com/JanssenProject/jans/issues/7231)) ([7d36b24](https://github.com/JanssenProject/jans/commit/7d36b24aba0d3e877503ac76d90f54c0c2cfbc4a))
+* **docs:** minor updates to the README ([#7366](https://github.com/JanssenProject/jans/issues/7366)) ([4859057](https://github.com/JanssenProject/jans/commit/4859057bd0bf505d6d96a027962f52de42c7e221))
+* **docs:** remove mariadb from docs ([#7232](https://github.com/JanssenProject/jans/issues/7232)) ([6bf4860](https://github.com/JanssenProject/jans/commit/6bf48601ea5ce4743bad0202d0a73aa70db9b379))
+* **docs:** remove oxtrust references ([#7390](https://github.com/JanssenProject/jans/issues/7390)) ([018423f](https://github.com/JanssenProject/jans/commit/018423fcad12d2e8c1926baf6bbd12cda56321e2))
+* **jans-auth-server:** replace Gluu branding with jans branding ([#7225](https://github.com/JanssenProject/jans/issues/7225)) ([e11f454](https://github.com/JanssenProject/jans/commit/e11f454979eec898c3b62e56f6295e26e6e7351e))
+* **kc-saml-plugin:** fixed IDP creation issue, enum values and removed kc lib dependency ([#7238](https://github.com/JanssenProject/jans/issues/7238)) ([d3401e3](https://github.com/JanssenProject/jans/commit/d3401e3b695f21a61c5ddc5675d242a30839ef06))
+* prepare for 1.0.22 release ([#7455](https://github.com/JanssenProject/jans/issues/7455)) ([4bf2562](https://github.com/JanssenProject/jans/commit/4bf2562050c86317658259c72bb641780a283579))
+* re-engineer how calls work in the engine ([#7152](https://github.com/JanssenProject/jans/issues/7152)) ([a940e7d](https://github.com/JanssenProject/jans/commit/a940e7dbc7da77c9f896dbe7bd73d7f9056231af))
+
+## [1.0.21](https://github.com/JanssenProject/jans/compare/docs-v1.0.20...docs-v1.0.21) (2023-12-14)
+
+
+### Features
+
+* add support for custom scripts ([#6970](https://github.com/JanssenProject/jans/issues/6970)) ([37b171d](https://github.com/JanssenProject/jans/commit/37b171d69d835573800d3765957c7eb4ce78b43a))
+* **agama:** use a mixed strategy for serialization ([#6883](https://github.com/JanssenProject/jans/issues/6883)) ([00aee0c](https://github.com/JanssenProject/jans/commit/00aee0c26565e8b0b574370610a75139c2155568))
+* **jans-auth-server:** archived jwks ([#6503](https://github.com/JanssenProject/jans/issues/6503)) ([c86ae0a](https://github.com/JanssenProject/jans/commit/c86ae0a5a703ff96fd1e69fddcc110b5b754ad71))
+* **jans-linux-setup:** use reference token for TUI ([#6585](https://github.com/JanssenProject/jans/issues/6585)) ([2918c11](https://github.com/JanssenProject/jans/commit/2918c11a25b50a395c71ad5dc252cf49d319a407))
+
+
+### Bug Fixes
+
+* **docs:** add more clarity to triage labels ([#6995](https://github.com/JanssenProject/jans/issues/6995)) ([5f93e2f](https://github.com/JanssenProject/jans/commit/5f93e2fb1e5595cc31fc4ab84fe8935c07c06a63))
+* **docs:** fix dynamic install docs ([#6913](https://github.com/JanssenProject/jans/issues/6913)) ([2d1d7b9](https://github.com/JanssenProject/jans/commit/2d1d7b92de20cc60d07c2d4748fc232e08cac973))
+* **jans-auth-server:** UpdateToken script is not invoked during Implicit Flow [#6561](https://github.com/JanssenProject/jans/issues/6561) ([#6573](https://github.com/JanssenProject/jans/issues/6573)) ([3ca1b24](https://github.com/JanssenProject/jans/commit/3ca1b24ecca8dacc2b9a53e862c49291c5c20c2c))
+* **jans-auth:** [#6527](https://github.com/JanssenProject/jans/issues/6527) ([#6532](https://github.com/JanssenProject/jans/issues/6532)) ([87ed3d6](https://github.com/JanssenProject/jans/commit/87ed3d6e65b1c5cafe9a979b43a42c7bbab6dd08))
+* prepare for 1.0.21 release ([#7008](https://github.com/JanssenProject/jans/issues/7008)) ([2132de6](https://github.com/JanssenProject/jans/commit/2132de6683f67bf22d5a863b149770d657073a83))
+
+## [1.0.20](https://github.com/JanssenProject/jans/compare/docs-v1.0.19...docs-v1.0.20) (2023-11-08)
+
+
+### Features
+
+* **jans-auth-server:** added PKCE support to authz challenge endpoint [#6180](https://github.com/JanssenProject/jans/issues/6180) ([#6339](https://github.com/JanssenProject/jans/issues/6339)) ([d9a24bc](https://github.com/JanssenProject/jans/commit/d9a24bc4399f656915923395858ea085ca3dccfa))
+* **jans-auth-server:** allow revoke any token - explicitly allow by config and scope [#6381](https://github.com/JanssenProject/jans/issues/6381) ([#6412](https://github.com/JanssenProject/jans/issues/6412)) ([47cbee9](https://github.com/JanssenProject/jans/commit/47cbee9cf917f0f79c53e9e0cfe1e2beab3108bc))
+* **jans-auth-server:** multi-step authn challenge flow custom script ([#6275](https://github.com/JanssenProject/jans/issues/6275)) ([b28f1c8](https://github.com/JanssenProject/jans/commit/b28f1c8078a7a8a3358d6d589ba7e7c4585bf15c))
+* **jans-pycloudlib:** add lock to prevent race condition ([#6329](https://github.com/JanssenProject/jans/issues/6329)) ([9dd82da](https://github.com/JanssenProject/jans/commit/9dd82da5c87ee829c73a1135ce8740b8353f8ab5))
+
+
+### Bug Fixes
+
+* **docs:** minor fixes in DPOP document ([#6374](https://github.com/JanssenProject/jans/issues/6374)) ([3431b85](https://github.com/JanssenProject/jans/commit/3431b85b922e7fa985c8201a13b990b3d99f7749))
+* **docs:** remove additional Agama title ([#6361](https://github.com/JanssenProject/jans/issues/6361)) ([c2ab212](https://github.com/JanssenProject/jans/commit/c2ab212b78e0fa73bde2d9b694fa44b22675b4ca))
+* prepare for 1.0.20 release ([c6e806e](https://github.com/JanssenProject/jans/commit/c6e806eb31fed998d52cbef7a7d94c231d913102))
+* registration_uri for super gluu script defaults to an /identity ([#6369](https://github.com/JanssenProject/jans/issues/6369)) ([28c4714](https://github.com/JanssenProject/jans/commit/28c47141a22a1139762655e3ccab6cc34cf7798f)), closes [#6183](https://github.com/JanssenProject/jans/issues/6183)
+
 ## [1.0.19](https://github.com/JanssenProject/jans/compare/docs-v1.0.18...docs-v1.0.19) (2023-10-11)
 
 

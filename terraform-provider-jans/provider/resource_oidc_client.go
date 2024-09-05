@@ -313,7 +313,7 @@ func resourceOidcClient() *schema.Resource {
 				Description: "Requested Client Authentication method for the Token Endpoint.",
 				ValidateDiagFunc: func(v interface{}, p cty.Path) diag.Diagnostics {
 
-					enums := []string{"client_secret_basic", "client_secret_post", "client_secret_jwt", "private_key_jwt", "tls_client_auth", "none"}
+					enums := []string{"client_secret_basic", "client_secret_post", "client_secret_jwt", "private_key_jwt", "access_token", "tls_client_auth", "self_signed_tls_client_auth", "none"}
 					return validateEnum(v, enums)
 				},
 			},
@@ -651,6 +651,11 @@ func resourceOidcClient() *schema.Resource {
 							Description: `sets prompt=login to the authorization request, which causes the authorization server 
 									to force the user to sign in again before it will show the authorization prompt.`,
 						},
+						"tx_token_lifetime": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Description: "Specifies the Client-specific TX Token expiration.",
+						},
 						"id_token_lifetime": {
 							Type:        schema.TypeInt,
 							Optional:    true,
@@ -697,6 +702,44 @@ func resourceOidcClient() *schema.Resource {
 							Optional:    true,
 							Description: "Specifies the evidence that the client presents to the authorization server.",
 						},
+						"introspection_signed_response_alg": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "JWS alg algorithm (JWA) required for signing the introspection response.",
+						},
+						"introspection_encrypted_response_alg": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "JWE alg algorithm (JWA) required for encrypting the introspection response.",
+						},
+						"introspection_encrypted_response_enc": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "JWE enc algorithm (JWA) required for encrypting the introspection response.",
+						},
+						"tx_token_signed_response_alg": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "JWS alg algorithm (JWA) required for signing the TX Token response.",
+						},
+						"tx_token_encrypted_response_alg": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "JWE alg algorithm (JWA) required for encrypting the TX Token response.",
+						},
+						"tx_token_encrypted_response_enc": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "JWE enc algorithm (JWA) required for encrypting the TX Token response.",
+						},
+						"authorization_details_types": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Description: "List of authorization details types.",
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+						},
 					},
 				},
 			},
@@ -732,7 +775,7 @@ func resourceOidcClient() *schema.Resource {
 				},
 			},
 			"backchannel_user_code_parameter": {
-				Type:        schema.TypeString,
+				Type:        schema.TypeBool,
 				Optional:    true,
 				Description: "Boolean value specifying whether the Client supports the user_code parameter. If omitted, the default value is false.",
 			},
@@ -762,17 +805,6 @@ func resourceOidcClient() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "Display name of the client.",
-			},
-			"authentication_method": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "",
-				ValidateDiagFunc: func(v interface{}, p cty.Path) diag.Diagnostics {
-
-					enums := []string{"client_secret_basic", "client_secret_post", "client_secret_jwt",
-						"private_key_jwt", "access_token", "tls_client_auth", "self_signed_tls_client_auth", "none"}
-					return validateEnum(v, enums)
-				},
 			},
 			"base_dn": {
 				Type:        schema.TypeString,

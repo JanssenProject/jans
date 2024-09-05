@@ -1,44 +1,24 @@
-from typing import Any, Optional, Sequence, Union, TypeVar, Callable
-from asyncio import ensure_future
+from typing import Any, Optional, Sequence, Callable
 
 from prompt_toolkit.layout.dimension import D
-from prompt_toolkit.layout.containers import (
-    HSplit,
-    VSplit,
-    DynamicContainer,
-    Window,
-    AnyContainer
-)
-from prompt_toolkit.widgets import (
-    Box,
-    Button,
-    Label,
-)
-from prompt_toolkit.application.current import get_app
-from prompt_toolkit.widgets import (
-    Button,
-    Dialog,
-    VerticalLine,
-    HorizontalLine,
-    CheckboxList,
-)
+from prompt_toolkit.layout.containers import HSplit, VSplit,\
+    DynamicContainer, Window
 
+from prompt_toolkit.widgets import Button, Label, TextArea, Frame
+from prompt_toolkit.widgets import Button, Dialog, CheckboxList
+
+from prompt_toolkit.formatted_text import HTML
 from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.widgets.base import RadioList
-from prompt_toolkit.layout.containers import FloatContainer
 from prompt_toolkit.formatted_text import AnyFormattedText
-from prompt_toolkit.layout.dimension import AnyDimension
 
-from cli import config_cli
-from utils.static import DialogResult, cli_style
-from utils.utils import DialogUtils
 from utils.multi_lang import _
+from utils.static import DialogResult, cli_style
+from utils.utils import DialogUtils, common_data
 from wui_components.jans_dialog_with_nav import JansDialogWithNav
-from wui_components.jans_side_nav_bar import JansSideNavBar
 from wui_components.jans_cli_dialog import JansGDialog
-from wui_components.jans_drop_down import DropDownWidget
 from wui_components.jans_vetrical_nav import JansVerticalNav
-from view_uma_dialog import ViewUMADialog
+from wui_components.jans_label_container import JansLabelContainer
 
 
 class EditScopeDialog(JansGDialog, DialogUtils):
@@ -46,7 +26,7 @@ class EditScopeDialog(JansGDialog, DialogUtils):
     """
     def __init__(
         self,
-        parent,
+        app,
         title: AnyFormattedText,
         data: list,
         buttons: Optional[Sequence[Button]]= [],
@@ -58,30 +38,44 @@ class EditScopeDialog(JansGDialog, DialogUtils):
         JansGDialog (dialog): This is the main dialog Class Widget for all Jans-cli-tui dialogs except custom dialogs like dialogs with navbar
         
                 Args:
-            parent (widget): This is the parent widget for the dialog, to access `Pageup` and `Pagedown`
+            app (widget): This is the parent application
             title (str): The Main dialog title
             data (list): selected line data 
             button_functions (list, optional): Dialog main buttons with their handlers. Defaults to [].
             save_handler (method, optional): handler invoked when closing the dialog. Defaults to None.
         """
-        super().__init__(parent, title, buttons)
+        super().__init__(app, title, buttons)
         self.save_handler = save_handler
         self.data = data
         self.title = title
+        self.app = app
         self.claims_container = None
         self.showInConfigurationEndpoint = self.data.get('attributes', {}).get('showInConfigurationEndpoint', '')
         self.defaultScope = self.data.get('defaultScope', '')
-        self.schema = self.myparent.cli_object.get_schema_from_reference('', '#/components/schemas/Scope')
+        self.schema = self.app.cli_object.get_schema_from_reference('', '#/components/schemas/Scope')
+        self.add_attribute_checkbox = CheckboxList(values=[('', '')])
         self.tbuffer = None
+        self.prepare_attributes_data()
         self.prepare_tabs()
         self.create_window()
-        self.sope_type = self.data.get('scopeType') or 'oauth'
+        self.sope_type = self.data.get('scopeType') or 'openid'
+
+    def prepare_attributes_data(self):
+        self.jans_attributes_data = []
+        for attribute in common_data.jans_attributes:
+            self.jans_attributes_data.append([attribute['dn'], attribute.get('displayName') or attribute.get('claimName')])
+
+
+    def get_attrib_by_dn(self, dn):
+        for attribute in common_data.jans_attributes:
+            if attribute['dn'] == dn:
+                return [attribute['dn'], attribute.get('displayName') or attribute.get('claimName')]
 
     def save(self) -> None:
         """method to invoked when saving the dialog (Save button is pressed)
         """
 
-        self.myparent.logger.debug('SAVE SCOPE')
+        self.app.logger.debug('SAVE SCOPE')
 
         data = {}
 
@@ -91,16 +85,16 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                 data[item_data['key']] = item_data['value']
 
         if data['scopeType'] in ('openid', 'dynamic') and hasattr(self, 'claims_container') and self.claims_container:
-            claims = [claim[0] for claim in self.claims_container.data]
+            claims = [claim[0] for claim in self.claims_container.entries]
             data['claims'] = claims
 
-        self.myparent.logger.debug('DATA: ' + str(data))
+        self.app.logger.debug('DATA: ' + str(data))
         self.data = data
         if 'attributes' in self.data.keys():
             self.data['attributes'] = {'showInConfigurationEndpoint':self.data['attributes']}
 
         cfr = self.check_required_fields(self.dialog.content)
-        self.myparent.logger.debug('CFR: '+str(cfr))
+        self.app.logger.debug('CFR: '+str(cfr))
         if not cfr:
             return
 
@@ -134,49 +128,49 @@ class EditScopeDialog(JansGDialog, DialogUtils):
         self.dialog = JansDialogWithNav(
             title=self.title,
             content= HSplit([
-                self.myparent.getTitledRadioButton(
+                self.app.getTitledRadioButton(
                                 _("Scope Type"),
                                 name='scopeType',
-                                current_value=self.data.get('scopeType'),
+                                current_value=self.data.get('scopeType') or 'openid',
                                 values=scope_types,
                                 on_selection_changed=self.scope_selection_changed,
-                                jans_help=self.myparent.get_help_from_schema(self.schema, 'scopeType'),
+                                jans_help=self.app.get_help_from_schema(self.schema, 'scopeType'),
                                 style=cli_style.radio_button),
 
-                self.myparent.getTitledText(
+                self.app.getTitledText(
                     _("id"), 
                     name='id', 
                     value=self.data.get('id',''), 
-                    jans_help=self.myparent.get_help_from_schema(self.schema, 'id'),
+                    jans_help=self.app.get_help_from_schema(self.schema, 'id'),
                     style=cli_style.edit_text_required),
 
-                self.myparent.getTitledText(
+                self.app.getTitledText(
                     _("inum"), 
                     name='inum', 
                     value=self.data.get('inum',''), 
-                    jans_help=self.myparent.get_help_from_schema(self.schema, 'inum'),
+                    jans_help=self.app.get_help_from_schema(self.schema, 'inum'),
                     style=cli_style.edit_text,
                     read_only=True,),
 
-                self.myparent.getTitledText(
+                self.app.getTitledText(
                     _("Display Name"), 
                     name='displayName', 
                     value=self.data.get('displayName',''),
-                    jans_help=self.myparent.get_help_from_schema(self.schema, 'displayName'),
+                    jans_help=self.app.get_help_from_schema(self.schema, 'displayName'),
                     style=cli_style.edit_text),
 
-                self.myparent.getTitledText(
+                self.app.getTitledText(
                     _("Description"), 
                     name='description', 
                     value=self.data.get('description',''), 
-                    jans_help=self.myparent.get_help_from_schema(self.schema, 'description'),
+                    jans_help=self.app.get_help_from_schema(self.schema, 'description'),
                     style=cli_style.edit_text),
 
                 DynamicContainer(lambda: self.alt_tabs[self.sope_type]),
             ], style='class:outh-scope-tabs'),
              button_functions=buttons,
-            height=self.myparent.dialog_height,
-            width=self.myparent.dialog_width,
+            height=self.app.dialog_height,
+            width=self.app.dialog_width,
                    )
 
     def scope_selection_changed(
@@ -191,47 +185,8 @@ class EditScopeDialog(JansGDialog, DialogUtils):
 
         self.sope_type = cb.current_value
 
-    def get_named_claims(
-        self,
-        claims_list:list
-        ) -> list:
-        """This method for getting claim name
 
-        Args:
-            claims_list (list): List for Claims
-
-        Returns:
-            list: List with Names retlated to that claims
-        """
-
-        calims_names = []
-
-        try :
-            response = self.myparent.cli_object.process_command_by_id(
-                        operation_id='get-attributes',
-                        url_suffix='',
-                        endpoint_args='',
-                        data_fn=None,
-                        data={}
-                        )
-        except Exception as e:
-                self.myparent.show_message(_("Error getting claims"), str(e))
-                return calims_names
-
-        if response.status_code not in (200, 201):
-            self.myparent.show_message(_("Error getting claims"), str(response.text))
-            return calims_names
-
-        result = response.json()
-
-        for entry in result["entries"] :
-            for claim in claims_list:
-                if claim == entry['dn']:
-                    calims_names.append([entry['dn'], entry['displayName']])
-
-        return calims_names
-
-    def delete_claim(self, **kwargs: Any) -> None:
+    def delete_claim(self, claim: list) -> None:
         """This method for the deletion of claim
 
         Args:
@@ -240,21 +195,16 @@ class EditScopeDialog(JansGDialog, DialogUtils):
 
         """
 
-        dialog = self.myparent.get_confirm_dialog(_("Are you sure want to delete claim dn:")+"\n {} ?".format(kwargs['selected'][0]))
-        async def coroutine():
-            focused_before = self.myparent.layout.current_window
-            result = await self.myparent.show_dialog_as_float(dialog)
-            try:
-                self.myparent.layout.focus(focused_before)
-            except Exception:
-                self.myparent.layout.focus(self.myparent.center_frame) ##
+        def do_delete_claim(dialog):
+            self.claims_container.remove_label(claim[0])
 
-            if result.lower() == 'yes':
-                self.data['claims'].remove(kwargs['selected'][0])
-                self.claims_container.data.remove(kwargs['selected'])
+        dialog = self.myparent.get_confirm_dialog(
+            message=HTML(_("Are you sure want to delete claim <b>{}</b>?").format(claim[1])),
+            confirm_handler=do_delete_claim
+        )
 
+        self.app.show_jans_dialog(dialog)
 
-        ensure_future(coroutine())
 
     def prepare_tabs(self) -> None:
         """Prepare the tabs for Edil Scope Dialogs
@@ -264,15 +214,15 @@ class EditScopeDialog(JansGDialog, DialogUtils):
 
 
         self.alt_tabs['oauth'] = HSplit([
-                            self.myparent.getTitledCheckBox(
+                            self.app.getTitledCheckBox(
                                     _("Default Scope"),
                                     name='defaultScope',
                                     checked=self.data.get('defaultScope'),
-                                    jans_help=self.myparent.get_help_from_schema(self.schema, 'defaultScope'),
+                                    jans_help=self.app.get_help_from_schema(self.schema, 'defaultScope'),
                                     style=cli_style.check_box,
                             ),
 
-                            self.myparent.getTitledCheckBox(
+                            self.app.getTitledCheckBox(
                                     _("Show in configuration endpoint"),
                                     name='showInConfigurationEndpoint',
                                     checked=self.data.get('attributes',{}).get('showInConfigurationEndpoint',''),
@@ -284,48 +234,45 @@ class EditScopeDialog(JansGDialog, DialogUtils):
 
 
         open_id_widgets = [
-                            self.myparent.getTitledCheckBox(
+                            self.app.getTitledCheckBox(
                                     _("Default Scope"),
                                     name='defaultScope',
                                     checked=self.data.get('defaultScope'),
-                                    jans_help=self.myparent.get_help_from_schema(self.schema, 'defaultScope'),
+                                    jans_help=self.app.get_help_from_schema(self.schema, 'defaultScope'),
                                     style=cli_style.check_box,
                             ),
 
-                            self.myparent.getTitledCheckBox(
+                            self.app.getTitledCheckBox(
                                     _("Show in configuration endpoint"),
                                     name='showInConfigurationEndpoint',
                                     checked=self.data.get('attributes',{}).get('showInConfigurationEndpoint',''),
                                     jans_help='Configuration Endpoint',
                                     style=cli_style.check_box,
                             ),
-
-                            # Window(char='-', height=1),
-
-                            # HorizontalLine(),
-                            self.myparent.getTitledText(
-                                    _("Search"), 
-                                    name='__search_claims__',
-                                    style='class:outh-scope-textsearch',width=10,
-                                    jans_help=_("Press enter to perform search"),
-                                    accept_handler=self.search_claims,
-                                    ),
                             ]
-        calims_data = self.get_named_claims(self.data.get('claims', []))
+
+        add_claim_button = VSplit([Window(), self.app.getButton(
+            text=_("Add Claim"),
+            name='oauth:scope:claim-button',
+            jans_help=_("Add claim"),
+            handler=self.add_claim)
+        ])
 
 
-        self.claims_container = JansVerticalNav(
-                myparent=self.myparent,
-                headers=['dn', 'Display Name'],
-                preferred_size= [0,0],
-                data=calims_data,
-                on_display=self.myparent.data_display_dialog,
-                on_delete=self.delete_claim,
-                selectes=0,
-                headerColor='class:outh-client-navbar-headcolor',
-                entriesColor='class:outh-client-navbar-entriescolor',
-                all_data=calims_data
-                )
+        claims = []
+        for claim in self.data.get('claims', []):
+            attbibute = self.get_attrib_by_dn(claim)
+            if attbibute:
+                claims.append(attbibute)
+
+        self.claims_container = JansLabelContainer(
+            title=_('Claims'),
+            width=int(self.app.dialog_width*1.1) - 26,
+            on_display=self.app.data_display_dialog,
+            on_delete=self.delete_claim,
+            buttonbox=add_claim_button,
+            entries=claims,
+        )
 
         open_id_widgets.append(self.claims_container)
 
@@ -333,28 +280,21 @@ class EditScopeDialog(JansGDialog, DialogUtils):
 
         self.alt_tabs['dynamic'] = HSplit([
 
-                        self.myparent.getTitledText(
+                        self.app.getTitledText(
                             _("Dynamic Scope Script"),
                             name='dynamicScopeScripts',
                             value='\n'.join(self.data.get('dynamicScopeScripts', [])),
-                            jans_help=self.myparent.get_help_from_schema(self.schema, 'dynamicScopeScripts'),
+                            jans_help=self.app.get_help_from_schema(self.schema, 'dynamicScopeScripts'),
                             height=3, 
                             style=cli_style.edit_text
                             ),
 
-                        self.myparent.getTitledText(
-                                _("Search"), 
-                                name='__search_claims__',
-                                style='class:outh-scope-textsearch',width=10,
-                                jans_help=_("Press enter to perform search")
-                                ),
-
-                        self.myparent.getTitledText(
+                        self.app.getTitledText(
                                 _("Claims"),
                                 name='claims',
                                 value='\n'.join(self.data.get('claims', [])),
                                 height=3, 
-                                jans_help=self.myparent.get_help_from_schema(self.schema, 'claims'),
+                                jans_help=self.app.get_help_from_schema(self.schema, 'claims'),
                                 style=cli_style.edit_text
                                 ),
 
@@ -362,67 +302,67 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                     )
 
         self.alt_tabs['spontaneous'] = HSplit([
-                    self.myparent.getTitledText(
+                    self.app.getTitledText(
                         _("Associated Client"), 
                         name='none', 
                         value=self.data.get('none',''), 
                         style=cli_style.edit_text,
                         read_only=True,
-                        jans_help=self.myparent.get_help_from_schema(self.schema, 'none'),
+                        jans_help=self.app.get_help_from_schema(self.schema, 'none'),
                         height=3,),## Not fount
 
-                    self.myparent.getTitledText(
+                    self.app.getTitledText(
                         _("Creationg time"), 
                         name='creationDate', 
                         value=self.data.get('creationDate',''), 
-                        jans_help=self.myparent.get_help_from_schema(self.schema, 'creationDate'),
+                        jans_help=self.app.get_help_from_schema(self.schema, 'creationDate'),
                         style=cli_style.edit_text,
                         read_only=True,),
 
                                                 ],width=D(),
                     )
 
-        uma_creator = self.data.get('creatorId','') or self.myparent.cli_object.get_user_info().get('inum','')
+        uma_creator = self.data.get('creatorId','') or self.app.cli_object.get_user_info().get('inum','')
 
 
         self.alt_tabs['uma'] = HSplit([
-                    self.myparent.getTitledText(
+                    self.app.getTitledText(
                         _("IconURL"), 
                         name='iconUrl', 
                         value=self.data.get('iconUrl',''), 
-                        jans_help=self.myparent.get_help_from_schema(self.schema, 'iconUrl'),
+                        jans_help=self.app.get_help_from_schema(self.schema, 'iconUrl'),
                         style=cli_style.edit_text),
                     
 
-                    self.myparent.getTitledText(_("Authorization Policies"),
+                    self.app.getTitledText(_("Authorization Policies"),
                             name='umaAuthorizationPolicies',
                             value='\n'.join(self.data.get('umaAuthorizationPolicies', [])),
                             height=3, 
-                            jans_help=self.myparent.get_help_from_schema(self.schema, 'umaAuthorizationPolicies'),
+                            jans_help=self.app.get_help_from_schema(self.schema, 'umaAuthorizationPolicies'),
                             style=cli_style.edit_text),
 
-                    self.myparent.getTitledText(
+                    self.app.getTitledText(
                         _("Associated Client"), 
                         name='none', 
                         value=self.data.get('none',''), 
-                        jans_help=self.myparent.get_help_from_schema(self.schema, 'none'),
+                        jans_help=self.app.get_help_from_schema(self.schema, 'none'),
                         style=cli_style.edit_text,
                         read_only=True,
                         height=3,), ## Not fount
 
-                    self.myparent.getTitledText(
+                    self.app.getTitledText(
                         _("Creationg time"), 
                         name='description', 
                         value=self.data.get('description',''), 
-                        jans_help=self.myparent.get_help_from_schema(self.schema, 'description'),
+                        jans_help=self.app.get_help_from_schema(self.schema, 'description'),
                         style=cli_style.edit_text,
                         read_only=True,),
 
-                    self.myparent.getTitledText(
+                    self.app.getTitledText(
                                     _("Creator"), 
                                     name='Creator',
                                     style=cli_style.edit_text,
-                                    jans_help=self.myparent.get_help_from_schema(self.schema, 'Creator'),
+                                    jans_help=self.app.get_help_from_schema(self.schema, 'Creator'),
                                     read_only=True,
                                     value=uma_creator
                                     ),
@@ -430,65 +370,87 @@ class EditScopeDialog(JansGDialog, DialogUtils):
                     width=D(),
                     )
 
-    def search_claims(
-        self, 
-        textbuffer: Buffer,
-        ) -> None:
-        """This method handel the search for claims and adding new claims
+    def attribute_exists(self, dn):
+        for dn_, name_ in self.claims_container.entries:
+            if dn_ == dn:
+                return True
 
-        Args:
-            tbuffer (Buffer): Buffer returned from the TextArea widget > GetTitleText
-        """
-
-        try :
-            response = self.myparent.cli_object.process_command_by_id(
-                        operation_id='get-attributes',
-                        url_suffix='',
-                        endpoint_args='pattern:{}'.format(textbuffer.text),
-                        data_fn=None,
-                        data={}
-                        )
-        except Exception as e:
-                    self.myparent.show_message(_("Error searching claims"), str(e))
-                    return
-
-        result = response.json()
-
-        if not result.get('entries'):
-            self.myparent.show_message(_("Ooops"), _("Can't find any claim for ʹ%sʹ.") % textbuffer.text)
-            return
-
+    def add_claim(self):
 
         def add_selected_claims(dialog):
             if 'claims' not in self.data:
                 self.data['claims'] = []
 
-            for item in dialog.body.current_values:
-                self.claims_container.add_item(item)
-                self.data['claims'].append(item[0])
+            self.data['claims'] += self.add_attribute_checkbox.current_values
+            self.fill_claims_container()
 
-        current_data = self.get_named_claims(self.data.get('claims', []))
+        attribute_list = []
+        for attribute in common_data.jans_attributes:
+            if not self.attribute_exists(attribute['dn']):
+                attribute_list.append((
+                    attribute['dn'],
+                    attribute.get('displayName') or attribute.get('claimName')
+                    ))
 
-        for i in range(len(current_data)):
-            current_data[i] = current_data[i][0]
+            attribute_list.sort(key=lambda x: x[1])
 
-        values = [([claim['dn'], claim['displayName']], claim['displayName']) for claim in result['entries']]
-        values_uniqe = []
+        def on_text_changed(event):
+            search_text = event.text
+            matching_items = []
+            for item in attribute_list:
+                if search_text.lower() in item[1].lower():
+                    matching_items.append(item)
+            if matching_items:
+                self.add_attribute_checkbox.values = matching_items
+                self.add_attribute_frame.body = HSplit(children=[self.add_attribute_checkbox])
+                self.add_attribute_checkbox._selected_index = 0
+            else:
+                self.add_attribute_frame.body = HSplit(children=[Label(text=_("No Items "), style=cli_style.label,
+                                                                   width=len(_("No Items "))),], width=D())
 
-        for k in values:
-            if k[0][0] not in current_data:
-                values_uniqe.append(k)
+        ta = TextArea(
+            height=D(),
+            width=D(),
+            multiline=False,
+        )
 
-        if not values_uniqe:
-            self.myparent.show_message(_("Ooops"), _("Can't find any New claim for ʹ%sʹ.") % textbuffer.text)
-            return
+        ta.buffer.on_text_changed += on_text_changed
 
-        check_box_list = CheckboxList(
-            values=values_uniqe,
-            )
-        buttons = [Button(_("Cancel")), Button(_("OK"), handler=add_selected_claims)]
-        dialog = JansGDialog(self.myparent, title=_("Select claims to add"), body=check_box_list, buttons=buttons)
-        self.myparent.show_jans_dialog(dialog)
+        self.add_attribute_checkbox.values = attribute_list
+        self.add_attribute_frame = Frame(
+            title="Checkbox list",
+            body=HSplit(children=[self.add_attribute_checkbox]),
+        )
+        layout = HSplit(children=[
+            VSplit(
+                children=[
+                    Label(text=_("Filter "), style=cli_style.label,
+                          width=len(_("Filter "))),
+                    ta
+                ]),
+            Window(height=2, char=' '),
+            self.add_attribute_frame
+
+        ])
+
+        buttons = [Button(_("Cancel")), Button(
+            _("OK"), handler=add_selected_claims)]
+
+        self.addAttributeDialog = JansGDialog(
+            self.app,
+            title=_("Select Attributes to add"),
+            body=layout,
+            buttons=buttons)
+
+        self.app.show_jans_dialog(self.addAttributeDialog)
+
+
+    def fill_claims_container(self):
+        for attribute_dn in self.data['claims']:
+            attribute = self.get_attrib_by_dn(attribute_dn)
+            if attribute and not self.attribute_exists(attribute_dn):
+                    self.claims_container.add_label(*attribute)
+
 
     def __pt_container__(self) -> Dialog:
         """The container for the dialog itself

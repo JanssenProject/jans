@@ -392,10 +392,7 @@ Server deployment
 2. Change the configuration as given below in `config.py`
 
      ```
-     ACR_VALUES = "agama"
+     ACR_VALUES = "agama_co.acme.password.flow"
      ```
 
-     ```
-     ADDITIONAL_PARAMS = {'agama_flow': 'co.acme.password.flow'}
-     ```
 3. Run the Tent test by accessing it via the browser

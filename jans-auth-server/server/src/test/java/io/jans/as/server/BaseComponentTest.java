@@ -6,7 +6,6 @@
 
 package io.jans.as.server;
 
-import io.jans.as.common.service.common.EncryptionService;
 import io.jans.as.common.service.common.InumService;
 import io.jans.as.common.service.common.UserService;
 import io.jans.as.model.config.StaticConfiguration;
@@ -24,6 +23,7 @@ import io.jans.as.server.uma.service.UmaResourceService;
 import io.jans.as.server.uma.service.UmaRptService;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.service.CacheService;
+import io.jans.service.EncryptionService;
 import io.jans.service.cdi.util.CdiUtil;
 
 /**

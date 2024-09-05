@@ -17,7 +17,7 @@ import io.jans.as.persistence.model.Scope;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
-import org.python.google.common.collect.Sets;
+import com.google.common.collect.Sets;
 import org.slf4j.Logger;
 
 import java.util.*;

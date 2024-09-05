@@ -21,7 +21,6 @@ import java.security.interfaces.ECPrivateKey;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
-import static io.jans.eleven.model.GenerateKeyResponseParam.KEY_ID;
 import static org.testng.Assert.*;
 
 /**
@@ -45,6 +44,7 @@ public class CryptoProviderTest extends BaseComponentTest {
             {Algorithm.ES384},
             {Algorithm.ES512},
     };
+    private static final String KEY_ID = "kid";
 
     private static Long expirationTime;
     private static String hs256Signature;

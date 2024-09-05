@@ -26,6 +26,11 @@ public enum TokenTypeHint implements HasParamName, AttributeEnum {
     ACCESS_TOKEN("access_token"),
 
     /**
+     * Transaction token
+     */
+    TX_TOKEN("tx_token"),
+
+    /**
      * A refresh token as defined in RFC6749, Section 1.5
      */
     REFRESH_TOKEN("refresh_token");

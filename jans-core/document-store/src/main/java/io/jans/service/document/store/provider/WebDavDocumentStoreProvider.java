@@ -10,22 +10,22 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.jans.service.document.store.conf.DocumentStoreConfiguration;
+import io.jans.service.document.store.conf.DocumentStoreType;
+import io.jans.service.document.store.conf.WebDavDocumentStoreConfiguration;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
-import io.jans.service.document.store.conf.DocumentStoreConfiguration;
-import io.jans.service.document.store.conf.WebDavDocumentStoreConfiguration;
-import io.jans.service.document.store.conf.DocumentStoreType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * @author Yuriy Movchan on 04/10/2020
  */
 @ApplicationScoped
-public class WebDavDocumentStoreProvider extends DocumentStoreProvider<WebDavDocumentStoreProvider> {
+public class WebDavDocumentStoreProvider extends DocumentStoreProvider<String> {
 
     @Inject
     private Logger log;
@@ -71,19 +71,32 @@ public class WebDavDocumentStoreProvider extends DocumentStoreProvider<WebDavDoc
 	}
 
 	@Override
-	public boolean saveDocument(String path, String documentContent, Charset charset, List<String> moduleList) {
+	public String saveDocument(String path, String description, String documentContent, Charset charset, List<String> moduleList) {
 		// TODO Auto-generated method stub
-		return false;
+		return null;
 	}
 
 	@Override
-	public boolean saveDocumentStream(String path, InputStream documentStream, List<String> moduleList) {
+	public String saveDocumentStream(String path, String description, InputStream documentStream, List<String> moduleList) {
 		// TODO Auto-generated method stub
-		return false;
+		return null;
+	}
+
+	@Override
+	public String saveBinaryDocumentStream(String path, String description, InputStream documentStream,
+			List<String> moduleList) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	@Override
 	public String readDocument(String path, Charset charset) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public InputStream readBinaryDocumentAsStream(String path) {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -95,15 +108,20 @@ public class WebDavDocumentStoreProvider extends DocumentStoreProvider<WebDavDoc
 	}
 
 	@Override
-	public boolean renameDocument(String currentPath, String destinationPath) {
+	public String renameDocument(String currentPath, String destinationPath) {
 		// TODO Auto-generated method stub
-		return false;
+		return null;
 	}
 
 	@Override
 	public boolean removeDocument(String path) {
 		// TODO Auto-generated method stub
 		return false;
+	}
+
+	@Override
+	public List<String> findDocumentsByModules(List<String> moduleList, String ... attributes) {
+        throw new RuntimeException("Not yet implemented");
 	}
 
 }

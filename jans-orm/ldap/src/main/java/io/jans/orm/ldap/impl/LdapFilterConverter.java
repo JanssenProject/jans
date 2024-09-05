@@ -6,12 +6,11 @@
 
 package io.jans.orm.ldap.impl;
 
-import jakarta.enterprise.context.ApplicationScoped;
-
 import io.jans.orm.exception.operation.SearchException;
 import io.jans.orm.search.filter.Filter;
 import io.jans.orm.search.filter.FilterType;
-import io.jans.orm.util.ArrayHelper;
+import io.jans.orm.util.StringHelper;
+import jakarta.enterprise.context.ApplicationScoped;
 
 /**
  * Filter to LDAP filter convert
@@ -51,12 +50,7 @@ public class LdapFilterConverter {
         }
 
         if (FilterType.EQUALITY == type) {
-        	String attributeName;
-        	if (ArrayHelper.isEmpty(genericFilter.getFilters())) {
-        		attributeName = genericFilter.getAttributeName();
-        	} else {
-        		attributeName = convertToLdapFilter(genericFilter.getFilters()[0]).getAttributeName();
-        	}
+    		String attributeName = resolveAttributeName(genericFilter);
             return com.unboundid.ldap.sdk.Filter.createEqualityFilter(attributeName, String.valueOf(genericFilter.getAssertionValue()));
         }
 
@@ -77,7 +71,8 @@ public class LdapFilterConverter {
         }
 
         if (FilterType.SUBSTRING == type) {
-            return com.unboundid.ldap.sdk.Filter.createSubstringFilter(genericFilter.getAttributeName(), genericFilter.getSubInitial(),
+    		String attributeName = resolveAttributeName(genericFilter);
+            return com.unboundid.ldap.sdk.Filter.createSubstringFilter(attributeName, genericFilter.getSubInitial(),
                     genericFilter.getSubAny(), genericFilter.getSubFinal());
         }
 
@@ -149,5 +144,22 @@ public class LdapFilterConverter {
 
         throw new SearchException(String.format("Unknown filter type '%s'", type), com.unboundid.ldap.sdk.ResultCode.PROTOCOL_ERROR_INT_VALUE);
     }
+
+	private String resolveAttributeName(Filter filter) throws SearchException {
+		String attributeName = filter.getAttributeName();
+
+		if (StringHelper.isEmpty(attributeName)) {
+			// Try to find attribute name inside sub-filters
+			for (Filter subFilter : filter.getFilters()) {
+				com.unboundid.ldap.sdk.Filter convertedSubFilter  = convertToLdapFilter(subFilter);
+				attributeName = convertedSubFilter.getAttributeName();
+				if (StringHelper.isNotEmpty(attributeName)) {
+					break;
+				}
+			}
+		}
+
+		return attributeName;
+	}
 
 }

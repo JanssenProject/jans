@@ -1,0 +1,4 @@
+Flow io.jans.agama.test.broken.flow2
+    Basepath "" 
+
+Log null.x      // This will crash

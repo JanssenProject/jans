@@ -11,6 +11,8 @@ public class ApiConstants {
     private ApiConstants() {}
 
     public static final String BASE_API_URL = "/";
+    public static final String CONFIG_APP_NAME = "jans-config-api";
+    public static final String ARTIFACT = "artifact";
     public static final String CONFIG = "/config";
     public static final String CONFIGS = "/configs";
     public static final String API_CONFIG = "/api-config";
@@ -51,7 +53,9 @@ public class ApiConstants {
     public static final String SMTP = "/smtp";
     public static final String GRANT_TYPES = "/grant-types";
     public static final String CACHE = "/cache";
+    public static final String MESSAGE = "/message";
     public static final String PERSISTENCE = "/persistence";
+    public static final String FEATURE_FLAGS = "/feature-flags";
     public static final String DATABASE = "/database";
     public static final String LDAP = "/ldap";
     public static final String SQL = "/sql";
@@ -59,6 +63,7 @@ public class ApiConstants {
     public static final String IN_MEMORY = "/in-memory";
     public static final String NATIVE_PERSISTENCE = "/native-persistence";
     public static final String MEMCACHED = "/memcached";
+    public static final String POSTGRES = "/postgres";
     public static final String TEST = "/test";
     public static final String INUM_PATH = "{inum}";
     public static final String ID_PATH = "{id}";
@@ -73,6 +78,14 @@ public class ApiConstants {
     public static final String STATISTICS = "/stat";
     public static final String USER = "/user";
     public static final String ORG = "/org";
+    public static final String JANS_ASSETS = "/jans-assets";
+    public static final String UPLOAD = "/upload";
+    public static final String STREAM = "/stream";
+    public static final String SERVICES = "/services";
+    public static final String ASSET_TYPE = "/asset-type";
+    public static final String SERVICE = "/service";
+        
+    public static final String APP_VERSION = "/app-version";
     public static final String SERVER_STAT = "/server-stat";
     public static final String USERNAME_PATH = "/{username}";
     public static final String CLIENTID_PATH = "/{clientId}";
@@ -90,9 +103,10 @@ public class ApiConstants {
     public static final String PLUGIN_NAME_PATH = "{pluginName}";
     public static final String AUTHORIZATIONS = "/authorizations";
     public static final String USERID_PATH = "{userId}";
+    public static final String SERVICE_NAME_PARAM_PATH = "/{service-name}";
+    
     public static final String USERID = "userId";
     public static final String USERNAME = "username";
-
     public static final String LIMIT = "limit";
     public static final String START_INDEX = "startIndex";
     public static final String PATTERN = "pattern";
@@ -113,6 +127,7 @@ public class ApiConstants {
     public static final String SESSIONID = "sessionId";
     public static final String USERDN = "userDn";
     public static final String PLUGIN_NAME = "pluginName";
+    public static final String SERVICE_NAME = "service-name";
     
 
     public static final String ALL = "all";
@@ -145,5 +160,6 @@ public class ApiConstants {
     public static final String DATA = "data";
     public static final String FIELD_VALUE_PAIR = "fieldValuePair";
     
+    public static final String EVENT_RANGE_PATH = "/{eventStartDate}-{eventEndDate}";
 
 }

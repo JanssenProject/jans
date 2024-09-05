@@ -89,7 +89,7 @@ def _on_connection_giveup(details: Details) -> None:
 class LockManager:
     @property
     def lock_enabled(self):
-        return as_boolean(os.environ.get("CN_ENABLE_LOCK", "true"))
+        return as_boolean(os.environ.get("CN_OCI_LOCK_ENABLED", "true"))
 
     @backoff.on_exception(
         backoff.constant,
@@ -239,16 +239,16 @@ class LockRecord(BaseLockRecord):
             An instance of lock adapter class.
 
         Raises:
-            ValueError: If the value of `CN_LOCK_ADAPTER` or `CN_PERSISTENCE_TYPE` environment variable is not supported.
+            ValueError: If the value of `CN_OCI_LOCK_ADAPTER` or `CN_PERSISTENCE_TYPE` environment variable is not supported.
 
         Examples:
 
         ```py
-        os.environ["CN_LOCK_ADAPTER"] = "sql"
+        os.environ["CN_OCI_LOCK_ADAPTER"] = "sql"
         LockStorage().adapter  # returns an instance of adapter class
         ```
 
-        The adapter name is pre-populated from `CN_LOCK_ADAPTER` environment variable.
+        The adapter name is pre-populated from `CN_OCI_LOCK_ADAPTER` environment variable.
 
         Supported lock adapter name:
 
@@ -257,7 +257,7 @@ class LockRecord(BaseLockRecord):
         - `couchbase`: returns and instance of [CouchbaseLock][jans.pycloudlib.lock.couchbase_lock.CouchbaseLock]
         - `ldap`: returns and instance of [LdapLock][jans.pycloudlib.lock.ldap_lock.LdapLock]
         """
-        _adapter = os.environ.get("CN_LOCK_ADAPTER") or PersistenceMapper().mapping["default"]
+        _adapter = os.environ.get("CN_OCI_LOCK_ADAPTER") or PersistenceMapper().mapping["default"]
 
         if _adapter == "sql":
             return SqlLock()

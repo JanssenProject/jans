@@ -24,6 +24,7 @@ import io.jans.as.model.token.TokenRevocationErrorResponseType;
 import io.jans.as.model.uma.UmaErrorResponseType;
 import io.jans.as.model.userinfo.UserInfoErrorResponseType;
 import io.jans.as.model.util.Util;
+import io.jans.model.error.ErrorMessage;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.CacheControl;
 import jakarta.ws.rs.core.MediaType;
@@ -102,6 +103,15 @@ public class ErrorResponseFactory implements Configuration {
         final DefaultErrorResponse error = getErrorResponse(type);
         error.setReason(BooleanUtils.isTrue(appConfiguration.getErrorReasonEnabled()) ? reason : "");
         return error.toJSonString();
+    }
+
+    public boolean isFeatureFlagEnabled(FeatureFlagType flagType) {
+        final Set<FeatureFlagType> enabledFlags = FeatureFlagType.from(appConfiguration);
+        if (enabledFlags.isEmpty()) { // no restrictions
+            return true;
+        }
+
+        return enabledFlags.contains(flagType);
     }
 
     public void validateFeatureEnabled(FeatureFlagType flagType) {

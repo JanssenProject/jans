@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.0.21](https://github.com/JanssenProject/jans/compare/jans-orm-v1.0.20...jans-orm-v1.0.21) (2023-12-14)
+
+
+### Features
+
+* add jans-lock-event library to publish messages to event server from jans-auth ([#6893](https://github.com/JanssenProject/jans/issues/6893)) ([c49f8f1](https://github.com/JanssenProject/jans/commit/c49f8f16af502429bf7a58fc31f6d5ffc1f67f78))
+* if DB column is boolean convert string "true" and '1' to true ([#6515](https://github.com/JanssenProject/jans/issues/6515)) ([3373497](https://github.com/JanssenProject/jans/commit/337349701253a532143934d13b27dccfe03f56e0))
+
+
+### Bug Fixes
+
+* prepare for 1.0.21 release ([#7008](https://github.com/JanssenProject/jans/issues/7008)) ([2132de6](https://github.com/JanssenProject/jans/commit/2132de6683f67bf22d5a863b149770d657073a83))
+* support boolean jdbc data type ([#6957](https://github.com/JanssenProject/jans/issues/6957)) ([efb5d48](https://github.com/JanssenProject/jans/commit/efb5d483337bba3a5037919bd15171b596b71e76))
+
+## [1.0.20](https://github.com/JanssenProject/jans/compare/jans-orm-v1.0.19...jans-orm-v1.0.20) (2023-11-08)
+
+
+### Bug Fixes
+
+* prepare for 1.0.20 release ([c6e806e](https://github.com/JanssenProject/jans/commit/c6e806eb31fed998d52cbef7a7d94c231d913102))
+
 ## [1.0.19](https://github.com/JanssenProject/jans/compare/jans-orm-v1.0.18...jans-orm-v1.0.19) (2023-10-11)
 
 

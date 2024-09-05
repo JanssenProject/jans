@@ -11,16 +11,18 @@ import io.jans.as.common.claims.Audience;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.AttributeService;
+import io.jans.as.model.authzdetails.AuthzDetails;
+import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.common.ScopeConstants;
 import io.jans.as.model.config.WebKeysConfiguration;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
+import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.model.jwt.Jwt;
 import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.token.JsonWebResponse;
+import io.jans.as.model.token.TokenErrorResponseType;
 import io.jans.as.model.util.JwtUtil;
 import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
-import io.jans.as.server.model.ldap.TokenEntity;
-import io.jans.as.server.model.ldap.TokenType;
 import io.jans.as.server.model.token.HandleTokenFactory;
 import io.jans.as.server.model.token.IdTokenFactory;
 import io.jans.as.server.model.token.JwtSigner;
@@ -33,12 +35,18 @@ import io.jans.as.server.service.external.ExternalUpdateTokenService;
 import io.jans.as.server.service.external.context.ExternalIntrospectionContext;
 import io.jans.as.server.service.external.context.ExternalUpdateTokenContext;
 import io.jans.as.server.service.stat.StatService;
+import io.jans.as.server.service.token.StatusListIndexService;
+import io.jans.as.server.service.token.StatusListService;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.as.server.util.TokenHashUtil;
 import io.jans.model.metric.MetricType;
+import io.jans.model.token.TokenEntity;
+import io.jans.model.token.TokenType;
 import io.jans.service.CacheService;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -94,6 +102,15 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
     @Inject
     private StatService statService;
 
+    @Inject
+    private ErrorResponseFactory errorResponseFactory;
+
+    @Inject
+    private StatusListService statusListService;
+
+    @Inject
+    private StatusListIndexService statusListIndexService;
+
     private boolean isCachedWithNoPersistence = false;
 
     protected AuthorizationGrant() {
@@ -109,9 +126,19 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
     }
 
     private IdToken createIdTokenInternal(AuthorizationCode authorizationCode, AccessToken accessToken, RefreshToken refreshToken, ExecutionContext executionContext) throws Exception {
+        executionContext.initFromGrantIfNeeded(this);
+
+        Integer statusListIndex = null;
+        if (errorResponseFactory.isFeatureFlagEnabled(FeatureFlagType.STATUS_LIST)) {
+            statusListIndex = statusListIndexService.next();
+            executionContext.setStatusListIndex(statusListIndex);
+        }
+
         JsonWebResponse jwr = idTokenFactory.createJwr(this, authorizationCode, accessToken, refreshToken, executionContext);
         final IdToken idToken = new IdToken(jwr.toString(), jwr.getClaims().getClaimAsDate(JwtClaimName.ISSUED_AT),
                 jwr.getClaims().getClaimAsDate(JwtClaimName.EXPIRATION_TIME));
+        idToken.setReferenceId(executionContext.getTokenReferenceId());
+        idToken.setStatusListIndex(statusListIndex);
         if (log.isTraceEnabled())
             log.trace("Created id_token: {}", idToken.getCode());
         return idToken;
@@ -172,6 +199,8 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
         if (nonce != null) {
             token.setNonce(nonce);
         }
+
+        token.getAttributes().setAuthorizationDetails(getAuthzDetailsAsString());
         token.setScope(getScopesAsString());
         token.setAuthMode(getAcrValues());
         token.setSessionDn(getSessionDn());
@@ -189,7 +218,18 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
     @Override
     public AccessToken createAccessToken(ExecutionContext context) {
         try {
+            context.initFromGrantIfNeeded(this);
+            context.generateRandomTokenReferenceId();
+
             final AccessToken accessToken = super.createAccessToken(context);
+
+            Integer statusListIndex = null;
+            if (errorResponseFactory.isFeatureFlagEnabled(FeatureFlagType.STATUS_LIST)) {
+                statusListIndex = statusListIndexService.next();
+                context.setStatusListIndex(statusListIndex);
+                accessToken.setStatusListIndex(statusListIndex);
+            }
+
             if (accessToken.getExpiresIn() < 0) {
                 log.trace("Failed to create access token with negative expiration time");
                 return null;
@@ -202,8 +242,16 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
 
             boolean externalOk = externalUpdateTokenService.modifyAccessToken(accessToken, ExternalUpdateTokenContext.of(context, jwtSigner));
             if (!externalOk) {
-                log.trace("External script forbids access token creation.");
-                return null;
+                final String reason = "External UpdateToken script forbids access token creation.";
+                log.trace(reason);
+
+                throw new WebApplicationException(Response
+                        .status(Response.Status.FORBIDDEN)
+                        .type(MediaType.APPLICATION_JSON_TYPE)
+                        .cacheControl(ServerUtil.cacheControl(true, false))
+                        .header("Pragma", "no-cache")
+                        .entity(errorResponseFactory.errorAsJson(TokenErrorResponseType.ACCESS_DENIED, reason))
+                        .build());
             }
 
             if (getClient().isAccessTokenAsJwt() && jwtSigner != null) {
@@ -237,6 +285,8 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
         final User user = getUser();
         final Client client = getClient();
 
+        context.initFromGrantIfNeeded(this);
+
         SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm
                 .fromString(appConfiguration.getDefaultSignatureAlgorithm());
         if (client.getAccessTokenSigningAlg() != null
@@ -255,9 +305,16 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
         jwt.getClaims().setClaim("acr", getAcrValues());
         jwt.getClaims().setClaim("auth_time", ServerUtil.dateToSeconds(getAuthenticationTime()));
         jwt.getClaims().setExpirationTime(accessToken.getExpirationDate());
-        jwt.getClaims().setIssuedAt(accessToken.getCreationDate());
+        jwt.getClaims().setIat(accessToken.getCreationDate());
+        jwt.getClaims().setNbf(accessToken.getCreationDate());
         jwt.getClaims().setSubjectIdentifier(getSub());
         jwt.getClaims().setClaim("x5t#S256", accessToken.getX5ts256());
+        jwt.getClaims().setClaim("jti", context.getTokenReferenceId());
+
+        final AuthzDetails authzDetails = getAuthzDetails();
+        if (!AuthzDetails.isEmpty(authzDetails)) {
+            jwt.getClaims().setClaim("authorization_details", authzDetails.asJsonArray());
+        }
 
         // DPoP
         final String dpop = context.getDpop();
@@ -269,6 +326,7 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
         }
 
         Audience.setAudience(jwt.getClaims(), getClient());
+        statusListService.addStatusClaimWithIndex(jwt, context);
 
         if (isTrue(client.getAttributes().getRunIntrospectionScriptBeforeJwtCreation())) {
             runIntrospectionScriptAndInjectValuesIntoJwt(jwt, context);
@@ -278,6 +336,8 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
     }
 
     private void runIntrospectionScriptAndInjectValuesIntoJwt(Jwt jwt, ExecutionContext executionContext) {
+        executionContext.initFromGrantIfNeeded(this);
+
         JSONObject responseAsJsonObject = new JSONObject();
 
         ExternalIntrospectionContext context = new ExternalIntrospectionContext(this, executionContext.getHttpRequest(), executionContext.getHttpResponse(), appConfiguration, attributeService);
@@ -295,6 +355,8 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
 
     private RefreshToken saveRefreshToken(RefreshToken refreshToken, ExecutionContext executionContext) {
         try {
+            executionContext.initFromGrantIfNeeded(this);
+
             if (refreshToken.getExpiresIn() > 0) {
                 final TokenEntity entity = asToken(refreshToken);
                 executionContext.setRefreshTokenEntity(entity);
@@ -339,11 +401,13 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
 
     @Override
     public RefreshToken createRefreshToken(ExecutionContext context) {
+        context.initFromGrantIfNeeded(this);
         return saveRefreshToken(() -> super.createRefreshToken(context), context);
     }
 
     @Override
     public RefreshToken createRefreshToken(ExecutionContext context, int lifetime) {
+        context.initFromGrantIfNeeded(this);
         return saveRefreshToken(() -> super.createRefreshToken(context, lifetime), context);
     }
 
@@ -361,10 +425,12 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
             String nonce, AuthorizationCode authorizationCode, AccessToken accessToken, RefreshToken refreshToken,
             String state, ExecutionContext executionContext) {
         try {
+            executionContext.initFromGrantIfNeeded(this);
             executionContext.setScopes(getScopes());
             executionContext.setClaimsAsString(getClaims());
             executionContext.setNonce(nonce);
             executionContext.setState(state);
+            executionContext.generateRandomTokenReferenceId();
 
             final IdToken idToken = createIdTokenInternal(authorizationCode, accessToken, refreshToken, executionContext);
             final AuthorizationGrant grant = executionContext.getGrant();
@@ -424,6 +490,12 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
         return result;
     }
 
+    public TokenEntity asToken(TxToken txToken) {
+        final TokenEntity result = asTokenEntity(txToken);
+        result.setTokenTypeEnum(TokenType.TX_TOKEN);
+        return result;
+    }
+
     public String getScopesAsString() {
         final StringBuilder scopes = new StringBuilder();
         for (String s : getScopes()) {
@@ -446,7 +518,9 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
         result.setUserId(getUserId());
         result.setUserDn(getUserDn());
         result.setClientId(getClientId());
+        result.setReferenceId(token.getReferenceId());
 
+        result.getAttributes().setStatusListIndex(token.getStatusListIndex());
         result.getAttributes().setX5cs256(token.getX5ts256());
         result.getAttributes().setDpopJkt(getDpopJkt());
 

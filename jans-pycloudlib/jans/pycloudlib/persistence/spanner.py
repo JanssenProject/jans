@@ -248,16 +248,16 @@ class SpannerClient(SqlSchemaMixin):
         """Get all rows from a table."""
         if not column_names:
             # TODO: faster lookup on column names
-            col_names = list(self.get_table_mapping().get(table_name, {}).keys())
+            column_names = list(self.get_table_mapping().get(table_name, {}).keys())
 
         with self.database.snapshot() as snapshot:  # type: ignore
             result = snapshot.read(
                 table=table_name,
-                columns=col_names,
+                columns=column_names,
                 keyset=KeySet(all_=True),  # type: ignore
             )
             for row in result:
-                yield dict(zip(col_names, row))
+                yield dict(zip(column_names, row))
 
     def insert_into_subtable(self, table_name: str, column_mapping: dict[str, _t.Any]) -> None:
         """Add new entry into subtable.
@@ -292,6 +292,9 @@ class SpannerClient(SqlSchemaMixin):
             values: Pre-transformed values.
         """
         type_ = self.sql_data_types.get(key, {})
+
+        if not type_:
+            type_ = self.sql_json_types.get(key, {})
 
         if not type_:
             attr_syntax = self.get_attr_syntax(key)

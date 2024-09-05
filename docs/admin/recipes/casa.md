@@ -89,7 +89,7 @@ casa_client_pw=MyCasaClientSecret
 
 ## Configuring authentication methods
 
-At this point, users ([How to create users](../../admin/config-guide/user-config.md#creating-an-user-resources) can log in to the Casa portal and [enable/configure one or more authentication methods](https://gluu.org/docs/casa/4.4/user-guide/) for their account.
+At this point, users ([How to create users](../../admin/config-guide/scim-config/user-config.md#creating-an-user-resources) can log in to the Casa portal and [enable/configure one or more authentication methods](https://gluu.org/docs/casa/4.4/user-guide/) for their account.
 
 ## Uninstalling Casa from Janssen Server
 

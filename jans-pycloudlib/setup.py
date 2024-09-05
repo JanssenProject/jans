@@ -47,6 +47,11 @@ setup(
         # handle CVE-2022-36087
         "oauthlib>=3.2.1",
         "boto3",
+        "sprig-aes>=0.4.0",
+        "marshmallow>=3.21.2",
+        "apispec[marshmallow]>=6.6.1",
+        "fqdn>=1.5.1",
+        "pem>=23.1.0",
     ],
     classifiers=[
         "Intended Audience :: Developers",

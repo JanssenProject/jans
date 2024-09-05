@@ -1,4 +1,4 @@
-FROM bellsoft/liberica-openjdk-alpine:17.0.8
+FROM bellsoft/liberica-openjdk-alpine:17.0.12@sha256:877a6ffc273212bd3f695db2a7973a05aa1bfb88ad550ba9ffe7deb7d1e50eee
 
 # ===============
 # Alpine packages
@@ -13,7 +13,7 @@ RUN apk update \
 # Jetty
 # =====
 
-ARG JETTY_VERSION=11.0.16
+ARG JETTY_VERSION=11.0.20
 ARG JETTY_HOME=/opt/jetty
 ARG JETTY_BASE=/opt/jans/jetty
 ARG JETTY_USER_HOME_LIB=/home/jetty/lib
@@ -50,8 +50,9 @@ RUN /opt/jython/bin/pip uninstall -y pip setuptools
 # Auth server
 # ===========
 
-ENV CN_VERSION=1.0.20-SNAPSHOT
-ENV CN_BUILD_DATE='2023-10-11 10:17'
+ENV CN_VERSION=1.1.5-SNAPSHOT
+ENV CN_BUILD_DATE='2024-08-26 16:00'
+
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-server/${CN_VERSION}/jans-auth-server-${CN_VERSION}.war
 
 # Install Jans Auth
@@ -78,42 +79,66 @@ ARG CASA_CONFIG_VERSION=${CN_VERSION}
 ARG CASA_CONFIG_BUILD_DATE=${CN_BUILD_DATE}
 ARG FIDO2_CLIENT_VERSION=${CN_VERSION}
 ARG FIDO2_CLIENT_BUILD_DATE=${CN_BUILD_DATE}
+ARG AGAMA_INBOUND_VERSION=${CN_VERSION}
+ARG AGAMA_INBOUND_BUILD_DATE=${CN_BUILD_DATE}
+ARG JANS_LOCK_VERSION=${CN_VERSION}
+ARG JANS_LOCK_BUILD_DATE=${CN_BUILD_DATE}
 
 RUN wget -q https://repo1.maven.org/maven2/com/twilio/sdk/twilio/${TWILIO_VERSION}/twilio-${TWILIO_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs/ \
     && wget -q https://repo1.maven.org/maven2/org/jsmpp/jsmpp/${JSMPP_VERSION}/jsmpp-${JSMPP_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs/ \
     && wget -q https://jenkins.jans.io/maven/io/jans/casa-config/${CASA_CONFIG_VERSION}/casa-config-${CASA_CONFIG_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs \
-    && wget -q https://jenkins.jans.io/maven/io/jans/jans-fido2-client/${FIDO2_CLIENT_VERSION}/jans-fido2-client-${FIDO2_CLIENT_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs
+    && wget -q https://jenkins.jans.io/maven/io/jans/jans-fido2-client/${FIDO2_CLIENT_VERSION}/jans-fido2-client-${FIDO2_CLIENT_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs \
+    && wget -q https://jenkins.jans.io/maven/io/jans/agama-inbound/${AGAMA_INBOUND_VERSION}/agama-inbound-${AGAMA_INBOUND_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs \
+    && wget -q https://jenkins.jans.io/maven/io/jans/jans-lock-service/${JANS_LOCK_VERSION}/jans-lock-service-${JANS_LOCK_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs \
+    && wget -q https://jenkins.jans.io/maven/io/jans/jans-lock-model/${JANS_LOCK_VERSION}/jans-lock-model-${JANS_LOCK_VERSION}.jar -P ${JETTY_BASE}/jans-auth/_libs
 
-# =====================
-# jans-linux-setup sync
-# =====================
+# ===========
+# Assets sync
+# ===========
 
 RUN mkdir -p ${JETTY_BASE}/jans-auth/agama/fl \
     ${JETTY_BASE}/jans-auth/agama/ftl \
-    ${JETTY_BASE}/jans-auth/agama/scripts
+    ${JETTY_BASE}/jans-auth/agama/scripts \
+    /app/templates \
+    /app/static/rdbm \
+    /app/schema
 
-ENV JANS_SOURCE_VERSION=a8884f39ee4eea3ef65d7cd41120343201d2b3e6
+ENV JANS_SOURCE_VERSION=fc9f04fe3b3d3d168f3090214b22ee80be371d92
+ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
-# we are using partial-clone and sparse-checkout to get the agama code
-RUN git clone --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
+# we are using partial-clone and sparse-checkout to get the assets
+RUN git clone --depth 500 --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
     && cd /tmp/jans \
     && git sparse-checkout init --cone \
     && git checkout ${JANS_SOURCE_VERSION} \
     && git sparse-checkout add agama/misc \
-    && git sparse-checkout add jans-linux-setup/jans_setup/static/auth/conf \
-    && git sparse-checkout add jans-casa/extras \
+    && git sparse-checkout add jans-linux-setup/jans_setup \
+    && git sparse-checkout add jans-pycloudlib \
+    && git sparse-checkout add jans-config-api/plugins/docs \
+    && cp ${JANS_SETUP_DIR}/static/rdbm/sql_data_types.json /app/static/rdbm/ \
+    && cp ${JANS_SETUP_DIR}/static/rdbm/ldap_sql_data_type_mapping.json /app/static/rdbm/ \
+    && cp ${JANS_SETUP_DIR}/static/rdbm/opendj_attributes_syntax.json /app/static/rdbm/ \
+    && cp ${JANS_SETUP_DIR}/static/rdbm/sub_tables.json /app/static/rdbm/ \
+    && cp ${JANS_SETUP_DIR}/schema/jans_schema.json /app/schema/ \
+    && cp ${JANS_SETUP_DIR}/schema/custom_schema.json /app/schema/ \
+    && cp ${JANS_SETUP_DIR}/schema/opendj_types.json /app/schema/ \
     && cp -R agama/misc/* ${JETTY_BASE}/jans-auth/agama/ \
-    && cp -R jans-linux-setup/jans_setup/static/auth/conf /etc/certs \
+    && cp -R ${JANS_SETUP_DIR}/static/auth/conf /etc/certs \
     && mkdir -p /opt/jans/python/libs \
-    && cp jans-casa/extras/casa-external_* /opt/jans/python/libs
+    && cp -R ${JANS_SETUP_DIR}/templates/jans-lock /app/templates/ \
+    && mkdir -p org/eclipse/jetty \
+    && cp ${JANS_SETUP_DIR}/static/favicon.ico org/eclipse/jetty/favicon.ico \
+    && zip -r ${JETTY_HOME}/lib/jetty-server-${JETTY_VERSION}.jar org/eclipse/jetty/favicon.ico \
+    && cp jans-config-api/plugins/docs/lock-plugin-swagger.yaml /app/templates/jans-lock/
 
 # ======
 # Python
 # ======
 
 COPY requirements.txt /app/requirements.txt
-RUN python3 -m ensurepip \
+RUN mv /usr/lib/python3.12/EXTERNALLY-MANAGED /usr/lib/python3.12/EXTERNALLY-MANAGED.disabled \
+    && python3 -m ensurepip \
     && pip3 install --no-cache-dir -U pip wheel setuptools \
     && pip3 install --no-cache-dir -r /app/requirements.txt \
     && pip3 uninstall -y pip wheel
@@ -161,16 +186,17 @@ ENV CN_CONFIG_ADAPTER=consul \
 # ==========
 
 ENV CN_SECRET_ADAPTER=vault \
-    CN_SECRET_VAULT_SCHEME=http \
-    CN_SECRET_VAULT_HOST=localhost \
-    CN_SECRET_VAULT_PORT=8200 \
     CN_SECRET_VAULT_VERIFY=false \
     CN_SECRET_VAULT_ROLE_ID_FILE=/etc/certs/vault_role_id \
     CN_SECRET_VAULT_SECRET_ID_FILE=/etc/certs/vault_secret_id \
     CN_SECRET_VAULT_CERT_FILE=/etc/certs/vault_client.crt \
     CN_SECRET_VAULT_KEY_FILE=/etc/certs/vault_client.key \
     CN_SECRET_VAULT_CACERT_FILE=/etc/certs/vault_ca.crt \
-    CN_SECRET_VAULT_NAMESPACE=jans \
+    CN_SECRET_VAULT_NAMESPACE="" \
+    CN_SECRET_VAULT_ADDR=http://localhost:8200 \
+    CN_SECRET_VAULT_KV_PATH=secret \
+    CN_SECRET_VAULT_PREFIX=jans \
+    CN_SECRET_VAULT_APPROLE_PATH=approle \
     CN_SECRET_KUBERNETES_NAMESPACE=default \
     CN_SECRET_KUBERNETES_SECRET=jans \
     CN_SECRET_KUBERNETES_USE_KUBE_CONFIG=false
@@ -205,7 +231,7 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_WAIT_MAX_TIME=300 \
     CN_WAIT_SLEEP_DURATION=10 \
     PYTHON_HOME=/opt/jython \
-    CN_DOCUMENT_STORE_TYPE=LOCAL \
+    CN_DOCUMENT_STORE_TYPE=DB \
     CN_JACKRABBIT_URL=http://localhost:8080 \
     CN_JACKRABBIT_ADMIN_ID=admin \
     CN_JACKRABBIT_ADMIN_PASSWORD_FILE=/etc/jans/conf/jackrabbit_admin_password \
@@ -217,13 +243,17 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_GOOGLE_SECRET_VERSION_ID=latest \
     CN_GOOGLE_SECRET_NAME_PREFIX=jans \
     CN_JETTY_REQUEST_HEADER_SIZE=8192 \
+    CN_JETTY_ARGS="" \
     CN_PROMETHEUS_PORT="" \
     CN_AWS_SECRETS_ENDPOINT_URL="" \
     CN_AWS_SECRETS_PREFIX=jans \
     CN_AWS_SECRETS_REPLICA_FILE="" \
     CN_AUTH_JETTY_PORT=8080 \
     CN_AUTH_JETTY_HOST=0.0.0.0 \
-    CN_SHARE_AUTH_CONF=true
+    CN_SHARE_AUTH_CONF=true \
+    CN_LOCK_ENABLED=false \
+    CN_OPA_URL=http://localhost:8181/v1 \
+    CN_SSL_CERT_FROM_SECRETS=true
 
 # @TODO: revisit the usage (if any)
 ENV ADMIN_UI_JWKS=http://${CN_AUTH_JETTY_HOST}:${CN_AUTH_JETTY_PORT}/jans-auth/restv1/jwks
@@ -237,7 +267,7 @@ EXPOSE $CN_AUTH_JETTY_PORT
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/auth-server" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.0.20" \
+    org.opencontainers.image.version="1.1.5" \
     org.opencontainers.image.title="Janssen Authorization Server" \
     org.opencontainers.image.description="OAuth 2.0 server and client; OpenID Connect Provider (OP) & UMA Authorization Server (AS)"
 
@@ -276,6 +306,7 @@ RUN chmod -R g=u ${JETTY_BASE}/jans-auth/custom \
     && chmod 664 /opt/java/lib/security/cacerts \
     && chown -R 1000:0 ${JETTY_BASE}/jans-auth/agama \
     && chown -R 1000:0 ${JETTY_BASE}/jans-auth/custom \
+    && chown -R 1000:0 ${JETTY_BASE}/jans-auth/resources \
     && chown -R 1000:0 /opt/jans/python/libs \
     && chown -R 1000:0 ${JETTY_BASE}/common/libs \
     && chown -R 1000:0 /usr/share/java \

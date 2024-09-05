@@ -109,7 +109,7 @@ public class RedirectUriTest {
         System.out.println(queryResult);
         //No empty Result
         assertTrue(queryResult.length() > 0);
-        assertEquals(queryResult, "eyJraWQiOiJrZXkxMjMiLCJ0eXAiOiJqd3QiLCJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJ1c2VyMTIzIiwiZXhwIjoiMzAwMCIsImV4cGlyZXNfaW4iOiIzMDAwIn0.12345");
+        assertEquals(queryResult, "eyJraWQiOiJrZXkxMjMiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJ1c2VyMTIzIiwiZXhwIjoiMzAwMCIsImV4cGlyZXNfaW4iOiIzMDAwIn0.12345");
     }
 
     @Test
@@ -137,7 +137,7 @@ public class RedirectUriTest {
         String queryResult = redirectUri.getQueryString();
         System.out.println(queryResult);
         assertNoEmptyQueryString(queryResult, RESPONSE, 1);
-        assertTrue(queryResult.startsWith("response=eyJ0eXAiOiJqd3QiLCJlbmMiOiJBMjU2R0NNIiwiYWxnIjoiUlNBMV81In0."));
+        assertTrue(queryResult.startsWith("response=eyJ0eXAiOiJKV1QiLCJlbmMiOiJBMjU2R0NNIiwiYWxnIjoiUlNBMV81In0."));
     }
 
     @Test
@@ -154,7 +154,7 @@ public class RedirectUriTest {
         String queryResult = redirectUri.getQueryString();
         System.out.println(queryResult);
         assertNoEmptyQueryString(queryResult, RESPONSE, 1);
-        assertTrue(queryResult.startsWith("response=eyJ0eXAiOiJqd3QiLCJlbmMiOiJBMTI4R0NNIiwiYWxnIjoiQTEyOEtXIn0."));
+        assertTrue(queryResult.startsWith("response=eyJ0eXAiOiJKV1QiLCJlbmMiOiJBMTI4R0NNIiwiYWxnIjoiQTEyOEtXIn0."));
     }
 
     @Test
@@ -171,7 +171,7 @@ public class RedirectUriTest {
         String queryResult = redirectUri.getQueryString();
         System.out.println(queryResult);
         assertNoEmptyQueryString(queryResult, RESPONSE, 1);
-        assertTrue(queryResult.startsWith("response=eyJjdHkiOiJqd3QiLCJ0eXAiOiJqd3QiLCJlbmMiOiJBMjU2R0NNIiwiYWxnIjoiUlNBMV81In0."));
+        assertTrue(queryResult.startsWith("response=eyJjdHkiOiJKV1QiLCJ0eXAiOiJKV1QiLCJlbmMiOiJBMjU2R0NNIiwiYWxnIjoiUlNBMV81In0."));
     }
 
     @Test
@@ -190,7 +190,7 @@ public class RedirectUriTest {
         System.out.println(queryResult);
 
         assertNoEmptyQueryString(queryResult, RESPONSE, 1);
-        assertTrue(queryResult.startsWith("response=eyJjdHkiOiJqd3QiLCJ0eXAiOiJqd3QiLCJlbmMiOiJBMTI4R0NNIiwiYWxnIjoiQTEyOEtXIn0."));
+        assertTrue(queryResult.startsWith("response=eyJjdHkiOiJKV1QiLCJ0eXAiOiJKV1QiLCJlbmMiOiJBMTI4R0NNIiwiYWxnIjoiQTEyOEtXIn0."));
     }
 
     @Test
@@ -204,12 +204,12 @@ public class RedirectUriTest {
         System.out.println(queryResult);
 
         assertNoEmptyQueryString(queryResult, RESPONSE, 1);
-        assertTrue(queryResult.startsWith("response=eyJraWQiOiJrZXkxMjMiLCJ0eXAiOiJqd3QiLCJhbGciOiJSUzI1NiJ9."));
+        assertTrue(queryResult.startsWith("response=eyJraWQiOiJrZXkxMjMiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9."));
     }
 
     @Test
     public void toString_withResponseModeFormPostJwt_validHtmlFormResponse() throws CryptoProviderException {
-        String valTestCase = "<html><head><title>Submit This Form</title></head><body onload=\"javascript:document.forms[0].submit()\"><form method=\"post\" action=\"http://redirecturl.com/\"><input type=\"hidden\" name=\"response\" value=\"eyJraWQiOiJrZXkxMjMiLCJ0eXAiOiJqd3QiLCJhbGciOiJSUzI1NiJ9.eyJzY29wZSI6Im9wZW5pZCIsInJlc3BvbnNlX3R5cGUiOiJ0b2tlbiBpZF90b2tlbiIsInJlZGlyZWN0X3VyaSI6Imh0dHA6Ly9yZWRpcmVjdHVybC5jb20vIiwic3RhdGUiOiJjOTU1NzBkMS01YWI4LTQ2OGItOWMwMS05Y2M2MGUwMmIwMjMiLCJleHAiOiIxNjQ0MjcwNDczMzAxIiwibm9uY2UiOiIwZGEwZDA0Yi1hNmJkLTRkOWUtOGJkOS0yMTE2NWYwZDNiYjciLCJleHBpcmVzX2luIjoiMTY0NDI3MDQ3MzMwMSIsImNsaWVudF9pZCI6IjEyMyJ9.12345\"/></form></body></html>";
+        String expected = "<html><head><title>Submit This Form</title></head><body onload=\"javascript:document.forms[0].submit()\"><form method=\"post\" action=\"http://redirecturl.com/\"><input type=\"hidden\" name=\"response\" value=\"eyJraWQiOiJrZXkxMjMiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzY29wZSI6Im9wZW5pZCIsInJlc3BvbnNlX3R5cGUiOiJ0b2tlbiBpZF90b2tlbiIsInJlZGlyZWN0X3VyaSI6Imh0dHA6Ly9yZWRpcmVjdHVybC5jb20vIiwic3RhdGUiOiJjOTU1NzBkMS01YWI4LTQ2OGItOWMwMS05Y2M2MGUwMmIwMjMiLCJleHAiOiIxNjQ0MjcwNDczMzAxIiwibm9uY2UiOiIwZGEwZDA0Yi1hNmJkLTRkOWUtOGJkOS0yMTE2NWYwZDNiYjciLCJleHBpcmVzX2luIjoiMTY0NDI3MDQ3MzMwMSIsImNsaWVudF9pZCI6IjEyMyJ9.12345\"/></form></body></html>";
         RedirectUri redirectUri = getRedirectUriTemplateToString();
         redirectUri.setResponseMode(ResponseMode.FORM_POST_JWT);
         AbstractCryptoProvider cryptoProvider = mock(AbstractCryptoProvider.class);
@@ -219,7 +219,7 @@ public class RedirectUriTest {
         redirectUri.setSharedSecret("shared_secret");
         redirectUri.setNestedSharedSecret("nested_shared_secret");
 
-        assertEquals(redirectUri.toString(), valTestCase);
+        assertEquals(redirectUri.toString(), expected);
     }
 
     @Test
@@ -251,7 +251,7 @@ public class RedirectUriTest {
 
     @Test
     public void toString_withResponseModeJwtAndresponseTypeToken_validURLFragmentString() throws CryptoProviderException {
-        String valTestCase = "http://redirecturl.com/#response=eyJraWQiOiJrZXkxMjMiLCJ0eXAiOiJqd3QiLCJhbGciOiJSUzI1NiJ9.eyJleHAiOiIxNjQ0MjcwNDczMzAxIiwiZXhwaXJlc19pbiI6IjE2NDQyNzA0NzMzMDEiLCJjbGllbnRfaWQiOiIxMjMifQ.12345";
+        String expected = "http://redirecturl.com/#response=eyJraWQiOiJrZXkxMjMiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJleHAiOiIxNjQ0MjcwNDczMzAxIiwiZXhwaXJlc19pbiI6IjE2NDQyNzA0NzMzMDEiLCJjbGllbnRfaWQiOiIxMjMifQ.12345";
         List<ResponseType> typeList = new ArrayList<>();
         typeList.add(ResponseType.TOKEN);
         RedirectUri redirectUri = new RedirectUri("http://redirecturl.com/", typeList, ResponseMode.JWT);
@@ -265,12 +265,12 @@ public class RedirectUriTest {
         when(cryptoProvider.sign(anyString(), anyString(), anyString(), any(SignatureAlgorithm.class))).thenReturn("12345");
         redirectUri.setCryptoProvider(cryptoProvider);
 
-        assertEquals(redirectUri.toString(), valTestCase);
+        assertEquals(redirectUri.toString(), expected);
     }
 
     @Test
     public void toString_withResponseModeJwtAndresponseTypeCode_validURLQueryString() throws CryptoProviderException {
-        String valTestCase = "http://redirecturl.com/?response=eyJraWQiOiJrZXkxMjMiLCJ0eXAiOiJqd3QiLCJhbGciOiJSUzI1NiJ9.eyJleHAiOiIxNjQ0MjcwNDczMzAxIiwiZXhwaXJlc19pbiI6IjE2NDQyNzA0NzMzMDEiLCJjbGllbnRfaWQiOiIxMjMifQ.12345";
+        String expected = "http://redirecturl.com/?response=eyJraWQiOiJrZXkxMjMiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJleHAiOiIxNjQ0MjcwNDczMzAxIiwiZXhwaXJlc19pbiI6IjE2NDQyNzA0NzMzMDEiLCJjbGllbnRfaWQiOiIxMjMifQ.12345";
         List<ResponseType> typeList = new ArrayList<>();
         typeList.add(ResponseType.CODE);
         RedirectUri redirectUri = new RedirectUri("http://redirecturl.com/", typeList, ResponseMode.JWT);
@@ -283,7 +283,7 @@ public class RedirectUriTest {
         when(cryptoProvider.sign(anyString(), anyString(), anyString(), any(SignatureAlgorithm.class))).thenReturn("12345");
         redirectUri.setCryptoProvider(cryptoProvider);
 
-        assertEquals(redirectUri.toString(), valTestCase);
+        assertEquals(redirectUri.toString(), expected);
     }
 
     @Test

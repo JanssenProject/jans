@@ -68,6 +68,11 @@ public enum RegisterRequestParam {
     CONTACTS("contacts"),
 
     /**
+     * Authorization Details Types (RFC9396). Fine-grained access.
+     */
+    AUTHORIZATION_DETAILS_TYPES("authorization_details_types"),
+
+    /**
      * Name of the Client to be presented to the user.
      */
     CLIENT_NAME("client_name"),
@@ -185,6 +190,36 @@ public enum RegisterRequestParam {
      * JWE enc algorithm (JWA) required for symmetric encryption of UserInfo Responses.
      */
     USERINFO_ENCRYPTED_RESPONSE_ENC("userinfo_encrypted_response_enc"),
+
+    /**
+     * JWS alg algorithm (JWA) required for Introspection Responses.
+     */
+    INTROSPECTION_SIGNED_RESPONSE_ALG("introspection_signed_response_alg"),
+
+    /**
+     * JWE alg algorithm (JWA) required for encrypting Introspection Responses.
+     */
+    INTROSPECTION_ENCRYPTED_RESPONSE_ALG("introspection_encrypted_response_alg"),
+
+    /**
+     * JWE enc algorithm (JWA) required for symmetric encryption of Introspection Responses.
+     */
+    INTROSPECTION_ENCRYPTED_RESPONSE_ENC("introspection_encrypted_response_enc"),
+
+    /**
+     * JWS alg algorithm (JWA) required for Transaction Token Responses.
+     */
+    TX_TOKEN_SIGNED_RESPONSE_ALG("tx_token_signed_response_alg"),
+
+    /**
+     * JWE alg algorithm (JWA) required for encrypting Transaction Token Responses.
+     */
+    TX_TOKEN_ENCRYPTED_RESPONSE_ALG("tx_token_encrypted_response_alg"),
+
+    /**
+     * JWE enc algorithm (JWA) required for symmetric encryption of Transaction Token Responses.
+     */
+    TX_TOKEN_ENCRYPTED_RESPONSE_ENC("tx_token_encrypted_response_enc"),
 
     /**
      * JWS alg algorithm (JWA) that must be required by the Authorization Server.
@@ -408,6 +443,16 @@ public enum RegisterRequestParam {
      * Client-specific access token expiration. Set this value to null or zero to use the default value.
      */
     ACCESS_TOKEN_LIFETIME("access_token_lifetime"),
+
+    /**
+     * Client-specific id_token expiration in seconds. Set this value to null or zero to use the default value.
+     */
+    ID_TOKEN_LIFETIME("id_token_lifetime"),
+
+    /**
+     * Client-specific tx_token expiration in seconds. Set this value to null or zero to use the default value.
+     */
+    TX_TOKEN_LIFETIME("tx_token_lifetime"),
 
     PAR_LIFETIME("par_lifetime"),
 

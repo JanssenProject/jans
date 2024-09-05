@@ -1,6 +1,6 @@
 # auth-server-key-rotation
 
-![Version: 1.0.20-dev](https://img.shields.io/badge/Version-1.0.20--dev-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.0.20-dev](https://img.shields.io/badge/AppVersion-1.0.20--dev-informational?style=flat-square)
+![Version: 1.1.5-dev](https://img.shields.io/badge/Version-1.1.5--dev-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.1.5](https://img.shields.io/badge/AppVersion-1.1.5-informational?style=flat-square)
 
 Responsible for regenerating auth-keys per x hours
 
@@ -27,12 +27,13 @@ Kubernetes: `>=v1.22.0-0`
 | additionalAnnotations | object | `{}` | Additional annotations that will be added across all resources  in the format of {cert-manager.io/issuer: "letsencrypt-prod"}. key app is taken |
 | additionalLabels | object | `{}` | Additional labels that will be added across all resources definitions in the format of {mylabel: "myapp"} |
 | affinity | object | `{}` |  |
+| customScripts | list | `[]` | Add custom scripts that have been mounted to run before the entrypoint. |
 | dnsConfig | object | `{}` | Add custom dns config |
 | dnsPolicy | string | `""` | Add custom dns policy |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pullPolicy to use for deploying. |
 | image.pullSecrets | list | `[]` | Image Pull Secrets |
 | image.repository | string | `"janssenproject/certmanager"` | Image  to use for deploying. |
-| image.tag | string | `"1.0.20_dev"` | Image  tag to use for deploying. |
+| image.tag | string | `"1.1.5_dev"` | Image  tag to use for deploying. |
 | keysLife | int | `48` | Auth server key rotation keys life in hours |
 | keysPushDelay | int | `0` | Delay (in seconds) before pushing private keys to Auth server |
 | keysPushStrategy | string | `"NEWER"` | Set key selection strategy after pushing private keys to Auth server (only takes effect when keysPushDelay value is greater than 0) |

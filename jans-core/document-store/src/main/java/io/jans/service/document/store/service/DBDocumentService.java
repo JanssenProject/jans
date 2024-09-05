@@ -10,12 +10,12 @@ import org.slf4j.Logger;
 
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.search.filter.Filter;
+import io.jans.service.document.store.model.Document;
 import io.jans.util.StringHelper;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import jakarta.inject.Named;
 
 /**
  * Provides operations with Document
@@ -23,10 +23,14 @@ import jakarta.inject.Named;
  * @author Shekhar L. Date : 29 Sep 2022
  */
 @ApplicationScoped
-@Named("DBDocumentService")
 public class DBDocumentService implements Serializable {
 
 	private static final long serialVersionUID = 65734145678106186L;
+
+	public static final String inum = "inum";
+	public static final String displayName = "displayName";
+	public static final String description = "description";
+	public static final String alias = "jansAlias";
 
 	@Inject
 	private Logger logger;
@@ -41,10 +45,7 @@ public class DBDocumentService implements Serializable {
 	public DBDocumentService(PersistenceEntryManager persistenceEntryManager) {
 		this.persistenceEntryManager = persistenceEntryManager;
 	}
-	
-	public static final String inum = "inum";
-	public static final String displayName = "displayName";
-	public static final String description = "description";
+
 
 	@PostConstruct
 	public void init() {
@@ -95,21 +96,6 @@ public class DBDocumentService implements Serializable {
 	}
 
 	/**
-	 * Build DN string for Document
-	 * 
-	 * @param inum
-	 *            Document Inum
-	 * @return DN string for specified scope or DN for Document branch if inum is null
-	 * @throws Exception
-	 */
-	public String getDnForDocument(String inum) throws Exception {
-		if (StringHelper.isEmpty(inum)) {
-			return String.format("ou=document,%s", "o=gluu");
-		}
-		return String.format("inum=%s,ou=document,%s", inum, "o=gluu");
-	}
-
-	/**
 	 * Update Document entry
 	 * 
 	 * @param Document
@@ -152,11 +138,13 @@ public class DBDocumentService implements Serializable {
 					null);
 			Filter descriptionFilter = Filter.createSubstringFilter(description, null, targetArray,
 					null);
-			searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter);
+			 Filter aliasFilter = Filter.createSubstringFilter(alias, null, targetArray,
+	                    null);
+			searchFilter = Filter.createORFilter(displayNameFilter, descriptionFilter, aliasFilter);
 		}
 		List<Document> result = new ArrayList<>();
 		try {
-			result = persistenceEntryManager.findEntries(getDnForDocument(null), Document.class, searchFilter, sizeLimit);
+			result = persistenceEntryManager.findEntries(baseDn(), Document.class, searchFilter, sizeLimit);
 			return result;
 		} catch (Exception e) {
 			logger.error("Failed to find Document : ", e);
@@ -176,7 +164,7 @@ public class DBDocumentService implements Serializable {
 
 	public List<Document> getAllDocumentsList(int size) {
 		try {
-			List<Document> documents = persistenceEntryManager.findEntries(getDnForDocument(null), Document.class, null, size);
+			List<Document> documents = persistenceEntryManager.findEntries(baseDn(), Document.class, null, size);
 			return documents;
 		} catch (Exception e) {
 			logger.error("Failed to find Document: ", e);
@@ -190,8 +178,8 @@ public class DBDocumentService implements Serializable {
 	 * @return documents
 	 */
 
-	public Document getDocumentByDn(String Dn) throws Exception {
-		return persistenceEntryManager.find(Document.class, Dn);
+	public Document getDocumentByDn(String dn) throws Exception {
+		return persistenceEntryManager.find(Document.class, dn);
 	}
 
 	/**
@@ -200,14 +188,64 @@ public class DBDocumentService implements Serializable {
 	 * @param DisplayName
 	 * @return documents
 	 */
-	public Document getDocumentByDisplayName(String DisplayName) throws Exception {
-		Document document = new Document();
-		document.setDisplayName(DisplayName);
-		document.setDn(getDnForDocument(null));;
-		List<Document> documents = persistenceEntryManager.findEntries(document);
+	public Document getDocumentByDisplayName(String displayName) throws Exception {
+        String baseDn = baseDn();
+		Filter filter = Filter.createEqualityFilter("displayName", displayName).multiValued();
+
+		List<Document> documents = persistenceEntryManager.findEntries(baseDn, Document.class, filter);
 		if ((documents != null) && (documents.size() > 0)) {
 			return documents.get(0);
 		}
+
 		return null;
 	}
+
+    public List<Document> findAllDocuments(String[] returnAttributes) {
+        String baseDn = baseDn();
+
+        List<Document> result = persistenceEntryManager.findEntries(baseDn, Document.class, null, returnAttributes);
+
+        return result;
+    }
+
+	public List<Document> findDocumentsListByModules(List<String> jansModules, String... returnAttributes) {
+        String baseDn = baseDn();
+
+        if ((jansModules == null) || (jansModules.size() == 0)) {
+            return findAllDocuments(returnAttributes);
+        }
+
+		List<Filter> jansModuleFilters = new ArrayList<Filter>();
+		for (String jansModule : jansModules) {
+	        Filter filter = Filter.createEqualityFilter("jansService", jansModule).multiValued();
+	        jansModuleFilters.add(filter);
+		}
+		
+		Filter filter = Filter.createORFilter(jansModuleFilters);
+
+		List<Document> documents = persistenceEntryManager.findEntries(baseDn, Document.class, filter, returnAttributes);
+		return documents;
+	}
+
+	/**
+	 * Build DN string for Document
+	 * 
+	 * @param inum
+	 *            Document Inum
+	 * @return DN string for specified scope or DN for Document branch if inum is null
+	 * @throws Exception
+	 */
+	public String getDnForDocument(String inum) throws Exception {
+		String baseDn = baseDn();
+		if (StringHelper.isEmpty(inum)) {
+			return baseDn;
+		}
+
+		return String.format("inum=%s,%s", inum, baseDn);
+	}
+
+	public String baseDn() {
+		return String.format("ou=document,%s", "o=jans");
+    }
+
 }

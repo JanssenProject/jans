@@ -48,8 +48,8 @@ class Plugin(DialogUtils):
 
     def prepare_container(self):
 
-        self.host_widget = self.app.getTitledText(_("SMTP Host"), name='host', style=cli_style.edit_text, widget_style=cli_style.black_bg_widget)
-        self.port_widget = self.app.getTitledText(_("SMTP Port"), name='port', text_type='integer', style=cli_style.edit_text, widget_style=cli_style.black_bg_widget)
+        self.host_widget = self.app.getTitledText(_("SMTP Host"), name='host', style=cli_style.edit_text_required, widget_style=cli_style.black_bg_widget)
+        self.port_widget = self.app.getTitledText(_("SMTP Port"), name='port', text_type='integer', style=cli_style.edit_text_required, widget_style=cli_style.black_bg_widget)
         self.connect_protection_widget = self.app.getTitledRadioButton(
                     _("Connect Protection"),
                     name='connect_protection',
@@ -57,8 +57,8 @@ class Plugin(DialogUtils):
                     style=cli_style.edit_text,
                     widget_style=cli_style.black_bg_widget
                     )
-        self.from_name_widget = self.app.getTitledText(_("From Name"), name='from_name', style=cli_style.edit_text, widget_style=cli_style.black_bg_widget)
-        self.from_email_address_widget = self.app.getTitledText(_("From Email Address"), name='from_email_address', style=cli_style.edit_text, widget_style=cli_style.black_bg_widget)
+        self.from_name_widget = self.app.getTitledText(_("From Name"), name='from_name', style=cli_style.edit_text_required, widget_style=cli_style.black_bg_widget)
+        self.from_email_address_widget = self.app.getTitledText(_("From Email Address"), name='from_email_address', style=cli_style.edit_text_required, widget_style=cli_style.black_bg_widget)
         self.requires_authentication_widget = self.app.getTitledCheckBox(_("Requires Authentication"), name='requires_authentication', style=cli_style.check_box, widget_style=cli_style.black_bg_widget)
         self.smtp_authentication_account_username_widget = self.app.getTitledText(_("SMTP User Name"), name='smtp_authentication_account_username', style=cli_style.edit_text, widget_style=cli_style.black_bg_widget)
         self.smtp_authentication_account_password_widget = self.app.getTitledText(_("SMTP Password"), name='smtp_authentication_account_password', style=cli_style.edit_text, widget_style=cli_style.black_bg_widget)
@@ -102,34 +102,55 @@ class Plugin(DialogUtils):
         self.app.stop_progressing()
         self.data = response.json()
 
-        self.host_widget.me.text = self.data.get('host', '')
-        self.port_widget.me.text = str(self.data.get('port', ''))
-        self.connect_protection_widget.me.current_value = self.data.get('connect_protection', '')
-        self.from_name_widget.me.text = self.data.get('from_name', '')
-        self.from_email_address_widget.me.text = self.data.get('from_email_address', '')
+        self.host_widget.me.text = self.data.get('host') or ''
+        self.port_widget.me.text = str(self.data.get('port')) or ''
+        self.connect_protection_widget.me.current_value = self.data.get('connect_protection') or 'None'
+        self.from_name_widget.me.text = self.data.get('from_name') or ''
+        self.from_email_address_widget.me.text = self.data.get('from_email_address') or ''
         self.requires_authentication_widget.me.checked = self.data.get('requires_authentication', False)
-        self.smtp_authentication_account_username_widget.me.text = self.data.get('smtp_authentication_account_username', '')
-        self.smtp_authentication_account_password_widget.me.text = self.data.get('smtp_authentication_account_password', '')
+        self.smtp_authentication_account_username_widget.me.text = self.data.get('smtp_authentication_account_username') or ''
+        self.smtp_authentication_account_password_widget.me.text = self.data.get('smtp_authentication_account_password') or ''
         self.trust_host_widget.me.checked = self.data.get('trust_host', False)
 
-        self.key_store_widget.me.text = self.data.get('key_store', '')
-        self.key_store_password_widget.me.text = self.data.get('key_store_password', '')
-        self.key_store_alias_widget.me.text = self.data.get('key_store_alias', '')
-        self.signing_algorithm_widget.me.text = self.data.get('signing_algorithm', '')
+        self.key_store_widget.me.text = self.data.get('key_store') or ''
+        self.key_store_password_widget.me.text = self.data.get('key_store_password') or ''
+        self.key_store_alias_widget.me.text = self.data.get('key_store_alias') or ''
+        self.signing_algorithm_widget.me.text = self.data.get('signing_algorithm') or ''
 
     def save_config(self) -> None:
         """This method saves STMP configuration
         """
-        self.data = self.make_data_from_dialog(tabs={'smtp': self.main_container})
+
+        cur_data = self.make_data_from_dialog(tabs={'smtp': self.main_container})
+
+
+        cfr = self.check_required_fields(data=cur_data, container=self.main_container, tobefocused=self.main_container)
+        if not cfr:
+            return
+
+        if self.requires_authentication_widget.me.checked:
+            missing_required = []
+            for widget in (self.smtp_authentication_account_username_widget, self.smtp_authentication_account_password_widget):
+                if not widget.me.text:
+                    missing_required.append(widget.title)
+
+            if missing_required:
+                self.app.show_message(_("Please fill required fields"), _("The following fields are required:\n") + ', '.join(missing_required), tobefocused=self.main_container)
+                return
 
         operation_id = 'put-config-smtp'
 
         async def coroutine():
-            cli_args = {'operation_id': operation_id, 'data': self.data}
+            cli_args = {'operation_id': operation_id, 'data': cur_data}
             self.app.start_progressing(_("Saving SMTP Configuration..."))
-            await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-            self.app.stop_progressing(_("SMTP Configuration was saved."))
-            await self.get_smtp_config()
+            response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+            if response.status_code == 200:
+                self.data = cur_data
+                self.app.stop_progressing(_("SMTP Configuration was saved."))
+                await self.get_smtp_config()
+            else:
+                self.app.show_message(_(common_strings.error), _("Save failed: {}\n").format(response.text), tobefocused=self.main_container)
+                self.app.stop_progressing(_("Failed to save SMTP Configuration."))
 
         asyncio.ensure_future(coroutine())
 
@@ -137,6 +158,16 @@ class Plugin(DialogUtils):
     def test_config(self) -> None:
         """This method tests SMTP configuration
         """
+
+        cur_data = self.make_data_from_dialog(tabs={'smtp': self.main_container})
+        not_match = []
+        for key in cur_data:
+            if cur_data[key] != self.data.get(key, ''):
+                not_match.append((key, cur_data[key], self.data.get(key)))
+
+        if not_match:
+            self.app.show_message(_(common_strings.error), _("Please save changes before testing."), tobefocused=self.main_container)
+            return
 
         async def coroutine():
             cli_args = {'operation_id': 'test-config-smtp', 'data': {'sign': True, 'subject': "SMTP Configuration verification", 'message': "Mail to test SMTP configuration"}}

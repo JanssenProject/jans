@@ -168,12 +168,13 @@ public class AuthorizeService {
             }
 
             String scope = session.getSessionAttributes().get(AuthorizeRequestParam.SCOPE);
+            String authorizationDetails = session.getSessionAttributes().get(AuthorizeRequestParam.AUTHORIZATION_DETAILS);
             Set<String> scopeSet = Sets.newHashSet(spaceSeparatedToList(scope));
             String responseType = session.getSessionAttributes().get(AuthorizeRequestParam.RESPONSE_TYPE);
 
             boolean persistDuringImplicitFlow = !io.jans.as.model.common.ResponseType.isImplicitFlow(responseType);
             if (!client.getTrustedClient() && persistDuringImplicitFlow && client.getPersistClientAuthorizations()) {
-                clientAuthorizationsService.add(user.getAttribute("inum"), client.getClientId(), scopeSet);
+                clientAuthorizationsService.add(user.getAttribute("inum"), client.getClientId(), scopeSet, authorizationDetails);
             }
             session.addPermission(clientId, true, scopeSet);
             sessionIdService.updateSessionId(session);

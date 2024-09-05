@@ -93,7 +93,7 @@ Feature: Verify DynamicRegistration configuration endpoint
     And print response
     
     @error
-  	Scenario: dynamicGrantTypeDefault configuration cannot be null
+  	Scenario: grantTypesSupportedByDynamicRegistration configuration cannot be null
     Given url  mainUrl
     And  header Authorization = 'Bearer ' + accessToken
     When method GET
@@ -101,7 +101,7 @@ Feature: Verify DynamicRegistration configuration endpoint
     And print response
     And assert response.length != null
     Then def result = response 
-    Then set result.dynamicGrantTypeDefault = null
+    Then set result.grantTypesSupportedByDynamicRegistration = null
     Given url  mainUrl
     And  header Authorization = 'Bearer ' + accessToken
     And request result

@@ -13,7 +13,7 @@ This Operation guide helps you learn about the common operations for Janssen on 
 ## Prerequisite
 - Review the [Janssen](../reference/kubernetes/README.md) components and architecture
 
-- Complete the [installation](../install/helm-install/local.md) of janssen on your desired Kubernetes provider.
+- Complete the [installation](../install/helm-install/README.md) of Janssen on your desired Kubernetes provider.
 
 ## Common Operations
 
@@ -27,4 +27,6 @@ This Operation guide helps you learn about the common operations for Janssen on 
 - [External Secrets and Configmaps](external-secrets-configmaps.md)
 - [Health Check](health-check.md)
 - [TUI K8s](tui-k8s.md)
-- [FAQ](faq.md)
+- [Custom Attributes](custom-attributes.md)
+- [Jans SAML/Keycloak](jans-saml.md)
+- [Memory Dump](memory-dump.md)

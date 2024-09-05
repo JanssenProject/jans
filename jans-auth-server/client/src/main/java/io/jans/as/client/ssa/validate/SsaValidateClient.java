@@ -17,12 +17,12 @@ public class SsaValidateClient extends BaseClient<SsaValidateRequest, SsaValidat
     private static final Logger LOG = Logger.getLogger(SsaValidateClient.class);
 
     public SsaValidateClient(String url) {
-        super(url);
+        super(url + "/validation");
     }
 
     @Override
     public String getHttpMethod() {
-        return HttpMethod.HEAD;
+        return HttpMethod.POST;
     }
 
     public SsaValidateResponse execSsaValidate(@NotNull String jti) {
@@ -42,7 +42,7 @@ public class SsaValidateClient extends BaseClient<SsaValidateRequest, SsaValidat
             clientRequest.header("Content-Type", request.getContentType());
             clientRequest.header("jti", request.getJti());
 
-            clientResponse = clientRequest.build(HttpMethod.HEAD).invoke();
+            clientResponse = clientRequest.build(HttpMethod.POST).invoke();
             final SsaValidateResponse res = new SsaValidateResponse(clientResponse);
             setResponse(res);
 

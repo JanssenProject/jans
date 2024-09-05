@@ -2,15 +2,24 @@ import json
 import logging.config
 import os
 import random
+import ssl
 import socket
 import time
 from functools import partial
+from pathlib import Path
 from uuid import uuid4
 
 import click
+from cryptography import x509
+from cryptography.x509.oid import NameOID
 
 from jans.pycloudlib import get_manager
 from jans.pycloudlib import wait_for
+from jans.pycloudlib.persistence.couchbase import sync_couchbase_password
+from jans.pycloudlib.persistence.couchbase import sync_couchbase_superuser_password
+from jans.pycloudlib.persistence.ldap import sync_ldap_password
+from jans.pycloudlib.persistence.sql import sync_sql_password
+from jans.pycloudlib.persistence.utils import PersistenceMapper
 from jans.pycloudlib.utils import get_random_chars
 from jans.pycloudlib.utils import get_sys_random_chars
 from jans.pycloudlib.utils import encode_text
@@ -19,12 +28,11 @@ from jans.pycloudlib.utils import generate_base64_contents
 from jans.pycloudlib.utils import safe_render
 from jans.pycloudlib.utils import ldap_encode
 from jans.pycloudlib.utils import get_server_certificate
-from jans.pycloudlib.utils import generate_ssl_certkey
 from jans.pycloudlib.utils import generate_ssl_ca_certkey
 from jans.pycloudlib.utils import generate_signed_ssl_certkey
 from jans.pycloudlib.utils import as_boolean
+from jans.pycloudlib.schema import load_schema_from_file
 
-from parameter import params_from_file
 from settings import LOGGING_CONFIG
 
 DEFAULT_SIG_KEYS = "RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512"
@@ -34,10 +42,6 @@ CONFIGURATOR_DIR = "/opt/jans/configurator"
 DB_DIR = os.environ.get("CN_CONFIGURATOR_DB_DIR", f"{CONFIGURATOR_DIR}/db")
 CERTS_DIR = os.environ.get("CN_CONFIGURATOR_CERTS_DIR", f"{CONFIGURATOR_DIR}/certs")
 JAVALIBS_DIR = f"{CONFIGURATOR_DIR}/javalibs"
-
-DEFAULT_CONFIG_FILE = os.environ.get("CN_CONFIGURATOR_CONFIG_FILE", f"{DB_DIR}/config.json")
-DEFAULT_SECRET_FILE = os.environ.get("CN_CONFIGURATOR_SECRET_FILE", f"{DB_DIR}/secret.json")
-DEFAULT_GENERATE_FILE = os.environ.get("CN_CONFIGURATOR_GENERATE_FILE", f"{DB_DIR}/generate.json")
 
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("configurator")
@@ -95,9 +99,9 @@ def generate_pkcs12(suffix, passwd, hostname):
 class CtxManager:
     def __init__(self, manager):
         self.manager = manager
-        self.ctx = {"config": {}, "secret": {}}
-        self._remote_config_ctx = None
-        self._remote_secret_ctx = None
+        self.ctx = {"_configmap": {}, "_secret": {}}
+        self._remote_config_ctx = {}
+        self._remote_secret_ctx = {}
 
     @property
     def remote_config_ctx(self):
@@ -113,40 +117,47 @@ class CtxManager:
 
     def set_config(self, key, value, reuse_if_exists=True):
         if reuse_if_exists and key in self.remote_config_ctx:
-            logger.info(f"re-using config {key}")
-            self.ctx["config"][key] = self.remote_config_ctx[key]
-            return self.ctx["config"][key]
+            logger.info(f"re-using configmap {key!r}")
+            self.ctx["_configmap"][key] = self.remote_config_ctx[key]
+            return self.ctx["_configmap"][key]
 
-        logger.info(f"adding config {key}")
+        logger.info(f"adding configmap {key!r}")
         if callable(value):
             value = value()
 
-        self.ctx["config"][key] = value
-        return self.ctx["config"][key]
+        if isinstance(value, bytes):
+            value = value.decode()
+
+        self.ctx["_configmap"][key] = value
+        return self.ctx["_configmap"][key]
 
     def set_secret(self, key, value, reuse_if_exists=True):
         if reuse_if_exists and key in self.remote_secret_ctx:
-            logger.info(f"re-using secret {key}")
-            self.ctx["secret"][key] = self.remote_secret_ctx[key]
-            return self.ctx["secret"][key]
+            logger.info(f"re-using secret {key!r}")
+            self.ctx["_secret"][key] = self.remote_secret_ctx[key]
+            return self.ctx["_secret"][key]
 
-        logger.info(f"adding secret {key}")
+        logger.info(f"adding secret {key!r}")
         if callable(value):
             value = value()
 
-        self.ctx["secret"][key] = value
+        if isinstance(value, bytes):
+            value = value.decode()
+
+        self.ctx["_secret"][key] = value
         return value
 
     def get_config(self, key, default=None):
-        return self.ctx["config"].get(key) or default
+        return self.ctx["_configmap"].get(key) or default
 
     def get_secret(self, key, default=None):
-        return self.ctx["secret"].get(key) or default
+        return self.ctx["_secret"].get(key) or default
 
 
 class CtxGenerator:
     def __init__(self, manager, params):
-        self.params = params
+        self.configmap_params = params["_configmap"]
+        self.secret_params = params["_secret"]
         self.manager = manager
         self.ctx_manager = CtxManager(self.manager)
 
@@ -166,93 +177,39 @@ class CtxGenerator:
     def get_secret(self, key, default=None):
         return self.ctx_manager.get_secret(key, default)
 
-    def base_ctx(self):
-        if self.params["salt"]:
-            self.set_secret("encoded_salt", self.params["salt"])
+    def transform_base_ctx(self):
+        if self.secret_params.get("encoded_salt"):
+            self.set_secret("encoded_salt", self.secret_params.get("encoded_salt"))
         else:
             self.set_secret("encoded_salt", partial(get_random_chars, 24))
-        self.set_config("orgName", self.params["org_name"])
-        self.set_config("country_code", self.params["country_code"])
-        self.set_config("state", self.params["state"])
-        self.set_config("city", self.params["city"])
-        self.set_config("hostname", self.params["hostname"])
-        self.set_config("admin_email", self.params["email"])
-        # self.set_config("jetty_base", "/opt/jans/jetty")
+
+        self.set_config("orgName", self.configmap_params["orgName"])
+        self.set_config("country_code", self.configmap_params["country_code"])
+        self.set_config("state", self.configmap_params["state"])
+        self.set_config("city", self.configmap_params["city"])
+        self.set_config("hostname", self.configmap_params["hostname"])
+        self.set_config("admin_email", self.configmap_params["admin_email"])
         self.set_config("admin_inum", lambda: f"{uuid4()}")
-        self.set_secret("encoded_admin_password", partial(ldap_encode, self.params["admin_pw"]))
+        self.set_secret("encoded_admin_password", partial(ldap_encode, self.secret_params["admin_password"]))
 
-        opt_scopes = self.params["optional_scopes"]
-        self.set_config("optional_scopes", list(set(opt_scopes)), False)
+        opt_scopes = self.configmap_params["optional_scopes"]
+        self.set_config("optional_scopes", opt_scopes, False)
 
-    def ldap_ctx(self):
+    def transform_ldap_ctx(self):
         encoded_salt = self.get_secret("encoded_salt")
 
-        # self.set_secret("encoded_ldap_pw", ldap_encode(self.params["admin_pw"]))
         self.set_secret(
             "encoded_ox_ldap_pw",
-            partial(encode_text, self.params["ldap_pw"], encoded_salt),
-        )
-        self.set_config("ldap_init_host", "localhost")
-        self.set_config("ldap_init_port", 1636)
-        self.set_config("ldap_port", 1389)
-        self.set_config("ldaps_port", 1636)
-        self.set_config("ldap_binddn", "cn=directory manager")
-        self.set_config("ldap_site_binddn", "cn=directory manager")
-        ldap_truststore_pass = self.set_secret("ldap_truststore_pass", get_random_chars)
-        self.set_config("ldapTrustStoreFn", "/etc/certs/opendj.pkcs12")
-        hostname = self.get_config("hostname")
-
-        generate_ssl_certkey(
-            "opendj",
-            self.get_config("admin_email"),
-            hostname,
-            self.get_config("orgName"),
-            self.get_config("country_code"),
-            self.get_config("state"),
-            self.get_config("city"),
-            extra_dns=["ldap"],
-            base_dir=CERTS_DIR,
-        )
-        with open(f"{CERTS_DIR}/opendj.pem", "w") as fw:
-            with open(f"{CERTS_DIR}/opendj.crt") as fr:
-                ldap_ssl_cert = fr.read()
-                self.set_secret(
-                    "ldap_ssl_cert",
-                    partial(encode_text, ldap_ssl_cert, encoded_salt),
-                )
-
-            with open(f"{CERTS_DIR}/opendj.key") as fr:
-                ldap_ssl_key = fr.read()
-                self.set_secret(
-                    "ldap_ssl_key",
-                    partial(encode_text, ldap_ssl_key, encoded_salt),
-                )
-
-            ldap_ssl_cacert = "".join([ldap_ssl_cert, ldap_ssl_key])
-            fw.write(ldap_ssl_cacert)
-            self.set_secret(
-                "ldap_ssl_cacert",
-                partial(encode_text, ldap_ssl_cacert, encoded_salt),
-            )
-
-        generate_pkcs12("opendj", ldap_truststore_pass, hostname)
-
-        with open(f"{CERTS_DIR}/opendj.pkcs12", "rb") as fr:
-            self.set_secret(
-                "ldap_pkcs12_base64",
-                partial(encode_text, fr.read(), encoded_salt),
-            )
-
-        self.set_secret(
-            "encoded_ldapTrustStorePass",
-            partial(encode_text, ldap_truststore_pass, encoded_salt),
+            partial(encode_text, self.secret_params.get("ldap_password", ""), encoded_salt),
         )
 
-    def redis_ctx(self):
-        # TODO: move this to persistence-loader
-        self.set_secret("redis_pw", self.params.get("redis_pw", ""))
+        self.set_config("ldap_binddn", "cn=Directory Manager")
+        self.set_config("ldap_site_binddn", "cn=Directory Manager")
 
-    def auth_ctx(self):
+    def transform_redis_ctx(self):
+        self.set_secret("redis_password", self.secret_params.get("redis_password", ""))
+
+    def transform_auth_ctx(self):
         encoded_salt = self.get_secret("encoded_salt")
 
         self.set_config("default_openid_jks_dn_name", "CN=Janssen Auth CA Certificates")
@@ -265,38 +222,11 @@ class CtxGenerator:
         self.set_config("auth_legacyIdTokenClaims", "false")
         self.set_config("auth_openidScopeBackwardCompatibility", "false")
 
-        # get user-input signing keys
-        allowed_sig_keys = DEFAULT_SIG_KEYS.split()
-        sig_keys = []
-
-        for k in self.params.get("auth_sig_keys", "").split():
-            k = k.strip()
-            if k not in allowed_sig_keys:
-                continue
-            sig_keys.append(k)
-
-        # if empty, fallback to default
-        sig_keys = sig_keys or allowed_sig_keys
-        sig_keys = " ".join(sig_keys)
-        self.set_config("auth_sig_keys", sig_keys)
-
-        # get user-input encryption keys
-        allowed_enc_keys = DEFAULT_ENC_KEYS.split()
-        enc_keys = []
-
-        for k in self.params.get("auth_enc_keys", "").split():
-            k = k.strip()
-            if k not in allowed_enc_keys:
-                continue
-            enc_keys.append(k)
-
-        # if empty, fallback to default
-        enc_keys = enc_keys or allowed_enc_keys
-        enc_keys = " ".join(enc_keys)
-        self.set_config("auth_enc_keys", enc_keys)
+        self.set_config("auth_sig_keys", self.configmap_params["auth_sig_keys"])
+        self.set_config("auth_enc_keys", self.configmap_params["auth_enc_keys"])
 
         # default exp = 48 hours + token lifetime (in hour)
-        exp = int(48 + (3600 / 3600))
+        exp = int(self.configmap_params["init_keys_exp"] + (3600 / 3600))
 
         _, err, retcode = generate_openid_keys_hourly(
             self.get_secret("auth_openid_jks_pass"),
@@ -304,8 +234,8 @@ class CtxGenerator:
             f"{CERTS_DIR}/auth-keys.json",
             self.get_config("default_openid_jks_dn_name"),
             exp=exp,
-            sig_keys=sig_keys,
-            enc_keys=enc_keys,
+            sig_keys=self.configmap_params["auth_sig_keys"],
+            enc_keys=self.configmap_params["auth_enc_keys"],
         )
         if retcode != 0:
             logger.error(f"Unable to generate auth keys; reason={err}")
@@ -325,7 +255,7 @@ class CtxGenerator:
                 partial(encode_text, fr.read(), encoded_salt),
             )
 
-    def web_ctx(self):
+    def transform_web_ctx(self):
         ssl_cert = f"{CERTS_DIR}/web_https.crt"
         ssl_key = f"{CERTS_DIR}/web_https.key"
         ssl_csr = f"{CERTS_DIR}/web_https.csr"
@@ -344,28 +274,14 @@ class CtxGenerator:
         # check from mounted files
         if not (os.path.isfile(ssl_cert) and os.path.isfile(ssl_key)):
             # no mounted files, hence download from frontend
-            ingress_addr = ""
-            if "CN_INGRESS_ADDRESS" in os.environ:
-                ingress_addr = os.environ.get("CN_INGRESS_ADDRESS")
-            ingress_servername = os.environ.get("CN_INGRESS_SERVERNAME") or ingress_addr
+            addr = os.environ.get("CN_INGRESS_ADDRESS") or self.ctx["_configmap"]["hostname"]
+            servername = os.environ.get("CN_INGRESS_SERVERNAME") or addr
 
-            if ingress_addr and ingress_servername:
-                logger.warning(
-                    f"Unable to find mounted {ssl_cert} and {ssl_key}; "
-                    f"trying to download from {ingress_addr}:443 (servername {ingress_servername})"  # noqa: C812
-                )
-
-                try:
-                    # cert will be downloaded into `ssl_cert` path
-                    get_server_certificate(ingress_addr, 443, ssl_cert, ingress_servername)
-                    # since cert is downloaded, key must mounted
-                    # or generate empty file
-                    if not os.path.isfile(ssl_key):
-                        with open(ssl_key, "w") as f:
-                            f.write("")
-                except (socket.gaierror, socket.timeout, OSError) as exc:
-                    # address not resolved or timed out
-                    logger.warning(f"Unable to download cert; reason={exc}")
+            logger.warning(
+                f"Unable to find mounted {ssl_cert} and {ssl_key}; "
+                f"trying to download from {addr}:443 (servername {servername})"
+            )
+            cert_from_domain(addr, servername, 443, ssl_cert, ssl_key, self.ctx["_configmap"]["hostname"])
 
         # no mounted nor downloaded files, hence we need to create self-generated files
         if not (os.path.isfile(ssl_cert) and os.path.isfile(ssl_key)):
@@ -427,87 +343,167 @@ class CtxGenerator:
         with open(ssl_key) as f:
             self.set_secret("ssl_key", f.read)
 
-    def couchbase_ctx(self):
+    def transform_couchbase_ctx(self):
         # TODO: move this to persistence-loader?
         self.set_config("couchbaseTrustStoreFn", "/etc/certs/couchbase.pkcs12")
         self.set_secret("couchbase_shib_user_password", get_random_chars)
-        self.set_secret("couchbase_password", self.params["couchbase_pw"])
-        self.set_secret("couchbase_superuser_password", self.params["couchbase_superuser_pw"])
+        self.set_secret("couchbase_password", self.secret_params.get("couchbase_password", ""))
+        self.set_secret("couchbase_superuser_password", self.secret_params.get("couchbase_superuser_password", ""))
 
-    def sql_ctx(self):
-        self.set_secret("sql_password", self.params["sql_pw"])
+    def transform_sql_ctx(self):
+        self.set_secret("sql_password", self.secret_params.get("sql_password", ""))
 
-    def generate(self):
-        opt_scopes = self.params["optional_scopes"]
+    def transform_misc_ctx(self):
+        # pre-populate the rest of configmaps
+        for k, v in self.configmap_params.items():
+            if v and k not in self.ctx["_configmap"]:
+                self.set_config(k, v)
 
-        self.base_ctx()
-        self.auth_ctx()
-        self.web_ctx()
+        # pre-populate the rest of secrets
+        for k, v in self.secret_params.items():
+            if v and k not in self.ctx["_secret"]:
+                self.set_secret(k, v)
 
-        # if "ldap" in opt_scopes:
-        #     self.ldap_ctx()
+    def transform(self):
+        """Transform configmaps and secrets (if needed)."""
+        opt_scopes = json.loads(self.configmap_params["optional_scopes"])
+
+        self.transform_base_ctx()
+        self.transform_auth_ctx()
+        self.transform_web_ctx()
+
+        if "ldap" in opt_scopes:
+            self.transform_ldap_ctx()
 
         if "redis" in opt_scopes:
-            self.redis_ctx()
+            self.transform_redis_ctx()
 
-        # if "couchbase" in opt_scopes:
-        #     self.couchbase_ctx()
+        if "couchbase" in opt_scopes:
+            self.transform_couchbase_ctx()
 
-        # if "sql" in opt_scopes:
-        #     self.sql_ctx()
+        if "sql" in opt_scopes:
+            self.transform_sql_ctx()
 
-        # populated config
+        self.transform_misc_ctx()
+
+        # populated configuration
         return self.ctx
 
+    def save_loaded_ctx(self):
+        logger.info("Saving configuration to backends")
 
-def _save_generated_ctx(manager, data, type_):
-    if type_ == "config":
-        backend = manager.config
-    else:
-        backend = manager.secret
-
-    logger.info(f"Saving {type_} to backend")
-    backend.set_all(data)
-
-
-def _load_from_file(manager, filepath, type_):
-    ctx_manager = CtxManager(manager)
-    if type_ == "config":
-        setter = ctx_manager.set_config
-        backend = manager.config
-    else:
-        setter = ctx_manager.set_secret
-        backend = manager.secret
-
-    logger.info(f"Loading {type_} from {filepath}")
-
-    with open(filepath, "r") as f:
-        data = json.loads(f.read())
-
-    ctx = data.get(f"_{type_}")
-    if not ctx:
-        logger.warning(f"Missing '_{type_}' key")
-        return
-
-    # tolerancy before checking existing key
-    time.sleep(5)
-
-    data = {k: setter(k, v) for k, v in ctx.items()}
-    backend.set_all(data)
+        for type_ in ["_configmap", "_secret"]:
+            if type_ == "_configmap":
+                backend = self.manager.config
+            else:
+                backend = self.manager.secret
+            backend.set_all(self.ctx[type_])
 
 
-def _dump_to_file(manager, filepath, type_):
-    if type_ == "config":
-        backend = manager.config
-    else:
-        backend = manager.secret
+def dump_to_file(manager, filepath):
+    logger.info(f"Saving configuration to {filepath}")
 
-    logger.info(f"Saving {type_} to {filepath}")
+    data = {"_configmap": {}, "_secret": {}}
 
-    data = {f"_{type_}": backend.get_all()}
-    data = json.dumps(data, sort_keys=True, indent=4)
+    for type_ in ["_configmap", "_secret"]:
+        if type_ == "_configmap":
+            backend = manager.config
+        else:
+            backend = manager.secret
+        data[type_] = backend.get_all()
+
     with open(filepath, "w") as f:
-        f.write(data)
+        f.write(json.dumps(data, sort_keys=True, indent=4))
+
+
+def cert_from_domain(addr, servername, port, certfile, keyfile, dns):
+    known_exceptions = (
+        socket.gaierror,
+        socket.timeout,
+        ConnectionRefusedError,
+        TimeoutError,
+        ConnectionResetError,
+        ssl.SSLEOFError,
+        ssl.SSLError,
+        OSError,
+    )
+    cert_downloaded = False
+
+    try:
+        # cert will be downloaded into `ssl_cert` path
+        get_server_certificate(addr, port, certfile, servername)
+        is_cert_valid = parse_cert(certfile, dns)
+
+        if not is_cert_valid:
+            logger.warning(f"The domain {dns} cannot be found in certificate SubjectAlternativeName or CommonName.")
+            Path(certfile).unlink(missing_ok=True)
+        else:
+            cert_downloaded = True
+            if not os.path.isfile(keyfile):
+                # since cert is downloaded, key must be mounted or simply generate empty file
+                with open(keyfile, "w") as f:
+                    f.write("")
+
+    except known_exceptions as exc:
+        # common error message on cert download attempt
+        logger.warning(
+            f"Unable to download SSL cert from {addr}. The certificate maybe missing "
+            f"or another issue encountered while trying to download the cert; reason={exc}."
+        )
+
+    env_name = "CN_SSL_CERT_FROM_DOMAIN"
+    if not cert_downloaded and as_boolean(os.environ.get(env_name, "false")):
+        raise RuntimeError(
+            f"Exiting the process due to the environment variable {env_name} is set to true. "
+            f"To skip this error, set the environment variable {env_name} to false."
+        )
+
+
+def parse_cert(certfile, dns):
+    with open(certfile) as f:
+        pem_data = f.read()
+
+    cert = x509.load_pem_x509_certificate(pem_data.encode())
+
+    # check for DNS in SAN
+    try:
+        san = cert.extensions.get_extension_for_class(x509.SubjectAlternativeName)
+    except x509.extensions.ExtensionNotFound:
+        san = None
+
+    # check whether dns is in SAN
+    if san and dns in san.value.get_values_for_type(x509.DNSName):
+        # DNS is found and matched
+        return True
+
+    # check CommonName in subject
+    common_names = [name.value for name in cert.subject.get_attributes_for_oid(NameOID.COMMON_NAME)]
+    if dns in common_names:
+        return True
+
+    # default value
+    return False
+
+
+def get_configuration_file():
+    path = os.environ.get("CN_CONFIGURATOR_CONFIGURATION_FILE", "/etc/jans/conf/configuration.json")
+
+    if os.path.isfile(path):
+        return path
+
+    # backward-compat
+    return f"{DB_DIR}/configuration.json"
+
+
+def get_dump_file():
+    path = os.environ.get("CN_CONFIGURATOR_DUMP_FILE", "/etc/jans/conf/configuration.out.json")
+
+    if os.path.isfile(path):
+        return path
+
+    # backward-compat
+    return f"{DB_DIR}/configuration.out.json"
+
 
 # ============
 # CLI commands
@@ -521,91 +517,88 @@ def cli():
 
 @cli.command()
 @click.option(
-    "--generate-file",
+    "--configuration-file",
     type=click.Path(exists=False),
-    help="Absolute path to file containing parameters for generating config and secret",
-    default=DEFAULT_GENERATE_FILE,
+    help="Absolute path to file contains configmaps and secrets",
+    default=get_configuration_file(),
     show_default=True,
 )
 @click.option(
-    "--config-file",
+    "--dump-file",
     type=click.Path(exists=False),
-    help="Absolute path to file contains config",
-    default=DEFAULT_CONFIG_FILE,
+    help="Absolute path to file contains dumped configmaps and secrets",
+    default=get_dump_file(),
     show_default=True,
 )
-@click.option(
-    "--secret-file",
-    type=click.Path(exists=False),
-    help="Absolute path to file contains secret",
-    default=DEFAULT_SECRET_FILE,
-    show_default=True,
-)
-def load(generate_file, config_file, secret_file):
-    """Loads config and secret from JSON files (generate if not exist).
+def load(configuration_file, dump_file):
+    """Loads configmaps and secrets from JSON file (generate if not exist).
     """
     deps = ["config_conn", "secret_conn"]
     wait_for(manager, deps=deps)
 
+    mapper = PersistenceMapper()
+    backend_type = mapper.mapping["default"]
+
+    match backend_type:
+        case "ldap":
+            sync_ldap_password(manager)
+        case "sql":
+            sync_sql_password(manager)
+        case "couchbase":
+            sync_couchbase_superuser_password(manager)
+            sync_couchbase_password(manager)
+
     # check whether config and secret in backend have been initialized
-    should_skip = as_boolean(os.environ.get("CN_CONFIGURATION_SKIP_INITIALIZED", False))
+    should_skip = as_boolean(os.environ.get("CN_CONFIGURATOR_SKIP_INITIALIZED", False))
     if should_skip and manager.config.get("hostname") and manager.secret.get("ssl_cert"):
         # config and secret may have been initialized
-        logger.info("Config and secret have been initialized")
+        logger.info("Configmaps and secrets have been initialized")
         return
 
     with manager.lock.create_lock("configurator-load"):
-        # there's no config and secret in backend, check whether to load from files
-        if os.path.isfile(config_file) and os.path.isfile(secret_file):
-            # load from existing files
-            logger.info(f"Re-using config and secret from {config_file} and {secret_file}")
-            _load_from_file(manager, config_file, "config")
-            _load_from_file(manager, secret_file, "secret")
-            return
+        logger.info(f"Loading configmaps and secrets from {configuration_file}")
 
-        # no existing files, hence generate new config and secret from parameters
-        logger.info(f"Loading parameters from {generate_file}")
-        params, err, code = params_from_file(generate_file)
+        params, err, code = load_schema_from_file(configuration_file)
         if code != 0:
-            logger.error(f"Unable to load parameters; reason={err}")
+            logger.error(f"Unable to load configmaps and secrets; reason={err}")
             raise click.Abort()
 
-        logger.info("Generating new config and secret")
         ctx_generator = CtxGenerator(manager, params)
-        ctx = ctx_generator.generate()
+        ctx_generator.transform()
+        ctx_generator.save_loaded_ctx()
 
-        # save config to its backend and file
-        _save_generated_ctx(manager, ctx["config"], "config")
-        _dump_to_file(manager, config_file, "config")
-
-        # save secret to its backend and file
-        _save_generated_ctx(manager, ctx["secret"], "secret")
-        _dump_to_file(manager, secret_file, "secret")
+        # dump saved configuration to file
+        dump_to_file(manager, dump_file)
 
 
 @cli.command()
 @click.option(
-    "--config-file",
+    "--dump-file",
     type=click.Path(exists=False),
-    help="Absolute path to file to save config",
-    default=DEFAULT_CONFIG_FILE,
+    help="Absolute path to file contains dumped configmaps and secrets",
+    default=get_dump_file(),
     show_default=True,
 )
-@click.option(
-    "--secret-file",
-    type=click.Path(exists=False),
-    help="Absolute path to file to save secret",
-    default=DEFAULT_SECRET_FILE,
-    show_default=True,
-)
-def dump(config_file, secret_file):
-    """Dumps config and secret into JSON files.
+def dump(dump_file):
+    """Dumps configmaps and secrets into JSON files.
     """
     deps = ["config_conn", "secret_conn"]
     wait_for(manager, deps=deps)
 
-    _dump_to_file(manager, config_file, "config")
-    _dump_to_file(manager, secret_file, "secret")
+    mapper = PersistenceMapper()
+    backend_type = mapper.mapping["default"]
+
+    match backend_type:
+        case "ldap":
+            sync_ldap_password(manager)
+        case "sql":
+            sync_sql_password(manager)
+        case "couchbase":
+            sync_couchbase_superuser_password(manager)
+            sync_couchbase_password(manager)
+
+    # dump all configuration from remote backend to file
+    dump_to_file(manager, dump_file)
 
 
 if __name__ == "__main__":

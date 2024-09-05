@@ -43,7 +43,7 @@ class Attributes(DialogUtils):
         self.main_container =  HSplit([
                     VSplit([
                         self.app.getTitledText(_("Search"), name='oauth:attributes:search', jans_help=_(common_strings.enter_to_search), accept_handler=self.search_attributes, style=cli_style.edit_text),
-                        self.app.getButton(text=_("Add Attribute"), name='oauth:attributes:add', jans_help=_("To add a new Agama project press this button"), handler=self.add_attributes),
+                        self.app.getButton(text=_("Add Attribute"), name='oauth:attributes:add', jans_help=_("To add a new attribute press this button"), handler=self.add_attributes),
                         ],
                         padding=3,
                         width=D(),
@@ -60,6 +60,37 @@ class Attributes(DialogUtils):
             params (dict): arguments passed by Nav Bar or add button
         """
         data = params['data']
+
+        def get_custom_validation_container(cb=None):
+            if getattr(cb, 'checked', False) or data.get('attributeValidation'):
+                self.custom_validation_container = HSplit([
+                                self.app.getTitledText(
+                                    title=_("    Regular Exprrssion"),
+                                    name='regexp',
+                                    value=data.get('attributeValidation',{}).get('regexp', ''),
+                                    style=cli_style.edit_text
+                                ),
+                                self.app.getTitledText(
+                                    title=_("    Minumum Lenght"),
+                                    name='minLength',
+                                    value=data.get('attributeValidation',{}).get('minLength', 8),
+                                    text_type='integer',
+                                    style=cli_style.edit_text
+                                ),
+                                self.app.getTitledText(
+                                    title=_("    Maximum Lenght"),
+                                    name='maxLength',
+                                    value=data.get('attributeValidation',{}).get('maxLength', 10),
+                                    text_type='integer',
+                                    style=cli_style.edit_text
+                                ),
+                                ],
+                                width=D()
+                            )
+            else:
+                self.custom_validation_container = HSplit([], width=D())
+
+        get_custom_validation_container()
 
         body = HSplit([
 
@@ -163,6 +194,17 @@ class Attributes(DialogUtils):
                     style=cli_style.edit_text
                 ),
 
+                self.app.getTitledCheckBox(
+                    _("Enable Custom Validation"),
+                    name='enableCustomValidation',
+                    checked=bool(data.get('attributeValidation')),
+                    on_selection_changed=get_custom_validation_container,
+                    jans_help=_("Check this to enable custom validation"),
+                    style=cli_style.check_box
+                ),
+
+                DynamicContainer(lambda: self.custom_validation_container)
+
             ])
 
         save_button = Button(_("Save"), handler=self.save_attribute)
@@ -194,6 +236,12 @@ class Attributes(DialogUtils):
         if 'origin' not in new_data:
             new_data['origin'] = 'jansCustomPerson'
 
+        enable_custom_validation = new_data.pop('enableCustomValidation')
+        if enable_custom_validation:
+            new_data['attributeValidation'] = self.make_data_from_dialog({'attributeValidation': self.custom_validation_container})
+        else:
+            new_data.pop('attributeValidation', None)
+
         if self.check_required_fields(dialog.body, data=new_data):
             dialog.future.set_result(True)
 
@@ -201,11 +249,15 @@ class Attributes(DialogUtils):
                 operation_id = 'put-attributes' if 'inum' in dialog.data  else 'post-attributes'
                 cli_args = {'operation_id': operation_id, 'data': new_data}
                 self.app.start_progressing(_("Saving Attribute ..."))
-                await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+                response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
                 self.app.stop_progressing()
-                self.get_attributes()
-                common_data.claims_retreived = False
 
+                if response.status_code in (200, 201):
+                    self.app.start_progressing(_("Attribute was saved"))
+                    self.get_attributes()
+                    common_data.claims_retreived = False
+                else:
+                    self.myparent.show_message(_("A server error ocurred while saving attribute"), str(response.text), tobefocused=self.main_container)
             asyncio.ensure_future(coroutine())
 
 
@@ -261,7 +313,14 @@ class Attributes(DialogUtils):
             pattern (str, optional): an optional argument for searching attribute.
         """
 
-        async def coroutine():
+        asyncio.ensure_future(self.get_attributes_coroutine(start_index, pattern))
+
+
+
+    async def get_attributes_coroutine(self,
+            start_index: Optional[int]= 0,
+            pattern: Optional[str]= '',
+            ) -> None:
 
             endpoint_args ='limit:{},startIndex:{}'.format(self.app.entries_per_page, start_index)
             if pattern:
@@ -280,11 +339,9 @@ class Attributes(DialogUtils):
             if not 'entriesCount' in data:
                 self.app.show_message(_(common_strings.error), HTML(_("Server reterned unexpected data <i>{}</i>").format(data)), tobefocused=self.app.center_container)
                 return
-
             self.working_container.all_data = data.get('entries', [])
             self.update_working_container(pattern=pattern, data=data)
 
-        asyncio.ensure_future(coroutine())
 
     def search_attributes(self, tbuffer:Buffer) -> None:
         """This method handel the search for Attributes

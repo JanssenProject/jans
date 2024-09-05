@@ -96,6 +96,21 @@ public class UserWebService extends BaseScimWebService implements IUserWebServic
         }
 
     }
+    
+    private void executeUserValidation(UserResource user, boolean laxRequiredness)
+            throws SCIMException {
+
+        executeValidation(user, laxRequiredness);
+        //See #8146
+        if (!appConfiguration.isSkipDefinedPasswordValidation()) {
+            String pwd = user.getPassword();
+
+            if (pwd != null && !scim2UserService.passwordValidationPassed(pwd))
+                throw new SCIMException("Supplied password not conformant to validation " +
+                    "rules defined upon password attribute");
+        }
+        
+    }
 
     private Response doSearch(String filter, Integer startIndex, Integer count, String sortBy,
            String sortOrder, String attrsList, String excludedAttrsList, String method) {
@@ -148,7 +163,7 @@ public class UserWebService extends BaseScimWebService implements IUserWebServic
         try {
             log.debug("Executing web service method. createUser");
 
-            executeValidation(user);
+            executeUserValidation(user, false);
             if (StringUtils.isEmpty(user.getUserName())) throw new SCIMException("Empty username not allowed");
 
             checkUidExistence(user.getUserName());
@@ -244,7 +259,7 @@ public class UserWebService extends BaseScimWebService implements IUserWebServic
                     httpHeaders, uriInfo, HttpMethod.PUT, userResourceType);
             if (response != null) return response;
 
-            executeValidation(user, true);
+            executeUserValidation(user, true);
             if (StringUtils.isNotEmpty(user.getUserName())) {
                 checkUidExistence(user.getUserName(), id);
             }
@@ -389,7 +404,7 @@ public class UserWebService extends BaseScimWebService implements IUserWebServic
 
             //Throws exception if final representation does not pass overall validation
             log.debug("patchUser. Revising final resource representation still passes validations");
-            executeValidation(user);
+            executeUserValidation(user, false);
             ScimResourceUtil.adjustPrimarySubAttributes(user);
 
             //Update timestamp

@@ -17,6 +17,9 @@
         "sectorIdentifiers": "ou=sector_identifiers,o=jans",
         "ciba": "ou=ciba,o=jans",
         "stat": "ou=stat,o=jans",
-        "par": "ou=par,o=jans"
+        "par": "ou=par,o=jans",
+        "archivedJwks": "ou=archived_jwks,o=jans",
+        "node": "ou=node,o=jans",
+        "statusIndexPool": "ou=status_index_pool,o=jans"
     }
 }

@@ -205,12 +205,6 @@ public class ExtensionsManager {
             zkService.refreshLabels();
         }
 
-        long distinctAcrs = plugExtensionMap.values().stream().flatMap(List::stream).map(AuthnMethod::getAcr).distinct().count();
-        if (distinctAcrs < plugExtensionMap.values().stream().mapToLong(List::size).sum()) {
-            logger.warn("Several extensions pretend to handle the same acr.");
-            logger.warn("Only the first one parsed for the plugin referenced in 'Enabled methods' of admin console will be effective");
-            logger.warn("The system extension (if exists) will be used if no plugin can handle an acr");
-        }
         knownPlugins = plugins;
 
     }
@@ -235,6 +229,22 @@ public class ExtensionsManager {
         return plugExtensionMap.entrySet().stream().filter(e -> plugIds.contains(e.getKey())).map(Map.Entry::getValue)
                 .flatMap(List::stream).collect(Collectors.toList());
     }
+    
+    public List<Pair<AuthnMethod, PluginDescriptor>> getAuthnMethodExts() {
+
+        List<Pair<AuthnMethod, PluginDescriptor>> list = new ArrayList<>();
+        PluginDescriptor dummy = new DefaultPluginDescriptor(null, null, null, "1.0", null, null, null);
+        
+        Map<String, PluginDescriptor> descriptors = getPlugins().stream().map(PluginWrapper::getDescriptor)
+                .collect(Collectors.toMap(d -> d.getPluginId(), d -> d));
+        
+        for (String plugId : plugExtensionMap.keySet()) {
+            PluginDescriptor descriptor = plugId == null ? dummy : descriptors.get(plugId);
+            plugExtensionMap.get(plugId).forEach(am -> list.add(new Pair<>(am, descriptor)));
+        }
+        return list;
+        
+    }
 
     public ClassLoader getPluginClassLoader(String clsName) {
 
@@ -246,6 +256,7 @@ public class ExtensionsManager {
 
                 Class<?> cls = loader.loadClass(pluginClassName);
                 if (clsName.startsWith(cls.getPackage().getName())) {
+                    logger.trace("Classloader of plugin {} will be used to lookup class {}", wrapper.getPluginId(), clsName); 
                     clsLoader = loader;
                     break;
                 }

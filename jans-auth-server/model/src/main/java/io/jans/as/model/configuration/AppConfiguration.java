@@ -11,11 +11,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
 import io.jans.agama.model.EngineConfig;
 import io.jans.as.model.common.*;
+import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.error.ErrorHandlingMethod;
 import io.jans.as.model.jwk.KeySelectionStrategy;
 import io.jans.as.model.ssa.SsaConfiguration;
 import io.jans.as.model.ssa.SsaValidationConfig;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.jans.doc.annotation.DocProperty;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
 
 import java.util.*;
 
@@ -34,6 +37,11 @@ public class AppConfiguration implements Configuration {
     public static final KeySelectionStrategy DEFAULT_KEY_SELECTION_STRATEGY = KeySelectionStrategy.OLDER;
     public static final String DEFAULT_STAT_SCOPE = "jans_stat";
     public static final String DEFAULT_AUTHORIZATION_CHALLENGE_ACR = "default_challenge";
+
+    public static final int DEFAULT_STATUS_LIST_RESPONSE_JWT_LIFETIME = 600; // 10min
+    public static final int DEFAULT_STATUS_LIST_BIT_SIZE = 2;
+    public static final int DEFAULT_STATUS_LIST_INDEX_ALLOCATION_BLOCK_SIZE = 100;
+    public static final XFrameOptions DEFAULT_X_FRAME_ORIGINS_VALUE = XFrameOptions.SAMEORIGIN;
 
     @DocProperty(description = "URL using the https scheme that OP asserts as Issuer identifier")
     private String issuer;
@@ -67,6 +75,9 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "URL of the OP's JSON Web Key Set (JWK) document. This contains the signing key(s) the RP uses to validate signatures from the OP")
     private String jwksUri;
+
+    @DocProperty(description = "URL of the OP's Archived JSON Web Key Set (JWK) document. This contains the signing key(s) the RP uses to validate signatures from the OP")
+    private String archivedJwksUri;
 
     @DocProperty(description = "Registration endpoint URL")
     private String registrationEndpoint;
@@ -143,8 +154,14 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Boolean value true allow all value for revoke endpoint", defaultValue = "false")
     private Boolean allowAllValueForRevokeEndpoint = false;
 
+    @DocProperty(description = "Boolean value true allows revoking of any token for any client. False value allows remove only tokens issued by client used at Revoke Endpoint", defaultValue = "false")
+    private Boolean allowRevokeForOtherClients = false;
+
     @DocProperty(description = "Sector Identifier cache lifetime in minutes", defaultValue = "1440")
     private int sectorIdentifierCacheLifetimeInMinutes = 1440;
+
+    @DocProperty(description = "Archived JWK lifetime in seconds")
+    private int archivedJwkLifetimeInSeconds;
 
     @DocProperty(description = "UMA Configuration endpoint URL")
     private String umaConfigurationEndpoint;
@@ -188,6 +205,18 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "The lifetime of spontaneous scope in seconds")
     private int spontaneousScopeLifetime;
 
+    @DocProperty(description = "Specifies status list bit size. (2 bits - 4 statuses, 4 bits - 16 statuses). Defaults to 2.")
+    private int statusListBitSize = DEFAULT_STATUS_LIST_BIT_SIZE;
+
+    @DocProperty(description = "The status list signature algorithm to sign response JWT. Defaults to RS256.")
+    private String statusListResponseJwtSignatureAlgorithm = SignatureAlgorithm.RS256.getName();
+
+    @DocProperty(description = "The status list response JWT lifetime (used to set exp claim in JWT).")
+    private int statusListResponseJwtLifetime = DEFAULT_STATUS_LIST_RESPONSE_JWT_LIFETIME;
+
+    @DocProperty(description = "Specifies how many status list indexes AS can reserve at once within pool (when status_list feature flag is enabled). Defaults to 100.")
+    private int statusListIndexAllocationBlockSize = DEFAULT_STATUS_LIST_INDEX_ALLOCATION_BLOCK_SIZE;
+
     @DocProperty(description = "Specifies which LDAP attribute is used for the subject identifier claim")
     private String openidSubAttribute;
 
@@ -196,6 +225,12 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "A list of the subject identifiers supported per client")
     private List<String> subjectIdentifiersPerClientSupported;
+
+    @DocProperty(description = "Add X-Frame-Options header to response if any string in the list is contained by request uri.")
+    private List<String> applyXFrameOptionsHeaderIfUriContainsAny;
+
+    @DocProperty(description = "Add X-Frame-Options header to response if any string in the list is contained by request uri.", defaultValue = "SAMEORIGIN")
+    private XFrameOptions xframeOptionsHeaderValue = DEFAULT_X_FRAME_ORIGINS_VALUE;
 
     @DocProperty(description = "This list details which OAuth 2.0 response_type values are supported by this OP.", defaultValue = "By default, every combination of code, token and id_token is supported.")
     private Set<Set<ResponseType>> responseTypesSupported;
@@ -229,6 +264,24 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "This JSON Array lists which JWS encryption algorithms (enc values) [JWA] can be used by for the UserInfo endpoint to encode the claims in a JWT")
     private List<String> userInfoEncryptionEncValuesSupported;
+
+    @DocProperty(description = "This JSON Array lists which JWS signing algorithms (alg values) [JWA] can be used by for the Introspection endpoint to encode the claims in a JWT")
+    private List<String> introspectionSigningAlgValuesSupported;
+
+    @DocProperty(description = "This JSON Array lists which JWS encryption algorithms (alg values) [JWA] can be used by for the Introspection endpoint to encode the claims in a JWT")
+    private List<String> introspectionEncryptionAlgValuesSupported;
+
+    @DocProperty(description = "This JSON Array lists which JWS encryption algorithms (enc values) [JWA] can be used by for the Introspection endpoint to encode the claims in a JWT")
+    private List<String> introspectionEncryptionEncValuesSupported;
+
+    @DocProperty(description = "This JSON Array lists which JWS signing algorithms (alg values) [JWA] can be used by for the Transaction Tokens at Token Endpoint to encode the claims in a JWT")
+    private List<String> txTokenSigningAlgValuesSupported;
+
+    @DocProperty(description = "This JSON Array lists which JWS encryption algorithms (alg values) [JWA] can be used by for the Transaction Tokens at Token Endpoint to encode the claims in a JWT")
+    private List<String> txTokenEncryptionAlgValuesSupported;
+
+    @DocProperty(description = "This JSON Array lists which JWS encryption algorithms (enc values) [JWA] can be used by for the Transaction Tokens at Token Endpoint to encode the claims in a JWT")
+    private List<String> txTokenEncryptionEncValuesSupported;
 
     @DocProperty(description = "A list of the JWS signing algorithms (alg values) supported by the OP for the ID Token to encode the Claims in a JWT")
     private List<String> idTokenSigningAlgValuesSupported;
@@ -311,17 +364,32 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "URL that the OpenID Provider provides to the person registering the Client to read about OpenID Provider's terms of service")
     private String opTosUri;
 
+    @DocProperty(description = "Defines client inactivity period in hours which means that client will be removed once it is passed.")
+    public int cleanUpInactiveClientAfterHoursOfInactivity = -1;
+
+    @DocProperty(description = "Interval for client periodic update timer. Update timer is used to debounce frequent updates of the client to avoid performance degradation.")
+    public int clientPeriodicUpdateTimerInterval = 3;
+
     @DocProperty(description = "The lifetime of the Authorization Code")
     private int authorizationCodeLifetime;
 
     @DocProperty(description = "The lifetime of the Refresh Token")
     private int refreshTokenLifetime;
 
+    @DocProperty(description = "The lifetime of the Transaction Token")
+    private int txTokenLifetime;
+
     @DocProperty(description = "The lifetime of the ID Token")
     private int idTokenLifetime;
 
     @DocProperty(description = "Boolean value specifying whether idToken filters claims based on accessToken")
     private Boolean idTokenFilterClaimsBasedOnAccessToken;
+
+    @DocProperty(description = "Boolean value specifying whether to save access_token, id_token and refresh_token in cache (with cacheKey=sha256Hex(token_code))")
+    private Boolean saveTokensInCache;
+
+    @DocProperty(description = "Boolean value specifying whether to save access_token, id_token and refresh_token in cache and skip persistence in DB at the same time (with cacheKey=sha256Hex(token_code))")
+    private Boolean saveTokensInCacheAndDontSaveInPersistence;
 
     @DocProperty(description = "The lifetime of the short lived Access Token")
     private int accessTokenLifetime;
@@ -413,6 +481,9 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Enable/Disable usage of highest level script in case ACR script does not exist", defaultValue = "false")
     private Boolean useHighestLevelScriptIfAcrScriptNotFound;
 
+    @DocProperty(description = "The acr mappings. When AS meets key-value in map, it tries to replace 'key' with 'value' as very first thing and use that 'value' in further processing.")
+    private Map<String, String> acrMappings;
+
     @DocProperty(description = "Boolean value specifying whether to enable user authentication filters")
     private Boolean authenticationFiltersEnabled;
 
@@ -464,11 +535,11 @@ public class AppConfiguration implements Configuration {
     /**
      * SessionId will be expired after sessionIdLifetime seconds
      */
-    @DocProperty(description = "The lifetime of session id in seconds. If 0 or -1 then expiration is not set. session_id cookie expires when browser session ends")
-    private Integer sessionIdLifetime = DEFAULT_SESSION_ID_LIFETIME;
+    @DocProperty(description = "The lifetime of session_id cookie in seconds. If 0 or -1 then expiration is not set. session_id cookie expires when browser session ends")
+    private Integer sessionIdCookieLifetime = DEFAULT_SESSION_ID_LIFETIME;
 
-    @DocProperty(description = "Dedicated property to control lifetime of the server side OP session object in seconds. Overrides sessionIdLifetime. By default value is 0, so object lifetime equals sessionIdLifetime (which sets both cookie and object expiration). It can be useful if goal is to keep different values for client cookie and server object")
-    private Integer serverSessionIdLifetime = sessionIdLifetime; // by default same as sessionIdLifetime
+    @DocProperty(description = "The lifetime of session_id server object in seconds. If not set falls back to session_id cookie expiration set by 'sessionIdCookieLifetime' configuration property")
+    private Integer sessionIdLifetime = sessionIdCookieLifetime;
 
     @DocProperty(description = "Authorization Scope for active session")
     private String activeSessionAuthorizationScope;
@@ -482,8 +553,8 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Choose if client can update Grant Type values")
     private Boolean enableClientGrantTypeUpdate;
 
-    @DocProperty(description = "This list details which OAuth 2.0 grant types can be set up with the client registration API")
-    private Set<GrantType> dynamicGrantTypeDefault;
+    @DocProperty(description = "This list details which OAuth 2.0 grant types can be set up with the dynamic client registration API")
+    private Set<GrantType> grantTypesSupportedByDynamicRegistration;
 
     @DocProperty(description = "The location for CSS files")
     private String cssLocation;
@@ -540,23 +611,6 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Specifies static decryption Kid")
     private String staticDecryptionKid;
 
-
-    //oxEleven
-    @DocProperty(description = "oxEleven Test Mode Token")
-    private String jansElevenTestModeToken;
-
-    @DocProperty(description = "oxEleven Generate Key endpoint URL")
-    private String jansElevenGenerateKeyEndpoint;
-
-    @DocProperty(description = "oxEleven Sign endpoint UR")
-    private String jansElevenSignEndpoint;
-
-    @DocProperty(description = "oxEleven Verify Signature endpoint URL")
-    private String jansElevenVerifySignatureEndpoint;
-
-    @DocProperty(description = "oxEleven Delete Key endpoint URL")
-    private String jansElevenDeleteKeyEndpoint;
-
     @DocProperty(description = "If True, rejects introspection requests if access_token does not have the uma_protection scope in its authorization header", defaultValue = "false")
     private Boolean introspectionAccessTokenMustHaveUmaProtectionScope = false;
 
@@ -571,6 +625,9 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "Choose whether to accept access tokens to call end_session endpoint")
     private Boolean endSessionWithAccessToken;
+
+    @DocProperty(description = "Disables prompt=create user registration functionality")
+    private Boolean disablePromptCreate;
 
     @DocProperty(description = "Sets cookie domain for all cookies created by OP")
     private String cookieDomain;
@@ -835,6 +892,7 @@ public class AppConfiguration implements Configuration {
     private List<String> discoveryDenyKeys;
 
     @DocProperty(description = "List of enabled feature flags")
+    @ArraySchema(schema = @Schema(implementation = FeatureFlagType.class))
     private List<String> featureFlags;
 
     @DocProperty(description = "Enable/disable request/response logging filter")
@@ -872,6 +930,17 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "Force Authentication Filtker to process OPTIONS request", defaultValue = "true")
     private Boolean skipAuthenticationFilterOptionsMethod = true;
+    
+    @DocProperty(description = "Lock message Pub configuration", defaultValue = "false")
+    private LockMessageConfig lockMessageConfig;
+
+    public int getArchivedJwkLifetimeInSeconds() {
+        return archivedJwkLifetimeInSeconds;
+    }
+
+    public void setArchivedJwkLifetimeInSeconds(int archivedJwkLifetimeInSeconds) {
+        this.archivedJwkLifetimeInSeconds = archivedJwkLifetimeInSeconds;
+    }
 
     public Boolean getDpopJktForceForAuthorizationCode() {
         return dpopJktForceForAuthorizationCode;
@@ -936,6 +1005,15 @@ public class AppConfiguration implements Configuration {
 
     public void setAllowAllValueForRevokeEndpoint(Boolean allowAllValueForRevokeEndpoint) {
         this.allowAllValueForRevokeEndpoint = allowAllValueForRevokeEndpoint;
+    }
+
+    public Boolean getAllowRevokeForOtherClients() {
+        if (allowRevokeForOtherClients == null) allowRevokeForOtherClients = false;
+        return allowRevokeForOtherClients;
+    }
+
+    public void setAllowRevokeForOtherClients(Boolean allowRevokeForOtherClients) {
+        this.allowRevokeForOtherClients = allowRevokeForOtherClients;
     }
 
     public Boolean getReturnDeviceSecretFromAuthzEndpoint() {
@@ -1716,6 +1794,24 @@ public class AppConfiguration implements Configuration {
     }
 
     /**
+     * Gets the URL of the OP's Archived JSON Web Key Set (JWK) document.
+     *
+     * @return The URL of the OP's Archived JSON Web Key Set (JWK) document.
+     */
+    public String getArchivedJwksUri() {
+        return archivedJwksUri;
+    }
+
+    /**
+     * Sets the URL of the OP's Archived JSON Web Key Set (JWK) document.
+     *
+     * @param archivedJwksUri The URL of the OP's Archived JSON Web Key Set (JWK) document.
+     */
+    public void setArchivedJwksUri(String archivedJwksUri) {
+        this.archivedJwksUri = archivedJwksUri;
+    }
+
+    /**
      * Returns the URL of the Dynamic Client Registration endpoint.
      *
      * @return The URL of the Dynamic Client Registration endpoint.
@@ -1822,6 +1918,28 @@ public class AppConfiguration implements Configuration {
         this.openIdConfigurationEndpoint = openIdConfigurationEndpoint;
     }
 
+    public List<String> getApplyXFrameOptionsHeaderIfUriContainsAny() {
+        if (applyXFrameOptionsHeaderIfUriContainsAny == null) {
+            applyXFrameOptionsHeaderIfUriContainsAny = new ArrayList<>();
+        }
+        return applyXFrameOptionsHeaderIfUriContainsAny;
+    }
+
+    public void setApplyXFrameOptionsHeaderIfUriContainsAny(List<String> applyXFrameOptionsHeaderIfUriContainsAny) {
+        this.applyXFrameOptionsHeaderIfUriContainsAny = applyXFrameOptionsHeaderIfUriContainsAny;
+    }
+
+    public XFrameOptions getXframeOptionsHeaderValue() {
+        if (xframeOptionsHeaderValue == null) {
+            xframeOptionsHeaderValue = DEFAULT_X_FRAME_ORIGINS_VALUE;
+        }
+        return xframeOptionsHeaderValue;
+    }
+
+    public void setXframeOptionsHeaderValue(XFrameOptions xframeOptionsHeaderValue) {
+        this.xframeOptionsHeaderValue = xframeOptionsHeaderValue;
+    }
+
     public Set<Set<ResponseType>> getResponseTypesSupported() {
         return responseTypesSupported;
     }
@@ -1894,6 +2012,54 @@ public class AppConfiguration implements Configuration {
 
     public void setAuthorizationEncryptionEncValuesSupported(List<String> authorizationEncryptionEncValuesSupported) {
         this.authorizationEncryptionEncValuesSupported = authorizationEncryptionEncValuesSupported;
+    }
+
+    public List<String> getIntrospectionSigningAlgValuesSupported() {
+        return introspectionSigningAlgValuesSupported;
+    }
+
+    public void setIntrospectionSigningAlgValuesSupported(List<String> introspectionSigningAlgValuesSupported) {
+        this.introspectionSigningAlgValuesSupported = introspectionSigningAlgValuesSupported;
+    }
+
+    public List<String> getIntrospectionEncryptionAlgValuesSupported() {
+        return introspectionEncryptionAlgValuesSupported;
+    }
+
+    public void setIntrospectionEncryptionAlgValuesSupported(List<String> introspectionEncryptionAlgValuesSupported) {
+        this.introspectionEncryptionAlgValuesSupported = introspectionEncryptionAlgValuesSupported;
+    }
+
+    public List<String> getIntrospectionEncryptionEncValuesSupported() {
+        return introspectionEncryptionEncValuesSupported;
+    }
+
+    public void setIntrospectionEncryptionEncValuesSupported(List<String> introspectionEncryptionEncValuesSupported) {
+        this.introspectionEncryptionEncValuesSupported = introspectionEncryptionEncValuesSupported;
+    }
+
+    public List<String> getTxTokenSigningAlgValuesSupported() {
+        return txTokenSigningAlgValuesSupported;
+    }
+
+    public void setTxTokenSigningAlgValuesSupported(List<String> txTokenSigningAlgValuesSupported) {
+        this.txTokenSigningAlgValuesSupported = txTokenSigningAlgValuesSupported;
+    }
+
+    public List<String> getTxTokenEncryptionAlgValuesSupported() {
+        return txTokenEncryptionAlgValuesSupported;
+    }
+
+    public void setTxTokenEncryptionAlgValuesSupported(List<String> txTokenEncryptionAlgValuesSupported) {
+        this.txTokenEncryptionAlgValuesSupported = txTokenEncryptionAlgValuesSupported;
+    }
+
+    public List<String> getTxTokenEncryptionEncValuesSupported() {
+        return txTokenEncryptionEncValuesSupported;
+    }
+
+    public void setTxTokenEncryptionEncValuesSupported(List<String> txTokenEncryptionEncValuesSupported) {
+        this.txTokenEncryptionEncValuesSupported = txTokenEncryptionEncValuesSupported;
     }
 
     public List<String> getUserInfoSigningAlgValuesSupported() {
@@ -2153,6 +2319,22 @@ public class AppConfiguration implements Configuration {
         this.opTosUri = opTosUri;
     }
 
+    public int getCleanUpInactiveClientAfterHoursOfInactivity() {
+        return cleanUpInactiveClientAfterHoursOfInactivity;
+    }
+
+    public void setCleanUpInactiveClientAfterHoursOfInactivity(int cleanUpInactiveClientAfterHoursOfInactivity) {
+        this.cleanUpInactiveClientAfterHoursOfInactivity = cleanUpInactiveClientAfterHoursOfInactivity;
+    }
+
+    public int getClientPeriodicUpdateTimerInterval() {
+        return clientPeriodicUpdateTimerInterval;
+    }
+
+    public void setClientPeriodicUpdateTimerInterval(int clientPeriodicUpdateTimerInterval) {
+        this.clientPeriodicUpdateTimerInterval = clientPeriodicUpdateTimerInterval;
+    }
+
     public int getAuthorizationCodeLifetime() {
         return authorizationCodeLifetime;
     }
@@ -2169,6 +2351,14 @@ public class AppConfiguration implements Configuration {
         this.refreshTokenLifetime = refreshTokenLifetime;
     }
 
+    public int getTxTokenLifetime() {
+        return txTokenLifetime;
+    }
+
+    public void setTxTokenLifetime(int txTokenLifetime) {
+        this.txTokenLifetime = txTokenLifetime;
+    }
+
     public int getIdTokenLifetime() {
         return idTokenLifetime;
     }
@@ -2183,6 +2373,22 @@ public class AppConfiguration implements Configuration {
 
     public void setAccessTokenLifetime(int accessTokenLifetime) {
         this.accessTokenLifetime = accessTokenLifetime;
+    }
+
+    public Boolean getSaveTokensInCache() {
+        return saveTokensInCache;
+    }
+
+    public void setSaveTokensInCache(Boolean saveTokensInCache) {
+        this.saveTokensInCache = saveTokensInCache;
+    }
+
+    public Boolean getSaveTokensInCacheAndDontSaveInPersistence() {
+        return saveTokensInCacheAndDontSaveInPersistence;
+    }
+
+    public void setSaveTokensInCacheAndDontSaveInPersistence(Boolean saveTokensInCacheAndDontSaveInPersistence) {
+        this.saveTokensInCacheAndDontSaveInPersistence = saveTokensInCacheAndDontSaveInPersistence;
     }
 
     public int getUmaRptLifetime() {
@@ -2232,6 +2438,38 @@ public class AppConfiguration implements Configuration {
 
     public void setSpontaneousScopeLifetime(int spontaneousScopeLifetime) {
         this.spontaneousScopeLifetime = spontaneousScopeLifetime;
+    }
+
+    public int getStatusListResponseJwtLifetime() {
+        return statusListResponseJwtLifetime;
+    }
+
+    public void setStatusListResponseJwtLifetime(int statusListResponseJwtLifetime) {
+        this.statusListResponseJwtLifetime = statusListResponseJwtLifetime;
+    }
+
+    public String getStatusListResponseJwtSignatureAlgorithm() {
+        return statusListResponseJwtSignatureAlgorithm;
+    }
+
+    public void setStatusListResponseJwtSignatureAlgorithm(String statusListResponseJwtSignatureAlgorithm) {
+        this.statusListResponseJwtSignatureAlgorithm = statusListResponseJwtSignatureAlgorithm;
+    }
+
+    public int getStatusListBitSize() {
+        return statusListBitSize;
+    }
+
+    public void setStatusListBitSize(int statusListBitSize) {
+        this.statusListBitSize = statusListBitSize;
+    }
+
+    public int getStatusListIndexAllocationBlockSize() {
+        return statusListIndexAllocationBlockSize;
+    }
+
+    public void setStatusListIndexAllocationBlockSize(int statusListIndexAllocationBlockSize) {
+        this.statusListIndexAllocationBlockSize = statusListIndexAllocationBlockSize;
     }
 
     public int getCleanServiceInterval() {
@@ -2581,52 +2819,20 @@ public class AppConfiguration implements Configuration {
         this.keyStoreSecret = keyStoreSecret;
     }
 
-    public String getJansElevenTestModeToken() {
-        return jansElevenTestModeToken;
-    }
-
-    public void setJansElevenTestModeToken(String jansElevenTestModeToken) {
-        this.jansElevenTestModeToken = jansElevenTestModeToken;
-    }
-
-    public String getJansElevenGenerateKeyEndpoint() {
-        return jansElevenGenerateKeyEndpoint;
-    }
-
-    public void setJansElevenGenerateKeyEndpoint(String jansElevenGenerateKeyEndpoint) {
-        this.jansElevenGenerateKeyEndpoint = jansElevenGenerateKeyEndpoint;
-    }
-
-    public String getJansElevenSignEndpoint() {
-        return jansElevenSignEndpoint;
-    }
-
-    public void setJansElevenSignEndpoint(String jansElevenSignEndpoint) {
-        this.jansElevenSignEndpoint = jansElevenSignEndpoint;
-    }
-
-    public String getJansElevenVerifySignatureEndpoint() {
-        return jansElevenVerifySignatureEndpoint;
-    }
-
-    public void setJansElevenVerifySignatureEndpoint(String jansElevenVerifySignatureEndpoint) {
-        this.jansElevenVerifySignatureEndpoint = jansElevenVerifySignatureEndpoint;
-    }
-
-    public String getJansElevenDeleteKeyEndpoint() {
-        return jansElevenDeleteKeyEndpoint;
-    }
-
-    public void setJansElevenDeleteKeyEndpoint(String jansElevenDeleteKeyEndpoint) {
-        this.jansElevenDeleteKeyEndpoint = jansElevenDeleteKeyEndpoint;
-    }
-
     public Boolean getEndSessionWithAccessToken() {
         return endSessionWithAccessToken;
     }
 
     public void setEndSessionWithAccessToken(Boolean endSessionWithAccessToken) {
         this.endSessionWithAccessToken = endSessionWithAccessToken;
+    }
+
+    public Boolean getDisablePromptCreate() {
+        return disablePromptCreate;
+    }
+
+    public void setDisablePromptCreate(Boolean disablePromptCreate) {
+        this.disablePromptCreate = disablePromptCreate;
     }
 
     public String getCookieDomain() {
@@ -2770,23 +2976,46 @@ public class AppConfiguration implements Configuration {
         this.enableClientGrantTypeUpdate = enableClientGrantTypeUpdate;
     }
 
-    public Set<GrantType> getDynamicGrantTypeDefault() {
-        return dynamicGrantTypeDefault;
+    public Set<GrantType> getGrantTypesSupportedByDynamicRegistration() {
+        return grantTypesSupportedByDynamicRegistration;
     }
 
-    public void setDynamicGrantTypeDefault(Set<GrantType> dynamicGrantTypeDefault) {
-        this.dynamicGrantTypeDefault = dynamicGrantTypeDefault;
+    public void setGrantTypesSupportedByDynamicRegistration(Set<GrantType> grantTypesSupportedByDynamicRegistration) {
+        this.grantTypesSupportedByDynamicRegistration = grantTypesSupportedByDynamicRegistration;
     }
 
     /**
-     * @return session_id lifetime. If null or value is zero or less then session_id lifetime is not set and will expire when browser session ends.
+     * @return session_id lifetime. If value is zero or less then session_id lifetime is set to Integer.MAX_VALUE. If null then falls back to 86400 seconds.
      */
     public Integer getSessionIdLifetime() {
         return sessionIdLifetime;
     }
 
+    /**
+     * Sets session id lifetime
+     *
+     * @param sessionIdLifetime session id lifetime
+     */
     public void setSessionIdLifetime(Integer sessionIdLifetime) {
         this.sessionIdLifetime = sessionIdLifetime;
+    }
+
+    /**
+     * Gets session id cookie lifetime
+     *
+     * @return session id cookie lifetime
+     */
+    public Integer getSessionIdCookieLifetime() {
+        return sessionIdCookieLifetime;
+    }
+
+    /**
+     * Sets session id cookie lifetime
+     *
+     * @param sessionIdCookieLifetime session id cookie lifetime
+     */
+    public void setSessionIdCookieLifetime(Integer sessionIdCookieLifetime) {
+        this.sessionIdCookieLifetime = sessionIdCookieLifetime;
     }
 
     public String getActiveSessionAuthorizationScope() {
@@ -2795,14 +3024,6 @@ public class AppConfiguration implements Configuration {
 
     public void setActiveSessionAuthorizationScope(String activeSessionAuthorizationScope) {
         this.activeSessionAuthorizationScope = activeSessionAuthorizationScope;
-    }
-
-    public Integer getServerSessionIdLifetime() {
-        return serverSessionIdLifetime;
-    }
-
-    public void setServerSessionIdLifetime(Integer serverSessionIdLifetime) {
-        this.serverSessionIdLifetime = serverSessionIdLifetime;
     }
 
     public Boolean getLogClientIdOnClientAuthentication() {
@@ -3308,6 +3529,15 @@ public class AppConfiguration implements Configuration {
         this.useHighestLevelScriptIfAcrScriptNotFound = useHighestLevelScriptIfAcrScriptNotFound;
     }
 
+    public Map<String, String> getAcrMappings() {
+        if (acrMappings == null) acrMappings = new HashMap<>();
+        return acrMappings;
+    }
+
+    public void setAcrMappings(Map<String, String> acrMappings) {
+        this.acrMappings = acrMappings;
+    }
+
     public EngineConfig getAgamaConfiguration() {
         return agamaConfiguration;
     }
@@ -3366,6 +3596,14 @@ public class AppConfiguration implements Configuration {
 
 	public void setSkipAuthenticationFilterOptionsMethod(Boolean skipAuthenticationFilterOptionsMethod) {
 		this.skipAuthenticationFilterOptionsMethod = skipAuthenticationFilterOptionsMethod;
+	}
+
+	public LockMessageConfig getLockMessageConfig() {
+		return lockMessageConfig;
+	}
+
+	public void setLockMessageConfig(LockMessageConfig lockMessageConfig) {
+		this.lockMessageConfig = lockMessageConfig;
 	}
 
 }

@@ -7,10 +7,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"mime/multipart"
 	"reflect"
 	"sort"
 
 	"net/http"
+	"net/textproto"
 	"net/url"
 )
 
@@ -254,6 +256,118 @@ func (c *Client) post(ctx context.Context, path, token string, req, resp any) er
 	return c.request(ctx, params)
 }
 
+type FormField struct {
+	Typ  string
+	Data io.Reader
+}
+
+type requestParamsOptions func(*requestParams) error
+
+func (c *Client) newParams(method, path string, resp any, options ...requestParamsOptions) (*requestParams, error) {
+	params := &requestParams{
+		method: method,
+		accept: "application/json",
+		path:   path,
+		resp:   resp,
+	}
+
+	for _, o := range options {
+		if err := o(params); err != nil {
+			return nil, err
+		}
+	}
+
+	return params, nil
+}
+
+func (c *Client) withToken(ctx context.Context, url string) requestParamsOptions {
+	return func(params *requestParams) (err error) {
+		params.token, err = c.getToken(ctx, url)
+		return
+	}
+}
+
+func (c *Client) withFormData(req map[string]FormField) requestParamsOptions {
+	return func(params *requestParams) (err error) {
+		var b bytes.Buffer
+
+		w := multipart.NewWriter(&b)
+		defer w.Close()
+
+		for key, r := range req {
+			var fw io.Writer
+
+			switch r.Typ {
+			case "file":
+				if fw, err = w.CreateFormFile(key, "file"); err != nil {
+					return
+				}
+			case "json":
+				h := make(textproto.MIMEHeader)
+				h.Set("Content-Disposition", fmt.Sprintf(`form-data; name="%s"`, key))
+				h.Set("Content-Type", "application/json")
+				if fw, err = w.CreatePart(h); err != nil {
+					return
+				}
+			}
+
+			if _, err = io.Copy(fw, r.Data); err != nil {
+				return
+			}
+		}
+
+		w.Close()
+
+		params.contentType = w.FormDataContentType()
+		params.payload = b.Bytes()
+
+		return nil
+	}
+}
+
+func (c *Client) postFormData(ctx context.Context, path, token string, req map[string]FormField, resp any) (err error) {
+	var b bytes.Buffer
+
+	w := multipart.NewWriter(&b)
+	defer w.Close()
+
+	for key, r := range req {
+		var fw io.Writer
+
+		switch r.Typ {
+		case "file":
+			if fw, err = w.CreateFormFile(key, "file"); err != nil {
+				return
+			}
+		case "json":
+			h := make(textproto.MIMEHeader)
+			h.Set("Content-Disposition", fmt.Sprintf(`form-data; name="%s"`, key))
+			h.Set("Content-Type", "application/json")
+			if fw, err = w.CreatePart(h); err != nil {
+				return
+			}
+		}
+
+		if _, err = io.Copy(fw, r.Data); err != nil {
+			return
+		}
+	}
+
+	w.Close()
+
+	params := requestParams{
+		method:      "POST",
+		path:        path,
+		contentType: w.FormDataContentType(),
+		accept:      "application/json",
+		token:       token,
+		payload:     b.Bytes(),
+		resp:        resp,
+	}
+
+	return c.request(ctx, params)
+}
+
 // post performs an HTTP POST request to the given path, using the given token
 // and the provided request entity, which is marshaled into JSON. The response
 // data is unmarshaled into the provided response value, which has to be of
@@ -355,10 +469,18 @@ func (c *Client) request(ctx context.Context, params requestParams) error {
 	}
 	client := &http.Client{Transport: tr}
 
+	// b, _ := httputil.DumpRequest(req, true)
+	// tflog.Info(ctx, "Request", map[string]any{"req": string(b)})
+	// fmt.Printf("Request:\n%s\n", string(b))
+
 	resp, err := client.Do(req)
 	if err != nil {
 		return fmt.Errorf("could not perform request: %w", err)
 	}
+
+	// b, _ = httputil.DumpResponse(resp, true)
+	// tflog.Info(ctx, "Response", map[string]any{"resp": string(b)})
+	// fmt.Printf("Response:\n%s\n", string(b))
 
 	if resp.StatusCode == 400 {
 		// try to read error message

@@ -1,6 +1,6 @@
 # casa
 
-![Version: 1.0.20-dev](https://img.shields.io/badge/Version-1.0.20--dev-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.0.20-dev](https://img.shields.io/badge/AppVersion-1.0.20--dev-informational?style=flat-square)
+![Version: 1.1.5-dev](https://img.shields.io/badge/Version-1.1.5--dev-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.1.5](https://img.shields.io/badge/AppVersion-1.1.5-informational?style=flat-square)
 
 Jans Casa ("Casa") is a self-service web portal for end-users to manage authentication and authorization preferences for their account in a Jans Server.
 
@@ -27,6 +27,7 @@ Kubernetes: `>=v1.21.0-0`
 |-----|------|---------|-------------|
 | additionalAnnotations | object | `{}` | Additional annotations that will be added across all resources  in the format of {cert-manager.io/issuer: "letsencrypt-prod"}. key app is taken |
 | additionalLabels | object | `{}` | Additional labels that will be added across all resources definitions in the format of {mylabel: "myapp"} |
+| customScripts | list | `[]` | Add custom scripts that have been mounted to run before the entrypoint. |
 | dnsConfig | object | `{}` | Add custom dns config |
 | dnsPolicy | string | `""` | Add custom dns policy |
 | fullnameOverride | string | `""` |  |
@@ -36,7 +37,7 @@ Kubernetes: `>=v1.21.0-0`
 | image.pullPolicy | string | `"IfNotPresent"` | Image pullPolicy to use for deploying. |
 | image.pullSecrets | list | `[]` | Image Pull Secrets |
 | image.repository | string | `"janssenproject/casa"` | Image  to use for deploying. |
-| image.tag | string | `"1.0.20_dev"` | Image  tag to use for deploying. |
+| image.tag | string | `"1.1.5_dev"` | Image  tag to use for deploying. |
 | lifecycle | object | `{}` |  |
 | livenessProbe | object | `{"httpGet":{"path":"/jans-casa/health-check","port":"http-casa"},"initialDelaySeconds":25,"periodSeconds":25,"timeoutSeconds":5}` | Configure the liveness healthcheck for casa if needed. |
 | livenessProbe.httpGet.path | string | `"/jans-casa/health-check"` | http liveness probe endpoint |

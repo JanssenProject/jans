@@ -6,10 +6,9 @@
 
 package io.jans.service.document.store.service;
 
+import io.jans.service.document.store.provider.DocumentStoreProvider;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-
-import io.jans.service.document.store.provider.DocumentStoreProvider;
 
 /**
  * @author Yuriy Movchan on 04/10/2020
@@ -17,7 +16,7 @@ import io.jans.service.document.store.provider.DocumentStoreProvider;
 @ApplicationScoped
 public class DocumentStoreService extends BaseDocumentStoreService {
 
-    @Inject
+	@Inject
     private DocumentStoreProvider documentStoreProvider;
 
 	@Override

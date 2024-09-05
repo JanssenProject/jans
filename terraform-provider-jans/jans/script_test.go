@@ -98,3 +98,22 @@ func TestScripts(t *testing.T) {
 		t.Errorf("script location type not updated")
 	}
 }
+
+func TestScriptTypes(t *testing.T) {
+
+	client, err := NewInsecureClient(host, user, pass)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	ctx := context.Background()
+
+	types, err := client.GetScriptTypes(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(types) == 0 {
+		t.Error("expected script types, got none")
+	}
+}

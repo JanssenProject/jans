@@ -129,7 +129,7 @@ public class RegisterCreateAction {
             registerValidator.validateCiba(r);
 
             registerParamsValidator.validateLogoutUri(r.getFrontChannelLogoutUri(), r.getRedirectUris(), errorResponseFactory);
-            registerParamsValidator.validateLogoutUri(r.getBackchannelLogoutUris(), r.getRedirectUris(), errorResponseFactory);
+            registerParamsValidator.validateLogoutUri(r.getBackchannelLogoutUri(), r.getRedirectUris(), errorResponseFactory);
 
             String clientsBaseDN = staticConfiguration.getBaseDn().getClients();
 
@@ -182,8 +182,8 @@ public class RegisterCreateAction {
             oAuth2AuditLog.setScope(registerService.clientScopesToString(client));
             oAuth2AuditLog.setSuccess(true);
         } catch (WebApplicationException e) {
-            if (log.isErrorEnabled()) {
-                log.error(e.getMessage(), e);
+            if (log.isTraceEnabled()) {
+                log.trace(e.getMessage(), e);
             }
             throw e;
         } catch (Exception e) {

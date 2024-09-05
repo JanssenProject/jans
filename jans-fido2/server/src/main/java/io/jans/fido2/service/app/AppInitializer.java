@@ -13,9 +13,9 @@ import io.jans.fido2.service.shared.LoggerService;
 import io.jans.fido2.service.shared.MetricService;
 import io.jans.model.custom.script.CustomScriptType;
 import io.jans.as.common.service.common.ApplicationFactory;
-import io.jans.as.common.service.common.EncryptionService;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.PersistenceConfiguration;
+import io.jans.service.EncryptionService;
 import io.jans.service.PythonService;
 import io.jans.service.cdi.event.ApplicationInitialized;
 import io.jans.service.cdi.event.ApplicationInitializedEvent;
@@ -276,7 +276,7 @@ public class AppInitializer {
 
 	public void destroy(@Observes @BeforeDestroyed(ApplicationScoped.class) ServletContext init) {
 		log.info("Stopping services and closing DB connections at server shutdown...");
-		log.debug("Checking who intiated destory", new Throwable());
+		log.debug("Checking who intiated destroy", new Throwable());
 
 		metricService.close();
 

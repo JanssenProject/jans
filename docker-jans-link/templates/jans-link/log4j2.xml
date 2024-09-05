@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration>
     <Properties>
-        <Property name="link.log.console.prefix" value="link" />
+        <Property name="link.log.console.prefix" value="jans-link" />
     </Properties>
     <Appenders>
         <Console name="STDOUT" target="SYSTEM_OUT">
-            <PatternLayout pattern="$log_prefix%d{dd-MM HH:mm:ss.SSS} %-5p %C{4} %F:%L- %m%n" />
+            <PatternLayout pattern="$log_prefix%d{dd-MM-yyyy HH:mm:ss.SSS} %-5p %C{4} %F:%L- %m%n" />
         </Console>
 
-        <RollingFile name="FILE" fileName="${sys:log.base}/logs/cacherefresh.log" filePattern="${sys:log.base}/logs/cacherefresh-%d{yyyy-MM-dd}-%i.log">
+        <RollingFile name="FILE" fileName="${sys:log.base}/logs/jans-link.log" filePattern="${sys:log.base}/logs/jans-link-%d{yyyy-MM-dd}-%i.log">
             <PatternLayout pattern="%d{dd-MM-yyyy HH:mm:ss.SSS} %-5p [%t] %C{4} %F:%L- %m%n" />
 
             <Policies>
@@ -17,7 +17,7 @@
             <DefaultRolloverStrategy max="30" />
         </RollingFile>
 
-		<RollingFile name="JANS_CACHEREFRESH_PERSISTENCE_FILE" fileName="${sys:log.base}/logs/cacherefresh_persistence.log" filePattern="${sys:log.base}/logs/cacherefresh_persistence-%d{yyyy-MM-dd}-%i.log">
+		<RollingFile name="JANS_LINK_PERSISTENCE_FILE" fileName="${sys:log.base}/logs/jans-link_persistence.log" filePattern="${sys:log.base}/logs/jans-link_persistence-%d{yyyy-MM-dd}-%i.log">
 			<PatternLayout pattern="%d %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
 
 			<Policies>
@@ -27,7 +27,7 @@
 			<DefaultRolloverStrategy max="30" />
 		</RollingFile>
 
-		<RollingFile name="JANS_CACHEREFRESH_PERSISTENCE_DURATION_FILE" fileName="${sys:log.base}/logs/cacherefresh_persistence_duration.log" filePattern="${sys:log.base}/logs/cacherefresh_persistence_duration-%d{yyyy-MM-dd}-%i.log">
+		<RollingFile name="JANS_LINK_PERSISTENCE_DURATION_FILE" fileName="${sys:log.base}/logs/jans-link_persistence_duration.log" filePattern="${sys:log.base}/logs/jans-link_persistence_duration-%d{yyyy-MM-dd}-%i.log">
 			<PatternLayout pattern="%d %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
 
 			<Policies>
@@ -37,7 +37,7 @@
 			<DefaultRolloverStrategy max="30" />
 		</RollingFile>
 
-		<RollingFile name="JANS_CACHEREFRESH_PERSISTENCE_LDAP_STATISTICS_FILE" fileName="${sys:log.base}/logs/cacherefresh_persistence_ldap_statistics.log" filePattern="${sys:log.base}/logs/cacherefresh_persistence_ldap_statistics-%d{yyyy-MM-dd}-%i.log">
+		<RollingFile name="JANS_LINK_PERSISTENCE_LDAP_STATISTICS_FILE" fileName="${sys:log.base}/logs/jans-link_persistence_ldap_statistics.log" filePattern="${sys:log.base}/logs/jans-link_persistence_ldap_statistics-%d{yyyy-MM-dd}-%i.log">
 			<PatternLayout pattern="%d %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
 
 			<Policies>
@@ -47,7 +47,7 @@
 			<DefaultRolloverStrategy max="30" />
 		</RollingFile>
 
-		<RollingFile name="JANS_CACHEREFRESH_SCRIPT_LOG_FILE" fileName="${sys:log.base}/logs/cacherefresh_script.log" filePattern="${sys:log.base}/logs/cacherefresh_script-%d{yyyy-MM-dd}-%i.log">
+		<RollingFile name="JANS_LINK_SCRIPT_LOG_FILE" fileName="${sys:log.base}/logs/jans-link_script.log" filePattern="${sys:log.base}/logs/jans-link_script-%d{yyyy-MM-dd}-%i.log">
 			<PatternLayout pattern="%d %-5p [%t] [%C{6}] (%F:%L) - %m%n" />
 
 			<Policies>

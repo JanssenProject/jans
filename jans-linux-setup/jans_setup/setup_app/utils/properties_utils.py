@@ -121,26 +121,16 @@ class PropertiesUtils(SetupUtils):
             if Config.cb_install and not Config.get('cb_password'):
                 Config.cb_password = Config.admin_password
 
-            if not Config.opendj_install:
-                if Config.cb_install:
-                    Config.mapping_locations = { group: 'couchbase' for group in Config.couchbaseBucketDict }
-
-                if Config.rdbm_install:
-                    Config.mapping_locations = { group: 'rdbm' for group in Config.couchbaseBucketDict }
-
             if Config.opendj_install == InstallTypes.LOCAL and not Config.installed_instance:
                 used_ports = self.opendj_used_ports()
                 if used_ports:
                     print(msg.used_ports.format(','.join(used_ports)))
                     sys.exit(1)
 
-
             self.set_persistence_type()
 
             if not Config.opendj_p12_pass:
                 Config.opendj_p12_pass = self.getPW()
-
-            self.check_oxd_server_https()
 
         if not Config.encode_salt:
             Config.encode_salt = self.getPW() + self.getPW()
@@ -148,16 +138,6 @@ class PropertiesUtils(SetupUtils):
         if not Config.jans_max_mem:
             Config.jans_max_mem = int(base.current_mem_size * .83 * 1000) # 83% of physical memory
 
-
-    def check_oxd_server_https(self):
-
-        if Config.get('oxd_server_https'):
-            Config.templateRenderingDict['oxd_hostname'], Config.templateRenderingDict['oxd_port'] = self.parse_url(Config.oxd_server_https)
-            if not Config.templateRenderingDict['oxd_port']: 
-                Config.templateRenderingDict['oxd_port'] = 8443
-        else:
-            Config.templateRenderingDict['oxd_hostname'] = Config.hostname
-            Config.oxd_server_https = 'https://{}:8443'.format(Config.hostname)
 
     def decrypt_properties(self, fn, passwd):
         out_file = fn[:-4] + '.' + uuid.uuid4().hex[:8] + '-DEC~'
@@ -202,13 +182,26 @@ class PropertiesUtils(SetupUtils):
         if p.get('cb_install') == '0':
            p['cb_install'] = InstallTypes.NONE
 
+        if p.get('cb_install'):
+            p['opendj_install'] = InstallTypes.NONE
+            p['rdbm_install'] = InstallTypes.NONE
+
+            for bucket in Config.couchbaseBucketDict:
+                if p.get(f'couchbase_{bucket}_mem'):
+                    Config.couchbaseBucketDict[bucket]['memory_allocation'] = int(p[f'couchbase_{bucket}_mem'])
+
+
         if p.get('opendj_install') == '0':
             p['opendj_install'] = InstallTypes.NONE
+
+        if base.as_bool(p.get('installLdap', False)):
+            p['opendj_install'] = InstallTypes.LOCAL
+            p['rdbm_install'] = InstallTypes.NONE
 
         if p.get('enable-script'):
             base.argsp.enable_script = p['enable-script'].split()
 
-        if p.get('loadTestData'):
+        if base.as_bool(p.get('loadTestData', False)):
             base.argsp.t = True
 
         if p.get('rdbm_type') == 'pgsql' and not p.get('rdbm_port'):
@@ -244,8 +237,6 @@ class PropertiesUtils(SetupUtils):
         if p.get('ldap_hostname') != 'localhost':
             if p.get('remoteLdap','').lower() == 'true':
                 Config.opendj_install = InstallTypes.REMOTE
-            elif p.get('installLdap','').lower() == 'true':
-                Config.opendj_install = InstallTypes.LOCAL
             elif p.get('opendj_install'):
                 Config.opendj_install = p['opendj_install']
             else:
@@ -438,45 +429,6 @@ class PropertiesUtils(SetupUtils):
 
         return result
 
-    def check_oxd_server(self, oxd_url, error_out=True, log_error=True):
-
-        oxd_url = os.path.join(oxd_url, 'health-check')
-
-        ctx = ssl.create_default_context()
-        ctx.check_hostname = True
-        ctx.verify_mode = ssl.CERT_NONE
-
-        try:
-            result = urllib.request.urlopen(
-                        oxd_url,
-                        timeout=2,
-                        context=ctx
-                    )
-            if result.code == 200:
-                oxd_status = json.loads(result.read().decode())
-                if oxd_status['status'] == 'running':
-                    return True
-        except Exception as e:
-            if log_error:
-                if Config.thread_queue:
-                    return str(e)
-                if error_out:
-                    print(colors.DANGER)
-                    print("Can't connect to oxd-server with url {}".format(oxd_url))
-                    print("Reason: ", e)
-                    print(colors.ENDC)
-
-    def check_oxd_ssl_cert(self, oxd_hostname, oxd_port):
-
-        oxd_cert = ssl.get_server_certificate((oxd_hostname, oxd_port))
-        with tempfile.TemporaryDirectory() as tmpdirname:
-            oxd_crt_fn = os.path.join(tmpdirname, 'oxd.crt')
-            self.writeFile(oxd_crt_fn, oxd_cert)
-            ssl_subjects = self.get_ssl_subject(oxd_crt_fn)
-
-            if ssl_subjects.get('commonName') != oxd_hostname:
-                return ssl_subjects
-
 
     def promptForBackendMappings(self):
 
@@ -510,6 +462,8 @@ class PropertiesUtils(SetupUtils):
             Config.mapping_locations[m] = 'couchbase'
 
     def set_persistence_type(self):
+        if Config.installed_instance:
+            return
         if Config.opendj_install and (not Config.cb_install) and (not Config.rdbm_install):
             Config.persistence_type = 'ldap'
         elif (not Config.opendj_install) and (not Config.rdbm_install) and Config.cb_install:
@@ -523,17 +477,17 @@ class PropertiesUtils(SetupUtils):
 
 
     def promptForHTTPD(self):
-        if Config.installed_instance and Config.installHttpd:
+        if Config.installed_instance and Config.install_httpd:
             return
 
         prompt_for_httpd = self.getPrompt("Install Apache HTTPD Server", 
-                                        self.getDefaultOption(Config.installHTTPD)
+                                        self.getDefaultOption(Config.install_httpd)
                                         )[0].lower()
 
-        Config.installHttpd = prompt_for_httpd == 'y'
+        Config.install_httpd = prompt_for_httpd == 'y'
 
-        if Config.installed_instance and Config.installHttpd:
-            Config.addPostSetupService.append('installHttpd')
+        if Config.installed_instance and Config.install_httpd:
+            Config.addPostSetupService.append('install_httpd')
 
 
     def promptForScimServer(self):
@@ -550,51 +504,16 @@ class PropertiesUtils(SetupUtils):
             Config.addPostSetupService.append('install_scim_server')
 
     def promptForFido2Server(self):
-        if Config.installed_instance and Config.installFido2:
+        if Config.installed_instance and Config.install_fido2:
             return
 
         prompt_for_fido2_server = self.getPrompt("Install Fido2 Server?",
-                                            self.getDefaultOption(Config.installFido2)
+                                            self.getDefaultOption(Config.install_fido2)
                                             )[0].lower()
-        Config.installFido2 = prompt_for_fido2_server == 'y'
+        Config.install_fido2 = prompt_for_fido2_server == 'y'
 
-        if Config.installed_instance and Config.installFido2:
-            Config.addPostSetupService.append('installFido2')
-
-
-    def promptForOxd(self):
-
-        if Config.installed_instance and Config.installOxd:
-            return
-
-        prompt_for_oxd = self.getPrompt("Install Oxd?", 
-                                            self.getDefaultOption(Config.installOxd)
-                                            )[0].lower()
-        Config.installOxd = prompt_for_oxd == 'y'
-
-        if Config.installOxd:
-            use_jans_storage = self.getPrompt("  Use Janssen Storage for Oxd?",
-                                                self.getDefaultOption(Config.get('oxd_use_jans_storage'))
-                                                )[0].lower()
-            Config.oxd_use_jans_storage = use_jans_storage == 'y'
-
-
-        if Config.installed_instance and Config.installOxd:
-            Config.addPostSetupService.append('installOxd')
-
-
-    def promptForEleven(self):
-        if Config.installed_instance and Config.installEleven:
-            return
-
-        promp_for_eleven = self.getPrompt("Install Eleven Server?",
-                                            self.getDefaultOption(Config.installEleven)
-                                            )[0].lower()
-
-        Config.installEleven = promp_for_eleven == 'y'
-
-        if Config.installed_instance and Config.installEleven:
-            Config.addPostSetupService.append('installEleven')
+        if Config.installed_instance and Config.install_fido2:
+            Config.addPostSetupService.append('install_fido2')
 
 
     def prompt_for_jans_link(self):
@@ -615,7 +534,7 @@ class PropertiesUtils(SetupUtils):
         if Config.installed_instance and Config.install_jans_keycloak_link:
             return
 
-        prompt_to_install = self.getPrompt("Install Jans Keycloak Link Server?",
+        prompt_to_install = self.getPrompt("Install Jans KC Link Server?",
                                             self.getDefaultOption(Config.install_jans_keycloak_link)
                                             )[0].lower()
 
@@ -647,18 +566,52 @@ class PropertiesUtils(SetupUtils):
 
         return True
 
+
+    def pompt_for_jans_lock(self):
+        if not self.prompt_to_install('install_jans_lock'):
+            return
+
+        prompt = self.getPrompt("Install Jans Lock?",
+                                            self.getDefaultOption(Config.install_jans_lock)
+                                            )[0].lower()
+
+        if prompt == 'y':
+            prompt = self.getPrompt("  Install Jans Lock as Server?",
+                                            self.getDefaultOption(Config.install_jans_lock)
+                                            )[0].lower()
+            if prompt == 'y':
+                Config.install_jans_lock = True
+                Config.install_jans_lock_as_server = True
+            else:
+                prompt = self.getPrompt("  Install Jans Lock as Auth Service?", self.getDefaultOption(True))[0].lower()
+                if prompt == 'y':
+                    Config.install_jans_lock = True
+
+            if Config.install_jans_lock:
+                prompt = self.getPrompt("  Install OPA?", self.getDefaultOption(Config.install_opa))[0].lower()
+                Config.install_opa = prompt == 'y'
+
+        if Config.installed_instance and Config.install_jans_lock:
+            Config.addPostSetupService.append('install_jans_lock')
+
     def prompt_for_jans_saml(self):
         if not self.prompt_to_install('install_jans_saml'):
             return
 
-        prompt = self.getPrompt("Install Jans SAML?",
+        prompt = self.getPrompt("Install Jans KC?",
                                             self.getDefaultOption(Config.install_jans_saml)
                                             )[0].lower()
 
         Config.install_jans_saml = prompt == 'y'
-        if Config.installed_instance and Config.install_jans_saml:
-            Config.addPostSetupService.append('install_jans_saml')
-
+        if Config.installed_instance:
+            if Config.install_jans_saml:
+                Config.addPostSetupService.append('install_jans_saml')
+                if Config.install_config_api and not Config.install_scim_server:
+                    Config.addPostSetupService.append('install_scim_server')
+                    Config.install_scim_server = True
+        else:
+            if Config.install_jans_saml and Config.install_config_api:
+                Config.install_scim_server = True
 
     def promptForConfigApi(self):
         if Config.installed_instance and Config.install_config_api:
@@ -704,7 +657,11 @@ class PropertiesUtils(SetupUtils):
 
                 if result[0]:
                     print("  {}Successfully connected to {} server{}".format(colors.OKGREEN, Config.rdbm_type.upper(), colors.ENDC))
-                    break
+                    dbUtils.set_mysql_version()
+                    if dbUtils.mariadb:
+                        print("  {}MariaDB is not supported. Please use MySQL Server. {}".format(colors.FAIL, colors.ENDC))
+                    else:
+                        break
                 else:
                     print("  {}Can't connect to {} server with provided credidentals.{}".format(colors.FAIL, Config.rdbm_type.upper(), colors.ENDC))
                     print("  ERROR:", result[1])
@@ -717,11 +674,11 @@ class PropertiesUtils(SetupUtils):
         print('Chose Backend Type:')
 
         backend_types = [
-                    BackendStrings.LOCAL_OPENDJ,
-                    BackendStrings.LOCAL_MYSQL,
-                    BackendStrings.REMOTE_MYSQL,
                     BackendStrings.LOCAL_PGSQL,
                     BackendStrings.REMOTE_PGSQL,
+                    BackendStrings.LOCAL_MYSQL,
+                    BackendStrings.REMOTE_MYSQL,
+                    BackendStrings.LOCAL_OPENDJ,
                     ]
 
         backend_types += [BackendStrings.REMOTE_COUCHBASE, BackendStrings.CLOUD_SPANNER]
@@ -757,6 +714,7 @@ class PropertiesUtils(SetupUtils):
 
         if backend_type_str == BackendStrings.LOCAL_OPENDJ:
             Config.opendj_install = InstallTypes.LOCAL
+            Config.rdbm_install = False
             ldapPass = Config.ldapPass or Config.admin_password or self.getPW(special='.*=!%&+/-')
 
             while True:
@@ -772,6 +730,7 @@ class PropertiesUtils(SetupUtils):
 
         elif backend_type_str == BackendStrings.REMOTE_OPENDJ:
             Config.opendj_install = InstallTypes.REMOTE
+            Config.rdbm_install = False
             while True:
                 ldapHost = self.getPrompt("    LDAP hostname")
                 ldapPass = self.getPrompt("    Password for '{0}'".format(Config.ldap_binddn))
@@ -785,7 +744,7 @@ class PropertiesUtils(SetupUtils):
             Config.ldap_hostname = ldapHost
 
         elif backend_type_str == BackendStrings.LOCAL_COUCHBASE:
-            Config.opendj_install = InstallTypes.NONE
+            Config.rdbm_install = False
             Config.cb_install = InstallTypes.LOCAL
             Config.isCouchbaseUserAdmin = True
 
@@ -798,10 +757,9 @@ class PropertiesUtils(SetupUtils):
                     print("Password must be at least 6 characters and include one uppercase letter, one lowercase letter, one digit, and one special character.")
 
             Config.cb_password = cbPass
-            Config.mapping_locations = { group: 'couchbase' for group in Config.couchbaseBucketDict }
 
         elif backend_type_str == BackendStrings.REMOTE_COUCHBASE:
-            Config.opendj_install = InstallTypes.NONE
+            Config.rdbm_install = False
             Config.cb_install = InstallTypes.REMOTE
 
             while True:
@@ -812,10 +770,7 @@ class PropertiesUtils(SetupUtils):
                 if result['result']:
                     break
 
-            Config.mapping_locations = { group: 'couchbase' for group in Config.couchbaseBucketDict }
-
         elif backend_type_str in (BackendStrings.LOCAL_MYSQL, BackendStrings.LOCAL_PGSQL):
-            Config.opendj_install = InstallTypes.NONE
             Config.rdbm_install = True
             Config.rdbm_install_type = InstallTypes.LOCAL
             if backend_type_str == BackendStrings.LOCAL_MYSQL:
@@ -826,8 +781,6 @@ class PropertiesUtils(SetupUtils):
                 Config.rdbm_type = 'pgsql'
 
         elif backend_type_str in (BackendStrings.REMOTE_MYSQL, BackendStrings.REMOTE_PGSQL):
-            Config.opendj_install = InstallTypes.NONE
-            Config.rdbm_install = True
             Config.rdbm_install_type = InstallTypes.REMOTE
             if backend_type_str == BackendStrings.REMOTE_MYSQL:
                 Config.rdbm_port = 3306
@@ -845,7 +798,10 @@ class PropertiesUtils(SetupUtils):
 
                 try:
                     if Config.rdbm_type == 'mysql':
-                        pymysql.connect(host=Config.rdbm_host, user=Config.rdbm_user, password=Config.rdbm_password, database=Config.rdbm_db, port=Config.rdbm_port)
+                        conn = pymysql.connect(host=Config.rdbm_host, user=Config.rdbm_user, password=Config.rdbm_password, database=Config.rdbm_db, port=Config.rdbm_port)
+                        if 'mariadb' in conn.server_version.lower():
+                            print("  {}MariaDB is not supported. Please use MySQL Server. {}".format(colors.FAIL, colors.ENDC))
+                            continue
                     else:
                         psycopg2.connect(dbname=Config.rdbm_db, user=Config.rdbm_user, password=Config.rdbm_password, host=Config.rdbm_host, port=Config.rdbm_port)
                     print("  {}{} connection was successful{}".format(colors.OKGREEN, Config.rdbm_type.upper(), colors.ENDC))
@@ -856,7 +812,6 @@ class PropertiesUtils(SetupUtils):
         elif backend_type_str == BackendStrings.CLOUD_SPANNER:
             Config.opendj_install = InstallTypes.NONE
             Config.rdbm_type = 'spanner'
-            Config.rdbm_install = True
             Config.rdbm_install_type = InstallTypes.REMOTE
 
             emulator = self.getPrompt("  Is it emulator?", "N|y")[0].lower()
@@ -924,6 +879,54 @@ class PropertiesUtils(SetupUtils):
             Config.ob_alias = self.getPrompt('  Openbanking Key Alias', Config.ob_alias)
 
 
+    def prompt_for_http_cert_info(self):
+        # IP address needed only for Apache2 and hosts file update
+        if Config.install_httpd:
+            Config.ip = self.get_ip()
+
+        if base.argsp.host_name:
+            detectedHostname = base.argsp.host_name
+        else:
+            detectedHostname = self.detect_hostname()
+
+            if detectedHostname == 'localhost':
+                detectedHostname = None
+
+        while True:
+            if detectedHostname:
+                Config.hostname = self.getPrompt("Enter hostname", detectedHostname)
+            else:
+                Config.hostname = self.getPrompt("Enter hostname")
+
+            if Config.hostname != 'localhost':
+                break
+            else:
+                print("Hostname can't be \033[;1mlocalhost\033[0;0m")
+
+        # Get city and state|province code
+        Config.city = self.getPrompt("Enter your city or locality", Config.city)
+        Config.state = self.getPrompt("Enter your state or province two letter code", Config.state)
+
+        # Get the Country Code
+        long_enough = False
+        while not long_enough:
+            countryCode = self.getPrompt("Enter two letter Country Code", Config.countryCode)
+            if len(countryCode) != 2:
+                print("Country code must be two characters")
+            else:
+                Config.countryCode = countryCode
+                long_enough = True
+
+        Config.orgName = self.getPrompt("Enter Organization Name", Config.orgName)
+
+        while True:
+            Config.admin_email = self.getPrompt('Enter email address for support at your organization', Config.admin_email)
+            if self.check_email(Config.admin_email):
+                break
+            else:
+                print("Please enter valid email address")
+
+
     def promptForProperties(self):
 
         if Config.noPrompt or '-x' in sys.argv:
@@ -938,54 +941,7 @@ class PropertiesUtils(SetupUtils):
             if promptForMITLicense != 'y':
                 sys.exit(0)
 
-            # IP address needed only for Apache2 and hosts file update
-            if Config.installHttpd:
-                Config.ip = self.get_ip()
-
-            if base.argsp.host_name:
-                detectedHostname = base.argsp.host_name
-            else:
-                detectedHostname = self.detect_hostname()
-
-                if detectedHostname == 'localhost':
-                    detectedHostname = None
-
-            while True:
-                if detectedHostname:
-                    Config.hostname = self.getPrompt("Enter hostname", detectedHostname)
-                else:
-                    Config.hostname = self.getPrompt("Enter hostname")
-
-                if Config.hostname != 'localhost':
-                    break
-                else:
-                    print("Hostname can't be \033[;1mlocalhost\033[0;0m")
-
-            Config.oxd_server_https = 'https://{}:8443'.format(Config.hostname)
-
-            # Get city and state|province code
-            Config.city = self.getPrompt("Enter your city or locality", Config.city)
-            Config.state = self.getPrompt("Enter your state or province two letter code", Config.state)
-
-            # Get the Country Code
-            long_enough = False
-            while not long_enough:
-                countryCode = self.getPrompt("Enter two letter Country Code", Config.countryCode)
-                if len(countryCode) != 2:
-                    print("Country code must be two characters")
-                else:
-                    Config.countryCode = countryCode
-                    long_enough = True
-
-            Config.orgName = self.getPrompt("Enter Organization Name", Config.orgName)
-
-            while True:
-                Config.admin_email = self.getPrompt('Enter email address for support at your organization', Config.admin_email)
-                if self.check_email(Config.admin_email):
-                    break
-                else:
-                    print("Please enter valid email address")
-            
+            self.prompt_for_http_cert_info()
             Config.jans_max_mem = self.getPrompt("Enter maximum RAM for applications in MB", str(Config.jans_max_mem))
 
 
@@ -1010,11 +966,8 @@ class PropertiesUtils(SetupUtils):
             self.prompt_for_jans_link()
             self.prompt_for_jans_keycloak_link()
             self.prompt_for_casa()
-
+            self.pompt_for_jans_lock()
             self.prompt_for_jans_saml()
-            #self.promptForEleven()
-            #if (not Config.installOxd) and Config.oxd_package:
-            #    self.promptForOxd()
 
 
 

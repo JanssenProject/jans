@@ -5,7 +5,10 @@ tags:
 - tools
 - tui
 - text base UI
+- navigation
 ---
+
+# TUI Navigation Guide
 
 ## General Structure:
 
@@ -178,3 +181,11 @@ can be used to delete a certain label
 
 ![image](https://user-images.githubusercontent.com/63171603/216968417-4cb15f2a-f01c-48bb-a27d-e4e73edb8082.png)
 
+## Logout and Exit
+
+Exit will close the TUI screen while logout will force re-authentication of TUI
+using device-code.
+
+Navigate to `Jans TUI` on upper right corner of the screen and hit enter.
+
+![](../../../../assets/image-tui-exit-logout.png)

@@ -1,9 +1,8 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>io.jans</groupId>
   <artifactId>jans-keycloak-link-parent</artifactId>
-  <version>1.0.20-SNAPSHOT</version>
+  <version>1.1.5-SNAPSHOT</version>
   <modules>
     <module>model</module>
     <module>service</module>
@@ -22,7 +21,10 @@
     <jetty.version>11.0.8</jetty.version>
     <weld.version>5.1.0.Final</weld.version>
     <resteasy.version>6.2.4.Final</resteasy.version>
-
+    <sonar.projectKey>JanssenProject_keycloak-link</sonar.projectKey>
+    <sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
+    <sonar.organization>janssenproject</sonar.organization>
+    <sonar.host.url>https://sonarcloud.io</sonar.host.url>
   </properties>
 
   <repositories>
@@ -106,5 +108,15 @@
     </dependency>
 
   </dependencies>
-
+<build>
+  <plugins>
+    <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-javadoc-plugin</artifactId>
+      <configuration>
+        <additionalJOption>-Xdoclint:none</additionalJOption>
+      </configuration>
+    </plugin>
+  </plugins>
+</build>
 </project>

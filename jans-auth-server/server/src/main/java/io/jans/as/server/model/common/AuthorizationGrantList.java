@@ -9,26 +9,26 @@ package io.jans.as.server.model.common;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.common.UserService;
+import io.jans.as.model.authzdetails.AuthzDetails;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.AbstractCryptoProvider;
 import io.jans.as.model.util.Util;
 import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
-import io.jans.as.server.model.ldap.TokenEntity;
-import io.jans.as.server.model.ldap.TokenType;
 import io.jans.as.server.service.ClientService;
 import io.jans.as.server.service.GrantService;
 import io.jans.as.server.service.MetricService;
 import io.jans.as.server.util.TokenHashUtil;
 import io.jans.model.metric.MetricType;
+import io.jans.model.token.TokenEntity;
+import io.jans.model.token.TokenType;
 import io.jans.service.CacheService;
 import io.jans.util.StringHelper;
-
-import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -208,9 +208,9 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
     @Override
     public AuthorizationGrant getAuthorizationGrantByRefreshToken(String clientId, String refreshTokenCode) {
         if (isFalse(appConfiguration.getPersistRefreshToken())) {
-            return assertTokenType((TokenEntity) cacheService.get(TokenHashUtil.hash(refreshTokenCode)), io.jans.as.server.model.ldap.TokenType.REFRESH_TOKEN, clientId);
+            return assertTokenType((TokenEntity) cacheService.get(TokenHashUtil.hash(refreshTokenCode)), io.jans.model.token.TokenType.REFRESH_TOKEN, clientId);
         }
-        return assertTokenType(grantService.getGrantByCode(refreshTokenCode), io.jans.as.server.model.ldap.TokenType.REFRESH_TOKEN, clientId);
+        return assertTokenType(grantService.getGrantByCode(refreshTokenCode), io.jans.model.token.TokenType.REFRESH_TOKEN, clientId);
     }
 
     public AuthorizationGrant assertTokenType(TokenEntity tokenEntity, TokenType tokenType, String clientId) {
@@ -246,7 +246,10 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
     @Override
     public AuthorizationGrant getAuthorizationGrantByAccessToken(String accessToken) {
         final TokenEntity tokenEntity = grantService.getGrantByCode(accessToken);
-        if (tokenEntity != null && (tokenEntity.getTokenTypeEnum() == io.jans.as.server.model.ldap.TokenType.ACCESS_TOKEN || tokenEntity.getTokenTypeEnum() == io.jans.as.server.model.ldap.TokenType.LONG_LIVED_ACCESS_TOKEN)) {
+        if (tokenEntity != null && (
+                tokenEntity.getTokenTypeEnum() == TokenType.ACCESS_TOKEN ||
+                        tokenEntity.getTokenTypeEnum() == TokenType.LONG_LIVED_ACCESS_TOKEN ||
+                        tokenEntity.getTokenTypeEnum() == TokenType.TX_TOKEN)) {
             return asGrant(tokenEntity);
         }
         return null;
@@ -258,7 +261,19 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
             return null;
         }
         final TokenEntity tokenEntity = grantService.getGrantByCode(idToken);
-        if (tokenEntity != null && (tokenEntity.getTokenTypeEnum() == io.jans.as.server.model.ldap.TokenType.ID_TOKEN)) {
+        if (tokenEntity != null && (tokenEntity.getTokenTypeEnum() == TokenType.ID_TOKEN)) {
+            return asGrant(tokenEntity);
+        }
+        return null;
+    }
+
+    @Override
+    public AuthorizationGrant getAuthorizationGrantByReferenceId(String referenceId) {
+        if (StringUtils.isBlank(referenceId)) {
+            return null;
+        }
+        final TokenEntity tokenEntity = grantService.getGrantByReferenceId(referenceId);
+        if (tokenEntity != null) {
             return asGrant(tokenEntity);
         }
         return null;
@@ -315,6 +330,7 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
 
                         result = deviceCodeGrant;
                         break;
+                    case TX_TOKEN:
                     case TOKEN_EXCHANGE:
                         TokenExchangeGrant tokenExchangeGrant = grantInstance.select(TokenExchangeGrant.class).get();
                         tokenExchangeGrant.init(user, AuthorizationGrantType.TOKEN_EXCHANGE, client, tokenEntity.getCreationDate());
@@ -333,13 +349,16 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
 
                 result.setTokenBindingHash(tokenEntity.getTokenBindingHash());
                 result.setNonce(nonce);
-                result.setX5cs256(tokenEntity.getAttributes().getX5cs256());
+                result.setX5ts256(tokenEntity.getAttributes().getX5cs256());
                 result.setDpopJkt(tokenEntity.getAttributes().getDpopJkt());
                 result.setTokenEntity(tokenEntity);
+                result.setReferenceId(tokenEntity.getReferenceId());
+                result.setStatusListIndex(tokenEntity.getAttributes().getStatusListIndex());
                 if (StringUtils.isNotBlank(grantId)) {
                     result.setGrantId(grantId);
                 }
                 result.setScopes(Util.splittedStringAsList(tokenEntity.getScope(), " "));
+                result.setAuthzDetails(AuthzDetails.ofSilently(tokenEntity.getAttributes().getAuthorizationDetails()));
 
                 result.setCodeChallenge(tokenEntity.getCodeChallenge());
                 result.setCodeChallengeMethod(tokenEntity.getCodeChallengeMethod());
@@ -362,24 +381,47 @@ public class AuthorizationGrantList implements IAuthorizationGrantList {
                             if (result instanceof AuthorizationCodeGrant) {
                                 final AuthorizationCode code = new AuthorizationCode(tokenEntity.getTokenCode(), tokenEntity.getCreationDate(), tokenEntity.getExpirationDate());
                                 final AuthorizationCodeGrant g = (AuthorizationCodeGrant) result;
+                                code.setX5ts256(g.getX5ts256());
+                                code.setReferenceId(tokenEntity.getReferenceId());
+                                code.setStatusListIndex(tokenEntity.getAttributes().getStatusListIndex());
                                 g.setAuthorizationCode(code);
                             }
                             break;
                         case REFRESH_TOKEN:
                             final RefreshToken refreshToken = new RefreshToken(tokenEntity.getTokenCode(), tokenEntity.getCreationDate(), tokenEntity.getExpirationDate());
+                            refreshToken.setX5ts256(result.getX5ts256());
+                            refreshToken.setReferenceId(tokenEntity.getReferenceId());
+                            refreshToken.setStatusListIndex(tokenEntity.getAttributes().getStatusListIndex());
                             result.setRefreshTokens(Collections.singletonList(refreshToken));
                             break;
                         case ACCESS_TOKEN:
                             final AccessToken accessToken = new AccessToken(tokenEntity.getTokenCode(), tokenEntity.getCreationDate(), tokenEntity.getExpirationDate());
                             accessToken.setDpop(tokenEntity.getDpop());
+                            accessToken.setX5ts256(result.getX5ts256());
+                            accessToken.setReferenceId(tokenEntity.getReferenceId());
+                            accessToken.setStatusListIndex(tokenEntity.getAttributes().getStatusListIndex());
                             result.setAccessTokens(Collections.singletonList(accessToken));
+                            break;
+                        case TX_TOKEN:
+                            final TxToken txToken = new TxToken(tokenEntity.getTokenCode(), tokenEntity.getCreationDate(), tokenEntity.getExpirationDate());
+                            txToken.setDpop(tokenEntity.getDpop());
+                            txToken.setX5ts256(result.getX5ts256());
+                            txToken.setReferenceId(tokenEntity.getReferenceId());
+                            txToken.setStatusListIndex(tokenEntity.getAttributes().getStatusListIndex());
+                            result.setTxTokens(Collections.singletonList(txToken));
                             break;
                         case ID_TOKEN:
                             final IdToken idToken = new IdToken(tokenEntity.getTokenCode(), tokenEntity.getCreationDate(), tokenEntity.getExpirationDate());
+                            idToken.setX5ts256(result.getX5ts256());
+                            idToken.setReferenceId(tokenEntity.getReferenceId());
+                            idToken.setStatusListIndex(tokenEntity.getAttributes().getStatusListIndex());
                             result.setIdToken(idToken);
                             break;
                         case LONG_LIVED_ACCESS_TOKEN:
                             final AccessToken longLivedAccessToken = new AccessToken(tokenEntity.getTokenCode(), tokenEntity.getCreationDate(), tokenEntity.getExpirationDate());
+                            longLivedAccessToken.setX5ts256(result.getX5ts256());
+                            longLivedAccessToken.setReferenceId(tokenEntity.getReferenceId());
+                            longLivedAccessToken.setStatusListIndex(tokenEntity.getAttributes().getStatusListIndex());
                             result.setLongLivedAccessToken(longLivedAccessToken);
                             break;
                     }

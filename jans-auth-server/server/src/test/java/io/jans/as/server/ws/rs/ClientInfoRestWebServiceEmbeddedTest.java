@@ -317,7 +317,7 @@ public class ClientInfoRestWebServiceEmbeddedTest extends BaseTest {
             assertTrue(jsonObj.has("jansAppType"), "Unexpected result: oxAuthAppType not found");
             assertTrue(jsonObj.has("jansIdTknSignedRespAlg"),
                     "Unexpected result: oxAuthIdTokenSignedResponseAlg not found");
-            assertTrue(jsonObj.has("jansRedirectURI"), "Unexpected result: oxAuthRedirectURI not found");
+            assertTrue(jsonObj.has("jansRedirectURI"), "Unexpected result: jansRedirectURI not found");
             assertTrue(jsonObj.has("jansScope"), "Unexpected result: oxAuthScope not found");
         } catch (JSONException e) {
             e.printStackTrace();

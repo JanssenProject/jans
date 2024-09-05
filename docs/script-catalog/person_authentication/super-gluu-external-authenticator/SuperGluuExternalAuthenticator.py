@@ -18,7 +18,7 @@ from io.jans.as.common.service.common.fido2 import RegistrationPersistenceServic
 from io.jans.as.server.service.net import HttpService, HttpService2
 from io.jans.as.server.util import ServerUtil
 from io.jans.util import StringHelper
-from io.jans.as.common.service.common import EncryptionService
+from io.jans.service import EncryptionService
 from io.jans.as.server.service import UserService
 from io.jans.service import MailService
 from io.jans.as.server.service.push.sns import PushPlatform
@@ -29,6 +29,7 @@ from java.time import ZonedDateTime
 from java.time.format import DateTimeFormatter
 from io.jans.as.model.configuration import AppConfiguration
 from io.jans.as.server.service.custom import CustomScriptService
+from io.jans.orm.model.fido2 import Fido2DeviceNotificationConf
 
 import sys
 import json
@@ -51,6 +52,8 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def init(self, customScript, configurationAttributes):
         print "Super-Gluu. Initialization"
+        
+        self.debugMode = False
 
         if not configurationAttributes.containsKey("authentication_mode"):
             print "Super-Gluu. Initialization. Property authentication_mode is mandatory"
@@ -62,7 +65,9 @@ class PersonAuthentication(PersonAuthenticationType):
 
         self.registrationUri = None
         if configurationAttributes.containsKey("registration_uri"):
-            self.registrationUri = configurationAttributes.get("registration_uri").getValue2()
+            registrationUriValue = configurationAttributes.get("registration_uri").getValue2()
+            if StringHelper.isNotEmptyString(registrationUriValue):
+                self.registrationUri = registrationUriValue
 
         authentication_mode = configurationAttributes.get("authentication_mode").getValue2()
         if StringHelper.isEmpty(authentication_mode):
@@ -760,8 +765,8 @@ class PersonAuthentication(PersonAuthenticationType):
             print "Super-Gluu. Initialize Gluu notification services. Created Android notification service"
 
         if ios_creds["enabled"]:
-            self.pushAndroidService = gluuClient
-            self.gluu_ios_platform_id = android_creds["platform_id"]
+            self.pushAppleService = gluuClient
+            self.gluu_ios_platform_id = ios_creds["platform_id"]
             print "Super-Gluu. Initialize Gluu notification services. Created iOS notification service"
 
         enabled = self.pushAndroidService != None or self.pushAppleService != None
@@ -819,12 +824,11 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 platform = device_data.getPlatform()
                 push_token = device_data.getPushToken()
-                debug = False
 
                 if StringHelper.equalsIgnoreCase(platform, "ios") and StringHelper.isNotEmpty(push_token):
                     # Sending notification to iOS user's device
                     if self.pushAppleService == None:
-                        print "Super-Gluu. Send push notification. Apple native push notification service is not enabled"
+                        print "Super-Gluu. Send push notification. Apple push notification service is not enabled"
                     else:
                         send_notification = True
 
@@ -856,11 +860,11 @@ class PersonAuthentication(PersonAuthenticationType):
                                     apple_push_platform = PushPlatform.APNS_SANDBOX
 
                                 send_notification_result = pushSnsService.sendPushMessage(self.pushAppleService, apple_push_platform, targetEndpointArn, push_message, None)
-                                if debug:
+                                if self.debugMode:
                                     print "Super-Gluu. Send iOS SNS push notification. token: '%s', message: '%s', send_notification_result: '%s', apple_push_platform: '%s'" % (push_token, push_message, send_notification_result, apple_push_platform)
                             elif self.pushGluuMode:
                                 send_notification_result = self.pushAppleService.sendNotification(self.buildNotifyAuthorizationHeader(), targetEndpointArn, push_message, self.gluu_ios_platform_id)
-                                if debug:
+                                if self.debugMode:
                                     print "Super-Gluu. Send iOS Gluu push notification. token: '%s', message: '%s', send_notification_result: '%s'" % (push_token, push_message, send_notification_result)
                         else:
                             additional_fields = { "request" : super_gluu_request }
@@ -872,14 +876,14 @@ class PersonAuthentication(PersonAuthenticationType):
                             push_message = msgBuilder.build()
 
                             send_notification_result = self.pushAppleService.push(push_token, push_message)
-                            if debug:
+                            if self.debugMode:
                                 print "Super-Gluu. Send iOS Native push notification. token: '%s', message: '%s', send_notification_result: '%s'" % (push_token, push_message, send_notification_result)
                         send_ios = send_ios + 1
 
                 if StringHelper.equalsIgnoreCase(platform, "android") and StringHelper.isNotEmpty(push_token):
                     # Sending notification to Android user's device
                     if self.pushAndroidService == None:
-                        print "Super-Gluu. Send native push notification. Android native push notification service is not enabled"
+                        print "Super-Gluu. Send native push notification. Android push notification service is not enabled"
                     else:
                         send_notification = True
 
@@ -903,31 +907,31 @@ class PersonAuthentication(PersonAuthenticationType):
 
                             if self.pushSnsMode:
                                 send_notification_result = pushSnsService.sendPushMessage(self.pushAndroidService, PushPlatform.GCM, targetEndpointArn, push_message, None)
-                                if debug:
+                                if self.debugMode:
                                     print "Super-Gluu. Send Android SNS push notification. token: '%s', message: '%s', send_notification_result: '%s'" % (push_token, push_message, send_notification_result)
                             elif self.pushGluuMode:
                                 send_notification_result = self.pushAndroidService.sendNotification(self.buildNotifyAuthorizationHeader(), targetEndpointArn, push_message, self.gluu_android_platform_id)
-                                if debug:
+                                if self.debugMode:
                                     print "Super-Gluu. Send Android Gluu push notification. token: '%s', message: '%s', send_notification_result: '%s'" % (push_token, push_message, send_notification_result)
                         else:
                             msgBuilder = Message.Builder().addData("message", super_gluu_request).addData("title", title).collapseKey("single").contentAvailable(True)
                             push_message = msgBuilder.build()
 
                             send_notification_result = self.pushAndroidService.send(push_message, push_token, 3)
-                            if debug:
+                            if self.debugMode:
                                 print "Super-Gluu. Send Android Native push notification. token: '%s', message: '%s', send_notification_result: '%s'" % (push_token, push_message, send_notification_result)
                         send_android = send_android + 1
 
         print "Super-Gluu. Send push notification. send_android: '%s', send_ios: '%s'" % (send_android, send_ios)
 
     def getTargetEndpointArn(self, registrationPersistenceService, pushSnsService, platform, user, u2fDevice):
+        print "Super-Gluu. Get target endpoint ARN. Preparing to build register device request with user='%s', platform='%s'" % (user.getUserId(), platform)
         targetEndpointArn = None
 
         # Return endpoint ARN if it created already
         notificationConf = u2fDevice.getDeviceNotificationConf()
-        if StringHelper.isNotEmpty(notificationConf):
-            notificationConfJson = json.loads(notificationConf)
-            targetEndpointArn = notificationConfJson['sns_endpoint_arn']
+        if notificationConf != None:
+            targetEndpointArn = notificationConf.getSnsEndpointArn()
             if StringHelper.isNotEmpty(targetEndpointArn):
                 print "Super-Gluu. Get target endpoint ARN. There is already created target endpoint ARN"
                 return targetEndpointArn
@@ -958,6 +962,8 @@ class PersonAuthentication(PersonAuthenticationType):
             targetEndpointArn = pushSnsService.createPlatformArn(pushClient, platformApplicationArn, pushToken, user)
         else:
             customUserData = pushSnsService.getCustomUserData(user)
+            if self.debugMode:
+                print "Super-Gluu. Get target endpoint ARN. Attempting to send register device request with user='%s', pushToken='%s', platformId='%s', customUserData='%s'" % (user.getUserId(), pushToken, platformId, customUserData)
             registerDeviceResponse = pushClient.registerDevice(self.buildNotifyAuthorizationHeader(), pushToken, customUserData, platformId);
             if registerDeviceResponse != None and registerDeviceResponse.getStatusCode() == 200:
                 targetEndpointArn = registerDeviceResponse.getEndpointArn()
@@ -971,7 +977,7 @@ class PersonAuthentication(PersonAuthenticationType):
         # Store created endpoint ARN in device entry
         userInum = user.getAttribute("inum")
         u2fDeviceUpdate = registrationPersistenceService.findRegisteredUserDevice(userInum, u2fDevice.getId())
-        u2fDeviceUpdate.setDeviceNotificationConf('{"sns_endpoint_arn" : "%s"}' % targetEndpointArn)
+        u2fDeviceUpdate.setDeviceNotificationConf(Fido2DeviceNotificationConf(targetEndpointArn, None, None))
         registrationPersistenceService.update(u2fDeviceUpdate)
         print "Super-Gluu. Send push notification. Stored ARN user's '%s' enpoint " % user.getUserId()
 
@@ -1133,6 +1139,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         redirect_str = "[\"%s\"]" % asRedirectUri
         data_org = {'redirect_uris': json.loads(redirect_str),
+                    'lifetime': 7884000,
                     'software_statement': asSSA}
         body = json.dumps(data_org)
 

@@ -66,6 +66,7 @@ public class RegisterRequest extends BaseRequest {
     private List<GrantType> grantTypes;
     private ApplicationType applicationType;
     private List<String> contacts;
+    private List<String> authorizationDetailsTypes;
     private final LocalizedString clientName;
     private final LocalizedString logoUri;
     private final LocalizedString clientUri;
@@ -73,7 +74,7 @@ public class RegisterRequest extends BaseRequest {
     private final LocalizedString tosUri;
     private String frontChannelLogoutUri;
     private Boolean frontChannelLogoutSessionRequired;
-    private List<String> backchannelLogoutUris;
+    private String backchannelLogoutUri;
     private Boolean backchannelLogoutSessionRequired;
     private String jwksUri;
     private String jwks;
@@ -105,6 +106,12 @@ public class RegisterRequest extends BaseRequest {
     private SignatureAlgorithm userInfoSignedResponseAlg;
     private KeyEncryptionAlgorithm userInfoEncryptedResponseAlg;
     private BlockEncryptionAlgorithm userInfoEncryptedResponseEnc;
+    private SignatureAlgorithm introspectionSignedResponseAlg;
+    private KeyEncryptionAlgorithm introspectionEncryptedResponseAlg;
+    private BlockEncryptionAlgorithm introspectionEncryptedResponseEnc;
+    private SignatureAlgorithm txTokenSignedResponseAlg;
+    private KeyEncryptionAlgorithm txTokenEncryptedResponseAlg;
+    private BlockEncryptionAlgorithm txTokenEncryptedResponseEnc;
     private SignatureAlgorithm requestObjectSigningAlg;
     private KeyEncryptionAlgorithm requestObjectEncryptionAlg;
     private BlockEncryptionAlgorithm requestObjectEncryptionEnc;
@@ -124,6 +131,8 @@ public class RegisterRequest extends BaseRequest {
     private List<String> authorizedOrigins;
     private Integer accessTokenLifetime;
     private Integer parLifetime;
+    private Integer idTokenLifetime;
+    private Integer txTokenLifetime;
     private Boolean requirePar;
     private Boolean dpopBoundAccessToken;
     private String softwareId;
@@ -168,6 +177,7 @@ public class RegisterRequest extends BaseRequest {
         this.responseTypes = new ArrayList<>();
         this.grantTypes = new ArrayList<>();
         this.contacts = new ArrayList<>();
+        this.authorizationDetailsTypes = new ArrayList<>();
         this.defaultAcrValues = new ArrayList<>();
         this.minimumAcrPriorityList = new ArrayList<>();
         this.postLogoutRedirectUris = new ArrayList<>();
@@ -293,12 +303,22 @@ public class RegisterRequest extends BaseRequest {
         this.registrationAccessToken = registrationAccessToken;
     }
 
-    public List<String> getBackchannelLogoutUris() {
-        return backchannelLogoutUris;
+    /**
+     * Returns backchannel logout uri
+     *
+     * @return backchannel logout uri
+     */
+    public String getBackchannelLogoutUri() {
+        return backchannelLogoutUri;
     }
 
-    public void setBackchannelLogoutUris(List<String> backchannelLogoutUris) {
-        this.backchannelLogoutUris = backchannelLogoutUris;
+    /**
+     * Sets backchannel logout uri
+     *
+     * @param backchannelLogoutUri backchannel logout uri
+     */
+    public void setBackchannelLogoutUri(String backchannelLogoutUri) {
+        this.backchannelLogoutUri = backchannelLogoutUri;
     }
 
     public Boolean getBackchannelLogoutSessionRequired() {
@@ -475,6 +495,24 @@ public class RegisterRequest extends BaseRequest {
      */
     public void setContacts(List<String> contacts) {
         this.contacts = contacts;
+    }
+
+    /**
+     * Gets authorization details types.
+     *
+     * @return authorization details types
+     */
+    public List<String> getAuthorizationDetailsTypes() {
+        return authorizationDetailsTypes;
+    }
+
+    /**
+     * Sets authorization details types
+     *
+     * @param authorizationDetailsTypes authorization details types
+     */
+    public void setAuthorizationDetailsTypes(List<String> authorizationDetailsTypes) {
+        this.authorizationDetailsTypes = authorizationDetailsTypes;
     }
 
     /**
@@ -898,6 +936,115 @@ public class RegisterRequest extends BaseRequest {
     }
 
     /**
+     * Returns the JWS alg algorithm (JWA) required for Introspection responses.
+     *
+     * @return The JWS algorithm (JWA).
+     */
+    public SignatureAlgorithm getIntrospectionSignedResponseAlg() {
+        return introspectionSignedResponseAlg;
+    }
+
+    /**
+     * Sets the JWS alg algorithm (JWA) required for Introspection responses.
+     *
+     * @param introspectionSignedResponseAlg The JWS algorithm (JWA).
+     */
+    public void setIntrospectionSignedResponseAlg(SignatureAlgorithm introspectionSignedResponseAlg) {
+        this.introspectionSignedResponseAlg = introspectionSignedResponseAlg;
+    }
+
+    /**
+     * Returns the JWE alg algorithm (JWA) required for encrypting Introspection responses.
+     *
+     * @return The JWE algorithm (JWA).
+     */
+    public KeyEncryptionAlgorithm getIntrospectionEncryptedResponseAlg() {
+        return introspectionEncryptedResponseAlg;
+    }
+
+    /**
+     * Sets the JWE alg algorithm (JWA) required for encrypting Introspection responses.
+     *
+     * @param introspectionEncryptedResponseAlg The JWE algorithm (JWA).
+     */
+    public void setIntrospectionEncryptedResponseAlg(KeyEncryptionAlgorithm introspectionEncryptedResponseAlg) {
+        this.introspectionEncryptedResponseAlg = introspectionEncryptedResponseAlg;
+    }
+
+    /**
+     * Returns the JWE enc algorithm (JWA) required for symmetric encryption of Introspection responses.
+     *
+     * @return The JWE algorithm (JWA).
+     */
+    public BlockEncryptionAlgorithm getIntrospectionEncryptedResponseEnc() {
+        return introspectionEncryptedResponseEnc;
+    }
+
+    /**
+     * Sets the JWE enc algorithm (JWA) required for symmetric encryption of Introspection responses.
+     *
+     * @param introspectionEncryptedResponseEnc The JWE algorithm (JWA).
+     */
+    public void setIntrospectionEncryptedResponseEnc(BlockEncryptionAlgorithm introspectionEncryptedResponseEnc) {
+        this.introspectionEncryptedResponseEnc = introspectionEncryptedResponseEnc;
+    }
+
+
+    /**
+     * Returns the JWS alg algorithm (JWA) required for Transaction Token responses.
+     *
+     * @return The JWS algorithm (JWA) for Transaction Tokens.
+     */
+    public SignatureAlgorithm getTxTokenSignedResponseAlg() {
+        return txTokenSignedResponseAlg;
+    }
+
+    /**
+     * Sets the JWS alg algorithm (JWA) required for Transaction Token responses.
+     *
+     * @param txTokenSignedResponseAlg The JWS algorithm (JWA) for Transaction Token.
+     */
+    public void setTxTokenSignedResponseAlg(SignatureAlgorithm txTokenSignedResponseAlg) {
+        this.txTokenSignedResponseAlg = txTokenSignedResponseAlg;
+    }
+
+    /**
+     * Returns the JWE alg algorithm (JWA) required for encrypting Transaction Token responses.
+     *
+     * @return The JWE algorithm (JWA) of Transaction Token.
+     */
+    public KeyEncryptionAlgorithm getTxTokenEncryptedResponseAlg() {
+        return txTokenEncryptedResponseAlg;
+    }
+
+    /**
+     * Sets the JWE alg algorithm (JWA) required for encrypting Transaction Token responses.
+     *
+     * @param txTokenEncryptedResponseAlg The JWE algorithm (JWA) of Transaction Token.
+     */
+    public void setTxTokenEncryptedResponseAlg(KeyEncryptionAlgorithm txTokenEncryptedResponseAlg) {
+        this.txTokenEncryptedResponseAlg = txTokenEncryptedResponseAlg;
+    }
+
+    /**
+     * Returns the JWE enc algorithm (JWA) required for symmetric encryption of Transaction Tokens responses.
+     *
+     * @return The JWE algorithm (JWA) of Transaction Token.
+     */
+    public BlockEncryptionAlgorithm getTxTokenEncryptedResponseEnc() {
+        return txTokenEncryptedResponseEnc;
+    }
+
+    /**
+     * Sets the JWE enc algorithm (JWA) required for symmetric encryption of Transaction Token responses.
+     *
+     * @param txTokenEncryptedResponseEnc The JWE algorithm (JWA) of Transaction Token.
+     */
+    public void setTxTokenEncryptedResponseEnc(BlockEncryptionAlgorithm txTokenEncryptedResponseEnc) {
+        this.txTokenEncryptedResponseEnc = txTokenEncryptedResponseEnc;
+    }
+
+    /**
      * Returns the JWS alg algorithm (JWA) required for UserInfo responses.
      *
      * @return The JWS algorithm (JWA).
@@ -1298,6 +1445,42 @@ public class RegisterRequest extends BaseRequest {
         this.parLifetime = parLifetime;
     }
 
+    /**
+     * Gets id_token lifetime in seconds
+     *
+     * @return id_token lifetime in seconds
+     */
+    public Integer getIdTokenLifetime() {
+        return idTokenLifetime;
+    }
+
+    /**
+     * Sets id_token lifetime in seconds
+     *
+     * @param idTokenLifetime id_token lifetime in seconds
+     */
+    public void setIdTokenLifetime(Integer idTokenLifetime) {
+        this.idTokenLifetime = idTokenLifetime;
+    }
+
+    /**
+     * Gets tx_token lifetime in seconds
+     *
+     * @return tx_token lifetime in seconds
+     */
+    public Integer getTxTokenLifetime() {
+        return txTokenLifetime;
+    }
+
+    /**
+     * Sets tx_token lifetime in seconds
+     *
+     * @param txTokenLifetime tx_token lifetime in seconds
+     */
+    public void setTxTokenLifetime(Integer txTokenLifetime) {
+        this.txTokenLifetime = txTokenLifetime;
+    }
+
     public Boolean getRequirePar() {
         return requirePar;
     }
@@ -1654,10 +1837,12 @@ public class RegisterRequest extends BaseRequest {
         result.setMinimumAcrPriorityList(extractListByKey(requestObject, MINIMUM_ACR_PRIORITY_LIST.toString()));
         result.setFrontChannelLogoutUri(requestObject.optString(FRONT_CHANNEL_LOGOUT_URI.toString()));
         result.setFrontChannelLogoutSessionRequired(requestObject.optBoolean(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString()));
-        result.setBackchannelLogoutUris(extractListByKey(requestObject, BACKCHANNEL_LOGOUT_URI.toString()));
+        result.setBackchannelLogoutUri(requestObject.optString(BACKCHANNEL_LOGOUT_URI.toString()));
         result.setBackchannelLogoutSessionRequired(requestObject.optBoolean(BACKCHANNEL_LOGOUT_SESSION_REQUIRED.toString()));
         result.setAccessTokenLifetime(integerOrNull(requestObject, ACCESS_TOKEN_LIFETIME.toString()));
         result.setParLifetime(integerOrNull(requestObject, PAR_LIFETIME.toString()));
+        result.setIdTokenLifetime(integerOrNull(requestObject, ID_TOKEN_LIFETIME.toString()));
+        result.setTxTokenLifetime(integerOrNull(requestObject, TX_TOKEN_LIFETIME.toString()));
         result.setRequirePar(booleanOrNull(requestObject, REQUIRE_PAR.toString()));
         result.setDpopBoundAccessToken(booleanOrNull(requestObject, DPOP_BOUND_ACCESS_TOKEN.toString()));
         result.setDefaultMaxAge(integerOrNull(requestObject, DEFAULT_MAX_AGE.toString()));
@@ -1687,6 +1872,12 @@ public class RegisterRequest extends BaseRequest {
         result.setUserInfoSignedResponseAlg(SignatureAlgorithm.fromString(requestObject.optString(USERINFO_SIGNED_RESPONSE_ALG.toString())));
         result.setUserInfoEncryptedResponseAlg(KeyEncryptionAlgorithm.fromName(requestObject.optString(USERINFO_ENCRYPTED_RESPONSE_ALG.toString())));
         result.setUserInfoEncryptedResponseEnc(BlockEncryptionAlgorithm.fromName(requestObject.optString(USERINFO_ENCRYPTED_RESPONSE_ENC.toString())));
+        result.setIntrospectionSignedResponseAlg(SignatureAlgorithm.fromString(requestObject.optString(INTROSPECTION_SIGNED_RESPONSE_ALG.toString())));
+        result.setIntrospectionEncryptedResponseAlg(KeyEncryptionAlgorithm.fromName(requestObject.optString(INTROSPECTION_ENCRYPTED_RESPONSE_ALG.toString())));
+        result.setIntrospectionEncryptedResponseEnc(BlockEncryptionAlgorithm.fromName(requestObject.optString(INTROSPECTION_ENCRYPTED_RESPONSE_ENC.toString())));
+        result.setTxTokenSignedResponseAlg(SignatureAlgorithm.fromString(requestObject.optString(TX_TOKEN_SIGNED_RESPONSE_ALG.toString())));
+        result.setTxTokenEncryptedResponseAlg(KeyEncryptionAlgorithm.fromName(requestObject.optString(TX_TOKEN_ENCRYPTED_RESPONSE_ALG.toString())));
+        result.setTxTokenEncryptedResponseEnc(BlockEncryptionAlgorithm.fromName(requestObject.optString(TX_TOKEN_ENCRYPTED_RESPONSE_ENC.toString())));
         result.setRequestObjectSigningAlg(SignatureAlgorithm.fromString(requestObject.optString(REQUEST_OBJECT_SIGNING_ALG.toString())));
         result.setRequestObjectEncryptionAlg(KeyEncryptionAlgorithm.fromName(requestObject.optString(REQUEST_OBJECT_ENCRYPTION_ALG.toString())));
         result.setRequestObjectEncryptionEnc(BlockEncryptionAlgorithm.fromName(requestObject.optString(REQUEST_OBJECT_ENCRYPTION_ENC.toString())));
@@ -1700,6 +1891,7 @@ public class RegisterRequest extends BaseRequest {
         result.setGrantTypes(extractGrantTypes(requestObject));
         result.setApplicationType(ApplicationType.fromString(requestObject.optString(APPLICATION_TYPE.toString())));
         result.setContacts(extractListByKey(requestObject, CONTACTS.toString()));
+        result.setAuthorizationDetailsTypes(extractListByKey(requestObject, AUTHORIZATION_DETAILS_TYPES.toString()));
         result.setIdTokenTokenBindingCnf(requestObject.optString(ID_TOKEN_TOKEN_BINDING_CNF.toString(), ""));
 
         LocalizedString.fromJson(requestObject, CLIENT_NAME.getName(), (String key, Locale locale) -> {
@@ -1799,6 +1991,9 @@ public class RegisterRequest extends BaseRequest {
         if (contacts != null && !contacts.isEmpty()) {
             function.apply(CONTACTS.toString(), toJSONArray(contacts));
         }
+        if (authorizationDetailsTypes != null && !authorizationDetailsTypes.isEmpty()) {
+            function.apply(AUTHORIZATION_DETAILS_TYPES.toString(), toJSONArray(authorizationDetailsTypes));
+        }
 
         if (StringUtils.isNotBlank(jwksUri)) {
             function.apply(JWKS_URI.toString(), jwksUri);
@@ -1852,6 +2047,24 @@ public class RegisterRequest extends BaseRequest {
         if (userInfoEncryptedResponseEnc != null) {
             function.apply(USERINFO_ENCRYPTED_RESPONSE_ENC.toString(), userInfoEncryptedResponseEnc.getName());
         }
+        if (introspectionSignedResponseAlg != null) {
+            function.apply(INTROSPECTION_SIGNED_RESPONSE_ALG.toString(), introspectionSignedResponseAlg.getName());
+        }
+        if (introspectionEncryptedResponseAlg != null) {
+            function.apply(INTROSPECTION_ENCRYPTED_RESPONSE_ALG.toString(), introspectionEncryptedResponseAlg.getName());
+        }
+        if (introspectionEncryptedResponseEnc != null) {
+            function.apply(INTROSPECTION_ENCRYPTED_RESPONSE_ENC.toString(), introspectionEncryptedResponseEnc.getName());
+        }
+        if (txTokenSignedResponseAlg != null) {
+            function.apply(TX_TOKEN_SIGNED_RESPONSE_ALG.toString(), txTokenSignedResponseAlg.getName());
+        }
+        if (txTokenEncryptedResponseAlg != null) {
+            function.apply(TX_TOKEN_ENCRYPTED_RESPONSE_ALG.toString(), txTokenEncryptedResponseAlg.getName());
+        }
+        if (txTokenEncryptedResponseEnc != null) {
+            function.apply(TX_TOKEN_ENCRYPTED_RESPONSE_ENC.toString(), txTokenEncryptedResponseEnc.getName());
+        }
         if (requestObjectSigningAlg != null) {
             function.apply(REQUEST_OBJECT_SIGNING_ALG.toString(), requestObjectSigningAlg.getName());
         }
@@ -1903,8 +2116,8 @@ public class RegisterRequest extends BaseRequest {
         if (frontChannelLogoutSessionRequired != null) {
             function.apply(FRONT_CHANNEL_LOGOUT_SESSION_REQUIRED.toString(), frontChannelLogoutSessionRequired.toString());
         }
-        if (backchannelLogoutUris != null && !backchannelLogoutUris.isEmpty()) {
-            function.apply(BACKCHANNEL_LOGOUT_URI.toString(), toJSONArray(backchannelLogoutUris));
+        if (backchannelLogoutUri != null && !backchannelLogoutUri.isEmpty()) {
+            function.apply(BACKCHANNEL_LOGOUT_URI.toString(), backchannelLogoutUri);
         }
         if (backchannelLogoutSessionRequired != null) {
             function.apply(BACKCHANNEL_LOGOUT_SESSION_REQUIRED.toString(), backchannelLogoutSessionRequired.toString());
@@ -1977,6 +2190,12 @@ public class RegisterRequest extends BaseRequest {
         }
         if (accessTokenLifetime != null) {
             function.apply(ACCESS_TOKEN_LIFETIME.toString(), accessTokenLifetime.toString());
+        }
+        if (idTokenLifetime != null) {
+            function.apply(ID_TOKEN_LIFETIME.toString(), idTokenLifetime.toString());
+        }
+        if (txTokenLifetime != null) {
+            function.apply(TX_TOKEN_LIFETIME.toString(), txTokenLifetime.toString());
         }
         if (parLifetime != null) {
             function.apply(PAR_LIFETIME.toString(), parLifetime.toString());

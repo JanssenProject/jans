@@ -29,6 +29,12 @@ Gets list of JSON Web Key (JWK) used by server. JWK is a JSON data structure tha
 
 ***Let's see some example of JWT public keys used in janssen.***
 
+When jwk is expired, it is archived and can be access by following url:
+
+```https://<your_server>/jans-auth/restv1/jwks/archived/{kid}``` 
+
+More info about archived jwks can be found [here](../endpoints/archived-jwks-uri.md)
+
 ### Example-1
 
 The "kty" (Key Type) of this key is RSA. This key is "use" (Public Key Use) for "sig" (Signature) on data. The "alg" (Algorithm) intended with this key is "RS256".

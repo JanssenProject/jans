@@ -53,6 +53,7 @@ navigate via `Auth Server`->`Properties`.
 
 - [mtlstokenrevocationendpoint](../../reference/json/properties/janssenauthserver-properties.md#mtlstokenrevocationendpoint)
 - [tokenRevocationEndpoint](../../reference/json/properties/janssenauthserver-properties.md#tokenrevocationendpoint)
+- [allowRevokeForOtherClients](../../reference/json/properties/janssenauthserver-properties.md#allowrevokeforotherclients)
 
 ## Revoke all tokens by `client_id`
 
@@ -61,6 +62,15 @@ To remove all tokens for given `client_id` it's required:
 - pass in request parameter `token_type_hint=all`
 
 `client` is identified by Client Authentication performed by AS to grant access to `/revoke` endpoint.
+
+## Revoke tokens of other clients
+
+By default Revoke Endpoint allows revoke only own client's tokens. 
+However it is possible to allow revoking of any token (which is issued with other client).
+
+For this it is required:
+- set global AS configuration property `allowRevokeForOtherClients` to `true`
+- add `revoke_any_token` scope to `client` which performs revoke call  
 
 ## Revoke Interception Script
 

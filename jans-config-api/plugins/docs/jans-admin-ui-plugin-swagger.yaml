@@ -12,242 +12,13 @@ info:
 servers:
 - url: https://jans.io/
   description: The Jans server
-  variables: {}
 tags:
 - name: Admin UI - Role
 - name: Admin UI - Permission
 - name: Admin UI - Role-Permissions Mapping
 - name: Admin UI - License
+- name: Admin UI - Webhooks
 paths:
-  /admin-ui/license/activate:
-    post:
-      tags:
-      - Admin UI - License
-      summary: Activate license using license-key
-      description: Activate license using license-key
-      operationId: activate-adminui-license
-      requestBody:
-        description: LicenseRequest object
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/LicenseRequest'
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GenericResponse'
-        "400":
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GenericResponse'
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GenericResponse'
-      security:
-      - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/adminui/license.write
-  /admin-ui/license/details:
-    get:
-      tags:
-      - Admin UI - License
-      summary: Get admin ui license details
-      description: Get admin ui license details
-      operationId: get-adminui-license
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/LicenseResponse'
-        "400":
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GenericResponse'
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GenericResponse'
-      security:
-      - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly
-  /admin-ui/license/isActive:
-    get:
-      tags:
-      - Admin UI - License
-      summary: Check if admin-ui license is active
-      description: Check if admin-ui license is active
-      operationId: is-license-active
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GenericResponse'
-        "400":
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GenericResponse'
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GenericResponse'
-      security:
-      - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly
-  /admin-ui/license/isConfigValid:
-    get:
-      tags:
-      - Admin UI - License
-      summary: Is license configuration valid
-      description: Is license configuration valid
-      operationId: check-adminui-license-config
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GenericResponse'
-        "400":
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GenericResponse'
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GenericResponse'
-      security:
-      - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly
-  /admin-ui/license/retrieve:
-    get:
-      tags:
-      - Admin UI - License
-      summary: Retrieve license from SCAN
-      description: Retrieve license from SCAN
-      operationId: retrieve-license
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GenericResponse'
-        "400":
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GenericResponse'
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GenericResponse'
-      security:
-      - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly
-  /admin-ui/license/ssa:
-    post:
-      tags:
-      - Admin UI - License
-      summary: Save SSA in configuration
-      description: Save SSA in configuration
-      operationId: adminui-post-ssa
-      requestBody:
-        description: SSARequest object
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SSARequest'
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GenericResponse'
-        "400":
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GenericResponse'
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GenericResponse'
-      security:
-      - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/adminui/license.write
-  /admin-ui/license/trial:
-    get:
-      tags:
-      - Admin UI - License
-      summary: Generate trial license
-      description: Generate trial license
-      operationId: get-trial-license
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GenericResponse'
-        "400":
-          description: Bad Request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GenericResponse'
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/GenericResponse'
-      security:
-      - oauth2:
-        - https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly
   /admin-ui/adminUIPermissions:
     get:
       tags:
@@ -733,6 +504,77 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/user/role.delete
+  /admin-ui/config:
+    get:
+      tags:
+      - Admin UI - Configuration
+      summary: Get Admin UI editable configuration
+      description: Get Admin UI editable configuration
+      operationId: get-adminui-conf
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AppConfigResponse'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+      security:
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/user/role.readonly
+    put:
+      tags:
+      - Admin UI - Configuration
+      summary: Edit Admin UI editable configuration
+      description: Edit Admin UI editable configuration
+      operationId: edit-adminui-conf
+      requestBody:
+        description: Admin Config object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AppConfigResponse'
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AppConfigResponse'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+      security:
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/properties.write
   /admin-ui/adminUIRolePermissionsMapping/{adminUIRole}:
     get:
       tags:
@@ -812,13 +654,854 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/config/adminui/user/rolePermissionMapping.delete
+  /admin-ui/license/activate:
+    post:
+      tags:
+      - Admin UI - License
+      summary: Activate license using license-key
+      description: Activate license using license-key
+      operationId: activate-adminui-license
+      requestBody:
+        description: LicenseRequest object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LicenseRequest'
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+      security:
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/license.write
+  /admin-ui/license/details:
+    get:
+      tags:
+      - Admin UI - License
+      summary: Get admin ui license details
+      description: Get admin ui license details
+      operationId: get-adminui-license
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LicenseResponse'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+      security:
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly
+  /admin-ui/license/isActive:
+    get:
+      tags:
+      - Admin UI - License
+      summary: Check if admin-ui license is active
+      description: Check if admin-ui license is active
+      operationId: is-license-active
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+      security:
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly
+  /admin-ui/license/isConfigValid:
+    get:
+      tags:
+      - Admin UI - License
+      summary: Is license configuration valid
+      description: Is license configuration valid
+      operationId: check-adminui-license-config
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+      security:
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly
+  /admin-ui/license/retrieve:
+    get:
+      tags:
+      - Admin UI - License
+      summary: Retrieve license from SCAN
+      description: Retrieve license from SCAN
+      operationId: retrieve-license
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+      security:
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly
+  /admin-ui/license/ssa:
+    post:
+      tags:
+      - Admin UI - License
+      summary: Save SSA in configuration
+      description: Save SSA in configuration
+      operationId: adminui-post-ssa
+      requestBody:
+        description: SSARequest object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SSARequest'
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+      security:
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/license.write
+  /admin-ui/license/trial:
+    get:
+      tags:
+      - Admin UI - License
+      summary: Generate trial license
+      description: Generate trial license
+      operationId: get-trial-license
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+      security:
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly
+  /admin-ui/webhook:
+    get:
+      tags:
+      - Admin UI - Webhooks
+      summary: Gets list of webhooks
+      description: Gets list of webhooks
+      operationId: get-all-webhooks
+      parameters:
+      - name: limit
+        in: query
+        description: Search size - max size of the results to return
+        schema:
+          type: integer
+          format: int32
+          default: 50
+      - name: pattern
+        in: query
+        description: Search pattern
+        schema:
+          type: string
+          default: ""
+      - name: startIndex
+        in: query
+        description: The 1-based index of the first query result
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - name: sortBy
+        in: query
+        description: Attribute whose value will be used to order the returned response
+        schema:
+          type: string
+          default: inum
+      - name: sortOrder
+        in: query
+        description: Order in which the sortBy param is applied. Allowed values are
+          "ascending" and "descending"
+        schema:
+          type: string
+          default: ascending
+      - name: fieldValuePair
+        in: query
+        description: Field and value pair for seraching
+        schema:
+          type: string
+          default: ""
+        examples:
+          Field value example:
+            description: Field value example
+            value: "scopeType=spontaneous,defaultScope=true"
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedResult'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    {
+                      "start": 0,
+                      "totalEntriesCount": 2,
+                      "entriesCount": 2,
+                      "entries": [{
+                        "dn": "inum=aad9e1dd-87f3-357f-a2fa-93ae8eb94998,ou=auiWebhooks,ou=admin-ui,o=jans",
+                        "inum": "aad9e1dd-87f3-357f-a2fa-93ae8eb94998",
+                        "displayName": "test-5",
+                        "description": "test1",
+                        "url": "https://jsonplaceholder.typicode.com/posts",
+                        "httpRequestBody": "{\"userId\": 11,\"id\": 11,\"title\": \"sunt aut facere repellat provident occaecati excepturi optio reprehenderit\",\"body\": \"quia et suscipitsutem sunt rem eveniet architecto\"}",
+                        "httpMethod": "POST",
+                        "jansEnabled": true,
+                        "httpHeaders": [{
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }],
+                        "baseDn": "inum=aad9e1dd-87f3-357f-a2fa-93ae8eb94998,ou=auiWebhooks,ou=admin-ui,o=jans"
+                      }, {
+                        "dn": "inum=d23d60e8-0187-3878-94d9-30d594c4c986,ou=auiWebhooks,ou=admin-ui,o=jans",
+                        "inum": "d23d60e8-0187-3878-94d9-30d594c4c986",
+                        "displayName": "test-6",
+                        "description": "test1",
+                        "url": "https://jsonplaceholder.typicode.com/posts",
+                        "httpRequestBody": "{\"userId\": 11,\"id\": 11,\"title\": \"sunt aut facere repellat provident occaecati excepturi optio reprehenderit\",\"body\": \"quia et suscipitsutem sunt rem eveniet architecto\"}",
+                        "httpMethod": "POST",
+                        "jansEnabled": true,
+                        "httpHeaders": [{
+                          "key": "Content-Type",
+                          "value": "application/json"
+                        }],
+                        "baseDn": "inum=d23d60e8-0187-3878-94d9-30d594c4c986,ou=auiWebhooks,ou=admin-ui,o=jans"
+                      }]
+                    }
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+      security:
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/webhook.readonly
+    put:
+      tags:
+      - Admin UI - Webhooks
+      summary: Update Webhook
+      description: Update Webhook
+      operationId: put-webhook
+      requestBody:
+        description: Webhook object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebhookEntry'
+            examples:
+              Request json example:
+                description: Request json example
+                value: |
+                  {
+                    "dn": "inum=2d3fe60f-db3f-3ab8-a285-e71e935ff282,ou=auiWebhooks,ou=admin-ui,o=jans",
+                    "inum": "2d3fe60f-db3f-3ab8-a285-e71e935ff282",
+                    "displayName": "posts-webhook-1",
+                    "description": "posts-webhook description",
+                    "url": "https://jsonplaceholder.typicode.com/posts",
+                    "httpRequestBody": "{\"userId\": 11,\"id\": 11,\"title\": \"sunt aut facere repellat provident occaecati excepturi optio reprehenderit\",\"body\": \"quia et suscipitsuscipit recusandae consequuntur expedita et cumreprehenderit molestiae ut ut quas otamnostrum rerum est autem sunt rem eveniet architecto\"}",
+                    "httpMethod": "POST",
+                    "jansEnabled": true,
+                    "httpHeaders": [{
+                      "key": "Content-Type",
+                      "value": "application/json"
+                    }],
+                    "auiFeatureIds": ["jans_link_write"],
+                    "baseDn": "inum=2d3fe60f-db3f-3ab8-a285-e71e935ff282,ou=auiWebhooks,ou=admin-ui,o=jans"
+                  }
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookEntry'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    {
+                      "dn": "inum=2d3fe60f-db3f-3ab8-a285-e71e935ff282,ou=auiWebhooks,ou=admin-ui,o=jans",
+                      "inum": "2d3fe60f-db3f-3ab8-a285-e71e935ff282",
+                      "displayName": "posts-webhook-1",
+                      "description": "posts-webhook description",
+                      "url": "https://jsonplaceholder.typicode.com/posts",
+                      "httpRequestBody": "{\"userId\": 11,\"id\": 11,\"title\": \"sunt aut facere repellat provident occaecati excepturi optio reprehenderit\",\"body\": \"quia et suscipitsuscipit recusandae consequuntur expedita et cumreprehenderit molestiae ut ut quas otamnostrum rerum est autem sunt rem eveniet architecto\"}",
+                      "httpMethod": "POST",
+                      "jansEnabled": true,
+                      "httpHeaders": [{
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }],
+                      "auiFeatureIds": ["jans_link_write"],
+                      "baseDn": "inum=2d3fe60f-db3f-3ab8-a285-e71e935ff282,ou=auiWebhooks,ou=admin-ui,o=jans"
+                    }
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+      security:
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/webhook.write
+    post:
+      tags:
+      - Admin UI - Webhooks
+      summary: Create Webhook
+      description: Create Webhook
+      operationId: post-webhook
+      requestBody:
+        description: Webhook object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebhookEntry'
+            examples:
+              Request json example:
+                description: Request json example
+                value: |
+                  {
+                    "displayName": "posts-webhook-1",
+                    "description": "posts-webhook description",
+                    "url": "https://reqres.in/api/users",
+                    "httpRequestBody": {
+                      "name": "morpheus",
+                      "job": "leader"
+                    },
+                    "httpMethod": "POST",
+                    "jansEnabled": true,
+                    "httpHeaders":[{"key":"Content-Type", "value":"application/json"}],
+                    "auiFeatureIds":["jans_link_write"]
+                  }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Scope'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    {
+                      "dn": "inum=f704922d-e97f-3097-a06a-4a90ddedb87a,ou=auiWebhooks,ou=admin-ui,o=jans",
+                      "inum": "f704922d-e97f-3097-a06a-4a90ddedb87a",
+                      "displayName": "posts-webhook-1",
+                      "description": "posts-webhook description",
+                      "url": "https://reqres.in/api/users",
+                      "httpRequestBody": {
+                        "name": "morpheus",
+                        "job": "leader"
+                      },
+                      "httpMethod": "POST",
+                      "jansEnabled": true,
+                      "httpHeaders": [{
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }],
+                      "auiFeatureIds": ["jans_link_write"],
+                      "baseDn": "inum=f704922d-e97f-3097-a06a-4a90ddedb87a,ou=auiWebhooks,ou=admin-ui,o=jans"
+                    }
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+      security:
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/webhook.write
+  /admin-ui/webhook/{webhookId}:
+    delete:
+      tags:
+      - Admin UI - Webhooks
+      summary: Delete Webhook
+      description: Delete Webhook
+      operationId: delete-Webhook-by-inum
+      parameters:
+      - name: webhookId
+        in: path
+        description: Webhook identifier
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+      security:
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/webhook.delete
+  /admin-ui/webhook/features:
+    get:
+      tags:
+      - Admin UI - Webhooks
+      summary: Gets list of Admin UI features
+      description: Gets list of Admin UI features
+      operationId: get-all-features
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuiFeature'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    [{
+                      "dn": "auiFeatureId=attributes_delete,ou=auiFeatures,ou=admin-ui,o=jans",
+                      "auiFeatureId": "attributes_delete",
+                      "displayName": "Schema:Person - Delete",
+                      "jansScope": "https://jans.io/oauth/config/attributes.delete"
+                    }, {
+                      "dn": "auiFeatureId=attributes_write,ou=auiFeatures,ou=admin-ui,o=jans",
+                      "auiFeatureId": "attributes_write",
+                      "displayName": "Schema:Person - Add/Edit",
+                      "jansScope": "https://jans.io/oauth/config/attributes.write"
+                    }, {
+                      "dn": "auiFeatureId=custom_script_delete,ou=auiFeatures,ou=admin-ui,o=jans",
+                      "auiFeatureId": "custom_script_delete",
+                      "displayName": "Custom Script - Delete",
+                      "jansScope": "https://jans.io/oauth/config/scripts.delete"
+                    }, {
+                      "dn": "auiFeatureId=custom_script_write,ou=auiFeatures,ou=admin-ui,o=jans",
+                      "auiFeatureId": "custom_script_write",
+                      "displayName": "Custom Script - Add/Edit",
+                      "jansScope": "https://jans.io/oauth/config/scripts.write"
+                    }, {
+                      "dn": "auiFeatureId=fido_configuration_write,ou=auiFeatures,ou=admin-ui,o=jans",
+                      "auiFeatureId": "fido_configuration_write",
+                      "displayName": "FIDO Configuration - Edit",
+                      "jansScope": "https://jans.io/oauth/jans-auth-server/config/properties.write"
+                    }, {
+                      "dn": "auiFeatureId=jans_link_write,ou=auiFeatures,ou=admin-ui,o=jans",
+                      "auiFeatureId": "jans_link_write",
+                      "displayName": "Jans Link - Edit",
+                      "jansScope": "https://jans.io/oauth/config/jans-link.write",
+                      "webhookIdsMapped": ["dd6e0e18-231e-3a47-8cbf-d7dc07018158", "5ea5829b-322f-33ec-acc7-17a89165d4fb", "57ebb7bc-ebb6-3f0c-8633-63a4f453cc11", "7d5295d2-0b88-3fa1-8ea1-f4ec93dea2fb"]
+                    }, {
+                      "dn": "auiFeatureId=oidc_clients_delete,ou=auiFeatures,ou=admin-ui,o=jans",
+                      "auiFeatureId": "oidc_clients_delete",
+                      "displayName": "OIDC Clients - Delete",
+                      "jansScope": "https://jans.io/oauth/config/openid/clients.delete"
+                    }, {
+                      "dn": "auiFeatureId=oidc_clients_write,ou=auiFeatures,ou=admin-ui,o=jans",
+                      "auiFeatureId": "oidc_clients_write",
+                      "displayName": "OIDC Clients - Add/Edit",
+                      "jansScope": "https://jans.io/oauth/config/openid/clients.write"
+                    }, {
+                      "dn": "auiFeatureId=scim_configuration_edit,ou=auiFeatures,ou=admin-ui,o=jans",
+                      "auiFeatureId": "scim_configuration_edit",
+                      "displayName": "SCIM Configuration - Edit",
+                      "jansScope": "https://jans.io/scim/config.write"
+                    }, {
+                      "dn": "auiFeatureId=scopes_delete,ou=auiFeatures,ou=admin-ui,o=jans",
+                      "auiFeatureId": "scopes_delete",
+                      "displayName": "Scopes - Delete",
+                      "jansScope": "https://jans.io/oauth/config/scopes.delete"
+                    }, {
+                      "dn": "auiFeatureId=scopes_write,ou=auiFeatures,ou=admin-ui,o=jans",
+                      "auiFeatureId": "scopes_write",
+                      "displayName": "Scopes - Add/Edit",
+                      "jansScope": "https://jans.io/oauth/config/scopes.write"
+                    }, {
+                      "dn": "auiFeatureId=smtp_configuration_edit,ou=auiFeatures,ou=admin-ui,o=jans",
+                      "auiFeatureId": "smtp_configuration_edit",
+                      "displayName": "SMTP Configuration - Edit",
+                      "jansScope": "https://jans.io/oauth/config/smtp.write"
+                    }, {
+                      "dn": "auiFeatureId=users_delete,ou=auiFeatures,ou=admin-ui,o=jans",
+                      "auiFeatureId": "users_delete",
+                      "displayName": "Users - Delete",
+                      "jansScope": "https://jans.io/oauth/config/user.delete"
+                    }, {
+                      "dn": "auiFeatureId=users_edit,ou=auiFeatures,ou=admin-ui,o=jans",
+                      "auiFeatureId": "users_edit",
+                      "displayName": "Users - Add/Edit",
+                      "jansScope": "https://jans.io/oauth/config/user.write"
+                    }]
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+      security:
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/webhook.readonly
+  /admin-ui/webhook/features/{webhookId}:
+    get:
+      tags:
+      - Admin UI - Webhooks
+      summary: Gets list of Admin UI features mapped to webhookId
+      description: Gets list of Admin UI features mapped to webhookId
+      operationId: get-features-by-webhook-id
+      parameters:
+      - name: webhookId
+        in: path
+        description: Webhook identifier
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuiFeature'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    [{
+                      "dn": "auiFeatureId=jans_link_write,ou=auiFeatures,ou=admin-ui,o=jans",
+                      "auiFeatureId": "jans_link_write",
+                      "displayName": "Jans Link - Edit",
+                      "jansScope": "https://jans.io/oauth/config/jans-link.write",
+                      "webhookIdsMapped": ["dd6e0e18-231e-3a47-8cbf-d7dc07018158", "5ea5829b-322f-33ec-acc7-17a89165d4fb", "57ebb7bc-ebb6-3f0c-8633-63a4f453cc11", "7d5295d2-0b88-3fa1-8ea1-f4ec93dea2fb"]
+                    }]
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+      security:
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/webhook.readonly
+  /admin-ui/webhook/{featureId}:
+    get:
+      tags:
+      - Admin UI - Webhooks
+      summary: Gets list of Admin UI Webhooks mapped to featureId
+      description: Gets list of Admin UI Webhooks mapped to featureId
+      operationId: get-webhooks-by-feature-id
+      parameters:
+      - name: featureId
+        in: path
+        description: Feature identifier
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WebhookEntry'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    [{
+                      "dn": "inum=aad9e1dd-87f3-357f-a2fa-93ae8eb94998,ou=auiWebhooks,ou=admin-ui,o=jans",
+                      "inum": "aad9e1dd-87f3-357f-a2fa-93ae8eb94998",
+                      "displayName": "test-5",
+                      "description": "test1",
+                      "url": "https://jsonplaceholder.typicode.com/posts",
+                      "httpRequestBody": "{\"userId\": 11,\"id\": 11,\"title\": \"sunt aut facere repellat provident occaecati excepturi optio reprehenderit\",\"body\": \"quia et suscipitsutem sunt rem eveniet architecto\"}",
+                      "httpMethod": "POST",
+                      "jansEnabled": true,
+                      "httpHeaders": [{
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }],
+                      "baseDn": "inum=aad9e1dd-87f3-357f-a2fa-93ae8eb94998,ou=auiWebhooks,ou=admin-ui,o=jans"
+                    }, {
+                      "dn": "inum=d23d60e8-0187-3878-94d9-30d594c4c986,ou=auiWebhooks,ou=admin-ui,o=jans",
+                      "inum": "d23d60e8-0187-3878-94d9-30d594c4c986",
+                      "displayName": "test-6",
+                      "description": "test1",
+                      "url": "https://jsonplaceholder.typicode.com/posts",
+                      "httpRequestBody": "{\"userId\": 11,\"id\": 11,\"title\": \"sunt aut facere repellat provident occaecati excepturi optio reprehenderit\",\"body\": \"quia et suscipitsutem sunt rem eveniet architecto\"}",
+                      "httpMethod": "POST",
+                      "jansEnabled": true,
+                      "httpHeaders": [{
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      }],
+                      "baseDn": "inum=d23d60e8-0187-3878-94d9-30d594c4c986,ou=auiWebhooks,ou=admin-ui,o=jans"
+                    }]
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+      security:
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/webhook.readonly
+  /admin-ui/webhook/trigger/{featureId}:
+    post:
+      tags:
+      - Admin UI - Webhooks
+      summary: Trigger webhooks mapped to featureId
+      description: Trigger webhooks mapped to featureId
+      operationId: trigger-webhook
+      parameters:
+      - name: featureId
+        in: path
+        description: Admin UI feature identifier
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: Webhook object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ShortCodeRequest'
+            examples:
+              Request json example:
+                description: Request json example
+                value: |
+                  [{
+                    "webhookId": "0a8e784b-2394-3a34-89d3-4a09d245aa32",
+                    "shortcodeValueMap": {"price": 100}
+                  }]
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuiFeature'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    [{
+                      "success": true,
+                      "responseMessage": "{\"id\":101,\"title\":\"iPhone 9\",\"price\":\"100\",\"description\":\"An apple mobile which is nothing like apple\"}",
+                      "responseCode": 200,
+                      "responseObject": {
+                        "webhookId": "0a8e784b-2394-3a34-89d3-4a09d245aa32",
+                        "webhookName": "Webhook1",
+                        "webhookMethod": "POST",
+                        "webhookRequestBody": "{dummy={a=b}, price=100, description=An apple mobile which is nothing like apple, id=1, title=iPhone 9}"
+                      }
+                    }, {
+                      "success": true,
+                      "responseMessage": "{\"users\":[{\"id\":1,\"firstName\":\"Terry\",\"lastName\":\"Medhurst\",\"maidenName\":\"Smitham\",\"age\":50,\"gender\":\"male\",\"email\":\"atuny0@sohu.com\",\"phone\":\"+63 791 675 8914\",\"username\":\"atuny0\",\"password\":\"9uQFF1Lh\",\"birthDate\":\"2000-12-25\",\"image\":\"https://robohash.org/Terry.png?set=set4\",\"bloodGroup\":\"A-\",\"height\":189,\"weight\":75.4,\"eyeColor\":\"Green\",\"hair\":{\"color\":\"Black\",\"type\":\"Strands\"},\"domain\":\"slashdot.org\",\"ip\":\"117.29.86.254\",\"address\":{\"address\":\"1745 T Street Southeast\",\"city\":\"Washington\",\"coordinates\":{\"lat\":38.867033,\"lng\":-76.979235},\"postalCode\":\"20020\",\"state\":\"DC\"},\"macAddress\":\"13:69:BA:56:A3:74\",\"university\":\"Capitol University\",\"bank\":{\"cardExpire\":\"06/22\",\"cardNumber\":\"50380955204220685\",\"cardType\":\"maestro\",\"currency\":\"Peso\",\"iban\":\"NO17 0695 2754 967\"},\"company\":{\"address\":{\"address\":\"629 Debbie Drive\",\"city\":\"Nashville\",\"coordinates\":{\"lat\":36.208114,\"lng\":-86.58621199999999},\"postalCode\":\"37076\",\"state\":\"TN\"},\"department\":\"Marketing\",\"name\":\"Blanda-O'Keefe\",\"title\":\"Help Desk Operator\"},\"ein\":\"20-9487066\",\"ssn\":\"661-64-2976\",\"userAgent\":\"Mozilla/5.0 (Windows NT 6.1) AppleWebKit/534.24 (KHTML, like Gecko) Chrome/12.0.702.0 Safari/534.24\",\"crypto\":{\"coin\":\"Bitcoin\",\"wallet\":\"0xb9fc2fe63b2a6c003f1c324c3bfa53259162181a\",\"network\":\"Ethereum (ERC20)\"}},{\"id\":2,\"firstName\":\"Sheldon\",\"lastName\":\"Quigley\",\"maidenName\":\"Cole\",\"age\":28,\"gender\":\"male\",\"email\":\"hbingley1@plala.or.jp\",\"phone\":\"+7 813 117 7139\",\"username\":\"hbingley1\",\"password\":\"CQutx25i8r\",\"birthDate\":\"2003-08-02\",\"image\":\"https://robohash.org/Sheldon.png?set=set4\",\"bloodGroup\":\"O+\",\"height\":187,\"weight\":74,\"eyeColor\":\"Brown\",\"hair\":{\"color\":\"Blond\",\"type\":\"Curly\"},\"domain\":\"51.la\",\"ip\":\"253.240.20.181\",\"address\":{\"address\":\"6007 Applegate Lane\",\"city\":\"Louisville\",\"coordinates\":{\"lat\":38.1343013,\"lng\":-85.6498512},\"postalCode\":\"40219\",\"state\":\"KY\"}",
+                      "responseCode": 200,
+                      "responseObject": {
+                        "webhookId": "bf21de5b-adb9-3581-82f5-76bb335f1cbd",
+                        "webhookName": "Dummyuser-test",
+                        "webhookMethod": "GET"
+                      }
+                    }]
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+      security:
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/config/adminui/webhook.readonly
 components:
   schemas:
-    LicenseRequest:
+    AdminPermission:
       type: object
       properties:
-        licenseKey:
+        tag:
           type: string
+        permission:
+          type: string
+        description:
+          type: string
+        defaultPermissionInToken:
+          type: boolean
     GenericResponse:
       type: object
       properties:
@@ -833,6 +1516,87 @@ components:
           $ref: '#/components/schemas/JsonNode'
     JsonNode:
       type: object
+    RolePermissionMapping:
+      type: object
+      properties:
+        role:
+          type: string
+        permissions:
+          type: array
+          items:
+            type: string
+    AdminRole:
+      type: object
+      properties:
+        role:
+          type: string
+        description:
+          type: string
+        deletable:
+          type: boolean
+    AppConfigResponse:
+      type: object
+      properties:
+        authServerHost:
+          type: string
+          description: Auth Server host
+          readOnly: true
+        authzBaseUrl:
+          type: string
+          description: Authorization base URL
+          readOnly: true
+        clientId:
+          type: string
+          description: OIDC Client ID
+          readOnly: true
+        responseType:
+          type: string
+          description: OIDC Client Secret
+          readOnly: true
+        scope:
+          type: string
+          description: Scope
+          readOnly: true
+        redirectUrl:
+          type: string
+          description: Redirect URL
+          readOnly: true
+        acrValues:
+          type: string
+          description: ACR Value
+        frontChannelLogoutUrl:
+          type: string
+          description: Front Channel Logout URL
+          readOnly: true
+        postLogoutRedirectUri:
+          type: string
+          description: Post Logout Redirect URL
+          readOnly: true
+        endSessionEndpoint:
+          type: string
+          description: End Session Endpoint
+          readOnly: true
+        sessionTimeoutInMins:
+          type: integer
+          description: Admin UI Session Timeout
+          format: int32
+        additionalParameters:
+          type: array
+          description: Additional Authentication Parameters
+          items:
+            $ref: '#/components/schemas/KeyValuePair'
+    KeyValuePair:
+      type: object
+      properties:
+        key:
+          type: string
+        value:
+          type: string
+    LicenseRequest:
+      type: object
+      properties:
+        licenseKey:
+          type: string
     LicenseResponse:
       type: object
       properties:
@@ -866,33 +1630,165 @@ components:
       properties:
         ssa:
           type: string
-    AdminPermission:
+    WebhookEntry:
+      required:
+      - displayName
+      - url
       type: object
       properties:
-        permission:
+        dn:
+          type: string
+        inum:
+          type: string
+        displayName:
+          maxLength: 60
+          minLength: 2
+          pattern: "^[a-zA-Z0-9_\\-\\:\\/\\.]+$"
           type: string
         description:
           type: string
-        defaultPermissionInToken:
-          type: boolean
-    RolePermissionMapping:
-      type: object
-      properties:
-        role:
+        url:
           type: string
-        permissions:
+        httpRequestBodyString:
+          type: string
+        httpMethod:
+          type: string
+        jansEnabled:
+          type: boolean
+        httpHeaders:
+          type: array
+          items:
+            $ref: '#/components/schemas/KeyValuePair'
+        auiFeatureIds:
+          uniqueItems: true
           type: array
           items:
             type: string
-    AdminRole:
+        httpRequestBody:
+          type: object
+          additionalProperties:
+            type: object
+        baseDn:
+          type: string
+    Scope:
       type: object
       properties:
-        role:
+        dn:
+          type: string
+        expirationDate:
+          type: string
+          format: date-time
+        deletable:
+          type: boolean
+        inum:
+          type: string
+        displayName:
+          type: string
+        id:
+          type: string
+        iconUrl:
           type: string
         description:
           type: string
-        deletable:
+        scopeType:
+          type: string
+          enum:
+          - openid
+          - dynamic
+          - uma
+          - spontaneous
+          - oauth
+        claims:
+          type: array
+          items:
+            type: string
+        defaultScope:
           type: boolean
+        groupClaims:
+          type: boolean
+        dynamicScopeScripts:
+          type: array
+          items:
+            type: string
+        umaAuthorizationPolicies:
+          type: array
+          items:
+            type: string
+        attributes:
+          $ref: '#/components/schemas/ScopeAttributes'
+        creatorId:
+          type: string
+        creatorType:
+          type: string
+          enum:
+          - none
+          - client
+          - user
+          - auto
+        creationDate:
+          type: string
+          format: date-time
+        creatorAttributes:
+          type: object
+          additionalProperties:
+            type: string
+        umaType:
+          type: boolean
+        baseDn:
+          type: string
+    ScopeAttributes:
+      type: object
+      properties:
+        spontaneousClientScopes:
+          type: array
+          items:
+            type: string
+        showInConfigurationEndpoint:
+          type: boolean
+    AuiFeature:
+      type: object
+      properties:
+        dn:
+          type: string
+        auiFeatureId:
+          type: string
+        displayName:
+          type: string
+        jansScope:
+          type: string
+        webhookIdsMapped:
+          type: array
+          items:
+            type: string
+        baseDn:
+          type: string
+    PagedResult:
+      type: object
+      properties:
+        start:
+          type: integer
+          format: int32
+        totalEntriesCount:
+          type: integer
+          format: int32
+        entriesCount:
+          type: integer
+          format: int32
+        entries:
+          type: array
+          items:
+            type: object
+    ShortCodeRequest:
+      required:
+      - webhookId
+      type: object
+      properties:
+        webhookId:
+          type: string
+        shortcodeValueMap:
+          type: object
+          additionalProperties:
+            type: object
   securitySchemes:
     oauth2:
       type: oauth2

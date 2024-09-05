@@ -12,6 +12,8 @@ usrEnvs:
 adminPassword: Test1234#
 # -- City. Used for certificate creation.
 city: Austin
+# -- Salt. Used for encoding/decoding sensitive data. If omitted or set to empty string, the value will be self-generated. Otherwise, a 24 alphanumeric characters are allowed as its value.
+salt: ""
 configmap:
   # -- Jetty header size in bytes in the auth server
   cnJettyRequestHeaderSize: 8192
@@ -86,6 +88,28 @@ configmap:
   cnAwsSecretsReplicaRegions: []
   # [aws_secret_manager_envs] END
   # [aws_envs] END
+  # [vault_envs] Envs related to Hashicorp vault
+  # -- Vault AppRole RoleID.
+  cnVaultRoleId: ""
+  # -- Vault AppRole SecretID.
+  cnVaultSecretId: ""
+  # -- Base URL of Vault.
+  cnVaultAddr: http://localhost:8200
+  # -- Verify connection to Vault.
+  cnVaultVerify: false
+  # -- Path to file contains Vault AppRole role ID.
+  cnVaultRoleIdFile: /etc/certs/vault_role_id
+  # -- Path to file contains Vault AppRole secret ID.
+  cnVaultSecretIdFile: /etc/certs/vault_secret_id
+  # -- Vault namespace used to access the secrets.
+  cnVaultNamespace: ""
+  # -- Path to Vault KV secrets engine.
+  cnVaultKvPath: secret
+  # -- Base prefix name used to access secrets.
+  cnVaultPrefix: jans
+  # -- Path to Vault AppRole.
+  cnVaultAppRolePath: approle
+  # [vault_envs] END
   # -- OpenDJ internal address. Leave as default. Used when `global.cnPersistenceType` is set to `ldap`.
   cnLdapUrl: "opendj:1636"
   # -- Value passed to Java option -XX:MaxRAMPercentage
@@ -118,6 +142,30 @@ configmap:
   cnLdapCrt: SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo=
   # -- OpenDJ key string. This must be encoded using base64.
   cnLdapKey: SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo=
+  # -- Quarkus transaction recovery. When using MySQL, there could be issue regarding XA_RECOVER_ADMIN; refer to https://dev.mysql.com/doc/refman/8.0/en/privileges-provided.html#priv_xa-recover-admin for details.
+  quarkusTransactionEnableRecovery: true
+  # -- Keycloak logging level
+  kcLogLevel: INFO
+  # -- Keycloak database vendor name (default to MySQL server). To use PostgreSQL server, change the value to postgres.
+  kcDbVendor: mysql
+  # -- Keycloak database username
+  kcDbUsername: keycloak
+  # -- Password for Keycloak database access
+  kcDbPassword: Test1234#
+  # -- Keycloak database schema name (note that PostgreSQL may using "public" schema).
+  kcDbSchema: keycloak
+  # -- Keycloak database host
+  kcDbUrlHost: mysql.kc.svc.cluster.local
+  # -- Keycloak database port (default to port 3306 for mysql).
+  kcDbUrlPort: 3306
+  # -- Keycloak database name
+  kcDbUrlDatabase: keycloak
+  # -- Keycloak database connection properties. If using postgresql, the value can be set to empty string.
+  kcDbUrlProperties: "?useUnicode=true&characterEncoding=UTF-8&character_set_server=utf8mb4"
+  # -- URL of OPA API
+  cnOpaUrl: http://opa.opa.svc.cluster.cluster.local:8181/v1
+  # -- Message type (one of POSTGRES, REDIS, or DISABLED)
+  cnMessageType: DISABLED
 # -- Country code. Used for certificate creation.
 countryCode: US
 # -- Email address of the administrator usually. Used for certificate creation.
@@ -126,7 +174,7 @@ image:
   # -- Image  to use for deploying.
   repository: janssenproject/configurator
   # -- Image  tag to use for deploying.
-  tag: 1.0.20_dev
+  tag: 1.1.5_dev
   # -- Image Pull Secrets
   pullSecrets: [ ]
 # -- LDAP admin password if OpennDJ is used for persistence.
@@ -183,3 +231,7 @@ fullNameOverride: ""
 additionalLabels: { }
 # -- Additional annotations that will be added across all resources  in the format of {cert-manager.io/issuer: "letsencrypt-prod"}. key app is taken
 additionalAnnotations: { }
+# -- Add custom scripts that have been mounted to run before the entrypoint.
+# - /tmp/custom.sh
+# - /tmp/custom2.sh
+customScripts: [ ]

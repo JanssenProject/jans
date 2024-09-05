@@ -41,9 +41,8 @@
 		<script
 			src="#{webConfigurationService.getJsLocation()}/jquery-qrcode-0.17.0.min.js"></script>
 		<script
-			src="#{webConfigurationService.getJsLocation()}/gluu-auth.js" />
-		<script
-			src="#{webConfigurationService.getJsLocation()}/jquery-ui.min.js"></script>
+			src="#{webConfigurationService.getJsLocation()}/gluu-auth.js"></script>
+			<script src="#{webConfigurationService.getJsLocation()}/jquery-ui.min.js"></script>
 		<ui:insert name="head" />
 
 		<style>
@@ -83,8 +82,8 @@ body {
 		<div class="col-sm-6 centered" style="text-align:center;">
 			<p class="centered">
 				&copy; <a target="_blank"
-					href="https://github.com/GluuFederation/oxAuth/blob/master/LICENSE"><h:outputText
-						value="#{msgs['common.gluuInc']}" escape="false" /></a> | <a
+					href="https://jans.io"><h:outputText
+						value="#{msgs['common.janssenProject']}" escape="false" /></a> | <a
 					target="_blank" href="#{client.policyUri}"><h:outputText
 						value="#{msgs['common.privacyPolicy']}" escape="false" /></a> | <a
 					target="_blank" href="#{client.tosUri}"><h:outputText

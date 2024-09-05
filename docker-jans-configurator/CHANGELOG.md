@@ -1,5 +1,33 @@
 # Changelog
 
+## [1.0.22-1](https://github.com/JanssenProject/jans/compare/docker-jans-configurator-v1.0.21-1...docker-jans-configurator-v1.0.22-1) (2024-01-22)
+
+
+### Bug Fixes
+
+* prepare for 1.0.22 release ([#7455](https://github.com/JanssenProject/jans/issues/7455)) ([4bf2562](https://github.com/JanssenProject/jans/commit/4bf2562050c86317658259c72bb641780a283579))
+
+## [1.0.21-1](https://github.com/JanssenProject/jans/compare/docker-jans-configurator-v1.0.20-1...docker-jans-configurator-v1.0.21-1) (2023-12-14)
+
+
+### Bug Fixes
+
+* **docker-jans-configurator:** add missing salt field ([#6560](https://github.com/JanssenProject/jans/issues/6560)) ([af1c31c](https://github.com/JanssenProject/jans/commit/af1c31ca5020d86ebea4b8914656ef5074a7e2cd))
+* **docker-jans:** allow custom salt ([#6551](https://github.com/JanssenProject/jans/issues/6551)) ([b099469](https://github.com/JanssenProject/jans/commit/b099469cd69ce958ae89945a8aecab1f0f446322))
+* prepare for 1.0.21 release ([#7008](https://github.com/JanssenProject/jans/issues/7008)) ([2132de6](https://github.com/JanssenProject/jans/commit/2132de6683f67bf22d5a863b149770d657073a83))
+
+## [1.0.20-1](https://github.com/JanssenProject/jans/compare/docker-jans-configurator-v1.0.19-1...docker-jans-configurator-v1.0.20-1) (2023-11-08)
+
+
+### Features
+
+* **jans-pycloudlib:** add lock to prevent race condition ([#6329](https://github.com/JanssenProject/jans/issues/6329)) ([9dd82da](https://github.com/JanssenProject/jans/commit/9dd82da5c87ee829c73a1135ce8740b8353f8ab5))
+
+
+### Bug Fixes
+
+* prepare for 1.0.20 release ([c6e806e](https://github.com/JanssenProject/jans/commit/c6e806eb31fed998d52cbef7a7d94c231d913102))
+
 ## [1.0.19-1](https://github.com/JanssenProject/jans/compare/docker-jans-configurator-v1.0.18-1...docker-jans-configurator-v1.0.19-1) (2023-10-11)
 
 

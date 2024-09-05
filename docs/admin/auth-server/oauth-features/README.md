@@ -28,6 +28,9 @@ The [Janssen Authentication Server](https://github.com/JanssenProject/jans/tree/
 - JWT Secured Authorization Response Mode for OAuth 2.0 (JARM) [(spec)](https://openid.net/specs/oauth-v2-jarm.html)
 - OAuth 2.0 for First-Party Native Applications [(spec draft)](https://www.ietf.org/archive/id/draft-parecki-oauth-first-party-native-apps-00.html)
 - The Use of Attestation in OAuth 2.0 Dynamic Client Registration [(spec draft)](https://www.ietf.org/id/draft-tschofenig-oauth-attested-dclient-reg-00.html)
+- OpenID Connect Core Error Code unmet_authentication_requirements [(spec)](https://openid.net/specs/openid-connect-unmet-authentication-requirements-1_0.html)
+- Transaction Tokens [(spec)](https://drafts.oauth.net/oauth-transaction-tokens/draft-ietf-oauth-transaction-tokens.html)
+- Global Token Revocation [(spec)](https://www.ietf.org/archive/id/draft-parecki-oauth-global-token-revocation-03.html)
 
 
 ## Protocol Overview
@@ -52,7 +55,7 @@ It's handy to know some OAuth 2.0 terminology:
 
 ## Have questions in the meantime?
 
-You can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussion) or the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). Any questions you have will help determine what information our documentation should cover.
+You can ask questions through [GitHub Discussions](https://github.com/JanssenProject/jans/discussions) or the [community chat on Gitter](https://gitter.im/JanssenProject/Lobby). Any questions you have will help determine what information our documentation should cover.
 
 ## Want to contribute?
 

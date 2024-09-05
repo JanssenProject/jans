@@ -15,6 +15,16 @@ To use the provider, you need to provide the URL of the Jansen instance, as
 well as valid credentials that have access to the Janssen instance.
 
 ```terraform
+terraform {
+  required_version = ">= 0.12.0"
+  required_providers {
+    janssen = {
+      source = "JanssenProject/jans"
+      version = "0.6.0"
+    }
+  }
+}
+
 provider "jans" {
   url           = "https://test-instnace.jans.io"
   client_id     = "1800.3d29d884-e56b-47ac-83ab-b37942b83a89"

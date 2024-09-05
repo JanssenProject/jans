@@ -31,7 +31,7 @@ the pros and cons of the various databases we currently support.
 1. **OpenDJ (LDAP)** Janssen supports Gluu's distribution of OpenDJ, and probably any
 other similar distributions like ForgeRock OpenDJ, Ping Directory Server, or
 Oracle Unified Directory. LDAP in general and OpenDJ in particular have been  
-successfully backing authentication service for more then 20 years. People tend
+successfully backing authentication service for more than 20 years. People tend
 to think of the LDAP tree structure as fast for reads, and slow for writes.
 That's just not true anymore--OpenDJ is able to perform quite well for write
 operations as well. OpenDJ has mature replication support, excellent command
@@ -40,32 +40,34 @@ of OpenDJ is scaling large datasets for high concurrency. While you can get
 around this shortcoming with a global LDAP proxy, such a topology gets
 complicated and costly to operate, as you have to break up the data and
 configure multiple replicated topologies. As a rule of thumb, if concurrency of
-more then 120 OpenID code flow authentications per second are needed, you should
-consider another database. But for concurrency less then this, OpenDJ is an
-excellent choice.
+more than 120 OpenID code flow authentications per second are needed, you should
+consider another database. But for concurrency less than this, OpenDJ is an
+excellent choice. Owing to these limitations, **LDAP is not 
+supported in production deployments using Kubernetes, 1.0.23 and forward**.
 
 1. **MySQL** You know it... you love it. That's the biggest advantage.
 Performance is great out of the box. But if you have high concurrency,
-you'll have to figure out a plan for replication, and horizontal scaling.
+you'll have to figure out a plan for replication, and horizontal scaling. 
+**MySQL is our default persistence for Production deployments using Kubernetes**.
 
 1. **Postgres** Same as MySQL above, but there are some great commercial
-distributions of Postgres like [EnterpriseDB](https://www.enterprisedb.com/).
+distributions of Postgres like [EnterpriseDB](https://www.enterprisedb.com/). **Postgres is our default 
+persistence for VM based non-production deployments**.
 
 1. **Couchbase** A JSON NoSQL database that supports automatic distribution
-of data for auto-scaling multi-region sharded cloud native deployments. Janssen
+of data for auto-scaling multi-region sharded cloud-native deployments. Janssen
 only supports the commercial distribution--but the previously mentioned database
 properties are enterprise class. If you need to host your own database, and you
-need infinite horizontal scalability, Couchbase should be your goto choice.
+need infinite horizontal scalability, Couchbase should be your go-to choice.
 
 1. **Aurora** So you want MySQL, but you want Amazon to handle some of the care
 and feeding? Aurora enables you to consume database as a cloud service.
 Scalability is excellent and multi-region deployments are [possible](https://aws.amazon.com/blogs/database/deploy-multi-region-amazon-aurora-applications-with-a-failover-blueprint/).
 The main catch is that write operations are limited to one region, with the
-ability failover to another region. But to accomplish this, you need a cloud
+ability to failover to another region. But to accomplish this, you need a cloud
 engineer to implement it.
 
 1. **Spanner** Google's multi-region cloud database as a service, Spanner
-was purpose built for auto-scaling, multi-region persistence. It has it's own
+was purpose-built for auto-scaling, and multi-region persistence. It has its own
 API, although recently Google added support for MySQL and Postgres drivers.
 
-1. **MariaDB** Coming soon! Similar to MySQL but more cutting edge.

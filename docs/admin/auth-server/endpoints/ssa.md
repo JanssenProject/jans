@@ -93,7 +93,7 @@ Create `SSA` for the organization with `expiration` (optional).
 | expiration     | Expiration date. `(Default value: calculated based on global SSA settings)`                                              | true     |
 | one_time_use   | Defined whether the SSA will be used only once or can be used multiple times. `(Default value: true)`                    | true     |
 | rotate_ssa     | TODO - Will be used to rotate expiration of the SSA, currently is only saved as part of the SSA. `(Default value: true)` | true     |
-| lifetime       | SSA Lifetime in milliseconds                                                                                             | true     |
+| lifetime       | SSA Lifetime in seconds                                                                                                  | true     |
 
 **Note:** You can add more `custom attributes` in the request, (you must have previously configured in the SSA global
 configuration).
@@ -136,7 +136,7 @@ Returned SSA is a JWT, containing the following structure:
 - `org_id` — The "org_id" is used for organization identification.
 - `software_roles` — List of string values, fixed value `["password", "notify"]`.
 - `grant_types` — Fixed value `["client_credentials"]`.
-- `lifetime` — SSA lifetime in milliseconds.
+- `lifetime` — SSA lifetime in seconds.
 - `exp` — Expiration Time.
 - `myCustom1, myCustom2, ...`: if you have custom attributes, they will be displayed here.
 
@@ -238,7 +238,7 @@ Get existing active SSA based on `jti` or `org_id`.
     - `description` — Describe SSA.
     - `one_time_use` — Defined whether the SSA will be used only once or can be used multiple times.
     - `rotate_ssa` — TODO - Will be used to rotate expiration of the SSA, currently is only saved as part of the SSA.
-    - `lifetime` — SSA lifetime in milliseconds.
+    - `lifetime` — SSA lifetime in seconds.
     - `myCustom1, myCustom2, ...` — if you have custom attributes, they will be displayed here.
 - `iss` — The "iss" is related to the client that created this SSA.
 - `created_at` — Creation time.
@@ -388,7 +388,7 @@ Method returns status 200 with an empty body if the corresponding SSA exists and
 ### Example:
 
 ```
-HEAD {{your-url}}/ssa
+POST {{your-url}}/ssa/validation
 jti: {{your-jti}}
 ```
 
@@ -528,10 +528,10 @@ The SSA entity contains the following fields:
 - `creationDate` type `Date` — SSA Creation date.
 - `creatorId` type `String` — Client that created SSA.
 - `creatorType` type enum `CreatorType` — Contains the following CreatorType values (`NONE`, `CLIENT`, `USER`, `AUTO`).
-- `ttl` type `Integer` — SSA lifetime in milliseconds.
+- `ttl` type `Integer` — SSA lifetime in seconds.
 - `atributes` type class `SsaAtributes`
     - `oneTimeUse` type `Boolean` — Whether the SSA will be single use.
-    - `lifetime` type `Integer` — SSA lifetime in milliseconds.
+    - `lifetime` type `Integer` — SSA lifetime in seconds.
     - `rotateSsa` type `Boolean` — TODO - Will be used to rotate expiration of the SSA, currently is only saved as part
       of the SSA.
     - `clientDn` type `String` — Client's DN.

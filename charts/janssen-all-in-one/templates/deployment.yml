@@ -1,0 +1,207 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "janssen-all-in-one.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    APP_NAME: auth-server
+    app: {{ .Release.Name }}-{{ include "janssen-all-in-one.name" . }}-aio
+{{ include "janssen-all-in-one.labels" . | indent 4 }}
+{{- if .Values.additionalLabels }}
+{{ toYaml .Values.additionalLabels | indent 4 }}
+{{- end }}
+{{- if or (.Values.additionalAnnotations) (.Values.customAnnotations.deployment) }}
+  annotations:
+{{- if .Values.additionalAnnotations }}
+{{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.customAnnotations.deployment }}
+{{ toYaml .Values.customAnnotations.deployment | indent 4 }}
+{{- end }}
+{{- end }}
+spec:
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-{{ include "janssen-all-in-one.name" . }}-aio
+  template:
+    metadata:
+      labels:
+        APP_NAME: auth-server
+        app: {{ .Release.Name }}-{{ include "janssen-all-in-one.name" . }}-aio
+      {{- if .Values.istio.ingress }}
+      annotations:
+        sidecar.istio.io/rewriteAppHTTPProbers: "true"
+      {{- end }}
+    spec:
+    {{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      dnsPolicy: {{ .Values.dnsPolicy | quote }}
+    {{- with .Values.dnsConfig }}
+      dnsConfig:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+      {{- if .Values.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- include "janssen-all-in-one.topology-spread-constraints" . | indent 8 }}
+      {{- end }}
+      serviceAccountName: {{ .Values.serviceAccountName }}
+      containers:
+      - name: {{ include "janssen-all-in-one.name" . }}
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        env:
+          {{- include "janssen-all-in-one.usr-envs" . | indent 12 }}
+          {{- include "janssen-all-in-one.usr-secret-envs" . | indent 12 }}
+        securityContext:
+          runAsUser: 1000
+          runAsNonRoot: true
+        {{- if or (not .Values.isFqdnRegistered) ( .Values.customScripts) }}
+        command:
+          - /bin/sh
+          - -c
+          - |
+              {{- with .Values.customScripts }}
+              {{- toYaml . | replace "- " "" | nindent 14}}
+              {{- end }}
+              python3 /scripts/tls_generator.py &
+              /app/bin/entrypoint.sh
+        {{- end}}
+        ports:
+        - name: {{ .Values.service.name }}
+          containerPort: {{ .Values.service.port }}
+        {{ if .Values.cnPrometheusPort }}
+        - name: prometheus-port
+          containerPort: {{ .Values.cnPrometheusPort }}
+        {{- end }}
+        envFrom:
+        - configMapRef:
+            name: {{ .Release.Name }}-config-cm
+        {{ if .Values.usrEnvs.secret }}
+        - secretRef:
+            name: {{ .Release.Name }}-global-user-custom-envs
+        {{- end }}
+        {{ if .Values.usrEnvs.normal }}
+        - configMapRef:
+            name: {{ .Release.Name }}-global-user-custom-envs
+        {{- end }}
+        lifecycle:
+{{- toYaml .Values.lifecycle | nindent 10 }}
+        volumeMounts:
+        {{- with .Values.volumeMounts }}
+{{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{ if or (eq .Values.configSecretAdapter "aws") (eq .Values.configAdapterName "aws") }}
+          - mountPath: {{ .Values.cnAwsSharedCredentialsFile }}
+            name: aws-shared-credential-file
+            subPath: aws_shared_credential_file
+          - mountPath: {{ .Values.cnAwsConfigFile }}
+            name: aws-config-file
+            subPath: aws_config_file
+          - mountPath: {{ .Values.cnAwsSecretsReplicaRegionsFile }}
+            name: aws-secrets-replica-regions
+            subPath: aws_secrets_replica_regions
+        {{- end }}
+        {{ if or (eq .Values.configSecretAdapter "google") (eq .Values.cnPersistenceType "spanner") }}
+          - mountPath: {{ .Values.cnGoogleApplicationCredentials }}
+            name: google-sa
+            subPath: google-credentials.json
+        {{- end }}
+        {{ if eq .Values.configSecretAdapter "vault" }}
+          - name: vault
+            mountPath: /etc/certs/vault_role_id
+            subPath: vault_role_id
+          - name: vault
+            mountPath: /etc/certs/vault_secret_id
+            subPath: vault_secret_id
+        {{- end }}
+          - mountPath: /etc/jans/conf/configuration.json
+            name: {{ .Release.Name }}-configuration-file
+            subPath: configuration.json
+          - mountPath: /scripts/tls_generator.py
+            name: {{ include "janssen-all-in-one.name" . }}-tls-script
+            subPath: tls_generator.py
+        {{- if not .Values.isFqdnRegistered }}
+          - name: {{ include "janssen-all-in-one.fullname" .}}-updatelbip
+            mountPath: /scripts/updatelbip.py
+            subPath: updatelbip.py
+        {{- end }}
+        {{- if .Values.saml.enabled }}
+          - name: kc-db-pass
+            mountPath: {{ .Values.kcDbPasswordFile }}
+            subPath: kc_db_password
+        {{- end }}
+        livenessProbe:
+{{- toYaml .Values.livenessProbe | nindent 10 }}
+        readinessProbe:
+{{- toYaml .Values.readinessProbe | nindent 10 }}
+        {{- if .Values.testEnviroment }}
+        resources: {}
+        {{- else }}
+        resources:
+{{- toYaml .Values.resources | nindent 10 }}
+        {{- end }}
+      {{- if not .Values.isFqdnRegistered  }}
+      hostAliases:
+      - ip: {{ .Values.lbIp }}
+        hostnames:
+        - {{ .Values.fqdn }}
+      {{- end }}
+      volumes:
+      {{- with .Values.volumes }}
+{{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{ if or (eq .Values.configSecretAdapter "aws") (eq .Values.configAdapterName "aws") }}
+        - name: aws-shared-credential-file
+          secret:
+            secretName: {{ .Release.Name }}-aws-config-creds
+            items:
+              - key: aws_shared_credential_file
+                path: aws_shared_credential_file
+        - name: aws-config-file
+          secret:
+            secretName: {{ .Release.Name }}-aws-config-creds
+            items:
+              - key: aws_config_file
+                path: aws_config_file
+        - name: aws-secrets-replica-regions
+          secret:
+            secretName: {{ .Release.Name }}-aws-config-creds
+            items:
+              - key: aws_secrets_replica_regions
+                path: aws_secrets_replica_regions
+      {{- end }}
+      {{ if or (eq .Values.configSecretAdapter "google") (eq .Values.cnPersistenceType "spanner") }}
+        - name: google-sa
+          secret:
+            secretName: {{ .Release.Name }}-google-sa
+      {{- end }}
+      {{ if eq .Values.configSecretAdapter "vault" }}
+        - name: vault
+          secret:
+            secretName: {{ .Release.Name }}-vault
+            items:
+            - key: vault_role_id
+              path: vault_role_id
+            - key: vault_secret_id
+              path: vault_secret_id
+      {{- end }}
+        - name: {{ .Release.Name }}-configuration-file
+          secret:
+            secretName: {{ .Release.Name }}-configuration-file
+        - name: {{ include "janssen-all-in-one.name" . }}-tls-script
+          configMap:
+            name: {{ include "janssen-all-in-one.fullname" . }}-tls-script
+      {{- if not .Values.isFqdnRegistered }}
+        - name: {{ include "janssen-all-in-one.fullname" . }}-updatelbip
+          configMap:
+            name: {{ .Release.Name }}-updatelbip
+      {{- end }}
+
+      {{- if .Values.saml.enabled }}
+        - name: kc-db-pass
+          secret:
+            secretName: {{ .Release.Name }}-kc-db-pass
+      {{- end }}

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE configuration>
+<configuration debug="false">
+    <variable name="app.home" value="${app.home:-/opt/kc-scheduler}"/>
+    <!-- <variable file="${app.home}/conf/config.properties"/> -->
+    <variable name="app.logdir" value="${app.home}/logs"/>
+    <variable name="app.logging.target" value="${app.logging.target:-STDOUT}"/>
+
+    <import class="ch.qos.logback.classic.encoder.PatternLayoutEncoder"/>
+    <import class="ch.qos.logback.core.ConsoleAppender"/>
+    <import class="ch.qos.logback.core.rolling.RollingFileAppender"/>
+    <import class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy"/>
+    <import class="ch.qos.logback.core.status.OnConsoleStatusListener"/>
+
+    <!-- <statusListener class="OnConsoleStatusListener"/> -->
+
+    <if condition='property("app.logging.target").equals("FILE")'>
+        <then>
+            <!-- log target is FILE -->
+            <appender name="FILE" class="RollingFileAppender">
+                <File>${app.logdir}/scheduler.log</File>
+                <append>true</append>
+                <rollingPolicy class="TimeBasedRollingPolicy">
+                    <fileNamePattern>${app.logdir}/scheduler-%d{yyyy-mm-dd}.log.gz</fileNamePattern>
+                    <maxHistory>${app.logging.loghistory:-180}</maxHistory>
+                </rollingPolicy>
+
+                <encoder class="PatternLayoutEncoder">
+                    <charset>UTF-8</charset>
+                    <pattern>%date{ISO8601}:%-5level [%logger:%line] - %msg%n%ex{short}</pattern>
+                </encoder>
+            </appender>
+
+        </then>
+        <else>
+            <!-- default log target is STDOUT -->
+            <appender name="STDOUT" class="ConsoleAppender">
+                <encoder class="PatternLayoutEncoder">
+                    <charset>UTF-8</charset>
+                    <pattern>jans-kc-scheduler - %date{ISO8601}:%-5level [%logger:%line] - %msg%n%ex{short}</pattern>
+                </encoder>
+            </appender>
+        </else>
+    </if>
+
+    <!-- loggers -->
+
+    <logger name="org.apache.http" level="${app.logging.level.apache.http:-INFO}">
+    </logger>
+
+    <logger name="org.apache.http.wire" level="${app.logging.level.apache.http.wire:-INFO}">
+    </logger>
+
+    <logger name="org.apache.http.headers" level="${app.logging.level.apache.http.header:-INFO}">
+    </logger>
+
+    <root level="${app.logging.level.root:-INFO}">
+      <appender-ref ref="${app.logging.target}"/>
+    </root>
+</configuration>

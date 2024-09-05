@@ -32,6 +32,7 @@ public final class AuthorizeRequestParam {
     public static final String ACR_VALUES = "acr_values";
     public static final String AMR_VALUES = "amr_values";
     public static final String CLAIMS = "claims";
+    public static final String AUTHORIZATION_DETAILS = "authorization_details";
     public static final String REGISTRATION = "registration";
     public static final String REQUEST = "request";
     public static final String REQUEST_URI = "request_uri";

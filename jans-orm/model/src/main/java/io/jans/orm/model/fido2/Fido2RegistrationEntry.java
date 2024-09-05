@@ -44,8 +44,9 @@ public class Fido2RegistrationEntry extends Fido2Entry implements Serializable {
     @AttributeName(name = "jansStatus")
     private Fido2RegistrationStatus registrationStatus;
 
+    @JsonObject
     @AttributeName(name = "jansDeviceNotificationConf")
-    private String deviceNotificationConf;
+    private Fido2DeviceNotificationConf deviceNotificationConf;
 
     @JsonObject
 	@AttributeName(name = "jansDeviceData")
@@ -92,11 +93,11 @@ public class Fido2RegistrationEntry extends Fido2Entry implements Serializable {
         this.registrationStatus = registrationStatus;
     }
 
-	public String getDeviceNotificationConf() {
+	public Fido2DeviceNotificationConf getDeviceNotificationConf() {
         return deviceNotificationConf;
     }
 
-    public void setDeviceNotificationConf(String deviceNotificationConf) {
+    public void setDeviceNotificationConf(Fido2DeviceNotificationConf deviceNotificationConf) {
         this.deviceNotificationConf = deviceNotificationConf;
     }
 

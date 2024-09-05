@@ -14,13 +14,12 @@ from prompt_toolkit.eventloop import get_event_loop
 
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from edit_user_dialog import EditUserDialog
-from utils.utils import DialogUtils, common_data, check_email
+from utils.utils import DialogUtils, get_help_with
 from utils.static import DialogResult
 from utils.multi_lang import _
 from wui_components.jans_cli_dialog import JansGDialog
 from utils.static import DialogResult, cli_style, common_strings
-
-common_data.users = SimpleNamespace()
+from utils.background_tasks import get_admin_ui_roles
 
 class Plugin(DialogUtils):
     """This is a general class for plugins 
@@ -40,15 +39,17 @@ class Plugin(DialogUtils):
         self.name = '[U]sers'
         self.users = {}
         self.widgets_ready = False
+        self.jans_help = get_help_with(f'<p>              {_("Change user password")}\n')
 
     def process(self) -> None:
         pass
 
-    def on_page_enter(self) -> None:
-        """Function to perform preliminary tasks before this page entered.
+    def init_plugin(self) -> None:
+        """The initialization for this plugin
         """
-        # we need claims everywhere
-        self.get_claims()
+        if self.app.plugin_enabled('admin'):
+            self.app.create_background_task(get_admin_ui_roles())
+
 
     def set_center_frame(self) -> None:
         """center frame content
@@ -148,7 +149,7 @@ class Plugin(DialogUtils):
 
         title = _("Edit User") if data else _("Add User")
 
-        edit_user_dialog = EditUserDialog(self.app, title=title, data=data, save_handler=self.save_user)
+        edit_user_dialog = EditUserDialog(parent=self, title=title, data=data)
         self.app.show_jans_dialog(edit_user_dialog)
 
 
@@ -171,8 +172,9 @@ class Plugin(DialogUtils):
                                 "value": "{}".format(self.new_password.me.text)}]}
                     }
                 self.app.start_progressing(_("Changing Password ..."))
-                await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
+                response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
                 self.app.stop_progressing()
+
             asyncio.ensure_future(coroutine())
 
         self.new_password = self.app.getTitledText(
@@ -225,111 +227,6 @@ class Plugin(DialogUtils):
                 buttons=buttons,
                 )
  
-    def save_user(self, dialog: Dialog) -> None:
-        """This method to save user data to server
-
-        Args:
-            dialog (_type_): the main dialog to save data in
-
-        Returns:
-            _type_: bool value to check the status code response
-        """
-
-        fix_title = _("Please fix!")
-        raw_data = self.make_data_from_dialog(tabs={'user': dialog.edit_user_container.content})
-
-        if not (raw_data['userId'].strip() and raw_data['mail'].strip()):
-            self.app.show_message(fix_title, _("Username and/or Email is empty"))
-            return
-
-        if not check_email(raw_data['mail']):
-            self.app.show_message(fix_title, _("Please enter a valid email"))
-            return
-
-        if 'baseDn' not in dialog.data and not raw_data['userPassword'].strip():
-            self.app.show_message(fix_title, _("Please enter Password"))
-            return
-
-        user_info = {'customObjectClasses':['top', 'jansPerson'], 'customAttributes':[]}
-        for key_ in ('mail', 'userId', 'displayName', 'givenName'):
-            user_info[key_] = raw_data.pop(key_)
-
-        if 'baseDn' not in dialog.data:
-            user_info['userPassword'] = raw_data.pop('userPassword')
-
-        for key_ in ('inum', 'baseDn', 'dn'):
-            if key_ in raw_data:
-                del raw_data[key_]
-            if key_ in dialog.data:
-                user_info[key_] = dialog.data[key_]
-
-        status = raw_data.pop('active')
-        user_info['jansStatus'] = 'active' if status else 'inactive'
-
-        for key_ in raw_data:
-            multi_valued = False
-            key_prop = dialog.get_claim_properties(key_)
-
-            if key_prop.get('dataType') == 'json':
-                try:
-                    json.loads(raw_data[key_])
-                except Exception as e:
-                    display_name = key_prop.get('displayName') or key_
-                    self.app.show_message(
-                                fix_title,
-                                _(HTML("Can't convert <b>{}</b> to json. Conversion error: <i>{}</i>").format(display_name, e))
-                            )
-                    return
-
-            user_info['customAttributes'].append({
-                    'name': key_, 
-                    'multiValued': multi_valued, 
-                    'values': [raw_data[key_]],
-                    })
-
-        for ca in dialog.data.get('customAttributes', []):
-            if ca['name'] == 'memberOf':
-                user_info['customAttributes'].append(ca)
-                break
-
-        if hasattr(dialog, 'admin_ui_roles_container'):
-            admin_ui_roles = [item[0] for item in dialog.admin_ui_roles_container.data]
-            if admin_ui_roles:
-               user_info['customAttributes'].append({
-                        'name': 'jansAdminUIRole', 
-                        'multiValued': len(admin_ui_roles) > 1, 
-                        'values': admin_ui_roles,
-                        })
-
-        async def coroutine():
-            operation_id = 'put-user' if dialog.data.get('baseDn') else 'post-user'
-            cli_args = {'operation_id': operation_id, 'data': user_info}
-            self.app.start_progressing(_("Saving user ..."))
-            response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-            self.app.stop_progressing()
-            if response.status_code == 500:
-                self.app.show_message(_('Error'), response.text + '\n' + response.reason)
-            else:
-                dialog.future.set_result(DialogResult.OK)
-                self.get_users()
-
-        asyncio.ensure_future(coroutine())
-
-    def get_claims(self) -> None:
-        """This method for getting claims
-        """
-        if hasattr(common_data.users, 'claims') and getattr(common_data, 'claims_retreived', False):
-            return
-        async def coroutine():
-            cli_args = {'operation_id': 'get-attributes', 'endpoint_args':'limit:200,status:active'}
-            self.app.start_progressing(_("Retreiving claims"))
-            response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-            self.app.stop_progressing()
-            result = response.json()
-            common_data.users.claims = result['entries']
-            common_data.claims_retreived = True
-
-        asyncio.ensure_future(coroutine())
 
     def search_user(self, tbuffer:Buffer) -> None:
         """This method handel the search for Users

@@ -6,6 +6,7 @@
 
 package io.jans.as.server.token.ws.rs;
 
+import io.jans.as.model.token.TokenRequestParam;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.FormParam;
@@ -41,6 +42,8 @@ public interface TokenRestWebService {
                     String password,
             @FormParam("scope")
                     String scope,
+            @FormParam(TokenRequestParam.AUTHORIZATION_DETAILS)
+                    String authorizationDetails,
             @FormParam("assertion")
                     String assertion,
             @FormParam("refresh_token")

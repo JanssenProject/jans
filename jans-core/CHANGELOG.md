@@ -1,5 +1,30 @@
 # Changelog
 
+## [1.0.21](https://github.com/JanssenProject/jans/compare/jans-core-v1.0.20...jans-core-v1.0.21) (2023-12-14)
+
+
+### Features
+
+* add Jans lock ([#7074](https://github.com/JanssenProject/jans/issues/7074)) ([ff3e904](https://github.com/JanssenProject/jans/commit/ff3e9044aa29ca32219b40eccab5c27e47233e15))
+* add jans-lock-event library to publish messages to event server from jans-auth ([#6893](https://github.com/JanssenProject/jans/issues/6893)) ([c49f8f1](https://github.com/JanssenProject/jans/commit/c49f8f16af502429bf7a58fc31f6d5ffc1f67f78))
+* add message configuration api to config-api [#6982](https://github.com/JanssenProject/jans/issues/6982) ([#6983](https://github.com/JanssenProject/jans/issues/6983)) ([945ba76](https://github.com/JanssenProject/jans/commit/945ba767da90d2c6c376b5b6cca6313c0851bbca))
+* **idp-plugin:** inbound SAML with Keycloak as SP and external SAML IDP ([#6793](https://github.com/JanssenProject/jans/issues/6793)) ([bc5eaad](https://github.com/JanssenProject/jans/commit/bc5eaade348d74d93da25c7494975b9aa35cded4))
+
+
+### Bug Fixes
+
+* feature flag default values ([#6857](https://github.com/JanssenProject/jans/issues/6857)) ([75b49be](https://github.com/JanssenProject/jans/commit/75b49be719d64c81a11805ee1c8d9562027c22e8))
+* **jans-core:** fixing jans-core compilation dependencies upgrade [#6783](https://github.com/JanssenProject/jans/issues/6783) ([#6785](https://github.com/JanssenProject/jans/issues/6785)) ([7a0a1da](https://github.com/JanssenProject/jans/commit/7a0a1da38ad08a81594ff1ec1f30636c2e31ef38))
+* **jans-core:** jans-core starts to fail after dependencies upgrade [#6783](https://github.com/JanssenProject/jans/issues/6783) ([#6784](https://github.com/JanssenProject/jans/issues/6784)) ([b67f1d3](https://github.com/JanssenProject/jans/commit/b67f1d301a101cf9c29e5404f15aa6acfa1d5877))
+* prepare for 1.0.21 release ([#7008](https://github.com/JanssenProject/jans/issues/7008)) ([2132de6](https://github.com/JanssenProject/jans/commit/2132de6683f67bf22d5a863b149770d657073a83))
+
+## [1.0.20](https://github.com/JanssenProject/jans/compare/jans-core-v1.0.19...jans-core-v1.0.20) (2023-11-08)
+
+
+### Bug Fixes
+
+* prepare for 1.0.20 release ([c6e806e](https://github.com/JanssenProject/jans/commit/c6e806eb31fed998d52cbef7a7d94c231d913102))
+
 ## [1.0.19](https://github.com/JanssenProject/jans/compare/jans-core-v1.0.18...jans-core-v1.0.19) (2023-10-11)
 
 

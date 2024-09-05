@@ -13,6 +13,7 @@ import io.jans.as.client.ssa.create.SsaCreateRequest;
 import io.jans.as.client.ssa.create.SsaCreateResponse;
 import io.jans.as.client.ssa.get.SsaGetResponse;
 import io.jans.as.client.ssa.jwtssa.SsaGetJwtResponse;
+import io.jans.as.client.ssa.validate.SsaValidateResponse;
 import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.model.jwe.Jwe;
 import io.jans.as.model.jwt.Jwt;
@@ -69,5 +70,9 @@ public class AssertBuilder {
 
     public static SsaGetJwtAssertBuilder ssaGetJwt(SsaGetJwtResponse response) {
         return new SsaGetJwtAssertBuilder(response);
+    }
+
+    public static SsaValidationAssertBuilder ssaValidate(SsaValidateResponse response) {
+        return new SsaValidationAssertBuilder(response);
     }
 }

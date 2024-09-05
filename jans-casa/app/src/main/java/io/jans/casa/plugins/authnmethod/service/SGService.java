@@ -4,17 +4,27 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.jans.as.model.fido.u2f.protocol.DeviceData;
+import io.jans.casa.core.ConfigurationHandler;
+import io.jans.casa.core.PersistenceService;
+import io.jans.casa.core.model.Fido2RegistrationEntry;
+import io.jans.casa.core.model.Person;
+import io.jans.casa.core.pojo.SuperGluuDevice;
+import io.jans.casa.misc.Utils;
+import io.jans.casa.plugins.authnmethod.SuperGluuExtension;
+import io.jans.casa.plugins.authnmethod.conf.SGConfig;
 import io.jans.orm.search.filter.Filter;
-import java.text.MessageFormat;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
+import java.net.*;
+import java.nio.charset.StandardCharsets;
+import java.text.MessageFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.stream.*;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -24,18 +34,9 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.util.EntityUtils;
-import io.jans.casa.core.ConfigurationHandler;
-import io.jans.casa.core.PersistenceService;
-import io.jans.casa.core.model.Fido2RegistrationEntry;
-import io.jans.casa.core.model.Person;
-import io.jans.casa.core.pojo.SuperGluuDevice;
-import io.jans.casa.misc.Utils;
-import io.jans.casa.plugins.authnmethod.SuperGluuExtension;
-import io.jans.casa.plugins.authnmethod.conf.SGConfig;
 import org.slf4j.Logger;
 import org.zkoss.util.resource.Labels;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
+
 /**
  * An app. scoped bean that encapsulates logic needed to enroll supergluu devices
  */
@@ -52,10 +53,10 @@ public class SGService extends FidoService {
 
     private SGConfig conf;
     private ObjectMapper mapper;
+
     @Inject
     private PersistenceService persistenceService;
     
-
     @PostConstruct
     private void inited() {
         mapper = new ObjectMapper();
@@ -65,20 +66,24 @@ public class SGService extends FidoService {
     public void reloadConfiguration() {
         String acr = SuperGluuExtension.ACR;
 
-        props = persistenceService.getCustScriptConfigProperties(acr);
+        props = persistenceService.getAgamaFlowConfigProperties(acr);
         if (props == null) {
-            logger.warn("Config. properties for custom script '{}' could not be read. Features related to {} will not be accessible",
-                    acr, acr.toUpperCase());
+            logger.warn("Config. properties for flow '{}' could not be read", acr);
         } else {
-            conf = SGConfig.get(props);
-            if (conf != null) {
-                conf.setAppId(persistenceService.getCustScriptConfigProperties(ConfigurationHandler.DEFAULT_ACR).get("supergluu_app_id"));
-                try {
-                    logger.info("Super Gluu settings found were: {}", mapper.writeValueAsString(conf));
-                } catch (Exception e) {
-                    logger.error(e.getMessage(), e);
+            try {
+                conf = SGConfig.get(props.getJSONObject("qr_options"));
+                String appId = props.optString("appId", null);
+                
+                if (appId == null) {
+                    appId = new URL(persistenceService.getIssuerUrl()).getHost() + "/jans-casa";
                 }
+                
+                conf.setAppId(appId);
+                logger.info("Super Gluu settings found were: {}", mapper.writeValueAsString(conf));
+            } catch (Exception e) {
+                logger.error(e.getMessage(), e);
             }
+        
         }
 
     }
@@ -164,9 +169,8 @@ public class SGService extends FidoService {
     
     public SuperGluuDevice getLatestSuperGluuDevice(String userInum, String rpId) {
 		
-		if (userInum == null) {
-			return null;
-		}
+		if (userInum == null)  return null;
+		
 		logger.trace("getLatestSuperGluuDevice. userInum id is {}", userInum);
 		String baseDn = getBaseDnForFido2RegistrationEntries(userInum);
         Filter userInumFilter = Filter.createEqualityFilter("personInum", userInum);
@@ -176,15 +180,13 @@ public class SGService extends FidoService {
         logger.trace("getLatestSuperGluuDevice. Filter", filter);
 		
         List<Fido2RegistrationEntry> fido2RegistrationnEntries =  persistenceService.find(Fido2RegistrationEntry.class, baseDn, filter);
-        if (fido2RegistrationnEntries.size() > 0)
-        {
+        if (fido2RegistrationnEntries.size() > 0) {
         	Fido2RegistrationEntry entry = fido2RegistrationnEntries.get(0);
         	SuperGluuDevice newDevice = new SuperGluuDevice(entry);
         	return newDevice;
-        }
         	
-        else 
-        	return null;
+        } else return null;
+
     }
     
     private String getBaseDnForFido2RegistrationEntries(String userInum) {

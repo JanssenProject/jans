@@ -1,5 +1,23 @@
 # Changelog
 
+## [1.0.21](https://github.com/JanssenProject/jans/compare/jans-fido2-v1.0.20...jans-fido2-v1.0.21) (2023-12-14)
+
+
+### Bug Fixes
+
+* API spec metadata ([#6473](https://github.com/JanssenProject/jans/issues/6473)) ([3922ddb](https://github.com/JanssenProject/jans/commit/3922ddb509db422d9a0f2c88df9f0d2e3fd05f46))
+* **fido2:** tests are failing due to NoClassDefFoundError: javax/xml/bind/annotation/XmlElement [#6865](https://github.com/JanssenProject/jans/issues/6865) ([#6866](https://github.com/JanssenProject/jans/issues/6866)) ([571b1d6](https://github.com/JanssenProject/jans/commit/571b1d670656487fc8ce30ad5658cf147fc4a919))
+* **jans-fido2:** put timeout when authenticator attachment is cross-platform ([#6415](https://github.com/JanssenProject/jans/issues/6415)) ([4fbdb44](https://github.com/JanssenProject/jans/commit/4fbdb446c6c3bb1e25a343c63af47a8f7a46723f))
+* openapi spec version element ([#6780](https://github.com/JanssenProject/jans/issues/6780)) ([e4aca8c](https://github.com/JanssenProject/jans/commit/e4aca8ce1b39cd89764b3c852418a8ed879b3925))
+* prepare for 1.0.21 release ([#7008](https://github.com/JanssenProject/jans/issues/7008)) ([2132de6](https://github.com/JanssenProject/jans/commit/2132de6683f67bf22d5a863b149770d657073a83))
+
+## [1.0.20](https://github.com/JanssenProject/jans/compare/jans-fido2-v1.0.19...jans-fido2-v1.0.20) (2023-11-08)
+
+
+### Bug Fixes
+
+* prepare for 1.0.20 release ([c6e806e](https://github.com/JanssenProject/jans/commit/c6e806eb31fed998d52cbef7a7d94c231d913102))
+
 ## [1.0.19](https://github.com/JanssenProject/jans/compare/jans-fido2-v1.0.18...jans-fido2-v1.0.19) (2023-10-11)
 
 

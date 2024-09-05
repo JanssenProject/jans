@@ -27,6 +27,7 @@ class Plugin:
                                 Button(text=_("Exit Jans TUI"), handler=self.exit_cli),
                                 Button(text=_("Logout and Exit Jans TUI"), handler=self.logout_exit_cli),
                                 Button(text=_("Configure Jans TUI"), handler=self.configure_cli),
+                                Button(text=_("Application Versions"), handler=self.app_versions),
                             ],
                             width=D()
                         ),
@@ -67,3 +68,31 @@ class Plugin:
         """Configures CLI creds
         """
         self.app.jans_creds_dialog()
+
+
+    def app_versions(self) -> None:
+        """Display Jannssen application versions
+        """
+
+        async def coroutine():
+
+            try:
+                response = self.app.cli_object.process_command_by_id(
+                        operation_id='get-app-version',
+                        url_suffix='',
+                        endpoint_args='',
+                        data_fn=None,
+                        data={}
+                        )
+                app_status = response.json()
+            except Exception as e:
+                self.app.show_message(_("Error application versions"), str(e), tobefocused=self.app.center_container)
+                return
+
+            self.app.show_message(
+                _("Jannsen Application Versions"),
+                '\n'.join([f"{app['title']} {app['version']}" for app in app_status]),
+                tobefocused=self.app.center_container
+                )
+
+        asyncio.ensure_future(coroutine())

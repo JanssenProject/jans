@@ -82,9 +82,12 @@ public interface AuthorizeRestWebService {
      * @param codeChallenge       PKCE code challenge
      * @param codeChallengeMethod PKCE code challenge method
      * @param authReqId           A unique identifier to identify the CIBA authentication request made by the Client.
-     * @param dpopJkt            The value of the dpop_jkt authorization request parameter is the JSON Web Key (JWK) Thumbprint
+     * @param dpopJkt             The value of the dpop_jkt authorization request parameter is the JSON Web Key (JWK) Thumbprint
      *                            of the proof-of-possession public key using the SHA-256 hash function - the same value
      *                            as used for the jkt confirmation method defined
+     * @param authorizationDetails The request parameter authorization_details contains, in JSON notation, an array of objects.
+     *                             Each JSON object contains the data to specify the authorization requirements for a certain
+     *                             type of resource. The type of resource or access requirement is determined by the type field.
      * @param httpRequest         http request
      * @param securityContext     An injectable interface that provides access to security
      *                            related information.
@@ -163,6 +166,7 @@ public interface AuthorizeRestWebService {
             @QueryParam("claims") String claims,
             @QueryParam("auth_req_id") String authReqId,
             @QueryParam("dpop_jkt") String dpopJkt,
+            @QueryParam("authorization_details") String authorizationDetails,
             @Context HttpServletRequest httpRequest,
             @Context HttpServletResponse httpResponse,
             @Context SecurityContext securityContext);
@@ -216,6 +220,9 @@ public interface AuthorizeRestWebService {
      * @param dpopJkt            The value of the dpop_jkt authorization request parameter is the JSON Web Key (JWK) Thumbprint
      *                            of the proof-of-possession public key using the SHA-256 hash function - the same value
      *                            as used for the jkt confirmation method defined
+     * @param authorizationDetails The request parameter authorization_details contains, in JSON notation, an array of objects.
+     *                             Each JSON object contains the data to specify the authorization requirements for a certain
+     *                             type of resource. The type of resource or access requirement is determined by the type field.
      * @param httpRequest         http request
      * @param securityContext     An injectable interface that provides access to security
      *                            related information.
@@ -274,7 +281,7 @@ public interface AuthorizeRestWebService {
             @FormParam("client_id") String clientId,
             @FormParam("redirect_uri") String redirectUri,
             @FormParam("state") String state,
-            @QueryParam("response_mode") String responseMode,
+            @FormParam("response_mode") String responseMode,
             @FormParam("nonce") String nonce,
             @FormParam("display") String display,
             @FormParam("prompt") String prompt,
@@ -288,12 +295,13 @@ public interface AuthorizeRestWebService {
             @FormParam("request_uri") String requestUri,
             @FormParam("session_id") String sessionId,
             @FormParam("origin_headers") String originHeaders,
-            @QueryParam("code_challenge") String codeChallenge,
-            @QueryParam("code_challenge_method") String codeChallengeMethod,
-            @QueryParam(AuthorizeRequestParam.CUSTOM_RESPONSE_HEADERS) String customResponseHeaders,
-            @QueryParam("claims") String claims,
-            @QueryParam("auth_req_id") String authReqId,
-            @QueryParam("dpop_jkt") String dpopJkt,
+            @FormParam("code_challenge") String codeChallenge,
+            @FormParam("code_challenge_method") String codeChallengeMethod,
+            @FormParam(AuthorizeRequestParam.CUSTOM_RESPONSE_HEADERS) String customResponseHeaders,
+            @FormParam("claims") String claims,
+            @FormParam("auth_req_id") String authReqId,
+            @FormParam("dpop_jkt") String dpopJkt,
+            @FormParam("authorization_details") String authorizationDetails,
             @Context HttpServletRequest httpRequest,
             @Context HttpServletResponse httpResponse,
             @Context SecurityContext securityContext);

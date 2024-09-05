@@ -1,0 +1,34 @@
+{
+  "start": 0,
+  "totalEntriesCount": 2,
+  "entriesCount": 2,
+  "entries": [{
+    "dn": "inum=aad9e1dd-87f3-357f-a2fa-93ae8eb94998,ou=auiWebhooks,ou=admin-ui,o=jans",
+    "inum": "aad9e1dd-87f3-357f-a2fa-93ae8eb94998",
+    "displayName": "test-5",
+    "description": "test1",
+    "url": "https://jsonplaceholder.typicode.com/posts",
+    "httpRequestBody": "{\"userId\": 11,\"id\": 11,\"title\": \"sunt aut facere repellat provident occaecati excepturi optio reprehenderit\",\"body\": \"quia et suscipitsutem sunt rem eveniet architecto\"}",
+    "httpMethod": "POST",
+    "jansEnabled": true,
+    "httpHeaders": [{
+      "key": "Content-Type",
+      "value": "application/json"
+    }],
+    "baseDn": "inum=aad9e1dd-87f3-357f-a2fa-93ae8eb94998,ou=auiWebhooks,ou=admin-ui,o=jans"
+  }, {
+    "dn": "inum=d23d60e8-0187-3878-94d9-30d594c4c986,ou=auiWebhooks,ou=admin-ui,o=jans",
+    "inum": "d23d60e8-0187-3878-94d9-30d594c4c986",
+    "displayName": "test-6",
+    "description": "test1",
+    "url": "https://jsonplaceholder.typicode.com/posts",
+    "httpRequestBody": "{\"userId\": 11,\"id\": 11,\"title\": \"sunt aut facere repellat provident occaecati excepturi optio reprehenderit\",\"body\": \"quia et suscipitsutem sunt rem eveniet architecto\"}",
+    "httpMethod": "POST",
+    "jansEnabled": true,
+    "httpHeaders": [{
+      "key": "Content-Type",
+      "value": "application/json"
+    }],
+    "baseDn": "inum=d23d60e8-0187-3878-94d9-30d594c4c986,ou=auiWebhooks,ou=admin-ui,o=jans"
+  }]
+}

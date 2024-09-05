@@ -122,6 +122,9 @@ venv.bak/
 # mkdocs documentation
 /site
 
+bin/
+.pydevproject
+
 # mypy
 .mypy_cache/
 
@@ -159,6 +162,7 @@ data-sources.json
 .settings
 .classpath
 .project
+.factorypath
 
 # scanner reports
 trivy.json

@@ -11,7 +11,7 @@ from string import Template
 from setup_app import paths
 from setup_app.static import AppType, InstallOption
 from setup_app.utils import base
-from setup_app.utils.ldif_utils import create_client_ldif
+from setup_app.utils.ldif_utils import myLdifParser, create_client_ldif
 from setup_app.config import Config
 from setup_app.installers.jetty import JettyInstaller
 from setup_app.pylib.ldif4.ldif import LDIFWriter
@@ -25,7 +25,6 @@ class ConfigApiInstaller(JettyInstaller):
                 (os.path.join(Config.dist_jans_dir, 'user-mgt-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/user-mgt-plugin/{0}/user-mgt-plugin-{0}-distribution.jar').format(base.current_app.app_info['jans_version'])),
                 (os.path.join(Config.dist_jans_dir, 'fido2-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/fido2-plugin/{0}/fido2-plugin-{0}-distribution.jar').format(base.current_app.app_info['jans_version'])),
                 (os.path.join(Config.dist_jans_dir, 'jans-link-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/jans-link-plugin/{0}/jans-link-plugin-{0}-distribution.jar').format(base.current_app.app_info['jans_version'])),
-                (os.path.join(Config.dist_jans_dir, 'saml-plugin.jar'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-config-api/plugins/saml-plugin/{0}/saml-plugin-{0}-distribution.jar').format(base.current_app.app_info['jans_version'])),
                 ]
 
     def __init__(self):
@@ -55,8 +54,8 @@ class ConfigApiInstaller(JettyInstaller):
     def install(self):
         self.copyFile(self.source_files[1][0], '/usr/sbin')
         self.run([paths.cmd_chmod, '+x', '/usr/sbin/facter'])
-        self.installJettyService(self.jetty_app_configuration[self.service_name], True)
-        self.logIt("Copying fido.war into jetty webapps folder...")
+        self.install_jettyService(self.jetty_app_configuration[self.service_name], True)
+        self.logIt("Copying jans-config-api.war into jetty webapps folder...")
         jettyServiceWebapps = os.path.join(self.jetty_base, self.service_name, 'webapps')
         self.copyFile(self.source_files[0][0], jettyServiceWebapps)
 
@@ -65,14 +64,11 @@ class ConfigApiInstaller(JettyInstaller):
         if Config.install_scim_server:
             self.install_plugin('scim-plugin')
 
-        if Config.installFido2:
+        if Config.install_fido2:
             self.install_plugin('fido2-plugin')
 
         if Config.install_jans_link:
             self.install_plugin('jans-link-plugin')
-
-        if Config.install_jans_saml:
-            self.install_plugin('saml-plugin')
 
         self.enable()
 
@@ -84,6 +80,7 @@ class ConfigApiInstaller(JettyInstaller):
                 self.copyFile(source_file[0], self.libDir)
                 plugin_path = os.path.join(self.libDir, os.path.basename(source_file[0]))
                 self.add_extra_class(plugin_path)
+                self.chown(plugin_path, Config.jetty_user, Config.jetty_group)
                 break
 
     def extract_files(self):
@@ -180,9 +177,9 @@ class ConfigApiInstaller(JettyInstaller):
         Config.templateRenderingDict['configOauthEnabled'] = 'false' if base.argsp.disable_config_api_security else 'true'
         Config.templateRenderingDict['apiApprovedIssuer'] = base.argsp.approved_issuer or 'https://{}'.format(Config.hostname)
 
-        _, oxauth_config = self.dbUtils.get_oxAuthConfDynamic()
+        _, jans_auth_config = self.dbUtils.get_jans_auth_conf_dynamic()
         for param in ('issuer', 'openIdConfigurationEndpoint', 'introspectionEndpoint', 'tokenEndpoint', 'tokenRevocationEndpoint'):
-            Config.templateRenderingDict[param] = oxauth_config[param]
+            Config.templateRenderingDict[param] = jans_auth_config[param]
 
         Config.templateRenderingDict['apiProtectionType'] = 'oauth2'
         Config.templateRenderingDict['endpointInjectionEnabled'] = 'false'
@@ -249,4 +246,30 @@ class ConfigApiInstaller(JettyInstaller):
         out_fn = os.path.join(self.output_folder, os.path.basename(template_fn))
         self.writeFile(out_fn, rendered_text)
         self.dbUtils.import_ldif([out_fn])
+
+    def update_jansservicemodule(self):
+        # this function is called by jans.py: JansInstaller.post_install_tasks()
+        self.logIt("Updating jansServiceModule for Config Api")
+
+        # find configuration dn
+        ldif_parser = myLdifParser(self.config_ldif_fn)
+        ldif_parser.parse()
+        for dn, _ in ldif_parser.entries:
+            if 'ou=configuration' in dn:
+                config_api_config_dn = dn
+                break
+
+        jans_service_modules = []
+
+        for jans_service_dir in os.listdir(Config.jetty_base):
+            if os.path.exists(os.path.join(Config.jetty_base, jans_service_dir, f'webapps/{jans_service_dir}.war')):
+                jans_service_modules.append(jans_service_dir)
+
+        self.logIt(f"Config Api jansConfDyn.assetMgtConfiguration.jansServiceModule list: {jans_service_modules}")
+
+        configuration = self.dbUtils.dn_exists(config_api_config_dn)
+        dynamic_configuration = json.loads(configuration['jansConfDyn'])
+        dynamic_configuration['assetMgtConfiguration']['jansServiceModule'] = sorted(jans_service_modules)
+        self.dbUtils.set_configuration('jansConfDyn', json.dumps(dynamic_configuration, indent=2), config_api_config_dn)
+
 

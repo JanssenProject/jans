@@ -81,7 +81,7 @@ Feature: Verify SessionId configuration endpoint
     And print response
     
     @sessionid-error
-  	Scenario: serverSessionIdLifetime configuration cannot be less than -1 (minus one)
+  	Scenario: sessionIdCookieLifetime configuration cannot be less than -1 (minus one)
     Given url  mainUrl
     And  header Authorization = 'Bearer ' + accessToken
     When method GET
@@ -89,7 +89,7 @@ Feature: Verify SessionId configuration endpoint
     And print response
     And assert response.length != null
     Then def result = response
-    Then set result.serverSessionIdLifetime = -5 
+    Then set result.sessionIdCookieLifetime = -5
     Given url  mainUrl
     And  header Authorization = 'Bearer ' + accessToken
     And request result

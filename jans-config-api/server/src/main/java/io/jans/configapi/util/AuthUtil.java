@@ -4,7 +4,6 @@ import com.unboundid.ldap.sdk.DN;
 import io.jans.as.client.RevokeSessionResponse;
 import io.jans.as.client.TokenResponse;
 import io.jans.as.common.model.registration.Client;
-import io.jans.as.common.service.common.EncryptionService;
 import io.jans.as.model.common.ScopeType;
 import io.jans.as.model.uma.wrapper.Token;
 import io.jans.as.model.util.Util;
@@ -22,12 +21,17 @@ import io.jans.configapi.core.util.ProtectionScopeType;
 import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.service.auth.ClientService;
 import io.jans.configapi.service.auth.ScopeService;
+import io.jans.service.EncryptionService;
 import io.jans.util.security.StringEncrypter.EncryptionException;
 
 import java.lang.reflect.Method;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.lang.reflect.Field;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -435,17 +439,42 @@ public class AuthUtil {
     }
 
     public Date parseStringToDateObj(String dateString) {
-        String DATE_PATTERN_YYYY_MM_DD = "yyyy-MM-dd";
-        SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_PATTERN_YYYY_MM_DD);
+        String datePattern = "yyyy-MM-dd";
+        SimpleDateFormat dateFormat = new SimpleDateFormat(datePattern);
         log.debug("parseStringToDateObj:{} ", dateString);
         Date date = null;
         try {
             date = dateFormat.parse(dateString);
         } catch (ParseException e) {
             log.error("Error in parsing string to date. Allowed Date Format : {},  Date-String : {} ",
-                    DATE_PATTERN_YYYY_MM_DD, dateString);
+                    datePattern, dateString);
         }
         return date;
     }
+    
+    public ByteArrayOutputStream getByteArrayOutputStream(InputStream input) throws IOException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        if(input ==null) {
+            return baos;
+        }
+        
+        byte[] buffer = new byte[1024];
+        int len;
+        while ((len = input.read(buffer)) > -1) {
+            baos.write(buffer, 0, len);
+        }
+        baos.flush();
+        return baos;
+    }
+    
+    public InputStream getInputStream(ByteArrayOutputStream output) {
+        InputStream input = null;
+        if (output == null) {
+            return input;
+        }
 
+        return new ByteArrayInputStream(output.toByteArray());  
+    }
+    
+    
 }

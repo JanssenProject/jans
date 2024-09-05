@@ -29,6 +29,28 @@ public class CodeGrantUtil {
         this.p = p;
     }
 
+    public static GeneralException exFromError(ErrorObject o) {
+        
+        Map<String, String> map = new HashMap<>();
+
+        String s = "" + o.getHTTPStatusCode();
+        map.put("HTTP status", s);
+        
+        s = o.getCode();
+        if (s != null) {
+            map.put("error code", s);
+        }
+
+        s = o.getDescription();
+        if (s != null) {
+            map.put("description", s);
+        }
+
+        s = map.toString(); 
+        return new GeneralException(s.substring(1, s.length() - 1));
+        
+    }
+
     public Pair<String, String> makeAuthzRequest() throws URISyntaxException {
         
         URI authzEndpoint = new URI(p.getAuthzEndpoint());
@@ -127,28 +149,6 @@ public class CodeGrantUtil {
         }
         return m;
 
-    }
-
-    private static GeneralException exFromError(ErrorObject o) {
-        
-        Map<String, String> map = new HashMap<>();
-
-        String s = "" + o.getHTTPStatusCode();
-        map.put("HTTP status", s);
-        
-        s = o.getCode();
-        if (s != null) {
-            map.put("error code", s);
-        }
-
-        s = o.getDescription();
-        if (s != null) {
-            map.put("description", s);
-        }
-
-        s = map.toString(); 
-        return new GeneralException(s.substring(1, s.length() - 1));
-        
     }
     
 }

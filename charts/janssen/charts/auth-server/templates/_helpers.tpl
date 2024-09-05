@@ -68,6 +68,20 @@ Create user custom defined secret envs
 {{- end }}
 
 {{/*
+Create JAVA_OPTIONS ENV for passing custom work and detailed logs
+*/}}
+{{- define "auth-server.customJavaOptions"}}
+{{ $custom := "" }}
+{{- $cnCustomJavaOptions := index .Values.global "auth-server" "cnCustomJavaOptions" }}
+{{- $custom := printf "%s" $cnCustomJavaOptions }}
+{{ $memory := .Values.resources.limits.memory | replace "Mi" "" | int -}}
+{{- $maxDirectMemory := printf "-XX:MaxDirectMemorySize=%dm" ( mul (mulf $memory 0.41) 1 ) -}}
+{{- $xmx := printf "-Xmx%dm" (sub $memory (mulf $memory 0.49)) -}}
+{{- $customJavaOptions := printf "%s %s %s" $custom $maxDirectMemory $xmx -}}
+{{ $customJavaOptions | trim | quote }}
+{{- end }}
+
+{{/*
 Create topologySpreadConstraints lists
 */}}
 {{- define "auth-server.topology-spread-constraints"}}

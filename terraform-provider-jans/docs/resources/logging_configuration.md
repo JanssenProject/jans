@@ -39,5 +39,3 @@ resource "jans_logging_configuration" "global" {
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-
-

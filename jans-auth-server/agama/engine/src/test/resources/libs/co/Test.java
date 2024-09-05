@@ -1,6 +1,6 @@
 package co;
 
-public class Test implements MyInterface {
+public class Test implements MyInterface, Serializable {
 
     private String id;
 

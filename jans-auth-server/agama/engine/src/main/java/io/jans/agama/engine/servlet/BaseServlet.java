@@ -109,13 +109,13 @@ public abstract class BaseServlet extends HttpServlet {
         
         //encoding MUST be set before calling getWriter 
         response.setCharacterEncoding(contentType.getSecond());
-        response.getWriter().write(sw.toString());
 
         engineConf.getDefaultResponseHeaders().forEach((h, v) -> response.setHeader(h, v));
         String mediaType = contentType.getFirst();
         if (mediaType != null) {
             response.setContentType(mediaType);
         }
+        response.getWriter().write(sw.toString());
 
     }
 

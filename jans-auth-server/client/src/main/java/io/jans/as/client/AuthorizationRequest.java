@@ -71,6 +71,8 @@ public class AuthorizationRequest extends BaseRequest {
     private String codeChallenge;
     private String codeChallengeMethod;
 
+    private String authorizationDetails;
+
     private String dpopJkt;
 
     private Map<String, String> customResponseHeaders;
@@ -142,6 +144,24 @@ public class AuthorizationRequest extends BaseRequest {
      */
     public void setDpopJkt(String dpopJkt) {
         this.dpopJkt = dpopJkt;
+    }
+
+    /**
+     * Gets authorization details
+     *
+     * @return authorization details
+     */
+    public String getAuthorizationDetails() {
+        return authorizationDetails;
+    }
+
+    /**
+     * Authorization details
+     *
+     * @param authorizationDetails authorization details
+     */
+    public void setAuthorizationDetails(String authorizationDetails) {
+        this.authorizationDetails = authorizationDetails;
     }
 
     /**
@@ -601,6 +621,7 @@ public class AuthorizationRequest extends BaseRequest {
             addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.CODE_CHALLENGE, codeChallenge);
             addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.CODE_CHALLENGE_METHOD, codeChallengeMethod);
             addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.DPOP_JKT, dpopJkt);
+            addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.AUTHORIZATION_DETAILS, authorizationDetails);
             addQueryStringParam(queryStringBuilder, AuthorizeRequestParam.CUSTOM_RESPONSE_HEADERS, customResponseHeadersAsString);
 
             for (String key : getCustomParameters().keySet()) {
@@ -662,6 +683,7 @@ public class AuthorizationRequest extends BaseRequest {
             putNotBlank(parameters, AuthorizeRequestParam.CODE_CHALLENGE, codeChallenge);
             putNotBlank(parameters, AuthorizeRequestParam.CODE_CHALLENGE_METHOD, codeChallengeMethod);
             putNotBlank(parameters, AuthorizeRequestParam.DPOP_JKT, dpopJkt);
+            putNotBlank(parameters, AuthorizeRequestParam.AUTHORIZATION_DETAILS, authorizationDetails);
             putNotBlank(parameters, AuthorizeRequestParam.CUSTOM_RESPONSE_HEADERS, customResponseHeadersAsString);
 
             for (String key : getCustomParameters().keySet()) {

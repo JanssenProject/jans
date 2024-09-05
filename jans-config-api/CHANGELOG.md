@@ -1,5 +1,61 @@
 # Changelog
 
+## [1.0.21](https://github.com/JanssenProject/jans/compare/jans-config-api-v1.0.20...jans-config-api-v1.0.21) (2023-12-14)
+
+
+### Features
+
+* add message configuration api to config-api [#6982](https://github.com/JanssenProject/jans/issues/6982) ([#6983](https://github.com/JanssenProject/jans/issues/6983)) ([945ba76](https://github.com/JanssenProject/jans/commit/945ba767da90d2c6c376b5b6cca6313c0851bbca))
+* **agama:** use a mixed strategy for serialization ([#6883](https://github.com/JanssenProject/jans/issues/6883)) ([00aee0c](https://github.com/JanssenProject/jans/commit/00aee0c26565e8b0b574370610a75139c2155568))
+* **config-api:** new endpoint to fetch feature flag except UNKOWN ([#6779](https://github.com/JanssenProject/jans/issues/6779)) ([cba403b](https://github.com/JanssenProject/jans/commit/cba403b9a8528a16cb378ad1a656abeb0859674b))
+* **idp-plugin:** inbound SAML with Keycloak as SP and external SAML IDP ([#6793](https://github.com/JanssenProject/jans/issues/6793)) ([bc5eaad](https://github.com/JanssenProject/jans/commit/bc5eaade348d74d93da25c7494975b9aa35cded4))
+* **jans-config:** changes to merge config-idp-plugin merged with config-saml-plugin ([#6921](https://github.com/JanssenProject/jans/issues/6921)) ([86e71c9](https://github.com/JanssenProject/jans/commit/86e71c944ee002f3ddda96280123a6aef36f2554))
+* **kc-saml-plugin:** cleanup and error handling ([#7054](https://github.com/JanssenProject/jans/issues/7054)) ([7fcea4f](https://github.com/JanssenProject/jans/commit/7fcea4fd75eec861a5f56050c2b8831b56a5568b))
+* **kc-saml-plugin:** saml enhancement for validation ([#6949](https://github.com/JanssenProject/jans/issues/6949)) ([ba07f32](https://github.com/JanssenProject/jans/commit/ba07f32edc6210fc3ad64d35338e5b7a642cb16a))
+* replace jwt token with reference token to access config-api (admin ui plugin) [#6562](https://github.com/JanssenProject/jans/issues/6562) ([#6587](https://github.com/JanssenProject/jans/issues/6587)) ([7f82250](https://github.com/JanssenProject/jans/commit/7f82250ca36d05ae3c0ab8f5ea13ba0d0dc3f4b7))
+
+
+### Bug Fixes
+
+* API spec metadata ([#6473](https://github.com/JanssenProject/jans/issues/6473)) ([3922ddb](https://github.com/JanssenProject/jans/commit/3922ddb509db422d9a0f2c88df9f0d2e3fd05f46))
+* **config-api:** hide authenticationMethod client model utility method [#7061](https://github.com/JanssenProject/jans/issues/7061) ([#7063](https://github.com/JanssenProject/jans/issues/7063)) ([66cea41](https://github.com/JanssenProject/jans/commit/66cea4102d2c8b05ea11559f85627305b9dee96d))
+* **config-api:** json build issue and saml plugin swagger spec annotation ([#6582](https://github.com/JanssenProject/jans/issues/6582)) ([5ece7a9](https://github.com/JanssenProject/jans/commit/5ece7a9c4877fe1cf5b1ed7a2c93da69b7091dd9))
+* **config-api:** made clientId optional for TR and customScript changes for returning types ([#6617](https://github.com/JanssenProject/jans/issues/6617)) ([9c59a06](https://github.com/JanssenProject/jans/commit/9c59a0621ab281f5ae41d7fba0278915a837f1aa))
+* **kc-saml-plugin:** error while updating SAML TR  ([#6974](https://github.com/JanssenProject/jans/issues/6974)) ([ad3041d](https://github.com/JanssenProject/jans/commit/ad3041d35134c7eca49379267c7fa1835e11a989))
+* **kc-saml-plugin:** metadata file type in Openi API spec incorrect  ([#7059](https://github.com/JanssenProject/jans/issues/7059)) ([9bd73ce](https://github.com/JanssenProject/jans/commit/9bd73ce8132bf898a0b3749ff9100d5df4eeb7b6))
+* openapi spec version element ([#6780](https://github.com/JanssenProject/jans/issues/6780)) ([e4aca8c](https://github.com/JanssenProject/jans/commit/e4aca8ce1b39cd89764b3c852418a8ed879b3925))
+* prepare for 1.0.21 release ([#7008](https://github.com/JanssenProject/jans/issues/7008)) ([2132de6](https://github.com/JanssenProject/jans/commit/2132de6683f67bf22d5a863b149770d657073a83))
+
+
+### Documentation
+
+* **config-api:** auth featureFlags should be described as enum in spec ([#6590](https://github.com/JanssenProject/jans/issues/6590)) ([fdf33c1](https://github.com/JanssenProject/jans/commit/fdf33c1b886ac981b8ad95015a8d338160220872))
+* **config-api:** issue 6382 - regen spec to reflect new fields in ClientAttributes ([#6566](https://github.com/JanssenProject/jans/issues/6566)) ([592f186](https://github.com/JanssenProject/jans/commit/592f1866624393c9eaa343cb44f03dc798ff2b4d))
+* **saml-plugin:** saml swagger spec rectification ([#6605](https://github.com/JanssenProject/jans/issues/6605)) ([6c82728](https://github.com/JanssenProject/jans/commit/6c82728d0be4f882c77e20e9f6a66d88daf5acd1))
+
+## [1.0.20](https://github.com/JanssenProject/jans/compare/jans-config-api-v1.0.19...jans-config-api-v1.0.20) (2023-11-08)
+
+
+### Features
+
+* adding scopes in config-api endpoint access token based on tags (admin-ui) [#6413](https://github.com/JanssenProject/jans/issues/6413) ([#6414](https://github.com/JanssenProject/jans/issues/6414)) ([643ba07](https://github.com/JanssenProject/jans/commit/643ba0780b5bf9f7383357075adb505774a39a27))
+* changing names of clients used in admin-ui [#1375](https://github.com/JanssenProject/jans/issues/1375) ([#6326](https://github.com/JanssenProject/jans/issues/6326)) ([9e63acb](https://github.com/JanssenProject/jans/commit/9e63acb28ee4354e361b6b8d3d7aabe0f5f94610))
+* **config-api:** open api spec changes for fetch custom script type endpoint ([#6290](https://github.com/JanssenProject/jans/issues/6290)) ([a8884f3](https://github.com/JanssenProject/jans/commit/a8884f39ee4eea3ef65d7cd41120343201d2b3e6))
+* **jans-config-api:** need API to fetch list containing all script-types from persistence ([#6276](https://github.com/JanssenProject/jans/issues/6276)) ([6958f7b](https://github.com/JanssenProject/jans/commit/6958f7b322e26b245e438939808f11c64c9608e3))
+
+
+### Bug Fixes
+
+* able to add duplicate role [#1432](https://github.com/JanssenProject/jans/issues/1432) ([#6465](https://github.com/JanssenProject/jans/issues/6465)) ([2ca4cc2](https://github.com/JanssenProject/jans/commit/2ca4cc2e334d7d86a1d00770d465626b1bd6dd97))
+* generate latest openApi spec from code [#6444](https://github.com/JanssenProject/jans/issues/6444) ([#6445](https://github.com/JanssenProject/jans/issues/6445)) ([23d40fa](https://github.com/JanssenProject/jans/commit/23d40fad93a58146ece961d053b1c55b525ffc23))
+* incorrect /license/details reponse (admin-ui) [#6418](https://github.com/JanssenProject/jans/issues/6418) ([#6419](https://github.com/JanssenProject/jans/issues/6419)) ([9d5212e](https://github.com/JanssenProject/jans/commit/9d5212ef7aa5efa35d00657bdacbabbc7d48b1e1))
+* prepare for 1.0.20 release ([c6e806e](https://github.com/JanssenProject/jans/commit/c6e806eb31fed998d52cbef7a7d94c231d913102))
+
+
+### Documentation
+
+* fixes ([#5984](https://github.com/JanssenProject/jans/issues/5984)) ([8b0cbfb](https://github.com/JanssenProject/jans/commit/8b0cbfbb4ab4731a41bdfc77321b287df3cdd805))
+
 ## [1.0.19](https://github.com/JanssenProject/jans/compare/jans-config-api-v1.0.18...jans-config-api-v1.0.19) (2023-10-11)
 
 

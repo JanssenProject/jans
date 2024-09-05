@@ -7,7 +7,7 @@
 package io.jans.as.common.service.common;
 
 import io.jans.as.model.config.StaticConfiguration;
-import io.jans.as.persistence.model.configuration.GluuConfiguration;
+import io.jans.config.GluuConfiguration;
 import io.jans.model.SmtpConfiguration;
 import io.jans.orm.PersistenceEntryManagerFactory;
 import io.jans.orm.model.PersistenceConfiguration;
@@ -16,6 +16,10 @@ import io.jans.service.cache.CacheConfiguration;
 import io.jans.service.cache.InMemoryConfiguration;
 import io.jans.service.document.store.conf.DocumentStoreConfiguration;
 import io.jans.service.document.store.conf.LocalDocumentStoreConfiguration;
+import io.jans.service.message.model.config.MessageConfiguration;
+import io.jans.service.message.model.config.MessageProviderType;
+import io.jans.service.message.model.config.NullMessageConfiguration;
+
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
@@ -69,6 +73,26 @@ public class ApplicationFactory {
         }
         log.info("Cache configuration: " + cacheConfiguration);
         return cacheConfiguration;
+    }
+
+    @Produces
+    @ApplicationScoped
+    public MessageConfiguration getMessageConfiguration() {
+    	MessageConfiguration messageConfiguration = configurationService.getConfiguration().getMessageConfiguration();
+        if (messageConfiguration == null || messageConfiguration.getMessageProviderType() == null) {
+            log.error("Failed to read message configuration from DB. Please check configuration jsMessageConf attribute " +
+                    "that must contain message configuration JSON represented by MessageConfiguration.class. Appliance DN: " + configurationService.getConfiguration().getDn());
+            log.info("Creating fallback Null message configuration ... ");
+
+            messageConfiguration = new MessageConfiguration();
+            messageConfiguration.setMessageProviderType(MessageProviderType.DISABLED);
+            messageConfiguration.setNullConfiguration(new NullMessageConfiguration());
+
+            log.info("NULL message configuration is created.");
+        }
+
+        log.info("Message configuration: " + messageConfiguration);
+        return messageConfiguration;
     }
 
     @Produces

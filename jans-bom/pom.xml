@@ -5,7 +5,7 @@
 	<artifactId>jans-bom</artifactId>
 	<packaging>pom</packaging>
 	<name>jans-bom</name>
-	<version>1.0.20-SNAPSHOT</version>
+	<version>1.1.5-SNAPSHOT</version>
 
     <distributionManagement>
 	  <repository>
@@ -35,7 +35,7 @@
 		<org.jboss.annotations.api.version>2.0.1.Final</org.jboss.annotations.api.version>
 		
 		<jakarta.ejb.api.version>4.0.1</jakarta.ejb.api.version>
-		<jakarta.mail.api.version>2.1.0</jakarta.mail.api.version>
+		<jakarta.mail.api.version>2.1.2</jakarta.mail.api.version>
 		<jakarta.mail.version>1.6.7</jakarta.mail.version>
 
 		<jakarta.websocket.api.version>2.1.0</jakarta.websocket.api.version>
@@ -46,17 +46,17 @@
 		<jackson.bom.version>2.13.4.20221013</jackson.bom.version>
 		<jackson.version>2.13.4</jackson.version>
 		<jackson.databind.version>2.13.4.2</jackson.databind.version>
-		<json.version>20230227</json.version>
+		<json.version>20231013</json.version>
 
-		<log4j.version>2.19.0</log4j.version>
+		<log4j.version>2.23.1</log4j.version>
 		<slf4j.version>1.7.36</slf4j.version>
 
 		<guava.version>32.1.1-jre</guava.version>
 	
-		<aws.sns.version>1.12.448</aws.sns.version>
+		<aws.sns.version>1.12.708</aws.sns.version>
 		<jackrabbit.version>2.21.13</jackrabbit.version>
 
-		<bc.version>1.70</bc.version>
+		<bc.version>1.78</bc.version>
 		<junit.jupiter.version>5.9.2</junit.jupiter.version>
 		<mockito.version>5.1.1</mockito.version>
 
@@ -158,6 +158,11 @@
             <dependency>
                 <groupId>io.jans</groupId>
                 <artifactId>jans-core-cache</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jans</groupId>
+                <artifactId>jans-core-message</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -271,17 +276,17 @@
 			<!-- Security -->
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
-				<artifactId>bcprov-jdk15on</artifactId>
+				<artifactId>bcprov-jdk18on</artifactId>
 				<version>${bc.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
-				<artifactId>bcpkix-jdk15on</artifactId>
+				<artifactId>bcpkix-jdk18on</artifactId>
 				<version>${bc.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
-				<artifactId>bcmail-jdk15on</artifactId>
+				<artifactId>bcmail-jdk18on</artifactId>
 				<version>${bc.version}</version>
 			</dependency>
 			<dependency>
@@ -302,8 +307,13 @@
 			<dependency>
 				<groupId>com.nimbusds</groupId>
 				<artifactId>nimbus-jose-jwt</artifactId>
-				<version>9.30.2</version>
+				<version>9.37.3</version>
 			</dependency>
+            <dependency>
+                <groupId>com.nimbusds</groupId>
+                <artifactId>oauth2-oidc-sdk</artifactId>
+                <version>11.7</version>
+            </dependency>
 
 			<!-- Weld -->
 			<dependency>
@@ -409,7 +419,7 @@
 			<!-- <dependency>
 				<groupId>javax.persistence</groupId>
 				<artifactId>persistence-api</artifactId>
-				<version>1.0.20-SNAPSHOT</version>
+				<version>1.1.5-SNAPSHOT</version>
 			</dependency> -->
 
 			<!-- hibernate -->
@@ -555,6 +565,11 @@
 				<artifactId>jackson-annotations</artifactId>
 				<version>${jackson.version}</version>
 			</dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.module</groupId>
+                <artifactId>jackson-module-jaxb-annotations</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
 			<dependency>
 				<groupId>com.fasterxml.jackson.core</groupId>
 				<artifactId>jackson-core</artifactId>
@@ -623,53 +638,14 @@
 			 </dependency>
 
 			<!-- RestEasy -->
-			 <dependency>
-	           <groupId>org.jboss.resteasy</groupId>
-	           <artifactId>resteasy-core</artifactId>
-	           <version>${resteasy.version}</version>
-	       </dependency>
 			<dependency>
-				<groupId>org.jboss.resteasy</groupId>
-				<artifactId>resteasy-cdi</artifactId>
-				<version>${resteasy.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.jboss.resteasy</groupId>
-				<artifactId>resteasy-client</artifactId>
-				<version>${resteasy.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.jboss.resteasy</groupId>
-				<artifactId>resteasy-servlet-initializer</artifactId>
-				<version>${resteasy.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.jboss.resteasy</groupId>
-				<artifactId>resteasy-jaxb-provider</artifactId>
-				<version>${resteasy.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.jboss.resteasy</groupId>
-				<artifactId>resteasy-jackson2-provider</artifactId>
-				<version>${resteasy.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.jboss.resteasy</groupId>
-				<artifactId>resteasy-json-p-provider</artifactId>
-				<version>${resteasy.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.jboss.resteasy</groupId>
-				<artifactId>resteasy-core-spi</artifactId>
-				<version>${resteasy.version}</version>
+			    <groupId>org.jboss.resteasy</groupId>
+			    <artifactId>resteasy-bom</artifactId>
+			    <version>${resteasy.version}</version>
+				<scope>import</scope>
+				<type>pom</type>
 			</dependency>
 
-			<!-- <dependency>
-			    <groupId>javax.ws.rs</groupId>
-			    <artifactId>javax.ws.rs-api</artifactId>
-			    <version>2.1.1</version>
-			</dependency>
- -->
 			<!-- JSON -->
 			<dependency>
 				<groupId>org.json</groupId>
@@ -764,12 +740,12 @@
 			<dependency>
 				<groupId>com.mysql</groupId>
 				<artifactId>mysql-connector-j</artifactId>
-				<version>8.0.32</version>
+				<version>8.2.0</version>
 			</dependency>
 			<dependency>
 			    <groupId>org.postgresql</groupId>
 			    <artifactId>postgresql</artifactId>
-			    <version>42.6.0</version>
+			    <version>42.7.3</version>
 			</dependency>
 
 			<!-- SQL Query -->
@@ -853,7 +829,7 @@
 			<dependency>
 				<groupId>org.testng</groupId>
 				<artifactId>testng</artifactId>
-				<version>6.14.3</version>
+				<version>7.8.0</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
@@ -946,6 +922,12 @@
 				<groupId>org.w3c.css</groupId>
 				<artifactId>sac</artifactId>
 				<version>1.3</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.seleniumhq.selenium</groupId>
+				<artifactId>htmlunit3-driver</artifactId>
+				<version>4.17.0</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

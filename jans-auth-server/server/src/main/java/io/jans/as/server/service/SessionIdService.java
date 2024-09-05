@@ -63,6 +63,7 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.TimeUnit;
 
+import static io.jans.as.server.service.AcrService.isAgama;
 import static org.apache.commons.lang.BooleanUtils.isTrue;
 
 /**
@@ -168,6 +169,10 @@ public class SessionIdService {
         return acr;
     }
 
+    public static boolean isAgamaInSessionAndRequest(String sessionAcr, List<String> acrValuesList) {
+        return isAgama(sessionAcr) && !acrValuesList.isEmpty() && isAgama(acrValuesList.iterator().next());
+    }
+
     // #34 - update session attributes with each request
     // 1) redirect_uri change -> update session
     // 2) acr change -> throw acr change exception
@@ -189,7 +194,7 @@ public class SessionIdService {
             }
 
             List<String> acrValuesList = acrValuesList(acrValuesStr);
-            boolean isAcrChanged = !acrValuesList.isEmpty() && !acrValuesList.contains(sessionAcr);
+            boolean isAcrChanged = !acrValuesList.isEmpty() && !acrValuesList.contains(sessionAcr) && !isAgamaInSessionAndRequest(sessionAcr, acrValuesList);
             if (isAcrChanged) {
                 Map<String, Integer> acrToLevel = externalAuthenticationService.acrToLevelMapping();
                 Integer sessionAcrLevel = Util.asInt(acrToLevel.get(externalAuthenticationService.scriptName(sessionAcr)), -1);
@@ -659,19 +664,20 @@ public class SessionIdService {
     }
 
     public int getServerSessionIdLifetimeInSeconds() {
-        if (appConfiguration.getServerSessionIdLifetime() != null && appConfiguration.getServerSessionIdLifetime() > 0) {
-            return appConfiguration.getServerSessionIdLifetime();
-        }
-        if (appConfiguration.getSessionIdLifetime() != null && appConfiguration.getSessionIdLifetime() > 0) {
-            return appConfiguration.getSessionIdLifetime();
+        if (appConfiguration.getSessionIdLifetime() != null) {
+            if (appConfiguration.getSessionIdLifetime() > 0) {
+                return appConfiguration.getSessionIdLifetime();
+            } else { // equals or less then 0
+                // if less or equal to 0 we put it for maximum period
+                return Integer.MAX_VALUE;
+            }
         }
 
-        // we don't know for how long we can put it in cache/persistence since expiration is not set, so we set it to max integer.
-        if (appConfiguration.getServerSessionIdLifetime() != null && appConfiguration.getSessionIdLifetime() != null &&
-                appConfiguration.getServerSessionIdLifetime() <= 0 && appConfiguration.getSessionIdLifetime() <= 0) {
-            return Integer.MAX_VALUE;
+        if (appConfiguration.getSessionIdCookieLifetime() != null && appConfiguration.getSessionIdCookieLifetime() > 0) {
+            return appConfiguration.getSessionIdCookieLifetime();
         }
-        log.debug("Session id lifetime configuration is null.");
+
+        log.debug("Session id lifetime configuration is null. (Both 'sessionIdLifetime' and 'sessionIdCookieLifetime' are null. Fallback to 86400 value.");
         return AppConfiguration.DEFAULT_SESSION_ID_LIFETIME;
     }
 
@@ -857,6 +863,10 @@ public class SessionIdService {
     }
 
     public void remove(List<SessionId> list) {
+        if (list == null || list.isEmpty()) {
+            return; // nothing to do
+        }
+
         for (SessionId id : list) {
             try {
                 remove(id);
@@ -909,9 +919,16 @@ public class SessionIdService {
 
         HashSet<String> resultAcrs = new HashSet<>();
         for (String acr : acrs) {
-            resultAcrs.add(externalAuthenticationService.scriptName(acr));
+            String acrForScript = isAgama(acr) ? AcrService.AGAMA : acr;
+            final String scriptName = externalAuthenticationService.scriptName(acrForScript);
+            if (StringUtils.isNotBlank(scriptName)) {
+                resultAcrs.add(acr);
+            }
         }
 
+        if (log.isTraceEnabled()) {
+            log.trace("acrValuesList {}", resultAcrs);
+        }
         return new ArrayList<>(resultAcrs);
     }
 

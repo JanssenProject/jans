@@ -12,6 +12,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
+import org.slf4j.Logger;
 
 /**
  * Implements all methods of the {@link SsaRestWebService} interface.
@@ -33,6 +34,9 @@ public class SsaRestWebServiceImpl implements SsaRestWebService {
 
     @Inject
     private SsaGetJwtAction ssaGetJwtAction;
+
+    @Inject
+    private Logger log;
 
     /**
      * Creates an SSA from the requested parameters.
@@ -76,7 +80,9 @@ public class SsaRestWebServiceImpl implements SsaRestWebService {
      */
     @Override
     public Response validate(String jti) {
-        return ssaValidateAction.validate(jti);
+        Response r = ssaValidateAction.validate(jti);
+        log.debug("{}", r.getEntity());
+        return r;
     }
 
     /**
@@ -101,7 +107,7 @@ public class SsaRestWebServiceImpl implements SsaRestWebService {
      * <p>
      * Method will return the following exceptions:
      * - {@link WebApplicationException} with status {@code 401} if this functionality is not enabled, request has to have at least scope "ssa.admin".
-     * - {@link WebApplicationException} with status {@code 422} if the SSA does not exist, is expired or used.
+     * - {@link WebApplicationException} with status {@code 400 (Bad Request) with <b>invalid_jti<b/> key}, when jti does not exist, is invalid or state is in (expired, used or revoked).
      * - {@link WebApplicationException} with status {@code 500} in case an uncontrolled error occurs when processing the method.
      * </p>
      *

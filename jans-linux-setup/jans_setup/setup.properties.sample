@@ -41,8 +41,14 @@ admin_email=
 ### The password to be used in Java KeyStore
 jksPass=
 
-### Install OpenDJ
-installLdap=True
+### Install Local PostgreSQL
+rdbm_install_type=1
+rdbm_type=pgsql
+rdbm_host=localhost
+rdbm_port=5432
+rdbm_db=jansdb
+rdbm_user=jans
+rdbm_password=qwerty
 
 ### Total memory (in KB) to be used by Jannses applications. This is typically 
 ### 80% of your physical memory. If you have 8GB of ram, value will be 6553
@@ -52,13 +58,12 @@ application_max_ram=
 install_config_api=
 
 ### If you want to install Fido2 Server, set this to True
-installFido2=
+install_fido2=
 
 ### If you want to install Scim Server, set this to True
 install_scim_server=
 
 ### To use remote MySQL as backend
-# installLdap=False
 # rdbm_install=2
 # rdbm_db = gluudb
 # rdbm_user = gluu

@@ -11,6 +11,7 @@ import io.jans.as.common.util.CommonUtils;
 import io.jans.as.common.util.RedirectUri;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
 import io.jans.as.model.authorize.AuthorizeResponseParam;
+import io.jans.as.model.authzdetails.AuthzDetails;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ResponseMode;
 import io.jans.as.model.common.ScopeConstants;
@@ -184,6 +185,12 @@ public class AuthzRequestService {
         authzRequest.setCodeChallengeMethod(par.getAttributes().getCodeChallengeMethod());
 
         authzRequest.setState(StringUtils.isNotBlank(par.getAttributes().getState()) ? par.getAttributes().getState() : "");
+
+        final String authorizationDetails = par.getAttributes().getAuthorizationDetails();
+        if (StringUtils.isNotBlank(authorizationDetails)) {
+            authzRequest.setAuthzDetailsString(authorizationDetails);
+            authzRequest.setAuthzDetails(AuthzDetails.ofSilently(authorizationDetails));
+        }
 
         if (StringUtils.isNotBlank(par.getAttributes().getDpopJkt()))
             authzRequest.setDpopJkt(par.getAttributes().getDpopJkt());

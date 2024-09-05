@@ -3,15 +3,16 @@ import sys
 import uuid
 import argparse
 
-from setup_app import static
+from setup_app import static, paths
 from setup_app.version import __version__
 from setup_app.utils import base
+from setup_app.config import Config
 
 OPENBANKING_PROFILE = 'openbanking'
 PROFILE = os.environ.get('JANS_PROFILE')
 
 parser_description='''Use this script to configure your Jans Server and to add initial data required for
-oxAuth and oxTrust to start. If setup.properties is found in this folder, these
+Jans Auth and other Jans services to start. If setup.properties is found in this folder, these
 properties will automatically be used instead of the interactive setup.
 '''
 
@@ -28,7 +29,7 @@ parser.add_argument('-encode-salt', help="24 characters length string to be used
 
 rdbm_group = parser.add_mutually_exclusive_group()
 rdbm_group.add_argument('-remote-rdbm', choices=['mysql', 'pgsql', 'spanner'], help="Enables using remote RDBM server")
-rdbm_group.add_argument('-local-rdbm', choices=['mysql', 'pgsql'], help="Enables installing/configuring local RDBM server")
+rdbm_group.add_argument('-local-rdbm', choices=['mysql', 'pgsql'], help="Enables installing/configuring local RDBM server", default='pgsql')
 parser.add_argument('-ip-address', help="Used primarily by Apache httpd for the Listen directive")
 parser.add_argument('-host-name', help="Internet-facing FQDN that is used to generate certificates and metadata.")
 parser.add_argument('-org-name', help="Organization name field used for generating X.509 certificates")
@@ -75,6 +76,8 @@ if PROFILE != OPENBANKING_PROFILE:
     parser.add_argument('-t', help="Load test data", action='store_true')
     parser.add_argument('-x', help="Load test data and exit", action='store_true')
     parser.add_argument('--allow-pre-released-features', help="Enable options to install experimental features, not yet officially supported", action='store_true')
+
+    parser.add_argument('--local-ldap', help="Install local OpenDJ Server", action='store_true')
     parser.add_argument('--listen_all_interfaces', help="Allow the LDAP server to listen on all server interfaces", action='store_true')
 
     ldap_group = parser.add_mutually_exclusive_group()
@@ -88,6 +91,9 @@ if PROFILE != OPENBANKING_PROFILE:
     parser.add_argument('-couchbase-bucket-prefix', help="Set prefix for couchbase buckets", default='jans')
     parser.add_argument('-couchbase-hostname', help="Remote couchbase server hostname")
 
+    for bucket in base.coucbase_bucket_dict:
+        parser.add_argument(f'-couchbase-{bucket}-mem', help=f"Memory allocation in MB for Couchbase bucket {bucket}", default=base.coucbase_bucket_dict[bucket]['memory_allocation'], type=int)
+
     parser.add_argument('--no-data', help="Do not import any data to database backend, used for clustering", action='store_true')
     parser.add_argument('--no-jsauth', help="Do not install OAuth2 Authorization Server", action='store_true')
     parser.add_argument('-ldap-admin-password', help="Used as the LDAP directory manager password")
@@ -95,13 +101,14 @@ if PROFILE != OPENBANKING_PROFILE:
 
     parser.add_argument('--no-scim', help="Do not install Scim Server", action='store_true')
     parser.add_argument('--no-fido2', help="Do not install Fido2 Server", action='store_true')
-    parser.add_argument('--install-eleven', help="Install Eleven Server", action='store_true')
-    parser.add_argument('--install-jans-link', help="Install Link Server", action='store_true')
+    parser.add_argument('--install-jans-link', help="Install Jans Link Server", action='store_true')
     parser.add_argument('--install-jans-keycloak-link', help="Install Keycloak Link Server", action='store_true')
 
-    parser.add_argument('--with-casa', help="Install Jans Casa Server", action='store_true')
-    parser.add_argument('--install-jans-saml', help="Install Jans SAML", action='store_true')
-    #parser.add_argument('--oxd-use-jans-storage', help="Use Jans Storage for Oxd Server", action='store_true')
+    parser.add_argument('--with-casa', help="Install Jans Casa", action='store_true')
+    parser.add_argument('--install-jans-saml', help="Install Jans KC", action='store_true')
+    parser.add_argument('--install-jans-lock', help="Install Jans Lock", action='store_true')
+    parser.add_argument('--install-opa', help="Install OPA", action='store_true')
+
     parser.add_argument('--load-config-api-test', help="Load Config Api Test Data", action='store_true')
 
     parser.add_argument('-config-patch-creds', help="password:username for downloading auto test ciba password")

@@ -66,7 +66,9 @@ func (c *Client) GetScripts(ctx context.Context) ([]Script, error) {
 
 	ret := response{}
 
-	if err := c.get(ctx, "/jans-config-api/api/v1/config/scripts", token, &ret); err != nil {
+	if err := c.get(ctx, "/jans-config-api/api/v1/config/scripts", token, &ret, map[string]string{
+		"limit": "5",
+	}); err != nil {
 		return nil, fmt.Errorf("get request failed: %w", err)
 	}
 
@@ -155,4 +157,20 @@ func (c *Client) DeleteScript(ctx context.Context, inum string) error {
 	}
 
 	return nil
+}
+
+// GetScriptTypes retrieves the list of supported script types.
+func (c *Client) GetScriptTypes(ctx context.Context) ([]string, error) {
+
+	token, err := c.getToken(ctx, "https://jans.io/oauth/config/scripts.readonly")
+	if err != nil {
+		return nil, fmt.Errorf("failed to get token: %w", err)
+	}
+
+	ret := []string{}
+	if err := c.get(ctx, "/jans-config-api/api/v1/config/scripts/types", token, &ret); err != nil {
+		return nil, fmt.Errorf("get request failed: %w", err)
+	}
+
+	return ret, nil
 }

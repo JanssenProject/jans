@@ -305,7 +305,7 @@ jansConfProperty: {"value1":"AS_CLIENT_ID","value2":"","description":""}
 jansConfProperty: {"value1":"AS_CLIENT_SECRET","value2":"","description":""}
 jansConfProperty: {"value1":"qr_options","value2":"{ size: 500, mSize: 0.05 }","description":""}
 jansConfProperty: {"value1":"label","value2":"Super Gluu","description":""}
-jansConfProperty: {"value1":"registration_uri","value2":"https://%(hostname)s/identity/register","description":""}
+jansConfProperty: {"value1":"registration_uri","value2":"","description":""}
 jansConfProperty: {"value1":"authentication_mode","value2":"two_step","description":""}
 jansConfProperty: {"value1":"notification_service_mode","value2":"jans","description":""}
 jansConfProperty: {"value1":"credentials_file","value2":"/etc/certs/super_gluu_creds.json","description":""}
@@ -477,6 +477,21 @@ jansScr::%(update_token_sample_script)s
 jansScrTyp: update_token
 jansProgLng: python
 
+version: 1
+dn: inum=2D3E.5A04,ou=scripts,o=jans
+objectClass: jansCustomScr
+objectClass: top
+description: Role Based Scopes Update Script
+displayName: role_based_scopes_update_token
+inum: 2D3E.5A04
+jansEnabled: TRUE
+jansLevel: 1
+jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
+jansProgLng: python
+jansRevision: 12
+jansScr::%(introspection_role_based_scopes_update_token_role_based_scopes_update_token)s
+jansScrTyp: update_token
+
 dn: inum=C1BA-C1BA,ou=scripts,o=jans
 description: Firebase notification sender
 displayName: firebase_ciba_end_user_notification
@@ -490,20 +505,6 @@ objectClass: top
 objectClass: jansCustomScr
 jansEnabled: false
 jansProgLng: python
-
-dn: inum=A44E-4F3D,ou=scripts,o=jans
-objectClass: top
-objectClass: jansCustomScr
-description: Role Based Scopes
-displayName: role_based_scopes
-inum: A44E-4F3D
-jansEnabled: true
-jansLevel: 1
-jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
-jansProgLng: python
-jansRevision: 1
-jansScr::%(introspection_introspection_role_based_scope_introspection_role_based_scope)s
-jansScrTyp: introspection
 
 dn: inum=A110-88AB,ou=scripts,o=jans
 objectClass: top
@@ -535,6 +536,20 @@ jansRevision: 11
 jansScr::%(discovery_discovery)s
 jansScrTyp: discovery
 
+dn: inum=0300-BA98,ou=scripts,o=jans
+objectClass: jansCustomScr
+objectClass: top
+description: Demo Authz Detail Java Script
+displayName: demo_authz_detail
+inum: 0300-BA98
+jansEnabled: true
+jansLevel: 1
+jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
+jansProgLng: java
+jansRevision: 11
+jansScr::%(authz_detail_authzdetail)s
+jansScrTyp: authz_detail
+
 dn: inum=0300-BA99,ou=scripts,o=jans
 objectClass: jansCustomScr
 objectClass: top
@@ -555,8 +570,6 @@ objectClass: top
 description: Agama Script
 displayName: agama
 inum: BADA-BADA
-jansConfProperty: {"value1":"cust_param_name","value2":"agama_flow","description":""}
-jansConfProperty: {"value1":"default_flow_name","value2":"","description":""}
 jansConfProperty: {"value1":"finish_userid_db_attribute","value2":"uid","description":""}
 jansEnabled: false
 jansLevel: 10
@@ -613,6 +626,22 @@ jansProgLng: python
 jansRevision: 0
 jansScr::%(introspection_introspection_github_claims_introspection_github_claims)s
 jansScrTyp: introspection
+
+dn: inum=9BAF-90D7,ou=scripts,o=jans
+description: Fido2 Extension module
+displayName: fido2 extension
+inum: 9BAF-90D7
+jansConfProperty: {"value1":"fido2_server_uri","value2":"https://%(hostname)s","description":""}
+jansLevel: 1
+jansModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
+jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
+jansRevision: 1
+jansScr::%(fido2_fido2extensionsample)s
+jansScrTyp: fido2_extension
+objectClass: top
+objectClass: jansCustomScr
+jansEnabled: false
+jansProgLng: python
 
 
 

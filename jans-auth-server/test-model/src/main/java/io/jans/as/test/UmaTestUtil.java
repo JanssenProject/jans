@@ -40,7 +40,7 @@ public class UmaTestUtil {
 
     public static void assertIt(UmaMetadata metadata) {
         Assert.assertNotNull(metadata, "Metadata is null");
-        Assert.assertTrue(ArrayUtils.contains(metadata.getGrantTypesSupported(), GrantType.OXAUTH_UMA_TICKET.getValue()));
+        Assert.assertTrue(ArrayUtils.contains(metadata.getGrantTypesSupported(), GrantType.UMA_TICKET.getValue()));
         Assert.assertNotNull(metadata.getIssuer(), "Issuer isn't correct");
         Assert.assertNotNull(metadata.getTokenEndpoint(), "Token endpoint isn't correct");
         Assert.assertNotNull(metadata.getIntrospectionEndpoint(), "Introspection endpoint isn't correct");

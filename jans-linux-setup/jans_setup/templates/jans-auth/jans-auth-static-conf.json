@@ -16,7 +16,10 @@
         "umaPolicy":"ou=policies,ou=uma,o=jans",
         "metric":"ou=statistic,o=metric",
         "sectorIdentifiers": "ou=sector_identifiers,o=jans",
+        "archivedJwks": "ou=archived_jwks,o=jans",
         "ciba": "ou=ciba,o=jans",
-        "ssa": "ou=ssa,o=jans"
+        "ssa": "ou=ssa,o=jans",
+        "node": "ou=node,o=jans",
+        "statusIndexPool": "ou=status_index_pool,o=jans"
     }
 }

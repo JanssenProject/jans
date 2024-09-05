@@ -59,7 +59,5 @@ The jans implementation of KeyGenerator accepts the following arguments:
 | -sig_keys         | Signature keys to generate. (For example: RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512)  |
 | _keyId            | Key name suffix                                                                                   |
 | -test_prop_file   | Test property file used for test purpose only                                                     |
-| -ox11             | oxEleven Generate Key Endpoint.                                                                   |
-| -at               | oxEleven Access Token                                                                             |
 
 

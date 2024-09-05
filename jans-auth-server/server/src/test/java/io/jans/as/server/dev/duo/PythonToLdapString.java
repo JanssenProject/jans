@@ -7,8 +7,10 @@
 package io.jans.as.server.dev.duo;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.jans.as.persistence.model.configuration.CustomProperty;
-import io.jans.as.persistence.model.configuration.IDPAuthConf;
+
+import io.jans.config.CustomProperty;
+import io.jans.config.IDPAuthConf;
+
 import org.apache.commons.io.IOUtils;
 import org.testng.annotations.Test;
 

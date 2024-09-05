@@ -139,7 +139,7 @@ One way to structure the solution is the following:
 
 - Template `commons.ftlh` is imported and its macro `main` called passing `true` for `useSidebar`
 
-- The markup between `<@com.main...` and `</@com.main>` is the content of the homepage, which is "inserted" by the `main` macro when the `<#nested>` directive is reached  
+- The markup inside `<@com.main...` tag is the content to be "inserted" when the `<#nested>` directive is reached  
 
 ```
 <#-- about.ftlh -->
@@ -162,7 +162,7 @@ One way to structure the solution is the following:
 !!! Important
     Ensure you have previously gone through the contents of this [page](./flows-navigation-ui.md) before proceeding
 
-This is a feature that in conjuction with [template overrides](#template-overrides) allows developers to implement backtracking or alternative routing. Suppose a flow is designed to reuse two or more existing subflows. As expected these subflows are neither aware of each other nor of its parent. How can the parent make so that once the user has landed at a page belonging to a given subflow A be presented the alternative to take another route, say, to subflow B?
+This is a feature that in conjuction with [template overrides](#template-overrides) allows developers to implement alternative routing and backtracking. Suppose a flow is designed to reuse two or more existing subflows. As expected these subflows are neither aware of each other nor of its parent. How can the parent make so that once the user has landed at a page belonging to a given subflow A be presented the alternative to take another route, say, to subflow B?
 
 Clearly a page at flow A can be overriden, however, how to abort A and make it jump to B? The answer is cancellation. Through flow cancellation, a running flow can be aborted and the control returned to one of its parents for further processing. This can achieved by overriding a template so that the POST to the current URL includes a form field named `_abort`.
 
@@ -194,10 +194,12 @@ The overriden template `cust_enter_otp.ftlh` would have a form like:
 ```
 ...
 <form method="post" enctype="application/x-www-form-urlencoded">
-    <button type="submit" id="_abort" name="_abort" value="">
+    <button type="submit" name="_abort">
         Didn't get an SMS?, send the passcode to my e-mail</button>
 </form>
 ```
+
+Note you cannot make cancellation occur at an arbitrary point of a flow. It can only happen when a page has been rendered, that is, an `RRF` directive is in execution. When a flow is aborted and the control returned back to a parent, there is no way to "resume" execution of the flow target of the cancellation. 
 
 ### Cancellation bubble-up
 
@@ -229,7 +231,7 @@ Note however URLs are not manipulable: an attempt to set the browser location to
 
 Additionally, the engine by default sends responses with proper HTTP headers so page contents are not cached. This is key to prevent manipulation and allows a safe usage of the browser's back button, where it will not be possible to visit past stages. 
 
-## Code transpilation
+### Code transpilation
 
 The engine has some timers running in the background. One of them [transpiles code](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/agama/engine/src/main/java/io/jans/agama/timer/Transpilation.java) when a change is detected in a given flow's source (written in Agama language). The transpilation process generates vanilla Javascript code runnable through [Mozilla Rhino](https://github.com/mozilla/rhino) by using a transformation chain like  (DSL) flow code -> (ANTLR4) parse tree -> (XML) abstract syntax tree -> JS. 
 
@@ -244,7 +246,7 @@ The transformation chain guarantees that a flow written in Agama DSL cannot:
 - You can find the (ANTLR4) DSL grammar [here](https://github.com/JanssenProject/jans/blob/main/agama/transpiler/src/main/antlr4/io/jans/agama/antlr/AuthnFlow.g4).
 - The last step of the transformation chain is carried out by means of [this](https://github.com/JanssenProject/jans/blob/main/agama/transpiler/src/main/resources/JSGenerator.ftl) Freemarker transformer
 
-## Other engine characteristics
+### Other engine characteristics
 
 Some interesting facts for the curious:
 

@@ -26,7 +26,7 @@ class PostInstallCommand(install):
             os.path.join(yaml_dir, 'jans-config-api-swagger-auto.yaml')
             )
 
-        for plugin_yaml_file in ('fido2-plugin-swagger.yaml', 'jans-admin-ui-plugin-swagger.yaml', 'scim-plugin-swagger.yaml', 'user-mgt-plugin-swagger.yaml'):
+        for plugin_yaml_file in ('fido2-plugin-swagger.yaml', 'jans-link-plugin-swagger.yaml', 'kc-saml-plugin-swagger.yaml', 'scim-plugin-swagger.yaml', 'jans-admin-ui-plugin-swagger.yaml', 'kc-link-plugin-swagger.yaml', 'lock-plugin-swagger.yaml', 'user-mgt-plugin-swagger.yaml'):
             print("downloding", plugin_yaml_file)
             urlretrieve(
                 'https://raw.githubusercontent.com/JanssenProject/jans/main/jans-config-api/plugins/docs/' + plugin_yaml_file,
@@ -83,13 +83,14 @@ setup(
     package_data={'': ['*.yaml', '.enabled']},
     zip_safe=False,
     install_requires=[
-        "ruamel.yaml>=0.16.5",
+        "ruamel.yaml>=0.16.5,<0.18.0",
         "PyJWT==2.4.0",
         "pygments",
         "prompt_toolkit==3.0.33",
         "requests",
         "urllib3",
         "pyDes",
+        "requests-toolbelt"
     ],
     classifiers=[
         "Intended Audience :: Developers",

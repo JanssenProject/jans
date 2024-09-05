@@ -1,7 +1,7 @@
 import json
 import asyncio
 from functools import partial
-from typing import Optional, Sequence
+from typing import Optional, Sequence, Any
 
 from prompt_toolkit.application import Application
 from prompt_toolkit.layout.dimension import D
@@ -12,13 +12,12 @@ from prompt_toolkit.widgets import Button, Dialog, Label
 from cli import config_cli
 from utils.static import DialogResult, cli_style
 from utils.utils import DialogUtils
+from utils.multi_lang import _
 from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.jans_tab import JansTab
-from typing import Any
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from prompt_toolkit.layout import Window
 
-from utils.multi_lang import _
 
 class ViewProperty(JansGDialog, DialogUtils):
     """The Main UMA-resources Dialog to view UMA Resource Details

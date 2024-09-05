@@ -64,6 +64,7 @@ specification. Sample below:
   "backchannel_logout_session_supported" : true,
   "token_endpoint" : "https://janssen-host-name/jans-auth/restv1/token",
   "response_types_supported" : [ "id_token token", "id_token", "code", "code token", "id_token code token", "id_token code", "token" ],
+  "acr_mappings" : {"alias1": "acr1"},
   "authorization_encryption_enc_values_supported" : [ "A128CBC+HS256", "A256CBC+HS512", "A128GCM", "A256GCM" ],
   "backchannel_token_delivery_modes_supported" : [ "poll", "ping", "push" ],
   "dpop_signing_alg_values_supported" : [ "RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "ES512", "PS256", "PS384", "PS512" ],
@@ -82,8 +83,9 @@ specification. Sample below:
   "request_object_signing_alg_values_supported" : [ "none", "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES384", "ES512", "ES512", "PS256", "PS384", "PS512" ],
   "request_object_encryption_alg_values_supported" : [ "RSA1_5", "RSA-OAEP", "A128KW", "A256KW" ],
   "session_revocation_endpoint" : "https://janssen-host-name/jans-auth/restv1/revoke_session",
+  "global_token_revocation_endpoint" : "https://janssen-host-name/jans-auth/restv1/global-token-revocation",
   "check_session_iframe" : "https://janssen-host-name/jans-auth/opiframe.htm",
-  "scopes_supported" : [ "https://jans.io/scim/all-resources.search", "address", "user_name", "clientinfo", "openid", "https://jans.io/scim/fido2.write", "profile", "uma_protection", "permission", "https://jans.io/scim/fido.read", "https://jans.io/scim/users.write", "https://jans.io/scim/groups.read", "revoke_session", "https://jans.io/scim/fido.write", "https://jans.io/scim/bulk", "https://jans.io/scim/users.read", "phone", "mobile_phone", "offline_access", "https://jans.io/scim/groups.write", "email", "https://jans.io/scim/fido2.read", "jans_client_api" ],
+  "scopes_supported" : [ "https://jans.io/scim/all-resources.search", "address", "user_name", "clientinfo", "openid", "https://jans.io/scim/fido2.write", "profile", "uma_protection", "permission", "https://jans.io/scim/fido.read", "https://jans.io/scim/users.write", "https://jans.io/scim/groups.read", "revoke_session", "global_token_revocation", "https://jans.io/scim/fido.write", "https://jans.io/scim/bulk", "https://jans.io/scim/users.read", "phone", "mobile_phone", "offline_access", "https://jans.io/scim/groups.write", "email", "https://jans.io/scim/fido2.read", "jans_client_api" ],
   "backchannel_logout_supported" : true,
   "acr_values_supported" : [ "simple_password_auth" ],
   "request_object_encryption_enc_values_supported" : [ "A128CBC+HS256", "A256CBC+HS512", "A128GCM", "A256GCM" ],
@@ -152,8 +154,38 @@ Individual modules of the Janssen Server will continue to write their operationa
 /opt/jans/bin/show_version.py
 ```
 
+Alternatively, [TUI](../config-guide/config-tools/jans-tui/README.md) can be used to get this information:
+
+1. Open TUI
+2. Navigate to `Jans TUI` menu item on top menu bar
+3. Navigate to `Application Versions`
+4. Hit `enter`
+
+This will show version of each Janssen Server modules:
+
+![](../../assets/tui-version-screen.png)
+
 -----------------------------
 
 ## After installation, what's next?
 
-After successful installation of the Janssen Server, move on to the [configuration steps](../config-guide/config-tools/jans-cli/README.md) in the Command Line Interface documentation to align Janssen with your organizational requirements.
+After successful installation of the Janssen Server, start configuring Janssen
+Server to fulfil your organizational requirements and authentication flows you
+intend to implement. Use the 
+[Text-based UI](../config-guide/config-tools/jans-tui/README.md) or  
+[command-line interface](../config-guide/config-tools/jans-cli/README.md) to 
+configure the Janssen Server.
+
+## Does the Janssen Server uninstall process remove the data store as well?
+
+Only if the persistence type is local LDAP, it will be removed during the
+Janssen server uninstallation process. 
+
+For all other persistence options, the
+Janssen server uninstall steps ([this](./vm-install/suse.md#uninstall)
+for instance) will only remove the Janssen Server
+software and it'll keep the data store untouched. Removing data store is at 
+the discretion of the
+administrator and it is a manual step. If not removed before attempting a
+reinstall of Janssen Server, the installer would fail due to the existence of
+the previous data store. 

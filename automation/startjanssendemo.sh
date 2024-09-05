@@ -2,9 +2,10 @@
 set -eo pipefail
 JANS_FQDN=$1
 JANS_PERSISTENCE=$2
-JANS_CI_CD_RUN=$3
+JANS_VERSION=$3
 EXT_IP=$4
-INSTALL_ISTIO=$5
+JANS_CI_CD_RUN=$5
+INSTALL_ISTIO=$6
 if [[ ! "$JANS_FQDN" ]]; then
   read -rp "Enter Hostname [demoexample.jans.io]:                           " JANS_FQDN
 fi
@@ -14,10 +15,10 @@ if ! [[ $JANS_FQDN == *"."*"."* ]]; then
   exit 1
 fi
 if [[ ! "$JANS_PERSISTENCE" ]]; then
-  read -rp "Enter persistence type [LDAP|MYSQL]:                            " JANS_PERSISTENCE
+  read -rp "Enter persistence type [LDAP|MYSQL|PGSQL]:                            " JANS_PERSISTENCE
 fi
-if [[ $JANS_PERSISTENCE != "LDAP" ]] && [[ $JANS_PERSISTENCE != "MYSQL" ]]; then
-  echo "[E] Incorrect entry. Please enter either LDAP or MYSQL"
+if [[ $JANS_PERSISTENCE != "LDAP" ]] && [[ $JANS_PERSISTENCE != "MYSQL" ]] && [[ $JANS_PERSISTENCE != "PGSQL" ]]; then
+  echo "[E] Incorrect entry. Please enter either LDAP, MYSQL or PGSQL"
   exit 1
 fi
 
@@ -29,8 +30,17 @@ if [[ -z $JANS_CI_CD_RUN ]]; then
 fi
 
 if [[ -z $EXT_IP ]]; then
-  EXT_IP=$(dig +short myip.opendns.com @resolver1.opendns.com)
+  EXT_IP=$(curl ipinfo.io/ip)
 fi
+
+wait_for_services() {
+  code=404
+  while [[ "$code" != "200" ]]; do
+    echo "Waiting for https://${JANS_FQDN}/$1 to respond with 200"
+    code=$(curl -s -o /dev/null -w ''%{http_code}'' -k https://"${JANS_FQDN}"/"$1")
+    sleep 5
+  done
+}
 
 sudo apt-get update
 sudo apt-get install openssl -y
@@ -72,9 +82,8 @@ fi
 
 PERSISTENCE_TYPE="sql"
 if [[ $JANS_PERSISTENCE == "MYSQL" ]]; then
-  sudo helm repo add bitnami https://charts.bitnami.com/bitnami
   sudo microk8s.kubectl get po --kubeconfig="$KUBECONFIG"
-  sudo helm install my-release --set auth.rootPassword=Test1234#,auth.database=jans bitnami/mysql -n jans --kubeconfig="$KUBECONFIG"
+  sudo helm install my-release --set auth.rootPassword=Test1234#,auth.database=jans -n jans oci://registry-1.docker.io/bitnamicharts/mysql --kubeconfig="$KUBECONFIG"
   cat << EOF > override.yaml
 config:
   countryCode: US
@@ -87,6 +96,26 @@ config:
     cnSqlDbDialect: mysql
     cnSqlDbHost: my-release-mysql.jans.svc
     cnSqlDbUser: root
+    cnSqlDbTimezone: UTC
+    cnSqldbUserPassword: Test1234#
+EOF
+fi
+
+if [[ $JANS_PERSISTENCE == "PGSQL" ]]; then
+  sudo microk8s.kubectl get po --kubeconfig="$KUBECONFIG"
+  sudo helm install my-release --set auth.postgresPassword=Test1234#,auth.database=jans -n jans oci://registry-1.docker.io/bitnamicharts/postgresql --kubeconfig="$KUBECONFIG"
+  cat << EOF > override.yaml
+config:
+  countryCode: US
+  email: support@gluu.org
+  orgName: Gluu
+  city: Austin
+  configmap:
+    cnSqlDbName: jans
+    cnSqlDbPort: 5432
+    cnSqlDbDialect: pgsql
+    cnSqlDbHost: my-release-postgresql.jans.svc
+    cnSqlDbUser: postgres
     cnSqlDbTimezone: UTC
     cnSqldbUserPassword: Test1234#
 EOF
@@ -127,6 +156,8 @@ fi
 echo "$EXT_IP $JANS_FQDN" | sudo tee -a /etc/hosts > /dev/null
 cat << EOF >> override.yaml
 global:
+  cloud:
+    testEnviroment: true
   istio:
     enable: $INSTALL_ISTIO
   cnPersistenceType: $PERSISTENCE_TYPE
@@ -148,20 +179,31 @@ global:
       scriptLogLevel: "$LOG_LEVEL"
       auditStatsLogTarget: "$LOG_TARGET"
       auditStatsLogLevel: "$LOG_LEVEL"
+  casa:
+    # -- App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed.
+    appLoggers:
+      casaLogTarget: "$LOG_TARGET"
+      casaLogLevel: "$LOG_LEVEL"
+      timerLogTarget: "$LOG_TARGET"
+      timerLogLevel: "$LOG_LEVEL"
+    ingress:
+      casaEnabled: true     
   config-api:
-    enabled: true
     appLoggers:
       configApiLogTarget: "$LOG_TARGET"
       configApiLogLevel: "$LOG_LEVEL"
   fido2:
-    enabled: true
+    ingress:
+      fido2ConfigEnabled: true
     appLoggers:
       fido2LogTarget: "$LOG_TARGET"
       fido2LogLevel: "$LOG_LEVEL"
       persistenceLogTarget: "$LOG_TARGET"
       persistenceLogLevel: "$LOG_LEVEL"
   scim:
-    enabled: true
+    ingress:
+      scimConfigEnabled: true
+      scimEnabled: true
     appLoggers:
       scimLogTarget: "$LOG_TARGET"
       scimLogLevel: "$LOG_LEVEL"
@@ -174,7 +216,6 @@ global:
       scriptLogTarget: "$LOG_TARGET"
       scriptLogLevel: "$LOG_LEVEL"
   fqdn: $JANS_FQDN
-  isFqdnRegistered: false
   lbIp: $EXT_IP
   opendj:
     # -- Boolean flag to enable/disable the OpenDJ  chart.
@@ -182,16 +223,6 @@ global:
 # -- Nginx ingress definitions chart
 nginx-ingress:
   ingress:
-    openidConfigEnabled: true
-    uma2ConfigEnabled: true
-    webfingerEnabled: true
-    webdiscoveryEnabled: true
-    scimConfigEnabled: true
-    scimEnabled: true
-    configApiEnabled: true
-    u2fConfigEnabled: true
-    fido2ConfigEnabled: true
-    authServerEnabled: true
     path: /
     hosts:
     - $JANS_FQDN
@@ -202,35 +233,17 @@ nginx-ingress:
       - $JANS_FQDN
 auth-server:
   livenessProbe:
-    # https://github.com/JanssenProject/docker-jans-auth-server/blob/master/scripts/healthcheck.py
-    exec:
-      command:
-        - python3
-        - /app/scripts/healthcheck.py
-    # Setting for testing purposes only. Under optimal resources the app should be up in 30-60 secs
     initialDelaySeconds: 300
-    periodSeconds: 30
-    timeoutSeconds: 5
   readinessProbe:
-    exec:
-      command:
-        - python3
-        - /app/scripts/healthcheck.py
-    # Setting for testing purposes only. Under optimal resources the app should be up in 30-60 secs
     initialDelaySeconds: 300
-    periodSeconds: 25
-    timeoutSeconds: 5
-opendj:
-  image:
-    repository: gluufederation/opendj
-    tag: 5.0.0_dev
 EOF
 sudo helm repo add janssen https://docs.jans.io/charts
 sudo helm repo update
-# remove --devel once we issue the first prod chart
-sudo helm install janssen janssen/janssen --devel -n jans -f override.yaml --kubeconfig="$KUBECONFIG"
-echo "Waiting for auth-server to come up. This may take 5-10 mins....Please do not cancel out...This will wait for the auth-server to be ready.."
-sleep 300
+sudo helm install janssen janssen/janssen -n jans -f override.yaml --kubeconfig="$KUBECONFIG" --version="$JANS_VERSION"
+
+wait_for_services jans-config-api/api/v1/health/ready
+wait_for_services jans-scim/sys/health-check
+
 cat << EOF > testendpoints.sh
 sudo microk8s config > config
 KUBECONFIG="$PWD"/config

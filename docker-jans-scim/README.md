@@ -32,15 +32,17 @@ The following environment variables are supported by the container:
 - `CN_CONFIG_KUBERNETES_CONFIGMAP`: Kubernetes configmaps name (default to `jans`).
 - `CN_CONFIG_KUBERNETES_USE_KUBE_CONFIG`: Load credentials from `$HOME/.kube/config`, only useful for non-container environment (default to `false`).
 - `CN_SECRET_ADAPTER`: The secrets' adapter, can be `vault` (default), `kubernetes`, or `google`.
-- `CN_SECRET_VAULT_SCHEME`: supported Vault scheme (`http` or `https`).
-- `CN_SECRET_VAULT_HOST`: hostname or IP of Vault (default to `localhost`).
-- `CN_SECRET_VAULT_PORT`: port of Vault (default to `8200`).
 - `CN_SECRET_VAULT_VERIFY`: whether to verify cert or not (default to `false`).
 - `CN_SECRET_VAULT_ROLE_ID_FILE`: path to file contains Vault AppRole role ID (default to `/etc/certs/vault_role_id`).
 - `CN_SECRET_VAULT_SECRET_ID_FILE`: path to file contains Vault AppRole secret ID (default to `/etc/certs/vault_secret_id`).
 - `CN_SECRET_VAULT_CERT_FILE`: path to Vault cert file (default to `/etc/certs/vault_client.crt`).
 - `CN_SECRET_VAULT_KEY_FILE`: path to Vault key file (default to `/etc/certs/vault_client.key`).
 - `CN_SECRET_VAULT_CACERT_FILE`: path to Vault CA cert file (default to `/etc/certs/vault_ca.crt`). This file will be used if it exists and `CN_SECRET_VAULT_VERIFY` set to `true`.
+- `CN_SECRET_VAULT_ADDR`: URL of Vault (default to `http://localhost:8200`).
+- `CN_SECRET_VAULT_NAMESPACE`: Namespace used to access secrets (default to empty string).
+- `CN_SECRET_VAULT_KV_PATH`: Path to KV secrets engine (default to `secret`).
+- `CN_SECRET_VAULT_PREFIX`: Base prefix name used to build secret path (default to `jans`).
+- `CN_SECRET_VAULT_APPROLE_PATH`: Path to AppRole (default to `approle`).
 - `CN_SECRET_KUBERNETES_NAMESPACE`: Kubernetes namespace (default to `default`).
 - `CN_SECRET_KUBERNETES_SECRET`: Kubernetes secrets name (default to `jans`).
 - `CN_SECRET_KUBERNETES_USE_KUBE_CONFIG`: Load credentials from `$HOME/.kube/config`, only useful for non-container environment (default to `false`).
@@ -84,6 +86,7 @@ The following environment variables are supported by the container:
 - `AWS_SHARED_CREDENTIALS_FILE`: The location of the shared credentials file used by the client (see https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html).
 - `AWS_CONFIG_FILE`: The location of the config file used by the client (see https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html).
 - `AWS_PROFILE`: The default profile to use, if any.
+- `CN_SSL_CERT_FROM_SECRETS`: Determine whether to get SSL cert from secrets backend (default to `true`). Note that the flag will take effect only if there's no mounted `/etc/certs/web_https.crt` file.
 
 ### Configure app loggers
 
@@ -167,3 +170,4 @@ i.e. `http://container:9093/metrics`.
 
 Note that Prometheus JMX exporter uses pre-defined config file (see `conf/prometheus-config.yaml`).
 To customize the config, mount custom config file to `/opt/prometheus/prometheus-config.yaml` inside the container.
+

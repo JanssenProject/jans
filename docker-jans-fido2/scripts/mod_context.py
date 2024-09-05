@@ -8,13 +8,13 @@ import sys
 import zipfile
 from collections import namedtuple
 
-from jans.pycloudlib.persistence import PersistenceMapper
+from jans.pycloudlib.persistence.utils import PersistenceMapper
 from jans.pycloudlib.utils import exec_cmd
 
 from settings import LOGGING_CONFIG
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("fido2")
+logger = logging.getLogger("jans-fido2")
 
 
 Library = namedtuple("Library", ["path", "basename", "meta"])

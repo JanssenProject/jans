@@ -32,6 +32,7 @@ type OidcClientAttribute struct {
 	RedirectUrisRegex                       string   `schema:"redirect_uris_regex" json:"redirectUrisRegex,omitempty"`
 	JansAuthorizedAcr                       []string `schema:"jans_authorized_acr" json:"jansAuthorizedAcr,omitempty"`
 	JansDefaultPromptLogin                  bool     `schema:"jans_default_prompt_login" json:"jansDefaultPromptLogin,omitempty"`
+	TxTokenLifetime                         int      `schema:"tx_token_lifetime" json:"txTokenLifetime,omitempty"`
 	IdTokenLifetime                         int      `schema:"id_token_lifetime" json:"idTokenLifetime,omitempty"`
 	AllowOfflineAccessWithoutConsent        bool     `schema:"allow_offline_access_without_consent" json:"allowOfflineAccessWithoutConsent,omitempty"`
 	MinimumAcrLevel                         int      `schema:"minimum_acr_level" json:"minimumAcrLevel,omitempty"`
@@ -40,6 +41,13 @@ type OidcClientAttribute struct {
 	MinimumAcrPriorityList                  []string `schema:"minimum_acr_priority_list" json:"minimumAcrPriorityList,omitempty"`
 	RequestedLifetime                       int      `schema:"requested_lifetime" json:"requestedLifetime,omitempty"`
 	Evidence                                string   `schema:"evidence" json:"evidence,omitempty"`
+	IntrospectionSignedResponseAlg          string   `schema:"introspection_signed_response_alg" json:"introspectionSignedResponseAlg,omitempty"`
+	IntrospectionEncryptedResponseAlg       string   `schema:"introspection_encrypted_response_alg" json:"introspectionEncryptedResponseAlg,omitempty"`
+	IntrospectionEncryptedResponseEnc       string   `schema:"introspection_encrypted_response_enc" json:"introspectionEncryptedResponseEnc,omitempty"`
+	TxTokenSignedResponseAlg                string   `schema:"tx_token_signed_response_alg" json:"txTokenSignedResponseAlg,omitempty"`
+	TxTokenEncryptedResponseAlg             string   `schema:"tx_token_encrypted_response_alg" json:"txTokenEncryptedResponseAlg,omitempty"`
+	TxTokenEncryptedResponseEnc             string   `schema:"tx_token_encrypted_response_enc" json:"txTokenEncryptedResponseEnc,omitempty"`
+	AuthorizationDetailsTypes               []string `schema:"authorization_details_types" json:"authorizationDetailsTypes,omitempty"`
 }
 
 // OidcClient is the definition of an OpenId Connect Client.
@@ -112,13 +120,12 @@ type OidcClient struct {
 	BackchannelTokenDeliveryMode               string               `schema:"backchannel_token_delivery_mode" json:"backchannelTokenDeliveryMode,omitempty"`
 	BackchannelClientNotificationEndpoint      string               `schema:"backchannel_client_notification_endpoint" json:"backchannelClientNotificationEndpoint,omitempty"`
 	BackchannelAuthenticationRequestSigningAlg string               `schema:"backchannel_authentication_request_signing_alg" json:"backchannelAuthenticationRequestSigningAlg,omitempty"`
-	BackchannelUserCodeParameter               string               `schema:"backchannel_user_code_parameter" json:"backchannelUserCodeParameter,omitempty"`
+	BackchannelUserCodeParameter               bool                 `schema:"backchannel_user_code_parameter" json:"backchannelUserCodeParameter,omitempty"`
 	Description                                string               `schema:"description" json:"description,omitempty"`
 	Organization                               string               `schema:"organization" json:"organization,omitempty"`
 	Groups                                     []string             `schema:"groups" json:"groups,omitempty"`
 	Ttl                                        int                  `schema:"ttl" json:"ttl,omitempty"`
 	DisplayName                                string               `schema:"display_name" json:"displayName,omitempty"`
-	AuthenticationMethod                       string               `schema:"authentication_method" json:"authenticationMethod,omitempty"`
 	BaseDn                                     string               `schema:"base_dn" json:"baseDn,omitempty"`
 	Inum                                       string               `schema:"inum" json:"inum,omitempty"`
 }
@@ -136,7 +143,9 @@ func (c *Client) GetOidcClients(ctx context.Context) ([]OidcClient, error) {
 	}
 	ret := response{}
 
-	if err := c.get(ctx, "/jans-config-api/api/v1/openid/clients", token, &ret); err != nil {
+	if err := c.get(ctx, "/jans-config-api/api/v1/openid/clients", token, &ret, map[string]string{
+		"limit": "5",
+	}); err != nil {
 		return nil, fmt.Errorf("get request failed: %w", err)
 	}
 

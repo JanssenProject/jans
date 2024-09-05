@@ -2,6 +2,7 @@ package io.jans.ca.plugin.adminui.rest.logging;
 
 import io.jans.ca.plugin.adminui.utils.CommonUtils;
 import io.jans.ca.plugin.adminui.utils.ErrorResponse;
+import io.jans.configapi.core.rest.ProtectedApi;
 import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -19,6 +20,7 @@ import java.util.Map;
 @Path("/admin-ui/logging")
 public class AuditLoggerResource {
 
+    public static final String AUDIT_LOGGING_WRITE_SCOPE = "https://jans.io/oauth/jans-auth-server/config/adminui/logging.write";
     static final String AUDIT = "/audit";
 
     @Inject
@@ -26,6 +28,7 @@ public class AuditLoggerResource {
 
     @POST
     @Path(AUDIT)
+    @ProtectedApi(scopes = {AUDIT_LOGGING_WRITE_SCOPE})
     @Produces(MediaType.APPLICATION_JSON)
     public Response auditLogging(@Valid @NotNull Map<String, Object> loggingRequest) {
         try {

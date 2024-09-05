@@ -13,7 +13,6 @@ import io.jans.keycloak.link.model.config.CacheRefreshConfiguration;
 import io.jans.keycloak.link.server.service.CacheRefreshConfigurationService;
 import io.jans.keycloak.link.server.service.KeycloakService;
 import io.jans.keycloak.link.service.CacheRefreshService;
-import io.jans.link.service.CacheRefreshUpdateMethod;
 import io.jans.keycloak.link.service.PersonService;
 import io.jans.keycloak.link.service.config.ApplicationFactory;
 import io.jans.keycloak.link.service.config.ConfigurationFactory;
@@ -35,6 +34,7 @@ import io.jans.orm.model.SearchScope;
 import io.jans.orm.search.filter.Filter;
 import io.jans.orm.util.ArrayHelper;
 import io.jans.orm.util.StringHelper;
+import io.jans.service.EncryptionService;
 import io.jans.service.ObjectSerializationService;
 import io.jans.service.SchemaService;
 import io.jans.service.cdi.async.Asynchronous;
@@ -49,7 +49,6 @@ import jakarta.enterprise.event.Event;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import org.apache.commons.beanutils.BeanUtilsBean2;
-import org.keycloak.admin.client.Keycloak;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.slf4j.Logger;
 
@@ -205,6 +204,18 @@ public class JansKeycloakLinkTimer extends BaseJansLinkTimer {
 			return false;
 		}
 
+		try {
+			// check connections to keycloak servers
+			log.info("keycloak server connection check ::");
+
+			String keycloak = keycloakService.getKeycloakInstance().serverInfo().getInfo().toString();
+			log.info("keycloak server connection check ::" + keycloak);
+		}catch(Exception e){
+			log.error("not able to connect keycloack server : " + e.getMessage());
+			e.printStackTrace();
+			return false;
+		}
+
 		long poolingInterval = StringHelper.toInteger(currentConfiguration.getKeycloakLinkPollingInterval()) * 60 * 1000;
 		if (poolingInterval < 0) {
 			return false;
@@ -261,12 +272,6 @@ public class JansKeycloakLinkTimer extends BaseJansLinkTimer {
 	private void processImpl(AppConfiguration currentConfiguration)
 			throws SearchException {
 		CacheRefreshUpdateMethod updateMethod = getUpdateMethod(currentConfiguration);
-
-		// Prepare and check connections to keycloak servers
-		log.info("keycloak server connection check ::");
-
-		Keycloak keycloak = keycloakService.getKeycloakInstance();
-		log.info("keycloak server connection check ::" + keycloak);
 
 		LdapServerConnection inumDbServerConnection;
 		if (currentConfiguration.isDefaultInumServer()) {
@@ -760,6 +765,7 @@ public class JansKeycloakLinkTimer extends BaseJansLinkTimer {
 					jansSimplePerson.getCustomAttributes().add(jansCustomAttribute);
 				}
 				jansSimplePerson.setDn(personService.getDnForPerson(personService.generateInumForNewPersonImpl()));
+				jansSimplePerson.setSourceServerName("Keycloak to jans");
 
 				sourceJansSimplePerson.add(jansSimplePerson);
 

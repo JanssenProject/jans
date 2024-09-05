@@ -105,14 +105,17 @@ public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationReq
         response.setIssuer(jsonObj.optString(ISSUER, null));
         response.setAuthorizationEndpoint(jsonObj.optString(AUTHORIZATION_ENDPOINT, null));
         response.setAuthorizationChallengeEndpoint(jsonObj.optString(AUTHORIZATION_CHALLENGE_ENDPOINT, null));
+        response.setStatusListEndpoint(jsonObj.optString(STATUS_LIST_ENDPOINT, null));
         response.setTokenEndpoint(jsonObj.optString(TOKEN_ENDPOINT, null));
         response.setRevocationEndpoint(jsonObj.optString(REVOCATION_ENDPOINT, null));
         response.setSessionRevocationEndpoint(jsonObj.optString(SESSION_REVOCATION_ENDPOINT, null));
+        response.setGlobalTokenRevocationEndpoint(jsonObj.optString(GLOBAL_TOKEN_REVOCATION_ENDPOINT, null));
         response.setUserInfoEndpoint(jsonObj.optString(USER_INFO_ENDPOINT, null));
         response.setClientInfoEndpoint(jsonObj.optString(CLIENT_INFO_ENDPOINT, null));
         response.setCheckSessionIFrame(jsonObj.optString(CHECK_SESSION_IFRAME, null));
         response.setEndSessionEndpoint(jsonObj.optString(END_SESSION_ENDPOINT, null));
         response.setJwksUri(jsonObj.optString(JWKS_URI, null));
+        response.setArchivedJwksUri(jsonObj.optString(ARCHIVED_JWKS_URI, null));
         response.setRegistrationEndpoint(jsonObj.optString(REGISTRATION_ENDPOINT, null));
         response.setIntrospectionEndpoint(jsonObj.optString(INTROSPECTION_ENDPOINT, null));
         response.setParEndpoint(jsonObj.optString(PAR_ENDPOINT, null));
@@ -129,11 +132,19 @@ public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationReq
                 response.setMltsAliases(Util.toSerializableMap(mtlsAliases.toMap()));
             }
         }
+        if (jsonObj.has(ACR_MAPPINGS)) {
+            final JSONObject acrMappings = jsonObj.optJSONObject(ACR_MAPPINGS);
+            if (acrMappings != null) {
+                response.setAcrMappings(Util.toSerializableMapOfStrings(acrMappings.toMap()));
+            }
+        }
         Util.addToListIfHas(response.getScopesSupported(), jsonObj, SCOPES_SUPPORTED);
         Util.addToListIfHas(response.getResponseTypesSupported(), jsonObj, RESPONSE_TYPES_SUPPORTED);
         Util.addToListIfHas(response.getResponseModesSupported(), jsonObj, RESPONSE_MODES_SUPPORTED);
+        Util.addToListIfHas(response.getPromptValuesSupported(), jsonObj, PROMPT_VALUES_SUPPORTED);
         Util.addToListIfHas(response.getGrantTypesSupported(), jsonObj, GRANT_TYPES_SUPPORTED);
         Util.addToListIfHas(response.getAcrValuesSupported(), jsonObj, ACR_VALUES_SUPPORTED);
+        Util.addToListIfHas(response.getAuthorizationDetailsTypesSupported(), jsonObj, AUTHORIZATION_DETAILS_TYPES_SUPPORTED);
         Util.addToListIfHas(response.getSubjectTypesSupported(), jsonObj, SUBJECT_TYPES_SUPPORTED);
         Util.addToListIfHas(response.getAuthorizationSigningAlgValuesSupported(), jsonObj, AUTHORIZATION_SIGNING_ALG_VALUES_SUPPORTED);
         Util.addToListIfHas(response.getAuthorizationEncryptionAlgValuesSupported(), jsonObj, AUTHORIZATION_ENCRYPTION_ALG_VALUES_SUPPORTED);

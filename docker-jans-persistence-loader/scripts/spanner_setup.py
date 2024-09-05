@@ -37,74 +37,38 @@ class SpannerBackend:
                     self.sql_indexes["__common__"]["fields"].append(attr_name)
 
     def get_data_type(self, attr, table=None):
+        def _resolve_actual_type(raw_type):
+            match raw_type["type"]:
+                case char_type if char_type in ["VARCHAR", "STRING"]:
+                    size = raw_type.get("size") or "MAX"
+                    data_type = f"STRING({size})"
+                case "TEXT":
+                    data_type = "STRING(MAX)"
+                case _:
+                    data_type = raw_type["type"]
+            return data_type  # noqa: R504
+
         # check from SQL data types first
-        type_def = self.client.sql_data_types.get(attr)
+        if type_def := self.client.sql_data_types.get(f"{table}:{attr}") or self.client.sql_data_types.get(attr):
+            # fallback to mysql
+            raw_type = type_def.get(self.client.dialect) or type_def.get("mysql", {})
 
-        if type_def:
-            type_ = type_def.get(self.client.dialect)
+            if table in raw_type.get("tables", {}):
+                raw_type = raw_type["tables"][table]
+            return _resolve_actual_type(raw_type)
 
-            if table in type_.get("tables", {}):
-                type_ = type_["tables"][table]
-
-            data_type = type_["type"]
-            if "size" in type_:
-                data_type = f"{data_type}({type_['size']})"
-            return data_type
+        # probably JSON-like data type
+        if attr in self.client.sql_json_types:
+            return self.client.sql_json_types[attr][self.client.dialect]["type"]
 
         # data type is undefined, hence check from syntax
         syntax = self.client.get_attr_syntax(attr)
         syntax_def = self.client.sql_data_types_mapping[syntax]
-        type_ = syntax_def.get(self.client.dialect)
-
-        char_type = "STRING"
-
-        if type_["type"] != char_type:
-            # not STRING
-            data_type = type_["type"]
-        else:
-            size = type_.get("size") or "MAX"
-            data_type = f"{char_type}({size})"
-
-        return data_type
+        raw_type = syntax_def.get(self.client.dialect)
+        return _resolve_actual_type(raw_type)
 
     def create_tables(self):
-        schemas = {}
-        attrs = {}
-        # cached schemas that holds table's column and its type
-        table_columns = defaultdict(dict)
-
-        for fn in self.client.schema_files:
-            with open(fn) as f:
-                schema = json.loads(f.read())
-
-            for oc in schema["objectClasses"]:
-                schemas[oc["names"][0]] = oc
-
-            for attr in schema["attributeTypes"]:
-                attrs[attr["names"][0]] = attr
-
-        for table, oc in schemas.items():
-            if oc.get("sql", {}).get("ignore"):
-                continue
-
-            # ``oc["may"]`` contains list of attributes
-            if "sql" in oc:
-                oc["may"] += oc["sql"].get("include", [])
-
-                for inc_oc in oc["sql"].get("includeObjectClass", []):
-                    oc["may"] += schemas[inc_oc]["may"]
-
-            doc_id_type = self.get_data_type("doc_id", table)
-            table_columns[table].update({
-                "doc_id": doc_id_type,
-                "objectClass": "STRING(48)",
-                "dn": "STRING(128)",
-            })
-
-            # make sure ``oc["may"]`` doesn't have duplicate attribute
-            for attr in set(oc["may"]):
-                data_type = self.get_data_type(attr, table)
-                table_columns[table].update({attr: data_type})
+        table_columns = self.table_mapping_from_schema()
 
         for table, attr_mapping in table_columns.items():
             self.client.create_table(table, attr_mapping, "doc_id")
@@ -156,6 +120,15 @@ class SpannerBackend:
             # run the callback
             self.create_spanner_indexes(table_name, column_mapping)
 
+    def create_unique_indexes(self):
+        for table_name, column in [
+            ("jansPerson", "mail"),
+            ("jansPerson", "uid"),
+        ]:
+            index_name = f"{table_name.lower()}_{column.lower()}_unique_idx"
+            query = f"CREATE UNIQUE INDEX {self.client.quoted_id(index_name)} ON {self.client.quoted_id(table_name)} ({self.client.quoted_id(column)})"
+            self.client.create_index(query)
+
     def import_builtin_ldif(self, ctx):
         optional_scopes = json.loads(self.manager.config.get("optional_scopes", "[]"))
         ldif_mappings = get_ldif_mappings_hook("spanner", optional_scopes)
@@ -174,6 +147,7 @@ class SpannerBackend:
 
         logger.info("Creating indexes (if not exist)")
         self.create_indexes()
+        self.create_unique_indexes()
 
         ctx = prepare_template_ctx(self.manager)
 
@@ -336,122 +310,43 @@ class SpannerBackend:
                     {col_name: self.client._transform_value(col_name, new_value)}
                 )
 
-        # the following columns are changed to multivalued (ARRAY type)
-        for mod in [
-            ("jansClnt", "jansDefAcrValues"),
-            ("jansClnt", "jansLogoutURI"),
-            ("jansPerson", "role"),
-            ("jansPerson", "mobile"),
-            ("jansPerson", "jansPersistentJWT"),
-            ("jansCustomScr", "jansAlias"),
-            ("jansClnt", "jansReqURI"),
-            ("jansClnt", "jansClaimRedirectURI"),
-            ("jansClnt", "jansAuthorizedOrigins"),
-            ("jansSessId", "deviceSecret"),
-        ]:
-            column_to_array(mod[0], mod[1])
+        table_columns = self.table_mapping_from_schema()
+        multivalued_type = "ARRAY<STRING(MAX)>"
 
-        # the following columns must be added to respective tables
-        for mod in [
-            ("jansToken", "jansUsrDN"),
-            ("jansPerson", "jansTrustedDevices"),
-            ("jansUmaRPT", "dpop"),
-            ("jansUmaPCT", "dpop"),
-            ("jansClnt", "o"),
-            ("jansClnt", "jansGrp"),
-            ("jansScope", "creatorId"),
-            ("jansScope", "creatorTyp"),
-            ("jansScope", "creatorAttrs"),
-            ("jansScope", "creationDate"),
-            ("jansStatEntry", "jansData"),
-            ("jansSessId", "deviceSecret"),
-            ("jansSsa", "jansState"),
-            ("jansClnt", "jansClntURILocalized"),
-            ("jansClnt", "jansLogoURILocalized"),
-            ("jansClnt", "jansPolicyURILocalized"),
-            ("jansClnt", "jansTosURILocalized"),
-            ("jansClnt", "displayNameLocalized"),
-            ("jansFido2AuthnEntry", "jansApp"),
-            ("jansFido2AuthnEntry", "jansCodeChallengeHash"),
-            ("jansFido2AuthnEntry", "exp"),
-            ("jansFido2AuthnEntry", "del"),
-            ("jansFido2RegistrationEntry", "jansApp"),
-            ("jansFido2RegistrationEntry", "jansPublicKeyIdHash"),
-            ("jansFido2RegistrationEntry", "jansDeviceData"),
-            ("jansFido2RegistrationEntry", "exp"),
-            ("jansFido2RegistrationEntry", "del"),
-        ]:
-            add_column(mod[0], mod[1])
+        for table_name, columns in table_columns.items():
+            for column, data_type in columns.items():
+                if column not in table_mapping[table_name]:
+                    logger.info(f"Adding new column {table_name}.{column}")
+                    add_column(table_name, column)
 
-        # change column type (except from/to multivalued)
-        for mod in [
-            ("jansPerson", "givenName"),
-            ("jansPerson", "sn"),
-            ("jansPerson", "userPassword"),
-            ("jansAppConf", "userPassword"),
-            ("jansPerson", "jansStatus"),
-            ("jansPerson", "cn"),
-            ("jansPerson", "secretAnswer"),
-            ("jansPerson", "secretQuestion"),
-            ("jansPerson", "street"),
-            ("jansPerson", "address"),
-            ("jansPerson", "picture"),
-            ("jansPerson", "mail"),
-            ("jansPerson", "gender"),
-            ("jansPerson", "jansNameFormatted"),
-            ("jansPerson", "jansExtId"),
-            ("jansGrp", "jansStatus"),
-            ("jansOrganization", "jansStatus"),
-            ("jansOrganization", "street"),
-            ("jansOrganization", "postalCode"),
-            ("jansOrganization", "mail"),
-            ("jansAppConf", "jansStatus"),
-            ("jansAttr", "jansStatus"),
-            ("jansUmaResourcePermission", "jansStatus"),
-            ("jansUmaResourcePermission", "jansUmaScope"),
-            ("jansDeviceRegistration", "jansStatus"),
-            ("jansFido2AuthnEntry", "jansStatus"),
-            ("jansFido2RegistrationEntry", "jansStatus"),
-            ("jansCibaReq", "jansStatus"),
-            ("jansInumMap", "jansStatus"),
-            ("jansDeviceRegistration", "jansDeviceKeyHandle"),
-            ("jansUmaResource", "jansUmaScope"),
-            ("jansU2fReq", "jansReq"),
-            ("jansFido2AuthnEntry", "jansAuthData"),
-            ("agmFlowRun", "agFlowEncCont"),
-            ("agmFlowRun", "agFlowSt"),
-            ("agmFlowRun", "jansCustomMessage"),
-            ("agmFlow", "agFlowMeta"),
-            ("agmFlow", "agFlowTrans"),
-            ("agmFlow", "jansCustomMessage"),
-            ("jansOrganization", "jansCustomMessage"),
-            ("jansDeviceRegistration", "jansApp"),
-            ("jansFido2AuthnEntry", "jansApp"),
-            ("jansFido2RegistrationEntry", "jansApp"),
-            ("adsPrjDeployment", "adsPrjDeplDetails"),
-            ("jansFido2RegistrationEntry", "jansDeviceData"),
-            ("jansDeviceRegistration", "jansDeviceData"),
-            ("jansFido2RegistrationEntry", "jansDeviceNotificationConf"),
-            ("jansDeviceRegistration", "jansDeviceNotificationConf"),
-        ]:
-            change_column_type(mod[0], mod[1])
+                else:
+                    old_data_type = table_mapping[table_name][column]
 
-        # columns are changed from multivalued
-        for mod in [
-            ("jansPerson", "jansMobileDevices"),
-            ("jansPerson", "jansOTPDevices"),
-            ("jansToken", "clnId"),
-            ("jansUmaRPT", "clnId"),
-            ("jansUmaPCT", "clnId"),
-            ("jansCibaReq", "clnId"),
-        ]:
-            column_from_array(mod[0], mod[1])
+                    if any([
+                        # same type
+                        data_type == old_data_type,
+                        # builtin columns
+                        column in ("doc_id", "objectClass", "dn"),
+                    ]):
+                        # no-ops
+                        continue
 
-        # int64 to string
-        for mod in [
-            ("jansFido2RegistrationEntry", "jansCodeChallengeHash"),
-        ]:
-            column_int_to_string(mod[0], mod[1])
+                    if data_type.startswith("STRING") and old_data_type == "INT64":
+                        # change int64 to string
+                        logger.info(f"Converting {table_name}.{column} column type {old_data_type} to {data_type}")
+                        column_int_to_string(table_name, column)
+                    elif data_type != multivalued_type and old_data_type != multivalued_type:
+                        # change non-multivalued type
+                        logger.info(f"Converting {table_name}.{column} column type from {old_data_type} to {data_type}")
+                        change_column_type(table_name, column)
+                    elif data_type == multivalued_type and old_data_type != multivalued_type:
+                        # change type to multivalued
+                        logger.info(f"Converting {table_name}.{column} column type from {old_data_type} to multivalued {data_type}")
+                        column_to_array(table_name, column)
+                    elif data_type != multivalued_type and old_data_type == multivalued_type:
+                        # change type from multivalued
+                        logger.info(f"Converting {table_name}.{column} column type from multivalued {old_data_type} to {data_type}")
+                        column_from_array(table_name, column)
 
     def import_custom_ldif(self, ctx):
         custom_dir = Path("/app/custom_ldif")
@@ -462,3 +357,43 @@ class SpannerBackend:
     def _import_ldif(self, path, ctx):
         logger.info(f"Importing {path} file")
         self.client.create_from_ldif(path, ctx)
+
+    def table_mapping_from_schema(self):
+        schemas = {}
+        attrs = {}
+        # cached schemas that holds table's column and its type
+        table_mapping = defaultdict(dict)
+
+        for fn in self.client.schema_files:
+            with open(fn) as f:
+                schema = json.loads(f.read())
+
+            for oc in schema["objectClasses"]:
+                schemas[oc["names"][0]] = oc
+
+            for attr in schema["attributeTypes"]:
+                attrs[attr["names"][0]] = attr
+
+        for table, oc in schemas.items():
+            if oc.get("sql", {}).get("ignore"):
+                continue
+
+            # ``oc["may"]`` contains list of attributes
+            if "sql" in oc:
+                oc["may"] += oc["sql"].get("include", [])
+
+                for inc_oc in oc["sql"].get("includeObjectClass", []):
+                    oc["may"] += schemas[inc_oc]["may"]
+
+            doc_id_type = self.get_data_type("doc_id", table)
+            table_mapping[table].update({
+                "doc_id": doc_id_type,
+                "objectClass": "STRING(48)",
+                "dn": "STRING(128)",
+            })
+
+            # make sure ``oc["may"]`` doesn't have duplicate attribute
+            for attr in set(oc["may"]):
+                data_type = self.get_data_type(attr, table)
+                table_mapping[table].update({attr: data_type})
+        return table_mapping

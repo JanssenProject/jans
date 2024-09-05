@@ -4,12 +4,8 @@ import io.jans.casa.core.SessionContext;
 import io.jans.casa.core.pojo.BrowserInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.zkoss.bind.annotation.AfterCompose;;
-import org.zkoss.bind.annotation.ContextParam;
-import org.zkoss.bind.annotation.ContextType;
-import org.zkoss.bind.annotation.Init;
+import org.zkoss.bind.annotation.*;
 import org.zkoss.json.JSONObject;
-import org.zkoss.zk.au.out.AuInvoke;
 import org.zkoss.zk.ui.Component;
 import org.zkoss.zk.ui.Executions;
 import org.zkoss.zk.ui.event.Event;
@@ -18,12 +14,11 @@ import org.zkoss.zk.ui.select.annotation.Listen;
 import org.zkoss.zk.ui.select.annotation.WireVariable;
 import org.zkoss.zk.ui.util.Clients;
 
-import java.time.ZoneOffset;
 import java.util.Optional;
+import java.time.ZoneOffset;
 
 /**
  * This class is employed to store in session some user settings.
- * @author jgomer
  */
 public class HomeViewModel {
 
@@ -31,11 +26,6 @@ public class HomeViewModel {
 
     @WireVariable
     private SessionContext sessionContext;
-
-    @Init
-    public void init() {
-        Clients.response(new AuInvoke("sendBrowserData"));
-    }
 
     @AfterCompose
     public void afterCompose(@ContextParam(ContextType.VIEW) Component view) {
@@ -51,10 +41,8 @@ public class HomeViewModel {
 
             updateOffset(jsonObject.get("offset"));
             updateScreenWidth(jsonObject.get("screenWidth"));
-
-            boolean mobile = Optional.ofNullable(jsonObject.get("isMobile")).map(Boolean.class::cast).orElse(false);
-            logger.trace("Detected browser is {} mobile", mobile ? "" : "not");
-            updateBrowserInfo(jsonObject.get("name"), jsonObject.get("version"), mobile);
+            
+            updateBrowserInfo(jsonObject.get("name"), jsonObject.get("major"), jsonObject.get("mobile"));
         }
 
         //reloads this page so the navigation flow proceeds (see HomeInitiator class)
@@ -88,22 +76,16 @@ public class HomeViewModel {
 
     }
 
-    private void updateBrowserInfo(Object browserName, Object browserVersion, boolean mobile) {
+    private void updateBrowserInfo(Object browserName, Object browserVersion, Object isMobile) {
 
         try {
             if (sessionContext.getBrowser() == null) {
                 BrowserInfo binfo = new BrowserInfo();
                 sessionContext.setBrowser(binfo);
 
-                binfo.setMobile(mobile);
                 binfo.setName(browserName.toString());
-
-                String version = browserVersion.toString();
-                int browserVer = version.indexOf(".");
-                if (browserVer > 0) {
-                    browserVer = Integer.parseInt(version.substring(0, browserVer));
-                }
-                binfo.setMainVersion(browserVer);
+                binfo.setMainVersion(Integer.valueOf(browserVersion.toString()));
+                binfo.setMobile(Boolean.parseBoolean​(isMobile.toString()));
             }
         } catch (Exception e) {
             logger.error(e.getMessage(), e);

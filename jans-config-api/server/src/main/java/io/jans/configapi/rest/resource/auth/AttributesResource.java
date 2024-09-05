@@ -30,6 +30,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.*;
 
+import java.util.*;
+import java.util.stream.*;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -54,6 +56,8 @@ import org.slf4j.Logger;
 public class AttributesResource extends ConfigBaseResource {
 
     private static final String JANS_ATTRIBUTE = "jans attribute";
+	    private static final String NAME_CONFLICT = "NAME_CONFLICT";
+    private static final String NAME_CONFLICT_MSG = "Attribute with same name `%s` already exists!";
 
     @Inject
     Logger log;
@@ -116,7 +120,9 @@ public class AttributesResource extends ConfigBaseResource {
     @RequestBody(description = "JansAttribute object", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JansAttribute.class), examples = @ExampleObject(name = "Request example", value = "example/attribute/attribute.json")))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Created", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JansAttribute.class), examples = @ExampleObject(name = "Response example", value = "example/attribute/attribute.json"))),
+            @ApiResponse(responseCode = "400", description = "BadRequest"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "406", description = "NotAcceptable"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @POST
     @ProtectedApi(scopes = { ApiAccessConstants.ATTRIBUTES_WRITE_ACCESS }, groupScopes = {}, superScopes = {
@@ -126,6 +132,26 @@ public class AttributesResource extends ConfigBaseResource {
         checkNotNull(attribute.getName(), AttributeNames.NAME);
         checkNotNull(attribute.getDisplayName(), AttributeNames.DISPLAY_NAME);
         checkResourceNotNull(attribute.getDataType(), AttributeNames.DATA_TYPE);
+        
+        // check if attribute with same name
+        List<JansAttribute> jansAttributes = attributeService.getAttributeWithName(attribute.getName());
+        log.info("Check if attribute with same name exists - attribute.getName():{}, jansAttributes:{}",
+                attribute.getName(), jansAttributes);
+        if (jansAttributes != null && !jansAttributes.isEmpty()) {
+            throw new WebApplicationException(getNotAcceptableException(
+                    "Attribute with same name '" + attribute.getName() + "' already exists!"));
+        }
+
+        // check if attribute exists in schema
+        boolean attributeValidation = attributeService.validateAttributeDefinition(attribute.getName());
+        log.info("** Validate attribute while creation - attribute.getName():{}, attributeValidation:{}",
+                attribute.getName(), attributeValidation);
+        if (!attributeValidation) {
+            throw new WebApplicationException(
+                    getNotAcceptableException("The attribute '" + attribute.getName() + "' not defined in DB schema"));
+        }
+        
+        
         String inum = attributeService.generateInumForNewAttribute();
         attribute.setInum(inum);
         attribute.setDn(attributeService.getDnForAttribute(inum));
@@ -141,17 +167,43 @@ public class AttributesResource extends ConfigBaseResource {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JansAttribute.class), examples = @ExampleObject(name = "Response example", value = "example/attribute/attribute.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "406", description = "NotAcceptable"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @PUT
     @ProtectedApi(scopes = { ApiAccessConstants.ATTRIBUTES_WRITE_ACCESS }, groupScopes = {}, superScopes = {
             ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     public Response updateAttribute(@Valid JansAttribute attribute) {
         log.debug(" JansAttribute details to update - attribute:{}", attribute);
-        String inum = attribute.getInum();
+        final String inum = attribute.getInum();
         checkResourceNotNull(inum, JANS_ATTRIBUTE);
         checkNotNull(attribute.getName(), AttributeNames.NAME);
         checkNotNull(attribute.getDisplayName(), AttributeNames.DISPLAY_NAME);
         checkResourceNotNull(attribute.getDataType(), AttributeNames.DATA_TYPE);
+        
+        // check if attribute with same name
+        List<JansAttribute> jansAttributes = attributeService.getAttributeWithName(attribute.getName());
+        log.info(
+                "Check if attribute with inum different then:{} but with same name exists - attribute.getName():{}, jansAttributes:{}",
+                inum, attribute.getName(), jansAttributes);
+        if (jansAttributes != null && !jansAttributes.isEmpty()) {
+            List<JansAttribute> list = jansAttributes.stream().filter(e -> !e.getInum().equalsIgnoreCase(inum))
+                    .collect(Collectors.toList());
+            logger.info("Other JansAttribute's with same name:{} are list:{}", attribute.getName(), list);
+            if (list != null && !list.isEmpty()) {
+                throwBadRequestException(NAME_CONFLICT, String.format(NAME_CONFLICT_MSG, attribute.getName()));
+            }
+        }
+        else {
+            // check if attribute exists in schema
+            boolean attributeValidation = attributeService.validateAttributeDefinition(attribute.getName());
+            log.info(" ** Validate attribute - attribute.getName():{}, attributeValidation:{}", attribute.getName(),
+                    attributeValidation);
+            if (!attributeValidation) {
+                throw new WebApplicationException(getNotAcceptableException(
+                        "The attribute type '" + attribute.getName() + "' not defined in DB schema"));
+            }
+        }
+        
         JansAttribute existingAttribute = attributeService.getAttributeByInum(inum);
         checkResourceNotNull(existingAttribute, JANS_ATTRIBUTE);
         attribute.setInum(existingAttribute.getInum());

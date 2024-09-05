@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>io.jans</groupId>
 		<artifactId>jans-auth-server-parent</artifactId>
-		<version>1.0.20-SNAPSHOT</version>
+		<version>1.1.5-SNAPSHOT</version>
 	</parent>
 
 	<prerequisites>
@@ -20,10 +20,10 @@
 
 		<filters>
 			<filter>profiles/${cfg}/config-build.properties</filter>
-			<filter>${basedir}/profiles/${cfg}/config-oxauth.properties</filter>
+			<filter>${basedir}/profiles/${cfg}/config-jans-auth.properties</filter>
 
-			<filter>${basedir}/profiles/${cfg}/config-oxauth-test.properties</filter>
-			<filter>profiles/${cfg}/config-oxauth-test-data.properties</filter>
+			<filter>${basedir}/profiles/${cfg}/config-jans-auth-test.properties</filter>
+			<filter>profiles/${cfg}/config-jans-auth-test-data.properties</filter>
 		</filters>
 
 		<resources>
@@ -289,6 +289,10 @@
 					<groupId>org.jboss.resteasy</groupId>
 					<artifactId>*</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>org.bouncycastle</groupId>
+					<artifactId>bcprov-jdk15on</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 		<!-- persistence model -->
@@ -368,16 +372,6 @@
             <artifactId>jans-core-script</artifactId>
         </dependency>
 
-		<!-- Eleven -->
-		<dependency>
-			<groupId>io.jans</groupId>
-			<artifactId>jans-eleven-model</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>io.jans</groupId>
-			<artifactId>jans-eleven-client</artifactId>
-		</dependency>
-
 		<!-- jans-notify -->
 		<dependency>
 			<groupId>io.jans</groupId>
@@ -391,6 +385,14 @@
             <version>${project.version}</version>
         </dependency>
 
+		<!-- lock -->
+<!--
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-lock-service</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+-->
 		<!-- Weld -->
 		<dependency>
             <groupId>jakarta.validation</groupId>
@@ -461,11 +463,11 @@
 		<!-- Security -->
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
-			<artifactId>bcprov-jdk15on</artifactId>
+			<artifactId>bcprov-jdk18on</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.bouncycastle</groupId>
-			<artifactId>bcpkix-jdk15on</artifactId>
+			<artifactId>bcpkix-jdk18on</artifactId>
 		</dependency>
 
 		<!-- Net -->
@@ -589,6 +591,7 @@
 			<groupId>org.testng</groupId>
 			<artifactId>testng</artifactId>
 			<scope>test</scope>
+            <version>6.14.3</version> <!-- we need 6.14.3 due to Arquillian -->
 		</dependency>
 		<dependency>
             <groupId>jakarta.websocket</groupId>
@@ -746,6 +749,11 @@
 					<artifactId>jakarta.el-api</artifactId>
 					<scope>test</scope>
 				</dependency>
+				<dependency>
+				    <groupId>jakarta.servlet.jsp</groupId>
+				    <artifactId>jakarta.servlet.jsp-api</artifactId>
+				    <scope>provided</scope>
+				</dependency>
 
 				<dependency>
 					<groupId>org.jboss.weld.servlet</groupId>
@@ -799,7 +807,11 @@
                     <groupId>org.bitbucket.b_c</groupId>
                     <artifactId>jose4j</artifactId>
                 </dependency>
-			</dependencies>
+                <dependency>
+                    <groupId>com.nimbusds</groupId>
+                    <artifactId>oauth2-oidc-sdk</artifactId>
+                </dependency>
+            </dependencies>
 
 			<build>
 				<plugins>
@@ -1011,7 +1023,7 @@
 				<dependency>
 					<groupId>org.glassfish.main.extras</groupId>
 					<artifactId>glassfish-embedded-all</artifactId>
-					<version>4.1.2</version>
+					<version>7.0.10</version>
 					<scope>test</scope>
 				</dependency>
 				<dependency>

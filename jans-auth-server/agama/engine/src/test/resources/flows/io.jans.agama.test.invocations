@@ -17,7 +17,7 @@ When E is null or E.class.name is not "groovy.util.ScriptException"
 | E = Call java.lang.Object#new s
 When E is null or E.class.name is not "java.lang.InstantiationException"  
     Finish false
-    
+
 // invoke an unknown method of a known class (java.lang.String)
 | E = Call s reverse
 When E is null or E.class.name is not "java.lang.NoSuchMethodException"  

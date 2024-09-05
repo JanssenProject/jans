@@ -19,6 +19,7 @@ from sqlalchemy.exc import DatabaseError
 from sqlalchemy.sql import select
 
 from jans.pycloudlib.lock.base_lock import BaseLock
+from jans.pycloudlib.utils import get_password_from_file
 
 if _t.TYPE_CHECKING:  # pragma: no cover
     # imported objects for function type hint, completion, etc.
@@ -50,12 +51,9 @@ class SqlLock(BaseLock):
 
         user = os.environ.get("CN_SQL_DB_USER", "jans")
 
-        password_file = os.environ.get("CN_LOCK_PASSWORD_FILE", "/etc/jans/conf/lock_password")
-        if not os.path.isfile(password_file):
-            password_file = os.environ.get("CN_SQL_PASSWORD_FILE", "/etc/jans/conf/sql_password")
+        password_file = os.environ.get("CN_SQL_PASSWORD_FILE", "/etc/jans/conf/sql_password")
 
-        with open(password_file) as f:
-            password = f.read().strip()
+        password = get_password_from_file(password_file)
 
         if self._dialect in ("pgsql", "postgresql"):
             connector = "postgresql+psycopg2"

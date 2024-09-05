@@ -6,11 +6,26 @@
 
 package io.jans.configapi.service.status;
 
+import io.jans.util.process.ProcessHelper;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import io.jans.configapi.configuration.ConfigurationFactory;
+import io.jans.configapi.core.util.Jackson;
+import io.jans.configapi.model.status.StatsData;
+import io.jans.configapi.model.status.FacterData;
+import io.jans.configapi.service.auth.ConfigurationService;
+import io.jans.configapi.service.cdi.event.StatusCheckerTimerEvent;
+import io.jans.configapi.util.ApiConstants;
+import io.jans.service.cdi.async.Asynchronous;
+import io.jans.service.cdi.event.Scheduled;
+import io.jans.service.timer.event.TimerEvent;
+import io.jans.service.timer.schedule.TimerSchedule;
+import io.jans.util.StringHelper;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import jakarta.annotation.PostConstruct;
@@ -19,35 +34,9 @@ import jakarta.enterprise.event.Event;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 
-import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.exec.CommandLine;
-import io.jans.configapi.model.status.StatsData;
-import io.jans.configapi.model.status.FacterData;
-import io.jans.util.process.ProcessHelper;
-
-import io.jans.configapi.configuration.ConfigurationFactory;
-import io.jans.configapi.service.auth.ConfigurationService;
-import io.jans.configapi.service.cdi.event.StatusCheckerTimerEvent;
-import io.jans.service.cdi.async.Asynchronous;
-import io.jans.service.cdi.event.BaseConfigurationReload;
-import io.jans.service.cdi.event.ConfigurationEvent;
-import io.jans.service.cdi.event.ConfigurationUpdate;
-import io.jans.service.cdi.event.LdapConfigurationReload;
-import io.jans.service.cdi.event.Scheduled;
-import io.jans.service.timer.event.TimerEvent;
-import io.jans.service.timer.schedule.TimerSchedule;
-import io.jans.util.StringHelper;
-import io.jans.util.properties.FileConfiguration;
-
-import static java.nio.charset.StandardCharsets.UTF_8;
-
 import org.apache.commons.lang.StringUtils;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -58,6 +47,7 @@ public class StatusCheckerTimer {
 
     private static final int DEFAULT_INTERVAL = 5 * 60; // 1 minute
     public static final String PROGRAM_FACTER = "facter";
+    public static final String PROGRAM_SHOW_VERSION = "/opt/jans/printVersion.py";
 
     @Inject
     private Logger log;
@@ -122,9 +112,26 @@ public class StatusCheckerTimer {
         statsData.setFacterData(getFacterData());
         statsData.setDbType(configurationService.getPersistenceType());
         
-        configurationService.setStatsData(statsData);
+        configurationService.setStatsData(statsData);        
+
         log.debug("Configuration status update finished");
     }
+
+    public StatsData getServerStatsData() {
+        log.debug("Starting update of sever status");
+
+        StatsData statsData = new StatsData();
+        Date currentDateTime = new Date();
+        statsData.setLastUpdate(currentDateTime);
+        statsData.setFacterData(getFacterData());
+        statsData.setDbType(configurationService.getPersistenceType());
+        
+        configurationService.setStatsData(statsData);        
+
+        log.debug("statsData:{}",statsData);
+        return statsData;
+    }
+
 
     private FacterData getFacterData() {
         log.debug("Getting Server status");
@@ -133,8 +140,11 @@ public class StatusCheckerTimer {
         if (!isLinux()) {
             return facterData;
         }
+        
         CommandLine commandLine = new CommandLine(PROGRAM_FACTER);
         commandLine.addArgument("-j");
+        log.debug("Getting server status for commandLine:{}", commandLine);
+        
         String resultOutput;
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream(4096);) {
             boolean result = ProcessHelper.executeProgram(commandLine, false, 0, bos);
@@ -143,14 +153,81 @@ public class StatusCheckerTimer {
             }
             resultOutput = new String(bos.toByteArray(), UTF_8);
             facterData = mapper.readValue(resultOutput, FacterData.class);
-        } catch (UnsupportedEncodingException ex) {
-            log.error("Failed to parse program {} output", PROGRAM_FACTER, ex);
+        } catch (UnsupportedEncodingException uex) {
+            log.error("Failed to parse program {} output", PROGRAM_FACTER, uex);
             return facterData;
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (Exception ex) {
+            log.error("Failed to execute program {} output:{}", PROGRAM_FACTER, ex);
         }
         log.debug("Server status - facterData:{}", facterData);
         return facterData;
+    }
+    
+    public JsonNode getAppVersionData(String artifact) {
+        log.debug("Getting application version for artifact:{}", artifact);
+       
+        JsonNode appVersion = null;
+        if (!isLinux()) {
+            return appVersion;
+        }
+
+        CommandLine commandLine = new CommandLine(PROGRAM_SHOW_VERSION);
+        if(StringUtils.isNotBlank(artifact) && !artifact.equalsIgnoreCase(ApiConstants.ALL)) {
+            commandLine.addArgument("-artifact="+artifact);
+        }
+        commandLine.addArgument("--json");
+        log.debug("Getting application version for commandLine:{}", commandLine);
+        
+        String resultOutput;
+        try (ByteArrayOutputStream bos = new ByteArrayOutputStream(4096);) {
+            
+            boolean result = ProcessHelper.executeProgram(commandLine, false, 0, bos);
+            if (!result) {
+                return appVersion;
+            }
+            
+            resultOutput = new String(bos.toByteArray(), UTF_8);
+            log.debug("resultOutput:{}", resultOutput);
+            
+            if(StringUtils.isNotBlank(resultOutput)) {
+                appVersion = Jackson.asJsonNode(resultOutput);
+            }
+            
+        } catch (UnsupportedEncodingException uex) {
+            log.debug("Failed to parse program {} output", PROGRAM_SHOW_VERSION, uex);
+            return appVersion;
+        } catch (Exception ex) {
+            log.error("Failed to execute program {} output", PROGRAM_SHOW_VERSION, ex);
+            return appVersion;
+        }
+        log.debug("Server application version - appVersion:{}", appVersion);
+        return appVersion;
+    }
+
+    private void printDirectory() {
+        log.debug("printDirectory");
+
+        if (!isLinux()) {
+            return;
+        }
+        CommandLine commandLine = new CommandLine("pwd");
+
+        String resultOutput = null;
+        try (ByteArrayOutputStream bos = new ByteArrayOutputStream(4096);) {
+            boolean result = ProcessHelper.executeProgram(commandLine, false, 0, bos);
+            if (!result) {
+                return;
+            }
+            resultOutput = new String(bos.toByteArray(), UTF_8);
+            log.debug("Directory:{}", resultOutput);
+
+        } catch (UnsupportedEncodingException uex) {
+            log.debug("Failed to parse Directory program {} output", "Directory", uex);
+            return;
+        } catch (Exception ex) {
+            log.error("Failed to execute program {} output", PROGRAM_SHOW_VERSION, ex);
+        }
+        log.debug(" Server Directory:{}", resultOutput);
     }
 
     private boolean isLinux() {

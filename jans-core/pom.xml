@@ -3,7 +3,7 @@
 	<groupId>io.jans</groupId>
 	<artifactId>jans-core-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>1.0.20-SNAPSHOT</version>
+	<version>1.1.5-SNAPSHOT</version>
 	<name>jans-core</name>
 
     <distributionManagement>
@@ -46,6 +46,7 @@
 		<module>util</module>
 		<module>model</module>
 		<module>cache</module>
+		<module>message</module>
 		<module>document-store</module>
 		<module>standalone</module>
 		<module>saml</module>
@@ -88,7 +89,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-clean-plugin</artifactId>
-					<version>3.2.0</version>
+					<version>3.3.2</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -128,7 +129,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-site-plugin</artifactId>
-					<version>4.0.0-M7</version>
+					<version>4.0.0-M16</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -168,6 +169,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
+					<version>3.8.0</version>
 					<configuration>
 						<failOnError>false</failOnError>
 					</configuration>

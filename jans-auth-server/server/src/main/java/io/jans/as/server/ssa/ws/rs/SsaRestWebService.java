@@ -59,10 +59,11 @@ public interface SsaRestWebService {
      * @param jti Unique identifier
      * @return {@link Response} with status {@code 200 (Ok)} if is was validated successfully,
      * or with status {@code 401 (Unauthorized)} if unauthorized access request,
+     * or with status {@code 400 (Bad Request) with <b>invalid_jti<b/> key}, when jti does not exist, is invalid or state is in (expired, used or revoked),
      * or with status {@code 500 (Internal Server Error)} if internal error occurred.
      */
-    @HEAD
-    @Path("/ssa")
+    @POST
+    @Path("/ssa/validation")
     @Produces({MediaType.APPLICATION_JSON})
     Response validate(@HeaderParam("jti") String jti);
 
@@ -91,7 +92,7 @@ public interface SsaRestWebService {
      * @param jti Unique identifier
      * @return {@link Response} with status {@code 200 (Ok)} and the body containing JWT of SSA.
      * or with status {@code 401} if this functionality is not enabled, request has to have at least scope "ssa.admin",
-     * or with status {@code 422} if the SSA does not exist, is expired or used,
+     * or with status {@code 403} if the SSA does not exist, is expired or used,
      * or with status {@code 500} in case an uncontrolled error occurs when processing the method.
      */
     @GET

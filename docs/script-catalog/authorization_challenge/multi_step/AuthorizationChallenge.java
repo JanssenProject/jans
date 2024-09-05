@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+import java.util.HashMap;
 import java.util.UUID;
 
 /**
@@ -144,6 +145,16 @@ public class AuthorizationChallenge implements AuthorizationChallengeType {
             deviceSessionObject.getAttributes().getAttributes().put(OTP_PARAMETER, otp);
         }
 
+        String clientId = context.getHttpRequest().getParameter("client_id");
+        if (StringUtils.isNotBlank(clientId)) {
+            deviceSessionObject.getAttributes().getAttributes().put("client_id", clientId);
+        }
+
+        String acrValues = context.getHttpRequest().getParameter("acr_values");
+        if (StringUtils.isNotBlank(acrValues)) {
+            deviceSessionObject.getAttributes().getAttributes().put("acr_values", acrValues);
+        }
+
         if (newSave) {
             deviceSessionService.persist(deviceSessionObject);
         } else {
@@ -182,5 +193,10 @@ public class AuthorizationChallenge implements AuthorizationChallengeType {
     @Override
     public int getApiVersion() {
         return 11;
+    }
+
+    @Override
+    public Map<String, String> getAuthenticationMethodClaims(Object context) {
+        return new HashMap<>();
     }
 }

@@ -100,7 +100,7 @@ tags:
 | dpopSigningAlgValuesSupported | Demonstration of Proof-of-Possession (DPoP) authorization signing algorithms supported | [Details](#dpopsigningalgvaluessupported) |
 | dpopTimeframe | Demonstration of Proof-of-Possession (DPoP) timeout | [Details](#dpoptimeframe) |
 | dpopUseNonce | Demonstration of Proof-of-Possession (DPoP) use nonce | [Details](#dpopusenonce) |
-| dynamicGrantTypeDefault | This list details which OAuth 2.0 grant types can be set up with the client registration API | [Details](#dynamicgranttypedefault) |
+| grantTypesSupportedByDynamicRegistration | This list details which OAuth 2.0 grant types can be set up with the client registration API | [Details](#granttypessupportedbydynamicregistration) |
 | dynamicRegistrationAllowedPasswordGrantScopes | List of grant scopes for dynamic registration | [Details](#dynamicregistrationallowedpasswordgrantscopes) |
 | dynamicRegistrationCustomAttributes | This list details the custom attributes allowed for dynamic registration | [Details](#dynamicregistrationcustomattributes) |
 | dynamicRegistrationCustomObjectClass | LDAP custom object class for dynamic registration | [Details](#dynamicregistrationcustomobjectclass) |
@@ -148,11 +148,6 @@ tags:
 | introspectionSkipAuthorization | Specifies if authorization to be skipped for introspection | [Details](#introspectionskipauthorization) |
 | invalidateSessionCookiesAfterAuthorizationFlow | Boolean value to specify whether to invalidate session_id and consent_session_id cookies right after successful or unsuccessful authorization | [Details](#invalidatesessioncookiesafterauthorizationflow) |
 | issuer | URL using the https scheme that OP asserts as Issuer identifier | [Details](#issuer) |
-| jansElevenDeleteKeyEndpoint | oxEleven Delete Key endpoint URL | [Details](#janselevendeletekeyendpoint) |
-| jansElevenGenerateKeyEndpoint | oxEleven Generate Key endpoint URL | [Details](#janselevengeneratekeyendpoint) |
-| jansElevenSignEndpoint | oxEleven Sign endpoint UR | [Details](#janselevensignendpoint) |
-| jansElevenTestModeToken | oxEleven Test Mode Token | [Details](#janseleventestmodetoken) |
-| jansElevenVerifySignatureEndpoint | oxEleven Verify Signature endpoint URL | [Details](#janselevenverifysignatureendpoint) |
 | jansId | URL for the Inum generator Service | [Details](#jansid) |
 | jansOpenIdConnectVersion | OpenID Connect Version | [Details](#jansopenidconnectversion) |
 | jmsBrokerURISet | JMS Broker URI Set | [Details](#jmsbrokeruriset) |
@@ -1090,7 +1085,7 @@ tags:
 - Default value: false
 
 
-### dynamicGrantTypeDefault
+### grantTypesSupportedByDynamicRegistration
 
 - Description: This list details which OAuth 2.0 grant types can be set up with the client registration API
 
@@ -1516,51 +1511,6 @@ tags:
 ### issuer
 
 - Description: URL using the https scheme that OP asserts as Issuer identifier
-
-- Required: No
-
-- Default value: None
-
-
-### jansElevenDeleteKeyEndpoint
-
-- Description: oxEleven Delete Key endpoint URL
-
-- Required: No
-
-- Default value: None
-
-
-### jansElevenGenerateKeyEndpoint
-
-- Description: oxEleven Generate Key endpoint URL
-
-- Required: No
-
-- Default value: None
-
-
-### jansElevenSignEndpoint
-
-- Description: oxEleven Sign endpoint UR
-
-- Required: No
-
-- Default value: None
-
-
-### jansElevenTestModeToken
-
-- Description: oxEleven Test Mode Token
-
-- Required: No
-
-- Default value: None
-
-
-### jansElevenVerifySignatureEndpoint
-
-- Description: oxEleven Verify Signature endpoint URL
 
 - Required: No
 

@@ -24,15 +24,17 @@ The following environment variables are supported by the container:
 - `CN_CONFIG_KUBERNETES_CONFIGMAP`: Kubernetes configmaps name (default to `jans`).
 - `CN_CONFIG_KUBERNETES_USE_KUBE_CONFIG`: Load credentials from `$HOME/.kube/config`, only useful for non-container environment (default to `false`).
 - `CN_SECRET_ADAPTER`: The secrets' adapter, can be `vault` or `kubernetes`.
-- `CN_SECRET_VAULT_SCHEME`: supported Vault scheme (`http` or `https`).
-- `CN_SECRET_VAULT_HOST`: hostname or IP of Vault (default to `localhost`).
-- `CN_SECRET_VAULT_PORT`: port of Vault (default to `8200`).
 - `CN_SECRET_VAULT_VERIFY`: whether to verify cert or not (default to `false`).
 - `CN_SECRET_VAULT_ROLE_ID_FILE`: path to file contains Vault AppRole role ID (default to `/etc/certs/vault_role_id`).
 - `CN_SECRET_VAULT_SECRET_ID_FILE`: path to file contains Vault AppRole secret ID (default to `/etc/certs/vault_secret_id`).
 - `CN_SECRET_VAULT_CERT_FILE`: path to Vault cert file (default to `/etc/certs/vault_client.crt`).
 - `CN_SECRET_VAULT_KEY_FILE`: path to Vault key file (default to `/etc/certs/vault_client.key`).
 - `CN_SECRET_VAULT_CACERT_FILE`: path to Vault CA cert file (default to `/etc/certs/vault_ca.crt`). This file will be used if it exists and `CN_SECRET_VAULT_VERIFY` set to `true`.
+- `CN_SECRET_VAULT_ADDR`: URL of Vault (default to `http://localhost:8200`).
+- `CN_SECRET_VAULT_NAMESPACE`: Namespace used to access secrets (default to empty string).
+- `CN_SECRET_VAULT_KV_PATH`: Path to KV secrets engine (default to `secret`).
+- `CN_SECRET_VAULT_PREFIX`: Base prefix name used to build secret path (default to `jans`).
+- `CN_SECRET_VAULT_APPROLE_PATH`: Path to AppRole (default to `approle`).
 - `CN_SECRET_KUBERNETES_NAMESPACE`: Kubernetes namespace (default to `default`).
 - `CN_SECRET_KUBERNETES_CONFIGMAP`: Kubernetes secrets name (default to `jans`).
 - `CN_SECRET_KUBERNETES_USE_KUBE_CONFIG`: Load credentials from `$HOME/.kube/config`, only useful for non-container environment (default to `false`).
@@ -54,12 +56,11 @@ The following environment variables are supported by the container:
 - `CN_COUCHBASE_KEEPALIVE_INTERVAL`: Keep-alive interval for Couchbase connection (default to `30000` milliseconds).
 - `CN_COUCHBASE_KEEPALIVE_TIMEOUT`: Keep-alive timeout for Couchbase connection (default to `2500` milliseconds).
 - `CN_JAVA_OPTIONS`: Java options passed to entrypoint, i.e. `-Xmx1024m` (default to empty-string).
-- `CN_DOCUMENT_STORE_TYPE`: Document store type (one of `LOCAL` or `JCA`; default to `LOCAL`).
+- `CN_DOCUMENT_STORE_TYPE`: Document store type (one of `LOCAL` or `DB`; default to `DB`).
 - `CN_JACKRABBIT_URL`: URL to remote repository (default to `http://localhost:8080`).
 - `CN_JACKRABBIT_SYNC_INTERVAL`: Interval between files sync (default to `300` seconds).
 - `CN_JACKRABBIT_ADMIN_ID`: Admin username (default to `admin`).
 - `CN_JACKRABBIT_ADMIN_PASSWORD_FILE`: Absolute path to file contains password for admin user (default to `/etc/jans/conf/jackrabbit_admin_password`).
-- `CN_SSL_CERT_FROM_SECRETS`: Determine whether to get SSL cert from secrets backend (default to `false`). Note that the flag will take effect only if there's no mounted `/etc/certs/web_https.crt` file.
 - `CN_SQL_DB_DIALECT`: Dialect name of SQL backend (one of `mysql`, `pgsql`; default to `mysql`).
 - `CN_SQL_DB_HOST`: Host of SQL backend (default to `localhost`).
 - `CN_SQL_DB_PORT`: Port of SQL backend (default to `3306`).
@@ -76,6 +77,7 @@ The following environment variables are supported by the container:
 - `CN_CASA_ADMIN_LOCK_FILE`: Path to lock file to enable/disable administration feature (default to `/opt/jans/jetty/jans-casa/.administrable`). If file is not exist, the feature is disabled.
 - `CN_PROMETHEUS_PORT`: Port used by Prometheus JMX agent (default to empty string). To enable Prometheus JMX agent, set the value to a number. See [Exposing metrics](#exposing-metrics) for details.
 - `CN_CASA_JWKS_SIZE_LIMIT`: Default HTTP size limit (in bytes) when retrieving remote JWKS (default to `100000`).
+- `CN_SSL_CERT_FROM_SECRETS`: Determine whether to get SSL cert from secrets backend (default to `true`). Note that the flag will take effect only if there's no mounted `/etc/certs/web_https.crt` file.
 
 ### Configure app loggers
 
@@ -154,4 +156,3 @@ Hybrid persistence supports all available persistence types. To configure hybrid
         "session": "spanner",
     }
     ```
-

@@ -6,6 +6,8 @@
 
 package io.jans.as.server.model.common;
 
+import io.jans.as.model.authzdetails.AuthzDetail;
+import io.jans.as.model.authzdetails.AuthzDetails;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.model.session.SessionId;
@@ -14,8 +16,9 @@ import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.token.JsonWebResponse;
 import io.jans.as.server.authorize.ws.rs.AuthzRequest;
 import io.jans.as.server.model.audit.OAuth2AuditLog;
-import io.jans.as.server.model.ldap.TokenEntity;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
+import io.jans.model.token.TokenEntity;
+import io.jans.util.IdUtil;
 import jakarta.faces.context.ExternalContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -42,13 +45,17 @@ public class ExecutionContext {
 
     private SessionId sessionId;
     private List<SessionId> currentSessions;
+    private SessionId authorizationChallengeSessionId;
 
     private AuthzRequest authzRequest;
+    private AuthzDetails authzDetails;
+    private AuthzDetail authzDetail;
 
     private AppConfiguration appConfiguration;
     private AttributeService attributeService;
 
     private CustomScriptConfiguration script;
+    private boolean skipModifyAccessTokenScript;
     private TokenEntity idTokenEntity;
     private TokenEntity accessTokenEntity;
     private TokenEntity refreshTokenEntity;
@@ -59,6 +66,8 @@ public class ExecutionContext {
 
     private String nonce;
     private String state;
+    private String tokenReferenceId = IdUtil.randomShortUUID();
+    private Integer statusListIndex;
 
     private boolean includeIdTokenClaims;
 
@@ -91,6 +100,7 @@ public class ExecutionContext {
         executionContext.setHttpResponse(authzRequest.getHttpResponse());
         executionContext.setClient(authzRequest.getClient());
         executionContext.setAuthzRequest(authzRequest);
+        executionContext.setAuthzDetails(authzRequest.getAuthzDetails());
         return executionContext;
     }
 
@@ -107,6 +117,91 @@ public class ExecutionContext {
         return executionContext;
     }
 
+    public static ExecutionContext of(ExecutionContext context) {
+        ExecutionContext executionContext = new ExecutionContext();
+        if (context == null) {
+            return executionContext;
+        }
+
+        executionContext.httpRequest = context.httpRequest;
+        executionContext.httpResponse = context.httpResponse;
+        executionContext.responseBuilder = context.responseBuilder;
+        executionContext.client = context.client;
+        executionContext.grant = context.grant;
+        executionContext.user = context.user;
+        executionContext.sessionId = context.sessionId;
+        executionContext.currentSessions = context.currentSessions;
+        executionContext.authorizationChallengeSessionId = context.authorizationChallengeSessionId;
+        executionContext.authzRequest = context.authzRequest;
+        executionContext.authzDetails = context.authzDetails;
+        executionContext.authzDetail = context.authzDetail;
+        executionContext.appConfiguration = context.appConfiguration;
+        executionContext.attributeService = context.attributeService;
+        executionContext.script = context.script;
+        executionContext.skipModifyAccessTokenScript = context.skipModifyAccessTokenScript;
+        executionContext.idTokenEntity = context.idTokenEntity;
+        executionContext.accessTokenEntity = context.accessTokenEntity;
+        executionContext.refreshTokenEntity = context.refreshTokenEntity;
+        executionContext.dpop = context.dpop;
+        executionContext.certAsPem = context.certAsPem;
+        executionContext.deviceSecret = context.deviceSecret;
+        executionContext.nonce = context.nonce;
+        executionContext.state = context.state;
+        executionContext.includeIdTokenClaims = context.includeIdTokenClaims;
+        executionContext.preProcessing = context.preProcessing;
+        executionContext.postProcessor = context.postProcessor;
+        executionContext.scopes = context.scopes;
+        executionContext.claimsAsString = context.claimsAsString;
+        executionContext.userSessions = context.userSessions;
+        executionContext.auditLog = context.auditLog;
+
+        executionContext.attributes.clear();
+        executionContext.attributes.putAll(context.attributes);
+
+        return executionContext;
+    }
+
+    public Integer getStatusListIndex() {
+        return statusListIndex;
+    }
+
+    public void setStatusListIndex(Integer statusListIndex) {
+        this.statusListIndex = statusListIndex;
+    }
+
+    public String generateRandomTokenReferenceId() {
+        tokenReferenceId = IdUtil.randomShortUUID();
+        return tokenReferenceId;
+    }
+
+    public String getTokenReferenceId() {
+        return tokenReferenceId;
+    }
+
+    public void setTokenReferenceId(String tokenReferenceId) {
+        this.tokenReferenceId = tokenReferenceId;
+    }
+
+    public ExecutionContext copy() {
+        return of(this);
+    }
+
+    public AuthzDetails getAuthzDetails() {
+        return authzDetails;
+    }
+
+    public void setAuthzDetails(AuthzDetails authzDetails) {
+        this.authzDetails = authzDetails;
+    }
+
+    public AuthzDetail getAuthzDetail() {
+        return authzDetail;
+    }
+
+    public void setAuthzDetail(AuthzDetail authzDetail) {
+        this.authzDetail = authzDetail;
+    }
+
     public AuthzRequest getAuthzRequest() {
         return authzRequest;
     }
@@ -121,6 +216,14 @@ public class ExecutionContext {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public SessionId getAuthorizationChallengeSessionId() {
+        return authorizationChallengeSessionId;
+    }
+
+    public void setAuthorizationChallengeSessionId(SessionId authorizationChallengeSessionId) {
+        this.authorizationChallengeSessionId = authorizationChallengeSessionId;
     }
 
     public List<SessionId> getCurrentSessions() {
@@ -145,6 +248,14 @@ public class ExecutionContext {
 
     public void setDeviceSecret(String deviceSecret) {
         this.deviceSecret = deviceSecret;
+    }
+
+    public boolean isSkipModifyAccessTokenScript() {
+        return skipModifyAccessTokenScript;
+    }
+
+    public void setSkipModifyAccessTokenScript(boolean skipModifyAccessTokenScript) {
+        this.skipModifyAccessTokenScript = skipModifyAccessTokenScript;
     }
 
     @NotNull
@@ -333,5 +444,14 @@ public class ExecutionContext {
 
     public void setResponseBuilder(Response.ResponseBuilder responseBuilder) {
         this.responseBuilder = responseBuilder;
+    }
+
+    public void initFromGrantIfNeeded(AuthorizationGrant authorizationGrant) {
+        if (client == null) {
+            client = authorizationGrant.getClient();
+        }
+        if (grant == null) {
+            grant = authorizationGrant;
+        }
     }
 }

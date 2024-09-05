@@ -24,7 +24,7 @@ from setup_app.installers.base import BaseInstaller
 
 class JansInstaller(BaseInstaller, SetupUtils):
 
-    install_var = 'installJans'
+    install_var = 'install_jans'
 
     def __repr__(self):
         setattr(base.current_app, self.__class__.__name__, self)
@@ -73,20 +73,19 @@ class JansInstaller(BaseInstaller, SetupUtils):
                     return ''
                 return prefix.ljust(30) + repr(getattr(Config, install_var, False)).rjust(35) + (' *' if install_var in Config.addPostSetupService else '') + '\n'
 
-            txt += get_install_string('Install Apache 2 web server', 'installHttpd')
-            txt += get_install_string('Install Auth Server', 'installOxAuth')
+            txt += get_install_string('Install Apache 2 web server', 'install_httpd')
+            txt += get_install_string('Install Auth Server', 'install_jans_auth')
             txt += get_install_string('Install Jans Config API', 'install_config_api')
             if Config.profile == 'jans':
-                txt += get_install_string('Install Fido2 Server', 'installFido2')
-                txt += get_install_string('Install Scim Server', 'install_scim_server')
-                txt += get_install_string('Install Jans Link Server', 'install_jans_link')
-                txt += get_install_string('Install Jans KC Link Server', 'install_jans_keycloak_link')
-                txt += get_install_string('Install Jans Casa Server', 'install_casa')
-                txt += get_install_string('Install Jans SAML', 'install_jans_saml')
-
-
-            if Config.profile == 'jans' and Config.installEleven:
-                txt += get_install_string('Install Eleven Server', 'installEleven')
+                for prompt_str, install_var in (
+                        ('Install Fido2 Server', 'install_fido2'),
+                        ('Install Scim Server', 'install_scim_server'),
+                        ('Install Jans Link Server', 'install_jans_link'),
+                        ('Install Jans KC Link Server', 'install_jans_keycloak_link'),
+                        ('Install Jans Casa', 'install_casa'),
+                        ('Install Jans Lock', 'install_jans_lock'),
+                        ('Install Jans KC', 'install_jans_saml')):
+                    txt += get_install_string(prompt_str, install_var)
 
             if base.argsp.t:
                 txt += 'Load Test Data '.ljust(30) + repr( base.argsp.t).rjust(35) + "\n"
@@ -111,20 +110,22 @@ class JansInstaller(BaseInstaller, SetupUtils):
         jansProgress.register(self)
 
         Config.install_time_ldap = time.strftime('%Y%m%d%H%M%SZ', time.gmtime(time.time()))
+        Config.jans_version = base.current_app.app_info['JANS_APP_VERSION']
+
         if not os.path.exists(Config.distFolder):
             print("Please ensure that you are running this script inside Jans container.")
             sys.exit(1)
 
         #Download jans-auth-client-jar-with-dependencies
-        if not os.path.exists(Config.non_setup_properties['oxauth_client_jar_fn']):
-            oxauth_client_jar_url = os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-auth-client/{0}/jans-auth-client-{0}-jar-with-dependencies.jar').format(base.current_app.app_info['jans_version'])
-            self.logIt("Downloading {}".format(os.path.basename(oxauth_client_jar_url)))
-            base.download(oxauth_client_jar_url, Config.non_setup_properties['oxauth_client_jar_fn'])
+        if not os.path.exists(Config.non_setup_properties['jans_auth_client_jar_fn']):
+            jans_auth_client_jar_url = os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-auth-client/{0}/jans-auth-client-{0}-jar-with-dependencies.jar').format(base.current_app.app_info['jans_version'])
+            self.logIt("Downloading {}".format(os.path.basename(jans_auth_client_jar_url)))
+            base.download(jans_auth_client_jar_url, Config.non_setup_properties['jans_auth_client_jar_fn'])
 
         self.logIt("Determining key generator path")
-        oxauth_client_jar_zf = zipfile.ZipFile(Config.non_setup_properties['oxauth_client_jar_fn'])
+        jans_auth_client_jar_zf = zipfile.ZipFile(Config.non_setup_properties['jans_auth_client_jar_fn'])
 
-        for f in oxauth_client_jar_zf.namelist():
+        for f in jans_auth_client_jar_zf.namelist():
             if os.path.basename(f) == 'KeyGenerator.class':
                 p, e = os.path.splitext(f)
                 Config.non_setup_properties['key_gen_path'] = p.replace(os.path.sep, '.')
@@ -133,7 +134,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
                 Config.non_setup_properties['key_export_path'] = p.replace(os.path.sep, '.')
 
         if (not 'key_gen_path' in Config.non_setup_properties) or (not 'key_export_path' in Config.non_setup_properties):
-            self.logIt("Can't determine key generator and/or key exporter path form {}".format(Config.non_setup_properties['oxauth_client_jar_fn']), True, True)
+            self.logIt("Can't determine key generator and/or key exporter path form {}".format(Config.non_setup_properties['jans_auth_client_jar_fn']), True, True)
         else:
             self.logIt("Key generator path was determined as {}".format(Config.non_setup_properties['key_export_path']))
 
@@ -314,6 +315,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
         for script in Config.jansScriptFiles:
             self.copyFile(script, Config.jansOptBinFolder)
+            self.run([paths.cmd_chmod, '+x', script])
 
         self.logIt("Rendering encode.py")
         encode_script = self.readFile(os.path.join(Config.templateFolder, 'encode.py'))
@@ -335,9 +337,14 @@ class JansInstaller(BaseInstaller, SetupUtils):
             self.run([paths.cmd_chown, 'root:root', target_fn])
             self.run([paths.cmd_chmod, '+x', target_fn])
 
-            print_version_scr_fn = os.path.join(Config.install_dir, 'setup_app/utils/printVersion.py')
-            self.run(['cp', '-f', print_version_scr_fn , Config.jansOptBinFolder])
-            self.run([paths.cmd_ln, '-s', 'printVersion.py' , 'show_version.py'], cwd=Config.jansOptBinFolder)
+            print_version_s = 'printVersion.py'
+            show_version_s = 'show_version.py'
+            print_version_scr_fn = os.path.join(Config.install_dir, f'setup_app/utils/{print_version_s}')
+            self.run(['cp', '-f', print_version_scr_fn , Config.jansOptFolder])
+            target_fn = os.path.join(Config.jansOptFolder, print_version_s)
+            self.run([paths.cmd_ln, '-s', target_fn, os.path.join(Config.jansOptBinFolder, show_version_s)])
+            self.chown(target_fn, Config.jetty_user, Config.root_user)
+            self.run([paths.cmd_chmod, '0550', target_fn])
 
         for scr in Path(Config.jansOptBinFolder).glob('*'):
             scr_path = scr.as_posix()
@@ -349,7 +356,8 @@ class JansInstaller(BaseInstaller, SetupUtils):
                 else:
                     scr_content.insert(0, first_line)
                 self.writeFile(scr_path, '\n'.join(scr_content), backup=False)
-
+            if scr.name == show_version_s:
+                continue
             self.run([paths.cmd_chmod, '700', scr_path])
 
     def update_hostname(self):
@@ -367,8 +375,10 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
             self.run(['/bin/hostname', Config.hostname])
 
+        etc_hosts_entry = '{}\t{}\t{}\n'.format(Config.ip, Config.hostname, Config.hostname.split('.')[0])
+
         if not os.path.exists(Config.etc_hosts):
-            self.writeFile(Config.etc_hosts, '{}\t{}\n'.format(Config.ip, Config.hostname))
+            self.writeFile(Config.etc_hosts, etc_hosts_entry)
         else:
             hostname_file_content = self.readFile(Config.etc_hosts)
             with open(Config.etc_hosts,'w') as w:
@@ -376,7 +386,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
                     if not Config.hostname in l.split():
                         w.write(l+'\n')
 
-                w.write('{}\t{}\n'.format(Config.ip, Config.hostname))
+                w.write(etc_hosts_entry)
 
         self.run([paths.cmd_chmod, '-R', '644', Config.etc_hosts])
 
@@ -501,7 +511,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
             #write post-install.py script
             self.logIt("Writing snap-post-setup.py", pbar='post-setup')
             post_setup_script = self.readFile(os.path.join(Config.templateFolder, 'snap-post-setup.py'))
-            
+
             for key, val in (('{{SNAP_NAME}}', os.environ['SNAP_NAME']),
                              ('{{SNAP_PY3}}', paths.cmd_py3),
                              ('{{SNAP}}', base.snap),
@@ -542,39 +552,48 @@ class JansInstaller(BaseInstaller, SetupUtils):
             self.writeFile(os.path.join(base.snap_common, 'etc/hosts.jans'), Config.ip + '\t' + Config.hostname)
 
         else:
-            self.run([paths.cmd_chown, '-R', 'jetty:root', Config.certFolder])
-            self.run([paths.cmd_chmod, '-R', '660', Config.certFolder])
-            self.run([paths.cmd_chmod, 'u+X', Config.certFolder])
-
-            self.chown(Config.jansBaseFolder, user=Config.jetty_user, group=Config.jetty_group, recursive=True)
-            for p in Path(Config.jansBaseFolder).rglob("*"):
-                if p.is_dir():
-                    self.run([paths.cmd_chmod, '750', p.as_posix()])
-                elif p.is_file():
-                    self.run([paths.cmd_chmod, '640', p.as_posix()])
-
-            if not Config.installed_instance:
-                cron_service = 'crond' if base.os_type in ['centos', 'red', 'fedora'] else 'cron'
-                self.restart(cron_service)
-
-
-            # if we are running inside shiv package, copy site pacakages to /opt/dist/jans-setup-packages and add to sys path
-
-            gluu_site_dir = '/opt/dist/jans-setup-packages'
-
-            for p in sys.path:
-                ps = str(p)
-                if '/.shiv/' in ps and ps.endswith('site-packages'):
-                    if not gluu_site_dir in sys.path:
-                        if not os.path.exists(site.USER_SITE):
-                            os.makedirs(site.USER_SITE)
-                        with open(os.path.join(site.USER_SITE, 'jans_setup_site.pth'), 'w') as site_file:
-                            site_file.write(gluu_site_dir)
-                        self.logIt("Copying site packages to {}".format(gluu_site_dir))
-                        shutil.copytree(p, gluu_site_dir, dirs_exist_ok=True)
+            self.secure_files()
 
         #enable scripts
         self.enable_scripts(base.argsp.enable_script)
+
+        # write default Lock Configuration to DB
+        base.current_app.JansLockInstaller.configure_message_conf()
+
+        # Update jansServiceModule for config-api on DB
+        base.current_app.ConfigApiInstaller.update_jansservicemodule()
+
+    def secure_files(self):
+        self.run([paths.cmd_chown, '-R', 'jetty:root', Config.certFolder])
+        self.run([paths.cmd_chmod, '-R', '660', Config.certFolder])
+        self.run([paths.cmd_chmod, 'u+X', Config.certFolder])
+
+        self.chown(Config.jansBaseFolder, user=Config.jetty_user, group=Config.jetty_group, recursive=True)
+        for p in Path(Config.jansBaseFolder).rglob("*"):
+            if p.is_dir():
+                self.run([paths.cmd_chmod, '750', p.as_posix()])
+            elif p.is_file():
+                self.run([paths.cmd_chmod, '640', p.as_posix()])
+
+        if not Config.installed_instance:
+            self.restart(base.cron_service)
+
+        # if we are running inside shiv package, copy site pacakages to /opt/dist/jans-setup-packages and add to sys path
+
+        gluu_site_dir = '/opt/dist/jans-setup-packages'
+
+        for p in sys.path:
+            ps = str(p)
+            if '/.shiv/' in ps and ps.endswith('site-packages'):
+                if not gluu_site_dir in sys.path:
+                    if not os.path.exists(site.USER_SITE):
+                        os.makedirs(site.USER_SITE)
+                    with open(os.path.join(site.USER_SITE, 'jans_setup_site.pth'), 'w') as site_file:
+                        site_file.write(gluu_site_dir)
+                    self.logIt("Copying site packages to {}".format(gluu_site_dir))
+                    shutil.copytree(p, gluu_site_dir, dirs_exist_ok=True)
+
+
 
     def apply_selinux_plicies(self):
         self.logIt("Applying SELinux Policies")
@@ -630,26 +649,27 @@ class JansInstaller(BaseInstaller, SetupUtils):
     def order_services(self):
 
         service_list = [
-                        ('jans-eleven', 'installEleven'),
-                        ('jans-auth', 'installOxAuth'),
+                        ('jans-auth', 'install_jans_auth'),
                         ('jans-config-api', 'install_config_api'),
-                        ('casa', 'install_casa'),
-                        ('jans-fido2', 'installFido2'),
+                        ('jans-casa', 'install_casa'),
+                        ('jans-fido2', 'install_fido2'),
                         ('jans-link', 'install_jans_link'),
                         ('jans-scim', 'install_scim_server'),
+                        ('jans-lock', 'install_jans_lock_as_server'),
+                        ('opa', 'install_opa'),
                         ('saml', 'install_jans_saml'),
                         ('jans-keycloak-link', 'install_jans_keycloak_link'),
+                        ('kc-scheduler', 'install_jans_saml'),
                         ]
         service_listr = service_list[:]
         service_listr.reverse()
         for i, service in enumerate(service_listr):
             order_var_str = 'order_{}_service'.format(service[0].replace('-','_'))
+            if service[0] == 'jans-auth':
+                Config.templateRenderingDict[order_var_str] = Config.backend_service
+                continue
             for sservice in (service_listr[i+1:]):
                 if Config.get(sservice[1]):
                     Config.templateRenderingDict[order_var_str] = sservice[0]+'.service'
                     break
-                else:
-                    if service[0] != 'jans-auth':
-                        Config.templateRenderingDict[order_var_str] = 'jans-auth.service'
-                    else:
-                        Config.templateRenderingDict['order_jans_auth_service'] =  'jans-eleven.service' if Config.installEleven else  Config.backend_service
+

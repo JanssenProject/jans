@@ -5,7 +5,7 @@
 	<groupId>io.jans</groupId>
 	<artifactId>jans-scim</artifactId>
 	<packaging>pom</packaging>
-	<version>1.0.20-SNAPSHOT</version>
+	<version>1.1.5-SNAPSHOT</version>
 	<name>SCIM API</name>
 	<url>http://www.gluu.org</url>
 
@@ -27,7 +27,7 @@
 
 		<jans.bom.version>${project.version}</jans.bom.version>
         
-		<jacoco.version>0.8.10</jacoco.version>
+		<jacoco.version>0.8.11</jacoco.version>
 
 		<sonar.projectKey>JanssenProject_jans-scim</sonar.projectKey>
 		<sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
@@ -118,7 +118,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-dependency-plugin</artifactId>
-					<version>3.5.0</version>
+					<version>3.6.1</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -153,7 +153,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-site-plugin</artifactId>
-					<version>4.0.0-M7</version>
+					<version>4.0.0-M16</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -171,6 +171,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
+					<version>3.8.0</version>
 					<configuration>
 						<failOnError>false</failOnError>
 					</configuration>
@@ -178,7 +179,7 @@
 				<plugin>
 					<groupId>com.github.spotbugs</groupId>
 					<artifactId>spotbugs-maven-plugin</artifactId>
-					<version>4.7.3.4</version>
+					<version>4.8.2.0</version>
 				</plugin>
 				<plugin>
 					<groupId>org.jacoco</groupId>

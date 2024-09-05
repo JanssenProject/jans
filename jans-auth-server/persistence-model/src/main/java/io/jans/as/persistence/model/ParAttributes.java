@@ -20,6 +20,8 @@ public class ParAttributes implements Serializable {
     @JsonProperty
     private String scope;
     @JsonProperty
+    private String authorizationDetails;
+    @JsonProperty
     private String responseType;
     @JsonProperty
     private String clientId;
@@ -80,6 +82,14 @@ public class ParAttributes implements Serializable {
 
     public void setScope(String scope) {
         this.scope = scope;
+    }
+
+    public String getAuthorizationDetails() {
+        return authorizationDetails;
+    }
+
+    public void setAuthorizationDetails(String authorizationDetails) {
+        this.authorizationDetails = authorizationDetails;
     }
 
     public String getResponseType() {
@@ -279,6 +289,7 @@ public class ParAttributes implements Serializable {
     public String toString() {
         return "ParAttributes{" +
                 "scope='" + scope + '\'' +
+                ", authorizationDetails='" + authorizationDetails + '\'' +
                 ", responseType='" + responseType + '\'' +
                 ", clientId='" + clientId + '\'' +
                 ", redirectUri='" + redirectUri + '\'' +

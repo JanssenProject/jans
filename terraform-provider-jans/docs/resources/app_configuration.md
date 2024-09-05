@@ -27,6 +27,7 @@ resource "jans_app_configuration" "global" {
 - `access_token_signing_alg_values_supported` (List of String) A list of the access token signing algorithms (alg values) supported by the OP. 
 							One of "none", "HS256", "HS384", "HS512", "RS256", "RS384", "RS512", "ES256", "ES384", 
 							"ES512", "PS256", "PS384", "PS512"
+- `acr_mappings` (Map of String) A map of ACR mappings. Example: { "acr1": "script1", "acr2": "script2" }
 - `active_session_authorization_scope` (String) Authorization Scope for active session.
 - `agama_configuration` (Block List, Max: 1) Engine Config which offers an alternative way to build authentication flows in Janssen server (see [below for nested schema](#nestedblock--agama_configuration))
 - `all_response_types_supported` (List of String) List of all response types supported.
@@ -35,7 +36,10 @@ resource "jans_app_configuration" "global" {
 - `allow_end_session_with_unmatched_sid` (Boolean) Boolean value specifying whether to allow end session with unmatched SID.
 - `allow_id_token_without_implicit_grant_type` (Boolean) Specifies if a token without implicit grant types is allowed.
 - `allow_post_logout_redirect_without_validation` (Boolean) Allows post logout redirect without validation for End Session Endpoint.
+- `allow_revoke_for_other_clients` (Boolean) Boolean value ture allow revoke for other clients.
 - `allow_spontaneous_scopes` (Boolean) Specifies whether to allow spontaneous scopes.
+- `archived_jwk_lifetime_in_seconds` (Number) The archived jwk lifetime in seconds.
+- `archived_jwks_uri` (String) Archved URLs of the OP's JSON Web Key Set (JWK) document.
 - `authentication_filters` (Block List) List of authentication filters. (see [below for nested schema](#nestedblock--authentication_filters))
 - `authentication_filters_enabled` (Boolean) Boolean value specifying whether to enable user authentication filters.
 - `authentication_protection_configuration` (Block List, Max: 1) Authentication Brute Force Protection Configuration. (see [below for nested schema](#nestedblock--authentication_protection_configuration))
@@ -74,10 +78,12 @@ resource "jans_app_configuration" "global" {
 - `claims_parameter_supported` (Boolean) Specifies whether the OP supports use of the claim’s parameter.
 - `clean_service_batch_chunk_size` (Number) Each clean up iteration fetches chunk of expired data per base dn and removes it from storage. Example: 10000
 - `clean_service_interval` (Number) Time interval for the Clean Service in seconds. Example: 60
+- `clean_up_inactive_client_after_hours_of_inactivity` (Number) The time interval in hours after which the client is considered inactive.
 - `client_authentication_filters` (Block List) List of client authentication filters. (see [below for nested schema](#nestedblock--client_authentication_filters))
 - `client_authentication_filters_enabled` (Boolean) Boolean value specifying whether to enable client authentication filters.
 - `client_black_list` (List of String) Black List for Client Redirection URIs.
 - `client_info_endpoint` (String) The Client Info endpoint URL. Example: https://server.example.com/restv1/clientinfo
+- `client_periodic_update_timer_interval` (Number) The time interval in seconds for the client periodic update timer.
 - `client_reg_default_to_code_flow_with_refresh` (Boolean) Boolean value specifying whether to add Authorization Code Flow with Refresh grant during client registration.
 - `client_white_list` (List of String) White List for Client Redirection URIs.
 - `configuration_update_interval` (Number) The interval for configuration update in seconds.
@@ -109,6 +115,7 @@ resource "jans_app_configuration" "global" {
 - `disable_authn_for_max_age_zero` (Boolean) Boolean value specifying whether to disable authentication for max age zero.
 - `disable_jdk_logger` (Boolean) Boolean value specifying whether to enable JDK Loggers.
 - `disable_prompt_consent` (Boolean) Boolean value specifying whether to disable prompt consent.
+- `disable_prompt_create` (Boolean) Boolean value specifying whether to disable prompt create.
 - `disable_prompt_login` (Boolean) Boolean value specifying whether to disable prompt login.
 - `disable_u2f_endpoint` (Boolean) Enable/Disable U2F endpoints.
 - `discovery_allowed_keys` (List of String) List of configuration response claim allowed to be displayed in discovery endpoint. Example: authorization_endpoint, 
@@ -118,14 +125,12 @@ resource "jans_app_configuration" "global" {
 								Example: id_generation_endpoint, auth_level_mapping, etc.
 - `display_values_supported` (List of String) A list of the display parameter values that the OpenID Provider supports. One of 'page', 'popup'.
 - `dn_name` (String) DN of certificate issuer.
+- `dpop_jkt_force_for_authorization_code` (Boolean) Demonstration of Proof-of-Possession (DPoP) JWK Thumbprint force for authorization code.
 - `dpop_jti_cache_time` (Number) Demonstration of Proof-of-Possession (DPoP) cache time.
 - `dpop_nonce_cache_time` (Number) Demonstration of Proof-of-Possession (DPoP) nonce cache time.
 - `dpop_signing_alg_values_supported` (List of String) Demonstration of Proof-of-Possession (DPoP) authorization signing algorithms supported.
 - `dpop_timeframe` (Number) Demonstration of Proof-of-Possession (DPoP) timeout.
 - `dpop_use_nonce` (Boolean) Demonstration of Proof-of-Possession (DPoP) nonce usage.
-- `dynamic_grant_type_default` (List of String) List of the OAuth 2.0 Grant Type values that it's possible to set via client 
-							registration API. One of 'none', 'authorization_code', 'implicit', 'password', 'client_credentials', 'refresh_token', 
-							'urn:ietf:params:oauth:grant-type:uma-ticket', 'urn:openid:params:grant-type:ciba', 'urn:ietf:params:oauth:grant-type:device_code'.
 - `dynamic_registration_allowed_password_grant_scopes` (List of String) List of grant scopes for dynamic registration.
 - `dynamic_registration_custom_attributes` (List of String) Custom attributes for the Dynamic registration. One of 'jansTrustedClnt'.
 - `dynamic_registration_custom_object_class` (String) LDAP custom object class for dynamic registration.
@@ -150,6 +155,7 @@ resource "jans_app_configuration" "global" {
 - `feature_flags` (List of String) List of feature flags.
 - `force_id_token_hint_precense` (Boolean) Boolean value specifying whether force id_token_hint parameter presence.
 - `force_offline_access_scope_to_enable_refresh_token` (Boolean) Boolean value specifying whether force offline_access scope to enable refresh_token grant type.
+- `force_ropc_in_authorization_endpoint` (Boolean) Specifies if ROPC is forced in authorization endpoint.
 - `force_signed_request_object` (Boolean) Boolean value true indicates that signed request object is mandatory.
 - `front_channel_logout_session_supported` (Boolean) Boolean value to specify support for front channel logout session.
 - `grant_types_and_response_types_autofix_enabled` (Boolean) Boolean value specifying whether to Grant types and Response types can be auto fixed.
@@ -157,6 +163,9 @@ resource "jans_app_configuration" "global" {
 							"client_credentials", "implicit", "password", "refresh_token", "urn:ietf:params:oauth:grant-type:device_code", 
 							"urn:ietf:params:oauth:grant-type:token-exchange", "urn:ietf:params:oauth:grant-type:uma-ticket", 
 							"urn:openid:params:grant-type:ciba".
+- `grant_types_supported_by_dynamic_registration` (List of String) List of the OAuth 2.0 Grant Type values that it's possible to set via client 
+							registration API. One of 'none', 'authorization_code', 'implicit', 'password', 'client_credentials', 'refresh_token', 
+							'urn:ietf:params:oauth:grant-type:uma-ticket', 'urn:openid:params:grant-type:ciba', 'urn:ietf:params:oauth:grant-type:device_code', 'tx_token'.
 - `http_logging_enabled` (Boolean) Enable/Disable request/response logging filter.
 - `http_logging_exclude_paths` (List of String) List of base URI for which request/response logging filter should not record activity. Example: "/auth/img", "/auth/stylesheet"
 - `http_logging_response_body_content` (Boolean) Boolean value specifying whether to log response body content.
@@ -177,17 +186,16 @@ resource "jans_app_configuration" "global" {
 - `include_sid_in_response` (Boolean) Boolean value specifying whether to include sessionId in response.
 - `introspection_access_token_must_have_introspection_scope` (Boolean) Reject introspection requests if access_token in Authorization header does not have introspection scope.
 - `introspection_access_token_must_have_uma_protection_scope` (Boolean) Reject introspection requests if access_token in Authorization header does not have uma_protection scope.
+- `introspection_encryption_alg_values_supported` (List of String) A list of the JWE encryption algorithms (alg values) JWA supported by the introspection endpoint
+- `introspection_encryption_enc_values_supported` (List of String) A list of the JWE encryption algorithms (alg values) JWA supported by the introspection endpoint
 - `introspection_endpoint` (String) URL for the Introspection Endpoint. Example: https://server.example.com/restv1/introspection
 - `introspection_response_scopes_backward_compatibility` (Boolean)
+- `introspection_restrict_basic_authn_to_own_tokens` (Boolean) Specifies if basic authentication to be restricted to own tokens.
 - `introspection_script_backward_compatibility` (Boolean) Boolean value specifying whether switch off client's introspection scripts (true value) and run all scripts that exists on server.
+- `introspection_signing_alg_values_supported` (List of String) A list of the JWS signing algorithms (alg values) JWA supported by the introspection endpoint
 - `introspection_skip_authorization` (Boolean) Specifies if authorization to be skipped for introspection.
 - `invalidate_session_cookies_after_authorization_flow` (Boolean) Boolean value to specify whether to invalidate 'session_id' and 'consent_session_id' cookies right after successful or unsuccessful authorization.
 - `issuer` (String) URL using the https scheme that OP asserts as Issuer identifier. Example: https://server.example.com/
-- `jans_eleven_delete_key_endpoint` (String) URL for the jansEleven Delete Key Endpoint. Example: https://server.example.com/janseleven/rest/oxeleven/deleteKey
-- `jans_eleven_generate_key_endpoint` (String) URL for the jansEleven Generate Key Endpoint. Example: https://server.example.com/janseleven/rest/janseleven/generateKey
-- `jans_eleven_sign_endpoint` (String) URL for the jansEleven Sign Endpoint. Example: https://server.example.com/janseleven/rest/janseleven/sign
-- `jans_eleven_test_mode_token` (String) jansEleven Test Mode Token.
-- `jans_eleven_verify_signature_endpoint` (String) URL for the jansEleven Verify Signature Endpoint. Example: https://server.example.com/janseleven/rest/janseleven/verifySignature
 - `jans_id` (String) URL for the Inum generator Service. Example: https://server.example.com/oxid/service/jans/inum
 - `jans_open_id_connect_version` (String) OpenID Connect Version. Example: openidconnect-1.0
 - `jms_broker_uri_set` (List of String) JMS Broker URI Set.
@@ -206,6 +214,7 @@ resource "jans_app_configuration" "global" {
 - `key_store_file` (String) The Key Store File (JKS). Example: /etc/certs/jans-auth-keys.jks
 - `key_store_secret` (String) The password of the Key Store.
 - `legacy_id_token_claims` (Boolean) Include Claims in ID Token.
+- `lock_message_config` (Block List, Max: 1) Lock message configuration. (see [below for nested schema](#nestedblock--lock_message_config))
 - `log_client_id_on_client_authentication` (Boolean) Boolean value to specify if application should log the Client ID on client authentication.
 - `log_client_name_on_client_authentication` (Boolean) Boolean value to specify if application should log the Client Name on client authentication.
 - `log_not_found_entity_as_error` (Boolean) Boolean value specifying whether to log not found entity as error.
@@ -275,10 +284,13 @@ resource "jans_app_configuration" "global" {
 - `return_device_secret_from_authz_endpoint` (Boolean) Boolean value to specify if the device secret should be returned by the authz endpoint.
 - `rotate_client_registration_access_token_on_usage` (Boolean) Boolean value specifying whether to rotate client registration access token on usage.
 - `rotate_device_secret` (Boolean) Enable/Disable device secret rotation.
+- `save_tokens_in_cache` (Boolean) Boolean value specifying whether to save token in cache.
+- `save_tokens_in_cache_and_dont_save_in_persistence` (Boolean) Boolean value specifying whether to save token in cache and don't save in persistence.
 - `sector_identifier_cache_lifetime_in_minutes` (Number) The cache lifetime in minutes of the sector identifier.
 - `server_session_id_lifetime` (Number) The sessionId lifetime in seconds for sessionId. By default same as sessionIdLifetime.
 - `service_documentation` (String) URL of a page containing human-readable information that developers might want or need to know 
 							when using the OpenID Provider. Example: http://gluu.org/docs
+- `session_id_cookie_lifetime` (Number) The lifetime of session id cookie in seconds. If 0 or -1 then expiration is not set. 'session_id' cookie expires when browser session ends.
 - `session_id_lifetime` (Number) The lifetime of session id in seconds. If 0 or -1 then expiration is not set. 'session_id' cookie expires when browser session ends.
 - `session_id_persist_in_cache` (Boolean) Boolean value specifying whether to persist session_id in cache.
 - `session_id_persist_on_prompt_none` (Boolean) Boolean value specifying whether to persist session ID on prompt none.
@@ -307,6 +319,10 @@ resource "jans_app_configuration" "global" {
 - `token_revocation_endpoint` (String) The URL for the access_token or refresh_token revocation endpoint. Example: https://server.example.com/restv1/revoke
 - `trusted_client_enabled` (Boolean) Boolean value specifying whether a client is trusted and no authorization is required.
 - `trusted_ssa_issuers` (Block List) List of trusted SSA issuers. (see [below for nested schema](#nestedblock--trusted_ssa_issuers))
+- `tx_token_encryption_alg_values_supported` (List of String) A list of the JWE encryption algorithms (alg values) supported by the Token Exchange endpoint.
+- `tx_token_encryption_enc_values_supported` (List of String) A list of the JWE encryption algorithms (enc values) supported by the Token Exchange endpoint.
+- `tx_token_lifetime` (Number) The lifetime of the Token Exchange Token.
+- `tx_token_signing_alg_values_supported` (List of String) A list of the JWS signing algorithms (alg values) supported by the Token Exchange endpoint.
 - `ui_locales_supported` (List of String) Languages and scripts supported for the user interface. One of "en", "bg", "de", "es", "fr", "it", "ru", "tr".
 - `uma_add_scopes_automatically` (Boolean) Add scopes automatically.
 - `uma_configuration_endpoint` (String) URL for the UMA Configuration Endpoint. Example: https://server.example.com/restv1/uma2-configuration
@@ -352,7 +368,6 @@ Optional:
 - `page_mismatch_error_page` (String)
 - `root_dir` (String)
 - `scripts_path` (String)
-- `serializer_type` (String)
 - `templates_path` (String)
 
 
@@ -460,6 +475,15 @@ Optional:
 Read-Only:
 
 - `id` (String) The ID of this resource.
+
+
+<a id="nestedblock--lock_message_config"></a>
+### Nested Schema for `lock_message_config`
+
+Optional:
+
+- `enable_id_token_messages` (Boolean) Boolean value specifying whether to enable ID Token messages.
+- `id_token_messages_channel` (String) ID Token messages channel.
 
 
 <a id="nestedblock--ssa_configuration"></a>

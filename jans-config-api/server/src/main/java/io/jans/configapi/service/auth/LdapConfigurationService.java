@@ -9,10 +9,11 @@ package io.jans.configapi.service.auth;
 import com.github.fge.jackson.JacksonUtils;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import io.jans.as.common.service.common.EncryptionService;
-import io.jans.as.persistence.model.configuration.GluuConfiguration;
-import io.jans.as.persistence.model.configuration.IDPAuthConf;
+
+import io.jans.config.GluuConfiguration;
+import io.jans.config.IDPAuthConf;
 import io.jans.model.ldap.GluuLdapConfiguration;
+import io.jans.service.EncryptionService;
 import io.jans.util.security.StringEncrypter;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

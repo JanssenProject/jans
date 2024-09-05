@@ -5,12 +5,12 @@ import subprocess
 import re
 import socket
 import shutil
-import uuid
 import base64
 import json
 import string
 import random
 import hashlib
+import math
 import grp
 
 from pathlib import Path
@@ -493,9 +493,11 @@ class SetupUtils(Crypto64):
                 self.logIt("Writing rendered template {}".format(full_output_file))
                 full_output_file.write_text(rendered_text)
 
-    def render_template(self, tmp_fn, pystring=False):
+    def render_template(self, tmp_fn, pystring=False, rendering_dict=None):
         template_text = self.readFile(tmp_fn)
         format_dict = self.merge_dicts(Config.__dict__, Config.templateRenderingDict)
+        if rendering_dict:
+            format_dict = self.merge_dicts(format_dict, rendering_dict)
         for k in format_dict:
             if isinstance(format_dict[k], bool):
                 format_dict[k] = str(format_dict[k]).lower()
@@ -554,3 +556,10 @@ class SetupUtils(Crypto64):
         usr_grp = '{}:{}'.format(user, group) if group else user
         cmd += [usr_grp, fn]
         self.run(cmd)
+
+    def get_ldap_time(self, timestamp=None):
+        if not timestamp:
+            timestamp = time.time()
+        microseconds, _ = math.modf(timestamp)
+        gm_time = time.gmtime(timestamp)
+        return time.strftime('%Y%m%d%H%M%S', gm_time) + f'{microseconds:.3f}Z'[1:]

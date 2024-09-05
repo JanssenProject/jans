@@ -2,13 +2,16 @@ let
     _primitiveUtils = Packages.io.jans.agama.engine.misc.PrimitiveUtils,
     _scriptUtils = Packages.io.jans.agama.engine.script.ScriptUtils,
     _logUtils = Packages.io.jans.agama.engine.script.LogUtils,
-    _booleanCls = new Packages.java.lang.Class.forName("java.lang.Boolean"),
-    _numberCls = new Packages.java.lang.Class.forName("java.lang.Number"),
-    _integerCls = new Packages.java.lang.Class.forName("java.lang.Integer"),
-    _stringCls = new Packages.java.lang.Class.forName("java.lang.String"),
-    _collectionCls = new Packages.java.lang.Class.forName("java.util.Collection"),
-    _listCls = new Packages.java.lang.Class.forName("java.util.List"),
-    _mapCls = new Packages.java.lang.Class.forName("java.util.Map")
+    _flowCrashEx = Packages.io.jans.agama.engine.exception.FlowCrashException,
+    _errorUtil = Packages.org.mozilla.javascript.NativeErrorUtil,
+    _booleanCls = Packages.java.lang.Class.forName("java.lang.Boolean"),
+    _numberCls = Packages.java.lang.Class.forName("java.lang.Number"),
+    _integerCls = Packages.java.lang.Class.forName("java.lang.Integer"),
+    _stringCls = Packages.java.lang.Class.forName("java.lang.String"),
+    _collectionCls = Packages.java.lang.Class.forName("java.util.Collection"),
+    _listCls = Packages.java.lang.Class.forName("java.util.List"),
+    _mapCls = Packages.java.lang.Class.forName("java.util.Map"),
+    _exceptionCls = Packages.java.lang.Class.forName("java.lang.Exception")
 
 function _renderReplyFetch(base, page, allowCallbackResume, data) {
     if (_isObject(data))
@@ -19,8 +22,9 @@ function _renderReplyFetch(base, page, allowCallbackResume, data) {
 function _redirectFetchAtCallback(url) {
     if (_isString(url)) {
         let jsonStr = _scriptUtils.pauseForExternalRedirect(url).second
-        //string parsing via JS was preferred over returning a Java Map directly because it feels more
-        //natural for RRF to return a native JS object; it creates the illusion there was no Java involved
+        //string parsing via JS was preferred over returning a Java Map directly
+        //because it feels more natural for RRF to return a native JS object;
+        //it creates the illusion there was no Java involved
         return JSON.parse(jsonStr)
     }
     throw new TypeError("Data passed to RFAC was not a string")
@@ -38,16 +42,14 @@ function _equals(a, b) {
     return _scriptUtils.testEquality(_scan(a), _scan(b))
 }
 
-function _actionCall(instance, instanceRequired, clsName, method, args) {
-    if (instanceRequired && _isNil(instance))
-        throw new TypeError("Cannot call method " + method + " of null")
-    return _scriptUtils.callAction(instance, clsName, method, args.map(_scan))
+function _actionCall(instance, clsName, method, args) {
+    return _scriptUtils.callAction(_scan(instance), clsName, method, args.map(_scan))
 }
 
 function _flowCall(flowName, basePath, urlOverrides, args) {
 
     if (!_isString(flowName))
-        throw new TypeError("Flow name is not a string")
+        return _flowCallErr(new TypeError("Flow name is not a string"))
 
     let mapping = _scriptUtils.templatesMapping(basePath, urlOverrides)
     let p = _scriptUtils.prepareSubflow(flowName, mapping)
@@ -55,19 +57,17 @@ function _flowCall(flowName, basePath, urlOverrides, args) {
     params.splice(0, 0, p.second)
 
     let f = p.first
-    //Modify p to avoid serializing a Java Pair in the next RRF call
+    //Modify p to avoid serializing a Java Pair in a RRF call (inside function f)
     //wrapping with ArrayList is a workaround for a kryo deserialization exception
     p = new Packages.java.util.ArrayList(mapping.values())
     mapping = null
 
-    let result
-    try {
-        result = f.apply(null, params)
-    } finally {
-        _scriptUtils.closeSubflow()
-    }
+    let result = f.apply(null, params)
+    _scriptUtils.closeSubflow()
 
-    if (_isNil(result)) return     //return undefined
+    if (_isNil(result))
+        return _flowCallErr(new Error(
+                "No Finish instruction was reached during execution of " + flowName))
     
     return { value: result,
         //determines if the parent should handle this returned value
@@ -75,8 +75,17 @@ function _flowCall(flowName, basePath, urlOverrides, args) {
 
 }
 
-function _makeRhinoException(e) {
-    return new Packages.org.mozilla.javascript.SubflowRhinoException(e)
+function _flowCallErr(e) {
+    return { value: _makeJavaException(null, e), bubbleUp: false }
+}
+
+function _makeJavaException(qname, e) {
+
+    let msg = e.toString()
+    _log2(qname, ["@e An error occurred:", msg])
+    _log2(qname, ["@t \n", _errorUtil.stackTraceOf(e)])
+    return new _flowCrashEx(msg)
+
 }
 
 function _finish(val) {
@@ -90,7 +99,7 @@ function _finish(val) {
     else if (_isObject(val, javaish) && _isBool(val.success))
         return val
 
-    throw new Error ("Cannot determine whether Finish value should be successful or not")
+    throw new Error("Cannot determine whether Finish value should be successful or not")
 
 }
 
@@ -133,6 +142,10 @@ function _ic(val, symbol) {
 
     throw new TypeError(symbol + " is not zero or a positive integer")
 
+}
+
+function _isJavaException(val) {
+    return _exceptionCls.isInstance(val)
 }
 
 function _isObject(val, javaish) {

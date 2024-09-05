@@ -12,7 +12,10 @@ from prompt_toolkit.widgets.base import Border
 from prompt_toolkit.layout.dimension import AnyDimension
 from prompt_toolkit.formatted_text import AnyFormattedText
 from prompt_toolkit.key_binding.key_bindings import KeyBindings, KeyBindingsBase
-from prompt_toolkit.formatted_text import HTML, merge_formatted_text
+from prompt_toolkit.formatted_text import HTML, merge_formatted_text, is_formatted_text
+
+
+from utils.multi_lang import _
 
 
 class JansVerticalNav():
@@ -42,6 +45,7 @@ class JansVerticalNav():
         hide_headers: Optional[bool] = False,
         custom_key_bindings: Optional[list] = None,
         field_to_find: Optional[str] = '',
+        italic_line: Optional[int] = -1
     ) -> FloatContainer:
         """init for JansVerticalNav
 
@@ -64,6 +68,7 @@ class JansVerticalNav():
             jans_help (str, optional): Status bar help message
             hide_headers (bool, optional): Hide or display headers
             custom_key_bindings (list, optional): List of custom keybindings. Each entry is a tuple of (key, callable)
+            italic_line (int, optional): Make text stype of this line as italic
         Examples:
             clients = JansVerticalNav(
                 myparent=self,
@@ -93,9 +98,18 @@ class JansVerticalNav():
         self.headerColor = headerColor
         self.entriesColor = entriesColor
         self.max_height = max_height
-        self.jans_help = jans_help
+        self.italic_line = italic_line
+
+        if not is_formatted_text(jans_help):
+            jans_help = HTML(jans_help)
+        self.jans_help = merge_formatted_text([HTML(_("Press <b>F1</b> for Help.") + " "), jans_help])
+
         self.on_enter = on_enter
         self.on_delete = on_delete
+
+        if not on_display:
+            on_display = self.myparent.data_display_dialog
+
         self.on_display = on_display
         self.change_password = change_password
         self.hide_headers = hide_headers
@@ -262,6 +276,7 @@ class JansVerticalNav():
 
         return merge_formatted_text(result)
 
+
     def _get_formatted_text(self) -> AnyFormattedText:
         """Get all selective entries
 
@@ -280,13 +295,15 @@ class JansVerticalNav():
             if entry[0] in error_data:
                 if i == self.selectes:
                     result.append([('[SetCursorPosition]', '')])
-                result.append(
-                    HTML('<i fg="#00ff48">{}</i>'.format('   '.join(entry))))
+                result.append(HTML('<i fg="#00ff48">{}</i>'.format('   '.join(entry))))
                 result.append('\n')
             else:
                 if i == self.selectes:
                     result.append([('[SetCursorPosition]', '')])
-                result.append('   '.join(entry))
+                text_ = '   '.join(entry)
+                if i == self.italic_line:
+                    text_ = HTML(f'<i>{text_}</i>')
+                result.append(text_)
                 result.append('\n')
 
         return merge_formatted_text(result)
@@ -300,6 +317,7 @@ class JansVerticalNav():
         if self.max_height:
             self.container_content[-1].height = self.max_height if self.max_height else len(
                 self.data)
+        self.selectes = 0
 
     def add_item(
         self,
@@ -309,6 +327,7 @@ class JansVerticalNav():
         self.handle_header_spaces()
         self.container_content[-1].height = self.max_height if self.max_height else len(
             self.data)
+        self.selectes = 0
 
     def replace_item(
         self,
@@ -322,6 +341,7 @@ class JansVerticalNav():
         self.data = []
         self.list_box.height = 0
         self.selectes = 0
+        self.italic_line = -1
 
     def _get_key_bindings(self) -> KeyBindingsBase:
         """All key binding for the Dialog with Navigation bar
@@ -366,7 +386,7 @@ class JansVerticalNav():
             if self.change_password:
                 self.change_password(data=self.all_data[self.selectes])
 
-        @kb.add('d')
+        @kb.add('v')
         def _(event):
             if not self.data:
                 return
@@ -379,6 +399,7 @@ class JansVerticalNav():
                 size=size,
                 data=self.all_data[self.selectes])
 
+        @kb.add('d')
         @kb.add('delete')
         def _(event):
             if self.data and self.on_delete:

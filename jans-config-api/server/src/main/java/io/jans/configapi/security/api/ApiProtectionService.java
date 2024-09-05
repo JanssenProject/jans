@@ -12,6 +12,7 @@ import io.jans.configapi.service.auth.ClientService;
 import io.jans.configapi.service.auth.ScopeService;
 import io.jans.configapi.core.util.Jackson;
 import io.jans.configapi.core.util.ProtectionScopeType;
+import io.jans.orm.exception.EntryPersistenceException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -169,8 +170,9 @@ public class ApiProtectionService {
 
             // ensure scope does not exists
             scope = scopeService.getScope(rsScope.getInum());
-            log.debug("Re-verify ConfigApiScope rsScope.getName():{} with rsScope.getInum():{} in DB - scope:{} ",
+            log.info("Re-verify ConfigApiScope rsScope.getName():{} with rsScope.getInum():{} in DB - scope:{} ",
                     rsScope.getName(), rsScope.getInum(), scope);
+
             if (scope == null) {
                 log.info("Scope - '{}' does not exist, hence creating it.", scope);
                 // Scope does not exists hence create Scope
@@ -181,7 +183,7 @@ public class ApiProtectionService {
                 scope.setInum(inum);
                 scope.setDn(scopeService.getDnForScope(inum));
                 scope.setScopeType(scopeType);
-                scopeService.addScope(scope);
+                addScope(scope);
             } else {
                 // Update resource
                 log.info("Scope - '{}' already exists, hence updating it.", rsScope.getName());
@@ -290,6 +292,14 @@ public class ApiProtectionService {
             }
         }
         return scopeList;
+    }
+    
+    private void addScope(Scope scope) {
+        try {
+            scopeService.addScope(scope);
+        } catch (EntryPersistenceException ex) {
+            log.error("Error while adding scope:{} is:{}",scope, ex);
+        }
     }
 
 }

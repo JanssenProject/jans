@@ -37,7 +37,10 @@ calling external APIs
 1. [Introspection](./scripts/introspection.md) : Introspection scripts allows to modify response of Introspection Endpoint spec and present additional meta information surrounding the token.
 1. [Post Authentication](./scripts/post-authentication.md)
 1. [Authorization Challenge](./scripts/authorization-challenge.md)
+1. [Authz Detail](./scripts/authz-detail.md)
+1. [Create User](./scripts/create-user.md)
 1. [Select Account](./scripts/select-account.md)
+1. [Health Check](./scripts/health-check.md)
 1. Resource Owner Password Credentials
 1. UMA 2 RPT Authorization Policies
 1. UMA 2 Claims-Gathering

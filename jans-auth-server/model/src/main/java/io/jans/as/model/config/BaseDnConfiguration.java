@@ -65,6 +65,20 @@ public class BaseDnConfiguration {
 	private String fido2Attestation;
 	@XmlElement(name = "fido2Assertion")
 	private String fido2Assertion;
+    @XmlElement(name = "archivedJwks")
+    private String archivedJwks;
+    @XmlElement(name = "node")
+    private String node;
+    @XmlElement(name = "statusIndexPool")
+    private String statusIndexPool;
+
+    public String getArchivedJwks() {
+        return archivedJwks;
+    }
+
+    public void setArchivedJwks(String archivedJwks) {
+        this.archivedJwks = archivedJwks;
+    }
 
     public String getStat() {
         return stat;
@@ -234,4 +248,19 @@ public class BaseDnConfiguration {
 		this.fido2Assertion = fido2Assertion;
 	}
 
+	public String getNode() {
+		return node;
+	}
+
+	public void setNode(String node) {
+		this.node = node;
+	}
+
+    public String getStatusIndexPool() {
+        return statusIndexPool;
+    }
+
+    public void setStatusIndexPool(String statusIndexPool) {
+        this.statusIndexPool = statusIndexPool;
+    }
 }

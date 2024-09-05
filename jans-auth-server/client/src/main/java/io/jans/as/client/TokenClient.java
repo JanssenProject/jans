@@ -229,6 +229,7 @@ public class TokenClient extends BaseClient<TokenRequest, TokenResponse> {
             addFormParameterIfNotBlank(USERNAME, getRequest().getUsername());
             addFormParameterIfNotBlank(PASSWORD, getRequest().getPassword());
             addFormParameterIfNotBlank(SCOPE, getRequest().getScope());
+            addFormParameterIfNotBlank(AUTHORIZATION_DETAILS, getRequest().getAuthorizationDetails());
             addFormParameterIfNotBlank(ASSERTION, getRequest().getAssertion());
             addFormParameterIfNotBlank(REFRESH_TOKEN, getRequest().getRefreshToken());
             addFormParameterIfNotBlank(AUTH_REQ_ID, getRequest().getAuthReqId());
@@ -239,6 +240,8 @@ public class TokenClient extends BaseClient<TokenRequest, TokenResponse> {
             addFormParameterIfNotBlank(ACTOR_TOKEN, getRequest().getActorToken());
             addFormParameterIfNotBlank(ACTOR_TOKEN_TYPE, getRequest().getActorTokenType());
             addFormParameterIfNotBlank(REQUESTED_TOKEN_TYPE, getRequest().getRequestedTokenType());
+            addFormParameterIfNotBlank(REQUEST_CONTEXT, getRequest().getRequestContext());
+            addFormParameterIfNotBlank(REQUEST_DETAILS, getRequest().getRequestDetails());
 
             for (String key : getRequest().getCustomParameters().keySet()) {
                 addFormParameterIfNotBlank(key, getRequest().getCustomParameters().get(key));

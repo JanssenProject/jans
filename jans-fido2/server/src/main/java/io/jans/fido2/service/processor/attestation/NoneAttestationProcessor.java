@@ -18,39 +18,39 @@
 
 package io.jans.fido2.service.processor.attestation;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
+import com.fasterxml.jackson.databind.JsonNode;
 import io.jans.fido2.ctap.AttestationFormat;
 import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.auth.AuthData;
 import io.jans.fido2.model.auth.CredAndCounterData;
-import io.jans.orm.model.fido2.Fido2RegistrationData;
+import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.processors.AttestationFormatProcessor;
+import io.jans.orm.model.fido2.Fido2RegistrationData;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import org.slf4j.Logger;
-
-import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * Attestation processor for attestations of fmt = none One of the attestation
  * formats called 'none'. When you getting it, that means two things:
- * 
+ * <p>
  * 1. You really don't need attestation, and so you are deliberately ignoring
  * it.
- * 
+ * <p>
  * 2. You forgot to set attestation flag to 'direct' when making credential.
- * 
+ * <p>
  * If you are getting attestation with fmt set to none, then no attestation
  * is provided, and you don't have anything to verify. Simply extract user
  * relevant information as specified below and save it to the database.
- *
- * 
  */
 @ApplicationScoped
 public class NoneAttestationProcessor implements AttestationFormatProcessor {
 
     @Inject
     private Logger log;
+
+    @Inject
+    private Base64Service base64Service;
 
     @Override
     public AttestationFormat getAttestationFormat() {
@@ -59,13 +59,16 @@ public class NoneAttestationProcessor implements AttestationFormatProcessor {
 
     @Override
     public void process(JsonNode attStmt, AuthData authData, Fido2RegistrationData credential, byte[] clientDataHash,
-            CredAndCounterData credIdAndCounters) {
+                        CredAndCounterData credIdAndCounters) {
         log.debug("None/Surrogate attestation {}", attStmt);
 
-        if (attStmt.iterator().hasNext()) {
+        if (!attStmt.isEmpty()) {
+            log.error("Problem with None/Surrogate attestation");
             throw new Fido2RuntimeException("Problem with None/Surrogate attestation");
         }
 
         credIdAndCounters.setAttestationType(getAttestationFormat().getFmt());
+        credIdAndCounters.setCredId(base64Service.urlEncodeToString(authData.getCredId()));
+        credIdAndCounters.setUncompressedEcPoint(base64Service.urlEncodeToString(authData.getCosePublicKey()));
     }
 }

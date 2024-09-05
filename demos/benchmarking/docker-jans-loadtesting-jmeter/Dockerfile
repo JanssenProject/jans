@@ -1,5 +1,5 @@
 # FROM blazemeter/taurus:master-f96971fa-2022-12-12
-FROM blazemeter/taurus:1.16.21
+FROM blazemeter/taurus:1.16.33@sha256:766af32fc3c075e3b984aab799c431cb5ade169fbbb120ba3d573d153486ea0b
 
 # ===============
 # Ubuntu packages
@@ -66,14 +66,14 @@ RUN pip install --no-cache-dir -U pip wheel \
 COPY scripts /scripts
 
 RUN mkdir -p /root/.bzt/jmeter-taurus \
-    && wget -q https://dlcdn.apache.org//jmeter/binaries/apache-jmeter-5.5.tgz -O /scripts/apache-jmeter-5.5.tgz \
-    && tar zxvf /scripts/apache-jmeter-5.5.tgz -C /root/.bzt/jmeter-taurus \
-    && mv /root/.bzt/jmeter-taurus/apache-jmeter-5.5 /root/.bzt/jmeter-taurus/5.5
+    && wget -q https://dlcdn.apache.org/jmeter/binaries/apache-jmeter-5.6.3.tgz -O /scripts/apache-jmeter-5.6.tgz \
+    && tar zxvf /scripts/apache-jmeter-5.6.tgz -C /root/.bzt/jmeter-taurus \
+    && mv /root/.bzt/jmeter-taurus/apache-jmeter-5.6.3 /root/.bzt/jmeter-taurus/5.6.3
 
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/loadtesting-jmeter" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.0.20" \
+    org.opencontainers.image.version="1.1.5" \
     org.opencontainers.image.title="Janssen Jmeter tests" \
     org.opencontainers.image.description="Janssen Jmeter and user loader image"
 

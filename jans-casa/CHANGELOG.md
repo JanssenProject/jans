@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.0.21](https://github.com/JanssenProject/jans/compare/jans-casa-v1.0.20...jans-casa-v1.0.21) (2023-12-14)
+
+
+### Bug Fixes
+
+* prepare for 1.0.21 release ([#7008](https://github.com/JanssenProject/jans/issues/7008)) ([2132de6](https://github.com/JanssenProject/jans/commit/2132de6683f67bf22d5a863b149770d657073a83))
+* remove colon from QR label [#6537](https://github.com/JanssenProject/jans/issues/6537) ([#6549](https://github.com/JanssenProject/jans/issues/6549)) ([22355b6](https://github.com/JanssenProject/jans/commit/22355b6a50102bca0ce58f76ee26f538e226fd3b))
+
+## [1.0.20](https://github.com/JanssenProject/jans/compare/jans-casa-v1.0.19...jans-casa-v1.0.20) (2023-11-08)
+
+
+### Bug Fixes
+
+* prepare for 1.0.20 release ([c6e806e](https://github.com/JanssenProject/jans/commit/c6e806eb31fed998d52cbef7a7d94c231d913102))
+
 ## 1.0.19 (2023-10-11)
 
 

@@ -14,6 +14,5 @@
   "openIdDiscoveryEndpoint": "https://pujavs3.infinity.com/.well-known/webfinger",
   "openIdConfigurationEndpoint": "https://pujavs3.infinity.com/.well-known/openid-configuration",
   "userInfoEndpoint": "https://pujavs3.infinity.com/jans-auth/restv1/userinfo",
-  "oxElevenGenerateKeyEndpoint": "https://pujavs3.infinity.com/oxeleven/rest/oxeleven/generateKey",
   "registrationEndpoint": "https://pujavs3.infinity.com/jans-auth/restv1/register"
 }

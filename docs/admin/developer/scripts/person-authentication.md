@@ -11,44 +11,76 @@ tags:
 
 ---
 
-## Person Authentication scripts
-The Jans-Auth Server leverages interception scripts of [PersonAuthenticationType](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/auth/PersonAuthenticationType.java) which when implemented can facilitate complex multi-step, multi-factor authentication workflows.
+# Person Authentication scripts
 
-The authentication flow in the Jans Server is driven by the openID spec. The authorization request to the OP (Jans server) contains an optional query parameter called `acr_values` which is used by the OP to pick an interception script which will be run when `/authorize` endpoint (Authentication flow) is invoked.
+The Janssen Server leverages interception scripts of 
+[PersonAuthenticationType](https://github.com/JanssenProject/jans/blob/main/jans-core/script/src/main/java/io/jans/model/custom/script/type/auth/PersonAuthenticationType.java) which when implemented can facilitate complex 
+multi-step, multi-factor authentication workflows.
 
-Each authentication method, whose name is the `acr` value, is tied to a `PersonAuthenticationType` script which offers the authentication workflow.
+The authentication flow in the Janssen Server is driven by the 
+[OpenID Connect specification](https://openid.net/specs/openid-connect-core-1_0.html). 
+The authorization request to the OP (the Janssen Server) contains an 
+optional query parameter called `acr_values` which is used by the OP to pick an 
+interception script which will be run when `/authorize` endpoint 
+(Authentication flow) is invoked.
+
+Each authentication method, whose name is the `acr` value, 
+is tied to a `PersonAuthenticationType` script which offers the authentication
+workflow.
 
 Typically, a `PersonAuthenticationType` script can be used to:  
- 1. introduce a new 2FA authentication mechanism  
- 2. customize multistep authentication  
- 3. offer Social logins  
- 4. proactively perform fraud detection and block a fraudulent user.
 
-Authentication mechanisms offered by Jans can be confirmed by checking the Janssen OP configuration URL, `https://<hostname>/.well-known/openid-configuration`, and finding the `acr_values_supported`.
+- Introduce a new 2FA authentication mechanism  
+- Customize multi-step authentication  
+- Offer Social logins  
+- Proactively perform fraud detection and block a fraudulent user
+
+Authentication mechanisms offered by Jans can be confirmed by checking the
+Janssen Server OP configuration URL:
+
+```
+https://<hostname>/.well-known/openid-configuration
+```
+
+under the claim `acr_values_supported`.
 
 ## Building blocks of an authentication workflow
 
-Jans-auth server comprises of a number of beans, configuration files and Facelets (JSF) views, packaged as a WAR module. That means custom scripts and custom pages (JSF facelets) can make use of business logic already encapsulated in the Weld managed beans. The following sections explain how authentication flow can be built using a custom script.
+Jans-auth server comprises of a number of beans, configuration files and 
+Facelets (JSF) views, packaged as a WAR module. That means custom scripts and 
+custom pages (JSF facelets) can make use of business logic already encapsulated 
+in the Weld managed beans. 
+
+The following sections explain how authentication 
+flow can be built using a custom script.
 
 ### A. Custom script
-The **PersonAuthenticationType** script is described by a java interface whose methods should be overridden to implement an authentication workflow.
-The [article](../scripts/person-authentication-interface) talks about these methods in detail and the psuedo code for each method.
+The **PersonAuthenticationType** script is described by a java interface 
+whose methods should be overridden to implement an authentication workflow.
+The [article](../scripts/person-authentication-interface) talks about these
+methods in detail and the psuedo code 
+for each method.
 
 ### B. UI pages:
-All web pages are **xhtml** files. The Command-Action offering by JSF framework is used by the Jans-auth server to implement authentication flows.
+All web pages are **xhtml** files. The Command-Action offering by JSF 
+framework is used by the Jans-auth server to implement authentication flows.
 
 #### a. Server-side actions implemented by custom script:
-The custom script's `authenticate` and `prepareForStep` implementations are called by the following java class - [Authenticator](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/auth/Authenticator.java). These methods are mapped as command actions and view actions respectively in the web page.
+The custom script's `authenticate` and `prepareForStep` implementations are 
+called by the following java class - [Authenticator](https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/java/io/jans/as/server/auth/Authenticator.java). These methods are 
+mapped as command actions and view actions respectively in the web page.
 
 Relevant methods:
 
-|Signature|Description|
-|-|-|
-|boolean authenticate()|Makes the authentication flow proceed by calling the `authenticate` method of the custom script|
-|String prepareAuthenticationForStep()|Makes the authentication flow proceed by calling the `prepareForStep` method of the custom script|
+| Signature                             | Description                                                                                       |
+|---------------------------------------|---------------------------------------------------------------------------------------------------|
+| boolean authenticate()                | Makes the authentication flow proceed by calling the `authenticate` method of the custom script   |
+| String prepareAuthenticationForStep() | Makes the authentication flow proceed by calling the `prepareForStep` method of the custom script |
 
 #### b. Web page in xhtml:
-1. The `f:metadata` and `f:viewAction` tags are used to load variables (prepared in the `prepareForStep` method of the custom script). These variables are rendered on the UI page.
+1. The `f:metadata` and `f:viewAction` tags are used to load variables 
+(prepared in the `prepareForStep` method of the custom script). These 
+variables are rendered on the UI page.
 ```
 <f:metadata>
    <f:viewAction action="#{authenticator.prepareAuthenticationForStep}"
@@ -63,39 +95,62 @@ Relevant methods:
 ```
 
 #### c. Page customizations:
-The Jans-auth server comes with a default set of pages for login, logout, errors, authorizations. You can easily override these pages or write new ones. You can easily apply your own stylesheet, images and resouce-bundles to your pages.
+The Jans-auth server comes with a default set of pages for login, logout, 
+errors, authorizations. You can easily override these pages or write new ones. 
+You can easily apply your own stylesheet, images and resouce-bundles to your 
+pages.
 
 This [article](#c-page-customizations) covers all the details you need to write your own web page.
 
 ### C. Business logic in Custom script:  
-Jans-auth server uses Weld 3.0 (JSR-365 aka CDI 2.0) for managed beans. The most important aspects of business logic are implemented through a set of beans. Details and examples of this can be found in this [article](../managed-beans.md)
+Jans-auth server uses Weld 3.0 (JSR-365 aka CDI 2.0) for managed beans. 
+The most important aspects of business logic are implemented through a set of 
+beans. Details and examples of this can be found in this [article](../managed-beans.md)
 
 ### D. Third party libraries for use in the custom script
-Java or Python libraries to be imported and used very easily. Remember, you can import a python library only if it has been written in "pure python".
+Java or Python libraries to be imported and used very easily. Remember, you 
+can import a python library only if it has been written in "pure python".
 More details of this mentioned [here](../interception-scripts.md#using-python-libraries-in-a-script)
 
 ### E. Configuring the `acr` parameter in the Jans-auth server:
-The `acr` parameter can be configured in the following ways :
-#### 1. Default authentication method:
 
-`default_acr`: This is the default authentication mechanism exposed to all applications that send users to the Janssen Server for sign-in. Unless an app specifically requests a different form of authentication using the OpenID Connect acr_values parameter (as specified below), users will receive the form of authentication specified in this field.
+The `acr` parameter can be configured in the following ways :
+
+####  Default authentication method:
+
+`default_acr`: This is the default authentication mechanism exposed to all 
+applications that send users to the Janssen Server for sign-in. Unless an app 
+specifically requests a different form of authentication using the 
+OpenID Connect acr_values parameter (as specified below), users will receive 
+the form of authentication specified in this field.
 
 #### Internal ACR
-If a default ACR is not specified, Janssen will determine it based on enabled scripts and the internal user/password ACR. This internal ACR, `simple_password_auth`, is set to level -1. This means that it has lower priority than any scripts, so Janssen server will use it only if no other authentication method is set.
+
+If a default ACR is not specified, Janssen will determine it based on enabled 
+scripts and the internal user/password ACR. This internal ACR, 
+`simple_password_auth`, is set to level -1. This means that it has lower 
+priority than any scripts, so Janssen server will use it only if no other 
+authentication method is set.
 
 Use the jans-cli to [update / look-up the default authentication method](https://github.com/JanssenProject/jans-cli/edit/main/docs/cli/cli-default-authentication-method.md).
 
 #### Authentication method for a client (RP):
-A client may also specify `default_acr_values` during registration (and omit the parameter `acr_values` while making an authentication request).
+A client may also specify `default_acr_values` during registration 
+(and omit the parameter `acr_values` while making an authentication request).
 
 #### Multiple Authentication Mechanisms
-The Jans Server can concurrently support multiple authentication mechanisms, enabling Web and mobile apps (clients) to request a specific type of authentication using the standard OpenID Connect request parameter: `acr_values`.
+The Jans Server can concurrently support multiple authentication mechanisms, 
+enabling Web and mobile apps (clients) to request a specific type of 
+authentication using the standard OpenID Connect request parameter: `acr_values`.
 Learn more about acr_values in the [OpenID Connect core spec](http://openid.net/specs/openid-connect-core-1_0.html#acrSemantics).
 
 #### Enabling an authentication mechanism
-An Authentication method is offered by the AS if its ACR value i.e. its corresponding custom script is `enabled`.
+An Authentication method is offered by the AS if its ACR value i.e. its 
+corresponding custom script is `enabled`.
 
-By default, users will get the default authentication mechanism as specified above. However, **using the OpenID Connect acr_values parameter, web and mobile clients can request any enabled authentication mechanism**.
+By default, users will get the default authentication mechanism as 
+specified above. However, **using the OpenID Connect acr_values parameter, 
+web and mobile clients can request any enabled authentication mechanism**.
 
 1. Obtain the json contents of a custom script by using a jans-cli command like `get-config-scripts-by-type`, `get-config-scripts-by-inum` etc.
 	Example :
@@ -105,7 +160,141 @@ By default, users will get the default authentication mechanism as specified abo
 2. [Update the custom script](https://github.com/JanssenProject/jans-cli/blob/main/docs/cli/cli-custom-scripts.md#update-an-existing-custom-script) and change the `enabled` attribute to `true`  
 
 #### Level (rank) of an Authentication mechanism :
-Each authentication mechanism (script) has a "Level" assigned to it which describes how secure and reliable it is. **The higher the "Level", higher is the reliability represented by the script.** Though several mechanisms can be enabled at the same Janssen server instance at the same time, for any specific user's session only one of them can be set as the current one (and will be returned as `acr` claim of id_token for them). If after initial session is created a new authorization request from a RP comes in specifying another authentication method, its "Level" will be compared to that of the method currently associated with this session. If requested method's "Level" is lower or equal to it, nothing is changed and the usual SSO behavior is observed. If it's higher (i.e. a more secure method is requested), it's not possible to serve such request using the existing session's context, and user must re-authenticate themselves to continue. If they succeed, a new session becomes associated with that requested mechanism instead.
+Each authentication mechanism (script) has a "Level" assigned to it which 
+describes how secure and reliable it is. **The higher the "Level", higher is 
+the reliability represented by the script.** Though several mechanisms can be 
+enabled at the same Janssen server instance at the same time, for any specific 
+user's session only one of them can be set as the current one (and will be 
+returned as `acr` claim of id_token for them). If after initial session is 
+created a new authorization request from a RP comes in specifying another 
+authentication method, its "Level" will be compared to that of the method 
+currently associated with this session. If requested method's "Level" is 
+lower or equal to it, nothing is changed and the usual SSO behavior is observed.
+If it's higher (i.e. a more secure method is requested), it's not possible to 
+serve such request using the existing session's context, and user must 
+re-authenticate themselves to continue. If they succeed, a new session 
+becomes associated with that requested mechanism instead.
+
+### F. Using person authenticator `jansAuthenticator` attribute :
+
+The `jansAuthenticator` attribute can be used in cases when person authenticator
+need to persist data between person logins. For example script can have 
+enrollment and authentication flows. And after enrollment it needs to store 
+data into user entry for later use in authentication flow.
+In order to search by enrolled authenticator there is another multi-valued 
+attribute `jansExtUid`. This attribute has default DB index to quick search.
+Both attributes is recommended to use In Jans since 1.1.1 version for better 
+compatibility in future.
+
+
+#### 1. Format of attributes
+
+```
+jansExtUid: [otp:xyz1, cert:xyz2, duo:xyz3, ...]
+jansAuthenticator: {
+   "xyz1": {"id": "xyz1", "type": "otp", "custom": {...}}, 
+   "xyz2": {"id": "xyz2", "type": "cert", "custom": {...}},
+   "xyz3": {"id": "xyz3", "type": "duo", "custom": {...}},
+    ...
+}
+
+```
+
+#### 2. Sample data:
+
+```
+jansExtUid: [hotp:S9dO_qKQoOcpPk9GuStlNO9seoA=, cert:totp, duo:Nv7Dg7aP0wRPJd6NHjx1ai9bN9Y=]
+jansAuthenticator:
+{
+  "S9dO_qKQoOcpPk9GuStlNO9seoA=": {
+    "id": "S9dO_qKQoOcpPk9GuStlNO9seoA=",
+    "type": "hotp",
+    "custom": {
+      "movingFactor": 3
+    }
+  },
+  "Nv7Dg7aP0wRPJd6NHjx1ai9bN9Y=": {
+    "id": "Nv7Dg7aP0wRPJd6NHjx1ai9bN9Y=",
+    "type": "totp"
+  }
+}
+```
+
+#### 2. Access `jansAuthenticator` and `jansExtUid` from generic bean
+
+For both attributes there are get/set methods in `User` entry. After loading 
+user object script can call these methods to get required data.
+
+```
+...
+    @AttributeName(name = "jansExtUid")
+    private String[] externalUid;
+
+    @JsonObject
+    @AttributeName(name = "jansAuthenticator")
+    private UserAuthenticatorList authenticator
+...
+	public String[] getExternalUid() {
+		return externalUid;
+	}
+
+	public void setExternalUid(String[] externalUid) {
+		this.externalUid = externalUid;
+	}
+
+	public UserAuthenticatorList getAuthenticator() {
+		return authenticator;
+	}
+
+	public void setAuthenticator(UserAuthenticatorList authenticator) {
+		this.authenticator = authenticator;
+	}
+...
+```
+
+`UserAuthenticatorList` is defined [here](https://github.com/JanssenProject/jans/blob/main/jans-core/model/src/main/java/io/jans/model/user/authenticator/UserAuthenticatorList.java). It contains list
+of `UserAuthenticator` objects. `UserAuthenticator` is defined [here](https://github.com/JanssenProject/jans/blob/main/jans-core/model/src/main/java/io/jans/model/user/authenticator/UserAuthenticator.java)
+
+For convenience in 1.1.1 there is new service `UserAuthenticator`. See it's 
+code [here](https://github.com/JanssenProject/jans/blob/main/jans-core/model/src/main/java/io/jans/model/user/authenticator/UserAuthenticator.java)
+
+It provides next API methods:
+
+```
+	public UserAuthenticatorList getUserAuthenticatorList(SimpleUser user);
+
+	public List<UserAuthenticator> getUserAuthenticatorsByType(SimpleUser user, String type);
+
+	public UserAuthenticator getUserAuthenticatorById(SimpleUser user, String id);
+
+	public void addUserAuthenticator(SimpleUser user, UserAuthenticator userAuthenticator);
+
+	public void removeUserAuthenticator(SimpleUser user, UserAuthenticator userAuthenticator);
+
+	public void removeUserAuthenticator(SimpleUser user, String type);
+
+	public UserAuthenticator createUserAuthenticator(String id, String type);
+
+	public UserAuthenticator createUserAuthenticator(String id, String type, Map<String, Object> custom);
+
+	public String formatExternalUid(String id, String type);
+
+	public boolean checkAndMigrateToAuthenticatorList(SimpleUser user);
+```
+
+All these methods update both `jansAuthenticator` and `jansExtUid` attributes 
+without persisting changes to DB. After calling these methods script should 
+persist user entry. It's expected behaviour because script might update other 
+fields too. Hence it's better to persist all changes in one update request to DB.
+
+
+#### 1. Default authentication method:
+
+`default_acr`: This is the default authentication mechanism exposed to all 
+applications that send users to the Janssen Server for sign-in. Unless an app 
+specifically requests a different form of authentication using the 
+OpenID Connect acr_values parameter (as specified below), users will receive 
+the form of authentication specified in this field.
 
 ## Usage scenarios
 
@@ -114,16 +303,21 @@ Each authentication mechanism (script) has a "Level" assigned to it which descri
 
 2. [OTP authentication](../../../script-catalog/person_authentication/otp-external-authenticator) : Authentication mechanism using an app like [Google authenticator](https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&hl=en), [FreeOTP](https://freeotp.github.io/) or [Authy](https://authy.com/) that implements the open standards [HOTP](https://tools.ietf.org/html/rfc4226) and [TOTP](https://tools.ietf.org/html/rfc6238)
 
-2. SMS OTP :  
+3. SMS OTP :  
 
-3. Email OTP:
+4. Email OTP:
 
 
 ### B. Implementing Multistep authentication
-1. [Redirect to previous step](https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/extension/person_authentication/other/basic.reset_to_step/BasicResetToStepExternalAuthenticator.py): The script here an example of how the number of steps can be varied depending on the context or business requirement.
+1. [Redirect to previous step](https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/extension/person_authentication/other/basic.reset_to_step/BasicResetToStepExternalAuthenticator.py): The script here an example of how the 
+number of steps can be varied depending on the context or business requirement.
 
 ### C. Implementing Social logins
-You can use a `PersonAuthenticationType` script to allow users to sign using credentials from popular **Social Identity providers** or **Inbound Identity Providers** like Facebook, Google and Apple. After users authenticate, thier Social Identity Provider credentials are provisioned into the Jans-auth server. More on this topic in this [article](../../recipes/social-login.md)
+You can use a `PersonAuthenticationType` script to allow users to sign using 
+credentials from popular **Social Identity providers** or 
+**Inbound Identity Providers** like Facebook, Google and Apple. After users 
+authenticate, thier Social Identity Provider credentials are provisioned into 
+the Jans-auth server. More on this topic in this [article](../../recipes/social-login.md)
 
 ### D. Proactively perform fraud detection
 1. Impossible travel
@@ -139,7 +333,10 @@ An example of a complete URL looks like this -
 		&scope=openid+profile+email+user_name \
 		&state=faad2cdjfdddjfkdf&nonce=dajdffdfsdcfff
 	```
-To test , enter the complete URL for authorization in a browser or create a simple webmapage with a link that simulates the user sign-in attempt. If the server is configured properly, the first page for the selected authentication method will be displayed to the user.
+To test , enter the complete URL for authorization in a browser or create a 
+simple webmapage with a link that simulates the user sign-in attempt. If the 
+server is configured properly, the first page for the selected authentication 
+method will be displayed to the user.
 
 ## FAQs
 

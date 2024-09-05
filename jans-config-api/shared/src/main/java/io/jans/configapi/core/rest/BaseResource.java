@@ -76,7 +76,7 @@ public class BaseResource {
     }
 
     public static void checkNotNull(String attribute, String attributeName) {
-        if (attribute == null) {
+        if (StringUtils.isBlank(attribute)) {
             throw new BadRequestException(getMissingAttributeError(attributeName));
         }
     }
@@ -123,6 +123,10 @@ public class BaseResource {
     public static void throwBadRequestException(String msg) {
         throw new BadRequestException(getBadRequestException(msg));
     }
+    
+    public static void throwBadRequestException(String msg, String description) {
+        throw new BadRequestException(getBadRequestException(msg, description));
+    }
 
     public static void throwBadRequestException(Object obj) {
         throw new BadRequestException(getBadRequestException(obj));
@@ -131,6 +135,17 @@ public class BaseResource {
     public static void throwInternalServerException(String msg) {
         throw new InternalServerErrorException(getInternalServerException(msg));
     }
+    
+    public static void throwInternalServerException(String msg, String description) {
+        throw new InternalServerErrorException(getInternalServerException(msg, description));
+    }
+    
+    public static void throwInternalServerException(String msg, Throwable throwable) {
+        throwable = findRootError(throwable);
+        if (throwable != null) {
+            throw new InternalServerErrorException(getInternalServerException(msg, throwable.getMessage()));
+        }
+    }
 
     public static void throwInternalServerException(Throwable throwable) {
         throwable = findRootError(throwable);
@@ -138,6 +153,15 @@ public class BaseResource {
             throw new InternalServerErrorException(getInternalServerException(throwable.getMessage()));
         }
     }
+    
+    public static void throwNotFoundException(String msg) {
+        throw new NotFoundException(getNotFoundError(msg));
+    }
+    
+    public static void throwNotFoundException(String msg, String description) {
+        throw new NotFoundException(getNotFoundError(msg, description));
+    }
+    
 
     /**
      * @param attributeName
@@ -156,6 +180,13 @@ public class BaseResource {
         return Response.status(Response.Status.NOT_FOUND).entity(error).build();
     }
 
+    protected static Response getNotFoundError(String msg, String description) {
+        ApiError error = new ApiError.ErrorBuilder()
+                .withCode(String.valueOf(Response.Status.NOT_FOUND.getStatusCode())).withMessage(msg).andDescription(description)
+                .build();
+        return Response.status(Response.Status.NOT_FOUND).entity(error).build();
+    }
+    
     protected static Response getNotAcceptableException(String msg) {
         ApiError error = new ApiError.ErrorBuilder()
                 .withCode(String.valueOf(Response.Status.NOT_ACCEPTABLE.getStatusCode())).withMessage(msg).build();
@@ -167,6 +198,12 @@ public class BaseResource {
                 .withCode(String.valueOf(Response.Status.BAD_REQUEST.getStatusCode())).withMessage(msg).build();
         return Response.status(Response.Status.BAD_REQUEST).entity(error).build();
     }
+    
+    protected static Response getBadRequestException(String msg, String description) {
+        ApiError error = new ApiError.ErrorBuilder()
+                .withCode(String.valueOf(Response.Status.BAD_REQUEST.getStatusCode())).withMessage(msg).andDescription(description).build();
+        return Response.status(Response.Status.BAD_REQUEST).entity(error).build();
+    }
 
     protected static Response getBadRequestException(Object obj) {
         return Response.status(Response.Status.BAD_REQUEST).entity(obj).build();
@@ -175,6 +212,13 @@ public class BaseResource {
     protected static Response getInternalServerException(String msg) {
         ApiError error = new ApiError.ErrorBuilder()
                 .withCode(String.valueOf(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode())).withMessage(msg)
+                .build();
+        return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(error).build();
+    }
+    
+    protected static Response getInternalServerException(String msg, String description) {
+        ApiError error = new ApiError.ErrorBuilder()
+                .withCode(String.valueOf(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode())).withMessage(msg).andDescription(description)
                 .build();
         return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(error).build();
     }

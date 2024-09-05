@@ -48,7 +48,7 @@ with open('/proc/1/status', 'r') as f:
     os_initdaemon = f.read().split()[1]
 
 # Determine os_type and os_version
-os_type, os_version = '', ''
+os_type, os_version, os_subversion = '', '', ''
 
 os_release_fn = '/usr/lib/os-release'
 if not os.path.exists(os_release_fn):
@@ -70,7 +70,10 @@ with open(os_release_fn) as f:
                         os_version = 'tumbleweed'
                         break
             elif row[0] == 'VERSION_ID':
-                os_version = row[1].split('.')[0]
+                version_split = row[1].split('.')
+                os_version = version_split[0]
+                if len(version_split) > 1:
+                    os_subversion = version_split[1]
 
 if not (os_type and os_version):
     print("Can't determine OS type and OS version")
@@ -78,6 +81,8 @@ if not (os_type and os_version):
 
 os_name = os_type + os_version
 deb_sysd_clone = os_name.startswith(('ubuntu', 'debian'))
+cron_service = 'crond' if os_type in ['centos', 'red', 'fedora'] else 'cron'
+
 
 # Determine service path
 if (os_type in ('centos', 'red', 'fedora', 'suse') and os_initdaemon == 'systemd') or deb_sysd_clone:
@@ -101,6 +106,8 @@ def get_os_description():
     desc_dict = { 'suse': 'SUSE', 'red': 'RHEL', 'ubuntu': 'Ubuntu', 'deb': 'Debian', 'centos': 'CentOS', 'fedora': 'Fedora' }
     descs = desc_dict.get(os_type, os_type)
     descs += ' ' + os_version
+    if os_subversion:
+        descs += f'.{os_subversion}'
 
     fipsl = subprocess.getoutput("sysctl crypto.fips_enabled").strip().split()
 
@@ -358,7 +365,9 @@ def download(url, dst, verbose=False, headers=None):
     urllib.request.install_opener(None)
 
 def extract_file(zip_file, source, target, ren=False):
+    fn = None
     zip_obj = zipfile.ZipFile(zip_file, "r")
+
     for member in zip_obj.infolist():
         if not member.is_dir() and member.filename.endswith(source):
             if ren:
@@ -368,9 +377,14 @@ def extract_file(zip_file, source, target, ren=False):
                 target_p = Path(target).joinpath(p.name)
                 if not target_p.parent.exists():
                     target_p.parent.mkdir(parents=True)
+            logIt(f"Extracting {source} from {zip_file} to {target}")
             target_p.write_bytes(zip_obj.read(member))
+            fn = target_p.as_posix()
             break
+
     zip_obj.close()
+
+    return fn
 
 
 def extract_from_zip(zip_file, sub_dir, target_dir, remove_target_dir=False):
@@ -446,6 +460,8 @@ def unpack_zip(zip_fn, extract_dir, with_par_dir=True):
 app_info_fn = os.environ.get('JANS_APP_INFO') or os.path.join(par_dir, 'app_info.json')
 current_app.app_info = readJsonFile(app_info_fn)
 current_app.jans_zip = os.path.join(Config.distFolder, 'jans/jans.zip')
+coucbase_bucket_dict = readJsonFile(os.path.join(paths.APP_ROOT, 'data/couchbase_buckets.json'), ordered=True)
+Config.couchbaseBucketDict = coucbase_bucket_dict
 
 def as_bool(val):
     return str(val).lower() in ('t', 'true', 'y', 'yes', 'on', 'ok', '1')

@@ -40,6 +40,15 @@ The extension can directly installed on Firefox browser from https://addons.mozi
 2. Click the `This Firefox` option.
 3. Click the `Load Temporary Add-on` button, then select the `jans-tarp-firefox-v{}.zip` zip file from `/jans-tarp/release/`.
 
+##### Note:
+
+When you are testing Janssen IdP with self-signed cert then follow below steps before client registration using jans-tarp.
+
+1. Open the OP_HOST url on browser.
+2. Accept the security risk due to self-signed cert and continue.
+
+![self-signed cert risk](./docs/images/untrusted_cert_risk.png)
+
 ## Testing with Keycloak (installed on localhost)
 
 1. Login to KC admin console
@@ -52,6 +61,4 @@ The extension can directly installed on Firefox browser from https://addons.mozi
 
 ![Client scopes](./docs/images/kc_add_scope.png)
 
-
-Suggestions and pull requests are welcomed!.
-
+Once above configuration is done, jans-tarp can be used test KC IdP.

@@ -94,12 +94,15 @@ public abstract class BaseTest {
     protected String gluuConfigurationEndpoint;
     protected String tokenEndpoint;
     protected String tokenRevocationEndpoint;
+    protected String statusListEndpoint;
     protected String userInfoEndpoint;
     protected String clientInfoEndpoint;
     protected String checkSessionIFrame;
     protected String endSessionEndpoint;
     protected String jwksUri;
+    protected String archivedJwksUri;
     protected String registrationEndpoint;
+    protected String globalTokenRevocationEndpoint;
     protected String configurationEndpoint;
     protected String introspectionEndpoint;
     protected String deviceAuthzEndpoint;
@@ -302,6 +305,14 @@ public abstract class BaseTest {
         this.authorizationChallengeEndpoint = authorizationChallengeEndpoint;
     }
 
+    public String getStatusListEndpoint() {
+        return statusListEndpoint;
+    }
+
+    public void setStatusListEndpoint(String statusListEndpoint) {
+        this.statusListEndpoint = statusListEndpoint;
+    }
+
     public String getTokenEndpoint() {
         return tokenEndpoint;
     }
@@ -358,12 +369,28 @@ public abstract class BaseTest {
         this.jwksUri = jwksUri;
     }
 
+    public String getArchivedJwksUri() {
+        return archivedJwksUri;
+    }
+
+    public void setArchivedJwksUri(String archivedJwksUri) {
+        this.archivedJwksUri = archivedJwksUri;
+    }
+
     public String getRegistrationEndpoint() {
         return registrationEndpoint;
     }
 
     public void setRegistrationEndpoint(String registrationEndpoint) {
         this.registrationEndpoint = registrationEndpoint;
+    }
+
+    public String getGlobalTokenRevocationEndpoint() {
+        return globalTokenRevocationEndpoint;
+    }
+
+    public void setGlobalTokenRevocationEndpoint(String globalTokenRevocationEndpoint) {
+        this.globalTokenRevocationEndpoint = globalTokenRevocationEndpoint;
     }
 
     public String getIntrospectionEndpoint() {
@@ -433,6 +460,7 @@ public abstract class BaseTest {
         //driver = new InternetExplorerDriver();
 
         driver = new HtmlUnitDriver(true);
+        driver.getWebClient().getOptions().setThrowExceptionOnScriptError(false);
     }
 
     public void stopSelenium() {
@@ -593,10 +621,15 @@ public abstract class BaseTest {
                 .pollingEvery(Duration.ofMillis(1000))
                 .ignoring(NoSuchElementException.class);
 
-        WebElement loginButton = wait.until(d -> {
-            return d.findElement(By.id(id));
-        });
-        return loginButton;
+        try {
+            WebElement loginButton = wait.until(d -> d.findElement(By.id(id)));
+            return loginButton;
+        } catch (TimeoutException e) {
+            System.out.println("PAGE URL: " + currentDriver.getCurrentUrl());
+            System.out.println("PAGE SOURCE: ");
+            System.out.println(currentDriver.getPageSource());
+            throw e;
+        }
     }
 
     protected String acceptAuthorization(WebDriver currentDriver, String redirectUri) {
@@ -803,7 +836,7 @@ public abstract class BaseTest {
 
         final String previousURL = driver.getCurrentUrl();
         doNotAllowButton.click();
-        WebDriverWait wait = new WebDriverWait(driver, 1);
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(1));
         wait.until((WebDriver d) -> (d.getCurrentUrl() != previousURL));
 
         String authorizationResponseStr = driver.getCurrentUrl();
@@ -862,7 +895,7 @@ public abstract class BaseTest {
 
             navigateToAuhorizationUrl(driver, driver.getCurrentUrl());
 
-            new WebDriverWait(driver, PageConfig.WAIT_OPERATION_TIMEOUT)
+            new WebDriverWait(driver, Duration.ofSeconds(PageConfig.WAIT_OPERATION_TIMEOUT))
                     .until(webDriver -> !webDriver.getCurrentUrl().contains("/authorize"));
         }
 
@@ -981,6 +1014,7 @@ public abstract class BaseTest {
 
             authorizationEndpoint = response.getAuthorizationEndpoint();
             authorizationChallengeEndpoint = response.getAuthorizationChallengeEndpoint();
+            statusListEndpoint = response.getStatusListEndpoint();
             tokenEndpoint = response.getTokenEndpoint();
             tokenRevocationEndpoint = response.getRevocationEndpoint();
             userInfoEndpoint = response.getUserInfoEndpoint();
@@ -988,7 +1022,9 @@ public abstract class BaseTest {
             checkSessionIFrame = response.getCheckSessionIFrame();
             endSessionEndpoint = response.getEndSessionEndpoint();
             jwksUri = response.getJwksUri();
+            archivedJwksUri = response.getArchivedJwksUri();
             registrationEndpoint = response.getRegistrationEndpoint();
+            globalTokenRevocationEndpoint = response.getGlobalTokenRevocationEndpoint();
             introspectionEndpoint = response.getIntrospectionEndpoint();
             parEndpoint = response.getParEndpoint();
             deviceAuthzEndpoint = response.getDeviceAuthzEndpoint();
@@ -1003,6 +1039,7 @@ public abstract class BaseTest {
 
             authorizationEndpoint = context.getCurrentXmlTest().getParameter("authorizationEndpoint");
             authorizationChallengeEndpoint = context.getCurrentXmlTest().getParameter("authorizationChallengeEndpoint");
+            statusListEndpoint = context.getCurrentXmlTest().getParameter("statusListEndpoint");
             tokenEndpoint = context.getCurrentXmlTest().getParameter("tokenEndpoint");
             tokenRevocationEndpoint = context.getCurrentXmlTest().getParameter("tokenRevocationEndpoint");
             userInfoEndpoint = context.getCurrentXmlTest().getParameter("userInfoEndpoint");
@@ -1010,7 +1047,9 @@ public abstract class BaseTest {
             checkSessionIFrame = context.getCurrentXmlTest().getParameter("checkSessionIFrame");
             endSessionEndpoint = context.getCurrentXmlTest().getParameter("endSessionEndpoint");
             jwksUri = context.getCurrentXmlTest().getParameter("jwksUri");
+            archivedJwksUri = context.getCurrentXmlTest().getParameter("archivedJwksUri");
             registrationEndpoint = context.getCurrentXmlTest().getParameter("registrationEndpoint");
+            globalTokenRevocationEndpoint = context.getCurrentXmlTest().getParameter("globalTokenRevocationEndpoint");
             configurationEndpoint = context.getCurrentXmlTest().getParameter("configurationEndpoint");
             introspectionEndpoint = context.getCurrentXmlTest().getParameter("introspectionEndpoint");
             parEndpoint = context.getCurrentXmlTest().getParameter("parEndpoint");

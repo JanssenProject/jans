@@ -6,7 +6,6 @@
 
 package io.jans.as.server.ws.rs;
 
-import com.google.common.collect.Lists;
 import io.jans.as.client.EndSessionRequest;
 import io.jans.as.client.RegisterRequest;
 import io.jans.as.model.authorize.AuthorizeResponseParam;
@@ -18,15 +17,14 @@ import io.jans.as.model.util.QueryStringDecoder;
 import io.jans.as.model.util.StringUtils;
 import io.jans.as.server.BaseTest;
 import io.jans.as.server.model.TClientService;
-import org.jboss.arquillian.container.test.api.RunAsClient;
+import jakarta.ws.rs.client.Invocation;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import org.jboss.arquillian.test.api.ArquillianResource;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.testng.annotations.Parameters;
 import org.testng.annotations.Test;
 
-import jakarta.ws.rs.client.Invocation;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
@@ -34,11 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
+import static org.testng.Assert.*;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -58,7 +52,7 @@ public class EndSessionBackchannelRestServerTest extends BaseTest {
         io.jans.as.client.RegisterRequest registerRequest = new RegisterRequest(ApplicationType.WEB, "jans test app", StringUtils.spaceSeparatedToList(redirectUris));
         registerRequest.setResponseTypes(Arrays.asList(ResponseType.TOKEN, ResponseType.ID_TOKEN));
         registerRequest.setPostLogoutRedirectUris(Arrays.asList(postLogoutRedirectUri));
-        registerRequest.setBackchannelLogoutUris(Lists.newArrayList(postLogoutRedirectUri));
+        registerRequest.setBackchannelLogoutUri(postLogoutRedirectUri);
         registerRequest.addCustomAttribute("jansTrustedClnt", "true");
 
         registerResponse = TClientService.register(registerRequest, getApiTagetURL(url));

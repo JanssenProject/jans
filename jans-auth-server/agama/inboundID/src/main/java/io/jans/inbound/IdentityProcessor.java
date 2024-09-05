@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 public class IdentityProcessor {
 
     private Provider provider;
+    private static Logger logger = LoggerFactory.getLogger(IdentityProcessor.class);
     
     public IdentityProcessor() { }
     
@@ -29,11 +30,13 @@ public class IdentityProcessor {
         this.provider = provider;
     }
     
-    public Map<String, List<Object>> applyMapping(Map<String, Object> profile, ClassLoader classLoader)
-            throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
+    public Map<String, List<Object>> applyMapping(Map<String, Object> profile, Field f)
+            throws IllegalAccessException {
+
+        logger.debug("Retrieving value of field {}", f.getName());
+        UnaryOperator<Map<String, Object>> op = (UnaryOperator<Map<String, Object>>) f.get(f.getDeclaringClass());
         
-        UnaryOperator<Map<String, Object>> op = getMapping(provider.getMappingClassField(), 
-                classLoader == null ? getClass().getClassLoader() : classLoader);
+        logger.debug("Applying mapping to incoming profile");
         Map<String, Object> pr = op.apply(profile);
         Map<String, List<Object>> res = new HashMap<>();
         
@@ -61,7 +64,6 @@ public class IdentityProcessor {
         
         if (profile.isEmpty()) throw new IllegalArgumentException("Empty profile data");
 
-        Logger logger = LoggerFactory.getLogger(getClass());
         UserService userService = CdiUtil.bean(UserService.class);
         logger.info("User provisioning started");
 
@@ -100,6 +102,11 @@ public class IdentityProcessor {
                 logger.info("Updating user {}", uid);
                 user.setCustomAttributes(attributesForUpdate(
                         user.getCustomAttributes(), profile2, provider.isCumulativeUpdate()));
+                
+                //ugly hack
+                Optional.ofNullable(user.getAttributeValues("jansExtUid"))
+                            .map(l -> l.toArray(new String[0])).ifPresent(user::setExternalUid);
+
                 userService.updateUser(user);
             }
             
@@ -128,7 +135,7 @@ public class IdentityProcessor {
             if (newValues != null) {
                 List<Object> values = new ArrayList<>(cumulative ? coa.getValues() : Collections.emptyList());
                 newValues.stream().filter(nv -> !values.contains(nv)).forEach(values::add);
-                
+
                 profile.remove(attrName);
                 coa.setValues(values);
             }
@@ -140,6 +147,7 @@ public class IdentityProcessor {
                 customAttrs.add(coa);
         });
 
+        logger.trace("Resulting list of attributes:\n{}", customAttrs.toString());
         return customAttrs;
 
     }
@@ -154,25 +162,6 @@ public class IdentityProcessor {
         });
         
         return attrs;
-
-    }
-    
-    private UnaryOperator<Map<String, Object>> getMapping(String field, ClassLoader clsLoader) 
-            throws ClassNotFoundException, NoSuchFieldException, IllegalAccessException {
-        
-        int i = 0;
-        boolean valid = field != null;
-        
-        if (valid) {
-            i = field.lastIndexOf(".");
-            valid = i > 0 && i < field.length() - 1;
-        }
-        if (!valid) throw new IllegalAccessException("Unexpected value passed for mapping field: " + field);
-        
-        String clsName = field.substring(0, i);
-        Class<?> cls = clsLoader.loadClass(clsName);
-        Field f = cls.getDeclaredField(field.substring(i + 1));
-        return (UnaryOperator<Map<String, Object>>) f.get(cls);
 
     }
 

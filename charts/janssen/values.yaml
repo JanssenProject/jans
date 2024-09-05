@@ -47,7 +47,7 @@ auth-server:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/auth-server
     # -- Image  tag to use for deploying.
-    tag: 1.0.20_dev
+    tag: 1.1.5_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -57,7 +57,7 @@ auth-server:
     limits:
       # -- CPU limit.
       cpu: 2500m
-      # -- Memory limit.
+      # -- Memory limit. This value is used to calculate memory allocation for Java. Currently it only supports `Mi`. Please refrain from using other units.
       memory: 2500Mi
     requests:
       # -- CPU request.
@@ -100,6 +100,10 @@ auth-server:
   additionalLabels: { }
   # -- Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
   additionalAnnotations: { }
+  # -- Add custom scripts that have been mounted to run before the entrypoint.
+  # - /tmp/custom.sh
+  # - /tmp/custom2.sh
+  customScripts: []
 # -- Responsible for regenerating auth-keys per x hours
 auth-server-key-rotation:
   # -- Add custom normal and secret envs to the service
@@ -120,7 +124,7 @@ auth-server-key-rotation:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/certmanager
     # -- Image  tag to use for deploying.
-    tag: 1.0.20_dev
+    tag: 1.1.5_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Auth server key rotation keys life in hours
@@ -159,6 +163,10 @@ auth-server-key-rotation:
   additionalLabels: { }
   # -- Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
   additionalAnnotations: {}
+  # -- Add custom scripts that have been mounted to run before the entrypoint.
+  # - /tmp/custom.sh
+  # - /tmp/custom2.sh
+  customScripts: []
 # -- Configuration parameters for setup and initial configuration secret and config layers used by Janssen services.
 config:
   # -- Add custom normal and secret envs to the service.
@@ -173,6 +181,8 @@ config:
   adminPassword: Test1234#
   # -- City. Used for certificate creation.
   city: Austin
+  # -- Salt. Used for encoding/decoding sensitive data. If omitted or set to empty string, the value will be self-generated. Otherwise, a 24 alphanumeric characters are allowed as its value.
+  salt: ""
   configmap:
     # -- Jetty header size in bytes in the auth server
     cnJettyRequestHeaderSize: 8192
@@ -248,6 +258,28 @@ config:
     cnAwsSecretsReplicaRegions: []
     # [aws_secret_manager_envs] END
     # [aws_envs] END
+    # [vault_envs] Envs related to Hashicorp vault
+    # -- Vault AppRole RoleID.
+    cnVaultRoleId: ""
+    # -- Vault AppRole SecretID.
+    cnVaultSecretId: ""
+    # -- Base URL of Vault.
+    cnVaultAddr: http://localhost:8200
+    # -- Verify connection to Vault.
+    cnVaultVerify: false
+    # -- Path to file contains Vault AppRole role ID.
+    cnVaultRoleIdFile: /etc/certs/vault_role_id
+    # -- Path to file contains Vault AppRole secret ID.
+    cnVaultSecretIdFile: /etc/certs/vault_secret_id
+    # -- Vault namespace used to access the secrets.
+    cnVaultNamespace: ""
+    # -- Path to Vault KV secrets engine.
+    cnVaultKvPath: secret
+    # -- Base prefix name used to access secrets.
+    cnVaultPrefix: jans
+    # -- Path to Vault AppRole.
+    cnVaultAppRolePath: approle
+    # [vault_envs] END
     # -- OpenDJ internal address. Leave as default. Used when `global.cnPersistenceType` is set to `ldap`.
     cnLdapUrl: "opendj:1636"
     # -- Value passed to Java option -XX:MaxRAMPercentage
@@ -282,6 +314,30 @@ config:
     cnLdapCrt: SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo=
     # -- OpenDJ key string. This must be encoded using base64.
     cnLdapKey: SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo=
+    # -- Quarkus transaction recovery. When using MySQL, there could be issue regarding XA_RECOVER_ADMIN; refer to https://dev.mysql.com/doc/refman/8.0/en/privileges-provided.html#priv_xa-recover-admin for details.
+    quarkusTransactionEnableRecovery: true
+    # -- Keycloak logging level
+    kcLogLevel: INFO
+    # -- Keycloak database vendor name (default to MySQL server). To use PostgreSQL server, change the value to postgres.
+    kcDbVendor: mysql
+    # -- Keycloak database username
+    kcDbUsername: keycloak
+    # -- Password for Keycloak database access
+    kcDbPassword: Test1234#
+    # -- Keycloak database schema name (note that PostgreSQL may be using "public" schema).
+    kcDbSchema: keycloak
+    # -- Keycloak database host uri
+    kcDbUrlHost: mysql.kc.svc.cluster.local
+    # -- Keycloak database port (default to port 3306 for mysql).
+    kcDbUrlPort: 3306
+    # -- Keycloak database name.
+    kcDbUrlDatabase: keycloak
+    # -- Keycloak database connection properties. If using postgresql, the value can be set to empty string.
+    kcDbUrlProperties: "?useUnicode=true&characterEncoding=UTF-8&character_set_server=utf8mb4"
+    # -- URL of OPA API
+    cnOpaUrl: http://opa.opa.svc.cluster.cluster.local:8181/v1
+    # -- Message type (one of POSTGRES, REDIS, or DISABLED)
+    cnMessageType: DISABLED
   # -- Country code. Used for certificate creation.
   countryCode: US
   # -- Email address of the administrator usually. Used for certificate creation.
@@ -290,7 +346,7 @@ config:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/configurator
     # -- Image  tag to use for deploying.
-    tag: 1.0.20_dev
+    tag: 1.1.5_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- LDAP admin password if OpenDJ is used for persistence.
@@ -333,6 +389,10 @@ config:
   additionalLabels: { }
   # -- Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
   additionalAnnotations: { }
+  # -- Add custom scripts that have been mounted to run before the entrypoint.
+  # - /tmp/custom.sh
+  # - /tmp/custom2.sh
+  customScripts: [ ]
 # -- Config Api endpoints can be used to configure the auth-server, which is an open-source OpenID Connect Provider (OP) and UMA Authorization Server (AS).
 config-api:
   # -- Configure the topology spread constraints. Notice this is a map NOT a list as in the upstream API
@@ -382,7 +442,7 @@ config-api:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/config-api
     # -- Image  tag to use for deploying.
-    tag: 1.0.20_dev
+    tag: 1.1.5_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -392,13 +452,13 @@ config-api:
     limits:
       # -- CPU limit.
       cpu: 1000m
-      # -- Memory limit.
-      memory: 1000Mi
+      # -- Memory limit. This value is used to calculate memory allocation for Java. Currently it only supports `Mi`. Please refrain from using other units.
+      memory: 1200Mi
     requests:
       # -- CPU request.
       cpu: 1000m
       # -- Memory request.
-      memory: 1000Mi
+      memory: 1200Mi
   # -- Configure the liveness healthcheck for the auth server if needed.
   livenessProbe:
     # -- http liveness probe endpoint
@@ -432,6 +492,10 @@ config-api:
   additionalLabels: { }
   # -- Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
   additionalAnnotations: { }
+  # -- Add custom scripts that have been mounted to run before the entrypoint.
+  # - /tmp/custom.sh
+  # - /tmp/custom2.sh
+  customScripts: [ ]
 # -- FIDO 2.0 (FIDO2) is an open authentication standard that enables leveraging common devices to authenticate to online services in both mobile and desktop environments.
 fido2:
   # -- Configure the topology spread constraints. Notice this is a map NOT a list as in the upstream API
@@ -481,7 +545,7 @@ fido2:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/fido2
     # -- Image  tag to use for deploying.
-    tag: 1.0.20_dev
+    tag: 1.1.5_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -491,7 +555,7 @@ fido2:
     limits:
       # -- CPU limit.
       cpu: 500m
-      # -- Memory limit.
+      # -- Memory limit. This value is used to calculate memory allocation for Java. Currently it only supports `Mi`. Please refrain from using other units.
       memory: 500Mi
     requests:
       # -- CPU request.
@@ -536,6 +600,10 @@ fido2:
   additionalLabels: { }
   # -- Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
   additionalAnnotations: { }
+  # -- Add custom scripts that have been mounted to run before the entrypoint.
+  # - /tmp/custom.sh
+  # - /tmp/custom2.sh
+  customScripts: [ ]
 # -- Janssen Casa ("Casa") is a self-service web portal for end-users to manage authentication and authorization preferences for their account in a Janssen Auth Server.
 casa:
   # -- Configure the topology spread constraints. Notice this is a map NOT a list as in the upstream API
@@ -585,7 +653,7 @@ casa:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/casa
     # -- Image  tag to use for deploying.
-    tag: 1.0.20_dev
+    tag: 1.1.5_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -595,7 +663,7 @@ casa:
     limits:
       # -- CPU limit.
       cpu: 500m
-      # -- Memory limit.
+      # -- Memory limit. This value is used to calculate memory allocation for Java. Currently it only supports `Mi`. Please refrain from using other units.
       memory: 500Mi
     requests:
       # -- CPU request.
@@ -636,6 +704,10 @@ casa:
   additionalLabels: { }
   # -- Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
   additionalAnnotations: { }
+  # -- Add custom scripts that have been mounted to run before the entrypoint.
+  # - /tmp/custom.sh
+  # - /tmp/custom2.sh
+  customScripts: []
 # -- Parameters used globally across all services helm charts.
 global:
   # -- Add custom normal and secret envs to the service.
@@ -652,10 +724,21 @@ global:
     ingress: false
 
   auth-server:
+    # — Add custom annotations for kubernetes resources for the service
+    customAnnotations:
+      destinationRule: {}
+      podDisruptionBudget: {}
+      virtualService: {}
+      deployment: {}
+      horizontalPodAutoscaler: {}
+      service: {}
+      secret: {}  
     # -- Name of the auth-server service. Please keep it as default.
     authServerServiceName: auth-server
     # -- Boolean flag to enable/disable auth-server chart. You should never set this to false.
     enabled: true
+    # -- passing custom java options to auth-server. Notice you do not need to pass in any loggers options as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs.
+    cnCustomJavaOptions: ""
     # -- App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed.
     appLoggers:
       # -- Enable log prefixing which enables prepending the STDOUT logs with the file name. i.e auth-server-script ===> 2022-12-20 17:49:55,744 INFO
@@ -710,10 +793,65 @@ global:
       webdiscoveryEnabled: true
       # -- Enable endpoint /.well-known/fido-configuration
       u2fConfigEnabled: true
+      # -- Enable endpoint /.well-known/lock-server-configuration
+      lockConfigEnabled: false
+      # -- Enable endpoint /jans-lock
+      lockEnabled: false
+      # -- Lock config ingress resource labels. key app is taken
+      lockConfigLabels: { }
+      # -- Lock config ingress resource additional annotations.
+      lockConfigAdditionalAnnotations: { }
+      # -- Lock ingress resource labels. key app is taken
+      lockLabels: { }
+      # -- Lock ingress resource additional annotations.
+      lockAdditionalAnnotations: { }
+      # -- openid-configuration ingress resource labels. key app is taken
+      openidConfigLabels: { }
+      # -- openid-configuration ingress resource additional annotations.
+      openidAdditionalAnnotations: { }
+      # -- device-code ingress resource labels. key app is taken
+      deviceCodeLabels: { }
+      # -- device-code ingress resource additional annotations.
+      deviceCodeAdditionalAnnotations: { }
+      # -- Firebase Messaging ingress resource labels. key app is taken
+      firebaseMessagingLabels: { }
+      # -- Firebase Messaging ingress resource additional annotations.
+      firebaseMessagingAdditionalAnnotations: { }
+      # -- uma2 config ingress resource labels. key app is taken
+      uma2ConfigLabels: { }
+      # -- uma2 config ingress resource additional annotations.
+      uma2AdditionalAnnotations: { }
+      # -- webfinger ingress resource labels. key app is taken
+      webfingerLabels: { }
+      # -- webfinger ingress resource additional annotations.
+      webfingerAdditionalAnnotations: { }
+      # -- webdiscovery ingress resource labels. key app is taken
+      webdiscoveryLabels: { }
+      # -- webdiscovery ingress resource additional annotations.
+      webdiscoveryAdditionalAnnotations: { }
+      # -- u2f config ingress resource labels. key app is taken
+      u2fConfigLabels: { }
+      # -- u2f config ingress resource additional annotations.
+      u2fAdditionalAnnotations: { }
+      # -- Auth server ingress resource labels. key app is taken
+      authServerLabels: { }
+      # -- Auth server ingress resource additional annotations.
+      authServerAdditionalAnnotations: { }
+
+
+    # -- Enable jans-lock as service running inside auth-server
+    lockEnabled: false
 
   auth-server-key-rotation:
     # -- Boolean flag to enable/disable the auth-server-key rotation cronjob chart.
-    enabled: false
+    enabled: true
+    # — Add custom annotations for kubernetes resources for the service
+    customAnnotations:
+      cronjob: {}
+      service: {}
+      secret: {}    
+    # -- The initial auth server key rotation keys life in hours
+    initKeysLife: 48
   # -- Volume storage type if using AWS volumes.
   awsStorageType: io1
   # -- Volume storage type if using Azure disks.
@@ -721,6 +859,17 @@ global:
   # -- Azure storage kind if using Azure disks
   azureStorageKind: Managed
   casa:
+    # — Add custom annotations for kubernetes resources for the service
+    customAnnotations:
+      destinationRule: {}
+      podDisruptionBudget: {}
+      virtualService: {}
+      deployment: {}
+      horizontalPodAutoscaler: {}
+      service: {}
+      secret: {}  
+    # -- passing custom java options to casa. Notice you do not need to pass in any loggers options as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs.
+    cnCustomJavaOptions: ""
     # -- App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed.
     appLoggers:
       # -- Enable log prefixing which enables prepending the STDOUT logs with the file name. i.e casa ===> 2022-12-20 17:49:55,744 INFO
@@ -741,23 +890,37 @@ global:
     ingress:
       # -- Enable casa endpoints /casa
       casaEnabled: false
+      # -- Casa ingress resource labels. key app is taken
+      casaLabels: { }
+      # -- Casa ingress resource additional annotations.
+      casaAdditionalAnnotations: { }
   cloud:
     # -- Boolean flag if enabled will strip resources requests and limits from all services.
     testEnviroment: false
   # -- Port used by Prometheus JMX agent (default to empty string). To enable Prometheus JMX agent, set the value to a number.
   cnPrometheusPort: ""
-  # -- Document store type to use for shibboleth files LOCAL.
-  cnDocumentStoreType: LOCAL
+  # -- Document store type to use for shibboleth files DB.
+  cnDocumentStoreType: DB
   # -- Persistence backend to run Janssen with ldap|couchbase|hybrid|sql|spanner.
   cnPersistenceType: sql
   config:
+    # — Add custom annotations for kubernetes resources for the service
+    customAnnotations:
+      clusterRoleBinding: {}
+      configMap: {}
+      job: {}
+      roleBinding: {}
+      role: {}
+      secret: {}
+      service: {}
+      serviceAccount: {}  
     # -- Boolean flag to enable/disable the configuration chart. This normally should never be false
     enabled: true
   # -- https://kubernetes.io/docs/concepts/workloads/controllers/ttlafterfinished/
   jobTtlSecondsAfterFinished: 300
   # -- The config backend adapter that will hold Janssen configuration layer. aws|google|kubernetes
   configAdapterName: kubernetes
-  # -- The config backend adapter that will hold Janssen secret layer. aws|google|kubernetes
+  # -- The config backend adapter that will hold Janssen secret layer. vault|aws|google|kubernetes
   configSecretAdapter: kubernetes
   # -- Base64 encoded service account. The sa must have roles/secretmanager.admin to use Google secrets and roles/spanner.databaseUser to use Spanner. Leave as this is a sensible default.
   cnGoogleApplicationCredentials: /etc/jans/conf/google-credentials.json
@@ -768,10 +931,20 @@ global:
   # The location of file contains replica regions definition (if any). This file is mostly used in primary region. Example of contents of the file: `[{"Region": "us-west-1"}]`.  Used only when global.configAdapterName and global.configSecretAdapter is set to aws. Leave as this is a sensible default.
   cnAwsSecretsReplicaRegionsFile: /etc/jans/conf/aws_secrets_replica_regions
   config-api:
+    # — Add custom annotations for kubernetes resources for the service
+    customAnnotations:
+      destinationRule: {}
+      podDisruptionBudget: {}
+      virtualService: {}
+      deployment: {}
+      horizontalPodAutoscaler: {}
+      service: {}
     # -- Name of the config-api service. Please keep it as default.
     configApiServerServiceName: config-api
     # -- Boolean flag to enable/disable the config-api chart.
     enabled: true
+    # -- passing custom java options to config-api. Notice you do not need to pass in any loggers options as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs.
+    cnCustomJavaOptions: ""
     # -- App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed.
     appLoggers:
       # -- Enable log prefixing which enables prepending the STDOUT logs with the file name. i.e config-api_persistence ===> 2022-12-20 17:49:55,744 INFO
@@ -800,13 +973,30 @@ global:
     ingress:
       # Enable config API endpoints /jans-config-api
       configApiEnabled: true
+      # -- configAPI ingress resource labels. key app is taken
+      configApiLabels: { }
+      # -- ConfigAPI ingress resource additional annotations.
+      configApiAdditionalAnnotations: { }          
+    # -- Comma-separated values of enabled plugins (supported plugins are "admin-ui","fido2","scim","user-mgt","jans-link","kc-saml")
+    plugins: "fido2,scim,user-mgt"
   # -- Fully qualified domain name to be used for Janssen installation. This address will be used to reach Janssen services.
   fqdn: demoexample.jans.io
   fido2:
+    # — Add custom annotations for kubernetes resources for the service
+    customAnnotations:
+      destinationRule: {}
+      podDisruptionBudget: {}
+      virtualService: {}
+      deployment: {}
+      horizontalPodAutoscaler: {}
+      service: {}
+      secret: {}  
     # -- Name of the fido2 service. Please keep it as default.
     fido2ServiceName: fido2
     # -- Boolean flag to enable/disable the fido2 chart.
     enabled: true
+    # -- passing custom java options to fido2. Notice you do not need to pass in any loggers options as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs.
+    cnCustomJavaOptions: ""
     # -- App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed.
     appLoggers:
       # -- Enable log prefixing which enables prepending the STDOUT logs with the file name. i.e fido2 ===> 2022-12-20 17:49:55,744 INFO
@@ -831,6 +1021,16 @@ global:
     ingress:
       # -- Enable endpoint /.well-known/fido2-configuration
       fido2ConfigEnabled: false
+      # -- Enable endpoint /jans-fido2
+      fido2Enabled: false
+      # -- fido2 config ingress resource labels. key app is taken
+      fido2ConfigLabels: { }
+      # -- fido2 config ingress resource additional annotations.
+      fido2ConfigAdditionalAnnotations: { }
+      # -- fido2 ingress resource labels. key app is taken
+      fido2Labels: { }
+      # -- fido2 ingress resource additional annotations.
+      fido2AdditionalAnnotations: { }      
   # -- GCE storage kind if using Google disks
   gcePdStorageType: pd-standard
   # -- Boolean flag to enable mapping global.lbIp  to global.fqdn inside pods on clouds that provide static ip for load balancers. On cloud that provide only addresses to the LB this flag will enable a script to actively scan config.configmap.lbAddr and update the hosts file inside the pods automatically.
@@ -858,14 +1058,42 @@ global:
     enabled: false
     # -- Name of the OpenDJ service. Please keep it as default.
     ldapServiceName: opendj
+    # — Add custom annotations for kubernetes resources for the service
+    customAnnotations:
+      cronjob: {}
+      horizontalPodAutoscaler: {}
+      destinationRule: {}
+      podDisruptionBudget: {}
+      service: {}
+      statefulset: {}
+      storageClass: {}
+      secret: {}    
   persistence:
+    # — Add custom annotations for kubernetes resources for the service
+    customAnnotations:
+      job: {}
+      service: {}
+      secret: {}  
     # -- Boolean flag to enable/disable the persistence chart.
     enabled: true
+  # -- service account used by Kubernetes resources
+  serviceAccountName: default   
   scim:
+    # — Add custom annotations for kubernetes resources for the service
+    customAnnotations:
+      destinationRule: {}
+      podDisruptionBudget: {}
+      virtualService: {}
+      deployment: {}
+      horizontalPodAutoscaler: {}
+      service: {}
+      secret: {}  
     # -- Name of the scim service. Please keep it as default.
     scimServiceName: scim
     # -- Boolean flag to enable/disable the SCIM chart.
     enabled: true
+    # -- passing custom java options to scim. Notice you do not need to pass in any loggers options as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs.
+    cnCustomJavaOptions: ""
     # -- App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed.
     appLoggers:
       # -- Enable log prefixing which enables prepending the STDOUT logs with the file name. i.e jans-scim ===> 2022-12-20 17:49:55,744 INFO
@@ -896,6 +1124,14 @@ global:
       scimConfigEnabled: false
       # -- Enable SCIM endpoints /jans-scim
       scimEnabled: false
+      # -- SCIM config ingress resource labels. key app is taken
+      scimConfigLabels: { }
+      # -- SCIM config ingress resource additional annotations.
+      scimConfigAdditionalAnnotations: { }
+      # -- SCIM config ingress resource labels. key app is taken
+      scimLabels: { }
+      # -- SCIM ingress resource additional annotations.
+      scimAdditionalAnnotations: { }      
   # -- StorageClass section for OpenDJ charts. This is not currently used by the openbanking distribution. You may specify custom parameters as needed.
   storageClass:
     allowVolumeExpansion: true
@@ -913,10 +1149,20 @@ global:
     reclaimPolicy: Retain
     volumeBindingMode: WaitForFirstConsumer
   link:
+    # — Add custom annotations for kubernetes resources for the service
+    customAnnotations:
+      destinationRule: {}
+      podDisruptionBudget: {}
+      virtualService: {}
+      deployment: {}
+      horizontalPodAutoscaler: {}
+      service: {}
     # -- Name of the link service. Please keep it as default.
     linkServiceName: link
     # -- Boolean flag to enable/disable the link chart.
     enabled: false
+    # -- passing custom java options to link. Notice you do not need to pass in any loggers options as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs.
+    cnCustomJavaOptions: ""
     # -- App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed.
     appLoggers:
       # -- Enable log prefixing which enables prepending the STDOUT logs with the file name. i.e link-persistence ===> 2022-12-20 17:49:55,744 INFO
@@ -945,6 +1191,30 @@ global:
     ingress:
       # Enable link endpoints /jans-link
       linkEnabled: true
+  saml:
+    # — Add custom annotations for kubernetes resources for the service
+    customAnnotations:
+      destinationRule: {}
+      podDisruptionBudget: {}
+      virtualService: {}
+      deployment: {}
+      horizontalPodAutoscaler: {}
+      service: {}
+      secret: {}  
+    # -- Name of the saml service. Please keep it as default.
+    samlServiceName: saml
+    # -- Boolean flag to enable/disable the saml chart.
+    enabled: false
+    # -- Enable endpoints in either istio or nginx ingress depending on users choice
+    ingress:
+      # Enable saml endpoints /kc
+      samlEnabled: false
+      # -- SAML config ingress resource labels. key app is taken
+      samlLabels: { }
+      # -- SAML ingress resource additional annotations.
+      samlAdditionalAnnotations: { }      
+    # -- passing custom java options to saml. DO NOT PASS JAVA_OPTIONS in envs.
+    cnCustomJavaOptions: ""
   # -- Path to SQL password file
   cnSqlPasswordFile: /etc/jans/conf/sql_password
   # -- Path to Couchbase password file
@@ -963,62 +1233,17 @@ global:
   cnLdapCacertFile: /etc/certs/opendj.pem
   # -- Path to OpenDJ truststore file
   cnLdapTruststoreFile: /etc/certs/opendj.pkcs12
+  # -- Path to file contains password for database access
+  kcDbPasswordFile: /etc/jans/conf/kc_db_password
+  # -- Path to file contains Keycloak admin credentials (username and password)
+  kcAdminCredentialsFile: /etc/jans/conf/kc_admin_creds
+  kc-scheduler:
+    # -- Boolean flag to enable/disable the kc-scheduler cronjob chart.
+    enabled: false
 
 # -- Nginx ingress definitions chart
 nginx-ingress:
   ingress:
-    # -- openid-configuration ingress resource labels. key app is taken
-    openidConfigLabels: { }
-    # -- openid-configuration ingress resource additional annotations.
-    openidAdditionalAnnotations: { }
-    # -- device-code ingress resource labels. key app is taken
-    deviceCodeLabels: { }
-    # -- device-code ingress resource additional annotations.
-    deviceCodeAdditionalAnnotations: { }
-    # -- Firebase Messaging ingress resource labels. key app is taken
-    firebaseMessagingLabels: { }
-    # -- Firebase Messaging ingress resource additional annotations.
-    firebaseMessagingAdditionalAnnotations: { }
-    # -- uma2 config ingress resource labels. key app is taken
-    uma2ConfigLabels: { }
-    # -- uma2 config ingress resource additional annotations.
-    uma2AdditionalAnnotations: { }
-    # -- webfinger ingress resource labels. key app is taken
-    webfingerLabels: { }
-    # -- webfinger ingress resource additional annotations.
-    webfingerAdditionalAnnotations: { }
-    # -- webdiscovery ingress resource labels. key app is taken
-    webdiscoveryLabels: { }
-    # -- webdiscovery ingress resource additional annotations.
-    webdiscoveryAdditionalAnnotations: { }
-    # -- SCIM config ingress resource labels. key app is taken
-    scimConfigLabels: { }
-    # -- SCIM config ingress resource additional annotations.
-    scimConfigAdditionalAnnotations: { }
-    # -- SCIM config ingress resource labels. key app is taken
-    scimLabels: { }
-    # -- SCIM ingress resource additional annotations.
-    scimAdditionalAnnotations: { }
-    # -- configAPI ingress resource labels. key app is taken
-    configApiLabels: { }
-    # -- ConfigAPI ingress resource additional annotations.
-    configApiAdditionalAnnotations: { }
-    # -- u2f config ingress resource labels. key app is taken
-    u2fConfigLabels: { }
-    # -- u2f config ingress resource additional annotations.
-    u2fAdditionalAnnotations: { }
-    # -- fido2 config ingress resource labels. key app is taken
-    fido2ConfigLabels: { }
-    # -- fido2 config ingress resource additional annotations.
-    fido2ConfigAdditionalAnnotations: { }
-    # -- Auth server ingress resource labels. key app is taken
-    authServerLabels: { }
-    # -- Auth server ingress resource additional annotations.
-    authServerAdditionalAnnotations: { }
-    # -- Casa ingress resource labels. key app is taken
-    casaLabels: { }
-    # -- Casa ingress resource additional annotations.
-    casaAdditionalAnnotations: { }
     # -- Additional labels that will be added across all ingress definitions in the format of {mylabel: "myapp"}
     additionalLabels: { }
     # -- Additional annotations that will be added across all ingress definitions in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
@@ -1181,6 +1406,10 @@ opendj:
   additionalLabels: { }
   # -- Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
   additionalAnnotations: { }
+  # -- Add custom scripts that have been mounted to run before the entrypoint.
+  # - /tmp/custom.sh
+  # - /tmp/custom2.sh
+  customScripts: [ ]
 # -- Job to generate data and initial config for Janssen Server persistence layer.
 persistence:
   # -- Add custom normal and secret envs to the service
@@ -1201,7 +1430,7 @@ persistence:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/persistence-loader
     # -- Image  tag to use for deploying.
-    tag: 1.0.20_dev
+    tag: 1.1.5_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Resource specs.
@@ -1232,6 +1461,10 @@ persistence:
   additionalLabels: { }
   # -- Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
   additionalAnnotations: { }
+  # -- Add custom scripts that have been mounted to run before the entrypoint.
+  # - /tmp/custom.sh
+  # - /tmp/custom2.sh
+  customScripts: [ ]
 # -- System for Cross-domain Identity Management (SCIM) version 2.0
 scim:
   # -- Configure the topology spread constraints. Notice this is a map NOT a list as in the upstream API
@@ -1281,7 +1514,7 @@ scim:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/scim
     # -- Image  tag to use for deploying.
-    tag: 1.0.20_dev
+    tag: 1.1.5_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -1290,13 +1523,13 @@ scim:
     limits:
       # -- CPU limit.
       cpu: 1000m
-      # -- Memory limit.
-      memory: 1000Mi
+      # -- Memory limit. This value is used to calculate memory allocation for Java. Currently it only supports `Mi`. Please refrain from using other units.
+      memory: 1200Mi
     requests:
       # -- CPU request.
       cpu: 1000m
       # -- Memory request.
-      memory: 1000Mi
+      memory: 1200Mi
   service:
     # -- The name of the scim port within the scim service. Please keep it as default.
     name: http-scim
@@ -1336,7 +1569,10 @@ scim:
   additionalLabels: { }
   # -- Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
   additionalAnnotations: { }
-
+  # -- Add custom scripts that have been mounted to run before the entrypoint.
+  # - /tmp/custom.sh
+  # - /tmp/custom2.sh
+  customScripts: [ ]
 # -- Link.
 link:
   # -- Configure the topology spread constraints. Notice this is a map NOT a list as in the upstream API
@@ -1386,7 +1622,7 @@ link:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/link
     # -- Image  tag to use for deploying.
-    tag: 1.0.20_dev
+    tag: 1.1.5_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -1396,13 +1632,13 @@ link:
     limits:
       # -- CPU limit.
       cpu: 500m
-      # -- Memory limit.
-      memory: 1000Mi
+      # -- Memory limit. This value is used to calculate memory allocation for Java. Currently it only supports `Mi`. Please refrain from using other units.
+      memory: 1200Mi
     requests:
       # -- CPU request.
       cpu: 500m
       # -- Memory request.
-      memory: 1000Mi
+      memory: 1200Mi
   # -- Configure the liveness healthcheck for the auth server if needed.
   livenessProbe:
     # -- http liveness probe endpoint
@@ -1440,3 +1676,171 @@ link:
   additionalLabels: { }
   # -- Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
   additionalAnnotations: { }
+  # -- Add custom scripts that have been mounted to run before the entrypoint.
+  # - /tmp/custom.sh
+  # - /tmp/custom2.sh
+  customScripts: [ ]
+# -- SAML.
+saml:
+  # -- Configure the topology spread constraints. Notice this is a map NOT a list as in the upstream API
+  # https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
+  topologySpreadConstraints: {}
+    # -- Define below as many constraints as needed. The key name should follow the structure tsc1, tsc2...etc.
+    # Do not enter the key labelSelector in the entry/entries below as that is automatically injected by the chart
+    #tsc1:
+    #  maxSkew: 1
+    #  minDomains: 1 # optional; beta since v1.25
+    #  topologyKey: kubernetes.io/hostname
+    #  whenUnsatisfiable: DoNotSchedule
+    #  matchLabelKeys: [] # optional; alpha since v1.25
+    #  nodeAffinityPolicy: [] # optional; alpha since v1.25
+    #  nodeTaintsPolicy: [] # optional; alpha since v1.25
+    #tsc2:
+      #maxSkew: 1
+  # -- Configure the PodDisruptionBudget
+  pdb:
+    enabled: true
+    maxUnavailable: "90%"
+  # -- Configure the HorizontalPodAutoscaler
+  hpa:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 50
+    # -- metrics if targetCPUUtilizationPercentage is not set
+    metrics: []
+    # -- Scaling Policies
+    behavior: {}
+  # -- Add custom normal and secret envs to the service
+  usrEnvs:
+    # -- Add custom normal envs to the service
+    # variable1: value1
+    normal: {}
+    # -- Add custom secret envs to the service
+    # variable1: value1
+    secret: {}
+  # -- Add custom dns policy
+  dnsPolicy: ""
+  # -- Add custom dns config
+  dnsConfig: {}
+  image:
+    # -- Image pullPolicy to use for deploying.
+    pullPolicy: IfNotPresent
+    # -- Image  to use for deploying.
+    repository: ghcr.io/janssenproject/jans/saml
+    # -- Image  tag to use for deploying.
+    tag: 1.1.5_dev
+    # -- Image Pull Secrets
+    pullSecrets: [ ]
+  # -- Service replica number.
+  replicas: 1
+  # -- Resource specs.
+  resources:
+    limits:
+      # -- CPU limit.
+      cpu: 500m
+      # -- Memory limit. This value is used to calculate memory allocation for Java. Currently it only supports `Mi`. Please refrain from using other units.
+      memory: 1200Mi
+    requests:
+      # -- CPU request.
+      cpu: 500m
+      # -- Memory request.
+      memory: 1200Mi
+  # -- Configure the liveness healthcheck for the auth server if needed.
+  livenessProbe:
+    # -- http liveness probe endpoint
+    exec:
+      command:
+        - python3
+        - /app/scripts/healthcheck.py
+    initialDelaySeconds: 30
+    periodSeconds: 30
+    timeoutSeconds: 5
+    failureThreshold: 10
+  readinessProbe:
+    # -- http readiness probe endpoint
+    exec:
+      command:
+        - python3
+        - /app/scripts/healthcheck.py
+    initialDelaySeconds: 25
+    periodSeconds: 25
+    timeoutSeconds: 5
+    failureThreshold: 10
+  # -- Configure any additional volumes that need to be attached to the pod
+  volumes: []
+  # -- Configure any additional volumesMounts that need to be attached to the containers
+  volumeMounts: []
+  # Actions on lifecycle events such as postStart and preStop
+  # Example
+  # lifecycle:
+  #   postStart:
+  #     exec:
+  #       command: ["sh", "-c", "mkdir /opt/jans/jetty/jans-auth/custom/static/stylesheet/"]
+  lifecycle: {}
+
+  # -- Additional labels that will be added across the gateway in the format of {mylabel: "myapp"}
+  additionalLabels: { }
+  # -- Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
+  additionalAnnotations: { }
+  # -- Add custom scripts that have been mounted to run before the entrypoint.
+  # - /tmp/custom.sh
+  # - /tmp/custom2.sh
+  customScripts: [ ]
+
+# -- Responsible for synchronizing Keycloak SAML clients
+kc-scheduler:
+  # -- Add custom normal and secret envs to the service
+  usrEnvs:
+    # -- Add custom normal envs to the service
+    # variable1: value1
+    normal: {}
+    # -- Add custom secret envs to the service
+    # variable1: value1
+    secret: {}
+  # -- Add custom dns policy
+  dnsPolicy: ""
+  # -- Add custom dns config
+  dnsConfig: {}
+  image:
+    # -- Image pullPolicy to use for deploying.
+    pullPolicy: IfNotPresent
+    # -- Image  to use for deploying.
+    repository: ghcr.io/janssenproject/jans/kc-scheduler
+    # -- Image  tag to use for deploying.
+    tag: 1.1.5_dev
+    # -- Image Pull Secrets
+    pullSecrets: [ ]
+  # -- Resource specs.
+  resources:
+    limits:
+      # -- CPU limit.
+      cpu: 300m
+      # -- Memory limit.
+      memory: 300Mi
+    requests:
+      # -- CPU request.
+      cpu: 300m
+      # -- Memory request.
+      memory: 300Mi
+  # -- Interval of running the scheduler (in minutes)
+  interval: 10
+  # -- Configure any additional volumes that need to be attached to the pod
+  volumes: []
+  # -- Configure any additional volumesMounts that need to be attached to the containers
+  volumeMounts: []
+  # Actions on lifecycle events such as postStart and preStop
+  # Example
+  # lifecycle:
+  #   postStart:
+  #     exec:
+  #       command: ["sh", "-c", "mkdir /opt/jans/jetty/jans-auth/custom/static/stylesheet/"]
+  lifecycle: {}
+  # -- Additional labels that will be added across the gateway in the format of {mylabel: "myapp"}
+  additionalLabels: { }
+  # -- Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
+  additionalAnnotations: {}
+  # -- Add custom scripts that have been mounted to run before the entrypoint.
+  # - /tmp/custom.sh
+  # - /tmp/custom2.sh
+  customScripts: []

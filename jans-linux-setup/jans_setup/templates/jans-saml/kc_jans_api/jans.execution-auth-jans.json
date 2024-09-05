@@ -1,0 +1,7 @@
+{
+    "parentFlow": "${jans_browser_auth_flow_id}",
+    "authenticator": "kc-jans-authn",
+    "authenticatorConfig": null,
+    "requirement": "ALTERNATIVE",
+    "priority": 20
+ }

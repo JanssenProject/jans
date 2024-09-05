@@ -119,6 +119,7 @@ public class ExternalUpdateTokenService extends ExternalScriptService {
     @NotNull
     private List<CustomScriptConfiguration> getScripts(@NotNull ExternalUpdateTokenContext context) {
         if (customScriptConfigurations == null || customScriptConfigurations.isEmpty() || context.getClient() == null) {
+            log.trace("No UpdateToken scripts or client is null.");
             return Lists.newArrayList();
         }
 
@@ -190,10 +191,17 @@ public class ExternalUpdateTokenService extends ExternalScriptService {
     }
 
     public boolean modifyAccessToken(AccessToken accessToken, ExternalUpdateTokenContext context) {
-        List<CustomScriptConfiguration> scripts = getScripts(context);
-        if (scripts.isEmpty()) {
+        if (context.getExecutionContext() != null && context.getExecutionContext().isSkipModifyAccessTokenScript()) {
+            log.trace("Skipped modifyAccessToken because execution context has skipModifyAccessTokenScript=true");
             return true;
         }
+
+        List<CustomScriptConfiguration> scripts = getScripts(context);
+        if (scripts.isEmpty()) {
+            log.trace("No UpdateToken scripts found.");
+            return true;
+        }
+
         log.trace("Executing {} update-token modifyAccessToken scripts.", scripts.size());
 
         for (CustomScriptConfiguration script : scripts) {

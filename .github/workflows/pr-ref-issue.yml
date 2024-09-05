@@ -11,18 +11,27 @@ on:
       - reopened
     paths-ignore:
       - "docs/**"
+      - ".github/workflows/**"
     branches:
       - main
   workflow_dispatch:
+permissions:
+  contents: read
+
 jobs:
   check-prs-issue:
-    if:  startsWith(github.head_ref, 'release-please') != true && startsWith(github.head_ref, 'dependabot/') != true && startsWith(github.head_ref, 'snyk-') != true
+    if:  startsWith(github.head_ref, 'release-') != true && startsWith(github.head_ref, 'dependabot/') != true && startsWith(github.head_ref, 'snyk-') != true && github.repository == 'JanssenProject/jans'
     name: Check PRs issue
     runs-on: ubuntu-latest
     permissions:
       issues: write
       pull-requests: write
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
+        with:
+          egress-policy: audit
+
       - name: Wait for 25 seconds so that GH can attach issue to the PR if already mentioned by author
         run: sleep 25s
         shell: bash

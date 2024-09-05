@@ -19,6 +19,7 @@ import io.jans.as.server.model.config.ConfigurationFactory;
 import io.jans.as.server.security.Identity;
 import io.jans.as.server.service.*;
 import io.jans.as.server.service.ciba.CibaRequestService;
+import io.jans.as.server.service.external.ExternalCreateUserService;
 import io.jans.as.server.service.external.ExternalPostAuthnService;
 import io.jans.as.server.service.external.ExternalUpdateTokenService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -53,6 +54,9 @@ public class AuthorizeRestWebServiceImplTest {
 
     @Mock
     private ErrorResponseFactory errorResponseFactory;
+
+    @Mock
+    private AcrService acrService;
 
     @Mock
     private AuthorizationGrantList authorizationGrantList;
@@ -119,6 +123,40 @@ public class AuthorizeRestWebServiceImplTest {
 
     @Mock
     private HttpServletRequest servletRequest;
+
+    @Mock
+    private ExternalCreateUserService externalCreateUserService;
+
+    @Test
+    public void checkPromptCreate_whenDisabledPromptCreate_shouldNotThrowException() {
+        AuthzRequest authzRequest = new AuthzRequest();
+        authzRequest.setSessionId("some_id");
+        authzRequest.addPrompt(Prompt.CREATE);
+
+        when(appConfiguration.getDisablePromptCreate()).thenReturn(true);
+
+        authorizeRestWebService.checkPromptCreate(authzRequest);
+        assertEquals(authzRequest.getSessionId(), "some_id");
+    }
+
+    @Test(expectedExceptions = NoLogWebApplicationException.class)
+    public void checkPromptCreate_whenEnabledPromptCreate_shouldNotThrowException() {
+        AuthzRequest authzRequest = new AuthzRequest();
+        authzRequest.setSessionId("some_id");
+        authzRequest.addPrompt(Prompt.CREATE);
+
+        final RedirectUri redirectUri = mock(RedirectUri.class);
+        when(redirectUri.toString()).thenReturn("http://rp.com");
+
+        authzRequest.setRedirectUriResponse(new RedirectUriResponse(redirectUri, "", mock(HttpServletRequest.class), mock(ErrorResponseFactory.class)));
+
+        when(identity.getSessionId()).thenReturn(new SessionId());
+        when(appConfiguration.getDisablePromptCreate()).thenReturn(false);
+        when(appConfiguration.getIssuer()).thenReturn("http://as.com");
+        when(servletRequest.getContextPath()).thenReturn("/path");
+
+        authorizeRestWebService.checkPromptCreate(authzRequest);
+    }
 
     @Test
     public void checkPromptLogin_whenDisablePromptLoginIsTrue_shouldNotClearSession() {

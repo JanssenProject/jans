@@ -6,6 +6,7 @@
 
 package io.jans.as.server.model.common;
 
+import io.jans.as.model.authzdetails.AuthzDetails;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.configuration.AppConfiguration;
@@ -30,6 +31,7 @@ public class CacheGrant implements Serializable {
     private Client client;
     private Date authenticationTime;
     private Set<String> scopes;
+    private String authzDetails;
     private String grantId;
     private String tokenBindingHash;
     private String nonce;
@@ -62,6 +64,7 @@ public class CacheGrant implements Serializable {
         client = grant.getClient();
         authenticationTime = grant.getAuthenticationTime();
         scopes = grant.getScopes();
+        authzDetails = grant.getAuthzDetailsAsString();
         tokenBindingHash = grant.getTokenBindingHash();
         grantId = grant.getGrantId();
         nonce = grant.getNonce();
@@ -84,6 +87,7 @@ public class CacheGrant implements Serializable {
         client = grant.getClient();
         authenticationTime = grant.getAuthenticationTime();
         scopes = grant.getScopes();
+        authzDetails = grant.getAuthzDetailsAsString();
         tokenBindingHash = grant.getTokenBindingHash();
         grantId = grant.getGrantId();
         nonce = grant.getNonce();
@@ -109,6 +113,7 @@ public class CacheGrant implements Serializable {
         client = grant.getClient();
         authenticationTime = grant.getAuthenticationTime();
         scopes = grant.getScopes();
+        authzDetails = grant.getAuthzDetailsAsString();
         tokenBindingHash = grant.getTokenBindingHash();
         grantId = grant.getGrantId();
         nonce = grant.getNonce();
@@ -146,6 +151,14 @@ public class CacheGrant implements Serializable {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public String getAuthzDetails() {
+        return authzDetails;
+    }
+
+    public void setAuthzDetails(String authzDetails) {
+        this.authzDetails = authzDetails;
     }
 
     public Set<String> getScopes() {
@@ -242,6 +255,7 @@ public class CacheGrant implements Serializable {
 
         grant.setAuthorizationCode(new AuthorizationCode(authorizationCodeString, authorizationCodeCreationDate, authorizationCodeExpirationDate));
         grant.setScopes(scopes);
+        grant.setAuthzDetails(AuthzDetails.ofSilently(authzDetails));
         grant.setGrantId(grantId);
         grant.setSessionDn(sessionDn);
         grant.setCodeChallenge(codeChallenge);
@@ -257,6 +271,7 @@ public class CacheGrant implements Serializable {
         CIBAGrant grant = grantInstance.select(CIBAGrant.class).get();
         grant.init(user, AuthorizationGrantType.CIBA, client, authenticationTime);
         grant.setScopes(scopes);
+        grant.setAuthzDetails(AuthzDetails.ofSilently(authzDetails));
         grant.setGrantId(grantId);
         grant.setSessionDn(sessionDn);
         grant.setCodeChallenge(codeChallenge);
@@ -274,6 +289,7 @@ public class CacheGrant implements Serializable {
         DeviceCodeGrant grant = grantInstance.select(DeviceCodeGrant.class).get();
         grant.init(user, AuthorizationGrantType.DEVICE_CODE, client, authenticationTime);
         grant.setScopes(scopes);
+        grant.setAuthzDetails(AuthzDetails.ofSilently(getAuthzDetails()));
         grant.setGrantId(grantId);
         grant.setSessionDn(sessionDn);
         grant.setCodeChallenge(codeChallenge);

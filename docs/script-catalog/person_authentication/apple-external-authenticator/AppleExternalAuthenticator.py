@@ -13,7 +13,7 @@ from io.jans.as.server.service.net import HttpService
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from io.jans.as.server.service import AuthenticationService, UserService
 from io.jans.orm import PersistenceEntryManager
-from io.jans.as.persistence.model.configuration import GluuConfiguration
+from io.jans.config import GluuConfiguration
 from io.jans.util import StringHelper
 from java.math import BigInteger
 from java.security import SecureRandom

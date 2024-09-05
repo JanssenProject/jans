@@ -12,27 +12,7 @@ tags:
 
 ## System Requirements
 
-The resources may be set to the minimum as below:
-
-- 8 GiB RAM
-- 8 CPU cores
-- 50GB hard-disk
-
-Use the listing below for detailed estimation of minimum required resources. Table contains the default resources recommendations per service. Depending on the use of each service the resources needs may be increase or decrease.
-
-| Service           | CPU Unit | RAM   | Disk Space | Processor Type | Required                           |
-|-------------------|----------|-------|------------|----------------|------------------------------------|
-| Auth server       | 2.5      | 2.5GB | N/A        | 64 Bit         | Yes                                |
-| LDAP (OpenDJ)     | 1.5      | 2GB   | 10GB       | 64 Bit         | Only if couchbase is not installed |
-| fido2             | 0.5      | 0.5GB | N/A        | 64 Bit         | No                                 |
-| scim              | 1.0      | 1.0GB | N/A        | 64 Bit         | No                                 |
-| config - job      | 0.5      | 0.5GB | N/A        | 64 Bit         | Yes on fresh installs              |
-| persistence - job | 0.5      | 0.5GB | N/A        | 64 Bit         | Yes on fresh installs              |
-| nginx             | 1        | 1GB   | N/A        | 64 Bit         | Yes if not ALB                     |
-| auth-key-rotation | 0.3      | 0.3GB | N/A        | 64 Bit         | No [Strongly recommended]          |
-| config-api        | 1        | 1GB   | N/A        | 64 Bit         | No                                 |
-
-Releases of images are in style 1.0.0-beta.0, 1.0.0-0
+{% include "includes/cn-system-requirements.md" %}
 
 ## Initial Setup
 
@@ -49,7 +29,7 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
 6.  Create cluster using a command such as the following example:
 
     ```  
-    gcloud container clusters create janssen-cluster --num-nodes 2 --machine-type e2-highcpu-8 --zone us-west1-a
+    gcloud container clusters create janssen-cluster --num-nodes 2 --machine-type e2-standard-4 --zone us-west1-a
     ```
     You can adjust `num-nodes` and `machine-type` as per your desired cluster size
 
@@ -90,7 +70,7 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
 
     - FQDN/domain is registered:
 
-        Add the following yaml snippet to your `override.yaml` file`:
+        Add the following yaml snippet to your `override.yaml` file:
 
         ```yaml
         global:
@@ -223,7 +203,7 @@ Releases of images are in style 1.0.0-beta.0, 1.0.0-0
             cnSqlDbName: jans
             cnSqlDbPort: 5432
             cnSqlDbDialect: pgsql
-            cnSqlDbHost: my-release-mysql.jans.svc
+            cnSqlDbHost: my-release-postgresql.jans.svc
             cnSqlDbUser: postgres
             cnSqlDbTimezone: UTC
             cnSqldbUserPassword: Test1234#

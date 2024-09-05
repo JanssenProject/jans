@@ -7,8 +7,8 @@ tags:
 - docker image
 ---
 
-!!! Warning 
-    **This image is for testing and development purposes only. Use Janssen [helm charts](https://github.com/JanssenProject/jans/tree/main/charts/janssen) for production setups.**
+> **Warning**
+> This image is for testing and development purposes only. Use Janssen [helm charts](https://github.com/JanssenProject/jans/tree/main/charts/janssen) for production setups.
 
 ## Overview
 
@@ -58,10 +58,20 @@ Download the compose file
 wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/jans-mysql-compose.yml 
 ```
 
-This docker compose file runs two containers, the janssen monolith container and mysql container.
+Download the the script files 
 
 ```bash
-docker compose -f jans-mysql-compose.yml up -d
+
+wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/up.sh
+wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/down.sh
+wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/clean.sh
+```
+
+This docker compose file runs two containers, the janssen monolith container and mysql container.
+To start the containers.
+
+```bash
+./up.sh
 ```
 
 To view the containers running
@@ -71,21 +81,22 @@ To view the containers running
 docker compose -f jans-mysql-compose.yml ps
 ```
 
+To stop the containers.
+
+```bash
+./down.sh
+```
+
 ## Configure Janssen Server
 
-1. Access the Docker container shell using:
+```bash
 
-    ```bash
-    docker compose -f jans-mysql-compose.yml exec jans sh
-    ```
+docker compose -f jans-mysql-compose.yml exec jans sh #This opens a bash terminal in the running container
 
-2. Grab a pair of client_id and client_pw(secret) from `setup.properties` or `/opt/jans/jans-setup/setup.properties.last`
+/opt/jans/jans-cli/config-cli.py #configure using the config-cli
 
-3. Use the CLI tools located under `/opt/jans/jans-cli/` to configure Janssen Server as needed. For example you can run the [TUI](../../config-guide/config-tools/jans-tui/README.md):
-    ```bash
-    python3 /opt/jans/jans-cli/config-cli-tui.py
-    ```
-
+/opt/jans/jans-cli/scim-cli.py #configure using the scim-cli
+```
 
 ## Access endpoints externally
 
@@ -102,7 +113,6 @@ After adding the record you can hit endpoints such as https://demoexample.jans.i
 
 Remove setup and volumes
 
+```bash
+./clean.sh
 ```
-docker compose -f jans-mysql-compose.yml down
-```
-

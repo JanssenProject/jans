@@ -70,14 +70,23 @@ public class JSONWebKeySet {
     public String toString() {
         try {
             JSONObject jwks = toJSONObject();
-            return toPrettyJson(jwks).replace("\\/", "/");
+            return toPrettyString(jwks);
+        } catch (JSONException e) {
+            LOG.error(e.getMessage(), e);
+            return "";
+        }
+    }
+
+    public static String toPrettyString(JSONObject json) {
+        try {
+            return toPrettyJson(json).replace("\\/", "/");
         } catch (JSONException | JsonProcessingException e) {
             LOG.error(e.getMessage(), e);
             return "";
         }
     }
 
-    private String toPrettyJson(JSONObject jsonObject) throws JsonProcessingException {
+    public static String toPrettyJson(JSONObject jsonObject) throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new JsonOrgModule());
         return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObject);

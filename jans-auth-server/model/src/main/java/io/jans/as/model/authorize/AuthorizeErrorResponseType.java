@@ -11,9 +11,27 @@ import io.jans.as.model.error.IErrorType;
 /**
  * Error codes for authorization error responses.
  *
- * @author Javier Rojas Blum Date: 09.22.2011
+ * @author Javier Rojas Blum
  */
 public enum AuthorizeErrorResponseType implements IErrorType {
+
+    /**
+     * The Authorization Server is unable to meet the requirements of the Relying Party for
+     * the authentication of the End-User. OP is unable to use acr specified in request.
+     */
+    UNMET_AUTHENTICATION_REQUIREMENTS("unmet_authentication_requirements"),
+
+    /**
+     * "request" parameter is supported by AS. But if it's switched off in configuration by setting
+     * requestParameterSupported=false then this error is returned from authorization endpoint.
+     */
+    REQUEST_NOT_SUPPORTED("request_not_supported"),
+
+    /**
+     * "request_uri" parameter is supported by AS. But if it's switched off in configuration by setting
+     * requestUriParameterSupported=false then this error is returned from authorization endpoint.
+     */
+    REQUEST_URI_NOT_SUPPORTED("request_uri_not_supported"),
 
     /**
      * The request is missing a required parameter, includes an
@@ -71,6 +89,18 @@ public enum AuthorizeErrorResponseType implements IErrorType {
      * Client's pre-registered redirect_uris.
      */
     INVALID_REQUEST_REDIRECT_URI("invalid_request_redirect_uri"),
+
+    /**
+     * invalid_authorization_details is returned to the client if any of the
+     * following are true of the objects in the authorization_details structure:
+     *
+     * - contains an unknown authorization details type value,
+     * - is an object of known type but containing unknown fields,
+     * - contains fields of the wrong type for the authorization details type,
+     * - contains fields with invalid values for the authorization details type, or
+     * - is missing required fields for the authorization details type.
+     */
+    INVALID_AUTHORIZATION_DETAILS("invalid_authorization_details "),
 
     /**
      * The Authorization Server requires End-User authentication. This error MAY

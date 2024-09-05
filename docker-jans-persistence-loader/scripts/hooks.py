@@ -13,7 +13,7 @@ from jans.pycloudlib.persistence.utils import PersistenceMapper
 
 def merge_auth_keystore_ctx_hook(manager, ctx: dict[str, _t.Any]) -> dict[str, _t.Any]:
     # maintain compatibility with upstream template
-    ctx["oxauth_openid_jks_fn"] = manager.config.get("auth_openid_jks_fn")
+    ctx["jans_auth_openid_jks_fn"] = manager.config.get("auth_openid_jks_fn")
     return ctx
 
 
@@ -21,12 +21,10 @@ def transform_auth_dynamic_config_hook(conf, manager):
     should_update = False
     hostname = manager.config.get("hostname")
 
-    if "redirectUrisRegexEnabled" not in conf:
-        conf["redirectUrisRegexEnabled"] = True
-        should_update = True
-
-    if "accessTokenSigningAlgValuesSupported" not in conf:
-        conf["accessTokenSigningAlgValuesSupported"] = [
+    # add missing top-level keys
+    for missing_key, value in [
+        ("redirectUrisRegexEnabled", True),
+        ("accessTokenSigningAlgValuesSupported", [
             "none",
             "HS256",
             "HS384",
@@ -40,17 +38,103 @@ def transform_auth_dynamic_config_hook(conf, manager):
             "ES512",
             "PS256",
             "PS384",
+            "PS512",
+        ]),
+        ("forceSignedRequestObject", False),
+        ("grantTypesAndResponseTypesAutofixEnabled", False),
+        ("useHighestLevelScriptIfAcrScriptNotFound", False),
+        ("requestUriBlockList", ["localhost", "127.0.0.1"]),
+        ("ssaConfiguration", {
+            "ssaEndpoint": f"https://{hostname}/jans-auth/restv1/ssa",
+            "ssaSigningAlg": "RS256",
+            "ssaExpirationInDays": 30,
+        }),
+        ("blockWebviewAuthorizationEnabled", False),
+        ("subjectIdentifiersPerClientSupported", ["mail", "uid"]),
+        ("agamaConfiguration", {
+            "enabled": True,
+            "templatesPath": "/ftl",
+            "scriptsPath": "/scripts",
+            "serializerType": "KRYO",
+            "maxItemsLoggedInCollections": 9,
+            "pageMismatchErrorPage": "mismatch.ftl",
+            "interruptionErrorPage": "timeout.ftl",
+            "crashErrorPage": "crash.ftl",
+            "finishedFlowPage": "finished.ftl",
+            "bridgeScriptPage": "agama.xhtml",
+            "defaultResponseHeaders": {
+                "Cache-Control": "max-age=0, no-store",
+            },
+        }),
+        ("authorizationChallengeEndpoint", f"https://{hostname}/jans-auth/restv1/authorization_challenge"),
+        ("archivedJwksUri", f"https://{hostname}/jans-auth/restv1/jwks/archived"),
+        ("featureFlags", []),
+        ("lockMessageConfig", {
+            "enableTokenMessages": False,
+            "tokenMessagesChannel": "jans_token"
+        }),
+        ("txTokenSigningAlgValuesSupported", [
+            "HS256",
+            "HS384",
+            "HS512",
+            "RS256",
+            "RS384",
+            "RS512",
+            "ES256",
+            "ES384",
+            "ES512",
+            "ES512",
+            "PS256",
+            "PS384",
             "PS512"
-        ]
-        should_update = True
-
-    if "forceSignedRequestObject" not in conf:
-        conf["forceSignedRequestObject"] = False
-        should_update = True
-
-    if "grantTypesAndResponseTypesAutofixEnabled" not in conf:
-        conf["grantTypesAndResponseTypesAutofixEnabled"] = False
-        should_update = True
+        ]),
+        ("txTokenEncryptionAlgValuesSupported", [
+            "RSA1_5",
+            "RSA-OAEP",
+            "A128KW",
+            "A256KW"
+        ]),
+        ("txTokenEncryptionEncValuesSupported", [
+            "A128CBC+HS256",
+            "A256CBC+HS512",
+            "A128GCM",
+            "A256GCM"
+        ]),
+        ("introspectionSigningAlgValuesSupported", [
+            "HS256",
+            "HS384",
+            "HS512",
+            "RS256",
+            "RS384",
+            "RS512",
+            "ES256",
+            "ES384",
+            "ES512",
+            "ES512",
+            "PS256",
+            "PS384",
+            "PS512"
+        ]),
+        ("introspectionEncryptionAlgValuesSupported", [
+            "RSA1_5",
+            "RSA-OAEP",
+            "A128KW",
+            "A256KW"
+        ]),
+        ("introspectionEncryptionEncValuesSupported", [
+            "A128CBC+HS256",
+            "A256CBC+HS512",
+            "A128GCM",
+            "A256GCM"
+        ]),
+        ("txTokenLifetime", 180),
+        ("sessionIdCookieLifetime", 86400),
+        ("tokenIndexAllocationBlockSize", 10),
+        ("tokenIndexLimit", 10000000),
+    ]:
+        if missing_key not in conf:
+            conf[missing_key] = value
+            should_update = True
 
     if "sessionIdEnabled" in conf:
         conf.pop("sessionIdEnabled")
@@ -73,27 +157,8 @@ def transform_auth_dynamic_config_hook(conf, manager):
         ]
         should_update = True
 
-    if "useHighestLevelScriptIfAcrScriptNotFound" not in conf:
-        conf["useHighestLevelScriptIfAcrScriptNotFound"] = False
-        should_update = True
-
     if "httpLoggingExcludePaths" not in conf:
         conf["httpLoggingExcludePaths"] = conf.pop("httpLoggingExludePaths", [])
-        should_update = True
-
-    if "requestUriBlockList" not in conf:
-        conf["requestUriBlockList"] = [
-            "localhost",
-            "127.0.0.1",
-        ]
-        should_update = True
-
-    if "ssaConfiguration" not in conf:
-        conf["ssaConfiguration"] = {
-            "ssaEndpoint": f"https://{hostname}/jans-auth/restv1/ssa",
-            "ssaSigningAlg": "RS256",
-            "ssaExpirationInDays": 30
-        }
         should_update = True
 
     if "ssaCustomAttributes" not in conf["ssaConfiguration"]:
@@ -110,21 +175,12 @@ def transform_auth_dynamic_config_hook(conf, manager):
 
     # change ox to jans
     for old_attr, new_attr in [
-        ("oxElevenGenerateKeyEndpoint", "jansElevenGenerateKeyEndpoint"),
-        ("oxElevenSignEndpoint", "jansElevenSignEndpoint"),
-        ("oxElevenVerifySignatureEndpoint", "jansElevenVerifySignatureEndpoint"),
-        ("oxElevenDeleteKeyEndpoint", "jansElevenDeleteKeyEndpoint"),
-        ("oxElevenJwksEndpoint", "jansElevenJwksEndpoint"),
         ("oxOpenIdConnectVersion", "jansOpenIdConnectVersion"),
         ("oxId", "jansId"),
     ]:
         if new_attr not in conf:
             conf[new_attr] = conf.pop(old_attr, None)
             should_update = True
-
-    if "blockWebviewAuthorizationEnabled" not in conf:
-        conf["blockWebviewAuthorizationEnabled"] = False
-        should_update = True
 
     if "dateFormatterPatterns" not in conf:
         # remove old config
@@ -149,28 +205,6 @@ def transform_auth_dynamic_config_hook(conf, manager):
         conf["personCustomObjectClassList"] = []
         should_update = True
 
-    if "subjectIdentifiersPerClientSupported" not in conf:
-        conf["subjectIdentifiersPerClientSupported"] = ["mail", "uid"]
-        should_update = True
-
-    if "agamaConfiguration" not in conf:
-        conf["agamaConfiguration"] = {
-            "enabled": False,
-            "templatesPath": "/ftl",
-            "scriptsPath": "/scripts",
-            "serializerType": "KRYO",
-            "maxItemsLoggedInCollections": 9,
-            "pageMismatchErrorPage": "mismatch.ftl",
-            "interruptionErrorPage": "timeout.ftl",
-            "crashErrorPage": "crash.ftl",
-            "finishedFlowPage": "finished.ftl",
-            "bridgeScriptPage": "agama.xhtml",
-            "defaultResponseHeaders": {
-                "Cache-Control": "max-age=0, no-store",
-            },
-        }
-        should_update = True
-
     if "interruptionTime" in conf["agamaConfiguration"]:
         conf["agamaConfiguration"].pop("interruptionTime", None)
         should_update = True
@@ -182,32 +216,90 @@ def transform_auth_dynamic_config_hook(conf, manager):
         conf["agamaConfiguration"]["defaultResponseHeaders"].pop("Content-Type", None)
         should_update = True
 
-    for grant_type in [
-        "urn:ietf:params:oauth:grant-type:device_code",
-        "urn:ietf:params:oauth:grant-type:token-exchange",
-    ]:
-        if grant_type not in conf["dynamicGrantTypeDefault"]:
-            conf["dynamicGrantTypeDefault"].append(grant_type)
-            should_update = True
-
-    # ensure agama_flow listed in authorizationRequestCustomAllowedParameters
-    if "agama_flow" not in [
+    # ensure agama_flow removed from authorizationRequestCustomAllowedParameters
+    if "agama_flow" in [
         p["paramName"] for p in conf["authorizationRequestCustomAllowedParameters"]
     ]:
-        conf["authorizationRequestCustomAllowedParameters"].append({
-            "paramName": "agama_flow", "returnInResponse": False,
-        })
+        conf["authorizationRequestCustomAllowedParameters"] = list(
+            itertools.takewhile(lambda p: p["paramName"] != "agama_flow", conf["authorizationRequestCustomAllowedParameters"])
+        )
         should_update = True
 
-    # avoid setting agama configuration root dir based on java system variable
-    if "rootDir" not in conf["agamaConfiguration"]:
-        conf["agamaConfiguration"]["rootDir"] = "/opt/jans/jetty/jans-auth/agama"
+    # add missing agama-level keys
+    for new_key, value in [
+        # avoid setting agama configuration root dir based on java system variable
+        ("rootDir", "/opt/jans/jetty/jans-auth/agama"),
+        # add serializers
+        ("serializeRules", {
+            "JAVA": ["java", "sun", "com.sun", "jdk"],
+            "KRYO": [],
+        }),
+    ]:
+        if new_key not in conf["agamaConfiguration"]:
+            conf["agamaConfiguration"][new_key] = value
+            should_update = True
+
+    # lockMessageConfig attribute rename
+    for new_attr, old_attr, default_val in [
+        ("enableTokenMessages", "enableIdTokenMessages", False),
+        ("tokenMessagesChannel", "idTokenMessagesChannel", "jans_token"),
+    ]:
+        if new_attr not in conf["lockMessageConfig"]:
+            conf["lockMessageConfig"][new_attr] = default_val
+            conf["lockMessageConfig"].pop(old_attr, None)
+            should_update = True
+
+    # dynamicGrantTypeDefault changed to grantTypesSupportedByDynamicRegistration
+    if "grantTypesSupportedByDynamicRegistration" not in conf:
+        conf["grantTypesSupportedByDynamicRegistration"] = conf.pop("dynamicGrantTypeDefault", [])
         should_update = True
 
-    # add authorizationChallengeEndpoint if missing
-    if "authorizationChallengeEndpoint" not in conf:
-        conf["authorizationChallengeEndpoint"] = f"https://{hostname}/jans-auth/restv1/authorization_challenge"
-        should_update = True
+    for grant_type in [
+        "authorization_code",
+        "implicit",
+        "client_credentials",
+        "refresh_token",
+        "urn:ietf:params:oauth:grant-type:uma-ticket",
+        "urn:ietf:params:oauth:grant-type:device_code",
+        "urn:ietf:params:oauth:grant-type:token-exchange",
+        "password",
+    ]:
+        if grant_type not in conf["grantTypesSupportedByDynamicRegistration"]:
+            conf["grantTypesSupportedByDynamicRegistration"].append(grant_type)
+            should_update = True
+
+    # featureflags
+    for flag in [
+        "health_check",
+        "userinfo",
+        "clientinfo",
+        "id_generation",
+        "registration",
+        "introspection",
+        "revoke_token",
+        "revoke_session",
+        "active_session",
+        "end_session",
+        "status_session",
+        "jans_configuration",
+        "ciba",
+        "device_authz",
+        "metric",
+        "stat",
+        "par",
+        "ssa",
+        "global_token_revocation",
+        "status_list",
+    ]:
+        if flag not in conf["featureFlags"]:
+            conf["featureFlags"].append(flag)
+            should_update = True
+
+    # remove tx_token
+    for attr in ["grantTypesSupported", "grantTypesSupportedByDynamicRegistration"]:
+        if "tx_token" in conf[attr]:
+            conf[attr].remove("tx_token")
+            should_update = True
 
     # return the conf and flag to determine whether it needs update or not
     return conf, should_update

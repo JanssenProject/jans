@@ -66,15 +66,9 @@ class ScimEventHandler(ScimType):
 
     def postSearchGroups(self, results, configurationAttributes):
         return True
-        
-    def allowResourceOperation(self, context, entity, configurationAttributes):
-        return True 
-    
-    def allowSearchOperation(self, context, configurationAttributes):
-        return ""
-    
-    def rejectedResourceOperationResponse(self, context, entity, configurationAttributes):
-        return None       
-    
-    def rejectedSearchOperationResponse(self, context, configurationAttributes):
+
+    def manageResourceOperation(self, context, entity, payload, configurationAttributes): 
+        return None
+
+    def manageSearchOperation(self, context, searchRequest, configurationAttributes):
         return None

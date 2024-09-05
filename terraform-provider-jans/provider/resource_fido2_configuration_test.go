@@ -21,10 +21,10 @@ func TestResourceFido2Config_Mapping(t *testing.T) {
 		Issuer:                      "https://moabu-21f13b7c-9069-ad58-5685-852e6d236020.gluu.info",
 		BaseEndpoint:                "https://moabu-21f13b7c-9069-ad58-5685-852e6d236020.gluu.info/jans-fido2/restv1",
 		CleanServiceInterval:        60,
-		CleanServiceBatchChunkSize:  10000,
+		CleanServiceBatchChunkSize:  100,
 		UseLocalCache:               true,
 		DisableJdkLogger:            true,
-		LoggingLevel:                "INFO",
+		LoggingLevel:                "",
 		LoggingLayout:               "text",
 		ExternalLoggerConfiguration: "",
 		MetricReporterEnabled:       true,
@@ -62,8 +62,8 @@ func TestResourceFido2Config_Mapping(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if len(patches) != 22 {
-		t.Errorf("Got %d patches, expected 22", len(patches))
+	if len(patches) != 21 {
+		t.Errorf("Got %d patches, expected 21", len(patches))
 	}
 
 	if err := fromSchemaResource(data, &newCfg); err != nil {
@@ -112,11 +112,11 @@ func testAccResourceCheckFido2ConfigurationImport(states []*terraform.InstanceSt
 
 		found = true
 
-		if err := checkAttribute(is, "clean_service_batch_chunk_size", "10000"); err != nil {
+		if err := checkAttribute(is, "clean_service_batch_chunk_size", "100"); err != nil {
 			return err
 		}
 
-		if err := checkAttribute(is, "logging_level", "INFO"); err != nil {
+		if err := checkAttribute(is, "logging_level", ""); err != nil {
 			return err
 		}
 

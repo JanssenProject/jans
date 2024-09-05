@@ -27,6 +27,7 @@ import io.jans.orm.operation.PersistenceOperationService;
 import io.jans.orm.search.filter.Filter;
 import io.jans.orm.util.ArrayHelper;
 import io.jans.orm.util.StringHelper;
+import io.jans.service.EncryptionService;
 import io.jans.service.ObjectSerializationService;
 import io.jans.service.SchemaService;
 import io.jans.util.OxConstants;

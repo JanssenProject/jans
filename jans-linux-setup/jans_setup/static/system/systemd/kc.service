@@ -5,7 +5,11 @@ After=%(order_saml_service)s
 [Service]
 Type=simple
 Environment="JAVA_HOME=%(jre_home)s"
-ExecStart=%(idp_config_data_dir)s/bin/kc.sh start-dev --http-port %(idp_config_http_port)s --log="console,file" --log-file="%(idp_config_data_dir)s/logs/keycloak.log" -Dlog.base="%(idp_config_data_dir)s/logs/%(service_name)s.log" -Djans.config.prop.path="%(idp_config_providers_dir)s"
+Environment="KEYCLOAK_ADMIN=admin"
+Environment="KEYCLOAK_ADMIN_PASSWORD=admin"
+Environment="JAVA_OPTS_APPEND=-Djans.base=%(jansBaseFolder)s"
+ExecStart=%(idp_config_data_dir)s/bin/kc.sh start-dev
+
 User=jetty
 Group=jetty
 

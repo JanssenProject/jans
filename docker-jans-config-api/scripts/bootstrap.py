@@ -10,27 +10,33 @@ from uuid import uuid4
 from ldif import LDIFWriter
 
 from jans.pycloudlib import get_manager
-from jans.pycloudlib.persistence import render_couchbase_properties
-from jans.pycloudlib.persistence import render_base_properties
-from jans.pycloudlib.persistence import render_hybrid_properties
-from jans.pycloudlib.persistence import render_ldap_properties
-from jans.pycloudlib.persistence import render_salt
-from jans.pycloudlib.persistence import sync_couchbase_truststore
-from jans.pycloudlib.persistence import sync_ldap_truststore
-from jans.pycloudlib.persistence import render_sql_properties
-from jans.pycloudlib.persistence import render_spanner_properties
+from jans.pycloudlib import wait_for_persistence
 from jans.pycloudlib.persistence.couchbase import CouchbaseClient
 from jans.pycloudlib.persistence.couchbase import id_from_dn
+from jans.pycloudlib.persistence.couchbase import render_couchbase_properties
+from jans.pycloudlib.persistence.couchbase import sync_couchbase_cert
+from jans.pycloudlib.persistence.couchbase import sync_couchbase_password
+from jans.pycloudlib.persistence.couchbase import sync_couchbase_truststore
+from jans.pycloudlib.persistence.hybrid import render_hybrid_properties
 from jans.pycloudlib.persistence.ldap import LdapClient
+from jans.pycloudlib.persistence.ldap import render_ldap_properties
+from jans.pycloudlib.persistence.ldap import sync_ldap_password
+from jans.pycloudlib.persistence.ldap import sync_ldap_truststore
+from jans.pycloudlib.persistence.spanner import render_spanner_properties
 from jans.pycloudlib.persistence.spanner import SpannerClient
-from jans.pycloudlib.persistence.sql import SqlClient
 from jans.pycloudlib.persistence.sql import doc_id_from_dn
+from jans.pycloudlib.persistence.sql import SqlClient
+from jans.pycloudlib.persistence.sql import render_sql_properties
+from jans.pycloudlib.persistence.sql import sync_sql_password
 from jans.pycloudlib.persistence.utils import PersistenceMapper
+from jans.pycloudlib.persistence.utils import render_base_properties
+from jans.pycloudlib.persistence.utils import render_salt
 from jans.pycloudlib.utils import cert_to_truststore
 from jans.pycloudlib.utils import generate_base64_contents
 from jans.pycloudlib.utils import get_random_chars
 from jans.pycloudlib.utils import encode_text
 from jans.pycloudlib.utils import as_boolean
+from jans.pycloudlib.utils import get_server_certificate
 
 from settings import LOGGING_CONFIG
 from plugins import AdminUiPlugin
@@ -38,7 +44,7 @@ from plugins import discover_plugins
 from utils import get_config_api_scope_mapping
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("config-api")
+logger = logging.getLogger("jans-config-api")
 
 
 def main():
@@ -62,20 +68,26 @@ def main():
             "/app/templates/jans-ldap.properties",
             "/etc/jans/conf/jans-ldap.properties",
         )
-        sync_ldap_truststore(manager)
+
+        if as_boolean(os.environ.get("CN_LDAP_USE_SSL", "true")):
+            sync_ldap_truststore(manager)
+        sync_ldap_password(manager)
 
     if "couchbase" in persistence_groups:
+        sync_couchbase_password(manager)
         render_couchbase_properties(
             manager,
             "/app/templates/jans-couchbase.properties",
             "/etc/jans/conf/jans-couchbase.properties",
         )
-        # need to resolve whether we're using default or user-defined couchbase cert
-        sync_couchbase_truststore(manager)
+
+        if as_boolean(os.environ.get("CN_COUCHBASE_TRUSTSTORE_ENABLE", "true")):
+            sync_couchbase_cert(manager)
+            sync_couchbase_truststore(manager)
 
     if "sql" in persistence_groups:
+        sync_sql_password(manager)
         db_dialect = os.environ.get("CN_SQL_DB_DIALECT", "mysql")
-
         render_sql_properties(
             manager,
             f"/app/templates/jans-{db_dialect}.properties",
@@ -89,12 +101,15 @@ def main():
             "/etc/jans/conf/jans-spanner.properties",
         )
 
-    if not all([
-        os.path.isfile("/etc/certs/web_https.crt"),
-        os.path.isfile("/etc/certs/web_https.key"),
-    ]):
-        manager.secret.to_file("ssl_cert", "/etc/certs/web_https.crt")
-        manager.secret.to_file("ssl_key", "/etc/certs/web_https.key")
+    wait_for_persistence(manager)
+
+    if not os.path.isfile("/etc/certs/web_https.crt"):
+        if as_boolean(os.environ.get("CN_SSL_CERT_FROM_SECRETS", "true")):
+            manager.secret.to_file("ssl_cert", "/etc/certs/web_https.crt")
+        else:
+            hostname = manager.config.get("hostname")
+            logger.info(f"Pulling SSL certificate from {hostname}")
+            get_server_certificate(hostname, 443, "/etc/certs/web_https.crt")
 
     cert_to_truststore(
         "web_https",
@@ -361,9 +376,11 @@ class PersistenceSetup:
         hostname = self.manager.config.get("hostname")
         approved_issuer = [hostname]
 
-        token_server_hostname = os.environ.get("CN_TOKEN_SERVER_BASE_HOSTNAME")
-        if token_server_hostname and token_server_hostname not in approved_issuer:
-            approved_issuer.append(token_server_hostname)
+        if token_server_url := os.environ.get("CN_TOKEN_SERVER_BASE_URL"):
+            token_server_hostname = urlparse(token_server_url).hostname
+
+            if token_server_hostname and token_server_hostname not in approved_issuer:
+                approved_issuer.append(token_server_hostname)
 
         ctx = {
             "hostname": hostname,
@@ -425,7 +442,6 @@ class PersistenceSetup:
         scope_mapping = get_config_api_scope_mapping()
         for inum, meta in scope_mapping.items():
             attrs = {
-                "creatorAttrs": [json.dumps({})],
                 "description": [f"Config API {meta['level']} {meta['name']}"],
                 "displayName": [f"Config API {meta['name']}"],
                 "inum": [inum],

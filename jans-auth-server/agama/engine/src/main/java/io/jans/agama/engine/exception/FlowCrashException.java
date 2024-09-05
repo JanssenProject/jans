@@ -1,7 +1,7 @@
 package io.jans.agama.engine.exception;
 
 public class FlowCrashException extends Exception {
-    
+
     public FlowCrashException(String message) {
         super(message);
     }

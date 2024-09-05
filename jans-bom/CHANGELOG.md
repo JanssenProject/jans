@@ -1,5 +1,28 @@
 # Changelog
 
+## [1.0.21](https://github.com/JanssenProject/jans/compare/jans-bom-v1.0.20...jans-bom-v1.0.21) (2023-12-14)
+
+
+### Features
+
+* add message configuration api to config-api [#6982](https://github.com/JanssenProject/jans/issues/6982) ([#6983](https://github.com/JanssenProject/jans/issues/6983)) ([945ba76](https://github.com/JanssenProject/jans/commit/945ba767da90d2c6c376b5b6cca6313c0851bbca))
+* **agama:** use a mixed strategy for serialization ([#6883](https://github.com/JanssenProject/jans/issues/6883)) ([00aee0c](https://github.com/JanssenProject/jans/commit/00aee0c26565e8b0b574370610a75139c2155568))
+
+
+### Bug Fixes
+
+* **jans-auth-server:** common-text upgrade 1.11.0 leads to class initialization problems [#6826](https://github.com/JanssenProject/jans/issues/6826) ([#6827](https://github.com/JanssenProject/jans/issues/6827)) ([f752fc3](https://github.com/JanssenProject/jans/commit/f752fc3380be6cf0712f8b78bd90085599addc24))
+* **jans-bom:** resteasy 6.2.x required weld upgrade thus reverting resteasy back to 6.0.3.Final [#6787](https://github.com/JanssenProject/jans/issues/6787) ([#6789](https://github.com/JanssenProject/jans/issues/6789)) ([4fe4806](https://github.com/JanssenProject/jans/commit/4fe4806832c8406b386990088806426f30c726e2))
+* **jans-core:** fixing jans-core compilation dependencies upgrade [#6783](https://github.com/JanssenProject/jans/issues/6783) ([#6785](https://github.com/JanssenProject/jans/issues/6785)) ([7a0a1da](https://github.com/JanssenProject/jans/commit/7a0a1da38ad08a81594ff1ec1f30636c2e31ef38))
+* prepare for 1.0.21 release ([#7008](https://github.com/JanssenProject/jans/issues/7008)) ([2132de6](https://github.com/JanssenProject/jans/commit/2132de6683f67bf22d5a863b149770d657073a83))
+
+## [1.0.20](https://github.com/JanssenProject/jans/compare/jans-bom-v1.0.19...jans-bom-v1.0.20) (2023-11-08)
+
+
+### Bug Fixes
+
+* prepare for 1.0.20 release ([c6e806e](https://github.com/JanssenProject/jans/commit/c6e806eb31fed998d52cbef7a7d94c231d913102))
+
 ## [1.0.19](https://github.com/JanssenProject/jans/compare/jans-bom-v1.0.18...jans-bom-v1.0.19) (2023-10-11)
 
 

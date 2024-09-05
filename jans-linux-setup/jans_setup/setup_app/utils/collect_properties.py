@@ -38,14 +38,13 @@ class CollectProperties(SetupUtils, BaseInstaller):
 
         jans_prop = base.read_properties_file(Config.jans_properties_fn)
         Config.persistence_type = jans_prop['persistence.type']
-        oxauth_ConfigurationEntryDN = jans_prop['jansAuth_ConfigurationEntryDN']
+        jans_auth_ConfigurationEntryDN = jans_prop['jansAuth_ConfigurationEntryDN']
         jans_ConfigurationDN = 'ou=configuration,o=jans'
 
         if Config.persistence_type in ('couchbase', 'sql', 'spanner'):
-            ptype = 'rdbm' if Config.persistence_type in ('sql', 'spanner') else 'couchbase'
-            Config.mapping_locations = { group: ptype for group in Config.couchbaseBucketDict }
             default_storage = Config.persistence_type
-
+        elif Config.persistence_type == 'ldap':
+            default_storage = Config.persistence_type
 
         if not Config.persistence_type in ('ldap', 'sql', 'spanner') and os.path.exists(Config.jansCouchebaseProperties):
             jans_cb_prop = base.read_properties_file(Config.jansCouchebaseProperties)
@@ -101,20 +100,11 @@ class CollectProperties(SetupUtils, BaseInstaller):
                 Config.google_application_credentials = jans_spanner_prop['auth.credentials-file']
                 Config.templateRenderingDict['spanner_creds'] = 'auth.credentials-file={}'.format(Config.google_application_credentials)
 
-
-        if Config.persistence_type in ['hybrid']:
-             jans_hybrid_properties = base.read_properties_file(jans_hybrid_properties_fn)
-             Config.mapping_locations = {'default': jans_hybrid_properties['storage.default']}
-             storages = [ storage.strip() for storage in jans_hybrid_properties['storages'].split(',') ]
-
-             for ml, m in (('user', 'people'), ('cache', 'cache'), ('site', 'link'), ('token', 'tokens')):
-                 for storage in storages:
-                     if m in jans_hybrid_properties.get('storage.{}.mapping'.format(storage),[]):
-                         Config.mapping_locations[ml] = storage
-
         if not Config.get('couchbase_bucket_prefix'):
             Config.couchbase_bucket_prefix = 'jans'
 
+
+        Config.set_mapping_locations()
 
         # It is time to bind database
         dbUtils.bind()
@@ -123,19 +113,6 @@ class CollectProperties(SetupUtils, BaseInstaller):
             dbUtils.rdm_automapper()
 
         result = dbUtils.search('ou=clients,o=jans', search_filter='(&(inum=1701.*)(objectClass=jansClnt))', search_scope=ldap3.SUBTREE)
-
-        if result:
-            Config.jans_radius_client_id = result['inum']
-            Config.jans_ro_encoded_pw = result['jansClntSecret']
-            Config.jans_ro_pw = self.unobscure(Config.jans_ro_encoded_pw)
-    
-            result = dbUtils.search('inum=5866-4202,ou=scripts,o=jans', search_scope=ldap3.BASE)
-            if result:
-                Config.enableRadiusScripts = result['jansEnabled']
-
-            result = dbUtils.search('ou=clients,o=jans', search_filter='(&(inum=1402.*)(objectClass=jansClnt))', search_scope=ldap3.SUBTREE)
-            if result:
-                Config.oxtrust_requesting_party_client_id = result['inum']
 
         oxConfiguration = dbUtils.search(jans_ConfigurationDN, search_filter='(objectClass=jansAppConf)', search_scope=ldap3.BASE)
         if 'jansIpAddress' in oxConfiguration:
@@ -150,7 +127,7 @@ class CollectProperties(SetupUtils, BaseInstaller):
 
         # Other clients
         client_var_id_list = [
-                    ('oxauth_client_id', '1001.'),
+                    ('jans_auth_client_id', '1001.'),
                     ('jca_client_id', '1800.', {'pw': 'jca_client_pw', 'encoded':'jca_client_encoded_pw'}),
                     ('jca_test_client_id', '1802.', {'pw': 'jca_test_client_pw', 'encoded':'jca_test_client_encoded_pw'}),
                     ('scim_client_id', '1201.', {'pw': 'scim_client_pw', 'encoded':'scim_client_encoded_pw'}),
@@ -161,31 +138,31 @@ class CollectProperties(SetupUtils, BaseInstaller):
         self.check_clients(client_var_id_list, create=False)
 
         result = dbUtils.search(
-                        search_base='inum={},ou=clients,o=jans'.format(Config.get('oxauth_client_id', '-1')),
+                        search_base='inum={},ou=clients,o=jans'.format(Config.get('jans_auth_client_id', '-1')),
                         search_filter='(objectClass=jansClnt)',
                         search_scope=ldap3.BASE,
                         )
         if result and result.get('jansClntSecret'):
-            Config.oxauthClient_encoded_pw = result['jansClntSecret']
-            Config.oxauthClient_pw = self.unobscure(Config.oxauthClient_encoded_pw)
+            Config.jans_auth_client_encoded_pw = result['jansClntSecret']
+            Config.jans_auth_client_pw = self.unobscure(Config.jans_auth_client_encoded_pw)
 
-        dn_oxauth, oxAuthConfDynamic = dbUtils.get_oxAuthConfDynamic()
+        dn_jans_auth, jans_auth_conf_dynamic = dbUtils.get_jans_auth_conf_dynamic()
 
-        o_issuer = urlparse(oxAuthConfDynamic['issuer'])
+        o_issuer = urlparse(jans_auth_conf_dynamic['issuer'])
         Config.hostname = str(o_issuer.netloc)
 
-        Config.oxauth_openidScopeBackwardCompatibility =  oxAuthConfDynamic.get('openidScopeBackwardCompatibility', False)
+        Config.jans_auth_openidScopeBackwardCompatibility =  jans_auth_conf_dynamic.get('openidScopeBackwardCompatibility', False)
 
-        if 'pairwiseCalculationSalt' in oxAuthConfDynamic:
-            Config.pairwiseCalculationSalt =  oxAuthConfDynamic['pairwiseCalculationSalt']
-        if 'legacyIdTokenClaims' in oxAuthConfDynamic:
-            Config.oxauth_legacyIdTokenClaims = oxAuthConfDynamic['legacyIdTokenClaims']
-        if 'pairwiseCalculationKey' in oxAuthConfDynamic:
-            Config.pairwiseCalculationKey = oxAuthConfDynamic['pairwiseCalculationKey']
-        if 'keyStoreFile' in oxAuthConfDynamic:
-            Config.oxauth_openid_jks_fn = oxAuthConfDynamic['keyStoreFile']
-        if 'keyStoreSecret' in oxAuthConfDynamic:
-            Config.oxauth_openid_jks_pass = oxAuthConfDynamic['keyStoreSecret']
+        if 'pairwiseCalculationSalt' in jans_auth_conf_dynamic:
+            Config.pairwiseCalculationSalt =  jans_auth_conf_dynamic['pairwiseCalculationSalt']
+        if 'legacyIdTokenClaims' in jans_auth_conf_dynamic:
+            Config.jans_auth_legacyIdTokenClaims = jans_auth_conf_dynamic['legacyIdTokenClaims']
+        if 'pairwiseCalculationKey' in jans_auth_conf_dynamic:
+            Config.pairwiseCalculationKey = jans_auth_conf_dynamic['pairwiseCalculationKey']
+        if 'keyStoreFile' in jans_auth_conf_dynamic:
+            Config.jans_auth_openid_jks_fn = jans_auth_conf_dynamic['keyStoreFile']
+        if 'keyStoreSecret' in jans_auth_conf_dynamic:
+            Config.jans_auth_openid_jks_pass = jans_auth_conf_dynamic['keyStoreSecret']
 
         httpd_crt_fn = '/etc/certs/httpd.crt'
         crt_fn = httpd_crt_fn if os.path.exists(httpd_crt_fn) else '/etc/certs/ob/server.crt'
@@ -213,7 +190,7 @@ class CollectProperties(SetupUtils, BaseInstaller):
 
         default_dir = '/etc/default'
         usedRatio = 0.001
-        oxauth_max_heap_mem = 0
+        jans_auth_max_heap_mem = 0
 
         jetty_services = JettyInstaller.jetty_app_configuration
 
@@ -224,11 +201,11 @@ class CollectProperties(SetupUtils, BaseInstaller):
                 if service == 'jans-auth':
                     service_prop = base.read_properties_file(service_default_fn)
                     m = re.search('-Xmx(\d*)m', service_prop['JAVA_OPTIONS'])
-                    oxauth_max_heap_mem = int(m.groups()[0])
+                    jans_auth_max_heap_mem = int(m.groups()[0])
 
-        if oxauth_max_heap_mem:
+        if jans_auth_max_heap_mem:
             ratioMultiplier = 1.0 + (1.0 - usedRatio)/usedRatio
-            applicationMemory = oxauth_max_heap_mem / jetty_services['jans-auth']['memory']['jvm_heap_ration']
+            applicationMemory = jans_auth_max_heap_mem / jetty_services['jans-auth']['memory']['jvm_heap_ration']
             allowedRatio = jetty_services['jans-auth']['memory']['ratio'] * ratioMultiplier
             application_max_ram = int(round(applicationMemory / allowedRatio))
 
@@ -239,12 +216,35 @@ class CollectProperties(SetupUtils, BaseInstaller):
             Config.ip = self.detect_ip()
 
         Config.install_scim_server = os.path.exists(os.path.join(Config.jetty_base, 'jans-scim/start.d'))
-        Config.installFido2 = os.path.exists(os.path.join(Config.jetty_base, 'jans-fido2/start.d'))
-        Config.installEleven = os.path.exists(os.path.join(Config.jetty_base, 'jans-eleven/start.d'))
+        Config.install_fido2 = os.path.exists(os.path.join(Config.jetty_base, 'jans-fido2/start.d'))
         Config.install_config_api = os.path.exists(os.path.join(Config.jansOptFolder, 'jans-config-api'))
         Config.install_jans_link = os.path.exists(os.path.join(Config.jansOptFolder, 'jans-link'))
         Config.install_casa = os.path.exists(os.path.join(Config.jetty_base, 'casa/start.d'))
         Config.install_jans_keycloak_link = os.path.exists(os.path.join(Config.jetty_base, 'jans-keycloak-link/start.d'))
+
+        # jans-idp config
+        jans_idp_config_result = dbUtils.dn_exists("ou=jans-idp,ou=configuration,o=jans")
+        if jans_idp_config_result:
+            jans_idp_config = json.loads(jans_idp_config_result.get('jansConfDyn', '{}'))
+            for config_var, json_prop in (
+                    ('jans_idp_enabled', 'enabled'),
+                    ('jans_idp_realm', 'realm'),
+                    ('jans_idp_client_id', 'clientId'),
+                    ('jans_idp_client_secret', 'clientSecret'),
+                    ('jans_idp_grant_type', 'grantType'),
+                    ('jans_idp_user_name', 'username'),
+                    ('jans_idp_user_password', 'password'),
+                    ('jans_idp_idp_root_dir', 'idpRootDir'),
+                    ('jans_idp_idp_metadata_root_dir', 'idpMetadataRootDir'),
+                    ('jans_idp_idp_metadata_temp_dir', 'idpMetadataTempDir'),
+                    ('jans_idp_idp_metadata_file', 'idpMetadataFile'),
+                    ('jans_idp_sp_metadata_root_dir', 'spMetadataRootDir'),
+                    ('jans_idp_sp_metadata_temp_dir', 'spMetadataTempDir'),
+                    ('jans_idp_ignore_validation', 'ignoreValidation')
+                    ):
+                if json_prop in jans_idp_config:
+                    setattr(Config, config_var, jans_idp_config[json_prop])
+
 
     def save(self):
         if os.path.exists(Config.setup_properties_fn):

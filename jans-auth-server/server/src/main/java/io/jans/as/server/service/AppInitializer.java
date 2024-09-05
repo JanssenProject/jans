@@ -6,35 +6,24 @@
 
 package io.jans.as.server.service;
 
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
-
-import org.jboss.weld.util.reflection.ParameterizedTypeImpl;
-import org.slf4j.Logger;
-
 import com.google.common.collect.Lists;
-
 import io.jans.as.common.service.common.ApplicationFactory;
-import io.jans.as.common.service.common.EncryptionService;
 import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.persistence.model.configuration.GluuConfiguration;
-import io.jans.as.persistence.model.configuration.IDPAuthConf;
 import io.jans.as.server.model.auth.AuthenticationMode;
 import io.jans.as.server.model.config.ConfigurationFactory;
 import io.jans.as.server.service.cdi.event.AuthConfigurationEvent;
 import io.jans.as.server.service.cdi.event.ReloadAuthScript;
 import io.jans.as.server.service.ciba.CibaRequestsProcessorJob;
+import io.jans.as.server.service.cluster.ClusterNodeManager;
 import io.jans.as.server.service.expiration.ExpirationNotificatorTimer;
 import io.jans.as.server.service.external.ExternalAuthenticationService;
 import io.jans.as.server.service.logger.LoggerService;
 import io.jans.as.server.service.stat.StatService;
 import io.jans.as.server.service.stat.StatTimer;
 import io.jans.as.server.service.status.ldap.LdapStatusTimer;
+import io.jans.config.GluuConfiguration;
+import io.jans.config.IDPAuthConf;
 import io.jans.exception.ConfigurationException;
 import io.jans.model.AuthenticationScriptUsageType;
 import io.jans.model.SimpleProperty;
@@ -47,6 +36,8 @@ import io.jans.orm.exception.BasePersistenceException;
 import io.jans.orm.ldap.impl.LdapEntryManagerFactory;
 import io.jans.orm.model.PersistenceConfiguration;
 import io.jans.orm.util.properties.FileConfiguration;
+import io.jans.service.ApplicationConfigurationFactory;
+import io.jans.service.EncryptionService;
 import io.jans.service.PythonService;
 import io.jans.service.cdi.async.Asynchronous;
 import io.jans.service.cdi.event.ApplicationInitialized;
@@ -55,7 +46,9 @@ import io.jans.service.cdi.event.LdapConfigurationReload;
 import io.jans.service.cdi.event.Scheduled;
 import io.jans.service.cdi.util.CdiUtil;
 import io.jans.service.custom.lib.CustomLibrariesLoader;
+import io.jans.service.custom.script.CustomScriptActivator;
 import io.jans.service.custom.script.CustomScriptManager;
+import io.jans.service.document.store.manager.DocumentStoreManager;
 import io.jans.service.external.ExternalPersistenceExtensionService;
 import io.jans.service.metric.inject.ReportMetric;
 import io.jans.service.timer.QuartzSchedulerManager;
@@ -78,6 +71,17 @@ import jakarta.enterprise.inject.spi.BeanManager;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.servlet.ServletContext;
+import org.jboss.weld.util.reflection.ParameterizedTypeImpl;
+import org.slf4j.Logger;
+
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Properties;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Javier Rojas Blum
@@ -90,6 +94,8 @@ import jakarta.servlet.ServletContext;
 public class AppInitializer {
 
     private final static int DEFAULT_INTERVAL = 30; // 30 seconds
+
+    private final static String DOCUMENT_STORE_MANAGER_JANS_AUTH_TYPE = "jans-auth"; // Module name
 
     @Inject
     private Logger log;
@@ -127,6 +133,9 @@ public class AppInitializer {
     private ApplicationFactory applicationFactory;
 
     @Inject
+    private Instance<ApplicationConfigurationFactory> applicationConfigurationFactory;
+
+    @Inject
     private Instance<AuthenticationMode> authenticationModeInstance;
 
     @Inject
@@ -134,12 +143,18 @@ public class AppInitializer {
 
     @Inject
     private PythonService pythonService;
+    
+    @Inject
+    private ClusterNodeManager clusterManager;
 
     @Inject
     private MetricService metricService;
 
     @Inject
     private CustomScriptManager customScriptManager;
+
+    @Inject
+    private Instance<CustomScriptActivator> customScriptActivatorInstance;
 
     @Inject
     private ExternalPersistenceExtensionService externalPersistenceExtensionService;
@@ -149,6 +164,9 @@ public class AppInitializer {
 
     @Inject
     private CleanerTimer cleanerTimer;
+
+    @Inject
+    private ClientLastUpdateAtTimer clientLastUpdateAtTimer;
 
     @Inject
     private KeyGeneratorTimer keyGeneratorTimer;
@@ -183,6 +201,9 @@ public class AppInitializer {
     @Inject
     private StatService statService;
 
+    @Inject
+    private DocumentStoreManager documentStoreManager;
+
     private AtomicBoolean isActive;
     private long lastFinishedTime;
     private AuthenticationMode authenticationMode;
@@ -201,7 +222,13 @@ public class AppInitializer {
     public void applicationInitialized(@Observes @Initialized(ApplicationScoped.class) Object init) {
         log.debug("Initializing application services");
 
+        // Load main app configuration first
         configurationFactory.create();
+
+		// Initialize plugins configurations
+		for (ApplicationConfigurationFactory configurationFactory : applicationConfigurationFactory) {
+			configurationFactory.create();
+		}
 
         PersistenceEntryManager localPersistenceEntryManager = persistenceEntryManagerInstance.get();
         log.trace("Attempting to use {}: {}", ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME, localPersistenceEntryManager.getOperationService());
@@ -222,6 +249,9 @@ public class AppInitializer {
         supportedCustomScriptTypes.remove(CustomScriptType.IDP);
         supportedCustomScriptTypes.remove(CustomScriptType.CONFIG_API);
         supportedCustomScriptTypes.remove(CustomScriptType.FIDO2_EXTENSION);
+        supportedCustomScriptTypes.remove(CustomScriptType.LOCK_EXTENSION);
+        
+        addPluginSupportedScripts(supportedCustomScriptTypes);
 
         statService.init();
 
@@ -229,15 +259,18 @@ public class AppInitializer {
         initSchedulerService();
 
         // Schedule timer tasks
+        clusterManager.initTimer();
         metricService.initTimer();
         configurationFactory.initTimer();
         loggerService.initTimer(true);
         ldapStatusTimer.initTimer();
         cleanerTimer.initTimer();
+        clientLastUpdateAtTimer.initTimer();
         customScriptManager.initTimer(supportedCustomScriptTypes);
         keyGeneratorTimer.initTimer();
         statTimer.initTimer();
         expirationNotificatorTimer.initTimer();
+        documentStoreManager.initTimer(Arrays.asList(DOCUMENT_STORE_MANAGER_JANS_AUTH_TYPE));
         initTimer();
         initCibaRequestsProcessor();
 
@@ -250,7 +283,16 @@ public class AppInitializer {
 
     }
 
-    protected void initSchedulerService() {
+    private void addPluginSupportedScripts(List<CustomScriptType> supportedCustomScriptTypes) {
+    	for (CustomScriptActivator customScriptActivator : customScriptActivatorInstance) {
+    		List<CustomScriptType> additionalActiveCustomScripts = customScriptActivator.getActiveCustomScripts();
+
+    		log.info("Addting plugin custom scripts: {}", additionalActiveCustomScripts);
+    		supportedCustomScriptTypes.addAll(additionalActiveCustomScripts);
+    	}
+	}
+
+	protected void initSchedulerService() {
         quartzSchedulerManager.start();
 
         String disableScheduler = System.getProperties().getProperty("gluu.disable.scheduler");
@@ -327,7 +369,7 @@ public class AppInitializer {
      * Utility method which can be used in custom scripts
      */
     public PersistenceEntryManager createPersistenceAuthEntryManager(GluuLdapConfiguration persistenceAuthConfig) {
-        PersistenceEntryManagerFactory persistenceEntryManagerFactory = applicationFactory.getPersistenceEntryManagerFactory();
+        PersistenceEntryManagerFactory persistenceEntryManagerFactory = applicationFactory.getPersistenceEntryManagerFactory(LdapEntryManagerFactory.class);
         Properties persistenceConnectionProperties = prepareAuthConnectionProperties(persistenceAuthConfig, persistenceEntryManagerFactory.getPersistenceType());
 
         PersistenceEntryManager persistenceAuthEntryManager =
@@ -479,8 +521,12 @@ public class AppInitializer {
         }
     }
 
-    private void closePersistenceEntryManagers(List<PersistenceEntryManager> oldPersistenceEntryManagers) {
-        // Close existing connections
+    public void closePersistenceEntryManagers(List<PersistenceEntryManager> oldPersistenceEntryManagers) {
+    	if (oldPersistenceEntryManagers == null ) {
+    		return;
+    	}
+
+    	// Close existing connections
         for (PersistenceEntryManager oldPersistenceEntryManager : oldPersistenceEntryManagers) {
             log.debug("Attempting to destroy {}: {}", ApplicationFactory.PERSISTENCE_AUTH_ENTRY_MANAGER_NAME,
                     oldPersistenceEntryManager);
@@ -543,7 +589,16 @@ public class AppInitializer {
         String prefix = persistenceType + "#";
         FileConfiguration configuration = configurationFactory.getPersistenceConfiguration().getConfiguration();
 
-        Properties properties = (Properties) configuration.getProperties().clone();
+        Properties properties = new Properties();
+        
+        // Get properties related to persistent type
+        for (Entry<Object, Object> propItem : configuration.getProperties().entrySet()) {
+        	String key = (String) propItem.getKey();
+        	if (key.startsWith(persistenceType)) {
+        		properties.put(key, propItem.getValue());
+        	}
+        }
+
         if (persistenceAuthConfig != null) {
             properties.setProperty(prefix + "servers", buildServersString(persistenceAuthConfig.getServers()));
 
@@ -681,7 +736,7 @@ public class AppInitializer {
 
     public void destroy(@Observes @BeforeDestroyed(ApplicationScoped.class) ServletContext init) {
         log.info("Stopping services and closing DB connections at server shutdown...");
-        log.debug("Checking who intiated destory", new Throwable());
+        log.debug("Checking who intiated destroy", new Throwable());
 
         metricService.close();
 

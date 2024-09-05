@@ -10,14 +10,15 @@ on:
       - '!update-pycloud-in-**'
     paths:
       - 'jans-link/**'
-      - 'keycloak-integration/**'
+      - 'jans-keycloak-integration/**'
+      - 'jans-keycloak-link/**'
       - 'jans-auth-server/**'
+      - 'jans-lock/**'
       - 'jans-orm/**'
       - 'jans-config-api/**'
       - 'jans-scim/**'
       - 'jans-core/**'
       - 'jans-fido2/**'
-      - 'jans-eleven/**'
       - 'agama/**'
       - 'jans-linux-setup/**'
       - 'jans-cli-tui/**'
@@ -36,14 +37,15 @@ on:
       - synchronize
     paths:
       - 'jans-link/**'
-      - 'keycloak-integration/**'
+      - 'jans-keycloak-integration/**'
+      - 'jans-keycloak-link/**'
       - 'jans-auth-server/**'
+      - 'jans-lock/**'
       - 'jans-orm/**'
       - 'jans-config-api/**'
       - 'jans-scim/**'
       - 'jans-core/**'
       - 'jans-fido2/**'
-      - 'jans-eleven/**'
       - 'agama/**'
       - 'jans-linux-setup/**'
       - 'jans-cli-tui/**'
@@ -61,18 +63,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        module: [keycloak-integration, jans-auth-server, agama, jans-config-api, jans-core, jans-linux-setup, jans-cli-tui, jans-fido2, jans-orm, jans-scim, jans-eleven, jans-pycloudlib, jans-link, jans-casa]
+        module: [jans-keycloak-link, jans-keycloak-integration, jans-auth-server, agama, jans-config-api, jans-core, jans-linux-setup, jans-cli-tui, jans-fido2, jans-orm, jans-scim, jans-pycloudlib, jans-link, jans-casa, jans-lock]
     env:
       JVM_PROJECTS: |
-        keycloak-integration
+        jans-keycloak-integration
+        jans-keycloak-link
         jans-link
         jans-auth-server
+        jans-lock
         jans-orm
         jans-config-api
         jans-scim
         jans-core
         jans-fido2
-        jans-eleven
         jans-casa
         agama
       NON_JVM_PROJECTS: |
@@ -81,8 +84,13 @@ jobs:
         jans-pycloudlib
 
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
+        with:
+          egress-policy: audit
+
       - name: check out code
-        uses: actions/checkout@v3
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of sonarqube analysis
 
@@ -118,18 +126,18 @@ jobs:
           echo event before: ${{ github.event.before }}
           echo GH sha: $GITHUB_SHA
 
-      - name: Set up JDK 11
+      - name: Set up JDK 17
         # JanssenProject/jans-cli-tui is too similar to JanssenProject/jans-client-api as the contains function is returning it belonging to the JVM_PROJECT
         if: contains(env.CHANGED_DIR, matrix.module) && contains(env.JVM_PROJECTS, matrix.module) && matrix.module != 'jans-cli-tui'
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@387ac29b308b003ca37ba93a6cab5eb57c8f5f93 # v4.0.0
         with:
-          java-version: '11'
+          java-version: '17'
           distribution: 'adopt'
           
       - name: Cache SonarCloud packages for JVM based project
         # JanssenProject/jans-cli-tui is too similar to JanssenProject/jans-client-api as the contains function is returning it belonging to the JVM_PROJECT
         if: contains(env.CHANGED_DIR, matrix.module) && contains(env.JVM_PROJECTS, matrix.module) && matrix.module != 'jans-cli-tui'
-        uses: actions/cache@v3
+        uses: actions/cache@13aacd865c20de90d75de3b17ebe84f7a17d57d2 # v4.0.0
         with:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
@@ -146,9 +154,9 @@ jobs:
           case ${{ matrix.module }} in
             "jans-auth-server")
                     ;&
+            "jans-lock")
+                    ;&          
             "jans-scim")
-                    ;&
-            "jans-eleven")
                     ;&
             "jans-config-api")
                   echo "Run Sonar analysis without test execution"
@@ -170,7 +178,7 @@ jobs:
 
       - name: SonarCloud Scan for non-JVM project
         if: contains(env.CHANGED_DIR, matrix.module) && contains(env.NON_JVM_PROJECTS, matrix.module)
-        uses: SonarSource/sonarcloud-github-action@master
+        uses: SonarSource/sonarcloud-github-action@49e6cd3b187936a73b8280d59ffd9da69df63ec9 # master
         with:
           args: >
             -Dsonar.organization=${{ env.REPO_ORG }}

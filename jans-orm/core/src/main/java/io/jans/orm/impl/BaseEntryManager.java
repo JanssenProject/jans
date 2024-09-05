@@ -6,9 +6,48 @@
 
 package io.jans.orm.impl;
 
+import static io.jans.orm.model.base.LocalizedString.EMPTY_LANG_TAG;
+import static io.jans.orm.model.base.LocalizedString.LOCALIZED;
+
+import java.io.Serializable;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.apache.commons.codec.binary.Base64;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import io.jans.orm.PersistenceEntryManager;
-import io.jans.orm.annotation.*;
+import io.jans.orm.annotation.AttributeEnum;
+import io.jans.orm.annotation.AttributeName;
+import io.jans.orm.annotation.AttributesList;
+import io.jans.orm.annotation.CustomObjectClass;
+import io.jans.orm.annotation.DN;
+import io.jans.orm.annotation.DataEntry;
+import io.jans.orm.annotation.Expiration;
+import io.jans.orm.annotation.JsonObject;
+import io.jans.orm.annotation.LanguageTag;
+import io.jans.orm.annotation.ObjectClass;
+import io.jans.orm.annotation.SchemaEntry;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.exception.InvalidArgumentException;
 import io.jans.orm.exception.MappingException;
@@ -28,19 +67,6 @@ import io.jans.orm.search.filter.Filter;
 import io.jans.orm.search.filter.FilterProcessor;
 import io.jans.orm.util.ArrayHelper;
 import io.jans.orm.util.StringHelper;
-import org.apache.commons.codec.binary.Base64;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.io.Serializable;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
-
-import static io.jans.orm.model.base.LocalizedString.*;
 
 /**
  * Abstract Entry Manager
@@ -60,6 +86,9 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 	private static final Class<?>[] LDAP_EXPIRATION_PROPERTY_ANNOTATION = { Expiration.class };
 
 	public static final String OBJECT_CLASS = "objectClass";
+	public static final String USER_PASSWORD = "userPassword";
+	private static final String MASKED = "*masked*";
+
 	public static final String[] EMPTY_STRING_ARRAY = new String[0];
 
 	private static final Class<?>[] GROUP_BY_ALLOWED_DATA_TYPES = { String.class, Date.class, Integer.class,
@@ -110,7 +139,9 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 		String[] objectClasses = getObjectClasses(entry, entryClass);
 		attributes.add(new AttributeData(OBJECT_CLASS, objectClasses, true));
 
-		LOG.debug(String.format("LDAP attributes for persist: %s", attributes));
+		if (LOG.isDebugEnabled()) {
+			LOG.debug(String.format("LDAP attributes for persist: %s", maskSensetiveData(attributes)));
+		}
 
 		persist(dnValue.toString(), objectClasses, attributes, expirationValue);
 	}
@@ -1251,6 +1282,8 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 					"Invalid list of sortBy properties " + Arrays.toString(sortByProperties));
 		}
 
+		List<PropertyAnnotation> propertiesAnnotations = getEntryPropertyAnnotations(entryClass);
+
 		// Get getters for all properties
 		Getter[][] propertyGetters = new Getter[sortByProperties.length][];
 		for (int i = 0; i < sortByProperties.length; i++) {
@@ -1261,7 +1294,8 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 				if (j > 0) {
 					currentEntryClass = propertyGetters[i][j - 1].getReturnType();
 				}
-				propertyGetters[i][j] = getGetter(currentEntryClass, tmpProperties[j]);
+				String beanProperty = resolveBeanPropertyByAttribute(propertiesAnnotations, tmpProperties[j]);
+				propertyGetters[i][j] = getGetter(currentEntryClass, beanProperty);
 			}
 
 			if (propertyGetters[i][tmpProperties.length - 1] == null) {
@@ -1442,24 +1476,14 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 			return null;
 		}
 
-		Object[] attributeValues = getAttributeValues(propertyName, jsonObject, propertyValue, multiValued);
+		AttributeData attributeData = getAttributeValues(propertyName, ldapAttributeName, jsonObject, propertyValue, multiValued);
 
-		if (LOG.isDebugEnabled()) {
-			LOG.debug(String.format("Property: %s, LdapProperty: %s, PropertyValue: %s", propertyName,
-					ldapAttributeName, Arrays.toString(attributeValues)));
-		}
-
-		if (attributeValues.length == 0) {
-			attributeValues = new String[] {};
-		} else if ((attributeValues.length == 1) && (attributeValues[0] == null)) {
-			return null;
-		}
-
-		return new AttributeData(ldapAttributeName, attributeValues, multiValued);
+		return attributeData;
 	}
 
-	private Object[] getAttributeValues(String propertyName, boolean jsonObject, Object propertyValue, boolean multiValued) {
+	private AttributeData getAttributeValues(String propertyName, String ldapAttributeName, boolean jsonObject, Object propertyValue, boolean multiValued) {
 		Object[] attributeValues = new Object[1];
+		boolean jsonValue = false;
 
 		boolean nativeType = getNativeAttributeValue(propertyValue, attributeValues, multiValued);
 		if (nativeType) {
@@ -1492,13 +1516,32 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 				}
 			}
 		} else if (jsonObject) {
+			jsonValue = true;
 			attributeValues[0] = convertValueToJson(propertyValue);
 		} else {
 			throw new MappingException("Entry property '" + propertyName
 					+ "' should has getter with String, String[], Boolean, Integer, Long, Date, List<String>, AttributeEnum or AttributeEnum[]"
 					+ " return type or has annotation JsonObject");
 		}
-		return attributeValues;
+
+		if (LOG.isDebugEnabled()) {
+			String values;
+			if (StringHelper.equalsIgnoreCase(USER_PASSWORD, propertyName)) {
+				values = MASKED;
+			} else {
+				values = Arrays.toString(attributeValues);
+			}
+			LOG.debug(String.format("Property: %s, LdapProperty: %s, PropertyValue: %s", propertyName,
+					ldapAttributeName, values));
+		}
+
+		if (attributeValues.length == 0) {
+			attributeValues = new String[] {};
+		} else if ((attributeValues.length == 1) && (attributeValues[0] == null)) {
+			return null;
+		}
+		
+		return new AttributeData(ldapAttributeName, attributeValues, multiValued, jsonValue);
 	}
 
 	/*
@@ -1516,6 +1559,8 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 			resultValue[0] = propertyValue;
 		} else if (propertyValue instanceof Long) {
 			resultValue[0] = propertyValue;
+		} else if (hasMapSupport() && propertyValue instanceof Map<?, ?>) {
+			resultValue[0] = propertyValue;
 		} else if (propertyValue instanceof Date) {
 			if (multiValued) {
 				resultValue[0] = getNativeDateMultiAttributeValue((Date) propertyValue);
@@ -1527,6 +1572,10 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 		}
 
 		return true;
+	}
+
+	protected boolean hasMapSupport() {
+		return false;
 	}
 
 	protected abstract Object getNativeDateAttributeValue(Date dateValue);
@@ -1989,9 +2038,9 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 			Object jsonValue = JSON_OBJECT_MAPPER.readValue(String.valueOf(propertyValue), parameterType);
 			return jsonValue;
 		} catch (Exception ex) {
-			LOG.error("Failed to convert json value '{}' to object `{}`", propertyValue, parameterType, ex);
-			throw new MappingException(String.format("Failed to convert json value '%s' to object of type %s",
-					propertyValue, parameterType));
+			final String msg = String.format("Failed to convert json value '%s' to object of type %s", propertyValue, parameterType);
+			LOG.error(msg, ex);
+			throw new MappingException(msg, ex);
 		}
 	}
 
@@ -2162,6 +2211,28 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 		} else {
 			return sb.toString().toLowerCase();
 		}
+	}
+	
+	protected String resolveBeanPropertyByAttribute(List<PropertyAnnotation> propertiesAnnotations, String attributeName) {
+		for (PropertyAnnotation propertiesAnnotation : propertiesAnnotations) {
+			String propertyName = propertiesAnnotation.getPropertyName();
+			Annotation ldapAttribute;
+
+			ldapAttribute = ReflectHelper.getAnnotationByType(propertiesAnnotation.getAnnotations(),
+					AttributeName.class);
+			if (ldapAttribute != null) {
+				String ldapAttributeName = ((AttributeName) ldapAttribute).name();
+				if (StringHelper.isEmpty(ldapAttributeName)) {
+					ldapAttributeName = propertyName;
+				}
+				ldapAttributeName = ldapAttributeName.toLowerCase();
+				if (StringHelper.equalsIgnoreCase(attributeName, ldapAttributeName)) {
+					return propertiesAnnotation.getPropertyName();
+				}
+			}
+		}
+
+		return attributeName;
 	}
 
 	private void addPropertyWithValuesToKey(StringBuilder sb, String propertyName, String[] values) {
@@ -2422,4 +2493,29 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 		System.out.println(variableName + ": END");
 	}
 
+	private String maskSensetiveData(List<AttributeData> attributes) {
+		if (attributes == null) {
+			return null;
+		}
+
+		boolean added = false;
+		StringBuilder sb = new StringBuilder("[");
+		for (AttributeData attr : attributes) {
+			if (added) {
+				sb.append(", ");
+			}
+
+			if (StringHelper.equalsIgnoreCase(USER_PASSWORD, attr.getName())) {
+				AttributeData clonedAttr = new AttributeData(
+						attr.getName(), MASKED, attr.getMultiValued(), attr.getJsonValue());
+				sb.append(clonedAttr);
+			} else {
+				sb.append(attr);
+			}
+			added = true;
+		}
+		sb.append(']');
+
+		return sb.toString();
+	}
 }

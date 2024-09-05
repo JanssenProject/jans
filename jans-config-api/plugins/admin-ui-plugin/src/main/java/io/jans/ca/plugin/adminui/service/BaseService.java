@@ -31,18 +31,29 @@ public class BaseService {
     Logger log;
 
     public io.jans.as.client.TokenResponse getToken(TokenRequest tokenRequest, String tokenEndpoint) {
-        return getToken(tokenRequest, tokenEndpoint, null);
+        return getToken(tokenRequest, tokenEndpoint, null, null);
     }
 
+
     /**
-     * > This function takes a token request, a token endpoint, and a user info JWT, and returns a token response
+     * This Java function sends a token request to a specified endpoint and returns the token response if successful.
      *
-     * @param tokenRequest  This is the object that contains the parameters that are sent to the token endpoint.
-     * @param tokenEndpoint The token endpoint of the authorization server.
-     * @param userInfoJwt   This is the JWT that is returned from the userinfo endpoint.
-     * @return A TokenResponse object
+     * @param tokenRequest The `getToken` method you provided is used to exchange authorization code for an access token.
+     * The `TokenRequest` parameter contains information required for this token exchange process, such as code, scope,
+     * grant type, redirect URI, client ID, etc.
+     * @param tokenEndpoint The `tokenEndpoint` parameter in the `getToken` method is the URL where the token request will
+     * be sent to in order to obtain an access token. This URL typically belongs to the authorization server that issues
+     * the access tokens.
+     * @param userInfoJwt The `userInfoJwt` parameter in the `getToken` method is a JSON Web Token (JWT) that contains user
+     * information. This token is typically used to provide information about the authenticated user to the authorization
+     * server when requesting an access token. The user information in the JWT can include details such as the user
+     * @param permissionTags The `permissionTags` parameter in the `getToken` method is a list of strings that represent
+     * permission tags. These permission tags are used to specify the permissions that the client application is
+     * requesting. The method processes these permission tags and includes them in the request body when making a call to
+     * the token endpoint.
+     * @return The method is returning a `io.jans.as.client.TokenResponse` object.
      */
-    public io.jans.as.client.TokenResponse getToken(TokenRequest tokenRequest, String tokenEndpoint, String userInfoJwt) {
+    public io.jans.as.client.TokenResponse getToken(TokenRequest tokenRequest, String tokenEndpoint, String userInfoJwt, List<String> permissionTags) {
 
         try {
             MultivaluedMap<String, String> body = new MultivaluedHashMap<>();
@@ -56,6 +67,10 @@ public class BaseService {
 
             if (!Strings.isNullOrEmpty(userInfoJwt)) {
                 body.putSingle("ujwt", userInfoJwt);
+            }
+
+            if (permissionTags != null && !permissionTags.isEmpty()) {
+                body.put("permission_tag", Collections.singletonList(String.join(" ", permissionTags)));
             }
 
             if (!Strings.isNullOrEmpty(tokenRequest.getCodeVerifier())) {
@@ -181,5 +196,25 @@ public class BaseService {
                 claims.put(key, (jwtClaims.getClaim(key)));
         });
         return claims;
+    }
+
+    public Optional<Map<String, Object>> introspectToken(String accessToken, String introspectionEndpoint) {
+        log.info("Token introspection from auth-server.");
+        Invocation.Builder request = ClientFactory.instance().getClientBuilder(introspectionEndpoint);
+        request.header("Authorization", "Bearer " + accessToken);
+
+        MultivaluedMap<String, String> body = new MultivaluedHashMap<>();
+        body.putSingle("token", accessToken);
+
+        Response response = request.post(Entity.form(body));
+
+        log.info("Introspection response status code: {}", response.getStatus());
+
+        if (response.getStatus() == 200) {
+            Optional<Map<String, Object>> entity = Optional.of(response.readEntity(Map.class));
+            log.info("Introspection response entity: {}", entity.get().toString());
+            return entity;
+        }
+        return Optional.empty();
     }
 }

@@ -1,5 +1,4 @@
 import argparse
-import glob
 import logging.config
 import os
 import pathlib
@@ -8,13 +7,13 @@ import sys
 import zipfile
 from collections import namedtuple
 
-from jans.pycloudlib.persistence import PersistenceMapper
+from jans.pycloudlib.persistence.utils import PersistenceMapper
 from jans.pycloudlib.utils import exec_cmd
 
 from settings import LOGGING_CONFIG
 
 logging.config.dictConfig(LOGGING_CONFIG)
-logger = logging.getLogger("auth")
+logger = logging.getLogger("jans-auth")
 
 
 Library = namedtuple("Library", ["path", "basename", "meta"])
@@ -66,8 +65,7 @@ def get_persistence_common_libs(dirpath):
 
 
 def get_default_custom_libs(app_name):
-    root = f"/opt/jans/jetty/{app_name}"
-    return [jar.replace(root, ".") for jar in glob.iglob(f"{root}/custom/libs/*.jar")]
+    return [f"/opt/jans/jetty/{app_name}/custom/libs/*"]
 
 
 def get_registered_common_libs(app_name, persistence_type):

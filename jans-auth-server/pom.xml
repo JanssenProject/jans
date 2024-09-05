@@ -5,7 +5,7 @@
 	<groupId>io.jans</groupId>
 	<artifactId>jans-auth-server-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>1.0.20-SNAPSHOT</version>
+	<version>1.1.5-SNAPSHOT</version>
 	<name>Jans authentication server parent</name>
     <distributionManagement>
 	  <repository>
@@ -26,12 +26,11 @@
 		<jans.bom.version>${project.version}</jans.bom.version>
 
 		<jans-core.version>${project.version}</jans-core.version>
-		<jans-eleven.version>${project.version}</jans-eleven.version>
 		<jans-notify.version>${project.version}</jans-notify.version>
 		<jans-fido2.version>${project.version}</jans-fido2.version>
 
 		<jakarta.jms.api.version>2.0.3</jakarta.jms.api.version>
-		<activemq.version>5.15.14</activemq.version>
+		<activemq.version>5.15.16</activemq.version>
 
 		<jettison.version>1.5.4</jettison.version>
 
@@ -59,7 +58,7 @@
 		<sonar.organization>janssenproject</sonar.organization>
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 		<weld.version>4.0.3.Final</weld.version>
-		<org.jboss.resteasy.client.microprofile.version>4.7.5.Final</org.jboss.resteasy.client.microprofile.version>
+		<org.jboss.resteasy.client.microprofile.version>4.7.9.Final</org.jboss.resteasy.client.microprofile.version>
         <jboss-jaxrs-api_3.0_spec.version>1.0.1.Final</jboss-jaxrs-api_3.0_spec.version>
     </properties>
 
@@ -192,16 +191,6 @@
 				<version>${project.version}</version>
 			</dependency>
 
-			<dependency>
-				<groupId>io.jans</groupId>
-				<artifactId>jans-eleven-client</artifactId>
-				<version>${jans-eleven.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>io.jans</groupId>
-				<artifactId>jans-eleven-model</artifactId>
-				<version>${jans-eleven.version}</version>
-			</dependency>
 			<dependency>
 				<groupId>io.jans</groupId>
 				<artifactId>jans-notify-client</artifactId>

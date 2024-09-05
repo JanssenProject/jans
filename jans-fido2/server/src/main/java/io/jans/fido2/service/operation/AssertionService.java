@@ -42,6 +42,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -228,6 +229,66 @@ public class AssertionService {
 		return optionsResponseNode;
 	}
 
+	public ObjectNode generateOptions(JsonNode params) {
+        log.debug("Generate assertion options: {}", params);
+
+		// Create result object
+		ObjectNode optionsResponseNode = dataMapperService.createObjectNode();
+
+		// Put userVerification
+		UserVerification userVerification = commonVerifiers.prepareUserVerification(params);
+		optionsResponseNode.put("userVerification", userVerification.name());
+
+		// Generate and put challenge
+		String challenge = challengeGenerator.getAssertionChallenge();
+		optionsResponseNode.put("challenge", challenge);
+		log.debug("Put challenge {}", challenge);
+
+		// Put RP
+		String documentDomain = commonVerifiers.verifyRpDomain(params);
+		log.debug("Put rpId {}", documentDomain);
+		optionsResponseNode.put("rpId", documentDomain);
+
+		// Put timeout
+		int timeout = commonVerifiers.verifyTimeout(params);
+		log.debug("Put timeout {}", timeout);
+		optionsResponseNode.put("timeout", timeout);
+
+		// Copy extensions
+		if (params.hasNonNull("extensions")) {
+			JsonNode extensions = params.get("extensions");
+
+			optionsResponseNode.set("extensions", extensions);
+			log.debug("Put extensions {}", extensions);
+		}
+
+		optionsResponseNode.put("status", "ok");
+
+		Fido2AuthenticationData entity = new Fido2AuthenticationData();
+		entity.setUsername(null);
+		entity.setChallenge(challenge);
+		entity.setDomain(documentDomain);
+		entity.setUserVerificationOption(userVerification);
+		entity.setStatus(Fido2AuthenticationStatus.pending);
+		entity.setApplicationId(documentDomain);
+
+		// Store original request
+		entity.setAssertionRequest(params.toString());
+
+		Fido2AuthenticationEntry authenticationEntity = authenticationPersistenceService.buildFido2AuthenticationEntry(entity, true);
+		if (params.hasNonNull("session_id")) {
+			authenticationEntity.setSessionStateId(params.get("session_id").asText());
+		}
+
+		// Set expiration
+		int unfinishedRequestExpiration = appConfiguration.getFido2Configuration().getUnfinishedRequestExpiration();
+		authenticationEntity.setExpiration(unfinishedRequestExpiration);
+
+		authenticationPersistenceService.save(authenticationEntity);
+
+		return optionsResponseNode;
+	}
+
 	public ObjectNode verify(JsonNode params) {
 		log.debug("authenticateResponse {}", params);
 
@@ -299,6 +360,23 @@ public class AssertionService {
         	authenticationData.setStatus(Fido2AuthenticationStatus.canceled);
         } else {
         	authenticationData.setStatus(Fido2AuthenticationStatus.authenticated);
+
+        	JsonNode responseDeviceData = responseNode.get("deviceData");
+    		if (responseDeviceData != null && responseDeviceData.isTextual()) {
+                try {
+    				Fido2DeviceData deviceData = dataMapperService.readValue(
+    						new String(base64Service.urlDecode(responseDeviceData.asText()), StandardCharsets.UTF_8),
+    						Fido2DeviceData.class);
+    	            
+    	            boolean pushTokenUpdated = !StringHelper.equals(registrationEntry.getDeviceData().getPushToken(), deviceData.getPushToken());
+    	            if (pushTokenUpdated) {
+    	            	prepareForPushTokenChange(registrationEntry);
+    	            }
+                    registrationEntry.setDeviceData(deviceData);
+                } catch (Exception ex) {
+                    throw errorResponseFactory.invalidRequest(String.format("Device data is invalid: %s", responseDeviceData), ex);
+                }
+            }
         }
 
 		// Set expiration
@@ -329,11 +407,34 @@ public class AssertionService {
 
 		finishResponseNode.put("status", "ok");
 		finishResponseNode.put("errorMessage", "");
+		finishResponseNode.put("username", registrationData.getUsername());
 
 		externalFido2InterceptionContext.addToContext(registrationEntry, authenticationEntity);
 		externalFido2InterceptionService.verifyAssertionFinish(finishResponseNode, externalFido2InterceptionContext);
 
 		return finishResponseNode;
+	}
+
+	private void prepareForPushTokenChange(Fido2RegistrationEntry registrationEntry) {
+		Fido2DeviceNotificationConf deviceNotificationConf = registrationEntry.getDeviceNotificationConf();
+		if (deviceNotificationConf == null) {
+			return;
+		}
+
+		String snsEndpointArn = deviceNotificationConf.getSnsEndpointArn();
+		if (StringHelper.isEmpty(snsEndpointArn)) {
+			return;
+		}
+		
+		deviceNotificationConf.setSnsEndpointArn(null);
+		deviceNotificationConf.setSnsEndpointArnRemove(snsEndpointArn);
+		List<String> snsEndpointArnHistory = deviceNotificationConf.getSnsEndpointArnHistory();
+		if (snsEndpointArnHistory == null) {
+			snsEndpointArnHistory = new ArrayList<>();
+			deviceNotificationConf.setSnsEndpointArnHistory(snsEndpointArnHistory);
+		}
+		
+		snsEndpointArnHistory.add(snsEndpointArn);
 	}
 
 	private Pair<ArrayNode, String> prepareAllowedCredentials(String documentDomain, String username, String requestedKeyHandle, boolean superGluu) {

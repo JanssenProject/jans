@@ -12,7 +12,10 @@ from wui_components.jans_nav_bar import JansNavBar
 from wui_components.jans_drop_down import DropDownWidget
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from wui_components.jans_cli_dialog import JansGDialog
-from wui_components.jans_spinner import Spinner
+from wui_components.widget_collections import get_ldap_config_widgets,\
+    get_data_for_ldap_widgets
+
+from utils.utils import common_data
 
 from utils.multi_lang import _
 from utils.utils import DialogUtils
@@ -255,7 +258,7 @@ class Plugin(DialogUtils):
                                         value=self.data.get('loggingLevel', 'INFO'),
                                         select_one_option=False
                                         ),
-                                    jans_help=self.app.get_help_from_schema(self.schema, 'updateMethod'),
+                                    jans_help=self.app.get_help_from_schema(self.schema, 'loggingLevel'),
                                     style=cli_style.edit_text
                                     ),
 
@@ -323,7 +326,7 @@ class Plugin(DialogUtils):
                                 width=D()
                                 )
 
-        self.inum_db_server_container = HSplit(self.get_ldap_config_entries(self.data.get('inumConfig'), widget_style=cli_style.black_bg_widget), width=D())
+        self.inum_db_server_container = HSplit(get_ldap_config_widgets(self.data.get('inumConfig'), widget_style=cli_style.black_bg_widget), width=D())
 
         self.default_inum_db_server_checkbox = self.app.getTitledCheckBox(
                                 title=_("Default Inum Server"), 
@@ -485,82 +488,11 @@ class Plugin(DialogUtils):
                 self.data = response.json()
                 self.update_source_backends_container()
             else:
-                self.app.show_message(_('Error Saving Comfig'), response.text + '\n' + response.reason)
+                self.app.show_message(_('Error Saving Config'), response.text + '\n' + response.reason)
 
         asyncio.ensure_future(coroutine())
 
 
-    def get_ldap_config_entries(self, data, widget_style=cli_style.white_bg_widget):
-
-        ldap_config_entires = [
-
-                self.app.getTitledText(
-                    title=_("Name"),
-                    name='configId',
-                    value=data.get('configId',''),
-                    style=cli_style.edit_text_required,
-                    widget_style=widget_style
-                ),
-
-                self.app.getTitledText(
-                    title=_("Bind DN"),
-                    name='bindDN',
-                    value=data.get('bindDN',''),
-                    style=cli_style.edit_text_required,
-                    widget_style=widget_style
-                ),
-
-                self.app.getTitledText(
-                    title=_("Bind Password"),
-                    name='bindPassword',
-                    value=data.get('bindPassword') or '',
-                    style=cli_style.edit_text_required,
-                    jans_help=_("Bind password for LDAP"),
-                    widget_style=widget_style
-                ),
-
-                self.app.getTitledWidget(
-                    title=_("Max Connections"),
-                    name='maxConnections',
-                    widget=Spinner(value=data.get('maxConnections', 2)),
-                    style=cli_style.edit_text_required,
-                ),
-
-                self.app.getTitledText(
-                    title=_("Server:Port"),
-                    name='servers',
-                    value=' '.join(data.get('servers',[])),
-                    style=cli_style.edit_text_required,
-                    jans_help=_("Space seperated server:port"),
-                    widget_style=widget_style
-                ),
-
-                self.app.getTitledText(
-                    title=_("Base DNs"),
-                    name='baseDNs',
-                    value=' '.join(data.get('baseDNs',[])),
-                    style=cli_style.edit_text_required,
-                    jans_help=_("Space seperated base dns"),
-                    widget_style=widget_style
-                ),
-
-                self.app.getTitledCheckBox(
-                    title=_("Use SSL"), 
-                    name='useSSL', 
-                    checked=data.get('useSSL', False),
-                    style=cli_style.check_box,
-                    widget_style=widget_style
-                ),
-                self.app.getTitledCheckBox(
-                    title=_("Enable"), 
-                    name='enabled', 
-                    checked=data.get('enabled', False),
-                    style=cli_style.check_box,
-                    widget_style=widget_style
-                ),
-            ]
-
-        return ldap_config_entires
 
     def edit_source_config_dialog(self, data=None, selected=None):
         if data:
@@ -569,17 +501,10 @@ class Plugin(DialogUtils):
             data = {}
             title = _("Add new Source LDAP Config")
 
-        body = HSplit(self.get_ldap_config_entries(data), width=D())
+        body = HSplit(get_ldap_config_widgets(data), width=D())
 
         def save_source_config(dialog):
-            sc_data = self.make_data_from_dialog(tabs={'sc': dialog.body})
-            sc_data['primaryKey'] = None
-            sc_data['localPrimaryKey'] = None
-            sc_data['useAnonymousBind'] = False
-            sc_data['version'] = data['version']+1 if 'version' in data else 0
-            sc_data['level'] = 0
-            sc_data['servers'] = sc_data['servers'].split()
-            sc_data['baseDNs'] = sc_data['baseDNs'].split()
+            sc_data = get_data_for_ldap_widgets(dialog.body)
 
             if 'sourceConfigs' not in self.data:
                 self.data['sourceConfigs'] = []

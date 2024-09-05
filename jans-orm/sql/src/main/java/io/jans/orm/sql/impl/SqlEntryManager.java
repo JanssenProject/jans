@@ -47,6 +47,7 @@ import io.jans.orm.model.SearchScope;
 import io.jans.orm.model.SortOrder;
 import io.jans.orm.model.base.LocalizedString;
 import io.jans.orm.reflect.property.PropertyAnnotation;
+import io.jans.orm.reflect.util.ReflectHelper;
 import io.jans.orm.search.filter.Filter;
 import io.jans.orm.search.filter.FilterProcessor;
 import io.jans.orm.sql.model.ConvertedExpression;
@@ -168,6 +169,8 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
 
     @Override
     protected void persist(String dn, String[] objectClasses, List<AttributeData> attributes, Integer expiration) {
+    	String baseObjectClass = getBaseObjectClassForDataOperation(objectClasses);
+
     	ArrayList<AttributeData> resultAttributes = new ArrayList<>(attributes.size() + 1);
         for (AttributeData attribute : attributes) {
             String attributeName = attribute.getName();
@@ -194,9 +197,10 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
 
                 AttributeData resultAttributeData;
                 if (Boolean.TRUE.equals(multiValued)) {
-                	resultAttributeData = new AttributeData(toInternalAttribute(attributeName), realValues, multiValued);
+                	resultAttributeData = new AttributeData(toInternalAttribute(baseObjectClass, attributeName), realValues, multiValued, attribute.getJsonValue());
                 } else {
-                	resultAttributeData = new AttributeData(toInternalAttribute(attributeName), realValues[0]);
+                	resultAttributeData = new AttributeData(toInternalAttribute(baseObjectClass, attributeName), realValues[0]);
+                	resultAttributeData.setJsonValue(attribute.getJsonValue());
                 }
 
                 resultAttributes.add(resultAttributeData);
@@ -209,7 +213,7 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
             resultAttributes.add(new AttributeData(SqlOperationService.DN, dn));
             resultAttributes.add(new AttributeData(SqlOperationService.DOC_ID, parsedKey.getKey()));
 
-            boolean result = getOperationService().addEntry(parsedKey.getKey(), getBaseObjectClassForDataOperation(objectClasses), resultAttributes);
+            boolean result = getOperationService().addEntry(parsedKey.getKey(), baseObjectClass, resultAttributes);
             if (!result) {
                 throw new EntryPersistenceException(String.format("Failed to persist entry: '%s'", dn));
             }
@@ -220,6 +224,8 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
 
     @Override
     public void merge(String dn, String[] objectClasses, List<AttributeDataModification> attributeDataModifications, Integer expirationValue) {
+    	String baseObjectClass = getBaseObjectClassForDataOperation(objectClasses);
+
         // Update entry
         try {
             List<AttributeDataModification> modifications = new ArrayList<AttributeDataModification>(attributeDataModifications.size());
@@ -230,10 +236,12 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
                 String attributeName = null;
                 Object[] attributeValues = null;
                 Boolean multiValued = null;
+                Boolean jsonValue = null;
                 if (attribute != null) {
                     attributeName = attribute.getName();
                     attributeValues = attribute.getValues();
                     multiValued = attribute.getMultiValued();
+                    jsonValue = attribute.getJsonValue();
                 }
 
                 String oldAttributeName = null;
@@ -247,16 +255,16 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
                 AttributeModificationType modificationType = attributeDataModification.getModificationType();
 				if ((AttributeModificationType.ADD == modificationType) ||
                 	(AttributeModificationType.FORCE_UPDATE == modificationType)) {
-                    modification = createModification(modificationType, toInternalAttribute(attributeName), multiValued, attributeValues);
+                    modification = createModification(modificationType, toInternalAttribute(baseObjectClass, attributeName), multiValued, jsonValue, attributeValues);
                 } else {
                     if ((AttributeModificationType.REMOVE == modificationType)) {
                 		if ((attribute == null) && isEmptyAttributeValues(oldAttribute)) {
 							// It's RDBS case. We don't need to set null to already empty table cell
                 			continue;
                 		}
-                        modification = createModification(AttributeModificationType.REMOVE, toInternalAttribute(oldAttributeName), multiValued, oldAttributeValues);
+                        modification = createModification(AttributeModificationType.REMOVE, toInternalAttribute(baseObjectClass, oldAttributeName), multiValued, jsonValue, oldAttributeValues);
                     } else if ((AttributeModificationType.REPLACE == modificationType)) {
-                        modification = createModification(AttributeModificationType.REPLACE, toInternalAttribute(attributeName), multiValued, attributeValues);
+                        modification = createModification(AttributeModificationType.REPLACE, toInternalAttribute(baseObjectClass, attributeName), multiValued, jsonValue, attributeValues);
                     }
                 }
 
@@ -266,7 +274,7 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
             }
 
             if (modifications.size() > 0) {
-                boolean result = getOperationService().updateEntry(toSQLKey(dn).getKey(), getBaseObjectClassForDataOperation(objectClasses), modifications);
+                boolean result = getOperationService().updateEntry(toSQLKey(dn).getKey(), baseObjectClass, modifications);
                 if (!result) {
                     throw new EntryPersistenceException(String.format("Failed to update entry: '%s'", dn));
                 }
@@ -369,10 +377,12 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
 
 	@Override
     protected List<AttributeData> find(String dn, String[] objectClasses, Map<String, PropertyAnnotation> propertiesAnnotationsMap, String... ldapReturnAttributes) {
+    	String baseObjectClass = getBaseObjectClassForDataOperation(objectClasses);
+
         try {
             // Load entry
             ParsedKey keyWithInum = toSQLKey(dn);
-            List<AttributeData> result = getOperationService().lookup(keyWithInum.getKey(), getBaseObjectClass(objectClasses), toInternalAttributes(ldapReturnAttributes));
+            List<AttributeData> result = getOperationService().lookup(keyWithInum.getKey(), baseObjectClass, toInternalAttributes(baseObjectClass, ldapReturnAttributes));
             if (result != null) {
                 return result;
             }
@@ -555,7 +565,7 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
 
 	private <O> PagedResult<EntryData> searchImpl(String key, String objectClass, ConvertedExpression expression, SearchScope scope, String[] attributes, OrderSpecifier<?>[] orderBy,
             SqlBatchOperationWraper<O> batchOperationWraper, SearchReturnDataType returnDataType, int start, int count, int pageSize) throws SearchException {
-		return getOperationService().search(key, objectClass, expression, scope, toInternalAttributes(attributes), orderBy, batchOperationWraper, returnDataType, start, count, pageSize);
+		return getOperationService().search(key, objectClass, expression, scope, toInternalAttributes(objectClass, attributes), orderBy, batchOperationWraper, returnDataType, start, count, pageSize);
 	}
 
     protected <T> List<T> createEntities(String baseDN, Class<T> entryClass, PagedResult<EntryData> searchResult) {
@@ -725,7 +735,7 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
         return searchResult.getTotalEntriesCount();
     }
 
-    private AttributeDataModification createModification(final AttributeModificationType type, final String attributeName, final Boolean multiValued, final Object... attributeValues) {
+    private AttributeDataModification createModification(final AttributeModificationType type, final String attributeName, final Boolean multiValued, final Boolean jsonValue, final Object... attributeValues) {
         String realAttributeName = attributeName;
 
         Object[] realValues = attributeValues;
@@ -736,12 +746,12 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
         escapeValues(realValues);
         
         if (Boolean.TRUE.equals(multiValued)) {
-            return new AttributeDataModification(type, new AttributeData(realAttributeName, realValues, multiValued));
+            return new AttributeDataModification(type, new AttributeData(realAttributeName, realValues, multiValued, jsonValue));
         } else {
         	if ((realValues == null) || (realValues.length == 0)) {
                 return new AttributeDataModification(type, new AttributeData(realAttributeName, null));
         	}
-            return new AttributeDataModification(type, new AttributeData(realAttributeName, realValues[0]));
+            return new AttributeDataModification(type, new AttributeData(realAttributeName, realValues[0], null, jsonValue));
         }
     }
 
@@ -919,7 +929,15 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
 
 	@Override
 	protected Object convertJsonToValue(Class<?> parameterType, Object propertyValue) {
+		if (ReflectHelper.assignableFrom(parameterType, Map.class)  &&  propertyValue instanceof Map<?, ?>) {
+			return propertyValue;
+		}
     	return super.convertJsonToValue(parameterType, propertyValue);
+	}
+
+    @Override
+	protected boolean hasMapSupport() {
+		return true;
 	}
 
     @Override
@@ -954,20 +972,20 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
 		((SqlOperationService) operationService).unescapeValues(realValues);
 	}
 
-	public String toInternalAttribute(String attributeName) {
-		return ((SqlOperationService) operationService).toInternalAttribute(attributeName);
+	public String toInternalAttribute(String objectClass, String attributeName) {
+		return ((SqlOperationService) operationService).toInternalAttribute(objectClass, attributeName);
 	}
 
-	public String[] toInternalAttributes(String[] attributeNames) {
-		return ((SqlOperationService) operationService).toInternalAttributes(attributeNames);
+	public String[] toInternalAttributes(String objectClass, String[] attributeNames) {
+		return ((SqlOperationService) operationService).toInternalAttributes(objectClass, attributeNames);
 	}
 
-	public String fromInternalAttribute(String internalAttributeName) {
-		return ((SqlOperationService) operationService).fromInternalAttribute(internalAttributeName);
+	public String fromInternalAttribute(String objectClass, String internalAttributeName) {
+		return ((SqlOperationService) operationService).fromInternalAttribute(objectClass, internalAttributeName);
 	}
 
-	public String[] fromInternalAttributes(String[] internalAttributeNames) {
-		return ((SqlOperationService) operationService).fromInternalAttributes(internalAttributeNames);
+	public String[] fromInternalAttributes(String objectClass, String[] internalAttributeNames) {
+		return ((SqlOperationService) operationService).fromInternalAttributes(objectClass, internalAttributeNames);
 	}
 
 	@Override
@@ -978,7 +996,12 @@ public class SqlEntryManager extends BaseEntryManager<SqlOperationService> imple
 
         SqlConnectionProvider sqlConnectionProvider = getOperationService().getConnectionProvider();
 		TableMapping tableMapping = sqlConnectionProvider.getTableMappingByKey(primaryKey, getBaseObjectClass(objectClasses));
+
 		Map<String, AttributeType> columTypes = tableMapping.getColumTypes();
+		if (columTypes == null) {
+			return null;
+		}
+
 		AttributeType attributeType = columTypes.get(propertyName.toLowerCase());
 		
 		return attributeType;

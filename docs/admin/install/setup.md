@@ -21,7 +21,7 @@ tags:
    
 1. The installer will detect which operating system, init type, and Apache version are currently on the server.
   
-2. The setup script will bring up a prompt to provide information for certificates as well as the IP Address and the hostname for the Gluu Server. Hit Enter to accept the default values.
+2. The setup script will bring up a prompt to provide information for certificates as well as the IP Address and the hostname for the Janssen Authorization Server. Hit Enter to accept the default values.
   
   ```bash
   Enter IP Address:
@@ -61,7 +61,7 @@ Avoid setup issues by acknowledging the following:
      
    - Use a real hostname--this can always be managed via host file entries if adding a DNS entry is too much work for testing.
      
-   - For clustered deployments, use the hostname of the cluster that will be used by applications connecting to Gluu.
+   - For clustered deployments, use the hostname of the cluster that will be used by applications connecting to Janssen Authorization Server.
   
 !!! Warning    
     Use a FQDN (fully qualified domain name) as hostname and refrain from using 127.0.0.1 as IP address or usage of private IP is not supported and not recommended.
@@ -86,7 +86,7 @@ To check usage of this script run help command
                      [-couchbase-admin-user COUCHBASE_ADMIN_USER] [-couchbase-admin-password COUCHBASE_ADMIN_PASSWORD]
                      [-couchbase-bucket-prefix COUCHBASE_BUCKET_PREFIX] [-couchbase-hostname COUCHBASE_HOSTNAME] [--no-data]
                      [--no-jsauth] [-ldap-admin-password LDAP_ADMIN_PASSWORD] [--no-config-api] [--no-scim] [--no-fido2]
-                     [--install-eleven] [--install-jans-link] [--with-casa] [--load-config-api-test]
+                     [--install-jans-link] [--with-casa] [--load-config-api-test]
                      [-config-patch-creds CONFIG_PATCH_CREDS] [-spanner-project SPANNER_PROJECT] [-spanner-instance SPANNER_INSTANCE]
                      [-spanner-database SPANNER_DATABASE]
                      [-spanner-emulator-host SPANNER_EMULATOR_HOST | -google-application-credentials GOOGLE_APPLICATION_CREDENTIALS]
@@ -94,7 +94,7 @@ To check usage of this script run help command
                      [-test-client-redirect-uri TEST_CLIENT_REDIRECT_URI] [--test-client-trusted]
 ```
 
-Use this script to configure your Jans Server and to add initial data required for oxAuth and oxTrust to start. If setup.properties is found in this folder, these properties will automatically be used instead of the interactive setup.
+Use this script to configure your Jans Server and to add initial data. If setup.properties is found in this folder, these properties will automatically be used instead of the interactive setup.
 
 Below are the optional arguments:
 
@@ -162,7 +162,6 @@ Below are the optional arguments:
 | --no-config-api | Do not install Jans Auth Config Api |
 | --no-scim | Do not install Scim Server |
 | --no-fido2 | Do not install Fido2 Server |
-| --install-eleven | Install Eleven Server |
 | --install-jans-link | Install Link Server |
 | --with-casa | Install Gluu/Flex Casa Server |
 | --load-config-api-test | Load Config Api Test Data |

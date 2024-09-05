@@ -77,6 +77,17 @@
 									</table>
 								</li>
 							</ui:repeat>
+                            <ui:repeat var="_authzDetail" value="#{_authzDetails}">
+                                <li>
+                                    <table>
+                                        <tr>
+                                            <td><span class="user"><i
+                                                    class="fa fa-user-circle"></i></span></td>
+                                            <td><h:outputFormat value="#{_authzDetail.uiRepresentation}"/></td>
+                                        </tr>
+                                    </table>
+                                </li>
+                            </ui:repeat>
 							<ui:fragment rendered="#{_request != null}">
 								<li>
 									<table>

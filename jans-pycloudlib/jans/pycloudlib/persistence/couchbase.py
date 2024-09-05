@@ -26,6 +26,7 @@ from jans.pycloudlib.utils import get_random_chars
 from jans.pycloudlib.utils import cert_to_truststore
 from jans.pycloudlib.utils import as_boolean
 from jans.pycloudlib.utils import safe_render
+from jans.pycloudlib.utils import get_password_from_file
 
 if _t.TYPE_CHECKING:  # pragma: no cover
     # imported objects for function type hint, completion, etc.
@@ -36,88 +37,40 @@ if _t.TYPE_CHECKING:  # pragma: no cover
 logger = logging.getLogger(__name__)
 
 
-def _get_cb_password(manager: Manager, password_file: str, secret_name: str) -> str:
-    """Get Couchbase user's password.
-
-    Priority:
-
-    1. get from password file (for backward-compat)
-    2. get from secrets
-
-    Args:
-        manager: An instance of manager class.
-        password_file: Path to file contains password.
-        secret_name: Name of the secrets to pull/push the password.
-
-    Returns:
-        Plaintext password.
-    """
-    if os.path.isfile(password_file):
-        with open(password_file) as f:
-            password = f.read().strip()
-            manager.secret.set(secret_name, password)
-    else:
-        # get from secrets (if any)
-        password = manager.secret.get(secret_name)
-    return password  # noqa: R504
-
-
-def get_couchbase_user(manager: _t.Union[Manager, None] = None) -> str:
-    """Get Couchbase username from `CN_COUCHBASE_USER` environment variable (default to `admin`).
-
-    Args:
-        manager: A no-op argument, preserved for backward compatibility.
+def get_couchbase_user() -> str:
+    """Get Couchbase username from `CN_COUCHBASE_USER` environment variable (default to `jans`).
 
     Returns:
         Couchbase username.
     """
-    return os.environ.get("CN_COUCHBASE_USER", "admin")
+    return os.environ.get("CN_COUCHBASE_USER", "jans")
 
 
-def get_couchbase_password(manager: Manager) -> str:
+def get_couchbase_password() -> str:
     """Get Couchbase user's password from file.
 
-    Default file is set to `/etc/jans/conf/couchbase_password`.
-    To change the location, simply pass `CN_COUCHBASE_PASSWORD_FILE` environment variable.
-
-    Args:
-        manager: An instance of manager class.
-
     Returns:
         Plaintext password.
     """
-    secret_name = "couchbase_password"  # nosec: B105
-    password_file = os.environ.get("CN_COUCHBASE_PASSWORD_FILE", "/etc/jans/conf/couchbase_password")
-    return _get_cb_password(manager, password_file, secret_name)
+    return get_password_from_file(get_couchbase_password_file())
 
 
-def get_couchbase_superuser(manager: _t.Union[Manager, None] = None) -> str:
+def get_couchbase_superuser() -> str:
     """Get Couchbase username from `CN_COUCHBASE_SUPERUSER` environment variable (default to empty-string).
-
-    Args:
-        manager: A no-op argument, preserved for backward compatibility.
 
     Returns:
         Couchbase username.
     """
-    return os.environ.get("CN_COUCHBASE_SUPERUSER", "")
+    return os.environ.get("CN_COUCHBASE_SUPERUSER", "admin")
 
 
-def get_couchbase_superuser_password(manager: Manager) -> str:
+def get_couchbase_superuser_password() -> str:
     """Get Couchbase superuser's password from file.
-
-    Default file is set to `/etc/jans/conf/couchbase_superuser_password`.
-    To change the location, simply pass `CN_COUCHBASE_SUPERUSER_PASSWORD_FILE` environment variable.
-
-    Args:
-        manager: An instance of manager class.
 
     Returns:
         Plaintext password.
     """
-    secret_name = "couchbase_superuser_password"  # nosec: B105
-    password_file = os.environ.get("CN_COUCHBASE_SUPERUSER_PASSWORD_FILE", "/etc/jans/conf/couchbase_superuser_password")
-    return _get_cb_password(manager, password_file, secret_name)
+    return get_password_from_file(get_couchbase_superuser_password_file())
 
 
 def get_couchbase_conn_timeout() -> int:
@@ -227,9 +180,9 @@ def render_couchbase_properties(manager: Manager, src: str, dest: str) -> None:
     with open(dest, "w") as fw:
         rendered_txt = txt % {
             "hostname": hostname,
-            "couchbase_server_user": get_couchbase_user(manager),
+            "couchbase_server_user": get_couchbase_user(),
             "encoded_couchbase_server_pw": encode_text(
-                get_couchbase_password(manager),
+                get_couchbase_password(),
                 manager.secret.get("encoded_salt"),
             ).decode(),
             "couchbase_buckets": ", ".join(couchbase_buckets),
@@ -251,15 +204,14 @@ def render_couchbase_properties(manager: Manager, src: str, dest: str) -> None:
         fw.write(rendered_txt)
 
 
-# DEPRECATED
-def sync_couchbase_cert(manager: _t.Union[Manager, None] = None) -> str:
-    """Synchronize Couchbase certificate.
+def sync_couchbase_cert(manager: Manager) -> str:
+    """Synchronize Couchbase certificate."""
+    cert_file = get_couchbase_cert_file()
 
-    This function is deprecated and will be removed in future versions.
-    """
-    cert_file = os.environ.get("CN_COUCHBASE_CERT_FILE", "/etc/certs/couchbase.crt")
-    with open(cert_file) as f:
-        return f.read()
+    if os.path.isfile(cert_file):
+        manager.secret.from_file("couchbase_cert", cert_file)
+    else:
+        manager.secret.to_file("couchbase_cert", cert_file)
 
 
 def sync_couchbase_truststore(manager: Manager, dest: str = "/etc/certs/couchbase.pkcs12") -> None:
@@ -269,7 +221,7 @@ def sync_couchbase_truststore(manager: Manager, dest: str = "/etc/certs/couchbas
         manager: An instance of manager class.
         dest: Absolute path where generated file is located.
     """
-    cert_file = os.environ.get("CN_COUCHBASE_CERT_FILE", "/etc/certs/couchbase.crt")
+    cert_file = get_couchbase_cert_file()
     dest = dest or manager.config.get("couchbaseTrustStoreFn")
     cert_to_truststore(
         "couchbase", cert_file, dest, resolve_couchbase_truststore_pw(manager),
@@ -570,12 +522,12 @@ class CouchbaseClient:
         self.manager = manager
 
         self.hosts = kwargs.get("hosts", "") or os.environ.get("CN_COUCHBASE_URL", "localhost")
-        self.user = kwargs.get("user", "") or get_couchbase_superuser(manager) or get_couchbase_user(manager)
+        self.user = kwargs.get("user", "") or get_couchbase_superuser() or get_couchbase_user()
 
         password = kwargs.get("password", "")
         with contextlib.suppress(FileNotFoundError):
-            password = get_couchbase_superuser_password(manager)
-        self.password: str = password or get_couchbase_password(manager)
+            password = get_couchbase_superuser_password()
+        self.password: str = password or get_couchbase_password()
 
         self.attr_processor = AttrProcessor()
 
@@ -685,10 +637,6 @@ class CouchbaseClient:
             name: Attribute name.
             values: Pre-transformed values.
         """
-        def as_dict(val: _t.Any) -> dict[str, _t.Any]:
-            retval: dict[str, _t.Any] = json.loads(val)
-            return retval
-
         def as_bool(val: _t.Any) -> bool:
             return val.lower() in ("true", "yes", "1", "on")
 
@@ -698,6 +646,13 @@ class CouchbaseClient:
                 retval = int(val)
             except (TypeError, ValueError):
                 pass
+            return retval
+
+        def maybe_json(val: _t.Any) -> _t.Any:
+            try:
+                retval = json.loads(val)
+            except json.decoder.JSONDecodeError:
+                retval = val
             return retval
 
         def as_datetime(val: _t.Any) -> str:
@@ -713,7 +668,7 @@ class CouchbaseClient:
             return dt.isoformat()
 
         callbacks = {
-            "json": as_dict,
+            "json": maybe_json,
             "boolean": as_bool,
             "integer": as_int,
             "datetime": as_datetime,
@@ -933,3 +888,42 @@ def resolve_couchbase_truststore_pw(manager: Manager) -> str:
         pw = get_random_chars()
         manager.secret.set("couchbase_truststore_pw", pw)
     return pw
+
+
+def get_couchbase_password_file():
+    return os.environ.get("CN_COUCHBASE_PASSWORD_FILE", "/etc/jans/conf/couchbase_password")
+
+
+def get_couchbase_superuser_password_file():
+    return os.environ.get("CN_COUCHBASE_SUPERUSER_PASSWORD_FILE", "/etc/jans/conf/couchbase_superuser_password")
+
+
+def _sync_cb_password(manager, password_file, secret_name):
+    if os.path.isfile(password_file):
+        manager.secret.set(secret_name, get_password_from_file(password_file))
+
+    # make sure password file always exists
+    if not os.path.isfile(password_file):
+        manager.secret.to_file(secret_name, password_file)
+
+
+def sync_couchbase_password(manager):
+    """Pull secret contains password to access Couchbase server as non-superuser.
+
+    Args:
+        manager: An instance of manager class.
+    """
+    _sync_cb_password(manager, get_couchbase_password_file(), "couchbase_password")
+
+
+def sync_couchbase_superuser_password(manager):
+    """Pull secret contains password to access Couchbase server as superuser.
+
+    Args:
+        manager: An instance of manager class.
+    """
+    _sync_cb_password(manager, get_couchbase_superuser_password_file(), "couchbase_superuser_password")
+
+
+def get_couchbase_cert_file():
+    return os.environ.get("CN_COUCHBASE_CERT_FILE", "/etc/certs/couchbase.crt")

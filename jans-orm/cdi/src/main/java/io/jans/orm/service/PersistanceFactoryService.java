@@ -152,8 +152,14 @@ public class PersistanceFactoryService implements BaseFactoryService {
 			}
 			PropertiesConfiguration propertiesConfiguration = persistenceFileConf.getPropertiesConfiguration();
 
-			// Allow to override value via environment variables
+			// Allow to override values via environment variables
 			replaceWithSystemValues(propertiesConfiguration);
+
+			// Allow to override values via upper cased environment variables
+			replaceWithUpperCasedSystemValues(propertiesConfiguration);
+
+			// Allow to override values via java variables
+			replaceWithJavaVariablesValues(propertiesConfiguration);
 			
 			// Merge all configuration into one with prefix
 			appendPropertiesWithPrefix(mergedPropertiesConfiguration, propertiesConfiguration, prefix);
@@ -173,6 +179,27 @@ public class PersistanceFactoryService implements BaseFactoryService {
             String key = (String) keys.next();
 			if (System.getenv(key) != null) {
 				propertiesConfiguration.setProperty(key, System.getenv(key));
+			}
+        }
+	}
+
+	private void replaceWithUpperCasedSystemValues(PropertiesConfiguration propertiesConfiguration) {
+		Iterator<?> keys = propertiesConfiguration.getKeys();
+        while (keys.hasNext()) {
+            String key = (String) keys.next();
+            String envKey = key.toUpperCase().replaceAll("\\.", "\\_").replaceAll("\\-", "\\_");
+			if (System.getenv(envKey) != null) {
+				propertiesConfiguration.setProperty(key, System.getenv(envKey));
+			}
+        }
+	}
+
+	private void replaceWithJavaVariablesValues(PropertiesConfiguration propertiesConfiguration) {
+		Iterator<?> keys = propertiesConfiguration.getKeys();
+        while (keys.hasNext()) {
+            String key = (String) keys.next();
+			if (System.getProperty(key) != null) {
+				propertiesConfiguration.setProperty(key, System.getProperty(key));
 			}
         }
 	}

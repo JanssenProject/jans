@@ -9,7 +9,7 @@
 	<parent>
 		<groupId>io.jans</groupId>
 		<artifactId>jans-fido2-parent</artifactId>
-		<version>1.0.20-SNAPSHOT</version>
+		<version>1.1.5-SNAPSHOT</version>
 	</parent>
 
 	<build>
@@ -124,6 +124,10 @@
             		<groupId>org.apache.jackrabbit</groupId>
             		<artifactId>jackrabbit-core</artifactId>
             	</exclusion>
+            	<exclusion>
+            		<groupId>org.bouncycastle</groupId>
+            		<artifactId>bcprov-jdk15on</artifactId>
+            	</exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -139,6 +143,10 @@
         <dependency>
             <groupId>org.jboss.resteasy</groupId>
             <artifactId>resteasy-servlet-initializer</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.module</groupId>
+            <artifactId>jackson-module-jaxb-annotations</artifactId>
         </dependency>
 
         <!-- Weld -->

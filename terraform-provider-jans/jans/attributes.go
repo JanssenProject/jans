@@ -39,7 +39,6 @@ type Attribute struct {
 	OxMultiValuedAttribute bool                 `schema:"ox_multi_valued_attribute" json:"oxMultiValuedAttribute,omitempty"`
 	JansHideOnDiscovery    bool                 `schema:"jans_hide_on_discovery" json:"jansHideOnDiscovery,omitempty"`
 	Custom                 bool                 `schema:"custom" json:"custom,omitempty"`
-	Required               bool                 `schema:"required" json:"requred,omitempty"`
 	AttributeValidation    *AttributeValidation `schema:"attribute_validation" json:"attributeValidation,omitempty"`
 	Tooltip                string               `schema:"tooltip" json:"tooltip,omitempty"`
 	AdminCanAccess         bool                 `schema:"admin_can_access" json:"adminCanAccess,omitempty"`
@@ -69,7 +68,9 @@ func (c *Client) GetAttributes(ctx context.Context) ([]Attribute, error) {
 
 	resp := response{}
 
-	if err := c.get(ctx, "/jans-config-api/api/v1/attributes", token, &resp); err != nil {
+	if err := c.get(ctx, "/jans-config-api/api/v1/attributes", token, &resp, map[string]string{
+		"limit": "5",
+	}); err != nil {
 		return nil, fmt.Errorf("get request failed: %w", err)
 	}
 

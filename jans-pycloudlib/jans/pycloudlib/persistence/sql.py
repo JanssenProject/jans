@@ -19,11 +19,13 @@ from sqlalchemy import MetaData
 from sqlalchemy import func
 from sqlalchemy import select
 from sqlalchemy import delete
+from sqlalchemy import event
 from ldif import LDIFParser
 from ldap3.utils import dn as dnutils
 
 from jans.pycloudlib.utils import encode_text
 from jans.pycloudlib.utils import safe_render
+from jans.pycloudlib.utils import get_password_from_file
 
 if _t.TYPE_CHECKING:  # pragma: no cover
     # imported objects for function type hint, completion, etc.
@@ -34,31 +36,6 @@ if _t.TYPE_CHECKING:  # pragma: no cover
 logger = logging.getLogger(__name__)
 
 SERVER_VERSION_RE = re.compile(r"[\d.]+")
-
-
-def get_sql_password(manager: Manager) -> str:
-    """Get password used for SQL database user.
-
-    Priority:
-
-    1. get from password file
-    2. get from secrets
-
-    Returns:
-        Plaintext password.
-    """
-    # ignore bandit rule as secret_name refers to attribute name of secrets
-    secret_name = "sql_password"  # nosec: B105
-    password_file = os.environ.get("CN_SQL_PASSWORD_FILE", "/etc/jans/conf/sql_password")
-
-    if os.path.isfile(password_file):
-        with open(password_file) as f:
-            password = f.read().strip()
-            manager.secret.set(secret_name, password)
-    else:
-        # get from secrets (if any)
-        password = manager.secret.get(secret_name)
-    return password  # noqa: R504
 
 
 class PostgresqlAdapter:
@@ -170,7 +147,7 @@ def doc_id_from_dn(dn: str) -> str:
 
     if doc_id == "jans":
         doc_id = "_"
-    return doc_id
+    return doc_id  # noqa: R504
 
 
 class SqlSchemaMixin:
@@ -179,17 +156,23 @@ class SqlSchemaMixin:
     @property
     def schema_files(self) -> list[str]:
         """Get list of schema files."""
-        files = [
+        return [
             "/app/schema/jans_schema.json",
             "/app/schema/custom_schema.json",
         ]
-        return files
 
     @cached_property
     def sql_data_types(self) -> dict[str, dict[str, _t.Any]]:
         """Get list of data types from pre-defined file."""
+        data_types = {}
         with open("/app/static/rdbm/sql_data_types.json") as f:
-            return json.loads(f.read())  # type: ignore
+            data_types.update(json.loads(f.read()))
+
+        custom_types_fn = os.environ.get("CN_SQL_CUSTOM_TYPES_FILE", "/etc/jans/conf/sql_data_types.custom.json")
+        if os.path.isfile(custom_types_fn):
+            with open(custom_types_fn) as f:
+                data_types.update(json.loads(f.read()))
+        return data_types  # type: ignore
 
     @cached_property
     def sql_data_types_mapping(self) -> dict[str, dict[str, _t.Any]]:
@@ -212,6 +195,20 @@ class SqlSchemaMixin:
         """Get a mapping of OpenDJ attribute types from pre-defined file."""
         with open("/app/static/rdbm/opendj_attributes_syntax.json") as f:
             return json.loads(f.read())  # type: ignore
+
+    @cached_property
+    def sql_json_types(self):
+        json_types = {}
+        for attr_type in self.attr_types:
+            for attr in attr_type["names"]:
+                if not attr_type.get("rdbm_json_column"):
+                    continue
+                json_types[attr] = {
+                    "mysql": {"type": "JSON"},
+                    "pgsql": {"type": "JSONB"},
+                    "spanner": {"type": "ARRAY<STRING(MAX)>"},
+                }
+        return json_types
 
     def get_attr_syntax(self, attr: str) -> str:
         """Get attribute syntax.
@@ -256,11 +253,19 @@ class SqlClient(SqlSchemaMixin):
 
         self.dialect = self.adapter.dialect
         self._metadata: _t.Optional[MetaData] = None
+        self._engine = None
 
-    @cached_property
+    @property
     def engine(self) -> Engine:
         """Lazy init of engine instance object."""
-        return create_engine(self.engine_url, pool_pre_ping=True, hide_parameters=True)
+        if not self._engine:
+            self._engine = create_engine(self.engine_url, pool_pre_ping=True, hide_parameters=True)
+
+            if self.dialect == "mysql":
+                event.listen(self._engine, "first_connect", set_mysql_strict_mode)
+
+        # initialized engine
+        return self._engine
 
     @property
     def engine_url(self) -> str:
@@ -445,6 +450,9 @@ class SqlClient(SqlSchemaMixin):
         type_ = self.sql_data_types.get(key, {})
 
         if not type_:
+            type_ = self.sql_json_types.get(key, {})
+
+        if not type_:
             attr_syntax = self.get_attr_syntax(key)
             type_ = self.sql_data_types_mapping[attr_syntax]
 
@@ -592,3 +600,36 @@ def render_sql_properties(manager: Manager, src: str, dest: str) -> None:
             "server_time_zone": os.environ.get("CN_SQL_DB_TIMEZONE", "UTC"),
         }
         f.write(rendered_txt)
+
+
+def set_mysql_strict_mode(dbapi_connection, connection_record):
+    cursor = dbapi_connection.cursor()
+    cursor.execute("SET SESSION sql_mode = 'TRADITIONAL'")
+    cursor.close()
+
+
+def get_sql_password_file():
+    return os.environ.get("CN_SQL_PASSWORD_FILE", "/etc/jans/conf/sql_password")
+
+
+def sync_sql_password(manager: Manager) -> None:
+    """Pull secret contains password to access RDBM server.
+
+    Args:
+        manager: An instance of manager class.
+    """
+    password_file = get_sql_password_file()
+
+    # previous version may not have sql_password secret hence we're pre-populating
+    # the value from mounted password file (if any)
+    if os.path.isfile(password_file):
+        manager.secret.set("sql_password", get_password_from_file(password_file))
+
+    # make sure password file always exists
+    if not os.path.isfile(password_file):
+        manager.secret.to_file("sql_password", password_file)
+
+
+def get_sql_password(manager: Manager | None = None):
+    password_file = get_sql_password_file()
+    return get_password_from_file(password_file)

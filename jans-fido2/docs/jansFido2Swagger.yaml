@@ -6,13 +6,16 @@ info:
   title: Janssen Fido2
   description: Janssen Fido2 - FIDO 2.0 is an open authentication standard that enables leveraging common devices to authenticate to online services in both mobile and desktop environments.
   contact:
-    email: xx@gluu.org
+    name: Contact
+    url: https://github.com/JanssenProject/jans/discussions
   license:
     name: License
-    url: https://github.com/JanssenProject/jans-fido2/blob/master/LICENSE
-  version: 1.0.11
+    url: https://github.com/JanssenProject/jans/blob/main/LICENSE
+  version: "OAS Version"
+servers:
+  - url: https://jans.local.io
 tags:
-  - name: developers
+  - name: About
     description: Janssen includes a FIDO2 component to implement a two-step, two-factor authentication (2FA) with username / password as the first step, and any FIDO2 device as the second step.
   - name: FIDO2 configuration
   - name: FIDO2 Assertion

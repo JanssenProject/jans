@@ -2,11 +2,11 @@ package io.jans.as.server.service;
 
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
-import io.jans.as.server.model.ldap.TokenEntity;
-import io.jans.as.server.model.ldap.TokenType;
+import io.jans.as.server.service.token.StatusListIndexService;
+import io.jans.model.token.TokenEntity;
+import io.jans.model.token.TokenType;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.service.CacheService;
-import io.jans.service.cache.CacheConfiguration;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -48,7 +48,38 @@ public class GrantServiceTest {
     private AppConfiguration appConfiguration;
 
     @Mock
-    private CacheConfiguration cacheConfiguration;
+    private StatusListIndexService statusListIndexService;
+
+    @Test
+    public void shouldPersist_byDefault_shouldReturnTrue() {
+        assertTrue(grantService.shouldPersist());
+    }
+
+    @Test
+    public void shouldPersist_whenDontPersistConfIsTrue_shouldReturnFalse() {
+        Mockito.doReturn(true).when(appConfiguration).getSaveTokensInCacheAndDontSaveInPersistence();
+
+        assertFalse(grantService.shouldPersist());
+    }
+
+    @Test
+    public void shouldSaveInCache_byDefault_shoultReturnFalse() {
+        assertFalse(grantService.shouldSaveInCache());
+    }
+
+    @Test
+    public void shouldSaveInCache_whenAllowedByConfig_shoultReturnTrue() {
+        Mockito.doReturn(true).when(appConfiguration).getSaveTokensInCacheAndDontSaveInPersistence();
+
+        assertTrue(grantService.shouldSaveInCache());
+    }
+
+    @Test
+    public void shouldSaveInCache_whenAllowedByMainConfig_shoultReturnTrue() {
+        Mockito.doReturn(true).when(appConfiguration).getSaveTokensInCache();
+
+        assertTrue(grantService.shouldSaveInCache());
+    }
 
     @Test
     public void filterOutRefreshTokenFromDeletion_forTokenWithoutOnlineAccess_shouldFilterOut() {

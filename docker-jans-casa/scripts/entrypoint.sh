@@ -41,6 +41,14 @@ get_max_ram_percentage() {
     fi
 }
 
+get_jetty_args() {
+    if [ -n "${CN_CASA_JETTY_ARGS}" ]; then
+        echo " ${CN_CASA_JETTY_ARGS} "
+    else
+        echo " ${CN_JETTY_ARGS} "
+    fi
+}
+
 touch "$CN_CASA_ADMIN_LOCK_FILE"
 get_prometheus_lib
 python3 "$basedir/wait.py"
@@ -64,6 +72,7 @@ exec java \
     -Dpython.home=/opt/jython \
     -Dadmin.lock=${CN_CASA_ADMIN_LOCK_FILE} \
     -Dcom.nimbusds.jose.jwk.source.RemoteJWKSet.defaultHttpSizeLimit=${CN_CASA_JWKS_SIZE_LIMIT} \
+    -Dacr=agama_io.jans.casa.authn.main \
     $(get_max_ram_percentage) \
     $(get_prometheus_opt) \
     $(get_java_options) \
@@ -71,4 +80,5 @@ exec java \
         jetty.http.host="${CN_CASA_JETTY_HOST}" \
         jetty.http.port="${CN_CASA_JETTY_PORT}" \
         jetty.deploy.scanInterval=0 \
-        jetty.httpConfig.sendServerVersion=false
+        jetty.httpConfig.sendServerVersion=false \
+        $(get_jetty_args)

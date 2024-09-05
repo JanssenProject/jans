@@ -31,7 +31,6 @@ description: |-
 						localhost as the hostname. Native Clients must only register redirect_uris using custom URI schemes or URLs using the
 						http scheme with localhost as the hostname.
 - `attributes` (Block List, Max: 1) (see [below for nested schema](#nestedblock--attributes))
-- `authentication_method` (String)
 - `authorized_origins` (List of String) Specifies authorized JavaScript origins.
 - `backchannel_authentication_request_signing_alg` (String) The JWS algorithm alg value that the Client will use for signing authentication request, as described 
 							in Section 7.1.1. of OAuth 2.0 [RFC6749]. When omitted, the Client will not send signed authentication requests.
@@ -39,7 +38,7 @@ description: |-
 							of an end-user by means of out-of-band mechanisms. Upon receipt of the notification, the Client makes a 
 							request to the token endpoint to obtain the tokens.
 - `backchannel_token_delivery_mode` (String) specifies how backchannel token will be delivered.
-- `backchannel_user_code_parameter` (String) Boolean value specifying whether the Client supports the user_code parameter. If omitted, the default value is false.
+- `backchannel_user_code_parameter` (Boolean) Boolean value specifying whether the Client supports the user_code parameter. If omitted, the default value is false.
 - `claim_redirect_uris` (List of String) Array of The Claims Redirect URIs to which the client wishes the authorization server to direct the 
 						requesting party's user agent after completing its interaction.
 - `claims` (List of String) Provide list of claims granted to the client.
@@ -135,6 +134,7 @@ Optional:
 - `additional_token_endpoint_auth_methods` (List of String) List of additional token endpoint authentication methods.
 - `allow_offline_access_without_consent` (Boolean) Specifies whether to allow offline access without consent.
 - `allow_spontaneous_scopes` (Boolean) boolean, whether to allow spontaneous scopes for client.
+- `authorization_details_types` (List of String) List of authorization details types.
 - `backchannel_logout_session_required` (Boolean) Boolean value specifying whether the RP requires that a sid (session ID) Claim be included in 
 									the Logout Token to identify the RP session with the OP when true. Default value is false.
 - `backchannel_logout_uri` (List of String) List of RP URL that will cause the RP to log itself out when sent a Logout Token by the OP.
@@ -142,7 +142,10 @@ Optional:
 - `dpop_bound_access_token` (Boolean) boolean value to indicate if DPoP bound access token is required.
 - `evidence` (String) Specifies the evidence that the client presents to the authorization server.
 - `id_token_lifetime` (Number) Specifies the Client-specific ID Token expiration.
+- `introspection_encrypted_response_alg` (String) JWE alg algorithm (JWA) required for encrypting the introspection response.
+- `introspection_encrypted_response_enc` (String) JWE enc algorithm (JWA) required for encrypting the introspection response.
 - `introspection_scripts` (List of String) List of introspection scripts.
+- `introspection_signed_response_alg` (String) JWS alg algorithm (JWA) required for signing the introspection response.
 - `jans_auth_enc_resp_alg` (String) JWE alg algorithm JWA required for encrypting authorization responses.
 - `jans_auth_enc_resp_enc` (String) JWE enc algorithm JWA required for encrypting auhtorization responses.
 - `jans_auth_signed_resp_alg` (String) JWS alg algorithm JWA required for signing authorization responses.
@@ -167,6 +170,10 @@ Optional:
 - `spontaneous_scopes` (List of String) List of spontaneous scope regular expression.
 - `tls_client_auth_subject_dn` (String) String representation of the expected subject distinguished name of the certificate, which 
 									the OAuth client will use in mutual TLS authentication.
+- `tx_token_encrypted_response_alg` (String) JWE alg algorithm (JWA) required for encrypting the TX Token response.
+- `tx_token_encrypted_response_enc` (String) JWE enc algorithm (JWA) required for encrypting the TX Token response.
+- `tx_token_lifetime` (Number) Specifies the Client-specific TX Token expiration.
+- `tx_token_signed_response_alg` (String) JWS alg algorithm (JWA) required for signing the TX Token response.
 - `update_token_script_dns` (List of String) List of update token scripts.
 
 
@@ -183,5 +190,3 @@ Optional:
 
 - `display_value` (String) Display value for the attribute.
 - `value` (String) Value for the attribute.
-
-

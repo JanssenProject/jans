@@ -20,12 +20,12 @@ import org.slf4j.Logger;
 
 import io.jans.as.model.common.IdType;
 import io.jans.model.JansAttribute;
+import io.jans.model.user.SimpleUser;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.operation.DuplicateEntryException;
 import io.jans.orm.model.AttributeData;
 import io.jans.orm.model.SearchScope;
 import io.jans.orm.model.base.SimpleBranch;
-import io.jans.orm.model.base.SimpleUser;
 import io.jans.orm.search.filter.Filter;
 import io.jans.scim.exception.DuplicateEmailException;
 import io.jans.scim.model.GluuCustomAttribute;

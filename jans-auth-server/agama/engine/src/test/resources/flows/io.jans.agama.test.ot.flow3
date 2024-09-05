@@ -1,0 +1,10 @@
+Flow io.jans.agama.test.ot.flow3
+    Basepath "ot" 
+
+obj = Trigger io.jans.agama.test.ot.flow1
+    Override templates "ot/page.ftl" "cust/cancel.ftlh"
+
+When obj.aborted is true and obj.data.flavor is not null
+    Finish true
+
+Finish false

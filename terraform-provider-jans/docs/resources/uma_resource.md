@@ -55,5 +55,3 @@ resource "jans_uma_resource" "test" {
 
 - `dn` (String)
 - `id` (String) Resource id.
-
-

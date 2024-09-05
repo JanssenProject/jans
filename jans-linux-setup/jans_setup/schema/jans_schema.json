@@ -299,6 +299,28 @@
       "x_origin": "Jans created attribute"
     },
     {
+      "desc": "Type of the entry",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansType"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Entry lock key",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "lockKey"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
       "desc": "exclude login page configuration",
       "equality": "caseIgnoreMatch",
       "names": [
@@ -493,6 +515,7 @@
         "jansClntURILocalized"
       ],
       "multivalued": true,
+      "rdbm_json_column": true,
       "oid": "jansAttr",
       "substr": "caseIgnoreSubstringsMatch",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
@@ -619,6 +642,7 @@
       "names": [
         "jansGrantTyp"
       ],
+      "rdbm_json_column": true,
       "oid": "jansAttr",
       "substr": "caseIgnoreSubstringsMatch",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
@@ -731,6 +755,7 @@
         "jansLogoURILocalized"
       ],
       "multivalued": true,
+      "rdbm_json_column": true,
       "oid": "jansAttr",
       "substr": "caseIgnoreSubstringsMatch",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
@@ -800,6 +825,7 @@
         "jansPolicyURILocalized"
       ],
       "multivalued": true,
+      "rdbm_json_column": true,
       "oid": "jansAttr",
       "substr": "caseIgnoreSubstringsMatch",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
@@ -924,6 +950,7 @@
       "names": [
         "jansRespTyp"
       ],
+      "rdbm_json_column": true,
       "oid": "jansAttr",
       "substr": "caseIgnoreSubstringsMatch",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
@@ -992,6 +1019,8 @@
       "names": [
         "creatorAttrs"
       ],
+      "json": true,
+      "rdbm_json_column": true,
       "oid": "jansAttr",
       "substr": "caseIgnoreSubstringsMatch",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
@@ -1103,6 +1132,7 @@
         "jansTosURILocalized"
       ],
       "multivalued": true,
+      "rdbm_json_column": true,
       "oid": "jansAttr",
       "substr": "caseIgnoreSubstringsMatch",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
@@ -1300,6 +1330,7 @@
         "jansDbAuth"
       ],
       "json": true,
+      "rdbm_json_column": true,
       "oid": "jansAttr",
       "substr": "caseIgnoreSubstringsMatch",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
@@ -1325,6 +1356,26 @@
       "oid": "jansAttr",
       "substr": "caseIgnoreSubstringsMatch",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Numeric identifier",
+      "equality": "integerMatch",
+      "names": [
+        "jansNum"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Numeric node identifier",
+      "equality": "integerMatch",
+      "names": [
+        "jansNodeId"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
       "x_origin": "Jans created attribute"
     },
     {
@@ -2300,6 +2351,19 @@
       "x_origin": "Jans created attribute"
     },
     {
+      "desc": "Jans Service property",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansService"
+      ],
+      "json": true,
+      "multivalued": true,
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
       "desc": "Conf property",
       "equality": "caseIgnoreMatch",
       "names": [
@@ -2318,6 +2382,8 @@
       "names": [
         "jansSessAttr"
       ],
+      "json": true,
+      "rdbm_json_column": true,
       "oid": "jansAttr",
       "substr": "caseIgnoreSubstringsMatch",
       "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
@@ -2538,6 +2604,18 @@
       "equality": "caseIgnoreMatch",
       "names": [
         "jansCacheConf"
+      ],
+      "json": true,
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Message configuration",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansMessageConf"
       ],
       "json": true,
       "oid": "jansAttr",
@@ -3237,6 +3315,7 @@
       "names": [
         "displayNameLocalized"
       ],
+      "rdbm_json_column": true,
       "multivalued": true,
       "oid": "jansAttr",
       "substr": "caseIgnoreSubstringsMatch",
@@ -3471,16 +3550,568 @@
       "x_origin": "Jans created attribute"
     },
     {
-		"desc": "SAML Trust Relationship file location of metadata",
-		"equality": "caseIgnoreMatch",
-		"names": [
-			"jansSAMLspMetaDataFN"
-		],
-		"oid": "jansAttr",
-		"substr": "caseIgnoreSubstringsMatch",
-		"syntax": "1.3.6.1.4.1.1466.115.121.1.15",
-		"x_origin": "Jans created attribute"
-	}
+      "desc": "SAML Trust Relationship file location of metadata",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansSAMLspMetaDataFN"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Provider Id",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "providerId"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Realm Name",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "realm"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "If enabled, email provided by this provider is not verified even if verification is enabled for the realm.",
+      "equality": "booleanMatch",
+      "names": [
+        "trustEmail"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Enable or disable if tokens must be stored after authenticating users.",
+      "equality": "booleanMatch",
+      "names": [
+        "storeToken"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Enable and disable if new users can read any stored tokens.",
+      "equality": "booleanMatch",
+      "names": [
+        "addReadTokenRoleOnCreate"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Authenticate enabled",
+      "equality": "booleanMatch",
+      "names": [
+        "authenticateByDefault"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "If true, users cannot log in through this provider. They can only link to this provider. This is useful if you don´t want to allow login from the provider, but want to integrate with a provider",
+      "equality": "booleanMatch",
+      "names": [
+        "linkOnly"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.7",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Alias of authentication flow, which is triggered after first login with this identity provider. Term ´First Login´ means that no Keycloak account is currently linked to the authenticated identity provider account.",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "firstBrokerLoginFlowAlias"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Alias of authentication flow, which is triggered after each login with this identity provider. Useful if you want additional verification of each user authenticated with this identity provider (for example OTP). Leave this to None if you need no any additional authenticators to be triggered after login with this identity provider. Also note that authenticator implementations must assume that user is already set in ClientSession as identity provider already set it.",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "postBrokerLoginFlowAlias"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "SAML Trusted IDP file location of metadata",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansSAMLidpMetaDataFN"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "SAML Trusted IDP URI location of metadata",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansSAMLidpMetaDataURL"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansSAMLspMetaLocation"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansSAMLidpMetaLocation"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "SAML IDP dynamic attribute map with key and value",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansSAMLidpConfDyn"
+      ],
+      "json": true,
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "signingCertificate",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "signingCertificate"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "validateSignature",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "validateSignature"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "singleLogoutServiceUrl",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "singleLogoutServiceUrl"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "nameIDPolicyFormat",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "nameIDPolicyFormat"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "entityId",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "entityId"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "singleSignOnServiceUrl",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "singleSignOnServiceUrl"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "encryptionPublicKey",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "encryptionPublicKey"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Webhook identifier",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "webhookId"
+      ],
+      "rdbm_json_column": true,
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "HTTP request method",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "httpMethod"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "HTTP request headers",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "httpHeaders"
+      ],
+      "multivalued": true,
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "HTTP request body",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "httpRequestBody"
+      ],
+      "oid": "jansAttr",
+      "json": true,
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Admin UI feature identifier",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "auiFeatureId"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "SAML Metadata",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "samlMetadata"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "SAML AssertionConsumerService Get endpoint where the Identity Provider will send SAML assertions",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansAssertionConsumerServiceGetURL"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "SAML AssertionConsumerService Post endpoint where the Identity Provider will send SAML assertions",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansAssertionConsumerServicePostURL"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Person authenticator configurations",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "jansAuthenticator"
+      ],
+      "json": true,
+      "multivalued": true,
+      "rdbm_json_column": true,
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "principalAttribute",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "principalAttribute"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "principalType",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "principalType"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Policy stats details",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "policyStats"
+      ],
+      "json": true,
+      "rdbm_json_column": true,
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "jansDownloadSize",
+      "equality": "integerMatch",
+      "names": [
+        "jansDownloadSize"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "jansFaiedlLoadCounter",
+      "equality": "integerMatch",
+      "names": [
+        "jansFaiedlLoadCounter"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "jansSuccessLoadCounter",
+      "equality": "integerMatch",
+      "names": [
+        "jansSuccessLoadCounter"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "Time information. Seconds from 1970-01-01T0:0:0Z",
+      "equality": "generalizedTimeMatch",
+      "names": [
+        "evaluationTimeNs"
+      ],
+      "oid": "jansAttr",
+      "ordering": "generalizedTimeOrderingMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.24",
+      "x_origin": "OpenID Connect 1.0 Standard Claim"
+    },
+    {
+      "desc": "Time information. Seconds from 1970-01-01T0:0:0Z",
+      "equality": "generalizedTimeMatch",
+      "names": [
+        "averageTimeNs"
+      ],
+      "oid": "jansAttr",
+      "ordering": "generalizedTimeOrderingMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.24",
+      "x_origin": "OpenID Connect 1.0 Standard Claim"
+    },
+    {
+      "desc": "memoryUsage",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "memoryUsage"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "requestCounter",
+      "equality": "integerMatch",
+      "names": [
+        "requestCounter"
+      ],
+      "oid": "jansAttr",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.27",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "engineStatus",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "engineStatus"
+      ],
+      "oid": "jansAttr",
+      "multivalued": true,
+      "rdbm_json_column": true,
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "eventTime",
+      "equality": "generalizedTimeMatch",
+      "names": [
+        "eventTime"
+      ],
+      "oid": "jansAttr",
+      "ordering": "generalizedTimeOrderingMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.24",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "eventType",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "eventType"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "severetyLevel",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "severetyLevel"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "actionName",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "actionName"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "decisionResult",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "decisionResult"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "requestedResource",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "requestedResource"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "principalId",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "principalId"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "clientId",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "clientId"
+      ],
+      "oid": "jansAttr",
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    },
+    {
+      "desc": "contextInformation",
+      "equality": "caseIgnoreMatch",
+      "names": [
+        "contextInformation"
+      ],
+      "oid": "jansAttr",
+      "multivalued": true,
+      "rdbm_json_column": true,
+      "substr": "caseIgnoreSubstringsMatch",
+      "syntax": "1.3.6.1.4.1.1466.115.121.1.15",
+      "x_origin": "Jans created attribute"
+    }
   ],
   "objectClasses": [
     {
@@ -3520,6 +4151,7 @@
         "jansPersistentJWT",
         "jansCreationTimestamp",
         "jansExtUid",
+        "jansAuthenticator",
         "jansOTPCache",
         "jansLastLogonTime",
         "jansActive",
@@ -3727,6 +4359,7 @@
         "jansLogViewerConfig",
         "jansLogConfigLocation",
         "jansCacheConf",
+        "jansMessageConf",
         "jansDocStoreConf",
         "jansSoftVer",
         "userPassword",
@@ -4012,6 +4645,28 @@
     {
       "kind": "STRUCTURAL",
       "may": [
+        "jansId",
+        "creationDate",
+        "exp",
+        "del",
+        "jansData",
+        "attr"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "jansArchJwk"
+      ],
+      "oid": "jansObjClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Jans created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
         "displayName",
         "inum",
         "owner",
@@ -4109,7 +4764,8 @@
         "ssnId",
         "attr",
         "tknBndCnf",
-        "dpop"
+        "dpop",
+        "jansId"
       ],
       "must": [
         "objectclass"
@@ -4333,7 +4989,8 @@
         "jansUsrId",
         "exp",
         "del",
-        "jansScope"
+        "jansScope",
+        "jansAttrs"
       ],
       "must": [
         "objectclass"
@@ -4652,7 +5309,7 @@
         "description",
         "document",
         "creationDate",
-        "jansModuleProperty",
+        "jansService",
         "jansLevel",
         "jansRevision",
         "jansEnabled",
@@ -4674,8 +5331,8 @@
       "kind": "STRUCTURAL",
       "may": [
         "inum",
-		"owner",
-        "jansClntId",
+        "owner",
+        "name",
         "displayName",
         "description",
         "rootUrl",
@@ -4690,28 +5347,247 @@
         "jansRedirectURI",
         "jansWebOrigins",
         "consentRequired",
-		"jansSAMLMetaDataFilter",
+        "samlMetadata",
+        "jansSAMLMetaDataFilter",
         "jansSAMLspMetaDataSourceTyp",
-		"jansSAMLspMetaDataFN",
-		"jansSAMLspMetaDataURL",
+        "jansSAMLspMetaDataFN",
+        "jansSAMLspMetaDataURL",
         "jansMetaLocation",
         "jansIsFed",
-        "jansEntityId",
         "jansEntityTyp",
         "jansProfileConf",
         "jansReleasedAttr",
         "url",
         "jansPostLogoutRedirectURI",
-        "protocol",		
+        "protocol",
         "jansStatus",
         "jansValidationStatus",
-		"jansValidationLog"
+        "jansValidationLog"
       ],
       "must": [
         "objectclass"
       ],
       "names": [
-        "jansSAMLconfig"
+        "jansTrustRelationship"
+      ],
+      "oid": "jansObjClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Jans created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "inum",
+        "creatorId",
+        "name",
+        "displayName",
+        "description",
+        "realm",
+        "jansEnabled",
+        "providerId",
+        "signingCertificate",
+        "validateSignature",
+        "singleLogoutServiceUrl",
+        "nameIDPolicyFormat",
+        "principalAttribute",
+        "principalType",
+        "entityId",
+        "singleSignOnServiceUrl",
+        "encryptionPublicKey",
+        "trustEmail",
+        "storeToken",
+        "addReadTokenRoleOnCreate",
+        "authenticateByDefault",
+        "linkOnly",
+        "firstBrokerLoginFlowAlias",
+        "postBrokerLoginFlowAlias",
+        "jansSAMLspMetaDataFN",
+        "jansSAMLspMetaDataURL",
+        "jansSAMLspMetaLocation",
+        "jansSAMLidpMetaDataFN",
+        "jansSAMLidpMetaDataURL",
+        "jansSAMLidpMetaLocation",
+        "jansStatus",
+        "jansValidationStatus",
+        "jansValidationLog",
+        "jansSAMLidpConfDyn"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "jansTrustedIdp"
+      ],
+      "oid": "jansObjClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Jans created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "inum",
+        "creationDate",
+        "eventTime",
+        "jansService",
+        "jansNodeId",
+        "jansStatus",
+        "engineStatus"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "jansHealthEntry"
+      ],
+      "oid": "jansObjClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Jans created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "inum",
+        "creationDate",
+        "eventTime",
+        "jansService",
+        "jansNodeId",
+        "eventType",
+        "severetyLevel",
+        "actionName",
+        "decisionResult",
+        "requestedResource",
+        "principalId",
+        "clientId",
+        "contextInformation"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "jansLogEntry"
+      ],
+      "oid": "jansObjClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Jans created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "inum",
+        "creationDate",
+        "eventTime",
+        "jansService",
+        "jansNodeId",
+        "jansStatus",
+        "jansDownloadSize",
+        "jansSuccessLoadCounter",
+        "jansFaiedlLoadCounter",
+        "evaluationTimeNs",
+        "averageTimeNs",
+        "memoryUsage",
+        "requestCounter",
+        "policyStats"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "jansTelemetryEntry"
+      ],
+      "oid": "jansObjClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Jans created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "auiFeatureId",
+        "displayName",
+        "jansScope",
+        "webhookId"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "auiFeatures"
+      ],
+      "oid": "jansObjClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Jans created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "inum",
+        "displayName",
+        "description",
+        "url",
+        "httpMethod",
+        "httpRequestBody",
+        "jansEnabled",
+        "httpHeaders"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "auiWebhooks"
+      ],
+      "oid": "jansObjClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Jans created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "jansNum",
+        "jansType",
+        "creationDate",
+        "jansLastUpd",
+        "lockKey"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "jansNode"
+      ],
+      "oid": "jansObjClass",
+      "sup": [
+        "top"
+      ],
+      "x_origin": "Jans created objectclass"
+    },
+    {
+      "kind": "STRUCTURAL",
+      "may": [
+        "jansNum",
+        "jansNodeId",
+        "dat",
+        "jansLastUpd",
+        "exp",
+        "lockKey"
+      ],
+      "must": [
+        "objectclass"
+      ],
+      "names": [
+        "jansStatusIdxPool"
       ],
       "oid": "jansObjClass",
       "sup": [

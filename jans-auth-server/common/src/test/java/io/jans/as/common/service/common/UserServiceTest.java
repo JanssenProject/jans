@@ -213,9 +213,9 @@ public class UserServiceTest {
         User resultUser = userService.addUser(user, true);
         assertNotNull(resultUser);
         assertNotNull(resultUser.getUserId());
-        assertNotNull(user.getAttribute("jansStatus"));
+        assertNotNull(user.getStatus());
         assertNotNull(user.getAttribute("inum"));
-        assertEquals(user.getAttribute("jansStatus"), GluuStatus.ACTIVE.getValue());
+        assertEquals(user.getStatus(), GluuStatus.ACTIVE);
         assertEquals(resultUser.getCustomObjectClasses().length, 2);
         assertEquals(user.getCustomObjectClasses()[0], resultUser.getCustomObjectClasses()[0]);
     }

@@ -8,7 +8,7 @@ package io.jans.fido2.model.error;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.jans.as.model.configuration.Configuration;
-import io.jans.as.model.error.ErrorMessage;
+import io.jans.model.error.ErrorMessage;
 import jakarta.xml.bind.annotation.*;
 
 import java.util.List;

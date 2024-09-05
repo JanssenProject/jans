@@ -49,11 +49,9 @@ func (c *Client) GetScopes(ctx context.Context) ([]Scope, error) {
 
 	ret := response{}
 
-	queryParams := map[string]string{
-		"limit": "100",
-	}
-
-	if err := c.get(ctx, "/jans-config-api/api/v1/scopes", token, &ret, queryParams); err != nil {
+	if err := c.get(ctx, "/jans-config-api/api/v1/scopes", token, &ret, map[string]string{
+		"limit": "5",
+	}); err != nil {
 		return nil, fmt.Errorf("get request failed: %w", err)
 	}
 

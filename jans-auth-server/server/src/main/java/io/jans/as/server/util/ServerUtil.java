@@ -6,25 +6,6 @@
 
 package io.jans.as.server.util;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLDecoder;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ThreadFactory;
-
-import org.apache.commons.lang.StringUtils;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.AnnotationIntrospector;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -32,7 +13,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
 import com.fasterxml.jackson.datatype.jsonorg.JsonOrgModule;
-
 import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.as.model.uma.persistence.UmaPermission;
 import io.jans.as.server.uma.service.UmaScopeService;
@@ -45,6 +25,20 @@ import jakarta.faces.context.ExternalContext;
 import jakarta.faces.context.FacesContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.core.CacheControl;
+import org.apache.commons.lang.StringUtils;
+import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ThreadFactory;
 
 /**
  * @author Yuriy Zabrovarnyy
@@ -70,6 +64,21 @@ public class ServerUtil {
     };
 
     private ServerUtil() {
+    }
+
+    public static Map<String, String[]> prepareForLogs(Map<String, String[]> parameters) {
+        if (parameters == null || parameters.isEmpty()) {
+            return new HashMap<>();
+        }
+
+        Map<String, String[]> result = new HashMap<>(parameters);
+        if (result.containsKey("client_secret")) {
+            result.put("client_secret", new String[] {"*****"});
+        }
+        if (result.containsKey("password")) {
+            result.put("password", new String[] {"*****"});
+        }
+        return result;
     }
 
     public static GregorianCalendar now() {

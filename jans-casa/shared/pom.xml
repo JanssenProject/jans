@@ -9,7 +9,7 @@
     <parent>
         <groupId>io.jans</groupId>
         <artifactId>casa-base</artifactId>
-        <version>1.0.20-SNAPSHOT</version>
+        <version>1.1.5-SNAPSHOT</version>
     </parent>
 
     <dependencies>
@@ -36,6 +36,11 @@
             <version>${project.version}</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-doc</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <!-- PLUGIN FRAMEWORK -->
         <dependency>
@@ -54,11 +59,24 @@
             <groupId>com.unboundid</groupId>
             <artifactId>unboundid-ldapsdk</artifactId>
         </dependency>
-
+        
+        <!-- FILE UPLOAD -->
+        <dependency>       
+            <groupId>commons-fileupload</groupId>
+            <artifactId>commons-fileupload</artifactId>
+            <version>1.5</version>
+        </dependency>
+                
         <!-- ZK -->
         <dependency>
             <groupId>org.zkoss.zk</groupId>
             <artifactId>zk</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-fileupload</groupId>
+                    <artifactId>commons-fileupload</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.zkoss.common</groupId>
@@ -101,11 +119,13 @@
             <version>1.0.1.Final</version>
         </dependency>
 
+        <!-- JSON -->
         <dependency>
-            <groupId>io.jans</groupId>
-            <artifactId>jans-doc</artifactId>
-            <version>${project.version}</version>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20240303</version>
         </dependency>
+
     </dependencies>
 
     <build>

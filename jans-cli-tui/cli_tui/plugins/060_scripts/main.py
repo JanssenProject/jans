@@ -23,6 +23,7 @@ from edit_script_dialog import EditScriptDialog
 from prompt_toolkit.application import Application
 from utils.multi_lang import _
 from utils.static import DialogResult, cli_style, common_strings
+from utils.background_tasks import retrieve_enabled_scripts
 from utils.utils import common_data
 
 class Plugin():
@@ -162,17 +163,17 @@ class Plugin():
 
         if self.data['start'] > 1:
             handler_partial = partial(
-                self.get_scripts, self.data['start']-self.app.entries_per_page-1, pattern)
+                self.get_scripts, self.data['start']-self.app.entries_per_page, pattern)
             prev_button = Button(_("Prev"), handler=handler_partial)
             prev_button.window.jans_help = _(
                 "Retreives previous %d entries") % self.app.entries_per_page
             buttons.append(prev_button)
         if self.data['totalEntriesCount'] > self.data['start'] + self.data['entriesCount']:
             handler_partial = partial(
-                self.get_scripts, self.data['start']+self.app.entries_per_page+1, pattern)
+                self.get_scripts, self.data['start']+self.app.entries_per_page, pattern)
             next_button = Button(_("Next"), handler=handler_partial)
             next_button.window.jans_help = _(
-                "Retreives previous %d entries") % self.app.entries_per_page
+                "Retreives next %d entries") % self.app.entries_per_page
             buttons.append(next_button)
 
         self.scripts_list_container = HSplit([
@@ -237,6 +238,7 @@ class Plugin():
             else:
                 dialog.future.set_result(DialogResult.OK)
                 self.get_scripts()
+                await retrieve_enabled_scripts()
 
         asyncio.ensure_future(coroutine())
 

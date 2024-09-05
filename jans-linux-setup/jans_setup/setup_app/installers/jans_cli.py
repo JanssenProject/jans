@@ -22,6 +22,7 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
                 (os.path.join(Config.dist_app_dir, 'prompt_toolkit.zip'), base.current_app.app_info['PROMPT_TOOLKIT']),
                 (os.path.join(Config.dist_app_dir, 'wcwidth.zip'), base.current_app.app_info['WCWIDTH']),
                 (os.path.join(Config.dist_app_dir, 'pygments.zip'), base.current_app.app_info['PYGMENTS']),
+                (os.path.join(Config.dist_app_dir, 'requests_toolbelt.zip'), base.current_app.app_info['REQUESTS_TOOLBELT']),
                 ]
 
     def __init__(self):
@@ -79,17 +80,11 @@ class JansCliInstaller(BaseInstaller, SetupUtils):
         base.extract_from_zip(self.source_files[1][0], 'src/prompt_toolkit', os.path.join(self.pylib_dir, 'prompt_toolkit'))
         base.extract_from_zip(self.source_files[2][0], 'wcwidth', os.path.join(self.pylib_dir, 'wcwidth'))
         base.extract_from_zip(self.source_files[3][0], 'pygments', os.path.join(self.pylib_dir, 'pygments'))
+        base.extract_from_zip(self.source_files[4][0], 'requests_toolbelt', os.path.join(self.pylib_dir, 'requests_toolbelt'))
 
         # extract yaml files
+        base.extract_subdir(base.current_app.jans_zip, 'jans-config-api/plugins/docs', os.path.join(ops_dir, 'jca'))
         base.extract_file(base.current_app.jans_zip, 'jans-config-api/docs/jans-config-api-swagger.yaml', os.path.join(ops_dir, 'jca', 'jans-config-api-swagger.yaml'), ren=True)
-        plugin_yamls = ['fido2-plugin-swagger.yaml', 'jans-admin-ui-plugin-swagger.yaml', 'scim-plugin-swagger.yaml', 'user-mgt-plugin-swagger.yaml']
-
-        if Config.install_jans_link:
-            plugin_yamls.append('jans-link-plugin-swagger.yaml')
-
-        for plugin_yaml_file in plugin_yamls:
-            base.extract_file(base.current_app.jans_zip, 'jans-config-api/plugins/docs/'+plugin_yaml_file, os.path.join(ops_dir, 'jca', plugin_yaml_file), ren=True)
-
         base.extract_file(base.current_app.jans_zip, 'jans-scim/server/src/main/resources/jans-scim-openapi.yaml', os.path.join(ops_dir, 'scim', 'scim.yaml'), ren=True)
         base.extract_file(base.current_app.jans_zip, 'jans-auth-server/docs/swagger.yaml', os.path.join(ops_dir, 'auth', 'swagger.yaml'), ren=True)
 

@@ -1,6 +1,11 @@
 {
     "authorize":[
         {
+            "id": "unmet_authentication_requirements",
+            "description": "The Authorization Server is unable to meet the requirements of the Relying Party for the authentication of the End-User. OP is unable to use acr specified in request.",
+            "uri": null
+        },
+        {
             "id":"invalid_request",
             "description":"The request is missing a required parameter, includes an unsupported parameter or parameter value, or is otherwise malformed.",
             "uri":null
@@ -51,6 +56,11 @@
             "uri":null
         },
         {
+            "id":"invalid_authorization_details",
+            "description":"The authorization_details in the Authorization Request does not pass AS validation.",
+            "uri":null
+        },
+        {
             "id":"login_required",
             "description":"The Authorization Server requires End-User authentication. This error MAY be returned when the prompt parameter in the Authorization Request is set to none to request that the Authorization Server should not display any user interfaces to the End-User, but the Authorization Request cannot be completed without displaying a user interface for user authentication.",
             "uri":null
@@ -68,6 +78,16 @@
         {
             "id":"user_mismatched",
             "description":"The current logged in End-User at the Authorization Server does not match the requested user. This error MAY be returned when the prompt parameter in the Authorization Request is set to none to request that the Authorization Server should not display any user interfaces to the End-User, but the Authorization Request cannot be completed without displaying a user interface to prompt for the correct End-User authentication.",
+            "uri":null
+        },
+        {
+            "id":"request_not_supported",
+            "description":"The request parameter is not supported.",
+            "uri":null
+        },
+        {
+            "id":"request_uri_not_supported",
+            "description":"The request uri parameter is not supported.",
             "uri":null
         },
         {
@@ -176,6 +196,21 @@
         {
             "id":"invalid_request",
             "description":"The request is missing a required parameter, includes an unsupported parameter or parameter value, repeats a parameter, includes multiple credentials, utilizes more than one mechanism for authenticating the client, or is otherwise malformed.",
+            "uri":null
+        },
+        {
+            "id":"invalid_authorization_details",
+            "description":"The authorization_details in the request does not pass AS validation.",
+            "uri":null
+        },
+        {
+            "id":"invalid_requested_token_type",
+            "description":"The requested_token_type in the request is not valid.",
+            "uri":null
+        },
+        {
+            "id":"invalid_subject_token_type",
+            "description":"The subject_token_type in the request is not valid.",
             "uri":null
         },
         {

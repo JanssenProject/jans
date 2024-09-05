@@ -6,6 +6,7 @@ import time
 import sqlalchemy
 import shutil
 import zipfile
+import random
 
 from string import Template
 from schema import AttributeType
@@ -61,6 +62,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         self.create_subtables()
         self.import_ldif()
         self.create_indexes()
+        self.create_unique_indexes()
         self.rdbmProperties()
 
     def prepare(self):
@@ -107,9 +109,14 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                 self.writeFile(unit_fn, '\n'.join(unit_file_content_list))
                 self.run(['systemctl', 'daemon-reload'])
 
+
+    def get_rdbm_pw(self):
+        return str(random.randint(10,99)) + random.choice('*_.<->') + self.getPW()
+
+
     def local_install(self):
         if not Config.rdbm_password:
-            Config.rdbm_password = self.getPW()
+            Config.rdbm_password = self.get_rdbm_pw()
         if not Config.rdbm_user:
             Config.rdbm_user = 'jans'
 
@@ -119,10 +126,17 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
             if Config.rdbm_type == 'mysql':
                 if base.os_type == 'suse':
-                    self.restart('mariadb')
-                    self.fix_unit_file('mariadb')
-                    self.enable('mariadb')
-                    Config.backend_service = 'mariadb.service'
+                    self.restart('mysql')
+                    self.fix_unit_file('mysql')
+                    self.enable('mysql')
+                    Config.backend_service = 'mysql.service'
+                    for l in open('/var/log/mysql/mysqld.log'):
+                        if 'A temporary password is generated for' in l:
+                            n = l.find('root@localhost:')
+                            mysql_tmp_root_passwd = l[n+15:].strip()
+                            break
+                    Config.mysql_root_password = self.get_rdbm_pw()
+                    self.run(f'''mysql -u root -p'{mysql_tmp_root_passwd}' -e "ALTER USER 'root'@'localhost' IDENTIFIED BY '{Config.mysql_root_password}'" --connect-expired-password''', shell=True)
 
                 elif base.clone_type == 'rpm':
                     self.restart('mysqld')
@@ -133,14 +147,15 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                     Config.backend_service = 'mysql.service'
 
                 result, conn = self.dbUtils.mysqlconnection(log=False)
+                user_passwd_str = f"-u root -p'{Config.mysql_root_password}' " if base.os_type == 'suse' else ''
                 if not result:
                     sql_cmd_list = [
-                        "CREATE DATABASE {};\n".format(Config.rdbm_db),
-                        "CREATE USER '{}'@'localhost' IDENTIFIED BY '{}';\n".format(Config.rdbm_user, Config.rdbm_password),
-                        "GRANT ALL PRIVILEGES ON {}.* TO '{}'@'localhost';\n".format(Config.rdbm_db, Config.rdbm_user),
+                        "CREATE DATABASE {}".format(Config.rdbm_db),
+                        "CREATE USER '{}'@'localhost' IDENTIFIED BY '{}'".format(Config.rdbm_user, Config.rdbm_password),
+                        "GRANT ALL PRIVILEGES ON {}.* TO '{}'@'localhost'".format(Config.rdbm_db, Config.rdbm_user),
                         ]
                     for cmd in sql_cmd_list:
-                        self.run("echo \"{}\" | mysql".format(cmd), shell=True)
+                        self.run(f'mysql {user_passwd_str}-e "{cmd}"', shell=True)
 
             elif Config.rdbm_type == 'pgsql':
                 if base.clone_type == 'rpm':
@@ -155,8 +170,9 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                 cmd_create_db = '''su - postgres -c "psql -U postgres -d postgres -c \\"CREATE DATABASE {};\\""'''.format(Config.rdbm_db)
                 cmd_create_user = '''su - postgres -c "psql -U postgres -d postgres -c \\"CREATE USER {} WITH PASSWORD '{}';\\""'''.format(Config.rdbm_user, Config.rdbm_password)
                 cmd_grant_previlages = '''su - postgres -c "psql -U postgres -d postgres -c \\"GRANT ALL PRIVILEGES ON DATABASE {} TO {};\\""'''.format(Config.rdbm_db, Config.rdbm_user)
+                cmd_alter_db = f'''su - postgres -c "psql -U postgres -d postgres -c \\"ALTER DATABASE {Config.rdbm_db} OWNER TO {Config.rdbm_user};\\""'''
 
-                for cmd in (cmd_create_db, cmd_create_user, cmd_grant_previlages):
+                for cmd in (cmd_create_db, cmd_create_user, cmd_grant_previlages, cmd_alter_db):
                     self.run(cmd, shell=True)
 
                 if base.clone_type == 'rpm':
@@ -169,20 +185,26 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                         self.writeFile(hba_file_path, hba_file_content)
                         self.start('postgresql')
 
-            self.enable('postgresql')
+                self.enable('postgresql')
 
         self.dbUtils.bind(force=True)
+
 
     def get_sql_col_type(self, attrname, table=None):
 
         if attrname in self.dbUtils.sql_data_types:
-            type_ = self.dbUtils.sql_data_types[attrname].get(Config.rdbm_type) or self.dbUtils.sql_data_types[attrname]['mysql']
+            type_ = self.dbUtils.sql_data_types.get(f'{table}:{attrname}',{}).get(Config.rdbm_type) or self.dbUtils.sql_data_types.get(f'{table}:{attrname}',{}).get('mysql') or self.dbUtils.sql_data_types[attrname].get(Config.rdbm_type) or self.dbUtils.sql_data_types[attrname]['mysql']
             if table in type_.get('tables', {}):
                 type_ = type_['tables'][table]
             if 'size' in type_:
-                data_type = '{}({})'.format(type_['type'], type_['size'])
+                dtype = 'STRING' if type_['type'] and Config.rdbm_type == 'spanner' else type_['type']
+                data_type = '{}({})'.format(dtype, type_['size'])
             else:
                 data_type = type_['type']
+
+        elif self.dbUtils.is_schema_rdbm_json(attrname):
+            return self.dbUtils.rdbm_json_types[Config.rdbm_type]['type']
+
         else:
             attr_syntax = self.dbUtils.get_attr_syntax(attrname)
             type_ = self.dbUtils.ldap_sql_data_type_mapping[attr_syntax].get(Config.rdbm_type) or self.dbUtils.ldap_sql_data_type_mapping[attr_syntax]['mysql']
@@ -454,6 +476,16 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                                     )
                         self.dbUtils.exec_rdbm_query(sql_cmd)
 
+    def create_unique_indexes(self):
+        #Create uniqueness for columns jansPerson.uid and jansPerson.mail
+        for table, column in (('jansPerson', 'mail'), ('jansPerson', 'uid')):
+            if Config.rdbm_type in ('mysql', 'spanner'):
+                sql_cmd = f'CREATE UNIQUE INDEX `{table.lower()}_{column.lower()}_unique_idx` ON `{table}` (`{column}`)'
+            elif Config.rdbm_type == 'pgsql':
+                sql_cmd = f'CREATE UNIQUE INDEX {table.lower()}_{column.lower()}_unique_idx ON "{table}"("{column}")'
+            self.dbUtils.exec_rdbm_query(sql_cmd)
+
+
     def import_ldif(self):
         ldif_files = []
 
@@ -510,6 +542,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
             self.createDirs(self.common_lib_dir)
         shutil.unpack_archive(self.source_files[0][0], self.common_lib_dir)
         self.chown(os.path.join(Config.jetty_base, 'common'), Config.jetty_user, Config.jetty_user, True)
+
 
     def installed(self):
         # to be implemented

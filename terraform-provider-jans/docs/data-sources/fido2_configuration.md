@@ -22,5 +22,3 @@ Data source for retrieving the Fido2 configuration of the Janssen server
 - `id` (String) The ID of this resource.
 - `issuer` (String) A URI indicating the party operating the FIDO U2F server.
 - `version` (String) The version of the FIDO2 U2F core protocol to which this server conforms. The value MUST be the string 1.0.
-
-

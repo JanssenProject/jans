@@ -7,13 +7,13 @@
 package io.jans.configapi.rest.resource.auth;
 
 import io.jans.as.common.service.common.ConfigurationService;
-import io.jans.as.common.service.common.EncryptionService;
-import io.jans.as.persistence.model.configuration.GluuConfiguration;
+import io.jans.config.GluuConfiguration;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.model.SmtpConfiguration;
 import io.jans.model.SmtpTest;
+import io.jans.service.EncryptionService;
 import io.jans.service.MailService;
 import io.jans.util.security.StringEncrypter.EncryptionException;
 

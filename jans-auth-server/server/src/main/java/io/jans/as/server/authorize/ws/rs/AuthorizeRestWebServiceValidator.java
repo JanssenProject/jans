@@ -9,10 +9,9 @@ package io.jans.as.server.authorize.ws.rs;
 import com.google.common.base.Strings;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.model.session.SessionId;
-import io.jans.as.common.model.session.SessionIdState;
 import io.jans.as.common.util.RedirectUri;
 import io.jans.as.model.authorize.AuthorizeErrorResponseType;
-import io.jans.as.model.common.Prompt;
+import io.jans.as.model.authzdetails.AuthzDetails;
 import io.jans.as.model.common.ResponseMode;
 import io.jans.as.model.common.ResponseType;
 import io.jans.as.model.configuration.AppConfiguration;
@@ -22,12 +21,9 @@ import io.jans.as.model.exception.InvalidJwtException;
 import io.jans.as.server.model.authorize.AuthorizeParamsValidator;
 import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.server.model.common.DeviceAuthorizationCacheControl;
-import io.jans.as.server.model.exception.AcrChangedException;
 import io.jans.as.server.model.exception.InvalidRedirectUrlException;
-import io.jans.as.server.security.Identity;
 import io.jans.as.server.service.*;
-import io.jans.as.server.service.external.session.SessionEvent;
-import io.jans.as.server.service.external.session.SessionEventType;
+import io.jans.as.server.service.external.ExternalAuthzDetailTypeService;
 import io.jans.as.server.util.RedirectUtil;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.orm.exception.EntryPersistenceException;
@@ -78,10 +74,7 @@ public class AuthorizeRestWebServiceValidator {
     private AppConfiguration appConfiguration;
 
     @Inject
-    private SessionIdService sessionIdService;
-
-    @Inject
-    private Identity identity;
+    private ExternalAuthzDetailTypeService externalAuthzDetailTypeService;
 
     public Client validateClient(String clientId, String state) {
         return validateClient(clientId, state, false);
@@ -215,7 +208,7 @@ public class AuthorizeRestWebServiceValidator {
                 log.error("The Nested JWT signature algorithm is not valid.");
                 throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST_OBJECT);
             }
-        } 
+        }
         String redirectUri = jwtRequest.getRedirectUri();
         Client client = clientService.getClient(jwtRequest.getClientId());
         if (redirectUri != null && redirectionUriService.validateRedirectionUri(client, redirectUri) == null) {
@@ -378,7 +371,7 @@ public class AuthorizeRestWebServiceValidator {
         throw new WebApplicationException(
                 RedirectUtil.getRedirectResponseBuilder(redirectUriResponse.getRedirectUri(), httpRequest).build());
     }
-    
+
     public WebApplicationException createInvalidJwtRequestException(RedirectUriResponse redirectUriResponse, String reason) {
         if (appConfiguration.isFapi()) {
             log.debug(reason); // in FAPI case log reason but don't send it since it's `reason` is not known.
@@ -391,40 +384,6 @@ public class AuthorizeRestWebServiceValidator {
         if (isTrue(appConfiguration.getRequirePkce()) && Strings.isNullOrEmpty(codeChallenge)) {
             log.error("PKCE is required but code_challenge is blank.");
             throw redirectUriResponse.createWebException(AuthorizeErrorResponseType.INVALID_REQUEST);
-        }
-    }
-
-    public void validateAcrs(AuthzRequest authzRequest, Client client) throws AcrChangedException {
-        if (!client.getAttributes().getAuthorizedAcrValues().isEmpty() &&
-                !client.getAttributes().getAuthorizedAcrValues().containsAll(authzRequest.getAcrValuesList())) {
-            throw authzRequest.getRedirectUriResponse().createWebException(AuthorizeErrorResponseType.INVALID_REQUEST,
-                    "Restricted acr value request, please review the list of authorized acr values for this client");
-        }
-        checkAcrChanged(authzRequest, identity.getSessionId()); // check after redirect uri is validated
-    }
-
-
-    private void checkAcrChanged(AuthzRequest authzRequest, SessionId sessionUser) throws AcrChangedException {
-        try {
-            sessionIdService.assertAuthenticatedSessionCorrespondsToNewRequest(sessionUser, authzRequest.getAcrValues());
-        } catch (AcrChangedException e) { // Acr changed
-            //See https://github.com/GluuFederation/oxTrust/issues/797
-            if (e.isForceReAuthentication()) {
-                if (!authzRequest.getPromptList().contains(Prompt.LOGIN)) {
-                    log.info("ACR is changed, adding prompt=login to prompts");
-                    authzRequest.addPrompt(Prompt.LOGIN);
-
-                    sessionUser.setState(SessionIdState.UNAUTHENTICATED);
-                    sessionUser.getSessionAttributes().put("prompt", authzRequest.getPrompt());
-                    if (!sessionIdService.persistSessionId(sessionUser)) {
-                        log.trace("Unable persist session_id, trying to update it.");
-                        sessionIdService.updateSessionId(sessionUser);
-                    }
-                    sessionIdService.externalEvent(new SessionEvent(SessionEventType.UNAUTHENTICATED, sessionUser));
-                }
-            } else {
-                throw e;
-            }
         }
     }
 
@@ -467,5 +426,87 @@ public class AuthorizeRestWebServiceValidator {
                 throw new WebApplicationException(Response.status(Response.Status.UNAUTHORIZED).build());
             }
         }
+    }
+
+    public void validateAuthorizationDetails(AuthzRequest authzRequest, Client client) {
+        final String authorizationDetailsString = authzRequest.getAuthzDetailsString();
+        if (StringUtils.isBlank(authorizationDetailsString)) {
+            return; // nothing to validate
+        }
+
+        // 1. check whether authz details is valid json and can be parsed
+        final AuthzDetails authzDetails = AuthzDetails.ofSilently(authorizationDetailsString);
+        if (authzDetails == null) {
+            log.debug("Unable to parse 'authorization_details' {}", authorizationDetailsString);
+            throw authzRequest.getRedirectUriResponse().createWebException(AuthorizeErrorResponseType.INVALID_AUTHORIZATION_DETAILS,
+                    "Unable to parse 'authorization_details'");
+        }
+        authzRequest.setAuthzDetails(authzDetails);
+
+        if (authzDetails.getDetails() == null || authzDetails.getDetails().isEmpty()) {
+            return; // nothing to validate
+        }
+
+        final Set<String> requestAuthzDetailsTypes = authzDetails.getTypes();
+
+        // 2. check whether authorization_details type is supported globally by AS
+        final Set<String> supportedAuthzDetailsTypes = externalAuthzDetailTypeService.getSupportedAuthzDetailsTypes();
+        if (!supportedAuthzDetailsTypes.containsAll(requestAuthzDetailsTypes)) {
+            log.debug("Not all authorization_details type are supported. Requested {}. AS supports: {}", requestAuthzDetailsTypes, supportedAuthzDetailsTypes);
+
+            throw authzRequest.getRedirectUriResponse().createWebException(AuthorizeErrorResponseType.INVALID_AUTHORIZATION_DETAILS,
+                    "Found not supported 'authorization_details' type.");
+        }
+
+        // 3. check whether authorization_details type is supported by client
+        if (!client.getAttributes().getAuthorizationDetailsTypes().containsAll(requestAuthzDetailsTypes)) {
+            log.debug("Client does not support all authorization_details types' {}. Client supports {}",
+                    requestAuthzDetailsTypes, client.getAttributes().getAuthorizationDetailsTypes());
+
+            throw authzRequest.getRedirectUriResponse().createWebException(AuthorizeErrorResponseType.UNAUTHORIZED_CLIENT,
+                    "Client does not support authorization_details type'");
+        }
+
+        // 4. external script validation
+        externalAuthzDetailTypeService.externalValidateAuthzDetails(authzRequest);
+    }
+
+    public void validateRequestParameterSupported(AuthzRequest authzRequest) {
+        String request = authzRequest.getRequest();
+        String state = authzRequest.getState();
+
+        if (StringUtils.isBlank(request)) {
+            return;
+        }
+
+        if (org.apache.commons.lang3.BooleanUtils.isTrue(appConfiguration.getRequestParameterSupported())) {
+            return;
+        }
+
+        log.debug("'request' support is switched off by requestParameterSupported=false configuration property.");
+        throw new WebApplicationException(Response
+                .status(Response.Status.BAD_REQUEST)
+                .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.REQUEST_NOT_SUPPORTED, state, "request processing is denied by AS."))
+                .build());
+
+    }
+
+    public void validateRequestUriParameterSupported(AuthzRequest authzRequest) {
+        String requestUri = authzRequest.getRequestUri();
+        String state = authzRequest.getState();
+
+        if (StringUtils.isBlank(requestUri)) {
+            return;
+        }
+
+        if (org.apache.commons.lang3.BooleanUtils.isTrue(appConfiguration.getRequestUriParameterSupported())) {
+            return;
+        }
+
+        log.debug("'request_uri' support is switched off by requestUriParameterSupported=false configuration property.");
+        throw new WebApplicationException(Response
+                .status(Response.Status.BAD_REQUEST)
+                .entity(errorResponseFactory.getErrorAsJson(AuthorizeErrorResponseType.REQUEST_URI_NOT_SUPPORTED, state, "request_uri processing is denied by AS"))
+                .build());
     }
 }

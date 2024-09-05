@@ -14,15 +14,18 @@ Custom claims provide the flexibility to include application-specific or user-sp
 
 ## Adding a new custom user claim
 
-=== "LDAP persistence"
+### LDAP persistence
 
-### Step 1: Create a custom attribute
+#### Step 1: Create a custom attribute
 
-Create a new custom attribute using [Test User Interface](../../../admin/config-guide/config-tools/jans-tui) or [CURL commands](../../../admin/config-guide/jans-cli/cli-attribute/#creating-an-attribute), superb tools provided in Janssen. The attribute name should be the claim name.
+Create a new custom attribute using 
+[Test User Interface](../../../config-guide/config-tools/jans-tui) or 
+[CURL commands](../../../config-guide/config-tools/jans-cli/README.md), 
+superb tools provided in Janssen. The attribute name should be the claim name.
 
 ![](../../../../assets/image-tui-add-attribute.png)
 
-### Step 2: Make entry of the claim in OpenDJ Schema 
+#### Step 2: Make entry of the claim in OpenDJ Schema 
 
 - In OpenDJ, add custom attributes in `/opt/opendj/config/schema/77-customAttributes.ldif`. In the below example, `newClaim` is our custom attribute.
 
@@ -75,9 +78,9 @@ The complete 77-customAttributes.ldif will look like this:
 !!!warning
     Spacing is extremely important in the customs attributes file above. There must be 2 spaces before and 1 after every entry (i.e. DESC), or your custom schema will fail to load properly because of a validation error. You cannot have line spaces between `attributeTypes:` or `objectClasses:`. This will cause failure in schema. Please check the error logs in /opt/opendj/logs/errors if you are experiencing issues with adding custom schema. This will help guide you on where there may be syntax errors.
 
-### Step 3: Restart `opendj` service.
+#### Step 3: Restart `opendj` service.
 
-[Restart](../../../../admin/vm-ops/restarting-services/#reload) the `opendj` service.
+[Restart](../../../../admin/vm-ops/restarting-services.md#reload) the `opendj` service.
 
 That will create the custom user claim in the local LDAP server.
 
@@ -85,15 +88,18 @@ Once the user claim is added, it can be used in user management.
 
 ![](../../../../assets/image-tui-user-claim.png)
 
-=== "MySQL persistence"
+### MySQL persistence
 
-### Step 1: Create a custom attribute
+#### Step 1: Create a custom attribute
 
-Create a new custom attribute using [Test User Interface](../../../admin/config-guide/config-tools/jans-tui) or [CURL commands](../../../admin/config-guide/jans-cli/cli-attribute/#creating-an-attribute), superb tools provided in Janssen. The attribute-name should be the claim-name.
+Create a new custom attribute using 
+[Test User Interface](../../../config-guide/config-tools/jans-tui) or 
+[CURL commands](../../../config-guide/config-tools/jans-cli/README.md), 
+superb tools provided in Janssen. The attribute-name should be the claim-name.
 
 ![](../../../../assets/image-tui-add-attribute.png)
 
-### Step 2: Make entry of the claim in MySQL Schema
+#### Step 2: Make entry of the claim in MySQL Schema
 
 - Add a column to table `jansPerson` in MySQL. Command will be `ALTER TABLE jansPerson ADD COLUMN <claimName> <dataType>`;
 

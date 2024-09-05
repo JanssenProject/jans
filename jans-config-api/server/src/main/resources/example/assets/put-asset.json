@@ -1,0 +1,16 @@
+{
+    "dn": "inum=ed901270-c0cd-43cf-a683-10795ff66349,ou=document,o=jans",
+    "selected": false,
+    "inum": "ed901270-c0cd-43cf-a683-10795ff66349",
+    "displayName": "janssen_dove_icon.png",
+    "description": "/opt/jans/jetty/jans-auth/custom/static",
+	"jansModuleProperty": [
+        "agama",
+        "img",
+        "/opt/jans/jetty/jans-auth"
+    ],
+    "jansLevel": "1",
+    "jansRevision": "2",
+    "jansEnabled": true,
+    "baseDn": "inum=ed901270-c0cd-43cf-a683-10795ff66349,ou=document,o=jans"
+}

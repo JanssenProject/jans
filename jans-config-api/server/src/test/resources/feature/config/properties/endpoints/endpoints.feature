@@ -272,24 +272,3 @@ Feature: Verify jans-auth available endpoints.
 	When method PUT
 	Then status 400
 	And print response
-	
-	
-	@endpoints-error
-	Scenario: oxElevenGenerateKeyEndpoint configuration cannot be null or empty
-	Given url  mainUrl
-	And  header Authorization = 'Bearer ' + accessToken
-	When method GET
-	Then status 200
-	And print response
-	And assert response.length != null
-	Then def result = response 
-	Then set result.oxElevenGenerateKeyEndpoint = null
-	Given url  mainUrl
-	And  header Authorization = 'Bearer ' + accessToken
-	And request result
-	When method PUT
-	Then status 400
-	And print response
-	
-	
-	

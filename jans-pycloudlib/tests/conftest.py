@@ -25,12 +25,19 @@ def gk8s_config():
 
 
 @pytest.fixture()
-def gvault_secret():
+def gvault_secret(tmpdir, monkeypatch):
     from jans.pycloudlib.secret import VaultSecret
 
-    secret = VaultSecret()
-    secret.prefix = "secret/testing"
-    yield secret
+    role_id_file = tmpdir.join("vault_role_id")
+    role_id_file.write("")
+    secret_id_file = tmpdir.join("vault_secret_id")
+    secret_id_file.write("")
+
+    monkeypatch.setenv("CN_SECRET_VAULT_ROLE_ID_FILE", str(role_id_file))
+    monkeypatch.setenv("CN_SECRET_VAULT_SECRET_ID_FILE", str(secret_id_file))
+    monkeypatch.setenv("CN_SECRET_VAULT_NAMESPACE", "testing")
+    monkeypatch.setenv("CN_SECRET_VAULT_KV_PATH", "secret")
+    yield VaultSecret()
 
 
 @pytest.fixture()
@@ -74,17 +81,16 @@ def gmanager(gconsul_config, gvault_secret):
         return ctx.get(key) or default
 
     def set_secret(key, value):
-        return
+        return True
 
     gmanager = get_manager()
 
     gconsul_config.get = get_config
-    gmanager.config.adapter = gconsul_config
+    gmanager.config.remote_adapter = gconsul_config
 
     gvault_secret.get = get_secret
     gvault_secret.set = set_secret
-    gmanager.secret.adapter = gvault_secret
-
+    gmanager.secret.remote_adapter = gvault_secret
     yield gmanager
 
 

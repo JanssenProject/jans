@@ -16,12 +16,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+import org.apache.commons.text.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.ExpressionUtils;
+import com.querydsl.core.types.NullExpression;
 import com.querydsl.core.types.Operation;
 import com.querydsl.core.types.Ops;
 import com.querydsl.core.types.Path;
@@ -42,7 +44,6 @@ import io.jans.orm.sql.operation.SqlOperationService;
 import io.jans.orm.sql.operation.SupportedDbType;
 import io.jans.orm.util.ArrayHelper;
 import io.jans.orm.util.StringHelper;
-import org.apache.commons.text.StringEscapeUtils;
 
 /**
  * Filter to SQL query convert
@@ -67,11 +68,21 @@ public class SqlFilterConverter {
 	private Path<Object> objectDocAlias = ExpressionUtils.path(Object.class, "doc");
 	
 	public static String[] SPECIAL_REGEX_CHARACTERS = new String[] { "\\", "/", ".", "*", "+", "?", "|", "(", ")", "[", "]", "{", "}" };
+	
+	private Map<String, JDBCType> jdbcEnumTypesMap;
 
 
     public SqlFilterConverter(SqlOperationService operationService) {
     	this.operationService = operationService;
     	this.dbType = operationService.getConnectionProvider().getDbType();
+    	initJdbcEnumTypesMap();
+	}
+
+	private void initJdbcEnumTypesMap() {
+		jdbcEnumTypesMap = new HashMap<>();
+        for( JDBCType sqlType : JDBCType.class.getEnumConstants()) {
+        	jdbcEnumTypesMap.put(StringHelper.toLowerCase(sqlType.name()) , sqlType);
+        }
 	}
 
 	public ConvertedExpression convertToSqlFilter(TableMapping tableMapping, Filter genericFilter, Map<String, PropertyAnnotation> propertiesAnnotationsMap) throws SearchException {
@@ -198,7 +209,11 @@ public class SqlFilterConverter {
 	        		return ConvertedExpression.build(operation, jsonAttributes);
     			}
             }
-        	return ConvertedExpression.build(ExpressionUtils.eq(columnExpression, buildTypedExpression(tableMapping, currentGenericFilter)), jsonAttributes);
+    		Expression typedExpression = buildTypedExpression(tableMapping, currentGenericFilter);
+    		if (typedExpression instanceof NullExpression) {
+    			return ConvertedExpression.build(ExpressionUtils.isNull(columnExpression), jsonAttributes);
+    		}
+        	return ConvertedExpression.build(ExpressionUtils.eq(columnExpression, typedExpression), jsonAttributes);
         }
 
         if (FilterType.LESS_OR_EQUAL == type) {
@@ -425,7 +440,7 @@ public class SqlFilterConverter {
 		return attributeType;
 	}
 
-	private String toInternalAttribute(Filter filter) {
+	private String toInternalAttribute(String tableName, Filter filter) {
 		String attributeName = filter.getAttributeName();
 
 		if (StringHelper.isEmpty(attributeName)) {
@@ -438,15 +453,15 @@ public class SqlFilterConverter {
 			}
 		}
 
-		return toInternalAttribute(attributeName);
+		return toInternalAttribute(tableName, attributeName);
 	}
 
-	private String toInternalAttribute(String attributeName) {
-		if (operationService == null) {
+	private String toInternalAttribute(String tableName, String attributeName) {
+		if ((operationService == null) || (tableName == null)) {
 			return attributeName;
 		}
 
-		return operationService.toInternalAttribute(attributeName);
+		return operationService.toInternalAttribute(tableName, attributeName);
 	}
 
 	private Expression buildTypedExpression(TableMapping tableMapping, Filter filter) throws SearchException {
@@ -494,19 +509,31 @@ public class SqlFilterConverter {
 					assertionValue = dateValue;
 				}
 			}
-			try {
-				if (attributeType != null) {
-					String columnType = attributeType.getType();
-					java.sql.JDBCType jdbcType = java.sql.JDBCType.valueOf(StringHelper.toUpperCase(columnType));
-	
-					if (jdbcType == java.sql.JDBCType.SMALLINT) {
-						if (StringHelper.equalsIgnoreCase((String) assertionValue, "true") || StringHelper.equalsIgnoreCase((String) assertionValue, "1")) {
-							assertionValue = 1;
-						}
+
+			if (attributeType != null) {
+				String columnType = attributeType.getType();
+
+				java.sql.JDBCType jdbcType = null;
+				// Fix for PostgreSQL 
+				if (StringHelper.equalsIgnoreCase(columnType, "bool")) { 
+					jdbcType = java.sql.JDBCType.BOOLEAN;
+				} else {
+					String lowerCaseColumnType = StringHelper.toLowerCase(columnType);
+					if (jdbcEnumTypesMap.containsKey(lowerCaseColumnType)) {
+						jdbcType = jdbcEnumTypesMap.get(lowerCaseColumnType);
+					} else {
+						LOG.trace("Failed to determine JDBC type '{}' ", attributeType.getType());
+						// Do nothing. Type is not defined in enum
 					}
 				}
-			} catch (java.lang.IllegalArgumentException ex) {
-				// Do nothing. Type is not defined in enum
+
+				if (jdbcType == java.sql.JDBCType.SMALLINT) {
+					boolean res = StringHelper.equalsIgnoreCase((String) assertionValue, "true") || StringHelper.equalsIgnoreCase((String) assertionValue, "1");
+					assertionValue = res ? 1 : 0;
+				} else if (jdbcType == java.sql.JDBCType.BOOLEAN) {
+					boolean res = StringHelper.equalsIgnoreCase((String) assertionValue, "true") || StringHelper.equalsIgnoreCase((String) assertionValue, "1");
+					assertionValue = res;
+				}
 			}
 		}
 
@@ -521,7 +548,8 @@ public class SqlFilterConverter {
     		return convertToSqlFilterImpl(tableMapping, genericFilter.getFilters()[0], propertiesAnnotationsMap, jsonAttributes, processor, skipAlias).expression();
 		}
 		
-		String internalAttribute = toInternalAttribute(genericFilter);
+		String tableName = tableMapping == null ? null : tableMapping.getTableName();
+		String internalAttribute = toInternalAttribute(tableName, genericFilter);
 		
 		return buildTypedPath(tableMapping, genericFilter, internalAttribute, skipAlias);
 	}

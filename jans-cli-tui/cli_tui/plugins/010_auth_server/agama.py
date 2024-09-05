@@ -8,22 +8,22 @@ from typing import Any
 from types import SimpleNamespace
 from prompt_toolkit.application import Application
 from prompt_toolkit.eventloop import get_event_loop
+from prompt_toolkit.layout import ScrollablePane
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.lexers import PygmentsLexer, DynamicLexer
 
 from prompt_toolkit.layout.containers import HSplit, VSplit, DynamicContainer, Window
 from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.formatted_text import HTML
-from prompt_toolkit.widgets import Button, Label, TextArea, Box
+from prompt_toolkit.widgets import Button, Label, TextArea, Box, Frame
 
 from utils.multi_lang import _
-from utils.utils import DialogUtils, fromisoformat
+from utils.utils import DialogUtils, fromisoformat, get_help_with
 from utils.static import cli_style, common_strings
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from wui_components.jans_path_browser import jans_file_browser_dialog, BrowseType
 from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.jans_table import JansTableWidget
-from wui_components.jans_path_browser import JansPathBrowserWidget
 
 class Agama(DialogUtils):
     def __init__(
@@ -31,22 +31,17 @@ class Agama(DialogUtils):
         app: Application
         ) -> None:
 
-
+        
         self.app = app
         self.data = []
         self.first_enter = False
-        self.jans_help = ("<d>              {}\n"
-                "<c>              {}\n"
-                "<Esc>            {}\n"
-                "<Alt + letter>   {}\n"
-                "<Delete>         {}\n"
-                "For More Visit  {}").format(
-                    _("display agama project config"),
-                    _("Manage agama project Configuration"),
-                    _("Close the current dialog"),
-                    _("Navigate to an other tab"),
-                    _("Delete current agama project if possible"),
-                    "https://docs.jans.io/v1.0.6/admin/config-guide/tui/")
+        self.app.agama_module = self
+        self.jans_help = get_help_with(
+                f'<d>              {_("Display Agama project config")}\n'
+                f'<c>              {_("Manage Agama project Configuration")}\n'
+                f'<Delete>         {_("Delete current Agama project")}',
+                without=['d', 'delete']
+                )
 
         self.working_container = JansVerticalNav(
                 myparent=app,
@@ -58,8 +53,7 @@ class Agama(DialogUtils):
                 headerColor=cli_style.navbar_headcolor,
                 entriesColor=cli_style.navbar_entriescolor,
                 hide_headers = True,
-                custom_key_bindings=([('c', self.display_config)]),
-                jans_help=HTML(_("Press <b>d</b> to see deployment details. Press <b>c</b> to view/set projects configurations."))
+                custom_key_bindings=([('c', self.display_config)])
             )
 
         self.main_container =  HSplit([
@@ -75,11 +69,20 @@ class Agama(DialogUtils):
 
         self.main_container.on_page_enter = self.on_page_enter
 
+        self.main_container.jans_help = get_help_with(
+                f'<v>              {_("Display Agama project details")}\n'
+                f'<c>              {_("Manage Agama project configuration")}\n',
+                without=['v', 'enter']
+                )
+
     def on_page_enter(self) -> None:
         self.first_enter = True
         self.get_agama_projects()
 
     def display_config(self, event):
+
+        if not self.working_container.all_data:
+            return
 
         project_data = self.working_container.all_data[self.working_container.selectes]
         project_name = project_data['details']['projectMetadata']['projectName']
@@ -191,14 +194,19 @@ class Agama(DialogUtils):
                 self.app.show_jans_dialog(file_browser_dialog)
 
             export_sample_config_button = Box(Button(export_sample_config_button_title, width=len(export_sample_config_button_title)+4, handler=export_sample_config))
-            export_current_config_button = Box(Button(export_current_config_button_title, width=len(export_current_config_button_title)+4, handler=export_current_config))
+            #export_current_config_button = Box(Button(export_current_config_button_title, width=len(export_current_config_button_title)+4, handler=export_current_config))
             import_configuration_button = Box(Button(import_configuration_button_title, width=len(import_configuration_button_title)+4, handler=import_config))
 
             dialog_title = _("Manage Configuration for Project {}").format(project_name)
             dialog = JansGDialog(
                         self.app,
                         title=dialog_title,
-                        body=HSplit([export_sample_config_button, export_current_config_button, import_configuration_button], width=D(), padding=1),
+                        body=HSplit([
+                            export_sample_config_button,
+                            #export_current_config_button,
+                            import_configuration_button
+                            ],
+                        width=D(), padding=1),
                         buttons=[Button('Close')],
                         width=len(dialog_title)+8
                         )
@@ -264,7 +272,7 @@ class Agama(DialogUtils):
         self.first_enter = False
 
 
-    async def get_projects_coroutine(self, search_str=''):
+    async def get_projects_coroutine(self, search_str='', update_container=True):
         cli_args = {'operation_id': 'get-agama-prj'}
         self.app.start_progressing(_("Retreiving agama projects..."))
         response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
@@ -283,7 +291,8 @@ class Agama(DialogUtils):
             return
 
         self.working_container.all_data = self.data.get('entries', [])
-        self.update_agama_container(search_str=search_str)
+        if update_container:
+            self.update_agama_container(search_str=search_str)
 
 
     def get_agama_projects(self, search_str=''):
@@ -392,10 +401,20 @@ class Agama(DialogUtils):
         project_name = params['data']['details']['projectMetadata'].get('projectName')
 
         async def coroutine():
-            cli_args = {'operation_id': 'get-agama-prj-by-name', 'url_suffix': 'name:{}'.format(project_name)}
+            cli_args = {'operation_id': 'get-agama-prj-by-name', 'url_suffix': f'name:{project_name}'}
             self.app.start_progressing(_("Retrieving details for project {}".format(project_name)))
             response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
             self.app.stop_progressing()
+
+            cli_args_config = {'operation_id': 'get-agama-prj-configs', 'url_suffix':f'name:{project_name}'}
+            self.app.start_progressing(_("Retrieving project configuration..."))
+            response_config = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args_config)
+            self.app.stop_progressing()
+
+            try:
+                result_config = response_config.json()
+            except Exception as e:
+                result_config = None
 
             if response.status_code == 200:
 
@@ -411,18 +430,43 @@ class Agama(DialogUtils):
                     ]
 
                 flow_errors = result['details'].get('flowsError', {})
-
+                buttons = [Button(_("Close"))]
 
                 if flow_errors:
                     jans_table = JansTableWidget(
                         app=self.app,
                         data=list(flow_errors.items()),
                         headers=["Flow", "Error"],
+                        max_height=D(),
                         )
                     body_widgets.append(jans_table)
 
-                buttons = [Button(_("Close"))]
-                dialog = JansGDialog(self.app, body=HSplit(body_widgets), title=_("Details of project {}").format(project_name), buttons=buttons)
+                if result_config:
+                    def show_config(dialog):
+                        config_text_area = TextArea(
+                            lexer=DynamicLexer(lambda: PygmentsLexer.from_filename('.json', sync_from_start=True)),
+                            scrollbar=True,
+                            line_numbers=True,
+                            multiline=True,
+                            read_only=True,
+                            text=str(json.dumps(result_config, indent=2)
+                            )
+                        )
+
+                        config_dialog = JansGDialog(self.app, body=HSplit([config_text_area]), title=_("Project Configuration"), buttons=[Button(_("Close"))])
+                        self.app.show_jans_dialog(config_dialog)
+
+                    config_button_label = _("View Configuration")
+                    config_button = Button(config_button_label, width=len(config_button_label)+4, handler=show_config)
+                    config_button.keep_dialog = True
+                    buttons.append(config_button)
+
+                dialog = JansGDialog(
+                        self.app, 
+                        body=ScrollablePane(content=HSplit(body_widgets), height=self.app.dialog_height, display_arrows=False, show_scrollbar=True),
+                        title=_("Details of project {}").format(project_name),
+                        buttons=buttons
+                        )
                 self.app.show_jans_dialog(dialog)
 
 

@@ -1,8 +1,10 @@
 """This module contains various helpers."""
 
 import base64
+import binascii
 import json
 import logging
+import os
 import pathlib
 import random
 import re
@@ -22,6 +24,7 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
 from ldap3.utils import hashed
+from sprig_aes import sprig_decrypt_aes
 
 from jans.pycloudlib.pki import generate_private_key
 from jans.pycloudlib.pki import generate_public_key
@@ -596,3 +599,63 @@ def generate_signed_ssl_certkey(
 
     sign_csr(cert_fn, csr, ca_key, ca_cert, valid_to=valid_to)
     return cert_fn, key_fn
+
+
+def get_password_from_file(password_file: str) -> str:
+    """Get password from file.
+
+    The contents of file will be loaded by the following priority:
+
+    1. Decode using AES CBC (sprig-aes implementation)
+    2. Decode using vanilla Base64
+    3. Plain text
+
+    Note that to decode using AES CBC, salt/key is loaded from file specified by
+    `CN_OCI_LOCK_SALT_FILE` environment variable (default to `/etc/jans/conf/oci_lock_salt`).
+
+    Args:
+        password_file: Path to file contains password.
+
+    Returns:
+        Plain text password.
+    """
+    with open(password_file) as f:
+        raw_passwd = f.read().strip()
+
+    decoder = os.environ.get("CN_OCI_LOCK_DECODER", "")
+
+    # sprig-aes format
+    if decoder == "sprig-aes":
+        salt_file = os.environ.get("CN_OCI_LOCK_SALT_FILE", "/etc/jans/conf/oci_lock_salt")
+
+        if not os.path.isfile(salt_file):
+            raise RuntimeError(f"Unable to find salt file {salt_file} to decode password file {password_file}")
+
+        with open(salt_file) as f:
+            salt = f.read().strip()
+
+        try:
+            passwd = sprig_decrypt_aes(raw_passwd, salt).decode()
+            logger.info(f"Using sprig-aes to load password from {password_file}")
+        except ValueError as exc:
+            raise ValueError(
+                f"Unable to load password from {password_file} using sprig-aes "
+                f"(either {salt_file} or {password_file} is incompatible with sprig-aes); error={exc}"
+            )
+
+    # base64 format
+    elif decoder == "base64":
+        try:
+            # maybe vanilla base64
+            passwd = base64.b64decode(raw_passwd).decode()
+            logger.warning(f"Using base64 to load password from {password_file}")
+        except (UnicodeDecodeError, binascii.Error) as exc:
+            raise ValueError(f"Unable to load password from {password_file} using base64; error={exc}")
+
+    # other formats
+    else:
+        passwd = raw_passwd
+        logger.warning(f"Using simple method to load password from {password_file}")
+
+    # returns plain text
+    return passwd.strip()

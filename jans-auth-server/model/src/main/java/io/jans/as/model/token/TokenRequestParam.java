@@ -23,6 +23,7 @@ public final class TokenRequestParam {
     public static final String USERNAME = "username";
     public static final String PASSWORD = "password";
     public static final String SCOPE = "scope";
+    public static final String AUTHORIZATION_DETAILS = "authorization_details";
     public static final String ASSERTION = "assertion";
     public static final String REFRESH_TOKEN = "refresh_token";
     public static final String AUTH_REQ_ID = "auth_req_id";
@@ -33,6 +34,8 @@ public final class TokenRequestParam {
     public static final String ACTOR_TOKEN = "actor_token";
     public static final String ACTOR_TOKEN_TYPE = "actor_token_type";
     public static final String REQUESTED_TOKEN_TYPE = "requested_token_type";
+    public static final String REQUEST_CONTEXT = "request_context";
+    public static final String REQUEST_DETAILS = "request_details";
 
 
     // Demonstrating Proof-of-Possession

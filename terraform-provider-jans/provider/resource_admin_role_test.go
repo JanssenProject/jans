@@ -1,17 +1,6 @@
 package provider
 
-import (
-	"context"
-	"errors"
-	"fmt"
-	"testing"
-
-	"github.com/google/go-cmp/cmp"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/jans/terraform-provider-jans/jans"
-)
-
+/*
 func TestAdminUIRole_Mapping(t *testing.T) {
 
 	schema := resourceAdminUIRole()
@@ -115,3 +104,4 @@ func testAccResourceCheckAdminUIRoleDestroy(s *terraform.State) error {
 
 	return nil
 }
+*/

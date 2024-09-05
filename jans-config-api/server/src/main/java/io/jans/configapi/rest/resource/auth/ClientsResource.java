@@ -10,7 +10,6 @@ import com.github.fge.jsonpatch.JsonPatch;
 import com.github.fge.jsonpatch.JsonPatchException;
 import static io.jans.as.model.util.Util.escapeLog;
 import io.jans.as.common.model.registration.Client;
-import io.jans.as.common.service.common.EncryptionService;
 import io.jans.as.common.service.common.InumService;
 import io.jans.as.persistence.model.Scope;
 import io.jans.configapi.core.rest.ProtectedApi;
@@ -28,6 +27,7 @@ import io.jans.configapi.core.util.Jackson;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.model.PagedResult;
+import io.jans.service.EncryptionService;
 import io.jans.util.StringHelper;
 import io.jans.util.security.StringEncrypter.EncryptionException;
 
@@ -296,7 +296,11 @@ public class ClientsResource extends ConfigBaseResource {
     private List<Client> getClients(List<Client> clients) throws EncryptionException {
         if (clients != null && !clients.isEmpty()) {
             for (Client client : clients) {
-                client.setClientSecret(encryptionService.decrypt(client.getClientSecret()));
+                try {
+                    client.setClientSecret(encryptionService.decrypt(client.getClientSecret()));
+                } catch (Exception ex) {
+                    logger.error(" Error while decrypting ClientSecret for '" + client.getClientId() + "', exception is - ",ex);
+                }
             }
         }
         return clients;

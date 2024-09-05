@@ -17,4 +17,3 @@ device as the second step.
 
 During Janssen installation, the administrator will have the option to also install 
 the FIDO2 component. 
-

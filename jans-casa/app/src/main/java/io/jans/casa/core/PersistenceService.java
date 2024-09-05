@@ -3,6 +3,7 @@ package io.jans.casa.core;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import io.jans.agama.model.*;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.PersistenceEntryManagerFactory;
 import io.jans.orm.ldap.impl.LdapEntryManagerFactory;
@@ -33,7 +34,9 @@ import io.jans.casa.core.model.GluuConfiguration;
 import io.jans.casa.core.model.Person;
 import io.jans.casa.misc.Utils;
 import io.jans.casa.service.IPersistenceService;
+
 import org.jboss.weld.inject.WeldInstance;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 
 @ApplicationScoped
@@ -42,6 +45,7 @@ public class PersistenceService implements IPersistenceService {
     private static final int RETRIES = 15;
     private static final int RETRY_INTERVAL = 15;
     private static final String DEFAULT_CONF_BASE = "/etc/jans/conf";
+    private static final String ADMIN_ROLE = "CasaAdmin";
 
     @Inject
     private Logger logger;
@@ -192,12 +196,21 @@ public class PersistenceService implements IPersistenceService {
 
     }
 
-    public PersistenceEntryManager getEntryManager() {
-        return entryManager;
+    public JSONObject getAgamaFlowConfigProperties(String qname) {
+        return Optional.ofNullable(getAgamaFlow(qname, Flow.ATTR_NAMES.META)).map(Flow::getMetadata)
+                .map(FlowMetadata::getProperties).map(JSONObject::new).orElse(null);
     }
 
     public Map<String, String> getCustScriptConfigProperties(String acr) {
         return Optional.ofNullable(getScript(acr)).map(Utils::scriptConfigPropertiesAsMap).orElse(null);
+    }
+
+    public JansOrganization getOrganization() {
+        return get(JansOrganization.class, rootDn);
+    }
+
+    public Set<String> getPersonOCs() {
+        return personCustomObjectClasses;
     }
 
     public String getPersonDn(String id) {
@@ -224,26 +237,19 @@ public class PersistenceService implements IPersistenceService {
         return jsonProperty(staticConfig, "baseDn", "scripts");
     }
 
-    public JansOrganization getOrganization() {
-        return get(JansOrganization.class, rootDn);
-    }
-
     public String getIssuerUrl() {
         return jsonProperty(dynamicConfig, "issuer");
     }
 
-    public Set<String> getPersonOCs() {
-        return personCustomObjectClasses;
+    public PersistenceEntryManager getEntryManager() {
+        return entryManager;
     }
 
     public boolean isAdmin(String userId) {
-        JansOrganization organization = getOrganization();
-        List<String> dns = organization.getManagerGroups();
 
-        Person personMember = get(Person.class, getPersonDn(userId));
-        return personMember != null
-                && personMember.getMemberOf().stream()
-                        .anyMatch(m -> dns.stream().anyMatch(dn -> dn.equals(m)));
+        Person petardo = get(Person.class, getPersonDn(userId));
+        return petardo != null
+                && petardo.getRoles().stream().anyMatch(ADMIN_ROLE::equals);
 
     }
 
@@ -337,6 +343,18 @@ public class PersistenceService implements IPersistenceService {
         }
         return script;
 
+    }
+    
+    private Flow getAgamaFlow(String qname, String... attributes) {
+        
+        try {
+            String dn = String.format("%s=%s,ou=flows,ou=agama,o=jans", Flow.ATTR_NAMES.QNAME, qname);
+            return entryManager.find(dn, Flow.class, attributes);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+        }
+        return null;
+        
     }
     
     private String jsonProperty(JsonNode node, String ...path) {

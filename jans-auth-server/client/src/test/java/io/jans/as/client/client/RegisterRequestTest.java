@@ -14,8 +14,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.testng.annotations.Test;
 
-import java.util.List;
-
 import static org.testng.Assert.assertEquals;
 
 /**
@@ -61,12 +59,12 @@ public class RegisterRequestTest {
 
     @Test
     public void getJSONParameters_forBackchannelLogoutUri_shouldReturnCorrectValue() {
-        final List<String> value = Lists.newArrayList("https://back.com/b1", "https://back.com/b2");
+        final String value = "https://back.com/b1";
 
         RegisterRequest request = new RegisterRequest();
-        request.setBackchannelLogoutUris(value);
+        request.setBackchannelLogoutUri(value);
 
-        assertEquals(value, request.getJSONParameters().getJSONArray(RegisterRequestParam.BACKCHANNEL_LOGOUT_URI.getName()).toList());
+        assertEquals(value, request.getJSONParameters().optString(RegisterRequestParam.BACKCHANNEL_LOGOUT_URI.getName()));
     }
 
     @Test

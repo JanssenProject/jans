@@ -52,10 +52,12 @@ import io.jans.orm.exception.operation.SearchException;
 import io.jans.orm.exception.operation.SearchScopeException;
 import io.jans.orm.impl.BaseEntryManager;
 import io.jans.orm.ldap.operation.LdapOperationService;
+import io.jans.orm.ldap.operation.impl.LdapConnectionProvider;
 import io.jans.orm.ldap.operation.impl.LdapOperationServiceImpl;
 import io.jans.orm.model.AttributeData;
 import io.jans.orm.model.AttributeDataModification;
 import io.jans.orm.model.AttributeDataModification.AttributeModificationType;
+import io.jans.orm.model.AttributeType;
 import io.jans.orm.model.BatchOperation;
 import io.jans.orm.model.DefaultBatchOperation;
 import io.jans.orm.model.EntryData;
@@ -923,6 +925,24 @@ public class LdapEntryManager extends BaseEntryManager<LdapOperationService> imp
             attributes.addAll(listAttributes);
         }
     }
+
+	@Override
+	public <T> AttributeType getAttributeType(String primaryKey, Class<T> entryClass, String propertyName) {
+        // Check entry class
+        checkEntryClass(entryClass, false);
+        String[] objectClasses = getTypeObjectClasses(entryClass);
+
+        LdapOperationService ldapOperationService = getOperationService();
+        for (String objectClass : objectClasses) {
+            Set<String> attributes = ldapOperationService.getAttributes(objectClass);
+            if (attributes.contains(propertyName.toLowerCase())) {
+            	String type = ldapOperationService.getAttributeType(propertyName.toLowerCase());
+            	return new AttributeType(propertyName, propertyName.toLowerCase(), type, null);
+            }
+        }
+        
+        return null;
+	}
 
     private static class CountBatchOperation<T> extends DefaultBatchOperation<T> {
 

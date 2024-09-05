@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.0.21](https://github.com/JanssenProject/jans/compare/agama-v1.0.20...agama-v1.0.21) (2023-12-14)
+
+
+### Features
+
+* **agama:** use a mixed strategy for serialization ([#6883](https://github.com/JanssenProject/jans/issues/6883)) ([00aee0c](https://github.com/JanssenProject/jans/commit/00aee0c26565e8b0b574370610a75139c2155568))
+
+
+### Bug Fixes
+
+* prepare for 1.0.21 release ([#7008](https://github.com/JanssenProject/jans/issues/7008)) ([2132de6](https://github.com/JanssenProject/jans/commit/2132de6683f67bf22d5a863b149770d657073a83))
+* serialization of undesired content when a flow crashes ([#6609](https://github.com/JanssenProject/jans/issues/6609)) ([93fdc02](https://github.com/JanssenProject/jans/commit/93fdc0214755a9b70582bdd55caddc07a302f508))
+
+## [1.0.20](https://github.com/JanssenProject/jans/compare/agama-v1.0.19...agama-v1.0.20) (2023-11-08)
+
+
+### Bug Fixes
+
+* prepare for 1.0.20 release ([c6e806e](https://github.com/JanssenProject/jans/commit/c6e806eb31fed998d52cbef7a7d94c231d913102))
+
 ## [1.0.19](https://github.com/JanssenProject/jans/compare/agama-v1.0.18...agama-v1.0.19) (2023-10-11)
 
 

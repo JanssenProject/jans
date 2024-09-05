@@ -119,7 +119,7 @@ The “special” value `null` can be used (responsibly) to represent the absenc
 
 - Access of an unknown property evaluates to `null`: `x.owner` 
 
-- If a key name does not follow the pattern `[a-zA-Z]( _ | [a-zA-Z] | [0-9] )*` an alternative notation must be employed to retrieve or modify the associated value. Click [here](#maps-and-dot-notation) to learn more 
+- If a key name does not follow the pattern `[a-zA-Z]( _ | [a-zA-Z] | [0-9] )*` an alternative notation must be employed to retrieve or modify the associated value. Click <a href="#maps-and-dot-notation">here</a> to learn more 
 
 ## Flow structure
 
@@ -174,7 +174,7 @@ Input names follow the same naming conventions (patterns) of variables and can b
 !!! Important
     Note the difference between properties and inputs. Properties are parameters that callers of the flow should not control or be interested in. On the other hand, inputs are parameters that callers supply explicitly to make the flow exhibit certain behaviors.
 
-To learn how callers can pass values to input parameters of a check [here](#input-parameters).
+Check this [section](#input-parameters) to learn how callers can pass values to input parameters of a flow.
 
 ### Flow statements
 
@@ -483,7 +483,7 @@ result = RRF "survey.htm" obj
 
 - The template location must be specified with a string literal only (not a variable)
 - Where and how to store templates is an engine-specific detail as well as the file formats supported. See [Assets management](./execution-rules.md#assets-management).
-- Use _map_ variables - not literals _map_s - for the second argument of `RRF`
+- Use _map_ variables - not literal _maps_ - for the second argument of `RRF`
 
 ## Looping
 
@@ -507,7 +507,7 @@ Repeat 3 times max
 ```
 
 </td>
-		<td>A loop that runs 3 iterations at most.<br/>A page is shown at every iteration.<br/>If the value entered by the user matches that of `month` variable, the loop is aborted earlier</td>
+		<td>A loop that runs 3 iterations at most.<br/>A page is shown at every iteration.<br/>If the value entered by the user matches that of <code>month</code> variable, the loop is aborted earlier</td>
 	</tr>
 	<tr>
 <td>
@@ -572,7 +572,7 @@ Iterate over human using attribute
 ```
 
 </td>
-		<td>Iterates over the keys of the map printing both the key and its associated value. To learn about the <code>.$</code> notation see [Maps and dot notation](#maps-and-dot-notation)</td>
+		<td>Iterates over the keys of the map printing both the key and its associated value. To learn about the <code>.$</code> notation see <a href="#maps-and-dot-notation">Maps and dot notation</a></td>
 	</tr>
 	<tr>
 <td>
@@ -699,7 +699,7 @@ Log "subflow returned with success?" outcome.success
 
 In an indented block using the `Override templates` keyword, several string literals can be provided. They specify the paths of the (subflows) templates that will be overriden by the parent and the corresponding new paths. In the example above, templates `path/basic.htm` and `path2/dir/detail.htm` rendered by flow `PersonalInfoGathering` (or its subflows) won't be picked from these locations but from the base path of the current (parent) flow using names `basic.htm` and `tmp/mydetail.htm` respectively. Usage of empty string denotes reusing the same file name than the original file.
 
-Alternatively, every pair of original vs. overriden path can be specified in a single line for more clarity, like this:
+Alternatively, every pair of original vs. new path can be specified in a single line for more clarity, like this:
 
 ```
 outcome = Trigger jo.jo.PersonalInfoGathering
@@ -707,6 +707,9 @@ outcome = Trigger jo.jo.PersonalInfoGathering
     "path2/dir/detail.htm" "tmp/mydetail.htm"
     ...
 ```
+
+!!! Note
+    The new (overriding) templates will be injected with the same data original templates would receive. In other words, this directive only "modifies" the first parameter of `RRF` instructions.  
 
 ## Foreign routines
 

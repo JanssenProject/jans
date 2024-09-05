@@ -15,22 +15,32 @@ import io.jans.model.custom.script.type.authz.ConsentGatheringType;
 import io.jans.model.custom.script.type.authz.DummyConsentGatheringType;
 import io.jans.model.custom.script.type.authzchallenge.AuthorizationChallengeType;
 import io.jans.model.custom.script.type.authzchallenge.DummyAuthorizationChallengeType;
+import io.jans.model.custom.script.type.authzdetails.AuthzDetailType;
+import io.jans.model.custom.script.type.authzdetails.DummyAuthzDetail;
 import io.jans.model.custom.script.type.ciba.DummyEndUserNotificationType;
 import io.jans.model.custom.script.type.ciba.EndUserNotificationType;
+import io.jans.model.custom.script.type.client.ClientAuthnType;
 import io.jans.model.custom.script.type.client.ClientRegistrationType;
+import io.jans.model.custom.script.type.client.DummyClientAuthnType;
 import io.jans.model.custom.script.type.client.DummyClientRegistrationType;
 import io.jans.model.custom.script.type.configapi.ConfigApiType;
 import io.jans.model.custom.script.type.configapi.DummyConfigApiType;
+import io.jans.model.custom.script.type.createuser.CreateUserType;
+import io.jans.model.custom.script.type.createuser.DummyCreateUserType;
 import io.jans.model.custom.script.type.discovery.DiscoveryType;
 import io.jans.model.custom.script.type.discovery.DummyDiscoveryType;
 import io.jans.model.custom.script.type.fido2.DummyFido2ExtensionType;
 import io.jans.model.custom.script.type.fido2.Fido2ExtensionType;
+import io.jans.model.custom.script.type.health.DummyHealthCheck;
+import io.jans.model.custom.script.type.health.HealthCheckType;
 import io.jans.model.custom.script.type.id.DummyIdGeneratorType;
 import io.jans.model.custom.script.type.id.IdGeneratorType;
 import io.jans.model.custom.script.type.idp.DummyIdpType;
 import io.jans.model.custom.script.type.idp.IdpType;
 import io.jans.model.custom.script.type.introspection.DummyIntrospectionType;
 import io.jans.model.custom.script.type.introspection.IntrospectionType;
+import io.jans.model.custom.script.type.lock.DummyLockExtensionType;
+import io.jans.model.custom.script.type.lock.LockExtensionType;
 import io.jans.model.custom.script.type.logout.DummyEndSessionType;
 import io.jans.model.custom.script.type.logout.EndSessionType;
 import io.jans.model.custom.script.type.owner.DummyResourceOwnerPasswordCredentialsType;
@@ -95,7 +105,9 @@ public enum CustomScriptType implements AttributeEnum {
     SPONTANEOUS_SCOPE("spontaneous_scope", "Spontaneous Scopes", SpontaneousScopeType.class, CustomScript.class, "SpontaneousScope", new DummySpontaneousScopeType()),
     END_SESSION("end_session", "End Session", EndSessionType.class, CustomScript.class, "EndSession", new DummyEndSessionType()),
     POST_AUTHN("post_authn", "Post Authentication", PostAuthnType.class, CustomScript.class, "PostAuthn", new DummyPostAuthnType()),
+    CLIENT_AUTHN("client_authn", "Client Authentication", ClientAuthnType.class, CustomScript.class, "ClientAuthn", new DummyClientAuthnType()),
     SELECT_ACCOUNT("select_account", "Select Account", SelectAccountType.class, CustomScript.class, "SelectAccount", new DummySelectAccountType()),
+    CREATE_USER("create_user", "Create User", CreateUserType.class, CustomScript.class, "CreateUser", new DummyCreateUserType()),
     SCIM("scim", "SCIM", ScimType.class, CustomScript.class, "ScimEventHandler", new DummyScimType()),
     CIBA_END_USER_NOTIFICATION("ciba_end_user_notification", "CIBA End User Notification", EndUserNotificationType.class,
             CustomScript.class, "EndUserNotification", new DummyEndUserNotificationType()),
@@ -103,10 +115,13 @@ public enum CustomScriptType implements AttributeEnum {
     PERSISTENCE_EXTENSION("persistence_extension", "Persistence Extension", PersistenceType.class, CustomScript.class, "PersistenceExtension", new DummyPeristenceType()),
     IDP("idp", "Idp Extension", IdpType.class, CustomScript.class, "IdpExtension", new DummyIdpType()),
     DISCOVERY("discovery", "Discovery", DiscoveryType.class, CustomScript.class, "Discovery", new DummyDiscoveryType()),
+    HEALTH_CHECK("health_check", "Health Check", HealthCheckType.class, CustomScript.class, "HealthCheck", new DummyHealthCheck()),
+    AUTHZ_DETAIL("authz_detail", "Authorization Detail", AuthzDetailType.class, CustomScript.class, "AuthzDetail", new DummyAuthzDetail()),
     UPDATE_TOKEN("update_token", "Update Token", UpdateTokenType.class, CustomScript.class, "UpdateToken", new DummyUpdateTokenType()),
     CONFIG_API("config_api_auth", "Config Api Auth", ConfigApiType.class, CustomScript.class,"ConfigApiAuthorization", new DummyConfigApiType()),
     MODIFY_SSA_RESPONSE("modify_ssa_response", "Modify SSA Response", ModifySsaResponseType.class, CustomScript.class, "ModifySsaResponse", new DummyModifySsaResponseType()),
     FIDO2_EXTENSION("fido2_extension", "Fido2 Extension", Fido2ExtensionType.class, CustomScript.class, "Fido2Extension", new DummyFido2ExtensionType()),
+    LOCK_EXTENSION("lock_extension", "Lock Extension", LockExtensionType.class, CustomScript.class, "LockExtension", new DummyLockExtensionType()),
     ;
 
     private String value;

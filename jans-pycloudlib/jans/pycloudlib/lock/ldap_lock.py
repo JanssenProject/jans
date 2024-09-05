@@ -12,6 +12,7 @@ from ldap3 import BASE
 
 from jans.pycloudlib.lock.base_lock import BaseLock
 from jans.pycloudlib.utils import as_boolean
+from jans.pycloudlib.utils import get_password_from_file
 
 logger = logging.getLogger(__name__)
 
@@ -37,13 +38,9 @@ class LdapLock(BaseLock):
     def connection(self):
         user = "cn=Directory Manager"
 
-        password_file = os.environ.get("CN_LOCK_PASSWORD_FILE", "/etc/jans/conf/lock_password")
-        if not os.path.isfile(password_file):
-            password_file = os.environ.get("CN_LDAP_PASSWORD_FILE", "/etc/jans/conf/ldap_password")
+        password_file = os.environ.get("CN_LDAP_PASSWORD_FILE", "/etc/jans/conf/ldap_password")
 
-        with open(password_file) as f:
-            password = f.read().strip()
-
+        password = get_password_from_file(password_file)
         return Connection(self._server, user, password)
 
     def _prepare_schema(self):

@@ -183,8 +183,8 @@ public class StatWS {
                 log.trace("Stat: {}", responseAsStr);
             return Response.ok().entity(responseAsStr).build();
         } catch (WebApplicationException e) {
-            if (log.isErrorEnabled())
-                log.error(e.getMessage(), e);
+            if (log.isTraceEnabled())
+                log.trace(e.getMessage(), e);
             throw e;
         } catch (Exception e) {
             log.error(e.getMessage(), e);

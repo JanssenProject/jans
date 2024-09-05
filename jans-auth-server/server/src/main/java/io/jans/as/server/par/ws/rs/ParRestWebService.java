@@ -75,6 +75,7 @@ public class ParRestWebService {
     @Produces({MediaType.APPLICATION_JSON})
     public Response requestPushedAuthorizationRequest(
             @FormParam("scope") String scope,
+            @FormParam("authorization_details") String authorizationDetails,
             @FormParam("response_type") String responseType,
             @FormParam("client_id") String clientId,
             @FormParam("redirect_uri") String redirectUri,
@@ -121,8 +122,8 @@ public class ParRestWebService {
 
             log.debug("Attempting to request PAR: "
                             + "acrValues = {}, amrValues = {}, originHeaders = {}, codeChallenge = {}, codeChallengeMethod = {}, "
-                            + "customRespHeaders = {}, claims = {}, tokenBindingHeader = {}",
-                    acrValuesStr, amrValuesStr, originHeaders, codeChallenge, codeChallengeMethod, customResponseHeaders, claims, tokenBindingHeader);
+                            + "customRespHeaders = {}, claims = {}, tokenBindingHeader = {}, authorizationDetails = {}",
+                    acrValuesStr, amrValuesStr, originHeaders, codeChallenge, codeChallengeMethod, customResponseHeaders, claims, tokenBindingHeader, authorizationDetails);
 
             List<ResponseType> responseTypes = ResponseType.fromString(responseType, " ");
             ResponseMode responseModeObj = ResponseMode.getByValue(responseMode);
@@ -148,6 +149,7 @@ public class ParRestWebService {
             par.setTtl(parLifetime);
             par.setExpirationDate(Util.createExpirationDate(parLifetime));
             par.getAttributes().setScope(scope);
+            par.getAttributes().setAuthorizationDetails(authorizationDetails);
             par.getAttributes().setNbf(Util.parseIntegerSilently(nbf));
             par.getAttributes().setResponseType(responseType);
             par.getAttributes().setClientId(clientId);
@@ -195,8 +197,9 @@ public class ParRestWebService {
                 throw errorResponseFactory.createBadRequestException(createErrorResponseFromRedirectErrorUri(e.getResponse().getLocation()));
             }
 
-            if (log.isErrorEnabled())
-                log.error(e.getMessage(), e);
+            if (log.isTraceEnabled()) {
+                log.trace(e.getMessage(), e);
+            }
             throw e;
         } catch (Exception e) {
             log.error(e.getMessage(), e);

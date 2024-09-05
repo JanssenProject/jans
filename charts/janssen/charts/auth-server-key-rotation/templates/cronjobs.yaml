@@ -10,9 +10,14 @@ metadata:
 {{- if .Values.additionalLabels }}
 {{ toYaml .Values.additionalLabels | indent 4 }}
 {{- end }}
-{{- if .Values.additionalAnnotations }}
+{{- if or (.Values.additionalAnnotations) (index .Values.global "auth-server-key-rotation" "customAnnotations" "cronjob") }}
   annotations:
+{{- if .Values.additionalAnnotations }}
 {{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+{{- if index .Values.global "auth-server-key-rotation" "customAnnotations" "cronjob" }}
+{{ toYaml (index .Values.global "auth-server-key-rotation" "customAnnotations" "cronjob") | indent 4 }}
+{{- end }}
 {{- end }}
 spec:
   schedule: "@every {{ .Values.keysLife }}h"
@@ -33,8 +38,19 @@ spec:
           dnsConfig:
 {{ toYaml . | indent 12 }}
         {{- end }}
+          serviceAccountName: {{ .Values.global.serviceAccountName }}
           containers:
             - name: {{ include "auth-server-key-rotation.name" . }}
+              {{- if .Values.customScripts }}
+              command:
+                - /bin/sh
+                - -c
+                - |
+                    {{- with .Values.customScripts }}
+                    {{- toYaml . | replace "- " "" | nindent 20}}
+                    {{- end }}
+                    /app/scripts/entrypoint.sh
+              {{- end}}
               image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
               env:
                 {{- include "auth-server-key-rotation.usr-envs" . | indent 16 }}
@@ -59,29 +75,17 @@ spec:
                   name: google-sa
                   subPath: google-credentials.json
                 {{- end }}
+              {{ if eq .Values.global.configSecretAdapter "vault" }}
+                - name: vault
+                  mountPath: /etc/certs/vault_role_id
+                  subPath: vault_role_id
+                - name: vault
+                  mountPath: /etc/certs/vault_secret_id
+                  subPath: vault_secret_id
+              {{- end }}
               {{- with .Values.volumeMounts }}
 {{- toYaml . | nindent 16 }}
               {{- end }}
-              {{- if or (eq .Values.global.cnPersistenceType "couchbase") (eq .Values.global.cnPersistenceType "hybrid") }}
-                {{- if not .Values.global.istio.enabled }}
-                - name: cb-crt
-                  mountPath: "/etc/certs/couchbase.crt"
-                  subPath: couchbase.crt
-                {{- end }}
-                - name: cb-pass
-                  mountPath: {{ .Values.global.cnCouchbasePasswordFile }}
-                  subPath: couchbase_password
-              {{- end }}
-                {{- if or (eq .Values.global.cnPersistenceType "sql") (eq .Values.global.cnPersistenceType "hybrid") }}
-                - name: sql-pass
-                  mountPath: {{ .Values.global.cnSqlPasswordFile }}
-                  subPath: sql_password
-                {{- end }}
-                {{- if or (eq .Values.global.cnPersistenceType "ldap") (eq .Values.global.cnPersistenceType "hybrid") }}
-                - name: ldap-pass
-                  mountPath: {{ .Values.global.cnLdapPasswordFile }}
-                  subPath: ldap_password
-                {{- end }}
               envFrom:
                 - configMapRef:
                     name: {{ .Release.Name }}-config-cm
@@ -131,24 +135,14 @@ spec:
               secret:
                 secretName: {{ .Release.Name }}-google-sa
           {{- end }}
-          {{- if or (eq .Values.global.cnPersistenceType "couchbase") (eq .Values.global.cnPersistenceType "hybrid") }}
-            {{- if not .Values.global.istio.enabled }}
-            - name: cb-crt
+          {{ if eq .Values.global.configSecretAdapter "vault" }}
+            - name: vault
               secret:
-                secretName: {{ .Release.Name }}-cb-crt
-            {{- end }}
-          {{- end }}
-          {{- if or (eq .Values.global.cnPersistenceType "sql") (eq .Values.global.cnPersistenceType "hybrid") }}
-            - name: sql-pass
-              secret:
-                secretName: {{ .Release.Name }}-sql-pass
-          {{- end }}
-          {{- if or (eq .Values.global.cnPersistenceType "ldap") (eq .Values.global.cnPersistenceType "hybrid") }}
-            - name: ldap-pass
-              secret:
-                secretName: {{ .Release.Name }}-ldap-pass
+                secretName: {{ .Release.Name }}-vault
                 items:
-                - key: ldap_password
-                  path: ldap_password
+                - key: vault_role_id
+                  path: vault_role_id
+                - key: vault_secret_id
+                  path: vault_secret_id
           {{- end }}
           restartPolicy: Never

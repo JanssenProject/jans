@@ -11,7 +11,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.jans.orm.model.base.SimpleUser;
+import io.jans.orm.sql.model.SimpleUser;
 import io.jans.orm.search.filter.Filter;
 import io.jans.orm.sql.impl.SqlEntryManager;
 import io.jans.orm.sql.persistence.SqlEntryManagerSample;

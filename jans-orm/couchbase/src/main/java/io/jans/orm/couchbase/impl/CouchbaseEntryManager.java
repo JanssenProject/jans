@@ -33,6 +33,7 @@ import io.jans.orm.impl.GenericKeyConverter;
 import io.jans.orm.impl.model.ParsedKey;
 import io.jans.orm.model.AttributeData;
 import io.jans.orm.model.AttributeDataModification;
+import io.jans.orm.model.AttributeType;
 import io.jans.orm.model.AttributeDataModification.AttributeModificationType;
 import io.jans.orm.model.BatchOperation;
 import io.jans.orm.model.DefaultBatchOperation;
@@ -934,6 +935,11 @@ public class CouchbaseEntryManager extends BaseEntryManager<CouchbaseOperationSe
 	}
 
     @Override
+	protected boolean hasMapSupport() {
+		return true;
+	}
+
+    @Override
 	protected Object getNativeDateAttributeValue(Date dateValue) {
 		return encodeTime(dateValue);
     }
@@ -1011,5 +1017,9 @@ public class CouchbaseEntryManager extends BaseEntryManager<CouchbaseOperationSe
 		return ((CouchbaseOperationService) operationService).fromInternalAttributes(internalAttributeNames);
 	}
 
+	@Override
+	public <T> AttributeType getAttributeType(String primaryKey, Class<T> entryClass, String propertyName) {
+		return new AttributeType(propertyName, propertyName.toLowerCase(), "JSON", null);
+	}
 
 }

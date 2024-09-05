@@ -1,5 +1,10 @@
 {
+  "serviceName": "jans-config-api",
   "configOauthEnabled": ${configOauthEnabled},
+  "disableLoggerTimer": false,
+  "disableAuditLogger": false,
+  "customAttributeValidationEnabled": true,
+  "acrValidationEnabled": true,
   "apiApprovedIssuer": ["${apiApprovedIssuer}"],
   "apiProtectionType": "${apiProtectionType}",
   "apiClientId": "${jca_client_id}",
@@ -10,11 +15,14 @@
   "authOpenidIntrospectionUrl": "${introspectionEndpoint}",
   "authOpenidTokenUrl": "${tokenEndpoint}",
   "authOpenidRevokeUrl": "${tokenRevocationEndpoint}",
-  "smallryeHealthRootPath": "/health-check",
   "disableJdkLogger":true,
   "loggingLevel":"INFO",
   "loggingLayout":"text",
   "externalLoggerConfiguration":"",
+  "maxCount": 200,
+  "acrExclusionList": [
+    "simple_password_auth"
+  ],
   "exclusiveAuthScopes": [
     "jans_stat",
     "https://jans.io/scim/users.read",
@@ -40,7 +48,7 @@
    "userMandatoryAttributes": [
     "mail",
     "displayName",
-    "jansStatus",
+    "status",
     "userPassword",
     "givenName"
   ],
@@ -65,6 +73,58 @@
     "enabled": true,
     "ignoreHttpMethod": [
       "@jakarta.ws.rs.GET()"
+    ]
+  },
+  "assetMgtConfiguration":{
+    "assetMgtEnabled":true,
+    "assetServerUploadEnabled":true,
+    "fileExtensionValidationEnabled":true,
+    "moduleNameValidationEnabled":true,
+    "assetBaseDirectory":"/opt/jans/jetty/%s/custom",
+    "jansServiceModule":[
+      "jans-auth",
+      "jans-casa",
+      "jans-config-api",
+      "jans-fido2",
+      "jans-link",
+      "jans-lock",
+      "jans-scim",
+      "jans-keycloak-link"
+    ],
+    "assetDirMapping":[
+      {
+        "directory":"i18n",
+        "type":[
+          "properties"
+        ],
+        "description":"Resource bundle file."
+      },
+      {
+        "directory":"libs",
+        "type":[
+          "jar"
+        ],
+        "description":"java archive library."
+      },
+      {
+        "directory":"pages",
+        "type":[
+          "xhtml"
+        ],
+        "description":"Web pages."
+      },
+      {
+        "directory":"static",
+        "type":[
+          "js",
+          "css",
+          "png",
+          "gif",
+          "jpg",
+          "jpeg"
+        ],
+        "description":"Static resources like Java-script, style-sheet and images."
+      }
     ]
   },
   "plugins": [
@@ -97,8 +157,18 @@
       "name": "saml",
       "description": "saml plugin",
       "className": "io.jans.configapi.plugin.saml.rest.ApiApplication"
+    },
+	{
+      "name": "kc-link",
+      "description": "kc-link plugin",
+      "className": "io.jans.configapi.plugin.kc.link.rest.ApiApplication"
+    },
+	{
+      "name": "lock",
+      "description": "lock plugin",
+      "className": "io.jans.configapi.plugin.lock.rest.ApiApplication"
     }
-	
+
   ]
 }
 

@@ -19,6 +19,9 @@ on:
       - "!jans-pycloudlib/CHANGELOG.md"
       - "!jans-pycloudlib/jans/pycloudlib/version.py"
       - "!**.md"
+permissions:
+  contents: read
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -26,9 +29,14 @@ jobs:
       matrix:
         python-version: ["3.10", "3.11"]
     steps:
-    - uses: actions/checkout@v3
+    - name: Harden Runner
+      uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
+      with:
+        egress-policy: audit
+
+    - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
@@ -40,7 +48,7 @@ jobs:
         cd ./jans-pycloudlib
         tox
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@eaaf4bedf32dbdc6b720b63067d99c4d77d6047d # v3.1.4
       with:
         file: ./jans-pycloudlib/coverage.xml
         files: ./jans-pycloudlib/coverage1.xml,./jans-pycloudlib/coverage2.xml

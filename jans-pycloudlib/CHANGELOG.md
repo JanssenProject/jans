@@ -1,5 +1,39 @@
 # Changelog
 
+## [1.0.22](https://github.com/JanssenProject/jans/compare/jans-pycloudlib-v1.0.21...jans-pycloudlib-v1.0.22) (2024-01-22)
+
+
+### Bug Fixes
+
+* **jans-pycloudlib:** specify decoder to load password from file ([#7300](https://github.com/JanssenProject/jans/issues/7300)) ([6b0a450](https://github.com/JanssenProject/jans/commit/6b0a450f03d432ff143ec0d2870456ddda6f9a5d))
+* prepare for 1.0.22 release ([#7455](https://github.com/JanssenProject/jans/issues/7455)) ([4bf2562](https://github.com/JanssenProject/jans/commit/4bf2562050c86317658259c72bb641780a283579))
+
+## [1.0.21](https://github.com/JanssenProject/jans/compare/jans-pycloudlib-v1.0.20...jans-pycloudlib-v1.0.21) (2023-12-14)
+
+
+### Features
+
+* **docker-jans:** automatically update schema of sql/spanner tables ([#6634](https://github.com/JanssenProject/jans/issues/6634)) ([2d86835](https://github.com/JanssenProject/jans/commit/2d868351ec9d8a8649ac804e2584aa7447e6c36f))
+
+
+### Bug Fixes
+
+* prepare for 1.0.21 release ([#7008](https://github.com/JanssenProject/jans/issues/7008)) ([2132de6](https://github.com/JanssenProject/jans/commit/2132de6683f67bf22d5a863b149770d657073a83))
+
+## [1.0.20](https://github.com/JanssenProject/jans/compare/jans-pycloudlib-v1.0.19...jans-pycloudlib-v1.0.20) (2023-11-08)
+
+
+### Features
+
+* **jans-pycloudlib:** add lock to prevent race condition ([#6329](https://github.com/JanssenProject/jans/issues/6329)) ([9dd82da](https://github.com/JanssenProject/jans/commit/9dd82da5c87ee829c73a1135ce8740b8353f8ab5))
+
+
+### Bug Fixes
+
+* **jans-pycloudlib:** handle operational error when creating table for lock ([#6347](https://github.com/JanssenProject/jans/issues/6347)) ([25633cf](https://github.com/JanssenProject/jans/commit/25633cf9ab019fdf60a65d2c27f2665c359abab7))
+* **jans-pycloudlib:** incorrect persistence entry check for ldap and couchbase ([#6297](https://github.com/JanssenProject/jans/issues/6297)) ([87ac453](https://github.com/JanssenProject/jans/commit/87ac453c121b9bdd2dfd7cb4ebb7b8628f322474))
+* prepare for 1.0.20 release ([c6e806e](https://github.com/JanssenProject/jans/commit/c6e806eb31fed998d52cbef7a7d94c231d913102))
+
 ## [1.0.19](https://github.com/JanssenProject/jans/compare/jans-pycloudlib-v1.0.18...jans-pycloudlib-v1.0.19) (2023-10-11)
 
 

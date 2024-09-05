@@ -33,12 +33,7 @@ public class CryptoProviderFactory {
         if (webKeyStorage == WebKeyStorage.KEYSTORE) {
             cryptoProvider = getKeyStoreProvider(configuration);
         } else if (webKeyStorage == WebKeyStorage.PKCS11) {
-            cryptoProvider = new ElevenCryptoProvider(
-                    configuration.getJansElevenGenerateKeyEndpoint(),
-                    configuration.getJansElevenSignEndpoint(),
-                    configuration.getJansElevenVerifySignatureEndpoint(),
-                    configuration.getJansElevenDeleteKeyEndpoint(),
-                    configuration.getJansElevenTestModeToken());
+            throw new UnsupportedOperationException("Method not implemented.");
         }
 
         if (cryptoProvider != null && configuration.getKeyRegenerationEnabled()) { // set interval only if re-generation is enabled

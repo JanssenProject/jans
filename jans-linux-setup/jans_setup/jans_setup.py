@@ -112,7 +112,6 @@ sys.path.insert(0, base.pylib_dir)
 from setup_app.utils.package_utils import packageUtils
 
 packageUtils.check_and_install_packages()
-sys.path.insert(0, os.path.join(base.pylib_dir, 'gcs'))
 
 if argsp.download_exit:
     downloads.download_all()
@@ -142,19 +141,16 @@ if base.current_app.profile == 'jans':
     from setup_app.installers.couchbase import CouchbaseInstaller
     from setup_app.installers.scim import ScimInstaller
     from setup_app.installers.fido import FidoInstaller
-    from setup_app.installers.eleven import ElevenInstaller
     from setup_app.installers.jans_link import JansLinkInstaller
     from setup_app.installers.jans_keycloak_link import JansKCLinkInstaller
     from setup_app.installers.jans_casa import CasaInstaller
 
     from setup_app.installers.jans_saml import JansSamlInstaller
-    
+    from setup_app.installers.jans_lock import JansLockInstaller
 
 from setup_app.installers.config_api import ConfigApiInstaller
 from setup_app.installers.jans_cli import JansCliInstaller
 from setup_app.installers.rdbm import RDBMInstaller
-# from setup_app.installers.oxd import OxdInstaller
-
 
 if base.snap:
     try:
@@ -266,17 +262,19 @@ configApiInstaller = ConfigApiInstaller()
 if Config.profile == 'jans':
     fidoInstaller = FidoInstaller()
     scimInstaller = ScimInstaller()
-    elevenInstaller = ElevenInstaller()
     casa_installer = CasaInstaller()
     jans_link_installer = JansLinkInstaller()
     jans_keycloak_link_installer = JansKCLinkInstaller()
     jans_saml_installer = JansSamlInstaller()
+    jans_lock_installer = JansLockInstaller()
 
 jansCliInstaller = JansCliInstaller()
 
-# oxdInstaller = OxdInstaller()
-
 rdbmInstaller.packageUtils = packageUtils
+
+if not Config.installed_instance:
+    Config.set_mapping_locations()
+
 
 if Config.installed_instance:
 
@@ -420,12 +418,12 @@ def main():
 
             jansInstaller.order_services()
 
-            if (Config.installed_instance and 'installHttpd' in Config.addPostSetupService) or (
-                    not Config.installed_instance and Config.installHttpd):
+            if (Config.installed_instance and 'install_httpd' in Config.addPostSetupService) or (
+                    not Config.installed_instance and Config.install_httpd):
                 httpdinstaller.configure()
 
-            if (Config.installed_instance and 'installOxAuth' in Config.addPostSetupService) or (
-                    not Config.installed_instance and Config.installOxAuth):
+            if (Config.installed_instance and 'install_jans_auth' in Config.addPostSetupService) or (
+                    not Config.installed_instance and Config.install_jans_auth):
                 jansAuthInstaller.start_installation()
 
             if (Config.installed_instance and configApiInstaller.install_var in Config.addPostSetupService) or (
@@ -436,17 +434,13 @@ def main():
 
             if Config.profile == 'jans':
 
-                if (Config.installed_instance and 'installFido2' in Config.addPostSetupService) or (
-                        not Config.installed_instance and Config.installFido2):
+                if (Config.installed_instance and 'install_fido2' in Config.addPostSetupService) or (
+                        not Config.installed_instance and Config.install_fido2):
                     fidoInstaller.start_installation()
 
                 if (Config.installed_instance and 'install_scim_server' in Config.addPostSetupService) or (
                         not Config.installed_instance and Config.install_scim_server):
                     scimInstaller.start_installation()
-
-                if (Config.installed_instance and elevenInstaller.install_var in Config.addPostSetupService) or (
-                        not Config.installed_instance and Config.get(elevenInstaller.install_var)):
-                    elevenInstaller.start_installation()
 
                 if (Config.installed_instance and casa_installer.install_var in Config.addPostSetupService) or (
                         not Config.installed_instance and Config.get(casa_installer.install_var)):
@@ -470,8 +464,10 @@ def main():
                         not Config.installed_instance and Config.get(jans_saml_installer.install_var)):
                     jans_saml_installer.start_installation()
 
-            # if (Config.installed_instance and 'installOxd' in Config.addPostSetupService) or (not Config.installed_instance and Config.installOxd):
-            #    oxdInstaller.start_installation()
+                if (Config.installed_instance and jans_lock_installer.install_var in Config.addPostSetupService) or (
+                        not Config.installed_instance and Config.get(jans_lock_installer.install_var)):
+                    jans_lock_installer.start_installation()
+
             jansInstaller.post_install_before_saving_properties()
             jansProgress.progress(PostSetup.service_name, "Saving properties")
             propertiesUtils.save_properties()

@@ -1,13 +1,8 @@
 package io.jans.ca.plugin.adminui.utils;
 
 public enum ErrorResponse {
-    GET_ACCESS_TOKEN_ERROR("Error in getting access token."),
     GET_API_PROTECTION_TOKEN_ERROR("Error in generating token to access Jans Config Api endpoints."),
-    GET_USER_INFO_ERROR("Error in getting User-Info."),
-    AUTHORIZATION_CODE_BLANK("Bad Request: Authourization `code` blank or empty."),
     USER_INFO_JWT_BLANK("User-Info jwt is blank or empty. Generating token with default scopes."),
-    CODE_OR_TOKEN_REQUIRED("Bad Request: Either `code` or `access_token` is required."),
-    CODE_VERIFIER_REQUIRED("Bad Request: `code_verifier` is required."),
     CHECK_LICENSE_ERROR("Error in checking license status. Check logs for further details."),
     ERROR_IN_LICENSE_CONFIGURATION_VALIDATION("Error in validating license configuration."),
     ACTIVATE_LICENSE_ERROR("Error in activating License. Check logs for further details."),
@@ -24,10 +19,14 @@ public enum ErrorResponse {
     ROLE_PERMISSION_MAPPING_PRESENT("Role permission mapping already present. Please use HTTP PUT request to modify mapping."),
     GET_ADMIUI_ROLES_ERROR("Error in fetching Admin UI roles."),
     SAVE_ADMIUI_ROLES_ERROR("Error in saving Admin UI roles."),
+    GET_ADMIUI_CONFIG_ERROR("Error in fetching Admin UI configuration."),
+    SAVE_ADMIUI_CONFIG_ERROR("Error in saving Admin UI configuration."),
+    ADMIUI_ROLE_ALREADY_PRESENT("Admin UI role already present."),
     EDIT_ADMIUI_ROLES_ERROR("Error in editing Admin UI roles."),
     DELETE_ADMIUI_ROLES_ERROR("Error in deleting Admin UI roles."),
     GET_ADMIUI_PERMISSIONS_ERROR("Error in fetching Admin UI permissions."),
     SAVE_ADMIUI_PERMISSIONS_ERROR("Error in saving Admin UI permissions."),
+    ADMIUI_PERMISSIONS_ALREADY_PRESENT("Permission already present."),
     EDIT_ADMIUI_PERMISSIONS_ERROR("Error in editing Admin UI permissions."),
     DELETE_ADMIUI_PERMISSIONS_ERROR("Error in deleting Admin UI permissions."),
     ROLE_MARKED_UNDELETABLE("Role cannot be deleted. Please set ‘deletable’ property of role to true."),
@@ -43,7 +42,23 @@ public enum ErrorResponse {
     LICENSE_NOT_PRESENT("Active license not present."),
     LICENSE_ALREADY_ACTIVE("The license has been already activated."),
     LICENSE_CONFIG_ABSENT("License configuration is not present."),
-    SCAN_HOSTNAME_MISSING("SCAN api hostname is missing in configuration.")
+    SCAN_HOSTNAME_MISSING("SCAN api hostname is missing in configuration."),
+    WEBHOOK_ENTRY_EMPTY("Webhook entry is empty."),
+    WEBHOOK_NAME_EMPTY("Webhook name is required."),
+    WEBHOOK_URL_EMPTY("Webhook URL is required."),
+    WEBHOOK_HTTP_METHOD_EMPTY("HTTP method for webhook is required."),
+    WEBHOOK_REQUEST_BODY_EMPTY("HTTP request-body for webhook is required for POST/PUT/PATCH request."),
+    WEBHOOK_REQUEST_BODY_PARSING_ERROR("Error in parsing request body."),
+    WEBHOOK_SAVE_ERROR("Error in saving webhook."),
+    WEBHOOK_SEARCH_ERROR("Error in fetching webhook."),
+    WEBHOOK_TRIGGER_ERROR("Error in triggering webhook."),
+    WEBHOOK_UPDATE_ERROR("Error in updating webhook."),
+    WEBHOOK_ID_MISSING("Webhook Id is missing in request."),
+    WEBHOOK_DELETE_ERROR("Error in removing webhook."),
+    WEBHOOK_RECORD_NOT_EXIST("Record does not exist."),
+    NO_WEBHOOK_FOUND("No webhook mapped to feature."),
+    WEBHOOK_CONTENT_TYPE_REQUIRED("Content-Type required."),
+    FETCH_DATA_ERROR("Error in fetching data.")
     ;
 
     private final String description;

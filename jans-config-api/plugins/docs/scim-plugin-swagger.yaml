@@ -12,7 +12,6 @@ info:
 servers:
 - url: https://jans.io/
   description: The Jans server
-  variables: {}
 tags:
 - name: SCIM - Config Management
 paths:
@@ -113,7 +112,11 @@ components:
           type: boolean
         disableJdkLogger:
           type: boolean
+        disableLoggerTimer:
+          type: boolean
         useLocalCache:
+          type: boolean
+        skipDefinedPasswordValidation:
           type: boolean
     JsonPatch:
       type: object

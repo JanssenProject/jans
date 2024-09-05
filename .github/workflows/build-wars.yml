@@ -5,13 +5,14 @@ on:
     branches:
       - main
     paths:
-      - 'keycloak-integration/**'
+      - 'jans-keycloak-integration/**'
+      - 'jans-keycloak-link/**'
       - 'agama/**'
       - 'jans-auth-server/**'
+      - 'jans-lock/**'
       - 'jans-bom/**'
       - 'jans-config-api/**'
       - 'jans-core/**'
-      - 'jans-eleven/**'
       - 'jans-fido2/**'
       - 'jans-orm/**'
       - 'jans-scim/**'
@@ -21,33 +22,40 @@ on:
    branches:
       - main
    paths:
-      - 'keycloak-integration/**'
+      - 'jans-keycloak-integration/**'
+      - 'jans-keycloak-link/**'
       - 'agama/**'
       - 'jans-auth-server/**'
+      - 'jans-lock/**'
       - 'jans-bom/**'
       - 'jans-config-api/**'
       - 'jans-core/**'
-      - 'jans-eleven/**'
       - 'jans-fido2/**'
       - 'jans-orm/**'
       - 'jans-scim/**'
       - 'jans-link/**'
 jobs:
   build:
+    if: github.repository == 'JanssenProject/jans'
     name: Build wars
     runs-on: ubuntu-latest
     continue-on-error: true
     strategy:
       max-parallel: 11
       matrix:
-        fldrpath: ['jans-bom','agama','jans-fido2','jans-core','jans-eleven','jans-auth-server','jans-orm','jans-config-api','jans-scim', 'keycloak-integration', 'jans-link']
+        fldrpath: ['jans-bom','agama','jans-fido2','jans-core','jans-auth-server','jans-orm','jans-config-api','jans-scim','jans-keycloak-integration','jans-link','jans-keycloak-link','jans-lock']
     steps:
+    - name: Harden Runner
+      uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
+      with:
+        egress-policy: audit
+
     - name : Variables
       run: |
          echo ${{ github.repository }}
          echo ${{ github.actor }}
 
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       with:
           repository: ${{ github.repository }}
 
@@ -74,10 +82,10 @@ jobs:
         fi
         echo "$DIRECTORIES_CHANGED"
 
-    - uses: actions/setup-java@v3
+    - uses: actions/setup-java@387ac29b308b003ca37ba93a6cab5eb57c8f5f93 # v4.0.0
       if: contains(env.DIRECTORIES_CHANGED, matrix.fldrpath)
       with:
-          java-version: '11'
+          java-version: '17'
           distribution: 'zulu'
 
     - name: Publish package

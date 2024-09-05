@@ -8,10 +8,11 @@ package io.jans.as.server.dev;
 
 import io.jans.as.model.config.BaseDnConfiguration;
 import io.jans.as.model.config.StaticConfiguration;
-import io.jans.as.model.error.ErrorMessage;
 import io.jans.as.model.error.ErrorMessages;
 import io.jans.as.model.jwk.JSONWebKeySet;
 import io.jans.as.server.util.ServerUtil;
+import io.jans.model.error.ErrorMessage;
+
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

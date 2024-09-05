@@ -81,12 +81,13 @@ from prompt_toolkit.keys import Keys
 from cli_style import style
 from utils.multi_lang import _
 from utils.static import cli_style, common_strings
+from utils.utils import common_data, get_help_with
 from utils.validators import IntegerValidator
+from utils import background_tasks
 from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.jans_nav_bar import JansNavBar
 from wui_components.jans_message_dialog import JansMessageDialog
 from wui_components.jans_path_browser import jans_file_browser_dialog, BrowseType
-
 home_dir = Path.home()
 config_dir = home_dir.joinpath('.config')
 config_dir.mkdir(parents=True, exist_ok=True)
@@ -106,6 +107,7 @@ class JansCliApp(Application):
     entries_per_page = 20 # we can make this configurable
 
     def __init__(self):
+        common_data.app = self
         self.executor = concurrent.futures.ThreadPoolExecutor(max_workers=5)
         self.set_keybindings()
         self.init_logger()
@@ -124,18 +126,7 @@ class JansCliApp(Application):
         self.browse_path = '/'
         self.app_configuration = {}
         self.current_page = None
-        self.jans_help = ("<Enter>          {} \n"
-                "<Esc>            {}\n"
-                "<Alt + letter>   {}\n"
-                "<d>              {}\n"
-                "<Delete>         {}\n"
-                "For More Visit  {}").format(
-                    _("Confirm or Edit current selection"),
-                    _("Close the current dialog"),
-                    _("Navigate to an other tab"),
-                    _("Display current item in JSON format if possible"),
-                    _("Delete current selection if possible"),
-                    "https://docs.jans.io/v1.0.6/admin/config-guide/tui/")
+        self.jans_help = get_help_with()
 
         self.not_implemented = Frame(
                             body=HSplit([Label(text=_("Not imlemented yet")), Button(text=_("MyButton"))], width=D()),
@@ -184,6 +175,7 @@ class JansCliApp(Application):
                 full_screen=True,
                 mouse_support=True, ## added
             )
+
         self.main_nav_selection_changed(self.nav_bar.navbar_entries[0][0])
         self.plugins_initialised = False
 
@@ -243,7 +235,6 @@ class JansCliApp(Application):
 
     def _load_plugins(self) -> None:
         # check if admin-ui plugin is available:
-
         plugin_dir = os.path.join(cur_dir, 'plugins')
         for plugin_file in sorted(Path(plugin_dir).glob('*/main.py')):
             if plugin_file.parent.joinpath('.enabled').exists():
@@ -253,6 +244,7 @@ class JansCliApp(Application):
                 spec.loader.exec_module(plugin)
                 plugin_object = plugin.Plugin(self)
                 self._plugins.append(plugin_object)
+
 
     def init_plugins(self) -> None:
         """Initilizse plugins
@@ -415,16 +407,20 @@ class JansCliApp(Application):
 
 
     def check_available_plugins(self) -> None:
-        """Disables plugins when cli object is ready"""
+        """Disables plugins when cli object is ready.
+        If a plugin is not deployed on config-api-server, it should be removed from TUI.
+        """
 
         if self.cli_object_ok:
+            self.create_background_task(background_tasks.get_attributes_coroutine(self))
+            self.create_background_task(background_tasks.get_persistence_type())
             response = self.cli_requests({'operation_id': 'get-plugins'})
             if response.ok:
                 plugins = response.json()
                 for plugin in plugins:
                     self.available_plugins.append(plugin['name'])
 
-                for pp in self._plugins:
+                for pp in self._plugins[:]:
                     if getattr(pp, 'server_side_plugin', False) and pp.pid not in self.available_plugins:
                         self.disable_plugin(pp.pid)
                     if hasattr(pp, 'on_cli_object_ready'):
@@ -627,13 +623,12 @@ class JansCliApp(Application):
         focus_previous(ev)
 
     def help(self,ev: KeyPressEvent) -> None:
-        
         plugin = self._plugins[self.nav_bar.cur_navbar_selection]
         if callable(getattr(plugin, "help", None)):
             plugin.help()
         else:
-            self.show_message(_("Help"),
-                self.jans_help,tobefocused=self.center_container)
+            help_msg = getattr(plugin, "jans_help", None) or self.jans_help
+            self.show_message(_("Help"), help_msg, tobefocused=self.center_container)
 
     def escape(self,ev: KeyPressEvent) -> None:
         try:
@@ -675,9 +670,14 @@ class JansCliApp(Application):
             text_type: Optional[str] = 'string',
             jans_list_type: Optional[bool] = False,
             password: Optional[bool] = False,
+            next_widget = None
             ) -> AnyContainer:
 
-        title += ': '
+        if value is None:
+            value = ''
+
+        if jans_list_type and isinstance(value, list):
+            value = '\n'.join(value)
 
         ta = TextArea(
                 text=str(value),
@@ -702,10 +702,16 @@ class JansCliApp(Application):
         ta.window.jans_name = name
         ta.window.jans_help = jans_help
 
+        label_widget = Window(FormattedTextControl(title+': '), width=len(title)+2, style=style, height=height)
+        titled_text_widgets = [label_widget, ta]
+        if next_widget:
+            titled_text_widgets.append(Window(width=1))
+            titled_text_widgets.append(next_widget)
 
-
-        v = VSplit([Window(FormattedTextControl(title), width=len(title)+1, style=style, height=height), ta])
+        v = VSplit(titled_text_widgets)
         v.me = ta
+        v.title = title
+        v.label_widget = label_widget
 
         if jans_list_type:
             v.jans_list_type = True
@@ -727,11 +733,12 @@ class JansCliApp(Application):
         if values and not (isinstance(values[0], tuple) or isinstance(values[0], list)):
             values = [(o,o) for o in values]
         cbl = CheckboxList(values=values)
+        cbl.default_style=widget_style
         cbl.current_values = current_values
         cbl.window.jans_name = name
         cbl.window.jans_help = jans_help
 
-        v = VSplit([Window(FormattedTextControl(title), width=len(title)+1, style=style,), cbl], style=widget_style)
+        v = VSplit([Window(FormattedTextControl(title), width=len(title)+1, style=style), cbl], style=widget_style)
         v.me = cbl
 
         return v
@@ -849,16 +856,21 @@ class JansCliApp(Application):
     def getButtonWithHandler(
                 self, 
                 text: AnyFormattedText,
-                name: AnyFormattedText,
-                jans_help: AnyFormattedText,
-                handler: Callable= None, 
+                name: Optional[AnyFormattedText] = '',
+                jans_help: Optional[AnyFormattedText] = '',
+                handler: Optional[Callable] = None,
+                centered: Optional[bool] = False,
                 ) -> Button:
-
-        b = Button(text=text, width=len(text)+2)
-        b.window.jans_name = name
-        b.window.jans_help = jans_help
+        text_ = _(text)
+        b = Button(text=text_, width=len(text_)+4)
+        if name:
+            b.window.jans_name = name
+        if jans_help:
+            b.window.jans_help = jans_help
         if handler:
             b.handler = lambda:handler(name)
+        if centered:
+            return VSplit([b], align=HorizontalAlign.CENTER)
         return b
 
     def update_status_bar(self) -> None:
@@ -1020,6 +1032,9 @@ class JansCliApp(Application):
             message: AnyFormattedText,
             confirm_handler: Optional[Callable]=None
         ) -> Dialog:
+
+        if isinstance(message, str):
+            message = HTML(message)
         body = VSplit([Label(message)], align=HorizontalAlign.CENTER)
         buttons = [Button(_("No")), Button(_("Yes"), handler=confirm_handler)]
         dialog = JansGDialog(self, title=_("Confirmation"), body=body, buttons=buttons, width=self.dialog_width-20)
