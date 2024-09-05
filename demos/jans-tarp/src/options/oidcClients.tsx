@@ -70,8 +70,8 @@ function createData(
     };
 }
 
-function Row(props: { row: ReturnType<typeof createData> }) {
-    const { row } = props;
+function Row(props: { row: ReturnType<typeof createData>, notifyOnDataChange }) {
+    const { row, notifyOnDataChange } = props;
     const [open, setOpen] = React.useState(false);
     const lifetime = Math.floor((row.expireAt - moment().toDate().getTime()) / 1000);
 
@@ -88,11 +88,16 @@ function Row(props: { row: ReturnType<typeof createData> }) {
                 chrome.storage.local.set({ oidcClients: clientArr.filter(obj => obj.clientId !== row.clientId) });
             }
         });
+        handleNotifyOnDataChange();
     }
+
+    const handleNotifyOnDataChange = () => {
+        notifyOnDataChange();
+    };
 
     return (
         <React.Fragment>
-            <AuthFlowInputs isOpen={open} handleDialog={handleDialog} client={row} />
+            <AuthFlowInputs isOpen={open} handleDialog={handleDialog} client={row} notifyOnDataChange={handleNotifyOnDataChange}/>
             <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
                 <TableCell>
                     <Tooltip title="Delete Client from jans-tarp">
@@ -113,7 +118,12 @@ function Row(props: { row: ReturnType<typeof createData> }) {
                     <Grid item xs={8}>
                         <Tooltip title="Trigger authentication flow">
                             <IconButton aria-label="Trigger Auth Flow">
-                                <OfflineBoltIcon sx={{ color: green[500] }} onClick={() => setOpen(true)} />
+                                <OfflineBoltIcon
+                                    sx={{ color: green[500] }}
+                                    onClick={() => {
+                                        setOpen(true);
+                                        notifyOnDataChange();
+                                    }} />
                             </IconButton>
                         </Tooltip>
                     </Grid>
@@ -123,15 +133,20 @@ function Row(props: { row: ReturnType<typeof createData> }) {
     );
 }
 
-export default function OIDCClients(data) {
+export default function OIDCClients({ data, notifyOnDataChange }) {
     const [modelOpen, setModelOpen] = React.useState(false);
     const [drawerOpen, setDrawerOpen] = React.useState(false);
     const handleDialog = (isOpen) => {
         setModelOpen(isOpen);
+        notifyOnDataChange();
     };
 
     const handleDrawer = (isOpen) => {
         setDrawerOpen(isOpen);
+    };
+
+    const handleNotifyOnDataChange = () => {
+        notifyOnDataChange();
     };
 
     return (
@@ -157,9 +172,9 @@ export default function OIDCClients(data) {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {(data.data === undefined || data.data.length == 0) ?
+                            {(data === undefined || data.length == 0) ?
                                 <TableCell colSpan={6}><Alert severity="warning">No Records to show.</Alert></TableCell> :
-                                data.data.map((row) => (<Row key={row.clientId} row={row} />))
+                                data.map((row) => (<Row key={row.clientId} row={row} notifyOnDataChange={handleNotifyOnDataChange} />))
                             }
                         </TableBody>
                     </Table>
