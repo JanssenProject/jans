@@ -6,7 +6,7 @@ use jwt::JWTDecoder;
 
 mod jwt_data_handler;
 use jwt_data_handler::{AuthzInputEntitiesError, DecodeTokensError, JWTData};
-pub use jwt_data_handler::{AuthzInputRaw, ResourceData};
+pub use jwt_data_handler::{AuthzRequest, CedarParams, ResourceData};
 pub(crate) mod jwt_tokens;
 mod policy_store;
 pub use policy_store::PolicyStoreEntry;
@@ -133,13 +133,13 @@ pub enum HandleError {
 
 impl Authz {
 	pub fn handle_raw_input(&self, data: &str) -> Result<Response, HandleError> {
-		let input = jwt_data_handler::AuthzInputRaw::parse_raw(data)
-			.map_err(HandleError::InputJsonParse)?;
+		let input =
+			jwt_data_handler::AuthzRequest::parse_raw(data).map_err(HandleError::InputJsonParse)?;
 
 		self.handle(input)
 	}
 
-	pub fn handle(&self, input: AuthzInputRaw) -> Result<Response, HandleError> {
+	pub fn handle(&self, input: AuthzRequest) -> Result<Response, HandleError> {
 		let decoded_input = input.decode_tokens(&self.jwt_dec)?;
 		let params = decoded_input.chedar_params;
 		let action = EntityUid::from_str(params.action.as_str()).map_err(HandleError::Action)?;
@@ -172,7 +172,7 @@ impl Authz {
 		Ok(decision)
 	}
 
-	pub fn is_authorized(&self, input: AuthzInputRaw) -> Result<bool, HandleError> {
+	pub fn is_authorized(&self, input: AuthzRequest) -> Result<bool, HandleError> {
 		let decision = self.handle(input)?;
 		Ok(match decision.decision() {
 			cedar_policy::Decision::Allow => true,

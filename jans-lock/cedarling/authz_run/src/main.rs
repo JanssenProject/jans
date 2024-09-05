@@ -30,7 +30,7 @@ fn real_demo_case() -> Result<(), Box<dyn std::error::Error>> {
 
 	// only show entities for debug
 	{
-		let q = authz::AuthzInputRaw::parse_raw(input_json)?;
+		let q = authz::AuthzRequest::parse_raw(input_json)?;
 		let decoded_input = q.decode_tokens(&jwt::JWTDecoder::new_without_validation())?;
 		let entites_box = authz.get_entities(decoded_input.jwt)?;
 

@@ -1,6 +1,5 @@
 use pyo3::{exceptions::PyValueError, prelude::*};
 
-use authz;
 
 use crate::policy_store::PolicyStore;
 // The config structs should match those in the authz module.
@@ -50,12 +49,12 @@ impl Default for TokenMapper {
 	}
 }
 
-impl Into<authz::TokenMapper> for TokenMapper {
-	fn into(self) -> authz::TokenMapper {
+impl From<TokenMapper> for authz::TokenMapper {
+	fn from(val: TokenMapper) -> Self {
 		authz::TokenMapper {
-			id_token: self.id_token,
-			userinfo_token: self.userinfo_token,
-			access_token: self.access_token,
+			id_token: val.id_token,
+			userinfo_token: val.userinfo_token,
+			access_token: val.access_token,
 		}
 	}
 }
@@ -97,7 +96,7 @@ impl TryInto<authz::BootstrapConfig> for BootstrapConfig {
 			application_name: self.application_name,
 			token_mapper: self.token_mapper.into(),
 			policy_store: self.policy_store.map(|store| store.inner).ok_or(
-				PyValueError::new_err("in BootstrapConfig field policy_store is none"),
+				PyValueError::new_err("in BootstrapConfig field policy_store is None"),
 			)?,
 		})
 	}

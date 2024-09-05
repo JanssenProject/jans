@@ -3,7 +3,6 @@ use pyo3::prelude::*;
 use pyo3::types::{PyAny, PyString, PyStringMethods};
 use serde_pyobject::from_pyobject;
 
-use authz;
 #[derive(Debug, Clone)]
 #[pyclass]
 pub struct PolicyStore {

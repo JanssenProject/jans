@@ -9,7 +9,7 @@ use super::{
 };
 
 #[derive(serde::Deserialize, Debug)]
-pub struct AuthzInputRaw {
+pub struct AuthzRequest {
 	// generates entities
 	pub id_token: String,
 	pub userinfo_token: String,
@@ -19,7 +19,7 @@ pub struct AuthzInputRaw {
 	pub extra: CedarParams,
 }
 
-impl AuthzInputRaw {
+impl AuthzRequest {
 	pub fn parse_raw(data: &str) -> Result<Self, serde_json::error::Error> {
 		let input = serde_json::from_str(data)?;
 		Ok(input)
@@ -34,7 +34,7 @@ pub struct CedarParams {
 	pub context: serde_json::Value,
 }
 
-#[derive(serde::Deserialize, Debug)]
+#[derive(serde::Deserialize, Debug, Clone)]
 pub struct ResourceData {
 	#[serde(rename = "type")]
 	pub _type: String,
@@ -60,7 +60,7 @@ pub enum DecodeTokensError {
 	AccessToken(jwt::DecodeError),
 }
 
-impl AuthzInputRaw {
+impl AuthzRequest {
 	pub fn decode_tokens(self, decoder: &jwt::JWTDecoder) -> Result<AuthzInput, DecodeTokensError> {
 		let id_token: IdToken = decoder
 			.decode(&self.id_token)

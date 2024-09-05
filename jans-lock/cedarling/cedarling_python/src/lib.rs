@@ -1,13 +1,15 @@
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
-use pyo3::{types::PyAny, Bound};
-use serde_pyobject::from_pyobject;
+use pyo3::Bound;
 
 mod config;
 use config::{BootstrapConfig, TokenMapper};
 
 mod policy_store;
 use policy_store::PolicyStore;
+
+mod request;
+use request::{Request, Resource};
 
 #[pyclass]
 pub struct Authz {
@@ -24,12 +26,12 @@ impl Authz {
 		})
 	}
 
-	pub fn is_authorized(&self, input: Bound<'_, PyAny>) -> PyResult<bool> {
-		let authz_input: authz::AuthzInputRaw = from_pyobject(input)?;
-		Ok(self
+	pub fn is_authorized(&self, request: Request) -> PyResult<bool> {
+		let authz_input: authz::AuthzRequest = request.try_into()?;
+		self
 			.inner
 			.is_authorized(authz_input)
-			.map_err(|err| PyValueError::new_err(err.to_string()))?)
+			.map_err(|err| PyValueError::new_err(err.to_string()))
 	}
 }
 
@@ -39,6 +41,8 @@ fn cedarling_python(m: &Bound<'_, PyModule>) -> PyResult<()> {
 	m.add_class::<TokenMapper>()?;
 	m.add_class::<Authz>()?;
 	m.add_class::<PolicyStore>()?;
+	m.add_class::<Request>()?;
+	m.add_class::<Resource>()?;
 
 	Ok(())
 }
