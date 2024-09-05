@@ -305,7 +305,8 @@ public abstract class AuthorizationGrant extends AbstractAuthorizationGrant {
         jwt.getClaims().setClaim("acr", getAcrValues());
         jwt.getClaims().setClaim("auth_time", ServerUtil.dateToSeconds(getAuthenticationTime()));
         jwt.getClaims().setExpirationTime(accessToken.getExpirationDate());
-        jwt.getClaims().setIssuedAt(accessToken.getCreationDate());
+        jwt.getClaims().setIat(accessToken.getCreationDate());
+        jwt.getClaims().setNbf(accessToken.getCreationDate());
         jwt.getClaims().setSubjectIdentifier(getSub());
         jwt.getClaims().setClaim("x5t#S256", accessToken.getX5ts256());
         jwt.getClaims().setClaim("jti", context.getTokenReferenceId());
