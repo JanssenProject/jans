@@ -1026,6 +1026,7 @@ class JansCliApp(Application):
         self.layout.focus(dialog)
         self.invalidate()
 
+        return dialog
 
     def get_confirm_dialog(
             self,

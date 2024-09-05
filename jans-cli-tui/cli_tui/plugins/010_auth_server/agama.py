@@ -30,6 +30,7 @@ from wui_components.jans_path_browser import jans_file_browser_dialog, BrowseTyp
 from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.jans_table import JansTableWidget
 
+
 class Agama(DialogUtils):
     def __init__(
         self,
@@ -225,7 +226,7 @@ class Agama(DialogUtils):
         asyncio.ensure_future(coroutine())
 
 
-    def update_agama_container(self, start_index=0, search_str=''):
+    def update_agama_container(self, start_index=0, search_str='', focus_dialog=None):
 
         self.working_container.clear()
         data_display = []
@@ -271,13 +272,15 @@ class Agama(DialogUtils):
         for datum in data_display[start_index:start_index+self.app.entries_per_page]:
             self.working_container.add_item(datum)
 
-        if not self.first_enter:
+        if focus_dialog:
+            self.app.layout.focus(focus_dialog)
+        elif not self.first_enter:
             self.app.layout.focus(self.working_container)
 
         self.first_enter = False
 
 
-    async def get_projects_coroutine(self, search_str='', update_container=True):
+    async def get_projects_coroutine(self, search_str='', update_container=True, focus_dialog=None):
         cli_args = {'operation_id': 'get-agama-prj'}
         self.app.start_progressing(_("Retrieving agama projects..."))
         response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
@@ -297,13 +300,13 @@ class Agama(DialogUtils):
 
         self.working_container.all_data = self.data.get('entries', [])
         if update_container:
-            self.update_agama_container(search_str=search_str)
+            self.update_agama_container(search_str=search_str, focus_dialog=focus_dialog)
 
 
-    def get_agama_projects(self, search_str=''):
-        asyncio.ensure_future(self.get_projects_coroutine(search_str))
+    def get_agama_projects(self, search_str='', focus_dialog=None):
+        asyncio.ensure_future(self.get_projects_coroutine(search_str=search_str, focus_dialog=focus_dialog))
 
-    def upload_project(self, file_path=None):
+    def upload_project(self, file_path=None, community_project_name=None):
         agama_status = self.app.app_configuration.get('agamaConfiguration',{}).get('enabled')
 
         def project_uploader(path, project_name):
@@ -314,7 +317,15 @@ class Agama(DialogUtils):
                 self.app.stop_progressing()
                 if file_path:
                     shutil.rmtree(os.path.dirname(file_path))
-                self.get_agama_projects()
+                focus_dialog = None
+                if community_project_name:
+                    focus_dialog = self.app.show_message(
+                        _("Project Info"),
+                        HTML(_("Please visit project home\n<b>{}</b>\nfor more information").format(os.path.join('https://github.com/GluuFederation', community_project_name))),
+                        tobefocused=self.app.center_container
+                        )
+
+                self.get_agama_projects(focus_dialog=focus_dialog)
 
             asyncio.ensure_future(coroutine())
 
@@ -497,7 +508,7 @@ class Agama(DialogUtils):
 
         def get_projects():
 
-            response = requests.get("https://github.com/orgs/GluuFederation/repositories?q=agama-", headers={"Accept":"application/json"})
+            response = requests.get('https://github.com/orgs/GluuFederation/repositories?q=agama-', headers={"Accept":"application/json"})
             result = response.json()
             downloads = []
             for repo in result["payload"]["repositories"]:
@@ -508,11 +519,10 @@ class Agama(DialogUtils):
                     for asset in result['assets']:
                         if asset['name'].endswith('.gama'):
                             downloads.append((repo_name, repo['description'], asset['browser_download_url']))
-
             return downloads
 
 
-        async def download_project_coroutine(download_project_dialog, download_url, download_fn):
+        async def download_project_coroutine(download_project_dialog, download_url, download_fn, project_name):
 
             download_path = os.path.join(tempfile.mkdtemp(), download_fn)
 
@@ -530,7 +540,7 @@ class Agama(DialogUtils):
             except Exception:
                 pass
 
-            self.upload_project(download_path)
+            self.upload_project(file_path=download_path, community_project_name=project_name)
 
 
         async def get_projects_coroutine(get_projects_dialog):
@@ -545,6 +555,7 @@ class Agama(DialogUtils):
 
             def deploy(select_project_dialog):
                 download_url = select_project_dialog.projects_radio_list.current_value
+                project_name = downloads[select_project_dialog.projects_radio_list._selected_index][0]
                 download_fn = os.path.split(download_url)[-1]
                 self.app.start_progressing(_("Downloading {}").format(download_fn))
 
@@ -558,7 +569,7 @@ class Agama(DialogUtils):
                 download_project_dialog.deploy_msg_label = deploy_msg_label
                 self.app.show_jans_dialog(download_project_dialog, focus=self.main_container)
 
-                asyncio.ensure_future(download_project_coroutine(download_project_dialog, download_url, download_fn))
+                asyncio.ensure_future(download_project_coroutine(download_project_dialog, download_url, download_fn, project_name))
 
 
             buttons = [Button(_("Cancel")), Button(_("Deploy"), handler=deploy)]
