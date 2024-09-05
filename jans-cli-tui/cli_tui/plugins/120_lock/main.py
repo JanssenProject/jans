@@ -7,7 +7,7 @@ from prompt_toolkit.layout.containers import HSplit, DynamicContainer,\
 
 from prompt_toolkit.layout import ScrollablePane
 from prompt_toolkit.layout.dimension import D
-from prompt_toolkit.widgets import Button
+from prompt_toolkit.widgets import Button, Frame
 from prompt_toolkit.application import Application
 from wui_components.widget_collections import get_logging_level_widget
 
@@ -47,7 +47,34 @@ class Plugin(DialogUtils):
         self.schema = self.app.cli_object.get_schema_from_reference('Lock', '#/components/schemas/AppConfiguration')
 
 
+        self.opa_config_base_url = common_data.app.getTitledText(
+                    title=_("Base URL"),
+                    name='baseUrl',
+                    value=self.data.get('opaConfiguration', {}).get('baseUrl', ''),
+                    style=cli_style.edit_text,
+                    jans_help=_("Base URL for OPA"),
+                    widget_style=cli_style.black_bg_widget
+                )
+
+        self.opa_config_accessToken = common_data.app.getTitledText(
+                    title=_("Access Token"),
+                    name='accessToken',
+                    value=self.data.get('opaConfiguration', {}).get('accessToken', ''),
+                    style=cli_style.edit_text,
+                    jans_help=_("Access token for OPA"),
+                    widget_style=cli_style.black_bg_widget
+                )
+
         self.working_container = HSplit([
+
+                common_data.app.getTitledText(
+                    title=_("Base DN"),
+                    name='baseDN',
+                    value=self.data.get('baseDN'),
+                    style=cli_style.edit_text,
+                    jans_help=_("Base DN"),
+                    widget_style=cli_style.black_bg_widget
+                ),
 
                 common_data.app.getTitledText(
                     title=_("Token Channels"),
@@ -69,6 +96,24 @@ class Plugin(DialogUtils):
 
                 get_logging_level_widget(self.data.get('loggingLevel', 'INFO')),
 
+                common_data.app.getTitledText(
+                    title=_("Logging Layout"),
+                    name='loggingLayout',
+                    value=self.data.get('loggingLayout', 'text'),
+                    style=cli_style.edit_text,
+                    jans_help=_("Logging layout"),
+                    widget_style=cli_style.black_bg_widget
+                ),
+
+                common_data.app.getTitledText(
+                    title=_("External Logger Configuration"),
+                    name='externalLoggerConfiguration',
+                    value=self.data.get('externalLoggerConfiguration'),
+                    style=cli_style.edit_text,
+                    jans_help=_("Configuration for External Logger"),
+                    widget_style=cli_style.black_bg_widget
+                ),
+
                 common_data.app.getTitledCheckBox(
                     title=_("Enable Metric Reporter"),
                     name='metricReporterEnabled', 
@@ -87,7 +132,7 @@ class Plugin(DialogUtils):
                 ),
 
                 common_data.app.getTitledText(
-                    title=_("Metric Reporter KeepData Days"),
+                    title=_("Metric Reporter Keep Data Days"),
                     name='metricReporterKeepDataDays',
                     value=self.data.get('metricReporterKeepDataDays', '15'),
                     style=cli_style.edit_text,
@@ -105,28 +150,62 @@ class Plugin(DialogUtils):
                 ),
 
                 common_data.app.getTitledText(
-                    title=_("Message Consumer Type"),
-                    name='messageConsumerType',
-                    value=self.data.get('messageConsumerType', 'OPA'),
+                    title=_("Metric Channel"),
+                    name='metricChannel',
+                    value=self.data.get('metricChannel', ''),
                     style=cli_style.edit_text,
                     widget_style=cli_style.black_bg_widget
                 ),
 
                 common_data.app.getTitledText(
-                    title=_("Policy Consumer Type"),
-                    name='policyConsumerType',
-                    value=self.data.get('policyConsumerType', 'OPA'),
+                    title=_("PDP Type"),
+                    name='pdpType',
+                    value=self.data.get('pdpType', 'OPA'),
+                    style=cli_style.edit_text,
+                    widget_style=cli_style.black_bg_widget
+                ),
+
+                Frame(
+                    title=_("OPA Configuration"),
+                    body=HSplit([self.opa_config_base_url, self.opa_config_accessToken]),
+                ),
+
+                common_data.app.getTitledText(
+                    title=_("Policies JSON URIs Authorization Token"),
+                    name='policiesJsonUrisAuthorizationToken',
+                    value=self.data.get('policiesJsonUrisAuthorizationToken', ''),
                     style=cli_style.edit_text,
                     widget_style=cli_style.black_bg_widget
                 ),
 
                 common_data.app.getTitledText(
-                    title=_("OPA Base URL"),
-                    name='opaConfiguration_baseUrl',
-                    value=self.data.get('opaConfiguration', {}).get('baseUrl', ''),
+                    title=_("Policies JSON URIs"),
+                    name='policiesJsonUris',
+                    value=' '.join(self.data.get('policiesJsonUris', [])),
+                    style=cli_style.edit_text,
+                    jans_help=_("Space seperated policies JSON URIs"),
+                    jans_list_type=True,
+                    widget_style=cli_style.black_bg_widget
+                ),
+
+                common_data.app.getTitledText(
+                    title=_("Policies Zip URIs Authorization Token"),
+                    name='policiesZipUrisAuthorizationToken',
+                    value=self.data.get('policiesZipUrisAuthorizationToken', ''),
                     style=cli_style.edit_text,
                     widget_style=cli_style.black_bg_widget
                 ),
+
+                common_data.app.getTitledText(
+                    title=_("Policies Zip URIs"),
+                    name='policiesZipUris',
+                    value=' '.join(self.data.get('policiesZipUris', [])),
+                    style=cli_style.edit_text,
+                    jans_help=_("Space seperated policies Zip URIs"),
+                    jans_list_type=True,
+                    widget_style=cli_style.black_bg_widget
+                ),
+
             Window(height=1),
             VSplit([Button(text=_("Save"), handler=self.save)], align=HorizontalAlign.CENTER)
 
@@ -163,8 +242,10 @@ class Plugin(DialogUtils):
 
         async def lock_config_coroutine():
             lock_config = self.make_data_from_dialog(tabs={'lock_config': self.working_container})
-            lock_config['opaConfiguration'] = {'baseUrl': lock_config.pop('opaConfiguration_baseUrl')}
-            lock_config['loggingLayout'] = 'text'
+            lock_config['opaConfiguration'] = {
+                'baseUrl': self.opa_config_base_url.me.text,
+                'accessToken': self.opa_config_accessToken.me.text,
+            }
 
             cli_args = {'operation_id': 'put-lock-properties', 'data': lock_config}
             common_data.app.start_progressing(_("Saving Lock configuration"))

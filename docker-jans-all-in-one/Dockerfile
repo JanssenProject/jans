@@ -3,7 +3,7 @@
 # ==============
 
 # original Janssen base version (without suffix)
-ARG BASE_VERSION=1.1.1
+ARG BASE_VERSION=1.1.5
 
 # the following ARGs set default base images
 # they can be overriden in build process via --build-arg option
@@ -46,7 +46,7 @@ FROM ${JANS_SAML_IMAGE} AS jans-saml-src
 # app
 # ===
 
-FROM bellsoft/liberica-openjdk-alpine:17.0.9@sha256:915d7a6c5874638a735296a99ac28c4a9cefb9bfda2bef796fc564449d44d6cc
+FROM bellsoft/liberica-openjdk-alpine:17.0.12@sha256:877a6ffc273212bd3f695db2a7973a05aa1bfb88ad550ba9ffe7deb7d1e50eee
 
 # hadolint ignore=DL3018
 RUN apk update \
@@ -54,14 +54,29 @@ RUN apk update \
     && apk add --no-cache tini bash curl openssl python3 py3-cryptography py3-psycopg2 py3-grpcio nginx \
     && apk add --no-cache --virtual .build-deps git wget
 
+# ===========
+# Assets sync
+# ===========
+
+ENV JANS_SOURCE_VERSION=fc9f04fe3b3d3d168f3090214b22ee80be371d92
+
+# note that as we're pulling from a monorepo (with multiple project in it)
+# we are using partial-clone and sparse-checkout to get the assets
+RUN git clone --depth 500 --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
+    && cd /tmp/jans \
+    && git sparse-checkout init --cone \
+    && git checkout ${JANS_SOURCE_VERSION} \
+    && git sparse-checkout add jans-pycloudlib
+
 # ------
 # Python
 # ------
 
 COPY /app/requirements.txt /app/requirements.txt
-RUN python3 -m ensurepip \
+RUN mv /usr/lib/python3.12/EXTERNALLY-MANAGED /usr/lib/python3.12/EXTERNALLY-MANAGED.disabled \
+    && python3 -m ensurepip \
     && pip3 install --no-cache-dir -U pip wheel setuptools \
-    && pip3 install --no-cache-dir --default-timeout=300 -r /app/requirements.txt \
+    && pip3 install --no-cache-dir -r /app/requirements.txt \
     && pip3 uninstall -y pip wheel
 
 # -------
@@ -69,7 +84,7 @@ RUN python3 -m ensurepip \
 # -------
 
 RUN apk del .build-deps \
-    && rm -rf /var/cache/apk/*
+    && rm -rf /var/cache/apk/* /tmp/jans
 
 # -------
 # License
@@ -81,7 +96,7 @@ COPY LICENSE /licenses/LICENSE
 # assets sync
 # -----------
 
-RUN mkdir -p /app/bin
+RUN mkdir -p /app/bin /usr/share/java
 
 COPY --from=jans-configurator-src /opt/jans/configurator/javalibs /opt/jans/configurator/javalibs
 COPY --from=jans-configurator-src /app/scripts /app/jans_aio/configurator
@@ -126,7 +141,7 @@ RUN ln -sf /app/jans_aio/jans_scim/entrypoint.sh /app/bin/jans-scim-entrypoint.s
 COPY --from=jans-casa-src /opt/jans/jetty/jans-casa /opt/jans/jetty/jans-casa
 COPY --from=jans-casa-src /app/templates/jans-casa /app/templates/jans-casa
 COPY --from=jans-casa-src /app/scripts /app/jans_aio/jans_casa
-COPY --from=jans-casa-src /app/static/extension/person_authentication/Casa.py /app/static/extension/person_authentication/Casa.py
+COPY --from=jans-casa-src /usr/share/java/casa-agama-project.zip /usr/share/java
 RUN ln -sf /app/jans_aio/jans_casa/entrypoint.sh /app/bin/jans-casa-entrypoint.sh
 
 COPY --from=jans-link-src /opt/jans/jetty/jans-link /opt/jans/jetty/jans-link
@@ -155,13 +170,12 @@ RUN ln -sf /usr/lib/jvm/jdk /opt/java
 RUN mkdir -p /opt/jans/configurator/db \
     /opt/jans/configurator/certs \
     /opt/jetty/temp \
-    /etc/nginx/jans-aio \
-    /usr/share/java
+    /etc/nginx/jans-aio
 
 COPY app /app
 
 # CN version as env var (with suffix if any, i.e. SNAPSHOT)
-ENV CN_VERSION=1.1.1-SNAPSHOT
+ENV CN_VERSION=1.1.5-SNAPSHOT
 
 # set directory contains installer code that will be added to Python sys.path
 ENV PYTHONPATH=/app
@@ -209,10 +223,7 @@ ENV JETTY_BASE=/opt/jans/jetty \
     CN_SAML_JAVA_OPTIONS="" \
     CN_SAML_KC_ADMIN_CREDENTIALS_FILE=/etc/jans/conf/kc_admin_creds \
     CN_SAML_KC_DB_PASSWORD_FILE=/etc/jans/conf/kc_db_password \
-    KC_HEALTH_ENABLED=true \
-    KC_METRICS_ENABLED=true \
     KC_LOG_LEVEL=INFO \
-    KC_PROXY=edge \
     KC_DB=mysql \
     KC_DB_USERNAME=keycloak \
     KC_DB_SCHEMA=keycloak \
@@ -225,7 +236,7 @@ ENV JETTY_BASE=/opt/jans/jetty \
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/all-in-one" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.1.1" \
+    org.opencontainers.image.version="1.1.5" \
     org.opencontainers.image.title="Janssen All-in-One" \
     org.opencontainers.image.description=""
 

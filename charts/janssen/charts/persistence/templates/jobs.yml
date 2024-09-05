@@ -9,9 +9,14 @@ metadata:
 {{- if .Values.additionalLabels }}
 {{ toYaml .Values.additionalLabels | indent 4 }}
 {{- end }}
-{{- if .Values.additionalAnnotations }}
+{{- if or (.Values.additionalAnnotations) (.Values.global.persistence.customAnnotations.job) }}
   annotations:
+{{- if .Values.additionalAnnotations }}
 {{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.global.persistence.customAnnotations.job }}
+{{ toYaml .Values.global.persistence.customAnnotations.job | indent 4 }}
+{{- end }}
 {{- end }}
 spec:
   ttlSecondsAfterFinished: {{ .Values.global.jobTtlSecondsAfterFinished }}
@@ -32,6 +37,7 @@ spec:
 {{ toYaml . | indent 8 }}
     {{- end }}
       restartPolicy: Never
+      serviceAccountName: {{ .Values.global.serviceAccountName }}
       containers:
       - name: {{ include "persistence.name" . }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -98,27 +104,6 @@ spec:
             mountPath: /etc/certs/vault_secret_id
             subPath: vault_secret_id
         {{- end }}
-        {{- if or (eq .Values.global.cnPersistenceType "couchbase") (eq .Values.global.cnPersistenceType "hybrid")  }}
-          - name: cb-crt
-            mountPath: "/etc/certs/couchbase.crt"
-            subPath: couchbase.crt
-          - name: cb-pass
-            mountPath: {{ .Values.global.cnCouchbasePasswordFile }}
-            subPath: couchbase_password
-          - name: cb-pass
-            mountPath: {{ .Values.global.cnCouchbaseSuperuserPasswordFile }}
-            subPath: couchbase_superuser_password
-        {{- end }}
-        {{- if or (eq .Values.global.cnPersistenceType "sql") (eq .Values.global.cnPersistenceType "hybrid") }}
-          - name: sql-pass
-            mountPath: {{ .Values.global.cnSqlPasswordFile }}
-            subPath: sql_password
-        {{- end }}
-        {{- if or (eq .Values.global.cnPersistenceType "ldap") (eq .Values.global.cnPersistenceType "hybrid") }}
-          - name: ldap-pass
-            mountPath: {{ .Values.global.cnLdapPasswordFile }}
-            subPath: ldap_password
-        {{- end }}
         resources:
 {{- toYaml .Values.resources | nindent 10 }}
       volumes:
@@ -159,30 +144,4 @@ spec:
               path: vault_role_id
             - key: vault_secret_id
               path: vault_secret_id
-      {{- end }}
-      {{- if or (eq .Values.global.cnPersistenceType "couchbase") (eq .Values.global.cnPersistenceType "hybrid")  }}
-        - name: cb-crt
-          secret:
-            secretName: {{ .Release.Name }}-cb-crt
-        - name: cb-pass
-          secret:
-            secretName: {{ .Release.Name }}-cb-pass
-            items:
-              - key: couchbase_password
-                path: couchbase_password
-              - key: couchbase_superuser_password
-                path: couchbase_superuser_password
-      {{- end }}
-      {{- if or (eq .Values.global.cnPersistenceType "sql") (eq .Values.global.cnPersistenceType "hybrid") }}
-        - name: sql-pass
-          secret:
-            secretName: {{ .Release.Name }}-sql-pass
-      {{- end }}
-      {{- if or (eq .Values.global.cnPersistenceType "ldap") (eq .Values.global.cnPersistenceType "hybrid") }}
-        - name: ldap-pass
-          secret:
-            secretName: {{ .Release.Name }}-ldap-pass
-            items:
-              - key: ldap_password
-                path: ldap_password
       {{- end }}

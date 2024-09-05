@@ -19,16 +19,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.enterprise.context.BeforeDestroyed;
-import jakarta.enterprise.event.Event;
-import jakarta.enterprise.event.Observes;
-import jakarta.enterprise.inject.Instance;
-import jakarta.inject.Inject;
-import jakarta.servlet.ServletContext;
-
-import io.jans.service.custom.inject.ReloadScript;
 import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+
 import io.jans.model.ScriptLocationType;
 import io.jans.model.SimpleCustomProperty;
 import io.jans.model.SimpleExtendedCustomProperty;
@@ -39,10 +32,17 @@ import io.jans.model.custom.script.type.BaseExternalType;
 import io.jans.service.cdi.async.Asynchronous;
 import io.jans.service.cdi.event.Scheduled;
 import io.jans.service.cdi.event.UpdateScriptEvent;
+import io.jans.service.custom.inject.ReloadScript;
 import io.jans.service.timer.event.TimerEvent;
 import io.jans.service.timer.schedule.TimerSchedule;
 import io.jans.util.StringHelper;
-import org.slf4j.Logger;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.context.BeforeDestroyed;
+import jakarta.enterprise.event.Event;
+import jakarta.enterprise.event.Observes;
+import jakarta.enterprise.inject.Instance;
+import jakarta.inject.Inject;
+import jakarta.servlet.ServletContext;
 
 /**
  * Provides actual versions of scripts
@@ -84,6 +84,8 @@ public class CustomScriptManager {
 	private long lastFinishedTime;
 
 	private Map<CustomScriptType, List<CustomScriptConfiguration>> customScriptConfigurationsByScriptType;
+	
+    private boolean initialized = false;
 
 	@Asynchronous
 	public void initTimer(List<CustomScriptType> supportedCustomScriptTypes) {
@@ -97,6 +99,8 @@ public class CustomScriptManager {
 
 		timerEvent.fire(new TimerEvent(new TimerSchedule(delay, DEFAULT_INTERVAL), new UpdateScriptEvent(),
 				Scheduled.Literal.INSTANCE));
+		
+		initialized = true;
 	}
 
 	protected void configure() {
@@ -261,7 +265,7 @@ public class CustomScriptManager {
 					// Add to script revision file modification time. This should allow to
 					// reload script automatically after changing location_type
 					long fileModifiactionTime = getFileModificationTime(loadedCustomScript.getLocationPath());
-					loadedCustomScript.setRevision(newCustomScript.getRevision() + fileModifiactionTime);
+					loadedCustomScript.setRevision(loadedCustomScript.getRevision() + fileModifiactionTime);
 
 					if (fileModifiactionTime != 0) {
 						String scriptFromFile = loadFromFile(loadedCustomScript.getLocationPath());
@@ -410,5 +414,9 @@ public class CustomScriptManager {
     public void clearScriptError(CustomScript customScript) {
         externalTypeCreator.clearScriptError(customScript);
     }
+
+	public boolean isInitialized() {
+		return initialized;
+	}
 
 }

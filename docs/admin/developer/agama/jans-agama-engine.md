@@ -26,17 +26,13 @@ The rest of this document describes implementation-specific details of the engin
 
 ## Launching flows
 
-Flows can be launched by sending an (OpenId Connect) authentication request to the user's browser. This usually boils down to make a redirection to a URL looking like `https://<jans-server-name>/jans-auth/restv1/authorize?acr_values=agama&agama_flow=flow-qname&scope=...&response_type=...&redirect_uri=https...&client_id=...&state=...`. Check the OpenId Connect [spec](https://openid.net/specs/openid-connect-core-1_0.html) for more details. Note Jans Server is spec-compliant.
+Flows can be launched by sending an (OpenId Connect) authentication request to the user's browser. This usually boils down to making a redirection to a URL looking like `https://<jans-server-name>/jans-auth/restv1/authorize?acr_values=agama_flowQname&scope=...&response_type=...&redirect_uri=https...&client_id=...&state=...`. Check the OpenId Connect [spec](https://openid.net/specs/openid-connect-core-1_0.html) for more details. Note Jans Server is spec-compliant.
 
 Things to highlight:
 
-- The `acr_values` parameter must be equal to `agama`
+- The `acr_values` parameter carries the qualified name (identifier) of the flow to launch prefixed with the string `agama_`, for example `acr_values=agama_test.acme.co`
 
-- The qualified name (identifier) of the flow to launch is passed using the parameter referenced in property `cust_param_name` of the Agama [bridge](./engine-bridge-config.md#bridge-configuration) script. `agama_flow` will most likely work since this is the default value employed by the Jans installer, e.g. `agama_flow=test.acme.co`
-
-- If the flow to call receives input parameters, their values can be passed in the custom parameter as well. Use a hyphen to separate the flow name and the parameters expressed in JSON object format. For example, if the flow had inputs  `height` and `color`, you can use `test.acme.co-{"height": 190, "color": "blue"}` for the value of `agama_flow`. Ensure to apply proper URL-encoding beforehand. In this case, the actual value would be `test-%7B%22height%22%3A+190%2C+%22color%22%3A+%22blue%22%7D`. If certain inputs are not provided, `null` values will be assigned for them
-
-- If for some reason you are not able to set the given custom parameter in the authorization request, you can set its value in the configuration property `default_flow_name` of the [bridge](./engine-bridge-config.md#bridge-configuration) script. Note this will launch the same fixed flow at all times
+- If the flow to call receives input parameters, this data can be appended to the `acr_values` parameter: use a hyphen to separate the flow name and the parameters expressed in Base64 URL encoded format. For example, if the flow had inputs  `height` and `color`, you would encode the string `{"height": 190, "color": "blue"}` and the resulting value would be `agama_test.acme.co-eyJoZWlnaHQiOiAxOTAsICJjb2xvciI6ICJibHVlIn0`. When a given input variable is not provided, the engine will assign a `null` value automatically
 
 ## Authentication and `Finish`
 
@@ -61,7 +57,7 @@ When the authentication succeeds, the whole contents of `data` are stored in the
 
 ### How timeouts work
 
-Authentication flows are normally short-lived. They usually span no more than a few minutes. In Agama, the maximum amount of time an end-user can take to fully complete a flow is driven by the [configuration of the authentication server](../../config-guide/jans-authorization-server-config.md), specifically the `sessionIdUnauthenticatedUnusedLifetime` property which is measured in seconds. As an example, if this value is 120, any attempt to authenticate taking more than two minutes will throw the given error page.
+Authentication flows are normally short-lived. They usually span no more than a few minutes. In Agama, the maximum amount of time an end-user can take to fully complete a flow is driven by the [configuration of the authentication server](../../config-guide/auth-server-config/jans-authorization-server-config.md), specifically the `sessionIdUnauthenticatedUnusedLifetime` property which is measured in seconds. As an example, if this value is 120, any attempt to authenticate taking more than two minutes will throw the given error page.
 
 Moreover, when a flow specifies its own timeout in the [header](../../../agama/language-reference.md#header-basics) the effective timeout is the smallest value between `sessionIdUnauthenticatedUnusedLifetime` and the value in the header.
 
@@ -83,7 +79,7 @@ The following table details the location of log data. Paths are relative to dire
 |`Log` instructions|`jans-auth_script.log`|
 |Foreign code|`jans-auth.log`|
 
-Depending on the specificity required, you may have to change the logging level so more or less details appear in the logs. This can be done by altering the `loggingLevel` property of the [auth server configuration](../../config-guide/jans-authorization-server-config.md). `DEBUG` usually suffices for troubleshooting.
+Depending on the specificity required, you may have to change the logging level so more or less details appear in the logs. This can be done by altering the `loggingLevel` property of the [auth server configuration](../../config-guide/auth-server-config/jans-authorization-server-config.md). `DEBUG` usually suffices for troubleshooting.
 
 The available levels for statements issued with the `Log` instruction are:
 

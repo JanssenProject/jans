@@ -189,6 +189,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
         self.dbUtils.bind(force=True)
 
+
     def get_sql_col_type(self, attrname, table=None):
 
         if attrname in self.dbUtils.sql_data_types:
@@ -196,9 +197,14 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
             if table in type_.get('tables', {}):
                 type_ = type_['tables'][table]
             if 'size' in type_:
-                data_type = '{}({})'.format(type_['type'], type_['size'])
+                dtype = 'STRING' if type_['type'] and Config.rdbm_type == 'spanner' else type_['type']
+                data_type = '{}({})'.format(dtype, type_['size'])
             else:
                 data_type = type_['type']
+
+        elif self.dbUtils.is_schema_rdbm_json(attrname):
+            return self.dbUtils.rdbm_json_types[Config.rdbm_type]['type']
+
         else:
             attr_syntax = self.dbUtils.get_attr_syntax(attrname)
             type_ = self.dbUtils.ldap_sql_data_type_mapping[attr_syntax].get(Config.rdbm_type) or self.dbUtils.ldap_sql_data_type_mapping[attr_syntax]['mysql']
@@ -536,6 +542,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
             self.createDirs(self.common_lib_dir)
         shutil.unpack_archive(self.source_files[0][0], self.common_lib_dir)
         self.chown(os.path.join(Config.jetty_base, 'common'), Config.jetty_user, Config.jetty_user, True)
+
 
     def installed(self):
         # to be implemented

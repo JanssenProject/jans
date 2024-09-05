@@ -10,6 +10,7 @@ import ldap3
 import pymysql
 import time
 
+from types import MappingProxyType
 from ldap3.utils import dn as dnutils
 from pathlib import PurePath
 
@@ -41,6 +42,8 @@ class DBUtils:
     session = None
     cbm = None
     mariadb = False
+    rdbm_json_types = MappingProxyType({ 'mysql': {'type': 'JSON'}, 'pgsql': {'type': 'JSONB'}, 'spanner': {'type': 'ARRAY<STRING(MAX)>'} })
+    jans_scopes = None
 
     def bind(self, use_ssl=True, force=False):
 
@@ -169,7 +172,7 @@ class DBUtils:
 
         for attr in attribDataTypes.listAttributes:
             if not attr in self.sql_data_types:
-                self.sql_data_types[attr] = { 'mysql': {'type': 'JSON'}, 'pgsql': {'type': 'JSONB'}, 'spanner': {'type': 'ARRAY<STRING(MAX)>'} }
+                self.sql_data_types[attr] = self.rdbm_json_types
 
     def in_subtable(self, table, attr):
         if table in self.sub_tables[Config.rdbm_type]:
@@ -197,7 +200,7 @@ class DBUtils:
     def set_cbm(self):
         self.cbm = CBM(Config.get('cb_query_node'), Config.get('couchebaseClusterAdmin'), Config.get('cb_password'))
 
-    def get_oxAuthConfDynamic(self):
+    def get_jans_auth_conf_dynamic(self):
         if self.moddb == BackendTypes.LDAP:
             self.ldap_conn.search(
                         search_base='ou=jans-auth,ou=configuration,o=jans',
@@ -207,47 +210,47 @@ class DBUtils:
                         )
 
             dn = self.ldap_conn.response[0]['dn']
-            oxAuthConfDynamic = json.loads(self.ldap_conn.response[0]['attributes']['jansConfDyn'][0])
+            jans_auth_conf_dynamic = json.loads(self.ldap_conn.response[0]['attributes']['jansConfDyn'][0])
 
         elif self.moddb in (BackendTypes.MYSQL, BackendTypes.PGSQL, BackendTypes.SPANNER):
             result = self.search(search_base='ou=jans-auth,ou=configuration,o=jans', search_filter='(objectClass=jansAppConf)', search_scope=ldap3.BASE)
             dn = result['dn'] 
-            oxAuthConfDynamic = json.loads(result['jansConfDyn'])
+            jans_auth_conf_dynamic = json.loads(result['jansConfDyn'])
 
         elif self.moddb == BackendTypes.COUCHBASE:
             n1ql = 'SELECT * FROM `{}` USE KEYS "configuration_jans-auth"'.format(self.default_bucket)
             result = self.cbm.exec_query(n1ql)
             js = result.json()
             dn = js['results'][0][self.default_bucket]['dn']
-            oxAuthConfDynamic = js['results'][0][self.default_bucket]['jansConfDyn']
+            jans_auth_conf_dynamic = js['results'][0][self.default_bucket]['jansConfDyn']
 
-        return dn, oxAuthConfDynamic
+        return dn, jans_auth_conf_dynamic
 
 
-    def set_oxAuthConfDynamic(self, entries):
+    def set_jans_auth_conf_dynamic(self, entries):
         if self.moddb == BackendTypes.LDAP:
-            dn, oxAuthConfDynamic = self.get_oxAuthConfDynamic()
-            oxAuthConfDynamic.update(entries)
+            dn, jans_auth_conf_dynamic = self.get_jans_auth_conf_dynamic()
+            jans_auth_conf_dynamic.update(entries)
 
             ldap_operation_result = self.ldap_conn.modify(
                     dn,
-                    {"jansConfDyn": [ldap3.MODIFY_REPLACE, json.dumps(oxAuthConfDynamic, indent=2)]}
+                    {"jansConfDyn": [ldap3.MODIFY_REPLACE, json.dumps(jans_auth_conf_dynamic, indent=2)]}
                     )
             self.log_ldap_result(ldap_operation_result)
 
         elif self.moddb in (BackendTypes.MYSQL, BackendTypes.PGSQL):
-            dn, oxAuthConfDynamic = self.get_oxAuthConfDynamic()
-            oxAuthConfDynamic.update(entries)
+            dn, jans_auth_conf_dynamic = self.get_jans_auth_conf_dynamic()
+            jans_auth_conf_dynamic.update(entries)
             sqlalchemyObj = self.get_sqlalchObj_for_dn(dn)
-            sqlalchemyObj.jansConfDyn = json.dumps(oxAuthConfDynamic, indent=2)
+            sqlalchemyObj.jansConfDyn = json.dumps(jans_auth_conf_dynamic, indent=2)
             self.session.commit()
 
         elif self.moddb in (BackendTypes.SPANNER,):
-            dn, oxAuthConfDynamic = self.get_oxAuthConfDynamic()
-            oxAuthConfDynamic.update(entries)
+            dn, jans_auth_conf_dynamic = self.get_jans_auth_conf_dynamic()
+            jans_auth_conf_dynamic.update(entries)
             doc_id = self.get_doc_id_from_dn(dn)
 
-            self.spanner_client.write_data(table='jansAppConf', columns=['doc_id', 'jansConfDyn'], values=[doc_id, json.dumps(oxAuthConfDynamic)], mutation='update')
+            self.spanner_client.write_data(table='jansAppConf', columns=['doc_id', 'jansConfDyn'], values=[doc_id, json.dumps(jans_auth_conf_dynamic)], mutation='update')
 
         elif self.moddb == BackendTypes.COUCHBASE:
             for k in entries:
@@ -437,7 +440,7 @@ class DBUtils:
                 for col, val in search_list:
                     if val == '*':
                         continue
-                    
+
                     if col.lower() == 'objectclass':
                         s_table = val
                     else:
@@ -749,9 +752,16 @@ class DBUtils:
 
             return table in metadata
 
+    def is_schema_rdbm_json(self, attrname):
+        for attr in self.jans_attributes:
+            if attrname in attr['names']:
+                return attr.get('rdbm_json_column')
+
     def get_attr_sql_data_type(self, key):
         if key in self.sql_data_types:
             data_type = self.sql_data_types[key]
+        elif self.is_schema_rdbm_json(key):
+            return self.rdbm_json_types[Config.rdbm_type]['type']
         else:
             attr_syntax = self.get_attr_syntax(key)
             data_type = self.ldap_sql_data_type_mapping[attr_syntax]
@@ -1241,6 +1251,24 @@ class DBUtils:
 
         return True, None
 
+
+    def get_scopes(self):
+        result = self.search(
+                    search_base='ou=scopes,o=jans',
+                    search_filter='(objectClass=jansScope)',
+                    search_scope=ldap3.LEVEL,
+                    fetchmany=True)
+        sopes = [ sope for _, sope in result ]
+
+        return sopes
+
+    def get_scope_by_jansid(self, jansid):
+        if not self.jans_scopes:
+            self.jans_scopes = self.get_scopes()
+
+        for jans_scope in self.jans_scopes:
+            if jans_scope['jansId'] == jansid:
+                return jans_scope
 
     def __del__(self):
         try:

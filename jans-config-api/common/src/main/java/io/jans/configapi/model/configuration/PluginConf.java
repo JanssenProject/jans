@@ -1,12 +1,18 @@
 package io.jans.configapi.model.configuration;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class PluginConf {
 
+    @Schema(description = "Name of the plugin.")
     private String name;
+    
+    @Schema(description = "Description of the plugin.")
     private String description;
+    
+    @Schema(description = "Plugin application class.")
     private String className;
 
     public String getName() {

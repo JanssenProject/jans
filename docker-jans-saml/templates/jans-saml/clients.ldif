@@ -1,36 +1,3 @@
-dn: inum=%(saml_scim_client_id)s,ou=clients,o=jans
-objectClass: top
-objectClass: jansClnt
-del: false
-displayName: Jans SCIM Client for SAML
-description: Jans SCIM Client for SAML
-inum: %(saml_scim_client_id)s
-jansAccessTknAsJwt: false
-jansAccessTknSigAlg: RS256
-jansAppTyp: web
-jansAttrs: {"tlsClientAuthSubjectDn":"","runIntrospectionScriptBeforeJwtCreation":false,"keepClientAuthorizationAfterExpiration":false,"allowSpontaneousScopes":false,"spontaneousScopes":[],"spontaneousScopeScriptDns":[],"backchannelLogoutUri":[],"backchannelLogoutSessionRequired":false,"additionalAudience":[],"postAuthnScripts":[],"consentGatheringScripts":[],"introspectionScripts":[],"rptClaimsScripts":[]}
-jansClntSecret: %(saml_scim_client_encoded_pw)s
-jansDisabled: false
-jansGrantTyp: authorization_code
-jansGrantTyp: client_credentials
-jansGrantTyp: password
-jansGrantTyp: refresh_token
-jansIdTknSignedRespAlg: RS256
-jansInclClaimsInIdTkn: false
-jansLogoutSessRequired: false
-jansPersistClntAuthzs: true
-jansRespTyp: code
-jansRptAsJwt: false
-jansScope: inum=F0C4,ou=scopes,o=jans
-jansScope: inum=1200.2B7428,ou=scopes,o=jans
-jansScope: inum=1200.0A0198,ou=scopes,o=jans
-jansSubjectTyp: pairwise
-jansTknEndpointAuthMethod: client_secret_basic
-jansTknEndpointAuthMethod: client_secret_post
-jansTrustedClnt: false
-jansRedirectURI: https://%(hostname)s/admin
-jansRedirectURI: http://localhost:4100
-
 dn: inum=%(kc_saml_openid_client_id)s,ou=clients,o=jans
 objectClass: top
 objectClass: jansClnt
@@ -57,7 +24,7 @@ jansScope: inum=764C,ou=scopes,o=jans
 jansScope: inum=10B2,ou=scopes,o=jans
 jansSubjectTyp: pairwise
 jansTknEndpointAuthMethod: client_secret_basic
-jansTrustedClnt: false
+jansTrustedClnt: true
 jansRedirectURI: https://%(hostname)s/kc/realms/jans/kc-jans-authn-rest-bridge/auth-complete
 
 dn: inum=%(kc_scheduler_api_client_id)s,ou=clients,o=jans

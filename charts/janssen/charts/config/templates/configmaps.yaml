@@ -9,9 +9,14 @@ metadata:
 {{- if .Values.additionalLabels }}
 {{ toYaml .Values.additionalLabels | indent 4 }}
 {{- end }}
-{{- if .Values.additionalAnnotations }}
+{{- if or (.Values.additionalAnnotations) (.Values.global.config.customAnnotations.configMap) }}
   annotations:
+{{- if .Values.additionalAnnotations }}
 {{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.global.config.customAnnotations.configMap }}
+{{ toYaml .Values.global.config.customAnnotations.configMap | indent 4 }}
+{{- end }}
 {{- end }}
 data:
   # Jetty header size in bytes in the auth server
@@ -221,7 +226,6 @@ data:
   {{- if .Values.global.saml.enabled }}
   QUARKUS_TRANSACTION_MANAGER_ENABLE_RECOVERY: {{ .Values.configmap.quarkusTransactionEnableRecovery | quote }}
   KC_LOG_LEVEL: {{ .Values.configmap.kcLogLevel | quote }}
-  KC_PROXY: {{ .Values.configmap.kcProxy | quote }}
   KC_DB: {{ .Values.configmap.kcDbVendor | quote }}
   KC_DB_USERNAME: {{ .Values.configmap.kcDbUsername | quote }}
   KC_DB_SCHEMA: {{ .Values.configmap.kcDbSchema | quote }}
@@ -357,9 +361,14 @@ metadata:
 {{- if .Values.additionalLabels }}
 {{ toYaml .Values.additionalLabels | indent 4 }}
 {{- end }}
-{{- if .Values.additionalAnnotations }}
+{{- if or (.Values.additionalAnnotations) (.Values.global.config.customAnnotations.configMap) }}
   annotations:
+{{- if .Values.additionalAnnotations }}
 {{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.global.config.customAnnotations.configMap }}
+{{ toYaml .Values.global.config.customAnnotations.configMap | indent 4 }}
+{{- end }}
 {{- end }}
 
 ---
@@ -454,7 +463,12 @@ metadata:
 {{- if .Values.additionalLabels }}
 {{ toYaml .Values.additionalLabels | indent 4 }}
 {{- end }}
-{{- if .Values.additionalAnnotations }}
+{{- if or (.Values.additionalAnnotations) (.Values.global.config.customAnnotations.configMap) }}
   annotations:
+{{- if .Values.additionalAnnotations }}
 {{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.global.config.customAnnotations.configMap }}
+{{ toYaml .Values.global.config.customAnnotations.configMap | indent 4 }}
+{{- end }}
 {{- end }}

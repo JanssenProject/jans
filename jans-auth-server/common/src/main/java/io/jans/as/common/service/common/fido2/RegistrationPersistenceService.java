@@ -137,34 +137,39 @@ public abstract class RegistrationPersistenceService {
     
     
     public boolean attachDeviceRegistrationToUser(String userInum, String deviceDn) {
+		return attachDeviceRegistrationToUser(userInum, deviceDn, null);
+    }
+
+    public boolean attachDeviceRegistrationToUser(String userInum, String deviceDn, String deviceName) {
 		Fido2RegistrationEntry registrationEntry = persistenceEntryManager.find(Fido2RegistrationEntry.class, deviceDn);
 		if (registrationEntry == null) {
 			return false;
 		}
-		
+
 		User user = userService.getUserByInum(userInum, "uid");
 		if (user == null) {
 			return false;
 		}
-		
+
 		persistenceEntryManager.remove(deviceDn, Fido2RegistrationEntry.class);
-		
+
         final String id = UUID.randomUUID().toString();
 
         String userAttestationDn = getDnForRegistrationEntry(userInum, id);
         registrationEntry.setId(id);
         registrationEntry.setDn(userAttestationDn);
         registrationEntry.setUserInum(userInum);
+        registrationEntry.setDisplayName(deviceName);
 
-		Fido2RegistrationData registrationData = registrationEntry.getRegistrationData();    
+		Fido2RegistrationData registrationData = registrationEntry.getRegistrationData();
 		registrationData.setUsername(user.getUserId());
 		registrationEntry.clearExpiration();
-		
+
 		save(registrationEntry);
 
 		return true;
     }
-    
+
     public Fido2RegistrationEntry findOneStepUserDeviceRegistration(String deviceDn) {
 		Fido2RegistrationEntry registrationEntry = persistenceEntryManager.find(Fido2RegistrationEntry.class, deviceDn);
 		

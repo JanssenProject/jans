@@ -1,5 +1,6 @@
 FROM ubuntu:22.04@sha256:e9569c25505f33ff72e88b2990887c9dcf230f23259da296eb814fc2b41af999
 
+
 # Don't start any optional services except for the few we need.
 RUN find /etc/systemd/system \
     /lib/systemd/system \
@@ -17,6 +18,9 @@ RUN echo 'APT::Install-Suggests "0";' >> /etc/apt/apt.conf.d/00-docker \
 RUN DEBIAN_FRONTEND=noninteractive \
     apt-get update \
     && apt-get install -y python3 tini curl ca-certificates dbus systemd iproute2 gpg python3-pip python3-dev libpq-dev gcc python3-psycopg2 python3-ldap3 git maven \
+    # install certbot
+    && apt-get -y install libaugeas0 \
+    && pip install certbot certbot-apache \
     && apt-get clean \
     # Cleaning up package lists
     && rm -rf /var/lib/apt/lists/*
@@ -29,6 +33,9 @@ RUN systemctl set-default multi-user.target \
 RUN rm -f /lib/systemd/system/systemd*udev* \
     && rm -f /lib/systemd/system/getty.target
 
+# Install google cloud client
+RUN curl https://sdk.cloud.google.com > install.sh && bash install.sh --disable-prompts
+
 HEALTHCHECK --interval=35s --timeout=4s CMD /opt/dist/scripts/jans-auth check | grep "Jetty running pid" || exit 1
 
 # Ports required by jetty
@@ -38,7 +45,7 @@ EXPOSE 443 8080 1636
 # jans-linux-setup
 # =====================
 
-ENV JANS_SOURCE_VERSION=aeba80d5fb2860e1336a49bfc3cbfc80f79b08ba
+ENV JANS_SOURCE_VERSION=71a68b3512f06e29ab8479479a4533c035326ecb
 
 # cleanup
 RUN rm -rf /tmp/jans
@@ -63,16 +70,26 @@ ENV CN_HOSTNAME="demoexample.jans.io" \
     TEST_CLIENT_ID="9876baac-de39-4c23-8a78-674b59df8c09" \
     TEST_CLIENT_SECRET="" \
     TEST_CLIENT_TRUSTED="true" \
+    CN_INSTALL_COUCHBASE="false" \
+    CN_INSTALL_SPANNER="false" \
     CN_INSTALL_LDAP="false" \
     CN_INSTALL_MYSQL="false" \
     CN_INSTALL_PGSQL="false" \
     CN_INSTALL_CONFIG_API="true" \
     CN_INSTALL_SCIM="true" \
     CN_INSTALL_FIDO2="true" \
+    CN_INSTALL_CASA="true" \
+    CN_INSTALL_KC_LINK="true" \
+    CN_INSTALL_LINK="true" \
+    CN_INSTALL_LOCK="true" \
+    CN_INSTALL_SAML="false" \
+    CN_INSTALL_OPA="true" \
     RDBMS_DATABASE="jans" \
     RDBMS_USER="jans" \
     RDBMS_PASSWORD="" \
-    RDBMS_HOST=""
+    RDBMS_HOST="" \
+    IS_FQDN_REGISTERED="false" \
+    RUN_TESTS="false"
 
 # ==========
 # misc stuff
@@ -81,11 +98,11 @@ ENV CN_HOSTNAME="demoexample.jans.io" \
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/monolith" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.1.1" \
+    org.opencontainers.image.version="1.1.5" \
     org.opencontainers.image.title="Janssen Monolith Image" \
     org.opencontainers.image.description="Janssen Authorization server"
 
 COPY scripts /app/scripts
 RUN chmod +x /app/scripts/entrypoint.sh
 
-CMD ["/bin/bash", "-c", "exec /app/scripts/entrypoint.sh --log-target=journal 3>&1"]
+CMD ["/bin/bash", "-c", "rm -rf /opt/jetty-11.0/temp/*; exec /app/scripts/entrypoint.sh --log-target=journal 3>&1"]

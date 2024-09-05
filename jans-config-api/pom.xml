@@ -5,7 +5,7 @@
 	<groupId>io.jans</groupId>
 	<artifactId>jans-config-api-parent</artifactId>
 	<packaging>pom</packaging>
-	<version>1.1.1-SNAPSHOT</version>
+	<version>1.1.5-SNAPSHOT</version>
 	<name>jans-config-api-parent</name>
 
 	<distributionManagement>
@@ -37,7 +37,6 @@
 		<microprofile.metrics.version>4.0</microprofile.metrics.version>
 		<microprofile.rest.client.version>3.0</microprofile.rest.client.version>
 		<smallrye.config.version>3.0.0-RC1</smallrye.config.version>
-		<smallrye.health.version>3.0.1</smallrye.health.version>
 		<smallrye.metrics.version>4.0.0-RC1</smallrye.metrics.version>
 		<org.jboss.resteasy.client.microprofile.version>4.7.5.Final</org.jboss.resteasy.client.microprofile.version>
 
@@ -244,11 +243,6 @@
 			</dependency>
 
 			<!-- Security -->
-			<dependency>
-				<groupId>com.nimbusds</groupId>
-				<artifactId>nimbus-jose-jwt</artifactId>
-				<version>9.28</version>
-			</dependency>
 			<dependency>
 				<groupId>org.bitbucket.b_c</groupId>
 				<artifactId>jose4j</artifactId>
@@ -471,7 +465,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-site-plugin</artifactId>
-					<version>4.0.0-M7</version>
+					<version>4.0.0-M16</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -509,6 +503,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-javadoc-plugin</artifactId>
+					<version>3.8.0</version>
 					<configuration>
 						<failOnError>false</failOnError>
 					</configuration>

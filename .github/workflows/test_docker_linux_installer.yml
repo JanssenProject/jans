@@ -21,12 +21,12 @@ jobs:
       max-parallel: 6
       matrix:
         # add '"pgsql" when supported
-        persistence-backends: ["MYSQL", "PGSQL", "LDAP"]
+        persistence-backends: ["MYSQL", "PGSQL", "LDAP", "COUCHBASE", "SPANNER"]
         python-version: ["3.7"]
       fail-fast: false
     steps:
     - name: Harden Runner
-      uses: step-security/harden-runner@eb238b55efaa70779f274895e782ed17c84f2895 # v2.6.1
+      uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
       with:
         egress-policy: audit
 
@@ -61,7 +61,7 @@ jobs:
       run: |
         ip=$(ifconfig eth0 | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1')
         sudo chmod u+x automation/startjanssenmonolithdemo.sh
-        sudo bash ./automation/startjanssenmonolithdemo.sh "demoexample.jans.io" "${{ matrix.persistence-backends }}" "${ip}" "${{ github.sha }}"
+        sudo RUN_TESTS=true bash ./automation/startjanssenmonolithdemo.sh "demoexample.jans.io" "${{ matrix.persistence-backends }}" "${ip}" "${{ github.sha }}"
         persistence=$(echo "${{ matrix.persistence-backends }}" | tr '[:upper:]' '[:lower:]')
         mv /tmp/reports /${{ matrix.persistence-backends }}-reports
 
@@ -112,7 +112,7 @@ jobs:
         name: java-${{ matrix.persistence-backends }}-test-results
         path: "/${{ matrix.persistence-backends }}-reports/*.xml"
 
-    - uses: dorny/test-reporter@1e3a380fe6f25600635b111ddb3547864782656a # v1
+    - uses: dorny/test-reporter@31a54ee7ebcacc03a09ea97a7e5465a47b84aea5 # v1
       continue-on-error: true
       if: >-
           github.event.pull_request.head.repo.full_name == github.repository ||

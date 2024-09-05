@@ -72,6 +72,8 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
     private String codeChallengeMethod;
     private String claims;
     private String dpopJkt;
+    private String referenceId;
+    private Integer statusListIndex;
 
     private String acrValues;
     private String sessionDn;
@@ -96,6 +98,22 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
         this.client = client;
         this.scopes = new CopyOnWriteArraySet<>();
         this.grantId = UUID.randomUUID().toString();
+    }
+
+    public String getReferenceId() {
+        return referenceId;
+    }
+
+    public void setReferenceId(String referenceId) {
+        this.referenceId = referenceId;
+    }
+
+    public Integer getStatusListIndex() {
+        return statusListIndex;
+    }
+
+    public void setStatusListIndex(Integer statusListIndex) {
+        this.statusListIndex = statusListIndex;
     }
 
     public String getDpopJkt() {
@@ -340,6 +358,7 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
 
         accessToken.setSessionDn(getSessionDn());
         accessToken.setX5ts256(CertUtils.confirmationMethodHashS256(executionContext.getCertAsPem()));
+        accessToken.setReferenceId(executionContext.getTokenReferenceId());
 
         final String dpop = executionContext.getDpop();
         if (StringUtils.isNoneBlank(dpop)) {
@@ -352,6 +371,8 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
 
     @Override
     public RefreshToken createRefreshToken(ExecutionContext context) {
+        context.generateRandomTokenReferenceId();
+
         int lifetime = appConfiguration.getRefreshTokenLifetime();
         if (client.getRefreshTokenLifetime() != null && client.getRefreshTokenLifetime() > 0) {
             lifetime = client.getRefreshTokenLifetime();
@@ -361,15 +382,20 @@ public abstract class AbstractAuthorizationGrant implements IAuthorizationGrant 
 
         refreshToken.setSessionDn(getSessionDn());
         refreshToken.setDpop(context.getDpop());
+        refreshToken.setReferenceId(context.getTokenReferenceId());
+
         return refreshToken;
     }
 
     @Override
     public RefreshToken createRefreshToken(ExecutionContext context, int lifetime) {
+        context.generateRandomTokenReferenceId();
+
         RefreshToken refreshToken = new RefreshToken(lifetime);
 
         refreshToken.setSessionDn(getSessionDn());
         refreshToken.setDpop(context.getDpop());
+        refreshToken.setReferenceId(context.getTokenReferenceId());
 
         return refreshToken;
     }

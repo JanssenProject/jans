@@ -1,4 +1,4 @@
-FROM bellsoft/liberica-openjre-alpine:17.0.9@sha256:7c9948b1e267037b7cadfe448e732b9cb719bfd38d8c5811f2f2d33cc0c05123
+FROM bellsoft/liberica-openjre-alpine:17.0.12@sha256:a39e3fb3c96ae89e936a2e50c0a597a91d2357a1ec19096c05e851f54f3a9715
 
 # ===============
 # Alpine packages
@@ -40,8 +40,10 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # KC Link
 # =======
 
-ENV CN_VERSION=1.1.1-SNAPSHOT
-ENV CN_BUILD_DATE='2024-03-11 08:03'
+
+ENV CN_VERSION=1.1.5-SNAPSHOT
+ENV CN_BUILD_DATE='2024-08-23 11:41'
+
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-keycloak-link-server/${CN_VERSION}/jans-keycloak-link-server-${CN_VERSION}.war
 
 # Install Link
@@ -55,20 +57,21 @@ RUN mkdir -p ${JETTY_BASE}/jans-keycloak-link/webapps \
     && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-keycloak-link --add-module=server,deploy,resources,http,http-forwarded,threadpool,jsp,cdi-decorate,jmx,stats,logging-log4j2 --approve-all-licenses \
     && rm -rf /tmp/jans-keycloak-link.war /tmp/WEB-INF
 
-# =====================
-# jans-linux-setup sync
-# =====================
+# ===========
+# Assets sync
+# ===========
 
-ENV JANS_SOURCE_VERSION=aeba80d5fb2860e1336a49bfc3cbfc80f79b08ba
+ENV JANS_SOURCE_VERSION=fc9f04fe3b3d3d168f3090214b22ee80be371d92
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
-# we are using partial-clone and sparse-checkout to get the jans-linux-setup code
-RUN git clone --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
+# we are using partial-clone and sparse-checkout to get the assets
+RUN git clone --depth 500 --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
     && cd /tmp/jans \
     && git sparse-checkout init --cone \
     && git checkout ${JANS_SOURCE_VERSION} \
-    && git sparse-checkout add ${JANS_SETUP_DIR}
+    && git sparse-checkout add ${JANS_SETUP_DIR} \
+    && git sparse-checkout add jans-pycloudlib
 
 RUN mkdir -p /etc/jans/conf \
     /app/static/rdbm \
@@ -86,14 +89,18 @@ RUN cd /tmp/jans \
     && cp ${JANS_SETUP_DIR}/schema/opendj_types.json /app/schema/ \
     && cp -R ${JANS_SETUP_DIR}/templates/jans-keycloak-link/configuration.ldif /app/templates/jans-keycloak-link/ \
     && cp -R ${JANS_SETUP_DIR}/templates/jans-keycloak-link/jans-keycloak-link-config.json /app/templates/jans-keycloak-link/ \
-    && cp -R ${JANS_SETUP_DIR}/templates/jans-keycloak-link/jans-keycloak-link-static-config.json /app/templates/jans-keycloak-link/
+    && cp -R ${JANS_SETUP_DIR}/templates/jans-keycloak-link/jans-keycloak-link-static-config.json /app/templates/jans-keycloak-link/ \
+    && mkdir -p org/eclipse/jetty \
+    && cp ${JANS_SETUP_DIR}/static/favicon.ico org/eclipse/jetty/favicon.ico \
+    && zip -r ${JETTY_HOME}/lib/jetty-server-${JETTY_VERSION}.jar org/eclipse/jetty/favicon.ico
 
 # ======
 # Python
 # ======
 
 COPY requirements.txt /app/requirements.txt
-RUN python3 -m ensurepip \
+RUN mv /usr/lib/python3.12/EXTERNALLY-MANAGED /usr/lib/python3.12/EXTERNALLY-MANAGED.disabled \
+    && python3 -m ensurepip \
     && pip3 install --no-cache-dir -U pip wheel setuptools \
     && pip3 install --no-cache-dir -r /app/requirements.txt \
     && pip3 uninstall -y pip wheel
@@ -194,7 +201,8 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_AWS_SECRETS_REPLICA_FILE="" \
     CN_KEYCLOAK_LINK_JETTY_PORT=9092 \
     CN_KEYCLOAK_LINK_JETTY_HOST=0.0.0.0 \
-    CN_JETTY_ARGS=""
+    CN_JETTY_ARGS="" \
+    CN_SSL_CERT_FROM_SECRETS=true
 
 # ==========
 # misc stuff
@@ -205,7 +213,7 @@ EXPOSE $CN_KEYCLOAK_LINK_JETTY_PORT
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/keycloak-link" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.1.1" \
+    org.opencontainers.image.version="1.1.5" \
     org.opencontainers.image.title="Janssen Keycloak Link" \
     org.opencontainers.image.description=""
 

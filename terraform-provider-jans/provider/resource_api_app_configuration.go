@@ -26,6 +26,16 @@ func resourceApiAppConfiguration() *schema.Resource {
 				Optional:    true,
 				Description: "",
 			},
+			"disable_logger_timer": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "",
+			},
+			"disable_audit_logger": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "",
+			},
 			"api_approved_issuer": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -289,6 +299,57 @@ func resourceApiAppConfiguration() *schema.Resource {
 							Type:        schema.TypeString,
 							Optional:    true,
 							Description: "",
+						},
+					},
+				},
+			},
+			"asset_mgt_configuration": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"asset_mgt_enabled": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: "",
+						},
+						"asset_server_upload_enabled": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: "",
+						},
+						"asset_base_directory": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "",
+						},
+						"asset_dir_mappings": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Description: "",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"directory": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: "",
+									},
+									"type": {
+										Type:        schema.TypeList,
+										Optional:    true,
+										Description: "",
+										Elem: &schema.Schema{
+											Type: schema.TypeString,
+										},
+									},
+									"description": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: "",
+									},
+								},
+							},
 						},
 					},
 				},

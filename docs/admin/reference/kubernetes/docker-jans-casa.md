@@ -61,7 +61,6 @@ The following environment variables are supported by the container:
 - `CN_JACKRABBIT_SYNC_INTERVAL`: Interval between files sync (default to `300` seconds).
 - `CN_JACKRABBIT_ADMIN_ID`: Admin username (default to `admin`).
 - `CN_JACKRABBIT_ADMIN_PASSWORD_FILE`: Absolute path to file contains password for admin user (default to `/etc/jans/conf/jackrabbit_admin_password`).
-- `CN_SSL_CERT_FROM_SECRETS`: Determine whether to get SSL cert from secrets backend (default to `false`). Note that the flag will take effect only if there's no mounted `/etc/certs/web_https.crt` file.
 - `CN_SQL_DB_DIALECT`: Dialect name of SQL backend (one of `mysql`, `pgsql`; default to `mysql`).
 - `CN_SQL_DB_HOST`: Host of SQL backend (default to `localhost`).
 - `CN_SQL_DB_PORT`: Port of SQL backend (default to `3306`).
@@ -78,6 +77,7 @@ The following environment variables are supported by the container:
 - `CN_CASA_ADMIN_LOCK_FILE`: Path to lock file to enable/disable administration feature (default to `/opt/jans/jetty/jans-casa/.administrable`). If file is not exist, the feature is disabled.
 - `CN_PROMETHEUS_PORT`: Port used by Prometheus JMX agent (default to empty string). To enable Prometheus JMX agent, set the value to a number. See [Exposing metrics](#exposing-metrics) for details.
 - `CN_CASA_JWKS_SIZE_LIMIT`: Default HTTP size limit (in bytes) when retrieving remote JWKS (default to `100000`).
+- `CN_SSL_CERT_FROM_SECRETS`: Determine whether to get SSL cert from secrets backend (default to `true`). Note that the flag will take effect only if there's no mounted `/etc/certs/web_https.crt` file.
 
 ### Configure app loggers
 

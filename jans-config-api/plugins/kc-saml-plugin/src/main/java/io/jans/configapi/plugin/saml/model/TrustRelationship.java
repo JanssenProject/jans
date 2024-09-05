@@ -29,6 +29,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 
 @DataEntry(sortBy = { "displayName" })
 @ObjectClass(value = "jansTrustRelationship")
@@ -38,119 +39,108 @@ public class TrustRelationship extends Entry implements Serializable {
     private static final long serialVersionUID = 7912166229997681502L;
 
     @AttributeName(ignoreDuringUpdate = true)
+    @Schema(description = "Unique identifier")
     private String inum;
 
     @AttributeName
+    @Schema(description = "Creator of Trust Relationship.")
     private String owner;
 
     @AttributeName(name = "name")
     @NotNull
     @Size(min = 0, max = 60, message = "Length of the name should not exceed 60")
+    @Schema(description = "The alphanumeric ID string that is used to identify the Trust Relationship.")
     private String name;
 
     @NotNull
     @Size(min = 0, max = 60, message = "Length of the Display Name should not exceed 60")
     @AttributeName
+    @Schema(description = "Trust Relationship display name.")
     private String displayName;
 
     @NotNull
     @Size(min = 0, max = 4000, message = "Length of the Description should not exceed 4000")
     @AttributeName
+    @Schema(description = "Description of the Trust Relationship.")
     private String description;
-
-    // Access settings
-    /**
-     * Root URL appended to relative URLs
-     */
-    @AttributeName
-    private String rootUrl;
-
-    /**
-     * URL to the admin interface of the client.
-     * 
-     */
-    @AttributeName
-    private String adminUrl;
-
-    /**
-     * Default URL, Home URL to use when the auth server needs to redirect or link
-     * back to the client.
-     * 
-     */
+    
+    @Schema(description = "URL to use when the auth server needs to redirect.")
     @AttributeName
     private String baseUrl;
 
-    @AttributeName(name = "surrogateAuthRequired")
-    private boolean surrogateAuthRequired;
-
     @AttributeName(name = "jansEnabled")
+    @Schema(description = "Indicates if Trust Relationship is enabled.")
     private boolean enabled;
 
-    /**
-     * Always list this in the Account UI, even if the user does not have an
-     * active session.
-     */
     @AttributeName(name = "displayInConsole")
+    @Schema(description = "Indicates if Trust Relationship should always be listed in the UI.")
     private boolean alwaysDisplayInConsole;
 
     @AttributeName(name = "jansPreferredMethod")
+    @Schema(description = "Preferred Authenticator Type.")
     private String clientAuthenticatorType;
 
     @AttributeName(name = "jansClntSecret")
+    @Schema(description = "Client secret.")
     private String secret;
 
     @AttributeName(name = "jansRegistrationAccessTkn")
+    @Schema(description = "Registration access token.")
     private String registrationAccessToken;
 
+    @Schema(description = "Boolean value if consent is required.")
     private Boolean consentRequired;
 
-    /**
-     * Trust Relationship SP metadata type - file, URI, federation
-     */
     @NotNull
     @AttributeName(name = "jansSAMLspMetaDataSourceTyp")
+    @Schema(description = "Trust Relationship SP metadata type - file, URI.")
     private MetadataSourceType spMetaDataSourceType;
 
     @JsonObject
     @AttributeName(name = "samlMetadata")
+    @Schema(description = "SAML entity metadata.")
     private SAMLMetadata samlMetadata;
 
     @AttributeName(name = "jansRedirectURI")
+    @Schema(description = "List of valid Redirect URI.")
     private String[] redirectUris;
 
-    /**
-     * Trust Relationship file location of metadata
-     */
+
     @AttributeName(name = "jansSAMLspMetaDataFN")
     @Hidden
+    @Schema(description = "Trust Relationship metadata file name.")
     private String spMetaDataFN;
 
     @AttributeName(name = "jansSAMLspMetaDataURL")
+    @Schema(description = "SAML entity metadata file URL.")
     private String spMetaDataURL;
 
     @AttributeName(name = "jansMetaLocation")
+    @Schema(description = "Trust Relationship metadata file location.")
     private String metaLocation;
 
     @AttributeName(name = "jansReleasedAttr")
+    @Schema(description = "Trust Relationship attributes that will be released to SAML server.")
     private List<String> releasedAttributes;
-
-    @Pattern(regexp = "^(https?|http)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]", message = "Please enter a valid SP url, including protocol (http/https)")
-    @AttributeName(name = "url")
-    private String url;
 
     @Pattern(regexp = "^$|(^(https?|http)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|])", message = "Please enter a valid url, including protocol (http/https)")
     @AttributeName(name = "jansPostLogoutRedirectURI")
+    @Schema(description = "Logout request URL.")
     private String spLogoutURL;
 
     @AttributeName(name = "jansStatus")
+    @Schema(description = "Trust Relationship setup status.")
     private GluuStatus status;
 
     @AttributeName(name = "jansValidationStatus")
+    @Schema(description = "Trust Relationship validation status.")
     private ValidationStatus validationStatus;
 
     @AttributeName(name = "jansValidationLog")
+    @Schema(description = "Validation log.")
     private List<String> validationLog;
 
+    @Schema(description = "List of profile configuration.")
     private Map<String, ProfileConfiguration> profileConfigurations = new HashMap<String, ProfileConfiguration>();
 
     public String getInum() {
@@ -193,36 +183,12 @@ public class TrustRelationship extends Entry implements Serializable {
         this.description = description;
     }
 
-    public String getRootUrl() {
-        return rootUrl;
-    }
-
-    public void setRootUrl(String rootUrl) {
-        this.rootUrl = rootUrl;
-    }
-
-    public String getAdminUrl() {
-        return adminUrl;
-    }
-
-    public void setAdminUrl(String adminUrl) {
-        this.adminUrl = adminUrl;
-    }
-
     public String getBaseUrl() {
         return baseUrl;
     }
 
     public void setBaseUrl(String baseUrl) {
         this.baseUrl = baseUrl;
-    }
-
-    public boolean isSurrogateAuthRequired() {
-        return surrogateAuthRequired;
-    }
-
-    public void setSurrogateAuthRequired(boolean surrogateAuthRequired) {
-        this.surrogateAuthRequired = surrogateAuthRequired;
     }
 
     public boolean isEnabled() {
@@ -329,14 +295,6 @@ public class TrustRelationship extends Entry implements Serializable {
         this.releasedAttributes = releasedAttributes;
     }
 
-    public String getUrl() {
-        return url;
-    }
-
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
     public String getSpLogoutURL() {
         return spLogoutURL;
     }
@@ -392,14 +350,14 @@ public class TrustRelationship extends Entry implements Serializable {
     @Override
     public String toString() {
         return "TrustRelationship [inum=" + inum + ", owner=" + owner + ", name=" + name + ", displayName="
-                + displayName + ", description=" + description + ", rootUrl=" + rootUrl + ", adminUrl=" + adminUrl
-                + ", baseUrl=" + baseUrl + ", surrogateAuthRequired=" + surrogateAuthRequired + ", enabled=" + enabled
+                + displayName + ", description=" + description 
+                + ", baseUrl=" + baseUrl + ", enabled=" + enabled
                 + ", alwaysDisplayInConsole=" + alwaysDisplayInConsole + ", clientAuthenticatorType="
                 + clientAuthenticatorType + ", secret=" + secret + ", registrationAccessToken="
                 + registrationAccessToken + ", consentRequired=" + consentRequired + ", spMetaDataSourceType="
                 + spMetaDataSourceType + ", samlMetadata=" + samlMetadata + ", redirectUris="
                 + Arrays.toString(redirectUris) + ", spMetaDataFN=" + spMetaDataFN + ", spMetaDataURL=" + spMetaDataURL
-                + ", metaLocation=" + metaLocation + ", releasedAttributes=" + releasedAttributes + ", url=" + url
+                + ", metaLocation=" + metaLocation + ", releasedAttributes=" + releasedAttributes 
                 + ", spLogoutURL=" + spLogoutURL + ", status=" + status + ", validationStatus=" + validationStatus
                 + ", validationLog=" + validationLog + ", profileConfigurations=" + profileConfigurations + "]";
     }

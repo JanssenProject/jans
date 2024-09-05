@@ -4,17 +4,15 @@ import java.util.Collection;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class DataFormatConversionConf {
 
-    /**
-     * Flag to enable and disable data conversion
-     */
+    @Schema(description = "Flag to enable and disable data conversion.")
     private boolean enabled;
 
-    /**
-     * HTTP methods for which data conversion is to be disabled
-     */
+    @Schema(description = "HTTP methods for which data conversion is to be disabled.")
     private Collection<String> ignoreHttpMethod;
 
     public boolean isEnabled() {

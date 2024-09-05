@@ -249,7 +249,7 @@ def uninstall_jans():
     os.system('systemctl daemon-reload')
     os.system('systemctl reset-failed')
 
-    remove_list = ['/etc/certs', '/etc/jans', '/opt/amazon-corretto*', '/opt/jre', '/opt/node*', '/opt/jetty*', '/opt/jython*', '/opt/keycloak', '/opt/idp', '/opt/opa']
+    remove_list = ['/etc/certs', '/etc/jans', '/opt/amazon-corretto*', '/opt/jre', '/opt/node*', '/opt/jetty*', '/opt/jython*', '/opt/keycloak', '/opt/idp', '/opt/opa', '/opt/kc-scheduler', '/etc/cron.d/kc-scheduler-cron']
     if argsp.profile == 'jans':
         remove_list.append('/opt/opendj')
     if not argsp.keep_downloads:

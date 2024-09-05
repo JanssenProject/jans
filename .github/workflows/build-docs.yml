@@ -22,8 +22,8 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version tag (e.g."v1.1.1")'
-        default: "v1.1.1"
+        description: 'Version tag (e.g."v1.1.5")'
+        default: "v1.1.5"
         required: false
 concurrency:
   group: run-once
@@ -35,12 +35,12 @@ jobs:
   build:
     permissions:
       contents: write  # for Git to git push
-    if: github.repository_owner == 'JanssenProject'
+    if: github.repository == 'JanssenProject/jans'
     name: Deploy docs
     runs-on: ubuntu-latest
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@eb238b55efaa70779f274895e782ed17c84f2895 # v2.6.1
+        uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
         with:
           egress-policy: audit
 

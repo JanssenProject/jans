@@ -105,6 +105,15 @@ public class ErrorResponseFactory implements Configuration {
         return error.toJSonString();
     }
 
+    public boolean isFeatureFlagEnabled(FeatureFlagType flagType) {
+        final Set<FeatureFlagType> enabledFlags = FeatureFlagType.from(appConfiguration);
+        if (enabledFlags.isEmpty()) { // no restrictions
+            return true;
+        }
+
+        return enabledFlags.contains(flagType);
+    }
+
     public void validateFeatureEnabled(FeatureFlagType flagType) {
         final Set<FeatureFlagType> enabledFlags = FeatureFlagType.from(appConfiguration);
         if (enabledFlags.isEmpty()) { // no restrictions

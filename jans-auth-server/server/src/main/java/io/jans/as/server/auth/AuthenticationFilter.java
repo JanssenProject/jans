@@ -32,6 +32,7 @@ import io.jans.as.server.model.common.AuthorizationGrantList;
 import io.jans.as.server.model.token.ClientAssertion;
 import io.jans.as.server.model.token.HttpAuthTokenType;
 import io.jans.as.server.service.*;
+import io.jans.as.server.service.external.ExternalClientAuthnService;
 import io.jans.as.server.service.token.TokenService;
 import io.jans.as.server.token.ws.rs.TxTokenValidator;
 import io.jans.as.server.util.ServerUtil;
@@ -79,6 +80,7 @@ import static org.apache.commons.lang3.BooleanUtils.isTrue;
                 "/restv1/userinfo",
                 "/restv1/revoke",
                 "/restv1/revoke_session",
+                "/restv1/global-token-revocation",
                 "/restv1/bc-authorize",
                 "/restv1/par",
                 "/restv1/device_authorization",
@@ -142,6 +144,9 @@ public class AuthenticationFilter implements Filter {
     @Inject
     private TxTokenValidator txTokenValidator;
 
+    @Inject
+    private ExternalClientAuthnService externalClientAuthnService;
+
     private String realm;
 
     @Override
@@ -165,11 +170,19 @@ public class AuthenticationFilter implements Filter {
                 return;
             }
 
+            final Client client = externalClientAuthnService.externalAuthenticateClient(httpRequest, httpResponse);
+            if (client != null) {
+                log.debug("Client {} is authenticated by external script.", client.getClientId());
+                filterChain.doFilter(servletRequest, servletResponse);
+                return;
+            }
+
             boolean tokenEndpoint = requestUrl.endsWith("/token");
             boolean tokenRevocationEndpoint = requestUrl.endsWith("/revoke");
             boolean backchannelAuthenticationEnpoint = requestUrl.endsWith("/bc-authorize");
             boolean deviceAuthorizationEndpoint = requestUrl.endsWith("/device_authorization");
             boolean revokeSessionEndpoint = requestUrl.endsWith("/revoke_session");
+            boolean globalTokenRevocationEndpoint = requestUrl.endsWith("/global-token-revocation");
             boolean isParEndpoint = requestUrl.endsWith("/par");
             boolean ssaEndpoint = requestUrl.endsWith("/ssa") &&
                     (Arrays.asList(HttpMethod.POST, HttpMethod.GET, HttpMethod.DELETE).contains(httpRequest.getMethod()));
@@ -187,7 +200,7 @@ public class AuthenticationFilter implements Filter {
                 return;
             }
 
-            if (tokenEndpoint || revokeSessionEndpoint || tokenRevocationEndpoint || deviceAuthorizationEndpoint || isParEndpoint || ssaEndpoint || ssaJwtEndpoint) {
+            if (tokenEndpoint || revokeSessionEndpoint || tokenRevocationEndpoint || deviceAuthorizationEndpoint || isParEndpoint || ssaEndpoint || ssaJwtEndpoint || globalTokenRevocationEndpoint) {
                 log.debug("Starting endpoint authentication {}", requestUrl);
 
                 // #686 : allow authenticated client via user access_token
@@ -416,6 +429,7 @@ public class AuthenticationFilter implements Filter {
                     if (servletRequest.getRequestURI().endsWith("/token")
                             || servletRequest.getRequestURI().endsWith("/revoke")
                             || servletRequest.getRequestURI().endsWith("/revoke_session")
+                            || servletRequest.getRequestURI().endsWith("/global-token-revocation")
                             || servletRequest.getRequestURI().endsWith("/userinfo")
                             || servletRequest.getRequestURI().endsWith("/bc-authorize")
                             || servletRequest.getRequestURI().endsWith("/par")

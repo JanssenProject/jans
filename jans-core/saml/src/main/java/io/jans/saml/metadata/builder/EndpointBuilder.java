@@ -1,5 +1,6 @@
 package io.jans.saml.metadata.builder;
 
+import io.jans.saml.metadata.model.SAMLBinding;
 import io.jans.saml.metadata.model.Endpoint;
 
 public class EndpointBuilder {
@@ -11,7 +12,7 @@ public class EndpointBuilder {
         this.endpoint = endpoint;
     }
 
-    public EndpointBuilder binding(final String binding) {
+    public EndpointBuilder binding(final SAMLBinding binding) {
 
         this.endpoint.setBinding(binding);
         return this;

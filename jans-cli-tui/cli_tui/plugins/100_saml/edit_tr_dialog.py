@@ -210,37 +210,6 @@ class EditTRDialog(JansGDialog, DialogUtils):
                     jans_help=_("Description for TR"),
                     widget_style=cli_style.white_bg_widget
                 ),
-                self.app.getTitledCheckBox(
-                    _("Surrogate Auth Required"),
-                    name='surrogateAuthRequired',
-                    checked=self.data.get('surrogateAuthRequired', False),
-                    jans_help=_("Is this TR enabled?"),
-                    style=cli_style.check_box
-                ),
-                self.app.getTitledText(
-                    title=_("Root URL"),
-                    name='rootUrl',
-                    value=self.data.get('rootUrl', ''),
-                    style=cli_style.edit_text,
-                    jans_help=_("Root URL for TR"),
-                    widget_style=cli_style.white_bg_widget
-                ),
-                self.app.getTitledText(
-                    title=_("Admin URL"),
-                    name='adminUrl',
-                    value=self.data.get('adminUrl', ''),
-                    style=cli_style.edit_text,
-                    jans_help=_("Admin URL for TR"),
-                    widget_style=cli_style.white_bg_widget
-                ),
-                self.app.getTitledText(
-                    title=_("URL"),
-                    name='url',
-                    value=self.data.get('url', ''),
-                    style=cli_style.edit_text,
-                    jans_help=_("URL for TR"),
-                    widget_style=cli_style.white_bg_widget
-                ),
                 self.app.getTitledText(
                     title=_("Service Provider Logout URL"),
                     name='spLogoutURL',
@@ -339,7 +308,7 @@ class EditTRDialog(JansGDialog, DialogUtils):
 
 
     def get_attribute_by_inum(self, inum: str) -> dict:
-        for attribute in common_data.scopes:
+        for attribute in common_data.jans_attributes:
             if attribute['inum'] == inum or attribute['dn'] == inum:
                 return attribute
         return {}
@@ -348,7 +317,7 @@ class EditTRDialog(JansGDialog, DialogUtils):
         for attribute_dn in self.data['releasedAttributes']:
             attribute = self.get_attribute_by_inum(attribute_dn)
             if attribute:
-                label = attribute['id']
+                label = attribute.get('displayName') or attribute['name']
                 if [attribute_dn, label] not in self.tr_attribute_entries:
                     self.tr_attribute_entries.append([attribute_dn, label])
                     if hasattr(self, 'released_attributes_container'):
@@ -370,10 +339,10 @@ class EditTRDialog(JansGDialog, DialogUtils):
             self.fill_tr_attributes()
 
         attribute_list = []
-        for attribute in common_data.scopes:
-            if not attribute_exists(attribute['dn']):
+        for attribute in common_data.jans_attributes:
+            if attribute['status'] == 'active' and not attribute_exists(attribute['dn']):
                 attribute_list.append(
-                    (attribute['dn'], attribute.get('id', '') or attribute['inum']))
+                    (attribute['dn'], attribute.get('displayName', '') or attribute['name']))
 
             attribute_list.sort(key=lambda x: x[1])
 
@@ -484,19 +453,22 @@ class EditTRDialog(JansGDialog, DialogUtils):
         elif sp_meta_data_source_type == 'manual':
             new_data['samlMetadata'] = matadata_type_container_data
 
+        if not self.new_tr:
+            new_data.pop('spMetaDataLocation', None)
+
         data = {'trustRelationship': new_data}
         if sp_meta_data_source_type == 'file':
-            if not self.metadata_file_path:
+            if self.new_tr and not self.metadata_file_path:
                 self.app.show_message(_(common_strings.error), _("Please browse a metadata source file"), tobefocused=self.edit_tr_container)
+                self.app.stop_progressing(_("Failed to save Trust Relationship."))
                 return
 
-                self.app.stop_progressing(_("Failed to save Trust Relationship."))
-
-            data['metaDataFile'] = self.metadata_file_path
-
+            if self.metadata_file_path:
+                data['metaDataFile'] = self.metadata_file_path
 
         async def coroutine():
             operation_id = 'post-trust-relationship-metadata-file' if self.new_tr else 'put-trust-relationship'
+
             cli_args = {'operation_id': operation_id, 'data': data}
             self.app.start_progressing()
             response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)

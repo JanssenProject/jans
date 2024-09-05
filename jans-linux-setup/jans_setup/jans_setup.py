@@ -151,8 +151,6 @@ if base.current_app.profile == 'jans':
 from setup_app.installers.config_api import ConfigApiInstaller
 from setup_app.installers.jans_cli import JansCliInstaller
 from setup_app.installers.rdbm import RDBMInstaller
-# from setup_app.installers.oxd import OxdInstaller
-
 
 if base.snap:
     try:
@@ -271,8 +269,6 @@ if Config.profile == 'jans':
     jans_lock_installer = JansLockInstaller()
 
 jansCliInstaller = JansCliInstaller()
-
-# oxdInstaller = OxdInstaller()
 
 rdbmInstaller.packageUtils = packageUtils
 
@@ -422,12 +418,12 @@ def main():
 
             jansInstaller.order_services()
 
-            if (Config.installed_instance and 'installHttpd' in Config.addPostSetupService) or (
-                    not Config.installed_instance and Config.installHttpd):
+            if (Config.installed_instance and 'install_httpd' in Config.addPostSetupService) or (
+                    not Config.installed_instance and Config.install_httpd):
                 httpdinstaller.configure()
 
-            if (Config.installed_instance and 'installOxAuth' in Config.addPostSetupService) or (
-                    not Config.installed_instance and Config.installOxAuth):
+            if (Config.installed_instance and 'install_jans_auth' in Config.addPostSetupService) or (
+                    not Config.installed_instance and Config.install_jans_auth):
                 jansAuthInstaller.start_installation()
 
             if (Config.installed_instance and configApiInstaller.install_var in Config.addPostSetupService) or (
@@ -438,8 +434,8 @@ def main():
 
             if Config.profile == 'jans':
 
-                if (Config.installed_instance and 'installFido2' in Config.addPostSetupService) or (
-                        not Config.installed_instance and Config.installFido2):
+                if (Config.installed_instance and 'install_fido2' in Config.addPostSetupService) or (
+                        not Config.installed_instance and Config.install_fido2):
                     fidoInstaller.start_installation()
 
                 if (Config.installed_instance and 'install_scim_server' in Config.addPostSetupService) or (
@@ -472,8 +468,6 @@ def main():
                         not Config.installed_instance and Config.get(jans_lock_installer.install_var)):
                     jans_lock_installer.start_installation()
 
-            # if (Config.installed_instance and 'installOxd' in Config.addPostSetupService) or (not Config.installed_instance and Config.installOxd):
-            #    oxdInstaller.start_installation()
             jansInstaller.post_install_before_saving_properties()
             jansProgress.progress(PostSetup.service_name, "Saving properties")
             propertiesUtils.save_properties()

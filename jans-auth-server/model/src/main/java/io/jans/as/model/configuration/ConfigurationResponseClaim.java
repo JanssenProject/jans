@@ -18,9 +18,11 @@ public final class ConfigurationResponseClaim {
     public static final String ISSUER = "issuer";
     public static final String AUTHORIZATION_ENDPOINT = "authorization_endpoint";
     public static final String AUTHORIZATION_CHALLENGE_ENDPOINT = "authorization_challenge_endpoint";
+    public static final String STATUS_LIST_ENDPOINT = "status_list_endpoint";
     public static final String TOKEN_ENDPOINT = "token_endpoint";
     public static final String REVOCATION_ENDPOINT = "revocation_endpoint";
     public static final String SESSION_REVOCATION_ENDPOINT = "session_revocation_endpoint";
+    public static final String GLOBAL_TOKEN_REVOCATION_ENDPOINT = "global_token_revocation_endpoint";
     public static final String USER_INFO_ENDPOINT = "userinfo_endpoint";
     public static final String CLIENT_INFO_ENDPOINT = "clientinfo_endpoint";
     public static final String CHECK_SESSION_IFRAME = "check_session_iframe";
@@ -37,6 +39,7 @@ public final class ConfigurationResponseClaim {
     public static final String SCOPE_TO_CLAIMS_MAPPING = "scope_to_claims_mapping";
     public static final String RESPONSE_TYPES_SUPPORTED = "response_types_supported";
     public static final String RESPONSE_MODES_SUPPORTED = "response_modes_supported";
+    public static final String PROMPT_VALUES_SUPPORTED = "prompt_values_supported";
     public static final String GRANT_TYPES_SUPPORTED = "grant_types_supported";
     public static final String ACR_VALUES_SUPPORTED = "acr_values_supported";
     public static final String AUTHORIZATION_DETAILS_TYPES_SUPPORTED = "authorization_details_types_supported";
@@ -86,6 +89,7 @@ public final class ConfigurationResponseClaim {
     public static final String BACKCHANNEL_LOGOUT_SUPPORTED = "backchannel_logout_supported";
     public static final String BACKCHANNEL_LOGOUT_SESSION_SUPPORTED = "backchannel_logout_session_supported";
     public static final String MTLS_ENDPOINT_ALIASES = "mtls_endpoint_aliases";
+    public static final String ACR_MAPPINGS = "acr_mappings";
 
     // CIBA
     public static final String BACKCHANNEL_AUTHENTICATION_ENDPOINT = "backchannel_authentication_endpoint";

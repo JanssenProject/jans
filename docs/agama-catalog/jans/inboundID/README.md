@@ -1,6 +1,6 @@
 # Inbound identity with Agama
 
-Using Agama administrators can delegate authorization to external services like social sites. In a typical setting users are shown a login form with a "Sign in with..." button for authentication to take place at a given 3rd party in order to get access to a target application.
+Using Agama administrators can delegate authorization to external services like social sites and enterprise access management solutions, e.g. Microsoft Entra ID, Oracle Access Management, etc. In a typical setting users are presented a login form with a "Sign in with..." button for authentication to take place at a given 3rd party in order to get access to a target application.
 
 This process is usually referred to as "inbound identity". In this document the steps required to setup inbound identity in your Janssen server are presented.
 
@@ -65,7 +65,6 @@ Let's add the required libraries to the authentication server:
 
 - Visit [this](https://maven.jans.io/maven/io/jans/agama-inbound/) page, navigate to the folder matching your Janssen server version, and download the jar file
 - SSH to the server. Transfer the file to directory `/opt/jans/jetty/jans-auth/custom/libs`
-- Navigate to `/opt/jans/jetty/jans-auth/webapps` and edit the file `jans-auth.xml` by adding `<Set name="extraClasspath">./custom/libs/*</Set>` before the root tag closes
 - Restart the server, e.g. `systemctl restart jans-auth`
 
 ### Make a `gama` archive

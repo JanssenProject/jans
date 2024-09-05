@@ -9,7 +9,7 @@ tags:
 ## Overview
 
 Container image to manage X.509 certificates and crypto keys in Janssen Server.
-The container designed to run as one-time command (or Job in kubernetes world).
+The container is designed to run as a one-time command (or Job in Kubernetes world).
 
 ## Versions
 
@@ -201,7 +201,7 @@ spec:
         spec:
           containers:
             - name: auth-key-rotation
-              image: ghcr.io/janssenproject/jans/certmanager:1.1.1_dev
+              image: ghcr.io/janssenproject/jans/certmanager:1.1.5_dev
               resources:
                 requests:
                   memory: "300Mi"

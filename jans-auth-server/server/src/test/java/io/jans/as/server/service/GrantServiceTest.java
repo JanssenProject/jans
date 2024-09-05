@@ -2,11 +2,11 @@ package io.jans.as.server.service;
 
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
+import io.jans.as.server.service.token.StatusListIndexService;
 import io.jans.model.token.TokenEntity;
 import io.jans.model.token.TokenType;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.service.CacheService;
-import io.jans.service.cache.CacheConfiguration;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -48,7 +48,7 @@ public class GrantServiceTest {
     private AppConfiguration appConfiguration;
 
     @Mock
-    private CacheConfiguration cacheConfiguration;
+    private StatusListIndexService statusListIndexService;
 
     @Test
     public void shouldPersist_byDefault_shouldReturnTrue() {

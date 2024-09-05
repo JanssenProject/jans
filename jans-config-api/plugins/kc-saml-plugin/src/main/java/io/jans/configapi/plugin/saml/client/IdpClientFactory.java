@@ -210,11 +210,11 @@ public class IdpClientFactory {
             Response response = null;
 
             if (isUpdate) {
-                logger.trace(" Update SAML IDP in KC server -  identityProviderJson.toMap():{}",
+                logger.debug(" Update SAML IDP in KC server -  identityProviderJson.toMap():{}",
                         identityProviderJson.toMap());
                 response = request.put(Entity.json(identityProviderJson.toMap()));
             } else {
-                logger.trace(" Create SAML IDP in KC server -  identityProviderJson.toMap():{}",
+                logger.debug(" Create SAML IDP in KC server -  identityProviderJson.toMap():{}",
                         identityProviderJson.toMap());
                 response = request.post(Entity.json(identityProviderJson.toMap()));
             }

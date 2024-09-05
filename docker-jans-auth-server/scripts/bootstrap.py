@@ -1,21 +1,29 @@
 import json
 import logging.config
 import os
+import shutil
+from pathlib import Path
 from string import Template
 
 from jans.pycloudlib import get_manager
-from jans.pycloudlib.persistence import render_couchbase_properties
-from jans.pycloudlib.persistence import render_base_properties
-from jans.pycloudlib.persistence import render_hybrid_properties
-from jans.pycloudlib.persistence import render_ldap_properties
-from jans.pycloudlib.persistence import render_salt
-from jans.pycloudlib.persistence import sync_couchbase_truststore
-from jans.pycloudlib.persistence import sync_ldap_truststore
-from jans.pycloudlib.persistence import render_sql_properties
-from jans.pycloudlib.persistence import render_spanner_properties
+from jans.pycloudlib import wait_for_persistence
+from jans.pycloudlib.persistence.couchbase import render_couchbase_properties
+from jans.pycloudlib.persistence.couchbase import sync_couchbase_cert
+from jans.pycloudlib.persistence.couchbase import sync_couchbase_truststore
+from jans.pycloudlib.persistence.couchbase import sync_couchbase_password
+from jans.pycloudlib.persistence.hybrid import render_hybrid_properties
+from jans.pycloudlib.persistence.ldap import render_ldap_properties
+from jans.pycloudlib.persistence.ldap import sync_ldap_password
+from jans.pycloudlib.persistence.ldap import sync_ldap_truststore
+from jans.pycloudlib.persistence.spanner import render_spanner_properties
+from jans.pycloudlib.persistence.sql import render_sql_properties
+from jans.pycloudlib.persistence.sql import sync_sql_password
+from jans.pycloudlib.persistence.utils import render_base_properties
+from jans.pycloudlib.persistence.utils import render_salt
 from jans.pycloudlib.persistence.utils import PersistenceMapper
-from jans.pycloudlib.utils import cert_to_truststore
 from jans.pycloudlib.utils import as_boolean
+from jans.pycloudlib.utils import cert_to_truststore
+from jans.pycloudlib.utils import get_server_certificate
 
 from settings import LOGGING_CONFIG
 from hooks import get_auth_keys_hook
@@ -48,20 +56,26 @@ def main():
             "/app/templates/jans-ldap.properties",
             "/etc/jans/conf/jans-ldap.properties",
         )
-        sync_ldap_truststore(manager)
+
+        if as_boolean(os.environ.get("CN_LDAP_USE_SSL", "true")):
+            sync_ldap_truststore(manager)
+        sync_ldap_password(manager)
 
     if "couchbase" in persistence_groups:
+        sync_couchbase_password(manager)
         render_couchbase_properties(
             manager,
             "/app/templates/jans-couchbase.properties",
             "/etc/jans/conf/jans-couchbase.properties",
         )
-        # need to resolve whether we're using default or user-defined couchbase cert
-        sync_couchbase_truststore(manager)
+
+        if as_boolean(os.environ.get("CN_COUCHBASE_TRUSTSTORE_ENABLE", "true")):
+            sync_couchbase_cert(manager)
+            sync_couchbase_truststore(manager)
 
     if "sql" in persistence_groups:
+        sync_sql_password(manager)
         db_dialect = os.environ.get("CN_SQL_DB_DIALECT", "mysql")
-
         render_sql_properties(
             manager,
             f"/app/templates/jans-{db_dialect}.properties",
@@ -75,8 +89,15 @@ def main():
             "/etc/jans/conf/jans-spanner.properties",
         )
 
+    wait_for_persistence(manager)
+
     if not os.path.isfile("/etc/certs/web_https.crt"):
-        manager.secret.to_file("ssl_cert", "/etc/certs/web_https.crt")
+        if as_boolean(os.environ.get("CN_SSL_CERT_FROM_SECRETS", "true")):
+            manager.secret.to_file("ssl_cert", "/etc/certs/web_https.crt")
+        else:
+            hostname = manager.config.get("hostname")
+            logger.info(f"Pulling SSL certificate from {hostname}")
+            get_server_certificate(hostname, 443, "/etc/certs/web_https.crt")
 
     cert_to_truststore(
         "web_https",
@@ -98,6 +119,8 @@ def main():
     except ValueError:
         # likely secret is not created yet
         logger.warning("Unable to pull file smtp-keys.pkcs12 from secrets")
+
+    copy_builtin_libs()
 
     if as_boolean(os.environ.get("CN_LOCK_ENABLED", "false")):
         configure_lock_logging()
@@ -187,6 +210,18 @@ def configure_logging():
     tmpl = Template(txt)
     with open(logfile, "w") as f:
         f.write(tmpl.safe_substitute(config))
+
+
+def copy_builtin_libs():
+    lock_enabled = as_boolean(os.environ.get("CN_LOCK_ENABLED", "false"))
+
+    for src in Path("/opt/jans/jetty/jans-auth/_libs").glob("*.jar"):
+        # skip jans-lock-service and jans-lock-model
+        if lock_enabled is False and src.name.startswith("jans-lock"):
+            continue
+
+        dst = f"/opt/jans/jetty/jans-auth/custom/libs/{src.name}"
+        shutil.copyfile(src, dst)
 
 
 if __name__ == "__main__":

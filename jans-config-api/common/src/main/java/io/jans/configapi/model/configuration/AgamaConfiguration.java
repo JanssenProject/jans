@@ -3,17 +3,15 @@ package io.jans.configapi.model.configuration;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AgamaConfiguration {
 
-    /**
-     * List of attributes required to create the Agama Flow
-     */
+    @Schema(description = "List of attributes required to create the Agama Flow.")
     private List<String> mandatoryAttributes;
 
-    /**
-     * List of attributes that are optional
-     */
+    @Schema(description = "List of attributes that are optional.")
     private List<String> optionalAttributes;
 
     public List<String> getMandatoryAttributes() {

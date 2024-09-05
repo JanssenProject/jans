@@ -9,7 +9,7 @@
 	<parent>
 		<groupId>io.jans</groupId>
 		<artifactId>jans-fido2-parent</artifactId>
-		<version>1.1.1-SNAPSHOT</version>
+		<version>1.1.5-SNAPSHOT</version>
 	</parent>
 
 	<build>
@@ -123,6 +123,10 @@
             	<exclusion>
             		<groupId>org.apache.jackrabbit</groupId>
             		<artifactId>jackrabbit-core</artifactId>
+            	</exclusion>
+            	<exclusion>
+            		<groupId>org.bouncycastle</groupId>
+            		<artifactId>bcprov-jdk15on</artifactId>
             	</exclusion>
             </exclusions>
         </dependency>

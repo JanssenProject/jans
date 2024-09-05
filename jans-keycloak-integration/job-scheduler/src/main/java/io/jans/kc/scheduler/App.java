@@ -10,6 +10,7 @@ package io.jans.kc.scheduler;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.SAXException;
 
 import io.jans.kc.scheduler.config.ConfigApiAuthnMethod;
 import io.jans.kc.scheduler.config.AppConfiguration;
@@ -26,9 +27,14 @@ import io.jans.kc.api.config.client.*;
 import io.jans.kc.api.config.client.impl.*;
 
 import io.jans.kc.api.admin.client.*;
+import io.jans.kc.api.admin.client.model.AuthenticationFlow;
 import io.jans.kc.api.admin.client.model.ManagedSamlClient;
+import io.jans.saml.metadata.parser.ParserCreateError;
+import io.jans.saml.metadata.util.SAXUtils;
 
 import java.util.List;
+
+import javax.xml.parsers.ParserConfigurationException;
 
 public class App {
     
@@ -43,39 +49,45 @@ public class App {
     private static KeycloakApiFactory keycloakApiFactory = null;
 
     private static boolean running = false;
+    private static boolean isCronJob = true;
     /*
      * Entry point 
      */
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException, ParserCreateError, ParserConfigurationException, SAXException {
 
         log.info("Application starting ...");
         try {
-            log.debug("Loading application configuration");
+            log.info("Loading application configuration");
             config = loadApplicationConfiguration();
-            log.debug("Application configuration loaded successfully. {}",config.toString());
+            log.info("Application configuration loaded successfully. {}",config.toString());
 
 
-            log.debug("Setting up access to external apis");
+            log.info("Setting up access to external apis");
             jansConfigApiFactory = JansConfigApiFactory.createFactory(config);
             keycloakApiFactory = KeycloakApiFactory.createFactory(config);
 
-            log.debug("Initializing scheduler ");
-            jobScheduler = createJobScheduler(config);
-            startJobScheduler(jobScheduler);
+            //initialize application objects
+            log.info("Initialization additional application objects");
+            SAXUtils.init();
 
-            log.debug("Starting jans trust relationship sync job");
-            startJansTrustRelationshipSyncJob(config);
-
-
-
-            log.debug("Performing post-startup operations");
-            performPostStartupOperations();
-
-            log.debug("Application startup successful");
-            while(running) {
-                Thread.sleep(1000);
+            if(isCronJob) {
+                log.info("Running as cron, skiping scheduler initialization");
+                runCronJobs();
+                log.info("Jobs run to completion.");
+            }else {
+                log.info("Not running as cron job. Initializing scheduler");
+                jobScheduler = createJobScheduler(config);
+                startJobScheduler(jobScheduler);
+                log.info("Starting jans trust relationship sync job");
+                startJansTrustRelationshipSyncJob(config);
+                log.info("Performing post-startup operations");
+                performPostStartupOperations();
+                log.info("Application startup successful");
+                while(running) {
+                    Thread.sleep(1000);
+                }
             }
-            log.debug("Application shutting down");
+            log.info("Application shutting down");
         }catch(StartupError e) {
             log.error("Application startup failed",e);
             if(jobScheduler != null) {
@@ -83,6 +95,15 @@ public class App {
             }
             System.exit(-1);
             return;
+        }catch(InterruptedException e) {
+            log.error("Application interrupted",e);
+            Thread.currentThread().interrupt();
+        }catch(Exception e) {
+            log.error("Fatal error starting application",e);
+            if(jobScheduler != null ) {
+                jobScheduler.stop();
+            }
+            System.exit(-1);
         }
 
     }
@@ -149,6 +170,12 @@ public class App {
         }
     }
 
+    private static final void runCronJobs() {
+
+        TrustRelationshipSyncJob trsyncjob = new TrustRelationshipSyncJob();
+        trsyncjob.run(null);
+    }
+
     private static final void performPostStartupOperations() {
 
         running = true;
@@ -202,16 +229,18 @@ public class App {
 
     private static class JansConfigApiFactory {
 
+        private String endpoint;
         private ApiCredentialsProvider credsprovider;
 
-        private JansConfigApiFactory(ApiCredentialsProvider credsprovider) {
+        private JansConfigApiFactory(String endpoint, ApiCredentialsProvider credsprovider) {
 
+            this.endpoint = endpoint;
             this.credsprovider = credsprovider;
         }
 
         public JansConfigApi newApiClient() {
 
-            return JansConfigApi.createInstance(credsprovider.getApiCredentials());
+            return JansConfigApi.createInstance(endpoint,credsprovider.getApiCredentials());
         }
 
         public static JansConfigApiFactory createFactory(AppConfiguration config) {
@@ -232,7 +261,7 @@ public class App {
                     throw new StartupError("Could not initialize jans-config API. Unsupported authn method");
                 }
                 ApiCredentialsProvider provider = OAuthApiCredentialsProvider.create(config.configApiAuthUrl(),authparams);
-                return new JansConfigApiFactory(provider);
+                return new JansConfigApiFactory(config.configApiUrl(),provider);
 
             }catch(CredentialsProviderError e) {
                 throw new StartupError("Could not initialize jans-config API",e);
@@ -249,7 +278,7 @@ public class App {
         public void run() {
 
             try {
-                log.debug("Shutting down application");
+                log.info("Shutting down application");
                 if (jobScheduler != null) {
                     jobScheduler.stop();
                 }

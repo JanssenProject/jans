@@ -7,13 +7,13 @@ from collections import namedtuple
 from ldif import LDIFParser
 
 from jans.pycloudlib import get_manager
-from jans.pycloudlib.persistence import CouchbaseClient
-from jans.pycloudlib.persistence import LdapClient
-from jans.pycloudlib.persistence import SpannerClient
-from jans.pycloudlib.persistence import SqlClient
-from jans.pycloudlib.persistence import doc_id_from_dn
-from jans.pycloudlib.persistence import id_from_dn
-from jans.pycloudlib.persistence import PersistenceMapper
+from jans.pycloudlib.persistence.couchbase import CouchbaseClient
+from jans.pycloudlib.persistence.ldap import LdapClient
+from jans.pycloudlib.persistence.spanner import SpannerClient
+from jans.pycloudlib.persistence.sql import SqlClient
+from jans.pycloudlib.persistence.sql import doc_id_from_dn
+from jans.pycloudlib.persistence.couchbase import id_from_dn
+from jans.pycloudlib.persistence.utils import PersistenceMapper
 from jans.pycloudlib.persistence.sql import get_sql_password
 from jans.pycloudlib.utils import as_boolean
 from jans.pycloudlib.utils import encode_text
@@ -325,17 +325,20 @@ class Upgrade:
         scim_id = JANS_SCIM_SCRIPT_DN
         basic_id = JANS_BASIC_SCRIPT_DN
         duo_id = "inum=5018-F9CF,ou=scripts,o=jans"
+        agama_id = "inum=BADA-BADA,ou=scripts,o=jans"
 
         if self.backend.type in ("sql", "spanner"):
             kwargs = {"table_name": "jansCustomScr"}
             scim_id = doc_id_from_dn(scim_id)
             basic_id = doc_id_from_dn(basic_id)
             duo_id = doc_id_from_dn(duo_id)
+            agama_id = doc_id_from_dn(agama_id)
         elif self.backend.type == "couchbase":
             kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
             scim_id = id_from_dn(scim_id)
             basic_id = id_from_dn(basic_id)
             duo_id = id_from_dn(duo_id)
+            agama_id = id_from_dn(agama_id)
 
         # toggle scim script
         scim_entry = self.backend.get_entry(scim_id, **kwargs)
@@ -343,6 +346,7 @@ class Upgrade:
 
         if scim_entry and scim_entry.attrs["jansEnabled"] != scim_enabled:
             scim_entry.attrs["jansEnabled"] = scim_enabled
+            scim_entry.attrs["jansRevision"] += 1
             self.backend.modify_entry(scim_entry.id, scim_entry.attrs, **kwargs)
 
         # always enable basic script
@@ -350,12 +354,42 @@ class Upgrade:
 
         if basic_entry and not as_boolean(basic_entry.attrs["jansEnabled"]):
             basic_entry.attrs["jansEnabled"] = True
+            basic_entry.attrs["jansRevision"] += 1
             self.backend.modify_entry(basic_entry.id, basic_entry.attrs, **kwargs)
 
         # delete DUO entry
         duo_entry = self.backend.get_entry(duo_id, **kwargs)
         if duo_entry and not as_boolean(os.environ.get("CN_DUO_ENABLED")):
             self.backend.delete_entry(duo_entry.id, **kwargs)
+
+        agama_entry = self.backend.get_entry(agama_id, **kwargs)
+        if agama_entry:
+            if self.backend.type == "sql" and self.backend.client.dialect == "mysql":
+                props = agama_entry.attrs["jansConfProperty"]["v"]
+            else:
+                props = agama_entry.attrs["jansConfProperty"]
+
+            if not isinstance(props, list):
+                props = [props]
+
+            props = [json.loads(prop) for prop in props]
+
+            # filter out unwanted properties
+            new_props = [
+                prop for prop in props
+                if prop["value1"] != "default_flow_name" and prop["value2"] != "agama_flow"
+            ]
+
+            if new_props != props:
+                new_props = [json.dumps(prop) for prop in new_props]
+
+                if self.backend.type == "sql" and self.backend.client.dialect == "mysql":
+                    agama_entry.attrs["jansConfProperty"]["v"] = new_props
+                else:
+                    agama_entry.attrs["jansConfProperty"] = new_props
+
+                agama_entry.attrs["jansRevision"] += 1
+                self.backend.modify_entry(agama_entry.id, agama_entry.attrs, **kwargs)
 
     def update_auth_dynamic_config(self):
         # default to ldap persistence
@@ -676,11 +710,19 @@ class Upgrade:
         if self.backend.type != "couchbase":
             entry.attrs["jansConfStatic"] = json.loads(entry.attrs["jansConfStatic"])
 
-        conf, should_update = _transform_auth_static_config(entry.attrs["jansConfStatic"])
+        should_update = False
+
+        # compare config from persistence with the ones from assets
+        with open("/app/templates/jans-auth/jans-auth-static-conf.json") as f:
+            new_conf = json.loads(f.read())
+
+            if entry.attrs["jansConfStatic"] != new_conf:
+                entry.attrs["jansConfStatic"] = new_conf
+                should_update = True
 
         if should_update:
             if self.backend.type != "couchbase":
-                entry.attrs["jansConfStatic"] = json.dumps(conf)
+                entry.attrs["jansConfStatic"] = json.dumps(entry.attrs["jansConfStatic"])
 
             entry.attrs["jansRevision"] += 1
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
@@ -800,13 +842,12 @@ class Upgrade:
             should_update = True
 
         # message configuration
-        if "jansMessageConf" not in entry.attrs:
-            entry.attrs["jansMessageConf"] = {}
+        message_conf = entry.attrs.get("jansMessageConf") or {}
 
         with contextlib.suppress(TypeError):
-            entry.attrs["jansMessageConf"] = json.loads(entry.attrs["jansMessageConf"])
+            message_conf = json.loads(message_conf)
 
-        entry.attrs["jansMessageConf"], should_update = _transform_message_config(entry.attrs["jansMessageConf"])
+        entry.attrs["jansMessageConf"], should_update = _transform_message_config(message_conf)
 
         # set document store
         doc_store_type = os.environ.get("CN_DOCUMENT_STORE_TYPE", "DB")
@@ -818,27 +859,48 @@ class Upgrade:
             entry.attrs["jansDocStoreConf"]["documentStoreType"] = doc_store_type
             should_update = True
 
+        # set jansDbAuth if persistence is ldap
+        if self.backend.type == "ldap" and not entry.attrs.get("jansDbAuth"):
+            should_update = True
+
         if should_update:
             if self.backend.type != "couchbase":
                 entry.attrs["jansMessageConf"] = json.dumps(entry.attrs["jansMessageConf"])
                 entry.attrs["jansDocStoreConf"] = json.dumps(entry.attrs["jansDocStoreConf"])
 
+                # set jansDbAuth if persistence is ldap
+                if self.backend.type == "ldap":
+                    ldaps_port = self.manager.config.get("ldap_init_port")
+                    ldap_hostname = self.manager.config.get("ldap_init_host")
+                    ldap_binddn = self.manager.config.get("ldap_binddn")
+                    ldap_use_ssl = str(as_boolean(os.environ.get("CN_LDAP_USE_SSL", True))).lower()
+                    encoded_ox_ldap_pw = self.manager.secret.get("encoded_ox_ldap_pw")
+
+                    entry.attrs["jansDbAuth"] = json.dumps({
+                        "type": "auth",
+                        "name": None,
+                        "level": 0,
+                        "priority": 1,
+                        "enabled": False,
+                        "version": 0,
+                        "config": {
+                            "configId": "auth_ldap_server",
+                            "servers": [f"{ldap_hostname}:{ldaps_port}"],
+                            "maxConnections": 1000,
+                            "bindDN": ldap_binddn,
+                            "bindPassword": encoded_ox_ldap_pw,
+                            "useSSL": ldap_use_ssl,
+                            "baseDNs": ["ou=people,o=jans"],
+                            "primaryKey": "uid",
+                            "localPrimaryKey": "uid",
+                            "useAnonymousBind": False,
+                            "enabled": False,
+                        },
+                    })
+
             revision = entry.attrs.get("jansRevision") or 1
             entry.attrs["jansRevision"] = revision + 1
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
-
-
-def _transform_auth_static_config(conf):
-    should_update = False
-
-    for key, dn in [
-        ("ssa", "ou=ssa,o=jans"),
-        ("archivedJwks", "ou=archived_jwks,o=jans"),
-    ]:
-        if key not in conf["baseDn"]:
-            conf["baseDn"][key] = dn
-            should_update = True
-    return conf, should_update
 
 
 def _transform_smtp_config(default_smtp_conf, smtp_conf):

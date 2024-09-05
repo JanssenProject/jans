@@ -15,6 +15,7 @@ import io.jans.as.server.model.common.ExecutionContext;
 import io.jans.as.server.model.common.RefreshToken;
 import io.jans.as.server.service.external.ExternalUpdateTokenService;
 import io.jans.as.server.service.external.context.ExternalUpdateTokenContext;
+import io.jans.model.GluuStatus;
 import jakarta.ejb.Stateless;
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
@@ -84,7 +85,7 @@ public class TokenCreatorService {
         }
 
         final User user = authorizationGrant.getUser();
-        if (user == null || "inactive".equalsIgnoreCase(user.getStatus())) {
+        if (user == null || (GluuStatus.INACTIVE == user.getStatus())) {
             log.trace("The user associated with this grant is not found or otherwise with status=inactive.");
             throw new WebApplicationException(error(400, TokenErrorResponseType.INVALID_GRANT, "The user associated with this grant is not found or otherwise with status=inactive.").build());
         }

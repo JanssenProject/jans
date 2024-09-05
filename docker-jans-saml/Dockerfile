@@ -1,6 +1,6 @@
-FROM quay.io/keycloak/keycloak:23.0.3@sha256:4f72a5b0c076755e806457d96404dd28dc1394013933d7170c154c26db9b6a16 as kc-src
+FROM quay.io/keycloak/keycloak:25.0.1@sha256:a3d10e729b140f5a044f6d04f324aa53ae58ed11398e0e6e432cb98042b41b1f as kc-src
 
-FROM bellsoft/liberica-openjre-alpine:17.0.9@sha256:7c9948b1e267037b7cadfe448e732b9cb719bfd38d8c5811f2f2d33cc0c05123
+FROM bellsoft/liberica-openjre-alpine:17.0.12@sha256:a39e3fb3c96ae89e936a2e50c0a597a91d2357a1ec19096c05e851f54f3a9715
 
 # ===============
 # Alpine packages
@@ -23,33 +23,29 @@ RUN mkdir -p /opt/keycloak/logs \
 # KC integration
 # ==============
 
-ENV CN_VERSION=1.1.1-SNAPSHOT
-ENV CN_BUILD_DATE='2024-03-11 19:25'
+ENV CN_VERSION=1.1.5-SNAPSHOT
+ENV CN_BUILD_DATE='2024-08-23 11:41'
 
-RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-storage-plugin/${CN_VERSION}/kc-jans-storage-plugin-${CN_VERSION}.jar -P /opt/keycloak/providers \
-    && wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-storage-plugin/${CN_VERSION}/kc-jans-storage-plugin-${CN_VERSION}-deps.zip -O /tmp/kc-storage-deps.zip \
-    && unzip /tmp/kc-storage-deps.zip -d /opt/keycloak/providers \
-    && rm -rf /tmp/kc-storage-deps.zip
+RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-spi/${CN_VERSION}/kc-jans-spi-${CN_VERSION}.jar -P /opt/keycloak/providers \
+    && wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-spi/${CN_VERSION}/kc-jans-spi-${CN_VERSION}-deps.zip -O /tmp/kc-jans-spi.zip \
+    && unzip /tmp/kc-jans-spi.zip -d /opt/keycloak/providers \
+    && rm -rf /tmp/kc-jans-spi.zip
 
-RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-authn-plugin/${CN_VERSION}/kc-jans-authn-plugin-${CN_VERSION}.jar -P /opt/keycloak/providers \
-    && wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-authn-plugin/${CN_VERSION}/kc-jans-authn-plugin-${CN_VERSION}-deps.zip -O /tmp/kc-authn-deps.zip \
-    && unzip /tmp/kc-authn-deps.zip -d /opt/keycloak/providers \
-    && rm -rf /tmp/kc-authn-deps.zip
+# ===========
+# Assets sync
+# ===========
 
-# =====================
-# jans-linux-setup sync
-# =====================
-
-ENV JANS_SOURCE_VERSION=aeba80d5fb2860e1336a49bfc3cbfc80f79b08ba
+ENV JANS_SOURCE_VERSION=fc9f04fe3b3d3d168f3090214b22ee80be371d92
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
-# we are using partial-clone and sparse-checkout to get the jans-linux-setup code
-RUN git clone --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
+# we are using partial-clone and sparse-checkout to get the assets
+RUN git clone --depth 500 --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
     && cd /tmp/jans \
     && git sparse-checkout init --cone \
     && git checkout ${JANS_SOURCE_VERSION} \
-    && git sparse-checkout add ${JANS_SETUP_DIR}
+    && git sparse-checkout add ${JANS_SETUP_DIR} \
+    && git sparse-checkout add jans-pycloudlib
 
 RUN mkdir -p /app/static/rdbm \
     /app/schema \
@@ -71,7 +67,8 @@ RUN cd /tmp/jans \
 # ======
 
 COPY requirements.txt /app/requirements.txt
-RUN python3 -m ensurepip \
+RUN mv /usr/lib/python3.12/EXTERNALLY-MANAGED /usr/lib/python3.12/EXTERNALLY-MANAGED.disabled \
+    && python3 -m ensurepip \
     && pip3 install --no-cache-dir -U pip wheel setuptools \
     && pip3 install --no-cache-dir -r /app/requirements.txt \
     && pip3 uninstall -y pip wheel
@@ -167,10 +164,8 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_SAML_JAVA_OPTIONS="" \
     CN_SAML_KC_ADMIN_CREDENTIALS_FILE=/etc/jans/conf/kc_admin_creds \
     CN_SAML_KC_DB_PASSWORD_FILE=/etc/jans/conf/kc_db_password \
-    KC_HEALTH_ENABLED=true \
-    KC_METRICS_ENABLED=true \
+    CN_SSL_CERT_FROM_SECRETS=true \
     KC_LOG_LEVEL=INFO \
-    KC_PROXY=edge \
     KC_DB=mysql \
     KC_DB_USERNAME=keycloak \
     KC_DB_SCHEMA=keycloak \
@@ -189,7 +184,7 @@ EXPOSE $CN_SAML_HTTP_PORT
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/saml" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.1.1" \
+    org.opencontainers.image.version="1.1.5" \
     org.opencontainers.image.title="Janssen SAML" \
     org.opencontainers.image.description=""
 

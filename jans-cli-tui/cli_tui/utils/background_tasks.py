@@ -4,12 +4,16 @@ from utils.utils import common_data
 from utils.static import common_strings
 from utils.multi_lang import _
 
+common_data.background_tasks_feeds['attributes'] = []
+
 
 async def get_attributes_coroutine(app) -> None:
 
     common_data.jans_attributes = []
     start_index = 1
     limit = 100
+
+    app.logger.info("Backrgound Task: retreiving attributes")
 
     while True:
 
@@ -33,9 +37,13 @@ async def get_attributes_coroutine(app) -> None:
         else:
             break
 
+    for feed in common_data.background_tasks_feeds['attributes']:
+        feed()
 
 async def retrieve_enabled_scripts() -> None:
     'Coroutine for retreiving enabled scripts'
+
+    common_data.app.logger.info("Backrgound Task: retreiving enabled scripts")
 
     cli_args = {'operation_id': 'get-config-scripts', 'endpoint_args': 'fieldValuePair:enabled=true'}
     response = await common_data.app.loop.run_in_executor(common_data.app.executor, common_data.app.cli_requests, cli_args)
@@ -46,3 +54,27 @@ async def retrieve_enabled_scripts() -> None:
 
     result = response.json()
     common_data.enabled_scripts = result['entries']
+
+
+
+async def get_admin_ui_roles() -> None:
+    'Coroutine for getting admin ui roles'
+
+    common_data.app.logger.info("Backrgound Task: retreiving admin-ui roles")
+    cli_args = {'operation_id': 'get-all-adminui-roles'}
+    common_data.app.start_progressing(_("Retreiving admin UI roles from server..."))
+    response = await get_event_loop().run_in_executor(common_data.app.executor, common_data.app.cli_requests, cli_args)
+    common_data.app.stop_progressing()
+    common_data.admin_ui_roles = response.json()
+
+
+async def get_persistence_type() -> None:
+    'Coroutine for getting persistence type'
+
+    common_data.app.logger.info("Backrgound Task: retreiving persistence type")
+    cli_args = {'operation_id': 'get-properties-persistence'}
+    common_data.app.start_progressing(_("Retreiving persistence type from server..."))
+    response = await get_event_loop().run_in_executor(common_data.app.executor, common_data.app.cli_requests, cli_args)
+    common_data.app.stop_progressing()
+    result = response.json()
+    common_data.server_persistence_type = result['persistenceType']

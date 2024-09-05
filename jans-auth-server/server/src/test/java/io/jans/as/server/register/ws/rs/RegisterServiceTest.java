@@ -24,6 +24,7 @@ import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -160,9 +161,32 @@ public class RegisterServiceTest {
     }
 
     @Test
+    public void identifyGrantType_whenGrantTypeIsNotSupportedForDynamicRegistration_shouldNotReturnIt() {
+        final HashSet<GrantType> allowedForRegistration = Sets.newHashSet(GrantType.values());
+        allowedForRegistration.remove(GrantType.AUTHORIZATION_CODE);
+
+        when(appConfiguration.getGrantTypesSupported()).thenReturn(Sets.newHashSet(GrantType.values()));
+        when(appConfiguration.getGrantTypesSupportedByDynamicRegistration()).thenReturn(allowedForRegistration);
+
+        final Set<GrantType> result = registerService.identifyGrantTypes(Lists.newArrayList(ResponseType.CODE), Lists.newArrayList(GrantType.AUTHORIZATION_CODE));
+        assertFalse(result.contains(GrantType.AUTHORIZATION_CODE));
+    }
+
+    @Test
+    public void identifyGrantType_whenGrantTypeIsSupportedForDynamicRegistration_shouldReturnIt() {
+        final HashSet<GrantType> allowedForRegistration = Sets.newHashSet(GrantType.AUTHORIZATION_CODE);
+
+        when(appConfiguration.getGrantTypesSupported()).thenReturn(Sets.newHashSet(GrantType.values()));
+        when(appConfiguration.getGrantTypesSupportedByDynamicRegistration()).thenReturn(allowedForRegistration);
+
+        final Set<GrantType> result = registerService.identifyGrantTypes(Lists.newArrayList(ResponseType.CODE), Lists.newArrayList(GrantType.AUTHORIZATION_CODE));
+        assertTrue(result.contains(GrantType.AUTHORIZATION_CODE));
+    }
+
+    @Test
     public void identifyGrantType_whenGrantTypeIsBlank_shouldFallbackToCodeValue() {
         when(appConfiguration.getGrantTypesSupported()).thenReturn(Sets.newHashSet(GrantType.values()));
-        when(appConfiguration.getDynamicGrantTypeDefault()).thenReturn(Sets.newHashSet(GrantType.values()));
+        when(appConfiguration.getGrantTypesSupportedByDynamicRegistration()).thenReturn(Sets.newHashSet(GrantType.values()));
 
         final Set<GrantType> result = registerService.identifyGrantTypes(new ArrayList<>(), new ArrayList<>());
         assertTrue(result.contains(GrantType.AUTHORIZATION_CODE));
@@ -171,7 +195,7 @@ public class RegisterServiceTest {
     @Test
     public void identifyGrantType_whenGrantTypeIsNotSupported_shouldRemoveIt() {
         when(appConfiguration.getGrantTypesSupported()).thenReturn(Sets.newHashSet());
-        when(appConfiguration.getDynamicGrantTypeDefault()).thenReturn(Sets.newHashSet(GrantType.values()));
+        when(appConfiguration.getGrantTypesSupportedByDynamicRegistration()).thenReturn(Sets.newHashSet(GrantType.values()));
 
         final Set<GrantType> result = registerService.identifyGrantTypes(new ArrayList<>(), new ArrayList<>());
         assertTrue(result.isEmpty());
@@ -180,7 +204,7 @@ public class RegisterServiceTest {
     @Test
     public void identifyGrantType_whenGrantTypeIsAbsentButAutofixEnabledForAuthorizationCode_shouldFix() {
         when(appConfiguration.getGrantTypesSupported()).thenReturn(Sets.newHashSet(GrantType.values()));
-        when(appConfiguration.getDynamicGrantTypeDefault()).thenReturn(Sets.newHashSet(GrantType.values()));
+        when(appConfiguration.getGrantTypesSupportedByDynamicRegistration()).thenReturn(Sets.newHashSet(GrantType.values()));
         when(appConfiguration.getGrantTypesAndResponseTypesAutofixEnabled()).thenReturn(true);
 
         final Set<GrantType> result = registerService.identifyGrantTypes(Lists.newArrayList(ResponseType.CODE), new ArrayList<>());
@@ -190,7 +214,7 @@ public class RegisterServiceTest {
     @Test
     public void identifyGrantType_whenGrantTypeIsAbsentButAutofixEnabledForToken_shouldFix() {
         when(appConfiguration.getGrantTypesSupported()).thenReturn(Sets.newHashSet(GrantType.values()));
-        when(appConfiguration.getDynamicGrantTypeDefault()).thenReturn(Sets.newHashSet(GrantType.values()));
+        when(appConfiguration.getGrantTypesSupportedByDynamicRegistration()).thenReturn(Sets.newHashSet(GrantType.values()));
         when(appConfiguration.getGrantTypesAndResponseTypesAutofixEnabled()).thenReturn(true);
 
         final Set<GrantType> result = registerService.identifyGrantTypes(Lists.newArrayList(ResponseType.TOKEN), new ArrayList<>());
@@ -200,7 +224,7 @@ public class RegisterServiceTest {
     @Test
     public void identifyGrantType_whenGrantTypeIsAbsentButAutofixEnabledForIdToken_shouldFix() {
         when(appConfiguration.getGrantTypesSupported()).thenReturn(Sets.newHashSet(GrantType.values()));
-        when(appConfiguration.getDynamicGrantTypeDefault()).thenReturn(Sets.newHashSet(GrantType.values()));
+        when(appConfiguration.getGrantTypesSupportedByDynamicRegistration()).thenReturn(Sets.newHashSet(GrantType.values()));
         when(appConfiguration.getGrantTypesAndResponseTypesAutofixEnabled()).thenReturn(true);
 
         final Set<GrantType> result = registerService.identifyGrantTypes(Lists.newArrayList(ResponseType.ID_TOKEN), new ArrayList<>());

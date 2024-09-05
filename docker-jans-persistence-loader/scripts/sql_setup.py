@@ -46,12 +46,7 @@ class SQLBackend:
 
     def get_data_type(self, attr, table=None):
         # check from SQL data types first
-        for col in [f"{table}:{attr}", attr]:
-            type_def = self.client.sql_data_types.get(col)
-
-            if not type_def:
-                continue
-
+        if type_def := self.client.sql_data_types.get(f"{table}:{attr}") or self.client.sql_data_types.get(attr):
             type_ = type_def.get(self.client.dialect) or type_def["mysql"]
 
             if table in type_.get("tables", {}):
@@ -60,7 +55,11 @@ class SQLBackend:
             data_type = type_["type"]
             if "size" in type_:
                 data_type = f"{data_type}({type_['size']})"
-            return data_type
+            return data_type  # noqa: R504
+
+        # probably JSON-like data type
+        if attr in self.client.sql_json_types:
+            return self.client.sql_json_types[attr][self.client.dialect]["type"]
 
         # data type is undefined, hence check from syntax
         syntax = self.client.get_attr_syntax(attr)
@@ -78,8 +77,7 @@ class SQLBackend:
                 data_type = "TINYTEXT" if self.client.dialect == "mysql" else "TEXT"
             else:
                 data_type = "TEXT"
-
-        return data_type
+        return data_type  # noqa: R504
 
     def create_tables(self):
         table_columns = self.table_mapping_from_schema()

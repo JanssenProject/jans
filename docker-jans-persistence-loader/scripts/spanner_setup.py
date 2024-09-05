@@ -37,35 +37,35 @@ class SpannerBackend:
                     self.sql_indexes["__common__"]["fields"].append(attr_name)
 
     def get_data_type(self, attr, table=None):
+        def _resolve_actual_type(raw_type):
+            match raw_type["type"]:
+                case char_type if char_type in ["VARCHAR", "STRING"]:
+                    size = raw_type.get("size") or "MAX"
+                    data_type = f"STRING({size})"
+                case "TEXT":
+                    data_type = "STRING(MAX)"
+                case _:
+                    data_type = raw_type["type"]
+            return data_type  # noqa: R504
+
         # check from SQL data types first
-        type_def = self.client.sql_data_types.get(attr)
+        if type_def := self.client.sql_data_types.get(f"{table}:{attr}") or self.client.sql_data_types.get(attr):
+            # fallback to mysql
+            raw_type = type_def.get(self.client.dialect) or type_def.get("mysql", {})
 
-        if type_def:
-            type_ = type_def.get(self.client.dialect)
+            if table in raw_type.get("tables", {}):
+                raw_type = raw_type["tables"][table]
+            return _resolve_actual_type(raw_type)
 
-            if table in type_.get("tables", {}):
-                type_ = type_["tables"][table]
-
-            data_type = type_["type"]
-            if "size" in type_:
-                data_type = f"{data_type}({type_['size']})"
-            return data_type
+        # probably JSON-like data type
+        if attr in self.client.sql_json_types:
+            return self.client.sql_json_types[attr][self.client.dialect]["type"]
 
         # data type is undefined, hence check from syntax
         syntax = self.client.get_attr_syntax(attr)
         syntax_def = self.client.sql_data_types_mapping[syntax]
-        type_ = syntax_def.get(self.client.dialect)
-
-        char_type = "STRING"
-
-        if type_["type"] != char_type:
-            # not STRING
-            data_type = type_["type"]
-        else:
-            size = type_.get("size") or "MAX"
-            data_type = f"{char_type}({size})"
-
-        return data_type
+        raw_type = syntax_def.get(self.client.dialect)
+        return _resolve_actual_type(raw_type)
 
     def create_tables(self):
         table_columns = self.table_mapping_from_schema()

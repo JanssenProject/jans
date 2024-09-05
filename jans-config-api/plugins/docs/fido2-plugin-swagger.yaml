@@ -14,6 +14,7 @@ servers:
   description: The Jans server
 tags:
 - name: Fido2 - Configuration
+- name: Fido2 - Registration
 paths:
   /fido2/fido2-config:
     get:
@@ -62,6 +63,46 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/fido2.write
+  /fido2/registration/device/{uuid}:
+    delete:
+      tags:
+      - Fido2 - Registration
+      summary: Delete Fido2 Device Data based on device UID
+      description: Delete Fido2 Device Data based on device UID
+      operationId: delete-fido2-device-data
+      parameters:
+      - name: uuid
+        in: path
+        description: Unique identifier string (UUID) assigned to device.
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/fido2.delete
   /fido2/registration/entries/{username}:
     get:
       tags:
@@ -85,6 +126,75 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Fido2RegistrationEntry'
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/fido2.readonly
+  /fido2/registration:
+    get:
+      tags:
+      - Fido2 - Registration
+      summary: Get a list of Fido2RegistrationEntry.
+      description: Get a list of Fido2RegistrationEntry.
+      operationId: get-fido2-registration-data
+      parameters:
+      - name: limit
+        in: query
+        description: Search size - max size of the results to return
+        schema:
+          type: integer
+          format: int32
+          default: 50
+      - name: pattern
+        in: query
+        description: Search pattern
+        schema:
+          type: string
+          default: ""
+      - name: startIndex
+        in: query
+        description: The 1-based index of the first query result
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - name: sortBy
+        in: query
+        description: Data whose value will be used to order the returned response
+        schema:
+          type: string
+          default: jansId
+      - name: sortOrder
+        in: query
+        description: Order in which the sortBy param is applied. Allowed values are
+          "ascending" and "descending"
+        schema:
+          type: string
+          default: ascending
+      - name: fieldValuePair
+        in: query
+        description: Field and value pair for seraching
+        schema:
+          type: string
+          default: ""
+        examples:
+          Field value example:
+            description: Field value example
+            value: "mail=abc@mail.com,jansStatus=true"
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fido2RegistrationEntryPagedResult'
+              examples:
+                Response example:
+                  description: Response example
+                  value: ""
         "401":
           description: Unauthorized
         "500":
@@ -187,6 +297,15 @@ components:
           type: array
           items:
             type: string
+    ApiError:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        description:
+          type: string
     Fido2DeviceData:
       type: object
       properties:
@@ -211,6 +330,17 @@ components:
             type: string
         push_token:
           type: string
+    Fido2DeviceNotificationConf:
+      type: object
+      properties:
+        sns_endpoint_arn:
+          type: string
+        sns_endpoint_arn_remove:
+          type: string
+        sns_endpoint_arn_history:
+          type: array
+          items:
+            type: string
     Fido2RegistrationData:
       type: object
       properties:
@@ -308,7 +438,7 @@ components:
           - compromised
           - canceled
         deviceNotificationConf:
-          type: string
+          $ref: '#/components/schemas/Fido2DeviceNotificationConf'
         deviceData:
           $ref: '#/components/schemas/Fido2DeviceData'
         expiration:
@@ -317,6 +447,22 @@ components:
           writeOnly: true
         baseDn:
           type: string
+    Fido2RegistrationEntryPagedResult:
+      type: object
+      properties:
+        start:
+          type: integer
+          format: int32
+        totalEntriesCount:
+          type: integer
+          format: int32
+        entriesCount:
+          type: integer
+          format: int32
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/Fido2RegistrationEntry'
   securitySchemes:
     oauth2:
       type: oauth2
@@ -324,7 +470,6 @@ components:
         clientCredentials:
           tokenUrl: "https://{op-hostname}/.../token"
           scopes:
-            https://jans.io/oauth/config/fido2.readonly: View fido2 configuration
-              related information
-            https://jans.io/oauth/config/fido2.write: Manage fido2 configuration related
-              information
+            https://jans.io/oauth/config/fido2.readonly: View fido2 related information
+            https://jans.io/oauth/config/fido2.write: Manage fido2 related information
+            https://jans.io/oauth/config/fido2.delete: Delete fido2 related information

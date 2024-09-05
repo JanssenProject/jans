@@ -220,7 +220,7 @@ public class UmaRptService {
             UmaRPT rpt = new UmaRPT(code, creationDate, expirationDate, null, client.getClientId());
             rpt.setPermissions(getPermissionDns(permissions));
             persist(rpt);
-            statService.reportUmaToken(GrantType.OXAUTH_UMA_TICKET);
+            statService.reportUmaToken(GrantType.UMA_TICKET);
             return rpt;
         } catch (Exception e) {
             if (log.isErrorEnabled()) {
@@ -246,7 +246,8 @@ public class UmaRptService {
         final Jwt jwt = jwtSigner.newJwt();
         jwt.getClaims().setClaim("client_id", client.getClientId());
         jwt.getClaims().setExpirationTime(expirationDate);
-        jwt.getClaims().setIssuedAt(creationDate);
+        jwt.getClaims().setIat(creationDate);
+        jwt.getClaims().setNbf(creationDate);
         Audience.setAudience(jwt.getClaims(), client);
 
         if (permissions != null && !permissions.isEmpty()) {

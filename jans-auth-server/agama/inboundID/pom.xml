@@ -10,7 +10,7 @@
     <parent>
         <groupId>io.jans</groupId>
         <artifactId>jans-auth-server-parent</artifactId>
-        <version>1.1.1-SNAPSHOT</version>
+        <version>1.1.5-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -63,22 +63,6 @@
         </dependency>
 
         <!-- JANSSEN -->
-        <dependency>
-            <groupId>io.jans</groupId>
-            <artifactId>jans-core-util</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.jans</groupId>
-            <artifactId>jans-core-service</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.jans</groupId>
-            <artifactId>jans-orm-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.jans</groupId>
-            <artifactId>jans-orm-model</artifactId>
-        </dependency>
         <dependency>
             <groupId>io.jans</groupId>
             <artifactId>jans-auth-common</artifactId>

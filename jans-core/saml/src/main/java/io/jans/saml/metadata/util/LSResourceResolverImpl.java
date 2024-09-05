@@ -17,14 +17,14 @@ public class LSResourceResolverImpl implements LSResourceResolver {
 
     static {
         namespacemap = new HashMap<>();
-        namespacemap.put("http://www.w3.org/XML/1998/namespace","/schema/www.w3.org/xml.xsd");
-        namespacemap.put("urn:oasis:names:tc:SAML:2.0:assertion","/schema/saml/saml-schema-assertion-2.0.xsd");
-        namespacemap.put("http://www.w3.org/2000/09/xmldsig#","/schema/www.w3.org/xmldsig-core-schema.xsd");
-        namespacemap.put("http://www.w3.org/2001/04/xmlenc#","/schema/www.w3.org/xenc-schema.xsd");
+        namespacemap.put("http://www.w3.org/XML/1998/namespace","/META-INF/xml.schemas/xml.xsd");
+        namespacemap.put("urn:oasis:names:tc:SAML:2.0:assertion","/META-INF/saml.schemas/saml-schema-assertion-2.0.xsd");
+        namespacemap.put("http://www.w3.org/2000/09/xmldsig#","/META-INF/xml.schemas/xmldsig-core-schema.xsd");
+        namespacemap.put("http://www.w3.org/2001/04/xmlenc#","/META-INF/xml.schemas/xenc-schema.xsd");
 
         publicidmap = new HashMap<>();
-        publicidmap.put("-//W3C//DTD XMLSchema 200102//EN","/schema/www.w3.org/XMLSchema.dtd");
-        publicidmap.put("datatypes","/schema/www.w3.org/datatypes.dtd");
+        publicidmap.put("-//W3C//DTD XMLSchema 200102//EN","/META-INF/xml.schemas/XMLSchema.dtd");
+        publicidmap.put("datatypes","/META-INF/xml.schemas/datatypes.dtd");
     }
 
     @Override
@@ -33,7 +33,7 @@ public class LSResourceResolverImpl implements LSResourceResolver {
         if(nameSpaceURI != null) {
             String resourcepath = namespacemap.get(nameSpaceURI);
             if(resourcepath!=null) {
-                
+            
                 return new LSInputImpl(getClass().getResourceAsStream(resourcepath));
             }
         }

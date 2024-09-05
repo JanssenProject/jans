@@ -55,7 +55,7 @@ flow, Review the CORS filter configuration for Jans Auth Server. CORS restricts
 access to trusted domains to execute browser application requests to Auth Server
 endpoints. By default, the filter allows any RP to call OpenID endpoints.
 
-Review Auth Server propoerties chosen for `sessionIdUnusedLifetime` and
+Review Auth Server properties chosen for `sessionIdUnusedLifetime` and
 `sessionIdLifetime`. Long sessions present higher risks of session hijacking and
 unauthorized access from shared devices.
 
@@ -144,5 +144,5 @@ are defined for the related scopes; though it simplifies initial testing, we
 recommend disabling this feature in production setups
 
 * `umaRestrictResourceToAssociatedClient` won't allow any other client except
-the one which registered the resource initially to acquire a RPT for it; it's
+the one that registered the resource initially to acquire a RPT for it; it's
 recommended to have it enabled for production setups

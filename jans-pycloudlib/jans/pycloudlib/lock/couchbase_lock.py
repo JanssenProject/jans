@@ -186,33 +186,18 @@ class CouchbaseLock(BaseLock):
                 resp.raise_for_status()
 
     def _resolve_auth(self):
-        # list of possible password files
-        password_files = [
-            os.environ.get("CN_OCI_LOCK_PASSWORD_FILE", "/etc/jans/conf/oci_lock_password")
-        ]
+        superuser_password_file = os.environ.get("CN_COUCHBASE_SUPERUSER_PASSWORD_FILE", "/etc/jans/conf/couchbase_superuser_password")
+        password_file = os.environ.get("CN_COUCHBASE_PASSWORD_FILE", "/etc/jans/conf/couchbase_password")
 
-        # check which user is accessing couchbase
-        user = os.environ.get("CN_COUCHBASE_SUPERUSER", "")
-
-        if user:
-            password_files.append(
-                os.environ.get("CN_COUCHBASE_SUPERUSER_PASSWORD_FILE", "/etc/jans/conf/couchbase_superuser_password")
-            )
-        else:
-            user = os.environ.get("CN_COUCHBASE_USER", "admin")
-            password_files.append(
-                os.environ.get("CN_COUCHBASE_PASSWORD_FILE", "/etc/jans/conf/couchbase_password")
-            )
-
-        # password of the running user
-        password = ""  # nosec: B105
-
-        for password_file in password_files:
-            if not os.path.isfile(password_file):
-                continue
-
+        if os.path.isfile(superuser_password_file):
+            user = os.environ.get("CN_COUCHBASE_SUPERUSER", "admin")
+            password = get_password_from_file(superuser_password_file)
+        elif os.path.isfile(password_file):
+            user = os.environ.get("CN_COUCHBASE_USER", "jans")
             password = get_password_from_file(password_file)
-            break
+        else:
+            user = ""
+            password = ""  # nosec: B105
 
         # auth credentials
         return user, password

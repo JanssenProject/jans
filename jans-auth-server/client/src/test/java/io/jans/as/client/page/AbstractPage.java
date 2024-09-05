@@ -17,6 +17,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.time.Duration;
 import java.util.Set;
 
 import static org.testng.Assert.fail;
@@ -35,7 +36,7 @@ public class AbstractPage implements Page {
 
     public static String waitForPageSwitch(WebDriver currentDriver, String previousURL) {
         Holder<String> currentUrl = new Holder<>();
-        WebDriverWait wait = new WebDriverWait(currentDriver, PageConfig.WAIT_OPERATION_TIMEOUT);
+        WebDriverWait wait = new WebDriverWait(currentDriver, Duration.ofSeconds(PageConfig.WAIT_OPERATION_TIMEOUT));
         wait.until((WebDriver d) -> {
             currentUrl.setT(d.getCurrentUrl());
             return !currentUrl.getT().equals(previousURL);

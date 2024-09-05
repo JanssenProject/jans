@@ -163,6 +163,17 @@ jansScopeTyp: oauth
 objectClass: top
 objectClass: jansScope
 
+dn: inum=7D92,ou=scopes,o=jans
+description: global_token_revocation scope is required to be able call /global-token-revocation endpoint
+displayName: global_token_revocation
+inum: 7D92
+jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
+jansDefScope: true
+jansId: global_token_revocation
+jansScopeTyp: openid
+objectClass: top
+objectClass: jansScope
+
 dn: inum=8A01,ou=scopes,o=jans
 description: View your mobile phone number.
 displayName: view_mobile_phone_number
@@ -192,7 +203,7 @@ displayName: view_user_permissions_roles
 inum: C4F5
 jansAttrs: {"spontaneousClientId":"","spontaneousClientScopes":[],"showInConfigurationEndpoint":true}
 jansDefScope: true
-jansId: permission
+jansId: role
 jansScopeTyp: dynamic
 jansScrDn: inum=CB5B-3211,ou=scripts,o=jans
 objectClass: top

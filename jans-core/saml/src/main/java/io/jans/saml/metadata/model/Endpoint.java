@@ -2,7 +2,7 @@ package io.jans.saml.metadata.model;
 
 public class Endpoint {
 
-    private String binding;
+    private SAMLBinding binding;
     private String location;
     private String responseLocation;
 
@@ -13,12 +13,12 @@ public class Endpoint {
         this.responseLocation = null;
     }
 
-    public String getBinding() {
+    public SAMLBinding getBinding() {
 
         return this.binding; 
     }
 
-    public void setBinding(final String binding) {
+    public void setBinding(final SAMLBinding binding) {
 
         this.binding = binding;
     }

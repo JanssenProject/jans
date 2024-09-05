@@ -5,7 +5,7 @@
 
     <groupId>io.jans.casa.plugins</groupId>
     <artifactId>${plugin.id}</artifactId>
-    <version>1.1.1-SNAPSHOT</version>
+    <version>1.1.5-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <properties>
@@ -37,7 +37,7 @@
                             <Plugin-Id>${plugin.id}</Plugin-Id>
                             <Plugin-Version>${project.version}</Plugin-Version>
                             <Plugin-Provider>Developer name</Plugin-Provider>
-                            <Plugin-Class>io.jans.casa.plugins.SampleCredentialPlugin</Plugin-Class>
+                            <Plugin-Class>io.jans.casa.plugins.sampleauthn.SampleCredentialPlugin</Plugin-Class>
                             <Plugin-Description>
                                 This plugin is a template for developers needing to add an authentication method
                                 to Jans-Casa

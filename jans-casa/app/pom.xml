@@ -9,7 +9,7 @@
     <parent>
         <groupId>io.jans</groupId>
         <artifactId>casa-base</artifactId>
-        <version>1.1.1-SNAPSHOT</version>
+        <version>1.1.5-SNAPSHOT</version>
     </parent>
 
     <dependencies>
@@ -25,6 +25,11 @@
         </dependency>
 
         <!-- JANS-->
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>agama-model</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>io.jans</groupId>
             <artifactId>jans-orm-model</artifactId>
@@ -336,12 +341,6 @@
                             <Implementation-Build>${buildNumber}</Implementation-Build>
                         </manifestEntries>
                     </archive>
-                    <packagingExcludes>
-                        WEB-INF/lib/bcpkix-jdk15on-*.jar,
-                        WEB-INF/lib/bcprov-jdk15on-*.jar,
-                        WEB-INF/lib/bcutil-jdk15on-*.jar,
-                        WEB-INF/lib/bcmail-jdk15on-*.jar
-                    </packagingExcludes>
                 </configuration>
             </plugin>
             <!-- Build number plugin -->

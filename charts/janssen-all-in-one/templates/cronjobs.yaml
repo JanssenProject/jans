@@ -10,9 +10,14 @@ metadata:
 {{- if (index .Values "auth-server-key-rotation" "additionalLabels") }}
 {{ toYaml (index .Values "auth-server-key-rotation" "additionalLabels") | indent 4 }}
 {{- end }}
-{{- if (index .Values "auth-server-key-rotation" "additionalAnnotations") }}
+{{- if or (index .Values "auth-server-key-rotation" "additionalAnnotations") (.Values.customAnnotations.cronjob) }}
   annotations:
+{{- if index .Values "auth-server-key-rotation" "additionalAnnotations" }}
 {{ toYaml (index .Values "auth-server-key-rotation" "additionalAnnotations") | indent 4 }}
+{{- end }}
+{{- if .Values.customAnnotations.cronjob }}
+{{ toYaml .Values.customAnnotations.cronjob | indent 4 }}
+{{- end }}
 {{- end }}
 spec:
   schedule: "@every {{ index .Values "auth-server-key-rotation" "keysLife" }}h"
@@ -33,6 +38,7 @@ spec:
           dnsConfig:
 {{ toYaml . | indent 12 }}
         {{- end }}
+          serviceAccountName: {{ .Values.serviceAccountName }}
           containers:
             - name: {{ include "janssen-all-in-one.name" . }}-as-key-rotation
               {{- if (index .Values "auth-server-key-rotation" "customScripts") }}
@@ -80,21 +86,6 @@ spec:
               {{- with (index .Values "auth-server-key-rotation" "volumeMounts") }}
 {{- toYaml . | nindent 16 }}
               {{- end }}
-              {{- if or (eq .Values.cnPersistenceType "couchbase") (eq .Values.cnPersistenceType "hybrid") }}
-                {{- if not .Values.istio.enabled }}
-                - name: cb-crt
-                  mountPath: "/etc/certs/couchbase.crt"
-                  subPath: couchbase.crt
-                {{- end }}
-                - name: cb-pass
-                  mountPath: {{ .Values.cnCouchbasePasswordFile }}
-                  subPath: couchbase_password
-              {{- end }}
-                {{- if or (eq .Values.cnPersistenceType "sql") (eq .Values.cnPersistenceType "hybrid") }}
-                - name: sql-pass
-                  mountPath: {{ .Values.cnSqlPasswordFile }}
-                  subPath: sql_password
-                {{- end }}
               envFrom:
                 - configMapRef:
                     name: {{ .Release.Name }}-config-cm
@@ -152,17 +143,154 @@ spec:
                 - key: vault_secret_id
                   path: vault_secret_id
           {{- end }}
-          {{- if or (eq .Values.cnPersistenceType "couchbase") (eq .Values.cnPersistenceType "hybrid") }}
-            {{- if not .Values.istio.enabled }}
-            - name: cb-crt
-              secret:
-                secretName: {{ .Release.Name }}-cb-crt
-            {{- end }}
+          restartPolicy: Never
+{{- end }}
+
+---
+
+{{ if and (index .Values "kc-scheduler" "enabled") (.Values.saml.enabled) -}}
+kind: CronJob
+apiVersion: batch/v1
+metadata:
+  name: {{ include "janssen-all-in-one.fullname" . }}-kc-scheduler
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Release.Name }}-{{ include "janssen-all-in-one.name" . }}-kc-scheduler
+{{ include "janssen-all-in-one.labels" . | indent 4 }}
+{{- if (index .Values "kc-scheduler" "additionalLabels") }}
+{{ toYaml (index .Values "kc-scheduler" "additionalLabels") | indent 4 }}
+{{- end }}
+{{- if (index .Values "kc-scheduler" "additionalAnnotations") }}
+  annotations:
+{{ toYaml (index .Values "kc-scheduler" "additionalAnnotations") | indent 4 }}
+{{- end }}
+spec:
+  schedule: "@every {{ index .Values "kc-scheduler" "interval" }}m"
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          annotations:
+            sidecar.istio.io/inject: "false"
+        spec:
+        {{- with (index .Values "kc-scheduler" "image" "pullSecrets") }}
+          imagePullSecrets:
+            {{- toYaml . | nindent 8 }}
+        {{- end }}
+          dnsPolicy: {{ index .Values "kc-scheduler" "dnsPolicy" | quote }}
+        {{- with (index .Values "kc-scheduler" "dnsConfig") }}
+          dnsConfig:
+{{ toYaml . | indent 12 }}
+        {{- end }}
+          containers:
+            - name: {{ include "janssen-all-in-one.name" . }}-kc-scheduler
+              {{- if (index .Values "kc-scheduler" "customScripts") }}
+              command:
+                - /bin/sh
+                - -c
+                - |
+                    {{- with (index .Values "kc-scheduler" "customScripts") }}
+                    {{- toYaml . | replace "- " "" | nindent 20}}
+                    {{- end }}
+                    /app/bin/entrypoint.sh
+              {{- end}}
+              image: "{{ index .Values "kc-scheduler" "image" "repository" }}:{{ index .Values "kc-scheduler" "image" "tag" }}"
+              env:
+                {{- include "janssen-all-in-one.usr-envs" . | indent 16 }}
+                {{- include "janssen-all-in-one.usr-secret-envs" . | indent 16 }}
+              imagePullPolicy: {{ index .Values "kc-scheduler" "image" "pullPolicy" }}
+              lifecycle:
+{{- toYaml (index .Values "kc-scheduler" "lifecycle") | nindent 16 }}
+              volumeMounts:
+              {{ if or (eq .Values.configSecretAdapter "aws") (eq .Values.configAdapterName "aws") }}
+                - mountPath: {{ .Values.cnAwsSharedCredentialsFile }}
+                  name: aws-shared-credential-file
+                  subPath: aws_shared_credential_file
+                - mountPath: {{ .Values.cnAwsConfigFile }}
+                  name: aws-config-file
+                  subPath: aws_config_file
+                - mountPath: {{ .Values.cnAwsSecretsReplicaRegionsFile }}
+                  name: aws-secrets-replica-regions
+                  subPath: aws_secrets_replica_regions
+              {{- end }}
+              {{ if or (eq .Values.configSecretAdapter "google") (eq .Values.cnPersistenceType "spanner") }}
+                - mountPath: {{ .Values.cnGoogleApplicationCredentials }}
+                  name: google-sa
+                  subPath: google-credentials.json
+                {{- end }}
+                {{ if eq .Values.configSecretAdapter "vault" }}
+                - name: vault
+                  mountPath: /etc/certs/vault_role_id
+                  subPath: vault_role_id
+                - name: vault
+                  mountPath: /etc/certs/vault_secret_id
+                  subPath: vault_secret_id
+                {{- end }}
+              {{- with (index .Values "kc-scheduler" "volumeMounts") }}
+{{- toYaml . | nindent 16 }}
+              {{- end }}
+              envFrom:
+                - configMapRef:
+                    name: {{ .Release.Name }}-config-cm
+                {{ if .Values.usrEnvs.secret }}
+                - secretRef:
+                    name: {{ .Release.Name }}-global-user-custom-envs
+                {{- end }}
+                {{ if .Values.usrEnvs.normal }}
+                - configMapRef:
+                    name: {{ .Release.Name }}-global-user-custom-envs
+                {{- end }}
+              {{- if .Values.testEnviroment }}
+              resources: {}
+              {{- else }}
+              resources:
+{{- toYaml (index .Values "kc-scheduler" "resources") | nindent 16 }}
+              {{- end }}
+          volumes:
+          {{- with (index .Values "kc-scheduler" "volumes") }}
+{{- toYaml . | nindent 12 }}
           {{- end }}
-          {{- if or (eq .Values.cnPersistenceType "sql") (eq .Values.cnPersistenceType "hybrid") }}
-            - name: sql-pass
+          {{ if or (eq .Values.configSecretAdapter "aws") (eq .Values.configAdapterName "aws") }}
+            - name: aws-shared-credential-file
               secret:
-                secretName: {{ .Release.Name }}-sql-pass
+                secretName: {{ .Release.Name }}-aws-config-creds
+                items:
+                  - key: aws_shared_credential_file
+                    path: aws_shared_credential_file
+            - name: aws-config-file
+              secret:
+                secretName: {{ .Release.Name }}-aws-config-creds
+                items:
+                  - key: aws_config_file
+                    path: aws_config_file
+            - name: aws-secrets-replica-regions
+              secret:
+                secretName: {{ .Release.Name }}-aws-config-creds
+                items:
+                  - key: aws_secrets_replica_regions
+                    path: aws_secrets_replica_regions
+          {{- end }}
+          {{ if or (eq .Values.configSecretAdapter "google") (eq .Values.cnPersistenceType "spanner") }}
+            - name: google-sa
+              secret:
+                secretName: {{ .Release.Name }}-google-sa
+          {{- end }}
+          {{ if eq .Values.configSecretAdapter "vault" }}
+            - name: vault
+              secret:
+                secretName: {{ .Release.Name }}-vault
+                items:
+                - key: vault_role_id
+                  path: vault_role_id
+                - key: vault_secret_id
+                  path: vault_secret_id
           {{- end }}
           restartPolicy: Never
+          {{- if not .Values.isFqdnRegistered  }}
+          hostAliases:
+            - ip: {{ .Values.lbIp }}
+              hostnames:
+                - {{ .Values.fqdn }}
+          {{- end }}
 {{- end }}

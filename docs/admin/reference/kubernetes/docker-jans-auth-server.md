@@ -99,6 +99,7 @@ The following environment variables are supported by the container:
 - `AWS_PROFILE`: The default profile to use, if any.
 - `CN_LOCK_ENABLED`: Enable `jans-lock` as part of `jans-auth`.
 - `CN_OPA_URL`: URL to OPA server (default to `http://localhost:8181/v1`).
+- `CN_SSL_CERT_FROM_SECRETS`: Determine whether to get SSL cert from secrets backend (default to `true`). Note that the flag will take effect only if there's no mounted `/etc/certs/web_https.crt` file.
 
 ### Configure app loggers
 

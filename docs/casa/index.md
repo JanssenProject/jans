@@ -36,29 +36,27 @@ Additional authenticators and use cases can be supported via [custom plugins](#e
 
 ## 2FA enrollment APIs
 
-To facilitate 2FA device enrollment during account registration, or elsewhere in an application ecosystem, Casa exposes [APIs](https://github.com/JanssenProject/jans/raw/main/jans-casa/app/src/main/webapp/enrollment-api.yaml)  for enrolling the following types of authenticators:   
+To facilitate 2FA device enrollment during account registration, or elsewhere in an application ecosystem, Casa exposes [APIs](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/app/src/main/webapp/enrollment-api.yaml)  for enrolling the following types of authenticators:   
 
 - Phone numbers for SMS OTP
 - OTP apps, cards, or dongles  
-- FIDO2 security keys
+- FIDO security keys
 
 ## Configuration via APIs
 
-Besides a comprehensive graphical [admin console](./administration/admin-console.md), application settings can also be manipulated by means of a configuration [API](https://github.com/JanssenProject/jans/raw/main/jans-casa/app/src/main/webapp/admin-api.yaml).
+Besides a comprehensive graphical [admin console](./administration/admin-console.md), application settings can also be manipulated by means of a configuration [API](https://github.com/JanssenProject/jans/raw/vreplace-janssen-version/jans-casa/app/src/main/webapp/admin-api.yaml).
 
 ## Existing plugins
 
 Casa is a plugin-oriented, Java web application. Existing functionality can be extended and new functionality and APIs can be introduced through plugins. Currently, there are plugins available for the following:
 
-- [Consent management](./plugins/consent-management.md) 
-- [Custom branding](./plugins/custom-branding.md)  
 - [2FA settings](./plugins/2fa-settings.md)
+- [Accounts linking](./plugins/accts-linking/account-linking-index.md)
+- [Consent management](./plugins/consent-management.md)
+- [Custom branding](./plugins/custom-branding.md)
+- [BioID](./plugins/bioid.md)
 
 If you are interested in onboarding additional authentication methods to Casa, read this [guide](./developer/add-authn-methods.md).
-
-## Janssen Server integration
-
-Janssen Server relies on "interception scripts" to implement user authentication. Casa itself has an interception script which defines authentication logic and routes authentications to specific 2FA mechanisms which also have their own scripts.        
 
 ## User roles
 
@@ -79,11 +77,15 @@ Use the following links to get started with Casa:
 ### Admin Guide
 
   - [Quick start](./administration/quick-start.md)
-  - [Admin console](./administration/admin-console.md)
-  - [Credentials storage](./administration/credentials-stored.md)        
+  - [Admin console](./administration/admin-console.md)     
   - [Custom branding](./administration/custom-branding.md)        
   - [FAQs](./administration/faq.md)            
 
 ### User Guide
 
 - [Home](./user-guide.md)
+
+### Developer guide
+
+- [Home](./developer/overview.md)
+- [Adding authentication methods](./developer/add-authn-methods.md)

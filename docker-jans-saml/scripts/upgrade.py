@@ -6,13 +6,13 @@ import os
 from collections import namedtuple
 
 from jans.pycloudlib import get_manager
-from jans.pycloudlib.persistence import CouchbaseClient
-from jans.pycloudlib.persistence import LdapClient
-from jans.pycloudlib.persistence import SpannerClient
-from jans.pycloudlib.persistence import SqlClient
-from jans.pycloudlib.persistence import PersistenceMapper
-from jans.pycloudlib.persistence import doc_id_from_dn
-from jans.pycloudlib.persistence import id_from_dn
+from jans.pycloudlib.persistence.couchbase import CouchbaseClient
+from jans.pycloudlib.persistence.couchbase import id_from_dn
+from jans.pycloudlib.persistence.ldap import LdapClient
+from jans.pycloudlib.persistence.spanner import SpannerClient
+from jans.pycloudlib.persistence.sql import doc_id_from_dn
+from jans.pycloudlib.persistence.sql import SqlClient
+from jans.pycloudlib.persistence.utils import PersistenceMapper
 
 from settings import LOGGING_CONFIG
 
@@ -51,17 +51,25 @@ def _transform_saml_dynamic_config(conf):
             "validateSignature",
             "singleLogoutServiceUrl",
             "nameIDPolicyFormat",
+            "principalAttribute",
+            "principalType",
             "idpEntityId",
             "singleSignOnServiceUrl",
-            "encryptionPublicKey"
+            "encryptionPublicKey",
         ]),
+        ("extIDPTokenUrl", "/realms/%s/broker/%s/token"),
+        ("extIDPRedirectUrl", "/kc/realms/%s/protocol/openid-connect/auth?client_id=%s&redirect_uri=%s&response_type=%s&kc_idp_hint=%s"),
+        ("setConfigDefaultValue", True),
     ]:
-        # dont update if key exists
-        if k in conf:
-            continue
+        if k not in conf:
+            conf[k] = v
+            should_update = True
 
-        conf[k] = v
-        should_update = True
+    # new attrs in kcSamlConfig
+    for new_attr in ["principalAttribute", "principalType"]:
+        if new_attr not in conf["kcSamlConfig"]:
+            conf["kcSamlConfig"].append(new_attr)
+            should_update = True
 
     # return modified config (if any) and update flag
     return conf, should_update

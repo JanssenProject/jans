@@ -42,7 +42,16 @@ public enum Prompt implements HasParamName {
      * This allows a user who has multiple accounts at the Authorization Server to
      * select amongst the multiple accounts that they may have current sessions for.
      */
-    SELECT_ACCOUNT("select_account");
+    SELECT_ACCOUNT("select_account"),
+
+    /**
+     * A value of create indicates to the OpenID Provider that the client desires
+     * that the user be shown the account creation UX rather than the login flow.
+     * Care must be taken if combining this value with other prompt values.
+     * Mutually exclusive conditions can arise so it is RECOMMENDED
+     * that create not be combined with any other values.
+     */
+    CREATE("create");
 
     private final String paramName;
 

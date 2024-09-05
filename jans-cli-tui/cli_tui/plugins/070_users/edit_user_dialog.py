@@ -1,21 +1,26 @@
-from typing import Optional, Sequence, Callable
 import asyncio
+import json
+
+from typing import Optional, Sequence, Callable, Any
 from functools import partial
+
+from prompt_toolkit import HTML
 from prompt_toolkit.layout.dimension import D
+from prompt_toolkit.layout import ScrollablePane
 from prompt_toolkit.layout.containers import HSplit, VSplit,\
     DynamicContainer, Window
-
+from prompt_toolkit.formatted_text import AnyFormattedText
 from prompt_toolkit.widgets import Button, Label, CheckboxList, Dialog
 from prompt_toolkit.eventloop import get_event_loop
+
+from utils.multi_lang import _
 from utils.static import DialogResult
+from utils.utils import DialogUtils, common_data, check_email
 from wui_components.jans_dialog_with_nav import JansDialogWithNav
 from wui_components.jans_cli_dialog import JansGDialog
-from utils.utils import DialogUtils, common_data, check_email
 from wui_components.jans_vetrical_nav import JansVerticalNav
-from prompt_toolkit.formatted_text import AnyFormattedText
-from typing import Any, Optional
-from prompt_toolkit.layout import ScrollablePane
-from utils.multi_lang import _
+from wui_components.jans_label_widget import JansLabelWidget
+
 
 class EditUserDialog(JansGDialog, DialogUtils):
     """This user editing dialog
@@ -90,7 +95,7 @@ class EditUserDialog(JansGDialog, DialogUtils):
             return [] if multi else ''
 
         if self.data:
-            active_checked = self.data.get('jansStatus', '').lower() == 'active'
+            active_checked = self.data.get('status', '').lower() == 'active'
         else:
             active_checked = True
 
@@ -108,38 +113,14 @@ class EditUserDialog(JansGDialog, DialogUtils):
                     Button(_("Add Claim"), handler=self.add_claim),
                 ]
 
+        if common_data.app.plugin_enabled('admin'):
+            self.admin_ui_roles_container = JansLabelWidget(
+                        title = _("Admin UI Roles"),
+                        values = get_custom_attribute('jansAdminUIRole', multi=True),
+                        data = [ (role['role'], role['role']) for role in common_data.admin_ui_roles ]
+                        )
 
-        if common_data.app.plugin_enabled('config_api'):
-            admin_ui_roles = [[role] for role in get_custom_attribute('jansAdminUIRole', multi=True) ]
-            admin_ui_roles_label = _("jansAdminUIRole")
-            add_admin_ui_role_label = _("Add Admin UI Role")
-            self.admin_ui_roles_container = JansVerticalNav(
-                    myparent=common_data.app,
-                    headers=['Role'],
-                    preferred_size=[20],
-                    data=admin_ui_roles,
-                    on_delete=self.delete_admin_ui_role,
-                    selectes=0,
-                    headerColor='class:outh-client-navbar-headcolor',
-                    entriesColor='class:outh-client-navbar-entriescolor',
-                    all_data=admin_ui_roles,
-                    underline_headings=False,
-                    max_width=25,
-                    jans_name='configurationProperties',
-                    max_height=False
-                    )
-
-            self.edit_user_content.insert(-1,
-                    VSplit([ 
-                        Label(text=admin_ui_roles_label, style='class:script-label', width=len(admin_ui_roles_label)+1), 
-                        self.admin_ui_roles_container,
-                        Window(width=2),
-                        HSplit([
-                                Window(height=1),
-                                Button(text=add_admin_ui_role_label, width=len(add_admin_ui_role_label)+4, handler=self.add_admin_ui_role),
-                                ]),
-                        ], height=4, width=D())
-                    )
+            self.edit_user_content.insert(-1, self.admin_ui_roles_container)
 
 
         if not self.data:
@@ -149,7 +130,7 @@ class EditUserDialog(JansGDialog, DialogUtils):
 
         for ca in self.data.get('customAttributes', []):
 
-            if ca['name'] in ('middleName', 'sn', 'jansStatus', 'nickname', 'jansActive', 'userPassword'):
+            if ca['name'] in ('middleName', 'sn', 'status', 'nickname', 'jansActive', 'userPassword', 'jansAdminUIRole'):
                 continue
 
             claim_prop = self.get_claim_properties(ca['name'])
@@ -169,7 +150,6 @@ class EditUserDialog(JansGDialog, DialogUtils):
 
 
 
-
         self.dialog = JansDialogWithNav(
             title=self.title,
             content=DynamicContainer(lambda: self.edit_user_container),
@@ -177,49 +157,6 @@ class EditUserDialog(JansGDialog, DialogUtils):
             height=common_data.app.dialog_height,
             width=common_data.app.dialog_width,
             )
-
-    def get_admin_ui_roles(self) -> None:
-        """This method for getting admin ui roles
-        """
-        async def coroutine():
-            cli_args = {'operation_id': 'get-all-adminui-roles'}
-            common_data.app.start_progressing(_("Retreiving admin UI roles from server..."))
-            response = await get_event_loop().run_in_executor(common_data.app.executor, common_data.app.cli_requests, cli_args)
-            common_data.app.stop_progressing()
-            self.admin_ui_roles = response.json()
-            self.add_admin_ui_role()
-        asyncio.ensure_future(coroutine())
-
-    def add_admin_ui_role(self) -> None:
-        """This method for adding new admin ui roles
-        """
-        if not self.admin_ui_roles:
-            self.get_admin_ui_roles()
-            return
-
-        ui_roles_to_be_added = []
-        for role in self.admin_ui_roles:
-            for cur_role in self.admin_ui_roles_container.data:
-                if cur_role[0] == role['role']:
-                    break
-            else:
-                ui_roles_to_be_added.append([role['role'], role['role']])
-
-        admin_ui_roles_checkbox = CheckboxList(values=ui_roles_to_be_added)
-
-        def add_role(dialog) -> None:
-            for role_ in admin_ui_roles_checkbox.current_values:
-                self.admin_ui_roles_container.add_item([role_])
-
-        body = HSplit([Label(_("Select Admin-UI role to be added to current user.")), admin_ui_roles_checkbox])
-        buttons = [Button(_("Cancel")), Button(_("OK"), handler=add_role)]
-        dialog = JansGDialog(common_data.app, title=_("Select Admin-UI"), body=body, buttons=buttons, width=common_data.app.dialog_width-20)
-        common_data.app.show_jans_dialog(dialog)
-
-    def delete_admin_ui_role(self, **kwargs: Any) -> None:
-        """This method for deleting admin ui roles
-        """
-        self.admin_ui_roles_container.remove_item(kwargs['selected'])
 
     def add_claim(self) -> None:
         """This method for adding new claim
@@ -233,9 +170,10 @@ class EditUserDialog(JansGDialog, DialogUtils):
         for claim in common_data.jans_attributes:
             if not claim['oxMultiValuedAttribute'] and claim['name'] in cur_claims:
                 continue
-            if claim['name'] in ('memberOf', 'userPassword', 'uid', 'jansStatus', 'jansActive', 'updatedAt'):
+            if claim['name'] in ('memberOf', 'userPassword', 'uid', 'status', 'jansActive', 'updatedAt', 'jansAdminUIRole'):
                 continue
-            claims_list.append((claim['name'], claim['displayName']))
+            if claim.get('status') == 'active':
+                claims_list.append((claim['name'], claim['displayName']))
 
         claims_checkbox = CheckboxList(values=claims_list)
 
@@ -253,7 +191,7 @@ class EditUserDialog(JansGDialog, DialogUtils):
             self.edit_user_container = ScrollablePane(content=HSplit(self.edit_user_content, width=D()),show_scrollbar=False)
 
 
-        body = HSplit([Label(_("Select claim to be added to current user.")), claims_checkbox])
+        body = HSplit([Label(HTML(_("Select claim to be added to current user.\n<i>Note</i>: Only <b>active</b> claims are displayed."))), claims_checkbox])
         buttons = [Button(_("Cancel")), Button(_("OK"), handler=add_claim)]
         dialog = JansGDialog(common_data.app, title=_("Claims"), body=body, buttons=buttons, width=common_data.app.dialog_width-20)
         common_data.app.show_jans_dialog(dialog)
@@ -278,7 +216,7 @@ class EditUserDialog(JansGDialog, DialogUtils):
             common_data.app.show_message(fix_title, _("Please enter Password"))
             return
 
-        user_info = {'customObjectClasses':['top', 'jansPerson'], 'customAttributes':[]}
+        user_info = {'customObjectClasses':['top', 'jansPerson', 'jansCustomPerson'], 'customAttributes':[]}
         for key_ in ('mail', 'userId', 'displayName', 'givenName'):
             user_info[key_] = raw_data.pop(key_)
 
@@ -292,13 +230,13 @@ class EditUserDialog(JansGDialog, DialogUtils):
                 user_info[key_] = self.data[key_]
 
         status = raw_data.pop('active')
-        user_info['jansStatus'] = 'active' if status else 'inactive'
+        user_info['status'] = 'active' if status else 'inactive'
 
         for key_ in raw_data:
             multi_valued = False
             key_prop = self.get_claim_properties(key_)
 
-            if key_prop.get('dataType') == 'json':
+            if key_prop.get('dataType') == 'json' and raw_data[key_]:
                 try:
                     json.loads(raw_data[key_])
                 except Exception as e:
@@ -321,7 +259,7 @@ class EditUserDialog(JansGDialog, DialogUtils):
                 break
 
         if hasattr(self, 'admin_ui_roles_container'):
-            admin_ui_roles = [item[0] for item in self.admin_ui_roles_container.data]
+            admin_ui_roles = self.admin_ui_roles_container.get_values()
             if admin_ui_roles:
                user_info['customAttributes'].append({
                         'name': 'jansAdminUIRole', 
@@ -335,7 +273,7 @@ class EditUserDialog(JansGDialog, DialogUtils):
             common_data.app.start_progressing(_("Saving user ..."))
             response = await common_data.app.loop.run_in_executor(common_data.app.executor, common_data.app.cli_requests, cli_args)
             common_data.app.stop_progressing()
-            if response.status_code != 201:
+            if response.status_code not in (200, 201):
                 common_data.app.show_message(_('Error'), response.text + '\n' + response.reason)
             else:
                 self.future.set_result(DialogResult.OK)

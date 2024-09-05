@@ -6,7 +6,18 @@
 
 package io.jans.as.server.service;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.lang.StringUtils;
+import org.json.JSONArray;
+import org.slf4j.Logger;
+
 import com.google.common.collect.Lists;
+
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.service.AttributeService;
 import io.jans.as.model.config.StaticConfiguration;
@@ -22,23 +33,14 @@ import io.jans.service.BaseCacheService;
 import io.jans.service.CacheService;
 import io.jans.service.LocalCacheService;
 import io.jans.util.StringHelper;
-import org.apache.commons.lang.StringUtils;
-import org.json.JSONArray;
-import org.slf4j.Logger;
-
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.inject.Named;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author Javier Rojas Blum Date: 07.05.2012
  * @author Yuriy Movchan Date: 2016/04/26
  */
-@Named
+@ApplicationScoped
 public class ScopeService {
 
     @Inject
@@ -52,9 +54,6 @@ public class ScopeService {
 
     @Inject
     private LocalCacheService localCacheService;
-
-    @Inject
-    private PersistenceEntryManager ldapEntryManager;
 
     @Inject
     private StaticConfiguration staticConfiguration;
@@ -73,7 +72,7 @@ public class ScopeService {
     public List<Scope> getAllScopesList() {
         String scopesBaseDN = staticConfiguration.getBaseDn().getScopes();
 
-        return ldapEntryManager.findEntries(scopesBaseDN,
+        return entryManager.findEntries(scopesBaseDN,
                 Scope.class,
                 Filter.createPresenceFilter("inum"));
     }
@@ -125,7 +124,7 @@ public class ScopeService {
      */
     public Scope getScopeByDn(String dn) {
         BaseCacheService usedCacheService = getCacheService();
-        final Scope scope = usedCacheService.getWithPut(dn, () -> ldapEntryManager.find(Scope.class, dn), 60);
+        final Scope scope = usedCacheService.getWithPut(dn, () -> entryManager.find(Scope.class, dn), 60);
         if (scope != null && StringUtils.isNotBlank(scope.getId())) {
             usedCacheService.put(scope.getId(), scope); // put also by id, since we call it by id and dn
         }
@@ -160,7 +159,7 @@ public class ScopeService {
             return (Scope) cached;
 
         try {
-            List<Scope> scopes = ldapEntryManager.findEntries(
+            List<Scope> scopes = entryManager.findEntries(
                     staticConfiguration.getBaseDn().getScopes(), Scope.class, Filter.createEqualityFilter("jansId", id));
             if ((scopes != null) && (scopes.size() > 0)) {
                 final Scope scope = scopes.get(0);
@@ -186,7 +185,7 @@ public class ScopeService {
             Filter filter = Filter.createEqualityFilter("jansClaim", claimDn);
 
             String scopesBaseDN = staticConfiguration.getBaseDn().getScopes();
-            scopes = ldapEntryManager.findEntries(scopesBaseDN, Scope.class, filter);
+            scopes = entryManager.findEntries(scopesBaseDN, Scope.class, filter);
 
             putInCache(claimDn, scopes);
         }
@@ -237,7 +236,7 @@ public class ScopeService {
     }
 
     public void persist(Scope scope) {
-        ldapEntryManager.persist(scope);
+    	entryManager.persist(scope);
     }
 
     private BaseCacheService getCacheService() {

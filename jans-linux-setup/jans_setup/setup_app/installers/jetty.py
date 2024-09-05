@@ -34,7 +34,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         setattr(base.current_app, self.__class__.__name__, self)
         self.service_name = 'jetty'
         self.needdb = False # we don't need backend connection in this class
-        self.install_var = 'installJetty'
+        self.install_var = 'install_jetty'
         self.app_type = AppType.APPLICATION
         self.install_type = InstallOption.MANDATORY
         if not base.snap:
@@ -82,6 +82,8 @@ class JettyInstaller(BaseInstaller, SetupUtils):
 
         self.applyChangesInFiles(self.app_custom_changes[NAME_STR])
 
+        self.replace_favicon()
+
         self.chown(jettyDestinationPath, Config.jetty_user, Config.jetty_group, recursive=True)
         self.run([paths.cmd_chown, '-h', '{}:{}'.format(Config.jetty_user, Config.jetty_group), self.jetty_home])
 
@@ -98,6 +100,23 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         self.chown(self.jetty_bin_sh_fn, Config.jetty_user, Config.jetty_group, recursive=True)
         self.run([paths.cmd_chmod, '-R', '755', self.jetty_bin_sh_fn])
 
+    def replace_favicon(self):
+        # icon directory
+        icon_subdir = 'org/eclipse/jetty'
+        favicon_fn = 'favicon.ico'
+        icon_dir = os.path.join(self.jetty_user_home_lib, icon_subdir)
+        self.createDirs(icon_dir)
+
+        # extract favicon
+        base.extract_file(base.current_app.jans_zip, f'jans-linux-setup/jans_setup/static/{favicon_fn}', os.path.join(icon_dir, favicon_fn), ren=True)
+
+        _, jetty_dist = self.get_jetty_info()
+        jetty_server_fn = f'{jetty_dist}/{self.jetty_dist_string}-{self.jetty_exact_version_string}/lib/jetty-server-{self.jetty_exact_version_string}.jar'
+
+        # replace favicon
+        self.run([Config.cmd_jar, '-uf', jetty_server_fn, os.path.join(icon_subdir, favicon_fn)], cwd=self.jetty_user_home_lib)
+
+
     def get_jetty_info(self):
         # first try latest versions
         self.jetty_dist_string = 'jetty-home'
@@ -109,13 +128,15 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         jetty_archive = max(jetty_archive_list)
 
         jetty_archive_fn = os.path.basename(jetty_archive)
-        jetty_regex = re.search('{}-(\d*\.\d*)'.format(self.jetty_dist_string), jetty_archive_fn)
+        jetty_regex = re.search(f'{self.jetty_dist_string}-(\d*\.\d*)', jetty_archive_fn)
+        jetty_exact_version_regex = re.search(f'{self.jetty_dist_string}-(\d*\.\d*.\d*)', jetty_archive_fn)
         if not jetty_regex:
             self.logIt("Can't determine Jetty version", True, True)
 
         jetty_dist = '/opt/jetty-' + jetty_regex.groups()[0]
         Config.templateRenderingDict['jetty_dist'] = jetty_dist
         self.jetty_version_string = jetty_regex.groups()[0]
+        self.jetty_exact_version_string = jetty_exact_version_regex.groups()[0]
 
         return jetty_archive, jetty_dist
 
@@ -131,7 +152,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
     def jetty_service_webapps(self):
         return os.path.join(self.jetty_service_dir, 'webapps')
 
-    def installJettyService(self, serviceConfiguration, supportCustomizations=False, supportOnlyPageCustomizations=False):
+    def install_jettyService(self, serviceConfiguration, supportCustomizations=False, supportOnlyPageCustomizations=False):
         service_name = serviceConfiguration['name']
         self.logIt("Installing jetty service %s..." % service_name)
         self.logIt("Deploying Jetty Service", pbar=service_name)
@@ -310,7 +331,7 @@ class JettyInstaller(BaseInstaller, SetupUtils):
                 Config.templateRenderingDict["%s_max_heap_mem" % applicationName] = maxHeapMem
                 Config.templateRenderingDict["%s_min_heap_mem" % applicationName] = minHeapMem
 
-                if maxHeapMem < 256 and applicationName in allowedApplicationsMemory:    
+                if maxHeapMem < 256 and applicationName in allowedApplicationsMemory:
                     retVal = False
 
         return retVal
@@ -334,9 +355,9 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         installedComponents = []
 
         # Jetty apps
-        for config_var, service in [('installOxAuth', 'jans-auth'),
+        for config_var, service in [('install_jans_auth', 'jans-auth'),
                                     ('install_scim_server', 'jans-scim'),
-                                    ('installFido2', 'jans-fido2'),
+                                    ('install_fido2', 'jans-fido2'),
                                     ('install_config_api', 'jans-config-api'),
                                     ('install_jans_lock_as_server', 'jans-lock'),
                                     ]:

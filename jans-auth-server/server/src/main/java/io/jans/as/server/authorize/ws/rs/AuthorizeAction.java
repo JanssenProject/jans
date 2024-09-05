@@ -73,6 +73,7 @@ import java.net.URI;
 import java.net.URLEncoder;
 import java.util.*;
 
+import static io.jans.as.server.service.AcrService.isAgama;
 import static io.jans.as.server.service.DeviceAuthorizationService.SESSION_USER_CODE;
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
@@ -327,7 +328,8 @@ public class AuthorizeAction {
                     acrValuesList = Arrays.asList(defaultAuthenticationMode.getName());
                 }
 
-                CustomScriptConfiguration customScriptConfiguration = externalAuthenticationService.determineCustomScriptConfiguration(AuthenticationScriptUsageType.INTERACTIVE, acrValuesList);
+                List<String> acrsToDetermineScript = AcrService.getAcrsToDetermineScript(acrValuesList);
+                CustomScriptConfiguration customScriptConfiguration = externalAuthenticationService.determineCustomScriptConfiguration(AuthenticationScriptUsageType.INTERACTIVE, acrsToDetermineScript);
 
                 if (customScriptConfiguration == null) {
                     log.error("Failed to get CustomScriptConfiguration. auth_step: {}, acr_values: {}", 1, this.acrValues);
@@ -336,6 +338,10 @@ public class AuthorizeAction {
                 }
 
                 String acr = customScriptConfiguration.getName();
+                if (isAgama(acr) && !acrValuesList.isEmpty()) {
+                    // for agama we use original acr to keep also flow name in it: agama_<flowName>
+                    acr = acrValuesList.iterator().next();
+                }
 
                 requestParameterMap.put(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, acr);
                 requestParameterMap.put("auth_step", Integer.toString(1));
@@ -385,7 +391,7 @@ public class AuthorizeAction {
             cookieService.creatRpOriginIdCookie(redirectUri);
             identity.setSessionId(unauthenticatedSession);
 
-            Map<String, Object> loginParameters = new HashMap<String, Object>();
+            Map<String, Object> loginParameters = new HashMap<>();
             if (requestParameterMap.containsKey(io.jans.as.model.authorize.AuthorizeRequestParam.LOGIN_HINT)) {
                 loginParameters.put(io.jans.as.model.authorize.AuthorizeRequestParam.LOGIN_HINT, requestParameterMap.get(io.jans.as.model.authorize.AuthorizeRequestParam.LOGIN_HINT));
             }

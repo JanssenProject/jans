@@ -32,6 +32,16 @@ public class TokenAttributes implements Serializable {
     private String dpopJkt;
     @JsonProperty("authorizationDetails")
     private String authorizationDetails;
+    @JsonProperty("statusListIndex")
+    private Integer statusListIndex;
+
+    public Integer getStatusListIndex() {
+        return statusListIndex;
+    }
+
+    public void setStatusListIndex(Integer statusListIndex) {
+        this.statusListIndex = statusListIndex;
+    }
 
     public String getAuthorizationDetails() {
         return authorizationDetails;

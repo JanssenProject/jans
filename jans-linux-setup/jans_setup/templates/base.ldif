@@ -147,3 +147,38 @@ dn: ou=archived_jwks,o=jans
 objectClass: top
 objectClass: organizationalUnit
 ou: archived_jwks
+
+dn: ou=node,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: node
+
+dn: ou=status_index_pool,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: status_index_pool
+
+dn: ou=document,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: document
+
+dn: ou=lock,o=jans
+objectClass: top
+objectClass: organizationalunit
+ou: lock
+
+dn: ou=health,ou=lock,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: health
+
+dn: ou=log,ou=lock,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: log
+
+dn: ou=telemetry,ou=lock,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: telemetry

@@ -58,10 +58,20 @@ Download the compose file
 wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/jans-mysql-compose.yml 
 ```
 
-This docker compose file runs two containers, the janssen monolith container and mysql container.
+Download the the script files 
 
 ```bash
-docker compose -f jans-mysql-compose.yml up -d
+
+wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/up.sh
+wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/down.sh
+wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/clean.sh
+```
+
+This docker compose file runs two containers, the janssen monolith container and mysql container.
+To start the containers.
+
+```bash
+./up.sh
 ```
 
 To view the containers running
@@ -69,6 +79,12 @@ To view the containers running
 ```bash
 
 docker compose -f jans-mysql-compose.yml ps
+```
+
+To stop the containers.
+
+```bash
+./down.sh
 ```
 
 ## Configure Janssen Server
@@ -97,7 +113,6 @@ After adding the record you can hit endpoints such as https://demoexample.jans.i
 
 Remove setup and volumes
 
+```bash
+./clean.sh
 ```
-docker compose -f jans-mysql-compose.yml down
-```
-

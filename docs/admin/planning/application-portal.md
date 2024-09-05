@@ -5,7 +5,7 @@ tags:
   - portal
 ---
 
-An application portal ("portal") is a website which displays all the
+An application portal ("portal") is a website that displays all the
 protected applications available for an end user to access. The Janssen Project
 does not provide a portal. But you can build your own.
 

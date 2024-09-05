@@ -24,6 +24,16 @@ public class KeyDescriptor {
         return this.use;
     }
 
+    public boolean isEncryptionKey() {
+
+        return "encryption".equalsIgnoreCase(use);
+    }
+
+    public boolean isSigningKey() {
+
+        return "signing".equalsIgnoreCase(use);
+    }
+
     public void setUse(final String use) {
 
         this.use = use;

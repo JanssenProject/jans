@@ -5,7 +5,7 @@
 
 	<groupId>io.jans.casa.plugins</groupId>
 	<artifactId>${plugin.id}</artifactId>
-	<version>1.1.1-SNAPSHOT</version>
+	<version>1.1.5-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
 	<properties>
@@ -37,7 +37,7 @@
 							<Plugin-Id>${plugin.id}</Plugin-Id>
 							<Plugin-Version>${project.version}</Plugin-Version>
 							<Plugin-Provider>Janssen project</Plugin-Provider>
-							<Plugin-Class>io.jans.casa.plugins.bioid.BioidPlugin</Plugin-Class>
+							<Plugin-Class>io.jans.casa.plugins.bioid.BioIdPlugin</Plugin-Class>
 							<Plugin-Description>
 								This is a bioid plugin used for enrolling a 2fa credential
 							</Plugin-Description>
@@ -71,6 +71,41 @@
 			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>casa-config</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>jans-core-model</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+			<exclusions>
+				<exclusion>
+					<groupId>*</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>io.jans</groupId>
+			<artifactId>agama-inbound</artifactId>
+			<version>${project.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>*</groupId>
+					<artifactId>*</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+	
+		<dependency>
+			<groupId>com.nimbusds</groupId>
+			<artifactId>oauth2-oidc-sdk</artifactId>
+			<version>11.7</version>
+			<scope>provided</scope>
+       		 </dependency>
 	</dependencies>
-
 </project>

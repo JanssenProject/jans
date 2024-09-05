@@ -5,13 +5,13 @@ import os
 from collections import namedtuple
 
 from jans.pycloudlib import get_manager
-from jans.pycloudlib.persistence import CouchbaseClient
-from jans.pycloudlib.persistence import LdapClient
-from jans.pycloudlib.persistence import SpannerClient
-from jans.pycloudlib.persistence import SqlClient
-from jans.pycloudlib.persistence import PersistenceMapper
-from jans.pycloudlib.persistence import doc_id_from_dn
-from jans.pycloudlib.persistence import id_from_dn
+from jans.pycloudlib.persistence.couchbase import CouchbaseClient
+from jans.pycloudlib.persistence.ldap import LdapClient
+from jans.pycloudlib.persistence.spanner import SpannerClient
+from jans.pycloudlib.persistence.sql import SqlClient
+from jans.pycloudlib.persistence.utils import PersistenceMapper
+from jans.pycloudlib.persistence.sql import doc_id_from_dn
+from jans.pycloudlib.persistence.couchbase import id_from_dn
 
 from settings import LOGGING_CONFIG
 from utils import get_config_api_scope_mapping
@@ -31,7 +31,7 @@ def _transform_api_dynamic_config(conf):
         ("userMandatoryAttributes", [
             "mail",
             "displayName",
-            "jansStatus",
+            "status",
             "userPassword",
             "givenName",
         ]),
@@ -56,6 +56,13 @@ def _transform_api_dynamic_config(conf):
             ],
         }),
         ("customAttributeValidationEnabled", True),
+        ("disableLoggerTimer", False),
+        ("disableAuditLogger", False),
+        ("assetMgtConfiguration", {}),
+        ("maxCount", 200),
+        ("acrValidationEnabled", True),
+        ("serviceName", "jans-config-api"),
+        ("acrExclusionList", ["simple_password_auth"]),
     ]:
         if missing_key not in conf:
             conf[missing_key] = value
@@ -113,6 +120,69 @@ def _transform_api_dynamic_config(conf):
     for supported_plugin in supported_plugins:
         if supported_plugin["name"] not in plugins_names:
             conf["plugins"].append(supported_plugin)
+            should_update = True
+
+    # userMandatoryAttributes.jansStatus is changed to userMandatoryAttributes.status
+    if "jansStatus" in conf["userMandatoryAttributes"]:
+        conf["userMandatoryAttributes"].remove("jansStatus")
+        should_update = True
+
+    if "status" not in conf["userMandatoryAttributes"]:
+        conf["userMandatoryAttributes"].append("status")
+        should_update = True
+
+    if "smallryeHealthRootPath" in conf:
+        conf.pop("smallryeHealthRootPath", None)
+        should_update = True
+
+    # asset management
+    asset_attrs = {
+        "assetMgtEnabled": conf.pop("assetMgtEnabled", True),
+        "assetServerUploadEnabled": True,
+        "assetBaseDirectory": "/opt/jans/jetty/%s/custom",
+        "assetDirMapping": [
+            {
+                "directory": "i18n",
+                "type": ["properties"],
+                "description": "Resource bundle file.",
+            },
+            {
+                "directory": "libs",
+                "type": ["jar"],
+                "description": "java archive library.",
+            },
+            {
+                "directory": "pages",
+                "type": ["xhtml"],
+                "description": "Web pages.",
+            },
+            {
+                "directory": "static",
+                "type": ["js", "css", "png", "gif", "jpg", "jpeg"],
+                "description": "Static resources like Java-script, style-sheet and images.",
+            },
+        ],
+        "fileExtensionValidationEnabled": True,
+        "moduleNameValidationEnabled": True,
+        "jansServiceModule": conf["assetMgtConfiguration"].pop("jansModules", []),
+    }
+    for k, v in asset_attrs.items():
+        if k not in conf["assetMgtConfiguration"]:
+            conf["assetMgtConfiguration"][k] = v
+            should_update = True
+
+    for module in [
+        "jans-auth",
+        "jans-casa",
+        "jans-config-api",
+        "jans-fido2",
+        "jans-link",
+        "jans-lock",
+        "jans-scim",
+        "jans-keycloak-link",
+    ]:
+        if module not in conf["assetMgtConfiguration"]["jansServiceModule"]:
+            conf["assetMgtConfiguration"]["jansServiceModule"].append(module)
             should_update = True
 
     # finalized conf and flag to determine update process
@@ -478,7 +548,7 @@ class Upgrade:
 
         for entry in entries:
             if self.backend.type == "sql" and self.backend.client.dialect == "mysql":
-                creator_attrs = entry.attrs["creatorAttrs"]["v"]
+                creator_attrs = (entry.attrs.get("creatorAttrs") or {}).get("v") or []
             else:
                 creator_attrs = entry.attrs.get("creatorAttrs") or []
 

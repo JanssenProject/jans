@@ -6,11 +6,12 @@
 
 package io.jans.as.server.token.ws.rs;
 
-import io.jans.as.model.authzdetails.AuthzDetails;
+import com.google.common.collect.Maps;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.model.session.SessionId;
 import io.jans.as.common.service.AttributeService;
+import io.jans.as.model.authzdetails.AuthzDetails;
 import io.jans.as.model.common.BackchannelTokenDeliveryMode;
 import io.jans.as.model.common.FeatureFlagType;
 import io.jans.as.model.common.GrantType;
@@ -39,6 +40,7 @@ import io.jans.as.server.service.external.context.ExternalUpdateTokenContext;
 import io.jans.as.server.service.stat.StatService;
 import io.jans.as.server.uma.service.UmaTokenService;
 import io.jans.as.server.util.ServerUtil;
+import io.jans.model.token.TokenEntity;
 import io.jans.orm.exception.AuthenticationException;
 import io.jans.orm.exception.operation.SearchException;
 import io.jans.util.OxConstants;
@@ -61,6 +63,7 @@ import org.slf4j.Logger;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 
 import static io.jans.as.model.config.Constants.*;
@@ -150,6 +153,8 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
     @Inject
     private TxTokenService txTokenService;
 
+    private final ConcurrentMap<String, String> refreshTokenLock = Maps.newConcurrentMap();
+
     @Override
     public Response requestAccessToken(String grantType, String code,
                                        String redirectUri, String username, String password, String scope,
@@ -206,10 +211,6 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
             final AuthzDetails authzDetails = authzDetailsService.validateAuthorizationDetails(authorizationDetails, executionContext);
             executionContext.setAuthzDetails(authzDetails);
 
-            if (txTokenService.isTxTokenFlow(request)) {
-                return txTokenService.processTxToken(executionContext);
-            }
-
             if (gt == GrantType.AUTHORIZATION_CODE) {
                 return processAuthorizationCode(code, scope, codeVerifier, sessionIdObj, executionContext);
             } else if (gt == GrantType.REFRESH_TOKEN) {
@@ -223,6 +224,11 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
             } else if (gt == GrantType.DEVICE_CODE) {
                 return processDeviceCodeGrantType(executionContext, deviceCode, scope);
             } else if (gt == GrantType.TOKEN_EXCHANGE) {
+
+                if (txTokenService.isTxTokenFlow(request)) {
+                    return txTokenService.processTxToken(executionContext);
+                }
+
                 final JSONObject responseJson = tokenExchangeService.processTokenExchange(scope, idTokenPreProcessing, executionContext);
                 return response(Response.ok().entity(responseJson.toString()), auditLog);
             }
@@ -384,8 +390,10 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
                     null, null, accToken, null, null, executionContext);
         }
 
-        if (reToken != null && refreshToken != null) {
-            grantService.removeByCode(refreshToken); // remove refresh token after access token and id_token is created.
+        TokenEntity lockedRefreshToken = lockAndRemoveRefreshToken(refreshToken);
+        if (lockedRefreshToken == null) {
+            log.trace("Failed to lock refresh token {}", refreshToken);
+            return response(error(400, TokenErrorResponseType.INVALID_GRANT, "Failed to lock refresh token."), auditLog);
         }
 
         tokenExchangeService.rotateDeviceSecretOnRefreshToken(executionContext.getHttpRequest(), authorizationGrant, scope);
@@ -393,12 +401,37 @@ public class TokenRestWebServiceImpl implements TokenRestWebService {
         statService.reportActiveUser(authorizationGrant.getUserId());
         auditLog.updateOAuth2AuditLog(authorizationGrant, true);
 
-        return response(Response.ok().entity(getJSonResponse(accToken,
+        final String entity = getJSonResponse(
+                accToken,
                 accToken.getTokenType(),
                 accToken.getExpiresIn(),
                 reToken,
                 scope,
-                idToken, checkedAuthzDetails)), auditLog);
+                idToken, checkedAuthzDetails);
+        return response(Response.ok().entity(entity), auditLog);
+    }
+
+    private TokenEntity lockAndRemoveRefreshToken(String refreshTokenCode) {
+        try {
+            synchronized (refreshTokenLock) {
+                if (refreshTokenLock.containsKey(refreshTokenCode)) {
+                    log.trace("Refresh token is already used by another request. Refresh token  code: {}", refreshTokenCode);
+                    return null;
+                }
+
+                refreshTokenLock.put(refreshTokenCode, refreshTokenCode);
+
+                final TokenEntity token = grantService.getGrantByCode(refreshTokenCode);
+                grantService.remove(token);
+                return token;
+            }
+        } catch (Exception e) {
+            // ignore
+            log.trace(e.getMessage(), e);
+        } finally {
+            refreshTokenLock.remove(refreshTokenCode);
+        }
+        return null;
     }
 
     private Response processAuthorizationCode(String code, String scope, String codeVerifier, SessionId sessionIdObj, ExecutionContext executionContext) {

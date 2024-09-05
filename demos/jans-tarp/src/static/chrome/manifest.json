@@ -1,8 +1,9 @@
 {
   "manifest_version": 3,
   "name": "jans-tarp",
-  "version": "1.1.1",
-  "description": "Relying Party tool in form of a Chrome Extension.",
+  "version": "1.1.5",
+  "version_name": "1.1.5-dev",
+  "description": "Relying Party tool in form of a Chrome Extension. Please note that the manifest version field should be one to four dot-separated integers identifying the version of this extension. The descriptive version string can be stated in the `version_name` field. For more details see https://developer.chrome.com/docs/extensions/reference/manifest/version.",
   "icons": {
     "16": "icon.png",
     "32": "icon.png",

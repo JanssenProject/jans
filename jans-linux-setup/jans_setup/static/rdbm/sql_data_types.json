@@ -35,17 +35,6 @@
       "type": "STRING"
     }
   },
-  "displayNameLocalized": {
-    "mysql": {
-      "type": "JSON"
-    },
-    "pgsql": {
-      "type": "JSONB"
-    },
-    "spanner": {
-      "type": "ARRAY<STRING(MAX)>"
-    }
-  },
   "givenName": {
     "mysql": {
       "size": 128,
@@ -169,34 +158,12 @@
       "type": "STRING(MAX)"
     }
   },
-  "jansDbAuth": {
-    "mysql": {
-      "type": "JSON"
-    },
-    "pgsql": {
-      "type": "JSONB"
-    },
-    "spanner": {
-      "type": "ARRAY<STRING(MAX)>"
-    }
-  },
   "jansDocStoreConf": {
     "mysql": {
       "type": "TEXT"
     },
     "spanner": {
       "type": "STRING(MAX)"
-    }
-  },
-  "jansGrantTyp": {
-    "mysql": {
-      "type": "JSON"
-    },
-    "pgsql": {
-      "type": "JSONB"
-    },
-    "spanner": {
-      "type": "ARRAY<STRING(MAX)>"
     }
   },
   "jansId": {
@@ -207,17 +174,6 @@
     "spanner": {
       "size": 128,
       "type": "STRING"
-    }
-  },
-  "jansRespTyp": {
-    "mysql": {
-      "type": "JSON"
-    },
-    "pgsql": {
-      "type": "JSONB"
-    },
-    "spanner": {
-      "type": "ARRAY<STRING(MAX)>"
     }
   },
   "jansScr": {
@@ -236,17 +192,6 @@
     "spanner": {
       "size": 16,
       "type": "STRING"
-    }
-  },
-  "jansValidation": {
-    "mysql": {
-      "type": "TINYTEXT"
-    },
-    "pgsql": {
-      "type": "TEXT"
-    },
-    "spanner": {
-      "type": "STRING(MAX)"
     }
   },
   "member": {
@@ -357,17 +302,6 @@
       "type": "STRING(MAX)"
     }
   },
-  "jansLogoURILocalized": {
-    "mysql": {
-      "type": "JSON"
-    },
-    "pgsql": {
-      "type": "JSONB"
-    },
-    "spanner": {
-      "type": "ARRAY<STRING(MAX)>"
-    }
-  },
   "jansPolicyURI": {
     "mysql": {
       "type": "TINYTEXT"
@@ -377,17 +311,6 @@
     },
     "spanner": {
       "type": "STRING(MAX)"
-    }
-  },
-  "jansPolicyURILocalized": {
-    "mysql": {
-      "type": "JSON"
-    },
-    "pgsql": {
-      "type": "JSONB"
-    },
-    "spanner": {
-      "type": "ARRAY<STRING(MAX)>"
     }
   },
   "jansSectorIdentifierURI": {
@@ -412,17 +335,6 @@
       "type": "STRING(MAX)"
     }
   },
-  "jansClntURILocalized": {
-    "mysql": {
-      "type": "JSON"
-    },
-    "pgsql": {
-      "type": "JSONB"
-    },
-    "spanner": {
-      "type": "ARRAY<STRING(MAX)>"
-    }
-  },
   "jansTosURI": {
     "mysql": {
       "type": "TINYTEXT"
@@ -432,17 +344,6 @@
     },
     "spanner": {
       "type": "STRING(MAX)"
-    }
-  },
-  "jansTosURILocalized": {
-    "mysql": {
-      "type": "JSON"
-    },
-    "pgsql": {
-      "type": "JSONB"
-    },
-    "spanner": {
-      "type": "ARRAY<STRING(MAX)>"
     }
   },
   "jansJwt": {
@@ -541,6 +442,12 @@
     "spanner": {
       "size": 48,
       "type": "STRING"
+    }
+  },
+  "jansToken:acr": {
+    "mysql": {
+      "size": 1024,
+      "type": "VARCHAR"
     }
   },
   "jansJwks": {
@@ -1084,39 +991,6 @@
       "type": "STRING"
     }
   },
-  "creatorAttrs": {
-    "mysql": {
-      "type": "JSON"
-    },
-    "pgsql": {
-      "type": "JSONB"
-    },
-    "spanner": {
-      "type": "ARRAY<STRING(MAX)>"
-    }
-  },
-  "jansSessAttr": {
-    "mysql": {
-      "type": "JSON"
-    },
-    "pgsql": {
-      "type": "JSONB"
-    },
-    "spanner": {
-      "type": "ARRAY<STRING(MAX)>"
-    }
-  },
-  "webhookId": {
-    "mysql": {
-      "type": "JSON"
-    },
-    "pgsql": {
-      "type": "JSONB"
-    },
-    "spanner": {
-      "type": "ARRAY<STRING(MAX)>"
-    }
-  },
   "url": {
     "mysql": {
       "type": "TEXT"
@@ -1142,6 +1016,28 @@
   "samlMetadata": {
     "mysql": {
       "type": "TINYTEXT"
+    },
+    "pgsql": {
+      "type": "TEXT"
+    },
+    "spanner": {
+      "type": "STRING(MAX)"
+    }
+  },
+  "document": {
+    "mysql": {
+      "type": "MEDIUMTEXT"
+    },
+    "pgsql": {
+      "type": "TEXT"
+    },
+    "spanner": {
+      "type": "STRING(MAX)"
+    }
+  },
+  "jansValidation": {
+    "mysql": {
+      "type": "MEDIUMTEXT"
     },
     "pgsql": {
       "type": "TEXT"

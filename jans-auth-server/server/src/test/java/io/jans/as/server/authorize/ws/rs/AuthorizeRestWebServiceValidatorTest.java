@@ -5,8 +5,10 @@ import io.jans.as.common.model.session.SessionId;
 import io.jans.as.common.util.RedirectUri;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
-import io.jans.as.server.security.Identity;
-import io.jans.as.server.service.*;
+import io.jans.as.server.service.ClientService;
+import io.jans.as.server.service.DeviceAuthorizationService;
+import io.jans.as.server.service.RedirectUriResponse;
+import io.jans.as.server.service.RedirectionUriService;
 import io.jans.as.server.service.external.ExternalAuthzDetailTypeService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.WebApplicationException;
@@ -49,12 +51,6 @@ public class AuthorizeRestWebServiceValidatorTest {
 
     @Mock
     private AppConfiguration appConfiguration;
-
-    @Mock
-    private SessionIdService sessionIdService;
-
-    @Mock
-    private Identity identity;
 
     @Mock
     private ExternalAuthzDetailTypeService externalAuthzDetailTypeService;

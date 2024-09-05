@@ -56,9 +56,12 @@ public class Constants {
     public static final String SUBJECT_TOKEN_TYPE_ID_TOKEN = "urn:ietf:params:oauth:token-type:id_token";
     public static final String ACTOR_TOKEN_TYPE_DEVICE_SECRET = "urn:x-oath:params:oauth:token-type:device-secret";
     public static final String TOKEN_TYPE_ACCESS_TOKEN = "urn:ietf:params:oauth:token-type:access_token";
-    public static final String TOKEN_TYPE_TX_TOKEN = "urn:ietf:params:oauth:token-type:txn_token";
+    public static final String TOKEN_TYPE_TX_TOKEN = "urn:ietf:params:oauth:token-type:txn-token";
 
     public static final String CONTENT_TYPE_APPLICATION_JSON_UTF_8 = "application/json;charset=UTF-8";
+
+    public static final String CONTENT_TYPE_STATUSLIST_JSON = "application/statuslist+json";
+    public static final String CONTENT_TYPE_STATUSLIST_JWT = "application/statuslist+jwt";
 
     public static final String AUTHORIZATION = "Authorization";
     public static final String AUTHORIZATION_BEARER = "Authorization: Bearer ";
@@ -67,4 +70,5 @@ public class Constants {
     public static final String REASON_CLIENT_NOT_AUTHORIZED = "The client is not authorized.";
 
     public static final String CORRELATION_ID_HEADER = "X-Correlation-Id";
+    public static final String X_FRAME_OPTIONS_HEADER = "X-Frame-Options";
 }

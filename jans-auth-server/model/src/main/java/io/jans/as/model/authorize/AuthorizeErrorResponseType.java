@@ -16,6 +16,12 @@ import io.jans.as.model.error.IErrorType;
 public enum AuthorizeErrorResponseType implements IErrorType {
 
     /**
+     * The Authorization Server is unable to meet the requirements of the Relying Party for
+     * the authentication of the End-User. OP is unable to use acr specified in request.
+     */
+    UNMET_AUTHENTICATION_REQUIREMENTS("unmet_authentication_requirements"),
+
+    /**
      * "request" parameter is supported by AS. But if it's switched off in configuration by setting
      * requestParameterSupported=false then this error is returned from authorization endpoint.
      */

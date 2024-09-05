@@ -18,7 +18,7 @@ By default, the bridge is disabled. To activate it do the following:
 
 ## Engine configuration
 
-Some aspects of the engine are configurable and they are integral part of the Jans authentication server's JSON configuration - specifically the section labeled `agamaConfiguration`. To learn how to perform changes in the server's configuration click [here](../../config-guide/jans-authorization-server-config.md).
+Some aspects of the engine are configurable and they are integral part of the Jans authentication server's JSON configuration - specifically the section labeled `agamaConfiguration`. To learn how to perform changes in the server's configuration click [here](../../config-guide/auth-server-config/jans-authorization-server-config.md).
 
 The properties of Agama engine configuration are described in the following:
 
@@ -75,10 +75,4 @@ Please account additional behaviors:
 
 ## Bridge configuration
 
-There are a few configuration properties admins can set to modify the behavior of the bridge:
-
-- `cust_param_name`: The name of the request parameter - in the authentication request - that will carry the name of the flow to launch. Ensure to register the given parameter name in the [server configuration](../../config-guide/jans-authorization-server-config.md) (property `authorizationRequestCustomAllowedParameters`) beforehand
-
-- `default_flow_name`: If the relying party (RP) is not able to send custom parameters or omits the flow name in the authentication request, the value of this property will be assumed to be the flow to launch by default
-
-- `finish_userid_db_attribute`: It is used to map the identity of the user to login in the case of sucessfully finished flows. The value of this property will contain a physical database attribute that will be correlated with the `userId` passed in the `Finish` instruction of the flow
+Administrators can modify the behavior of the bridge by setting the `finish_userid_db_attribute` configuration property of the script. This is used to map the identity of the user to login in the case of sucessfully finished flows. The value of this property will contain a physical database attribute that will be correlated with the `userId` passed in the `Finish` instruction of the flow.

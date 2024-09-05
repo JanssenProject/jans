@@ -7,9 +7,12 @@
 package io.jans.configapi.configuration;
 
 import io.jans.as.common.service.common.ApplicationFactory;
+import io.jans.configapi.model.configuration.ApiAppConfiguration;
+import io.jans.configapi.model.configuration.AssetMgtConfiguration;
 import io.jans.configapi.security.api.ApiProtectionService;
 import io.jans.configapi.security.service.AuthorizationService;
 import io.jans.configapi.security.service.OpenIdAuthorizationService;
+import io.jans.configapi.service.auth.AssetService;
 import io.jans.configapi.service.logger.LoggerService;
 import io.jans.exception.ConfigurationException;
 import io.jans.exception.OxIntializationException;
@@ -23,10 +26,8 @@ import io.jans.service.cdi.util.CdiUtil;
 import io.jans.service.custom.script.CustomScriptManager;
 import io.jans.service.timer.QuartzSchedulerManager;
 import io.jans.util.StringHelper;
-import org.jboss.resteasy.plugins.server.servlet.ResteasyContextParameters;
-import org.slf4j.Logger;
-import java.util.ArrayList;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -43,6 +44,9 @@ import jakarta.servlet.ServletContext;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 import org.jboss.resteasy.plugins.providers.RegisterBuiltin;
 import org.jboss.resteasy.plugins.providers.jackson.ResteasyJackson2Provider;
+import org.jboss.resteasy.plugins.server.servlet.ResteasyContextParameters;
+
+import org.slf4j.Logger;
 
 @ApplicationScoped
 @Named("appInitializer")
@@ -82,6 +86,9 @@ public class AppInitializer {
     @Inject
     private PythonService pythonService;
 
+    @Inject
+    AssetService assetService;
+
     public void onStart(@Observes @Initialized(ApplicationScoped.class) Object init) {
         log.info("=============  STARTING API APPLICATION  ========================");
         log.info("init:{}", init);
@@ -96,7 +103,8 @@ public class AppInitializer {
         this.configurationFactory.create();
         persistenceEntryManagerInstance.get();
         this.createAuthorizationService();
-        log.info("Initialized ApiAppConfiguration:{}", this.configurationFactory.getApiAppConfiguration());
+        ApiAppConfiguration apiAppConfiguration = this.configurationFactory.getApiAppConfiguration();
+        log.info("Initialized ApiAppConfiguration:{}", apiAppConfiguration);
 
         // Initialize python interpreter
         pythonService
@@ -109,11 +117,17 @@ public class AppInitializer {
         initCustomScripts();
 
         // Schedule timer tasks
-        configurationFactory.initTimer();        
+        configurationFactory.initTimer();
+
+        // load custom assets
+        this.loadCustomAsset(apiAppConfiguration.getServiceName());
 
         // Schedule timer tasks
-        loggerService.initTimer(true);
-        
+        if (!apiAppConfiguration.isDisableLoggerTimer()) {
+            log.debug("LoggerService timer enabled!");
+            loggerService.initTimer(true);
+        }
+
         log.info("==============  APPLICATION IS UP AND RUNNING ===================");
     }
 
@@ -128,6 +142,12 @@ public class AppInitializer {
     @ApplicationScoped
     public ConfigurationFactory getConfigurationFactory() {
         return configurationFactory;
+    }
+
+    @Produces
+    @ApplicationScoped
+    public AssetMgtConfiguration getAssetMgtConfiguration() {
+        return this.configurationFactory.getApiAppConfiguration().getAssetMgtConfiguration();
     }
 
     @Produces
@@ -205,5 +225,20 @@ public class AppInitializer {
         supportedCustomScriptTypes.add(CustomScriptType.CONFIG_API);
         customScriptManager.initTimer(supportedCustomScriptTypes);
         log.info("Initialized Custom Scripts!");
+    }
+
+    private void loadCustomAsset(String serviceName) {
+        try {
+            if (StringHelper.isEmpty(serviceName)) {
+                serviceName = "jans-config-api";
+            }
+
+            log.info("Loading Custom Asset serviceName:{} ", serviceName);
+            String loadServiceResult = this.assetService.loadServiceAsset(serviceName);
+            log.info("Loading Custom Asset serviceName:{}, loadServiceResult:{}", serviceName, loadServiceResult);
+            
+        } catch (Exception ex) {
+            log.error("Error while loadCustomAsset is - ", ex);
+        }
     }
 }

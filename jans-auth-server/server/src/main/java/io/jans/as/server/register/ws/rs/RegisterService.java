@@ -137,7 +137,7 @@ public class RegisterService {
         }
 
         result.retainAll(appConfiguration.getGrantTypesSupported());
-        result.retainAll(appConfiguration.getDynamicGrantTypeDefault());
+        result.retainAll(appConfiguration.getGrantTypesSupportedByDynamicRegistration());
 
         return result;
     }

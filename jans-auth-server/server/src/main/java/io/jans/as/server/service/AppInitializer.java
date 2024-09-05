@@ -15,6 +15,7 @@ import io.jans.as.server.model.config.ConfigurationFactory;
 import io.jans.as.server.service.cdi.event.AuthConfigurationEvent;
 import io.jans.as.server.service.cdi.event.ReloadAuthScript;
 import io.jans.as.server.service.ciba.CibaRequestsProcessorJob;
+import io.jans.as.server.service.cluster.ClusterNodeManager;
 import io.jans.as.server.service.expiration.ExpirationNotificatorTimer;
 import io.jans.as.server.service.external.ExternalAuthenticationService;
 import io.jans.as.server.service.logger.LoggerService;
@@ -47,6 +48,7 @@ import io.jans.service.cdi.util.CdiUtil;
 import io.jans.service.custom.lib.CustomLibrariesLoader;
 import io.jans.service.custom.script.CustomScriptActivator;
 import io.jans.service.custom.script.CustomScriptManager;
+import io.jans.service.document.store.manager.DocumentStoreManager;
 import io.jans.service.external.ExternalPersistenceExtensionService;
 import io.jans.service.metric.inject.ReportMetric;
 import io.jans.service.timer.QuartzSchedulerManager;
@@ -74,7 +76,9 @@ import org.slf4j.Logger;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -90,6 +94,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class AppInitializer {
 
     private final static int DEFAULT_INTERVAL = 30; // 30 seconds
+
+    private final static String DOCUMENT_STORE_MANAGER_JANS_AUTH_TYPE = "jans-auth"; // Module name
 
     @Inject
     private Logger log;
@@ -137,6 +143,9 @@ public class AppInitializer {
 
     @Inject
     private PythonService pythonService;
+    
+    @Inject
+    private ClusterNodeManager clusterManager;
 
     @Inject
     private MetricService metricService;
@@ -191,6 +200,9 @@ public class AppInitializer {
 
     @Inject
     private StatService statService;
+
+    @Inject
+    private DocumentStoreManager documentStoreManager;
 
     private AtomicBoolean isActive;
     private long lastFinishedTime;
@@ -247,6 +259,7 @@ public class AppInitializer {
         initSchedulerService();
 
         // Schedule timer tasks
+        clusterManager.initTimer();
         metricService.initTimer();
         configurationFactory.initTimer();
         loggerService.initTimer(true);
@@ -257,6 +270,7 @@ public class AppInitializer {
         keyGeneratorTimer.initTimer();
         statTimer.initTimer();
         expirationNotificatorTimer.initTimer();
+        documentStoreManager.initTimer(Arrays.asList(DOCUMENT_STORE_MANAGER_JANS_AUTH_TYPE));
         initTimer();
         initCibaRequestsProcessor();
 
@@ -355,7 +369,7 @@ public class AppInitializer {
      * Utility method which can be used in custom scripts
      */
     public PersistenceEntryManager createPersistenceAuthEntryManager(GluuLdapConfiguration persistenceAuthConfig) {
-        PersistenceEntryManagerFactory persistenceEntryManagerFactory = applicationFactory.getPersistenceEntryManagerFactory();
+        PersistenceEntryManagerFactory persistenceEntryManagerFactory = applicationFactory.getPersistenceEntryManagerFactory(LdapEntryManagerFactory.class);
         Properties persistenceConnectionProperties = prepareAuthConnectionProperties(persistenceAuthConfig, persistenceEntryManagerFactory.getPersistenceType());
 
         PersistenceEntryManager persistenceAuthEntryManager =
@@ -507,8 +521,12 @@ public class AppInitializer {
         }
     }
 
-    private void closePersistenceEntryManagers(List<PersistenceEntryManager> oldPersistenceEntryManagers) {
-        // Close existing connections
+    public void closePersistenceEntryManagers(List<PersistenceEntryManager> oldPersistenceEntryManagers) {
+    	if (oldPersistenceEntryManagers == null ) {
+    		return;
+    	}
+
+    	// Close existing connections
         for (PersistenceEntryManager oldPersistenceEntryManager : oldPersistenceEntryManagers) {
             log.debug("Attempting to destroy {}: {}", ApplicationFactory.PERSISTENCE_AUTH_ENTRY_MANAGER_NAME,
                     oldPersistenceEntryManager);
@@ -571,7 +589,16 @@ public class AppInitializer {
         String prefix = persistenceType + "#";
         FileConfiguration configuration = configurationFactory.getPersistenceConfiguration().getConfiguration();
 
-        Properties properties = (Properties) configuration.getProperties().clone();
+        Properties properties = new Properties();
+        
+        // Get properties related to persistent type
+        for (Entry<Object, Object> propItem : configuration.getProperties().entrySet()) {
+        	String key = (String) propItem.getKey();
+        	if (key.startsWith(persistenceType)) {
+        		properties.put(key, propItem.getValue());
+        	}
+        }
+
         if (persistenceAuthConfig != null) {
             properties.setProperty(prefix + "servers", buildServersString(persistenceAuthConfig.getServers()));
 
@@ -709,7 +736,7 @@ public class AppInitializer {
 
     public void destroy(@Observes @BeforeDestroyed(ApplicationScoped.class) ServletContext init) {
         log.info("Stopping services and closing DB connections at server shutdown...");
-        log.debug("Checking who intiated destory", new Throwable());
+        log.debug("Checking who intiated destroy", new Throwable());
 
         metricService.close();
 

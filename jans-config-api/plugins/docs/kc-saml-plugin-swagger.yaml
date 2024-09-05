@@ -525,23 +525,6 @@ paths:
       security:
       - oauth2:
         - https://jans.io/idp/saml.readonly
-  /kc/saml/idp/process-idp-meta-file:
-    post:
-      tags:
-      - SAML - Identity Broker
-      summary: Process unprocessed IDP metadata files
-      description: Process unprocessed IDP metadata files
-      operationId: post-idp-metadata-files
-      responses:
-        "200":
-          description: OK
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/idp/saml.write
   /kc/samlConfig:
     get:
       tags:
@@ -825,6 +808,12 @@ paths:
                 $ref: '#/components/schemas/TrustRelationship'
         "401":
           description: Unauthorized
+        "404":
+          description: Trust relationship not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
         "500":
           description: InternalServerError
       security:
@@ -871,23 +860,6 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/saml.readonly
-  /kc/saml/trust-relationship/process-sp-meta-file:
-    post:
-      tags:
-      - SAML - Trust Relationship
-      summary: Process unprocessed metadata files
-      description: Process unprocessed metadata files
-      operationId: post-metadata-files
-      responses:
-        "200":
-          description: OK
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/saml.write
 components:
   schemas:
     BrokerIdentityProviderForm:
@@ -914,62 +886,103 @@ components:
           type: string
         inum:
           type: string
+          description: Unique identifier.
         creatorId:
           type: string
+          description: Creator of IDP.
         name:
           type: string
+          description: Name uniquely identifies an identity provider.
         displayName:
           maxLength: 60
           minLength: 0
           type: string
+          description: Identity provider display name.
         description:
           maxLength: 500
           minLength: 0
           type: string
+          description: Description of Identity provider.
         realm:
           type: string
+          description: Realm in which Identity provider is created.
         enabled:
           type: boolean
+          description: Indicates if Identity provider is enabled.
         signingCertificate:
           type: string
+          description: Digital certificate used to verify the authenticity of the
+            request.
         validateSignature:
           type: string
         singleLogoutServiceUrl:
           type: string
+          description: Url used to send logout requests.
         nameIDPolicyFormat:
           type: string
+          description: ' URI reference corresponding to a name identifier format.'
+        principalAttribute:
+          type: string
+          description: ' Name or Friendly Name of the attribute used to identify external
+            users.'
+        principalType:
+          type: string
+          description: Way to identify and track external users from the assertion.
         idpEntityId:
           type: string
+          description: Entity ID that will be used to uniquely identify this SAML
+            Service Provider.
         singleSignOnServiceUrl:
           type: string
+          description: Url used to send SAML authentication requests.
         encryptionPublicKey:
           type: string
+          description: Public key to use to encrypt the message.
         providerId:
           type: string
+          description: "IDP provider, should be SAML."
         trustEmail:
           type: boolean
+          description: "If enabled, email provided by this provider is not verified\
+            \ even if verification is enabled for the realm."
         storeToken:
           type: boolean
+          description: Enable/disable if tokens must be stored after authenticating
+            users.
         addReadTokenRoleOnCreate:
           type: boolean
+          description: Enable/disable if new users can read any stored tokens.
         authenticateByDefault:
           type: boolean
         linkOnly:
           type: boolean
+          description: "If true, users cannot log in through this provider. They can\
+            \ only link to this provider."
         firstBrokerLoginFlowAlias:
           type: string
+          description: "Alias of authentication flow, which is triggered after first\
+            \ login with this identity provider. Term 'First Login' means that no\
+            \ Keycloak account is currently linked to the authenticated identity provider\
+            \ account."
         postBrokerLoginFlowAlias:
           type: string
+          description: "Alias of authentication flow, which is triggered after each\
+            \ login with this identity provider."
         spMetaDataURL:
           type: string
+          description: SAML SP metadata file URL.
         spMetaDataLocation:
           type: string
+          description: SP metadata file location.
         idpMetaDataURL:
           type: string
+          description: SAML IDP metadata file URL.
         idpMetaDataLocation:
           type: string
+          description: SAML IDP metadata file location.
         status:
           type: string
+          description: IDP setup status.
           enum:
           - active
           - inactive
@@ -977,6 +990,7 @@ components:
           - register
         validationStatus:
           type: string
+          description: IDP validation status.
           enum:
           - In Progress
           - Success
@@ -984,8 +998,10 @@ components:
           - Failed
         validationLog:
           type: array
+          description: IDP validation log.
           items:
             type: string
+            description: IDP validation log.
         baseDn:
           type: string
     IdentityProviderPagedResult:
@@ -1011,66 +1027,110 @@ components:
       properties:
         applicationName:
           type: string
+          description: Name of application.
         samlTrustRelationshipDn:
           type: string
+          description: Trust relationship organizational unit.
         trustedIdpDn:
           type: string
+          description: Identity provider organizational unit.
         enabled:
           type: boolean
+          description: SAML functionality enabled.
         selectedIdp:
           type: string
+          description: Selected SAML server.
         serverUrl:
           type: string
+          description: SAML server URL.
         realm:
           type: string
+          description: "SAML server realm, default is `jans`."
         clientId:
           type: string
+          description: Jans auth SAML client ID.
         clientSecret:
           type: string
+          description: Jans auth SAML client password.
         grantType:
           type: string
+          description: Grant type to get access token.
         scope:
           type: string
+          description: Oauth2 scope to get access token.
         username:
           type: string
+          description: SAML server username.
         password:
           type: string
+          description: SAML server user credentails.
         spMetadataUrl:
           type: string
+          description: Relative SAML server SP Metadata Url.
         tokenUrl:
           type: string
+          description: Relative SAML server Token Url.
         idpUrl:
           type: string
+          description: Relative SAML server IDP Url.
+        extIDPTokenUrl:
+          type: string
+          description: Relative SAML server IDP Token Url.
+        extIDPRedirectUrl:
+          type: string
+          description: Relative IDP redirect Url.
         idpMetadataImportUrl:
           type: string
+          description: Relative SAML server Metadata import Url.
         idpRootDir:
           type: string
+          description: Jans Auth server root SAML directory.
         idpMetadataDir:
           type: string
+          description: Jans Auth server relative SAML directory to store IDP Metadata
+            files.
         idpMetadataTempDir:
           type: string
+          description: Jans Auth server relative SAML temp directory to store IDP
+            Metadata files.
         idpMetadataFile:
           type: string
+          description: IDP Metadata file name format.
         spMetadataDir:
           type: string
+          description: Jans Auth server relative SAML directory to store SP Metadata
+            files.
         spMetadataTempDir:
           type: string
+          description: Jans Auth server relative SAML temp directory to store SP Metadata
+            files.
         spMetadataFile:
           type: string
+          description: SP Metadata file name format.
         ignoreValidation:
           type: boolean
+          description: Boolean value to enable/disable SAML validation.
+        setConfigDefaultValue:
+          type: boolean
+          description: Boolean value `true` to set the default values for an IDP.
         idpMetadataMandatoryAttributes:
           type: array
+          description: List of mandatory IDP Metadata attributes.
           items:
             type: string
+            description: List of mandatory IDP Metadata attributes.
         kcAttributes:
           type: array
+          description: Keycloak SAML attribute names.
           items:
             type: string
+            description: Keycloak SAML attribute names.
         kcSamlConfig:
           type: array
+          description: Keycloak SAML config attribute names.
           items:
             type: string
+            description: Keycloak SAML config attribute names.
     JsonPatch:
       type: object
     ProfileConfiguration:
@@ -1080,19 +1140,29 @@ components:
           type: string
         signResponses:
           type: string
+      description: List of profile configuration.
     SAMLMetadata:
       type: object
       properties:
         nameIDPolicyFormat:
           type: string
+          description: ' URI reference corresponding to a name identifier format.'
         entityId:
           type: string
+          description: Entity ID that will be used to uniquely identify this SAML
+            Service Provider.
         singleLogoutServiceUrl:
           type: string
+          description: Url used to send logout requests.
         jansAssertionConsumerServiceGetURL:
           type: string
+          description: GET URL the Identity provider (IdP) will send the SAML Response
+            containing the assertions.
         jansAssertionConsumerServicePostURL:
           type: string
+          description: POST URL the Identity provider (IdP) will send the SAML Response
+            containing the assertions.
+      description: SAML entity metadata.
     TrustRelationship:
       required:
       - description
@@ -1105,42 +1175,51 @@ components:
           type: string
         inum:
           type: string
+          description: Unique identifier
         owner:
           type: string
+          description: Creator of Trust Relationship.
         name:
           maxLength: 60
           minLength: 0
           type: string
+          description: The alphanumeric ID string that is used to identify the Trust
+            Relationship.
         displayName:
           maxLength: 60
           minLength: 0
           type: string
+          description: Trust Relationship display name.
         description:
           maxLength: 4000
           minLength: 0
           type: string
-        rootUrl:
-          type: string
-        adminUrl:
-          type: string
+          description: Description of the Trust Relationship.
         baseUrl:
           type: string
-        surrogateAuthRequired:
-          type: boolean
+          description: URL to use when the auth server needs to redirect.
         enabled:
           type: boolean
+          description: Indicates if Trust Relationship is enabled.
         alwaysDisplayInConsole:
           type: boolean
+          description: Indicates if Trust Relationship should always be listed in
+            the UI.
         clientAuthenticatorType:
           type: string
+          description: Preferred Authenticator Type.
         secret:
           type: string
+          description: Client secret.
         registrationAccessToken:
           type: string
+          description: Registration access token.
         consentRequired:
           type: boolean
+          description: Boolean value if consent is required.
         spMetaDataSourceType:
           type: string
+          description: "Trust Relationship SP metadata type - file, URI."
           enum:
           - file
           - manual
@@ -1148,24 +1227,31 @@ components:
           $ref: '#/components/schemas/SAMLMetadata'
         redirectUris:
           type: array
+          description: List of valid Redirect URI.
           items:
             type: string
+            description: List of valid Redirect URI.
         spMetaDataURL:
           type: string
+          description: SAML entity metadata file URL.
         metaLocation:
           type: string
+          description: Trust Relationship metadata file location.
         releasedAttributes:
           type: array
+          description: Trust Relationship attributes that will be released to SAML
+            server.
           items:
             type: string
-        url:
-          pattern: "^(https?|http)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|]"
-          type: string
+            description: Trust Relationship attributes that will be released to SAML
+              server.
         spLogoutURL:
           pattern: "^$|(^(https?|http)://[-a-zA-Z0-9+&@#/%?=~_|!:,.;]*[-a-zA-Z0-9+&@#/%=~_|])"
           type: string
+          description: Logout request URL.
         status:
           type: string
+          description: Trust Relationship setup status.
           enum:
           - active
           - inactive
@@ -1173,6 +1259,7 @@ components:
           - register
         validationStatus:
           type: string
+          description: Trust Relationship validation status.
           enum:
           - In Progress
           - Success
@@ -1180,12 +1267,15 @@ components:
           - Failed
         validationLog:
           type: array
+          description: Validation log.
           items:
             type: string
+            description: Validation log.
         profileConfigurations:
           type: object
           additionalProperties:
             $ref: '#/components/schemas/ProfileConfiguration'
+          description: List of profile configuration.
         baseDn:
           type: string
     TrustRelationshipForm:

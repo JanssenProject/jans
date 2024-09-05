@@ -7,7 +7,7 @@
 	<parent>
 		<groupId>io.jans</groupId>
 		<artifactId>jans-config-api-parent</artifactId>
-		<version>1.1.1-SNAPSHOT</version>
+		<version>1.1.5-SNAPSHOT</version>
 	</parent>
 
 	<dependencies>
@@ -15,15 +15,7 @@
 		<!-- jans -->
 		<dependency>
 			<groupId>io.jans</groupId>
-			<artifactId>jans-core-model</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>io.jans</groupId>
 			<artifactId>jans-auth-common</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>io.jans</groupId>
-			<artifactId>jans-core-server</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>io.jans</groupId>
@@ -39,32 +31,8 @@
         	<groupId>jakarta.inject</groupId>
         	<artifactId>jakarta.inject-api</artifactId>
         </dependency>
-		<dependency>
-			<groupId>org.jboss.weld.servlet</groupId>
-			<artifactId>weld-servlet-core</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.jboss.weld</groupId>
-			<artifactId>weld-core-impl</artifactId>
-		</dependency>
 
 		<!-- RestEasy -->
-		<dependency>
-			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>resteasy-cdi</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>resteasy-client</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>resteasy-servlet-initializer</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.jboss.resteasy</groupId>
-			<artifactId>resteasy-jaxb-provider</artifactId>
-		</dependency>
 		<dependency>
 			<groupId>org.jboss.resteasy</groupId>
 			<artifactId>resteasy-jackson2-provider</artifactId>

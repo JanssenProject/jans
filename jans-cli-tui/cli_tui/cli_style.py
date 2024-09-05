@@ -130,6 +130,7 @@ style = Style.from_dict(
         ### WUI Componenets
         ## jans_data_picker
         "date-picker-monthandyear":"bg:#1e51fa",
+        "date-picker-weekdays-header":"bg:#1e510a",
         "date-picker-day":"bg:#D3D3D3",
         "date-picker-time":"bg:#bab1b1",
         "dialog-titled-widget":"bg:#ffffff fg:green",
@@ -150,6 +151,7 @@ style = Style.from_dict(
         "table-white-header": "nounderline bold fg:ansiblack bg:White",
         "table-white-data": "nounderline fg:ansiblack bg:LightGray",
         "table-white-bg": "nounderline bg:ansiwhite",
+        "table-black-bg": "nounderline bg:black",
 
         # dialog
         'dialog':             'bg:#4444ff',
