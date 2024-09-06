@@ -52,7 +52,6 @@ public class Fido2Configuration {
     @DocProperty(description = "Boolean value indicating whether the MDS download should be omitted")
     private boolean disableMetadataService = false;
     @DocProperty(description = "Enum value indicating whether MDS validation should be omitted during attestation")
-//    private boolean skipValidateMdsInAttestationEnabled = false;
     private AttestationMode attestationMode;
     @DocProperty(description = "Boolean value indicating whether the assertion custom endpoint (used especially in passkey) is enabled.")
     private boolean assertionOptionsGenerateEndpointEnabled = false;
@@ -126,14 +125,6 @@ public class Fido2Configuration {
     public void setAttestationMode(AttestationMode attestationMode){
         this.attestationMode = attestationMode;
     }
-
-//    public boolean isSkipValidateMdsInAttestationEnabled() {
-//        return skipValidateMdsInAttestationEnabled;
-//    }
-//
-//    public void setSkipValidateMdsInAttestationEnabled(boolean skipValidateMdsInAttestationEnabled) {
-//        this.skipValidateMdsInAttestationEnabled = skipValidateMdsInAttestationEnabled;
-//    }
 
     public boolean isAssertionOptionsGenerateEndpointEnabled() {
         return assertionOptionsGenerateEndpointEnabled;
