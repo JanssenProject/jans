@@ -32,6 +32,9 @@ public class AuditService {
 
     @Inject
     Logger logger;
+    
+
+    public static final String EVENT_TIME = "eventTime";
 
     @Inject
     @Named(ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME)
@@ -148,8 +151,8 @@ public class AuditService {
     public List<TelemetryEntry> getTelemetryEntrysByRange(Date eventStartDate, Date eventEndDate, int sizeLimit) {
         logger.debug("Search TelemetryEntrys by event range: [{}, {}], sizeLimit:{}", eventStartDate, eventEndDate, sizeLimit);
         
-        Filter eventStartDateFilter = Filter.createGreaterOrEqualFilter(AttributeConstants.EVENT_TIME, eventStartDate);
-        Filter eventEndDateFilter = Filter.createLessOrEqualFilter(AttributeConstants.EVENT_TIME, eventEndDate);
+        Filter eventStartDateFilter = Filter.createGreaterOrEqualFilter(EVENT_TIME, eventStartDate);
+        Filter eventEndDateFilter = Filter.createLessOrEqualFilter(EVENT_TIME, eventEndDate);
         
         Filter searchFilter = Filter.createANDFilter(eventStartDateFilter, eventEndDateFilter);
 
@@ -195,8 +198,8 @@ public class AuditService {
     public List<HealthEntry> getHealthEntrysByRange(Date eventDateStart, Date eventDateEnd, int sizeLimit) {
         logger.debug("Search HealthEntrys by event range: [{}, {}], sizeLimit:{}", eventDateStart, eventDateEnd, sizeLimit);
         
-        Filter eventDateStartFilter = Filter.createGreaterOrEqualFilter(AttributeConstants.EVENT_TIME, eventDateStart);
-        Filter eventDateEndFilter = Filter.createLessOrEqualFilter(AttributeConstants.EVENT_TIME, eventDateEnd);
+        Filter eventDateStartFilter = Filter.createGreaterOrEqualFilter(EVENT_TIME, eventDateStart);
+        Filter eventDateEndFilter = Filter.createLessOrEqualFilter(EVENT_TIME, eventDateEnd);
         
         Filter searchFilter = Filter.createANDFilter(eventDateStartFilter, eventDateEndFilter);
 
@@ -242,8 +245,8 @@ public class AuditService {
     public List<LogEntry> getLogEntrysByRange(Date eventDateStart, Date eventDateEnd, int sizeLimit) {
         logger.debug("Search LogEntrys by event range: [{}, {}], sizeLimit:{}", eventDateStart, eventDateEnd, sizeLimit);
         
-        Filter eventDateStartFilter = Filter.createGreaterOrEqualFilter(AttributeConstants.EVENT_TIME, eventDateStart);
-        Filter eventDateEndFilter = Filter.createLessOrEqualFilter(AttributeConstants.EVENT_TIME, eventDateEnd);
+        Filter eventDateStartFilter = Filter.createGreaterOrEqualFilter(EVENT_TIME, eventDateStart);
+        Filter eventDateEndFilter = Filter.createLessOrEqualFilter(EVENT_TIME, eventDateEnd);
         
         Filter searchFilter = Filter.createANDFilter(eventDateStartFilter, eventDateEndFilter);
 
