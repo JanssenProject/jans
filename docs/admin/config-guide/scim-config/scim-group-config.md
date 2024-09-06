@@ -5,7 +5,7 @@ tags:
   - group
 ---
 
-# Group Resources
+# Group Management
 
 > Prerequisite: Know how to use the Janssen CLI in [command-line mode](../config-tools/jans-cli/README.md)
 
