@@ -88,16 +88,12 @@ function Row(props: { row: ReturnType<typeof createData>, notifyOnDataChange }) 
                 chrome.storage.local.set({ oidcClients: clientArr.filter(obj => obj.clientId !== row.clientId) });
             }
         });
-        handleNotifyOnDataChange();
-    }
-
-    const handleNotifyOnDataChange = () => {
         notifyOnDataChange();
-    };
+    }
 
     return (
         <React.Fragment>
-            <AuthFlowInputs isOpen={open} handleDialog={handleDialog} client={row} notifyOnDataChange={handleNotifyOnDataChange}/>
+            <AuthFlowInputs isOpen={open} handleDialog={handleDialog} client={row} notifyOnDataChange={notifyOnDataChange}/>
             <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
                 <TableCell>
                     <Tooltip title="Delete Client from jans-tarp">
@@ -145,10 +141,6 @@ export default function OIDCClients({ data, notifyOnDataChange }) {
         setDrawerOpen(isOpen);
     };
 
-    const handleNotifyOnDataChange = () => {
-        notifyOnDataChange();
-    };
-
     return (
         <Container maxWidth="lg">
             <RegisterClient isOpen={modelOpen} handleDialog={handleDialog} />
@@ -172,9 +164,9 @@ export default function OIDCClients({ data, notifyOnDataChange }) {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {(data === undefined || data.length == 0) ?
+                            {(data === undefined || data?.length == 0) ?
                                 <TableCell colSpan={6}><Alert severity="warning">No Records to show.</Alert></TableCell> :
-                                data.map((row) => (<Row key={row.clientId} row={row} notifyOnDataChange={handleNotifyOnDataChange} />))
+                                data.map((row) => (<Row key={row?.clientId} row={row} notifyOnDataChange={notifyOnDataChange} />))
                             }
                         </TableBody>
                     </Table>

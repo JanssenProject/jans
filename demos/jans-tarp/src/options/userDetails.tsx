@@ -62,7 +62,7 @@ const UserDetails = ({data, notifyOnDataChange}) => {
             </div>
             <legend><span className="number">O</span> User Details:</legend>
             <hr />
-            {data.displayToken ?
+            {data?.displayToken ?
                 <>
                     <div className="alert alert-success alert-dismissable fade in">
                         <strong>Access Token</strong>
