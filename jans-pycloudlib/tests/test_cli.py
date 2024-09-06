@@ -43,7 +43,7 @@ def test_encoding_decode_file_salt(monkeypatch, gmanager):
 
     monkeypatch.setattr(
         "jans.pycloudlib.manager.Manager",
-        lambda cfg, scr, lck: gmanager,
+        lambda: gmanager,
     )
 
     runner = CliRunner()
@@ -128,7 +128,7 @@ def test_encoding_decode_string_salt(monkeypatch, gmanager):
 
     monkeypatch.setattr(
         "jans.pycloudlib.manager.Manager",
-        lambda cfg, scr, lck: gmanager,
+        lambda: gmanager,
     )
 
     runner = CliRunner()
