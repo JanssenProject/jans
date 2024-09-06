@@ -253,15 +253,15 @@ public class AssetService {
 
         // copy assets on server
         for (Document asset : assets) {
-            InputStream in = this.readDocumentAsStream(asset.getDisplayName(), asset.getDocument());
+            InputStream in = this.readDocumentAsStream(asset.getFileName(), asset.getDocument());
             if (in == null) {
                 sb.append("Asset file for service{" + serviceName + "} is blank");
             }
 
             // save on server
             String result = copyAssetOnServer(asset, in);
-            log.info("Asset file:{} load result for serviceName:{} is:{}", asset.getDisplayName(), serviceName, result);
-            sb.append("Asset file:{" + asset.getDisplayName() + "} load result for service:{" + serviceName + "} is:{"
+            log.info("Asset file:{} load result for serviceName:{} is:{}", asset.getFileName(), serviceName, result);
+            sb.append("Asset file:{" + asset.getFileName() + "} load result for service:{" + serviceName + "} is:{"
                     + result + "}");
 
         }
@@ -322,7 +322,7 @@ public class AssetService {
         if (asset == null) {
             throw new InvalidAttributeException(" Asset object is null!!!");
         }
-        return readDocumentAsStream(asset.getDisplayName(), asset.getDocument());
+        return readDocumentAsStream(asset.getFileName(), asset.getDocument());
 
     }
 
@@ -378,7 +378,7 @@ public class AssetService {
         }
 
         List<String> serviceModules = asset.getService();
-        String assetFileName = asset.getDisplayName();
+        String assetFileName = asset.getFileName();
         log.info("Copy assetFileName:{} for serviceModules:{}", asset, serviceModules);
         if (StringUtils.isBlank(assetFileName)) {
             throw new InvalidConfigurationException("Asset name is null!");
@@ -422,7 +422,7 @@ public class AssetService {
         }
 
         List<String> serviceModules = asset.getService();
-        String assetFileName = asset.getDisplayName();
+        String assetFileName = asset.getFileName();
 
         log.info("Asset to be deleted for serviceModules:{}, assetFileName:{}", serviceModules, assetFileName);
 
@@ -565,7 +565,7 @@ public class AssetService {
             return;
         }
 
-        String fileName = asset.getDisplayName();
+        String fileName = asset.getFileName();
         String fileExtension = this.getFileExtension(fileName);
         List<String> validFileExtensions = this.getValidFileExtension();
         log.info("Checking valid file extention - fileName:{}, fileExtension:{}, validFileExtensions:{}", fileName,
