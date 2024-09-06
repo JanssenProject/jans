@@ -8205,7 +8205,9 @@ components:
           type: string
         inum:
           type: string
-        displayName:
+        fileName:
+          type: string
+        filePath:
           type: string
         description:
           type: string
@@ -8368,19 +8370,19 @@ components:
           type: string
         selected:
           type: boolean
-        whitePagesCanView:
-          type: boolean
-        adminCanEdit:
-          type: boolean
-        adminCanView:
+        userCanEdit:
           type: boolean
         userCanView:
           type: boolean
-        userCanEdit:
+        adminCanView:
+          type: boolean
+        adminCanEdit:
+          type: boolean
+        userCanAccess:
           type: boolean
         adminCanAccess:
           type: boolean
-        userCanAccess:
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -9226,8 +9228,6 @@ components:
           type: boolean
         lockMessageConfig:
           $ref: '#/components/schemas/LockMessageConfig'
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -9237,6 +9237,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -10805,10 +10807,10 @@ components:
         ttl:
           type: integer
           format: int32
-        persisted:
-          type: boolean
         opbrowserState:
           type: string
+        persisted:
+          type: boolean
     SessionIdAccessMap:
       type: object
       properties:

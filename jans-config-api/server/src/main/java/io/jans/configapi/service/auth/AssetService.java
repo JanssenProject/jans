@@ -172,6 +172,7 @@ public class AssetService {
 
         // validation
         validateModules(asset);
+        validateAssetMetadata(asset);
         ByteArrayOutputStream bos = null;
         if (documentStream != null) {
             validateFileExtension(asset);
@@ -365,6 +366,25 @@ public class AssetService {
         return asset;
     }
 
+    private Document validateAssetMetadata(Document asset) {
+        log.info("Validate Asset File type - asset:{}", asset);
+        if (asset == null) {
+            throw new InvalidConfigurationException("Asset is null!");
+        }
+        String assetFileName = asset.getFileName();
+        log.info("assetFileName", assetFileName);
+        if (StringUtils.isBlank(assetFileName)) {
+            throw new InvalidConfigurationException("Asset name is null!");
+        }
+
+        String assetDir = this.getAssetDir(assetFileName);
+        asset.setFilePath(assetDir);
+        log.info("For saving assetFileName:{} assetDir:{}", assetFileName, assetDir, asset.getFileName());
+
+        return asset;
+
+    }
+    
     private String copyAssetOnServer(Document asset, InputStream stream) throws IOException {
         log.info("Copy asset on server - asset:{}, stream:{}", asset, stream);
         String result = null;
@@ -384,8 +404,8 @@ public class AssetService {
             throw new InvalidConfigurationException("Asset name is null!");
         }
 
-        String assetDir = this.getAssetDir(assetFileName);
-        log.info("For saving assetFileName:{} assetDir:{}", assetFileName, assetDir);
+        String assetDir = asset.getFilePath();
+        log.info("For saving assetFileName:{} assetDir:{}", assetFileName, assetDir, asset.getFileName());
 
         // validate service directory
         validateServiceDirectory(assetFileName, assetDir, serviceModules);
@@ -430,7 +450,7 @@ public class AssetService {
             throw new InvalidConfigurationException("Asset name is null!");
         }
 
-        String assetDir = this.getAssetDir(assetFileName);
+        String assetDir = asset.getFilePath();
         log.info("For removing assetFileName:{} assetDir:{}", assetFileName, assetDir);
 
         for (String serviceName : serviceModules) {

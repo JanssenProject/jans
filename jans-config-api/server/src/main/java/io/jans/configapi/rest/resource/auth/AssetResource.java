@@ -230,7 +230,7 @@ public class AssetResource extends ConfigBaseResource {
         Document asset = assetForm.getDocument();
         log.info(" Create asset:{} ", asset);
         checkResourceNotNull(asset, ASSET_DATA);
-        checkNotNull(asset.getFileName(), AttributeNames.DISPLAY_NAME);
+        checkNotNull(asset.getFileName(), "fileName");
 
         // check if asset with same name already exist
         List<Document> assets = assetService.getAssetByName(asset.getFileName());
@@ -285,7 +285,7 @@ public class AssetResource extends ConfigBaseResource {
         log.debug(" Create asset:{} ", asset);
         checkResourceNotNull(asset, ASSET_DATA);
         checkResourceNotNull(inum, ASSET_INUM);
-        checkNotNull(asset.getFileName(), AttributeNames.DISPLAY_NAME);
+        checkNotNull(asset.getFileName(), "fileName");
 
         // validate if asset exist
         Document existingDoc = assetService.getAssetByInum(asset.getInum());
