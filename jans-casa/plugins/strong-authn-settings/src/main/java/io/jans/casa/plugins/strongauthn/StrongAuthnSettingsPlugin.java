@@ -1,7 +1,5 @@
 package io.jans.casa.plugins.strongauthn;
 
-import io.jans.service.cache.CacheInterface;
-
 import java.util.Collections;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
@@ -33,18 +31,15 @@ public class StrongAuthnSettingsPlugin extends Plugin implements ITrackable {
     public static final int TRUSTED_LOCATION_EXPIRATION_DAYS = 15;
 
     private static final int ONE_DAY = (int) TimeUnit.DAYS.toSeconds(1);
-    private final String ACTIVE_INSTANCE_PRESENCE = getClass().getName() + "_activeInstanceSet";
 
     private Logger logger = LoggerFactory.getLogger(getClass());
     private IPluginSettingsHandler<Configuration> settingsHandler;
     private Scheduler scheduler;
     private JobKey jobKey;
-    private CacheInterface storeService;
 
     public StrongAuthnSettingsPlugin(PluginWrapper wrapper) throws Exception {
         super(wrapper);
         settingsHandler = StrongAuthSettingsService.instance(wrapper.getPluginId()).getSettingsHandler();
-        storeService = Utils.managedBean(CacheInterface.class);
         scheduler = StdSchedulerFactory.getDefaultScheduler();
     }
 
@@ -66,14 +61,7 @@ public class StrongAuthnSettingsPlugin extends Plugin implements ITrackable {
             }
 
         }
-
-        //Optimistically, the following if-else allows the sweeping logic to be executed only by a single node
-        //(in a multi node environment)
-        if (storeService.get(ACTIVE_INSTANCE_PRESENCE) == null) {
-            //temporarily take the ownership for sweeping data
-            storeService.put(ONE_DAY, ACTIVE_INSTANCE_PRESENCE, true);
-            jobKey = initTimer(10);
-        }
+        jobKey = initTimer(10);
 
     }
 
