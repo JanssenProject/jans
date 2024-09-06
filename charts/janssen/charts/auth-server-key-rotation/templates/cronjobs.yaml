@@ -70,11 +70,6 @@ spec:
                   name: aws-secrets-replica-regions
                   subPath: aws_secrets_replica_regions
               {{- end }}
-              {{ if or (eq .Values.global.configSecretAdapter "google") (eq .Values.global.cnPersistenceType "spanner") }}
-                - mountPath: {{ .Values.global.cnGoogleApplicationCredentials }}
-                  name: google-sa
-                  subPath: google-credentials.json
-                {{- end }}
               {{- with .Values.volumeMounts }}
 {{- toYaml . | nindent 16 }}
               {{- end }}
@@ -121,10 +116,5 @@ spec:
                 items:
                   - key: aws_secrets_replica_regions
                     path: aws_secrets_replica_regions
-          {{- end }}
-          {{ if or (eq .Values.global.configSecretAdapter "google") (eq .Values.global.cnPersistenceType "spanner") }}
-            - name: google-sa
-              secret:
-                secretName: {{ .Release.Name }}-google-sa
           {{- end }}
           restartPolicy: Never

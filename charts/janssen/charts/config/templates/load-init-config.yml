@@ -66,11 +66,6 @@ spec:
         - name: {{ include "config.fullname" . }}-tls-script
           configMap:
             name: {{ include "config.fullname" . }}-tls-script
-        {{ if or (eq .Values.global.configSecretAdapter "google") (eq .Values.global.cnPersistenceType "spanner") }}
-        - name: google-sa
-          secret:
-            secretName: {{ .Release.Name }}-google-sa
-        {{- end }}
       serviceAccountName: {{ .Values.global.serviceAccountName }}
       containers:
       - name: {{ include "config.name" . }}
@@ -104,11 +99,6 @@ spec:
           - mountPath: /scripts/tls_generator.py
             name: {{ include "config.fullname" . }}-tls-script
             subPath: tls_generator.py
-          {{ if or (eq .Values.global.configSecretAdapter "google") (eq .Values.global.cnPersistenceType "spanner") }}
-          - mountPath: {{ .Values.global.cnGoogleApplicationCredentials }}
-            name: google-sa
-            subPath: google-credentials.json
-          {{- end }}
         envFrom:
         - configMapRef:
             name: {{ .Release.Name }}-config-cm
