@@ -205,6 +205,8 @@ public class AuthenticationService {
                 sessionIdAttributes.put(Constants.AUTHENTICATED_USER, userName);
             }
             sessionIdService.updateSessionIdIfNeeded(sessionId, authenticated);
+        } else {
+        	log.warn("Failed to set authenticated user in session!");
         }
     }
 
