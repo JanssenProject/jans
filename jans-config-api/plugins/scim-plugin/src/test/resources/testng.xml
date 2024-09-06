@@ -1,0 +1,32 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+
+<suite name="Config-API" parallel="false">
+
+    <parameter name="propertiesFile" value="target/test-classes/testng.properties" />
+    
+	<!--
+    <listeners>
+        <listener class-name="io.jans.configapi.listener.AlterSuiteListener" />
+        <listener class-name="io.jans.configapi.listener.SkipTestsListener" />
+    </listeners>
+	-->
+
+    <test name="Metric Test" enabled="true">
+        <!-- section 4 RFC 7644 -->
+        <classes>
+            <class name="io.jans.scim2.client.servicemeta.ServiceProviderConfigTest" />
+            <class name="io.jans.scim2.client.servicemeta.ResourceTypesTest" />
+            <class name="io.jans.scim2.client.servicemeta.SchemasTest" />
+        </classes>
+    </test>
+
+    <test name="Client Test" enabled="true">
+        <classes>
+            <class name="io.jans.scim2.client.singleresource.MinimalUserTest" />
+            <class name="io.jans.scim2.client.singleresource.MinimalGroupTest" />
+        </classes>
+    </test>
+
+   
+
+</suite>

@@ -193,14 +193,12 @@
 			<groupId>io.rest-assured</groupId>
 			<artifactId>rest-assured</artifactId>
 			<scope>test</scope>
-		</dependency>
-		
+		</dependency>		
 		<dependency>
 			<groupId>org.testng</groupId>
 			<artifactId>testng</artifactId>
 			<scope>test</scope>
 		</dependency>
-
 
 
 		<!-- Others -->
@@ -256,10 +254,7 @@
 		<testResources>
 			<testResource>
 				<directory>src/test/resources</directory>
-				<includes>
-					<include>**/*.json</include>
-					<include>**/*.xml</include>
-				</includes>
+				<filtering>true</filtering>
 			</testResource>
 		</testResources>
 		
