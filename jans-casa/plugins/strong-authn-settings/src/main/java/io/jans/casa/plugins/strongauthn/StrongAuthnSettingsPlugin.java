@@ -64,16 +64,25 @@ public class StrongAuthnSettingsPlugin extends Plugin implements ITrackable {
         jobKey = initTimer(10);
 
     }
-
+    
     @Override
-    public void delete() {
+    public void stop() {
 
         try {
             if (jobKey != null) {
                 logger.info("Removing trusted devices sweeper job");
                 scheduler.deleteJob(jobKey);
             }
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+        }
 
+    }
+
+    @Override
+    public void delete() {
+
+        try {
             logger.warn("Flushing strong authentication settings...");
             settingsHandler.setSettings(null);
             settingsHandler.save();
