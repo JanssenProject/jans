@@ -93,7 +93,7 @@ jobs:
       id: run_build
       run: |
          cd jans/
-         sudo python${{ matrix.python_version }} install.py -download-exit -yes --keep-downloads --keep-setup
+         sudo python${{ matrix.python_version }} install.py -download-exit -yes --keep-downloads --keep-setup -force-download
          cp -r /opt/dist jans-src/opt/
          cp -r /opt/jans jans-src/opt/
          touch jans-src/opt/jans/jans-setup/package

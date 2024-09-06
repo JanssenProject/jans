@@ -45,7 +45,7 @@ public interface DocumentStore<T> {
 	/**
 	 * Load document from store as stream
 	 */
-	InputStream readDocumentAsStream(String path) ;
+	InputStream readDocumentAsStream(String path);
 
 	/**
 	 * Load binary document from store as stream

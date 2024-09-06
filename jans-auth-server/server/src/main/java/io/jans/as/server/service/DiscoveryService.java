@@ -220,6 +220,10 @@ public class DiscoveryService {
             jsonObj.put(SSA_ENDPOINT, appConfiguration.getSsaConfiguration().getSsaEndpoint());
         }
 
+        final Map<String, String> acrMappings = appConfiguration.getAcrMappings();
+        if (acrMappings != null && !acrMappings.isEmpty())
+            jsonObj.put(ACR_MAPPINGS, acrMappings);
+
         filterOutKeys(jsonObj, appConfiguration);
         localResponseCache.putDiscoveryResponse(jsonObj);
         return jsonObj;

@@ -234,6 +234,21 @@
     ],
     "custom": []
   },
+  "jansLogEntry": {
+    "fields": [
+      "eventTime"
+    ]
+  },
+  "jansTelemetryEntry": {
+    "fields": [
+      "eventTime"
+    ]
+  },
+  "jansHealthEntry": {
+    "fields": [
+      "eventTime"
+    ]
+  },
   "__common__": {
     "JSON": [
       "USING GIN (JSONB_PATH_QUERY_ARRAY(\"$field\", '$[*]'))"

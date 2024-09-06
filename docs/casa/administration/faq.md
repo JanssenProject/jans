@@ -37,12 +37,6 @@ When people add OTP mobile apps, the enrollment appears in the device associated
 ### A page with a "Service Temporarily Unavailable" message appears when accessing the application
 This is the 503 HTTP error. There is an Apache server in front of the application and this means the reverse proxy couldn't establish a communication internally with the app. This usually happens when Casa hasn't started completely, so it's usually a matter of waiting a few seconds.
 
-### An "incorrect email or password" error is shown when pressing the login button in the SSO form
-
-This reveals a problem in execution of *casa* custom script. Check if `jans-auth_script.log` is showing an error related to the authentication method in question.
-
-If you cannot diagnose the issue, please use the [Janssen Server discussions](https://github.com/JanssenProject/jans/discussions) to ask for help. 
-
 ### An "Unauthorized access" error is shown when accessing the application
 
 This is caused by an unauthorized access attempt (e.g. users requesting URLs without ever logging in or after session has expired).

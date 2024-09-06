@@ -1,0 +1,9 @@
+[package]
+name = "authz_run"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+authz = { workspace = true }
+log = { workspace = true }
+simplelog = "0.12.2"

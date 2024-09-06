@@ -40,4 +40,6 @@ public class AttributeConstants {
     public static final String MEMBER = "member";
 
     public static final String JANS_ATTR_NAME = "jansAttrName";
+
+    public static final String EVENT_TIME = "eventTime";
 }

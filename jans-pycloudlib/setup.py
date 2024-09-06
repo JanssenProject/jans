@@ -52,6 +52,8 @@ setup(
         "apispec[marshmallow]>=6.6.1",
         "fqdn>=1.5.1",
         "pem>=23.1.0",
+        # extra dependency for google-cloud-secret-manager
+        "grpc-interceptor>=0.15.4",
     ],
     classifiers=[
         "Intended Audience :: Developers",

@@ -25,9 +25,10 @@ From the perspective of a user already logged into Casa, the experience is as fo
 
 ## Components deployment
 
+<!--
 !!! Note
     Ensure you are running at least version 1.1.1 of Jans Authentication Server and Casa
-
+-->
 The pieces that allow materialization of the experience summarized above are the following:
 
 a) The Casa plugin jar file
@@ -53,13 +54,12 @@ In the following, it is assumed you have a VM-based installation of Jans Server 
     cd jans
     git sparse-checkout init --cone
     git sparse-checkout set docs/agama-catalog/jans/inboundID/project
-    git sparse-checkout set jans-casa/plugins/acct-linking/extras/agama
     git checkout main
     cd docs/agama-catalog/jans/inboundID/project
     zip -r inbound.zip *
     ```
     
-1. Download the Casa accounts linking Agama project `https://maven.jans.io/maven/io/jans/casa/plugins/acct-linking-agama/replace-janssen-version/acct-linking-agama-replace-janssen-version-SNAPSHOT-project.zip`
+1. Download the Casa accounts linking Agama project `https://maven.jans.io/maven/io/jans/casa/plugins/acct-linking-agama/replace-janssen-version/acct-linking-agama-replace-janssen-version-project.zip`
 
 1. Transfer the two zip files to a location in the server, deploy both archives using TUI (Agama menu)
 

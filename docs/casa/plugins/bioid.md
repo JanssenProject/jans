@@ -45,6 +45,7 @@ zip -r casa-bioid.gama ./*
   }
 }
 ```
+
 - `host`: Replace `<HOSTNAME>` with the hostname of your server
 - `endpoint`: BioID API endpoint. Leave as default
 - `appIdentifier`: The app identifier string from BWS Portal - Configuration

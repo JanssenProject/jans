@@ -15,7 +15,6 @@ from io.jans.jsf2.message import FacesMessages
 from io.jans.model.custom.script.type.auth import PersonAuthenticationType
 from io.jans.orm import PersistenceEntryManager
 from io.jans.service.cdi.util import CdiUtil
-from io.jans.util import StringHelper
 
 from jakarta.faces.application import FacesMessage
 from java.util import Arrays
@@ -131,10 +130,10 @@ class PersonAuthentication(PersonAuthenticationType):
             cesar = session.getSessionAttributes()
             param = cesar.get("agama_flow")
 
-            if StringHelper.isEmpty(param):
+            if not param:
                 param = self.extractAgamaFlow(cesar.get("acr_values"))
 
-                if StringHelper.isEmpty(param):
+                if not param:
                     print "Agama. Unable to determine the Agama flow to launch. Check the docs"
                     return False
             
@@ -192,7 +191,7 @@ class PersonAuthentication(PersonAuthenticationType):
         
         if prop != None:
             val = prop.getValue2()
-            if StringHelper.isEmpty(val):
+            if not val:
                 val = None
 
         return val 
@@ -205,7 +204,7 @@ class PersonAuthentication(PersonAuthenticationType):
         
     def extractAgamaFlow(self, acr):
         prefix = "agama_"
-        if StringHelper.isNotEmpty(acr) and acr.find(prefix) == 0:
+        if acr and acr.startswith(prefix) == 0:
             return acr[len(prefix):]
         return None        
         

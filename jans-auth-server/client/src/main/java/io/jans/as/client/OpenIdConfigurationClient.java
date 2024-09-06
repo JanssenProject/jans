@@ -132,6 +132,12 @@ public class OpenIdConfigurationClient extends BaseClient<OpenIdConfigurationReq
                 response.setMltsAliases(Util.toSerializableMap(mtlsAliases.toMap()));
             }
         }
+        if (jsonObj.has(ACR_MAPPINGS)) {
+            final JSONObject acrMappings = jsonObj.optJSONObject(ACR_MAPPINGS);
+            if (acrMappings != null) {
+                response.setAcrMappings(Util.toSerializableMapOfStrings(acrMappings.toMap()));
+            }
+        }
         Util.addToListIfHas(response.getScopesSupported(), jsonObj, SCOPES_SUPPORTED);
         Util.addToListIfHas(response.getResponseTypesSupported(), jsonObj, RESPONSE_TYPES_SUPPORTED);
         Util.addToListIfHas(response.getResponseModesSupported(), jsonObj, RESPONSE_MODES_SUPPORTED);

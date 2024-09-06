@@ -7,7 +7,7 @@
         
     <h:title self="@define(title)">${zkService.appName} - ${labels.sample.method_label}</h:title>
 
-    <!-- Class SampleCredentialVM is this view's handler -->
+    <!-- Class SampleCredentialVM is this view's handler, aka vm -->
     
     <z:div if="${empty pageScope.error}" viewModel="@('io.jans.casa.plugins.sample.vm.SampleCredentialVM')"
            self="@define(maincontent)">
@@ -19,15 +19,19 @@
 
                 <div class="${css.panel}">
                     <h2 class="f4 dark-blue2">${labels.sample.method_title}</h2>
-                    <p>${labels.sample.method_text}</p>
-                    <p>Ensure you have added the custom script for this authentication method in the server and that it was enabled under "Enabled authentication methods" here in Casa admin console</p>
+                    <p class="ma0">${labels.sample.method_text}</p>                    
                 </div>
 
                 <!-- Write the markup that lists the currently enrolled credentials and allows the user  
                 to add and remove them. Take a look at existing Jans Casa enrollment pages for examples.
                 See https://github.com/JanssenProject/jans/tree/main/jans-casa/app/src/main/webapp/user -->
+
+                <div class="${css.panel}">
                 
-                <div class="${css.panel}">TODO</div>
+                    <h:input type="color" class="${css.colorPicker} mr3" value="@bind(vm.favoriteColor)" />
+                    
+                    <z:button label="${labels.general.save}" sclass="${css.primaryButton}" onClick="@('update')" />
+                </div>
                 
             </section>
         </div>

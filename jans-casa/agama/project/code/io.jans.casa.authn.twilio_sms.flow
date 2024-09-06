@@ -38,6 +38,6 @@ Repeat 3 times max
         Finish true
     
     matches = false
-        
-obj = { success: false, message: "Too many failed attempts" }
+
+obj = { success: false, message: "Too many failed attempts for SMS verification" }
 Finish obj

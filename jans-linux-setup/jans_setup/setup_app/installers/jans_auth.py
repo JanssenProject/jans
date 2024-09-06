@@ -61,6 +61,8 @@ class JansAuthInstaller(JettyInstaller):
         self.set_class_path([os.path.join(self.custom_lib_dir, '*')])
         self.external_libs()
         self.setup_agama()
+        if Config.persistence_type == 'ldap':
+            self.populate_jans_db_auth()
         self.enable()
 
     def generate_configuration(self):
@@ -227,3 +229,29 @@ class JansAuthInstaller(JettyInstaller):
         self.renderTemplateInOut(src_xml, tmp_dir, self.jetty_service_webapps)
         self.chown(os.path.join(self.jetty_service_webapps, os.path.basename(src_xml)), Config.jetty_user, Config.jetty_group)
 
+
+    def populate_jans_db_auth(self):
+        ldap_config = {
+            'type': 'auth',
+            'name': None,
+            'level': 0,
+            'priority': 1,
+            'enabled': False,
+            'version': 0, 
+            'config': {
+                'configId': 'auth_ldap_server', 
+                'servers': [f'{Config.ldap_hostname}:{Config.ldaps_port}'],
+                'maxConnections': 1000,
+                'bindDN': f'{Config.ldap_binddn}',
+                'bindPassword': f'{Config.ldap_bind_encoded_pw}',
+                'useSSL': True,
+                'baseDNs': ['ou=people,o=jans'],
+                'primaryKey': 'uid', 
+                'localPrimaryKey': 'uid',
+                'useAnonymousBind': False,
+                'enabled': False
+            }
+        }
+
+        self.logIt(f"Populating jansDbAuth with {ldap_config}")
+        self.dbUtils.set_configuration('jansDbAuth', json.dumps(ldap_config, indent=2), dn='ou=configuration,o=jans')

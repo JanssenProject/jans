@@ -83,9 +83,9 @@ determined using client-level configuration. This is the default authentication 
 that send end-users to the Janssen Server for sign-in.
 
 To configure this parameter using Janssen Text base UI (TUI) configuration
-tool, navigate to `Auth Server`->`Defaults` as shown below:
+tool, navigate to `Auth Server`->`Authn`->`Default ACR` as shown below:
 
-![](../../../assets/jans-tui-auth-server-default.png)
+![](../../../assets/tui-authn-dafault-acr.png)
 
 ## ACR Precedence Levels
 

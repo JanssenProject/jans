@@ -234,6 +234,21 @@
     ],
     "custom": []
   },
+  "jansLogEntry": {
+    "fields": [
+      "eventTime"
+    ]
+  },
+  "jansTelemetryEntry": {
+    "fields": [
+      "eventTime"
+    ]
+  },
+  "jansHealthEntry": {
+    "fields": [
+      "eventTime"
+    ]
+  },
   "__common__": {
     "JSON": [
       "CAST($field->'$.v' AS CHAR(128) ARRAY)",

@@ -31,10 +31,11 @@ class Agama(DialogUtils):
         app: Application
         ) -> None:
 
-
+        
         self.app = app
         self.data = []
         self.first_enter = False
+        self.app.agama_module = self
         self.jans_help = get_help_with(
                 f'<d>              {_("Display Agama project config")}\n'
                 f'<c>              {_("Manage Agama project Configuration")}\n'
@@ -271,7 +272,7 @@ class Agama(DialogUtils):
         self.first_enter = False
 
 
-    async def get_projects_coroutine(self, search_str=''):
+    async def get_projects_coroutine(self, search_str='', update_container=True):
         cli_args = {'operation_id': 'get-agama-prj'}
         self.app.start_progressing(_("Retreiving agama projects..."))
         response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
@@ -290,7 +291,8 @@ class Agama(DialogUtils):
             return
 
         self.working_container.all_data = self.data.get('entries', [])
-        self.update_agama_container(search_str=search_str)
+        if update_container:
+            self.update_agama_container(search_str=search_str)
 
 
     def get_agama_projects(self, search_str=''):

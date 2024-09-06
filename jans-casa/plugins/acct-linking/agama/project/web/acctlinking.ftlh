@@ -35,7 +35,7 @@
                             <tr class="pointer" onClick="javascript:idp_redirect('${p.id}')">
                                 <td class="w2 tc">
                                     <img style="max-width:2rem" alt="${p.displayName!""}"
-                                        src="${p.logoImg!"none.png"}" />
+                                        src="${p.logoImg!"../t505fp/inboundID/none.png"}" />
                                 </td>
                                 <td class="f7-cust w4 v-mid">${p.displayName!""}</td>
                             </tr>

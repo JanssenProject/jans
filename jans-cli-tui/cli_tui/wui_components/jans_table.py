@@ -1,3 +1,4 @@
+import math
 import textwrap
 
 from typing import Optional
@@ -73,7 +74,7 @@ class JansTableWidget():
             max_width = self.app.dialog_width - 5 - len(max_col_sizes) * self.padding
             if total_col_size > max_width:
                 max_col_ratio = [c/total_col_size for c in max_col_sizes]
-                self.preferred_size = [int(r*max_width) for r in max_col_ratio]
+                self.preferred_size = [math.ceil(r*max_width) for r in max_col_ratio]
             else:
                 self.preferred_size = max_col_sizes
 
@@ -101,7 +102,6 @@ class JansTableWidget():
                 row_widgets.append(TextArea(c, width=self.preferred_size[i], read_only=True, height=len(m), style=self.data_style))
                 table_height += len(m) +1
             table_widgets.append(VSplit(row_widgets, width=D(), padding=self.padding))
-
 
         table_container = HSplit(table_widgets, height=table_height, width=D(), padding=1, style=self.bg_style)
 

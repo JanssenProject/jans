@@ -8,7 +8,7 @@ Flow io.jans.casa.authn.fido2
     Basepath "authn"
     Inputs userData withEscape
 
-jose = Call io.jans.agamalab.authn.FidoValidator#new
+jose = Call io.jans.casa.authn.FidoValidator#new
 assertion = Call jose assertionRequest userData.uid
 
 obj = { name: userData.name, escape: withEscape, assertion: assertion }

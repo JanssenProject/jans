@@ -4,6 +4,8 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 import org.apache.commons.codec.binary.Base64InputStream;
@@ -19,6 +21,7 @@ import io.jans.service.document.store.exception.DocumentException;
 import io.jans.service.document.store.exception.WriteDocumentException;
 import io.jans.service.document.store.model.Document;
 import io.jans.service.document.store.service.DBDocumentService;
+import io.jans.util.Pair;
 import io.jans.util.StringHelper;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -97,7 +100,8 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<Document> {
 		log.debug("Save document: '{}'", path);
 		Document oxDocument = new Document();
 		oxDocument.setDocument(documentContent);
-		oxDocument.setDisplayName(path);
+		
+		setFileNameAndPath(oxDocument, path);
 		try {
 				oxDocument.setInum(documentService.generateInumForNewDocument());
 				String dn = "inum=" + oxDocument.getInum() + ",ou=document,o=jans";
@@ -117,7 +121,7 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<Document> {
 	public String saveDocumentStream(String path, String description, InputStream documentStream, List<String> moduleList) {
 
 		Document oxDocument = new Document();
-		oxDocument.setDisplayName(path);
+		setFileNameAndPath(oxDocument, path);
 
 		try {
 			String documentContent = new String(documentStream.readAllBytes(), StandardCharsets.UTF_8);
@@ -186,7 +190,7 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<Document> {
 				log.error("Document doesn't Exist with the name  '{}'", currentPath);
 				return null;
 			}
-			oxDocument.setDisplayName(destinationPath);
+			setFileNameAndPath(oxDocument, destinationPath);
 			documentService.updateDocument(oxDocument);
 			Document oxDocumentDestination = documentService.getDocumentByDisplayName(destinationPath);
 			if (oxDocumentDestination == null) {
@@ -228,7 +232,7 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<Document> {
 				log.error("Document doesn't Exist with the name  '{}'", currentPath);
 				return null;
 			}
-			oxDocument.setDisplayName(destinationPath);
+			setFileNameAndPath(oxDocument, destinationPath);
 			documentService.updateDocument(oxDocument);
 			Document oxDocumentDestination = documentService.getDocumentByDisplayName(destinationPath);
 			if (oxDocumentDestination == null) {
@@ -269,6 +273,22 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<Document> {
 			log.error("Failed to find documents for modules '{}'", moduleList, e);
 			throw new DocumentException(e);
 		}
+	}
+
+	private void setFileNameAndPath(Document document, String path) {
+		Pair<String, String> splittedPath = extractFileNameAndPath(path);
+		document.setFileName(splittedPath.getSecond());
+		document.setFilePath(splittedPath.getFirst());
+	}
+
+	public Pair<String, String> extractFileNameAndPath(String filePath) {
+		Path path = Paths.get(filePath);
+		Path parentPath = path.getParent();
+		if (parentPath == null) {
+			return new Pair<String, String>(null, path.getFileName().toString());
+		}
+
+		return new Pair<String, String>(parentPath.toString(), path.getFileName().toString());
 	}
 
 }

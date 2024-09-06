@@ -89,6 +89,7 @@ public final class ConfigurationResponseClaim {
     public static final String BACKCHANNEL_LOGOUT_SUPPORTED = "backchannel_logout_supported";
     public static final String BACKCHANNEL_LOGOUT_SESSION_SUPPORTED = "backchannel_logout_session_supported";
     public static final String MTLS_ENDPOINT_ALIASES = "mtls_endpoint_aliases";
+    public static final String ACR_MAPPINGS = "acr_mappings";
 
     // CIBA
     public static final String BACKCHANNEL_AUTHENTICATION_ENDPOINT = "backchannel_authentication_endpoint";

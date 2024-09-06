@@ -38,7 +38,7 @@ spec:
         runAsUser: 1000
         runAsGroup: 1000
         fsGroup: 1000
-      serviceAccountName: {{ .Values.global.serviceAccountName }}  
+      serviceAccountName: {{ .Values.global.serviceAccountName }}
       containers:
       - name: {{ include "opendj.name" $ }}
         {{- if .Values.customScripts }}
@@ -83,18 +83,9 @@ spec:
         {{- with $.Values.volumeMounts }}
 {{- toYaml . | nindent 10 }}
         {{- end }}
-          - name: ldap-certkey
-            mountPath: {{ .Values.global.cnLdapCertFile }}
-            subPath: opendj.crt
-          - name: ldap-certkey
-            mountPath: {{ .Values.global.cnLdapKeyFile }}
-            subPath: opendj.key
-          - name: ldap-pass
-            mountPath: {{ .Values.global.cnLdapPasswordFile }}
-            subPath: ldap_password
-          - name: ldap-pass
-            mountPath: {{ .Values.global.cnLdapTruststorePasswordFile }}
-            subPath: ldap_truststore_password
+          - mountPath: /etc/jans/conf/configuration.json
+            name: {{ .Release.Name }}-configuration-file
+            subPath: configuration.json
         livenessProbe:
 {{- toYaml $.Values.livenessProbe | nindent 10 }}
         readinessProbe:
@@ -108,12 +99,9 @@ spec:
 {{- toYaml $.Values.resources | nindent 10 }}
         {{- end }}
       volumes:
-      - name: ldap-pass
+      - name: {{ .Release.Name }}-configuration-file
         secret:
-          secretName: {{ .Release.Name }}-ldap-pass
-      - name: ldap-certkey
-        secret:
-          secretName: {{ .Release.Name }}-ldap-certkey
+          secretName: {{ .Release.Name }}-configuration-file
   volumeClaimTemplates:
   - metadata:
       name: opendj-volume

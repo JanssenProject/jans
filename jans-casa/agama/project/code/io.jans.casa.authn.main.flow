@@ -53,15 +53,15 @@ Repeat 3 times max
     When E is not null
         Log "@e Authentication flow % for user % crashed: %" method userData.inum E
         E = null
-        error = true
+        message = "We had trouble authenticating you"
     Otherwise
         When obj.success is true
             Call reinutil updateTrustedDevices
             Finish uid
 
-        error = true
+        message = obj.message
 
-    obj = { enrolledMethods: methods, error: error, selector: conf.selector }
+    obj = { enrolledMethods: methods, message: message, selector: conf.selector }
 
     //Show a page for the user to select an alternative type of credential to login
     obj = RRF "selector.ftlh" obj

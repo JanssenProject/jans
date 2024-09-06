@@ -16,9 +16,8 @@
 
 package io.jans.lock.service.ws.rs.audit;
 
-import io.jans.lock.util.AuditService;
+import io.jans.lock.service.audit.AuditService;
 import io.jans.lock.util.ServerUtil;
-import io.jans.service.security.api.ProtectedApi;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
@@ -50,13 +49,13 @@ public class AuditRestWebServiceImpl implements AuditRestWebService {
     @Override
     public Response processHealthRequest(HttpServletRequest request, HttpServletResponse response,
             SecurityContext sec) {
-        log.debug("Processing Health request - request:{}", request);
-        return processAuditRequest(request, "Health");
+        log.info("Processing Health request - request:{}", request);
+        return processAuditRequest(request, "health");
     }
 
     @Override
     public Response processLogRequest(HttpServletRequest request, HttpServletResponse response, SecurityContext sec) {
-        log.debug("Processing Log request - request:{}", request);
+        log.info("Processing Log request - request:{}", request);
         return processAuditRequest(request, "log");
 
     }
@@ -64,13 +63,13 @@ public class AuditRestWebServiceImpl implements AuditRestWebService {
     @Override
     public Response processTelemetryRequest(HttpServletRequest request, HttpServletResponse response,
             SecurityContext sec) {
-        log.debug("Processing Telemetry request - request:{}", request);
+        log.info("Processing Telemetry request - request:{}", request);
         return processAuditRequest(request, "telemetry");
 
     }
 
     private Response processAuditRequest(HttpServletRequest request, String requestType) {
-        log.debug("Processing request - request:{}, requestType:{}", request, requestType);
+        log.info("Processing request - request:{}, requestType:{}", request, requestType);
 
         Response.ResponseBuilder builder = Response.ok();
         builder.cacheControl(ServerUtil.cacheControlWithNoStoreTransformAndPrivate());
@@ -81,7 +80,7 @@ public class AuditRestWebServiceImpl implements AuditRestWebService {
         log.debug("response:{}", response);
 
         if (response != null) {
-            log.trace(
+            log.debug(
                     "Response for Access Token -  response.getStatus():{}, response.getStatusInfo():{}, response.getEntity().getClass():{}",
                     response.getStatus(), response.getStatusInfo(), response.getEntity().getClass());
             String entity = response.readEntity(String.class);

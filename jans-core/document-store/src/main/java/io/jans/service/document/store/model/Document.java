@@ -17,7 +17,6 @@ import io.jans.orm.model.base.Entry;
  * 
  * @author Shekhar L. Date: 01.10.2022
  */
-
 @DataEntry(sortBy = { "displayName" })
 @ObjectClass(value = "jansDocument")
 @JsonInclude(Include.NON_NULL)
@@ -28,8 +27,11 @@ public class Document extends Entry implements Serializable {
     @AttributeName(ignoreDuringUpdate = true)
     private String inum;
 
-    @AttributeName
-    private String displayName;
+    @AttributeName(name = "displayName")
+    private String fileName;
+
+    @AttributeName(name = "jansFilePath")
+    private String filePath;
 
     @AttributeName
     private String description;
@@ -63,15 +65,23 @@ public class Document extends Entry implements Serializable {
         this.inum = inum;
     }
 
-    public String getDisplayName() {
-        return displayName;
+    public String getFileName() {
+        return fileName;
     }
 
-    public void setDisplayName(String displayName) {
-        this.displayName = displayName;
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
     }
 
-    public String getDescription() {
+    public String getFilePath() {
+		return filePath;
+	}
+
+	public void setFilePath(String filePath) {
+		this.filePath = filePath;
+	}
+
+	public String getDescription() {
         return description;
     }
 
@@ -137,8 +147,8 @@ public class Document extends Entry implements Serializable {
 
 	@Override
 	public String toString() {
-		return "Document [inum=" + inum + ", displayName=" + displayName + ", description=" + description
-				+ ", document=" + document + ", creationDate=" + creationDate + ", service=" + service + ", level="
-				+ level + ", revision=" + revision + ", enabled=" + enabled + ", alias=" + alias + "]";
+		return "Document [inum=" + inum + ", fileName=" + fileName + ", filePath=" + filePath + ", description="
+				+ description + ", document=" + document + ", creationDate=" + creationDate + ", service=" + service
+				+ ", level=" + level + ", revision=" + revision + ", enabled=" + enabled + ", alias=" + alias + "]";
 	}
 }

@@ -233,31 +233,31 @@ public class DocumentStoreManager {
 	}
 
 	private void saveDocument(Document document) {
-		try (InputStream is = documentStoreService.readBinaryDocumentAsStream(document.getDisplayName())) {
-			log.info("Writing file {} as stream", document.getDisplayName());
+		try (InputStream is = documentStoreService.readBinaryDocumentAsStream(document.getFileName())) {
+			log.info("Writing file {} as stream", document.getFileName());
 			
-			File file = new File(document.getDisplayName());
+			File file = new File(document.getFileName());
 			try (OutputStream os = new BufferedOutputStream(new FileOutputStream(file))) {
 				IOUtils.copy(is, os);
 			}
-			log.info("File {} was created successfully", document.getDisplayName());
+			log.info("File {} was created successfully", document.getFileName());
 		} catch (Exception ex) {
-			log.error("Failed to write file {} as stream", document.getDisplayName(), ex);
+			log.error("Failed to write file {} as stream", document.getFileName(), ex);
 		}
 	}
 
 	private void removeDocument(Document document) {
 		try {
-			File file = new File(document.getDisplayName());
+			File file = new File(document.getFileName());
 			
 			boolean res = file.delete();
 			if (res) {
-				log.info("File was {} removed successfully", document.getDisplayName());
+				log.info("File was {} removed successfully", document.getFileName());
 			} else {
-				log.error("Failed to remove file {}", document.getDisplayName());
+				log.error("Failed to remove file {}", document.getFileName());
 			}
 		} catch (Exception ex) {
-			log.error("Failed to remove file {}", document.getDisplayName(), ex);
+			log.error("Failed to remove file {}", document.getFileName(), ex);
 		}
 	}
 

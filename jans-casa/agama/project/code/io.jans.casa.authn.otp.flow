@@ -8,7 +8,7 @@ Flow io.jans.casa.authn.otp
     Basepath "authn"
     Inputs userData withEscape
 
-jose = Call io.jans.agamalab.authn.OTPValidator#new
+jose = Call io.jans.casa.authn.OTPValidator#new
 match = true
     
 Repeat 3 times max
@@ -23,5 +23,5 @@ Repeat 3 times max
     When match is true
         Finish true
         
-obj = { success: false, message: "Too many failed attempts" }
+obj = { success: false, message: "Too many failed attempts for OTP verification" }
 Finish obj

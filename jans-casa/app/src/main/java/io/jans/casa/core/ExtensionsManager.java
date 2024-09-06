@@ -256,6 +256,7 @@ public class ExtensionsManager {
 
                 Class<?> cls = loader.loadClass(pluginClassName);
                 if (clsName.startsWith(cls.getPackage().getName())) {
+                    logger.trace("Classloader of plugin {} will be used to lookup class {}", wrapper.getPluginId(), clsName); 
                     clsLoader = loader;
                     break;
                 }
