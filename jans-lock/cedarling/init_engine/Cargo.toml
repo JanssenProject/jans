@@ -11,4 +11,5 @@ jwt = { workspace = true }
 base64 = { workspace = true }
 log = { workspace = true }
 cedar-policy = { workspace = true }
+ehttp = { workspace = true, features = ["json"] }
 derivative = "2.2.0"

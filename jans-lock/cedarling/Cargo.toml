@@ -12,6 +12,7 @@ serde = { version = "1.0", features = ["derive"] }
 thiserror = "1.0.63"
 base64 = "0.22.1"
 log = "0.4.22"
+ehttp = { version = "0.5.0" }
 
 [profile.release]
 strip = "symbols"
