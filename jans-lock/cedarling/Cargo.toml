@@ -1,10 +1,12 @@
 [workspace]
 resolver = "2"
-members = ["authz", "authz_run", "cedarling_python", "jwt"]
+members = ["authz", "authz_run", "cedarling_python", "init_engine", "jwt"]
 
 [workspace.dependencies]
 authz = { path = "authz" }
 jwt = { path = "jwt" }
+init_engine = { path = "init_engine" }
+cedar-policy = "3.2.0"
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
 thiserror = "1.0.63"
