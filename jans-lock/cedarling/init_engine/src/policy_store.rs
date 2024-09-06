@@ -7,7 +7,7 @@ pub type TrustedIssuers = BTreeMap<String, TrustedIssuer>;
 
 #[derive(Debug, Clone, serde::Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct PolicyStoreEntry {
+pub struct PolicyStore {
 	#[serde(deserialize_with = "parse_schema")]
 	pub schema: cedar_policy::Schema,
 	pub trusted_issuers: TrustedIssuers,

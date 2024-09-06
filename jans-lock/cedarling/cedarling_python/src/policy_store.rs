@@ -6,14 +6,14 @@ use serde_pyobject::from_pyobject;
 #[derive(Debug, Clone)]
 #[pyclass]
 pub struct PolicyStore {
-	pub(crate) inner: init_engine::policy_store::PolicyStoreEntry,
+	pub(crate) inner: init_engine::policy_store::PolicyStore,
 }
 
 #[pymethods]
 impl PolicyStore {
 	#[new]
 	fn new(input: Bound<'_, PyAny>) -> PyResult<Self> {
-		let store: init_engine::policy_store::PolicyStoreEntry = from_pyobject(input)?;
+		let store: init_engine::policy_store::PolicyStore = from_pyobject(input)?;
 		Ok(PolicyStore { inner: store })
 	}
 

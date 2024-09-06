@@ -1,5 +1,5 @@
 pub mod policy_store;
-use policy_store::PolicyStoreEntry;
+use policy_store::PolicyStore;
 
 pub mod policy_store_config;
 
@@ -22,7 +22,7 @@ pub struct TokenMapper {
 pub struct BootstrapConfig {
 	pub application_name: Option<String>,
 	pub token_mapper: TokenMapper,
-	pub policy_store: PolicyStoreEntry,
+	pub policy_store: PolicyStore,
 }
 
 impl BootstrapConfig {

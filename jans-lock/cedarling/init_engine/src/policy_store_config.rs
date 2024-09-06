@@ -1,4 +1,4 @@
-use crate::policy_store::PolicyStoreEntry;
+use crate::policy_store::PolicyStore;
 
 #[derive(serde::Deserialize, serde::Serialize, Debug)]
 #[serde(tag = "strategy")]
@@ -16,15 +16,15 @@ pub enum GetPolicyError {
 }
 
 impl PolicyStoreConfig {
-	pub fn get_policy(self) -> Result<PolicyStoreEntry, GetPolicyError> {
+	pub fn get_policy(self) -> Result<PolicyStore, GetPolicyError> {
 		match self {
 			Self::LocalJson(policy_raw_json) => Self::get_local_policy(policy_raw_json.as_str()),
 			Self::RemoteURI(_uri) => todo!(),
 		}
 	}
 
-	pub fn get_local_policy(policy_raw_json: &str) -> Result<PolicyStoreEntry, GetPolicyError> {
-		let policy: PolicyStoreEntry = serde_json::from_str(policy_raw_json)?;
+	pub fn get_local_policy(policy_raw_json: &str) -> Result<PolicyStore, GetPolicyError> {
+		let policy: PolicyStore = serde_json::from_str(policy_raw_json)?;
 		Ok(policy)
 	}
 }
