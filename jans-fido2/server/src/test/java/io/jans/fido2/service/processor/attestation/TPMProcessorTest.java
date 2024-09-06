@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.jans.fido2.model.auth.AuthData;
 import io.jans.fido2.model.auth.CredAndCounterData;
 import io.jans.fido2.model.conf.AppConfiguration;
-import io.jans.fido2.model.conf.Fido2Configuration;
 import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.CertificateService;
@@ -140,7 +139,7 @@ class TPMProcessorTest {
     }
 
     @Test
-    void process_ifX5cAndSkipValidateMdsInAttestationIsFalseAndVerifyAttestationCertificatesThrowError_badRequestException() throws IOException {
+    void process_ifX5cAndVerifyAttestationCertificatesThrowError_badRequestException() throws IOException {
         ObjectNode attStmt = mapper.createObjectNode();
         ArrayNode x5cArray = mapper.createArrayNode();
         x5cArray.add("certPath1");
@@ -155,9 +154,6 @@ class TPMProcessorTest {
         Fido2RegistrationData registration = new Fido2RegistrationData();
         byte[] clientDataHash = "test-clientDataHash".getBytes();
         CredAndCounterData credIdAndCounters = new CredAndCounterData();
-        Fido2Configuration fido2Configuration = new Fido2Configuration();
-        fido2Configuration.setSkipValidateMdsInAttestationEnabled(false);
-        when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
         ObjectNode cborPublicKey = mapper.createObjectNode();
         cborPublicKey.put("-1", "test-PublicKey");
         when(dataMapperService.cborReadTree(any())).thenReturn(cborPublicKey);
@@ -184,7 +180,7 @@ class TPMProcessorTest {
     }
 
     @Test
-    void process_ifX5cAndSkipValidateMdsInAttestationIsFalseAndVerifyAttestationCertificatesIsValid_success() throws IOException {
+    void process_ifX5cAndVerifyAttestationCertificatesIsValid_success() throws IOException {
         ObjectNode attStmt = mapper.createObjectNode();
         ArrayNode x5cArray = mapper.createArrayNode();
         x5cArray.add("certPath1");
@@ -207,9 +203,6 @@ class TPMProcessorTest {
         TPMT_PUBLIC tpmtPublic = TPMT_PUBLIC.fromTpm(pubAreaBuffer);
         ObjectNode cborPublicKey = mapper.createObjectNode();
         cborPublicKey.put("-1", "test-PublicKey");
-        Fido2Configuration fido2Configuration = new Fido2Configuration();
-        fido2Configuration.setSkipValidateMdsInAttestationEnabled(false);
-        when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
         when(dataMapperService.cborReadTree(any())).thenReturn(cborPublicKey);
         MessageDigest messageDigest = mock(MessageDigest.class);
         when(signatureVerifier.getDigest(-256)).thenReturn(messageDigest);
@@ -229,7 +222,6 @@ class TPMProcessorTest {
         verify(base64Service, times(3)).decode(anyString());
         verify(certificateService, times(2)).getCertificates(anyList());
         verify(attestationCertificateService).getAttestationRootCertificates(any(AuthData.class), anyList());
-        verify(appConfiguration).getFido2Configuration();
         verify(log).trace("TPM attStmt 'alg': {}", -256);
         verify(base64Service, times(2)).urlEncodeToString(any());
         verifyNoMoreInteractions(log);
