@@ -69,7 +69,7 @@ public class Document extends Entry implements Serializable {
         return fileName;
     }
 
-    public void getFileName(String fileName) {
+    public void setFileName(String fileName) {
         this.fileName = fileName;
     }
 
