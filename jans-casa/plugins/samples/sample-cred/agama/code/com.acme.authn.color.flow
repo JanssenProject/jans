@@ -1,0 +1,19 @@
+Flow com.acme.authn.color
+    Basepath ""
+    Inputs userData
+    
+obj = { }
+Repeat 3 times max
+    data = RRF "color-prompt.ftlh" obj
+    
+    When data.skipped is ""
+        Finish false
+
+    obj.matches = Call com.acme.ColorVerifier#matches userData.inum data.selection
+    When obj.matches is true
+        Finish true
+        
+Log "User did not pass color validation :("
+
+obj = { success: false, message: "Too many failed attempts for color validation" }
+Finish obj

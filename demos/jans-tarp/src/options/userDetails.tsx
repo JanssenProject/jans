@@ -4,9 +4,11 @@ import './options.css'
 import './alerts.css';
 import { WindmillSpinner } from 'react-spinner-overlay'
 
-const UserDetails = (data) => {
+const UserDetails = ({data, notifyOnDataChange}) => {
     const [loading, setLoading] = useState(false);
-    const [showMore, setShowMore] = useState(false);
+    const [showMoreIdToken, setShowMoreIdToken] = useState(false);
+    const [showMoreAT, setShowMoreAT] = useState(false);
+    const [showMoreUI, setShowMoreUI] = useState(false);
     async function logout() {
         setLoading(true);
         try {
@@ -49,6 +51,7 @@ const UserDetails = (data) => {
 
         }
         setLoading(false);
+        notifyOnDataChange("true");
     }
 
     return (
@@ -59,22 +62,24 @@ const UserDetails = (data) => {
             </div>
             <legend><span className="number">O</span> User Details:</legend>
             <hr />
-            {data.data.displayToken ?
+            {data?.displayToken ?
                 <>
                     <div className="alert alert-success alert-dismissable fade in">
                         <strong>Access Token</strong>
-                        <p>{!!data.data ? data.data?.access_token : ''}</p>
+                        <p>{showMoreAT ? (!!data ? data?.access_token : '') : (!!data ? data?.access_token.substring(0, 250).concat(' ...') : '')}</p>
+                        <a href="#" onClick={() => setShowMoreAT(!showMoreAT)}>{showMoreAT ? "Show less" : "Show more"}</a>
                     </div>
                     <div className="alert alert-success alert-dismissable fade in">
                         <strong>Id Token</strong>
-                        <p>{showMore ? (!!data.data ? data.data?.id_token : '') : (!!data.data ? data.data?.id_token.substring(0, 250).concat(' ...') : '')}</p>
-                        <a href="#" onClick={() => setShowMore(!showMore)}>{showMore ? "Show less" : "Show more"}</a>
+                        <p>{showMoreIdToken ? (!!data ? data?.id_token : '') : (!!data ? data?.id_token.substring(0, 250).concat(' ...') : '')}</p>
+                        <a href="#" onClick={() => setShowMoreIdToken(!showMoreIdToken)}>{showMoreIdToken ? "Show less" : "Show more"}</a>
                     </div>
                 </>
                 : ''}
             <div className="alert alert-success alert-dismissable fade in">
                 <strong>User Details</strong>
-                <p>{!!data.data ? JSON.stringify(data.data?.userDetails) : ''}</p>
+                <p>{showMoreUI ? (!!data ? data?.userDetails : '') : (!!data ? data?.userDetails.substring(0, 250).concat(' ...') : '')}</p>
+                <a href="#" onClick={() => setShowMoreUI(!showMoreUI)}>{showMoreUI ? "Show less" : "Show more"}</a>
             </div>
             <hr />
             <button id="logoutButton" onClick={logout}>Logout</button>

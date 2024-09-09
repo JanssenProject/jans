@@ -1,7 +1,7 @@
 <?page language="xhtml"?>
 <?init class="org.zkoss.zk.ui.util.Composition" template="/basic.zul"?>
 <?init class="io.jans.casa.core.navigation.HomeInitiator"?>
-<?script src="/scripts/platform.js"?>
+<?script src="/scripts/ua-parser.pack-2.0.0.js"?>
 <zk:zk xmlns:z="http://www.zkoss.org/2005/zul" xmlns:h="xhtml" xmlns:zk="zk" xmlns="native">
 
     <h:title self="@define(title)">${zkService.appName}</h:title>
@@ -19,6 +19,17 @@
                 <p>${pageScope.description}</p>
             </div>
         </div>
+    
+        <z:script if="${empty pageScope.error}" defer="true">
+            let uapr = (new UAParser()).getResult()
+            let brwData = uapr.browser 
+            brwData = { name: brwData.name, major: brwData.major, mobile: uapr.device.type == "mobile",  
+                    screenWidth: screen.width, offset: -60 * new Date().getTimezoneOffset() }
+
+            console.log(JSON.stringify(brwData))
+            sendToServer(brwData)
+    
+        </z:script>
     </z:div>
 
 </zk:zk>

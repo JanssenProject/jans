@@ -798,6 +798,60 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/jans_asset-read
+  /api/v1/jans-assets/service/{service-name}:
+    post:
+      tags:
+      - Jans Assets
+      summary: Load assets on server for a service
+      description: Load assets on server for a service
+      operationId: load-service-asset
+      parameters:
+      - name: service-name
+        in: path
+        description: Service Name
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: String multipart form.
+        content:
+          multipart/form-data:
+            schema:
+              type: string
+      responses:
+        "200":
+          description: Asset file loaded
+          content:
+            application/json:
+              schema:
+                type: string
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: ""
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/jans_asset-write
   /api/v1/jans-assets/upload:
     put:
       tags:
@@ -4475,6 +4529,7 @@ paths:
                   - spontaneous_scope
                   - end_session
                   - post_authn
+                  - client_authn
                   - select_account
                   - create_user
                   - scim
@@ -8150,7 +8205,9 @@ components:
           type: string
         inum:
           type: string
-        displayName:
+        fileName:
+          type: string
+        filePath:
           type: string
         description:
           type: string
@@ -8159,19 +8216,19 @@ components:
         creationDate:
           type: string
           format: date-time
-        jansService:
+        service:
           type: array
           items:
             type: string
-        jansLevel:
+        level:
           type: integer
           format: int32
-        jansRevision:
+        revision:
           type: integer
           format: int32
-        jansEnabled:
+        enabled:
           type: boolean
-        jansAlias:
+        alias:
           type: string
         baseDn:
           type: string
@@ -8315,13 +8372,13 @@ components:
           type: boolean
         whitePagesCanView:
           type: boolean
-        adminCanView:
-          type: boolean
-        userCanView:
-          type: boolean
         adminCanEdit:
           type: boolean
         userCanEdit:
+          type: boolean
+        adminCanView:
+          type: boolean
+        userCanView:
           type: boolean
         userCanAccess:
           type: boolean
@@ -8476,6 +8533,15 @@ components:
           type: array
           items:
             type: string
+        applyXFrameOptionsHeaderIfUriContainsAny:
+          type: array
+          items:
+            type: string
+        xframeOptionsHeaderValue:
+          type: string
+          enum:
+          - SAMEORIGIN
+          - DENY
         responseTypesSupported:
           uniqueItems: true
           type: array
@@ -9162,6 +9228,8 @@ components:
           type: boolean
         lockMessageConfig:
           $ref: '#/components/schemas/LockMessageConfig'
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -9171,8 +9239,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -9969,6 +10035,9 @@ components:
     ApiAppConfiguration:
       type: object
       properties:
+        serviceName:
+          type: string
+          description: Config API service name.
         configOauthEnabled:
           type: boolean
           description: OAuth authentication enable/disable flag. Default value `true`.
@@ -10051,6 +10120,14 @@ components:
           type: integer
           description: Maximum number of results per page in search endpoints.
           format: int32
+        acrExclusionList:
+          type: array
+          description: List of ACR values that should be excluded from active validation
+            check.
+          items:
+            type: string
+            description: List of ACR values that should be excluded from active validation
+              check.
         userExclusionAttributes:
           type: array
           description: User attribute that should not be returned in response.
@@ -10251,6 +10328,7 @@ components:
           - spontaneous_scope
           - end_session
           - post_authn
+          - client_authn
           - select_account
           - create_user
           - scim
@@ -10293,14 +10371,14 @@ components:
           type: boolean
         internal:
           type: boolean
+        locationPath:
+          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
-        locationPath:
-          type: string
         baseDn:
           type: string
     ScriptError:
@@ -10729,10 +10807,10 @@ components:
         ttl:
           type: integer
           format: int32
-        persisted:
-          type: boolean
         opbrowserState:
           type: string
+        persisted:
+          type: boolean
     SessionIdAccessMap:
       type: object
       properties:

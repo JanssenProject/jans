@@ -776,6 +776,10 @@ class JCA_CLI:
 
 
     def pretty_print(self, data):
+        if isinstance(data, str):
+            print(data)
+            return
+
         pp_string = json.dumps(data, indent=2)
         if args.no_color:
             print(pp_string)
@@ -862,11 +866,14 @@ class JCA_CLI:
                 print(self.colored_text(response.text, error_color))
                 return None
 
-        try:
-            return response.json()
-        except Exception as e:
-            print("An error ocurred while retrieving data")
-            self.print_exception(e)
+        if response.headers.get('Content-Type', '').lower() == 'application/json':
+            try:
+                return response.json()
+            except Exception as e:
+                print("An error ocurred while retrieving data")
+                self.print_exception(e)
+        else:
+            return response.text
 
     def get_mime_for_endpoint(self, endpoint, req='requestBody'):
         if req in endpoint.info:

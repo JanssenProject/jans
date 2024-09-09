@@ -1,145 +1,115 @@
 ## cedarling ⚙️
 
-The `cedarling` is an embeddable Webassembly Component that runs a local Cedar Engine, enabling fine grained and responsive Policy Management on the Web (or any JS environment). The `cedarling` allows for dynamic updates to it's internal Policy Store via Server Sent events, enabling sub-second Access Management.
+### Installation
 
-### Setup 1️⃣
+1. Ensure you have installed [Rust](https://www.rust-lang.org/tools/install) installed.
+2. Clone the repository:
+   ```bash
+   git clone https://github.com/JanssenProject/jans.git
+   cd jans/jans-lock/cedarling/
+   ```
+3. Install dependencies and build:
+   ```bash
+   cargo build --release
+   ```
+4. The result of build process will be in `target/release` folder
 
-Make sure you have [the Rust Toolchain](https://rustup.rs/), [`wasm-bindgen`](https://rustwasm.github.io/wasm-bindgen/reference/cli.html), [`clang`](https://clang.llvm.org/) and the `wasm32-unknown-unknown` Rust target triple installed. General setup follows the following flow:
+### Notes
 
-```bash
-# clang installation differs by OS and distribution
+To execute example (`authz_run`)
 
-$ rustup default stable # Install Rust stable
-$ rustup target add wasm32-unknown-unknown # Install wasm target
-
-$ cargo install -f wasm-bindgen-cli # Install wasm-bindgen CLI
+```
+cargo run
 ```
 
-### Building ⚒️
+Path to local policy store:
 
-To build the `cedarling`, run the following commands, the appropriate Javascript bindings will be generated in the `out` directory.
-
-
-```bash
-$ cargo build --release --target wasm32-unknown-unknown
-
-# For use in Node, Deno or the Edge
-$ wasm-bindgen --out-dir out ./target/wasm32-unknown-unknown/release/cedarling.wasm
-
-$ ls out
-	out
-	├── cedarling_bg.js
-	├── cedarling_bg.wasm
-	├── cedarling_bg.wasm.d.ts
-	├── cedarling.d.ts
-	└── cedarling.js
+```
+policy-store/local.json
 ```
 
-To run the `cedarling`, you'll need to include the `cedarling.js`, `cedarling_bg.js` and `cedarling.wasm`. The other files in `out` are Typescript type definitions.
+Path to input data:
 
-### Special Instructions for the Web 🌍
-
-The Web requires the WASM binary to be loaded from the network, and thus requires some manual initialization. Luckily, it's not a complicated process. To build:
-
-```bash
-$ wasm-bindgen --out-dir out ./target/wasm32-unknown-unknown/release/cedarling.wasm --target web
+```
+cedar_files/input.json
 ```
 
-To instantiate:
+The schema for demo was modified and placed in
 
-```js
-import setup, { authz, init } from "cedarling.js";
-
-// The default export is the initialization function, here renamed to `setup`
-await setup();
-
-// ... use cedarling functions here
+```
+schema/human/cedarling_demo_schema.schema
 ```
 
-### Testing 🧪
+and policy was modified and placed in
 
-To test, you'll need the `wasm-pack` test utility. To install `wasm-pack` refer [here](https://rustwasm.github.io/wasm-pack/installer/), or run:
-
-```bash
-$ curl https://rustwasm.github.io/wasm-pack/installer/init.sh -sSf | sh
+```
+cedar_files/policies_1.cedar
 ```
 
-The tests simulate a JS environment, therefore there's no need to write any actual JS tests. To run tests, run:
+also local policy store was modified according to files above.
 
-```bash
-$ wasm-pack test --node
-$ wasm-pack test --chrome # --firefox or --safari
-```
+# Python binding
 
-### Usage 🔧
-
-From within your JS project, you'll need to import the exported `cedarling` functions from the `cedarling.js` file.
-
-```js
-// Cedarling Initialization Flow
-// INFO: The cedarling must be initialized once and no more than once
-
-import { init } from "cedarling.js"
-
-const config = {
-	policyStore: {
-		// can be "local", "remote" or "lock-master",
-		// each strategy requires different parameters, see below
-		strategy: "local",
-	},
-	// if policy-store.json is compressed using deflate-zlib
-	decompressPolicyStore: false,
-	// [OPTIONAL] How often, in milliseconds, will the cedarling refresh it's TrustStore. The cedarling won't refresh it's trust store if not omitted
-	trustStoreRefreshRate: 2000,
-	// Set of jwt algorithms that the cedarling will allow, empty if omitted
-	supportedAlgorithms: ["HS256", "HS384", "RS256"]
-};
-
-/// > config.policyStore options <
-
-// the "local" strategy is a fallback option. the cedarling will use a statically embedded policy store, located in `/policy-store/default.json`
-const local = {
-	strategy: "local"
-};
-
-// the "remote" strategy is only slightly more complex than "local", with the only difference being you provide a http `url` from which a simple GET request is used to acquire the Policy Store
-const remote = {
-	strategy: "remote",
-	url: "https://raw.githubusercontent.com/JanssenProject/jans/main/jans-lock/cedarling/policy-store/default.json"
-}
-
-// the "lock-master" strategy is a more complicated, authenticated strategy employing OAuth.
-const lockMaster = {
-	strategy: "lock-master",
-	// `url` a http URL to a Jans Lock Master instance
-	url: "https://lock.master.gluu.cloud",
-	// `policyStoreId` acquire a specific Policy Store from the Lock Master
-	policyStoreId: "#83J5KF9U2KAKtO2J",
-	// `enableDynamicConfiguration` if the cedarling should subscribe to Policy Updates via the Lock Master's SSE endpoint
-	enableDynamicConfiguration: true,
-	// `ssaJwt`: Software Statement used by the cedarling during OAuth Dynamic Client registration
-	ssaJwt: "..."
-}
-
-/// END > config.policyStore options <
-
-// To initialize the cedarling, run init(config)
-init(config);
-```
+To build the python binding you need move to the `cedarling_python` folder and follow steps written in `Readme.md`
 
 ---
 
-```js
-// Cedarling Authorization Flow
+---
 
-import { init, authz } from "cedarling.js"
+# Cedarling ⚙️
 
-// Ensure the cedarling is initialized before calling authz
-init(..);
+## Overview
 
-// 🚧 (WIP)
+`cedarling` is a component of the Janssen Project that manages policy evaluation and authorization using the Cedar policy language. This project includes a Rust core and Python bindings for integration.
+
+## Installation
+
+### Prerequisites
+
+- Ensure [Rust](https://www.rust-lang.org/tools/install) is installed on your system.
+
+### Steps
+
+1. **Clone the repository:**
+
+   ```bash
+   git clone https://github.com/JanssenProject/jans.git
+   cd jans/jans-lock/cedarling/
+   ```
+
+2. **Build the project:**
+   Install dependencies and build the project in release mode:
+
+   ```bash
+   cargo build --release
+   ```
+
+3. **Locate the build output:**
+   After building, the compiled binaries will be located in the `target/release` folder.
+
+## Usage
+
+To run the example executable (`authz_run`), use:
+
+```bash
+cargo run
 ```
 
-### Lock Master SSE Interface 🚧
+### Configuration Files:
 
-> A specification for Policy Updates is in incubation
+- **Policy Store:** Path to the local policy store:  
+  `demo/policy-store/local.json`
+- **Input Data:** Path to the input data file:  
+  `demo/input.json`
+
+- **Demo Schema:** The schema for the demo (modified version) is located at:  
+  `schema/human/cedarling_demo_schema.schema`
+
+- **Policies:** The modified policies are available at:  
+  `demo/policies_1.cedar`
+
+> Note: The local policy store is customized according to the schema and policies above.
+
+### Python Binding
+
+To build the Python bindings for `cedarling`, navigate to the `cedarling_python` folder and follow the instructions in its `README.md`.
