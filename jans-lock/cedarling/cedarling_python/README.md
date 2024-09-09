@@ -74,6 +74,7 @@ Follow these steps to install the Python package in a virtual environment.
    ```bash
    pip list
    ```
+   You should see `cedarling_python` listed among the available packages.
 
 > If you want to install the package globally (not in a virtual environment), you can skip steps 2 and 3.
 
