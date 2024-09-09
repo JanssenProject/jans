@@ -12,7 +12,7 @@ import org.pf4j.Extension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-//@Extension
+@Extension
 public class SuperGluuExtension implements AuthnMethod {
 
     public static final String ACR = "io.jans.casa.authn.super_gluu";
