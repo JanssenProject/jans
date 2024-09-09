@@ -16,7 +16,7 @@ RUN apk update \
 # JAR files required to generate OpenID Connect keys
 
 ENV CN_VERSION=1.1.5-SNAPSHOT
-ENV CN_BUILD_DATE='2024-08-23 11:41'
+ENV CN_BUILD_DATE='2024-09-06 13:05'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-client/${CN_VERSION}/jans-auth-client-${CN_VERSION}-jar-with-dependencies.jar
 
@@ -27,7 +27,7 @@ RUN mkdir -p /opt/jans/configurator/javalibs \
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=fc9f04fe3b3d3d168f3090214b22ee80be371d92
+ENV JANS_SOURCE_VERSION=b645f0bdb706b933bf5c93fc261a6f00ce5a1882
 
 RUN git clone --depth 500 --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
     && cd /tmp/jans \

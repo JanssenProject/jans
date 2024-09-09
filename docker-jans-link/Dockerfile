@@ -42,7 +42,7 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 
 
 ENV CN_VERSION=1.1.5-SNAPSHOT
-ENV CN_BUILD_DATE='2024-08-23 11:41'
+ENV CN_BUILD_DATE='2024-09-06 13:16'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-link-server/${CN_VERSION}/jans-link-server-${CN_VERSION}.war
 
@@ -61,7 +61,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-link/webapps \
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=fc9f04fe3b3d3d168f3090214b22ee80be371d92
+ENV JANS_SOURCE_VERSION=b645f0bdb706b933bf5c93fc261a6f00ce5a1882
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)

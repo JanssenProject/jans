@@ -24,6 +24,7 @@ from jans.pycloudlib.persistence.ldap import sync_ldap_password
 from jans.pycloudlib.persistence.ldap import sync_ldap_truststore
 from jans.pycloudlib.persistence.spanner import render_spanner_properties
 from jans.pycloudlib.persistence.spanner import SpannerClient
+from jans.pycloudlib.persistence.spanner import sync_google_credentials
 from jans.pycloudlib.persistence.sql import doc_id_from_dn
 from jans.pycloudlib.persistence.sql import render_sql_properties
 from jans.pycloudlib.persistence.sql import SqlClient
@@ -168,6 +169,7 @@ def main():
             "/app/templates/jans-spanner.properties",
             "/etc/jans/conf/jans-spanner.properties",
         )
+        sync_google_credentials(manager)
 
     wait_for_persistence(manager)
 

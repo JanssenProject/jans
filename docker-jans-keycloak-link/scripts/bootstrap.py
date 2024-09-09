@@ -21,6 +21,7 @@ from jans.pycloudlib.persistence.ldap import sync_ldap_password
 from jans.pycloudlib.persistence.ldap import sync_ldap_truststore
 from jans.pycloudlib.persistence.spanner import render_spanner_properties
 from jans.pycloudlib.persistence.spanner import SpannerClient
+from jans.pycloudlib.persistence.spanner import sync_google_credentials
 from jans.pycloudlib.persistence.sql import SqlClient
 from jans.pycloudlib.persistence.sql import render_sql_properties
 from jans.pycloudlib.persistence.sql import sync_sql_password
@@ -98,6 +99,7 @@ def main():
             "/app/templates/jans-spanner.properties",
             "/etc/jans/conf/jans-spanner.properties",
         )
+        sync_google_credentials(manager)
 
     if not os.path.isfile("/etc/certs/web_https.crt"):
         if as_boolean(os.environ.get("CN_SSL_CERT_FROM_SECRETS", "true")):

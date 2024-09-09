@@ -5,6 +5,7 @@ from jans.pycloudlib import wait_for_persistence_conn
 from jans.pycloudlib.persistence.couchbase import sync_couchbase_password
 from jans.pycloudlib.persistence.couchbase import sync_couchbase_superuser_password
 from jans.pycloudlib.persistence.ldap import sync_ldap_password
+from jans.pycloudlib.persistence.spanner import sync_google_credentials
 from jans.pycloudlib.persistence.sql import sync_sql_password
 from jans.pycloudlib.persistence.utils import PersistenceMapper
 
@@ -45,6 +46,9 @@ def main():
         # superuser is required to create buckets, etc.
         sync_couchbase_superuser_password(manager)
         sync_couchbase_password(manager)
+
+    if "spanner" in persistence_groups:
+        sync_google_credentials(manager)
 
     wait_for_persistence_conn(manager)
 

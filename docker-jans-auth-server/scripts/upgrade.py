@@ -65,6 +65,7 @@ def _transform_lock_dynamic_config(conf, manager):
                 "log"
             ],
         }),
+        ("groupScopeEnabled", True),
     ]:
         if missing_key not in conf:
             conf[missing_key] = value

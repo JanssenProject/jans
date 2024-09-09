@@ -27,6 +27,7 @@ from jans.pycloudlib.persistence.ldap import sync_ldap_password
 from jans.pycloudlib.persistence.ldap import sync_ldap_truststore
 from jans.pycloudlib.persistence.spanner import render_spanner_properties
 from jans.pycloudlib.persistence.spanner import SpannerClient
+from jans.pycloudlib.persistence.spanner import sync_google_credentials
 from jans.pycloudlib.persistence.sql import SqlClient
 from jans.pycloudlib.persistence.sql import render_sql_properties
 from jans.pycloudlib.persistence.sql import sync_sql_password
@@ -129,6 +130,7 @@ def main():
             "/etc/jans/conf/jans-spanner.properties",
         )
         extract_common_libs("spanner")
+        sync_google_credentials(manager)
 
     wait_for_persistence(manager)
 

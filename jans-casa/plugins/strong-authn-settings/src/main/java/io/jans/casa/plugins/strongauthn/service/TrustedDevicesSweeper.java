@@ -3,14 +3,6 @@ package io.jans.casa.plugins.strongauthn.service;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import io.jans.orm.search.filter.Filter;
-import io.jans.util.security.StringEncrypter;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-
 import io.jans.casa.core.model.PersonPreferences;
 import io.jans.casa.misc.Utils;
 import io.jans.casa.plugins.strongauthn.conf.Configuration;
@@ -18,30 +10,35 @@ import io.jans.casa.plugins.strongauthn.model.TrustedDevice;
 import io.jans.casa.plugins.strongauthn.conf.TrustedDevicesSettings;
 import io.jans.casa.plugins.strongauthn.model.TrustedOrigin;
 import io.jans.casa.service.IPersistenceService;
-import org.quartz.Job;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
+import io.jans.orm.search.filter.Filter;
+import io.jans.service.cache.CacheInterface;
+import io.jans.util.security.StringEncrypter;
 
-import static io.jans.casa.plugins.strongauthn.StrongAuthnSettingsPlugin.*;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
+import org.quartz.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static io.jans.casa.plugins.strongauthn.StrongAuthnSettingsPlugin.*;
+
 public class TrustedDevicesSweeper implements Job {
 
+    private static final int QUASI_DAY = (int) (TimeUnit.DAYS.toSeconds(1) - TimeUnit.HOURS.toSeconds(1));
+    private final String ACTIVE_INSTANCE_PRESENCE = getClass().getName() + "_activeInstanceSet";
+    
     private Logger logger = LoggerFactory.getLogger(getClass());
 
     private IPersistenceService persistenceService;
     private StringEncrypter stringEncrypter;
+    private CacheInterface storeService;
 
     private long locationExpiration;
     private long deviceExpiration;
     private ObjectMapper mapper;
 
     public TrustedDevicesSweeper() {
-
-        mapper = new ObjectMapper();
-        persistenceService = Utils.managedBean(IPersistenceService.class);
 
         Configuration settings = StrongAuthSettingsService.instance().getSettingsHandler().getSettings();
         Optional<TrustedDevicesSettings> tsettings = Optional.ofNullable(settings.getTrustedDevicesSettings());
@@ -51,10 +48,14 @@ public class TrustedDevicesSweeper implements Job {
                 tsettings.map(TrustedDevicesSettings::getDeviceExpirationDays).orElse(TRUSTED_DEVICE_EXPIRATION_DAYS));
 
         try {
+            mapper = new ObjectMapper();
+            persistenceService = Utils.managedBean(IPersistenceService.class);
+
+            storeService = Utils.managedBean(CacheInterface.class);
             stringEncrypter = Utils.stringEncrypter();
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
-            logger.warn("Problem grabbing an instance of StringEncrypter. Device sweeping will not be available");
+            logger.warn("Device sweeping will not be available");
         }
 
     }
@@ -63,6 +64,13 @@ public class TrustedDevicesSweeper implements Job {
 
         if (stringEncrypter == null)
             return;
+
+        //Optimistically, the following two statements avoid the sweeping logic to be executed by
+        //several nodes (in a multi node environment) at the same time. This process is expensive
+        if (storeService.get(ACTIVE_INSTANCE_PRESENCE) != null) return;
+
+        //temporarily take the ownership for sweeping data
+        storeService.put(QUASI_DAY, ACTIVE_INSTANCE_PRESENCE, true);
 
         logger.info("TrustedDevicesSweeper. Running timer job");
         long now = System.currentTimeMillis();

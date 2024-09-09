@@ -75,7 +75,7 @@ public class SGService extends FidoService {
                 String appId = props.optString("appId", null);
                 
                 if (appId == null) {
-                    appId = new URL(persistenceService.getIssuerUrl()).getHost() + "/jans-casa";
+                    appId = String.format("https://%s/%s", new URL(persistenceService.getIssuerUrl()).getHost(), "jans-casa");
                 }
                 
                 conf.setAppId(appId);
