@@ -1,5 +1,6 @@
 package io.jans.fido2.model.attestation;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.jans.entry.PublicKeyCredentialHints;
 import io.jans.fido2.ctap.AttestationConveyancePreference;
@@ -8,6 +9,7 @@ import io.jans.fido2.model.common.*;
 import java.util.List;
 import java.util.Set;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class PublicKeyCredentialCreationOptions {
     private AttestationConveyancePreference attestation;
     private AuthenticatorSelection authenticatorSelection;
@@ -22,8 +24,7 @@ public class PublicKeyCredentialCreationOptions {
     private JsonNode extensions;
     private String status;
     private String errorMessage;
-
-    private List<PublicKeyCredentialHints> publicKeyCredentialHints;
+    private Set<String> hints;
 
     public AttestationConveyancePreference getAttestation() {
         return attestation;
@@ -129,31 +130,21 @@ public class PublicKeyCredentialCreationOptions {
         this.errorMessage = errorMessage;
     }
 
-    @Override
-    public String toString() {
-        return "PublicKeyCredentialCreationOptions{" +
-                "attestation=" + attestation +
-                ", authenticatorSelection=" + authenticatorSelection +
-                ", challenge='" + challenge + '\'' +
-                ", pubKeyCredParams=" + pubKeyCredParams +
-                ", rp=" + rp +
-                ", user=" + user +
-                ", username='" + username + '\'' +
-                ", displayName='" + displayName + '\'' +
-                ", excludeCredentials=" + excludeCredentials +
-                ", publicKeyCredentialHints=" + publicKeyCredentialHints +
-                ", timeout=" + timeout +
-                ", extensions=" + extensions +
-                ", status='" + status + '\'' +
-                ", errorMessage='" + errorMessage + '\'' +
-                '}';
-    }
+	public Set<String> getHints() {
+		return hints;
+	}
 
-    public List<PublicKeyCredentialHints> getPublicKeyCredentialHints() {
-        return publicKeyCredentialHints;
-    }
+	public void setHints(Set<String> hints) {
+		this.hints = hints;
+	}
 
-    public void setPublicKeyCredentialHints(List<PublicKeyCredentialHints> publicKeyCredentialHints) {
-        this.publicKeyCredentialHints = publicKeyCredentialHints;
-    }
+	@Override
+	public String toString() {
+		return "PublicKeyCredentialCreationOptions [attestation=" + attestation + ", authenticatorSelection="
+				+ authenticatorSelection + ", challenge=" + challenge + ", pubKeyCredParams=" + pubKeyCredParams
+				+ ", rp=" + rp + ", user=" + user + ", username=" + username + ", displayName=" + displayName
+				+ ", excludeCredentials=" + excludeCredentials + ", timeout=" + timeout + ", extensions=" + extensions
+				+ ", status=" + status + ", errorMessage=" + errorMessage + ", hints="
+				+ hints + "]";
+	}
 }

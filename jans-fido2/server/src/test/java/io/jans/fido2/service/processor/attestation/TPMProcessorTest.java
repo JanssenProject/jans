@@ -156,7 +156,7 @@ class TPMProcessorTest {
         byte[] clientDataHash = "test-clientDataHash".getBytes();
         CredAndCounterData credIdAndCounters = new CredAndCounterData();
         Fido2Configuration fido2Configuration = new Fido2Configuration();
-        fido2Configuration.setSkipValidateMdsInAttestationEnabled(false);
+        fido2Configuration.setSkipAttestation(false);
         when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
         ObjectNode cborPublicKey = mapper.createObjectNode();
         cborPublicKey.put("-1", "test-PublicKey");
@@ -208,7 +208,7 @@ class TPMProcessorTest {
         ObjectNode cborPublicKey = mapper.createObjectNode();
         cborPublicKey.put("-1", "test-PublicKey");
         Fido2Configuration fido2Configuration = new Fido2Configuration();
-        fido2Configuration.setSkipValidateMdsInAttestationEnabled(false);
+        fido2Configuration.setSkipAttestation(false);
         when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
         when(dataMapperService.cborReadTree(any())).thenReturn(cborPublicKey);
         MessageDigest messageDigest = mock(MessageDigest.class);

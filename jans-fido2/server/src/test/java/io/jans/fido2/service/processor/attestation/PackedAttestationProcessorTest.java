@@ -95,7 +95,7 @@ class PackedAttestationProcessorTest {
         byte[] clientDataHash = "test-clientDataHash".getBytes();
         CredAndCounterData credIdAndCounters = new CredAndCounterData();
         Fido2Configuration fido2Configuration = new Fido2Configuration();
-        fido2Configuration.setSkipValidateMdsInAttestationEnabled(false);
+        fido2Configuration.setSkipAttestation(false);
         when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
         when(errorResponseFactory.badRequestException(any(), any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
@@ -127,7 +127,7 @@ class PackedAttestationProcessorTest {
         byte[] clientDataHash = "test-clientDataHash".getBytes();
         CredAndCounterData credIdAndCounters = new CredAndCounterData();
         Fido2Configuration fido2Configuration = new Fido2Configuration();
-        fido2Configuration.setSkipValidateMdsInAttestationEnabled(false);
+        fido2Configuration.setSkipAttestation(false);
         when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
         List<X509Certificate> certificates = Collections.singletonList(mock(X509Certificate.class));
         when(certificateService.getCertificates(anyList())).thenReturn(certificates);
@@ -167,7 +167,7 @@ class PackedAttestationProcessorTest {
         CredAndCounterData credIdAndCounters = new CredAndCounterData();
         String signature = "test-signature";
         Fido2Configuration fido2Configuration = new Fido2Configuration();
-        fido2Configuration.setSkipValidateMdsInAttestationEnabled(false);
+        fido2Configuration.setSkipAttestation(false);
         when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
         when(commonVerifiers.verifyAlgorithm(any(), anyInt())).thenReturn(alg);
         when(commonVerifiers.verifyBase64String(any())).thenReturn(signature);
@@ -214,7 +214,7 @@ class PackedAttestationProcessorTest {
         CredAndCounterData credIdAndCounters = new CredAndCounterData();
         String signature = "test-signature";
         Fido2Configuration fido2Configuration = new Fido2Configuration();
-        fido2Configuration.setSkipValidateMdsInAttestationEnabled(false);
+        fido2Configuration.setSkipAttestation(false);
         when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
         when(commonVerifiers.verifyAlgorithm(any(), anyInt())).thenReturn(alg);
         when(commonVerifiers.verifyBase64String(any())).thenReturn(signature);
@@ -254,7 +254,7 @@ class PackedAttestationProcessorTest {
         CredAndCounterData credIdAndCounters = new CredAndCounterData();
         String signature = "test-signature";
         Fido2Configuration fido2Configuration = new Fido2Configuration();
-        fido2Configuration.setSkipValidateMdsInAttestationEnabled(true);
+        fido2Configuration.setSkipAttestation(true);
         when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
         when(commonVerifiers.verifyAlgorithm(any(), anyInt())).thenReturn(alg);
         when(commonVerifiers.verifyBase64String(any())).thenReturn(signature);

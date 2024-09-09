@@ -62,9 +62,13 @@ public class ConfigurationController {
         response.set("assertion", assertion);
         assertion.put("base_path", baseEndpointUri + "/assertion");
         assertion.put("options_endpoint", baseEndpointUri + "/assertion/options");
-        if (appConfiguration.getFido2Configuration().isAssertionOptionsGenerateEndpointEnabled()) {
-            assertion.put("options_generate_endpoint", baseEndpointUri + "/assertion/options/generate");
-        }
+      //TODO: delete this when checking issue related to isAssertionOptionsGenerateEndpointEnabled
+		/*
+		 * if (appConfiguration.getFido2Configuration().
+		 * isAssertionOptionsGenerateEndpointEnabled()) {
+		 * assertion.put("options_generate_endpoint", baseEndpointUri +
+		 * "/assertion/options/generate"); }
+		 */
         assertion.put("result_endpoint", baseEndpointUri + "/assertion/result");
 
         if (appConfiguration.isSuperGluuEnabled()) {

@@ -70,7 +70,8 @@ public class AssertionController {
         });
     }
 
-    @POST
+    //TODO: delete this when checking issue related to isAssertionOptionsGenerateEndpointEnabled
+    /*@POST
     @Consumes({"application/json"})
     @Produces({"application/json"})
     @Path("/options/generate")
@@ -82,7 +83,7 @@ public class AssertionController {
             AsserOptGenerateResponse result = assertionService.generateOptions(assertionOptionsGenerate);
             return Response.ok().entity(result).build();
         });
-    }
+    }*/
 
     @POST
     @Consumes({"application/json"})

@@ -97,7 +97,7 @@ class U2FAttestationProcessorTest {
         when(commonVerifiers.verifyBase64String(any())).thenReturn("test-signature");
         when(certificateVerifier.verifyAttestationCertificates(any(), any())).thenThrow(new Fido2MissingAttestationCertException("test missing"));
         when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
-        when(fido2Configuration.isSkipValidateMdsInAttestationEnabled()).thenReturn(false);
+        when(fido2Configuration.isSkipAttestation()).thenReturn(false);
         when(errorResponseFactory.badRequestException(any(), any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
         WebApplicationException res = assertThrows(WebApplicationException.class, () -> u2FAttestationProcessor.process(attStmt, authData, registration, clientDataHash, credIdAndCounters));
@@ -138,7 +138,7 @@ class U2FAttestationProcessorTest {
         when(commonVerifiers.verifyBase64String(any())).thenReturn("test-signature");
         when(certificateVerifier.verifyAttestationCertificates(any(), any())).thenThrow(new Fido2MissingAttestationCertException("test missing"));
         when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
-        when(fido2Configuration.isSkipValidateMdsInAttestationEnabled()).thenReturn(false);
+        when(fido2Configuration.isSkipAttestation()).thenReturn(false);
         X509Certificate publicCert1 = mock(X509Certificate.class);
         when(certificateService.getCertificates(anyList())).thenReturn(Collections.singletonList(publicCert1));
         when(publicCert1.getIssuerDN()).thenReturn((UserPrincipal) () -> "test-issuer");
@@ -181,7 +181,7 @@ class U2FAttestationProcessorTest {
         when(commonVerifiers.verifyBase64String(any())).thenReturn("test-signature");
         when(certificateVerifier.verifyAttestationCertificates(any(), any())).thenReturn(verifiedCert);
         when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
-        when(fido2Configuration.isSkipValidateMdsInAttestationEnabled()).thenReturn(false);
+        when(fido2Configuration.isSkipAttestation()).thenReturn(false);
 
         u2FAttestationProcessor.process(attStmt, authData, registration, clientDataHash, credIdAndCounters);
         verify(commonVerifiers).verifyAAGUIDZeroed(authData);
@@ -212,7 +212,7 @@ class U2FAttestationProcessorTest {
         when(attStmt.get("sig")).thenReturn(mock(JsonNode.class));
         when(commonVerifiers.verifyBase64String(any())).thenReturn("test-signature");
         when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
-        when(fido2Configuration.isSkipValidateMdsInAttestationEnabled()).thenReturn(true);
+        when(fido2Configuration.isSkipAttestation()).thenReturn(true);
 
         u2FAttestationProcessor.process(attStmt, authData, registration, clientDataHash, credIdAndCounters);
         verify(commonVerifiers).verifyAAGUIDZeroed(authData);

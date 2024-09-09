@@ -18,8 +18,8 @@ public class Fido2RegistrationData extends Fido2Data {
     private String userId;
     private String challenge;
 
-    private String attenstationRequest;
-    private String attenstationResponse;
+    private String attestationRequest;
+    private String attestationResponse;
 
     private String uncompressedECPoint;
     private String publicKeyId;
@@ -72,20 +72,20 @@ public class Fido2RegistrationData extends Fido2Data {
         this.challenge = challenge;
     }
 
-    public String getAttenstationRequest() {
-        return attenstationRequest;
+    public String getAttestationRequest() {
+        return attestationRequest;
     }
 
-    public void setAttenstationRequest(String attenstationRequest) {
-        this.attenstationRequest = attenstationRequest;
+    public void setAttestationRequest(String attestationRequest) {
+        this.attestationRequest = attestationRequest;
     }
 
-    public String getAttenstationResponse() {
-        return attenstationResponse;
+    public String getAttestationResponse() {
+        return attestationResponse;
     }
 
-    public void setAttenstationResponse(String attenstationResponse) {
-        this.attenstationResponse = attenstationResponse;
+    public void setAttestationResponse(String attestationResponse) {
+        this.attestationResponse = attestationResponse;
     }
 
     public String getUncompressedECPoint() {
@@ -170,7 +170,7 @@ public class Fido2RegistrationData extends Fido2Data {
 	@Override
 	public String toString() {
 		return "Fido2RegistrationData [username=" + username + ", domain=" + domain + ", userId=" + userId + ", challenge=" + challenge
-				+ ", attenstationRequest=" + attenstationRequest + ", attenstationResponse=" + attenstationResponse
+				+ ", attestationRequest=" + attestationRequest + ", attestationResponse=" + attestationResponse
 				+ ", uncompressedECPoint=" + uncompressedECPoint + ", publicKeyId=" + publicKeyId + ", type=" + type + ", status=" + status
 				+ ", counter=" + counter + ", attestationType=" + attestationType + ", signatureAlgorithm=" + signatureAlgorithm
 				+ ", applicationId=" + applicationId + "]";

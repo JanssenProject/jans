@@ -70,9 +70,6 @@ public class CommonVerifiers {
     private NetworkService networkService;
 
     @Inject
-    private AppConfiguration appConfiguration;
-
-    @Inject
     private Base64Service base64Service;
 
     @Inject
@@ -95,13 +92,14 @@ public class CommonVerifiers {
         }
     }
 
-    public String verifyRpDomain(String documentDomain) {
-        if (Strings.isNullOrEmpty(documentDomain)) {
-            documentDomain = appConfiguration.getIssuer();
+    public String verifyRpDomain(String origin, String rpId) {
+    	
+        if (Strings.isNullOrEmpty(origin)) {
+            origin = rpId;
         }
-        documentDomain = networkService.getHost(documentDomain);
-
-        return documentDomain;
+        origin = networkService.getHost(origin);
+        log.debug("Returning rp id : "+ origin);
+        return origin;
     }
 
     public void verifyCounter(int oldCounter, int newCounter) {
@@ -110,27 +108,11 @@ public class CommonVerifiers {
             return;
         if (newCounter <= oldCounter) {
             throw new Fido2CompromisedDevice("Counter did not increase");
-        }
+        } 
     }
 
 
-    public List<PublicKeyCredentialHints> verifyHints(JsonNode params) {
-        JsonNode userAgent;
-        List<PublicKeyCredentialHints> publicKeyCredentialHints = new ArrayList<PublicKeyCredentialHints>();
-        if (params.hasNonNull("user-agent")) {
-            userAgent = params.get("user-agent");
-            for (int i = 0; i < userAgent.size(); i++) {
-                // accessing each element of userAgent
-                log.debug(" user-agent " + i +  " " + userAgent.get(i).asText());
-                publicKeyCredentialHints.add(PublicKeyCredentialHints.getByValue(userAgent.get(i).asText()));
-            }
-        }else{
-            publicKeyCredentialHints.add(PublicKeyCredentialHints.getByValue(""));
-        }
-        return publicKeyCredentialHints;
-    }
-
-
+    
     public void verifyCounter(int counter) {
         if (counter < 0) {
             throw new Fido2RuntimeException("Invalid field : counter");
@@ -367,22 +349,7 @@ public class CommonVerifiers {
         }
     }
 
-    public AttestationConveyancePreference verifyAttestationConveyanceType(AttestationOptions attestationOptions) {
-        AttestationConveyancePreference attestationConveyancePreference = null;
-
-        if (attestationOptions.getAttestation() != null) {
-                String type = attestationOptions.getAttestation().getKeyName();
-                attestationConveyancePreference = AttestationConveyancePreference.valueOf(type);
-        }
-
-        if (attestationConveyancePreference == null) {
-            attestationConveyancePreference = AttestationConveyancePreference.direct;
-        }
-        
-        return attestationConveyancePreference;
-    }
-
-    public TokenBindingSupport verifyTokenBindingSupport(String status) {
+	public TokenBindingSupport verifyTokenBindingSupport(String status) {
     	if (status == null) {
     		return null;
     	}

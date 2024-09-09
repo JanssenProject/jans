@@ -33,6 +33,7 @@ import io.jans.fido2.service.verifier.AttestationVerifier;
 import io.jans.fido2.service.verifier.CommonVerifiers;
 import io.jans.fido2.service.verifier.DomainVerifier;
 import io.jans.orm.model.fido2.*;
+import io.jans.service.net.NetworkService;
 import io.jans.util.StringHelper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -93,6 +94,9 @@ public class AttestationService {
 
 	@Inject
     private ErrorResponseFactory errorResponseFactory;
+	
+	@Inject
+    private NetworkService networkService;
 
 	@Context
 	private HttpServletRequest httpRequest;
@@ -119,14 +123,7 @@ public class AttestationService {
 
 		// Create result object
 		PublicKeyCredentialCreationOptions credentialCreationOptions = new PublicKeyCredentialCreationOptions();
-		// Put attestation
-		AttestationConveyancePreference attestationConveyancePreference = commonVerifiers.verifyAttestationConveyanceType(attestationOptions);
-		credentialCreationOptions.setAttestation(attestationConveyancePreference);
-		log.debug("Put attestation {}", attestationConveyancePreference);
-
-		// Put authenticatorSelection
-		prepareAuthenticatorSelection(credentialCreationOptions, attestationOptions);
-		log.debug("Put authenticatorSelection {}", credentialCreationOptions.getAuthenticatorSelection());
+		
 
 		// Generate and put challenge
 		String challenge = challengeGenerator.getAttestationChallenge();
@@ -139,8 +136,15 @@ public class AttestationService {
 		pubKeyCredParams.stream().forEach(ele -> log.debug("Put pubKeyCredParam {}", ele.toString()));
 
 		// Put RP
-		String documentDomain = commonVerifiers.verifyRpDomain(attestationOptions.getDocumentDomain());
+		
+		
+		
+		
+		String documentDomain = commonVerifiers.verifyRpDomain(attestationOptions.getDocumentDomain(), appConfiguration.getIssuer());
 		RelyingParty relyingParty = createRpDomain(documentDomain);
+		log.debug("Relying Party: "+relyingParty);
+		
+		
 		if (relyingParty != null) {
 			credentialCreationOptions.setRp(relyingParty);
 			log.debug("Put rp {}", relyingParty.toString());
@@ -158,32 +162,80 @@ public class AttestationService {
 			credentialCreationOptions.setExcludeCredentials(excludedCredentials);
 			excludedCredentials.stream().forEach(ele -> log.debug("Put excludeCredentials {}", ele.toString()));
 		}
-
-		//put hints
-		if(null != attestationOptions.getExtensions()) {
-			List<PublicKeyCredentialHints> hints = commonVerifiers.verifyHints(attestationOptions.getExtensions());
-			credentialCreationOptions.setPublicKeyCredentialHints(hints);
-			log.debug("puts hints {}", hints);
+		
+		// Put authenticatorSelection
+		credentialCreationOptions.setAuthenticatorSelection(new AuthenticatorSelection());
+		
+		//set hints - client-device, security key, hybrid
+		List<String> hints = appConfiguration.getFido2Configuration().getHints();
+		
+		credentialCreationOptions.setHints(new HashSet<String>(hints));
+		if(hints.contains(PublicKeyCredentialHints.CLIENT_DEVICE))
+		{
+			credentialCreationOptions.getAuthenticatorSelection().setAuthenticatorAttachment(AuthenticatorAttachment.PLATFORM);
+			credentialCreationOptions.getAuthenticatorSelection().setUserVerification(UserVerification.preferred); 
+			credentialCreationOptions.getAuthenticatorSelection().setRequireResidentKey(true);
+			credentialCreationOptions.getAuthenticatorSelection().setResidentKey(UserVerification.preferred);
+			
 		}
-
+		else
+		{
+			credentialCreationOptions.getAuthenticatorSelection().setAuthenticatorAttachment(AuthenticatorAttachment.CROSS_PLATFORM);
+			credentialCreationOptions.getAuthenticatorSelection().setUserVerification(UserVerification.required); 
+			credentialCreationOptions.getAuthenticatorSelection().setRequireResidentKey(false);
+		}
+		log.debug("Put authenticatorSelection {}", credentialCreationOptions.getAuthenticatorSelection());
+		// set attestation - enterprise, none, direct
+		boolean enterpriseAttestation = appConfiguration.getFido2Configuration().isEnterpriseAttestation();
+		if (enterpriseAttestation)
+		{
+			credentialCreationOptions.setAttestation(AttestationConveyancePreference.enterprise);
+		}
+		// only platform authn, no other types of authenticators are allowed
+		else if(hints.contains(PublicKeyCredentialHints.CLIENT_DEVICE.getValue()) && hints.size()== 1)
+		{
+			credentialCreationOptions.setAttestation(AttestationConveyancePreference.none);
+		}
+		else if(appConfiguration.getFido2Configuration().isSkipAttestation())
+		{
+			credentialCreationOptions.setAttestation(AttestationConveyancePreference.none);
+		}
+		
+		// the priority of this check is last
+		else if(hints.contains(PublicKeyCredentialHints.SECURITY_KEY.getValue()) || hints.contains(PublicKeyCredentialHints.HYBRID.getValue()))
+		{
+			credentialCreationOptions.setAttestation(AttestationConveyancePreference.direct);
+		}
+		//TODO: this else does not make sense
+		else
+		{
+			credentialCreationOptions.setAttestation(AttestationConveyancePreference.direct);
+		}
+		
+		log.debug("Put attestation {}", credentialCreationOptions.getAttestation());
+		
 		// Copy extensions
 		if (attestationOptions.getExtensions() != null) {
 			credentialCreationOptions.setExtensions(attestationOptions.getExtensions());
 
 			log.debug("Put extensions {}", attestationOptions.getExtensions());
 		}
-		// incase of Apple's Touch ID and Window's Hello; timeout,status and error message cause a NotAllowedError on the browser, so skipping these attributes
-		if (attestationOptions.getAuthenticatorAttachment() != null) {
-			if (AuthenticatorAttachment.CROSS_PLATFORM.getAttachment().equals(attestationOptions.getAuthenticatorAttachment().getAttachment())) {
-				// Put timeout
-				long timeout = commonVerifiers.verifyTimeout(attestationOptions.getTimeout());
-				credentialCreationOptions.setTimeout(timeout);
-				log.debug("Put timeout {}", timeout);
-
-				credentialCreationOptions.setStatus("ok");
-				credentialCreationOptions.setErrorMessage("");
-			}
-		}
+		
+		//TODO: this should be deleted ater testing
+		/*
+		 * // incase of Apple's Touch ID and Window's Hello; timeout,status and error
+		 * message cause a NotAllowedError on the browser, so skipping these attributes
+		 * if (attestationOptions.getAuthenticatorAttachment() != null) { if
+		 * (AuthenticatorAttachment.CROSS_PLATFORM.getAttachment().equals(
+		 * attestationOptions.getAuthenticatorAttachment().getAttachment())) { // Put
+		 * timeout long timeout =
+		 * commonVerifiers.verifyTimeout(attestationOptions.getTimeout());
+		 * credentialCreationOptions.setTimeout(timeout); log.debug("Put timeout {}",
+		 * timeout);
+		 * 
+		 * credentialCreationOptions.setStatus("ok");
+		 * credentialCreationOptions.setErrorMessage(""); } }
+		 */
 		
 		// Store request in DB
 		Fido2RegistrationData entity = new Fido2RegistrationData();
@@ -202,7 +254,7 @@ public class AttestationService {
 		//}
 
 		// Store original requests
-		entity.setAttenstationRequest(CommonUtilService.toJsonNode(attestationOptions).toString());
+		entity.setAttestationRequest(CommonUtilService.toJsonNode(attestationOptions).toString());
 
 		Fido2RegistrationEntry registrationEntry = registrationPersistenceService.buildFido2RegistrationEntry(entity, oneStep);
 		//if (params.hasNonNull("session_id")) {
@@ -285,7 +337,7 @@ public class AttestationService {
         }
 
 		// Store original response
-		registrationData.setAttenstationResponse(CommonUtilService.toJsonNode(attestationResult).toString());
+		registrationData.setAttestationResponse(CommonUtilService.toJsonNode(attestationResult).toString());
 
 		// Set actual counter value. Note: Fido2 not update initial value in
 		// Fido2RegistrationData to minimize DB updates
@@ -419,13 +471,14 @@ public class AttestationService {
 
 	private RelyingParty createRpDomain(String documentDomain) {
 		List<RequestedParty> requestedParties = appConfiguration.getFido2Configuration().getRequestedParties();
-
+		
 		if ((requestedParties == null) || requestedParties.isEmpty()) {
 			// Add entry for default RP
 			return RelyingParty.createRelyingParty(documentDomain, appConfiguration.getIssuer());
 		} else {
 			for (RequestedParty requestedParty : requestedParties) {
 				for (String domain : requestedParty.getDomains()) {
+					
 					if (StringHelper.equalsIgnoreCase(documentDomain, domain)) {
 						// Add entry for supported RP
 						return RelyingParty.createRelyingParty(documentDomain, requestedParty.getName());
@@ -465,5 +518,5 @@ public class AttestationService {
 
 		return excludedKeys;
 	}
-
+	
 }

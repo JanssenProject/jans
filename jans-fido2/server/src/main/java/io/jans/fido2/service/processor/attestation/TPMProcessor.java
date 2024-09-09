@@ -138,7 +138,7 @@ public class TPMProcessor implements AttestationFormatProcessor {
             List<X509Certificate> trustAnchorCertificates = attestationCertificateService.getAttestationRootCertificates(authData, aikCertificates);
             X509Certificate aikCertificate = aikCertificates.get(0);
 
-            if (appConfiguration.getFido2Configuration().isSkipValidateMdsInAttestationEnabled()) {
+            if (appConfiguration.getFido2Configuration().isSkipAttestation()) {
                 log.warn("SkipValidateMdsInAttestation is enabled");
             } else {
 //                try {

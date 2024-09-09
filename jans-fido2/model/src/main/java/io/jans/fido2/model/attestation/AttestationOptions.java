@@ -1,14 +1,17 @@
 package io.jans.fido2.model.attestation;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.jans.fido2.ctap.AttestationConveyancePreference;
 import io.jans.fido2.ctap.AuthenticatorAttachment;
 import io.jans.fido2.model.common.SuperGluuSupport;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class AttestationOptions extends SuperGluuSupport {
-    private String username;
+    private String username ;
     private String displayName;
     private AttestationConveyancePreference attestation;
     private String documentDomain;

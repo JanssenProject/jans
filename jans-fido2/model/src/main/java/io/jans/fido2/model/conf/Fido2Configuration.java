@@ -18,6 +18,7 @@ import io.jans.doc.annotation.DocProperty;
  * @author Yuriy Movchan Date: 11/05/2018
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
+
 public class Fido2Configuration {
 
     @DocProperty(description = "Authenticators certificates folder")
@@ -32,7 +33,6 @@ public class Fido2Configuration {
     private boolean checkU2fAttestations = false;
     @DocProperty(description = "Allow to enroll users on enrollment/authentication requests")
     private boolean userAutoEnrollment = false;
-
     @DocProperty(description = "Expiration time in seconds for pending enrollment/authentication requests")
     private int unfinishedRequestExpiration = 120; // 120 seconds
     @DocProperty(description = "Expiration time in seconds for approved authentication requests")
@@ -48,10 +48,13 @@ public class Fido2Configuration {
     @DocProperty(description = "Boolean value indicating whether the MDS download should be omitted")
     private boolean skipDownloadMdsEnabled = false;
     @DocProperty(description = "Boolean value indicating whether MDS validation should be omitted during attestation")
-    private boolean skipValidateMdsInAttestationEnabled = false;
-    @DocProperty(description = "Boolean value indicating whether the assertion custom endpoint (used especially in passkey) is enabled.")
-    private boolean assertionOptionsGenerateEndpointEnabled = false;
-
+    private boolean skipAttestation = false;
+    @DocProperty(description = "Hints to the RP - security-key, client-device, hybrid")
+    private List<String> hints = new ArrayList<String>();
+    @DocProperty(description = "If authenticators have been enabled for use in a specific protected envt (enterprise authenticators)")
+    private boolean enterpriseAttestation = false;
+    
+    
     public String getAuthenticatorCertsFolder() {
         return authenticatorCertsFolder;
     }
@@ -156,19 +159,44 @@ public class Fido2Configuration {
         this.skipDownloadMdsEnabled = skipDownloadMdsEnabled;
     }
 
-    public boolean isSkipValidateMdsInAttestationEnabled() {
-        return skipValidateMdsInAttestationEnabled;
-    }
+	public boolean isSkipAttestation() {
+		return skipAttestation;
+	}
 
-    public void setSkipValidateMdsInAttestationEnabled(boolean skipValidateMdsInAttestationEnabled) {
-        this.skipValidateMdsInAttestationEnabled = skipValidateMdsInAttestationEnabled;
-    }
+	public void setSkipAttestation(boolean skipAttestation) {
+		this.skipAttestation = skipAttestation;
+	}
 
-    public boolean isAssertionOptionsGenerateEndpointEnabled() {
-        return assertionOptionsGenerateEndpointEnabled;
-    }
+	public List<String> getHints() {
+		return hints;
+	}
 
-    public void setAssertionOptionsGenerateEndpointEnabled(boolean assertionOptionsGenerateEndpointEnabled) {
-        this.assertionOptionsGenerateEndpointEnabled = assertionOptionsGenerateEndpointEnabled;
-    }
-}
+	public void setHints(List<String> hints) {
+		this.hints = hints;
+	}
+
+	public boolean isEnterpriseAttestation() {
+		return enterpriseAttestation;
+	}
+
+	public void setEnterpriseAttestation(boolean enterpriseOnly) {
+		this.enterpriseAttestation = enterpriseOnly;
+	}
+
+	@Override
+	public String toString() {
+		return "Fido2Configuration [authenticatorCertsFolder=" + authenticatorCertsFolder + ", mdsAccessToken="
+				+ mdsAccessToken + ", mdsCertsFolder=" + mdsCertsFolder + ", mdsTocsFolder=" + mdsTocsFolder
+				+ ", checkU2fAttestations=" + checkU2fAttestations + ", userAutoEnrollment=" + userAutoEnrollment
+				+ ", unfinishedRequestExpiration=" + unfinishedRequestExpiration + ", authenticationHistoryExpiration="
+				+ authenticationHistoryExpiration + ", serverMetadataFolder=" + serverMetadataFolder
+				+ ", requestedCredentialTypes=" + requestedCredentialTypes + ", requestedParties=" + requestedParties
+				+ ", metadataUrlsProvider=" + metadataUrlsProvider + ", skipDownloadMdsEnabled="
+				+ skipDownloadMdsEnabled + ", skipAttestation=" + skipAttestation + ", hints=" + hints
+				+ ", enterpriseAttestation=" + enterpriseAttestation + "]";
+	}
+
+	
+
+	
+ }
