@@ -182,7 +182,16 @@ LOCAL_POLICY_STORE='''
 }
 '''
 
+# example with raw json
 store = PolicyStore.from_raw_json(LOCAL_POLICY_STORE)
+
+# example with reading from file
+store = PolicyStore.from_filepath("../demo/policy-store/local.json")
+
+# example with loading from remote uri
+store = PolicyStore.from_remote_uri(
+    "https://raw.githubusercontent.com/JanssenProject/jans/main/jans-lock/cedarling/demo/policy-store/local.json")
+
 
 # none means default mapping
 mapper=TokenMapper(id_token=None, userinfo_token=None, access_token=None)
