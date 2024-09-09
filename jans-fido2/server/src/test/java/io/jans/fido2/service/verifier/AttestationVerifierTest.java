@@ -4,6 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.jans.fido2.model.auth.AuthData;
 import io.jans.fido2.model.auth.CredAndCounterData;
+import io.jans.fido2.model.conf.AppConfiguration;
+import io.jans.fido2.model.conf.AttestationMode;
+import io.jans.fido2.model.conf.Fido2Configuration;
 import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.fido2.service.AuthenticatorDataParser;
 import io.jans.fido2.service.Base64Service;
@@ -53,6 +56,9 @@ class AttestationVerifierTest {
 
     @Mock
     private ErrorResponseFactory errorResponseFactory;
+
+    @Mock
+    private AppConfiguration appConfiguration;
 
     @Test
     void verifyAuthenticatorAttestationResponse_attestationObjectFieldIsNull_fido2RuntimeException() {
@@ -167,6 +173,10 @@ class AttestationVerifierTest {
         when(commonVerifiers.verifyAuthData(any())).thenReturn(authDataText);
         when(authenticatorDataParser.parseAttestationData(authDataText)).thenReturn(authData);
         when(attestationProcessorFactory.getCommandProcessor(fmt)).thenReturn(attestationProcessor);
+
+        Fido2Configuration fido2Configuration = new Fido2Configuration();
+        fido2Configuration.setAttestationMode(AttestationMode.MONITOR);
+        when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
 
         CredAndCounterData credIdAndCounters = attestationVerifier.verifyAuthenticatorAttestationResponse(authenticatorResponse, credential);
         assertNotNull(credIdAndCounters);

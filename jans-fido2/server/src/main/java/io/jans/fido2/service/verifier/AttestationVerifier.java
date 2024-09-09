@@ -21,7 +21,10 @@ package io.jans.fido2.service.verifier;
 import java.io.IOException;
 
 import com.google.common.base.Strings;
+import io.jans.fido2.ctap.AttestationFormat;
 import io.jans.fido2.model.attestation.Response;
+import io.jans.fido2.model.conf.AppConfiguration;
+import io.jans.fido2.model.conf.AttestationMode;
 import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.orm.model.fido2.Fido2RegistrationData;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -64,6 +67,9 @@ public class AttestationVerifier {
     @Inject
     private ErrorResponseFactory errorResponseFactory;
 
+    @Inject
+    private AppConfiguration appConfiguration;
+
     public CredAndCounterData verifyAuthenticatorAttestationResponse(Response response, Fido2RegistrationData credential) {
         if (Strings.isNullOrEmpty(response.getAttestationObject()) || Strings.isNullOrEmpty(response.getClientDataJSON())) {
             throw errorResponseFactory.invalidRequest("Authenticator data is invalid");
@@ -101,7 +107,18 @@ public class AttestationVerifier {
 
             byte[] clientDataHash = DigestUtils.getSha256Digest().digest(base64Service.urlDecode(clientDataJson));
             AttestationFormatProcessor attestationProcessor = attestationProcessorFactory.getCommandProcessor(fmt);
-            attestationProcessor.process(attStmt, authData, credential, clientDataHash, credIdAndCounters);
+
+            if (AttestationMode.DISABLED.equals(appConfiguration.getFido2Configuration().getAttestationMode())) {
+                log.warn("SkipValidateMdsInAttestation is enabled");
+            } else {
+                if (AttestationMode.ENFORCED.equals(appConfiguration.getFido2Configuration().getAttestationMode()) && fmt.equals(AttestationFormat.none.getFmt())) {
+                    //TODO throw exception here
+                    throw new Fido2RuntimeException("Error Message Here");
+                }
+                else {
+                    attestationProcessor.process(attStmt, authData, credential, clientDataHash, credIdAndCounters);
+                }
+            }
 
             //get flags buffer
             byte[] flagsBuffer = authData.getFlags();

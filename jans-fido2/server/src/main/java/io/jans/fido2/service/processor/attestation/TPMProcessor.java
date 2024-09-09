@@ -33,14 +33,12 @@ import java.util.Iterator;
 import java.util.List;
 
 import io.jans.fido2.model.attestation.AttestationErrorResponseType;
-import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.error.ErrorResponseFactory;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import io.jans.fido2.ctap.AttestationFormat;
-import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.auth.AuthData;
 import io.jans.fido2.model.auth.CredAndCounterData;
 import io.jans.orm.model.fido2.Fido2RegistrationData;
@@ -93,9 +91,6 @@ public class TPMProcessor implements AttestationFormatProcessor {
     private Base64Service base64Service;
 
     @Inject
-    private AppConfiguration appConfiguration;
-
-    @Inject
     private ErrorResponseFactory errorResponseFactory;
 
     @Override
@@ -138,18 +133,15 @@ public class TPMProcessor implements AttestationFormatProcessor {
             List<X509Certificate> trustAnchorCertificates = attestationCertificateService.getAttestationRootCertificates(authData, aikCertificates);
             X509Certificate aikCertificate = aikCertificates.get(0);
 
-            if (appConfiguration.getFido2Configuration().isSkipValidateMdsInAttestationEnabled()) {
-                log.warn("SkipValidateMdsInAttestation is enabled");
-            } else {
 //                try {
 //
 //                } catch (Fido2RuntimeException e) {
 //                    log.error("Error on verify attestation certificates: {}", e.getMessage(), e);
 //                    throw e;
 //                }
-                X509Certificate verifiedCert = certificateVerifier.verifyAttestationCertificates(certificates, trustAnchorCertificates);
-                verifyAIKCertificate(aikCertificate, verifiedCert);
-            }
+            X509Certificate verifiedCert = certificateVerifier.verifyAttestationCertificates(certificates, trustAnchorCertificates);
+            verifyAIKCertificate(aikCertificate, verifiedCert);
+
 
             verifyTPMCertificateExtenstion(aikCertificate, authData);
 

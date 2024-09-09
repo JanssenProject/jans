@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.jans.fido2.model.auth.AuthData;
 import io.jans.fido2.model.auth.CredAndCounterData;
 import io.jans.fido2.model.conf.AppConfiguration;
-import io.jans.fido2.model.conf.Fido2Configuration;
 import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.CertificateService;
@@ -80,7 +79,7 @@ class PackedAttestationProcessorTest {
     }
 
     @Test
-    void process_ifAttStmtHasX5cAndSkipValidateMdsInAttestationEnabledIsFalseAndTrustManagerIsNull_badRequestException() throws DecoderException {
+    void process_ifAttStmtHasX5cAndTrustManagerIsNull_badRequestException() throws DecoderException {
         ObjectNode attStmt = instanceMapper().createObjectNode();
         ArrayNode x5cArray = instanceMapper().createArrayNode();
         x5cArray.add("certPath1");
@@ -94,9 +93,6 @@ class PackedAttestationProcessorTest {
         Fido2RegistrationData registration = new Fido2RegistrationData();
         byte[] clientDataHash = "test-clientDataHash".getBytes();
         CredAndCounterData credIdAndCounters = new CredAndCounterData();
-        Fido2Configuration fido2Configuration = new Fido2Configuration();
-        fido2Configuration.setSkipValidateMdsInAttestationEnabled(false);
-        when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
         when(errorResponseFactory.badRequestException(any(), any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
         WebApplicationException res = assertThrows(WebApplicationException.class, () -> packedAttestationProcessor.process(attStmt, authData, registration, clientDataHash, credIdAndCounters));
@@ -112,7 +108,7 @@ class PackedAttestationProcessorTest {
     }
 
     @Test
-    void process_ifAttStmtHasX5cAndSkipValidateMdsInAttestationEnabledIsFalseAndTrustManagerAndAcceptedIssuersLengthIsZero_fido2RuntimeException() throws DecoderException {
+    void process_ifAttStmtHasX5cAndAcceptedIssuersLengthIsZero_fido2RuntimeException() throws DecoderException {
         ObjectNode attStmt = instanceMapper().createObjectNode();
         ArrayNode x5cArray = instanceMapper().createArrayNode();
         x5cArray.add("certPath1");
@@ -126,9 +122,6 @@ class PackedAttestationProcessorTest {
         Fido2RegistrationData registration = new Fido2RegistrationData();
         byte[] clientDataHash = "test-clientDataHash".getBytes();
         CredAndCounterData credIdAndCounters = new CredAndCounterData();
-        Fido2Configuration fido2Configuration = new Fido2Configuration();
-        fido2Configuration.setSkipValidateMdsInAttestationEnabled(false);
-        when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
         List<X509Certificate> certificates = Collections.singletonList(mock(X509Certificate.class));
         when(certificateService.getCertificates(anyList())).thenReturn(certificates);
         X509TrustManager tm = mock(X509TrustManager.class);
@@ -149,7 +142,7 @@ class PackedAttestationProcessorTest {
     }
 
     @Test
-    void process_ifAttStmtHasX5cAndSkipValidateMdsInAttestationEnabledIsFalseAndTrustManagerAndIsSelfSignedTrue_badRequestException() throws DecoderException {
+    void process_ifAttStmtHasX5cAndTrustManagerAndIsSelfSignedTrue_badRequestException() throws DecoderException {
         ObjectNode attStmt = instanceMapper().createObjectNode();
         ArrayNode x5cArray = instanceMapper().createArrayNode();
         x5cArray.add("certPath1");
@@ -166,9 +159,6 @@ class PackedAttestationProcessorTest {
         byte[] clientDataHash = "test-clientDataHash".getBytes();
         CredAndCounterData credIdAndCounters = new CredAndCounterData();
         String signature = "test-signature";
-        Fido2Configuration fido2Configuration = new Fido2Configuration();
-        fido2Configuration.setSkipValidateMdsInAttestationEnabled(false);
-        when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
         when(commonVerifiers.verifyAlgorithm(any(), anyInt())).thenReturn(alg);
         when(commonVerifiers.verifyBase64String(any())).thenReturn(signature);
         List<X509Certificate> certificates = Collections.singletonList(mock(X509Certificate.class));
@@ -196,7 +186,7 @@ class PackedAttestationProcessorTest {
     }
 
     @Test
-    void process_ifAttStmtHasX5cAndSkipValidateMdsInAttestationEnabledIsFalseAndTrustManagerAndIsSelfSignedTrue_success() throws DecoderException {
+    void process_ifAttStmtHasX5cAndTrustManagerAndIsSelfSignedTrue_success() throws DecoderException {
         ObjectNode attStmt = instanceMapper().createObjectNode();
         ArrayNode x5cArray = instanceMapper().createArrayNode();
         x5cArray.add("certPath1");
@@ -213,9 +203,6 @@ class PackedAttestationProcessorTest {
         byte[] clientDataHash = "test-clientDataHash".getBytes();
         CredAndCounterData credIdAndCounters = new CredAndCounterData();
         String signature = "test-signature";
-        Fido2Configuration fido2Configuration = new Fido2Configuration();
-        fido2Configuration.setSkipValidateMdsInAttestationEnabled(false);
-        when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
         when(commonVerifiers.verifyAlgorithm(any(), anyInt())).thenReturn(alg);
         when(commonVerifiers.verifyBase64String(any())).thenReturn(signature);
         List<X509Certificate> certificates = Collections.singletonList(mock(X509Certificate.class));
@@ -236,36 +223,6 @@ class PackedAttestationProcessorTest {
         verify(certificateVerifier).isSelfSigned(any(X509Certificate.class));
         verify(base64Service, times(2)).urlEncodeToString(any());
         verifyNoInteractions(log, coseService);
-    }
-
-    @Test
-    void process_ifAttStmtHasX5cAndSkipValidateMdsInAttestationEnabledIsTrue_success() {
-        ObjectNode attStmt = instanceMapper().createObjectNode();
-        ArrayNode x5cArray = instanceMapper().createArrayNode();
-        x5cArray.add("certPath1");
-        attStmt.set("x5c", x5cArray);
-        int alg = -7;
-        attStmt.put("alg", alg);
-        attStmt.put("sig", "test-signature");
-        AuthData authData = new AuthData();
-        authData.setKeyType(alg);
-        Fido2RegistrationData registration = new Fido2RegistrationData();
-        byte[] clientDataHash = "test-clientDataHash".getBytes();
-        CredAndCounterData credIdAndCounters = new CredAndCounterData();
-        String signature = "test-signature";
-        Fido2Configuration fido2Configuration = new Fido2Configuration();
-        fido2Configuration.setSkipValidateMdsInAttestationEnabled(true);
-        when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
-        when(commonVerifiers.verifyAlgorithm(any(), anyInt())).thenReturn(alg);
-        when(commonVerifiers.verifyBase64String(any())).thenReturn(signature);
-
-        packedAttestationProcessor.process(attStmt, authData, registration, clientDataHash, credIdAndCounters);
-        verify(commonVerifiers).verifyAlgorithm(any(JsonNode.class), any(Integer.class));
-        verify(commonVerifiers).verifyBase64String(any(JsonNode.class));
-        verify(log).warn(eq("SkipValidateMdsInAttestation is enabled"));
-        verify(base64Service, times(2)).urlEncodeToString(any());
-        verifyNoInteractions(authenticatorDataVerifier, certificateService, attestationCertificateService, certificateVerifier, coseService);
-        verifyNoMoreInteractions(log);
     }
 
     @Test
