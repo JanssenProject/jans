@@ -98,7 +98,7 @@ public class PackedAttestationProcessor implements AttestationFormatProcessor {
         String signature = commonVerifiers.verifyBase64String(attStmt.get("sig"));
 
         if (attStmt.hasNonNull("x5c")) {
-            if (appConfiguration.getFido2Configuration().isSkipValidateMdsInAttestationEnabled()) {
+            if (appConfiguration.getFido2Configuration().isSkipAttestation()) {
                 log.warn("SkipValidateMdsInAttestation is enabled");
             } else {
                 List<X509Certificate> attestationCertificates = getAttestationCertificates(attStmt);

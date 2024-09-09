@@ -10,6 +10,7 @@ public enum AttestationConveyancePreference {
 
     direct("direct"),
     indirect("indirect"),
+    enterprise("enterprise"),
     none("none");
 
     private String keyName;

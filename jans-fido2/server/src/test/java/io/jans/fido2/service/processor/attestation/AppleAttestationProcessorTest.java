@@ -122,7 +122,7 @@ class AppleAttestationProcessorTest {
         X509Certificate credCert = mock(X509Certificate.class);
         when(certificateService.getCertificate(anyString())).thenReturn(credCert);
         Fido2Configuration fido2Configuration = new Fido2Configuration();
-        fido2Configuration.setSkipValidateMdsInAttestationEnabled(false);
+        fido2Configuration.setSkipAttestation(false);
         when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
         when(attestationCertificateService.getRootCertificatesBySubjectDN(anyString())).thenThrow(new Fido2RuntimeException("test exception"));
         when(credCert.getIssuerDN()).thenReturn(new BasicUserPrincipal("test issuer dn"));
@@ -160,7 +160,7 @@ class AppleAttestationProcessorTest {
         X509Certificate credCert = mock(X509Certificate.class);
         when(certificateService.getCertificate(anyString())).thenReturn(credCert);
         Fido2Configuration fido2Configuration = new Fido2Configuration();
-        fido2Configuration.setSkipValidateMdsInAttestationEnabled(false);
+        fido2Configuration.setSkipAttestation(false);
         when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
         List<X509Certificate> rootCertificates = Collections.singletonList(mock(X509Certificate.class));
         when(attestationCertificateService.getRootCertificatesBySubjectDN(anyString())).thenReturn(rootCertificates);
@@ -204,7 +204,7 @@ class AppleAttestationProcessorTest {
         X509Certificate credCert = mock(X509Certificate.class);
         when(certificateService.getCertificate(anyString())).thenReturn(credCert);
         Fido2Configuration fido2Configuration = new Fido2Configuration();
-        fido2Configuration.setSkipValidateMdsInAttestationEnabled(false);
+        fido2Configuration.setSkipAttestation(false);
         when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
         List<X509Certificate> rootCertificates = Collections.singletonList(mock(X509Certificate.class));
         when(attestationCertificateService.getRootCertificatesBySubjectDN(anyString())).thenReturn(rootCertificates);
@@ -254,7 +254,7 @@ class AppleAttestationProcessorTest {
         X509Certificate credCert = mock(X509Certificate.class);
         when(certificateService.getCertificate(anyString())).thenReturn(credCert);
         Fido2Configuration fido2Configuration = new Fido2Configuration();
-        fido2Configuration.setSkipValidateMdsInAttestationEnabled(false);
+        fido2Configuration.setSkipAttestation(false);
         when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
         List<X509Certificate> rootCertificates = Collections.singletonList(mock(X509Certificate.class));
         when(attestationCertificateService.getRootCertificatesBySubjectDN(anyString())).thenReturn(rootCertificates);
@@ -308,7 +308,7 @@ class AppleAttestationProcessorTest {
         X509Certificate credCert = mock(X509Certificate.class);
         when(certificateService.getCertificate(anyString())).thenReturn(credCert);
         Fido2Configuration fido2Configuration = new Fido2Configuration();
-        fido2Configuration.setSkipValidateMdsInAttestationEnabled(false);
+        fido2Configuration.setSkipAttestation(false);
         when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
         List<X509Certificate> rootCertificates = Collections.singletonList(mock(X509Certificate.class));
         when(attestationCertificateService.getRootCertificatesBySubjectDN(anyString())).thenReturn(rootCertificates);

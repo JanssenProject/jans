@@ -115,7 +115,7 @@ public class U2FAttestationProcessor implements AttestationFormatProcessor {
             credIdAndCounters.setSignatureAlgorithm(alg);
             List<X509Certificate> trustAnchorCertificates = attestationCertificateService.getAttestationRootCertificates((JsonNode) null, certificates);
 
-            if (appConfiguration.getFido2Configuration().isSkipValidateMdsInAttestationEnabled()) {
+            if (appConfiguration.getFido2Configuration().isSkipAttestation()) {
                 log.warn("SkipValidateMdsInAttestation is enabled");
             } else {
                 try {

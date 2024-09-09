@@ -21,7 +21,7 @@ public class AttestationOrAssertionResponse {
 	private String aaguidOrSkid;
 	private String authenticatorName;
 	private String origin;
-	private String transportSecurityKeyOrPlatformHybrid;
+	private String hint;
 	public String getCredentialID() {
 		return credentialID;
 	}
@@ -118,12 +118,13 @@ public class AttestationOrAssertionResponse {
 		this.origin = origin;
 	}
 
-	public String getTransportSecurityKeyOrPlatformHybrid() {
-		return transportSecurityKeyOrPlatformHybrid;
+	
+	public String getHint() {
+		return hint;
 	}
 
-	public void setTransportSecurityKeyOrPlatformHybrid(String transportSecurityKeyOrPlatformHybrid) {
-		this.transportSecurityKeyOrPlatformHybrid = transportSecurityKeyOrPlatformHybrid;
+	public void setHint(String hint) {
+		this.hint = hint;
 	}
 
 	public String getChallenge() {
@@ -215,7 +216,7 @@ public class AttestationOrAssertionResponse {
 				+ ", multiFactor=" + multiFactor + ", multiDevice=" + multiDevice + ", deviceType=" + deviceType
 				+ ", certified=" + certified + ", certificationLevel=" + certificationLevel + ", aaguidOrSkid="
 				+ aaguidOrSkid + ", authenticatorName=" + authenticatorName + ", origin=" + origin
-				+ ", transportSecurityKeyOrPlatformHybrid=" + transportSecurityKeyOrPlatformHybrid + ", challenge="
+				+ ", hint=" + hint + ", challenge="
 				+ challenge + ", rpId=" + rpId + ", allowCredentials=" + allowCredentials + ", timeout=" + timeout
 				+ ", extensions=" + extensions + "]";
 	}

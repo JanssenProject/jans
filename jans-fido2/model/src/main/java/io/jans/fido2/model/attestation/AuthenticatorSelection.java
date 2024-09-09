@@ -1,8 +1,11 @@
 package io.jans.fido2.model.attestation;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import io.jans.fido2.ctap.AuthenticatorAttachment;
 import io.jans.orm.model.fido2.UserVerification;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class AuthenticatorSelection {
     private AuthenticatorAttachment authenticatorAttachment;
     private UserVerification userVerification;

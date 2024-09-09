@@ -150,7 +150,7 @@ public class AssertionService {
 		log.debug("Put challenge {}", challenge);
 
 		// Put RP
-		String documentDomain = commonVerifiers.verifyRpDomain(assertionOptions.getDocumentDomain());
+		String documentDomain = commonVerifiers.verifyRpDomain(assertionOptions.getDocumentDomain(),appConfiguration.getIssuer());
 		assertionOptionsResponse.setRpId(documentDomain);
 		log.debug("Put rpId {}", documentDomain);
 
@@ -249,7 +249,7 @@ public class AssertionService {
 		log.debug("Put challenge {}", challenge);
 
 		// Put RP
-		String documentDomain = commonVerifiers.verifyRpDomain(assertionOptionsGenerate.getDocumentDomain());
+		String documentDomain = commonVerifiers.verifyRpDomain(assertionOptionsGenerate.getDocumentDomain(), appConfiguration.getIssuer());
 		asserOptGenerateResponse.setRpId(documentDomain);
 		log.debug("Put rpId {}", documentDomain);
 
@@ -456,13 +456,13 @@ public class AssertionService {
 
 		List<PublicKeyCredentialDescriptor> allowedFido2Keys =  new ArrayList<>(allowedFido2Registrations.size());
 		allowedFido2Registrations.forEach((f) -> {
-			log.debug("attestation request:" + f.getRegistrationData().getAttenstationRequest());
+			log.debug("attestation request:" + f.getRegistrationData().getAttestationRequest());
 			String transports[];
 			if (superGluu) {
 				transports = new String[] { "net", "qr" };
 			} else {
-				transports = ((f.getRegistrationData().getAttestationType().equalsIgnoreCase(AttestationFormat.apple.getFmt())) || ( f.getRegistrationData().getAttenstationRequest() != null &&
-						f.getRegistrationData().getAttenstationRequest().contains(AuthenticatorAttachment.PLATFORM.getAttachment())))
+				transports = ((f.getRegistrationData().getAttestationType().equalsIgnoreCase(AttestationFormat.apple.getFmt())) || ( f.getRegistrationData().getAttestationRequest() != null &&
+						f.getRegistrationData().getAttestationRequest().contains(AuthenticatorAttachment.PLATFORM.getAttachment())))
 
 						? new String[] { "internal" }
 						: new String[] { "usb", "ble", "nfc" };
