@@ -80,9 +80,15 @@ spec:
           {{- with .Values.volumeMounts }}
 {{- toYaml . | nindent 10 }}
           {{- end }}
+          - mountPath: /etc/jans/conf/configuration.json
+            name: {{ .Release.Name }}-configuration-file
+            subPath: configuration.json
         resources:
 {{- toYaml .Values.resources | nindent 10 }}
       volumes:
       {{- with .Values.volumes }}
 {{- toYaml . | nindent 8 }}
       {{- end }}
+        - name: {{ .Release.Name }}-configuration-file
+          secret:
+            secretName: {{ .Release.Name }}-configuration-file

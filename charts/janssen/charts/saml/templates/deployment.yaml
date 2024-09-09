@@ -108,6 +108,9 @@ spec:
             - name: {{ include "saml.fullname" .}}-updatelbip
               mountPath: "/scripts"
           {{- end }}
+            - mountPath: /etc/jans/conf/configuration.json
+              name: {{ .Release.Name }}-configuration-file
+              subPath: configuration.json
           livenessProbe:
 {{- toYaml .Values.livenessProbe | nindent 12 }}
           readinessProbe:
@@ -132,6 +135,9 @@ spec:
           configMap:
             name: {{ .Release.Name }}-updatelbip
       {{- end }}
+        - name: {{ .Release.Name }}-configuration-file
+          secret:
+            secretName: {{ .Release.Name }}-configuration-file
       {{- if not .Values.global.isFqdnRegistered }}
       hostAliases:
        - ip: {{ .Values.global.lbIp }}

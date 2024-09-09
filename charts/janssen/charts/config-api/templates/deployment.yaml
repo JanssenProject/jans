@@ -96,6 +96,9 @@ spec:
             - name: {{ include "config-api.name" . }}-updatelbip
               mountPath: /scripts
             {{- end }}
+            - mountPath: /etc/jans/conf/configuration.json
+              name: {{ .Release.Name }}-configuration-file
+              subPath: configuration.json
           {{- if and ( .Values.global.opendj.enabled ) (or (eq .Values.global.storageClass.provisioner "microk8s.io/hostpath" ) (eq .Values.global.storageClass.provisioner "k8s.io/minikube-hostpath")) }}
           resources: {}
           {{- else if .Values.global.cloud.testEnviroment }}
@@ -113,6 +116,9 @@ spec:
           configMap:
             name: {{ .Release.Name }}-updatelbip
         {{- end }}
+        - name: {{ .Release.Name }}-configuration-file
+          secret:
+            secretName: {{ .Release.Name }}-configuration-file
       {{- if not .Values.global.isFqdnRegistered  }}
       hostAliases:
       - ip: {{ .Values.global.lbIp }}
