@@ -4,6 +4,12 @@ This project uses `maturin` to create a Python library from Rust code. Follow th
 
 ### Prerequisites
 
+1. (Optional) Install build tools (for Linux users): You may need to install essential build tools by running:
+   ```
+   sudo apt install build-essential
+   ```
+
+
 1. **Install `maturin`:**
    We recommend using `pipx` to install `maturin`. First, ensure `pipx` is installed by following the [official instructions](https://pipx.pypa.io/stable/).
 
