@@ -7,17 +7,18 @@ import tempfile
 import shutil
 
 from urllib import request
-
+from functools import partial
 from datetime import datetime
 from typing import Any
 from types import SimpleNamespace
+
 from prompt_toolkit.application import Application
 from prompt_toolkit.eventloop import get_event_loop
 from prompt_toolkit.layout import ScrollablePane
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.lexers import PygmentsLexer, DynamicLexer
 
-from prompt_toolkit.layout.containers import HSplit, VSplit, DynamicContainer, Window
+from prompt_toolkit.layout.containers import HSplit, VSplit, DynamicContainer, Window, HorizontalAlign
 from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.formatted_text import HTML
 from prompt_toolkit.widgets import Button, Label, TextArea, Box, Frame, RadioList
@@ -65,8 +66,7 @@ class Agama(DialogUtils):
         self.main_container =  HSplit([
                     VSplit([
                         self.app.getTitledText(_("Search"), name='oauth:agama:search', jans_help=_(common_strings.enter_to_search), accept_handler=self.search_agama_project, style=cli_style.edit_text),
-                        self.app.getButton(text=_("Add a New Project"), name='oauth:agama:add', jans_help=_("To add a new Agama project press this button"), handler=self.upload_project),
-                        self.app.getButton(text=_("Community Projects"), name='oauth:agama:community-projects', jans_help=_("Deploy Agama Lab community projects"), handler=self.deploy_agama_lab_community_projects),
+                        self.app.getButton(text=_("Add a New Project"), name='oauth:agama:add', jans_help=_("To add a new Agama project press this button"), handler=self.add_new_project),
                         ],
                         padding=3,
                         width=D(),
@@ -81,6 +81,45 @@ class Agama(DialogUtils):
                 f'<c>              {_("Manage Agama project configuration")}\n',
                 without=['v', 'enter']
                 )
+
+    def add_new_project(self) -> None:
+
+
+        def button_handler(handler, dialog):
+            dialog.future.set_result(True)
+            handler()
+
+        buttons = [Button(_("Cancel"))]
+
+        new_project_dialog = JansGDialog(
+                self.app,
+                body=HSplit([]),
+                title=_("Add a new Agama Project"),
+                buttons=buttons
+                )
+
+        upload_button = self.app.getButton(
+                    text=_("Upload a Project"),
+                    name='agama:upload_project',
+                    jans_help=_("Upload an agama project from filesystem"),
+                    handler=partial(button_handler, handler=self.upload_project, dialog=new_project_dialog)
+                    )
+
+        deploy_community_project_button = self.app.getButton(
+                    text=_("Add a Community Project"),
+                    name='agama:deploy_community_project',
+                    jans_help=_("Deploys an Agama Lab community project (requires internet connection)"),
+                    handler=partial(button_handler, handler=self.deploy_agama_lab_community_projects, dialog=new_project_dialog)
+                    )
+
+        new_project_dialog.dialog.body=HSplit(
+                [VSplit([upload_button], align=HorizontalAlign.CENTER),
+                VSplit([deploy_community_project_button], align=HorizontalAlign.CENTER)],
+                width=D()
+                )
+        self.app.show_jans_dialog(new_project_dialog)
+
+
 
     def on_page_enter(self) -> None:
         self.first_enter = True
