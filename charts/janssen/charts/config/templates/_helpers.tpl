@@ -86,3 +86,17 @@ Create optional scopes list
 {{- end}}
 {{ toJson $newList }}
 {{- end }}
+
+{{/*
+Create AWS shared credentials.
+*/}}
+{{- define "config.aws-shared-credentials" }}
+    {{- printf "[%s]\naws_access_key_id = %s\naws_secret_access_key = %s\n" .Values.configmap.cnAwsProfile .Values.configmap.cnAwsAccessKeyId .Values.configmap.cnAwsSecretAccessKey }}
+{{- end }}
+
+{{/*
+Create AWS config.
+*/}}
+{{- define "config.aws-config" }}
+    {{- printf "[%s]\nregion = %s\n" .Values.configmap.cnAwsProfile .Values.configmap.cnAwsDefaultRegion }}
+{{- end }}
