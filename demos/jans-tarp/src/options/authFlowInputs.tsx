@@ -25,7 +25,7 @@ const createOption = (label: string) => ({
   name: label,
 });
 const filter = createFilterOptions();
-export default function AuthFlowInputs({ isOpen, handleDialog, client }) {
+export default function AuthFlowInputs({ isOpen, handleDialog, client, notifyOnDataChange }) {
   const [open, setOpen] = React.useState(isOpen);
   const [errorMessage, setErrorMessage] = React.useState("")
   const [additionalParamError, setAdditionalParamError] = React.useState("")
@@ -181,6 +181,7 @@ export default function AuthFlowInputs({ isOpen, handleDialog, client }) {
           console.log("userDetails: " + JSON.stringify(userInfoResponse.data));
           handleClose();
         });
+        notifyOnDataChange();
       }
     }
   }
