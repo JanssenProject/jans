@@ -140,7 +140,7 @@ export default function RegisterClient({ isOpen, handleDialog }) {
 
       if (openidConfig != undefined) {
         chrome.storage.local.set({ opConfiguration: openidConfig.data }).then(() => {
-          console.log("openapiConfig is set to " + openidConfig);
+          console.log("OP Configuration: " + JSON.stringify(openidConfig));
         });
 
         const registrationUrl = openidConfig.data.registration_endpoint;
