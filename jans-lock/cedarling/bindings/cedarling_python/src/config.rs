@@ -5,8 +5,6 @@ use crate::policy_store::PolicyStore;
 // The key idea is to keep authz independent from the Python bindings.
 // Therefore, we map the Python binding structs to pure Rust equivalents.
 
-// TODO: investigate how to create macros for automatic `Into` implementation
-
 #[pyclass]
 #[derive(Debug, Clone)]
 pub struct TokenMapper {
@@ -39,7 +37,7 @@ impl TokenMapper {
 
 impl Default for TokenMapper {
 	fn default() -> Self {
-		let role: authz_engine::TokenMapper = <_>::default();
+		let role: cedarling::TokenMapper = <_>::default();
 		Self {
 			id_token: role.id_token,
 			userinfo_token: role.userinfo_token,
@@ -48,9 +46,9 @@ impl Default for TokenMapper {
 	}
 }
 
-impl From<TokenMapper> for authz_engine::TokenMapper {
+impl From<TokenMapper> for cedarling::TokenMapper {
 	fn from(val: TokenMapper) -> Self {
-		authz_engine::TokenMapper {
+		cedarling::TokenMapper {
 			id_token: val.id_token,
 			userinfo_token: val.userinfo_token,
 			access_token: val.access_token,
@@ -87,11 +85,11 @@ impl BootstrapConfig {
 	}
 }
 
-impl TryInto<authz_engine::BootstrapConfig> for BootstrapConfig {
+impl TryInto<cedarling::BootstrapConfig> for BootstrapConfig {
 	type Error = PyErr;
 
-	fn try_into(self) -> Result<authz_engine::BootstrapConfig, Self::Error> {
-		Ok(authz_engine::BootstrapConfig {
+	fn try_into(self) -> Result<cedarling::BootstrapConfig, Self::Error> {
+		Ok(cedarling::BootstrapConfig {
 			application_name: self.application_name,
 			token_mapper: self.token_mapper.into(),
 			policy_store: self.policy_store.map(|store| store.inner).ok_or(

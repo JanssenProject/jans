@@ -5,8 +5,9 @@ pub use authz_engine;
 pub use init_engine;
 pub use jwt_engine;
 
-#[doc(hidden)]
-pub use authz_engine::{Authz, AuthzNewError, AuthzRequest};
+use authz_engine::{Authz, AuthzNewError, AuthzRequest};
+pub use authz_engine::{CedarParams, ResourceData};
+pub use init_engine::policy_store::PolicyStore;
 pub use init_engine::policy_store_config::{GetPolicyError, PolicyStoreConfig};
 pub use init_engine::{BootstrapConfig, TokenMapper};
 

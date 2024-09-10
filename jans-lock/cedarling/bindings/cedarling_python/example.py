@@ -1,4 +1,4 @@
-from cedarling_python import Authz, BootstrapConfig, TokenMapper, PolicyStore, Request, Resource
+from cedarling_python import init, BootstrapConfig, TokenMapper, PolicyStore, Request, Resource
 
 # for example we store it in the variable,
 # but local policy store better to store in the file
@@ -32,7 +32,7 @@ config = BootstrapConfig(application_name="DemoApp",
 # also fields support setters and getter
 config.policy_store = store
 
-authz = Authz(config)
+authz = init(config)
 
 # Create a new Request instance
 req = Request()

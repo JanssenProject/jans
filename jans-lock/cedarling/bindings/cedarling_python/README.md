@@ -170,12 +170,24 @@ Represents the resource involved in the authorization request.
 
 Most functions return Python exceptions, such as `PyValueError`, if something goes wrong during the authorization process.
 
+### init function
+
+Is used to initialize the authorization engine with a `BootstrapConfig`.
+
+```
+config = BootstrapConfig()
+...
+authz = init(BootstrapConfig)
+...
+result = authz.is_authorized(req)
+```
+
 ## Example
 
 Ilustrate how to use the library.
 
 ```
-from cedarling_python import Authz, BootstrapConfig, TokenMapper, PolicyStore, Request, Resource
+from cedarling_python import init, BootstrapConfig, TokenMapper, PolicyStore, Request, Resource
 
 # for example we store it in the variable, 
 # but local policy store better to store in the file
@@ -208,7 +220,7 @@ config = BootstrapConfig(application_name="DemoApp",token_mapper=mapper,policy_s
 # also fields support setters and getter
 config.policy_store = store
 
-authz = Authz(config)
+authz = init(config)
 
 # Create a new Request instance
 req = Request()

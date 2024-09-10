@@ -77,11 +77,11 @@ impl Request {
 	}
 }
 
-impl TryInto<authz_engine::AuthzRequest> for Request {
+impl TryInto<cedarling::Request> for Request {
 	type Error = PyErr;
 
-	fn try_into(self) -> Result<authz_engine::AuthzRequest, Self::Error> {
-		Ok(authz_engine::AuthzRequest {
+	fn try_into(self) -> Result<cedarling::Request, Self::Error> {
+		Ok(cedarling::Request {
 			id_token: self
 				.id_token
 				.ok_or(PyValueError::new_err("in Request value id_token is None"))?,
@@ -92,13 +92,13 @@ impl TryInto<authz_engine::AuthzRequest> for Request {
 				"in Request value access_token is None",
 			))?,
 
-			extra: authz_engine::CedarParams {
+			extra: cedarling::CedarParams {
 				action: self
 					.action
 					.ok_or(PyValueError::new_err("in Request value action is None"))?,
 				resource: self
 					.resource
-					.map(|r| authz_engine::ResourceData {
+					.map(|r| cedarling::ResourceData {
 						_type: r._type,
 						id: r.id,
 					})
