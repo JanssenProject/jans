@@ -18,8 +18,12 @@ fn real_demo_case() -> Result<(), Box<dyn std::error::Error>> {
 	let policy_json = include_str!("../../demo/policy-store/local.json");
 	let input_json = include_str!("../../demo/input.json");
 
+	// none means default mapping
+	// in this example, we extract the "role" claim from the userinfo token
 	let token_mapper = TokenMapper {
-		..Default::default()
+		userinfo_token: Some("role".to_string()),
+		id_token: None,
+		access_token: None,
 	};
 
 	let authz = init(BootstrapConfig {
