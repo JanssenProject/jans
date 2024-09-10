@@ -3,9 +3,9 @@ resolver = "2"
 members = [
     "engines/authz_engine",
     "authz_run",
-    "cedarling_python",
     "engines/init_engine",
     "engines/jwt_engine",
+    "bindings/cedarling_python",
 ]
 
 [workspace.dependencies]
