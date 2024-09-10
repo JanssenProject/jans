@@ -24,7 +24,7 @@ fn real_demo_case() -> Result<(), Box<dyn std::error::Error>> {
 
 	let authz = Authz::new(authz::BootstrapConfig {
 		application_name: Some("Demo_App".to_owned()),
-		policy_store: PolicyStoreConfig::LocalJson(policy_json.to_owned()).get_policy()?,
+		policy_store: PolicyStoreConfig::JsonRaw(policy_json.to_owned()).get_policy()?,
 		token_mapper,
 	})?;
 

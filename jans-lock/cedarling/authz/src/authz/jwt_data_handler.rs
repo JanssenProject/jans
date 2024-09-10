@@ -3,10 +3,8 @@ use std::str::FromStr;
 
 use cedar_policy::{Entity, EntityId, EntityTypeName, EntityUid, ParseErrors};
 
-use super::{
-	jwt_tokens::{AccessToken, EntityCreatingError, IdToken, UserInfoToken, UserMissedInfo},
-	TokenMapper,
-};
+use super::jwt_tokens::{AccessToken, EntityCreatingError, IdToken, UserInfoToken, UserMissedInfo};
+use init_engine::TokenMapper;
 
 #[derive(serde::Deserialize, Debug)]
 pub struct AuthzRequest {
@@ -50,6 +48,7 @@ impl ResourceData {
 	}
 }
 
+#[allow(clippy::enum_variant_names)]
 #[derive(thiserror::Error, Debug)]
 pub enum DecodeTokensError {
 	#[error("could not decode id_token: {0}")]
@@ -100,6 +99,7 @@ pub struct AuthzInput {
 	pub chedar_params: CedarParams,
 }
 
+#[allow(clippy::enum_variant_names)]
 #[derive(thiserror::Error, Debug)]
 pub enum AuthzInputEntitiesError {
 	#[error("could not get id token entity from id_token: {0}")]
