@@ -1,6 +1,5 @@
 use pyo3::{exceptions::PyValueError, prelude::*};
 
-
 use crate::policy_store::PolicyStore;
 // The config structs should match those in the authz module.
 // The key idea is to keep authz independent from the Python bindings.
