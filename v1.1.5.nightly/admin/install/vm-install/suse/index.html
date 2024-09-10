@@ -2266,8 +2266,6 @@
         
           
         
-          
-        
       
       
         <label class="md-nav__link" for="__nav_1_7_2">
@@ -2346,20 +2344,6 @@
     <li class="md-nav__item">
       <a href="../../../config-guide/auth-server-config/jans-authorization-server-config/" class="md-nav__link">
         Auth Server Property Configuration
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../config-guide/auth-server-config/messaging-config/" class="md-nav__link">
-        Messaging Configuration
       </a>
     </li>
   
@@ -8758,17 +8742,17 @@ needed for OpenID and FIDO.</li>
 <li>Download the release package from the GitHub Janssen Project
   <a href="https://github.com/JanssenProject/jans/releases">Releases</a></li>
 </ul>
-<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/v1.1.5.nightly/jans-1.1.5.nightly-suse15.x86_64.rpm
+<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-suse15.x86_64.rpm
 </code></pre></div>
 <ul>
 <li>Verify integrity of the downloaded package using published <code>sha256sum</code>.</li>
 </ul>
 <p>Download <code>sha256sum</code> file for the package</p>
-<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/v1.1.5.nightly/jans-1.1.5.nightly-suse15.x86_64.rpm.sha256sum
+<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-suse15.x86_64.rpm.sha256sum
 </code></pre></div>
 <p>Check the hash if it is matching. You may need to change your working directory
 to where both the rpm and sha256sum file are located.</p>
-<div class="highlight"><pre><span></span><code>sha256sum -c jans-1.1.5.nightly-suse15.x86_64.rpm.sha256sum
+<div class="highlight"><pre><span></span><code>sha256sum -c jans-replace-janssen-version-suse15.x86_64.rpm.sha256sum
 </code></pre></div>
 <p>Output similar to below should confirm the integrity of the downloaded package.</p>
 <div class="highlight"><pre><span></span><code>&lt;package-name&gt;: OK
@@ -8776,7 +8760,7 @@ to where both the rpm and sha256sum file are located.</p>
 <ul>
 <li>Install the package</li>
 </ul>
-<div class="highlight"><pre><span></span><code>sudo zypper install ~/jans-1.1.5.nightly-suse15.x86_64.rpm
+<div class="highlight"><pre><span></span><code>sudo zypper install ~/jans-replace-janssen-version-suse15.x86_64.rpm
 </code></pre></div>
 <h2 id="run-the-setup-script">Run the setup script<a class="headerlink" href="#run-the-setup-script" title="Permanent link">#</a></h2>
 <ul>

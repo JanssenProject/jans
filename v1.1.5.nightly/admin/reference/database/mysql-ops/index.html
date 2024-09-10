@@ -2179,8 +2179,6 @@
         
           
         
-          
-        
       
       
         <label class="md-nav__link" for="__nav_1_7_2">
@@ -2259,20 +2257,6 @@
     <li class="md-nav__item">
       <a href="../../../config-guide/auth-server-config/jans-authorization-server-config/" class="md-nav__link">
         Auth Server Property Configuration
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../config-guide/auth-server-config/messaging-config/" class="md-nav__link">
-        Messaging Configuration
       </a>
     </li>
   
@@ -8782,9 +8766,9 @@ ALTER TABLE jansdb.jansPerson ADD INDEX `jansPerson_CustomIdx2` ((lower(`mail`))
 <h3 id="add-custom-attribute">Add custom attribute<a class="headerlink" href="#add-custom-attribute" title="Permanent link">#</a></h3>
 <p>There are three steps here: </p>
 <ul>
-<li>Create attribute in MySQL database: <code>ALTER TABLE jansdb.jansPerson ADD COLUMN cmdAttr VARCHAR(64) NULL;</code> </li>
+<li>Create attribute in MySQL database: <code>ALTER TABLE jansdb.jansPerson ADD COLUMN cmdAttr VARCHAR(64) NULL;</code></li>
+<li>Restart the ConfgiApi <a href="../../vm-ops/restarting-services/">service</a>. If you are using kubernetes please restart the <a href="https://kubernetes.io/docs/reference/kubectl/generated/kubectl_rollout/kubectl_rollout_restart/">deployment</a>.</li>
 <li>Create attribute using the terraform provider, curl commands, or  TUI: <img alt="tui_custom_attribute" src="../../../../assets/TUI_CustomAttribute.png" /></li>
-<li>Restart the ConfgiApi service</li>
 </ul>
 <h3 id="ldap-to-mysql-migration-script">LDAP to MySQL Migration Script<a class="headerlink" href="#ldap-to-mysql-migration-script" title="Permanent link">#</a></h3>
 <p>Please refer to <a href="../converting-data/#ldap-to-mysql-migration-script">these steps</a>.</p>
@@ -8798,7 +8782,7 @@ ALTER TABLE jansdb.jansPerson ADD INDEX `jansPerson_CustomIdx2` ((lower(`mail`))
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-08-27T09:45:30+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-08-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-09-10T03:45:10+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-09-10</span>
       
         <br>
         Created:

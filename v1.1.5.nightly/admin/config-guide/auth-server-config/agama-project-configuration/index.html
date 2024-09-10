@@ -2183,8 +2183,6 @@
         
           
         
-          
-        
       
       
         <label class="md-nav__link" for="__nav_1_7_2">
@@ -2263,20 +2261,6 @@
     <li class="md-nav__item">
       <a href="../jans-authorization-server-config/" class="md-nav__link">
         Auth Server Property Configuration
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../messaging-config/" class="md-nav__link">
-        Messaging Configuration
       </a>
     </li>
   
@@ -9252,6 +9236,7 @@ the <a href="../../config-tools/jans-tui/">Text-Based UI</a> also.</p>
 <h3 id="agama-project-screen">Agama Project Screen<a class="headerlink" href="#agama-project-screen" title="Permanent link">#</a></h3>
 <p>Navigate to <code>Auth Server</code> -&gt; <code>Agama</code> to open the Agama projects screen as shown 
 in the image below.</p>
+<p><img alt="image" src="../../../../assets/tui-agama-project-list.png" /></p>
 <ul>
 <li>
 <p>To get the list of currently added projects, bring the control to <code>Search</code> box
@@ -9259,12 +9244,25 @@ in the image below.</p>
   projects with matching names.</p>
 </li>
 <li>
-<p>Deploy a new project using <code>Upload Project</code> button. It'll open the explore
-  dialogue. Using this dialogue, navigate the file system and select<br />
-  the <code>.gama</code> archive for the new project.</p>
+<p>Add a new project using <code>Add a New Project</code> button. It will open a dialogue where
+  you can either deploy a local project or deploy an Agama Lab community project
+  as shown in the image below.</p>
 </li>
 </ul>
-<p><img alt="image" src="../../../../assets/tui-agama-project-list.png" /></p>
+<p><img alt="image" src="../../../../assets/tui-agama-select-deployment.png" /></p>
+<ol>
+<li>
+<p>If you select the first option, it'll open the explore
+    dialogue. Using this dialogue, navigate the file system and select
+    the <code>.gama</code> archive for the new project.</p>
+</li>
+<li>
+<p>If you select the second option, it'ill collect a list of Agama Lab
+    community projects from GitHub and display a selection list as shown in
+    the image below.</p>
+<p><img alt="image" src="../../../../assets/tui-agama-community-projects-list.png" /></p>
+</li>
+</ol>
 <h3 id="agama-project-help-menu">Agama Project Help Menu<a class="headerlink" href="#agama-project-help-menu" title="Permanent link">#</a></h3>
 <p>TUI provides key-press commands to open various dialogues that help manage and
 configure Agama projects. All the key-press commands are listed in the help menu.
@@ -9303,7 +9301,7 @@ document</a>.</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-07-10T09:34:30+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-07-10</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-09-10T12:38:06+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-09-10</span>
       
         <br>
         Created:

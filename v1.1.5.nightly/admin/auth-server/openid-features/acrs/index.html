@@ -2179,8 +2179,6 @@
         
           
         
-          
-        
       
       
         <label class="md-nav__link" for="__nav_1_7_2">
@@ -2259,20 +2257,6 @@
     <li class="md-nav__item">
       <a href="../../../config-guide/auth-server-config/jans-authorization-server-config/" class="md-nav__link">
         Auth Server Property Configuration
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../config-guide/auth-server-config/messaging-config/" class="md-nav__link">
-        Messaging Configuration
       </a>
     </li>
   
@@ -8933,8 +8917,15 @@ must re-authenticate to continue. If the user succeeds, a new session with a new
 <p>There is <code>acrMappings</code> AS configuration property which allows to specify aliases for acrs.
 <code>acrMappings</code> contains simple map in key-value form.</p>
 <p>Lets say RP sends request with <code>acr_values=loginWithOtpCheck</code>. If <code>acrMappings</code> contains mapping "loginWithOtpCheck":"otp" then
-AS will map <code>loginWithOtpCheck</code> to <code>otp</code> and will use <code>acr_values=otp</code>. 
-It means that script must be called <code>otp</code> in this case and not <code>loginWithOtpCheck</code>. </p>
+AS will map <code>loginWithOtpCheck</code> to <code>otp</code> and will use <code>acr_values=otp</code> for actual processing on server side. 
+It means that custom script must be called <code>otp</code> in this case on AS side and not <code>loginWithOtpCheck</code> (because <code>loginWithOtpCheck</code> is alias to <code>otp</code>). </p>
+<p>ACR mappings are published on discovery page <code>GET /.well-known/openid-configuration HTTP/1.1</code></p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="err">...</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;acr_mappings&quot;</span><span class="p">:{</span><span class="nt">&quot;alias1&quot;</span><span class="p">:</span><span class="s2">&quot;acr1&quot;</span><span class="p">,</span><span class="w"> </span><span class="nt">&quot;loginWithOtpCheck&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;otp&quot;</span><span class="p">}</span><span class="w"></span>
+<span class="w">  </span><span class="err">...</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
 <h2 id="flowchart-how-the-jans-as-derives-an-acr-value-for-a-user-session">Flowchart - How the Jans AS derives an ACR value for a user session :<a class="headerlink" href="#flowchart-how-the-jans-as-derives-an-acr-value-for-a-user-session" title="Permanent link">#</a></h2>
 <pre class="mermaid"><code>flowchart TD
     A[RP send authentication request] --&gt; B{Request contains &lt;br /&gt;&lt;code&gt;acr_values&lt;/code&gt; parameter?}
@@ -8975,7 +8966,7 @@ with detail log in <code>jans-auth.log</code>.</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-08-30T09:00:17+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-08-30</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-09-10T09:57:26+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-09-10</span>
       
         <br>
         Created:
