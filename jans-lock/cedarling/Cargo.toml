@@ -1,9 +1,15 @@
 [workspace]
 resolver = "2"
-members = ["authz", "authz_run", "cedarling_python", "init_engine", "jwt"]
+members = [
+    "authz_engine",
+    "authz_run",
+    "cedarling_python",
+    "init_engine",
+    "jwt",
+]
 
 [workspace.dependencies]
-authz = { path = "authz" }
+authz_engine = { path = "authz_engine" }
 jwt = { path = "jwt" }
 init_engine = { path = "init_engine" }
 cedar-policy = "3.2.0"

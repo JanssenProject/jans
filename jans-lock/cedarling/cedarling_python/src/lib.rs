@@ -13,7 +13,7 @@ use request::{Request, Resource};
 
 #[pyclass]
 pub struct Authz {
-	inner: authz::Authz,
+	inner: authz_engine::Authz,
 }
 
 #[pymethods]
@@ -21,15 +21,14 @@ impl Authz {
 	#[new]
 	fn new(bootstrap_config: BootstrapConfig) -> PyResult<Self> {
 		Ok(Authz {
-			inner: authz::Authz::new(bootstrap_config.try_into()?)
+			inner: authz_engine::Authz::new(bootstrap_config.try_into()?)
 				.map_err(|err| PyValueError::new_err(err.to_string()))?,
 		})
 	}
 
 	pub fn is_authorized(&self, request: Request) -> PyResult<bool> {
-		let authz_input: authz::AuthzRequest = request.try_into()?;
-		self
-			.inner
+		let authz_input: authz_engine::AuthzRequest = request.try_into()?;
+		self.inner
 			.is_authorized(authz_input)
 			.map_err(|err| PyValueError::new_err(err.to_string()))
 	}

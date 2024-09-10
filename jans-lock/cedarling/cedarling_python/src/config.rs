@@ -39,7 +39,7 @@ impl TokenMapper {
 
 impl Default for TokenMapper {
 	fn default() -> Self {
-		let role: authz::TokenMapper = <_>::default();
+		let role: authz_engine::TokenMapper = <_>::default();
 		Self {
 			id_token: role.id_token,
 			userinfo_token: role.userinfo_token,
@@ -48,9 +48,9 @@ impl Default for TokenMapper {
 	}
 }
 
-impl From<TokenMapper> for authz::TokenMapper {
+impl From<TokenMapper> for authz_engine::TokenMapper {
 	fn from(val: TokenMapper) -> Self {
-		authz::TokenMapper {
+		authz_engine::TokenMapper {
 			id_token: val.id_token,
 			userinfo_token: val.userinfo_token,
 			access_token: val.access_token,
@@ -87,11 +87,11 @@ impl BootstrapConfig {
 	}
 }
 
-impl TryInto<authz::BootstrapConfig> for BootstrapConfig {
+impl TryInto<authz_engine::BootstrapConfig> for BootstrapConfig {
 	type Error = PyErr;
 
-	fn try_into(self) -> Result<authz::BootstrapConfig, Self::Error> {
-		Ok(authz::BootstrapConfig {
+	fn try_into(self) -> Result<authz_engine::BootstrapConfig, Self::Error> {
+		Ok(authz_engine::BootstrapConfig {
 			application_name: self.application_name,
 			token_mapper: self.token_mapper.into(),
 			policy_store: self.policy_store.map(|store| store.inner).ok_or(

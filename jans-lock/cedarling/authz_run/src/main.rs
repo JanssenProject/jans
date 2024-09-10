@@ -1,6 +1,6 @@
 use std::io::Write;
 
-use authz::{jwt, Authz, PolicyStoreConfig};
+use authz_engine::{jwt, Authz, PolicyStoreConfig};
 use simplelog::*;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -18,11 +18,11 @@ fn real_demo_case() -> Result<(), Box<dyn std::error::Error>> {
 	let policy_json = include_str!("../../demo/policy-store/local.json");
 	let input_json = include_str!("../../demo/input.json");
 
-	let token_mapper = authz::TokenMapper {
+	let token_mapper = authz_engine::TokenMapper {
 		..Default::default()
 	};
 
-	let authz = Authz::new(authz::BootstrapConfig {
+	let authz = Authz::new(authz_engine::BootstrapConfig {
 		application_name: Some("Demo_App".to_owned()),
 		policy_store: PolicyStoreConfig::JsonRaw(policy_json.to_owned()).get_policy()?,
 		token_mapper,
@@ -30,7 +30,7 @@ fn real_demo_case() -> Result<(), Box<dyn std::error::Error>> {
 
 	// only show entities for debug
 	{
-		let q = authz::AuthzRequest::parse_raw(input_json)?;
+		let q = authz_engine::AuthzRequest::parse_raw(input_json)?;
 		let decoded_input = q.decode_tokens(&jwt::JWTDecoder::new_without_validation())?;
 		let entites_box = authz.get_entities(decoded_input.jwt)?;
 

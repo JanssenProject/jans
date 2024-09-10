@@ -4,6 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-authz = { workspace = true }
+authz_engine = { workspace = true }
 log = { workspace = true }
 simplelog = "0.12.2"

@@ -9,7 +9,7 @@ pub struct PolicyStore {
 	pub(crate) inner: init_engine::policy_store::PolicyStore,
 }
 
-fn get_store_from_config(config: authz::PolicyStoreConfig) -> PyResult<PolicyStore> {
+fn get_store_from_config(config: authz_engine::PolicyStoreConfig) -> PyResult<PolicyStore> {
 	let store = config
 		.get_policy()
 		.map_err(|err| PyValueError::new_err(err.to_string()))?;
@@ -34,18 +34,18 @@ impl PolicyStore {
 	#[staticmethod]
 	pub fn from_raw_json(raw_json: &Bound<'_, PyString>) -> PyResult<Self> {
 		let rust_str = to_rust_string(raw_json)?;
-		get_store_from_config(authz::PolicyStoreConfig::JsonRaw(rust_str))
+		get_store_from_config(authz_engine::PolicyStoreConfig::JsonRaw(rust_str))
 	}
 
 	#[staticmethod]
 	pub fn from_filepath(filepath: &Bound<'_, PyString>) -> PyResult<Self> {
 		let rust_str = to_rust_string(filepath)?;
-		get_store_from_config(authz::PolicyStoreConfig::File(rust_str.into()))
+		get_store_from_config(authz_engine::PolicyStoreConfig::File(rust_str.into()))
 	}
 
 	#[staticmethod]
 	pub fn from_remote_uri(uri: &Bound<'_, PyString>) -> PyResult<Self> {
 		let rust_str = to_rust_string(uri)?;
-		get_store_from_config(authz::PolicyStoreConfig::RemoteURI(rust_str.into()))
+		get_store_from_config(authz_engine::PolicyStoreConfig::RemoteURI(rust_str.into()))
 	}
 }
