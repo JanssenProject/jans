@@ -9,9 +9,14 @@ metadata:
 {{- if .Values.additionalLabels }}
 {{ toYaml .Values.additionalLabels | indent 4 }}
 {{- end }}
-{{- if .Values.additionalAnnotations }}
+{{- if or (.Values.additionalAnnotations) (.Values.global.config.customAnnotations.job) }}
   annotations:
+{{- if .Values.additionalAnnotations }}
 {{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.global.config.customAnnotations.job }}
+{{ toYaml .Values.global.config.customAnnotations.job | indent 4 }}
+{{- end }}
 {{- end }}
 spec:
   ttlSecondsAfterFinished: {{ .Values.global.jobTtlSecondsAfterFinished }}
@@ -55,9 +60,9 @@ spec:
               - key: aws_secrets_replica_regions
                 path: aws_secrets_replica_regions
       {{- end }}
-        - name: {{ include "config.fullname" . }}-mount-gen-file
+        - name: {{ .Release.Name }}-configuration-file
           secret:
-            secretName: {{ include "config.fullname" . }}-gen-json-file
+            secretName: {{ .Release.Name }}-configuration-file
         - name: {{ include "config.fullname" . }}-tls-script
           configMap:
             name: {{ include "config.fullname" . }}-tls-script
@@ -76,29 +81,7 @@ spec:
             - key: vault_secret_id
               path: vault_secret_id
         {{- end }}
-        {{- if or (eq .Values.global.cnPersistenceType "couchbase") (eq .Values.global.cnPersistenceType "hybrid") }}
-        - name: cb-pass
-          secret:
-            secretName: {{ .Release.Name }}-cb-pass
-            items:
-              - key: couchbase_password
-                path: couchbase_password
-              - key: couchbase_superuser_password
-                path: couchbase_superuser_password
-        {{- end }}
-        {{- if or (eq .Values.global.cnPersistenceType "sql") (eq .Values.global.cnPersistenceType "hybrid") }}
-        - name: sql-pass
-          secret:
-            secretName: {{ .Release.Name }}-sql-pass
-        {{- end }}
-        {{- if or (eq .Values.global.cnPersistenceType "ldap") (eq .Values.global.cnPersistenceType "hybrid") }}
-        - name: ldap-pass
-          secret:
-            secretName: {{ .Release.Name }}-ldap-pass
-            items:
-              - key: ldap_password
-                path: ldap_password
-        {{- end }}
+      serviceAccountName: {{ .Values.global.serviceAccountName }}
       containers:
       - name: {{ include "config.name" . }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -125,8 +108,8 @@ spec:
             name: aws-secrets-replica-regions
             subPath: aws_secrets_replica_regions
         {{- end }}
-          - mountPath: /app/db/configuration.json
-            name: {{ include "config.fullname" . }}-mount-gen-file
+          - mountPath: /etc/jans/conf/configuration.json
+            name: {{ .Release.Name }}-configuration-file
             subPath: configuration.json
           - mountPath: /scripts/tls_generator.py
             name: {{ include "config.fullname" . }}-tls-script
@@ -143,24 +126,6 @@ spec:
           - name: vault
             mountPath: /etc/certs/vault_secret_id
             subPath: vault_secret_id
-          {{- end }}
-          {{- if or (eq .Values.global.cnPersistenceType "couchbase") (eq .Values.global.cnPersistenceType "hybrid") }}
-          - name: cb-pass
-            mountPath: {{ .Values.global.cnCouchbasePasswordFile }}
-            subPath: couchbase_password
-          - name: cb-pass
-            mountPath: {{ .Values.global.cnCouchbaseSuperuserPasswordFile }}
-            subPath: couchbase_superuser_password
-          {{- end }}
-          {{- if or (eq .Values.global.cnPersistenceType "ldap") (eq .Values.global.cnPersistenceType "hybrid") }}
-          - name: ldap-pass
-            mountPath: {{ .Values.global.cnLdapPasswordFile }}
-            subPath: ldap_password
-          {{- end }}
-          {{- if or (eq .Values.global.cnPersistenceType "sql") (eq .Values.global.cnPersistenceType "hybrid") }}
-          - name: sql-pass
-            mountPath: {{ .Values.global.cnSqlPasswordFile }}
-            subPath: sql_password
           {{- end }}
         envFrom:
         - configMapRef:

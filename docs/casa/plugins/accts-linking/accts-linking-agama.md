@@ -13,7 +13,7 @@ The accounts linking Agama project must be configured in order to integrate thir
 
 ```
 {
-"io.jans.casa.acctlinking.Launcher": {
+"io.jans.casa.authn.acctlinking": {
     
     "providerID_1": { ... },
     "providerID_2": { ... },
@@ -22,7 +22,7 @@ The accounts linking Agama project must be configured in order to integrate thir
 }
 ```
 
-Each property part of the JSON object `io.jans.casa.acctlinking.Launcher` holds the configuration of a different identity provider. Here's a how a typical configuration of a provider looks like:
+Each property part of the JSON object `io.jans.casa.auth.acctlinking` holds the configuration of a different identity provider. Here's a how a typical configuration of a provider looks like:
 
 ```
 {
@@ -87,7 +87,7 @@ The return value of the mapping is a `Map<String, Object>`. This caters for case
 
 After attribute mapping occurs, the local database is checked to determine if the incoming user is known (based on the `ID` in the mapping and the ID of the provider in question). If no match is found, the user is onboarded: a new entry is created in the database using the information found in the resulting mapping. Otherwise, the exact behavior varies depending on the provider configuration as follows:
 
-- If `skipProfileUpdate` is set to `false`, the existing database entry is left untouched, otherwise
+- If `skipProfileUpdate` is set to `false`, the existing database entry is left untouched, otherwise:
 - If `cumulativeUpdate` is set to `false`, the existing attributes in the entry which are part of the mapping are overwritten
 - If `cumulativeUpdate` is set to `true`, the existing attribute values in the entry are preserved and new values are added if present in the mapping
 

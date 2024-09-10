@@ -10,9 +10,14 @@ metadata:
 {{- if (index .Values "auth-server-key-rotation" "additionalLabels") }}
 {{ toYaml (index .Values "auth-server-key-rotation" "additionalLabels") | indent 4 }}
 {{- end }}
-{{- if (index .Values "auth-server-key-rotation" "additionalAnnotations") }}
+{{- if or (index .Values "auth-server-key-rotation" "additionalAnnotations") (.Values.customAnnotations.cronjob) }}
   annotations:
+{{- if index .Values "auth-server-key-rotation" "additionalAnnotations" }}
 {{ toYaml (index .Values "auth-server-key-rotation" "additionalAnnotations") | indent 4 }}
+{{- end }}
+{{- if .Values.customAnnotations.cronjob }}
+{{ toYaml .Values.customAnnotations.cronjob | indent 4 }}
+{{- end }}
 {{- end }}
 spec:
   schedule: "@every {{ index .Values "auth-server-key-rotation" "keysLife" }}h"
@@ -33,6 +38,7 @@ spec:
           dnsConfig:
 {{ toYaml . | indent 12 }}
         {{- end }}
+          serviceAccountName: {{ .Values.serviceAccountName }}
           containers:
             - name: {{ include "janssen-all-in-one.name" . }}-as-key-rotation
               {{- if (index .Values "auth-server-key-rotation" "customScripts") }}
@@ -80,21 +86,6 @@ spec:
               {{- with (index .Values "auth-server-key-rotation" "volumeMounts") }}
 {{- toYaml . | nindent 16 }}
               {{- end }}
-              {{- if or (eq .Values.cnPersistenceType "couchbase") (eq .Values.cnPersistenceType "hybrid") }}
-                {{- if not .Values.istio.enabled }}
-                - name: cb-crt
-                  mountPath: "/etc/certs/couchbase.crt"
-                  subPath: couchbase.crt
-                {{- end }}
-                - name: cb-pass
-                  mountPath: {{ .Values.cnCouchbasePasswordFile }}
-                  subPath: couchbase_password
-              {{- end }}
-                {{- if or (eq .Values.cnPersistenceType "sql") (eq .Values.cnPersistenceType "hybrid") }}
-                - name: sql-pass
-                  mountPath: {{ .Values.cnSqlPasswordFile }}
-                  subPath: sql_password
-                {{- end }}
               envFrom:
                 - configMapRef:
                     name: {{ .Release.Name }}-config-cm
@@ -151,18 +142,6 @@ spec:
                   path: vault_role_id
                 - key: vault_secret_id
                   path: vault_secret_id
-          {{- end }}
-          {{- if or (eq .Values.cnPersistenceType "couchbase") (eq .Values.cnPersistenceType "hybrid") }}
-            {{- if not .Values.istio.enabled }}
-            - name: cb-crt
-              secret:
-                secretName: {{ .Release.Name }}-cb-crt
-            {{- end }}
-          {{- end }}
-          {{- if or (eq .Values.cnPersistenceType "sql") (eq .Values.cnPersistenceType "hybrid") }}
-            - name: sql-pass
-              secret:
-                secretName: {{ .Release.Name }}-sql-pass
           {{- end }}
           restartPolicy: Never
 {{- end }}
@@ -251,21 +230,6 @@ spec:
               {{- with (index .Values "kc-scheduler" "volumeMounts") }}
 {{- toYaml . | nindent 16 }}
               {{- end }}
-              {{- if or (eq .Values.cnPersistenceType "couchbase") (eq .Values.cnPersistenceType "hybrid") }}
-                {{- if not .Values.istio.enabled }}
-                - name: cb-crt
-                  mountPath: "/etc/certs/couchbase.crt"
-                  subPath: couchbase.crt
-                {{- end }}
-                - name: cb-pass
-                  mountPath: {{ .Values.cnCouchbasePasswordFile }}
-                  subPath: couchbase_password
-              {{- end }}
-                {{- if or (eq .Values.cnPersistenceType "sql") (eq .Values.cnPersistenceType "hybrid") }}
-                - name: sql-pass
-                  mountPath: {{ .Values.cnSqlPasswordFile }}
-                  subPath: sql_password
-                {{- end }}
               envFrom:
                 - configMapRef:
                     name: {{ .Release.Name }}-config-cm
@@ -321,18 +285,6 @@ spec:
                   path: vault_role_id
                 - key: vault_secret_id
                   path: vault_secret_id
-          {{- end }}
-          {{- if or (eq .Values.cnPersistenceType "couchbase") (eq .Values.cnPersistenceType "hybrid") }}
-            {{- if not .Values.istio.enabled }}
-            - name: cb-crt
-              secret:
-                secretName: {{ .Release.Name }}-cb-crt
-            {{- end }}
-          {{- end }}
-          {{- if or (eq .Values.cnPersistenceType "sql") (eq .Values.cnPersistenceType "hybrid") }}
-            - name: sql-pass
-              secret:
-                secretName: {{ .Release.Name }}-sql-pass
           {{- end }}
           restartPolicy: Never
           {{- if not .Values.isFqdnRegistered  }}

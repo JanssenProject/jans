@@ -1,0 +1,15 @@
+[package]
+name = "init_engine"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+serde_json = { workspace = true }
+serde = { workspace = true }
+thiserror = { workspace = true }
+jwt = { workspace = true }
+base64 = { workspace = true }
+log = { workspace = true }
+cedar-policy = { workspace = true }
+ehttp = { workspace = true, features = ["json"] }
+derivative = "2.2.0"

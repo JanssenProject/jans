@@ -2,20 +2,26 @@ import os
 import json
 import asyncio
 import zipfile
+import requests
+import tempfile
+import shutil
 
+from urllib import request
+from functools import partial
 from datetime import datetime
 from typing import Any
 from types import SimpleNamespace
+
 from prompt_toolkit.application import Application
 from prompt_toolkit.eventloop import get_event_loop
 from prompt_toolkit.layout import ScrollablePane
 from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.lexers import PygmentsLexer, DynamicLexer
 
-from prompt_toolkit.layout.containers import HSplit, VSplit, DynamicContainer, Window
+from prompt_toolkit.layout.containers import HSplit, VSplit, DynamicContainer, Window, HorizontalAlign
 from prompt_toolkit.buffer import Buffer
 from prompt_toolkit.formatted_text import HTML
-from prompt_toolkit.widgets import Button, Label, TextArea, Box, Frame
+from prompt_toolkit.widgets import Button, Label, TextArea, Box, Frame, RadioList
 
 from utils.multi_lang import _
 from utils.utils import DialogUtils, fromisoformat, get_help_with
@@ -25,9 +31,10 @@ from wui_components.jans_path_browser import jans_file_browser_dialog, BrowseTyp
 from wui_components.jans_cli_dialog import JansGDialog
 from wui_components.jans_table import JansTableWidget
 
+
 class Agama(DialogUtils):
     def __init__(
-        self, 
+        self,
         app: Application
         ) -> None:
 
@@ -35,6 +42,7 @@ class Agama(DialogUtils):
         self.app = app
         self.data = []
         self.first_enter = False
+        self.app.agama_module = self
         self.jans_help = get_help_with(
                 f'<d>              {_("Display Agama project config")}\n'
                 f'<c>              {_("Manage Agama project Configuration")}\n'
@@ -58,7 +66,7 @@ class Agama(DialogUtils):
         self.main_container =  HSplit([
                     VSplit([
                         self.app.getTitledText(_("Search"), name='oauth:agama:search', jans_help=_(common_strings.enter_to_search), accept_handler=self.search_agama_project, style=cli_style.edit_text),
-                        self.app.getButton(text=_("Upload Project"), name='oauth:agama:add', jans_help=_("To add a new Agama project press this button"), handler=self.upload_project),
+                        self.app.getButton(text=_("Add a New Project"), name='oauth:agama:add', jans_help=_("To add a new Agama project press this button"), handler=self.add_new_project),
                         ],
                         padding=3,
                         width=D(),
@@ -73,6 +81,45 @@ class Agama(DialogUtils):
                 f'<c>              {_("Manage Agama project configuration")}\n',
                 without=['v', 'enter']
                 )
+
+    def add_new_project(self) -> None:
+
+
+        def button_handler(handler, dialog):
+            dialog.future.set_result(True)
+            handler()
+
+        buttons = [Button(_("Cancel"))]
+
+        new_project_dialog = JansGDialog(
+                self.app,
+                body=HSplit([]),
+                title=_("Add a new Agama Project"),
+                buttons=buttons
+                )
+
+        upload_button = self.app.getButton(
+                    text=_("Upload a Project"),
+                    name='agama:upload_project',
+                    jans_help=_("Upload an agama project from filesystem"),
+                    handler=partial(button_handler, handler=self.upload_project, dialog=new_project_dialog)
+                    )
+
+        deploy_community_project_button = self.app.getButton(
+                    text=_("Add a Community Project"),
+                    name='agama:deploy_community_project',
+                    jans_help=_("Deploys an Agama Lab community project (requires internet connection)"),
+                    handler=partial(button_handler, handler=self.deploy_agama_lab_community_projects, dialog=new_project_dialog)
+                    )
+
+        new_project_dialog.dialog.body=HSplit(
+                [VSplit([upload_button], align=HorizontalAlign.CENTER),
+                VSplit([deploy_community_project_button], align=HorizontalAlign.CENTER)],
+                width=D()
+                )
+        self.app.show_jans_dialog(new_project_dialog)
+
+
 
     def on_page_enter(self) -> None:
         self.first_enter = True
@@ -156,7 +203,6 @@ class Agama(DialogUtils):
                     self.app.show_message(_(common_strings.error), _("An error ocurred while saving") + ":\n{}".format(str(e)), tobefocused=fdata.main_dialog)
 
 
-
             async def get_current_config_coroutine():
 
                 cli_args = {'operation_id': 'get-agama-prj-configs', 'url_suffix':'name:{}'.format(project_name)}
@@ -219,7 +265,7 @@ class Agama(DialogUtils):
         asyncio.ensure_future(coroutine())
 
 
-    def update_agama_container(self, start_index=0, search_str=''):
+    def update_agama_container(self, start_index=0, search_str='', focus_dialog=None):
 
         self.working_container.clear()
         data_display = []
@@ -265,15 +311,17 @@ class Agama(DialogUtils):
         for datum in data_display[start_index:start_index+self.app.entries_per_page]:
             self.working_container.add_item(datum)
 
-        if not self.first_enter:
+        if focus_dialog:
+            self.app.layout.focus(focus_dialog)
+        elif not self.first_enter:
             self.app.layout.focus(self.working_container)
 
         self.first_enter = False
 
 
-    async def get_projects_coroutine(self, search_str=''):
+    async def get_projects_coroutine(self, search_str='', update_container=True, focus_dialog=None):
         cli_args = {'operation_id': 'get-agama-prj'}
-        self.app.start_progressing(_("Retreiving agama projects..."))
+        self.app.start_progressing(_("Retrieving agama projects..."))
         response = await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
         self.app.stop_progressing()
 
@@ -290,13 +338,14 @@ class Agama(DialogUtils):
             return
 
         self.working_container.all_data = self.data.get('entries', [])
-        self.update_agama_container(search_str=search_str)
+        if update_container:
+            self.update_agama_container(search_str=search_str, focus_dialog=focus_dialog)
 
 
-    def get_agama_projects(self, search_str=''):
-        asyncio.ensure_future(self.get_projects_coroutine(search_str))
+    def get_agama_projects(self, search_str='', focus_dialog=None):
+        asyncio.ensure_future(self.get_projects_coroutine(search_str=search_str, focus_dialog=focus_dialog))
 
-    def upload_project(self):
+    def upload_project(self, file_path=None, community_project_name=None):
         agama_status = self.app.app_configuration.get('agamaConfiguration',{}).get('enabled')
 
         def project_uploader(path, project_name):
@@ -305,7 +354,17 @@ class Agama(DialogUtils):
                 self.app.start_progressing(_("Uploading agama project..."))
                 await get_event_loop().run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
                 self.app.stop_progressing()
-                self.get_agama_projects()
+                if file_path:
+                    shutil.rmtree(os.path.dirname(file_path))
+                focus_dialog = None
+                if community_project_name:
+                    focus_dialog = self.app.show_message(
+                        _("Project Info"),
+                        HTML(_("Please visit project home\n<b>{}</b>\nfor more information").format(os.path.join('https://github.com/GluuFederation', community_project_name))),
+                        tobefocused=self.app.center_container
+                        )
+
+                self.get_agama_projects(focus_dialog=focus_dialog)
 
             asyncio.ensure_future(coroutine())
 
@@ -357,7 +416,10 @@ class Agama(DialogUtils):
             self.app.show_jans_dialog(file_browser_dialog)
 
         if agama_status:
-            continue_upload()
+            if file_path:
+                do_upload_project(file_path)
+            else:
+                continue_upload()
         else:
             continue_button = Button(_("Continue!"), handler=continue_upload)
             buttons = [Button('Back'), continue_button] 
@@ -478,5 +540,98 @@ class Agama(DialogUtils):
             if params['selected'][3] == _("Pending"):
                 asyncio.ensure_future(self.get_projects_coroutine())
             asyncio.ensure_future(coroutine())
-            
+
+
+    def deploy_agama_lab_community_projects(self):
+
+
+        def get_projects():
+
+            response = requests.get('https://github.com/orgs/GluuFederation/repositories?q=agama-', headers={"Accept":"application/json"})
+            result = response.json()
+            downloads = []
+            for repo in result["payload"]["repositories"]:
+                repo_name = repo["name"]
+                response = requests.get(f'https://api.github.com/repos/GluuFederation/{repo_name}/releases/latest', headers={'Accept': 'application/json'})
+                if response.ok:
+                    result = response.json()
+                    for asset in result['assets']:
+                        if asset['name'].endswith('.gama'):
+                            downloads.append((repo_name, repo['description'], asset['browser_download_url']))
+            return downloads
+
+
+        async def download_project_coroutine(download_project_dialog, download_url, download_fn, project_name):
+
+            download_path = os.path.join(tempfile.mkdtemp(), download_fn)
+
+            def download_project():
+                request.urlretrieve(download_url, download_path)
+
+            await get_event_loop().run_in_executor(self.app.executor, download_project)
+
+            download_project_dialog.deploy_msg_label.text = _("Deploying {}").format(download_fn)
+
+            await asyncio.sleep(1)
+
+            try:
+                download_project_dialog.future.set_result(True)
+            except Exception:
+                pass
+
+            self.upload_project(file_path=download_path, community_project_name=project_name)
+
+
+        async def get_projects_coroutine(get_projects_dialog):
+            self.app.start_progressing(_("Retrieving Agama Lab community projects..."))
+            downloads = await get_event_loop().run_in_executor(self.app.executor, get_projects)
+            self.app.stop_progressing()
+            get_projects_dialog.future.set_result(True)
+
+            projects = [ (dl, name + "\n    " + desc) for name, desc, dl in downloads ]
+
+            projects_radio_list = RadioList(values=projects)
+
+            def deploy(select_project_dialog):
+                download_url = select_project_dialog.projects_radio_list.current_value
+                project_name = downloads[select_project_dialog.projects_radio_list._selected_index][0]
+                download_fn = os.path.split(download_url)[-1]
+                self.app.start_progressing(_("Downloading {}").format(download_fn))
+
+                deploy_msg_label = Label(_("Downloading {}").format(download_url))
+                download_project_dialog = JansGDialog(
+                        self.app,
+                        title=_("Downloading"),
+                        body=HSplit([deploy_msg_label]),
+                        buttons=[]
+                        )
+                download_project_dialog.deploy_msg_label = deploy_msg_label
+                self.app.show_jans_dialog(download_project_dialog, focus=self.main_container)
+
+                asyncio.ensure_future(download_project_coroutine(download_project_dialog, download_url, download_fn, project_name))
+
+
+            buttons = [Button(_("Cancel")), Button(_("Deploy"), handler=deploy)]
+
+            select_project_dialog = JansGDialog(
+                    self.app,
+                    title=_("Select Project to Deploy"),
+                    body=HSplit([projects_radio_list]),
+                    buttons=buttons
+                    )
+            select_project_dialog.projects_radio_list = projects_radio_list
+            self.app.show_jans_dialog(select_project_dialog)
+
+
+        buttons = [Button(_("Cancel"))]
+
+        get_projects_dialog = JansGDialog(
+                self.app,
+                title=_("Getting Projects"),
+                body=HSplit([Label(_("Please wait while retrieving Agama Lab community projects"))]),
+                buttons=buttons
+                )
+        self.app.show_jans_dialog(get_projects_dialog)
+
+        asyncio.ensure_future(get_projects_coroutine(get_projects_dialog))
 

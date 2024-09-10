@@ -23,11 +23,13 @@ import io.jans.service.PythonService;
 import io.jans.service.cdi.event.LdapConfigurationReload;
 import io.jans.service.cdi.util.CdiUtil;
 import io.jans.service.custom.script.CustomScriptManager;
+import io.jans.service.document.store.manager.DocumentStoreManager;
 import io.jans.service.timer.QuartzSchedulerManager;
 import io.jans.util.StringHelper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Arrays;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.BeforeDestroyed;
@@ -85,6 +87,9 @@ public class AppInitializer {
     @Inject
     private PythonService pythonService;
 
+    @Inject
+    DocumentStoreManager documentStoreManager;
+
     public void onStart(@Observes @Initialized(ApplicationScoped.class) Object init) {
         log.info("=============  STARTING API APPLICATION  ========================");
         log.info("init:{}", init);
@@ -113,14 +118,17 @@ public class AppInitializer {
         initCustomScripts();
 
         // Schedule timer tasks
-        configurationFactory.initTimer();        
+        configurationFactory.initTimer();
+
+        // load custom assets
+        this.loadCustomAsset(apiAppConfiguration.getServiceName());
 
         // Schedule timer tasks
-        if(!apiAppConfiguration.isDisableLoggerTimer()) {
+        if (!apiAppConfiguration.isDisableLoggerTimer()) {
             log.debug("LoggerService timer enabled!");
             loggerService.initTimer(true);
         }
-        
+
         log.info("==============  APPLICATION IS UP AND RUNNING ===================");
     }
 
@@ -142,7 +150,7 @@ public class AppInitializer {
     public AssetMgtConfiguration getAssetMgtConfiguration() {
         return this.configurationFactory.getApiAppConfiguration().getAssetMgtConfiguration();
     }
-    
+
     @Produces
     @ApplicationScoped
     @Named(ApplicationFactory.PERSISTENCE_ENTRY_MANAGER_NAME)
@@ -218,5 +226,20 @@ public class AppInitializer {
         supportedCustomScriptTypes.add(CustomScriptType.CONFIG_API);
         customScriptManager.initTimer(supportedCustomScriptTypes);
         log.info("Initialized Custom Scripts!");
+    }
+
+    private void loadCustomAsset(String serviceName) {
+        try {
+            if (StringHelper.isEmpty(serviceName)) {
+                serviceName = "jans-config-api";
+            }
+
+            log.info("Loading Custom Asset for serviceName:{} ", serviceName);
+            this.documentStoreManager.initTimer(Arrays.asList(serviceName));
+            log.info("Custom Asset for serviceName:{} loaded", serviceName);
+            
+        } catch (Exception ex) {
+            log.error("Error while loadCustomAsset is - ", ex);
+        }
     }
 }

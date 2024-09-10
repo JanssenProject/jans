@@ -3,6 +3,21 @@ kind: CronJob
 apiVersion: batch/v1
 metadata:
   name: {{ include "opendj.fullname" . }}-backup
+  namespace: {{ $.Release.Namespace }}
+  labels:
+{{ include "opendj.labels" $ | indent 4}}
+{{- if $.Values.additionalLabels }}
+{{ toYaml $.Values.additionalLabels | indent 4 }}
+{{- end }}
+{{- if or (.Values.additionalAnnotations) (.Values.global.opendj.customAnnotations.cronjob) }}
+  annotations:
+{{- if .Values.additionalAnnotations }}
+{{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.global.opendj.customAnnotations.cronjob }}
+{{ toYaml .Values.global.opendj.customAnnotations.cronjob | indent 4 }}
+{{- end }}
+{{- end }}
 spec:
   schedule: {{ .Values.backup.cronJobSchedule | quote }}
   concurrencyPolicy: Forbid
@@ -15,6 +30,7 @@ spec:
           dnsConfig:
     {{ toYaml . | indent 12 }}
         {{- end }}
+          serviceAccountName: {{ .Values.global.serviceAccountName }}
           containers:
             - name: {{ include "opendj.fullname" . }}-backup
               image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -51,8 +67,8 @@ spec:
                 - name: LDAP_PASSWORD
                   valueFrom:
                     secretKeyRef:
-                      name: {{ .Release.Name }}-ldap-cron-pass
-                      key: password
+                      name: cn
+                      key: ldap_password
               #  while true; do sleep 60; ldaplog=$(cat /opt/opendj/logs/server.out); startedstr="The Directory Server has started successfully";  if [ -z "${ldaplog##*$startedstr*}" ]; then break; fi; echo "Waiting for opendj server to start"; done
               command:
               - /bin/sh
@@ -87,24 +103,12 @@ spec:
                 LDAP_BACKUP_FILE=backup-$RANDOM_NUM.ldif
                 /opt/opendj/bin/export-ldif --hostname "$LDAP_HOST" --port 4444 --bindDN "$LDAP_BIND_DN" --bindPassword "$LDAP_PASSWORD" --backendID userRoot --ldifFile /opt/opendj/ldif/$LDAP_BACKUP_FILE --trustAll
               volumeMounts:
-              - name: ldap-certkey
-                mountPath: {{ .Values.global.cnLdapCertFile }}
-                subPath: opendj.crt
-              - name: ldap-certkey
-                mountPath: {{ .Values.global.cnLdapKeyFile }}
-                subPath: opendj.key
-              - name: ldap-pass
-                mountPath: {{ .Values.global.cnLdapPasswordFile }}
-                subPath: ldap_password
-              - name: ldap-pass
-                mountPath: {{ .Values.global.cnLdapTruststorePasswordFile }}
-                subPath: ldap_truststore_password
+              - mountPath: /etc/jans/conf/configuration.json
+                name: {{ .Release.Name }}-configuration-file
+                subPath: configuration.json
           restartPolicy: Never
           volumes:
-          - name: ldap-pass
+          - name: {{ .Release.Name }}-configuration-file
             secret:
-              secretName: {{ .Release.Name }}-ldap-pass
-          - name: ldap-certkey
-            secret:
-              secretName: {{ .Release.Name }}-ldap-certkey
+              secretName: {{ .Release.Name }}-configuration-file
 {{- end }}

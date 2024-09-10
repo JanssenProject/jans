@@ -1,10 +1,10 @@
 {
-  "JANS_APP_VERSION": "1.1.4",
+  "JANS_APP_VERSION": "1.1.5",
   "JANS_BUILD": "-SNAPSHOT",
   "JETTY_VERSION": "11.0.15",
   "AMAZON_CORRETTO_VERSION": "17",
   "JYTHON_VERSION": "2.7.3",
-  "OPENDJ_VERSION": "4.5.1",
+  "OPENDJ_VERSION": "4.5.3",
   "JANS_MAVEN": "https://jenkins.jans.io",
   "APPLE_WEBAUTHN": "https://www.apple.com/certificateauthority/Apple_WebAuthn_Root_CA.pem",
   "SQLALCHEMY": "https://github.com/sqlalchemy/sqlalchemy/archive/rel_1_3_23.zip",

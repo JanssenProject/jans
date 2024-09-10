@@ -20,6 +20,7 @@ import io.jans.as.model.jwt.JwtClaims;
 import io.jans.as.model.jwt.JwtSubClaimObject;
 import io.jans.as.model.token.JsonWebResponse;
 import io.jans.as.persistence.model.Scope;
+import io.jans.as.server.authorize.ws.rs.AuthzRequest;
 import io.jans.as.server.model.authorize.Claim;
 import io.jans.as.server.model.authorize.JwtAuthorizationRequest;
 import io.jans.as.server.model.common.*;
@@ -28,6 +29,7 @@ import io.jans.as.server.service.ScopeService;
 import io.jans.as.server.service.SessionIdService;
 import io.jans.as.server.service.date.DateFormatterService;
 import io.jans.as.server.service.external.ExternalAuthenticationService;
+import io.jans.as.server.service.external.ExternalAuthorizationChallengeService;
 import io.jans.as.server.service.external.ExternalDynamicScopeService;
 import io.jans.as.server.service.external.ExternalUpdateTokenService;
 import io.jans.as.server.service.external.context.DynamicScopeExternalContext;
@@ -102,7 +104,10 @@ public class IdTokenFactory {
     @Inject
     private StatusListService statusListService;
 
-    private void setAmrClaim(JsonWebResponse jwt, String acrValues) {
+    @Inject
+    private ExternalAuthorizationChallengeService externalAuthorizationChallengeService;
+
+    private void setAmrClaim(JsonWebResponse jwt, String acrValues, Client client) {
         List<String> amrList = Lists.newArrayList();
 
         CustomScriptConfiguration script = externalAuthenticationService.getCustomScriptConfigurationByName(acrValues);
@@ -114,15 +119,30 @@ public class IdTokenFactory {
 
             if (apiVersion > 3) {
                 Map<String, String> authenticationMethodClaimsOrNull = externalAuthenticator.getAuthenticationMethodClaims(script.getConfigurationAttributes());
-                if (authenticationMethodClaimsOrNull != null) {
-                    for (String key : authenticationMethodClaimsOrNull.keySet()) {
-                        amrList.add(key + ":" + authenticationMethodClaimsOrNull.get(key));
-                    }
-                }
+                addToAmrList(amrList, authenticationMethodClaimsOrNull);
             }
+        } else {
+            AuthzRequest authzRequest = new AuthzRequest();
+            authzRequest.setAcrValues(acrValues);
+            authzRequest.setClientId(client.getClientId());
+
+            ExecutionContext executionContext = new ExecutionContext();
+            executionContext.setAuthzRequest(authzRequest);
+            executionContext.setClient(client);
+
+            final Map<String, String> amrMap = externalAuthorizationChallengeService.getAuthenticationMethodClaims(executionContext);
+            addToAmrList(amrList, amrMap);
         }
 
         jwt.getClaims().setClaim(JwtClaimName.AUTHENTICATION_METHOD_REFERENCES, amrList);
+    }
+
+    private void addToAmrList(List<String> amrList, Map<String, String> claims) {
+        if (claims != null) {
+            for (Map.Entry<String, String> entry : claims.entrySet()) {
+                amrList.add(entry.getKey() + ":" + entry.getValue());
+            }
+        }
     }
 
     private void fillClaims(JsonWebResponse jwr,
@@ -151,7 +171,8 @@ public class IdTokenFactory {
         Date expiration = calendar.getTime();
 
         jwr.getClaims().setExpirationTime(expiration);
-        jwr.getClaims().setIssuedAt(issuedAt);
+        jwr.getClaims().setIat(issuedAt);
+        jwr.getClaims().setNbf(issuedAt);
         jwr.setClaim("jti", executionContext.getTokenReferenceId()); // provided uniqueness of id_token for same RP requests, oxauth: 1493
 
         if (executionContext.getPreProcessing() != null) {
@@ -170,7 +191,7 @@ public class IdTokenFactory {
         acrValues = AcrService.removeParametersFromAgamaAcr(acrValues);
         if (acrValues != null) {
             jwr.setClaim(JwtClaimName.AUTHENTICATION_CONTEXT_CLASS_REFERENCE, acrValues);
-            setAmrClaim(jwr, acrValues);
+            setAmrClaim(jwr, acrValues, client);
         }
         String nonce = executionContext.getNonce();
         if (StringUtils.isNotBlank(nonce)) {

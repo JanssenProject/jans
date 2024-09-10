@@ -39,7 +39,7 @@ Say we want to increase the size of `mail` field to 144. Do the following:<br>
   * `use jansdb; select * from jansGrp\G;` 
 * Add specific user in this group
   * Get `DN` of user
-    * `use jansdb; select * from jansPerson where uid='testUser'\G;
+    * `use jansdb; select * from jansPerson where uid='testUser'\G`;
     * Copy `DN` of this user. i.e. `inum=83d43a5d-3311-4c93-ae26-df80c320557a,ou=people,o=jans` 
   * Perform operation: `use jansdb; update jansGrp set member = '{"v": ["inum=e4fe2c89-f588-41a2-aac5-2f1afa63bed1,ou=people,o=jans", "inum=83d43a5d-3311-4c93-ae26-df80c320557a,ou=people,o=jans"]}';` 
 
@@ -55,10 +55,11 @@ In this example we are doing to update one user's email address.
 
 ### Add custom attribute
 
-There are two steps here: 
+There are three steps here: 
 
-* Create attribute in MySQL database: `ALTER TABLE `jansdb`.`jansPerson` ADD COLUMN `cmdAttr` VARCHAR(64) NULL;` 
-* Create attribute from TUI: ![tui_custom_attribute](../../../assets/TUI_CustomAttribute.png)
+* Create attribute in MySQL database: `ALTER TABLE jansdb.jansPerson ADD COLUMN cmdAttr VARCHAR(64) NULL;`
+* Restart the ConfgiApi [service](../../vm-ops/restarting-services/). If you are using kubernetes please restart the [deployment](https://kubernetes.io/docs/reference/kubectl/generated/kubectl_rollout/kubectl_rollout_restart/).
+* Create attribute using the terraform provider, curl commands, or  TUI: ![tui_custom_attribute](../../../assets/TUI_CustomAttribute.png)
 
 ### LDAP to MySQL Migration Script
 
