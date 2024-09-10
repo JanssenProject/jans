@@ -112,8 +112,7 @@ public class AttestationVerifier {
                 log.warn("SkipValidateMdsInAttestation is enabled");
             } else {
                 if (AttestationMode.ENFORCED.equals(appConfiguration.getFido2Configuration().getAttestationMode()) && fmt.equals(AttestationFormat.none.getFmt())) {
-                    //TODO throw exception here
-                    throw new Fido2RuntimeException("Error Message Here");
+                    throw new Fido2RuntimeException("Unauthorized to perform this action");
                 }
                 else {
                     attestationProcessor.process(attStmt, authData, credential, clientDataHash, credIdAndCounters);

@@ -2,6 +2,7 @@ package io.jans.fido2.service.verifier;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import io.jans.fido2.exception.Fido2RuntimeException;
 import io.jans.fido2.model.auth.AuthData;
 import io.jans.fido2.model.auth.CredAndCounterData;
 import io.jans.fido2.model.conf.AppConfiguration;
@@ -182,6 +183,111 @@ class AttestationVerifierTest {
         assertNotNull(credIdAndCounters);
         assertEquals(credIdAndCounters.getCounters(), 0);
         verify(log).debug("Authenticator data {} {}", fmt, authenticatorDataNode);
+        verify(base64Service, times(2)).urlDecode(anyString());
+    }
+
+    @Test
+    void verifyAuthenticatorAttestationResponse_whenAttestationModeIsDisabled_shouldSkipAttestation() throws IOException {
+        String attestationObjectString = "TEST-attestationObject";
+        String clientDataJSONString = "TEST-clientDataJSON";
+        io.jans.fido2.model.attestation.Response authenticatorResponse = new io.jans.fido2.model.attestation.Response();
+        authenticatorResponse.setClientDataJSON(clientDataJSONString);
+        authenticatorResponse.setAttestationObject(attestationObjectString);
+
+        ObjectNode authenticatorDataNode = mapper.createObjectNode();
+        authenticatorDataNode.put("attStmt", "TEST-attStmt");
+        authenticatorDataNode.put("authData", "TEST-authData");
+        Fido2RegistrationData credential = new Fido2RegistrationData();
+        AuthData authData = new AuthData();
+        authData.setCounters("TEST-counter".getBytes());
+        String authDataText = "TEST-authDataText";
+        String fmt = "TEST-fmt";
+        AttestationFormatProcessor attestationProcessor = mock(AttestationFormatProcessor.class);
+        when(base64Service.urlDecode(attestationObjectString)).thenReturn(attestationObjectString.getBytes());
+        when(base64Service.urlDecode(clientDataJSONString)).thenReturn(clientDataJSONString.getBytes());
+        when(dataMapperService.cborReadTree(any())).thenReturn(authenticatorDataNode);
+        when(commonVerifiers.verifyFmt(authenticatorDataNode, "fmt")).thenReturn(fmt);
+        when(commonVerifiers.verifyAuthData(any())).thenReturn(authDataText);
+        when(authenticatorDataParser.parseAttestationData(authDataText)).thenReturn(authData);
+        when(attestationProcessorFactory.getCommandProcessor(fmt)).thenReturn(attestationProcessor);
+
+        Fido2Configuration fido2Configuration = new Fido2Configuration();
+        fido2Configuration.setAttestationMode(AttestationMode.DISABLED);
+        when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
+
+        CredAndCounterData result = attestationVerifier.verifyAuthenticatorAttestationResponse(authenticatorResponse, credential);
+
+        assertNotNull(result);
+        verify(log).warn(eq("SkipValidateMdsInAttestation is enabled"));
+    }
+
+    @Test
+    void verifyAuthenticatorAttestationResponse_whenAttestationModeIsEnforcedAndFmtNone_shouldThrowException() throws IOException {
+        String attestationObjectString = "TEST-attestationObject";
+        String clientDataJSONString = "TEST-clientDataJSON";
+        io.jans.fido2.model.attestation.Response authenticatorResponse = new io.jans.fido2.model.attestation.Response();
+        authenticatorResponse.setClientDataJSON(clientDataJSONString);
+        authenticatorResponse.setAttestationObject(attestationObjectString);
+
+        ObjectNode authenticatorDataNode = mapper.createObjectNode();
+        authenticatorDataNode.put("attStmt", "TEST-attStmt");
+        authenticatorDataNode.put("authData", "TEST-authData");
+        Fido2RegistrationData credential = new Fido2RegistrationData();
+        AuthData authData = new AuthData();
+        authData.setCounters("TEST-counter".getBytes());
+        String authDataText = "TEST-authDataText";
+        String fmt = "none";
+        AttestationFormatProcessor attestationProcessor = mock(AttestationFormatProcessor.class);
+        when(base64Service.urlDecode(attestationObjectString)).thenReturn(attestationObjectString.getBytes());
+        when(base64Service.urlDecode(clientDataJSONString)).thenReturn(clientDataJSONString.getBytes());
+        when(dataMapperService.cborReadTree(any())).thenReturn(authenticatorDataNode);
+        when(commonVerifiers.verifyFmt(authenticatorDataNode, "fmt")).thenReturn(fmt);
+        when(commonVerifiers.verifyAuthData(any())).thenReturn(authDataText);
+        when(authenticatorDataParser.parseAttestationData(authDataText)).thenReturn(authData);
+        when(attestationProcessorFactory.getCommandProcessor(fmt)).thenReturn(attestationProcessor);
+
+        Fido2Configuration fido2Configuration = new Fido2Configuration();
+        fido2Configuration.setAttestationMode(AttestationMode.ENFORCED);
+        when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
+
+        Fido2RuntimeException exception = assertThrows(Fido2RuntimeException.class, () ->
+                attestationVerifier.verifyAuthenticatorAttestationResponse(authenticatorResponse, credential)
+        );
+        assertEquals("Unauthorized to perform this action", exception.getMessage());
+    }
+
+    @Test
+    void verifyAuthenticatorAttestationResponse_whenAttestationModeIsEnforcedAndFormatIsNotNone_shouldProcess() throws IOException {
+        String attestationObjectString = "TEST-attestationObject";
+        String clientDataJSONString = "TEST-clientDataJSON";
+        io.jans.fido2.model.attestation.Response authenticatorResponse = new io.jans.fido2.model.attestation.Response();
+        authenticatorResponse.setClientDataJSON(clientDataJSONString);
+        authenticatorResponse.setAttestationObject(attestationObjectString);
+
+        ObjectNode authenticatorDataNode = mapper.createObjectNode();
+        authenticatorDataNode.put("attStmt", "TEST-attStmt");
+        authenticatorDataNode.put("authData", "TEST-authData");
+        Fido2RegistrationData credential = new Fido2RegistrationData();
+        AuthData authData = new AuthData();
+        authData.setCounters("TEST-counter".getBytes());
+        String authDataText = "TEST-authDataText";
+        String fmt = "apple";
+        AttestationFormatProcessor attestationProcessor = mock(AttestationFormatProcessor.class);
+        when(base64Service.urlDecode(attestationObjectString)).thenReturn(attestationObjectString.getBytes());
+        when(base64Service.urlDecode(clientDataJSONString)).thenReturn(clientDataJSONString.getBytes());
+        when(dataMapperService.cborReadTree(any())).thenReturn(authenticatorDataNode);
+        when(commonVerifiers.verifyFmt(authenticatorDataNode, "fmt")).thenReturn(fmt);
+        when(commonVerifiers.verifyAuthData(any())).thenReturn(authDataText);
+        when(authenticatorDataParser.parseAttestationData(authDataText)).thenReturn(authData);
+        when(attestationProcessorFactory.getCommandProcessor(fmt)).thenReturn(attestationProcessor);
+
+        Fido2Configuration fido2Configuration = new Fido2Configuration();
+        fido2Configuration.setAttestationMode(AttestationMode.ENFORCED);
+        when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
+        CredAndCounterData result = attestationVerifier.verifyAuthenticatorAttestationResponse(authenticatorResponse, credential);
+
+        assertNotNull(result);
+        assertEquals(result.getCounters(), 0);
         verify(base64Service, times(2)).urlDecode(anyString());
     }
 }
