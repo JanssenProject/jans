@@ -46,7 +46,7 @@ class Plugin(DialogUtils):
         self.assets_container = HSplit([])
         self.assets_list_box = JansVerticalNav(
                 myparent=common_data.app,
-                headers=['inum', _("Display Name"), _("Enabled"), _("Creation Time")],
+                headers=['inum', _("File Name"), _("Enabled"), _("Creation Time")],
                 preferred_size= [40, 40 ,10, 20],
                 data=[],
                 on_enter=self.edit_asset,
@@ -114,8 +114,8 @@ class Plugin(DialogUtils):
             new_data = self.make_data_from_dialog(tabs={'asset': dialog.body})
             data.update(new_data)
 
-            if not (data.get('description') and data.get('displayName')):
-                self.app.show_message(common_strings.error, HTML(_("Please fill <b>Description</b> and <b>Display Name</b>")), tobefocused=dialog)
+            if not (data.get('description') and data.get('fileName')):
+                self.app.show_message(common_strings.error, HTML(_("Please fill <b>Description</b> and <b>File Name</b>")), tobefocused=dialog)
                 return
 
             data['service'] = [data.pop('jansService')]
@@ -159,7 +159,7 @@ class Plugin(DialogUtils):
             common_data.app.show_jans_dialog(file_browser_dialog)
 
 
-        display_name_widget = common_data.app.getTitledText(_("Display Name"), name='displayName', value=data.get('displayName'), style=cli_style.edit_text_required)
+        display_name_widget = common_data.app.getTitledText(_("File Name"), name='fileName', value=data.get('fileName'), style=cli_style.edit_text_required)
 
         def read_asset(path):
             self.asset_file_path = path
@@ -280,7 +280,7 @@ class Plugin(DialogUtils):
             self.assets_list_box.clear()
             self.assets_list_box.all_data = self.data['entries']
             for asset_info in self.data['entries']:
-                self.assets_list_box.add_item((asset_info['inum'], asset_info['displayName'], asset_info['enabled'], asset_info.get('creationDate', '---')))
+                self.assets_list_box.add_item((asset_info['inum'], asset_info['fileName'], asset_info['enabled'], asset_info.get('creationDate', '---')))
 
             self.assets_container = self.assets_list_box
 
