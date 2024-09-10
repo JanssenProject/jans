@@ -8,7 +8,7 @@ use init_engine::TokenMapper;
 
 #[derive(serde::Deserialize, Debug)]
 pub struct AuthzRequest {
-	// generates entities
+	// generated entities
 	pub id_token: String,
 	pub userinfo_token: String,
 	pub access_token: String,
