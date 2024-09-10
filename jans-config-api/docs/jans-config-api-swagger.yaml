@@ -8205,7 +8205,9 @@ components:
           type: string
         inum:
           type: string
-        displayName:
+        fileName:
+          type: string
+        filePath:
           type: string
         description:
           type: string
@@ -8366,21 +8368,21 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
+        selected:
+          type: boolean
         whitePagesCanView:
           type: boolean
-        selected:
+        userCanAccess:
+          type: boolean
+        adminCanAccess:
+          type: boolean
+        userCanEdit:
           type: boolean
         adminCanEdit:
           type: boolean
         userCanView:
           type: boolean
-        userCanEdit:
-          type: boolean
         adminCanView:
-          type: boolean
-        userCanAccess:
-          type: boolean
-        adminCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -10805,10 +10807,10 @@ components:
         ttl:
           type: integer
           format: int32
-        persisted:
-          type: boolean
         opbrowserState:
           type: string
+        persisted:
+          type: boolean
     SessionIdAccessMap:
       type: object
       properties:

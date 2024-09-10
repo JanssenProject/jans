@@ -193,7 +193,10 @@ def check_resources():
 
 
 def determineApacheVersion(full=False):
-    httpd_cmd = shutil.which(httpd_name) or shutil.which('apache2ctl')
+    for cmd_ in ('apache2', 'httpd', 'apache2ctl'):
+        httpd_cmd = shutil.which(cmd_)
+        if httpd_cmd:
+            break
     cmd = httpd_cmd + " -v | egrep '^Server version'"
     output = run(cmd, shell=True)
     apache_version_re = re.search('Apache/(\d).(\d).(\d)', output.strip())
@@ -328,7 +331,7 @@ def find_script_names(ldif_file):
                 result = rec.search(l)
                 if result:
                     name_list.append(result.groups()[0])
-                
+
     return name_list
 
 def download(url, dst, verbose=False, headers=None):

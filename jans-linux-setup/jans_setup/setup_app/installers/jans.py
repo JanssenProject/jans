@@ -153,7 +153,11 @@ class JansInstaller(BaseInstaller, SetupUtils):
             self.writeHybridProperties()
 
         # set systemd start timeout to 5 mins
-        systemd_conf_fn = '/etc/systemd/system.conf'
+        for sys_prefix in ('/etc', '/usr/lib'):
+            systemd_conf_fn = os.path.join(sys_prefix, 'systemd/system.conf')
+            if os.path.exists(systemd_conf_fn):
+                break
+
         systemd_conf = []
 
         for l in open(systemd_conf_fn):

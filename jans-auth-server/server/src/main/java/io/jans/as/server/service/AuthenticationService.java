@@ -205,6 +205,8 @@ public class AuthenticationService {
                 sessionIdAttributes.put(Constants.AUTHENTICATED_USER, userName);
             }
             sessionIdService.updateSessionIdIfNeeded(sessionId, authenticated);
+        } else {
+        	log.warn("Failed to set authenticated user in session!");
         }
     }
 
@@ -535,10 +537,12 @@ public class AuthenticationService {
 
         com.codahale.metrics.Timer.Context timerContext = metricService
                 .getTimer(MetricType.USER_AUTHENTICATION_RATE).time();
+        String userId = null;
         try {
             User user = userService.getUserByInum(userInum);
             if ((user != null) && checkUserStatus(user)) {
-                credentials.setUsername(user.getUserId());
+            	userId = user.getUserId();
+                credentials.setUsername(userId);
                 configureAuthenticatedUser(user);
                 updateLastLogonUserTime(user);
 
@@ -551,7 +555,7 @@ public class AuthenticationService {
             timerContext.stop();
         }
 
-        setAuthenticatedUserSessionAttribute(null, authenticated);
+        setAuthenticatedUserSessionAttribute(userId, authenticated);
 
         MetricType metricType;
         if (authenticated) {

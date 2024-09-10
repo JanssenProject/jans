@@ -63,6 +63,10 @@ public class JwtClaims extends JwtClaimSet {
         setClaim(NOT_BEFORE, notBefore);
     }
 
+    public void setNbf(Date notBefore) {
+        setNotBefore(notBefore);
+    }
+
     /**
      * Identifies the time at which the JWT was issued.
      * This claim can be used to determine the age of the token.
@@ -75,6 +79,10 @@ public class JwtClaims extends JwtClaimSet {
 
     public void setIatNow() {
         setIssuedAt(new Date());
+    }
+
+    public void setIat(Date issuedAt) {
+        setIssuedAt(issuedAt);
     }
 
     /**

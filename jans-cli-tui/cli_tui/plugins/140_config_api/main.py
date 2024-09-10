@@ -41,12 +41,13 @@ class Plugin(DialogUtils):
             app (Generic): The main Application class
         """
         self.app = app
-        common_data.background_tasks_feeds['attributes'].append(self.feed_attribute_widgets)
+        
         self.pid = 'config-api'
         self.name = 'Config API'
         self.server_side_plugin = False
         self.page_entered = False
         self.data = {}
+
         self.prepare_navbar()
         self.prepare_containers()
 
@@ -54,7 +55,6 @@ class Plugin(DialogUtils):
     def init_plugin(self) -> None:
         """The initialization for this plugin
         """
-
         self.app.create_background_task(self.get_configuration())
 
 
@@ -65,6 +65,7 @@ class Plugin(DialogUtils):
 
     def create_widgets(self):
         self.schema = self.app.cli_object.get_schema_from_reference('', '#/components/schemas/ApiAppConfiguration')
+
         label_widget_width = common_data.app.output.get_size().columns - 3
 
         self.user_exclusion_attributes_widget = JansLabelWidget(
@@ -491,6 +492,11 @@ class Plugin(DialogUtils):
 
         self.data = response.json()
         self.create_widgets()
+
+    def on_page_enter(self):
+        if not self.page_entered:
+            self.feed_attribute_widgets()
+            self.page_entered = True
 
     def get_attr_displayname_from_name(self, name):
         for attribute in common_data.jans_attributes:

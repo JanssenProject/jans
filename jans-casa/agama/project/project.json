@@ -51,6 +51,7 @@
             "from_number": ""            
         },
         "io.jans.casa.authn.super_gluu": {
+            "timeout": 80,
             "qr_options": {
                 "label": "",
                 "size": 400,
