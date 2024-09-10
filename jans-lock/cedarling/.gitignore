@@ -5,6 +5,7 @@
 /out
 *.log
 coverage.txt
+lcov.info
 
 # files for debug
 cedar_files/demo_tokens_data.txt
