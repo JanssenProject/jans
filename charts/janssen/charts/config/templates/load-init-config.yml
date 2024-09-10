@@ -62,9 +62,9 @@ spec:
           {{- with .Values.volumeMounts }}
 {{- toYaml . | nindent 10 }}
           {{- end }}
-          - mountPath: /etc/jans/conf/configuration.json
+          - mountPath: {{ .Values.global.cnConfiguratorConfigurationFile }}
             name: {{ .Release.Name }}-configuration-file
-            subPath: configuration.json
+            subPath: {{ .Values.global.cnConfiguratorConfigurationFile | base }}
           - mountPath: /scripts/tls_generator.py
             name: {{ include "config.fullname" . }}-tls-script
             subPath: tls_generator.py

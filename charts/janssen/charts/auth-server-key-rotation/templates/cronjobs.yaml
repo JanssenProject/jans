@@ -62,9 +62,9 @@ spec:
               {{- with .Values.volumeMounts }}
 {{- toYaml . | nindent 16 }}
               {{- end }}
-                - mountPath: /etc/jans/conf/configuration.json
+                - mountPath: {{ .Values.global.cnConfiguratorConfigurationFile }}
                   name: {{ .Release.Name }}-configuration-file
-                  subPath: configuration.json
+                  subPath: {{ .Values.global.cnConfiguratorConfigurationFile | base }}
               envFrom:
                 - configMapRef:
                     name: {{ .Release.Name }}-config-cm

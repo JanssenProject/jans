@@ -62,9 +62,9 @@ spec:
               {{- with (index .Values "auth-server-key-rotation" "volumeMounts") }}
 {{- toYaml . | nindent 16 }}
               {{- end }}
-                - mountPath: /etc/jans/conf/configuration.json
+                - mountPath: {{ .Values.cnConfiguratorConfigurationFile }}
                   name: {{ .Release.Name }}-configuration-file
-                  subPath: configuration.json
+                  subPath: {{ .Values.cnConfiguratorConfigurationFile | base }}
               envFrom:
                 - configMapRef:
                     name: {{ .Release.Name }}-config-cm
@@ -153,9 +153,9 @@ spec:
               {{- with (index .Values "kc-scheduler" "volumeMounts") }}
 {{- toYaml . | nindent 16 }}
               {{- end }}
-                - mountPath: /etc/jans/conf/configuration.json
+                - mountPath: {{ .Values.cnConfiguratorConfigurationFile }}
                   name: {{ .Release.Name }}-configuration-file
-                  subPath: configuration.json
+                  subPath: {{ .Values.cnConfiguratorConfigurationFile | base }}
               envFrom:
                 - configMapRef:
                     name: {{ .Release.Name }}-config-cm

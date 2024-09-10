@@ -103,9 +103,9 @@ spec:
                 LDAP_BACKUP_FILE=backup-$RANDOM_NUM.ldif
                 /opt/opendj/bin/export-ldif --hostname "$LDAP_HOST" --port 4444 --bindDN "$LDAP_BIND_DN" --bindPassword "$LDAP_PASSWORD" --backendID userRoot --ldifFile /opt/opendj/ldif/$LDAP_BACKUP_FILE --trustAll
               volumeMounts:
-              - mountPath: /etc/jans/conf/configuration.json
+              - mountPath: {{ .Values.global.cnConfiguratorConfigurationFile }}
                 name: {{ .Release.Name }}-configuration-file
-                subPath: configuration.json
+                subPath: {{ .Values.global.cnConfiguratorConfigurationFile | base }}
           restartPolicy: Never
           volumes:
           - name: {{ .Release.Name }}-configuration-file

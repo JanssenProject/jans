@@ -100,9 +100,9 @@ spec:
           - name: {{ include "fido2.fullname" .}}-updatelbip
             mountPath: "/scripts"
         {{- end }}
-          - mountPath: /etc/jans/conf/configuration.json
+          - mountPath: {{ .Values.global.cnConfiguratorConfigurationFile }}
             name: {{ .Release.Name }}-configuration-file
-            subPath: configuration.json
+            subPath: {{ .Values.global.cnConfiguratorConfigurationFile | base }}
         livenessProbe:
 {{- toYaml .Values.livenessProbe | nindent 10 }}
         readinessProbe:

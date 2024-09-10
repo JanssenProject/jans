@@ -263,7 +263,7 @@ auth-server:
     # -- Lock ingress resource labels. key app is taken
     lockLabels: { }
     # -- Lock ingress resource additional annotations.
-    lockAdditionalAnnotations: { }        
+    lockAdditionalAnnotations: { }
     # -- openid-configuration ingress resource labels. key app is taken
     openidConfigLabels: { }
     # -- openid-configuration ingress resource additional annotations.
@@ -390,7 +390,7 @@ casa:
     # -- Casa ingress resource labels. key app is taken
     casaLabels: { }
     # -- Casa ingress resource additional annotations.
-    casaAdditionalAnnotations: { }     
+    casaAdditionalAnnotations: { }
 config-api:
   # -- Name of the config-api service. Please keep it as default.
   configApiServerServiceName: config-api
@@ -427,7 +427,7 @@ config-api:
     # -- configAPI ingress resource labels. key app is taken
     configApiLabels: { }
     # -- ConfigAPI ingress resource additional annotations.
-    configApiAdditionalAnnotations: { }  
+    configApiAdditionalAnnotations: { }
   # -- Comma-separated values of enabled plugins (supported plugins are "admin-ui","fido2","scim","user-mgt","jans-link","kc-saml")
   plugins: "admin-ui,fido2,scim,user-mgt"
 fido2:
@@ -511,7 +511,7 @@ scim:
     # -- SCIM config ingress resource labels. key app is taken
     scimLabels: { }
     # -- SCIM ingress resource additional annotations.
-    scimAdditionalAnnotations: { }    
+    scimAdditionalAnnotations: { }
 link:
   # -- Name of the link service. Please keep it as default.
   linkServiceName: link
@@ -592,6 +592,10 @@ cnCouchbaseSuperuserPasswordFile: /etc/jans/conf/couchbase_superuser_password
 kcDbPasswordFile: /etc/jans/conf/kc_db_password
 # -- Path to file contains Keycloak admin credentials (username and password)
 kcAdminCredentialsFile: /etc/jans/conf/kc_admin_creds
+# -- Path to configuration schema file
+cnConfiguratorConfigurationFile: /etc/jans/conf/configuration.json
+# -- Path to dumped configuration schema file
+cnConfiguratorDumpFile: /etc/jans/conf/configuration.out.json
 
 # ingress properties
 istio:
