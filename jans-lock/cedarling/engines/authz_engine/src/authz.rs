@@ -9,7 +9,6 @@ use jwt_data_handler::{AuthzInputEntitiesError, DecodeTokensError, JWTData};
 pub use jwt_data_handler::{AuthzRequest, CedarParams, ResourceData};
 pub(crate) mod jwt_tokens;
 use init_engine::policy_store::TrustedIssuers;
-use init_engine::policy_store_config::GetPolicyError;
 use init_engine::{BootstrapConfig, TokenMapper};
 
 pub(crate) mod exp_parsers;
@@ -30,10 +29,8 @@ pub struct Authz {
 
 #[derive(thiserror::Error, Debug)]
 pub enum AuthzNewError {
-	#[error("could not get policy store: {0}")]
-	PolicyStore(#[from] GetPolicyError),
-	#[error("could not parse entities: {0}")]
-	Entities(#[from] EntitiesError),
+	// TODO: currently we don't have a way to handle the error
+	// but it should be in the future
 }
 
 impl Authz {
