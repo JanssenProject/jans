@@ -4,14 +4,14 @@ members = [
     "authz_engine",
     "authz_run",
     "cedarling_python",
-    "init_engine",
+    "engines/init_engine",
     "jwt_engine",
 ]
 
 [workspace.dependencies]
 authz_engine = { path = "authz_engine" }
 jwt_engine = { path = "jwt_engine" }
-init_engine = { path = "init_engine" }
+init_engine = { path = "engines/init_engine" }
 cedar-policy = "3.2.0"
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
