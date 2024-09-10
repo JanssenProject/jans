@@ -100,14 +100,14 @@ class Plugin(DialogUtils):
         else:
             data = {}
 
-        new_asset = True if data else False
+        new_asset = not bool(data)
 
         title = _("Edit Asset") if data else _("Add Asset")
 
         self.asset_file_path = ''
 
         def save_asset(dialog: Dialog) -> None:
-            if not self.asset_file_path:
+            if new_asset and not self.asset_file_path:
                 self.app.show_message(common_strings.error, _("Please select asset"), tobefocused=dialog)
                 return
 
@@ -121,9 +121,12 @@ class Plugin(DialogUtils):
             data['service'] = [data.pop('jansService')]
 
             data.pop('document', None)
-            form_data = {'assetFile': self.asset_file_path, 'document': data}
+            form_data = {'document': data}
 
-            operation_id = 'put-asset' if new_asset else 'post-new-asset'
+            if new_asset:
+                form_data['assetFile'] = self.asset_file_path
+
+            operation_id = 'post-new-asset' if new_asset else 'put-asset'
             cli_args = {'operation_id': operation_id, 'data': form_data}
 
             async def coroutine():
