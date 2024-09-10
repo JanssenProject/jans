@@ -204,7 +204,7 @@ class PersonAuthentication(PersonAuthenticationType):
         
     def extractAgamaFlow(self, acr):
         prefix = "agama_"
-        if acr and acr.startswith(prefix) == 0:
+        if acr and acr.startswith(prefix):
             return acr[len(prefix):]
         return None        
         
