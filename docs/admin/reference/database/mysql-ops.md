@@ -57,9 +57,9 @@ In this example we are doing to update one user's email address.
 
 There are three steps here: 
 
-* Create attribute in MySQL database: `ALTER TABLE jansdb.jansPerson ADD COLUMN cmdAttr VARCHAR(64) NULL;` 
+* Create attribute in MySQL database: `ALTER TABLE jansdb.jansPerson ADD COLUMN cmdAttr VARCHAR(64) NULL;`
+* Restart the ConfgiApi [service](../../vm-ops/restarting-services/). If you are using kubernetes please restart the [deployment](https://kubernetes.io/docs/reference/kubectl/generated/kubectl_rollout/kubectl_rollout_restart/).
 * Create attribute using the terraform provider, curl commands, or  TUI: ![tui_custom_attribute](../../../assets/TUI_CustomAttribute.png)
-* Restart the ConfgiApi service
 
 ### LDAP to MySQL Migration Script
 
