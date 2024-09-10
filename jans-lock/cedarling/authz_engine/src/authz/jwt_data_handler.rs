@@ -52,15 +52,18 @@ impl ResourceData {
 #[derive(thiserror::Error, Debug)]
 pub enum DecodeTokensError {
 	#[error("could not decode id_token: {0}")]
-	IdToken(jwt::DecodeError),
+	IdToken(jwt_engine::DecodeError),
 	#[error("could not decode userinfo_token: {0}")]
-	UserInfoToken(jwt::DecodeError),
+	UserInfoToken(jwt_engine::DecodeError),
 	#[error("could not decode access_token: {0}")]
-	AccessToken(jwt::DecodeError),
+	AccessToken(jwt_engine::DecodeError),
 }
 
 impl AuthzRequest {
-	pub fn decode_tokens(self, decoder: &jwt::JWTDecoder) -> Result<AuthzInput, DecodeTokensError> {
+	pub fn decode_tokens(
+		self,
+		decoder: &jwt_engine::JWTDecoder,
+	) -> Result<AuthzInput, DecodeTokensError> {
 		let id_token: IdToken = decoder
 			.decode(&self.id_token)
 			.map_err(DecodeTokensError::IdToken)?;

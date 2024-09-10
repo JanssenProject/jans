@@ -1,6 +1,6 @@
 use std::io::Write;
 
-use authz_engine::{jwt, Authz, PolicyStoreConfig};
+use authz_engine::{jwt_engine, Authz, PolicyStoreConfig};
 use simplelog::*;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -31,7 +31,7 @@ fn real_demo_case() -> Result<(), Box<dyn std::error::Error>> {
 	// only show entities for debug
 	{
 		let q = authz_engine::AuthzRequest::parse_raw(input_json)?;
-		let decoded_input = q.decode_tokens(&jwt::JWTDecoder::new_without_validation())?;
+		let decoded_input = q.decode_tokens(&jwt_engine::JWTDecoder::new_without_validation())?;
 		let entites_box = authz.get_entities(decoded_input.jwt)?;
 
 		let stdout = std::io::stdout();

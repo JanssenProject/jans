@@ -2,7 +2,7 @@ use cedar_policy::{
 	Authorizer, Context, Entities, EntitiesError, EntityUid, ParseErrors, PolicySet, Request,
 	Response,
 };
-use jwt::JWTDecoder;
+use jwt_engine::JWTDecoder;
 
 mod jwt_data_handler;
 use jwt_data_handler::{AuthzInputEntitiesError, DecodeTokensError, JWTData};

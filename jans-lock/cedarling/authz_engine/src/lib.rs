@@ -1,7 +1,7 @@
 mod authz;
 pub use authz::*;
 
-pub use jwt;
+pub use jwt_engine;
 
 pub use init_engine;
 pub use init_engine::{BootstrapConfig, TokenMapper};

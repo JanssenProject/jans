@@ -26,7 +26,7 @@ pub struct BootstrapConfig {
 }
 
 impl BootstrapConfig {
-	pub fn get_jwt_decoder(&self) -> jwt::JWTDecoder {
-		jwt::JWTDecoder::WithoutValidation
+	pub fn get_jwt_decoder(&self) -> jwt_engine::JWTDecoder {
+		jwt_engine::JWTDecoder::WithoutValidation
 	}
 }
