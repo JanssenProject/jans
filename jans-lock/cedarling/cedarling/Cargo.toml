@@ -1,0 +1,9 @@
+[package]
+name = "cedarling"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+authz_engine = { workspace = true }
+jwt_engine = { workspace = true }
+init_engine = { workspace = true }

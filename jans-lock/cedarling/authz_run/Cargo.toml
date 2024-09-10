@@ -4,6 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-authz_engine = { workspace = true }
+cedarling = { workspace = true }
 log = { workspace = true }
 simplelog = "0.12.2"

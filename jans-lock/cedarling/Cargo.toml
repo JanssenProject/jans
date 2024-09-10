@@ -6,9 +6,11 @@ members = [
     "engines/init_engine",
     "engines/jwt_engine",
     "bindings/cedarling_python",
+    "cedarling",
 ]
 
 [workspace.dependencies]
+cedarling = { path = "cedarling" }
 authz_engine = { path = "engines/authz_engine" }
 jwt_engine = { path = "engines/jwt_engine" }
 init_engine = { path = "engines/init_engine" }
