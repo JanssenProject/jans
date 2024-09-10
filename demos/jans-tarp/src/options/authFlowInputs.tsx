@@ -48,8 +48,6 @@ export default function AuthFlowInputs({ isOpen, handleDialog, client, notifyOnD
   React.useEffect(() => {
     (async () => {
       const scopes = client?.scope.split(" ");
-      console.log('scope==========>'+JSON.stringify(client?.scope.split(" ")))
-      console.log('scopeOptions==========>'+JSON.stringify(scopes.map((ele) => ({name: ele}))))
       setAcrValueOption(client?.acrValuesSupported.map((ele) => createOption(ele)));
       setScopeOptions(scopes.map((ele) => ({name: ele})))
       
