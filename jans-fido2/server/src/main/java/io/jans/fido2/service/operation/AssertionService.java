@@ -378,7 +378,7 @@ public class AssertionService {
         }
 
 		// Set expiration
-		int unfinishedRequestExpiration = appConfiguration.getFido2Configuration().getAuthenticationHistoryExpiration();
+		int unfinishedRequestExpiration = appConfiguration.getFido2Configuration().getMetadataRefreshInterval();
 		authenticationEntity.setExpiration(unfinishedRequestExpiration);
 
 		authenticationPersistenceService.update(authenticationEntity);

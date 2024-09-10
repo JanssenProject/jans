@@ -177,13 +177,22 @@ class Plugin(DialogUtils):
                                 self.app.getTitledText(_("Authentication History Expiration"), name='authenticationHistoryExpiration', value=fido2_static_config.get('authenticationHistoryExpiration',''), jans_help=self.app.get_help_from_schema(static_schema, 'authenticationHistoryExpiration'), style='class:outh-scope-text', text_type='integer',widget_style=cli_style.black_bg_widget),
                                 self.app.getTitledText(_("Server Metadata Folder"), name='serverMetadataFolder', value=fido2_static_config.get('serverMetadataFolder',''), jans_help=self.app.get_help_from_schema(static_schema, 'serverMetadataFolder'), style='class:outh-scope-text',widget_style=cli_style.black_bg_widget),
 
-                                self.app.getTitledCheckBox(_("User Auto Enrollment"), name='userAutoEnrollment', checked=fido2_static_config.get('userAutoEnrollment'), jans_help=self.app.get_help_from_schema(static_schema, 'userAutoEnrollment'), style=cli_style.check_box,widget_style=cli_style.black_bg_widget),
+                                self.app.getTitledCheckBox(_("User Auto Enrollment"), name='debugUserAutoEnrollment', checked=fido2_static_config.get('userAutoEnrollment'), jans_help=self.app.get_help_from_schema(static_schema, 'userAutoEnrollment'), style=cli_style.check_box,widget_style=cli_style.black_bg_widget),
                                 self.app.getTitledText(
                                             _("Requested Credential Types"),
                                             name='requestedCredentialTypes',
                                             value='\n'.join(fido2_static_config.get('requestedCredentialTypes', [])),
                                             height=3, 
                                             jans_help=self.app.get_help_from_schema(static_schema, 'requestedCredentialTypes'), 
+                                            style='class:outh-scope-text'
+                                            ,widget_style=cli_style.black_bg_widget
+                                            ),
+                                self.app.getTitledText(
+                                            _("Supported Algorithms"),
+                                            name='enabledFidoAlgorithms',
+                                            value='\n'.join(fido2_static_config.get('enabledFidoAlgorithms', [])),
+                                            height=3, 
+                                            jans_help=self.app.get_help_from_schema(static_schema, 'enabledFidoAlgorithms'),
                                             style='class:outh-scope-text'
                                             ,widget_style=cli_style.black_bg_widget
                                             ),
@@ -286,7 +295,7 @@ class Plugin(DialogUtils):
         fido2_static = self.make_data_from_dialog(tabs={'static': self.tabs['static']})
 
         fido2_config['personCustomObjectClassList'] = fido2_config['personCustomObjectClassList'].splitlines()
-        fido2_static['requestedCredentialTypes'] = fido2_static['requestedCredentialTypes'].splitlines()
+        fido2_static['enabledFidoAlgorithms'] = fido2_static['enabledFidoAlgorithms'].splitlines()
 
         fido2_static['requestedParties'] = []
         for name, domains in self.requested_parties_container.data:

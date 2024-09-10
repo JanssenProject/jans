@@ -24,25 +24,27 @@
       "mdsCertsFolder":"%(fido2ConfigFolder)s/mds/cert",
       "mdsTocsFolder":"%(fido2ConfigFolder)s/mds/toc",
       "serverMetadataFolder":"%(fido2ConfigFolder)s/server_metadata",
-      "requestedCredentialTypes":[
+      "enabledFidoAlgorithms":[
          "RS256",
          "ES256","Ed25519"
       ],
-      "requestedParties":[
+      "rp":[
          {
-            "name":"https://%(hostname)s",
-            "domains":[
+            "id":"https://%(hostname)s",
+            "origins":[
                "%(hostname)s"
             ]
          }
       ],
-      "userAutoEnrollment":false,
+      "debugUserAutoEnrollment":false,
       "unfinishedRequestExpiration":180,
       "authenticationHistoryExpiration":1296000,
       "metadataUrlsProvider":"",
+
       "skipDownloadMdsEnabled":false,
       "skipAttestation":false,
       "enterpriseAttestation":"false",
       "hints":["security-key","client-device","hybrid"]
+
    }
 }
