@@ -4,6 +4,7 @@
 /samples
 /out
 *.log
+coverage.txt
 
 # files for debug
 cedar_files/demo_tokens_data.txt
