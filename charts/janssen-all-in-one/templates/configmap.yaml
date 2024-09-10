@@ -43,14 +43,16 @@ data:
   {{ if or (eq .Values.configSecretAdapter "aws") (eq .Values.configAdapterName "aws") }}
   # [aws_envs] Envs related to using AWS
   {{- if .Values.configmap.cnAwsSecretsEndpointUrl }}
-  CN_AWS_SECRETS_ENDPOINT_URL: {{ .Values.configmap.cnAwsSecretsEndpointUrl }}
+  CN_AWS_SECRETS_ENDPOINT_URL: {{ .Values.configmap.cnAwsSecretsEndpointUrl | quote }}
   {{- end }}
-  CN_AWS_SECRETS_PREFIX: {{ .Values.configmap.cnAwsSecretsNamePrefix }}
-  CN_AWS_SECRETS_REPLICA_FILE: {{ .Values.cnAwsSecretsReplicaRegionsFile }}
-  AWS_DEFAULT_REGION: {{ .Values.configmap.cnAwsDefaultRegion }}
-  AWS_SHARED_CREDENTIALS_FILE: {{ .Values.cnAwsSharedCredentialsFile }}
-  AWS_CONFIG_FILE: {{ .Values.cnAwsConfigFile }}
-  #AWS_PROFILE
+  CN_AWS_SECRETS_PREFIX: {{ .Values.configmap.cnAwsSecretsNamePrefix | quote }}
+  CN_AWS_SECRETS_REPLICA_FILE: {{ .Values.cnAwsSecretsReplicaRegionsFile | quote }}
+  AWS_DEFAULT_REGION: {{ .Values.configmap.cnAwsDefaultRegion | quote }}
+  AWS_SHARED_CREDENTIALS_FILE: {{ .Values.cnAwsSharedCredentialsFile | quote }}
+  AWS_CONFIG_FILE: {{ .Values.cnAwsConfigFile | quote }}
+  {{- if or (ne .Values.configmap.cnAwsProfile "") (ne .Values.configmap.cnAwsProfile "default") }}
+  AWS_PROFILE: {{ .Values.configmap.cnAwsProfile | quote }}
+  {{- end }}
   # [aws_envs] END
   {{- end }}
   # [vault_envs] Envs related to Hashicorp vault

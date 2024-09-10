@@ -59,33 +59,12 @@ spec:
               lifecycle:
 {{- toYaml (index .Values "auth-server-key-rotation" "lifecycle") | nindent 16 }}
               volumeMounts:
-              {{ if or (eq .Values.configSecretAdapter "aws") (eq .Values.configAdapterName "aws") }}
-                - mountPath: {{ .Values.cnAwsSharedCredentialsFile }}
-                  name: aws-shared-credential-file
-                  subPath: aws_shared_credential_file
-                - mountPath: {{ .Values.cnAwsConfigFile }}
-                  name: aws-config-file
-                  subPath: aws_config_file
-                - mountPath: {{ .Values.cnAwsSecretsReplicaRegionsFile }}
-                  name: aws-secrets-replica-regions
-                  subPath: aws_secrets_replica_regions
-              {{- end }}
-              {{ if or (eq .Values.configSecretAdapter "google") (eq .Values.cnPersistenceType "spanner") }}
-                - mountPath: {{ .Values.cnGoogleApplicationCredentials }}
-                  name: google-sa
-                  subPath: google-credentials.json
-                {{- end }}
-                {{ if eq .Values.configSecretAdapter "vault" }}
-                - name: vault
-                  mountPath: /etc/certs/vault_role_id
-                  subPath: vault_role_id
-                - name: vault
-                  mountPath: /etc/certs/vault_secret_id
-                  subPath: vault_secret_id
-                {{- end }}
               {{- with (index .Values "auth-server-key-rotation" "volumeMounts") }}
 {{- toYaml . | nindent 16 }}
               {{- end }}
+                - mountPath: /etc/jans/conf/configuration.json
+                  name: {{ .Release.Name }}-configuration-file
+                  subPath: configuration.json
               envFrom:
                 - configMapRef:
                     name: {{ .Release.Name }}-config-cm
@@ -108,41 +87,9 @@ spec:
           {{- with (index .Values "auth-server-key-rotation" "volumes") }}
 {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{ if or (eq .Values.configSecretAdapter "aws") (eq .Values.configAdapterName "aws") }}
-            - name: aws-shared-credential-file
+            - name: {{ .Release.Name }}-configuration-file
               secret:
-                secretName: {{ .Release.Name }}-aws-config-creds
-                items:
-                  - key: aws_shared_credential_file
-                    path: aws_shared_credential_file
-            - name: aws-config-file
-              secret:
-                secretName: {{ .Release.Name }}-aws-config-creds
-                items:
-                  - key: aws_config_file
-                    path: aws_config_file
-            - name: aws-secrets-replica-regions
-              secret:
-                secretName: {{ .Release.Name }}-aws-config-creds
-                items:
-                  - key: aws_secrets_replica_regions
-                    path: aws_secrets_replica_regions
-          {{- end }}
-          {{ if or (eq .Values.configSecretAdapter "google") (eq .Values.cnPersistenceType "spanner") }}
-            - name: google-sa
-              secret:
-                secretName: {{ .Release.Name }}-google-sa
-          {{- end }}
-          {{ if eq .Values.configSecretAdapter "vault" }}
-            - name: vault
-              secret:
-                secretName: {{ .Release.Name }}-vault
-                items:
-                - key: vault_role_id
-                  path: vault_role_id
-                - key: vault_secret_id
-                  path: vault_secret_id
-          {{- end }}
+                secretName: {{ .Release.Name }}-configuration-file
           restartPolicy: Never
 {{- end }}
 
@@ -203,33 +150,12 @@ spec:
               lifecycle:
 {{- toYaml (index .Values "kc-scheduler" "lifecycle") | nindent 16 }}
               volumeMounts:
-              {{ if or (eq .Values.configSecretAdapter "aws") (eq .Values.configAdapterName "aws") }}
-                - mountPath: {{ .Values.cnAwsSharedCredentialsFile }}
-                  name: aws-shared-credential-file
-                  subPath: aws_shared_credential_file
-                - mountPath: {{ .Values.cnAwsConfigFile }}
-                  name: aws-config-file
-                  subPath: aws_config_file
-                - mountPath: {{ .Values.cnAwsSecretsReplicaRegionsFile }}
-                  name: aws-secrets-replica-regions
-                  subPath: aws_secrets_replica_regions
-              {{- end }}
-              {{ if or (eq .Values.configSecretAdapter "google") (eq .Values.cnPersistenceType "spanner") }}
-                - mountPath: {{ .Values.cnGoogleApplicationCredentials }}
-                  name: google-sa
-                  subPath: google-credentials.json
-                {{- end }}
-                {{ if eq .Values.configSecretAdapter "vault" }}
-                - name: vault
-                  mountPath: /etc/certs/vault_role_id
-                  subPath: vault_role_id
-                - name: vault
-                  mountPath: /etc/certs/vault_secret_id
-                  subPath: vault_secret_id
-                {{- end }}
               {{- with (index .Values "kc-scheduler" "volumeMounts") }}
 {{- toYaml . | nindent 16 }}
               {{- end }}
+                - mountPath: /etc/jans/conf/configuration.json
+                  name: {{ .Release.Name }}-configuration-file
+                  subPath: configuration.json
               envFrom:
                 - configMapRef:
                     name: {{ .Release.Name }}-config-cm
@@ -251,41 +177,9 @@ spec:
           {{- with (index .Values "kc-scheduler" "volumes") }}
 {{- toYaml . | nindent 12 }}
           {{- end }}
-          {{ if or (eq .Values.configSecretAdapter "aws") (eq .Values.configAdapterName "aws") }}
-            - name: aws-shared-credential-file
+            - name: {{ .Release.Name }}-configuration-file
               secret:
-                secretName: {{ .Release.Name }}-aws-config-creds
-                items:
-                  - key: aws_shared_credential_file
-                    path: aws_shared_credential_file
-            - name: aws-config-file
-              secret:
-                secretName: {{ .Release.Name }}-aws-config-creds
-                items:
-                  - key: aws_config_file
-                    path: aws_config_file
-            - name: aws-secrets-replica-regions
-              secret:
-                secretName: {{ .Release.Name }}-aws-config-creds
-                items:
-                  - key: aws_secrets_replica_regions
-                    path: aws_secrets_replica_regions
-          {{- end }}
-          {{ if or (eq .Values.configSecretAdapter "google") (eq .Values.cnPersistenceType "spanner") }}
-            - name: google-sa
-              secret:
-                secretName: {{ .Release.Name }}-google-sa
-          {{- end }}
-          {{ if eq .Values.configSecretAdapter "vault" }}
-            - name: vault
-              secret:
-                secretName: {{ .Release.Name }}-vault
-                items:
-                - key: vault_role_id
-                  path: vault_role_id
-                - key: vault_secret_id
-                  path: vault_secret_id
-          {{- end }}
+                secretName: {{ .Release.Name }}-configuration-file
           restartPolicy: Never
           {{- if not .Values.isFqdnRegistered  }}
           hostAliases:
