@@ -7,7 +7,7 @@ pub mod policy_store_config;
 /// for CEDARLING_ROLE_MAPPING value in BootstrapConfig
 /// for `id_token` default value `role`
 /// for `userinfo_token` default value `role`
-#[derive(Debug, derivative::Derivative, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, derivative::Derivative)]
 #[derivative(Default, Clone)]
 pub struct TokenMapper {
 	#[derivative(Default(value = "Some(\"role\".into())"))]
