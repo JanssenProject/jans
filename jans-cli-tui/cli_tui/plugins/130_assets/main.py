@@ -229,10 +229,10 @@ class Plugin(DialogUtils):
                 response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
                 self.app.stop_progressing()
                 if response:
-                    self.app.show_message(_("Error"), _("Deletion was not completed {}".format(response)))
+                    self.app.show_message(_("Error"), _("Deletion was not completed {}".format(response)), tobefocused=self.main_container)
                 else:
                     await self.get_assets()
-                self.app.layout.focus(self.main_container)
+                    self.app.layout.focus(self.main_container)
 
             asyncio.ensure_future(coroutine())
 
