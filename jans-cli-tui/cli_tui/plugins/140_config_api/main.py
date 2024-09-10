@@ -48,7 +48,6 @@ class Plugin(DialogUtils):
         self.page_entered = False
         self.data = {}
 
-        common_data.background_tasks_feeds['attributes'].append(self.feed_attribute_widgets)
         self.prepare_navbar()
         self.prepare_containers()
 
@@ -56,23 +55,6 @@ class Plugin(DialogUtils):
     def init_plugin(self) -> None:
         """The initialization for this plugin
         """
-
-        self.label_widget_width = common_data.app.output.get_size().columns - 3
-
-        self.user_exclusion_attributes_widget = JansLabelWidget(
-                        title = _("User Exclusion Attributes"),
-                        values = ['test'],
-                        data = [],
-                        label_width=self.label_widget_width
-                        )
-
-        self.user_mandatory_attributes_widget = JansLabelWidget(
-                        title = _("User Mandatory Attributes"),
-                        values = ['test'],
-                        data = [],
-                        label_width=self.label_widget_width
-                        )
-
         self.app.create_background_task(self.get_configuration())
 
 
@@ -83,6 +65,22 @@ class Plugin(DialogUtils):
 
     def create_widgets(self):
         self.schema = self.app.cli_object.get_schema_from_reference('', '#/components/schemas/ApiAppConfiguration')
+
+        label_widget_width = common_data.app.output.get_size().columns - 3
+
+        self.user_exclusion_attributes_widget = JansLabelWidget(
+                        title = _("User Exclusion Attributes"),
+                        values = ['test'],
+                        data = [],
+                        label_width=label_widget_width
+                        )
+
+        self.user_mandatory_attributes_widget = JansLabelWidget(
+                        title = _("User Mandatory Attributes"),
+                        values = ['test'],
+                        data = [],
+                        label_width=label_widget_width
+                        )
 
         self.tabs['main_'] = HSplit([
                         self.app.getTitledCheckBox(
@@ -165,14 +163,14 @@ class Plugin(DialogUtils):
                         title = _("Mandatory Attributes"),
                         values = copy.deepcopy(self.data.get('agamaConfiguration', {}).get('mandatoryAttributes', [])),
                         data = [('qname', 'qname'),('source', 'source')],
-                        label_width=self.label_widget_width
+                        label_width=label_widget_width
                         )
 
         self.agama_configuration_optional_attributes_widget = JansLabelWidget(
                         title = _("Optioanl Attributes"),
                         values = copy.deepcopy(self.data.get('agamaConfiguration', {}).get('optionalAttributes', [])),
                         data = [('serialVersionUID', 'serialVersionUID'), ('enabled', 'enabled')],
-                        label_width=self.label_widget_width
+                        label_width=label_widget_width
                         )
 
         self.tabs['agamaConfiguration'] = HSplit([
@@ -210,7 +208,7 @@ class Plugin(DialogUtils):
                         title = _("Header Attributes"),
                         values = copy.deepcopy(self.data.get('auditLogConf', {}).get('headerAttributes', [])),
                         data = [('User-inum', 'User-inum')],
-                        label_width=self.label_widget_width
+                        label_width=label_widget_width
                         )
 
         self.tabs['auditLogConf'] = HSplit([
@@ -494,6 +492,11 @@ class Plugin(DialogUtils):
 
         self.data = response.json()
         self.create_widgets()
+
+    def on_page_enter(self):
+        if not self.page_entered:
+            self.feed_attribute_widgets()
+            self.page_entered = True
 
     def get_attr_displayname_from_name(self, name):
         for attribute in common_data.jans_attributes:
