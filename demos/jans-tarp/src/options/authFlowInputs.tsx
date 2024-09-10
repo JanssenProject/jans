@@ -84,7 +84,7 @@ export default function AuthFlowInputs({ isOpen, handleDialog, client, notifyOnD
     const { secret, hashed } = await Utils.generateRandomChallengePair();
     let scopes = selectedScopes.map((ele) => ele.name).join(" ");
     if(!(!!scopes && scopes.length > 0)) {
-      scopes = client?.scope.map((ele) => ele.name).join(" ");
+      scopes = client?.scope;
     }
 
     let options: ILooseObject = {
