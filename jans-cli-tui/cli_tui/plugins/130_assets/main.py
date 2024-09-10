@@ -123,7 +123,7 @@ class Plugin(DialogUtils):
             data.pop('document', None)
             form_data = {'document': data}
 
-            if new_asset:
+            if self.asset_file_path:
                 form_data['assetFile'] = self.asset_file_path
 
             operation_id = 'post-new-asset' if new_asset else 'put-asset'
