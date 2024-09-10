@@ -1,6 +1,8 @@
 mod authz;
 pub use authz::*;
 
+mod authz_tests;
+
 pub use jwt_engine;
 
 pub use init_engine;

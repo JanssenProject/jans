@@ -22,8 +22,7 @@ fn real_demo_case() -> Result<(), Box<dyn std::error::Error>> {
 	// in this example, we extract the "role" claim from the userinfo token
 	let token_mapper = TokenMapper {
 		userinfo_token: Some("role".to_string()),
-		id_token: None,
-		access_token: None,
+		..Default::default()
 	};
 
 	let authz = init(BootstrapConfig {
