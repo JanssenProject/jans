@@ -64,11 +64,11 @@ pub enum HandleError {
 	#[error("could not get entities from input: {0}")]
 	AuthzInputEntities(#[from] AuthzInputEntitiesError),
 	#[error("could not add entities values to entities list: {0}")]
-	AddEntities(#[from] EntitiesError),
+	AddEntities(#[from] EntitiesError), //this case was not covered by unit tests, because need to break creation of entities on previous steps
 	#[error("could not create context: {0}")]
 	Context(cedar_policy::ContextJsonError),
 	#[error("could not create request type: {0}")]
-	Request(String),
+	Request(String), //this case was not covered by unit tests, because all fields are created in previous steps according to the schema
 }
 
 impl Authz {
