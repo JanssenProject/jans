@@ -2,7 +2,6 @@ import os
 import time
 import glob
 import json
-import ruamel.yaml
 import base64
 import shutil
 import zipfile
