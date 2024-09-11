@@ -36,6 +36,16 @@ func resourceApiAppConfiguration() *schema.Resource {
 				Optional:    true,
 				Description: "",
 			},
+			"custom_attribute_validation_enabled": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "",
+			},
+			"arc_validation_enabled": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "",
+			},
 			"api_approved_issuer": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -85,11 +95,6 @@ func resourceApiAppConfiguration() *schema.Resource {
 				Description: "",
 			},
 			"auth_openid_revoke_url": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "",
-			},
-			"smallrye_health_root_path": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "",
@@ -319,10 +324,28 @@ func resourceApiAppConfiguration() *schema.Resource {
 							Optional:    true,
 							Description: "",
 						},
+						"file_extension_validation_enabled": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: "",
+						},
+						"module_name_validation_enabled": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: "",
+						},
 						"asset_base_directory": {
 							Type:        schema.TypeString,
 							Optional:    true,
 							Description: "",
+						},
+						"jans_service_module": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Description: "",
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
 						},
 						"asset_dir_mappings": {
 							Type:        schema.TypeList,

@@ -61,9 +61,9 @@ func (c *Client) GetAttributes(ctx context.Context) ([]Attribute, error) {
 	}
 
 	type response struct {
-		Data       []Attribute `json:"data"`
-		Count      int         `json:"entriesCount"`
-		TotalItems int         `json:"totalItems"`
+		Entries           []Attribute `json:"entries"`
+		EntriesCount      int         `json:"entriesCount"`
+		TotalEntriesCount int         `json:"totalEntriesCount"`
 	}
 
 	resp := response{}
@@ -74,7 +74,7 @@ func (c *Client) GetAttributes(ctx context.Context) ([]Attribute, error) {
 		return nil, fmt.Errorf("get request failed: %w", err)
 	}
 
-	return resp.Data, nil
+	return resp.Entries, nil
 }
 
 // GetAttribute returns a single Jans attribute, identified by its inum.

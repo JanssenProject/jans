@@ -25,6 +25,16 @@ func resourceScimAppConfiguration() *schema.Resource {
 				Optional:    true,
 				Description: "Application config Base DN",
 			},
+			"disable_logger_timer": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "",
+			},
+			"disable_audit_logger": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "",
+			},
 			"application_url": {
 				Type:        schema.TypeString,
 				Optional:    true,

@@ -16,9 +16,18 @@ func TestCustomUsers(t *testing.T) {
 
 	ctx := context.Background()
 
-	_, err = client.GetCustomUsers(ctx)
+	users, err := client.GetCustomUsers(ctx)
 	if err != nil {
 		t.Error(err)
+	}
+
+	for _, user := range users {
+		if user.UserID == "test" {
+			err = client.DeleteCustomUser(ctx, user.Inum)
+			if err != nil {
+				t.Fatal(err)
+			}
+		}
 	}
 
 	usr := CustomUser{
@@ -77,7 +86,7 @@ func TestCustomUsers(t *testing.T) {
 		Mail:                "exampleUsr1@jans.io",
 		OxAuthPersistentJwt: []string{"jwt1", "jwt2"},
 		DisplayName:         "Default Test User",
-		JansStatus:          "active",
+		Status:              "active",
 		UserPassword:        "pwd123",
 		GivenName:           "exampleUsr1",
 	}

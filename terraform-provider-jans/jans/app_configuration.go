@@ -163,6 +163,10 @@ type AppConfiguration struct {
 	StatAuthorizationScope                                    string                                `schema:"stat_authorization_scope" json:"statAuthorizationScope"`
 	AllowSpontaneousScopes                                    bool                                  `schema:"allow_spontaneous_scopes" json:"allowSpontaneousScopes"`
 	SpontaneousScopeLifetime                                  int                                   `schema:"spontaneous_scope_lifetime" json:"spontaneousScopeLifetime"`
+	StatusListBitSize                                         int                                   `schema:"status_list_bit_size" json:"statusListBitSize"`
+	StatusListResponseJwtSignatureAlgorithm                   string                                `schema:"status_list_response_jwt_signature_algorithm" json:"statusListResponseJwtSignatureAlgorithm"`
+	StatusListResponseJwtLifetime                             int                                   `schema:"status_list_response_jwt_lifetime" json:"statusListResponseJwtLifetime"`
+	StatusListIndexAllocationBlockSize                        int                                   `schema:"status_list_index_allocation_block_size" json:"statusListIndexAllocationBlockSize"`
 	OpenIDSubAttribute                                        string                                `schema:"openid_sub_attribute" json:"openIdSubAttribute"`
 	PublicSubjectIdentifierPerClientEnabled                   bool                                  `schema:"public_subject_identifier_per_client_enabled" json:"publicSubjectIdentifierPerClientEnabled"`
 	SubjectIdentifiersPerClientSupported                      []string                              `schema:"subject_identifiers_per_client_supported" json:"subjectIdentifiersPerClientSupported"`

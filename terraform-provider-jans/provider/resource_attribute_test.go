@@ -36,7 +36,6 @@ func TestResourceAttribute_Mapping(t *testing.T) {
 		Urn:                    "http://openid.net/specs/openid-connect-core-1_0.html/StandardClaims/birthdate",
 		OxMultiValuedAttribute: false,
 		Custom:                 false,
-		Required:               false,
 		AdminCanAccess:         true,
 		AdminCanView:           true,
 		AdminCanEdit:           true,
@@ -106,7 +105,7 @@ resource "jans_attribute" "test" {
 			"user",
 			"admin",
 	]
-	name                      = "l"
+	name                      = "l2"
 	origin                    = "jansCustomPerson"
 	saml1_uri                 = "urn:mace:dir:attribute-def:l"
 	saml2_uri                 = "urn:oid:2.5.4.7"
