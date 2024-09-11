@@ -52,6 +52,14 @@ also local policy store was modified according to files above.
 
 To build the python binding you need move to the `cedarling_python` folder and follow steps written in `Readme.md`
 
+# Unit tests of rust code
+
+For tests we use standart unit test framework for rust.  
+To run tests you need to install [Rust](https://www.rust-lang.org/tools/install). And then execute:
+```
+cargo test
+```
+
 # Code coverage of rust code
 
 To generate code coverage we use `cargo-llvm-cov`. To install it run:
