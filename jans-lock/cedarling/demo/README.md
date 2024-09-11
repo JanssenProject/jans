@@ -12,3 +12,5 @@ This folder contains the necessary data to run the example Rust crate **`cedarli
 
 - **`input.json`**  
   This file contains the input data, formatted in JSON, that can be used to make authorization requests. It defines the specific authorization scenarios to be tested.
+
+Others files are used in unit tests.
