@@ -51,3 +51,30 @@ also local policy store was modified according to files above.
 # Python binding
 
 To build the python binding you need move to the `cedarling_python` folder and follow steps written in `Readme.md`
+
+# Code coverage of rust code
+
+To generate code coverage we use `cargo-llvm-cov`. To install it run:
+```
+cargo install cargo-llvm-cov
+```
+
+You can run code coverage by running:
+### Simple table
+```
+cargo llvm-cov > coverage.txt
+```
+the result will be in `coverage.txt` file.
+
+### HTML results
+```
+cargo llvm-cov --html --open
+```
+the result will be opened in browser.
+
+### Generate `lcov.info` file
+```
+cargo llvm-cov --workspace --lcov --output-path lcov.info
+```
+the result will be in `lcov.info` file.  
+With `lcov.info` you can use IDE tools like [coverage gutters](https://marketplace.visualstudio.com/items?itemName=ryanluker.vscode-coverage-gutters) to watch code coverage.
