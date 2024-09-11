@@ -1,7 +1,6 @@
 import os
 import glob
 import shutil
-import ruamel.yaml
 
 from setup_app.utils import base
 from setup_app.static import AppType, InstallOption
@@ -98,9 +97,7 @@ class ScimInstaller(JettyInstaller):
 
     def generate_configuration(self):
         self.logIt("Generating {} configuration".format(self.service_name))
-        yml_str = self.readFile(self.jans_scim_openapi_fn)
-        yml_str = yml_str.replace('\t', ' ')
-        cfg_yml = ruamel.yaml.load(yml_str, ruamel.yaml.RoundTripLoader)
+        cfg_yml = base.read_yaml_file(self.jans_scim_openapi_fn)
         config_scopes = cfg_yml['components']['securitySchemes']['scim_oauth']['flows']['clientCredentials']['scopes']
 
         scope_ldif_fd = open(self.ldif_scopes_fn, 'wb')
