@@ -17,6 +17,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import java.util.Arrays;
 import java.util.Optional;
 
+import io.jans.fido2.model.conf.AttestationMode;
 import org.jboss.weld.junit5.auto.ExcludeBean;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -171,7 +172,11 @@ public class FullFlowAndroidTest {
 	AppConfiguration produceAppConfiguration() {
 		AppConfiguration appConfiguration = Mockito.mock(AppConfiguration.class);
 
-		Fido2Configuration fido2Configuration = new Fido2Configuration();
+		Fido2Configuration fido2Configuration = new Fido2Configuration(null, null, null,
+				null, false, false,
+				0, 0, null,
+				null, null, null, false,
+				AttestationMode.DISABLED, null, false);
 		Mockito.when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
 		Mockito.when(appConfiguration.getIssuer()).thenReturn(issuer);
 
