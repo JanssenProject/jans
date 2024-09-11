@@ -176,7 +176,7 @@ public class FullFlowAndroidTest {
 				null, false, false,
 				0, 0, null,
 				null, null, null, false,
-				AttestationMode.DISABLED, null, false);
+				AttestationMode.MONITOR, null, false);
 		Mockito.when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
 		Mockito.when(appConfiguration.getIssuer()).thenReturn(issuer);
 
