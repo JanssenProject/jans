@@ -63,8 +63,10 @@ mod tests {
 		include_str!("../../../demo/policy-store/local_schema_base64_poisoned.json");
 	const POLICY_RAW_JSON_SCHEMA_STRUCT_POISONED: &str =
 		include_str!("../../../demo/policy-store/local_schema_schema_struct_poisoned.json");
-	const POLICY_RAW_JSON_POLICY_POISONED: &str =
-		include_str!("../../../demo/policy-store/local_policy_poisoned.json");
+	const POLICY_RAW_JSON_POLICY_BASE64_POISONED: &str =
+		include_str!("../../../demo/policy-store/local_policy_base64_poisoned.json");
+	const POLICY_RAW_JSON_POLICY_STRUCT_POISONED: &str =
+		include_str!("../../../demo/policy-store/local_policy_struct_poisoned.json");
 
 	fn check_policy_store(policy: &PolicyStore) {
 		// policies and schema we don`t check because it is parsed and validated during the parsing json
@@ -142,14 +144,35 @@ mod tests {
 	}
 
 	#[test]
-	fn get_local_policy_raw_json_policy_fail() {
-		let err = PolicyStoreConfig::get_local_policy_raw_json(POLICY_RAW_JSON_POLICY_POISONED)
-			.expect_err("should be error");
+	fn get_local_policy_raw_json_policy_base64_fail() {
+		let err =
+			PolicyStoreConfig::get_local_policy_raw_json(POLICY_RAW_JSON_POLICY_BASE64_POISONED)
+				.expect_err("should be error");
 		assert!(
 			matches!(err, GetPolicyError::ParseJson(_)),
 			"Expected ParseJson error, got: {:?}",
 			err
 		);
+
+		assert!(err
+			.to_string()
+			.contains("unable to parse Policy source as valid base64"))
+	}
+
+	#[test]
+	fn get_local_policy_raw_json_policy_struct_fail() {
+		let err =
+			PolicyStoreConfig::get_local_policy_raw_json(POLICY_RAW_JSON_POLICY_STRUCT_POISONED)
+				.expect_err("should be error");
+		assert!(
+			matches!(err, GetPolicyError::ParseJson(_)),
+			"Expected ParseJson error, got: {:?}",
+			err
+		);
+
+		assert!(err
+			.to_string()
+			.contains("unable to parse Policy from string"))
 	}
 
 	#[test]
