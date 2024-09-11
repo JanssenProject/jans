@@ -72,7 +72,6 @@ public class DiscoveryServiceTest {
         when(appConfiguration.getAcrMappings()).thenReturn(acrMappings);
 
         final JSONObject json = discoveryService.process();
-        System.out.println(json.toString());
         final Map<String, String> acrMappingsFromJson = Util.toSerializableMapOfStrings(json.optJSONObject(ConfigurationResponseClaim.ACR_MAPPINGS).toMap());
         assertNotNull(acrMappingsFromJson);
         assertEquals("acr1", acrMappingsFromJson.get("alias1"));
