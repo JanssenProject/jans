@@ -53,6 +53,10 @@ public class AcrService {
         return StringUtils.isNotBlank(acr) && (acr.startsWith("agama_") || AGAMA.equalsIgnoreCase(acr));
     }
 
+    public static String getScriptName(String acr) {
+        return isAgama(acr) ? AGAMA : acr;
+    }
+
     public void validateAcrs(AuthzRequest authzRequest, Client client) throws AcrChangedException {
         applyAcrMappings(authzRequest);
 
