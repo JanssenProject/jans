@@ -129,8 +129,9 @@ def read_swagger(op_mode):
     cfg_yaml[op_mode] = {}
     for yaml_fn in glob.glob(os.path.join(cur_dir, 'ops', op_mode, '*.yaml')):
         fn, ext = os.path.splitext(os.path.basename(yaml_fn))
+        yaml_obj = ruamel.yaml.YAML()
         with open(yaml_fn) as f:
-            config_ = ruamel.yaml.load(f.read().replace('\t', ''), ruamel.yaml.RoundTripLoader)
+            config_ = yaml_obj.load(f.read().replace('\t', ''))
             plugin_name = get_plugin_name_from_title(config_['info']['title'])
             cfg_yaml[op_mode][plugin_name] = config_
 
