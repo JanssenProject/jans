@@ -19,6 +19,7 @@ import io.jans.fido2.model.attestation.*;
 import io.jans.fido2.model.auth.CredAndCounterData;
 import io.jans.fido2.model.common.*;
 import io.jans.fido2.model.conf.AppConfiguration;
+import io.jans.fido2.model.conf.AttestationMode;
 import io.jans.fido2.model.conf.RequestedParty;
 import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.fido2.service.Base64Service;
@@ -196,7 +197,7 @@ public class AttestationService {
 		{
 			credentialCreationOptions.setAttestation(AttestationConveyancePreference.none);
 		}
-		else if(appConfiguration.getFido2Configuration().isSkipAttestation())
+		else if(appConfiguration.getFido2Configuration().getAttestationMode().equals(AttestationMode.DISABLED))
 		{
 			credentialCreationOptions.setAttestation(AttestationConveyancePreference.none);
 		}
