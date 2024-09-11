@@ -22,9 +22,9 @@ import Alert from '@mui/material/Alert';
 export default function RegisterClient({ isOpen, handleDialog }) {
   const [open, setOpen] = React.useState(isOpen);
   const [selectedScopes, setSelectedScopes] = React.useState([])
+  const [scopeOptions, setScopeOptions] = React.useState([{ name: "openid" }]);
   const [expireAt, setExpireAt] = React.useState(null);
   const [issuer, setIssuer] = React.useState(null);
-  const [scopeOptions, setScopeOptions] = React.useState([{ name: "openid" }]);
   const [issuerError, setIssuerError] = React.useState("")
   const [errorMessage, setErrorMessage] = React.useState("")
   const [loading, setLoading] = React.useState(false);
