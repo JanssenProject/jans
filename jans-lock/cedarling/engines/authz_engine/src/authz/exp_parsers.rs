@@ -84,17 +84,16 @@ pub fn url_exp(url_raw: &str) -> Result<RestrictedExpression, ParseURLToExpError
 pub enum TrustedIssuerEntityError {
 	#[error("could not get url exp: {0}")]
 	Parse(#[from] ParseURLToExpError),
-
-	#[error("could not create entity uid from json: {0}")]
-	CreateFromJson(String),
 	#[error("could not create new entity: {0}")]
 	NewEntity(#[from] EntityAttrEvaluationError),
 }
 
 pub fn trusted_issuer_entity(url_raw: &str) -> Result<Entity, TrustedIssuerEntityError> {
-	let id = serde_json::json!({ "__entity": { "type": "Jans::TrustedIssuer", "id": url_raw } });
-	let uid = EntityUid::from_json(id)
-		.map_err(|err| TrustedIssuerEntityError::CreateFromJson(err.to_string()))?;
+	let uid = EntityUid::from_type_name_and_id(
+		// it should newer panic
+		EntityTypeName::from_str("Jans::TrustedIssuer").unwrap(),
+		EntityId::new(url_raw),
+	);
 
 	let attrs = HashMap::from([("issuer_entity_id".to_string(), url_exp(url_raw)?)]);
 
