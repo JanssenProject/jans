@@ -1,6 +1,6 @@
 # Demo data folder
 
-This folder contains the necessary data to run the example Rust crate **`authz_run`**.
+This folder contains the necessary data to run the example Rust crate **`cedarling_run`**.
 
 ## Files
 

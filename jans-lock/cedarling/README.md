@@ -16,7 +16,7 @@
 
 ### Notes
 
-To execute example (`authz_run`)
+To execute example (`cedarling_run`)
 
 ```
 cargo run
