@@ -80,7 +80,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
                 for prompt_str, install_var in (
                         ('Install Fido2 Server', 'install_fido2'),
                         ('Install Scim Server', 'install_scim_server'),
-                        ('Install Jans Link Server', 'install_jans_link'),
+                        ('Install Jans LDAP Link Server', 'install_jans_ldap_link'),
                         ('Install Jans KC Link Server', 'install_jans_keycloak_link'),
                         ('Install Jans Casa', 'install_casa'),
                         ('Install Jans Lock', 'install_jans_lock'),
@@ -153,7 +153,11 @@ class JansInstaller(BaseInstaller, SetupUtils):
             self.writeHybridProperties()
 
         # set systemd start timeout to 5 mins
-        systemd_conf_fn = '/etc/systemd/system.conf'
+        for sys_prefix in ('/etc', '/usr/lib'):
+            systemd_conf_fn = os.path.join(sys_prefix, 'systemd/system.conf')
+            if os.path.exists(systemd_conf_fn):
+                break
+
         systemd_conf = []
 
         for l in open(systemd_conf_fn):
@@ -653,7 +657,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
                         ('jans-config-api', 'install_config_api'),
                         ('jans-casa', 'install_casa'),
                         ('jans-fido2', 'install_fido2'),
-                        ('jans-link', 'install_jans_link'),
+                        ('jans-link', 'install_jans_ldap_link'),
                         ('jans-scim', 'install_scim_server'),
                         ('jans-lock', 'install_jans_lock_as_server'),
                         ('opa', 'install_opa'),
