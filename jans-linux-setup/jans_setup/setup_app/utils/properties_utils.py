@@ -520,7 +520,7 @@ class PropertiesUtils(SetupUtils):
         if Config.installed_instance and Config.install_jans_link:
             return
 
-        prompt_jans_link = self.getPrompt("Install Jans Link Server?",
+        prompt_jans_link = self.getPrompt("Install Jans LDAP Link Server?",
                                             self.getDefaultOption(Config.install_jans_link)
                                             )[0].lower()
 
