@@ -119,8 +119,6 @@ public class AttestationService {
         // Verify request parameters
         commonVerifiers.verifyAttestationOptions(attestationOptions);
 
-		boolean oneStep = commonVerifiers.isSuperGluuOneStepMode(CommonUtilService.toJsonNode(attestationOptions));
-
 		// Create result object
 		PublicKeyCredentialCreationOptions credentialCreationOptions = new PublicKeyCredentialCreationOptions();
 		
@@ -157,11 +155,11 @@ public class AttestationService {
 		log.debug("Put user {}", user.toString());
 
 		// Put excludeCredentials
-		if (!oneStep) {
-			Set<PublicKeyCredentialDescriptor> excludedCredentials = prepareExcludeCredentials(documentDomain, attestationOptions.getUsername());
-			credentialCreationOptions.setExcludeCredentials(excludedCredentials);
-			excludedCredentials.stream().forEach(ele -> log.debug("Put excludeCredentials {}", ele.toString()));
-		}
+		
+		Set<PublicKeyCredentialDescriptor> excludedCredentials = prepareExcludeCredentials(documentDomain, attestationOptions.getUsername());
+		credentialCreationOptions.setExcludeCredentials(excludedCredentials);
+		excludedCredentials.stream().forEach(ele -> log.debug("Put excludeCredentials {}", ele.toString()));
+		
 		
 		// Put authenticatorSelection
 		credentialCreationOptions.setAuthenticatorSelection(new AuthenticatorSelection());
@@ -256,7 +254,7 @@ public class AttestationService {
 		// Store original requests
 		entity.setAttestationRequest(CommonUtilService.toJsonNode(attestationOptions).toString());
 
-		Fido2RegistrationEntry registrationEntry = registrationPersistenceService.buildFido2RegistrationEntry(entity, oneStep);
+		Fido2RegistrationEntry registrationEntry = registrationPersistenceService.buildFido2RegistrationEntry(entity);
 		//if (params.hasNonNull("session_id")) {
 		if (attestationOptions.getSessionId() != null) {
 			registrationEntry.setSessionStateId(attestationOptions.getSessionId());
@@ -283,10 +281,7 @@ public class AttestationService {
         ExternalFido2Context externalFido2InterceptionContext = new ExternalFido2Context(CommonUtilService.toJsonNode(attestationResult), httpRequest, httpResponse);
         boolean externalInterceptContext = externalFido2InterceptionService.verifyAttestationStart(CommonUtilService.toJsonNode(attestationResult), externalFido2InterceptionContext);
 
-        boolean superGluu = commonVerifiers.hasSuperGluu(CommonUtilService.toJsonNode(attestationResult));
-        boolean oneStep = commonVerifiers.isSuperGluuOneStepMode(CommonUtilService.toJsonNode(attestationResult));
-        boolean cancelRequest = commonVerifiers.isSuperGluuCancelRequest(CommonUtilService.toJsonNode(attestationResult));
-
+       
 		// Verify if there are mandatory request parameters
 		commonVerifiers.verifyBasicAttestationResultRequest(attestationResult);
 		commonVerifiers.verifyAssertionType(attestationResult.getType());
@@ -296,15 +291,13 @@ public class AttestationService {
 
 		// Verify client data
 		JsonNode clientDataJSONNode = commonVerifiers.verifyClientJSON(attestationResult.getResponse().getClientDataJSON());
-		if (!superGluu) {
-			commonVerifiers.verifyClientJSONTypeIsCreate(clientDataJSONNode);
-		}
+		
 
 		// Get challenge
 		String challenge = commonVerifiers.getChallenge(clientDataJSONNode);
 
 		// Find registration entry
-		Fido2RegistrationEntry registrationEntry = registrationPersistenceService.findByChallenge(challenge, oneStep)
+		Fido2RegistrationEntry registrationEntry = registrationPersistenceService.findByChallenge(challenge)
 				.parallelStream().findAny().orElseThrow(() ->
 					errorResponseFactory.badRequestException(AttestationErrorResponseType.INVALID_CHALLENGE, String.format("Can't find associated attestation request by challenge '%s'", challenge)));
 		Fido2RegistrationData registrationData = registrationEntry.getRegistrationData();
@@ -329,12 +322,7 @@ public class AttestationService {
 		registrationData.setBackupEligibilityFlag(attestationData.getBackupEligibilityFlag());
 		registrationData.setBackupStateFlag(attestationData.getBackupStateFlag());
 
-        // Support cancel request
-        if (cancelRequest) {
-        	registrationData.setStatus(Fido2RegistrationStatus.canceled);
-        } else {
-        	registrationData.setStatus(Fido2RegistrationStatus.registered);
-        }
+		registrationData.setStatus(Fido2RegistrationStatus.registered);
 
 		// Store original response
 		registrationData.setAttestationResponse(CommonUtilService.toJsonNode(attestationResult).toString());
@@ -364,13 +352,9 @@ public class AttestationService {
         String sessionStateId = registrationEntry.getSessionStateId();
         registrationEntry.setSessionStateId(null);
 
-        // Set expiration for one_step entry
-        if (oneStep) {
-            int unfinishedRequestExpiration = appConfiguration.getFido2Configuration().getUnfinishedRequestExpiration();
-        	registrationEntry.setExpiration(unfinishedRequestExpiration);
-        } else {
-        	registrationEntry.clearExpiration();
-        }
+        
+        registrationEntry.clearExpiration();
+        
 
 		registrationPersistenceService.update(registrationEntry);
 
@@ -378,7 +362,7 @@ public class AttestationService {
         if (StringHelper.isNotEmpty(sessionStateId)) {
             log.debug("There is session id. Setting session id attributes");
 
-            userSessionIdService.updateUserSessionIdOnFinishRequest(sessionStateId, registrationEntry.getUserInum(), registrationEntry, true, oneStep);
+            userSessionIdService.updateUserSessionIdOnFinishRequest(sessionStateId, registrationEntry.getUserInum(), registrationEntry, true);
         }
 
 		// Create result object

@@ -40,7 +40,6 @@ import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.DataMapperService;
 import io.jans.fido2.service.processors.AttestationFormatProcessor;
-import io.jans.fido2.sg.SuperGluuMode;
 import io.jans.orm.model.fido2.UserVerification;
 import io.jans.service.net.NetworkService;
 import io.jans.util.StringHelper;
@@ -56,12 +55,6 @@ import tss.tpm.TPMT_PUBLIC;
  */
 @ApplicationScoped
 public class CommonVerifiers {
-
-    public static final String SUPER_GLUU_REQUEST = "super_gluu_request";
-    public static final String SUPER_GLUU_MODE = "super_gluu_request_mode";
-    public static final String SUPER_GLUU_REQUEST_CANCEL = "super_gluu_request_cancel";
-    public static final String SUPER_GLUU_APP_ID = "super_gluu_app_id";
-    public static final String SUPER_GLUU_KEY_HANDLE = "super_gluu_key_handle";
 
     @Inject
     private Logger log;
@@ -435,45 +428,7 @@ public class CommonVerifiers {
         }
     }
 
-    public boolean hasSuperGluu(JsonNode params) {
-        if (params.hasNonNull(SUPER_GLUU_REQUEST)) {
-            JsonNode node = params.get(SUPER_GLUU_REQUEST);
-            return node.isBoolean() && node.asBoolean();
-        }
-
-        return false;
-    }
-
-    public void verifyNotUseGluuParameters(JsonNode params) {
-        // Protect generic U2F/Fido2 from sending requests with Super Gluu parameters
-        if (params.hasNonNull(SUPER_GLUU_REQUEST) || params.hasNonNull(SUPER_GLUU_MODE) ||
-            params.hasNonNull(SUPER_GLUU_APP_ID) || params.hasNonNull(SUPER_GLUU_KEY_HANDLE) ||
-                params.hasNonNull(SUPER_GLUU_REQUEST_CANCEL)) {
-            throw errorResponseFactory.badRequestException(AssertionErrorResponseType.CONFLICT_WITH_SUPER_GLUU, "Input request conflicts with Super Gluu parameters");
-        }
-    }
-
-    public boolean isSuperGluuOneStepMode(JsonNode params) {
-        if (!hasSuperGluu(params)) {
-            return false;
-        }
-        if (!params.hasNonNull(SUPER_GLUU_MODE)) {
-            return false;
-        }
-        JsonNode node = params.get(SUPER_GLUU_MODE);
-        return SuperGluuMode.ONE_STEP == SuperGluuMode.fromModeValue(node.asText());
-    }
-
-    public boolean isSuperGluuCancelRequest(JsonNode params) {
-        if (!hasSuperGluu(params)) {
-            return false;
-        }
-        if (!params.hasNonNull(SUPER_GLUU_REQUEST_CANCEL)) {
-            return false;
-        }
-        JsonNode node = params.get(SUPER_GLUU_REQUEST_CANCEL);
-        return node.isBoolean() && node.asBoolean();
-    }
+    
 
     private void validateNodeNotNull(JsonNode node) throws Fido2RuntimeException {
         if ((node == null) || node.isNull()) {

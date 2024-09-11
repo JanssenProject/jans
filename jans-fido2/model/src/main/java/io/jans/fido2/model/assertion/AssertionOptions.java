@@ -3,10 +3,10 @@ package io.jans.fido2.model.assertion;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
-import io.jans.fido2.model.common.SuperGluuSupport;
+
 import io.jans.orm.model.fido2.UserVerification;
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AssertionOptions extends SuperGluuSupport {
+public class AssertionOptions  {
     private String username;
     private UserVerification userVerification;
     private String documentDomain;

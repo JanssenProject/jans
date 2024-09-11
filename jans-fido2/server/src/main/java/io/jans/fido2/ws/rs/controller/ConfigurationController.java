@@ -71,11 +71,6 @@ public class ConfigurationController {
 		 */
         assertion.put("result_endpoint", baseEndpointUri + "/assertion/result");
 
-        if (appConfiguration.isSuperGluuEnabled()) {
-        	response.put("super_gluu_registration_endpoint", baseEndpointUri + "/attestation/registration");
-        	response.put("super_gluu_authentication_endpoint", baseEndpointUri + "/assertion/authentication");
-        }
-
         ResponseBuilder builder = Response.ok().entity(response.toString());
         return builder.build();
 	}

@@ -71,8 +71,6 @@ public class AppConfiguration implements Configuration, Serializable {
 	@DocProperty(description = "Custom object class list for dynamic person enrolment")
     private List<String> personCustomObjectClassList;
 	
-	@DocProperty(description = "Boolean value to enable disable Super Gluu extension")
-    private boolean superGluuEnabled;
 	
     @DocProperty(description = "Boolean value specifying whether to persist session_id in cache", defaultValue = "false")
     private Boolean sessionIdPersistInCache = false;
@@ -197,14 +195,7 @@ public class AppConfiguration implements Configuration, Serializable {
 		this.fido2Configuration = fido2Configuration;
 	}
 
-	public boolean isSuperGluuEnabled() {
-		return superGluuEnabled;
-	}
-
-	public void setSuperGluuEnabled(boolean superGluuEnabled) {
-		this.superGluuEnabled = superGluuEnabled;
-	}
-
+	
     public Boolean getSessionIdPersistInCache() {
         if (sessionIdPersistInCache == null) sessionIdPersistInCache = false;
         return sessionIdPersistInCache;
