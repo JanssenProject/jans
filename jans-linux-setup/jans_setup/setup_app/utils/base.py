@@ -17,6 +17,7 @@ import multiprocessing
 import ssl
 import tempfile
 import urllib.request
+import ruamel.yaml
 
 
 from pathlib import Path
@@ -321,6 +322,11 @@ def readJsonFile(jsonFile, ordered=False):
         with open(jsonFile) as f:
             return json.load(f, object_pairs_hook=object_pairs_hook)
 
+def read_yaml_file(yaml_fn):
+    yaml_obj = ruamel.yaml.YAML()
+    with open(yaml_fn) as f:
+        data = yaml_obj.load(f)
+        return data
 
 def find_script_names(ldif_file):
     name_list = []
