@@ -33,6 +33,29 @@ public class BaseTest {
     public void finalize() {
         client.close();
     }
+    
+    private void setupClient(Map<String, String> params) throws Exception {
+
+        logger.info("Initializing client...");
+        String tokenEndpointAuthnMethod = params.get("tokenEndpointAuthnMethod");
+        String domainURL = params.get("domainURL");
+        String OIDCMetadataUrl = params.get("OIDCMetadataUrl");
+        String clientId = params.get("clientId");
+
+        if (tokenEndpointAuthnMethod.equals("client_secret_basic")) {
+            client = ScimClientFactory.getClient(domainURL, OIDCMetadataUrl, clientId, params.get("clientSecret"));
+
+        } else if (tokenEndpointAuthnMethod.equals("client_secret_post")) {
+            client = ScimClientFactory.getClient(domainURL, OIDCMetadataUrl, clientId, params.get("clientSecret"), true);
+
+        } else if (tokenEndpointAuthnMethod.equals("private_key_jwt")) {
+            client = ScimClientFactory.getClient(domainURL, OIDCMetadataUrl, clientId, 
+                Paths.get(params.get("keyStorePath")), params.get("keyStorePassword"), params.get("keyId"));
+        } else {
+           throw new Exception("Unsupported method for token endpoint authentication: " + tokenEndpointAuthnMethod);
+        }
+
+    }
 
     private void setupClient(Map<String, String> params) throws Exception {
 
