@@ -39,9 +39,9 @@ def example():
     # Create a new Request instance
     req = Request()
 
-    req.access_token = input("insert assess_token:")
-    req.id_token = input("insert id_token:")
-    req.userinfo_token = input("insert userinfo_token:")
+    req.access_token = input("insert assess token:")
+    req.id_token = input("insert id token:")
+    req.userinfo_token = input("insert userinfo token:")
     req.action = input("insert action:")
     req.resource = Resource(_type=input("insert resource type:"),
                             id=input("insert resource id:"))
