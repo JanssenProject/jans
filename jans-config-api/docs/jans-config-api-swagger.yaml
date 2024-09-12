@@ -8372,17 +8372,17 @@ components:
           type: boolean
         whitePagesCanView:
           type: boolean
-        userCanAccess:
-          type: boolean
-        adminCanAccess:
+        userCanView:
           type: boolean
         userCanEdit:
           type: boolean
+        adminCanView:
+          type: boolean
         adminCanEdit:
           type: boolean
-        userCanView:
+        adminCanAccess:
           type: boolean
-        adminCanView:
+        userCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -10807,10 +10807,10 @@ components:
         ttl:
           type: integer
           format: int32
-        opbrowserState:
-          type: string
         persisted:
           type: boolean
+        opbrowserState:
+          type: string
     SessionIdAccessMap:
       type: object
       properties:
