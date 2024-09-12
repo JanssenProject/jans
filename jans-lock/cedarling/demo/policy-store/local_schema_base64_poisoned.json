@@ -1,0 +1,23 @@
+{
+  "policies": {
+    "b34fce229be0629e1e17baca42fbfe3621b70540598c": "cGVybWl0ICgKICBwcmluY2lwYWwgaW4gSmFuczo6Um9sZTo6IkFkbWluIiwKICBhY3Rpb24gPT0gSmFuczo6QWN0aW9uOjoiRXhlY3V0ZSIsCiAgcmVzb3VyY2UKKTs="
+  },
+  "trustedIssuers": {
+    "Google": {
+      "description": "Consumer IDP",
+      "openidConfigurationEndpoint": "https://accounts.google.com/.well-known/openid-configuration",
+      "accessTokens": {
+        "trusted": true
+      },
+      "idTokens": {
+        "trusted": true,
+        "principalIdentifier": "email"
+      },
+      "userinfoTokens": {
+        "trusted": true,
+        "roleMapping": "role"
+      }
+    }
+  },
+  "schema": "bmFtZXNwYWNlIEphbnMGxpZXNUbyB7CiAgICAgICAgcHJpbmNpcGFsOiBbVXNlciwgUm9sZV0sCiAgICAgICAgcmVzb3VyY2U6IEFwcGxpY2F0aW9uLAogICAgICAgIGNvbnRleHQ6IEVtcHR5Q29udGV4dCwKICAgIH07Cn0K"
+}

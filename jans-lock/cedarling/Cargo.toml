@@ -1,11 +1,19 @@
 [workspace]
 resolver = "2"
-members = ["authz", "authz_run", "cedarling_python", "init_engine", "jwt"]
+members = [
+    "engines/authz_engine",
+    "cedarling_run",
+    "engines/init_engine",
+    "engines/jwt_engine",
+    "bindings/cedarling_python",
+    "cedarling",
+]
 
 [workspace.dependencies]
-authz = { path = "authz" }
-jwt = { path = "jwt" }
-init_engine = { path = "init_engine" }
+cedarling = { path = "cedarling" }
+authz_engine = { path = "engines/authz_engine" }
+jwt_engine = { path = "engines/jwt_engine" }
+init_engine = { path = "engines/init_engine" }
 cedar-policy = "3.2.0"
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
