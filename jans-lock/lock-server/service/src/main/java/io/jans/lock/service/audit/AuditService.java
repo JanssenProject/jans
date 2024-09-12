@@ -1,14 +1,5 @@
 package io.jans.lock.service.audit;
 
-import io.jans.as.model.uma.wrapper.Token;
-import io.jans.lock.service.TokenEndpointService;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.ws.rs.core.Response;
-
-import jakarta.servlet.http.HttpServletRequest;
-
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,6 +9,13 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.http.entity.ContentType;
 import org.json.JSONObject;
 import org.slf4j.Logger;
+
+import io.jans.as.model.uma.wrapper.Token;
+import io.jans.lock.service.TokenEndpointService;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.Response;
 
 @ApplicationScoped
 public class AuditService {
