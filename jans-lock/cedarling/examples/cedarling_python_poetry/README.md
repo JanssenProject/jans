@@ -18,13 +18,14 @@ Example poetry application that works with the `cedarling_python` python binding
     Watch to the `cedarling_python` folder and in [README.md](../../bindings/cedarling_python/README.md) file.
     You need to read the `Prerequisites` and `Only Building the Library` sections. And then follow the steps.
 
-    After executing the last command `maturin build` you will see in the console something like this:
+    After executing the last command `maturin build --release` you will see in the console something like this:
     ```
     ...
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 20.27s
-    📦 Built wheel for CPython 3.11 to D:\upwork\jans\jans-lock\cedarling\target\wheels\cedarling_python-0.1.0-cp311-none-win_amd64.whl
+    Finished `release` profile [optimized] target(s) in 27.07s
+    📦 Built wheel for CPython 3.11 to D:\path_to_the_project\jans\jans-lock\cedarling\target\wheels\cedarling_python-1.1.5-cp311-none-win_amd64.whl
     ```
-    Where `D:\upwork\jans\jans-lock\cedarling\target\wheels\cedarling_python-0.1.0-cp311-none-win_amd64.whl` is the path of the `whl` file.
+    Where `D:\path_to_the_project\jans\jans-lock\cedarling\target\wheels\cedarling_python-1.1.5-cp311-none-win_amd64.whl` is the path to the `whl` file.
+
 
 1. **Install Dependencies**
     If you need to install dependency of cedarling_python for your poetry project, you can do so with Poetry:
@@ -32,7 +33,11 @@ Example poetry application that works with the `cedarling_python` python binding
     ```bash
     poetry add <path_to_wheel_file>
     ```
-    Where `<path_to_wheel_file>` is the path of the `whl` file from previous step.
+    Where `<path_to_wheel_file>` is the path of the `whl` file from previous step.  
+    But also you can use relative path like this (the name of the result file may vary depending on the platform.):
+    ```
+    poetry add ../../target/wheels/cedarling_python-1.1.5-cp311-none-win_amd64.whl
+    ```
 
 1. Add your python program and execute.
     For example:
