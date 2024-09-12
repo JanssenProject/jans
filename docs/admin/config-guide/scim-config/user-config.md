@@ -329,25 +329,32 @@ Using `patch-user-by-id` operation, We can modify user properties partially. As 
 For example, In the above `test user`, we are going to `add` one more email, `remove` nickName and `replace` displayName. Let's put all the operations in a json file `/tmp/patch-user.json`:
 
 ```json title="patch-user.json"
-[
-	{
-    "op": "add",
-    "path": "emails",
-    "value": {
-      "value": "testuser@imshakil.33mail.com",
-      "primary": false
-    }
-  },
-  {
-    "op": "replace",
-    "path": "displayName",
-    "value": "New User"
-  },
-  {
-    "op": "remove",
-    "path": "nickName"
-  }
-]
+{
+    "schemas": [
+        "urn:ietf:params:scim:api:messages:2.0:PatchOp"
+    ],
+    "Operations": [
+        {
+            "op": "replace",
+            "path": "displayName",
+            "value": "Test User"
+        },
+        {
+            "op": "add",
+            "path": "emails",
+            "value": [
+                {
+                    "value": "test.user@example.jans.io",
+                    "primary": true
+                }
+            ]
+        },
+        {
+            "op": "remove",
+            "path": "nickName"
+        }
+    ]
+}
 ```
 The command line to run all of these operations:
 ```bash title="Command"
