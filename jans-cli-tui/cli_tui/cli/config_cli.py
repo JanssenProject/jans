@@ -1489,6 +1489,8 @@ class JCA_CLI:
                 if 'items' in prop:
                     if 'enum' in prop['items']:
                         return [random.choice(prop['items']['enum'])]
+                    elif 'example' in prop['items']:
+                        return [prop['items']['example']]
                     elif 'type' in prop['items']:
                         return [prop['items']['type']]
                 else:
@@ -1502,9 +1504,17 @@ class JCA_CLI:
             else:
                 return 'string'
 
+            print("END")
+
+
         for prop_name in schema.get('properties', {}):
             prop = schema['properties'][prop_name]
-            sample_schema[prop_name] = get_sample_prop(prop)
+            if 'properties' in prop:
+                sample_schema[prop_name] = {}
+                for sprop in prop['properties']:
+                    sample_schema[prop_name][sprop] = get_sample_prop(prop['properties'][sprop])
+            else:
+                sample_schema[prop_name] = get_sample_prop(prop)
 
         print(json.dumps(sample_schema, indent=2))
 
