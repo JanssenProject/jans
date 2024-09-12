@@ -122,6 +122,38 @@ public class AuthClientFactory {
         }
         return null;
     }
+    
+    
+    public static TokenResponse revokeToken(final String revokeUrl, final String clientId, final String token, final String tokenTypeHint) {
+        log.debug("Request for Access Token -  revokeUrl:{}, clientId:{}, token:{} , tokenTypeHint:{}", revokeUrl, clientId, token, tokenTypeHint);
+        Response response = null;
+        try {
+           /* TokenRequest tokenRequest = new TokenRequest(GrantType.CLIENT_CREDENTIALS);
+            tokenRequest.setScope(scope);
+            tokenRequest.setAuthUsername(clientId);
+            tokenRequest.setAuthPassword(clientSecret);
+            Builder request = getClientBuilder(tokenUrl);
+            request.header("Authorization", "Basic " + tokenRequest.getEncodedCredentials());
+            request.header(CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED);
+            final MultivaluedHashMap<String, String> multivaluedHashMap = new MultivaluedHashMap<>(
+                    tokenRequest.getParameters());
+            response = request.post(Entity.form(multivaluedHashMap));
+            log.trace("Response for Access Token -  response:{}", response);
+            if (response.getStatus() == 200) {
+                String entity = response.readEntity(String.class);
+                TokenResponse tokenResponse = new TokenResponse();
+                tokenResponse.setEntity(entity);
+                tokenResponse.injectDataFromJson(entity);
+                return tokenResponse;
+            }*/
+        } finally {
+
+            if (response != null) {
+                response.close();
+            }
+        }
+        return null;
+    }
 
     public static String getIntrospectionEndpoint(String issuer) throws JsonProcessingException {
         log.debug(" Get Introspection Endpoint - issuer:{}", issuer);

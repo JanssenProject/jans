@@ -118,4 +118,8 @@ public class ConfigurationService {
     public boolean isLowercaseFilter(String baseDn) {        
         return !PersistenceEntryManager.PERSITENCE_TYPES.ldap.name().equals(persistenceManager.getPersistenceType(baseDn));
     }
+    
+    public String getRevokeUrl() {
+        return configurationFactory.getApiAppConfiguration().getAuthOpenidRevokeUrl();
+    }
 }

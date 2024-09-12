@@ -20,6 +20,7 @@ import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.register.ApplicationType;
 import io.jans.model.SearchRequest;
+import io.jans.model.token.TokenEntity;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;
@@ -30,6 +31,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -390,4 +392,26 @@ public class ClientService implements Serializable {
 
         }
     }
+    
+    public List<TokenEntity> getGrantsOfClient(String clientId) {
+        try {
+            final String baseDn = getDnForClient(clientId);
+            return persistenceEntryManager.findEntries(baseDn, TokenEntity.class, Filter.createPresenceFilter("tknCde"));
+        } catch (Exception ex) {
+            logger.error("Exception while getting client token is - ", ex);
+        }
+        return Collections.emptyList();
+    }
+    
+    public void revokeClientToken(String clientId) {
+        try {
+            final String baseDn = getDnForClient(clientId);
+           
+        } catch (Exception ex) {
+            logger.error("Exception while getting client token is - ", ex);
+        }
+
+    }
+    
+    
 }

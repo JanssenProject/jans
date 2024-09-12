@@ -55,16 +55,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * @author Mougang T.Gasmyr
- *
- */
 
-@Path(ApiConstants.OPENID + ApiConstants.CLIENTS)
+
+@Path(ApiConstants.TOKEN)
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @ApplicationScoped
-public class ClientsResource extends ConfigBaseResource {
+public class TokenResource extends ConfigBaseResource {
 
     private static final String OPENID_CONNECT_CLIENT = "openid connect client";
 
@@ -89,7 +86,7 @@ public class ClientsResource extends ConfigBaseResource {
     @Inject
     AttributeService attributeService;
 
-    @Operation(summary = "Gets list of OpenID Connect clients", description = "Gets list of OpenID Connect clients", operationId = "get-oauth-openid-clients", tags = {
+    @Operation(summary = "Get client token details", description = "Gets list of OpenID Connect clients", operationId = "get-oauth-openid-clients", tags = {
             "OAuth - OpenID Connect - Clients" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.OPENID_CLIENTS_READ_ACCESS }))
     @ApiResponses(value = {
