@@ -1,6 +1,6 @@
 # Demo data folder
 
-This folder contains the necessary data to run the example Rust crate **`authz_run`**.
+This folder contains the necessary data to run the example Rust crate **`cedarling_run`**.
 
 ## Files
 
@@ -12,3 +12,5 @@ This folder contains the necessary data to run the example Rust crate **`authz_r
 
 - **`input.json`**  
   This file contains the input data, formatted in JSON, that can be used to make authorization requests. It defines the specific authorization scenarios to be tested.
+
+Others files are used in unit tests.
