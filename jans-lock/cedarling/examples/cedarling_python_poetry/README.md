@@ -51,10 +51,9 @@ Example poetry application that works with the `cedarling_python` python binding
     ```
     ...
     Finished `dev` profile [unoptimized + debuginfo] target(s) in 20.27s
-    📦 Built wheel for CPython 3.11 to D:\upwork\jans\jans-lock\cedarling\target\wheels\cedarling_python-0.1.0-cp311-none-win_amd64.whl
+    📦 Built wheel for CPython 3.11 to D:\jans\jans-lock\cedarling\target\wheels\cedarling_python-0.1.0-cp311-none-win_amd64.whl
     ```
-    Where `D:\upwork\jans\jans-lock\cedarling\target\wheels\cedarling_python-0.1.0-cp311-none-win_amd64.whl` is the path of the `whl` file.
-
+    Where `D:\jans\jans-lock\cedarling\target\wheels\cedarling_python-0.1.0-cp311-none-win_amd64.whl` is the path of the `whl` file.
 
 1. **Install Dependencies **
     If you need to install dependency of cedarling_python for your poetry project, you can do so with Poetry:
