@@ -32,13 +32,13 @@ paths:
           format: int32
           default: 50
       - name: eventStartDate
-        in: path
+        in: query
         description: Event start date in ISO8601 format
         required: true
         schema:
           type: string
       - name: eventEndtDate
-        in: path
+        in: query
         description: Event end date in ISO8601 format
         required: true
         schema:
@@ -77,13 +77,13 @@ paths:
           format: int32
           default: 50
       - name: eventStartDate
-        in: path
+        in: query
         description: Event start date in ISO8601 format
         required: true
         schema:
           type: string
       - name: eventEndtDate
-        in: path
+        in: query
         description: Event end date in ISO8601 format
         required: true
         schema:
@@ -122,13 +122,13 @@ paths:
           format: int32
           default: 50
       - name: eventStartDate
-        in: path
+        in: query
         description: Event start date in ISO8601 format
         required: true
         schema:
           type: string
       - name: eventEndtDate
-        in: path
+        in: query
         description: Event end date in ISO8601 format
         required: true
         schema:
