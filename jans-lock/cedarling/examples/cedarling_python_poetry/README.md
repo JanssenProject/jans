@@ -15,7 +15,7 @@ Example poetry application that works with the `cedarling_python` python binding
     This command will help you set up the `pyproject.toml` file.
 
 1. Compile `whl` file for cedarling_python.
-    Watch to the `cedarling_python` folder and in [README.md](../../bindings\cedarling_python\README.md) file.
+    Watch to the `cedarling_python` folder and in [README.md](../../bindings/cedarling_python/README.md) file.
     You need to read the `Prerequisites` and `Only Building the Library` sections. And then follow the steps.
 
     After executing the last command `maturin build` you will see in the console something like this:
@@ -44,7 +44,7 @@ Example poetry application that works with the `cedarling_python` python binding
 
 
 1. Compile `whl` file for cedarling_python.
-    Watch to the `cedarling_python` folder and in [README.md](../../bindings\cedarling_python\README.md) file.
+    Watch to the `cedarling_python` folder and in [README.md](../../bindings/cedarling_python/README.md) file.
     You need to read the `Prerequisites` and `Only Building the Library` sections. And then follow the steps.
 
     After executing the last command `maturin build` you will see in the console something like this:
