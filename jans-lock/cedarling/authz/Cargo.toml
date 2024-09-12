@@ -4,12 +4,14 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+# project local deps
+init_engine = { workspace = true }
+jwt = { workspace = true }
+# other
 serde_json = { workspace = true }
 serde = { workspace = true }
 thiserror = { workspace = true }
-jwt = { workspace = true }
 base64 = { workspace = true }
 log = { workspace = true }
-cedar-policy = "3.2.0"
+cedar-policy = { workspace = true }
 url = "2.5"
-derivative = "2.2.0"

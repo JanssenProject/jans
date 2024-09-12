@@ -17,6 +17,7 @@ import multiprocessing
 import ssl
 import tempfile
 import urllib.request
+import ruamel.yaml
 
 
 from pathlib import Path
@@ -193,7 +194,10 @@ def check_resources():
 
 
 def determineApacheVersion(full=False):
-    httpd_cmd = shutil.which(httpd_name) or shutil.which('apache2ctl')
+    for cmd_ in ('apache2', 'httpd', 'apache2ctl'):
+        httpd_cmd = shutil.which(cmd_)
+        if httpd_cmd:
+            break
     cmd = httpd_cmd + " -v | egrep '^Server version'"
     output = run(cmd, shell=True)
     apache_version_re = re.search('Apache/(\d).(\d).(\d)', output.strip())
@@ -318,6 +322,11 @@ def readJsonFile(jsonFile, ordered=False):
         with open(jsonFile) as f:
             return json.load(f, object_pairs_hook=object_pairs_hook)
 
+def read_yaml_file(yaml_fn):
+    yaml_obj = ruamel.yaml.YAML()
+    with open(yaml_fn) as f:
+        data = yaml_obj.load(f)
+        return data
 
 def find_script_names(ldif_file):
     name_list = []
@@ -328,7 +337,7 @@ def find_script_names(ldif_file):
                 result = rec.search(l)
                 if result:
                     name_list.append(result.groups()[0])
-                
+
     return name_list
 
 def download(url, dst, verbose=False, headers=None):
