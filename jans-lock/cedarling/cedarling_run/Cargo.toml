@@ -1,6 +1,6 @@
 [package]
 name = "cedarling_run"
-version = "0.1.0"
+version = "1.1.5"
 edition = "2021"
 
 [dependencies]
