@@ -31,6 +31,8 @@ import org.apache.http.entity.ContentType;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 /**
  * Provides interface for audit REST web services
  *  
@@ -53,6 +55,13 @@ public class AuditRestWebServiceImpl implements AuditRestWebService {
         return processAuditRequest(request, "health");
     }
 
+	@Override
+	public Response processBulkHealthRequest(HttpServletRequest request, HttpServletResponse response,
+			SecurityContext sec) {
+        log.info("Processing Bulk Health request - request:{}", request);
+        return processAuditRequest(request, "health/bulk");
+	}
+
     @Override
     public Response processLogRequest(HttpServletRequest request, HttpServletResponse response, SecurityContext sec) {
         log.info("Processing Log request - request:{}", request);
@@ -60,13 +69,24 @@ public class AuditRestWebServiceImpl implements AuditRestWebService {
 
     }
 
+	@Override
+	public Response processBulkLogRequest(HttpServletRequest request, HttpServletResponse response, SecurityContext sec) {
+        log.info("Processing Bulk Log request - request:{}", request);
+        return processAuditRequest(request, "log/bulk");
+	}
+
     @Override
-    public Response processTelemetryRequest(HttpServletRequest request, HttpServletResponse response,
-            SecurityContext sec) {
+    public Response processTelemetryRequest(HttpServletRequest request, HttpServletResponse response, SecurityContext sec) {
         log.info("Processing Telemetry request - request:{}", request);
         return processAuditRequest(request, "telemetry");
 
     }
+
+	@Override
+	public Response processBulkTelemetryRequest(HttpServletRequest request, HttpServletResponse response, SecurityContext sec) {
+        log.info("Processing Bulk Telemetry request - request:{}", request);
+        return processAuditRequest(request, "telemetry/bulk");
+	}
 
     private Response processAuditRequest(HttpServletRequest request, String requestType) {
         log.info("Processing request - request:{}, requestType:{}", request, requestType);
@@ -75,7 +95,7 @@ public class AuditRestWebServiceImpl implements AuditRestWebService {
         builder.cacheControl(ServerUtil.cacheControlWithNoStoreTransformAndPrivate());
         builder.header(ServerUtil.PRAGMA, ServerUtil.NO_CACHE);
 
-        JSONObject json = this.auditService.getJSONObject(request);
+        JsonNode json = this.auditService.getJsonNode(request);
         Response response = this.auditService.post(requestType, json.toString(), ContentType.APPLICATION_JSON);
         log.debug("response:{}", response);
 
@@ -88,7 +108,6 @@ public class AuditRestWebServiceImpl implements AuditRestWebService {
             builder.entity(entity);
 
             if (response.getStatusInfo().equals(Status.OK)) {
-
                 log.debug(" Status.CREATED:{}, entity:{}", Status.OK, entity);
             } else {
                 log.error("Error while saving audit data - response.getStatusInfo():{}, entity:{}",
