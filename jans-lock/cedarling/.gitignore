@@ -4,6 +4,9 @@
 /samples
 /out
 *.log
+coverage.txt
+lcov.info
+test_profile.profraw
 
 # files for debug
 cedar_files/demo_tokens_data.txt
