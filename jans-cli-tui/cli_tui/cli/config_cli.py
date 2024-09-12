@@ -1228,25 +1228,29 @@ class JCA_CLI:
         # TODO: suffix_param, endpoint_params
 
         endpoint = self.get_fake_endpoint(path)
-        
+
         if not data:
             try:
                 data = self.get_json_from_file(data_fn)
             except ValueError as ve:
                 self.exit_with_error(str(ve))
 
-            if ('configuser' not in endpoint.path) and (not isinstance(data, list)):
-                self.exit_with_error("{} must be array of /components/schemas/PatchRequest".format(data_fn))
+        op_modes = ('add', 'remove', 'replace', 'move', 'copy', 'test')
+        def check_op_mode(item):
+            if not item['op'] in ('add', 'remove', 'replace', 'move', 'copy', 'test'):
+                self.exit_with_error("op must be one of {}".format(', '.join(op_modes)))
 
-        if 'configuser' not in endpoint.path:
-            op_modes = ('add', 'remove', 'replace', 'move', 'copy', 'test')
+        def fix_path(item):
+            if not item['path'].startswith('/'):
+                item['path'] = '/' + item['path']
 
-            for item in data:
-                if not item['op'] in op_modes:
-                    print("op must be one of {}".format(', '.join(op_modes)))
-                    sys.exit()
-                if not item['path'].startswith('/'):
-                    item['path'] = '/' + item['path']
+        check_list = data if self.my_op_mode != 'scim' else data['Operations']
+
+        for item in check_list:
+            check_op_mode(item)
+            if self.my_op_mode != 'scim':
+                fix_path(item)
+
 
         response = self.patch_requests(endpoint, suffix_param, data)
 
@@ -1584,7 +1588,7 @@ def main():
     if len(sys.argv) < 2:
         print("\u001b[38;5;{}mNo arguments were provided. Type {} -h to get help.\u001b[0m".format(warning_color, os.path.realpath(__file__)))
 
-    error_log_file = os.path.join(log_dir, 'cli_eorror.log')
+    error_log_file = os.path.join(log_dir, 'cli_error.log')
     cli_object = JCA_CLI(host, client_id, client_secret, access_token, test_client, wrapped=False)
 
     if args.revoke_session:
