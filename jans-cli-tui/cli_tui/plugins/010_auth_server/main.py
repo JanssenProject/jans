@@ -42,7 +42,7 @@ from edit_scope_dialog import EditScopeDialog
 from ssa import SSA
 from agama import Agama
 from authn import Authn
-from message import Message
+#from message import Message
 from attributes import Attributes
 
 from prompt_toolkit.widgets import (
@@ -71,7 +71,7 @@ class Plugin(DialogUtils):
         self.ssa = SSA(app)
         self.agama = Agama(app)
         self.authn = Authn(app)
-        self.message = Message()
+        #self.message = Message()
         self.attributes = Attributes(app)
         self.oauth_containers = {}
 
@@ -264,7 +264,7 @@ class Plugin(DialogUtils):
         self.oauth_containers['authn'] = self.authn.main_container
         self.oauth_containers['attributes'] = self.attributes.main_container
         self.oauth_containers['logging'] = DynamicContainer(lambda: self.oauth_data_container['logging'])
-        self.oauth_containers['message'] = self.message.main_container
+        #self.oauth_containers['message'] = self.message.main_container
 
         self.oauth_main_container = HSplit([
                                         Box(self.nav_bar.nav_window, style='class:sub-navbar', height=1),
@@ -285,7 +285,7 @@ class Plugin(DialogUtils):
                         ('keys', 'Ke[y]s'),
                         ('authn', 'Au[t]hn'),
                         ('properties', 'Properti[e]s'),
-                        ('message', 'Messa[g]es'),
+                        #('message', 'Messa[g]es'),
                         ('logging', 'Lo[g]ging'),
                         ('ssa', '[S]SA'),
                         ('agama', 'Aga[m]a'),

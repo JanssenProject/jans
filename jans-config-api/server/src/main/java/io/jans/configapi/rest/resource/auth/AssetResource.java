@@ -13,7 +13,6 @@ import io.jans.configapi.rest.form.AssetForm;
 
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
-import io.jans.configapi.util.AttributeNames;
 import io.jans.model.JansAttribute;
 import io.jans.model.SearchRequest;
 import io.jans.orm.model.PagedResult;

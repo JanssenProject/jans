@@ -134,7 +134,7 @@ nav:
       - JSON Web Key: admin/config-guide/auth-server-config/json-web-key-config.md
       - Authentication Method Configuration: admin/config-guide/auth-server-config/authentication-method-config.md
       - Auth Server Property Configuration: admin/config-guide/auth-server-config/jans-authorization-server-config.md
-      - Messaging Configuration: admin/config-guide/auth-server-config/messaging-config.md
+      #- Messaging Configuration: admin/config-guide/auth-server-config/messaging-config.md
       - Logging: admin/config-guide/auth-server-config/logging-configuration.md
       - SSA Configuration: admin/config-guide/auth-server-config/ssa-config.md
       - Agama Project Configuration: admin/config-guide/auth-server-config/agama-project-configuration.md

@@ -510,15 +510,14 @@ class SetupUtils(Crypto64):
         return rendered_text
 
     def add_yacron_job(self, command, schedule, name=None, args={}):
-        import ruamel.yaml
+        from ruamel.yaml import YAML
 
         if not name:
             name = command
 
         yacron_yaml_fn = os.path.join(base.snap_common, 'etc/cron-jobs.yaml')
 
-        yml_str = self.readFile(yacron_yaml_fn)
-        yacron_yaml = ruamel.yaml.load(yml_str, ruamel.yaml.RoundTripLoader)
+        yacron_yaml = base.read_yaml_file(self.jans_scim_openapi_fn)
 
         if not yacron_yaml:
             yacron_yaml = {'jobs': []}
@@ -528,11 +527,13 @@ class SetupUtils(Crypto64):
 
         job = { 'command': command, 'schedule': schedule, 'name': name }
         job.update(args)
-        
+
         yacron_yaml['jobs'].append(job)
 
-        yml_str = ruamel.yaml.dump(yacron_yaml, Dumper=ruamel.yaml.RoundTripDumper)
-        self.writeFile(yacron_yaml_fn, yml_str)
+        yaml_obj = YAML()
+
+        with open(yacron_yaml_fn, 'w') as w:
+            yaml_obj.dump(yacron_yaml, w)
 
 
     def port_used(self, port):

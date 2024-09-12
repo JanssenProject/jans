@@ -8,42 +8,13 @@ mod jwt_data_handler;
 use jwt_data_handler::{AuthzInputEntitiesError, DecodeTokensError, JWTData};
 pub use jwt_data_handler::{AuthzRequest, CedarParams, ResourceData};
 pub(crate) mod jwt_tokens;
-mod policy_store;
-pub use policy_store::PolicyStoreEntry;
-use policy_store::TrustedIssuers;
+use init_engine::policy_store::TrustedIssuers;
+use init_engine::policy_store_config::GetPolicyError;
+use init_engine::{BootstrapConfig, TokenMapper};
 
 pub(crate) mod exp_parsers;
 
 use std::str::FromStr;
-
-#[derive(serde::Deserialize, serde::Serialize, Debug)]
-#[serde(tag = "strategy")]
-#[serde(rename_all = "kebab-case")]
-#[serde(rename_all_fields = "camelCase")]
-pub enum PolicyStoreConfig {
-	LocalJson(String),
-	RemoteURI(String),
-}
-
-#[derive(thiserror::Error, Debug)]
-pub enum GetPolicyError {
-	#[error("could not parse policy from json: {0}")]
-	ParseJson(#[from] serde_json::Error),
-}
-
-impl PolicyStoreConfig {
-	pub fn get_policy(self) -> Result<PolicyStoreEntry, GetPolicyError> {
-		match self {
-			Self::LocalJson(policy_raw_json) => Self::get_local_policy(policy_raw_json.as_str()),
-			Self::RemoteURI(_uri) => todo!(),
-		}
-	}
-
-	pub fn get_local_policy(policy_raw_json: &str) -> Result<PolicyStoreEntry, GetPolicyError> {
-		let policy: PolicyStoreEntry = serde_json::from_str(policy_raw_json)?;
-		Ok(policy)
-	}
-}
 
 pub struct Authz {
 	application_name: Option<String>,
@@ -63,34 +34,6 @@ pub enum AuthzNewError {
 	PolicyStore(#[from] GetPolicyError),
 	#[error("could not parse entities: {0}")]
 	Entities(#[from] EntitiesError),
-}
-
-/// represent mapping tokens and role field
-/// for CEDARLING_ROLE_MAPPING value in BootstrapConfig
-/// for `id_token` default value `role`
-/// for `userinfo_token` default value `role`
-#[derive(Debug, derivative::Derivative, serde::Serialize, serde::Deserialize)]
-#[derivative(Default, Clone)]
-pub struct TokenMapper {
-	#[derivative(Default(value = "Some(\"role\".into())"))]
-	pub id_token: Option<String>,
-	#[derivative(Default(value = "Some(\"role\".into())"))]
-	pub userinfo_token: Option<String>,
-	pub access_token: Option<String>,
-}
-
-/// Bootstrap properties of application [link](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties)
-#[derive(Debug)]
-pub struct BootstrapConfig {
-	pub application_name: Option<String>,
-	pub token_mapper: TokenMapper,
-	pub policy_store: PolicyStoreEntry,
-}
-
-impl BootstrapConfig {
-	fn get_jwt_decoder(&self) -> JWTDecoder {
-		JWTDecoder::WithoutValidation
-	}
 }
 
 impl Authz {

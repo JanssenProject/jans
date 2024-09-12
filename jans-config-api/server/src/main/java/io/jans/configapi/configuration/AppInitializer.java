@@ -12,7 +12,6 @@ import io.jans.configapi.model.configuration.AssetMgtConfiguration;
 import io.jans.configapi.security.api.ApiProtectionService;
 import io.jans.configapi.security.service.AuthorizationService;
 import io.jans.configapi.security.service.OpenIdAuthorizationService;
-import io.jans.configapi.service.auth.AssetService;
 import io.jans.configapi.service.logger.LoggerService;
 import io.jans.exception.ConfigurationException;
 import io.jans.exception.OxIntializationException;
@@ -24,11 +23,13 @@ import io.jans.service.PythonService;
 import io.jans.service.cdi.event.LdapConfigurationReload;
 import io.jans.service.cdi.util.CdiUtil;
 import io.jans.service.custom.script.CustomScriptManager;
+import io.jans.service.document.store.manager.DocumentStoreManager;
 import io.jans.service.timer.QuartzSchedulerManager;
 import io.jans.util.StringHelper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Arrays;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.BeforeDestroyed;
@@ -87,7 +88,7 @@ public class AppInitializer {
     private PythonService pythonService;
 
     @Inject
-    AssetService assetService;
+    DocumentStoreManager documentStoreManager;
 
     public void onStart(@Observes @Initialized(ApplicationScoped.class) Object init) {
         log.info("=============  STARTING API APPLICATION  ========================");
@@ -233,9 +234,9 @@ public class AppInitializer {
                 serviceName = "jans-config-api";
             }
 
-            log.info("Loading Custom Asset serviceName:{} ", serviceName);
-            String loadServiceResult = this.assetService.loadServiceAsset(serviceName);
-            log.info("Loading Custom Asset serviceName:{}, loadServiceResult:{}", serviceName, loadServiceResult);
+            log.info("Loading Custom Asset for serviceName:{} ", serviceName);
+            this.documentStoreManager.initTimer(Arrays.asList(serviceName));
+            log.info("Custom Asset for serviceName:{} loaded", serviceName);
             
         } catch (Exception ex) {
             log.error("Error while loadCustomAsset is - ", ex);

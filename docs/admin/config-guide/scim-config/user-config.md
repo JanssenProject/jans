@@ -5,21 +5,40 @@ tags:
   - user
 ---
 
-# User Resources
+# User Management
 
-> Prerequisite: Know how to use the Janssen CLI in [command-line mode](../config-tools/jans-cli/README.md)
+The Janssen Server provides multiple configuration tools to perform these
+tasks.
 
-The first thing is to do, Let's get some information for the following task:
+=== "Use Command-line"
 
+    Use the command line to perform actions from the terminal. Learn how to 
+    use Jans CLI [here](../config-tools/jans-cli/README.md) or jump straight to 
+    the [Using Command Line](#using-command-line)
+
+=== "Use Text-based UI"
+
+    Use a fully functional text-based user interface from the terminal. 
+    Learn how to use Jans Text-based UI (TUI) 
+    [here](../config-tools/jans-tui/README.md) or jump straight to the
+    [Using Text-based UI](#using-text-based-ui)
+
+=== "Use REST API"
+
+    Use REST API for programmatic access or invoke via tools like CURL or 
+    Postman. Learn how to use Janssen Server Config API 
+    [here](../config-tools/config-api/README.md) or Jump straight to the
+    [Using Configuration REST API](#using-configuration-rest-api)
+
+## Using Command Line
+
+In the Janssen Server, you can do CRUD operations for user management using its command line tool. To get the details of command line for CRUD operations relevant to User Management, you can find the `operation-id` under the `User` task using the Jans CLI in scim mode. The following command line:
+
+```bash title="Command"
+/opt/jans/jans-cli/config-cli.py -scim --info User
 ```
-/opt/jans/jans-cli/scim-cli.py --info User
-```
 
-In retrun we get,
-
-```
-root@testjans:~# /opt/jans/jans-cli/scim-cli.py --info User
-
+```text title="Sample Output" linenums="1"
 Operation ID: get-users
   Description: Query User resources (see section 3.4.2 of RFC 7644)
   Parameters:
@@ -35,135 +54,99 @@ Operation ID: create-user
   Parameters:
   attributes: A comma-separated list of attribute names to return in the response [string]
   excludedAttributes: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list) [string]
-  Schema: /components/schemas/UserResource
-  Schema: /components/schemas/UserResource
+  Schema: UserResource
+  Schema: UserResource
 Operation ID: get-user-by-id
   Description: Retrieves a User resource by Id (see section 3.4.1 of RFC 7644)
-  url-suffix: id
   Parameters:
   attributes: A comma-separated list of attribute names to return in the response [string]
   excludedAttributes: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list) [string]
   id: No description is provided for this parameter [string]
 Operation ID: update-user-by-id
-  Description: Updates a User resource (see section 3.5.1 of RFC 7644). Update works in a replacement fashion&amp;#58; every
-attribute value found in the payload sent will replace the one in the existing resource representation. Attributes 
-not passed in the payload will be left intact.
-
-  url-suffix: id
+  Description: Updates a User resource (see section 3.5.1 of RFC 7644). Update works in a replacement fashion; every attribute value found in the payload sent will replace the one in the existing resource representation. Attributes not passed in the payload will be left intact.
   Parameters:
   attributes: A comma-separated list of attribute names to return in the response [string]
   excludedAttributes: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list) [string]
   id: No description is provided for this parameter [string]
-  Schema: /components/schemas/UserResource
-  Schema: /components/schemas/UserResource
+  Schema: UserResource
+  Schema: UserResource
 Operation ID: delete-user-by-id
   Description: Deletes a user resource
-  url-suffix: id
   Parameters:
   id: Identifier of the resource to delete [string]
 Operation ID: patch-user-by-id
-  Description: Updates one or more attributes of a User resource using a sequence of additions, removals, and 
-replacements operations. See section 3.5.2 of RFC 7644
-
-  url-suffix: id
+  Description: Updates one or more attributes of a User resource using a sequence of additions, removals, and replacements operations. See section 3.5.2 of RFC 7644
   Parameters:
   attributes: A comma-separated list of attribute names to return in the response [string]
   excludedAttributes: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list) [string]
   id: No description is provided for this parameter [string]
-  Schema: /components/schemas/PatchRequest
-  Schema: /components/schemas/PatchRequest
+  Schema: PatchRequest
+  Schema: PatchRequest
 Operation ID: search-user
   Description: Query User resources (see section 3.4.2 of RFC 7644)
-  Schema: /components/schemas/SearchRequest
-  Schema: /components/schemas/SearchRequest
+  Schema: SearchRequest
+  Schema: SearchRequest
 
-To get sample schema type /opt/jans/jans-cli/scim-cli.py --schema <schma>, for example /opt/jans/jans-cli/scim-cli.py 
+To get sample schema type /opt/jans/jans-cli/config-cli.py -scim --schema-sample <schema>, for example /opt/jans/jans-cli/config-cli.py -scim --schema-sample SearchRequest
 ```
 
-## Find Users List 
+### Get Users List 
   
-This operation is used to get list of the users and its properties. The command line is: 
+This operation is used to get list of the users and its properties. The following command line: 
   
+```bash title="Command"
+/opt/jans/jans-cli/config-cli.py -scim --operation-id get-users
 ```
-/opt/jans/jans-cli/scim-cli.py --operation-id get-users
-```
-  
-By default, This will return all of the users and their properties. 
 
-```
-root@testjans:~# /opt/jans/jans-cli/scim-cli.py --operation-id get-users
-
-Getting access token for scope https://jans.io/scim/users.read
+```json title="Sample Output" linenums="1"
 {
-  "Resources": [
-    {
-      "externalId": null,
-      "userName": "admin",
-      "name": {
-        "familyName": "User",
-        "givenName": "Admin",
-        "middleName": "Admin",
-        "honorificPrefix": null,
-        "honorificSuffix": null,
-        "formatted": "Admin Admin User"
-      },
-      "displayName": "Default Admin User",
-      "nickName": "Admin",
-      "profileUrl": null,
-      "title": "MH Shakil",
-      "userType": null,
-      "preferredLanguage": null,
-      "locale": null,
-      "timezone": null,
-      "active": true,
-      "password": null,
-      "emails": [
-        {
-          "value": "admin@testjans.gluu.com",
-          "display": null,
-          "type": null,
-          "primary": false
-        }
-      ],
-      "phoneNumbers": null,
-      "ims": null,
-      "photos": null,
-      "addresses": null,
-      "groups": [
-        {
-          "value": "60B7",
-          "$ref": "https://testjans.gluu.com/jans-scim/restv1/v2/Groups/60B7",
-          "display": "Jannsen Manager Group",
-          "type": "direct"
-        }
-      ],
-      "entitlements": null,
-      "roles": null,
-      "x509Certificates": null,
-      "urn:ietf:params:scim:schemas:extension:gluu:2.0:User": null,
-      "schemas": [
-        "urn:ietf:params:scim:schemas:core:2.0:User"
-      ],
-      "id": "18ca6089-42fb-410a-a5b5-c2631d75dc7d",
-      "meta": {
-        "resourceType": "User",
-        "created": null,
-        "lastModified": "2021-04-06T18:39:54.087Z",
-        "location": "https://testjans.gluu.com/jans-scim/restv1/v2/Users/18ca6089-42fb-410a-a5b5-c2631d75dc7d"
-      }
-    }
-  ],
   "schemas": [
     "urn:ietf:params:scim:api:messages:2.0:ListResponse"
   ],
   "totalResults": 1,
   "startIndex": 1,
-  "itemsPerPage": 1
+  "itemsPerPage": 1,
+  "Resources": [
+    {
+      "schemas": [
+        "urn:ietf:params:scim:schemas:core:2.0:User"
+      ],
+      "id": "f764391d-56de-4b74-b0a2-f32814706dcc",
+      "meta": {
+        "resourceType": "User",
+        "location": "https://imshakil-boss-guppy.gluu.info/jans-scim/restv1/v2/Users/f764391d-56de-4b74-b0a2-f32814706dcc"
+      },
+      "userName": "admin",
+      "name": {
+        "familyName": "User",
+        "givenName": "Admin",
+        "middleName": "Admin",
+        "formatted": "Admin Admin User"
+      },
+      "displayName": "Default Admin User",
+      "nickName": "Admin",
+      "active": true,
+      "emails": [
+        {
+          "value": "admin@imshakil-boss-guppy.gluu.info",
+          "primary": false
+        }
+      ],
+      "groups": [
+        {
+          "value": "60B7",
+          "display": "Janssen Manager Group",
+          "type": "direct",
+          "$ref": "https://imshakil-boss-guppy.gluu.info/jans-scim/restv1/v2/Groups/60B7"
+        }
+      ]
+    }
+  ]
 }
 
 ```
 
-It also supports parameters for the advanced search. Those parameters are:
+As shown in the [output](#using-command-line) for `--info` command, `get-users` operation-id also supports parameters for the advanced search. Those parameters are:
 
     1. attributes
     2. excludeAttributes
@@ -174,262 +157,242 @@ It also supports parameters for the advanced search. Those parameters are:
 
 This is an example with `endpoint-args`:
 
-```
-/opt/jans/jans-cli/scim-cli.py --operation-id get-users --endpoint-args count:1
+```bash title="Command"
+/opt/jans/jans-cli/config-cli.py -scim --operation-id get-users --endpoint-args attributes:emails
 ```
 
-It returns as below:
-
-```
-Getting access token for scope https://jans.io/scim/users.read
-Calling with params count=1
+```json title="Sample Output" linenums="1"
 {
-  "Resources": [
-    {
-      "externalId": null,
-      "userName": "admin",
-      "name": {
-        "familyName": "User",
-        "givenName": "Admin",
-        "middleName": "Admin",
-        "honorificPrefix": null,
-        "honorificSuffix": null,
-        "formatted": "Admin Admin User"
-      },
-      "displayName": "Default Admin User",
-      "nickName": "Admin",
-      "profileUrl": null,
-      "title": "MH Shakil",
-      "userType": null,
-      "preferredLanguage": null,
-      "locale": null,
-      "timezone": null,
-      "active": true,
-      "password": null,
-      "emails": [
-        {
-          "value": "admin@testjans.gluu.com",
-          "display": null,
-          "type": null,
-          "primary": false
-        }
-      ],
-      "phoneNumbers": null,
-      "ims": null,
-      "photos": null,
-      "addresses": null,
-      "groups": [
-        {
-          "value": "60B7",
-          "$ref": "https://testjans.gluu.com/jans-scim/restv1/v2/Groups/60B7",
-          "display": "Jannsen Manager Group",
-          "type": "direct"
-        }
-      ],
-      "entitlements": null,
-      "roles": null,
-      "x509Certificates": null,
-      "urn:ietf:params:scim:schemas:extension:gluu:2.0:User": null,
-      "schemas": [
-        "urn:ietf:params:scim:schemas:core:2.0:User"
-      ],
-      "id": "18ca6089-42fb-410a-a5b5-c2631d75dc7d",
-      "meta": {
-        "resourceType": "User",
-        "created": null,
-        "lastModified": "2021-04-06T18:39:54.087Z",
-        "location": "https://testjans.gluu.com/jans-scim/restv1/v2/Users/18ca6089-42fb-410a-a5b5-c2631d75dc7d"
-      }
-    }
-  ],
   "schemas": [
     "urn:ietf:params:scim:api:messages:2.0:ListResponse"
   ],
   "totalResults": 1,
   "startIndex": 1,
-  "itemsPerPage": 1
-}
-
-```
-
-## Creating an User Resources
-
-This operation can be performed to create user resources. 
-
-```
-Operation ID: create-user
-  Description: Allows creating a User resource via POST (see section 3.3 of RFC 7644)
-  Parameters:
-  attributes: A comma-separated list of attribute names to return in the response [string]
-  excludedAttributes: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list) [string]
-  Schema: /components/schemas/UserResource
-```
-
-As we see, to perform this operation we need to define the schema. So, let's get the schema of this operation.
-
-```
-/opt/jans/jans-cli/scim-cli.py --schema /components/schemas/UserResource > /tmp/create-user.json
-```
-
-```
-root@testjans:~# cat /tmp/create-user.json
-
-
-{
-  "externalId": null,
-  "userName": null,
-  "name": {
-    "familyName": null,
-    "givenName": null,
-    "middleName": null,
-    "honorificPrefix": null,
-    "honorificSuffix": null,
-    "formatted": null
-  },
-  "displayName": null,
-  "nickName": null,
-  "profileUrl": null,
-  "title": "Vice President",
-  "userType": "Contractor",
-  "preferredLanguage": "en",
-  "locale": "en-US",
-  "timezone": "America/Los_Angeles",
-  "active": false,
-  "password": null,
-  "emails": {
-    "value": "gossow@nsfw.com",
-    "display": null,
-    "type": "work",
-    "primary": true
-  },
-  "phoneNumbers": {
-    "value": "+1-555-555-8377",
-    "display": null,
-    "type": "fax",
-    "primary": true
-  },
-  "ims": {
-    "value": null,
-    "display": null,
-    "type": "gtalk",
-    "primary": true
-  },
-  "photos": {
-    "value": "https://pics.nsfw.com/gossow.png",
-    "display": null,
-    "type": "thumbnail",
-    "primary": true
-  },
-  "addresses": {
-    "formatted": null,
-    "streetAddress": "56 Acacia Avenue",
-    "locality": null,
-    "region": null,
-    "postalCode": null,
-    "country": "UK",
-    "type": "home",
-    "primary": false
-  },
-  "groups": {
-    "value": "180ee84f0671b1",
-    "$ref": "https://nsfw.com/scim/restv1/v2/Groups/180ee84f0671b1",
-    "display": "Cult managers",
-    "type": "direct"
-  },
-  "entitlements": {
-    "value": "Stakeholder",
-    "display": null,
-    "type": null,
-    "primary": false
-  },
-  "roles": {
-    "value": "Project manager",
-    "display": null,
-    "type": null,
-    "primary": false
-  },
-  "x509Certificates": {
-    "value": null,
-    "display": null,
-    "type": null,
-    "primary": true
-  },
-  "urn:ietf:params:scim:schemas:extension:gluu:2.0:User": {},
-  "schemas": [],
-  "id": null,
-  "meta": {
-    "resourceType": null,
-    "created": null,
-    "lastModified": null,
-    "location": null
-  }
+  "itemsPerPage": 1,
+  "Resources": [
+    {
+      "schemas": [
+        "urn:ietf:params:scim:schemas:core:2.0:User"
+      ],
+      "id": "f764391d-56de-4b74-b0a2-f32814706dcc",
+      "emails": [
+        {
+          "value": "admin@imshakil-boss-guppy.gluu.info",
+          "primary": false
+        }
+      ]
+    }
+  ]
 }
 ```
-Now it's pretty simple. Fill each of this information, you may skip some of this properties as well. If you look at the schema, some of the properties are already filled with some random value. You can modify them as well or ignore them.
 
-let's modify this schema:
+### Creating a New User
 
-```
-nano /tmp/create-user.json
-```
+To create a new user using Jans CLI, we can use `create-user` operation-id. As shown in the [output](#using-command-line) for `--info` command, the `create-user` operation requires data to be sent according to `UserResource` schema. To see the schema, use the command as below:
 
-![](../../../assets/image-cl-scim-create-user-03042021.png)
-
-Finally use below command line, to create an user resources.
-
-```
-/opt/jans/jans-cli/scim-cli.py --operation-id create-user --data /tmp/create-user.json
-
+```bash title="Command" linenums="1"
+/opt/jans/jans-cli/config-cli.py -scim --schema UserResource
 ```
 
-It will generate user `inum` value, metadata and will be added in user resources:
+The Janssen Server also provides sample data for the above schema. Let's run the following command to get the sample schema:
 
+```bash title="Command"
+/opt/jans/jans-cli/config-cli.py -scim --schema-sample UserResource
 ```
-Getting access token for scope https://jans.io/scim/users.write
-Server Response:
+
+From the above example of schema file, we can fill required values in a data file `/tmp/user.json`. As we have seen in the sample schema there are lot of properties, but we are going to fill minimum to create a `test user`:
+
+```json title="user.json" linenums="1"
 {
-  "externalId": null,
-  "userName": "mhosen",
-  "name": {
-    "familyName": "mobarak",
-    "givenName": "mobarak",
-    "middleName": null,
-    "honorificPrefix": null,
-    "honorificSuffix": null,
-    "formatted": "mobarak mobarak"
-  },
-  "displayName": "mobarak",
-  "nickName": null,
-  "profileUrl": null,
-  "title": "Vice President",
-  "userType": "Contractor",
-  "preferredLanguage": "en",
-  "locale": "en-US",
-  "timezone": "America/Los_Angeles",
+  "userName": "test.user",
+  "displayName": "Test User",
+  "nickName": "testu",
   "active": true,
-  "password": null,
-  "emails": null,
-  "phoneNumbers": null,
-  "ims": null,
-  "photos": null,
-  "addresses": null,
-  "groups": null,
-  "entitlements": null,
-  "roles": null,
-  "x509Certificates": null,
-  "urn:ietf:params:scim:schemas:extension:gluu:2.0:User": null,
+  "password": "pass@word",
+  "emails": [
+	  {
+		  "value": "testuser@maildomain.net",
+		  "primary": true
+	  }
+  ]
+}
+```
+Let's run the following command to create user in Janssen Server:
+
+```bash title="Command"
+/opt/jans/jans-cli/config-cli.py -scim --operation-id create-user --data /tmp/user.json
+```
+
+```json title="Output"
+{
   "schemas": [
     "urn:ietf:params:scim:schemas:core:2.0:User"
   ],
-  "id": "7034663f-dc43-4f8c-8074-e8e75cae9c96",
+  "id": "e24c1479-4a61-4f1f-aa30-2ccc13c0b130",
   "meta": {
     "resourceType": "User",
-    "created": "2021-04-17T14:54:30.430Z",
-    "lastModified": "2021-04-17T14:54:30.430Z",
-    "location": "https://testjans.gluu.org/jans-scim/restv1/v2/Users/7034663f-dc43-4f8c-8074-e8e75cae9c96"
-  }
+    "created": "2024-09-04T06:36:00.882Z",
+    "lastModified": "2024-09-04T06:36:00.882Z",
+    "location": "https://imshakil-boss-guppy.gluu.info/jans-scim/restv1/v2/Users/e24c1479-4a61-4f1f-aa30-2ccc13c0b130"
+  },
+  "userName": "test.user",
+  "displayName": "Test User",
+  "nickName": "testu",
+  "active": true,
+  "emails": [
+    {
+      "value": "testuser@maildomain.net",
+      "primary": true
+    }
+  ]
 }
-
-root@testjans:~# 
 ```
 
+### Find User by Id
+
+We can retrieve user details using user's `id`. For example in the above created user id is `e24c1479-4a61-4f1f-aa30-2ccc13c0b130`. To get the user details by user id, We can use the `get-user-by-id` operation as below:
+
+```bash title="Command"
+/opt/jans/jans-cli/config-cli.py -scim --operation-id get-user-by-id --url-suffix="id:e24c1479-4a61-4f1f-aa30-2ccc13c0b130"
+```
+
+```json title="Output"
+{
+  "schemas": [
+    "urn:ietf:params:scim:schemas:core:2.0:User"
+  ],
+  "id": "e24c1479-4a61-4f1f-aa30-2ccc13c0b130",
+  "meta": {
+    "resourceType": "User",
+    "created": "2024-09-04T06:36:00.882Z",
+    "lastModified": "2024-09-04T06:36:00.882Z",
+    "location": "https://imshakil-boss-guppy.gluu.info/jans-scim/restv1/v2/Users/e24c1479-4a61-4f1f-aa30-2ccc13c0b130"
+  },
+  "userName": "test.user",
+  "displayName": "Test User",
+  "nickName": "testu",
+  "active": true,
+  "emails": [
+    {
+      "value": "testuser@maildomain.net",
+      "primary": true
+    }
+  ]
+}
+```
+
+### Update User by Id
+
+Using Jans CLI, We can update user information. As shown in the [output](#using-command-line) command, the `update-user-by-id` operation requires user data that needs to be changed. You can find details of user properties in [schema](#creating-a-new-user). Let's change the `nickname` for the above `Test user`. First,we need to put the update data into a json file `/tmp/update-user.json`:
+```json title='update-user.json
+{
+  "nickName": "testuser"
+}
+```
+Let's run the following command:
+```bash title="Command"
+ /opt/jans/jans-cli/config-cli.py -scim --operation-id update-user-by-id --url-suffix="id:e24c1479-4a61-4f1f-aa30-2ccc13c0b130" --data /tmp/update-user.json
+```
+```json title="Sample Output"
+{
+  "schemas": [
+    "urn:ietf:params:scim:schemas:core:2.0:User"
+  ],
+  "id": "e24c1479-4a61-4f1f-aa30-2ccc13c0b130",
+  "meta": {
+    "resourceType": "User",
+    "created": "2024-09-04T06:36:00.882Z",
+    "lastModified": "2024-09-05T05:38:31.491Z",
+    "location": "https://imshakil-boss-guppy.gluu.info/jans-scim/restv1/v2/Users/e24c1479-4a61-4f1f-aa30-2ccc13c0b130"
+  },
+  "userName": "test.user",
+  "displayName": "Test User",
+  "nickName": "testuser",
+  "active": true,
+  "emails": [
+    {
+      "value": "testuser@maildomain.net",
+      "primary": true
+    }
+  ]
+}
+```
+
+### Patch User by Id
+
+Using `patch-user-by-id` operation, We can modify user properties partially. As we have seen in the [Output](#using-command-line) of `--info` command, `patch-user-by-id` operation requires `PatchRequest` [schema](../config-tools/jans-cli/README.md#about-schemas) definition for payload data. To get the sample `PatchRequest` schema, run the followwing command:
+
+```bash titl="Command"
+/opt/jans/jans-cli/config-cli.py -scim --schema-sample PatchRequest
+```
+
+For example, In the above `test user`, we are going to `add` one more email, `remove` nickName and `replace` displayName. Let's put all the operations in a json file `/tmp/patch-user.json`:
+
+```json title="patch-user.json"
+[
+	{
+    "op": "add",
+    "path": "emails",
+    "value": {
+      "value": "testuser@imshakil.33mail.com",
+      "primary": false
+    }
+  },
+  {
+    "op": "replace",
+    "path": "displayName",
+    "value": "New User"
+  },
+  {
+    "op": "remove",
+    "path": "nickName"
+  }
+]
+```
+The command line to run all of these operations:
+```bash title="Command"
+/opt/jans/jans-cli/config-cli.py -scim --operation patch-user-by-id --url-suffix="id:e24c1479-4a61-4f1f-aa30-2ccc13c0b130" --data /tmp/patch-user.json
+```
+
+### Delete User by ID
+
+To delete the, run the following command with the specific user ID as `--url-suffix=id:user-id`. For example, let's delete the `test user` we have created earlier:
+
+```bash title="Command"
+/opt/jans/jans-cli/config-cli.py -scim --operation-id delete-user-by-id --url-suffix="id:e24c1479-4a61-4f1f-aa30-2ccc13c0b130"
+```
+
+## Using Text-based UI
+Start TUI using the command below:
+
+```bash title="Command"
+/opt/jans/jans-cli/jans_cli_tui.py
+```
+
+Navigate to `Users` to open the users tab as shown in the image below:
+
+![](../../../assets/jans-tui-user-mgt.png)
+
+- We can see the list of users from search option
+- To get the list of users available in the Janssen Server, bring the control to `Search` box (using `tab` key) and press `Enter` key. 
+
+
+### Add / Update / Delete User
+
+1. To add user into server, hit `Enter` on `Add Users` button, fill up user details and press `Save` button to save it. Please check image below:
+
+![add-user](../../../assets/jans-tui-create-user.png)
+
+2. To modify any user properties, find the user from search box and hit `Enter` to pop-up user details, update user details and finally hit on `Save` button to update the changes. 
+
+![update-user](../../../assets/jans-tui-update-user.png)
+
+3. To delete user, bring the control on the specific user row and press `delete` or `d` key from keyboard. It will show a pop-up for confirmation as below:
+
+![delete-user](../../../assets/jans-tui-delete-user.png)
+
+## Using Configuration REST API
+
+Janssen Server Configuration REST API exposes relevant endpoints for managing
+and configuring the OpenID Connect Client. Endpoint details are published in the [Swagger
+document](../../reference/openapi.md).

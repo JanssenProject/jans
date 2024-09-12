@@ -8370,17 +8370,17 @@ components:
           type: string
         selected:
           type: boolean
-        userCanEdit:
+        adminCanEdit:
           type: boolean
-        userCanView:
+        userCanEdit:
           type: boolean
         adminCanView:
           type: boolean
-        adminCanEdit:
-          type: boolean
-        userCanAccess:
+        userCanView:
           type: boolean
         adminCanAccess:
+          type: boolean
+        userCanAccess:
           type: boolean
         whitePagesCanView:
           type: boolean

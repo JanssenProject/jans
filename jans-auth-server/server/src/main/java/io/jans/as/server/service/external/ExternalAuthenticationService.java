@@ -79,6 +79,8 @@ public class ExternalAuthenticationService extends ExternalScriptService {
             return null;
         }
 
+        acr = AcrService.getScriptName(acr);
+
         if (scriptAliasMap.containsKey(acr)) {
             return scriptAliasMap.get(acr);
         }

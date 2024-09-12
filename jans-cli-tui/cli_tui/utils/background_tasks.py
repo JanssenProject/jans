@@ -10,6 +10,7 @@ common_data.background_tasks_feeds['attributes'] = []
 async def get_attributes_coroutine(app) -> None:
 
     common_data.jans_attributes = []
+    jans_attributes = []
     start_index = 1
     limit = 100
 
@@ -24,7 +25,7 @@ async def get_attributes_coroutine(app) -> None:
             try:
                 data = response.json()
                 if data.get('entriesCount'):
-                    common_data.jans_attributes += data['entries']
+                    jans_attributes += data['entries']
                     app.logger.info("%d attributes retreived", data['entriesCount'])
                 else:
                     break
@@ -36,6 +37,8 @@ async def get_attributes_coroutine(app) -> None:
                 break
         else:
             break
+
+    common_data.jans_attributes = jans_attributes
 
     for feed in common_data.background_tasks_feeds['attributes']:
         app.logger.info(f"Executing feed {feed.__name__}")

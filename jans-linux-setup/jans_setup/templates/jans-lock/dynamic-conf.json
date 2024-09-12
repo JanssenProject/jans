@@ -6,7 +6,7 @@
   ],
   "clientId": "%(lock_client_id)s",
   "clientPassword": "%(lock_client_encoded_pw)s",
-  "tokenUrl": "%(tokenEndpoint)s",
+  "tokenUrl": "%(jans_auth_token_endpoint)s",
   "groupScopeEnabled": true,
   "endpointGroups": {
     "audit": [

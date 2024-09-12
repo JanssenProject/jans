@@ -284,15 +284,14 @@ public class AssetService {
         dbDocumentService.removeDocument(asset);
         log.info("Deleted asset identified by inum {}", inum);
 
-        // remove asset from server
-        boolean status = deleteAssetFromServer(asset);
-        log.info("Status on deleting asset from server is:{}", status);
-        if (!status) {
+        asset = this.getAssetByInum(inum);
+        log.info("Checking if asset is deleted properly - asset :{}", asset);
+        if (asset != null) {
             log.error("Could not remove asset from server identified by inum:{}", inum);
             throw new WebApplicationException("Could not delete asset identified by inum - " + inum);
         }
 
-        return status;
+        return true;
     }
 
     public List<String> getValidModuleName() {

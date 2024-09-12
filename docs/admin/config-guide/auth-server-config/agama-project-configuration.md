@@ -363,15 +363,28 @@ sudo /opt/jans/jans-cli/jans_cli_tui.py
 Navigate to `Auth Server` -> `Agama` to open the Agama projects screen as shown 
 in the image below.
 
+![image](../../../assets/tui-agama-project-list.png)
+
 * To get the list of currently added projects, bring the control to `Search` box
   (using the tab key), and press `Enter`. Type the search string to search for
   projects with matching names.
 
-* Deploy a new project using `Upload Project` button. It'll open the explore
-  dialogue. Using this dialogue, navigate the file system and select  
-  the `.gama` archive for the new project.
+* Add a new project using `Add a New Project` button. It will open a dialogue where
+  you can either deploy a local project or deploy an Agama Lab community project
+  as shown in the image below.
 
-![image](../../../assets/tui-agama-project-list.png)
+  ![image](../../../assets/tui-agama-select-deployment.png)
+
+  1. If you select the first option, it'll open the explore
+    dialogue. Using this dialogue, navigate the file system and select
+    the `.gama` archive for the new project.
+
+  2. If you select the second option, it'ill collect a list of Agama Lab
+    community projects from GitHub and display a selection list as shown in
+    the image below.
+
+    ![image](../../../assets/tui-agama-community-projects-list.png)
+
 
 ### Agama Project Help Menu
 

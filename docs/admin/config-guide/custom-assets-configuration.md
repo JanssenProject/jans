@@ -96,7 +96,7 @@ custom assets on the Janssen Server.
     {
       "dn": "inum=61edc29d-45f8-4ab9-8c9a-7b39e4cbe440,ou=document,o=jans",
       "inum": "61edc29d-45f8-4ab9-8c9a-7b39e4cbe440",
-      "displayName": "p2.properties",
+      "fileName": "p2.properties",
       "description": "Valid text description",
       "document": "cHJvcGVydGllcyBoZXJlLiAK\r\n",
       "creationDate": "2024-07-31T07:36:08",
@@ -110,7 +110,7 @@ custom assets on the Janssen Server.
     {
       "dn": "inum=835c7a68-57b1-4e39-8d2a-2a3963f2a92f,ou=document,o=jans",
       "inum": "835c7a68-57b1-4e39-8d2a-2a3963f2a92f",
-      "displayName": "p1.properties",
+      "fileName": "p1.properties",
       "description": "updated thrice Valid text description",
       "document": "cHJvcGVydGllcwo=\r\n",
       "jansService": [
@@ -122,7 +122,7 @@ custom assets on the Janssen Server.
     {
       "dn": "inum=fd67d07b-c874-4bc1-a9f0-860fc4f7a091,ou=document,o=jans",
       "inum": "fd67d07b-c874-4bc1-a9f0-860fc4f7a091",
-      "displayName": "p.properties",
+      "fileName": "p.properties",
       "description": "Valid text description",
       "document": "cHJvcGVydGllcyBoZXJlLiAK\r\n",
       "creationDate": "2024-07-31T07:40:03",
@@ -154,7 +154,7 @@ It returns the details as below:
 {
   "dn": "inum=61edc29d-45f8-4ab9-8c9a-7b39e4cbe440,ou=document,o=jans",
   "inum": "61edc29d-45f8-4ab9-8c9a-7b39e4cbe440",
-  "displayName": "p2.properties",
+  "fileName": "p2.properties",
   "description": "Valid text description",
   "document": "cHJvcGVydGllcyBoZXJlLiAK\r\n",
   "creationDate": "2024-07-31T07:36:08",
@@ -188,7 +188,7 @@ It returns the details as below:
     {
       "dn": "inum=835c7a68-57b1-4e39-8d2a-2a3963f2a92f,ou=document,o=jans",
       "inum": "835c7a68-57b1-4e39-8d2a-2a3963f2a92f",
-      "displayName": "p1.properties",
+      "fileName": "p1.properties",
       "description": "updated thrice Valid text description",
       "document": "cHJvcGVydGllcwo=\r\n",
       "jansService": [
@@ -276,7 +276,7 @@ a custom asset to the `jans-auth` service.
 ```json title="Input" linenums="1" 
 {
   "document": {
-    "displayName": "p3.properties",
+    "fileName": "p3.properties",
     "description": "text description",
     "jansService": [
       "jans-auth"
@@ -304,7 +304,7 @@ assuming that there is an existing asset as show below:
 {
   "dn": "inum=fd67d07b-c874-4bc1-a9f0-860fc4f7a091,ou=document,o=jans",
   "inum": "fd67d07b-c874-4bc1-a9f0-860fc4f7a091",
-  "displayName": "p.properties",
+  "fileName": "p.properties",
   "description": "Valid text description",
   "document": "cHJvcGVydGllcyBoZXJlLiAK\r\n",
   "creationDate": "2024-07-31T07:40:03",
@@ -330,7 +330,7 @@ content in it. Let's name this text file as `/tmp/update-asset.json`
   "document": {
       "dn": "inum=fd67d07b-c874-4bc1-a9f0-860fc4f7a091,ou=document,o=jans",
       "inum": "fd67d07b-c874-4bc1-a9f0-860fc4f7a091",
-      "displayName": "p.properties",
+      "fileName": "p.properties",
       "description": "Valid text description",
       "document": "cHJvcGVydGllcyBoZXJlLiAK\r\n",
       "creationDate": "2024-07-31T07:40:03",
@@ -357,7 +357,7 @@ Upon successful execution, this command will return with updated asset values.
 {
   "dn": "inum=fd67d07b-c874-4bc1-a9f0-860fc4f7a091,ou=document,o=jans",
   "inum": "fd67d07b-c874-4bc1-a9f0-860fc4f7a091",
-  "displayName": "p.properties",
+  "fileName": "p.properties",
   "description": "Valid text description",
   "document": "cHJvcGVydGllcyBoZXJlLiAK\r\n",
   "creationDate": "2024-07-31T07:40:03",
@@ -397,7 +397,7 @@ Navigate to `Assets` tab to open the Assets screen as shown in the image below.
 
 * To get the list of currently added Assets, bring the control to the Search 
 box (using the tab key), and press Enter. Type the search string to search 
-for Asset with matching `Display Name` and `inum`.
+for Asset with matching `inum`, or `File Name` or `Description`
 
 
 ![Image](../../assets/tui-asset-screen.png)

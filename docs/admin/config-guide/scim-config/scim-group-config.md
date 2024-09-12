@@ -5,78 +5,86 @@ tags:
   - group
 ---
 
-# Group Resources
+# Group Management
 
-> Prerequisite: Know how to use the Janssen CLI in [command-line mode](../config-tools/jans-cli/README.md)
+The Janssen Server provides multiple configuration tools to perform these
+tasks.
 
-Group resources are used to manage user resources easily with some operations. 
-If you run the below command, then you will get a list of operations as below:
+=== "Use Command-line"
 
+    Use the command line to perform actions from the terminal. Learn how to 
+    use Jans CLI [here](../config-tools/jans-cli/README.md) or jump straight to 
+    the [Using Command Line](#using-command-line)
+
+=== "Use REST API"
+
+    Use REST API for programmatic access or invoke via tools like CURL or 
+    Postman. Learn how to use Janssen Server Config API 
+    [here](../config-tools/config-api/README.md) or Jump straight to the
+    [Using Configuration REST API](#using-configuration-rest-api)
+
+## Using Command Line
+
+```bash title="Command"
+/opt/jans/jans-cli/config-cli.py -scim --info Group
 ```
-root@testjans:~# /opt/jans/jans-cli/scim-cli.py --info Group
 
+```text title="Command Output"
 Operation ID: get-groups
-Description: Query Group resources (see section 3.4.2 of RFC 7644)
-Parameters:
-attributes: A comma-separated list of attribute names to return in the response [string]
-excludedAttributes: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list) [string]
-filter: An expression specifying the search criteria. See section 3.4.2.2 of RFC 7644 [string]
-startIndex: The 1-based index of the first query result [integer]
-count: Specifies the desired maximum number of query results per page [integer]
-sortBy: The attribute whose value will be used to order the returned responses [string]
-sortOrder: Order in which the sortBy param is applied. Allowed values are "ascending" and "descending" [string]
+  Description: Query Group resources (see section 3.4.2 of RFC 7644)
+  Parameters:
+  attributes: A comma-separated list of attribute names to return in the response [string]
+  excludedAttributes: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list) [string]
+  filter: An expression specifying the search criteria. See section 3.4.2.2 of RFC 7644 [string]
+  startIndex: The 1-based index of the first query result [integer]
+  count: Specifies the desired maximum number of query results per page [integer]
+  sortBy: The attribute whose value will be used to order the returned responses [string]
+  sortOrder: Order in which the sortBy param is applied. Allowed values are "ascending" and "descending" [string]
 Operation ID: create-group
-Description: Allows creating a Group resource via POST (see section 3.3 of RFC 7644)
-Parameters:
-attributes: A comma-separated list of attribute names to return in the response [string]
-excludedAttributes: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list) [string]
-Schema: /components/schemas/GroupResource
-Schema: /components/schemas/GroupResource
+  Description: Allows creating a Group resource via POST (see section 3.3 of RFC 7644)
+  Parameters:
+  attributes: A comma-separated list of attribute names to return in the response [string]
+  excludedAttributes: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list) [string]
+  Schema: GroupResource
+  Schema: GroupResource
 Operation ID: get-group-by-id
-Description: Retrieves a Group resource by Id (see section 3.4.1 of RFC 7644)
-url-suffix: id
-Parameters:
-attributes: A comma-separated list of attribute names to return in the response [string]
-excludedAttributes: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list) [string]
-id: No description is provided for this parameter [string]
+  Description: Retrieves a Group resource by Id (see section 3.4.1 of RFC 7644)
+  Parameters:
+  attributes: A comma-separated list of attribute names to return in the response [string]
+  excludedAttributes: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list) [string]
+  id: No description is provided for this parameter [string]
 Operation ID: update-group-by-id
-Description: Updates a Group resource (see section 3.5.1 of RFC 7644). Update works in a replacement fashion&amp;#58; every
-attribute value found in the payload sent will replace the one in the existing resource representation. Attributes 
+  Description: Updates a Group resource (see section 3.5.1 of RFC 7644). Update works in a replacement fashion&amp;#58; every
+attribute value found in the payload sent will replace the one in the existing resource representation. Attributes
 not passed in the payload will be left intact.
 
-url-suffix: id
-Parameters:
-attributes: A comma-separated list of attribute names to return in the response [string]
-excludedAttributes: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list) [string]
-id: No description is provided for this parameter [string]
-Schema: /components/schemas/GroupResource
-Schema: /components/schemas/GroupResource
+  Parameters:
+  attributes: A comma-separated list of attribute names to return in the response [string]
+  excludedAttributes: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list) [string]
+  id: No description is provided for this parameter [string]
+  Schema: GroupResource
+  Schema: GroupResource
 Operation ID: delete-group-by-id
-Description: Deletes a group resource (see section 3.6 of RFC 7644)
-url-suffix: id
-Parameters:
-id: Identifier of the resource to delete [string]
+  Description: Deletes a group resource (see section 3.6 of RFC 7644)
+  Parameters:
+  id: Identifier of the resource to delete [string]
 Operation ID: patch-group-by-id
-Description: Updates one or more attributes of a Group resource using a sequence of additions, removals, and 
-replacements operations. See section 3.5.2 of RFC 7644
+  Description: Updates one or more attributes of a Group resource using a sequence of additions, removals, and replacements operations. See section 3.5.2 of RFC 7644
 
-url-suffix: id
-Parameters:
-attributes: A comma-separated list of attribute names to return in the response [string]
-excludedAttributes: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list) [string]
-id: No description is provided for this parameter [string]
-Schema: /components/schemas/PatchRequest
-Schema: /components/schemas/PatchRequest
+  Parameters:
+  attributes: A comma-separated list of attribute names to return in the response [string]
+  excludedAttributes: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list) [string]
+  id: No description is provided for this parameter [string]
+  Schema: PatchRequest
+  Schema: PatchRequest
 Operation ID: search-group
-Description: Query Group resources (see section 3.4.2 of RFC 7644)
-Schema: /components/schemas/SearchRequest
-Schema: /components/schemas/SearchRequest
+  Description: Query Group resources (see section 3.4.2 of RFC 7644)
+  Schema: SearchRequest
+  Schema: SearchRequest
 
-To get sample schema type /opt/jans/jans-cli/scim-cli.py --schema <schma>, for example /opt/jans/jans-cli/scim-cli.py --schema /components/schemas/SearchRequest
-
-root@testjans:~# 
+To get sample schema type /opt/jans/jans-cli/config-cli.py -scim --schema-sample <schema>, for example /opt/jans/jans-cli/config-cli.py -scim --schema-sample SearchRequest 
 ```
-
+,,,,,,,,,,,,,,,,,,,,
 Table of Contents
 =================
 
@@ -90,15 +98,49 @@ Table of Contents
     * [Search Group](#search-group)
 
 
-## Get Groups
+### Get Groups
 
-This operation can be used to get list of groups that are used to organize user resources. Let's run the below command:
+This operation can be used to get list of groups. To get the list of groups, run the following command:
 
+```bash title="Command"
+/opt/jans/jans-cli/config-cli.py -scim --operation-id get-groups
 ```
-# /opt/jans/jans-cli/scim-cli.py --operation-id get-users
+
+It will show the list of groups with all the members linked with each of these groups. 
+
+```json title="Sample Output"
+{
+  "schemas": [
+    "urn:ietf:params:scim:api:messages:2.0:ListResponse"
+  ],
+  "totalResults": 1,
+  "startIndex": 1,
+  "itemsPerPage": 1,
+  "Resources": [
+    {
+      "schemas": [
+        "urn:ietf:params:scim:schemas:core:2.0:Group"
+      ],
+      "id": "60B7",
+      "meta": {
+        "resourceType": "Group",
+        "location": "https://imshakil-boss-guppy.gluu.info/jans-scim/restv1/v2/Groups/60B7"
+      },
+      "displayName": "Janssen Manager Group",
+      "members": [
+        {
+          "value": "f764391d-56de-4b74-b0a2-f32814706dcc",
+          "type": "User",
+          "display": "Default Admin User",
+          "$ref": "https://imshakil-boss-guppy.gluu.info/jans-scim/restv1/v2/Users/f764391d-56de-4b74-b0a2-f32814706dcc"
+        }
+      ]
+    }
+  ]
+}
 ```
 
-It will show the list of groups with all the members linked with each of the group. You can filter for the advanced search with some of its properties:
+You can filter for the advanced search with some of its properties:
 
 1. attributes
 2. excludeAttributes
@@ -107,319 +149,161 @@ It will show the list of groups with all the members linked with each of the gro
 5. sortBy [attribute]
 6. sortOrder ['ascending', 'descending']
 
+### Creating Group
 
+Using `create-group` operation, we can create groups into Janssen Server. As we have seen in the [output](#using-command-line) of `--info` command, this operation requires `GroupResource` schema. To know the details of schema, run the following command:
+
+```bash title="Command"
+/opt/jans/jans-cli/config-cli.py -scim --schema GroupResource
 ```
 
-Getting access token for scope https://jans.io/scim/groups.read
+The Janssen server also provides sample schema. To get the sample schema of `GroupResource`:
+
+```bash title="Command"
+/opt/jans/jans-cli/config-cli.py -scim --schema-sample GroupResource
+```
+
+According to schema, let's put all the details into a json file `/tmp/create-group.json` to create a group.
+
+```json title="sample"
 {
-"Resources": [
-  {
-    "displayName": "Jannsen Manager Group",
-    "members": [
-      {
-        "$ref": "https://testjans.gluu.org/jans-scim/restv1/v2/Users/e0b8a6a5-1955-49d7-acba-55a75b2373df",
-        "type": "User",
-        "display": "Default Admin User",
-        "value": "e0b8a6a5-1955-49d7-acba-55a75b2373df"
-        }
-      ],
-      "schemas": [
-        "urn:ietf:params:scim:schemas:core:2.0:Group"
-      ],
-      "id": "60B7",
-      "meta": {
-        "resourceType": "Group",
-        "created": null,
-        "lastModified": null,
-        "location": "https://testjans.gluu.org/jans-scim/restv1/v2/Groups/60B7"
-      }
-    }
-  ],
-  "schemas": [
-    "urn:ietf:params:scim:api:messages:2.0:ListResponse"
-  ],
-  "totalResults": 1,
-  "startIndex": 1,
-  "itemsPerPage": 1
-}
-
-root@testjans:~# 
-
-```
-
-## Create Group
-
-This operation can be used to create group resources to manage user resources. 
-
-```
-Operation ID: create-group
-Description: Allows creating a Group resource via POST (see section 3.3 of RFC 7644)
-Parameters:
-attributes: A comma-separated list of attribute names to return in the response [string]
-excludedAttributes: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list) [string]
-Schema: /components/schemas/GroupResource
-
-```
-
-So, let's get first the schema, to get schema:
-
-```
-/opt/jans/jans-cli/scim-cli.py --schema /components/schemas/GroupResource
-```
-
-```
-root@testjans:~# /opt/jans/jans-cli/scim-cli.py --schema /components/schemas/GroupResource
-
-
-{
-  "displayName": null,
-  "members": {
-    "$ref": null,
-    "type": null,
-    "display": null,
-    "value": null
-  },
-  "schemas": [],
-  "id": null,
-  "meta": {
-    "resourceType": null,
-    "created": null,
-    "lastModified": null,
-    "location": null
-  }
+  "displayName": "New Group"
 }
 ```
-The schema defines the properties of an attribute.Just Create a json file with each properties in schema filling by a value.
 
-![SCIM create group](../../../assets/image-cl-scim-create-group-03042021.png)
+Now let's run the following command to add group into the server:
 
-As you see, I have removed `members` from the schema. We will add members in this group later. Let's use the command to create the group with this data.
+```bash title="Command"
+ /opt/jans/jans-cli/config-cli.py -scim --operation-id create-group --data /tmp/create-group.json
+``` 
 
-```
-/opt/jans/jans-cli/scim-cli.py --operation-id create-group --data group.json
-```
-
-```
-Getting access token for scope https://jans.io/scim/groups.write
-Server Response:
+```json title="Command Output"
 {
-  "displayName": "Jannsen Test Group",
-  "members": null,
   "schemas": [
     "urn:ietf:params:scim:schemas:core:2.0:Group"
   ],
-  "id": "766ffd8c-88a8-4aa8-a430-a5b3ae809c21",
+  "id": "7a20464c-3651-48a0-9c9c-6b59373df60c",
   "meta": {
     "resourceType": "Group",
-    "created": "2021-04-14T19:54:03.091Z",
-    "lastModified": "2021-04-14T19:54:03.091Z",
-    "location": "https://testjans.gluu.org/jans-scim/restv1/v2/Groups/766ffd8c-88a8-4aa8-a430-a5b3ae809c21"
-  }
+    "created": "2024-09-06T03:46:31.224Z",
+    "lastModified": "2024-09-06T03:46:31.224Z",
+    "location": "https://imshakil-boss-guppy.gluu.info/jans-scim/restv1/v2/Groups/7a20464c-3651-48a0-9c9c-6b59373df60c"
+  },
+  "displayName": "New Group"
 }
 ```
 
-To verify let's use the `get-groups` operation id:
+### Get Group by ID
 
+We can view the specific group details through its `id` using `get-group-by-id` operation. 
+For example, We can put the above created group `id:7a20464c-3651-48a0-9c9c-6b59373df60c` with `--url-suffix` to get the groupe details. The following command as below:
+
+```bash title="Command"
+/opt/jans/jans-cli/config-cli.py -scim --operation-id get-group-by-id --url-suffix="id:7a20464c-3651-48a0-9c9c-6b59373df60c"
 ```
-root@testjans:~# /opt/jans/jans-cli/scim-cli.py --operation-id get-groups
-
-Getting access token for scope https://jans.io/scim/groups.read
+```json title="Command Output"
 {
-  "Resources": [
-    {
-      "displayName": "Jannsen Manager Group",
-      "members": [
-        {
-          "$ref": "https://testjans.gluu.org/jans-scim/restv1/v2/Users/e0b8a6a5-1955-49d7-acba-55a75b2373df",
-          "type": "User",
-          "display": "Default Admin User",
-          "value": "e0b8a6a5-1955-49d7-acba-55a75b2373df"
-        }
-      ],
-      "schemas": [
-        "urn:ietf:params:scim:schemas:core:2.0:Group"
-      ],
-      "id": "60B7",
-      "meta": {
-        "resourceType": "Group",
-        "created": null,
-        "lastModified": null,
-        "location": "https://testjans.gluu.org/jans-scim/restv1/v2/Groups/60B7"
-      }
-    },
-    {
-      "displayName": "Jannsen Test Group",
-      "members": [],
-      "schemas": [
-        "urn:ietf:params:scim:schemas:core:2.0:Group"
-      ],
-      "id": "766ffd8c-88a8-4aa8-a430-a5b3ae809c21",
-      "meta": {
-        "resourceType": "Group",
-        "created": "2021-04-14T19:54:03.091Z",
-        "lastModified": "2021-04-14T19:54:03.091Z",
-        "location": "https://testjans.gluu.org/jans-scim/restv1/v2/Groups/766ffd8c-88a8-4aa8-a430-a5b3ae809c21"
-      }
-    }
-  ],
   "schemas": [
-    "urn:ietf:params:scim:api:messages:2.0:ListResponse"
+    "urn:ietf:params:scim:schemas:core:2.0:Group"
   ],
-  "totalResults": 2,
-  "startIndex": 1,
-  "itemsPerPage": 2
+  "id": "7a20464c-3651-48a0-9c9c-6b59373df60c",
+  "meta": {
+    "resourceType": "Group",
+    "created": "Fri Sep 06 03:46:31 UTC 2024",
+    "lastModified": "Fri Sep 06 03:46:31 UTC 2024",
+    "location": "https://imshakil-boss-guppy.gluu.info/jans-scim/restv1/v2/Groups/7a20464c-3651-48a0-9c9c-6b59373df60c"
+  },
+  "displayName": "New Group",
+  "members": []
 }
-
-root@testjans:~# 
 ```
 
-## Get Group by ID
+We see `members` is empty since we did not associate any user with this group yet. We will add members into this gorup in the next operation. 
 
-If you have an id of a group resource, Then you can view its properties through this operation.
+### Update Group by ID
 
-```
-Operation ID: get-group-by-id
-Description: Retrieves a Group resource by Id (see section 3.4.1 of RFC 7644)
-url-suffix: id
-Parameters:
-attributes: A comma-separated list of attribute names to return in the response [string]
-excludedAttributes: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list) [string]
-id: No description is provided for this parameter [string]
-```
-In our case, id:766ffd8c-88a8-4aa8-a430-a5b3ae809c21 that's created while performing the `create-group` operation.
+The `update-group-by-id` operation can be used to update group name and adding members into the group. Let's create a json file `/tmp/update-group.json` according to the [`GroupResource`](#creating-group) schema:
 
-```
-/opt/jans/jans-cli/scim-cli.py --operation-id get-group-by-id --url-suffix id:766ffd8c-88a8-4aa8-a430-a5b3ae809c21
-```
-
-In return, you must see the group resources linked with the id:
-
-```
-Getting access token for scope https://jans.io/scim/groups.read
+```json title="Sample"
 {
-"displayName": "Jannsen Test Group",
-"members": [],
-"schemas": [
-  "urn:ietf:params:scim:schemas:core:2.0:Group"
-],
-"id": "766ffd8c-88a8-4aa8-a430-a5b3ae809c21",
-"meta": {
-  "resourceType": "Group",
-  "created": "2021-04-14T19:54:03.091Z",
-  "lastModified": "2021-04-14T19:54:03.091Z",
-  "location": "https://testjans.gluu.org/jans-scim/restv1/v2/Groups/766ffd8c-88a8-4aa8-a430-a5b3ae809c21"
-}
+  "members": [
+    {
+      "value": "4ed288be-4d1c-4e05-a3af-7a8935fc7f4c",
+      "type": "user"
+    }
+  ]
 }
 ```
-## Update Group by ID
 
-If we look at the description, We see this op-mode needs `url-suffix` as `id` and `schema` definition for data. 
+We can get the `value` which is actually the `id` of specific users from [user management](./user-config.md#get-users-list) section. Let's run the following command to update empty members properties with a member into the group we created [above](#creating-group).
 
-```
-Operation ID: update-group-by-id
-Description: Updates a Group resource (see section 3.5.1 of RFC 7644). 
-Update works in a replacement fashion&amp;#58; every attribute 
-value found in the payload sent will replace the one in
-the existing resource representation. Attributes not passed in the
-payload will be left intact.
-
-url-suffix: id
-Parameters:
-attributes: A comma-separated list of attribute names to return in the response [string]
-excludedAttributes: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list) [string]
-id: No description is provided for this parameter [string]
-Schema: /components/schemas/GroupResource
+```bash title="Command"
+/opt/jans/jans-cli/config-cli.py -scim --operation-id update-group-by-id --url-suffix="id:7a20464c-3651-48a0-9c9c-6b59373df60c" --data /tmp/update-group.json
 ```
 
-Let's get the schema first:
-
-```
-/opt/jans/jans-cli/scim-cli.py --schema /components/schemas/GroupResource > /tmp/group.json
-```
-
-let's modify this schema to add members into a selected group:
-
-![](../../../assets/image-cl-scim-group-update-03042021.png)
-
-- displayName: It should be a group name
-- id: Selected group id which one you want to updae
-- meta: Meta data of the selected group
-
-Now let's add this member into the group we are going to update.
-
-```
-root@testjans:~# /opt/jans/jans-cli/scim-cli.py --operation-id update-group-by-id --data /tmp/group.json --url-suffix id:56030854-2784-408e-8fa7-e11835804ac7
-
-Getting access token for scope https://jans.io/scim/groups.write
-Server Response:
+```json title="Output"
 {
-"displayName": "Test Janssen Server",
-"members": [
-{
-  "$ref": "https://testjans.gluu.com/jans-scim/restv1/v2/Users/null",
-  "type": "User",
-  "display": null,
-  "value": null
+  "schemas": [
+    "urn:ietf:params:scim:schemas:core:2.0:Group"
+  ],
+  "id": "7a20464c-3651-48a0-9c9c-6b59373df60c",
+  "meta": {
+    "resourceType": "Group",
+    "created": "Fri Sep 06 03:46:31 UTC 2024",
+    "lastModified": "2024-09-06T05:15:53.227Z",
+    "location": "https://imshakil-boss-guppy.gluu.info/jans-scim/restv1/v2/Groups/7a20464c-3651-48a0-9c9c-6b59373df60c"
+  },
+  "displayName": "New Group",
+  "members": [
+    {
+      "value": "4ed288be-4d1c-4e05-a3af-7a8935fc7f4c",
+      "type": "User",
+      "display": "Test User",
+      "$ref": "https://imshakil-boss-guppy.gluu.info/jans-scim/restv1/v2/Users/4ed288be-4d1c-4e05-a3af-7a8935fc7f4c"
+    }
+  ]
 }
-],
-"schemas": [
-"urn:ietf:params:scim:schemas:core:2.0:Group"
-],
-"id": "56030854-2784-408e-8fa7-e11835804ac7",
-"meta": {
-"resourceType": "Group",
-"created": "2021-04-19T22:15:15.151Z",
-"lastModified": "2021-04-21T16:22:24.085Z",
-"location": "https://testjans.gluu.com/jans-scim/restv1/v2/Groups/56030854-2784-408e-8fa7-e11835804ac7"
-}
-}
-
-root@testjans:~# 
 ```
 
-That's how we can update a group using this operation method.
-Please remember one thing, this update method just replace the data. If you want to add members instead of replacing then you must try [patch-group-by-id](#patch-group).
+> **Please remember one thing, this update method just replace the data. If you want to add members instead of replacing then you must try [patch-group-by-id](#patch-group).**
 
-## Delete Group by ID
+### Delete Group by ID
 
 You can delete a group by its ID. The command line looks like:
 
-```
-/opt/jans/jans-cli/scim-cli.py --operation-id delete-group-by-id --url-suffix id:56030854-2784-408e-8fa7-e11835804ac7
-```
-
-It will delete the group and all of its data matched with the unique ID.
-
-```
-root@testjans:~# /opt/jans/jans-cli/scim-cli.py --operation-id delete-group-by-id --url-suffix id:56030854-2784-408e-8fa7-e11835804ac7
-
-Getting access token for scope https://jans.io/scim/groups.write
+```bash title="Command"
+/opt/jans/jans-cli/config-cli.py -scim --operation-id delete-group-by-id --url-suffix="id:7a20464c-3651-48a0-9c9c-6b59373df60c"
 ```
 
-## Patch Group
+It will delete the group and all of its associated data if match with the unique group ID.
 
-This is also an option to update any existing group resources. The only difference between [update-group-by-id](#update-group-by-id) and [patch-group](#patch-group) is that the first one just replace new data with previous data. It won't add any new data into the group. But Patch-group supports few more operations including replace. Like, You can `test`, `add`, `replace`, `delete`, `copy` any data from a Group resource.
+### Patch Group
 
-If wee look at the description:
+This is also an option to update any existing group resources. The only difference between [update-group-by-id](#update-group-by-id) and [patch-group](#patch-group) is that the first one just replace new data with previous one. It won't add any new data into the group. With `patch-group-by-id` operation, we can `add`, `remove`, and `replace` properties of group.
 
-```
-Operation ID: patch-group-by-id
-  Description: Updates one or more attributes of a Group resource using a sequence of additions, removals, and 
-replacements operations. See section 3.5.2 of RFC 7644
-
-  url-suffix: id
-  Parameters:
-  attributes: A comma-separated list of attribute names to return in the response [string]
-  excludedAttributes: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list) [string]
-  id: No description is provided for this parameter [string]
-  Schema: /components/schemas/PatchRequest
-```
-
-As we see, It has a schema file. So, Let's get the schema:
+According to the [output](#using-command-line) of `--info` command, we can see `patch-group-by-id` requires `PatchRequest` schema. 
 
 ```
-
+[
+	{
+		"op": "add",
+		"path": "members",
+		"value": {
+			"value": "f764391d-56de-4b74-b0a2-f32814706dcc",
+			"type": "user"
+		}
+	}
+]
 ```
 
-## Search Group
+Let's run the following command:
 
+```bash title="Command"
+/opt/jans/jans-cli/config-cli.py -scim --operation-id patch-group-by-id --url-suffix="id:7a20464c-3651-48a0-9c9c-6b59373df60c" --data /tmp/patch-user.json
+```
+
+## Using Configuration REST API
+
+Janssen Server Configuration REST API exposes relevant endpoints for managing
+and configuring the OpenID Connect Client. Endpoint details are published in the [Swagger
+document](../../reference/openapi.md).

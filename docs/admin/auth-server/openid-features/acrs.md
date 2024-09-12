@@ -106,8 +106,18 @@ There is `acrMappings` AS configuration property which allows to specify aliases
 `acrMappings` contains simple map in key-value form.
 
 Lets say RP sends request with `acr_values=loginWithOtpCheck`. If `acrMappings` contains mapping "loginWithOtpCheck":"otp" then
-AS will map `loginWithOtpCheck` to `otp` and will use `acr_values=otp`. 
-It means that script must be called `otp` in this case and not `loginWithOtpCheck`. 
+AS will map `loginWithOtpCheck` to `otp` and will use `acr_values=otp` for actual processing on server side. 
+It means that custom script must be called `otp` in this case on AS side and not `loginWithOtpCheck` (because `loginWithOtpCheck` is alias to `otp`). 
+
+ACR mappings are published on discovery page `GET /.well-known/openid-configuration HTTP/1.1`
+
+```json
+{
+  ...
+  "acr_mappings":{"alias1":"acr1", "loginWithOtpCheck": "otp"}
+  ...
+}
+```
 
 ## Flowchart - How the Jans AS derives an ACR value for a user session :
 

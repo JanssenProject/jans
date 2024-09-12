@@ -53,6 +53,19 @@ public class AcrServiceTest {
     private AppConfiguration appConfiguration;
 
     @Test
+    public void getScriptName_whenAcrIsAgama_shouldReturnAgama() {
+        assertEquals(AcrService.getScriptName("agama_flow-parameter1"), "agama");
+        assertEquals(AcrService.getScriptName("agama_io.jans.flow-parameter1"), "agama");
+        assertEquals(AcrService.getScriptName("agama_io.jans.flow"), "agama");
+        assertEquals(AcrService.getScriptName("agama"), "agama");
+    }
+
+    @Test
+    public void getScriptName_whenAcrNotAgama_shouldReturnProvidedAcr() {
+        assertEquals(AcrService.getScriptName("basic"), "basic");
+    }
+
+    @Test
     public void removeParametersFromAgamaAcr_whenAcrHasParameters_shouldRemoveParameters() {
         assertEquals(AcrService.removeParametersFromAgamaAcr("agama_flow-parameter1"), "agama_flow");
         assertEquals(AcrService.removeParametersFromAgamaAcr("agama_io.jans.flow-parameter1"), "agama_io.jans.flow");
