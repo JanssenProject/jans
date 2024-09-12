@@ -26,7 +26,7 @@ Example poetry application that works with the `cedarling_python` python binding
     ```
     Where `D:\upwork\jans\jans-lock\cedarling\target\wheels\cedarling_python-0.1.0-cp311-none-win_amd64.whl` is the path of the `whl` file.
 
-1. **Install Dependencies **
+1. **Install Dependencies**
     If you need to install dependency of cedarling_python for your poetry project, you can do so with Poetry:
 
     ```bash
@@ -55,7 +55,7 @@ Example poetry application that works with the `cedarling_python` python binding
     ```
     Where `D:\jans\jans-lock\cedarling\target\wheels\cedarling_python-0.1.0-cp311-none-win_amd64.whl` is the path of the `whl` file.
 
-1. **Install Dependencies **
+1. **Install Dependencies**
     If you need to install dependency of cedarling_python for your poetry project, you can do so with Poetry:
 
     ```bash
