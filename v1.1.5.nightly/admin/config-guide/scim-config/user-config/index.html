@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#user-resources" class="md-skip">
+        <a href="#user-management" class="md-skip">
           Skip to content
         </a>
       
@@ -2472,15 +2472,83 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#find-users-list" class="md-nav__link">
-    Find Users List
+  <a href="#using-command-line" class="md-nav__link">
+    Using Command Line
   </a>
+  
+    <nav class="md-nav" aria-label="Using Command Line">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#get-users-list" class="md-nav__link">
+    Get Users List
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#creating-a-new-user" class="md-nav__link">
+    Creating a New User
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#find-user-by-id" class="md-nav__link">
+    Find User by Id
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#update-user-by-id" class="md-nav__link">
+    Update User by Id
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#patch-user-by-id" class="md-nav__link">
+    Patch User by Id
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#delete-user-by-id" class="md-nav__link">
+    Delete User by ID
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#creating-an-user-resources" class="md-nav__link">
-    Creating an User Resources
+  <a href="#using-text-based-ui" class="md-nav__link">
+    Using Text-based UI
+  </a>
+  
+    <nav class="md-nav" aria-label="Using Text-based UI">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#add-update-delete-user" class="md-nav__link">
+    Add / Update / Delete User
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-configuration-rest-api" class="md-nav__link">
+    Using Configuration REST API
   </a>
   
 </li>
@@ -8570,15 +8638,83 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#find-users-list" class="md-nav__link">
-    Find Users List
+  <a href="#using-command-line" class="md-nav__link">
+    Using Command Line
   </a>
+  
+    <nav class="md-nav" aria-label="Using Command Line">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#get-users-list" class="md-nav__link">
+    Get Users List
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#creating-a-new-user" class="md-nav__link">
+    Creating a New User
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#find-user-by-id" class="md-nav__link">
+    Find User by Id
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#update-user-by-id" class="md-nav__link">
+    Update User by Id
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#patch-user-by-id" class="md-nav__link">
+    Patch User by Id
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#delete-user-by-id" class="md-nav__link">
+    Delete User by ID
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#creating-an-user-resources" class="md-nav__link">
-    Creating an User Resources
+  <a href="#using-text-based-ui" class="md-nav__link">
+    Using Text-based UI
+  </a>
+  
+    <nav class="md-nav" aria-label="Using Text-based UI">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#add-update-delete-user" class="md-nav__link">
+    Add / Update / Delete User
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-configuration-rest-api" class="md-nav__link">
+    Using Configuration REST API
   </a>
   
 </li>
@@ -8625,17 +8761,83 @@
   </a>
 
 
-<h1 id="user-resources">User Resources<a class="headerlink" href="#user-resources" title="Permanent link">#</a></h1>
-<blockquote>
-<p>Prerequisite: Know how to use the Janssen CLI in <a href="../../config-tools/jans-cli/">command-line mode</a></p>
-</blockquote>
-<p>The first thing is to do, Let's get some information for the following task:</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/scim-cli.py --info User
+<h1 id="user-management">User Management<a class="headerlink" href="#user-management" title="Permanent link">#</a></h1>
+<p>The Janssen Server provides multiple configuration tools to perform these
+tasks.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Use Command-line</label><label for="__tabbed_1_2">Use Text-based UI</label><label for="__tabbed_1_3">Use REST API</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>Use the command line to perform actions from the terminal. Learn how to 
+use Jans CLI <a href="../../config-tools/jans-cli/">here</a> or jump straight to 
+the <a href="#using-command-line">Using Command Line</a></p>
+</div>
+<div class="tabbed-block">
+<p>Use a fully functional text-based user interface from the terminal. 
+Learn how to use Jans Text-based UI (TUI) 
+<a href="../../config-tools/jans-tui/">here</a> or jump straight to the
+<a href="#using-text-based-ui">Using Text-based UI</a></p>
+</div>
+<div class="tabbed-block">
+<p>Use REST API for programmatic access or invoke via tools like CURL or 
+Postman. Learn how to use Janssen Server Config API 
+<a href="../../config-tools/config-api/">here</a> or Jump straight to the
+<a href="#using-configuration-rest-api">Using Configuration REST API</a></p>
+</div>
+</div>
+</div>
+<h2 id="using-command-line">Using Command Line<a class="headerlink" href="#using-command-line" title="Permanent link">#</a></h2>
+<p>In the Janssen Server, you can do CRUD operations for user management using its command line tool. To get the details of command line for CRUD operations relevant to User Management, you can find the <code>operation-id</code> under the <code>User</code> task using the Jans CLI in scim mode. The following command line:</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py -scim --info User
 </code></pre></div>
-<p>In retrun we get,</p>
-<div class="highlight"><pre><span></span><code>root@testjans:~# /opt/jans/jans-cli/scim-cli.py --info User
-
-Operation ID: get-users
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span></pre></div></td><td class="code"><div><pre><span></span><code>Operation ID: get-users
   Description: Query User resources (see section 3.4.2 of RFC 7644)
   Parameters:
   attributes: A comma-separated list of attribute names to return in the response [string]
@@ -8650,126 +8852,134 @@ Operation ID: create-user
   Parameters:
   attributes: A comma-separated list of attribute names to return in the response [string]
   excludedAttributes: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list) [string]
-  Schema: /components/schemas/UserResource
-  Schema: /components/schemas/UserResource
+  Schema: UserResource
+  Schema: UserResource
 Operation ID: get-user-by-id
   Description: Retrieves a User resource by Id (see section 3.4.1 of RFC 7644)
-  url-suffix: id
   Parameters:
   attributes: A comma-separated list of attribute names to return in the response [string]
   excludedAttributes: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list) [string]
   id: No description is provided for this parameter [string]
 Operation ID: update-user-by-id
-  Description: Updates a User resource (see section 3.5.1 of RFC 7644). Update works in a replacement fashion&amp;amp;#58; every
-attribute value found in the payload sent will replace the one in the existing resource representation. Attributes 
-not passed in the payload will be left intact.
-
-  url-suffix: id
+  Description: Updates a User resource (see section 3.5.1 of RFC 7644). Update works in a replacement fashion; every attribute value found in the payload sent will replace the one in the existing resource representation. Attributes not passed in the payload will be left intact.
   Parameters:
   attributes: A comma-separated list of attribute names to return in the response [string]
   excludedAttributes: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list) [string]
   id: No description is provided for this parameter [string]
-  Schema: /components/schemas/UserResource
-  Schema: /components/schemas/UserResource
+  Schema: UserResource
+  Schema: UserResource
 Operation ID: delete-user-by-id
   Description: Deletes a user resource
-  url-suffix: id
   Parameters:
   id: Identifier of the resource to delete [string]
 Operation ID: patch-user-by-id
-  Description: Updates one or more attributes of a User resource using a sequence of additions, removals, and 
-replacements operations. See section 3.5.2 of RFC 7644
-
-  url-suffix: id
+  Description: Updates one or more attributes of a User resource using a sequence of additions, removals, and replacements operations. See section 3.5.2 of RFC 7644
   Parameters:
   attributes: A comma-separated list of attribute names to return in the response [string]
   excludedAttributes: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list) [string]
   id: No description is provided for this parameter [string]
-  Schema: /components/schemas/PatchRequest
-  Schema: /components/schemas/PatchRequest
+  Schema: PatchRequest
+  Schema: PatchRequest
 Operation ID: search-user
   Description: Query User resources (see section 3.4.2 of RFC 7644)
-  Schema: /components/schemas/SearchRequest
-  Schema: /components/schemas/SearchRequest
+  Schema: SearchRequest
+  Schema: SearchRequest
 
-To get sample schema type /opt/jans/jans-cli/scim-cli.py --schema &lt;schma&gt;, for example /opt/jans/jans-cli/scim-cli.py 
+To get sample schema type /opt/jans/jans-cli/config-cli.py -scim --schema-sample &lt;schema&gt;, for example /opt/jans/jans-cli/config-cli.py -scim --schema-sample SearchRequest
+</code></pre></div></td></tr></table></div>
+<h3 id="get-users-list">Get Users List<a class="headerlink" href="#get-users-list" title="Permanent link">#</a></h3>
+<p>This operation is used to get list of the users and its properties. The following command line: </p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py -scim --operation-id get-users
 </code></pre></div>
-<h2 id="find-users-list">Find Users List<a class="headerlink" href="#find-users-list" title="Permanent link">#</a></h2>
-<p>This operation is used to get list of the users and its properties. The command line is: </p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/scim-cli.py --operation-id get-users
-</code></pre></div>
-<p>By default, This will return all of the users and their properties. </p>
-<div class="highlight"><pre><span></span><code>root@testjans:~# /opt/jans/jans-cli/scim-cli.py --operation-id get-users
-
-Getting access token for scope https://jans.io/scim/users.read
-{
-  &quot;Resources&quot;: [
-    {
-      &quot;externalId&quot;: null,
-      &quot;userName&quot;: &quot;admin&quot;,
-      &quot;name&quot;: {
-        &quot;familyName&quot;: &quot;User&quot;,
-        &quot;givenName&quot;: &quot;Admin&quot;,
-        &quot;middleName&quot;: &quot;Admin&quot;,
-        &quot;honorificPrefix&quot;: null,
-        &quot;honorificSuffix&quot;: null,
-        &quot;formatted&quot;: &quot;Admin Admin User&quot;
-      },
-      &quot;displayName&quot;: &quot;Default Admin User&quot;,
-      &quot;nickName&quot;: &quot;Admin&quot;,
-      &quot;profileUrl&quot;: null,
-      &quot;title&quot;: &quot;MH Shakil&quot;,
-      &quot;userType&quot;: null,
-      &quot;preferredLanguage&quot;: null,
-      &quot;locale&quot;: null,
-      &quot;timezone&quot;: null,
-      &quot;active&quot;: true,
-      &quot;password&quot;: null,
-      &quot;emails&quot;: [
-        {
-          &quot;value&quot;: &quot;admin@testjans.gluu.com&quot;,
-          &quot;display&quot;: null,
-          &quot;type&quot;: null,
-          &quot;primary&quot;: false
-        }
-      ],
-      &quot;phoneNumbers&quot;: null,
-      &quot;ims&quot;: null,
-      &quot;photos&quot;: null,
-      &quot;addresses&quot;: null,
-      &quot;groups&quot;: [
-        {
-          &quot;value&quot;: &quot;60B7&quot;,
-          &quot;$ref&quot;: &quot;https://testjans.gluu.com/jans-scim/restv1/v2/Groups/60B7&quot;,
-          &quot;display&quot;: &quot;Jannsen Manager Group&quot;,
-          &quot;type&quot;: &quot;direct&quot;
-        }
-      ],
-      &quot;entitlements&quot;: null,
-      &quot;roles&quot;: null,
-      &quot;x509Certificates&quot;: null,
-      &quot;urn:ietf:params:scim:schemas:extension:gluu:2.0:User&quot;: null,
-      &quot;schemas&quot;: [
-        &quot;urn:ietf:params:scim:schemas:core:2.0:User&quot;
-      ],
-      &quot;id&quot;: &quot;18ca6089-42fb-410a-a5b5-c2631d75dc7d&quot;,
-      &quot;meta&quot;: {
-        &quot;resourceType&quot;: &quot;User&quot;,
-        &quot;created&quot;: null,
-        &quot;lastModified&quot;: &quot;2021-04-06T18:39:54.087Z&quot;,
-        &quot;location&quot;: &quot;https://testjans.gluu.com/jans-scim/restv1/v2/Users/18ca6089-42fb-410a-a5b5-c2631d75dc7d&quot;
-      }
-    }
-  ],
-  &quot;schemas&quot;: [
-    &quot;urn:ietf:params:scim:api:messages:2.0:ListResponse&quot;
-  ],
-  &quot;totalResults&quot;: 1,
-  &quot;startIndex&quot;: 1,
-  &quot;itemsPerPage&quot;: 1
-}
-</code></pre></div>
-<p>It also supports parameters for the advanced search. Those parameters are:</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;schemas&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;urn:ietf:params:scim:api:messages:2.0:ListResponse&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">],</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;totalResults&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;startIndex&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;itemsPerPage&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;Resources&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;schemas&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">        </span><span class="s2">&quot;urn:ietf:params:scim:schemas:core:2.0:User&quot;</span><span class="w"></span>
+<span class="w">      </span><span class="p">],</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;f764391d-56de-4b74-b0a2-f32814706dcc&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;meta&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;resourceType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;User&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;location&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://imshakil-boss-guppy.gluu.info/jans-scim/restv1/v2/Users/f764391d-56de-4b74-b0a2-f32814706dcc&quot;</span><span class="w"></span>
+<span class="w">      </span><span class="p">},</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;userName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;admin&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;familyName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;User&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;givenName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Admin&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;middleName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Admin&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;formatted&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Admin Admin User&quot;</span><span class="w"></span>
+<span class="w">      </span><span class="p">},</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;displayName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Default Admin User&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;nickName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Admin&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;active&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;emails&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">        </span><span class="p">{</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;admin@imshakil-boss-guppy.gluu.info&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;primary&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">      </span><span class="p">],</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;groups&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">        </span><span class="p">{</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;60B7&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;display&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Janssen Manager Group&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;direct&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;$ref&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://imshakil-boss-guppy.gluu.info/jans-scim/restv1/v2/Groups/60B7&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">      </span><span class="p">]</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">  </span><span class="p">]</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div></td></tr></table></div>
+<p>As shown in the <a href="#using-command-line">output</a> for <code>--info</code> command, <code>get-users</code> operation-id also supports parameters for the advanced search. Those parameters are:</p>
 <div class="codehilite"><pre><span></span><code><span class="mf">1.</span><span class="w"> </span><span class="n">attributes</span><span class="w"></span>
 <span class="mf">2.</span><span class="w"> </span><span class="n">excludeAttributes</span><span class="w"></span>
 <span class="mf">3.</span><span class="w"> </span><span class="k">filter</span><span class="w"></span>
@@ -8779,246 +8989,247 @@ Getting access token for scope https://jans.io/scim/users.read
 </code></pre></div>
 
 <p>This is an example with <code>endpoint-args</code>:</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/scim-cli.py --operation-id get-users --endpoint-args count:1
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py -scim --operation-id get-users --endpoint-args attributes:emails
 </code></pre></div>
-<p>It returns as below:</p>
-<div class="highlight"><pre><span></span><code>Getting access token for scope https://jans.io/scim/users.read
-Calling with params count=1
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;schemas&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;urn:ietf:params:scim:api:messages:2.0:ListResponse&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">],</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;totalResults&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;startIndex&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;itemsPerPage&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;Resources&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;schemas&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">        </span><span class="s2">&quot;urn:ietf:params:scim:schemas:core:2.0:User&quot;</span><span class="w"></span>
+<span class="w">      </span><span class="p">],</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;f764391d-56de-4b74-b0a2-f32814706dcc&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;emails&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">        </span><span class="p">{</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;admin@imshakil-boss-guppy.gluu.info&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;primary&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">false</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">      </span><span class="p">]</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">  </span><span class="p">]</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div></td></tr></table></div>
+<h3 id="creating-a-new-user">Creating a New User<a class="headerlink" href="#creating-a-new-user" title="Permanent link">#</a></h3>
+<p>To create a new user using Jans CLI, we can use <code>create-user</code> operation-id. As shown in the <a href="#using-command-line">output</a> for <code>--info</code> command, the <code>create-user</code> operation requires data to be sent according to <code>UserResource</code> schema. To see the schema, use the command as below:</p>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Command</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>/opt/jans/jans-cli/config-cli.py -scim --schema UserResource
+</code></pre></div></td></tr></table></div>
+<p>The Janssen Server also provides sample data for the above schema. Let's run the following command to get the sample schema:</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py -scim --schema-sample UserResource
+</code></pre></div>
+<p>From the above example of schema file, we can fill required values in a data file <code>/tmp/user.json</code>. As we have seen in the sample schema there are lot of properties, but we are going to fill minimum to create a <code>test user</code>:</p>
+<p><div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">user.json</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;userName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;test.user&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;displayName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Test User&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;nickName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;testu&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;active&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;password&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;pass@word&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;emails&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">      </span><span class="p">{</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;testuser@maildomain.net&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;primary&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"></span>
+<span class="w">      </span><span class="p">}</span><span class="w"></span>
+<span class="w">  </span><span class="p">]</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div></td></tr></table></div>
+Let's run the following command to create user in Janssen Server:</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py -scim --operation-id create-user --data /tmp/user.json
+</code></pre></div>
+<div class="highlight"><span class="filename">Output</span><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;schemas&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;urn:ietf:params:scim:schemas:core:2.0:User&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">],</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;e24c1479-4a61-4f1f-aa30-2ccc13c0b130&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;meta&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;resourceType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;User&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;created&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-09-04T06:36:00.882Z&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;lastModified&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-09-04T06:36:00.882Z&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;location&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://imshakil-boss-guppy.gluu.info/jans-scim/restv1/v2/Users/e24c1479-4a61-4f1f-aa30-2ccc13c0b130&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">},</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;userName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;test.user&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;displayName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Test User&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;nickName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;testu&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;active&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;emails&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;testuser@maildomain.net&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;primary&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">  </span><span class="p">]</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
+<h3 id="find-user-by-id">Find User by Id<a class="headerlink" href="#find-user-by-id" title="Permanent link">#</a></h3>
+<p>We can retrieve user details using user's <code>id</code>. For example in the above created user id is <code>e24c1479-4a61-4f1f-aa30-2ccc13c0b130</code>. To get the user details by user id, We can use the <code>get-user-by-id</code> operation as below:</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py -scim --operation-id get-user-by-id --url-suffix<span class="o">=</span><span class="s2">&quot;id:e24c1479-4a61-4f1f-aa30-2ccc13c0b130&quot;</span>
+</code></pre></div>
+<div class="highlight"><span class="filename">Output</span><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;schemas&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;urn:ietf:params:scim:schemas:core:2.0:User&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">],</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;e24c1479-4a61-4f1f-aa30-2ccc13c0b130&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;meta&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;resourceType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;User&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;created&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-09-04T06:36:00.882Z&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;lastModified&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-09-04T06:36:00.882Z&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;location&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://imshakil-boss-guppy.gluu.info/jans-scim/restv1/v2/Users/e24c1479-4a61-4f1f-aa30-2ccc13c0b130&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">},</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;userName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;test.user&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;displayName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Test User&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;nickName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;testu&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;active&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;emails&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;testuser@maildomain.net&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;primary&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">  </span><span class="p">]</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div>
+<h3 id="update-user-by-id">Update User by Id<a class="headerlink" href="#update-user-by-id" title="Permanent link">#</a></h3>
+<p>Using Jans CLI, We can update user information. As shown in the <a href="#using-command-line">output</a> command, the <code>update-user-by-id</code> operation requires user data that needs to be changed. You can find details of user properties in <a href="#creating-a-new-user">schema</a>. Let's change the <code>nickname</code> for the above <code>Test user</code>. First,we need to put the update data into a json file <code>/tmp/update-user.json</code>:
+```json title='update-user.json
 {
-  &quot;Resources&quot;: [
-    {
-      &quot;externalId&quot;: null,
-      &quot;userName&quot;: &quot;admin&quot;,
-      &quot;name&quot;: {
-        &quot;familyName&quot;: &quot;User&quot;,
-        &quot;givenName&quot;: &quot;Admin&quot;,
-        &quot;middleName&quot;: &quot;Admin&quot;,
-        &quot;honorificPrefix&quot;: null,
-        &quot;honorificSuffix&quot;: null,
-        &quot;formatted&quot;: &quot;Admin Admin User&quot;
-      },
-      &quot;displayName&quot;: &quot;Default Admin User&quot;,
-      &quot;nickName&quot;: &quot;Admin&quot;,
-      &quot;profileUrl&quot;: null,
-      &quot;title&quot;: &quot;MH Shakil&quot;,
-      &quot;userType&quot;: null,
-      &quot;preferredLanguage&quot;: null,
-      &quot;locale&quot;: null,
-      &quot;timezone&quot;: null,
-      &quot;active&quot;: true,
-      &quot;password&quot;: null,
-      &quot;emails&quot;: [
+  "nickName": "testuser"
+}
+<div class="highlight"><pre><span></span><code>Let&#39;s run the following command:
+```bash title=&quot;Command&quot;
+ /opt/jans/jans-cli/config-cli.py -scim --operation-id update-user-by-id --url-suffix=&quot;id:e24c1479-4a61-4f1f-aa30-2ccc13c0b130&quot; --data /tmp/update-user.json
+</code></pre></div>
+<div class="highlight"><span class="filename">Sample Output</span><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;schemas&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">    </span><span class="s2">&quot;urn:ietf:params:scim:schemas:core:2.0:User&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">],</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;e24c1479-4a61-4f1f-aa30-2ccc13c0b130&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;meta&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;resourceType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;User&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;created&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-09-04T06:36:00.882Z&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;lastModified&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-09-05T05:38:31.491Z&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;location&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://imshakil-boss-guppy.gluu.info/jans-scim/restv1/v2/Users/e24c1479-4a61-4f1f-aa30-2ccc13c0b130&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="p">},</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;userName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;test.user&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;displayName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Test User&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;nickName&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;testuser&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;active&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;emails&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;testuser@maildomain.net&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;primary&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">  </span><span class="p">]</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+</code></pre></div></p>
+<h3 id="patch-user-by-id">Patch User by Id<a class="headerlink" href="#patch-user-by-id" title="Permanent link">#</a></h3>
+<p>Using <code>patch-user-by-id</code> operation, We can modify user properties partially. As we have seen in the <a href="#using-command-line">Output</a> of <code>--info</code> command, <code>patch-user-by-id</code> operation requires <code>PatchRequest</code> <a href="../../config-tools/jans-cli/#about-schemas">schema</a> definition for payload data. To get the sample <code>PatchRequest</code> schema, run the followwing command:</p>
+<p>```bash titl="Command"
+/opt/jans/jans-cli/config-cli.py -scim --schema-sample PatchRequest
+<div class="highlight"><pre><span></span><code>For example, In the above `test user`, we are going to `add` one more email, `remove` nickName and `replace` displayName. Let&#39;s put all the operations in a json file `/tmp/patch-user.json`:
+
+```json title=&quot;patch-user.json&quot;
+{
+    &quot;schemas&quot;: [
+        &quot;urn:ietf:params:scim:api:messages:2.0:PatchOp&quot;
+    ],
+    &quot;Operations&quot;: [
         {
-          &quot;value&quot;: &quot;admin@testjans.gluu.com&quot;,
-          &quot;display&quot;: null,
-          &quot;type&quot;: null,
-          &quot;primary&quot;: false
-        }
-      ],
-      &quot;phoneNumbers&quot;: null,
-      &quot;ims&quot;: null,
-      &quot;photos&quot;: null,
-      &quot;addresses&quot;: null,
-      &quot;groups&quot;: [
+            &quot;op&quot;: &quot;replace&quot;,
+            &quot;path&quot;: &quot;displayName&quot;,
+            &quot;value&quot;: &quot;Test User&quot;
+        },
         {
-          &quot;value&quot;: &quot;60B7&quot;,
-          &quot;$ref&quot;: &quot;https://testjans.gluu.com/jans-scim/restv1/v2/Groups/60B7&quot;,
-          &quot;display&quot;: &quot;Jannsen Manager Group&quot;,
-          &quot;type&quot;: &quot;direct&quot;
+            &quot;op&quot;: &quot;add&quot;,
+            &quot;path&quot;: &quot;emails&quot;,
+            &quot;value&quot;: [
+                {
+                    &quot;value&quot;: &quot;test.user@example.jans.io&quot;,
+                    &quot;primary&quot;: true
+                }
+            ]
+        },
+        {
+            &quot;op&quot;: &quot;remove&quot;,
+            &quot;path&quot;: &quot;nickName&quot;
         }
-      ],
-      &quot;entitlements&quot;: null,
-      &quot;roles&quot;: null,
-      &quot;x509Certificates&quot;: null,
-      &quot;urn:ietf:params:scim:schemas:extension:gluu:2.0:User&quot;: null,
-      &quot;schemas&quot;: [
-        &quot;urn:ietf:params:scim:schemas:core:2.0:User&quot;
-      ],
-      &quot;id&quot;: &quot;18ca6089-42fb-410a-a5b5-c2631d75dc7d&quot;,
-      &quot;meta&quot;: {
-        &quot;resourceType&quot;: &quot;User&quot;,
-        &quot;created&quot;: null,
-        &quot;lastModified&quot;: &quot;2021-04-06T18:39:54.087Z&quot;,
-        &quot;location&quot;: &quot;https://testjans.gluu.com/jans-scim/restv1/v2/Users/18ca6089-42fb-410a-a5b5-c2631d75dc7d&quot;
-      }
-    }
-  ],
-  &quot;schemas&quot;: [
-    &quot;urn:ietf:params:scim:api:messages:2.0:ListResponse&quot;
-  ],
-  &quot;totalResults&quot;: 1,
-  &quot;startIndex&quot;: 1,
-  &quot;itemsPerPage&quot;: 1
+    ]
 }
 </code></pre></div>
-<h2 id="creating-an-user-resources">Creating an User Resources<a class="headerlink" href="#creating-an-user-resources" title="Permanent link">#</a></h2>
-<p>This operation can be performed to create user resources. </p>
-<div class="highlight"><pre><span></span><code>Operation ID: create-user
-  Description: Allows creating a User resource via POST (see section 3.3 of RFC 7644)
-  Parameters:
-  attributes: A comma-separated list of attribute names to return in the response [string]
-  excludedAttributes: When specified, the response will contain a default set of attributes minus those listed here (as a comma-separated list) [string]
-  Schema: /components/schemas/UserResource
+The command line to run all of these operations:
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py -scim --operation patch-user-by-id --url-suffix<span class="o">=</span><span class="s2">&quot;id:e24c1479-4a61-4f1f-aa30-2ccc13c0b130&quot;</span> --data /tmp/patch-user.json
+</code></pre></div></p>
+<h3 id="delete-user-by-id">Delete User by ID<a class="headerlink" href="#delete-user-by-id" title="Permanent link">#</a></h3>
+<p>To delete the, run the following command with the specific user ID as <code>--url-suffix=id:user-id</code>. For example, let's delete the <code>test user</code> we have created earlier:</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py -scim --operation-id delete-user-by-id --url-suffix<span class="o">=</span><span class="s2">&quot;id:e24c1479-4a61-4f1f-aa30-2ccc13c0b130&quot;</span>
 </code></pre></div>
-<p>As we see, to perform this operation we need to define the schema. So, let's get the schema of this operation.</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/scim-cli.py --schema /components/schemas/UserResource &gt; /tmp/create-user.json
+<h2 id="using-text-based-ui">Using Text-based UI<a class="headerlink" href="#using-text-based-ui" title="Permanent link">#</a></h2>
+<p>Start TUI using the command below:</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/jans_cli_tui.py
 </code></pre></div>
-<p><div class="highlight"><pre><span></span><code>root@testjans:~# cat /tmp/create-user.json
-
-
-{
-  &quot;externalId&quot;: null,
-  &quot;userName&quot;: null,
-  &quot;name&quot;: {
-    &quot;familyName&quot;: null,
-    &quot;givenName&quot;: null,
-    &quot;middleName&quot;: null,
-    &quot;honorificPrefix&quot;: null,
-    &quot;honorificSuffix&quot;: null,
-    &quot;formatted&quot;: null
-  },
-  &quot;displayName&quot;: null,
-  &quot;nickName&quot;: null,
-  &quot;profileUrl&quot;: null,
-  &quot;title&quot;: &quot;Vice President&quot;,
-  &quot;userType&quot;: &quot;Contractor&quot;,
-  &quot;preferredLanguage&quot;: &quot;en&quot;,
-  &quot;locale&quot;: &quot;en-US&quot;,
-  &quot;timezone&quot;: &quot;America/Los_Angeles&quot;,
-  &quot;active&quot;: false,
-  &quot;password&quot;: null,
-  &quot;emails&quot;: {
-    &quot;value&quot;: &quot;gossow@nsfw.com&quot;,
-    &quot;display&quot;: null,
-    &quot;type&quot;: &quot;work&quot;,
-    &quot;primary&quot;: true
-  },
-  &quot;phoneNumbers&quot;: {
-    &quot;value&quot;: &quot;+1-555-555-8377&quot;,
-    &quot;display&quot;: null,
-    &quot;type&quot;: &quot;fax&quot;,
-    &quot;primary&quot;: true
-  },
-  &quot;ims&quot;: {
-    &quot;value&quot;: null,
-    &quot;display&quot;: null,
-    &quot;type&quot;: &quot;gtalk&quot;,
-    &quot;primary&quot;: true
-  },
-  &quot;photos&quot;: {
-    &quot;value&quot;: &quot;https://pics.nsfw.com/gossow.png&quot;,
-    &quot;display&quot;: null,
-    &quot;type&quot;: &quot;thumbnail&quot;,
-    &quot;primary&quot;: true
-  },
-  &quot;addresses&quot;: {
-    &quot;formatted&quot;: null,
-    &quot;streetAddress&quot;: &quot;56 Acacia Avenue&quot;,
-    &quot;locality&quot;: null,
-    &quot;region&quot;: null,
-    &quot;postalCode&quot;: null,
-    &quot;country&quot;: &quot;UK&quot;,
-    &quot;type&quot;: &quot;home&quot;,
-    &quot;primary&quot;: false
-  },
-  &quot;groups&quot;: {
-    &quot;value&quot;: &quot;180ee84f0671b1&quot;,
-    &quot;$ref&quot;: &quot;https://nsfw.com/scim/restv1/v2/Groups/180ee84f0671b1&quot;,
-    &quot;display&quot;: &quot;Cult managers&quot;,
-    &quot;type&quot;: &quot;direct&quot;
-  },
-  &quot;entitlements&quot;: {
-    &quot;value&quot;: &quot;Stakeholder&quot;,
-    &quot;display&quot;: null,
-    &quot;type&quot;: null,
-    &quot;primary&quot;: false
-  },
-  &quot;roles&quot;: {
-    &quot;value&quot;: &quot;Project manager&quot;,
-    &quot;display&quot;: null,
-    &quot;type&quot;: null,
-    &quot;primary&quot;: false
-  },
-  &quot;x509Certificates&quot;: {
-    &quot;value&quot;: null,
-    &quot;display&quot;: null,
-    &quot;type&quot;: null,
-    &quot;primary&quot;: true
-  },
-  &quot;urn:ietf:params:scim:schemas:extension:gluu:2.0:User&quot;: {},
-  &quot;schemas&quot;: [],
-  &quot;id&quot;: null,
-  &quot;meta&quot;: {
-    &quot;resourceType&quot;: null,
-    &quot;created&quot;: null,
-    &quot;lastModified&quot;: null,
-    &quot;location&quot;: null
-  }
-}
-</code></pre></div>
-Now it's pretty simple. Fill each of this information, you may skip some of this properties as well. If you look at the schema, some of the properties are already filled with some random value. You can modify them as well or ignore them.</p>
-<p>let's modify this schema:</p>
-<div class="highlight"><pre><span></span><code>nano /tmp/create-user.json
-</code></pre></div>
-<p><img alt="" src="../../../../assets/image-cl-scim-create-user-03042021.png" /></p>
-<p>Finally use below command line, to create an user resources.</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/scim-cli.py --operation-id create-user --data /tmp/create-user.json
-</code></pre></div>
-<p>It will generate user <code>inum</code> value, metadata and will be added in user resources:</p>
-<div class="highlight"><pre><span></span><code>Getting access token for scope https://jans.io/scim/users.write
-Server Response:
-{
-  &quot;externalId&quot;: null,
-  &quot;userName&quot;: &quot;mhosen&quot;,
-  &quot;name&quot;: {
-    &quot;familyName&quot;: &quot;mobarak&quot;,
-    &quot;givenName&quot;: &quot;mobarak&quot;,
-    &quot;middleName&quot;: null,
-    &quot;honorificPrefix&quot;: null,
-    &quot;honorificSuffix&quot;: null,
-    &quot;formatted&quot;: &quot;mobarak mobarak&quot;
-  },
-  &quot;displayName&quot;: &quot;mobarak&quot;,
-  &quot;nickName&quot;: null,
-  &quot;profileUrl&quot;: null,
-  &quot;title&quot;: &quot;Vice President&quot;,
-  &quot;userType&quot;: &quot;Contractor&quot;,
-  &quot;preferredLanguage&quot;: &quot;en&quot;,
-  &quot;locale&quot;: &quot;en-US&quot;,
-  &quot;timezone&quot;: &quot;America/Los_Angeles&quot;,
-  &quot;active&quot;: true,
-  &quot;password&quot;: null,
-  &quot;emails&quot;: null,
-  &quot;phoneNumbers&quot;: null,
-  &quot;ims&quot;: null,
-  &quot;photos&quot;: null,
-  &quot;addresses&quot;: null,
-  &quot;groups&quot;: null,
-  &quot;entitlements&quot;: null,
-  &quot;roles&quot;: null,
-  &quot;x509Certificates&quot;: null,
-  &quot;urn:ietf:params:scim:schemas:extension:gluu:2.0:User&quot;: null,
-  &quot;schemas&quot;: [
-    &quot;urn:ietf:params:scim:schemas:core:2.0:User&quot;
-  ],
-  &quot;id&quot;: &quot;7034663f-dc43-4f8c-8074-e8e75cae9c96&quot;,
-  &quot;meta&quot;: {
-    &quot;resourceType&quot;: &quot;User&quot;,
-    &quot;created&quot;: &quot;2021-04-17T14:54:30.430Z&quot;,
-    &quot;lastModified&quot;: &quot;2021-04-17T14:54:30.430Z&quot;,
-    &quot;location&quot;: &quot;https://testjans.gluu.org/jans-scim/restv1/v2/Users/7034663f-dc43-4f8c-8074-e8e75cae9c96&quot;
-  }
-}
-
-root@testjans:~# 
-</code></pre></div>
+<p>Navigate to <code>Users</code> to open the users tab as shown in the image below:</p>
+<p><img alt="" src="../../../../assets/jans-tui-user-mgt.png" /></p>
+<ul>
+<li>We can see the list of users from search option</li>
+<li>To get the list of users available in the Janssen Server, bring the control to <code>Search</code> box (using <code>tab</code> key) and press <code>Enter</code> key. </li>
+</ul>
+<h3 id="add-update-delete-user">Add / Update / Delete User<a class="headerlink" href="#add-update-delete-user" title="Permanent link">#</a></h3>
+<ol>
+<li>To add user into server, hit <code>Enter</code> on <code>Add Users</code> button, fill up user details and press <code>Save</code> button to save it. Please check image below:</li>
+</ol>
+<p><img alt="add-user" src="../../../../assets/jans-tui-create-user.png" /></p>
+<ol>
+<li>To modify any user properties, find the user from search box and hit <code>Enter</code> to pop-up user details, update user details and finally hit on <code>Save</code> button to update the changes. </li>
+</ol>
+<p><img alt="update-user" src="../../../../assets/jans-tui-update-user.png" /></p>
+<ol>
+<li>To delete user, bring the control on the specific user row and press <code>delete</code> or <code>d</code> key from keyboard. It will show a pop-up for confirmation as below:</li>
+</ol>
+<p><img alt="delete-user" src="../../../../assets/jans-tui-delete-user.png" /></p>
+<h2 id="using-configuration-rest-api">Using Configuration REST API<a class="headerlink" href="#using-configuration-rest-api" title="Permanent link">#</a></h2>
+<p>Janssen Server Configuration REST API exposes relevant endpoints for managing
+and configuring the OpenID Connect Client. Endpoint details are published in the <a href="../../../reference/openapi/">Swagger
+document</a>.</p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-07-10T09:34:30+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-07-10</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-09-12T10:02:24+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-09-12</span>
       
         <br>
         Created:
