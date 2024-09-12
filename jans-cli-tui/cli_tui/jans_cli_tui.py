@@ -846,7 +846,7 @@ class JansCliApp(Application):
                 handler: Callable= None, 
                 ) -> Button:
 
-        b = Button(text=text, width=len(text)+2)
+        b = Button(text=text, width=len(text)+4)
         b.window.jans_name = name
         b.window.jans_help = jans_help
         if handler:
@@ -1026,6 +1026,7 @@ class JansCliApp(Application):
         self.layout.focus(dialog)
         self.invalidate()
 
+        return dialog
 
     def get_confirm_dialog(
             self,

@@ -129,8 +129,9 @@ def read_swagger(op_mode):
     cfg_yaml[op_mode] = {}
     for yaml_fn in glob.glob(os.path.join(cur_dir, 'ops', op_mode, '*.yaml')):
         fn, ext = os.path.splitext(os.path.basename(yaml_fn))
+        yaml_obj = ruamel.yaml.YAML()
         with open(yaml_fn) as f:
-            config_ = ruamel.yaml.load(f.read().replace('\t', ''), ruamel.yaml.RoundTripLoader)
+            config_ = yaml_obj.load(f.read().replace('\t', ''))
             plugin_name = get_plugin_name_from_title(config_['info']['title'])
             cfg_yaml[op_mode][plugin_name] = config_
 
@@ -1077,6 +1078,7 @@ class JCA_CLI:
                                             print('  {}: {}'.format(param[0], param[1]))
 
                                 if 'requestBody' in path:
+                                    schema_list = []
                                     for apptype in path['requestBody'].get('content', {}):
                                         if 'schema' in path['requestBody']['content'][apptype]:
                                             if path['requestBody']['content'][apptype]['schema'].get('type') == 'object' and '$ref' not in path['requestBody']['content'][apptype]['schema']:
@@ -1102,7 +1104,9 @@ class JCA_CLI:
                                             else:
                                                 if '$ref' in path['requestBody']['content'][apptype]['schema']:
                                                     schema_path = path['requestBody']['content'][apptype]['schema']['$ref']
-                                                    print('  Schema: {}{}'.format(mode_suffix, os.path.basename(schema_path)))
+                                                    if not schema_path in schema_list:
+                                                        schema_list.append(schema_path)
+                                                        print('  Schema: {}{}'.format(mode_suffix, os.path.basename(schema_path)))
                             break
         if schema_path:
             print()
@@ -1227,25 +1231,29 @@ class JCA_CLI:
         # TODO: suffix_param, endpoint_params
 
         endpoint = self.get_fake_endpoint(path)
-        
+
         if not data:
             try:
                 data = self.get_json_from_file(data_fn)
             except ValueError as ve:
                 self.exit_with_error(str(ve))
 
-            if ('configuser' not in endpoint.path) and (not isinstance(data, list)):
-                self.exit_with_error("{} must be array of /components/schemas/PatchRequest".format(data_fn))
+        op_modes = ('add', 'remove', 'replace', 'move', 'copy', 'test')
+        def check_op_mode(item):
+            if not item['op'] in ('add', 'remove', 'replace', 'move', 'copy', 'test'):
+                self.exit_with_error("op must be one of {}".format(', '.join(op_modes)))
 
-        if 'configuser' not in endpoint.path:
-            op_modes = ('add', 'remove', 'replace', 'move', 'copy', 'test')
+        def fix_path(item):
+            if not item['path'].startswith('/'):
+                item['path'] = '/' + item['path']
 
-            for item in data:
-                if not item['op'] in op_modes:
-                    print("op must be one of {}".format(', '.join(op_modes)))
-                    sys.exit()
-                if not item['path'].startswith('/'):
-                    item['path'] = '/' + item['path']
+        check_list = data if self.my_op_mode != 'scim' else data['Operations']
+
+        for item in check_list:
+            check_op_mode(item)
+            if self.my_op_mode != 'scim':
+                fix_path(item)
+
 
         response = self.patch_requests(endpoint, suffix_param, data)
 
@@ -1484,6 +1492,8 @@ class JCA_CLI:
                 if 'items' in prop:
                     if 'enum' in prop['items']:
                         return [random.choice(prop['items']['enum'])]
+                    elif 'example' in prop['items']:
+                        return [prop['items']['example']]
                     elif 'type' in prop['items']:
                         return [prop['items']['type']]
                 else:
@@ -1497,9 +1507,17 @@ class JCA_CLI:
             else:
                 return 'string'
 
+            print("END")
+
+
         for prop_name in schema.get('properties', {}):
             prop = schema['properties'][prop_name]
-            sample_schema[prop_name] = get_sample_prop(prop)
+            if 'properties' in prop:
+                sample_schema[prop_name] = {}
+                for sprop in prop['properties']:
+                    sample_schema[prop_name][sprop] = get_sample_prop(prop['properties'][sprop])
+            else:
+                sample_schema[prop_name] = get_sample_prop(prop)
 
         print(json.dumps(sample_schema, indent=2))
 
@@ -1583,7 +1601,7 @@ def main():
     if len(sys.argv) < 2:
         print("\u001b[38;5;{}mNo arguments were provided. Type {} -h to get help.\u001b[0m".format(warning_color, os.path.realpath(__file__)))
 
-    error_log_file = os.path.join(log_dir, 'cli_eorror.log')
+    error_log_file = os.path.join(log_dir, 'cli_error.log')
     cli_object = JCA_CLI(host, client_id, client_secret, access_token, test_client, wrapped=False)
 
     if args.revoke_session:

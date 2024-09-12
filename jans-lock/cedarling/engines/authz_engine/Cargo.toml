@@ -1,0 +1,17 @@
+[package]
+name = "authz_engine"
+version = "1.1.5"
+edition = "2021"
+
+[dependencies]
+# project local deps
+init_engine = { workspace = true }
+jwt_engine = { workspace = true }
+# other
+serde_json = { workspace = true }
+serde = { workspace = true }
+thiserror = { workspace = true }
+base64 = { workspace = true }
+log = { workspace = true }
+cedar-policy = { workspace = true }
+url = "2.5"
