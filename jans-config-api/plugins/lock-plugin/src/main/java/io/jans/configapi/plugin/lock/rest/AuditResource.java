@@ -12,7 +12,6 @@ import java.time.format.DateTimeParseException;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
 import io.jans.as.common.service.common.ApplicationFactory;
@@ -26,7 +25,6 @@ import io.jans.configapi.plugin.lock.service.AuditService;
 import io.jans.configapi.plugin.lock.util.Constants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.orm.PersistenceEntryManager;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -35,7 +33,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.validation.Valid;
@@ -49,11 +46,6 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-
-import java.util.Date;
-import java.util.List;
-
-import org.slf4j.Logger;
 
 
 @Path(Constants.AUDIT)
