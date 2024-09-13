@@ -159,7 +159,5 @@ public class ApiConstants {
     public static final String ENTRIES_COUNT = "entriesCount";
     public static final String DATA = "data";
     public static final String FIELD_VALUE_PAIR = "fieldValuePair";
-    
-    public static final String EVENT_RANGE_PATH = "/{eventStartDate}-{eventEndDate}";
 
 }

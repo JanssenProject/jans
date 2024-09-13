@@ -44,7 +44,7 @@ public class TxTokenValidatorTest {
 
     @Test
     public void validateRequestedTokenType_forValidValue_shouldNotRaiseException() {
-        txTokenValidator.validateRequestedTokenType("urn:ietf:params:oauth:token-type:txn-token", AUDIT_LOG);
+        txTokenValidator.validateRequestedTokenType("urn:ietf:params:oauth:token-type:txn_token", AUDIT_LOG);
     }
 
     @Test(expectedExceptions = WebApplicationException.class)
