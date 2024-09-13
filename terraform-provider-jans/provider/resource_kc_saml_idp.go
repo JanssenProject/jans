@@ -79,6 +79,16 @@ func resourceKCSamlIDP() *schema.Resource {
 				Optional:    true,
 				Description: "Name ID policy format of the identity provider.",
 			},
+			"principal_attribute": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Principal attribute of the identity provider.",
+			},
+			"principal_type": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Principal type of the identity provider.",
+			},
 			"idp_entity_id": {
 				Type:        schema.TypeString,
 				Optional:    true,

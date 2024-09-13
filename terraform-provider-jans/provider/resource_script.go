@@ -81,6 +81,7 @@ func resourceScript() *schema.Resource {
 						"spontaneous_scope",
 						"end_session",
 						"post_authn",
+						"client_authn",
 						"select_account",
 						"create_user",
 						"scim",

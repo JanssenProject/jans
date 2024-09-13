@@ -112,11 +112,11 @@ func testAccResourceCheckFido2ConfigurationImport(states []*terraform.InstanceSt
 
 		found = true
 
-		if err := checkAttribute(is, "clean_service_batch_chunk_size", "100"); err != nil {
+		if err := checkAttribute(is, "clean_service_batch_chunk_size", "10000"); err != nil {
 			return err
 		}
 
-		if err := checkAttribute(is, "logging_level", ""); err != nil {
+		if err := checkAttribute(is, "logging_level", "INFO"); err != nil {
 			return err
 		}
 
