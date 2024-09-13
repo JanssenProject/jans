@@ -16,7 +16,7 @@ tags:
 - name: Lock - Configuration
 - name: Lock - Audit
 paths:
-  /lock/audit/health:
+  /lock/audit/health/search:
     get:
       tags:
       - Lock - Audit
@@ -34,10 +34,11 @@ paths:
       - name: eventStartDate
         in: query
         description: Event start date in ISO8601 format
+        required: true
         schema:
           type: string
-      - name: eventEndtDate
-        in: path
+      - name: eventEndDate
+        in: query
         description: Event end date in ISO8601 format
         required: true
         schema:
@@ -60,6 +61,217 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/lock/health.readonly
+  /lock/audit/log/search:
+    get:
+      tags:
+      - Lock - Log
+      summary: Rerquest log records for specific event range
+      description: Rerquest log records for specific event range
+      operationId: request-lock-log-records-event-range
+      parameters:
+      - name: limit
+        in: query
+        description: Search size - max size of the results to return
+        schema:
+          type: integer
+          format: int32
+          default: 50
+      - name: eventStartDate
+        in: query
+        description: Event start date in ISO8601 format
+        required: true
+        schema:
+          type: string
+      - name: eventEndDate
+        in: query
+        description: Event end date in ISO8601 format
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LogEntry'
+        "400":
+          description: Wrong date range specified
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/lock/log.readonly
+  /lock/audit/telemetry/search:
+    get:
+      tags:
+      - Lock - Audit
+      summary: Request telemetry records for specific event range
+      description: Rerquest telemetry records for specific event range
+      operationId: request-lock-telemetry-records-event-range
+      parameters:
+      - name: limit
+        in: query
+        description: Search size - max size of the results to return
+        schema:
+          type: integer
+          format: int32
+          default: 50
+      - name: eventStartDate
+        in: query
+        description: Event start date in ISO8601 format
+        required: true
+        schema:
+          type: string
+      - name: eventEndDate
+        in: query
+        description: Event end date in ISO8601 format
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TelemetryEntry'
+        "400":
+          description: Wrong date range specified
+        "401":
+          description: Unauthorized
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/lock/telemetry.readonly
+  /lock/audit/health/bulk:
+    post:
+      tags:
+      - Lock - Audit
+      summary: Bulk save health data
+      description: Bulk save health data
+      operationId: bulk-save-health-data
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/HealthEntry'
+      responses:
+        "200":
+          description: Ok
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      security:
+      - oauth2:
+        - https://jans.io/oauth/lock/health.write
+  /lock/audit/log/bulk:
+    post:
+      tags:
+      - Lock - Audit
+      summary: Bulk save log data
+      description: Bulk save log data
+      operationId: bulk-save-log-data
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/LogEntry'
+      responses:
+        "200":
+          description: Ok
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      security:
+      - oauth2:
+        - https://jans.io/oauth/lock/log.write
+  /lock/audit/telemetry/bulk:
+    post:
+      tags:
+      - Lock - Audit
+      summary: Bulk save telemetry data
+      description: Bulk save telemetry data
+      operationId: bulk-save-telemetry-data
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: '#/components/schemas/TelemetryEntry'
+      responses:
+        "200":
+          description: Ok
+        "400":
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      security:
+      - oauth2:
+        - https://jans.io/oauth/lock/telemetry.write
+  /lock/audit/health:
     post:
       tags:
       - Lock - Audit
@@ -97,96 +309,6 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/lock/health.write
-  /lock/audit/log/{eventStartDate}-{eventEndDate}:
-    get:
-      tags:
-      - Lock - Log
-      summary: Rerquest log records for specific event range
-      description: Rerquest log records for specific event range
-      operationId: request-lock-log-records-event-range
-      parameters:
-      - name: limit
-        in: query
-        description: Search size - max size of the results to return
-        schema:
-          type: integer
-          format: int32
-          default: 50
-      - name: eventStartDate
-        in: path
-        description: Event start date in ISO8601 format
-        required: true
-        schema:
-          type: string
-      - name: eventEndtDate
-        in: path
-        description: Event end date in ISO8601 format
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/LogEntry'
-        "400":
-          description: Wrong date range specified
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/lock/log.readonly
-  /lock/audit/telemetry/{eventStartDate}-{eventEndDate}:
-    get:
-      tags:
-      - Lock - Audit
-      summary: Request telemetry records for specific event range
-      description: Rerquest telemetry records for specific event range
-      operationId: request-lock-telemetry-records-event-range
-      parameters:
-      - name: limit
-        in: query
-        description: Search size - max size of the results to return
-        schema:
-          type: integer
-          format: int32
-          default: 50
-      - name: eventStartDate
-        in: path
-        description: Event start date in ISO8601 format
-        required: true
-        schema:
-          type: string
-      - name: eventEndtDate
-        in: path
-        description: Event end date in ISO8601 format
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/TelemetryEntry'
-        "400":
-          description: Wrong date range specified
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/lock/telemetry.readonly
   /lock/audit/log:
     post:
       tags:

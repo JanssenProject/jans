@@ -7,7 +7,6 @@ import java.util.Optional;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.entity.ContentType;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 
 import com.fasterxml.jackson.databind.JsonNode;

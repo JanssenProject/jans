@@ -11,10 +11,8 @@ import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
 import org.apache.http.entity.ContentType;
 import org.apache.http.util.EntityUtils;
-import org.json.JSONObject;
 import org.slf4j.Logger;
 
 import io.jans.as.client.TokenRequest;
@@ -181,21 +179,6 @@ public class TokenEndpointService {
             log.error("Error while getting entity using EntityUtils is ", ex);
         }
         return jsonString;
-    }
-
-    public JSONObject getResponseJson(HttpServiceResponse serviceResponse) {
-        JSONObject jsonObj = null;
-        if (serviceResponse == null || serviceResponse.getHttpResponse() == null) {
-            return jsonObj;
-        }
-
-        HttpResponse httpResponse = serviceResponse.getHttpResponse();
-        if (httpResponse != null && httpResponse.getEntity() != null) {
-            jsonObj = new JSONObject(httpResponse.getEntity());
-            log.debug("getResponseJson() - .jsonObj:{}", jsonObj);
-        }
-
-        return jsonObj;
     }
 
     public Status getResponseStatus(HttpServiceResponse serviceResponse) {

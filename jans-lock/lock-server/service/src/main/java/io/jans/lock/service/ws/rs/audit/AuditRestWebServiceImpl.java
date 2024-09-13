@@ -16,6 +16,11 @@
 
 package io.jans.lock.service.ws.rs.audit;
 
+import org.apache.http.entity.ContentType;
+import org.slf4j.Logger;
+
+import com.fasterxml.jackson.databind.JsonNode;
+
 import io.jans.lock.service.audit.AuditService;
 import io.jans.lock.util.ServerUtil;
 import jakarta.enterprise.context.Dependent;
@@ -24,14 +29,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.SecurityContext;
 import jakarta.ws.rs.core.Response.Status;
-
-import org.apache.http.entity.ContentType;
-import org.json.JSONObject;
-import org.slf4j.Logger;
-
-import com.fasterxml.jackson.databind.JsonNode;
+import jakarta.ws.rs.core.SecurityContext;
 
 /**
  * Provides interface for audit REST web services
