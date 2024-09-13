@@ -24,6 +24,18 @@ paths:
       description: Rerquest health records for specific event range
       operationId: request-lock-health-records-event-range
       parameters:
+      - name: eventStartDate
+        in: path
+        description: Event start date in ISO8601 format
+        required: true
+        schema:
+          type: string
+      - name: eventEndDate
+        in: path
+        description: Event end date in ISO8601 format
+        required: true
+        schema:
+          type: string
       - name: limit
         in: query
         description: Search size - max size of the results to return
@@ -31,18 +43,6 @@ paths:
           type: integer
           format: int32
           default: 50
-      - name: eventStartDate
-        in: query
-        description: Event start date in ISO8601 format
-        required: true
-        schema:
-          type: string
-      - name: eventEndtDate
-        in: query
-        description: Event end date in ISO8601 format
-        required: true
-        schema:
-          type: string
       responses:
         "200":
           description: Ok
@@ -69,6 +69,18 @@ paths:
       description: Rerquest log records for specific event range
       operationId: request-lock-log-records-event-range
       parameters:
+      - name: eventStartDate
+        in: path
+        description: Event start date in ISO8601 format
+        required: true
+        schema:
+          type: string
+      - name: eventEndDate
+        in: path
+        description: Event end date in ISO8601 format
+        required: true
+        schema:
+          type: string
       - name: limit
         in: query
         description: Search size - max size of the results to return
@@ -76,18 +88,6 @@ paths:
           type: integer
           format: int32
           default: 50
-      - name: eventStartDate
-        in: query
-        description: Event start date in ISO8601 format
-        required: true
-        schema:
-          type: string
-      - name: eventEndtDate
-        in: query
-        description: Event end date in ISO8601 format
-        required: true
-        schema:
-          type: string
       responses:
         "200":
           description: Ok
@@ -114,6 +114,18 @@ paths:
       description: Rerquest telemetry records for specific event range
       operationId: request-lock-telemetry-records-event-range
       parameters:
+      - name: eventStartDate
+        in: path
+        description: Event start date in ISO8601 format
+        required: true
+        schema:
+          type: string
+      - name: eventEndDate
+        in: path
+        description: Event end date in ISO8601 format
+        required: true
+        schema:
+          type: string
       - name: limit
         in: query
         description: Search size - max size of the results to return
@@ -121,18 +133,6 @@ paths:
           type: integer
           format: int32
           default: 50
-      - name: eventStartDate
-        in: query
-        description: Event start date in ISO8601 format
-        required: true
-        schema:
-          type: string
-      - name: eventEndtDate
-        in: query
-        description: Event end date in ISO8601 format
-        required: true
-        schema:
-          type: string
       responses:
         "200":
           description: Ok

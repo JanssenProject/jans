@@ -19,6 +19,7 @@ import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.register.ApplicationType;
+import io.jans.configapi.security.client.AuthClientFactory;
 import io.jans.model.SearchRequest;
 import io.jans.model.token.TokenEntity;
 import io.jans.orm.PersistenceEntryManager;
@@ -37,6 +38,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import jakarta.ws.rs.core.Response;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -393,7 +396,8 @@ public class ClientService implements Serializable {
         }
     }
     
-    public List<TokenEntity> getGrantsOfClient(String clientId) {
+    public List<TokenEntity> getTokenOfClient(String clientId) {
+        logger.info(" Fetch token for clientId:{}", clientId);
         try {
             final String baseDn = getDnForClient(clientId);
             return persistenceEntryManager.findEntries(baseDn, TokenEntity.class, Filter.createPresenceFilter("tknCde"));
@@ -403,15 +407,11 @@ public class ClientService implements Serializable {
         return Collections.emptyList();
     }
     
-    public void revokeClientToken(String clientId) {
-        try {
-            final String baseDn = getDnForClient(clientId);
-           
-        } catch (Exception ex) {
-            logger.error("Exception while getting client token is - ", ex);
-        }
+    public Response revokeClientToken(String clientId, String token, String tokenTypeHint) {
+        logger.info(" Revoke token - clientId:{}, token:{}, tokenTypeHint:{}", clientId, token, tokenTypeHint);
+
+        return AuthClientFactory.revokeToken(this.configurationService.getRevokeUrl(), clientId, token, tokenTypeHint);
 
     }
-    
-    
+       
 }

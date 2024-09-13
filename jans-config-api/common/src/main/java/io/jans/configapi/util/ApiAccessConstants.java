@@ -43,7 +43,16 @@ public class ApiAccessConstants {
     public static final String OPENID_CLIENTS_READ_ACCESS = "https://jans.io/oauth/config/openid/clients.readonly";
     public static final String OPENID_CLIENTS_WRITE_ACCESS = "https://jans.io/oauth/config/openid/clients.write";
     public static final String OPENID_CLIENTS_DELETE_ACCESS = "https://jans.io/oauth/config/openid/clients.delete";
-
+   
+    public static final String CLIENTS_TOKEN_READ_ACCESS = "https://jans.io/oauth/config/openid/client-token.readonly";
+    public static final String CLIENTS_TOKEN_WRITE_ACCESS = "https://jans.io/oauth/config/openid/client-token.write";
+    public static final String CLIENTS_TOKEN_DELETE_ACCESS = "https://jans.io/oauth/config/openid/client-token.delete";
+    
+    public static final String CLIENTS_SESSION_READ_ACCESS = "https://jans.io/oauth/config/openid/client-session.readonly";
+    public static final String CLIENTS_SESSION_WRITE_ACCESS = "https://jans.io/oauth/config/openid/client-session.write";
+    public static final String CLIENTS_SESSION_DELETE_ACCESS = "https://jans.io/oauth/config/openid/client-session.delete";
+    
+    
     public static final String UMA_RESOURCES_READ_ACCESS = "https://jans.io/oauth/config/uma/resources.readonly";
     public static final String UMA_RESOURCES_WRITE_ACCESS = "https://jans.io/oauth/config/uma/resources.write";
     public static final String UMA_RESOURCES_DELETE_ACCESS = "https://jans.io/oauth/config/uma/resources.delete";

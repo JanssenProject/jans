@@ -14,6 +14,7 @@ import io.jans.as.common.service.common.InumService;
 import io.jans.as.persistence.model.Scope;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.model.SearchRequest;
+import io.jans.model.token.TokenEntity;
 import io.jans.configapi.service.auth.ClientService;
 import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.service.auth.AttributeService;
@@ -31,6 +32,7 @@ import io.jans.service.EncryptionService;
 import io.jans.util.StringHelper;
 import io.jans.util.security.StringEncrypter.EncryptionException;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -41,6 +43,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.*;
+
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -105,15 +108,17 @@ public class ClientsResource extends ConfigBaseResource {
             @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
             @Parameter(description = "Attribute whose value will be used to order the returned response") @DefaultValue(ApiConstants.INUM) @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
             @Parameter(description = "Order in which the sortBy param is applied. Allowed values are \"ascending\" and \"descending\"") @DefaultValue(ApiConstants.ASCENDING) @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder,
-            @Parameter(description = "Field and value pair for seraching", examples = @ExampleObject(name = "Field value example", value = "applicationType=web,persistClientAuthorizations=true")) @DefaultValue("") @QueryParam(value = ApiConstants.FIELD_VALUE_PAIR) String fieldValuePair) throws EncryptionException {
+            @Parameter(description = "Field and value pair for seraching", examples = @ExampleObject(name = "Field value example", value = "applicationType=web,persistClientAuthorizations=true")) @DefaultValue("") @QueryParam(value = ApiConstants.FIELD_VALUE_PAIR) String fieldValuePair)
+            throws EncryptionException {
         if (logger.isDebugEnabled()) {
-            logger.debug("Client serach param - limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}, fieldValuePair:{}",
+            logger.debug(
+                    "Client serach param - limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}, fieldValuePair:{}",
                     escapeLog(limit), escapeLog(pattern), escapeLog(startIndex), escapeLog(sortBy),
                     escapeLog(sortOrder), escapeLog(fieldValuePair));
         }
 
         SearchRequest searchReq = createSearchRequest(clientService.getDnForClient(null), pattern, sortBy, sortOrder,
-                startIndex, limit, null, null, this.getMaxCount(),fieldValuePair, Client.class);
+                startIndex, limit, null, null, this.getMaxCount(), fieldValuePair, Client.class);
 
         return Response.ok(this.doSearch(searchReq)).build();
     }
@@ -129,7 +134,8 @@ public class ClientsResource extends ConfigBaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_READ_ACCESS }, groupScopes = {
             ApiAccessConstants.OPENID_READ_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Path(ApiConstants.INUM_PATH)
-    public Response getOpenIdClientByInum(@Parameter(description = "Client identifier") @PathParam(ApiConstants.INUM) @NotNull String inum) {
+    public Response getOpenIdClientByInum(
+            @Parameter(description = "Client identifier") @PathParam(ApiConstants.INUM) @NotNull String inum) {
         if (logger.isDebugEnabled()) {
             logger.debug("Client serach by inum:{}", escapeLog(inum));
         }
@@ -137,26 +143,28 @@ public class ClientsResource extends ConfigBaseResource {
         checkResourceNotNull(client, OPENID_CONNECT_CLIENT);
         return Response.ok(client).build();
     }
-    
-    @Operation(summary = "Get OpenId Connect Client by Inum", description = "Get OpenId Connect Client by Inum", operationId = "get-oauth-openid-clients-by-inum", tags = {
-    "OAuth - OpenID Connect - Clients" }, security = @SecurityRequirement(name = "oauth2", scopes = {
-            ApiAccessConstants.OPENID_CLIENTS_READ_ACCESS }))
-@ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Client.class), examples = @ExampleObject(name = "Response json example", value = "example/openid-clients/clients/openid-clients-get.json"))),
-    @ApiResponse(responseCode = "401", description = "Unauthorized"),
-    @ApiResponse(responseCode = "500", description = "InternalServerError") })
-@GET
-@ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_READ_ACCESS }, groupScopes = {
-    ApiAccessConstants.OPENID_READ_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
-@Path(ApiConstants.INUM_PATH)
-public Response getClientToken(@Parameter(description = "Client identifier") @PathParam(ApiConstants.INUM) @NotNull String inum) {
-if (logger.isDebugEnabled()) {
-    logger.debug("Client serach by inum:{}", escapeLog(inum));
-}
-Client client = clientService.getClientByInum(inum);
-checkResourceNotNull(client, OPENID_CONNECT_CLIENT);
-return Response.ok(client).build();
-}
+
+    @Hidden
+    @Operation(summary = "Get client token details", description = "Get client token details", operationId = "get-clients-token-details", tags = {
+            "OAuth - OpenID Connect - Clients" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    ApiAccessConstants.CLIENTS_TOKEN_READ_ACCESS }))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = TokenEntity.class)))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
+    @GET
+    @ProtectedApi(scopes = { ApiAccessConstants.CLIENTS_TOKEN_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.OPENID_READ_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @Path(ApiConstants.INUM_PATH)
+    public Response getClientToken(
+            @Parameter(description = "Client identifier") @PathParam(ApiConstants.INUM) @NotNull String inum) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Client serach by inum:{}", escapeLog(inum));
+        }
+        List<TokenEntity> tokenEntityList = clientService.getTokenOfClient(inum);
+
+        return Response.ok(tokenEntityList).build();
+    }
 
     @Operation(summary = "Create new OpenId Connect client", description = "Create new OpenId Connect client", operationId = "post-oauth-openid-client", tags = {
             "OAuth - OpenID Connect - Clients" }, security = @SecurityRequirement(name = "oauth2", scopes = {
@@ -278,8 +286,9 @@ return Response.ok(client).build();
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_WRITE_ACCESS }, groupScopes = {
             ApiAccessConstants.OPENID_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_WRITE_ACCESS })
     @Path(ApiConstants.INUM_PATH)
-    public Response patchClient(@Parameter(description = "Client identifier") @PathParam(ApiConstants.INUM) @NotNull String inum, @NotNull String jsonPatchString)
-            throws JsonPatchException, IOException {
+    public Response patchClient(
+            @Parameter(description = "Client identifier") @PathParam(ApiConstants.INUM) @NotNull String inum,
+            @NotNull String jsonPatchString) throws JsonPatchException, IOException {
         if (logger.isDebugEnabled()) {
             logger.debug("Client details to be patched - inum:{}, jsonPatchString:{}", escapeLog(inum),
                     escapeLog(jsonPatchString));
@@ -303,7 +312,8 @@ return Response.ok(client).build();
     @Path(ApiConstants.INUM_PATH)
     @ProtectedApi(scopes = { ApiAccessConstants.OPENID_CLIENTS_DELETE_ACCESS }, groupScopes = {
             ApiAccessConstants.OPENID_DELETE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
-    public Response deleteClient(@Parameter(description = "Client identifier") @PathParam(ApiConstants.INUM) @NotNull String inum) {
+    public Response deleteClient(
+            @Parameter(description = "Client identifier") @PathParam(ApiConstants.INUM) @NotNull String inum) {
         if (logger.isDebugEnabled()) {
             logger.debug("Client to be deleted - inum:{} ", escapeLog(inum));
         }
@@ -319,7 +329,9 @@ return Response.ok(client).build();
                 try {
                     client.setClientSecret(encryptionService.decrypt(client.getClientSecret()));
                 } catch (Exception ex) {
-                    logger.error(" Error while decrypting ClientSecret for '" + client.getClientId() + "', exception is - ",ex);
+                    logger.error(
+                            " Error while decrypting ClientSecret for '" + client.getClientId() + "', exception is - ",
+                            ex);
                 }
             }
         }

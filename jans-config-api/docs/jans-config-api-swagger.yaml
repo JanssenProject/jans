@@ -3462,7 +3462,7 @@ paths:
       - OAuth - OpenID Connect - Clients
       summary: Get OpenId Connect Client by Inum
       description: Get OpenId Connect Client by Inum
-      operationId: get-oauth-openid-clients-by-inum_1
+      operationId: get-oauth-openid-clients-by-inum
       parameters:
       - name: inum
         in: path
@@ -9807,19 +9807,19 @@ components:
           type: string
         selected:
           type: boolean
-        whitePagesCanView:
-          type: boolean
         adminCanView:
-          type: boolean
-        userCanEdit:
           type: boolean
         adminCanEdit:
           type: boolean
+        userCanEdit:
+          type: boolean
         userCanView:
+          type: boolean
+        userCanAccess:
           type: boolean
         adminCanAccess:
           type: boolean
-        userCanAccess:
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -11442,10 +11442,10 @@ components:
           type: array
           items:
             type: object
-        displayValue:
-          type: string
         value:
           type: object
+        displayValue:
+          type: string
     LocalizedString:
       type: object
       properties:
@@ -12244,10 +12244,10 @@ components:
         ttl:
           type: integer
           format: int32
-        opbrowserState:
-          type: string
         persisted:
           type: boolean
+        opbrowserState:
+          type: string
     SessionIdAccessMap:
       type: object
       properties:

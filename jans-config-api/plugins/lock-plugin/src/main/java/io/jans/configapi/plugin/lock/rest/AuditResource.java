@@ -36,6 +36,7 @@ import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
@@ -97,9 +98,9 @@ public class AuditResource extends BaseResource {
     @Path(Constants.HEALTH + ApiConstants.EVENT_RANGE_PATH)
     @ProtectedApi(scopes = { Constants.LOCK_HEALTH_READ_ACCESS })
     public Response getHealthEntrysByRange(
-            @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
-            @Parameter(description = "Event start date in ISO8601 format") @QueryParam("eventStartDate") @NotNull String eventStartDateIso8601,
-            @Parameter(description = "Event end date in ISO8601 format") @QueryParam("eventEndtDate") @NotNull String eventEndDateIso8601) {
+            @Parameter(description = "Event start date in ISO8601 format") @PathParam("eventStartDate") @NotNull String eventStartDateIso8601,
+            @Parameter(description = "Event end date in ISO8601 format") @PathParam("eventEndDate") @NotNull String eventEndDateIso8601,
+            @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit) {
         logger.debug("Get Health entries by by event range");
 
         checkNotNull(eventStartDateIso8601, EVENT_START_DATE_ISO8601);
@@ -147,9 +148,9 @@ public class AuditResource extends BaseResource {
     @Path(Constants.LOG + ApiConstants.EVENT_RANGE_PATH)
     @ProtectedApi(scopes = { Constants.LOCK_LOG_READ_ACCESS })
     public Response getLogEntrysByRange(
-            @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
-            @Parameter(description = "Event start date in ISO8601 format") @QueryParam("eventStartDate") @NotNull String eventStartDateIso8601,
-            @Parameter(description = "Event end date in ISO8601 format") @QueryParam("eventEndtDate") @NotNull String eventEndDateIso8601) {
+            @Parameter(description = "Event start date in ISO8601 format") @PathParam("eventStartDate") @NotNull String eventStartDateIso8601,
+            @Parameter(description = "Event end date in ISO8601 format") @PathParam("eventEndDate") @NotNull String eventEndDateIso8601,
+            @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit) {
         logger.debug("Get Log entries by by event range");
 
         checkNotNull(eventStartDateIso8601, EVENT_START_DATE_ISO8601);
@@ -196,9 +197,9 @@ public class AuditResource extends BaseResource {
     @Path(Constants.TELEMETRY + ApiConstants.EVENT_RANGE_PATH)
     @ProtectedApi(scopes = { Constants.LOCK_TELEMETRY_READ_ACCESS })
     public Response getTelemetryEntrysByRange(
-            @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
-            @Parameter(description = "Event start date in ISO8601 format") @QueryParam("eventStartDate") @NotNull String eventStartDateIso8601,
-            @Parameter(description = "Event end date in ISO8601 format") @QueryParam("eventEndtDate") @NotNull String eventEndDateIso8601) {
+            @Parameter(description = "Event start date in ISO8601 format") @PathParam("eventStartDate") @NotNull String eventStartDateIso8601,
+            @Parameter(description = "Event end date in ISO8601 format") @PathParam("eventEndDate") @NotNull String eventEndDateIso8601,
+            @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit) {
         logger.debug("Get Telemetry entries by by event range");
 
         checkNotNull(eventStartDateIso8601, EVENT_START_DATE_ISO8601);
