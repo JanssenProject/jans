@@ -1,14 +1,5 @@
 package io.jans.lock.service.audit;
 
-import io.jans.as.model.uma.wrapper.Token;
-import io.jans.lock.service.TokenEndpointService;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.ws.rs.core.Response;
-
-import jakarta.servlet.http.HttpServletRequest;
-
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,8 +7,17 @@ import java.util.Optional;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.entity.ContentType;
-import org.json.JSONObject;
 import org.slf4j.Logger;
+
+import com.fasterxml.jackson.databind.JsonNode;
+
+import io.jans.as.model.uma.wrapper.Token;
+import io.jans.lock.service.DataMapperService;
+import io.jans.lock.service.TokenEndpointService;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.Response;
 
 @ApplicationScoped
 public class AuditService {
@@ -26,7 +26,10 @@ public class AuditService {
     private Logger log;
 
     @Inject
-    TokenEndpointService tokenEndpointService;
+    private TokenEndpointService tokenEndpointService;
+    
+    @Inject
+    private DataMapperService dataMapperService;
 
     private Map<String, Date> tokenDetails = new HashMap<>();
 
@@ -49,8 +52,21 @@ public class AuditService {
         return this.tokenEndpointService.post(endpoint, postData, contentType, accessToken);
     }
 
-    public JSONObject getJSONObject(HttpServletRequest request) {
-        return this.tokenEndpointService.getJSONObject(request);
+    public JsonNode getJsonNode(HttpServletRequest request) {
+    	JsonNode jsonBody = null;
+        if (request == null) {
+            return jsonBody;
+        }
+
+        try {
+        	jsonBody = dataMapperService.readTree(request.getInputStream());
+            log.debug(" jsonBody:{}", jsonBody);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            log.error("Exception while retriving json from request is - ", ex);
+        }
+
+        return jsonBody;
     }
 
     private String getAccessTokenForAudit(String endpoint) {
