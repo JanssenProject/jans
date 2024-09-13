@@ -150,6 +150,7 @@ public class TxTokenService {
         calendar.add(Calendar.SECOND, getTxTokenLifetime(client));
         Date expiration = calendar.getTime();
 
+
         jwr.getClaims().setIssuer(appConfiguration.getIssuer());
         jwr.getClaims().setExpirationTime(expiration);
         jwr.getClaims().setIat(issuedAt);
@@ -291,6 +292,7 @@ public class TxTokenService {
 
         final JwtSigner jwtSigner = newJwtSigner(client);
         final Jwt jwt = jwtSigner.newJwt();
+        jwt.getHeader().setType(JwtType.TX_TOKEN); // override value which is set in jwt signer
         fillPayload(jwt, audience, requestContext, requestDetails, executionContext, authorizationGrant);
         return jwtSigner.sign();
     }
