@@ -34,7 +34,7 @@ type AssetMgtConfiguration struct {
 	ModuleNameValidationEnabled    bool              `schema:"module_name_validation_enabled" json:"moduleNameValidationEnabled"`
 	AssetBaseDirectory             string            `schema:"asset_base_directory" json:"assetBaseDirectory"`
 	JansServiceModule              []string          `schema:"jans_service_module" json:"jansServiceModule"`
-	AssetDirMappings               []AssetDirMapping `schema:"asset_dir_mappings" json:"assetDirMappings"`
+	AssetDirMappings               []AssetDirMapping `schema:"asset_dir_mappings" json:"assetDirMapping"`
 }
 
 // PersistenceConfiguration represents the persistence configuration
@@ -44,7 +44,7 @@ type ApiAppConfiguration struct {
 	DisableLoggerTimer               bool                      `schema:"disable_logger_timer" json:"disableLoggerTimer"`
 	DisableAuditLogger               bool                      `schema:"disable_audit_logger" json:"disableAuditLogger"`
 	CustomAttributeValidationEnabled bool                      `schema:"custom_attribute_validation_enabled" json:"customAttributeValidationEnabled"`
-	ArcValidationEnabled             bool                      `schema:"arc_validation_enabled" json:"arcValidationEnabled"`
+	ArcValidationEnabled             bool                      `schema:"acr_validation_enabled" json:"acrValidationEnabled"`
 	ApiApprovedIssuer                []string                  `schema:"api_approved_issuer" json:"apiApprovedIssuer"`
 	ApiProtectionType                string                    `schema:"api_protection_type" json:"apiProtectionType"`
 	ApiClientId                      string                    `schema:"api_client_id" json:"apiClientId"`

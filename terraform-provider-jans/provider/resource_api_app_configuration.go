@@ -41,7 +41,7 @@ func resourceApiAppConfiguration() *schema.Resource {
 				Optional:    true,
 				Description: "",
 			},
-			"arc_validation_enabled": {
+			"acr_validation_enabled": {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Description: "",

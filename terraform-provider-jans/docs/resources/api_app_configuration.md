@@ -28,7 +28,7 @@ resource "jans_api_app_configuration" "global" {
 - `api_client_id` (String)
 - `api_client_password` (String)
 - `api_protection_type` (String)
-- `arc_validation_enabled` (Boolean)
+- `acr_validation_enabled` (Boolean)
 - `asset_mgt_configuration` (Block List) (see [below for nested schema](#nestedblock--asset_mgt_configuration))
 - `audit_log_conf` (Block List) (see [below for nested schema](#nestedblock--audit_log_conf))
 - `auth_issuer_url` (String)
