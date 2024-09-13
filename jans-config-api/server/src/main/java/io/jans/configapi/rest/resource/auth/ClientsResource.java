@@ -32,7 +32,6 @@ import io.jans.service.EncryptionService;
 import io.jans.util.StringHelper;
 import io.jans.util.security.StringEncrypter.EncryptionException;
 
-import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -144,7 +143,6 @@ public class ClientsResource extends ConfigBaseResource {
         return Response.ok(client).build();
     }
 
-    @Hidden
     @Operation(summary = "Get client token details", description = "Get client token details", operationId = "get-clients-token-details", tags = {
             "OAuth - OpenID Connect - Clients" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.CLIENTS_TOKEN_READ_ACCESS }))
