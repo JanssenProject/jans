@@ -14,3 +14,11 @@ dynamic = ["version"]
 
 [tool.maturin]
 features = ["pyo3/extension-module"]
+
+
+[tool.poetry]
+name = "cedarling_python"
+version = "0.1.0"
+description = ""
+authors = ["Oleh Bozhok <oleh@gluu.org>"]
+readme = "README.md"
