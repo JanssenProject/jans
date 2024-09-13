@@ -42,5 +42,12 @@ If any of those 3 parameters is not provided, the provider will not be able to c
 Optionally, users can also set the following variables:
 
 * `insecure_client` - If set to `true`, the provider will not verify the TLS certificate of the Janssen server. This is useful for testing purposes and should not be used in production, unless absolutely unavoidable.
-  
 
+## Tests
+
+Before you run the tests, the custom_attribute test requires that a custom column is present in the user table, to be added as the custom attribute. Add `tbutlonger` VARCHAR field by following the [guide](https://docs.jans.io/stable/admin/reference/database/mysql-ops/#add-custom-attribute) provided in the Janssen documentation.
+
+You can run the tests by running `make test`.
+
+The tests require some environment variables to run, which are automatically set when running them through the Makefile.
+When debugging the tests, without using the Makefile, make sure to have the environment variables present. They can be found in the Makefile.

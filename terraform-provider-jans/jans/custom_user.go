@@ -18,14 +18,13 @@ type UserAuthenticatorList struct {
 type CustomUser struct {
 	Dn                  string                `schema:"dn" json:"dn,omitempty"`
 	BaseDn              string                `schema:"base_dn" json:"baseDn,omitempty"`
-	JansStatus          string                `schema:"jans_status" json:"jansStatus,omitempty"`
 	UserID              string                `schema:"user_id" json:"userId,omitempty"`
 	CreatedAt           string                `schema:"created_at" json:"createdAt,omitempty"`
 	UpdatedAt           string                `schema:"updated_at" json:"updatedAt,omitempty"`
 	OxAuthPersistentJwt []string              `schema:"ox_auth_persistent_jwt" json:"oxAuthPersistentJwt,omitempty"`
 	ExternalUid         []string              `schema:"external_uid" json:"externalUid,omitempty"`
 	Authenticator       UserAuthenticatorList `schema:"authenticator" json:"authenticator,omitempty"`
-	Status              string                `schema:"status" json:"status,omitempty"`
+	Status              string                `schema:"jans_status" json:"status,omitempty"`
 	CustomAttributes    []CustomAttribute     `schema:"custom_attributes" json:"customAttributes,omitempty"`
 	CustomObjectClasses []string              `schema:"custom_object_classes" json:"customObjectClasses,omitempty"`
 	Mail                string                `schema:"mail" json:"mail,omitempty"`
