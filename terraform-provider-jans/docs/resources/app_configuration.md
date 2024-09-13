@@ -309,6 +309,10 @@ resource "jans_app_configuration" "global" {
 - `stat_timer_interval_in_seconds` (Number) Statistical data capture time interval.
 - `static_decryption_kid` (String) Specifies static decryption Kid
 - `static_kid` (String) Specifies static Kid
+- `status_list_bit_size` (Number) The size of status list bit.
+- `status_list_index_allocation_block_size` (Number) The size of status list index allocation block.
+- `status_list_response_jwt_lifetime` (Number) The lifetime of status list response JWT.
+- `status_list_response_jwt_signature_algorithm` (String) The signature algorithm for status list response JWT.
 - `subject_identifiers_per_client_supported` (List of String) A list of the subject identifiers supported per client.
 - `subject_types_supported` (List of String) A list of the Subject Identifier types that this OP supports. Valid types include pairwise and public.
 - `token_endpoint` (String) The token endpoint URL. Example: https://server.example.com/restv1/token

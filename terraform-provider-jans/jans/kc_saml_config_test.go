@@ -16,8 +16,9 @@ func TestCreateConfig(t *testing.T) {
 	ctx := context.Background()
 
 	config := &KCSAMLConfiguration{
-		ApplicationName: "SomeAPP",
-		Enabled:         true,
+		ApplicationName:                "SomeAPP",
+		Enabled:                        true,
+		IdpMetadataMandatoryAttributes: []string{"name"},
 	}
 
 	_, err = c.CreateKCSAMLConfiguration(ctx, config)

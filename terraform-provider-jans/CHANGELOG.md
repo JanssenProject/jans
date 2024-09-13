@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.1.5](https://github.com/JanssenProject/terraform-provider-jans/compare/v1.1.2...v1.1.5) (2024-09-11)
+
+
+### Bug Fixes
+
+* documentation 
+* update API and sync with jans updates 
+
 ## [1.1.2](https://github.com/JanssenProject/terraform-provider-jans/compare/v1.1.0...v1.1.2) (2024-05-29)
 
 

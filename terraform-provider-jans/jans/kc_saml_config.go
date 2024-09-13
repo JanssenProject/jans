@@ -33,6 +33,7 @@ type KCSAMLConfiguration struct {
 	SpMetadataTempDir              string   `schema:"sp_metadata_temp_dir" json:"spMetadataTempDir"`
 	SpMetadataFile                 string   `schema:"sp_metadata_file" json:"spMetadataFile"`
 	IgnoreValidation               bool     `schema:"ignore_validation" json:"ignoreValidation"`
+	SetConfigDefaultValue          bool     `schema:"set_config_default_value" json:"setConfigDefaultValue"`
 	IdpMetadataMandatoryAttributes []string `schema:"idp_metadata_mandatory_attributes" json:"idpMetadataMandatoryAttributes"`
 	KcAttributes                   []string `schema:"kc_attributes" json:"kcAttributes"`
 	KcSamlConfig                   []string `schema:"kc_saml_config" json:"kcSamlConfig"`

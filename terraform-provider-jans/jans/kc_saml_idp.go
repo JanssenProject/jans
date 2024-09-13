@@ -33,6 +33,8 @@ type IdentityProvider struct {
 	ValidateSignature         string   `schema:"validate_signature" json:"validateSignature"`
 	SingleLogoutServiceUrl    string   `schema:"single_logout_service_url" json:"singleLogoutServiceUrl"`
 	NameIDPolicyFormat        string   `schema:"name_id_policy_format" json:"nameIDPolicyFormat"`
+	PrincipalAttribute        string   `schema:"principal_attribute" json:"principalAttribute"`
+	PrincipalType             string   `schema:"principal_type" json:"principalType"`
 	IdpEntityId               string   `schema:"idp_entity_id" json:"idpEntityId"`
 	SingleSignOnServiceUrl    string   `schema:"single_sign_on_service_url" json:"singleSignOnServiceUrl"`
 	EncryptionPublicKey       string   `schema:"encryption_public_key" json:"encryptionPublicKey"`
@@ -145,7 +147,7 @@ func (c *Client) GetIDP(ctx context.Context, inum string) (*IdentityProvider, er
 
 func (c *Client) DeleteIDP(ctx context.Context, inum string) error {
 
-	token, err := c.getToken(ctx, "https://jans.io/idp/saml.write")
+	token, err := c.getToken(ctx, "https://jans.io/idp/saml.delete")
 	if err != nil {
 		return fmt.Errorf("failed to get token: %w", err)
 	}

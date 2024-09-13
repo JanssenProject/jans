@@ -21,9 +21,6 @@ type TrustRelationship struct {
 	DisplayName              string                `schema:"display_name" json:"displayName"`
 	Description              string                `schema:"description" json:"description"`
 	RootUrl                  string                `schema:"root_url" json:"rootUrl"`
-	AdminUrl                 string                `schema:"admin_url" json:"adminUrl"`
-	BaseUrl                  string                `schema:"base_url" json:"baseUrl"`
-	SurrogateAuthRequired    bool                  `schema:"surrogate_auth_required" json:"surrogateAuthRequired"`
 	Enabled                  bool                  `schema:"enabled" json:"enabled"`
 	AlwaysDisplayInConsole   bool                  `schema:"always_display_in_console" json:"alwaysDisplayInConsole"`
 	ClientAuthenticatorType  string                `schema:"client_authenticator_type" json:"clientAuthenticatorType"`
@@ -36,7 +33,6 @@ type TrustRelationship struct {
 	SPMetaDataURL            string                `schema:"sp_meta_data_url" json:"spMetaDataURL"`
 	MetaLocation             string                `schema:"meta_location" json:"metaLocation"`
 	ReleasedAttributes       []string              `schema:"released_attributes" json:"releasedAttributes"`
-	Url                      string                `schema:"url" json:"url"`
 	SPLogoutURL              string                `schema:"sp_logout_url" json:"spLogoutURL"`
 	Status                   string                `schema:"status" json:"status"`
 	ValidationStatus         string                `schema:"validation_status" json:"validationStatus"`
@@ -69,7 +65,7 @@ func (c *Client) createTRFormData(tr *TrustRelationship, file io.Reader) (map[st
 
 	tr.SPMetaDataSourceType = "manual"
 	if file != nil {
-		data["metaDataFile"] = FormField{
+		data["assetFile"] = FormField{
 			Typ:  "file",
 			Data: file,
 		}
@@ -148,6 +144,20 @@ func (c *Client) DeleteTR(ctx context.Context, inum string) error {
 	}
 
 	return nil
+}
+
+func (c *Client) GetTRs(ctx context.Context) ([]TrustRelationship, error) {
+	token, err := c.getToken(ctx, "https://jans.io/oauth/config/saml.readonly")
+	if err != nil {
+		return nil, fmt.Errorf("failed to get token: %w", err)
+	}
+
+	resp := []TrustRelationship{}
+	if err = c.get(ctx, "/jans-config-api/kc/saml/trust-relationship", token, &resp); err != nil {
+		return nil, fmt.Errorf("get request failed: %w", err)
+	}
+
+	return resp, nil
 }
 
 func (c *Client) GetTR(ctx context.Context, inum string) (*TrustRelationship, error) {

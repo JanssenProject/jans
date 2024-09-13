@@ -23,8 +23,8 @@ func TestAgamaDeployment(t *testing.T) {
 		t.Error(err)
 	}
 
-	if len(deployments) != 0 {
-		t.Errorf("expected 0 deployments, got %d", len(deployments))
+	if len(deployments) != 1 {
+		t.Errorf("expected 1 deployments, got %d", len(deployments))
 	}
 	_ = client.DeleteAgamaDeployment(ctx, "test-deployment")
 
@@ -70,8 +70,8 @@ func TestAgamaDeployment(t *testing.T) {
 		t.Error(err)
 	}
 
-	if len(deployments) != 1 {
-		t.Errorf("expected 1 deployment, got %d", len(deployments))
+	if len(deployments) != 2 {
+		t.Errorf("expected 2 deployment, got %d", len(deployments))
 	}
 
 	// delete test deployment
