@@ -52,6 +52,11 @@ import jakarta.ws.rs.core.Response;
 @Produces(MediaType.APPLICATION_JSON)
 public class AuditResource extends BaseResource {
 
+    private static final String EVENT_START_DATE_ISO8601 = "eventStartDateIso8601";
+    private static final String EVENT_END_DATE_ISO8601 = "eventEndDateIso8601";
+    private static final String EVENT_START_DATE_PARSE_ERR = "Can't parse event start date !";
+    private static final String EVENT_END_DATE_PARSE_ERR = "Can't parse event end date !";
+
 	@Inject
 	Logger logger;
 
@@ -119,23 +124,14 @@ public class AuditResource extends BaseResource {
 			@Parameter(description = "Event end date in ISO8601 format") @QueryParam("eventEndDate") @NotNull String eventEndDateIso8601) {
 		logger.debug("Get Health entries by by event range");
 
-		if (StringUtils.isBlank(eventStartDateIso8601)) {
-			throwBadRequestException("Event start date should not be null or empty !");
-		}
-
-		if (StringUtils.isBlank(eventEndDateIso8601)) {
-			throwBadRequestException("Event end date should not be null or empty !");
-		}
+        checkNotNull(eventStartDateIso8601, EVENT_START_DATE_ISO8601);
+        checkNotNull(eventEndDateIso8601, EVENT_END_DATE_ISO8601);
 
 		Date eventStartDate = decodeTime(eventStartDateIso8601);
-		if (eventStartDate == null) {
-			throwBadRequestException("Can't parse ISO-8601 event start date!");
-		}
+		checkResourceNotNull(eventStartDate, EVENT_START_DATE_PARSE_ERR);
 
 		Date eventEndDate = decodeTime(eventEndDateIso8601);
-		if (eventEndDate == null) {
-			throwBadRequestException("Can't parse ISO-8601 event end date !");
-		}
+		checkResourceNotNull(eventStartDate, EVENT_END_DATE_PARSE_ERR);
 
 		List<HealthEntry> entries = auditService.getHealthEntrysByRange(eventStartDate, eventEndDate, limit);
 
@@ -199,23 +195,14 @@ public class AuditResource extends BaseResource {
 			@Parameter(description = "Event end date in ISO8601 format") @QueryParam("eventEndDate") @NotNull String eventEndDateIso8601) {
 		logger.debug("Get Log entries by by event range");
 
-		if (StringUtils.isBlank(eventStartDateIso8601)) {
-			throwBadRequestException("Event start date should not be null or empty !");
-		}
-
-		if (StringUtils.isBlank(eventEndDateIso8601)) {
-			throwBadRequestException("Event end date should not be null or empty !");
-		}
+        checkNotNull(eventStartDateIso8601, EVENT_START_DATE_ISO8601);
+        checkNotNull(eventEndDateIso8601, EVENT_END_DATE_ISO8601);
 
 		Date eventStartDate = decodeTime(eventStartDateIso8601);
-		if (eventStartDate == null) {
-			throwBadRequestException("Can't parse ISO-8601 event start date!");
-		}
+		checkResourceNotNull(eventStartDate, EVENT_START_DATE_PARSE_ERR);
 
 		Date eventEndDate = decodeTime(eventEndDateIso8601);
-		if (eventEndDate == null) {
-			throwBadRequestException("Can't parse ISO-8601 event end date !");
-		}
+		checkResourceNotNull(eventStartDate, EVENT_END_DATE_PARSE_ERR);
 
 		List<LogEntry> entries = auditService.getLogEntrysByRange(eventStartDate, eventEndDate, limit);
 
@@ -279,23 +266,14 @@ public class AuditResource extends BaseResource {
 			@Parameter(description = "Event end date in ISO8601 format") @QueryParam("eventEndDate") @NotNull String eventEndDateIso8601) {
 		logger.debug("Get Telemetry entries by by event range");
 
-		if (StringUtils.isBlank(eventStartDateIso8601)) {
-			throwBadRequestException("Event start date should not be null or empty !");
-		}
-
-		if (StringUtils.isBlank(eventEndDateIso8601)) {
-			throwBadRequestException("Event end date should not be null or empty !");
-		}
+        checkNotNull(eventStartDateIso8601, EVENT_START_DATE_ISO8601);
+        checkNotNull(eventEndDateIso8601, EVENT_END_DATE_ISO8601);
 
 		Date eventStartDate = decodeTime(eventStartDateIso8601);
-		if (eventStartDate == null) {
-			throwBadRequestException("Can't parse ISO-8601 event start date!");
-		}
+		checkResourceNotNull(eventStartDate, EVENT_START_DATE_PARSE_ERR);
 
 		Date eventEndDate = decodeTime(eventEndDateIso8601);
-		if (eventEndDate == null) {
-			throwBadRequestException("Can't parse ISO-8601 event end date !");
-		}
+		checkResourceNotNull(eventStartDate, EVENT_END_DATE_PARSE_ERR);
 
 		List<TelemetryEntry> entries = auditService.getTelemetryEntrysByRange(eventStartDate, eventEndDate, limit);
 
