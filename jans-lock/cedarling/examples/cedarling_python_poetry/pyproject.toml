@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "cedarling_python_poetry"
+version = "1.1.5"
+description = "Cedarling is a component library which is a performant local authorization service that runs the Rust Cedar Engine."
+authors = ["Oleh Bohzok <olehbozhok@gmail.com>"]
+license = "Apache License"
+readme = "README.md"
+
+[tool.poetry.scripts]
+pythonPoetry = 'pythonpoetry:example'
+
+[tool.poetry.dependencies]
+python = "^3.8"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
