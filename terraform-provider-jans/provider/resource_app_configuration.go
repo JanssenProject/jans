@@ -458,6 +458,26 @@ func resourceAppConfiguration() *schema.Resource {
 				Optional:    true,
 				Description: "The lifetime of spontaneous scope in seconds.",
 			},
+			"status_list_bit_size": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "The size of status list bit.",
+			},
+			"status_list_response_jwt_signature_algorithm": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The signature algorithm for status list response JWT.",
+			},
+			"status_list_response_jwt_lifetime": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "The lifetime of status list response JWT.",
+			},
+			"status_list_index_allocation_block_size": {
+				Type:        schema.TypeInt,
+				Optional:    true,
+				Description: "The size of status list index allocation block.",
+			},
 			"openid_sub_attribute": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -540,7 +560,6 @@ func resourceAppConfiguration() *schema.Resource {
 							"implicit",
 							"password",
 							"refresh_token",
-							"tx_token",
 							"urn:ietf:params:oauth:grant-type:device_code",
 							"urn:ietf:params:oauth:grant-type:token-exchange",
 							"urn:ietf:params:oauth:grant-type:uma-ticket",
@@ -2098,6 +2117,8 @@ func resourceAppConfiguration() *schema.Resource {
 							"INTROSPECTION",
 							"REVOKE_TOKEN",
 							"REVOKE_SESSION",
+							"GLOBAL_TOKEN_REVOCATION",
+							"STATUS_LIST",
 							"ACTIVE_SESSION",
 							"END_SESSION",
 							"STATUS_SESSION",

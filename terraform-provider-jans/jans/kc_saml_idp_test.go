@@ -2,6 +2,7 @@ package jans
 
 import (
 	"context"
+	"os"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -26,7 +27,12 @@ func TestCreateIDP(t *testing.T) {
 		SingleSignOnServiceUrl: "https://moabu-promoted-loon.gluu.info/idp/profile/SAML2/POST/SSO",
 	}
 
-	idp, err = c.CreateIDP(ctx, idp, nil)
+	file, err := os.Open("testdata/metadata.xml")
+	if err != nil {
+		t.Fatalf("could not open metadata file: %v", err)
+	}
+
+	idp, err = c.CreateIDP(ctx, idp, file)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -38,7 +44,11 @@ func TestCreateIDP(t *testing.T) {
 
 	idp.Description = "Updated description"
 
-	idp, err = c.UpdateIDP(ctx, idp, nil)
+	if _, err = file.Seek(0, 0); err != nil {
+		t.Fatalf("could not seek to beginning of file: %v", err)
+	}
+
+	idp, err = c.UpdateIDP(ctx, idp, file)
 	if err != nil {
 		t.Fatal(err)
 	}

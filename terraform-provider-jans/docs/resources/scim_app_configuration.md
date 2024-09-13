@@ -43,7 +43,9 @@ resource "jans_scim_app_configuration" "global" {
 - `base_endpoint` (String) SCIM base endpoint URL
 - `bulk_max_operations` (Number) Specifies maximum bulk operations.
 - `bulk_max_payload_size` (Number) Specifies maximum payload size of bulk operations.
+- `disable_audit_logger` (Boolean)
 - `disable_jdk_logger` (Boolean) Boolean value specifying whether to enable JDK Loggers.
+- `disable_logger_timer` (Boolean)
 - `external_logger_configuration` (String) Path to external log4j2 logging configuration.
 - `logging_layout` (String) Logging layout used for Server loggers.
 - `logging_level` (String) Logging level for scim logger.

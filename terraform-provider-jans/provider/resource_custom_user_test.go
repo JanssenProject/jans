@@ -77,7 +77,7 @@ func TestResourceCustomUser_Mapping(t *testing.T) {
 		},
 		Mail:         "exampleUsr1@jans.io",
 		DisplayName:  "Default Test User",
-		JansStatus:   "active",
+		Status:       "active",
 		UserPassword: "pwd123",
 		GivenName:    "exampleUsr1",
 	}
