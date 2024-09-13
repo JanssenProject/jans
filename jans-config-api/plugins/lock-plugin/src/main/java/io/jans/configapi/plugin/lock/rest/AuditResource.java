@@ -6,6 +6,7 @@
 
 package io.jans.configapi.plugin.lock.rest;
 
+
 import java.time.Instant;
 import java.time.format.DateTimeParseException;
 import java.util.Date;
@@ -25,6 +26,7 @@ import io.jans.configapi.plugin.lock.service.AuditService;
 import io.jans.configapi.plugin.lock.util.Constants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.orm.PersistenceEntryManager;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
@@ -33,6 +35,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+
 import jakarta.inject.Inject;
 import jakarta.inject.Named;
 import jakarta.validation.Valid;
@@ -47,6 +50,12 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
+import java.util.Date;
+import java.util.List;
+
+import org.slf4j.Logger;
+
+
 @Path(Constants.AUDIT)
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
@@ -56,6 +65,7 @@ public class AuditResource extends BaseResource {
     private static final String EVENT_END_DATE_ISO8601 = "eventEndDateIso8601";
     private static final String EVENT_START_DATE_PARSE_ERR = "Can't parse event start date !";
     private static final String EVENT_END_DATE_PARSE_ERR = "Can't parse event end date !";
+
 
 	@Inject
 	Logger logger;
@@ -289,5 +299,6 @@ public class AuditResource extends BaseResource {
 			return null;
 		}
 	}
+
 
 }

@@ -732,7 +732,7 @@ global:
       deployment: {}
       horizontalPodAutoscaler: {}
       service: {}
-      secret: {}  
+      secret: {}
     # -- Name of the auth-server service. Please keep it as default.
     authServerServiceName: auth-server
     # -- Boolean flag to enable/disable auth-server chart. You should never set this to false.
@@ -849,7 +849,7 @@ global:
     customAnnotations:
       cronjob: {}
       service: {}
-      secret: {}    
+      secret: {}
     # -- The initial auth server key rotation keys life in hours
     initKeysLife: 48
   # -- Volume storage type if using AWS volumes.
@@ -867,7 +867,7 @@ global:
       deployment: {}
       horizontalPodAutoscaler: {}
       service: {}
-      secret: {}  
+      secret: {}
     # -- passing custom java options to casa. Notice you do not need to pass in any loggers options as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs.
     cnCustomJavaOptions: ""
     # -- App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed.
@@ -913,7 +913,7 @@ global:
       role: {}
       secret: {}
       service: {}
-      serviceAccount: {}  
+      serviceAccount: {}
     # -- Boolean flag to enable/disable the configuration chart. This normally should never be false
     enabled: true
   # -- https://kubernetes.io/docs/concepts/workloads/controllers/ttlafterfinished/
@@ -976,7 +976,7 @@ global:
       # -- configAPI ingress resource labels. key app is taken
       configApiLabels: { }
       # -- ConfigAPI ingress resource additional annotations.
-      configApiAdditionalAnnotations: { }          
+      configApiAdditionalAnnotations: { }
     # -- Comma-separated values of enabled plugins (supported plugins are "admin-ui","fido2","scim","user-mgt","jans-link","kc-saml")
     plugins: "fido2,scim,user-mgt"
   # -- Fully qualified domain name to be used for Janssen installation. This address will be used to reach Janssen services.
@@ -990,7 +990,7 @@ global:
       deployment: {}
       horizontalPodAutoscaler: {}
       service: {}
-      secret: {}  
+      secret: {}
     # -- Name of the fido2 service. Please keep it as default.
     fido2ServiceName: fido2
     # -- Boolean flag to enable/disable the fido2 chart.
@@ -1030,7 +1030,7 @@ global:
       # -- fido2 ingress resource labels. key app is taken
       fido2Labels: { }
       # -- fido2 ingress resource additional annotations.
-      fido2AdditionalAnnotations: { }      
+      fido2AdditionalAnnotations: { }
   # -- GCE storage kind if using Google disks
   gcePdStorageType: pd-standard
   # -- Boolean flag to enable mapping global.lbIp  to global.fqdn inside pods on clouds that provide static ip for load balancers. On cloud that provide only addresses to the LB this flag will enable a script to actively scan config.configmap.lbAddr and update the hosts file inside the pods automatically.
@@ -1067,17 +1067,17 @@ global:
       service: {}
       statefulset: {}
       storageClass: {}
-      secret: {}    
+      secret: {}
   persistence:
     # — Add custom annotations for kubernetes resources for the service
     customAnnotations:
       job: {}
       service: {}
-      secret: {}  
+      secret: {}
     # -- Boolean flag to enable/disable the persistence chart.
     enabled: true
   # -- service account used by Kubernetes resources
-  serviceAccountName: default   
+  serviceAccountName: default
   scim:
     # — Add custom annotations for kubernetes resources for the service
     customAnnotations:
@@ -1087,7 +1087,7 @@ global:
       deployment: {}
       horizontalPodAutoscaler: {}
       service: {}
-      secret: {}  
+      secret: {}
     # -- Name of the scim service. Please keep it as default.
     scimServiceName: scim
     # -- Boolean flag to enable/disable the SCIM chart.
@@ -1131,7 +1131,7 @@ global:
       # -- SCIM config ingress resource labels. key app is taken
       scimLabels: { }
       # -- SCIM ingress resource additional annotations.
-      scimAdditionalAnnotations: { }      
+      scimAdditionalAnnotations: { }
   # -- StorageClass section for OpenDJ charts. This is not currently used by the openbanking distribution. You may specify custom parameters as needed.
   storageClass:
     allowVolumeExpansion: true
@@ -1200,7 +1200,7 @@ global:
       deployment: {}
       horizontalPodAutoscaler: {}
       service: {}
-      secret: {}  
+      secret: {}
     # -- Name of the saml service. Please keep it as default.
     samlServiceName: saml
     # -- Boolean flag to enable/disable the saml chart.
@@ -1212,7 +1212,7 @@ global:
       # -- SAML config ingress resource labels. key app is taken
       samlLabels: { }
       # -- SAML ingress resource additional annotations.
-      samlAdditionalAnnotations: { }      
+      samlAdditionalAnnotations: { }
     # -- passing custom java options to saml. DO NOT PASS JAVA_OPTIONS in envs.
     cnCustomJavaOptions: ""
   # -- Path to SQL password file
@@ -1240,6 +1240,10 @@ global:
   kc-scheduler:
     # -- Boolean flag to enable/disable the kc-scheduler cronjob chart.
     enabled: false
+  # -- Path to configuration schema file
+  cnConfiguratorConfigurationFile: /etc/jans/conf/configuration.json
+  # -- Path to dumped configuration schema file
+  cnConfiguratorDumpFile: /etc/jans/conf/configuration.out.json
 
 # -- Nginx ingress definitions chart
 nginx-ingress:
