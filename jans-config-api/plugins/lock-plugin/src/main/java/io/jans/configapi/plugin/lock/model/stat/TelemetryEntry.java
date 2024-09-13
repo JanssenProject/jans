@@ -47,10 +47,10 @@ public class TelemetryEntry extends BaseEntry implements Serializable {
     private long policyFailedLoadCounter;
 
     @AttributeName(name = "evaluationTimeNs")
-    private Date lastPolicyEvaluationTimeNs;
+    private int lastPolicyEvaluationTimeNs;
 
     @AttributeName(name = "averageTimeNs")
-    private Date avgPolicyEvaluationTimeNs;
+    private int avgPolicyEvaluationTimeNs;
 
     @JsonProperty("memoryUsage")
     private String memoryUsage;
@@ -134,19 +134,19 @@ public class TelemetryEntry extends BaseEntry implements Serializable {
 		this.policyFailedLoadCounter = policyFailedLoadCounter;
 	}
 
-	public Date getLastPolicyEvaluationTimeNs() {
+	public int getLastPolicyEvaluationTimeNs() {
 		return lastPolicyEvaluationTimeNs;
 	}
 
-	public void setLastPolicyEvaluationTimeNs(Date lastPolicyEvaluationTimeNs) {
+	public void setLastPolicyEvaluationTimeNs(int lastPolicyEvaluationTimeNs) {
 		this.lastPolicyEvaluationTimeNs = lastPolicyEvaluationTimeNs;
 	}
 
-	public Date getAvgPolicyEvaluationTimeNs() {
+	public int getAvgPolicyEvaluationTimeNs() {
 		return avgPolicyEvaluationTimeNs;
 	}
 
-	public void setAvgPolicyEvaluationTimeNs(Date avgPolicyEvaluationTimeNs) {
+	public void setAvgPolicyEvaluationTimeNs(int avgPolicyEvaluationTimeNs) {
 		this.avgPolicyEvaluationTimeNs = avgPolicyEvaluationTimeNs;
 	}
 
