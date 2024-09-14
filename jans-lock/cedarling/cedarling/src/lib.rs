@@ -6,3 +6,5 @@
 //! "Fit for purpose" policies help developers build a better user experience.
 //! For example, why display form fields that a user is not authorized to see?
 //! The Cedarling is a more productive and flexible way to handle authorization.
+
+mod authz;
