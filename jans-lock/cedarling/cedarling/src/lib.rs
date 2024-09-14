@@ -8,3 +8,4 @@
 //! The Cedarling is a more productive and flexible way to handle authorization.
 
 mod authz;
+mod init;
