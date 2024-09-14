@@ -1,0 +1,13 @@
+[workspace]
+resolver = "2"
+members = ["cedarling"]
+
+[workspace.dependencies]
+
+
+[profile.release]
+strip = "symbols"
+debug-assertions = true
+lto = "thin"
+opt-level = "s"
+codegen-units = 1
