@@ -17,6 +17,7 @@ mod authz;
 mod init;
 mod jwt;
 mod lock;
+mod models;
 
 #[doc(hidden)]
 #[cfg(test)]
