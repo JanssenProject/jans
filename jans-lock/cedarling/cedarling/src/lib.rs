@@ -16,3 +16,7 @@
 mod authz;
 mod init;
 mod jwt;
+
+#[doc(hidden)]
+#[cfg(test)]
+mod tests;
