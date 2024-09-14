@@ -17,6 +17,12 @@ from jans.pycloudlib.persistence.utils import PersistenceMapper
 from jans.pycloudlib.utils import as_boolean
 
 from settings import LOGGING_CONFIG
+from utils import get_ads_project_base64
+from utils import get_ads_project_md5sum
+from utils import generalized_time_utc
+from utils import utcnow
+from utils import CASA_AGAMA_DEPLOYMENT_ID
+from utils import CASA_AGAMA_ARCHIVE
 
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("jans-casa")
@@ -30,36 +36,51 @@ class LDAPBackend:
         self.client = LdapClient(manager)
         self.type = "ldap"
 
-    def format_attrs(self, attrs):
-        _attrs = {}
-        for k, v in attrs.items():
-            if len(v) < 2:
-                v = v[0]
-            _attrs[k] = v
-        return _attrs
+    def format_attrs(self, entry, raw_values=None):
+        raw_values = raw_values or []
+        attrs = {}
+
+        for attr in entry.entry_attributes:
+            if attr in raw_values:
+                values = entry[attr].raw_values
+            else:
+                values = entry[attr].values
+
+            if len(values) < 2:
+                v = values[0]
+            else:
+                v = values
+            attrs[attr] = v
+        return attrs
 
     def get_entry(self, key, filter_="", attrs=None, **kwargs):
         filter_ = filter_ or "(objectClass=*)"
+        raw_values = kwargs.get("raw_values")
 
         entry = self.client.get(key, filter_=filter_, attributes=attrs)
         if not entry:
             return None
-        return Entry(entry.entry_dn, self.format_attrs(entry.entry_attributes_as_dict))
+        return Entry(entry.entry_dn, self.format_attrs(entry, raw_values))
 
     def modify_entry(self, key, attrs=None, **kwargs):
         attrs = attrs or {}
-        del_flag = kwargs.get("delete_attr", False)
-
-        if del_flag:
-            mod = self.client.MODIFY_DELETE
-        else:
-            mod = self.client.MODIFY_REPLACE
+        del_attrs = kwargs.get("delete_attrs") or []
 
         for k, v in attrs.items():
             if not isinstance(v, list):
                 v = [v]
+
+            if k in del_attrs:
+                mod = self.client.MODIFY_DELETE
+            else:
+                mod = self.client.MODIFY_REPLACE
             attrs[k] = [(mod, v)]
-        return self.client.modify(key, attrs)
+
+        modified, _ = self.client.modify(key, attrs)
+        return modified
+
+    def delete_entry(self, key, **kwargs):
+        return self.client.delete(key)
 
 
 class SQLBackend:
@@ -80,6 +101,10 @@ class SQLBackend:
         attrs = attrs or {}
         table_name = kwargs.get("table_name")
         return self.client.update(table_name, key, attrs), ""
+
+    def delete_entry(self, key, **kwargs):
+        table_name = kwargs.get("table_name")
+        return self.client.delete(table_name, key)
 
 
 class CouchbaseBackend:
@@ -131,6 +156,10 @@ class CouchbaseBackend:
             message = req.text or req.reason
         return status, message
 
+    def delete_entry(self, key, **kwargs):
+        bucket = kwargs.get("bucket")
+        return self.client.delete(bucket, key)
+
 
 class SpannerBackend:
     def __init__(self, manager):
@@ -150,6 +179,10 @@ class SpannerBackend:
         attrs = attrs or {}
         table_name = kwargs.get("table_name")
         return self.client.update(table_name, key, attrs), ""
+
+    def delete_entry(self, key, **kwargs):
+        table_name = kwargs.get("table_name")
+        return self.client.delete(table_name, key)
 
 
 BACKEND_CLASSES = {
@@ -175,6 +208,7 @@ class Upgrade:
         self.update_client_uris()
         self.update_conf_app()
         self.update_agama_script()
+        self.update_agama_deployment()
 
     def update_client_scopes(self):
         kwargs = {}
@@ -323,6 +357,49 @@ class Upgrade:
             entry.attrs["jansEnabled"] = True
             entry.attrs["jansRevision"] += 1
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
+
+    def update_agama_deployment(self):
+        casa_agama_deployment_id = CASA_AGAMA_DEPLOYMENT_ID
+        deploy_id = f"jansId={casa_agama_deployment_id},ou=deployments,ou=agama,o=jans"
+
+        if self.backend.type in ("sql", "spanner"):
+            kwargs = {"table_name": "adsPrjDeployment"}
+            deploy_id = doc_id_from_dn(deploy_id)
+        elif self.backend.type == "couchbase":
+            kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
+            deploy_id = id_from_dn(deploy_id)
+        else:
+            # for ldap, get the raw value of the following attribute so we get a precise value
+            kwargs = {"raw_values": ["jansEndDate"]}
+
+        entry = self.backend.get_entry(deploy_id, **kwargs)
+        proj_archive = CASA_AGAMA_ARCHIVE
+        assets_md5 = get_ads_project_md5sum(proj_archive)
+
+        # marker to determine whether we need to update persistence if asset is changed
+        if entry and assets_md5 != self.manager.config.get("casa_agama_md5sum"):
+            logger.info(f"Detected changes of casa-agama-project assets; synchronizing changes from {proj_archive} to persistence.")
+
+            entry.attrs["adsPrjDeplDetails"] = json.dumps({"projectMetadata": {"projectName": "casa"}})
+            entry.attrs["adsPrjAssets"] = get_ads_project_base64(proj_archive)
+            entry.attrs["jansActive"] = False
+            start_date = utcnow()
+
+            if self.backend.type in ("sql", "spanner"):
+                entry.attrs["jansStartDate"] = start_date
+                entry.attrs["jansEndDate"] = None
+            elif self.backend.type == "couchbase":
+                entry.attrs["jansStartDate"] = start_date.strftime("%Y-%m-%dT%H:%M:%SZ")
+                entry.attrs["jansEndDate"] = ""
+                entry.attrs["adsPrjDeplDetails"] = {"projectMetadata": {"projectName": "casa"}}
+                ...
+            else:  # ldap
+                # remove jansEndDate
+                kwargs["delete_attrs"] = ["jansEndDate"]
+                entry.attrs["jansStartDate"] = generalized_time_utc(start_date)
+
+            if self.backend.modify_entry(entry.id, entry.attrs, **kwargs):
+                self.manager.config.set("casa_agama_md5sum", assets_md5)
 
 
 def main():
