@@ -392,7 +392,6 @@ class Upgrade:
                 entry.attrs["jansStartDate"] = start_date.strftime("%Y-%m-%dT%H:%M:%SZ")
                 entry.attrs["jansEndDate"] = ""
                 entry.attrs["adsPrjDeplDetails"] = {"projectMetadata": {"projectName": "casa"}}
-                ...
             else:  # ldap
                 # remove jansEndDate
                 kwargs["delete_attrs"] = ["jansEndDate"]
