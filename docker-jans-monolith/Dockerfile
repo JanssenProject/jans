@@ -20,7 +20,7 @@ RUN DEBIAN_FRONTEND=noninteractive \
     && apt-get install -y python3 tini curl ca-certificates dbus systemd iproute2 gpg python3-pip python3-dev libpq-dev gcc python3-psycopg2 python3-ldap3 git maven \
     # install certbot
     && apt-get -y install libaugeas0 \
-    && pip install certbot certbot-apache \
+    && pip install ruamel.yaml certbot certbot-apache \
     && apt-get clean \
     # Cleaning up package lists
     && rm -rf /var/lib/apt/lists/*
@@ -45,7 +45,7 @@ EXPOSE 443 8080 1636
 # jans-linux-setup
 # =====================
 
-ENV JANS_SOURCE_VERSION=b645f0bdb706b933bf5c93fc261a6f00ce5a1882
+ENV JANS_SOURCE_VERSION=4b07e84a14df81899900724515f3eead1d579443
 
 # cleanup
 RUN rm -rf /tmp/jans
