@@ -13,7 +13,7 @@ RUN apk update \
 # KC scheduler
 # ============
 
-ENV CN_VERSION=1.1.5-SNAPSHOT
+ENV CN_VERSION=1.1.5
 ENV CN_BUILD_DATE='2024-09-06 13:35'
 ENV SCHEDULER_HOME=/opt/kc-scheduler
 
