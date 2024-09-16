@@ -1,20 +1,25 @@
-/// This library is entry point for the authorization engine.
-/// it is used to initialize the authorization engine and to authorize requests.
-///
-pub use authz_engine;
-pub use init_engine;
-pub use jwt_engine;
+/*
+ * This software is available under the Apache-2.0 license.
+ * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+ *
+ * Copyright (c) 2024, Gluu, Inc.
+ */
+#![deny(missing_docs)]
+//! # Cedarling
+//! The Cedarling is a performant local authorization service that runs the Rust Cedar Engine.
+//! Cedar policies and schema are loaded at startup from a locally cached "Policy Store".
+//! In simple terms, the Cedarling returns the answer: should the application allow this action on this resource given these JWT tokens.
+//! "Fit for purpose" policies help developers build a better user experience.
+//! For example, why display form fields that a user is not authorized to see?
+//! The Cedarling is a more productive and flexible way to handle authorization.
 
-use authz_engine::{Authz, AuthzNewError, AuthzRequest};
-pub use authz_engine::{CedarParams, ResourceData};
-pub use init_engine::policy_store::PolicyStore;
-pub use init_engine::policy_store_config::{GetPolicyError, PolicyStoreConfig};
-pub use init_engine::{BootstrapConfig, TokenMapper};
+mod authz;
+mod init;
+mod jwt;
+mod lock;
+mod log;
+mod models;
 
-pub type InitError = AuthzNewError;
-pub type Instance = Authz;
-pub type Request = AuthzRequest;
-
-pub fn init(config: BootstrapConfig) -> Result<Instance, InitError> {
-	Authz::new(config)
-}
+#[doc(hidden)]
+#[cfg(test)]
+mod tests;
