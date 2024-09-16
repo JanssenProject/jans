@@ -511,9 +511,13 @@ def main():
                 msg.installation_completed += "To manage your Janssen Identity Provider:\n"
                 msg.installation_completed += '/opt/jans/jans-cli/config-cli-tui.py'
                 if base.current_app.profile == static.SetupProfiles.OPENBANKING:
-                    ca_dir = os.path.join(Config.output_dir, 'CA')
-                    crt_fn = os.path.join(ca_dir, 'client.crt')
-                    key_fn = os.path.join(ca_dir, 'client.key')
+                    if static_kid == 'ob-gluu-test':
+                        ca_dir = os.path.join(Config.output_dir, 'CA')
+                        crt_fn = os.path.join(ca_dir, 'client.crt')
+                        key_fn = os.path.join(ca_dir, 'client.key')
+                    else:
+                        crt_fn = '/path/to/client.crt'
+                        key_fn = '/path/to/client.key'
                     msg.installation_completed += ' -CC {} -CK {}'.format(crt_fn, key_fn)
                 msg.installation_completed +="\n"
 
