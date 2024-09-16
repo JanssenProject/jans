@@ -122,7 +122,7 @@ class LockPersistenceSetup:
             "jans_opa_host": "localhost",
             "jans_opa_port": 8181,
             "base_endpoint": "jans-auth",
-            "tokenEndpoint": f"https://{hostname}/jans-auth/restv1/token",
+            "jans_auth_token_endpoint": f"https://{hostname}/jans-auth/restv1/token",
         }
 
         # client

@@ -1,8 +1,6 @@
 import json
 import logging.config
-import math
 import os
-import time
 from uuid import uuid4
 from string import Template
 from functools import cached_property
@@ -40,6 +38,10 @@ from jans.pycloudlib.utils import as_boolean
 from jans.pycloudlib.utils import get_server_certificate
 
 from settings import LOGGING_CONFIG
+from utils import generalized_time_utc
+from utils import get_ads_project_base64
+from utils import CASA_AGAMA_DEPLOYMENT_ID
+from utils import CASA_AGAMA_ARCHIVE
 
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("jans-casa")
@@ -234,7 +236,7 @@ class PersistenceSetup:
             "casa_redirect_uri": f"https://{hostname}/jans-casa",
             "casa_redirect_logout_uri": f"https://{hostname}/jans-casa/bye.zul",
             "casa_frontchannel_logout_uri": f"https://{hostname}/jans-casa/autologout",
-            "casa_agama_deployment_id": "202447d5-d44c-3125-b1f7-207cb33b6bf7",
+            "casa_agama_deployment_id": CASA_AGAMA_DEPLOYMENT_ID,
         }
 
         # Casa client
@@ -258,15 +260,8 @@ class PersistenceSetup:
         with open("/app/templates/jans-casa/casa-config.json") as f:
             ctx["casa_config_base64"] = generate_base64_contents(f.read() % ctx)
 
-        # calculate start date
-        ts = time.time()
-        microseconds, _ = math.modf(ts)
-        gm_ts = time.gmtime(ts)
-        ctx["jans_start_date"] = time.strftime("%Y%m%d%H%M%S", gm_ts) + f"{microseconds:.3f}Z"[1:]
-
-        # casa agama project (requires agama script to be enabled)
-        with open("/usr/share/java/casa-agama-project.zip", "rb") as f:
-            ctx["ads_prj_assets_base64"] = generate_base64_contents(f.read())
+        ctx["jans_start_date"] = generalized_time_utc()
+        ctx["ads_prj_assets_base64"] = get_ads_project_base64(CASA_AGAMA_ARCHIVE)
 
         # finalized contexts
         return ctx
