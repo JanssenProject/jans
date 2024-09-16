@@ -99,6 +99,24 @@ def _transform_lock_dynamic_config(conf, manager):
         conf["baseEndpoint"] = f"https://{hostname}/jans-auth/v1"
         should_update = True
 
+    # new audit endpoint groups
+    for audit_endpoint in ["telemetry/bulk", "health/bulk", "log/bulk"]:
+        if audit_endpoint in conf["endpointGroups"]["audit"]:
+            continue
+        conf["endpointGroups"]["audit"].append(audit_endpoint)
+        should_update = True
+
+    # new endpoint details
+    for k, v in {
+        "jans-config-api/lock/audit/telemetry/bulk": ["https://jans.io/oauth/lock/telemetry.readonly", "https://jans.io/oauth/lock/telemetry.write"],
+        "jans-config-api/lock/audit/log/bulk": ["https://jans.io/oauth/lock/log.write"],
+        "jans-config-api/lock/audit/health/bulk": ["https://jans.io/oauth/lock/health.readonly", "https://jans.io/oauth/lock/health.write"],
+    }.items():
+        if k in conf["endpointDetails"]:
+            continue
+        conf["endpointDetails"][k] = v
+        should_update = True
+
     # return modified config (if any) and update flag
     return conf, should_update
 
