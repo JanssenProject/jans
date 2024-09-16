@@ -150,14 +150,16 @@ public class AuditService {
 
     public List<TelemetryEntry> getTelemetryEntrysByRange(Date eventStartDate, Date eventEndDate, int sizeLimit) {
         logger.debug("Search TelemetryEntrys by event range: [{}, {}], sizeLimit:{}", eventStartDate, eventEndDate, sizeLimit);
+
+        String baseDn = getDnForTelemetryEntry(null);
         
-        Filter eventStartDateFilter = Filter.createGreaterOrEqualFilter(EVENT_TIME, eventStartDate);
-        Filter eventEndDateFilter = Filter.createLessOrEqualFilter(EVENT_TIME, eventEndDate);
+        Filter eventStartDateFilter = Filter.createGreaterOrEqualFilter(EVENT_TIME, persistenceEntryManager.encodeTime(baseDn, eventStartDate));
+        Filter eventEndDateFilter = Filter.createLessOrEqualFilter(EVENT_TIME, persistenceEntryManager.encodeTime(baseDn, eventEndDate));
         
         Filter searchFilter = Filter.createANDFilter(eventStartDateFilter, eventEndDateFilter);
 
         logger.debug("Search TelemetryEntrys with searchFilter: {}", searchFilter);
-        return persistenceEntryManager.findEntries(getDnForTelemetryEntry(null), TelemetryEntry.class, searchFilter,
+		return persistenceEntryManager.findEntries(baseDn, TelemetryEntry.class, searchFilter,
                 sizeLimit);
     }
 
@@ -197,14 +199,16 @@ public class AuditService {
 
     public List<HealthEntry> getHealthEntrysByRange(Date eventDateStart, Date eventDateEnd, int sizeLimit) {
         logger.debug("Search HealthEntrys by event range: [{}, {}], sizeLimit:{}", eventDateStart, eventDateEnd, sizeLimit);
+
+        String baseDn = getDnForHealthEntry(null);
         
-        Filter eventDateStartFilter = Filter.createGreaterOrEqualFilter(EVENT_TIME, eventDateStart);
-        Filter eventDateEndFilter = Filter.createLessOrEqualFilter(EVENT_TIME, eventDateEnd);
+        Filter eventDateStartFilter = Filter.createGreaterOrEqualFilter(EVENT_TIME, persistenceEntryManager.encodeTime(baseDn, eventDateStart));
+        Filter eventDateEndFilter = Filter.createLessOrEqualFilter(EVENT_TIME, persistenceEntryManager.encodeTime(baseDn, eventDateEnd));
         
         Filter searchFilter = Filter.createANDFilter(eventDateStartFilter, eventDateEndFilter);
 
         logger.debug("Search HealthEntrys with searchFilter: {}", searchFilter);
-        return persistenceEntryManager.findEntries(getDnForTelemetryEntry(null), HealthEntry.class, searchFilter,
+		return persistenceEntryManager.findEntries(baseDn, HealthEntry.class, searchFilter,
                 sizeLimit);
     }
 
@@ -244,14 +248,16 @@ public class AuditService {
 
     public List<LogEntry> getLogEntrysByRange(Date eventDateStart, Date eventDateEnd, int sizeLimit) {
         logger.debug("Search LogEntrys by event range: [{}, {}], sizeLimit:{}", eventDateStart, eventDateEnd, sizeLimit);
+
+        String baseDn = getDnForLogEntry(null);
         
-        Filter eventDateStartFilter = Filter.createGreaterOrEqualFilter(EVENT_TIME, eventDateStart);
-        Filter eventDateEndFilter = Filter.createLessOrEqualFilter(EVENT_TIME, eventDateEnd);
+        Filter eventDateStartFilter = Filter.createGreaterOrEqualFilter(EVENT_TIME, persistenceEntryManager.encodeTime(baseDn, eventDateStart));
+        Filter eventDateEndFilter = Filter.createLessOrEqualFilter(EVENT_TIME, persistenceEntryManager.encodeTime(baseDn, eventDateEnd));
         
         Filter searchFilter = Filter.createANDFilter(eventDateStartFilter, eventDateEndFilter);
 
         logger.debug("Search LogEntrys with searchFilter: {}", searchFilter);
-        return persistenceEntryManager.findEntries(getDnForTelemetryEntry(null), LogEntry.class, searchFilter,
+        return persistenceEntryManager.findEntries(baseDn, LogEntry.class, searchFilter,
                 sizeLimit);
     }
    

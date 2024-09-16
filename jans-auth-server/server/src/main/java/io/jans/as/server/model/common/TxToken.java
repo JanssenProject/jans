@@ -28,7 +28,7 @@ public class TxToken extends AbstractToken {
      */
     public TxToken(int lifeTime) {
         super(lifeTime);
-        this.tokenType = TokenType.TX_TOKEN;
+        this.tokenType = TokenType.N_A;
     }
 
     public TxToken(String tokenCode, Date creationDate, Date expirationDate) {
