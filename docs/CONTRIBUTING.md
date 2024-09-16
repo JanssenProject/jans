@@ -148,6 +148,20 @@ Backport changes are now supported through a [workflow](https://github.com/zeebe
 For-example to backport changes in a certain PR to version `v1.0.0` a label to that PR matching the version must be added i.e `backport/v1.0.0`.
 The flow consists of creating a new branch, cherry-picking the changes of the original PR and creating a new PR to merge them.
 
+### License Header
+
+The Janssen Project uses Apache-2.0 license. Any existing or new code file 
+has to start with license header as shown below:
+
+```Text
+/*
+ * This software is available under the Apache-2.0 license. 
+ * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+ *
+ * Copyright (c) 2024, Gluu, Inc. 
+ */
+```
+
 # Contributing to the documentation
 Great documentation is a reflection of software's maturity and the great community that stands behind it. Contributing to the Janssen Project documentation is the easiest way to learn about the Janssen Project and to get involved in the community process. 
 
