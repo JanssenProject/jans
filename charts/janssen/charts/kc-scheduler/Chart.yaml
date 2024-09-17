@@ -1,7 +1,7 @@
 
 apiVersion: v2
 name: kc-scheduler
-version: 1.1.5-dev
+version: 1.1.5
 kubeVersion: ">=v1.22.0-0"
 description: Responsible for synchronizing Keycloak SAML clients
 type: application

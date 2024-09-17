@@ -22,10 +22,8 @@ Resource for managing Keycloak SAML Trust Relationship.
 
 ### Optional
 
-- `admin_url` (String) Admin URL of the trust relationship.
 - `always_display_in_console` (Boolean) Always display in console of the trust relationship.
 - `base_dn` (String) Base DN of the trust relationship.
-- `base_url` (String) Base URL of the trust relationship.
 - `client_authenticator_type` (String) Client authenticator type of the trust relationship.
 - `consent_required` (Boolean) Consent required of the trust relationship.
 - `enabled` (Boolean) Status of the trust relationship.
@@ -43,8 +41,6 @@ Resource for managing Keycloak SAML Trust Relationship.
 - `sp_logout_url` (String) SP logout URL of the trust relationship.
 - `sp_meta_data_url` (String) SP metadata URL of the trust relationship.
 - `status` (String) Status of the trust relationship.
-- `surrogate_auth_required` (Boolean) Surrogate auth required of the trust relationship.
-- `url` (String) URL of the trust relationship.
 - `validation_log` (List of String) Validation log of the trust relationship.
 - `validation_status` (String) Validation status of the trust relationship.
 

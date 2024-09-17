@@ -30,8 +30,8 @@ public class HealthEntry extends BaseEntry implements Serializable {
 	@AttributeName(name = "jansService")
 	private String service;
 
-	@AttributeName(name = "jansNodeId")
-	private String nodeId;
+	@AttributeName(name = "jansNodeName")
+	private String nodeName;
 
 	@AttributeName(name = "jansStatus")
 	private String status;
@@ -73,12 +73,12 @@ public class HealthEntry extends BaseEntry implements Serializable {
 		this.service = service;
 	}
 
-	public String getNodeId() {
-		return nodeId;
+	public String getnodeName() {
+		return nodeName;
 	}
 
-	public void setNodeId(String nodeId) {
-		this.nodeId = nodeId;
+	public void setnodeName(String nodeName) {
+		this.nodeName = nodeName;
 	}
 
 	public String getStatus() {
@@ -100,7 +100,7 @@ public class HealthEntry extends BaseEntry implements Serializable {
 	@Override
 	public String toString() {
 		return "HealthEntry [inum=" + inum + ", creationDate=" + creationDate + ", eventTime=" + eventTime
-				+ ", service=" + service + ", nodeId=" + nodeId + ", status=" + status + ", engineStatus="
+				+ ", service=" + service + ", nodeName=" + nodeName + ", status=" + status + ", engineStatus="
 				+ engineStatus + ", toString()=" + super.toString() + "]";
 	}
 

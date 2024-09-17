@@ -1078,6 +1078,7 @@ class JCA_CLI:
                                             print('  {}: {}'.format(param[0], param[1]))
 
                                 if 'requestBody' in path:
+                                    schema_list = []
                                     for apptype in path['requestBody'].get('content', {}):
                                         if 'schema' in path['requestBody']['content'][apptype]:
                                             if path['requestBody']['content'][apptype]['schema'].get('type') == 'object' and '$ref' not in path['requestBody']['content'][apptype]['schema']:
@@ -1103,7 +1104,9 @@ class JCA_CLI:
                                             else:
                                                 if '$ref' in path['requestBody']['content'][apptype]['schema']:
                                                     schema_path = path['requestBody']['content'][apptype]['schema']['$ref']
-                                                    print('  Schema: {}{}'.format(mode_suffix, os.path.basename(schema_path)))
+                                                    if not schema_path in schema_list:
+                                                        schema_list.append(schema_path)
+                                                        print('  Schema: {}{}'.format(mode_suffix, os.path.basename(schema_path)))
                             break
         if schema_path:
             print()

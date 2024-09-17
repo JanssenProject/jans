@@ -42,16 +42,33 @@ public interface AuditRestWebService {
 	Response processHealthRequest(@Context HttpServletRequest request, @Context HttpServletResponse response, @Context SecurityContext sec);
 
 	@POST
+	@Path("/health/bulk")
+	@Produces({ MediaType.APPLICATION_JSON })
+	@ProtectedApi(scopes = {"https://jans.io/lock-server/audit.write"})
+	Response processBulkHealthRequest(@Context HttpServletRequest request, @Context HttpServletResponse response, @Context SecurityContext sec);
+
+	@POST
 	@Path("/log")
 	@Produces({ MediaType.APPLICATION_JSON })
 	@ProtectedApi(scopes = {"https://jans.io/lock-server/audit.write"})
 	Response processLogRequest(@Context HttpServletRequest request, @Context HttpServletResponse response, @Context SecurityContext sec);
 
 	@POST
+	@Path("/log/bulk")
+	@Produces({ MediaType.APPLICATION_JSON })
+	@ProtectedApi(scopes = {"https://jans.io/lock-server/audit.write"})
+	Response processBulkLogRequest(@Context HttpServletRequest request, @Context HttpServletResponse response, @Context SecurityContext sec);
+
+	@POST
 	@Path("/telemetry")
 	@Produces({ MediaType.APPLICATION_JSON })
 	@ProtectedApi(scopes = {"https://jans.io/lock-server/audit.write"})
-	Response processTelemetryRequest(@Context HttpServletRequest request, @Context HttpServletResponse response,
-			@Context SecurityContext sec);
+	Response processTelemetryRequest(@Context HttpServletRequest request, @Context HttpServletResponse response, @Context SecurityContext sec);
+
+	@POST
+	@Path("/telemetry/bulk")
+	@Produces({ MediaType.APPLICATION_JSON })
+	@ProtectedApi(scopes = {"https://jans.io/lock-server/audit.write"})
+	Response processBulkTelemetryRequest(@Context HttpServletRequest request, @Context HttpServletResponse response, @Context SecurityContext sec);
 
 }
