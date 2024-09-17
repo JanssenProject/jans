@@ -1,0 +1,16 @@
+dn: inum=@!1111!2FDB.CF02,ou=scripts,o=gluu
+objectClass: oxCustomScript
+objectClass: top
+description: Passport authentication module
+displayName: passport
+gluuStatus: false
+inum: @!1111!2FDB.CF02
+oxConfigurationProperty: {"value1":"generic_remote_attributes_list","value2":"username, email, name, name, givenName, familyName, provider","description":""}
+oxConfigurationProperty: {"value1":"generic_local_attributes_list","value2":"uid, mail, cn, displayName, givenName, sn, provider","description":""}
+oxLevel: 60
+oxModuleProperty: {"value1":"usage_type","value2":"interactive","description":""}
+oxModuleProperty: {"value1":"location_type","value2":"ldap","description":""}
+oxRevision: 1
+oxScript:: <copy content of the file from PassportExternalAuthenticator.py>
+oxScriptType: person_authentication
+programmingLanguage: python
