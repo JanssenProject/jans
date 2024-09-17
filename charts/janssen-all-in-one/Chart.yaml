@@ -3,7 +3,7 @@ annotations:
   artifacthub.io/containsSecurityUpdates: 'true'
   artifacthub.io/images: |
     - name: all-in-one
-      image: ghcr.io/janssenproject/jans/all-in-one:1.1.5_dev
+      image: ghcr.io/janssenproject/jans/all-in-one:1.1.5-1
   artifacthub.io/license: Apache-2.0
   artifacthub.io/prerelease: 'false'
   catalog.cattle.io/certified: partner
@@ -22,4 +22,4 @@ maintainers:
     email: support@jans.io
 description: Janssen Access and Identity Management All-in-One Chart. This chart deploys the selected janssen microservice all in one deployment.
 name: janssen-all-in-one
-version: 1.1.5-dev
+version: 1.1.5

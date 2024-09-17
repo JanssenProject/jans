@@ -152,9 +152,14 @@ func resourceKCSamlConfiguration() *schema.Resource {
 				Description: "SP Metadata File.",
 			},
 			"ignore_validation": {
-				Type:        schema.TypeString,
+				Type:        schema.TypeBool,
 				Optional:    true,
 				Description: "Ignore Validation.",
+			},
+			"set_config_default_value": {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Set Config Default Value.",
 			},
 			"idp_metadata_mandatory_attributes": {
 				Type:        schema.TypeList,
