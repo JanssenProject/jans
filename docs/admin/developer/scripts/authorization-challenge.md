@@ -185,10 +185,7 @@ public class AuthorizationChallenge implements AuthorizationChallengeType {
         DeviceSessionService deviceSessionService = CdiUtil.bean(DeviceSessionService.class);
         boolean newSave = deviceSessionObject == null;
         if (newSave) {
-            final String id = UUID.randomUUID().toString();
-            deviceSessionObject = new DeviceSession();
-            deviceSessionObject.setId(id);
-            deviceSessionObject.setDn(deviceSessionService.buildDn(id));
+            deviceSessionObject = deviceSessionService.newDeviceSession();
         }
 
         String username = context.getHttpRequest().getParameter(USERNAME_PARAMETER);
@@ -395,10 +392,7 @@ public class AuthorizationChallenge implements AuthorizationChallengeType {
         DeviceSessionService deviceSessionService = CdiUtil.bean(DeviceSessionService.class);
         boolean newSave = deviceSessionObject == null;
         if (newSave) {
-            final String id = UUID.randomUUID().toString();
-            deviceSessionObject = new DeviceSession();
-            deviceSessionObject.setId(id);
-            deviceSessionObject.setDn(deviceSessionService.buildDn(id));
+            deviceSessionObject = deviceSessionService.newDeviceSession();
         }
 
         String username = context.getHttpRequest().getParameter(USERNAME_PARAMETER);

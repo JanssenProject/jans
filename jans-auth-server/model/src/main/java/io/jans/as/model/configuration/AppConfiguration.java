@@ -33,6 +33,7 @@ import java.util.*;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AppConfiguration implements Configuration {
 
+    public static final int DEFAULT_DEVICE_SESSION_LIFETIME = 86400;
     public static final int DEFAULT_SESSION_ID_LIFETIME = 86400;
     public static final KeySelectionStrategy DEFAULT_KEY_SELECTION_STRATEGY = KeySelectionStrategy.OLDER;
     public static final String DEFAULT_STAT_SCOPE = "jans_stat";
@@ -692,6 +693,9 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Choose whether to disable U2F endpoints", defaultValue = "false")
     private Boolean disableU2fEndpoint = false;
 
+    @DocProperty(description = "Device session lifetime in seconds")
+    private Integer deviceSessionLifetimeInSeconds;
+
     // Token Exchange
     @DocProperty(description = "", defaultValue = "false")
     private Boolean rotateDeviceSecret = false;
@@ -1022,6 +1026,17 @@ public class AppConfiguration implements Configuration {
 
     public void setReturnDeviceSecretFromAuthzEndpoint(Boolean returnDeviceSecretFromAuthzEndpoint) {
         this.returnDeviceSecretFromAuthzEndpoint = returnDeviceSecretFromAuthzEndpoint;
+    }
+
+    public Integer getDeviceSessionLifetimeInSeconds() {
+        if (deviceSessionLifetimeInSeconds == null) {
+           deviceSessionLifetimeInSeconds = DEFAULT_DEVICE_SESSION_LIFETIME;
+        }
+        return deviceSessionLifetimeInSeconds;
+    }
+
+    public void setDeviceSessionLifetimeInSeconds(Integer deviceSessionLifetimeInSeconds) {
+        this.deviceSessionLifetimeInSeconds = deviceSessionLifetimeInSeconds;
     }
 
     public Boolean getRotateDeviceSecret() {
