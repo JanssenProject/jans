@@ -450,7 +450,86 @@ Janssen Server Configuration REST API exposes relevant endpoints for managing
 and configuring the OpenID Connect Client. Endpoint details are published in the [Swagger
 document](../../reference/openapi.md).
 
+### Get SCIM Client
+
+Let's obtain the credentials of this client first. In TUI, navigate to `Auth Server > Clients`. In the search field type SCIM (uppercase). Highlight the row that matches a client named "SCIM Client" and press Enter. To see in `JSON` formate please press `d`.
+
+From the "Basic" section, grab the "client id" and "client secret". This secret is encrypted, to decrypt it, in a terminal run `/opt/jans/bin/encode.py -D ENCRYPTED-SECRET-HERE`.
+
+
+### Get Access token
+
+Let's get a token, 
+```
+curl -k -u 'CLIENT_ID:DECRYPTED_CLIENT_SECRET' -k -d grant_type=client_credentials -d scope='https://jans.io/scim/users.read https://jans.io/scim/users write' https://<jans-server>/jans-auth/restv1/token > /tmp/token.json
+```
+In response `token.json` we will get `access_token`
+```
+{
+"access_token":"11a76589-7955-4247-9ca5-f3ad7884305...",
+"scope":"https://jans.io/scim/users.read",
+"token_type":"Bearer",
+"expires_in":299
+}
+```
+
+### Retrive existing User 
+
+To get an existing user 
+
+```
+curl -k -G -H 'Authorization: Bearer ACCESS_TOKEN' --data-urlencode 'filter=displayName co "Admin"' https://<jans-server>/jans-scim/restv1/v2/Users > /tmp/user.json
+```
+In response `user.json` we will get 
+```
+{
+  "schemas": [
+    "urn:ietf:params:scim:api:messages:2.0:ListResponse"
+  ],
+  "totalResults": 1,
+  "startIndex": 1,
+  "itemsPerPage": 1,
+  "Resources": [
+    {
+      "schemas": [
+        "urn:ietf:params:scim:schemas:core:2.0:User"
+      ],
+      "id": "5fdbb720-a1fd-477f-af92-b7c054f02c98",
+      "meta": {
+        "resourceType": "User",
+        "created": "2023-06-12T14:54:09.531Z",
+        "location": "https://raju.jans13.me/jans-scim/restv1/v2/Users/5fdbb720-a1fd-477f-af92-b7c054f02c98"
+      },
+      "userName": "admin",
+      "name": {
+        "familyName": "...",
+        "givenName": "...",
+        "middleName": "...",
+        "formatted": "..."
+      },
+      "displayName": "Admin",
+      "active": true,
+      "emails": [
+        {
+          "value": "example@gluu.org",
+          "primary": false
+        }
+      ],
+      "groups": [
+        {
+          "value": "60B7",
+          "display": "Jannsen Manager Group",
+          "type": "direct",
+          "$ref": "https://raju.jans13.me/jans-scim/restv1/v2/Groups/60B7"
+        }
+      ]
+    }
+  ]
+}
+```
+
 ### Create an User
+
 Let's start creating a dummy user. A client sends a POST request containing a "User" to the "/Users" endpoint. 
 ```
 POST /Users  HTTP/1.1
@@ -531,7 +610,7 @@ Overwrite your `input.json` with the following. Replace content in angle bracket
 }
 ```
 
-PUT with curl:
+**PUT with curl**:
 
 ```
 curl -k -X PUT -H 'Authorization: Bearer ACCESS_TOKEN' -H 'Content-Type: application/scim+json' -d @input.json -o output.json https://<jans-server>/jans-scim/restv1/v2/Users/<user-inum>
@@ -694,5 +773,3 @@ curl -k -X DELETE -H 'Authorization: Bearer ACCESS_TOKEN' https://<jans-server>/
 Use the inum of our dummy user, **Jensen Barbara**.
 
 Check your LDAP or via Jans TUI to see that **Bjensen** is gone.
-
-
