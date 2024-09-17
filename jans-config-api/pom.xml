@@ -47,7 +47,7 @@
 		<cucumber.version>3.8.0</cucumber.version>
 		<jacoco.version>0.8.10</jacoco.version>
 		<mapstruct.version>1.5.3.Final</mapstruct.version>
-		<swagger.version>2.2.7</swagger.version>
+		<swagger.version>2.2.11</swagger.version>
 
 		<sonar.projectKey>JanssenProject_jans-config-api</sonar.projectKey>
 		<sonar.moduleKey>${project.groupId}:${project.artifactId}</sonar.moduleKey>
