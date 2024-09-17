@@ -557,11 +557,11 @@ components:
           type: integer
           format: int64
         lastPolicyEvaluationTimeNs:
-          type: string
-          format: date-time
+          type: integer
+          format: int32
         avgPolicyEvaluationTimeNs:
-          type: string
-          format: date-time
+          type: integer
+          format: int32
         evaluationRequestsCount:
           type: integer
           format: int64

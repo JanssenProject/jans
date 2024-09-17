@@ -104,6 +104,7 @@ public class ApiConstants {
     public static final String AUTHORIZATIONS = "/authorizations";
     public static final String USERID_PATH = "{userId}";
     public static final String SERVICE_NAME_PARAM_PATH = "/{service-name}";
+    public static final String TOKEN_PATH = "/{token}";
     
     public static final String USERID = "userId";
     public static final String USERNAME = "username";
@@ -128,7 +129,7 @@ public class ApiConstants {
     public static final String USERDN = "userDn";
     public static final String PLUGIN_NAME = "pluginName";
     public static final String SERVICE_NAME = "service-name";
-    
+    public static final String TOKEN_PARAM = "token";  
 
     public static final String ALL = "all";
     public static final String ACTIVE = "active";

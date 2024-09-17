@@ -275,14 +275,18 @@ public class ClientService implements Serializable {
             }
         }
 
-        logger.trace("After setting - responseTypeSet:{}, client.getResponseTypes():{}, appConfiguration.getAllResponseTypesSupported():{}, grantTypeSet:{}, client.getGrantTypes():{}, appConfiguration.getGrantTypesSupported():{}",
-                responseTypeSet, client.getResponseTypes(), appConfiguration.getAllResponseTypesSupported(), grantTypeSet, client.getGrantTypes(), appConfiguration.getGrantTypesSupported());
+        logger.trace(
+                "After setting - responseTypeSet:{}, client.getResponseTypes():{}, appConfiguration.getAllResponseTypesSupported():{}, grantTypeSet:{}, client.getGrantTypes():{}, appConfiguration.getGrantTypesSupported():{}",
+                responseTypeSet, client.getResponseTypes(), appConfiguration.getAllResponseTypesSupported(),
+                grantTypeSet, client.getGrantTypes(), appConfiguration.getGrantTypesSupported());
         responseTypeSet.retainAll(appConfiguration.getAllResponseTypesSupported());
         grantTypeSet.retainAll(appConfiguration.getGrantTypesSupported());
-        logger.trace("After setting - responseTypeSet:{}, grantTypeSet:{}, appConfiguration.getGrantTypesSupportedByDynamicRegistration():{}",
+        logger.trace(
+                "After setting - responseTypeSet:{}, grantTypeSet:{}, appConfiguration.getGrantTypesSupportedByDynamicRegistration():{}",
                 responseTypeSet, grantTypeSet, appConfiguration.getGrantTypesSupportedByDynamicRegistration());
 
-        Set<GrantType> grantTypesSupportedByDynamicRegistration = appConfiguration.getGrantTypesSupportedByDynamicRegistration();
+        Set<GrantType> grantTypesSupportedByDynamicRegistration = appConfiguration
+                .getGrantTypesSupportedByDynamicRegistration();
         grantTypeSet.retainAll(grantTypesSupportedByDynamicRegistration);
 
         if (!update || (responseTypeSet != null && !responseTypeSet.isEmpty())) {
@@ -395,23 +399,24 @@ public class ClientService implements Serializable {
 
         }
     }
-    
+
     public List<TokenEntity> getTokenOfClient(String clientId) {
         logger.info(" Fetch token for clientId:{}", clientId);
         try {
             final String baseDn = getDnForClient(clientId);
-            return persistenceEntryManager.findEntries(baseDn, TokenEntity.class, Filter.createPresenceFilter("tknCde"));
+            return persistenceEntryManager.findEntries(baseDn, TokenEntity.class,
+                    Filter.createPresenceFilter("tknCde"));
         } catch (Exception ex) {
             logger.error("Exception while getting client token is - ", ex);
         }
         return Collections.emptyList();
     }
-    
+
     public Response revokeClientToken(String clientId, String token, String tokenTypeHint) {
         logger.info(" Revoke token - clientId:{}, token:{}, tokenTypeHint:{}", clientId, token, tokenTypeHint);
 
         return AuthClientFactory.revokeToken(this.configurationService.getRevokeUrl(), clientId, token, tokenTypeHint);
 
     }
-       
+
 }

@@ -3245,84 +3245,25 @@ paths:
     post:
       tags:
       - OAuth - OpenID Connect - Clients
-      summary: Create new OpenId Connect client
-      description: Create new OpenId Connect client
-      operationId: post-oauth-openid-client
-      requestBody:
-        description: OpenID Connect Client object
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Client'
-            examples:
-              Request json example:
-                description: Request json example
-                value: |
-                  {
-                      "deletable": false,
-                      "clientSecret": "test1234",
-                      "frontChannelLogoutSessionRequired": false,
-                      "redirectUris": [
-                          "https://jans.server2/admin-ui",
-                          "http://localhost:4100"
-                      ],
-                      "responseTypes": [
-                          "code"
-                      ],
-                      "grantTypes": [
-                          "authorization_code",
-                          "refresh_token",
-                          "client_credentials"
-                      ],
-                      "applicationType": "web",
-                      "clientName": "",
-                      "logoUri": "",
-                      "clientUri": "",
-                      "policyUri":"",
-                      "tosUri": "",
-                      "subjectType": "pairwise",
-                      "idTokenSignedResponseAlg": "RS256",
-                      "tokenEndpointAuthMethod": "client_secret_basic",
-                      "scopes": [
-                          "inum=C4F7,ou=scopes,o=jans"
-                      ],
-                      "trustedClient": false,
-                      "persistClientAuthorizations": true,
-                      "includeClaimsInIdToken": false,
-                      "customAttributes": [
-                          {
-                              "name": "displayName",
-                              "multiValued": false,
-                              "values": [
-                                  "Api Client"
-                              ],
-                              "value": "Api Client",
-                              "displayValue": "Api Client"
-                          }
-                      ],
-                      "customObjectClasses": [
-                          "top"
-                      ],
-                      "rptAsJwt": false,
-                      "accessTokenAsJwt": false,
-                      "accessTokenSigningAlg": "RS256",
-                      "disabled": false,
-                      "attributes": {
-                          "runIntrospectionScriptBeforeJwtCreation": false,
-                          "keepClientAuthorizationAfterExpiration": false,
-                          "allowSpontaneousScopes": false,
-                          "backchannelLogoutSessionRequired": false,
-                          "parLifetime": 600,
-                          "requirePar": false,
-                          "jansDefaultPromptLogin": false
-                      },
-                      "tokenBindingSupported": false,
-                      "authenticationMethod": "client_secret_basic",
-                      "displayName": "Api Client"
-                  }
+      summary: Revoke client token.
+      description: Revoke client token.
+      operationId: revoke-client-token
+      parameters:
+      - name: clientId
+        in: path
+        description: Client identifier
+        required: true
+        schema:
+          type: string
+      - name: token
+        in: path
+        description: Token
+        required: true
+        schema:
+          type: string
       responses:
-        "201":
-          description: Created
+        "204":
+          description: No Content
           content:
             application/json:
               schema:
@@ -3455,7 +3396,7 @@ paths:
           description: InternalServerError
       security:
       - oauth2:
-        - https://jans.io/oauth/config/openid/clients.write
+        - https://jans.io/oauth/config/openid/client-token.delete
   /api/v1/openid/clients/{inum}:
     get:
       tags:
@@ -8505,7 +8446,7 @@ paths:
       - OAuth - OpenID Connect - Clients
       summary: Create new OpenId Connect client
       description: Create new OpenId Connect client
-      operationId: post-oauth-openid-client_1
+      operationId: post-oauth-openid-client
       requestBody:
         description: OpenID Connect Client object
         content:
@@ -9807,19 +9748,19 @@ components:
           type: string
         selected:
           type: boolean
-        whitePagesCanView:
-          type: boolean
-        userCanView:
-          type: boolean
-        userCanEdit:
-          type: boolean
         adminCanView:
           type: boolean
         adminCanEdit:
           type: boolean
+        userCanEdit:
+          type: boolean
+        userCanView:
+          type: boolean
         adminCanAccess:
           type: boolean
         userCanAccess:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -10665,6 +10606,8 @@ components:
           type: boolean
         lockMessageConfig:
           $ref: '#/components/schemas/LockMessageConfig'
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -10674,8 +10617,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -11894,14 +11835,14 @@ components:
           type: boolean
         internal:
           type: boolean
+        locationPath:
+          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
-        locationPath:
-          type: string
         baseDn:
           type: string
     ScriptError:

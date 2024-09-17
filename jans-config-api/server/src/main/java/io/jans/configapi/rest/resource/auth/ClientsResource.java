@@ -154,13 +154,41 @@ public class ClientsResource extends ConfigBaseResource {
             ApiAccessConstants.OPENID_READ_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Path(ApiConstants.INUM_PATH)
     public Response getClientToken(
-            @Parameter(description = "Client identifier") @PathParam(ApiConstants.INUM) @NotNull String inum) {
+            @Parameter(description = "Client identifier") @PathParam(ApiConstants.CLIENTID) @NotNull String clientId) {
         if (logger.isDebugEnabled()) {
-            logger.debug("Client serach by inum:{}", escapeLog(inum));
+            logger.debug("Serach tokens by clientId:{}", escapeLog(clientId));
         }
-        List<TokenEntity> tokenEntityList = clientService.getTokenOfClient(inum);
+        checkNotNull(clientId, ApiConstants.CLIENTID);
+        List<TokenEntity> tokenEntityList = clientService.getTokenOfClient(clientId);
 
         return Response.ok(tokenEntityList).build();
+    }
+
+    @Operation(summary = "Revoke client token.", description = "Revoke client token.", operationId = "revoke-client-token", tags = {
+            "OAuth - OpenID Connect - Clients" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    ApiAccessConstants.CLIENTS_TOKEN_DELETE_ACCESS }))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "No Content", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Client.class), examples = @ExampleObject(name = "Response json example", value = "example/openid-clients/clients/openid-clients-get.json"))),
+            @ApiResponse(responseCode = "400", description = "Bad Request"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
+    @POST
+    @ProtectedApi(scopes = { ApiAccessConstants.CLIENTS_TOKEN_DELETE_ACCESS }, groupScopes = {
+            ApiAccessConstants.OPENID_DELETE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
+    public Response createOpenIdConnect(
+            @Parameter(description = "Client identifier") @PathParam(ApiConstants.CLIENTID) @NotNull String clientId,
+            @Parameter(description = "Token") @PathParam(ApiConstants.TOKEN_PARAM) @NotNull String token) {
+        if (logger.isDebugEnabled()) {
+            logger.debug("Delete client token - clientId:{}, token():{}", escapeLog(clientId), escapeLog(token));
+        }
+
+        checkNotNull(clientId, ApiConstants.CLIENTID);
+        checkNotNull(token, ApiConstants.TOKEN_PARAM);
+
+        Response response = clientService.revokeClientToken(clientId, token, token);
+        logger.debug(" Revoke client response:{}", response);
+
+        return Response.status(Response.Status.CREATED).entity(response).build();
     }
 
     @Operation(summary = "Create new OpenId Connect client", description = "Create new OpenId Connect client", operationId = "post-oauth-openid-client", tags = {
