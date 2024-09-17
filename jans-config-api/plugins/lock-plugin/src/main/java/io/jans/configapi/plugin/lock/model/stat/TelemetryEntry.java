@@ -31,14 +31,14 @@ public class TelemetryEntry extends BaseEntry implements Serializable {
     @AttributeName(name = "jansService")
     private String service;
 
-    @AttributeName(name = "jansNodeId")
-    private String nodeId;
+    @AttributeName(name = "jansNodeName")
+    private String nodeName;
 
     @AttributeName(name = "jansStatus")
     private String status;
 
     @AttributeName(name = "jansDownloadSize")
-    private Integer lastPolicyLoadSize;
+    private int lastPolicyLoadSize;
 
     @AttributeName(name = "jansSuccessLoadCounter")
     private long policySuccessLoadCounter;
@@ -47,10 +47,10 @@ public class TelemetryEntry extends BaseEntry implements Serializable {
     private long policyFailedLoadCounter;
 
     @AttributeName(name = "evaluationTimeNs")
-    private Date lastPolicyEvaluationTimeNs;
+    private int lastPolicyEvaluationTimeNs;
 
     @AttributeName(name = "averageTimeNs")
-    private Date avgPolicyEvaluationTimeNs;
+    private int avgPolicyEvaluationTimeNs;
 
     @JsonProperty("memoryUsage")
     private String memoryUsage;
@@ -94,12 +94,12 @@ public class TelemetryEntry extends BaseEntry implements Serializable {
 		this.service = service;
 	}
 
-	public String getNodeId() {
-		return nodeId;
+	public String getnodeName() {
+		return nodeName;
 	}
 
-	public void setNodeId(String nodeId) {
-		this.nodeId = nodeId;
+	public void setnodeName(String nodeName) {
+		this.nodeName = nodeName;
 	}
 
 	public String getStatus() {
@@ -110,11 +110,11 @@ public class TelemetryEntry extends BaseEntry implements Serializable {
 		this.status = status;
 	}
 
-	public Integer getLastPolicyLoadSize() {
+	public int getLastPolicyLoadSize() {
 		return lastPolicyLoadSize;
 	}
 
-	public void setLastPolicyLoadSize(Integer lastPolicyLoadSize) {
+	public void setLastPolicyLoadSize(int lastPolicyLoadSize) {
 		this.lastPolicyLoadSize = lastPolicyLoadSize;
 	}
 
@@ -134,19 +134,19 @@ public class TelemetryEntry extends BaseEntry implements Serializable {
 		this.policyFailedLoadCounter = policyFailedLoadCounter;
 	}
 
-	public Date getLastPolicyEvaluationTimeNs() {
+	public int getLastPolicyEvaluationTimeNs() {
 		return lastPolicyEvaluationTimeNs;
 	}
 
-	public void setLastPolicyEvaluationTimeNs(Date lastPolicyEvaluationTimeNs) {
+	public void setLastPolicyEvaluationTimeNs(int lastPolicyEvaluationTimeNs) {
 		this.lastPolicyEvaluationTimeNs = lastPolicyEvaluationTimeNs;
 	}
 
-	public Date getAvgPolicyEvaluationTimeNs() {
+	public int getAvgPolicyEvaluationTimeNs() {
 		return avgPolicyEvaluationTimeNs;
 	}
 
-	public void setAvgPolicyEvaluationTimeNs(Date avgPolicyEvaluationTimeNs) {
+	public void setAvgPolicyEvaluationTimeNs(int avgPolicyEvaluationTimeNs) {
 		this.avgPolicyEvaluationTimeNs = avgPolicyEvaluationTimeNs;
 	}
 
@@ -177,7 +177,7 @@ public class TelemetryEntry extends BaseEntry implements Serializable {
 	@Override
 	public String toString() {
 		return "TelemetryEntry [inum=" + inum + ", creationDate=" + creationDate + ", eventTime=" + eventTime
-				+ ", service=" + service + ", nodeId=" + nodeId + ", status=" + status + ", lastPolicyLoadSize="
+				+ ", service=" + service + ", nodeName=" + nodeName + ", status=" + status + ", lastPolicyLoadSize="
 				+ lastPolicyLoadSize + ", policySuccessLoadCounter=" + policySuccessLoadCounter
 				+ ", policyFailedLoadCounter=" + policyFailedLoadCounter + ", lastPolicyEvaluationTimeNs="
 				+ lastPolicyEvaluationTimeNs + ", avgPolicyEvaluationTimeNs=" + avgPolicyEvaluationTimeNs

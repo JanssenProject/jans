@@ -39,6 +39,8 @@ Resource for managing Keycloak SAML Identity Provider.
 - `metadata_file` (String) Metadata file location for the trust relationship.
 - `name_id_policy_format` (String) Name ID policy format of the identity provider.
 - `post_broker_login_flow_alias` (String) Post broker login flow alias of the identity provider.
+- `principal_attribute` (String) Principal attribute of the identity provider.
+- `principal_type` (String) Principal type of the identity provider.
 - `provider_id` (String) Provider ID of the identity provider.
 - `signing_certificate` (String) Signing certificate of the identity provider.
 - `single_logout_service_url` (String) Single logout service URL of the identity provider.

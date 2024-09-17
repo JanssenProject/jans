@@ -13,6 +13,7 @@ import (
 var testFile embed.FS
 
 func TestCreateJansAsset(t *testing.T) {
+	t.Skip("Service not implemented")
 	c, err := NewInsecureClient(host, user, pass)
 	if err != nil {
 		t.Fatal(err)

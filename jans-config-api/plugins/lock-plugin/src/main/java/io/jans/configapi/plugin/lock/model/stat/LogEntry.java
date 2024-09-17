@@ -2,7 +2,7 @@ package io.jans.configapi.plugin.lock.model.stat;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.HashMap;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -31,8 +31,8 @@ public class LogEntry extends BaseEntry implements Serializable {
     @AttributeName(name = "jansService")
     private String service;
 
-    @AttributeName(name = "jansNodeId")
-    private String nodeId;
+    @AttributeName(name = "jansNodeName")
+    private String nodeName;
 
     @AttributeName(name = "eventType")
     private String eventType;
@@ -57,7 +57,7 @@ public class LogEntry extends BaseEntry implements Serializable {
 
     @JsonObject
     @AttributeName(name = "contextInformation")
-    private HashMap<String, String> contextInformation;
+    private Map<String, String> contextInformation;
 
 	public String getInum() {
 		return inum;
@@ -91,12 +91,12 @@ public class LogEntry extends BaseEntry implements Serializable {
 		this.service = service;
 	}
 
-	public String getNodeId() {
-		return nodeId;
+	public String getnodeName() {
+		return nodeName;
 	}
 
-	public void setNodeId(String nodeId) {
-		this.nodeId = nodeId;
+	public void setnodeName(String nodeName) {
+		this.nodeName = nodeName;
 	}
 
 	public String getEventType() {
@@ -155,18 +155,18 @@ public class LogEntry extends BaseEntry implements Serializable {
 		this.clientId = clientId;
 	}
 
-	public HashMap<String, String> getContextInformation() {
+	public Map<String, String> getContextInformation() {
 		return contextInformation;
 	}
 
-	public void setContextInformation(HashMap<String, String> contextInformation) {
+	public void setContextInformation(Map<String, String> contextInformation) {
 		this.contextInformation = contextInformation;
 	}
 
 	@Override
 	public String toString() {
 		return "LogEntry [inum=" + inum + ", creationDate=" + creationDate + ", eventTime=" + eventTime + ", service="
-				+ service + ", nodeId=" + nodeId + ", eventType=" + eventType + ", severetyLevel=" + severetyLevel
+				+ service + ", nodeName=" + nodeName + ", eventType=" + eventType + ", severetyLevel=" + severetyLevel
 				+ ", action=" + action + ", decisionResult=" + decisionResult + ", requestedResource="
 				+ requestedResource + ", princiaplId=" + princiaplId + ", clientId=" + clientId
 				+ ", contextInformation=" + contextInformation + ", toString()=" + super.toString() + "]";
