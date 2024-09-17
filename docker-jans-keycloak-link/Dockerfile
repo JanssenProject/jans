@@ -41,8 +41,8 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # =======
 
 
-ENV CN_VERSION=1.1.5-SNAPSHOT
-ENV CN_BUILD_DATE='2024-09-06 13:25'
+ENV CN_VERSION=1.1.6-SNAPSHOT
+ENV CN_BUILD_DATE='2024-09-16 07:00'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-keycloak-link-server/${CN_VERSION}/jans-keycloak-link-server-${CN_VERSION}.war
 
@@ -61,7 +61,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-keycloak-link/webapps \
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=b645f0bdb706b933bf5c93fc261a6f00ce5a1882
+ENV JANS_SOURCE_VERSION=4b07e84a14df81899900724515f3eead1d579443
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -213,7 +213,7 @@ EXPOSE $CN_KEYCLOAK_LINK_JETTY_PORT
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/keycloak-link" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \
     org.opencontainers.image.vendor="Janssen Project" \
-    org.opencontainers.image.version="1.1.5" \
+    org.opencontainers.image.version="1.1.6" \
     org.opencontainers.image.title="Janssen Keycloak Link" \
     org.opencontainers.image.description=""
 

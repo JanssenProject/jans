@@ -28,6 +28,7 @@ resource "jans_api_app_configuration" "global" {
 - `api_client_id` (String)
 - `api_client_password` (String)
 - `api_protection_type` (String)
+- `acr_validation_enabled` (Boolean)
 - `asset_mgt_configuration` (Block List) (see [below for nested schema](#nestedblock--asset_mgt_configuration))
 - `audit_log_conf` (Block List) (see [below for nested schema](#nestedblock--audit_log_conf))
 - `auth_issuer_url` (String)
@@ -37,6 +38,7 @@ resource "jans_api_app_configuration" "global" {
 - `auth_openid_token_url` (String)
 - `config_oauth_enabled` (Boolean)
 - `cors_configuration_filters` (Block List) (see [below for nested schema](#nestedblock--cors_configuration_filters))
+- `custom_attribute_validation_enabled` (Boolean)
 - `data_format_conversion_conf` (Block List) (see [below for nested schema](#nestedblock--data_format_conversion_conf))
 - `disable_audit_logger` (Boolean)
 - `disable_jdk_logger` (Boolean)
@@ -48,7 +50,6 @@ resource "jans_api_app_configuration" "global" {
 - `logging_level` (String)
 - `max_count` (Number)
 - `plugins` (Block List) (see [below for nested schema](#nestedblock--plugins))
-- `smallrye_health_root_path` (String)
 - `user_exclusion_attributes` (List of String)
 - `user_mandatory_attributes` (List of String)
 
@@ -74,6 +75,9 @@ Optional:
 - `asset_dir_mappings` (Block List) (see [below for nested schema](#nestedblock--asset_mgt_configuration--asset_dir_mappings))
 - `asset_mgt_enabled` (Boolean)
 - `asset_server_upload_enabled` (Boolean)
+- `file_extension_validation_enabled` (Boolean)
+- `jans_service_module` (List of String)
+- `module_name_validation_enabled` (Boolean)
 
 <a id="nestedblock--asset_mgt_configuration--asset_dir_mappings"></a>
 ### Nested Schema for `asset_mgt_configuration.asset_dir_mappings`

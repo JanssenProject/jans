@@ -8,6 +8,8 @@ import (
 // ScimAppConfigurations is the definition of the SCIM app configuration.
 type ScimAppConfigurations struct {
 	BaseDN                      string `schema:"base_dn" json:"baseDN"`
+	DisableLoggerTimer          bool   `schema:"disable_logger_timer" json:"disableLoggerTimer"`
+	DisableAuditLogger          bool   `schema:"disable_audit_logger" json:"disableAuditLogger"`
 	ApplicationUrl              string `schema:"application_url" json:"applicationUrl"`
 	BaseEndpoint                string `schema:"base_endpoint" json:"baseEndpoint"`
 	PersonCustomObjectClass     string `schema:"person_custom_object_class" json:"personCustomObjectClass"`

@@ -31,7 +31,7 @@ Resource for managing Keycloak SAML Configuration.
 - `idp_metadata_temp_dir` (String) IDP Metadata Temporary Directory.
 - `idp_root_dir` (String) IDP Root Directory.
 - `idp_url` (String) IDP URL.
-- `ignore_validation` (String) Ignore Validation.
+- `ignore_validation` (Boolean) Ignore Validation.
 - `kc_attributes` (List of String) KC Attributes.
 - `kc_saml_config` (List of String) KC SAML Config..
 - `password` (String) Password.
@@ -39,6 +39,7 @@ Resource for managing Keycloak SAML Configuration.
 - `saml_trust_relationship_dn` (String) SAML trust relationship DN.
 - `scope` (String) Scope.
 - `server_url` (String) Server URL.
+- `set_config_default_value` (Boolean) Set Config Default Value.
 - `slected_idp` (String) Selected IDP.
 - `sp_metadata_dir` (String) SP Metadata Directory.
 - `sp_metadata_file` (String) SP Metadata File.
