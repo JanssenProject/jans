@@ -17,7 +17,7 @@ Although the schema covers many attributes one might think of, at times you will
 
 * Register and activate your new attribute through **Jans TUI**.
 
-Please visit this [page](https://docs.jans.io/head/admin/config-guide/attribute-configuration/) for a more detailed explanation. When registering the attribute in the **TUI**, please ensure you have set the `Include in SCIM Extension` parameter to `true`.
+Please visit this [page](../config-guide/auth-server-config/attribute-configuration.md) for a more detailed explanation. When registering the attribute in the **TUI**, please ensure you have set the `Include in SCIM Extension` parameter to `true`.
 
 ![attribute](https://github.com/JanssenProject/jans/assets/43112579/61d0aff6-75fa-4e6b-8db6-2eeb3332cfe5)
 
