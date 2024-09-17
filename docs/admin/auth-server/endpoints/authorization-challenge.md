@@ -142,7 +142,9 @@ Full sample script can be found [here](../../../script-catalog/authorization_cha
 Device session is optional. AS does not return it by default. 
 It's possible to pass in request `use_device_session=true` which makes AS return it in error response.
 If it is desired to use `device_session` and don't pass `client_id` (or other parameters) in next request, 
-it should be put in attributes of `device_session` object.
+it should be put in attributes of `device_session` object. 
+`device_session` object lifetime is set by `deviceSessionLifetimeInSeconds` AS configuration property. 
+If `deviceSessionLifetimeInSeconds` is not set then value falls back to `86400` seconds.
 
 Example
 ```java
@@ -241,10 +243,7 @@ In custom script it's easy to code what data has to be kept in `device_session`.
         DeviceSessionService deviceSessionService = CdiUtil.bean(DeviceSessionService.class);
         boolean newSave = deviceSessionObject == null;
         if (newSave) {
-            final String id = UUID.randomUUID().toString();
-            deviceSessionObject = new DeviceSession();
-            deviceSessionObject.setId(id);
-            deviceSessionObject.setDn(deviceSessionService.buildDn(id));
+            deviceSessionObject = deviceSessionService.newDeviceSession();
         }
 
         String username = context.getHttpRequest().getParameter(USERNAME_PARAMETER);
