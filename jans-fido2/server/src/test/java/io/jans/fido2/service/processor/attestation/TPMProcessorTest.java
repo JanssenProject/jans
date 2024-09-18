@@ -1,5 +1,6 @@
 package io.jans.fido2.service.processor.attestation;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -12,12 +13,15 @@ import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.CertificateService;
 import io.jans.fido2.service.DataMapperService;
 import io.jans.fido2.service.mds.AttestationCertificateService;
+import io.jans.fido2.service.mds.LocalMdsService;
+import io.jans.fido2.service.mds.MdsService;
 import io.jans.fido2.service.verifier.CertificateVerifier;
 import io.jans.fido2.service.verifier.CommonVerifiers;
 import io.jans.fido2.service.verifier.SignatureVerifier;
 import io.jans.orm.model.fido2.Fido2RegistrationData;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
+import org.apache.commons.codec.binary.Hex;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -28,6 +32,7 @@ import tss.tpm.TPMS_ATTEST;
 import tss.tpm.TPMT_PUBLIC;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
@@ -75,6 +80,15 @@ class TPMProcessorTest {
 
     @Mock
     private ErrorResponseFactory errorResponseFactory;
+
+    @InjectMocks
+    private AttestationCertificateService attestationCertificateServices;
+
+    @Mock
+    private LocalMdsService localMdsService;
+
+    @Mock
+    private MdsService mdsService;
 
     @Test
     void getAttestationFormat_valid_tpm() {
@@ -233,5 +247,54 @@ class TPMProcessorTest {
         verify(log).trace("TPM attStmt 'alg': {}", -256);
         verify(base64Service, times(2)).urlEncodeToString(any());
         verifyNoMoreInteractions(log);
+    }
+
+    @Test
+    void getAttestationRootCertificates_enterpriseAttestationEnabled() {
+        String aaguid = "test-aaguid";
+        AuthData authData = mock(AuthData.class);
+        when(authData.getAaguid()).thenReturn(aaguid.getBytes(StandardCharsets.UTF_8));
+
+        List<X509Certificate> attestationCertificates = Collections.singletonList(mock(X509Certificate.class));
+
+        Fido2Configuration fido2Config = mock(Fido2Configuration.class);
+        when(fido2Config.isEnterpriseAttestation()).thenReturn(true);
+        when(appConfiguration.getFido2Configuration()).thenReturn(fido2Config);
+
+        String hexAaguid = Hex.encodeHexString(aaguid.getBytes(StandardCharsets.UTF_8));
+        JsonNode metadata = mock(JsonNode.class);
+        when(localMdsService.getAuthenticatorsMetadata(hexAaguid)).thenReturn(metadata);
+
+        List<X509Certificate> result = attestationCertificateServices.getAttestationRootCertificates(authData, attestationCertificates);
+
+        assertNotNull(result);
+        verify(localMdsService).getAuthenticatorsMetadata(hexAaguid);
+    }
+
+    @Test
+    void getAttestationRootCertificates_enterpriseAttestationDisabled() {
+        String aaguid = "test-aaguid";
+        AuthData authData = mock(AuthData.class);
+        when(authData.getAaguid()).thenReturn(aaguid.getBytes(StandardCharsets.UTF_8));
+
+        List<X509Certificate> attestationCertificates = Collections.singletonList(mock(X509Certificate.class));
+
+        Fido2Configuration fido2Config = mock(Fido2Configuration.class);
+        when(fido2Config.isEnterpriseAttestation()).thenReturn(false);
+        when(appConfiguration.getFido2Configuration()).thenReturn(fido2Config);
+
+        JsonNode fetchedMetadata = mock(JsonNode.class);
+        when(mdsService.fetchMetadata(authData.getAaguid())).thenReturn(fetchedMetadata);
+        doNothing().when(commonVerifiers).verifyThatMetadataIsValid(fetchedMetadata);
+
+        List<X509Certificate> expectedCertificates = Collections.singletonList(mock(X509Certificate.class));
+        when(attestationCertificateServices.getAttestationRootCertificates(fetchedMetadata, attestationCertificates))
+                .thenReturn(expectedCertificates);
+
+        List<X509Certificate> result = attestationCertificateServices.getAttestationRootCertificates(authData, attestationCertificates);
+
+        assertNotNull(result);
+        verify(mdsService).fetchMetadata(authData.getAaguid());
+        verify(commonVerifiers).verifyThatMetadataIsValid(fetchedMetadata);
     }
 }
