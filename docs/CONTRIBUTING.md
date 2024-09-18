@@ -179,7 +179,8 @@ contributor's GitHub username:
 
 #### Signing the CLA
 
-The current version of CLA can be found [here]. This is just for your reference.
+The current version of CLA can be found 
+[here](https://github.com/JanssenProject/jans/blob/main/docs/governance/janssen-project-CLA-version-1.pdf). This is just for your reference.
 This same CLA will be signed digitally by following the steps below:
 
 1. The contributor sends an e-mail expressing willingness to contribute and 
