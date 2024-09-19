@@ -214,15 +214,6 @@ class EditIdentityProvideDialog(JansGDialog, DialogUtils):
                     widget_style=cli_style.white_bg_widget
                 ),
 
-                common_data.app.getTitledText(
-                    title=_("Realm"),
-                    name='realm',
-                    value=self.data.get('realm', 'jans'),
-                    style=cli_style.edit_text_required,
-                    jans_help=_("realm"),
-                    widget_style=cli_style.white_bg_widget
-                ),
-
                 common_data.app.getTitledWidget(
                     _("Metadata Source Type"),
                     name='idpMetaDataSourceType',
@@ -255,6 +246,7 @@ class EditIdentityProvideDialog(JansGDialog, DialogUtils):
 
         provider_data = copy.deepcopy(self.data)
         provider_data.update(new_data)
+        provider_data['realm'] = 'jans'
         import_metadata_from_file = provider_data.pop('idpMetaDataSourceType', None) == 'file'
 
         if import_metadata_from_file and not self.metadata_file_path:
