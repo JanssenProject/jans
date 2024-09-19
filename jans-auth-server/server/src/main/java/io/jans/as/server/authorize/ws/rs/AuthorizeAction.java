@@ -981,6 +981,25 @@ public class AuthorizeAction {
         this.claims = claims;
     }
 
+    public String getClientDisplayName() {
+        log.trace("client {}", clientId);
+
+        if (StringUtils.isBlank(clientId)) {
+            return "Unknown";
+        }
+
+        final Client client = clientService.getClient(clientId);
+        if (StringUtils.isNotBlank(client.getClientName())) {
+            return client.getClientName();
+        }
+
+        if (StringUtils.isNotBlank(client.getClientId())) {
+            return client.getClientId();
+        }
+
+        return "Unknown";
+    }
+
     public String getAuthReqId() {
         return authReqId;
     }
