@@ -9,9 +9,14 @@ metadata:
 {{- if .Values.additionalLabels }}
 {{ toYaml .Values.additionalLabels | indent 4 }}
 {{- end }}
-{{- if .Values.additionalAnnotations }}
+{{- if or (.Values.additionalAnnotations) (.Values.global.saml.customAnnotations.horizontalPodAutoscaler) }}
   annotations:
+{{- if .Values.additionalAnnotations }}
 {{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.global.saml.customAnnotations.horizontalPodAutoscaler }}
+{{ toYaml .Values.global.saml.customAnnotations.horizontalPodAutoscaler | indent 4 }}
+{{- end }}
 {{- end }}
 spec:
   scaleTargetRef:

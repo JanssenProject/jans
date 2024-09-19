@@ -1,0 +1,43 @@
+//Sends the user a random OTP code via the Casa SMS delivery REST endpoint. The code is 
+//delivered to user's registered mobile phone number. If more than one phone is found, a
+//selector page is shown for the user to pick one
+//Then, a page to enter the sent code is presented. Once the user enters a correct value,
+//the flow finishes successfully. Upon the third failed attempt the flow fails negatively
+//The identity of the user is provided in userData input param
+
+Flow io.jans.casa.authn.twilio_sms
+    Basepath "authn"
+    Inputs userData withEscape
+
+sensei = Call io.jans.casa.authn.OTPSmsSender#new
+numbers = Call sensei getPhoneNumbers userData.inum
+
+When numbers.length is 1
+    number = numbers[0]
+Otherwise
+    obj = { }
+    obj.phones = Call sensei mask numbers
+    obj = RRF "sms_prompt.ftlh" obj
+    i = Call java.lang.Integer#parseInt obj.phoneIdx
+    number = numbers[i] 
+
+//code = "123"
+code = Call sensei send number
+matches = true
+    
+Repeat 3 times max
+    obj = { name: userData.name, escape: withEscape, matches: matches }
+
+    data = RRF "sms.ftlh" obj
+    
+    When data.skipped is ""
+        Finish false
+
+    //data.passcode = Call data.passcode strip
+    When data.passcode is code
+        Finish true
+    
+    matches = false
+
+obj = { success: false, message: "Too many failed attempts for SMS verification" }
+Finish obj

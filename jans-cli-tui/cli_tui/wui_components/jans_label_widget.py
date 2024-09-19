@@ -19,7 +19,6 @@ class JansLabelWidget:
 
         self.data = data
         self.values = values
-        self.add_checkbox = CheckboxList(values=[('', '')])
         add_button_container = VSplit([Window(), Button(_("Add"), handler=self.add_value)])
 
         initial_labels = []
@@ -46,6 +45,8 @@ class JansLabelWidget:
 
     def add_value(self) -> None:
 
+        add_checkbox = CheckboxList(values=[('', '')])
+
         def value_exists(value_id: str) -> bool:
             for item_id, item_label in self.container.entries:
                 if item_id == value_id:
@@ -53,7 +54,7 @@ class JansLabelWidget:
             return False
 
         def add_selected_values(dialog):
-            for value_id in self.add_checkbox.current_values:
+            for value_id in add_checkbox.current_values:
                 self.container.add_label(*self.get_label_entry(value_id))
 
         value_list = []
@@ -62,7 +63,7 @@ class JansLabelWidget:
                 value_list.append(val)
 
         if not value_list:
-            common_data.app.show_message(("No Data"), _("Currenlty you have no option to add"))
+            common_data.app.show_message(("No Data"), _("Currenlty you have no option to add"), tobefocused=self.container)
             return
 
         def on_text_changed(event):
@@ -72,9 +73,9 @@ class JansLabelWidget:
                 if search_text.lower() in item[1].lower():
                     matching_items.append(item)
             if matching_items:
-                self.add_checkbox.values = matching_items
-                self.add_frame.body = HSplit(children=[self.add_checkbox])
-                self.add_checkbox._selected_index = 0
+                add_checkbox.values = matching_items
+                self.add_frame.body = HSplit(children=[add_checkbox])
+                add_checkbox._selected_index = 0
             else:
                 self.add_frame.body = HSplit(children=[Label(text=_("No Items "), style=cli_style.label,
                                                                    width=len(_("No Items "))),], width=D())
@@ -87,10 +88,10 @@ class JansLabelWidget:
 
         ta.buffer.on_text_changed += on_text_changed
 
-        self.add_checkbox.values = value_list
+        add_checkbox.values = value_list
         self.add_frame = Frame(
             title="Checkbox list",
-            body=HSplit(children=[self.add_checkbox]),
+            body=HSplit(children=[add_checkbox]),
         )
         layout = HSplit(children=[
             VSplit(

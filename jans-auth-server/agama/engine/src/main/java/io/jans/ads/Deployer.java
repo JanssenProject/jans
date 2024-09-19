@@ -450,6 +450,7 @@ public class Deployer {
             }
         }
 
+        Set<String> toRemove = new HashSet<>();
         //Iterate over the projects "known" to this bean. Note these may differ from the
         //currently stored projects (actualPrjIds)
         for (String prjId : projectsFlows.keySet()) {
@@ -459,8 +460,10 @@ public class Deployer {
                 logger.info("Project with id {} has been removed recently. Removing references...", prjId);
 
                 try {
+                    toRemove.addAll(projectsLibs.get(prjId));
+
                     projectsFinishTimes.remove(prjId);
-                    purge(projectsBasePaths.get(prjId), projectsLibs.get(prjId));
+                    purge(projectsBasePaths.get(prjId), null);
                 } catch(IOException e) {
                     logger.error(e.getMessage());
                 }
@@ -488,6 +491,14 @@ public class Deployer {
             set = Optional.ofNullable(dd.getLibs()).map(HashSet::new)
                     .orElse(new HashSet<>());
             projectsLibs.put(prjId, set);
+            toRemove.removeAll(set);
+        }
+
+        //Do safe source file removal, see jans#9153
+        try {
+            purge(null, toRemove);
+        } catch(IOException e) {
+            logger.error(e.getMessage());
         }
 
     }

@@ -15,10 +15,10 @@ standards-based identity services.
 Using Janssen Project software, organizations can build *runtime* identity
 services to meet 100% of their requirements for enrollment, authentication,
 credential management, and authorization. The Janssen Project includes software
-tools and services for deploying, operating, testing and developing identity
+tools and services for deploying, operating, testing, and developing identity
 infrastructure at scale.
 
-Scale is more than cloud native design patterns. To truly scale, domains
+Scale is more than cloud-native design patterns. To truly scale, domains
 have to consider the people and organizational challenges. To scale domains
 need to:
 
@@ -44,7 +44,7 @@ with regard to scaling identity infrastructure.
 
 Janssen Project tackles the most challenging security requirements. This means
 keeping current with OpenID and FIDO self-certifications, creating distributions
-that enabling conformance with FIPS 140-2, and implementing best practices for
+that enables conformance with FIPS 140-2, and implementing best practices for
 software development.
 
 Janssen Project is unapologetically Java. The reason is simple: Java has the
@@ -63,15 +63,15 @@ community. Developers don't want to contribute to a project that might change
 the license at any moment (e.g. Hashicorp, Elastic, MongoDB).
 
 There is room for many companies to productize the Janssen Project software.
-Governments can feel safe using Janssen Project--it's been recognized as a
+Governments can feel safe using the Janssen Project--it's been recognized as a
 [Digital Public Good](https://app.digitalpublicgoods.net/a/10470). A healthy
-ecosystem for infrastructure software results in long term innovation velocity.
+ecosystem for infrastructure software results in long-term innovation velocity.
 
 With the introduction of Agama, we're hoping that developers will have an
-opportunity to build connectors to third party systems and services. Gluu is
+opportunity to build connectors to third-party systems and services. Gluu is
 hosting the [Agama Lab Explore Catalog](https://agama-lab.gluu.org) to
 help developers publish their Agama projects, making it easier for the community
-to find ready-built projects that encourage re-use of code.
+to find ready-built projects that encourage the re-use of code.
 
 # Deployment
 
@@ -81,5 +81,5 @@ for non-production instances.
 * Linux system administrators should have packages for easy installation
 and update of non-clustered deployments.
 
-* Cloud native engineers should have assets for high-end deployments,
+* Cloud-native engineers should have assets for high-end deployments,
 including high concurrency and high availability.

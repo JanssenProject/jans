@@ -35,6 +35,8 @@ class common_strings:
     error = "Error!"
     info = "Info"
     oops = "Oops"
+    success = "Success"
+    warning = "Warning!"
 
     help_enter      = f'<Enter>          {_("Confirm or Edit current selection")}'
     help_esc        = f'<Esc>            {_("Close the current dialog")}'

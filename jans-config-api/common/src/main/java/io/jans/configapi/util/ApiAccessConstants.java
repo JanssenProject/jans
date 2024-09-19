@@ -8,9 +8,6 @@ public class ApiAccessConstants {
     public static final String JANS_AUTH_CONFIG_READ_ACCESS = "https://jans.io/oauth/jans-auth-server/config/properties.readonly";
     public static final String JANS_AUTH_CONFIG_WRITE_ACCESS = "https://jans.io/oauth/jans-auth-server/config/properties.write";
 
-    public static final String FIDO2_CONFIG_READ_ACCESS = "https://jans.io/oauth/config/fido2.readonly";
-    public static final String FIDO2_CONFIG_WRITE_ACCESS = "https://jans.io/oauth/config/fido2.write";
-
     public static final String ATTRIBUTES_READ_ACCESS = "https://jans.io/oauth/config/attributes.readonly";
     public static final String ATTRIBUTES_WRITE_ACCESS = "https://jans.io/oauth/config/attributes.write";
     public static final String ATTRIBUTES_DELETE_ACCESS = "https://jans.io/oauth/config/attributes.delete";

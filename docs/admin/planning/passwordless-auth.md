@@ -2,6 +2,7 @@
 tags:
   - administration
   - planning
+  - passwordless
 ---
 
 Auth Server is not proscriptive about how an organization authenticates a
@@ -23,7 +24,7 @@ web pages to establish that identity. These pages can ask for any "factors".
 For example, if you want to perform two factor authentication in one step,
 you could use a FIDO 2 credential, which combines possession with either
 knowledge or biometric. But in practice, you could ask for any one or more
-combination of credentials--none of which must include password.
+combinations of credentials--none of which must include a password.
 
 Net-net, "passwordless" is really just marketing jargon. Normally it implies
 some kind of risk assessment to optimize user experience. If you can imagine

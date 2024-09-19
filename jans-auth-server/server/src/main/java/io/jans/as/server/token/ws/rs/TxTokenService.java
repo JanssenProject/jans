@@ -150,9 +150,11 @@ public class TxTokenService {
         calendar.add(Calendar.SECOND, getTxTokenLifetime(client));
         Date expiration = calendar.getTime();
 
+
         jwr.getClaims().setIssuer(appConfiguration.getIssuer());
         jwr.getClaims().setExpirationTime(expiration);
-        jwr.getClaims().setIssuedAt(issuedAt);
+        jwr.getClaims().setIat(issuedAt);
+        jwr.getClaims().setNbf(issuedAt);
         jwr.setClaim("txn", UUID.randomUUID().toString());
         jwr.setClaim("sub", UUID.randomUUID().toString());
         jwr.setClaim("purp", JwtType.TX_TOKEN.toString());
@@ -290,6 +292,7 @@ public class TxTokenService {
 
         final JwtSigner jwtSigner = newJwtSigner(client);
         final Jwt jwt = jwtSigner.newJwt();
+        jwt.getHeader().setType(JwtType.TX_TOKEN); // override value which is set in jwt signer
         fillPayload(jwt, audience, requestContext, requestDetails, executionContext, authorizationGrant);
         return jwtSigner.sign();
     }

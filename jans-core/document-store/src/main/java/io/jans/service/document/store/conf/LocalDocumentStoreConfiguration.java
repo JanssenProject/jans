@@ -8,9 +8,9 @@ package io.jans.service.document.store.conf;
 
 import java.io.Serializable;
 
-import jakarta.xml.bind.annotation.XmlElement;
-
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+import jakarta.xml.bind.annotation.XmlElement;
 
 /**
  * @author Yuriy Movchan on 04/10/2020

@@ -38,9 +38,7 @@ class LdapLock(BaseLock):
     def connection(self):
         user = "cn=Directory Manager"
 
-        password_file = os.environ.get("CN_OCI_LOCK_PASSWORD_FILE", "/etc/jans/conf/oci_lock_password")
-        if not os.path.isfile(password_file):
-            password_file = os.environ.get("CN_LDAP_PASSWORD_FILE", "/etc/jans/conf/ldap_password")
+        password_file = os.environ.get("CN_LDAP_PASSWORD_FILE", "/etc/jans/conf/ldap_password")
 
         password = get_password_from_file(password_file)
         return Connection(self._server, user, password)

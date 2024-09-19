@@ -38,30 +38,6 @@ logger = logging.getLogger(__name__)
 SERVER_VERSION_RE = re.compile(r"[\d.]+")
 
 
-def get_sql_password(manager: Manager) -> str:
-    """Get password used for SQL database user.
-
-    Priority:
-
-    1. get from password file
-    2. get from secrets
-
-    Returns:
-        Plaintext password.
-    """
-    # ignore bandit rule as secret_name refers to attribute name of secrets
-    secret_name = "sql_password"  # nosec: B105
-    password_file = os.environ.get("CN_SQL_PASSWORD_FILE", "/etc/jans/conf/sql_password")
-
-    if os.path.isfile(password_file):
-        password = get_password_from_file(password_file)
-        manager.secret.set(secret_name, password)
-    else:
-        # get from secrets (if any)
-        password = manager.secret.get(secret_name)
-    return password  # noqa: R504
-
-
 class PostgresqlAdapter:
     """Class for PostgreSQL adapter."""
 
@@ -630,3 +606,30 @@ def set_mysql_strict_mode(dbapi_connection, connection_record):
     cursor = dbapi_connection.cursor()
     cursor.execute("SET SESSION sql_mode = 'TRADITIONAL'")
     cursor.close()
+
+
+def get_sql_password_file():
+    return os.environ.get("CN_SQL_PASSWORD_FILE", "/etc/jans/conf/sql_password")
+
+
+def sync_sql_password(manager: Manager) -> None:
+    """Pull secret contains password to access RDBM server.
+
+    Args:
+        manager: An instance of manager class.
+    """
+    password_file = get_sql_password_file()
+
+    # previous version may not have sql_password secret hence we're pre-populating
+    # the value from mounted password file (if any)
+    if os.path.isfile(password_file):
+        manager.secret.set("sql_password", get_password_from_file(password_file))
+
+    # make sure password file always exists
+    if not os.path.isfile(password_file):
+        manager.secret.to_file("sql_password", password_file)
+
+
+def get_sql_password(manager: Manager | None = None):
+    password_file = get_sql_password_file()
+    return get_password_from_file(password_file)

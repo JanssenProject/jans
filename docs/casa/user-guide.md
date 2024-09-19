@@ -34,13 +34,9 @@ After the minimum number of credentials have been enrolled (as specified by the 
 
 If the switch is not visible, your administrator may have configured the system so that 2FA is turned on automatically when enough credentials are available.
 
-When prompted for 2FA, a combination of credential strength and the type of device being used to access the protected resource will be used to determine which type of strong credential is prompted first. Depending on settings specified by your admin, you can actually choose the type of credential yourself. 
+When prompted for 2FA, the specific credential to be prompted first varies depending on the priority of credentials established by the administrator and the user's preferred method, if set.
 
-As an example, if you're accessing a 2FA protected application from a laptop, and you've enrolled FIDO keys and OTP apps to secure your account, FIDO will be presented as the first option for 2FA. Alternatively, if you're accessing the protected resource from a mobile device, OTP will be presented first. The exact ranking and order will be determined by the administrator. 
-
-If at any time the credential prompted is unavailable, you can choose to present any other previously enrolled 2FA credential type. 
-
-![u2f-auth-plus-options](../assets/casa/gluu-u2f-authentication.png) 
+If at any time the credential prompted is unavailable, you have the option to present any other previously enrolled 2FA credential type.
 
 To turn off 2FA, click again the switch. 
 
@@ -61,14 +57,14 @@ If you opt for 2FA based on location, device, or both, a new widget will appear 
 
 ### 2FA best practices
 
-The context of an authentication attempt can determine which type of credential is most convenient to use. For instance, security keys may not be compatible with mobile phones or certain browsers. 
+Depending on the device used to get access, some credentials are more convenient to use than others. For instance, security keys may not be compatible with mobile phones or certain browsers.
 
 **To reduce the chance of account lockout**, enroll at least two different _types_ of 2FA credentials -- e.g. one security key and one OTP app; or one OTP app and one SMS phone number, etc. This way, regardless which device you're using to access a protected resource, you will have a usable option for passing strong authentication. 
 
 
 ## 2FA credential details & enrollment
 
-The details page provides additional details about each enrolled credential, for instance last used, mobile operating system, and device name. Nicknames can be edited, credentials can be deleted and new credentials can be enrolled and nicknamed. 
+The details page provides additional information about each enrolled credential, for instance its name and date of enrollment. Nicknames can be edited, credentials can be deleted and new credentials can be enrolled and nicknamed. 
 
 Depending on administrator configurations, some of the below sections may nor may not be available, or sections not listed here may appear.
 

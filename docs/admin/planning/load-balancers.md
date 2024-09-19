@@ -18,7 +18,7 @@ HTTP Ingress.
 In your load balancer configuration, you can use any routing algorithm. There
 is no need for "sticky sessions", or whatever the load balancer you are using
 calls that. For example, it's ok to use even round robin. Although modern HTTP
-ingress controllers enable some very flexibile routing options to do A/B
+ingress controllers enable some very flexible routing options to do A/B
 testing and zero downtime updates.
 
 As Janssen Auth Server doesn't really care what load balancer you use, some

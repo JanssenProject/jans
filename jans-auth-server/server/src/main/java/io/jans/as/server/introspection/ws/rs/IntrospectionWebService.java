@@ -128,9 +128,9 @@ public class IntrospectionWebService {
             if (authorizationGrant == null) {
                 log.debug("Authorization grant is null.");
                 if (isTrue(pair.getSecond())) {
-                    log.debug("Returned {\"active\":false.");
+                    log.debug("Returned {\"active\":false}.");
                     throw new WebApplicationException(Response.status(Response.Status.OK)
-                            .entity("{\"active\":false")
+                            .entity("{\"active\":false}")
                             .type(MediaType.APPLICATION_JSON_TYPE)
                             .build());
                 }

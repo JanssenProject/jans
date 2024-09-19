@@ -83,9 +83,9 @@ determined using client-level configuration. This is the default authentication 
 that send end-users to the Janssen Server for sign-in.
 
 To configure this parameter using Janssen Text base UI (TUI) configuration
-tool, navigate to `Auth Server`->`Defaults` as shown below:
+tool, navigate to `Auth Server`->`Authn`->`Default ACR` as shown below:
 
-![](../../../assets/jans-tui-auth-server-default.png)
+![](../../../assets/tui-authn-dafault-acr.png)
 
 ## ACR Precedence Levels
 
@@ -106,8 +106,18 @@ There is `acrMappings` AS configuration property which allows to specify aliases
 `acrMappings` contains simple map in key-value form.
 
 Lets say RP sends request with `acr_values=loginWithOtpCheck`. If `acrMappings` contains mapping "loginWithOtpCheck":"otp" then
-AS will map `loginWithOtpCheck` to `otp` and will use `acr_values=otp`. 
-It means that script must be called `otp` in this case and not `loginWithOtpCheck`. 
+AS will map `loginWithOtpCheck` to `otp` and will use `acr_values=otp` for actual processing on server side. 
+It means that custom script must be called `otp` in this case on AS side and not `loginWithOtpCheck` (because `loginWithOtpCheck` is alias to `otp`). 
+
+ACR mappings are published on discovery page `GET /.well-known/openid-configuration HTTP/1.1`
+
+```json
+{
+  ...
+  "acr_mappings":{"alias1":"acr1", "loginWithOtpCheck": "otp"}
+  ...
+}
+```
 
 ## Flowchart - How the Jans AS derives an ACR value for a user session :
 

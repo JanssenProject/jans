@@ -14,7 +14,6 @@ import jakarta.ws.rs.core.Response;
 
 import io.jans.casa.core.pojo.OTPDevice;
 import io.jans.casa.misc.Utils;
-import io.jans.casa.plugins.authnmethod.OTPExtension;
 import io.jans.casa.plugins.authnmethod.rs.status.otp.ComputeRequestCode;
 import io.jans.casa.plugins.authnmethod.rs.status.otp.FinishCode;
 import io.jans.casa.plugins.authnmethod.rs.status.otp.ValidateCode;
@@ -25,12 +24,9 @@ import org.slf4j.Logger;
 
 import static com.lochbridge.oath.otp.keyprovisioning.OTPKey.OTPType;
 
-/**
- * @author jgomer
- */
 @ApplicationScoped
 @ProtectedApi(scopes = "https://jans.io/casa.enroll")
-@Path("/enrollment/" + OTPExtension.ACR)
+@Path("/enrollment/otp")
 @Produces(MediaType.APPLICATION_JSON)
 public class OTPEnrollingWS {
 

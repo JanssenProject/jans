@@ -919,8 +919,7 @@ public class SessionIdService {
 
         HashSet<String> resultAcrs = new HashSet<>();
         for (String acr : acrs) {
-            String acrForScript = isAgama(acr) ? AcrService.AGAMA : acr;
-            final String scriptName = externalAuthenticationService.scriptName(acrForScript);
+            final String scriptName = externalAuthenticationService.scriptName(acr);
             if (StringUtils.isNotBlank(scriptName)) {
                 resultAcrs.add(acr);
             }

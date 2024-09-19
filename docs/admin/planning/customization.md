@@ -36,9 +36,9 @@ which fetches the respective [Facelets](https://en.wikipedia.org/wiki/Facelets)
 it's possible to mix content such as regular HTML with JSF components.
 Thus Facelets pages can have both static and **dynamic content** and leverage
 all your "normal" web design tools like CSS and JavaScript. Facelets also
-supports templates. Each `.xhtml` page has access to the authentication context,
+support templates. Each `.xhtml` page has access to the authentication context,
 and you can insert data from the respective interception script. Also, each
-`.xhtml` page is unique, and has a built in state identifier, preventing Auth
+`.xhtml` page is unique and has a built-in state identifier, preventing Auth
 Server from responding to any page which it did not render. For more information,
 see the [Developer Guide](../developer/README.md).
 
@@ -50,7 +50,7 @@ of the subject.
 
 You can change the descriptions for the various front-channel Auth Server
 error messages, for example, what would Auth Server return for a bad
-request to the Authorization Endpoint. Of course you can also customize the web
+request to the Authorization Endpoint. Of course, you can also customize the web
 server error messages, like 404, by configuring your web server.  Auth Server
 should **never** return a stackTrace.
 

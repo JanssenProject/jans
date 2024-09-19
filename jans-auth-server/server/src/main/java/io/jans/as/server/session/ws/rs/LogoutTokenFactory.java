@@ -72,7 +72,8 @@ public class LogoutTokenFactory {
         Date expiration = calendar.getTime();
 
         jwr.getClaims().setExpirationTime(expiration);
-        jwr.getClaims().setIssuedAt(issuedAt);
+        jwr.getClaims().setIat(issuedAt);
+        jwr.getClaims().setNbf(issuedAt);
         jwr.getClaims().setIssuer(appConfiguration.getIssuer());
         jwr.getClaims().setJwtId(UUID.randomUUID());
         jwr.getClaims().setClaim("events", getLogoutTokenEvents());

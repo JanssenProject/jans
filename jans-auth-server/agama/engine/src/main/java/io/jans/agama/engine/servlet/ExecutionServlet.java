@@ -26,10 +26,9 @@ public class ExecutionServlet extends BaseServlet {
     public static final String URL_PREFIX = "/fl/";
     public static final String CALLBACK_PATH = URL_PREFIX + "callback";
     public static final String ABORT_PARAM = "_abort";
-    
-    //TODO: put string in agama resource bundle
-    private static final String NO_ACTIVE_FLOW = "No flow running currently " +
-        "or your flow may have already finished/timed out.";
+
+    private static final String NO_ACTIVE_FLOW = "This flow may have already finished/timed out. " +
+            "Login again to the website you were trying to access originally.";
     
     @Inject
     private FlowService flowService;

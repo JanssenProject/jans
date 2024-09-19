@@ -162,7 +162,7 @@ One way to structure the solution is the following:
 !!! Important
     Ensure you have previously gone through the contents of this [page](./flows-navigation-ui.md) before proceeding
 
-This is a feature that in conjuction with [template overrides](#template-overrides) allows developers to implement backtracking or alternative routing. Suppose a flow is designed to reuse two or more existing subflows. As expected these subflows are neither aware of each other nor of its parent. How can the parent make so that once the user has landed at a page belonging to a given subflow A be presented the alternative to take another route, say, to subflow B?
+This is a feature that in conjuction with [template overrides](#template-overrides) allows developers to implement alternative routing and backtracking. Suppose a flow is designed to reuse two or more existing subflows. As expected these subflows are neither aware of each other nor of its parent. How can the parent make so that once the user has landed at a page belonging to a given subflow A be presented the alternative to take another route, say, to subflow B?
 
 Clearly a page at flow A can be overriden, however, how to abort A and make it jump to B? The answer is cancellation. Through flow cancellation, a running flow can be aborted and the control returned to one of its parents for further processing. This can achieved by overriding a template so that the POST to the current URL includes a form field named `_abort`.
 
@@ -194,10 +194,12 @@ The overriden template `cust_enter_otp.ftlh` would have a form like:
 ```
 ...
 <form method="post" enctype="application/x-www-form-urlencoded">
-    <button type="submit" id="_abort" name="_abort" value="">
+    <button type="submit" name="_abort">
         Didn't get an SMS?, send the passcode to my e-mail</button>
 </form>
 ```
+
+Note you cannot make cancellation occur at an arbitrary point of a flow. It can only happen when a page has been rendered, that is, an `RRF` directive is in execution. When a flow is aborted and the control returned back to a parent, there is no way to "resume" execution of the flow target of the cancellation. 
 
 ### Cancellation bubble-up
 

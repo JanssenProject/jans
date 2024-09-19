@@ -206,9 +206,9 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
     }
 
     private List<String> findMissingScopes(Map<ProtectionScopeType, List<String>> scopeMap, List<String> tokenScopes) {
-        logger.debug("Check scopeMap:{}, tokenScopes:{}", scopeMap, tokenScopes);
+        logger.info("Check scopeMap:{}, tokenScopes:{}", scopeMap, tokenScopes);
         List<String> scopeList = new ArrayList<>();
-        if (tokenScopes == null || tokenScopes.isEmpty() || scopeMap == null || scopeMap.isEmpty()) {
+        if (scopeMap == null || scopeMap.isEmpty()) {
             return scopeList;
         }
 
@@ -236,7 +236,7 @@ public class OpenIdAuthorizationService extends AuthorizationService implements 
             containsScope = containsAnyElement(scopeList, tokenScopes);
             logger.debug("Token contains GROUP scopes?:{}", containsScope);
 
-			// Group scope present so no need to check normal scope
+            // Group scope present so no need to check normal scope
             if (containsScope) {
                 return missingScopes;
             }

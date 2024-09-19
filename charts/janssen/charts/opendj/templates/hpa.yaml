@@ -8,9 +8,14 @@ metadata:
 {{- if .Values.additionalLabels }}
 {{ toYaml .Values.additionalLabels | indent 4 }}
 {{- end }}
-{{- if .Values.additionalAnnotations }}
+{{- if or (.Values.additionalAnnotations) (.Values.global.opendj.customAnnotations.horizontalPodAutoscaler) }}
   annotations:
+{{- if .Values.additionalAnnotations }}
 {{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.global.opendj.customAnnotations.horizontalPodAutoscaler }}
+{{ toYaml .Values.global.opendj.customAnnotations.horizontalPodAutoscaler | indent 4 }}
+{{- end }}
 {{- end }}
 spec:
   scaleTargetRef:

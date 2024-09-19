@@ -246,7 +246,8 @@ public class UmaRptService {
         final Jwt jwt = jwtSigner.newJwt();
         jwt.getClaims().setClaim("client_id", client.getClientId());
         jwt.getClaims().setExpirationTime(expirationDate);
-        jwt.getClaims().setIssuedAt(creationDate);
+        jwt.getClaims().setIat(creationDate);
+        jwt.getClaims().setNbf(creationDate);
         Audience.setAudience(jwt.getClaims(), client);
 
         if (permissions != null && !permissions.isEmpty()) {

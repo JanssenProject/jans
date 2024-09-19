@@ -6,13 +6,13 @@ import os
 from collections import namedtuple
 
 from jans.pycloudlib import get_manager
-from jans.pycloudlib.persistence import CouchbaseClient
-from jans.pycloudlib.persistence import LdapClient
-from jans.pycloudlib.persistence import SpannerClient
-from jans.pycloudlib.persistence import SqlClient
-from jans.pycloudlib.persistence import PersistenceMapper
-from jans.pycloudlib.persistence import doc_id_from_dn
-from jans.pycloudlib.persistence import id_from_dn
+from jans.pycloudlib.persistence.couchbase import CouchbaseClient
+from jans.pycloudlib.persistence.couchbase import id_from_dn
+from jans.pycloudlib.persistence.ldap import LdapClient
+from jans.pycloudlib.persistence.spanner import SpannerClient
+from jans.pycloudlib.persistence.sql import SqlClient
+from jans.pycloudlib.persistence.sql import doc_id_from_dn
+from jans.pycloudlib.persistence.utils import PersistenceMapper
 from jans.pycloudlib.utils import as_boolean
 
 from settings import LOGGING_CONFIG
@@ -58,6 +58,14 @@ def _transform_lock_dynamic_config(conf, manager):
                 "https://jans.io/oauth/lock/health.write"
             ],
         }),
+        ("endpointGroups", {
+            "audit": [
+                "telemetry",
+                "health",
+                "log"
+            ],
+        }),
+        ("groupScopeEnabled", True),
     ]:
         if missing_key not in conf:
             conf[missing_key] = value
@@ -89,6 +97,24 @@ def _transform_lock_dynamic_config(conf, manager):
     # base endpoint is changed from jans-lock to jans-auth
     if conf["baseEndpoint"] != f"https://{hostname}/jans-auth/v1":
         conf["baseEndpoint"] = f"https://{hostname}/jans-auth/v1"
+        should_update = True
+
+    # new audit endpoint groups
+    for audit_endpoint in ["telemetry/bulk", "health/bulk", "log/bulk"]:
+        if audit_endpoint in conf["endpointGroups"]["audit"]:
+            continue
+        conf["endpointGroups"]["audit"].append(audit_endpoint)
+        should_update = True
+
+    # new endpoint details
+    for k, v in {
+        "jans-config-api/lock/audit/telemetry/bulk": ["https://jans.io/oauth/lock/telemetry.readonly", "https://jans.io/oauth/lock/telemetry.write"],
+        "jans-config-api/lock/audit/log/bulk": ["https://jans.io/oauth/lock/log.write"],
+        "jans-config-api/lock/audit/health/bulk": ["https://jans.io/oauth/lock/health.readonly", "https://jans.io/oauth/lock/health.write"],
+    }.items():
+        if k in conf["endpointDetails"]:
+            continue
+        conf["endpointDetails"][k] = v
         should_update = True
 
     # return modified config (if any) and update flag

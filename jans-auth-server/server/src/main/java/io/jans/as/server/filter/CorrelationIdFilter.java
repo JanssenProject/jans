@@ -1,16 +1,13 @@
 package io.jans.as.server.filter;
 
-import io.jans.as.server.uma.authorization.UmaWebException;
-import org.apache.commons.lang.StringUtils;
-import org.apache.logging.log4j.ThreadContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.servlet.*;
 import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.lang.StringUtils;
+import org.apache.logging.log4j.ThreadContext;
+
 import java.io.IOException;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -20,10 +17,9 @@ import static io.jans.as.model.config.Constants.CORRELATION_ID_HEADER;
 @WebFilter(filterName = "CorrelationIdFilter", asyncSupported = true, urlPatterns = {"/*"})
 public class CorrelationIdFilter implements Filter {
 
-    private static final Logger log = LoggerFactory.getLogger(UmaWebException.class);
-
     @Override
-    public void init(FilterConfig filterConfig) throws ServletException {
+    public void init(FilterConfig filterConfig) {
+        // empty
     }
 
     @Override
@@ -51,6 +47,6 @@ public class CorrelationIdFilter implements Filter {
 
     @Override
     public void destroy() {
+        // empty
     }
-
 }
