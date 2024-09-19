@@ -91,11 +91,11 @@ public class LogEntry extends BaseEntry implements Serializable {
 		this.service = service;
 	}
 
-	public String getnodeName() {
+	public String getNodeName() {
 		return nodeName;
 	}
 
-	public void setnodeName(String nodeName) {
+	public void setNodeName(String nodeName) {
 		this.nodeName = nodeName;
 	}
 
