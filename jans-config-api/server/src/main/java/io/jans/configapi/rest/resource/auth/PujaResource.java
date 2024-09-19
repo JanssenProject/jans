@@ -27,6 +27,7 @@ import io.swagger.v3.oas.annotations.security.*;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -34,11 +35,11 @@ import jakarta.ws.rs.core.Response;
 
 import java.util.*;
 
-@Path(ApiConstants.TOKEN)
+@Path("/puja")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @ApplicationScoped
-public class TokenResource extends ConfigBaseResource {
+public class PujaResource extends ConfigBaseResource {
 
     @Inject
     ClientService clientService;
@@ -53,7 +54,7 @@ public class TokenResource extends ConfigBaseResource {
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.TOKEN_READ_ACCESS }, groupScopes = {
             ApiAccessConstants.TOKEN_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
-    @Path(ApiConstants.TOKEN + ApiConstants.INUM_PATH)
+    @Path("/test" + ApiConstants.INUM_PATH)
     public Response getClientToken(
             @Parameter(description = "Client identifier - inum") @PathParam(ApiConstants.INUM) @NotNull String inum) {
         logger.error("Serach tokens by inum:{}", inum);
@@ -82,18 +83,15 @@ public class TokenResource extends ConfigBaseResource {
     @POST
     @ProtectedApi(scopes = { ApiAccessConstants.TOKEN_DELETE_ACCESS }, groupScopes = {
             ApiAccessConstants.OPENID_DELETE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
-    @Path(ApiConstants.TOKEN + ApiConstants.REVOKE)
-    public Response revokeClientToken(
-            @Parameter(description = "Client identifier") @PathParam(ApiConstants.CLIENTID) @NotNull String clientId,
-            @Parameter(description = "Token") @PathParam(ApiConstants.TOKEN_PARAM) @NotNull String token) {
+    @Path("/test/revoke")
+    public Response revokeClientToken(@Valid TokenEntity tokenEntity) {
         if (logger.isDebugEnabled()) {
-            logger.debug("Delete client token - clientId:{}, token():{}", escapeLog(clientId), escapeLog(token));
+            logger.debug("Delete client token - tokenEntity():{}", escapeLog(tokenEntity));
         }
 
-        checkNotNull(clientId, ApiConstants.CLIENTID);
-        checkNotNull(token, ApiConstants.TOKEN_PARAM);
+        checkResourceNotNull(tokenEntity, "TokenEntity object");
 
-        Response response = clientService.revokeClientToken(clientId, token, token);
+        Response response = clientService.revokeClientToken(tokenEntity);
         logger.debug(" Revoke client token response:{}", response);
         if (response != null) {
             logger.debug(" Revoke client token - response.getStatus():{}, response.getEntity():{}",

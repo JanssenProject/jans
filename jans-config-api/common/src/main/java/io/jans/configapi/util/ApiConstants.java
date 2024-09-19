@@ -42,6 +42,7 @@ public class ApiConstants {
     public static final String GRANT = "/grant";
     public static final String SUBJECT = "/subject";
     public static final String TOKEN = "/token";
+    public static final String REVOKE = "/revoke";
     public static final String SEPARATOR = "/";
     public static final String SERVER_CONFIG = "/server-config";
     public static final String SERVER_CLEANUP = "/server-cleanup";

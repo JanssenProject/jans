@@ -400,10 +400,10 @@ public class ClientService implements Serializable {
         }
     }
 
-    public List<TokenEntity> getTokenOfClient(String clientId) {
-        logger.info(" Fetch token for clientId:{}", clientId);
+    public List<TokenEntity> getTokenOfClient(String inum) {
+        logger.error(" Fetch token for inum:{}", inum);
         try {
-            final String baseDn = getDnForClient(clientId);
+            final String baseDn = getDnForClient(inum);
             return persistenceEntryManager.findEntries(baseDn, TokenEntity.class,
                     Filter.createPresenceFilter("tknCde"));
         } catch (Exception ex) {
@@ -412,11 +412,15 @@ public class ClientService implements Serializable {
         return Collections.emptyList();
     }
 
-    public Response revokeClientToken(String clientId, String token, String tokenTypeHint) {
-        logger.info(" Revoke token - clientId:{}, token:{}, tokenTypeHint:{}", clientId, token, tokenTypeHint);
-
-        return AuthClientFactory.revokeToken(this.configurationService.getRevokeUrl(), clientId, token, tokenTypeHint);
-
+    public Response revokeClientToken(String inum, String token, String tokenTypeHint) {
+        logger.info(" Revoke token - inum:{}, token:{}, tokenTypeHint:{}", inum, token, tokenTypeHint);
+        return AuthClientFactory.revokeToken(this.configurationService.getRevokeUrl(), inum, token, tokenTypeHint);
+    }
+    
+    public Response revokeClientToken(TokenEntity tokenEntity) {
+        logger.error(" Revoke token - tokenEntity:{}", tokenEntity);
+        //return AuthClientFactory.revokeToken(this.configurationService.getRevokeUrl(), inum, token, tokenTypeHint);
+        return null;
     }
 
 }

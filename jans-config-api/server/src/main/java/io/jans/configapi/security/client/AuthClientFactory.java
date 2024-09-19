@@ -50,9 +50,6 @@ public class AuthClientFactory {
     private static final String AUTHORIZATION = "Authorization";
     private static Logger log = LoggerFactory.getLogger(AuthClientFactory.class);
 
-    private AuthClientFactory() {
-    }
-
     public static IntrospectionService getIntrospectionService(String url, boolean followRedirects) {
         return createIntrospectionService(url, followRedirects);
     }
