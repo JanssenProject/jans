@@ -198,15 +198,16 @@ class JansSamlInstaller(BaseInstaller, SetupUtils):
         jans_execution_config_jans_fn = 'jans.execution-config-jans.json'
         jans_userstorage_provider_component_fn = 'jans.userstorage-provider-component.json'
         jans_disable_verify_profile_fn = 'jans.disable-required-action-verify-profile.json'
+        jans_update_authenticator_config_fn = 'jans.update-authenticator-config.json'
 
-        for tmp_fn in (jans_api_openid_client_fn, jans_api_realm_fn, jans_api_user_fn, jans_browser_auth_flow_fn, jans_disable_verify_profile_fn):
+        for tmp_fn in (jans_api_openid_client_fn, jans_api_realm_fn, jans_api_user_fn, jans_browser_auth_flow_fn, jans_disable_verify_profile_fn, jans_update_authenticator_config_fn):
             self.renderTemplateInOut(os.path.join(jans_api_tmp_dir, tmp_fn), jans_api_tmp_dir, jans_api_output_dir, pystring=True)
 
         self.logIt("Starting KC for config api idp plugin configurations")
         self.start()
         #wait a while for KC to start
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        for i in range(24):
+        for i in range(30):
             self.logIt("Wait 5 seconds to KC started")
             time.sleep(5)
             try:
@@ -217,7 +218,7 @@ class JansSamlInstaller(BaseInstaller, SetupUtils):
             except Exception:
                 self.logIt("KC not ready")
         else:
-            self.logIt("KC did not start in 120 seconds. Giving up configuration", errorLog=True, fatal=True)
+            self.logIt("KC did not start in 150 seconds. Giving up configuration", errorLog=True, fatal=True)
 
         kcadm_cmd = '/opt/keycloak/bin/kcadm.sh'
         kcm_server_url = f'http://localhost:{Config.idp_config_http_port}/kc'
@@ -275,6 +276,16 @@ class JansSamlInstaller(BaseInstaller, SetupUtils):
             # create userstorage provider component
             self.renderTemplateInOut(os.path.join(jans_api_tmp_dir, jans_userstorage_provider_component_fn), jans_api_tmp_dir, jans_api_output_dir, pystring=True)
             self.run([kcadm_cmd, 'create', 'components', '-r', Config.jans_idp_realm, '-f', os.path.join(jans_api_output_dir, jans_userstorage_provider_component_fn), '--config', kc_tmp_config], env=env)
+
+            # turn off update profile for Review Profile
+            result, _ = self.run([kcadm_cmd, 'get', 'authentication/flows/first%20broker%20login/executions', '-r', 'jans', '--config', kc_tmp_config], env=env, get_stderr=True)
+            data = json.loads(result)
+            for entry in data:
+                if entry['displayName'] == 'Review Profile':
+                    entry_auth_config_s, _ = self.run([kcadm_cmd, 'get', f'authentication/executions/{entry["id"]}', '-r', 'jans', '--config', kc_tmp_config], env=env, get_stderr=True)
+                    entry_auth_config = json.loads(entry_auth_config_s)
+                    self.run([kcadm_cmd, 'update', f'authentication/config/{entry_auth_config["authenticatorConfig"]}', '-f', os.path.join(jans_api_output_dir, jans_update_authenticator_config_fn),  '-r', 'jans', '--config', kc_tmp_config], env=env, get_stderr=True)
+                    break
 
     def install_keycloak_scheduler(self):
 
