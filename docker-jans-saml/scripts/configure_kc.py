@@ -338,7 +338,6 @@ class KC:
                 profile_update_enabled = json.loads(out.decode()).get("config", {}).get("update.profile.on.first.login", "")
 
             if profile_update_enabled != "off":
-                logger.info("=== HERE ===")
                 auth_config_fn = f"{self.base_dir}/jans.update-authenticator-config.json"
                 out, err, code = exec_cmd(f"{self.kcadm_script} update authentication/config/{auth_config}  -f {auth_config_fn} -r {self.ctx['jans_idp_realm']} --config {self.config_file}")
 
