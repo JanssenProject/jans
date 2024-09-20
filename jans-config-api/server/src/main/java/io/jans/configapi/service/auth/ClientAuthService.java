@@ -193,22 +193,24 @@ public class ClientAuthService {
     }
 
     public PagedResult<TokenEntity> getTokenOfClient(SearchRequest searchRequest) {
-        logger.error(" Fetch token with searchRequest:{}", searchRequest);
+        logger.info(" Fetch token with searchRequest:{}", searchRequest);
 
         Filter searchFilter = Filter.createEqualityFilter("clnId", searchRequest.getFilter());
-        logger.error("Search Token searchFilter:{}", searchFilter);
+        logger.debug("Search Token searchFilter:{}", searchFilter);
 
-        return persistenceEntryManager.findPagedEntries(getDnForTokenEntity(null), TokenEntity.class, searchFilter,
-                null, searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
+        return persistenceEntryManager.findPagedEntries(geTokenDn(null), TokenEntity.class, searchFilter, null,
+                searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
                 searchRequest.getStartIndex(), searchRequest.getCount(), searchRequest.getMaxCount());
 
     }
 
     public void revokeTokenEntity(String tknCde) {
-        logger.error(" Revoke token - tknCde:{}", tknCde);
+        if (logger.isInfoEnabled()) {
+            logger.info(" Revoke token - tknCde:{}", escapeLog(tknCde));
+        }
 
         TokenEntity tokenEntity = this.getTokenEntityByCode(tknCde);
-        logger.error("Token to be revoked identified by tknCde:{} is:{}", tokenEntity, tknCde);
+        logger.debug("Token to be revoked identified by tknCde:{} is:{}", tokenEntity, tknCde);
 
         if (tokenEntity == null) {
             throw new NotFoundException("Could not find Token identified by - " + tknCde);
@@ -220,19 +222,11 @@ public class ClientAuthService {
     public TokenEntity getTokenEntityByCode(String tknCde) {
         TokenEntity tokenEntity = null;
         try {
-            tokenEntity = persistenceEntryManager.find(TokenEntity.class, getDnForTokenEntity(tknCde));
+            tokenEntity = persistenceEntryManager.find(TokenEntity.class, geTokenDn(tknCde));
         } catch (Exception ex) {
             logger.error("Failed to get Token identified by tknCde:{" + tknCde + "}", ex);
         }
         return tokenEntity;
-    }
-
-    public String getDnForTokenEntity(String tknCde) {
-        String orgDn = organizationService.getDnForOrganization();
-        if (StringHelper.isEmpty(tknCde)) {
-            return String.format("ou=tokens,%s", orgDn);
-        }
-        return String.format("tknCde=%s,ou=tokens,%s", tknCde, orgDn);
     }
 
 }

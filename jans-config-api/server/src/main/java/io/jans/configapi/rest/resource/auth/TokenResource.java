@@ -13,7 +13,6 @@ import io.jans.model.JansAttribute;
 import io.jans.model.SearchRequest;
 import io.jans.model.token.TokenEntity;
 import io.jans.orm.model.PagedResult;
-import io.jans.service.document.store.model.Document;
 import io.jans.configapi.service.auth.ClientAuthService;
 import io.jans.configapi.service.auth.ClientService;
 import io.jans.configapi.util.ApiAccessConstants;
@@ -21,8 +20,8 @@ import io.jans.configapi.util.ApiConstants;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -56,7 +55,7 @@ public class TokenResource extends ConfigBaseResource {
             "OAuth - OpenID Connect - Clients" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.TOKEN_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = TokenEntity.class)))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PagedResult.class), examples = @ExampleObject(name = "Response example", value = "example/token/token-get.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
@@ -66,18 +65,18 @@ public class TokenResource extends ConfigBaseResource {
     @Path(ApiConstants.CLIENT + ApiConstants.CLIENTID_PATH)
     public Response getClientToken(
             @Parameter(description = "Script identifier") @PathParam(ApiConstants.CLIENTID) @NotNull String clientId) {
-        logger.error("Serach tokens by clientId:{}", clientId);
-        if (logger.isDebugEnabled()) {
-            logger.debug("Serach tokens by clientId:{}", escapeLog(clientId));
+        
+        if (logger.isInfoEnabled()) {
+            logger.info("Serach tokens by clientId:{}", escapeLog(clientId));
         }
         checkNotNull(clientId, ApiConstants.CLIENTID);
 
         // validate clientId
         Client client = clientService.getClientByInum(clientId);
         checkResourceNotNull(client, "Client");
-        logger.error("Serach tokens by client:{}", client);
+        logger.debug("Serach tokens by client:{}", client);
 
-        SearchRequest searchReq = createSearchRequest(clientAuthService.getDnForTokenEntity(null), clientId, "tknCde",
+        SearchRequest searchReq = createSearchRequest(clientAuthService.geTokenDn(null), clientId, "tknCde",
                 ApiConstants.ASCENDING, Integer.parseInt(ApiConstants.DEFAULT_LIST_START_INDEX),
                 Integer.parseInt(ApiConstants.DEFAULT_LIST_SIZE), null, null, this.getMaxCount(), null,
                 JansAttribute.class);
@@ -102,8 +101,8 @@ public class TokenResource extends ConfigBaseResource {
     @Path(ApiConstants.REVOKE + ApiConstants.TOKEN_CODE_PATH)
     public Response revokeClientToken(
             @Parameter(description = "Token Code") @PathParam(ApiConstants.TOKEN_CODE_PARAM) @NotNull String tknCde) {
-        if (logger.isDebugEnabled()) {
-            logger.debug("Revoke token - tknCde():{}", escapeLog(tknCde));
+        if (logger.isInfoEnabled()) {
+            logger.info("Revoke token - tknCde():{}", escapeLog(tknCde));
         }
 
         checkResourceNotNull(tknCde, ApiConstants.TOKEN_CODE_PARAM);
