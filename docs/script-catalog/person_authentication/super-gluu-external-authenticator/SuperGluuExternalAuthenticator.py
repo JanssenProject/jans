@@ -1107,7 +1107,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         try:
             httpService = CdiUtil.bean(HttpService2)
-            resultResponse = httpService.executePost(endpointUrl, None, headers, body, ContentType.APPLICATION_JSON, None)
+            resultResponse = httpService.executePost(endpointUrl, authData, headers, body, ContentType.APPLICATION_FORM_URLENCODED, None)
             httpResponse = resultResponse.getHttpResponse()
             httpResponseStatusCode = httpResponse.getStatusLine().getStatusCode()
             print "Super-Gluu. Scan. Get token response status code: %s" % httpResponseStatusCode
