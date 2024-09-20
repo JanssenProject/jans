@@ -483,7 +483,7 @@ components:
           format: date-time
         service:
           type: string
-        getnodeName:
+        nodeName:
           type: string
         status:
           type: string
@@ -506,7 +506,7 @@ components:
           format: date-time
         service:
           type: string
-        getnodeName:
+        nodeName:
           type: string
         eventType:
           type: string
@@ -543,7 +543,7 @@ components:
           format: date-time
         service:
           type: string
-        getnodeName:
+        nodeName:
           type: string
         status:
           type: string
