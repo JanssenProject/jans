@@ -53,6 +53,10 @@ To retrieve the current server configuration using TUI proceed as below:
 
 You can modify the configuration in place by editing the fields of your interest. To persist the changes, highlight the "Save" button at the bottom and press enter 
 
+## SCIM Operations Guide using CLI, TUI and API
+
+SCIM operations support mutiple options. Please check out this [documentation](../config-guide/scim-config/user-config.md) for guidelines of scim operations.
+
 ## When will changes take effect?
 
 Any configuration update will take effect one minute after it has been applied whether via CLI or TUI. 

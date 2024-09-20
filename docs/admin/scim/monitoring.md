@@ -4,9 +4,11 @@ tags:
   - scim
 ---
 
-## This content is in progress
+## How is SCIM data stored?
 
-The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.
+SCIM [schema spec](https://datatracker.ietf.org/doc/html/rfc7643) does not use LDAP attribute names but a different naming convention for resource attributes (note this is not the case of custom attributes where the SCIM name used is that of the LDAP attribute).
+
+It is possible to determine if a given LDAP attribute is being mapped to a SCIM attribute. For that you need to check in Jans TUI `Auth-Server >> Attributes` and click on any attributes. Check `Include in SCIM Extension:` is `true` or `false`. Whenever you try to map any LDAP attribute to a SCIM attribute keep it's value `true`.
 
 ## Have questions in the meantime?
 
