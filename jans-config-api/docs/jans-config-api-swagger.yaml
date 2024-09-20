@@ -5990,60 +5990,6 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/plugin.readonly
-  /api/v1/puja/inum/{inum}:
-    get:
-      tags:
-      - OAuth - OpenID Connect - Clients
-      summary: Get client token details
-      description: Get client token details
-      operationId: get-token-details
-      parameters:
-      - name: inum
-        in: path
-        description: Script identifier
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/TokenEntity'
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/token.readonly
-  /api/v1/puja/test/revoke:
-    post:
-      tags:
-      - OAuth - OpenID Connect - Clients
-      summary: Revoke client token.
-      description: Revoke client token.
-      operationId: revoke-token
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/TokenEntity'
-      responses:
-        "200":
-          description: Ok
-        "400":
-          description: Bad Request
-        "401":
-          description: Unauthorized
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/config/token.delete
   /api/v1/scopes:
     get:
       tags:
@@ -7668,17 +7614,17 @@ paths:
       - oauth2:
         - https://jans.io/oauth/config/stats.readonly
         - jans_stat
-  /api/v1/token/token{inum}:
+  /api/v1/token/client/{clientId}:
     get:
       tags:
       - OAuth - OpenID Connect - Clients
       summary: Get client token details
       description: Get client token details
-      operationId: get-token-details_1
+      operationId: get-token-details
       parameters:
-      - name: inum
+      - name: clientId
         in: path
-        description: Client identifier - inum
+        description: Script identifier
         required: true
         schema:
           type: string
@@ -7693,38 +7639,36 @@ paths:
                   $ref: '#/components/schemas/TokenEntity'
         "401":
           description: Unauthorized
+        "404":
+          description: Not Found
         "500":
           description: InternalServerError
       security:
       - oauth2:
         - https://jans.io/oauth/config/token.readonly
-  /api/v1/token/token/revoke:
-    post:
+  /api/v1/token/revoke/{tknCde}:
+    delete:
       tags:
       - OAuth - OpenID Connect - Clients
       summary: Revoke client token.
       description: Revoke client token.
-      operationId: revoke-token_1
+      operationId: revoke-token
       parameters:
-      - name: clientId
+      - name: tknCde
         in: path
-        description: Client identifier
-        required: true
-        schema:
-          type: string
-      - name: token
-        in: path
-        description: Token
+        description: Token Code
         required: true
         schema:
           type: string
       responses:
-        "200":
-          description: Ok
+        "204":
+          description: No Content
         "400":
           description: Bad Request
         "401":
           description: Unauthorized
+        "404":
+          description: Not Found
         "500":
           description: InternalServerError
       security:
@@ -8488,19 +8432,19 @@ components:
           type: string
         selected:
           type: boolean
-        whitePagesCanView:
+        adminCanView:
+          type: boolean
+        adminCanEdit:
+          type: boolean
+        userCanView:
+          type: boolean
+        userCanEdit:
           type: boolean
         adminCanAccess:
           type: boolean
         userCanAccess:
           type: boolean
-        adminCanEdit:
-          type: boolean
-        adminCanView:
-          type: boolean
-        userCanView:
-          type: boolean
-        userCanEdit:
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -9349,8 +9293,6 @@ components:
           type: boolean
         lockMessageConfig:
           $ref: '#/components/schemas/LockMessageConfig'
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -9360,6 +9302,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -10809,92 +10753,6 @@ components:
           type: string
         baseDn:
           type: string
-    TokenAttributes:
-      type: object
-      properties:
-        x5cs256:
-          type: string
-        online_access:
-          type: boolean
-        attributes:
-          type: object
-          additionalProperties:
-            type: string
-        dpopJkt:
-          type: string
-        authorizationDetails:
-          type: string
-        statusListIndex:
-          type: integer
-          format: int32
-    TokenEntity:
-      type: object
-      properties:
-        dn:
-          type: string
-        grantId:
-          type: string
-        userId:
-          type: string
-        userDn:
-          type: string
-        clientId:
-          type: string
-        creationDate:
-          type: string
-          format: date-time
-        expirationDate:
-          type: string
-          format: date-time
-        deletable:
-          type: boolean
-        authenticationTime:
-          type: string
-          format: date-time
-        scope:
-          type: string
-        tokenCode:
-          type: string
-        tokenType:
-          type: string
-        grantType:
-          type: string
-        jwtRequest:
-          type: string
-        authorizationCode:
-          type: string
-        nonce:
-          type: string
-        codeChallenge:
-          type: string
-        codeChallengeMethod:
-          type: string
-        claims:
-          type: string
-        tokenBindingHash:
-          type: string
-        referenceId:
-          type: string
-        authMode:
-          type: string
-        sessionDn:
-          type: string
-        ttl:
-          type: integer
-          format: int32
-        attributes:
-          $ref: '#/components/schemas/TokenAttributes'
-        dpop:
-          type: string
-        tokenTypeEnum:
-          type: string
-          enum:
-          - ID_TOKEN
-          - ACCESS_TOKEN
-          - LONG_LIVED_ACCESS_TOKEN
-          - REFRESH_TOKEN
-          - AUTHORIZATION_CODE
-          - TX_TOKEN
     CustomScope:
       type: object
       properties:
@@ -11085,6 +10943,92 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/UserAuthenticator'
+    TokenAttributes:
+      type: object
+      properties:
+        x5cs256:
+          type: string
+        online_access:
+          type: boolean
+        attributes:
+          type: object
+          additionalProperties:
+            type: string
+        dpopJkt:
+          type: string
+        authorizationDetails:
+          type: string
+        statusListIndex:
+          type: integer
+          format: int32
+    TokenEntity:
+      type: object
+      properties:
+        dn:
+          type: string
+        grantId:
+          type: string
+        userId:
+          type: string
+        userDn:
+          type: string
+        clientId:
+          type: string
+        creationDate:
+          type: string
+          format: date-time
+        expirationDate:
+          type: string
+          format: date-time
+        deletable:
+          type: boolean
+        authenticationTime:
+          type: string
+          format: date-time
+        scope:
+          type: string
+        tokenCode:
+          type: string
+        tokenType:
+          type: string
+        grantType:
+          type: string
+        jwtRequest:
+          type: string
+        authorizationCode:
+          type: string
+        nonce:
+          type: string
+        codeChallenge:
+          type: string
+        codeChallengeMethod:
+          type: string
+        claims:
+          type: string
+        tokenBindingHash:
+          type: string
+        referenceId:
+          type: string
+        authMode:
+          type: string
+        sessionDn:
+          type: string
+        ttl:
+          type: integer
+          format: int32
+        attributes:
+          $ref: '#/components/schemas/TokenAttributes'
+        dpop:
+          type: string
+        tokenTypeEnum:
+          type: string
+          enum:
+          - ID_TOKEN
+          - ACCESS_TOKEN
+          - LONG_LIVED_ACCESS_TOKEN
+          - REFRESH_TOKEN
+          - AUTHORIZATION_CODE
+          - TX_TOKEN
     UmaResource:
       required:
       - name

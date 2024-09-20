@@ -4,11 +4,15 @@ import io.jans.orm.search.filter.Filter;
 import io.jans.util.StringHelper;
 import io.jans.as.persistence.model.ClientAuthorization;
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.model.PagedResult;
+import io.jans.orm.model.SortOrder;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.common.service.OrganizationService;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.persistence.model.Scope;
 import io.jans.configapi.core.model.Token;
+import io.jans.model.SearchRequest;
+import io.jans.model.token.TokenEntity;
 
 import static io.jans.as.model.util.Util.escapeLog;
 
@@ -17,6 +21,7 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.ws.rs.NotFoundException;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -185,6 +190,49 @@ public class ClientAuthService {
 
         return scopeService.searchScopesById(scopeIds);
 
+    }
+
+    public PagedResult<TokenEntity> getTokenOfClient(SearchRequest searchRequest) {
+        logger.error(" Fetch token with searchRequest:{}", searchRequest);
+
+        Filter searchFilter = Filter.createEqualityFilter("clnId", searchRequest.getFilter());
+        logger.error("Search Token searchFilter:{}", searchFilter);
+
+        return persistenceEntryManager.findPagedEntries(getDnForTokenEntity(null), TokenEntity.class, searchFilter,
+                null, searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
+                searchRequest.getStartIndex(), searchRequest.getCount(), searchRequest.getMaxCount());
+
+    }
+
+    public void revokeTokenEntity(String tknCde) {
+        logger.error(" Revoke token - tknCde:{}", tknCde);
+
+        TokenEntity tokenEntity = this.getTokenEntityByCode(tknCde);
+        logger.error("Token to be revoked identified by tknCde:{} is:{}", tokenEntity, tknCde);
+
+        if (tokenEntity == null) {
+            throw new NotFoundException("Could not find Token identified by - " + tknCde);
+        }
+
+        persistenceEntryManager.removeRecursively(tokenEntity.getDn(), TokenEntity.class);
+    }
+
+    public TokenEntity getTokenEntityByCode(String tknCde) {
+        TokenEntity tokenEntity = null;
+        try {
+            tokenEntity = persistenceEntryManager.find(TokenEntity.class, getDnForTokenEntity(tknCde));
+        } catch (Exception ex) {
+            logger.error("Failed to get Token identified by tknCde:{" + tknCde + "}", ex);
+        }
+        return tokenEntity;
+    }
+
+    public String getDnForTokenEntity(String tknCde) {
+        String orgDn = organizationService.getDnForOrganization();
+        if (StringHelper.isEmpty(tknCde)) {
+            return String.format("ou=tokens,%s", orgDn);
+        }
+        return String.format("tknCde=%s,ou=tokens,%s", tknCde, orgDn);
     }
 
 }

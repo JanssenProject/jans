@@ -19,9 +19,7 @@ import io.jans.as.model.common.SubjectType;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
 import io.jans.as.model.register.ApplicationType;
-import io.jans.configapi.security.client.AuthClientFactory;
 import io.jans.model.SearchRequest;
-import io.jans.model.token.TokenEntity;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;
@@ -32,14 +30,11 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.io.Serializable;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import jakarta.ws.rs.core.Response;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -275,18 +270,14 @@ public class ClientService implements Serializable {
             }
         }
 
-        logger.trace(
-                "After setting - responseTypeSet:{}, client.getResponseTypes():{}, appConfiguration.getAllResponseTypesSupported():{}, grantTypeSet:{}, client.getGrantTypes():{}, appConfiguration.getGrantTypesSupported():{}",
-                responseTypeSet, client.getResponseTypes(), appConfiguration.getAllResponseTypesSupported(),
-                grantTypeSet, client.getGrantTypes(), appConfiguration.getGrantTypesSupported());
+        logger.trace("After setting - responseTypeSet:{}, client.getResponseTypes():{}, appConfiguration.getAllResponseTypesSupported():{}, grantTypeSet:{}, client.getGrantTypes():{}, appConfiguration.getGrantTypesSupported():{}",
+                responseTypeSet, client.getResponseTypes(), appConfiguration.getAllResponseTypesSupported(), grantTypeSet, client.getGrantTypes(), appConfiguration.getGrantTypesSupported());
         responseTypeSet.retainAll(appConfiguration.getAllResponseTypesSupported());
         grantTypeSet.retainAll(appConfiguration.getGrantTypesSupported());
-        logger.trace(
-                "After setting - responseTypeSet:{}, grantTypeSet:{}, appConfiguration.getGrantTypesSupportedByDynamicRegistration():{}",
+        logger.trace("After setting - responseTypeSet:{}, grantTypeSet:{}, appConfiguration.getGrantTypesSupportedByDynamicRegistration():{}",
                 responseTypeSet, grantTypeSet, appConfiguration.getGrantTypesSupportedByDynamicRegistration());
 
-        Set<GrantType> grantTypesSupportedByDynamicRegistration = appConfiguration
-                .getGrantTypesSupportedByDynamicRegistration();
+        Set<GrantType> grantTypesSupportedByDynamicRegistration = appConfiguration.getGrantTypesSupportedByDynamicRegistration();
         grantTypeSet.retainAll(grantTypesSupportedByDynamicRegistration);
 
         if (!update || (responseTypeSet != null && !responseTypeSet.isEmpty())) {
@@ -399,28 +390,4 @@ public class ClientService implements Serializable {
 
         }
     }
-
-    public List<TokenEntity> getTokenOfClient(String inum) {
-        logger.error(" Fetch token for inum:{}", inum);
-        try {
-            final String baseDn = getDnForClient(inum);
-            return persistenceEntryManager.findEntries(baseDn, TokenEntity.class,
-                    Filter.createPresenceFilter("tknCde"));
-        } catch (Exception ex) {
-            logger.error("Exception while getting client token is - ", ex);
-        }
-        return Collections.emptyList();
-    }
-
-    public Response revokeClientToken(String inum, String token, String tokenTypeHint) {
-        logger.info(" Revoke token - inum:{}, token:{}, tokenTypeHint:{}", inum, token, tokenTypeHint);
-        return AuthClientFactory.revokeToken(this.configurationService.getRevokeUrl(), inum, token, tokenTypeHint);
-    }
-    
-    public Response revokeClientToken(TokenEntity tokenEntity) {
-        logger.error(" Revoke token - tokenEntity:{}", tokenEntity);
-        //return AuthClientFactory.revokeToken(this.configurationService.getRevokeUrl(), inum, token, tokenTypeHint);
-        return null;
-    }
-
 }

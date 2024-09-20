@@ -166,7 +166,6 @@ public class ApiApplication extends BaseApiApplication {
         classes.add(ConfigApiResource.class);
         classes.add(ClientAuthResource.class);
         classes.add(TokenResource.class);
-        classes.add(PujaResource.class);
                 
         log.info("appConfiguration:{}",appConfiguration );
         if(appConfiguration!=null && appConfiguration.getAssetMgtConfiguration()!=null && appConfiguration.getAssetMgtConfiguration().isAssetMgtEnabled()) {

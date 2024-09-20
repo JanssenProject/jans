@@ -9,12 +9,15 @@ package io.jans.configapi.rest.resource.auth;
 import static io.jans.as.model.util.Util.escapeLog;
 import io.jans.as.common.model.registration.Client;
 import io.jans.configapi.core.rest.ProtectedApi;
-
+import io.jans.model.JansAttribute;
+import io.jans.model.SearchRequest;
 import io.jans.model.token.TokenEntity;
+import io.jans.orm.model.PagedResult;
+import io.jans.service.document.store.model.Document;
+import io.jans.configapi.service.auth.ClientAuthService;
 import io.jans.configapi.service.auth.ClientService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
-
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -40,8 +43,11 @@ import java.util.*;
 @ApplicationScoped
 public class TokenResource extends ConfigBaseResource {
 
+    private class TokenEntityPagedResult extends PagedResult<TokenEntity> {
+    };
+
     @Inject
-    ClientService clientService;
+    ClientAuthService clientAuthService;
 
     @Inject
     ClientService clientService;
@@ -52,56 +58,90 @@ public class TokenResource extends ConfigBaseResource {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = TokenEntity.class)))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.TOKEN_READ_ACCESS }, groupScopes = {
             ApiAccessConstants.TOKEN_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
-    @Path(PATH_SEPARATOR + ApiConstants.INUM + PATH_SEPARATOR + ApiConstants.INUM_PATH)
+    @Path(ApiConstants.CLIENT + ApiConstants.CLIENTID_PATH)
     public Response getClientToken(
-            @Parameter(description = "Script identifier") @PathParam(ApiConstants.INUM) @NotNull String inum) {
-        logger.error("Serach tokens by inum:{}", inum);
+            @Parameter(description = "Script identifier") @PathParam(ApiConstants.CLIENTID) @NotNull String clientId) {
+        logger.error("Serach tokens by clientId:{}", clientId);
         if (logger.isDebugEnabled()) {
-            logger.debug("Serach tokens by inum:{}", escapeLog(inum));
+            logger.debug("Serach tokens by clientId:{}", escapeLog(clientId));
         }
-        checkNotNull(inum, ApiConstants.INUM);
+        checkNotNull(clientId, ApiConstants.CLIENTID);
 
-//validate inum
-        Client client = clientService.getClientByInum(inum);
+        // validate clientId
+        Client client = clientService.getClientByInum(clientId);
         checkResourceNotNull(client, "Client");
         logger.error("Serach tokens by client:{}", client);
 
-        List<TokenEntity> tokenEntityList = clientService.getTokenOfClient(inum);
-        logger.error("Client:{} token are tokenEntityList:{}", inum, tokenEntityList);
-        return Response.ok(tokenEntityList).build();
+        SearchRequest searchReq = createSearchRequest(clientAuthService.getDnForTokenEntity(null), clientId, "tknCde",
+                ApiConstants.ASCENDING, Integer.parseInt(ApiConstants.DEFAULT_LIST_START_INDEX),
+                Integer.parseInt(ApiConstants.DEFAULT_LIST_SIZE), null, null, this.getMaxCount(), null,
+                JansAttribute.class);
+
+        TokenEntityPagedResult tokenEntityPagedResult = searchTokenByClientId(searchReq);
+        logger.info("Asset fetched based on name are:{}", tokenEntityPagedResult);
+        return Response.ok(tokenEntityPagedResult).build();
+
     }
 
     @Operation(summary = "Revoke client token.", description = "Revoke client token.", operationId = "revoke-token", tags = {
             "OAuth - OpenID Connect - Clients" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.TOKEN_DELETE_ACCESS }))
-    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Ok"),
+    @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "No Content"),
             @ApiResponse(responseCode = "400", description = "Bad Request"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
-    @POST
+    @DELETE
     @ProtectedApi(scopes = { ApiAccessConstants.TOKEN_DELETE_ACCESS }, groupScopes = {
             ApiAccessConstants.OPENID_DELETE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
-    @Path("/test/revoke")
-    public Response revokeClientToken(@Valid TokenEntity tokenEntity) {
+    @Path(ApiConstants.REVOKE + ApiConstants.TOKEN_CODE_PATH)
+    public Response revokeClientToken(
+            @Parameter(description = "Token Code") @PathParam(ApiConstants.TOKEN_CODE_PARAM) @NotNull String tknCde) {
         if (logger.isDebugEnabled()) {
-            logger.debug("Delete client token - tokenEntity():{}", escapeLog(tokenEntity));
+            logger.debug("Revoke token - tknCde():{}", escapeLog(tknCde));
         }
 
-        checkResourceNotNull(tokenEntity, "TokenEntity object");
+        checkResourceNotNull(tknCde, ApiConstants.TOKEN_CODE_PARAM);
+        clientAuthService.revokeTokenEntity(tknCde);
+        logger.info(" Successfully deleted token identified by tknCde:{}", tknCde);
 
-        Response response = clientService.revokeClientToken(tokenEntity);
-        logger.debug(" Revoke client token response:{}", response);
-        if (response != null) {
-            logger.debug(" Revoke client token - response.getStatus():{}, response.getEntity():{}",
-                    response.getStatus(), response.getEntity());
+        return Response.noContent().build();
+    }
 
+    private TokenEntityPagedResult searchTokenByClientId(SearchRequest searchReq) {
+
+        logger.debug("Search asset by name params - searchReq:{} ", searchReq);
+        TokenEntityPagedResult tokenEntityPagedResult = null;
+        PagedResult<TokenEntity> pagedResult = clientAuthService.getTokenOfClient(searchReq);
+
+        logger.debug("PagedResult  - pagedResult:{}", pagedResult);
+        if (pagedResult != null) {
+            logger.debug(
+                    "Asset fetched  - pagedResult.getTotalEntriesCount():{}, pagedResult.getEntriesCount():{}, pagedResult.getEntries():{}",
+                    pagedResult.getTotalEntriesCount(), pagedResult.getEntriesCount(), pagedResult.getEntries());
+            tokenEntityPagedResult = getTokenEntityPagedResult(pagedResult);
         }
 
-        return Response.status(Response.Status.OK).entity(response).build();
+        logger.debug("Asset tokenEntityPagedResult:{} ", tokenEntityPagedResult);
+        return tokenEntityPagedResult;
+    }
+
+    private TokenEntityPagedResult getTokenEntityPagedResult(PagedResult<TokenEntity> pagedResult) {
+        TokenEntityPagedResult tokenEntityPagedResult = null;
+        if (pagedResult != null) {
+            List<TokenEntity> tokenEntityList = pagedResult.getEntries();
+            tokenEntityPagedResult = new TokenEntityPagedResult();
+            tokenEntityPagedResult.setStart(pagedResult.getStart());
+            tokenEntityPagedResult.setEntriesCount(pagedResult.getEntriesCount());
+            tokenEntityPagedResult.setTotalEntriesCount(pagedResult.getTotalEntriesCount());
+            tokenEntityPagedResult.setEntries(tokenEntityList);
+        }
+        return tokenEntityPagedResult;
     }
 
 }
