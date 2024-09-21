@@ -51,7 +51,10 @@ import org.slf4j.Logger;
                 @Tag(name = "Auth - Session Management"), @Tag(name = "Organization Configuration"),
                 @Tag(name = "Auth Server Health - Check"), @Tag(name = "Plugins"),
                 @Tag(name = "Configuration – Config API"), @Tag(name = "Client Authorization"),
-                @Tag(name = "Jans Assets")},
+                @Tag(name = "Jans Assets"),
+                @Tag(name = "Tokens"),
+                @Tag(name = "Sessions"),
+        },
 
         servers = { @Server(url = "https://jans.local.io", description = "The Jans server") })
 
@@ -113,6 +116,12 @@ import org.slf4j.Logger;
         @OAuthScope(name = ApiAccessConstants.JANS_ASSET_READ_ACCESS, description = "View Jans Assets"),
         @OAuthScope(name = ApiAccessConstants.JANS_ASSET_WRITE_ACCESS, description = "Manage Jans Assets"),
         @OAuthScope(name = ApiAccessConstants.JANS_ASSET_DELETE_ACCESS, description = "Delete Jans Assets"),
+        @OAuthScope(name = ApiAccessConstants.TOKEN_READ_ACCESS, description = "View Token details"),
+        @OAuthScope(name = ApiAccessConstants.TOKEN_WRITE_ACCESS, description = "Manage Token details"),
+        @OAuthScope(name = ApiAccessConstants.TOKEN_DELETE_ACCESS, description = "Delete Token details"),
+        @OAuthScope(name = ApiAccessConstants.SESSION_READ_ACCESS, description = "View Session details"),
+        @OAuthScope(name = ApiAccessConstants.SESSION_WRITE_ACCESS, description = "Manage Session details"),
+        @OAuthScope(name = ApiAccessConstants.SESSION_DELETE_ACCESS, description = "Delete Session details")
         }
 
 )))
@@ -156,11 +165,14 @@ public class ApiApplication extends BaseApiApplication {
         classes.add(PluginResource.class);
         classes.add(ConfigApiResource.class);
         classes.add(ClientAuthResource.class);
-        
+        classes.add(TokenResource.class);
+                
         log.info("appConfiguration:{}",appConfiguration );
         if(appConfiguration!=null && appConfiguration.getAssetMgtConfiguration()!=null && appConfiguration.getAssetMgtConfiguration().isAssetMgtEnabled()) {
             classes.add(AssetResource.class);
         }
+        
+        log.error("\n\n All classes:{}",classes+"\n\n\n");
 
         return classes;
     }
