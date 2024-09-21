@@ -35,7 +35,6 @@ import jakarta.ws.rs.client.Invocation.Builder;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.Response;
-
 import org.eclipse.microprofile.rest.client.annotation.RegisterProvider;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 import org.jboss.resteasy.client.jaxrs.engines.ApacheHttpClient43Engine;
@@ -48,7 +47,7 @@ import org.slf4j.LoggerFactory;
 public class AuthClientFactory {
 
     private static final String CONTENT_TYPE = "Content-Type";
-
+    private static final String AUTHORIZATION = "Authorization";
     private static Logger log = LoggerFactory.getLogger(AuthClientFactory.class);
 
     public static IntrospectionService getIntrospectionService(String url, boolean followRedirects) {
@@ -101,7 +100,7 @@ public class AuthClientFactory {
             tokenRequest.setAuthUsername(clientId);
             tokenRequest.setAuthPassword(clientSecret);
             Builder request = getClientBuilder(tokenUrl);
-            request.header("Authorization", "Basic " + tokenRequest.getEncodedCredentials());
+            request.header(AUTHORIZATION, "Basic " + tokenRequest.getEncodedCredentials());
             request.header(CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED);
             final MultivaluedHashMap<String, String> multivaluedHashMap = new MultivaluedHashMap<>(
                     tokenRequest.getParameters());
@@ -121,6 +120,27 @@ public class AuthClientFactory {
             }
         }
         return null;
+    }
+
+    public static Response revokeToken(final String revokeUrl, final String clientId, final String token,
+            final String tokenTypeHint) {
+        log.debug("Request for Access Token -  revokeUrl:{}, clientId:{}, token:{} , tokenTypeHint:{}", revokeUrl,
+                clientId, token, tokenTypeHint);
+
+        Builder request = getClientBuilder(revokeUrl);
+        request.header(AUTHORIZATION, token);
+        request.header(CONTENT_TYPE, MediaType.APPLICATION_JSON);
+
+        log.debug(" request:{}}", request);
+        MultivaluedHashMap<String, String> multivaluedHashMap = new MultivaluedHashMap<>();
+        multivaluedHashMap.add("token", token);
+        multivaluedHashMap.add("token_type_hint", tokenTypeHint);
+        multivaluedHashMap.add("client_id", clientId);
+
+        Response response = request.post(Entity.entity(Entity.form(multivaluedHashMap), MediaType.APPLICATION_JSON));
+        log.debug(" response:{}", response);
+
+        return response;
     }
 
     public static String getIntrospectionEndpoint(String issuer) throws JsonProcessingException {
@@ -191,14 +211,13 @@ public class AuthClientFactory {
     }
 
     public static RevokeSessionResponse revokeSession(String url, String token, String userId) {
-        log.debug("Request for Access Token -  url:{}, token:{}, userId:{} ", url,
-                token, userId);
+        log.debug("Request for Access Token -  url:{}, token:{}, userId:{} ", url, token, userId);
         Response response = null;
         try {
             RevokeSessionRequest revokeSessionRequest = new RevokeSessionRequest("uid", "test");
-         
+
             Builder request = getClientBuilder(url);
-            request.header("Authorization", "Basic " + token);
+            request.header(AUTHORIZATION, "Basic " + token);
             request.header(CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED);
             final MultivaluedHashMap<String, String> multivaluedHashMap = new MultivaluedHashMap<>(
                     revokeSessionRequest.getParameters());
