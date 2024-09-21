@@ -40,6 +40,8 @@ tags:
 - name: Configuration – Config API
 - name: Client Authorization
 - name: Jans Assets
+- name: Tokens
+- name: Sessions
 paths:
   /api/v1/health/app-version:
     get:
@@ -7612,6 +7614,129 @@ paths:
       - oauth2:
         - https://jans.io/oauth/config/stats.readonly
         - jans_stat
+  /api/v1/token/client/{clientId}:
+    get:
+      tags:
+      - OAuth - OpenID Connect - Clients
+      summary: Get client token details
+      description: Get client token details
+      operationId: get-token-details
+      parameters:
+      - name: clientId
+        in: path
+        description: Script identifier
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedResult'
+              examples:
+                Response example:
+                  description: Response example
+                  value: |
+                    {
+                        "start": 0,
+                        "totalEntriesCount": 3,
+                        "entriesCount": 3,
+                        "entries": [
+                            {
+                                "dn": "tknCde=4960533184fab18d8932045b70de17f827c916010ab5d5c86f7202ca6cf7c176,ou=tokens,o=jans",
+                                "grantId": "82736426-1a72-46bb-8e76-52f3bca2c614",
+                                "clientId": "2000.cc8b29ae-cb4a-49ea-b176-8695e53919d9",
+                                "creationDate": "2024-09-20T12:55:30",
+                                "expirationDate": "2024-10-30T12:55:30",
+                                "deletable": true,
+                                "scope": "jans_stat openid https://jans.io/oauth/jans-auth-server/config/adminui/properties.readonly https://jans.io/oauth/jans-auth-server/config/adminui/license.write https://jans.io/oauth/config/stats.readonly https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly",
+                                "tokenCode": "4960533184fab18d8932045b70de17f827c916010ab5d5c86f7202ca6cf7c176",
+                                "tokenType": "access_token",
+                                "grantType": "client_credentials",
+                                "referenceId": "uIw3N7qeRiKR1pvzE1OmxQ",
+                                "attributes": {
+                                    "online_access": false,
+                                    "statusListIndex": 1101
+                                },
+                                "tokenTypeEnum": "ACCESS_TOKEN"
+                            },
+                            {
+                                "dn": "tknCde=5495ac7fedd47f57a10f314896fe88d415dbec067c7cea5d57138e2723b73e84,ou=tokens,o=jans",
+                                "grantId": "2c4123dd-886f-447e-a65d-207bf60c3307",
+                                "clientId": "2000.cc8b29ae-cb4a-49ea-b176-8695e53919d9",
+                                "creationDate": "2024-09-20T12:55:37",
+                                "expirationDate": "2024-10-30T12:55:37",
+                                "deletable": true,
+                                "scope": "jans_stat openid https://jans.io/oauth/jans-auth-server/config/adminui/properties.readonly https://jans.io/oauth/jans-auth-server/config/adminui/license.write https://jans.io/oauth/config/stats.readonly https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly",
+                                "tokenCode": "5495ac7fedd47f57a10f314896fe88d415dbec067c7cea5d57138e2723b73e84",
+                                "tokenType": "access_token",
+                                "grantType": "client_credentials",
+                                "referenceId": "bgPvtouST66zHFaH4vrWhA",
+                                "attributes": {
+                                    "online_access": false,
+                                    "statusListIndex": 1102
+                                },
+                                "tokenTypeEnum": "ACCESS_TOKEN"
+                            },
+                            {
+                                "dn": "tknCde=f0977b8c359446ff7a5aa157a930c89506485b266d988507478e367f53fd5445,ou=tokens,o=jans",
+                                "grantId": "d0c427ec-0c6e-4fdf-83eb-43a19e633eec",
+                                "clientId": "2000.cc8b29ae-cb4a-49ea-b176-8695e53919d9",
+                                "creationDate": "2024-09-20T12:55:37",
+                                "expirationDate": "2024-10-20T12:55:37",
+                                "deletable": true,
+                                "scope": "jans_stat openid https://jans.io/oauth/jans-auth-server/config/adminui/properties.readonly https://jans.io/oauth/jans-auth-server/config/adminui/license.write https://jans.io/oauth/config/stats.readonly https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly",
+                                "tokenCode": "f0977b8c359446ff7a5aa157a930c89506485b266d988507478e367f53fd5445",
+                                "tokenType": "access_token",
+                                "grantType": "client_credentials",
+                                "referenceId": "1DnmKY6pS1S6XeKSHAj2Ag",
+                                "attributes": {
+                                    "online_access": false,
+                                    "statusListIndex": 1103
+                                },
+                                "tokenTypeEnum": "ACCESS_TOKEN"
+                            }
+                        ]
+                    }
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/token.readonly
+  /api/v1/token/revoke/{tknCde}:
+    delete:
+      tags:
+      - OAuth - OpenID Connect - Clients
+      summary: Revoke client token.
+      description: Revoke client token.
+      operationId: revoke-token
+      parameters:
+      - name: tknCde
+        in: path
+        description: Token Code
+        required: true
+        schema:
+          type: string
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/token.delete
   /api/v1/uma/resources:
     get:
       tags:
@@ -8370,17 +8495,16 @@ components:
           type: string
         selected:
           type: boolean
-        adminCanView:
+        userCanEdit:
           type: boolean
         adminCanEdit:
           type: boolean
         userCanView:
           type: boolean
-        userCanEdit:
+        adminCanView:
           type: boolean
         userCanAccess:
           type: boolean
-
         adminCanAccess:
           type: boolean
         whitePagesCanView:
@@ -9009,6 +9133,9 @@ components:
           type: boolean
         disableU2fEndpoint:
           type: boolean
+        deviceSessionLifetimeInSeconds:
+          type: integer
+          format: int32
         rotateDeviceSecret:
           type: boolean
         returnDeviceSecretFromAuthzEndpoint:
@@ -10372,14 +10499,14 @@ components:
           type: boolean
         internal:
           type: boolean
-        locationPath:
-          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
+        locationPath:
+          type: string
         baseDn:
           type: string
     ScriptError:
@@ -10808,10 +10935,10 @@ components:
         ttl:
           type: integer
           format: int32
-        persisted:
-          type: boolean
         opbrowserState:
           type: string
+        persisted:
+          type: boolean
     SessionIdAccessMap:
       type: object
       properties:
@@ -11009,3 +11136,9 @@ components:
             https://jans.io/oauth/config/jans_asset-read: View Jans Assets
             https://jans.io/oauth/config/jans_asset-write: Manage Jans Assets
             https://jans.io/oauth/config/jans_asset-delete: Delete Jans Assets
+            https://jans.io/oauth/config/token.readonly: View Token details
+            https://jans.io/oauth/config/token.write: Manage Token details
+            https://jans.io/oauth/config/token.delete: Delete Token details
+            https://jans.io/oauth/config/session.readonly: View Session details
+            https://jans.io/oauth/config/session.write: Manage Session details
+            https://jans.io/oauth/config/session.delete: Delete Session details
