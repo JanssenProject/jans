@@ -3,7 +3,7 @@ use crate::models::policy_store_config::{PolicyStoreConfig, PolicyStoreSource};
 
 /// Error cases for loading policy
 #[derive(Debug, thiserror::Error)]
-pub enum ErrorLoadPolicy {
+pub enum ErrorLoadPolicyStore {
     #[error("{0}")]
     JsonParce(#[from] serde_json::Error),
     #[error("store policy is empty")]
@@ -17,22 +17,24 @@ pub enum ErrorLoadPolicy {
 /// Load policy store based on config
 //
 // Unit tests will be added when will be implemented other types of sources
-pub(crate) fn load_policy_store(config: PolicyStoreConfig) -> Result<PolicyStore, ErrorLoadPolicy> {
+pub(crate) fn load_policy_store(
+    config: PolicyStoreConfig,
+) -> Result<PolicyStore, ErrorLoadPolicyStore> {
     let mut policy_store_map: PolicyStoreMap = match config.source {
         PolicyStoreSource::Json(json_raw) => serde_json::from_str(json_raw.as_str())?,
     };
 
     if policy_store_map.policy_stores.is_empty() {
-        return Err(ErrorLoadPolicy::PolicyEmpty);
+        return Err(ErrorLoadPolicyStore::PolicyEmpty);
     }
 
     let policy: PolicyStore = match (config.store_id, policy_store_map.policy_stores.len()) {
         (Some(store_id), _) => policy_store_map
             .policy_stores
             .remove(store_id.as_str())
-            .ok_or(ErrorLoadPolicy::FindPolicy(store_id))?,
+            .ok_or(ErrorLoadPolicyStore::FindPolicy(store_id))?,
         (None, 0) => {
-            return Err(ErrorLoadPolicy::PolicyEmpty);
+            return Err(ErrorLoadPolicyStore::PolicyEmpty);
         },
         (None, 1) => {
             // getting first element and we know it is save to use unwrap here,
@@ -45,7 +47,7 @@ pub(crate) fn load_policy_store(config: PolicyStoreConfig) -> Result<PolicyStore
                 .unwrap()
         },
         (None, 2..) => {
-            return Err(ErrorLoadPolicy::MoreThanOnePolicy);
+            return Err(ErrorLoadPolicyStore::MoreThanOnePolicy);
         },
     };
 
