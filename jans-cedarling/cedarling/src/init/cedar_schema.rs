@@ -1,3 +1,10 @@
+/*
+ * This software is available under the Apache-2.0 license.
+ * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+ *
+ * Copyright (c) 2024, Gluu, Inc.
+ */
+
 use base64::prelude::*;
 
 const MSG_UNABLE_DECODE_SCHEMA_BASE64: &str = "unable to decode cedar policy schema base64";
