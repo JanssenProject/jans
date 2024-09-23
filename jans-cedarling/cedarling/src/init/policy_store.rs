@@ -31,10 +31,6 @@ pub(crate) fn load_policy_store(
         PolicyStoreSource::Json(json_raw) => serde_json::from_str(json_raw.as_str())?,
     };
 
-    if policy_store_map.policy_stores.is_empty() {
-        return Err(ErrorLoadPolicyStore::PolicyEmpty);
-    }
-
     let policy: PolicyStore = match (config.store_id, policy_store_map.policy_stores.len()) {
         (Some(store_id), _) => policy_store_map
             .policy_stores
