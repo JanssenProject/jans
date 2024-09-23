@@ -9,66 +9,88 @@ tags:
 
 ## What is Cedar
 
-[Cedar](https://www.cedarpolicy.com/en) was invented by Amazon for their 
-[Verified Permission](https://aws.amazon.com/verified-permissions/) service. Cedar enables 
-developers to create complex, contextual policies without cluttering application code with lots 
-of `if` - `then` statements. Externalizing policies also makes it easier to audit the security 
-controls and decisions of an application.  
+[Cedar](https://www.cedarpolicy.com/en) is a policy syntax invented by Amazon for their 
+[Verified Permission](https://aws.amazon.com/verified-permissions/) service. Cedar policies
+enable developers implement fine-grain access control and externalize policies. To learn more
+about why the design of Cedar is intuitive, fast and safe, read this 
+[article](https://aws.amazon.com/blogs/security/how-we-designed-cedar-to-be-intuitive-to-use-fast-and-safe/) 
+or watch this [video](https://www.youtube.com/watch?v=k6pPcnLuOXY&t=1779s)
 
-Cedar is a deterministic policy engine--if the schema and policies are validated, the engine will 
-always return `allow` or `deny` for an authorization request. Cedar uses the **PARC** syntax: 
-**P**rincipal, **A**ction, **R**esource, **C**ontext. For example, you may have a policy that says
+Cedar uses the **PARC** syntax: 
+* **P**rincipal
+* **A**ction
+* **R**esource
+* **C**ontext. 
+
+For example, you may have a policy that says
 *Admins* can *write* to the */config* folder. The *Admin* Role is the Principal, *write* is the 
 Action, and the */config* folder is the Resource. The Context is used to specify information about
-the enivironment, like the time of day or network address. Cedar is a compromise: it's less reductive 
-then RBAC but still deterministic; at the same time, it's less flexible then a full programming 
-language, but still expressive.
+the enivironment, like the time of day or network address. 
 
 ![](../../assets/lock-cedarling-diagram-3.jpg)
 
+Fine grain access control makes sense in both the frontend and backend. In the frontend, it can 
+help developers build better UX. For example, why display form fields that a user is not authorized
+to see? In the backend, fine grain policies are necessary for zero-trust security.
+
 ## What is the Cedarling
 
-The Cedarling is a performant local authorization service that runs the Rust Cedar Engine. 
-Cedar policies and schema are loaded at startup from a locally cached "Policy Store". In simple 
-terms, the Cedarling returns the answer: should the application allow this action on this resource
-given these JWT tokens. "Fit for purpose" policies help developers build a better user experience. 
-For example, why display form fields that a user is not authorized to see? The Cedarling is a more 
-productive and flexible way to handle authorization. 
+The Cedarling is a performant local authorization service that runs the Rust Cedar Engine. After 
+loading policies and schema, the Cedarling will allow (or deny) fine grain access requests based 
+on the contents of the request, including one or more JWT tokens. The Cedarling is fast because it 
+has all the data it needs to make a local decision, which is contained in the JWTs and the other 
+parameters of the authz request. No cloud round-trips are needed to return an authz decision. 
+The Cedarling can execute many requests in less then 1ms--this is critical for web and mobile
+applications to rely on the Cedarling for UX fine grain authorization. 
 
-In addition to authorization, the Cedarling can perform two more important jobs: (1) it can 
-validate JWT tokens; (2) it can create an audit log of all authorizations permitted and denied.
+In addition to authorization, the Cedarling can perform two more important jobs: (1) validating 
+JWT tokens; (2) logging all authorizations permitted and denied. In enterprise deployments, the 
+Cedarling can POST batched logs to a central collection point. These authz decision logs are very 
+useful for enterprises to show evidence of policy usage for compliance, or to perform forensic 
+analysis. The logs show everything the attacker did, and everything they tried to do.
+
+Architecturally, the Cedarling is an autonomous stateful Policy Decision Point, or "PDP". It is 
+stateful because it implements local in-memory caching to optimize logging and token mapping. The 
+Cedarling is written in Rust with bindings to other languages like Javascript, WASM, iOS, 
+Android, Python, Java, PHP or Go. There is only one release of the Cedarling--no matter what 
+development platform you're using. That means you'll never have to wait for the release for your
+specific platform. 
 
 ### Authorization 
 
-The Cedarling runs in the browser as a WebAssembly ("WASM") component, in a mobile application, 
-or in the cloud. Although it runs at the edge--even embedded in a JavaScript browser application--
-the Cedarling is not just for front end security. Developers can use it for backend applications
-and even API gateways--multilayered security is best.
-
-The Cedarling provides RBAC out-of-the-box. Developers can also express a variety of policies 
-beyond the limitations of "person with role has access". For example, you can allow access only to
-users who authenticate with a certain type of passkey or incorporate a fraud score to elevate 
-security for riskier transaction. These policies are easily and rapidly evaluated by the Cedarling.
-
-Architecturally, the Cedarling is an autonomous Policy Decision Point, or "PDP". The Cedarling 
-rapidly evaluates authorization requests because it has all the policies and data it needs to make
-a local decision. A key feature of the Cedarling is to log all `allow` or `deny` decisions returned
-to the application. In an enterprise deployment, this audit log is sent for central archiving.
+The __Policy Store__ contains the Cedar Policies, Cedar Schema, and optionally, a list of the 
+Trusted IDPs. The Cedarling loads its Policy Store during initialization as a static JSON file
+or fetched via HTTPS. In enterprise deployments, the Cedarling can retrieve its Policy Store from
+an OAuth protected endpoint.
 
 ![](../../assets/lock-cedarling-diagram-1.jpg)
 
-The Cedarling loads its Policy Store during initialization as a static JSON file or fetched via HTTPS. 
-The Policy Store contains the Cedar Policies, Cedar Schema, and optionally, a list of the Trusted IDPs. 
-Developers may consider the Cedarling Policy Store as part of the code. While there is some core schema,
-developers will frequently need to add actions and resources that are specific for their application. 
-For example, a developer writing a support ticket application might want to define an action called 
-"Close" or "Reply", and an entity type called "Ticket". 
+Developers need to define Cedar Schema that makes sense for their application. For example, a 
+developer writing a customer support application might define an "Issue" Resource and Actions like
+"Reply" or "Close". Once the schema is defined, developers can author policies to model the fine 
+grain access controls needed to implement the business rules of their application. The easiest way
+to define schema and policies is to use the [AgamaLab](https://cloud.gluu.org/agama-lab) Policy 
+Designer. This is a free developer tool hosted by [Gluu](https://gluu.org).
 
-Where does the Cedarling get the data for policy evaluation? Or in Cedar jargon, where do the 
-entities come from? The application request includes the Resource data--remember the application 
-is asking if it can perform a certain action on a certain resource. The Principal entities are 
-derived from the JWTs--the combined OpenID id_token and  Userinfo tokens enable the Cedarling to 
-create a User and Role entities; the OAuth access token is used to create a Client entity.
+The Cedar Pricipals are derived from the JWT tokens. The Resource, Action, and Context are sent 
+in the authz request. The OpenID id_token and Userinfo tokens are joined by the Cedarling to create 
+User and Role entities; the OAuth access token is used to create a "Client" entity, which is the 
+software or "workload" that is acting on behalf of the person. The Cedarling evaluates that both
+the person is authorized, and the workload is authorized. 
+
+The Cedarling maps "Roles" out-of-the-box. In Cedar Roles are a special kind of Principal. Instead
+of saying "User can perform action", you can say "Role can perform action". This is a 
+very convenient way to implement RBAC. Developers can specify which JWT claim is used to create
+Roles. For example, some organizations use the `role` user claim of the OpenID Userinfo token, 
+while others might use the `memberOf` claim in the OpenID id_token.
+
+Developers can also express a variety of policies beyond the limitations of RBAC. Developers
+can also express ABAC conditions, or combine ABAC conditions with RBAC. For example, a policy 
+like Admins can access a "private" Resource from the private network, during business hours. In this 
+case "Admins" is the role, but the other conditions are ABAC. Policy evaluation is performant because 
+Cedar uses the RBAC role to "slice" the data, minimizing the number of entries on which to evaluate
+the ABAC conditions.
+
 
 ![](../../assets/lock-cedarling-diagram-2.jpg)
 
