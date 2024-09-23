@@ -30,6 +30,7 @@ public class ApiConstants {
     public static final String UMA = "/uma";
     public static final String DYN_REGISTRATION = "/dyn_registration";
     public static final String SESSION = "/session";
+    public static final String CLIENT = "/client";
     public static final String CLIENTS = "/clients";
     public static final String OPENID = "/openid";
     public static final String SCOPES = "/scopes";
@@ -42,6 +43,7 @@ public class ApiConstants {
     public static final String GRANT = "/grant";
     public static final String SUBJECT = "/subject";
     public static final String TOKEN = "/token";
+    public static final String REVOKE = "/revoke";
     public static final String SEPARATOR = "/";
     public static final String SERVER_CONFIG = "/server-config";
     public static final String SERVER_CLEANUP = "/server-cleanup";
@@ -104,6 +106,8 @@ public class ApiConstants {
     public static final String AUTHORIZATIONS = "/authorizations";
     public static final String USERID_PATH = "{userId}";
     public static final String SERVICE_NAME_PARAM_PATH = "/{service-name}";
+    public static final String TOKEN_PATH = "/{token}";
+    public static final String TOKEN_CODE_PATH = "/{tknCde}";
     
     public static final String USERID = "userId";
     public static final String USERNAME = "username";
@@ -128,6 +132,7 @@ public class ApiConstants {
     public static final String USERDN = "userDn";
     public static final String PLUGIN_NAME = "pluginName";
     public static final String SERVICE_NAME = "service-name";
+    public static final String TOKEN_CODE_PARAM = "tknCde";
     
 
     public static final String ALL = "all";

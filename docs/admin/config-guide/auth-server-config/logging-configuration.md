@@ -12,18 +12,6 @@ Meaning there is no single switch or configuration that will enable or disable
 logs for all modules. Each module can be individually configured and can be
 configured differently when it comes to logging.
 
-Logging for `jans-auth` service is what we are going to discuss in detail 
-in this document.
-Logging for other modules is configured by changing the module's 
-property values. Use the documentation on how to update configuration 
-properties for 
-corresponding modules to update logging related properties. For instance:
-
-[//]: # (TODO: not sure if the sections below exist in respective docs. But)
-[//]: # (if not then we need to add this content and link it here)
-- [Updating properties for Fido2 module]()
-- [Updating properties for SCIM module]()
-
 ## Log Configuration For jans-auth
 
 === "Use Command-line"
@@ -49,9 +37,9 @@ corresponding modules to update logging related properties. For instance:
 
 ##  Using Command Line
 
-In the Janssen Server, you can deploy and customize the Logging Configuration using the
-command line. To get the details of Janssen command line operations relevant to
-Logging configuration, you can check the operations under 
+In the Janssen Server, you can deploy and customize the Logging Configuration 
+using the command line. To get the details of Janssen command line operations 
+relevant to Logging configuration, you can check the operations under 
 `ConfigurationLogging` task using the
 command below:
 
@@ -93,110 +81,60 @@ To get sample schema type /opt/jans/jans-cli/config-cli.py --schema <schema>, fo
 
 ### Update Logging Configuration
 
-To update logging configuration, get the schema first:
-```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --schema Logging > /tmp/log-config.json
-```
-The schema can now be found in the log-config.json file.
+To update the configuration follow the steps below.
 
-For your information, you can obtain the format of the `Logging`
-schema by running the aforementioned command without a file.
-
-```text title="Schema Format"
-loggingLevel                  string
-loggingLayout                 string
-httpLoggingEnabled            boolean
-disableJdkLogger              boolean
-enabledOAuthAuditLogging      boolean
-externalLoggerConfiguration   string
-httpLoggingExcludePaths       array of string
-                              uniqueItems: True
-```
-
-you can also use the following command for `Logging` schema example.
-
-```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --schema-sample Logging
-```
-```text title="Schema Example"
-{
-  "loggingLevel": "string",
-  "loggingLayout": "string",
-  "httpLoggingEnabled": true,
-  "disableJdkLogger": false,
-  "enabledOAuthAuditLogging": true,
-  "externalLoggerConfiguration": "string",
-  "httpLoggingExcludePaths": [
-    "string"
-  ]
-}
-```
-
-let's update the schema:
-```bash title="Command"
-nano /tmp/log-config.json
-```
-
-As seen below, I have added `loggingLevel` for the value `INFO` 
-and `enabledOAuditLogging` for the value `false`.
-
-```json title="Input"
-{
-  "loggingLevel": "INFO",
-  "loggingLayout": "string",
-  "httpLoggingEnabled": true,
-  "disableJdkLogger": true,
-  "enabledOAuthAuditLogging": false,
-  "externalLoggerConfiguration": "string",
-  "httpLoggingExcludePaths": [
-    "string"
-  ]
-}
-```
-
-Let's do the operation:
-
-```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --operation-id put-config-logging \
- --data /tmp/log-config.json
-```
-
-You will get the updated result as below:
-
-```json  title="Sample Output" linenums="1"
-{
-  "loggingLevel": "INFO",
-  "loggingLayout": "string",
-  "httpLoggingEnabled": true,
-  "disableJdkLogger": true,
-  "enabledOAuthAuditLogging": false,
-  "externalLoggerConfiguration": "string",
-  "httpLoggingExcludePaths": [
-    "string"
-  ]
-}
-```
+1. Get the current logging configuration and store it in a file for editing.
+   The following command will retrieve the current logging configuration and 
+   store it in a file.
+   ```bash title="Command"
+   /opt/jans/jans-cli/config-cli.py -no-color \
+   --operation-id get-config-logging > /tmp/log-config.json
+   ```
+2. Update the configuration with desired value in the file while 
+      keeping other properties and values unchanged. Updates must adhere to the
+      `Logging` schema as mentioned [here](#using-command-line).
+      The schema details can be retrieved using the command below.
+      The schema defines what values and datatypes are acceptable for each 
+      property value.
+   ```bash title="Command"
+   /opt/jans/jans-cli/config-cli.py --schema Logging 
+   ```
+3. Use the updated file to send the update to the Janssen Server using the 
+    command below
+   ```bash title="Command"
+   /opt/jans/jans-cli/config-cli.py --operation-id put-config-logging \
+   --data /tmp/log-config.json
+   ```
+   Upon successful execution of the update, the Janssen Server responds with 
+   updated configuration.
 
 ## Using-text-based-ui
 
-In Janssen, You can manage Logging configuration using
-the [Text-Based UI](../config-tools/jans-tui/README.md) also.
-
-You can start TUI using the command below:
+Start TUI using the command below:
 
 ```bash title="Command"
 sudo /opt/jans/jans-cli/jans_cli_tui.py
 ```
-### Logging Screen
+### Logging Configuration for Auth Server
 
 * Navigate to `Auth Server` -> `Logging` to open the Logging screen as shown
-in the image below.
-
-* Logging screen allows the administrator to set logging parameters as per
-the requirements.
-
+in the image below to change the logging properties configuration.
 
 ![image](../../../assets/tui-logging-config.png)
+
+### Logging Configuration for FIDO
+
+* Navigate to `FIDO` to open the Logging screen as shown
+in the image below to change the logging properties configuration.
+
+![image](../../../assets/tui-FIDO-logging-use.jpg)
+
+### Logging Configuration for SCIM
+
+* Navigate to `SCIM` to open the Logging screen as shown
+in the image below to change the logging properties configuration.
+
+![image](../../../assets/tui-scim-logging-use.jpg)
 
 ## Using Configuration REST API
 
@@ -207,8 +145,11 @@ document](./../../reference/openapi.md).
 ## Default Log Location
 
 On a VM installation, logs for `jans-auth` module are generated at
-`/opt/jans/jetty/jans-auth/logs/`.
+`/opt/jans/jetty/jans-auth/logs/`. Similarly, logs for FIDO2 and SCIM modules
+are generated under `/opt/jans/jetty/jans-fido2/logs/` and 
+`/opt/jans/jetty/jans-scim/logs/` respectively.
 
 ## Cloud-Native Deployments
 
-Logging configuration for a cloud-native deployment is [detailed here](../../kubernetes-ops/logs.md)
+Logging configuration for a cloud-native deployment is 
+[detailed here](../../kubernetes-ops/logs.md)
