@@ -11,3 +11,4 @@
 //! - get keys for JWT validation
 
 pub(crate) mod cedar_schema;
+pub(crate) mod policy_store;

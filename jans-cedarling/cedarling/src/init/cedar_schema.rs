@@ -25,13 +25,13 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::models::policy_store::PolicyStoreSet;
+    use crate::models::policy_store::PolicyStoreMap;
 
     #[test]
     fn test_read_ok() {
         static POLICY_STORE_RAW: &str = include_str!("test_files/policy-store_ok.json");
 
-        let policy_result = serde_json::from_str::<PolicyStoreSet>(POLICY_STORE_RAW);
+        let policy_result = serde_json::from_str::<PolicyStoreMap>(POLICY_STORE_RAW);
         assert!(policy_result.is_ok());
     }
 
@@ -40,7 +40,7 @@ mod tests {
         static POLICY_STORE_RAW: &str =
             include_str!("test_files/policy-store_schema_err_base64.json");
 
-        let policy_result = serde_json::from_str::<PolicyStoreSet>(POLICY_STORE_RAW);
+        let policy_result = serde_json::from_str::<PolicyStoreMap>(POLICY_STORE_RAW);
         assert!(policy_result
             .unwrap_err()
             .to_string()
@@ -52,7 +52,7 @@ mod tests {
         static POLICY_STORE_RAW: &str =
             include_str!("test_files/policy-store_schema_err_json.json");
 
-        let policy_result = serde_json::from_str::<PolicyStoreSet>(POLICY_STORE_RAW);
+        let policy_result = serde_json::from_str::<PolicyStoreMap>(POLICY_STORE_RAW);
         assert!(policy_result
             .unwrap_err()
             .to_string()
@@ -64,7 +64,7 @@ mod tests {
         static POLICY_STORE_RAW: &str =
             include_str!("test_files/policy-store_schema_err_cedar_mistake.json");
 
-        let policy_result = serde_json::from_str::<PolicyStoreSet>(POLICY_STORE_RAW);
+        let policy_result = serde_json::from_str::<PolicyStoreMap>(POLICY_STORE_RAW);
         // in this scenario error message looks like:
         // `unable to decode cedar policy schema json: failed to resolve type: User_TypeNotExist", line: 35, column: 1`
         let err_msg = policy_result.unwrap_err().to_string();

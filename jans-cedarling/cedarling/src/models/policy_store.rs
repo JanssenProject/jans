@@ -9,9 +9,9 @@ pub struct PolicyStore {
     pub schema: cedar_policy::Schema,
 }
 
-/// PolicyStoreSet it is a store for `PolicyStore` accessible by key.
+/// PolicyStoreMap it is a store for `PolicyStore` accessible by key.
 #[derive(Debug, serde::Deserialize)]
-pub(crate) struct PolicyStoreSet {
+pub(crate) struct PolicyStoreMap {
     #[serde(flatten)]
     pub policy_stores: HashMap<String, PolicyStore>,
 }
