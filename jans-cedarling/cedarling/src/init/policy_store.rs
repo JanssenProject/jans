@@ -15,7 +15,7 @@ pub enum ErrorLoadPolicyStore {
     JsonParce(#[from] serde_json::Error),
     #[error("store policy is empty")]
     PolicyEmpty,
-    #[error("could not get policy, the `store_key` is not specified and the count on policies more than 1")]
+    #[error("the `store_key` is not specified and the count on policies more than 1")]
     MoreThanOnePolicy,
     #[error("could not found policy by id: {0}")]
     FindPolicy(String),
