@@ -59,12 +59,14 @@ impl Cedarling {
         let application_id = config.authz_config.application_name.clone();
 
         let policy_store = load_policy_store(config.policy_store_config)
+           // Log success when loading the policy store
             .inspect(|_| {
                 log.log(
                     LogEntry::new_with_data(pdp_id, application_id.clone(), LogType::System)
                         .set_message("PolicyStore loaded successfully".to_string()),
                 );
             })
+            // Log failure when loading the policy store
             .inspect_err(|err| {
                 log.log(
                     LogEntry::new_with_data(pdp_id, application_id, LogType::System)
