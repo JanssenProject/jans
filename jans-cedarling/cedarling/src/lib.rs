@@ -23,3 +23,47 @@ mod models;
 #[doc(hidden)]
 #[cfg(test)]
 mod tests;
+
+use std::rc::Rc;
+
+use authz::Authz;
+use log::init_logger;
+pub use log::LogStorage;
+pub use models::config::*;
+
+/// The instance of the Cedarling application.
+#[derive(Clone)]
+pub struct Cedarling {
+    log: log::Logger,
+    #[allow(dead_code)]
+    authz: Rc<Authz>,
+}
+
+impl Cedarling {
+    /// Create a new instance of the Cedarling application.
+    pub fn new(config: BootstrapConfig) -> Cedarling {
+        let log = init_logger(config.log_config);
+        let authz = Authz::new(config.authz_config, log.clone());
+
+        Cedarling {
+            log,
+            authz: Rc::new(authz),
+        }
+    }
+}
+
+// implements LogStorage for Cedarling
+// we can use this methods outside crate only when import trait
+impl LogStorage for Cedarling {
+    fn pop_logs(&self) -> Vec<models::log_entry::LogEntry> {
+        self.log.pop_logs()
+    }
+
+    fn get_log_by_id(&self, id: &str) -> Option<models::log_entry::LogEntry> {
+        self.log.get_log_by_id(id)
+    }
+
+    fn get_log_ids(&self) -> Vec<String> {
+        self.log.get_log_ids()
+    }
+}
