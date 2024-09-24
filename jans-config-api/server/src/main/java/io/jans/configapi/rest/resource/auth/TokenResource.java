@@ -82,7 +82,7 @@ public class TokenResource extends ConfigBaseResource {
                 JansAttribute.class);
 
         TokenEntityPagedResult tokenEntityPagedResult = searchTokenByClientId(searchReq);
-        logger.info("Asset fetched based on name are:{}", tokenEntityPagedResult);
+        logger.info("Token fetched are:{}", tokenEntityPagedResult);
         return Response.ok(tokenEntityPagedResult).build();
 
     }
@@ -114,19 +114,19 @@ public class TokenResource extends ConfigBaseResource {
 
     private TokenEntityPagedResult searchTokenByClientId(SearchRequest searchReq) {
 
-        logger.debug("Search asset by name params - searchReq:{} ", searchReq);
+        logger.debug("Search Token by name params - searchReq:{} ", searchReq);
         TokenEntityPagedResult tokenEntityPagedResult = null;
         PagedResult<TokenEntity> pagedResult = clientAuthService.getTokenOfClient(searchReq);
 
         logger.debug("PagedResult  - pagedResult:{}", pagedResult);
         if (pagedResult != null) {
             logger.debug(
-                    "Asset fetched  - pagedResult.getTotalEntriesCount():{}, pagedResult.getEntriesCount():{}, pagedResult.getEntries():{}",
+                    "Token fetched  - pagedResult.getTotalEntriesCount():{}, pagedResult.getEntriesCount():{}, pagedResult.getEntries():{}",
                     pagedResult.getTotalEntriesCount(), pagedResult.getEntriesCount(), pagedResult.getEntries());
             tokenEntityPagedResult = getTokenEntityPagedResult(pagedResult);
         }
 
-        logger.debug("Asset tokenEntityPagedResult:{} ", tokenEntityPagedResult);
+        logger.debug("Token tokenEntityPagedResult:{} ", tokenEntityPagedResult);
         return tokenEntityPagedResult;
     }
 
