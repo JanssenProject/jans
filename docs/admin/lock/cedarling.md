@@ -215,7 +215,7 @@ These Bootstrap Properties control default application level behavior.
 
 * **`CEDARLING_APPLICATION_NAME`** : Human friendly identifier for this application
 
-* **`CEDARLING_POLICY_STORE_URI`** : Location of policy store JSON, used if policy store is not local, or retreived from Lock Master.
+* **`CEDARLING_POLICY_STORE_URI`** : Location of policy store JSON, used if policy store is not local, or retreived from Lock Server.
 
 * **`CEDARLING_JWT_VALIDATION`** : Enabled | Disabled 
 
@@ -229,19 +229,19 @@ These Bootstrap Properties control default application level behavior.
 
 The following bootstrap properties are only needed for enterprise deployments.
 
-* **`CEDARLING_LOCK`** : Enabled | Disabled. If Enabled, the Cedarling will connect to the Lock Master for policies, and subscribe for SSE events. 
+* **`CEDARLING_LOCK`** : Enabled | Disabled. If Enabled, the Cedarling will connect to the Lock Server for policies, and subscribe for SSE events. 
 
-* **`CEDARLING_LOCK_MASTER_CONFIGURATION_URI`** : Required if `LOCK` == `Enabled`. URI where Cedarling can get JSON file with all required metadata about Lock Master, i.e. `.well-known/lock-server-configuration`.
+* **`CEDARLING_LOCK_MASTER_CONFIGURATION_URI`** : Required if `LOCK` == `Enabled`. URI where Cedarling can get JSON file with all required metadata about Lock Server, i.e. `.well-known/lock-server-configuration`.
 
-* **`CEDARLING_LOCK_SSA_JWT`** : SSA for DCR in a Lock Master deployment. The Cedarling will validate this SSA JWT prior to DCR.
+* **`CEDARLING_LOCK_SSA_JWT`** : SSA for DCR in a Lock Server deployment. The Cedarling will validate this SSA JWT prior to DCR.
 
-* **`CEDARLING_POLICY_STORE_ID`** : The identifier of the policy stored needed only for Lock Master deployments.
+* **`CEDARLING_POLICY_STORE_ID`** : The identifier of the policy stored needed only for Lock Server deployments.
 
-* **`CEDARLING_AUDIT_LOG_INTERVAL`** : How often to send log messages to Lock Master (0 to turn off trasmission)
+* **`CEDARLING_AUDIT_LOG_INTERVAL`** : How often to send log messages to Lock Server (0 to turn off trasmission)
 
-* **`CEDARLING_AUDIT_HEALTH_INTERVAL`** : How often to send health messages to Lock Master (0 to turn off transmission)
+* **`CEDARLING_AUDIT_HEALTH_INTERVAL`** : How often to send health messages to Lock Server (0 to turn off transmission)
 
-* **`CEDARLING_AUDIT_TELEMETRY_INTERVAL`** : How often to send telemetry messages to Lock Master (0 to turn off transmission)
+* **`CEDARLING_AUDIT_TELEMETRY_INTERVAL`** : How often to send telemetry messages to Lock Server (0 to turn off transmission)
 
 * **`CEDARLING_DYNAMIC_CONFIGURATION`** : Enabled | Disabled, controls whether Cedarling should listen for SSE config updates
 
