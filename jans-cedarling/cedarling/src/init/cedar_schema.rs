@@ -7,8 +7,13 @@
 
 use base64::prelude::*;
 
-const MSG_UNABLE_DECODE_SCHEMA_BASE64: &str = "unable to decode cedar policy schema base64";
-const MSG_UNABLE_DECODE_SCHEMA_JSON: &str = "unable to decode cedar policy schema json";
+#[derive(Debug, thiserror::Error)]
+pub enum ParceCedarSchemaErrMsg {
+    #[error("unable to decode cedar policy schema base64")]
+    BASE64,
+    #[error("unable to decode cedar policy schema json")]
+    JSON,
+}
 
 /// A custom deserializer for Cedar's Schema.
 //
@@ -19,11 +24,11 @@ where
 {
     let source = <String as serde::Deserialize>::deserialize(deserializer)?;
     let decoded: Vec<u8> = BASE64_STANDARD.decode(source.as_str()).map_err(|err| {
-        serde::de::Error::custom(format!("{MSG_UNABLE_DECODE_SCHEMA_BASE64}: {}", err,))
+        serde::de::Error::custom(format!("{}: {}", ParceCedarSchemaErrMsg::BASE64, err,))
     })?;
 
     let schema = cedar_policy::Schema::from_json_file(decoded.as_slice()).map_err(|err| {
-        serde::de::Error::custom(format!("{MSG_UNABLE_DECODE_SCHEMA_JSON}: {}", err))
+        serde::de::Error::custom(format!("{}: {}", ParceCedarSchemaErrMsg::JSON, err))
     })?;
 
     Ok(schema)
@@ -51,7 +56,7 @@ mod tests {
         assert!(policy_result
             .unwrap_err()
             .to_string()
-            .contains(MSG_UNABLE_DECODE_SCHEMA_BASE64));
+            .contains(&ParceCedarSchemaErrMsg::BASE64.to_string()));
     }
 
     #[test]
@@ -63,7 +68,7 @@ mod tests {
         assert!(policy_result
             .unwrap_err()
             .to_string()
-            .contains(MSG_UNABLE_DECODE_SCHEMA_JSON));
+            .contains(&ParceCedarSchemaErrMsg::JSON.to_string()));
     }
 
     #[test]
@@ -75,7 +80,7 @@ mod tests {
         // in this scenario error message looks like:
         // `unable to decode cedar policy schema json: failed to resolve type: User_TypeNotExist", line: 35, column: 1`
         let err_msg = policy_result.unwrap_err().to_string();
-        assert!(err_msg.contains(MSG_UNABLE_DECODE_SCHEMA_JSON));
+        assert!(err_msg.contains(&ParceCedarSchemaErrMsg::JSON.to_string()));
         assert!(err_msg.contains("failed to resolve type"));
     }
 }
