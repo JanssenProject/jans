@@ -135,7 +135,7 @@ public class ApiConstants {
     public static final String USERDN = "userDn";
     public static final String PLUGIN_NAME = "pluginName";
     public static final String SERVICE_NAME = "service-name";
-    public static final String TOKEN_CODE_PARAM = "tknCde";
+    public static final String TOKEN_CODE = "tknCde";
     public static final String OUTSIDE_SID = "outsideSid";
     public static final String JANS_SESS_ATTR = "jansSessAttr";
 

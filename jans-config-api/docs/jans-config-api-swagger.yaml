@@ -40,7 +40,7 @@ tags:
 - name: Configuration – Config API
 - name: Client Authorization
 - name: Jans Assets
-- name: Tokens
+- name: Token
 paths:
   /api/v1/health/app-version:
     get:
@@ -7618,7 +7618,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/PagedResult'
+                $ref: '#/components/schemas/SessionPagedResult'
               examples:
                 Response json example:
                   description: Response json example
@@ -7686,14 +7686,14 @@ paths:
   /api/v1/token/client/{clientId}:
     get:
       tags:
-      - OAuth - OpenID Connect - Clients
+      - Token
       summary: Get client token details
       description: Get client token details
       operationId: get-token-details
       parameters:
       - name: clientId
         in: path
-        description: Script identifier
+        description: Client identifier
         required: true
         schema:
           type: string
@@ -7707,68 +7707,7 @@ paths:
               examples:
                 Response example:
                   description: Response example
-                  value: |
-                    {
-                        "start": 0,
-                        "totalEntriesCount": 3,
-                        "entriesCount": 3,
-                        "entries": [
-                            {
-                                "dn": "tknCde=4960533184fab18d8932045b70de17f827c916010ab5d5c86f7202ca6cf7c176,ou=tokens,o=jans",
-                                "grantId": "82736426-1a72-46bb-8e76-52f3bca2c614",
-                                "clientId": "2000.cc8b29ae-cb4a-49ea-b176-8695e53919d9",
-                                "creationDate": "2024-09-20T12:55:30",
-                                "expirationDate": "2024-10-30T12:55:30",
-                                "deletable": true,
-                                "scope": "jans_stat openid https://jans.io/oauth/jans-auth-server/config/adminui/properties.readonly https://jans.io/oauth/jans-auth-server/config/adminui/license.write https://jans.io/oauth/config/stats.readonly https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly",
-                                "tokenCode": "4960533184fab18d8932045b70de17f827c916010ab5d5c86f7202ca6cf7c176",
-                                "tokenType": "access_token",
-                                "grantType": "client_credentials",
-                                "referenceId": "uIw3N7qeRiKR1pvzE1OmxQ",
-                                "attributes": {
-                                    "online_access": false,
-                                    "statusListIndex": 1101
-                                },
-                                "tokenTypeEnum": "ACCESS_TOKEN"
-                            },
-                            {
-                                "dn": "tknCde=5495ac7fedd47f57a10f314896fe88d415dbec067c7cea5d57138e2723b73e84,ou=tokens,o=jans",
-                                "grantId": "2c4123dd-886f-447e-a65d-207bf60c3307",
-                                "clientId": "2000.cc8b29ae-cb4a-49ea-b176-8695e53919d9",
-                                "creationDate": "2024-09-20T12:55:37",
-                                "expirationDate": "2024-10-30T12:55:37",
-                                "deletable": true,
-                                "scope": "jans_stat openid https://jans.io/oauth/jans-auth-server/config/adminui/properties.readonly https://jans.io/oauth/jans-auth-server/config/adminui/license.write https://jans.io/oauth/config/stats.readonly https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly",
-                                "tokenCode": "5495ac7fedd47f57a10f314896fe88d415dbec067c7cea5d57138e2723b73e84",
-                                "tokenType": "access_token",
-                                "grantType": "client_credentials",
-                                "referenceId": "bgPvtouST66zHFaH4vrWhA",
-                                "attributes": {
-                                    "online_access": false,
-                                    "statusListIndex": 1102
-                                },
-                                "tokenTypeEnum": "ACCESS_TOKEN"
-                            },
-                            {
-                                "dn": "tknCde=f0977b8c359446ff7a5aa157a930c89506485b266d988507478e367f53fd5445,ou=tokens,o=jans",
-                                "grantId": "d0c427ec-0c6e-4fdf-83eb-43a19e633eec",
-                                "clientId": "2000.cc8b29ae-cb4a-49ea-b176-8695e53919d9",
-                                "creationDate": "2024-09-20T12:55:37",
-                                "expirationDate": "2024-10-20T12:55:37",
-                                "deletable": true,
-                                "scope": "jans_stat openid https://jans.io/oauth/jans-auth-server/config/adminui/properties.readonly https://jans.io/oauth/jans-auth-server/config/adminui/license.write https://jans.io/oauth/config/stats.readonly https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly",
-                                "tokenCode": "f0977b8c359446ff7a5aa157a930c89506485b266d988507478e367f53fd5445",
-                                "tokenType": "access_token",
-                                "grantType": "client_credentials",
-                                "referenceId": "1DnmKY6pS1S6XeKSHAj2Ag",
-                                "attributes": {
-                                    "online_access": false,
-                                    "statusListIndex": 1103
-                                },
-                                "tokenTypeEnum": "ACCESS_TOKEN"
-                            }
-                        ]
-                    }
+                  value: ""
         "401":
           description: Unauthorized
         "404":
@@ -7781,7 +7720,7 @@ paths:
   /api/v1/token/revoke/{tknCde}:
     delete:
       tags:
-      - OAuth - OpenID Connect - Clients
+      - Token
       summary: Revoke client token.
       description: Revoke client token.
       operationId: revoke-token
@@ -7806,6 +7745,77 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/token.delete
+  /api/v1/token/search:
+    get:
+      tags:
+      - Token
+      summary: Search tokens
+      description: Search tokens
+      operationId: search-token
+      parameters:
+      - name: limit
+        in: query
+        description: Search size - max size of the results to return
+        schema:
+          type: integer
+          format: int32
+          default: 50
+      - name: pattern
+        in: query
+        description: Search pattern
+        schema:
+          type: string
+          default: ""
+      - name: startIndex
+        in: query
+        description: The 1-based index of the first query result
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - name: sortBy
+        in: query
+        description: Attribute whose value will be used to order the returned response
+        schema:
+          type: string
+          default: tknCde
+      - name: sortOrder
+        in: query
+        description: Order in which the sortBy param is applied. Allowed values are
+          "ascending" and "descending"
+        schema:
+          type: string
+          default: ascending
+      - name: fieldValuePair
+        in: query
+        description: Field and value pair for seraching
+        schema:
+          type: string
+          default: ""
+        examples:
+          Field value example:
+            description: Field value example
+            value: "grtTyp=client_credentials,tknTyp=access_token"
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenEntityPagedResult'
+              examples:
+                Response example:
+                  description: Response example
+                  value: ""
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/token.readonly
   /api/v1/uma/resources:
     get:
       tags:
@@ -8564,19 +8574,19 @@ components:
           type: string
         selected:
           type: boolean
-        userCanEdit:
-          type: boolean
-        userCanView:
+        whitePagesCanView:
           type: boolean
         adminCanEdit:
           type: boolean
         adminCanView:
           type: boolean
-        userCanAccess:
+        userCanEdit:
+          type: boolean
+        userCanView:
           type: boolean
         adminCanAccess:
           type: boolean
-        whitePagesCanView:
+        userCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -9237,7 +9247,7 @@ components:
           type: boolean
         fapiCompatibility:
           type: boolean
-        forceIdTokenHintPrecense:
+        forceIdTokenHintPresence:
           type: boolean
         rejectEndSessionIfIdTokenExpired:
           type: boolean
@@ -9425,8 +9435,6 @@ components:
           type: boolean
         lockMessageConfig:
           $ref: '#/components/schemas/LockMessageConfig'
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -9436,6 +9444,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -10568,14 +10578,14 @@ components:
           type: boolean
         internal:
           type: boolean
+        locationPath:
+          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
-        locationPath:
-          type: string
         baseDn:
           type: string
     ScriptError:
@@ -11004,10 +11014,10 @@ components:
         ttl:
           type: integer
           format: int32
-        opbrowserState:
-          type: string
         persisted:
           type: boolean
+        opbrowserState:
+          type: string
     SessionIdAccessMap:
       type: object
       properties:
@@ -11075,6 +11085,124 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/UserAuthenticator'
+    SessionPagedResult:
+      type: object
+      properties:
+        start:
+          type: integer
+          format: int32
+        totalEntriesCount:
+          type: integer
+          format: int32
+        entriesCount:
+          type: integer
+          format: int32
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/SessionId'
+    TokenAttributes:
+      type: object
+      properties:
+        x5cs256:
+          type: string
+        online_access:
+          type: boolean
+        attributes:
+          type: object
+          additionalProperties:
+            type: string
+        dpopJkt:
+          type: string
+        authorizationDetails:
+          type: string
+        statusListIndex:
+          type: integer
+          format: int32
+    TokenEntity:
+      type: object
+      properties:
+        dn:
+          type: string
+        grantId:
+          type: string
+        userId:
+          type: string
+        userDn:
+          type: string
+        clientId:
+          type: string
+        creationDate:
+          type: string
+          format: date-time
+        expirationDate:
+          type: string
+          format: date-time
+        deletable:
+          type: boolean
+        authenticationTime:
+          type: string
+          format: date-time
+        scope:
+          type: string
+        tokenCode:
+          type: string
+        tokenType:
+          type: string
+        grantType:
+          type: string
+        jwtRequest:
+          type: string
+        authorizationCode:
+          type: string
+        nonce:
+          type: string
+        codeChallenge:
+          type: string
+        codeChallengeMethod:
+          type: string
+        claims:
+          type: string
+        tokenBindingHash:
+          type: string
+        referenceId:
+          type: string
+        authMode:
+          type: string
+        sessionDn:
+          type: string
+        ttl:
+          type: integer
+          format: int32
+        attributes:
+          $ref: '#/components/schemas/TokenAttributes'
+        dpop:
+          type: string
+        tokenTypeEnum:
+          type: string
+          enum:
+          - ID_TOKEN
+          - ACCESS_TOKEN
+          - LONG_LIVED_ACCESS_TOKEN
+          - REFRESH_TOKEN
+          - AUTHORIZATION_CODE
+          - TX_TOKEN
+    TokenEntityPagedResult:
+      type: object
+      properties:
+        start:
+          type: integer
+          format: int32
+        totalEntriesCount:
+          type: integer
+          format: int32
+        entriesCount:
+          type: integer
+          format: int32
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/TokenEntity'
     UmaResource:
       required:
       - name

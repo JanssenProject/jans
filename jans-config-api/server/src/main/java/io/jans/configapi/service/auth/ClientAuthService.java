@@ -1,19 +1,18 @@
 package io.jans.configapi.service.auth;
 
-import io.jans.orm.search.filter.Filter;
-import io.jans.util.StringHelper;
-import io.jans.as.persistence.model.ClientAuthorization;
-import io.jans.orm.PersistenceEntryManager;
-import io.jans.orm.model.PagedResult;
-import io.jans.orm.model.SortOrder;
 import io.jans.as.common.model.registration.Client;
+import io.jans.as.persistence.model.ClientAuthorization;
 import io.jans.as.common.service.OrganizationService;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.persistence.model.Scope;
 import io.jans.configapi.core.model.Token;
 import io.jans.model.SearchRequest;
 import io.jans.model.token.TokenEntity;
-
+import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.model.PagedResult;
+import io.jans.orm.model.SortOrder;
+import io.jans.orm.search.filter.Filter;
+import io.jans.util.StringHelper;
 import static io.jans.as.model.util.Util.escapeLog;
 
 import java.util.*;
@@ -192,13 +191,44 @@ public class ClientAuthService {
 
     }
 
-    public PagedResult<TokenEntity> getTokenOfClient(SearchRequest searchRequest) {
-        logger.info(" Fetch token with searchRequest:{}", searchRequest);
+    public PagedResult<TokenEntity> searchToken(SearchRequest searchRequest) {
+        logger.debug("Search Token with searchRequest:{}", searchRequest);
 
-        Filter searchFilter = Filter.createEqualityFilter("clnId", searchRequest.getFilter());
-        logger.debug("Search Token searchFilter:{}", searchFilter);
+        Filter searchFilter = null;
+        List<Filter> filters = new ArrayList<>();
+        if (searchRequest.getFilterAssertionValue() != null && !searchRequest.getFilterAssertionValue().isEmpty()) {
 
-        return persistenceEntryManager.findPagedEntries(geTokenDn(null), TokenEntity.class, searchFilter, null,
+            for (String assertionValue : searchRequest.getFilterAssertionValue()) {
+                String[] targetArray = new String[] { assertionValue };
+                Filter grantIdFilter = Filter.createSubstringFilter("grtId", null, targetArray, null);
+                Filter userIdFilter = Filter.createSubstringFilter("usrId", null, targetArray, null);
+                Filter userDnFilter = Filter.createSubstringFilter("jansUsrDN", null, targetArray, null);
+                Filter clientIdFilter = Filter.createSubstringFilter("clnId", null, targetArray, null);
+                Filter scopeFilter = Filter.createSubstringFilter("scp", null, targetArray, null);
+                Filter tokenTypeFilter = Filter.createSubstringFilter("tknTyp", null, targetArray, null);
+                Filter grantTypeFilter = Filter.createSubstringFilter("grtTyp", null, targetArray, null);
+                Filter inumFilter = Filter.createSubstringFilter("jansId", null, targetArray, null);
+                filters.add(Filter.createORFilter(grantIdFilter, userIdFilter, userDnFilter, clientIdFilter,
+                        scopeFilter, tokenTypeFilter, grantTypeFilter, inumFilter));
+            }
+            searchFilter = Filter.createORFilter(filters);
+        }
+
+        logger.trace("Token pattern searchFilter:{}", searchFilter);
+        List<Filter> fieldValueFilters = new ArrayList<>();
+        if (searchRequest.getFieldValueMap() != null && !searchRequest.getFieldValueMap().isEmpty()) {
+            for (Map.Entry<String, String> entry : searchRequest.getFieldValueMap().entrySet()) {
+                Filter dataFilter = Filter.createEqualityFilter(entry.getKey(), entry.getValue());
+                logger.trace("Token dataFilter:{}", dataFilter);
+                fieldValueFilters.add(Filter.createANDFilter(dataFilter));
+            }
+            searchFilter = Filter.createANDFilter(Filter.createORFilter(filters),
+                    Filter.createANDFilter(fieldValueFilters));
+        }
+
+        logger.debug("Token searchFilter:{}", searchFilter);
+
+        return persistenceEntryManager.findPagedEntries(getDnForClient(null), TokenEntity.class, searchFilter, null,
                 searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
                 searchRequest.getStartIndex(), searchRequest.getCount(), searchRequest.getMaxCount());
 

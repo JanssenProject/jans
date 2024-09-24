@@ -52,7 +52,7 @@ import org.slf4j.Logger;
                 @Tag(name = "Auth Server Health - Check"), @Tag(name = "Plugins"),
                 @Tag(name = "Configuration – Config API"), @Tag(name = "Client Authorization"),
                 @Tag(name = "Jans Assets"),
-                @Tag(name = "Tokens"),
+                @Tag(name = "Token"),
         },
 
         servers = { @Server(url = "https://jans.local.io", description = "The Jans server") })

@@ -9,7 +9,6 @@ package io.jans.configapi.rest.resource.auth;
 import static io.jans.as.model.util.Util.escapeLog;
 import io.jans.as.common.model.registration.Client;
 import io.jans.configapi.core.rest.ProtectedApi;
-import io.jans.model.JansAttribute;
 import io.jans.model.SearchRequest;
 import io.jans.model.token.TokenEntity;
 import io.jans.orm.model.PagedResult;
@@ -52,10 +51,10 @@ public class TokenResource extends ConfigBaseResource {
     ClientService clientService;
 
     @Operation(summary = "Get client token details", description = "Get client token details", operationId = "get-token-details", tags = {
-            "OAuth - OpenID Connect - Clients" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+            "Token" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.TOKEN_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PagedResult.class), examples = @ExampleObject(name = "Response example", value = "example/token/token-get.json"))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = PagedResult.class), examples = @ExampleObject(name = "Response example", value = "example/token/get-token.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
@@ -64,8 +63,8 @@ public class TokenResource extends ConfigBaseResource {
             ApiAccessConstants.TOKEN_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     @Path(ApiConstants.CLIENT + ApiConstants.CLIENTID_PATH)
     public Response getClientToken(
-            @Parameter(description = "Script identifier") @PathParam(ApiConstants.CLIENTID) @NotNull String clientId) {
-        
+            @Parameter(description = "Client identifier") @PathParam(ApiConstants.CLIENTID) @NotNull String clientId) {
+
         if (logger.isInfoEnabled()) {
             logger.info("Serach tokens by clientId:{}", escapeLog(clientId));
         }
@@ -76,19 +75,58 @@ public class TokenResource extends ConfigBaseResource {
         checkResourceNotNull(client, "Client");
         logger.debug("Serach tokens by client:{}", client);
 
-        SearchRequest searchReq = createSearchRequest(clientAuthService.geTokenDn(null), clientId, "tknCde",
+        String fieldValuePair = "clnId=" + clientId;
+        SearchRequest searchReq = createSearchRequest(clientAuthService.geTokenDn(null), null, ApiConstants.TOKEN_CODE,
                 ApiConstants.ASCENDING, Integer.parseInt(ApiConstants.DEFAULT_LIST_START_INDEX),
-                Integer.parseInt(ApiConstants.DEFAULT_LIST_SIZE), null, null, this.getMaxCount(), null,
-                JansAttribute.class);
+                Integer.parseInt(ApiConstants.DEFAULT_LIST_SIZE), null, null, this.getMaxCount(), fieldValuePair,
+                TokenEntity.class);
 
-        TokenEntityPagedResult tokenEntityPagedResult = searchTokenByClientId(searchReq);
+        TokenEntityPagedResult tokenEntityPagedResult = searchTokens(searchReq);
+        logger.info("Token fetched are:{}", tokenEntityPagedResult);
+        return Response.ok(tokenEntityPagedResult).build();
+
+    }
+
+    @Operation(summary = "Search tokens", description = "Search tokens", operationId = "search-token", tags = {
+            "Token" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    ApiAccessConstants.TOKEN_READ_ACCESS }))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = TokenEntityPagedResult.class), examples = @ExampleObject(name = "Response example", value = "example/token/get-token.json"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not Found"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
+    @GET
+    @ProtectedApi(scopes = { ApiAccessConstants.TOKEN_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.TOKEN_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @Path(ApiConstants.SEARCH)
+    public Response searchTokenEntries(
+            @Parameter(description = "Search size - max size of the results to return") @DefaultValue(ApiConstants.DEFAULT_LIST_SIZE) @QueryParam(value = ApiConstants.LIMIT) int limit,
+            @Parameter(description = "Search pattern") @DefaultValue("") @QueryParam(value = ApiConstants.PATTERN) String pattern,
+            @Parameter(description = "The 1-based index of the first query result") @DefaultValue(ApiConstants.DEFAULT_LIST_START_INDEX) @QueryParam(value = ApiConstants.START_INDEX) int startIndex,
+            @Parameter(description = "Attribute whose value will be used to order the returned response") @DefaultValue(ApiConstants.TOKEN_CODE) @QueryParam(value = ApiConstants.SORT_BY) String sortBy,
+            @Parameter(description = "Order in which the sortBy param is applied. Allowed values are \"ascending\" and \"descending\"") @DefaultValue(ApiConstants.ASCENDING) @QueryParam(value = ApiConstants.SORT_ORDER) String sortOrder,
+            @Parameter(description = "Field and value pair for seraching", examples = @ExampleObject(name = "Field value example", value = "grtTyp=client_credentials,tknTyp=access_token")) @DefaultValue("") @QueryParam(value = ApiConstants.FIELD_VALUE_PAIR) String fieldValuePair) {
+        if (logger.isInfoEnabled()) {
+            logger.info(
+                    "Token serach param - limit:{}, pattern:{}, startIndex:{}, sortBy:{}, sortOrder:{}, fieldValuePair:{}",
+                    escapeLog(limit), escapeLog(pattern), escapeLog(startIndex), escapeLog(sortBy),
+                    escapeLog(sortOrder), escapeLog(fieldValuePair));
+        }
+
+        SearchRequest searchReq = createSearchRequest(clientAuthService.geTokenDn(null), pattern,
+                ApiConstants.TOKEN_CODE, ApiConstants.ASCENDING,
+                Integer.parseInt(ApiConstants.DEFAULT_LIST_START_INDEX),
+                Integer.parseInt(ApiConstants.DEFAULT_LIST_SIZE), null, null, this.getMaxCount(), fieldValuePair,
+                TokenEntity.class);
+
+        TokenEntityPagedResult tokenEntityPagedResult = searchTokens(searchReq);
         logger.info("Token fetched are:{}", tokenEntityPagedResult);
         return Response.ok(tokenEntityPagedResult).build();
 
     }
 
     @Operation(summary = "Revoke client token.", description = "Revoke client token.", operationId = "revoke-token", tags = {
-            "OAuth - OpenID Connect - Clients" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+            "Token" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.TOKEN_DELETE_ACCESS }))
     @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "No Content"),
             @ApiResponse(responseCode = "400", description = "Bad Request"),
@@ -100,23 +138,23 @@ public class TokenResource extends ConfigBaseResource {
             ApiAccessConstants.OPENID_DELETE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
     @Path(ApiConstants.REVOKE + ApiConstants.TOKEN_CODE_PATH)
     public Response revokeClientToken(
-            @Parameter(description = "Token Code") @PathParam(ApiConstants.TOKEN_CODE_PARAM) @NotNull String tknCde) {
+            @Parameter(description = "Token Code") @PathParam(ApiConstants.TOKEN_CODE) @NotNull String tknCde) {
         if (logger.isInfoEnabled()) {
             logger.info("Revoke token - tknCde():{}", escapeLog(tknCde));
         }
 
-        checkResourceNotNull(tknCde, ApiConstants.TOKEN_CODE_PARAM);
+        checkResourceNotNull(tknCde, ApiConstants.TOKEN_CODE);
         clientAuthService.revokeTokenEntity(tknCde);
         logger.info(" Successfully deleted token identified by tknCde:{}", tknCde);
 
         return Response.noContent().build();
     }
 
-    private TokenEntityPagedResult searchTokenByClientId(SearchRequest searchReq) {
+    private TokenEntityPagedResult searchTokens(SearchRequest searchReq) {
 
         logger.debug("Search Token by name params - searchReq:{} ", searchReq);
         TokenEntityPagedResult tokenEntityPagedResult = null;
-        PagedResult<TokenEntity> pagedResult = clientAuthService.getTokenOfClient(searchReq);
+        PagedResult<TokenEntity> pagedResult = clientAuthService.searchToken(searchReq);
 
         logger.debug("PagedResult  - pagedResult:{}", pagedResult);
         if (pagedResult != null) {

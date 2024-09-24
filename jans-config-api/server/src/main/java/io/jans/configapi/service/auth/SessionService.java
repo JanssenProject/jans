@@ -97,8 +97,9 @@ public class SessionService {
                 Filter sidFilter = Filter.createSubstringFilter(ApiConstants.OUTSIDE_SID, null, targetArray, null);
                 Filter sessAttrFilter = Filter.createSubstringFilter(ApiConstants.JANS_SESS_ATTR, null, targetArray,
                         null);
+                Filter permissionFilter = Filter.createSubstringFilter("jansPermissionGrantedMap", null, targetArray, null);
                 Filter idFilter = Filter.createSubstringFilter(ApiConstants.JANSID, null, targetArray, null);
-                filters.add(Filter.createORFilter(userFilter, sidFilter, sessAttrFilter, idFilter));
+                filters.add(Filter.createORFilter(userFilter, sidFilter, sessAttrFilter, permissionFilter, idFilter));
             }
             searchFilter = Filter.createORFilter(filters);
         }
