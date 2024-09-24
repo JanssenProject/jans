@@ -744,7 +744,7 @@ public class AppConfiguration implements Configuration {
     private Boolean fapiCompatibility = false;
 
     @DocProperty(description = "Boolean value specifying whether force id_token_hint parameter presence", defaultValue = "false")
-    private Boolean forceIdTokenHintPrecense = false;
+    private Boolean forceIdTokenHintPresence = false;
 
     @DocProperty(description = "default value false. If true and id_token is not found in db, request is rejected", defaultValue = "false")
     private Boolean rejectEndSessionIfIdTokenExpired = false;
@@ -1476,13 +1476,13 @@ public class AppConfiguration implements Configuration {
         this.trustedSsaIssuers = trustedSsaIssuers;
     }
 
-    public Boolean getForceIdTokenHintPrecense() {
-        if (forceIdTokenHintPrecense == null) forceIdTokenHintPrecense = false;
-        return forceIdTokenHintPrecense;
+    public Boolean getForceIdTokenHintPresence() {
+        if (forceIdTokenHintPresence == null) forceIdTokenHintPresence = false;
+        return forceIdTokenHintPresence;
     }
 
-    public void setForceIdTokenHintPrecense(Boolean forceIdTokenHintPrecense) {
-        this.forceIdTokenHintPrecense = forceIdTokenHintPrecense;
+    public void setForceIdTokenHintPresence(Boolean forceIdTokenHintPresence) {
+        this.forceIdTokenHintPresence = forceIdTokenHintPresence;
     }
 
     public Boolean getRejectEndSessionIfIdTokenExpired() {
