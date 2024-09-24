@@ -41,7 +41,7 @@
       "authenticationHistoryExpiration":1296000,
       "metadataUrlsProvider":"",
       "skipDownloadMdsEnabled":false,
-      "skipAttestation":false,
+      "attestationMode":"monitor",
       "enterpriseAttestation":"false",
       "hints":["security-key","client-device","hybrid"]
    }

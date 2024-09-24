@@ -108,7 +108,7 @@ It will return the result as below:
       }
     ],
     "disableMetadataService": false,
-    "skipValidateMdsInAttestationEnabled": false,
+    "attestationMode": "monitor",
     "assertionOptionsGenerateEndpointEnabled": true
   }
 }
