@@ -124,17 +124,10 @@ public class AssertionService {
         ExternalFido2Context externalFido2InterceptionContext = new ExternalFido2Context(CommonUtilService.toJsonNode(assertionOptions), httpRequest, httpResponse);
         boolean externalInterceptContext = externalFido2InterceptionService.authenticateAssertionStart(CommonUtilService.toJsonNode(assertionOptions), externalFido2InterceptionContext);
 
-        boolean superGluu = commonVerifiers.hasSuperGluu(CommonUtilService.toJsonNode(assertionOptions));
-        boolean oneStep = commonVerifiers.isSuperGluuOneStepMode(CommonUtilService.toJsonNode(assertionOptions));
 
 		// Verify request parameters
-		String username = null;
-		if (!(superGluu && oneStep)) {
-			commonVerifiers.verifyAssertionOptions(assertionOptions);
-
-			// Get username
-			username = assertionOptions.getUsername();//commonVerifiers.verifyThatFieldString(params, "username");
-		}
+		String username = assertionOptions.getUsername();//commonVerifiers.verifyThatFieldString(params, "username");
+		
 
 		// Create result object
 		//ObjectNode optionsResponseNode = dataMapperService.createObjectNode();
@@ -156,17 +149,9 @@ public class AssertionService {
 
 
 		String applicationId = documentDomain;
-		if (superGluu && !Strings.isNullOrEmpty(assertionOptions.getSuperGluuAppId())) {
-			applicationId = assertionOptions.getSuperGluuAppId();
-		}
-
-		String requestedKeyHandle = null;
-		if (superGluu && !Strings.isNullOrEmpty(assertionOptions.getSuperGluuKeyHandle())) {
-			requestedKeyHandle = assertionOptions.getSuperGluuKeyHandle();
-		}
-
+		
 		// Put allowCredentials
-		Pair<List<PublicKeyCredentialDescriptor>, String> allowedCredentialsPair = prepareAllowedCredentials(applicationId, username, requestedKeyHandle, superGluu);
+		Pair<List<PublicKeyCredentialDescriptor>, String> allowedCredentialsPair = prepareAllowedCredentials(applicationId, username);
 		List<PublicKeyCredentialDescriptor> allowedCredentials = allowedCredentialsPair.getLeft();
 		if (allowedCredentials.isEmpty()) {
 			throw errorResponseFactory.badRequestException(AssertionErrorResponseType.KEYS_NOT_FOUND, "Can't find associated key(s). Username: " + username);
@@ -206,16 +191,13 @@ public class AssertionService {
 		entity.setDomain(documentDomain);
 		entity.setUserVerificationOption(userVerification);
 		entity.setStatus(Fido2AuthenticationStatus.pending);
-		if (!Strings.isNullOrEmpty(assertionOptions.getSuperGluuAppId())) {
-			entity.setApplicationId(assertionOptions.getSuperGluuAppId());
-		} else {
-			entity.setApplicationId(documentDomain);
-		}
+		entity.setApplicationId(documentDomain);
+		
 
 		// Store original request
 		entity.setAssertionRequest(CommonUtilService.toJsonNode(assertionOptions).toString());
 
-		Fido2AuthenticationEntry authenticationEntity = authenticationPersistenceService.buildFido2AuthenticationEntry(entity, oneStep);
+		Fido2AuthenticationEntry authenticationEntity = authenticationPersistenceService.buildFido2AuthenticationEntry(entity);
 		if (!Strings.isNullOrEmpty(assertionOptions.getSessionId())) {
 			authenticationEntity.setSessionStateId(assertionOptions.getSessionId());
 		}
@@ -277,7 +259,7 @@ public class AssertionService {
 		// Store original request
 		entity.setAssertionRequest(CommonUtilService.toJsonNode(assertionOptionsGenerate).toString());
 
-		Fido2AuthenticationEntry authenticationEntity = authenticationPersistenceService.buildFido2AuthenticationEntry(entity, true);
+		Fido2AuthenticationEntry authenticationEntity = authenticationPersistenceService.buildFido2AuthenticationEntry(entity);
 		if (!Strings.isNullOrEmpty(assertionOptionsGenerate.getSessionId())) {
 			authenticationEntity.setSessionStateId(assertionOptionsGenerate.getSessionId());
 		}
@@ -298,9 +280,6 @@ public class AssertionService {
         ExternalFido2Context externalFido2InterceptionContext = new ExternalFido2Context(CommonUtilService.toJsonNode(assertionResult), httpRequest, httpResponse);
         boolean externalInterceptContext = externalFido2InterceptionService.verifyAssertionStart(CommonUtilService.toJsonNode(assertionResult), externalFido2InterceptionContext);
 
-        boolean superGluu = commonVerifiers.hasSuperGluu(CommonUtilService.toJsonNode(assertionResult));
-        boolean oneStep = commonVerifiers.isSuperGluuOneStepMode(CommonUtilService.toJsonNode(assertionResult));
-        boolean cancelRequest = commonVerifiers.isSuperGluuCancelRequest(CommonUtilService.toJsonNode(assertionResult));
 
 		// Verify if there are mandatory request parameters
 		commonVerifiers.verifyBasicPayload(assertionResult);
@@ -316,15 +295,13 @@ public class AssertionService {
 		}
 		// Verify client data
 		JsonNode clientJsonNode = commonVerifiers.verifyClientJSON(response.getClientDataJSON());
-		if (!superGluu) {
-			clientJsonNode = commonVerifiers.verifyClientJSONTypeIsGet(clientJsonNode);
-		}
+		
 
 		// Get challenge
 		String challenge = commonVerifiers.getChallenge(clientJsonNode);
 
 		// Find authentication entry
-		Fido2AuthenticationEntry authenticationEntity = authenticationPersistenceService.findByChallenge(challenge, oneStep).parallelStream()
+		Fido2AuthenticationEntry authenticationEntity = authenticationPersistenceService.findByChallenge(challenge).parallelStream()
 				.findFirst().orElseThrow(() -> new Fido2RuntimeException(
 						String.format("Can't find associated assertion request by challenge '%s'", challenge)));
 		Fido2AuthenticationData authenticationData = authenticationEntity.getAuthenticationData();
@@ -353,29 +330,27 @@ public class AssertionService {
 		// Store original response
 		authenticationData.setAssertionResponse(CommonUtilService.toJsonNode(assertionResult).toString());
 
-        // Support cancel request
-        if (cancelRequest) {
-        	authenticationData.setStatus(Fido2AuthenticationStatus.canceled);
-        } else {
-        	authenticationData.setStatus(Fido2AuthenticationStatus.authenticated);
+		authenticationData.setStatus(Fido2AuthenticationStatus.authenticated);
 
-			String deviceDataStr = response.getDeviceData();
-    		if (!Strings.isNullOrEmpty(deviceDataStr)) {
-                try {
-    				Fido2DeviceData deviceData = dataMapperService.readValue(
-    						new String(base64Service.urlDecode(deviceDataStr), StandardCharsets.UTF_8),
-    						Fido2DeviceData.class);
-    	            
-    	            boolean pushTokenUpdated = !StringHelper.equals(registrationEntry.getDeviceData().getPushToken(), deviceData.getPushToken());
-    	            if (pushTokenUpdated) {
-    	            	prepareForPushTokenChange(registrationEntry);
-    	            }
-                    registrationEntry.setDeviceData(deviceData);
-                } catch (Exception ex) {
-                    throw errorResponseFactory.invalidRequest(String.format("Device data is invalid: %s", deviceDataStr), ex);
-                }
-            }
-        }
+		//TODO: CHeck with Yuriy Ack if this should be here
+		String deviceDataStr = response.getDeviceData();
+		if (!Strings.isNullOrEmpty(deviceDataStr)) {
+			try {
+				Fido2DeviceData deviceData = dataMapperService.readValue(
+						new String(base64Service.urlDecode(deviceDataStr), StandardCharsets.UTF_8),
+						Fido2DeviceData.class);
+
+				boolean pushTokenUpdated = !StringHelper.equals(registrationEntry.getDeviceData().getPushToken(),
+						deviceData.getPushToken());
+				if (pushTokenUpdated) {
+					prepareForPushTokenChange(registrationEntry);
+				}
+				registrationEntry.setDeviceData(deviceData);
+			} catch (Exception ex) {
+				throw errorResponseFactory.invalidRequest(String.format("Device data is invalid: %s", deviceDataStr),
+						ex);
+			}
+		}
 
 		// Set expiration
 		int unfinishedRequestExpiration = appConfiguration.getFido2Configuration().getMetadataRefreshInterval();
@@ -393,7 +368,7 @@ public class AssertionService {
         if (StringHelper.isNotEmpty(sessionStateId)) {
             log.debug("There is session id. Setting session id attributes");
 
-            userSessionIdService.updateUserSessionIdOnFinishRequest(sessionStateId, registrationEntry.getUserInum(), registrationEntry, authenticationEntity, false, oneStep);
+            userSessionIdService.updateUserSessionIdOnFinishRequest(sessionStateId, registrationEntry.getUserInum(), registrationEntry, authenticationEntity, false);
         }
 
 		// Create result object
@@ -433,42 +408,45 @@ public class AssertionService {
 		snsEndpointArnHistory.add(snsEndpointArn);
 	}
 
-	private Pair<List<PublicKeyCredentialDescriptor>, String> prepareAllowedCredentials(String documentDomain, String username, String requestedKeyHandle, boolean superGluu) {
+	private Pair<List<PublicKeyCredentialDescriptor>, String> prepareAllowedCredentials(String documentDomain,
+			String username) {
 		if (appConfiguration.isOldU2fMigrationEnabled()) {
-	 		List<DeviceRegistration> existingFidoRegistrations = deviceRegistrationService.findAllRegisteredByUsername(username,
-					documentDomain);
+			List<DeviceRegistration> existingFidoRegistrations = deviceRegistrationService
+					.findAllRegisteredByUsername(username, documentDomain);
 			if (existingFidoRegistrations.size() > 0) {
 				deviceRegistrationService.migrateToFido2(existingFidoRegistrations, documentDomain, username);
 			}
 		}
 
 		List<Fido2RegistrationEntry> existingFido2Registrations;
-		if (superGluu && StringHelper.isNotEmpty(requestedKeyHandle)) {
-			Fido2RegistrationEntry fido2RegistrationEntry = registrationPersistenceService.findByPublicKeyId(username, requestedKeyHandle, documentDomain).orElseThrow(() -> new Fido2RuntimeException(
-						String.format("Can't find associated key '%s' for application '%s'", requestedKeyHandle, documentDomain)));
-			existingFido2Registrations = Arrays.asList(fido2RegistrationEntry);
-		} else {
-			existingFido2Registrations = registrationPersistenceService.findByRpRegisteredUserDevices(username, superGluu ? documentDomain : null);
-		}
-		//  f.getRegistrationData().getAttenstationRequest() null check is added to maintain backward compatiblity with U2F devices when U2F devices are migrated to the FIDO2 server
-		List<Fido2RegistrationEntry> allowedFido2Registrations = existingFido2Registrations.parallelStream()
-				.filter(f -> StringHelper.isNotEmpty(f.getRegistrationData().getPublicKeyId())).collect(Collectors.toList());
 
-		List<PublicKeyCredentialDescriptor> allowedFido2Keys =  new ArrayList<>(allowedFido2Registrations.size());
+		// TODO: incase of a bug, this the second argument should have been null, see
+		// old code to understand
+		existingFido2Registrations = registrationPersistenceService.findByRpRegisteredUserDevices(username,
+				documentDomain);
+
+		// f.getRegistrationData().getAttenstationRequest() null check is added to
+		// maintain backward compatiblity with U2F devices when U2F devices are migrated
+		// to the FIDO2 server
+		List<Fido2RegistrationEntry> allowedFido2Registrations = existingFido2Registrations.parallelStream()
+				.filter(f -> StringHelper.isNotEmpty(f.getRegistrationData().getPublicKeyId()))
+				.collect(Collectors.toList());
+
+		List<PublicKeyCredentialDescriptor> allowedFido2Keys = new ArrayList<>(allowedFido2Registrations.size());
 		allowedFido2Registrations.forEach((f) -> {
 			log.debug("attestation request:" + f.getRegistrationData().getAttestationRequest());
 			String transports[];
-			if (superGluu) {
-				transports = new String[] { "net", "qr" };
-			} else {
-				transports = ((f.getRegistrationData().getAttestationType().equalsIgnoreCase(AttestationFormat.apple.getFmt())) || ( f.getRegistrationData().getAttestationRequest() != null &&
-						f.getRegistrationData().getAttestationRequest().contains(AuthenticatorAttachment.PLATFORM.getAttachment())))
 
-						? new String[] { "internal" }
-						: new String[] { "usb", "ble", "nfc" };
-			}
-			PublicKeyCredentialDescriptor descriptor = new PublicKeyCredentialDescriptor(
-					transports, f.getRegistrationData().getPublicKeyId());
+			transports = ((f.getRegistrationData().getAttestationType()
+					.equalsIgnoreCase(AttestationFormat.apple.getFmt()))
+					|| (f.getRegistrationData().getAttestationRequest() != null && f.getRegistrationData()
+							.getAttestationRequest().contains(AuthenticatorAttachment.PLATFORM.getAttachment())))
+
+									? new String[] { "internal" }
+									: new String[] { "usb", "ble", "nfc" };
+
+			PublicKeyCredentialDescriptor descriptor = new PublicKeyCredentialDescriptor(transports,
+					f.getRegistrationData().getPublicKeyId());
 
 			allowedFido2Keys.add(descriptor);
 		});
@@ -476,10 +454,9 @@ public class AssertionService {
 		Optional<Fido2RegistrationEntry> fidoRegistration = allowedFido2Registrations.parallelStream()
 				.filter(f -> StringUtils.isNotEmpty(f.getRegistrationData().getApplicationId())).findAny();
 		String applicationId = null;
+
 		// applicationId should not be sent incase of pure fido2
-		if (fidoRegistration.isPresent() && superGluu) {
-			applicationId = fidoRegistration.get().getRegistrationData().getApplicationId();
-		}
+		applicationId = fidoRegistration.get().getRegistrationData().getApplicationId();
 
 		return Pair.of(allowedFido2Keys, applicationId);
 	}
