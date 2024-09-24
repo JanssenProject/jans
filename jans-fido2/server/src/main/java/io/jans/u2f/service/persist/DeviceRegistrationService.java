@@ -123,7 +123,7 @@ public class DeviceRegistrationService {
 
 			// Save converted Fido2 entry
 			Date enrollmentDate = fidoRegistration.getCreationDate();
-			Fido2RegistrationEntry fido2RegistrationEntry = registrationPersistenceService.buildFido2RegistrationEntry(fido2RegistrationData, false);
+			Fido2RegistrationEntry fido2RegistrationEntry = registrationPersistenceService.buildFido2RegistrationEntry(fido2RegistrationData);
 			
 			// Restore dates modified by buildFido2RegistrationEntry
 			fido2RegistrationEntry.getRegistrationData().setCreatedDate(enrollmentDate);

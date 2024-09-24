@@ -2,9 +2,8 @@ package io.jans.fido2.model.assertion;
 
 import com.google.common.base.Strings;
 import io.jans.fido2.model.common.PublicKeyCredentialType;
-import io.jans.fido2.model.common.SuperGluuSupport;
 
-public class AssertionResult extends SuperGluuSupport {
+public class AssertionResult  {
     private String id;
     private String type = PublicKeyCredentialType.PUBLIC_KEY.getKeyName();
     private String rawId;
