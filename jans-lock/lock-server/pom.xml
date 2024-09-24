@@ -23,7 +23,7 @@
 	</modules>
 
 	<packaging>pom</packaging>
-	<name>Jans lock master parent</name>
+	<name>Jans lock server parent</name>
 	<url>https://github.com/JanssenProject/jans</url>
 
 	<properties>
