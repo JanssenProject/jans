@@ -103,12 +103,12 @@ spec:
                 LDAP_BACKUP_FILE=backup-$RANDOM_NUM.ldif
                 /opt/opendj/bin/export-ldif --hostname "$LDAP_HOST" --port 4444 --bindDN "$LDAP_BIND_DN" --bindPassword "$LDAP_PASSWORD" --backendID userRoot --ldifFile /opt/opendj/ldif/$LDAP_BACKUP_FILE --trustAll
               volumeMounts:
-              - mountPath: {{ .Values.global.cnConfiguratorConfigurationFile }}
-                name: {{ .Release.Name }}-configuration-file
-                subPath: {{ .Values.global.cnConfiguratorConfigurationFile | base }}
+              {{- with (include "cn.config.schema" . | fromYaml).volumeMounts }}
+{{- toYaml . | nindent 16 }}
+              {{- end }}
           restartPolicy: Never
           volumes:
-          - name: {{ .Release.Name }}-configuration-file
-            secret:
-              secretName: {{ .Release.Name }}-configuration-file
+          {{- with (include "cn.config.schema" . | fromYaml).volumes }}
+{- toYaml . | nindent 12 }}
+          {{- end }}
 {{- end }}

@@ -101,6 +101,9 @@ spec:
           {{- with .Values.volumeMounts }}
 {{- toYaml . | nindent 12 }}
           {{- end }}
+          {{- with (include "cn.config.schema" . | fromYaml).volumeMounts }}
+{{- toYaml . | nindent 12 }}
+          {{- end }}
             - name: kc-db-pass
               mountPath: {{ .Values.global.kcDbPasswordFile }}
               subPath: kc_db_password
@@ -108,9 +111,6 @@ spec:
             - name: {{ include "saml.fullname" .}}-updatelbip
               mountPath: "/scripts"
           {{- end }}
-            - mountPath: {{ .Values.global.cnConfiguratorConfigurationFile }}
-              name: {{ .Release.Name }}-configuration-file
-              subPath: {{ .Values.global.cnConfiguratorConfigurationFile | base }}
           livenessProbe:
 {{- toYaml .Values.livenessProbe | nindent 12 }}
           readinessProbe:
@@ -127,6 +127,9 @@ spec:
       {{- with .Values.volumes }}
 {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- with (include "cn.config.schema" . | fromYaml).volumes }}
+{{- toYaml . | nindent 8 }}
+      {{- end }}
         - name: kc-db-pass
           secret:
             secretName: {{ .Release.Name }}-kc-db-pass
@@ -135,9 +138,6 @@ spec:
           configMap:
             name: {{ .Release.Name }}-updatelbip
       {{- end }}
-        - name: {{ .Release.Name }}-configuration-file
-          secret:
-            secretName: {{ .Release.Name }}-configuration-file
       {{- if not .Values.global.isFqdnRegistered }}
       hostAliases:
        - ip: {{ .Values.global.lbIp }}
