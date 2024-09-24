@@ -39,7 +39,7 @@ tags:
 | unfinishedRequestExpiration             | 180                                                                            | Expiration time in seconds for pending enrollment/authentication requests                               |
 | authenticationHistoryExpiration         | 1296000                                                                        | Expiration time in seconds for approved authentication requests.                                        |
 | disableMetadataService                  | false                                                                          | Boolean value indicating whether the MDS download should be omitted                                     |
-| skipValidateMdsInAttestationEnabled     | false                                                                          | Boolean value indicating whether MDS validation should be omitted during attestation                    |
+| attestationMode                         | "monitor"                                                                      | Enum value indicating whether MDS validation should be omitted during attestation                       |
 | assertionOptionsGenerateEndpointEnabled | false                                                                          | Boolean value indicating whether the assertion custom endpoint (used especially in passkey) is enabled. |
 
 ### Configuring the FIDO2 server:
@@ -81,7 +81,7 @@ Response:
     "serverMetadataFolder": "/etc/jans/conf/fido2/server_metadata",
     "metadataUrlsProvider": "",
     "disableMetadataService": false,
-    "skipValidateMdsInAttestationEnabled": false,
+    "attestationMode": "monitor",
     "assertionOptionsGenerateEndpointEnabled":true,
     "enabledFidoAlgorithms": [
       "RS256",

@@ -32,7 +32,7 @@ def _transform_fido2_dynamic_config(conf):
         ("metadataUrlsProvider", ""),
         ("errorReasonEnabled", False),
         ("skipDownloadMdsEnabled", False),
-        ("skipValidateMdsInAttestationEnabled", False),
+        ("attestationMode", "monitor"),
         ("sessionIdPersistInCache", False),
         ("assertionOptionsGenerateEndpointEnabled", True),
     ]:
