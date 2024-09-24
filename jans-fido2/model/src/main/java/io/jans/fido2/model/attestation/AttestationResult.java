@@ -1,9 +1,9 @@
 package io.jans.fido2.model.attestation;
 
 import io.jans.fido2.model.common.PublicKeyCredentialType;
-import io.jans.fido2.model.common.SuperGluuSupport;
 
-public class AttestationResult extends SuperGluuSupport {
+
+public class AttestationResult  {
     private String id;
     private String type = PublicKeyCredentialType.PUBLIC_KEY.getKeyName();
     private Response response;
