@@ -15,7 +15,6 @@ import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.fido2.service.DataMapperService;
 import io.jans.fido2.service.operation.AttestationService;
-import io.jans.fido2.service.sg.converter.AttestationSuperGluuController;
 import io.jans.fido2.service.util.CommonUtilService;
 import io.jans.fido2.service.verifier.CommonVerifiers;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -51,9 +50,6 @@ public class AttestationController {
     private CommonVerifiers commonVerifiers;
 
     @Inject
-    private AttestationSuperGluuController attestationSuperGluuController;
-
-    @Inject
     private AppConfiguration appConfiguration;
 
     @Inject
@@ -68,7 +64,6 @@ public class AttestationController {
             if (appConfiguration.getFido2Configuration() == null) {
                 throw errorResponseFactory.forbiddenException();
             }
-            commonVerifiers.verifyNotUseGluuParameters(CommonUtilService.toJsonNode(attestationOptions));
             PublicKeyCredentialCreationOptions result = attestationService.options(attestationOptions);
             return Response.ok().entity(result).build();
         });
@@ -83,44 +78,14 @@ public class AttestationController {
             if (appConfiguration.getFido2Configuration() == null) {
                 throw errorResponseFactory.forbiddenException();
             }
-            commonVerifiers.verifyNotUseGluuParameters(CommonUtilService.toJsonNode(attestationResult));
             AttestationOrAssertionResponse result = attestationService.verify(attestationResult);
             return Response.ok().entity(result).build();
         });
     }
 
-    @GET
-    @Produces({"application/json"})
-    @Path("/registration")
-    public Response startRegistration(@QueryParam("username") String userName,
-                                      @QueryParam("application") String appId,
-                                      @QueryParam("session_id") String sessionId,
-                                      @QueryParam("enrollment_code") String enrollmentCode) {
-        return processRequest(() -> {
-            if ((appConfiguration.getFido2Configuration() == null) && !appConfiguration.isSuperGluuEnabled()) {
-                throw errorResponseFactory.forbiddenException();
-            }
-            log.debug("Start registration: username = {}, application = {}, session_id = {}, enrollment_code = {}", userName, appId, sessionId, enrollmentCode);
-            JsonNode result = attestationSuperGluuController.startRegistration(userName, appId, sessionId, enrollmentCode);
-            log.debug("Prepared U2F_V2 registration options request: {}", result.toString());
-            return Response.ok().entity(result).build();
-        });
-    }
+   
 
-    @POST
-    @Produces({"application/json"})
-    @Path("/registration")
-    public Response finishRegistration(@FormParam("username") String userName, @FormParam("tokenResponse") String registerResponseString) {
-        return processRequest(() -> {
-            if ((appConfiguration.getFido2Configuration() == null) && !appConfiguration.isSuperGluuEnabled()) {
-                throw errorResponseFactory.forbiddenException();
-            }
-            log.debug("Finish registration: username = {}, tokenResponse = {}", userName, registerResponseString);
-            JsonNode result = attestationSuperGluuController.finishRegistration(userName, registerResponseString);
-            log.debug("Prepared U2F_V2 registration verify request: {}", result.toString());
-            return Response.ok().entity(result).build();
-        });
-    }
+    
 
     private Response processRequest(RequestProcessor processor) {
         try {

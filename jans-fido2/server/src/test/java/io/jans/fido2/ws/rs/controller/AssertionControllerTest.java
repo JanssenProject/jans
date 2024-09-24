@@ -1,19 +1,18 @@
 package io.jans.fido2.ws.rs.controller;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import io.jans.fido2.model.assertion.*;
-import io.jans.fido2.model.common.AttestationOrAssertionResponse;
-import io.jans.fido2.model.conf.AppConfiguration;
-import io.jans.fido2.model.conf.Fido2Configuration;
-import io.jans.fido2.model.error.ErrorResponseFactory;
-import io.jans.fido2.service.DataMapperService;
-import io.jans.fido2.service.operation.AssertionService;
-import io.jans.fido2.service.sg.converter.AssertionSuperGluuController;
-import io.jans.fido2.service.verifier.CommonVerifiers;
-import jakarta.ws.rs.BadRequestException;
-import jakarta.ws.rs.WebApplicationException;
-import jakarta.ws.rs.core.Response;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.contains;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -21,10 +20,19 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 
-import java.io.IOException;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import io.jans.fido2.model.assertion.AssertionOptions;
+import io.jans.fido2.model.assertion.AssertionOptionsResponse;
+import io.jans.fido2.model.assertion.AssertionResult;
+import io.jans.fido2.model.common.AttestationOrAssertionResponse;
+import io.jans.fido2.model.conf.AppConfiguration;
+import io.jans.fido2.model.conf.Fido2Configuration;
+import io.jans.fido2.model.error.ErrorResponseFactory;
+import io.jans.fido2.service.DataMapperService;
+import io.jans.fido2.service.operation.AssertionService;
+import io.jans.fido2.service.verifier.CommonVerifiers;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.Response;
 
 @ExtendWith(MockitoExtension.class)
 class AssertionControllerTest {
@@ -40,9 +48,6 @@ class AssertionControllerTest {
 
     @Mock
     private DataMapperService dataMapperService;
-
-    @Mock
-    private AssertionSuperGluuController assertionSuperGluuController;
 
     @Mock
     private AppConfiguration appConfiguration;
@@ -97,7 +102,6 @@ class AssertionControllerTest {
 
         verify(appConfiguration).getFido2Configuration();
         verify(log).error(contains("Unknown Error"), any(), any());
-        verify(commonVerifiers).verifyNotUseGluuParameters(any());
         verify(assertionService).options(any());
         verifyNoMoreInteractions(errorResponseFactory);
     }
@@ -112,7 +116,6 @@ class AssertionControllerTest {
         assertEquals(response.getStatus(), 200);
 
         verify(appConfiguration).getFido2Configuration();
-        verify(commonVerifiers).verifyNotUseGluuParameters(any());
         verify(assertionService).options(any());
         verifyNoInteractions(log, errorResponseFactory);
     }
@@ -215,7 +218,6 @@ class AssertionControllerTest {
         assertEquals(response.getStatus(), 200);
 
         verify(appConfiguration).getFido2Configuration();
-        verify(commonVerifiers).verifyNotUseGluuParameters(any());
         verify(assertionService).options(any());
         verifyNoInteractions(log, errorResponseFactory);
     }
@@ -265,7 +267,6 @@ class AssertionControllerTest {
 
         verify(appConfiguration).getFido2Configuration();
         verify(log).error(contains("Unknown Error"), any(), any());
-        verify(commonVerifiers).verifyNotUseGluuParameters(any());
         verify(assertionService).verify(any());
         verifyNoMoreInteractions(errorResponseFactory);
     }
@@ -280,139 +281,11 @@ class AssertionControllerTest {
         assertEquals(response.getStatus(), 200);
 
         verify(appConfiguration).getFido2Configuration();
-        verify(commonVerifiers).verifyNotUseGluuParameters(any());
         verify(assertionService).verify(any());
         verifyNoInteractions(log, errorResponseFactory);
     }
 
-    @Test
-    void startAuthentication_ifFido2ConfigurationIsNullAndSuperGluuEnabledIsFalse_forbiddenException() {
-        String userName = "test_username";
-        String keyHandle = "test_key_handle";
-        String appId = "test_app_id";
-        String sessionId = "test_session_id";
-        when(appConfiguration.getFido2Configuration()).thenReturn(null);
-        when(appConfiguration.isSuperGluuEnabled()).thenReturn(false);
-        when(errorResponseFactory.forbiddenException()).thenReturn(new WebApplicationException(Response.status(500).entity("test exception").build()));
+   
 
-        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> assertionController.startAuthentication(userName, keyHandle, appId, sessionId));
-        assertNotNull(ex);
-        assertNotNull(ex.getResponse());
-        assertEquals(ex.getResponse().getStatus(), 500);
-        assertEquals(ex.getResponse().getEntity(), "test exception");
-
-        verify(appConfiguration).getFido2Configuration();
-        verify(appConfiguration).isSuperGluuEnabled();
-        verifyNoInteractions(log, assertionSuperGluuController);
-        verifyNoMoreInteractions(errorResponseFactory);
-    }
-
-    @Test
-    void startAuthentication_ifFidoConfigurationNotNullAndThrownError_unknownError() {
-        String userName = "test_username";
-        String keyHandle = "test_key_handle";
-        String appId = "test_app_id";
-        String sessionId = "test_session_id";
-        when(appConfiguration.getFido2Configuration()).thenReturn(mock(Fido2Configuration.class));
-        when(assertionSuperGluuController.startAuthentication(any(), any(), any(), any())).thenThrow(new RuntimeException("Runtime test error"));
-        when(errorResponseFactory.unknownError(any())).thenReturn(new WebApplicationException(Response.status(500).entity("test exception").build()));
-
-        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> assertionController.startAuthentication(userName, keyHandle, appId, sessionId));
-        assertNotNull(ex);
-        assertNotNull(ex.getResponse());
-        assertEquals(ex.getResponse().getStatus(), 500);
-        assertEquals(ex.getResponse().getEntity(), "test exception");
-
-        verify(appConfiguration).getFido2Configuration();
-        verify(appConfiguration, never()).isSuperGluuEnabled();
-        verify(log).debug("Start authentication: username = {}, keyhandle = {}, application = {}, session_id = {}", userName, keyHandle, appId, sessionId);
-        verify(log).error(contains("Unknown Error"), any(), any());
-        verifyNoMoreInteractions(appConfiguration, log);
-    }
-
-    @Test
-    void startAuthentication_ifFidoConfigurationIsNullAndSuperGluuEnabledIsTrue_success() {
-        String userName = "test_username";
-        String keyHandle = "test_key_handle";
-        String appId = "test_app_id";
-        String sessionId = "test_session_id";
-        when(appConfiguration.getFido2Configuration()).thenReturn(null);
-        when(appConfiguration.isSuperGluuEnabled()).thenReturn(true);
-        when(assertionSuperGluuController.startAuthentication(any(), any(), any(), any())).thenReturn(mock(ObjectNode.class));
-
-        Response response = assertionController.startAuthentication(userName, keyHandle, appId, sessionId);
-        assertNotNull(response);
-        assertEquals(response.getStatus(), 200);
-
-        verify(appConfiguration).getFido2Configuration();
-        verify(appConfiguration).isSuperGluuEnabled();
-        verify(assertionSuperGluuController).startAuthentication(userName, keyHandle, appId, sessionId);
-        verify(log).debug("Start authentication: username = {}, keyhandle = {}, application = {}, session_id = {}", userName, keyHandle, appId, sessionId);
-        verify(log).debug(contains("Prepared U2F_V2 authentication options request"), anyString());
-        verifyNoInteractions(errorResponseFactory);
-        verifyNoMoreInteractions(log);
-    }
-
-    @Test
-    void finishAuthentication_ifFido2ConfigurationIsNullAndSuperGluuEnabledIsFalse_forbiddenException() {
-        String userName = "test_username";
-        String authenticateResponseString = "test_authenticate_response_string";
-        when(appConfiguration.getFido2Configuration()).thenReturn(null);
-        when(appConfiguration.isSuperGluuEnabled()).thenReturn(false);
-
-        when(errorResponseFactory.forbiddenException()).thenReturn(new WebApplicationException(Response.status(500).entity("test exception").build()));
-
-        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> assertionController.finishAuthentication(userName, authenticateResponseString));
-        assertNotNull(ex);
-        assertNotNull(ex.getResponse());
-        assertEquals(ex.getResponse().getStatus(), 500);
-        assertEquals(ex.getResponse().getEntity(), "test exception");
-
-        verify(appConfiguration).getFido2Configuration();
-        verify(appConfiguration).isSuperGluuEnabled();
-        verifyNoInteractions(log, assertionSuperGluuController);
-        verifyNoMoreInteractions(errorResponseFactory);
-    }
-
-    @Test
-    void finishAuthentication_ifFidoConfigurationNotNullAndThrownError_unknownError() {
-        String userName = "test_username";
-        String authenticateResponseString = "test_authenticate_response_string";
-        when(appConfiguration.getFido2Configuration()).thenReturn(mock(Fido2Configuration.class));
-        when(assertionSuperGluuController.finishAuthentication(any(), any())).thenThrow(new RuntimeException("Runtime test error"));
-        when(errorResponseFactory.unknownError(any())).thenReturn(new WebApplicationException(Response.status(500).entity("test exception").build()));
-
-        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> assertionController.finishAuthentication(userName, authenticateResponseString));
-        assertNotNull(ex);
-        assertNotNull(ex.getResponse());
-        assertEquals(ex.getResponse().getStatus(), 500);
-        assertEquals(ex.getResponse().getEntity(), "test exception");
-
-        verify(appConfiguration).getFido2Configuration();
-        verify(appConfiguration, never()).isSuperGluuEnabled();
-        verify(log).debug("Finish authentication: username = {}, tokenResponse = {}", userName, authenticateResponseString);
-        verify(log).error(contains("Unknown Error"), any(), any());
-        verifyNoMoreInteractions(appConfiguration, log);
-    }
-
-    @Test
-    void finishAuthentication_ifFidoConfigurationIsNullAndSuperGluuEnabledIsTrue_success() {
-        String userName = "test_username";
-        String authenticateResponseString = "test_authenticate_response_string";
-        when(appConfiguration.getFido2Configuration()).thenReturn(null);
-        when(appConfiguration.isSuperGluuEnabled()).thenReturn(true);
-        when(assertionSuperGluuController.finishAuthentication(any(), any())).thenReturn(mock(ObjectNode.class));
-
-        Response response = assertionController.finishAuthentication(userName, authenticateResponseString);
-        assertNotNull(response);
-        assertEquals(response.getStatus(), 200);
-
-        verify(appConfiguration).getFido2Configuration();
-        verify(appConfiguration).isSuperGluuEnabled();
-        verify(assertionSuperGluuController).finishAuthentication(userName, authenticateResponseString);
-        verify(log).debug("Finish authentication: username = {}, tokenResponse = {}", userName, authenticateResponseString);
-        verify(log).debug(contains("Prepared U2F_V2 authentication verify request"), anyString());
-        verifyNoInteractions(errorResponseFactory);
-        verifyNoMoreInteractions(log);
-    }
+   
 }

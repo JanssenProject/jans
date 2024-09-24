@@ -211,6 +211,6 @@ public class Fido2Configuration {
 	}
     
    
-
+	public Fido2Configuration() {}
 }
 
