@@ -62,12 +62,30 @@
       "title-prefixes": []
     }
   },
+  "comp-agama": {
+    "color": "0052CC",
+    "description": "Touching folder /agama",
+    "auto-label": {
+      "branch": "",
+      "paths": ["agama"],
+      "title-prefixes": []
+    }
+  },
   "comp-charts-jans": {
     "color": "0052CC",
     "description": "Touching folder /charts",
     "auto-label": {
       "branch": "",
       "paths": ["charts"],
+      "title-prefixes": []
+    }
+  },
+  "comp-docker-jans-all-in-one": {
+    "color": "0052CC",
+    "description": "Touching folder /docker-jans-all-in-one",
+    "auto-label": {
+      "branch": "",
+      "paths": ["docker-jans-all-in-one"],
       "title-prefixes": []
     }
   },
@@ -80,21 +98,12 @@
       "title-prefixes": []
     }
   },
-  "comp-docker-jans-link": {
+  "comp-docker-jans-casa": {
     "color": "0052CC",
-    "description": "Touching folder /docker-jans-link",
+    "description": "Touching folder /docker-jans-casa",
     "auto-label": {
       "branch": "",
-      "paths": ["docker-jans-link"],
-      "title-prefixes": []
-    }
-  },
-  "comp-docker-jans-all-in-one": {
-    "color": "0052CC",
-    "description": "Touching folder /docker-jans-all-in-one",
-    "auto-label": {
-      "branch": "",
-      "paths": ["docker-jans-all-in-one"],
+      "paths": ["docker-jans-casa"],
       "title-prefixes": []
     }
   },
@@ -134,6 +143,33 @@
       "title-prefixes": []
     }
   },
+  "comp-docker-jans-kc-scheduler": {
+    "color": "0052CC",
+    "description": "Touching folder /docker-jans-kc-scheduler",
+    "auto-label": {
+      "branch": "",
+      "paths": ["docker-jans-kc-scheduler"],
+      "title-prefixes": []
+    }
+  },
+  "comp-docker-jans-link": {
+    "color": "0052CC",
+    "description": "Touching folder /docker-jans-link",
+    "auto-label": {
+      "branch": "",
+      "paths": ["docker-jans-link"],
+      "title-prefixes": []
+    }
+  },
+  "comp-docker-jans-monolith": {
+    "color": "0052CC",
+    "description": "Touching folder /docker-jans-monolith",
+    "auto-label": {
+      "branch": "",
+      "paths": ["docker-jans-monolith"],
+      "title-prefixes": []
+    }
+  },
   "comp-docker-jans-persistence-loader": {
     "color": "0052CC",
     "description": "Touching folder /docker-jans-persistence-loader",
@@ -143,12 +179,30 @@
       "title-prefixes": []
     }
   },
+  "comp-docker-jans-saml": {
+    "color": "0052CC",
+    "description": "Touching folder /docker-jans-saml",
+    "auto-label": {
+      "branch": "",
+      "paths": ["docker-jans-saml"],
+      "title-prefixes": []
+    }
+  },
   "comp-docker-jans-scim": {
     "color": "0052CC",
     "description": "Touching folder /docker-jans-scim",
     "auto-label": {
       "branch": "",
       "paths": ["docker-jans-scim"],
+      "title-prefixes": []
+    }
+  },
+  "comp-docs": {
+    "color": "0052CC",
+    "description": "Touching folder /docs",
+    "auto-label": {
+      "branch": "",
+      "paths": ["docs"],
       "title-prefixes": []
     }
   },
@@ -167,6 +221,24 @@
     "auto-label": {
       "branch": "",
       "paths": ["jans-bom"],
+      "title-prefixes": []
+    }
+  },
+  "comp-jans-casa": {
+    "color": "0052CC",
+    "description": "Touching folder /jans-casa",
+    "auto-label": {
+      "branch": "",
+      "paths": ["jans-casa"],
+      "title-prefixes": []
+    }
+  },
+  "comp-jans-cedarling": {
+    "color": "0052CC",
+    "description": "Touching folder /jans-cedarling",
+    "auto-label": {
+      "branch": "",
+      "paths": ["jans-cedarling"],
       "title-prefixes": []
     }
   },
@@ -206,12 +278,48 @@
       "title-prefixes": []
     }
   },
+  "comp-jans-keycloak-integartion": {
+    "color": "0052CC",
+    "description": "Touching folder /jans-keycloak-integartion",
+    "auto-label": {
+      "branch": "",
+      "paths": ["jans-keycloak-integartion"],
+      "title-prefixes": []
+    }
+  },
+  "comp-jans-keycloak-link": {
+    "color": "0052CC",
+    "description": "Touching folder /jans-keycloak-link",
+    "auto-label": {
+      "branch": "",
+      "paths": ["jans-keycloak-link"],
+      "title-prefixes": []
+    }
+  },
+  "comp-jans-link": {
+    "color": "0052CC",
+    "description": "Touching folder /jans-link",
+    "auto-label": {
+      "branch": "",
+      "paths": ["jans-link"],
+      "title-prefixes": []
+    }
+  },
   "comp-jans-linux-setup": {
     "color": "0052CC",
     "description": "Touching folder /jans-linux-setup",
     "auto-label": {
       "branch": "",
       "paths": ["jans-linux-setup"],
+      "title-prefixes": []
+    }
+  },
+  "comp-jans-lock": {
+    "color": "0052CC",
+    "description": "Touching folder /jans-lock",
+    "auto-label": {
+      "branch": "",
+      "paths": ["jans-lock"],
       "title-prefixes": []
     }
   },
@@ -242,21 +350,12 @@
       "title-prefixes": []
     }
   },
-  "comp-super-jans": {
+  "comp-terraform-provider-jans": {
     "color": "0052CC",
-    "description": "Touching folder /super-jans",
+    "description": "Touching folder /terraform-provider-jans",
     "auto-label": {
       "branch": "",
-      "paths": ["super-jans"],
-      "title-prefixes": []
-    }
-  },
-  "comp-agama": {
-    "color": "0052CC",
-    "description": "Touching folder /agama",
-    "auto-label": {
-      "branch": "",
-      "paths": ["agama"],
+      "paths": ["terraform-provider-jans"],
       "title-prefixes": []
     }
   },

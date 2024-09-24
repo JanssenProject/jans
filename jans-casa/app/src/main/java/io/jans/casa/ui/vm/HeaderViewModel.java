@@ -54,8 +54,8 @@ public class HeaderViewModel {
             logger.trace("Log off attempt for {}", sessionContext.getUser().getUserName());
 
             //After End-User has logged out, the Client might request to log him out of the OP too
-            String idToken = authFlowContext.getIdToken();
-            Executions.sendRedirect(oidcFlowService.getLogoutUrl(idToken));
+            //String idToken = authFlowContext.getIdToken();
+            Executions.sendRedirect(oidcFlowService.getLogoutUrl());
 
             //Kill session
             WebUtils.invalidateSession(WebUtils.getServletRequest());

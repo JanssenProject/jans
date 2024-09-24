@@ -399,7 +399,7 @@ nav:
     - Jans Keycloak Link: admin/link/jans-keycloak-link.md
   - Lock Guide:
       - admin/lock/README.md
-      - Lock Master: admin/lock/lock-server.md
+      - Lock Server: admin/lock/lock-server.md
       - Authorization Using Cedarling: admin/lock/cedarling.md
   - Janssen Recipes:
     - admin/recipes/README.md

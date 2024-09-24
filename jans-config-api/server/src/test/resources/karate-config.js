@@ -67,6 +67,7 @@ function() {
         api_config_url: baseUrl + '/jans-config-api/api/v1/api-config',
 		agama_deployment_url: baseUrl + '/jans-config-api/api/v1/agama-deployment',
 		clients_authorizations_url: baseUrl + '/jans-config-api/api/v1/clients/authorizations',
+		token_url: baseUrl + '/jans-config-api/api/v1/token',
 		
     };
 
