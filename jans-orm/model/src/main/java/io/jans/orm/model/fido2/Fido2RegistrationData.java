@@ -14,7 +14,7 @@ public class Fido2RegistrationData extends Fido2Data {
     private static final long serialVersionUID = 4599467930864459334L;
 
     private String username;
-    private String domain;
+    private String origin;
     private String userId;
     private String challenge;
 
@@ -34,7 +34,7 @@ public class Fido2RegistrationData extends Fido2Data {
 
     private int signatureAlgorithm;
 
-    private String applicationId;
+    private String rpId;
     //Credential backup eligibility and current backup state is conveyed by the backupStateFlag and backupEligibilityFlag flags in the authenticator data. See https://w3c.github.io/webauthn/#sctn-authenticator-data
     private boolean backupStateFlag;
 
@@ -48,13 +48,7 @@ public class Fido2RegistrationData extends Fido2Data {
         this.username = username;
     }
 
-    public String getDomain() {
-        return domain;
-    }
-
-    public void setDomain(String domain) {
-        this.domain = domain;
-    }
+    
 
     public String getUserId() {
         return userId;
@@ -144,13 +138,7 @@ public class Fido2RegistrationData extends Fido2Data {
         this.signatureAlgorithm = signatureAlgorithm;
     }
 
-    public String getApplicationId() {
-		return applicationId;
-	}
-
-	public void setApplicationId(String applicationId) {
-		this.applicationId = applicationId;
-	}
+   
 
     public boolean getBackupStateFlag() {
         return this.backupStateFlag;
@@ -169,10 +157,10 @@ public class Fido2RegistrationData extends Fido2Data {
     }
 	@Override
 	public String toString() {
-		return "Fido2RegistrationData [username=" + username + ", domain=" + domain + ", userId=" + userId + ", challenge=" + challenge
+		return "Fido2RegistrationData [username=" + username + ", origin=" + origin + ", userId=" + userId + ", challenge=" + challenge
 				+ ", attestationRequest=" + attestationRequest + ", attestationResponse=" + attestationResponse
 				+ ", uncompressedECPoint=" + uncompressedECPoint + ", publicKeyId=" + publicKeyId + ", type=" + type + ", status=" + status
 				+ ", counter=" + counter + ", attestationType=" + attestationType + ", signatureAlgorithm=" + signatureAlgorithm
-				+ ", applicationId=" + applicationId + "]";
+				+ ", rpId=" + rpId + "]";
 	}
 }
