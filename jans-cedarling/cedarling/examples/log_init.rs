@@ -1,9 +1,19 @@
+/*
+ * This software is available under the Apache-2.0 license.
+ * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+ *
+ * Copyright (c) 2024, Gluu, Inc.
+ */
+
 use cedarling::{
-    AuthzConfig, BootstrapConfig, Cedarling, LogConfig, LogStorage, LogType, MemoryLogConfig,
+    AuthzConfig, BootstrapConfig, Cedarling, LogConfig, LogStorage, LogTypeConfig, MemoryLogConfig,
+    PolicyStoreConfig, PolicyStoreSource,
 };
 use std::env;
 
-fn main() {
+static POLICY_STORE_RAW: &str = include_str!("../src/init/test_files/policy-store_ok.json");
+
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Collect command-line arguments
     let args: Vec<String> = env::args().collect();
 
@@ -17,13 +27,13 @@ fn main() {
     // Parse the log type from the first argument
     let log_type_arg = &args[1];
     let log_type = match log_type_arg.as_str() {
-        "off" => LogType::Off,
-        "stdout" => LogType::StdOut,
-        "lock" => LogType::Lock,
+        "off" => LogTypeConfig::Off,
+        "stdout" => LogTypeConfig::StdOut,
+        "lock" => LogTypeConfig::Lock,
         "memory" => extract_memory_config(args),
         _ => {
             eprintln!("Invalid log type, defaulting to StdOut.");
-            LogType::StdOut
+            LogTypeConfig::StdOut
         },
     };
 
@@ -35,7 +45,11 @@ fn main() {
             application_name: "test_app".to_string(),
         },
         log_config: LogConfig { log_type },
-    });
+        policy_store_config: PolicyStoreConfig {
+            source: PolicyStoreSource::Json(POLICY_STORE_RAW.to_string()),
+            store_id: None,
+        },
+    })?;
 
     println!("Stage 1:");
     let logs_ids = authz.get_log_ids();
@@ -58,9 +72,11 @@ fn main() {
 
     println!("\n\n Stage 4:\nShow len of keys left using get_log_ids");
     println!("Number of keys left: {:?}", authz.get_log_ids().len());
+
+    Ok(())
 }
 
-fn extract_memory_config(args: Vec<String>) -> LogType {
+fn extract_memory_config(args: Vec<String>) -> LogTypeConfig {
     if args.len() < 3 {
         eprintln!("Memory log type requires two additional arguments: ttl value in seconds");
         std::process::exit(1);
@@ -69,5 +85,5 @@ fn extract_memory_config(args: Vec<String>) -> LogType {
     let log_ttl: u64 = args[2]
         .parse()
         .expect("Invalid ttl value, should be integer");
-    LogType::Memory(MemoryLogConfig { log_ttl })
+    LogTypeConfig::Memory(MemoryLogConfig { log_ttl })
 }
