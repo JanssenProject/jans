@@ -77,10 +77,10 @@ mod tests {
             include_str!("test_files/policy-store_schema_err_cedar_mistake.json");
 
         let policy_result = serde_json::from_str::<PolicyStoreMap>(POLICY_STORE_RAW);
-        // in this scenario error message looks like:
-        // `unable to decode cedar policy schema json: failed to resolve type: User_TypeNotExist", line: 35, column: 1`
         let err_msg = policy_result.unwrap_err().to_string();
-        assert!(err_msg.contains(&ParceCedarSchemaErrMsg::JSON.to_string()));
-        assert!(err_msg.contains("failed to resolve type"));
+        assert_eq!(
+            err_msg,
+            "unable to decode cedar policy schema json: failed to resolve type: User_TypeNotExist at line 35 column 1"
+        );
     }
 }
