@@ -13,7 +13,7 @@ use cedar_policy::PolicyId;
 // we use camel case to show that it is like a constant
 #[allow(non_camel_case_types)]
 #[derive(Debug, thiserror::Error)]
-enum ParsePolicySetErrMsg {
+enum ParsePolicySetMessage {
     #[error("unable to decode base64")]
     BASE64,
     #[error("unable to decode to utf8 string")]
@@ -59,7 +59,7 @@ where
         cedar_policy::PolicySet::from_policies(policy_vec.into_iter()).map_err(|err| {
             serde::de::Error::custom(format!(
                 "{}: {err}",
-                ParsePolicySetErrMsg::CREATE_POLICY_SET
+                ParsePolicySetMessage::CREATE_POLICY_SET
             ))
         })?,
     )
@@ -73,15 +73,15 @@ where
     let decoded = BASE64_STANDARD
         .decode(policy_raw.policy_content.as_str())
         .map_err(|err| {
-            serde::de::Error::custom(format!("{}: {err}", ParsePolicySetErrMsg::BASE64))
+            serde::de::Error::custom(format!("{}: {err}", ParsePolicySetMessage::BASE64))
         })?;
     let decoded_str = String::from_utf8(decoded).map_err(|err| {
-        serde::de::Error::custom(format!("{}: {err}", ParsePolicySetErrMsg::STRING))
+        serde::de::Error::custom(format!("{}: {err}", ParsePolicySetMessage::STRING))
     })?;
 
     let policy =
         cedar_policy::Policy::parse(Some(PolicyId::new(id)), decoded_str).map_err(|err| {
-            serde::de::Error::custom(format!("{}: {err}", ParsePolicySetErrMsg::HUMAN_REDABLE))
+            serde::de::Error::custom(format!("{}: {err}", ParsePolicySetMessage::HUMAN_REDABLE))
         })?;
 
     Ok(policy)
@@ -109,7 +109,7 @@ mod tests {
         assert!(policy_result
             .unwrap_err()
             .to_string()
-            .contains(&ParsePolicySetErrMsg::BASE64.to_string()));
+            .contains(&ParsePolicySetMessage::BASE64.to_string()));
     }
 
     #[test]
@@ -121,7 +121,7 @@ mod tests {
         assert!(policy_result
             .unwrap_err()
             .to_string()
-            .contains(&ParsePolicySetErrMsg::STRING.to_string()));
+            .contains(&ParsePolicySetMessage::STRING.to_string()));
     }
 
     #[test]
