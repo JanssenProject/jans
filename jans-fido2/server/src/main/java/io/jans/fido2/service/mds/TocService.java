@@ -29,8 +29,8 @@ import io.jans.fido2.service.Fido2Service;
 import io.jans.fido2.service.app.ConfigurationFactory;
 import io.jans.fido2.service.verifier.CertificateVerifier;
 import io.jans.service.cdi.event.ApplicationInitialized;
+import io.jans.service.document.store.model.Document;
 import io.jans.service.document.store.service.DBDocumentService;
-import io.jans.service.document.store.service.Document;
 import io.jans.util.Pair;
 import io.jans.util.StringHelper;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -368,14 +368,14 @@ public class TocService {
 
 			for (String cert : headerCertificatesX5c) {
 				Document document = new Document();
-				document.setDisplayName(metadataServer + "_" + (index++));
+				document.setFileName(metadataServer + "_" + (index++));
 				document.setDescription("metadata certificate for " + metadataServer);
-				document.setJansService(new ArrayList<>(Arrays.asList("Fido2 MDS")));
+				document.setService(new ArrayList<>(Arrays.asList("Fido2 MDS")));
 				try {
 					document.setDocument(cert);
 					document.setInum(dbDocumentService.generateInumForNewDocument());
 					document.setDn(dbDocumentService.getDnForDocument(document.getInum()));
-					document.setJansEnabled(true);
+					document.setEnabled(true);
 					dbDocumentService.addDocument(document);
 					result.add(document.getInum());
 				} catch (Exception e) {

@@ -155,6 +155,23 @@ public class Fido2RegistrationData extends Fido2Data {
     public void setBackupEligibilityFlag(boolean backupEligibilityFlag) {
         this.backupEligibilityFlag = backupEligibilityFlag;
     }
+
+    public String getOrigin() {
+        return origin;
+    }
+
+    public void setOrigin(String origin) {
+        this.origin = origin;
+    }
+
+    public String getRpId() {
+        return rpId;
+    }
+
+    public void setRpId(String rpId) {
+        this.rpId = rpId;
+    }
+
 	@Override
 	public String toString() {
 		return "Fido2RegistrationData [username=" + username + ", origin=" + origin + ", userId=" + userId + ", challenge=" + challenge
