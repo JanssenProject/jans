@@ -241,7 +241,7 @@ public class AttestationService {
 		entity.setUsername(attestationOptions.getUsername());
 		entity.setUserId(userId);
 		entity.setChallenge(challenge);
-		entity.setDomain(documentDomain);
+		entity.setOrigin(documentDomain);
 		entity.setStatus(Fido2RegistrationStatus.pending);
 		//if (params.hasNonNull(CommonVerifiers.SUPER_GLUU_APP_ID)) {
 		/*
@@ -249,7 +249,7 @@ public class AttestationService {
 		 * entity.setApplicationId(attestationOptions.getSuperGluuAppId()); } else {
 		 */
 		// TODO: this can be removed out in the future
-			entity.setApplicationId(documentDomain);
+			entity.setRpId(documentDomain);
 		//}
 
 		// Store original requests
@@ -304,7 +304,7 @@ public class AttestationService {
 		Fido2RegistrationData registrationData = registrationEntry.getRegistrationData();
 
 		// Verify domain
-		domainVerifier.verifyDomain(registrationData.getDomain(), clientDataJSONNode);
+		domainVerifier.verifyDomain(registrationData.getOrigin(), clientDataJSONNode);
 
 		// Verify authenticator attestation response
 		CredAndCounterData attestationData = attestationVerifier.verifyAuthenticatorAttestationResponse(attestationResult.getResponse(),

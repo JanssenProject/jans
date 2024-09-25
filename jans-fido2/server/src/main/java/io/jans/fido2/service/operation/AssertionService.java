@@ -188,10 +188,10 @@ public class AssertionService {
 		Fido2AuthenticationData entity = new Fido2AuthenticationData();
 		entity.setUsername(username);
 		entity.setChallenge(challenge);
-		entity.setDomain(documentDomain);
+		entity.setOrigin(documentDomain);
 		entity.setUserVerificationOption(userVerification);
 		entity.setStatus(Fido2AuthenticationStatus.pending);
-		entity.setApplicationId(documentDomain);
+		entity.setRpId(documentDomain);
 		
 
 		// Store original request
@@ -251,10 +251,10 @@ public class AssertionService {
 		Fido2AuthenticationData entity = new Fido2AuthenticationData();
 		entity.setUsername(null);
 		entity.setChallenge(challenge);
-		entity.setDomain(documentDomain);
+		entity.setOrigin(documentDomain);
 		entity.setUserVerificationOption(userVerification);
 		entity.setStatus(Fido2AuthenticationStatus.pending);
-		entity.setApplicationId(documentDomain);
+		entity.setRpId(documentDomain);
 
 		// Store original request
 		entity.setAssertionRequest(CommonUtilService.toJsonNode(assertionOptionsGenerate).toString());
@@ -307,7 +307,7 @@ public class AssertionService {
 		Fido2AuthenticationData authenticationData = authenticationEntity.getAuthenticationData();
 
 		// Verify domain
-		domainVerifier.verifyDomain(authenticationData.getDomain(), clientJsonNode);
+		domainVerifier.verifyDomain(authenticationData.getOrigin(), clientJsonNode);
 
 		// Find registered public key
 		Fido2RegistrationEntry registrationEntry = registrationPersistenceService.findByPublicKeyId(keyId, authenticationEntity.getRpId())
@@ -452,11 +452,11 @@ public class AssertionService {
 		});
 
 		Optional<Fido2RegistrationEntry> fidoRegistration = allowedFido2Registrations.parallelStream()
-				.filter(f -> StringUtils.isNotEmpty(f.getRegistrationData().getApplicationId())).findAny();
+				.filter(f -> StringUtils.isNotEmpty(f.getRegistrationData().getRpId())).findAny();
 		String applicationId = null;
 
 		// applicationId should not be sent incase of pure fido2
-		applicationId = fidoRegistration.get().getRegistrationData().getApplicationId();
+		applicationId = fidoRegistration.get().getRegistrationData().getRpId();
 
 		return Pair.of(allowedFido2Keys, applicationId);
 	}

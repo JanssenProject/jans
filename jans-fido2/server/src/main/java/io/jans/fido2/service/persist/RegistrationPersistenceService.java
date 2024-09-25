@@ -91,7 +91,7 @@ public class RegistrationPersistenceService extends io.jans.as.common.service.co
         if (StringUtils.isNotEmpty(challenge)) {
         	registrationEntry.setChallengeHash(getChallengeHashCode(challenge));
         }
-        registrationEntry.setRpId(registrationData.getApplicationId());
+        registrationEntry.setRpId(registrationData.getRpId());
 
         registrationData.setCreatedDate(now);
         registrationData.setCreatedBy(userName);
