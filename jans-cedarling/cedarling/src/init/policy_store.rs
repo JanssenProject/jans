@@ -21,15 +21,22 @@ pub enum ErrorLoadPolicyStore {
     FindPolicy(String),
 }
 
+fn load_policy_store_map(
+    source: PolicyStoreSource,
+) -> Result<PolicyStoreMap, ErrorLoadPolicyStore> {
+    let policy_store_map: PolicyStoreMap = match source {
+        PolicyStoreSource::Json(json_raw) => serde_json::from_str(json_raw.as_str())?,
+    };
+    Ok(policy_store_map)
+}
+
 /// Load policy store based on config
 //
 // Unit tests will be added when will be implemented other types of sources
 pub(crate) fn load_policy_store(
     config: PolicyStoreConfig,
 ) -> Result<PolicyStore, ErrorLoadPolicyStore> {
-    let mut policy_store_map: PolicyStoreMap = match config.source {
-        PolicyStoreSource::Json(json_raw) => serde_json::from_str(json_raw.as_str())?,
-    };
+    let mut policy_store_map = load_policy_store_map(config.source)?;
 
     let policy: PolicyStore = match (config.store_id, policy_store_map.policy_stores.len()) {
         (Some(store_id), _) => policy_store_map
