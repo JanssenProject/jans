@@ -21,6 +21,7 @@ pub enum ErrorLoadPolicyStore {
     FindPolicy(String),
 }
 
+/// Load policy store from source
 fn load_policy_store_map(
     source: PolicyStoreSource,
 ) -> Result<PolicyStoreMap, ErrorLoadPolicyStore> {
