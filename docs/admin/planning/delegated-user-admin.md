@@ -10,7 +10,7 @@ their organization. You will not be surprised to hear that this is an
 identity management use case that Janssen Auth Server does not provide
 out of the box.
 
-But if you wanted to build a web site that performed this function,
+But if you wanted to build a website that performed this function,
 you could use the SCIM protocol to do so. In your application, you
 could read the user claims to find out the organization, role, or
 other information about the person managing data. Then your web application

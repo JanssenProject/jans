@@ -1,21 +1,5 @@
 package io.jans.casa.plugins.authnmethod.rs;
 
-import io.jans.service.cache.CacheProvider;
-
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Stream;
-import jakarta.annotation.PostConstruct;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
-
-import net.jodah.expiringmap.ExpiringMap;
-
 import io.jans.casa.core.ConfigurationHandler;
 import io.jans.casa.core.PersistenceService;
 import io.jans.casa.core.UserService;
@@ -30,14 +14,24 @@ import io.jans.casa.plugins.authnmethod.rs.status.sg.EnrollmentStatusCode;
 import io.jans.casa.plugins.authnmethod.rs.status.u2f.FinishCode;
 import io.jans.casa.plugins.authnmethod.service.SGService;
 import io.jans.casa.rest.ProtectedApi;
-import org.slf4j.Logger;
-import java.util.UUID;
+import io.jans.service.cache.CacheProvider;
 
-/**
- * @author jgomer
- */
+import org.slf4j.Logger;
+
+import net.jodah.expiringmap.ExpiringMap;
+
+import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
+import jakarta.annotation.PostConstruct;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+
 @ApplicationScoped
-//@Path("/enrollment/" + SuperGluuExtension.ACR)
+//@Path("/enrollment/super_gluu")
 public class SuperGluuEnrollingWS {
 
     private static final String BANNED_KEYS_PREFIX = "casa_blk_";   //Banned lookup keys
@@ -124,7 +118,8 @@ public class SuperGluuEnrollingWS {
             status = EnrollmentStatusCode.FAILED;
         } else {
 
-            newDevice = sgService.getLatestSuperGluuDevice(userId, persistenceService.getCustScriptConfigProperties(ConfigurationHandler.DEFAULT_ACR).get("supergluu_app_id"));
+            newDevice = sgService.getLatestSuperGluuDevice(userId, sgService.getConf().getAppId());
+            
             if (newDevice == null) {
                 //Not ready yet (probably due to delayed push or user delayed to approve)
                 cacheProvider.put(MIN_CLIENT_POLL_PERIOD, BANNED_KEYS_PREFIX + queryParamKey, "");

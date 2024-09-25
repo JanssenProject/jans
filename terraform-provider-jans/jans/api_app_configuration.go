@@ -28,43 +28,47 @@ type AssetDirMapping struct {
 }
 
 type AssetMgtConfiguration struct {
-	AssetMgtEnabled          bool              `schema:"asset_mgt_enabled" json:"assetMgtEnabled"`
-	AssetServerUploadEnabled bool              `schema:"asset_server_upload_enabled" json:"assetServerUploadEnabled"`
-	AssetBaseDirectory       string            `schema:"asset_base_directory" json:"assetBaseDirectory"`
-	AssetDirMappings         []AssetDirMapping `schema:"asset_dir_mappings" json:"assetDirMappings"`
+	AssetMgtEnabled                bool              `schema:"asset_mgt_enabled" json:"assetMgtEnabled"`
+	AssetServerUploadEnabled       bool              `schema:"asset_server_upload_enabled" json:"assetServerUploadEnabled"`
+	FileExtensionValidationEnabled bool              `schema:"file_extension_validation_enabled" json:"fileExtensionValidationEnabled"`
+	ModuleNameValidationEnabled    bool              `schema:"module_name_validation_enabled" json:"moduleNameValidationEnabled"`
+	AssetBaseDirectory             string            `schema:"asset_base_directory" json:"assetBaseDirectory"`
+	JansServiceModule              []string          `schema:"jans_service_module" json:"jansServiceModule"`
+	AssetDirMappings               []AssetDirMapping `schema:"asset_dir_mappings" json:"assetDirMapping"`
 }
 
 // PersistenceConfiguration represents the persistence configuration
 // of the Janssen server.
 type ApiAppConfiguration struct {
-	ConfigOauthEnabled          bool                      `schema:"config_oauth_enabled" json:"configOauthEnabled"`
-	DisableLoggerTimer          bool                      `schema:"disable_logger_timer" json:"disableLoggerTimer"`
-	DisableAuditLogger          bool                      `schema:"disable_audit_logger" json:"disableAuditLogger"`
-	ApiApprovedIssuer           []string                  `schema:"api_approved_issuer" json:"apiApprovedIssuer"`
-	ApiProtectionType           string                    `schema:"api_protection_type" json:"apiProtectionType"`
-	ApiClientId                 string                    `schema:"api_client_id" json:"apiClientId"`
-	ApiClientPassword           string                    `schema:"api_client_password" json:"apiClientPassword"`
-	EndpointInjectionEnabled    bool                      `schema:"endpoint_injection_enabled" json:"endpointInjectionEnabled"`
-	AuthIssuerUrl               string                    `schema:"auth_issuer_url" json:"authIssuerUrl"`
-	AuthOpenidConfigurationUrl  string                    `schema:"auth_openid_configuration_url" json:"authOpenidConfigurationUrl"`
-	AuthOpenidIntrospectionUrl  string                    `schema:"auth_openid_introspection_url" json:"authOpenidIntrospectionUrl"`
-	AuthOpenidTokenUrl          string                    `schema:"auth_openid_token_url" json:"authOpenidTokenUrl"`
-	AuthOpenidRevokeUrl         string                    `schema:"auth_openid_revoke_url" json:"authOpenidRevokeUrl"`
-	SmallryeHealthRootPath      string                    `schema:"smallrye_health_root_path" json:"smallryeHealthRootPath"`
-	ExclusiveAuthScopes         []string                  `schema:"exclusive_auth_scopes" json:"exclusiveAuthScopes"`
-	CorsConfigurationFilters    []CorsConfigurationFilter `schema:"cors_configuration_filters" json:"corsConfigurationFilters"`
-	LoggingLevel                string                    `schema:"logging_level" json:"loggingLevel"`
-	LoggingLayout               string                    `schema:"logging_layout" json:"loggingLayout"`
-	ExternalLoggerConfiguration string                    `schema:"external_logger_configuration" json:"externalLoggerConfiguration"`
-	DisableJdkLogger            bool                      `schema:"disable_jdk_logger" json:"disableJdkLogger"`
-	MaxCount                    int                       `schema:"max_count" json:"maxCount"`
-	UserExclusionAttributes     []string                  `schema:"user_exclusion_attributes" json:"userExclusionAttributes"`
-	UserMandatoryAttributes     []string                  `schema:"user_mandatory_attributes" json:"userMandatoryAttributes"`
-	AgamaConfiguration          AgamaConfiguration        `schema:"agama_configuration" json:"agamaConfiguration"`
-	AuditLogConf                AuditLogConf              `schema:"audit_log_conf" json:"auditLogConf"`
-	DataFormatConversionConf    DataFormatConversionConf  `schema:"data_format_conversion_conf" json:"dataFormatConversionConf"`
-	Plugins                     []PluginConf              `schema:"plugins" json:"plugins"`
-	AssetMgtConfiguration       AssetMgtConfiguration     `schema:"asset_mgt_configuration" json:"assetMgtConfiguration"`
+	ConfigOauthEnabled               bool                      `schema:"config_oauth_enabled" json:"configOauthEnabled"`
+	DisableLoggerTimer               bool                      `schema:"disable_logger_timer" json:"disableLoggerTimer"`
+	DisableAuditLogger               bool                      `schema:"disable_audit_logger" json:"disableAuditLogger"`
+	CustomAttributeValidationEnabled bool                      `schema:"custom_attribute_validation_enabled" json:"customAttributeValidationEnabled"`
+	ArcValidationEnabled             bool                      `schema:"acr_validation_enabled" json:"acrValidationEnabled"`
+	ApiApprovedIssuer                []string                  `schema:"api_approved_issuer" json:"apiApprovedIssuer"`
+	ApiProtectionType                string                    `schema:"api_protection_type" json:"apiProtectionType"`
+	ApiClientId                      string                    `schema:"api_client_id" json:"apiClientId"`
+	ApiClientPassword                string                    `schema:"api_client_password" json:"apiClientPassword"`
+	EndpointInjectionEnabled         bool                      `schema:"endpoint_injection_enabled" json:"endpointInjectionEnabled"`
+	AuthIssuerUrl                    string                    `schema:"auth_issuer_url" json:"authIssuerUrl"`
+	AuthOpenidConfigurationUrl       string                    `schema:"auth_openid_configuration_url" json:"authOpenidConfigurationUrl"`
+	AuthOpenidIntrospectionUrl       string                    `schema:"auth_openid_introspection_url" json:"authOpenidIntrospectionUrl"`
+	AuthOpenidTokenUrl               string                    `schema:"auth_openid_token_url" json:"authOpenidTokenUrl"`
+	AuthOpenidRevokeUrl              string                    `schema:"auth_openid_revoke_url" json:"authOpenidRevokeUrl"`
+	ExclusiveAuthScopes              []string                  `schema:"exclusive_auth_scopes" json:"exclusiveAuthScopes"`
+	CorsConfigurationFilters         []CorsConfigurationFilter `schema:"cors_configuration_filters" json:"corsConfigurationFilters"`
+	LoggingLevel                     string                    `schema:"logging_level" json:"loggingLevel"`
+	LoggingLayout                    string                    `schema:"logging_layout" json:"loggingLayout"`
+	ExternalLoggerConfiguration      string                    `schema:"external_logger_configuration" json:"externalLoggerConfiguration"`
+	DisableJdkLogger                 bool                      `schema:"disable_jdk_logger" json:"disableJdkLogger"`
+	MaxCount                         int                       `schema:"max_count" json:"maxCount"`
+	UserExclusionAttributes          []string                  `schema:"user_exclusion_attributes" json:"userExclusionAttributes"`
+	UserMandatoryAttributes          []string                  `schema:"user_mandatory_attributes" json:"userMandatoryAttributes"`
+	AgamaConfiguration               AgamaConfiguration        `schema:"agama_configuration" json:"agamaConfiguration"`
+	AuditLogConf                     AuditLogConf              `schema:"audit_log_conf" json:"auditLogConf"`
+	DataFormatConversionConf         DataFormatConversionConf  `schema:"data_format_conversion_conf" json:"dataFormatConversionConf"`
+	Plugins                          []PluginConf              `schema:"plugins" json:"plugins"`
+	AssetMgtConfiguration            AssetMgtConfiguration     `schema:"asset_mgt_configuration" json:"assetMgtConfiguration"`
 }
 
 // GetApiAppConfiguration returns the current API configuration.

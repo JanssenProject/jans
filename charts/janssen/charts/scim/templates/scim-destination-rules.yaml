@@ -10,9 +10,14 @@ metadata:
 {{- if .Values.additionalLabels }}
 {{ toYaml .Values.additionalLabels | indent 4 }}
 {{- end }}
-{{- if .Values.additionalAnnotations }}
+{{- if or (.Values.additionalAnnotations) (.Values.global.scim.customAnnotations.destinationRule) }}
   annotations:
+{{- if .Values.additionalAnnotations }}
 {{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.global.scim.customAnnotations.destinationRule }}
+{{ toYaml .Values.global.scim.customAnnotations.destinationRule | indent 4 }}
+{{- end }}
 {{- end }}
 spec:
   host: {{ .Values.global.scim.scimServiceName }}.{{ .Release.Namespace }}.svc.cluster.local

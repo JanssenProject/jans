@@ -70,7 +70,7 @@ with the applications that requested them. Out of the box, Auth Server supports
 many MFA workflows, including FIDO, passkeys, OATH OTP (HOTP, TOTP), SMS (via
 Twilio or SMPP), and many more. But you're not limited to the MFA that comes
 out of the box. Using Person Authentication Scripts, you can implement any
-authentication workflow which you can imagine. You can also use the Janssen
+authentication workflow that you can imagine. You can also use the Janssen
 Project's Agama programming language to implement multi-step authentication
 workflows.
 
@@ -84,10 +84,10 @@ the complexity of cookie sharing between the mobile phone browser SDK, and
 the mobile browser (assuming you are using the system browser), your results
 may vary if you actually want SSO.  Recently, OpenID has published a new
 specification draft for [Native SSO for Mobile Apps](https://openid.net/specs/openid-connect-native-sso-1_0.html),
-which is on the [roadmap](https://github.com/JanssenProject/jans/issues/2518).
+that is on the [roadmap](https://github.com/JanssenProject/jans/issues/2518).
 There are some other hacky ways you can implement mobile authentication, for
 example, using the OAuth `password` grant--but this is possible only for first-party 
-applications, and is generally discouraged, because there is no way to
+applications, and is generally discouraged because there is no way to
 securely store a client secret in the mobile application, which hackers can
 easily decompile.
 

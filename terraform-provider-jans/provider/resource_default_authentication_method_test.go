@@ -18,7 +18,7 @@ func TestResourceDefaultAuthenticationMethod_Mapping(t *testing.T) {
 	data := schema.Data(nil)
 
 	acr := jans.DefaultAuthenticationMethod{
-		DefaultAcr: "pwd",
+		DefaultAcr: "simple_password_auth",
 	}
 
 	if err := toSchemaResource(data, acr); err != nil {
@@ -72,7 +72,7 @@ func testAccResourceCheckDefaultAuthenticationMethodImport(states []*terraform.I
 
 		found = true
 
-		if err := checkAttribute(is, "default_acr", "token"); err != nil {
+		if err := checkAttribute(is, "default_acr", "simple_password_auth"); err != nil {
 			return err
 		}
 

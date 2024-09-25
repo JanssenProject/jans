@@ -19,21 +19,21 @@ A Lock topology has three software components:
 ("WASM") application that runs the 
 [Amazon Rust Cedar Engine](https://github.com/cedar-policy/cedar) and 
 validates JWTs
-2. [Lock Master](./lock-master.md): a Java Weld application that connects 
+2. [Lock Server](./lock-server.md): a Java Weld application that connects 
 ephemeral Cedarlings to the enterprise
 3. Jans Auth Server: which provides the OAuth and OpenID services
 
-![](../../assets/lock-wasm-master-OP.jpg)
+![](../../assets/lock-wasm-lock-server-OP.jpg)
 
 Lock is designed for domains that deploy a **network of Cedarlings**. 
 Communication in this Lock topology 
-is bi-directional. Cedarlings can send information to the Lock Master, and 
-the Lock Master can push 
-updates to the Cedarlings. Notifications from the Lock Master to the Cedarlings
+is bi-directional. Cedarlings can send information to the Lock Server, and 
+the Lock Server can push 
+updates to the Cedarlings. Notifications from the Lock Server to the Cedarlings
  are connectionless--
 a Cedarling subscibes to event notifications using 
 [Server Sent Events](https://html.spec.whatwg.org/multipage/server-sent-events.html#server-sent-events) 
-or "SSE". Requests from the Cedarling to the Lock Master are sent via HTTP Post
+or "SSE". Requests from the Cedarling to the Lock Server are sent via HTTP Post
  to OAuth protected endpoints. 
 
 ## Authz Theoretical Background
@@ -60,7 +60,7 @@ Jans Lock aligns with this model:
 | PIP | JWT tokens | Contain data to instantiate entities |
 | PEP | Application | Must rely on Cedarling for decision |
 | PAP | Jans Config API | Endpoints for Lock admin configuration |
-| PRP | Lock Master | Endpoints to publish Policy Store and other PDP configuration |
+| PRP | Lock Server | Endpoints to publish Policy Store and other PDP configuration |
 
 ## Policy Store
 
@@ -129,7 +129,7 @@ is no data for the policies to evaluate. The Cedarling creates the Resource and
 
 ## More information
 
-* Lock Master configuration and operation [docs](./lock-master.md) 
+* Lock Server configuration and operation [docs](./lock-server.md) 
 * Cedarling [docs](./cedarling.md)
 * Cedarling [Readme](https://github.com/JanssenProject/jans/blob/main/jans-lock/cedarling/README.md)
 * Cedarling [Training](.) (coming soon)

@@ -20,9 +20,9 @@ workflows to update identity information, and through the use of "connectors",
 to push this data to all disparate databases.
 
 IDM platforms range in size and complexity. An admin could write a Python
-script to automate adding new users to a domain. Or large enterprises may
+script to automate adding new users to a domain. Large enterprises may
 implement a commercial IDM platform, like [Sailpoint](https://sailpoint.com) or
-an open source IDM platform like [Evolveum Midpoint](https://evolveum.com).
+an open-source IDM platform like [Evolveum Midpoint](https://evolveum.com).
 Or you might have a human IDM--"Hey Bob, we hired a new person. Can you add
 her?"
 
@@ -47,7 +47,7 @@ the MongoDB database. It's also possible to implement approval workflows using
 UMA. For example, an API might require an UMA access token (i.e. an RPT token),
 and obtaining this token may require the consent of two different individuals.
 
-But it is worth remembering that the Janssen Platform was not purpose built for
+But it is worth remembering that the Janssen Platform was not purpose-built for
 IDM, and therefore any implementation for such use cases should be tactical.
 You may have to build many features yourself. Especially for enterprise
 workforce applications, you should seriously consider using off-the-shelf

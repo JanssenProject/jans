@@ -10,9 +10,14 @@ metadata:
 {{- if .Values.additionalLabels }}
 {{ toYaml .Values.additionalLabels | indent 4 }}
 {{- end }}
-{{- if .Values.additionalAnnotations }}
+{{- if or (.Values.additionalAnnotations) (index .Values.global "config-api" "customAnnotations" "virtualService") }}
   annotations:
+{{- if .Values.additionalAnnotations }}
 {{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+{{- if index .Values.global "config-api" "customAnnotations" "virtualService" }}
+{{ toYaml (index .Values.global "config-api" "customAnnotations" "virtualService") | indent 4 }}
+{{- end }}
 {{- end }}
 spec:
 {{- if .Values.global.istio.gateways }}

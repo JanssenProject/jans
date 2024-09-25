@@ -102,8 +102,13 @@ public class IdentityProcessor {
                 logger.info("Updating user {}", uid);
                 user.setCustomAttributes(attributesForUpdate(
                         user.getCustomAttributes(), profile2, provider.isCumulativeUpdate()));
-                userService.updateUser(user);
             }
+
+            //ugly hack
+            Optional.ofNullable(user.getAttributeValues("jansExtUid"))
+                        .map(l -> l.toArray(new String[0])).ifPresent(user::setExternalUid);
+
+            userService.updateUser(user);
             
         } else {
             logger.info("Adding user {}", uid);
@@ -130,7 +135,7 @@ public class IdentityProcessor {
             if (newValues != null) {
                 List<Object> values = new ArrayList<>(cumulative ? coa.getValues() : Collections.emptyList());
                 newValues.stream().filter(nv -> !values.contains(nv)).forEach(values::add);
-                
+
                 profile.remove(attrName);
                 coa.setValues(values);
             }
@@ -142,6 +147,7 @@ public class IdentityProcessor {
                 customAttrs.add(coa);
         });
 
+        logger.trace("Resulting list of attributes:\n{}", customAttrs.toString());
         return customAttrs;
 
     }

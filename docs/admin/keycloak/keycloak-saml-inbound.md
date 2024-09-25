@@ -21,22 +21,28 @@ The following is a high-level diagram depicting a typical inbound identity user 
 
 ## Configure SAML IDP
 Use [Janssen Text-based UI(TUI)](../config-guide/config-tools/jans-tui/README.md) or [Janssen command-line interface](../config-guide/config-tools/jans-cli/README.md) to create new IDP Keycloak Server.
-1. Navigate to Inbound SAML
+1. Navigate to `Jans SAML` > `Identity Providers`
 
-1. Click on `Add IDP`
+1. Go to `Add Identity Provider` and press **Enter**
 
 1. Enter a name (unique identifier) for this provider (letters, digits, and underscore characters allowed).
 
-1. Enter a display name for the IDP
+1. Enter a display name for the `Add Identity Provider`
 
-1. Upload IDP Metadata  using `Import Metadata from File`.
+1. Upload IDP Metadata by selecting **file** for `Metadata Source Type` and press **Enter** after you navigated on **Browse** of `Metadata File`
 
-1. Optionally provide individual metadata elements.
+1. Or you can, optionally provide individual metadata elements by selecting **manual** for `Metadata Source Type`.
+   See adding a sample idp in the following figure
+   ![Add Isentitiy Provider](../../assets/tui-admin-keycloack-add-idp.png)
 
 1. Save details
 
-SAML IDP is created in Keycloak server under default realm ,`jans-api`. IDP details are also persisted in Jans DB.
+SAML IDP is created in Keycloak server under realm **jans**. IDP details are also persisted in Jans DB.
 
+To edit IDP details later, you can navigate to the idp in the list and press **Enter**, you will get a popup screen as shown in the
+figure below:
+
+![Edit Isentitiy Provider](../../assets/tui-admin-keycloack-edit-idp.png)
 
 ## Configure IDP for inbound SAML 
 1. SAML IDP should have been configured as stated in above

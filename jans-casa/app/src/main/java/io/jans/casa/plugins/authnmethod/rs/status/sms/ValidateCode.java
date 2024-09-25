@@ -19,15 +19,9 @@ public enum ValidateCode {
 
     public Response getResponse() {
 
-        String json = null;
-        Response.Status httpStatus;
+        String json = Utils.jsonFromObject(Collections.singletonMap("code", toString()));
+        Response.Status httpStatus = equals(MATCH) || equals(NO_MATCH_OR_EXPIRED) ? OK : BAD_REQUEST;
 
-        if (equals(MATCH)) {
-            httpStatus = OK;
-        } else {
-            httpStatus = equals(MISSING_PARAMS) ? BAD_REQUEST : INTERNAL_SERVER_ERROR;
-            json = Utils.jsonFromObject(Collections.singletonMap("code", toString()));
-        }
         return Response.status(httpStatus).entity(json).build();
 
     }

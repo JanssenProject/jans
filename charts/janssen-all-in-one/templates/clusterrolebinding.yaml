@@ -8,9 +8,14 @@ metadata:
 {{- if .Values.additionalLabels }}
 {{ toYaml .Values.additionalLabels | indent 4 }}
 {{- end }}
-{{- if .Values.additionalAnnotations }}
+{{- if or (.Values.additionalAnnotations) (.Values.customAnnotations.clusterRoleBinding) }}
   annotations:
+{{- if .Values.additionalAnnotations }}
 {{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.customAnnotations.clusterRoleBinding }}
+{{ toYaml .Values.customAnnotations.clusterRoleBinding | indent 4 }}
+{{- end }}
 {{- end }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -31,9 +36,14 @@ metadata:
   labels:
     app: {{ .Release.Name }}-{{ include "janssen-all-in-one.name" . }}-aio
   name: {{ .Release.Name }}-{{ .Release.Namespace }}-rolebinding
-{{- if .Values.additionalAnnotations }}
+{{- if or (.Values.additionalAnnotations) (.Values.customAnnotations.clusterRoleBinding) }}
   annotations:
+{{- if .Values.additionalAnnotations }}
 {{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.customAnnotations.clusterRoleBinding }}
+{{ toYaml .Values.customAnnotations.clusterRoleBinding | indent 4 }}
+{{- end }}
 {{- end }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
@@ -41,5 +51,5 @@ roleRef:
   name: edit
 subjects:
 - kind: ServiceAccount
-  name: default
+  name: {{ .Values.serviceAccountName }}
   namespace: {{ .Release.Namespace }}

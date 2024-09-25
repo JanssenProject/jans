@@ -46,7 +46,7 @@ class Plugin(DialogUtils):
         self.assets_container = HSplit([])
         self.assets_list_box = JansVerticalNav(
                 myparent=common_data.app,
-                headers=['inum', _("Display Name"), _("Enabled"), _("Creation Time")],
+                headers=['inum', _("File Name"), _("Enabled"), _("Creation Time")],
                 preferred_size= [40, 40 ,10, 20],
                 data=[],
                 on_enter=self.edit_asset,
@@ -94,33 +94,39 @@ class Plugin(DialogUtils):
     def edit_asset(self, **kwargs: Any) -> None:
         """Method to display the edit asset dialog
         """
+
         if kwargs:
             data = kwargs.get('data', {})
         else:
             data = {}
+
+        new_asset = not bool(data)
 
         title = _("Edit Asset") if data else _("Add Asset")
 
         self.asset_file_path = ''
 
         def save_asset(dialog: Dialog) -> None:
-            if not self.asset_file_path:
+            if new_asset and not self.asset_file_path:
                 self.app.show_message(common_strings.error, _("Please select asset"), tobefocused=dialog)
                 return
 
             new_data = self.make_data_from_dialog(tabs={'asset': dialog.body})
             data.update(new_data)
 
-            if not (data.get('description') and data.get('displayName')):
-                self.app.show_message(common_strings.error, HTML(_("Please fill <b>Description</b> and <b>Display Name</b>")), tobefocused=dialog)
+            if not (data.get('description') and data.get('fileName')):
+                self.app.show_message(common_strings.error, HTML(_("Please fill <b>Description</b> and <b>File Name</b>")), tobefocused=dialog)
                 return
 
-            data['jansService'] = [data.pop('jansService')]
+            data['service'] = [data.pop('service')]
 
             data.pop('document', None)
-            form_data = {'assetFile': self.asset_file_path, 'document': data}
+            form_data = {'document': data}
 
-            operation_id = 'put-asset' if data else 'post-new-asset'
+            if self.asset_file_path:
+                form_data['assetFile'] = self.asset_file_path
+
+            operation_id = 'post-new-asset' if new_asset else 'put-asset'
             cli_args = {'operation_id': operation_id, 'data': form_data}
 
             async def coroutine():
@@ -156,7 +162,7 @@ class Plugin(DialogUtils):
             common_data.app.show_jans_dialog(file_browser_dialog)
 
 
-        display_name_widget = common_data.app.getTitledText(_("Display Name"), name='displayName', value=data.get('displayName'), style=cli_style.edit_text_required)
+        display_name_widget = common_data.app.getTitledText(_("File Name"), name='fileName', value=data.get('fileName'), style=cli_style.edit_text_required)
 
         def read_asset(path):
             self.asset_file_path = path
@@ -166,21 +172,21 @@ class Plugin(DialogUtils):
         inum_widget = common_data.app.getTitledText(_("inum"), name='inum', value=data.get('inum'), read_only=True, style=cli_style.read_only)
         jans_level_widget =  common_data.app.getTitledWidget(
                                 _("Level"),
-                                name='jansLevel',
+                                name='level',
                                 widget=Spinner(
-                                    value=int(data.get('jansLevel', 0))
+                                    value=int(data.get('level', 0))
                                     ),
                                 style=cli_style.drop_down
                             )
-        enabled_widget = common_data.app.getTitledCheckBox(_("Enabled"), name='jansEnabled', checked=data.get('jansEnabled'), style=cli_style.check_box)
+        enabled_widget = common_data.app.getTitledCheckBox(_("Enabled"), name='enabled', checked=data.get('enabled'), style=cli_style.check_box)
         description_widget = common_data.app.getTitledText(_("Description"), name='description', value=data.get('description', ''), style=cli_style.edit_text_required)
 
         jans_serice_widget = self.app.getTitledWidget(
                                     _("Jans Service"),
-                                    name='jansService',
+                                    name='service',
                                     widget=DropDownWidget(
                                         values=[(s,s) for s in common_data.asset_services],
-                                        value=data.get('jansService', common_data.asset_services)[0],
+                                        value=data.get('service', common_data.asset_services)[0],
                                         select_one_option=False
                                         ),
                                     jans_help=_("Select Jans Service"),
@@ -223,9 +229,10 @@ class Plugin(DialogUtils):
                 response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
                 self.app.stop_progressing()
                 if response:
-                    self.app.show_message(_("Error"), _("Deletion was not completed {}".format(response)))
+                    self.app.show_message(_("Error"), _("Deletion was not completed {}".format(response)), tobefocused=self.main_container)
                 else:
                     await self.get_assets()
+                    self.app.layout.focus(self.main_container)
 
             asyncio.ensure_future(coroutine())
 
@@ -235,7 +242,7 @@ class Plugin(DialogUtils):
                 title=_("Confirm"),
                 message=HTML(_("Are you sure you want to delete asset <b>{}</b>?")).format(kwargs['selected'][1]),
                 buttons=buttons,
-                tobefocused=self.assets_container
+                tobefocused=self.main_container
                 )
 
 
@@ -276,7 +283,7 @@ class Plugin(DialogUtils):
             self.assets_list_box.clear()
             self.assets_list_box.all_data = self.data['entries']
             for asset_info in self.data['entries']:
-                self.assets_list_box.add_item((asset_info['inum'], asset_info['displayName'], asset_info['jansEnabled'], asset_info.get('creationDate', '---')))
+                self.assets_list_box.add_item((asset_info['inum'], asset_info['fileName'], asset_info['enabled'], asset_info.get('creationDate', '---')))
 
             self.assets_container = self.assets_list_box
 

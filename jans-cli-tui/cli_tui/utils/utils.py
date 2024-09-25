@@ -16,6 +16,7 @@ from wui_components.jans_date_picker import DateSelectWidget
 from utils.multi_lang import _
 
 common_data = SimpleNamespace()
+common_data.background_tasks_feeds = {}
 
 class DialogUtils:
 

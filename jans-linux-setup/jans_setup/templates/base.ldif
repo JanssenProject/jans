@@ -163,17 +163,22 @@ objectClass: top
 objectClass: organizationalUnit
 ou: document
 
-dn: ou=lock-health,o=jans
+dn: ou=lock,o=jans
 objectClass: top
-objectClass: organizationalUnit
-ou: lock-health
+objectClass: organizationalunit
+ou: lock
 
-dn: ou=lock-log,o=jans
+dn: ou=health,ou=lock,o=jans
 objectClass: top
 objectClass: organizationalUnit
-ou: lock-log
+ou: health
 
-dn: ou=lock-telemetry,o=jans
+dn: ou=log,ou=lock,o=jans
 objectClass: top
 objectClass: organizationalUnit
-ou: lock-telemetry
+ou: log
+
+dn: ou=telemetry,ou=lock,o=jans
+objectClass: top
+objectClass: organizationalUnit
+ou: telemetry

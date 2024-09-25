@@ -3,7 +3,6 @@ package io.jans.casa.rest;
 import io.jans.casa.core.ConfigurationHandler;
 import io.jans.casa.core.PersistenceService;
 import io.jans.casa.core.UserService;
-import io.jans.casa.core.model.CustomScript;
 import io.jans.casa.core.ExtensionsManager;
 import io.jans.casa.extension.AuthnMethod;
 import io.jans.casa.misc.Utils;

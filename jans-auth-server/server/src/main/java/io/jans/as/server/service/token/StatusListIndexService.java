@@ -92,7 +92,13 @@ public class StatusListIndexService {
     }
 
     public Integer next() {
-        return nextIndex().getFirst();
+        try {
+            return nextIndex().getFirst();
+        } catch (Exception e) {
+            // return -1. Even if we failed to get next index, we don't want to fail entire call
+            log.error("Failed to get next index", e);
+            return -1;
+        }
     }
 
     public Pair<Integer, StatusIndexPool> nextIndex() {

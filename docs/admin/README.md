@@ -13,12 +13,12 @@ each specific area.
 
 * **Deployment and Planning Guide**  High level design concepts and architecture.
 
-* **Installation** Howto's for VM and cloud native deployment
+* **Installation** Howto's for VM and cloud-native deployment
 
-* **Kubernetes Operation Guide** Day-to-day administration for cloud native
+* **Kubernetes Operation Guide** Day-to-day administration for cloud-native
 
 * **VM Operation Guide** Day-to-day administration if you installed a SUSE,
-Red Hat, or Ubuntu linux package.
+Red Hat, or Ubuntu Linux package.
 
 * **Configuration Guide** How to use the various configuration tools: command
 line, `curl`, or the text user interface ("TUI").

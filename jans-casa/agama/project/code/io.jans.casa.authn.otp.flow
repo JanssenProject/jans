@@ -1,0 +1,27 @@
+//Prompts for a one-time passcode against any of the already enrolled OTP-based credentials
+//the user has. It returns a positive value if the challenge was successful, or a negative
+//value if he decided to use a different credential or if there were more than 3 failed 
+//attempts 
+//The identity of the user to authenticate is provided in userData input param
+
+Flow io.jans.casa.authn.otp
+    Basepath "authn"
+    Inputs userData withEscape
+
+jose = Call io.jans.casa.authn.OTPValidator#new
+match = true
+    
+Repeat 3 times max
+    obj = { name: userData.name, escape: withEscape, matches: match }
+
+    data = RRF "code.ftlh" obj
+    
+    When data.skipped is ""
+        Finish false
+
+    match = Call jose check userData.inum data.passcode
+    When match is true
+        Finish true
+        
+obj = { success: false, message: "Too many failed attempts for OTP verification" }
+Finish obj

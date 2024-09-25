@@ -79,6 +79,10 @@
 		<filter-name>CorrelationIdFilter</filter-name>
 		<url-pattern />
 	</filter-mapping>
+    <filter-mapping>
+        <filter-name>HeadersFilter</filter-name>
+        <url-pattern />
+    </filter-mapping>
 	<filter-mapping>
 		<filter-name>CorsFilter</filter-name>
 		<url-pattern />

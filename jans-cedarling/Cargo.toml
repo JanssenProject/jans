@@ -1,0 +1,17 @@
+[workspace]
+resolver = "2"
+members = ["cedarling", "sparkv"]
+
+[workspace.dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+thiserror = "1.0"
+sparkv = { path = "sparkv" }
+
+
+[profile.release]
+strip = "symbols"
+debug-assertions = true
+lto = "thin"
+opt-level = "s"
+codegen-units = 1
