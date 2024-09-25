@@ -27,7 +27,7 @@ enum ParsePolicySetErrMsg {
 /// Represents a raw data of the `Policy` in the `PolicyStore`
 /// is private and used only in the [`parse_policy_set`] function
 #[derive(Debug, serde::Deserialize)]
-struct PolicyRaw {
+struct RawPolicy {
     // unused fields
     // pub description: String,
     // pub creation_date: String,
@@ -41,7 +41,7 @@ pub(crate) fn parse_policy_set<'de, D>(deserializer: D) -> Result<cedar_policy::
 where
     D: serde::Deserializer<'de>,
 {
-    let policies = <HashMap<String, PolicyRaw> as serde::Deserialize>::deserialize(deserializer)?;
+    let policies = <HashMap<String, RawPolicy> as serde::Deserialize>::deserialize(deserializer)?;
 
     let policy_vec = policies
         .into_iter()
@@ -66,7 +66,7 @@ where
 }
 
 // function to deserialize a single policy from `PolicyRaw`
-fn parse_policy<'de, D>(id: &str, policy_raw: PolicyRaw) -> Result<cedar_policy::Policy, D::Error>
+fn parse_policy<'de, D>(id: &str, policy_raw: RawPolicy) -> Result<cedar_policy::Policy, D::Error>
 where
     D: serde::Deserializer<'de>,
 {
