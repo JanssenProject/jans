@@ -101,7 +101,7 @@ public class AuthenticationPersistenceService {
         if (StringUtils.isNotEmpty(challenge)) {
         	authenticationEntity.setChallengeHash(challengeGenerator.getChallengeHashCode(challenge));
         }
-        authenticationEntity.setRpId(authenticationData.getApplicationId());
+        authenticationEntity.setRpId(authenticationData.getRpId());
 
         authenticationData.setCreatedDate(now);
         authenticationData.setCreatedBy(userName);

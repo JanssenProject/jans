@@ -87,7 +87,7 @@ class U2FAttestationProcessorTest {
         byte[] clientDataHash = new byte[]{};
         CredAndCounterData credIdAndCounters = mock(CredAndCounterData.class);
         JsonNode x5cNode = mock(JsonNode.class);
-        when(registration.getDomain()).thenReturn("test-domain");
+        when(registration.getOrigin()).thenReturn("test-domain");
         when(attStmt.hasNonNull("x5c")).thenReturn(true);
         when(attStmt.get("x5c")).thenReturn(x5cNode);
         when(x5cNode.elements()).thenReturn(Collections.emptyIterator());
@@ -124,7 +124,7 @@ class U2FAttestationProcessorTest {
         byte[] clientDataHash = new byte[]{};
         CredAndCounterData credIdAndCounters = mock(CredAndCounterData.class);
         JsonNode x5cNode = mock(JsonNode.class);
-        when(registration.getDomain()).thenReturn("test-domain");
+        when(registration.getOrigin()).thenReturn("test-domain");
         when(attStmt.hasNonNull("x5c")).thenReturn(true);
         when(attStmt.get("x5c")).thenReturn(x5cNode);
         when(x5cNode.elements()).thenReturn(Collections.singletonList((JsonNode) new TextNode("cert1")).iterator());
@@ -162,7 +162,8 @@ class U2FAttestationProcessorTest {
         byte[] clientDataHash = new byte[]{};
         CredAndCounterData credIdAndCounters = mock(CredAndCounterData.class);
         JsonNode x5cNode = mock(JsonNode.class);
-        when(registration.getDomain()).thenReturn("test-domain");
+        when(registration.getOrigin
+        		()).thenReturn("test-domain");
         when(attStmt.hasNonNull("x5c")).thenReturn(true);
         when(attStmt.get("x5c")).thenReturn(x5cNode);
         when(x5cNode.elements()).thenReturn(Collections.singletonList((JsonNode) new TextNode("cert1")).iterator());
@@ -193,7 +194,7 @@ class U2FAttestationProcessorTest {
         Fido2RegistrationData registration = mock(Fido2RegistrationData.class);
         byte[] clientDataHash = new byte[]{};
         CredAndCounterData credIdAndCounters = mock(CredAndCounterData.class);
-        when(registration.getDomain()).thenReturn("test-domain");
+        when(registration.getOrigin()).thenReturn("test-domain");
         when(attStmt.get("sig")).thenReturn(mock(JsonNode.class));
         when(attStmt.hasNonNull("x5c")).thenReturn(false);
         when(attStmt.hasNonNull("ecdaaKeyId")).thenReturn(true);
@@ -222,7 +223,7 @@ class U2FAttestationProcessorTest {
         Fido2RegistrationData registration = mock(Fido2RegistrationData.class);
         byte[] clientDataHash = new byte[]{};
         CredAndCounterData credIdAndCounters = mock(CredAndCounterData.class);
-        when(registration.getDomain()).thenReturn("test-domain");
+        when(registration.getOrigin()).thenReturn("test-domain");
         when(authData.getAuthDataDecoded()).thenReturn("test-decoded".getBytes());
         when(attStmt.get("sig")).thenReturn(mock(JsonNode.class));
         when(commonVerifiers.verifyBase64String(any())).thenReturn("test-signature");

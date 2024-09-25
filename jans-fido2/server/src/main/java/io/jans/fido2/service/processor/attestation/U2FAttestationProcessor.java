@@ -99,7 +99,7 @@ public class U2FAttestationProcessor implements AttestationFormatProcessor {
         commonVerifiers.verifyAAGUIDZeroed(authData);
 
         userVerificationVerifier.verifyUserPresent(authData);
-        commonVerifiers.verifyRpIdHash(authData, registration.getDomain());
+        commonVerifiers.verifyRpIdHash(authData, registration.getOrigin());
 
         if (attStmt.hasNonNull("x5c")) {
             Iterator<JsonNode> i = attStmt.get("x5c").elements();
