@@ -10,11 +10,19 @@ use std::collections::HashMap;
 use base64::prelude::*;
 use cedar_policy::PolicyId;
 
-const MSG_UNABLE_DECODE_POLICY_BASE64: &str = "decode base64, error:";
-const MSG_UNABLE_DECODE_POLICY_STRING: &str = "decode to utf8 string, error:";
-const MSG_UNABLE_DECODE_POLICY_HUMAN_REDABLE: &str = "decode from human redable format, error:";
-const MSG_UNABLE_TO_CREATE_POLICY_SET: &str =
-    "could not collect policy store's to policy set, error:";
+// we use camel case to show that it is like a constant
+#[allow(non_camel_case_types)]
+#[derive(Debug, thiserror::Error)]
+enum ParsePolicySetErrMsg {
+    #[error("unable to decode base64")]
+    BASE64,
+    #[error("unable to decode to utf8 string")]
+    STRING,
+    #[error("unable to decode from human redable format")]
+    HUMAN_REDABLE,
+    #[error("could not collect policy store's to policy set")]
+    CREATE_POLICY_SET,
+}
 
 /// Represents a raw data of the `Policy` in the `PolicyStore`
 /// is private and used only in the [`parse_policy_set`] function
@@ -49,7 +57,10 @@ where
 
     Ok(
         cedar_policy::PolicySet::from_policies(policy_vec.into_iter()).map_err(|err| {
-            serde::de::Error::custom(format!("{MSG_UNABLE_TO_CREATE_POLICY_SET} {err}"))
+            serde::de::Error::custom(format!(
+                "{}: {err}",
+                ParsePolicySetErrMsg::CREATE_POLICY_SET
+            ))
         })?,
     )
 }
@@ -62,15 +73,15 @@ where
     let decoded = BASE64_STANDARD
         .decode(policy_raw.policy_content.as_str())
         .map_err(|err| {
-            serde::de::Error::custom(format!("{MSG_UNABLE_DECODE_POLICY_BASE64} {}", err))
+            serde::de::Error::custom(format!("{}: {err}", ParsePolicySetErrMsg::BASE64))
         })?;
     let decoded_str = String::from_utf8(decoded).map_err(|err| {
-        serde::de::Error::custom(format!("{MSG_UNABLE_DECODE_POLICY_STRING} {}", err))
+        serde::de::Error::custom(format!("{}: {err}", ParsePolicySetErrMsg::STRING))
     })?;
 
     let policy =
         cedar_policy::Policy::parse(Some(PolicyId::new(id)), decoded_str).map_err(|err| {
-            serde::de::Error::custom(format!("{MSG_UNABLE_DECODE_POLICY_HUMAN_REDABLE} {}", err))
+            serde::de::Error::custom(format!("{}: {err}", ParsePolicySetErrMsg::HUMAN_REDABLE))
         })?;
 
     Ok(policy)
@@ -98,7 +109,7 @@ mod tests {
         assert!(policy_result
             .unwrap_err()
             .to_string()
-            .contains(MSG_UNABLE_DECODE_POLICY_BASE64));
+            .contains(&ParsePolicySetErrMsg::BASE64.to_string()));
     }
 
     #[test]
@@ -110,7 +121,7 @@ mod tests {
         assert!(policy_result
             .unwrap_err()
             .to_string()
-            .contains(MSG_UNABLE_DECODE_POLICY_STRING));
+            .contains(&ParsePolicySetErrMsg::STRING.to_string()));
     }
 
     #[test]
@@ -122,7 +133,7 @@ mod tests {
         // in this scenario error message looks like:
         // "unable to decode policy with id: 840da5d85403f35ea76519ed1a18a33989f855bf1cf8, error: decode from human redable format error: unexpected token `)`
         let err_msg = policy_result.unwrap_err().to_string();
-        assert!(err_msg.contains(MSG_UNABLE_DECODE_POLICY_HUMAN_REDABLE));
+        assert!(err_msg.contains(&ParsePolicySetErrMsg::HUMAN_REDABLE.to_string()));
         assert!(err_msg.contains("unexpected token `)`"));
     }
 }
