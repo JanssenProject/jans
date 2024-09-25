@@ -454,7 +454,7 @@ public class AttestationService {
 		return credentialParametersSets;
 	}
 
-	private RelyingParty createRpDomain(String documentDomain) {
+	public RelyingParty createRpDomain(String documentDomain) {
 		List<RequestedParty> requestedParties = appConfiguration.getFido2Configuration().getRequestedParties();
 		
 		if ((requestedParties == null) || requestedParties.isEmpty()) {
