@@ -11,13 +11,6 @@ The Cedarling is a more productive and flexible way to handle authorization.
 
 Cedarling is written in the Rust programming language (folder `cedarling`). And you can import it into your project as a dependency.
 
-## Cedarling bindings
-
-We have support binding for this platforms:
-
-- [ ] Python
-- [ ] Wasm
-
 ## Examples of rust Cedarling
 
 Rust examples of using Cedarling contains in the folder `cedarling/examples`.

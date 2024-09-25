@@ -12,6 +12,8 @@ pub mod authz_config;
 pub mod bootstrap_config;
 pub mod log_config;
 pub mod log_entry;
+pub mod policy_store;
+pub mod policy_store_config;
 
 /// # Configuration module.
 /// Reimport all entities that we need to configure application
@@ -21,4 +23,5 @@ pub mod config {
     pub use authz_config::*;
     pub use bootstrap_config::*;
     pub use log_config::*;
+    pub use policy_store_config::*;
 }

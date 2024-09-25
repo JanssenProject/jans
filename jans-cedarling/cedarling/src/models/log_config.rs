@@ -8,14 +8,14 @@
 /// A set of properties used to configure logging in the `Cedarling` application.
 pub struct LogConfig {
     /// `CEDARLING_LOG_TYPE` in [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) documentation.
-    pub log_type: LogType,
+    pub log_type: LogTypeConfig,
 }
 
 ///  Log type configuration.
 ///  `CEDARLING_LOG_TYPE` in [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) documentation.
 ///   Current type represent this value.
 #[derive(Debug, Clone, Copy)]
-pub enum LogType {
+pub enum LogTypeConfig {
     /// Logger do nothing. It means that all logs will be ignored.
     Off,
     /// Logger holds all logs in database (in memory) with eviction policy.
