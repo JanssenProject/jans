@@ -27,9 +27,20 @@ mod tests;
 use std::rc::Rc;
 
 use authz::Authz;
-use log::init_logger;
+use init::policy_store::{load_policy_store, ErrorLoadPolicyStore};
 pub use log::LogStorage;
+use log::{init_logger, LogWriter};
 pub use models::config::*;
+use models::log_entry::{LogEntry, LogType};
+use uuid7::uuid4;
+
+/// Errors that can occur during initialization Cedarling.
+#[derive(Debug, thiserror::Error)]
+pub enum ErrorInitCedarling {
+    /// Error that may occur during loading the policy store.
+    #[error("Could not load policy :{0}")]
+    PolicyStore(#[from] ErrorLoadPolicyStore),
+}
 
 /// The instance of the Cedarling application.
 #[derive(Clone)]
@@ -41,14 +52,34 @@ pub struct Cedarling {
 
 impl Cedarling {
     /// Create a new instance of the Cedarling application.
-    pub fn new(config: BootstrapConfig) -> Cedarling {
-        let log = init_logger(config.log_config);
-        let authz = Authz::new(config.authz_config, log.clone());
+    pub fn new(config: BootstrapConfig) -> Result<Cedarling, ErrorInitCedarling> {
+        let log: Rc<log::LogStrategy> = init_logger(config.log_config);
+        // we use uuid v4 because it is generated based on random numbers.
+        let pdp_id = uuid4();
+        let application_id = config.authz_config.application_name.clone();
 
-        Cedarling {
+        let policy_store = load_policy_store(config.policy_store_config)
+           // Log success when loading the policy store
+            .inspect(|_| {
+                log.log(
+                    LogEntry::new_with_data(pdp_id, application_id.clone(), LogType::System)
+                        .set_message("PolicyStore loaded successfully".to_string()),
+                );
+            })
+            // Log failure when loading the policy store
+            .inspect_err(|err| {
+                log.log(
+                    LogEntry::new_with_data(pdp_id, application_id, LogType::System)
+                        .set_message(format!("Could not load PolicyStore: {}", err.to_string())),
+                )
+            })?;
+
+        let authz = Authz::new(config.authz_config, pdp_id, log.clone(), policy_store);
+
+        Ok(Cedarling {
             log,
             authz: Rc::new(authz),
-        }
+        })
     }
 }
 

@@ -10,7 +10,7 @@ use super::memory_logger::MemoryLogger;
 use super::nop_logger::NopLogger;
 use super::stdout_logger::StdOutLogger;
 use crate::models::log_config::LogConfig;
-use crate::models::log_config::LogType;
+use crate::models::log_config::LogTypeConfig;
 use crate::models::log_entry::LogEntry;
 
 /// LogStrategy implements strategy pattern for logging.
@@ -25,10 +25,10 @@ impl LogStrategy {
     /// Initializes the corresponding logger accordingly.
     pub fn new(config: LogConfig) -> Self {
         match config.log_type {
-            LogType::Off => Self::OnlyWriter(Box::new(NopLogger)),
-            LogType::Memory(config) => Self::MemoryLogger(MemoryLogger::new(config)),
-            LogType::StdOut => Self::OnlyWriter(Box::new(StdOutLogger::new())),
-            LogType::Lock => todo!(),
+            LogTypeConfig::Off => Self::OnlyWriter(Box::new(NopLogger)),
+            LogTypeConfig::Memory(config) => Self::MemoryLogger(MemoryLogger::new(config)),
+            LogTypeConfig::StdOut => Self::OnlyWriter(Box::new(StdOutLogger::new())),
+            LogTypeConfig::Lock => todo!(),
         }
     }
 }
