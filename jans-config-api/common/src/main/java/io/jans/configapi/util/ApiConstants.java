@@ -86,6 +86,8 @@ public class ApiConstants {
     public static final String SERVICES = "/services";
     public static final String ASSET_TYPE = "/asset-type";
     public static final String SERVICE = "/service";
+    public static final String SEARCH = "/search";
+    public static final String JANSID_PATH = "/id";
         
     public static final String APP_VERSION = "/app-version";
     public static final String SERVER_STAT = "/server-stat";
@@ -107,7 +109,9 @@ public class ApiConstants {
     public static final String USERID_PATH = "{userId}";
     public static final String SERVICE_NAME_PARAM_PATH = "/{service-name}";
     public static final String TOKEN_PATH = "/{token}";
-    public static final String TOKEN_CODE_PATH = "/{tknCde}";
+    public static final String TOKEN_CODE_PATH = "/tknCde";
+    public static final String JANSID_PATH_PARAM = "/{jansId}";
+    public static final String TOKEN_CODE_PATH_PARAM = "/{tknCde}";
     
     public static final String USERID = "userId";
     public static final String USERNAME = "username";
@@ -117,6 +121,8 @@ public class ApiConstants {
     public static final String WITH_ASSOCIATED_CLIENTS = "withAssociatedClients";
     public static final String STATUS = "status";
     public static final String INUM = "inum";
+    public static final String JANSID = "jansId";
+    public static final String JANS_USR_DN = "jansUsrDN";
     public static final String ID = "id";
     public static final String SCOPE_INUM = "scope_inum";
     public static final String TYPE = "type";
@@ -132,8 +138,10 @@ public class ApiConstants {
     public static final String USERDN = "userDn";
     public static final String PLUGIN_NAME = "pluginName";
     public static final String SERVICE_NAME = "service-name";
-    public static final String TOKEN_CODE_PARAM = "tknCde";
-    
+    public static final String TOKEN_CODE = "tknCde";
+    public static final String OUTSIDE_SID = "outsideSid";
+    public static final String JANS_SESS_ATTR = "jansSessAttr";
+
 
     public static final String ALL = "all";
     public static final String ACTIVE = "active";
