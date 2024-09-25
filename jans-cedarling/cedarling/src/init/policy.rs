@@ -130,10 +130,7 @@ mod tests {
             include_str!("test_files/policy-store_policy_err_broken_policy.json");
 
         let policy_result = serde_json::from_str::<PolicyStoreMap>(POLICY_STORE_RAW);
-        // in this scenario error message looks like:
-        // "unable to decode policy with id: 840da5d85403f35ea76519ed1a18a33989f855bf1cf8, error: decode from human redable format error: unexpected token `)`
         let err_msg = policy_result.unwrap_err().to_string();
-        assert!(err_msg.contains(&ParsePolicySetErrMsg::HUMAN_REDABLE.to_string()));
-        assert!(err_msg.contains("unexpected token `)`"));
+        assert_eq!(err_msg,"unable to decode policy with id: 840da5d85403f35ea76519ed1a18a33989f855bf1cf8, error: unable to decode from human redable format: unexpected token `)` at line 15 column 1")
     }
 }
