@@ -52,8 +52,7 @@ import org.slf4j.Logger;
                 @Tag(name = "Auth Server Health - Check"), @Tag(name = "Plugins"),
                 @Tag(name = "Configuration – Config API"), @Tag(name = "Client Authorization"),
                 @Tag(name = "Jans Assets"),
-                @Tag(name = "Tokens"),
-                @Tag(name = "Sessions"),
+                @Tag(name = "Token"),
         },
 
         servers = { @Server(url = "https://jans.local.io", description = "The Jans server") })
@@ -118,10 +117,7 @@ import org.slf4j.Logger;
         @OAuthScope(name = ApiAccessConstants.JANS_ASSET_DELETE_ACCESS, description = "Delete Jans Assets"),
         @OAuthScope(name = ApiAccessConstants.TOKEN_READ_ACCESS, description = "View Token details"),
         @OAuthScope(name = ApiAccessConstants.TOKEN_WRITE_ACCESS, description = "Manage Token details"),
-        @OAuthScope(name = ApiAccessConstants.TOKEN_DELETE_ACCESS, description = "Delete Token details"),
-        @OAuthScope(name = ApiAccessConstants.SESSION_READ_ACCESS, description = "View Session details"),
-        @OAuthScope(name = ApiAccessConstants.SESSION_WRITE_ACCESS, description = "Manage Session details"),
-        @OAuthScope(name = ApiAccessConstants.SESSION_DELETE_ACCESS, description = "Delete Session details")
+        @OAuthScope(name = ApiAccessConstants.TOKEN_DELETE_ACCESS, description = "Delete Token details")
         }
 
 )))
@@ -170,9 +166,7 @@ public class ApiApplication extends BaseApiApplication {
         log.info("appConfiguration:{}",appConfiguration );
         if(appConfiguration!=null && appConfiguration.getAssetMgtConfiguration()!=null && appConfiguration.getAssetMgtConfiguration().isAssetMgtEnabled()) {
             classes.add(AssetResource.class);
-        }
-        
-        log.error("\n\n All classes:{}",classes+"\n\n\n");
+        }        
 
         return classes;
     }
