@@ -8,6 +8,8 @@ tags:
 
 # Janssen Auth Server Feature Flags
 
+To access "Feature Flags": TUI > `Auth Server` > `Properties` > search for "feature", a "featureFlags" property will appear and you can optimize your configuration there. 
+
 | Feature Flag Name | Description |  | 
 |-----|-----|-----|
 | ACTIVE_SESSION | Enable/Disable active session endpoint | [Details](#active_session) |
