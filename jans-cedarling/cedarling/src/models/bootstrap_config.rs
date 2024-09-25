@@ -7,6 +7,7 @@
 
 use super::authz_config::AuthzConfig;
 use super::log_config::LogConfig;
+use super::policy_store_config::PolicyStoreConfig;
 
 /// Bootstrap configuration
 /// properties for configuration `Cedarling` application.
@@ -16,4 +17,6 @@ pub struct BootstrapConfig {
     pub authz_config: AuthzConfig,
     /// A set of properties used to configure logging in the `Cedarling` application.
     pub log_config: LogConfig,
+    /// A set of properties used to load `PolicyStore` in the `Cedarling` application.
+    pub policy_store_config: PolicyStoreConfig,
 }
