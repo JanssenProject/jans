@@ -87,6 +87,7 @@ public class ApiConstants {
     public static final String ASSET_TYPE = "/asset-type";
     public static final String SERVICE = "/service";
     public static final String SEARCH = "/search";
+    public static final String JANSID_PATH = "/id";
         
     public static final String APP_VERSION = "/app-version";
     public static final String SERVER_STAT = "/server-stat";
@@ -108,7 +109,9 @@ public class ApiConstants {
     public static final String USERID_PATH = "{userId}";
     public static final String SERVICE_NAME_PARAM_PATH = "/{service-name}";
     public static final String TOKEN_PATH = "/{token}";
-    public static final String TOKEN_CODE_PATH = "/{tknCde}";
+    public static final String TOKEN_CODE_PATH = "/tknCde";
+    public static final String JANSID_PATH_PARAM = "/{jansId}";
+    public static final String TOKEN_CODE_PATH_PARAM = "/{tknCde}";
     
     public static final String USERID = "userId";
     public static final String USERNAME = "username";
