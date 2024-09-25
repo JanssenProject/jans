@@ -123,7 +123,7 @@ public class DeviceRegistrationService {
 
 			// Save converted Fido2 entry
 			Date enrollmentDate = fidoRegistration.getCreationDate();
-			Fido2RegistrationEntry fido2RegistrationEntry = registrationPersistenceService.buildFido2RegistrationEntry(fido2RegistrationData, false);
+			Fido2RegistrationEntry fido2RegistrationEntry = registrationPersistenceService.buildFido2RegistrationEntry(fido2RegistrationData);
 			
 			// Restore dates modified by buildFido2RegistrationEntry
 			fido2RegistrationEntry.getRegistrationData().setCreatedDate(enrollmentDate);
@@ -160,7 +160,7 @@ public class DeviceRegistrationService {
 		registrationData.setUpdatedBy(username);
 
 		registrationData.setUsername(username);
-		registrationData.setDomain(documentDomain);
+		registrationData.setOrigin(documentDomain);
 
 		JsonNode uncompressedECPoint = coseService.convertECKeyToUncompressedPoint(
 				base64Service.urlDecode(fidoRegistration.getDeviceRegistrationConfiguration().getPublicKey()));
@@ -179,7 +179,7 @@ public class DeviceRegistrationService {
 
 		registrationData.setStatus(Fido2RegistrationStatus.registered);
 		
-		registrationData.setApplicationId(fidoRegistration.getApplication());
+		registrationData.setRpId(fidoRegistration.getApplication());
 
 		return registrationData;
 	}

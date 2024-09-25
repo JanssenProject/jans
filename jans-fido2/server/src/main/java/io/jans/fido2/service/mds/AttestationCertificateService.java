@@ -114,18 +114,22 @@ public class AttestationCertificateService {
 
 	public List<X509Certificate> getAttestationRootCertificates(AuthData authData, List<X509Certificate> attestationCertificates) {
 		String aaguid = Hex.encodeHexString(authData.getAaguid());
-
-		JsonNode metadataForAuthenticator = localMdsService.getAuthenticatorsMetadata(aaguid);
-		if (metadataForAuthenticator == null) {
+		Fido2Configuration fido2Configuration = appConfiguration.getFido2Configuration();
+		JsonNode metadataForAuthenticator;
+		if (fido2Configuration.isEnterpriseAttestation()) {
+			metadataForAuthenticator = localMdsService.getAuthenticatorsMetadata(aaguid);
+			if (metadataForAuthenticator == null) {
+				metadataForAuthenticator = dataMapperService.createObjectNode();
+			}
+		} else {
 			try {
 				log.info("No Local metadata for authenticator {}. Checking for metadata MDS3 blob", aaguid);
 				JsonNode metadata = mdsService.fetchMetadata(authData.getAaguid());
 				commonVerifiers.verifyThatMetadataIsValid(metadata);
-				
 				return getAttestationRootCertificates(metadata, attestationCertificates);
 			} catch (Fido2RuntimeException ex) {
 				log.warn("Failed to get metadata from Fido2 meta-data server: {}", ex.getMessage(), ex);
-				
+
 				metadataForAuthenticator = dataMapperService.createObjectNode();
 			}
 		}

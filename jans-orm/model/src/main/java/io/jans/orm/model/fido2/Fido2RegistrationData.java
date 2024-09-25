@@ -14,12 +14,12 @@ public class Fido2RegistrationData extends Fido2Data {
     private static final long serialVersionUID = 4599467930864459334L;
 
     private String username;
-    private String domain;
+    private String origin;
     private String userId;
     private String challenge;
 
-    private String attenstationRequest;
-    private String attenstationResponse;
+    private String attestationRequest;
+    private String attestationResponse;
 
     private String uncompressedECPoint;
     private String publicKeyId;
@@ -34,7 +34,11 @@ public class Fido2RegistrationData extends Fido2Data {
 
     private int signatureAlgorithm;
 
-    private String applicationId;
+    private String rpId;
+    //Credential backup eligibility and current backup state is conveyed by the backupStateFlag and backupEligibilityFlag flags in the authenticator data. See https://w3c.github.io/webauthn/#sctn-authenticator-data
+    private boolean backupStateFlag;
+
+    private boolean backupEligibilityFlag;
 
     public String getUsername() {
         return username;
@@ -44,13 +48,7 @@ public class Fido2RegistrationData extends Fido2Data {
         this.username = username;
     }
 
-    public String getDomain() {
-        return domain;
-    }
-
-    public void setDomain(String domain) {
-        this.domain = domain;
-    }
+    
 
     public String getUserId() {
         return userId;
@@ -68,20 +66,20 @@ public class Fido2RegistrationData extends Fido2Data {
         this.challenge = challenge;
     }
 
-    public String getAttenstationRequest() {
-        return attenstationRequest;
+    public String getAttestationRequest() {
+        return attestationRequest;
     }
 
-    public void setAttenstationRequest(String attenstationRequest) {
-        this.attenstationRequest = attenstationRequest;
+    public void setAttestationRequest(String attestationRequest) {
+        this.attestationRequest = attestationRequest;
     }
 
-    public String getAttenstationResponse() {
-        return attenstationResponse;
+    public String getAttestationResponse() {
+        return attestationResponse;
     }
 
-    public void setAttenstationResponse(String attenstationResponse) {
-        this.attenstationResponse = attenstationResponse;
+    public void setAttestationResponse(String attestationResponse) {
+        this.attestationResponse = attestationResponse;
     }
 
     public String getUncompressedECPoint() {
@@ -140,20 +138,46 @@ public class Fido2RegistrationData extends Fido2Data {
         this.signatureAlgorithm = signatureAlgorithm;
     }
 
-    public String getApplicationId() {
-		return applicationId;
-	}
+   
 
-	public void setApplicationId(String applicationId) {
-		this.applicationId = applicationId;
-	}
+    public boolean getBackupStateFlag() {
+        return this.backupStateFlag;
+    }
+
+    public void setBackupStateFlag(boolean backupStateFlag) {
+        this.backupStateFlag = backupStateFlag;
+    }
+
+    public boolean getBackupEligibilityFlag() {
+        return this.backupEligibilityFlag;
+    }
+
+    public void setBackupEligibilityFlag(boolean backupEligibilityFlag) {
+        this.backupEligibilityFlag = backupEligibilityFlag;
+    }
+
+    public String getOrigin() {
+        return origin;
+    }
+
+    public void setOrigin(String origin) {
+        this.origin = origin;
+    }
+
+    public String getRpId() {
+        return rpId;
+    }
+
+    public void setRpId(String rpId) {
+        this.rpId = rpId;
+    }
 
 	@Override
 	public String toString() {
-		return "Fido2RegistrationData [username=" + username + ", domain=" + domain + ", userId=" + userId + ", challenge=" + challenge
-				+ ", attenstationRequest=" + attenstationRequest + ", attenstationResponse=" + attenstationResponse
+		return "Fido2RegistrationData [username=" + username + ", origin=" + origin + ", userId=" + userId + ", challenge=" + challenge
+				+ ", attestationRequest=" + attestationRequest + ", attestationResponse=" + attestationResponse
 				+ ", uncompressedECPoint=" + uncompressedECPoint + ", publicKeyId=" + publicKeyId + ", type=" + type + ", status=" + status
 				+ ", counter=" + counter + ", attestationType=" + attestationType + ", signatureAlgorithm=" + signatureAlgorithm
-				+ ", applicationId=" + applicationId + "]";
+				+ ", rpId=" + rpId + "]";
 	}
 }

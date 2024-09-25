@@ -4,10 +4,13 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.fido2.model.auth;
+package io.jans.fido2.model.common;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.google.common.base.Strings;
+
+import java.util.Arrays;
 
 /**
  * PublicKeyCredentialDescriptor - https://www.w3.org/TR/webauthn-2/#enum-credentialType
@@ -20,16 +23,16 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 public class PublicKeyCredentialDescriptor {
 
     private String type;
-    private String transports[];
+    private String[] transports;
     private String id;
 
-    public PublicKeyCredentialDescriptor(String type, String id) {
-        this.type = type;
+    public PublicKeyCredentialDescriptor(String id) {
+        this.type = PublicKeyCredentialType.PUBLIC_KEY.getKeyName();
         this.id = id;
     }
 
-    public PublicKeyCredentialDescriptor(String type, String transports[], String id) {
-        this.type = type;
+    public PublicKeyCredentialDescriptor(String[] transports, String id) {
+        this.type = PublicKeyCredentialType.PUBLIC_KEY.getKeyName();
         this.transports = transports;
         this.id = id;
     }
@@ -46,4 +49,12 @@ public class PublicKeyCredentialDescriptor {
         return id;
     }
 
+    @Override
+    public String toString() {
+        return "PublicKeyCredentialDescriptor{" +
+                "type='" + type + '\'' +
+                ", transports=" + Arrays.toString(transports) +
+                ", id='" + id + '\'' +
+                '}';
+    }
 }
