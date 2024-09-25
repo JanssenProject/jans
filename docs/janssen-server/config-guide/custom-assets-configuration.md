@@ -14,7 +14,7 @@ assets.
 
     Use the command line to perform actions from the terminal. Learn how to 
     use Jans CLI [here](../config-guide/config-tools/jans-cli/README.md) or jump straight to 
-    the [Using Command Line](#using-command-line)
+    the [Using Command Line](#using-the-command-line)
 
 === "Use Text-based UI"
 

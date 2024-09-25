@@ -276,7 +276,7 @@ so our `config-api--assetmgt-patch.json` will be as follows:
     "value": false
   }
 ]
- ```
+```
 
 ##  Using Text-based UI
 

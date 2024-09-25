@@ -209,8 +209,8 @@ It will show the configuration details as below.
 
 To update the configuration follow the steps below.
 
-1. [Get the current Postgres messaging configuration](#get-configuration-message-postgres) 
-and store it in a file for editing using the command below.
+1. [Get the current Postgres messaging configuration](#get-postgres-messaging-configuration) 
+and store it in a file for editing using the command [below].
    ```bash
    /opt/jans/jans-cli/config-cli.py -no-color --operation-id get-config-message-postgres >\
     /tmp/postgres.json
@@ -345,7 +345,7 @@ It will show the configuration details.
 
 To update the configuration follow the steps below.
 
-1. [Get the current Redis Message configuration](#get-redis-message-configuration) 
+1. [Get the current Redis Message configuration](#get-redis-messaging-configuration) 
  and store it into a file for editing
    ```bash
    /opt/jans/jans-cli/config-cli.py -no-color --operation-id get-config-message-redis >\
@@ -353,7 +353,7 @@ To update the configuration follow the steps below.
    ```
 2. Edit and update the desired configuration values in the file while keeping 
  other properties and values unchanged. Updates must adhere to 
- the `RedisMessageConfiguration` schema as mentioned [here](#redis-message-configuration).
+ the `RedisMessageConfiguration` schema as mentioned [here](#messaging-configuration-for-redis).
  The schema details can be retrieved using the command below. 
  The schema defines what values and datatypes are acceptable for each property value.
    ```text title="Command"

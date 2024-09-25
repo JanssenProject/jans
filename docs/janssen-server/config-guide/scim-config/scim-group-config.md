@@ -84,18 +84,6 @@ Operation ID: search-group
 
 To get sample schema type /opt/jans/jans-cli/config-cli.py -scim --schema-sample <schema>, for example /opt/jans/jans-cli/config-cli.py -scim --schema-sample SearchRequest 
 ```
-,,,,,,,,,,,,,,,,,,,,
-Table of Contents
-=================
-
-  * [Group Resources](#group-resources)
-    * [Get Groups](#get-groups)
-    * [Create Group](#create-group)
-    * [Get Group by ID](#get-group-by-id)
-    * [Update Group by ID](#update-group-by-id)
-    * [Delete Group by ID](#delete-group-by-id)
-    * [Patch Group](#patch-group)
-    * [Search Group](#search-group)
 
 
 ### Get Groups
@@ -149,7 +137,7 @@ You can filter for the advanced search with some of its properties:
 5. sortBy [attribute]
 6. sortOrder ['ascending', 'descending']
 
-### Creating Group
+### Create Group
 
 Using `create-group` operation, we can create groups into Janssen Server. As we have seen in the [output](#using-command-line) of `--info` command, this operation requires `GroupResource` schema. To know the details of schema, run the following command:
 
