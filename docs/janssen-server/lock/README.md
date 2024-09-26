@@ -15,7 +15,7 @@ distributed applications and audit the activity of both people and software.
 
 A Lock topology has three software components: 
 
-1. [Cedarling](./cedarling.md): a WebAssembly 
+1. [Cedarling](../../../../../code/jans/docs/cedarling.md): a WebAssembly 
 ("WASM") application that runs the 
 [Amazon Rust Cedar Engine](https://github.com/cedar-policy/cedar) and 
 validates JWTs
@@ -130,7 +130,7 @@ is no data for the policies to evaluate. The Cedarling creates the Resource and
 ## More information
 
 * Lock Server configuration and operation [docs](./lock-server.md) 
-* Cedarling [docs](./cedarling.md)
+* Cedarling [docs](../../../../../code/jans/docs/cedarling.md)
 * Cedarling [Readme](https://github.com/JanssenProject/jans/blob/main/jans-lock/cedarling/README.md)
 * Cedarling [Training](.) (coming soon)
 
