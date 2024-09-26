@@ -88,7 +88,14 @@ Follow these steps to install the Python package in a virtual environment.
 
    You should see `cedarling_python` listed among the available packages.
 
-> If you want to install the package globally (not in a virtual environment), you can skip steps 2 and 3.
+   > If you want to install the package globally (not in a virtual environment), you can skip steps 2 and 3.
+
+1. Read documentation
+  After installing the package you can read the documentation from python using the following command:
+
+   ```bash
+   python -m pydoc cedarling_python
+   ```
 
 ---
 
