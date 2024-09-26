@@ -6,18 +6,26 @@
 
 package io.jans.configapi.service.auth;
 
-import io.jans.service.CacheService;
 import io.jans.as.common.model.session.SessionId;
 import io.jans.as.common.model.session.SessionIdState;
 import io.jans.as.model.config.StaticConfiguration;
+import io.jans.configapi.util.ApiConstants;
+import io.jans.model.SearchRequest;
 import io.jans.orm.PersistenceEntryManager;
+import io.jans.orm.model.PagedResult;
+import io.jans.orm.model.SortOrder;
 import io.jans.orm.search.filter.Filter;
+import io.jans.service.CacheService;
 import io.jans.util.StringHelper;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -37,7 +45,7 @@ public class SessionService {
     @Inject
     private Logger logger;
 
-    private String getDnForSession(String sessionId) {
+    public String getDnForSession(String sessionId) {
         if (StringHelper.isEmpty(sessionId)) {
             return staticConfiguration.getBaseDn().getSessions();
         }
@@ -74,6 +82,46 @@ public class SessionService {
         sessionList.sort((SessionId s1, SessionId s2) -> s2.getCreationDate().compareTo(s1.getCreationDate()));
         logger.debug("Sorted Session sessionList:{}", sessionList);
         return sessionList;
+    }
+
+    public PagedResult<SessionId> searchSession(SearchRequest searchRequest) {
+        logger.info("Search Session with searchRequest:{}", searchRequest);
+
+        Filter searchFilter = null;
+        List<Filter> filters = new ArrayList<>();
+        if (searchRequest.getFilterAssertionValue() != null && !searchRequest.getFilterAssertionValue().isEmpty()) {
+
+            for (String assertionValue : searchRequest.getFilterAssertionValue()) {
+                String[] targetArray = new String[] { assertionValue };
+                Filter userFilter = Filter.createSubstringFilter(ApiConstants.JANS_USR_DN, null, targetArray, null);
+                Filter sidFilter = Filter.createSubstringFilter(ApiConstants.OUTSIDE_SID, null, targetArray, null);
+                Filter sessAttrFilter = Filter.createSubstringFilter(ApiConstants.JANS_SESS_ATTR, null, targetArray,
+                        null);
+                Filter permissionFilter = Filter.createSubstringFilter("jansPermissionGrantedMap", null, targetArray, null);
+                Filter idFilter = Filter.createSubstringFilter(ApiConstants.JANSID, null, targetArray, null);
+                filters.add(Filter.createORFilter(userFilter, sidFilter, sessAttrFilter, permissionFilter, idFilter));
+            }
+            searchFilter = Filter.createORFilter(filters);
+        }
+
+        logger.trace("Session pattern searchFilter:{}", searchFilter);
+        List<Filter> fieldValueFilters = new ArrayList<>();
+        if (searchRequest.getFieldValueMap() != null && !searchRequest.getFieldValueMap().isEmpty()) {
+            for (Map.Entry<String, String> entry : searchRequest.getFieldValueMap().entrySet()) {
+                Filter dataFilter = Filter.createEqualityFilter(entry.getKey(), entry.getValue());
+                logger.trace("Session dataFilter:{}", dataFilter);
+                fieldValueFilters.add(Filter.createANDFilter(dataFilter));
+            }
+            searchFilter = Filter.createANDFilter(Filter.createORFilter(filters),
+                    Filter.createANDFilter(fieldValueFilters));
+        }
+
+        logger.info("Session searchFilter:{}", searchFilter);
+
+        return persistenceEntryManager.findPagedEntries(getDnForSession(null), SessionId.class, searchFilter, null,
+                searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
+                searchRequest.getStartIndex(), searchRequest.getCount(), searchRequest.getMaxCount());
+
     }
 
     public void revokeSession(String userDn) {

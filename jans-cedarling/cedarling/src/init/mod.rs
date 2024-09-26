@@ -4,7 +4,11 @@
  *
  * Copyright (c) 2024, Gluu, Inc.
  */
-//! # Auth Engine
+//! # Init Engine
 //! Part of Cedarling that main purpose is:
-//! - evaluate if authorization is granted for *user*
-//! - evaluate if authorization is granted for *client*
+//! - read boostrap properties
+//! - load Cedar Policies
+//! - get keys for JWT validation
+
+pub(crate) mod cedar_schema;
+pub(crate) mod policy_store;

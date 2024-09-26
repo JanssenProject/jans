@@ -92,7 +92,7 @@ components:
       type: oauth2
 host: https://lock.master.gluu.cloud
 info:
-  title: Lock Master Endpoints
+  title: Lock Server Endpoints
   version: 0.1
 openapi: 3.0.2
 paths:
@@ -108,7 +108,7 @@ paths:
         default:
           $ref: '#/components/responses/DEFAULT_ERROR'
       tags:
-      - Lock Master
+      - Lock Server
   /audit/health:
     post:
       requestBody:
@@ -295,8 +295,8 @@ paths:
       tags:
       - Lock SSE
 tags:
-- description: Lock Master Endpoints
-  name: Lock Master
+- description: Lock Server Endpoints
+  name: Lock Server
 - description: Posts Audit Log to Auth Server
   name: Audit
 - description: Retrieve policy stores
