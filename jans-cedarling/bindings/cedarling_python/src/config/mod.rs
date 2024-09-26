@@ -10,6 +10,7 @@ use pyo3::Bound;
 mod authz_config;
 mod memory_log_config;
 mod off_log_config;
+mod policy_store_config;
 mod policy_store_source;
 mod stdout_log_config;
 
@@ -19,6 +20,7 @@ pub fn register_entities(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<off_log_config::OffLogConfig>()?;
     m.add_class::<stdout_log_config::StdOutLogConfig>()?;
     m.add_class::<policy_store_source::PolicyStoreSource>()?;
+    m.add_class::<policy_store_config::PolicyStoreConfig>()?;
 
     Ok(())
 }

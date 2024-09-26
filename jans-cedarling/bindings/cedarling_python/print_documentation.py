@@ -1,5 +1,5 @@
 from cedarling_python import AuthzConfig, MemoryLogConfig, OffLogConfig, StdOutLogConfig
-from cedarling_python import PolicyStoreSource
+from cedarling_python import PolicyStoreSource, PolicyStoreConfig
 
 import inspect
 
@@ -19,6 +19,6 @@ def print_inspect(type_value):
 
 
 types = [AuthzConfig, MemoryLogConfig, OffLogConfig,
-         StdOutLogConfig, PolicyStoreSource]
+         StdOutLogConfig, PolicyStoreSource, PolicyStoreConfig]
 for t in types:
     print_inspect(t)

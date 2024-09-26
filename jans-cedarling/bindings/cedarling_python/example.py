@@ -1,5 +1,5 @@
 from cedarling_python import AuthzConfig, MemoryLogConfig, OffLogConfig, StdOutLogConfig
-from cedarling_python import PolicyStoreSource
+from cedarling_python import PolicyStoreSource, PolicyStoreConfig
 
 
 authz_config = AuthzConfig(application_name="example_app_name")
@@ -21,3 +21,8 @@ policy_raw_json = open("example_files/policy-store.json",
                        mode="r", encoding="utf8").read()
 # for now we support only json source
 policy_source = PolicyStoreSource(json=policy_raw_json)
+
+policy_store_config = PolicyStoreConfig(
+    source=policy_source, store_id="8b805e22fdd39f3dd33a13d9fb446d8e6314153ca997")
+# if we have only one policy store in file we can avoid using store id
+policy_store_config = None
