@@ -88,21 +88,16 @@ use super::stdout_log_config::StdOutLogConfig;
 ///     # Creating a new BootstrapConfig with memory log configuration
 ///     authz = AuthzConfig(application_name="MyApp")
 ///     log_config = MemoryLogConfig(log_ttl=300)
-///     policy_store = PolicyStoreConfig(source=PolicyStoreSource(json='{"policy": {"id": "policy1", "rules": []}}'))
+///     policy_store = PolicyStoreConfig(source=PolicyStoreSource(json='{...}'))
 ///
 ///     bootstrap_config = BootstrapConfig(authz_config=authz, log_config=log_config, policy_store_config=policy_store)
 ///
 ///     # Setting log config to OffLogConfig
-///     bootstrap_config.set_log_config(OffLogConfig())
-///
-///     # Accessing configuration attributes
-///     print(bootstrap_config.authz_config)
-///     print(bootstrap_config.log_config)
-///     print(bootstrap_config.policy_store_config)
+///     bootstrap_config.log_config = OffLogConfig()
 ///
 ///     # Attempting to set an invalid log configuration will raise a ValueError
 ///     try:
-///         bootstrap_config.set_log_config("InvalidConfig")
+///         bootstrap_config.log_config = "InvalidConfig"
 ///     except ValueError as e:
 ///         print(f"Error: {e}")
 /// ```
@@ -167,7 +162,7 @@ impl BootstrapConfig {
     }
 
     #[setter]
-    fn set_log_config(&mut self, value: PyObject) -> PyResult<()> {
+    fn log_config(&mut self, value: PyObject) -> PyResult<()> {
         self.log_config = Some(extract_log_config(&value)?);
         Ok(())
     }
