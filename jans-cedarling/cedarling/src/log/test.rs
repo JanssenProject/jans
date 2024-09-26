@@ -152,7 +152,7 @@ fn test_log_stdout_logger() {
     let json_str = serde_json::json!(&log_entry).to_string();
 
     let test_writer = TestWriter::new();
-    let buffer = Box::new(test_writer.clone()) as Box<dyn Write + 'static>;
+    let buffer = Box::new(test_writer.clone()) as Box<dyn Write + Send + Sync + 'static>;
     let logger = StdOutLogger::new_with(buffer);
     let strategy = LogStrategy::OnlyWriter(Box::new(logger));
 

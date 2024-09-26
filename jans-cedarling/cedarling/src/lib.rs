@@ -24,7 +24,7 @@ mod models;
 #[cfg(test)]
 mod tests;
 
-use std::rc::Rc;
+use std::sync::Arc;
 
 use authz::Authz;
 use init::policy_store::{load_policy_store, LoadPolicyStoreError};
@@ -43,17 +43,18 @@ pub enum InitCedarlingError {
 }
 
 /// The instance of the Cedarling application.
+/// It is safe to share between threads.
 #[derive(Clone)]
 pub struct Cedarling {
     log: log::Logger,
     #[allow(dead_code)]
-    authz: Rc<Authz>,
+    authz: Arc<Authz>,
 }
 
 impl Cedarling {
     /// Create a new instance of the Cedarling application.
     pub fn new(config: BootstrapConfig) -> Result<Cedarling, InitCedarlingError> {
-        let log: Rc<log::LogStrategy> = init_logger(config.log_config);
+        let log = init_logger(config.log_config);
         // we use uuid v4 because it is generated based on random numbers.
         let pdp_id = uuid4();
         let application_id = config.authz_config.application_name.clone();
@@ -78,7 +79,7 @@ impl Cedarling {
 
         Ok(Cedarling {
             log,
-            authz: Rc::new(authz),
+            authz: Arc::new(authz),
         })
     }
 }
