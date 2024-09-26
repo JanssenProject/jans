@@ -70,7 +70,7 @@ impl Cedarling {
             .inspect_err(|err| {
                 log.log(
                     LogEntry::new_with_data(pdp_id, application_id, LogType::System)
-                        .set_message(format!("Could not load PolicyStore: {}", err.to_string())),
+                        .set_message(format!("Could not load PolicyStore: {}", err)),
                 )
             })?;
 

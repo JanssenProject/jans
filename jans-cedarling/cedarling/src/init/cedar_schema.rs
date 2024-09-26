@@ -8,6 +8,7 @@
 use base64::prelude::*;
 
 #[derive(Debug, thiserror::Error)]
+#[allow(clippy::upper_case_acronyms)]
 pub enum ParceCedarSchemaSetMessage {
     #[error("unable to decode cedar policy schema base64")]
     BASE64,

@@ -12,6 +12,7 @@ use cedar_policy::PolicyId;
 
 // we use camel case to show that it is like a constant
 #[allow(non_camel_case_types)]
+#[allow(clippy::upper_case_acronyms)]
 #[derive(Debug, thiserror::Error)]
 enum ParsePolicySetMessage {
     #[error("unable to decode base64")]
@@ -55,14 +56,12 @@ where
         })
         .collect::<Result<Vec<cedar_policy::Policy>, _>>()?;
 
-    Ok(
-        cedar_policy::PolicySet::from_policies(policy_vec.into_iter()).map_err(|err| {
+    cedar_policy::PolicySet::from_policies(policy_vec).map_err(|err| {
             serde::de::Error::custom(format!(
                 "{}: {err}",
                 ParsePolicySetMessage::CREATE_POLICY_SET
             ))
-        })?,
-    )
+        })
 }
 
 // function to deserialize a single policy from `PolicyRaw`

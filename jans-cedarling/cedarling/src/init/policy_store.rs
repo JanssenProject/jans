@@ -53,7 +53,6 @@ pub(crate) fn load_policy_store(
             policy_store_map
                 .policy_stores
                 .into_values()
-                .into_iter()
                 .next()
                 .unwrap()
         },
