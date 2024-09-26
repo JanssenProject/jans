@@ -501,7 +501,7 @@ It returns all the information of the Jans Authorization server.
   "dcrAuthorizationWithMTLS": false,
   "useLocalCache": true,
   "fapiCompatibility": false,
-  "forceIdTokenHintPrecense": false,
+  "forceIdTokenHintPresence": false,
   "rejectEndSessionIfIdTokenExpired": false,
   "allowEndSessionWithUnmatchedSid": false,
   "forceOfflineAccessScopeToEnableRefreshToken": true,

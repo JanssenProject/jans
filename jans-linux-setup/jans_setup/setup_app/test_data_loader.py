@@ -291,7 +291,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                                     'rejectJwtWithNoneAlg': False,
                                     'removeRefreshTokensForClientOnLogout': True,
                                     'fapiCompatibility': False,
-                                    'forceIdTokenHintPrecense': False,
+                                    'forceIdTokenHintPresence': False,
                                     'introspectionScriptBackwardCompatibility': False,
                                     'allowSpontaneousScopes': True,
                                     'spontaneousScopeLifetime': 0,

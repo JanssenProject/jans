@@ -6,6 +6,7 @@
 
 package io.jans.orm.couchbase.operation.impl;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -137,7 +138,9 @@ public class CouchbaseConnectionProvider {
     }
 
     private void openWithWaitImpl() {
-        String connectionMaxWaitTime = props.getProperty("connection.connection-max-wait-time");
+    	int waitUntilReadyTimeSeconds = StringHelper.toInteger(props.getProperty("connection.wait-until-ready-time"), -1);
+    	
+    	String connectionMaxWaitTime = props.getProperty("connection.connection-max-wait-time");
         int connectionMaxWaitTimeSeconds = 30;
         if (StringHelper.isNotEmpty(connectionMaxWaitTime)) {
             connectionMaxWaitTimeSeconds = Integer.parseInt(connectionMaxWaitTime);
@@ -156,7 +159,7 @@ public class CouchbaseConnectionProvider {
             }
 
             try {
-                open();
+                open(waitUntilReadyTimeSeconds);
                 if (isConnected()) {
                 	break;
                 } else {
@@ -182,7 +185,7 @@ public class CouchbaseConnectionProvider {
         }
     }
 
-    private void open() {
+    private void open(int waitUntilReadyTimeSeconds) {
         this.bucketToBaseNameMapping = new HashMap<String, BucketMapping>();
         this.baseNameToBucketMapping = new HashMap<String, BucketMapping>();
 
@@ -193,12 +196,21 @@ public class CouchbaseConnectionProvider {
 
         this.cluster = Cluster.connect(connectionString, clusterOptions);
 
+        if (waitUntilReadyTimeSeconds > 0) {
+            LOG.info("Uwe waitUntilReady cluster SDK option: '{}'", waitUntilReadyTimeSeconds);
+        	this.cluster.waitUntilReady(Duration.ofSeconds(waitUntilReadyTimeSeconds));
+        }
+
         // Open required buckets
         for (String bucketName : buckets) {
             String baseNamesProp = props.getProperty(String.format("bucket.%s.mapping", bucketName), "");
             String[] baseNames = StringHelper.split(baseNamesProp, ",");
 
             Bucket bucket = this.cluster.bucket(bucketName);
+            if (waitUntilReadyTimeSeconds > 0) {
+                LOG.info("Uwe waitUntilReady bucket SDK option: '{}'", waitUntilReadyTimeSeconds);
+                bucket.waitUntilReady(Duration.ofSeconds(waitUntilReadyTimeSeconds));
+            }
 
             BucketMapping bucketMapping = new BucketMapping(bucketName, bucket);
 

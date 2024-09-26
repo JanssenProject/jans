@@ -33,6 +33,7 @@ import java.util.*;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AppConfiguration implements Configuration {
 
+    public static final int DEFAULT_DEVICE_SESSION_LIFETIME = 86400;
     public static final int DEFAULT_SESSION_ID_LIFETIME = 86400;
     public static final KeySelectionStrategy DEFAULT_KEY_SELECTION_STRATEGY = KeySelectionStrategy.OLDER;
     public static final String DEFAULT_STAT_SCOPE = "jans_stat";
@@ -692,6 +693,9 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Choose whether to disable U2F endpoints", defaultValue = "false")
     private Boolean disableU2fEndpoint = false;
 
+    @DocProperty(description = "Device session lifetime in seconds")
+    private Integer deviceSessionLifetimeInSeconds;
+
     // Token Exchange
     @DocProperty(description = "", defaultValue = "false")
     private Boolean rotateDeviceSecret = false;
@@ -740,7 +744,7 @@ public class AppConfiguration implements Configuration {
     private Boolean fapiCompatibility = false;
 
     @DocProperty(description = "Boolean value specifying whether force id_token_hint parameter presence", defaultValue = "false")
-    private Boolean forceIdTokenHintPrecense = false;
+    private Boolean forceIdTokenHintPresence = false;
 
     @DocProperty(description = "default value false. If true and id_token is not found in db, request is rejected", defaultValue = "false")
     private Boolean rejectEndSessionIfIdTokenExpired = false;
@@ -1022,6 +1026,17 @@ public class AppConfiguration implements Configuration {
 
     public void setReturnDeviceSecretFromAuthzEndpoint(Boolean returnDeviceSecretFromAuthzEndpoint) {
         this.returnDeviceSecretFromAuthzEndpoint = returnDeviceSecretFromAuthzEndpoint;
+    }
+
+    public Integer getDeviceSessionLifetimeInSeconds() {
+        if (deviceSessionLifetimeInSeconds == null) {
+           deviceSessionLifetimeInSeconds = DEFAULT_DEVICE_SESSION_LIFETIME;
+        }
+        return deviceSessionLifetimeInSeconds;
+    }
+
+    public void setDeviceSessionLifetimeInSeconds(Integer deviceSessionLifetimeInSeconds) {
+        this.deviceSessionLifetimeInSeconds = deviceSessionLifetimeInSeconds;
     }
 
     public Boolean getRotateDeviceSecret() {
@@ -1461,13 +1476,13 @@ public class AppConfiguration implements Configuration {
         this.trustedSsaIssuers = trustedSsaIssuers;
     }
 
-    public Boolean getForceIdTokenHintPrecense() {
-        if (forceIdTokenHintPrecense == null) forceIdTokenHintPrecense = false;
-        return forceIdTokenHintPrecense;
+    public Boolean getForceIdTokenHintPresence() {
+        if (forceIdTokenHintPresence == null) forceIdTokenHintPresence = false;
+        return forceIdTokenHintPresence;
     }
 
-    public void setForceIdTokenHintPrecense(Boolean forceIdTokenHintPrecense) {
-        this.forceIdTokenHintPrecense = forceIdTokenHintPrecense;
+    public void setForceIdTokenHintPresence(Boolean forceIdTokenHintPresence) {
+        this.forceIdTokenHintPresence = forceIdTokenHintPresence;
     }
 
     public Boolean getRejectEndSessionIfIdTokenExpired() {

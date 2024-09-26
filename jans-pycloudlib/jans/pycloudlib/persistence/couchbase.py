@@ -347,13 +347,14 @@ class N1qlApi(BaseApi):
             An instance of `requests.Response`.
         """
         data = kwargs.get("data", {})
+        timeout = kwargs.get("timeout", 60)
 
-        resp = self.session.post(
+        return self.session.post(
             f"{self.scheme}://{self.host}:{self.port}/{path}",
             data=data,
             auth=(self.user, self.password),
+            timeout=timeout,
         )
-        return resp
 
 
 def build_n1ql_request_body(query: str, *args: _t.Any, **kwargs: _t.Any) -> dict[str, _t.Any]:
@@ -418,6 +419,7 @@ class RestApi(BaseApi):
         """
         data = kwargs.get("data", {})
         method = kwargs.get("method", "")
+        timeout = kwargs.get("timeout", 60)
 
         callbacks = {
             "GET": self.session.get,
@@ -429,11 +431,11 @@ class RestApi(BaseApi):
         if not callable(req):
             raise ValueError(f"Unsupported method {method}")
 
-        resp: Response = req(
+        return req(
             f"{self.scheme}://{self.host}:{self.port}/{path}",
             auth=(self.user, self.password),
+            timeout=timeout,
         )
-        return resp
 
 
 class AttrProcessor:
@@ -605,8 +607,9 @@ class CouchbaseClient:
         Returns:
             An instance of `requests.Response`.
         """
+        timeout = kwargs.get("timeout", 60)
         data = build_n1ql_request_body(query, *args, **kwargs)
-        resp: Response = self.n1ql_client.exec_api("query/service", data=data)
+        resp: Response = self.n1ql_client.exec_api("query/service", data=data, timeout=timeout)
         return resp
 
     def create_user(self, username: str, password: str, fullname: str, roles: str) -> Response:
