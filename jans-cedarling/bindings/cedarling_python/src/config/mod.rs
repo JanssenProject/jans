@@ -8,6 +8,7 @@ use pyo3::prelude::*;
 use pyo3::Bound;
 
 mod authz_config;
+mod bootstrap_config;
 mod memory_log_config;
 mod off_log_config;
 mod policy_store_config;
@@ -21,6 +22,7 @@ pub fn register_entities(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<stdout_log_config::StdOutLogConfig>()?;
     m.add_class::<policy_store_source::PolicyStoreSource>()?;
     m.add_class::<policy_store_config::PolicyStoreConfig>()?;
+    m.add_class::<bootstrap_config::BootstrapConfig>()?;
 
     Ok(())
 }

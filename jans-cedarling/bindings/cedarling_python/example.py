@@ -1,8 +1,9 @@
 from cedarling_python import AuthzConfig, MemoryLogConfig, OffLogConfig, StdOutLogConfig
-from cedarling_python import PolicyStoreSource, PolicyStoreConfig
+from cedarling_python import PolicyStoreSource, PolicyStoreConfig, BootstrapConfig
 
 
 authz_config = AuthzConfig(application_name="example_app_name")
+# we can also set value to as property
 authz_config.application_name = "example_app_name2"
 
 # use log config to store logs in memory with a time-to-live of 120 seconds
@@ -26,3 +27,9 @@ policy_store_config = PolicyStoreConfig(
     source=policy_source, store_id="8b805e22fdd39f3dd33a13d9fb446d8e6314153ca997")
 # if we have only one policy store in file we can avoid using store id
 policy_store_config = None
+
+# collect all in the BootstrapConfig
+bootstrap_config = BootstrapConfig(
+    authz_config=authz_config,
+    log_config=log_config,
+    policy_store_config=policy_store_config)
