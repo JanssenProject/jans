@@ -31,14 +31,15 @@ use init::policy_store::{load_policy_store, LoadPolicyStoreError};
 pub use log::LogStorage;
 use log::{init_logger, LogWriter};
 pub use models::config::*;
-use models::log_entry::{LogEntry, LogType};
+pub use models::log_entry::LogEntry;
+use models::log_entry::LogType;
 use uuid7::uuid4;
 
 /// Errors that can occur during initialization Cedarling.
 #[derive(Debug, thiserror::Error)]
 pub enum InitCedarlingError {
     /// Error that may occur during loading the policy store.
-    #[error("Could not load policy :{0}")]
+    #[error("Could not load policy: {0}")]
     PolicyStore(#[from] LoadPolicyStoreError),
 }
 
@@ -87,11 +88,11 @@ impl Cedarling {
 // implements LogStorage for Cedarling
 // we can use this methods outside crate only when import trait
 impl LogStorage for Cedarling {
-    fn pop_logs(&self) -> Vec<models::log_entry::LogEntry> {
+    fn pop_logs(&self) -> Vec<LogEntry> {
         self.log.pop_logs()
     }
 
-    fn get_log_by_id(&self, id: &str) -> Option<models::log_entry::LogEntry> {
+    fn get_log_by_id(&self, id: &str) -> Option<LogEntry> {
         self.log.get_log_by_id(id)
     }
 
