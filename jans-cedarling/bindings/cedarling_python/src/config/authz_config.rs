@@ -55,7 +55,7 @@ use pyo3::prelude::*;
 /// ```
 ///
 #[derive(Debug, Clone)]
-#[pyclass]
+#[pyclass(get_all, set_all)]
 pub struct AuthzConfig {
     application_name: Option<String>,
 }
@@ -66,13 +66,6 @@ impl AuthzConfig {
     #[pyo3(signature = (application_name=None))]
     fn new(application_name: Option<String>) -> PyResult<Self> {
         Ok(AuthzConfig { application_name })
-    }
-
-    #[setter]
-    fn application_name(&mut self, application_name: String) -> PyResult<()> {
-        self.application_name = Some(application_name);
-
-        Ok(())
     }
 }
 
