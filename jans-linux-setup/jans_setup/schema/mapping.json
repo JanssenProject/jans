@@ -75,7 +75,7 @@
       "gluuVdsCacheRefreshLastUpdateCount",
       "gluuVdsCacheRefreshProblemCount",
       "gluuVdsCacheRefreshPollingInterval",
-      "gluuVdsCacheRefreshEnabled"      
+      "gluuVdsCacheRefreshEnabled"
     ],
     "attributeType": [
       "xdiStatement",
