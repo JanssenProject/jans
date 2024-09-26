@@ -4,15 +4,13 @@
  *
  * Copyright (c) 2024, Gluu, Inc.
  */
-
 use pyo3::prelude::*;
 use pyo3::Bound;
 
-mod config;
+mod authz_config;
 
-#[pymodule]
-fn cedarling_python(m: &Bound<'_, PyModule>) -> PyResult<()> {
-    config::register_entities(m)?;
+pub fn register_entities(m: &Bound<'_, PyModule>) -> PyResult<()> {
+    m.add_class::<authz_config::AuthzConfig>()?;
 
     Ok(())
 }
