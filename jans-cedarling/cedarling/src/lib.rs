@@ -27,7 +27,7 @@ mod tests;
 use std::rc::Rc;
 
 use authz::Authz;
-use init::policy_store::{load_policy_store, ErrorLoadPolicyStore};
+use init::policy_store::{load_policy_store, LoadPolicyStoreError};
 pub use log::LogStorage;
 use log::{init_logger, LogWriter};
 pub use models::config::*;
@@ -36,10 +36,10 @@ use uuid7::uuid4;
 
 /// Errors that can occur during initialization Cedarling.
 #[derive(Debug, thiserror::Error)]
-pub enum ErrorInitCedarling {
+pub enum InitCedarlingError {
     /// Error that may occur during loading the policy store.
     #[error("Could not load policy :{0}")]
-    PolicyStore(#[from] ErrorLoadPolicyStore),
+    PolicyStore(#[from] LoadPolicyStoreError),
 }
 
 /// The instance of the Cedarling application.
@@ -52,7 +52,7 @@ pub struct Cedarling {
 
 impl Cedarling {
     /// Create a new instance of the Cedarling application.
-    pub fn new(config: BootstrapConfig) -> Result<Cedarling, ErrorInitCedarling> {
+    pub fn new(config: BootstrapConfig) -> Result<Cedarling, InitCedarlingError> {
         let log: Rc<log::LogStrategy> = init_logger(config.log_config);
         // we use uuid v4 because it is generated based on random numbers.
         let pdp_id = uuid4();
