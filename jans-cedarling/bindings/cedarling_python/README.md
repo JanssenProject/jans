@@ -141,4 +141,11 @@ If you only want to build the library without installing it in the Python enviro
    maturin build --release
    ```
 
-___
+## Python types definitions
+
+  The python types definitions are available in the `PYTHON_TYPES.md` file. Or by clicking [here](PYTHON_TYPES.md).
+  Also after installing the library you can get same information using:
+
+  ```bash
+  python -m pydoc cedarling_python
+  ```

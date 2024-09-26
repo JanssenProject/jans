@@ -9,7 +9,8 @@ import inspect
 
 def print_inspect(type_value):
     '''
-        print the signature and doc string for a given type
+        this is a helper function to show the signature and doc string for a given type
+        is used only to validate is documentation and signature from the python side
     '''
     # we add additional newlines to make it more readable.
     print("___")
@@ -34,8 +35,17 @@ def print_inspect(type_value):
             print(f"documentation: {doc}")
 
 
+def print_doc(type_value):
+    '''
+        this is a helper function show to doc string for a given type
+    '''
+    print(type_value.__doc__)
+    print("___\n\n")
+
+
 types = [AuthzConfig, MemoryLogConfig, OffLogConfig,
          StdOutLogConfig, PolicyStoreSource, PolicyStoreConfig, BootstrapConfig,
          Cedarling]
 for t in types:
-    print_inspect(t)
+    # print_inspect(t)
+    print_doc(t)
