@@ -1,4 +1,4 @@
-from cedarling_python import AuthzConfig, MemoryLogConfig
+from cedarling_python import AuthzConfig, MemoryLogConfig, OffLogConfig
 import inspect
 
 # script to show the signature and documentation string for a python cedarling bindings
@@ -12,10 +12,10 @@ def print_inspect(type_value):
     print(f"Show signature of type: {type_value.__name__}:\n")
     print(inspect.signature(type_value))
     print(f"Show documentation string of type: {type_value.__name__}:\n")
-    print(AuthzConfig.__doc__)
+    print(type_value.__doc__)
     print("\n")
 
 
-types = [AuthzConfig, MemoryLogConfig]
+types = [AuthzConfig, MemoryLogConfig, OffLogConfig]
 for t in types:
     print_inspect(t)
