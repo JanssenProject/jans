@@ -8,7 +8,7 @@
 use base64::prelude::*;
 
 #[derive(Debug, thiserror::Error)]
-pub enum ParceCedarSchemaErrMsg {
+pub enum ParceCedarSchemaSetMessage {
     #[error("unable to decode cedar policy schema base64")]
     BASE64,
     #[error("unable to decode cedar policy schema json")]
@@ -24,11 +24,11 @@ where
 {
     let source = <String as serde::Deserialize>::deserialize(deserializer)?;
     let decoded: Vec<u8> = BASE64_STANDARD.decode(source.as_str()).map_err(|err| {
-        serde::de::Error::custom(format!("{}: {}", ParceCedarSchemaErrMsg::BASE64, err,))
+        serde::de::Error::custom(format!("{}: {}", ParceCedarSchemaSetMessage::BASE64, err,))
     })?;
 
     let schema = cedar_policy::Schema::from_json_file(decoded.as_slice()).map_err(|err| {
-        serde::de::Error::custom(format!("{}: {}", ParceCedarSchemaErrMsg::JSON, err))
+        serde::de::Error::custom(format!("{}: {}", ParceCedarSchemaSetMessage::JSON, err))
     })?;
 
     Ok(schema)
@@ -56,7 +56,7 @@ mod tests {
         assert!(policy_result
             .unwrap_err()
             .to_string()
-            .contains(&ParceCedarSchemaErrMsg::BASE64.to_string()));
+            .contains(&ParceCedarSchemaSetMessage::BASE64.to_string()));
     }
 
     #[test]
@@ -68,7 +68,7 @@ mod tests {
         assert!(policy_result
             .unwrap_err()
             .to_string()
-            .contains(&ParceCedarSchemaErrMsg::JSON.to_string()));
+            .contains(&ParceCedarSchemaSetMessage::JSON.to_string()));
     }
 
     #[test]
@@ -77,10 +77,10 @@ mod tests {
             include_str!("test_files/policy-store_schema_err_cedar_mistake.json");
 
         let policy_result = serde_json::from_str::<PolicyStoreMap>(POLICY_STORE_RAW);
-        // in this scenario error message looks like:
-        // `unable to decode cedar policy schema json: failed to resolve type: User_TypeNotExist", line: 35, column: 1`
         let err_msg = policy_result.unwrap_err().to_string();
-        assert!(err_msg.contains(&ParceCedarSchemaErrMsg::JSON.to_string()));
-        assert!(err_msg.contains("failed to resolve type"));
+        assert_eq!(
+            err_msg,
+            "unable to decode cedar policy schema json: failed to resolve type: User_TypeNotExist at line 35 column 1"
+        );
     }
 }
