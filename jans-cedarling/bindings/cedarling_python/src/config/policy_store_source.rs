@@ -31,7 +31,7 @@ use pyo3::prelude::*;
 /// ```python
 ///
 ///     # Creating a new PolicyStoreSource instance with a JSON string
-///     json_string = '{"policy": {"id": "policy1", "rules": []}}'
+///     json_string = '{...}'
 ///     config = PolicyStoreSource(json=json_string)
 ///
 ///     # Attempting to create a PolicyStoreSource without a JSON string (raises ValueError)
