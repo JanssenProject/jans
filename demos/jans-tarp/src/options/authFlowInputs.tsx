@@ -85,133 +85,140 @@ export default function AuthFlowInputs({
   };
 
   const triggerCodeFlow = async () => {
-    setLoading(true);
-    const redirectUrl = client?.redirectUris[0];
-    const { secret, hashed } = await Utils.generateRandomChallengePair();
-    let scopes = selectedScopes.map((ele) => ele.name).join(" ");
-    if (!(!!scopes && scopes.length > 0)) {
-      scopes = client?.scope;
-    }
+    try {
+      setLoading(true);
+      const redirectUrl = client?.redirectUris[0];
+      const { secret, hashed } = await Utils.generateRandomChallengePair();
+      let scopes = selectedScopes.map((ele) => ele.name).join(" ");
+      if (!(!!scopes && scopes.length > 0)) {
+        scopes = client?.scope;
+      }
 
-    let options: ILooseObject = {
-      scope: scopes,
-      response_type: client?.responseType[0],
-      redirect_uri: redirectUrl,
-      client_id: client?.clientId,
-      code_challenge_method: "S256",
-      code_challenge: hashed,
-      nonce: uuidv4(),
-    };
-
-    if (!!selectedAcr && selectedAcr.length > 0) {
-      options.acr_values = selectedAcr[0].name;
-    }
-
-    let authzUrl = `${client?.authorizationEndpoint}?${qs.stringify(options)}`;
-
-    if (!!additionalParams && additionalParams.trim() != "") {
-      client.additionalParams = additionalParams.trim();
-      chrome.storage.local.get(["oidcClients"], (result) => {
-        let clientArr = [];
-        if (!!result.oidcClients) {
-          clientArr = result.oidcClients;
-          clientArr = clientArr.map((obj) =>
-            obj.clientId === client.clientId ? client : obj
-          );
-          chrome.storage.local.set({ oidcClients: clientArr });
-        }
-      });
-
-      let additionalParamJSON = JSON.parse(additionalParams);
-      console.log("Processing additional parameters");
-      Object.keys(additionalParamJSON).forEach((key) => {
-        console.log(key + "~~~" + additionalParamJSON[key]);
-        authzUrl += `&${key}=${additionalParamJSON[key]}`;
-      });
-    }
-
-    console.log("Obtained autorization URL: " + authzUrl);
-
-    const resultUrl: string = await new Promise((resolve, reject) => {
-      customLaunchWebAuthFlow(
-        {
-          url: authzUrl,
-          redirectUrl: redirectUrl,
-        },
-        (callbackUrl, error) => {
-          if (!!error) {
-            console.error("Error in executing auth url: ", error);
-            logout();
-            reject(error);
-          } else {
-            console.log("Callback Url: ", callbackUrl);
-            resolve(callbackUrl);
-          }
-        }
-      );
-    });
-
-    if (resultUrl) {
-      const urlParams = new URLSearchParams(new URL(resultUrl).search);
-      const code = urlParams.get("code");
-      console.log("code:" + code);
-
-      const tokenReqData = qs.stringify({
-        redirect_uri: redirectUrl,
-        grant_type: "authorization_code",
-        code_verifier: secret,
-        client_id: client?.clientId,
-        code,
+      let options: ILooseObject = {
         scope: scopes,
-      });
-
-      const tokenReqOptions = {
-        method: "POST",
-        headers: {
-          "content-type": "application/x-www-form-urlencoded",
-          Authorization:
-            "Basic " + btoa(`${client?.clientId}:${client?.clientSecret}`),
-        },
-        data: tokenReqData,
-        url: client.tokenEndpoint,
+        response_type: client?.responseType[0],
+        redirect_uri: redirectUrl,
+        client_id: client?.clientId,
+        code_challenge_method: "S256",
+        code_challenge: hashed,
+        nonce: uuidv4(),
       };
 
-      const tokenResponse = await axios(tokenReqOptions);
+      if (!!selectedAcr && selectedAcr.length > 0) {
+        options.acr_values = selectedAcr[0].name;
+      }
 
-      if (
-        tokenResponse &&
-        tokenResponse.data &&
-        tokenResponse.data.access_token
-      ) {
-        console.log("tokenResponse:" + JSON.stringify(tokenResponse));
+      let authzUrl = `${client?.authorizationEndpoint}?${qs.stringify(
+        options
+      )}`;
 
-        const userInfoOptions = {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${tokenResponse.data.access_token}`,
+      if (!!additionalParams && additionalParams.trim() != "") {
+        client.additionalParams = additionalParams.trim();
+        chrome.storage.local.get(["oidcClients"], (result) => {
+          let clientArr = [];
+          if (!!result.oidcClients) {
+            clientArr = result.oidcClients;
+            clientArr = clientArr.map((obj) =>
+              obj.clientId === client.clientId ? client : obj
+            );
+            chrome.storage.local.set({ oidcClients: clientArr });
+          }
+        });
+
+        let additionalParamJSON = JSON.parse(additionalParams);
+        console.log("Processing additional parameters");
+        Object.keys(additionalParamJSON).forEach((key) => {
+          console.log(key + "~~~" + additionalParamJSON[key]);
+          authzUrl += `&${key}=${additionalParamJSON[key]}`;
+        });
+      }
+
+      console.log("Obtained autorization URL: " + authzUrl);
+
+      const resultUrl: string = await new Promise((resolve, reject) => {
+        customLaunchWebAuthFlow(
+          {
+            url: authzUrl,
+            redirectUrl: redirectUrl,
           },
-          url: client.userinfoEndpoint,
+          (callbackUrl, error) => {
+            if (!!error) {
+              console.error("Error in executing auth url: ", error);
+              logout();
+              reject(error);
+            } else {
+              console.log("Callback Url: ", callbackUrl);
+              resolve(callbackUrl);
+            }
+          }
+        );
+      });
+      console.log("resultUrl", resultUrl);
+
+      if (resultUrl) {
+        const urlParams = new URLSearchParams(new URL(resultUrl).search);
+        const code = urlParams.get("code");
+        console.log("code:" + code);
+
+        const tokenReqData = qs.stringify({
+          redirect_uri: redirectUrl,
+          grant_type: "authorization_code",
+          code_verifier: secret,
+          client_id: client?.clientId,
+          code,
+          scope: scopes,
+        });
+
+        const tokenReqOptions = {
+          method: "POST",
+          headers: {
+            "content-type": "application/x-www-form-urlencoded",
+            Authorization:
+              "Basic " + btoa(`${client?.clientId}:${client?.clientSecret}`),
+          },
+          data: tokenReqData,
+          url: client.tokenEndpoint,
         };
 
-        const userInfoResponse = await axios(userInfoOptions);
+        const tokenResponse = await axios(tokenReqOptions);
 
-        chrome.storage.local
-          .set({
-            loginDetails: {
-              access_token: tokenResponse.data.access_token,
-              userDetails: userInfoResponse.data,
-              id_token: tokenResponse.data.id_token,
-              displayToken: displayToken,
+        if (
+          tokenResponse &&
+          tokenResponse.data &&
+          tokenResponse.data.access_token
+        ) {
+          console.log("tokenResponse:" + JSON.stringify(tokenResponse));
+
+          const userInfoOptions = {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${tokenResponse.data.access_token}`,
             },
-          })
-          .then(async () => {
-            console.log(
-              "userDetails: " + JSON.stringify(userInfoResponse.data)
-            );
-            handleClose();
-          });
-        notifyOnDataChange();
+            url: client.userinfoEndpoint,
+          };
+
+          const userInfoResponse = await axios(userInfoOptions);
+
+          chrome.storage.local
+            .set({
+              loginDetails: {
+                access_token: tokenResponse.data.access_token,
+                userDetails: userInfoResponse.data,
+                id_token: tokenResponse.data.id_token,
+                displayToken: displayToken,
+              },
+            })
+            .then(async () => {
+              console.log(
+                "userDetails: " + JSON.stringify(userInfoResponse.data)
+              );
+              handleClose();
+            });
+          notifyOnDataChange();
+        }
       }
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -239,55 +246,71 @@ export default function AuthFlowInputs({
   };
 
   const customLaunchWebAuthFlow = (options, callback) => {
-    var requestId = Math.random().toString(36).substring(2);
-    var redirectUrl = options.redirectUrl;
-    var authUrl = options.url + "&state=" + requestId;
-    chrome.tabs.create({ url: authUrl }, function (tab) {
-      var intervalId = setInterval(function () {
-        chrome.tabs.get(tab.id, function (currentTab) {
-          if (!currentTab) {
-            clearInterval(intervalId);
+    try {
+      var requestId = Math.random().toString(36).substring(2);
+      var redirectUrl = options.redirectUrl;
+      var authUrl = options.url + "&state=" + requestId;
+      chrome.tabs.create({ url: authUrl }, function (tab) {
+        var intervalId = setInterval(function () {
+          chrome.tabs.get(tab.id, function (currentTab) {
+            if (!currentTab) {
+              clearInterval(intervalId);
+              chrome.tabs.remove(tab.id);
+              callback(undefined, new Error("Authorization tab was closed."));
+              setLoading(false);
+            }
+          });
+        }, 1000);
+
+        const onTabRemoved = (tabId, removeInfo) => {
+          if (tabId === tab.id) {
+            chrome.tabs.onRemoved.removeListener(onTabRemoved); // Clean up the listener
             chrome.tabs.remove(tab.id);
-            callback(undefined, new Error("Authorization tab was closed."));
+            setLoading(false);
+          }
+        };
+
+        chrome.tabs.onRemoved.addListener(onTabRemoved);
+
+        chrome.tabs.onUpdated.addListener(function listener(
+          tabId,
+          changeInfo,
+          tab
+        ) {
+          if (!!chrome.runtime.lastError) {
+            console.log("Error in chrome.runtime.lastError");
+            chrome.tabs.remove(tabId);
+            callback(undefined, chrome.runtime.lastError);
+            chrome.tabs.onUpdated.removeListener(listener);
+          }
+          if (tabId === tab?.id && changeInfo?.status === "complete") {
+            chrome.tabs.sendMessage(
+              tab.id,
+              { requestId: requestId },
+              function (response) {
+                clearInterval(intervalId);
+                chrome.tabs.query(
+                  { active: true, lastFocusedWindow: true },
+                  (tabs) => {
+                    let url = tabs[0].url;
+                    const urlParams = new URLSearchParams(new URL(url).search);
+                    const code = urlParams.get("code");
+                    if (code != null && areUrlsEqual(url, redirectUrl)) {
+                      callback(url, undefined);
+                      chrome.tabs.remove(tab.id);
+                      setLoading(false);
+                      chrome.tabs.onUpdated.removeListener(listener);
+                    }
+                  }
+                );
+              }
+            );
           }
         });
-      }, 1000);
-
-      chrome.tabs.onUpdated.addListener(function listener(
-        tabId,
-        changeInfo,
-        tab
-      ) {
-        if (!!chrome.runtime.lastError) {
-          chrome.tabs.remove(tabId);
-          callback(undefined, chrome.runtime.lastError);
-          chrome.tabs.onUpdated.removeListener(listener);
-        }
-        if (tabId === tab?.id && changeInfo?.status === "complete") {
-          chrome.tabs.sendMessage(
-            tab.id,
-            { requestId: requestId },
-            function (response) {
-              clearInterval(intervalId);
-              chrome.tabs.query(
-                { active: true, lastFocusedWindow: true },
-                (tabs) => {
-                  let url = tabs[0].url;
-                  const urlParams = new URLSearchParams(new URL(url).search);
-                  const code = urlParams.get("code");
-                  if (code != null && areUrlsEqual(url, redirectUrl)) {
-                    callback(url, undefined);
-                    chrome.tabs.remove(tab.id);
-                    setLoading(false);
-                    chrome.tabs.onUpdated.removeListener(listener);
-                  }
-                }
-              );
-            }
-          );
-        }
       });
-    });
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const areUrlsEqual = (url1, url2) => {
@@ -308,7 +331,12 @@ export default function AuthFlowInputs({
     <React.Fragment>
       <Dialog
         open={open}
-        onClose={handleClose}
+        onClose={(event, reason) => {
+          console.log("reason: " + reason);
+          if (reason !== "backdropClick") {
+            handleClose();
+          }
+        }}
         PaperProps={{
           component: "form",
           onSubmit: (event) => {
