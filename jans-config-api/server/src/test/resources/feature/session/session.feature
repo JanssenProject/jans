@@ -20,6 +20,18 @@ Scenario: Fetch all session
 	And print response
 
 
+Scenario: Fetch all session
+Given url mainUrl
+And header Authorization = 'Bearer ' + accessToken
+When method GET
+Then status 200
+Given url mainUrl + '/search'
+And header Authorization = 'Bearer ' + accessToken
+When method GET
+Then status 200
+And print response
+
+
 @ignore		
 Scenario: Revoke user session
 	Given url mainUrl 

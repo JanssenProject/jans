@@ -217,9 +217,9 @@ public class OIDCFlowService {
 
     }
 
-    public String getLogoutUrl(String idTokenHint) {
+    public String getLogoutUrl() {
         
-        return UriBuilder.fromUri(endSessionEndpoint).queryParam("id_token_hint", idTokenHint)
+        return UriBuilder.fromUri(endSessionEndpoint)   //.queryParam("id_token_hint", idTokenHint)
                 .queryParam("post_logout_redirect_uri", settings.getPostLogoutUri())
                 .build().toString();
         
