@@ -1,4 +1,4 @@
-from cedarling_python import AuthzConfig, MemoryLogConfig, OffLogConfig
+from cedarling_python import AuthzConfig, MemoryLogConfig, OffLogConfig, StdOutLogConfig
 
 
 authz_config = AuthzConfig(application_name="example_app_name")
@@ -11,3 +11,6 @@ log_config.log_ttl = 120
 
 # use disabled log config to ignore all logging
 log_config = OffLogConfig()
+
+# use log config to print logs to stdout
+log_config = StdOutLogConfig()

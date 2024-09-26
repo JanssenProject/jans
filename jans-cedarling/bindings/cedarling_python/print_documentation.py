@@ -1,4 +1,4 @@
-from cedarling_python import AuthzConfig, MemoryLogConfig, OffLogConfig
+from cedarling_python import AuthzConfig, MemoryLogConfig, OffLogConfig, StdOutLogConfig
 import inspect
 
 # script to show the signature and documentation string for a python cedarling bindings
@@ -16,6 +16,6 @@ def print_inspect(type_value):
     print("\n")
 
 
-types = [AuthzConfig, MemoryLogConfig, OffLogConfig]
+types = [AuthzConfig, MemoryLogConfig, OffLogConfig, StdOutLogConfig]
 for t in types:
     print_inspect(t)
