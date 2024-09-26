@@ -16,6 +16,7 @@ pub struct PolicyStoreConfig {
 }
 
 /// PolicyStoreSource - represent the place where we going to read the policy.
+#[derive(Debug, Clone)]
 pub enum PolicyStoreSource {
     /// Read policy from raw JSON
     Json(String),
