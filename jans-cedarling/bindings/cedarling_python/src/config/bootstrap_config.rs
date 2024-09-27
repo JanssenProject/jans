@@ -5,7 +5,7 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-use pyo3::exceptions::PyValueError;
+use pyo3::exceptions::{PyTypeError, PyValueError};
 use pyo3::prelude::*;
 
 use crate::config::authz_config::AuthzConfig;
@@ -71,12 +71,12 @@ use super::stdout_log_config::StdOutLogConfig;
 ///     :param log_config: Optional. A logging configuration (`OffLogConfig`, `MemoryLogConfig`, `StdOutLogConfig`).
 ///     :param policy_store_config: Optional. A `PolicyStoreConfig` object for configuring the policy store.
 ///
-/// .. method:: set_log_config(self, value)
+/// .. method(setter):: log_config(self, value)
 ///
 ///     Sets the log configuration. The value must be one of the following types: `OffLogConfig`, `MemoryLogConfig`, or `StdOutLogConfig`.
 ///
 ///     :param value: The log configuration object.
-///     :raises ValueError: If the provided log configuration is not a valid type.
+///     :raises TypeError: If the provided log configuration is not a valid type.
 ///
 /// Example
 /// -------
@@ -95,10 +95,10 @@ use super::stdout_log_config::StdOutLogConfig;
 ///     # Setting log config to OffLogConfig
 ///     bootstrap_config.log_config = OffLogConfig()
 ///
-///     # Attempting to set an invalid log configuration will raise a ValueError
+///     # Attempting to set an invalid log configuration will raise a TypeError
 ///     try:
 ///         bootstrap_config.log_config = "InvalidConfig"
-///     except ValueError as e:
+///     except TypeError as e:
 ///         print(f"Error: {e}")
 /// ```
 ///
@@ -130,7 +130,7 @@ fn extract_log_config(log_config: &PyObject) -> PyResult<cedarling::LogConfig> {
         } else if let Ok(log_config) = log_config.extract::<StdOutLogConfig>(py) {
             Ok(log_config.into())
         } else {
-            Err(PyValueError::new_err("Invalid log_config type. Expected one of: OffLogConfig, MemoryLogConfig, StdOutLogConfig."))
+            Err(PyTypeError::new_err("Invalid log_config type. Expected one of: OffLogConfig, MemoryLogConfig, StdOutLogConfig."))
         }
     })?;
 

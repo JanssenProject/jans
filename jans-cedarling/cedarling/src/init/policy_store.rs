@@ -50,11 +50,7 @@ pub(crate) fn load_policy_store(
         (None, 1) => {
             // getting first element and we know it is save to use unwrap here,
             // because we know that there is only one element in the map
-            policy_store_map
-                .policy_stores
-                .into_values()
-                .next()
-                .unwrap()
+            policy_store_map.policy_stores.into_values().next().unwrap()
         },
         (None, 2..) => {
             return Err(LoadPolicyStoreError::MoreThanOnePolicy);

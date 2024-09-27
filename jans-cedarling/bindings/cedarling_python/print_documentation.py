@@ -40,7 +40,7 @@ def print_doc(type_value):
         this is a helper function show to doc string for a given type
     '''
     print(type_value.__doc__)
-    print("___\n\n")
+    print("___\n")
 
 
 types = [AuthzConfig, MemoryLogConfig, OffLogConfig,

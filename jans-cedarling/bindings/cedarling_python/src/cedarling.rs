@@ -82,7 +82,7 @@ impl Cedarling {
     #[new]
     fn new(config: BootstrapConfig) -> PyResult<Self> {
         let inner = cedarling::Cedarling::new(config.try_into()?)
-            .map_err(|err| PyValueError::new_err(format!("{:?}", err.to_string())))?;
+            .map_err(|err| PyValueError::new_err(err.to_string()))?;
         Ok(Self { inner })
     }
 

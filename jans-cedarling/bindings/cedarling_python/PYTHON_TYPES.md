@@ -162,7 +162,6 @@ Example
     # Creating a new StdOutLogConfig instance to write log information to std output stream.
     config = StdOutLogConfig()
 ```
-
 ___
 
 PolicyStoreSource
@@ -330,12 +329,12 @@ Methods
     :param log_config: Optional. A logging configuration (`OffLogConfig`, `MemoryLogConfig`, `StdOutLogConfig`).
     :param policy_store_config: Optional. A `PolicyStoreConfig` object for configuring the policy store.
 
-.. method:: set_log_config(self, value)
+.. method(setter):: log_config(self, value)
 
     Sets the log configuration. The value must be one of the following types: `OffLogConfig`, `MemoryLogConfig`, or `StdOutLogConfig`.
 
     :param value: The log configuration object.
-    :raises ValueError: If the provided log configuration is not a valid type.
+    :raises TypeError: If the provided log configuration is not a valid type.
 
 Example
 -------
@@ -354,10 +353,10 @@ Example
     # Setting log config to OffLogConfig
     bootstrap_config.log_config = OffLogConfig()
 
-    # Attempting to set an invalid log configuration will raise a ValueError
+    # Attempting to set an invalid log configuration will raise a TypeError
     try:
         bootstrap_config.log_config = "InvalidConfig"
-    except ValueError as e:
+    except TypeError as e:
         print(f"Error: {e}")
 ```
 
@@ -423,3 +422,4 @@ Methods
     :rtype: List[str]
 
 ___
+
