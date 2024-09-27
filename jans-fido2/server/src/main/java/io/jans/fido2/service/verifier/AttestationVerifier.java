@@ -108,10 +108,10 @@ public class AttestationVerifier {
             byte[] clientDataHash = DigestUtils.getSha256Digest().digest(base64Service.urlDecode(clientDataJson));
             AttestationFormatProcessor attestationProcessor = attestationProcessorFactory.getCommandProcessor(fmt);
 
-            if (AttestationMode.DISABLED.equals(appConfiguration.getFido2Configuration().getAttestationMode())) {
+            if (AttestationMode.DISABLED.getValue().equals(appConfiguration.getFido2Configuration().getAttestationMode())) {
                 log.warn("SkipValidateMdsInAttestation is enabled");
             } else {
-                if (AttestationMode.ENFORCED.equals(appConfiguration.getFido2Configuration().getAttestationMode()) && fmt.equals(AttestationFormat.none.getFmt())) {
+                if (AttestationMode.ENFORCED.getValue().equals(appConfiguration.getFido2Configuration().getAttestationMode()) && fmt.equals(AttestationFormat.none.getFmt())) {
                     throw new Fido2RuntimeException("Unauthorized to perform this action");
                 }
                 else {

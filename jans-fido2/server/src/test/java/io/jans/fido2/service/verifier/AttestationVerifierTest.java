@@ -179,7 +179,7 @@ class AttestationVerifierTest {
                 null, false, false,
                 0, 0, null,
                 null, null, null, false,
-                AttestationMode.MONITOR, null, false);
+                AttestationMode.MONITOR.getValue(), null, false);
         when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
 
 
@@ -219,7 +219,7 @@ class AttestationVerifierTest {
                 null, false, false,
                 0, 0, null,
                 null, null, null, false,
-                AttestationMode.DISABLED, null, false);
+                AttestationMode.DISABLED.getValue(), null, false);
         when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
 
         CredAndCounterData result = attestationVerifier.verifyAuthenticatorAttestationResponse(authenticatorResponse, credential);
@@ -257,7 +257,7 @@ class AttestationVerifierTest {
                 null, false, false,
                 0, 0, null,
                 null, null, null, false,
-                AttestationMode.ENFORCED, null, false);
+                AttestationMode.ENFORCED.getValue(), null, false);
         when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
 
         Fido2RuntimeException exception = assertThrows(Fido2RuntimeException.class, () ->
@@ -295,7 +295,7 @@ class AttestationVerifierTest {
                 null, false, false,
                 0, 0, null,
                 null, null, null, false,
-                AttestationMode.ENFORCED, null, false);
+                AttestationMode.ENFORCED.getValue(), null, false);
         when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
         CredAndCounterData result = attestationVerifier.verifyAuthenticatorAttestationResponse(authenticatorResponse, credential);
 
