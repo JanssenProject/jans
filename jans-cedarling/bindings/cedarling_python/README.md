@@ -64,7 +64,7 @@ Follow these steps to install the Python package in a virtual environment.
    cd bindings/cedarling_python
    ```
 
-1. **Install `maturin` dependencies** (optional, for **windows** not work)::
+1. **Install `maturin` dependencies** (optional, does not work for **windows**)::
 
    ```bash
    pip install maturin[patchelf]
