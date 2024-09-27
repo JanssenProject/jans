@@ -2,7 +2,7 @@
 
 This project uses `maturin` to create a Python library from Rust code. Follow the steps below to install and build the library.
 
-## Prerequisites
+## Prerequisites and Installing the Python Library
 
 1. (Optional) Install build tools (for Linux users): You may need to install essential build tools by running:
 
@@ -27,10 +27,6 @@ This project uses `maturin` to create a Python library from Rust code. Follow th
    ```
 
    If Rust is not installed, you can install it from [here](https://www.rust-lang.org/tools/install).
-
-## Installing the Python Library
-
-Follow these steps to install the Python package in a virtual environment.
 
 1. **Clone the repository**:
    Ensure the repository is loaded into your directory.
@@ -103,7 +99,7 @@ To verify that the library works correctly, you can run the provided `example.py
 python example.py
 ```
 
-## Only Building the Library
+## Building the Python Library
 
 If you only want to build the library without installing it in the Python environment, follow these steps:
 
@@ -170,7 +166,7 @@ If you only want to build the library without installing it in the Python enviro
   
 ### Run test with `tox`
 
-  1. Ensure that you installed rust compiler and toolchain. You install it by following the official [rust installation guide](https://www.rust-lang.org/tools/install).
+  1. Ensure that you installed rust compiler and toolchain. You can install it by following the official [rust installation guide](https://www.rust-lang.org/tools/install).
 
   1. Ensure tox is installed:
   You can install tox in your environment using pip:
