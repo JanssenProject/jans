@@ -15,11 +15,11 @@ use cedar_policy::PolicyId;
 #[allow(clippy::upper_case_acronyms)]
 #[derive(Debug, thiserror::Error)]
 enum ParsePolicySetMessage {
-    #[error("unable to decode base64")]
+    #[error("unable to decode policy_content as base64")]
     BASE64,
-    #[error("unable to decode to utf8 string")]
+    #[error("unable to decode policy_content to utf8 string")]
     STRING,
-    #[error("unable to decode from human redable format")]
+    #[error("unable to decode policy_content from human redable format")]
     HUMAN_REDABLE,
     #[error("could not collect policy store's to policy set")]
     CREATE_POLICY_SET,
@@ -57,11 +57,11 @@ where
         .collect::<Result<Vec<cedar_policy::Policy>, _>>()?;
 
     cedar_policy::PolicySet::from_policies(policy_vec).map_err(|err| {
-            serde::de::Error::custom(format!(
-                "{}: {err}",
-                ParsePolicySetMessage::CREATE_POLICY_SET
-            ))
-        })
+        serde::de::Error::custom(format!(
+            "{}: {err}",
+            ParsePolicySetMessage::CREATE_POLICY_SET
+        ))
+    })
 }
 
 // function to deserialize a single policy from `PolicyRaw`
@@ -130,6 +130,6 @@ mod tests {
 
         let policy_result = serde_json::from_str::<PolicyStoreMap>(POLICY_STORE_RAW);
         let err_msg = policy_result.unwrap_err().to_string();
-        assert_eq!(err_msg,"unable to decode policy with id: 840da5d85403f35ea76519ed1a18a33989f855bf1cf8, error: unable to decode from human redable format: unexpected token `)` at line 15 column 1")
+        assert_eq!(err_msg,"unable to decode policy with id: 840da5d85403f35ea76519ed1a18a33989f855bf1cf8, error: unable to decode policy_content from human redable format: unexpected token `)` at line 15 column 1")
     }
 }
