@@ -37,7 +37,7 @@ of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.github
 
 ## Disabling The Endpoint Using Feature Flag
 
-`/end_session` endpoint can be enabled or disable using [END_SESSION feature flag](../../reference/json/feature-flags/janssenauthserver-feature-flags.md#endsession).
+`/end_session` endpoint can be enabled or disable using [END_SESSION feature flag](../../reference/json/feature-flags/janssenauthserver-feature-flags.md#end_session).
 Use [Janssen Text-based UI(TUI)](../../config-guide/config-tools/jans-tui/README.md) or [Janssen command-line interface](../../config-guide/config-tools/jans-cli/README.md) to perform this task.
 
 When using TUI, navigate via `Auth Server`->`Properties`->`enabledFeatureFlags` to screen below. From here, enable or

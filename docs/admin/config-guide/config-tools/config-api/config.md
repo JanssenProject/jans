@@ -16,21 +16,23 @@ tasks.
 === "Use Command-line"
 
     Use the command line to perform actions from the terminal. Learn how to 
-    use Jans CLI [here](../config-tools/jans-cli/README.md) or jump straight to 
+    use Jans CLI [here](../jans-cli/README.md) or jump straight to 
     the [Using Command Line](#using-command-line)
 
 === "Use Text-based UI"
 
     Use a fully functional text-based user interface from the terminal. 
     Learn how to use Jans Text-based UI (TUI) 
-    [here](../config-tools/jans-tui/README.md) or jump straight to the
+    [here](../jans-tui/README.md) or jump straight to the
     [Using Text-based UI](#using-text-based-ui)
+
+
 
 === "Use REST API"
 
     Use REST API for programmatic access or invoke via tools like CURL or 
     Postman. Learn how to use Janssen Server Config API 
-    [here](../config-tools/config-api/README.md) or Jump straight to the
+    [here](../config-api/README.md) or Jump straight to the
     [Using Configuration REST API](#using-configuration-rest-api)
 
 
@@ -502,8 +504,6 @@ and update.
 
 ##  Using Text-based UI
 
-In the Janssen Server, You can manage Config-API Configuration using 
-the [Text-Based UI](../config-tools/jans-tui/README.md) also.
 
 You can start TUI using the command below:
 
@@ -517,11 +517,11 @@ Config-API configurations in six sub-tabs, namely
 **Data Format Conversion**
 
 
-![image](../../../assets/tui-config-api-main.png)
+![image](../../../../assets/tui-config-api-main.png)
 
 ## Using Configuration REST API
 
 Janssen Server Configuration REST API exposes relevant endpoints for 
 managing and configuring the Config-API Configuration. Endpoint details 
-are published in the [Swagger document](./../../../../jans-config-api/docs/jans-config-api-swagger.yaml), 
+are published in the [Swagger document](../../../../../../jans/jans-config-api/docs/jans-config-api-swagger.yaml), 
 see endpoint `/api/v1/api-config`

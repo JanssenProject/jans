@@ -43,7 +43,7 @@ Response:
 
 ## Customization authentication flow using Interception script
 
-  In the Janssen ecosystem, the authentication flow that comprises of the calls to WebAuthn API and the FIDO server is achieved using an interception script, details of it can be found [here](../../script-catalog/person_authentication/fido2-external-authenticator/README).
+  In the Janssen ecosystem, the authentication flow that comprises of the calls to WebAuthn API and the FIDO server is achieved using an interception script, details of it can be found [here](../../script-catalog/person_authentication/fido2-external-authenticator/README.md).
 
 
 ## References
