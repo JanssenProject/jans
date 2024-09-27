@@ -106,15 +106,41 @@ public class SessionResource extends ConfigBaseResource {
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
-    @POST
+    @DELETE
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_SESSION_DELETE_ACCESS,
             ApiAccessConstants.JANS_AUTH_REVOKE_SESSION }, groupScopes = {}, superScopes = {
                     ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
-    @Path(ApiConstants.USERDN_PATH)
-    public Response getAppConfiguration(
+    @Path(ApiConstants.USER + ApiConstants.USERDN_PATH)
+    public Response deleteUsersSession(
             @Parameter(description = "User domain name") @PathParam(ApiConstants.USERDN) @NotNull String userDn) {
-        logger.debug("userDn:{}", userDn);
-        sessionService.revokeSession(userDn);
+        if (logger.isInfoEnabled()) {
+            logger.info("Delete session by userDn:{}", escapeLog(userDn));
+        }
+        checkResourceNotNull(userDn, ApiConstants.USERDN);
+        sessionService.revokeUserSession(userDn);
+        return Response.ok().build();
+    }
+
+    @Operation(summary = "Delete a session.", description = "Delete a session.", operationId = "delete-session", tags = {
+            "Auth - Session Management" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    ApiAccessConstants.JANS_AUTH_SESSION_DELETE_ACCESS, ApiAccessConstants.JANS_AUTH_REVOKE_SESSION }))
+    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Ok"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not Found"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
+    @DELETE
+    @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_SESSION_DELETE_ACCESS,
+            ApiAccessConstants.JANS_AUTH_REVOKE_SESSION }, groupScopes = {}, superScopes = {
+                    ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
+    @Path(ApiConstants.JANSID_PATH + ApiConstants.JANSID_PATH_PARAM)
+    public Response deleteSession(
+            @Parameter(description = "Session Unique identifier.") @PathParam(ApiConstants.JANSID) @NotNull String jansId) {
+        if (logger.isInfoEnabled()) {
+            logger.info("Delete session identified by jansId:{}", escapeLog(jansId));
+        }
+        checkResourceNotNull(jansId, ApiConstants.JANSID);
+
+        sessionService.revokeSessionById(jansId);
         return Response.ok().build();
     }
 

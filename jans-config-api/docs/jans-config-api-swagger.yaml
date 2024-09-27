@@ -7510,6 +7510,60 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/scopes.readonly
+  /api/v1/jans-auth-server/session/id/{jansId}:
+    delete:
+      tags:
+      - Auth - Session Management
+      summary: Delete a session.
+      description: Delete a session.
+      operationId: delete-session
+      parameters:
+      - name: jansId
+        in: path
+        description: Session Unique identifier.
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/session.delete
+        - revoke_session
+  /api/v1/jans-auth-server/session/user/{userDn}:
+    delete:
+      tags:
+      - Auth - Session Management
+      summary: Revoke all sessions by userDn
+      description: Revoke all sessions by userDn
+      operationId: revoke-user-session
+      parameters:
+      - name: userDn
+        in: path
+        description: User domain name
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/jans-auth-server/session.delete
+        - revoke_session
   /api/v1/jans-auth-server/session:
     get:
       tags:
@@ -7617,33 +7671,6 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/jans-auth-server/session.readonly
-        - revoke_session
-  /api/v1/jans-auth-server/session/{userDn}:
-    post:
-      tags:
-      - Auth - Session Management
-      summary: Revoke all sessions by userDn
-      description: Revoke all sessions by userDn
-      operationId: revoke-user-session
-      parameters:
-      - name: userDn
-        in: path
-        description: User domain name
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          description: Ok
-        "401":
-          description: Unauthorized
-        "404":
-          description: Not Found
-        "500":
-          description: InternalServerError
-      security:
-      - oauth2:
-        - https://jans.io/oauth/jans-auth-server/session.delete
         - revoke_session
   /api/v1/jans-auth-server/session/search:
     get:
@@ -9105,15 +9132,15 @@ components:
           type: boolean
         adminCanView:
           type: boolean
+        userCanEdit:
+          type: boolean
         adminCanEdit:
           type: boolean
         userCanView:
           type: boolean
-        userCanEdit:
+        userCanAccess:
           type: boolean
         adminCanAccess:
-          type: boolean
-        userCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -9962,6 +9989,8 @@ components:
           type: boolean
         lockMessageConfig:
           $ref: '#/components/schemas/LockMessageConfig'
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -9971,8 +10000,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn

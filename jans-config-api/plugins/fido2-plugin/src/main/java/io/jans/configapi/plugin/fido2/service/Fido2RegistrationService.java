@@ -67,6 +67,17 @@ public class Fido2RegistrationService {
                 : ApiConstants.DEFAULT_MAX_COUNT);
     }
 
+    public Fido2RegistrationEntry getFido2RegistrationEntryById(String id) {
+        Fido2RegistrationEntry fido2RegistrationEntry = null;
+        try {
+            fido2RegistrationEntry = persistenceEntryManager.find(Fido2RegistrationEntry.class,
+                    getDnFido2RegistrationEntry(id));
+        } catch (Exception ex) {
+            log.error("Failed to get fido2RegistrationEntry identified by id:{" + id + "}", ex);
+        }
+        return fido2RegistrationEntry;
+    }
+
     public PagedResult<Fido2RegistrationEntry> searchFido2Registration(SearchRequest searchRequest) {
         log.info("Search Fido2Registration with searchRequest:{}", searchRequest);
 
@@ -155,34 +166,31 @@ public class Fido2RegistrationService {
         return persistenceEntryManager.contains(baseDn, SimpleBranch.class);
     }
 
-    public void removeFido2RegistrationEntry(String uuid) {
+    public void removeFido2RegistrationEntry(String id) {
         if (log.isInfoEnabled()) {
-            log.info("Remove Fido2RegistrationEntry request for device with uuid:{}", escapeLog(uuid));
+            log.info("Remove Fido2RegistrationEntry request for device with id:{}", escapeLog(id));
         }
 
-        if (StringUtils.isBlank(uuid)) {
-            throw new InvalidAttributeException("Device uuid is null!");
+        if (StringUtils.isBlank(id)) {
+            throw new InvalidAttributeException("Fido2RegistrationEntry id is null!");
         }
 
-        Fido2RegistrationEntry fido2RegistrationEntry = this.getFido2RegistrationEntryByDeviceId(uuid);
-        log.debug("Fido2RegistrationEntry identified by uuid:{} is:{}", uuid, fido2RegistrationEntry);
+        Fido2RegistrationEntry fido2RegistrationEntry = this.getFido2RegistrationEntryById(id);
+        log.debug("Fido2RegistrationEntry identified by id:{} is:{}", id, fido2RegistrationEntry);
         if (fido2RegistrationEntry == null) {
-            throw new InvalidAttributeException("No device found with uuid:{" + uuid + "}");
+            throw new InvalidAttributeException("No Fido2RegistrationEntry found with id:{" + id + "}");
         }
-
-        String dn = this.getDnFido2RegistrationEntry(fido2RegistrationEntry.getId());
-        log.info("Remove Fido2RegistrationEntry with dn:{}", dn);
 
         // delete entry
-        persistenceEntryManager.removeRecursively(dn, Fido2RegistrationEntry.class);
+        persistenceEntryManager.removeRecursively(fido2RegistrationEntry.getBaseDn(), Fido2RegistrationEntry.class);
 
         // verify post delete
-        fido2RegistrationEntry = this.getFido2RegistrationEntryByDeviceId(uuid);
+        fido2RegistrationEntry = this.getFido2RegistrationEntryByDeviceId(id);
         if (fido2RegistrationEntry != null) {
             throw new WebApplicationException(
-                    "Fido2RegistrationEntry device with uuid:{" + uuid + "} could not be deleted!");
+                    "Fido2RegistrationEntry device with id:{" + id + "} could not be deleted!");
         }
-        log.info("Successfully deleted Fido2RegistrationEntry device with uuid:{}", uuid);
+        log.info("Successfully deleted Fido2RegistrationEntry device with id:{}", id);
     }
 
     public Fido2RegistrationEntry getFido2RegistrationEntryByDeviceId(String uuid) {

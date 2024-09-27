@@ -11,6 +11,8 @@ import io.jans.as.common.model.session.SessionIdState;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.model.SearchRequest;
+import io.jans.model.token.TokenEntity;
+import io.jans.model.token.TokenType;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.PagedResult;
 import io.jans.orm.model.SortOrder;
@@ -21,6 +23,8 @@ import io.jans.util.StringHelper;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
+
+import static io.jans.as.model.util.Util.escapeLog;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -41,6 +45,9 @@ public class SessionService {
 
     @Inject
     CacheService cacheService;
+
+    @Inject
+    TokenService tokenService;
 
     @Inject
     private Logger logger;
@@ -97,7 +104,8 @@ public class SessionService {
                 Filter sidFilter = Filter.createSubstringFilter(ApiConstants.OUTSIDE_SID, null, targetArray, null);
                 Filter sessAttrFilter = Filter.createSubstringFilter(ApiConstants.JANS_SESS_ATTR, null, targetArray,
                         null);
-                Filter permissionFilter = Filter.createSubstringFilter("jansPermissionGrantedMap", null, targetArray, null);
+                Filter permissionFilter = Filter.createSubstringFilter("jansPermissionGrantedMap", null, targetArray,
+                        null);
                 Filter idFilter = Filter.createSubstringFilter(ApiConstants.JANSID, null, targetArray, null);
                 filters.add(Filter.createORFilter(userFilter, sidFilter, sessAttrFilter, permissionFilter, idFilter));
             }
@@ -124,8 +132,51 @@ public class SessionService {
 
     }
 
-    public void revokeSession(String userDn) {
-        logger.debug("Revoke session userDn:{}, cacheService:{}", userDn, cacheService);
+    public void revokeSessionTokens(String id, String sessionDn) {
+        logger.info("Revoke session tokens for id:{}, sessionDn:{}", id, sessionDn);
+        try {
+            String[] tokenTypeList = { TokenType.ACCESS_TOKEN.getValue(), TokenType.ID_TOKEN.getValue() };
+            List<TokenEntity> tokenList = tokenService.getTokenEntityBySessionDn(sessionDn, tokenTypeList);
+            logger.info("Revoke tokens for id:{}, sessionDn:{}, tokenList:{}", id, sessionDn, tokenList);
+            for (TokenEntity token : tokenList) {
+                tokenService.revokeTokenEntity(token.getTokenCode());
+            }
+        } catch (Exception ex) {
+            logger.error(" Error while revoking session token is - ", ex);
+        }
+    }
+
+    public void revokeSessionById(String id) {
+        if (logger.isInfoEnabled()) {
+            logger.info("Delete session by id:{}", escapeLog(id));
+        }
+
+        if (StringUtils.isNotBlank(id)) {
+            Filter filter = Filter.createANDFilter(Filter.createEqualityFilter(ApiConstants.JANSID, id),
+                    Filter.createEqualityFilter("jansState", SessionIdState.AUTHENTICATED));
+
+            List<SessionId> sessionList = persistenceEntryManager.findEntries(getDnForSession(null), SessionId.class,
+                    filter);
+            logger.debug("User sessionList:{}", sessionList);
+
+            if (sessionList == null || sessionList.isEmpty()) {
+                throw new NotFoundException(
+                        "No " + SessionIdState.AUTHENTICATED + " session exists for the id '" + id + "'!!!");
+            }
+
+            sessionList.stream().forEach(session -> {
+                persistenceEntryManager.remove(session.getDn(), SessionId.class);
+                cacheService.remove(session.getDn());
+                revokeSessionTokens(id, session.getDn());
+            });
+        }
+    }
+
+    public void revokeUserSession(String userDn) {
+        if (logger.isInfoEnabled()) {
+            logger.info("Delete session of userDn:{}", escapeLog(userDn));
+        }
+        logger.info("Revoke session userDn:{}, cacheService:{}", userDn, cacheService);
 
         if (StringUtils.isNotBlank(userDn)) {
             Filter filter = Filter.createANDFilter(Filter.createEqualityFilter("jansUsrDN", userDn),
@@ -143,9 +194,9 @@ public class SessionService {
             sessionList.stream().forEach(session -> {
                 persistenceEntryManager.remove(session.getDn(), SessionId.class);
                 cacheService.remove(session.getDn());
+                revokeSessionTokens(userDn, session.getDn());
             });
         }
-
     }
 
 }

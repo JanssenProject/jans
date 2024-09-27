@@ -63,17 +63,50 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/fido2.write
-  /fido2/registration/device/{uuid}:
+  /fido2/registration/id/{jansId}:
+    get:
+      tags:
+      - Fido2 - Registration
+      summary: Fetch Fido2RegistrationEntry by Id.
+      description: Fetch Fido2RegistrationEntry by Id.
+      operationId: get-fido2-data
+      parameters:
+      - name: jansId
+        in: path
+        description: Fido2Registration identifier
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fido2RegistrationEntry'
+              examples:
+                Response example:
+                  description: Response example
+                  value: ""
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+        "500":
+          description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/fido2.readonly
     delete:
       tags:
       - Fido2 - Registration
       summary: Delete Fido2 Device Data based on device UID
       description: Delete Fido2 Device Data based on device UID
-      operationId: delete-fido2-device-data
+      operationId: delete-fido2-data
       parameters:
-      - name: uuid
+      - name: jansId
         in: path
-        description: Unique identifier string (UUID) assigned to device.
+        description: Fido2Registration Unique identifier.
         required: true
         schema:
           type: string
@@ -194,7 +227,84 @@ paths:
               examples:
                 Response example:
                   description: Response example
-                  value: ""
+                  value: |
+                    {
+                        "start": 0,
+                        "totalEntriesCount": 2,
+                        "entriesCount": 2,
+                        "entries": [
+                            {
+                                "dn": "jansId=50b1c565-cb63-4d1c-9e60-b25c7ed15807,ou=fido2_register,inum=4e138215-42c6-43b2-a138-e98d282421a3,ou=people,o=jans",
+                                "id": "50b1c565-cb63-4d1c-9e60-b25c7ed15807",
+                                "challange": "uKQWXt4bowi2DM8EWtuFWOhMZLh9Fqw7r-4LWFcFY2I",
+                                "challengeHash": 73147,
+                                "creationDate": "2024-09-25T17:32:00",
+                                "userInum": "4e138215-42c6-43b2-a138-e98d282421a3",
+                                "rpId": "admin-ui-test.gluu.org",
+                                "deletable": false,
+                                "publicKeyId": "TTtrcadQOUwPKVRBccLNJw3PnNw",
+                                "publicKeyIdHash": 31071,
+                                "registrationData": {
+                                    "createdDate": "2024-09-25T17:32:00",
+                                    "updatedDate": "2024-09-25T17:34:53",
+                                    "createdBy": "arnab",
+                                    "updatedBy": "arnab",
+                                    "username": "arnab",
+                                    "domain": "admin-ui-test.gluu.org",
+                                    "userId": "EZ-odnHs9EDWdY52OikD--lqjvFAHqJdZctqnxu0Kao",
+                                    "challenge": "uKQWXt4bowi2DM8EWtuFWOhMZLh9Fqw7r-4LWFcFY2I",
+                                    "attenstationRequest": "{\"attestation\":\"direct\",\"displayName\":\"arnab\",\"authenticatorSelection\":{\"authenticatorAttachment\":\"platform\",\"userVerification\":\"discouraged\",\"requireResidentKey\":\"false\"},\"username\":\"arnab\"}",
+                                    "attenstationResponse": "{\"type\":\"public-key\",\"id\":\"TTtrcadQOUwPKVRBccLNJw3PnNw\",\"response\":{\"attestationObject\":\"o2NmbXRkbm9uZWdhdHRTdG10oGhhdXRoRGF0YViYjZHVp5tBCFVmGadN9klm_j50zRn-V4OMG9wljvmxv3ddAAAAAPv8MAcVTk7MjAtuAgVX170AFE07a3GnUDlMDylUQXHCzScNz5zcpQECAyYgASFYIEAey21gffFOf4PAHS2YtXE2mShi8LDXhHg5zouLceaXIlggvCyrOjHhY_KvPDCKmssmF1g8YbEn_fXRAfHf-cfVros\",\"clientDataJSON\":\"eyJ0eXBlIjoid2ViYXV0aG4uY3JlYXRlIiwiY2hhbGxlbmdlIjoidUtRV1h0NGJvd2kyRE04RVd0dUZXT2hNWkxoOUZxdzdyLTRMV0ZjRlkySSIsIm9yaWdpbiI6Imh0dHBzOi8vYWRtaW4tdWktdGVzdC5nbHV1Lm9yZyIsImNyb3NzT3JpZ2luIjpmYWxzZX0\"},\"clientExtensionResults\":{}}",
+                                    "uncompressedECPoint": "pQECAyYgASFYIEAey21gffFOf4PAHS2YtXE2mShi8LDXhHg5zouLceaXIlggvCyrOjHhY_KvPDCKmssmF1g8YbEn_fXRAfHf-cfVros",
+                                    "publicKeyId": "TTtrcadQOUwPKVRBccLNJw3PnNw",
+                                    "type": "public-key",
+                                    "status": "registered",
+                                    "counter": 0,
+                                    "attestationType": "none",
+                                    "signatureAlgorithm": 0,
+                                    "applicationId": "admin-ui-test.gluu.org"
+                                },
+                                "counter": 0,
+                                "registrationStatus": "registered",
+                                "baseDn": "jansId=50b1c565-cb63-4d1c-9e60-b25c7ed15807,ou=fido2_register,inum=4e138215-42c6-43b2-a138-e98d282421a3,ou=people,o=jans"
+                            },
+                            {
+                                "dn": "jansId=6e196a5d-122b-4f06-8ff8-6f41b32bc2a6,ou=fido2_register,inum=1e73f801-22c2-4c19-a757-f96a87a5c713,ou=people,o=jans",
+                                "id": "6e196a5d-122b-4f06-8ff8-6f41b32bc2a6",
+                                "challange": "CCkCZgre81B-6SYCzzfLqSReF4b7enbibnp487AEPkU",
+                                "challengeHash": 76195,
+                                "creationDate": "2024-09-25T17:13:51",
+                                "userInum": "1e73f801-22c2-4c19-a757-f96a87a5c713",
+                                "rpId": "admin-ui-test.gluu.org",
+                                "deletable": false,
+                                "publicKeyId": "RaA1BFgMwgKXFSVYJ4qPab0Dz_Y4zntWH0Wq21Uz6c8",
+                                "publicKeyIdHash": 75217,
+                                "registrationData": {
+                                    "createdDate": "2024-09-25T17:13:51",
+                                    "updatedDate": "2024-09-25T17:15:43",
+                                    "createdBy": "admin",
+                                    "updatedBy": "admin",
+                                    "username": "admin",
+                                    "domain": "admin-ui-test.gluu.org",
+                                    "userId": "fEJVrzv_s5p5_SCUjiVofbS01eKJwybVIFoRcE-Vl6Y",
+                                    "challenge": "CCkCZgre81B-6SYCzzfLqSReF4b7enbibnp487AEPkU",
+                                    "attenstationRequest": "{\"attestation\":\"direct\",\"displayName\":\"admin\",\"authenticatorSelection\":{\"authenticatorAttachment\":\"platform\",\"userVerification\":\"discouraged\",\"requireResidentKey\":\"false\"},\"username\":\"admin\"}",
+                                    "attenstationResponse": "{\"type\":\"public-key\",\"id\":\"RaA1BFgMwgKXFSVYJ4qPab0Dz_Y4zntWH0Wq21Uz6c8\",\"response\":{\"attestationObject\":\"o2NmbXRmcGFja2VkZ2F0dFN0bXSiY2FsZyZjc2lnWEcwRQIhANoBaaelHNJkCSnrmxSeixWKyCsA-IYW19LAv7IQoRcnAiAaQw6Rjc1By7RdA00k6qzDtOwLCoPvBTFACAL9nr6tPWhhdXRoRGF0YVikjZHVp5tBCFVmGadN9klm_j50zRn-V4OMG9wljvmxv3dFAAAAAK3OAAI1vMYKZIsLJfHwVQMAIEWgNQRYDMIClxUlWCeKj2m9A8_2OM57Vh9FqttVM-nPpQECAyYgASFYIMyALzgwTY7Oe3rzssnlBfrwk5TuZ1a-cKkEuRIYE0-tIlgghEQR51yw4l1fQLjvYi4ydFdOvC5rHkVrk-xxcuwcotE\",\"clientDataJSON\":\"eyJ0eXBlIjoid2ViYXV0aG4uY3JlYXRlIiwiY2hhbGxlbmdlIjoiQ0NrQ1pncmU4MUItNlNZQ3p6ZkxxU1JlRjRiN2VuYmlibnA0ODdBRVBrVSIsIm9yaWdpbiI6Imh0dHBzOi8vYWRtaW4tdWktdGVzdC5nbHV1Lm9yZyIsImNyb3NzT3JpZ2luIjpmYWxzZX0\"},\"clientExtensionResults\":{}}",
+                                    "uncompressedECPoint": "pQECAyYgASFYIMyALzgwTY7Oe3rzssnlBfrwk5TuZ1a-cKkEuRIYE0-tIlgghEQR51yw4l1fQLjvYi4ydFdOvC5rHkVrk-xxcuwcotE",
+                                    "publicKeyId": "RaA1BFgMwgKXFSVYJ4qPab0Dz_Y4zntWH0Wq21Uz6c8",
+                                    "type": "public-key",
+                                    "status": "registered",
+                                    "counter": 0,
+                                    "attestationType": "packed",
+                                    "signatureAlgorithm": 0,
+                                    "applicationId": "admin-ui-test.gluu.org"
+                                },
+                                "counter": 0,
+                                "registrationStatus": "registered",
+                                "baseDn": "jansId=6e196a5d-122b-4f06-8ff8-6f41b32bc2a6,ou=fido2_register,inum=1e73f801-22c2-4c19-a757-f96a87a5c713,ou=people,o=jans"
+                            }
+                        ]
+                    }
         "401":
           description: Unauthorized
         "500":
