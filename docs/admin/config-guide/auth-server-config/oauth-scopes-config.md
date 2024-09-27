@@ -23,14 +23,14 @@ tasks.
 
     Use a fully functional text-based user interface from the terminal. 
     Learn how to use Jans Text-based UI (TUI) 
-    [here](./config-tools/jans-tui/README.md) or jump straight to the
+    [here](../config-tools/jans-tui/README.md) or jump straight to the
     [configuration steps](#using-text-based-ui)
 
 === "Use REST API"
 
     Use REST API for programmatic access or invoke via tools like CURL or 
     Postman. Learn how to use Janssen Server Config API 
-    [here](./config-tools/config-api/README.md) or Jump straight to the
+    [here](../config-tools/config-api/README.md) or Jump straight to the
     [Using Configuration REST API](#using-configuration-rest-api)
 
 
@@ -268,7 +268,7 @@ Operation ID: patch-oauth-scopes-by-id
   Schema: Array of JsonPatch
 ```
 The `patch-oauth-scopes-by-id` operation uses the [JSON Patch](https://jsonpatch.com/#the-patch) schema to describe 
-the configuration change. Refer [here](../../admin/config-guide/config-tools/jans-cli/README.md#patch-request-schema) 
+the configuration change. Refer [here](../config-tools/jans-cli/README.md#patch-request-schema) 
 to know more about schema.
 
 
@@ -376,9 +376,6 @@ Just change the `inum` value to your own according to which one you want to dele
 ## Using Text-based UI
 
 
-In Janssen, You can deploy and customize an Scope using
-the [Text-Based UI](./config-tools/jans-tui/README.md) also.
-
 You can start TUI using the command below:
 
 ```bash title="Command"
@@ -407,4 +404,4 @@ such as `oauth`, `OpenID`, `dynamic`, and `uma`, with the correct data.
 
 Janssen Server Configuration REST API exposes relevant endpoints for managing
 and configuring the OAuth Scope. Endpoint details are published in the [Swagger
-document](./../reference/openapi.md).
+document](./../../reference/openapi.md).

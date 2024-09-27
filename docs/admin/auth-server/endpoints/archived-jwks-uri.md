@@ -35,7 +35,7 @@ Archived JWKs endpoint can be further configured using Janssen Server configurat
 [Janssen Text-based UI(TUI)](../../config-guide/config-tools/jans-tui/README.md) to configure the properties,
 navigate via `Auth Server`->`Properties`.
 
-- [archivedJwksUri](../../reference/json/properties/janssenauthserver-properties.md#archivedjwksuri)
+- [archivedJwksUri](../../reference/json/properties/janssenauthserver-properties.md#jwksuri)
 - [archivedJwkLifetimeInSeconds](../../reference/json/properties/janssenauthserver-properties.md#archivedjwklifetimeinseconds)
 
 If `archivedJwkLifetimeInSeconds` is not set then AS falls back to one year expiration. After archived jwk lifetime is passed, jwk is removed from archive.

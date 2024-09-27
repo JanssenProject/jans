@@ -7,7 +7,7 @@ tags:
 
 # Flows navigation, UI pages and assets
 
-[RRF](../../../agama/language-reference.md#RRF) is a powerful construct in Agama. Its syntax follows this pattern:
+[RRF](../../../agama/language-reference.md#rrf) is a powerful construct in Agama. Its syntax follows this pattern:
 
 (_assignment-var_ =)? `RRF` "path-to-UI-template" _map-variable_?
 

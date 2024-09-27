@@ -58,4 +58,5 @@ Please follow these steps to install intermediate certificates:
 
 - Place your intermediate certificate file in `/etc/certs`
 - Modify `/etc/apache2/sites-available/https_jans.conf` and add `SSLCertificateChainFile /etc/certs/name_of_your_interm_root_cert.crt` under the line containing `SSLCertificateKeyFile`
-- [Restart](../restarting-services.md) the `httpd/apache2` service
+- [Restart](../../janssen-server/vm-ops/restarting-services.md#restart) the `httpd/apache2` service
+
