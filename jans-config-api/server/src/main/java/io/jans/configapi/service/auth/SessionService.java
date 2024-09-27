@@ -59,13 +59,13 @@ public class SessionService {
         return String.format("jansId=%s,%s", sessionId, staticConfiguration.getBaseDn().getSessions());
     }
 
-    public SessionId getSessionById(String sid) {
-        logger.debug("Get Session by sid:{}", sid);
+    public SessionId getSessionById(String id) {
+        logger.debug("Get Session by id:{}", id);
         SessionId sessionId = null;
         try {
-            sessionId = persistenceEntryManager.find(SessionId.class, getDnForSession(sid));
+            sessionId = persistenceEntryManager.find(SessionId.class, getDnForSession(id));
         } catch (Exception ex) {
-            logger.error("Failed to load session entry", ex);
+            logger.error("Failed to load session entry with id " + id, ex);
         }
         return sessionId;
     }
@@ -155,20 +155,18 @@ public class SessionService {
             Filter filter = Filter.createANDFilter(Filter.createEqualityFilter(ApiConstants.JANSID, id),
                     Filter.createEqualityFilter("jansState", SessionIdState.AUTHENTICATED));
 
-            List<SessionId> sessionList = persistenceEntryManager.findEntries(getDnForSession(null), SessionId.class,
-                    filter);
-            logger.debug("User sessionList:{}", sessionList);
+            SessionId sessionToDelete = getSessionById(id);
+            logger.debug("User sessionToDelete:{}", sessionToDelete);
 
-            if (sessionList == null || sessionList.isEmpty()) {
+            if (sessionToDelete == null) {
                 throw new NotFoundException(
-                        "No " + SessionIdState.AUTHENTICATED + " session exists for the id '" + id + "'!!!");
+                        "No " + SessionIdState.AUTHENTICATED + " session exists for id '" + id + "'!!!");
             }
 
-            sessionList.stream().forEach(session -> {
-                persistenceEntryManager.remove(session.getDn(), SessionId.class);
-                cacheService.remove(session.getDn());
-                revokeSessionTokens(id, session.getDn());
-            });
+            persistenceEntryManager.remove(sessionToDelete.getDn(), SessionId.class);
+            cacheService.remove(sessionToDelete.getDn());
+            revokeSessionTokens(id, sessionToDelete.getDn());
+
         }
     }
 
@@ -188,7 +186,7 @@ public class SessionService {
 
             if (sessionList == null || sessionList.isEmpty()) {
                 throw new NotFoundException(
-                        "No " + SessionIdState.AUTHENTICATED + " session exists for the user '" + userDn + "'!!!");
+                        "No " + SessionIdState.AUTHENTICATED + " session exists for user '" + userDn + "'!!!");
             }
 
             sessionList.stream().forEach(session -> {
