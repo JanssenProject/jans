@@ -29,6 +29,7 @@ import io.jans.fido2.service.Fido2Service;
 import io.jans.fido2.service.app.ConfigurationFactory;
 import io.jans.fido2.service.verifier.CertificateVerifier;
 import io.jans.service.cdi.event.ApplicationInitialized;
+import io.jans.service.document.store.exception.DocumentException;
 import io.jans.service.document.store.model.Document;
 import io.jans.service.document.store.service.DBDocumentService;
 import io.jans.util.Pair;
@@ -37,6 +38,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
@@ -131,42 +133,47 @@ public class TocService {
 			log.warn("Fido2 MDS cert and TOC properties should be set");
 			return new HashMap<String, JsonNode>();
 		}
+		log.info("Populating TOC certs entries from {}", mdsTocRootCertsFolder);
 		log.info("Populating TOC entries from {}", mdsTocFilesFolder);
 
-		Path path = FileSystems.getDefault().getPath(mdsTocFilesFolder);
+		try {
+			List<Document> tocRootCertsDocuments = dbDocumentService.getDocumentsByFilePath(mdsTocRootCertsFolder);
+		} catch (Exception e) {
+			log.error("Failed to fetch toc Root Certs Documents ", e);
+			throw new DocumentException(e);
+		}
+
+		List<Document> tocFilesdocuments = new ArrayList<>();
+		try {
+			tocFilesdocuments = dbDocumentService.getDocumentsByFilePath(mdsTocFilesFolder);
+		} catch (Exception e) {
+			log.error("Failed to fetch toc Files Documents ", e);
+			throw new DocumentException(e);
+		}
+
 		List<Map<String, JsonNode>> maps = new ArrayList<>();
-		try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(path)) {
-			Iterator<Path> iter = directoryStream.iterator();
-			while (iter.hasNext()) {
-				Path filePath = iter.next();
+		for(Document document :tocFilesdocuments){
 				try {
-					Pair<LocalDate, Map<String, JsonNode>> result = parseTOC(mdsTocRootCertsFolder, filePath);
+					Pair<LocalDate, Map<String, JsonNode>> result = parseTOC(mdsTocRootCertsFolder, document.getDocument());
 					log.info("Get TOC {} entries with nextUpdate date {}", result.getSecond().size(),
 							result.getFirst());
 
 					maps.add(result.getSecond());
 				} catch (IOException e) {
-					log.warn("Can't access or open path: {}", filePath, e);
+					log.warn("Can't access or open path: {}", document.getFileName(), e);
 				} catch (ParseException e) {
-					log.warn("Can't parse path: {}", filePath, e);
+					log.warn("Can't parse path: {}", document.getFileName(), e);
 				}
 			}
-		} catch (Exception e) {
-			log.warn("Something wrong with path", e);
-		}
 
 		return mergeAndResolveDuplicateEntries(maps);
 	}
 
-    private Map<String, JsonNode> parseTOC(String mdsTocRootCertFile, String mdsTocFileLocation) {
-        try {
-            return parseTOC(mdsTocRootCertFile, FileSystems.getDefault().getPath(mdsTocFileLocation)).getSecond();
-        } catch (IOException e) {
-            throw new Fido2RuntimeException("Unable to read TOC at " + mdsTocFileLocation, e);
-        } catch (ParseException e) {
-            throw new Fido2RuntimeException("Unable to parse TOC at " + mdsTocFileLocation, e);
-        }
-    }
+	private Pair<LocalDate, Map<String, JsonNode>> parseTOC(String mdsTocRootCertsFolder, String content)
+			throws IOException, ParseException {
+		String decodedString = new String(base64Service.decode(content));
+		return readEntriesFromTocJWT(decodedString, mdsTocRootCertsFolder, true);
+	}
 
 	private Pair<LocalDate, Map<String, JsonNode>> parseTOC(String mdsTocRootCertsFolder, Path path)
 			throws IOException, ParseException {
@@ -279,24 +286,43 @@ public class TocService {
 		Fido2Configuration fido2Configuration = appConfiguration.getFido2Configuration();
 
 		String mdsTocFilesFolder = fido2Configuration.getMdsTocsFolder();
-
-		Path path = FileSystems.getDefault().getPath(mdsTocFilesFolder);
-		try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(path)) {
-			Iterator<Path> iter = directoryStream.iterator();
-			while (iter.hasNext()) {
-				Path filePath = iter.next();
-				try (InputStream in = metadataUrl.openStream()) {
-
-					Files.copy(in, filePath, StandardCopyOption.REPLACE_EXISTING);
-
-					log.info("TOC file updated.");
-					return true;
-				}
+		try {
+			List<Document> documents = dbDocumentService.getDocumentsByFilePath(mdsTocFilesFolder);
+			for (Document document : documents){
+				dbDocumentService.removeDocument(document);
 			}
-		} catch (IOException e) {
-			log.warn("Can't access or open path: {}", path, e);
+		} catch (Exception e) {
+			log.error("Failed to remove old document of mdsTocFilesFolder" , e);
+			throw new DocumentException(e);
 		}
-		return false;
+
+		try (InputStream in = metadataUrl.openStream()) {
+			byte[] sourceBytes = IOUtils.toByteArray(in);
+
+			String encodedString = base64Service.encodeToString(sourceBytes);
+
+			Document document = new Document();
+			document.setFileName("mdsToc");
+			document.setDescription("MDS TOC JWT file");
+			document.setService(new ArrayList<>(Arrays.asList("Fido2 MDS")));
+			document.setFilePath(mdsTocFilesFolder);
+			try {
+				document.setDocument(encodedString);
+				document.setInum(dbDocumentService.generateInumForNewDocument());
+				document.setDn(dbDocumentService.getDnForDocument(document.getInum()));
+				document.setEnabled(true);
+				dbDocumentService.addDocument(document);
+			} catch (Exception e) {
+				log.error("Failed to add new document of mdsTocFilesFolder" , e);
+				throw new DocumentException(e);
+			}
+
+			log.info("TOC file updated.");
+			return true;
+		} catch (IOException e) {
+			log.warn("Can't access or open path: {}", metadataUrl, e);
+			throw new Fido2RuntimeException("Can't access or open path: {}" + metadataUrl + e.getMessage(), e);
+		}
 	}
 
 	private void loadMetadataServiceExternalProvider() {
@@ -362,7 +388,8 @@ public class TocService {
 				try {
 					dbDocumentService.removeDocument(certDoc);
 				} catch (Exception e) {
-					throw new RuntimeException(e);
+					log.error("Failed to remove document file[ath:'" +certDoc.getFilePath()+ "' : " , e);
+					throw new DocumentException(e);
 				}
 			}
 
@@ -379,7 +406,8 @@ public class TocService {
 					dbDocumentService.addDocument(document);
 					result.add(document.getInum());
 				} catch (Exception e) {
-					throw new RuntimeException(e);
+					log.error("Failed to add document for  '" + document.getFileName() + ", message: " + e.getMessage(), e);
+					throw new DocumentException(e);
 				}
 			}
 	}
