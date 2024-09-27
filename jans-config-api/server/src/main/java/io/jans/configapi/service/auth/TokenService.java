@@ -15,6 +15,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
 @ApplicationScoped
@@ -38,6 +39,9 @@ public class TokenService {
     }
 
     public TokenEntity getTokenEntityByCode(String tknCde) {
+        if (logger.isInfoEnabled()) {
+            logger.info("Get token - tknCde():{}", escapeLog(tknCde));
+        }
         TokenEntity tokenEntity = null;
         try {
             tokenEntity = persistenceEntryManager.find(TokenEntity.class, getDnForTokenEntity(tknCde));
@@ -91,6 +95,25 @@ public class TokenService {
                 null, searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
                 searchRequest.getStartIndex(), searchRequest.getCount(), searchRequest.getMaxCount());
 
+    }
+
+    public List<TokenEntity> getTokenEntityBySessionDn(String sessionDn, String[] tokenTypeList) {
+        logger.info("Get Token for a sessionDn:{}, tokenTypeList:{}", sessionDn, tokenTypeList);
+        List<TokenEntity> tokens = null;
+        if (StringUtils.isEmpty(sessionDn)) {
+            return tokens;
+        }
+        Filter ssnIdFilter = Filter.createEqualityFilter("ssnId", sessionDn);
+        Filter searchFilter = Filter.createANDFilter(ssnIdFilter);
+        if (tokenTypeList != null && tokenTypeList.length > 0) {
+            searchFilter = Filter.createANDFilter(Filter.createANDFilter(ssnIdFilter),
+                    Filter.createSubstringFilter("tknTyp", null, tokenTypeList, null));
+        }
+
+        logger.info("Fileter for token sessionDn:{}, tokenTypeList:{} is:{}", sessionDn, tokenTypeList, searchFilter);
+        tokens = persistenceEntryManager.findEntries(getDnForTokenEntity(null), TokenEntity.class, searchFilter);
+        logger.debug("Token for session sessionDn:{} are tokens:{}", sessionDn, tokens);
+        return tokens;
     }
 
     public void revokeTokenEntity(String tknCde) {
