@@ -46,11 +46,11 @@ public class Fido2RegistrationResource extends BaseResource {
     private class Fido2RegistrationEntryPagedResult extends PagedResult<Fido2RegistrationEntry> {
     };
 
-    @Operation(summary = "Get a list of Fido2RegistrationEntry.", description = "Get a list of Fido2RegistrationEntry.", operationId = "get-fido2-registration-data", tags = {
+    @Operation(summary = "Get a list of Fido2RegistrationEntry.", description = "Get a list of Fido2RegistrationEntry.", operationId = "search-fido2-registration-data", tags = {
             "Fido2 - Registration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.FIDO2_CONFIG_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Fido2RegistrationEntryPagedResult.class), examples = @ExampleObject(name = "Response example", value = "example/fido2/get-all-fido2-data.json"))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Fido2RegistrationEntryPagedResult.class), examples = @ExampleObject(name = "Response example", value = "example/fido2/search-fido2-registration-data.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
@@ -79,11 +79,11 @@ public class Fido2RegistrationResource extends BaseResource {
         return Response.ok(this.doSearch(searchReq)).build();
     }
 
-    @Operation(summary = "Fetch Fido2RegistrationEntry by Id.", description = "Fetch Fido2RegistrationEntry by Id.", operationId = "get-fido2-data", tags = {
+    @Operation(summary = "Fetch Fido2RegistrationEntry by Id.", description = "Fetch Fido2RegistrationEntry by Id.", operationId = "get-fido2-by-id", tags = {
             "Fido2 - Registration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.FIDO2_CONFIG_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Fido2RegistrationEntry.class), examples = @ExampleObject(name = "Response example", value = "example/fido2/get-fido2-data.json"))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Fido2RegistrationEntry.class), examples = @ExampleObject(name = "Response example", value = "example/fido2/get-fido2-by-id.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
@@ -106,7 +106,7 @@ public class Fido2RegistrationResource extends BaseResource {
             "Fido2 - Registration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.FIDO2_CONFIG_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = Fido2RegistrationEntry.class)))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = Fido2RegistrationEntry.class)), examples = @ExampleObject(name = "Response example", value = "example/fido2/get-all-fido2-data.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
@@ -114,7 +114,7 @@ public class Fido2RegistrationResource extends BaseResource {
     @ProtectedApi(scopes = { Constants.FIDO2_CONFIG_READ_ACCESS })
     public Response findAllRegisteredByUsername(
             @Parameter(description = "User name") @PathParam("username") @NotNull String username) {
-        logger.debug("FIDO2 registration entries by username.");
+        logger.info("FIDO2 registration entries by username.");
         List<Fido2RegistrationEntry> entries = fido2RegistrationService.findAllRegisteredByUsername(username);
         return Response.ok(entries).build();
     }

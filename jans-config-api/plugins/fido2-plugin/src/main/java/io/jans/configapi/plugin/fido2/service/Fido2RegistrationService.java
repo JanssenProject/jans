@@ -127,15 +127,20 @@ public class Fido2RegistrationService {
     }
 
     public List<Fido2RegistrationEntry> findAllRegisteredByUsername(String username) {
+        if (log.isInfoEnabled()) {
+            log.info("Find Fido2 Registered by username:{}", escapeLog(username));
+        }
+
         String userInum = userFido2Srv.getUserInum(username);
+        log.info("Find Fido2 Registered by userInum:{}", userInum);
         if (userInum == null) {
             return Collections.emptyList();
         }
 
         String baseDn = getBaseDnForFido2RegistrationEntries(userInum);
+        log.info("Find Fido2 Registered by baseDn:{}", baseDn);
         if (persistenceEntryManager.hasBranchesSupport(baseDn) && !containsBranch(baseDn)) {
             return Collections.emptyList();
-
         }
 
         Filter registeredFilter = Filter.createEqualityFilter("jansStatus",
