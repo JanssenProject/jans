@@ -31,7 +31,7 @@ public class DBDocumentService implements Serializable {
 	public static final String displayName = "displayName";
 	public static final String description = "description";
 	public static final String alias = "jansAlias";
-	public static final String jansFilePAth = "jansFilePAth";
+	public static final String jansFilePath = "jansFilePath";
 
 	@Inject
 	private Logger logger;
@@ -253,7 +253,7 @@ public class DBDocumentService implements Serializable {
 		Filter searchFilter = null;
 		if (StringHelper.isNotEmpty(filePath)) {
 			String[] targetArray = new String[] { filePath };
-			Filter displayNameFilter = Filter.createSubstringFilter(jansFilePAth, null, targetArray,
+			Filter displayNameFilter = Filter.createSubstringFilter(jansFilePath, null, targetArray,
 					null);
 			searchFilter = Filter.createORFilter(displayNameFilter);
 		}

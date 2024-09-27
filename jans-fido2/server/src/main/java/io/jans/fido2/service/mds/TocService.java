@@ -29,6 +29,7 @@ import io.jans.fido2.service.Fido2Service;
 import io.jans.fido2.service.app.ConfigurationFactory;
 import io.jans.fido2.service.verifier.CertificateVerifier;
 import io.jans.service.cdi.event.ApplicationInitialized;
+import io.jans.service.document.store.exception.DocumentException;
 import io.jans.service.document.store.model.Document;
 import io.jans.service.document.store.service.DBDocumentService;
 import io.jans.util.Pair;
@@ -138,14 +139,16 @@ public class TocService {
 		try {
 			List<Document> tocRootCertsDocuments = dbDocumentService.getDocumentsByFilePath(mdsTocRootCertsFolder);
 		} catch (Exception e) {
-			throw new RuntimeException(e);
+			log.error("Failed to fetch toc Root Certs Documents ", e);
+			throw new DocumentException(e);
 		}
 
 		List<Document> tocFilesdocuments = new ArrayList<>();
 		try {
 			tocFilesdocuments = dbDocumentService.getDocumentsByFilePath(mdsTocFilesFolder);
 		} catch (Exception e) {
-			throw new RuntimeException(e);
+			log.error("Failed to fetch toc Files Documents ", e);
+			throw new DocumentException(e);
 		}
 
 		List<Map<String, JsonNode>> maps = new ArrayList<>();
@@ -289,7 +292,8 @@ public class TocService {
 				dbDocumentService.removeDocument(document);
 			}
 		} catch (Exception e) {
-			throw new RuntimeException(e);
+			log.error("Failed to remove old document of mdsTocFilesFolder" , e);
+			throw new DocumentException(e);
 		}
 
 		try (InputStream in = metadataUrl.openStream()) {
@@ -309,14 +313,15 @@ public class TocService {
 				document.setEnabled(true);
 				dbDocumentService.addDocument(document);
 			} catch (Exception e) {
-				throw new RuntimeException(e);
+				log.error("Failed to add new document of mdsTocFilesFolder" , e);
+				throw new DocumentException(e);
 			}
 
 			log.info("TOC file updated.");
 			return true;
 		} catch (IOException e) {
 			log.warn("Can't access or open path: {}", metadataUrl, e);
-			throw new RuntimeException(e);
+			throw new Fido2RuntimeException("Can't access or open path: {}" + metadataUrl + e.getMessage(), e);
 		}
 	}
 
@@ -383,7 +388,8 @@ public class TocService {
 				try {
 					dbDocumentService.removeDocument(certDoc);
 				} catch (Exception e) {
-					throw new RuntimeException(e);
+					log.error("Failed to remove document file[ath:'" +certDoc.getFilePath()+ "' : " , e);
+					throw new DocumentException(e);
 				}
 			}
 
@@ -400,7 +406,8 @@ public class TocService {
 					dbDocumentService.addDocument(document);
 					result.add(document.getInum());
 				} catch (Exception e) {
-					throw new RuntimeException(e);
+					log.error("Failed to add document for  '" + document.getFileName() + ", message: " + e.getMessage(), e);
+					throw new DocumentException(e);
 				}
 			}
 	}
