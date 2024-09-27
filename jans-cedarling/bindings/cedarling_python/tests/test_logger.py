@@ -1,4 +1,4 @@
-from cedarling_python import MemoryLogConfig, OffLogConfig, StdOutLogConfig
+from cedarling_python import MemoryLogConfig, DisabledLoggingConfig, StdOutLogConfig
 from cedarling_python import Cedarling
 from config import sample_bootstrap_config
 
@@ -43,7 +43,7 @@ def test_memory_logger(sample_bootstrap_config):
 def test_off_logger(sample_bootstrap_config):
     # map fixture to variable with shorter name for readability
     config = sample_bootstrap_config
-    config.log_config = OffLogConfig()
+    config.log_config = DisabledLoggingConfig()
 
     cedarling = Cedarling(config)
 

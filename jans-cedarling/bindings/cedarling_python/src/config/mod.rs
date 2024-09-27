@@ -18,7 +18,7 @@ mod stdout_log_config;
 pub fn register_entities(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<authz_config::AuthzConfig>()?;
     m.add_class::<memory_log_config::MemoryLogConfig>()?;
-    m.add_class::<off_log_config::OffLogConfig>()?;
+    m.add_class::<off_log_config::DisabledLoggingConfig>()?;
     m.add_class::<stdout_log_config::StdOutLogConfig>()?;
     m.add_class::<policy_store_source::PolicyStoreSource>()?;
     m.add_class::<policy_store_config::PolicyStoreConfig>()?;

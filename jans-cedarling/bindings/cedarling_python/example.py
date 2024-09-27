@@ -1,4 +1,4 @@
-from cedarling_python import AuthzConfig, MemoryLogConfig, OffLogConfig, StdOutLogConfig
+from cedarling_python import AuthzConfig, MemoryLogConfig, DisabledLoggingConfig, StdOutLogConfig
 from cedarling_python import PolicyStoreSource, PolicyStoreConfig, BootstrapConfig
 from cedarling_python import Cedarling
 
@@ -14,7 +14,7 @@ log_config = MemoryLogConfig(log_ttl=100)
 # log_config.log_ttl = 120
 
 # use disabled log config to ignore all logging
-# log_config = OffLogConfig()
+# log_config = DisabledLoggingConfig()
 
 # use log config to print logs to stdout
 # log_config = StdOutLogConfig()

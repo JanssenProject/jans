@@ -1,4 +1,4 @@
-from cedarling_python import AuthzConfig, MemoryLogConfig, OffLogConfig, StdOutLogConfig
+from cedarling_python import AuthzConfig, MemoryLogConfig, DisabledLoggingConfig, StdOutLogConfig
 from cedarling_python import PolicyStoreSource, PolicyStoreConfig, BootstrapConfig
 from cedarling_python import Cedarling
 
@@ -43,7 +43,7 @@ def print_doc(type_value):
     print("___\n")
 
 
-types = [AuthzConfig, MemoryLogConfig, OffLogConfig,
+types = [AuthzConfig, MemoryLogConfig, DisabledLoggingConfig,
          StdOutLogConfig, PolicyStoreSource, PolicyStoreConfig, BootstrapConfig,
          Cedarling]
 for t in types:

@@ -12,7 +12,7 @@ use crate::config::authz_config::AuthzConfig;
 use crate::config::policy_store_config::PolicyStoreConfig;
 
 use super::memory_log_config::MemoryLogConfig;
-use super::off_log_config::OffLogConfig;
+use super::off_log_config::DisabledLoggingConfig;
 use super::stdout_log_config::StdOutLogConfig;
 
 /// BootstrapConfig
@@ -31,7 +31,7 @@ use super::stdout_log_config::StdOutLogConfig;
 ///
 ///     :param authz_config: An `AuthzConfig` object representing the authorization configuration.
 ///     :param log_config: A logging configuration, which can be one of the following:
-///                        - `OffLogConfig`: Disable logging.
+///                        - `DisabledLoggingConfig`: Disable logging.
 ///                        - `MemoryLogConfig`: Configure memory-based logging.
 ///                        - `StdOutLogConfig`: Configure logging to standard output.
 ///     :param policy_store_config: A `PolicyStoreConfig` object representing the policy store configuration.
@@ -48,7 +48,7 @@ use super::stdout_log_config::StdOutLogConfig;
 /// .. attribute:: log_config
 ///
 ///     A set of properties used to configure logging in the `Cedarling` application. The log configuration must be one of the following:
-///     - `OffLogConfig`: Disables logging.
+///     - `DisabledLoggingConfig`: Disables logging.
 ///     - `MemoryLogConfig`: Configures memory-based logging.
 ///     - `StdOutLogConfig`: Logs to standard output.
 ///
@@ -68,12 +68,12 @@ use super::stdout_log_config::StdOutLogConfig;
 ///     Initializes a new instance of the `BootstrapConfig` class.
 ///
 ///     :param authz_config: Optional. An `AuthzConfig` object representing the authorization configuration.
-///     :param log_config: Optional. A logging configuration (`OffLogConfig`, `MemoryLogConfig`, `StdOutLogConfig`).
+///     :param log_config: Optional. A logging configuration (`DisabledLoggingConfig`, `MemoryLogConfig`, `StdOutLogConfig`).
 ///     :param policy_store_config: Optional. A `PolicyStoreConfig` object for configuring the policy store.
 ///
 /// .. method(setter):: log_config(self, value)
 ///
-///     Sets the log configuration. The value must be one of the following types: `OffLogConfig`, `MemoryLogConfig`, or `StdOutLogConfig`.
+///     Sets the log configuration. The value must be one of the following types: `DisabledLoggingConfig`, `MemoryLogConfig`, or `StdOutLogConfig`.
 ///
 ///     :param value: The log configuration object.
 ///     :raises TypeError: If the provided log configuration is not a valid type.
@@ -92,8 +92,8 @@ use super::stdout_log_config::StdOutLogConfig;
 ///
 ///     bootstrap_config = BootstrapConfig(authz_config=authz, log_config=log_config, policy_store_config=policy_store)
 ///
-///     # Setting log config to OffLogConfig
-///     bootstrap_config.log_config = OffLogConfig()
+///     # Setting log config to DisabledLoggingConfig
+///     bootstrap_config.log_config = DisabledLoggingConfig()
 ///
 ///     # Attempting to set an invalid log configuration will raise a TypeError
 ///     try:
@@ -112,7 +112,7 @@ pub struct BootstrapConfig {
     //
     // we implement setter for this field manually
     // because we can use for this option next classes:
-    // - OffLogConfig
+    // - DisabledLoggingConfig
     // - MemoryLogConfig
     // - StdOutLogConfig
     pub log_config: Option<cedarling::LogConfig>,
@@ -123,14 +123,14 @@ pub struct BootstrapConfig {
 
 fn extract_log_config(log_config: &PyObject) -> PyResult<cedarling::LogConfig> {
     let log_type = Python::with_gil(|py| -> PyResult<cedarling::LogTypeConfig> {
-        if let Ok(log_config) = log_config.extract::<OffLogConfig>(py) {
+        if let Ok(log_config) = log_config.extract::<DisabledLoggingConfig>(py) {
             Ok(log_config.into())
         } else if let Ok(log_config) = log_config.extract::<MemoryLogConfig>(py) {
             Ok(log_config.into())
         } else if let Ok(log_config) = log_config.extract::<StdOutLogConfig>(py) {
             Ok(log_config.into())
         } else {
-            Err(PyTypeError::new_err("Invalid log_config type. Expected one of: OffLogConfig, MemoryLogConfig, StdOutLogConfig."))
+            Err(PyTypeError::new_err("Invalid log_config type. Expected one of: DisabledLoggingConfig, MemoryLogConfig, StdOutLogConfig."))
         }
     })?;
 

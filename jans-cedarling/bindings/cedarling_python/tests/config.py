@@ -1,5 +1,5 @@
 from os.path import join
-from cedarling_python import AuthzConfig, MemoryLogConfig, OffLogConfig, StdOutLogConfig
+from cedarling_python import AuthzConfig, MemoryLogConfig, DisabledLoggingConfig, StdOutLogConfig
 from cedarling_python import PolicyStoreSource, PolicyStoreConfig, BootstrapConfig
 import pytest
 
@@ -15,7 +15,7 @@ def sample_bootstrap_config():
 
     # log_config = MemoryLogConfig(log_ttl=100)
     # log_config = StdOutLogConfig()
-    log_config = OffLogConfig()
+    log_config = DisabledLoggingConfig()
 
     # Create policy source configuration
     with open(join(TEST_FILES_PATH, "policy-store_ok.json"),

@@ -100,18 +100,18 @@ Example
 
 ___
 
-OffLogConfig
+DisabledLoggingConfig
 ============
 
-`OffLogConfig` is a Python wrapper around the Rust `cedarling::LogTypeConfig` struct.
+`DisabledLoggingConfig` is a Python wrapper around the Rust `cedarling::LogTypeConfig` struct.
 This configuration represents the "Off" log setting, where the logger is effectively disabled, and all log entries are ignored.
 
 Class Definition
 ----------------
 
-.. class:: OffLogConfig()
+.. class:: DisabledLoggingConfig()
 
-    The `OffLogConfig` class is used when logging is turned off. This configuration disables logging, meaning that no logs are captured or stored.
+    The `DisabledLoggingConfig` class is used when logging is turned off. This configuration disables logging, meaning that no logs are captured or stored.
 
     This configuration is invariant, meaning once created, it remains constant and cannot be modified.
 
@@ -120,15 +120,15 @@ Methods
 
 .. method:: __init__(self)
 
-    Initializes a new instance of the `OffLogConfig` class. This effectively disables logging.
+    Initializes a new instance of the `DisabledLoggingConfig` class. This effectively disables logging.
 
 Example
 -------
 
 .. code-block:: python
 
-    # Creating a new OffLogConfig instance to disable logging
-    config = OffLogConfig()
+    # Creating a new DisabledLoggingConfig instance to disable logging
+    config = DisabledLoggingConfig()
 
 ___
 
@@ -162,6 +162,7 @@ Example
     # Creating a new StdOutLogConfig instance to write log information to std output stream.
     config = StdOutLogConfig()
 ```
+
 ___
 
 PolicyStoreSource
@@ -289,7 +290,7 @@ Class Definition
 
     :param authz_config: An `AuthzConfig` object representing the authorization configuration.
     :param log_config: A logging configuration, which can be one of the following:
-                       - `OffLogConfig`: Disable logging.
+                       - `DisabledLoggingConfig`: Disable logging.
                        - `MemoryLogConfig`: Configure memory-based logging.
                        - `StdOutLogConfig`: Configure logging to standard output.
     :param policy_store_config: A `PolicyStoreConfig` object representing the policy store configuration.
@@ -306,7 +307,7 @@ Attributes
 .. attribute:: log_config
 
     A set of properties used to configure logging in the `Cedarling` application. The log configuration must be one of the following:
-    - `OffLogConfig`: Disables logging.
+    - `DisabledLoggingConfig`: Disables logging.
     - `MemoryLogConfig`: Configures memory-based logging.
     - `StdOutLogConfig`: Logs to standard output.
 
@@ -326,12 +327,12 @@ Methods
     Initializes a new instance of the `BootstrapConfig` class.
 
     :param authz_config: Optional. An `AuthzConfig` object representing the authorization configuration.
-    :param log_config: Optional. A logging configuration (`OffLogConfig`, `MemoryLogConfig`, `StdOutLogConfig`).
+    :param log_config: Optional. A logging configuration (`DisabledLoggingConfig`, `MemoryLogConfig`, `StdOutLogConfig`).
     :param policy_store_config: Optional. A `PolicyStoreConfig` object for configuring the policy store.
 
 .. method(setter):: log_config(self, value)
 
-    Sets the log configuration. The value must be one of the following types: `OffLogConfig`, `MemoryLogConfig`, or `StdOutLogConfig`.
+    Sets the log configuration. The value must be one of the following types: `DisabledLoggingConfig`, `MemoryLogConfig`, or `StdOutLogConfig`.
 
     :param value: The log configuration object.
     :raises TypeError: If the provided log configuration is not a valid type.
@@ -350,8 +351,8 @@ Example
 
     bootstrap_config = BootstrapConfig(authz_config=authz, log_config=log_config, policy_store_config=policy_store)
 
-    # Setting log config to OffLogConfig
-    bootstrap_config.log_config = OffLogConfig()
+    # Setting log config to DisabledLoggingConfig
+    bootstrap_config.log_config = DisabledLoggingConfig()
 
     # Attempting to set an invalid log configuration will raise a TypeError
     try:
@@ -422,4 +423,3 @@ Methods
     :rtype: List[str]
 
 ___
-
