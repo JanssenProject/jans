@@ -41,7 +41,14 @@ impl LogWriter for StdOutLogger {
         let json_str = serde_json::json!(&entry).to_string();
         // we can't handle error here or test it so we just panic if it happens.
         // we should have specific platform to get error
-        writeln!(self.writer.lock().unwrap(), "{}", &json_str).unwrap();
+        writeln!(
+            self.writer
+                .lock()
+                .expect("In StdOutLogger writer mutex should unlock"),
+            "{}",
+            &json_str
+        )
+        .unwrap();
     }
 }
 

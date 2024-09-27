@@ -11,6 +11,10 @@ use crate::models::log_entry::LogEntry;
 use sparkv::{Config as ConfigSparKV, SparKV};
 use std::{sync::Mutex, time::Duration};
 
+const STORAGE_MUTEX_EXPECT_MESSAGE: &str = "MemoryLogger storage mutex should unlock";
+const STORAGE_JSON_PARSE_EXPECT_MESSAGE: &str =
+    "In MemoryLogger storage value should be valid LogEntry json string";
+
 /// A logger that store logs in-memory.
 pub(crate) struct MemoryLogger {
     storage: Mutex<SparKV>,
@@ -37,7 +41,7 @@ impl LogWriter for MemoryLogger {
         let result = self
             .storage
             .lock()
-            .unwrap()
+            .expect(STORAGE_MUTEX_EXPECT_MESSAGE)
             .set(entry.id.to_string().as_str(), &json_string);
 
         if let Err(err) = result {
@@ -52,26 +56,30 @@ impl LogStorage for MemoryLogger {
     fn pop_logs(&self) -> Vec<LogEntry> {
         // TODO: implement more efficient implementation
 
-        let mut storage_guard = self.storage.lock().unwrap();
+        let mut storage_guard = self.storage.lock().expect(STORAGE_MUTEX_EXPECT_MESSAGE);
 
         let keys = storage_guard.get_keys();
 
         keys.iter()
             .filter_map(|key| storage_guard.pop(key))
             // we call unwrap, because we know that the value is valid json
-            .map(|str_json| serde_json::from_str::<LogEntry>(str_json.as_str()).unwrap())
+            .map(|str_json| serde_json::from_str::<LogEntry>(str_json.as_str())
+            .expect(STORAGE_JSON_PARSE_EXPECT_MESSAGE))
             .collect()
     }
 
     fn get_log_by_id(&self, id: &str) -> Option<LogEntry> {
-        self.storage.lock().unwrap()
+        self.storage.lock().expect(STORAGE_MUTEX_EXPECT_MESSAGE)
             .get(id)
             // we call unwrap, because we know that the value is valid json
-            .map(|str_json| serde_json::from_str::<LogEntry>(str_json.as_str()).unwrap())
+            .map(|str_json| serde_json::from_str::<LogEntry>(str_json.as_str()).expect(STORAGE_JSON_PARSE_EXPECT_MESSAGE))
     }
 
     fn get_log_ids(&self) -> Vec<String> {
-        self.storage.lock().unwrap().get_keys()
+        self.storage
+            .lock()
+            .expect(STORAGE_MUTEX_EXPECT_MESSAGE)
+            .get_keys()
     }
 }
 
