@@ -2,11 +2,11 @@
 
 This project uses `maturin` to create a Python library from Rust code. Follow the steps below to install and build the library.
 
-### Prerequisites
+## Prerequisites
 
 1. (Optional) Install build tools (for Linux users): You may need to install essential build tools by running:
 
-   ```
+   ```bash
    sudo apt install build-essential
    ```
 
@@ -27,8 +27,6 @@ This project uses `maturin` to create a Python library from Rust code. Follow th
    ```
 
    If Rust is not installed, you can install it from [here](https://www.rust-lang.org/tools/install).
-
----
 
 ## Installing the Python Library
 
@@ -97,8 +95,6 @@ Follow these steps to install the Python package in a virtual environment.
    python -m pydoc cedarling_python
    ```
 
----
-
 ## Running a Python Script
 
 To verify that the library works correctly, you can run the provided `example.py` script. Make sure the virtual environment is activated before running the script:
@@ -106,8 +102,6 @@ To verify that the library works correctly, you can run the provided `example.py
 ```bash
 python example.py
 ```
-
----
 
 ## Only Building the Library
 
@@ -149,3 +143,47 @@ If you only want to build the library without installing it in the Python enviro
   ```bash
   python -m pydoc cedarling_python
   ```
+
+## Testing the Python bindings
+
+  We use `pytest` and `tox` to create reproduceable environments for testing.
+
+### Run test with `pytest`  
+
+  To run the tests, with `pytest`:
+  
+  1. Make sure that you have installed the `cedarling_python` package in your virtual enviroment or system.
+  1. Install `pytest`:
+
+     ```bash
+     pip install pytest
+     ```
+
+  1. Make sure that you are in the `bindings/cedarling_python/` folder.
+  1. Run the following command:
+
+     ```bash
+     pytest
+     ```
+
+  1. See the results in the terminal.
+  
+### Run test with `tox`
+
+  1. Ensure that you installed rust compiler and toolchain. You install it by following the official [rust installation guide](https://www.rust-lang.org/tools/install).
+
+  1. Ensure tox is installed:
+  You can install tox in your environment using pip:
+
+     ```bash
+     pip install tox
+     ```
+
+  1. Make sure that you are in the `bindings/cedarling_python/` folder.
+  1. Run the following command:
+
+     ```bash
+     tox
+     ```
+
+  1. See the results in the terminal.
