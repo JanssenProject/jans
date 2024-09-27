@@ -11,18 +11,16 @@ use base64::prelude::*;
 use cedar_policy::PolicyId;
 
 // we use camel case to show that it is like a constant
-#[allow(non_camel_case_types)]
-#[allow(clippy::upper_case_acronyms)]
 #[derive(Debug, thiserror::Error)]
 enum ParsePolicySetMessage {
     #[error("unable to decode policy_content as base64")]
-    BASE64,
+    Base64,
     #[error("unable to decode policy_content to utf8 string")]
-    STRING,
+    String,
     #[error("unable to decode policy_content from human redable format")]
-    HUMAN_REDABLE,
+    HumanRedable,
     #[error("could not collect policy store's to policy set")]
-    CREATE_POLICY_SET,
+    CreatePolicySet,
 }
 
 /// Represents a raw data of the `Policy` in the `PolicyStore`
@@ -57,10 +55,7 @@ where
         .collect::<Result<Vec<cedar_policy::Policy>, _>>()?;
 
     cedar_policy::PolicySet::from_policies(policy_vec).map_err(|err| {
-        serde::de::Error::custom(format!(
-            "{}: {err}",
-            ParsePolicySetMessage::CREATE_POLICY_SET
-        ))
+        serde::de::Error::custom(format!("{}: {err}", ParsePolicySetMessage::CreatePolicySet))
     })
 }
 
@@ -72,15 +67,15 @@ where
     let decoded = BASE64_STANDARD
         .decode(policy_raw.policy_content.as_str())
         .map_err(|err| {
-            serde::de::Error::custom(format!("{}: {err}", ParsePolicySetMessage::BASE64))
+            serde::de::Error::custom(format!("{}: {err}", ParsePolicySetMessage::Base64))
         })?;
     let decoded_str = String::from_utf8(decoded).map_err(|err| {
-        serde::de::Error::custom(format!("{}: {err}", ParsePolicySetMessage::STRING))
+        serde::de::Error::custom(format!("{}: {err}", ParsePolicySetMessage::String))
     })?;
 
     let policy =
         cedar_policy::Policy::parse(Some(PolicyId::new(id)), decoded_str).map_err(|err| {
-            serde::de::Error::custom(format!("{}: {err}", ParsePolicySetMessage::HUMAN_REDABLE))
+            serde::de::Error::custom(format!("{}: {err}", ParsePolicySetMessage::HumanRedable))
         })?;
 
     Ok(policy)
@@ -108,7 +103,7 @@ mod tests {
         assert!(policy_result
             .unwrap_err()
             .to_string()
-            .contains(&ParsePolicySetMessage::BASE64.to_string()));
+            .contains(&ParsePolicySetMessage::Base64.to_string()));
     }
 
     #[test]
@@ -120,7 +115,7 @@ mod tests {
         assert!(policy_result
             .unwrap_err()
             .to_string()
-            .contains(&ParsePolicySetMessage::STRING.to_string()));
+            .contains(&ParsePolicySetMessage::String.to_string()));
     }
 
     #[test]
