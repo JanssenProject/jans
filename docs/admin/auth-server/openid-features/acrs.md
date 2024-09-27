@@ -63,7 +63,7 @@ General pattern is `agama_<flow name>`.
 ## Configuring ACRs in the JANS AS:
 
 ACRs can be configured on two levels:
-### 1. Client Level ACR :
+### 1. Client Level ACR
 
 The client can configure a specific ACR that should be used if the authentication request is missing `acr_values`
 parameter. This can be configured using `Default ACR` attribute of the client configuration.
@@ -136,7 +136,7 @@ flowchart TD
   the request. This parameter is defined in the OpenId Connect core specification,
   section [3.1.2.1](https://openid.net/specs/openid-connect-core-1_0.html#AuthRequest).
 - If the `acr_values` parameter is not received with the request, then Janssen Server uses the
-  value from the `Default ACR` configuration [from the client](#1-client-level-acr-)
+  value from the `Default ACR` configuration [from the client](#1-client-level-acr)
 - If Janssen Server doesn't find `acr_values` request parameter nor does it find the `Default ACR` configured for the
   client, then the Janssen Server checks the server configuration property
   [useHighestLevelScriptIfAcrScriptNotFound](../../reference/json/properties/janssenauthserver-properties.md#usehighestlevelscriptifacrscriptnotfound).

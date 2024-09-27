@@ -68,7 +68,7 @@ Configure `/etc/certs/super_gluu_creds.json`. For each Mobile app (Android, iOS)
 User and Developer Guides can be found on the [Super Gluu docs site](https://gluu.org/docs/supergluu).
 
 ### Interception script
-- [Super Gluu interception script](../SuperGluuExternalAuthenticator.py) is included in the default Janssen Server distribution
+- [Super Gluu interception script](../../../script-catalog/person_authentication/super-gluu-external-authenticator/SuperGluuExternalAuthenticator.py) is included in the default Janssen Server distribution
 
 The Super Gluu Interception script can be configured to work in 2 modes:
 A. Two step Flow (Default mode)

@@ -27,8 +27,7 @@ In `Authentication` -> `Radius Service` -> `Clients`, create a new client (which
     <Set name="extraClasspath">/opt/gluu/jetty/oxauth/custom/libs/jradius-client.jar</Set>
     ```
     
-- [Restart](../operation/services.md#restart) the `oxauth` service     
-    
+- [Restart](../../../../janssen-server/vm-ops/restarting-services.md#restart) the `oxauth` service
 
 
 ### Enable Interception Script
