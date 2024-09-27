@@ -43,7 +43,7 @@ Relevant methods:
 |-|-|
 |`boolean authenticate(String userName)`|Performs authentication for the user whose identifier (`userName`) is passed as parameter|
 |`boolean authenticate(String userName, String password)`|Performs authentication for the user whose identifier (`userName`) is passed as parameter. The `password` supplied must be the correct password of the user in question|
-|`User getAuthenticatedUser()`|Returns a representation of the currently authenticated user. `null` if no user is currently authenticated. See [User](#class-user) data object|
+|`User getAuthenticatedUser()`|Returns a representation of the currently authenticated user. `null` if no user is currently authenticated. See [User](#usage) data object|
 
 Usage:
 ```

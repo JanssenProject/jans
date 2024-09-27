@@ -24,7 +24,7 @@ any combination is valid.
 ## Supported types of 2FA
 
 Users will only be able to add credentials with a type matching one of the already enabled authentication methods in 
-the [admin console](./admin-console.md#enabled-methods). Other methods may be supported via [plugins](../index.md#existing-plugins).
+the [admin console](./admin-console.md#authentication-methods). Other methods may be supported via [plugins](../index.md#existing-plugins).
 
 ## Resetting a user's 2FA availability
 

@@ -33,7 +33,7 @@ markdown_extensions:
     emoji_generator: !!python/name:materialx.emoji.to_svg
     emoji_index: !!python/name:materialx.emoji.twemoji
 nav:
-- Administration:
+- 'Janssen Server':
   - Introduction: admin/README.md
   - Deployment and Planning Guide:
     - admin/planning/README.md
@@ -400,7 +400,6 @@ nav:
   - Lock Guide:
       - admin/lock/README.md
       - Lock Server: admin/lock/lock-server.md
-      - Authorization Using Cedarling: admin/lock/cedarling.md
   - Janssen Recipes:
     - admin/recipes/README.md
     - Benchmark: admin/recipes/benchmark.md
@@ -418,30 +417,8 @@ nav:
       - Using SCIM: admin/usermgmt/usermgmt-scim.md
       - Using CLI/TUI: admin/usermgmt/usermgmt-cli-tui.md
       - Using jans-link: admin/usermgmt/usermgmt-jans-link.md
-- Contribute:
-  - Contribution Guidelines: CONTRIBUTING.md
-  - Code of Conduct: CODE_OF_CONDUCT.md
-  - Design and Implementation:
-    - contribute/implementation-design/README.md
-    - Agama: contribute/implementation-design/agama.md
-    - jans-auth-server: contribute/implementation-design/jans-auth-server.md
-    - jans-cli: contribute/implementation-design/jans-cli.md
-    - jans-config-api: contribute/implementation-design/jans-config-api.md
-    - jans-core: contribute/implementation-design/jans-core.md
-    - jans-fido2: contribute/implementation-design/jans-fido2.md
-    - jans-orm: contribute/implementation-design/jans-orm.md
-    - jans-scim: contribute/implementation-design/jans-scim.md
-  - CI-CD:
-    - GitHub CI: contribute/ci-cd/github-ci.md
-    - Jenkins CI: contribute/ci-cd/jenkins-ci.md
-    - Release Process: contribute/ci-cd/release-process.md
-  - Development: contribute/development.md
-  - Testing: contribute/testing.md
-  - Developer FAQ: contribute/developer-faq.md
-- Governance:
-  - Charter: governance/charter.md
-  - Copyright-notice: governance/copyright-notices.md
-  - Triage: governance/triage.md
+- Cedarling:
+  - Authorization Using Cedarling: cedarling.md
 - Agama:
   - Introduction: agama/introduction.md
   - Language reference: agama/language-reference.md
@@ -469,6 +446,31 @@ nav:
         - 'Overview': 'casa/developer/overview.md'
         - 'Adding authentication methods': 'casa/developer/add-authn-methods.md'
     - User Guide: 'casa/user-guide.md'
+- Contribute:
+  - Contribution Guidelines: CONTRIBUTING.md
+  - Code of Conduct: CODE_OF_CONDUCT.md
+  - Design and Implementation:
+    - contribute/implementation-design/README.md
+    - Agama: contribute/implementation-design/agama.md
+    - jans-auth-server: contribute/implementation-design/jans-auth-server.md
+    - jans-cli: contribute/implementation-design/jans-cli.md
+    - jans-config-api: contribute/implementation-design/jans-config-api.md
+    - jans-core: contribute/implementation-design/jans-core.md
+    - jans-fido2: contribute/implementation-design/jans-fido2.md
+    - jans-orm: contribute/implementation-design/jans-orm.md
+    - jans-scim: contribute/implementation-design/jans-scim.md
+  - CI-CD:
+    - GitHub CI: contribute/ci-cd/github-ci.md
+    - Jenkins CI: contribute/ci-cd/jenkins-ci.md
+    - Release Process: contribute/ci-cd/release-process.md
+  - Development: contribute/development.md
+  - Testing: contribute/testing.md
+  - Developer FAQ: contribute/developer-faq.md
+- Governance:
+  - Charter: governance/charter.md
+  - Copyright-notice: governance/copyright-notices.md
+  - Triage: governance/triage.md
+
 plugins:
 - include-markdown
 - tags
