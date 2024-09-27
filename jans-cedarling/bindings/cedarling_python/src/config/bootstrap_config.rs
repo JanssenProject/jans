@@ -148,9 +148,7 @@ impl BootstrapConfig {
         policy_store_config: Option<PolicyStoreConfig>,
     ) -> PyResult<Self> {
         let log_config = match log_config {
-            Some(python_value) => {
-                Some(extract_log_config(&python_value)?) // Convert Py<PyAny> to &PyAny
-            },
+            Some(python_value) => Some(extract_log_config(&python_value)?),
             None => None,
         };
 
