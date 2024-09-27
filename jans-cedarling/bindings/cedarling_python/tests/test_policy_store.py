@@ -33,8 +33,9 @@ def test_load_policy_store(sample_bootstrap_config, policy_file_name, expected_e
     # map fixture to variable with shorter name for readability
     config = sample_bootstrap_config
 
-    policy_raw_json = open(join(TEST_FILES_PATH, policy_file_name),
-                           mode="r", encoding="utf8").read()
+    with open(join(TEST_FILES_PATH, policy_file_name),
+              mode="r", encoding="utf8") as f:
+        policy_raw_json = f.read()
     # for now we support only json source
     policy_source = PolicyStoreSource(
         json=policy_raw_json)
