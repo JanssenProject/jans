@@ -13,7 +13,6 @@ use std::{sync::Mutex, time::Duration};
 
 /// A logger that store logs in-memory.
 pub(crate) struct MemoryLogger {
-    // Using RefCell to enable interior mutability
     storage: Mutex<SparKV>,
 }
 
