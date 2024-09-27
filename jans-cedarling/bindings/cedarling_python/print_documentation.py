@@ -35,17 +35,36 @@ def print_inspect(type_value):
             print(f"documentation: {doc}")
 
 
+def print_header():
+    print('''
+# Cedarling Python bindings types documentation
+
+This document describes the Cedarling Python bindings types.  
+Documentation was generated from python types.
+''')
+
+
+def fix_newlines(str_value):
+    '''
+    make newline in markdown correct
+    '''
+    return str_value.replace("\n:", "  \n:")
+
+
 def print_doc(type_value):
     '''
         this is a helper function show to doc string for a given type
     '''
-    print(type_value.__doc__)
+    print(fix_newlines(type_value.__doc__))
     print("___\n")
 
 
 types = [AuthzConfig, MemoryLogConfig, DisabledLoggingConfig,
          StdOutLogConfig, PolicyStoreSource, PolicyStoreConfig, BootstrapConfig,
          Cedarling]
-for t in types:
-    # print_inspect(t)
-    print_doc(t)
+
+if __name__ == "__main__":
+    print_header()
+    for t in types:
+        # print_inspect(t)
+        print_doc(t)

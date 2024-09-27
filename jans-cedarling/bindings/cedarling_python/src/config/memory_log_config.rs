@@ -10,55 +10,22 @@ use pyo3::prelude::*;
 /// MemoryLogConfig
 /// ===============
 ///
-/// `MemoryLogConfig` is a Python wrapper around the Rust `cedarling::LogTypeConfig` struct.
-///  It is used to configure memory-based logging and is part of the overall logging configuration within the `cedarling` system.
-///  The configuration takes parameters from `cedarling::MemoryLogConfig`.
-///
-/// Class Definition
-/// ----------------
-///
-/// .. class:: MemoryLogConfig(log_ttl=60)
-///
-///     The `MemoryLogConfig` class allows you to configure memory logging settings, particularly the time-to-live (TTL) for log entries.
-///
-///     :param log_ttl: Optional. The maximum time to live (in seconds) of log entries. Defaults to `60` seconds (1 minute).
+/// A Python wrapper for the Rust `cedarling::LogTypeConfig`, used to configure memory-based logging.
 ///
 /// Attributes
 /// ----------
-///
-/// .. attribute:: log_ttl
-///
-///     The time-to-live (TTL) for log entries in memory, measured in seconds. This represents the `CEDARLING_LOG_TTL` setting from the `bootstrap properties` as defined in the `cedarling` documentation.
-///
-///     :type: int
-///
-/// Methods
-/// -------
-///
-/// .. method:: __init__(self, log_ttl=60)
-///
-///     Initializes a new instance of the `MemoryLogConfig` class.
-///
-///     :param log_ttl: Optional. The time-to-live (in seconds) for log entries. Defaults to `60` seconds (1 minute).
+/// :param log_ttl: Optional TTL for log entries (in seconds), default is `60`.
 ///
 /// Example
 /// -------
-///
 /// ```python
-///
-///     # Creating a new MemoryLogConfig instance with the default TTL
-///     config = MemoryLogConfig()
-///
-///     # Creating a new MemoryLogConfig instance with a custom TTL
-///     config = MemoryLogConfig(log_ttl=120)
-///
-///     # Accessing the log_ttl attribute
-///     print(config.log_ttl)
-///
-///     # Setting a new TTL value
-///     config.log_ttl = 300
+/// # Initialize with default TTL
+/// config = MemoryLogConfig()              
+/// # Initialize with custom TTL
+/// config = MemoryLogConfig(log_ttl=120)   
+/// print(config.log_ttl)                    # Accessing TTL
+/// config.log_ttl = 300                     # Updating TTL
 /// ```
-///
 #[derive(Debug, Clone)]
 #[pyclass(get_all, set_all)]
 pub struct MemoryLogConfig {

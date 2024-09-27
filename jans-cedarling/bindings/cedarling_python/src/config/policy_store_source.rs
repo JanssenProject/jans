@@ -4,43 +4,20 @@ use pyo3::prelude::*;
 /// PolicyStoreSource
 /// =================
 ///
-/// `PolicyStoreSource` is a Python wrapper around the Rust `cedarling::PolicyStoreSource` struct. It represents the source from which policies are read. Currently, the supported source for reading policies is a JSON string.
+/// A Python wrapper for the Rust `cedarling::PolicyStoreSource` struct.
+/// This class specifies the source for reading policy data, currently supporting
+/// JSON strings.
 ///
-/// Class Definition
-/// ----------------
-///
-/// .. class:: PolicyStoreSource(json=None)
-///
-///     The `PolicyStoreSource` class is used to specify the source from which the policy data is loaded. At present, it supports reading policies from a JSON string.
-///
-///     :param json: Optional. A JSON-formatted string that represents the policy data.
-///
-/// Methods
-/// -------
-///
-/// .. method:: __init__(self, json=None)
-///
-///     Initializes a new instance of the `PolicyStoreSource` class with a JSON string. If no JSON string is provided, a `ValueError` is raised.
-///
-///     :param json: A JSON-formatted string. If not provided, raises a `ValueError`.
-///     :raises ValueError: If the `json` parameter is not specified.
+/// Attributes
+/// ----------
+/// :param json: Optional JSON string for policy data.
 ///
 /// Example
 /// -------
-///
 /// ```python
-///
-///     # Creating a new PolicyStoreSource instance with a JSON string
-///     json_string = '{...}'
-///     config = PolicyStoreSource(json=json_string)
-///
-///     # Attempting to create a PolicyStoreSource without a JSON string (raises ValueError)
-///     try:
-///         invalid_config = PolicyStoreSource()
-///     except ValueError as e:
-///         print(f"Error: {e}")
+/// # Initialize with a JSON string
+/// config = PolicyStoreSource(json='{...}')
 /// ```
-///
 #[derive(Debug, Clone)]
 #[pyclass]
 pub struct PolicyStoreSource {

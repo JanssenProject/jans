@@ -13,68 +13,28 @@ use crate::config::policy_store_source::PolicyStoreSource;
 /// PolicyStoreConfig
 /// =================
 ///
-/// `PolicyStoreConfig` is a Python wrapper around the Rust `cedarling::PolicyStoreConfig` struct.
-///  It represents the configuration for the policy store, including the source from which policies are read and the optional policy store ID.
-///
-/// Class Definition
-/// ----------------
-///
-/// .. class:: PolicyStoreConfig(source=None, store_id=None)
-///
-///     The `PolicyStoreConfig` class is used to configure how and where policies are loaded. The `source` specifies the location (e.g., JSON) of the policy, and `store_id` represents the ID of the policy store, which is optional.
-///
-///     :param source: Optional. A `PolicyStoreSource` object representing the policy source.
-///     :param store_id: Optional. A string representing the policy store ID. If not specified, only one policy store is assumed in the `source`.
+/// A Python wrapper for the Rust `cedarling::PolicyStoreConfig` struct.
+/// Configures how and where policies are loaded, specifying the source and optional store ID.
 ///
 /// Attributes
 /// ----------
-///
-/// .. attribute:: source
-///
-///     The source from which the policy is read. This attribute is required for policy configuration.
-///
-///     :type: PolicyStoreSource or None
-///
-/// .. attribute:: store_id
-///
-///     The ID of the policy store. If this is not provided, the assumption is that there is only one policy store in the `source`.
-///
-///     :type: str or None
-///
-/// Methods
-/// -------
-///
-/// .. method:: __init__(self, source=None, store_id=None)
-///
-///     Initializes a new instance of the `PolicyStoreConfig` class. Both `source` and `store_id` are optional, but the `source` must be provided for the configuration to be valid.
-///
-///     :param source: Optional. A `PolicyStoreSource` object.
-///     :param store_id: Optional. A string representing the ID of the policy store.
+/// :param source: Optional `PolicyStoreSource` for the policy location.
+/// :param store_id: Optional store ID; assumes one store if not provided.
 ///
 /// Example
 /// -------
-///
 /// ```python
+/// # Create a PolicyStoreConfig with a source and store_id
+/// source = PolicyStoreSource(json='{...')
+/// config = PolicyStoreConfig(source=source, store_id="store1")
 ///
-///     # Creating a new PolicyStoreConfig instance with a source and store_id
-///     source = PolicyStoreSource(json='{"policy": {"id": "policy1", "rules": []}}')
-///     config = PolicyStoreConfig(source=source, store_id="store1")
+/// # Create without store_id
+/// config_without_store_id = PolicyStoreConfig(source=source)
 ///
-///     # Creating a PolicyStoreConfig instance without a store_id
-///     config_without_store_id = PolicyStoreConfig(source=source)
-///
-///     # Accessing attributes
-///     print(config.source)
-///     print(config.store_id)
-///     
-///     # Attempting to create PolicyStoreConfig without a source will raise an error during conversion
-///     try:
-///         invalid_config = PolicyStoreConfig(store_id="store1")
-///         # This will raise an error when converted to cedarling::PolicyStoreConfig
-///     except ValueError as e:
-///         print(f"Error: {e}")
+/// # Access attributes
+/// print(config.source)
+/// print(config.store_id)
 /// ```
-///
 #[derive(Debug, Clone)]
 #[pyclass(get_all, set_all)]
 pub struct PolicyStoreConfig {

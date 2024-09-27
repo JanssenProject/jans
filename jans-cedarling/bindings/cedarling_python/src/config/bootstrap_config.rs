@@ -18,90 +18,27 @@ use super::stdout_log_config::StdOutLogConfig;
 /// BootstrapConfig
 /// ===============
 ///
-/// `BootstrapConfig` is a Python wrapper around the Rust `cedarling::BootstrapConfig` struct.
-///  It represents the main configuration for bootstrapping the `Cedarling` application.
-///  This configuration includes settings for authorization (`AuthzConfig`), logging (`LogConfig`), and policy store (`PolicyStoreConfig`).
-///
-/// Class Definition
-/// ----------------
-///
-/// .. class:: BootstrapConfig(authz_config=None, log_config=None, policy_store_config=None)
-///
-///     The `BootstrapConfig` class is used to configure the initial properties for the `Cedarling` application. This includes setting up authorization, logging, and the policy store.
-///
-///     :param authz_config: An `AuthzConfig` object representing the authorization configuration.
-///     :param log_config: A logging configuration, which can be one of the following:
-///                        - `DisabledLoggingConfig`: Disable logging.
-///                        - `MemoryLogConfig`: Configure memory-based logging.
-///                        - `StdOutLogConfig`: Configure logging to standard output.
-///     :param policy_store_config: A `PolicyStoreConfig` object representing the policy store configuration.
+/// A Python wrapper for the Rust `cedarling::BootstrapConfig` struct.
+/// Configures the `Cedarling` application, including authorization, logging, and policy store settings.
 ///
 /// Attributes
 /// ----------
-///
-/// .. attribute:: authz_config
-///
-///     A set of properties used to configure the `Authz` (authorization) in the `Cedarling` application.
-///
-///     :type: AuthzConfig
-///
-/// .. attribute:: log_config
-///
-///     A set of properties used to configure logging in the `Cedarling` application. The log configuration must be one of the following:
-///     - `DisabledLoggingConfig`: Disables logging.
-///     - `MemoryLogConfig`: Configures memory-based logging.
-///     - `StdOutLogConfig`: Logs to standard output.
-///
-///     :type: LogConfig
-///
-/// .. attribute:: policy_store_config
-///
-///     A set of properties used to load and configure the policy store in the `Cedarling` application.
-///
-///     :type: PolicyStoreConfig
-///
-/// Methods
-/// -------
-///
-/// .. method:: __init__(self, authz_config=None, log_config=None, policy_store_config=None)
-///
-///     Initializes a new instance of the `BootstrapConfig` class.
-///
-///     :param authz_config: Optional. An `AuthzConfig` object representing the authorization configuration.
-///     :param log_config: Optional. A logging configuration (`DisabledLoggingConfig`, `MemoryLogConfig`, `StdOutLogConfig`).
-///     :param policy_store_config: Optional. A `PolicyStoreConfig` object for configuring the policy store.
-///
-/// .. method(setter):: log_config(self, value)
-///
-///     Sets the log configuration. The value must be one of the following types: `DisabledLoggingConfig`, `MemoryLogConfig`, or `StdOutLogConfig`.
-///
-///     :param value: The log configuration object.
-///     :raises TypeError: If the provided log configuration is not a valid type.
+/// :param authz_config: An `AuthzConfig` object for authorization settings.
+/// :param log_config: A logging configuration (can be `DisabledLoggingConfig`, `MemoryLogConfig`, or `StdOutLogConfig`).
+/// :param policy_store_config: A `PolicyStoreConfig` object for the policy store configuration.
 ///
 /// Example
 /// -------
-///
 /// ```python
+/// from cedarling import BootstrapConfig, AuthzConfig, MemoryLogConfig, PolicyStoreConfig
 ///
-///     from cedarling import BootstrapConfig, AuthzConfig, MemoryLogConfig, PolicyStoreConfig
+/// # Create a BootstrapConfig with memory logging
+/// authz = AuthzConfig(application_name="MyApp")
+/// log_config = MemoryLogConfig(log_ttl=300)
+/// policy_store = PolicyStoreConfig(source=PolicyStoreSource(json='{...}'))
 ///
-///     # Creating a new BootstrapConfig with memory log configuration
-///     authz = AuthzConfig(application_name="MyApp")
-///     log_config = MemoryLogConfig(log_ttl=300)
-///     policy_store = PolicyStoreConfig(source=PolicyStoreSource(json='{...}'))
-///
-///     bootstrap_config = BootstrapConfig(authz_config=authz, log_config=log_config, policy_store_config=policy_store)
-///
-///     # Setting log config to DisabledLoggingConfig
-///     bootstrap_config.log_config = DisabledLoggingConfig()
-///
-///     # Attempting to set an invalid log configuration will raise a TypeError
-///     try:
-///         bootstrap_config.log_config = "InvalidConfig"
-///     except TypeError as e:
-///         print(f"Error: {e}")
+/// bootstrap_config = BootstrapConfig(authz_config=authz, log_config=log_config, policy_store_config=policy_store)
 /// ```
-///
 #[derive(Debug, Clone)]
 #[pyclass]
 pub struct BootstrapConfig {
