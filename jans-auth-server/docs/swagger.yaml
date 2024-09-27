@@ -4563,6 +4563,7 @@ paths:
         ----
 
         This endpoint does not have any security, it is an open endpoint.
+      operationId: validate-ssa
       parameters:
         - schema:
             type: string
