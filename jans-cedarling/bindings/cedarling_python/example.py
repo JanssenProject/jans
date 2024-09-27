@@ -20,8 +20,9 @@ log_config = MemoryLogConfig(log_ttl=100)
 # log_config = StdOutLogConfig()
 
 # Create policy source configuration
-policy_raw_json = open("example_files/policy-store.json",
-                       mode="r", encoding="utf8").read()
+with open("example_files/policy-store.json",
+          mode="r", encoding="utf8") as f:
+    policy_raw_json = f.read()
 # for now we support only json source
 policy_source = PolicyStoreSource(json=policy_raw_json)
 
