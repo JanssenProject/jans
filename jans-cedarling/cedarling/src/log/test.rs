@@ -23,7 +23,7 @@ use crate::models::log_config;
 fn test_new_log_strategy_off() {
     // Arrange
     let config = LogConfig {
-        log_type: log_config::LogType::Off,
+        log_type: log_config::LogTypeConfig::Off,
     };
 
     // Act
@@ -37,7 +37,7 @@ fn test_new_log_strategy_off() {
 fn test_new_log_strategy_memory() {
     // Arrange
     let config = LogConfig {
-        log_type: log_config::LogType::Memory(log_config::MemoryLogConfig { log_ttl: 60 }),
+        log_type: log_config::LogTypeConfig::Memory(log_config::MemoryLogConfig { log_ttl: 60 }),
     };
 
     // Act
@@ -51,7 +51,7 @@ fn test_new_log_strategy_memory() {
 fn test_new_logstrategy_stdout() {
     // Arrange
     let config = LogConfig {
-        log_type: log_config::LogType::StdOut,
+        log_type: log_config::LogTypeConfig::StdOut,
     };
 
     // Act
@@ -65,7 +65,7 @@ fn test_new_logstrategy_stdout() {
 fn test_log_memory_logger() {
     // Arrange
     let config = LogConfig {
-        log_type: log_config::LogType::Memory(log_config::MemoryLogConfig { log_ttl: 60 }),
+        log_type: log_config::LogTypeConfig::Memory(log_config::MemoryLogConfig { log_ttl: 60 }),
     };
     let strategy = LogStrategy::new(config);
     let entry = LogEntry {
