@@ -91,7 +91,7 @@ render in the iFrame at the time of logout. These
 configuration values can be updated using TUI as shown [here](#client-configuration)
 
 Janssen Server also provides a feature flag
-[END_SESSION](../../../reference/json/feature-flags/janssenauthserver-feature-flags.md#endsession)
+[END_SESSION](../../../reference/json/feature-flags/janssenauthserver-feature-flags.md#end_session)
 that enables or disables this endpoint. If this flag is enabled, it has the same effect as having
 `frontchannel_logout_supported` and `frontchannel_logout_session_supported` metadata values set to `true`. These
 metadata values are defined [here](https://openid.net/specs/openid-connect-frontchannel-1_0.html#OPLogout) in

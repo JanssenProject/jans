@@ -65,7 +65,7 @@ The following tables summarize the available endpoints. All URLs are relative to
 |Purpose|Add or replace an Agama project to the server|
 |Method|POST|
 |Path params|`name` (the project's name)|
-|Body|The binary contents of a `.gama` file; example [here](#sample-file). Ensure to use header `Content-Type: application/zip`|
+|Body|The binary contents of a `.gama` file; example [here](../../../agama/gama-format.md#sample-project). Ensure to use header `Content-Type: application/zip`|
 |Query params|`autoconfigure` - passing `true` will make this project be configured with the sample configurations found in the provided binary archive (`configs` section of [project.json](../../../agama/gama-format.md#metadata)). This param should rarely be passed: use only in controlled environments where the archive is not shared with third parties|
 |Output|Textual explanation, e.g. `A deployment task for project XXX has been queued. Use the GET endpoint to poll status`|
 |Status|202 (the task was created and scheduled for deployment), 409 (there is a task already for this project and it hasn't finished yet), 400 (a param is missing)|

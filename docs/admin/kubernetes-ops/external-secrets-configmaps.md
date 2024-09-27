@@ -2,7 +2,7 @@
    This guide shows how to store and retrieve jans `configmaps` and `secrets` externally in `AWS Secrets Manager`, `GCP Secret Manager` and `Vault`.  
 
 !!! Note
-    Configmaps and Secrets are stored as a collection of key-value pairs. A secret in AWS/GCP Secret Manager has a max size of 65536 bytes. So the collection of key-value pairs is splitted between secrets, and thus note that during secrets [retrieval](#retrieve-secrets-) it's possible that a single key-value pair is to be splitted between 2 AWS/GCP secrets.
+    Configmaps and Secrets are stored as a collection of key-value pairs. A secret in AWS/GCP Secret Manager has a max size of 65536 bytes. So the collection of key-value pairs is splitted between secrets, and thus note that during secrets [retrieval](#retrieve-secrets) it's possible that a single key-value pair is to be splitted between 2 AWS/GCP secrets.
 
 ##  Create Secrets
 

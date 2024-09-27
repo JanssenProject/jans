@@ -295,7 +295,7 @@ Modify it to update attribute `name`, `display name`, `view type`:
 nano /tmp/attribute.json
 ```
 
-![post-attribute.png](../../assets/image-cl-post-attribute-03042021.png)
+![post-attribute.png](../../../assets/image-cl-post-attribute-03042021.png)
 
 Now, let's add this attribute using `post-attributes`:
 ```commandline
@@ -507,9 +507,9 @@ If we look at the description, we see that there is a schema file. Let's get the
 
 Let's modify this schema file to change the status of an attribute as below:
 
-![](../../assets/image-cl-attribute-patch-03042021.png)
+![image](../../../assets/image-cl-attribute-patch-03042021.png)
 
-In the above image, added two tasks. To know more about how we can modify this schema file to perform a specific task, follow this link: [patch-request-schema](config-tools/jans-cli/README.md#patch-request-schema)
+In the above image, added two tasks. To know more about how we can modify this schema file to perform a specific task, follow this link: [patch-request-schema](../config-tools/jans-cli/README.md#patch-request-schema)
 
 Let's update an attribute by its `inum` value. In our case, `inum`: 6EEB. Before patching the selected attribute, you can check its properties using [get-attributes-by-inum](#get-attribute-by-inum) operation.
 

@@ -57,7 +57,7 @@ flow can be built using a custom script.
 ### A. Custom script
 The **PersonAuthenticationType** script is described by a java interface 
 whose methods should be overridden to implement an authentication workflow.
-The [article](../scripts/person-authentication-interface) talks about these
+The [article](../scripts/person-authentication-interface.md) talks about these
 methods in detail and the psuedo code 
 for each method.
 
@@ -299,9 +299,9 @@ the form of authentication specified in this field.
 ## Usage scenarios
 
 ### A. Implementing 2FA authentication mechanisms
-1. [FIDO2](../../../script-catalog/person_authentication/fido2-external-authenticator/README) : Authentications using platform authenticators embedded into a person's device or physical USB, NFC or Bluetooth security keys that are inserted into a USB slot of a computer
+1. [FIDO2](../../../script-catalog/person_authentication/fido2-external-authenticator/README.md) : Authentications using platform authenticators embedded into a person's device or physical USB, NFC or Bluetooth security keys that are inserted into a USB slot of a computer
 
-2. [OTP authentication](../../../script-catalog/person_authentication/otp-external-authenticator) : Authentication mechanism using an app like [Google authenticator](https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&hl=en), [FreeOTP](https://freeotp.github.io/) or [Authy](https://authy.com/) that implements the open standards [HOTP](https://tools.ietf.org/html/rfc4226) and [TOTP](https://tools.ietf.org/html/rfc6238)
+2. [OTP authentication](../../../script-catalog/person_authentication/otp-external-authenticator/README.md) : Authentication mechanism using an app like [Google authenticator](https://play.google.com/store/apps/details?id=com.google.android.apps.authenticator2&hl=en), [FreeOTP](https://freeotp.github.io/) or [Authy](https://authy.com/) that implements the open standards [HOTP](https://tools.ietf.org/html/rfc4226) and [TOTP](https://tools.ietf.org/html/rfc6238)
 
 3. SMS OTP :  
 

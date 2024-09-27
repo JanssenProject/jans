@@ -99,6 +99,6 @@ Predefined 2FA policy options include:
 
 The default policy is to enforce 2FA for every login attempt. If the admin opts to allow users to manager their own
 policy, a new widget will appear in the user-facing dashboard as described in
-the [user guide](../user-guide.md#2fa-settings--trusted-devices).
+the [user guide](../user-guide.md#2fa-settings-and-trusted-devices).
 
 In addition, the plugin exposes an API to programmatically manipulate these settings.
