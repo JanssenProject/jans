@@ -9,7 +9,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
 import { ILooseObject } from './ILooseObject';
-import LinearProgress from '@mui/material/LinearProgress';
+import CircularProgress from "@mui/material/CircularProgress";
 import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -221,9 +221,16 @@ export default function RegisterClient({ isOpen, handleDialog }) {
             event.preventDefault();
           },
         }}
+         className="form-container"
       >
         <DialogTitle>Register OIDC Client</DialogTitle>
-        {loading ? <LinearProgress color="success" /> : ''}
+        {loading ? (
+          <div className="loader-overlay">
+            <CircularProgress color="success" />
+          </div>
+        ) : (
+          ""
+        )}
         <DialogContent>
           <DialogContentText>
             Submit below details to create a new OIDC client.

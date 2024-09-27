@@ -8,7 +8,7 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import InputLabel from '@mui/material/InputLabel';
 import Select from '@mui/material/Select';
-import LinearProgress from '@mui/material/LinearProgress';
+import CircularProgress from "@mui/material/CircularProgress";
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 import qs from 'qs';
@@ -229,6 +229,17 @@ export default function AuthFlowInputs({ isOpen, handleDialog, client, notifyOnD
         });
       }, 1000);
 
+      const onTabRemoved = (tabId, removeInfo) => {
+        if (tabId === tab.id) {
+          chrome.tabs.onRemoved.removeListener(onTabRemoved); // Clean up the listener
+          chrome.tabs.remove(tab.id);
+          callback(undefined, new Error('Authorization tab was closed.'));
+          setLoading(false);
+        }
+      };
+
+      chrome.tabs.onRemoved.addListener(onTabRemoved);
+
       chrome.tabs.onUpdated.addListener(function listener(tabId, changeInfo, tab) {
         if (!!chrome.runtime.lastError) {
           chrome.tabs.remove(tabId);
@@ -273,16 +284,27 @@ export default function AuthFlowInputs({ isOpen, handleDialog, client, notifyOnD
     <React.Fragment>
       <Dialog
         open={open}
-        onClose={handleClose}
+        onClose={(event, reason) => {
+          if (reason !== "backdropClick") {
+            handleClose();
+          }
+        }}
         PaperProps={{
           component: 'form',
           onSubmit: (event) => {
             event.preventDefault();            
           },
         }}
+        className="form-container"
       >
         <DialogTitle>Authentication Flow Inputs</DialogTitle>
-        {loading ? <LinearProgress color="success" /> : ''}
+        {loading ? (
+          <div className="loader-overlay">
+            <CircularProgress color="success" />
+          </div>
+        ) : (
+          ""
+        )}
         <DialogContent>
           <DialogContentText>
             Enter inputs (optional) before initiating authentication flow.
