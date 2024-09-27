@@ -102,7 +102,7 @@ impl TryInto<cedarling::PolicyStoreConfig> for PolicyStoreConfig {
         let source = self
             .source
             .ok_or(PyValueError::new_err(
-                "in PolicyStoreConfig source not specified",
+                "Expected source for PolicyStoreConfig, but got: None",
             ))?
             .into();
 

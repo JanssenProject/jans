@@ -75,7 +75,7 @@ impl TryInto<cedarling::AuthzConfig> for AuthzConfig {
     fn try_into(self) -> Result<cedarling::AuthzConfig, Self::Error> {
         Ok(cedarling::AuthzConfig {
             application_name: self.application_name.ok_or(PyValueError::new_err(
-                "in AuthzConfig value application_name is None",
+                "Expected application_name for AuthzConfig, but got: None",
             ))?,
         })
     }
