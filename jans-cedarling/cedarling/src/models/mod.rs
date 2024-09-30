@@ -10,6 +10,7 @@
 
 pub mod authz_config;
 pub mod bootstrap_config;
+pub mod jwt_config;
 pub mod log_config;
 pub mod log_entry;
 pub mod policy_store;
@@ -22,6 +23,7 @@ pub mod config {
 
     pub use authz_config::*;
     pub use bootstrap_config::*;
+    pub use jwt_config::*;
     pub use log_config::*;
     pub use policy_store_config::*;
 }

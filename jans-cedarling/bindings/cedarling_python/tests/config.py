@@ -1,6 +1,6 @@
 from os.path import join
 from cedarling_python import AuthzConfig, MemoryLogConfig, DisabledLoggingConfig, StdOutLogConfig
-from cedarling_python import PolicyStoreSource, PolicyStoreConfig, BootstrapConfig
+from cedarling_python import PolicyStoreSource, PolicyStoreConfig, BootstrapConfig, JwtConfig
 import pytest
 
 ROOT_FOLDER_PATH = "../../"
@@ -27,9 +27,13 @@ def sample_bootstrap_config():
     policy_store_config = PolicyStoreConfig(
         source=policy_source, store_id=None)
 
+    jwt_config = JwtConfig(enabled=False)
+
     # collect all in the BootstrapConfig
     bootstrap_config = BootstrapConfig(
         authz_config=authz_config,
         log_config=log_config,
-        policy_store_config=policy_store_config)
+        policy_store_config=policy_store_config,
+        jwt_config=jwt_config
+    )
     return bootstrap_config

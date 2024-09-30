@@ -11,6 +11,7 @@ use pyo3::prelude::*;
 use crate::config::authz_config::AuthzConfig;
 use crate::config::policy_store_config::PolicyStoreConfig;
 
+use super::jwt_config::JwtConfig;
 use super::memory_log_config::MemoryLogConfig;
 use super::off_log_config::DisabledLoggingConfig;
 use super::stdout_log_config::StdOutLogConfig;
@@ -26,6 +27,7 @@ use super::stdout_log_config::StdOutLogConfig;
 /// :param authz_config: An `AuthzConfig` object for authorization settings.
 /// :param log_config: A logging configuration (can be `DisabledLoggingConfig`, `MemoryLogConfig`, or `StdOutLogConfig`).
 /// :param policy_store_config: A `PolicyStoreConfig` object for the policy store configuration.
+/// :param jwt_config: A `JwtConfig` object for JWT validation settings.
 ///
 /// Example
 /// -------
@@ -36,8 +38,9 @@ use super::stdout_log_config::StdOutLogConfig;
 /// authz = AuthzConfig(application_name="MyApp")
 /// log_config = MemoryLogConfig(log_ttl=300)
 /// policy_store = PolicyStoreConfig(source=PolicyStoreSource(json='{...}'))
+/// jwt_config = JwtConfig(enabled=False)
 ///
-/// bootstrap_config = BootstrapConfig(authz_config=authz, log_config=log_config, policy_store_config=policy_store)
+/// bootstrap_config = BootstrapConfig(authz_config=authz, log_config=log_config, policy_store_config=policy_store, jwt_config=jwt_config)
 /// ```
 #[derive(Debug, Clone)]
 #[pyclass]
@@ -56,6 +59,8 @@ pub struct BootstrapConfig {
     /// A set of properties used to load `PolicyStore` in the `Cedarling` application.
     #[pyo3(set)]
     pub policy_store_config: Option<PolicyStoreConfig>,
+    /// A set of properties used to configure `JWT` validation in the `Cedarling` application.
+    pub jwt_config: Option<JwtConfig>,
 }
 
 fn extract_log_config(log_config: &PyObject) -> PyResult<cedarling::LogConfig> {
@@ -78,11 +83,12 @@ fn extract_log_config(log_config: &PyObject) -> PyResult<cedarling::LogConfig> {
 #[pymethods]
 impl BootstrapConfig {
     #[new]
-    #[pyo3(signature = (authz_config=None, log_config=None, policy_store_config=None))]
+    #[pyo3(signature = (authz_config=None, log_config=None, policy_store_config=None, jwt_config=None))]
     fn new(
         authz_config: Option<AuthzConfig>,
-        log_config: Option<PyObject>, // Use Py<PyAny> instead of &PyAny
+        log_config: Option<PyObject>,
         policy_store_config: Option<PolicyStoreConfig>,
+        jwt_config: Option<JwtConfig>,
     ) -> PyResult<Self> {
         let log_config = match log_config {
             Some(python_value) => Some(extract_log_config(&python_value)?),
@@ -93,6 +99,7 @@ impl BootstrapConfig {
             authz_config,
             policy_store_config,
             log_config,
+            jwt_config,
         })
     }
 
@@ -118,6 +125,10 @@ impl TryFrom<BootstrapConfig> for cedarling::BootstrapConfig {
             policy_store_config: value
                 .policy_store_config
                 .ok_or(PyValueError::new_err("value policy_store_config is None"))?
+                .try_into()?,
+            jwt_config: value
+                .jwt_config
+                .ok_or(PyValueError::new_err("value jwt_config is None"))?
                 .try_into()?,
         })
     }

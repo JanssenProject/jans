@@ -6,6 +6,7 @@
  */
 
 use super::authz_config::AuthzConfig;
+use super::jwt_config::JwtConfig;
 use super::log_config::LogConfig;
 use super::policy_store_config::PolicyStoreConfig;
 
@@ -19,4 +20,6 @@ pub struct BootstrapConfig {
     pub log_config: LogConfig,
     /// A set of properties used to load `PolicyStore` in the `Cedarling` application.
     pub policy_store_config: PolicyStoreConfig,
+    /// A set of properties used to configure JWT in the `Cedarling` application.
+    pub jwt_config: JwtConfig,
 }

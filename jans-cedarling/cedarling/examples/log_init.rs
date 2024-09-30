@@ -6,8 +6,8 @@
  */
 
 use cedarling::{
-    AuthzConfig, BootstrapConfig, Cedarling, LogConfig, LogStorage, LogTypeConfig, MemoryLogConfig,
-    PolicyStoreConfig, PolicyStoreSource,
+    AuthzConfig, BootstrapConfig, Cedarling, JwtConfig, LogConfig, LogStorage, LogTypeConfig,
+    MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource,
 };
 use std::env;
 
@@ -49,6 +49,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             source: PolicyStoreSource::Json(POLICY_STORE_RAW.to_string()),
             store_id: None,
         },
+        jwt_config: JwtConfig::Disabled,
     })?;
 
     println!("Stage 1:");
