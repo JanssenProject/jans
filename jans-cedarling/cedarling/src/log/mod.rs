@@ -60,7 +60,7 @@ mod stdout_logger;
 #[cfg(test)]
 mod test;
 
-use std::rc::Rc;
+use std::sync::Arc;
 
 use crate::models::log_config::LogConfig;
 pub use interface::LogStorage;
@@ -68,10 +68,10 @@ pub(crate) use interface::LogWriter;
 pub(crate) use log_strategy::LogStrategy;
 
 /// Type alias for logger that is used in application
-pub(crate) type Logger = Rc<LogStrategy>;
+pub(crate) type Logger = Arc<LogStrategy>;
 
 /// Initialize logger.
 /// entry point for initialize logger
 pub(crate) fn init_logger(config: LogConfig) -> Logger {
-    Rc::new(LogStrategy::new(config))
+    Arc::new(LogStrategy::new(config))
 }

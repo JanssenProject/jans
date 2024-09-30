@@ -7,27 +7,30 @@
 
 use super::interface::LogWriter;
 use crate::models::log_entry::LogEntry;
-use std::{cell::RefCell, io::Write, rc::Rc};
+use std::{
+    io::Write,
+    sync::{Arc, Mutex},
+};
 
-/// A logger that do nothing.
+/// A logger that write to std output.
 pub(crate) struct StdOutLogger {
     // we use `dyn Write`` trait to make it testable and mockable.
-    writer: RefCell<Box<dyn Write>>,
+    writer: Mutex<Box<dyn Write + Send + Sync>>,
 }
 
 impl StdOutLogger {
     pub(crate) fn new() -> Self {
         Self {
-            writer: RefCell::new(Box::new(std::io::stdout())),
+            writer: Mutex::new(Box::new(std::io::stdout())),
         }
     }
 
     // Create a new StdOutLogger with custom writer.
     // is used in tests.
     #[allow(dead_code)]
-    pub(crate) fn new_with(writer: Box<dyn Write>) -> Self {
+    pub(crate) fn new_with(writer: Box<dyn Write + Send + Sync>) -> Self {
         Self {
-            writer: RefCell::new(writer),
+            writer: Mutex::new(Box::new(writer)),
         }
     }
 }
@@ -38,7 +41,14 @@ impl LogWriter for StdOutLogger {
         let json_str = serde_json::json!(&entry).to_string();
         // we can't handle error here or test it so we just panic if it happens.
         // we should have specific platform to get error
-        writeln!(self.writer.borrow_mut(), "{}", &json_str).unwrap();
+        writeln!(
+            self.writer
+                .lock()
+                .expect("In StdOutLogger writer mutex should unlock"),
+            "{}",
+            &json_str
+        )
+        .unwrap();
     }
 }
 
@@ -46,26 +56,26 @@ impl LogWriter for StdOutLogger {
 #[allow(dead_code)]
 #[derive(Clone)]
 pub(crate) struct TestWriter {
-    buf: Rc<RefCell<Vec<u8>>>,
+    buf: Arc<Mutex<Vec<u8>>>,
 }
 
 #[allow(dead_code)]
 impl TestWriter {
     pub(crate) fn new() -> Self {
         Self {
-            buf: Rc::new(RefCell::new(Vec::new())),
+            buf: Arc::new(Mutex::new(Vec::new())),
         }
     }
 
     pub(crate) fn into_inner_buf(self) -> String {
-        let buf = self.buf.take();
+        let buf = self.buf.lock().unwrap();
         String::from_utf8_lossy(buf.as_slice()).into_owned()
     }
 }
 
 impl Write for TestWriter {
     fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
-        self.buf.borrow_mut().extend_from_slice(buf);
+        self.buf.lock().unwrap().extend_from_slice(buf);
         Ok(buf.len())
     }
 
@@ -107,7 +117,7 @@ mod tests {
 
         // Create a test writer
         let mut test_writer = TestWriter::new();
-        let buffer = Box::new(test_writer.clone()) as Box<dyn Write + 'static>;
+        let buffer = Box::new(test_writer.clone()) as Box<dyn Write + Send + Sync + 'static>;
 
         // Create logger with test writer
         let logger = StdOutLogger::new_with(buffer);

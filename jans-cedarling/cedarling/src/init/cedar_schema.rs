@@ -10,9 +10,9 @@ use base64::prelude::*;
 #[derive(Debug, thiserror::Error)]
 pub enum ParceCedarSchemaSetMessage {
     #[error("unable to decode cedar policy schema base64")]
-    BASE64,
+    Base64,
     #[error("unable to decode cedar policy schema json")]
-    JSON,
+    Json,
 }
 
 /// A custom deserializer for Cedar's Schema.
@@ -24,11 +24,11 @@ where
 {
     let source = <String as serde::Deserialize>::deserialize(deserializer)?;
     let decoded: Vec<u8> = BASE64_STANDARD.decode(source.as_str()).map_err(|err| {
-        serde::de::Error::custom(format!("{}: {}", ParceCedarSchemaSetMessage::BASE64, err,))
+        serde::de::Error::custom(format!("{}: {}", ParceCedarSchemaSetMessage::Base64, err,))
     })?;
 
     let schema = cedar_policy::Schema::from_json_file(decoded.as_slice()).map_err(|err| {
-        serde::de::Error::custom(format!("{}: {}", ParceCedarSchemaSetMessage::JSON, err))
+        serde::de::Error::custom(format!("{}: {}", ParceCedarSchemaSetMessage::Json, err))
     })?;
 
     Ok(schema)
@@ -56,7 +56,7 @@ mod tests {
         assert!(policy_result
             .unwrap_err()
             .to_string()
-            .contains(&ParceCedarSchemaSetMessage::BASE64.to_string()));
+            .contains(&ParceCedarSchemaSetMessage::Base64.to_string()));
     }
 
     #[test]
@@ -68,7 +68,7 @@ mod tests {
         assert!(policy_result
             .unwrap_err()
             .to_string()
-            .contains(&ParceCedarSchemaSetMessage::JSON.to_string()));
+            .contains(&ParceCedarSchemaSetMessage::Json.to_string()));
     }
 
     #[test]
