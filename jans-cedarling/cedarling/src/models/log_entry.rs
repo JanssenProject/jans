@@ -34,7 +34,11 @@ pub struct LogEntry {
 }
 
 impl LogEntry {
-    pub fn new_with_data(pdp_id: Uuid, application_id: String, log_kind: LogType) -> LogEntry {
+    pub(crate) fn new_with_data(
+        pdp_id: Uuid,
+        application_id: String,
+        log_kind: LogType,
+    ) -> LogEntry {
         let unix_time_sec = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .expect("Time went backwards")
@@ -54,12 +58,13 @@ impl LogEntry {
         }
     }
 
-    pub fn set_message(mut self, message: String) -> Self {
+    pub(crate) fn set_message(mut self, message: String) -> Self {
         self.msg = message;
         self
     }
 
-    pub fn set_auth_info(mut self, auth_info: AuthorizationLogInfo) -> Self {
+    #[allow(dead_code)]
+    pub(crate) fn set_auth_info(mut self, auth_info: AuthorizationLogInfo) -> Self {
         self.auth_info = Some(auth_info);
         self
     }
