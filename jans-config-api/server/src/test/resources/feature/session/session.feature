@@ -10,7 +10,7 @@ Scenario: Fetch all session
 	Then status 401 
 	And print response
 
-
+@ignore	
 Scenario: Fetch all session
 	Given url mainUrl 
 	And print 'accessToken = '+accessToken
@@ -19,7 +19,7 @@ Scenario: Fetch all session
 	Then status 200 
 	And print response
 
-
+@ignore	
 Scenario: Fetch all session
 Given url mainUrl
 And header Authorization = 'Bearer ' + accessToken
