@@ -36,8 +36,7 @@ Twilio trial accounts only allow sending messages to mobile numbers already link
     <Set name="extraClasspath">/opt/jans/jetty/jans-auth/custom/libs/twilio.jar</Set>
     ```
     
-- [Restart](../operation/services.md#restart) the `jans-auth` service     
-    
+- [Restart](../../../janssen-server/vm-ops/restarting-services.md#restart) the `jans-auth` service
 ## Properties
 
 The custom script has the following properties:    

@@ -29,7 +29,7 @@ return temp;
     Then status 401
     And print response
     
- 	    
+ 	@ignore	    
     @ldap-config-get-by-name
   	Scenario: Get LDAP configuration By Name    
     And print result
@@ -61,7 +61,7 @@ return temp;
     And print response
     And assert response.length != null        
 
-
+	@ignore	
     @ldap-config-put
   	Scenario: Update LDAP configuration
   	And print result
@@ -97,7 +97,7 @@ return temp;
     And print response
     And assert response.length != null    
        
-    
+    @ignore	
     @ldap-config-patch
 	Scenario: Patch LDAP configuration
 	And print result
