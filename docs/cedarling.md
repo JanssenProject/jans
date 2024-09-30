@@ -24,7 +24,7 @@ the enivironment, like the time of day or network address. Cedar is a compromise
 then RBAC but still deterministic; at the same time, it's less flexible then a full programming 
 language, but still expressive.
 
-![](../../assets/lock-cedarling-diagram-3.jpg)
+![image](./assets/lock-cedarling-diagram-3.jpg)
 
 ## What is the Cedarling
 
@@ -55,7 +55,7 @@ rapidly evaluates authorization requests because it has all the policies and dat
 a local decision. A key feature of the Cedarling is to log all `allow` or `deny` decisions returned
 to the application. In an enterprise deployment, this audit log is sent for central archiving.
 
-![](../../assets/lock-cedarling-diagram-1.jpg)
+![image](./assets/lock-cedarling-diagram-1.jpg)
 
 The Cedarling loads its Policy Store during initialization as a static JSON file or fetched via HTTPS. 
 The Policy Store contains the Cedar Policies, Cedar Schema, and optionally, a list of the Trusted IDPs. 
@@ -70,7 +70,7 @@ is asking if it can perform a certain action on a certain resource. The Principa
 derived from the JWTs--the combined OpenID id_token and  Userinfo tokens enable the Cedarling to 
 create a User and Role entities; the OAuth access token is used to create a Client entity.
 
-![](../../assets/lock-cedarling-diagram-2.jpg)
+![image](./assets/lock-cedarling-diagram-2.jpg)
 
 The id_token JWT represents a user authentication event. The access token JWT represents a 
 client authentication event. These tokens contain other interesting contextual data. An OpenID 
@@ -138,7 +138,7 @@ Here is a summary of the ways the Cedarling may validate a JWT, depending on you
 * If Cedarling is Locked, check token status
 * Check access token and id_token `exp` and `nbf` claims if time sent in Context
 
-![](../../assets/lock-cedarling-diagram-4.jpg)
+![image](./assets/lock-cedarling-diagram-4.jpg)
 
 ### Audit Logs
 
