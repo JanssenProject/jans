@@ -404,8 +404,9 @@ public class RedirectUri {
             sb.append("<body onload=\"javascript:document.forms[0].submit()\">");
             sb.append("<form method=\"post\" action=\"").append(baseRedirectUri).append("\">");
             for (Map.Entry<String, String> entry : responseParameters.entrySet()) {
+                String entryKey = StringEscapeUtils.escapeHtml(entry.getKey());
                 String entryValue = StringEscapeUtils.escapeHtml(entry.getValue());
-                sb.append("<input type=\"hidden\" name=\"").append(entry.getKey()).append("\" value=\"").append(entryValue).append("\"/>");
+                sb.append("<input type=\"hidden\" name=\"").append(entryKey).append("\" value=\"").append(entryValue).append("\"/>");
             }
             sb.append("</form>");
             sb.append("</body>");
