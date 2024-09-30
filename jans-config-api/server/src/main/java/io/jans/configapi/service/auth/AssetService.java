@@ -6,9 +6,7 @@
 
 package io.jans.configapi.service.auth;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+
 
 import io.jans.as.common.service.common.ApplicationFactory;
 import io.jans.as.common.util.AttributeConstants;
@@ -37,6 +35,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -294,21 +296,42 @@ public class AssetService {
         return true;
     }
 
-    public List<String> getValidModuleName() {
-        return this.appConfiguration.getAssetMgtConfiguration().getJansServiceModule();
+    public List<String> getValidServiceModuleName() {
+        List<String> serviceModules = null;
+        AssetMgtConfiguration assetMgtConfiguration =  this.getAssetMgtConfiguration();
+        log.info("assetMgtConfiguration:{} ", assetMgtConfiguration);
+        if(assetMgtConfiguration == null || assetMgtConfiguration.getAssetDirMapping()==null)
+        {
+            return serviceModules;
+        }
+        
+        List<AssetDirMapping> assetDirMappingList = this.getAssetDirMapping();
+        
+        if(assetDirMappingList==null || assetDirMappingList.isEmpty()) {
+            return serviceModules;
+        }
+
+        HashSet<String> dirSet = new HashSet<>();
+        for(AssetDirMapping mapping: assetDirMappingList) {
+            dirSet.addAll(mapping.getJansServiceModule());
+        }
+        
+        serviceModules = new ArrayList(dirSet);
+        log.info(" ServiceModuleName  serviceModules:{}- ", serviceModules);
+        return serviceModules;
+        
     }
 
     public List<String> getValidFileExtension() {
         List<String> validFileExtension = new ArrayList<>();
 
-        if (appConfiguration.getAssetMgtConfiguration().getAssetDirMapping() == null
-                || appConfiguration.getAssetMgtConfiguration().getAssetDirMapping().isEmpty()) {
+        List<AssetDirMapping> assetDirList = this.getAssetDirMapping();
+        
+        if (assetDirList == null || assetDirList.isEmpty()) {
             return validFileExtension;
         }
 
-        List<AssetDirMapping> assetDir = this.appConfiguration.getAssetMgtConfiguration().getAssetDirMapping();
-
-        for (AssetDirMapping dir : assetDir) {
+        for (AssetDirMapping dir : assetDirList) {
             validFileExtension.addAll(dir.getType());
         }
 
@@ -613,7 +636,7 @@ public class AssetService {
             throw new InvalidConfigurationException("Service module to save asset is not provided in request!");
         }
 
-        List<String> validModules = getValidModuleName();
+        List<String> validModules = getValidServiceModuleName();
         log.info("validModules:{} ", validModules);
 
         if (validModules == null || validModules.isEmpty() || !isModuleNameValidationEnabled()) {
@@ -686,6 +709,18 @@ public class AssetService {
 
     private DocumentStoreType getDocumentStoreType() {
         return documentStoreService.getProviderType();
+    }
+    
+    private AssetMgtConfiguration getAssetMgtConfiguration() {
+        return this.appConfiguration.getAssetMgtConfiguration();
+    }
+    
+    private List<AssetDirMapping> getAssetDirMapping() {
+        List<AssetDirMapping> assetDirMapping = null;
+        if(this.getAssetMgtConfiguration() == null) {
+            return assetDirMapping;
+        }
+        return this.getAssetMgtConfiguration().getAssetDirMapping();
     }
 
 }
