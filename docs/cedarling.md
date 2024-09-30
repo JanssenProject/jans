@@ -163,6 +163,11 @@ bootstrap property:
 * `std_out` - write logs synchronously to std_out
 * `lock` - periodically POST logs to Jans Lock Server `/audit` endpoint for central archiving. 
 
+There are three different log records produced by the Cedarling:
+* `Decision` - The result and diagnostics of an authz decision
+* `System` - Startup, debug and other Cedarling messages not related to authz
+* `Metric`- Performance and usage data
+
 ## Cedarling Policy Store
 
 By convention, the filename is `cedarling_store.json`. It contains all the data the 
