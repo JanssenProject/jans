@@ -7,13 +7,13 @@
 
 //! Module for creating cedar-policy entities
 
-mod entities_meta;
-mod entity_create;
+mod meta;
+mod create;
 
 use std::collections::HashSet;
 
 use crate::models::token_data::TokenClaim;
-use entity_create::CedarPolicyCreateTypeError;
+use create::CedarPolicyCreateTypeError;
 
 /// Describe errors on creating entites for AccessToken
 #[derive(thiserror::Error, Debug)]
@@ -27,7 +27,7 @@ pub fn create_access_token_entities(
     data: &TokenClaim,
 ) -> Result<Vec<cedar_policy::Entity>, AccessTokenEntitiesError> {
     let mut entities = Vec::new();
-    entities.push(entities_meta::WorkloadEntityMeta.create_entity(data, HashSet::new())?);
+    entities.push(meta::WorkloadEntityMeta.create_entity(data, HashSet::new())?);
     // TODO: add more entities
 
     Ok(entities)

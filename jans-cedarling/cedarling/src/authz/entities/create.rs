@@ -15,17 +15,17 @@ use cedar_policy::{EntityId, EntityTypeName, EntityUid, RestrictedExpression};
 
 /// Meta information about an entity type.
 /// Is used to store in `static` variable.
-pub struct EntityMetaInfo<'a> {
+pub struct EntityMetadata<'a> {
     entity_type: &'a str,
     entity_id_data_key: &'a str,
-    meta_attributes: Vec<EntityAttributeMeta<'a>>,
+    meta_attributes: Vec<EntityAttributeMetadata<'a>>,
 }
 
-impl<'a> EntityMetaInfo<'a> {
+impl<'a> EntityMetadata<'a> {
     pub fn new(
         entity_type: &'a str,
         entity_id_data_key: &'a str,
-        meta_attributes: Vec<EntityAttributeMeta<'a>>,
+        meta_attributes: Vec<EntityAttributeMetadata<'a>>,
     ) -> Self {
         Self {
             entity_type,
@@ -53,7 +53,7 @@ impl<'a> EntityMetaInfo<'a> {
 }
 
 /// Meta information about an attribute for cedar policy.
-pub struct EntityAttributeMeta<'a> {
+pub struct EntityAttributeMetadata<'a> {
     // The name of the attribute in the cedar policy
     pub attribute_name: &'a str,
     // The name of the token claim that contains the value.
@@ -100,7 +100,7 @@ impl CedarPolicyType {
 pub fn create_entity(
     entity_type: &str,
     entity_id_data_key: &str,
-    meta_attributes: &[EntityAttributeMeta],
+    meta_attributes: &[EntityAttributeMetadata],
     data: &TokenClaim,
     parents: HashSet<EntityUid>,
 ) -> Result<cedar_policy::Entity, CedarPolicyCreateTypeError> {
