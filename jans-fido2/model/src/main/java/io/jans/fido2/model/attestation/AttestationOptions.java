@@ -14,7 +14,7 @@ public class AttestationOptions {
     private String username ;
     private String displayName;
     private AttestationConveyancePreference attestation;
-    private String documentDomain;
+    private String origin;
     private JsonNode extensions;
     private AuthenticatorSelection authenticatorSelection;
     private AuthenticatorAttachment authenticatorAttachment;
@@ -70,12 +70,12 @@ public class AttestationOptions {
         this.authenticatorSelection = authenticatorSelection;
     }
 
-    public String getDocumentDomain() {
-        return documentDomain;
+    public String getOrigin() {
+        return origin;
     }
 
-    public void setDocumentDomain(String documentDomain) {
-        this.documentDomain = documentDomain;
+    public void setOrigin(String origin) {
+        this.origin = origin;
     }
 
     public AuthenticatorAttachment getAuthenticatorAttachment() {
@@ -100,10 +100,15 @@ public class AttestationOptions {
                 "username='" + username + '\'' +
                 ", displayName='" + displayName + '\'' +
                 ", attestation=" + attestation +
-                ", documentDomain='" + documentDomain + '\'' +
+                ", origin='" + origin + '\'' +
                 ", extensions=" + extensions +
                 ", authenticatorSelection=" + authenticatorSelection +
                 ", timeout=" + timeout +
                 '}';
     }
+
+	public AttestationOptions() {
+		
+	}
+    
 }

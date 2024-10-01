@@ -212,5 +212,20 @@ public class Fido2Configuration {
     
    
 	public Fido2Configuration() {}
+
+	@Override
+	public String toString() {
+		return "Fido2Configuration [authenticatorCertsFolder=" + authenticatorCertsFolder + ", mdsAccessToken="
+				+ mdsAccessToken + ", mdsCertsFolder=" + mdsCertsFolder + ", mdsTocsFolder=" + mdsTocsFolder
+				+ ", checkU2fAttestations=" + checkU2fAttestations + ", debugUserAutoEnrollment="
+				+ debugUserAutoEnrollment + ", unfinishedRequestExpiration=" + unfinishedRequestExpiration
+				+ ", metadataRefreshInterval=" + metadataRefreshInterval + ", serverMetadataFolder="
+				+ serverMetadataFolder + ", enabledFidoAlgorithms=" + enabledFidoAlgorithms + ", requestedParties="
+				+ requestedParties + ", metadataServers=" + metadataServers + ", disableMetadataService="
+				+ disableMetadataService + ", hints=" + hints + ", enterpriseAttestation=" + enterpriseAttestation
+				+ ", attestationMode=" + attestationMode + "]";
+	}
+	
+	
 }
 

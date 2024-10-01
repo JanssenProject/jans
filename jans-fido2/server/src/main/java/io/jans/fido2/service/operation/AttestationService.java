@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.google.common.base.Strings;
 import io.jans.entry.PublicKeyCredentialHints;
+import io.jans.entry.Transports;
 import io.jans.fido2.ctap.AttestationConveyancePreference;
 import io.jans.fido2.ctap.AuthenticatorAttachment;
 import io.jans.fido2.ctap.CoseEC2Algorithm;
@@ -106,7 +107,7 @@ public class AttestationService {
 
     /*
      * Requires mandatory parameters: username, displayName, attestation Support non
-     * mandatory parameters: authenticatorSelection, documentDomain, extensions,
+     * mandatory parameters: authenticatorSelection, origin, extensions,
      * timeout
      */
     public PublicKeyCredentialCreationOptions options(AttestationOptions attestationOptions) {
@@ -135,14 +136,9 @@ public class AttestationService {
 		pubKeyCredParams.stream().forEach(ele -> log.debug("Put pubKeyCredParam {}", ele.toString()));
 
 		// Put RP
-		
-		
-		
-		
-		String documentDomain = commonVerifiers.verifyRpDomain(attestationOptions.getDocumentDomain(), appConfiguration.getIssuer());
-		RelyingParty relyingParty = createRpDomain(documentDomain);
+		String origin = commonVerifiers.verifyRpDomain(attestationOptions.getOrigin(), appConfiguration.getIssuer());
+		RelyingParty relyingParty = createRpDomain(origin);
 		log.debug("Relying Party: "+relyingParty);
-		
 		
 		if (relyingParty != null) {
 			credentialCreationOptions.setRp(relyingParty);
@@ -157,7 +153,7 @@ public class AttestationService {
 
 		// Put excludeCredentials
 		
-		Set<PublicKeyCredentialDescriptor> excludedCredentials = prepareExcludeCredentials(documentDomain, attestationOptions.getUsername());
+		Set<PublicKeyCredentialDescriptor> excludedCredentials = prepareExcludeCredentials(origin, attestationOptions.getUsername());
 		credentialCreationOptions.setExcludeCredentials(excludedCredentials);
 		excludedCredentials.stream().forEach(ele -> log.debug("Put excludeCredentials {}", ele.toString()));
 		
@@ -169,7 +165,8 @@ public class AttestationService {
 		List<String> hints = appConfiguration.getFido2Configuration().getHints();
 		
 		credentialCreationOptions.setHints(new HashSet<String>(hints));
-		if(hints.contains(PublicKeyCredentialHints.CLIENT_DEVICE))
+		// only platform 
+		if(hints.contains(PublicKeyCredentialHints.CLIENT_DEVICE) && hints.size() == 1)
 		{
 			credentialCreationOptions.getAuthenticatorSelection().setAuthenticatorAttachment(AuthenticatorAttachment.PLATFORM);
 			credentialCreationOptions.getAuthenticatorSelection().setUserVerification(UserVerification.preferred); 
@@ -220,36 +217,16 @@ public class AttestationService {
 			log.debug("Put extensions {}", attestationOptions.getExtensions());
 		}
 		
-		//TODO: this should be deleted ater testing
-		/*
-		 * // incase of Apple's Touch ID and Window's Hello; timeout,status and error
-		 * message cause a NotAllowedError on the browser, so skipping these attributes
-		 * if (attestationOptions.getAuthenticatorAttachment() != null) { if
-		 * (AuthenticatorAttachment.CROSS_PLATFORM.getAttachment().equals(
-		 * attestationOptions.getAuthenticatorAttachment().getAttachment())) { // Put
-		 * timeout long timeout =
-		 * commonVerifiers.verifyTimeout(attestationOptions.getTimeout());
-		 * credentialCreationOptions.setTimeout(timeout); log.debug("Put timeout {}",
-		 * timeout);
-		 * 
-		 * credentialCreationOptions.setStatus("ok");
-		 * credentialCreationOptions.setErrorMessage(""); } }
-		 */
-		
 		// Store request in DB
 		Fido2RegistrationData entity = new Fido2RegistrationData();
 		entity.setUsername(attestationOptions.getUsername());
 		entity.setUserId(userId);
 		entity.setChallenge(challenge);
-		entity.setOrigin(documentDomain);
+		entity.setOrigin(origin);
 		entity.setStatus(Fido2RegistrationStatus.pending);
-		//if (params.hasNonNull(CommonVerifiers.SUPER_GLUU_APP_ID)) {
-		/*
-		 * if (!Strings.isNullOrEmpty(attestationOptions.getSuperGluuAppId())) {
-		 * entity.setApplicationId(attestationOptions.getSuperGluuAppId()); } else {
-		 */
+		
 		// TODO: this can be removed out in the future
-			entity.setRpId(documentDomain);
+			entity.setRpId(origin);
 		//}
 
 		// Store original requests
@@ -272,6 +249,7 @@ public class AttestationService {
 		externalFido2InterceptionContext.addToContext(registrationEntry, null);
 		externalFido2InterceptionService.registerAttestationFinish(CommonUtilService.toJsonNode(attestationOptions), externalFido2InterceptionContext);
 
+		log.debug("Returning from options: "+credentialCreationOptions.toString());
 		return credentialCreationOptions;
 	}
 
@@ -286,9 +264,6 @@ public class AttestationService {
 		// Verify if there are mandatory request parameters
 		commonVerifiers.verifyBasicAttestationResultRequest(attestationResult);
 		commonVerifiers.verifyAssertionType(attestationResult.getType());
-
-		// Get response
-		//JsonNode responseNode = params.get("response");
 
 		// Verify client data
 		JsonNode clientDataJSONNode = commonVerifiers.verifyClientJSON(attestationResult.getResponse().getClientDataJSON());
@@ -320,8 +295,12 @@ public class AttestationService {
 		registrationData.setType(PublicKeyCredentialType.PUBLIC_KEY.getKeyName());
 		registrationData.setAttestationType(attestationData.getAttestationType());
 
+		// all flags being set
 		registrationData.setBackupEligibilityFlag(attestationData.getBackupEligibilityFlag());
 		registrationData.setBackupStateFlag(attestationData.getBackupStateFlag());
+		registrationData.setAttestedCredentialDataFlag(attestationData.isAttestedCredentialDataFlag());
+		registrationData.setUserPresentFlag(attestationData.isUserPresentFlag());
+		registrationData.setUserVerifiedFlag(attestationData.isUserVerifiedFlag());
 
 		registrationData.setStatus(Fido2RegistrationStatus.registered);
 
@@ -332,7 +311,7 @@ public class AttestationService {
 		// Fido2RegistrationData to minimize DB updates
 		registrationData.setCounter(registrationEntry.getCounter());
 
-		String deviceDataFromReq = attestationResult.getResponse().getDeviceData();
+	/*	String deviceDataFromReq = attestationResult.getResponse().getDeviceData();
 		if (!Strings.isNullOrEmpty(deviceDataFromReq)) {
             try {
 				Fido2DeviceData deviceData = dataMapperService.readValue(
@@ -342,7 +321,7 @@ public class AttestationService {
             } catch (Exception ex) {
                 throw errorResponseFactory.invalidRequest(String.format("Device data is invalid: %s", deviceDataFromReq), ex);
             }
-        }
+        }*/
 
         registrationEntry.setPublicKeyId(registrationData.getPublicKeyId());
 
@@ -454,20 +433,20 @@ public class AttestationService {
 		return credentialParametersSets;
 	}
 
-	public RelyingParty createRpDomain(String documentDomain) {
+	public RelyingParty createRpDomain(String origin) {
 		List<RequestedParty> requestedParties = appConfiguration.getFido2Configuration().getRequestedParties();
 		
 		if ((requestedParties == null) || requestedParties.isEmpty()) {
 			// Add entry for default RP
-			return RelyingParty.createRelyingParty(documentDomain, appConfiguration.getIssuer());
+			return RelyingParty.createRelyingParty(origin, appConfiguration.getIssuer());
 		} else {
 			for (RequestedParty requestedParty : requestedParties) {
 
 				for (String domain : requestedParty.getOrigins()) {
 
-					if (StringHelper.equalsIgnoreCase(documentDomain, domain)) {
+					if (StringHelper.equalsIgnoreCase(origin, domain)) {
 						// Add entry for supported RP
-						return RelyingParty.createRelyingParty(documentDomain, requestedParty.getId());
+						return RelyingParty.createRelyingParty(origin, requestedParty.getId());
 					}
 				}
 			}
@@ -483,22 +462,14 @@ public class AttestationService {
 		return base64Service.urlEncodeToString(buffer);
 	}
 
-	private ObjectNode createUserCredentials(String userId, String username, String displayName) {
-		ObjectNode credentialUserEntityNode = dataMapperService.createObjectNode();
-		credentialUserEntityNode.put("id", userId);
-		credentialUserEntityNode.put("name", username);
-		credentialUserEntityNode.put("displayName", displayName);
 
-		return credentialUserEntityNode;
-	}
-
-	private Set<PublicKeyCredentialDescriptor> prepareExcludeCredentials(String documentDomain, String username) {
+	private Set<PublicKeyCredentialDescriptor> prepareExcludeCredentials(String origin, String username) {
 		List<Fido2RegistrationEntry> existingRegistrations = registrationPersistenceService
-				.findByRpRegisteredUserDevices(username, documentDomain);
+				.findByRpRegisteredUserDevices(username, origin);
 		Set<PublicKeyCredentialDescriptor> excludedKeys = existingRegistrations.parallelStream()
 				.filter(f -> StringHelper.isNotEmpty(f.getRegistrationData().getPublicKeyId()))
 				.map(f -> new PublicKeyCredentialDescriptor(
-						new String[] { "usb", "ble", "nfc", "internal", "net", "qr" },
+						new String[] { Transports.USB.getValue(),Transports.BLE.getValue() ,Transports.NFC.getValue() ,Transports.INTERNAL.getValue(), Transports.HYBRID.getValue() },
 						f.getRegistrationData().getPublicKeyId()))
 				.collect(Collectors.toSet());
 

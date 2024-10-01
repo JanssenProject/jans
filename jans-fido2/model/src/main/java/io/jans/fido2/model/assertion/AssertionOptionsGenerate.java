@@ -7,7 +7,7 @@ import io.jans.orm.model.fido2.UserVerification;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AssertionOptionsGenerate {
     private UserVerification userVerification;
-    private String documentDomain;
+    private String origin;
     private Long timeout;
     private JsonNode extensions;
     @JsonProperty(value = "session_id")
@@ -21,12 +21,12 @@ public class AssertionOptionsGenerate {
         this.userVerification = userVerification;
     }
 
-    public String getDocumentDomain() {
-        return documentDomain;
+    public String getOrigin() {
+        return origin;
     }
 
-    public void setDocumentDomain(String documentDomain) {
-        this.documentDomain = documentDomain;
+    public void setOrigin(String origin) {
+        this.origin = origin;
     }
 
     public Long getTimeout() {
@@ -57,7 +57,7 @@ public class AssertionOptionsGenerate {
     public String toString() {
         return "AssertionOptionsGenerate{" +
                 "userVerification=" + userVerification +
-                ", documentDomain='" + documentDomain + '\'' +
+                ", origin='" + origin + '\'' +
                 ", timeout=" + timeout +
                 ", extensions=" + extensions +
                 ", sessionId='" + sessionId + '\'' +

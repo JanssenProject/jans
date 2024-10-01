@@ -51,6 +51,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import io.jans.entry.Transports;
 
 /**
  * Core offering by the FIDO2 server, assertion is invoked upon authentication
@@ -115,7 +116,7 @@ public class AssertionService {
 
     /*
      * Requires mandatory parameters: username Support non mandatory parameters:
-     * userVerification, documentDomain, extensions, timeout
+     * userVerification, origin, extensions, timeout
      */
     public AssertionOptionsResponse options(AssertionOptions assertionOptions) {
         log.debug("Assertion options {}", CommonUtilService.toJsonNode(assertionOptions));
@@ -143,12 +144,12 @@ public class AssertionService {
 		log.debug("Put challenge {}", challenge);
 
 		// Put RP
-		String documentDomain = commonVerifiers.verifyRpDomain(assertionOptions.getDocumentDomain(),appConfiguration.getIssuer());
-		assertionOptionsResponse.setRpId(documentDomain);
-		log.debug("Put rpId {}", documentDomain);
+		String origin = commonVerifiers.verifyRpDomain(assertionOptions.getOrigin(),appConfiguration.getIssuer());
+		assertionOptionsResponse.setRpId(origin);
+		log.debug("Put rpId {}", origin);
 
 
-		String applicationId = documentDomain;
+		String applicationId = origin;
 		
 		// Put allowCredentials
 		Pair<List<PublicKeyCredentialDescriptor>, String> allowedCredentialsPair = prepareAllowedCredentials(applicationId, username);
@@ -188,10 +189,10 @@ public class AssertionService {
 		Fido2AuthenticationData entity = new Fido2AuthenticationData();
 		entity.setUsername(username);
 		entity.setChallenge(challenge);
-		entity.setOrigin(documentDomain);
+		entity.setOrigin(origin);
 		entity.setUserVerificationOption(userVerification);
 		entity.setStatus(Fido2AuthenticationStatus.pending);
-		entity.setRpId(documentDomain);
+		entity.setRpId(origin);
 		
 
 		// Store original request
@@ -231,9 +232,9 @@ public class AssertionService {
 		log.debug("Put challenge {}", challenge);
 
 		// Put RP
-		String documentDomain = commonVerifiers.verifyRpDomain(assertionOptionsGenerate.getDocumentDomain(), appConfiguration.getIssuer());
-		asserOptGenerateResponse.setRpId(documentDomain);
-		log.debug("Put rpId {}", documentDomain);
+		String origin = commonVerifiers.verifyRpDomain(assertionOptionsGenerate.getOrigin(), appConfiguration.getIssuer());
+		asserOptGenerateResponse.setRpId(origin);
+		log.debug("Put rpId {}", origin);
 
 		// Put timeout
 		long timeout = commonVerifiers.verifyTimeout(assertionOptionsGenerate.getTimeout());
@@ -251,10 +252,10 @@ public class AssertionService {
 		Fido2AuthenticationData entity = new Fido2AuthenticationData();
 		entity.setUsername(null);
 		entity.setChallenge(challenge);
-		entity.setOrigin(documentDomain);
+		entity.setOrigin(origin);
 		entity.setUserVerificationOption(userVerification);
 		entity.setStatus(Fido2AuthenticationStatus.pending);
-		entity.setRpId(documentDomain);
+		entity.setRpId(origin);
 
 		// Store original request
 		entity.setAssertionRequest(CommonUtilService.toJsonNode(assertionOptionsGenerate).toString());
@@ -408,22 +409,16 @@ public class AssertionService {
 		snsEndpointArnHistory.add(snsEndpointArn);
 	}
 
-	private Pair<List<PublicKeyCredentialDescriptor>, String> prepareAllowedCredentials(String documentDomain,
+	private Pair<List<PublicKeyCredentialDescriptor>, String> prepareAllowedCredentials(String origin,
 			String username) {
-		if (appConfiguration.isOldU2fMigrationEnabled()) {
-			List<DeviceRegistration> existingFidoRegistrations = deviceRegistrationService
-					.findAllRegisteredByUsername(username, documentDomain);
-			if (existingFidoRegistrations.size() > 0) {
-				deviceRegistrationService.migrateToFido2(existingFidoRegistrations, documentDomain, username);
-			}
-		}
+		
 
 		List<Fido2RegistrationEntry> existingFido2Registrations;
 
 		// TODO: incase of a bug, this the second argument should have been null, see
 		// old code to understand
 		existingFido2Registrations = registrationPersistenceService.findByRpRegisteredUserDevices(username,
-				documentDomain);
+				origin);
 
 		// f.getRegistrationData().getAttenstationRequest() null check is added to
 		// maintain backward compatiblity with U2F devices when U2F devices are migrated
@@ -437,13 +432,19 @@ public class AssertionService {
 			log.debug("attestation request:" + f.getRegistrationData().getAttestationRequest());
 			String transports[];
 
-			transports = ((f.getRegistrationData().getAttestationType()
-					.equalsIgnoreCase(AttestationFormat.apple.getFmt()))
+			if (f.getRegistrationData().getAttestationType().equalsIgnoreCase(AttestationFormat.apple.getFmt())
+					|| (f.getRegistrationData().getAttestationType().equalsIgnoreCase(AttestationFormat.tpm.getFmt()))
 					|| (f.getRegistrationData().getAttestationRequest() != null && f.getRegistrationData()
-							.getAttestationRequest().contains(AuthenticatorAttachment.PLATFORM.getAttachment())))
-
-									? new String[] { "internal" }
-									: new String[] { "usb", "ble", "nfc" };
+							.getAttestationRequest().contains(AuthenticatorAttachment.PLATFORM.getAttachment()))
+					) {
+				transports = new String[] { Transports.INTERNAL.getValue() };
+			}
+			// multidevice
+			else if (f.getRegistrationData().getBackupEligibilityFlag()) {
+				transports = new String[] { Transports.HYBRID.getValue() };
+			} else {
+				transports = new String[] { Transports.USB.getValue(), Transports.NFC.getValue(), Transports.BLE.getValue() };
+			}
 
 			PublicKeyCredentialDescriptor descriptor = new PublicKeyCredentialDescriptor(transports,
 					f.getRegistrationData().getPublicKeyId());
