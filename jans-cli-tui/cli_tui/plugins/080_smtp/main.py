@@ -5,15 +5,10 @@ from typing import Any
 
 import prompt_toolkit
 from prompt_toolkit.eventloop import get_event_loop
-from prompt_toolkit.layout.containers import HSplit, DynamicContainer,\
-    VSplit, Window, HorizontalAlign, Window
+from prompt_toolkit.layout.containers import HSplit, VSplit, Window, HorizontalAlign
 from prompt_toolkit.layout.dimension import D
-from prompt_toolkit.widgets import Frame, Button, Label, Box, Dialog
+from prompt_toolkit.widgets import Button
 from prompt_toolkit.application import Application
-from wui_components.jans_nav_bar import JansNavBar
-from wui_components.jans_drop_down import DropDownWidget
-from wui_components.jans_vetrical_nav import JansVerticalNav
-from wui_components.jans_cli_dialog import JansGDialog
 from utils.multi_lang import _
 from utils.utils import DialogUtils
 from utils.static import cli_style, common_strings

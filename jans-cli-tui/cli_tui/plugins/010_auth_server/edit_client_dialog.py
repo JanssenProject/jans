@@ -12,6 +12,7 @@ from prompt_toolkit.layout.containers import (
     HSplit,
     VSplit,
     DynamicContainer,
+    HorizontalAlign,
 )
 from prompt_toolkit.widgets import (
     Button,
@@ -26,10 +27,10 @@ from prompt_toolkit.filters import Condition
 from prompt_toolkit.lexers import PygmentsLexer, DynamicLexer
 from prompt_toolkit.application.current import get_app
 from prompt_toolkit.buffer import Buffer
-from prompt_toolkit.formatted_text import AnyFormattedText
+from prompt_toolkit.formatted_text import AnyFormattedText, HTML
 from prompt_toolkit.eventloop import get_event_loop
 
-from utils.static import DialogResult, cli_style, ISOFORMAT
+from utils.static import DialogResult, cli_style, common_strings, ISOFORMAT
 from utils.multi_lang import _
 from utils.utils import common_data, fromisoformat, DialogUtils
 from wui_components.jans_dialog_with_nav import JansDialogWithNav
@@ -100,7 +101,9 @@ class EditClientDialog(JansGDialog, DialogUtils):
         self.title = title
         self.nav_dialog_width = int(self.myparent.dialog_width*1.1)
         self.client_scopes_entries = []
+        self.active_tokes_buttons = VSplit([])
         self.add_scope_checkbox = CheckboxList(values=[('', '')])
+        self.activate_tokens_per_page = self.myparent.dialog_height-11
         self.fill_client_scopes()
         self.prepare_tabs()
         self.create_window()
@@ -798,7 +801,6 @@ class EditClientDialog(JansGDialog, DialogUtils):
                 (_("Transaction Token Enc for Encryption"), 'txTokenEncryptedResponseEnc',
                  'tx_token_encryption_enc_values_supported'),
 
-
         ):
 
             self.drop_down_select_first.append(swagger_key)
@@ -981,7 +983,141 @@ class EditClientDialog(JansGDialog, DialogUtils):
 
         self.tabs['Client Scripts'] = HSplit(list(self.scripts_widget_dict.values()), width=D(), style=cli_style.tabs)
 
+
+        self.active_tokens_list = JansVerticalNav(
+                myparent=common_data.app,
+                headers=[_("Delatable"), _("Expiration"), _("Token Type")],
+                preferred_size=[0, 0, 0],
+                data={},
+                on_display=common_data.app.data_display_dialog,
+                on_delete=self.delete_active_token,
+                selectes=0,
+                headerColor=cli_style.navbar_headcolor,
+                entriesColor=cli_style.navbar_entriescolor,
+                all_data=[],
+                hide_headers=True
+            )
+
+        self.active_tokens_list.start_index = 0
+        self.search_active_tokens_button = self.myparent.getButtonWithHandler(
+                                text=_("Get Active Tokens"),
+                                name='oauth:active-tokens:search',
+                                jans_help=_("Gets active tokens associated with this client"),
+                                handler=self.search_active_tokens,
+                                centered=True
+                            )
+
+        if self.data.get('inum'):
+            self.tabs['Active Tokens'] = HSplit([
+                            self.search_active_tokens_button,
+                            self.active_tokens_list,
+                            DynamicContainer(lambda: self.active_tokes_buttons)
+                        ],
+                        width=D())
+
         self.left_nav = list(self.tabs.keys())[0]
+
+    def delete_active_token(self, **kwargs: Any) -> None:
+        """This method for the deletion of the User 
+        """
+
+        entry = self.active_tokens_list.all_data[kwargs['selected_idx']]
+
+        if not entry.get('deletable'):
+            common_data.app.show_message(_(common_strings.warning), _("This token cannot be delated."), tobefocused=self.active_tokens_list)
+            return
+
+        def do_delete_token():
+            cli_args = {'operation_id': 'revoke-token', 'url_suffix': f"tknCde:{entry['tokenCode']}"}
+
+            async def coroutine():
+                common_data.app.start_progressing(_("Deleting token {}...").format(entry['tokenCode']))
+                response = await common_data.app.loop.run_in_executor(common_data.app.executor, common_data.app.cli_requests, cli_args)
+                common_data.app.stop_progressing()
+
+                if response is not None:
+                    common_data.app.show_message(_(common_strings.error), _("Token was not delated"), tobefocused=self.active_tokens_list)
+                    return
+
+                self.get_client_active_tokens(start_index=self.active_tokens_list.start_index)
+            asyncio.ensure_future(coroutine())
+
+
+        buttons = [Button(_("No")), Button(_("Yes"), handler=do_delete_token)]
+
+        common_data.app.show_message(
+                title=_(common_strings.confirm),
+                message=HTML(_("Are you sure you want to delete token <b>{}</b>?").format(entry['tokenCode'])),
+                buttons=buttons,
+                )
+
+
+    def search_active_tokens(self, button_name) -> None:
+        """This method handle the search for active tokens
+
+        Args:
+            tbuffer (Buffer): Buffer returned from the TextArea widget > GetTitleText
+        """
+
+        #self.oauth_get_scopes(pattern=tbuffer.text)
+
+        if not self.data.get('inum'):
+            return
+
+        self.get_client_active_tokens()
+
+    def get_client_active_tokens(self, start_index=0, pattern=''):
+        self.active_tokens_list.start_index = start_index
+
+        endpoint_args = f"limit:{self.activate_tokens_per_page},startIndex:{start_index},fieldValuePair:clientId={self.data['inum']}"
+        if pattern:
+            endpoint_args += f',pattern:{pattern}'
+
+        cli_args = {'operation_id': 'search-token', 'endpoint_args': endpoint_args}
+
+
+        def get_next():
+            self.get_client_active_tokens(start_index=start_index+self.activate_tokens_per_page, pattern=pattern)
+
+        def get_previous():
+            self.get_client_active_tokens(start_index=start_index-self.activate_tokens_per_page, pattern=pattern)
+
+
+        async def coroutine():
+            common_data.app.start_progressing(_("Retreiving tokens from server..."))
+            response = await common_data.app.loop.run_in_executor(common_data.app.executor, common_data.app.cli_requests, cli_args)
+            common_data.app.stop_progressing()
+            result = response.json()
+            common_data.app.logger.debug("Tokens: {}".format(result))
+
+            if not result.get('entries'):
+                self.active_tokes_buttons = VSplit([])
+                common_data.app.show_message(_(common_strings.no_matching_result), _("No token found for this search."), tobefocused=self.search_active_tokens_button)
+                return
+
+            self.active_tokens_list.clear()
+            all_data = result['entries']
+            self.active_tokens_list.all_data = all_data
+            for entry in all_data:
+                #entry.pop('tokenCode', None)
+                self.active_tokens_list.add_item(
+                    [str(entry.get('deletable', 'False')),
+                    str(entry.get('expirationDate', '---')),
+                    entry.get('tokenType', '---')]
+                )
+
+            buttons = []
+            if start_index:
+                buttons.append(Button("Previous", handler=get_previous))
+            if result['totalEntriesCount'] > start_index + self.activate_tokens_per_page:
+                buttons.append(Button("Next", handler=get_next))
+
+            self.active_tokes_buttons = VSplit(buttons, padding=1, align=HorizontalAlign.CENTER)
+            self.active_tokens_list.hide_headers = False
+            common_data.app.layout.focus(self.active_tokens_list)
+
+        asyncio.ensure_future(coroutine())
+
 
 
     def scope_exists(self, scope_dn: str) -> bool:
