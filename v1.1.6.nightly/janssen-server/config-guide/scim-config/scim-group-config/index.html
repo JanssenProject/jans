@@ -8943,7 +8943,7 @@ For example, We can put the above created group <code>id:7a20464c-3651-48a0-9c9c
 </code></pre></div></p>
 <p>We see <code>members</code> is empty since we did not associate any user with this group yet. We will add members into this gorup in the next operation. </p>
 <h3 id="update-group-by-id">Update Group by ID<a class="headerlink" href="#update-group-by-id" title="Permanent link">#</a></h3>
-<p>The <code>update-group-by-id</code> operation can be used to update group name and adding members into the group. Let's create a json file <code>/tmp/update-group.json</code> according to the <a href="#creating-group"><code>GroupResource</code></a> schema:</p>
+<p>The <code>update-group-by-id</code> operation can be used to update group name and adding members into the group. Let's create a json file <code>/tmp/update-group.json</code> according to the <a href="#create-group"><code>GroupResource</code></a> schema:</p>
 <div class="highlight"><span class="filename">Sample</span><pre><span></span><code><span class="p">{</span><span class="w"></span>
 <span class="w">  </span><span class="nt">&quot;members&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
 <span class="w">    </span><span class="p">{</span><span class="w"></span>
@@ -8953,7 +8953,7 @@ For example, We can put the above created group <code>id:7a20464c-3651-48a0-9c9c
 <span class="w">  </span><span class="p">]</span><span class="w"></span>
 <span class="p">}</span><span class="w"></span>
 </code></pre></div>
-<p>We can get the <code>value</code> which is actually the <code>id</code> of specific users from <a href="../user-config/#get-users-list">user management</a> section. Let's run the following command to update empty members properties with a member into the group we created <a href="#creating-group">above</a>.</p>
+<p>We can get the <code>value</code> which is actually the <code>id</code> of specific users from <a href="../user-config/#get-users-list">user management</a> section. Let's run the following command to update empty members properties with a member into the group we created <a href="#create-group">above</a>.</p>
 <div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py -scim --operation-id update-group-by-id --url-suffix<span class="o">=</span><span class="s2">&quot;id:7a20464c-3651-48a0-9c9c-6b59373df60c&quot;</span> --data /tmp/update-group.json
 </code></pre></div>
 <div class="highlight"><span class="filename">Output</span><pre><span></span><code><span class="p">{</span><span class="w"></span>
@@ -9013,7 +9013,7 @@ document</a>.</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-09-27T12:12:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-01T08:56:03+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-01</span>
       
         <br>
         Created:

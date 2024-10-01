@@ -8759,7 +8759,7 @@
 </div>
 <p>Use this guide to install and configure your Casa deployment.</p>
 <h2 id="installation">Installation<a class="headerlink" href="#installation" title="Permanent link">#</a></h2>
-<p>Jans Casa can be used with <a href="https://jans.io">Janssen Server</a> or <a href="https://gluu.org">Gluu Flex Server</a>. At <a href="https://docs.jans.io/v1.1.6.nightly/admin/install/">installation</a> time (applies to any of these two products), you will be prompted if you desire to include Casa. If you want to add Casa post-installation, you will simply have to re-run the installer and ensure to select Casa.</p>
+<p>Jans Casa can be used with <a href="https://jans.io">Janssen Server</a> or <a href="https://gluu.org">Gluu Flex Server</a>. At <a href="https://docs.jans.io/vreplace-janssen-version/admin/install/">installation</a> time (applies to any of these two products), you will be prompted if you desire to include Casa. If you want to add Casa post-installation, you will simply have to re-run the installer and ensure to select Casa.</p>
 <h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">#</a></h2>
 <h3 id="enable-authentication-methods">Enable authentication methods<a class="headerlink" href="#enable-authentication-methods" title="Permanent link">#</a></h3>
 <p>The "out-of-the-box" login experience in Casa consists of the usual username and password prompt. To start leveraging a stronger authentication login to Casa with an administrative account (visit <code>https://&lt;your-server-name&gt;/jans-casa</code>) and activate the <a href="../admin-console/#authentication-methods">methods</a> you want to offer Casa users.</p>
@@ -8767,7 +8767,7 @@
 <ul>
 <li>
 <p>Usage of OTP via SMS requires the setup of a <a href="https://twilio.com">Twilio</a> account and populating configuration properties of 
-flow <code>io.jans.casa.authn.twilio_sms</code> found in Casa Agama project. You can do the latter via <a href="../../admin/config-guide/auth-server-config/agama-project-configuration/#agama-project-configuration-screen">TUI</a>. We encourage you to use the online Twilio testing tools beforehand to ensure you can send SMS to the countries you are targetting</p>
+flow <code>io.jans.casa.authn.twilio_sms</code> found in Casa Agama project. You can do the latter via <a href="../../../janssen-server/config-guide/auth-server-config/agama-project-configuration/#agama-project-configuration-screen">TUI</a>. We encourage you to use the online Twilio testing tools beforehand to ensure you can send SMS to the countries you are targetting</p>
 </li>
 <li>
 <p>Usage of Super Gluu has some preliminar requisites described <a href="https://docs.gluu.org/head/supergluu/admin-guide/">here</a></p>
@@ -8786,7 +8786,7 @@ flow <code>io.jans.casa.authn.twilio_sms</code> found in Casa Agama project. You
 <p>Click <a href="../2fa-basics/">here</a> to learn more about 2FA in Casa.</p>
 <h2 id="finish-configuration">Finish configuration<a class="headerlink" href="#finish-configuration" title="Permanent link">#</a></h2>
 <p>Once you are done with testing, you may use casa as the default authentication method of 
-Janssen Server using <a href="../../admin/config-guide/config-tools/jans-tui/README.md">TUI</a> 
+Janssen Server using <a href="../../../janssen-server/config-guide/config-tools/jans-tui/">TUI</a> 
  to log in users via Casa for all applications the server protects.</p>
 <p>Finally, as a security measure you can thoroughly disable access to the administrative console of Casa by following the steps below:</p>
 <ol>
@@ -8808,7 +8808,7 @@ Janssen Server using <a href="../../admin/config-guide/config-tools/jans-tui/REA
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-08-29T15:56:50+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-08-29</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-01T08:56:03+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-01</span>
       
         <br>
         Created:
