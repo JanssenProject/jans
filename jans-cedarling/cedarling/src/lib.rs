@@ -24,36 +24,38 @@ mod models;
 #[cfg(test)]
 mod tests;
 
-use std::rc::Rc;
+use std::sync::Arc;
 
 use authz::Authz;
 use init::policy_store::{load_policy_store, LoadPolicyStoreError};
 pub use log::LogStorage;
 use log::{init_logger, LogWriter};
 pub use models::config::*;
-use models::log_entry::{LogEntry, LogType};
+pub use models::log_entry::LogEntry;
+use models::log_entry::LogType;
 use uuid7::uuid4;
 
 /// Errors that can occur during initialization Cedarling.
 #[derive(Debug, thiserror::Error)]
 pub enum InitCedarlingError {
     /// Error that may occur during loading the policy store.
-    #[error("Could not load policy :{0}")]
+    #[error("Could not load policy: {0}")]
     PolicyStore(#[from] LoadPolicyStoreError),
 }
 
 /// The instance of the Cedarling application.
+/// It is safe to share between threads.
 #[derive(Clone)]
 pub struct Cedarling {
     log: log::Logger,
     #[allow(dead_code)]
-    authz: Rc<Authz>,
+    authz: Arc<Authz>,
 }
 
 impl Cedarling {
     /// Create a new instance of the Cedarling application.
     pub fn new(config: BootstrapConfig) -> Result<Cedarling, InitCedarlingError> {
-        let log: Rc<log::LogStrategy> = init_logger(config.log_config);
+        let log = init_logger(config.log_config);
         // we use uuid v4 because it is generated based on random numbers.
         let pdp_id = uuid4();
         let application_id = config.authz_config.application_name.clone();
@@ -70,7 +72,7 @@ impl Cedarling {
             .inspect_err(|err| {
                 log.log(
                     LogEntry::new_with_data(pdp_id, application_id, LogType::System)
-                        .set_message(format!("Could not load PolicyStore: {}", err.to_string())),
+                        .set_message(format!("Could not load PolicyStore: {}", err)),
                 )
             })?;
 
@@ -78,7 +80,7 @@ impl Cedarling {
 
         Ok(Cedarling {
             log,
-            authz: Rc::new(authz),
+            authz: Arc::new(authz),
         })
     }
 }
@@ -86,11 +88,11 @@ impl Cedarling {
 // implements LogStorage for Cedarling
 // we can use this methods outside crate only when import trait
 impl LogStorage for Cedarling {
-    fn pop_logs(&self) -> Vec<models::log_entry::LogEntry> {
+    fn pop_logs(&self) -> Vec<LogEntry> {
         self.log.pop_logs()
     }
 
-    fn get_log_by_id(&self, id: &str) -> Option<models::log_entry::LogEntry> {
+    fn get_log_by_id(&self, id: &str) -> Option<LogEntry> {
         self.log.get_log_by_id(id)
     }
 

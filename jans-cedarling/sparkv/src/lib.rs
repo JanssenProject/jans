@@ -180,7 +180,7 @@ mod tests {
     #[test]
     fn test_sparkv_new_with_config() {
         let config: Config = Config::new();
-        let sparkv = SparKV::with_config(config.clone());
+        let sparkv = SparKV::with_config(config);
         assert_eq!(sparkv.config, config);
     }
 
@@ -188,11 +188,11 @@ mod tests {
     fn test_len_is_empty() {
         let mut sparkv = SparKV::new();
         assert_eq!(sparkv.len(), 0);
-        assert_eq!(sparkv.is_empty(), true);
+        assert!(sparkv.is_empty());
 
         _ = sparkv.set("keyA", "value");
         assert_eq!(sparkv.len(), 1);
-        assert_eq!(sparkv.is_empty(), false);
+        assert!(!sparkv.is_empty());
     }
 
     #[test]
