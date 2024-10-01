@@ -73,7 +73,7 @@ sudo certbot certonly --apache
 
 !!! Note
     - Use this installation for testing only
-    - Good understanding of Janssen Server installation process in general is a prerequisite. Here we are just highlighting steps without a lot of details. Visit [installation](../admin/install/README.md) documentation for complete understanding.
+    - Good understanding of Janssen Server installation process in general is a prerequisite. Here we are just highlighting steps without a lot of details. Visit [installation](../janssen-server/install/README.md) documentation for complete understanding.
 
 
 This installation uses Gluu Testing certificate.

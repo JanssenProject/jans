@@ -260,7 +260,7 @@ tags:
 
 ### Referencing Janssen Project Release in Documents
 
-We often need to reference release numbers in the documentation. For example, [Ubuntu package installation guide](admin/install/vm-install/ubuntu.md).
+We often need to reference release numbers in the documentation. For example, [Ubuntu package installation guide](./janssen-server/install/vm-install/ubuntu.md).
 In this guide, the following command is documented:
 
 ```

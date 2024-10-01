@@ -119,7 +119,7 @@ ACR mappings are published on discovery page `GET /.well-known/openid-configurat
 }
 ```
 
-## Flowchart - How the Jans AS derives an ACR value for a user session :
+## Flowchart : How the Jans AS derives an ACR value for a user session
 
 ```mermaid
 flowchart TD
