@@ -9,84 +9,98 @@ tags:
 
 ## What is Cedar
 
-[Cedar](https://www.cedarpolicy.com/en) was invented by Amazon for their 
-[Verified Permission](https://aws.amazon.com/verified-permissions/) service. Cedar enables 
-developers to create complex, contextual policies without cluttering application code with lots 
-of `if` - `then` statements. Externalizing policies also makes it easier to audit the security 
-controls and decisions of an application.  
+[Cedar](https://www.cedarpolicy.com/en) is a policy syntax invented by Amazon and used by their 
+[Verified Permission](https://aws.amazon.com/verified-permissions/) service. Cedar policies
+enable developers to implement fine-grain access control and externalize policies. To learn more
+about why the design of Cedar is intuitive, fast and safe, read this 
+[article](https://aws.amazon.com/blogs/security/how-we-designed-cedar-to-be-intuitive-to-use-fast-and-safe/) 
+or watch this [video](https://www.youtube.com/watch?v=k6pPcnLuOXY&t=1779s)
 
-Cedar is a deterministic policy engine--if the schema and policies are validated, the engine will 
-always return `allow` or `deny` for an authorization request. Cedar uses the **PARC** syntax: 
-**P**rincipal, **A**ction, **R**esource, **C**ontext. For example, you may have a policy that says
+Cedar uses the **PARC** syntax: 
+* **P**rincipal
+* **A**ction
+* **R**esource
+* **C**ontext. 
+
+For example, you may have a policy that says
 *Admins* can *write* to the */config* folder. The *Admin* Role is the Principal, *write* is the 
 Action, and the */config* folder is the Resource. The Context is used to specify information about
-the enivironment, like the time of day or network address. Cedar is a compromise: it's less reductive 
-then RBAC but still deterministic; at the same time, it's less flexible then a full programming 
-language, but still expressive.
+the enivironment, like the time of day or network address. 
 
-![](../../assets/lock-cedarling-diagram-3.jpg)
+![](./assets/lock-cedarling-diagram-3.jpg)
+
+Fine grain access control makes sense in both the frontend and backend. In the frontend, mastery of 
+authz can help developers build better UX. For example, why display form fields a user is not 
+authorized to see? In the backend, fine grain policies are necessary for zero-trust security.
 
 ## What is the Cedarling
 
-The Cedarling is a performant local authorization service that runs the Rust Cedar Engine. 
-Cedar policies and schema are loaded at startup from a locally cached "Policy Store". In simple 
-terms, the Cedarling returns the answer: should the application allow this action on this resource
-given these JWT tokens. "Fit for purpose" policies help developers build a better user experience. 
-For example, why display form fields that a user is not authorized to see? The Cedarling is a more 
-productive and flexible way to handle authorization. 
+The Cedarling is a performant local authorization service that runs the 
+[Rust Cedar Engine](https://github.com/cedar-policy/cedar). After loading policies and schema, the Cedarling will allow (or deny) fine grain access requests based on the contents of the request, including one or more JWT tokens. The Cedarling is fast because it has all the data it needs to 
+make a local decision, which is contained in the JWTs and the other parameters of the authz request.
+No cloud round-trips are needed to return an authz decision. The Cedarling can execute many requests 
+in less then 1ms--this is critical for web and mobile applications to rely on the Cedarling for UX
+fine grain authorization. 
 
-In addition to authorization, the Cedarling can perform two more important jobs: (1) it can 
-validate JWT tokens; (2) it can create an audit log of all authorizations permitted and denied.
+In addition to authorization, the Cedarling can perform two more important jobs: (1) validating 
+JWT tokens; (2) logging all authorizations permitted and denied. 
+
+In enterprise deployments, the Cedarling can POST batched logs to a central collection point. These 
+authz decision logs are compliance evidence and are useful to perform forensic analysis. The logs 
+show everything an  attacker did, and everything they tried to do.
+
+Architecturally, the Cedarling is an autonomous stateful Policy Decision Point, or "PDP". It is 
+stateful because it implements local in-memory caching to optimize logging and token mapping. The 
+Cedarling is written in Rust with bindings to other languages like Javascript, WASM, iOS, 
+Android, Python, Java, PHP or Go. There is only one release of the Cedarling--no matter what 
+development platform you're using. That means you'll never have to wait for the release for your
+specific platform. 
+
+![](./assets/lock-cedarling-diagram-1.jpg)
 
 ### Authorization 
 
-The Cedarling runs in the browser as a WebAssembly ("WASM") component, in a mobile application, 
-or in the cloud. Although it runs at the edge--even embedded in a JavaScript browser application--
-the Cedarling is not just for front end security. Developers can use it for backend applications
-and even API gateways--multilayered security is best.
+The __Policy Store__ contains the Cedar Policies, Cedar Schema, and optionally, a list of the 
+Trusted IDPs. The Cedarling loads its Policy Store during initialization as a static JSON file
+or fetched via HTTPS. In enterprise deployments, the Cedarling can retrieve its Policy Store from
+a Jans Lock Server OAuth protected endpoint.
 
-The Cedarling provides RBAC out-of-the-box. Developers can also express a variety of policies 
-beyond the limitations of "person with role has access". For example, you can allow access only to
-users who authenticate with a certain type of passkey or incorporate a fraud score to elevate 
-security for riskier transaction. These policies are easily and rapidly evaluated by the Cedarling.
+Developers need to define Cedar Schema that makes sense for their application. For example, a 
+developer writing a customer support application might define an "Issue" Resource and Actions like
+"Reply" or "Close". Once the schema is defined, developers can author policies to model the fine 
+grain access controls needed to implement the business rules of their application. The easiest way
+to define schema and policies is to use the [AgamaLab](https://cloud.gluu.org/agama-lab) Policy 
+Designer. This is a free developer tool hosted by [Gluu](https://gluu.org).
 
-Architecturally, the Cedarling is an autonomous Policy Decision Point, or "PDP". The Cedarling 
-rapidly evaluates authorization requests because it has all the policies and data it needs to make
-a local decision. A key feature of the Cedarling is to log all `allow` or `deny` decisions returned
-to the application. In an enterprise deployment, this audit log is sent for central archiving.
+The JWTs, Resource, Action, and Context are sent in the authz request. Cedar Pricipals entities 
+are derived from JWT tokens. The OpenID Connect ("OIDC") JWTs are joined by the Cedarling to create 
+User and Role entities; the OAuth access token is used to create a Workload entity, which is the 
+software that is acting on behalf of the Person (or autonomously). The Cedarling validates that
+given its policies, both the Person and Workload are authorized.
 
-![](../../assets/lock-cedarling-diagram-1.jpg)
+The Cedarling maps "Roles" out-of-the-box. In Cedar, Roles are a special kind of Principal. Instead
+of saying "User can perform action", we can say "Role can perform action"--a convenient way to 
+implement RBAC. Developers can specify which JWT claim is used to map Cedar Roles. For example, one domain may use the `role` user claim of the OpenID Userinfo token; another domain may use the 
+`memberOf` claim in the OIDC id_token.
 
-The Cedarling loads its Policy Store during initialization as a static JSON file or fetched via HTTPS. 
-The Policy Store contains the Cedar Policies, Cedar Schema, and optionally, a list of the Trusted IDPs. 
-Developers may consider the Cedarling Policy Store as part of the code. While there is some core schema,
-developers will frequently need to add actions and resources that are specific for their application. 
-For example, a developer writing a support ticket application might want to define an action called 
-"Close" or "Reply", and an entity type called "Ticket". 
+Developers can also express a variety of policies beyond the limitations of RBAC by expressing ABAC conditions, or combining ABAC and RBAC conditions. For example, a policy like Admins can access a 
+"private" Resource from the private network, during business hours. In this case "Admins" is the role, 
+but the other conditions are ABAC. Policy evaluation is fast because Cedar uses the RBAC role to 
+"slice" the data, minimizing the number of entries on which to evaluate the ABAC conditions.
 
-Where does the Cedarling get the data for policy evaluation? Or in Cedar jargon, where do the 
-entities come from? The application request includes the Resource data--remember the application 
-is asking if it can perform a certain action on a certain resource. The Principal entities are 
-derived from the JWTs--the combined OpenID id_token and  Userinfo tokens enable the Cedarling to 
-create a User and Role entities; the OAuth access token is used to create a Client entity.
+![](./assets/lock-cedarling-diagram-2.jpg)
 
-![](../../assets/lock-cedarling-diagram-2.jpg)
-
-The id_token JWT represents a user authentication event. The access token JWT represents a 
-client authentication event. These tokens contain other interesting contextual data. An OpenID 
-Connect id_token tells you who authenticated, when they authenticated, how they authenticatated, 
-and optionally other claims like the User's roles. An OAuth access token  can tell you information 
-about the software that obtained the JWT, its extent of access as defined by the OAuth Authorization Server 
-(*i.e.* the values of the `scope` claim), or other claims--domains frequently enhance the access token to
+The OIDC id_token JWT represents a Person authentication event. The access token JWT represents a 
+Workload authentication event. These tokens contain other interesting contextual data. The id_token 
+tells you who authenticated, when they authenticated, how they authenticatated, and optionally other 
+claims like the User's roles. An OAuth access token can tell you information about the Workload that 
+obtained the JWT, its extent of access as defined by the OAuth Authorization Server (*i.e.* the 
+values of the `scope` claim), or other claims--domains frequently enhance the access token to
 contain business specific data needed for policy evaluation.
 
-The Cedarling authorizes a person using a certain piece of software. From a logical perspective, 
-`person_allowed AND client_allowed` must be `True`. A person may be either explicitly allowed, or 
-have a role that enables access. For example, `person_allowed` is `True` if 
-`user=mike OR role=SuperUser` and application is from `org_id=Acme`. 
-
-The JWT's, Action, Resource and Context is sent by the application in the authorization request. For 
-example, this is a sample request from a hypothetical JS application:
+The Cedarling authorizes a Person using a certain piece of software. From a logical perspective, 
+`person_allowed AND workload_allowed` must be `True`. The JWT's, Action, Resource and Context is sent by the application in the authorization request. For example, this is a sample request from a 
+hypothetical application:
 
 ```
 input = { 
@@ -116,34 +130,43 @@ decision_result = authz(input)
 
 Optionally, the Cedarling can validate the signatures of the JWTs for developers. To enable this, 
 set the `CEDARLING_JWT_VALIDATION` bootstrap property to `True`. For testing, developers can set 
-this property to `False` and submit an unsigned JWT, for example one you generate with 
+this property to `False` and submit an unsigned JWT, for example a JWT generated on 
 [JWT.io](https://jwt.io). 
 
 If token validation is enabled, on initiatilization the Cedarling downloads the public keys of 
 the Trusted IDPs specified in the Cedarling policy store. The Cedarling uses the JWT `iss` 
 claim to determine the right keys for validation.
 
-In an enterprise deployment, the Cedarling can also check if a JWT has been revoked. The Cedarling
+In an enterprise deployment, the Cedarling can also check for JWT revocation. The Cedarling
 checks the status following a mechanism described in the 
 [OAuth Status Lists](https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/)
 draft. Enforcing the status of tokens helps limit the damage of account takeover--i.e. to immediately 
 recursively revoke all the tokens issued to an attacker. Domains may want to use Token Status also to 
-implement single-transaction tokens; for example, a token that is good for one and only one wire 
-transfer.
+implement single-transaction tokens.
 
 Here is a summary of the ways the Cedarling may validate a JWT, depending on your bootstrap properties:
 * Validate signature from Trusted Issuer 
+* Check JWT status
 * Discard id_token if `aud` does not match access_token `client_id` 
 * Discard Userinfo token not associated with a `sub` from the id_token
-* If Cedarling is Locked, check token status
 * Check access token and id_token `exp` and `nbf` claims if time sent in Context
 
-![](../../assets/lock-cedarling-diagram-4.jpg)
+![](./assets/lock-cedarling-diagram-4.jpg)
 
 ### Audit Logs
 
-The audit log contain a record of all a Cedarling's decisions and token validations. In an enterprise
-deployment, logs are sent to the Lock Server `/audit` endpoint for central archiving.
+The Cedarling logs contains a record of all a Cedarling's decisions and token validations. 
+Cedarling has four logging options, which are configurable via the `CEDARLING_LOG_TYPE`
+bootstrap property: 
+* `off` - no logging
+* `memory` - logs stored in Cedarling in-memory KV store, fetched by client via logging interface. This is ideal for batching logs without impeding authz performance
+* `std_out` - write logs synchronously to std_out
+* `lock` - periodically POST logs to Jans Lock Server `/audit` endpoint for central archiving. 
+
+There are three different log records produced by the Cedarling:
+* `Decision` - The result and diagnostics of an authz decision
+* `System` - Startup, debug and other Cedarling messages not related to authz
+* `Metric`- Performance and usage data
 
 ## Cedarling Policy Store
 
@@ -188,12 +211,12 @@ The JSON schema looks like this:
 Non-normative example:
 ```
 [
-{"name": "IDP1", 
+{"name": "IDP-1", 
  "description": "Acme IDP", 
  "openid_configuration_endpoint": "https://acme.com/.well-known/openid-configuration",
  "access_tokens": {"trusted": True}, 
- "id_tokens": {"trusted":True, "principal_identifier": "email"},
- "userinfo_tokens": {"trusted": True, "role_mapping": ["hr-admin", "staff"]},
+ "id_tokens": {"trusted": True, "principal_identifier": "email"},
+ "userinfo_tokens": {"trusted": True},
  "tx_tokens": {"trusted": True}
 },
 {IDP-2},
@@ -203,8 +226,11 @@ Non-normative example:
 
 ### Policy and Schema Authoring
 
-You can hand create your Cedar policies and schema in [Visual Studio](https://marketplace.visualstudio.com/items?itemName=cedar-policy.vscode-cedar). Make sure you run the cedar command line tool to validate both your 
-schema and policies. The eaisest way to author your policy store is to use the Policy Designer in 
+You can hand create your Cedar policies and schema in 
+[Visual Studio](https://marketplace.visualstudio.com/items?itemName=cedar-policy.vscode-cedar). 
+Make sure you run the cedar command line tool to validate both your schema and policies. 
+
+The easiest way to author your policy store is to use the Policy Designer in 
 [Agama Lab](https://cloud.gluu.org/agama-lab). This tool helps you define the policies, schema and
 trusted IDPs and to publish a policy store to a Github repository.
 
@@ -246,6 +272,3 @@ The following bootstrap properties are only needed for enterprise deployments.
 * **`CEDARLING_DYNAMIC_CONFIGURATION`** : Enabled | Disabled, controls whether Cedarling should listen for SSE config updates
 
 * **`CEDARLING_GET_TOKEN_STATUS_LIST_UPDATES`** :  Enabled | Disabled, controls whether Cedarling should listen for SSE OAuth Status List updates
-
-
-
