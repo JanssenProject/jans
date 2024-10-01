@@ -127,7 +127,7 @@ Janssen Server uses this URI to send the HTTP logout request. The client can als
 [here](https://openid.net/specs/openid-connect-backchannel-1_0.html#BCRegistration) by using client configuration.
 
 Janssen Server also provides a feature flag
-[END_SESSION](../../../reference/json/feature-flags/janssenauthserver-feature-flags.md#endsession)
+[END_SESSION](../../../reference/json/feature-flags/janssenauthserver-feature-flags.md#end_session)
 that enables or disables this endpoint. If this flag is enabled, it has the same effect as having
 `backchannel_logout_supported` and `backchannel_logout_session_supported` metadata values set to `true`. These
 metadata values are defined [here](https://openid.net/specs/openid-connect-backchannel-1_0.html#BCSupport) in
