@@ -28,6 +28,7 @@ import java.security.interfaces.RSAPublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.RSAPublicKeySpec;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static io.jans.as.model.authorize.AuthorizeRequestParam.*;
@@ -36,9 +37,20 @@ import static io.jans.as.model.authorize.AuthorizeResponseParam.RESPONSE;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.*;
+import static org.testng.AssertJUnit.assertFalse;
 
 @Listeners(MockitoTestNGListener.class)
 public class RedirectUriTest {
+
+    @Test
+    public void html_forFormPostWithRxssAttack_shouldEscapeInjectedScript() {
+        RedirectUri redirectUri = new RedirectUri("https://example.info/identity/authcode.htm", Collections.singletonList(ResponseType.CODE), ResponseMode.FORM_POST);
+        redirectUri.parseQueryString("https://example.info/oxauth/restv1/authorize?client_id=1001.9a0d0cdb-8fe5-4239-a459-e7cf9cb9fe34&redirect_uri=https%3A%2F%2Fyuriyz-kind-honeybee.gluu.info%2Fidentity%2Fauthcode.htm&response_mode=form_post&state=http://aaa&foo\"><script>alert(location.href)</script>");
+        final String html = redirectUri.toString();
+
+        assertFalse(html.contains("<script>"));
+        assertFalse(html.contains("</script>"));
+    }
 
     @Test
     public void parseQueryString_queryStringNull_EmptyResult() {

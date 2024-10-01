@@ -1,0 +1,39 @@
+{
+    "dn": "jansId=1402016d-afb0-49f7-87b7-c75fc9469c82,ou=sessions,o=jans",
+    "id": "1402016d-afb0-49f7-87b7-c75fc9469c82",
+    "outsideSid": "de37667f-faa7-4862-863e-8a9052ed6bdb",
+    "lastUsedAt": "2024-09-24T16:20:28",
+    "userDn": "inum=122ff2df-911d-424b-bbfe-891a43a70e95,ou=people,o=jans",
+    "authenticationTime": "2024-09-24T16:20:28",
+    "state": "authenticated",
+    "sessionState": "7daacb5d8e08e0cfc31d451c754997e9046e9ba9bcdcab44fe17f151a58896d4.c733047c-e1a1-4df8-8ea1-71b478eec572",
+    "permissionGrantedMap": {
+        "permissionGranted": {
+            "2000.cc8b29ae-cb4a-49ea-b176-8695e53919d9": true
+        }
+    },
+    "sessionAttributes": {
+        "acr": "simple_password_auth",
+        "remote_ip": "219.91.139.247",
+        "opbs": "d7ab8698-7253-4db8-86ad-ef6c57761262",
+        "acr_values": "simple_password_auth",
+        "scope": "openid profile email user_name jansAdminUIRole",
+        "response_type": "code",
+        "redirect_uri": "https://pujavs-hopeful-colt.gluu.info/admin",
+        "state": "abc",
+        "nonce": "xyz",
+        "client_id": "2000.cc8b29ae-cb4a-49ea-b176-8695e53919d9",
+        "auth_user": "admin",
+        "old_session_id": "3da23a8e-b936-44b0-b286-db013ef0f7a6",
+        "session_id": "1402016d-afb0-49f7-87b7-c75fc9469c82",
+        "sid": "de37667f-faa7-4862-863e-8a9052ed6bdb",
+        "2000.cc8b29ae-cb4a-49ea-b176-8695e53919d9_authz_scopes": "openid user_name profile email jansAdminUIRole",
+        "successful_rp_redirect_count": "1"
+    },
+    "expirationDate": "2024-09-25T16:20:18",
+    "deletable": true,
+    "creationDate": "2024-09-24T16:20:18",
+    "persisted": false,
+    "ttl": 0,
+    "opbrowserState": "d7ab8698-7253-4db8-86ad-ef6c57761262"
+}
