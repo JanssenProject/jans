@@ -151,6 +151,7 @@ Here is a summary of the ways the Cedarling may validate a JWT, depending on you
 * Discard Userinfo token not associated with a `sub` from the id_token
 * Check access token and id_token `exp` and `nbf` claims if time sent in Context
 
+
 ![](./assets/lock-cedarling-diagram-4.jpg)
 
 ### Audit Logs

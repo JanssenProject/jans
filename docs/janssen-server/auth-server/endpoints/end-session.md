@@ -57,7 +57,7 @@ navigate via `Auth Server`->`Properties`.
 - [mtlsEndSessionEndpoint](../../reference/json/properties/janssenauthserver-properties.md#mtlsendsessionendpoint)
 - [rejectEndSessionIfIdTokenExpired](../../reference/json/properties/janssenauthserver-properties.md#rejectendsessionifidtokenexpired)
 - [allowPostLogoutRedirectWithoutValidation](../../reference/json/properties/janssenauthserver-properties.md#allowpostlogoutredirectwithoutvalidation)
-- [forceIdTokenHintPresence](../../reference/json/properties/janssenauthserver-properties.md#forceidtokenhintprecense)
+- [forceIdTokenHintPresence](../../reference/json/properties/janssenauthserver-properties.md#forceidtokenhintpresence)
 
 Apart from the above-mentioned server properties, the properties relevant to individual clients can be configured
 during client registration or can be edited later. When using 
