@@ -130,7 +130,6 @@ public class AssetService {
         return persistenceEntryManager.findPagedEntries(getDnForAsset(null), Document.class, searchFilter, null,
                 searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
                 searchRequest.getStartIndex(), searchRequest.getCount(), searchRequest.getMaxCount());
-
     }
 
     public Document getAssetByInum(String inum) throws Exception {
@@ -212,7 +211,6 @@ public class AssetService {
                     log.info("Result of asset saved on server :{}", result);
                 }
             }
-
         }
 
         // save asset in DB store
@@ -268,7 +266,6 @@ public class AssetService {
                     + result + "}");
 
         }
-
         return sb.toString();
     }
 
@@ -318,8 +315,7 @@ public class AssetService {
         
         serviceModules = new ArrayList(dirSet);
         log.info(" ServiceModuleName  serviceModules:{}- ", serviceModules);
-        return serviceModules;
-        
+        return serviceModules;        
     }
 
     public List<String> getValidFileExtension() {
@@ -404,7 +400,6 @@ public class AssetService {
         log.info("For saving assetFileName:{} assetDir:{}", assetFileName, assetDir, asset.getFileName());
 
         return asset;
-
     }
     
     private String copyAssetOnServer(Document asset, InputStream stream) throws IOException {
@@ -436,7 +431,6 @@ public class AssetService {
             result = copyAsset(assetFileName, assetDir, serviceName, stream);
         }
         return result;
-
     }
 
     private String copyAsset(String assetFileName, String assetDir, String serviceName, InputStream stream)
@@ -507,7 +501,7 @@ public class AssetService {
     }
 
     private boolean isAssetServerUploadEnabled() {
-        return this.appConfiguration.getAssetMgtConfiguration().isAssetServerUploadEnabled();
+        return this.getAssetMgtConfiguration().isAssetServerUploadEnabled();
     }
 
     private String getFileExtension(String fileName) {
@@ -517,19 +511,16 @@ public class AssetService {
     private String getAssetDir(String assetFileName) {
         log.info("Get asset directory assetFileName:{}", assetFileName);
         StringBuilder sb = new StringBuilder();
-
+        
         if (StringUtils.isBlank(assetFileName) || this.appConfiguration == null
-                || this.appConfiguration.getAssetMgtConfiguration() == null) {
+                || this.getAssetMgtConfiguration() == null) {
             return sb.toString();
         }
 
-        AssetMgtConfiguration assetMgtConfiguration = this.appConfiguration.getAssetMgtConfiguration();
+        AssetMgtConfiguration assetMgtConfiguration = this.getAssetMgtConfiguration();
 
-        if (assetMgtConfiguration == null || StringUtils.isBlank(assetMgtConfiguration.getAssetBaseDirectory())) {
-            throw new InvalidConfigurationException("Config for asset management is not defined!");
-        }
-
-        sb.append(assetMgtConfiguration.getAssetBaseDirectory());
+    
+        //sb.append(assetMgtConfiguration.getAssetBaseDirectory());
         String assetDir = getAssetDirectory(assetFileName);
         log.info("assetMgtConfiguration:{}, sb:{}, assetDir:{}", assetMgtConfiguration, sb, assetDir);
 
@@ -566,11 +557,11 @@ public class AssetService {
 
         String directory = null;
         if (StringUtils.isBlank(assetFileName) || this.appConfiguration == null
-                || this.appConfiguration.getAssetMgtConfiguration() == null) {
+                || this.getAssetMgtConfiguration() == null) {
             return directory;
         }
 
-        List<AssetDirMapping> dirMapping = this.appConfiguration.getAssetMgtConfiguration().getAssetDirMapping();
+        List<AssetDirMapping> dirMapping = this..getAssetDirMapping();
         log.info("Get asset Directory - dirMapping:{}", dirMapping);
         if (dirMapping == null || dirMapping.isEmpty()) {
             return directory;
@@ -650,7 +641,6 @@ public class AssetService {
             throw new InvalidConfigurationException(
                     "Valid modules are '{" + validModules + "}', '{" + invalidModuleList + "}' not supported!");
         }
-
     }
 
     private void validateServiceDirectory(String assetFileName, String assetDir, List<String> serviceModules) {
@@ -659,6 +649,7 @@ public class AssetService {
         StringBuilder invalidServiceDirList = new StringBuilder();
         StringBuilder missingMapping = new StringBuilder();
         StringBuilder errorMsg = new StringBuilder();
+        
         for (String serviceName : serviceModules) {
 
             String serviceDirectory = this.getServiceDirectory(assetDir, serviceName);
@@ -671,7 +662,6 @@ public class AssetService {
             if (!serviceDirectoryExist) {
                 invalidServiceDirList.append(serviceName);
             }
-
         }
 
         log.debug("missingMapping:{}, invalidServiceDirList:{}", missingMapping, invalidServiceDirList);
@@ -703,7 +693,6 @@ public class AssetService {
             log.error("Asset file name '{}' is empty", name);
             return null;
         }
-
         return new ByteArrayInputStream(assetContent.getBytes());
     }
 
