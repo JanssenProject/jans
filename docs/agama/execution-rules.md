@@ -58,7 +58,7 @@ The `Timeout` directive specifies a maximum allowable execution time for a _top-
 
 Cancellation allows a flow to early interrupt the execution of a given subflow thus enabling the implementation of alternative routing without the need of re-writing subflows. It can only take place upon the execution of a given `RRF` instruction part of a subflow that has been `Trigger`ed.
 
-This feature is better understood via [examples](../admin/developer/agama/advanced-usages.md#cancellation) - note the link provided is specific to the Janssen Server engine only. Other engines may implement cancellation in a different way, the only requirement is to preserve the convention that the returned value of a cancelled flow must be of the form: `{ aborted: true, data: ..., url: ... }`. 
+This feature is better understood via [examples](../janssen-server/developer/agama/advanced-usages.md#cancellation) - note the link provided is specific to the Janssen Server engine only. Other engines may implement cancellation in a different way, the only requirement is to preserve the convention that the returned value of a cancelled flow must be of the form: `{ aborted: true, data: ..., url: ... }`. 
 
 ## Launching flows
 
