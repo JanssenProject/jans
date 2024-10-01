@@ -96,7 +96,7 @@ public class AttestationService {
 
 	@Inject
     private ErrorResponseFactory errorResponseFactory;
-	
+
 	@Inject
     private NetworkService networkService;
 
@@ -192,7 +192,7 @@ public class AttestationService {
 		{
 			credentialCreationOptions.setAttestation(AttestationConveyancePreference.none);
 		}
-		else if(appConfiguration.getFido2Configuration().getAttestationMode().equals(AttestationMode.DISABLED))
+		else if(appConfiguration.getFido2Configuration().getAttestationMode().equals(AttestationMode.DISABLED.getValue()))
 		{
 			credentialCreationOptions.setAttestation(AttestationConveyancePreference.none);
 		}

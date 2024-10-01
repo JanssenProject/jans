@@ -54,7 +54,7 @@ public class Fido2Configuration {
     @DocProperty(description = "If authenticators have been enabled for use in a specific protected envt (enterprise authenticators)")
     private boolean enterpriseAttestation = false;
     @DocProperty(description = "Enum value indicating whether MDS validation should be omitted during attestation")
-    private AttestationMode attestationMode;
+    private String attestationMode;
 
     public String getAuthenticatorCertsFolder() {
         return authenticatorCertsFolder;
@@ -178,10 +178,10 @@ public class Fido2Configuration {
         this.metadataServers = metadataServers;
     }
 
-    public AttestationMode getAttestationMode(){
+    public String getAttestationMode(){
         return attestationMode;
     }
-    public void setAttestationMode(AttestationMode attestationMode) {
+    public void setAttestationMode(String attestationMode) {
         this.attestationMode = attestationMode;
     }
 
@@ -189,7 +189,7 @@ public class Fido2Configuration {
 			String mdsTocsFolder, boolean checkU2fAttestations, boolean debugUserAutoEnrollment,
 			int unfinishedRequestExpiration, int metadataRefreshInterval, String serverMetadataFolder,
 			List<String> enabledFidoAlgorithms, List<RequestedParty> requestedParties,
-			List<MetadataServer> metadataServers, boolean disableMetadataService, AttestationMode attestationMode,
+			List<MetadataServer> metadataServers, boolean disableMetadataService, String attestationMode,
 			List<String> hints, boolean enterpriseAttestation) {
 		super();
 		this.authenticatorCertsFolder = authenticatorCertsFolder;
@@ -228,4 +228,3 @@ public class Fido2Configuration {
 	
 	
 }
-
