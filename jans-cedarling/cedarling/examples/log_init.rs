@@ -37,9 +37,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         },
     };
 
-    println!("Authz initialized with log type: {:?}", log_type);
-
-    // Create the Authz instance with the selected log type
+    println!("Cedarling initialized with log type: {:?}", log_type);
     let cedarling = Cedarling::new(BootstrapConfig {
         authz_config: AuthzConfig {
             application_name: "test_app".to_string(),
