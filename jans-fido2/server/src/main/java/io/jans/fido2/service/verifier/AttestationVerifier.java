@@ -107,6 +107,7 @@ public class AttestationVerifier {
 
             byte[] clientDataHash = DigestUtils.getSha256Digest().digest(base64Service.urlDecode(clientDataJson));
             AttestationFormatProcessor attestationProcessor = attestationProcessorFactory.getCommandProcessor(fmt);
+            log.debug("attestationProcessor : "+attestationProcessor.getClass());
 
             if (AttestationMode.DISABLED.equals(appConfiguration.getFido2Configuration().getAttestationMode())) {
                 log.warn("SkipValidateMdsInAttestation is enabled");
@@ -115,6 +116,7 @@ public class AttestationVerifier {
                     throw new Fido2RuntimeException("Unauthorized to perform this action");
                 }
                 else {
+                	log.debug("Invoking Format Processers");
                     attestationProcessor.process(attStmt, authData, credential, clientDataHash, credIdAndCounters);
                 }
             }
@@ -122,7 +124,12 @@ public class AttestationVerifier {
             byte[] flagsBuffer = authData.getFlags();
             credIdAndCounters.setBackupEligibilityFlag(authenticatorDataParser.verifyBackupEligibility(flagsBuffer));
             credIdAndCounters.setBackupStateFlag(authenticatorDataParser.verifyBackupState(flagsBuffer));
-
+            
+            credIdAndCounters.setAttestedCredentialDataFlag(authenticatorDataParser.verifyAtFlag(flagsBuffer));
+            
+            credIdAndCounters.setUserPresentFlag(authenticatorDataParser.verifyUPFlag(flagsBuffer));
+            credIdAndCounters.setUserVerifiedFlag(authenticatorDataParser.verifyUVFlag(flagsBuffer));
+            log.debug("credIdAndCounters : "+credIdAndCounters.toString());
             return credIdAndCounters;
         } catch (IOException ex) {
             throw errorResponseFactory.invalidRequest("Failed to parse and verify authenticator attestation response data", ex);

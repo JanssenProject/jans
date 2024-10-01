@@ -104,6 +104,7 @@
         <dependency>
             <groupId>io.jans</groupId>
             <artifactId>jans-fido2-model</artifactId>
+            <scope>import</scope>
         </dependency>
 
         <!-- commons -->

@@ -113,13 +113,16 @@ public class CommonVerifiers {
     }
 
     public void verifyAttestationOptions(AttestationOptions params) {
-        long count = Arrays.asList(!Strings.isNullOrEmpty(params.getUsername()),
-                !Strings.isNullOrEmpty(params.getDisplayName()),
-                params.getAttestation() != null)
-                        .parallelStream().filter(f -> !f).count();
-        if (count != 0) {
-            throw new Fido2RuntimeException("Invalid parameters");
-        }
+    	if(Strings.isNullOrEmpty(params.getUsername()))
+    	{
+    		throw new Fido2RuntimeException("Username is a mandatory parameter");
+    	}
+		/*
+		 * long count = Arrays.asList(!Strings.isNullOrEmpty(params.getUsername()),
+		 * !Strings.isNullOrEmpty(params.getDisplayName()), params.getAttestation() !=
+		 * null) .parallelStream().filter(f -> !f).count(); if (count != 0) { throw new
+		 * Fido2RuntimeException("Invalid parameters"); }
+		 */
     }
 
     public void verifyAssertionOptions(AssertionOptions assertionOptions) {
