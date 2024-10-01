@@ -46,11 +46,11 @@ public class Fido2RegistrationResource extends BaseResource {
     private class Fido2RegistrationEntryPagedResult extends PagedResult<Fido2RegistrationEntry> {
     };
 
-    @Operation(summary = "Get a list of Fido2RegistrationEntry.", description = "Get a list of Fido2RegistrationEntry.", operationId = "get-fido2-registration-data", tags = {
+    @Operation(summary = "Get a list of Fido2RegistrationEntry.", description = "Get a list of Fido2RegistrationEntry.", operationId = "search-fido2-registration-data", tags = {
             "Fido2 - Registration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.FIDO2_CONFIG_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Fido2RegistrationEntryPagedResult.class), examples = @ExampleObject(name = "Response example", value = "example/fido2/get-all-fido2-data.json"))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Fido2RegistrationEntryPagedResult.class), examples = @ExampleObject(name = "Response example", value = "example/fido2/search-fido2-registration-data.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
@@ -79,11 +79,34 @@ public class Fido2RegistrationResource extends BaseResource {
         return Response.ok(this.doSearch(searchReq)).build();
     }
 
+    @Operation(summary = "Fetch Fido2RegistrationEntry by Id.", description = "Fetch Fido2RegistrationEntry by Id.", operationId = "get-fido2-by-id", tags = {
+            "Fido2 - Registration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    Constants.FIDO2_CONFIG_READ_ACCESS }))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Fido2RegistrationEntry.class), examples = @ExampleObject(name = "Response example", value = "example/fido2/get-fido2-by-id.json"))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not Found"),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
+    @GET
+    @ProtectedApi(scopes = { Constants.FIDO2_CONFIG_READ_ACCESS }, groupScopes = {
+            Constants.FIDO2_CONFIG_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @Path(ApiConstants.JANSID_PATH + ApiConstants.JANSID_PATH_PARAM)
+    public Response getFido2RegistrationEntryById(
+            @Parameter(description = "Fido2Registration identifier") @PathParam(ApiConstants.JANSID) @NotNull String jansId) {
+        if (logger.isInfoEnabled()) {
+            logger.info("Fido2RegistrationEntry search by id:{}", escapeLog(jansId));
+        }
+        Fido2RegistrationEntry fido2RegistrationEntry = this.fido2RegistrationService
+                .getFido2RegistrationEntryById(jansId);
+
+        return Response.ok(fido2RegistrationEntry).build();
+    }
+
     @Operation(summary = "Get details of connected FIDO2 devices registered to user", description = "Get details of connected FIDO2 devices registered to user", operationId = "get-registration-entries-fido2", tags = {
             "Fido2 - Registration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.FIDO2_CONFIG_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = Fido2RegistrationEntry.class)))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = Fido2RegistrationEntry.class)), examples = @ExampleObject(name = "Response example", value = "example/fido2/get-all-fido2-data.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
@@ -91,12 +114,12 @@ public class Fido2RegistrationResource extends BaseResource {
     @ProtectedApi(scopes = { Constants.FIDO2_CONFIG_READ_ACCESS })
     public Response findAllRegisteredByUsername(
             @Parameter(description = "User name") @PathParam("username") @NotNull String username) {
-        logger.debug("FIDO2 registration entries by username.");
+        logger.info("FIDO2 registration entries by username.");
         List<Fido2RegistrationEntry> entries = fido2RegistrationService.findAllRegisteredByUsername(username);
         return Response.ok(entries).build();
     }
 
-    @Operation(summary = "Delete Fido2 Device Data based on device UID", description = "Delete Fido2 Device Data based on device UID", operationId = "delete-fido2-device-data", tags = {
+    @Operation(summary = "Delete Fido2 Device Data based on device UID", description = "Delete Fido2 Device Data based on device UID", operationId = "delete-fido2-data", tags = {
             "Fido2 - Registration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.FIDO2_CONFIG_DELETE_ACCESS }))
     @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "No Content"),
@@ -105,20 +128,20 @@ public class Fido2RegistrationResource extends BaseResource {
             @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
             @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))), })
     @DELETE
-    @Path(Constants.DEVICE + Constants.UUID_PATH)
+    @Path(ApiConstants.JANSID_PATH + ApiConstants.JANSID_PATH_PARAM)
     @ProtectedApi(scopes = { Constants.FIDO2_CONFIG_DELETE_ACCESS })
-    public Response deleteFido2DeviceData(
-            @Parameter(description = "Unique identifier string (UUID) assigned to device.") @PathParam("uuid") @NotNull String uuid) {
+    public Response deleteFido2Data(
+            @Parameter(description = "Fido2Registration Unique identifier.") @PathParam(ApiConstants.JANSID) @NotNull String jansId) {
         if (logger.isInfoEnabled()) {
-            logger.info("Request to delete Fido2 device identified by uuid:{}", escapeLog(uuid));
+            logger.info("Request to delete Fido2 device identified by jansId:{}", escapeLog(jansId));
         }
-
+        checkResourceNotNull(jansId, ApiConstants.JANSID);
         try {
             // delete device
-            fido2RegistrationService.removeFido2RegistrationEntry(uuid);
+            fido2RegistrationService.removeFido2RegistrationEntry(jansId);
 
             if (logger.isInfoEnabled()) {
-                logger.info("Successfully deleted Fido2 Device with uuid:{}", escapeLog(uuid));
+                logger.info("Successfully deleted Fido2 with id:{}", escapeLog(jansId));
             }
 
         } catch (InvalidAttributeException iae) {

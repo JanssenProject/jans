@@ -236,7 +236,6 @@ class KC:
 
     def create_flow_executions(self, flow):
         def _create_execution(config_fn, flow, authenticator):
-            execution_id = ""
             executions = [
                 execution for execution in flow["authenticationExecutions"]
                 if execution["authenticator"] == authenticator
@@ -246,8 +245,8 @@ class KC:
                 if code != 0:
                     logger.warning(f"Unable to create execution specified in {config_fn}; reason={err.decode()}")
                 else:
-                    execution_id = err.decode().strip().split()[-1].strip("'").strip('"')
-            return execution_id
+                    return err.decode().strip().split()[-1].strip("'").strip('"')
+            return ""
 
         # create required executions
         _create_execution(f"{self.base_dir}/jans.execution-auth-cookie.json", flow, "auth-cookie")
@@ -313,6 +312,37 @@ class KC:
         _, err, code = exec_cmd(f"{self.kcadm_script} update authentication/required-actions/VERIFY_PROFILE -r {self.ctx['jans_idp_realm']} -f {profile_config} --config {self.config_file}")
         if code != 0:
             logger.warning(f"Unable to disable VERIFY_PROFILE specified in {profile_config}; reason={err.decode()}")
+
+    def disable_first_login_update_profile(self):
+        auth_config = ""
+        profile_update_enabled = ""
+
+        # extract authenticator config
+        out, err, code = exec_cmd(f"{self.kcadm_script} get authentication/flows/first%20broker%20login/executions -r {self.ctx['jans_idp_realm']} --config {self.config_file}")
+
+        if code != 0:
+            logger.warning(f"Unable to get first broker login flows; reason={err.decode()}")
+        else:
+            for flow in json.loads(out.decode()):
+                if flow["displayName"] == "Review Profile":
+                    auth_config = flow["authenticationConfig"]
+                    break
+
+        # extract profile update config
+        if auth_config:
+            out, err, code = exec_cmd(f"{self.kcadm_script} get authentication/config/{auth_config} -r {self.ctx['jans_idp_realm']} --config {self.config_file}")
+
+            if code != 0:
+                logger.warning(f"Unable to get config {auth_config}; reason={err.decode()}")
+            else:
+                profile_update_enabled = json.loads(out.decode()).get("config", {}).get("update.profile.on.first.login", "")
+
+            if profile_update_enabled != "off":
+                auth_config_fn = f"{self.base_dir}/jans.update-authenticator-config.json"
+                out, err, code = exec_cmd(f"{self.kcadm_script} update authentication/config/{auth_config}  -f {auth_config_fn} -r {self.ctx['jans_idp_realm']} --config {self.config_file}")
+
+                if code != 0:
+                    logger.warning(f"Unable to update config {auth_config}; reason={err.decode()}")
 
 
 class MysqlKeycloak:
@@ -429,6 +459,9 @@ def main():
             ])
 
             kc.create_flow_executions(flow)
+
+        kc.render_templates(templates=["jans.update-authenticator-config.json"])
+        kc.disable_first_login_update_profile()
 
         # grant privilege (if required)
         kc.grant_xa_transaction_privilege()
