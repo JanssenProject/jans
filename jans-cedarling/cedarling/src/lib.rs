@@ -26,13 +26,17 @@ mod tests;
 
 use std::sync::Arc;
 
+pub use authz::AuthorizeError;
 use authz::Authz;
 use init::policy_store::{load_policy_store, LoadPolicyStoreError};
+pub use jwt::DecodeJwtError;
+use jwt::JwtService;
 pub use log::LogStorage;
 use log::{init_logger, LogWriter};
 pub use models::config::*;
 pub use models::log_entry::LogEntry;
 use models::log_entry::LogType;
+pub use models::request::Request;
 use uuid7::uuid4;
 
 /// Errors that can occur during initialization Cedarling.
@@ -71,17 +75,35 @@ impl Cedarling {
             // Log failure when loading the policy store
             .inspect_err(|err| {
                 log.log(
-                    LogEntry::new_with_data(pdp_id, application_id, LogType::System)
+                    LogEntry::new_with_data(pdp_id, application_id.clone(), LogType::System)
                         .set_message(format!("Could not load PolicyStore: {}", err)),
                 )
             })?;
 
-        let authz = Authz::new(config.authz_config, pdp_id, log.clone(), policy_store);
+        let jwt_service = JwtService::new(config.jwt_config);
+        log.log(
+            LogEntry::new_with_data(pdp_id, application_id, LogType::System)
+                .set_message("JWT service loaded successfully".to_string()),
+        );
+
+        let authz = Authz::new(
+            config.authz_config,
+            pdp_id,
+            log.clone(),
+            policy_store,
+            jwt_service,
+        );
 
         Ok(Cedarling {
             log,
             authz: Arc::new(authz),
         })
+    }
+
+    /// Authorize request
+    /// makes authorization decision based on the [`Request`]
+    pub fn authorize(&self, request: &Request) -> Result<(), AuthorizeError> {
+        Ok(self.authz.authorize(request)?)
     }
 }
 

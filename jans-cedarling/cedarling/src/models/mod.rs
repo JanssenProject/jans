@@ -15,6 +15,8 @@ pub mod log_config;
 pub mod log_entry;
 pub mod policy_store;
 pub mod policy_store_config;
+pub mod request;
+pub mod token_data;
 
 /// # Configuration module.
 /// Reimport all entities that we need to configure application
