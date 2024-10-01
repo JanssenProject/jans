@@ -42,7 +42,7 @@ To further reduce the likelihood of lockouts, you can force users to initially e
 credential before any other. OTP credentials are generally more accessible than their counterparts (like Fido) since 
 they normally don't demand special conditions from the device used to access, like having a USB port.
 
-To do so, add a property named `2fa_requisite` to the configuration of the Agama flow that backs the given authentication method, and assign `true` as its value. You can do this via [TUI](../../admin/config-guide/auth-server-config/agama-project-configuration/#agama-project-configuration-screen). Note
+To do so, add a property named `2fa_requisite` to the configuration of the Agama flow that backs the given authentication method, and assign `true` as its value. You can do this via [TUI](../../janssen-server/config-guide/auth-server-config/agama-project-configuration.md#agama-project-configuration-screen). Note
 this mechanism is applicable for the out-of-the box authentication methods supported by Casa. For other methods contributed via plugins, consult their respective documentation.
 
 You can flag more than one method as requisite. In this case users will be encouraged to enroll one credential 

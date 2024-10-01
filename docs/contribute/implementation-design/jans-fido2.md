@@ -67,7 +67,7 @@ Response:
     2. Assertion
     The authenticator credentials obtained after querying the WebAuthn API is forwarded to the FIDO2 server for attestation or assertion.
 
-7. **Interception script** : In the Janssen ecosystem, the authentication flow that comprises of the calls to WebAuthn API and the FIDO server is achieved using an interception script, details of it can be found [here](../../script-catalog/person_authentication/fido2-external-authenticator/README).
+7. **Interception script** : In the Janssen ecosystem, the authentication flow that comprises of the calls to WebAuthn API and the FIDO server is achieved using an interception script, details of it can be found [here](../../script-catalog/person_authentication/fido2-external-authenticator/README.md).
 
 
 ### Attestation formats supported by Janssen's FIDO server
