@@ -523,5 +523,5 @@ Config-API configurations in six sub-tabs, namely
 
 Janssen Server Configuration REST API exposes relevant endpoints for 
 managing and configuring the Config-API Configuration. Endpoint details 
-are published in the [Swagger document](../../../../../../jans/jans-config-api/docs/jans-config-api-swagger.yaml), 
+are published in the [Swagger document](../../../../janssen-server/reference/openapi.md), 
 see endpoint `/api/v1/api-config`
