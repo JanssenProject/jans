@@ -20,17 +20,12 @@ tasks.
 
 === "Use Text-based UI"
 
-    Use a fully functional text-based user interface from the terminal. 
-    Learn how to use Jans Text-based UI (TUI) 
-    [here](../config-tools/jans-tui/README.md) or jump straight to the
-    [configuration steps](#using-text-based-ui)
+    UMA Resource is not possible in Text-based UI.
+
 
 === "Use REST API"
 
-    Use REST API for programmatic access or invoke via tools like CURL or 
-    Postman. Learn how to use Janssen Server Config API 
-    [here](../config-tools/config-api/README.md) or Jump straight to the
-    [Using Configuration REST API](#using-configuration-rest-api)
+    The UMA Resource does not have a REST API.
 
 
 ##  Using Command Line

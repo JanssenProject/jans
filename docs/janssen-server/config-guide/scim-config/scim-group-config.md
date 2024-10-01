@@ -210,7 +210,7 @@ We see `members` is empty since we did not associate any user with this group ye
 
 ### Update Group by ID
 
-The `update-group-by-id` operation can be used to update group name and adding members into the group. Let's create a json file `/tmp/update-group.json` according to the [`GroupResource`](#creating-group) schema:
+The `update-group-by-id` operation can be used to update group name and adding members into the group. Let's create a json file `/tmp/update-group.json` according to the [`GroupResource`](#create-group) schema:
 
 ```json title="Sample"
 {
@@ -223,7 +223,7 @@ The `update-group-by-id` operation can be used to update group name and adding m
 }
 ```
 
-We can get the `value` which is actually the `id` of specific users from [user management](./user-config.md#get-users-list) section. Let's run the following command to update empty members properties with a member into the group we created [above](#creating-group).
+We can get the `value` which is actually the `id` of specific users from [user management](./user-config.md#get-users-list) section. Let's run the following command to update empty members properties with a member into the group we created [above](#create-group).
 
 ```bash title="Command"
 /opt/jans/jans-cli/config-cli.py -scim --operation-id update-group-by-id --url-suffix="id:7a20464c-3651-48a0-9c9c-6b59373df60c" --data /tmp/update-group.json
