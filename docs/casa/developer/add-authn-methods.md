@@ -13,7 +13,7 @@ Supporting a new authentication mechanisms consists of two tasks: coding an Agam
 ## Agama flow
 
 !!! Note
-    Acquaintance with Agama [framework](../../agama/introduction.md) and Agama project [management](../../admin/config-guide/auth-server-config/agama-project-configuration.md) is required
+    Acquaintance with Agama [framework](../../agama/introduction.md) and Agama project [management](../../janssen-server/config-guide/auth-server-config/agama-project-configuration.md) is required
 
 ### About Casa authentication flow
 
@@ -107,7 +107,7 @@ Ensure to properly escape double quotes if necessary. Also make the markup a one
 ### Recommended practices
 
 !!! Note
-    Ensure to go through [this](../../admin/developer/agama/agama-best-practices.md) page before proceeding
+    Ensure to go through [this](../../janssen-server/developer/agama/agama-best-practices.md) page before proceeding
 
 #### Config settings
 
