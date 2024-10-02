@@ -61,6 +61,8 @@ impl Authz {
 
     /// Evaluate Authorization Request
     /// - evaluate if authorization is granted for *client*
+    //
+    // this function will be finished in next issue
     pub fn authorize(&self, request: &Request) -> Result<(), AuthorizeError> {
         #[allow(unused_variables)]
         let access_token_entities = create_access_token_entities(
