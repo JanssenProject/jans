@@ -13,7 +13,7 @@ cedar-policy = "4.0.0"
 base64 = "0.22.1"
 url = "2.5.2"
 lazy_static = "1.5.0"
-
+di = { workspace = true }
 
 [dev-dependencies]
 # is used in testing

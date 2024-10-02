@@ -6,8 +6,8 @@
  */
 
 use cedarling::{
-    AuthzConfig, BootstrapConfig, Cedarling, JwtConfig, LogConfig, LogStorage, LogTypeConfig,
-    MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource,
+    BootstrapConfig, Cedarling, JwtConfig, LogConfig, LogStorage, LogTypeConfig, MemoryLogConfig,
+    PolicyStoreConfig, PolicyStoreSource,
 };
 use std::env;
 
@@ -39,9 +39,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("Cedarling initialized with log type: {:?}", log_type);
     let cedarling = Cedarling::new(BootstrapConfig {
-        authz_config: AuthzConfig {
-            application_name: "test_app".to_string(),
-        },
+        application_name: "test_app".to_string(),
         log_config: LogConfig { log_type },
         policy_store_config: PolicyStoreConfig {
             source: PolicyStoreSource::Json(POLICY_STORE_RAW.to_string()),

@@ -1,4 +1,4 @@
-from cedarling_python import AuthzConfig, MemoryLogConfig, DisabledLoggingConfig, StdOutLogConfig
+from cedarling_python import MemoryLogConfig, DisabledLoggingConfig, StdOutLogConfig
 from cedarling_python import PolicyStoreSource, PolicyStoreConfig, BootstrapConfig
 from cedarling_python import Cedarling
 from config import TEST_FILES_PATH, sample_bootstrap_config

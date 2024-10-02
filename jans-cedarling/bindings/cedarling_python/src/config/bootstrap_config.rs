@@ -8,7 +8,6 @@
 use pyo3::exceptions::{PyTypeError, PyValueError};
 use pyo3::prelude::*;
 
-use crate::config::authz_config::AuthzConfig;
 use crate::config::policy_store_config::PolicyStoreConfig;
 
 use super::jwt_config::JwtConfig;
@@ -24,6 +23,7 @@ use super::stdout_log_config::StdOutLogConfig;
 ///
 /// Attributes
 /// ----------
+/// :param application_name: The name of this application.
 /// :param authz_config: An `AuthzConfig` object for authorization settings.
 /// :param log_config: A logging configuration (can be `DisabledLoggingConfig`, `MemoryLogConfig`, or `StdOutLogConfig`).
 /// :param policy_store_config: A `PolicyStoreConfig` object for the policy store configuration.
@@ -40,14 +40,14 @@ use super::stdout_log_config::StdOutLogConfig;
 /// policy_store = PolicyStoreConfig(source=PolicyStoreSource(json='{...}'))
 /// jwt_config = JwtConfig(enabled=False)
 ///
-/// bootstrap_config = BootstrapConfig(authz_config=authz, log_config=log_config, policy_store_config=policy_store, jwt_config=jwt_config)
+/// bootstrap_config = BootstrapConfig(application_name="MyApp",authz_config=authz, log_config=log_config, policy_store_config=policy_store, jwt_config=jwt_config)
 /// ```
 #[derive(Debug, Clone)]
 #[pyclass]
 pub struct BootstrapConfig {
-    /// A set of properties used to configure `Authz` in the `Cedarling` application.
+    /// The name of this application.
     #[pyo3(set)]
-    pub authz_config: Option<AuthzConfig>,
+    application_name: Option<String>,
     /// A set of properties used to configure logging in the `Cedarling` application.
     //
     // we implement setter for this field manually
@@ -83,9 +83,9 @@ fn extract_log_config(log_config: &PyObject) -> PyResult<cedarling::LogConfig> {
 #[pymethods]
 impl BootstrapConfig {
     #[new]
-    #[pyo3(signature = (authz_config=None, log_config=None, policy_store_config=None, jwt_config=None))]
+    #[pyo3(signature = (application_name=None, log_config=None, policy_store_config=None, jwt_config=None))]
     fn new(
-        authz_config: Option<AuthzConfig>,
+        application_name: Option<String>,
         log_config: Option<PyObject>,
         policy_store_config: Option<PolicyStoreConfig>,
         jwt_config: Option<JwtConfig>,
@@ -96,7 +96,7 @@ impl BootstrapConfig {
         };
 
         Ok(Self {
-            authz_config,
+            application_name,
             policy_store_config,
             log_config,
             jwt_config,
@@ -115,10 +115,9 @@ impl TryFrom<BootstrapConfig> for cedarling::BootstrapConfig {
 
     fn try_from(value: BootstrapConfig) -> Result<Self, Self::Error> {
         Ok(Self {
-            authz_config: value
-                .authz_config
-                .ok_or(PyValueError::new_err("value authz_config is None"))?
-                .try_into()?,
+            application_name: value
+                .application_name
+                .ok_or(PyValueError::new_err("value application_name is None"))?,
             log_config: value
                 .log_config
                 .ok_or(PyValueError::new_err("value log_config is None"))?,

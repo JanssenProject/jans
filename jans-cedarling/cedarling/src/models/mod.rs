@@ -8,7 +8,7 @@
 //! This package provides the core data models for the *Cedarling* application,
 //! defining the structures and types essential for its functionality.
 
-pub mod authz_config;
+pub(crate) mod app_types;
 pub mod bootstrap_config;
 pub mod jwt_config;
 pub mod log_config;
@@ -23,7 +23,6 @@ pub mod token_data;
 pub mod config {
     use super::*;
 
-    pub use authz_config::*;
     pub use bootstrap_config::*;
     pub use jwt_config::*;
     pub use log_config::*;

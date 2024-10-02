@@ -1,5 +1,5 @@
 from os.path import join
-from cedarling_python import AuthzConfig, MemoryLogConfig, DisabledLoggingConfig, StdOutLogConfig
+from cedarling_python import MemoryLogConfig, DisabledLoggingConfig, StdOutLogConfig
 from cedarling_python import PolicyStoreSource, PolicyStoreConfig, BootstrapConfig, JwtConfig
 import pytest
 
@@ -11,8 +11,6 @@ TEST_FILES_PATH = join(ROOT_FOLDER_PATH, "cedarling/src/init/test_files")
 # and can change some part in the specific test case
 @pytest.fixture
 def sample_bootstrap_config():
-    authz_config = AuthzConfig(application_name="example_app_name")
-
     # log_config = MemoryLogConfig(log_ttl=100)
     # log_config = StdOutLogConfig()
     log_config = DisabledLoggingConfig()
@@ -31,7 +29,7 @@ def sample_bootstrap_config():
 
     # collect all in the BootstrapConfig
     bootstrap_config = BootstrapConfig(
-        authz_config=authz_config,
+        application_name="example_app_name",
         log_config=log_config,
         policy_store_config=policy_store_config,
         jwt_config=jwt_config

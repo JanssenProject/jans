@@ -9,17 +9,19 @@
 //! - evaluate if authorization is granted for *user*
 //! - evaluate if authorization is granted for *client*
 
+use std::sync::Arc;
+
 use crate::jwt::DecodeJwtError;
 use crate::jwt::JwtService;
 use crate::log::{LogWriter, Logger};
-use crate::models::authz_config::AuthzConfig;
+use crate::models::app_types;
 use crate::models::log_entry::{LogEntry, LogType};
 use crate::models::policy_store::PolicyStore;
 use crate::models::request::Request;
-use uuid7::Uuid;
 
 mod entities;
 
+use di::DependencySupplier;
 use entities::{create_access_token_entities, AccessTokenEntitiesError};
 
 /// Authorization Service
@@ -28,33 +30,31 @@ use entities::{create_access_token_entities, AccessTokenEntitiesError};
 #[allow(dead_code)]
 pub struct Authz {
     log_service: Logger,
-    pdp_id: Uuid,
-    application_name: String,
+    pdp_id: app_types::PdpID,
+    application_name: app_types::ApplicationName,
     policy_store: PolicyStore,
-    jwt_service: JwtService,
+    jwt_service: Arc<JwtService>,
 }
 
 impl Authz {
     /// Create a new Authorization Service
-    pub fn new(
-        config: AuthzConfig,
-        pdp_id: Uuid,
-        log: Logger,
-        policy_store: PolicyStore,
-        jwt_service: JwtService,
-    ) -> Self {
-        let application_name = config.application_name;
+    pub(crate) fn new_with_container(dep_map: &di::DependencyMap) -> Self {
+        let application_name: Arc<app_types::ApplicationName> = dep_map.get();
+        let pdp_id = *dep_map.get();
+        let log: Logger = dep_map.get();
+        let policy_store: Arc<PolicyStore> = dep_map.get();
+        let jwt_service: Arc<JwtService> = dep_map.get();
 
         log.log(
-            LogEntry::new_with_data(pdp_id, application_name.clone(), LogType::System)
+            LogEntry::new_with_data(pdp_id, application_name.as_ref().clone(), LogType::System)
                 .set_message("Cedarling Authz initialized successfully".to_string()),
         );
 
         Self {
             log_service: log,
             pdp_id,
-            application_name,
-            policy_store,
+            application_name: application_name.as_ref().clone(),
+            policy_store: policy_store.as_ref().clone(),
             jwt_service,
         }
     }
