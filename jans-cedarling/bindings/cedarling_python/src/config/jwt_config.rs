@@ -20,7 +20,7 @@ use pyo3::{exceptions::PyValueError, prelude::*};
 ///
 /// Example
 /// -------
-/// ```python
+/// ```
 /// # Initialize with JWT validation enabled
 /// config = JwtConfig(enabled=True, signature_algorithms=["RS256", "HS256"])
 /// ```

@@ -31,7 +31,7 @@ use super::stdout_log_config::StdOutLogConfig;
 ///
 /// Example
 /// -------
-/// ```python
+/// ```
 /// from cedarling import BootstrapConfig, AuthzConfig, MemoryLogConfig, PolicyStoreConfig
 ///
 /// # Create a BootstrapConfig with memory logging

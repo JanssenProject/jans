@@ -19,7 +19,7 @@ use pyo3::prelude::*;
 ///
 /// Example
 /// -------
-/// ```python
+/// ```
 /// req = Request(access_token="your_token")
 /// ```
 #[derive(Debug, Clone)]
