@@ -15,10 +15,10 @@ use cedar_policy::{EntityId, EntityTypeName, EntityUid, RestrictedExpression};
 
 /// Meta information about an entity type.
 /// Is used to store in `static` variable.
-pub struct EntityMetadata<'a> {
-    entity_type: &'a str,
-    entity_id_data_key: &'a str,
-    meta_attributes: Vec<EntityAttributeMetadata<'a>>,
+pub(crate) struct EntityMetadata<'a> {
+    pub entity_type: &'a str,
+    pub entity_id_data_key: &'a str,
+    pub meta_attributes: Vec<EntityAttributeMetadata<'a>>,
 }
 
 impl<'a> EntityMetadata<'a> {
@@ -63,7 +63,7 @@ pub struct EntityAttributeMetadata<'a> {
 }
 
 /// Cedar policy type to store in the [`EntityAttributeMeta`]
-pub enum CedarPolicyType {
+pub(crate) enum CedarPolicyType {
     String,
     #[allow(dead_code)]
     Long,

@@ -7,8 +7,10 @@
 
 //! Module for creating cedar-policy entities
 
-mod meta;
 mod create;
+mod meta;
+#[cfg(test)]
+mod test_create;
 
 use std::collections::HashSet;
 

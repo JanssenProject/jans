@@ -61,6 +61,17 @@ pub enum GetTokenClaimValue {
 }
 
 impl GetTokenClaimValue {
+    pub(crate) fn json_value_type_name(value: &Value) -> String {
+        match value {
+            Value::Null => "null".to_string(),
+            Value::Bool(_) => "bool".to_string(),
+            Value::Number(_) => "number".to_string(),
+            Value::String(_) => "string".to_string(),
+            Value::Array(_) => "array".to_string(),
+            Value::Object(_) => "object".to_string(),
+        }
+    }
+
     /// Returns `KeyNotCorrectType` error case
     /// is used for useful error message
     fn not_correct_type(
@@ -68,14 +79,7 @@ impl GetTokenClaimValue {
         expected_type_name: &str,
         got_value: &Value,
     ) -> GetTokenClaimValue {
-        let got_value_type_name = match got_value {
-            Value::Null => "null".to_string(),
-            Value::Bool(_) => "bool".to_string(),
-            Value::Number(_) => "number".to_string(),
-            Value::String(_) => "string".to_string(),
-            Value::Array(_) => "array".to_string(),
-            Value::Object(_) => "object".to_string(),
-        };
+        let got_value_type_name = Self::json_value_type_name(got_value);
 
         GetTokenClaimValue::KeyNotCorrectType {
             key: key.to_string(),

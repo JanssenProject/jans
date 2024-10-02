@@ -11,7 +11,7 @@ use super::create::{CedarPolicyType, EntityAttributeMetadata, EntityMetadata};
 
 // Represent meta information about entity from cedar-policy schema.
 lazy_static! {
-    pub static ref WorkloadEntityMeta: EntityMetadata<'static> = EntityMetadata::new(
+    pub(crate) static ref WorkloadEntityMeta: EntityMetadata<'static> = EntityMetadata::new(
         "Jans::Workload",
         "sub",
         vec![
