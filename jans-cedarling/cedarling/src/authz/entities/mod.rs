@@ -30,7 +30,5 @@ pub fn create_access_token_entities(
 ) -> Result<Vec<cedar_policy::Entity>, AccessTokenEntitiesError> {
     let mut entities = Vec::new();
     entities.push(meta::WorkloadEntityMeta.create_entity(data, HashSet::new())?);
-    // TODO: add more entities
-
     Ok(entities)
 }
