@@ -46,7 +46,7 @@ fn sort_json(value: &mut Value) {
 
 // test all successful cases
 #[test]
-fn it_works() {
+fn successful_scenario() {
     let metadata = EntityMetadata::new(
         "test",
         "test_id_key",
