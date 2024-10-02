@@ -55,7 +55,7 @@ pub trait DependencySupplier<Value> {
 ///
 /// ```
 /// # use std::sync::Arc;
-/// use dptree::di::{DependencyMap, DependencySupplier};
+/// use di::{DependencyMap, DependencySupplier};
 ///
 /// let mut container = DependencyMap::new();
 /// container.insert(5_i32);
@@ -75,7 +75,7 @@ pub trait DependencySupplier<Value> {
 ///
 /// ```should_panic
 /// # use std::sync::Arc;
-/// use dptree::di::{DependencyMap, DependencySupplier};
+/// use di::{DependencyMap, DependencySupplier};
 /// let mut container = DependencyMap::new();
 /// container.insert(10i32);
 /// container.insert(true);
