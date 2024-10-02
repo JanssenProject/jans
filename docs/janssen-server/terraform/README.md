@@ -47,12 +47,12 @@ Let's have an example on `importing` the current `logging level` of a deployment
 
 1. Configure Terraform to install the required plugins for the `Janssen provider`. Add this to your `versions.tf` file:
 
-    ```
+    ```bash
     terraform {
      required_providers {
         jans = {
         source = "JanssenProject/jans"
-        version = "0.7.3"
+        version = "1.1.5" #update based on your targeted version
         }
      }
     }
@@ -85,7 +85,7 @@ Let's have an example on `importing` the current `logging level` of a deployment
     variable "jans_fqdn" {
         description = "Jans FQQN"
         type        = string
-        default     = "https://demoexample.jans.org" #Replace with https://<YOUR_DOMAIN>
+        default     = "https://demoexample.jans.io" #Replace with https://<YOUR_DOMAIN>
         }  
         
         variable "jans_client_id" {
