@@ -1,4 +1,4 @@
-# DI fork from [link](https://github.com/teloxide/dptree/blob/master/LICENSE)
+# DI fork from [link](https://github.com/teloxide/dptree/blob/master/src/di.rs)
 
 Simple and powerfull dependency manager container.
 
