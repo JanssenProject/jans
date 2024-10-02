@@ -36,10 +36,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.Optional;
+import java.util.stream.*;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -395,7 +398,7 @@ public class AssetService {
             throw new InvalidConfigurationException("Asset name is null!");
         }
 
-        String assetDir = this.getAssetDir(assetFileName);
+        String assetDir = this.getAssetDir(asset);
         asset.setFilePath(assetDir);
         log.info("For saving assetFileName:{} assetDir:{}", assetFileName, assetDir, asset.getFileName());
 
@@ -508,8 +511,14 @@ public class AssetService {
         return FilenameUtils.getExtension(fileName);
     }
 
-    private String getAssetDir(String assetFileName) {
-        log.info("Get asset directory assetFileName:{}", assetFileName);
+    private String getAssetDir(Document asset) {
+        log.info("Get asset directory asset:{}", asset);
+        
+        if (asset == null) {
+            throw new InvalidConfigurationException("Asset details is empty!");
+        }
+        
+        String assetFileName = asset.getFileName();
         StringBuilder sb = new StringBuilder();
         
         if (StringUtils.isBlank(assetFileName) || this.appConfiguration == null
@@ -521,7 +530,7 @@ public class AssetService {
 
     
         //sb.append(assetMgtConfiguration.getAssetBaseDirectory());
-        String assetDir = getAssetDirectory(assetFileName);
+        String assetDir = getAssetDirectory(asset);
         log.info("assetMgtConfiguration:{}, sb:{}, assetDir:{}", assetMgtConfiguration, sb, assetDir);
 
         if (StringUtils.isBlank(assetDir)) {
@@ -552,35 +561,84 @@ public class AssetService {
 
     }
 
-    private String getAssetDirectory(String assetFileName) {
-        log.info("Get asset Directory for assetFileName:{}", assetFileName);
+    private String getAssetDirectory(Document asset) {
+        log.info("Get asset Directory for asset:{}", asset);
 
         String directory = null;
-        if (StringUtils.isBlank(assetFileName) || this.appConfiguration == null
-                || this.getAssetMgtConfiguration() == null) {
-            return directory;
+        String assetFileName = asset.getFileName();
+        String filePath = asset.getFilePath();
+        List<String> serviceModuleList = asset.getService();
+        
+        if (StringUtils.isBlank(assetFileName)) {
+            throw new InvalidConfigurationException("Asset FileName is null!");
+        }
+        
+        if (serviceModuleList==null || serviceModuleList.isEmpty()) {
+            throw new InvalidConfigurationException("Service module for asset to be upload is null!");
         }
 
-        List<AssetDirMapping> dirMapping = this..getAssetDirMapping();
+        List<AssetDirMapping> dirMapping = this.getAssetDirMapping();
         log.info("Get asset Directory - dirMapping:{}", dirMapping);
         if (dirMapping == null || dirMapping.isEmpty()) {
             return directory;
         }
         String fileExtension = this.getFileExtension(assetFileName);
         log.info("Get asset Directory for fileExtension:{}", fileExtension);
+                     
+        List<AssetDirMapping> assetDirMappingList = dirMapping.stream().filter(e -> e.getType().contains(fileExtension)).toList();
+        log.info(" AssetDirMapping for fileExtension:{} is assetDirMappingList:{}", fileExtension, assetDirMappingList);
 
-        Optional<AssetDirMapping> assetDirMapping = dirMapping.stream().filter(e -> e.getType().contains(fileExtension))
-                .findFirst();
-        log.info("Get asset Directory - assetDirMapping.isPresent():{}", assetDirMapping.isPresent());
-
-        if (assetDirMapping.isEmpty()) {
-            return directory;
+        if (assetDirMappingList==null || assetDirMappingList.isEmpty()) {
+            throw new InvalidConfigurationException(
+                    "AssetDirMapping for [" + fileExtension + "] is not defined in config!");
         }
+        
+        List<AssetDirMapping> moduleMappingList = assetDirMappingList.stream().filter(e -> e.getJansServiceModule().contains(serviceModuleList)).toList();
+        log.info(" AssetDirMapping for specified service:{} is moduleMappingList:{}", serviceModuleList, moduleMappingList);
 
+        
+        if (moduleMappingList==null || moduleMappingList.isEmpty()) {
+            throw new InvalidConfigurationException(
+                    "AssetDirMapping for [" + serviceModuleList + "] is not defined in config!");
+        }
+        
+        HashMap<String, AssetDirMapping> serviceMap = new HashMap<>();
+        for(String service : serviceModuleList) {
+            log.info("Get mapping for service:{}", service);
+               for(AssetDirMapping mapping : assetDirMappingList) {
+                   log.info("mapping:{}", mapping);
+                   if(mapping.getJansServiceModule()!=null && mapping.getJansServiceModule().contains(service)) {
+                       serviceMap.put(service, mapping);
+                   }
+        }
+    }
+        
+        if (serviceMap==null || serviceMap.isEmpty()) {
+            throw new InvalidConfigurationException(
+                    "AssetDirMapping for [" + serviceModuleList + "] is not defined in config!");
+        }
+        
+        
+        Set<String> keys = serviceMap.keySet();
+        List<String> missingService = missingElements(new ArrayList(keys), serviceModuleList);
+        if (serviceMap==null || serviceMap.isEmpty()) {
+            throw new InvalidConfigurationException(
+                    "AssetDirMapping for [" + missingService + "] is not defined in config!");
+        }
+        
+        
+        
         directory = assetDirMapping.get().getDirectory();
         return directory;
     }
 
+
+    private List<String> missingElements(List<String> a, List<String> b) {
+        return a.stream()
+                .filter(s->!b.contains(s))
+                .collect(Collectors.toList());
+    }
+    
     private boolean isFileExtensionValidationEnabled() {
         return this.appConfiguration.getAssetMgtConfiguration().isFileExtensionValidationEnabled();
     }
