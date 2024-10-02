@@ -923,7 +923,7 @@ class JCA_CLI:
         if params:
             post_params['params'] = params
 
-        if mime_type.endswith(('json', 'text')):
+        if mime_type and mime_type.endswith(('json', 'text')):
             post_params['json'] = data
         else:
             post_params['data'] = data
