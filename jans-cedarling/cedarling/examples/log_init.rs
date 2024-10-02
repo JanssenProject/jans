@@ -54,7 +54,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         "Show results of get_logs(): returns a list of all log ids: {:?}",
         &logs_ids
     );
-    println!("\n\n Stage 2:\nShow result of get_log_by_id for each key.");
+    println!("\n\nStage 2:\nShow result of get_log_by_id for each key.");
     for id in logs_ids {
         let entry = cedarling
             .get_log_by_id(&id)
