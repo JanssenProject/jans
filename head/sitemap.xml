@@ -21,11 +21,6 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/head/cedarling/</loc>
-         <lastmod>2024-10-03</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
          <loc>https://jans.io/docs/head/agama/execution-rules/</loc>
          <lastmod>2024-10-03</lastmod>
          <changefreq>daily</changefreq>
@@ -157,6 +152,11 @@
     </url>
     <url>
          <loc>https://jans.io/docs/head/casa/plugins/accts-linking/accts-linking-agama/</loc>
+         <lastmod>2024-10-03</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/head/cedarling/cedarling/</loc>
          <lastmod>2024-10-03</lastmod>
          <changefreq>daily</changefreq>
     </url>
