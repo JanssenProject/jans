@@ -14,9 +14,9 @@ Developers can think of **SCIM** merely as a **REST API** with endpoints exposin
 
 This section covers how to configure, protect, and monitor the Janssen Server SCIM module and its APIs.
 
-## Installation 
+## Installation
 
-The API is available as a component of Jans Server. Upon [installation](../install/vm-install/vm-requirements.md) you can select if you want SCIM included in your environment. To add SCIM post-install do the following:
+The API is available as a component of the Janssen Server. Upon [installation](../install/vm-install/vm-requirements.md) you can select if you want SCIM included in your environment. To add SCIM post-install do the following:
 
 ```bash title="Command"
 python3 /opt/jans/jans-setup/setup.py --install-scim
@@ -61,12 +61,12 @@ The second is a stronger approach that turns off validation of incoming members 
 * Display names are never returned regardless of `attributes` or `excludedAttributes` parameters values
 * Remove/replace patch operations that involve display names in path filters are ignored, eg: `"path": "members[value eq \"2819c223\" or display eq \"Joe\"]"`
 
-
 ## User Registration Process with SCIM
+
 SCIM service has many use cases. One interesting and often arising is that of coding your own user registration process. With your SCIM endpoints you can build a custom application to maintain user entries in your database.
 
-
 ### Important Considerations
+
 Here, you have some useful tips before you start:
 
 1. Choose a toolset you feel comfortable to work with. Keep in mind that you have to leverage the capabilities of your language/framework to issue complex HTTPS requests. Be sure that:

@@ -24,7 +24,7 @@ To retrieve the current server configuration run the command `python3 /opt/jans/
 
 To modify some aspect of the retrieved configuration prepare a PATCH request in JSON format. For instance:
 
-```
+```json title="PATCH"
 [
 { 
   "op":"replace",
@@ -51,7 +51,7 @@ To retrieve the current server configuration using TUI proceed as below:
 1. Highlight the "Get Scim Configuration" button using the tab key
 1. Press enter
 
-You can modify the configuration in place by editing the fields of your interest. To persist the changes, highlight the "Save" button at the bottom and press enter 
+You can modify the configuration in place by editing the fields of your interest. To persist the changes, highlight the "Save" button at the bottom and press enter.
 
 ## SCIM Operations Guide using CLI, TUI and API
 
@@ -59,4 +59,4 @@ SCIM operations support mutiple options. Please check out this [documentation](.
 
 ## When will changes take effect?
 
-Any configuration update will take effect one minute after it has been applied whether via CLI or TUI. 
+Any configuration update will take effect one minute after it has been applied whether via CLI or TUI.
