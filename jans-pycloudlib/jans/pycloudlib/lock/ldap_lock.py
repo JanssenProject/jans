@@ -64,7 +64,6 @@ class LdapLock(BaseLock):
                     "displayName": [org_name],
                     "jansOrgShortName": [org_name],
                     "jansThemeColor": [166309],
-                    "jansManagerGrp": ["inum=60B7,ou=groups,o=jans"],
                     "o": ["jans"],
                 }
             )
