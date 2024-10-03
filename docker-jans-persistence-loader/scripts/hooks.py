@@ -323,10 +323,7 @@ def get_ldif_mappings_hook(group, optional_scopes=None):
         ]
 
     def user_files():
-        return [
-            "jans-auth/people.ldif",
-            "jans-auth/groups.ldif",
-        ]
+        return ["jans-auth/people.ldif"]
 
     def site_files():
         return ["o_site.ldif"]
