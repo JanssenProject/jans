@@ -883,7 +883,10 @@ class JCA_CLI:
 
 
     def post_requests(self, endpoint, data, params=None, method='post'):
-        url = 'https://{}{}'.format(self.host, endpoint.path)
+        if self.my_op_mode == 'auth' and endpoint.info['operationId'] == 'well-known-gluu-configuration':
+            url = 'https://{}{}'.format(self.idp_host, endpoint.path)
+        else:
+            url = 'https://{}{}'.format(self.host, endpoint.path)
         url_param_name = self.get_url_param(endpoint.path)
 
         security = self.get_scope_for_endpoint(endpoint)
@@ -923,7 +926,7 @@ class JCA_CLI:
         if params:
             post_params['params'] = params
 
-        if mime_type.endswith(('json', 'text')):
+        if mime_type and mime_type.endswith(('json', 'text')):
             post_params['json'] = data
         else:
             post_params['data'] = data
