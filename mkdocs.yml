@@ -418,7 +418,7 @@ nav:
       - Using CLI/TUI: janssen-server/usermgmt/usermgmt-cli-tui.md
       - Using jans-link: janssen-server/usermgmt/usermgmt-jans-link.md
 - Cedarling:
-  - Authorization Using Cedarling: cedarling.md
+  - Authorization Using Cedarling: 'cedarling/cedarling.md'
 - Agama:
   - Introduction: agama/introduction.md
   - Language reference: agama/language-reference.md
