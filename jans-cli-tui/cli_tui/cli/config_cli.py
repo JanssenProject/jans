@@ -883,7 +883,10 @@ class JCA_CLI:
 
 
     def post_requests(self, endpoint, data, params=None, method='post'):
-        url = 'https://{}{}'.format(self.host, endpoint.path)
+        if self.my_op_mode == 'auth' and endpoint.info['operationId'] == 'well-known-gluu-configuration':
+            url = 'https://{}{}'.format(self.idp_host, endpoint.path)
+        else:
+            url = 'https://{}{}'.format(self.host, endpoint.path)
         url_param_name = self.get_url_param(endpoint.path)
 
         security = self.get_scope_for_endpoint(endpoint)
