@@ -8733,10 +8733,10 @@
 <p><code>enabled</code>: A boolean value that specifies if the engine is enabled. To disable the engine, open <a href="../../../config-guide/config-tools/jans-tui/">TUI</a> and navigate to <code>Auth Server</code> &gt; <code>properties</code> &gt; <code>agamaConfiguration</code>. Then uncheck <code>enabled</code> and hit <code>save</code></p>
 </li>
 <li>
-<p><code>templatesPath</code>: A path relative to <code>/opt/jans/jetty/jans-auth/server/agama</code> that serves as the root of Agama flow pages. Default value is <code>/ftl</code></p>
+<p><code>templatesPath</code>: A path relative to <code>/opt/jans/jetty/jans-auth/agama</code> that serves as the root of Agama flow pages. Default value is <code>/ftl</code></p>
 </li>
 <li>
-<p><code>scriptsPath</code>: A path relative to <code>/opt/jans/jetty/jans-auth/server/agama</code> that serves as the root of the hierarchy of (Java/Groovy) classes added on the fly. Default value is <code>/scripts</code></p>
+<p><code>scriptsPath</code>: A path relative to <code>/opt/jans/jetty/jans-auth/agama</code> that serves as the root of the hierarchy of (Java/Groovy) classes added on the fly. Default value is <code>/scripts</code></p>
 </li>
 <li>
 <p><code>maxItemsLoggedInCollections</code>: When a list or map is <a href="../../../../agama/language-reference/#logging">logged</a>
@@ -8744,16 +8744,16 @@
   a flow, only the first few items are included in the output. You can use this property to increase that limit. Default value is <code>9</code></p>
 </li>
 <li>
-<p><code>pageMismatchErrorPage</code>: A path relative to <code>/opt/jans/jetty/jans-auth/server/agama</code> containing the location of the page shown when an unexpected URL is requested while a flow is in course. Default value is <code>mismatch.ftlh</code></p>
+<p><code>pageMismatchErrorPage</code>: A path relative to <code>/opt/jans/jetty/jans-auth/agama</code> containing the location of the page shown when an unexpected URL is requested while a flow is in course. Default value is <code>mismatch.ftlh</code></p>
 </li>
 <li>
-<p><code>interruptionErrorPage</code>: A path relative to <code>/opt/jans/jetty/jans-auth/server/agama</code> containing the location of the page shown when a user exceeds the amount of time allowed to take a flow to completion. Note that in order to preserve resources, the engine holds references to unfinished flows only for a small period of time (usually less than two minutes). Once the reference is lost, the error page regarded here won't be shown but <code>pageMismatchErrorPage</code>. Default value is <code>timeout.ftlh</code></p>
+<p><code>interruptionErrorPage</code>: A path relative to <code>/opt/jans/jetty/jans-auth/agama</code> containing the location of the page shown when a user exceeds the amount of time allowed to take a flow to completion. Note that in order to preserve resources, the engine holds references to unfinished flows only for a small period of time (usually less than two minutes). Once the reference is lost, the error page regarded here won't be shown but <code>pageMismatchErrorPage</code>. Default value is <code>timeout.ftlh</code></p>
 </li>
 <li>
-<p><code>crashErrorPage</code>: A path relative to <code>/opt/jans/jetty/jans-auth/server/agama</code> containing the location of the page shown when an error has occured while running the flow. It contains a brief description of the problem for troubleshooting. Default value is <code>crash.ftlh</code></p>
+<p><code>crashErrorPage</code>: A path relative to <code>/opt/jans/jetty/jans-auth/agama</code> containing the location of the page shown when an error has occured while running the flow. It contains a brief description of the problem for troubleshooting. Default value is <code>crash.ftlh</code></p>
 </li>
 <li>
-<p><code>finishedFlowPage</code>:  A path relative to <code>/opt/jans/jetty/jans-auth/server/agama</code> containing the location of the page shown when a flow has finished (whether successfully or not) in the phase handled exclusively by the engine. This page features an auto-submitting form that users won't notice in practice. This page will rarely need modifications. Default value is <code>finished.ftlh</code></p>
+<p><code>finishedFlowPage</code>:  A path relative to <code>/opt/jans/jetty/jans-auth/agama</code> containing the location of the page shown when a flow has finished (whether successfully or not) in the phase handled exclusively by the engine. This page features an auto-submitting form that users won't notice in practice. This page will rarely need modifications. Default value is <code>finished.ftlh</code></p>
 </li>
 <li>
 <p><code>bridgeScriptPage</code>: This is a facelets (JSF) page the bridge needs for proper operation. This page resides in the authentication server WAR file and will rarely need modifications. Default value is <code>agama.xhtml</code></p>
@@ -8801,7 +8801,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-09-27T12:12:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-03T17:35:41+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-03</span>
       
         <br>
         Created:
