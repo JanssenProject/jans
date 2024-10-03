@@ -29,12 +29,6 @@ Entry = namedtuple("Entry", ["id", "attrs"])
 
 manager = get_manager()
 
-#: ID of base entry
-JANS_BASE_DN = "o=jans"
-
-#: ID of manager group
-JANS_MANAGER_GROUP_DN = "inum=60B7,ou=groups,o=jans"
-
 #: ID of jans-auth config
 JANS_AUTH_CONFIG_DN = "ou=jans-auth,ou=configuration,o=jans"
 
@@ -303,7 +297,6 @@ class Upgrade:
         self.update_scopes_entries()
         self.update_clients_entries()
         self.update_scim_scopes_entries()
-        self.update_base_entries()
 
         if hasattr(self.backend, "update_misc"):
             self.backend.update_misc()
@@ -468,28 +461,6 @@ class Upgrade:
 
         _update_claim_names()
         _update_mobile_attr()
-
-    def update_base_entries(self):
-        # default to ldap persistence
-        kwargs = {}
-        id_ = JANS_BASE_DN
-
-        if self.backend.type in ("sql", "spanner"):
-            kwargs = {"table_name": "jansOrganization"}
-            id_ = doc_id_from_dn(id_)
-        elif self.backend.type == "couchbase":
-            kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
-            id_ = id_from_dn(id_)
-
-        # add jansManagerGrp to base entry
-        entry = self.backend.get_entry(id_, **kwargs)
-
-        if not entry:
-            return
-
-        if not entry.attrs.get("jansManagerGrp"):
-            entry.attrs["jansManagerGrp"] = JANS_MANAGER_GROUP_DN
-            self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
 
     def update_scim_scopes_entries(self):
         # default to ldap persistence
