@@ -89,7 +89,7 @@
         "jansServiceModule": [
           "jans-config-api"
         ],
-        "description": "Custom log4j xml file for plugins."
+        "description": "Custom xml file for plugins."
       },
       {
         "directory": "/opt/jans/jetty/%s/custom/i18n",
@@ -111,6 +111,7 @@
         "jansServiceModule": [
           "jans-auth",
           "jans-config-api",
+          "jans-keycloak-link",
           "jans-scim"
         ],
         "description": "java archive library."
@@ -180,7 +181,7 @@
         "description": "Archive file for storing cryptographic objects."
       },
       {
-        "directory": "/opt/jans/jetty/jans-auth/agama/fl",
+        "directory": "/opt/jans/jetty/jans-auth/%s/fl",
         "type": [
           "js",
           "css",
@@ -195,7 +196,7 @@
         "description": "Agama Static resources."
       },
       {
-        "directory": "/opt/jans/jetty/jans-auth/agama/ftl",
+        "directory": "/opt/jans/jetty/jans-auth/%s/ftl",
         "type": [
           "ftl",
           "ftlh"
@@ -206,7 +207,7 @@
         "description": "Freemarker Template."
       },
       {
-        "directory": "/opt/jans/jetty/jans-auth/agama/scripts",
+        "directory": "/opt/jans/jetty/jans-auth/%s/scripts",
         "type": [
           "java",
           "groovy",
@@ -259,6 +260,37 @@
           "jans-fido2"
         ],
         "description": " FIDO Server Metadata."
+      },
+      {
+        "directory": "/opt/jans/jetty/%s/custom-libs",
+        "type": [
+          "jar"
+        ],
+        "jansServiceModule": [
+          "jans-lock",
+          "jans-link"
+        ],
+        "description": "java archive library."
+      },
+      {
+        "directory": "/var/jans/keycloak-link-snapshots",
+        "type": [
+          "txt"
+        ],
+        "jansServiceModule": [
+          "jans-keycloak-link"
+        ],
+        "description": "Keycloak link snapshots."
+      },
+      {
+        "directory": "/var/jans/link-snapshots/",
+        "type": [
+          "txt"
+        ],
+        "jansServiceModule": [
+          "jans-link"
+        ],
+        "description": "Link snapshots."
       }
     ]
   },

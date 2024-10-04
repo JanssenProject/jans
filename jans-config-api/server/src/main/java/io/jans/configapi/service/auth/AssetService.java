@@ -21,7 +21,6 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.service.document.store.model.Document;
 import io.jans.service.document.store.provider.DBDocumentStoreProvider;
 import io.jans.service.document.store.service.DBDocumentService;
-import io.jans.service.document.store.conf.DocumentStoreType;
 
 import io.jans.util.exception.InvalidAttributeException;
 import io.jans.util.exception.InvalidConfigurationException;
@@ -39,7 +38,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Properties;
 import java.util.stream.*;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -54,6 +52,9 @@ import org.slf4j.Logger;
 
 @ApplicationScoped
 public class AssetService {
+
+    private static final String ASSET_DIR_STR = "AssetDirMapping for [";
+    private static final String NOT_DEFINED_IN_CONFIG = "] is not defined in config!";
 
     @Inject
     Logger log;
@@ -293,7 +294,7 @@ public class AssetService {
             dirSet.addAll(mapping.getJansServiceModule());
         }
 
-        serviceModules = new ArrayList(dirSet);
+        serviceModules = new ArrayList<>(dirSet);
         log.info(" ServiceModuleName  serviceModules:{}- ", serviceModules);
         return serviceModules;
     }
@@ -311,7 +312,7 @@ public class AssetService {
             validFileExtension.addAll(dir.getType());
         }
         log.info("validFileExtension:{}  - ", validFileExtension);
-        HashSet<String> dataSet = new HashSet(validFileExtension);
+        HashSet<String> dataSet = new HashSet<>(validFileExtension);
         validFileExtension = new ArrayList<>(dataSet);
         log.info("unique validFileExtension:{}  - ", validFileExtension);
 
@@ -351,7 +352,7 @@ public class AssetService {
                 return asset;
             }
 
-            int intRevision = asset.getRevision();
+            int intRevision = (asset.getRevision() == null ? 0 : asset.getRevision());
             log.debug(" Current asset intRevision is:{}", intRevision);
 
             if (isUpdate) {
@@ -359,6 +360,7 @@ public class AssetService {
             }
             asset.setRevision(intRevision);
             log.info("Updated asset revision to asset.getJansRevision():{}", asset.getRevision());
+
         } catch (Exception ex) {
             log.error("Exception while updating asset revision is - ", ex);
             return asset;
@@ -372,14 +374,15 @@ public class AssetService {
             throw new InvalidConfigurationException("Asset is null!");
         }
         String assetFileName = asset.getFileName();
-        log.info("assetFileName", assetFileName);
+        log.info("assetFileName:{}", assetFileName);
         if (StringUtils.isBlank(assetFileName)) {
             throw new InvalidConfigurationException("Asset name is null!");
         }
 
         String assetDir = this.getAssetDir(asset);
         asset.setFilePath(assetDir);
-        log.info("For saving assetFileName:{} assetDir:{}", assetFileName, assetDir, asset.getFileName());
+        log.info("For saving assetFileName:{} assetDir:{}, asset.getFileName():{}", assetFileName, assetDir,
+                asset.getFileName());
 
         return asset;
     }
@@ -404,52 +407,6 @@ public class AssetService {
         }
 
         String assetFileName = asset.getFileName();
-        StringBuilder sb = new StringBuilder();
-
-        if (StringUtils.isBlank(assetFileName) || this.appConfiguration == null
-                || this.getAssetMgtConfiguration() == null) {
-            return sb.toString();
-        }
-
-        AssetMgtConfiguration assetMgtConfiguration = this.getAssetMgtConfiguration();
-
-        String assetDir = getAssetDirectory(asset);
-        log.info("assetMgtConfiguration:{}, sb:{}, assetDir:{}", assetMgtConfiguration, sb, assetDir);
-
-        if (StringUtils.isBlank(assetDir)) {
-            throw new InvalidConfigurationException(
-                    "Directory to save asset [" + assetFileName + "] is not defined in config!");
-        }
-
-        if (StringUtils.isNotBlank(assetDir)) {
-            sb.append(File.separator);
-            sb.append(assetDir);
-        }
-
-        return sb.toString();
-    }
-
-    private String getServiceDirectory(String assetDir, String serviceName) {
-
-        log.info("Get service directory assetDir:{}, serviceName:{}", assetDir, serviceName);
-
-        String path = null;
-        if (StringUtils.isBlank(assetDir) || StringUtils.isBlank(serviceName)) {
-            return path;
-        }
-        path = String.format(assetDir, serviceName);
-        log.info("Service directory assetDir:{}, serviceName:{}, path:{}", assetDir, serviceName, path);
-
-        return path;
-
-    }
-
-    private String getAssetDirectory(Document asset) {
-        log.error("Get asset Directory for asset:{}", asset);
-
-        String directory = null;
-        String assetFileName = asset.getFileName();
-        String filePath = asset.getFilePath();
         List<String> serviceModuleList = asset.getService();
 
         if (StringUtils.isBlank(assetFileName)) {
@@ -460,6 +417,35 @@ public class AssetService {
             throw new InvalidConfigurationException("Service module for asset to be upload is null!");
         }
 
+        if (this.appConfiguration == null || this.getAssetMgtConfiguration() == null) {
+            throw new InvalidConfigurationException("Application setup issue as config is null!");
+        }
+
+        String assetDir = getAssetDirectory(asset);
+        log.info("assetDir:{} for assetFileName:{}", assetDir, assetFileName);
+
+        if (StringUtils.isBlank(assetDir)) {
+            throw new InvalidConfigurationException(
+                    "Directory to save asset [" + assetFileName + NOT_DEFINED_IN_CONFIG);
+        }
+
+        StringBuilder sb = new StringBuilder();
+        if (StringUtils.isNotBlank(assetDir)) {
+            sb.append(File.separator);
+            sb.append(assetDir);
+        }
+
+        return sb.toString();
+    }
+
+    private String getAssetDirectory(Document asset) {
+        log.error("Get asset Directory for asset:{}", asset);
+
+        String directory = null;
+        String assetFileName = asset.getFileName();
+        String filePath = asset.getFilePath();
+        List<String> serviceModuleList = asset.getService();
+
         List<AssetDirMapping> assetDirMapping = this.getAssetDirMapping();
         log.error("Get asset Directory - assetDirMapping:{}", assetDirMapping);
         if (assetDirMapping == null || assetDirMapping.isEmpty()) {
@@ -469,15 +455,57 @@ public class AssetService {
         log.error("Get asset Directory for fileExtension:{}, serviceModuleList:{}", fileExtension, serviceModuleList);
 
         List<AssetDirMapping> assetDirMappingList = assetDirMapping.stream()
-                .filter(e -> e.getType().contains(fileExtension))
-                .collect(Collectors.toList());
-        log.error(" AssetDirMapping based on fileExtension:{} and serviceModuleList:{} is assetDirMappingList:{}", fileExtension, serviceModuleList, assetDirMappingList);
+                .filter(e -> e.getType().contains(fileExtension)).collect(Collectors.toList());
+        log.error(" AssetDirMapping based on fileExtension:{} and serviceModuleList:{} is assetDirMappingList:{}",
+                fileExtension, serviceModuleList, assetDirMappingList);
 
         if (assetDirMappingList == null || assetDirMappingList.isEmpty()) {
             throw new InvalidConfigurationException(
-                    "AssetDirMapping for [" + fileExtension + "] asset type is not defined in config!");
+                    ASSET_DIR_STR + fileExtension + "] asset type is not defined in config!");
         }
 
+        HashMap<String, String> serviceDirMap = this.getServiceDirMap(serviceModuleList, assetDirMappingList);
+        log.error("Asset serviceDirMap :{}", serviceDirMap);
+
+        if (serviceDirMap.isEmpty()) {
+            throw new InvalidConfigurationException(ASSET_DIR_STR + serviceModuleList + NOT_DEFINED_IN_CONFIG);
+        }
+
+        Set<String> keys = serviceDirMap.keySet();
+        log.error("Check missing service - keys:{}, serviceModuleList:{}", keys, serviceModuleList);
+        List<String> missingService = missingElements(new ArrayList<>(keys), serviceModuleList);
+        log.error("missingService:{}", missingService);
+
+        if (missingService != null && !missingService.isEmpty()) {
+            throw new InvalidConfigurationException(
+                    ASSET_DIR_STR + missingService + "] service is not defined in config!");
+        }
+
+        HashSet<String> values = new HashSet<>(serviceDirMap.values());
+        log.error("values:{}", values);
+        if (values.isEmpty()) {
+            throw new InvalidConfigurationException(ASSET_DIR_STR + assetFileName + NOT_DEFINED_IN_CONFIG);
+        }
+
+        if (values.size() > 1) {
+            throw new InvalidConfigurationException("Multiple filePath defined in config [" + values
+                    + "] for the assetType [" + fileExtension + "] and service [" + serviceModuleList
+                    + "] and filePath provided in request is [" + filePath + "]. Please modify request !");
+        }
+
+        directory = values.iterator().next();
+        log.error("directory:{}", directory);
+        if (StringUtils.isNotBlank(filePath) && !filePath.equals(directory)) {
+            throw new InvalidConfigurationException("FilePath provided is [" + filePath
+                    + "] does not match the one defined in config [" + directory + "] !");
+        }
+        return directory;
+    }
+
+    private HashMap<String, String> getServiceDirMap(List<String> serviceModuleList,
+            List<AssetDirMapping> assetDirMappingList) {
+        log.error("For retrieving service dir mapping - serviceModuleList:{}, assetDirMappingList:{}",
+                serviceModuleList, assetDirMappingList);
         HashMap<String, String> serviceDirMap = new HashMap<>();
         for (String service : serviceModuleList) {
             log.error("Get mapping for service:{}", service);
@@ -488,43 +516,9 @@ public class AssetService {
                 }
             }
         }
-        
+
         log.error("serviceDirMap:{}", serviceDirMap);
-        
-        if (serviceDirMap == null || serviceDirMap.isEmpty()) {
-            throw new InvalidConfigurationException(
-                    "AssetDirMapping for [" + serviceModuleList + "] is not defined in config!");
-        }
-
-        Set<String> keys = serviceDirMap.keySet();
-        log.error("Check missing service - keys:{}, serviceModuleList:{}", keys, serviceModuleList);
-        List<String> missingService = missingElements(new ArrayList(keys), serviceModuleList);
-        log.error("missingService:{}", missingService);
-        
-        if (missingService != null && !missingService.isEmpty()) {
-            throw new InvalidConfigurationException(
-                    "AssetDirMapping for [" + missingService + "] service is not defined in config!");
-        }
-
-        HashSet<String> values = new HashSet(serviceDirMap.values());
-        log.error("values:{}", values);
-        if (values == null || values.isEmpty()) {
-            throw new InvalidConfigurationException(
-                    "AssetDirMapping for [" + assetFileName + "] is not defined in config!");
-        }
-
-        if (values.size() > 1) {
-            throw new InvalidConfigurationException(
-                    "Multiple filePath defined in config [" + values + "] for the assetType [" + fileExtension + "] and service ["+ serviceModuleList +"] and filePath provided in request is [" + filePath + "]. Please modify request !");
-        }
-        
-        directory = values.iterator().next();
-        log.error("directory:{}", directory);
-        if(StringUtils.isNotBlank(filePath) && !filePath.equals(directory)) {
-            throw new InvalidConfigurationException(
-                    "FilePath provided is [" + filePath + "] does not match the one defined in config [" + directory + "] !");
-        }
-        return directory;
+        return serviceDirMap;
     }
 
     private List<String> missingElements(List<String> a, List<String> b) {
@@ -593,49 +587,6 @@ public class AssetService {
         }
     }
 
-    private void validateServiceDirectory(String assetFileName, String assetDir, List<String> serviceModules) {
-        log.error("validate service directory details - assetFileName,:{}, assetDir:{}, serviceModules:{}", assetDir,
-                assetFileName, serviceModules);
-        StringBuilder invalidServiceDirList = new StringBuilder();
-        StringBuilder missingMapping = new StringBuilder();
-        StringBuilder errorMsg = new StringBuilder();
-
-        for (String serviceName : serviceModules) {
-
-            String serviceDirectory = this.getServiceDirectory(assetDir, serviceName);
-            if (StringUtils.isBlank(serviceDirectory)) {
-                missingMapping.append(serviceName);
-            }
-
-            // check if the asset directory exist
-            boolean serviceDirectoryExist = isServiceDirectoryExist(serviceDirectory);
-            if (!serviceDirectoryExist) {
-                invalidServiceDirList.append(serviceName);
-            }
-        }
-
-        log.debug("missingMapping:{}, invalidServiceDirList:{}", missingMapping, invalidServiceDirList);
-        if (StringUtils.isNotBlank(missingMapping.toString())) {
-            errorMsg.append("Cannot save asset as service directory mapping for [" + missingMapping + "] is null!");
-        }
-
-        if (StringUtils.isNotBlank(invalidServiceDirList.toString())) {
-            errorMsg.append("Service directory to save asset [" + invalidServiceDirList + "] does not exist!");
-        }
-
-        log.info("errorMsg:{}", errorMsg);
-        if (StringUtils.isNotBlank(errorMsg.toString())) {
-            throw new InvalidConfigurationException(errorMsg.toString());
-        }
-    }
-
-    private boolean isServiceDirectoryExist(String serviceDirectory) {
-        File dir = new File(serviceDirectory);
-        boolean serviceDirectoryExist = dir.exists();
-        log.info("Check using File API serviceDirectory:{} - exist:{}", serviceDirectory, serviceDirectoryExist);
-        return serviceDirectoryExist;
-    }
-
     private InputStream readDocumentAsStream(String name, String assetContent) {
         log.debug("Asset name:{} assetContent: '{}'", name, assetContent);
 
@@ -644,10 +595,6 @@ public class AssetService {
             return null;
         }
         return new ByteArrayInputStream(assetContent.getBytes());
-    }
-
-    private DocumentStoreType getDocumentStoreType() {
-        return documentStoreService.getProviderType();
     }
 
     private AssetMgtConfiguration getAssetMgtConfiguration() {
