@@ -86,21 +86,23 @@ public class Fido2RegistrationService {
         if (searchRequest.getFilterAssertionValue() != null && !searchRequest.getFilterAssertionValue().isEmpty()) {
 
             for (String assertionValue : searchRequest.getFilterAssertionValue()) {
-                String[] targetArray = new String[] { assertionValue };
+                log.info("Search Fido2Registration with assertionValue:{}", assertionValue);
+                if (StringUtils.isNotBlank(assertionValue)) {
+                    String[] targetArray = new String[] { assertionValue };
 
-                Filter displayNameFilter = Filter.createSubstringFilter("displayName", null, targetArray, null);
-                Filter descriptionFilter = Filter.createSubstringFilter("jansRegistrationData", null, targetArray,
-                        null);
-                Filter statusFilter = Filter.createSubstringFilter("jansStatus", null, targetArray, null);
-                Filter notificationConfFilter = Filter.createSubstringFilter("jansDeviceNotificationConf", null,
-                        targetArray, null);
-                Filter deviceDataFilter = Filter.createSubstringFilter("jansDeviceData", null, targetArray, null);
-                Filter personInumFilter = Filter.createSubstringFilter("personInum", null, targetArray, null);
-                Filter inumFilter = Filter.createSubstringFilter("jansId", null, targetArray, null);
+                    Filter displayNameFilter = Filter.createSubstringFilter("displayName", null, targetArray, null);
+                    Filter descriptionFilter = Filter.createSubstringFilter("jansRegistrationData", null, targetArray,
+                            null);
+                    Filter statusFilter = Filter.createSubstringFilter("jansStatus", null, targetArray, null);
+                    Filter notificationConfFilter = Filter.createSubstringFilter("jansDeviceNotificationConf", null,
+                            targetArray, null);
+                    Filter deviceDataFilter = Filter.createSubstringFilter("jansDeviceData", null, targetArray, null);
+                    Filter personInumFilter = Filter.createSubstringFilter("personInum", null, targetArray, null);
+                    Filter inumFilter = Filter.createSubstringFilter("jansId", null, targetArray, null);
 
-                filters.add(Filter.createORFilter(displayNameFilter, descriptionFilter, statusFilter,
-                        notificationConfFilter, deviceDataFilter, personInumFilter, inumFilter));
-
+                    filters.add(Filter.createORFilter(displayNameFilter, descriptionFilter, statusFilter,
+                            notificationConfFilter, deviceDataFilter, personInumFilter, inumFilter));
+                }
             }
             searchFilter = Filter.createORFilter(filters);
         }

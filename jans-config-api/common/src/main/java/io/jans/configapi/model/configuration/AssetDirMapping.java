@@ -17,6 +17,9 @@ public class AssetDirMapping {
     @Schema(description = "Description of assets stored in directory.")
     private String description;
 
+    @Schema(description = "List of supported service module where asset can be uploaded.")
+    private List<String> jansServiceModule;
+
     public String getDirectory() {
         return directory;
     }
@@ -41,9 +44,18 @@ public class AssetDirMapping {
         this.description = description;
     }
 
+    public List<String> getJansServiceModule() {
+        return jansServiceModule;
+    }
+
+    public void setJansServiceModule(List<String> jansServiceModule) {
+        this.jansServiceModule = jansServiceModule;
+    }
+
     @Override
     public String toString() {
-        return "AssetDirMapping [directory=" + directory + ", type=" + type + ", description=" + description + "]";
+        return "AssetDirMapping [directory=" + directory + ", type=" + type + ", description=" + description
+                + ", jansServiceModule=" + jansServiceModule + "]";
     }
 
 }
