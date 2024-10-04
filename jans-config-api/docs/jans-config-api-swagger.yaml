@@ -9166,11 +9166,11 @@ components:
           type: boolean
         adminCanView:
           type: boolean
-        userCanEdit:
+        userCanView:
           type: boolean
         adminCanEdit:
           type: boolean
-        userCanView:
+        userCanEdit:
           type: boolean
         adminCanAccess:
           type: boolean
@@ -10023,6 +10023,8 @@ components:
           type: boolean
         lockMessageConfig:
           $ref: '#/components/schemas/LockMessageConfig'
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -10032,8 +10034,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -11163,14 +11163,14 @@ components:
           type: boolean
         internal:
           type: boolean
-        locationPath:
-          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
+        locationPath:
+          type: string
         baseDn:
           type: string
     ScriptError:
@@ -11599,10 +11599,10 @@ components:
         ttl:
           type: integer
           format: int32
-        persisted:
-          type: boolean
         opbrowserState:
           type: string
+        persisted:
+          type: boolean
     SessionIdAccessMap:
       type: object
       properties:

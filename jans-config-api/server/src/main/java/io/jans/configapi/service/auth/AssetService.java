@@ -39,7 +39,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Optional;
+import java.util.Properties;
 import java.util.stream.*;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -310,10 +310,10 @@ public class AssetService {
         for (AssetDirMapping dir : assetDirList) {
             validFileExtension.addAll(dir.getType());
         }
-
-        HashSet dataSet = new HashSet(validFileExtension);
-        validFileExtension = new ArrayList<>(dataSet);
         log.info("validFileExtension:{}  - ", validFileExtension);
+        HashSet<String> dataSet = new HashSet(validFileExtension);
+        validFileExtension = new ArrayList<>(dataSet);
+        log.info("unique validFileExtension:{}  - ", validFileExtension);
 
         return validFileExtension;
     }
@@ -418,7 +418,7 @@ public class AssetService {
 
         if (StringUtils.isBlank(assetDir)) {
             throw new InvalidConfigurationException(
-                    "Directory to upload asset [" + assetFileName + "] is not defined in config!");
+                    "Directory to save asset [" + assetFileName + "] is not defined in config!");
         }
 
         if (StringUtils.isNotBlank(assetDir)) {
@@ -466,25 +466,16 @@ public class AssetService {
             return directory;
         }
         String fileExtension = this.getFileExtension(assetFileName);
-        log.error("Get asset Directory for fileExtension:{}", fileExtension);
+        log.error("Get asset Directory for fileExtension:{}, serviceModuleList:{}", fileExtension, serviceModuleList);
 
         List<AssetDirMapping> assetDirMappingList = assetDirMapping.stream()
-                .filter(e -> e.getType().contains(fileExtension)).collect(Collectors.toList());
-        log.error(" AssetDirMapping for fileExtension:{} is assetDirMappingList:{}", fileExtension, assetDirMappingList);
+                .filter(e -> e.getType().contains(fileExtension))
+                .collect(Collectors.toList());
+        log.error(" AssetDirMapping based on fileExtension:{} and serviceModuleList:{} is assetDirMappingList:{}", fileExtension, serviceModuleList, assetDirMappingList);
 
         if (assetDirMappingList == null || assetDirMappingList.isEmpty()) {
             throw new InvalidConfigurationException(
-                    "AssetDirMapping for [" + fileExtension + "] is not defined in config!");
-        }
-
-        List<AssetDirMapping> moduleMappingList = assetDirMappingList.stream()
-                .filter(e -> e.getJansServiceModule().contains(serviceModuleList)).collect(Collectors.toList());
-        log.error(" AssetDirMapping for specified service:{} is moduleMappingList:{}", serviceModuleList,
-                moduleMappingList);
-
-        if (moduleMappingList == null || moduleMappingList.isEmpty()) {
-            throw new InvalidConfigurationException(
-                    "AssetDirMapping for [" + serviceModuleList + "] is not defined in config!");
+                    "AssetDirMapping for [" + fileExtension + "] asset type is not defined in config!");
         }
 
         HashMap<String, String> serviceDirMap = new HashMap<>();
@@ -497,19 +488,22 @@ public class AssetService {
                 }
             }
         }
+        
         log.error("serviceDirMap:{}", serviceDirMap);
+        
         if (serviceDirMap == null || serviceDirMap.isEmpty()) {
             throw new InvalidConfigurationException(
                     "AssetDirMapping for [" + serviceModuleList + "] is not defined in config!");
         }
 
         Set<String> keys = serviceDirMap.keySet();
-        log.error("keys:{}", keys);
+        log.error("Check missing service - keys:{}, serviceModuleList:{}", keys, serviceModuleList);
         List<String> missingService = missingElements(new ArrayList(keys), serviceModuleList);
         log.error("missingService:{}", missingService);
-        if (missingService != null || !missingService.isEmpty()) {
+        
+        if (missingService != null && !missingService.isEmpty()) {
             throw new InvalidConfigurationException(
-                    "AssetDirMapping for [" + missingService + "] is not defined in config!");
+                    "AssetDirMapping for [" + missingService + "] service is not defined in config!");
         }
 
         HashSet<String> values = new HashSet(serviceDirMap.values());
@@ -521,9 +515,16 @@ public class AssetService {
 
         if (values.size() > 1) {
             throw new InvalidConfigurationException(
-                    "filePath provided[" + filePath + "] does not match [" + values + "] as defined in config!");
+                    "Multiple filePath defined in config [" + values + "] for the assetType [" + fileExtension + "] and service ["+ serviceModuleList +"] and filePath provided in request is [" + filePath + "]. Please modify request !");
         }
-        return values.iterator().next();
+        
+        directory = values.iterator().next();
+        log.error("directory:{}", directory);
+        if(StringUtils.isNotBlank(filePath) && !filePath.equals(directory)) {
+            throw new InvalidConfigurationException(
+                    "FilePath provided is [" + filePath + "] does not match the one defined in config [" + directory + "] !");
+        }
+        return directory;
     }
 
     private List<String> missingElements(List<String> a, List<String> b) {
