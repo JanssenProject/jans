@@ -10,6 +10,7 @@
 
 pub(crate) mod app_types;
 pub mod bootstrap_config;
+pub(crate) mod cedar_schema;
 pub mod jwt_config;
 pub mod log_config;
 pub mod log_entry;
