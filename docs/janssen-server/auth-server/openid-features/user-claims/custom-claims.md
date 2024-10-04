@@ -80,7 +80,7 @@ The complete 77-customAttributes.ldif will look like this:
 
 #### Step 3: Restart `opendj` service.
 
-[Restart](../../../../admin/vm-ops/restarting-services.md#reload) the `opendj` service.
+[Restart](../../../../janssen-server/vm-ops/restarting-services.md#restart) the `opendj` service.
 
 That will create the custom user claim in the local LDAP server.
 

@@ -30,7 +30,7 @@ If you've followed the steps as described above, next time he attempts to log in
 
 ### How to adjust the issuer for OTP tokens
 
-When people add OTP mobile apps, the enrollment appears in the device associated with an "issuer", so it is easy to recognize where the OTPs generated can be used. To keep track of which OTPs are valid for which IDPs, the issuer property can be adjusted in flow `io.jans.casa.authn.otp` part of Casa Agama project - you can use [TUI](../../admin/config-guide/auth-server-config/agama-project-configuration/#agama-project-configuration-screen) for this purpose. For example, you might want to set the `issuer` property to `ACME Dev` on your dev server, and `ACME, Inc.` on your production server. 
+When people add OTP mobile apps, the enrollment appears in the device associated with an "issuer", so it is easy to recognize where the OTPs generated can be used. To keep track of which OTPs are valid for which IDPs, the issuer property can be adjusted in flow `io.jans.casa.authn.otp` part of Casa Agama project - you can use [TUI](../../janssen-server/config-guide/auth-server-config/agama-project-configuration.md#agama-project-configuration-screen) for this purpose. For example, you might want to set the `issuer` property to `ACME Dev` on your dev server, and `ACME, Inc.` on your production server. 
 
 ## Errors shown in the UI
 
@@ -67,7 +67,7 @@ For Time-based OTP, ensure the time of your server is correctly synchronized (us
 
 Big time differences can cause unsuccessful attempts to enroll TOTP credentials in Casa.
 
-For Event-based OTP (HOTP), ensure you are using a suitable value for `look ahead window` (we suggest at least 10). Check the configuration of flow `io.jans.casa.authn.otp` part of Casa Agama project - you can use [TUI](../../admin/config-guide/auth-server-config/agama-project-configuration/#agama-project-configuration-screen) for this purpose.
+For Event-based OTP (HOTP), ensure you are using a suitable value for `look ahead window` (we suggest at least 10). Check the configuration of flow `io.jans.casa.authn.otp` part of Casa Agama project - you can use [TUI](../../janssen-server/config-guide/auth-server-config/agama-project-configuration.md#agama-project-configuration-screen) for this purpose.
 
 ### The user interface is not showing any means to enroll credentials
 

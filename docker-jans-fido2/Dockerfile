@@ -1,4 +1,4 @@
-FROM bellsoft/liberica-openjre-alpine:17.0.12@sha256:a39e3fb3c96ae89e936a2e50c0a597a91d2357a1ec19096c05e851f54f3a9715
+FROM bellsoft/liberica-openjre-alpine:17.0.12@sha256:29cb2ee552c7c7a924b6a1b59802508dc5123e7edad1d65d575bbf07cd05fa6d
 
 # ===============
 # Alpine packages
@@ -42,7 +42,7 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 
 
 ENV CN_VERSION=1.1.6-SNAPSHOT
-ENV CN_BUILD_DATE='2024-09-16 06:55'
+ENV CN_BUILD_DATE='2024-10-02 14:39'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-fido2-server/${CN_VERSION}/jans-fido2-server-${CN_VERSION}.war
 
@@ -61,7 +61,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-fido2/webapps \
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=4b07e84a14df81899900724515f3eead1d579443
+ENV JANS_SOURCE_VERSION=5e7b579f097714d685a6c1e0cedd004df0ce85f8
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)

@@ -45,7 +45,6 @@ class JansAuthInstaller(JettyInstaller):
         self.jans_auth_openid_jwks_fn = os.path.join(self.output_folder, 'jans-auth-keys.json')
         self.jans_auth_openid_jks_fn = os.path.join(Config.certFolder, 'jans-auth-keys.' + Config.default_store_type.lower())
         self.ldif_people = os.path.join(self.output_folder, 'people.ldif')
-        self.ldif_groups = os.path.join(self.output_folder, 'groups.ldif')
         self.agama_root = os.path.join(self.jetty_base, self.service_name, 'agama')
         self.custom_lib_dir = os.path.join(self.jetty_base, self.service_name, 'custom/libs/')
 
@@ -127,7 +126,7 @@ class JansAuthInstaller(JettyInstaller):
 
         Config.templateRenderingDict['person_custom_object_class_list'] = '[]' if Config.mapping_locations['default'] == 'rdbm' else '["jansCustomPerson", "jansPerson"]'
 
-        templates = [self.jans_auth_config_json, self.ldif_people, self.ldif_groups]
+        templates = [self.jans_auth_config_json, self.ldif_people]
 
         for tmp in templates:
             self.renderTemplateInOut(tmp, self.templates_folder, self.output_folder)
@@ -151,7 +150,7 @@ class JansAuthInstaller(JettyInstaller):
         for temp in (self.ldif_config, self.ldif_role_scope_mappings):
             self.renderTemplateInOut(temp, self.templates_folder, self.output_folder)
 
-        self.dbUtils.import_ldif([self.ldif_config, self.ldif_scripts, self.ldif_role_scope_mappings, self.ldif_people, self.ldif_groups])
+        self.dbUtils.import_ldif([self.ldif_config, self.ldif_scripts, self.ldif_role_scope_mappings, self.ldif_people])
 
         if Config.profile == SetupProfiles.OPENBANKING:
             self.import_openbanking_certificate()
