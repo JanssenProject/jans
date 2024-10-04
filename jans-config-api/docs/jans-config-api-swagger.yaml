@@ -615,6 +615,39 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/jans_asset-read
+  /api/v1/jans-assets/asset-dir-mapping:
+    get:
+      tags:
+      - Jans Assets
+      summary: Get valid asset types
+      description: Get valid asset types
+      operationId: get-asset-dir-mapping
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AssetDirMapping'
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/jans_asset-read
   /api/v1/jans-assets:
     get:
       tags:
@@ -9040,6 +9073,28 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Document'
+    AssetDirMapping:
+      type: object
+      properties:
+        directory:
+          type: string
+          description: Relative path to asset base directory.
+        type:
+          type: array
+          description: List of file extention that are stored in directory.
+          items:
+            type: string
+            description: List of file extention that are stored in directory.
+        description:
+          type: string
+          description: Description of assets stored in directory.
+        jansServiceModule:
+          type: array
+          description: List of supported service module where asset can be uploaded.
+          items:
+            type: string
+            description: List of supported service module where asset can be uploaded.
+      description: Asset type mapped to server directory.
     AssetForm:
       required:
       - assetFile
@@ -9162,19 +9217,19 @@ components:
           type: string
         selected:
           type: boolean
-        adminCanView:
-          type: boolean
-        userCanEdit:
-          type: boolean
-        userCanView:
+        whitePagesCanView:
           type: boolean
         adminCanEdit:
           type: boolean
-        adminCanAccess:
+        userCanView:
+          type: boolean
+        userCanEdit:
+          type: boolean
+        adminCanView:
           type: boolean
         userCanAccess:
           type: boolean
-        whitePagesCanView:
+        adminCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -10023,8 +10078,6 @@ components:
           type: boolean
         lockMessageConfig:
           $ref: '#/components/schemas/LockMessageConfig'
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -10034,6 +10087,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -10948,28 +11003,6 @@ components:
             $ref: '#/components/schemas/PluginConf'
         assetMgtConfiguration:
           $ref: '#/components/schemas/AssetMgtConfiguration'
-    AssetDirMapping:
-      type: object
-      properties:
-        directory:
-          type: string
-          description: Relative path to asset base directory.
-        type:
-          type: array
-          description: List of file extention that are stored in directory.
-          items:
-            type: string
-            description: List of file extention that are stored in directory.
-        description:
-          type: string
-          description: Description of assets stored in directory.
-        jansServiceModule:
-          type: array
-          description: List of supported service module where asset can be uploaded.
-          items:
-            type: string
-            description: List of supported service module where asset can be uploaded.
-      description: Asset type mapped to server directory.
     AssetMgtConfiguration:
       type: object
       properties:
@@ -11163,14 +11196,14 @@ components:
           type: boolean
         internal:
           type: boolean
-        locationPath:
-          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
+        locationPath:
+          type: string
         baseDn:
           type: string
     ScriptError:
