@@ -102,10 +102,8 @@ ENV CN_SECRET_ADAPTER=vault \
 # Persistence ENV
 # ===============
 
-ENV CN_PERSISTENCE_TYPE=ldap \
+ENV CN_PERSISTENCE_TYPE=sql \
     CN_HYBRID_MAPPING="{}" \
-    CN_LDAP_URL=localhost:1636 \
-    CN_LDAP_USE_SSL=true \
     CN_COUCHBASE_URL=localhost \
     CN_COUCHBASE_USER=admin \
     CN_COUCHBASE_CERT_FILE=/etc/certs/couchbase.crt \
