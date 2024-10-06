@@ -32,6 +32,7 @@ setup(
         "python-consul>=1.0.1",
         "hvac>=0.7.0",
         "kubernetes>=11.0",
+        # @TODO: REMOVE THIS
         "ldap3>=2.5",
         "backoff>=2.1.2",
         "docker>=3.7.2",
