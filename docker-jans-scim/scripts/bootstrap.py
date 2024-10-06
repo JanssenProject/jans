@@ -268,7 +268,6 @@ class PersistenceSetup:
             entries = self.client.search("jansScope", ["jansId"])
             return [entry["jansId"] for entry in entries]
 
-        if self.persistence_type == "couchbase":
         # likely couchbase
         bucket = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
         req = self.client.exec_query(
