@@ -54,7 +54,7 @@ The following environment variables are supported by the container:
 - `CN_REDIS_URL`: URL of Redis server, format is host:port (optional; default to `localhost:6379`).
 - `CN_REDIS_TYPE`: Redis service type, either `STANDALONE` or `CLUSTER` (optional; default to `STANDALONE`).
 - `CN_MEMCACHED_URL`: URL of Memcache server, format is host:port (optional; default to `localhost:11211`).
-- `CN_PERSISTENCE_TYPE`: Persistence backend being used (`couchbase`, or `hybrid`; default to `sql`).
+- `CN_PERSISTENCE_TYPE`: Persistence backend being used (`couchbase`, `sql`, `spanner`, or `hybrid`; default to `sql`).
 - `CN_HYBRID_MAPPING`: Specify data mapping for each persistence (default to `"{}"`). Note this environment only takes effect when `CN_PERSISTENCE_TYPE` is set to `hybrid`. See [hybrid mapping](#hybrid-mapping) section for details.
 - `CN_PERSISTENCE_SKIP_INITIALIZED`: skip initialization if backend already initialized (default to `false`).
 - `CN_PERSISTENCE_UPDATE_AUTH_DYNAMIC_CONFIG`: Whether to allow automatic updates of `jans-auth` configuration (default to `true`).

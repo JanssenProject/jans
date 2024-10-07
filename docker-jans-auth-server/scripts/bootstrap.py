@@ -129,8 +129,6 @@ def configure_logging():
         "persistence_log_level": "INFO",
         "persistence_duration_log_target": "FILE",
         "persistence_duration_log_level": "INFO",
-        "ldap_stats_log_target": "FILE",
-        "ldap_stats_log_level": "INFO",
         "script_log_target": "FILE",
         "script_log_level": "INFO",
         "audit_log_target": "FILE",
@@ -177,7 +175,6 @@ def configure_logging():
         "http_log_target": "JANS_AUTH_HTTP_REQUEST_RESPONSE_FILE",
         "persistence_log_target": "JANS_AUTH_PERSISTENCE_FILE",
         "persistence_duration_log_target": "JANS_AUTH_PERSISTENCE_DURATION_FILE",
-        "ldap_stats_log_target": "JANS_AUTH_PERSISTENCE_LDAP_STATISTICS_FILE",
         "script_log_target": "JANS_AUTH_SCRIPT_LOG_FILE",
         "audit_log_target": "JANS_AUTH_AUDIT_LOG_FILE",
     }

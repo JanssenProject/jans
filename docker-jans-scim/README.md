@@ -49,7 +49,7 @@ The following environment variables are supported by the container:
 - `CN_WAIT_MAX_TIME`: How long the startup "health checks" should run (default to `300` seconds).
 - `CN_WAIT_SLEEP_DURATION`: Delay between startup "health checks" (default to `10` seconds).
 - `CN_MAX_RAM_PERCENTAGE`: Value passed to Java option `-XX:MaxRAMPercentage`.
-- `CN_PERSISTENCE_TYPE`: Persistence backend being used (one of `sql`, `couchbase`, or `hybrid`; default to `sql`).
+- `CN_PERSISTENCE_TYPE`: Persistence backend being used (one of `sql`, `couchbase`, `spanner`, or `hybrid`; default to `sql`).
 - `CN_HYBRID_MAPPING`: Specify data mapping for each persistence (default to `"{}"`). Note this environment only takes effect when `CN_PERSISTENCE_TYPE` is set to `hybrid`. See [hybrid mapping](#hybrid-mapping) section for details.
 - `CN_COUCHBASE_URL`: Address of Couchbase server (default to `localhost`).
 - `CN_COUCHBASE_USER`: Username of Couchbase server (default to `admin`).
@@ -114,8 +114,6 @@ The following key-value pairs are the defaults:
     "persistence_log_level": "INFO",
     "persistence_duration_log_target": "FILE",
     "persistence_duration_log_level": "INFO",
-    "ldap_stats_log_target": "FILE",
-    "ldap_stats_log_level": "INFO",
     "script_log_target": "FILE",
     "script_log_level": "INFO"
 }

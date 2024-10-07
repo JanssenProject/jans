@@ -125,8 +125,6 @@ def configure_logging():
         "persistence_log_level": "INFO",
         "persistence_duration_log_target": "FILE",
         "persistence_duration_log_level": "INFO",
-        "ldap_stats_log_target": "FILE",
-        "ldap_stats_log_level": "INFO",
         "script_log_target": "FILE",
         "script_log_level": "INFO",
         "log_prefix": "",
@@ -170,7 +168,6 @@ def configure_logging():
         "scim_log_target": "FILE",
         "persistence_log_target": "JANS_SCIM_PERSISTENCE_FILE",
         "persistence_duration_log_target": "JANS_SCIM_PERSISTENCE_DURATION_FILE",
-        "ldap_stats_log_target": "JANS_SCIM_PERSISTENCE_LDAP_STATISTICS_FILE",
         "script_log_target": "JANS_SCIM_SCRIPT_LOG_FILE",
     }
     for key, value in file_aliases.items():

@@ -129,8 +129,6 @@ The following key-value pairs are the defaults:
     "persistence_log_level": "INFO",
     "persistence_duration_log_target": "FILE",
     "persistence_duration_log_level": "INFO",
-    "ldap_stats_log_target": "FILE",
-    "ldap_stats_log_level": "INFO",
     "script_log_target": "FILE",
     "script_log_level": "INFO",
     "audit_log_target": "FILE",
@@ -218,4 +216,3 @@ i.e. `http://container:9093/metrics`.
 
 Note that Prometheus JMX exporter uses pre-defined config file (see `conf/prometheus-config.yaml`).
 To customize the config, mount custom config file to `/opt/prometheus/prometheus-config.yaml` inside the container.
-
