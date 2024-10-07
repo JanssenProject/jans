@@ -14,7 +14,7 @@ use cedar_policy::{EntityId, EntityTypeName, EntityUid};
 use pretty_assertions::assert_eq;
 use serde_json::{Map, Value};
 
-use crate::models::token_data::{GetTokenClaimValue, TokenClaim};
+use crate::models::token_data::{GetTokenClaimValue, TokenPayload};
 
 use super::create::*;
 
@@ -78,7 +78,7 @@ fn successful_scenario() {
         "entity_uid_key": "unique_id"
     });
 
-    let claim: TokenClaim = serde_json::from_value(json).unwrap();
+    let claim: TokenPayload = serde_json::from_value(json).unwrap();
 
     let parents = vec![
         EntityUid::from_type_name_and_id(
@@ -146,7 +146,7 @@ fn get_token_claim_type_string_error() {
         "string_key": 123,
     });
 
-    let claim: TokenClaim = serde_json::from_value(json.clone()).unwrap();
+    let claim: TokenPayload = serde_json::from_value(json.clone()).unwrap();
 
     let entity_creation_error = metadata
         .create_entity(&claim, HashSet::new())
@@ -199,7 +199,7 @@ fn get_token_claim_cedar_type_error() {
         "string_key": "string value",
     });
 
-    let claim: TokenClaim = serde_json::from_value(json.clone()).unwrap();
+    let claim: TokenPayload = serde_json::from_value(json.clone()).unwrap();
 
     let entity_creation_error = metadata
         .create_entity(&claim, HashSet::new())
@@ -220,7 +220,7 @@ fn create_entity_cedar_type_error() {
         "string_key": "string value",
     });
 
-    let claim: TokenClaim = serde_json::from_value(json.clone()).unwrap();
+    let claim: TokenPayload = serde_json::from_value(json.clone()).unwrap();
 
     let entity_creation_error = metadata
         .create_entity(&claim, HashSet::new())

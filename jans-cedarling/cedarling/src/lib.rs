@@ -38,7 +38,7 @@ use models::app_types;
 pub use models::config::*;
 pub use models::log_entry::LogEntry;
 use models::log_entry::LogType;
-pub use models::request::Request;
+pub use models::request::{Request, ResourceData};
 
 /// Errors that can occur during initialization Cedarling.
 #[derive(Debug, thiserror::Error)]
@@ -105,7 +105,7 @@ impl Cedarling {
 
     /// Authorize request
     /// makes authorization decision based on the [`Request`]
-    pub fn authorize(&self, request: &Request) -> Result<(), AuthorizeError> {
+    pub fn authorize(&self, request: Request) -> Result<cedar_policy::Response, AuthorizeError> {
         self.authz.authorize(request)
     }
 }
