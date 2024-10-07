@@ -83,10 +83,10 @@ impl Cedarling {
     fn pop_logs(&self) -> PyResult<Vec<PyObject>> {
         let logs = self.inner.pop_logs();
         Python::with_gil(|py| -> PyResult<Vec<PyObject>> {
-            Ok(logs
+            logs
                 .iter()
                 .map(|entry| log_entry_to_py(py, entry))
-                .collect::<PyResult<Vec<PyObject>>>()?)
+                .collect::<PyResult<Vec<PyObject>>>()
         })
     }
 
@@ -114,10 +114,9 @@ impl Cedarling {
     // this function will be finished in next issue
     pub fn authorize(&self, request: &Request) -> PyResult<()> {
         let cedarling_request: cedarling::Request = request.into();
-        Ok(self
-            .inner
+        self.inner
             .authorize(&cedarling_request)
-            .map_err(|err| PyValueError::new_err(err.to_string()))?)
+            .map_err(|err| PyValueError::new_err(err.to_string()))
     }
 }
 

@@ -36,7 +36,7 @@ fn sort_json(value: &mut Value) {
 
         *map = sorted_map;
     } else if let Value::Array(arr) = value {
-        arr.sort_by(|a, b| a.to_string().cmp(&b.to_string())); // Sort the array elements
+        arr.sort_by_key(|a| a.to_string()); // Sort the array elements
 
         for item in arr.iter_mut() {
             sort_json(item); // Sort each element in the array

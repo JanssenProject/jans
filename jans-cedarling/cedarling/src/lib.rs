@@ -106,7 +106,7 @@ impl Cedarling {
     /// Authorize request
     /// makes authorization decision based on the [`Request`]
     pub fn authorize(&self, request: &Request) -> Result<(), AuthorizeError> {
-        Ok(self.authz.authorize(request)?)
+        self.authz.authorize(request)
     }
 }
 

@@ -28,7 +28,7 @@ pub enum AccessTokenEntitiesError {
 pub fn create_access_token_entities(
     data: &TokenClaim,
 ) -> Result<Vec<cedar_policy::Entity>, AccessTokenEntitiesError> {
-    let mut entities = Vec::new();
-    entities.push(meta::WorkloadEntityMeta.create_entity(data, HashSet::new())?);
+    let entities = vec![meta::WorkloadEntityMeta.create_entity(data, HashSet::new())?];
+
     Ok(entities)
 }

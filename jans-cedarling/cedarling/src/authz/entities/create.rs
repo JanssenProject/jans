@@ -43,8 +43,8 @@ impl<'a> EntityMetadata<'a> {
         parents: HashSet<EntityUid>,
     ) -> Result<cedar_policy::Entity, CedarPolicyCreateTypeError> {
         create_entity(
-            &self.entity_type,
-            &self.entity_id_data_key,
+            self.entity_type,
+            self.entity_id_data_key,
             self.meta_attributes.as_slice(),
             data,
             parents,
@@ -116,15 +116,15 @@ pub fn create_entity(
         .map(|attr| {
             let cedar_exp = attr
                 .cedar_policy_type
-                .token_attribute_to_cedar_exp(attr.token_claims_key, &data)?;
+                .token_attribute_to_cedar_exp(attr.token_claims_key, data)?;
             Ok((attr.attribute_name.to_string(), cedar_exp))
         })
         .collect::<Result<Vec<(String, RestrictedExpression)>, CedarPolicyCreateTypeError>>()?;
 
     let attrs: HashMap<String, RestrictedExpression> = HashMap::from_iter(attr_vec);
 
-    Ok(cedar_policy::Entity::new(uid, attrs, parents)
-        .map_err(|err| CedarPolicyCreateTypeError::CreateEntity(entity_type.to_string(), err))?)
+    cedar_policy::Entity::new(uid, attrs, parents)
+        .map_err(|err| CedarPolicyCreateTypeError::CreateEntity(entity_type.to_string(), err))
 }
 
 /// Describe errors on creating entity

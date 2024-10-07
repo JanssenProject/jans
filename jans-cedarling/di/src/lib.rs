@@ -31,10 +31,8 @@ use std::{
 /// There are two possible ways to handle the situation when your container
 /// cannot return a value of specified type:
 ///
-/// 1. Do not implement [`DependencySupplier`] for the type. It often requires
-/// some type-level manipulations.
-/// 2. Runtime panic. Be careful in this case: check whether you add your type
-/// to the container.
+/// 1. Do not implement [`DependencySupplier`] for the type. It often requires some type-level manipulations.
+/// 2. Runtime panic. Be careful in this case: check whether you add your type to the container.
 ///
 /// A concrete solution is left to a particular implementation.
 pub trait DependencySupplier<Value> {
