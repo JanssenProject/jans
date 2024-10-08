@@ -418,7 +418,16 @@ nav:
       - Using CLI/TUI: janssen-server/usermgmt/usermgmt-cli-tui.md
       - Using jans-link: janssen-server/usermgmt/usermgmt-jans-link.md
 - Cedarling:
-  - Authorization Using Cedarling: 'cedarling/cedarling.md'
+  - Overview: 'cedarling/cedarling-overview.md'
+  - Authz: 'cedarling/cedarling-authz.md'
+  - Policy Store: 'cedarling/cedarling-policy-store.md'
+  - JWT: 'cedarling/cedarling-jwt.md'
+  - Logs: 'cedarling/cedarling-logs.md'
+  - Properties: 'cedarling/cedarling-properties.md'
+  - Python: 'cedarling/cedarling-python.md'
+  - WASM: 'cedarling/cedarling-wasm.md'
+  - iOS: 'cedarling/cedarling-ios.md'
+  - Android: 'cedarling/cedarling-android.md'
 - Agama:
   - Introduction: agama/introduction.md
   - Language reference: agama/language-reference.md
