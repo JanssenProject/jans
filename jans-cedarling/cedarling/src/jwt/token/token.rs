@@ -5,7 +5,7 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-use super::{AccessToken, IdToken, TransactionToken, UserInfoToken};
+use super::{AccessToken, Error, IdToken, TransactionToken, UserInfoToken};
 use jsonwebtoken::{decode, Algorithm, DecodingKey, Validation};
 
 /// Represents the different types of tokens that the system supports.
@@ -20,7 +20,6 @@ use jsonwebtoken::{decode, Algorithm, DecodingKey, Validation};
 /// - `IdToken`: Contains user identity claims. Often used to authenticate users in OpenID Connect flows.
 /// - `TransactionToken`: Used to track and verify specific transactions, ensuring that the transaction is valid.
 /// - `UserInfoToken`: Holds additional user details, often retrieved post-authentication to provide more user information.
-
 pub enum TokenKind {
     /// Authorizes access to protected resources.
     AccessToken,
@@ -71,7 +70,6 @@ impl Token {
     /// - Returns an error if the token is invalid, expired, or if the provided algorithm is not implemented.
     ///
     /// # TODO
-    /// - Implement custom error handling using the `thiserror` crate for more detailed error reporting.
     /// - Implement automatically obtaining the `decoding_key` from provided IDPs.
     /// - Implement custom validation for each `TokenKind`
     pub fn validate(
@@ -79,34 +77,43 @@ impl Token {
         kind: TokenKind,
         decoding_key: &Vec<u8>,
         algorithm: Algorithm,
-    ) -> Result<Self, Box<dyn std::error::Error>> {
+    ) -> Result<Self, Error> {
         // Define validation parameters
         let mut validation = Validation::new(algorithm);
         validation.validate_exp = true; // Ensure that the token hasn't expired
 
         // Decode key
         let decoding_key = match algorithm {
-            Algorithm::RS256 => DecodingKey::from_rsa_pem(decoding_key)?,
+            Algorithm::RS256 => {
+                DecodingKey::from_rsa_pem(decoding_key).map_err(|e| Error::KeyError(e))?
+            },
             Algorithm::HS256 => DecodingKey::from_secret(decoding_key),
-            _ => return Err("Algorithim not implemented".into()),
+            _ => return Err(Error::UnsupportedAlgorithm(algorithm)),
         };
 
         // Decode and validate token
         let token = match kind {
             TokenKind::AccessToken => {
-                let data = decode::<AccessToken>(&token, &decoding_key, &validation)?;
+                // TODO: set the audience programatically
+                validation.set_audience(&vec!["https://auth.myapp.com"]);
+
+                let data = decode::<AccessToken>(&token, &decoding_key, &validation)
+                    .map_err(|e| Error::ValidationError(e))?;
                 Token::AccessToken(data.claims)
             },
             TokenKind::IdToken => {
-                let data = decode::<IdToken>(&token, &decoding_key, &validation)?;
+                let data = decode::<IdToken>(&token, &decoding_key, &validation)
+                    .map_err(|e| Error::ValidationError(e))?;
                 Token::IdToken(data.claims)
             },
             TokenKind::TransactionToken => {
-                let data = decode::<TransactionToken>(&token, &decoding_key, &validation)?;
+                let data = decode::<TransactionToken>(&token, &decoding_key, &validation)
+                    .map_err(|e| Error::ValidationError(e))?;
                 Token::TransactionToken(data.claims)
             },
             TokenKind::UserInfoToken => {
-                let data = decode::<UserInfoToken>(&token, &decoding_key, &validation)?;
+                let data = decode::<UserInfoToken>(&token, &decoding_key, &validation)
+                    .map_err(|e| Error::ValidationError(e))?;
                 Token::UserInfoToken(data.claims)
             },
         };
