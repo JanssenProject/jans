@@ -38,7 +38,6 @@ All methods return `true`/`false`, the server issues an error if this response i
 
 If parameters is not present then error has to be created and `false` returned. If all is good script has to
 return `true`.
-
 ### Objects
 
 | Object name               | Object description                                                                                                                                                                                                               |
