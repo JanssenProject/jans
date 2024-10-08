@@ -9,6 +9,7 @@
 ///! Each token serves a specific purpose, such as authentication, authorization,
 ///! user identity management, and transaction tracking.
 mod access_token;
+mod error;
 mod id_token;
 mod token;
 mod transaction_token;
@@ -18,6 +19,7 @@ mod user_info_token;
 mod tests;
 
 pub use access_token::*;
+pub use error::*;
 pub use id_token::*;
 pub use token::*;
 pub use transaction_token::*;
