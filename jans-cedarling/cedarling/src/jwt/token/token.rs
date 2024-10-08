@@ -93,31 +93,71 @@ impl Token {
 
         // Decode and validate token
         let token = match kind {
-            TokenKind::AccessToken => {
-                // TODO: set the audience programatically
-                validation.set_audience(&vec!["https://auth.myapp.com"]);
-
-                let data = decode::<AccessToken>(&token, &decoding_key, &validation)
-                    .map_err(|e| Error::ValidationError(e))?;
-                Token::AccessToken(data.claims)
-            },
-            TokenKind::IdToken => {
-                let data = decode::<IdToken>(&token, &decoding_key, &validation)
-                    .map_err(|e| Error::ValidationError(e))?;
-                Token::IdToken(data.claims)
-            },
+            TokenKind::AccessToken => Self::validate_access_token(token, decoding_key, validation)?,
+            TokenKind::IdToken => Self::validate_id_token(token, decoding_key, validation)?,
             TokenKind::TransactionToken => {
-                let data = decode::<TransactionToken>(&token, &decoding_key, &validation)
-                    .map_err(|e| Error::ValidationError(e))?;
-                Token::TransactionToken(data.claims)
+                Self::validate_transaction_token(token, decoding_key, validation)?
             },
             TokenKind::UserInfoToken => {
-                let data = decode::<UserInfoToken>(&token, &decoding_key, &validation)
-                    .map_err(|e| Error::ValidationError(e))?;
-                Token::UserInfoToken(data.claims)
+                Self::validate_userinfo_token(token, decoding_key, validation)?
             },
         };
 
         Ok(token)
+    }
+
+    fn validate_access_token(
+        token: &str,
+        decoding_key: DecodingKey,
+        mut validation: Validation,
+    ) -> Result<Token, Error> {
+        // Define validation parameters
+        validation.set_required_spec_claims(&vec!["aud", "exp", "iat", "iss", "jti", "scope"]);
+        validation.set_audience(&vec!["https://auth.myapp.com"]);
+        validation.set_issuer(&vec!["https://auth.myapp.com"]);
+
+        let data = decode::<AccessToken>(&token, &decoding_key, &validation)
+            .map_err(|e| Error::ValidationError(e))?;
+
+        Ok(Token::AccessToken(data.claims))
+    }
+
+    fn validate_id_token(
+        token: &str,
+        decoding_key: DecodingKey,
+        validation: Validation,
+    ) -> Result<Token, Error> {
+        // TODO: Define validation parameters for `ValidateIdToken`
+
+        let data = decode::<IdToken>(&token, &decoding_key, &validation)
+            .map_err(|e| Error::ValidationError(e))?;
+
+        Ok(Token::IdToken(data.claims))
+    }
+
+    fn validate_userinfo_token(
+        token: &str,
+        decoding_key: DecodingKey,
+        validation: Validation,
+    ) -> Result<Token, Error> {
+        // TODO: Define validation parameters for `UserInfoToken`
+
+        let data = decode::<UserInfoToken>(&token, &decoding_key, &validation)
+            .map_err(|e| Error::ValidationError(e))?;
+
+        Ok(Token::UserInfoToken(data.claims))
+    }
+
+    fn validate_transaction_token(
+        token: &str,
+        decoding_key: DecodingKey,
+        validation: Validation,
+    ) -> Result<Token, Error> {
+        // TODO: Define validation parameters for `TransactionToken`
+
+        let data = decode::<TransactionToken>(&token, &decoding_key, &validation)
+            .map_err(|e| Error::ValidationError(e))?;
+
+        Ok(Token::TransactionToken(data.claims))
     }
 }

@@ -5,20 +5,16 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-//! This module tests the logic for validating `RSA` encrypted `AccessToken`s
-//!
-//! # TODO:
-//! - add test for expired tokens
+//! This contains tests for validating `RSA` encrypted `AccessToken`s
 
 use std::error::Error;
 use std::time::{SystemTime, UNIX_EPOCH};
 
-use jsonwebtoken::{
-    decode, encode, Algorithm, DecodingKey, EncodingKey, Header, TokenData, Validation,
-};
+use jsonwebtoken::{encode, Algorithm, EncodingKey, Header};
 use openssl::rsa::Rsa;
+use serde::Serialize;
 
-use crate::jwt::token::AccessToken;
+use crate::jwt::token::{AccessToken, Token, TokenKind};
 
 fn generate_rsa_key() -> Result<(Vec<u8>, Vec<u8>), Box<dyn Error>> {
     let private = Rsa::generate(2048)?;
@@ -26,20 +22,6 @@ fn generate_rsa_key() -> Result<(Vec<u8>, Vec<u8>), Box<dyn Error>> {
     let private_key = private.private_key_to_pem()?;
 
     Ok((private_key, public_key))
-}
-
-fn create_access_token_claims() -> Result<AccessToken, Box<dyn Error>> {
-    let now = SystemTime::now();
-    let iat = now.duration_since(UNIX_EPOCH)?.as_secs();
-    let exp = now.duration_since(UNIX_EPOCH)?.as_secs() + 3600; // Set expiration 1 hour from now
-    Ok(AccessToken {
-        aud: "https://auth.myapp.com".to_string(),
-        exp: exp.try_into()?,
-        iat: iat.try_into()?,
-        iss: "https://auth.myapp.com".to_string(),
-        jti: "1".to_string(),
-        scope: "scope".to_string(),
-    })
 }
 
 fn create_jwt(claims: &AccessToken, private_key: &Vec<u8>) -> Result<String, Box<dyn Error>> {
@@ -52,33 +34,81 @@ fn create_jwt(claims: &AccessToken, private_key: &Vec<u8>) -> Result<String, Box
     Ok(token)
 }
 
-fn validate_jwt(
-    token: &str,
-    public_key: &Vec<u8>,
-) -> Result<TokenData<AccessToken>, Box<dyn Error>> {
-    // Define the validation parameters (e.g., algorithm, claims)
-    let mut validation = Validation::new(Algorithm::RS256);
-    validation.validate_exp = true; // Ensure that the token hasn't expired
-    validation.set_audience(&vec!["https://auth.myapp.com".to_string()]); // Set expected audience
+#[test]
+fn can_validate_access_token_with_correct_claims() {
+    let (private_key, public_key) = generate_rsa_key().expect("should generate keys");
 
-    let decoding_key = DecodingKey::from_rsa_pem(public_key)?;
+    let now = SystemTime::now();
+    let iat = now.duration_since(UNIX_EPOCH).unwrap().as_secs();
+    let exp = now.duration_since(UNIX_EPOCH).unwrap().as_secs() + 3600; // Set expiration 1 hour from now
+    let claims = AccessToken {
+        aud: "https://auth.myapp.com".to_string(),
+        exp: exp.try_into().expect("should convert `u64` to `i64"),
+        iat: iat.try_into().expect("should convert `u64` to `i64"),
+        iss: "https://auth.myapp.com".to_string(),
+        jti: "1".to_string(),
+        scope: "scope".to_string(),
+    };
 
-    // Verify the token using the public key
-    let token_data = decode::<AccessToken>(&token, &decoding_key, &validation)?;
+    let token = create_jwt(&claims, &private_key).expect("should create token");
 
-    Ok(token_data)
+    Token::validate(
+        &token,
+        TokenKind::AccessToken,
+        &public_key,
+        Algorithm::RS256,
+    )
+    .unwrap();
 }
 
 #[test]
-fn can_validate_access_token() {
+#[should_panic]
+fn returns_error_on_invalid_token() {
+    let (_, public_key) = generate_rsa_key().expect("should generate keys");
+
+    let invalid_token = "invalid_token";
+    Token::validate(
+        &invalid_token,
+        TokenKind::AccessToken,
+        &public_key,
+        Algorithm::RS256,
+    )
+    .unwrap();
+}
+
+#[test]
+#[should_panic]
+fn returns_error_on_incomplete_claims() {
     let (private_key, public_key) = generate_rsa_key().expect("should generate keys");
 
-    let claims = create_access_token_claims().expect("should create claims");
-    let token = create_jwt(&claims, &private_key).expect("should create jwt");
+    #[derive(Serialize)]
+    struct TokenWithMissingClaims {
+        pub aud: String,
+        pub exp: i64,
+        pub iat: i64,
+        pub iss: String,
+    }
 
-    validate_jwt(&token, &public_key).unwrap();
-    assert!(validate_jwt(&token, &public_key).is_ok());
+    let now = SystemTime::now();
+    let iat = now.duration_since(UNIX_EPOCH).unwrap().as_secs();
+    let exp = now.duration_since(UNIX_EPOCH).unwrap().as_secs() + 3600; // Set expiration 1 hour from now
+    let claims = TokenWithMissingClaims {
+        aud: "https://auth.myapp.com".to_string(),
+        exp: exp.try_into().expect("should convert `u64` to `i64"),
+        iat: iat.try_into().expect("should convert `u64` to `i64"),
+        iss: "https://auth.myapp.com".to_string(),
+    };
 
-    let wrong_token = "wrong_token";
-    assert!(validate_jwt(&wrong_token, &public_key).is_err());
+    // let token = create_jwt(&claims, &private_key).expect("should create token");
+    let header = Header::new(Algorithm::RS256);
+    let encoding_key = EncodingKey::from_rsa_pem(&private_key).expect("should read encoding key");
+    let token = encode(&header, &claims, &encoding_key).expect("should encode token");
+
+    Token::validate(
+        &token,
+        TokenKind::AccessToken,
+        &public_key,
+        Algorithm::RS256,
+    )
+    .unwrap();
 }

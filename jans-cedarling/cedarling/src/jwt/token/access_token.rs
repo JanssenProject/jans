@@ -21,7 +21,7 @@ use serde::{Deserialize, Serialize};
 /// - `iat`: The issued-at time (in seconds since the Unix epoch) when the token was created.
 /// - `iss`: The issuer of the token, typically a URL representing the authorization server.
 /// - `jti`: A unique identifier for the token, often used to prevent token reuse.
-/// - `scope`: The scope of the access granted by the token, typically a space-separated string representing permissions.
+/// - `scope`: The scope of the access granted by the token.
 #[derive(Deserialize, Serialize, Debug, PartialEq)]
 pub struct AccessToken {
     /// The intended recipient of the token, usually a service or API identifier.
@@ -39,6 +39,6 @@ pub struct AccessToken {
     /// A unique identifier for the token.
     pub jti: String,
 
-    /// The permissions or scope granted by the token, typically a space-separated list.
+    /// The permissions or scope granted by the token.
     pub scope: String,
 }
