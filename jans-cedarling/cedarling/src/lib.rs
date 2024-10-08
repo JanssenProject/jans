@@ -15,7 +15,7 @@
 
 mod authz;
 mod init;
-mod jwt;
+pub mod jwt;
 mod lock;
 mod log;
 mod models;
