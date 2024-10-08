@@ -8826,14 +8826,14 @@
 <ol>
 <li>
 <p>Configure Terraform to install the required plugins for the <code>Janssen provider</code>. Add this to your <code>versions.tf</code> file:</p>
-<div class="highlight"><pre><span></span><code>terraform {
- required_providers {
-    jans = {
-    source = &quot;JanssenProject/jans&quot;
-    version = &quot;0.7.3&quot;
-    }
- }
-}
+<div class="highlight"><pre><span></span><code>terraform <span class="o">{</span>
+ required_providers <span class="o">{</span>
+    <span class="nv">jans</span> <span class="o">=</span> <span class="o">{</span>
+    <span class="nb">source</span> <span class="o">=</span> <span class="s2">&quot;JanssenProject/jans&quot;</span>
+    <span class="nv">version</span> <span class="o">=</span> <span class="s2">&quot;1.1.5&quot;</span> <span class="c1">#update based on your targeted version</span>
+    <span class="o">}</span>
+ <span class="o">}</span>
+<span class="o">}</span>
 </code></pre></div>
 </li>
 <li>
@@ -8872,7 +8872,7 @@
     <div class="highlight"><pre><span></span><code>variable &quot;jans_fqdn&quot; {
     description = &quot;Jans FQQN&quot;
     type        = string
-    default     = &quot;https://demoexample.jans.org&quot; #Replace with https://&lt;YOUR_DOMAIN&gt;
+    default     = &quot;https://demoexample.jans.io&quot; #Replace with https://&lt;YOUR_DOMAIN&gt;
     }  
 
     variable &quot;jans_client_id&quot; {
@@ -8962,7 +8962,7 @@ logging_level = &quot;TRACE&quot;
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-09-27T12:12:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-08T11:40:38+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-08</span>
       
         <br>
         Created:

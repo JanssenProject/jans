@@ -9027,31 +9027,42 @@ This image is for testing and development purposes only. Use Janssen <a href="ht
 </tbody>
 </table>
 <h2 id="how-to-run">How to run<a class="headerlink" href="#how-to-run" title="Permanent link">#</a></h2>
-<p>Download the compose file </p>
+<p>Download the compose file of your chosen persistence from mysql, postgres or ldap </p>
 <div class="highlight"><pre><span></span><code>wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/jans-mysql-compose.yml 
+wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/jans-postgres-compose.yml 
+wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/jans-ldap-compose.yml 
 </code></pre></div>
-<p>Download the the script files </p>
+<p>Download the script files </p>
 <div class="highlight"><pre><span></span><code>wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/up.sh
 wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/down.sh
 wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/clean.sh
 </code></pre></div>
+<p>Give execute permission to the scripts
+<code>chmod u+x up.sh down.sh clean.sh</code></p>
 <p>This docker compose file runs two containers, the janssen monolith container and mysql container.
 To start the containers.</p>
-<div class="highlight"><pre><span></span><code>./up.sh
+<div class="highlight"><pre><span></span><code>./up.sh <span class="c1">#You can pass mysql|postgres|ldap as an argument to the script. If you don&#39;t pass any, it will default to mysql.</span>
 </code></pre></div>
 <p>To view the containers running</p>
 <div class="highlight"><pre><span></span><code>docker compose -f jans-mysql-compose.yml ps
 </code></pre></div>
 <p>To stop the containers.</p>
-<div class="highlight"><pre><span></span><code>./down.sh
+<div class="highlight"><pre><span></span><code>./down.sh <span class="c1">#You can pass mysql|postgres|ldap as an argument to the script. If you don&#39;t pass any, it will default to mysql.</span>
 </code></pre></div>
 <h2 id="configure-janssen-server">Configure Janssen Server<a class="headerlink" href="#configure-janssen-server" title="Permanent link">#</a></h2>
-<div class="highlight"><pre><span></span><code>docker compose -f jans-mysql-compose.yml <span class="nb">exec</span> jans sh <span class="c1">#This opens a bash terminal in the running container</span>
-
-/opt/jans/jans-cli/config-cli.py <span class="c1">#configure using the config-cli</span>
-
-/opt/jans/jans-cli/scim-cli.py <span class="c1">#configure using the scim-cli</span>
-</code></pre></div>
+<ol>
+<li>Access the Docker container shell using:
+    <div class="highlight"><pre><span></span><code>docker compose -f jans-mysql-compose.yml <span class="nb">exec</span> jans /bin/bash <span class="c1">#This opens a bash terminal in the running container</span>
+</code></pre></div></li>
+<li>
+<p>You can grab <code>client_id</code> and <code>client_pw</code>(secret) pairs and other values from <code>setup.properties</code> or <code>/opt/jans/jans-setup/setup.properties.last</code></p>
+</li>
+<li>
+<p>Use the CLI tools located under <code>/opt/jans/jans-cli/</code> to configure Gluu flex as needed. For example you can run the <a href="https://docs.jans.io/head/admin/config-guide/config-tools/jans-tui/">TUI</a>:
+    <div class="highlight"><pre><span></span><code>python3 /opt/jans/jans-cli/config-cli-tui.py
+</code></pre></div></p>
+</li>
+</ol>
 <h2 id="access-endpoints-externally">Access endpoints externally<a class="headerlink" href="#access-endpoints-externally" title="Permanent link">#</a></h2>
 <p>Add to your <code>/etc/hosts</code> file the ip domain record which should be the ip of the instance docker is installed at and the domain used in the env above <code>CN_HOSTNAME</code>.</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># For-example</span>
@@ -9060,7 +9071,7 @@ To start the containers.</p>
 <p>After adding the record you can hit endpoints such as https://demoexample.jans.io/.well-known/openid-configuration</p>
 <h2 id="clean-up">Clean up<a class="headerlink" href="#clean-up" title="Permanent link">#</a></h2>
 <p>Remove setup and volumes</p>
-<div class="highlight"><pre><span></span><code>./clean.sh
+<div class="highlight"><pre><span></span><code>./clean.sh <span class="c1">#You can pass mysql|postgres|ldap as an argument to the script. If you don&#39;t pass any, it will default to mysql.</span>
 </code></pre></div>
 
   <hr>
@@ -9068,7 +9079,7 @@ To start the containers.</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-09-27T12:12:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-08T11:40:38+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-08</span>
       
         <br>
         Created:
