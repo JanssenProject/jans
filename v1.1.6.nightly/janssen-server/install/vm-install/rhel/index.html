@@ -249,7 +249,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../../../cedarling/cedarling/" class="md-tabs__link">
+      <a href="../../../../cedarling/cedarling-overview/" class="md-tabs__link">
         Cedarling
       </a>
     </li>
@@ -7582,6 +7582,24 @@
         
           
         
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
       
       
         <label class="md-nav__link" for="__nav_2">
@@ -7602,8 +7620,134 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../../cedarling/cedarling/" class="md-nav__link">
-        Authorization Using Cedarling
+      <a href="../../../../cedarling/cedarling-overview/" class="md-nav__link">
+        Overview
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../cedarling/cedarling-authz/" class="md-nav__link">
+        Authz
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../cedarling/cedarling-policy-store/" class="md-nav__link">
+        Policy Store
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../cedarling/cedarling-jwt/" class="md-nav__link">
+        JWT
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../cedarling/cedarling-logs/" class="md-nav__link">
+        Logs
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../cedarling/cedarling-properties/" class="md-nav__link">
+        Properties
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../cedarling/cedarling-python.md" class="md-nav__link">
+        Python
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../cedarling/cedarling-wasm.md" class="md-nav__link">
+        WASM
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../cedarling/cedarling-ios.md" class="md-nav__link">
+        iOS
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../cedarling/cedarling-android.md" class="md-nav__link">
+        Android
       </a>
     </li>
   
@@ -8778,26 +8922,26 @@ sudo yum -y module enable mod_auth_openidc
 <li>Download the release package from the Github Janssen Project
   <a href="https://github.com/JanssenProject/jans/releases">Releases</a></li>
 </ul>
-<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/v1.1.6.nightly/jans-1.1.6.nightly-el8.x86_64.rpm -P ~/
+<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-el8.x86_64.rpm -P ~/
 </code></pre></div>
 <ul>
 <li>
 <p>Verify integrity of the downloaded package using published <code>sha256sum</code>.</p>
 <p>Download <code>sha256sum</code> file for the package</p>
-<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/v1.1.6.nightly/jans-1.1.6.nightly-el8.x86_64.rpm.sha256sum -P ~/
+<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-el8.x86_64.rpm.sha256sum -P ~/
 </code></pre></div>
 <p>Check the hash if it is matching.</p>
-<div class="highlight"><pre><span></span><code>sha256sum -c jans-1.1.6.nightly-el8.x86_64.rpm.sha256sum
+<div class="highlight"><pre><span></span><code>sha256sum -c jans-replace-janssen-version-el8.x86_64.rpm.sha256sum
 </code></pre></div>
 <p>Output similar to below should confirm the integrity of the downloaded package.</p>
-<div class="highlight"><pre><span></span><code>jans-1.1.6.nightly-el8.x86_64.rpm: OK
+<div class="highlight"><pre><span></span><code>jans-replace-janssen-version-el8.x86_64.rpm: OK
 </code></pre></div>
 </li>
 <li>
 <p>Install the package</p>
 </li>
 </ul>
-<div class="highlight"><pre><span></span><code>sudo yum install ~/jans-1.1.6.nightly-el8.x86_64.rpm
+<div class="highlight"><pre><span></span><code>sudo yum install ~/jans-replace-janssen-version-el8.x86_64.rpm
 </code></pre></div>
 <h2 id="run-the-setup-script">Run the setup script<a class="headerlink" href="#run-the-setup-script" title="Permanent link">#</a></h2>
 <ul>

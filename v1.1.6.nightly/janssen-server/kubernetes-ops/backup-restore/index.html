@@ -249,7 +249,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../../cedarling/cedarling/" class="md-tabs__link">
+      <a href="../../../cedarling/cedarling-overview/" class="md-tabs__link">
         Cedarling
       </a>
     </li>
@@ -7561,6 +7561,24 @@
         
           
         
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
       
       
         <label class="md-nav__link" for="__nav_2">
@@ -7581,8 +7599,134 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../cedarling/cedarling/" class="md-nav__link">
-        Authorization Using Cedarling
+      <a href="../../../cedarling/cedarling-overview/" class="md-nav__link">
+        Overview
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cedarling/cedarling-authz/" class="md-nav__link">
+        Authz
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cedarling/cedarling-policy-store/" class="md-nav__link">
+        Policy Store
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cedarling/cedarling-jwt/" class="md-nav__link">
+        JWT
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cedarling/cedarling-logs/" class="md-nav__link">
+        Logs
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cedarling/cedarling-properties/" class="md-nav__link">
+        Properties
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cedarling/cedarling-python.md" class="md-nav__link">
+        Python
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cedarling/cedarling-wasm.md" class="md-nav__link">
+        WASM
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cedarling/cedarling-ios.md" class="md-nav__link">
+        iOS
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../cedarling/cedarling-android.md" class="md-nav__link">
+        Android
       </a>
     </li>
   
@@ -8749,7 +8893,7 @@
 </code></pre></div></p>
 </li>
 </ol>
-<p>Keep note of the chart version. For example: <code>1.1.6.nightly</code></p>
+<p>Keep note of the chart version. For example: <code>replace-janssen-version</code></p>
 <h3 id="manual-restore">Manual Restore<a class="headerlink" href="#manual-restore" title="Permanent link">#</a></h3>
 <ol>
 <li>
@@ -8771,7 +8915,7 @@
 <p>Insall jans using the override or user supplied values with the same chart version:</p>
 </li>
 </ol>
-<div class="highlight"><pre><span></span><code>helm install &lt;release-name&gt; janssen/janssen -f values.yaml --version<span class="o">=</span>&lt;1.1.6.nightly&gt; -n &lt;namespace&gt;
+<div class="highlight"><pre><span></span><code>helm install &lt;release-name&gt; janssen/janssen -f values.yaml --version<span class="o">=</span>&lt;replace-janssen-version&gt; -n &lt;namespace&gt;
 </code></pre></div>
 <h2 id="automatic-backup-and-restore">Automatic Backup and Restore<a class="headerlink" href="#automatic-backup-and-restore" title="Permanent link">#</a></h2>
 <p>There are several tools that helps in automatic backups and restore, like <a href="https://www.kasten.io/kubernetes/use-cases/backup-restore">Kasten K10</a>.</p>
