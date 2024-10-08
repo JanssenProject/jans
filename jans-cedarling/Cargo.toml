@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["bindings/*", "cedarling", "sparkv"]
+members = ["bindings/*", "cedarling", "di", "sparkv"]
 
 [workspace.dependencies]
 serde = { version = "1.0", features = ["derive"] }
@@ -8,6 +8,7 @@ serde_json = "1.0"
 thiserror = "1.0"
 sparkv = { path = "sparkv" }
 cedarling = { path = "cedarling" }
+di = { path = "di" }
 
 
 [profile.release]
