@@ -19,7 +19,7 @@ use pyo3::prelude::*;
 ///
 /// Example
 /// -------
-/// ```python
+/// ```
 /// # Disable logging
 /// config = DisabledLoggingConfig()
 /// ```

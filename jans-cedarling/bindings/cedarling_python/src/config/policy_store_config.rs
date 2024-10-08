@@ -23,7 +23,7 @@ use crate::config::policy_store_source::PolicyStoreSource;
 ///
 /// Example
 /// -------
-/// ```python
+/// ```
 /// # Create a PolicyStoreConfig with a source and store_id
 /// source = PolicyStoreSource(json='{...')
 /// config = PolicyStoreConfig(source=source, store_id="store1")

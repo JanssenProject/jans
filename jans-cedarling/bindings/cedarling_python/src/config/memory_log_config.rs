@@ -18,7 +18,7 @@ use pyo3::prelude::*;
 ///
 /// Example
 /// -------
-/// ```python
+/// ```
 /// # Initialize with default TTL
 /// config = MemoryLogConfig()              
 /// # Initialize with custom TTL

@@ -72,6 +72,6 @@ pub(crate) type Logger = Arc<LogStrategy>;
 
 /// Initialize logger.
 /// entry point for initialize logger
-pub(crate) fn init_logger(config: LogConfig) -> Logger {
-    Arc::new(LogStrategy::new(config))
+pub(crate) fn init_logger(config: LogConfig) -> LogStrategy {
+    LogStrategy::new(config)
 }

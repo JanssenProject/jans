@@ -7,18 +7,22 @@
 
 use base64::prelude::*;
 
+use crate::models::cedar_schema::{CedarSchema, CedarSchemaJson};
+
 #[derive(Debug, thiserror::Error)]
 pub enum ParceCedarSchemaSetMessage {
     #[error("unable to decode cedar policy schema base64")]
     Base64,
-    #[error("unable to decode cedar policy schema json")]
-    Json,
+    #[error("unable to unmarshal cedar policy schema json to the structure")]
+    CedarSchemaJsonFormat,
+    #[error("unable to parse cedar policy schema json")]
+    Parse,
 }
 
 /// A custom deserializer for Cedar's Schema.
 //
-// is used to deserialize field `schema` in `PolicyStore`
-pub(crate) fn parse_cedar_schema<'de, D>(deserializer: D) -> Result<cedar_policy::Schema, D::Error>
+// is used to deserialize field `schema` in `PolicyStore` from base64 and get [`cedar_policy::Schema`]
+pub(crate) fn parse_cedar_schema<'de, D>(deserializer: D) -> Result<CedarSchema, D::Error>
 where
     D: serde::Deserializer<'de>,
 {
@@ -27,11 +31,26 @@ where
         serde::de::Error::custom(format!("{}: {}", ParceCedarSchemaSetMessage::Base64, err,))
     })?;
 
-    let schema = cedar_policy::Schema::from_json_file(decoded.as_slice()).map_err(|err| {
-        serde::de::Error::custom(format!("{}: {}", ParceCedarSchemaSetMessage::Json, err))
-    })?;
+    // parse cedar policy schema to the our structure
+    let cedar_policy_json: CedarSchemaJson =
+        serde_json::from_reader(decoded.as_slice()).map_err(|err| {
+            serde::de::Error::custom(format!(
+                "{}: {}",
+                ParceCedarSchemaSetMessage::CedarSchemaJsonFormat,
+                err
+            ))
+        })?;
 
-    Ok(schema)
+    // parse cedar policy schema to the `cedar_policy::Schema`
+    let cedar_policy_schema =
+        cedar_policy::Schema::from_json_file(decoded.as_slice()).map_err(|err| {
+            serde::de::Error::custom(format!("{}: {}", ParceCedarSchemaSetMessage::Parse, err))
+        })?;
+
+    Ok(CedarSchema {
+        schema: cedar_policy_schema,
+        json: cedar_policy_json,
+    })
 }
 
 #[cfg(test)]
@@ -68,11 +87,11 @@ mod tests {
         assert!(policy_result
             .unwrap_err()
             .to_string()
-            .contains(&ParceCedarSchemaSetMessage::Json.to_string()));
+            .contains(&ParceCedarSchemaSetMessage::CedarSchemaJsonFormat.to_string()));
     }
 
     #[test]
-    fn test_read_cedar_error() {
+    fn test_parse_cedar_error() {
         static POLICY_STORE_RAW: &str =
             include_str!("test_files/policy-store_schema_err_cedar_mistake.json");
 
@@ -80,7 +99,7 @@ mod tests {
         let err_msg = policy_result.unwrap_err().to_string();
         assert_eq!(
             err_msg,
-            "unable to decode cedar policy schema json: failed to resolve type: User_TypeNotExist at line 35 column 1"
+            "unable to parse cedar policy schema json: failed to resolve type: User_TypeNotExist at line 35 column 1"
         );
     }
 }
