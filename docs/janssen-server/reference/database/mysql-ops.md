@@ -5,7 +5,6 @@ tags:
   - database
   - additional claims to database
   - jansPerson
-  - LDAP to MySQL Migration Script
 ---
 
 Below operations require to log into mysql workspace first with command: `mysql`
@@ -60,10 +59,6 @@ There are three steps here:
 * Create attribute in MySQL database: `ALTER TABLE jansdb.jansPerson ADD COLUMN cmdAttr VARCHAR(64) NULL;`
 * Restart the ConfgiApi [service](../../../janssen-server/vm-ops/restarting-services.md#restart). If you are using kubernetes please restart the [deployment](https://kubernetes.io/docs/reference/kubectl/generated/kubectl_rollout/kubectl_rollout_restart/).
 * Create attribute using the terraform provider, curl commands, or  TUI: ![tui_custom_attribute](../../../assets/TUI_CustomAttribute.png)
-
-### LDAP to MySQL Migration Script
-
-Please refer to [these steps](./converting-data.md#ldap-to-mysql-migration-script).
 
 
 !!! Contribute
