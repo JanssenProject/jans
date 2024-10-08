@@ -122,7 +122,7 @@ tags:
 | externalUriWhiteList | This list specifies which external URIs can be called by AS (if empty any URI can be called) | [Details](#externaluriwhitelist) |
 | fapiCompatibility | Boolean value specifying whether to turn on FAPI compatibility mode. If true AS behaves in more strict mode | [Details](#fapicompatibility) |
 | featureFlags | List of enabled feature flags | [Details](#featureflags) |
-| forceIdTokenHintPresence | Boolean value specifying whether force id_token_hint parameter presence | [Details](#forceidtokenhintprecense) |
+| forceIdTokenHintPresence | Boolean value specifying whether force id_token_hint parameter presence | [Details](#forceidtokenhintpresence) |
 | forceOfflineAccessScopeToEnableRefreshToken | Boolean value specifying whether force offline_access scope to enable refresh_token grant type. Default value is true | [Details](#forceofflineaccessscopetoenablerefreshtoken) |
 | forceSignedRequestObject | Boolean value true indicates that signed request object is mandatory | [Details](#forcesignedrequestobject) |
 | frontChannelLogoutSessionSupported | Choose whether to support front channel session logout | [Details](#frontchannellogoutsessionsupported) |

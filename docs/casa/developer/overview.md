@@ -87,7 +87,7 @@ Given the warning above, there has to be a way to launch a different Agama flow 
 
 ### Requisites
 
-Regardless of the customization required, it is desirable to get acquaintance with Agama [framework](../../agama/introduction.md). This is a good time to go through the Agama developer guide pages found in the  Administration section of Jans Server docs. Specifically, several of the Agama [advanced usages](../../admin/developer/agama/advanced-usages.md#advanced-usages) will help you materialize your requirements.
+Regardless of the customization required, it is desirable to get acquaintance with Agama [framework](../../agama/introduction.md). This is a good time to go through the Agama developer guide pages found in the  Administration section of Jans Server docs. Specifically, several of the Agama [advanced usages](../../janssen-server/developer/agama/advanced-usages.md#advanced-usages) will help you materialize your requirements.
 
 Extract [the Agama project](https://maven.jans.io/maven/io/jans/casa-agama/replace-janssen-version/casa-agama-vreplace-janssen-version-project.zip) to your development machine. It is useful to get an idea of how and what the out-of-the-box project does. Also, keep the [Freemarker](https://freemarker.apache.org/docs/index.html) manual at hand.
 
@@ -95,7 +95,7 @@ Extract [the Agama project](https://maven.jans.io/maven/io/jans/casa-agama/repla
 
 The UI pages of the default Casa flow resemble the design of the Casa app itself. Also, modifications applied through the "custom branding" functionalities are automatically reflected in flow pages without any sort of intervention. This is neat, but if you need radical changes, you will have to code the UI pages your own based on the existing ones.
 
-For this purpose, create a new Agama project with one flow in it. Pick one of the pages you want to change from the original project and build your own - initially keep it really simple: a dummy page is OK. From your new flow, use the `Trigger` directive to launch `io.jans.casa.authn.main` found in the original project. Add an `Override templates` directive to your `Trigger` so the page in Casa project is superseded by the page you are creating. This is explained [here](../../admin/developer/agama/advanced-usages.md#template-overrides).
+For this purpose, create a new Agama project with one flow in it. Pick one of the pages you want to change from the original project and build your own - initially keep it really simple: a dummy page is OK. From your new flow, use the `Trigger` directive to launch `io.jans.casa.authn.main` found in the original project. Add an `Override templates` directive to your `Trigger` so the page in Casa project is superseded by the page you are creating. This is explained [here](../../janssen-server/developer/agama/advanced-usages.md#template-overrides).
 
 Pack your new project and deploy it. Wait for around 30 seconds and try to log into Casa to see the changes. Note you have to configure casa so your flow is launched, not the default one, ie. `io.jans.casa.authn.main`. This was explained [earlier](#casa-acr-update).
 
@@ -107,7 +107,7 @@ This is probably the most common requirement. Visit this [page](./add-authn-meth
 
 ### Other forms of customization
 
-Most forms of customization can be tackled using flow cancellation. Through cancellation, a flow can be aborted while running and the control returned to one of its callers.  Learn more about this topic [here](../../admin/developer/agama/advanced-usages/#cancellation).
+Most forms of customization can be tackled using flow cancellation. Through cancellation, a flow can be aborted while running and the control returned to one of its callers.  Learn more about this topic [here](../../janssen-server/developer/agama/advanced-usages#cancellation).
 
 As an example, let's assume you want to add a _"don't have an account? register here"_ button in the initial screen of Casa flow. Here's what you can do:
 

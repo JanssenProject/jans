@@ -68,7 +68,7 @@ There are two types of users in Jans Casa:
 
 Admin users have access to the Casa [admin console](./administration/admin-console.md). All users can manage their 2FA credentials, as outlined in the [user guide](./user-guide.md). 
 
-A user can be "turned" into an administrator by editing his profile - in [TUI](../admin/config-guide/config-tools/jans-tui/README.md) for instance - ensuring `CasaAdmin` is part of his `role` attribute.
+A user can be "turned" into an administrator by editing his profile - in [TUI](../janssen-server/config-guide/config-tools/jans-tui/README.md) for instance - ensuring `CasaAdmin` is part of his `role` attribute.
 
 ## Get started
 

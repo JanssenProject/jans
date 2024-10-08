@@ -300,4 +300,4 @@ in six sub-tabs, namely **Main**, **Agama**, **Plugins**, **Asset Management**, 
 
 Janssen Server Configuration REST API exposes relevant endpoints for 
 managing and configuring the Config-API Configuration. Endpoint details 
-are published in the [Swagger document](../../../../../jans/jans-config-api/docs/jans-config-api-swagger.yaml), see endpoint `/api/v1/api-config`
+are published in the [Swagger document](./../../reference/openapi.md), see endpoint `/api/v1/api-config`.

@@ -218,7 +218,7 @@ and store it in a file for editing using the command [below].
 2. Edit and update the desired configuration values in the file while
  keeping other properties and values unchanged.Updates must adhere 
  to the `PostgresMessageConfiguration` schema as mentioned 
- [here](#message-configuration-postgres). 
+ [here](#messaging-configuration-for-postgres). 
  The schema details can be retrieved using the command below. 
  The schema defines what values and datatypes are acceptable for each property 
  value.
