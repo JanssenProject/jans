@@ -46,6 +46,10 @@
 			<artifactId>mysql-connector-j</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>com.google.protobuf</groupId>
+			<artifactId>protobuf-java</artifactId>
+		</dependency>
+		<dependency>
 		    <groupId>org.postgresql</groupId>
 		    <artifactId>postgresql</artifactId>
 		</dependency>
