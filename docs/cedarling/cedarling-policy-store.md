@@ -1,4 +1,14 @@
-## Cedarling Policy Store
+---
+tags:
+  - administration
+  - lock
+  - authorization / authz
+  - Cedar
+  - Cedarling
+  - policy store
+---
+
+# Cedarling Policy Store
 
 By convention, the filename is `cedarling_store.json`. It contains all the data the 
 Cedarling needs to evaluate policies and verify JWT tokens:
@@ -19,7 +29,7 @@ The JSON schema looks like this:
 ```
 
 
-### Policy and Schema Authoring
+## Policy and Schema Authoring
 
 You can hand create your Cedar policies and schema in 
 [Visual Studio](https://marketplace.visualstudio.com/items?itemName=cedar-policy.vscode-cedar). 

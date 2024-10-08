@@ -1,4 +1,18 @@
-### Audit Logs
+---
+tags:
+  - administration
+  - lock
+  - authorization / authz
+  - Cedar
+  - Cedarling
+  - logging
+  - audit
+---
+
+
+# Cedarling Logs
+
+## Cedarling Audit Logs
 
 The Cedarling logs contains a record of all a Cedarling's decisions and token validations. 
 Cedarling has four logging options, which are configurable via the `CEDARLING_LOG_TYPE`
@@ -16,7 +30,7 @@ There are three different log records produced by the Cedarling:
 * `System` - Startup, debug and other Cedarling messages not related to authz
 * `Metric`- Performance and usage data
 
-### Jans Lock Server
+## Jans Lock Server
 
 In enterprise deployments, [Janssen Lock Server](../janssen-server/lock/) collects Cedarling 
 logs and can stream to a database or S3 bucket. The Cedarling decision logs provide compliance 

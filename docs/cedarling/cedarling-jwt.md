@@ -5,7 +5,10 @@ tags:
   - authorization / authz
   - Cedar
   - Cedarling
+  - JWT
 ---
+
+# Cedarling JWT Flow
 
 ![](../assets/lock-cedarling-diagram-4.jpg)
 

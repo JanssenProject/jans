@@ -1,4 +1,13 @@
-### Authorization 
+---
+tags:
+  - administration
+  - lock
+  - authorization / authz
+  - Cedar
+  - Cedarling
+---
+
+# Authorization Using Cedarling
 
 The __Policy Store__ contains the Cedar Policies, Cedar Schema, and optionally, a list of the 
 Trusted IDPs. The Cedarling loads its Policy Store during initialization as a static JSON file

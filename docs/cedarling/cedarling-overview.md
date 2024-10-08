@@ -7,6 +7,8 @@ tags:
   - Cedarling
 ---
 
+# Cedarling Overview
+
 ## What is Cedar
 
 [Cedar](https://www.cedarpolicy.com/en) is a policy syntax invented by Amazon and used by their 
@@ -86,7 +88,7 @@ multilayer security. Each Cedarling has it's own specific policy store. The API 
 does not need to know the policies or schema for the mobile application. By layering security, you can 
 implement a zero trust architecture.
 
-## Cedarling Interfaces
+### Cedarling Interfaces
 
 The developer using the Cedarling to build an application uses three easy interfaces: ("`init`"), 
 authorization ("`authz`") and logging ("`log`"). 
@@ -108,7 +110,7 @@ decision.
 The `log` interface enables developers to retrieve decision and system logs from the Cedarling's 
 in-memory cache. See the Cedarling [log](./cedarling-logs) documentation for more information. 
 
-## Cedarling Components
+### Cedarling Components
 
 As a developer, you don't really need to understand how the Cedarling is constructed. But this 
 section is meant to give you an idea to help you get a better understand of what it's actually

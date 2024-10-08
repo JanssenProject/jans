@@ -5,9 +5,10 @@ tags:
   - authorization / authz
   - Cedar
   - Cedarling
+  - properties
 ---
 
-## Cedarling Properties
+# Cedarling Properties
 
 These Bootstrap Properties control default application level behavior.
 
