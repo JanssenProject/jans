@@ -29,8 +29,7 @@ log_config = MemoryLogConfig(log_ttl=100)
 # use log config to print logs to stdout
 # log_config = StdOutLogConfig()
 
-# Create policy source configuration
-with open("example_files/policy-store.json",
+with open("policy-store.json",
           mode="r", encoding="utf8") as f:
     policy_raw_json = f.read()
 # for now we support only json source
@@ -74,7 +73,9 @@ request = Request(access_token=example_access_token)
 instance.authorize(request)
 ```
 
-Save the script to a file, call it `example.py` and run it from within the virtual environment.
+- Save the script in a file called `example.py`
+- Save [this](https://github.com/JanssenProject/jans/blob/main/jans-cedarling/bindings/cedarling_python/example_files/policy-store.json) demo policy store file to `policy-store.json` in the same location
+- Run the example script:
 
 ```
 (venv) $ python example.py
