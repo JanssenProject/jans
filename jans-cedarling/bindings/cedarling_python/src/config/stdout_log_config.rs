@@ -19,7 +19,7 @@ use pyo3::prelude::*;
 ///
 /// Example
 /// -------
-/// ```python
+/// ```
 /// # Create an instance for logging to standard output
 /// config = StdOutLogConfig()
 /// ```

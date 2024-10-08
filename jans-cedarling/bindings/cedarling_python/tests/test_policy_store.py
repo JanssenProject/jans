@@ -1,4 +1,4 @@
-from cedarling_python import AuthzConfig, MemoryLogConfig, DisabledLoggingConfig, StdOutLogConfig
+from cedarling_python import MemoryLogConfig, DisabledLoggingConfig, StdOutLogConfig
 from cedarling_python import PolicyStoreSource, PolicyStoreConfig, BootstrapConfig
 from cedarling_python import Cedarling
 from config import TEST_FILES_PATH, sample_bootstrap_config
@@ -22,9 +22,9 @@ test_cases_err = [
     ("policy-store_schema_err_base64.json",
      "unable to decode cedar policy schema base64"),
     ("policy-store_schema_err_json.json",
-     "unable to decode cedar policy schema json"),
+     "unable to unmarshal cedar policy schema json to the structure"),
     ("policy-store_schema_err_cedar_mistake.json",
-     "unable to decode cedar policy schema json: failed to resolve type: User_TypeNotExist at line 35 column 1"),
+     "Could not load policy: unable to parse cedar policy schema json: failed to resolve type: User_TypeNotExist at line 35 column 1"),
 ]
 
 
