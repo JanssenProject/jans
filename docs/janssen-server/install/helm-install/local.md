@@ -15,7 +15,7 @@ For local deployments like `minikube` and `MicroK8s` or cloud installations in d
 - 4 CPU cores
 - 50 GB hard-disk
 
-Use the listing below for detailed estimation of minimum required resources. Table contains the default resources recommendations per service. Depending on the use of each service the resources needs may increase or decrease.
+Use the listing below for a detailed estimation of minimum required resources. The table contains the default resources recommendation per service. Depending on the use of each service the resources need may increase or decrease.
 
 | Service           | CPU Unit | RAM   | Disk Space | Processor Type | Required                           |
 |-------------------|----------|-------|------------|----------------|------------------------------------|
