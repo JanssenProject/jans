@@ -2,7 +2,7 @@
 tags:
   - administration
   - developer
-  - scripts
+  - script-catalog
 ---
 
 # Application Session Script Guide

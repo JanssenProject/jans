@@ -1,3 +1,10 @@
+---
+tags:
+  - administration
+  - developer
+  - script-catalog
+---
+
 # SCIM Guide
 
 ## Overview
@@ -301,22 +308,24 @@ There is an important exception to the above and is related to the `manage*` met
 
 ## Script Type: Python
 
-### [Custom SCIM Event Handler](sample-script/custom_scim_handler.py)
+### Custom SCIM Event Handler
 
-The sample code snippet shows how to:
+Find the script [here](../../../script-catalog/scim/sample-script/custom_scim_handler.py)
 
+The sample code snippet shows how to -
 1. Modify Search Results
-1. Segment the user base
-1. Allow/Deny resource operations
-1. Allow/Deny searches
+2. Segment the user base
+3. Allow/Deny resource operations
+4. Allow/Deny searches
 
 ## Script Type: Java
 
-### [Custom SCIM Event Handler](sample-script/custom_scim_handler.java)
+### Custom SCIM Event Handler
 
-The sample code snippet shows how to:
+Find the code [here](../../../script-catalog/scim/sample-script/custom_scim_handler.java)
 
+The sample code snippet shows how to -
 1. Modify Search Results
-1. Segment the user base
-1. Allow/Deny resource operations
-1. Allow/Deny searches
+2. Segment the user base
+3. Allow/Deny resource operations
+4. Allow/Deny searches
