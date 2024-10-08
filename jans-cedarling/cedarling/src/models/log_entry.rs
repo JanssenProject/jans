@@ -8,10 +8,14 @@
 //! # Log entry
 //! The module contains structs for logging events.
 
+use std::sync::Arc;
 use std::time::{SystemTime, UNIX_EPOCH};
 
+use di::{DependencyMap, DependencySupplier};
 use uuid7::uuid7;
 use uuid7::Uuid;
+
+use super::app_types;
 
 /// LogEntry is a struct that encapsulates all relevant data for logging events.
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
@@ -34,9 +38,14 @@ pub struct LogEntry {
 }
 
 impl LogEntry {
+    pub(crate) fn new_with_container(dep_map: &DependencyMap, log_kind: LogType) -> LogEntry {
+        let app_id: Arc<app_types::ApplicationName> = dep_map.get();
+        Self::new_with_data(*dep_map.get(), app_id.as_ref().clone(), log_kind)
+    }
+
     pub(crate) fn new_with_data(
-        pdp_id: Uuid,
-        application_id: String,
+        pdp_id: app_types::PdpID,
+        application_id: app_types::ApplicationName,
         log_kind: LogType,
     ) -> LogEntry {
         let unix_time_sec = SystemTime::now()
@@ -51,8 +60,8 @@ impl LogEntry {
             id: uuid7(),
             time: unix_time_sec,
             log_kind,
-            pdp_id,
-            application_id,
+            pdp_id: pdp_id.0,
+            application_id: application_id.0,
             auth_info: None,
             msg: String::new(),
         }

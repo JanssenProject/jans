@@ -1,0 +1,25 @@
+{
+    "Jans": {
+        "entityTypes": {
+            "Access_token": {
+                "shape": {
+                    "type": "Record",
+                    "attributes": {
+                        "aud": {
+                            "type": "EntityOrCommon",
+                            "name": "String"
+                        },
+                        "exp": {
+                            "type": "EntityOrCommon",
+                            "name": "Long"
+                        },
+                        "iat": {
+                            "type": "Long"
+                        }
+                    }
+                }
+            }
+        },
+        "actions": {}
+    }
+}
