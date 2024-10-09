@@ -15,3 +15,7 @@ jsonwebtoken = "9.3.0"
 
 [dev-dependencies]
 openssl = "0.10.66" # used to generate RSA keys for JWTEngine tests
+url = "2.5.2"
+lazy_static = "1.5.0"
+di = { workspace = true }
+pretty_assertions = "1" # is used in testing

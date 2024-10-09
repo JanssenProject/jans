@@ -55,10 +55,6 @@ if docker volume inspect ${DOCKER_PROJECT}_${DATABASE_VOLUME_NAME} &> /dev/null;
 	docker volume rm ${DOCKER_PROJECT}_${DATABASE_VOLUME_NAME} &> /dev/null
 fi
 
-if docker volume inspect ${DOCKER_PROJECT}_${DATABASE_VOLUME_NAME} &> /dev/null; then
-	docker volume rm ${DOCKER_PROJECT}_${DATABASE_VOLUME_NAME}
-fi
-
 if docker image inspect ${JANSSEN_IMAGE} &> /dev/null; then
 	docker image rm ${JANSSEN_IMAGE}
 fi
