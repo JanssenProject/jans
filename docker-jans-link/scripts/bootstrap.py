@@ -120,8 +120,6 @@ def configure_logging():
         "persistence_log_level": "INFO",
         "persistence_duration_log_target": "FILE",
         "persistence_duration_log_level": "INFO",
-        "ldap_stats_log_target": "FILE",
-        "ldap_stats_log_level": "INFO",
         "script_log_target": "FILE",
         "script_log_level": "INFO",
         "log_prefix": "",
@@ -165,7 +163,6 @@ def configure_logging():
         "link_log_target": "FILE",
         "persistence_log_target": "JANS_LINK_PERSISTENCE_FILE",
         "persistence_duration_log_target": "JANS_LINK_PERSISTENCE_DURATION_FILE",
-        "ldap_stats_log_target": "JANS_LINK_PERSISTENCE_LDAP_STATISTICS_FILE",
         "script_log_target": "JANS_LINK_SCRIPT_LOG_FILE",
     }
     for key, value in file_aliases.items():
@@ -207,7 +204,7 @@ class PersistenceSetup:
 
     @cached_property
     def ctx(self) -> dict[str, _t.Any]:
-        # @TODO: double check if we can remove these contexts
+        # @TODO: remove ldap-related contexts after https://github.com/JanssenProject/jans/issues/9698 implemented
         host, port = os.environ.get("CN_LDAP_URL", "localhost:1636").split(":")
 
         password = self.manager.secret.get("encoded_ox_ldap_pw")

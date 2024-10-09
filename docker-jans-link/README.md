@@ -114,8 +114,6 @@ The following key-value pairs are the defaults:
     "persistence_log_level": "INFO",
     "persistence_duration_log_target": "FILE",
     "persistence_duration_log_level": "INFO",
-    "ldap_stats_log_target": "FILE",
-    "ldap_stats_log_level": "INFO",
     "script_log_target": "FILE",
     "script_log_level": "INFO"
 }
