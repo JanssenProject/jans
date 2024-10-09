@@ -8919,7 +8919,7 @@ zip -r inbound.zip *
 <li>Apply changes as needed - this is covered in a separate doc page <a href="../accts-linking-agama/">here</a>. Note you can add or remove sections in the file at will, and that providers can also be disabled so they are not listed in the login page or in Casa app</li>
 <li>Still in TUI, choose to import the file you have edited</li>
 </ol>
-<p>For VM-based installations, update the file <code>/etc/default/jans-casa</code>. Locate a segment that reads <code>-Dacr=</code> and assign  <code>io.jans.casa.authn.acctlinking</code> as new value. This will make Casa use the flow found in the accounts linking project - not the flow bundled out-of-the-box. </p>
+<p>For VM-based installations, update the file <code>/etc/default/jans-casa</code>. Locate a segment that reads <code>-Dacr=</code> and assign  <code>agama_io.jans.casa.authn.acctlinking</code> as new value. This will make Casa use the flow found in the accounts linking project - not the flow bundled out-of-the-box. </p>
 <p>Finally restart Casa and conduct your testing. You will now see the login page contains a list of links to the configured identity providers.</p>
 
   <hr>
@@ -8927,7 +8927,7 @@ zip -r inbound.zip *
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-08-28T08:03:05+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-08-28</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-09T12:40:57+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-09</span>
       
         <br>
         Created:
