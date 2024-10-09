@@ -49,4 +49,12 @@ pub enum DecodeJwtError {
     /// Errors that shouldn't really happen but happened somehow
     #[error("An unexpected error occurred: {0}")]
     Unexpected(String),
+
+    /// Happens when trying to validate a token without a `KeyService`
+    #[error("Could not get hold of a key")]
+    KeyServiceNotFound,
+
+    /// Happens when a key could not be retrieved from the `KeyService`
+    #[error("Could not get hold of a key")]
+    KeyNotFound,
 }

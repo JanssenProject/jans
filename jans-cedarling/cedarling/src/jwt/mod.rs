@@ -16,4 +16,4 @@ mod service;
 mod tests;
 
 pub use error::DecodeJwtError;
-pub(crate) use service::JwtService;
+pub(crate) use service::*;
