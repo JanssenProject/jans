@@ -30,6 +30,7 @@ public class AppInitializer {
     public void run(@Observes @ApplicationInitialized(ApplicationScoped.class) 
             ApplicationInitializedEvent event) {
     	
+        // Add Agama type to Document Store Manager
     	documentStoreManager.getSupportedServiceTypes().add(DOCUMENT_STORE_MANAGER_JANS_AGAMA_TYPE);
 
         trTimer.initTimer();
