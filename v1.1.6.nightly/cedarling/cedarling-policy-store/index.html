@@ -8828,10 +8828,13 @@ Cedarling needs to evaluate policies and verify JWT tokens:</p>
 </ol>
 <p>The JSON schema looks like this:</p>
 <div class="highlight"><pre><span></span><code>{
-    &quot;app_id&quot;: &quot;...&quot;,
-    &quot;policies&quot;: &quot;...&quot;,
-    &quot;schema&quot;: &quot;...&quot;,
-    &quot;trusted_idps&quot;: [...]
+    &quot;some_unique_identifier&quot;: {
+        &quot;name&quot;: &quot;...&quot;,
+        &quot;description&quot;: &quot;...&quot;,
+        &quot;policies&quot;: {},
+        &quot;identity_source&quot;: {},
+        &quot;schema&quot;: &quot;...&quot;
+    }
 }
 </code></pre></div>
 <h2 id="policy-and-schema-authoring">Policy and Schema Authoring<a class="headerlink" href="#policy-and-schema-authoring" title="Permanent link">#</a></h2>
@@ -8847,7 +8850,7 @@ trusted IDPs and to publish a policy store to a Github repository.</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-08T06:55:54+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-08</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-09T19:16:25+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-09</span>
       
         <br>
         Created:
