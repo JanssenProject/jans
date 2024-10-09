@@ -142,7 +142,7 @@ pub enum AuthorizeError {
     /// Error encountered while creating resource entity
     #[error("{0}")]
     ResourceEntity(#[from] ResourceEntityError),
-    /// Error encountered while parcing Action to EntityUid
+    /// Error encountered while parsing Action to EntityUid
     #[error("could not parse action: {0}")]
     Action(cedar_policy::ParseErrors),
     /// Error encountered while validating context according to the schema
