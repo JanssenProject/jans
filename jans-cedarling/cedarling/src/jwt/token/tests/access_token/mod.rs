@@ -5,5 +5,4 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-mod access_token;
-mod id_token;
+mod rsa;

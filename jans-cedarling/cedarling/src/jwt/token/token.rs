@@ -105,7 +105,6 @@ impl Token {
         if data.claims.jti != *expected_claims.jti() {
             return Err(Error::ValidationError("invalid jti".to_string()));
         }
-
         if data.claims.scope != *expected_claims.scope() {
             return Err(Error::ValidationError("invalid scope".to_string()));
         }
@@ -116,13 +115,48 @@ impl Token {
     fn validate_id_token(
         token: &str,
         decoding_key: DecodingKey,
-        validation: Validation,
-        _expected_claims: claims::IdToken,
+        mut validation: Validation,
+        expected_claims: claims::IdToken,
     ) -> Result<Token, Error> {
-        // TODO: Define validation parameters for `ValidateIdToken`
+        validation.set_required_spec_claims(&id_token::REQUIRED_CLAIMS);
+        validation.set_audience(&vec![expected_claims.aud()]);
+        validation.set_issuer(&vec![expected_claims.iss()]);
 
+        // Validate required params
         let data = decode::<IdToken>(&token, &decoding_key, &validation)
             .map_err(|e| Error::ValidationError(e.to_string()))?;
+
+        // Validate custom params
+        if data.claims.acr != *expected_claims.acr() {
+            return Err(Error::ValidationError("invalid acr".to_string()));
+        }
+        if data.claims.amr != *expected_claims.amr() {
+            return Err(Error::ValidationError("invalid amr".to_string()));
+        }
+        if data.claims.azp != *expected_claims.azp() {
+            return Err(Error::ValidationError("invalid azp".to_string()));
+        }
+        if data.claims.birthdate != *expected_claims.birthdate() {
+            return Err(Error::ValidationError("invalid birthdate".to_string()));
+        }
+        if data.claims.email != *expected_claims.email() {
+            return Err(Error::ValidationError("invalid email".to_string()));
+        }
+        if data.claims.jti != *expected_claims.jti() {
+            return Err(Error::ValidationError("invalid jti".to_string()));
+        }
+        if data.claims.name != *expected_claims.name() {
+            return Err(Error::ValidationError("invalid name".to_string()));
+        }
+        if data.claims.phone_number != *expected_claims.phone_number() {
+            return Err(Error::ValidationError("invalid phone_number".to_string()));
+        }
+        if data.claims.role != *expected_claims.role() {
+            return Err(Error::ValidationError("invalid role".to_string()));
+        }
+        if data.claims.sub != *expected_claims.sub() {
+            return Err(Error::ValidationError("invalid sub".to_string()));
+        }
 
         Ok(Token::IdToken(data.claims))
     }

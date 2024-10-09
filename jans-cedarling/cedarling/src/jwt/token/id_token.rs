@@ -5,7 +5,24 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
+
+/// Required claims for `IdToken`
+pub const REQUIRED_CLAIMS: [&str; 13] = [
+    "acr",
+    "amr",
+    "aud",
+    "azp",
+    "email",
+    "exp",
+    "iat",
+    "iss",
+    "jti",
+    "name",
+    "phone_number",
+    "role",
+    "sub",
+];
 
 /// Represents the claims contained within an ID Token.
 ///
@@ -32,7 +49,7 @@ use serde::Deserialize;
 /// - `phone_number`: The user's phone number, which is optional and may not always be present.
 /// - `role`: A list of roles assigned to the user, indicating their permissions or access level.
 /// - `sub`: The subject identifier, a unique identifier for the user in the context of the token issuer.
-#[derive(Deserialize)]
+#[derive(Deserialize, Serialize)]
 pub struct IdToken {
     /// The Authentication Context Class Reference (ACR), indicating the authentication strength.
     pub acr: Vec<String>,
