@@ -16,9 +16,11 @@ use crate::jwt::DecodeJwtError;
 use crate::jwt::JwtService;
 use crate::log::{LogWriter, Logger};
 use crate::models::app_types;
+use crate::models::log_entry::AuthorizationLogInfo;
 use crate::models::log_entry::{LogEntry, LogType};
 use crate::models::policy_store::PolicyStore;
 use crate::models::request::Request;
+use crate::AuthorizeResult;
 
 mod entities;
 
@@ -26,6 +28,7 @@ use di::DependencySupplier;
 use entities::create_resource_entity;
 use entities::ResourceEntityError;
 use entities::{create_access_token_entities, AccessTokenEntitiesError};
+
 /// Authorization Service
 /// The primary service of the Cedarling application responsible for evaluating authorization requests.
 /// It leverages other services as needed to complete its evaluations.
@@ -63,7 +66,7 @@ impl Authz {
 
     /// Evaluate Authorization Request
     /// - evaluate if authorization is granted for *client*
-    pub fn authorize(&self, request: Request) -> Result<cedar_policy::Response, AuthorizeError> {
+    pub fn authorize(&self, request: Request) -> Result<AuthorizeResult, AuthorizeError> {
         let access_token_entities = create_access_token_entities(
             &self.policy_store.schema.json,
             &self.jwt_service.decode_token_data(request.access_token)?,
@@ -76,24 +79,26 @@ impl Authz {
             .map_err(AuthorizeError::Action)?;
 
         let context: cedar_policy::Context = cedar_policy::Context::from_json_value(
-            request.context,
+            request.context.clone(),
             Some((&self.policy_store.schema.schema, &action)),
         )?;
 
-        let request = cedar_policy::Request::new(
-            access_token_entities.workload_entity.uid(),
+        let principal_workload_uid = access_token_entities.workload_entity.uid();
+        let resource_uid = resource_entity.uid();
+
+        let cedar_request = cedar_policy::Request::new(
+            principal_workload_uid.clone(),
             action,
-            resource_entity.uid(),
+            resource_uid.clone(),
             context,
             Some(&self.policy_store.schema.schema),
         )?;
 
         // collect all entities
-        let entities_iterator: Vec<cedar_policy::Entity> = access_token_entities
+        let entities_iterator = access_token_entities
             .entities()
             .into_iter()
-            .chain(vec![resource_entity])
-            .collect();
+            .chain(vec![resource_entity]);
 
         let entities = cedar_policy::Entities::from_entities(
             entities_iterator,
@@ -101,8 +106,27 @@ impl Authz {
         )?;
 
         let authorizer = cedar_policy::Authorizer::new();
-        let decision = authorizer.is_authorized(&request, &self.policy_store.policies, &entities);
-        Ok(decision)
+        let decision =
+            authorizer.is_authorized(&cedar_request, &self.policy_store.policies, &entities);
+
+        self.log_service.as_ref().log(
+            LogEntry::new_with_data(
+                self.pdp_id,
+                self.application_name.clone(),
+                LogType::Decision,
+            )
+            .set_auth_info(AuthorizationLogInfo {
+                action: request.action.clone(),
+                context: request.context,
+                decision: decision.decision().into(),
+                principal: principal_workload_uid.to_string(),
+                diagnostics: decision.diagnostics().clone().into(),
+                resource: resource_uid.to_string(),
+            })
+            .set_message("Result of authorize with resource as workload entity".to_string()),
+        );
+
+        Ok(AuthorizeResult { workload: decision })
     }
 }
 

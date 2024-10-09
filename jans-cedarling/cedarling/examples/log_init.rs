@@ -7,9 +7,9 @@
 
 use cedarling::{
     BootstrapConfig, Cedarling, JwtConfig, LogConfig, LogStorage, LogTypeConfig, MemoryLogConfig,
-    PolicyStoreConfig, PolicyStoreSource, Request, ResourceData,
+    PolicyStoreConfig, PolicyStoreSource,
 };
-use std::{collections::HashMap, env};
+use std::env;
 
 static POLICY_STORE_RAW: &str = include_str!("../src/init/test_files/policy-store_ok.json");
 
@@ -69,29 +69,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("\n\n Stage 4:\nShow len of keys left using get_log_ids");
     println!("Number of keys left: {:?}", cedarling.get_log_ids().len());
-
-    let access_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJib0c4ZGZjNU1LVG4zN283Z3NkQ2V5cUw4THBXUXRnb080MW0xS1p3ZHEwIiwiY29kZSI6ImJmMTkzNGY2LTM5MDUtNDIwYS04Mjk5LTZiMmUzZmZkZGQ2ZSIsImlzcyI6Imh0dHBzOi8vYWRtaW4tdWktdGVzdC5nbHV1Lm9yZyIsInRva2VuX3R5cGUiOiJCZWFyZXIiLCJjbGllbnRfaWQiOiI1YjQ0ODdjNC04ZGIxLTQwOWQtYTY1My1mOTA3YjgwOTQwMzkiLCJhdWQiOiI1YjQ0ODdjNC04ZGIxLTQwOWQtYTY1My1mOTA3YjgwOTQwMzkiLCJhY3IiOiJiYXNpYyIsIng1dCNTMjU2IjoiIiwic2NvcGUiOlsib3BlbmlkIiwicHJvZmlsZSJdLCJvcmdfaWQiOiJzb21lX2xvbmdfaWQiLCJhdXRoX3RpbWUiOjE3MjQ4MzA3NDYsImV4cCI6MTcyNDk0NTk3OCwiaWF0IjoxNzI0ODMyMjU5LCJqdGkiOiJseFRtQ1ZSRlR4T2pKZ3ZFRXBvek1RIiwibmFtZSI6IkRlZmF1bHQgQWRtaW4gVXNlciIsInN0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjIwMSwidXJpIjoiaHR0cHM6Ly9hZG1pbi11aS10ZXN0LmdsdXUub3JnL2phbnMtYXV0aC9yZXN0djEvc3RhdHVzX2xpc3QifX19._eQT-DsfE_kgdhA0YOyFxxPEMNw44iwoelWa5iU1n9s";
-
-    let result = cedarling.authorize(Request {
-        access_token,
-        action: "Jans::Action::\"Update\"".to_string(),
-        context: serde_json::json!({}),
-        resource: ResourceData {
-            id: "random_id".to_string(),
-            resource_type: "Jans::Issue".to_string(),
-            payload: HashMap::from_iter([(
-                "org_id".to_string(),
-                serde_json::Value::String("some_long_id".to_string()),
-            )]),
-        },
-    });
-    if let Err(ref e) = &result {
-        eprintln!("Error while authorizing: {}\n\n", e)
-    }
-    let result = result?;
-
-    println!("decision: {:?}", result.decision());
-    println!("diagnostics: {:?}", result.diagnostics());
 
     Ok(())
 }
