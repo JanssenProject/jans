@@ -1,13 +1,19 @@
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::{
+    sync::Arc,
+    time::{SystemTime, UNIX_EPOCH},
+};
 
 use base64::prelude::*;
 use rand::Rng;
 use serde::{Deserialize, Serialize};
 
-use jsonwebtoken::{encode, EncodingKey, Header};
+use jsonwebtoken::{encode, DecodingKey, EncodingKey, Header};
 use test_utils::assert_eq;
 
-use crate::{jwt::JwtService, JwtConfig};
+use crate::{
+    jwt::{JwtService, KeyService},
+    JwtConfig,
+};
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 struct Claims {
@@ -21,7 +27,7 @@ struct Claims {
 #[test]
 fn can_decode_claims_unvalidated() {
     let config = JwtConfig::Disabled;
-    let service = JwtService::new(config);
+    let service = JwtService::new(config, None);
 
     let (claims, token, _) =
         generate_token(true).expect("should generate an expired token with a random key");
@@ -33,6 +39,37 @@ fn can_decode_claims_unvalidated() {
     assert_eq!(claims, result)
 }
 
+#[test]
+fn can_decode_claims_validated() {
+    // Setup token
+    let (claims, token, key) =
+        generate_token(true).expect("should generate an expired token with a random key");
+
+    // Setup mock key service
+    struct MockKeyService {
+        secret: String,
+    }
+
+    impl KeyService for MockKeyService {
+        fn get_key(&self) -> Result<jsonwebtoken::DecodingKey, super::DecodeJwtError> {
+            DecodingKey::from_base64_secret(&self.secret)
+                .map_err(|_| crate::DecodeJwtError::KeyNotFound)
+        }
+    }
+
+    // Setup JWT service
+    let config = JwtConfig::Disabled;
+    let key_service = MockKeyService { secret: key };
+    let jwt_service = JwtService::new(config, Some(Arc::new(key_service)));
+
+    let result = jwt_service
+        .decode::<Claims>(&token)
+        .expect("should decode token");
+
+    assert_eq!(claims, result)
+}
+
+/// Returns (Claims, JWT, Key)
 fn generate_token(expired: bool) -> Result<(Claims, String, String), Box<dyn std::error::Error>> {
     let iat: u64;
     let exp: u64;
