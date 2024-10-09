@@ -33,7 +33,7 @@ pub(crate) struct AccessTokenEntities {
 
 impl AccessTokenEntities {
     /// Map all values to vector of cedar-policy entities
-    pub fn to_vec(self) -> Vec<cedar_policy::Entity> {
+    pub fn entities(self) -> Vec<cedar_policy::Entity> {
         vec![self.workload_entity, self.access_token_entity]
     }
 }
@@ -56,7 +56,7 @@ pub enum ResourceEntityError {
     Create(#[from] CedarPolicyCreateTypeError),
 }
 
-/// Create resource entity from [`ResourceData`]
+/// Create entity from [`ResourceData`]
 pub fn create_resource_entity(
     resource: ResourceData,
     schema: &CedarSchemaJson,

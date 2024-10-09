@@ -52,7 +52,7 @@ impl<'a> EntityMetadata<'a> {
             EntityId::new(data.get_value::<String>(self.entity_id_data_key)?),
         );
 
-        let parsed_typename = parse_namespace_and_typename(&self.entity_type);
+        let parsed_typename = parse_namespace_and_typename(self.entity_type);
         // fetch the schema record from the json-schema.
         let entity_schema_record = fetch_schema_record(
             &parsed_typename.namespace(),
@@ -113,9 +113,9 @@ fn fetch_schema_record<'a>(
 }
 
 /// get mapping of the entity attributes
-fn entity_meta_attributes<'a>(
-    schema_record: &'a CedarSchemaRecord,
-) -> impl Iterator<Item = EntityAttributeMetadata<'a>> {
+fn entity_meta_attributes(
+    schema_record: &CedarSchemaRecord,
+) -> impl Iterator<Item = EntityAttributeMetadata> {
     schema_record
         .attributes
         .iter()
@@ -140,7 +140,7 @@ pub fn create_entity<'a>(
     let attr_vec = entity_meta_attributes(schema_record)
         .filter_map(|attr: EntityAttributeMetadata<'a>| {
             let attr_name = attr.attribute_name;
-            let cedar_exp_result = token_attribute_to_cedar_exp(&attr, &data, entity_namespace);
+            let cedar_exp_result = token_attribute_to_cedar_exp(&attr, data, entity_namespace);
             match (cedar_exp_result, attr.is_required) {
                 (Ok(cedar_exp), _) => Some(Ok((attr_name.to_string(), cedar_exp))),
                 (
@@ -157,10 +157,8 @@ pub fn create_entity<'a>(
 
     let attrs: HashMap<String, RestrictedExpression> = HashMap::from_iter(attr_vec);
 
-    Ok(
-        cedar_policy::Entity::new(entity_uid.clone(), attrs, HashSet::new())
-            .map_err(|err| CedarPolicyCreateTypeError::CreateEntity(entity_uid.to_string(), err))?,
-    )
+    cedar_policy::Entity::new(entity_uid.clone(), attrs, HashSet::new())
+        .map_err(|err| CedarPolicyCreateTypeError::CreateEntity(entity_uid.to_string(), err))
 }
 
 /// Meta information about an attribute for cedar policy.
@@ -187,8 +185,11 @@ fn token_attribute_to_cedar_exp(
         PrimitiveTypeKind::Boolean => claim.get_expression::<bool>(token_claim_key)?,
         PrimitiveTypeKind::TypeName(entity_type_name) => {
             // We need concat typename of entity attribute with the namespace of entity
-            let entity_type =
-                format!("{entity_namespace}{CEDAR_POLICY_SEPARATOR}{entity_type_name}",);
+            let entity_type = if entity_namespace.is_empty() {
+                format!("{entity_namespace}{CEDAR_POLICY_SEPARATOR}{entity_type_name}")
+            } else {
+                entity_type_name.to_string()
+            };
             let uid = EntityUid::from_type_name_and_id(
                 EntityTypeName::from_str(entity_type.as_str()).map_err(|err| {
                     CedarPolicyCreateTypeError::EntityTypeName(entity_type.to_string(), err)

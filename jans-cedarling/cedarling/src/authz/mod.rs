@@ -26,8 +26,6 @@ use di::DependencySupplier;
 use entities::create_resource_entity;
 use entities::ResourceEntityError;
 use entities::{create_access_token_entities, AccessTokenEntitiesError};
-use serde::de;
-
 /// Authorization Service
 /// The primary service of the Cedarling application responsible for evaluating authorization requests.
 /// It leverages other services as needed to complete its evaluations.
@@ -66,7 +64,6 @@ impl Authz {
     /// Evaluate Authorization Request
     /// - evaluate if authorization is granted for *client*
     pub fn authorize(&self, request: Request) -> Result<cedar_policy::Response, AuthorizeError> {
-        #[allow(unused_variables)]
         let access_token_entities = create_access_token_entities(
             &self.policy_store.schema.json,
             &self.jwt_service.decode_token_data(request.access_token)?,
@@ -81,8 +78,7 @@ impl Authz {
         let context: cedar_policy::Context = cedar_policy::Context::from_json_value(
             request.context,
             Some((&self.policy_store.schema.schema, &action)),
-        )
-        .map_err(AuthorizeError::CreateContext)?;
+        )?;
 
         let request = cedar_policy::Request::new(
             access_token_entities.workload_entity.uid(),
@@ -90,14 +86,13 @@ impl Authz {
             resource_entity.uid(),
             context,
             Some(&self.policy_store.schema.schema),
-        )
-        .map_err(AuthorizeError::CreateRequest)?;
+        )?;
 
         // collect all entities
         let entities_iterator: Vec<cedar_policy::Entity> = access_token_entities
-            .to_vec()
+            .entities()
             .into_iter()
-            .chain(vec![resource_entity].into_iter())
+            .chain(vec![resource_entity])
             .collect();
 
         let entities = cedar_policy::Entities::from_entities(
@@ -128,10 +123,10 @@ pub enum AuthorizeError {
     Action(cedar_policy::ParseErrors),
     /// Error encountered while validating context according to the schema
     #[error("could not create context: {0}")]
-    CreateContext(cedar_policy::ContextJsonError),
+    CreateContext(#[from] cedar_policy::ContextJsonError),
     /// Error encountered while creating [`cedar_policy::Request`]
     #[error("could not create request type: {0}")]
-    CreateRequest(cedar_policy::RequestValidationError),
+    CreateRequest(#[from] cedar_policy::RequestValidationError),
     /// Error encountered while collecting all entities
     #[error("could not collect all entities: {0}")]
     Entities(#[from] cedar_policy::entities_errors::EntitiesError),

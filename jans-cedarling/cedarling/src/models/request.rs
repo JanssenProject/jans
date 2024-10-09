@@ -9,8 +9,6 @@ use std::{collections::HashMap, str::FromStr};
 
 use cedar_policy::{EntityId, EntityTypeName, EntityUid, ParseErrors};
 
-use super::token_data::TokenPayload;
-
 /// Box to store authorization data
 #[derive(Debug, serde::Deserialize)]
 pub struct Request<'a> {
