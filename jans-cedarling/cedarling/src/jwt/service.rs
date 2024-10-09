@@ -1,9 +1,11 @@
-use base64::prelude::*;
+use jsonwebtoken::{decode, decode_header, DecodingKey, Header, Validation};
 use std::sync::Arc;
 
 use crate::{models::token_data::TokenPayload, JwtConfig};
 
 use super::DecodeJwtError;
+
+// const SUPPORTED_ALGORITHMS: [&str; 1] = ["HS256"];
 
 /// Service for JWT validation
 #[derive(Clone)]
@@ -36,16 +38,53 @@ impl JwtService {
     }
 }
 
-// decode JWT without validation when in config disabled value
+// Decodes the JWT header without validation
+fn extract_jwt_header(jwt: &str) -> Result<Header, jsonwebtoken::errors::Error> {
+    let header = decode_header(jwt)?;
+    Ok(header)
+}
+
+// Decodes the JWT without validation
 fn decode_jwt_without_validation<T: serde::de::DeserializeOwned>(
     jwt: &str,
 ) -> Result<T, DecodeJwtError> {
-    let payload_base64 = jwt.split('.').nth(1).ok_or(DecodeJwtError::MalformedJWT)?;
-    let payload_json = BASE64_STANDARD_NO_PAD
-        .decode(payload_base64)
-        .map_err(|err| DecodeJwtError::UnableToDecodeBase64(err, payload_base64.to_owned()))?;
+    let header = extract_jwt_header(jwt).map_err(|_| DecodeJwtError::MalformedJWT)?;
 
-    let payload_json = String::from_utf8(payload_json)?;
-    serde_json::from_str(payload_json.as_str())
-        .map_err(|err| DecodeJwtError::UnableToParseJson(err, payload_json.to_owned()))
+    let mut validator = Validation::new(header.alg);
+    validator.insecure_disable_signature_validation();
+    validator.validate_exp = false;
+    validator.validate_aud = false;
+
+    let key = DecodingKey::from_secret("secret".as_ref());
+
+    let claims = match decode::<T>(&jwt, &key, &validator) {
+        Ok(token_data) => token_data.claims,
+        Err(e) => match e.kind() {
+            jsonwebtoken::errors::ErrorKind::InvalidToken => Err(DecodeJwtError::MalformedJWT)?,
+            jsonwebtoken::errors::ErrorKind::InvalidSignature => {
+                Err(DecodeJwtError::InvalidSignature)?
+            },
+            jsonwebtoken::errors::ErrorKind::InvalidEcdsaKey => Err(DecodeJwtError::InvalidKey)?,
+            jsonwebtoken::errors::ErrorKind::InvalidRsaKey(_) => Err(DecodeJwtError::InvalidKey)?,
+            jsonwebtoken::errors::ErrorKind::ExpiredSignature => {
+                Err(DecodeJwtError::ExpiredSignature)?
+            },
+            jsonwebtoken::errors::ErrorKind::InvalidIssuer => Err(DecodeJwtError::InvalidIssuer)?,
+            jsonwebtoken::errors::ErrorKind::InvalidAudience => {
+                Err(DecodeJwtError::InvalidAudience)?
+            },
+            jsonwebtoken::errors::ErrorKind::Base64(decode_error) => Err(
+                DecodeJwtError::UnableToDecodeBase64(decode_error.to_string()),
+            )?,
+            jsonwebtoken::errors::ErrorKind::Json(arc) => {
+                Err(DecodeJwtError::UnableToParseJson(arc.clone()))?
+            },
+            jsonwebtoken::errors::ErrorKind::Utf8(err) => {
+                Err(DecodeJwtError::UnableToString(err.clone()))?
+            },
+            _ => Err(DecodeJwtError::Unexpected(e.to_string()))?,
+        },
+    };
+
+    Ok(claims)
 }

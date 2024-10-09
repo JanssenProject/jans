@@ -12,6 +12,8 @@
 
 mod error;
 mod service;
+#[cfg(test)]
+mod tests;
 
 pub use error::DecodeJwtError;
 pub(crate) use service::JwtService;
