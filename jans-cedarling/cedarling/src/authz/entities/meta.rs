@@ -14,5 +14,5 @@ lazy_static! {
     pub(crate) static ref WorkloadEntityMeta: EntityMetadata<'static> =
         EntityMetadata::new("Jans::Workload", "client_id",);
     pub(crate) static ref AccessTokenMeta: EntityMetadata<'static> =
-        EntityMetadata::new("Jans::Access_token", "aud",);
+        EntityMetadata::new("Jans::Access_token", "jti",);
 }
