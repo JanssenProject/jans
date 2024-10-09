@@ -185,7 +185,7 @@ fn token_attribute_to_cedar_exp(
         PrimitiveTypeKind::Boolean => claim.get_expression::<bool>(token_claim_key)?,
         PrimitiveTypeKind::TypeName(entity_type_name) => {
             // We need concat typename of entity attribute with the namespace of entity
-            let entity_type = if entity_namespace.is_empty() {
+            let entity_type = if !entity_namespace.is_empty() {
                 format!("{entity_namespace}{CEDAR_POLICY_SEPARATOR}{entity_type_name}")
             } else {
                 entity_type_name.to_string()
