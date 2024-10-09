@@ -72,7 +72,7 @@ pyasn1==0.4.8
 pyasn1-modules==0.2.8
 pycodestyle==2.9.1
 pycparser==2.21
-pycryptodomex==3.17
+pycryptodomex==3.21.0
 pydocstyle==6.1.1
 pyflakes==2.5.0
 Pygments==2.13.0
