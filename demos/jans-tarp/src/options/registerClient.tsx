@@ -9,7 +9,7 @@ import DialogTitle from '@mui/material/DialogTitle';
 import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
 import { ILooseObject } from './ILooseObject';
-import LinearProgress from '@mui/material/LinearProgress';
+import CircularProgress from "@mui/material/CircularProgress";
 import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
 import { AdapterMoment } from '@mui/x-date-pickers/AdapterMoment'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -22,9 +22,9 @@ import Alert from '@mui/material/Alert';
 export default function RegisterClient({ isOpen, handleDialog }) {
   const [open, setOpen] = React.useState(isOpen);
   const [selectedScopes, setSelectedScopes] = React.useState([])
+  const [scopeOptions, setScopeOptions] = React.useState([{ name: "openid" }]);
   const [expireAt, setExpireAt] = React.useState(null);
   const [issuer, setIssuer] = React.useState(null);
-  const [scopeOptions, setScopeOptions] = React.useState([{ name: "openid" }]);
   const [issuerError, setIssuerError] = React.useState("")
   const [errorMessage, setErrorMessage] = React.useState("")
   const [loading, setLoading] = React.useState(false);
@@ -140,7 +140,7 @@ export default function RegisterClient({ isOpen, handleDialog }) {
 
       if (openidConfig != undefined) {
         chrome.storage.local.set({ opConfiguration: openidConfig.data }).then(() => {
-          console.log("openapiConfig is set to " + openidConfig);
+          console.log("OP Configuration: " + JSON.stringify(openidConfig));
         });
 
         const registrationUrl = openidConfig.data.registration_endpoint;
@@ -153,7 +153,10 @@ export default function RegisterClient({ isOpen, handleDialog }) {
           grant_types: ['authorization_code'],
           application_type: 'web',
           client_name: 'jans-tarp-' + uuidv4(),
-          token_endpoint_auth_method: 'client_secret_basic'
+          token_endpoint_auth_method: 'client_secret_basic',
+          access_token_as_jwt: true,
+          userinfo_signed_response_alg: "RS256",
+          jansInclClaimsInIdTkn: "true"
         };
 
         if (!!expireAt) {
@@ -218,9 +221,16 @@ export default function RegisterClient({ isOpen, handleDialog }) {
             event.preventDefault();
           },
         }}
+         className="form-container"
       >
         <DialogTitle>Register OIDC Client</DialogTitle>
-        {loading ? <LinearProgress color="success" /> : ''}
+        {loading ? (
+          <div className="loader-overlay">
+            <CircularProgress color="success" />
+          </div>
+        ) : (
+          ""
+        )}
         <DialogContent>
           <DialogContentText>
             Submit below details to create a new OIDC client.

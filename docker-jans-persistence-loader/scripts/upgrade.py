@@ -7,13 +7,13 @@ from collections import namedtuple
 from ldif import LDIFParser
 
 from jans.pycloudlib import get_manager
-from jans.pycloudlib.persistence import CouchbaseClient
-from jans.pycloudlib.persistence import LdapClient
-from jans.pycloudlib.persistence import SpannerClient
-from jans.pycloudlib.persistence import SqlClient
-from jans.pycloudlib.persistence import doc_id_from_dn
-from jans.pycloudlib.persistence import id_from_dn
-from jans.pycloudlib.persistence import PersistenceMapper
+from jans.pycloudlib.persistence.couchbase import CouchbaseClient
+from jans.pycloudlib.persistence.ldap import LdapClient
+from jans.pycloudlib.persistence.spanner import SpannerClient
+from jans.pycloudlib.persistence.sql import SqlClient
+from jans.pycloudlib.persistence.sql import doc_id_from_dn
+from jans.pycloudlib.persistence.couchbase import id_from_dn
+from jans.pycloudlib.persistence.utils import PersistenceMapper
 from jans.pycloudlib.persistence.sql import get_sql_password
 from jans.pycloudlib.utils import as_boolean
 from jans.pycloudlib.utils import encode_text
@@ -28,12 +28,6 @@ logger = logging.getLogger("persistence-loader")
 Entry = namedtuple("Entry", ["id", "attrs"])
 
 manager = get_manager()
-
-#: ID of base entry
-JANS_BASE_DN = "o=jans"
-
-#: ID of manager group
-JANS_MANAGER_GROUP_DN = "inum=60B7,ou=groups,o=jans"
 
 #: ID of jans-auth config
 JANS_AUTH_CONFIG_DN = "ou=jans-auth,ou=configuration,o=jans"
@@ -303,7 +297,6 @@ class Upgrade:
         self.update_scopes_entries()
         self.update_clients_entries()
         self.update_scim_scopes_entries()
-        self.update_base_entries()
 
         if hasattr(self.backend, "update_misc"):
             self.backend.update_misc()
@@ -468,28 +461,6 @@ class Upgrade:
 
         _update_claim_names()
         _update_mobile_attr()
-
-    def update_base_entries(self):
-        # default to ldap persistence
-        kwargs = {}
-        id_ = JANS_BASE_DN
-
-        if self.backend.type in ("sql", "spanner"):
-            kwargs = {"table_name": "jansOrganization"}
-            id_ = doc_id_from_dn(id_)
-        elif self.backend.type == "couchbase":
-            kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
-            id_ = id_from_dn(id_)
-
-        # add jansManagerGrp to base entry
-        entry = self.backend.get_entry(id_, **kwargs)
-
-        if not entry:
-            return
-
-        if not entry.attrs.get("jansManagerGrp"):
-            entry.attrs["jansManagerGrp"] = JANS_MANAGER_GROUP_DN
-            self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
 
     def update_scim_scopes_entries(self):
         # default to ldap persistence
@@ -859,10 +830,44 @@ class Upgrade:
             entry.attrs["jansDocStoreConf"]["documentStoreType"] = doc_store_type
             should_update = True
 
+        # set jansDbAuth if persistence is ldap
+        if self.backend.type == "ldap" and not entry.attrs.get("jansDbAuth"):
+            should_update = True
+
         if should_update:
             if self.backend.type != "couchbase":
                 entry.attrs["jansMessageConf"] = json.dumps(entry.attrs["jansMessageConf"])
                 entry.attrs["jansDocStoreConf"] = json.dumps(entry.attrs["jansDocStoreConf"])
+
+                # set jansDbAuth if persistence is ldap
+                if self.backend.type == "ldap":
+                    ldaps_port = self.manager.config.get("ldap_init_port")
+                    ldap_hostname = self.manager.config.get("ldap_init_host")
+                    ldap_binddn = self.manager.config.get("ldap_binddn")
+                    ldap_use_ssl = str(as_boolean(os.environ.get("CN_LDAP_USE_SSL", True))).lower()
+                    encoded_ox_ldap_pw = self.manager.secret.get("encoded_ox_ldap_pw")
+
+                    entry.attrs["jansDbAuth"] = json.dumps({
+                        "type": "auth",
+                        "name": None,
+                        "level": 0,
+                        "priority": 1,
+                        "enabled": False,
+                        "version": 0,
+                        "config": {
+                            "configId": "auth_ldap_server",
+                            "servers": [f"{ldap_hostname}:{ldaps_port}"],
+                            "maxConnections": 1000,
+                            "bindDN": ldap_binddn,
+                            "bindPassword": encoded_ox_ldap_pw,
+                            "useSSL": ldap_use_ssl,
+                            "baseDNs": ["ou=people,o=jans"],
+                            "primaryKey": "uid",
+                            "localPrimaryKey": "uid",
+                            "useAnonymousBind": False,
+                            "enabled": False,
+                        },
+                    })
 
             revision = entry.attrs.get("jansRevision") or 1
             entry.attrs["jansRevision"] = revision + 1

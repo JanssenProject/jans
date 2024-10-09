@@ -8,7 +8,7 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import InputLabel from '@mui/material/InputLabel';
 import Select from '@mui/material/Select';
-import LinearProgress from '@mui/material/LinearProgress';
+import CircularProgress from "@mui/material/CircularProgress";
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 import qs from 'qs';
@@ -25,7 +25,7 @@ const createOption = (label: string) => ({
   name: label,
 });
 const filter = createFilterOptions();
-export default function AuthFlowInputs({ isOpen, handleDialog, client }) {
+export default function AuthFlowInputs({ isOpen, handleDialog, client, notifyOnDataChange }) {
   const [open, setOpen] = React.useState(isOpen);
   const [errorMessage, setErrorMessage] = React.useState("")
   const [additionalParamError, setAdditionalParamError] = React.useState("")
@@ -34,7 +34,8 @@ export default function AuthFlowInputs({ isOpen, handleDialog, client }) {
   const [loading, setLoading] = React.useState(false);
   const [acrValueOption, setAcrValueOption] = React.useState([]);
   const [selectedAcr, setSelectedAcr] = React.useState([])
-  
+  const [selectedScopes, setSelectedScopes] = React.useState([])
+  const [scopeOptions, setScopeOptions] = React.useState([{ name: "openid" }]);
 
   React.useEffect(() => {
     if (isOpen) {
@@ -46,7 +47,10 @@ export default function AuthFlowInputs({ isOpen, handleDialog, client }) {
 
   React.useEffect(() => {
     (async () => {
-      setAcrValueOption(client.acrValuesSupported.map((ele) => createOption(ele)));
+      const scopes = client?.scope.split(" ");
+      setAcrValueOption(client?.acrValuesSupported.map((ele) => createOption(ele)));
+      setScopeOptions(scopes.map((ele) => ({name: ele})))
+      
     })();
   }, [])
 
@@ -78,9 +82,13 @@ export default function AuthFlowInputs({ isOpen, handleDialog, client }) {
     setLoading(true);
     const redirectUrl = client?.redirectUris[0];
     const { secret, hashed } = await Utils.generateRandomChallengePair();
+    let scopes = selectedScopes.map((ele) => ele.name).join(" ");
+    if(!(!!scopes && scopes.length > 0)) {
+      scopes = client?.scope;
+    }
 
     let options: ILooseObject = {
-      scope: client?.scope,
+      scope: scopes,
       response_type: client?.responseType[0],
       redirect_uri: redirectUrl,
       client_id: client?.clientId,
@@ -143,7 +151,7 @@ export default function AuthFlowInputs({ isOpen, handleDialog, client }) {
         code_verifier: secret,
         client_id: client?.clientId,
         code,
-        scope: client?.scope
+        scope: scopes
       })
 
       const tokenReqOptions = {
@@ -181,6 +189,7 @@ export default function AuthFlowInputs({ isOpen, handleDialog, client }) {
           console.log("userDetails: " + JSON.stringify(userInfoResponse.data));
           handleClose();
         });
+        notifyOnDataChange();
       }
     }
   }
@@ -219,6 +228,17 @@ export default function AuthFlowInputs({ isOpen, handleDialog, client }) {
           }
         });
       }, 1000);
+
+      const onTabRemoved = (tabId, removeInfo) => {
+        if (tabId === tab.id) {
+          chrome.tabs.onRemoved.removeListener(onTabRemoved); // Clean up the listener
+          chrome.tabs.remove(tab.id);
+          callback(undefined, new Error('Authorization tab was closed.'));
+          setLoading(false);
+        }
+      };
+
+      chrome.tabs.onRemoved.addListener(onTabRemoved);
 
       chrome.tabs.onUpdated.addListener(function listener(tabId, changeInfo, tab) {
         if (!!chrome.runtime.lastError) {
@@ -264,16 +284,27 @@ export default function AuthFlowInputs({ isOpen, handleDialog, client }) {
     <React.Fragment>
       <Dialog
         open={open}
-        onClose={handleClose}
+        onClose={(event, reason) => {
+          if (reason !== "backdropClick") {
+            handleClose();
+          }
+        }}
         PaperProps={{
           component: 'form',
           onSubmit: (event) => {
             event.preventDefault();            
           },
         }}
+        className="form-container"
       >
         <DialogTitle>Authentication Flow Inputs</DialogTitle>
-        {loading ? <LinearProgress color="success" /> : ''}
+        {loading ? (
+          <div className="loader-overlay">
+            <CircularProgress color="success" />
+          </div>
+        ) : (
+          ""
+        )}
         <DialogContent>
           <DialogContentText>
             Enter inputs (optional) before initiating authentication flow.
@@ -360,6 +391,61 @@ export default function AuthFlowInputs({ isOpen, handleDialog, client }) {
               freeSolo
               renderInput={(params) => (
                 <TextField {...params} label="Acr Values" />
+              )}
+            />
+            <InputLabel id="scope-value-label">Scope</InputLabel>
+            <Autocomplete
+              value={selectedScopes}
+              multiple
+              defaultValue={[scopeOptions[0]]}
+              onChange={(event, newValue, reason, details) => {
+                let valueList = selectedScopes;
+                if (details.option.create && reason !== 'removeOption') {
+                  valueList.push({ id: undefined, name: details.option.name, create: details.option.create });
+                  setSelectedScopes(valueList);
+                }
+                else {
+                  setSelectedScopes(newValue);
+                }
+              }}
+              filterSelectedOptions
+              filterOptions={(options, params) => {
+                const filtered = filter(options, params);
+
+                const { inputValue } = params;
+                // Suggest the creation of a new value
+                const isExisting = options.some((option) => inputValue === option.name);
+                if (inputValue !== '' && !isExisting) {
+                  filtered.push({
+                    name: inputValue,
+                    label: `Add "${inputValue}"`,
+                    create: true
+                  });
+                }
+
+                return filtered;
+              }}
+              selectOnFocus
+              clearOnBlur
+              handleHomeEndKeys
+              id="scope"
+              options={scopeOptions}
+              getOptionLabel={(option) => {
+                // Value selected with enter, right from the input
+                if (typeof option === 'string') {
+                  return option;
+                }
+                // Add "xxx" option created dynamically
+                if (option.label) {
+                  return option.name;
+                }
+                // Regular option
+                return option.name;
+              }}
+              renderOption={(props, option) => <li {...props}>{option.create ? option.label : option.name}</li>}
+              freeSolo
+              renderInput={(params) => (
+                <TextField {...params} label="Scopes" />
               )}
             />
             <FormControlLabel control={<Checkbox color="success" onChange={() => setDisplayToken(!displayToken)}/>} label="Display Access Token and ID Token after authentication" />

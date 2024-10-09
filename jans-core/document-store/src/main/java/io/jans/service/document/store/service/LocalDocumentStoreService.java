@@ -6,11 +6,10 @@
 
 package io.jans.service.document.store.service;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 import io.jans.service.document.store.LocalDocumentStore;
 import io.jans.service.document.store.provider.DocumentStoreProvider;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 /**
  * @author Yuriy Movchan on 04/10/2020

@@ -62,7 +62,8 @@ public class StrongAuthSettingsService {
             if (Utils.isNotEmpty(policy)) {
                 Stream.of(policy.split(",\\s*")).forEach(str -> {
                     try {
-                        list.add(EnforcementPolicy.valueOf(str.toUpperCase()).toString());
+                        EnforcementPolicy.valueOf(str);
+                        list.add(str);
                     } catch (Exception e) {
                         logger.error("The policy '{}' is not recognized", str);
                     }
@@ -90,7 +91,7 @@ public class StrongAuthSettingsService {
     public boolean update2FAPolicies(String userId, Set<String> policies) {
 
         boolean updated = false;
-        String str = policies.stream().map(String::toLowerCase).reduce("", (partial, next) -> partial + ", " + next);
+        String str = policies.stream().reduce("", (partial, next) -> partial + ", " + next);
         try {
             PersonPreferences person = personPreferencesInstance(userId);
             person.setStrongAuthPolicy(str.substring(2));

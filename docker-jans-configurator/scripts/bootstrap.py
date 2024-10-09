@@ -15,6 +15,12 @@ from cryptography.x509.oid import NameOID
 
 from jans.pycloudlib import get_manager
 from jans.pycloudlib import wait_for
+from jans.pycloudlib.persistence.couchbase import sync_couchbase_password
+from jans.pycloudlib.persistence.couchbase import sync_couchbase_superuser_password
+from jans.pycloudlib.persistence.ldap import sync_ldap_password
+from jans.pycloudlib.persistence.spanner import sync_google_credentials
+from jans.pycloudlib.persistence.sql import sync_sql_password
+from jans.pycloudlib.persistence.utils import PersistenceMapper
 from jans.pycloudlib.utils import get_random_chars
 from jans.pycloudlib.utils import get_sys_random_chars
 from jans.pycloudlib.utils import encode_text
@@ -37,9 +43,6 @@ CONFIGURATOR_DIR = "/opt/jans/configurator"
 DB_DIR = os.environ.get("CN_CONFIGURATOR_DB_DIR", f"{CONFIGURATOR_DIR}/db")
 CERTS_DIR = os.environ.get("CN_CONFIGURATOR_CERTS_DIR", f"{CONFIGURATOR_DIR}/certs")
 JAVALIBS_DIR = f"{CONFIGURATOR_DIR}/javalibs"
-
-DEFAULT_CONFIGURATION_FILE = os.environ.get("CN_CONFIGURATOR_CONFIGURATION_FILE", f"{DB_DIR}/configuration.json")
-DEFAULT_DUMP_FILE = os.environ.get("CN_CONFIGURATOR_DUMP_FILE", f"{DB_DIR}/configuration.out.json")
 
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("configurator")
@@ -176,8 +179,8 @@ class CtxGenerator:
         return self.ctx_manager.get_secret(key, default)
 
     def transform_base_ctx(self):
-        if self.secret_params["encoded_salt"]:
-            self.set_secret("encoded_salt", self.secret_params["encoded_salt"])
+        if self.secret_params.get("encoded_salt"):
+            self.set_secret("encoded_salt", self.secret_params.get("encoded_salt"))
         else:
             self.set_secret("encoded_salt", partial(get_random_chars, 24))
 
@@ -198,11 +201,14 @@ class CtxGenerator:
 
         self.set_secret(
             "encoded_ox_ldap_pw",
-            partial(encode_text, self.secret_params["ldap_password"], encoded_salt),
+            partial(encode_text, self.secret_params.get("ldap_password", ""), encoded_salt),
         )
 
+        self.set_config("ldap_binddn", "cn=Directory Manager")
+        self.set_config("ldap_site_binddn", "cn=Directory Manager")
+
     def transform_redis_ctx(self):
-        self.set_secret("redis_password", self.secret_params["redis_password"])
+        self.set_secret("redis_password", self.secret_params.get("redis_password", ""))
 
     def transform_auth_ctx(self):
         encoded_salt = self.get_secret("encoded_salt")
@@ -342,11 +348,11 @@ class CtxGenerator:
         # TODO: move this to persistence-loader?
         self.set_config("couchbaseTrustStoreFn", "/etc/certs/couchbase.pkcs12")
         self.set_secret("couchbase_shib_user_password", get_random_chars)
-        self.set_secret("couchbase_password", self.secret_params["couchbase_password"])
-        self.set_secret("couchbase_superuser_password", self.secret_params["couchbase_superuser_password"])
+        self.set_secret("couchbase_password", self.secret_params.get("couchbase_password", ""))
+        self.set_secret("couchbase_superuser_password", self.secret_params.get("couchbase_superuser_password", ""))
 
     def transform_sql_ctx(self):
-        self.set_secret("sql_password", self.secret_params["sql_password"])
+        self.set_secret("sql_password", self.secret_params.get("sql_password", ""))
 
     def transform_misc_ctx(self):
         # pre-populate the rest of configmaps
@@ -480,6 +486,26 @@ def parse_cert(certfile, dns):
     return False
 
 
+def get_configuration_file():
+    path = os.environ.get("CN_CONFIGURATOR_CONFIGURATION_FILE", "/etc/jans/conf/configuration.json")
+
+    if os.path.isfile(path):
+        return path
+
+    # backward-compat
+    return f"{DB_DIR}/configuration.json"
+
+
+def get_dump_file():
+    path = os.environ.get("CN_CONFIGURATOR_DUMP_FILE", "/etc/jans/conf/configuration.out.json")
+
+    if os.path.isfile(path):
+        return path
+
+    # backward-compat
+    return f"{DB_DIR}/configuration.out.json"
+
+
 # ============
 # CLI commands
 # ============
@@ -495,14 +521,14 @@ def cli():
     "--configuration-file",
     type=click.Path(exists=False),
     help="Absolute path to file contains configmaps and secrets",
-    default=DEFAULT_CONFIGURATION_FILE,
+    default=get_configuration_file(),
     show_default=True,
 )
 @click.option(
     "--dump-file",
     type=click.Path(exists=False),
     help="Absolute path to file contains dumped configmaps and secrets",
-    default=DEFAULT_DUMP_FILE,
+    default=get_dump_file(),
     show_default=True,
 )
 def load(configuration_file, dump_file):
@@ -510,6 +536,20 @@ def load(configuration_file, dump_file):
     """
     deps = ["config_conn", "secret_conn"]
     wait_for(manager, deps=deps)
+
+    mapper = PersistenceMapper()
+    backend_type = mapper.mapping["default"]
+
+    match backend_type:
+        case "ldap":
+            sync_ldap_password(manager)
+        case "sql":
+            sync_sql_password(manager)
+        case "couchbase":
+            sync_couchbase_superuser_password(manager)
+            sync_couchbase_password(manager)
+        case "spanner":
+            sync_google_credentials(manager)
 
     # check whether config and secret in backend have been initialized
     should_skip = as_boolean(os.environ.get("CN_CONFIGURATOR_SKIP_INITIALIZED", False))
@@ -539,7 +579,7 @@ def load(configuration_file, dump_file):
     "--dump-file",
     type=click.Path(exists=False),
     help="Absolute path to file contains dumped configmaps and secrets",
-    default=DEFAULT_DUMP_FILE,
+    default=get_dump_file(),
     show_default=True,
 )
 def dump(dump_file):
@@ -547,6 +587,22 @@ def dump(dump_file):
     """
     deps = ["config_conn", "secret_conn"]
     wait_for(manager, deps=deps)
+
+    mapper = PersistenceMapper()
+    backend_type = mapper.mapping["default"]
+
+    match backend_type:
+        case "ldap":
+            sync_ldap_password(manager)
+        case "sql":
+            sync_sql_password(manager)
+        case "couchbase":
+            sync_couchbase_superuser_password(manager)
+            sync_couchbase_password(manager)
+        case "spanner":
+            sync_google_credentials(manager)
+
+    # dump all configuration from remote backend to file
     dump_to_file(manager, dump_file)
 
 

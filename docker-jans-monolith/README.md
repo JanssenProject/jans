@@ -67,6 +67,9 @@ wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-mono
 wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/clean.sh
 ```
 
+Give execute permission to the scripts
+`chmod u+x up.sh down.sh clean.sh`
+
 This docker compose file runs two containers, the janssen monolith container and mysql container.
 To start the containers.
 

@@ -1,16 +1,15 @@
 package io.jans.service.document.store.provider;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
-import io.jans.service.document.store.exception.DocumentException;
-import io.jans.service.document.store.exception.WriteDocumentException;
 import org.apache.commons.codec.binary.Base64InputStream;
-import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,8 +17,11 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.service.document.store.conf.DBDocumentStoreConfiguration;
 import io.jans.service.document.store.conf.DocumentStoreConfiguration;
 import io.jans.service.document.store.conf.DocumentStoreType;
+import io.jans.service.document.store.exception.DocumentException;
+import io.jans.service.document.store.exception.WriteDocumentException;
+import io.jans.service.document.store.model.Document;
 import io.jans.service.document.store.service.DBDocumentService;
-import io.jans.service.document.store.service.Document;
+import io.jans.util.Pair;
 import io.jans.util.StringHelper;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -29,7 +31,10 @@ import jakarta.inject.Inject;
  * @author Shekhar L. on 29/10/2022
  */
 @ApplicationScoped
-public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentStoreProvider> {
+public class DBDocumentStoreProvider extends DocumentStoreProvider<Document> {
+
+	protected static final String[] FIND_DOCUMENT_CHECK_ATTRIBUTES = { "dn", "inum", "jansRevision", "displayName",
+			"jansHash", "jansEnabled" };
 
 	@Inject
 	private Logger log;
@@ -95,14 +100,15 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentSto
 		log.debug("Save document: '{}'", path);
 		Document oxDocument = new Document();
 		oxDocument.setDocument(documentContent);
-		oxDocument.setDisplayName(path);
+		
+		setFileNameAndPath(oxDocument, path);
 		try {
 				oxDocument.setInum(documentService.generateInumForNewDocument());
 				String dn = "inum=" + oxDocument.getInum() + ",ou=document,o=jans";
 				oxDocument.setDn(dn);
 				oxDocument.setDescription(description);
-				oxDocument.setJansEnabled(true);
-				oxDocument.setJansService(moduleList);
+				oxDocument.setEnabled(true);
+				oxDocument.setService(moduleList);
 				documentService.addDocument(oxDocument);
 				return path;
 		} catch (Exception ex) {
@@ -115,7 +121,7 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentSto
 	public String saveDocumentStream(String path, String description, InputStream documentStream, List<String> moduleList) {
 
 		Document oxDocument = new Document();
-		oxDocument.setDisplayName(path);
+		setFileNameAndPath(oxDocument, path);
 
 		try {
 			String documentContent = new String(documentStream.readAllBytes(), StandardCharsets.UTF_8);
@@ -125,8 +131,8 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentSto
 			String dn = "inum=" + oxDocument.getInum() + ",ou=document,o=jans";
 			oxDocument.setDn(dn);
 			oxDocument.setDescription(description);
-			oxDocument.setJansEnabled(true);
-			oxDocument.setJansService(moduleList);
+			oxDocument.setEnabled(true);
+			oxDocument.setService(moduleList);
 			documentService.addDocument(oxDocument);
 			return path;
 		} catch (Exception e) {
@@ -160,14 +166,13 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentSto
 	@Override
 	public InputStream readDocumentAsStream(String name) {
 		log.debug("Read document as stream: '{}'", name);
-		String filecontecnt = readDocument(name, null);
-		if (filecontecnt == null) {
-			log.error("Document file '{}' isn't exist", name);
+		String fileData = readDocument(name, null);
+		if (fileData == null) {
+			log.error("Document file '{}' isn't empty", name);
 			return null;
 		}
 
-		InputStream InputStream = new ByteArrayInputStream(filecontecnt.getBytes());
-		return InputStream;
+		return new ByteArrayInputStream(fileData.getBytes());     
 	}
 
 	@Override
@@ -185,7 +190,7 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentSto
 				log.error("Document doesn't Exist with the name  '{}'", currentPath);
 				return null;
 			}
-			oxDocument.setDisplayName(destinationPath);
+			setFileNameAndPath(oxDocument, destinationPath);
 			documentService.updateDocument(oxDocument);
 			Document oxDocumentDestination = documentService.getDocumentByDisplayName(destinationPath);
 			if (oxDocumentDestination == null) {
@@ -227,7 +232,7 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentSto
 				log.error("Document doesn't Exist with the name  '{}'", currentPath);
 				return null;
 			}
-			oxDocument.setDisplayName(destinationPath);
+			setFileNameAndPath(oxDocument, destinationPath);
 			documentService.updateDocument(oxDocument);
 			Document oxDocumentDestination = documentService.getDocumentByDisplayName(destinationPath);
 			if (oxDocumentDestination == null) {
@@ -243,7 +248,7 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentSto
 	}
 
 	public String readDocumentByDisplayName(String filePath) {
-		log.debug("location of document: '{}'", filePath);
+		log.debug("Read document: '{}'", filePath);
 		Document oxDocument;
 		try {
 			oxDocument = documentService.getDocumentByDisplayName(filePath);
@@ -255,6 +260,35 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<DBDocumentSto
 			throw new DocumentException(e);
 		}
 		return null;
+	}
+
+	@Override
+	public List<Document> findDocumentsByModules(List<String> moduleList, String ... attributes) {
+		log.debug("Find documents for modules: '{}'", moduleList);
+		List<Document> oxDocuments;
+		try {
+			oxDocuments = documentService.findDocumentsListByModules(moduleList, attributes);
+			return oxDocuments;
+		} catch (Exception e) {
+			log.error("Failed to find documents for modules '{}'", moduleList, e);
+			throw new DocumentException(e);
+		}
+	}
+
+	private void setFileNameAndPath(Document document, String path) {
+		Pair<String, String> splittedPath = extractFileNameAndPath(path);
+		document.setFileName(splittedPath.getSecond());
+		document.setFilePath(splittedPath.getFirst());
+	}
+
+	public Pair<String, String> extractFileNameAndPath(String filePath) {
+		Path path = Paths.get(filePath);
+		Path parentPath = path.getParent();
+		if (parentPath == null) {
+			return new Pair<String, String>(null, path.getFileName().toString());
+		}
+
+		return new Pair<String, String>(parentPath.toString(), path.getFileName().toString());
 	}
 
 }

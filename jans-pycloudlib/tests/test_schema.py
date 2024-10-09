@@ -58,19 +58,13 @@ def test_empty_certkey():
     AWS_CONFIG,
     AWS_CONFIG_B64,
 ])
-def test_secret_transform_b64(value):
+def test_secret_transform_data(value):
     from jans.pycloudlib.schema import SecretSchema
 
-    given = SecretSchema().transform_b64({
+    given = SecretSchema().transform_data({
         "aws_config": value
     })
-    expected = {
-        "aws_config": AWS_CONFIG,
-        "google_credentials": "",
-        "aws_credentials": "",
-        "aws_replica_regions": "",
-    }
-    assert given == expected
+    assert given["aws_config"] == AWS_CONFIG
 
 
 @pytest.mark.parametrize("value", [

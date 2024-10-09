@@ -225,6 +225,21 @@
     ],
     "custom": []
   },
+  "jansLogEntry": {
+    "fields": [
+      "eventTime"
+    ]
+  },
+  "jansTelemetryEntry": {
+    "fields": [
+      "eventTime"
+    ]
+  },
+  "jansHealthEntry": {
+    "fields": [
+      "eventTime"
+    ]
+  },
   "__common__": {
     "JSON": [],
     "fields": [

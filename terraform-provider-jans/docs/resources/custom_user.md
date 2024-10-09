@@ -56,6 +56,7 @@ resource "jans_custom_user" "test" {
 - `custom_object_classes` (List of String)
 - `external_uid` (List of String) External UID.
 - `ox_auth_persistent_jwt` (List of String) Persistent JWT.
+- `status` (String) User status
 - `user_password` (String) User password
 
 ### Read-Only

@@ -55,21 +55,6 @@ func resourceKCSamlTR() *schema.Resource {
 				Optional:    true,
 				Description: "Root URL of the trust relationship.",
 			},
-			"admin_url": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Admin URL of the trust relationship.",
-			},
-			"base_url": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "Base URL of the trust relationship.",
-			},
-			"surrogate_auth_required": {
-				Type:        schema.TypeBool,
-				Optional:    true,
-				Description: "Surrogate auth required of the trust relationship.",
-			},
 			"enabled": {
 				Type:        schema.TypeBool,
 				Optional:    true,
@@ -163,11 +148,6 @@ func resourceKCSamlTR() *schema.Resource {
 				Optional:    true,
 				Elem:        &schema.Schema{Type: schema.TypeString},
 				Description: "Released attributes of the trust relationship.",
-			},
-			"url": {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "URL of the trust relationship.",
 			},
 			"sp_logout_url": {
 				Type:        schema.TypeString,

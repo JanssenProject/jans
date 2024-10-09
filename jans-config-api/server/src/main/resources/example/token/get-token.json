@@ -1,0 +1,18 @@
+{
+    "dn": "tknCde=280c8e7055fb51cee1fdd6442fe7fdba98dfd319f0e931ac0756a19936722286,ou=tokens,o=jans",
+    "grantId": "5e3d27ba-00a2-400e-be6d-b1424d1c1f33",
+    "clientId": "2000.cc8b29ae-cb4a-49ea-b176-8695e53919d9",
+    "creationDate": "2024-09-23T15:03:50",
+    "expirationDate": "2024-10-23T15:03:50",
+    "deletable": true,
+    "scope": "jans_stat openid https://jans.io/oauth/jans-auth-server/config/adminui/properties.readonly https://jans.io/oauth/jans-auth-server/config/adminui/license.write https://jans.io/oauth/config/stats.readonly https://jans.io/oauth/jans-auth-server/config/adminui/license.readonly",
+    "tokenCode": "280c8e7055fb51cee1fdd6442fe7fdba98dfd319f0e931ac0756a19936722286",
+    "tokenType": "access_token",
+    "grantType": "client_credentials",
+    "referenceId": "4zdnUjyjRoWqqLCMtguvDA",
+    "attributes": {
+        "online_access": false,
+        "statusListIndex": 301
+    },
+    "tokenTypeEnum": "ACCESS_TOKEN"
+}

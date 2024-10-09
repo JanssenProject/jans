@@ -6,15 +6,16 @@
 
 package io.jans.service.document.store;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.jans.service.document.store.conf.DocumentStoreConfiguration;
+import io.jans.service.document.store.conf.DocumentStoreType;
 import io.jans.service.document.store.provider.DocumentStoreProvider;
 import io.jans.service.document.store.provider.JcaDocumentStoreProvider;
 import io.jans.service.document.store.provider.LocalDocumentStoreProvider;
 import io.jans.service.document.store.provider.WebDavDocumentStoreProvider;
 import io.jans.util.security.StringEncrypter;
-import io.jans.service.document.store.conf.DocumentStoreType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * @author Yuriy Movchan on 04/10/2020

@@ -29,7 +29,6 @@ func TestResourceApiAppConfiguration_Mapping(t *testing.T) {
 		AuthOpenidIntrospectionUrl: "https://demoexample.gluu.org/jans-auth/restv1/introspection",
 		AuthOpenidTokenUrl:         "https://demoexample.gluu.org/jans-auth/restv1/token",
 		AuthOpenidRevokeUrl:        "https://demoexample.gluu.org/jans-auth/restv1/revoke",
-		SmallryeHealthRootPath:     "/health-check",
 		ExclusiveAuthScopes:        []string{"jans_stat", "https://jans.io/scim/users.read", "https://jans.io/scim/users.write"},
 		CorsConfigurationFilters: []jans.CorsConfigurationFilter{
 			{
@@ -96,8 +95,8 @@ func TestResourceApiAppConfiguration_Mapping(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if len(patches) != 25 {
-		t.Errorf("Got %d patches, expected 25", len(patches))
+	if len(patches) != 24 {
+		t.Errorf("Got %d patches, expected 24", len(patches))
 	}
 
 	if err := fromSchemaResource(data, &newConfig); err != nil {

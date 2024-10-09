@@ -2,7 +2,6 @@ package io.jans.casa.core.pojo;
 
 /**
  * A POJO holding basic information about a user's browser.
- * @author jgomer
  */
 public class BrowserInfo {
 

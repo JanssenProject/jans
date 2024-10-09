@@ -10,6 +10,8 @@ import jakarta.inject.Named;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
+import java.util.*;
+
 /**
  * @author Yuriy Z
  */
@@ -28,6 +30,29 @@ public class DeviceSessionService {
 
     @Inject
     private StaticConfiguration staticConfiguration;
+
+    public DeviceSession newDeviceSession() {
+        final String id = UUID.randomUUID().toString();
+        return newDeviceSession(id);
+    }
+
+    public DeviceSession newDeviceSession(String id) {
+        int lifetimeInSeconds = appConfiguration.getDeviceSessionLifetimeInSeconds();
+
+        final Calendar calendar = new GregorianCalendar();
+        final Date creationDate = calendar.getTime();
+        calendar.add(Calendar.SECOND, lifetimeInSeconds);
+        final Date expirationDate = calendar.getTime();
+
+        DeviceSession deviceSession = new DeviceSession();
+        deviceSession.setId(id);
+        deviceSession.setDn(buildDn(id));
+        deviceSession.setDeletable(true);
+        deviceSession.setTtl(lifetimeInSeconds);
+        deviceSession.setCreationDate(creationDate);
+        deviceSession.setExpirationDate(expirationDate);
+        return deviceSession;
+    }
 
     public String buildDn(String id) {
         return String.format("jansId=%s,%s", id, staticConfiguration.getBaseDn().getSessions());

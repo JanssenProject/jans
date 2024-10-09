@@ -68,7 +68,7 @@ Configure `/etc/certs/super_gluu_creds.json`. For each Mobile app (Android, iOS)
 User and Developer Guides can be found on the [Super Gluu docs site](https://gluu.org/docs/supergluu).
 
 ### Interception script
-- [Super Gluu interception script](../SuperGluuExternalAuthenticator.py) is included in the default Janssen Server distribution
+- [Super Gluu interception script](../../../script-catalog/person_authentication/super-gluu-external-authenticator/SuperGluuExternalAuthenticator.py) is included in the default Janssen Server distribution
 
 The Super Gluu Interception script can be configured to work in 2 modes:
 A. Two step Flow (Default mode)
@@ -289,4 +289,4 @@ A user's Super Gluu device(s) can be removed by a Janssen administrator by direc
 Now the old device is gone and the user can enroll a new device
 
 ### Device management using SCIM
-See the [SCIM documentation](../../admin/usermgmt/usermgmt-scim#fido-2-devices) on how to manage Super Gluu devices, using the SCIM protocol.
+See the [SCIM documentation](../../../janssen-server/usermgmt/usermgmt-scim.md#fido-2-devices) on how to manage Super Gluu devices, using the SCIM [protocol].
