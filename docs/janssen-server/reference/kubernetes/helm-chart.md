@@ -348,6 +348,8 @@ Kubernetes: `>=v1.22.0-0`
 | global.casa.ingress.casaLabels | object | `{}` | Casa ingress resource labels. key app is taken |
 | global.cloud.testEnviroment | bool | `false` | Boolean flag if enabled will strip resources requests and limits from all services. |
 | global.cnConfiguratorConfigurationFile | string | `"/etc/jans/conf/configuration.json"` | Path to configuration schema file |
+| global.cnConfiguratorCustomSchema | object | `{"secretName":""}` | Use custom configuration schema in existing secrets. Note, the secrets has to contain the key configuration.json or any basename as specified in cnConfiguratorConfigurationFile. |
+| global.cnConfiguratorCustomSchema.secretName | string | `""` | The name of the secrets used for storing custom configuration schema. |
 | global.cnConfiguratorDumpFile | string | `"/etc/jans/conf/configuration.out.json"` | Path to dumped configuration schema file |
 | global.cnCouchbasePasswordFile | string | `"/etc/jans/conf/couchbase_password"` | Path to Couchbase password file |
 | global.cnCouchbaseSuperuserPasswordFile | string | `"/etc/jans/conf/couchbase_superuser_password"` | Path to Couchbase superuser password file |
