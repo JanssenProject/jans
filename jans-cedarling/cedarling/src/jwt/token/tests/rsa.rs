@@ -14,7 +14,8 @@ use jsonwebtoken::{encode, Algorithm, EncodingKey, Header};
 use openssl::rsa::Rsa;
 use serde::Serialize;
 
-use crate::jwt::token::{AccessToken, Token, TokenKind};
+use crate::jwt::claims::{self, Claims};
+use crate::jwt::token::{AccessToken, Token};
 
 fn generate_rsa_key() -> Result<(Vec<u8>, Vec<u8>), Box<dyn Error>> {
     let private = Rsa::generate(2048)?;
@@ -50,15 +51,16 @@ fn can_validate_access_token_with_correct_claims() {
         scope: "scope".to_string(),
     };
 
+    let expected_claims = Claims::AccessToken(claims::AccessToken::new(
+        "https://auth.myapp.com",
+        "https://auth.myapp.com",
+        "1",
+        "scope",
+    ));
+
     let token = create_jwt(&claims, &private_key).expect("should create token");
 
-    Token::validate(
-        &token,
-        TokenKind::AccessToken,
-        &public_key,
-        Algorithm::RS256,
-    )
-    .unwrap();
+    Token::validate(&token, expected_claims, &public_key, Algorithm::RS256).unwrap();
 }
 
 #[test]
@@ -66,10 +68,17 @@ fn can_validate_access_token_with_correct_claims() {
 fn returns_error_on_invalid_token() {
     let (_, public_key) = generate_rsa_key().expect("should generate keys");
 
+    let expected_claims = Claims::AccessToken(claims::AccessToken::new(
+        "https://auth.myapp.com",
+        "https://auth.myapp.com",
+        "1",
+        "scope",
+    ));
+
     let invalid_token = "invalid_token";
     Token::validate(
         &invalid_token,
-        TokenKind::AccessToken,
+        expected_claims,
         &public_key,
         Algorithm::RS256,
     )
@@ -99,16 +108,17 @@ fn returns_error_on_incomplete_claims() {
         iss: "https://auth.myapp.com".to_string(),
     };
 
+    let expected_claims = Claims::AccessToken(claims::AccessToken::new(
+        "https://auth.myapp.com",
+        "https://auth.myapp.com",
+        "1",
+        "scope",
+    ));
+
     // let token = create_jwt(&claims, &private_key).expect("should create token");
     let header = Header::new(Algorithm::RS256);
     let encoding_key = EncodingKey::from_rsa_pem(&private_key).expect("should read encoding key");
     let token = encode(&header, &claims, &encoding_key).expect("should encode token");
 
-    Token::validate(
-        &token,
-        TokenKind::AccessToken,
-        &public_key,
-        Algorithm::RS256,
-    )
-    .unwrap();
+    Token::validate(&token, expected_claims, &public_key, Algorithm::RS256).unwrap();
 }

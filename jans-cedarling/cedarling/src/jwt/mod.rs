@@ -11,13 +11,8 @@
 //! - validate JWT status
 //! - extract JWT claims
 
-/// The `token` module provides various types of JWT used in the system.
-/// These tokens handle different aspects of authentication, authorization,
-/// user identity, and transactions.
-///
-/// This module contains the following types of tokens:
-/// - `AccessToken`: Used for authenticating and authorizing access to protected resources.
-/// - `IdToken`: Contains user identity claims.
-/// - `TransactionToken`: Used to track and verify specific transactions.
-/// - `UserInfoToken`: Stores additional user details that might be retrieved after authentication.
+/// Represents claims to be tested agains tokens
+pub mod claims;
+
+/// The `token` module provides validation for various types of JWT.
 pub mod token;

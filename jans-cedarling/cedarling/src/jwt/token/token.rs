@@ -5,34 +5,10 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-use super::{AccessToken, Error, IdToken, TransactionToken, UserInfoToken};
+use crate::jwt::claims::{self, Claims};
+
+use super::*;
 use jsonwebtoken::{decode, Algorithm, DecodingKey, Validation};
-
-/// Represents the different types of tokens that the system supports.
-///
-/// This enum is used to distinguish between various token types, each serving
-/// a unique role in authentication, authorization, and user management.
-/// The `TokenKind` enum is primarily used in token validation to indicate
-/// which type of token is being processed.
-//
-/// # Variants
-/// - `AccessToken`: Used for authorizing access to resources.
-/// - `IdToken`: Contains user identity claims. Often used to authenticate users in OpenID Connect flows.
-/// - `TransactionToken`: Used to track and verify specific transactions, ensuring that the transaction is valid.
-/// - `UserInfoToken`: Holds additional user details, often retrieved post-authentication to provide more user information.
-pub enum TokenKind {
-    /// Authorizes access to protected resources.
-    AccessToken,
-
-    /// Contains identity information about the user for authentication purposes.
-    IdToken,
-
-    /// Used to track and verify specific transactions.
-    TransactionToken,
-
-    /// Stores additional user details retrieved after authentication.
-    UserInfoToken,
-}
 
 /// Represents various types of supported JWT tokens
 pub enum Token {
@@ -63,7 +39,7 @@ impl Token {
     ///
     /// # Returns
     /// - `Ok(Token)`: If the token is successfully validated, it returns the appropriate `Token` variant.
-    /// - `Err(Box<dyn std::error::Error>)`: If validation fails or an unsupported algorithm is provided,
+    /// - `Err(jwt::error::Error)`: If validation fails or an unsupported algorithm is provided,
     ///   an error is returned.
     ///
     /// # Errors
@@ -71,10 +47,10 @@ impl Token {
     ///
     /// # TODO
     /// - Implement automatically obtaining the `decoding_key` from provided IDPs.
-    /// - Implement custom validation for each `TokenKind`
+    /// - Implement custom validation for each kind of token
     pub fn validate(
         token: &str,
-        kind: TokenKind,
+        expected_claims: Claims,
         decoding_key: &Vec<u8>,
         algorithm: Algorithm,
     ) -> Result<Self, Error> {
@@ -92,14 +68,18 @@ impl Token {
         };
 
         // Decode and validate token
-        let token = match kind {
-            TokenKind::AccessToken => Self::validate_access_token(token, decoding_key, validation)?,
-            TokenKind::IdToken => Self::validate_id_token(token, decoding_key, validation)?,
-            TokenKind::TransactionToken => {
-                Self::validate_transaction_token(token, decoding_key, validation)?
+        let token = match expected_claims {
+            Claims::AccessToken(expected_claims) => {
+                Self::validate_access_token(token, decoding_key, validation, expected_claims)?
             },
-            TokenKind::UserInfoToken => {
-                Self::validate_userinfo_token(token, decoding_key, validation)?
+            Claims::IdToken(expected_claims) => {
+                Self::validate_id_token(token, decoding_key, validation, expected_claims)?
+            },
+            Claims::TransactionToken(expected_claims) => {
+                Self::validate_transaction_token(token, decoding_key, validation, expected_claims)?
+            },
+            Claims::UserInfoToken(expected_claims) => {
+                Self::validate_userinfo_token(token, decoding_key, validation, expected_claims)?
             },
         };
 
@@ -110,14 +90,25 @@ impl Token {
         token: &str,
         decoding_key: DecodingKey,
         mut validation: Validation,
+        expected_claims: claims::AccessToken,
     ) -> Result<Token, Error> {
         // Define validation parameters
-        validation.set_required_spec_claims(&vec!["aud", "exp", "iat", "iss", "jti", "scope"]);
-        validation.set_audience(&vec!["https://auth.myapp.com"]);
-        validation.set_issuer(&vec!["https://auth.myapp.com"]);
+        validation.set_required_spec_claims(&access_token::REQUIRED_CLAIMS);
+        validation.set_audience(&vec![expected_claims.aud()]);
+        validation.set_issuer(&vec![expected_claims.iss()]);
 
+        // Validate required params
         let data = decode::<AccessToken>(&token, &decoding_key, &validation)
-            .map_err(|e| Error::ValidationError(e))?;
+            .map_err(|e| Error::ValidationError(e.to_string()))?;
+
+        // Validate custom params
+        if data.claims.jti != *expected_claims.jti() {
+            return Err(Error::ValidationError("invalid jti".to_string()));
+        }
+
+        if data.claims.scope != *expected_claims.scope() {
+            return Err(Error::ValidationError("invalid scope".to_string()));
+        }
 
         Ok(Token::AccessToken(data.claims))
     }
@@ -126,11 +117,12 @@ impl Token {
         token: &str,
         decoding_key: DecodingKey,
         validation: Validation,
+        _expected_claims: claims::IdToken,
     ) -> Result<Token, Error> {
         // TODO: Define validation parameters for `ValidateIdToken`
 
         let data = decode::<IdToken>(&token, &decoding_key, &validation)
-            .map_err(|e| Error::ValidationError(e))?;
+            .map_err(|e| Error::ValidationError(e.to_string()))?;
 
         Ok(Token::IdToken(data.claims))
     }
@@ -139,11 +131,12 @@ impl Token {
         token: &str,
         decoding_key: DecodingKey,
         validation: Validation,
+        _expected_claims: claims::UserinfoToken,
     ) -> Result<Token, Error> {
         // TODO: Define validation parameters for `UserInfoToken`
 
         let data = decode::<UserInfoToken>(&token, &decoding_key, &validation)
-            .map_err(|e| Error::ValidationError(e))?;
+            .map_err(|e| Error::ValidationError(e.to_string()))?;
 
         Ok(Token::UserInfoToken(data.claims))
     }
@@ -152,11 +145,12 @@ impl Token {
         token: &str,
         decoding_key: DecodingKey,
         validation: Validation,
+        _expected_claims: claims::TransactionToken,
     ) -> Result<Token, Error> {
         // TODO: Define validation parameters for `TransactionToken`
 
         let data = decode::<TransactionToken>(&token, &decoding_key, &validation)
-            .map_err(|e| Error::ValidationError(e))?;
+            .map_err(|e| Error::ValidationError(e.to_string()))?;
 
         Ok(Token::TransactionToken(data.claims))
     }

@@ -18,9 +18,9 @@ mod user_info_token;
 #[cfg(test)]
 mod tests;
 
-pub use access_token::*;
+pub use access_token::AccessToken;
 pub use error::*;
-pub use id_token::*;
-pub use token::*;
-pub use transaction_token::*;
-pub use user_info_token::*;
+pub use id_token::IdToken;
+pub use token::Token;
+pub use transaction_token::TransactionToken;
+pub use user_info_token::UserInfoToken;

@@ -7,6 +7,9 @@
 
 use serde::{Deserialize, Serialize};
 
+/// Required claims for `AccessToken`
+pub const REQUIRED_CLAIMS: [&str; 6] = ["aud", "exp", "iat", "iss", "jti", "scope"];
+
 /// Represents the claims contained within an Access Token.
 ///
 /// An `AccessToken` is a token used to authorize access to protected resources.

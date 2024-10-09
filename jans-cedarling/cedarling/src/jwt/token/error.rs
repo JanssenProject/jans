@@ -39,5 +39,5 @@ pub enum Error {
     ///
     /// - `0`: The underlying validation error from the `jsonwebtoken` crate.
     #[error("Error validating token: {0}")]
-    ValidationError(jsonwebtoken::errors::Error),
+    ValidationError(String),
 }
