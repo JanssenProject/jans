@@ -1,4 +1,4 @@
-FROM bellsoft/liberica-openjdk-alpine:17.0.12@sha256:877a6ffc273212bd3f695db2a7973a05aa1bfb88ad550ba9ffe7deb7d1e50eee
+FROM bellsoft/liberica-openjdk-alpine:17.0.12@sha256:83719ee0075de03ecc7a99db489fd72a022e49f09c0e6e6350bcc05310c3caf6
 
 # ===============
 # Alpine packages
@@ -41,7 +41,7 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # ====
 
 ENV CN_VERSION=1.1.6-SNAPSHOT
-ENV CN_BUILD_DATE='2024-09-16 06:59'
+ENV CN_BUILD_DATE='2024-10-02 14:33'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-scim-server/${CN_VERSION}/jans-scim-server-${CN_VERSION}.war
 
@@ -60,7 +60,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-scim/webapps \
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=4b07e84a14df81899900724515f3eead1d579443
+ENV JANS_SOURCE_VERSION=5e7b579f097714d685a6c1e0cedd004df0ce85f8
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCIM_RESOURCE_DIR=jans-scim/server/src/main/resources
 

@@ -5,7 +5,7 @@ This document explains how to configure the Gluu Server so that when a user logs
 
 ## Prerequisites 
 
-- A Gluu Server (installation instructions [here](../installation-guide/index.md)) which will play the role of RADIUS client    
+- A Gluu Server (installation instructions [here](../../../../janssen-server/install/)) which will play the role of RADIUS client    
 - The [Fortinet script](https://github.com/GluuFederation/oxAuth/blob/master/Server/integrations/fortinet/FortinetExternalAuthenticator.py) (included in the default Gluu Server distribution);   
 - A Fortinet server which is the RADIUS server.     
 - The jradius-client [jar library](https://sourceforge.net/projects/jradius-client/files/) added to oxAuth
@@ -27,8 +27,7 @@ In `Authentication` -> `Radius Service` -> `Clients`, create a new client (which
     <Set name="extraClasspath">/opt/gluu/jetty/oxauth/custom/libs/jradius-client.jar</Set>
     ```
     
-- [Restart](../operation/services.md#restart) the `oxauth` service     
-    
+- [Restart](../../../../janssen-server/vm-ops/restarting-services.md#restart) the `oxauth` service
 
 
 ### Enable Interception Script

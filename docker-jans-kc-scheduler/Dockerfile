@@ -1,4 +1,4 @@
-FROM bellsoft/liberica-openjre-alpine:17.0.12@sha256:a39e3fb3c96ae89e936a2e50c0a597a91d2357a1ec19096c05e851f54f3a9715
+FROM bellsoft/liberica-openjre-alpine:17.0.12@sha256:29cb2ee552c7c7a924b6a1b59802508dc5123e7edad1d65d575bbf07cd05fa6d
 
 # ===============
 # Alpine packages
@@ -14,7 +14,7 @@ RUN apk update \
 # ============
 
 ENV CN_VERSION=1.1.6-SNAPSHOT
-ENV CN_BUILD_DATE='2024-09-06 13:35'
+ENV CN_BUILD_DATE='2024-10-02 09:30'
 ENV SCHEDULER_HOME=/opt/kc-scheduler
 
 RUN mkdir -p ${SCHEDULER_HOME}/bin \
@@ -38,7 +38,7 @@ RUN wget -q https://repo1.maven.org/maven2/org/codehaus/janino/janino/3.1.9/jani
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=4b07e84a14df81899900724515f3eead1d579443
+ENV JANS_SOURCE_VERSION=5e7b579f097714d685a6c1e0cedd004df0ce85f8
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the assets

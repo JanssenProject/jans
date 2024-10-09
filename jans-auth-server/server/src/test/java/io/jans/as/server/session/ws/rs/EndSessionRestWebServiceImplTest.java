@@ -116,7 +116,7 @@ public class EndSessionRestWebServiceImplTest {
 
     @Test(expectedExceptions = WebApplicationException.class)
     public void validateIdTokenHint_whenIdTokenHintIsBlankButRequired_shouldGetError() {
-        when(appConfiguration.getForceIdTokenHintPrecense()).thenReturn(true);
+        when(appConfiguration.getForceIdTokenHintPresence()).thenReturn(true);
 
         endSessionRestWebService.validateIdTokenHint("", null, "", "http://postlogout.com", "");
     }
