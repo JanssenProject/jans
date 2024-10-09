@@ -2,7 +2,6 @@ package io.jans.service.document.store.model;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -43,7 +42,7 @@ public class Document extends Entry implements Serializable {
     private Date creationDate;
 
     @AttributeName(name = "jansService")
-    private List<String> service;
+    private String service;
 
     @AttributeName(name = "jansLevel")
     private Integer level;
@@ -105,11 +104,11 @@ public class Document extends Entry implements Serializable {
         this.creationDate = creationDate;
     }
 
-    public List<String> getService() {
+    public String getService() {
 		return service;
 	}
 
-	public void setService(List<String> service) {
+	public void setService(String service) {
 		this.service = service;
 	}
 
