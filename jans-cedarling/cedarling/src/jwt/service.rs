@@ -3,17 +3,13 @@ use std::sync::Arc;
 
 use crate::{models::token_data::TokenPayload, JwtConfig};
 
-use super::DecodeJwtError;
+use super::{key_service::KeyService, DecodeJwtError};
 
 /// Service for JWT validation
 #[derive(Clone)]
 pub struct JwtService {
     config: Arc<JwtConfig>,
     key_service: Option<Arc<dyn KeyService>>,
-}
-
-pub trait KeyService: Send + Sync {
-    fn get_key(&self) -> Result<DecodingKey, DecodeJwtError>;
 }
 
 impl JwtService {
@@ -45,6 +41,8 @@ impl JwtService {
     fn decode_and_validate_jwt<T: serde::de::DeserializeOwned>(
         &self,
         jwt: &str,
+        // TODO: figure out if `signature_algorithms` still needed since
+        // the algorithms is defined in the JWT header anyways
         _signature_algorithms: &Vec<String>,
     ) -> Result<T, DecodeJwtError> {
         let header = extract_jwt_header(jwt).map_err(|_| DecodeJwtError::MalformedJWT)?;
@@ -56,7 +54,9 @@ impl JwtService {
             .key_service
             .as_ref()
             .ok_or_else(|| DecodeJwtError::KeyServiceNotFound)?;
-        let key = key_service.get_key()?;
+        let key = key_service
+            .get_key(&header.kid.ok_or(DecodeJwtError::MissingKeyId)?)
+            .map_err(|e| DecodeJwtError::KeyNotFound(e))?;
 
         let claims = match decode::<T>(&jwt, &key, &validator) {
             Ok(data) => data.claims,

@@ -11,9 +11,12 @@
 //! - extract JWT claims
 
 mod error;
+mod key_service;
 mod service;
 #[cfg(test)]
-mod tests;
+mod test;
 
 pub use error::DecodeJwtError;
+#[allow(unused_imports)]
+pub(crate) use key_service::*;
 pub(crate) use service::*;
