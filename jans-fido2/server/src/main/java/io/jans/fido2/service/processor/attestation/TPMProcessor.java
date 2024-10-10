@@ -168,6 +168,7 @@ public class TPMProcessor implements AttestationFormatProcessor {
             credIdAndCounters.setAttestationType(getAttestationFormat().getFmt());
             credIdAndCounters.setCredId(base64Service.urlEncodeToString(authData.getCredId()));
             credIdAndCounters.setUncompressedEcPoint(base64Service.urlEncodeToString(authData.getCosePublicKey()));
+            credIdAndCounters.setAuthenticatorName(attestationCertificateService.getAttestationAuthenticatorName(authData));
             credIdAndCounters.setSignatureAlgorithm(alg);
         } else {
             throw errorResponseFactory.badRequestException(AttestationErrorResponseType.TPM_ERROR, "Problem with TPM attestation. Unsupported");

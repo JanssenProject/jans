@@ -171,6 +171,7 @@ public class AppleAttestationProcessor implements AttestationFormatProcessor {
 			// log.info("attStmt.get(\"alg\")"+attStmt.get("alg"));
 			int alg = -7;// commonVerifiers.verifyAlgorithm(attStmt.get("alg"), authData.getKeyType());
 			credIdAndCounters.setSignatureAlgorithm(alg);
+			credIdAndCounters.setAuthenticatorName(attestationCertificateService.getAttestationAuthenticatorName(authData));
 		}
 	}
 }
