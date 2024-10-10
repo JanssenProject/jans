@@ -388,7 +388,7 @@ the [Text-Based UI](./config-tools/jans-tui/README.md) also.
 You can start TUI using the command below:
 
 ```bash title="Command"
-sudo /opt/jans/jans-cli/jans_cli_tui.py
+jans tui
 ```
 
 ### Asset Screen

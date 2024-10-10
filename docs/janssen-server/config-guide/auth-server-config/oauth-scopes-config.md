@@ -379,7 +379,7 @@ Just change the `inum` value to your own according to which one you want to dele
 You can start TUI using the command below:
 
 ```bash title="Command"
-sudo /opt/jans/jans-cli/jans_cli_tui.py
+jans tui
 ```
 
 ### Scope Screen 
