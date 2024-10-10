@@ -508,7 +508,7 @@ and update.
 You can start TUI using the command below:
 
 ```bash title="Command"
-sudo /opt/jans/jans-cli/jans_cli_tui.py
+jans tui
 ```
 
 Navigate to `Config API` section where administrators can update 

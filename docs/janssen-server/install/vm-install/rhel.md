@@ -96,8 +96,8 @@ After the successful completion of setup process, [verify the system health](../
 
 Begin configuration by accessing the TUI with the following command:
 
-```
-sudo /opt/jans/jans-cli/jans_cli_tui.py
+```bash
+jans tui
 ```
 
 Full TUI documentation can be found [here](../../config-guide/config-tools/jans-tui/README.md)
