@@ -111,9 +111,9 @@ mod tests {
             principal: "test_principal".to_string(),
             action: "test_action".to_string(),
             resource: "test_resource".to_string(),
-            context: "{}".to_string(),
+            context: serde_json::json!({}),
             decision: Decision::Allow,
-            diagnostics: "test diagnostic info".to_string(),
+            diagnostics: Default::default(),
         });
         let entry2 = LogEntry::new_with_data(
             app_types::PdpID::new(),

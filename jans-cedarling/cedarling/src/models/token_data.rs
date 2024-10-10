@@ -10,41 +10,54 @@ use std::collections::HashMap;
 use cedar_policy::RestrictedExpression;
 use serde_json::Value;
 
-/// A container for storing token data.
-/// Provides methods for retrieving claims from the token.
-#[derive(Debug, serde::Deserialize)]
-pub(crate) struct TokenClaim {
+/// A container for storing token data or data attributes for the .
+/// Provides methods for retrieving payload from the token or attributes for the .
+#[derive(Debug, Clone, serde::Deserialize)]
+pub(crate) struct TokenPayload {
     #[serde(flatten)]
-    pub claims: HashMap<String, serde_json::Value>,
+    pub payload: HashMap<String, serde_json::Value>,
 }
 
-impl TokenClaim {
+impl TokenPayload {
+    fn new(payload: HashMap<String, serde_json::Value>) -> Self {
+        Self { payload }
+    }
+
     /// Get claim attribute value
     /// for all types that implements `ClaimGetter<T>`
     pub fn get_value<T>(&self, key: &str) -> Result<T, GetTokenClaimValue>
     where
-        TokenClaim: ClaimGetter<T>,
+        TokenPayload: AttributeGetter<T>,
     {
-        self.get_claim_value(key)
+        self.get_attribute_value(key)
     }
 
     /// Get claim attribute [`RestrictedExpression`]
     /// for all types that implements `ClaimGetter<T>`
     pub fn get_expression<T>(&self, key: &str) -> Result<RestrictedExpression, GetTokenClaimValue>
     where
-        TokenClaim: ClaimGetter<T>,
+        TokenPayload: AttributeGetter<T>,
     {
-        self.get_claim_expression(key)
+        self.get_attribute_expression(key)
+    }
+}
+
+impl From<HashMap<String, serde_json::Value>> for TokenPayload {
+    fn from(value: HashMap<String, serde_json::Value>) -> Self {
+        TokenPayload::new(value)
     }
 }
 
 /// Trait to get claim attribute value by key from token data
-pub(crate) trait ClaimGetter<T> {
+pub(crate) trait AttributeGetter<T> {
     /// Get claim attribute value
-    fn get_claim_value(&self, key: &str) -> Result<T, GetTokenClaimValue>;
+    fn get_attribute_value(&self, key: &str) -> Result<T, GetTokenClaimValue>;
 
     /// Get claim attribute [`RestrictedExpression`]
-    fn get_claim_expression(&self, key: &str) -> Result<RestrictedExpression, GetTokenClaimValue>;
+    fn get_attribute_expression(
+        &self,
+        key: &str,
+    ) -> Result<RestrictedExpression, GetTokenClaimValue>;
 }
 
 /// Errors that can occur when trying to get claim attribute value from token data
@@ -90,9 +103,9 @@ impl GetTokenClaimValue {
 }
 
 // impl ClaimGetter for getting `i64` value
-impl ClaimGetter<i64> for TokenClaim {
-    fn get_claim_value(&self, key: &str) -> Result<i64, GetTokenClaimValue> {
-        if let Some(attr_value) = self.claims.get(key) {
+impl AttributeGetter<i64> for TokenPayload {
+    fn get_attribute_value(&self, key: &str) -> Result<i64, GetTokenClaimValue> {
+        if let Some(attr_value) = self.payload.get(key) {
             attr_value
                 .as_i64()
                 .ok_or(GetTokenClaimValue::not_correct_type(key, "i64", attr_value))
@@ -101,15 +114,18 @@ impl ClaimGetter<i64> for TokenClaim {
         }
     }
 
-    fn get_claim_expression(&self, key: &str) -> Result<RestrictedExpression, GetTokenClaimValue> {
+    fn get_attribute_expression(
+        &self,
+        key: &str,
+    ) -> Result<RestrictedExpression, GetTokenClaimValue> {
         Ok(RestrictedExpression::new_long(self.get_value(key)?))
     }
 }
 
 // impl ClaimGetter for getting `String` value
-impl ClaimGetter<String> for TokenClaim {
-    fn get_claim_value(&self, key: &str) -> Result<String, GetTokenClaimValue> {
-        if let Some(attr_value) = self.claims.get(key) {
+impl AttributeGetter<String> for TokenPayload {
+    fn get_attribute_value(&self, key: &str) -> Result<String, GetTokenClaimValue> {
+        if let Some(attr_value) = self.payload.get(key) {
             let result = attr_value
                 .as_str()
                 .ok_or(GetTokenClaimValue::not_correct_type(
@@ -122,7 +138,32 @@ impl ClaimGetter<String> for TokenClaim {
         }
     }
 
-    fn get_claim_expression(&self, key: &str) -> Result<RestrictedExpression, GetTokenClaimValue> {
+    fn get_attribute_expression(
+        &self,
+        key: &str,
+    ) -> Result<RestrictedExpression, GetTokenClaimValue> {
         Ok(RestrictedExpression::new_string(self.get_value(key)?))
+    }
+}
+
+// impl ClaimGetter for getting `bool` value
+impl AttributeGetter<bool> for TokenPayload {
+    fn get_attribute_value(&self, key: &str) -> Result<bool, GetTokenClaimValue> {
+        if let Some(attr_value) = self.payload.get(key) {
+            attr_value
+                .as_bool()
+                .ok_or(GetTokenClaimValue::not_correct_type(
+                    key, "bool", attr_value,
+                ))
+        } else {
+            Err(GetTokenClaimValue::KeyNotFound(key.to_string()))
+        }
+    }
+
+    fn get_attribute_expression(
+        &self,
+        key: &str,
+    ) -> Result<RestrictedExpression, GetTokenClaimValue> {
+        Ok(RestrictedExpression::new_bool(self.get_value(key)?))
     }
 }
