@@ -373,7 +373,7 @@ To delete the, run the following command with the specific user ID as `--url-suf
 Start TUI using the command below:
 
 ```bash title="Command"
-/opt/jans/jans-cli/jans_cli_tui.py
+jans tui
 ```
 
 Navigate to `Users` to open the users tab as shown in the image below:
