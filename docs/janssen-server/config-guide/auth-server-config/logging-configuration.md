@@ -113,7 +113,7 @@ To update the configuration follow the steps below.
 Start TUI using the command below:
 
 ```bash title="Command"
-sudo /opt/jans/jans-cli/jans_cli_tui.py
+jans tui
 ```
 ### Logging Configuration for Auth Server
 

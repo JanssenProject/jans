@@ -1,11 +1,7 @@
-from cedarling_python import AuthzConfig, MemoryLogConfig, DisabledLoggingConfig, StdOutLogConfig
-from cedarling_python import PolicyStoreSource, PolicyStoreConfig, BootstrapConfig
+from cedarling_python import MemoryLogConfig, DisabledLoggingConfig, StdOutLogConfig
+from cedarling_python import PolicyStoreSource, PolicyStoreConfig, BootstrapConfig, JwtConfig
 from cedarling_python import Cedarling
 
-
-authz_config = AuthzConfig(application_name="example_app_name")
-# we can also set value to as property
-# authz_config.application_name = "example_app_name2"
 
 # use log config to store logs in memory with a time-to-live of 120 seconds
 # by default it is 60 seconds
@@ -31,11 +27,17 @@ policy_store_config = PolicyStoreConfig(
 # if we have only one policy store in file we can avoid using store id
 policy_store_config.store_id = None
 
+# Create jwt configuration
+# do not validate JWT tokens
+jwt_config = JwtConfig(enabled=False)
+
 # collect all in the BootstrapConfig
 bootstrap_config = BootstrapConfig(
-    authz_config=authz_config,
+    application_name="TestApp",
     log_config=log_config,
-    policy_store_config=policy_store_config)
+    policy_store_config=policy_store_config,
+    jwt_config=jwt_config
+)
 
 # initialize cedarling instance
 # all values in the bootstrap_config is parsed and validated at this step.

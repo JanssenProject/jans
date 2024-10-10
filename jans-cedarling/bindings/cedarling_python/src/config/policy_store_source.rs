@@ -14,7 +14,7 @@ use pyo3::prelude::*;
 ///
 /// Example
 /// -------
-/// ```python
+/// ```
 /// # Initialize with a JSON string
 /// config = PolicyStoreSource(json='{...}')
 /// ```
