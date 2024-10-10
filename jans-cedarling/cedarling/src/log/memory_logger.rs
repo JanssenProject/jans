@@ -86,8 +86,10 @@ impl LogStorage for MemoryLogger {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::models::log_entry::{AuthorizationLogInfo, Decision, LogEntry, LogType};
-    use uuid7::uuid7;
+    use crate::models::{
+        app_types,
+        log_entry::{AuthorizationLogInfo, Decision, LogEntry, LogType},
+    };
 
     fn create_memory_logger() -> MemoryLogger {
         let config = MemoryLogConfig { log_ttl: 60 };
@@ -99,17 +101,25 @@ mod tests {
         let logger = create_memory_logger();
 
         // create log entries
-        let entry1 = LogEntry::new_with_data(uuid7(), "app1".to_string(), LogType::Decision)
-            .set_message("some message".to_string())
-            .set_auth_info(AuthorizationLogInfo {
-                principal: "test_principal".to_string(),
-                action: "test_action".to_string(),
-                resource: "test_resource".to_string(),
-                context: "{}".to_string(),
-                decision: Decision::Allow,
-                diagnostics: "test diagnostic info".to_string(),
-            });
-        let entry2 = LogEntry::new_with_data(uuid7(), "app2".to_string(), LogType::System);
+        let entry1 = LogEntry::new_with_data(
+            app_types::PdpID::new(),
+            app_types::ApplicationName("app1".to_string()),
+            LogType::Decision,
+        )
+        .set_message("some message".to_string())
+        .set_auth_info(AuthorizationLogInfo {
+            principal: "test_principal".to_string(),
+            action: "test_action".to_string(),
+            resource: "test_resource".to_string(),
+            context: "{}".to_string(),
+            decision: Decision::Allow,
+            diagnostics: "test diagnostic info".to_string(),
+        });
+        let entry2 = LogEntry::new_with_data(
+            app_types::PdpID::new(),
+            app_types::ApplicationName("app2".to_string()),
+            LogType::System,
+        );
 
         // log entries
         logger.log(entry1.clone());
@@ -146,8 +156,16 @@ mod tests {
         let logger = create_memory_logger();
 
         // create log entries
-        let entry1 = LogEntry::new_with_data(uuid7(), "app1".to_string(), LogType::Decision);
-        let entry2 = LogEntry::new_with_data(uuid7(), "app2".to_string(), LogType::Metric);
+        let entry1 = LogEntry::new_with_data(
+            app_types::PdpID::new(),
+            app_types::ApplicationName("app1".to_string()),
+            LogType::Decision,
+        );
+        let entry2 = LogEntry::new_with_data(
+            app_types::PdpID::new(),
+            app_types::ApplicationName("app2".to_string()),
+            LogType::Metric,
+        );
 
         // log entries
         logger.log(entry1.clone());

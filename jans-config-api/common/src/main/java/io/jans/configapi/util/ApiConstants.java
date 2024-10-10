@@ -85,6 +85,7 @@ public class ApiConstants {
     public static final String STREAM = "/stream";
     public static final String SERVICES = "/services";
     public static final String ASSET_TYPE = "/asset-type";
+    public static final String ASSET_DIR_MAPPING = "/asset-dir-mapping";
     public static final String SERVICE = "/service";
     public static final String SEARCH = "/search";
     public static final String JANSID_PATH = "/id";

@@ -331,7 +331,7 @@ It will delete the OpenID Connect client if it matches with the given `inum`.
 Start TUI using the command below:
 
 ```bash title="Command"
-sudo /opt/jans/jans-cli/jans_cli_tui.py
+jans tui
 ```
 
 ### Client Screen

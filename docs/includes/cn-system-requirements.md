@@ -4,7 +4,7 @@ The resources may be set minimally to the below:
 - 8-10 CPU cores based on the services deployed
 - 50GB hard-disk
 
-Use the listing below for detailed estimation of minimum required resources. Table contains the default resources recommendations per service. Depending on the use of each service the resources needs may be increased or decreased.
+Use the listing below for a detailed estimation of minimum required resources. The table contains the default resources recommendation per service. Depending on the use of each service the resources need may be increased or decreased.
 
 | Service           | CPU Unit | RAM   | Disk Space | Processor Type | Required                           |
 |-------------------|----------|-------|------------|----------------|------------------------------------|
