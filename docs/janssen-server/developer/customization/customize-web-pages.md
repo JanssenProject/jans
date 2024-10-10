@@ -25,6 +25,81 @@ All of the above need some amount of custom assets, like custom CSS stylesheets,
 logo images, etc to be available on the Janssen Server. All these are called
 `Custom Assets`.
 
+## Custom Assets Accepted by Module
+
+Listing of custom asset types that each Janssen Server module accepts:
+
+
+### Config-API
+
+| Path | Asset Type |
+|----------------|-------------|
+| /opt/jans/jetty/jans-config-api/custom/config	| *.xml
+| /opt/jans/jetty/jans-config-api/custom/i18n	| *.properties
+| /opt/jans/jetty/jans-config-api/custom/libs		| *.jar
+| /opt/jans/jetty/jans-config-api/custom/pages	| *.xhtml
+| /opt/jans/jetty/jans-config-api/custom/static | *.js, *.css, *.png, *.gif, *.jpg, *.jpeg
+
+## Auth-Server
+
+
+
+| Path | Asset Type |
+|----------------|-------------|
+| /opt/jans/jetty/jans-auth/custom/i18n	| *.properties
+| /opt/jans/jetty/jans-auth/custom/libs	| *.jars
+| /opt/jans/jetty/jans-auth/custom/pages| *.xhtml
+| /opt/jans/jetty/jans-auth/custom/static	| *.js, *.css, *.png, *.gif, *.jpg, *.jpeg
+| /etc/certs/jans-auth-keys.pkcs12	 | *.pkcs12
+
+### Casa
+
+| Path | Asset Type |
+|----------------|-------------|
+| /opt/jans/jetty/jans-casa/plugins		| *.jar
+| /opt/jans/jetty/jans-casa/static		| *.js, *.css, *.png, *.gif, *.jpg, *.jpeg
+
+### Agama
+
+| Path | Asset Type |
+|----------------|-------------|
+| /opt/jans/jetty/jans-auth/agama		| engine templates
+| /opt/jans/jetty/jans-auth/agama/fl		| *.js, *.css, *.png, *.gif, *.jpg, *.jpeg
+| /opt/jans/jetty/jans-auth/agama/ftl | *.ftl, *.ftlh
+| /opt/jans/jetty/jans-auth/agama/scripts | *.java *.groovy, *.gvy, *.gy, *.gsh
+
+### Fido2
+
+| Path | Asset Type |
+|----------------|-------------|
+| /etc/jans/conf/fido2/authenticator_cert| *.pem, *.crt
+| /etc/jans/conf/fido2/mds/cert	| *.crt
+| /etc/jans/conf/fido2/mds/toc | *.jwt
+| /etc/jans/conf/fido2/server_metadata | *.json
+
+### Lock
+
+| Path | Asset Type |
+|----------------|-------------|
+| /opt/jans/jetty/jans-lock/custom-libs	| *.jar
+
+
+### KeyCloak-link
+
+| Path | Asset Type |
+|----------------|-------------|
+| /opt/jans/jetty/jans-keycloak-link/custom/libs/| *.jar
+| /var/jans/keycloak-link-snapshots/	| *.txt
+
+
+### Link
+
+| Path | Asset Type |
+|----------------|-------------|
+| /opt/jans/jetty/jans-link/custom-libs	| *.jar
+| /var/jans/link-snapshots/	| *.txt
+
+
 ## Managing Custom Assets
 
 Janssen Server configuration tools like CLI and TUI provide the ability to add, 
@@ -33,20 +108,6 @@ update, and delete custom assets. Refer to the
 to learn how to manage custom assets.
 
  
-
-### Directory structure for customization
-
-When custom assets are added Janssen Server, the server makes the assets 
-available at following locations so that they can be referenced and used by
-other components.
-
-| Directory                      | Asset Type                      | Description                         |
-|--------------------------------|-------------------------------------|-------------------------------------|
-| /opt/jans/jetty/`<service-name>`/custom/i18n   | properties                         | Resource bundle file                |
-| /opt/jans/jetty/`<service-name>`/custom/libs   | lib                                | java archive library              |
-| /opt/jans/jetty/`<service-name>`/custom/pages | xhtml                              | Web pages                           |
-| /opt/jans/jetty/`<service-name>`/custom/static | js, css, png, gif , jpg, jpeg | Static resources like Java-script, style-sheet and images |
-
 ## Customizing Web Pages
 
 Janssen Server uses [xhtml pages](https://github.com/JanssenProject/jans/tree/main/jans-auth-server/server/src/main/webapp) to render the web interface needed in 
