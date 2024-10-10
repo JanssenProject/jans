@@ -1,6 +1,6 @@
 // use std::string::FromUtf8Error;
 
-use std::sync::Arc;
+use std::{str::pattern::DoubleEndedSearcher, sync::Arc};
 
 /// Error type for JWT decoding
 #[derive(thiserror::Error, Debug)]
@@ -57,4 +57,29 @@ pub enum DecodeJwtError {
     /// Happens when a key could not be retrieved from the `KeyService`
     #[error("Could not get hold of a key")]
     KeyNotFound,
+}
+
+impl Into<DecodeJwtError> for jsonwebtoken::errors::Error {
+    fn into(self) -> DecodeJwtError {
+        match self.kind() {
+            jsonwebtoken::errors::ErrorKind::InvalidToken => DecodeJwtError::MalformedJWT,
+            jsonwebtoken::errors::ErrorKind::InvalidSignature => DecodeJwtError::InvalidSignature,
+            jsonwebtoken::errors::ErrorKind::InvalidEcdsaKey => DecodeJwtError::InvalidKey,
+            jsonwebtoken::errors::ErrorKind::InvalidRsaKey(_) => DecodeJwtError::InvalidKey,
+            jsonwebtoken::errors::ErrorKind::ExpiredSignature => DecodeJwtError::ExpiredSignature,
+            jsonwebtoken::errors::ErrorKind::InvalidIssuer => DecodeJwtError::InvalidIssuer,
+            jsonwebtoken::errors::ErrorKind::InvalidAudience => DecodeJwtError::InvalidAudience,
+            jsonwebtoken::errors::ErrorKind::Base64(decode_error) => {
+                DecodeJwtError::UnableToDecodeBase64(decode_error.to_string())
+            },
+
+            jsonwebtoken::errors::ErrorKind::Json(arc) => {
+                DecodeJwtError::UnableToParseJson(arc.clone())
+            },
+            jsonwebtoken::errors::ErrorKind::Utf8(err) => {
+                DecodeJwtError::UnableToString(err.clone())
+            },
+            _ => DecodeJwtError::Unexpected(self.to_string()),
+        }
+    }
 }
