@@ -28,7 +28,4 @@ docker_images="docker-jans-auth-server docker-jans-certmanager docker-jans-confi
 for image in $docker_images;do
   cp "$MAIN_DIRECTORY_LOCATION"/"$image"/README.md "$MAIN_DIRECTORY_LOCATION"/docs/admin/reference/kubernetes/"$image".md
 done
-echo "cp docker-opendj main README.md"
-wget https://raw.githubusercontent.com/GluuFederation/docker-opendj/5.0/README.md -O "$MAIN_DIRECTORY_LOCATION"/docs/admin/reference/kubernetes/docker-opendj.md
-sed -i '1 s/^/---\ntags:\n  - administration\n  - reference\n  - kubernetes\n - docker image\n---\n/' "$MAIN_DIRECTORY_LOCATION"/docs/admin/reference/kubernetes/docker-opendj.md
 echo "generated-cn-docs.sh executed successfully!"
