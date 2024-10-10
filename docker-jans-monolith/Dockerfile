@@ -15,6 +15,7 @@ RUN echo 'APT::Install-Suggests "0";' >> /etc/apt/apt.conf.d/00-docker \
     && echo 'APT::Install-Recommends "0";' >> /etc/apt/apt.conf.d/00-docker
 
 # Prevent prompt errors during package installation
+# @TODO: remove python-ldap3 after ldap support removed
 RUN DEBIAN_FRONTEND=noninteractive \
     apt-get update \
     && apt-get install -y python3 tini curl ca-certificates dbus systemd iproute2 gpg python3-pip python3-dev libpq-dev gcc python3-psycopg2 python3-ldap3 git maven \
@@ -72,7 +73,6 @@ ENV CN_HOSTNAME="demoexample.jans.io" \
     TEST_CLIENT_TRUSTED="true" \
     CN_INSTALL_COUCHBASE="false" \
     CN_INSTALL_SPANNER="false" \
-    CN_INSTALL_LDAP="false" \
     CN_INSTALL_MYSQL="false" \
     CN_INSTALL_PGSQL="false" \
     CN_INSTALL_CONFIG_API="true" \

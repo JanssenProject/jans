@@ -12,7 +12,6 @@ def validate_persistence_type(type_: str) -> None:
 
     - `couchbase`
     - `hybrid`
-    - `ldap`
     - `spanner`
     - `sql`
 
@@ -26,20 +25,6 @@ def validate_persistence_type(type_: str) -> None:
             f"Unsupported persistence type {type_}; "
             f"please choose one of {types}"
         )
-
-
-def validate_persistence_ldap_mapping(type_: str, ldap_mapping: str) -> None:
-    """Validate persistence mapping for ldap.
-
-    This function is deprecated.
-    """
-    import warnings
-
-    warnings.warn(
-        "'validate_persistence_ldap_mapping' function is now a no-op function "
-        "and no longer required by hybrid persistence; "
-        "use 'validate_persistence_hybrid_mapping' function instead",
-        DeprecationWarning)
 
 
 def validate_persistence_sql_dialect(dialect: str) -> None:

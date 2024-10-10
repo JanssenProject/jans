@@ -7,7 +7,6 @@ from collections import Counter
 from collections import deque
 
 from jans.pycloudlib.persistence.couchbase import CouchbaseClient
-from jans.pycloudlib.persistence.ldap import LdapClient
 from jans.pycloudlib.persistence.sql import SqlClient
 from jans.pycloudlib.persistence.spanner import SpannerClient
 from jans.pycloudlib.persistence.utils import PersistenceMapper
@@ -73,39 +72,6 @@ class BasePersistence:
 
     def modify_auth_config(self, id_, rev, conf_dynamic, conf_webkeys):
         raise NotImplementedError
-
-
-class LdapPersistence(BasePersistence):
-    def __init__(self, manager):
-        self.client = LdapClient(manager)
-
-    def get_auth_config(self):
-        entry = self.client.get(
-            "ou=jans-auth,ou=configuration,o=jans",
-            attributes=["jansRevision", "jansConfWebKeys", "jansConfDyn"],
-        )
-
-        if not entry:
-            return {}
-
-        config = {
-            "id": entry.entry_dn,
-            "jansRevision": entry["jansRevision"][0],
-            "jansConfWebKeys": entry["jansConfWebKeys"][0],
-            "jansConfDyn": entry["jansConfDyn"][0],
-        }
-        return config
-
-    def modify_auth_config(self, id_, rev, conf_dynamic, conf_webkeys):
-        modified, _ = self.client.modify(
-            id_,
-            {
-                'jansRevision': [(self.client.MODIFY_REPLACE, [str(rev)])],
-                'jansConfWebKeys': [(self.client.MODIFY_REPLACE, [json.dumps(conf_webkeys)])],
-                'jansConfDyn': [(self.client.MODIFY_REPLACE, [json.dumps(conf_dynamic)])],
-            }
-        )
-        return modified
 
 
 class CouchbasePersistence(BasePersistence):
@@ -178,7 +144,6 @@ class SpannerPersistence(SqlPersistence):
 
 
 _backend_classes = {
-    "ldap": LdapPersistence,
     "couchbase": CouchbasePersistence,
     "sql": SqlPersistence,
     "spanner": SpannerPersistence,

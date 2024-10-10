@@ -149,10 +149,6 @@ configmap:
   cnSecretKubernetesSecret: cn
   # -- Load balancer address for AWS if the FQDN is not registered.
   lbAddr: ""
-  # -- OpenDJ certificate string. This must be encoded using base64.
-  cnLdapCrt: SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo=
-  # -- OpenDJ key string. This must be encoded using base64.
-  cnLdapKey: SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo=
   # -- Quarkus transaction recovery. When using MySQL, there could be issue regarding XA_RECOVER_ADMIN; refer to https://dev.mysql.com/doc/refman/8.0/en/privileges-provided.html#priv_xa-recover-admin for details.
   quarkusTransactionEnableRecovery: true
   # -- Keycloak logging level
@@ -218,10 +214,6 @@ auth-server:
     persistenceDurationLogTarget: "FILE"
     # -- jans-auth_persistence_duration.log level
     persistenceDurationLogLevel: "INFO"
-    # -- jans-auth_persistence_ldap_statistics.log target
-    ldapStatsLogTarget: "FILE"
-    # -- jans-auth_persistence_ldap_statistics.log level
-    ldapStatsLogLevel: "INFO"
     # -- jans-auth_script.log target
     scriptLogTarget: "FILE"
     # -- jans-auth_script.log level
@@ -412,10 +404,6 @@ config-api:
     persistenceDurationLogTarget: "FILE"
     # -- config-api_persistence_duration.log level
     persistenceDurationLogLevel: "INFO"
-    # -- config-api_persistence_ldap_statistics.log target
-    ldapStatsLogTarget: "FILE"
-    # -- config-api_persistence_ldap_statistics.log level
-    ldapStatsLogLevel: "INFO"
     # -- config-api_script.log target
     scriptLogTarget: "FILE"
     # -- config-api_script.log level
@@ -490,10 +478,6 @@ scim:
     persistenceDurationLogTarget: "FILE"
     # -- jans-scim_persistence_duration.log level
     persistenceDurationLogLevel: "INFO"
-    # -- jans-scim_persistence_ldap_statistics.log target
-    ldapStatsLogTarget: "FILE"
-    # -- jans-scim_persistence_ldap_statistics.log level
-    ldapStatsLogLevel: "INFO"
     # -- jans-scim_script.log target
     scriptLogTarget: "FILE"
     # -- jans-scim_script.log level
@@ -533,10 +517,6 @@ link:
     persistenceDurationLogTarget: "FILE"
     # -- cacherefresh_persistence_duration.log level
     persistenceDurationLogLevel: "INFO"
-    # -- cacherefresh_persistence_ldap_statistics.log target
-    ldapStatsLogTarget: "FILE"
-    # -- cacherefresh_persistence_ldap_statistics.log level
-    ldapStatsLogLevel: "INFO"
     # -- cacherefresh_script.log target
     scriptLogTarget: "FILE"
     # -- cacherefresh_script.log level

@@ -88,57 +88,7 @@ def test_wait_for_secret(gmanager, monkeypatch):
         wait_for_secret(gmanager)
 
 
-def test_wait_for_ldap(gmanager, monkeypatch):
-    from jans.pycloudlib.wait import wait_for_ldap
-
-    monkeypatch.setenv("CN_WAIT_MAX_TIME", "0")
-    monkeypatch.setenv("CN_PERSISTENCE_TYPE", "ldap")
-
-    monkeypatch.setattr(
-        "jans.pycloudlib.persistence.ldap.LdapClient.search",
-        lambda cls, base, filter_, attrs, limit: None
-    )
-
-    with pytest.raises(Exception):
-        wait_for_ldap(gmanager)
-
-
 _PERSISTENCE_MAPPER_GROUP_FUNC = "jans.pycloudlib.persistence.utils.PersistenceMapper.groups"
-
-
-def test_wait_for_ldap_no_search_mapping(gmanager, monkeypatch):
-    from jans.pycloudlib.wait import wait_for_ldap
-
-    monkeypatch.setenv("CN_WAIT_MAX_TIME", "0")
-    monkeypatch.setenv("CN_PERSISTENCE_TYPE", "ldap")
-
-    monkeypatch.setattr(
-        "jans.pycloudlib.persistence.ldap.LdapClient.is_connected",
-        lambda cls: False
-    )
-
-    monkeypatch.setattr(
-        _PERSISTENCE_MAPPER_GROUP_FUNC,
-        lambda cls: {"ldap": ["random"]}
-    )
-
-    with pytest.raises(Exception):
-        wait_for_ldap(gmanager)
-
-
-def test_wait_for_ldap_conn(gmanager, monkeypatch):
-    from jans.pycloudlib.wait import wait_for_ldap_conn
-
-    monkeypatch.setenv("CN_WAIT_MAX_TIME", "0")
-    monkeypatch.setenv("CN_PERSISTENCE_TYPE", "ldap")
-
-    monkeypatch.setattr(
-        "jans.pycloudlib.persistence.ldap.LdapClient.is_connected",
-        lambda cls: False
-    )
-
-    with pytest.raises(Exception):
-        wait_for_ldap_conn(gmanager)
 
 
 def test_wait_for_couchbase(gmanager, monkeypatch):
@@ -308,7 +258,6 @@ _WAIT_FOR_FUNC = "jans.pycloudlib.wait.wait_for"
 
 
 @pytest.mark.parametrize("persistence_type, deps", [
-    ("ldap", ["ldap"]),
     ("couchbase", ["couchbase"]),
     ("sql", ["sql"]),
     ("spanner", ["spanner"]),
@@ -332,7 +281,7 @@ def test_wait_for_persistence_hybrid(monkeypatch, gmanager):
         json.dumps({
             "default": "sql",
             "user": "spanner",
-            "site": "ldap",
+            "site": "sql",
             "cache": "sql",
             "token": "couchbase",
             "session": "sql",
@@ -341,11 +290,10 @@ def test_wait_for_persistence_hybrid(monkeypatch, gmanager):
 
     with patch(_WAIT_FOR_FUNC, autospec=True) as patched:
         wait_for_persistence(gmanager)
-        patched.assert_called_with(gmanager, ["couchbase", "ldap", "spanner", "sql"])
+        patched.assert_called_with(gmanager, ["couchbase", "spanner", "sql"])
 
 
 @pytest.mark.parametrize("persistence_type, deps", [
-    ("ldap", ["ldap_conn"]),
     ("couchbase", ["couchbase_conn"]),
     ("sql", ["sql_conn"]),
     ("spanner", ["spanner_conn"]),
@@ -369,7 +317,7 @@ def test_wait_for_persistence_conn_hybrid(monkeypatch, gmanager):
         json.dumps({
             "default": "sql",
             "user": "spanner",
-            "site": "ldap",
+            "site": "sql",
             "cache": "sql",
             "token": "couchbase",
             "session": "sql",
@@ -378,7 +326,7 @@ def test_wait_for_persistence_conn_hybrid(monkeypatch, gmanager):
 
     with patch(_WAIT_FOR_FUNC, autospec=True) as patched:
         wait_for_persistence_conn(gmanager)
-        patched.assert_called_with(gmanager, ["couchbase_conn", "ldap_conn", "spanner_conn", "sql_conn"])
+        patched.assert_called_with(gmanager, ["couchbase_conn", "spanner_conn", "sql_conn"])
 
 
 def test_wait_for(gmanager):

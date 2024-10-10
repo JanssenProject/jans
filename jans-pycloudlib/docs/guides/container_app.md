@@ -55,7 +55,7 @@ def create_manager():
 def wait(manager):
     # ensure startup orders is guarded by waiting for readiness of
     # the following dependencies
-    deps = ["config", "secret", "ldap"]
+    deps = ["config", "secret", "sql"]
     wait_for(manager, deps)
 
 
@@ -85,37 +85,47 @@ confDir=
 pythonModulesDir=/opt/jans/python/libs:/opt/jython/Lib/site-packages
 ```
 
-Create ``/app/templates/jans-ldap.properties.tmpl``:
+Create ``/app/templates/jans-mysql.properties``:
 
 ```
-bindDN: %(ldap_binddn)s
-bindPassword: %(encoded_ox_ldap_pw)s
-servers: %(ldap_hostname)s:%(ldaps_port)s
+db.schema.name=%(rdbm_schema)s
 
-useSSL: true
-ssl.trustStoreFile: %(ldapTrustStoreFn)s
-ssl.trustStorePin: %(encoded_ldapTrustStorePass)s
-ssl.trustStoreFormat: pkcs12
+connection.uri=jdbc:mysql://%(rdbm_host)s:%(rdbm_port)s/%(rdbm_db)s?enabledTLSProtocols=TLSv1.2
 
-maxconnections: 10
+connection.driver-property.serverTimezone=%(server_time_zone)s
+# Prefix connection.driver-property.key=value will be coverterd to key=value JDBC driver properties
+#connection.driver-property.driverProperty=driverPropertyValue
+
+#connection.driver-property.useServerPrepStmts=false
+connection.driver-property.cachePrepStmts=false
+connection.driver-property.cacheResultSetMetadata=true
+connection.driver-property.metadataCacheSize=500
+#connection.driver-property.prepStmtCacheSize=500
+#connection.driver-property.prepStmtCacheSqlLimit=1024
+
+auth.userName=%(rdbm_user)s
+auth.userPassword=%(rdbm_password_enc)s
+
+# Password hash method
+password.encryption.method=SSHA-256
+
+# Connection pool size
+connection.pool.max-total=40
+connection.pool.max-idle=15
+connection.pool.min-idle=5
+
+# Max time needed to create connection pool in milliseconds
+connection.pool.create-max-wait-time-millis=20000
 
 # Max wait 20 seconds
-connection.max-wait-time-millis=20000
+connection.pool.max-wait-time-millis=20000
 
-# Force to recreate polled connections after 30 minutes
-connection.max-age-time-millis=1800000
-
-# Invoke connection health check after checkout it from pool
-connection-pool.health-check.on-checkout.enabled=false
-
-# Interval to check connections in pool. Value is 3 minutes. Not used when onnection-pool.health-check.on-checkout.enabled=true
-connection-pool.health-check.interval-millis=180000
-
-# How long to wait during connection health check. Max wait 20 seconds
-connection-pool.health-check.max-response-time-millis=20000
+# Allow to evict connection in pool after 30 minutes
+connection.pool.min-evictable-idle-time-millis=1800000
 
 binaryAttributes=objectGUID
 certificateAttributes=userCertificate
+
 ```
 
 Create a Python script to configure persistence:
@@ -124,10 +134,10 @@ Create a Python script to configure persistence:
 import os
 
 from jans.pycloudlib import get_manager
-from jans.pycloudlib.persistence import render_salt
-from jans.pycloudlib.persistence import render_base_properties
-from jans.pycloudlib.persistence import render_ldap_properties
-from jans.pycloudlib.persistence import sync_ldap_truststore
+from jans.pycloudlib.persistence.utils import render_salt
+from jans.pycloudlib.persistence.utils import render_base_properties
+from jans.pycloudlib.persistence.sql import render_sql_properties
+from jans.pycloudlib.persistence.sql import sync_sql_password
 
 
 def create_manager():
@@ -142,17 +152,17 @@ def create_manager():
 
 
 def configure_persistence(manager):
-    persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "ldap")
+    persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "sql")
 
-    render_salt(manager, "/app/templates/salt.tmpl", "/etc/jans/conf/salt")
-    render_base_properties("/app/templates/jans.properties.tmpl", "/etc/jans/conf/jans.properties")
+    render_salt(manager, "/app/templates/salt", "/etc/jans/conf/salt")
+    render_base_properties("/app/templates/jans.properties", "/etc/jans/conf/jans.properties")
 
-    render_ldap_properties(
+    render_sql_properties(
         manager,
-        "/app/templates/jans-ldap.properties.tmpl",
-        "/etc/jans/conf/jans-ldap.properties",
+        "/app/templates/jans-mysql.properties",
+        "/etc/jans/conf/jans-mysql.properties",
     )
-    sync_ldap_truststore(manager)
+    sync_sql_password(manager)
 
 
 if __name__ == "__main__":

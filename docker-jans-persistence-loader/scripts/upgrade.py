@@ -8,7 +8,6 @@ from ldif import LDIFParser
 
 from jans.pycloudlib import get_manager
 from jans.pycloudlib.persistence.couchbase import CouchbaseClient
-from jans.pycloudlib.persistence.ldap import LdapClient
 from jans.pycloudlib.persistence.spanner import SpannerClient
 from jans.pycloudlib.persistence.sql import SqlClient
 from jans.pycloudlib.persistence.sql import doc_id_from_dn
@@ -104,47 +103,6 @@ def collect_claim_names(ldif_file="/app/templates/attributes.ldif"):
                 continue
             rows[dn] = entry["jansClaimName"][0]
     return rows
-
-
-class LDAPBackend:
-    def __init__(self, manager):
-        self.manager = manager
-        self.client = LdapClient(manager)
-        self.type = "ldap"
-
-    def get_entry(self, key, filter_="", attrs=None, **kwargs):
-        def format_attrs(attrs):
-            _attrs = {}
-            for k, v in attrs.items():
-                if len(v) < 2:
-                    v = v[0]
-                _attrs[k] = v
-            return _attrs
-
-        filter_ = filter_ or "(objectClass=*)"
-
-        entry = self.client.get(key, filter_=filter_, attributes=attrs)
-        if not entry:
-            return None
-        return Entry(entry.entry_dn, format_attrs(entry.entry_attributes_as_dict))
-
-    def modify_entry(self, key, attrs=None, **kwargs):
-        attrs = attrs or {}
-        del_flag = kwargs.get("delete_attr", False)
-
-        if del_flag:
-            mod = self.client.MODIFY_DELETE
-        else:
-            mod = self.client.MODIFY_REPLACE
-
-        for k, v in attrs.items():
-            if not isinstance(v, list):
-                v = [v]
-            attrs[k] = [(mod, v)]
-        return self.client.modify(key, attrs)
-
-    def delete_entry(self, key, **kwargs):
-        return self.client.delete(key)
 
 
 class SQLBackend:
@@ -274,7 +232,6 @@ BACKEND_CLASSES = {
     "sql": SQLBackend,
     "couchbase": CouchbaseBackend,
     "spanner": SpannerBackend,
-    "ldap": LDAPBackend,
 }
 
 
@@ -313,7 +270,6 @@ class Upgrade:
         self.update_config()
 
     def update_scripts_entries(self):
-        # default to ldap persistence
         kwargs = {}
         scim_id = JANS_SCIM_SCRIPT_DN
         basic_id = JANS_BASIC_SCRIPT_DN
@@ -385,7 +341,6 @@ class Upgrade:
                 self.backend.modify_entry(agama_entry.id, agama_entry.attrs, **kwargs)
 
     def update_auth_dynamic_config(self):
-        # default to ldap persistence
         kwargs = {}
         id_ = JANS_AUTH_CONFIG_DN
 
@@ -415,7 +370,6 @@ class Upgrade:
 
     def update_attributes_entries(self):
         def _update_claim_names():
-            # default to ldap persistence
             kwargs = {}
             rows = collect_claim_names()
 
@@ -463,7 +417,6 @@ class Upgrade:
         _update_mobile_attr()
 
     def update_scim_scopes_entries(self):
-        # default to ldap persistence
         kwargs = {}
 
         # add jansAttrs to SCIM users.read and users.write scopes
@@ -485,7 +438,6 @@ class Upgrade:
                 self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
 
     def update_scopes_entries(self):
-        # default to ldap persistence
         kwargs = {}
         id_ = JANS_PROFILE_SCOPE_DN
 
@@ -506,7 +458,6 @@ class Upgrade:
             self.backend.modify_entry(entry.id, attrs, **kwargs)
 
     def update_people_entries(self):
-        # default to ldap persistence
         admin_inum = self.manager.config.get("admin_inum")
 
         id_ = f"inum={admin_inum},ou=people,o=jans"
@@ -541,7 +492,7 @@ class Upgrade:
             elif self.user_backend.type == "spanner" and not entry.attrs[attr_name]:
                 entry.attrs[attr_name] = [role_name]
                 should_update = True
-            else:  # ldap and couchbase
+            else:  # couchbase
                 if attr_name not in entry.attrs:
                     entry.attrs[attr_name] = [role_name]
                     should_update = True
@@ -625,7 +576,6 @@ class Upgrade:
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
 
     def update_auth_errors_config(self):
-        # default to ldap persistence
         kwargs = {}
         id_ = JANS_AUTH_CONFIG_DN
 
@@ -662,7 +612,6 @@ class Upgrade:
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
 
     def update_auth_static_config(self):
-        # default to ldap persistence
         kwargs = {}
         id_ = JANS_AUTH_CONFIG_DN
 
@@ -830,44 +779,10 @@ class Upgrade:
             entry.attrs["jansDocStoreConf"]["documentStoreType"] = doc_store_type
             should_update = True
 
-        # set jansDbAuth if persistence is ldap
-        if self.backend.type == "ldap" and not entry.attrs.get("jansDbAuth"):
-            should_update = True
-
         if should_update:
             if self.backend.type != "couchbase":
                 entry.attrs["jansMessageConf"] = json.dumps(entry.attrs["jansMessageConf"])
                 entry.attrs["jansDocStoreConf"] = json.dumps(entry.attrs["jansDocStoreConf"])
-
-                # set jansDbAuth if persistence is ldap
-                if self.backend.type == "ldap":
-                    ldaps_port = self.manager.config.get("ldap_init_port")
-                    ldap_hostname = self.manager.config.get("ldap_init_host")
-                    ldap_binddn = self.manager.config.get("ldap_binddn")
-                    ldap_use_ssl = str(as_boolean(os.environ.get("CN_LDAP_USE_SSL", True))).lower()
-                    encoded_ox_ldap_pw = self.manager.secret.get("encoded_ox_ldap_pw")
-
-                    entry.attrs["jansDbAuth"] = json.dumps({
-                        "type": "auth",
-                        "name": None,
-                        "level": 0,
-                        "priority": 1,
-                        "enabled": False,
-                        "version": 0,
-                        "config": {
-                            "configId": "auth_ldap_server",
-                            "servers": [f"{ldap_hostname}:{ldaps_port}"],
-                            "maxConnections": 1000,
-                            "bindDN": ldap_binddn,
-                            "bindPassword": encoded_ox_ldap_pw,
-                            "useSSL": ldap_use_ssl,
-                            "baseDNs": ["ou=people,o=jans"],
-                            "primaryKey": "uid",
-                            "localPrimaryKey": "uid",
-                            "useAnonymousBind": False,
-                            "enabled": False,
-                        },
-                    })
 
             revision = entry.attrs.get("jansRevision") or 1
             entry.attrs["jansRevision"] = revision + 1
@@ -894,7 +809,7 @@ def _transform_message_config(conf):
     should_update = False
     provider_type = os.environ.get("CN_MESSAGE_TYPE", "DISABLED")
 
-    if os.environ.get("CN_PERSISTENCE_TYPE", "ldap") == "sql" and os.environ.get("CN_SQL_DB_DIALECT", "mysql") in ("pgsql", "postgresql"):
+    if os.environ.get("CN_PERSISTENCE_TYPE", "sql") == "sql" and os.environ.get("CN_SQL_DB_DIALECT", "mysql") in ("pgsql", "postgresql"):
         pg_pw_encoded = encode_text(
             get_sql_password(manager),
             manager.secret.get("encoded_salt")

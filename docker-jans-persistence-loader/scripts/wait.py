@@ -20,7 +20,7 @@ def validate_doc_store_type(value):
 
 
 def main():
-    persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "ldap")
+    persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "sql")
     validate_persistence_type(persistence_type)
 
     if persistence_type == "sql":

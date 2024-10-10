@@ -5,7 +5,7 @@ if [ -z "$1" ]; then
     yaml="jans-mysql-compose.yml"
 else
 	case "$1" in
-		mysql|ldap|postgres|couchbase|spanner)
+		mysql|postgres|couchbase|spanner)
 			yaml="jans-${1}-compose.yml"
 			;;
 		*)
@@ -45,8 +45,3 @@ fi
 
 export JANSSEN_IMAGE
 docker compose -f ${yaml} up -d
-
-
-
-
-

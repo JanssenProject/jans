@@ -97,9 +97,9 @@ def test_secret_local_adapter():
 
 @pytest.mark.parametrize("key, expected, decode, binary_mode", [
     ("sql_password", "secret", False, False),
-    ("encoded_ox_ldap_pw", "secret", True, False),
-    ("encoded_ox_ldap_pw", "secret", False, True),
-    ("encoded_ox_ldap_pw", "secret", True, True),
+    ("random", "secret", True, False),
+    ("random", "secret", False, True),
+    ("random", "secret", True, True),
 ])
 def test_manager_secret_to_file(
     gmanager,

@@ -96,8 +96,6 @@ data:
   | replace "persistenceLogLevel" "persistence_log_level"
   | replace "persistenceDurationLogTarget" "persistence_duration_log_target"
   | replace "persistenceDurationLogLevel" "persistence_duration_log_level"
-  | replace "ldapStatsLogTarget" "ldap_stats_log_target"
-  | replace "ldapStatsLogLevel" "ldap_stats_log_level"
   | replace "scriptLogTarget" "script_log_target"
   | replace "scriptLogLevel" "script_log_level"
   | replace "auditStatsLogTarget" "audit_log_target"
@@ -114,8 +112,6 @@ data:
   | replace "persistenceLogLevel" "persistence_log_level"
   | replace "persistenceDurationLogTarget" "persistence_duration_log_target"
   | replace "persistenceDurationLogLevel" "persistence_duration_log_level"
-  | replace "ldapStatsLogTarget" "ldap_stats_log_target"
-  | replace "ldapStatsLogLevel" "ldap_stats_log_level"
   | replace "scriptLogTarget" "script_log_target"
   | replace "scriptLogLevel" "script_log_level"
   | replace "enableStdoutLogPrefix" "enable_stdout_log_prefix"
@@ -155,7 +151,6 @@ data:
   {{- end }}
   {{- if .Values.istio.enabled }}
   CN_COUCHBASE_TRUSTSTORE_ENABLE: "false"
-  CN_LDAP_USE_SSL: "false"
   {{- end }}
   {{- if .Values.scim.enabled }}
   CN_SCIM_ENABLED: {{ .Values.scim.enabled | quote }}
@@ -168,8 +163,6 @@ data:
   | replace "persistenceLogLevel" "persistence_log_level"
   | replace "persistenceDurationLogTarget" "persistence_duration_log_target"
   | replace "persistenceDurationLogLevel" "persistence_duration_log_level"
-  | replace "ldapStatsLogTarget" "ldap_stats_log_target"
-  | replace "ldapStatsLogLevel" "ldap_stats_log_level"
   | replace "scriptLogTarget" "script_log_target"
   | replace "scriptLogLevel" "script_log_level"
   | replace "enableStdoutLogPrefix" "enable_stdout_log_prefix"
@@ -205,12 +198,6 @@ data:
   CN_SQL_PASSWORD_FILE: {{ .Values.cnSqlPasswordFile }}
   CN_COUCHBASE_PASSWORD_FILE: {{ .Values.cnCouchbasePasswordFile }}
   CN_COUCHBASE_SUPERUSER_PASSWORD_FILE: {{ .Values.cnCouchbaseSuperuserPasswordFile }}
-  CN_LDAP_PASSWORD_FILE: {{ .Values.cnLdapPasswordFile }}
-  CN_LDAP_TRUSTSTORE_PASSWORD_FILE: {{ .Values.cnLdapTruststorePasswordFile }}
-  CN_LDAP_CERT_FILE: {{ .Values.cnLdapCertFile }}
-  CN_LDAP_KEY_FILE: {{ .Values.cnLdapKeyFile }}
-  CN_LDAP_CACERT_FILE: {{ .Values.cnLdapCacertFile }}
-  CN_LDAP_TRUSTSTORE_FILE: {{ .Values.cnLdapTruststoreFile }}
   CN_CONFIG_API_PLUGINS: {{ index .Values "config-api" "plugins" | quote }}
   CN_AIO_COMPONENTS: {{ include "janssen-all-in-one.aioComponents" . | fromJsonArray | join "," | quote}}
   {{- if .Values.saml.enabled }}

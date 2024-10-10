@@ -17,18 +17,15 @@ cd ..
 helm-docs "$MAIN_DIRECTORY_LOCATION"/charts/
 rm -rf helmtemp
 echo "Copying Helm chart Readme to helm-chart.md"
-cp "$MAIN_DIRECTORY_LOCATION"/charts/janssen/README.md "$MAIN_DIRECTORY_LOCATION"/docs/admin/reference/kubernetes/helm-chart.md
+cp "$MAIN_DIRECTORY_LOCATION"/charts/janssen/README.md "$MAIN_DIRECTORY_LOCATION"/docs/janssen-server/reference/kubernetes/helm-chart.md
 echo "Adding keywords to helm-chart"
-sed -i '1 s/^/---\ntags:\n  - administration\n  - reference\n  - kubernetes\n---\n/' "$MAIN_DIRECTORY_LOCATION"/docs/admin/reference/kubernetes/helm-chart.md
+sed -i '1 s/^/---\ntags:\n  - administration\n  - reference\n  - kubernetes\n---\n/' "$MAIN_DIRECTORY_LOCATION"/docs/janssen-server/reference/kubernetes/helm-chart.md
 echo "Copying docker-monolith main README.md to compose.md"
-cp "$MAIN_DIRECTORY_LOCATION"/docker-jans-monolith/README.md "$MAIN_DIRECTORY_LOCATION"/docs/admin/install/docker-install/compose.md
+cp "$MAIN_DIRECTORY_LOCATION"/docker-jans-monolith/README.md "$MAIN_DIRECTORY_LOCATION"/docs/janssen-server/install/docker-install/compose.md
 echo "Copying docker images Readme to respective image md"
 # cp docker files main README.md
 docker_images="docker-jans-auth-server docker-jans-certmanager docker-jans-config-api docker-jans-configurator docker-jans-fido2 docker-jans-persistence-loader docker-jans-scim docker-jans-monolith docker-jans-casa docker-jans-link docker-jans-all-in-one"
 for image in $docker_images;do
-  cp "$MAIN_DIRECTORY_LOCATION"/"$image"/README.md "$MAIN_DIRECTORY_LOCATION"/docs/admin/reference/kubernetes/"$image".md
+  cp "$MAIN_DIRECTORY_LOCATION"/"$image"/README.md "$MAIN_DIRECTORY_LOCATION"/docs/janssen-server/reference/kubernetes/"$image".md
 done
-echo "cp docker-opendj main README.md"
-wget https://raw.githubusercontent.com/GluuFederation/docker-opendj/5.0/README.md -O "$MAIN_DIRECTORY_LOCATION"/docs/admin/reference/kubernetes/docker-opendj.md
-sed -i '1 s/^/---\ntags:\n  - administration\n  - reference\n  - kubernetes\n - docker image\n---\n/' "$MAIN_DIRECTORY_LOCATION"/docs/admin/reference/kubernetes/docker-opendj.md
 echo "generated-cn-docs.sh executed successfully!"

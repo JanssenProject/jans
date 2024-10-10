@@ -8,7 +8,7 @@ tags:
 
 ## Overview
 
-Persistence is a special container to load initial data for LDAP or Couchbase.
+Persistence is a special container to load initial data for supported persistence.
 
 ## Versions
 
@@ -54,12 +54,10 @@ The following environment variables are supported by the container:
 - `CN_REDIS_URL`: URL of Redis server, format is host:port (optional; default to `localhost:6379`).
 - `CN_REDIS_TYPE`: Redis service type, either `STANDALONE` or `CLUSTER` (optional; default to `STANDALONE`).
 - `CN_MEMCACHED_URL`: URL of Memcache server, format is host:port (optional; default to `localhost:11211`).
-- `CN_PERSISTENCE_TYPE`: Persistence backend being used (one of `ldap`, `couchbase`, or `hybrid`; default to `ldap`).
+- `CN_PERSISTENCE_TYPE`: Persistence backend being used (`couchbase`, `sql`, `spanner`, or `hybrid`; default to `sql`).
 - `CN_HYBRID_MAPPING`: Specify data mapping for each persistence (default to `"{}"`). Note this environment only takes effect when `CN_PERSISTENCE_TYPE` is set to `hybrid`. See [hybrid mapping](#hybrid-mapping) section for details.
 - `CN_PERSISTENCE_SKIP_INITIALIZED`: skip initialization if backend already initialized (default to `false`).
 - `CN_PERSISTENCE_UPDATE_AUTH_DYNAMIC_CONFIG`: Whether to allow automatic updates of `jans-auth` configuration (default to `true`).
-- `CN_LDAP_URL`: Address and port of LDAP server (default to `localhost:1636`).
-- `CN_LDAP_USE_SSL`: Whether to use SSL connection to LDAP server (default to `true`).
 - `CN_COUCHBASE_URL`: Address of Couchbase server (default to `localhost`).
 - `CN_COUCHBASE_USER`: Username of Couchbase server (default to `admin`).
 - `CN_COUCHBASE_SUPERUSER`: Superuser of Couchbase server (default to empty-string).
@@ -103,12 +101,12 @@ As per v1.0.1, hybrid persistence supports all available persistence types. To c
 
     ```
     {
-        "default": "<couchbase|ldap|spanner|sql>",
-        "user": "<couchbase|ldap|spanner|sql>",
-        "site": "<couchbase|ldap|spanner|sql>",
-        "cache": "<couchbase|ldap|spanner|sql>",
-        "token": "<couchbase|ldap|spanner|sql>",
-        "session": "<couchbase|ldap|spanner|sql>",
+        "default": "<couchbase|spanner|sql>",
+        "user": "<couchbase|spanner|sql>",
+        "site": "<couchbase|spanner|sql>",
+        "cache": "<couchbase|spanner|sql>",
+        "token": "<couchbase|spanner|sql>",
+        "session": "<couchbase|spanner|sql>",
     }
     ```
 
@@ -118,7 +116,7 @@ As per v1.0.1, hybrid persistence supports all available persistence types. To c
     {
         "default": "sql",
         "user": "spanner",
-        "site": "ldap",
+        "site": "sql",
         "cache": "sql",
         "token": "couchbase",
         "session": "spanner",

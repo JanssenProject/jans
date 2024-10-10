@@ -47,7 +47,7 @@ def test_render_salt(tmpdir, gmanager, monkeypatch):
 def test_render_base_properties(monkeypatch, tmpdir):
     from jans.pycloudlib.persistence import render_base_properties
 
-    persistence_type = "ldap"
+    persistence_type = "sql"
     monkeypatch.setenv("CN_PERSISTENCE_TYPE", persistence_type)
 
     src = tmpdir.join("jans.properties.tmpl")
@@ -64,66 +64,6 @@ fido2_ConfigurationEntryDN=ou=fido2,ou=configuration,o=jans
 
     render_base_properties(str(src), str(dest))
     assert dest.read() == expected
-
-# ====
-# LDAP
-# ====
-
-
-def test_render_ldap_properties(tmpdir, gmanager):
-    from jans.pycloudlib.persistence.ldap import render_ldap_properties
-
-    tmpl = """
-bindDN: %(ldap_binddn)s
-bindPassword: %(encoded_ox_ldap_pw)s
-servers: %(ldap_hostname)s:%(ldaps_port)s
-ssl.trustStoreFile: %(ldapTrustStoreFn)s
-ssl.trustStorePin: %(encoded_ldapTrustStorePass)s
-""".strip()
-
-    host, port = "localhost", 1636
-    expected = f"""
-bindDN: {gmanager.config.get("ldap_binddn")}
-bindPassword: {gmanager.secret.get("encoded_ox_ldap_pw")}
-servers: {host}:{port}
-ssl.trustStoreFile: {gmanager.config.get("ldapTrustStoreFn")}
-ssl.trustStorePin: {gmanager.secret.get("encoded_ldapTrustStorePass")}
-""".strip()
-
-    src = tmpdir.join("jans-ldap.properties.tmpl")
-    src.write(tmpl)
-    dest = tmpdir.join("jans-ldap.properties")
-
-    render_ldap_properties(gmanager, str(src), str(dest))
-    assert dest.read() == expected
-
-
-@pytest.mark.parametrize("url, host", [
-    ("localhost", "localhost"),
-    ("localhost:1636", "localhost"),
-])
-def test_extract_ldap_host(url, host):
-    from jans.pycloudlib.persistence.ldap import extract_ldap_host
-
-    assert extract_ldap_host(url) == host
-
-
-@pytest.mark.parametrize("use_ssl, port", [
-    ("True", 1636),
-    ("False", 1389),
-])
-def test_resolve_ldap_port(monkeypatch, use_ssl, port):
-    from jans.pycloudlib.persistence.ldap import resolve_ldap_port
-
-    monkeypatch.setenv("CN_LDAP_USE_SSL", use_ssl)
-    assert resolve_ldap_port() == port
-
-
-def test_ldap_client_init(gmanager):
-    from jans.pycloudlib.persistence.ldap import LdapClient
-
-    client = LdapClient(gmanager)
-    assert str(client.server) == "ldaps://localhost:1636 - ssl"
 
 
 # =========
@@ -406,12 +346,12 @@ def test_render_couchbase_properties_hybrid(monkeypatch, tmpdir, gmanager):
     monkeypatch.setenv("CN_COUCHBASE_PASSWORD_FILE", str(passwd))
     monkeypatch.setenv("CN_PERSISTENCE_TYPE", "hybrid")
     monkeypatch.setenv("CN_HYBRID_MAPPING", json.dumps({
-        "default": "ldap",
+        "default": "sql",
         "user": "couchbase",
-        "site": "ldap",
-        "cache": "ldap",
+        "site": "sql",
+        "cache": "sql",
         "token": "couchbase",
-        "session": "ldap",
+        "session": "sql",
     }))
 
     tmpl = """
@@ -476,17 +416,16 @@ def test_resolve_hybrid_storages(monkeypatch):
         "default": "sql",
         "user": "spanner",
         "site": "couchbase",
-        "cache": "ldap",
+        "cache": "sql",
         "token": "sql",
         "session": "sql",
     }))
     expected = {
-        "storages": "couchbase, ldap, spanner, sql",
+        "storages": "couchbase, spanner, sql",
         "storage.default": "sql",
         "storage.couchbase.mapping": "link",
-        "storage.ldap.mapping": "cache",
         "storage.spanner.mapping": "people, groups, authorizations",
-        "storage.sql.mapping": "tokens, sessions",
+        "storage.sql.mapping": "cache, tokens, sessions",
     }
     mapper = PersistenceMapper()
     assert resolve_hybrid_storages(mapper) == expected
@@ -499,7 +438,7 @@ def test_render_hybrid_properties(monkeypatch, tmpdir):
     monkeypatch.setenv(
         "CN_HYBRID_MAPPING",
         json.dumps({
-            "default": "ldap",
+            "default": "sql",
             "user": "couchbase",
             "site": "sql",
             "cache": "sql",
@@ -509,8 +448,8 @@ def test_render_hybrid_properties(monkeypatch, tmpdir):
     )
 
     expected = """
-storages: couchbase, ldap, spanner, sql
-storage.default: ldap
+storages: couchbase, spanner, sql
+storage.default: sql
 storage.couchbase.mapping: people, groups, authorizations
 storage.spanner.mapping: tokens
 storage.sql.mapping: link, cache, sessions
@@ -803,7 +742,6 @@ def test_spanner_database_prop(spanner_client):
 
 
 @pytest.mark.parametrize("type_", [
-    "ldap",
     "couchbase",
     "sql",
     "spanner",
@@ -829,7 +767,7 @@ def test_persistence_mapper_hybrid_mapping(monkeypatch):
     mapping = {
         "default": "sql",
         "user": "spanner",
-        "site": "ldap",
+        "site": "sql",
         "cache": "sql",
         "token": "couchbase",
         "session": "sql",
@@ -845,8 +783,8 @@ def test_persistence_mapper_hybrid_mapping(monkeypatch):
     "[]",
     "{}",  # empty dict
     {"user": "sql"},  # missing remaining keys
-    {"default": "sql", "user": "spanner", "cache": "ldap", "site": "couchbase", "token": "sql", "session": "random"},  # invalid type
-    {"default": "sql", "user": "spanner", "cache": "ldap", "site": "couchbase", "token": "sql", "foo": "sql"},  # invalid key
+    {"default": "sql", "user": "spanner", "cache": "sql", "site": "couchbase", "token": "sql", "session": "random"},  # invalid type
+    {"default": "sql", "user": "spanner", "cache": "sql", "site": "couchbase", "token": "sql", "foo": "sql"},  # invalid key
 ])
 def test_persistence_mapper_validate_hybrid_mapping(monkeypatch, mapping):
     from jans.pycloudlib.persistence.utils import PersistenceMapper
@@ -865,7 +803,7 @@ def test_persistence_mapper_groups(monkeypatch):
     monkeypatch.setenv("CN_HYBRID_MAPPING", json.dumps({
         "default": "sql",
         "user": "spanner",
-        "site": "ldap",
+        "site": "sql",
         "cache": "sql",
         "token": "couchbase",
         "session": "sql",
@@ -873,9 +811,8 @@ def test_persistence_mapper_groups(monkeypatch):
 
     groups = {
         "couchbase": ["token"],
-        "ldap": ["site"],
         "spanner": ["user"],
-        "sql": ["default", "cache", "session"],
+        "sql": ["default", "site", "cache", "session"],
     }
     assert PersistenceMapper().groups() == groups
 
@@ -887,7 +824,7 @@ def test_persistence_mapper_groups_rdn(monkeypatch):
     monkeypatch.setenv("CN_HYBRID_MAPPING", json.dumps({
         "default": "sql",
         "user": "spanner",
-        "site": "ldap",
+        "site": "sql",
         "cache": "sql",
         "token": "couchbase",
         "session": "sql",
@@ -895,9 +832,8 @@ def test_persistence_mapper_groups_rdn(monkeypatch):
 
     groups = {
         "couchbase": ["tokens"],
-        "ldap": ["link"],
         "spanner": ["people, groups, authorizations"],
-        "sql": ["", "cache", "sessions"],
+        "sql": ["", "link", "cache", "sessions"],
     }
     assert PersistenceMapper().groups_with_rdn() == groups
 

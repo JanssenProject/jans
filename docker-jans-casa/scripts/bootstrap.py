@@ -16,10 +16,6 @@ from jans.pycloudlib.persistence.couchbase import sync_couchbase_cert
 from jans.pycloudlib.persistence.couchbase import sync_couchbase_password
 from jans.pycloudlib.persistence.couchbase import sync_couchbase_truststore
 from jans.pycloudlib.persistence.hybrid import render_hybrid_properties
-from jans.pycloudlib.persistence.ldap import LdapClient
-from jans.pycloudlib.persistence.ldap import render_ldap_properties
-from jans.pycloudlib.persistence.ldap import sync_ldap_password
-from jans.pycloudlib.persistence.ldap import sync_ldap_truststore
 from jans.pycloudlib.persistence.spanner import render_spanner_properties
 from jans.pycloudlib.persistence.spanner import SpannerClient
 from jans.pycloudlib.persistence.spanner import sync_google_credentials
@@ -122,7 +118,7 @@ def configure_logging():
 
 
 def main():
-    persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "ldap")
+    persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "sql")
 
     render_salt(manager, "/app/templates/salt", "/etc/jans/conf/salt")
     render_base_properties("/app/templates/jans.properties", "/etc/jans/conf/jans.properties")
@@ -132,17 +128,6 @@ def main():
 
     if persistence_type == "hybrid":
         render_hybrid_properties("/etc/jans/conf/jans-hybrid.properties")
-
-    if "ldap" in persistence_groups:
-        render_ldap_properties(
-            manager,
-            "/app/templates/jans-ldap.properties",
-            "/etc/jans/conf/jans-ldap.properties",
-        )
-
-        if as_boolean(os.environ.get("CN_LDAP_USE_SSL", "true")):
-            sync_ldap_truststore(manager)
-        sync_ldap_password(manager)
 
     if "couchbase" in persistence_groups:
         sync_couchbase_password(manager)
@@ -213,7 +198,6 @@ class PersistenceSetup:
         self.manager = manager
 
         client_classes = {
-            "ldap": LdapClient,
             "couchbase": CouchbaseClient,
             "spanner": SpannerClient,
             "sql": SqlClient,
@@ -284,21 +268,17 @@ class PersistenceSetup:
         if self.persistence_type in ("sql", "spanner"):
             return bool(self.client.get("jansCustomScr", doc_id_from_dn(id_)))
 
-        # couchbase
-        if self.persistence_type == "couchbase":
-            bucket = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
-            key = id_from_dn(id_)
-            req = self.client.exec_query(
-                f"SELECT META().id, {bucket}.* FROM {bucket} USE KEYS '{key}'"
-            )
-            try:
-                entry = req.json()["results"][0]
-                return bool(entry["id"])
-            except IndexError:
-                return False
-
-        # ldap
-        return bool(self.client.get(id_))
+        # likely couchbase
+        bucket = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
+        key = id_from_dn(id_)
+        req = self.client.exec_query(
+            f"SELECT META().id, {bucket}.* FROM {bucket} USE KEYS '{key}'"
+        )
+        try:
+            entry = req.json()["results"][0]
+            return bool(entry["id"])
+        except IndexError:
+            return False
 
     def import_ldif_files(self):
         for file_ in self.ldif_files:

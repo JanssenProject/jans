@@ -23,6 +23,7 @@ from cryptography.hazmat.primitives import padding
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
+# @TODO: change to different library or use stdlib
 from ldap3.utils import hashed
 from sprig_aes import sprig_decrypt_aes
 
@@ -246,6 +247,7 @@ def get_server_certificate(
             return cert
 
 
+# @TODO: change to different library or use stdlib
 def ldap_encode(password: _t.AnyStr) -> _t.Any:
     """Encode the password string to comply to LDAP specification.
 
