@@ -122,7 +122,7 @@ data:
   LB_ADDR: {{ .Values.configmap.lbAddr }}
   {{- end }}
   CN_PERSISTENCE_TYPE: {{ .Values.global.cnPersistenceType }}
-  {{- else if or (eq .Values.global.cnPersistenceType "couchbase") (eq .Values.global.cnPersistenceType "hybrid") }}
+  {{- if or (eq .Values.global.cnPersistenceType "couchbase") (eq .Values.global.cnPersistenceType "hybrid") }}
   #  used only if CN_PERSISTENCE_TYPE is couchbase or hybrid
   CN_COUCHBASE_URL: {{ .Values.configmap.cnCouchbaseUrl }}
   CN_COUCHBASE_BUCKET_PREFIX: {{ .Values.configmap.cnCouchbaseBucketPrefix }}
