@@ -51,46 +51,16 @@ impl JwtService {
 
         let validator = Validation::new(header.alg);
 
+        // fetch decoding key from the KeyService
         let key_service = self
             .key_service
             .as_ref()
             .ok_or_else(|| DecodeJwtError::KeyServiceNotFound)?;
         let key = key_service.get_key()?;
 
-        // TODO: move this to a helper function
         let claims = match decode::<T>(&jwt, &key, &validator) {
-            Ok(token_data) => token_data.claims,
-            Err(e) => match e.kind() {
-                jsonwebtoken::errors::ErrorKind::InvalidToken => Err(DecodeJwtError::MalformedJWT)?,
-                jsonwebtoken::errors::ErrorKind::InvalidSignature => {
-                    Err(DecodeJwtError::InvalidSignature)?
-                },
-                jsonwebtoken::errors::ErrorKind::InvalidEcdsaKey => {
-                    Err(DecodeJwtError::InvalidKey)?
-                },
-                jsonwebtoken::errors::ErrorKind::InvalidRsaKey(_) => {
-                    Err(DecodeJwtError::InvalidKey)?
-                },
-                jsonwebtoken::errors::ErrorKind::ExpiredSignature => {
-                    Err(DecodeJwtError::ExpiredSignature)?
-                },
-                jsonwebtoken::errors::ErrorKind::InvalidIssuer => {
-                    Err(DecodeJwtError::InvalidIssuer)?
-                },
-                jsonwebtoken::errors::ErrorKind::InvalidAudience => {
-                    Err(DecodeJwtError::InvalidAudience)?
-                },
-                jsonwebtoken::errors::ErrorKind::Base64(decode_error) => Err(
-                    DecodeJwtError::UnableToDecodeBase64(decode_error.to_string()),
-                )?,
-                jsonwebtoken::errors::ErrorKind::Json(arc) => {
-                    Err(DecodeJwtError::UnableToParseJson(arc.clone()))?
-                },
-                jsonwebtoken::errors::ErrorKind::Utf8(err) => {
-                    Err(DecodeJwtError::UnableToString(err.clone()))?
-                },
-                _ => Err(DecodeJwtError::Unexpected(e.to_string()))?,
-            },
+            Ok(data) => data.claims,
+            Err(e) => return Err(e.into()),
         };
 
         Ok(claims)
@@ -116,34 +86,9 @@ fn decode_jwt_without_validation<T: serde::de::DeserializeOwned>(
 
     let key = DecodingKey::from_secret("secret".as_ref());
 
-    // TODO: move this to a helper function
     let claims = match decode::<T>(&jwt, &key, &validator) {
-        Ok(token_data) => token_data.claims,
-        Err(e) => match e.kind() {
-            jsonwebtoken::errors::ErrorKind::InvalidToken => Err(DecodeJwtError::MalformedJWT)?,
-            jsonwebtoken::errors::ErrorKind::InvalidSignature => {
-                Err(DecodeJwtError::InvalidSignature)?
-            },
-            jsonwebtoken::errors::ErrorKind::InvalidEcdsaKey => Err(DecodeJwtError::InvalidKey)?,
-            jsonwebtoken::errors::ErrorKind::InvalidRsaKey(_) => Err(DecodeJwtError::InvalidKey)?,
-            jsonwebtoken::errors::ErrorKind::ExpiredSignature => {
-                Err(DecodeJwtError::ExpiredSignature)?
-            },
-            jsonwebtoken::errors::ErrorKind::InvalidIssuer => Err(DecodeJwtError::InvalidIssuer)?,
-            jsonwebtoken::errors::ErrorKind::InvalidAudience => {
-                Err(DecodeJwtError::InvalidAudience)?
-            },
-            jsonwebtoken::errors::ErrorKind::Base64(decode_error) => Err(
-                DecodeJwtError::UnableToDecodeBase64(decode_error.to_string()),
-            )?,
-            jsonwebtoken::errors::ErrorKind::Json(arc) => {
-                Err(DecodeJwtError::UnableToParseJson(arc.clone()))?
-            },
-            jsonwebtoken::errors::ErrorKind::Utf8(err) => {
-                Err(DecodeJwtError::UnableToString(err.clone()))?
-            },
-            _ => Err(DecodeJwtError::Unexpected(e.to_string()))?,
-        },
+        Ok(data) => data.claims,
+        Err(e) => return Err(e.into()),
     };
 
     Ok(claims)
