@@ -21,10 +21,13 @@ The JSON schema looks like this:
 
 ```
 {
-    "app_id": "...",
-    "policies": "...",
-    "schema": "...",
-    "trusted_idps": [...]
+    "some_unique_identifier": {
+        "name": "...",
+        "description": "...",
+        "policies": {},
+        "identity_source": {},
+        "schema": "..."
+    }
 }
 ```
 
