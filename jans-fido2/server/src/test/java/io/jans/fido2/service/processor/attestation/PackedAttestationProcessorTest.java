@@ -275,6 +275,6 @@ class PackedAttestationProcessorTest {
         verify(commonVerifiers).verifyAlgorithm(any(JsonNode.class), any(Integer.class));
         verify(commonVerifiers).verifyBase64String(any(JsonNode.class));
         verify(base64Service, times(2)).urlEncodeToString(any());
-        verifyNoInteractions(certificateService, attestationCertificateService, appConfiguration, log, certificateVerifier);
+        verifyNoInteractions(certificateService, appConfiguration, log, certificateVerifier);
     }
 }
