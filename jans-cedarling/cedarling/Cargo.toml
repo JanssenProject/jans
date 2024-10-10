@@ -17,4 +17,4 @@ di = { workspace = true }
 
 [dev-dependencies]
 # is used in testing
-pretty_assertions = "1"
+test_utils = { workspace = true }
