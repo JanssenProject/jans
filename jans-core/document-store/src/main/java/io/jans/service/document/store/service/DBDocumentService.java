@@ -217,7 +217,7 @@ public class DBDocumentService implements Serializable {
 
 		List<Filter> jansModuleFilters = new ArrayList<Filter>();
 		for (String jansModule : jansModules) {
-	        Filter filter = Filter.createEqualityFilter("jansService", jansModule).multiValued();
+	        Filter filter = Filter.createEqualityFilter("jansService", jansModule);
 	        jansModuleFilters.add(filter);
 		}
 		

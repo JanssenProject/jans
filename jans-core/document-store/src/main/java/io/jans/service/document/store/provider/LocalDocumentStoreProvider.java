@@ -102,7 +102,7 @@ public class LocalDocumentStoreProvider extends DocumentStoreProvider<String> {
 	}
 
 	@Override
-	public String saveDocument(String path, String description, String documentContent, Charset charset, List<String> moduleList) {
+	public String saveDocument(String path, String description, String documentContent, Charset charset, String module) {
 		log.debug("Save document: '{}'", path);
 
 		File file = buildFilePath(path);
@@ -122,7 +122,7 @@ public class LocalDocumentStoreProvider extends DocumentStoreProvider<String> {
 	}
 
 	@Override
-	public String saveDocumentStream(String path, String description, InputStream documentStream, List<String> moduleList) {
+	public String saveDocumentStream(String path, String description, InputStream documentStream, String module) {
 		log.debug("Save document from stream: '{}'", path);
 
 		File file = buildFilePath(path);
@@ -143,8 +143,8 @@ public class LocalDocumentStoreProvider extends DocumentStoreProvider<String> {
 
 	@Override
 	public String saveBinaryDocumentStream(String path, String description, InputStream documentStream,
-			List<String> moduleList) {
-		return saveDocumentStream(path, description, documentStream, moduleList);
+			String module) {
+		return saveDocumentStream(path, description, documentStream, module);
 	}
 
 	@Override

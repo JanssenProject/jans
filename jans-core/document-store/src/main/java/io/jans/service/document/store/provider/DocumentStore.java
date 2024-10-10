@@ -25,17 +25,17 @@ public interface DocumentStore<T> {
 	/**
 	 * Save document into store
 	 */
-	String saveDocument(String path, String description, String documentContent, Charset charset, List<String> moduleList);
+	String saveDocument(String path, String description, String documentContent, Charset charset, String module);
 
 	/**
 	 * Save document stream into store
 	 */
-	String saveDocumentStream(String path, String description, InputStream documentStream, List<String> moduleList);
+	String saveDocumentStream(String path, String description, InputStream documentStream, String module);
 
 	/**
 	 * Save binary document stream into store
 	 */
-	String saveBinaryDocumentStream(String path, String description, InputStream documentStream, List<String> moduleList);
+	String saveBinaryDocumentStream(String path, String description, InputStream documentStream, String module);
 
 	/**
 	 * Load document from store

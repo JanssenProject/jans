@@ -9042,9 +9042,7 @@ components:
           type: string
           format: date-time
         service:
-          type: array
-          items:
-            type: string
+          type: string
         level:
           type: integer
           format: int32
@@ -9219,13 +9217,13 @@ components:
           type: boolean
         whitePagesCanView:
           type: boolean
-        adminCanEdit:
+        adminCanView:
           type: boolean
         userCanView:
           type: boolean
         userCanEdit:
           type: boolean
-        adminCanView:
+        adminCanEdit:
           type: boolean
         userCanAccess:
           type: boolean
@@ -10078,6 +10076,8 @@ components:
           type: boolean
         lockMessageConfig:
           $ref: '#/components/schemas/LockMessageConfig'
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -10087,8 +10087,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -11632,10 +11630,10 @@ components:
         ttl:
           type: integer
           format: int32
-        persisted:
-          type: boolean
         opbrowserState:
           type: string
+        persisted:
+          type: boolean
     SessionIdAccessMap:
       type: object
       properties:

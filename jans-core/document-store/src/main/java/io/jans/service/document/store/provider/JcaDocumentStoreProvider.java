@@ -149,7 +149,7 @@ public class JcaDocumentStoreProvider extends DocumentStoreProvider<String> {
 	}
 
 	@Override
-	public String saveDocument(String path, String description, String documentContent, Charset charset, List<String> moduleList) {
+	public String saveDocument(String path, String description, String documentContent, Charset charset, String module) {
 		log.debug("Save document: '{}'", path);
 		
 		String normalizedPath = getNormalizedPath(path);
@@ -172,7 +172,7 @@ public class JcaDocumentStoreProvider extends DocumentStoreProvider<String> {
 	}
 
 	@Override
-	public String saveDocumentStream(String path, String description, InputStream documentStream, List<String> moduleList) {
+	public String saveDocumentStream(String path, String description, InputStream documentStream, String module) {
 		log.debug("Save document from stream: '{}'", path);
 
 		String normalizedPath = getNormalizedPath(path);
@@ -196,7 +196,7 @@ public class JcaDocumentStoreProvider extends DocumentStoreProvider<String> {
 
 	@Override
 	public String saveBinaryDocumentStream(String path, String description, InputStream documentStream,
-			List<String> moduleList) {
+			String module) {
 		throw new UnsupportedOperationException("Method not implemented.");
 	}
 

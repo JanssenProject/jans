@@ -87,7 +87,7 @@ public class SamlIdpService {
                 metadataFile, localDocumentStoreService);
         try {
             String result = documentStoreService.saveDocumentStream(metadataFile, null,
-                    stream, List.of("jans-server", documentStoreModuleName));
+                    stream, documentStoreModuleName);
             logger.info("SAML file saving result:{}", result);
 
             InputStream newFile = documentStoreService.readDocumentAsStream(metadataFile);
