@@ -1,6 +1,6 @@
-// use std::string::FromUtf8Error;
+use std::sync::Arc;
 
-use std::{str::pattern::DoubleEndedSearcher, sync::Arc};
+use super::key_service::KeyServiceError;
 
 /// Error type for JWT decoding
 #[derive(thiserror::Error, Debug)]
@@ -55,8 +55,12 @@ pub enum DecodeJwtError {
     KeyServiceNotFound,
 
     /// Happens when a key could not be retrieved from the `KeyService`
-    #[error("Could not get hold of a key")]
-    KeyNotFound,
+    #[error("Could not get hold of a key from the KeyService: {0}")]
+    KeyNotFound(#[from] KeyServiceError),
+
+    /// Happens when a key could not be retrieved from the `KeyService`
+    #[error("The token is missing the `kid` (Key ID) in its headers")]
+    MissingKeyId,
 }
 
 impl Into<DecodeJwtError> for jsonwebtoken::errors::Error {
