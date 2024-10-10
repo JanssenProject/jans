@@ -1,6 +1,6 @@
 from cedarling_python import MemoryLogConfig, DisabledLoggingConfig, StdOutLogConfig
 from cedarling_python import PolicyStoreSource, PolicyStoreConfig, BootstrapConfig, JwtConfig
-from cedarling_python import Cedarling, Request
+from cedarling_python import Cedarling
 
 
 # use log config to store logs in memory with a time-to-live of 120 seconds
@@ -53,8 +53,3 @@ instance = Cedarling(bootstrap_config)
 # show logs
 print("Logs stored in memory:")
 print(*instance.pop_logs(), sep="\n\n")
-
-example_access_token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJzb21lX3VuaXF1ZV9pZCIsImlzcyI6Imh0dHA6Oi8vZXhhbXBsZS5jb20ifQ.0EBtuIHAKtPZRKqX6LBXOZ52erMB2xuMTfVSoaYHK-o'
-request = Request(access_token=example_access_token)
-# if
-instance.authorize(request)

@@ -8,6 +8,7 @@
 //! # Log entry
 //! The module contains structs for logging events.
 
+use std::collections::HashSet;
 use std::sync::Arc;
 use std::time::{SystemTime, UNIX_EPOCH};
 
@@ -97,11 +98,11 @@ pub struct AuthorizationLogInfo {
     /// cedar-policy resource
     pub resource: String,
     /// cedar-policy context
-    pub context: String,
+    pub context: serde_json::Value,
     /// cedar-policy decision
     pub decision: Decision,
     /// cedar-policy diagnostics information
-    pub diagnostics: String,
+    pub diagnostics: Diagnostics,
 }
 
 /// Cedar-policy decision of the authorization
@@ -110,4 +111,63 @@ pub struct AuthorizationLogInfo {
 pub enum Decision {
     Allow,
     Deny,
+}
+
+#[doc(hidden)]
+impl From<cedar_policy::Decision> for Decision {
+    fn from(value: cedar_policy::Decision) -> Self {
+        match value {
+            cedar_policy::Decision::Allow => Decision::Allow,
+            cedar_policy::Decision::Deny => Decision::Deny,
+        }
+    }
+}
+
+/// An error occurred when evaluating a policy
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+pub struct PolicyEvaluationError {
+    /// Id of the policy with an error
+    id: String,
+    /// Underlying evaluation error string representation
+    error: String,
+}
+
+#[doc(hidden)]
+impl From<&cedar_policy::AuthorizationError> for PolicyEvaluationError {
+    fn from(value: &cedar_policy::AuthorizationError) -> Self {
+        match value {
+            cedar_policy::AuthorizationError::PolicyEvaluationError(policy_evaluation_error) => {
+                Self {
+                    id: policy_evaluation_error.policy_id().to_string(),
+                    error: policy_evaluation_error.inner().to_string(),
+                }
+            },
+        }
+    }
+}
+
+/// Diagnostics providing more information on how a `Decision` was reached
+#[derive(Debug, Default, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+pub struct Diagnostics {
+    /// `PolicyId`s of the policies that contributed to the decision.
+    /// If no policies applied to the request, this set will be empty.
+    reason: HashSet<String>,
+    /// Errors that occurred during authorization. The errors should be
+    /// treated as unordered, since policies may be evaluated in any order.
+    errors: Vec<PolicyEvaluationError>,
+}
+
+#[doc(hidden)]
+impl From<cedar_policy::Diagnostics> for Diagnostics {
+    fn from(value: cedar_policy::Diagnostics) -> Self {
+        Self {
+            reason: HashSet::from_iter(
+                value
+                    .reason()
+                    .into_iter()
+                    .map(|policy_id| policy_id.to_string()),
+            ),
+            errors: value.errors().into_iter().map(|err| err.into()).collect(),
+        }
+    }
 }

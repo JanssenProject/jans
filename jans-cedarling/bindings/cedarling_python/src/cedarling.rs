@@ -9,7 +9,6 @@ use cedarling::LogStorage;
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 
-use crate::authorize::Request;
 use crate::config::bootstrap_config::BootstrapConfig;
 use serde_pyobject::to_pyobject;
 
@@ -59,11 +58,6 @@ use serde_pyobject::to_pyobject;
 ///
 ///     :returns: A list of log entry IDs.
 ///     :rtype: List[str]
-///
-/// .. method:: authorize(self, Request)
-///
-///    Evaluate Authorization Request.
-///
 #[derive(Clone)]
 #[pyclass]
 pub struct Cedarling {
@@ -83,8 +77,7 @@ impl Cedarling {
     fn pop_logs(&self) -> PyResult<Vec<PyObject>> {
         let logs = self.inner.pop_logs();
         Python::with_gil(|py| -> PyResult<Vec<PyObject>> {
-            logs
-                .iter()
+            logs.iter()
                 .map(|entry| log_entry_to_py(py, entry))
                 .collect::<PyResult<Vec<PyObject>>>()
         })
@@ -106,17 +99,6 @@ impl Cedarling {
     /// returns a list of all log ids
     fn get_log_ids(&self) -> Vec<String> {
         self.inner.get_log_ids()
-    }
-
-    /// Evaluate Authorization Request
-    /// - evaluate if authorization is granted for *client*
-    //
-    // this function will be finished in next issue
-    pub fn authorize(&self, request: &Request) -> PyResult<()> {
-        let cedarling_request: cedarling::Request = request.into();
-        self.inner
-            .authorize(&cedarling_request)
-            .map_err(|err| PyValueError::new_err(err.to_string()))
     }
 }
 

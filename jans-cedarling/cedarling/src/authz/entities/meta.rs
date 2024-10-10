@@ -7,26 +7,12 @@
 
 use lazy_static::lazy_static;
 
-use super::create::{CedarPolicyType, EntityAttributeMetadata, EntityMetadata};
+use super::create::EntityMetadata;
 
 // Represent meta information about entity from cedar-policy schema.
 lazy_static! {
-    pub(crate) static ref WorkloadEntityMeta: EntityMetadata<'static> = EntityMetadata::new(
-        "Jans::Workload",
-        "sub",
-        vec![
-            EntityAttributeMetadata {
-                attribute_name: "client_id",
-                token_claims_key: "sub",
-                cedar_policy_type: CedarPolicyType::String,
-            },
-            EntityAttributeMetadata {
-                attribute_name: "iss",
-                token_claims_key: "iss",
-                cedar_policy_type: CedarPolicyType::EntityUid {
-                    entity_type: "Jans::TrustedIssuer",
-                },
-            },
-        ]
-    );
+    pub(crate) static ref WorkloadEntityMeta: EntityMetadata<'static> =
+        EntityMetadata::new("Jans::Workload", "client_id",);
+    pub(crate) static ref AccessTokenMeta: EntityMetadata<'static> =
+        EntityMetadata::new("Jans::Access_token", "jti",);
 }
