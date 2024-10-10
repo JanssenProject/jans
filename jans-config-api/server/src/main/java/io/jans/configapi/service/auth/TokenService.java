@@ -60,17 +60,20 @@ public class TokenService {
             logger.trace("Search Token searchRequest.getFilterAssertionValue() :{}",
                     searchRequest.getFilterAssertionValue());
             for (String assertionValue : searchRequest.getFilterAssertionValue()) {
-                String[] targetArray = new String[] { assertionValue };
-                Filter grantIdFilter = Filter.createSubstringFilter("grtId", null, targetArray, null);
-                Filter userIdFilter = Filter.createSubstringFilter("usrId", null, targetArray, null);
-                Filter userDnFilter = Filter.createSubstringFilter("jansUsrDN", null, targetArray, null);
-                Filter clientIdFilter = Filter.createSubstringFilter("clnId", null, targetArray, null);
-                Filter scopeFilter = Filter.createSubstringFilter("scp", null, targetArray, null);
-                Filter tokenTypeFilter = Filter.createSubstringFilter("tknTyp", null, targetArray, null);
-                Filter grantTypeFilter = Filter.createSubstringFilter("grtTyp", null, targetArray, null);
-                Filter inumFilter = Filter.createSubstringFilter("jansId", null, targetArray, null);
-                filters.add(Filter.createORFilter(grantIdFilter, userIdFilter, userDnFilter, clientIdFilter,
-                        scopeFilter, tokenTypeFilter, grantTypeFilter, inumFilter));
+                logger.error("Session Search with assertionValue:{}", assertionValue);
+                if (StringUtils.isNotBlank(assertionValue)) {
+                    String[] targetArray = new String[] { assertionValue };
+                    Filter grantIdFilter = Filter.createSubstringFilter("grtId", null, targetArray, null);
+                    Filter userIdFilter = Filter.createSubstringFilter("usrId", null, targetArray, null);
+                    Filter userDnFilter = Filter.createSubstringFilter("jansUsrDN", null, targetArray, null);
+                    Filter clientIdFilter = Filter.createSubstringFilter("clnId", null, targetArray, null);
+                    Filter scopeFilter = Filter.createSubstringFilter("scp", null, targetArray, null);
+                    Filter tokenTypeFilter = Filter.createSubstringFilter("tknTyp", null, targetArray, null);
+                    Filter grantTypeFilter = Filter.createSubstringFilter("grtTyp", null, targetArray, null);
+                    Filter inumFilter = Filter.createSubstringFilter("jansId", null, targetArray, null);
+                    filters.add(Filter.createORFilter(grantIdFilter, userIdFilter, userDnFilter, clientIdFilter,
+                            scopeFilter, tokenTypeFilter, grantTypeFilter, inumFilter));
+                }
             }
             searchFilter = Filter.createORFilter(filters);
             logger.trace("Search Token searchFilter :{}", searchFilter);

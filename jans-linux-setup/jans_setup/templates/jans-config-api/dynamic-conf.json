@@ -75,6 +75,15 @@
       "@jakarta.ws.rs.GET()"
     ]
   },
+  "apiEndpointMgt": [
+    {
+      "name": "Session",
+      "mandatoryAttributes": [],
+      "exclusionAttributes": [
+        "jansId"
+      ]
+    }
+  ],
   "assetMgtConfiguration": {
     "assetMgtEnabled": true,
     "assetServerUploadEnabled": true,
