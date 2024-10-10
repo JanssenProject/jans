@@ -12,7 +12,7 @@
 use base64::prelude::*;
 use std::{string::FromUtf8Error, sync::Arc};
 
-use crate::models::{jwt_config::JwtConfig, token_data::TokenClaim};
+use crate::models::{jwt_config::JwtConfig, token_data::TokenPayload};
 
 /// Service for JWT validation
 #[derive(Clone)]
@@ -40,7 +40,7 @@ impl JwtService {
     }
 
     /// Decode JWT to `TokenData`
-    pub fn decode_token_data(&self, jwt: &str) -> Result<TokenClaim, DecodeJwtError> {
+    pub fn decode_token_data(&self, jwt: &str) -> Result<TokenPayload, DecodeJwtError> {
         self.decode(jwt)
     }
 }

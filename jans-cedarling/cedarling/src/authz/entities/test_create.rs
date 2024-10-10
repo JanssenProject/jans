@@ -7,149 +7,131 @@
 
 //! Testing the creating entities
 
-use core::panic;
-use std::{collections::HashSet, str::FromStr};
+use test_utils::assert_eq;
 
-use cedar_policy::{EntityId, EntityTypeName, EntityUid};
-use pretty_assertions::assert_eq;
-use serde_json::{Map, Value};
-
-use crate::models::token_data::{GetTokenClaimValue, TokenClaim};
+use crate::models::{
+    cedar_schema::CedarSchemaJson,
+    token_data::{GetTokenClaimValue, TokenPayload},
+};
 
 use super::create::*;
-
-// Recursively sort the fields of JSON objects
-// we need deterministic ordering of the JSON objects to be able to compare them
-fn sort_json(value: &mut Value) {
-    if let Value::Object(map) = value {
-        // in serde_json, maps are opdered if used feature "preserve_order", it is enabled by default
-        let mut sorted_map = Map::new();
-
-        // Sort the map by key and recursively sort nested values
-        let mut entries: Vec<_> = map.iter_mut().collect();
-        entries.sort_by_key(|(k, _)| k.to_owned());
-
-        for (key, val) in entries {
-            sort_json(val); // Recursively sort nested JSON objects
-            sorted_map.insert(key.to_owned(), val.clone());
-        }
-
-        *map = sorted_map;
-    } else if let Value::Array(arr) = value {
-        arr.sort_by_key(|a| a.to_string()); // Sort the array elements
-
-        for item in arr.iter_mut() {
-            sort_json(item); // Sort each element in the array
-        }
-    }
-}
+use test_utils::SortedJson;
 
 // test all successful cases
+// with empty namespace
 #[test]
-fn successful_scenario() {
-    let metadata = EntityMetadata::new(
-        "test",
-        "test_id_key",
-        vec![
-            EntityAttributeMetadata {
-                attribute_name: "string_key",
-                token_claims_key: "string_key",
-                cedar_policy_type: CedarPolicyType::String,
-            },
-            EntityAttributeMetadata {
-                attribute_name: "long_key",
-                token_claims_key: "long_key",
-                cedar_policy_type: CedarPolicyType::Long,
-            },
-            EntityAttributeMetadata {
-                attribute_name: "entity_uid_key",
-                token_claims_key: "entity_uid_key",
-                cedar_policy_type: CedarPolicyType::EntityUid {
-                    entity_type: "test_entity",
-                },
-            },
-        ],
-    );
+fn successful_scenario_empty_namespace() {
+    let schema_json = include_str!("test_create_data/successful_scenario_schema.json");
+    let schema: CedarSchemaJson = serde_json::from_str(schema_json).unwrap();
+
+    let metadata = EntityMetadata::new("Test", "test_id_key");
 
     let json = serde_json::json!( {
         "test_id_key": "test_id",
         "string_key": "test string value",
         "long_key": 12345,
-        "entity_uid_key": "unique_id"
+        "entity_uid_key": "unique_id",
+        "bool_key": true,
     });
 
-    let claim: TokenClaim = serde_json::from_value(json).unwrap();
-
-    let parents = vec![
-        EntityUid::from_type_name_and_id(
-            EntityTypeName::from_str("test_parent_type1").unwrap(),
-            EntityId::from_str("test1").unwrap(),
-        ),
-        EntityUid::from_type_name_and_id(
-            EntityTypeName::from_str("test_parent_type2").unwrap(),
-            EntityId::from_str("test2").unwrap(),
-        ),
-    ];
+    let payload: TokenPayload = serde_json::from_value(json).unwrap();
 
     let entity = metadata
-        .create_entity(&claim, HashSet::from_iter(parents))
+        .create_entity(&schema, &payload)
         .expect("entity should be created");
 
-    let mut entity_json = entity.to_json_value().expect("should serialize to json");
-    sort_json(&mut entity_json);
+    let entity_json = entity.to_json_value().expect("should serialize to json");
 
-    let mut expected = serde_json::json!({
+    let expected = serde_json::json!({
         "uid": {
-            "type": "test",
+            "type": "Test",
             "id": "test_id"
         },
         "attrs": {
             "entity_uid_key": {
                 "__entity": {
-                    "type": "test_entity",
+                    "type": "Test2",
                     "id": "unique_id"
                 }
             },
             "long_key": 12345,
-            "string_key": "test string value"
+            "string_key": "test string value",
+            "bool_key": true
         },
-        "parents": [
-            {
-                "type": "test_parent_type2",
-                "id": "test2"
-            },
-            {
-                "type": "test_parent_type1",
-                "id": "test1"
-            }
-        ]
+        "parents": []
     });
-    sort_json(&mut expected);
 
-    assert_eq!(entity_json, expected);
+    assert_eq!(expected.sorted(), entity_json.sorted());
 }
 
+// test all successful cases
+// with empty namespace
 #[test]
-fn get_token_claim_type_string_error() {
-    let metadata = EntityMetadata::new(
-        "test",
-        "test_id_key",
-        vec![EntityAttributeMetadata {
-            attribute_name: "key",
-            token_claims_key: "string_key",
-            cedar_policy_type: CedarPolicyType::String,
-        }],
-    );
+fn successful_scenario_not_empty_namespace() {
+    let schema_json = include_str!("test_create_data/successful_scenario_schema.json");
+    let schema: CedarSchemaJson = serde_json::from_str(schema_json).unwrap();
+
+    let metadata = EntityMetadata::new("Jans::Test", "test_id_key");
 
     let json = serde_json::json!( {
         "test_id_key": "test_id",
-        "string_key": 123,
+        "string_key": "test string value",
+        "long_key": 12345,
+        "entity_uid_key": "unique_id",
+        "bool_key": true,
     });
 
-    let claim: TokenClaim = serde_json::from_value(json.clone()).unwrap();
+    let payload: TokenPayload = serde_json::from_value(json).unwrap();
+
+    let entity = metadata
+        .create_entity(&schema, &payload)
+        .expect("entity should be created");
+
+    let entity_json = entity.to_json_value().expect("should serialize to json");
+
+    let expected = serde_json::json!({
+        "uid": {
+            "type": "Jans::Test",
+            "id": "test_id"
+        },
+        "attrs": {
+            "entity_uid_key": {
+                "__entity": {
+                    "type": "Jans::Test2",
+                    "id": "unique_id"
+                }
+            },
+            "long_key": 12345,
+            "string_key": "test string value",
+            "bool_key": true
+        },
+        "parents": []
+    });
+
+    assert_eq!(expected.sorted(), entity_json.sorted());
+}
+
+/// test wrong string type in token payload
+#[test]
+fn get_token_claim_type_string_error() {
+    let schema_json = include_str!("test_create_data/successful_scenario_schema.json");
+    let schema: CedarSchemaJson = serde_json::from_str(schema_json).unwrap();
+
+    let metadata = EntityMetadata::new("Test", "test_id_key");
+
+    let test_key = "string_key";
+    let json = serde_json::json!( {
+        "test_id_key": "test_id",
+        test_key: 123,
+        "long_key": 12345,
+        "entity_uid_key": "unique_id",
+        "bool_key": true,
+    });
+
+    let payload: TokenPayload = serde_json::from_value(json.clone()).unwrap();
 
     let entity_creation_error = metadata
-        .create_entity(&claim, HashSet::new())
+        .create_entity(&schema, &payload)
         .expect_err("entity creating should throw error");
 
     if let CedarPolicyCreateTypeError::GetTokenClaimValue(GetTokenClaimValue::KeyNotCorrectType {
@@ -158,19 +140,10 @@ fn get_token_claim_type_string_error() {
         ..
     }) = entity_creation_error
     {
-        let origin_expected_key = metadata.meta_attributes[0].token_claims_key;
-
-        let json_attr_value = json
-            .as_object()
-            .unwrap()
-            .get(metadata.meta_attributes[0].token_claims_key)
-            .unwrap();
+        let json_attr_value = json.as_object().unwrap().get(test_key).unwrap();
         let origin_type = GetTokenClaimValue::json_value_type_name(json_attr_value);
 
-        assert!(
-            key == origin_expected_key,
-            "expected key: {origin_expected_key}, but got: {key}"
-        );
+        assert!(key == test_key, "expected key: {test_key}, but got: {key}");
         assert!(
             got_type == origin_type,
             "expected type: {origin_type}, but got: {got_type}"
@@ -180,121 +153,192 @@ fn get_token_claim_type_string_error() {
     }
 }
 
+/// test wrong long type in token payload
 #[test]
-fn get_token_claim_cedar_type_error() {
-    let metadata = EntityMetadata::new(
-        "test",
-        "test_id_key",
-        vec![EntityAttributeMetadata {
-            attribute_name: "key",
-            token_claims_key: "string_key",
-            cedar_policy_type: CedarPolicyType::EntityUid {
-                entity_type: "Test:",
-            },
-        }],
-    );
+fn get_token_claim_type_long_error() {
+    let schema_json = include_str!("test_create_data/successful_scenario_schema.json");
+    let schema: CedarSchemaJson = serde_json::from_str(schema_json).unwrap();
 
+    let metadata = EntityMetadata::new("Test", "test_id_key");
+
+    let test_key = "long_key";
     let json = serde_json::json!( {
         "test_id_key": "test_id",
-        "string_key": "string value",
+        "string_key": "test string",
+        "long_key": "str",
+        "entity_uid_key": "unique_id",
+        "bool_key": true,
     });
 
-    let claim: TokenClaim = serde_json::from_value(json.clone()).unwrap();
+    let payload: TokenPayload = serde_json::from_value(json.clone()).unwrap();
 
     let entity_creation_error = metadata
-        .create_entity(&claim, HashSet::new())
+        .create_entity(&schema, &payload)
         .expect_err("entity creating should throw error");
 
-    assert!(matches!(
-        entity_creation_error,
-        CedarPolicyCreateTypeError::EntityTypeName(_, _)
-    ))
-}
+    if let CedarPolicyCreateTypeError::GetTokenClaimValue(GetTokenClaimValue::KeyNotCorrectType {
+        key,
+        got_type,
+        ..
+    }) = entity_creation_error
+    {
+        let json_attr_value = json.as_object().unwrap().get(test_key).unwrap();
+        let origin_type = GetTokenClaimValue::json_value_type_name(json_attr_value);
 
-#[test]
-fn create_entity_cedar_type_error() {
-    let metadata = EntityMetadata::new("Test:1", "test_id_key", vec![]);
-
-    let json = serde_json::json!( {
-        "test_id_key": "test_id",
-        "string_key": "string value",
-    });
-
-    let claim: TokenClaim = serde_json::from_value(json.clone()).unwrap();
-
-    let entity_creation_error = metadata
-        .create_entity(&claim, HashSet::new())
-        .expect_err("entity creating should throw error");
-
-    assert!(matches!(
-        entity_creation_error,
-        CedarPolicyCreateTypeError::EntityTypeName(_, _)
-    ))
-}
-
-macro_rules! get_claim_neg_test {
-    ($suite:ident, $($name:ident: $cedar_policy_type:expr, $claim_value:expr)*) => {
-        mod $suite {
-            use super::*;
-            $(
-                #[test]
-                fn $name() {
-                    let metadata = EntityMetadata::new(
-                        "test",
-                        "test_id_key",
-                        vec![EntityAttributeMetadata {
-                            attribute_name: "key",
-                            token_claims_key: "claim_key",
-                            cedar_policy_type: $cedar_policy_type,
-                        }],
-                    );
-
-                    let json = serde_json::json!( {
-                        "test_id_key": "test_id",
-                        "claim_key": $claim_value,
-                    });
-
-                    let claim: TokenClaim = serde_json::from_value(json.clone()).unwrap();
-
-                    let entity_creation_error = metadata
-                        .create_entity(&claim, HashSet::new())
-                        .expect_err("entity creating should throw error");
-
-                    if let CedarPolicyCreateTypeError::GetTokenClaimValue(GetTokenClaimValue::KeyNotCorrectType {
-                        key,
-                        got_type,
-                        ..
-                    }) = entity_creation_error
-                    {
-                        let origin_expected_key = metadata.meta_attributes[0].token_claims_key;
-
-                        let json_attr_value = json
-                            .as_object()
-                            .unwrap()
-                            .get(metadata.meta_attributes[0].token_claims_key)
-                            .unwrap();
-                        let origin_type = GetTokenClaimValue::json_value_type_name(json_attr_value);
-
-                        assert!(
-                            key == origin_expected_key,
-                            "expected key: {origin_expected_key}, but got: {key}"
-                        );
-                        assert!(
-                            got_type == origin_type,
-                            "expected type: {origin_type}, but got: {got_type}"
-                        );
-                    } else {
-                        std::panic!("expected error type: CedarPolicyCreateTypeError::GetTokenClaimValue(GetTokenClaimValue::KeyNotCorrectType), but got: {entity_creation_error}");
-                    }
-                }
-            )*
-        }
+        assert!(key == test_key, "expected key: {test_key}, but got: {key}");
+        assert!(
+            got_type == origin_type,
+            "expected type: {origin_type}, but got: {got_type}"
+        );
+    } else {
+        panic!("expected error type: CedarPolicyCreateTypeError::GetTokenClaimValue(GetTokenClaimValue::KeyNotCorrectType), but got: {entity_creation_error}");
     }
 }
 
-// using table testing with rust macros
-get_claim_neg_test! {get_claim_attr_type_negative_tests,
-    get_string: CedarPolicyType::String, 123
-    get_long: CedarPolicyType::Long, "some string"
-    get_entity_uid: CedarPolicyType::EntityUid{entity_type:"SomeType"}, 123
+/// test wrong entity_uid type in token payload
+#[test]
+fn get_token_claim_type_entity_uid_error() {
+    let schema_json = include_str!("test_create_data/successful_scenario_schema.json");
+    let schema: CedarSchemaJson = serde_json::from_str(schema_json).unwrap();
+
+    let metadata = EntityMetadata::new("Test", "test_id_key");
+
+    let test_key = "entity_uid_key";
+    let json = serde_json::json!( {
+        "test_id_key": "test_id",
+        "string_key": "test string",
+        "long_key": 1234,
+        "entity_uid_key": 123,
+        "bool_key": true,
+    });
+
+    let payload: TokenPayload = serde_json::from_value(json.clone()).unwrap();
+
+    let entity_creation_error = metadata
+        .create_entity(&schema, &payload)
+        .expect_err("entity creating should throw error");
+
+    if let CedarPolicyCreateTypeError::GetTokenClaimValue(GetTokenClaimValue::KeyNotCorrectType {
+        key,
+        got_type,
+        ..
+    }) = entity_creation_error
+    {
+        let json_attr_value = json.as_object().unwrap().get(test_key).unwrap();
+        let origin_type = GetTokenClaimValue::json_value_type_name(json_attr_value);
+
+        assert!(key == test_key, "expected key: {test_key}, but got: {key}");
+        assert!(
+            got_type == origin_type,
+            "expected type: {origin_type}, but got: {got_type}"
+        );
+    } else {
+        panic!("expected error type: CedarPolicyCreateTypeError::GetTokenClaimValue(GetTokenClaimValue::KeyNotCorrectType), but got: {entity_creation_error}");
+    }
+}
+
+/// test wrong boolean type in token payload
+#[test]
+fn get_token_claim_type_boolean_error() {
+    let schema_json = include_str!("test_create_data/successful_scenario_schema.json");
+    let schema: CedarSchemaJson = serde_json::from_str(schema_json).unwrap();
+
+    let metadata = EntityMetadata::new("Test", "test_id_key");
+
+    let test_key = "bool_key";
+    let json = serde_json::json!( {
+        "test_id_key": "test_id",
+        "string_key": "test string",
+        "long_key": 1234,
+        "entity_uid_key": 123,
+        "bool_key": 123,
+    });
+
+    let payload: TokenPayload = serde_json::from_value(json.clone()).unwrap();
+
+    let entity_creation_error = metadata
+        .create_entity(&schema, &payload)
+        .expect_err("entity creating should throw error");
+
+    if let CedarPolicyCreateTypeError::GetTokenClaimValue(GetTokenClaimValue::KeyNotCorrectType {
+        key,
+        got_type,
+        ..
+    }) = entity_creation_error
+    {
+        let json_attr_value = json.as_object().unwrap().get(test_key).unwrap();
+        let origin_type = GetTokenClaimValue::json_value_type_name(json_attr_value);
+
+        assert!(key == test_key, "expected key: {test_key}, but got: {key}");
+        assert!(
+            got_type == origin_type,
+            "expected type: {origin_type}, but got: {got_type}"
+        );
+    } else {
+        panic!("expected error type: CedarPolicyCreateTypeError::GetTokenClaimValue(GetTokenClaimValue::KeyNotCorrectType), but got: {entity_creation_error}");
+    }
+}
+
+/// create entity with wrong cedar typename
+#[test]
+fn get_token_claim_cedar_typename_error() {
+    let schema_json = include_str!("test_create_data/successful_scenario_schema.json");
+    let schema: CedarSchemaJson = serde_json::from_str(schema_json).unwrap();
+
+    let metadata = EntityMetadata::new("Jans:::Test", "test_id_key");
+
+    let json = serde_json::json!( {
+        "test_id_key": "test_id",
+        "string_key": "test string value",
+        "long_key": 12345,
+        "entity_uid_key": "unique_id",
+        "bool_key": true,
+    });
+
+    let payload: TokenPayload = serde_json::from_value(json).unwrap();
+
+    let entity_creation_error = metadata
+        .create_entity(&schema, &payload)
+        .expect_err("entity creating should throw error");
+
+    if let CedarPolicyCreateTypeError::EntityTypeName(typename, _) = &entity_creation_error {
+        assert_eq!("Jans:::Test", typename);
+    } else {
+        panic!(
+            "error should be CedarPolicyCreateTypeError::EntityTypeName, but got {:?}",
+            entity_creation_error
+        );
+    }
+}
+
+/// create entity with wrong cedar typename in the attribute
+#[test]
+fn get_token_claim_cedar_typename_in_attr_error() {
+    let schema_json = include_str!("test_create_data/type_error_schema.json");
+    let schema: CedarSchemaJson = serde_json::from_str(schema_json).unwrap();
+
+    let metadata = EntityMetadata::new("Jans::Test", "test_id_key");
+
+    let json = serde_json::json!( {
+        "test_id_key": "test_id",
+        "string_key": "test string value",
+        "long_key": 12345,
+        "entity_uid_key": "unique_id",
+        "bool_key": true,
+    });
+
+    let payload: TokenPayload = serde_json::from_value(json).unwrap();
+
+    let entity_creation_error = metadata
+        .create_entity(&schema, &payload)
+        .expect_err("entity creating should throw error");
+
+    if let CedarPolicyCreateTypeError::EntityTypeName(typename, _) = &entity_creation_error {
+        assert_eq!("Jans:::Test2", typename);
+    } else {
+        panic!(
+            "error should be CedarPolicyCreateTypeError::EntityTypeName, but got {:?}",
+            entity_creation_error
+        );
+    }
 }
