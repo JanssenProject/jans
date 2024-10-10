@@ -26,10 +26,6 @@ if [ -z "$JANSSEN_VERSION" ]; then
     JANSSEN_VERSION="1.1.6_dev"
 fi
 
-if [ -z "$DATABASE_VOLUME_NAME" ]; then
-    DATABASE_VOLUME_NAME="db-data"
-fi
-
 if [ -z "$JANSSEN_SERVICE_NAME" ]; then
     JANSSEN_SERVICE_NAME="jans"
 fi
