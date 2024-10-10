@@ -205,7 +205,7 @@ Note:  `SMTP Password` should be an App password and not a web login password.
 Start TUI using the command below:
 
 ```bash title="Command"
-sudo /opt/jans/jans-cli/jans_cli_tui.py
+jans tui
 ```
 
 ### SMPT Screen

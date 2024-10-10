@@ -29,7 +29,7 @@ The filter name is `io.jans.as.server.filter.CorsFilter`.
 
 CORS can be configured in Jans Server using `Jans TUI`. Follow these steps:
 
-1. Open `Jans TUI` using `/opt/jans/jans-cli/jans_cli_tui.py` command.
+1. Open `Jans TUI` using `jans tui` command.
 2. Go to `Auth Server > Properties` and select `corsConfigurationFilters`
 3. This will display the CORS Configuration Filter parameters, as shown below:
  
