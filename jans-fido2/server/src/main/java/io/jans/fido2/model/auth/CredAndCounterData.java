@@ -30,6 +30,7 @@ public class CredAndCounterData {
 	private boolean extensionDataFlag;
 	private boolean userVerifiedFlag;
 	private boolean userPresentFlag;
+	private String authenticatorName;
 
 	public String getCredId() {
 		return credId;
@@ -122,4 +123,7 @@ public class CredAndCounterData {
 	public void setUserPresentFlag(boolean userPresentFlag) {
 		this.userPresentFlag = userPresentFlag;
 	}
+
+	public void setAuthenticatorName(String authenticatorName) {this.authenticatorName = authenticatorName;}
+	public String getAuthenticatorName() {return authenticatorName;}
 }

@@ -120,6 +120,7 @@ public class PackedAttestationProcessor implements AttestationFormatProcessor {
         credIdAndCounters.setCredId(base64Service.urlEncodeToString(authData.getCredId()));
         credIdAndCounters.setUncompressedEcPoint(base64Service.urlEncodeToString(authData.getCosePublicKey()));
         credIdAndCounters.setSignatureAlgorithm(alg);
+        credIdAndCounters.setAuthenticatorName(attestationCertificateService.getAttestationAuthenticatorName(authData));
     }
 
 	private List<X509Certificate> getAttestationCertificates(JsonNode attStmt) {

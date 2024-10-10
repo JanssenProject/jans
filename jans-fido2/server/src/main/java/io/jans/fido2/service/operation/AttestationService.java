@@ -353,6 +353,7 @@ public class AttestationService {
 		attestationResultResponse.setCredentials(credentialDescriptor);
 		attestationResultResponse.setStatus("ok");
 		attestationResultResponse.setErrorMessage("");
+		attestationResultResponse.setAuthenticatorName(attestationData.getAuthenticatorName());
 
 		externalFido2InterceptionContext.addToContext(registrationEntry, null);
 		externalFido2InterceptionService.verifyAttestationFinish(CommonUtilService.toJsonNode(attestationResult), externalFido2InterceptionContext);
