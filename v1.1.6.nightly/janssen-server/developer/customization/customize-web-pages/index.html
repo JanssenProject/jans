@@ -5435,22 +5435,84 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#managing-custom-assets" class="md-nav__link">
-    Managing Custom Assets
+  <a href="#custom-assets-accepted-by-module" class="md-nav__link">
+    Custom Assets Accepted by Module
   </a>
   
-    <nav class="md-nav" aria-label="Managing Custom Assets">
+    <nav class="md-nav" aria-label="Custom Assets Accepted by Module">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#directory-structure-for-customization" class="md-nav__link">
-    Directory structure for customization
+  <a href="#config-api" class="md-nav__link">
+    Config-API
   </a>
   
 </li>
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#auth-server" class="md-nav__link">
+    Auth-Server
+  </a>
+  
+    <nav class="md-nav" aria-label="Auth-Server">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#casa" class="md-nav__link">
+    Casa
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#agama" class="md-nav__link">
+    Agama
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fido2" class="md-nav__link">
+    Fido2
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lock" class="md-nav__link">
+    Lock
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#keycloak-link" class="md-nav__link">
+    KeyCloak-link
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#link" class="md-nav__link">
+    Link
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#managing-custom-assets" class="md-nav__link">
+    Managing Custom Assets
+  </a>
   
 </li>
       
@@ -8840,22 +8902,84 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#managing-custom-assets" class="md-nav__link">
-    Managing Custom Assets
+  <a href="#custom-assets-accepted-by-module" class="md-nav__link">
+    Custom Assets Accepted by Module
   </a>
   
-    <nav class="md-nav" aria-label="Managing Custom Assets">
+    <nav class="md-nav" aria-label="Custom Assets Accepted by Module">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#directory-structure-for-customization" class="md-nav__link">
-    Directory structure for customization
+  <a href="#config-api" class="md-nav__link">
+    Config-API
   </a>
   
 </li>
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#auth-server" class="md-nav__link">
+    Auth-Server
+  </a>
+  
+    <nav class="md-nav" aria-label="Auth-Server">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#casa" class="md-nav__link">
+    Casa
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#agama" class="md-nav__link">
+    Agama
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fido2" class="md-nav__link">
+    Fido2
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lock" class="md-nav__link">
+    Lock
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#keycloak-link" class="md-nav__link">
+    KeyCloak-link
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#link" class="md-nav__link">
+    Link
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#managing-custom-assets" class="md-nav__link">
+    Managing Custom Assets
+  </a>
   
 </li>
       
@@ -9018,46 +9142,201 @@ meet the branding of the organization. </p>
 <p>All of the above need some amount of custom assets, like custom CSS stylesheets,
 logo images, etc to be available on the Janssen Server. All these are called
 <code>Custom Assets</code>.</p>
+<h2 id="custom-assets-accepted-by-module">Custom Assets Accepted by Module<a class="headerlink" href="#custom-assets-accepted-by-module" title="Permanent link">#</a></h2>
+<p>Listing of custom asset types that each Janssen Server module accepts:</p>
+<h3 id="config-api">Config-API<a class="headerlink" href="#config-api" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Path</th>
+<th>Asset Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>/opt/jans/jetty/jans-config-api/custom/config</td>
+<td>*.xml</td>
+</tr>
+<tr>
+<td>/opt/jans/jetty/jans-config-api/custom/i18n</td>
+<td>*.properties</td>
+</tr>
+<tr>
+<td>/opt/jans/jetty/jans-config-api/custom/libs</td>
+<td>*.jar</td>
+</tr>
+<tr>
+<td>/opt/jans/jetty/jans-config-api/custom/pages</td>
+<td>*.xhtml</td>
+</tr>
+<tr>
+<td>/opt/jans/jetty/jans-config-api/custom/static</td>
+<td><em>.js, </em>.css, <em>.png, </em>.gif, <em>.jpg, </em>.jpeg</td>
+</tr>
+</tbody>
+</table>
+<h2 id="auth-server">Auth-Server<a class="headerlink" href="#auth-server" title="Permanent link">#</a></h2>
+<table>
+<thead>
+<tr>
+<th>Path</th>
+<th>Asset Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>/opt/jans/jetty/jans-auth/custom/i18n</td>
+<td>*.properties</td>
+</tr>
+<tr>
+<td>/opt/jans/jetty/jans-auth/custom/libs</td>
+<td>*.jars</td>
+</tr>
+<tr>
+<td>/opt/jans/jetty/jans-auth/custom/pages</td>
+<td>*.xhtml</td>
+</tr>
+<tr>
+<td>/opt/jans/jetty/jans-auth/custom/static</td>
+<td><em>.js, </em>.css, <em>.png, </em>.gif, <em>.jpg, </em>.jpeg</td>
+</tr>
+<tr>
+<td>/etc/certs/jans-auth-keys.pkcs12</td>
+<td>*.pkcs12</td>
+</tr>
+</tbody>
+</table>
+<h3 id="casa">Casa<a class="headerlink" href="#casa" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Path</th>
+<th>Asset Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>/opt/jans/jetty/jans-casa/plugins</td>
+<td>*.jar</td>
+</tr>
+<tr>
+<td>/opt/jans/jetty/jans-casa/static</td>
+<td><em>.js, </em>.css, <em>.png, </em>.gif, <em>.jpg, </em>.jpeg</td>
+</tr>
+</tbody>
+</table>
+<h3 id="agama">Agama<a class="headerlink" href="#agama" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Path</th>
+<th>Asset Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>/opt/jans/jetty/jans-auth/agama</td>
+<td>engine templates</td>
+</tr>
+<tr>
+<td>/opt/jans/jetty/jans-auth/agama/fl</td>
+<td><em>.js, </em>.css, <em>.png, </em>.gif, <em>.jpg, </em>.jpeg</td>
+</tr>
+<tr>
+<td>/opt/jans/jetty/jans-auth/agama/ftl</td>
+<td><em>.ftl, </em>.ftlh</td>
+</tr>
+<tr>
+<td>/opt/jans/jetty/jans-auth/agama/scripts</td>
+<td><em>.java </em>.groovy, <em>.gvy, </em>.gy, *.gsh</td>
+</tr>
+</tbody>
+</table>
+<h3 id="fido2">Fido2<a class="headerlink" href="#fido2" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Path</th>
+<th>Asset Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>/etc/jans/conf/fido2/authenticator_cert</td>
+<td><em>.pem, </em>.crt</td>
+</tr>
+<tr>
+<td>/etc/jans/conf/fido2/mds/cert</td>
+<td>*.crt</td>
+</tr>
+<tr>
+<td>/etc/jans/conf/fido2/mds/toc</td>
+<td>*.jwt</td>
+</tr>
+<tr>
+<td>/etc/jans/conf/fido2/server_metadata</td>
+<td>*.json</td>
+</tr>
+</tbody>
+</table>
+<h3 id="lock">Lock<a class="headerlink" href="#lock" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Path</th>
+<th>Asset Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>/opt/jans/jetty/jans-lock/custom-libs</td>
+<td>*.jar</td>
+</tr>
+</tbody>
+</table>
+<h3 id="keycloak-link">KeyCloak-link<a class="headerlink" href="#keycloak-link" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Path</th>
+<th>Asset Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>/opt/jans/jetty/jans-keycloak-link/custom/libs/</td>
+<td>*.jar</td>
+</tr>
+<tr>
+<td>/var/jans/keycloak-link-snapshots/</td>
+<td>*.txt</td>
+</tr>
+</tbody>
+</table>
+<h3 id="link">Link<a class="headerlink" href="#link" title="Permanent link">#</a></h3>
+<table>
+<thead>
+<tr>
+<th>Path</th>
+<th>Asset Type</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>/opt/jans/jetty/jans-link/custom-libs</td>
+<td>*.jar</td>
+</tr>
+<tr>
+<td>/var/jans/link-snapshots/</td>
+<td>*.txt</td>
+</tr>
+</tbody>
+</table>
 <h2 id="managing-custom-assets">Managing Custom Assets<a class="headerlink" href="#managing-custom-assets" title="Permanent link">#</a></h2>
 <p>Janssen Server configuration tools like CLI and TUI provide the ability to add, 
 update, and delete custom assets. Refer to the 
 <a href="../../../config-guide/custom-assets-configuration/">custom assets configuration guide</a>
 to learn how to manage custom assets.</p>
-<h3 id="directory-structure-for-customization">Directory structure for customization<a class="headerlink" href="#directory-structure-for-customization" title="Permanent link">#</a></h3>
-<p>When custom assets are added Janssen Server, the server makes the assets 
-available at following locations so that they can be referenced and used by
-other components.</p>
-<table>
-<thead>
-<tr>
-<th>Directory</th>
-<th>Asset Type</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>/opt/jans/jetty/<code>&lt;service-name&gt;</code>/custom/i18n</td>
-<td>properties</td>
-<td>Resource bundle file</td>
-</tr>
-<tr>
-<td>/opt/jans/jetty/<code>&lt;service-name&gt;</code>/custom/libs</td>
-<td>lib</td>
-<td>java archive library</td>
-</tr>
-<tr>
-<td>/opt/jans/jetty/<code>&lt;service-name&gt;</code>/custom/pages</td>
-<td>xhtml</td>
-<td>Web pages</td>
-</tr>
-<tr>
-<td>/opt/jans/jetty/<code>&lt;service-name&gt;</code>/custom/static</td>
-<td>js, css, png, gif , jpg, jpeg</td>
-<td>Static resources like Java-script, style-sheet and images</td>
-</tr>
-</tbody>
-</table>
 <h2 id="customizing-web-pages">Customizing Web Pages<a class="headerlink" href="#customizing-web-pages" title="Permanent link">#</a></h2>
 <p>Janssen Server uses <a href="https://github.com/JanssenProject/jans/tree/main/jans-auth-server/server/src/main/webapp">xhtml pages</a> to render the web interface needed in 
 interactive web-flows. For example, password authentication flow. </p>
@@ -9135,7 +9414,7 @@ the built-in
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-09-27T12:12:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-10T06:12:49+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-10</span>
       
         <br>
         Created:
