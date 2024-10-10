@@ -10,12 +10,16 @@ use mock_key_service::*;
 use utils::*;
 
 #[test]
+/// Tests the ability to decode claims from a JWT token without validation.
 fn can_decode_claims_unvalidated() {
+    // Initialize JwtService with validation disabled
     let config = JwtConfig::Disabled;
     let service = JwtService::new(config, None);
 
+    // Generate an expired token using ES256
     let (token, _public_key, claims) = generate_token(jwt::Algorithm::ES256, true);
 
+    // Call decode
     let result = service
         .decode::<Claims>(&token)
         .expect("should decode token");
@@ -24,10 +28,13 @@ fn can_decode_claims_unvalidated() {
 }
 
 #[test]
+/// Tests the ability to decode claims from a JWT token with validation.
 fn can_decode_claims_validated() {
+    // Initialize JwtService with validation enabled
     let algorithm = jwt::Algorithm::ES256;
     let (private_keys, jwks) = generate_keys(jwk::Algorithm::ES256);
 
+    // Generate a token using ES256
     let (token, claims) = generate_token_using_keys(algorithm, private_keys, false);
 
     // Setup key service

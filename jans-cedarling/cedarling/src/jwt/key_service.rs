@@ -1,11 +1,10 @@
 use jsonwebtoken as jwt;
 use jsonwebtoken::DecodingKey;
 
-/// Error type for JWT decoding
+/// Custom error type for `KeyService` operations.
 #[derive(thiserror::Error, Debug)]
 #[non_exhaustive]
 pub enum KeyServiceError {
-    /// Key is not in the storage
     #[error("Item with the given key was not found: {0}")]
     KeyNotFound(Box<str>),
 
@@ -19,7 +18,8 @@ pub enum KeyServiceError {
     ParsingError(jwt::errors::Error),
 }
 
-#[allow(dead_code)]
+/// Trait for a service that manages cryptographic keys used for JWT operations.
 pub trait KeyService: Send + Sync {
+    /// Retrieves the decoding key associated with the specified key identifier (`kid`).
     fn get_key(&self, kid: &str) -> Result<DecodingKey, KeyServiceError>;
 }

@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 use jsonwebkey::{self as jwk, Algorithm};
 use jsonwebtoken::{self as jwt};
 
+/// A user-defined struct for holding token claims.
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct Claims {
     iss: String,
@@ -14,13 +15,9 @@ pub struct Claims {
     iat: u64,
 }
 
-/// This is a helper function that generates a token
+/// Generates a JSON Web Token (JWT) with specified algorithm and expiration status.
 ///
-/// Returns (token serialized as String, , claims)
-/// Returns:
-/// - 0: the token serialized as a String
-/// - 1: the public jwk serialized as a String
-/// - 2: the claims of the token as a `Claims` struct
+/// (jwt, jwk, claims)
 pub fn generate_token(algorithm: jwt::Algorithm, expired: bool) -> (String, String, Claims) {
     let jwk_alg = match algorithm {
         jwt::Algorithm::HS256 => jwk::Algorithm::HS256,
@@ -49,6 +46,7 @@ pub fn generate_token(algorithm: jwt::Algorithm, expired: bool) -> (String, Stri
     (token, dec_key, claims)
 }
 
+/// Generates claims for a JWT
 fn generate_claims(expired: bool) -> Claims {
     let iat: u64;
     let exp: u64;
@@ -70,12 +68,7 @@ fn generate_claims(expired: bool) -> Claims {
     }
 }
 
-/// This is a helper function that generates a pair of private and public keys
-/// that should be used to mimic the actual implementation
-///
-/// Returns:
-/// - 0: a tuple of (key_id, encoding_key)
-/// - 1: a JWK serialized to a string
+/// Generates a pair of private and public keys for signing and verifying JWTs
 fn generate_key_pair(algorithm: jwk::Algorithm) -> ((String, jwt::EncodingKey), String) {
     let key_id = "some_key_id".to_string();
 
@@ -108,12 +101,7 @@ fn generate_key_pair(algorithm: jwk::Algorithm) -> ((String, jwt::EncodingKey), 
     ((key_id, private_key), public_key)
 }
 
-/// This is a helper function that generates a set of private and public keys
-/// that should be used to mimic the actual implementation
-///
-/// Returns:
-/// - 0: a Vec of (key_id, encoding_key)
-/// - 1: a JWKS serialized to a String
+/// Generates a set of private and public keys for signing and verifying JWTs
 pub fn generate_keys(algorithm: jwk::Algorithm) -> (Vec<(String, jwt::EncodingKey)>, String) {
     let mut public_keys = jwt::jwk::JwkSet { keys: vec![] };
     let mut private_keys = vec![];
@@ -149,11 +137,7 @@ pub fn generate_keys(algorithm: jwk::Algorithm) -> (Vec<(String, jwt::EncodingKe
     (private_keys, public_keys)
 }
 
-/// Generates a token and signs it using the specified keys and algorithm
-///
-/// Returns:
-/// - 0: the token serialized as a String
-/// - 1: the token's claims as a `Claims` struct
+/// Generates a JWT using a keyset
 pub fn generate_token_using_keys(
     algorithm: jwt::Algorithm,
     encoding_keys: Vec<(String, jwt::EncodingKey)>,
@@ -172,6 +156,7 @@ pub fn generate_token_using_keys(
     }
 
     // select a key from the keyset
+    // for simplicity, were just choosing the first one
     let key_id = encoding_keys[0].0.clone();
     let enc_key = &encoding_keys[0].1;
 

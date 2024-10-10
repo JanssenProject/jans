@@ -5,7 +5,11 @@ use crate::{models::token_data::TokenPayload, JwtConfig};
 
 use super::{key_service::KeyService, DecodeJwtError};
 
-/// Service for JWT validation
+/// Service for JWT validation.
+///
+/// The `JwtService` is responsible for decoding and validating JSON Web Tokens (JWTs).
+/// It can operate in two modes: with validation, using a specified key service for key retrieval,
+/// and without validation, for cases where the token's validity is not required.
 #[derive(Clone)]
 pub struct JwtService {
     config: Arc<JwtConfig>,
@@ -13,7 +17,10 @@ pub struct JwtService {
 }
 
 impl JwtService {
-    /// Create new JWT service
+    /// Creates a new instance of `JwtService`.
+    ///
+    /// If `CEDARLING_JWT_VALIDATION` is set to `Enabled` in the
+    /// bootstrap properties `key_service` cannot not be `None`.
     pub fn new(config: JwtConfig, key_service: Option<Arc<dyn KeyService>>) -> Self {
         Self {
             config: Arc::new(config),
@@ -21,8 +28,7 @@ impl JwtService {
         }
     }
 
-    /// Generic decoder for JWT
-    #[allow(unused_variables)]
+    /// Decodes a JWT, optionally validating it based on the configuration settings.
     pub fn decode<T: serde::de::DeserializeOwned>(&self, jwt: &str) -> Result<T, DecodeJwtError> {
         match self.config.as_ref() {
             JwtConfig::Disabled => decode_jwt_without_validation(jwt),
@@ -32,12 +38,12 @@ impl JwtService {
         }
     }
 
-    /// Decode JWT to `TokenData`
+    /// Decodes a JWT and returns the `TokenPayload`.
     pub fn decode_token_data(&self, jwt: &str) -> Result<TokenPayload, DecodeJwtError> {
         self.decode(jwt)
     }
 
-    // Decodes the JWT with validation
+    /// Decodes and validates a JWT using the specified algorithms and keys.
     fn decode_and_validate_jwt<T: serde::de::DeserializeOwned>(
         &self,
         jwt: &str,
@@ -67,13 +73,13 @@ impl JwtService {
     }
 }
 
-// Decodes the JWT header without validation
+/// Extracts the JWT header from the given JWT string without validation.
 fn extract_jwt_header(jwt: &str) -> Result<Header, jsonwebtoken::errors::Error> {
     let header = decode_header(jwt)?;
     Ok(header)
 }
 
-// Decodes the JWT without validation
+/// Decodes a JWT without performing any validation.
 fn decode_jwt_without_validation<T: serde::de::DeserializeOwned>(
     jwt: &str,
 ) -> Result<T, DecodeJwtError> {
