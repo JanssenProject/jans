@@ -12,7 +12,7 @@ import io.jans.as.model.config.StaticConfiguration;
 import io.jans.configapi.model.configuration.ApiAppConfiguration;
 import io.jans.configapi.model.configuration.ApiEndpointMgt;
 import io.jans.configapi.util.ApiConstants;
-import io.jans.configapi.core.util.DataUtil;
+import io.jans.configapi.core.util.Jackson;
 import io.jans.model.SearchRequest;
 import io.jans.model.token.TokenEntity;
 import io.jans.model.token.TokenType;
@@ -29,12 +29,14 @@ import jakarta.ws.rs.NotFoundException;
 
 import static io.jans.as.model.util.Util.escapeLog;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
+import org.json.JSONObject;
 import org.slf4j.Logger;
 
 @ApplicationScoped
@@ -54,9 +56,6 @@ public class SessionService {
 
     @Inject
     TokenService tokenService;
-
-    @Inject
-    DataUtil dataUtil;
 
     @Inject
     private ApiAppConfiguration appConfiguration;
@@ -265,25 +264,56 @@ public class SessionService {
         }
 
         for (SessionId session : sessionList) {
-            this.excludedAttribute(session, sessionApiEndpointMgt.getExclusionAttributes());
+            this.excludeAttribute(session, sessionApiEndpointMgt.getExclusionAttributes());
         }
 
         logger.debug("After modification sessionList:{}", sessionList);
         return sessionList;
     }
 
-    private SessionId excludedAttribute(SessionId session, List<String> exclusionAttributes) {
-        if (session == null || exclusionAttributes == null || exclusionAttributes.isEmpty()) {
-            return session;
-        }
-        for (String attribute : exclusionAttributes) {
-            try {
-                DataUtil.invokeReflectionSetter(session, attribute, null);
-            } catch (Exception ex) {
-                logger.error("Error while nullifying attribute[" + attribute + "] value is ", ex);
+    private SessionId excludeAttribute(SessionId session, List<String> exclusionAttributes) {
+        logger.debug("Exclude attribute - session:{}, exclusionAttributes:{}", session, exclusionAttributes);
+        try {
+            if (session == null || exclusionAttributes == null || exclusionAttributes.isEmpty()) {
+                return session;
             }
+            String patchAsString = this.excludeAttributes(exclusionAttributes);
+            logger.debug("Exclude attribute - exclusionAttributes:{}, patchAsString:{}", exclusionAttributes,
+                    patchAsString);
+
+            if (StringUtils.isBlank(patchAsString)) {
+                return session;
+            }
+
+            session = Jackson.applyPatch(patchAsString, session);
+            logger.info("After exclude attribute - exclusionAttributes:{}, session:{}", exclusionAttributes, session);
+        } catch (Exception ex) {
+            logger.error("Error while nullifying attribute[" + exclusionAttributes + "] value is - ", ex);
         }
+
         return session;
+    }
+
+    private String excludeAttributes(List<String> exclusionAttributes) throws IOException {
+        logger.info("Exclude attribute - exclusionAttributes:{}", exclusionAttributes);
+        String patchAsString = null;
+        if (exclusionAttributes == null || exclusionAttributes.isEmpty()) {
+            return patchAsString;
+        }
+
+        List<JSONObject> jsonObjectList = new ArrayList<>();
+        for (String attribute : exclusionAttributes) {
+            JSONObject jsonObject = new JSONObject();
+            String newValue = null;
+            jsonObject.put("op", "replace");
+            jsonObject.put("path", attribute);
+            jsonObject.put("value", newValue);
+            jsonObjectList.add(jsonObject);
+        }
+
+        patchAsString = Jackson.asPrettyJson(jsonObjectList);
+        logger.info("Exclude attribute - jsonObjectList:{}, patchAsString:{}", jsonObjectList, patchAsString);
+        return patchAsString;
     }
 
 }

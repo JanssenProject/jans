@@ -80,8 +80,10 @@
       "name": "Session",
       "mandatoryAttributes": [],
       "exclusionAttributes": [
-        "id",
-		"dn"
+        "/id",
+        "/dn",
+        "/sessionAttributes/session_id",
+        "/sessionAttributes/old_session_id"
       ]
     }
   ],
