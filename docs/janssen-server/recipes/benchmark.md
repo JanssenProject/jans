@@ -199,9 +199,6 @@ Loading users requires a hefty but temporary amount of resources. By default, th
     | `GOOGLE_PROJECT_ID`              | Google Project ID. **Used with Spanner**                                                                      | ``                     |
     | `GOOGLE_SPANNER_INSTANCE_ID`     | Google Spanner Instance ID. **Used with Spanner**                                                             | ``                     |
     | `GOOGLE_SPANNER_DATABASE_ID`     | Google Spanner Database ID. **Used with Spanner**                                                             | ``                     |
-    | `LDAP_URL`                       | LDAP URL if LDAP is the persistence to load users in.                                                         | `opendj:1636`          |
-    | `LDAP_PW`                        | LDAP PW  if LDAP is the persistence to load users in.                                                         | ``                     |
-    | `LDAP_DN`                        | LDAP DN if LDAP is the persistence to load users in.                                                          | `cn=directory manager` |
     | `RDBMS_TYPE`                     | RDBMS type if `mysql` or `pgsql` is the persistence to load users in.                                         | `mysql`                |
     | `RDBMS_DB`                       | RDBMS Database name if `mysql` or `pgsql` is the persistence to load users in.                                | `jans`                 |
     | `RDBMS_USER`                     | RDBMS user if `mysql` or `pgsql` is the persistence to load users in.                                         | `jans`                 |
