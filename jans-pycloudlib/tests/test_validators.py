@@ -2,6 +2,7 @@ import pytest
 
 
 @pytest.mark.parametrize("type_", [
+    "ldap",
     "couchbase",
     "hybrid",
     "sql",
@@ -34,6 +35,13 @@ def test_validate_persistence_sql_dialect_invalid():
 
     with pytest.raises(ValueError):
         validate_persistence_sql_dialect("random")
+
+
+def test_validate_persistence_ldap_mapping():
+    from jans.pycloudlib.validators import validate_persistence_ldap_mapping
+
+    with pytest.deprecated_call():
+        validate_persistence_ldap_mapping("hybrid", "default")
 
 
 def test_validate_persistence_hybrid_mapping(monkeypatch):

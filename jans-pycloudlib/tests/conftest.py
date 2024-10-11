@@ -60,6 +60,7 @@ def gmanager(gconsul_config, gvault_secret):
 
     def get_config(key, default=""):
         ctx = {
+            "ldap_binddn": "cn=Directory Manager",
             "couchbase_server_user": "admin",
             "jca_client_id": "1234",
         }
@@ -67,6 +68,9 @@ def gmanager(gconsul_config, gvault_secret):
 
     def get_secret(key, default=""):
         ctx = {
+            "encoded_ox_ldap_pw": ENCODED_PW,
+            "encoded_ldapTrustStorePass": ENCODED_PW,
+            "ldap_pkcs12_base64": ENCODED_PW,
             "encoded_salt": "7MEDWVFAG3DmakHRyjMqp5EE",
             "sql_password": "secret",
             "couchbase_password": "secret",

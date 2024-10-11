@@ -21,6 +21,7 @@ import backoff
 from jans.pycloudlib.lock.couchbase_lock import CouchbaseLock
 from jans.pycloudlib.lock.spanner_lock import SpannerLock
 from jans.pycloudlib.lock.sql_lock import SqlLock
+from jans.pycloudlib.lock.ldap_lock import LdapLock
 from jans.pycloudlib.utils import as_boolean
 from jans.pycloudlib.persistence.utils import PersistenceMapper
 
@@ -33,7 +34,7 @@ logger = logging.getLogger(__name__)
 
 _DATETIME_FMT = "%Y-%m-%dT%H:%M:%S.%fZ"
 
-LockAdapter = _t.Union[SqlLock, SpannerLock, CouchbaseLock]
+LockAdapter = _t.Union[SqlLock, SpannerLock, CouchbaseLock, LdapLock]
 """Lock adapter type.
 
 Currently supports the following classes:
@@ -41,6 +42,7 @@ Currently supports the following classes:
 * [SqlLock][jans.pycloudlib.lock.sql_lock.SqlLock]
 * [SpannerLock][jans.pycloudlib.lock.spanner_lock.SpannerLock]
 * [CouchbaseLock][jans.pycloudlib.lock.couchbase_lock.CouchbaseLock]
+* [LdapLock][jans.pycloudlib.lock.ldap_lock.LdapLock]
 """
 
 
@@ -253,6 +255,7 @@ class LockRecord(BaseLockRecord):
         - `sql`: returns an instance of [SqlLock][jans.pycloudlib.lock.sql_lock.SqlLock]
         - `spanner`: returns and instance of [SpannerLock][jans.pycloudlib.lock.spanner_lock.SpannerLock]
         - `couchbase`: returns and instance of [CouchbaseLock][jans.pycloudlib.lock.couchbase_lock.CouchbaseLock]
+        - `ldap`: returns and instance of [LdapLock][jans.pycloudlib.lock.ldap_lock.LdapLock]
         """
         _adapter = os.environ.get("CN_OCI_LOCK_ADAPTER") or PersistenceMapper().mapping["default"]
 
@@ -265,7 +268,8 @@ class LockRecord(BaseLockRecord):
         if _adapter == "couchbase":
             return CouchbaseLock()
 
-        # unsupported adapter
+        if _adapter == "ldap":
+            return LdapLock()
         raise ValueError(f"Unsupported lock adapter {_adapter!r}")
 
     def _record_expired(self, record: dict[str, _t.Any]) -> bool:
@@ -447,4 +451,5 @@ __all__ = [
     "SpannerLock",
     "SqlLock",
     "CouchbaseLock",
+    "LdapLock",
 ]
