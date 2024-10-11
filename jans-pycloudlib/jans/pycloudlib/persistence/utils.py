@@ -49,14 +49,13 @@ def render_base_properties(src: str, dest: str) -> None:
 
     with open(dest, "w") as f:
         rendered_txt = txt % {
-            "persistence_type": os.environ.get("CN_PERSISTENCE_TYPE", "ldap"),
+            "persistence_type": os.environ.get("CN_PERSISTENCE_TYPE", "sql"),
         }
         f.write(rendered_txt)
 
 
 #: Supported persistence types.
 PERSISTENCE_TYPES = (
-    "ldap",
     "couchbase",
     "sql",
     "spanner",
@@ -157,7 +156,7 @@ class PersistenceMapper:
     """
 
     def __init__(self) -> None:
-        self.type = os.environ.get("CN_PERSISTENCE_TYPE", "ldap")
+        self.type = os.environ.get("CN_PERSISTENCE_TYPE", "sql")
         self._mapping: dict[str, str] = {}
 
     @property
@@ -191,10 +190,9 @@ class PersistenceMapper:
 
         ```py
         {
-            "sql": ["cache", "default", "session"],
+            "sql": ["cache", "default", "session", "site"],
             "couchbase": ["user"],
             "spanner": ["token"],
-            "ldap": ["site"],
         }
         ```
         """
@@ -211,10 +209,9 @@ class PersistenceMapper:
 
         ```py
         {
-            "sql": ["cache", "", "sessions"],
+            "sql": ["cache", "", "sessions", "link"],
             "couchbase": ["people, groups, authorizations"],
             "spanner": ["tokens"],
-            "ldap": ["link"],
         }
         ```
         """
