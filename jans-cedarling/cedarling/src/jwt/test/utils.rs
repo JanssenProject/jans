@@ -9,8 +9,8 @@ use std::time::{SystemTime, UNIX_EPOCH};
 
 use serde::{Deserialize, Serialize};
 
-use jsonwebkey::{self as jwk, Algorithm};
-use jsonwebtoken::{self as jwt};
+use jsonwebkey as jwk;
+use jsonwebtoken as jwt;
 
 /// A user-defined struct for holding token claims.
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
@@ -22,23 +22,16 @@ pub struct Claims {
     iat: u64,
 }
 
-/// Generates a JSON Web Token (JWT) with specified algorithm and expiration status.
+/// Generates a JWT Signed with ES256
 ///
-/// (jwt, jwk, claims)
-pub fn generate_token(algorithm: jwt::Algorithm, expired: bool) -> (String, String, Claims) {
-    let jwk_alg = match algorithm {
-        jwt::Algorithm::HS256 => jwk::Algorithm::HS256,
-        jwt::Algorithm::ES256 => jwk::Algorithm::ES256,
-        jwt::Algorithm::RS256 => jwk::Algorithm::RS256,
-        _ => panic!("not implemented"),
-    };
-
-    let (enc_key, dec_key) = generate_key_pair(jwk_alg);
+/// Returns a tuple: (token, public_key, claims)
+pub fn generate_token(expired: bool) -> (String, String, Claims) {
+    let (enc_key, dec_key) = generate_key_pair();
 
     let claims = generate_claims(expired);
     let header = jwt::Header {
         typ: Some("JWT".to_string()),
-        alg: algorithm,
+        alg: jwt::Algorithm::ES256,
         cty: None,
         jku: None,
         jwk: None,
@@ -75,65 +68,46 @@ fn generate_claims(expired: bool) -> Claims {
     }
 }
 
-/// Generates a pair of private and public keys for signing and verifying JWTs
-fn generate_key_pair(algorithm: jwk::Algorithm) -> ((String, jwt::EncodingKey), String) {
+/// Generates a pair of private and public keys for signing and verifying JWTs using ES256
+fn generate_key_pair() -> ((String, jwt::EncodingKey), String) {
     let key_id = "some_key_id".to_string();
 
     // Generate a private key
-    let mut jwk = match algorithm {
-        Algorithm::HS256 => jwk::JsonWebKey::new(jwk::Key::generate_symmetric(256)),
-        _ => jwk::JsonWebKey::new(jwk::Key::generate_p256()),
-    };
+    let mut jwk = jwk::JsonWebKey::new(jwk::Key::generate_p256());
 
-    jwk.set_algorithm(algorithm)
+    jwk.set_algorithm(jwk::Algorithm::ES256)
         .expect("should set encryption algorithm");
     jwk.key_id = Some(key_id.clone());
 
-    // since `.to_public()` will error if used on a symmetric key
-    let public_key = match algorithm {
-        // I can't figure out how to get the symmetric key from the docs...
-        // probably just use asymmetric keys for now for testing
-        Algorithm::HS256 => todo!(),
-        _ => serde_json::to_string(&jwk.key.to_public()).expect("should serialize public key"),
-    };
+    let public_key =
+        serde_json::to_string(&jwk.key.to_public()).expect("should serialize public key");
 
-    let private_key = match algorithm {
-        Algorithm::HS256 => {
-            jwt::EncodingKey::from_base64_secret(&public_key).expect("should generate encoding key")
-        },
-        _ => jwt::EncodingKey::from_ec_pem(jwk.key.to_pem().as_bytes())
-            .expect("should generate encoding key"),
-    };
+    let private_key = jwt::EncodingKey::from_ec_pem(jwk.key.to_pem().as_bytes())
+        .expect("should generate encoding key");
 
     ((key_id, private_key), public_key)
 }
 
-/// Generates a set of private and public keys for signing and verifying JWTs
-pub fn generate_keys(algorithm: jwk::Algorithm) -> (Vec<(String, jwt::EncodingKey)>, String) {
+/// Generates a set of private and public keys using ES256
+///
+/// Returns a tuple: (Vec<(key_id, private_key)>, jwks)
+pub fn generate_keys() -> (Vec<(String, jwt::EncodingKey)>, String) {
     let mut public_keys = jwt::jwk::JwkSet { keys: vec![] };
     let mut private_keys = vec![];
 
     for kid in 1..=5 {
         // Generate a private key
-        let mut jwk = match algorithm {
-            Algorithm::HS256 => jwk::JsonWebKey::new(jwk::Key::generate_symmetric(256)),
-            _ => jwk::JsonWebKey::new(jwk::Key::generate_p256()),
-        };
-        jwk.set_algorithm(algorithm)
+        let mut jwk = jwk::JsonWebKey::new(jwk::Key::generate_p256());
+        jwk.set_algorithm(jwk::Algorithm::ES256)
             .expect("should set encryption algorithm");
         jwk.key_id = Some("some_id".to_string());
 
-        // since `.to_public()` will error if used on a symmetric key
-        let public_key = match algorithm {
-            Algorithm::HS256 => {
-                serde_json::to_string(&jwk.key).expect("should serialize public key")
-            },
-            _ => serde_json::to_string(&jwk.key.to_public()).expect("should serialize public key"),
-        };
-
-        let key: jwt::jwk::Jwk =
+        // Generate public key
+        let public_key =
+            serde_json::to_string(&jwk.key.to_public()).expect("should serialize public key");
+        let public_key: jwt::jwk::Jwk =
             serde_json::from_str(&public_key).expect("should deserialize public key");
-        public_keys.keys.push(key);
+        public_keys.keys.push(public_key);
 
         let private_key = jwt::EncodingKey::from_ec_pem(jwk.key.to_pem().as_bytes())
             .expect("should generate encoding key");
@@ -146,7 +120,6 @@ pub fn generate_keys(algorithm: jwk::Algorithm) -> (Vec<(String, jwt::EncodingKe
 
 /// Generates a JWT using a keyset
 pub fn generate_token_using_keys(
-    algorithm: jwt::Algorithm,
     encoding_keys: Vec<(String, jwt::EncodingKey)>,
     expired: bool,
 ) -> (String, Claims) {
@@ -179,7 +152,7 @@ pub fn generate_token_using_keys(
     // specify the header
     let header = jwt::Header {
         typ: Some("JWT".to_string()),
-        alg: algorithm,
+        alg: jwt::Algorithm::ES256,
         cty: None,
         jku: None,
         jwk: None,
