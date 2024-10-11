@@ -5,7 +5,7 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-use jsonwebtoken::{decode, decode_header, DecodingKey, Header, Validation};
+use jsonwebtoken::{decode, decode_header, Algorithm, DecodingKey, Header, Validation};
 use std::sync::Arc;
 
 use crate::{models::token_data::TokenPayload, JwtConfig};
@@ -54,11 +54,18 @@ impl JwtService {
     fn decode_and_validate_jwt<T: serde::de::DeserializeOwned>(
         &self,
         jwt: &str,
-        // TODO: figure out if `signature_algorithms` still needed since
-        // the algorithms is defined in the JWT header anyways
-        _signature_algorithms: &Vec<String>,
+        signature_algorithms: &Vec<String>,
     ) -> Result<T, DecodeJwtError> {
         let header = extract_jwt_header(jwt).map_err(|_| DecodeJwtError::MalformedJWT)?;
+
+        // Automatically reject unsupported algorithms
+        let alg_string = alg_to_string(header.alg);
+        if !signature_algorithms.contains(&alg_string) {
+            return Err(DecodeJwtError::ValidationError(format!(
+                "The token is signed using an unsupported algorithm: {}",
+                alg_string
+            )));
+        }
 
         let validator = Validation::new(header.alg);
 
@@ -105,4 +112,22 @@ fn decode_jwt_without_validation<T: serde::de::DeserializeOwned>(
     };
 
     Ok(claims)
+}
+
+// Converts an algorithim to it's String representation
+fn alg_to_string(algorithm: Algorithm) -> String {
+    match algorithm {
+        Algorithm::HS256 => "HS256".to_string(),
+        Algorithm::HS384 => "HS384".to_string(),
+        Algorithm::HS512 => "HS512".to_string(),
+        Algorithm::ES256 => "ES256".to_string(),
+        Algorithm::ES384 => "ES384".to_string(),
+        Algorithm::RS256 => "RS256".to_string(),
+        Algorithm::RS384 => "RS384".to_string(),
+        Algorithm::RS512 => "RS512".to_string(),
+        Algorithm::PS256 => "PS256".to_string(),
+        Algorithm::PS384 => "PS384".to_string(),
+        Algorithm::PS512 => "PS512".to_string(),
+        Algorithm::EdDSA => "EdDSA".to_string(),
+    }
 }

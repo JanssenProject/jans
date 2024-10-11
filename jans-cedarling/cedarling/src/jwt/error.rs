@@ -68,6 +68,10 @@ pub enum DecodeJwtError {
     /// Happens when a key could not be retrieved from the `KeyService`
     #[error("The token is missing the `kid` (Key ID) in its headers")]
     MissingKeyId,
+
+    /// Happens when a key could not be retrieved from the `KeyService`
+    #[error("Error validating the token: {0}")]
+    ValidationError(String),
 }
 
 impl Into<DecodeJwtError> for jsonwebtoken::errors::Error {
