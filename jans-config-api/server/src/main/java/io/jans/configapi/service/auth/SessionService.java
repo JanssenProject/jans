@@ -29,7 +29,6 @@ import jakarta.ws.rs.NotFoundException;
 
 import static io.jans.as.model.util.Util.escapeLog;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -69,51 +68,65 @@ public class SessionService {
         return String.format("jansId=%s,%s", sessionId, staticConfiguration.getBaseDn().getSessions());
     }
 
-    public SessionId getSessionById(String id) {
-        logger.debug("Get Session by id:{}", id);
+    public SessionId getSessionBySid(String sid, boolean excludeAttributes) {
+        logger.debug("Get Session by sid:{}, excludeAttributes:{}", sid, excludeAttributes);
         SessionId sessionId = null;
         try {
-            sessionId = persistenceEntryManager.find(SessionId.class, getDnForSession(id));
+
+            List<SessionId> sessionList = persistenceEntryManager.findEntries(getDnForSession(null), SessionId.class,
+                    Filter.createEqualityFilter(ApiConstants.SID, sid));
+            if (sessionList != null && !sessionList.isEmpty()) {
+                sessionId = sessionList.get(0);
+            }
+            this.modifySession(sessionId, excludeAttributes);
         } catch (Exception ex) {
-            logger.error("Failed to load session entry with id " + id, ex);
+            logger.error("Failed to load session entry with sid " + sid, ex);
         }
         return sessionId;
     }
 
-    public List<SessionId> getAllSessions(int sizeLimit) {
-        logger.debug("Get All Session sizeLimit:{}", sizeLimit);
-        return persistenceEntryManager.findEntries(getDnForSession(null), SessionId.class, null, sizeLimit);
+    public List<SessionId> getAllSessions(int sizeLimit, boolean excludeAttributes) {
+        logger.debug("Get All Session sizeLimit:{}, excludeAttributes:{}", sizeLimit, excludeAttributes);
+        List<SessionId> sessionList = persistenceEntryManager.findEntries(getDnForSession(null), SessionId.class, null,
+                sizeLimit);
+        this.modifySessionList(sessionList, excludeAttributes);
+        return sessionList;
     }
 
-    public List<SessionId> getAllSessions() {
-        return persistenceEntryManager.findEntries(getDnForSession(null), SessionId.class, null);
+    public List<SessionId> getAllSessions(boolean excludeAttributes) {
+        List<SessionId> sessionList = persistenceEntryManager.findEntries(getDnForSession(null), SessionId.class, null);
+        this.modifySessionList(sessionList, excludeAttributes);
+        return sessionList;
     }
 
-    public List<SessionId> getSessions() {
+    public List<SessionId> getSessions(boolean excludeAttributes) {
         List<SessionId> sessionList = persistenceEntryManager.findEntries(getDnForSession(null), SessionId.class,
                 Filter.createGreaterOrEqualFilter("exp", persistenceEntryManager.encodeTime(getDnForSession(null),
                         new Date(System.currentTimeMillis()))),
                 0);
-        logger.debug("All sessionList:{}", sessionList);
+        logger.debug("All sessionList:{}, excludeAttributes:{}", sessionList, excludeAttributes);
 
         sessionList.sort((SessionId s1, SessionId s2) -> s2.getCreationDate().compareTo(s1.getCreationDate()));
         logger.debug("Sorted Session sessionList:{}", sessionList);
+
+        this.modifySessionList(sessionList, excludeAttributes);
+
         return sessionList;
     }
 
-    public PagedResult<SessionId> searchSession(SearchRequest searchRequest) {
-        logger.error("Search Session with searchRequest:{}", searchRequest);
+    public PagedResult<SessionId> searchSession(SearchRequest searchRequest, boolean excludeAttributes) {
+        logger.info("Search Session with searchRequest:{}, excludeAttributes:{}", searchRequest, excludeAttributes);
 
         Filter searchFilter = null;
         List<Filter> filters = new ArrayList<>();
         if (searchRequest.getFilterAssertionValue() != null && !searchRequest.getFilterAssertionValue().isEmpty()) {
 
             for (String assertionValue : searchRequest.getFilterAssertionValue()) {
-                logger.error("Session Search with assertionValue:{}", assertionValue);
+                logger.debug("Session Search with assertionValue:{}", assertionValue);
                 if (StringUtils.isNotBlank(assertionValue)) {
                     String[] targetArray = new String[] { assertionValue };
                     Filter userFilter = Filter.createSubstringFilter(ApiConstants.JANS_USR_DN, null, targetArray, null);
-                    Filter sidFilter = Filter.createSubstringFilter(ApiConstants.OUTSIDE_SID, null, targetArray, null);
+                    Filter sidFilter = Filter.createSubstringFilter(ApiConstants.SID, null, targetArray, null);
                     Filter sessAttrFilter = Filter.createSubstringFilter(ApiConstants.JANS_SESS_ATTR, null, targetArray,
                             null);
                     Filter permissionFilter = Filter.createSubstringFilter("jansPermissionGrantedMap", null,
@@ -126,7 +139,7 @@ public class SessionService {
             searchFilter = Filter.createORFilter(filters);
         }
 
-        logger.error("Session pattern searchFilter:{}", searchFilter);
+        logger.debug("Session pattern searchFilter:{}", searchFilter);
         List<Filter> fieldValueFilters = new ArrayList<>();
         if (searchRequest.getFieldValueMap() != null && !searchRequest.getFieldValueMap().isEmpty()) {
             for (Map.Entry<String, String> entry : searchRequest.getFieldValueMap().entrySet()) {
@@ -138,11 +151,19 @@ public class SessionService {
                     Filter.createANDFilter(fieldValueFilters));
         }
 
-        logger.error("Session searchFilter:{}", searchFilter);
+        logger.debug("Session searchFilter:{}", searchFilter);
 
-        return persistenceEntryManager.findPagedEntries(getDnForSession(null), SessionId.class, searchFilter, null,
-                searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
-                searchRequest.getStartIndex(), searchRequest.getCount(), searchRequest.getMaxCount());
+        PagedResult<SessionId> pagedSessionList = persistenceEntryManager.findPagedEntries(getDnForSession(null),
+                SessionId.class, searchFilter, null, searchRequest.getSortBy(),
+                SortOrder.getByValue(searchRequest.getSortOrder()), searchRequest.getStartIndex(),
+                searchRequest.getCount(), searchRequest.getMaxCount());
+
+        if (pagedSessionList != null) {
+            List<SessionId> sessionList = this.modifySessionList(pagedSessionList.getEntries(), excludeAttributes);
+            pagedSessionList.setEntries(sessionList);
+        }
+
+        return pagedSessionList;
 
     }
 
@@ -160,26 +181,23 @@ public class SessionService {
         }
     }
 
-    public void revokeSessionById(String id) {
+    public void revokeSessionBySid(String sid) {
         if (logger.isInfoEnabled()) {
-            logger.info("Delete session by id:{}", escapeLog(id));
+            logger.info("Delete session by sid:{}", escapeLog(sid));
         }
 
-        if (StringUtils.isNotBlank(id)) {
-            Filter filter = Filter.createANDFilter(Filter.createEqualityFilter(ApiConstants.JANSID, id),
-                    Filter.createEqualityFilter("jansState", SessionIdState.AUTHENTICATED));
-
-            SessionId sessionToDelete = getSessionById(id);
+        if (StringUtils.isNotBlank(sid)) {
+            SessionId sessionToDelete = this.getSessionBySid(sid, false);
             logger.debug("User sessionToDelete:{}", sessionToDelete);
 
             if (sessionToDelete == null) {
                 throw new NotFoundException(
-                        "No " + SessionIdState.AUTHENTICATED + " session exists for id '" + id + "'!!!");
+                        "No " + SessionIdState.AUTHENTICATED + " session exists for sid '" + sid + "'!!!");
             }
 
             persistenceEntryManager.remove(sessionToDelete.getDn(), SessionId.class);
             cacheService.remove(sessionToDelete.getDn());
-            revokeSessionTokens(id, sessionToDelete.getDn());
+            revokeSessionTokens(sessionToDelete.getId(), sessionToDelete.getDn());
 
         }
     }
@@ -219,26 +237,27 @@ public class SessionService {
         }
         return apiEndpointMgt;
     }
-    private SessionId modifySession(SessionId session) {
-        logger.debug("Modify session:{}", session);
-        if (session == null ) {
+
+    private SessionId modifySession(SessionId session, boolean excludeAttributes) {
+        logger.debug("Modify session:{}, excludeAttributes:{}", session, excludeAttributes);
+        if (session == null) {
             return session;
         }
         List<SessionId> sessionList = new ArrayList<>();
         sessionList.add(session);
-        sessionList = modifySessionList(sessionList);
+        this.modifySessionList(sessionList, excludeAttributes);
         logger.debug("After modify session:{}", session);
         return session;
-        
+
     }
 
-    private List<SessionId> modifySessionList(List<SessionId> sessionList) {
-        logger.debug("Modify sessionList:{}", sessionList);
+    private List<SessionId> modifySessionList(List<SessionId> sessionList, boolean excludeAttributes) {
+        logger.debug("Modify sessionList:{}, excludeAttributes:{}", sessionList, excludeAttributes);
 
-        if (sessionList == null || sessionList.isEmpty()) {
+        if (sessionList == null || sessionList.isEmpty() || !excludeAttributes) {
             return sessionList;
         }
-        
+
         ApiEndpointMgt sessionApiEndpointMgt = this.getSessionApiEndpointMgt();
         logger.debug("sessionApiEndpointMgt:{}", sessionApiEndpointMgt);
         if (sessionApiEndpointMgt == null) {

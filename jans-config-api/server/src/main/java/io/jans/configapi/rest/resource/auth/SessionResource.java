@@ -60,7 +60,7 @@ public class SessionResource extends ConfigBaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_SESSION_READ_ACCESS }, groupScopes = {}, superScopes = {
             ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getAllSessions() {
-        final List<SessionId> sessions = sessionService.getSessions();
+        final List<SessionId> sessions = sessionService.getSessions(true);
         logger.debug("sessions:{}", sessions);
         return Response.ok(sessions).build();
     }
@@ -110,14 +110,14 @@ public class SessionResource extends ConfigBaseResource {
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_SESSION_READ_ACCESS }, groupScopes = {}, superScopes = {
             ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
-    @Path(ApiConstants.JANSID_PATH + ApiConstants.JANSID_PATH_PARAM)
+    @Path(ApiConstants.SID_PATH + ApiConstants.SID_PATH_PARAM)
     public Response getSessionById(
-            @Parameter(description = "Session Unique identifier.") @PathParam(ApiConstants.JANSID) @NotNull String jansId) {
+            @Parameter(description = "Session identifier.") @PathParam(ApiConstants.SID) @NotNull String sid) {
         if (logger.isInfoEnabled()) {
-            logger.info("Delete session identified by jansId:{}", escapeLog(jansId));
+            logger.info("Delete session identified by sid:{}", escapeLog(sid));
         }
-        checkResourceNotNull(jansId, ApiConstants.JANSID);
-        final SessionId session = sessionService.getSessionById(jansId);
+        checkResourceNotNull(sid, ApiConstants.SID);
+        final SessionId session = sessionService.getSessionBySid(sid, true);
         logger.debug("session:{}", session);
         return Response.ok(session).build();
     }
@@ -155,15 +155,15 @@ public class SessionResource extends ConfigBaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_SESSION_DELETE_ACCESS,
             ApiAccessConstants.JANS_AUTH_REVOKE_SESSION }, groupScopes = {}, superScopes = {
                     ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
-    @Path(ApiConstants.JANSID_PATH + ApiConstants.JANSID_PATH_PARAM)
-    public Response deleteSessionById(
-            @Parameter(description = "Session Unique identifier.") @PathParam(ApiConstants.JANSID) @NotNull String jansId) {
+    @Path(ApiConstants.SID_PATH + ApiConstants.SID_PATH_PARAM)
+    public Response deleteSessionBySid(
+            @Parameter(description = "Session identifier.") @PathParam(ApiConstants.SID) @NotNull String sid) {
         if (logger.isInfoEnabled()) {
-            logger.info("Delete session identified by jansId:{}", escapeLog(jansId));
+            logger.info("Delete session identified by sid:{}", escapeLog(sid));
         }
-        checkResourceNotNull(jansId, ApiConstants.JANSID);
+        checkResourceNotNull(sid, ApiConstants.SID);
 
-        sessionService.revokeSessionById(jansId);
+        sessionService.revokeSessionBySid(sid);
         return Response.ok().build();
     }
 
@@ -171,7 +171,7 @@ public class SessionResource extends ConfigBaseResource {
 
         logger.debug("Search Token by name params - searchReq:{} ", searchReq);
         SessionPagedResult sessionPagedResult = null;
-        PagedResult<SessionId> pagedResult = sessionService.searchSession(searchReq);
+        PagedResult<SessionId> pagedResult = sessionService.searchSession(searchReq, true);
 
         logger.debug("PagedResult  - pagedResult:{}", pagedResult);
         if (pagedResult != null) {

@@ -80,7 +80,8 @@
       "name": "Session",
       "mandatoryAttributes": [],
       "exclusionAttributes": [
-        "jansId"
+        "id",
+		"dn"
       ]
     }
   ],

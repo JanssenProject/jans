@@ -7543,7 +7543,7 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/scopes.readonly
-  /api/v1/jans-auth-server/session/id/{jansId}:
+  /api/v1/jans-auth-server/session/sid/{sid}:
     get:
       tags:
       - Auth - Session Management
@@ -7551,9 +7551,9 @@ paths:
       description: Get session by id.
       operationId: get-session-by-id
       parameters:
-      - name: jansId
+      - name: sid
         in: path
-        description: Session Unique identifier.
+        description: Session identifier.
         required: true
         schema:
           type: string
@@ -7585,9 +7585,9 @@ paths:
       description: Delete a session.
       operationId: delete-session
       parameters:
-      - name: jansId
+      - name: sid
         in: path
-        description: Session Unique identifier.
+        description: Session identifier.
         required: true
         schema:
           type: string
@@ -9219,17 +9219,17 @@ components:
           type: boolean
         adminCanEdit:
           type: boolean
-        adminCanView:
-          type: boolean
         userCanEdit:
           type: boolean
         userCanView:
           type: boolean
-        userCanAccess:
-          type: boolean
         adminCanAccess:
           type: boolean
+        userCanAccess:
+          type: boolean
         whitePagesCanView:
+          type: boolean
+        adminCanView:
           type: boolean
         baseDn:
           type: string
@@ -11001,8 +11001,32 @@ components:
           description: Details of enabled plugins.
           items:
             $ref: '#/components/schemas/PluginConf'
+        apiEndpointMgt:
+          type: array
+          description: Api endpoint configuration details.
+          items:
+            $ref: '#/components/schemas/ApiEndpointMgt'
         assetMgtConfiguration:
           $ref: '#/components/schemas/AssetMgtConfiguration'
+    ApiEndpointMgt:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of api endpoint.
+        mandatoryAttributes:
+          type: array
+          description: List of mandatory attribute.
+          items:
+            type: string
+            description: List of mandatory attribute.
+        exclusionAttributes:
+          type: array
+          description: Attribute that should not be returned in response.
+          items:
+            type: string
+            description: Attribute that should not be returned in response.
+      description: Api endpoint configuration details.
     AssetMgtConfiguration:
       type: object
       properties:
@@ -11196,14 +11220,14 @@ components:
           type: boolean
         internal:
           type: boolean
+        locationPath:
+          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
-        locationPath:
-          type: string
         baseDn:
           type: string
     ScriptError:
