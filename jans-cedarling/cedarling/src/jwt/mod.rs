@@ -16,7 +16,7 @@ mod service;
 #[cfg(test)]
 mod test;
 
-pub use error::DecodeJwtError;
+pub use error::Error;
 #[allow(unused_imports)]
 pub(crate) use key_service::*;
 pub(crate) use service::*;

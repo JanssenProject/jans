@@ -12,8 +12,7 @@
 use std::str::FromStr;
 use std::sync::Arc;
 
-use crate::jwt::DecodeJwtError;
-use crate::jwt::JwtService;
+use crate::jwt;
 use crate::log::{LogWriter, Logger};
 use crate::models::app_types;
 use crate::models::log_entry::AuthorizationLogInfo;
@@ -38,7 +37,7 @@ pub struct Authz {
     pdp_id: app_types::PdpID,
     application_name: app_types::ApplicationName,
     policy_store: PolicyStore,
-    jwt_service: Arc<JwtService>,
+    jwt_service: Arc<jwt::JwtService>,
 }
 
 impl Authz {
@@ -48,7 +47,7 @@ impl Authz {
         let pdp_id = *dep_map.get();
         let log: Logger = dep_map.get();
         let policy_store: Arc<PolicyStore> = dep_map.get();
-        let jwt_service: Arc<JwtService> = dep_map.get();
+        let jwt_service: Arc<jwt::JwtService> = dep_map.get();
 
         log.log(
             LogEntry::new_with_data(pdp_id, application_name.as_ref().clone(), LogType::System)
@@ -133,9 +132,9 @@ impl Authz {
 /// Error type for Authorization Service
 #[derive(thiserror::Error, Debug)]
 pub enum AuthorizeError {
-    /// Error encountered while decoding JWT token data
-    #[error("Malformed JWT provided")]
-    JWT(#[from] DecodeJwtError),
+    /// Error encountered while parsing JWT data
+    #[error("Error while parsing JWT: {0}")]
+    JWT(#[from] jwt::Error),
     /// Error encountered while creating access token entities
     #[error("{0}")]
     AccessTokenEntities(#[from] AccessTokenEntitiesError),

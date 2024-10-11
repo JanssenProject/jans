@@ -30,6 +30,6 @@ impl KeyService for MockKeyService {
             .find(&kid)
             .ok_or(KeyServiceError::KeyNotFound(kid.into()))?;
 
-        Ok(DecodingKey::from_jwk(key).map_err(|e| KeyServiceError::DecodingError(e))?)
+        Ok(DecodingKey::from_jwk(key).unwrap())
     }
 }

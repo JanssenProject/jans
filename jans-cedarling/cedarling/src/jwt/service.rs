@@ -10,7 +10,7 @@ use std::sync::Arc;
 
 use crate::{models::token_data::TokenPayload, JwtConfig};
 
-use super::{key_service::KeyService, DecodeJwtError};
+use super::{key_service::KeyService, Error};
 
 /// Service for JWT validation.
 ///
@@ -36,7 +36,7 @@ impl JwtService {
     }
 
     /// Decodes a JWT, optionally validating it based on the configuration settings.
-    pub fn decode<T: serde::de::DeserializeOwned>(&self, jwt: &str) -> Result<T, DecodeJwtError> {
+    pub fn decode<T: serde::de::DeserializeOwned>(&self, jwt: &str) -> Result<T, Error> {
         match self.config.as_ref() {
             JwtConfig::Disabled => decode_jwt_without_validation(jwt),
             JwtConfig::Enabled {
@@ -46,7 +46,7 @@ impl JwtService {
     }
 
     /// Decodes a JWT and returns the `TokenPayload`.
-    pub fn decode_token_data(&self, jwt: &str) -> Result<TokenPayload, DecodeJwtError> {
+    pub fn decode_token_data(&self, jwt: &str) -> Result<TokenPayload, Error> {
         self.decode(jwt)
     }
 
@@ -55,16 +55,13 @@ impl JwtService {
         &self,
         jwt: &str,
         signature_algorithms: &Vec<String>,
-    ) -> Result<T, DecodeJwtError> {
-        let header = extract_jwt_header(jwt).map_err(|_| DecodeJwtError::MalformedJWT)?;
+    ) -> Result<T, Error> {
+        let header = extract_jwt_header(jwt).map_err(|e| Error::ParsingError(e))?;
 
         // Automatically reject unsupported algorithms
         let alg_string = alg_to_string(header.alg);
         if !signature_algorithms.contains(&alg_string) {
-            return Err(DecodeJwtError::ValidationError(format!(
-                "The token is signed using an unsupported algorithm: {}",
-                alg_string
-            )));
+            return Err(Error::UnsupportedAlgorithm);
         }
 
         let validator = Validation::new(header.alg);
@@ -73,15 +70,18 @@ impl JwtService {
         let key_service = self
             .key_service
             .as_ref()
-            .ok_or_else(|| DecodeJwtError::KeyServiceNotFound)?;
+            .ok_or_else(|| Error::KeyServiceNotFound)?;
         let key = key_service
-            .get_key(&header.kid.ok_or(DecodeJwtError::MissingKeyId)?)
-            .map_err(|e| DecodeJwtError::KeyNotFound(e))?;
+            .get_key(
+                &header
+                    .kid
+                    .ok_or(Error::MissingRequiredHeader("kid".to_string()))?,
+            )
+            .map_err(|e| Error::MissingKey(e))?;
 
-        let claims = match decode::<T>(&jwt, &key, &validator) {
-            Ok(data) => data.claims,
-            Err(e) => return Err(e.into()),
-        };
+        let claims = decode::<T>(&jwt, &key, &validator)
+            .map_err(|e| Error::ValidationError(e))?
+            .claims;
 
         Ok(claims)
     }
@@ -94,10 +94,8 @@ fn extract_jwt_header(jwt: &str) -> Result<Header, jsonwebtoken::errors::Error> 
 }
 
 /// Decodes a JWT without performing any validation.
-fn decode_jwt_without_validation<T: serde::de::DeserializeOwned>(
-    jwt: &str,
-) -> Result<T, DecodeJwtError> {
-    let header = extract_jwt_header(jwt).map_err(|_| DecodeJwtError::MalformedJWT)?;
+fn decode_jwt_without_validation<T: serde::de::DeserializeOwned>(jwt: &str) -> Result<T, Error> {
+    let header = extract_jwt_header(jwt).map_err(|e| Error::ParsingError(e))?;
 
     let mut validator = Validation::new(header.alg);
     validator.insecure_disable_signature_validation();
@@ -106,10 +104,9 @@ fn decode_jwt_without_validation<T: serde::de::DeserializeOwned>(
 
     let key = DecodingKey::from_secret("secret".as_ref());
 
-    let claims = match decode::<T>(&jwt, &key, &validator) {
-        Ok(data) => data.claims,
-        Err(e) => return Err(e.into()),
-    };
+    let claims = decode::<T>(&jwt, &key, &validator)
+        .map_err(|e| Error::ValidationError(e))?
+        .claims;
 
     Ok(claims)
 }

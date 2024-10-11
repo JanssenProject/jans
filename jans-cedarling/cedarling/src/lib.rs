@@ -30,8 +30,6 @@ pub use authz::AuthorizeError;
 use authz::Authz;
 use di::{DependencyMap, DependencySupplier};
 use init::policy_store::{load_policy_store, LoadPolicyStoreError};
-pub use jwt::DecodeJwtError;
-use jwt::JwtService;
 pub use log::LogStorage;
 use log::{init_logger, LogWriter};
 use models::app_types;
@@ -91,7 +89,7 @@ impl Cedarling {
 
         // TODO: pass in `Some(Arc<dyn Keyservice>)` in here if
         // `CEDARLING_JWT_VALIDATION` is enabled
-        let jwt_service = JwtService::new(config.jwt_config, None);
+        let jwt_service = jwt::JwtService::new(config.jwt_config, None);
         log.log(
             LogEntry::new_with_container(&container, LogType::System)
                 .set_message("JWT service loaded successfully".to_string()),
