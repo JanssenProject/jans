@@ -7543,7 +7543,7 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/scopes.readonly
-  /api/v1/jans-auth-server/session/sid/{sid}:
+  /api/v1/jans-auth-server/session/id/{jansId}:
     get:
       tags:
       - Auth - Session Management
@@ -7551,9 +7551,9 @@ paths:
       description: Get session by id.
       operationId: get-session-by-id
       parameters:
-      - name: sid
+      - name: jansId
         in: path
-        description: Session identifier.
+        description: Session Unique identifier.
         required: true
         schema:
           type: string
@@ -7585,9 +7585,9 @@ paths:
       description: Delete a session.
       operationId: delete-session
       parameters:
-      - name: sid
+      - name: jansId
         in: path
-        description: Session identifier.
+        description: Session Unique identifier.
         required: true
         schema:
           type: string
@@ -9042,9 +9042,7 @@ components:
           type: string
           format: date-time
         service:
-          type: array
-          items:
-            type: string
+          type: string
         level:
           type: integer
           format: int32
@@ -9217,19 +9215,19 @@ components:
           type: string
         selected:
           type: boolean
-        userCanView:
+        whitePagesCanView:
           type: boolean
         adminCanView:
           type: boolean
-        adminCanEdit:
+        userCanView:
           type: boolean
         userCanEdit:
+          type: boolean
+        adminCanEdit:
           type: boolean
         userCanAccess:
           type: boolean
         adminCanAccess:
-          type: boolean
-        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -10078,6 +10076,8 @@ components:
           type: boolean
         lockMessageConfig:
           $ref: '#/components/schemas/LockMessageConfig'
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -10087,8 +10087,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -11001,32 +10999,8 @@ components:
           description: Details of enabled plugins.
           items:
             $ref: '#/components/schemas/PluginConf'
-        apiEndpointMgt:
-          type: array
-          description: Api endpoint configuration details.
-          items:
-            $ref: '#/components/schemas/ApiEndpointMgt'
         assetMgtConfiguration:
           $ref: '#/components/schemas/AssetMgtConfiguration'
-    ApiEndpointMgt:
-      type: object
-      properties:
-        name:
-          type: string
-          description: Name of api endpoint.
-        mandatoryAttributes:
-          type: array
-          description: List of mandatory attribute.
-          items:
-            type: string
-            description: List of mandatory attribute.
-        exclusionAttributes:
-          type: array
-          description: Attribute that should not be returned in response.
-          items:
-            type: string
-            description: Attribute that should not be returned in response.
-      description: Api endpoint configuration details.
     AssetMgtConfiguration:
       type: object
       properties:
