@@ -653,6 +653,56 @@
                         }
                     }
                 },
+                "storageClass": {
+                    "description": "StorageClass section for OpenDJ charts. This is not currently used by the openbanking distribution. You may specify custom parameters as needed.",
+                    "type": "object",
+                    "properties": {
+                        "allowVolumeExpansion": {
+                            "type": "boolean"
+                        },
+                        "allowedTopologies": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "mountOptions": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
+                        },
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "fsType": {
+                                    "type": "string"
+                                },
+                                "kind": {
+                                    "type": "string"
+                                },
+                                "pool": {
+                                    "type": "string"
+                                },
+                                "storageAccountType": {
+                                    "type": "string"
+                                },
+                                "type": {
+                                    "type": "string"
+                                }
+                            }
+                        },
+                        "provisioner": {
+                            "type": "string"
+                        },
+                        "reclaimPolicy": {
+                            "type": "string"
+                        },
+                        "volumeBindingMode": {
+                            "type": "string"
+                        }
+                    }
+                },
                 "link": {
                     "type": "object",
                     "properties": {

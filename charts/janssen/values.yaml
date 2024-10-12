@@ -1095,6 +1095,22 @@ global:
       scimLabels: { }
       # -- SCIM ingress resource additional annotations.
       scimAdditionalAnnotations: { }
+  # -- StorageClass section. This is not currently used by the openbanking distribution. You may specify custom parameters as needed.
+  storageClass:
+    allowVolumeExpansion: true
+    allowedTopologies: []
+    mountOptions:
+    - debug
+    # -- parameters:
+    #fsType: ""
+    #kind: ""
+    #pool: ""
+    #storageAccountType: ""
+    #type: ""
+    parameters: {}
+    provisioner: microk8s.io/hostpath
+    reclaimPolicy: Retain
+    volumeBindingMode: WaitForFirstConsumer
   link:
     # — Add custom annotations for kubernetes resources for the service
     customAnnotations:
