@@ -12,7 +12,7 @@ import io.jans.as.model.config.StaticConfiguration;
 import io.jans.configapi.model.configuration.ApiAppConfiguration;
 import io.jans.configapi.model.configuration.ApiEndpointMgt;
 import io.jans.configapi.util.ApiConstants;
-import io.jans.configapi.core.util.Jackson;
+import io.jans.configapi.core.util.DataUtil;
 import io.jans.model.SearchRequest;
 import io.jans.model.token.TokenEntity;
 import io.jans.model.token.TokenType;
@@ -277,15 +277,10 @@ public class SessionService {
             if (session == null || exclusionAttributes == null || exclusionAttributes.isEmpty()) {
                 return session;
             }
-            String patchAsString = this.excludeAttributes(exclusionAttributes);
-            logger.debug("Exclude attribute - exclusionAttributes:{}, patchAsString:{}", exclusionAttributes,
-                    patchAsString);
-
-            if (StringUtils.isBlank(patchAsString)) {
-                return session;
+            
+            for (String attribute : exclusionAttributes) {
+                session = DataUtil.setField(session, attribute, null);
             }
-
-            session = Jackson.applyPatch(patchAsString, session);
             logger.info("After exclude attribute - exclusionAttributes:{}, session:{}", exclusionAttributes, session);
         } catch (Exception ex) {
             logger.error("Error while nullifying attribute[" + exclusionAttributes + "] value is - ", ex);
@@ -294,26 +289,6 @@ public class SessionService {
         return session;
     }
 
-    private String excludeAttributes(List<String> exclusionAttributes) throws IOException {
-        logger.info("Exclude attribute - exclusionAttributes:{}", exclusionAttributes);
-        String patchAsString = null;
-        if (exclusionAttributes == null || exclusionAttributes.isEmpty()) {
-            return patchAsString;
-        }
-
-        List<JSONObject> jsonObjectList = new ArrayList<>();
-        for (String attribute : exclusionAttributes) {
-            JSONObject jsonObject = new JSONObject();
-            String newValue = null;
-            jsonObject.put("op", "replace");
-            jsonObject.put("path", attribute);
-            jsonObject.put("value", newValue);
-            jsonObjectList.add(jsonObject);
-        }
-
-        patchAsString = Jackson.asPrettyJson(jsonObjectList);
-        logger.info("Exclude attribute - jsonObjectList:{}, patchAsString:{}", jsonObjectList, patchAsString);
-        return patchAsString;
-    }
+  
 
 }
