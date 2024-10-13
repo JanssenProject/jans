@@ -1,0 +1,100 @@
+# The contents of this file are subject to the terms of the Common Development and
+# Distribution License (the License). You may not use this file except in compliance with the
+# License.
+#
+# You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+# specific language governing permission and limitations under the License.
+#
+# When distributing Covered Software, include this CDDL Header Notice in each file and include
+# the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+# Header, with the fields enclosed by brackets [] replaced by your own identifying
+# information: "Portions Copyright [year] [name of copyright owner]".
+#
+# Copyright 2006-2009 Sun Microsystems, Inc.
+# Portions Copyright 2011 ForgeRock AS.
+
+# This file contains schema definitions from draft-good-ldap-changelog, which
+# defines a mechanism for storing informmation about changes to Directory
+# Server data.
+dn: cn=schema
+objectClass: top
+objectClass: ldapSubentry
+objectClass: subschema
+attributeTypes: ( 2.16.840.1.113730.3.1.5 NAME 'changeNumber'
+  DESC 'a number which uniquely identifies a change made to a directory entry'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.27 EQUALITY integerMatch
+  ORDERING integerOrderingMatch SINGLE-VALUE
+  X-ORIGIN 'draft-good-ldap-changelog' )
+attributeTypes: ( 2.16.840.1.113730.3.1.6 NAME 'targetDN'
+  DESC 'the DN of the entry which was modified' EQUALITY distinguishedNameMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.12 SINGLE-VALUE
+  X-ORIGIN 'draft-good-ldap-changelog' )
+attributeTypes: ( 2.16.840.1.113730.3.1.7 NAME 'changeType'
+  DESC 'the type of change made to an entry' EQUALITY caseIgnoreMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 SINGLE-VALUE
+  X-ORIGIN 'draft-good-ldap-changelog' )
+attributeTypes: ( 2.16.840.1.113730.3.1.8 NAME 'changes'
+  DESC 'a set of changes to apply to an entry'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.40 X-ORIGIN 'draft-good-ldap-changelog' )
+attributeTypes: ( 2.16.840.1.113730.3.1.9 NAME 'newRDN'
+  DESC 'the new RDN of an entry which is the target of a modrdn operation'
+  EQUALITY distinguishedNameMatch SYNTAX 1.3.6.1.4.1.1466.115.121.1.12
+  SINGLE-VALUE X-ORIGIN 'draft-good-ldap-changelog' )
+attributeTypes: ( 2.16.840.1.113730.3.1.10 NAME 'deleteOldRDN'
+  DESC 'a flag which indicates if the old RDN should be retained as an
+  attribute of the entry' EQUALITY booleanMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.7 SINGLE-VALUE
+  X-ORIGIN 'draft-good-ldap-changelog' )
+attributeTypes: ( 2.16.840.1.113730.3.1.11 NAME 'newSuperior'
+  DESC 'the new parent of an entry which is the target of a moddn operation'
+  EQUALITY distinguishedNameMatch SYNTAX 1.3.6.1.4.1.1466.115.121.1.12
+  SINGLE-VALUE X-ORIGIN 'draft-good-ldap-changelog' )
+attributeTypes: ( 2.16.840.1.113730.3.1.77 NAME 'changeTime'
+  DESC 'the time when the change was processed'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  SINGLE-VALUE
+  X-ORIGIN 'Sun Directory Server' )
+attributeTypes: ( 1.3.6.1.4.1.42.2.27.9.1.724 NAME 'replicaIdentifier'
+  DESC 'the OpenDS replication domain server identifier for the change'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  SINGLE-VALUE
+  USAGE directoryOperation
+  X-ORIGIN 'OpenDS Directory Server' )
+attributeTypes: ( 1.3.6.1.4.1.42.2.27.9.1.725 NAME 'replicationCSN'
+  DESC 'The OpenDS replication change number for the change'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  SINGLE-VALUE
+  USAGE directoryOperation
+  X-ORIGIN 'OpenDS Directory Server' )
+attributeTypes: ( 1.3.6.1.4.1.26027.1.1.590
+  NAME ( 'targetEntryUUID' 'targetUniqueID' )
+  DESC 'The OpenDS unique id of the entry targeted by the change'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  SINGLE-VALUE
+  USAGE directoryOperation
+  X-ORIGIN 'OpenDS Directory Server' )
+attributeTypes: ( 1.3.6.1.4.1.26027.1.1.591 NAME 'changeLogCookie'
+  DESC 'The OpenDS opaque cookie for the External Changelog'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  SINGLE-VALUE
+  USAGE directoryOperation
+  X-ORIGIN 'OpenDS Directory Server' )
+attributeTypes: ( 1.3.6.1.4.1.26027.1.1.604 NAME 'changeInitiatorsName'
+  DESC 'The initiator user of the change'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  SINGLE-VALUE
+  USAGE directoryOperation
+  X-ORIGIN 'OpenDS Directory Server' )
+attributeTypes: ( 1.3.6.1.4.1.36733.2.1.1.6 NAME 'includedAttributes'
+  DESC 'A set of attributes which were part of the entry before the changes were applied'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.40
+  SINGLE-VALUE
+  USAGE directoryOperation
+  X-ORIGIN 'OpenDJ Directory Server' )
+objectClasses: ( 2.16.840.1.113730.3.2.1 NAME 'changeLogEntry' SUP top
+  STRUCTURAL
+  MUST ( changeNumber $ targetDN $ changeType $ changeTime )
+  MAY ( changes $ newRDN $ deleteOldRDN $ newSuperior )
+  X-ORIGIN 'draft-good-ldap-changelog' )
+objectClasses: ( 1.2.840.113556.1.3.23 NAME 'container' SUP top STRUCTURAL
+  MUST cn X-ORIGIN 'Microsoft Active Directory' )

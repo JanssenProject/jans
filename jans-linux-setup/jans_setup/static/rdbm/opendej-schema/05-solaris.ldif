@@ -1,0 +1,223 @@
+# The contents of this file are subject to the terms of the Common Development and
+# Distribution License (the License). You may not use this file except in compliance with the
+# License.
+#
+# You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+# specific language governing permission and limitations under the License.
+#
+# When distributing Covered Software, include this CDDL Header Notice in each file and include
+# the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+# Header, with the fields enclosed by brackets [] replaced by your own identifying
+# information: "Portions Copyright [year] [name of copyright owner]".
+#
+# Copyright 2008-2009 Sun Microsystems, Inc.
+
+# This file contains schema definitions required for Solaris and
+# OpenSolaris LDAP naming services
+#
+dn: cn=schema
+objectClass: top
+objectClass: ldapSubentry
+objectClass: subschema
+attributeTypes: ( 1.3.6.1.4.1.42.2.27.1.1.12 NAME 'nisNetIdUser'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 X-ORIGIN 'Solaris Specific' )
+attributeTypes: ( 1.3.6.1.4.1.42.2.27.1.1.13 NAME 'nisNetIdGroup'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 X-ORIGIN 'Solaris Specific' )
+attributeTypes: ( 1.3.6.1.4.1.42.2.27.1.1.14 NAME 'nisNetIdHost'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 X-ORIGIN 'Solaris Specific' )
+attributeTypes: ( 1.3.6.1.4.1.42.2.27.2.1.15 NAME 'rfc822mailMember'
+  DESC 'rfc822 mail addresss of group member' SYNTAX
+  1.3.6.1.4.1.1466.115.121.1.26 X-ORIGIN 'Solaris Specific' )
+attributeTypes: ( 2.16.840.1.113730.3.1.30 NAME 'mgrpRFC822MailMember'
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 X-ORIGIN 'Solaris Specific' )
+attributeTypes: ( 1.3.6.1.4.1.42.2.27.5.1.1 NAME 'SolarisProjectID' DESC
+  'Unique ID for a Solaris Project entry' EQUALITY integerMatch SYNTAX
+  1.3.6.1.4.1.1466.115.121.1.27 SINGLE-VALUE X-ORIGIN 'Solaris Specific' )
+attributeTypes: ( 1.3.6.1.4.1.42.2.27.5.1.2 NAME 'SolarisProjectName' DESC
+  'Name of a Solaris Project Entry' EQUALITY caseExactIA5Match SYNTAX
+  1.3.6.1.4.1.1466.115.121.1.26 SINGLE-VALUE X-ORIGIN 'Solaris Specific' )
+attributeTypes: ( 1.3.6.1.4.1.42.2.27.5.1.3 NAME 'SolarisProjectAttr' DESC
+  'Attributes of a Solaris Project entry' EQUALITY caseExactIA5Match SYNTAX
+  1.3.6.1.4.1.1466.115.121.1.26 SINGLE-VALUE X-ORIGIN 'Solaris Specific' )
+attributeTypes: ( 1.3.6.1.4.1.42.2.27.5.1.4 NAME 'SolarisAttrKeyValue' DESC
+  'Semi-colon separated key=value pairs of attributes' EQUALITY
+  caseIgnoreIA5Match SUBSTR caseIgnoreIA5SubstringsMatch SYNTAX
+  1.3.6.1.4.1.1466.115.121.1.26 SINGLE-VALUE X-ORIGIN 'Solaris Specific' )
+attributeTypes: ( 1.3.6.1.4.1.42.2.27.5.1.5 NAME 'SolarisAuditAlways' DESC
+  'Always audited attributes per-user' EQUALITY caseIgnoreIA5Match SYNTAX
+  1.3.6.1.4.1.1466.115.121.1.26 SINGLE-VALUE X-ORIGIN 'Solaris Specific' )
+attributeTypes: ( 1.3.6.1.4.1.42.2.27.5.1.6 NAME 'SolarisAuditNever' DESC
+  'Never audited attributes per-user' EQUALITY caseIgnoreIA5Match SYNTAX
+  1.3.6.1.4.1.1466.115.121.1.26 SINGLE-VALUE X-ORIGIN 'Solaris Specific' )
+attributeTypes: ( 1.3.6.1.4.1.42.2.27.5.1.7 NAME 'SolarisAttrShortDesc' DESC
+  'Short description about an entry, used by GUIs' EQUALITY caseIgnoreIA5Match
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 SINGLE-VALUE X-ORIGIN 'Solaris
+  Specific' )
+attributeTypes: ( 1.3.6.1.4.1.42.2.27.5.1.8 NAME 'SolarisAttrLongDesc' DESC
+  'Detail description about an entry' EQUALITY caseIgnoreIA5Match SYNTAX
+  1.3.6.1.4.1.1466.115.121.1.26 SINGLE-VALUE X-ORIGIN 'Solaris Specific' )
+attributeTypes: ( 1.3.6.1.4.1.42.2.27.5.1.9 NAME 'SolarisKernelSecurityPolicy'
+  DESC 'Solaris kernel security policy' EQUALITY caseIgnoreIA5Match SYNTAX
+  1.3.6.1.4.1.1466.115.121.1.26 SINGLE-VALUE X-ORIGIN 'Solaris Specific' )
+attributeTypes: ( 1.3.6.1.4.1.42.2.27.5.1.10 NAME 'SolarisProfileType' DESC
+  'Type of object defined in profile'EQUALITY caseIgnoreIA5Match SYNTAX
+  1.3.6.1.4.1.1466.115.121.1.26 SINGLE-VALUE X-ORIGIN 'Solaris Specific' )
+attributeTypes: ( 1.3.6.1.4.1.42.2.27.5.1.11 NAME 'SolarisProfileId' DESC
+  'Identifier of object defined in profile' EQUALITY caseIgnoreIA5Match SYNTAX
+  1.3.6.1.4.1.1466.115.121.1.26 SINGLE-VALUE X-ORIGIN 'Solaris Specific' )
+attributeTypes: ( 1.3.6.1.4.1.42.2.27.5.1.12 NAME 'SolarisUserQualifier' DESC
+  'Per-user login attributes' EQUALITY caseIgnoreIA5Match SYNTAX
+  1.3.6.1.4.1.1466.115.121.1.26 SINGLE-VALUE X-ORIGIN 'Solaris Specific' )
+attributeTypes: ( 1.3.6.1.4.1.42.2.27.5.1.13 NAME 'SolarisAttrReserved1' DESC
+  'Reserved for future use' EQUALITY caseIgnoreIA5Match SYNTAX
+  1.3.6.1.4.1.1466.115.121.1.26 SINGLE-VALUE X-ORIGIN 'Solaris Specific' )
+attributeTypes: ( 1.3.6.1.4.1.42.2.27.5.1.14 NAME 'SolarisAttrReserved2'
+  DESC 'Reserved for future use' EQUALITY caseIgnoreIA5Match SYNTAX
+  1.3.6.1.4.1.1466.115.121.1.26 SINGLE-VALUE X-ORIGIN 'Solaris Specific' )
+attributeTypes: ( 1.3.6.1.4.1.42.2.27.5.1.15 NAME 'SolarisLDAPServers' DESC
+  'LDAP Server address eg. 76.234.3.1:389' EQUALITY caseIgnoreIA5Match SYNTAX
+  1.3.6.1.4.1.1466.115.121.1.26 X-ORIGIN 'Solaris Specific' )
+attributeTypes: ( 1.3.6.1.4.1.42.2.27.5.1.16 NAME 'SolarisSearchBaseDN' DESC
+  'Search Base Distinguished Name' EQUALITY caseIgnoreMatch SYNTAX
+  1.3.6.1.4.1.1466.115.121.1.15 SINGLE-VALUE X-ORIGIN 'Solaris Specific' )
+attributeTypes: ( 1.3.6.1.4.1.42.2.27.5.1.17 NAME 'SolarisCacheTTL' DESC
+  'TTL value for the Domain information eg. 1w, 2d, 3h, 10m, or 5s' EQUALITY
+  caseIgnoreIA5Match SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 SINGLE-VALUE
+  X-ORIGIN 'Solaris Specific' )
+attributeTypes: ( 1.3.6.1.4.1.42.2.27.5.1.18 NAME 'SolarisBindDN' DESC
+  'DN to be used to bind to the directory as proxy' EQUALITY caseIgnoreMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 SINGLE-VALUE X-ORIGIN
+  'Solaris Specific' )
+attributeTypes: ( 1.3.6.1.4.1.42.2.27.5.1.19 NAME 'SolarisBindPassword' DESC
+  'Password for bindDN to authenticate to the directory' EQUALITY
+  octetStringMatch SYNTAX 1.3.6.1.4.1.1466.115.121.1.40 SINGLE-VALUE
+  X-ORIGIN 'Solaris Specific' )
+attributeTypes: ( 1.3.6.1.4.1.42.2.27.5.1.20 NAME 'SolarisAuthMethod' DESC
+  'Authentication method to be used eg. "NS_LDAP_AUTH_NONE",
+  "NS_LDAP_AUTH_SIMPLE" or "NS_LDAP_AUTH_SASL_CRAM_MD5"' EQUALITY
+  caseIgnoreIA5Match SYNTAX 1.3.6.1.4.1.1466.115.121.1.26
+  X-ORIGIN 'Solaris Specific' )
+attributeTypes: ( 1.3.6.1.4.1.42.2.27.5.1.21 NAME 'SolarisTransportSecurity'
+  DESC 'Transport Level Security method to be used eg. "NS_LDAP_SEC_NONE" or
+  "NS_LDAP_SEC_SASL_TLS"' EQUALITY caseIgnoreIA5Match SYNTAX
+  1.3.6.1.4.1.1466.115.121.1.26 SINGLE-VALUE X-ORIGIN 'Solaris Specific' )
+attributeTypes: ( 1.3.6.1.4.1.42.2.27.5.1.22 NAME 'SolarisCertificatePath'
+  DESC 'Path to certificate file/device' EQUALITY caseExactIA5Match SYNTAX
+  1.3.6.1.4.1.1466.115.121.1.26 SINGLE-VALUE X-ORIGIN 'Solaris Specific' )
+attributeTypes: ( 1.3.6.1.4.1.42.2.27.5.1.23 NAME 'SolarisCertificatePassword'
+  DESC 'Password or PIN that grants access to certificate.' EQUALITY
+  octetStringMatch SYNTAX 1.3.6.1.4.1.1466.115.121.1.40 SINGLE-VALUE
+  X-ORIGIN 'Solaris Specific' )
+attributeTypes: ( 1.3.6.1.4.1.42.2.27.5.1.24 NAME 'SolarisDataSearchDN' DESC
+  'Search DN for data lookup in ":(DN0),(DN1),..." format' EQUALITY
+  caseIgnoreMatch SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 X-ORIGIN
+  'Solaris Specific' )
+attributeTypes: ( 1.3.6.1.4.1.42.2.27.5.1.25 NAME 'SolarisSearchScope' DESC
+  'Scope to be used for search operations eg. "NS_LDAP_SCOPE_BASE",
+  "NS_LDAP_SCOPE_ONELEVEL" or "NS_LDAP_SCOPE_SUBTREE"' EQUALITY
+  caseIgnoreIA5Match SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 SINGLE-VALUE
+  X-ORIGIN 'Solaris Specific' )
+attributeTypes: ( 1.3.6.1.4.1.42.2.27.5.1.26 NAME 'SolarisSearchTimeLimit'
+  DESC 'Time Limit in seconds for search operations' EQUALITY integerMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.27 SINGLE-VALUE X-ORIGIN
+  'Solaris Specific' )
+attributeTypes: ( 1.3.6.1.4.1.42.2.27.5.1.27 NAME 'SolarisPreferredServer'
+  DESC 'Preferred LDAP Server address or network number' EQUALITY
+  caseIgnoreIA5Match SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 X-ORIGIN
+  'Solaris Specific' )
+attributeTypes: ( 1.3.6.1.4.1.42.2.27.5.1.28 NAME 'SolarisPreferredServerOnly'
+  DESC 'Boolean flag for use of preferredServer or not' EQUALITY booleanMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.7 SINGLE-VALUE X-ORIGIN
+  'Solaris Specific' )
+attributeTypes: ( 1.3.6.1.4.1.42.2.27.5.1.29 NAME 'SolarisSearchReferral' DESC
+  'referral chasing option eg. "NS_LDAP_NOREF" or "NS_LDAP_FOLLOWREF"'
+  EQUALITY caseIgnoreIA5Match SYNTAX 1.3.6.1.4.1.1466.115.121.1.26
+  SINGLE-VALUE X-ORIGIN 'Solaris Specific' )
+attributeTypes: ( 1.3.6.1.4.1.42.2.27.5.1.30 NAME 'memberGid' DESC 'Posix
+  Group Name' EQUALITY caseExactIA5Match SYNTAX
+  1.3.6.1.4.1.1466.115.121.1.26 X-ORIGIN 'Solaris Specific' )
+attributeTypes: ( 1.3.6.1.4.1.42.2.27.5.1.31 NAME 'SolarisBindTimeLimit' DESC
+  'Time Limit in seconds for bind operations' EQUALITY integerMatch SYNTAX
+  1.3.6.1.4.1.1466.115.121.1.27 SINGLE-VALUE X-ORIGIN 'Solaris Specific' )
+# Solaris NIS+2LDAP
+attributeTypes: ( 1.3.6.1.4.1.42.2.27.5.1.57 NAME 'nisplusTimeZone' DESC
+  'tzone column from NIS+ timezone table' SYNTAX 1.3.6.1.4.1.1466.115.121.1.26
+  SINGLE-VALUE X-ORIGIN 'Solaris Specific' )
+# Solaris IDMap project
+attributeTypes: ( 1.3.6.1.4.1.42.2.27.5.1.62 NAME 'winAccountName'
+  DESC 'Windows user or group Name corresponding to a Unix user or group'
+  EQUALITY caseIgnoreMatch SUBSTR caseIgnoreSubstringsMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 X-ORIGIN 'Solaris Specific' )
+attributeTypes: ( 1.3.6.1.4.1.42.2.27.5.1.63 NAME 'sun-printer-bsdaddr'
+  DESC 'Sets the server, print queue destination name and whether the client
+  generates protocol extensions. "Solaris" specifies a Solaris print server
+  extension. The value is represented by the following value: server ","
+  destination ", Solaris".' SYNTAX 1.3.6.1.4.1.1466.115.121.1.15
+  SINGLE-VALUE X-ORIGIN 'Solaris Specific' )
+attributeTypes: ( 1.3.6.1.4.1.42.2.27.5.1.64 NAME 'sun-printer-kvp'
+  DESC 'This attribute contains a set of key value pairs which may have
+  meaning to the print subsystem or may be user defined. Each value is
+  represented by the following: key "=" value.' SYNTAX
+  1.3.6.1.4.1.1466.115.121.1.15 X-ORIGIN 'Solaris Specific' )
+attributeTypes: ( 1.3.6.1.4.1.42.2.27.5.1.67 NAME 'ipTnetTemplateName'
+  DESC 'Trusted Solaris network template template_name' SYNTAX
+  1.3.6.1.4.1.1466.115.121.1.26 SINGLE-VALUE X-ORIGIN 'Solaris Specific' )
+attributeTypes: ( 1.3.6.1.4.1.42.2.27.5.1.68 NAME 'ipTnetNumber'
+  DESC 'Trusted Solaris network template ip_address' SYNTAX
+  1.3.6.1.4.1.1466.115.121.1.26 SINGLE-VALUE X-ORIGIN 'Solaris Specific' )
+objectClasses: ( 1.3.6.1.4.1.42.2.27.1.2.5 NAME 'nisMailAlias' SUP top
+  MUST cn MAY rfc822mailMember X-ORIGIN 'Solaris Specific' )
+objectClasses: ( 1.3.6.1.4.1.42.2.27.1.2.6 NAME 'nisNetId' SUP top
+  MUST cn MAY ( nisNetIdUser $ nisNetIdGroup $ nisNetIdHost )
+  X-ORIGIN 'Solaris Specific' )
+objectClasses: ( 1.3.6.1.4.1.42.2.27.5.2.1 NAME 'SolarisProject'
+  SUP top STRUCTURAL MUST ( SolarisProjectID $ SolarisProjectName )
+  MAY ( memberUid $ memberGid $ description $ SolarisProjectAttr )
+  X-ORIGIN 'Solaris Specific' )
+objectClasses: ( 1.3.6.1.4.1.42.2.27.5.2.2 NAME 'SolarisAuditUser' SUP top
+  AUXILIARY MAY ( SolarisAuditAlways $ SolarisAuditNever )
+  X-ORIGIN 'Solaris Specific' )
+objectClasses: ( 1.3.6.1.4.1.42.2.27.5.2.3 NAME 'SolarisUserAttr'
+  SUP top AUXILIARY DESC 'User attributes'
+  MAY ( SolarisUserQualifier $ SolarisAttrReserved1 $
+  SolarisAttrReserved2 $ SolarisAttrKeyValue ) X-ORIGIN 'Solaris Specific' )
+objectClasses: ( 1.3.6.1.4.1.42.2.27.5.2.4 NAME 'SolarisAuthAttr'
+  SUP top STRUCTURAL DESC 'Authorizations data' MUST cn
+  MAY ( SolarisAttrReserved1 $ SolarisAttrReserved2 $
+  SolarisAttrShortDesc $ SolarisAttrLongDesc $ SolarisAttrKeyValue ) X-ORIGIN
+  'Solaris Specific' )
+objectClasses: ( 1.3.6.1.4.1.42.2.27.5.2.5 NAME 'SolarisProfAttr'
+  SUP top STRUCTURAL DESC 'Profiles data' MUST cn
+  MAY ( SolarisAttrReserved1 $ SolarisAttrReserved2 $
+  SolarisAttrLongDesc $ SolarisAttrKeyValue ) X-ORIGIN 'Solaris Specific' )
+objectClasses: ( 1.3.6.1.4.1.42.2.27.5.2.6 NAME 'SolarisExecAttr'
+  SUP top AUXILIARY DESC 'Profiles execution attributes'
+  MAY ( SolarisKernelSecurityPolicy $ SolarisProfileType $
+  SolarisAttrReserved1 $ SolarisAttrReserved2 $
+  SolarisProfileId $ SolarisAttrKeyValue ) X-ORIGIN 'Solaris Specific' )
+objectClasses: ( 1.3.6.1.4.1.42.2.27.5.2.7  NAME 'SolarisNamingProfile'
+  SUP top STRUCTURAL DESC 'Solaris LDAP Naming client profile objectClass'
+  MUST ( cn $ SolarisLDAPServers $ SolarisSearchBaseDN )
+  MAY ( SolarisBindDN $ SolarisBindPassword $ SolarisAuthMethod $
+  SolarisTransportSecurity $ SolarisCertificatePath $
+  SolarisCertificatePassword $ SolarisDataSearchDN $
+  SolarisSearchScope $ SolarisSearchTimeLimit $
+  SolarisPreferredServer $ SolarisPreferredServerOnly $
+  SolarisCacheTTL $ SolarisSearchReferral $ SolarisBindTimeLimit )
+  X-ORIGIN 'Solaris Specific' )
+objectClasses: ( 2.16.840.1.113730.3.2.4 NAME 'mailGroup' SUP top
+  STRUCTURAL MUST mail MAY ( cn $ mgrpRFC822MailMember ) X-ORIGIN
+  'Solaris Specific' )
+objectClasses: ( 1.3.6.1.4.1.42.2.27.5.2.14 NAME 'sunPrinter'
+  DESC 'Sun printer information' SUP top AUXILIARY MUST printer-name
+  MAY (sun-printer-bsdaddr $ sun-printer-kvp) X-ORIGIN 'Solaris Specific' )
+objectClasses: ( 1.3.6.1.4.1.42.2.27.5.2.12 NAME 'nisplusTimeZoneData'
+  DESC 'NIS+ timezone table data' SUP top STRUCTURAL MUST cn
+  MAY ( nisplusTimeZone $ description ) X-ORIGIN 'Solaris Specific' )
+objectClasses: ( 1.3.6.1.4.1.42.2.27.5.2.8 NAME 'ipTnetTemplate'
+  DESC 'Object class for TSOL network templates' SUP top STRUCTURAL
+  MUST ipTnetTemplateName MAY SolarisAttrKeyValue X-ORIGIN
+  'Solaris Specific' )
+objectClasses: ( 1.3.6.1.4.1.42.2.27.5.2.9 NAME 'ipTnetHost'
+  DESC 'Associates an IP address or wildcard with a TSOL template_name'
+  SUP top AUXILIARY MUST ipTnetNumber X-ORIGIN 'Solaris Specific' )

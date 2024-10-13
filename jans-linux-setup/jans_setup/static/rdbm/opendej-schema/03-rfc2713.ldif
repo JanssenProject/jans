@@ -1,0 +1,61 @@
+# The contents of this file are subject to the terms of the Common Development and
+# Distribution License (the License). You may not use this file except in compliance with the
+# License.
+#
+# You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+# specific language governing permission and limitations under the License.
+#
+# When distributing Covered Software, include this CDDL Header Notice in each file and include
+# the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+# Header, with the fields enclosed by brackets [] replaced by your own identifying
+# information: "Portions Copyright [year] [name of copyright owner]".
+#
+# Copyright 2006-2008 Sun Microsystems, Inc.
+
+# This file contains schema definitions from RFC 2713, which defines a
+# mechanism for storing serialized Java objects in the Directory Server.
+dn: cn=schema
+objectClass: top
+objectClass: ldapSubentry
+objectClass: subschema
+attributeTypes: ( 1.3.6.1.4.1.42.2.27.4.1.6 NAME 'javaClassName'
+  DESC 'Fully qualified name of distinguished Java class or interface'
+  EQUALITY caseExactMatch SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 SINGLE-VALUE
+  X-ORIGIN 'RFC 2713' )
+attributeTypes: ( 1.3.6.1.4.1.42.2.27.4.1.7 NAME 'javaCodebase'
+  DESC 'URL(s) specifying the location of class definition'
+  EQUALITY caseExactIA5Match SYNTAX 1.3.6.1.4.1.1466.115.121.1.26
+  X-ORIGIN 'RFC 2713' )
+attributeTypes: ( 1.3.6.1.4.1.42.2.27.4.1.13 NAME 'javaClassNames'
+  DESC 'Fully qualified Java class or interface name' EQUALITY caseExactMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 X-ORIGIN 'RFC 2713' )
+attributeTypes: ( 1.3.6.1.4.1.42.2.27.4.1.8 NAME 'javaSerializedData'
+  DESC 'Serialized form of a Java object' SYNTAX 1.3.6.1.4.1.1466.115.121.1.40
+  SINGLE-VALUE X-ORIGIN 'RFC 2713' )
+attributeTypes: ( 1.3.6.1.4.1.42.2.27.4.1.10 NAME 'javaFactory'
+  DESC 'Fully qualified Java class name of a JNDI object factory'
+  EQUALITY caseExactMatch SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 SINGLE-VALUE
+  X-ORIGIN 'RFC 2713' )
+attributeTypes: ( 1.3.6.1.4.1.42.2.27.4.1.11 NAME 'javaReferenceAddress'
+  DESC 'Addresses associated with a JNDI Reference' EQUALITY caseExactMatch
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 X-ORIGIN 'RFC 2713' )
+attributeTypes: ( 1.3.6.1.4.1.42.2.27.4.1.12 NAME 'javaDoc'
+  DESC 'The Java documentation for the class' EQUALITY caseExactIA5Match
+  SYNTAX 1.3.6.1.4.1.1466.115.121.1.26 X-ORIGIN 'RFC 2713' )
+objectClasses: ( 1.3.6.1.4.1.42.2.27.4.2.1 NAME 'javaContainer'
+  DESC 'Container for a Java object' SUP top STRUCTURAL MUST ( cn )
+  X-ORIGIN 'RFC 2713' )
+objectClasses: ( 1.3.6.1.4.1.42.2.27.4.2.4 NAME 'javaObject'
+  DESC 'Java object representation' SUP top ABSTRACT MUST ( javaClassName )
+  MAY ( javaClassNames $ javaCodebase $ javaDoc $ description )
+  X-ORIGIN 'RFC 2713' )
+objectClasses: ( 1.3.6.1.4.1.42.2.27.4.2.5 NAME 'javaSerializedObject'
+  DESC 'Java serialized object' SUP javaObject AUXILIARY
+  MUST ( javaSerializedData ) X-ORIGIN 'RFC 2713' )
+objectClasses: ( 1.3.6.1.4.1.42.2.27.4.2.8 NAME 'javaMarshalledObject'
+  DESC 'Java marshalled object' SUP javaObject AUXILIARY
+  MUST ( javaSerializedData ) X-ORIGIN 'RFC 2713' )
+objectClasses: ( 1.3.6.1.4.1.42.2.27.4.2.7 NAME 'javaNamingReference'
+  DESC 'JNDI reference' SUP javaObject AUXILIARY
+  MAY ( javaReferenceAddress $ javaFactory ) X-ORIGIN 'RFC 2713' )
+
