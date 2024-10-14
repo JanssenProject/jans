@@ -88,8 +88,12 @@ public class TokenService {
                 logger.trace("Token dataFilter:{}", dataFilter);
                 fieldValueFilters.add(Filter.createANDFilter(dataFilter));
             }
-            searchFilter = Filter.createANDFilter(Filter.createORFilter(filters),
-                    Filter.createANDFilter(fieldValueFilters));
+            if (filters.isEmpty()) {
+                searchFilter = Filter.createANDFilter(fieldValueFilters);
+            } else {
+                searchFilter = Filter.createANDFilter(Filter.createORFilter(filters),
+                        Filter.createANDFilter(fieldValueFilters));
+            }
         }
 
         logger.info("Token final searchFilter:{}", searchFilter);

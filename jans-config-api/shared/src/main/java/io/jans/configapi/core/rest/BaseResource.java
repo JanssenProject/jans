@@ -233,24 +233,20 @@ public class BaseResource {
                     escapeLog(maximumRecCount), escapeLog(fieldValuePair), escapeLog(entityClass));
         }
         
-        log.error(
-                "Search Request params:: - schemas:{}, filter:{}, sortBy:{}, sortOrder:{}, startIndex:{}, count:{}, attrsList:{}, excludedAttrsList:{}, maximumRecCount:{}, fieldValuePair:{}, entityClass:{}",
-                schemas, filter, sortBy, sortOrder, startIndex, count, attrsList, excludedAttrsList,
-                maximumRecCount, fieldValuePair, entityClass);
-        
+       
         SearchRequest searchRequest = new SearchRequest();
         searchRequest.setEntityClass(entityClass);
 
         // Validation
         checkNotEmpty(schemas, "Schema");
         int maxCount = maximumRecCount;
-        log.error(" count:{}, maxCount:{}", count, maxCount);
+        log.trace(" count:{}, maxCount:{}", count, maxCount);
         if (count > maxCount) {
             throwBadRequestException("Maximum number of results per page is " + maxCount);
         }
 
         count = count == null ? maxCount : count;
-        log.error(" count:{} ", count);
+        log.trace(" count:{} ", count);
         // Per spec, a negative value SHALL be interpreted as "0" for count
         if (count < 0) {
             count = 0;
@@ -259,7 +255,7 @@ public class BaseResource {
         if (StringUtils.isEmpty(sortOrder) || !sortOrder.equals(SortOrder.DESCENDING.getValue())) {
             sortOrder = SortOrder.ASCENDING.getValue();
         }
-        log.error(" util.getTokens(filter,TOKEN_DELIMITER):{} , util.getFieldValueMap(searchRequest, fieldValuePair, TOKEN_DELIMITER, FIELD_VALUE_SEPARATOR)):{}", util.getTokens(filter, TOKEN_DELIMITER), util.getFieldValueMap(entityClass, fieldValuePair, TOKEN_DELIMITER, FIELD_VALUE_SEPARATOR));
+        log.debug(" util.getTokens(filter,TOKEN_DELIMITER):{} , util.getFieldValueMap(searchRequest, fieldValuePair, TOKEN_DELIMITER, FIELD_VALUE_SEPARATOR)):{}", util.getTokens(filter, TOKEN_DELIMITER), util.getFieldValueMap(entityClass, fieldValuePair, TOKEN_DELIMITER, FIELD_VALUE_SEPARATOR));
         searchRequest.setSchemas(schemas);
         searchRequest.setAttributes(attrsList);
         searchRequest.setExcludedAttributes(excludedAttrsList);

@@ -7592,8 +7592,8 @@ paths:
         schema:
           type: string
       responses:
-        "200":
-          description: Ok
+        "204":
+          description: No Content
         "401":
           description: Unauthorized
         "404":
@@ -7619,8 +7619,8 @@ paths:
         schema:
           type: string
       responses:
-        "200":
-          description: Ok
+        "204":
+          description: No Content
         "401":
           description: Unauthorized
         "404":
@@ -9219,11 +9219,11 @@ components:
           type: boolean
         adminCanEdit:
           type: boolean
-        adminCanView:
-          type: boolean
         userCanView:
           type: boolean
         userCanEdit:
+          type: boolean
+        adminCanView:
           type: boolean
         adminCanAccess:
           type: boolean
@@ -11630,10 +11630,10 @@ components:
         ttl:
           type: integer
           format: int32
-        opbrowserState:
-          type: string
         persisted:
           type: boolean
+        opbrowserState:
+          type: string
     SessionIdAccessMap:
       type: object
       properties:

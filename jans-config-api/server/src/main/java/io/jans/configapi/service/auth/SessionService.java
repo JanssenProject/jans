@@ -271,12 +271,10 @@ public class SessionService {
         if (session == null) {
             return session;
         }
-        logger.error("Excluding session ID session:{}", session);
         session.setId(null);
         session.setDn(null);
         session.getSessionAttributes().put("session_id", null);
         session.getSessionAttributes().put("old_session_id", null);
-        logger.error("Excluded session ID session:{}", session);
         return session;
     }
 
