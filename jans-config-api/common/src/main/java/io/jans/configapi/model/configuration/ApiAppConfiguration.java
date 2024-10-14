@@ -100,9 +100,6 @@ public class ApiAppConfiguration implements Configuration {
     @Schema(description = "Details of enabled plugins.")
     private List<PluginConf> plugins;
 
-    @Schema(description = "Api endpoint configuration details.")
-    private List<ApiEndpointMgt> apiEndpointMgt;
-    
     @Schema(description = "Asset management configuration details.")
     private AssetMgtConfiguration assetMgtConfiguration;
 
@@ -356,14 +353,6 @@ public class ApiAppConfiguration implements Configuration {
     public void setAssetMgtConfiguration(AssetMgtConfiguration assetMgtConfiguration) {
         this.assetMgtConfiguration = assetMgtConfiguration;
     }
-    
-    public List<ApiEndpointMgt> getApiEndpointMgt() {
-        return apiEndpointMgt;
-    }
-
-    public void setApiEndpointMgt(List<ApiEndpointMgt> apiEndpointMgt) {
-        this.apiEndpointMgt = apiEndpointMgt;
-    }
 
     @Override
     public String toString() {
@@ -382,8 +371,7 @@ public class ApiAppConfiguration implements Configuration {
                 + ", userExclusionAttributes=" + userExclusionAttributes + ", userMandatoryAttributes="
                 + userMandatoryAttributes + ", agamaConfiguration=" + agamaConfiguration + ", auditLogConf="
                 + auditLogConf + ", dataFormatConversionConf=" + dataFormatConversionConf + ", plugins=" + plugins
-                + ", assetMgtConfiguration=" + assetMgtConfiguration 
-                + ", apiEndpointMgt=" + apiEndpointMgt + "]";
+                + ", assetMgtConfiguration=" + assetMgtConfiguration + "]";
     }    
     
 }

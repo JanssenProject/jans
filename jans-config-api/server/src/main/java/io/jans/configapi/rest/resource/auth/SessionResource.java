@@ -60,7 +60,7 @@ public class SessionResource extends ConfigBaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_SESSION_READ_ACCESS }, groupScopes = {}, superScopes = {
             ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getAllSessions() {
-        final List<SessionId> sessions = sessionService.getSessions(true);
+        final List<SessionId> sessions = sessionService.getSessions();
         logger.debug("sessions:{}", sessions);
         return Response.ok(sessions).build();
     }
@@ -117,7 +117,7 @@ public class SessionResource extends ConfigBaseResource {
             logger.info("Delete session identified by sid:{}", escapeLog(sid));
         }
         checkResourceNotNull(sid, ApiConstants.SID);
-        final SessionId session = sessionService.getSessionBySid(sid, true);
+        final SessionId session = sessionService.getSessionBySid(sid);
         logger.debug("session:{}", session);
         return Response.ok(session).build();
     }
@@ -125,7 +125,7 @@ public class SessionResource extends ConfigBaseResource {
     @Operation(summary = "Revoke all sessions by userDn", description = "Revoke all sessions by userDn", operationId = "revoke-user-session", tags = {
             "Auth - Session Management" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.JANS_AUTH_SESSION_DELETE_ACCESS, ApiAccessConstants.JANS_AUTH_REVOKE_SESSION }))
-    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Ok"),
+    @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "No Content"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
@@ -147,7 +147,7 @@ public class SessionResource extends ConfigBaseResource {
     @Operation(summary = "Delete a session.", description = "Delete a session.", operationId = "delete-session", tags = {
             "Auth - Session Management" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.JANS_AUTH_SESSION_DELETE_ACCESS, ApiAccessConstants.JANS_AUTH_REVOKE_SESSION }))
-    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Ok"),
+    @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "No Content"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
@@ -171,7 +171,7 @@ public class SessionResource extends ConfigBaseResource {
 
         logger.debug("Search Token by name params - searchReq:{} ", searchReq);
         SessionPagedResult sessionPagedResult = null;
-        PagedResult<SessionId> pagedResult = sessionService.searchSession(searchReq, true);
+        PagedResult<SessionId> pagedResult = sessionService.searchSession(searchReq);
 
         logger.debug("PagedResult  - pagedResult:{}", pagedResult);
         if (pagedResult != null) {

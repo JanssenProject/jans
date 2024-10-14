@@ -9217,13 +9217,13 @@ components:
           type: boolean
         whitePagesCanView:
           type: boolean
-        userCanView:
+        adminCanEdit:
           type: boolean
         adminCanView:
           type: boolean
-        userCanEdit:
+        userCanView:
           type: boolean
-        adminCanEdit:
+        userCanEdit:
           type: boolean
         adminCanAccess:
           type: boolean
@@ -10999,32 +10999,8 @@ components:
           description: Details of enabled plugins.
           items:
             $ref: '#/components/schemas/PluginConf'
-        apiEndpointMgt:
-          type: array
-          description: Api endpoint configuration details.
-          items:
-            $ref: '#/components/schemas/ApiEndpointMgt'
         assetMgtConfiguration:
           $ref: '#/components/schemas/AssetMgtConfiguration'
-    ApiEndpointMgt:
-      type: object
-      properties:
-        name:
-          type: string
-          description: Name of api endpoint.
-        mandatoryAttributes:
-          type: array
-          description: List of mandatory attribute.
-          items:
-            type: string
-            description: List of mandatory attribute.
-        exclusionAttributes:
-          type: array
-          description: Attribute that should not be returned in response.
-          items:
-            type: string
-            description: Attribute that should not be returned in response.
-      description: Api endpoint configuration details.
     AssetMgtConfiguration:
       type: object
       properties:

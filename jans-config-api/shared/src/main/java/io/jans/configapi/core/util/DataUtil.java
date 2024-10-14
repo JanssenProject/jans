@@ -164,32 +164,6 @@ public class DataUtil {
     public static Object invokeGetterMethod(Object obj, String variableName) {
         return JsonApplier.getInstance().invokeReflectionGetter(obj, variableName);
     }
-    
-    public static <T> T setField(T object, String fieldName, Object fieldValue)
-            throws Exception {
-        if (fieldName.contains(".")) {
-            int firstDotLocation = fieldName.indexOf('.');
-            String childFieldName = fieldName.substring(0, firstDotLocation);
-            Field field = object.getClass().getDeclaredField(childFieldName);
-            field.setAccessible(true);
-            Object childFieldInstance = field.get(object);
-            if (childFieldInstance == null) {
-                Class<?> type = field.getType();
-                //invoking no argument constructor
-                childFieldInstance = type.getConstructor().newInstance();
-                field.set(object, childFieldInstance);
-            }
-            field.setAccessible(false);
-            setField(childFieldInstance, fieldName.substring(firstDotLocation + 1), fieldValue);
-        } else {
-            Field field = object.getClass().getDeclaredField(fieldName);
-            field.setAccessible(true);
-            field.set(object, fieldValue);
-            field.setAccessible(false);
-        }
-        
-        return (T)object;
-    }
 
     public static boolean isKeyPresentInMap(String key, Map<String, String> map) {
         logger.debug("Check key:{} is present in map:{}", key, map);
