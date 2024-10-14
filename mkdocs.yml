@@ -85,6 +85,7 @@ nav:
       - Docker compose: janssen-server/install/docker-install/compose.md
     - Setup Instructions: janssen-server/install/setup.md
     - FAQ: janssen-server/install/install-faq.md
+    - jans command: janssen-server/install/jans-command.md
   - Kubernetes Operation Guide:
     - janssen-server/kubernetes-ops/README.md
     - Upgrade: janssen-server/kubernetes-ops/upgrade.md
@@ -476,9 +477,9 @@ plugins:
 - search
 - exclude-search:
     exclude_unreferenced: true
-- git-revision-date-localized:
-    enable_creation_date: true
-    type: timeago
+# - git-revision-date-localized:
+#     enable_creation_date: true
+#     type: timeago
 repo_name: GitHub
 repo_url: https://github.com/JanssenProject/jans/
 site_author: Janssen, Inc.
