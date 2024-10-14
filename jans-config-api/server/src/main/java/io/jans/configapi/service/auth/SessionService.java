@@ -37,6 +37,12 @@ import org.slf4j.Logger;
 @ApplicationScoped
 public class SessionService {
 
+    private static final String SID_MSG = "Get Session by sid:{}";
+    private static final String SID_ERROR = "Failed to load session entry with sid ";
+
+    @Inject
+    private Logger logger;
+
     @Inject
     PersistenceEntryManager persistenceEntryManager;
 
@@ -49,9 +55,6 @@ public class SessionService {
     @Inject
     TokenService tokenService;
 
-    @Inject
-    private Logger logger;
-
     public String getDnForSession(String sessionId) {
         if (StringHelper.isEmpty(sessionId)) {
             return staticConfiguration.getBaseDn().getSessions();
@@ -59,24 +62,32 @@ public class SessionService {
         return String.format("jansId=%s,%s", sessionId, staticConfiguration.getBaseDn().getSessions());
     }
 
-    public SessionId getSessionById(String id) {
-        logger.debug("Get Session by id:{}", id);
+    public SessionId getSessionBySid(String sid) {
+        if (logger.isInfoEnabled()) {
+            logger.info(SID_MSG, escapeLog(sid));
+        }
         SessionId sessionId = null;
         try {
-            sessionId = persistenceEntryManager.find(SessionId.class, getDnForSession(id));
+            sessionId = this.getSession(sid);
+            this.modifySession(sessionId);
         } catch (Exception ex) {
-            logger.error("Failed to load session entry with id " + id, ex);
+            logger.error(SID_ERROR + sid, ex);
         }
         return sessionId;
     }
 
     public List<SessionId> getAllSessions(int sizeLimit) {
         logger.debug("Get All Session sizeLimit:{}", sizeLimit);
-        return persistenceEntryManager.findEntries(getDnForSession(null), SessionId.class, null, sizeLimit);
+        List<SessionId> sessionList = persistenceEntryManager.findEntries(getDnForSession(null), SessionId.class, null,
+                sizeLimit);
+        this.modifySessionList(sessionList);
+        return sessionList;
     }
 
     public List<SessionId> getAllSessions() {
-        return persistenceEntryManager.findEntries(getDnForSession(null), SessionId.class, null);
+        List<SessionId> sessionList = persistenceEntryManager.findEntries(getDnForSession(null), SessionId.class, null);
+        this.modifySessionList(sessionList);
+        return sessionList;
     }
 
     public List<SessionId> getSessions() {
@@ -88,6 +99,9 @@ public class SessionService {
 
         sessionList.sort((SessionId s1, SessionId s2) -> s2.getCreationDate().compareTo(s1.getCreationDate()));
         logger.debug("Sorted Session sessionList:{}", sessionList);
+
+        this.modifySessionList(sessionList);
+
         return sessionList;
     }
 
@@ -99,20 +113,24 @@ public class SessionService {
         if (searchRequest.getFilterAssertionValue() != null && !searchRequest.getFilterAssertionValue().isEmpty()) {
 
             for (String assertionValue : searchRequest.getFilterAssertionValue()) {
-                String[] targetArray = new String[] { assertionValue };
-                Filter userFilter = Filter.createSubstringFilter(ApiConstants.JANS_USR_DN, null, targetArray, null);
-                Filter sidFilter = Filter.createSubstringFilter(ApiConstants.OUTSIDE_SID, null, targetArray, null);
-                Filter sessAttrFilter = Filter.createSubstringFilter(ApiConstants.JANS_SESS_ATTR, null, targetArray,
-                        null);
-                Filter permissionFilter = Filter.createSubstringFilter("jansPermissionGrantedMap", null, targetArray,
-                        null);
-                Filter idFilter = Filter.createSubstringFilter(ApiConstants.JANSID, null, targetArray, null);
-                filters.add(Filter.createORFilter(userFilter, sidFilter, sessAttrFilter, permissionFilter, idFilter));
+                logger.debug("Session Search with assertionValue:{}", assertionValue);
+                if (StringUtils.isNotBlank(assertionValue)) {
+                    String[] targetArray = new String[] { assertionValue };
+                    Filter userFilter = Filter.createSubstringFilter(ApiConstants.JANS_USR_DN, null, targetArray, null);
+                    Filter sidFilter = Filter.createSubstringFilter(ApiConstants.SID, null, targetArray, null);
+                    Filter sessAttrFilter = Filter.createSubstringFilter(ApiConstants.JANS_SESS_ATTR, null, targetArray,
+                            null);
+                    Filter permissionFilter = Filter.createSubstringFilter("jansPermissionGrantedMap", null,
+                            targetArray, null);
+                    Filter idFilter = Filter.createSubstringFilter(ApiConstants.JANSID, null, targetArray, null);
+                    filters.add(
+                            Filter.createORFilter(userFilter, sidFilter, sessAttrFilter, permissionFilter, idFilter));
+                }
             }
             searchFilter = Filter.createORFilter(filters);
         }
 
-        logger.trace("Session pattern searchFilter:{}", searchFilter);
+        logger.debug("Session pattern searchFilter:{}", searchFilter);
         List<Filter> fieldValueFilters = new ArrayList<>();
         if (searchRequest.getFieldValueMap() != null && !searchRequest.getFieldValueMap().isEmpty()) {
             for (Map.Entry<String, String> entry : searchRequest.getFieldValueMap().entrySet()) {
@@ -120,15 +138,27 @@ public class SessionService {
                 logger.trace("Session dataFilter:{}", dataFilter);
                 fieldValueFilters.add(Filter.createANDFilter(dataFilter));
             }
-            searchFilter = Filter.createANDFilter(Filter.createORFilter(filters),
-                    Filter.createANDFilter(fieldValueFilters));
+            if (filters.isEmpty()) {
+                searchFilter = Filter.createANDFilter(fieldValueFilters);
+            } else {
+                searchFilter = Filter.createANDFilter(Filter.createORFilter(filters),
+                        Filter.createANDFilter(fieldValueFilters));
+            }
         }
 
-        logger.info("Session searchFilter:{}", searchFilter);
+        logger.debug("Session searchFilter:{}", searchFilter);
 
-        return persistenceEntryManager.findPagedEntries(getDnForSession(null), SessionId.class, searchFilter, null,
-                searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
-                searchRequest.getStartIndex(), searchRequest.getCount(), searchRequest.getMaxCount());
+        PagedResult<SessionId> pagedSessionList = persistenceEntryManager.findPagedEntries(getDnForSession(null),
+                SessionId.class, searchFilter, null, searchRequest.getSortBy(),
+                SortOrder.getByValue(searchRequest.getSortOrder()), searchRequest.getStartIndex(),
+                searchRequest.getCount(), searchRequest.getMaxCount());
+
+        if (pagedSessionList != null) {
+            List<SessionId> sessionList = this.modifySessionList(pagedSessionList.getEntries());
+            pagedSessionList.setEntries(sessionList);
+        }
+
+        return pagedSessionList;
 
     }
 
@@ -146,26 +176,23 @@ public class SessionService {
         }
     }
 
-    public void revokeSessionById(String id) {
+    public void revokeSessionBySid(String sid) {
         if (logger.isInfoEnabled()) {
-            logger.info("Delete session by id:{}", escapeLog(id));
+            logger.info("Delete session by sid:{}", escapeLog(sid));
         }
 
-        if (StringUtils.isNotBlank(id)) {
-            Filter filter = Filter.createANDFilter(Filter.createEqualityFilter(ApiConstants.JANSID, id),
-                    Filter.createEqualityFilter("jansState", SessionIdState.AUTHENTICATED));
-
-            SessionId sessionToDelete = getSessionById(id);
+        if (StringUtils.isNotBlank(sid)) {
+            SessionId sessionToDelete = this.getSession(sid);
             logger.debug("User sessionToDelete:{}", sessionToDelete);
 
             if (sessionToDelete == null) {
                 throw new NotFoundException(
-                        "No " + SessionIdState.AUTHENTICATED + " session exists for id '" + id + "'!!!");
+                        "No " + SessionIdState.AUTHENTICATED + " session exists for sid '" + sid + "'!!!");
             }
 
             persistenceEntryManager.remove(sessionToDelete.getDn(), SessionId.class);
             cacheService.remove(sessionToDelete.getDn());
-            revokeSessionTokens(id, sessionToDelete.getDn());
+            revokeSessionTokens(sessionToDelete.getId(), sessionToDelete.getDn());
 
         }
     }
@@ -195,6 +222,65 @@ public class SessionService {
                 revokeSessionTokens(userDn, session.getDn());
             });
         }
+    }
+
+    private SessionId modifySession(SessionId session) {
+        logger.debug("Modify session:{}", session);
+        if (session == null) {
+            return session;
+        }
+        List<SessionId> sessionList = new ArrayList<>();
+        sessionList.add(session);
+        this.modifySessionList(sessionList);
+        logger.debug("After modify session:{}", session);
+        return session;
+
+    }
+
+    private List<SessionId> modifySessionList(List<SessionId> sessionList) {
+        logger.debug("Modify sessionList:{}", sessionList);
+
+        if (sessionList == null || sessionList.isEmpty()) {
+            return sessionList;
+        }
+
+        for (SessionId session : sessionList) {
+            excludeAttribute(session);
+        }
+
+        logger.debug("After modification sessionList:{}", sessionList);
+        return sessionList;
+    }
+
+    private SessionId getSession(String sid) {
+        if (logger.isInfoEnabled()) {
+            logger.info(SID_MSG, escapeLog(sid));
+        }
+
+        SessionId sessionId = null;
+        try {
+
+            List<SessionId> sessionList = persistenceEntryManager.findEntries(getDnForSession(null), SessionId.class,
+                    Filter.createEqualityFilter(ApiConstants.SID, sid));
+            if (sessionList != null && !sessionList.isEmpty()) {
+                sessionId = sessionList.get(0);
+            }
+
+        } catch (Exception ex) {
+            logger.error(SID_ERROR + sid, ex);
+        }
+        return sessionId;
+    }
+
+    private SessionId excludeAttribute(SessionId session) {
+        if (session == null) {
+            return session;
+        }
+        session.setId(null);
+        session.setDn(null);
+        session.getSessionAttributes().put("session_id", null);
+        session.getSessionAttributes().put("old_session_id", null);
+        return session;
     }
 
 }

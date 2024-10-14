@@ -79,14 +79,14 @@ public class Fido2RegistrationService {
     }
 
     public PagedResult<Fido2RegistrationEntry> searchFido2Registration(SearchRequest searchRequest) {
-        log.info("Search Fido2Registration with searchRequest:{}", searchRequest);
+        log.info("**** Search Fido2Registration with searchRequest:{}", searchRequest);
 
         Filter searchFilter = null;
         List<Filter> filters = new ArrayList<>();
         if (searchRequest.getFilterAssertionValue() != null && !searchRequest.getFilterAssertionValue().isEmpty()) {
 
             for (String assertionValue : searchRequest.getFilterAssertionValue()) {
-                log.info("Search Fido2Registration with assertionValue:{}", assertionValue);
+                log.debug(" **** Search Fido2Registration with assertionValue:{}", assertionValue);
                 if (StringUtils.isNotBlank(assertionValue)) {
                     String[] targetArray = new String[] { assertionValue };
 
@@ -107,7 +107,7 @@ public class Fido2RegistrationService {
             searchFilter = Filter.createORFilter(filters);
         }
 
-        log.debug("Fido2Registration pattern searchFilter:{}", searchFilter);
+        log.debug("\n\n\n Fido2Registration pattern searchFilter:{}", searchFilter);
 
         List<Filter> fieldValueFilters = new ArrayList<>();
         if (searchRequest.getFieldValueMap() != null && !searchRequest.getFieldValueMap().isEmpty()) {
@@ -116,11 +116,18 @@ public class Fido2RegistrationService {
                 log.trace("Fido2Registration dataFilter:{}", dataFilter);
                 fieldValueFilters.add(Filter.createANDFilter(dataFilter));
             }
-            searchFilter = Filter.createANDFilter(Filter.createORFilter(filters),
-                    Filter.createANDFilter(fieldValueFilters));
+            
+            if(!filters.isEmpty()) {
+                searchFilter = Filter.createANDFilter(Filter.createORFilter(filters),
+                        Filter.createANDFilter(fieldValueFilters));
+            }
+            else {
+                searchFilter = Filter.createANDFilter(fieldValueFilters);
+            }
+            
         }
 
-        log.debug("Fido2Registration searchFilter:{}", searchFilter);
+        log.debug(" Final - Fido2Registration searchFilter:{}", searchFilter);
 
         return persistenceEntryManager.findPagedEntries(getDnFido2RegistrationEntry(null), Fido2RegistrationEntry.class,
                 searchFilter, null, searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
@@ -140,14 +147,14 @@ public class Fido2RegistrationService {
         }
 
         String baseDn = getBaseDnForFido2RegistrationEntries(userInum);
-        log.info("Find Fido2 Registered by baseDn:{}", baseDn);
+        log.debug("Find Fido2 Registered by baseDn:{}", baseDn);
         if (persistenceEntryManager.hasBranchesSupport(baseDn) && !containsBranch(baseDn)) {
             return Collections.emptyList();
         }
 
         Filter registeredFilter = Filter.createEqualityFilter("jansStatus",
                 Fido2RegistrationStatus.registered.getValue());
-
+        log.info("Find Fido2 Registered by registeredFilter:{}", registeredFilter);
         return persistenceEntryManager.findEntries(baseDn, Fido2RegistrationEntry.class, registeredFilter);
     }
 
