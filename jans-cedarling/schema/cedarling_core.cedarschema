@@ -25,6 +25,8 @@ namespace Jans {
         client_id: String,
         iss: TrustedIssuer,
         name: String,
+        spiffe_id: String,
+        rp_id: String
     };
     entity Access_token  = {
         aud: String,
