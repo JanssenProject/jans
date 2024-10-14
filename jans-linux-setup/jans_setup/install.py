@@ -59,11 +59,6 @@ bacup_ext = '-back.' + time.ctime()
 def check_install_dependencies():
 
     try:
-        import ldap3
-    except ImportError:
-        package_dependencies.append('python3-ldap3')
-
-    try:
         import psycopg2
     except ImportError:
         package_dependencies.append('python3-psycopg2')
@@ -224,9 +219,6 @@ def uninstall_jans():
     if os.path.exists('/opt/keycloak'):
         service_list.append('kc')
 
-    if os.path.exists('/opt/opendj/bin/stop-ds'):
-        service_list.append('opendj')
-
     if os.path.exists('/opt/opa'):
         service_list.append('opa')
 
@@ -250,8 +242,7 @@ def uninstall_jans():
     os.system('systemctl reset-failed')
 
     remove_list = ['/etc/certs', '/etc/jans', '/opt/amazon-corretto*', '/opt/jre', '/opt/node*', '/opt/jetty*', '/opt/jython*', '/opt/keycloak', '/opt/idp', '/opt/opa', '/opt/kc-scheduler', '/etc/cron.d/kc-scheduler-cron']
-    if argsp.profile == 'jans':
-        remove_list.append('/opt/opendj')
+
     if not argsp.keep_downloads:
         remove_list.append('/opt/dist')
 
