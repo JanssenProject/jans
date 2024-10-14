@@ -36,7 +36,8 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         self.register_progess()
         self.output_dir = os.path.join(Config.output_dir, Config.rdbm_type)
         self.common_lib_dir = os.path.join(Config.jetty_base, 'common/libs/spanner')
-        self.opendj_attributes = []
+        opendj_schema_desc_fn = os.path.join(Config.install_dir, 'schema/opendj_schema_descriptions.json')
+        self.opendj_schema_descriptions = base.readJsonFile(opendj_schema_desc_fn)
 
     @property
     def qchar(self):
@@ -57,27 +58,12 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
             schema_ = base.readJsonFile(schema_full_path)
             self.jans_attributes += schema_.get('attributeTypes', [])
 
-        self.prepare()
         self.create_tables(jans_schema_files)
         self.create_subtables()
         self.import_ldif()
         self.create_indexes()
         self.create_unique_indexes()
         self.rdbmProperties()
-
-    def prepare(self):
-        # we need opendj package for getting attribute descriptions
-
-        opendj_schema_dirg = os.path.join(Config.static_rdbm_dir, 'opendej-schema/*.ldif')
-
-        for schema_fn in glob.glob(opendj_schema_dirg):
-            schema_io = open(schema_fn, 'rb')
-            parser = LDIFParser(schema_io)
-            for _, entry in parser.parse():
-                if 'attributeTypes' in entry:
-                    for attr_str in entry['attributeTypes']:
-                        attr_type = AttributeType(attr_str)
-                        self.opendj_attributes.append(attr_type.tokens)
 
     def reset_rdbm_db(self):
         self.logIt("Resetting DB {}".format(Config.rdbm_db))
@@ -225,19 +211,11 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
 
     def get_attr_description(self, attrname):
-        desc = ''
         for attrib in self.dbUtils.jans_attributes:
             if attrname in attrib['names']:
-                desc = attrib.get('desc')
-                break
-        else:
-            for attrib in self.opendj_attributes:
-                if attrname in attrib['NAME']:
-                    desc_t = attrib.get('DESC')
-                    if desc_t and desc_t[0]:
-                        desc = desc_t[0]
-                    break
-        return desc
+                return attrib.get('desc')
+
+        return self.opendj_schema_descriptions.get(attrname, '')
 
     def get_col_def(self, attrname, sql_tbl_name):
         data_type = self.get_sql_col_type(attrname, sql_tbl_name)
