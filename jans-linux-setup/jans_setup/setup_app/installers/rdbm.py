@@ -9,7 +9,6 @@ import random
 import glob
 
 from string import Template
-from schema import AttributeType
 from setup_app import paths
 from setup_app.static import AppType, InstallOption
 from setup_app.config import Config
@@ -18,7 +17,6 @@ from setup_app.static import InstallTypes
 from setup_app.installers.base import BaseInstaller
 from setup_app.utils.setup_utils import SetupUtils
 from setup_app.utils.package_utils import packageUtils
-from setup_app.pylib.ldif4.ldif import LDIFParser
 
 class RDBMInstaller(BaseInstaller, SetupUtils):
 
