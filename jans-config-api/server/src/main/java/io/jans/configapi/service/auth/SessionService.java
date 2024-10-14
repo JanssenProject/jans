@@ -253,7 +253,10 @@ public class SessionService {
     }
 
     private SessionId getSession(String sid) {
-        logger.debug(SID_MSG, sid);
+        if (logger.isInfoEnabled()) {
+            logger.info(SID_MSG, escapeLog(sid));
+        }
+
         SessionId sessionId = null;
         try {
 
