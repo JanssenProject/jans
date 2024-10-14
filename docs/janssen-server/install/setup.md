@@ -35,7 +35,7 @@ tags:
   Enter Password for Admin User:
   ```
   
-3. Next, pick a persistence mechanism. Choose from MySQL ,PGSql, an LDAP that can be installed locally or remotely, or Couchbase, an enterprise NoSQL cloud database.
+3. Next, pick a persistence mechanism. Choose from MySQL ,PGSql, or Couchbase, an enterprise NoSQL cloud database.
     
 4. Next, pick which services should be installed for this deployment:
 

@@ -3,7 +3,6 @@ tags:
   - administration
   - planning
   - persistence
-  - LDAP
   - MySQL
   - Couchbase
   - Aurora

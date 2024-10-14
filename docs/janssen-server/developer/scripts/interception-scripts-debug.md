@@ -10,7 +10,7 @@ For development the kubernetes setup must be local and accessible to the debug s
 
 ### System Requirements
 
-The minimum system requirement for running all jans services are `8GB RAM`, `4 CPU`, and `50GB disk`. This can be dropped to `4GB RAM`, `4CPU` and `20GB` disk space if operating with required services auth-server, and LDAP.
+The minimum system requirement for running all jans services are `8GB RAM`, `4 CPU`, and `50GB disk`. This can be dropped to `4GB RAM`, `4CPU` and `20GB` disk space if operating with required service auth-serv.
 
 ### Setup Minikube
 

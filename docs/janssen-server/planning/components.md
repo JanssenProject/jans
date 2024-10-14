@@ -69,7 +69,7 @@ projects. You will most likely need this project when you build other Janssen
 components.
 
 1. **Jans ORM**: This is the library for persistence and caching implementations
-in Janssen. Currently, LDAP and Couchbase are supported. RDBMS is coming soon.
+in Janssen. Currently, RDBMS and Couchbase are supported. 
 
 1. **Agama**: The Agama module offers an alternative way to build authentication
 flows in Janssen Server. With Agama, flows are coded in a DSL (domain specific
