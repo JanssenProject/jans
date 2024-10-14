@@ -5,11 +5,10 @@ import sys
 import time
 import sqlalchemy
 import shutil
-import zipfile
 import random
+import glob
 
 from string import Template
-from schema import AttributeType
 from setup_app import paths
 from setup_app.static import AppType, InstallOption
 from setup_app.config import Config
@@ -18,7 +17,6 @@ from setup_app.static import InstallTypes
 from setup_app.installers.base import BaseInstaller
 from setup_app.utils.setup_utils import SetupUtils
 from setup_app.utils.package_utils import packageUtils
-from setup_app.pylib.ldif4.ldif import LDIFParser
 
 class RDBMInstaller(BaseInstaller, SetupUtils):
 
@@ -36,7 +34,8 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         self.register_progess()
         self.output_dir = os.path.join(Config.output_dir, Config.rdbm_type)
         self.common_lib_dir = os.path.join(Config.jetty_base, 'common/libs/spanner')
-        self.opendj_attributes = []
+        opendj_schema_desc_fn = os.path.join(Config.install_dir, 'schema/opendj_schema_descriptions.json')
+        self.opendj_schema_descriptions = base.readJsonFile(opendj_schema_desc_fn)
 
     @property
     def qchar(self):
@@ -57,30 +56,12 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
             schema_ = base.readJsonFile(schema_full_path)
             self.jans_attributes += schema_.get('attributeTypes', [])
 
-        self.prepare()
         self.create_tables(jans_schema_files)
         self.create_subtables()
         self.import_ldif()
         self.create_indexes()
         self.create_unique_indexes()
         self.rdbmProperties()
-
-    def prepare(self):
-        # we need opendj package for getting attribute descriptions
-        base.current_app.OpenDjInstaller.check_for_download()
-
-        if os.path.exists(base.current_app.OpenDjInstaller.source_files[0][0]):
-            opendj_zip = zipfile.ZipFile(base.current_app.OpenDjInstaller.source_files[0][0])
-
-            for fn in opendj_zip.namelist():
-                if 'opendj/template/config/schema/' in fn and fn.endswith('.ldif'):
-                    schema_io = io.BytesIO(opendj_zip.read(fn))
-                    parser = LDIFParser(schema_io)
-                    for _, entry in parser.parse():
-                        if 'attributeTypes' in entry:
-                            for attr_str in entry['attributeTypes']:
-                                attr_type = AttributeType(attr_str)
-                                self.opendj_attributes.append(attr_type.tokens)
 
     def reset_rdbm_db(self):
         self.logIt("Resetting DB {}".format(Config.rdbm_db))
@@ -228,19 +209,11 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
 
     def get_attr_description(self, attrname):
-        desc = ''
         for attrib in self.dbUtils.jans_attributes:
             if attrname in attrib['names']:
-                desc = attrib.get('desc')
-                break
-        else:
-            for attrib in self.opendj_attributes:
-                if attrname in attrib['NAME']:
-                    desc_t = attrib.get('DESC')
-                    if desc_t and desc_t[0]:
-                        desc = desc_t[0]
-                    break
-        return desc
+                return attrib.get('desc')
+
+        return self.opendj_schema_descriptions.get(attrname, '')
 
     def get_col_def(self, attrname, sql_tbl_name):
         data_type = self.get_sql_col_type(attrname, sql_tbl_name)
@@ -367,7 +340,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         sql_indexes = base.readJsonFile(sql_indexes_fn)
 
         # read opendj indexes and add multivalued attributes to JSON indexing
-        opendj_index = base.readJsonFile(base.current_app.OpenDjInstaller.openDjIndexJson)
+        opendj_index = base.readJsonFile(os.path.join(Config.static_rdbm_dir, 'opendj_index.json'))
         opendj_index_list = [ atribute['attribute'] for atribute in opendj_index ]
 
         for attribute in self.jans_attributes:
