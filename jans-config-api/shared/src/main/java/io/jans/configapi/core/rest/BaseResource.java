@@ -233,7 +233,6 @@ public class BaseResource {
                     escapeLog(maximumRecCount), escapeLog(fieldValuePair), escapeLog(entityClass));
         }
         
-       
         SearchRequest searchRequest = new SearchRequest();
         searchRequest.setEntityClass(entityClass);
 
