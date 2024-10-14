@@ -139,7 +139,6 @@ public class Fido2RegistrationService {
         if (log.isInfoEnabled()) {
             log.info("Find Fido2 Registered by username:{}", escapeLog(username));
         }
-        log.info("Find Fido2 Registered by username:{}", escapeLog(username));
 
         String userInum = userFido2Srv.getUserInum(username);
         log.info("Find Fido2 Registered by userInum:{}", userInum);

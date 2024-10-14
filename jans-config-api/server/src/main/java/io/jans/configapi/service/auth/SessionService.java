@@ -63,7 +63,9 @@ public class SessionService {
     }
 
     public SessionId getSessionBySid(String sid) {
-        logger.debug(SID_MSG, sid);
+        if (logger.isInfoEnabled()) {
+            logger.info(SID_MSG, escapeLog(sid));
+        }
         SessionId sessionId = null;
         try {
             sessionId = this.getSession(sid);
