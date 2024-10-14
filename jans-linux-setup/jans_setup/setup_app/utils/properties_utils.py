@@ -206,6 +206,8 @@ class PropertiesUtils(SetupUtils):
 
         if p.get('rdbm_type') == 'pgsql' and not p.get('rdbm_port'):
             p['rdbm_port'] = '5432'
+        elif p.get('rdbm_type') == 'mysql' and not p.get('rdbm_port'):
+            p['rdbm_port'] = '3306'
 
         properties_list = list(p.keys())
 
