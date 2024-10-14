@@ -5,15 +5,20 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-use super::authz_config::AuthzConfig;
+use super::jwt_config::JwtConfig;
 use super::log_config::LogConfig;
+use super::policy_store_config::PolicyStoreConfig;
 
 /// Bootstrap configuration
 /// properties for configuration `Cedarling` application.
 /// [link](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) to the documentation.
 pub struct BootstrapConfig {
-    /// A set of properties used to configure `Authz` in the `Cedarling` application.
-    pub authz_config: AuthzConfig,
+    /// `CEDARLING_APPLICATION_NAME` in [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) documentation.
+    pub application_name: String,
     /// A set of properties used to configure logging in the `Cedarling` application.
     pub log_config: LogConfig,
+    /// A set of properties used to load `PolicyStore` in the `Cedarling` application.
+    pub policy_store_config: PolicyStoreConfig,
+    /// A set of properties used to configure JWT in the `Cedarling` application.
+    pub jwt_config: JwtConfig,
 }

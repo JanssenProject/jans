@@ -43,6 +43,6 @@ mod tests {
         assert_eq!(config.max_item_size, 500_000);
         assert_eq!(config.max_ttl, std::time::Duration::from_secs(60 * 60));
         assert_eq!(config.default_ttl, std::time::Duration::from_secs(5 * 60));
-        assert_eq!(config.auto_clear_expired, true);
+        assert!(config.auto_clear_expired);
     }
 }

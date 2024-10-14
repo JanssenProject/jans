@@ -629,7 +629,7 @@ jansScrTyp: introspection
 
 dn: inum=9BAF-90D7,ou=scripts,o=jans
 description: Fido2 Extension module
-displayName: fido2 extension
+displayName: fido2_extension
 inum: 9BAF-90D7
 jansConfProperty: {"value1":"fido2_server_uri","value2":"https://%(hostname)s","description":""}
 jansLevel: 1

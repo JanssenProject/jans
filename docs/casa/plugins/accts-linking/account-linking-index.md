@@ -92,6 +92,6 @@ Now it's time to supply the settings grabbed. The component these configurations
 1. Apply changes as needed - this is covered in a separate doc page [here](./accts-linking-agama.md). Note you can add or remove sections in the file at will, and that providers can also be disabled so they are not listed in the login page or in Casa app
 1. Still in TUI, choose to import the file you have edited
 
-For VM-based installations, update the file `/etc/default/jans-casa`. Locate a segment that reads `-Dacr=` and assign  `io.jans.casa.authn.acctlinking` as new value. This will make Casa use the flow found in the accounts linking project - not the flow bundled out-of-the-box. 
+For VM-based installations, update the file `/etc/default/jans-casa`. Locate a segment that reads `-Dacr=` and assign  `agama_io.jans.casa.authn.acctlinking` as new value. This will make Casa use the flow found in the accounts linking project - not the flow bundled out-of-the-box. 
 
 Finally restart Casa and conduct your testing. You will now see the login page contains a list of links to the configured identity providers.

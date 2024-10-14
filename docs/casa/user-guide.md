@@ -40,7 +40,8 @@ If at any time the credential prompted is unavailable, you have the option to pr
 
 To turn off 2FA, click again the switch. 
 
-### 2FA settings & trusted devices
+### 2FA settings and trusted devices
+
 If enabled by the system administrator, you can set your own policy for when 2FA is enforced. To manage your settings, after enrolling credentials and turning on 2FA, click the `Manage your 2FA settings` button in the Preferred Authentication Mechanism widget. 
 
 ![2fa-settings](../assets/casa/user-facing-2fa-settings.png)
