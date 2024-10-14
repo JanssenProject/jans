@@ -375,13 +375,14 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
     def set_ulimits(self):
         self.logIt("Setting ulimist")
+        conf_fn = '/etc/security/limits.conf'
         try:
             apache_user = 'apache' if base.clone_type == 'rpm' else 'www-data'
 
-            self.appendLine("%s     soft nofile     131072" % apache_user, "/etc/security/limits.conf")
-            self.appendLine("%s     hard nofile     262144" % apache_user, "/etc/security/limits.conf")
-            self.appendLine("jetty      soft nofile     131072", "/etc/security/limits.conf")
-            self.appendLine("jetty      hard nofile     262144", "/etc/security/limits.conf")
+            self.appendLine(f'{apache_user}    soft nofile     131072', conf_fn)
+            self.appendLine(f'{apache_user}     hard nofile     262144', conf_fn)
+            self.appendLine('jetty      soft nofile     131072', conf_fn)
+            self.appendLine('jetty      hard nofile     262144', conf_fn)
         except:
             self.logIt("Could not set limits.")
 

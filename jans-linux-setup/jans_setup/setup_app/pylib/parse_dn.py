@@ -14,13 +14,13 @@ def _validate_attribute_value(attribute_value):
     if attribute_value[0] == '#':  # only hex characters are valid
         for c in attribute_value:
             if c not in hexdigits:  # allowed only hex digits as per RFC 4514
-                raise Exception('character ' + c + ' not allowed in hex representation of attribute value')
+                raise ValueError('character ' + c + ' not allowed in hex representation of attribute value')
         if len(attribute_value) % 2 == 0:  # string must be # + HEX HEX (an odd number of chars)
-            raise Exception('hex representation must be in the form of <HEX><HEX> pairs')
+            raise ValueError('hex representation must be in the form of <HEX><HEX> pairs')
     if attribute_value[0] == ' ':  # unescaped space cannot be used as leading or last character
-        raise Exception('SPACE must be escaped as leading character of attribute value')
+        raise ValueError('SPACE must be escaped as leading character of attribute value')
     if attribute_value.endswith(' ') and not attribute_value.endswith('\\ '):
-        raise Exception('SPACE must be escaped as trailing character of attribute value')
+        raise ValueError('SPACE must be escaped as trailing character of attribute value')
 
     state = STATE_ANY
     for c in attribute_value:
@@ -28,23 +28,23 @@ def _validate_attribute_value(attribute_value):
             if c == '\\':
                 state = STATE_ESCAPE
             elif c in '"#+,;<=>\00':
-                raise Exception('special character ' + c + ' must be escaped')
+                raise ValueError('special character ' + c + ' must be escaped')
         elif state == STATE_ESCAPE:
             if c in hexdigits:
                 state = STATE_ESCAPE_HEX
             elif c in ' "#+,;<=>\\\00':
                 state = STATE_ANY
             else:
-                raise Exception('invalid escaped character ' + c)
+                raise ValueError('invalid escaped character ' + c)
         elif state == STATE_ESCAPE_HEX:
             if c in hexdigits:
                 state = STATE_ANY
             else:
-                raise Exception('invalid escaped character ' + c)
+                raise ValueError('invalid escaped character ' + c)
 
     # final state
     if state != STATE_ANY:
-        raise Exception('invalid final character')
+        raise ValueError('invalid final character')
 
     return True
 
@@ -52,17 +52,17 @@ def _validate_attribute_value(attribute_value):
 
 def _validate_attribute_type(attribute_type):
     if not attribute_type:
-        raise Exception('attribute type not present')
+        raise ValueError('attribute type not present')
 
     if attribute_type == '<GUID':  # patch for AD DirSync
         return True
 
     for c in attribute_type:
         if not (c in ascii_letters or c in digits or c == '-'):  # allowed uppercase and lowercase letters, digits and hyphen as per RFC 4512
-            raise Exception('character \'' + c + '\' not allowed in attribute type')
+            raise ValueError('character \'' + c + '\' not allowed in attribute type')
 
     if attribute_type[0] in digits or attribute_type[0] == '-':  # digits and hyphen not allowed as first character
-        raise Exception('character \'' + attribute_type[0] + '\' not allowed as first character of attribute type')
+        raise ValueError('character \'' + attribute_type[0] + '\' not allowed as first character of attribute type')
 
     return True
 
@@ -171,16 +171,16 @@ def parse_dn(dn, escape=False, strip=False):
         attribute_type, attribute_value = _split_ava(ava, escape, strip)
 
         if not _validate_attribute_type(attribute_type):
-            raise Exception('unable to validate attribute type in ' + ava)
+            raise ValueError('unable to validate attribute type in ' + ava)
 
         if not _validate_attribute_value(attribute_value):
-            raise Exception('unable to validate attribute value in ' + ava)
+            raise ValueError('unable to validate attribute value in ' + ava)
 
         rdns.append((attribute_type, attribute_value, separator))
         dn = dn[len(ava) + 1:]
 
     if not rdns:
-        raise Exception('empty dn')
+        raise ValueError('empty dn')
 
     return rdns
 

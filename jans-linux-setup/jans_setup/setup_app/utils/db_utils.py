@@ -33,6 +33,7 @@ import sqlalchemy
 import sqlalchemy.orm
 import sqlalchemy.ext.automap
 
+SCRIPTS_DN_TMP = 'inum={},ou=scripts,o=jans'
 
 class DBUtils:
 
@@ -44,7 +45,7 @@ class DBUtils:
     rdbm_json_types = MappingProxyType({ 'mysql': {'type': 'JSON'}, 'pgsql': {'type': 'JSONB'}, 'spanner': {'type': 'ARRAY<STRING(MAX)>'} })
     jans_scopes = None
 
-    def bind(self, use_ssl=True, force=False):
+    def bind(self, force=False):
 
         setattr(base.current_app, self.__class__.__name__, self)
         self.mariadb = None
@@ -223,13 +224,13 @@ class DBUtils:
     def enable_script(self, inum, enable=True):
         base.logIt("Enabling script {}".format(inum))
         if self.moddb in (BackendTypes.MYSQL, BackendTypes.PGSQL):
-            dn = 'inum={},ou=scripts,o=jans'.format(inum)
+            dn = SCRIPTS_DN_TMP.format(inum)
             sqlalchemyObj = self.get_sqlalchObj_for_dn(dn)
             sqlalchemyObj.jansEnabled = 1 if enable else 0
             self.session.commit()
 
         elif self.moddb == BackendTypes.SPANNER:
-            dn = 'inum={},ou=scripts,o=jans'.format(inum)
+            dn = SCRIPTS_DN_TMP.format(inum)
             table = self.get_spanner_table_for_dn(dn)
             if table:
                 self.spanner_client.write_data(table=table, columns=['doc_id', 'jansEnabled'], values=[inum, enable], mutation='update')
@@ -483,7 +484,7 @@ class DBUtils:
                 self.cbm.exec_query(n1ql)
 
     def add_client2script(self, script_inum, client_id):
-        dn = 'inum={},ou=scripts,o=jans'.format(script_inum)
+        dn = SCRIPTS_DN_TMP.format(script_inum)
 
         backend_location = self.get_backend_location_for_dn(dn)
 
@@ -491,11 +492,11 @@ class DBUtils:
             sqlalchemyObj = self.get_sqlalchObj_for_dn(dn)
             if sqlalchemyObj:
                 if sqlalchemyObj.jansConfProperty:
-                    jansConfProperty = copy.deepcopy(sqlalchemyObj.jansConfProperty)
+                    jans_conf_property = copy.deepcopy(sqlalchemyObj.jansConfProperty)
                 else:
-                    jansConfProperty = {'v': []}
+                    jans_conf_property = {'v': []}
 
-                ox_configuration_property_list = jansConfProperty['v'] if Config.rdbm_type == 'mysql' else jansConfProperty
+                ox_configuration_property_list = jans_conf_property['v'] if Config.rdbm_type == 'mysql' else jans_conf_property
 
                 for i, oxconfigprop in enumerate(ox_configuration_property_list[:]):
                     if isinstance(oxconfigprop, str):
@@ -507,30 +508,30 @@ class DBUtils:
                 else:
                     ox_configuration_property_list.append(json.dumps({'value1': 'allowed_clients', 'value2': client_id}))
 
-                sqlalchemyObj.jansConfProperty = jansConfProperty if BackendTypes.MYSQL else ox_configuration_property_list
+                sqlalchemyObj.jansConfProperty = jans_conf_property if BackendTypes.MYSQL else ox_configuration_property_list
                 self.session.commit()
 
 
         elif backend_location == BackendTypes.SPANNER:
             spanner_data_list = self.spanner_client.get_dict_data('SELECT jansConfProperty from jansCustomScr WHERE dn="{}"'.format(dn))
             spanner_data = spanner_data_list[0]
-            jansConfProperty = []
+            jans_conf_property = []
             added = False
-            jansConfProperty = spanner_data.get('jansConfProperty', [])
+            jans_conf_property = spanner_data.get('jansConfProperty', [])
 
-            for i, oxconfigprop in enumerate(jansConfProperty):
+            for i, oxconfigprop in enumerate(jans_conf_property):
                 oxconfigpropjs = json.loads(oxconfigprop)
                 if oxconfigpropjs.get('value1') == 'allowed_clients':
                     if client_id in oxconfigpropjs['value2']:
                         return
                     oxconfigpropjs['value2'] = self.add2strlist(client_id, oxconfigpropjs['value2'])
-                    jansConfProperty[i] = json.dumps(oxconfigpropjs)
+                    jans_conf_property[i] = json.dumps(oxconfigpropjs)
                     added = True
                     break
 
             if not added:
-                jansConfProperty.append(json.dumps({'value1': 'allowed_clients', 'value2': client_id}))
-            self.spanner_client.write_data(table='jansCustomScr', columns=['doc_id', 'jansConfProperty'], values=[script_inum, jansConfProperty], mutation='update')
+                jans_conf_property.append(json.dumps({'value1': 'allowed_clients', 'value2': client_id}))
+            self.spanner_client.write_data(table='jansCustomScr', columns=['doc_id', 'jansConfProperty'], values=[script_inum, jans_conf_property], mutation='update')
 
         elif backend_location == BackendTypes.COUCHBASE:
             bucket = self.get_bucket_for_dn(dn)
