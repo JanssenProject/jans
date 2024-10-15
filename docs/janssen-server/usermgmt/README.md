@@ -25,10 +25,6 @@ In this document we will cover managing people in the Jans Server's LDAP Directo
 
 If you choose any of RDBMS like mysql, or postgreSQL, you can explore your jans server database using any tool that are supported by the regarding RDBMS. Let's see how we can connect PostgreSQL DB from jans server to your local PC.
 
-* Browse ldap and go to `ou=people`.
-
-  ![ldap_people](https://github.com/JanssenProject/jans/assets/43112579/8da57305-0227-4bdb-82f8-0044f8b05afe)
-
 ## Want to contribute?
 
 If you have content you'd like to contribute to this page in the meantime, you can get started with our [Contribution guide](https://docs.jans.io/head/CONTRIBUTING/).
