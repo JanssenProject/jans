@@ -1563,13 +1563,6 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#opendj" class="md-nav__link">
-    Opendj
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#auth-server" class="md-nav__link">
     auth-server
   </a>
@@ -6737,7 +6730,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/kubernetes/docker-opendj/" class="md-nav__link">
+      <a href="../../reference/kubernetes/docker-opendj.md" class="md-nav__link">
         Gluu OpenDJ
       </a>
     </li>
@@ -8863,13 +8856,6 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#opendj" class="md-nav__link">
-    Opendj
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#auth-server" class="md-nav__link">
     auth-server
   </a>
@@ -8964,29 +8950,6 @@
 </ol>
 <h2 id="jans-liveness-and-readiness-probes">Jans Liveness and Readiness probes<a class="headerlink" href="#jans-liveness-and-readiness-probes" title="Permanent link">#</a></h2>
 <p>Here is a list of the liveness and readiness probes of the deployed jans components</p>
-<h3 id="opendj">Opendj<a class="headerlink" href="#opendj" title="Permanent link">#</a></h3>
-<p>Opendj uses <a href="https://github.com/GluuFederation/docker-opendj/blob/master/scripts/healthcheck.py">healthcheck.py</a> in liveness probe.
-This python script connects to opendj to test its liveness.</p>
-<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="nt">livenessProbe</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="c1"># Executes the python3 healthcheck.</span><span class="w"></span>
-<span class="w">    </span><span class="nt">exec</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">command</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">python3</span><span class="w"></span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/app/scripts/healthcheck.py</span><span class="w"></span>
-<span class="w">    </span><span class="c1"># Configure the liveness healthcheck for the OpenDJ if needed.</span><span class="w"></span>
-<span class="w">    </span><span class="nt">initialDelaySeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span><span class="w"></span>
-<span class="w">    </span><span class="nt">periodSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span><span class="w"></span>
-<span class="w">    </span><span class="nt">timeoutSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span><span class="w"></span>
-<span class="w">    </span><span class="nt">failureThreshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span><span class="w"></span>
-<span class="w">  </span><span class="nt">readinessProbe</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">tcpSocket</span><span class="p">:</span><span class="w"></span>
-<span class="w">      </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1636</span><span class="w"></span>
-<span class="w">    </span><span class="c1"># Configure the readiness healthcheck for the OpenDJ if needed.  </span><span class="w"></span>
-<span class="w">    </span><span class="nt">initialDelaySeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">60</span><span class="w"></span>
-<span class="w">    </span><span class="nt">timeoutSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5</span><span class="w"></span>
-<span class="w">    </span><span class="nt">periodSeconds</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">25</span><span class="w"></span>
-<span class="w">    </span><span class="nt">failureThreshold</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">20</span><span class="w"></span>
-</code></pre></div>
 <h3 id="auth-server">auth-server<a class="headerlink" href="#auth-server" title="Permanent link">#</a></h3>
 <p>Auth-sever executes the python3 <a href="https://github.com/JanssenProject/jans/blob/main/docker-jans-auth-server/scripts/healthcheck.py">healthcheck.py</a> in liveness and readiness probes.
 This python scripts parses the healthcheck endpoint to make sure the status is up.</p>
@@ -9080,7 +9043,7 @@ This python scripts parses the healthcheck endpoint to make sure the status is u
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-09-27T12:12:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-15T10:12:47+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-15</span>
       
         <br>
         Created:

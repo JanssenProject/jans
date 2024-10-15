@@ -6720,7 +6720,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../docker-opendj/" class="md-nav__link">
+      <a href="../docker-opendj.md" class="md-nav__link">
         Gluu OpenDJ
       </a>
     </li>
@@ -8914,7 +8914,7 @@
   <h1>Persistence</h1>
 
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">#</a></h2>
-<p>Persistence is a special container to load initial data for LDAP or Couchbase.</p>
+<p>Persistence is a special container to load initial data for supported persistence.</p>
 <h2 id="versions">Versions<a class="headerlink" href="#versions" title="Permanent link">#</a></h2>
 <p>See <a href="https://github.com/orgs/JanssenProject/packages/container/package/jans%2Fpersistence-loader">Packages</a> for available versions.</p>
 <h2 id="environment-variables">Environment Variables<a class="headerlink" href="#environment-variables" title="Permanent link">#</a></h2>
@@ -8956,12 +8956,10 @@
 <li><code>CN_REDIS_URL</code>: URL of Redis server, format is host:port (optional; default to <code>localhost:6379</code>).</li>
 <li><code>CN_REDIS_TYPE</code>: Redis service type, either <code>STANDALONE</code> or <code>CLUSTER</code> (optional; default to <code>STANDALONE</code>).</li>
 <li><code>CN_MEMCACHED_URL</code>: URL of Memcache server, format is host:port (optional; default to <code>localhost:11211</code>).</li>
-<li><code>CN_PERSISTENCE_TYPE</code>: Persistence backend being used (one of <code>ldap</code>, <code>couchbase</code>, or <code>hybrid</code>; default to <code>ldap</code>).</li>
+<li><code>CN_PERSISTENCE_TYPE</code>: Persistence backend being used (<code>couchbase</code>, <code>sql</code>, <code>spanner</code>, or <code>hybrid</code>; default to <code>sql</code>).</li>
 <li><code>CN_HYBRID_MAPPING</code>: Specify data mapping for each persistence (default to <code>"{}"</code>). Note this environment only takes effect when <code>CN_PERSISTENCE_TYPE</code> is set to <code>hybrid</code>. See <a href="#hybrid-mapping">hybrid mapping</a> section for details.</li>
 <li><code>CN_PERSISTENCE_SKIP_INITIALIZED</code>: skip initialization if backend already initialized (default to <code>false</code>).</li>
 <li><code>CN_PERSISTENCE_UPDATE_AUTH_DYNAMIC_CONFIG</code>: Whether to allow automatic updates of <code>jans-auth</code> configuration (default to <code>true</code>).</li>
-<li><code>CN_LDAP_URL</code>: Address and port of LDAP server (default to <code>localhost:1636</code>).</li>
-<li><code>CN_LDAP_USE_SSL</code>: Whether to use SSL connection to LDAP server (default to <code>true</code>).</li>
 <li><code>CN_COUCHBASE_URL</code>: Address of Couchbase server (default to <code>localhost</code>).</li>
 <li><code>CN_COUCHBASE_USER</code>: Username of Couchbase server (default to <code>admin</code>).</li>
 <li><code>CN_COUCHBASE_SUPERUSER</code>: Superuser of Couchbase server (default to empty-string).</li>
@@ -9004,19 +9002,19 @@
 <li>
 <p>Set <code>CN_HYBRID_MAPPING</code> with the following format:</p>
 <div class="highlight"><pre><span></span><code>{
-    &quot;default&quot;: &quot;&lt;couchbase|ldap|spanner|sql&gt;&quot;,
-    &quot;user&quot;: &quot;&lt;couchbase|ldap|spanner|sql&gt;&quot;,
-    &quot;site&quot;: &quot;&lt;couchbase|ldap|spanner|sql&gt;&quot;,
-    &quot;cache&quot;: &quot;&lt;couchbase|ldap|spanner|sql&gt;&quot;,
-    &quot;token&quot;: &quot;&lt;couchbase|ldap|spanner|sql&gt;&quot;,
-    &quot;session&quot;: &quot;&lt;couchbase|ldap|spanner|sql&gt;&quot;,
+    &quot;default&quot;: &quot;&lt;couchbase|spanner|sql&gt;&quot;,
+    &quot;user&quot;: &quot;&lt;couchbase|spanner|sql&gt;&quot;,
+    &quot;site&quot;: &quot;&lt;couchbase|spanner|sql&gt;&quot;,
+    &quot;cache&quot;: &quot;&lt;couchbase|spanner|sql&gt;&quot;,
+    &quot;token&quot;: &quot;&lt;couchbase|spanner|sql&gt;&quot;,
+    &quot;session&quot;: &quot;&lt;couchbase|spanner|sql&gt;&quot;,
 }
 </code></pre></div>
 <p>Example:</p>
 <div class="highlight"><pre><span></span><code>{
     &quot;default&quot;: &quot;sql&quot;,
     &quot;user&quot;: &quot;spanner&quot;,
-    &quot;site&quot;: &quot;ldap&quot;,
+    &quot;site&quot;: &quot;sql&quot;,
     &quot;cache&quot;: &quot;sql&quot;,
     &quot;token&quot;: &quot;couchbase&quot;,
     &quot;session&quot;: &quot;spanner&quot;,
@@ -9030,7 +9028,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-09-27T12:12:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-15T10:12:47+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-15</span>
       
         <br>
         Created:

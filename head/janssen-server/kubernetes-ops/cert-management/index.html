@@ -1518,13 +1518,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#ldap" class="md-nav__link">
-    LDAP
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -6730,7 +6723,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/kubernetes/docker-opendj/" class="md-nav__link">
+      <a href="../../reference/kubernetes/docker-opendj.md" class="md-nav__link">
         Gluu OpenDJ
       </a>
     </li>
@@ -8881,13 +8874,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#ldap" class="md-nav__link">
-    LDAP
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -9120,69 +9106,13 @@ If no mounted or downloaded files are found, it generates self-signed SSL certif
 </code></pre></div>
 </li>
 </ol>
-<h2 id="ldap">LDAP<a class="headerlink" href="#ldap" title="Permanent link">#</a></h2>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>Starting from <code>1.0.20</code>, the <code>ghcr.io/janssenproject/jans/certmanager</code> image is no longer handle LDAP certificate and key rotation in favor of re-generating them manually.</p>
-</div>
-<table>
-<thead>
-<tr>
-<th>Associated certificates and keys</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>/etc/certs/opendj.crt</td>
-</tr>
-<tr>
-<td>/etc/certs/opendj.key</td>
-</tr>
-</tbody>
-</table>
-<ol>
-<li>
-<p>Prepare cert and key for OpenDJ, for example:</p>
-<div class="highlight"><pre><span></span><code>openssl req -x509 -newkey rsa:2048 -sha256 -days 365 -nodes -keyout opendj.key -out opendj.crt -subj &#39;/CN=demoexample.jans.io&#39; -addext &#39;subjectAltName=DNS:ldap,DNS:opendj&#39;
-</code></pre></div>
-</li>
-<li>
-<p>Extract the contents of OpenDJ cert and key files as base64 string:</p>
-<div class="highlight"><pre><span></span><code>OPENDJ_CERT_B64=$(base64 opendj.crt -w0)
-OPENDJ_KEY_B64=$(base64 opendj.key -w0)
-</code></pre></div>
-</li>
-<li>
-<p>Add the following yaml snippet to your <code>override.yaml</code> file, for example:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">global</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">cnPersistenceType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ldap</span><span class="w"></span>
-<span class="w">  </span><span class="nt">storageClass</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">provisioner</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kubernetes.io/aws-ebs</span><span class="w"></span>
-<span class="w">  </span><span class="nt">opendj</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
-<span class="nt">config</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">configmap</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="c1"># -- contents of OpenDJ cert file in base64-string</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnLdapCrt</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;OPENDJ_CERT_B64&gt;</span><span class="w"></span>
-<span class="w">    </span><span class="c1"># -- contents of OpenDJ key file in base64-string</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnLdapKey</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;OPENDJ_KEY_B64&gt;</span><span class="w"></span>
-</code></pre></div>
-</li>
-<li>
-<p>Rollout restart OpenDJ statefulset:</p>
-<div class="highlight"><pre><span></span><code>kubectl -n &lt;jans-namespace&gt; rollout restart sts &lt;opendj-statefulset-name&gt;
-</code></pre></div>
-<p>Wait until pods are re-deployed successfully (this will update OpenDJ certificate and key in Kubernetes secrets).
-Afterwards, do rollout restart for other deployments/statefulsets to ensure latest OpenDJ certificate and key are pulled into pods.</p>
-</li>
-</ol>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-09-27T12:12:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-15T10:12:47+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-15</span>
       
         <br>
         Created:
