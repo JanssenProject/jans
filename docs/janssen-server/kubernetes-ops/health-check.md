@@ -21,32 +21,6 @@ Jans deployed components uses two types of probes:
 
 Here is a list of the liveness and readiness probes of the deployed jans components
 
-### Opendj 
-
-Opendj uses [healthcheck.py](https://github.com/GluuFederation/docker-opendj/blob/master/scripts/healthcheck.py) in liveness probe.
-This python script connects to opendj to test its liveness.
-
-```yaml
-  livenessProbe:
-    # Executes the python3 healthcheck.
-    exec:
-      command:
-      - python3
-      - /app/scripts/healthcheck.py
-    # Configure the liveness healthcheck for the OpenDJ if needed.
-    initialDelaySeconds: 30
-    periodSeconds: 30
-    timeoutSeconds: 5
-    failureThreshold: 20
-  readinessProbe:
-    tcpSocket:
-      port: 1636
-    # Configure the readiness healthcheck for the OpenDJ if needed.  
-    initialDelaySeconds: 60
-    timeoutSeconds: 5
-    periodSeconds: 25
-    failureThreshold: 20
-```
 ### auth-server
 
 Auth-sever executes the python3 [healthcheck.py](https://github.com/JanssenProject/jans/blob/main/docker-jans-auth-server/scripts/healthcheck.py) in liveness and readiness probes.

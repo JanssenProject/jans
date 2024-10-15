@@ -43,7 +43,6 @@ Follow Keystore files are used by Janssen:
 
   - jans-auth-keys.pkcs12
   - smtp-keys.pkcs12
-  - opendj.pkcs12 (if OpenDJ is used for saving of configuration)
 .
 
 ### jans-auth-keys.pkcs12
@@ -1083,41 +1082,6 @@ KeyIdentifier [
 This Key Store stores one alias (**smtp_sig_ec256**) and it is used for keeping of key/certificate, which is used by email sending functionality - signing of emails.
 Alias **smtp_sig_ec256** contains self-signed certificate. User/Admin can update this KeyStore, adding key/certificate signed by trusted certificate authority (CA) (X-509 PKI).
 
-### opendj.pkcs12
-
-Here is the example of the file: **/etc/certs/opendj.pkcs12** (list of entries/aliases).
-
-```bash
-keytool -list -v -storetype PKCS12 -keystore /etc/certs/opendj.pkcs12 -storepass ea895af42613
-```
-
-```text
-Keystore type: PKCS12
-Keystore provider: SUN
-
-Your keystore contains 1 entry
-
-Alias name: server-cert
-Creation date: Aug 17, 2023
-Entry type: trustedCertEntry
-
-Owner: CN=localhost, O=OpenDJ RSA Self-Signed Certificate
-Issuer: CN=localhost, O=OpenDJ RSA Self-Signed Certificate
-Serial number: 6fcee61e
-Valid from: Tue Aug 08 06:57:21 CDT 2023 until: Mon Aug 03 06:57:21 CDT 2043
-Certificate fingerprints:
-         SHA1: 21:AC:7E:45:A2:42:E7:DA:E5:E0:F0:E7:EB:92:F9:8A:AB:BB:92:76
-         SHA256: 34:52:0D:0B:58:E8:4A:4C:FA:E1:91:DB:59:0F:53:14:45:C7:F8:5B:5F:1D:44:F5:78:5D:D8:A1:81:90:3B:58
-Signature algorithm name: SHA256withRSA
-Subject Public Key Algorithm: 2048-bit RSA key
-Version: 3
-
-
-*******************************************
-*******************************************
-```
-
-This Key Store stores one alias (**server-cert**) and it is used for keeping of certificate, which is used duringcreation of SSL/TLS connections to the OpenID server.
 
 ### BCFKS KeyStore
 
