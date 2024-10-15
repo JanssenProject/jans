@@ -15,7 +15,6 @@ url = "2.5.2"
 lazy_static = "1.5.0"
 di = { workspace = true }
 jsonwebtoken = "9.3.0"
-jsonwebkey = "0.3.5"
 
 [dev-dependencies]
 # is used in testing
