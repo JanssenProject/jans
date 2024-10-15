@@ -487,7 +487,7 @@ public class SqlFilterConverter {
 
 	private String resolveAttributeName(TableMapping tableMapping, Filter filter) throws SearchException {
 		if ((tableMapping == null) || (filter == null)) {
-			return null;
+			return filter.getAttributeName();
 		}
 
 		String attributeName = filter.getAttributeName();
