@@ -3,7 +3,6 @@
     "optional": "",
     "mandatory": "httpd httpd-mod_ssl mod_auth_openidc rsyslog postgresql postgresql-contrib postgresql-server",
     "python": {
-      "ldap3": "python3-ldap3",
       "requests": "python3-requests",
       "ruamel.yaml": "python3-ruamel-yaml",
       "certifi": "python3-certifi",
@@ -15,7 +14,7 @@
     "optional": "",
     "mandatory": "httpd mod_ssl mod_auth_openidc rsyslog postgresql postgresql-contrib postgresql-server",
     "python": {
-      "ldap3": "python3-ldap3",
+      
       "requests": "python3-requests",
       "ruamel.yaml": "python3-ruamel-yaml",
       "certifi": "python3-certifi",
@@ -27,7 +26,6 @@
     "optional": "",
     "mandatory": "httpd mod_ssl mod_auth_openidc rsyslog postgresql postgresql-contrib postgresql-server",
     "python": {
-      "ldap3": "python-ldap3",
       "requests": "python-requests",
       "ruamel.yaml": "python-ruamel-yaml",
       "certifi": "python-certifi",
@@ -39,7 +37,7 @@
     "optional": "",
     "mandatory": "httpd mod_ssl mod_auth_openidc  rsyslog  python3-certifi postgresql postgresql-contrib postgresql-server",
     "python": {
-      "ldap3": "python3-ldap3",
+      
       "requests": "python3-requests",
       "ruamel.yaml": "python3-ruamel-yaml",
       "Crypto": "python3-cryptography",
@@ -50,7 +48,6 @@
     "optional": "",
     "mandatory": "httpd mod_ssl mod_auth_openidc rsyslog postgresql postgresql-contrib postgresql-server",
     "python": {
-      "ldap3": "python3-ldap3",
       "requests": "python3-requests",
       "ruamel.yaml": "python3-ruamel-yaml",
       "certifi": "python3-certifi",
@@ -62,7 +59,6 @@
     "optional": "",
     "mandatory": "httpd mod_ssl mod_auth_openidc rsyslog postgresql postgresql-contrib postgresql-server",
     "python": {
-      "ldap3": "python-ldap3",
       "requests": "python-requests",
       "ruamel.yaml": "python-ruamel-yaml",
       "certifi": "python-certifi",
@@ -74,7 +70,6 @@
     "optional": "",
     "mandatory": "apache2 apache2-mod_auth_openidc rsyslog openssl postgresql postgresql-server postgresql-contrib",
     "python": {
-      "ldap3": "python3-ldap3",
       "requests": "python3-requests",
       "ruamel.yaml": "python3-ruamel.yaml",
       "certifi": "python3-certifi",
@@ -86,7 +81,6 @@
     "optional": "",
     "mandatory": "apache2 apache2-mod_auth_openidc  rsyslog openssl postgresql postgresql-server postgresql-contrib",
     "python": {
-      "ldap3": "python3-ldap3",
       "requests": "python3-requests",
       "ruamel.yaml": "python3-ruamel.yaml",
       "certifi": "python3-certifi",
@@ -98,7 +92,6 @@
     "optional": "",
     "mandatory": "apache2 rsyslog postgresql postgresql-contrib",
     "python": {
-      "ldap3": "python3-ldap3",
       "requests": "python3-requests",
       "ruamel.yaml": "python3-ruamel.yaml",
       "certifi": "python3-certifi",
@@ -110,7 +103,6 @@
     "optional": "",
     "mandatory": "apache2 rsyslog postgresql postgresql-contrib",
     "python": {
-      "ldap3": "python3-ldap3",
       "requests": "python3-requests",
       "ruamel.yaml": "python3-ruamel.yaml",
       "certifi": "python3-certifi",
@@ -122,7 +114,6 @@
     "optional": "",
     "mandatory": "apache2 rsyslog postgresql postgresql-contrib",
     "python": {
-      "ldap3": "python3-ldap3",
       "requests": "python3-requests",
       "ruamel.yaml": "python3-ruamel.yaml",
       "certifi": "python3-certifi",
@@ -134,7 +125,7 @@
     "optional": "",
     "mandatory": "apache2 rsyslog python3-urllib3 python3-certifi postgresql postgresql-contrib",
     "python": {
-      "ldap3": "python3-ldap3",
+      
       "requests": "python3-requests",
       "ruamel.yaml": "python3-ruamel.yaml",
       "Crypto": "python3-crypto",
@@ -145,7 +136,6 @@
     "optional": "",
     "mandatory": "apache2 rsyslog python3-urllib3 python3-certifi postgresql postgresql-contrib",
     "python": {
-      "ldap3": "python3-ldap3",
       "requests": "python3-requests",
       "ruamel.yaml": "python3-ruamel.yaml",
       "cryptography": "python3-cryptography",

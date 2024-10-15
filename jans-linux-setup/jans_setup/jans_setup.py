@@ -135,7 +135,6 @@ from setup_app.installers.jre import JreInstaller
 from setup_app.installers.jetty import JettyInstaller
 from setup_app.installers.jython import JythonInstaller
 from setup_app.installers.jans_auth import JansAuthInstaller
-from setup_app.installers.opendj import OpenDjInstaller
 
 if base.current_app.profile == 'jans':
     from setup_app.installers.couchbase import CouchbaseInstaller
@@ -249,7 +248,6 @@ propertiesUtils.check_properties()
 jreInstaller = JreInstaller()
 jettyInstaller = JettyInstaller()
 jythonInstaller = JythonInstaller()
-openDjInstaller = OpenDjInstaller()
 
 if Config.profile == 'jans':
     couchbaseInstaller = CouchbaseInstaller()
@@ -310,10 +308,8 @@ if Config.profile == 'jans':
     if argsp.t and argsp.x:
         print_or_log("Loading test data")
         testDataLoader.dbUtils.bind()
-        testDataLoader.createLdapPw()
         configApiInstaller.load_test_data()
         testDataLoader.load_test_data()
-        testDataLoader.deleteLdapPw()
         print_or_log("Test data loaded.")
 
     if not argsp.t and argsp.x and argsp.load_config_api_test:
@@ -389,12 +385,6 @@ def main():
                 jansInstaller.generate_smtp_config()
                 jansInstaller.copy_scripts()
                 jansInstaller.encode_passwords()
-
-                if Config.profile == 'jans':
-                    Config.ldapCertFn = Config.opendj_cert_fn
-                    Config.ldapTrustStoreFn = Config.opendj_p12_fn
-                    Config.encoded_ldapTrustStorePass = Config.encoded_opendj_p12_pass
-
                 jansInstaller.render_templates()
                 jansInstaller.render_configuration_template()
 
@@ -407,8 +397,6 @@ def main():
 
                 # Installing jans components
                 if Config.profile == 'jans':
-                    if Config.opendj_install:
-                        openDjInstaller.start_installation()
 
                     if Config.cb_install:
                         couchbaseInstaller.start_installation()
@@ -472,9 +460,6 @@ def main():
             jansProgress.progress(PostSetup.service_name, "Saving properties")
             propertiesUtils.save_properties()
             time.sleep(2)
-
-            if Config.opendj_install:
-                openDjInstaller.restart()
 
             jansInstaller.post_install_tasks()
 
