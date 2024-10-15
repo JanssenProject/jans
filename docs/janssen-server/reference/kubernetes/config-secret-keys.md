@@ -42,13 +42,6 @@ kubectl get secret -n jans -o yaml
 | `default_openid_jks_dn_name`            | `CN=Janssen Auth CA Certificates`                       |
 | `hostname`                              | `demoexample.jans.io`                                   |
 | `jca_client_id`                         | `1800.ca41fad2-6ab6-46b1-b4a9-3387992a8cb0`             |
-| `ldap_binddn`                           | `cn=directory manager`                                  |
-| `ldap_init_host`                        | `localhost`                                             |
-| `ldap_init_port`                        | `1636`                                                  |
-| `ldap_port`                             | `1389`                                                  |
-| `ldap_site_binddn`                      | `cn=directory manager`                                  |
-| `ldapTrustStoreFn`                      | `/etc/certs/opendj.pkcs12`                              |
-| `ldaps_port`                            | `1636`                                                  |
 | `optional_scopes`                       | `["fido2", "scim", "sql"]`                              |
 | `orgName`                               | `Janssen`                                               |
 | `test_client_id`                        | `2000.4a8f3e8b-96b0-435a-8427-a287c242f4d9`             |
@@ -67,16 +60,9 @@ kubectl get secret -n jans -o yaml
 | `couchbase_shib_user_password` | base64               |                          |
 | `couchbase_superuser_password` | base64               |                          |
 | `encoded_admin_password`       | ldap_encode + base64 |                          |
-| `encoded_ldapTrustStorePass`   | pyDes + base64       |                          |
-| `encoded_ox_ldap_pw`           | pyDes + base64       |                          |
 | `encoded_salt`                 | base64               |                          |
 | `jca_client_encoded_pw`        | pyDes + base64       |                          |
 | `jca_client_pw`                | pyDes + base64       |                          |
-| `ldap_pkcs12_base64`           | pyDes + base64       | /etc/certs/opendj.pkcs12 |
-| `ldap_ssl_cacert`              | pyDes + base64       | /etc/certs/opendj.pem    |
-| `ldap_ssl_cert`                | pyDes + base64       | /etc/certs/opendj.crt    |
-| `ldap_ssl_key`                 | pyDes + base64       | /etc/certs/opendj.key    |
-| `ldap_truststore_pass`         | base64               |                          |
 | `otp_configuration`            | base64               |                          |
 | `pairwiseCalculationKey`       | base64               |                          |
 | `pairwiseCalculationSalt`      | base64               |                          |
@@ -118,32 +104,3 @@ kubectl get secret -n jans -o yaml
     echo <encodedValue> | base64 -d #replace encodedValue with the value from the previous command
     ```
 
-### Opening `/etc/certs/opendj.pkcs12` file
-
-!!! Note
-    We assume Jans is installed in a namespace called `jans`
-
-1. Make a directory called `delete_me`
-
-    ```bash
-    mkdir delete_me && cd delete_me
-    ```
-   
-1. Get the `ldap_truststore_pass`  from backend secret and save `ldap_truststore_pass`  in a file called `ldap_truststore_pass`
-
-    ```bash
-    kubectl get secret cn -o json -n jans | grep '"ldap_truststore_pass":' | sed -e 's#.*:\(\)#\1#' | tr -d '"' | tr -d "," | tr -d '[:space:]' > ldap_truststore_pass
-    ```
-
-1. Base64 decode the `ldap_truststore_pass` and save the decoded `ldap_truststore_pass` in a file called `ldap_truststore_pass_decoded`
-
-    ```bash
-    base64 -d ldap_truststore_pass > ldap_truststore_pass_decoded
-    ```
-
-1. Use `ldap_truststore_pass_decoded` to unlock `/etc/certs/opendj.pkcs12` in opendj pod.
-
-    ```bash
-    keytool -list -v -keystore /etc/certs/opendj.pkcs12 --storepass ldap_truststore_pass_decoded
-    ```
-    
