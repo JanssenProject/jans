@@ -70,7 +70,7 @@ Starts services for the Janssen Server.
 
 Start a specific service.
 
-```bash title="sample command"
+```bash title="Sample Command"
 jans start -service=jans-config-api
 ```
 
@@ -90,7 +90,7 @@ jans stop
 
 Stop a specific service.
 
-```bash title="Command"
+```bash title=" Sample Command"
 jans stop -service=jans-config-api
 ```
 ```title="Sample Output"
@@ -132,11 +132,11 @@ jans health
 
 Health check for specific service.
 
-```bash title="Command"
+```bash title="Sample Command"
 jans health -service=<service-name>
 ```
 
-```title="sample Output"
+```title="Sample Output"
 Checking health status for jans-config-api
   Executing curl -s http://localhost:8074/jans-config-api/api/v1/health/live
   Command output: {"name":"jans-config-api liveness","status":"UP"}
