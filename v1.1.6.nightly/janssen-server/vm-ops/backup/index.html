@@ -1703,26 +1703,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#ldif-data-backup" class="md-nav__link">
-    LDIF Data Backup
-  </a>
-  
-    <nav class="md-nav" aria-label="LDIF Data Backup">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#opendj" class="md-nav__link">
-    OpenDj
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -6713,7 +6693,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/kubernetes/docker-opendj/" class="md-nav__link">
+      <a href="../../reference/kubernetes/docker-opendj.md" class="md-nav__link">
         Gluu OpenDJ
       </a>
     </li>
@@ -8832,26 +8812,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#ldif-data-backup" class="md-nav__link">
-    LDIF Data Backup
-  </a>
-  
-    <nav class="md-nav" aria-label="LDIF Data Backup">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#opendj" class="md-nav__link">
-    OpenDj
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -8923,104 +8883,13 @@
 <p>Start the server again: <code>systemctl start list-units --all "jans*"</code></p>
 </li>
 </ul>
-<h2 id="ldif-data-backup">LDIF Data Backup<a class="headerlink" href="#ldif-data-backup" title="Permanent link">#</a></h2>
-<p>From time to time (daily or weekly), the LDAP database should be exported in a standard LDIF format. Having the data in plain text offers some options for recovery that are not possible with a binary backup.</p>
-<p>Instructions are provided below for exporting OpenDJ data. The below instructions address situations where unused and expired cache and session related entries are piling and causing issues with functionality.</p>
-<h3 id="opendj">OpenDj<a class="headerlink" href="#opendj" title="Permanent link">#</a></h3>
-<p>If your Jans Server is backed by OpenDJ, follow these steps to backup your data:</p>
-<ol>
-<li>
-<p>First check your cache entries by running the following command:</p>
-<div class="highlight"><pre><span></span><code>/opt/opendj/bin/ldapsearch -h localhost -p 1636 -Z -X -D &quot;cn=directory manager&quot; -w &lt;pass&gt; -b &#39;o=jans&#39; &#39;grtId=*&#39; dn | grep &#39;dn:&#39; | wc -l
-</code></pre></div>
-</li>
-<li>
-<p>Dump the data as LDIF :</p>
-<ul>
-<li>
-<p>Stop the services using <code>systemctl stop opendj</code></p>
-</li>
-<li>
-<p>Now export the LDIF and save it in appropriate place safe</p>
-</li>
-</ul>
-<p><div class="highlight"><pre><span></span><code>/opt/opendj/bin/export-ldif -n userRoot --offline -l databackup_date.ldif
-</code></pre></div>
-* Now exclude jansGrant(grntId) so the command becomes:</p>
-<div class="highlight"><pre><span></span><code>/opt/opendj/bin/export-ldif -n userRoot --offline -l yourdata_withoutoxAuthGrantId.ldif --includeFilter &#39;(!(grtId=*))&#39;
-</code></pre></div>
-<ul>
-<li>You may also wish to exclude jansMetric so the command becomes:</li>
-</ul>
-<div class="highlight"><pre><span></span><code>/opt/opendj/bin/export-ldif -n userRoot --offline -l yourdata_withoutGrantIdMetic.ldif --includeFilter &#39;(&amp;(!(grtId=*))(!(objectClass=jansMetric)))&#39;
-</code></pre></div>
-</li>
-<li>
-<p>Now, only if needed, rebuild indexes:</p>
-<ul>
-<li>Check status of indexes:
-<div class="highlight"><pre><span></span><code>/opt/opendj/bin/backendstat show-index-status --backendID userRoot --baseDN o=jans
-</code></pre></div></li>
-</ul>
-<p>Take note of all indexes that need to be rebuilt. If no indexing is needed, move on to step 4.</p>
-<ul>
-<li>
-<p>Start the opendj service <code>systemctl start opendj</code></p>
-</li>
-<li>
-<p>Build backend index for all indexes that need it accoring to previous status command, change passoword -w and index name accordingly. This command has to be run for every index separately:</p>
-</li>
-</ul>
-<div class="highlight"><pre><span></span><code>/opt/opendj/bin/dsconfig create-backend-index --port 4444 --hostname localhost --bindDN &quot;cn=directory manager&quot; -w password --backend-name userRoot --index-name iname --set index-type:equality --set index-entry-limit:4000 --trustAll --no-prompt
-</code></pre></div>
-<ul>
-<li>
-<p>Stop the opendj service <code>systemctl stop opendj</code></p>
-</li>
-<li>
-<p>Rebuild the indexes as needed, here are examples :</p>
-</li>
-</ul>
-<div class="highlight"><pre><span></span><code>/opt/opendj/bin/rebuild-index --baseDN o=jans --index iname
-/opt/opendj/bin/rebuild-index --baseDN o=jans --index uid
-/opt/opendj/bin/rebuild-index --baseDN o=jans --index mail
-</code></pre></div>
-<ul>
-<li>Check status again :</li>
-</ul>
-<div class="highlight"><pre><span></span><code>/opt/opendj/bin/backendstat show-index-status --backendID userRoot --baseDN o=jans
-</code></pre></div>
-<ul>
-<li>Verify indexes:</li>
-</ul>
-<div class="highlight"><pre><span></span><code>/opt/opendj/bin/verify-index --baseDN o=jans --countErrors
-</code></pre></div>
-</li>
-<li>
-<p>Next import your previously exported LDIF.</p>
-<div class="highlight"><pre><span></span><code>/opt/opendj/bin/import-ldif -n userRoot --offline -l your-backup.ldif
-</code></pre></div>
-</li>
-</ol>
-<p>If you moved to a new LDAP, copy back your schema files to this directory:</p>
-<div class="highlight"><pre><span></span><code>/opt/opendj/config/schema/
-</code></pre></div>
-<ul>
-<li>Start the <code>opendj</code> and other services</li>
-<li>
-<p>Finally, verify the cache entries have been removed:</p>
-<div class="highlight"><pre><span></span><code>/opt/opendj/bin/ldapsearch -h localhost -p 1636 -Z -X -D &quot;cn=directory manager&quot; -w &lt;pass&gt; -b &#39;o=jans&#39; &#39;grtId=*&#39; dn | grep &#39;dn:&#39; | wc -l
-</code></pre></div>
-</li>
-</ul>
-<p>You should be done and everything should be working perfectly. You may notice your Jans Server responding slower than before. That is expected -- your LDAP is adjusting to the new data, and indexing might be in process. Give it some time and it should be back to normal.</p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-09-27T12:12:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-15T10:12:47+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-15</span>
       
         <br>
         Created:

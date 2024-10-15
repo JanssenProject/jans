@@ -6709,7 +6709,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../reference/kubernetes/docker-opendj/" class="md-nav__link">
+      <a href="../../../reference/kubernetes/docker-opendj.md" class="md-nav__link">
         Gluu OpenDJ
       </a>
     </li>
@@ -8914,14 +8914,6 @@
 <td>Yes</td>
 </tr>
 <tr>
-<td>LDAP (OpenDJ)</td>
-<td>1.5</td>
-<td>2GB</td>
-<td>10GB</td>
-<td>64 Bit</td>
-<td>Only if Couchbase/SQL not installed</td>
-</tr>
-<tr>
 <td>fido2</td>
 <td>0.5</td>
 <td>0.5GB</td>
@@ -9008,7 +9000,7 @@
 <p>Start a fresh Ubuntu <code>18.04</code>/<code>20.04</code>/<code>22.04</code> VM with ports <code>443</code> and <code>80</code> open. Then execute the following:</p>
 <p><div class="highlight"><pre><span></span><code>sudo su -
 </code></pre></div>
-<div class="highlight"><pre><span></span><code>wget https://raw.githubusercontent.com/JanssenProject/jans/v1.1.6.nightly/automation/startjanssendemo.sh <span class="o">&amp;&amp;</span> chmod u+x startjanssendemo.sh <span class="o">&amp;&amp;</span> ./startjanssendemo.sh
+<div class="highlight"><pre><span></span><code>wget https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/automation/startjanssendemo.sh <span class="o">&amp;&amp;</span> chmod u+x startjanssendemo.sh <span class="o">&amp;&amp;</span> ./startjanssendemo.sh
 </code></pre></div></p>
 <p>This will install Docker, Microk8s, Helm and Janssen with the default settings that can be found inside <a href="https://github.com/JanssenProject/jans/blob/main/charts/janssen/values.yaml">values.yaml</a>.  </p>
 <p>The installer will automatically add a record to your hosts record in the VM but if you want to access the endpoints outside the VM you must map the <code>ip</code> of the instance running Ubuntu to the FQDN you provided and then access the endpoints at your browser such in the example in the table below.</p>
@@ -9042,7 +9034,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-08T11:40:38+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-08</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-15T10:12:47+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-15</span>
       
         <br>
         Created:

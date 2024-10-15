@@ -6716,7 +6716,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../reference/kubernetes/docker-opendj/" class="md-nav__link">
+      <a href="../../../reference/kubernetes/docker-opendj.md" class="md-nav__link">
         Gluu OpenDJ
       </a>
     </li>
@@ -8943,14 +8943,6 @@
 <td>Yes</td>
 </tr>
 <tr>
-<td>LDAP (OpenDJ)</td>
-<td>1.5</td>
-<td>2GB</td>
-<td>10GB</td>
-<td>64 Bit</td>
-<td>Only if Couchbase/SQL not installed</td>
-</tr>
-<tr>
 <td>fido2</td>
 <td>0.5</td>
 <td>0.5GB</td>
@@ -9114,55 +9106,6 @@ helm install nginx ingress-nginx/ingress-nginx
 </code></pre></div>
 </li>
 <li>
-<p>LDAP/Opendj for persistence storage</p>
-<p>Prepare cert and key for OpenDJ, for example:</p>
-<div class="highlight"><pre><span></span><code>openssl req -x509 -newkey rsa:2048 -sha256 -days 365 -nodes -keyout opendj.key -out opendj.crt -subj &#39;/CN=demoexample.jans.io&#39; -addext &#39;subjectAltName=DNS:ldap,DNS:opendj&#39;
-</code></pre></div>
-<p>Extract the contents of OpenDJ cert and key files as base64 string:</p>
-<div class="highlight"><pre><span></span><code>OPENDJ_CERT_B64=$(base64 opendj.crt -w0)
-OPENDJ_KEY_B64=$(base64 opendj.key -w0)
-</code></pre></div>
-<p>Add the following yaml snippet to your <code>override.yaml</code> file:
-  <div class="highlight"><pre><span></span><code><span class="nt">global</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">cnPersistenceType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ldap</span><span class="w"></span>
-<span class="w">  </span><span class="nt">storageClass</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">provisioner</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kubernetes.io/aws-ebs</span><span class="w"></span>
-<span class="w">  </span><span class="nt">opendj</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
-<span class="nt">config</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">configmap</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="c1"># -- contents of OpenDJ cert file in base64-string</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnLdapCrt</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;OPENDJ_CERT_B64&gt;</span><span class="w"></span>
-<span class="w">    </span><span class="c1"># -- contents of OpenDJ key file in base64-string</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnLdapKey</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;OPENDJ_KEY_B64&gt;</span><span class="w"></span>
-</code></pre></div></p>
-<p>So if your desired configuration has no-FQDN and LDAP, the final <code>override.yaml</code> file will look something like that:</p>
-<div class="highlight"><pre><span></span><code><span class="w"> </span><span class="nt">global</span><span class="p">:</span><span class="w"></span>
-<span class="w">   </span><span class="nt">cnPersistenceType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ldap</span><span class="w"></span>
-<span class="w">   </span><span class="nt">isFqdnRegistered</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span><span class="w"></span>
-<span class="w">   </span><span class="nt">storageClass</span><span class="p">:</span><span class="w"></span>
-<span class="w">     </span><span class="nt">provisioner</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kubernetes.io/aws-ebs</span><span class="w"></span>
-<span class="w">   </span><span class="nt">opendj</span><span class="p">:</span><span class="w"></span>
-<span class="w">     </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w"></span>
-<span class="w"> </span><span class="nt">config</span><span class="p">:</span><span class="w"></span>
-<span class="w">   </span><span class="nt">configmap</span><span class="p">:</span><span class="w"></span>
-<span class="w">     </span><span class="nt">lbAddr</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http://</span><span class="w"> </span><span class="c1">#Add LB address from previous command</span><span class="w"></span>
-<span class="w">     </span><span class="c1"># -- contents of OpenDJ cert file in base64-string</span><span class="w"></span>
-<span class="w">     </span><span class="nt">cnLdapCrt</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;OPENDJ_CERT_B64&gt;</span><span class="w"></span>
-<span class="w">     </span><span class="c1"># -- contents of OpenDJ key file in base64-string</span><span class="w"></span>
-<span class="w">     </span><span class="nt">cnLdapKey</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;OPENDJ_KEY_B64&gt;</span><span class="w"></span>
-<span class="w"> </span><span class="nt">nginx-ingress</span><span class="p">:</span><span class="w"></span>
-<span class="w">   </span><span class="nt">ingress</span><span class="p">:</span><span class="w"></span>
-<span class="w">     </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/</span><span class="w"></span>
-<span class="w">     </span><span class="nt">hosts</span><span class="p">:</span><span class="w"></span>
-<span class="w">     </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">demoexample.jans.io</span><span class="w"> </span><span class="c1">#CHANGE-THIS to the FQDN used for Jans</span><span class="w"></span>
-<span class="w">     </span><span class="nt">tls</span><span class="p">:</span><span class="w"></span>
-<span class="w">     </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">secretName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tls-certificate</span><span class="w"></span>
-<span class="w">       </span><span class="nt">hosts</span><span class="p">:</span><span class="w"></span>
-<span class="w">       </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">demoexample.jans.io</span><span class="w"> </span><span class="c1">#CHANGE-THIS to the FQDN used for Jans          </span><span class="w"></span>
-</code></pre></div>
-</li>
-<li>
 <p>Couchbase for pesistence storage</p>
 <p>Add the following yaml snippet to your <code>override.yaml</code> file:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">global</span><span class="p">:</span><span class="w"></span>
@@ -9272,7 +9215,7 @@ helm install janssen janssen/janssen -n jans -f override.yaml
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-09-27T12:12:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-15T10:12:47+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-15</span>
       
         <br>
         Created:

@@ -6655,7 +6655,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/kubernetes/docker-opendj/" class="md-nav__link">
+      <a href="../../reference/kubernetes/docker-opendj.md" class="md-nav__link">
         Gluu OpenDJ
       </a>
     </li>
@@ -8791,11 +8791,6 @@
     
       
       
-        <span class="md-tag">LDAP</span>
-      
-    
-      
-      
         <span class="md-tag">MySQL</span>
       
     
@@ -8851,24 +8846,6 @@ size fits all solution for databases. The following section will detail some of
 the pros and cons of the various databases we currently support.</p>
 <ol>
 <li>
-<p><strong>OpenDJ (LDAP)</strong> Janssen supports Gluu's distribution of OpenDJ, and probably any
-other similar distributions like ForgeRock OpenDJ, Ping Directory Server, or
-Oracle Unified Directory. LDAP in general and OpenDJ in particular have been<br />
-successfully backing authentication service for more than 20 years. People tend
-to think of the LDAP tree structure as fast for reads, and slow for writes.
-That's just not true anymore--OpenDJ is able to perform quite well for write
-operations as well. OpenDJ has mature replication support, excellent command
-line tools for administration, and excellent stability. The main disadvantage
-of OpenDJ is scaling large datasets for high concurrency. While you can get
-around this shortcoming with a global LDAP proxy, such a topology gets
-complicated and costly to operate, as you have to break up the data and
-configure multiple replicated topologies. As a rule of thumb, if concurrency of
-more than 120 OpenID code flow authentications per second are needed, you should
-consider another database. But for concurrency less than this, OpenDJ is an
-excellent choice. Owing to these limitations, <strong>LDAP is not 
-supported in production deployments using Kubernetes, 1.0.23 and forward</strong>.</p>
-</li>
-<li>
 <p><strong>MySQL</strong> You know it... you love it. That's the biggest advantage.
 Performance is great out of the box. But if you have high concurrency,
 you'll have to figure out a plan for replication, and horizontal scaling. 
@@ -8906,7 +8883,7 @@ API, although recently Google added support for MySQL and Postgres drivers.</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-09-27T12:12:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-15T10:12:47+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-15</span>
       
         <br>
         Created:

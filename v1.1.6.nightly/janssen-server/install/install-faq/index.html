@@ -6775,7 +6775,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../reference/kubernetes/docker-opendj/" class="md-nav__link">
+      <a href="../../reference/kubernetes/docker-opendj.md" class="md-nav__link">
         Gluu OpenDJ
       </a>
     </li>
@@ -9143,15 +9143,13 @@ intend to implement. Use the
 <a href="../../config-guide/config-tools/jans-cli/">command-line interface</a> to 
 configure the Janssen Server.</p>
 <h2 id="does-the-janssen-server-uninstall-process-remove-the-data-store-as-well">Does the Janssen Server uninstall process remove the data store as well?<a class="headerlink" href="#does-the-janssen-server-uninstall-process-remove-the-data-store-as-well" title="Permanent link">#</a></h2>
-<p>Only if the persistence type is local LDAP, it will be removed during the
-Janssen server uninstallation process. </p>
-<p>For all other persistence options, the
+<p>No. For all persistence options, the
 Janssen server uninstall steps (<a href="../vm-install/suse/#uninstall">this</a>
 for instance) will only remove the Janssen Server
-software and it'll keep the data store untouched. Removing data store is at 
+software and it'll keep the data store untouched. Removing the data store is at 
 the discretion of the
 administrator and it is a manual step. If not removed before attempting a
-reinstall of Janssen Server, the installer would fail due to the existence of
+reinstall of the Janssen Server, the installer would fail due to the existence of
 the previous data store. </p>
 
   <hr>
@@ -9159,7 +9157,7 @@ the previous data store. </p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-09-27T12:12:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-15T10:12:47+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-15</span>
       
         <br>
         Created:

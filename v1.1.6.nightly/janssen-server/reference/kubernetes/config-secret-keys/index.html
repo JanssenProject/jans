@@ -6531,13 +6531,6 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#opening-etccertsopendjpkcs12-file" class="md-nav__link">
-    Opening /etc/certs/opendj.pkcs12 file
-  </a>
-  
-</li>
-        
       </ul>
     </nav>
   
@@ -6732,7 +6725,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../docker-opendj/" class="md-nav__link">
+      <a href="../docker-opendj.md" class="md-nav__link">
         Gluu OpenDJ
       </a>
     </li>
@@ -8878,13 +8871,6 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#opening-etccertsopendjpkcs12-file" class="md-nav__link">
-    Opening /etc/certs/opendj.pkcs12 file
-  </a>
-  
-</li>
-        
       </ul>
     </nav>
   
@@ -9022,34 +9008,6 @@
 <td><code>1800.ca41fad2-6ab6-46b1-b4a9-3387992a8cb0</code></td>
 </tr>
 <tr>
-<td><code>ldap_binddn</code></td>
-<td><code>cn=directory manager</code></td>
-</tr>
-<tr>
-<td><code>ldap_init_host</code></td>
-<td><code>localhost</code></td>
-</tr>
-<tr>
-<td><code>ldap_init_port</code></td>
-<td><code>1636</code></td>
-</tr>
-<tr>
-<td><code>ldap_port</code></td>
-<td><code>1389</code></td>
-</tr>
-<tr>
-<td><code>ldap_site_binddn</code></td>
-<td><code>cn=directory manager</code></td>
-</tr>
-<tr>
-<td><code>ldapTrustStoreFn</code></td>
-<td><code>/etc/certs/opendj.pkcs12</code></td>
-</tr>
-<tr>
-<td><code>ldaps_port</code></td>
-<td><code>1636</code></td>
-</tr>
-<tr>
 <td><code>optional_scopes</code></td>
 <td><code>["fido2", "scim", "sql"]</code></td>
 </tr>
@@ -9121,16 +9079,6 @@
 <td></td>
 </tr>
 <tr>
-<td><code>encoded_ldapTrustStorePass</code></td>
-<td>pyDes + base64</td>
-<td></td>
-</tr>
-<tr>
-<td><code>encoded_ox_ldap_pw</code></td>
-<td>pyDes + base64</td>
-<td></td>
-</tr>
-<tr>
 <td><code>encoded_salt</code></td>
 <td>base64</td>
 <td></td>
@@ -9143,31 +9091,6 @@
 <tr>
 <td><code>jca_client_pw</code></td>
 <td>pyDes + base64</td>
-<td></td>
-</tr>
-<tr>
-<td><code>ldap_pkcs12_base64</code></td>
-<td>pyDes + base64</td>
-<td>/etc/certs/opendj.pkcs12</td>
-</tr>
-<tr>
-<td><code>ldap_ssl_cacert</code></td>
-<td>pyDes + base64</td>
-<td>/etc/certs/opendj.pem</td>
-</tr>
-<tr>
-<td><code>ldap_ssl_cert</code></td>
-<td>pyDes + base64</td>
-<td>/etc/certs/opendj.crt</td>
-</tr>
-<tr>
-<td><code>ldap_ssl_key</code></td>
-<td>pyDes + base64</td>
-<td>/etc/certs/opendj.key</td>
-</tr>
-<tr>
-<td><code>ldap_truststore_pass</code></td>
-<td>base64</td>
 <td></td>
 </tr>
 <tr>
@@ -9276,40 +9199,13 @@
 </code></pre></div>
 </li>
 </ol>
-<h3 id="opening-etccertsopendjpkcs12-file">Opening <code>/etc/certs/opendj.pkcs12</code> file<a class="headerlink" href="#opening-etccertsopendjpkcs12-file" title="Permanent link">#</a></h3>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>We assume Jans is installed in a namespace called <code>jans</code></p>
-</div>
-<ol>
-<li>
-<p>Make a directory called <code>delete_me</code></p>
-<div class="highlight"><pre><span></span><code>mkdir delete_me <span class="o">&amp;&amp;</span> <span class="nb">cd</span> delete_me
-</code></pre></div>
-</li>
-<li>
-<p>Get the <code>ldap_truststore_pass</code>  from backend secret and save <code>ldap_truststore_pass</code>  in a file called <code>ldap_truststore_pass</code></p>
-<div class="highlight"><pre><span></span><code>kubectl get secret cn -o json -n jans <span class="p">|</span> grep <span class="s1">&#39;&quot;ldap_truststore_pass&quot;:&#39;</span> <span class="p">|</span> sed -e <span class="s1">&#39;s#.*:\(\)#\1#&#39;</span> <span class="p">|</span> tr -d <span class="s1">&#39;&quot;&#39;</span> <span class="p">|</span> tr -d <span class="s2">&quot;,&quot;</span> <span class="p">|</span> tr -d <span class="s1">&#39;[:space:]&#39;</span> &gt; ldap_truststore_pass
-</code></pre></div>
-</li>
-<li>
-<p>Base64 decode the <code>ldap_truststore_pass</code> and save the decoded <code>ldap_truststore_pass</code> in a file called <code>ldap_truststore_pass_decoded</code></p>
-<div class="highlight"><pre><span></span><code>base64 -d ldap_truststore_pass &gt; ldap_truststore_pass_decoded
-</code></pre></div>
-</li>
-<li>
-<p>Use <code>ldap_truststore_pass_decoded</code> to unlock <code>/etc/certs/opendj.pkcs12</code> in opendj pod.</p>
-<div class="highlight"><pre><span></span><code>keytool -list -v -keystore /etc/certs/opendj.pkcs12 --storepass ldap_truststore_pass_decoded
-</code></pre></div>
-</li>
-</ol>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-09-27T12:12:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-15T10:12:47+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-15</span>
       
         <br>
         Created:

@@ -6664,7 +6664,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../../reference/kubernetes/docker-opendj/" class="md-nav__link">
+      <a href="../../../reference/kubernetes/docker-opendj.md" class="md-nav__link">
         Gluu OpenDJ
       </a>
     </li>
@@ -8840,8 +8840,7 @@
 <p>Follow Keystore files are used by Janssen:</p>
 <ul>
 <li>jans-auth-keys.pkcs12</li>
-<li>smtp-keys.pkcs12</li>
-<li>opendj.pkcs12 (if OpenDJ is used for saving of configuration)
+<li>smtp-keys.pkcs12
 .</li>
 </ul>
 <h3 id="jans-auth-keyspkcs12">jans-auth-keys.pkcs12<a class="headerlink" href="#jans-auth-keyspkcs12" title="Permanent link">#</a></h3>
@@ -9865,35 +9864,6 @@ KeyIdentifier [
 </code></pre></div>
 <p>This Key Store stores one alias (<strong>smtp_sig_ec256</strong>) and it is used for keeping of key/certificate, which is used by email sending functionality - signing of emails.
 Alias <strong>smtp_sig_ec256</strong> contains self-signed certificate. User/Admin can update this KeyStore, adding key/certificate signed by trusted certificate authority (CA) (X-509 PKI).</p>
-<h3 id="opendjpkcs12">opendj.pkcs12<a class="headerlink" href="#opendjpkcs12" title="Permanent link">#</a></h3>
-<p>Here is the example of the file: <strong>/etc/certs/opendj.pkcs12</strong> (list of entries/aliases).</p>
-<div class="highlight"><pre><span></span><code>keytool -list -v -storetype PKCS12 -keystore /etc/certs/opendj.pkcs12 -storepass ea895af42613
-</code></pre></div>
-<div class="highlight"><pre><span></span><code>Keystore type: PKCS12
-Keystore provider: SUN
-
-Your keystore contains 1 entry
-
-Alias name: server-cert
-Creation date: Aug 17, 2023
-Entry type: trustedCertEntry
-
-Owner: CN=localhost, O=OpenDJ RSA Self-Signed Certificate
-Issuer: CN=localhost, O=OpenDJ RSA Self-Signed Certificate
-Serial number: 6fcee61e
-Valid from: Tue Aug 08 06:57:21 CDT 2023 until: Mon Aug 03 06:57:21 CDT 2043
-Certificate fingerprints:
-         SHA1: 21:AC:7E:45:A2:42:E7:DA:E5:E0:F0:E7:EB:92:F9:8A:AB:BB:92:76
-         SHA256: 34:52:0D:0B:58:E8:4A:4C:FA:E1:91:DB:59:0F:53:14:45:C7:F8:5B:5F:1D:44:F5:78:5D:D8:A1:81:90:3B:58
-Signature algorithm name: SHA256withRSA
-Subject Public Key Algorithm: 2048-bit RSA key
-Version: 3
-
-
-*******************************************
-*******************************************
-</code></pre></div>
-<p>This Key Store stores one alias (<strong>server-cert</strong>) and it is used for keeping of certificate, which is used duringcreation of SSL/TLS connections to the OpenID server.</p>
 <h3 id="bcfks-keystore">BCFKS KeyStore<a class="headerlink" href="#bcfks-keystore" title="Permanent link">#</a></h3>
 <p>Janssen also supports <strong>BCFKS</strong> format of KeyStore. As a rule this format is used on <strong>RHEL/DISA-STIG</strong> OS. Access to this type of KeyStore is provided by <strong>BCFIPS</strong> crypto provider. Modules of cryptoprovider can be found (after installing on <strong>RHEL/DISA-STIG</strong> OS) here:</p>
 <ul>
@@ -10545,7 +10515,7 @@ Version: 3
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-09-27T12:12:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-15T10:12:47+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-15</span>
       
         <br>
         Created:
