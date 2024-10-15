@@ -487,7 +487,7 @@ public class SqlFilterConverter {
 
 	private String resolveAttributeName(TableMapping tableMapping, Filter filter) throws SearchException {
 		if ((tableMapping == null) || (filter == null)) {
-			return null;
+			return filter.getAttributeName();
 		}
 
 		String attributeName = filter.getAttributeName();
@@ -534,7 +534,7 @@ public class SqlFilterConverter {
 		if (StringHelper.isEmpty(attributeName)) {
 			// Try to find inside sub-filter
 			for (Filter subFilter : filter.getFilters()) {
-				attributeName = resolveAttributeName(tableMapping, subFilter);
+				attributeName = subFilter.getAttributeName();
 				if (StringHelper.isNotEmpty(attributeName)) {
 					break;
 				}
