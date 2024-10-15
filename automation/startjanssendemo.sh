@@ -15,10 +15,10 @@ if ! [[ $JANS_FQDN == *"."*"."* ]]; then
   exit 1
 fi
 if [[ ! "$JANS_PERSISTENCE" ]]; then
-  read -rp "Enter persistence type [LDAP|MYSQL|PGSQL]:                            " JANS_PERSISTENCE
+  read -rp "Enter persistence type [MYSQL|PGSQL]:                            " JANS_PERSISTENCE
 fi
-if [[ $JANS_PERSISTENCE != "LDAP" ]] && [[ $JANS_PERSISTENCE != "MYSQL" ]] && [[ $JANS_PERSISTENCE != "PGSQL" ]]; then
-  echo "[E] Incorrect entry. Please enter either LDAP, MYSQL or PGSQL"
+if [[ $JANS_PERSISTENCE != "MYSQL" ]] && [[ $JANS_PERSISTENCE != "PGSQL" ]]; then
+  echo "[E] Incorrect entry. Please enter either MYSQL or PGSQL"
   exit 1
 fi
 
@@ -121,38 +121,6 @@ config:
 EOF
 fi
 
-ENABLE_LDAP="false"
-if [[ $JANS_PERSISTENCE == "LDAP" ]]; then
-  openssl req \
-    -x509 \
-    -newkey rsa:2048 \
-    -sha256 \
-    -days 365 \
-    -nodes \
-    -keyout opendj.key \
-    -out opendj.crt \
-    -subj "/CN=$JANS_FQDN" \
-    -addext 'subjectAltName=DNS:ldap,DNS:opendj'
-
-  LDAP_CERT_B64=$(base64 opendj.crt -w0)
-  LDAP_KEY_B64=$(base64 opendj.key -w0)
-
-  rm -f opendj.crt opendj.key
-
-  cat << EOF > override.yaml
-config:
-  countryCode: US
-  email: support@gluu.org
-  orgName: Gluu
-  city: Austin
-  configmap:
-    cnLdapCrt: $LDAP_CERT_B64
-    cnLdapKey: $LDAP_KEY_B64
-EOF
-  PERSISTENCE_TYPE="ldap"
-  ENABLE_LDAP="true"
-fi
-
 echo "$EXT_IP $JANS_FQDN" | sudo tee -a /etc/hosts > /dev/null
 cat << EOF >> override.yaml
 global:
@@ -173,8 +141,6 @@ global:
       persistenceLogLevel: "$LOG_LEVEL"
       persistenceDurationLogTarget: "$LOG_TARGET"
       persistenceDurationLogLevel: "$LOG_LEVEL"
-      ldapStatsLogTarget: "$LOG_TARGET"
-      ldapStatsLogLevel: "$LOG_LEVEL"
       scriptLogTarget: "$LOG_TARGET"
       scriptLogLevel: "$LOG_LEVEL"
       auditStatsLogTarget: "$LOG_TARGET"
@@ -187,7 +153,7 @@ global:
       timerLogTarget: "$LOG_TARGET"
       timerLogLevel: "$LOG_LEVEL"
     ingress:
-      casaEnabled: true     
+      casaEnabled: true
   config-api:
     appLoggers:
       configApiLogTarget: "$LOG_TARGET"
@@ -211,15 +177,10 @@ global:
       persistenceLogLevel: "$LOG_LEVEL"
       persistenceDurationLogTarget: "$LOG_TARGET"
       persistenceDurationLogLevel: "$LOG_LEVEL"
-      ldapStatsLogTarget: "$LOG_TARGET"
-      ldapStatsLogLevel: "$LOG_LEVEL"
       scriptLogTarget: "$LOG_TARGET"
       scriptLogLevel: "$LOG_LEVEL"
   fqdn: $JANS_FQDN
   lbIp: $EXT_IP
-  opendj:
-    # -- Boolean flag to enable/disable the OpenDJ  chart.
-    enabled: $ENABLE_LDAP
 # -- Nginx ingress definitions chart
 nginx-ingress:
   ingress:

@@ -50,10 +50,8 @@ The following environment variables are supported by the container:
 - `CN_SECRET_GOOGLE_SECRET_VERSION_ID`: Google Secret Manager version ID (default to `latest`).
 - `CN_SECRET_GOOGLE_SECRET_NAME_PREFIX`: Prefix for Google Secret Manager name (default to `jans`).
 - `CN_SECRET_GOOGLE_SECRET_MANAGER_PASSPHRASE`: Passphrase for Google Secret Manager (default to `secret`).
-- `CN_PERSISTENCE_TYPE`: Persistence backend being used (one of `ldap`, `couchbase`, or `hybrid`; default to `ldap`).
+- `CN_PERSISTENCE_TYPE`: Persistence backend being used (one of `sql`, `couchbase`, `spanner`, or `hybrid`; default to `sql`).
 - `CN_HYBRID_MAPPING`: Specify data mapping for each persistence (default to `"{}"`). Note this environment only takes effect when `CN_PERSISTENCE_TYPE` is set to `hybrid`. See [hybrid mapping](#hybrid-mapping) section for details.
-- `CN_LDAP_URL`: Address and port of LDAP server (default to `localhost:1636`).
-- `CN_LDAP_USE_SSL`: Whether to use SSL connection to LDAP server (default to `true`).
 - `CN_COUCHBASE_URL`: Address of Couchbase server (default to `localhost`).
 - `CN_COUCHBASE_USER`: Username of Couchbase server (default to `admin`).
 - `CN_COUCHBASE_CERT_FILE`: Couchbase root certificate location (default to `/etc/certs/couchbase.crt`).
@@ -226,12 +224,12 @@ As per v1.0.1, hybrid persistence supports all available persistence types. To c
 
     ```
     {
-        "default": "<couchbase|ldap|spanner|sql>",
-        "user": "<couchbase|ldap|spanner|sql>",
-        "site": "<couchbase|ldap|spanner|sql>",
-        "cache": "<couchbase|ldap|spanner|sql>",
-        "token": "<couchbase|ldap|spanner|sql>",
-        "session": "<couchbase|ldap|spanner|sql>",
+        "default": "<couchbase|spanner|sql>",
+        "user": "<couchbase|spanner|sql>",
+        "site": "<couchbase|spanner|sql>",
+        "cache": "<couchbase|spanner|sql>",
+        "token": "<couchbase|spanner|sql>",
+        "session": "<couchbase|spanner|sql>",
     }
     ```
 
@@ -241,7 +239,7 @@ As per v1.0.1, hybrid persistence supports all available persistence types. To c
     {
         "default": "sql",
         "user": "spanner",
-        "site": "ldap",
+        "site": "sql",
         "cache": "sql",
         "token": "couchbase",
         "session": "spanner",
