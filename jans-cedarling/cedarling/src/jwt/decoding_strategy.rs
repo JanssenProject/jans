@@ -37,25 +37,6 @@ impl DecodingStrategy {
         Self::WithoutValidation
     }
 
-    /// Decodes a JWT without performing validation.
-    fn decode_jwt_without_validation<T: DeserializeOwned>(jwt: &str) -> Result<T, Error> {
-        let header = jwt::decode_header(jwt).map_err(Error::ParsingError)?;
-
-        let mut validator = jwt::Validation::new(header.alg);
-        validator.insecure_disable_signature_validation();
-        validator.validate_exp = false;
-        validator.validate_aud = false;
-        validator.validate_nbf = false;
-
-        let key = jwt::DecodingKey::from_secret("secret".as_ref());
-
-        let claims = jwt::decode::<T>(&jwt, &key, &validator)
-            .map_err(Error::ValidationError)?
-            .claims;
-
-        Ok(claims)
-    }
-
     /// Creates a new decoding strategy that performs validation.
     pub fn new_with_validation(
         dep_map: &di::DependencyMap,
@@ -72,54 +53,73 @@ impl DecodingStrategy {
             supported_algs,
         })
     }
-
-    /// Decodes and validates a JWT using the specified algorithms and keys.
-    ///
-    /// Returns an error for tokens not signed with an algorithm not in
-    /// `supported_algs` or when validation fails.
-    fn decode_and_validate_jwt<T: serde::de::DeserializeOwned>(
-        jwt: &str,
-        supported_algs: &Vec<jwt::Algorithm>,
-        key_service: &Arc<dyn GetKey>,
-    ) -> Result<T, Error> {
-        let header = jwt::decode_header(jwt).map_err(Error::ParsingError)?;
-
-        // Automatically reject unsupported algorithms
-        if !supported_algs.contains(&header.alg) {
-            return Err(Error::TokenSignedWithUnsupportedAlgorithm(header.alg));
-        }
-
-        let mut validator = jwt::Validation::new(header.alg);
-        // TODO: set valid `aud` and `iss` depending on
-        // the OpenID configuration fetched from the server
-        validator.validate_aud = false;
-
-        // fetch decoding key from the KeyService
-        let key = key_service.get_key(
-            &header
-                .kid
-                .ok_or(Error::MissingRequiredHeader("kid".to_string()))?,
-        )?;
-
-        let claims = jwt::decode::<T>(&jwt, &key, &validator)
-            .map_err(Error::ValidationError)?
-            .claims;
-
-        Ok(claims)
-    }
 }
 
 /// Decodes a JWT token based on the current decoding strategy.
 impl Decode for DecodingStrategy {
     fn decode<T: DeserializeOwned>(&self, jwt: &str) -> Result<T, Error> {
         match self {
-            DecodingStrategy::WithoutValidation => Self::decode_jwt_without_validation(jwt),
+            DecodingStrategy::WithoutValidation => decode_jwt_without_validation(jwt),
             DecodingStrategy::WithValidation {
                 key_service,
                 supported_algs,
-            } => Self::decode_and_validate_jwt(jwt, supported_algs, key_service),
+            } => decode_and_validate_jwt(jwt, supported_algs, key_service),
         }
     }
+}
+
+/// Decodes and validates a JWT using the specified algorithms and keys.
+///
+/// Returns an error for tokens not signed with an algorithm not in
+/// `supported_algs` or when validation fails.
+fn decode_and_validate_jwt<T: serde::de::DeserializeOwned>(
+    jwt: &str,
+    supported_algs: &Vec<jwt::Algorithm>,
+    key_service: &Arc<dyn GetKey>,
+) -> Result<T, Error> {
+    let header = jwt::decode_header(jwt).map_err(Error::ParsingError)?;
+
+    // Automatically reject unsupported algorithms
+    if !supported_algs.contains(&header.alg) {
+        return Err(Error::TokenSignedWithUnsupportedAlgorithm(header.alg));
+    }
+
+    let mut validator = jwt::Validation::new(header.alg);
+    // TODO: set valid `aud` and `iss` depending on
+    // the OpenID configuration fetched from the server
+    validator.validate_aud = false;
+
+    // fetch decoding key from the KeyService
+    let key = key_service.get_key(
+        &header
+            .kid
+            .ok_or(Error::MissingRequiredHeader("kid".to_string()))?,
+    )?;
+
+    let claims = jwt::decode::<T>(&jwt, &key, &validator)
+        .map_err(Error::ValidationError)?
+        .claims;
+
+    Ok(claims)
+}
+
+/// Decodes a JWT without performing validation.
+fn decode_jwt_without_validation<T: DeserializeOwned>(jwt: &str) -> Result<T, Error> {
+    let header = jwt::decode_header(jwt).map_err(Error::ParsingError)?;
+
+    let mut validator = jwt::Validation::new(header.alg);
+    validator.insecure_disable_signature_validation();
+    validator.validate_exp = false;
+    validator.validate_aud = false;
+    validator.validate_nbf = false;
+
+    let key = jwt::DecodingKey::from_secret("secret".as_ref());
+
+    let claims = jwt::decode::<T>(&jwt, &key, &validator)
+        .map_err(Error::ValidationError)?
+        .claims;
+
+    Ok(claims)
 }
 
 /// A wrapper for the key service used to retrieve decoding keys.
