@@ -12,7 +12,7 @@ tags:
 To get info about Jans Authorization Server operations:
 
 ```text
-/opt/jans/jans-cli/config-cli.py --info ConfigurationProperties
+jans cli --info ConfigurationProperties
 
 
 Operation ID: get-properties
@@ -23,7 +23,7 @@ Operation ID: patch-properties
 Operation ID: get-properties-persistence
   Description: Returns persistence type configured for Jans authorization server.
 
-To get sample schema type /opt/jans/jans-cli/config-cli.py --schema <schma>, for example /opt/jans/jans-cli/config-cli.py --schema JsonPatch
+To get sample schema type jans cli --schema <schma>, for example jans cli --schema JsonPatch
 ```
 
 Jans Authorization server has two operations `id` to `get/modify` its properties.
@@ -43,7 +43,7 @@ Table of Contents
 It returns all the information of the Jans Authorization server.
 
 ```text
- /opt/jans/jans-cli/config-cli.py --operation-id get-properties
+ jans cli --operation-id get-properties
  ```
  
  You will get output like below
@@ -614,12 +614,12 @@ Operation ID: patch-properties
   Description: Partially modifies Jans authorization server AppConfiguration properties.
   Schema: Array of /components/schemas/PatchRequest
 
-To get sample shema type /opt/jans/jans-cli/config-cli.py --schema <schma>, for example /opt/jans/jans-cli/config-cli.py --schema /components/schemas/PatchRequest
+To get sample shema type jans cli --schema <schma>, for example jans cli --schema /components/schemas/PatchRequest
 ```
 Let's look at the schema first:
 
 ```text
-/opt/jans/jans-cli/config-cli.py --schema /components/schemas/PatchRequest > /tmp/patch-jans-auth.json
+jans cli --schema /components/schemas/PatchRequest > /tmp/patch-jans-auth.json
 ```
 
 It will create a `.json` file in `/tmp` with schema.
@@ -648,7 +648,7 @@ Don't forget to use **square brackets** (`[]`). Otherwise, it won't work.
 Now, let's do the operation.
 
 ```commandline
-/opt/jans/jans-cli/config-cli.py --operation-id patch-properties --data /tmp/patch-jans-auth.json
+jans cli --operation-id patch-properties --data /tmp/patch-jans-auth.json
 ```
 
 If you run the following command line, you must see that `cibaEnabled` is `true`:
@@ -659,7 +659,7 @@ If you run the following command line, you must see that `cibaEnabled` is `true`
 
 You can get the persistence details for jans auth server.
 ```
-/opt/jans/jans-cli/config-cli.py --operation-id get-properties-persistence
+jans cli --operation-id get-properties-persistence
 ```
 
 Default persistence type is `LDAP`.

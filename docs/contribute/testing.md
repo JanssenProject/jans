@@ -77,7 +77,7 @@ After installation, we have to complete device authentication to use OpenBanking
 We can run the below command on the command line. For example:
 
 ```
-/opt/jans/jans-cli/config-cli.py -CC /opt/jans/jans-setup/output/CA/client.crt -CK /opt/jans/jans-setup/output/CA/client.key –operation-id get-oauth-openid-clients
+jans cli -CC /opt/jans/jans-setup/output/CA/client.crt -CK /opt/jans/jans-setup/output/CA/client.key –operation-id get-oauth-openid-clients
 ```
 
 in the same way we can run other commands. Rest of the testing is same for jans and openbanking.

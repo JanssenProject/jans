@@ -26,7 +26,7 @@ tasks.
 ## Using Command Line
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py -scim --info Group
+jans cli -scim --info Group
 ```
 
 ```text title="Command Output"
@@ -82,7 +82,7 @@ Operation ID: search-group
   Schema: SearchRequest
   Schema: SearchRequest
 
-To get sample schema type /opt/jans/jans-cli/config-cli.py -scim --schema-sample <schema>, for example /opt/jans/jans-cli/config-cli.py -scim --schema-sample SearchRequest 
+To get sample schema type jans cli -scim --schema-sample <schema>, for example jans cli -scim --schema-sample SearchRequest 
 ```
 
 
@@ -91,7 +91,7 @@ To get sample schema type /opt/jans/jans-cli/config-cli.py -scim --schema-sample
 This operation can be used to get list of groups. To get the list of groups, run the following command:
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py -scim --operation-id get-groups
+jans cli -scim --operation-id get-groups
 ```
 
 It will show the list of groups with all the members linked with each of these groups. 
@@ -142,13 +142,13 @@ You can filter for the advanced search with some of its properties:
 Using `create-group` operation, we can create groups into Janssen Server. As we have seen in the [output](#using-command-line) of `--info` command, this operation requires `GroupResource` schema. To know the details of schema, run the following command:
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py -scim --schema GroupResource
+jans cli -scim --schema GroupResource
 ```
 
 The Janssen server also provides sample schema. To get the sample schema of `GroupResource`:
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py -scim --schema-sample GroupResource
+jans cli -scim --schema-sample GroupResource
 ```
 
 According to schema, let's put all the details into a json file `/tmp/create-group.json` to create a group.
@@ -162,7 +162,7 @@ According to schema, let's put all the details into a json file `/tmp/create-gro
 Now let's run the following command to add group into the server:
 
 ```bash title="Command"
- /opt/jans/jans-cli/config-cli.py -scim --operation-id create-group --data /tmp/create-group.json
+ jans cli -scim --operation-id create-group --data /tmp/create-group.json
 ``` 
 
 ```json title="Command Output"
@@ -187,7 +187,8 @@ We can view the specific group details through its `id` using `get-group-by-id` 
 For example, We can put the above created group `id:7a20464c-3651-48a0-9c9c-6b59373df60c` with `--url-suffix` to get the groupe details. The following command as below:
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py -scim --operation-id get-group-by-id --url-suffix="id:7a20464c-3651-48a0-9c9c-6b59373df60c"
+jans cli -scim --operation-id get-group-by-id \
+--url-suffix="id:7a20464c-3651-48a0-9c9c-6b59373df60c"
 ```
 ```json title="Command Output"
 {
@@ -226,7 +227,8 @@ The `update-group-by-id` operation can be used to update group name and adding m
 We can get the `value` which is actually the `id` of specific users from [user management](./user-config.md#get-users-list) section. Let's run the following command to update empty members properties with a member into the group we created [above](#create-group).
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py -scim --operation-id update-group-by-id --url-suffix="id:7a20464c-3651-48a0-9c9c-6b59373df60c" --data /tmp/update-group.json
+jans cli -scim --operation-id update-group-by-id \
+--url-suffix="id:7a20464c-3651-48a0-9c9c-6b59373df60c" --data /tmp/update-group.json
 ```
 
 ```json title="Output"
@@ -260,7 +262,8 @@ We can get the `value` which is actually the `id` of specific users from [user m
 You can delete a group by its ID. The command line looks like:
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py -scim --operation-id delete-group-by-id --url-suffix="id:7a20464c-3651-48a0-9c9c-6b59373df60c"
+jans cli -scim --operation-id delete-group-by-id \
+--url-suffix="id:7a20464c-3651-48a0-9c9c-6b59373df60c"
 ```
 
 It will delete the group and all of its associated data if match with the unique group ID.
@@ -287,7 +290,8 @@ According to the [output](#using-command-line) of `--info` command, we can see `
 Let's run the following command:
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py -scim --operation-id patch-group-by-id --url-suffix="id:7a20464c-3651-48a0-9c9c-6b59373df60c" --data /tmp/patch-user.json
+jans cli -scim --operation-id patch-group-by-id \
+--url-suffix="id:7a20464c-3651-48a0-9c9c-6b59373df60c" --data /tmp/patch-user.json
 ```
 
 ## Using Configuration REST API

@@ -70,7 +70,7 @@ https://demoexample.jans.io/.well-known/openid-configuration
 
 3. Use the CLI tools located under `/opt/jans/jans-cli/` to configure Janssen Server as needed. For example you can run the [TUI](../../config-guide/config-tools/jans-tui/README.md):
     ```bash
-    python3 /opt/jans/jans-cli/config-cli-tui.py
+    jans tui
     ```
 
 

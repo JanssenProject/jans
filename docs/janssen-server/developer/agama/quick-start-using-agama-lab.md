@@ -379,9 +379,8 @@ Server deployment
 1. Download the `.gama` file from the GitHub repository
 2. Open [TUI](../../config-guide/config-tools/jans-tui/README.md) using following commands on Janssen Server
 
-     ```
-     cd /opt/jans/jans-cli
-     python3 jans_cli_tui.py
+     ```bash title="Command"
+     jans tui
      ```
 
 3. Navigate to `Auth Server` > `Agama` > `Upload Project`. Select the `.gama` file to upload.

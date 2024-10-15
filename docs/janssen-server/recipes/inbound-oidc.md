@@ -138,7 +138,7 @@ rp->>browser: Page is accessed
 
    - Add the custom script
       ```
-      /opt/jans/jans-cli/config-cli.py --operation-id post-config-scripts --data /tmp/cs.json
+      jans cli --operation-id post-config-scripts --data /tmp/cs.json
       ```
          
 ### 2. Login Page Setup

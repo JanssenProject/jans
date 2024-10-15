@@ -257,7 +257,7 @@ curl -X PATCH -k -H 'Content-Type: application/json-patch+json' \
 Command to obtain metadata schema
 
 ```shell
-/opt/jans/jans-cli/config-cli.py --schema /components/schemas/Client
+jans cli --schema /components/schemas/Client
 ```
 
 Output:
