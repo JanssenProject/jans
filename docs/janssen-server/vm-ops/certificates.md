@@ -10,12 +10,12 @@ tags:
 
 Janssen components have cryptographic keys and X.509 certificates that are stored on the filesystem at the time of installation. Details for certificates associated with each component are provided below. The following certificates are available in the `/etc/certs` folder.
 
-|APACHE		       |OPENDJ         |Jans Auth CA Certificates|
-|:---------------|:--------------|:------------------------|
-|httpd.crt	     |opendj.crt	   |jans-auth-keys.p12       |
-|https.csr	     |opendj.pksc12	 |
-|httpd.key       |               |
-|httpd.key.orig  |               |
+| APACHE		       | Jans Auth CA Certificates |
+|:---------------|---------------------------|
+| httpd.crt	     | jans-auth-keys.p12        |
+| https.csr	     |
+| httpd.key      |
+| httpd.key.orig |
 
 ## Custom Script JSON Files
 Additionally the following json files are available which are used in different custom scripts for multi-factor authentication.

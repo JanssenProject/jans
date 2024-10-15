@@ -35,7 +35,7 @@ RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-spi/${CN_VERSION}/kc-j
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=5e7b579f097714d685a6c1e0cedd004df0ce85f8
+ENV JANS_SOURCE_VERSION=5f3b30e4b565601ccb31cd985920c09071cd1b54
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -129,10 +129,8 @@ ENV CN_SECRET_ADAPTER=vault \
 # Persistence ENV
 # ===============
 
-ENV CN_PERSISTENCE_TYPE=ldap \
+ENV CN_PERSISTENCE_TYPE=sql \
     CN_HYBRID_MAPPING="{}" \
-    CN_LDAP_URL=localhost:1636 \
-    CN_LDAP_USE_SSL=true \
     CN_COUCHBASE_URL=localhost \
     CN_COUCHBASE_USER=admin \
     CN_COUCHBASE_CERT_FILE=/etc/certs/couchbase.crt \

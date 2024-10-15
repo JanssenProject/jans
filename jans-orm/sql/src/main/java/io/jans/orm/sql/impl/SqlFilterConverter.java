@@ -534,7 +534,7 @@ public class SqlFilterConverter {
 		if (StringHelper.isEmpty(attributeName)) {
 			// Try to find inside sub-filter
 			for (Filter subFilter : filter.getFilters()) {
-				attributeName = subFilter.getAttributeName();
+				attributeName = resolveAttributeName(tableMapping, subFilter);
 				if (StringHelper.isNotEmpty(attributeName)) {
 					break;
 				}
