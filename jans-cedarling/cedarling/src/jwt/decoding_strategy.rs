@@ -39,7 +39,7 @@ impl DecodingStrategy {
 
     /// Decodes a JWT without performing validation.
     fn decode_jwt_without_validation<T: DeserializeOwned>(jwt: &str) -> Result<T, Error> {
-        let header = jwt::decode_header(jwt).map_err(|e| Error::ParsingError(e))?;
+        let header = jwt::decode_header(jwt).map_err(Error::ParsingError)?;
 
         let mut validator = jwt::Validation::new(header.alg);
         validator.insecure_disable_signature_validation();
@@ -50,7 +50,7 @@ impl DecodingStrategy {
         let key = jwt::DecodingKey::from_secret("secret".as_ref());
 
         let claims = jwt::decode::<T>(&jwt, &key, &validator)
-            .map_err(|e| Error::ValidationError(e))?
+            .map_err(Error::ValidationError)?
             .claims;
 
         Ok(claims)
@@ -82,7 +82,7 @@ impl DecodingStrategy {
         supported_algs: &Vec<jwt::Algorithm>,
         key_service: &Arc<dyn GetKey>,
     ) -> Result<T, Error> {
-        let header = jwt::decode_header(jwt).map_err(|e| Error::ParsingError(e))?;
+        let header = jwt::decode_header(jwt).map_err(Error::ParsingError)?;
 
         // Automatically reject unsupported algorithms
         if !supported_algs.contains(&header.alg) {
@@ -102,7 +102,7 @@ impl DecodingStrategy {
         )?;
 
         let claims = jwt::decode::<T>(&jwt, &key, &validator)
-            .map_err(|e| Error::ValidationError(e))?
+            .map_err(Error::ValidationError)?
             .claims;
 
         Ok(claims)
