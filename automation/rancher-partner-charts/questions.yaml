@@ -58,37 +58,21 @@ questions:
   type: enum
   group: "Persistence"
   label: Gluu Persistence backend
-  description: "Persistence backend to run Gluu with ldap|couchbase|hybrid|sql|spanner"
+  description: "Persistence backend to run Gluu with couchbase|hybrid|sql|spanner"
   options:
-    - "ldap"
     - "couchbase"
     - "hybrid"
     - "spanner"
     - "sql"
-# LDAP
-- variable: global.opendj.enabled
-  default: false
-  type: boolean
-  group: "Persistence"
-  required: true
-  label: Enable installation of OpenDJ
-  description: "Boolean flag to enable/disable the OpenDJ  chart."
-  show_if: "global.cnPersistenceType=ldap||global.cnPersistenceType=hybrid"
-- variable: config.configmap.cnLdapUrl
-  default: "opendj:1636"
-  type: hostname
-  group: "Persistence"
-  required: true
-  label: OpenDJ remote URL
-  description: "OpenDJ remote URL. This must be resolvable by the pods"
-  show_if: "global.opendj.enabled=false&&global.cnPersistenceType=ldap||global.cnPersistenceType=hybrid"
-- variable: config.configmap.cnPersistenceLdapMapping
+
+# Hybrid
+- variable: config.configmap.cnPersistenceHybridMapping
   default: "default"
   required: false
   type: enum
   group: "Persistence"
-  label: Gluu Persistence LDAP mapping
-  description: "Specify data that should be saved in LDAP (one of default, user, cache, site, token, or session; default to default). Note this environment only takes effect when `global.cnPersistenceType`  is set to `hybrid`."
+  label: Gluu Persistence hybrid mapping
+  description: "Specify data that should be saved in persistence (one of default, user, cache, site, token, or session; default to default). Note this environment only takes effect when `global.cnPersistenceType`  is set to `hybrid`."
   options:
     - "default"
     - "user"
@@ -241,42 +225,6 @@ questions:
   label: Couchbase password for the restricted user
   show_if: "global.cnPersistenceType=couchbase||global.cnPersistenceType=hybrid"
 
-# ==============================
-#  StorageClass and volume group
-# ==============================
-- variable: global.storageClass.provisioner
-  default: "microk8s.io/hostpath"
-  type: string
-  group: "Volumes"
-  required: true
-  label: StorageClass provisioner
-  show_if: "global.cnPersistenceType=ldap"
-  subquestions:
-  - variable: global.storageClass.allowVolumeExpansion
-    default: true
-    type: boolean
-    group: "Volumes"
-    required: true
-    label: StorageClass Volume expansion
-  - variable: global.storageClass.reclaimPolicy
-    default: "Retain"
-    type: enum
-    group: "Volumes"
-    required: true
-    label: StorageClass reclaimPolicy
-    options:
-      - "Delete"
-      - "Retain"
-  - variable: global.storageClass.volumeBindingMode
-    default: "WaitForFirstConsumer"
-    type: enum
-    group: "Volumes"
-    required: true
-    options:
-      - "WaitForFirstConsumer"
-      - "Immediate"
-    label: StorageClass volumeBindingMode
-
 # ===========
 # Cache group
 # ===========
@@ -364,16 +312,6 @@ questions:
   group: "Configuration"
   label: Organization
   description: "Organization name. Used for certificate creation."
-
-
-- variable: config.ldapPassword
-  default: "Test1234#"
-  type: password
-  group: "Configuration"
-  required: true
-  label: LDAP password
-  description: "LDAP admin password if OpenDJ is used for persistence"
-  show_if: "global.cnPersistenceType=ldap||global.cnPersistenceType=hybrid"
 
 - variable: global.isFqdnRegistered
   default: true
@@ -647,35 +585,6 @@ questions:
   label: Fido2 image tag
   group: "Images"
   show_if: "global.fido2.enabled=true"
-# OpenDJ
-- variable: opendj.image.repository
-  required: true
-  type: string
-  default: "gluufederation/opendj"
-  description: "The OpenDJ Image repository"
-  label: OpenDJ image repo
-  group: "Images"
-  show_if: "global.opendj.enabled=true"
-- variable: opendj.image.pullPolicy
-  required: true
-  type: enum
-  group: "Images"
-  default: IfNotPresent
-  description: "The OpenDJ Image pull policy"
-  label: OpenDJ imagePullPolicy
-  options:
-  - "Always"
-  - "IfNotPresent"
-  - "Never"
-  show_if: "global.opendj.enabled=true"
-- variable: opendj.image.tag
-  required: true
-  type: string
-  default: "5.0.0_dev"
-  description: "The OpenDJ Image tag"
-  label: OpenDJ image tag
-  group: "Images"
-  show_if: "global.opendj.enabled=true"
 # Persistence
 - variable: persistence.image.repository
   required: true
@@ -774,15 +683,6 @@ questions:
   label: Fido2 Replicas
   description: "Service replica number."
   show_if: "global.fido2.enabled=true"
-# OpenDJ
-- variable: opendj.replicas
-  default: 1
-  required: false
-  type: int
-  group: "Replicas"
-  label: OpenDJ Replicas
-  description: "Service replica number."
-  show_if: "global.opendj.enabled=true"
 # SCIM
 - variable: scim.replicas
   default: 1

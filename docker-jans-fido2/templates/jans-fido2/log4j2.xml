@@ -64,20 +64,10 @@
 			<AppenderRef ref="$persistence_log_target" />
 		</Logger>
 
-		<Logger name="com.unboundid.ldap.sdk.LDAPConnection" level="$persistence_log_level" additivity="false">
-            <Property name="fido2.log.console.group">-persistence</Property>
-			<AppenderRef ref="$persistence_log_target" />
-		</Logger>
-
 		<logger name="com.couchbase.client" level="$persistence_log_level" additivity="false">
             <Property name="fido2.log.console.group">-persistence</Property>
 			<AppenderRef ref="$persistence_log_target" />
 		</logger>
-
-		<Logger name="io.jans.orm.ldap.operation.watch" level="$persistence_duration_log_level" additivity="false">
-            <Property name="fido2.log.console.group">-persistence-duration</Property>
-			<AppenderRef ref="$persistence_duration_log_target" />
-		</Logger>
 
 		<Logger name="io.jans.orm.couchbase.operation.watch" level="$persistence_duration_log_level" additivity="false">
             <Property name="fido2.log.console.group">-persistence-duration</Property>

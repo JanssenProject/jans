@@ -36,7 +36,7 @@ Acquaintance with the following technologies is recommended:
 - ZK 9 framework
 - PF4J framework
 - HTML/CSS/Javascript
-- The underlying database engine used by your Jans Server installation, e.g. LDAP, MySQL, etc.
+- The underlying database engine used by your Jans Server installation, e.g. PostgreSQL, MySQL, etc.
 
 ### Sample plugins
 
