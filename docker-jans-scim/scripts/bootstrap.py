@@ -18,10 +18,6 @@ from jans.pycloudlib.persistence.couchbase import sync_couchbase_cert
 from jans.pycloudlib.persistence.couchbase import sync_couchbase_password
 from jans.pycloudlib.persistence.couchbase import sync_couchbase_truststore
 from jans.pycloudlib.persistence.hybrid import render_hybrid_properties
-from jans.pycloudlib.persistence.ldap import LdapClient
-from jans.pycloudlib.persistence.ldap import render_ldap_properties
-from jans.pycloudlib.persistence.ldap import sync_ldap_truststore
-from jans.pycloudlib.persistence.ldap import sync_ldap_password
 from jans.pycloudlib.persistence.spanner import render_spanner_properties
 from jans.pycloudlib.persistence.spanner import SpannerClient
 from jans.pycloudlib.persistence.spanner import sync_google_credentials
@@ -54,7 +50,7 @@ manager = get_manager()
 
 
 def main():
-    persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "ldap")
+    persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "sql")
 
     render_salt(manager, "/app/templates/salt", "/etc/jans/conf/salt")
     render_base_properties("/app/templates/jans.properties", "/etc/jans/conf/jans.properties")
@@ -66,17 +62,6 @@ def main():
         hybrid_prop = "/etc/jans/conf/jans-hybrid.properties"
         if not os.path.exists(hybrid_prop):
             render_hybrid_properties(hybrid_prop)
-
-    if "ldap" in persistence_groups:
-        render_ldap_properties(
-            manager,
-            "/app/templates/jans-ldap.properties",
-            "/etc/jans/conf/jans-ldap.properties",
-        )
-
-        if as_boolean(os.environ.get("CN_LDAP_USE_SSL", "true")):
-            sync_ldap_truststore(manager)
-        sync_ldap_password(manager)
 
     if "couchbase" in persistence_groups:
         sync_couchbase_password(manager)
@@ -140,8 +125,6 @@ def configure_logging():
         "persistence_log_level": "INFO",
         "persistence_duration_log_target": "FILE",
         "persistence_duration_log_level": "INFO",
-        "ldap_stats_log_target": "FILE",
-        "ldap_stats_log_level": "INFO",
         "script_log_target": "FILE",
         "script_log_level": "INFO",
         "log_prefix": "",
@@ -185,7 +168,6 @@ def configure_logging():
         "scim_log_target": "FILE",
         "persistence_log_target": "JANS_SCIM_PERSISTENCE_FILE",
         "persistence_duration_log_target": "JANS_SCIM_PERSISTENCE_DURATION_FILE",
-        "ldap_stats_log_target": "JANS_SCIM_PERSISTENCE_LDAP_STATISTICS_FILE",
         "script_log_target": "JANS_SCIM_SCRIPT_LOG_FILE",
     }
     for key, value in file_aliases.items():
@@ -212,7 +194,6 @@ class PersistenceSetup:
         self.manager = manager
 
         client_classes = {
-            "ldap": LdapClient,
             "couchbase": CouchbaseClient,
             "spanner": SpannerClient,
             "sql": SqlClient,
@@ -284,17 +265,13 @@ class PersistenceSetup:
             entries = self.client.search("jansScope", ["jansId"])
             return [entry["jansId"] for entry in entries]
 
-        if self.persistence_type == "couchbase":
-            bucket = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
-            req = self.client.exec_query(
-                f"SELECT {bucket}.jansId FROM {bucket} WHERE objectClass = 'jansScope'",
-            )
-            results = req.json()["results"]
-            return [item["jansId"] for item in results]
-
-        # likely ldap
-        entries = self.client.search("ou=scopes,o=jans", "(objectClass=jansScope)", ["jansId"])
-        return [entry.entry_attributes_as_dict["jansId"][0] for entry in entries]
+        # likely couchbase
+        bucket = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
+        req = self.client.exec_query(
+            f"SELECT {bucket}.jansId FROM {bucket} WHERE objectClass = 'jansScope'",
+        )
+        results = req.json()["results"]
+        return [item["jansId"] for item in results]
 
     def generate_scopes_ldif(self):
         # jansId to compare to

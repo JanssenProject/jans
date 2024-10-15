@@ -87,8 +87,7 @@ For fresh installation, generate the initial configuration by creating `/path/to
         "orgName": "Gluu Inc."
     },
     "_secret": {
-        "admin_password": "S3cr3t+pass",
-        "ldap_password": "S3cr3t+pass"
+        "admin_password": "S3cr3t+pass"
     }
 }
 ```
@@ -99,12 +98,11 @@ For fresh installation, generate the initial configuration by creating `/path/to
 
     - `auth_sig_keys`: space-separated key algorithm for signing (default to `RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512`)
     - `auth_enc_keys`: space-separated key algorithm for encryption (default to `RSA1_5 RSA-OAEP`)
-    - `optional_scopes`: list of optional scopes (as JSON string) that will be used (supported scopes are `ldap`, `couchbase`, `redis`, `sql`; default to empty list)
+    - `optional_scopes`: list of optional scopes (as JSON string) that will be used (supported scopes are `couchbase`, `redis`, `sql`; default to empty list)
     - `init_keys_exp`: the initial keys expiration time in hours (default to `48`; extra 1 hour will be added for hard limit)
 
 2.  `_secret`:
 
-    - `ldap_password`: user's password to access LDAP database (only used if `optional_scopes` list contains `ldap` scope)
     - `sql_password`: user's password to access SQL database (only used if `optional_scopes` list contains `sql` scope)
     - `couchbase_password`: user's password to access Couchbase database (only used if `optional_scopes` list contains `couchbase` scope)
     - `couchbase_superuser_password`: superusers password to access Couchbase database (only used if `optional_scopes` list contains `couchbase` scope)
@@ -147,7 +145,7 @@ To generate initial configmaps and secrets:
                 name: config-generate-params
           containers:
             - name: configurator-load
-              image: ghcr.io/janssenproject/jans/configurator:1.1.6_dev
+              image: ghcr.io/janssenproject/jans/configurator:$VERSION
               volumeMounts:
                 - mountPath: /app/db/configuration.json
                   name: config-generate-params
@@ -185,7 +183,7 @@ To restore configuration from `configuration.out.json` file:
                 name: config-dump-params
           containers:
             - name: configurator-load
-              image: ghcr.io/janssenproject/jans/configurator:1.1.6_dev
+              image: ghcr.io/janssenproject/jans/configurator:$VERSION
               volumeMounts:
                 - mountPath: /app/db/configuration.out.json
                   name: config-dump-params
@@ -211,7 +209,7 @@ spec:
       restartPolicy: Never
       containers:
         - name: configurator-dump-job
-          image: ghcr.io/janssenproject/jans/configurator:1.1.6_dev
+          image: ghcr.io/janssenproject/jans/configurator:$VERSION
           command:
             - /bin/sh
             - -c
