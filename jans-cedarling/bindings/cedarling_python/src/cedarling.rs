@@ -58,8 +58,6 @@ use serde_pyobject::to_pyobject;
 ///
 ///     :returns: A list of log entry IDs.
 ///     :rtype: List[str]
-///
-///
 #[derive(Clone)]
 #[pyclass]
 pub struct Cedarling {
@@ -79,10 +77,9 @@ impl Cedarling {
     fn pop_logs(&self) -> PyResult<Vec<PyObject>> {
         let logs = self.inner.pop_logs();
         Python::with_gil(|py| -> PyResult<Vec<PyObject>> {
-            Ok(logs
-                .iter()
+            logs.iter()
                 .map(|entry| log_entry_to_py(py, entry))
-                .collect::<PyResult<Vec<PyObject>>>()?)
+                .collect::<PyResult<Vec<PyObject>>>()
         })
     }
 

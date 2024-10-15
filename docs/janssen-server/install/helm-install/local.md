@@ -15,12 +15,11 @@ For local deployments like `minikube` and `MicroK8s` or cloud installations in d
 - 4 CPU cores
 - 50 GB hard-disk
 
-Use the listing below for detailed estimation of minimum required resources. Table contains the default resources recommendations per service. Depending on the use of each service the resources needs may increase or decrease.
+Use the listing below for a detailed estimation of minimum required resources. The table contains the default resources recommendation per service. Depending on the use of each service the resources need may increase or decrease.
 
 | Service           | CPU Unit | RAM   | Disk Space | Processor Type | Required                           |
 |-------------------|----------|-------|------------|----------------|------------------------------------|
 | Auth server       | 2.5      | 2.5GB | N/A        | 64 Bit         | Yes                                |
-| LDAP (OpenDJ)     | 1.5      | 2GB   | 10GB       | 64 Bit         | Only if Couchbase/SQL not installed|
 | fido2             | 0.5      | 0.5GB | N/A        | 64 Bit         | No                                 |
 | scim              | 1        | 1GB   | N/A        | 64 Bit         | No                                 |
 | config - job      | 0.3      | 0.3GB | N/A        | 64 Bit         | Yes on fresh installs              |
