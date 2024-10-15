@@ -4,19 +4,20 @@
  *
  * Copyright (c) 2024, Gluu, Inc.
  */
-//! # JWT Engine
-//! Part of Cedarling that main purpose is:
-//! - validate JWT signature
-//! - validate JWT status
-//! - extract JWT claims
 
+//! # `JwtEngine`
+//!
+//! The `JwtEngine` is responsible for
+//! - validating JWT signatures
+//! - validating JWT status
+//! - extracting JWT claims
+
+mod decoding_strategy;
 mod error;
-mod key_service;
-mod service;
+mod jwt_service;
 #[cfg(test)]
 mod test;
+mod traits;
 
-pub use error::Error;
-#[allow(unused_imports)]
-pub(crate) use key_service::*;
-pub(crate) use service::*;
+pub use error::*;
+pub(crate) use jwt_service::*;

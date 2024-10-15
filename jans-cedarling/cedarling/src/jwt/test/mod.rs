@@ -8,18 +8,17 @@
 mod mock_key_service;
 mod utils;
 
-use std::sync::Arc;
-
-use crate::{jwt::JwtService, JwtConfig};
+use super::{decoding_strategy::DecodingStrategy, JwtService};
+use jsonwebtoken::Algorithm;
 use mock_key_service::*;
+use std::sync::Arc;
 use utils::*;
 
 #[test]
 /// Tests the ability to decode claims from a JWT token without validation.
 fn can_decode_claims_unvalidated() {
     // Initialize JwtService with validation disabled
-    let config = JwtConfig::Disabled;
-    let service = JwtService::new(config, None);
+    let service = JwtService::new(DecodingStrategy::WithoutValidation);
 
     // Generate an expired token using ES256
     let (token, _public_key, claims) = generate_token(true);
@@ -37,6 +36,7 @@ fn can_decode_claims_unvalidated() {
 fn can_decode_claims_validated() {
     // Initialize JwtService with validation enabled
     let (private_keys, jwks) = generate_keys();
+    println!("{}", jwks);
 
     // Generate a token using ES256
     let (token, claims) = generate_token_using_keys(private_keys, false);
@@ -45,8 +45,10 @@ fn can_decode_claims_validated() {
     let key_service = MockKeyService::new_from_str(&jwks);
 
     // Setup JWT service
-    let config = JwtConfig::Disabled;
-    let jwt_service = JwtService::new(config, Some(Arc::new(key_service)));
+    let jwt_service = JwtService::new(DecodingStrategy::WithValidation {
+        key_service: Arc::new(key_service),
+        supported_algs: vec![Algorithm::ES256],
+    });
 
     // validate token
     let result = jwt_service

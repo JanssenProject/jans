@@ -5,12 +5,10 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-use std::time::{SystemTime, UNIX_EPOCH};
-
-use serde::{Deserialize, Serialize};
-
 use jsonwebkey as jwk;
 use jsonwebtoken as jwt;
+use serde::{Deserialize, Serialize};
+use std::time::{SystemTime, UNIX_EPOCH};
 
 /// A user-defined struct for holding token claims.
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
@@ -46,17 +44,18 @@ pub fn generate_token(expired: bool) -> (String, String, Claims) {
     (token, dec_key, claims)
 }
 
-/// Generates claims for a JWT
+// Generates claims for a JWT
 fn generate_claims(expired: bool) -> Claims {
     let iat: u64;
     let exp: u64;
     if expired {
-        iat = 1695198692;
-        exp = 1695195092;
+        iat = 1695198692; // timestamp for issued at (iat)
+        exp = 1695195092; // timestamp for expiration (exp)
     } else {
         let now = SystemTime::now();
+        // set issued at (iat) at the current time
         iat = now.duration_since(UNIX_EPOCH).unwrap().as_secs();
-        exp = iat + 3600; // Set expiration 1 hour from now
+        exp = iat + 3600; // set expiration 1 hour from now
     }
 
     Claims {
@@ -103,10 +102,11 @@ pub fn generate_keys() -> (Vec<(String, jwt::EncodingKey)>, String) {
         jwk.key_id = Some("some_id".to_string());
 
         // Generate public key
-        let public_key =
-            serde_json::to_string(&jwk.key.to_public()).expect("should serialize public key");
+        let mut public_key =
+            serde_json::to_value(&jwk.key.to_public()).expect("should serialize public key");
+        public_key["kid"] = serde_json::Value::String(kid.to_string()); // set `kid`
         let public_key: jwt::jwk::Jwk =
-            serde_json::from_str(&public_key).expect("should deserialize public key");
+            serde_json::from_value(public_key).expect("should deserialize public key");
         public_keys.keys.push(public_key);
 
         let private_key = jwt::EncodingKey::from_ec_pem(jwk.key.to_pem().as_bytes())

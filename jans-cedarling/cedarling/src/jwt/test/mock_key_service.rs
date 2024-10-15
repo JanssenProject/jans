@@ -5,31 +5,33 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-use jsonwebtoken::{jwk::JwkSet, DecodingKey};
+use std::collections::HashMap;
 
-use crate::jwt::{KeyService, KeyServiceError};
+use super::super::{traits::GetKey, Error};
+use jsonwebtoken::{jwk::JwkSet, DecodingKey};
 
 /// A mock implementation of the `KeyService` trait for testing purposes.
 pub struct MockKeyService {
-    jwks: JwkSet,
+    keys: HashMap<Box<str>, DecodingKey>,
 }
 
 impl MockKeyService {
     /// Creates a new `MockKeyService` from a JSON string representation of JWKS.
     pub fn new_from_str(jwks_str: &str) -> Self {
         let jwks: JwkSet = serde_json::from_str(jwks_str).expect("failed to parse JWKS string");
-        Self { jwks }
+        let mut keys = HashMap::new();
+        for k in jwks.keys {
+            let decoding_key = DecodingKey::from_jwk(&k).unwrap();
+            keys.insert(k.common.key_id.unwrap().into(), decoding_key);
+        }
+        Self { keys }
     }
 }
 
-impl KeyService for MockKeyService {
+impl GetKey for MockKeyService {
     /// Retrieves a key from the JWKS using its key ID (kid).
-    fn get_key(&self, kid: &str) -> Result<DecodingKey, KeyServiceError> {
-        let key = self
-            .jwks
-            .find(&kid)
-            .ok_or(KeyServiceError::KeyNotFound(kid.into()))?;
-
-        Ok(DecodingKey::from_jwk(key).unwrap())
+    fn get_key(&self, kid: &str) -> Result<&DecodingKey, Error> {
+        let key = self.keys.get(kid).ok_or(Error::MissingKey(kid.into()))?;
+        Ok(key)
     }
 }

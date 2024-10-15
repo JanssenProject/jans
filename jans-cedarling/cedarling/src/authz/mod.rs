@@ -68,7 +68,7 @@ impl Authz {
     pub fn authorize(&self, request: Request) -> Result<AuthorizeResult, AuthorizeError> {
         let access_token_entities = create_access_token_entities(
             &self.policy_store.schema.json,
-            &self.jwt_service.decode_token_data(request.access_token)?,
+            &self.jwt_service.decode(request.access_token)?,
         )?;
 
         let resource_entity =

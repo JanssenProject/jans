@@ -87,9 +87,7 @@ impl Cedarling {
             })?;
         container.insert(policy_store);
 
-        // TODO: pass in `Some(Arc<dyn Keyservice>)` in here if
-        // `CEDARLING_JWT_VALIDATION` is enabled
-        let jwt_service = jwt::JwtService::new(config.jwt_config, None);
+        let jwt_service = jwt::JwtService::new_with_container(&container, config.jwt_config);
         log.log(
             LogEntry::new_with_container(&container, LogType::System)
                 .set_message("JWT service loaded successfully".to_string()),

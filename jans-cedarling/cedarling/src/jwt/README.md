@@ -1,7 +1,6 @@
 # JWT service
 
-JWT service is responsible for:
-
-- validate JWT signature
-- validate JWT status
-- extract JWT claims
+The `JWTService` is responsible for:
+- validating JWT signatures
+- validating JWT status
+- extracting JWT claims
