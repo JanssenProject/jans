@@ -34,7 +34,6 @@ DEFAULT_SCOPES = (
 )
 
 OPTIONAL_SCOPES = (
-    "ldap",
     "couchbase",
     "redis",
     "sql",
@@ -92,39 +91,6 @@ class SecretSchema(Schema):
         metadata={
             "description": "Password for admin user",
         }
-    )
-
-    # previously ldap_pw
-    ldap_password = String(
-        load_default="",
-        dump_default="",
-        metadata={
-            "description": "Password for LDAP (OpenDJ) user",
-        },
-    )
-
-    ldap_truststore_pass = String(
-        load_default="",
-        dump_default="",
-        metadata={
-            "description": "Password for LDAP (OpenDJ) truststore",
-        },
-    )
-
-    ldap_ssl_cert = CertKey(
-        load_default="",
-        dump_default="",
-        metadata={
-            "description": "LDAP (OpenDJ) certificate",
-        },
-    )
-
-    ldap_ssl_key = CertKey(
-        load_default="",
-        dump_default="",
-        metadata={
-            "description": "LDAP (OpenDJ) private key",
-        },
     )
 
     # previously sql_pw
@@ -286,23 +252,7 @@ class SecretSchema(Schema):
         load_default="",
         dump_default="",
         metadata={
-            "description": "LDAP-encoded password of admin",
-        },
-    )
-
-    encoded_ox_ldap_pw = String(
-        load_default="",
-        dump_default="",
-        metadata={
-            "description": "Encoded password for Bind DN",
-        },
-    )
-
-    encoded_ldapTrustStorePass = String(
-        load_default="",
-        dump_default="",
-        metadata={
-            "description": "Encoded password for LDAP (OpenDJ) truststore",
+            "description": "Encoded password of admin",
         },
     )
 
@@ -391,14 +341,6 @@ class SecretSchema(Schema):
         dump_default="",
         metadata={
             "description": "Client secret of Keycloak scheduler API app",
-        },
-    )
-
-    ldap_pkcs12_base64 = String(
-        load_default="",
-        dump_default="",
-        metadata={
-            "description": "Private keys (keystore) of LDAP (OpenDJ)",
         },
     )
 
@@ -835,33 +777,6 @@ class ConfigmapSchema(Schema):
     )
 
     # @TODO: change to HARDCODED value instead
-    ldapTrustStoreFn = String(
-        load_default="",
-        dump_default="",
-        metadata={
-            "description": "Path to keystore file used for connecting to LDAP (OpenDJ)",
-        },
-    )
-
-    # @TODO: change to HARDCODED value instead
-    ldap_binddn = String(
-        load_default="",
-        dump_default="",
-        metadata={
-            "description": "Bind DN for LDAP (OpenDJ)",
-        },
-    )
-
-    # @TODO: change to HARDCODED value instead
-    ldap_site_binddn = String(
-        load_default="",
-        dump_default="",
-        metadata={
-            "description": "Bind DN for LDAP (OpenDJ)",
-        },
-    )
-
-    # @TODO: change to HARDCODED value instead
     default_openid_jks_dn_name = String(
         load_default="CN=Janssen Auth CA Certificates",
         dump_default="CN=Janssen Auth CA Certificates",
@@ -875,46 +790,6 @@ class ConfigmapSchema(Schema):
         dump_default="admin",
         metadata={
             "description": "Admin username of Keycloak",
-        },
-    )
-
-    ldap_init_host = String(
-        load_default="",
-        dump_default="",
-        metadata={
-            "description": "Initial hostname for LDAP (OpenDJ)",
-        },
-    )
-
-    ldap_init_port = String(
-        load_default="",
-        dump_default="",
-        metadata={
-            "description": "Initial port for LDAP (OpenDJ)",
-        },
-    )
-
-    ldap_peers = String(
-        load_default="",
-        dump_default="",
-        metadata={
-            "description": "Mapping of LDAP (OpenDJ) peers contains host and its ports",
-        },
-    )
-
-    ldap_port = String(
-        load_default="",
-        dump_default="",
-        metadata={
-            "description": "Port for LDAP (OpenDJ)",
-        },
-    )
-
-    ldaps_port = String(
-        load_default="",
-        dump_default="",
-        metadata={
-            "description": "Secure port for LDAP (OpenDJ)",
         },
     )
 

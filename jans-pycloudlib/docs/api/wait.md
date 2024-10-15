@@ -16,10 +16,6 @@
 
 ::: jans.pycloudlib.wait.wait_for_secret
 
-::: jans.pycloudlib.wait.wait_for_ldap
-
-::: jans.pycloudlib.wait.wait_for_ldap_conn
-
 ::: jans.pycloudlib.wait.wait_for_couchbase
 
 ::: jans.pycloudlib.wait.wait_for_couchbase_conn

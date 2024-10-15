@@ -6,12 +6,11 @@ import json
 import logging
 import copy
 import hashlib
-import ldap3
 import pymysql
 import time
 
 from types import MappingProxyType
-from ldap3.utils import dn as dnutils
+from setup_app.pylib.parse_dn import parse_dn
 from pathlib import PurePath
 
 warnings.filterwarnings("ignore")
@@ -19,7 +18,7 @@ warnings.filterwarnings("ignore")
 
 from setup_app import static
 from setup_app.config import Config
-from setup_app.static import InstallTypes, BackendTypes, colors
+from setup_app.static import InstallTypes, BackendTypes, colors, SearchScopes
 from setup_app.utils import base
 from setup_app.utils.cbm import CBM
 from setup_app.utils import ldif_utils
@@ -34,6 +33,7 @@ import sqlalchemy
 import sqlalchemy.orm
 import sqlalchemy.ext.automap
 
+SCRIPTS_DN_TMP = 'inum={},ou=scripts,o=jans'
 
 class DBUtils:
 
@@ -45,7 +45,7 @@ class DBUtils:
     rdbm_json_types = MappingProxyType({ 'mysql': {'type': 'JSON'}, 'pgsql': {'type': 'JSONB'}, 'spanner': {'type': 'ARRAY<STRING(MAX)>'} })
     jans_scopes = None
 
-    def bind(self, use_ssl=True, force=False):
+    def bind(self, force=False):
 
         setattr(base.current_app, self.__class__.__name__, self)
         self.mariadb = None
@@ -57,9 +57,7 @@ class DBUtils:
                 format='%(asctime)s %(levelname)s - %(message)s'
                 )
 
-        if Config.mapping_locations['default'] == 'ldap':
-            self.moddb = BackendTypes.LDAP
-        elif Config.mapping_locations['default'] == 'rdbm':
+        if Config.mapping_locations['default'] == 'rdbm':
             self.read_jans_schema()
             if Config.rdbm_type == 'mysql':
                 self.moddb = BackendTypes.MYSQL
@@ -77,20 +75,6 @@ class DBUtils:
                         )
         else:
             self.moddb = BackendTypes.COUCHBASE
-
-        if not hasattr(self, 'ldap_conn') or force:
-            for group in Config.mapping_locations:
-                if Config.mapping_locations[group] == 'ldap':
-                    base.logIt("Making LDAP Conncetion")
-                    ldap_server = ldap3.Server(Config.ldap_hostname, port=int(Config.ldaps_port), use_ssl=use_ssl)
-                    self.ldap_conn = ldap3.Connection(
-                                ldap_server,
-                                user=Config.ldap_binddn,
-                                password=Config.ldapPass,
-                                )
-                    base.logIt("Making LDAP Connection to host {}:{} with user {}".format(Config.ldap_hostname, Config.ldaps_port, Config.ldap_binddn))
-                    self.ldap_conn.bind()
-                    break
 
         if not self.session or force:
             for group in Config.mapping_locations:
@@ -201,19 +185,8 @@ class DBUtils:
         self.cbm = CBM(Config.get('cb_query_node'), Config.get('couchebaseClusterAdmin'), Config.get('cb_password'))
 
     def get_jans_auth_conf_dynamic(self):
-        if self.moddb == BackendTypes.LDAP:
-            self.ldap_conn.search(
-                        search_base='ou=jans-auth,ou=configuration,o=jans',
-                        search_scope=ldap3.BASE,
-                        search_filter='(objectClass=*)',
-                        attributes=["jansConfDyn"]
-                        )
-
-            dn = self.ldap_conn.response[0]['dn']
-            jans_auth_conf_dynamic = json.loads(self.ldap_conn.response[0]['attributes']['jansConfDyn'][0])
-
-        elif self.moddb in (BackendTypes.MYSQL, BackendTypes.PGSQL, BackendTypes.SPANNER):
-            result = self.search(search_base='ou=jans-auth,ou=configuration,o=jans', search_filter='(objectClass=jansAppConf)', search_scope=ldap3.BASE)
+        if self.moddb in (BackendTypes.MYSQL, BackendTypes.PGSQL, BackendTypes.SPANNER):
+            result = self.search(search_base='ou=jans-auth,ou=configuration,o=jans', search_filter='(objectClass=jansAppConf)', search_scope=SearchScopes.BASE)
             dn = result['dn'] 
             jans_auth_conf_dynamic = json.loads(result['jansConfDyn'])
 
@@ -228,17 +201,7 @@ class DBUtils:
 
 
     def set_jans_auth_conf_dynamic(self, entries):
-        if self.moddb == BackendTypes.LDAP:
-            dn, jans_auth_conf_dynamic = self.get_jans_auth_conf_dynamic()
-            jans_auth_conf_dynamic.update(entries)
-
-            ldap_operation_result = self.ldap_conn.modify(
-                    dn,
-                    {"jansConfDyn": [ldap3.MODIFY_REPLACE, json.dumps(jans_auth_conf_dynamic, indent=2)]}
-                    )
-            self.log_ldap_result(ldap_operation_result)
-
-        elif self.moddb in (BackendTypes.MYSQL, BackendTypes.PGSQL):
+        if self.moddb in (BackendTypes.MYSQL, BackendTypes.PGSQL):
             dn, jans_auth_conf_dynamic = self.get_jans_auth_conf_dynamic()
             jans_auth_conf_dynamic.update(entries)
             sqlalchemyObj = self.get_sqlalchObj_for_dn(dn)
@@ -260,21 +223,14 @@ class DBUtils:
 
     def enable_script(self, inum, enable=True):
         base.logIt("Enabling script {}".format(inum))
-        if self.moddb == BackendTypes.LDAP:
-            ldap_operation_result = self.ldap_conn.modify(
-                    'inum={},ou=scripts,o=jans'.format(inum),
-                    {"jansEnabled": [ldap3.MODIFY_REPLACE, str(enable).lower()]}
-                    )
-            self.log_ldap_result(ldap_operation_result)
-
-        elif self.moddb in (BackendTypes.MYSQL, BackendTypes.PGSQL):
-            dn = 'inum={},ou=scripts,o=jans'.format(inum)
+        if self.moddb in (BackendTypes.MYSQL, BackendTypes.PGSQL):
+            dn = SCRIPTS_DN_TMP.format(inum)
             sqlalchemyObj = self.get_sqlalchObj_for_dn(dn)
             sqlalchemyObj.jansEnabled = 1 if enable else 0
             self.session.commit()
 
         elif self.moddb == BackendTypes.SPANNER:
-            dn = 'inum={},ou=scripts,o=jans'.format(inum)
+            dn = SCRIPTS_DN_TMP.format(inum)
             table = self.get_spanner_table_for_dn(dn)
             if table:
                 self.spanner_client.write_data(table=table, columns=['doc_id', 'jansEnabled'], values=[inum, enable], mutation='update')
@@ -284,14 +240,7 @@ class DBUtils:
             self.cbm.exec_query(n1ql)
 
     def enable_service(self, service):
-        if self.moddb == BackendTypes.LDAP:
-            ldap_operation_result = self.ldap_conn.modify(
-                'ou=configuration,o=jans',
-                {service: [ldap3.MODIFY_REPLACE, 'true']}
-                )
-            self.log_ldap_result(ldap_operation_result)
-
-        elif self.moddb in (BackendTypes.MYSQL, BackendTypes.PGSQL):
+        if self.moddb in (BackendTypes.MYSQL, BackendTypes.PGSQL):
             sqlalchemyObj = self.get_sqlalchObj_for_dn('ou=configuration,o=jans')
             setattr(sqlalchemyObj, service, 1)
             self.session.commit()
@@ -304,16 +253,7 @@ class DBUtils:
             self.cbm.exec_query(n1ql)
 
     def set_configuration(self, component, value, dn='ou=configuration,o=jans'):
-        if self.moddb == BackendTypes.LDAP:
-            if value is None:
-                value = []
-            ldap_operation_result = self.ldap_conn.modify(
-                dn,
-                {component: [ldap3.MODIFY_REPLACE, value]}
-                )
-            self.log_ldap_result(ldap_operation_result)
-
-        elif self.moddb in (BackendTypes.MYSQL, BackendTypes.PGSQL):
+        if self.moddb in (BackendTypes.MYSQL, BackendTypes.PGSQL):
             typed_val = self.get_rdbm_val(component, value)
             result = self.get_sqlalchObj_for_dn(dn)
             table_name = result.objectClass
@@ -350,14 +290,6 @@ class DBUtils:
             data = self.dn_exists_rdbm(dn, table)
             return data
 
-        elif mapping_location == BackendTypes.LDAP:
-            base.logIt("Querying LDAP for dn {}".format(dn))
-            result = self.ldap_conn.search(search_base=dn, search_filter='(objectClass=*)', search_scope=ldap3.BASE, attributes=['*'])
-            if result:
-                key_document = ldif_utils.get_document_from_entry(self.ldap_conn.response[0]['dn'], self.ldap_conn.response[0]['attributes'])
-                if key_document:
-                    return key_document[1]
-
         else:
             bucket = self.get_bucket_for_dn(dn)
             key = ldif_utils.get_key_from(dn)
@@ -384,21 +316,9 @@ class DBUtils:
         return self.session.query(sqlalchemy_table).filter(sqlalchemy_table.columns.dn == dn).first()
 
 
-    def search(self, search_base, search_filter='(objectClass=*)', search_scope=ldap3.LEVEL, fetchmany=False):
+    def search(self, search_base, search_filter='(objectClass=*)', search_scope=SearchScopes.LEVEL, fetchmany=False):
         base.logIt("Searching database for dn {} with filter {}".format(search_base, search_filter))
         backend_location = self.get_backend_location_for_dn(search_base)
-
-        if backend_location == BackendTypes.LDAP:
-            if self.ldap_conn.search(search_base=search_base, search_filter=search_filter, search_scope=search_scope, attributes=['*']):
-                if not fetchmany:
-                    key, document = ldif_utils.get_document_from_entry(self.ldap_conn.response[0]['dn'], self.ldap_conn.response[0]['attributes'])
-                    return document
-
-                documents = []
-                for result in self.ldap_conn.response:
-                    key, document = ldif_utils.get_document_from_entry(result['dn'], result['attributes'])
-                    documents.append((key, document))
-                return documents
 
         if backend_location in (BackendTypes.MYSQL, BackendTypes.PGSQL, BackendTypes.SPANNER):
             if backend_location != BackendTypes.SPANNER and self.Base is None:
@@ -451,7 +371,7 @@ class DBUtils:
                 if not s_table:
                     return retVal
 
-                if search_scope == ldap3.BASE:
+                if search_scope == SearchScopes.BASE:
                     dn_clause = 'dn = "{}"'.format(search_base)
                 else:
                     dn_clause = 'dn LIKE "%{}"'.format(search_base)
@@ -480,7 +400,7 @@ class DBUtils:
                     else:
                         sqlalchemyQueryObject = sqlalchemyQueryObject.filter(sqlalchemyCol == val)
 
-            if search_scope == ldap3.BASE:
+            if search_scope == SearchScopes.BASE:
                 sqlalchemyQueryObject = sqlalchemyQueryObject.filter(sqlalchemy_table.dn == search_base)
             else:
                 sqlalchemyQueryObject = sqlalchemyQueryObject.filter(sqlalchemy_table.dn.like('%'+search_base))
@@ -499,7 +419,7 @@ class DBUtils:
             key = ldif_utils.get_key_from(search_base)
             bucket = self.get_bucket_for_key(key)
 
-            if search_scope == ldap3.BASE:
+            if search_scope == SearchScopes.BASE:
                 n1ql = 'SELECT * FROM `{}` USE KEYS "{}"'.format(bucket, key)
             else:
 
@@ -511,7 +431,7 @@ class DBUtils:
                 else:
                     dn_to_parse = search_filter.strip('(').strip(')')
 
-                parsed_dn = dnutils.parse_dn(dn_to_parse)
+                parsed_dn = parse_dn(dn_to_parse)
                 attr = parsed_dn[0][0]
                 val = parsed_dn[0][1]
                 if '*' in val:
@@ -544,15 +464,7 @@ class DBUtils:
         if self.dn_exists(dn):
             backend_location = self.get_backend_location_for_dn(dn)
 
-            if backend_location == BackendTypes.LDAP:
-                def recursive_delete(dn):
-                    self.ldap_conn.search(search_base=dn, search_filter='(objectClass=*)', search_scope=ldap3.LEVEL)
-                    for entry in self.ldap_conn.response:
-                        recursive_delete(entry['dn'])
-                    self.ldap_conn.delete(dn)
-                recursive_delete(dn)
-
-            elif backend_location in (BackendTypes.MYSQL, BackendTypes.PGSQL):
+            if backend_location in (BackendTypes.MYSQL, BackendTypes.PGSQL):
                 sqlalchemy_obj = self.get_sqlalchObj_for_dn(dn)
                 if sqlalchemy_obj:
                     self.session.delete(sqlalchemy_obj)
@@ -572,41 +484,19 @@ class DBUtils:
                 self.cbm.exec_query(n1ql)
 
     def add_client2script(self, script_inum, client_id):
-        dn = 'inum={},ou=scripts,o=jans'.format(script_inum)
+        dn = SCRIPTS_DN_TMP.format(script_inum)
 
         backend_location = self.get_backend_location_for_dn(dn)
 
-        if backend_location == BackendTypes.LDAP:
-            if self.dn_exists(dn):
-                for e in self.ldap_conn.response[0]['attributes'].get('jansConfProperty', []):
-                    try:
-                        jansConfProperty = json.loads(e)
-                    except:
-                        continue
-                    if isinstance(jansConfProperty, dict) and jansConfProperty.get('value1') == 'allowed_clients':
-                        if not client_id in jansConfProperty['value2']:
-                            jansConfProperty['value2'] = self.add2strlist(client_id, jansConfProperty['value2'])
-                            jansConfProperty_js = json.dumps(jansConfProperty)
-                            ldap_operation_result = self.ldap_conn.modify(
-                                dn,
-                                {'jansConfProperty': [ldap3.MODIFY_DELETE, e]}
-                                )
-                            self.log_ldap_result(ldap_operation_result)
-                            ldap_operation_result = self.ldap_conn.modify(
-                                dn,
-                                {'jansConfProperty': [ldap3.MODIFY_ADD, jansConfProperty_js]}
-                                )
-                            self.log_ldap_result(ldap_operation_result)
-
-        elif backend_location in (BackendTypes.MYSQL, BackendTypes.PGSQL):
+        if backend_location in (BackendTypes.MYSQL, BackendTypes.PGSQL):
             sqlalchemyObj = self.get_sqlalchObj_for_dn(dn)
             if sqlalchemyObj:
                 if sqlalchemyObj.jansConfProperty:
-                    jansConfProperty = copy.deepcopy(sqlalchemyObj.jansConfProperty)
+                    jans_conf_property = copy.deepcopy(sqlalchemyObj.jansConfProperty)
                 else:
-                    jansConfProperty = {'v': []}
+                    jans_conf_property = {'v': []}
 
-                ox_configuration_property_list = jansConfProperty['v'] if Config.rdbm_type == 'mysql' else jansConfProperty
+                ox_configuration_property_list = jans_conf_property['v'] if Config.rdbm_type == 'mysql' else jans_conf_property
 
                 for i, oxconfigprop in enumerate(ox_configuration_property_list[:]):
                     if isinstance(oxconfigprop, str):
@@ -618,30 +508,30 @@ class DBUtils:
                 else:
                     ox_configuration_property_list.append(json.dumps({'value1': 'allowed_clients', 'value2': client_id}))
 
-                sqlalchemyObj.jansConfProperty = jansConfProperty if BackendTypes.MYSQL else ox_configuration_property_list
+                sqlalchemyObj.jansConfProperty = jans_conf_property if BackendTypes.MYSQL else ox_configuration_property_list
                 self.session.commit()
 
 
         elif backend_location == BackendTypes.SPANNER:
             spanner_data_list = self.spanner_client.get_dict_data('SELECT jansConfProperty from jansCustomScr WHERE dn="{}"'.format(dn))
             spanner_data = spanner_data_list[0]
-            jansConfProperty = []
+            jans_conf_property = []
             added = False
-            jansConfProperty = spanner_data.get('jansConfProperty', [])
+            jans_conf_property = spanner_data.get('jansConfProperty', [])
 
-            for i, oxconfigprop in enumerate(jansConfProperty):
+            for i, oxconfigprop in enumerate(jans_conf_property):
                 oxconfigpropjs = json.loads(oxconfigprop)
                 if oxconfigpropjs.get('value1') == 'allowed_clients':
                     if client_id in oxconfigpropjs['value2']:
                         return
                     oxconfigpropjs['value2'] = self.add2strlist(client_id, oxconfigpropjs['value2'])
-                    jansConfProperty[i] = json.dumps(oxconfigpropjs)
+                    jans_conf_property[i] = json.dumps(oxconfigpropjs)
                     added = True
                     break
 
             if not added:
-                jansConfProperty.append(json.dumps({'value1': 'allowed_clients', 'value2': client_id}))
-            self.spanner_client.write_data(table='jansCustomScr', columns=['doc_id', 'jansConfProperty'], values=[script_inum, jansConfProperty], mutation='update')
+                jans_conf_property.append(json.dumps({'value1': 'allowed_clients', 'value2': client_id}))
+            self.spanner_client.write_data(table='jansCustomScr', columns=['doc_id', 'jansConfProperty'], values=[script_inum, jans_conf_property], mutation='update')
 
         elif backend_location == BackendTypes.COUCHBASE:
             bucket = self.get_bucket_for_dn(dn)
@@ -677,11 +567,6 @@ class DBUtils:
                 return r[0][attribute]
 
 
-    def log_ldap_result(self, ldap_operation_result):
-        if not ldap_operation_result:
-            base.logIt("Ldap modify operation failed {}".format(str(self.ldap_conn.result)))
-            base.logIt("Ldap modify operation failed {}".format(str(self.ldap_conn.result)), True)
-
 
     def get_attr_syntax(self, attrname):
         for jans_attr in self.jans_attributes:
@@ -697,7 +582,7 @@ class DBUtils:
             return opendj_syntax
 
     def get_rootdn(self, dn):
-        dn_parsed = dnutils.parse_dn(dn)
+        dn_parsed = parse_dn(dn)
         dn_parsed.pop(0)
         dnl=[]
 
@@ -813,7 +698,7 @@ class DBUtils:
         return objectClass
 
     def get_doc_id_from_dn(self, dn):
-        dn_parsed = dnutils.parse_dn(dn)
+        dn_parsed = parse_dn(dn)
         doc_id = dn_parsed[0][1]
         if doc_id == 'jans':
             doc_id = '_'
@@ -846,25 +731,8 @@ class DBUtils:
 
             for dn, entry in parser.entries:
                 backend_location = force if force else self.get_backend_location_for_dn(dn)
-                if backend_location == BackendTypes.LDAP:
-                    if 'add' in  entry and 'changetype' in entry:
-                        base.logIt("LDAP modify add dn:{} entry:{}".format(dn, dict(entry)))
-                        change_attr = entry['add'][0]
-                        ldap_operation_result = self.ldap_conn.modify(dn, {change_attr: [(ldap3.MODIFY_ADD, entry[change_attr])]})
-                        self.log_ldap_result(ldap_operation_result)
 
-                    elif 'replace' in  entry and 'changetype' in entry:
-                        base.logIt("LDAP modify replace dn:{} entry:{}".format(dn, dict(entry)))
-                        change_attr = entry['replace'][0]
-                        ldap_operation_result = self.ldap_conn.modify(dn, {change_attr: [(ldap3.MODIFY_REPLACE, [entry[change_attr][0]])]})
-                        self.log_ldap_result(ldap_operation_result)
-
-                    elif not self.dn_exists(dn):
-                        base.logIt("Adding LDAP dn:{} entry:{}".format(dn, dict(entry)))
-                        ldap_operation_result = self.ldap_conn.add(dn, attributes=entry)
-                        self.log_ldap_result(ldap_operation_result)
-
-                elif backend_location in (BackendTypes.MYSQL, BackendTypes.PGSQL):
+                if backend_location in (BackendTypes.MYSQL, BackendTypes.PGSQL):
                     if self.Base is None:
                         self.rdm_automapper()
 
@@ -907,7 +775,7 @@ class DBUtils:
 
                     else:
                         vals = {}
-                        dn_parsed = dnutils.parse_dn(dn)
+                        dn_parsed = parse_dn(dn)
                         rdn_name = dn_parsed[0][0]
                         objectClass = self.get_clean_objcet_class(entry)
                         if objectClass.lower() == 'organizationalunit':
@@ -991,7 +859,7 @@ class DBUtils:
 
                     else:
                         vals = {}
-                        dn_parsed = dnutils.parse_dn(dn)
+                        dn_parsed = parse_dn(dn)
                         rdn_name = dn_parsed[0][0]
                         objectClass = objectClass = self.get_clean_objcet_class(entry)
                         if objectClass.lower() == 'organizationalunit':
@@ -1120,7 +988,7 @@ class DBUtils:
 
                 else:
                     vals = {}
-                    dn_parsed = dnutils.parse_dn(dn)
+                    dn_parsed = parse_dn(dn)
                     rdn_name = dn_parsed[0][0]
                     objectClass = entry.get('objectClass') or entry.get('objectclass')
 
@@ -1160,23 +1028,6 @@ class DBUtils:
                     self.session.add(sqlalchObj)
                     self.session.commit()
 
-    def import_schema(self, schema_file):
-        if self.moddb == BackendTypes.LDAP:
-            base.logIt("Importing schema {}".format(schema_file))
-            parser = ldif_utils.myLdifParser(schema_file)
-            parser.parse()
-            for dn, entry in parser.entries:
-                if 'changetype' in entry:
-                    entry.pop('changetype')
-                if 'add' in entry:
-                    entry.pop('add')
-                for entry_type in entry:
-                    for e in entry[entry_type]:
-                        base.logIt("Adding to schema, type: {}  value: {}".format(entry_type, e))
-                        ldap_operation_result = self.ldap_conn.modify(dn, {entry_type: [ldap3.MODIFY_ADD, e]})
-                        self.log_ldap_result(ldap_operation_result)
-            #we need re-bind after schema operations
-            self.ldap_conn.rebind()
 
     def get_group_for_key(self, key):
         key_prefix = self.get_key_prefix(key)
@@ -1203,8 +1054,6 @@ class DBUtils:
         key = ldif_utils.get_key_from(dn)
         group = self.get_group_for_key(key)
 
-        if Config.mapping_locations[group] == 'ldap':
-            return static.BackendTypes.LDAP
 
         if Config.mapping_locations[group] == 'rdbm':
             if Config.rdbm_type == 'mysql':
@@ -1256,7 +1105,7 @@ class DBUtils:
         result = self.search(
                     search_base='ou=scopes,o=jans',
                     search_filter='(objectClass=jansScope)',
-                    search_scope=ldap3.LEVEL,
+                    search_scope=SearchScopes.LEVEL,
                     fetchmany=True)
         sopes = [ sope for _, sope in result ]
 
@@ -1269,13 +1118,6 @@ class DBUtils:
         for jans_scope in self.jans_scopes:
             if jans_scope['jansId'] == jansid:
                 return jans_scope
-
-    def __del__(self):
-        try:
-            self.ldap_conn.unbind()
-            self.ready = False
-        except:
-            pass
 
 
 dbUtils = DBUtils()
