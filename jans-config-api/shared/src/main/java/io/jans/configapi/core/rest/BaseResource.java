@@ -67,7 +67,8 @@ public class BaseResource {
     public static final String MISSING_ATTRIBUTE_CODE = "OCA001";
     public static final String MISSING_ATTRIBUTE_MESSAGE = "A required attribute is missing.";
     public static final String TOKEN_DELIMITER = ",";
-    public static final String FIELD_VALUE_SEPARATOR = "=";
+    public static final String FIELD_VALUE_SEPARATOR_1 = "=";
+    public static final String FIELD_VALUE_SEPARATOR = "(?<=>)";
 
     public static <T> void checkResourceNotNull(T resource, String objectName) {
         if (resource == null) {
@@ -254,7 +255,7 @@ public class BaseResource {
         if (StringUtils.isEmpty(sortOrder) || !sortOrder.equals(SortOrder.DESCENDING.getValue())) {
             sortOrder = SortOrder.ASCENDING.getValue();
         }
-        log.debug(" util.getTokens(filter,TOKEN_DELIMITER):{} , util.getFieldValueMap(searchRequest, fieldValuePair, TOKEN_DELIMITER, FIELD_VALUE_SEPARATOR)):{}", util.getTokens(filter, TOKEN_DELIMITER), util.getFieldValueMap(entityClass, fieldValuePair, TOKEN_DELIMITER, FIELD_VALUE_SEPARATOR));
+        log.debug(" util.getTokens(filter,TOKEN_DELIMITER):{} , util.getFieldValueMap(searchRequest, fieldValuePair, TOKEN_DELIMITER, FIELD_VALUE_SEPARATOR_1)):{}, FIELD_VALUE_SEPARATOR:{}", util.getTokens(filter, TOKEN_DELIMITER), util.getFieldValueMap(entityClass, fieldValuePair, TOKEN_DELIMITER, FIELD_VALUE_SEPARATOR_1), FIELD_VALUE_SEPARATOR);
         searchRequest.setSchemas(schemas);
         searchRequest.setAttributes(attrsList);
         searchRequest.setExcludedAttributes(excludedAttrsList);
@@ -265,7 +266,8 @@ public class BaseResource {
         searchRequest.setCount(count);
         searchRequest.setMaxCount(maximumRecCount);
         searchRequest.setFilterAssertionValue(util.getTokens(filter, TOKEN_DELIMITER));
-        searchRequest.setFieldValueMap((util.getFieldValueMap(entityClass, fieldValuePair, TOKEN_DELIMITER, FIELD_VALUE_SEPARATOR)));
+        searchRequest.setFieldValueMap((util.getFieldValueMap(entityClass, fieldValuePair, TOKEN_DELIMITER, FIELD_VALUE_SEPARATOR_1)));
+        searchRequest.setFieldFilterData((util.getFieldValueList(entityClass, fieldValuePair, TOKEN_DELIMITER, FIELD_VALUE_SEPARATOR)));
         return searchRequest;
 
     }

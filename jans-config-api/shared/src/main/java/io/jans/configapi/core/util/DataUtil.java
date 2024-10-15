@@ -126,6 +126,24 @@ public class DataUtil {
         logger.debug("Fields:{} of type:{}  ", allFields, type);
         return allFields;
     }
+    
+    public static Map<String, String> getFieldDataType(Class<?> type, List<String> fieldList) {
+        logger.error("getFieldDataType - type:{} , fieldList:{}  ", type, fieldList);
+        Map<String, String> fieldTypeMap  = null;
+        if(type==null || fieldList==null || fieldList.isEmpty()) {
+            return fieldTypeMap;
+        }
+        
+        fieldTypeMap  = getFieldTypeMap(type);
+        if(fieldTypeMap==null || fieldTypeMap.isEmpty()) {
+            return fieldTypeMap;
+        }
+        
+        fieldTypeMap.keySet().retainAll(fieldList);
+        
+        logger.error("Final - fieldList:{} of fieldTypeMap:{}  ", fieldList, fieldTypeMap);
+        return fieldTypeMap;
+    }
 
     public static List<Field> getAllFields(List<Field> fields, Class<?> type) {
         logger.debug("Getting fields type:{} - fields:{} ", type, fields);

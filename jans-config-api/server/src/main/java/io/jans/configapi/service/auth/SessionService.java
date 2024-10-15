@@ -10,6 +10,8 @@ import io.jans.as.common.model.session.SessionId;
 import io.jans.as.common.model.session.SessionIdState;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.configapi.util.ApiConstants;
+import io.jans.configapi.core.util.DataUtil;
+import io.jans.model.FieldFilterData;
 import io.jans.model.SearchRequest;
 import io.jans.model.token.TokenEntity;
 import io.jans.model.token.TokenType;
@@ -130,21 +132,16 @@ public class SessionService {
             searchFilter = Filter.createORFilter(filters);
         }
 
-        logger.debug("Session pattern searchFilter:{}", searchFilter);
+        logger.error("\n\n\n Session pattern searchFilter:{}", searchFilter);
+     
+        
+        logger.error("\n\n\n Session searchRequest.getFieldFilterData():{}", searchRequest.getFieldFilterData());
         List<Filter> fieldValueFilters = new ArrayList<>();
-        if (searchRequest.getFieldValueMap() != null && !searchRequest.getFieldValueMap().isEmpty()) {
-            for (Map.Entry<String, String> entry : searchRequest.getFieldValueMap().entrySet()) {
-                Filter dataFilter = Filter.createEqualityFilter(entry.getKey(), entry.getValue());
-                logger.trace("Session dataFilter:{}", dataFilter);
-                fieldValueFilters.add(Filter.createANDFilter(dataFilter));
-            }
-            if (filters.isEmpty()) {
-                searchFilter = Filter.createANDFilter(fieldValueFilters);
-            } else {
-                searchFilter = Filter.createANDFilter(Filter.createORFilter(filters),
-                        Filter.createANDFilter(fieldValueFilters));
-            }
+        if (searchRequest.getFieldFilterData() != null && !searchRequest.getFieldFilterData().isEmpty()) {
+            createFilter(SessionId.class, searchRequest.getFieldFilterData(),getDnForSession(null));
+           
         }
+
 
         logger.debug("Session searchFilter:{}", searchFilter);
 
@@ -281,6 +278,51 @@ public class SessionService {
         session.getSessionAttributes().put("session_id", null);
         session.getSessionAttributes().put("old_session_id", null);
         return session;
+    }
+
+    private Map<String, String> getFieldDataType(Class<?> type, List<FieldFilterData> fieldFilterData) {
+        logger.error("After modification type:{}, fieldFilterData:{}", type, fieldFilterData);
+        List<String> fieldList = new ArrayList<>();
+        for (FieldFilterData entry : fieldFilterData) {
+            fieldList.add(entry.getField());
+        }
+        return DataUtil.getFieldDataType(type, fieldList);
+    }
+
+    private List<Filter> createFilter(Class<?> type, List<FieldFilterData> fieldFilterData, String primaryKey) {
+        Map<String, String> dataTypeMap = getFieldDataType(type, fieldFilterData);
+        logger.error("\n\n Session dataTypeMap:{}", dataTypeMap);
+
+        List<Filter> filters = new ArrayList<>();
+        for (FieldFilterData entry : fieldFilterData) {
+
+            String dataType = dataTypeMap.get(entry.getField());
+            logger.error("dataType:{}", dataType);
+
+            Filter dataFilter = null;
+            if ("String".equals(dataType)) {
+
+                dataFilter = Filter.createEqualityFilter(entry.getField(), entry.getValue());
+
+            } else if ("Date".equals(dataType) && "=".equalsIgnoreCase(entry.getOperator())) {
+
+                dataFilter = Filter.createEqualityFilter(entry.getField(), entry.getValue());
+
+            } else if ("Date".equals(dataType) && ">".equalsIgnoreCase(entry.getOperator())) {
+
+                dataFilter = Filter.createGreaterOrEqualFilter(entry.getField(),
+                        persistenceEntryManager.decodeTime(primaryKey, entry.getValue()));
+
+            } else if ("Date".equals(dataType) && "<".equalsIgnoreCase(entry.getOperator())) {
+
+                dataFilter = Filter.createLessOrEqualFilter(entry.getField(),
+                        persistenceEntryManager.decodeTime(primaryKey, entry.getValue()));
+
+            }
+            logger.trace("Token dataFilter:{}", dataFilter);
+            filters.add(dataFilter);
+        }
+        return filters;
     }
 
 }
