@@ -26,8 +26,11 @@ mod entities;
 
 use di::DependencySupplier;
 use entities::create_resource_entity;
+use entities::CedarPolicyCreateTypeError;
 use entities::ResourceEntityError;
-use entities::{create_access_token_entities, AccessTokenEntitiesError};
+use entities::{
+    create_access_token_entities, id_token_entity, user_entity, AccessTokenEntitiesError,
+};
 
 /// Authorization Service
 /// The primary service of the Cedarling application responsible for evaluating authorization requests.
@@ -67,10 +70,22 @@ impl Authz {
     /// Evaluate Authorization Request
     /// - evaluate if authorization is granted for *client*
     pub fn authorize(&self, request: Request) -> Result<AuthorizeResult, AuthorizeError> {
-        let access_token_entities = create_access_token_entities(
+        let access_token_data = self.jwt_service.decode_token_data(request.access_token)?;
+        let id_token_data = self.jwt_service.decode_token_data(request.id_token)?;
+        let userinfo_token_data = self.jwt_service.decode_token_data(request.userinfo_token)?;
+
+        let access_token_entities =
+            create_access_token_entities(&self.policy_store.schema.json, &access_token_data)?;
+
+        let id_token_entity = id_token_entity(&self.policy_store.schema.json, &id_token_data)
+            .map_err(AuthorizeError::CreateIdTokenEntity)?;
+
+        let user_entity = user_entity(
             &self.policy_store.schema.json,
-            &self.jwt_service.decode_token_data(request.access_token)?,
-        )?;
+            &id_token_data,
+            &userinfo_token_data,
+        )
+        .map_err(AuthorizeError::CreateUserEntity)?;
 
         let resource_entity =
             create_resource_entity(request.resource, &self.policy_store.schema.json)?;
@@ -85,20 +100,14 @@ impl Authz {
 
         let principal_workload_uid = access_token_entities.workload_entity.uid();
         let resource_uid = resource_entity.uid();
-
-        let cedar_request = cedar_policy::Request::new(
-            principal_workload_uid.clone(),
-            action,
-            resource_uid.clone(),
-            context,
-            Some(&self.policy_store.schema.schema),
-        )?;
+        let principal_user_entity_uid = user_entity.uid();
 
         // collect all entities
-        let entities_iterator = access_token_entities
-            .entities()
-            .into_iter()
-            .chain(vec![resource_entity]);
+        let entities_iterator = access_token_entities.entities().into_iter().chain(vec![
+            resource_entity,
+            id_token_entity,
+            user_entity,
+        ]);
 
         let entities = cedar_policy::Entities::from_entities(
             entities_iterator,
@@ -106,27 +115,81 @@ impl Authz {
         )?;
 
         let authorizer = cedar_policy::Authorizer::new();
-        let decision =
-            authorizer.is_authorized(&cedar_request, &self.policy_store.policies, &entities);
 
-        self.log_service.as_ref().log(
-            LogEntry::new_with_data(
-                self.pdp_id,
-                self.application_name.clone(),
-                LogType::Decision,
-            )
-            .set_auth_info(AuthorizationLogInfo {
-                action: request.action.clone(),
-                context: request.context,
-                decision: decision.decision().into(),
-                principal: principal_workload_uid.to_string(),
-                diagnostics: decision.diagnostics().clone().into(),
-                resource: resource_uid.to_string(),
-            })
-            .set_message("Result of authorize with resource as workload entity".to_string()),
-        );
+        let decision_principal_response = {
+            // _____ check policy where principal is workload _____
+            let request_principal_workload = cedar_policy::Request::new(
+                principal_workload_uid.clone(),
+                action.clone(),
+                resource_uid.clone(),
+                context.clone(),
+                Some(&self.policy_store.schema.schema),
+            )?;
 
-        Ok(AuthorizeResult { workload: decision })
+            let decision_principal_workload = authorizer.is_authorized(
+                &request_principal_workload,
+                &self.policy_store.policies,
+                &entities,
+            );
+
+            self.log_service.as_ref().log(
+                LogEntry::new_with_data(
+                    self.pdp_id,
+                    self.application_name.clone(),
+                    LogType::Decision,
+                )
+                .set_auth_info(AuthorizationLogInfo {
+                    action: request.action.clone(),
+                    context: request.context.clone(),
+                    decision: decision_principal_workload.decision().into(),
+                    principal: principal_workload_uid.to_string(),
+                    diagnostics: decision_principal_workload.diagnostics().clone().into(),
+                    resource: resource_uid.to_string(),
+                })
+                .set_message("Result of authorize with resource as workload entity".to_string()),
+            );
+            decision_principal_workload
+        };
+
+        let user_principal_response = {
+            // _____ check policy where principal is user _____
+            let request_user_workload = cedar_policy::Request::new(
+                principal_user_entity_uid.clone(),
+                action,
+                resource_uid.clone(),
+                context,
+                Some(&self.policy_store.schema.schema),
+            )?;
+
+            let user_principal_workload = authorizer.is_authorized(
+                &request_user_workload,
+                &self.policy_store.policies,
+                &entities,
+            );
+
+            self.log_service.as_ref().log(
+                LogEntry::new_with_data(
+                    self.pdp_id,
+                    self.application_name.clone(),
+                    LogType::Decision,
+                )
+                .set_auth_info(AuthorizationLogInfo {
+                    action: request.action.clone(),
+                    context: request.context,
+                    decision: user_principal_workload.decision().into(),
+                    principal: principal_workload_uid.to_string(),
+                    diagnostics: user_principal_workload.diagnostics().clone().into(),
+                    resource: resource_uid.to_string(),
+                })
+                .set_message("Result of authorize with resource as user entity".to_string()),
+            );
+            user_principal_workload
+        };
+
+        Ok(AuthorizeResult {
+            workload: decision_principal_response,
+            person: user_principal_response,
+        })
     }
 }
 
@@ -139,6 +202,12 @@ pub enum AuthorizeError {
     /// Error encountered while creating access token entities
     #[error("{0}")]
     AccessTokenEntities(#[from] AccessTokenEntitiesError),
+    /// Error encountered while creating access token entities
+    #[error("could not create Jans::id_token: {0}")]
+    CreateIdTokenEntity(CedarPolicyCreateTypeError),
+    /// Error encountered while creating access token entities
+    #[error("could not create Jans::User: {0}")]
+    CreateUserEntity(CedarPolicyCreateTypeError),
     /// Error encountered while creating resource entity
     #[error("{0}")]
     ResourceEntity(#[from] ResourceEntityError),

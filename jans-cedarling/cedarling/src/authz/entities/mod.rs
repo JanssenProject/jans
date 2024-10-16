@@ -16,7 +16,8 @@ use crate::{
     models::{cedar_schema::CedarSchemaJson, token_data::TokenPayload},
     ResourceData,
 };
-use create::{create_entity, parse_namespace_and_typename, CedarPolicyCreateTypeError};
+pub(crate) use create::CedarPolicyCreateTypeError;
+use create::{create_entity, parse_namespace_and_typename};
 
 /// Describe errors on creating entites for AccessToken
 #[derive(thiserror::Error, Debug)]
@@ -47,6 +48,32 @@ pub fn create_access_token_entities(
         access_token_entity: meta::AccessTokenMeta.create_entity(schema, data)?,
         workload_entity: meta::WorkloadEntityMeta.create_entity(schema, data)?,
     })
+}
+
+/// Create id_token entity
+pub fn id_token_entity(
+    schema: &CedarSchemaJson,
+    data: &TokenPayload,
+) -> Result<cedar_policy::Entity, CedarPolicyCreateTypeError> {
+    meta::IdToken.create_entity(schema, data)
+}
+
+/// Create user entity
+pub fn user_entity(
+    schema: &CedarSchemaJson,
+    id_token_data: &TokenPayload,
+    userinfo_token_data: &TokenPayload,
+) -> Result<cedar_policy::Entity, CedarPolicyCreateTypeError> {
+    const SUB_KEY: &str = "sub";
+
+    // if 'sub' is not the same we discard the userinfo token
+    let data = if id_token_data.payload.get(SUB_KEY) == userinfo_token_data.payload.get(SUB_KEY) {
+        &id_token_data.extend(userinfo_token_data.clone())
+    } else {
+        id_token_data
+    };
+
+    meta::User.create_entity(schema, data)
 }
 
 /// Describe errors on creating resource entity

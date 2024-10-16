@@ -5,9 +5,8 @@ use cedar_policy::Decision;
 pub struct AuthorizeResult {
     /// Result of authorization where principal is `Jans::Workload`
     pub workload: cedar_policy::Response,
-    // The response for the user entity
-    // next field will be added in further PR
-    // pub person: cedar_policy::Response,
+    /// Result of authorization where principal is `Jans::User`
+    pub person: cedar_policy::Response,
 }
 
 impl AuthorizeResult {
