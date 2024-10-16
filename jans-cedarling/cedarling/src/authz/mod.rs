@@ -12,7 +12,6 @@
 use std::str::FromStr;
 use std::sync::Arc;
 
-use crate::jwt::DecodeJwtError;
 use crate::jwt::JwtService;
 use crate::log::{LogWriter, Logger};
 use crate::models::app_types;
@@ -22,8 +21,10 @@ use crate::models::policy_store::PolicyStore;
 use crate::models::request::Request;
 use crate::AuthorizeResult;
 
+mod decode_tokens;
 mod entities;
 
+use decode_tokens::{decode_tokens, DecodeTokensError};
 use di::DependencySupplier;
 use entities::create_resource_entity;
 use entities::CedarPolicyCreateTypeError;
@@ -70,20 +71,21 @@ impl Authz {
     /// Evaluate Authorization Request
     /// - evaluate if authorization is granted for *client*
     pub fn authorize(&self, request: Request) -> Result<AuthorizeResult, AuthorizeError> {
-        let access_token_data = self.jwt_service.decode_token_data(request.access_token)?;
-        let id_token_data = self.jwt_service.decode_token_data(request.id_token)?;
-        let userinfo_token_data = self.jwt_service.decode_token_data(request.userinfo_token)?;
+        let decoded_tokens = decode_tokens(&request, self.jwt_service.as_ref())?;
 
-        let access_token_entities =
-            create_access_token_entities(&self.policy_store.schema.json, &access_token_data)?;
+        let access_token_entities = create_access_token_entities(
+            &self.policy_store.schema.json,
+            &decoded_tokens.access_token,
+        )?;
 
-        let id_token_entity = id_token_entity(&self.policy_store.schema.json, &id_token_data)
-            .map_err(AuthorizeError::CreateIdTokenEntity)?;
+        let id_token_entity =
+            id_token_entity(&self.policy_store.schema.json, &decoded_tokens.id_token)
+                .map_err(AuthorizeError::CreateIdTokenEntity)?;
 
         let user_entity = user_entity(
             &self.policy_store.schema.json,
-            &id_token_data,
-            &userinfo_token_data,
+            &decoded_tokens.id_token,
+            &decoded_tokens.userinfo,
         )
         .map_err(AuthorizeError::CreateUserEntity)?;
 
@@ -197,8 +199,8 @@ impl Authz {
 #[derive(thiserror::Error, Debug)]
 pub enum AuthorizeError {
     /// Error encountered while decoding JWT token data
-    #[error("Malformed JWT provided")]
-    JWT(#[from] DecodeJwtError),
+    #[error(transparent)]
+    JWT(#[from] DecodeTokensError),
     /// Error encountered while creating access token entities
     #[error("{0}")]
     AccessTokenEntities(#[from] AccessTokenEntitiesError),
