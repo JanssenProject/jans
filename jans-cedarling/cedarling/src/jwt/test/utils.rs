@@ -10,81 +10,26 @@ use jsonwebtoken as jwt;
 use serde::{Deserialize, Serialize};
 use std::time::{SystemTime, UNIX_EPOCH};
 
-/// A user-defined struct for holding token claims.
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
-pub struct Claims {
-    iss: String,
-    sub: String,
-    aud: String,
-    exp: u64,
-    iat: u64,
+// eyJhbGciOiJSUzI1NiIsImtpZCI6IjA2Y2FlY2FiMzZiMDM5NmQ2MzJmZmQ3ZjYzODU5NTcxNTJlNzZiN2EiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE2MjgxNzMwMDAsImlhdCI6MTYyODE2OTQwMCwiYXRfaGFzaCI6InUtWTBCY29XdXpXQm5xckR6NHFxY1EiLCJhdWQiOiI2MzE3NDM5MzQ1ODQtaWdvY2xvdWR1c2VyYXBwcy5jb20iLCJzdWIiOiIxMTIzNDU2Nzg5MCIsInNjb3BlcyI6Im9wZW5pZCBwcm9maWxlIGVtYWlsIn0.CzxgNDP1K2HlZL1hjmsby7dYPjtFmoqz5TK6DLbHmg4Rghv0eXqXpRpiCwEpzxl9FJYY7XJGLHg_zvORWiZKDpWcPfwlMfOPSSbWVZjPcDQdRar0kgtnxRnHk1nl-NdhkAb8dJfUuPnoIdqrq4ftcqDjsE1yMvoYyFLjx8JFCpA
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Default)]
+pub struct AccessTokenClaims {
+    pub iss: String,
+    pub aud: String,
+    pub sub: String,
+    pub scopes: String,
+    pub exp: u64,
+    pub iat: u64,
 }
 
-/// Generates a JWT Signed with ES256
-///
-/// Returns a tuple: (token, public_key, claims)
-pub fn generate_token(expired: bool) -> (String, String, Claims) {
-    let (enc_key, dec_key) = generate_key_pair();
-
-    let claims = generate_claims(expired);
-    let header = jwt::Header {
-        typ: Some("JWT".to_string()),
-        alg: jwt::Algorithm::ES256,
-        cty: None,
-        jku: None,
-        jwk: None,
-        kid: Some(enc_key.0.clone()),
-        x5u: None,
-        x5c: None,
-        x5t: None,
-        x5t_s256: None,
-    };
-
-    let token = jwt::encode(&header, &claims, &enc_key.1).expect("should generate token");
-    (token, dec_key, claims)
-}
-
-// Generates claims for a JWT
-fn generate_claims(expired: bool) -> Claims {
-    let iat: u64;
-    let exp: u64;
-    if expired {
-        iat = 1695198692; // timestamp for issued at (iat)
-        exp = 1695195092; // timestamp for expiration (exp)
-    } else {
-        let now = SystemTime::now();
-        // set issued at (iat) at the current time
-        iat = now.duration_since(UNIX_EPOCH).unwrap().as_secs();
-        exp = iat + 3600; // set expiration 1 hour from now
-    }
-
-    Claims {
-        iss: "https://auth.myapp.com".to_string(),
-        sub: "user123".to_string(),
-        aud: "myapp.com".to_string(),
-        exp,
-        iat,
-    }
-}
-
-/// Generates a pair of private and public keys for signing and verifying JWTs using ES256
-fn generate_key_pair() -> ((String, jwt::EncodingKey), String) {
-    let key_id = "some_key_id".to_string();
-
-    // Generate a private key
-    let mut jwk = jwk::JsonWebKey::new(jwk::Key::generate_p256());
-
-    jwk.set_algorithm(jwk::Algorithm::ES256)
-        .expect("should set encryption algorithm");
-    jwk.key_id = Some(key_id.clone());
-
-    let public_key =
-        serde_json::to_string(&jwk.key.to_public()).expect("should serialize public key");
-
-    let private_key = jwt::EncodingKey::from_ec_pem(jwk.key.to_pem().as_bytes())
-        .expect("should generate encoding key");
-
-    ((key_id, private_key), public_key)
+// eyJhbGciOiJSUzI1NiIsImtpZCI6IjA2Y2FlY2FiMzZiMDM5NmQ2MzJmZmQ3ZjYzODU5NTcxNTJlNzZiN2EiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLCJzdWIiOiIxMTIzNDU2Nzg5MCIsImF1ZCI6IjYzMTc0MzkzNDU4NC1pZ29jbG91ZHVzZXJhcHBzLmNvbSIsImVtYWlsIjoidXNlckBlbWFpbC5jb20iLCJuYW1lIjoiSm9obiBEb2UiLCJleHAiOjE2MjgxNzMwMDAsImlhdCI6MTYyODE2OTQwMCwiaXNzIjoiaHR0cHM6Ly9hY2NvdW50cy5nb29nbGUuY29tIiwibmFtZSI6IkpvaG4gRG9lIn0.YyyyzVDC7iFlZL1hjmsby7dYPjtFmoqz5TK6DLbHmg4Rghv0eXqXpRpiCwEpzxl9FJYY7XJGLHg_zvORWiZKDpWcPfwlMfOPSSbWVZjPcDQdRar0kgtnxRnHk1nl-NdhkAb8dJfUuPnoIdqrq4ftcqDjsE1yMvoYyFLjx8JFCpA
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Default)]
+pub struct IdTokenClaims {
+    pub iss: String,
+    pub sub: String,
+    pub aud: String,
+    pub email: String,
+    pub exp: u64,
+    pub iat: u64,
 }
 
 /// Generates a set of private and public keys using ES256
@@ -94,7 +39,7 @@ pub fn generate_keys() -> (Vec<(String, jwt::EncodingKey)>, String) {
     let mut public_keys = jwt::jwk::JwkSet { keys: vec![] };
     let mut private_keys = vec![];
 
-    for kid in 1..=5 {
+    for kid in 1..=2 {
         // Generate a private key
         let mut jwk = jwk::JsonWebKey::new(jwk::Key::generate_p256());
         jwk.set_algorithm(jwk::Algorithm::ES256)
@@ -118,21 +63,22 @@ pub fn generate_keys() -> (Vec<(String, jwt::EncodingKey)>, String) {
     (private_keys, public_keys)
 }
 
-/// Generates a JWT using a keyset
-pub fn generate_token_using_keys(
-    encoding_keys: Vec<(String, jwt::EncodingKey)>,
+/// Generates an access_token using a ket from a keyset
+pub fn generate_access_token_using_keys(
+    claims: &mut AccessTokenClaims,
+    encoding_keys: &Vec<(String, jwt::EncodingKey)>,
     expired: bool,
-) -> (String, Claims) {
+) -> String {
     // set expiration
-    let iat: u64;
-    let exp: u64;
     if expired {
-        iat = 1695198692;
-        exp = 1695195092;
+        // generate an expired token
+        claims.iat = 1695198692;
+        claims.exp = 1695195092;
     } else {
+        // Set expiration 1 hour from now
         let now = SystemTime::now();
-        iat = now.duration_since(UNIX_EPOCH).unwrap().as_secs();
-        exp = iat + 3600; // Set expiration 1 hour from now
+        claims.iat = now.duration_since(UNIX_EPOCH).unwrap().as_secs();
+        claims.exp = claims.iat + 3600;
     }
 
     // select a key from the keyset
@@ -140,31 +86,47 @@ pub fn generate_token_using_keys(
     let key_id = encoding_keys[0].0.clone();
     let enc_key = &encoding_keys[0].1;
 
-    // specify the token payload
-    let claims = Claims {
-        iss: "https://auth.myapp.com".to_string(),
-        sub: "user123".to_string(),
-        aud: "myapp.com".to_string(),
-        exp,
-        iat,
-    };
-
     // specify the header
     let header = jwt::Header {
-        typ: Some("JWT".to_string()),
         alg: jwt::Algorithm::ES256,
-        cty: None,
-        jku: None,
-        jwk: None,
         kid: Some(key_id),
-        x5u: None,
-        x5c: None,
-        x5t: None,
-        x5t_s256: None,
+        ..Default::default()
     };
 
     // serialize token to a string
-    let token = jwt::encode(&header, &claims, enc_key).expect("should generate token");
+    jwt::encode(&header, &claims, enc_key).expect("should generate token")
+}
 
-    (token, claims)
+/// Generates an access_token using a ket from a keyset
+pub fn generate_id_token_using_keys(
+    claims: &mut IdTokenClaims,
+    encoding_keys: &Vec<(String, jwt::EncodingKey)>,
+    expired: bool,
+) -> String {
+    // set expiration
+    if expired {
+        // generate an expired token
+        claims.iat = 1695198692;
+        claims.exp = 1695195092;
+    } else {
+        // Set expiration 1 hour from now
+        let now = SystemTime::now();
+        claims.iat = now.duration_since(UNIX_EPOCH).unwrap().as_secs();
+        claims.exp = claims.iat + 3600;
+    }
+
+    // select a key from the keyset
+    // for simplicity, were just choosing the second one
+    let key_id = encoding_keys[1].0.clone();
+    let enc_key = &encoding_keys[1].1;
+
+    // specify the header
+    let header = jwt::Header {
+        alg: jwt::Algorithm::ES256,
+        kid: Some(key_id),
+        ..Default::default()
+    };
+
+    // serialize token to a string
+    jwt::encode(&header, &claims, enc_key).expect("should generate token")
 }

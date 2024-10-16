@@ -19,6 +19,7 @@ use crate::models::log_entry::AuthorizationLogInfo;
 use crate::models::log_entry::{LogEntry, LogType};
 use crate::models::policy_store::PolicyStore;
 use crate::models::request::Request;
+use crate::models::token_data::TokenPayload;
 use crate::AuthorizeResult;
 
 mod entities;
@@ -66,10 +67,18 @@ impl Authz {
     /// Evaluate Authorization Request
     /// - evaluate if authorization is granted for *client*
     pub fn authorize(&self, request: Request) -> Result<AuthorizeResult, AuthorizeError> {
-        let access_token_entities = create_access_token_entities(
-            &self.policy_store.schema.json,
-            &self.jwt_service.decode(request.access_token)?,
-        )?;
+        let (access_token_entities, _id_token_entities) = self
+            .jwt_service
+            .decode_tokens::<TokenPayload, TokenPayload>(request.access_token, request.id_token)?;
+
+        let access_token_entities =
+            create_access_token_entities(&self.policy_store.schema.json, &access_token_entities)?;
+
+        // TODO: check if `request.userinfo_token.sub` == `id_token.sub`
+        // Note that "Userinfo Token" isn't a JWT which is why we're not
+        // passing it to JWT Service. It's usually a JSON you can GET from the
+        // userinfo endpoint. For example:
+        // `curl -X GET 'https://openidconnect.googleapis.com/v1/userinfo' -H 'Authorization: Bearer ACCESS_TOKEN'`
 
         let resource_entity =
             create_resource_entity(request.resource, &self.policy_store.schema.json)?;
