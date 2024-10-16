@@ -33,8 +33,8 @@ pub(crate) struct AccessTokenEntities {
 
 impl AccessTokenEntities {
     /// Map all values to vector of cedar-policy entities
-    pub fn entities(self) -> Vec<cedar_policy::Entity> {
-        vec![self.workload_entity, self.access_token_entity]
+    pub fn into_iter(self) -> impl Iterator<Item = cedar_policy::Entity> {
+        vec![self.workload_entity, self.access_token_entity].into_iter()
     }
 }
 
