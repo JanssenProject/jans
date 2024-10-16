@@ -11,6 +11,7 @@ import io.jans.as.common.model.session.SessionIdState;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.core.util.DataUtil;
+import io.jans.configapi.core.util.Util;
 import io.jans.model.FieldFilterData;
 import io.jans.model.SearchRequest;
 import io.jans.model.attribute.AttributeDataType;
@@ -29,6 +30,7 @@ import jakarta.ws.rs.NotFoundException;
 
 import static io.jans.as.model.util.Util.escapeLog;
 
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -57,6 +59,9 @@ public class SessionService {
 
     @Inject
     TokenService tokenService;
+    
+    @Inject
+    Util util;
 
     public String getDnForSession(String sessionId) {
         if (StringHelper.isEmpty(sessionId)) {
@@ -117,18 +122,17 @@ public class SessionService {
 
             for (String assertionValue : searchRequest.getFilterAssertionValue()) {
                 logger.debug("Session Search with assertionValue:{}", assertionValue);
-                if (StringUtils.isNotBlank(assertionValue)) {
-                    String[] targetArray = new String[] { assertionValue };
-                    Filter userFilter = Filter.createSubstringFilter(ApiConstants.JANS_USR_DN, null, targetArray, null);
-                    Filter sidFilter = Filter.createSubstringFilter(ApiConstants.SID, null, targetArray, null);
-                    Filter sessAttrFilter = Filter.createSubstringFilter(ApiConstants.JANS_SESS_ATTR, null, targetArray,
-                            null);
-                    Filter permissionFilter = Filter.createSubstringFilter("jansPermissionGrantedMap", null,
-                            targetArray, null);
-                    Filter idFilter = Filter.createSubstringFilter(ApiConstants.JANSID, null, targetArray, null);
-                    filters.add(
-                            Filter.createORFilter(userFilter, sidFilter, sessAttrFilter, permissionFilter, idFilter));
-                }
+
+                String[] targetArray = new String[] { assertionValue };
+                Filter userFilter = Filter.createSubstringFilter(ApiConstants.JANS_USR_DN, null, targetArray, null);
+                Filter sidFilter = Filter.createSubstringFilter(ApiConstants.SID, null, targetArray, null);
+                Filter sessAttrFilter = Filter.createSubstringFilter(ApiConstants.JANS_SESS_ATTR, null, targetArray,
+                        null);
+                Filter permissionFilter = Filter.createSubstringFilter("jansPermissionGrantedMap", null, targetArray,
+                        null);
+                Filter idFilter = Filter.createSubstringFilter(ApiConstants.JANSID, null, targetArray, null);
+                filters.add(Filter.createORFilter(userFilter, sidFilter, sessAttrFilter, permissionFilter, idFilter));
+
             }
             searchFilter = Filter.createORFilter(filters);
         }
@@ -138,7 +142,7 @@ public class SessionService {
         logger.error("\n\n\n Session searchRequest.getFieldFilterData():{}", searchRequest.getFieldFilterData());
         List<Filter> fieldValueFilters = new ArrayList<>();
         if (searchRequest.getFieldFilterData() != null && !searchRequest.getFieldFilterData().isEmpty()) {
-            fieldValueFilters = DataUtil.createFilter(SessionId.class, searchRequest.getFieldFilterData(),
+            fieldValueFilters = DataUtil.createFilter(this.getPropertiesAnnotations(SessionId.class), searchRequest.getFieldFilterData(),
                     getDnForSession(null), persistenceEntryManager);
         }
 
@@ -250,7 +254,7 @@ public class SessionService {
         logger.debug("After modification sessionList:{}", sessionList);
         return sessionList;
     }
-
+    
     private SessionId getSession(String sid) {
         if (logger.isInfoEnabled()) {
             logger.info(SID_MSG, escapeLog(sid));
@@ -280,6 +284,10 @@ public class SessionService {
         session.getSessionAttributes().put("session_id", null);
         session.getSessionAttributes().put("old_session_id", null);
         return session;
+    }
+    
+    private Map<String, List<Annotation>> getPropertiesAnnotations(Class<?> entityClass) {
+        return util.getPropertiesAnnotations(entityClass);    
     }
 
 }

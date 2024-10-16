@@ -17,6 +17,7 @@ import jakarta.inject.Named;
 import java.beans.Introspector;
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -174,7 +175,7 @@ public class DataUtil {
         logger.debug("AllFields:{} ", fields);
 
         for (Field field : fields) {
-            logger.debug(
+            logger.error(
                     "field:{} , field.getAnnotatedType():{}, field.getAnnotations():{} , field.getType().getAnnotations():{}, field.getType().getCanonicalName():{} , field.getType().getClass():{} , field.getType().getClasses():{} , field.getType().getComponentType():{}",
                     field, field.getAnnotatedType(), field.getAnnotations(), field.getType().getAnnotations(),
                     field.getType().getCanonicalName(), field.getType().getClass(), field.getType().getClasses(),
@@ -233,19 +234,22 @@ public class DataUtil {
         return getFieldDataType(type, fieldList);
     }
 
-    public static List<Filter> createFilter(Class<?> type, List<FieldFilterData> fieldFilterData, String primaryKey,
+    public static List<Filter> createFilter(Map<String, List<Annotation>> propertiesAnnotations, List<FieldFilterData> fieldFilterData, String primaryKey,
             PersistenceEntryManager persistenceEntryManager) {
-        logger.error("After modification type:{}, fieldFilterData:{}, primaryKey:{}, persistenceEntryManager:{}", type,
+        logger.error("After modification propertiesAnnotations:{}, fieldFilterData:{}, primaryKey:{}, persistenceEntryManager:{}", propertiesAnnotations,
                 fieldFilterData, primaryKey, persistenceEntryManager);
         List<Filter> filters = new ArrayList<>();
 
-        if (type == null || fieldFilterData == null || fieldFilterData.isEmpty() || StringUtils.isBlank(primaryKey)
+        if (propertiesAnnotations == null || propertiesAnnotations.isEmpty() || fieldFilterData == null || fieldFilterData.isEmpty() || StringUtils.isBlank(primaryKey)
                 || persistenceEntryManager == null) {
             return filters;
         }
+        
+        
 
-        Map<String, String> dataTypeMap = getFieldType(type, fieldFilterData);
-        logger.error(" type:{} dataTypeMap:{}", type.getCanonicalName(), dataTypeMap);
+        //puja
+        Map<String, String> dataTypeMap = getFieldType(null, fieldFilterData);
+        //logger.error(" type:{} dataTypeMap:{}", type.getCanonicalName(), dataTypeMap);
 
         for (FieldFilterData entry : fieldFilterData) {
 
