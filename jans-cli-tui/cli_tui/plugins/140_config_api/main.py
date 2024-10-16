@@ -1,26 +1,19 @@
 import copy
 import asyncio
 import json
-import urllib.request
 from collections import OrderedDict
 from typing import Any, Optional
 from functools import partial
 
 import prompt_toolkit
-from prompt_toolkit.layout.containers import HSplit, DynamicContainer,\
-    VSplit, Window, HorizontalAlign, ConditionalContainer, FormattedTextControl
-from prompt_toolkit.filters import Condition
+from prompt_toolkit.layout.containers import HSplit, DynamicContainer, VSplit, Window, HorizontalAlign
 from prompt_toolkit.formatted_text import HTML
 from prompt_toolkit.layout.dimension import D
-from prompt_toolkit.widgets import Button, Label, Box, Dialog
+from prompt_toolkit.widgets import Button, Label, Dialog, TextArea, Box
 from prompt_toolkit.application import Application
 from wui_components.jans_nav_bar import JansNavBar
-from wui_components.jans_drop_down import DropDownWidget
 from wui_components.jans_vetrical_nav import JansVerticalNav
 from wui_components.jans_cli_dialog import JansGDialog
-from wui_components.jans_spinner import Spinner
-from wui_components.jans_path_browser import jans_file_browser_dialog, BrowseType
-from wui_components.jans_label_container import JansLabelContainer
 from wui_components.widget_collections import get_logging_level_widget
 from wui_components.jans_label_widget import JansLabelWidget
 
@@ -64,9 +57,24 @@ class Plugin(DialogUtils):
         self.app.center_container = self.main_container
 
     def create_widgets(self):
+
         self.schema = self.app.cli_object.get_schema_from_reference('', '#/components/schemas/ApiAppConfiguration')
 
         label_widget_width = common_data.app.output.get_size().columns - 3
+
+
+        def add_acr_validation(widget):
+
+            acr_text_area = TextArea()
+
+            def do_add_acr(dialog):
+                widget.container.add_label(acr_text_area.text, acr_text_area.text)
+
+            acr_label = _("ACR Name")
+            body = VSplit([Label(acr_label + ' :', width=(len(acr_label)+3)), acr_text_area])
+            buttons = [Button(_("Cancel")), Button(_("OK"), handler=do_add_acr)]
+            dialog = JansGDialog(self.app, title=_("ACR to Exclude Validation"), body=body, buttons=buttons, width=self.app.dialog_width-20)
+            self.app.show_jans_dialog(dialog)
 
         self.user_exclusion_attributes_widget = JansLabelWidget(
                         title = _("User Exclusion Attributes"),
@@ -82,7 +90,26 @@ class Plugin(DialogUtils):
                         label_width=label_widget_width
                         )
 
+        self.acr_exclusion_widget = JansLabelWidget(
+                        title = _("Exclude ACR Validation"),
+                        values = self.data.get('acrExclusionList', []),
+                        data = [],
+                        label_width=label_widget_width,
+                        add_handler=add_acr_validation
+                        )
+
         self.tabs['main_'] = HSplit([
+
+                        self.app.getTitledText(
+                            _("Maximum Number of Result Per Page"),
+                            name='maxCount',
+                            value=self.data.get('maxCount') or '50',
+                            jans_help=self.app.get_help_from_schema(self.schema, 'maxCount'),
+                            style=cli_style.edit_text,
+                            widget_style=cli_style.black_bg_widget,
+                            text_type='integer'
+                        ),
+
                         self.app.getTitledCheckBox(
                             _("Enable Configuring OAuth"),
                             name='configOauthEnabled',
@@ -119,6 +146,17 @@ class Plugin(DialogUtils):
                             widget_style=cli_style.black_bg_widget
                         ),
 
+                        self.app.getTitledCheckBox(
+                            _("Enable acr Validation"),
+                            name='acrValidationEnabled',
+                            checked=self.data.get('acrValidationEnabled'),
+                            jans_help=self.app.get_help_from_schema(self.schema, 'acrValidationEnabled'),
+                            style=cli_style.check_box,
+                            widget_style=cli_style.black_bg_widget
+                        ),
+
+                        self.acr_exclusion_widget,
+
                     common_data.app.getTitledText(
                         title=_("Approved Issuer"),
                         name='apiApprovedIssuer',
@@ -138,7 +176,16 @@ class Plugin(DialogUtils):
                         name='loggingLayout',
                         value=self.data.get('loggingLayout', 'text'),
                         style=cli_style.edit_text,
-                        jans_help=_("Logging layout"),
+                        jans_help=self.app.get_help_from_schema(self.schema, 'loggingLayout'),
+                        widget_style=cli_style.black_bg_widget
+                    ),
+
+                    common_data.app.getTitledText(
+                        title=_("External Logger Configuration"),
+                        name='externalLoggerConfiguration',
+                        value=self.data.get('externalLoggerConfiguration', ''),
+                        style=cli_style.edit_text,
+                        jans_help=self.app.get_help_from_schema(self.schema, 'externalLoggerConfiguration'),
                         widget_style=cli_style.black_bg_widget
                     ),
 
@@ -219,6 +266,18 @@ class Plugin(DialogUtils):
                     style=cli_style.check_box,
                     widget_style=cli_style.black_bg_widget
                 ),
+
+            common_data.app.getTitledText(
+                    title=_("Ignore Http Method"),
+                    name='ignoreHttpMethod',
+                    value=copy.deepcopy(self.data.get('AuditLogConf', {}).get('ignoreHttpMethod', [])),
+                    style=cli_style.edit_text,
+                    widget_style=cli_style.black_bg_widget,
+                    jans_help="Enter values each line",
+                    jans_list_type=True,
+                    height=3
+                    ),
+
             self.audit_log_configuration_header_attributes_widget,
             Window(height=D()),
             ],
@@ -591,12 +650,13 @@ class Plugin(DialogUtils):
         new_data = self.make_data_from_dialog(tabs={'main_': self.tabs['main_']})
 
         for prop in new_data:
-            if new_data[prop] != self.data[prop]:
+            if new_data[prop] != self.data.get(prop):
                 changes.append((prop, new_data[prop]))
 
         for ppath, widget in (
                 (('userExclusionAttributes',), self.user_exclusion_attributes_widget),
                 (('userMandatoryAttributes',), self.user_mandatory_attributes_widget),
+                (('acrExclusionList',), self.acr_exclusion_widget),
                 (('agamaConfiguration', 'mandatoryAttributes'), self.agama_configuration_mandatory_attributes_widget),
                 (('agamaConfiguration', 'optionalAttributes'), self.agama_configuration_optional_attributes_widget),
                 (('auditLogConf', 'headerAttributes'), self.audit_log_configuration_header_attributes_widget),
@@ -609,7 +669,7 @@ class Plugin(DialogUtils):
         for ctab in ('auditLogConf', 'dataFormatConversionConf', 'assetMgtConfiguration', 'plugins'):
             data_ = self.make_data_from_dialog(tabs={ctab: self.tabs[ctab]})
             for prop in data_:
-                if data_[prop] != self.data[ctab][prop]:
+                if data_[prop] != self.data[ctab].get(prop):
                     changes.append(('/'.join((ctab, prop)), data_[prop]))
 
         if self.plugins_list_box.all_data != self.data['plugins']:
