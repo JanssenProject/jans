@@ -10,7 +10,6 @@ use jsonwebtoken as jwt;
 use serde::{Deserialize, Serialize};
 use std::time::{SystemTime, UNIX_EPOCH};
 
-// eyJhbGciOiJSUzI1NiIsImtpZCI6IjA2Y2FlY2FiMzZiMDM5NmQ2MzJmZmQ3ZjYzODU5NTcxNTJlNzZiN2EiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjE2MjgxNzMwMDAsImlhdCI6MTYyODE2OTQwMCwiYXRfaGFzaCI6InUtWTBCY29XdXpXQm5xckR6NHFxY1EiLCJhdWQiOiI2MzE3NDM5MzQ1ODQtaWdvY2xvdWR1c2VyYXBwcy5jb20iLCJzdWIiOiIxMTIzNDU2Nzg5MCIsInNjb3BlcyI6Im9wZW5pZCBwcm9maWxlIGVtYWlsIn0.CzxgNDP1K2HlZL1hjmsby7dYPjtFmoqz5TK6DLbHmg4Rghv0eXqXpRpiCwEpzxl9FJYY7XJGLHg_zvORWiZKDpWcPfwlMfOPSSbWVZjPcDQdRar0kgtnxRnHk1nl-NdhkAb8dJfUuPnoIdqrq4ftcqDjsE1yMvoYyFLjx8JFCpA
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Default)]
 pub struct AccessTokenClaims {
     pub iss: String,
@@ -21,7 +20,6 @@ pub struct AccessTokenClaims {
     pub iat: u64,
 }
 
-// eyJhbGciOiJSUzI1NiIsImtpZCI6IjA2Y2FlY2FiMzZiMDM5NmQ2MzJmZmQ3ZjYzODU5NTcxNTJlNzZiN2EiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJodHRwczovL2FjY291bnRzLmdvb2dsZS5jb20iLCJzdWIiOiIxMTIzNDU2Nzg5MCIsImF1ZCI6IjYzMTc0MzkzNDU4NC1pZ29jbG91ZHVzZXJhcHBzLmNvbSIsImVtYWlsIjoidXNlckBlbWFpbC5jb20iLCJuYW1lIjoiSm9obiBEb2UiLCJleHAiOjE2MjgxNzMwMDAsImlhdCI6MTYyODE2OTQwMCwiaXNzIjoiaHR0cHM6Ly9hY2NvdW50cy5nb29nbGUuY29tIiwibmFtZSI6IkpvaG4gRG9lIn0.YyyyzVDC7iFlZL1hjmsby7dYPjtFmoqz5TK6DLbHmg4Rghv0eXqXpRpiCwEpzxl9FJYY7XJGLHg_zvORWiZKDpWcPfwlMfOPSSbWVZjPcDQdRar0kgtnxRnHk1nl-NdhkAb8dJfUuPnoIdqrq4ftcqDjsE1yMvoYyFLjx8JFCpA
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Default)]
 pub struct IdTokenClaims {
     pub iss: String,
@@ -72,8 +70,8 @@ pub fn generate_access_token_using_keys(
     // set expiration
     if expired {
         // generate an expired token
-        claims.iat = 1695198692;
-        claims.exp = 1695195092;
+        claims.iat = 1695198692; // Wed Sep 20 2023 08:31:32 GMT+0000
+        claims.exp = 1695195092; // Wed Sep 20 2023 07:31:32 GMT+0000
     } else {
         // Set expiration 1 hour from now
         let now = SystemTime::now();
@@ -106,8 +104,8 @@ pub fn generate_id_token_using_keys(
     // set expiration
     if expired {
         // generate an expired token
-        claims.iat = 1695198692;
-        claims.exp = 1695195092;
+        claims.iat = 1695198692; // Wed Sep 20 2023 08:31:32 GMT+0000
+        claims.exp = 1695195092; // Wed Sep 20 2023 07:31:32 GMT+0000
     } else {
         // Set expiration 1 hour from now
         let now = SystemTime::now();
