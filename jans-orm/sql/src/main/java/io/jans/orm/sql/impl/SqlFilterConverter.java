@@ -351,7 +351,7 @@ public class SqlFilterConverter {
             Expression expression;
             if (multiValued) {
     			if (SupportedDbType.POSTGRESQL == this.dbType) {
-    				String likeString = "\"" + StringEscapeUtils.escapeJava(like.toString()) + "\"";
+    				String likeString = StringEscapeUtils.escapeJava(like.toString());
 	            	return buildPostgreSqlMultivaluedComparisionExpression(tableMapping, jsonAttributes,
 							currentGenericFilter, typedPathColumn, Expressions.constant("like_regex"),
 							likeString);
