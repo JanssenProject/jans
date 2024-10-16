@@ -77,6 +77,11 @@ namespace Jans {
         role: Set<String>,
         sub: String,
     };
+    entity HTTP_Request = {
+        "url": Url,
+        "header": Set<String>,
+        "accept": Set<String>,
+    };
 
     // ******  Actions  ******
     action Compare appliesTo {
@@ -117,6 +122,31 @@ namespace Jans {
     action Write appliesTo {
         principal: [User, Role],
         resource: Application,
+        context: Context,
+    };
+    action GET appliesTo {
+          principal: Workload,
+          resource: HTTP_Request,
+          context: Context,
+    };
+    action PUT appliesTo {
+        principal: Workload,
+        resource: HTTP_Request,
+        context: Context,
+    };
+    action DELETE appliesTo {
+        principal: Workload,
+        resource: HTTP_Request,
+        context: Context,
+    };
+    action HEAD appliesTo {
+        principal: Workload,
+        resource: HTTP_Request,
+        context: Context,
+    };
+    action PATCH appliesTo {
+        principal: Workload,
+        resource: HTTP_Request,
         context: Context,
     };
 }
