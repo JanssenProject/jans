@@ -1,10 +1,15 @@
 package io.jans.configapi.core.util;
 
 import io.jans.as.model.json.JsonApplier;
+import io.jans.model.FieldFilterData;
+import io.jans.model.FilterOperator;
+import io.jans.model.attribute.AttributeDataType;
+import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.MappingException;
 import io.jans.orm.reflect.property.Getter;
 import io.jans.orm.reflect.property.Setter;
 import io.jans.orm.reflect.util.ReflectHelper;
+import io.jans.orm.search.filter.Filter;
 import io.jans.util.StringHelper;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -17,6 +22,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -126,21 +132,21 @@ public class DataUtil {
         logger.debug("Fields:{} of type:{}  ", allFields, type);
         return allFields;
     }
-    
+
     public static Map<String, String> getFieldDataType(Class<?> type, List<String> fieldList) {
         logger.error("getFieldDataType - type:{} , fieldList:{}  ", type, fieldList);
-        Map<String, String> fieldTypeMap  = null;
-        if(type==null || fieldList==null || fieldList.isEmpty()) {
+        Map<String, String> fieldTypeMap = null;
+        if (type == null || fieldList == null || fieldList.isEmpty()) {
             return fieldTypeMap;
         }
-        
-        fieldTypeMap  = getFieldTypeMap(type);
-        if(fieldTypeMap==null || fieldTypeMap.isEmpty()) {
+
+        fieldTypeMap = getFieldTypeMap(type);
+        if (fieldTypeMap.isEmpty()) {
             return fieldTypeMap;
         }
-        
+
         fieldTypeMap.keySet().retainAll(fieldList);
-        
+
         logger.error("Final - fieldList:{} of fieldTypeMap:{}  ", fieldList, fieldTypeMap);
         return fieldTypeMap;
     }
@@ -211,6 +217,73 @@ public class DataUtil {
             }
         }
         return false;
+    }
+
+    public static Map<String, String> getFieldType(Class<?> type, List<FieldFilterData> fieldFilterData) {
+        logger.error("After modification type:{}, fieldFilterData:{}", type, fieldFilterData);
+        Map<String, String> fieldTypeMap = null;
+        if (type == null || fieldFilterData == null || fieldFilterData.isEmpty()) {
+            return fieldTypeMap;
+        }
+
+        List<String> fieldList = new ArrayList<>();
+        for (FieldFilterData entry : fieldFilterData) {
+            fieldList.add(entry.getField());
+        }
+        return getFieldDataType(type, fieldList);
+    }
+
+    public static List<Filter> createFilter(Class<?> type, List<FieldFilterData> fieldFilterData, String primaryKey,
+            PersistenceEntryManager persistenceEntryManager) {
+        logger.error("After modification type:{}, fieldFilterData:{}, primaryKey:{}, persistenceEntryManager:{}", type,
+                fieldFilterData, primaryKey, persistenceEntryManager);
+        List<Filter> filters = new ArrayList<>();
+
+        if (type == null || fieldFilterData == null || fieldFilterData.isEmpty() || StringUtils.isBlank(primaryKey)
+                || persistenceEntryManager == null) {
+            return filters;
+        }
+
+        Map<String, String> dataTypeMap = getFieldType(type, fieldFilterData);
+        logger.error(" type:{} dataTypeMap:{}", type.getCanonicalName(), dataTypeMap);
+
+        for (FieldFilterData entry : fieldFilterData) {
+
+            String dataType = AttributeDataType.STRING.getValue();
+
+            if (dataTypeMap != null && dataTypeMap.containsKey(entry.getField())) {
+                dataType = dataTypeMap.get(entry.getField());
+            }
+            logger.error("entry.getField():{}, dataType:{}", entry.getField(), dataType);
+
+            Filter dataFilter = null;
+            if (AttributeDataType.STRING.getValue().equalsIgnoreCase(dataType)) {
+                logger.error("entry.getField():{}, dataType:{}, AttributeDataType.STRING.getValue():{}",
+                        entry.getField(), dataType, AttributeDataType.STRING.getValue());
+                dataFilter = Filter.createEqualityFilter(entry.getField(), entry.getValue());
+
+            } else if (AttributeDataType.DATE.getDisplayName().equalsIgnoreCase(dataType)) {
+                logger.error("entry.getField():{}, dataType:{}, AttributeDataType.DATE.getDisplayName():{}",
+                        entry.getField(), dataType, AttributeDataType.DATE.getDisplayName());
+                Date dateValue = persistenceEntryManager.decodeTime(primaryKey, entry.getValue());
+                if (FilterOperator.EQUALITY.getSign().equalsIgnoreCase(entry.getOperator())) {
+
+                    dataFilter = Filter.createEqualityFilter(entry.getField(), dateValue);
+
+                } else if (FilterOperator.GREATER.getSign().equalsIgnoreCase(entry.getOperator())) {
+
+                    dataFilter = Filter.createGreaterOrEqualFilter(entry.getField(), dateValue);
+
+                } else if (FilterOperator.LESS.getSign().equalsIgnoreCase(entry.getOperator())) {
+
+                    dataFilter = Filter.createLessOrEqualFilter(entry.getField(), dateValue);
+
+                }
+            }
+            logger.error("Filters for  fieldFilterData - dataFilter:{}", dataFilter);
+            filters.add(dataFilter);
+        }
+        return filters;
     }
 
 }

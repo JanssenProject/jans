@@ -13,6 +13,7 @@ import io.jans.configapi.util.ApiConstants;
 import io.jans.configapi.core.util.DataUtil;
 import io.jans.model.FieldFilterData;
 import io.jans.model.SearchRequest;
+import io.jans.model.attribute.AttributeDataType;
 import io.jans.model.token.TokenEntity;
 import io.jans.model.token.TokenType;
 import io.jans.orm.PersistenceEntryManager;
@@ -133,15 +134,16 @@ public class SessionService {
         }
 
         logger.error("\n\n\n Session pattern searchFilter:{}", searchFilter);
-     
-        
+
         logger.error("\n\n\n Session searchRequest.getFieldFilterData():{}", searchRequest.getFieldFilterData());
         List<Filter> fieldValueFilters = new ArrayList<>();
         if (searchRequest.getFieldFilterData() != null && !searchRequest.getFieldFilterData().isEmpty()) {
-            createFilter(SessionId.class, searchRequest.getFieldFilterData(),getDnForSession(null));
-           
+            fieldValueFilters = DataUtil.createFilter(SessionId.class, searchRequest.getFieldFilterData(),
+                    getDnForSession(null), persistenceEntryManager);
         }
 
+        searchFilter = Filter.createANDFilter(Filter.createORFilter(filters),
+                Filter.createANDFilter(fieldValueFilters));
 
         logger.debug("Session searchFilter:{}", searchFilter);
 
@@ -278,51 +280,6 @@ public class SessionService {
         session.getSessionAttributes().put("session_id", null);
         session.getSessionAttributes().put("old_session_id", null);
         return session;
-    }
-
-    private Map<String, String> getFieldDataType(Class<?> type, List<FieldFilterData> fieldFilterData) {
-        logger.error("After modification type:{}, fieldFilterData:{}", type, fieldFilterData);
-        List<String> fieldList = new ArrayList<>();
-        for (FieldFilterData entry : fieldFilterData) {
-            fieldList.add(entry.getField());
-        }
-        return DataUtil.getFieldDataType(type, fieldList);
-    }
-
-    private List<Filter> createFilter(Class<?> type, List<FieldFilterData> fieldFilterData, String primaryKey) {
-        Map<String, String> dataTypeMap = getFieldDataType(type, fieldFilterData);
-        logger.error("\n\n Session dataTypeMap:{}", dataTypeMap);
-
-        List<Filter> filters = new ArrayList<>();
-        for (FieldFilterData entry : fieldFilterData) {
-
-            String dataType = dataTypeMap.get(entry.getField());
-            logger.error("dataType:{}", dataType);
-
-            Filter dataFilter = null;
-            if ("String".equals(dataType)) {
-
-                dataFilter = Filter.createEqualityFilter(entry.getField(), entry.getValue());
-
-            } else if ("Date".equals(dataType) && "=".equalsIgnoreCase(entry.getOperator())) {
-
-                dataFilter = Filter.createEqualityFilter(entry.getField(), entry.getValue());
-
-            } else if ("Date".equals(dataType) && ">".equalsIgnoreCase(entry.getOperator())) {
-
-                dataFilter = Filter.createGreaterOrEqualFilter(entry.getField(),
-                        persistenceEntryManager.decodeTime(primaryKey, entry.getValue()));
-
-            } else if ("Date".equals(dataType) && "<".equalsIgnoreCase(entry.getOperator())) {
-
-                dataFilter = Filter.createLessOrEqualFilter(entry.getField(),
-                        persistenceEntryManager.decodeTime(primaryKey, entry.getValue()));
-
-            }
-            logger.trace("Token dataFilter:{}", dataFilter);
-            filters.add(dataFilter);
-        }
-        return filters;
     }
 
 }

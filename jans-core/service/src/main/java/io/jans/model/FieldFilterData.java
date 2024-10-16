@@ -43,7 +43,7 @@ public class FieldFilterData {
 
     @Override
     public String toString() {
-        return "FieldMap [field=" + field + ", operator=" + operator + ", value=" + value + "]";
+        return "FieldMap [field:" + field + ", operator:" + operator + ", value:" + value + "]";
     }
 
 }

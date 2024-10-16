@@ -165,7 +165,7 @@ public class Util {
                 String[] result = dataStr.split(separator);
                 log.error("result.length:{}, separator:{}, result:{}",result.length, separator, Arrays.toString(result));
                 
-                fieldFilterData = new FieldFilterData(getFieldDBName(entityClass,result[0]), separator , result[1]);
+                fieldFilterData = new FieldFilterData(result[0], separator , result[1]);
             }
             log.error("dataStr:{} , fieldValueSeparator:{}, fieldFilterData:{}", dataStr, fieldValueSeparator, fieldFilterData);
         }
