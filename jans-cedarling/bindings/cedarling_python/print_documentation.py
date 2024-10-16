@@ -1,6 +1,6 @@
 from cedarling_python import MemoryLogConfig, DisabledLoggingConfig, StdOutLogConfig
 from cedarling_python import PolicyStoreSource, PolicyStoreConfig, BootstrapConfig
-from cedarling_python import Cedarling, Request
+from cedarling_python import Cedarling
 
 import inspect
 
@@ -61,7 +61,7 @@ def print_doc(type_value):
 
 types = [MemoryLogConfig, DisabledLoggingConfig,
          StdOutLogConfig, PolicyStoreSource, PolicyStoreConfig, BootstrapConfig,
-         Cedarling, Request]
+         Cedarling]
 
 if __name__ == "__main__":
     print_header()

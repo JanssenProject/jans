@@ -1,3 +1,8 @@
+class SearchScopes:
+    SUBTREE = 'SUBTREE'
+    BASE = 'BASE'
+    LEVEL = 'LEVEL'
+
 class InstallTypes:
     NONE   =  0
     LOCAL  = '1'
@@ -22,7 +27,6 @@ class BackendTypes:
     SPANNER   = 5
 
 class BackendStrings:
-    LOCAL_OPENDJ     = 'Local OpenDj'
     REMOTE_OPENDJ    = 'Remote OpenDj'
     LOCAL_COUCHBASE  = 'Local Couchbase'
     REMOTE_COUCHBASE = 'Remote Couchbase'

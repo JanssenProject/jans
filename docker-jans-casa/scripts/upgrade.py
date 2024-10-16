@@ -9,7 +9,6 @@ from urllib.parse import urlunparse
 from jans.pycloudlib import get_manager
 from jans.pycloudlib.persistence.couchbase import CouchbaseClient
 from jans.pycloudlib.persistence.couchbase import id_from_dn
-from jans.pycloudlib.persistence.ldap import LdapClient
 from jans.pycloudlib.persistence.spanner import SpannerClient
 from jans.pycloudlib.persistence.sql import SqlClient
 from jans.pycloudlib.persistence.sql import doc_id_from_dn
@@ -28,59 +27,6 @@ logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("jans-casa")
 
 Entry = namedtuple("Entry", ["id", "attrs"])
-
-
-class LDAPBackend:
-    def __init__(self, manager):
-        self.manager = manager
-        self.client = LdapClient(manager)
-        self.type = "ldap"
-
-    def format_attrs(self, entry, raw_values=None):
-        raw_values = raw_values or []
-        attrs = {}
-
-        for attr in entry.entry_attributes:
-            if attr in raw_values:
-                values = entry[attr].raw_values
-            else:
-                values = entry[attr].values
-
-            if len(values) < 2:
-                v = values[0]
-            else:
-                v = values
-            attrs[attr] = v
-        return attrs
-
-    def get_entry(self, key, filter_="", attrs=None, **kwargs):
-        filter_ = filter_ or "(objectClass=*)"
-        raw_values = kwargs.get("raw_values")
-
-        entry = self.client.get(key, filter_=filter_, attributes=attrs)
-        if not entry:
-            return None
-        return Entry(entry.entry_dn, self.format_attrs(entry, raw_values))
-
-    def modify_entry(self, key, attrs=None, **kwargs):
-        attrs = attrs or {}
-        del_attrs = kwargs.get("delete_attrs") or []
-
-        for k, v in attrs.items():
-            if not isinstance(v, list):
-                v = [v]
-
-            if k in del_attrs:
-                mod = self.client.MODIFY_DELETE
-            else:
-                mod = self.client.MODIFY_REPLACE
-            attrs[k] = [(mod, v)]
-
-        modified, _ = self.client.modify(key, attrs)
-        return modified
-
-    def delete_entry(self, key, **kwargs):
-        return self.client.delete(key)
 
 
 class SQLBackend:
@@ -189,7 +135,6 @@ BACKEND_CLASSES = {
     "sql": SQLBackend,
     "couchbase": CouchbaseBackend,
     "spanner": SpannerBackend,
-    "ldap": LDAPBackend,
 }
 
 
@@ -365,12 +310,9 @@ class Upgrade:
         if self.backend.type in ("sql", "spanner"):
             kwargs = {"table_name": "adsPrjDeployment"}
             deploy_id = doc_id_from_dn(deploy_id)
-        elif self.backend.type == "couchbase":
+        else: # likely couchbase
             kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
             deploy_id = id_from_dn(deploy_id)
-        else:
-            # for ldap, get the raw value of the following attribute so we get a precise value
-            kwargs = {"raw_values": ["jansEndDate"]}
 
         entry = self.backend.get_entry(deploy_id, **kwargs)
         proj_archive = CASA_AGAMA_ARCHIVE
@@ -388,14 +330,10 @@ class Upgrade:
             if self.backend.type in ("sql", "spanner"):
                 entry.attrs["jansStartDate"] = start_date
                 entry.attrs["jansEndDate"] = None
-            elif self.backend.type == "couchbase":
+            else: # likely couchbase
                 entry.attrs["jansStartDate"] = start_date.strftime("%Y-%m-%dT%H:%M:%SZ")
                 entry.attrs["jansEndDate"] = ""
                 entry.attrs["adsPrjDeplDetails"] = {"projectMetadata": {"projectName": "casa"}}
-            else:  # ldap
-                # remove jansEndDate
-                kwargs["delete_attrs"] = ["jansEndDate"]
-                entry.attrs["jansStartDate"] = generalized_time_utc(start_date)
 
             if self.backend.modify_entry(entry.id, entry.attrs, **kwargs):
                 self.manager.config.set("casa_agama_md5sum", assets_md5)

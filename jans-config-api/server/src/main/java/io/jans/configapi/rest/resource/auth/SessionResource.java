@@ -110,14 +110,14 @@ public class SessionResource extends ConfigBaseResource {
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_SESSION_READ_ACCESS }, groupScopes = {}, superScopes = {
             ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
-    @Path(ApiConstants.JANSID_PATH + ApiConstants.JANSID_PATH_PARAM)
+    @Path(ApiConstants.SID_PATH + ApiConstants.SID_PATH_PARAM)
     public Response getSessionById(
-            @Parameter(description = "Session Unique identifier.") @PathParam(ApiConstants.JANSID) @NotNull String jansId) {
+            @Parameter(description = "Session identifier.") @PathParam(ApiConstants.SID) @NotNull String sid) {
         if (logger.isInfoEnabled()) {
-            logger.info("Delete session identified by jansId:{}", escapeLog(jansId));
+            logger.info("Delete session identified by sid:{}", escapeLog(sid));
         }
-        checkResourceNotNull(jansId, ApiConstants.JANSID);
-        final SessionId session = sessionService.getSessionById(jansId);
+        checkResourceNotNull(sid, ApiConstants.SID);
+        final SessionId session = sessionService.getSessionBySid(sid);
         logger.debug("session:{}", session);
         return Response.ok(session).build();
     }
@@ -125,7 +125,7 @@ public class SessionResource extends ConfigBaseResource {
     @Operation(summary = "Revoke all sessions by userDn", description = "Revoke all sessions by userDn", operationId = "revoke-user-session", tags = {
             "Auth - Session Management" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.JANS_AUTH_SESSION_DELETE_ACCESS, ApiAccessConstants.JANS_AUTH_REVOKE_SESSION }))
-    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Ok"),
+    @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "No Content"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
@@ -147,7 +147,7 @@ public class SessionResource extends ConfigBaseResource {
     @Operation(summary = "Delete a session.", description = "Delete a session.", operationId = "delete-session", tags = {
             "Auth - Session Management" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.JANS_AUTH_SESSION_DELETE_ACCESS, ApiAccessConstants.JANS_AUTH_REVOKE_SESSION }))
-    @ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Ok"),
+    @ApiResponses(value = { @ApiResponse(responseCode = "204", description = "No Content"),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "404", description = "Not Found"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
@@ -155,15 +155,15 @@ public class SessionResource extends ConfigBaseResource {
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_SESSION_DELETE_ACCESS,
             ApiAccessConstants.JANS_AUTH_REVOKE_SESSION }, groupScopes = {}, superScopes = {
                     ApiAccessConstants.SUPER_ADMIN_DELETE_ACCESS })
-    @Path(ApiConstants.JANSID_PATH + ApiConstants.JANSID_PATH_PARAM)
-    public Response deleteSessionById(
-            @Parameter(description = "Session Unique identifier.") @PathParam(ApiConstants.JANSID) @NotNull String jansId) {
+    @Path(ApiConstants.SID_PATH + ApiConstants.SID_PATH_PARAM)
+    public Response deleteSessionBySid(
+            @Parameter(description = "Session identifier.") @PathParam(ApiConstants.SID) @NotNull String sid) {
         if (logger.isInfoEnabled()) {
-            logger.info("Delete session identified by jansId:{}", escapeLog(jansId));
+            logger.info("Delete session identified by sid:{}", escapeLog(sid));
         }
-        checkResourceNotNull(jansId, ApiConstants.JANSID);
+        checkResourceNotNull(sid, ApiConstants.SID);
 
-        sessionService.revokeSessionById(jansId);
+        sessionService.revokeSessionBySid(sid);
         return Response.ok().build();
     }
 
