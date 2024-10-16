@@ -5,6 +5,7 @@ import io.jans.casa.misc.AppStateEnum;
 import io.jans.casa.model.ApplicationConfiguration;
 import io.jans.casa.timer.*;
 import io.jans.orm.exception.operation.PersistenceException;
+import io.jans.service.document.store.manager.DocumentStoreManager;
 import io.jans.util.security.SecurityProviderUtility;
 
 import jakarta.annotation.PostConstruct;
@@ -19,6 +20,8 @@ import org.slf4j.Logger;
 public class ConfigurationHandler {
 
     public static final String AGAMA_FLOW_ACR = System.getProperty("acr");
+
+    private final static String DOCUMENT_STORE_MANAGER_JANS_CASA_TYPE = "casa"; // Module name
 
     @Inject
     private Logger logger;
@@ -43,6 +46,9 @@ public class ConfigurationHandler {
 
     @Inject
     private FSPluginChecker pluginChecker;
+
+    @Inject
+    private DocumentStoreManager documentStoreManager;
 
     private ApplicationConfiguration appConfiguration;
 
@@ -78,7 +84,10 @@ public class ConfigurationHandler {
                 computeAcrPluginMapping();
                 computeCorsOrigins();
                 saveSettings();
-                
+
+                // Initialize Document Store Manager
+                documentStoreManager.initTimer(Arrays.asList(DOCUMENT_STORE_MANAGER_JANS_CASA_TYPE));
+
                 setAppState(AppStateEnum.OPERATING);
                 
                 try {

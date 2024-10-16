@@ -30,6 +30,7 @@ import io.jans.scim.service.ConfigurationFactory;
 import io.jans.scim.service.logger.LoggerService;
 import io.jans.service.PythonService;
 import io.jans.service.custom.script.CustomScriptManager;
+import io.jans.service.document.store.manager.DocumentStoreManager;
 import io.jans.service.timer.QuartzSchedulerManager;
 import io.jans.util.StringHelper;
 import io.jans.util.security.PropertiesDecrypter;
@@ -38,6 +39,8 @@ import io.jans.util.security.StringEncrypter;
 
 @ApplicationScoped
 public class AppInitializer {
+
+    private final static String DOCUMENT_STORE_MANAGER_JANS_SCIM_TYPE = "jans-scim"; // Module name
 
     private static final int RETRIES = 15;
     private static final int RETRY_INTERVAL = 15;
@@ -73,6 +76,9 @@ public class AppInitializer {
     //@Inject
     //private ExternalScimService externalScimService;
 
+    @Inject
+    private DocumentStoreManager documentStoreManager;
+
     public void applicationInitialized(@Observes @Initialized(ApplicationScoped.class) Object init) {
 
         logger.info("SCIM service initializing...");
@@ -94,8 +100,11 @@ public class AppInitializer {
         //externalScimService.init();
         customScriptManager.initTimer(Arrays.asList(
             CustomScriptType.SCIM, CustomScriptType.PERSISTENCE_EXTENSION, CustomScriptType.ID_GENERATOR));
-        logger.info("Initialized!");
 
+        // Initialize Document Store Manager
+        documentStoreManager.initTimer(Arrays.asList(DOCUMENT_STORE_MANAGER_JANS_SCIM_TYPE));
+
+        logger.info("Initialized!");
     }
 
     @Produces
