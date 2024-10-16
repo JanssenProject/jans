@@ -3,7 +3,6 @@ tags:
   - administration
   - planning
   - persistence
-  - LDAP
   - MySQL
   - Couchbase
   - Aurora
@@ -27,23 +26,6 @@ consider operational concerns.
 Janssen's strategy is to provide optionality for persistence. There is no one
 size fits all solution for databases. The following section will detail some of
 the pros and cons of the various databases we currently support.
-
-1. **OpenDJ (LDAP)** Janssen supports Gluu's distribution of OpenDJ, and probably any
-other similar distributions like ForgeRock OpenDJ, Ping Directory Server, or
-Oracle Unified Directory. LDAP in general and OpenDJ in particular have been  
-successfully backing authentication service for more than 20 years. People tend
-to think of the LDAP tree structure as fast for reads, and slow for writes.
-That's just not true anymore--OpenDJ is able to perform quite well for write
-operations as well. OpenDJ has mature replication support, excellent command
-line tools for administration, and excellent stability. The main disadvantage
-of OpenDJ is scaling large datasets for high concurrency. While you can get
-around this shortcoming with a global LDAP proxy, such a topology gets
-complicated and costly to operate, as you have to break up the data and
-configure multiple replicated topologies. As a rule of thumb, if concurrency of
-more than 120 OpenID code flow authentications per second are needed, you should
-consider another database. But for concurrency less than this, OpenDJ is an
-excellent choice. Owing to these limitations, **LDAP is not 
-supported in production deployments using Kubernetes, 1.0.23 and forward**.
 
 1. **MySQL** You know it... you love it. That's the biggest advantage.
 Performance is great out of the box. But if you have high concurrency,

@@ -15,10 +15,6 @@ from jans.pycloudlib.persistence.couchbase import sync_couchbase_cert
 from jans.pycloudlib.persistence.couchbase import sync_couchbase_password
 from jans.pycloudlib.persistence.couchbase import sync_couchbase_truststore
 from jans.pycloudlib.persistence.hybrid import render_hybrid_properties
-from jans.pycloudlib.persistence.ldap import LdapClient
-from jans.pycloudlib.persistence.ldap import render_ldap_properties
-from jans.pycloudlib.persistence.ldap import sync_ldap_password
-from jans.pycloudlib.persistence.ldap import sync_ldap_truststore
 from jans.pycloudlib.persistence.spanner import render_spanner_properties
 from jans.pycloudlib.persistence.spanner import SpannerClient
 from jans.pycloudlib.persistence.spanner import sync_google_credentials
@@ -49,7 +45,7 @@ manager = get_manager()
 
 
 def main():
-    persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "ldap")
+    persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "sql")
 
     render_salt(manager, "/app/templates/salt", "/etc/jans/conf/salt")
     render_base_properties("/app/templates/jans.properties", "/etc/jans/conf/jans.properties")
@@ -61,17 +57,6 @@ def main():
         hybrid_prop = "/etc/jans/conf/jans-hybrid.properties"
         if not os.path.exists(hybrid_prop):
             render_hybrid_properties(hybrid_prop)
-
-    if "ldap" in persistence_groups:
-        render_ldap_properties(
-            manager,
-            "/app/templates/jans-ldap.properties",
-            "/etc/jans/conf/jans-ldap.properties",
-        )
-
-        if as_boolean(os.environ.get("CN_LDAP_USE_SSL", "true")):
-            sync_ldap_truststore(manager)
-        sync_ldap_password(manager)
 
     if "couchbase" in persistence_groups:
         sync_couchbase_password(manager)
@@ -135,8 +120,6 @@ def configure_logging():
         "persistence_log_level": "INFO",
         "persistence_duration_log_target": "FILE",
         "persistence_duration_log_level": "INFO",
-        "ldap_stats_log_target": "FILE",
-        "ldap_stats_log_level": "INFO",
         "script_log_target": "FILE",
         "script_log_level": "INFO",
         "log_prefix": "",
@@ -180,7 +163,6 @@ def configure_logging():
         "link_log_target": "FILE",
         "persistence_log_target": "JANS_LINK_PERSISTENCE_FILE",
         "persistence_duration_log_target": "JANS_LINK_PERSISTENCE_DURATION_FILE",
-        "ldap_stats_log_target": "JANS_LINK_PERSISTENCE_LDAP_STATISTICS_FILE",
         "script_log_target": "JANS_LINK_SCRIPT_LOG_FILE",
     }
     for key, value in file_aliases.items():
@@ -207,7 +189,6 @@ class PersistenceSetup:
         self.manager = manager
 
         client_classes = {
-            "ldap": LdapClient,
             "couchbase": CouchbaseClient,
             "spanner": SpannerClient,
             "sql": SqlClient,
@@ -223,6 +204,7 @@ class PersistenceSetup:
 
     @cached_property
     def ctx(self) -> dict[str, _t.Any]:
+        # @TODO: remove ldap-related contexts after https://github.com/JanssenProject/jans/issues/9698 implemented
         host, port = os.environ.get("CN_LDAP_URL", "localhost:1636").split(":")
 
         password = self.manager.secret.get("encoded_ox_ldap_pw")
