@@ -90,65 +90,48 @@ impl Authz {
 
         let entities = entities_data.entities(Some(&self.policy_store.schema.schema))?;
 
-        let workload_result = {
-            let workload_result = self
-                .execute_authorize(ExecuteAuthorizeParameters {
-                    entities: &entities,
-                    principal: principal_workload_uid.clone(),
-                    action: action.clone(),
-                    resource: resource_uid.clone(),
-                    context: context.clone(),
-                })
-                .map_err(AuthorizeError::CreateRequestWorkloadEntity)?;
+        let workload_result = self
+            .execute_authorize(ExecuteAuthorizeParameters {
+                entities: &entities,
+                principal: principal_workload_uid.clone(),
+                action: action.clone(),
+                resource: resource_uid.clone(),
+                context: context.clone(),
+            })
+            .map_err(AuthorizeError::CreateRequestWorkloadEntity)?;
 
-            self.log_service.as_ref().log(
-                LogEntry::new_with_data(
-                    self.pdp_id,
-                    self.application_name.clone(),
-                    LogType::Decision,
-                )
-                .set_auth_info(AuthorizationLogInfo {
-                    action: request.action.clone(),
-                    context: request.context.clone(),
-                    decision: workload_result.decision().into(),
-                    principal: principal_workload_uid.to_string(),
-                    diagnostics: workload_result.diagnostics().clone().into(),
-                    resource: resource_uid.to_string(),
-                })
-                .set_message("Result of authorize with resource as workload entity".to_string()),
-            );
-            workload_result
-        };
+        let person_result = self
+            .execute_authorize(ExecuteAuthorizeParameters {
+                entities: &entities,
+                principal: principal_user_entity_uid.clone(),
+                action,
+                resource: resource_uid.clone(),
+                context,
+            })
+            .map_err(AuthorizeError::CreateRequestUserEntity)?;
 
-        let person_result = {
-            let person_result = self
-                .execute_authorize(ExecuteAuthorizeParameters {
-                    entities: &entities,
-                    principal: principal_user_entity_uid.clone(),
-                    action,
-                    resource: resource_uid.clone(),
-                    context,
-                })
-                .map_err(AuthorizeError::CreateRequestUserEntity)?;
+        self.log_service.log(
+            LogEntry::new_with_data(
+                self.pdp_id,
+                self.application_name.clone(),
+                LogType::Decision,
+            )
+            .set_auth_info(AuthorizationLogInfo {
+                action: request.action,
+                context: request.context,
+                resource: resource_uid.to_string(),
 
-            self.log_service.as_ref().log(
-                LogEntry::new_with_data(
-                    self.pdp_id,
-                    self.application_name.clone(),
-                    LogType::Decision,
-                )
-                .set_auth_info(AuthorizationLogInfo {
-                    action: request.action,
-                    context: request.context,
-                    decision: person_result.decision().into(),
-                    principal: principal_workload_uid.to_string(),
-                    diagnostics: person_result.diagnostics().clone().into(),
-                    resource: resource_uid.to_string(),
-                })
-                .set_message("Result of authorize with resource as user entity".to_string()),
-            );
-            person_result
-        };
+                person_principal: principal_user_entity_uid.to_string(),
+                workload_principal: principal_workload_uid.to_string(),
+
+                person_diagnostics: person_result.diagnostics().clone().into(),
+                workload_diagnostics: workload_result.diagnostics().clone().into(),
+
+                person_decision: person_result.decision().into(),
+                workload_decision: workload_result.decision().into(),
+            })
+            .set_message("Result of authorize.".to_string()),
+        );
 
         Ok(AuthorizeResult {
             workload: workload_result,
