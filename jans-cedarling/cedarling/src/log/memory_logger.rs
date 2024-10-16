@@ -108,12 +108,18 @@ mod tests {
         )
         .set_message("some message".to_string())
         .set_auth_info(AuthorizationLogInfo {
-            principal: "test_principal".to_string(),
             action: "test_action".to_string(),
             resource: "test_resource".to_string(),
             context: serde_json::json!({}),
-            decision: Decision::Allow,
-            diagnostics: Default::default(),
+
+            person_principal: "test_person_principal".to_string(),
+            workload_principal: "test_workload_principal".to_string(),
+
+            person_diagnostics: Default::default(),
+            workload_diagnostics: Default::default(),
+
+            person_decision: Decision::Allow,
+            workload_decision: Decision::Allow,
         });
         let entry2 = LogEntry::new_with_data(
             app_types::PdpID::new(),

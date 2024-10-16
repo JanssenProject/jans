@@ -23,6 +23,14 @@ impl TokenPayload {
         Self { payload }
     }
 
+    /// Clone current value and extend with the given payload.
+    pub fn extend(&self, payload: TokenPayload) -> Self {
+        let mut result = self.clone();
+        result.payload.extend(payload.payload);
+
+        result
+    }
+
     /// Get claim attribute value
     /// for all types that implements `ClaimGetter<T>`
     pub fn get_value<T>(&self, key: &str) -> Result<T, GetTokenClaimValue>

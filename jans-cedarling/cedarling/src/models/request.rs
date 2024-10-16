@@ -14,8 +14,10 @@ use cedar_policy::{EntityId, EntityTypeName, EntityUid, ParseErrors};
 pub struct Request<'a> {
     /// Access token raw value
     pub access_token: &'a str,
-    // pub id_token:  &'a str,
-    // pub userinfo_token:  &'a str,
+    /// Id token raw value
+    pub id_token: &'a str,
+    /// User info token raw value
+    pub userinfo_token: &'a str,
     /// cedar_policy action
     pub action: String,
     /// cedar_policy resource data
