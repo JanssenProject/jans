@@ -6,6 +6,7 @@
  */
 
 /// A set of properties used to configure logging in the `Cedarling` application.
+#[derive(Debug, Clone)]
 pub struct LogConfig {
     /// `CEDARLING_LOG_TYPE` in [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) documentation.
     pub log_type: LogTypeConfig,

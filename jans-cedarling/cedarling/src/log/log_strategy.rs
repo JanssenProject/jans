@@ -17,7 +17,7 @@ use crate::models::log_entry::LogEntry;
 /// It is used to provide a single point of access for logging and same api for different loggers.
 pub(crate) enum LogStrategy {
     MemoryLogger(MemoryLogger),
-    OnlyWriter(Box<dyn LogWriter>),
+    OnlyWriter(Box<dyn LogWriter + Send + Sync>),
 }
 
 impl LogStrategy {

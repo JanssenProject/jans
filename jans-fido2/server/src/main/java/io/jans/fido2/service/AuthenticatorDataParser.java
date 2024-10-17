@@ -94,6 +94,9 @@ public class AuthenticatorDataParser {
         //Credential backup eligibility and current backup state is conveyed by the BE and BS flags. See https://w3c.github.io/webauthn/#sctn-credential-backup for details.
         boolean hasBEFlag = verifyBackupEligibility(flagsBuffer);
         boolean hasBSFlag = verifyBackupState(flagsBuffer);
+        
+        boolean hasUVFlag = verifyUVFlag(flagsBuffer);
+        boolean hasUPFlag = verifyUPFlag(flagsBuffer);
         log.debug("FLAGS hex {}", Hex.encodeHexString(flagsBuffer));
 
         byte[] counterBuffer = Arrays.copyOfRange(buffer, offset, offset += 4);
@@ -208,14 +211,29 @@ public class AuthenticatorDataParser {
     public boolean verifyBackupEligibility(byte[] flags) {
         return (flags[0] & FLAG_BACKUP_ELIGIBILITY) == FLAG_BACKUP_ELIGIBILITY;
     }
-
+    
     /*
-     * Checks if the Backup State flag is set in the given flags byte array.
+     * Checks if the BackupState BS flag is set in the given flags byte array.
      */
     public boolean verifyBackupState(byte[] flags) {
         return (flags[0] & FLAG_BACKUP_STATE) == FLAG_BACKUP_STATE;
     }
 
+    /*
+     * Checks if the UserPresent flag is set in the given flags byte array.
+     */
+    public boolean verifyUPFlag(byte[] flags) {
+        return (flags[0] & FLAG_USER_PRESENT) == FLAG_USER_PRESENT;
+    }
+
+    /*
+     * Checks if the UserVerified flag is set in the given flags byte array.
+     */
+    public boolean verifyUVFlag(byte[] flags) {
+        return (flags[0] & FLAG_USER_VERIFIED) == FLAG_USER_VERIFIED;
+    }
+
+   
     public void verifyAttestationBuffer(byte[] attestationBuffer) {
         if (attestationBuffer.length == 0) {
             throw new Fido2RuntimeException("Invalid attestation data buffer");

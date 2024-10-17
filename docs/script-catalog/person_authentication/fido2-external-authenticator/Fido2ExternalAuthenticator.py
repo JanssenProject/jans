@@ -70,8 +70,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
         if step == 1:
             print "Fido2. Authenticate for step 1"
-            identity.setWorkingParameter("platformAuthenticatorAvailable",ServerUtil.getFirstValue(requestParameters, "loginForm:platformAuthenticator"))
-
+            
             user_password = credentials.getPassword()
             logged_in = False
             if StringHelper.isNotEmptyString(user_name) and StringHelper.isNotEmptyString(user_password):
@@ -104,9 +103,13 @@ class PersonAuthentication(PersonAuthenticationType):
             if auth_method == 'authenticate':
                 print "Fido2. Prepare for step 2. Call Fido2 in order to finish authentication flow"
                 assertionService = Fido2ClientFactory.instance().createAssertionService(self.metaDataConfiguration)
+                
                 assertionStatus = assertionService.verify(token_response)
                 authenticationStatusEntity = assertionStatus.readEntity(java.lang.String)
-
+                print "token_response %s " % token_response
+                print "assertionStatus: %s" % assertionStatus
+                print "assertionStatus.getStatus() : %s" % assertionStatus.getStatus() 
+                print "authenticationStatusEntity : %s" % authenticationStatusEntity 
                 if assertionStatus.getStatus() != Response.Status.OK.getStatusCode():
                     print "Fido2. Authenticate for step 2. Get invalid authentication status from Fido2 server"
                     return False
@@ -115,8 +118,14 @@ class PersonAuthentication(PersonAuthenticationType):
             elif auth_method == 'enroll':
                 print "Fido2. Prepare for step 2. Call Fido2 in order to finish registration flow"
                 attestationService = Fido2ClientFactory.instance().createAttestationService(self.metaDataConfiguration)
+                
                 attestationStatus = attestationService.verify(token_response)
-
+                print "token_response %s " % token_response
+                print "attestationStatus: %s" % attestationStatus
+                print "attestationStatus.getStatus() : %s" % attestationStatus.getStatus() 
+                attestationStatusEntity = attestationStatus.readEntity(java.lang.String)
+                
+                print "attestationStatusEntity : %s" % attestationStatusEntity 
                 if attestationStatus.getStatus() != Response.Status.OK.getStatusCode():
                     print "Fido2. Authenticate for step 2. Get invalid registration status from Fido2 server"
                     return False
@@ -170,11 +179,7 @@ class PersonAuthentication(PersonAuthenticationType):
                     assertionService = Fido2ClientFactory.instance().createAssertionService(metaDataConfiguration)
                     assertionRequest = json.dumps({'username': userName}, separators=(',', ':'))
                     assertionResponse = assertionService.authenticate(assertionRequest).readEntity(java.lang.String)
-                    # if device has only platform authenticator and assertion is expecting a security key
-                    if "internal" in assertionResponse:
-                        identity.setWorkingParameter("platformAuthenticatorAvailable", "true")
-                    else:
-                        identity.setWorkingParameter("platformAuthenticatorAvailable", "false")
+                    print "assertionResponse %s " % assertionResponse
 
                 except ClientErrorException, ex:
                     print "Fido2. Prepare for step 2. Failed to start assertion flow. Exception:", sys.exc_info()[1]
@@ -184,19 +189,14 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 try:
                     attestationService = Fido2ClientFactory.instance().createAttestationService(metaDataConfiguration)
-                    platformAuthenticatorAvailable = identity.getWorkingParameter("platformAuthenticatorAvailable") == "true"
-                    basic_json = {'username': userName, 'displayName': userName, 'attestation' : 'direct'}
-                    print "% s" % identity.getWorkingParameter("platformAuthenticatorAvailable")
-                    if platformAuthenticatorAvailable is True:
-                       # the reason behind userVerification = discouraged  --> https://chromium.googlesource.com/chromium/src/+/master/content/browser/webauth/uv_preferred.md
-                       platform_json = {"authenticatorSelection":{"authenticatorAttachment":"platform","requireResidentKey" : "false", "userVerification" : "discouraged" } }
-                       basic_json.update(platform_json)
-
-                       # also need to add this --> excludeCredentials : [//registered ids]
+                    
+                    basic_json = {'username': userName, 'displayName': userName}
+                    
+                    
                     print " basic_json %s" % basic_json
 
                     attestationRequest = json.dumps(basic_json)
-                    #, separators=(',', ':'))
+                    
 
                     attestationResponse = attestationService.register(attestationRequest).readEntity(java.lang.String)
                 except ClientErrorException, ex:
@@ -216,7 +216,7 @@ class PersonAuthentication(PersonAuthenticationType):
             return False
 
     def getExtraParametersForStep(self, configurationAttributes, step):
-        return Arrays.asList( "platformAuthenticatorAvailable")
+        return Arrays.asList( "fido2_assertion_request","fido2_attestation_request")
 
     def getCountAuthenticationSteps(self, configurationAttributes):
         return 2
@@ -226,13 +226,11 @@ class PersonAuthentication(PersonAuthenticationType):
 
     def getPageForStep(self, configurationAttributes, step):
         if step == 1:
-            return "/auth/fido2/step1.xhtml"
+            return "/auth/fido2/login.xhtml"
         elif step == 2:
             identity = CdiUtil.bean(Identity)
-            if identity.getWorkingParameter("platformAuthenticatorAvailable") == "true":
-                return "/auth/fido2/platform.xhtml"
-            else:
-                return "/auth/fido2/secKeys.xhtml"
+            return "/auth/fido2/passkeys.xhtml"
+            
         return ""
 
     def logout(self, configurationAttributes, requestParameters):

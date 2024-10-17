@@ -1,40 +1,26 @@
 package io.jans.fido2.model.attestation;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Response {
-    private String attestationObject;
-    private String clientDataJSON;
-    private String clientExtensionResults;
-    private String deviceData;
+	private String attestationObject;
+	private String clientDataJSON;
 
-    public String getAttestationObject() {
-        return attestationObject;
-    }
+	public String getAttestationObject() {
+		return attestationObject;
+	}
 
-    public void setAttestationObject(String attestationObject) {
-        this.attestationObject = attestationObject;
-    }
+	public void setAttestationObject(String attestationObject) {
+		this.attestationObject = attestationObject;
+	}
 
-    public String getClientDataJSON() {
-        return clientDataJSON;
-    }
+	public String getClientDataJSON() {
+		return clientDataJSON;
+	}
 
-    public void setClientDataJSON(String clientDataJSON) {
-        this.clientDataJSON = clientDataJSON;
-    }
+	public void setClientDataJSON(String clientDataJSON) {
+		this.clientDataJSON = clientDataJSON;
+	}
 
-    public String getClientExtensionResults() {
-        return clientExtensionResults;
-    }
-
-    public void setClientExtensionResults(String clientExtensionResults) {
-        this.clientExtensionResults = clientExtensionResults;
-    }
-
-    public String getDeviceData() {
-        return deviceData;
-    }
-
-    public void setDeviceData(String deviceData) {
-        this.deviceData = deviceData;
-    }
 }

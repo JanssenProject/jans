@@ -1,0 +1,24 @@
+entity Test = {
+    string_key: String,
+    long_key: Long,
+    bool_key: Boolean,
+    entity_uid_key: Test2,
+    optional_key?: String
+};
+
+entity Test2 = {
+};
+
+
+namespace Jans{
+    entity Test = {
+        string_key: String,
+        long_key: Long,
+        bool_key: Boolean,
+        entity_uid_key: Test2,
+        optional_key?: String
+    };
+
+    entity Test2 = {
+    };
+}

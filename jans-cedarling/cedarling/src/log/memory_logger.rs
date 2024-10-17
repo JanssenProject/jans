@@ -9,12 +9,15 @@ use super::interface::{LogStorage, LogWriter};
 use crate::models::log_config::MemoryLogConfig;
 use crate::models::log_entry::LogEntry;
 use sparkv::{Config as ConfigSparKV, SparKV};
-use std::{cell::RefCell, time::Duration};
+use std::{sync::Mutex, time::Duration};
+
+const STORAGE_MUTEX_EXPECT_MESSAGE: &str = "MemoryLogger storage mutex should unlock";
+const STORAGE_JSON_PARSE_EXPECT_MESSAGE: &str =
+    "In MemoryLogger storage value should be valid LogEntry json string";
 
 /// A logger that store logs in-memory.
 pub(crate) struct MemoryLogger {
-    // Using RefCell to enable interior mutability
-    storage: RefCell<SparKV>,
+    storage: Mutex<SparKV>,
 }
 
 impl MemoryLogger {
@@ -25,7 +28,7 @@ impl MemoryLogger {
         };
 
         MemoryLogger {
-            storage: RefCell::new(SparKV::with_config(sparkv_config)),
+            storage: Mutex::new(SparKV::with_config(sparkv_config)),
         }
     }
 }
@@ -37,7 +40,8 @@ impl LogWriter for MemoryLogger {
 
         let result = self
             .storage
-            .borrow_mut()
+            .lock()
+            .expect(STORAGE_MUTEX_EXPECT_MESSAGE)
             .set(entry.id.to_string().as_str(), &json_string);
 
         if let Err(err) = result {
@@ -52,33 +56,40 @@ impl LogStorage for MemoryLogger {
     fn pop_logs(&self) -> Vec<LogEntry> {
         // TODO: implement more efficient implementation
 
-        let keys = self.storage.borrow().get_keys();
+        let mut storage_guard = self.storage.lock().expect(STORAGE_MUTEX_EXPECT_MESSAGE);
+
+        let keys = storage_guard.get_keys();
 
         keys.iter()
-            .filter_map(|key| self.storage.borrow_mut().pop(key))
+            .filter_map(|key| storage_guard.pop(key))
             // we call unwrap, because we know that the value is valid json
-            .map(|str_json| serde_json::from_str::<LogEntry>(str_json.as_str()).unwrap())
+            .map(|str_json| serde_json::from_str::<LogEntry>(str_json.as_str())
+            .expect(STORAGE_JSON_PARSE_EXPECT_MESSAGE))
             .collect()
     }
 
     fn get_log_by_id(&self, id: &str) -> Option<LogEntry> {
-        self.storage
-            .borrow()
+        self.storage.lock().expect(STORAGE_MUTEX_EXPECT_MESSAGE)
             .get(id)
             // we call unwrap, because we know that the value is valid json
-            .map(|str_json| serde_json::from_str::<LogEntry>(str_json.as_str()).unwrap())
+            .map(|str_json| serde_json::from_str::<LogEntry>(str_json.as_str()).expect(STORAGE_JSON_PARSE_EXPECT_MESSAGE))
     }
 
     fn get_log_ids(&self) -> Vec<String> {
-        self.storage.borrow().get_keys()
+        self.storage
+            .lock()
+            .expect(STORAGE_MUTEX_EXPECT_MESSAGE)
+            .get_keys()
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::models::log_entry::{AuthorizationLogInfo, Decision, LogEntry, LogType};
-    use uuid7::uuid7;
+    use crate::models::{
+        app_types,
+        log_entry::{AuthorizationLogInfo, Decision, LogEntry, LogType},
+    };
 
     fn create_memory_logger() -> MemoryLogger {
         let config = MemoryLogConfig { log_ttl: 60 };
@@ -90,17 +101,25 @@ mod tests {
         let logger = create_memory_logger();
 
         // create log entries
-        let entry1 = LogEntry::new_with_data(uuid7(), "app1".to_string(), LogType::Decision)
-            .set_message("some message".to_string())
-            .set_auth_info(AuthorizationLogInfo {
-                principal: "test_principal".to_string(),
-                action: "test_action".to_string(),
-                resource: "test_resource".to_string(),
-                context: "{}".to_string(),
-                decision: Decision::Allow,
-                diagnostics: "test diagnostic info".to_string(),
-            });
-        let entry2 = LogEntry::new_with_data(uuid7(), "app2".to_string(), LogType::System);
+        let entry1 = LogEntry::new_with_data(
+            app_types::PdpID::new(),
+            app_types::ApplicationName("app1".to_string()),
+            LogType::Decision,
+        )
+        .set_message("some message".to_string())
+        .set_auth_info(AuthorizationLogInfo {
+            principal: "test_principal".to_string(),
+            action: "test_action".to_string(),
+            resource: "test_resource".to_string(),
+            context: serde_json::json!({}),
+            decision: Decision::Allow,
+            diagnostics: Default::default(),
+        });
+        let entry2 = LogEntry::new_with_data(
+            app_types::PdpID::new(),
+            app_types::ApplicationName("app2".to_string()),
+            LogType::System,
+        );
 
         // log entries
         logger.log(entry1.clone());
@@ -137,8 +156,16 @@ mod tests {
         let logger = create_memory_logger();
 
         // create log entries
-        let entry1 = LogEntry::new_with_data(uuid7(), "app1".to_string(), LogType::Decision);
-        let entry2 = LogEntry::new_with_data(uuid7(), "app2".to_string(), LogType::Metric);
+        let entry1 = LogEntry::new_with_data(
+            app_types::PdpID::new(),
+            app_types::ApplicationName("app1".to_string()),
+            LogType::Decision,
+        );
+        let entry2 = LogEntry::new_with_data(
+            app_types::PdpID::new(),
+            app_types::ApplicationName("app2".to_string()),
+            LogType::Metric,
+        );
 
         // log entries
         logger.log(entry1.clone());

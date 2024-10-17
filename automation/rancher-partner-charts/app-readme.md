@@ -23,7 +23,6 @@ The Janssen Server can be deployed to support the following open standards for a
 - System for Cross-domain Identity Management (SCIM)    
 - FIDO Universal 2nd Factor (U2F)
 - FIDO 2.0 / WebAuthn
-- Lightweight Directory Access Protocol (LDAP)   
 - Remote Authentication Dial-In User Service (RADIUS)
 
 ### Important notes for installation:
@@ -32,4 +31,4 @@ The Janssen Server can be deployed to support the following open standards for a
 ### Quick install on Rancher UI with Docker single node
 - Install the nginx-ingress-controller chart.
 - Install the OpenEBS chart.
-- Install Janssen chart and specify your persistence as ldap.
+- Install Janssen chart and specify your persistence.

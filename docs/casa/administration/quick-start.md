@@ -24,7 +24,7 @@ The "out-of-the-box" login experience in Casa consists of the usual username and
 **Important notes**:
 
 - Usage of OTP via SMS requires the setup of a [Twilio](https://twilio.com) account and populating configuration properties of 
-flow `io.jans.casa.authn.twilio_sms` found in Casa Agama project. You can do the latter via [TUI](../../admin/config-guide/auth-server-config/agama-project-configuration/#agama-project-configuration-screen). We encourage you to use the online Twilio testing tools beforehand to ensure you can send SMS to the countries you are targetting
+flow `io.jans.casa.authn.twilio_sms` found in Casa Agama project. You can do the latter via [TUI](../../janssen-server/config-guide/auth-server-config/agama-project-configuration.md#agama-project-configuration-screen). We encourage you to use the online Twilio testing tools beforehand to ensure you can send SMS to the countries you are targetting
 
 - Usage of Super Gluu has some preliminar requisites described [here](https://docs.gluu.org/head/supergluu/admin-guide/)
 
@@ -46,7 +46,7 @@ Click [here](./2fa-basics.md) to learn more about 2FA in Casa.
 ## Finish configuration
 
 Once you are done with testing, you may use casa as the default authentication method of 
-Janssen Server using [TUI](../../admin/config-guide/config-tools/jans-tui/README.md) 
+Janssen Server using [TUI](../../janssen-server/config-guide/config-tools/jans-tui/README.md) 
  to log in users via Casa for all applications the server protects.
  
 Finally, as a security measure you can thoroughly disable access to the administrative console of Casa by following the steps below:

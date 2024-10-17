@@ -107,7 +107,7 @@ public class PackedAttestationProcessor implements AttestationFormatProcessor {
                 throw errorResponseFactory.badRequestException(AttestationErrorResponseType.PACKED_ERROR, "Self signed certificate");
             }
 
-            credIdAndCounters.setSignatureAlgorithm(alg);
+            
 
         } else if (attStmt.hasNonNull("ecdaaKeyId")) {
             String ecdaaKeyId = attStmt.get("ecdaaKeyId").asText();
@@ -119,6 +119,8 @@ public class PackedAttestationProcessor implements AttestationFormatProcessor {
         credIdAndCounters.setAttestationType(getAttestationFormat().getFmt());
         credIdAndCounters.setCredId(base64Service.urlEncodeToString(authData.getCredId()));
         credIdAndCounters.setUncompressedEcPoint(base64Service.urlEncodeToString(authData.getCosePublicKey()));
+        credIdAndCounters.setSignatureAlgorithm(alg);
+        credIdAndCounters.setAuthenticatorName(attestationCertificateService.getAttestationAuthenticatorName(authData));
     }
 
 	private List<X509Certificate> getAttestationCertificates(JsonNode attStmt) {

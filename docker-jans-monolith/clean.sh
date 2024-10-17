@@ -5,7 +5,7 @@ if [ -z "$1" ]; then
     yaml="jans-mysql-compose.yml"
 else
 	case "$1" in
-		mysql|ldap|postgres|couchbase|spanner)
+		mysql|postgres|couchbase|spanner)
 			yaml="jans-${1}-compose.yml"
 			;;
 		*)
@@ -53,10 +53,6 @@ fi
 
 if docker volume inspect ${DOCKER_PROJECT}_${DATABASE_VOLUME_NAME} &> /dev/null; then
 	docker volume rm ${DOCKER_PROJECT}_${DATABASE_VOLUME_NAME} &> /dev/null
-fi
-
-if docker volume inspect ${DOCKER_PROJECT}_${DATABASE_VOLUME_NAME} &> /dev/null; then
-	docker volume rm ${DOCKER_PROJECT}_${DATABASE_VOLUME_NAME}
 fi
 
 if docker image inspect ${JANSSEN_IMAGE} &> /dev/null; then

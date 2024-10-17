@@ -9,6 +9,7 @@ import re
 import typing as _t
 import warnings
 from collections import defaultdict
+from collections.abc import Callable
 from functools import cached_property
 from tempfile import NamedTemporaryFile
 
@@ -528,7 +529,12 @@ class SqlClient(SqlSchemaMixin):
                     attr_mapping[attr] = self._transform_value(attr, entry[attr])
                 yield table_name, attr_mapping
 
-    def create_from_ldif(self, filepath: str, ctx: dict[str, _t.Any]) -> None:
+    def create_from_ldif(
+        self,
+        filepath: str,
+        ctx: dict[str, _t.Any],
+        transform_column_mapping: None | Callable[[str, dict], dict] = None,
+    ) -> None:
         """Create entry with data loaded from an LDIF template file.
 
         Args:
@@ -541,6 +547,8 @@ class SqlClient(SqlSchemaMixin):
             dst.flush()
 
             for table_name, column_mapping in self._data_from_ldif(dst.name):
+                if callable(transform_column_mapping):
+                    column_mapping = transform_column_mapping(table_name, column_mapping)
                 self.insert_into(table_name, column_mapping)
 
     def get_server_version(self) -> tuple[int, ...]:
