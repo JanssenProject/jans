@@ -10,6 +10,7 @@ use pyo3::Bound;
 mod decision;
 mod diagnostics;
 mod policy_evaluation_error;
+mod request;
 mod resource_data;
 
 pub fn register_entities(m: &Bound<'_, PyModule>) -> PyResult<()> {
@@ -17,6 +18,7 @@ pub fn register_entities(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<diagnostics::Diagnostics>()?;
     m.add_class::<decision::Decision>()?;
     m.add_class::<resource_data::ResourceData>()?;
+    m.add_class::<request::Request>()?;
 
     Ok(())
 }

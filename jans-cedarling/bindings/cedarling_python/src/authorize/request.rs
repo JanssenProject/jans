@@ -5,13 +5,33 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-use cedarling::ResourceData;
-use pyo3::exceptions::{PyTypeError, PyValueError};
+// use cedarling::ResourceData;
+use super::resource_data::ResourceData;
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
+use serde_pyobject::from_pyobject;
 
-#[pyclass(get_all)]
-pub struct Request<'a> {
+/// Request
+/// =======
+///
+/// A Python wrapper for the Rust `cedarling::Request` struct. Represents
+/// authorization data with access token, action, resource, and context.
+///
+/// Attributes
+/// ----------
+/// :param access_token: The access token string.
+/// :param action: The action to be authorized.
+/// :param resource: Resource data (wrapped `ResourceData` object).
+/// :param context: Python dictionary with additional context.
+///
+/// Example
+/// -------
+/// ```python
+/// # Create a request for authorization
+/// request = Request(access_token="token123", action="read", resource=resource, context={})
+/// ```
+#[pyclass(get_all, set_all)]
+pub struct Request {
     /// Access token raw value
     pub access_token: String,
     /// cedar_policy action
@@ -19,35 +39,41 @@ pub struct Request<'a> {
     /// cedar_policy resource data
     pub resource: ResourceData,
     /// context to be used in cedar_policy
-    pub context: &'a PyDict,
+    pub context: Py<PyDict>,
 }
 
-// #[pymethods]
-// impl BootstrapConfig {
-//     #[new]
-//     #[pyo3(signature = (application_name=None, log_config=None, policy_store_config=None, jwt_config=None))]
-//     fn new(
-//         application_name: Option<String>,
-//         log_config: Option<PyObject>,
-//         policy_store_config: Option<PolicyStoreConfig>,
-//         jwt_config: Option<JwtConfig>,
-//     ) -> PyResult<Self> {
-//         let log_config = match log_config {
-//             Some(python_value) => Some(extract_log_config(&python_value)?),
-//             None => None,
-//         };
+#[pymethods]
+impl Request {
+    #[new]
+    fn new(
+        access_token: String,
+        action: String,
+        resource: ResourceData,
+        context: Py<PyDict>,
+    ) -> Self {
+        Self {
+            access_token,
+            action,
+            resource,
+            context,
+        }
+    }
+}
 
-//         Ok(Self {
-//             application_name,
-//             policy_store_config,
-//             log_config,
-//             jwt_config,
-//         })
-//     }
+impl TryFrom<Request> for cedarling::Request {
+    type Error = PyErr;
 
-//     #[setter]
-//     fn log_config(&mut self, value: PyObject) -> PyResult<()> {
-//         self.log_config = Some(extract_log_config(&value)?);
-//         Ok(())
-//     }
-// }
+    fn try_from(value: Request) -> Result<Self, Self::Error> {
+        let context = Python::with_gil(|py| -> Result<serde_json::Value, PyErr> {
+            let context = value.context.into_bound(py);
+            from_pyobject(context).map_err(|err| err.0)
+        })?;
+
+        Ok(Self {
+            access_token: value.access_token,
+            action: value.action,
+            resource: value.resource.into(),
+            context,
+        })
+    }
+}
