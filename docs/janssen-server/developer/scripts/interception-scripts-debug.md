@@ -231,7 +231,7 @@ Now we are ready to perform script development and debugging. Here is a quick ov
 
 1. Enable remote debugging on the `jans-auth` service.
 
-1. Instruct the auth server to load the script from the file system *instead* of LDAP.
+1. Instruct the auth server to load the script from the file system *instead* of MySQL.
 
 1. Add debug instructions to the script.
 

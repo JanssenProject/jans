@@ -235,7 +235,7 @@ value for getApiVersion is greater than 10
 | Description | Description Text |
 | Programming Languages | Python/Java |
 | Level | Used in Person Authentication script type, the strength of the credential is a numerical value assigned to the custom script that is tied to the authentication method. The higher the value, the stronger it is considered. Thus, if a user has several credentials enrolled, he will be asked to present the one of them having the highest strength associated. |
-| Location type | <ul> <li> Database - Stored in persistence (LDAP, MYSQL or PLSQL whichever applicable ) </li><li>File - stored as a file </ul> |
+| Location type | <ul> <li> Database - Stored in persistence (MYSQL or PLSQL whichever applicable ) </li><li>File - stored as a file </ul> |
 | Interactive | <ul><li>Web - web application</li><li>native - mobile application</li><li>both</li></ul> |
 | Custom Properties | Key - value pairs for configurable parameters like Third Party API keys, location of configuration files etc |
 
