@@ -10,6 +10,7 @@ use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 
 use crate::authorize::authorize_result::AuthorizeResult;
+use crate::authorize::errors::authorize_error_to_py;
 use crate::authorize::request::Request;
 use crate::config::bootstrap_config::BootstrapConfig;
 use serde_pyobject::to_pyobject;
@@ -106,8 +107,7 @@ impl Cedarling {
         let cedarling_instance = self
             .inner
             .authorize(request.borrow().to_cedarling()?)
-            // TODO: convert error to correct python error
-            .map_err(|err| PyValueError::new_err(err.to_string()))?;
+            .map_err(authorize_error_to_py)?;
         Ok(cedarling_instance.into())
     }
 }

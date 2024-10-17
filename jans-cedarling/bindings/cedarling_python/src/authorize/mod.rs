@@ -11,6 +11,7 @@ pub(crate) mod authorize_result;
 mod authorize_result_response;
 mod decision;
 mod diagnostics;
+pub(crate) mod errors;
 mod policy_evaluation_error;
 pub(crate) mod request;
 mod resource_data;
@@ -23,6 +24,10 @@ pub fn register_entities(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<request::Request>()?;
     m.add_class::<authorize_result_response::AuthorizeResultResponse>()?;
     m.add_class::<authorize_result::AuthorizeResult>()?;
+
+    let submodule = PyModule::new_bound(m.py(), "authorize_errors")?;
+    errors::authorize_errors_module(&submodule)?;
+    m.add_submodule(&submodule)?;
 
     Ok(())
 }
