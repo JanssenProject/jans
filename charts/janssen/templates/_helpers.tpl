@@ -30,3 +30,19 @@ Create chart name and version as used by the chart label.
 {{- define "cn.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
+
+{{/*
+Create configuration schema-related objects.
+*/}}
+{{- define "cn.config.schema" -}}
+{{- $commonName := (printf "%s-configuration-file" .Release.Name) -}}
+{{- $secretName := .Values.global.cnConfiguratorCustomSchema.secretName | default $commonName -}}
+volumes:
+  - name: {{ $commonName }}
+    secret:
+      secretName: {{ $secretName }}
+volumeMounts:
+  - name: {{ $commonName }}
+    mountPath: {{ .Values.global.cnConfiguratorConfigurationFile }}
+    subPath: {{ .Values.global.cnConfiguratorConfigurationFile | base }}
+{{- end -}}
