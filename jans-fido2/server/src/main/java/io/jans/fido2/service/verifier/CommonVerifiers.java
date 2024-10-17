@@ -8,11 +8,20 @@ package io.jans.fido2.service.verifier;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 
+import com.google.common.base.Strings;
+import io.jans.entry.PublicKeyCredentialHints;
 import io.jans.fido2.model.assertion.AssertionErrorResponseType;
+import io.jans.fido2.model.assertion.AssertionOptions;
+import io.jans.fido2.model.assertion.AssertionResult;
 import io.jans.fido2.model.attestation.AttestationErrorResponseType;
+import io.jans.fido2.model.attestation.AttestationOptions;
+import io.jans.fido2.model.attestation.AttestationResult;
+import io.jans.fido2.model.attestation.Response;
 import io.jans.fido2.model.error.ErrorResponseFactory;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -22,7 +31,6 @@ import org.slf4j.Logger;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.jans.fido2.ctap.AttestationConveyancePreference;
-import io.jans.fido2.ctap.AuthenticatorAttachment;
 import io.jans.fido2.ctap.TokenBindingSupport;
 import io.jans.fido2.exception.Fido2CompromisedDevice;
 import io.jans.fido2.exception.Fido2RuntimeException;
@@ -32,7 +40,6 @@ import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.service.Base64Service;
 import io.jans.fido2.service.DataMapperService;
 import io.jans.fido2.service.processors.AttestationFormatProcessor;
-import io.jans.fido2.sg.SuperGluuMode;
 import io.jans.orm.model.fido2.UserVerification;
 import io.jans.service.net.NetworkService;
 import io.jans.util.StringHelper;
@@ -49,20 +56,11 @@ import tss.tpm.TPMT_PUBLIC;
 @ApplicationScoped
 public class CommonVerifiers {
 
-    public static final String SUPER_GLUU_REQUEST = "super_gluu_request";
-    public static final String SUPER_GLUU_MODE = "super_gluu_request_mode";
-    public static final String SUPER_GLUU_REQUEST_CANCEL = "super_gluu_request_cancel";
-    public static final String SUPER_GLUU_APP_ID = "super_gluu_app_id";
-    public static final String SUPER_GLUU_KEY_HANDLE = "super_gluu_key_handle";
-
     @Inject
     private Logger log;
 
     @Inject
     private NetworkService networkService;
-
-    @Inject
-    private AppConfiguration appConfiguration;
 
     @Inject
     private Base64Service base64Service;
@@ -87,16 +85,14 @@ public class CommonVerifiers {
         }
     }
 
-    public String verifyRpDomain(JsonNode params) {
-        String documentDomain;
-        if (params.hasNonNull("documentDomain")) {
-            documentDomain = params.get("documentDomain").asText();
-        } else {
-            documentDomain = appConfiguration.getIssuer();
+    public String verifyRpDomain(String origin, String rpId) {
+    	
+        if (Strings.isNullOrEmpty(origin)) {
+            origin = rpId;
         }
-        documentDomain = networkService.getHost(documentDomain);
-
-        return documentDomain;
+        origin = networkService.getHost(origin);
+        log.debug("Returning rp id : "+ origin);
+        return origin;
     }
 
     public void verifyCounter(int oldCounter, int newCounter) {
@@ -105,37 +101,52 @@ public class CommonVerifiers {
             return;
         if (newCounter <= oldCounter) {
             throw new Fido2CompromisedDevice("Counter did not increase");
-        }
+        } 
     }
 
+
+    
     public void verifyCounter(int counter) {
         if (counter < 0) {
             throw new Fido2RuntimeException("Invalid field : counter");
         }
     }
 
-    public void verifyAttestationOptions(JsonNode params) {
-        long count = Arrays.asList(params.hasNonNull("username"),
-                        params.hasNonNull("displayName"),
-                        params.hasNonNull("attestation"))
-                .parallelStream().filter(f -> !f).count();
-        if (count != 0) {
-            throw new Fido2RuntimeException("Invalid parameters");
-        }
+    public void verifyAttestationOptions(AttestationOptions params) {
+    	if(Strings.isNullOrEmpty(params.getUsername()))
+    	{
+    		throw new Fido2RuntimeException("Username is a mandatory parameter");
+    	}
+		/*
+		 * long count = Arrays.asList(!Strings.isNullOrEmpty(params.getUsername()),
+		 * !Strings.isNullOrEmpty(params.getDisplayName()), params.getAttestation() !=
+		 * null) .parallelStream().filter(f -> !f).count(); if (count != 0) { throw new
+		 * Fido2RuntimeException("Invalid parameters"); }
+		 */
     }
 
-    public void verifyAssertionOptions(JsonNode params) {
-        long count = Collections.singletonList(params.hasNonNull("username"))
+    public void verifyAssertionOptions(AssertionOptions assertionOptions) {
+        long count = Collections.singletonList(!Strings.isNullOrEmpty(assertionOptions.getUsername()))
                 .parallelStream().filter(f -> !f).count();
         if (count != 0) {
             throw errorResponseFactory.invalidRequest("Invalid parameters");
         }
     }
 
-    public void verifyBasicPayload(JsonNode params) {
-        long count = Arrays.asList(params.hasNonNull("response"),
-                params.hasNonNull("type"),
-                params.hasNonNull("id")
+    public void verifyBasicPayload(AssertionResult assertionResult) {
+        long count = Arrays.asList(assertionResult.getResponse() != null,
+                !Strings.isNullOrEmpty(assertionResult.getType()),
+                !Strings.isNullOrEmpty(assertionResult.getId())
+        ).parallelStream().filter(f -> !f).count();
+        if (count != 0) {
+            throw errorResponseFactory.invalidRequest("Invalid parameters");
+        }
+    }
+
+    public void verifyBasicAttestationResultRequest(AttestationResult attestationResult) {
+        long count = Arrays.asList(attestationResult.getResponse() != null,
+                !Strings.isNullOrEmpty(attestationResult.getType()),
+                !Strings.isNullOrEmpty(attestationResult.getId())
         ).parallelStream().filter(f -> !f).count();
         if (count != 0) {
             throw errorResponseFactory.invalidRequest("Invalid parameters");
@@ -247,8 +258,21 @@ public class CommonVerifiers {
         }
     }
 
-    public void verifyClientJSONTypeIsGet(JsonNode clientJsonNode) {
-            verifyClientJSONType(clientJsonNode, "webauthn.get");
+    public JsonNode verifyClientDataJSON(String clientDataJson) {
+        if(Strings.isNullOrEmpty(clientDataJson)) {
+            throw errorResponseFactory.invalidRequest("Invalid clientDataJson Null or Empty");
+        }
+        try {
+            JsonNode clientJsonNode = dataMapperService.readTree(clientDataJson);
+            return clientJsonNode;
+        } catch (IOException e) {
+            throw errorResponseFactory.invalidRequest("Can't parse message");
+        }
+    }
+
+    public JsonNode verifyClientJSONTypeIsGet(JsonNode clientJsonNode) {
+        verifyClientJSONType(clientJsonNode, "webauthn.get");
+        return clientJsonNode;
     }
 
     void verifyClientJSONType(JsonNode clientJsonNode, String type) {
@@ -263,14 +287,14 @@ public class CommonVerifiers {
         verifyClientJSONType(clientJsonNode, "webauthn.create");
     }
 
-    public JsonNode verifyClientJSON(JsonNode responseNode) {
+    public JsonNode verifyClientJSON(String clientDataJSON) {
         JsonNode clientJsonNode = null;
         try {
-            if (!responseNode.hasNonNull("clientDataJSON")) {
+            if (Strings.isNullOrEmpty(clientDataJSON)) {
                 throw errorResponseFactory.invalidRequest("Client data JSON is missing");
             }
             clientJsonNode = dataMapperService
-                    .readTree(new String(base64Service.urlDecode(responseNode.get("clientDataJSON").asText()), StandardCharsets.UTF_8));
+                    .readTree(new String(base64Service.urlDecode(clientDataJSON), StandardCharsets.UTF_8));
             if (clientJsonNode == null) {
                 throw errorResponseFactory.invalidRequest("Client data JSON is empty");
             }
@@ -321,21 +345,7 @@ public class CommonVerifiers {
         }
     }
 
-    public AttestationConveyancePreference verifyAttestationConveyanceType(JsonNode params) {
-        AttestationConveyancePreference attestationConveyancePreference = null;
-        if (params.has("attestation")) {
-            String type = verifyThatFieldString(params, "attestation");
-            attestationConveyancePreference = AttestationConveyancePreference.valueOf(type);
-        }
-
-        if (attestationConveyancePreference == null) {
-            attestationConveyancePreference = AttestationConveyancePreference.direct;
-        }
-        
-        return attestationConveyancePreference;
-    }
-
-    public TokenBindingSupport verifyTokenBindingSupport(String status) {
+	public TokenBindingSupport verifyTokenBindingSupport(String status) {
     	if (status == null) {
     		return null;
     	}
@@ -348,63 +358,31 @@ public class CommonVerifiers {
         }
     }
 
-    public AuthenticatorAttachment verifyAuthenticatorAttachment(JsonNode authenticatorAttachment) {
-        if (authenticatorAttachment == null) {
-            return null;
-        }
+    public UserVerification prepareUserVerification(UserVerification userVerification) {
 
-        AuthenticatorAttachment authenticatorAttachmentEnum = AuthenticatorAttachment.fromAttachmentValue(authenticatorAttachment.asText());
-        if (authenticatorAttachmentEnum == null) {
-            throw new Fido2RuntimeException("Wrong authenticator attachment parameter " + authenticatorAttachment);
-        } else {
-            return authenticatorAttachmentEnum;
-        }
-    }
-
-    public UserVerification verifyUserVerification(JsonNode userVerification) {
         if (userVerification == null) {
-            return null;
+            userVerification = UserVerification.preferred;
         }
-
-        try {
-            return UserVerification.valueOf(userVerification.asText());
-        } catch (Exception e) {
-            throw new Fido2RuntimeException("Wrong user verification parameter " + userVerification);
-        }
-    }
-
-    public UserVerification prepareUserVerification(JsonNode params) {
-        UserVerification userVerification = UserVerification.preferred;
-
-        if (params.hasNonNull("userVerification")) {
-            userVerification = verifyUserVerification(params.get("userVerification"));
-        }
-
         return userVerification;
     }
 
-    public Boolean verifyRequireResidentKey(JsonNode requireResidentKey) {
-        if (requireResidentKey == null) {
-            return null;
-        }
-
-        try {
-            return requireResidentKey.asBoolean();
-        } catch (Exception e) {
-            throw new Fido2RuntimeException("Wrong authenticator attachment parameter " + e.getMessage(), e);
-        }
-    }
-
-    public String verifyAssertionType(JsonNode typeNode, String fieldName) {
-        String type = verifyThatFieldString(typeNode, fieldName);
+    public String verifyAssertionType(String type) {
+        verifyNullOrEmptyString(type);
         if (!"public-key".equals(type)) {
             throw errorResponseFactory.invalidRequest("Invalid type");
         }
         return type;
     }
 
-    public String verifyCredentialId(CredAndCounterData attestationData, JsonNode params) {
-        String paramsKeyId = verifyBase64UrlString(params, "id");
+    public String verifyNullOrEmptyString(String input) {
+        if (Strings.isNullOrEmpty(input)) {
+            throw errorResponseFactory.invalidRequest("Invalid data, value is null");
+        }
+        return input;
+    }
+
+    public String verifyCredentialId(CredAndCounterData attestationData, AttestationResult attestationResult) {
+        String paramsKeyId = attestationResult.getId();
         
         if (StringHelper.isEmpty(paramsKeyId)) {
             throw errorResponseFactory.invalidRequest("Credential id attestationObject and response id mismatch");
@@ -418,10 +396,10 @@ public class CommonVerifiers {
         return paramsKeyId;
     }
 
-    public String getChallenge(JsonNode clientDataJSONNode) {
+    public String getChallenge(JsonNode clientJsonNode) {
         try {
             String clientDataChallenge = base64Service
-                    .urlEncodeToStringWithoutPadding(base64Service.urlDecode(clientDataJSONNode.get("challenge").asText()));
+                    .urlEncodeToStringWithoutPadding(base64Service.urlDecode(clientJsonNode.get("challenge").asText()));
 
             return clientDataChallenge;
         } catch (Exception ex) {
@@ -429,12 +407,10 @@ public class CommonVerifiers {
         }
     }
 
-    public int verifyTimeout(JsonNode params) {
-        int timeout = 90;
-        if (params.hasNonNull("timeout")) {
-            timeout = params.get("timeout").asInt(timeout);
+    public long verifyTimeout(Long timeout) {
+        if (timeout == null) {
+            timeout = 90L;
         }
-
         return timeout;
     }
 
@@ -455,45 +431,7 @@ public class CommonVerifiers {
         }
     }
 
-    public boolean hasSuperGluu(JsonNode params) {
-        if (params.hasNonNull(SUPER_GLUU_REQUEST)) {
-            JsonNode node = params.get(SUPER_GLUU_REQUEST);
-            return node.isBoolean() && node.asBoolean();
-        }
-
-        return false;
-    }
-
-    public void verifyNotUseGluuParameters(JsonNode params) {
-        // Protect generic U2F/Fido2 from sending requests with Super Gluu parameters
-        if (params.hasNonNull(SUPER_GLUU_REQUEST) || params.hasNonNull(SUPER_GLUU_MODE) ||
-            params.hasNonNull(SUPER_GLUU_APP_ID) || params.hasNonNull(SUPER_GLUU_KEY_HANDLE) ||
-                params.hasNonNull(SUPER_GLUU_REQUEST_CANCEL)) {
-            throw errorResponseFactory.badRequestException(AssertionErrorResponseType.CONFLICT_WITH_SUPER_GLUU, "Input request conflicts with Super Gluu parameters");
-        }
-    }
-
-    public boolean isSuperGluuOneStepMode(JsonNode params) {
-        if (!hasSuperGluu(params)) {
-            return false;
-        }
-        if (!params.hasNonNull(SUPER_GLUU_MODE)) {
-            return false;
-        }
-        JsonNode node = params.get(SUPER_GLUU_MODE);
-        return SuperGluuMode.ONE_STEP == SuperGluuMode.fromModeValue(node.asText());
-    }
-
-    public boolean isSuperGluuCancelRequest(JsonNode params) {
-        if (!hasSuperGluu(params)) {
-            return false;
-        }
-        if (!params.hasNonNull(SUPER_GLUU_REQUEST_CANCEL)) {
-            return false;
-        }
-        JsonNode node = params.get(SUPER_GLUU_REQUEST_CANCEL);
-        return node.isBoolean() && node.asBoolean();
-    }
+    
 
     private void validateNodeNotNull(JsonNode node) throws Fido2RuntimeException {
         if ((node == null) || node.isNull()) {

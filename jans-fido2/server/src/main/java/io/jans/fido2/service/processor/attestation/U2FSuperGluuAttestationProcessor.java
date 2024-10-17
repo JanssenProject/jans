@@ -119,7 +119,7 @@ public class U2FSuperGluuAttestationProcessor implements AttestationFormatProces
             byte[] challengeHash = DigestUtils.getSha256Digest().digest(registration.getChallenge().getBytes(Charset.forName("UTF-8")));
             
             // RP ID hash is application for Super Gluu
-            byte[] rpIdhash = DigestUtils.getSha256Digest().digest(registration.getApplicationId().getBytes(Charset.forName("UTF-8")));
+            byte[] rpIdhash = DigestUtils.getSha256Digest().digest(registration.getRpId().getBytes(Charset.forName("UTF-8")));
 			
             authenticatorDataVerifier.verifyU2FAttestationSignature(authData, rpIdhash, challengeHash, signature, verifiedCert, alg);
         }
@@ -127,6 +127,7 @@ public class U2FSuperGluuAttestationProcessor implements AttestationFormatProces
         credIdAndCounters.setAttestationType(getAttestationFormat().getFmt());
         credIdAndCounters.setCredId(base64Service.urlEncodeToString(authData.getCredId()));
         credIdAndCounters.setUncompressedEcPoint(base64Service.urlEncodeToString(authData.getCosePublicKey()));
+        credIdAndCounters.setAuthenticatorName(attestationCertificateService.getAttestationAuthenticatorName(authData));
     }
 
 }

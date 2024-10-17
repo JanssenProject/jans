@@ -60,38 +60,38 @@ public class RegistrationPersistenceService extends io.jans.as.common.service.co
     private ErrorResponseFactory errorResponseFactory;
 
     public void save(Fido2RegistrationData registrationData) {
-        Fido2RegistrationEntry registrationEntry = buildFido2RegistrationEntry(registrationData, false);
+        Fido2RegistrationEntry registrationEntry = buildFido2RegistrationEntry(registrationData);
 
         save(registrationEntry);
     }
 
-    public Fido2RegistrationEntry buildFido2RegistrationEntry(Fido2RegistrationData registrationData, boolean oneStep) {
+    public Fido2RegistrationEntry buildFido2RegistrationEntry(Fido2RegistrationData registrationData) {
 		String userName = registrationData.getUsername();
 
 		String userInum = null;
-    	if (!oneStep) {
-	        User user = userService.getUser(userName, "inum");
-	        if (user == null) {
-	            if (appConfiguration.getFido2Configuration().isUserAutoEnrollment()) {
-	                user = userService.addDefaultUser(userName);
-	            } else {
-	                throw errorResponseFactory.badRequestException(AttestationErrorResponseType.USER_AUTO_ENROLLMENT_IS_DISABLED, "Auto user enrollment was disabled. User not exists!");
-	            }
-	        }
-	        userInum = userService.getUserInum(user);
-    	}
+    	
+        User user = userService.getUser(userName, "inum");
+        if (user == null) {
+            if (appConfiguration.getFido2Configuration().isDebugUserAutoEnrollment()) {
+                user = userService.addDefaultUser(userName);
+            } else {
+                throw errorResponseFactory.badRequestException(AttestationErrorResponseType.USER_AUTO_ENROLLMENT_IS_DISABLED, "Auto user enrollment was disabled. User not exists!");
+            }
+        }
+        userInum = userService.getUserInum(user);
+	
 
         Date now = new GregorianCalendar(TimeZone.getTimeZone("UTC")).getTime();
         final String id = UUID.randomUUID().toString();
         final String challenge = registrationData.getChallenge();
 
-        String dn = oneStep ? getDnForRegistrationEntry(null, id) : getDnForRegistrationEntry(userInum, id);
+        String dn = getDnForRegistrationEntry(userInum, id);
         Fido2RegistrationEntry registrationEntry = new Fido2RegistrationEntry(dn, id, now, userInum, registrationData, challenge);
         registrationEntry.setRegistrationStatus(registrationData.getStatus());
         if (StringUtils.isNotEmpty(challenge)) {
         	registrationEntry.setChallengeHash(getChallengeHashCode(challenge));
         }
-        registrationEntry.setRpId(registrationData.getApplicationId());
+        registrationEntry.setRpId(registrationData.getRpId());
 
         registrationData.setCreatedDate(now);
         registrationData.setCreatedBy(userName);
@@ -173,8 +173,8 @@ public class RegistrationPersistenceService extends io.jans.as.common.service.co
         return fido2RegistrationnEntries;
     }
     
-    public List<Fido2RegistrationEntry> findByChallenge(String challenge, boolean oneStep) {
-        String baseDn = oneStep ? getDnForRegistrationEntry(null, null) : getBaseDnForFido2RegistrationEntries(null);
+    public List<Fido2RegistrationEntry> findByChallenge(String challenge) {
+        String baseDn = getBaseDnForFido2RegistrationEntries(null);
 
         Filter codeChallengFilter = Filter.createEqualityFilter("jansCodeChallenge", challenge);
         Filter codeChallengHashCodeFilter = Filter.createEqualityFilter("jansCodeChallengeHash", getChallengeHashCode(challenge));
