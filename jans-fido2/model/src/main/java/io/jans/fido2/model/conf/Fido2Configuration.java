@@ -49,14 +49,13 @@ public class Fido2Configuration {
     private List<MetadataServer> metadataServers = new ArrayList<MetadataServer>();
     @DocProperty(description = "Boolean value indicating whether the MDS download should be omitted")
     private boolean disableMetadataService = false;
-    @DocProperty(description = "Boolean value indicating whether MDS validation should be omitted during attestation")
-    private boolean skipAttestation = false;
     @DocProperty(description = "Hints to the RP - security-key, client-device, hybrid")
     private List<String> hints = new ArrayList<String>();
     @DocProperty(description = "If authenticators have been enabled for use in a specific protected envt (enterprise authenticators)")
     private boolean enterpriseAttestation = false;
-    
-    
+    @DocProperty(description = "Enum value indicating whether MDS validation should be omitted during attestation")
+    private String attestationMode;
+
     public String getAuthenticatorCertsFolder() {
         return authenticatorCertsFolder;
     }
@@ -121,17 +120,6 @@ public class Fido2Configuration {
 	}
 
 
-   
-
-	public boolean isSkipAttestation() {
-		return skipAttestation;
-	}
-
-
-	public void setSkipAttestation(boolean skipAttestation) {
-		this.skipAttestation = skipAttestation;
-	}
-
 	public List<String> getHints() {
 		return hints;
 	}
@@ -190,11 +178,18 @@ public class Fido2Configuration {
         this.metadataServers = metadataServers;
     }
 
+    public String getAttestationMode(){
+        return attestationMode;
+    }
+    public void setAttestationMode(String attestationMode) {
+        this.attestationMode = attestationMode;
+    }
+
 	public Fido2Configuration(String authenticatorCertsFolder, String mdsAccessToken, String mdsCertsFolder,
 			String mdsTocsFolder, boolean checkU2fAttestations, boolean debugUserAutoEnrollment,
 			int unfinishedRequestExpiration, int metadataRefreshInterval, String serverMetadataFolder,
 			List<String> enabledFidoAlgorithms, List<RequestedParty> requestedParties,
-			List<MetadataServer> metadataServers, boolean disableMetadataService, boolean skipAttestation,
+			List<MetadataServer> metadataServers, boolean disableMetadataService, String attestationMode,
 			List<String> hints, boolean enterpriseAttestation) {
 		super();
 		this.authenticatorCertsFolder = authenticatorCertsFolder;
@@ -210,12 +205,26 @@ public class Fido2Configuration {
 		this.requestedParties = requestedParties;
 		this.metadataServers = metadataServers;
 		this.disableMetadataService = disableMetadataService;
-		this.skipAttestation = skipAttestation;
+		this.attestationMode = attestationMode;
 		this.hints = hints;
 		this.enterpriseAttestation = enterpriseAttestation;
 	}
     
    
+	public Fido2Configuration() {}
 
+	@Override
+	public String toString() {
+		return "Fido2Configuration [authenticatorCertsFolder=" + authenticatorCertsFolder + ", mdsAccessToken="
+				+ mdsAccessToken + ", mdsCertsFolder=" + mdsCertsFolder + ", mdsTocsFolder=" + mdsTocsFolder
+				+ ", checkU2fAttestations=" + checkU2fAttestations + ", debugUserAutoEnrollment="
+				+ debugUserAutoEnrollment + ", unfinishedRequestExpiration=" + unfinishedRequestExpiration
+				+ ", metadataRefreshInterval=" + metadataRefreshInterval + ", serverMetadataFolder="
+				+ serverMetadataFolder + ", enabledFidoAlgorithms=" + enabledFidoAlgorithms + ", requestedParties="
+				+ requestedParties + ", metadataServers=" + metadataServers + ", disableMetadataService="
+				+ disableMetadataService + ", hints=" + hints + ", enterpriseAttestation=" + enterpriseAttestation
+				+ ", attestationMode=" + attestationMode + "]";
+	}
+	
+	
 }
-

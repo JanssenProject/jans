@@ -30,6 +30,8 @@ import java.util.stream.Collectors;
 
 import io.jans.fido2.model.attestation.AttestationErrorResponseType;
 import io.jans.fido2.model.error.ErrorResponseFactory;
+import io.jans.service.document.store.model.Document;
+import io.jans.service.document.store.service.DBDocumentService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -55,6 +57,8 @@ public class CertificateService {
 
     @Inject
     private ErrorResponseFactory errorResponseFactory;
+    @Inject
+    private DBDocumentService dbDocumentService;
 
     public X509Certificate getCertificate(String x509certificate) {
         return getCertificate(new ByteArrayInputStream(base64Service.decode(x509certificate)));
@@ -120,18 +124,9 @@ public class CertificateService {
 
     public List<X509Certificate> getCertificates(String rootCertificatePath) {
         ArrayList<X509Certificate> certificates = new ArrayList<X509Certificate>();
-        Path path = FileSystems.getDefault().getPath(rootCertificatePath);
-        try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(path)) {
-            Iterator<Path> iter = directoryStream.iterator();
-            while (iter.hasNext()) {
-                Path filePath = iter.next();
-                if (!Files.isDirectory(filePath)) {
-					certificates.add(getCertificate(Files.newInputStream(filePath)));
-				}
-            }
-        } catch (Exception ex) {
-            log.error("Failed to load cert from folder: '{}'", rootCertificatePath, ex);
-        }
+        List<Document> tocCertificatesDocuments = dbDocumentService.getDocumentsByFilePath(rootCertificatePath);
+        for (Document certDB : tocCertificatesDocuments)
+            certificates.add(getCertificate(certDB.getDocument()));
         
         return certificates;
     }

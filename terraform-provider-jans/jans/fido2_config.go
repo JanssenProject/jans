@@ -6,8 +6,8 @@ import (
 )
 
 type RequestedParties struct {
-	Name    string   `schema:"name" json:"name"`
-	Domains []string `schema:"domains" json:"domains"`
+	Id    string   `schema:"name" json:"name"`
+	Origins []string `schema:"domains" json:"domains"`
 }
 
 // Fido2Configuration represents the Fido2 configuration properties

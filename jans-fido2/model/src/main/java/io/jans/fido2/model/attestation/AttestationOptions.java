@@ -6,15 +6,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.jans.fido2.ctap.AttestationConveyancePreference;
 import io.jans.fido2.ctap.AuthenticatorAttachment;
-import io.jans.fido2.model.common.SuperGluuSupport;
+
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class AttestationOptions extends SuperGluuSupport {
+public class AttestationOptions {
     private String username ;
     private String displayName;
     private AttestationConveyancePreference attestation;
-    private String documentDomain;
+    private String origin;
     private JsonNode extensions;
     private AuthenticatorSelection authenticatorSelection;
     private AuthenticatorAttachment authenticatorAttachment;
@@ -70,12 +70,12 @@ public class AttestationOptions extends SuperGluuSupport {
         this.authenticatorSelection = authenticatorSelection;
     }
 
-    public String getDocumentDomain() {
-        return documentDomain;
+    public String getOrigin() {
+        return origin;
     }
 
-    public void setDocumentDomain(String documentDomain) {
-        this.documentDomain = documentDomain;
+    public void setOrigin(String origin) {
+        this.origin = origin;
     }
 
     public AuthenticatorAttachment getAuthenticatorAttachment() {
@@ -100,10 +100,15 @@ public class AttestationOptions extends SuperGluuSupport {
                 "username='" + username + '\'' +
                 ", displayName='" + displayName + '\'' +
                 ", attestation=" + attestation +
-                ", documentDomain='" + documentDomain + '\'' +
+                ", origin='" + origin + '\'' +
                 ", extensions=" + extensions +
                 ", authenticatorSelection=" + authenticatorSelection +
                 ", timeout=" + timeout +
                 '}';
     }
+
+	public AttestationOptions() {
+		
+	}
+    
 }

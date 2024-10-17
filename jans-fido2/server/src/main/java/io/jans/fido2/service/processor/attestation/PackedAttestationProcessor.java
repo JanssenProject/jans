@@ -26,7 +26,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import io.jans.fido2.model.attestation.AttestationErrorResponseType;
-import io.jans.fido2.model.conf.AppConfiguration;
 import io.jans.fido2.model.error.ErrorResponseFactory;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -80,8 +79,6 @@ public class PackedAttestationProcessor implements AttestationFormatProcessor {
     @Inject
     private CertificateService certificateService;
 
-    @Inject
-    private AppConfiguration appConfiguration;
 
     @Inject
     private ErrorResponseFactory errorResponseFactory;
@@ -98,21 +95,19 @@ public class PackedAttestationProcessor implements AttestationFormatProcessor {
         String signature = commonVerifiers.verifyBase64String(attStmt.get("sig"));
 
         if (attStmt.hasNonNull("x5c")) {
-            if (appConfiguration.getFido2Configuration().isSkipAttestation()) {
-                log.warn("SkipValidateMdsInAttestation is enabled");
-            } else {
-                List<X509Certificate> attestationCertificates = getAttestationCertificates(attStmt);
-                X509TrustManager tm = attestationCertificateService.populateTrustManager(authData, attestationCertificates);
-                if ((tm == null) || (tm.getAcceptedIssuers().length == 0)) {
-                    throw errorResponseFactory.badRequestException(AttestationErrorResponseType.PACKED_ERROR, "Packed full attestation but no certificates in metadata for authenticator " + Hex.encodeHexString(authData.getAaguid()));
-                }
-                X509Certificate verifiedCert = certificateVerifier.verifyAttestationCertificates(attestationCertificates, Arrays.asList(tm.getAcceptedIssuers()));
-                authenticatorDataVerifier.verifyPackedAttestationSignature(authData.getAuthDataDecoded(), clientDataHash, signature, verifiedCert, alg);
-                if (certificateVerifier.isSelfSigned(verifiedCert)) {
-                    throw errorResponseFactory.badRequestException(AttestationErrorResponseType.PACKED_ERROR, "Self signed certificate");
-                }
+
+            List<X509Certificate> attestationCertificates = getAttestationCertificates(attStmt);
+            X509TrustManager tm = attestationCertificateService.populateTrustManager(authData, attestationCertificates);
+            if ((tm == null) || (tm.getAcceptedIssuers().length == 0)) {
+                throw errorResponseFactory.badRequestException(AttestationErrorResponseType.PACKED_ERROR, "Packed full attestation but no certificates in metadata for authenticator " + Hex.encodeHexString(authData.getAaguid()));
             }
-            credIdAndCounters.setSignatureAlgorithm(alg);
+            X509Certificate verifiedCert = certificateVerifier.verifyAttestationCertificates(attestationCertificates, Arrays.asList(tm.getAcceptedIssuers()));
+            authenticatorDataVerifier.verifyPackedAttestationSignature(authData.getAuthDataDecoded(), clientDataHash, signature, verifiedCert, alg);
+            if (certificateVerifier.isSelfSigned(verifiedCert)) {
+                throw errorResponseFactory.badRequestException(AttestationErrorResponseType.PACKED_ERROR, "Self signed certificate");
+            }
+
+            
 
         } else if (attStmt.hasNonNull("ecdaaKeyId")) {
             String ecdaaKeyId = attStmt.get("ecdaaKeyId").asText();
@@ -124,6 +119,7 @@ public class PackedAttestationProcessor implements AttestationFormatProcessor {
         credIdAndCounters.setAttestationType(getAttestationFormat().getFmt());
         credIdAndCounters.setCredId(base64Service.urlEncodeToString(authData.getCredId()));
         credIdAndCounters.setUncompressedEcPoint(base64Service.urlEncodeToString(authData.getCosePublicKey()));
+        credIdAndCounters.setSignatureAlgorithm(alg);
     }
 
 	private List<X509Certificate> getAttestationCertificates(JsonNode attStmt) {

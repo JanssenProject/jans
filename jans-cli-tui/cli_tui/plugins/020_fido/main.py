@@ -51,8 +51,8 @@ class Plugin(DialogUtils):
         title = _("Enter Request Party Properties")
         schema = self.app.cli_object.get_schema_from_reference('Fido2', '#/components/schemas/RequestedParty')
         cur_data = kwargs.get('passed', ['', ''])
-        name_widget = self.app.getTitledText(_("Name"), name='name', value=cur_data[0], jans_help=self.app.get_help_from_schema(self.schema, 'name'), style='class:outh-scope-text')
-        domains_widget = self.app.getTitledText(_("Domains"), name='domains', value='\n'.join(cur_data[1].split(', ')),  height=3, jans_help=self.app.get_help_from_schema(self.schema, 'domains'), style='class:dialog-titled-widget')
+        name_widget = self.app.getTitledText(_("ID"), name='id', value=cur_data[0], jans_help=self.app.get_help_from_schema(self.schema, 'id'), style='class:outh-scope-text')
+        domains_widget = self.app.getTitledText(_("Origins"), name='origins', value='\n'.join(cur_data[1].split(', ')),  height=3, jans_help=self.app.get_help_from_schema(self.schema, 'origins'), style='class:dialog-titled-widget')
 
         def add_request_party(dialog: Dialog) -> None:
             name_ = name_widget.me.text
@@ -146,12 +146,12 @@ class Plugin(DialogUtils):
         add_party_title =  _("Add Party")
 
         requested_parties_data = []
-        for rp in fido2_static_config.get('requestedParties', {}):
-            requested_parties_data.append([rp.get('name',''), ', '.join(rp.get('domains', []))])
+        for rp in fido2_static_config.get('rp', {}):
+            requested_parties_data.append([rp.get('id',''), ', '.join(rp.get('origins', []))])
 
         self.requested_parties_container = JansVerticalNav(
                 myparent=self.app,
-                headers=['Name', 'Domains'],
+                headers=['id', 'origins'],
                 preferred_size=[30, 30],
                 data=requested_parties_data,
                 on_enter=self.edit_requested_party,
@@ -163,7 +163,7 @@ class Plugin(DialogUtils):
                 all_data=requested_parties_data,
                 underline_headings=False,
                 max_width=65,
-                jans_name='RequestedParties',
+                jans_name='rp',
                 max_height=False
                 )
 
@@ -297,9 +297,9 @@ class Plugin(DialogUtils):
         fido2_config['personCustomObjectClassList'] = fido2_config['personCustomObjectClassList'].splitlines()
         fido2_static['enabledFidoAlgorithms'] = fido2_static['enabledFidoAlgorithms'].splitlines()
 
-        fido2_static['requestedParties'] = []
+        fido2_static['rp'] = []
         for name, domains in self.requested_parties_container.data:
-            fido2_static['requestedParties'].append({'name': name, 'domains': domains.splitlines()})
+            fido2_static['rp'].append({'id': name, 'origins': domains.splitlines()})
 
         fido2_config['fido2Configuration'] = fido2_static
 

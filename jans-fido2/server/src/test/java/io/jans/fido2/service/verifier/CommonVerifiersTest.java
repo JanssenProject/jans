@@ -92,18 +92,18 @@ class CommonVerifiersTest {
     }
 
     @Test
-    void verifyRpDomain_documentDomainNotNull_valid() {
-        String documentDomainsValue = "https://test.domain";
-        when(networkService.getHost(documentDomainsValue)).thenReturn("test.domain");
+    void verifyRpDomain_originNotNull_valid() {
+        String originsValue = "https://test.domain";
+        when(networkService.getHost(originsValue)).thenReturn("test.domain");
 
-        String response = commonVerifiers.verifyRpDomain(documentDomainsValue);
+        String response = commonVerifiers.verifyRpDomain(originsValue);
         assertNotNull(response);
         assertEquals(response, "test.domain");
         verify(appConfiguration, never()).getIssuer();
     }
 
     @Test
-    void verifyRpDomain_documentDomainIsNull_valid() {
+    void verifyRpDomain_originIsNull_valid() {
         String issuer = "https://test.domain";
         when(appConfiguration.getIssuer()).thenReturn(issuer);
         when(networkService.getHost(issuer)).thenReturn("test.domain");

@@ -37,6 +37,7 @@
                                 console.log('Executing get attestation Fido2 request', attestation_request);
 
                                 request = JSON.parse(attestation_request);
+				alert("Request : "+ request);
                                 webauthn.createCredential(request).then(data => {
                                         setStatus('Get attestation key data.');
                                         document.getElementById('tokenResponse').value = JSON.stringify(webauthn.responseToObject(data));
