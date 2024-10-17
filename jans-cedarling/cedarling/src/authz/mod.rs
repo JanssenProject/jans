@@ -12,14 +12,14 @@
 use std::str::FromStr;
 use std::sync::Arc;
 
-use crate::jwt::DecodeJwtError;
-use crate::jwt::JwtService;
+use crate::jwt;
 use crate::log::{LogWriter, Logger};
 use crate::models::app_types;
 use crate::models::log_entry::AuthorizationLogInfo;
 use crate::models::log_entry::{LogEntry, LogType};
 use crate::models::policy_store::PolicyStore;
 use crate::models::request::Request;
+use crate::models::token_data::TokenPayload;
 use crate::AuthorizeResult;
 
 mod entities;
@@ -38,7 +38,7 @@ pub struct Authz {
     pdp_id: app_types::PdpID,
     application_name: app_types::ApplicationName,
     policy_store: PolicyStore,
-    jwt_service: Arc<JwtService>,
+    jwt_service: Arc<jwt::JwtService>,
 }
 
 impl Authz {
@@ -48,7 +48,7 @@ impl Authz {
         let pdp_id = *dep_map.get();
         let log: Logger = dep_map.get();
         let policy_store: Arc<PolicyStore> = dep_map.get();
-        let jwt_service: Arc<JwtService> = dep_map.get();
+        let jwt_service: Arc<jwt::JwtService> = dep_map.get();
 
         log.log(
             LogEntry::new_with_data(pdp_id, application_name.as_ref().clone(), LogType::System)
@@ -67,10 +67,18 @@ impl Authz {
     /// Evaluate Authorization Request
     /// - evaluate if authorization is granted for *client*
     pub fn authorize(&self, request: Request) -> Result<AuthorizeResult, AuthorizeError> {
-        let access_token_entities = create_access_token_entities(
-            &self.policy_store.schema.json,
-            &self.jwt_service.decode_token_data(request.access_token)?,
-        )?;
+        let (access_token_entities, _id_token_entities) = self
+            .jwt_service
+            .decode_tokens::<TokenPayload, TokenPayload>(request.access_token, request.id_token)?;
+
+        let access_token_entities =
+            create_access_token_entities(&self.policy_store.schema.json, &access_token_entities)?;
+
+        // TODO: check if `request.userinfo_token.sub` == `id_token.sub`
+        // Note that "Userinfo Token" isn't a JWT which is why we're not
+        // passing it to JWT Service. It's usually a JSON you can GET from the
+        // userinfo endpoint. For example:
+        // `curl -X GET 'https://openidconnect.googleapis.com/v1/userinfo' -H 'Authorization: Bearer ACCESS_TOKEN'`
 
         let resource_entity =
             create_resource_entity(request.resource, &self.policy_store.schema.json)?;
@@ -133,9 +141,9 @@ impl Authz {
 /// Error type for Authorization Service
 #[derive(thiserror::Error, Debug)]
 pub enum AuthorizeError {
-    /// Error encountered while decoding JWT token data
-    #[error("Malformed JWT provided")]
-    JWT(#[from] DecodeJwtError),
+    /// Error encountered while parsing JWT data
+    #[error("Error while parsing JWT: {0}")]
+    JWT(#[from] jwt::Error),
     /// Error encountered while creating access token entities
     #[error("{0}")]
     AccessTokenEntities(#[from] AccessTokenEntitiesError),
