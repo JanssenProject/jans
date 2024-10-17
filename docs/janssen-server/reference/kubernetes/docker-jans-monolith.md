@@ -53,6 +53,7 @@ Installation depends on the set of environment variables shown below. These envi
 Download the compose file of your chosen persistence from mysql or postgres
 
 ```bash
+
 wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/jans-mysql-compose.yml 
 wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/jans-postgres-compose.yml 
 ```
