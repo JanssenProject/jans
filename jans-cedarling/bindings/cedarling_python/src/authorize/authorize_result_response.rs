@@ -35,7 +35,7 @@ impl AuthorizeResultResponse {
     /// Diagnostics providing more information on how this decision was reached
     #[getter]
     fn diagnostics(&self) -> Diagnostics {
-        self.inner.diagnostics().clone().into()
+        self.inner.diagnostics().into()
     }
 }
 

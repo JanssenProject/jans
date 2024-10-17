@@ -33,8 +33,8 @@ pub struct Diagnostics {
     errors: Vec<PolicyEvaluationError>,
 }
 
-impl From<cedar_policy::Diagnostics> for Diagnostics {
-    fn from(value: cedar_policy::Diagnostics) -> Self {
+impl From<&cedar_policy::Diagnostics> for Diagnostics {
+    fn from(value: &cedar_policy::Diagnostics) -> Self {
         // use type for logging
         let diagnostics_info: cedarling::bindings::Diagnostics = value.into();
 

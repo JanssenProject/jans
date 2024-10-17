@@ -169,8 +169,8 @@ pub struct Diagnostics {
 }
 
 #[doc(hidden)]
-impl From<cedar_policy::Diagnostics> for Diagnostics {
-    fn from(value: cedar_policy::Diagnostics) -> Self {
+impl From<&cedar_policy::Diagnostics> for Diagnostics {
+    fn from(value: &cedar_policy::Diagnostics) -> Self {
         Self {
             reason: HashSet::from_iter(
                 value

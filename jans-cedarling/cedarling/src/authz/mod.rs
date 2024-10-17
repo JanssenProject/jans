@@ -131,7 +131,7 @@ impl Authz {
                 context: request.context,
                 decision: decision.decision().into(),
                 principal: principal_workload_uid.to_string(),
-                diagnostics: decision.diagnostics().clone().into(),
+                diagnostics: decision.diagnostics().into(),
                 resource: resource_uid.to_string(),
             })
             .set_message("Result of authorize with resource as workload entity".to_string()),
