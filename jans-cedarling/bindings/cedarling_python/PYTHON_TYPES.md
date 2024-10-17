@@ -214,6 +214,7 @@ authorization data with access token, action, resource, and context.
 Attributes
 ----------  
 :param access_token: The access token string.  
+:param id_token: The id token string.  
 :param action: The action to be authorized.  
 :param resource: Resource data (wrapped `ResourceData` object).  
 :param context: Python dictionary with additional context.
