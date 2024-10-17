@@ -122,6 +122,7 @@ fn get_token_claim_type_string_error() {
     let test_key = "string_key";
     let json = serde_json::json!( {
         "test_id_key": "test_id",
+        // This will trigger the type error, because it's not a String.
         test_key: 123,
         "long_key": 12345,
         "entity_uid_key": "unique_id",
@@ -165,6 +166,7 @@ fn get_token_claim_type_long_error() {
     let json = serde_json::json!( {
         "test_id_key": "test_id",
         "string_key": "test string",
+        // This will trigger the type error, because it's not an i64.
         "long_key": "str",
         "entity_uid_key": "unique_id",
         "bool_key": true,
@@ -208,6 +210,7 @@ fn get_token_claim_type_entity_uid_error() {
         "test_id_key": "test_id",
         "string_key": "test string",
         "long_key": 1234,
+        // This will trigger the type error, because it's not a String.
         "entity_uid_key": 123,
         "bool_key": true,
     });
