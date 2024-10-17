@@ -79,6 +79,7 @@ class Cedarling:
 @final
 class Request:
     access_token: str
+    id_token: str
     action: str
     resource: ResourceData
     context: Dict[str, Any]
