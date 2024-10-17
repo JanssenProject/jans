@@ -127,9 +127,9 @@ impl From<cedar_policy::Decision> for Decision {
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct PolicyEvaluationError {
     /// Id of the policy with an error
-    id: String,
+    pub id: String,
     /// Underlying evaluation error string representation
-    error: String,
+    pub error: String,
 }
 
 #[doc(hidden)]
@@ -151,10 +151,10 @@ impl From<&cedar_policy::AuthorizationError> for PolicyEvaluationError {
 pub struct Diagnostics {
     /// `PolicyId`s of the policies that contributed to the decision.
     /// If no policies applied to the request, this set will be empty.
-    reason: HashSet<String>,
+    pub reason: HashSet<String>,
     /// Errors that occurred during authorization. The errors should be
     /// treated as unordered, since policies may be evaluated in any order.
-    errors: Vec<PolicyEvaluationError>,
+    pub errors: Vec<PolicyEvaluationError>,
 }
 
 #[doc(hidden)]

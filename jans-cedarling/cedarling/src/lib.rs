@@ -39,6 +39,11 @@ pub use models::log_entry::LogEntry;
 use models::log_entry::LogType;
 pub use models::request::{Request, ResourceData};
 
+#[doc(hidden)]
+pub mod bindings {
+    pub use super::models::log_entry::{AuthorizationLogInfo, Diagnostics, PolicyEvaluationError};
+}
+
 /// Errors that can occur during initialization Cedarling.
 #[derive(Debug, thiserror::Error)]
 pub enum InitCedarlingError {
