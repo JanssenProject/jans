@@ -471,8 +471,7 @@ nav:
     - jans-orm: contribute/implementation-design/jans-orm.md
     - jans-scim: contribute/implementation-design/jans-scim.md
   - CI-CD:
-    - GitHub CI: contribute/ci-cd/github-ci.md
-    - Jenkins CI: contribute/ci-cd/jenkins-ci.md
+    #- GitHub CI: contribute/ci-cd/github-ci.md
     - Release Process: contribute/ci-cd/release-process.md
   - Development: contribute/development.md
   - Testing: contribute/testing.md
