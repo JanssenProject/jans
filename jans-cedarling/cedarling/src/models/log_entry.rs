@@ -106,11 +106,22 @@ pub struct AuthorizationLogInfo {
 }
 
 /// Cedar-policy decision of the authorization
-#[derive(Debug, Clone, PartialEq, Copy, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Copy, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "UPPERCASE")]
 pub enum Decision {
+    /// Determined that the request should be allowed
     Allow,
+    /// Determined that the request should be denied.
     Deny,
+}
+
+impl ToString for Decision {
+    fn to_string(&self) -> String {
+        match self {
+            Decision::Allow => "ALLOW".to_string(),
+            Decision::Deny => "DENY".to_string(),
+        }
+    }
 }
 
 #[doc(hidden)]
@@ -127,9 +138,9 @@ impl From<cedar_policy::Decision> for Decision {
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct PolicyEvaluationError {
     /// Id of the policy with an error
-    id: String,
+    pub id: String,
     /// Underlying evaluation error string representation
-    error: String,
+    pub error: String,
 }
 
 #[doc(hidden)]
@@ -151,15 +162,15 @@ impl From<&cedar_policy::AuthorizationError> for PolicyEvaluationError {
 pub struct Diagnostics {
     /// `PolicyId`s of the policies that contributed to the decision.
     /// If no policies applied to the request, this set will be empty.
-    reason: HashSet<String>,
+    pub reason: HashSet<String>,
     /// Errors that occurred during authorization. The errors should be
     /// treated as unordered, since policies may be evaluated in any order.
-    errors: Vec<PolicyEvaluationError>,
+    pub errors: Vec<PolicyEvaluationError>,
 }
 
 #[doc(hidden)]
-impl From<cedar_policy::Diagnostics> for Diagnostics {
-    fn from(value: cedar_policy::Diagnostics) -> Self {
+impl From<&cedar_policy::Diagnostics> for Diagnostics {
+    fn from(value: &cedar_policy::Diagnostics) -> Self {
         Self {
             reason: HashSet::from_iter(
                 value

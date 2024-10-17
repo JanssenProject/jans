@@ -1,7 +1,7 @@
 
 # Cedarling Python bindings types documentation
 
-This document describes the Cedarling Python bindings types.  
+This document describes the Cedarling Python bindings types.
 Documentation was generated from python types.
 
 MemoryLogConfig
@@ -155,54 +155,178 @@ Methods
 
     :param config: A `BootstrapConfig` object with startup settings.
 
-.. method:: pop_logs(self)
+.. method:: pop_logs(self) -> List[dict]
 
     Retrieves and removes all logs from storage.
 
     :returns: A list of log entries as Python objects.
-    :rtype: List[PyObject]
 
     :raises ValueError: If an error occurs while fetching logs.
 
-.. method:: get_log_by_id(self, id)
+.. method:: get_log_by_id(self, id: str) -> dict|None
 
     Gets a log entry by its ID.
 
     :param id: The log entry ID.
-    :type id: str
-
-    :returns: The log entry as a Python object or None if not found.
-    :rtype: Optional[PyObject]
 
     :raises ValueError: If an error occurs while fetching the log.
 
-.. method:: get_log_ids(self)
+.. method:: get_log_ids(self) -> List[str]
 
     Retrieves all stored log IDs.
 
-    :returns: A list of log entry IDs.
-    :rtype: List[str]
+.. method:: authorize(self, request: Request) -> AuthorizeResult
 
-.. method:: authorize(self, Request)
+    Execute authorize request
+    :param request: Request struct for authorize.
 
-   Evaluate Authorization Request.
+___
 
+ResourceData
+============
+
+A Python wrapper for the Rust `cedarling::ResourceData` struct. This class represents
+a resource entity with a type, ID, and attributes. Attributes are stored as a payload
+in a dictionary format.
+
+Attributes
+----------  
+:param resource_type: Type of the resource entity.  
+:param id: ID of the resource entity.  
+:param payload: Optional dictionary of attributes.
+
+Methods
+-------
+.. method:: __init__(self, resource_type: str, id: str, **kwargs: dict)
+    Initialize a new ResourceData. In kwargs the payload is a dictionary of entity attributes.
+
+.. method:: from_dict(cls, value: dict) -> ResourceData
+    Initialize a new ResourceData from a dictionary.
+    To pass `resource_type` you need to use `type` key.
 ___
 
 Request
 =======
 
-Python wrapper for the Rust `cedarling::Request` struct.
-Stores authorization data
+A Python wrapper for the Rust `cedarling::Request` struct. Represents
+authorization data with access token, action, resource, and context.
 
 Attributes
 ----------  
-:param access_token: A string containing the access token.
+:param access_token: The access token string.  
+:param id_token: The id token string.  
+:param action: The action to be authorized.  
+:param resource: Resource data (wrapped `ResourceData` object).  
+:param context: Python dictionary with additional context.
 
 Example
 -------
+```python
+# Create a request for authorization
+request = Request(access_token="token123", action="read", resource=resource, context={})
 ```
-req = Request(access_token="your_token")
-```
+___
+
+AuthorizeResult
+===============
+
+A Python wrapper for the Rust `cedarling::AuthorizeResult` struct.
+Represents the result of an authorization request.
+
+Methods
+-------
+.. method:: is_allowed(self) -> bool
+    Returns whether the request is allowed.
+
+.. method:: workload(self) -> AuthorizeResultResponse
+    Returns the detailed response as an `AuthorizeResultResponse` object.
+
+___
+
+AuthorizeResultResponse
+=======================
+
+A Python wrapper for the Rust `cedar_policy::Response` struct.
+Represents the result of an authorization request.
+
+Attributes
+----------  
+:param decision: The authorization decision (wrapped `Decision` object).  
+:param diagnostics: Additional information on the decision (wrapped `Diagnostics` object).
+___
+
+Decision
+========
+
+Represents the decision result of a Cedar policy authorization.
+
+Methods
+-------
+value() -> str
+    Returns the string value of the decision.
+__str__() -> str
+    Returns the string representation of the decision.
+__repr__() -> str
+    Returns the detailed type representation of the decision.
+__eq__(other: Decision) -> bool
+    Compares two `Decision` objects for equality.
+___
+
+Diagnostics
+===========
+
+Provides detailed information about how a policy decision was made, including policies that contributed to the decision and any errors encountered during evaluation.
+
+Attributes
+----------
+reason : set of str
+    A set of `PolicyId`s for the policies that contributed to the decision. If no policies applied, this set is empty.
+errors : list of PolicyEvaluationError
+    A list of errors that occurred during the authorization process. These are unordered as policies may be evaluated in any order.
+___
+
+PolicyEvaluationError
+=====================
+
+Represents an error that occurred when evaluating a Cedar policy.
+
+Attributes
+----------
+id : str
+    The ID of the policy that caused the error.
+error : str
+    The error message describing the evaluation failure.
+___
+
+# authorize_errors.AccessTokenEntitiesError
+Error encountered while creating access token entities
+___
+
+# authorize_errors.ActionError
+Error encountered while parsing Action to EntityUid
+___
+
+# authorize_errors.AuthorizeError
+Exception raised by authorize_errors
+___
+
+# authorize_errors.CreateContextError
+Error encountered while validating context according to the schema
+___
+
+# authorize_errors.CreateRequestError
+Error encountered while creating cedar_policy::Request
+___
+
+# authorize_errors.EntitiesError
+Error encountered while collecting all entities
+___
+
+# authorize_errors.JWTError
+Error encountered while decoding JWT token data
+___
+
+# authorize_errors.ResourceEntityError
+Error encountered while creating resource entity
 ___
 
