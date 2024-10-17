@@ -1,0 +1,6 @@
+project: demos/jans-chip/ios/Jans-Chip.xcodeproj
+retain_public: true
+schemes:
+- Jans-Chip
+targets:
+- Jans-Chip

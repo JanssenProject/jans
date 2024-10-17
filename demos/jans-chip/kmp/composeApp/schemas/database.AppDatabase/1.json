@@ -1,0 +1,49 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "f6a4750ffc2a9b3589e4e1723a88a571",
+    "entities": [
+      {
+        "tableName": "OIDC_CLIENT",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` ()",
+        "fields": [],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": []
+        }
+      },
+      {
+        "tableName": "OP_CONFIGURATION",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` ()",
+        "fields": [],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": []
+        }
+      },
+      {
+        "tableName": "FIDO_CONFIGURATION",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` ()",
+        "fields": [],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": []
+        }
+      },
+      {
+        "tableName": "APP_INTEGRITY",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` ()",
+        "fields": [],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": []
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f6a4750ffc2a9b3589e4e1723a88a571')"
+    ]
+  }
+}
