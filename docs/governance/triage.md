@@ -70,7 +70,7 @@ These labels enrich issue/PR with metadata that will help during triage process 
 
 ### Bot labeling methodology
 
-The following labels are automatically assigned to Issues and PRs in GitHub following the schema provided in this [file](../../automation/github-labels/labels-schema.json).
+The following labels are automatically assigned to Issues and PRs in GitHub following the schema provided in this [file](https://raw.githubusercontent.com/JanssenProject/jans/refs/heads/main/automation/github-labels/labels-schema.json).
 
 | Label               | Method                                                                                                                                                                                                                                               |
 |---------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|

@@ -4,7 +4,7 @@ import json
 
 from collections import OrderedDict
 
-from ldap3.utils import dn as dnutils
+from setup_app.pylib.parse_dn import parse_dn
 from setup_app.pylib.ldif4.ldif import LDIFParser, LDIFWriter
 from setup_app.pylib.schema import AttributeType, ObjectClass
 from setup_app.utils.attributes import attribDataTypes
@@ -29,7 +29,7 @@ class myLdifParser(LDIFParser):
 
 def get_key_from(dn):
     dns = []
-    for rd in dnutils.parse_dn(dn):
+    for rd in parse_dn(dn):
 
         if rd[0] == 'o' and rd[1] == 'jans':
             continue

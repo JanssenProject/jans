@@ -12,6 +12,7 @@ public class AttestationResult  {
     private String type = PublicKeyCredentialType.PUBLIC_KEY.getKeyName();
     private Response response;
     private HashMap<String, String> clientExtensionResults;
+    private String authentictatorAttachment;
     
     public String getId() {
         return id;
@@ -41,12 +42,21 @@ public class AttestationResult  {
 		this.clientExtensionResults = clientExtensionResults;
 	}
 
+	public String getAuthentictatorAttachment() {
+		return authentictatorAttachment;
+	}
+
+	public void setAuthentictatorAttachment(String authentictatorAttachment) {
+		this.authentictatorAttachment = authentictatorAttachment;
+	}
+
 	@Override
 	public String toString() {
 		return "AttestationResult [id=" + id + ", type=" + type + ", response=" + response + ", clientExtensionResults="
-				+ clientExtensionResults + "]";
+				+ clientExtensionResults + ", authentictatorAttachment=" + authentictatorAttachment + "]";
 	}
 
+	
 	
 
    

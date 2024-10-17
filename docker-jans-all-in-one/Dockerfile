@@ -46,7 +46,7 @@ FROM ${JANS_SAML_IMAGE} AS jans-saml-src
 # app
 # ===
 
-FROM bellsoft/liberica-openjdk-alpine:17.0.12@sha256:877a6ffc273212bd3f695db2a7973a05aa1bfb88ad550ba9ffe7deb7d1e50eee
+FROM bellsoft/liberica-openjdk-alpine:17.0.12@sha256:83719ee0075de03ecc7a99db489fd72a022e49f09c0e6e6350bcc05310c3caf6
 
 # hadolint ignore=DL3018
 RUN apk update \
@@ -58,7 +58,7 @@ RUN apk update \
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=4b07e84a14df81899900724515f3eead1d579443
+ENV JANS_SOURCE_VERSION=5f3b30e4b565601ccb31cd985920c09071cd1b54
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the assets
@@ -213,8 +213,6 @@ ENV JETTY_BASE=/opt/jans/jetty \
     CN_SQL_PASSWORD_FILE=/etc/jans/conf/sql_password \
     CN_COUCHBASE_PASSWORD_FILE=/etc/jans/conf/couchbase_password \
     CN_COUCHBASE_SUPERUSER_PASSWORD_FILE=/etc/jans/conf/couchbase_superuser_password \
-    CN_LDAP_PASSWORD_FILE=/etc/jans/conf/ldap_password \
-    CN_LDAP_TRUSTSTORE_PASSWORD_FILE=/etc/jans/conf/ldap_truststore_password \
     CN_KEYCLOAK_LINK_JETTY_HOST=127.0.0.1 \
     CN_KEYCLOAK_LINK_JETTY_PORT=9092 \
     CN_KEYCLOAK_LINK_JAVA_OPTIONS="" \
