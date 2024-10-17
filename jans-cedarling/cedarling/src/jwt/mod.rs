@@ -24,6 +24,7 @@
 mod decoding_strategy;
 mod error;
 mod jwt_service;
+mod key_service;
 #[cfg(test)]
 mod test;
 mod token;
