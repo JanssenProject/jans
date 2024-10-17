@@ -7,6 +7,7 @@
 
 use std::collections::HashMap;
 
+use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyType};
 use serde_pyobject::from_pyobject;
@@ -80,7 +81,7 @@ impl ResourceData {
     /// method to build a resource data object from a python dictionary
     #[classmethod]
     fn from_dict(_cls: Bound<'_, PyType>, value: Bound<'_, PyDict>) -> PyResult<Self> {
-        from_pyobject(value).map_err(|err| err.0)
+        from_pyobject(value).map_err(|err| PyValueError::new_err(err.0))
     }
 }
 
