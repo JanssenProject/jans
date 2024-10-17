@@ -7,6 +7,7 @@
 
 // use cedarling::ResourceData;
 use super::resource_data::ResourceData;
+use pyo3::exceptions::PyRuntimeError;
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
 use serde_pyobject::from_pyobject;
@@ -64,7 +65,9 @@ impl Request {
     pub fn to_cedarling(&self) -> Result<cedarling::Request, PyErr> {
         let context = Python::with_gil(|py| -> Result<serde_json::Value, PyErr> {
             let context = self.context.clone_ref(py).into_bound(py);
-            from_pyobject(context).map_err(|err| err.0)
+            from_pyobject(context).map_err(|err| {
+                PyRuntimeError::new_err(format!("Failed to convert context: {}", err.to_string()))
+            })
         })?;
 
         Ok(cedarling::Request {

@@ -7,7 +7,7 @@
 
 use std::collections::HashMap;
 
-use pyo3::exceptions::PyValueError;
+use pyo3::exceptions::{PyRuntimeError, PyValueError};
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyType};
 use serde_pyobject::from_pyobject;
@@ -52,7 +52,12 @@ pub struct ResourceData {
 type PayloadType = HashMap<String, serde_json::Value>;
 
 fn get_payload(object: Bound<'_, PyDict>) -> PyResult<PayloadType> {
-    from_pyobject(object).map_err(|err| err.0)
+    from_pyobject(object).map_err(|err| {
+        PyRuntimeError::new_err(format!(
+            "Failed to convert to rust HashMap<String, serde_json::Value>: {}",
+            err.to_string()
+        ))
+    })
 }
 
 #[pymethods]
