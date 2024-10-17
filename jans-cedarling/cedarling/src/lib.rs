@@ -30,6 +30,7 @@ pub use authz::AuthorizeError;
 use authz::Authz;
 use di::{DependencyMap, DependencySupplier};
 use init::policy_store::{load_policy_store, LoadPolicyStoreError};
+pub use jwt::CreateJwtServiceError;
 pub use log::LogStorage;
 use log::{init_logger, LogWriter};
 use models::app_types;
@@ -53,6 +54,9 @@ pub enum InitCedarlingError {
     /// Error that may occur during loading the policy store.
     #[error("Could not load policy: {0}")]
     PolicyStore(#[from] LoadPolicyStoreError),
+    /// Error that may occur during loading the JWT service.
+    #[error("Could not load JWT service: {0}")]
+    JWT(#[from] CreateJwtServiceError),
 }
 
 /// The instance of the Cedarling application.
@@ -95,7 +99,7 @@ impl Cedarling {
             })?;
         container.insert(policy_store);
 
-        let jwt_service = jwt::JwtService::new_with_container(&container, config.jwt_config);
+        let jwt_service = jwt::JwtService::new_with_container(&container, config.jwt_config)?;
         log.log(
             LogEntry::new_with_container(&container, LogType::System)
                 .set_message("JWT service loaded successfully".to_string()),

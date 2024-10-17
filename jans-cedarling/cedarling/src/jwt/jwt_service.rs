@@ -8,7 +8,7 @@
 use super::decoding_strategy::DecodingStrategy;
 use super::token::{AccessToken, IdToken};
 use super::traits::{Decode, ExtractClaims};
-use super::Error;
+use super::{CreateJwtServiceError, Error};
 use crate::JwtConfig;
 use serde::de::DeserializeOwned;
 
@@ -40,7 +40,7 @@ impl JwtService {
     pub fn new_with_container(
         dep_map: &di::DependencyMap,
         config: JwtConfig,
-    ) -> Result<Self, Error> {
+    ) -> Result<Self, CreateJwtServiceError> {
         match config {
             JwtConfig::Disabled => {
                 let decoding_strategy = DecodingStrategy::new_without_validation();
