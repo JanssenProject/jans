@@ -9,7 +9,6 @@ import java.nio.file.Paths;
 import java.util.List;
 
 import org.apache.commons.codec.binary.Base64InputStream;
-import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,7 +95,7 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<Document> {
 	}
 
 	@Override
-	public String saveDocument(String path, String description, String documentContent, Charset charset, List<String> moduleList) {
+	public String saveDocument(String path, String description, String documentContent, Charset charset, String module) {
 		log.debug("Save document: '{}'", path);
 		Document oxDocument = new Document();
 		oxDocument.setDocument(documentContent);
@@ -108,7 +107,7 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<Document> {
 				oxDocument.setDn(dn);
 				oxDocument.setDescription(description);
 				oxDocument.setEnabled(true);
-				oxDocument.setService(moduleList);
+				oxDocument.setService(module);
 				documentService.addDocument(oxDocument);
 				return path;
 		} catch (Exception ex) {
@@ -118,7 +117,7 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<Document> {
 	}
 
 	@Override
-	public String saveDocumentStream(String path, String description, InputStream documentStream, List<String> moduleList) {
+	public String saveDocumentStream(String path, String description, InputStream documentStream, String module) {
 
 		Document oxDocument = new Document();
 		setFileNameAndPath(oxDocument, path);
@@ -132,7 +131,7 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<Document> {
 			oxDocument.setDn(dn);
 			oxDocument.setDescription(description);
 			oxDocument.setEnabled(true);
-			oxDocument.setService(moduleList);
+			oxDocument.setService(module);
 			documentService.addDocument(oxDocument);
 			return path;
 		} catch (Exception e) {
@@ -143,8 +142,8 @@ public class DBDocumentStoreProvider extends DocumentStoreProvider<Document> {
 
 	@Override
 	public String saveBinaryDocumentStream(String path, String description, InputStream documentStream,
-			List<String> moduleList) {
-		return saveDocumentStream(path, description, new Base64InputStream(documentStream, true), moduleList);
+			String module) {
+		return saveDocumentStream(path, description, new Base64InputStream(documentStream, true), module);
 	}
 
 	@Override
