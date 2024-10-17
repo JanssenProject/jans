@@ -1,7 +1,7 @@
 
 # Cedarling Python bindings types documentation
 
-This document describes the Cedarling Python bindings types.  
+This document describes the Cedarling Python bindings types.
 Documentation was generated from python types.
 
 MemoryLogConfig
@@ -295,5 +295,37 @@ id : str
     The ID of the policy that caused the error.
 error : str
     The error message describing the evaluation failure.
+___
+
+# authorize_errors.AccessTokenEntitiesError
+Error encountered while creating access token entities
+___
+
+# authorize_errors.ActionError
+Error encountered while parsing Action to EntityUid
+___
+
+# authorize_errors.AuthorizeError
+Exception raised by authorize_errors
+___
+
+# authorize_errors.CreateContextError
+Error encountered while validating context according to the schema
+___
+
+# authorize_errors.CreateRequestError
+Error encountered while creating cedar_policy::Request
+___
+
+# authorize_errors.EntitiesError
+Error encountered while collecting all entities
+___
+
+# authorize_errors.JWTError
+Error encountered while decoding JWT token data
+___
+
+# authorize_errors.ResourceEntityError
+Error encountered while creating resource entity
 ___
 
