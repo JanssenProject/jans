@@ -273,7 +273,10 @@ fn get_token_claim_type_boolean_error() {
         let json_attr_value = json.as_object().unwrap().get(test_key).unwrap();
         let origin_type = GetTokenClaimValue::json_value_type_name(json_attr_value);
 
-        assert!(key == test_key, "expected key: {test_key}, but got: {key} with schema expected_type: {expected_type}");
+        assert!(
+            key == test_key,
+            "expected key: {test_key}, but got: {key} with schema expected_type: {expected_type}"
+        );
         assert!(
             got_type == origin_type,
             "expected type: {origin_type}, but got: {got_type} with schema expected_type: {expected_type}"
@@ -289,6 +292,7 @@ fn get_token_claim_cedar_typename_error() {
     let schema_json = include_str!("test_create_data/successful_scenario_schema.json");
     let schema: CedarSchemaJson = serde_json::from_str(schema_json).unwrap();
 
+    // Mistake in entity type name, should be `"Jans::Test"`, it will trigger error
     let metadata = EntityMetadata::new("Jans:::Test", "test_id_key");
 
     let json = serde_json::json!( {
@@ -316,6 +320,14 @@ fn get_token_claim_cedar_typename_error() {
 }
 
 /// create entity with wrong cedar typename in the attribute
+// The JSON schema contains an error.r:
+//
+// "entity_uid_key": {
+//     "type": "EntityOrCommon",
+//     "name": ":Test2"
+// },
+//
+// ":Test2" is not correct type definition, it will trigger error
 #[test]
 fn get_token_claim_cedar_typename_in_attr_error() {
     let schema_json = include_str!("test_create_data/type_error_schema.json");
