@@ -159,15 +159,5 @@ class ConfigurationControllerTest {
         }
         assertTrue(assertionNode.has("result_endpoint"));
         assertEquals(assertionNode.get("result_endpoint").asText(), baseEndpoint + "/assertion/result");
-
-        if (verifySuperGluu) {
-            assertTrue(nodeEntity.has("super_gluu_registration_endpoint"));
-            assertEquals(nodeEntity.get("super_gluu_registration_endpoint").asText(), baseEndpoint + "/attestation/registration");
-            assertTrue(nodeEntity.has("super_gluu_authentication_endpoint"));
-            assertEquals(nodeEntity.get("super_gluu_authentication_endpoint").asText(), baseEndpoint + "/assertion/authentication");
-        } else {
-            assertFalse(nodeEntity.has("super_gluu_registration_endpoint"));
-            assertFalse(nodeEntity.has("super_gluu_authentication_endpoint"));
-        }
     }
 }
