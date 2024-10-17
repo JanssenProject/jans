@@ -1,0 +1,8 @@
+[package]
+name = "test_utils"
+version = "1.1.6"
+edition = "2021"
+
+[dependencies]
+pretty_assertions = "1"
+serde_json = { workspace = true }

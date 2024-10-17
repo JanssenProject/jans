@@ -28,7 +28,6 @@ class Config:
     os_default = '/etc/default'
     sysemProfile = '/etc/profile'
     jython_home = '/opt/jython'
-    ldap_base_dir = '/opt/opendj'
     network = '/etc/sysconfig/network'
     jetty_home = '/opt/jetty'
     node_home = '/opt/node'
@@ -70,12 +69,7 @@ class Config:
 
     @classmethod
     def calculate_mem(self):
-        if Config.opendj_install:
-            self.opendj_max_ram = int(int(Config.jans_max_mem) * .2) # 20% of mem_use
-            self.application_max_ram = int(int(Config.jans_max_mem) * .8) # 80% of mem_use
-        else:
-            self.opendj_max_ram = 0
-            self.application_max_ram = int(Config.jans_max_mem)
+        self.application_max_ram = int(Config.jans_max_mem)
 
     @classmethod
     def init(self, install_dir=INSTALL_DIR):
@@ -87,16 +81,13 @@ class Config:
         self.thread_queue = None
         self.jetty_user = self.jetty_group = 'jetty'
         self.root_user = self.root_group = 'root'
-        self.ldap_user = self.ldap_group = 'ldap'
         self.backend_service = 'network.target'
         self.dump_config_on_error = False
 
         if not self.output_dir:
             self.output_dir = os.path.join(install_dir, 'output')
 
-        self.ldap_bin_dir = os.path.join(self.ldap_base_dir, 'bin')
         if base.snap:
-            self.ldap_base_dir = os.path.join(base.snap_common, 'opendj')
             self.jetty_user = 'root'
 
         self.default_store_type = 'PKCS12'
@@ -142,7 +133,6 @@ class Config:
         self.cmd_java = os.path.join(self.jre_home, 'bin/java')
         self.cmd_keytool = os.path.join(self.jre_home, 'bin/keytool')
         self.cmd_jar = os.path.join(self.jre_home, 'bin/jar')
-        os.environ['OPENDJ_JAVA_HOME'] = self.jre_home
 
         if self.profile == OPENBANKING_PROFILE:
             self.use_external_key = True
@@ -154,16 +144,13 @@ class Config:
 
         # Component ithversions
         self.apache_version = None
-        self.opendj_version = None
 
         #passwords
-        self.ldapPass = None
         self.admin_password = ''
         self.cb_password = None
         self.encoded_cb_password = ''
 
         #DB installation types
-        self.opendj_install = InstallTypes.NONE
         self.cb_install = InstallTypes.NONE
         self.rdbm_install = InstallTypes.LOCAL
 
@@ -200,7 +187,7 @@ class Config:
         self.install_config_api = True
         self.install_casa = False
         self.install_jans_cli = True
-        self.install_jans_link = False
+        self.install_jans_ldap_link = False
         self.loadTestData = False
         self.allowPreReleasedFeatures = False
         self.install_jans_saml = False
@@ -238,7 +225,6 @@ class Config:
         self.city = None
         self.state = None
         self.admin_email = None
-        self.ldap_bind_encoded_pw = None
         self.encode_salt = None
         self.admin_inum = None
 
@@ -250,24 +236,6 @@ class Config:
 
         self.extensionFolder = os.path.join(self.staticFolder, 'extension')
         self.script_catalog_dir = os.path.join(self.install_dir, 'script_catalog')
-
-        self.encoded_ldapTrustStorePass = None
-
-        self.ldapCertFn = self.opendj_cert_fn = os.path.join(self.certFolder, 'opendj.crt')
-        self.ldapTrustStoreFn = self.opendj_p12_fn = os.path.join(self.certFolder, 'opendj.pkcs12')
-
-        self.opendj_p12_pass = None
-
-        self.ldap_binddn = 'cn=directory manager'
-        self.ldap_hostname = 'localhost'
-        self.couchbase_hostname = 'localhost'
-        self.ldap_port = '1389'
-        self.ldaps_port = '1636'
-        self.ldap_admin_port = '4444'
-
-        self.ldap_user_home = self.ldap_base_dir
-        self.ldapPassFn = os.path.join(self.ldap_user_home, '.pw')
-        self.ldap_backend_type = 'je'
 
         self.jansScriptFiles = [
                             os.path.join(self.install_dir, 'static/scripts/logmanager.sh'),
@@ -285,7 +253,6 @@ class Config:
         # reflect final path if the file must be copied after its rendered.
 
         self.jans_python_readme = os.path.join(self.jansOptPythonFolder, 'libs/python.txt')
-        self.ox_ldap_properties = os.path.join(self.configFolder, 'jans-ldap.properties')
         self.jansCouchebaseProperties = os.path.join(self.configFolder, 'jans-couchbase.properties')
         self.jansRDBMProperties = os.path.join(self.configFolder, 'jans-sql.properties')
         self.jansSpannerProperties = os.path.join(self.configFolder, 'jans-spanner.properties')
@@ -304,7 +271,6 @@ class Config:
 
         ### rsyslog file customised for init.d
         self.rsyslogUbuntuInitFile = os.path.join(self.install_dir, 'static/system/ubuntu/rsyslog')
-        self.ldap_setup_properties = os.path.join(self.templateFolder, 'opendj-setup.properties')
 
         # OpenID key generation default setting
         self.default_openid_jks_dn_name = 'CN=Jans Auth CA Certificates'
@@ -343,25 +309,19 @@ class Config:
                              self.ldif_agama: False,
                              }
 
-        if self.profile != OPENBANKING_PROFILE:
-            self.ce_templates[self.ox_ldap_properties] = True
-            self.ce_templates[self.ldap_setup_properties] = False
-
 
         self.service_requirements = {
-                        'opendj': ['', 70],
-                        'jans-auth': ['opendj', 72],
-                        'jans-fido2': ['opendj', 73],
-                        'identity': ['opendj jans-auth', 74],
-                        'jans-scim': ['opendj jans-auth', 75],
-                        'idp': ['opendj jans-auth', 76],
-                        'casa': ['opendj jans-auth', 78],
-                        'passport': ['opendj jans-auth', 82],
-                        'jans-auth-rp': ['opendj jans-auth', 84],
-                        'jans-config-api': ['opendj jans-auth', 85],
+                        'jans-auth': ['network-online.target', 72],
+                        'jans-fido2': ['network-online.target', 73],
+                        'identity': ['jans-auth', 74],
+                        'jans-scim': ['jans-auth', 75],
+                        'idp': ['jans-auth', 76],
+                        'casa': ['jans-auth', 78],
+                        'passport': ['jans-auth', 82],
+                        'jans-auth-rp': ['jans-auth', 84],
+                        'jans-config-api': ['jans-auth', 85],
                         }
 
-        self.install_time_ldap = None
 
         self.non_setup_properties = {
             'jans_auth_client_jar_fn': os.path.join(self.dist_jans_dir, 'jans-auth-client-jar-with-dependencies.jar')

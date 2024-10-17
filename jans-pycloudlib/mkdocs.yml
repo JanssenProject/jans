@@ -48,7 +48,6 @@ nav:
       - "Secret": api/secret.md
       - "Persistence":
           - "Couchbase": api/persistence/couchbase.md
-          - "LDAP": api/persistence/ldap.md
           - "Spanner": api/persistence/spanner.md
           - "SQL": api/persistence/sql.md
           - "Hybrid": api/persistence/hybrid.md

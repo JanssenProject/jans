@@ -8,20 +8,22 @@ from functools import cached_property
 from string import Template
 
 from jans.pycloudlib import get_manager
-from jans.pycloudlib.persistence import render_couchbase_properties
-from jans.pycloudlib.persistence import render_base_properties
-from jans.pycloudlib.persistence import render_hybrid_properties
-from jans.pycloudlib.persistence import render_ldap_properties
-from jans.pycloudlib.persistence import render_salt
-from jans.pycloudlib.persistence import sync_couchbase_truststore
-from jans.pycloudlib.persistence import sync_ldap_truststore
-from jans.pycloudlib.persistence import render_sql_properties
-from jans.pycloudlib.persistence import render_spanner_properties
+from jans.pycloudlib import wait_for_persistence
 from jans.pycloudlib.persistence.couchbase import CouchbaseClient
-from jans.pycloudlib.persistence.ldap import LdapClient
+from jans.pycloudlib.persistence.couchbase import render_couchbase_properties
+from jans.pycloudlib.persistence.couchbase import sync_couchbase_cert
+from jans.pycloudlib.persistence.couchbase import sync_couchbase_truststore
+from jans.pycloudlib.persistence.couchbase import sync_couchbase_password
+from jans.pycloudlib.persistence.hybrid import render_hybrid_properties
+from jans.pycloudlib.persistence.spanner import render_spanner_properties
 from jans.pycloudlib.persistence.spanner import SpannerClient
+from jans.pycloudlib.persistence.spanner import sync_google_credentials
 from jans.pycloudlib.persistence.sql import SqlClient
+from jans.pycloudlib.persistence.sql import render_sql_properties
+from jans.pycloudlib.persistence.sql import sync_sql_password
 from jans.pycloudlib.persistence.utils import PersistenceMapper
+from jans.pycloudlib.persistence.utils import render_base_properties
+from jans.pycloudlib.persistence.utils import render_salt
 from jans.pycloudlib.utils import cert_to_truststore
 from jans.pycloudlib.utils import generate_base64_contents
 from jans.pycloudlib.utils import as_boolean
@@ -42,7 +44,7 @@ manager = get_manager()
 
 
 def main():
-    persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "ldap")
+    persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "sql")
 
     render_salt(manager, "/app/templates/salt", "/etc/jans/conf/salt")
     render_base_properties("/app/templates/jans.properties", "/etc/jans/conf/jans.properties")
@@ -55,25 +57,21 @@ def main():
         if not os.path.exists(hybrid_prop):
             render_hybrid_properties(hybrid_prop)
 
-    if "ldap" in persistence_groups:
-        render_ldap_properties(
-            manager,
-            "/app/templates/jans-ldap.properties",
-            "/etc/jans/conf/jans-ldap.properties",
-        )
-        sync_ldap_truststore(manager)
-
     if "couchbase" in persistence_groups:
+        sync_couchbase_password(manager)
         render_couchbase_properties(
             manager,
             "/app/templates/jans-couchbase.properties",
             "/etc/jans/conf/jans-couchbase.properties",
         )
-        sync_couchbase_truststore(manager)
+
+        if as_boolean(os.environ.get("CN_COUCHBASE_TRUSTSTORE_ENABLE", "true")):
+            sync_couchbase_cert(manager)
+            sync_couchbase_truststore(manager)
 
     if "sql" in persistence_groups:
+        sync_sql_password(manager)
         db_dialect = os.environ.get("CN_SQL_DB_DIALECT", "mysql")
-
         render_sql_properties(
             manager,
             f"/app/templates/jans-{db_dialect}.properties",
@@ -86,6 +84,7 @@ def main():
             "/app/templates/jans-spanner.properties",
             "/etc/jans/conf/jans-spanner.properties",
         )
+        sync_google_credentials(manager)
 
     if not os.path.isfile("/etc/certs/web_https.crt"):
         if as_boolean(os.environ.get("CN_SSL_CERT_FROM_SECRETS", "true")):
@@ -94,6 +93,8 @@ def main():
             hostname = manager.config.get("hostname")
             logger.info(f"Pulling SSL certificate from {hostname}")
             get_server_certificate(hostname, 443, "/etc/certs/web_https.crt")
+
+    wait_for_persistence(manager)
 
     cert_to_truststore(
         "web_https",
@@ -118,8 +119,6 @@ def configure_logging():
         "persistence_log_level": "INFO",
         "persistence_duration_log_target": "FILE",
         "persistence_duration_log_level": "INFO",
-        "ldap_stats_log_target": "FILE",
-        "ldap_stats_log_level": "INFO",
         "script_log_target": "FILE",
         "script_log_level": "INFO",
         "log_prefix": "",
@@ -163,7 +162,6 @@ def configure_logging():
         "keycloak_link_log_target": "FILE",
         "persistence_log_target": "JANS_KEYCLOAK_PERSISTENCE_FILE",
         "persistence_duration_log_target": "JANS_KEYCLOAK_PERSISTENCE_DURATION_FILE",
-        "ldap_stats_log_target": "JANS_KEYCLOAK_PERSISTENCE_LDAP_STATISTICS_FILE",
         "script_log_target": "JANS_KEYCLOAK_SCRIPT_LOG_FILE",
     }
     for key, value in file_aliases.items():
@@ -190,7 +188,6 @@ class PersistenceSetup:
         self.manager = manager
 
         client_classes = {
-            "ldap": LdapClient,
             "couchbase": CouchbaseClient,
             "spanner": SpannerClient,
             "sql": SqlClient,
@@ -207,6 +204,7 @@ class PersistenceSetup:
     @cached_property
     def ctx(self) -> dict[str, _t.Any]:
         ctx = {
+            # @TODO: double check if we can safely remove these contexts
             "ldap_binddn": self.manager.config.get("ldap_binddn"),
             "ldap_hostname": self.manager.config.get("ldap_init_host"),
             "ldaps_port": self.manager.config.get("ldap_init_port"),

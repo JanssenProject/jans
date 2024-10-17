@@ -9,7 +9,7 @@
   <parent>
     <groupId>io.jans</groupId>
     <artifactId>jans-kc-parent</artifactId>
-    <version>1.1.4-SNAPSHOT</version>
+    <version>1.1.6-SNAPSHOT</version>
   </parent>
 
   <prerequisites>
@@ -19,10 +19,32 @@
   <dependencies>
 
     <!-- keycloak dependencies -->
+
+    <!--
+      TODO: Remove this *immediately* after CVEs related to these dependencies
+      are sorted out. These dependencies replace ones required by keycloak-admin-client
+      but contain security vulnerabilities
+    -->
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>${commons-io.version}</version>
+    </dependency>
+
     <dependency>
       <groupId>org.keycloak</groupId>
       <artifactId>keycloak-admin-client</artifactId>
       <scope>compile</scope>
+      <!-- 
+        temporary exclusion for dependencies that contain some vulnerabilities 
+        remove *IMMEDIATELY AFTER dependencies are updated*
+      -->
+      <exclusions>
+        <exclusion>
+          <artifactId>org.jboss.resteasy</artifactId>
+          <groupId>resteasy-multipart-provider</groupId>
+        </exclusion>
+      </exclusions>
     </dependency>
 
     <dependency>
@@ -91,10 +113,15 @@
     </dependency>
     <!-- end jboss logging dependencies-->
 
+    <!-- dependencies for items with security vulnerabilities -->
+    <!-- end dependencies for items with security vulnerabilities -->
+
+    <!-- jans dependencies -->
     <dependency>
       <groupId>io.jans</groupId>
       <artifactId>jans-core-saml</artifactId>
     </dependency>
+    <!-- end jans dependencies -->
     
   </dependencies>
 

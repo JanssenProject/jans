@@ -9,9 +9,14 @@ metadata:
 {{- if .Values.additionalLabels }}
 {{ toYaml .Values.additionalLabels | indent 4 }}
 {{- end }}
-{{- if .Values.additionalAnnotations }}
+{{- if or (.Values.additionalAnnotations) (.Values.global.config.customAnnotations.secret) }}
   annotations:
+{{- if .Values.additionalAnnotations }}
 {{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.global.config.customAnnotations.secret }}
+{{ toYaml .Values.global.config.customAnnotations.secret | indent 4 }}
+{{- end }}
 {{- end }}
 type: Opaque
 data:
@@ -31,9 +36,14 @@ metadata:
 {{- if .Values.additionalLabels }}
 {{ toYaml .Values.additionalLabels | indent 4 }}
 {{- end }}
-{{- if .Values.additionalAnnotations }}
+{{- if or (.Values.additionalAnnotations) (.Values.global.config.customAnnotations.configMap) }}
   annotations:
+{{- if .Values.additionalAnnotations }}
 {{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.global.config.customAnnotations.configMap }}
+{{ toYaml .Values.global.config.customAnnotations.configMap | indent 4 }}
+{{- end }}
 {{- end }}
 data:
   {{- range $key, $val := .Values.global.usrEnvs.normal }}
@@ -52,9 +62,14 @@ metadata:
 {{- if .Values.additionalLabels }}
 {{ toYaml .Values.additionalLabels | indent 4 }}
 {{- end }}
-{{- if .Values.additionalAnnotations }}
+{{- if or (.Values.additionalAnnotations) (.Values.global.config.customAnnotations.secret) }}
   annotations:
+{{- if .Values.additionalAnnotations }}
 {{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.global.config.customAnnotations.secret }}
+{{ toYaml .Values.global.config.customAnnotations.secret | indent 4 }}
+{{- end }}
 {{- end }}
 type: Opaque
 data:

@@ -11,16 +11,11 @@ import java.io.Serializable;
 import java.time.ZoneOffset;
 import java.util.Optional;
 
-/**
- * @author jgomer
- */
 @Named
 @SessionScoped
 public class SessionContext implements ISessionContext, Serializable {
 
     private User user;
-
-    private boolean onMobile;
 
     private BrowserInfo browser;
 

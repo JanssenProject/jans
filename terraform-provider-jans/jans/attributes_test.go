@@ -16,9 +16,17 @@ func TestAttributes(t *testing.T) {
 
 	ctx := context.Background()
 
-	_, err = client.GetAttributes(ctx)
+	attrs, err := client.GetAttributes(ctx)
 	if err != nil {
 		t.Fatal(err)
+	}
+
+	for _, attr := range attrs {
+		if attr.Name == "l" {
+			if err = client.DeleteAttribute(ctx, attr.Inum); err != nil {
+				t.Fatal(err)
+			}
+		}
 	}
 
 	newAttribute := &Attribute{
@@ -31,7 +39,7 @@ func TestAttributes(t *testing.T) {
 		DisplayName:    "test",
 		EditType:       []string{"user", "admin"},
 		Inum:           "7AC6",
-		Name:           "t",
+		Name:           "tbutlonger",
 		Origin:         "jansCustomPerson",
 		Saml1Uri:       "urn:mace:dir:attribute-def:t",
 		Saml2Uri:       "urn:oid:2.5.4.7",

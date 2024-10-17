@@ -1,7 +1,5 @@
 package io.jans.casa.ui.vm.user;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import io.jans.casa.misc.WebUtils;
 import io.jans.casa.core.pojo.SuperGluuDevice;
 import io.jans.casa.ui.UIUtils;
@@ -9,6 +7,9 @@ import io.jans.casa.misc.Utils;
 import io.jans.casa.plugins.authnmethod.SuperGluuExtension;
 import io.jans.casa.plugins.authnmethod.conf.SGConfig;
 import io.jans.casa.plugins.authnmethod.service.SGService;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.zkoss.bind.BindUtils;
 import org.zkoss.bind.annotation.*;
 import org.zkoss.json.JavaScriptValue;
@@ -34,7 +35,7 @@ public class SuperGluuViewModel extends UserViewModel {
 
     private static final int QR_SCAN_TIMEOUT = 60;
 
-    private Logger logger = LogManager.getLogger(getClass());
+    private Logger logger = LoggerFactory.getLogger(getClass());
 
     @WireVariable("sGService")
     private SGService sgService;

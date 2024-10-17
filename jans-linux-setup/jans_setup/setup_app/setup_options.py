@@ -16,7 +16,7 @@ def get_setup_options():
         'install_httpd': True,
         'install_scim_server': True if base.current_app.profile == 'jans' else False,
         'install_fido2': True,
-        'install_jans_link': False,
+        'install_jans_ldap_link': False,
         'install_jans_keycloak_link': False,
         'install_casa': False,
         'install_jans_saml': False,
@@ -27,53 +27,48 @@ def get_setup_options():
         'loadTestDataExit': False,
         'loadData': True,
         'properties_password': None,
-        'opendj_install': 0,
     }
 
-    if base.argsp.local_ldap:
-        setupOptions['opendj_install'] = InstallTypes.LOCAL
+
+    if getattr(base.argsp, 'remote_couchbase', None):
+        setupOptions['cb_install'] = InstallTypes.REMOTE
         setupOptions['rdbm_install'] = False
-        setupOptions['rdbm_install_type'] = InstallTypes.NONE
+
+    if base.argsp.remote_rdbm:
+        setupOptions['rdbm_install_type'] = InstallTypes.REMOTE
+        setupOptions['rdbm_type'] = base.argsp.remote_rdbm
+        if not base.argsp.remote_rdbm == 'spanner':
+            setupOptions['rdbm_host'] = base.argsp.rdbm_host
+
     else:
-        if getattr(base.argsp, 'remote_couchbase', None):
-            setupOptions['cb_install'] = InstallTypes.REMOTE
-            setupOptions['rdbm_install'] = False
+        setupOptions['rdbm_install_type'] = InstallTypes.LOCAL
+        setupOptions['rdbm_type'] = base.argsp.local_rdbm
+        setupOptions['rdbm_host'] = 'localhost'
 
-        if base.argsp.remote_rdbm:
-            setupOptions['rdbm_install_type'] = InstallTypes.REMOTE
-            setupOptions['rdbm_type'] = base.argsp.remote_rdbm
-            if not base.argsp.remote_rdbm == 'spanner':
-                setupOptions['rdbm_host'] = base.argsp.rdbm_host
+    if base.argsp.rdbm_port:
+        setupOptions['rdbm_port'] = base.argsp.rdbm_port
+    else:
+        if setupOptions.get('rdbm_type') == 'pgsql':
+            setupOptions['rdbm_port'] = 5432
 
-        else:
-            setupOptions['rdbm_install_type'] = InstallTypes.LOCAL
-            setupOptions['rdbm_type'] = base.argsp.local_rdbm
-            setupOptions['rdbm_host'] = 'localhost'
+    if base.argsp.rdbm_db:
+        setupOptions['rdbm_db'] = base.argsp.rdbm_db
+    if base.argsp.rdbm_user:
+        setupOptions['rdbm_user'] = base.argsp.rdbm_user
+    if base.argsp.rdbm_password:
+        setupOptions['rdbm_password'] = base.argsp.rdbm_password
 
-        if base.argsp.rdbm_port:
-            setupOptions['rdbm_port'] = base.argsp.rdbm_port
-        else:
-            if setupOptions.get('rdbm_type') == 'pgsql':
-                setupOptions['rdbm_port'] = 5432
-
-        if base.argsp.rdbm_db:
-            setupOptions['rdbm_db'] = base.argsp.rdbm_db
-        if base.argsp.rdbm_user:
-            setupOptions['rdbm_user'] = base.argsp.rdbm_user
-        if base.argsp.rdbm_password:
-            setupOptions['rdbm_password'] = base.argsp.rdbm_password
-
-        if base.current_app.profile == 'jans':
-            if base.argsp.spanner_project:
-                setupOptions['spanner_project'] = base.argsp.spanner_project
-            if base.argsp.spanner_instance:
-                setupOptions['spanner_instance'] = base.argsp.spanner_instance
-            if base.argsp.spanner_database:
-                setupOptions['spanner_database'] = base.argsp.spanner_database
-            if base.argsp.spanner_emulator_host:
-                setupOptions['spanner_emulator_host'] = base.argsp.spanner_emulator_host
-            if base.argsp.google_application_credentials:
-                setupOptions['google_application_credentials'] = base.argsp.google_application_credentials
+    if base.current_app.profile == 'jans':
+        if base.argsp.spanner_project:
+            setupOptions['spanner_project'] = base.argsp.spanner_project
+        if base.argsp.spanner_instance:
+            setupOptions['spanner_instance'] = base.argsp.spanner_instance
+        if base.argsp.spanner_database:
+            setupOptions['spanner_database'] = base.argsp.spanner_database
+        if base.argsp.spanner_emulator_host:
+            setupOptions['spanner_emulator_host'] = base.argsp.spanner_emulator_host
+        if base.argsp.google_application_credentials:
+            setupOptions['google_application_credentials'] = base.argsp.google_application_credentials
 
 
     if base.current_app.profile == 'jans':
@@ -103,8 +98,8 @@ def get_setup_options():
         if base.argsp.no_fido2:
             setupOptions['install_fido2'] = False
 
-        if base.argsp.install_jans_link:
-            setupOptions['install_jans_link'] = True
+        if base.argsp.install_jans_ldap_link:
+            setupOptions['install_jans_ldap_link'] = True
 
         if base.argsp.install_jans_keycloak_link:
             setupOptions['install_jans_keycloak_link'] = True
@@ -119,13 +114,8 @@ def get_setup_options():
         if base.argsp.jans_max_mem:
             setupOptions['jans_max_mem'] = base.argsp.jans_max_mem
 
-        if base.argsp.ldap_admin_password:
-            setupOptions['ldapPass'] = base.argsp.ldap_admin_password
-
         if base.argsp.admin_password:
             setupOptions['admin_password'] = base.argsp.admin_password
-        elif base.argsp.ldap_admin_password:
-            setupOptions['admin_password'] = base.argsp.ldap_admin_password
 
         if base.argsp.f:
             if os.path.isfile(base.argsp.f):
@@ -138,19 +128,11 @@ def get_setup_options():
         setupOptions['loadTestData']  = base.argsp.t
         setupOptions['loadTestDataExit'] = base.argsp.x
         setupOptions['allowPreReleasedFeatures'] = base.argsp.allow_pre_released_features
-        setupOptions['listenAllInterfaces'] = base.argsp.listen_all_interfaces
         setupOptions['config_patch_creds'] = base.argsp.config_patch_creds
         setupOptions['dump_config_on_error'] = base.argsp.dump_config_on_error
 
-        if base.argsp.remote_ldap:
-            setupOptions['opendj_install'] = InstallTypes.REMOTE
-            setupOptions['rdbm_install'] = False
-
         if base.argsp.no_data:
             setupOptions['loadData'] = False
-
-        if base.argsp.remote_ldap:
-            setupOptions['listenAllInterfaces'] = True
 
         if base.argsp.import_ldif:
             if os.path.isdir(base.argsp.import_ldif):
@@ -163,7 +145,6 @@ def get_setup_options():
         setupOptions['properties_password'] = base.argsp.properties_password
 
     if base.current_app.profile == SetupProfiles.OPENBANKING:
-        setupOptions['opendj_install'] = InstallTypes.NONE
         setupOptions['static_kid'] = base.argsp.static_kid
         setupOptions['ob_key_fn'] = base.argsp.ob_key_fn
         setupOptions['ob_cert_fn'] = base.argsp.ob_cert_fn

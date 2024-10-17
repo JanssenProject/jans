@@ -1,0 +1,20 @@
+[workspace]
+resolver = "2"
+members = ["bindings/*", "cedarling", "di", "sparkv", "test_utils"]
+
+[workspace.dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+thiserror = "1.0"
+sparkv = { path = "sparkv" }
+cedarling = { path = "cedarling" }
+di = { path = "di" }
+test_utils = { path = "test_utils" }
+
+
+[profile.release]
+strip = "symbols"
+debug-assertions = true
+lto = "thin"
+opt-level = "s"
+codegen-units = 1

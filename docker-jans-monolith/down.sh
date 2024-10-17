@@ -5,7 +5,7 @@ if [ -z "$1" ]; then
     yaml="jans-mysql-compose.yml"
 else
 	case "$1" in
-		mysql|ldap|postgres|couchbase|spanner)
+		mysql|postgres|couchbase|spanner)
 			yaml="jans-${1}-compose.yml"
 			;;
 		*)
@@ -23,11 +23,7 @@ if [ -z "$INSTALLED_JANSSEN_NAME" ]; then
 fi
 
 if [ -z "$JANSSEN_VERSION" ]; then
-    JANSSEN_VERSION="1.1.4_dev"
-fi
-
-if [ -z "$DATABASE_VOLUME_NAME" ]; then
-    DATABASE_VOLUME_NAME="db-data"
+    JANSSEN_VERSION="1.1.6_dev"
 fi
 
 if [ -z "$JANSSEN_SERVICE_NAME" ]; then
@@ -50,10 +46,3 @@ if ! docker image inspect ${JANSSEN_IMAGE} &> /dev/null; then
 fi
 export JANSSEN_IMAGE
 docker compose -f ${yaml} down
-
-
-
-
-
-
-

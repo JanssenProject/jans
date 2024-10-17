@@ -57,23 +57,26 @@ public class HOTPAlgorithmService implements IOTPAlgorithm {
     }
 
     public String getExternalUid(String secretKey, String code) {
-        Pair<Boolean, Long> result = validateKey(Base64.getUrlDecoder().decode(secretKey), code);
+        Pair<Boolean, Long> result = validateKey(secretKey, code);
         return result.getX()
                 ? String.format("%s:%s;%s", OTPType.HOTP.getName().toLowerCase(), secretKey, result.getY())
                 : null;
     }
 
-    private Pair<Boolean, Long> validateKey(byte[] secretKey, String otpCode) {
+    private Pair<Boolean, Long> validateKey(String secretKey, String otpCode) {
         //Use 1 as moving factor (assumes this is the very first use of the OTP hard token). In practice, this might not
         //be the case, so a big value for look ahead window is used. This should not be done when validating an OTPs at
         //login time, however, for enrollment is OK
         return validateKey(secretKey, otpCode, 1, MAX_LOOK_AHEAD_WINDOW);
     }
 
-    private Pair<Boolean, Long> validateKey(byte[] secretKey, String otpCode, int movingFactor, Integer alternativeLookAheadWindow) {
+    public Pair<Boolean, Long> validateKey(String secretKey, String otpCode, int movingFactor, Integer alternativeLookAheadWindow) {
+        
+        byte[] bsecret = Base64.getUrlDecoder().decode(secretKey);
+        
         int window = alternativeLookAheadWindow == null ? conf.getLookAheadWindow() : alternativeLookAheadWindow;
-        HOTPValidationResult result = HOTPValidator.lookAheadWindow(window).validate(secretKey, movingFactor, conf.getDigits(), otpCode);
-        return result.isValid() ? new Pair<>(true, result.getNewMovingFactor()) : new Pair<>(false, null);
+        HOTPValidationResult result = HOTPValidator.lookAheadWindow(window).validate(bsecret, movingFactor, conf.getDigits(), otpCode);
+        return result.isValid() ? new Pair<>(true, result.getNewMovingFactor()) : new Pair<>(false, null);   
     }
-
+    
 }

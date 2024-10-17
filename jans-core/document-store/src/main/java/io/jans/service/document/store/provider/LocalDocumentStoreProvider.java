@@ -14,27 +14,27 @@ import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import io.jans.service.document.store.conf.DocumentStoreConfiguration;
+import io.jans.service.document.store.conf.DocumentStoreType;
+import io.jans.service.document.store.conf.LocalDocumentStoreConfiguration;
 import io.jans.service.document.store.exception.DocumentException;
 import io.jans.service.document.store.exception.WriteDocumentException;
+import io.jans.util.StringHelper;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
-import io.jans.service.document.store.conf.DocumentStoreConfiguration;
-import io.jans.service.document.store.conf.LocalDocumentStoreConfiguration;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import io.jans.service.document.store.conf.DocumentStoreType;
-import io.jans.util.StringHelper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * @author Yuriy Movchan on 04/10/2020
  */
 @ApplicationScoped
-public class LocalDocumentStoreProvider extends DocumentStoreProvider<LocalDocumentStoreProvider> {
+public class LocalDocumentStoreProvider extends DocumentStoreProvider<String> {
 
     @Inject
     private Logger log;
@@ -102,7 +102,7 @@ public class LocalDocumentStoreProvider extends DocumentStoreProvider<LocalDocum
 	}
 
 	@Override
-	public String saveDocument(String path, String description, String documentContent, Charset charset, List<String> moduleList) {
+	public String saveDocument(String path, String description, String documentContent, Charset charset, String module) {
 		log.debug("Save document: '{}'", path);
 
 		File file = buildFilePath(path);
@@ -122,7 +122,7 @@ public class LocalDocumentStoreProvider extends DocumentStoreProvider<LocalDocum
 	}
 
 	@Override
-	public String saveDocumentStream(String path, String description, InputStream documentStream, List<String> moduleList) {
+	public String saveDocumentStream(String path, String description, InputStream documentStream, String module) {
 		log.debug("Save document from stream: '{}'", path);
 
 		File file = buildFilePath(path);
@@ -143,8 +143,8 @@ public class LocalDocumentStoreProvider extends DocumentStoreProvider<LocalDocum
 
 	@Override
 	public String saveBinaryDocumentStream(String path, String description, InputStream documentStream,
-			List<String> moduleList) {
-		return saveDocumentStream(path, description, documentStream, moduleList);
+			String module) {
+		return saveDocumentStream(path, description, documentStream, module);
 	}
 
 	@Override
@@ -236,5 +236,9 @@ public class LocalDocumentStoreProvider extends DocumentStoreProvider<LocalDocum
 		return new File(filePath);
 	}
 
+	@Override
+	public List<String> findDocumentsByModules(List<String> moduleList, String ... attributes) {
+        throw new RuntimeException("Not yet implemented");
+	}
 
 }

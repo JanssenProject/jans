@@ -1,7 +1,6 @@
 package io.jans.casa.ui.vm.user;
 
-import io.jans.casa.core.ExtensionsManager;
-import io.jans.casa.core.PersistenceService;
+import io.jans.casa.core.*;
 import io.jans.casa.extension.AuthnMethod;
 import io.jans.casa.extension.PreferredMethodFragment;
 import io.jans.casa.misc.Utils;
@@ -23,7 +22,6 @@ import java.util.stream.Collectors;
 /**
  * This is the ViewModel of page fragment preferred.zul (and the fragments included by it). It controls the functionality
  * for setting the user's preferred authentication method when second factor authentication is enabled
- * @author jgomer
  */
 public class UserPreferenceViewModel extends UserViewModel {
 
@@ -89,7 +87,7 @@ public class UserPreferenceViewModel extends UserViewModel {
     	
         if (mfaEnabled) {
         	//Checks if selectedMethod maps to a real acr, or is otherwise marker data
-        	if (persistenceService.getScript(selectedMethod) == null) {
+        	if (!confSettings.getAcrPluginMap().containsKey(selectedMethod)) {
         	    selectedMethod =  null; 
         	}
     	} else {

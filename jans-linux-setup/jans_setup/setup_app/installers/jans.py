@@ -39,16 +39,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
                 txt += 'countryCode'.ljust(30) + Config.countryCode.rjust(35) + "\n"
                 txt += 'Applications max ram (MB)'.ljust(30) + str(Config.application_max_ram).rjust(35) + "\n"
 
-                if Config.get('opendj_install') and Config.get('opendj_max_ram'):
-                    txt += 'OpenDJ max ram (MB)'.ljust(30) + str(Config.opendj_max_ram).rjust(35) + "\n"
-
                 bc = []
-
-                if Config.get('opendj_install'):
-                    t_ = 'opendj'
-                    if Config.opendj_install == InstallTypes.REMOTE:
-                        t_ += '[R]'
-                    bc.append(t_)
 
                 if Config.get('cb_install'):
                     t_ = 'couchbase'
@@ -80,7 +71,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
                 for prompt_str, install_var in (
                         ('Install Fido2 Server', 'install_fido2'),
                         ('Install Scim Server', 'install_scim_server'),
-                        ('Install Jans Link Server', 'install_jans_link'),
+                        ('Install Jans LDAP Link Server', 'install_jans_ldap_link'),
                         ('Install Jans KC Link Server', 'install_jans_keycloak_link'),
                         ('Install Jans Casa', 'install_casa'),
                         ('Install Jans Lock', 'install_jans_lock'),
@@ -153,7 +144,11 @@ class JansInstaller(BaseInstaller, SetupUtils):
             self.writeHybridProperties()
 
         # set systemd start timeout to 5 mins
-        systemd_conf_fn = '/etc/systemd/system.conf'
+        for sys_prefix in ('/etc', '/usr/lib'):
+            systemd_conf_fn = os.path.join(sys_prefix, 'systemd/system.conf')
+            if os.path.exists(systemd_conf_fn):
+                break
+
         systemd_conf = []
 
         for l in open(systemd_conf_fn):
@@ -227,9 +222,6 @@ class JansInstaller(BaseInstaller, SetupUtils):
         if not templates:
             templates = Config.ce_templates
 
-        if Config.persistence_type in ('couchbase', 'sql', 'spanner') and Config.get('ox_ldap_properties'):
-            Config.ce_templates[Config.ox_ldap_properties] = False
-
         for fullPath in templates:
             try:
                 self.renderTemplate(fullPath)
@@ -254,7 +246,6 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
     def writeHybridProperties(self):
 
-        ldap_mappings = self.getMappingType('ldap')
         couchbase_mappings = self.getMappingType('couchbase')
         
         for group in Config.mapping_locations:
@@ -268,14 +259,6 @@ class JansInstaller(BaseInstaller, SetupUtils):
                         'storages: {0}'.format(', '.join(storages)),
                         'storage.default: {0}'.format(default_mapping),
                         ]
-
-        if ldap_mappings:
-            jans_hybrid_roperties.append('storage.ldap.mapping: {0}'.format(', '.join(ldap_mappings)))
-            ldap_map_list = []
-            for m in ldap_mappings:
-                if m != 'default':
-                    ldap_map_list.append(Config.couchbaseBucketDict[m]['mapping'])
-            jans_hybrid_roperties.append('storage.ldap.mapping: {0}'.format(', '.join(ldap_map_list)))
 
         if couchbase_mappings:
             cb_map_list = []
@@ -392,15 +375,14 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
     def set_ulimits(self):
         self.logIt("Setting ulimist")
+        conf_fn = '/etc/security/limits.conf'
         try:
             apache_user = 'apache' if base.clone_type == 'rpm' else 'www-data'
 
-            self.appendLine("ldap       soft nofile     131072", "/etc/security/limits.conf")
-            self.appendLine("ldap       hard nofile     262144", "/etc/security/limits.conf")
-            self.appendLine("%s     soft nofile     131072" % apache_user, "/etc/security/limits.conf")
-            self.appendLine("%s     hard nofile     262144" % apache_user, "/etc/security/limits.conf")
-            self.appendLine("jetty      soft nofile     131072", "/etc/security/limits.conf")
-            self.appendLine("jetty      hard nofile     262144", "/etc/security/limits.conf")
+            self.appendLine(f'{apache_user}    soft nofile     131072', conf_fn)
+            self.appendLine(f'{apache_user}     hard nofile     262144', conf_fn)
+            self.appendLine('jetty      soft nofile     131072', conf_fn)
+            self.appendLine('jetty      hard nofile     262144', conf_fn)
         except:
             self.logIt("Could not set limits.")
 
@@ -500,8 +482,6 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
         self.apply_selinux_plicies()
 
-        self.deleteLdapPw()
-
         self.dbUtils.bind(force=True)
 
         if base.argsp.import_ldif:
@@ -533,7 +513,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
             for crt_fn in Path(os.path.join(base.snap_common, 'etc/certs')).glob('*'):
                 self.run([paths.cmd_chmod, '0600', crt_fn.as_posix()])
 
-            for spath in ('jans', 'etc/jans/conf', 'opendj/db'):
+            for spath in ('jans', 'etc/jans/conf'):
                 for gpath in Path(os.path.join(base.snap_common, spath)).rglob('*'):
                     if ('node_modules' in gpath.as_posix()) or ('jans/bin' in gpath.as_posix()) or ('jetty/temp' in gpath.as_posix()):
                         continue
@@ -653,7 +633,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
                         ('jans-config-api', 'install_config_api'),
                         ('jans-casa', 'install_casa'),
                         ('jans-fido2', 'install_fido2'),
-                        ('jans-link', 'install_jans_link'),
+                        ('jans-link', 'install_jans_ldap_link'),
                         ('jans-scim', 'install_scim_server'),
                         ('jans-lock', 'install_jans_lock_as_server'),
                         ('opa', 'install_opa'),

@@ -245,8 +245,6 @@ public class SamlService {
         
         if (file != null && file.available() > 0) {
             saveSpMetaDataFileSourceTypeFile(trustRelationship, file);
-        }else {
-            trustRelationship.setSpMetaDataFN(null);
         }
         
         persistenceEntryManager.merge(trustRelationship);

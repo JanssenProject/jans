@@ -105,6 +105,11 @@ func resourceCustomUser() *schema.Resource {
 					},
 				},
 			},
+			"status": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "User status",
+			},
 			"custom_attributes": {
 				Type:        schema.TypeList,
 				Optional:    true,
@@ -177,6 +182,10 @@ func resourceCustomUserRead(ctx context.Context, d *schema.ResourceData, meta an
 	attr, err := c.GetCustomUser(ctx, inum)
 	if err != nil {
 		return handleNotFoundError(ctx, err, d)
+	}
+
+	if len(attr.Authenticator.Authenticators) == 0 {
+		attr.Authenticator.Authenticators = nil
 	}
 
 	if err := toSchemaResource(d, attr); err != nil {

@@ -5,13 +5,13 @@ import re
 import sys
 import base64
 import glob
-import ldap3
 
 from urllib.parse import urlparse
-from ldap3.utils import dn as dnutils
 
 from setup_app import paths
 from setup_app import static
+from setup_app.static import SearchScopes
+
 from setup_app.utils import base
 from setup_app.config import Config
 from setup_app.utils.db_utils import dbUtils
@@ -112,9 +112,9 @@ class CollectProperties(SetupUtils, BaseInstaller):
         if dbUtils.session:
             dbUtils.rdm_automapper()
 
-        result = dbUtils.search('ou=clients,o=jans', search_filter='(&(inum=1701.*)(objectClass=jansClnt))', search_scope=ldap3.SUBTREE)
+        result = dbUtils.search('ou=clients,o=jans', search_filter='(&(inum=1701.*)(objectClass=jansClnt))', search_scope=SearchScopes.SUBTREE)
 
-        oxConfiguration = dbUtils.search(jans_ConfigurationDN, search_filter='(objectClass=jansAppConf)', search_scope=ldap3.BASE)
+        oxConfiguration = dbUtils.search(jans_ConfigurationDN, search_filter='(objectClass=jansAppConf)', search_scope=SearchScopes.BASE)
         if 'jansIpAddress' in oxConfiguration:
             Config.ip = oxConfiguration['jansIpAddress']
 
@@ -140,7 +140,7 @@ class CollectProperties(SetupUtils, BaseInstaller):
         result = dbUtils.search(
                         search_base='inum={},ou=clients,o=jans'.format(Config.get('jans_auth_client_id', '-1')),
                         search_filter='(objectClass=jansClnt)',
-                        search_scope=ldap3.BASE,
+                        search_scope=SearchScopes.BASE,
                         )
         if result and result.get('jansClntSecret'):
             Config.jans_auth_client_encoded_pw = result['jansClntSecret']
@@ -218,7 +218,7 @@ class CollectProperties(SetupUtils, BaseInstaller):
         Config.install_scim_server = os.path.exists(os.path.join(Config.jetty_base, 'jans-scim/start.d'))
         Config.install_fido2 = os.path.exists(os.path.join(Config.jetty_base, 'jans-fido2/start.d'))
         Config.install_config_api = os.path.exists(os.path.join(Config.jansOptFolder, 'jans-config-api'))
-        Config.install_jans_link = os.path.exists(os.path.join(Config.jansOptFolder, 'jans-link'))
+        Config.install_jans_ldap_link = os.path.exists(os.path.join(Config.jansOptFolder, 'jans-link'))
         Config.install_casa = os.path.exists(os.path.join(Config.jetty_base, 'casa/start.d'))
         Config.install_jans_keycloak_link = os.path.exists(os.path.join(Config.jetty_base, 'jans-keycloak-link/start.d'))
 

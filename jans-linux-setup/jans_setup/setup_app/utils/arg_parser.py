@@ -77,12 +77,6 @@ if PROFILE != OPENBANKING_PROFILE:
     parser.add_argument('-x', help="Load test data and exit", action='store_true')
     parser.add_argument('--allow-pre-released-features', help="Enable options to install experimental features, not yet officially supported", action='store_true')
 
-    parser.add_argument('--local-ldap', help="Install local OpenDJ Server", action='store_true')
-    parser.add_argument('--listen_all_interfaces', help="Allow the LDAP server to listen on all server interfaces", action='store_true')
-
-    ldap_group = parser.add_mutually_exclusive_group()
-    ldap_group.add_argument('--remote-ldap', help="Enables using remote LDAP server", action='store_true')
-    ldap_group.add_argument('--disable-local-ldap', help="Disables installing local LDAP server", action='store_true')
 
     parser.add_argument('--remote-couchbase', help="Enables using remote couchbase server", action='store_true')
     parser.add_argument('--local-couchbase', help="Enables installing couchbase server", action='store_true')
@@ -96,12 +90,12 @@ if PROFILE != OPENBANKING_PROFILE:
 
     parser.add_argument('--no-data', help="Do not import any data to database backend, used for clustering", action='store_true')
     parser.add_argument('--no-jsauth', help="Do not install OAuth2 Authorization Server", action='store_true')
-    parser.add_argument('-ldap-admin-password', help="Used as the LDAP directory manager password")
+
     parser.add_argument('--no-config-api', help="Do not install Jans Auth Config Api", action='store_true')
 
     parser.add_argument('--no-scim', help="Do not install Scim Server", action='store_true')
     parser.add_argument('--no-fido2', help="Do not install Fido2 Server", action='store_true')
-    parser.add_argument('--install-jans-link', help="Install Jans Link Server", action='store_true')
+    parser.add_argument('--install-jans-ldap-link', help="Install Jans LDAP Link Server", action='store_true')
     parser.add_argument('--install-jans-keycloak-link', help="Install Keycloak Link Server", action='store_true')
 
     parser.add_argument('--with-casa', help="Install Jans Casa", action='store_true')

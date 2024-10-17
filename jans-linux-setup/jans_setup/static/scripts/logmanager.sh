@@ -24,22 +24,23 @@
 
 # Script to compress logfiles over defined periodicity
 #Author : Vishwa Ranjan
+#Refactor: Zico, Oct 14, 2024
 
 #Variable Definition
 KEEPDAYS1=1   #for compression
 KEEPDAYS2=15  #for deletion
 
 
-DIRS="/opt/shibboleth-idp/logs/ /opt/gluu/jetty/idp/logs/ /opt/gluu/jetty/oxauth/logs /opt/gluu/jetty/identity/logs /var/log/ /var/log/httpd/ /var/log/shibboleth/ /var/log/cups/ /var/removedldif/"
+DIRS="/opt/jans/jetty/jans-auth/logs /opt/jans/jetty/jans-casa/logs /opt/jans/jetty/jans-config-api/logs /opt/jans/jetty/jans-fido2/logs /opt/jans/jetty/jans-keycloak-link/logs /opt/jans/jetty/jans-link/logs /opt/jans/jetty/jans-lock/logs /opt/jans/jetty/jans-scim/logs /var/log/ /var/log/adminui"
 
 PWD=`pwd`
 PWD1=$PWD
 TEMPDIR="/tmp/gluumanager"
-mkdir $TEMPDIR >> /opt/gluu/logs/logmanager.log 2>&1
+mkdir $TEMPDIR >> /var/log/logmanager.log 2>&1
 cd $TEMPDIR
-echo "$(date) : Changing to TEMP Directory" $TEMPDIR >> /opt/gluu/logs/logmanager.log
+echo "$(date) : Changing to TEMP Directory" $TEMPDIR >> /var/log/logmanager.log
 #compression Section
-echo "$(date) : Starting Compression">> /opt/gluu/logs/logmanager.log
+echo "$(date) : Starting Compression">> /var/log/logmanager.log
 for dir in $DIRS
 do
  if [ -d "$dir" ]; then
@@ -47,13 +48,13 @@ do
  fi
  for fname in $FILES
    do
-           echo "$(date) : Compressing file" $fname >> /opt/gluu/logs/logmanager.log
-           gzip --best --force $fname >> /opt/gluu/logs/logmanager.log 2>&1
+           echo "$(date) : Compressing file" $fname >> /var/log/logmanager.log
+           gzip --best --force $fname >> /var/log/logmanager.log 2>&1
    done
 done
 
 # Deletion Section
-echo "$(date) : Starting Deletion">> /opt/gluu/logs/logmanager.log
+echo "$(date) : Starting Deletion">> /var/log/logmanager.log
 for dir in $DIRS
 do
  if [ -d "$dir" ]; then
@@ -61,11 +62,11 @@ do
  fi
  for fname in $FILES
    do
-           echo "$(date) : Deleting file" $fname >> /opt/gluu/logs/logmanager.log
-           rm -f $fname >> /opt/gluu/logs/logmanager.log 2>&1
+           echo "$(date) : Deleting file" $fname >> /var/log/logmanager.log
+           rm -f $fname >> /var/log/logmanager.log 2>&1
    done
 done
-echo "$(date) : Changing back to working  Directory" $PWD1 >> /opt/gluu/logs/logmanager.log
-cd $PWD1 >> /opt/gluu/logs/logmanager.log 2>&1
-echo "$(date) : Removing Temp Directory" $TEMPDIR >> /opt/gluu/logs/logmanager.log
-rm -r  $TEMPDIR >> /opt/gluu/logs/logmanager.log 2>&1
+echo "$(date) : Changing back to working  Directory" $PWD1 >> /var/log/logmanager.log
+cd $PWD1 >> /var/log/logmanager.log 2>&1
+echo "$(date) : Removing Temp Directory" $TEMPDIR >> /var/log/logmanager.log
+rm -r  $TEMPDIR >> /var/log/logmanager.log 2>&1

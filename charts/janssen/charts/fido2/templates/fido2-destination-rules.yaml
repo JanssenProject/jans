@@ -10,9 +10,14 @@ metadata:
 {{- if .Values.additionalLabels }}
 {{ toYaml .Values.additionalLabels | indent 4 }}
 {{- end }}
-{{- if .Values.additionalAnnotations }}
+{{- if or (.Values.additionalAnnotations) (.Values.global.fido2.customAnnotations.destinationRule) }}
   annotations:
+{{- if .Values.additionalAnnotations }}
 {{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.global.fido2.customAnnotations.destinationRule }}
+{{ toYaml .Values.global.fido2.customAnnotations.destinationRule | indent 4 }}
+{{- end }}
 {{- end }}
 spec:
   host: {{ .Values.global.fido2.fido2ServiceName }}.{{ .Release.Namespace }}.svc.cluster.local

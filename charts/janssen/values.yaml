@@ -47,7 +47,7 @@ auth-server:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/auth-server
     # -- Image  tag to use for deploying.
-    tag: 1.1.4_dev
+    tag: 1.1.6_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -124,7 +124,7 @@ auth-server-key-rotation:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/certmanager
     # -- Image  tag to use for deploying.
-    tag: 1.1.4_dev
+    tag: 1.1.6_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Auth server key rotation keys life in hours
@@ -280,20 +280,18 @@ config:
     # -- Path to Vault AppRole.
     cnVaultAppRolePath: approle
     # [vault_envs] END
-    # -- OpenDJ internal address. Leave as default. Used when `global.cnPersistenceType` is set to `ldap`.
-    cnLdapUrl: "opendj:1636"
     # -- Value passed to Java option -XX:MaxRAMPercentage
     cnMaxRamPercent: "75.0"
     # -- SCIM protection mode OAUTH|TEST|UMA
     cnScimProtectionMode: "OAUTH"
-    # -- Specify data that should be saved in LDAP (one of default, user, cache, site, token, or session; default to default). Note this environment only takes effect when `global.cnPersistenceType`  is set to `hybrid`.
+    # -- Specify data that should be saved in persistence (one of default, user, cache, site, token, or session; default to default). Note this environment only takes effect when `global.cnPersistenceType`  is set to `hybrid`.
     #{
-    #  "default": "<couchbase|ldap|spanner|sql>",
-    #  "user": "<couchbase|ldap|spanner|sql>",
-    #  "site": "<couchbase|ldap|spanner|sql>",
-    #  "cache": "<couchbase|ldap|spanner|sql>",
-    #  "token": "<couchbase|ldap|spanner|sql>",
-    #  "session": "<couchbase|ldap|spanner|sql>",
+    #  "default": "<couchbase|spanner|sql>",
+    #  "user": "<couchbase|spanner|sql>",
+    #  "site": "<couchbase|spanner|sql>",
+    #  "cache": "<couchbase|spanner|sql>",
+    #  "token": "<couchbase|spanner|sql>",
+    #  "session": "<couchbase|spanner|sql>",
     #}
     cnPersistenceHybridMapping: "{}"
     # -- Redis Sentinel Group. Often set when `config.configmap.cnRedisType` is set to `SENTINEL`. Can be used when  `config.configmap.cnCacheType` is set to `REDIS`.
@@ -310,10 +308,6 @@ config:
     cnSecretKubernetesSecret: cn
     # -- Load balancer address for AWS if the FQDN is not registered.
     lbAddr: ""
-    # -- OpenDJ certificate string. This must be encoded using base64.
-    cnLdapCrt: SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo=
-    # -- OpenDJ key string. This must be encoded using base64.
-    cnLdapKey: SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo=
     # -- Quarkus transaction recovery. When using MySQL, there could be issue regarding XA_RECOVER_ADMIN; refer to https://dev.mysql.com/doc/refman/8.0/en/privileges-provided.html#priv_xa-recover-admin for details.
     quarkusTransactionEnableRecovery: true
     # -- Keycloak logging level
@@ -346,13 +340,9 @@ config:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/configurator
     # -- Image  tag to use for deploying.
-    tag: 1.1.4_dev
+    tag: 1.1.6_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
-  # -- LDAP admin password if OpenDJ is used for persistence.
-  ldapPassword: P@ssw0rds
-  # -- LDAP truststore password if OpenDJ is used for persistence
-  ldapTruststorePassword: changeit
   # -- Organization name. Used for certificate creation.
   orgName: Janssen
   # -- Redis admin password if `config.configmap.cnCacheType` is set to `REDIS`.
@@ -442,7 +432,7 @@ config-api:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/config-api
     # -- Image  tag to use for deploying.
-    tag: 1.1.4_dev
+    tag: 1.1.6_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -545,7 +535,7 @@ fido2:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/fido2
     # -- Image  tag to use for deploying.
-    tag: 1.1.4_dev
+    tag: 1.1.6_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -653,7 +643,7 @@ casa:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/casa
     # -- Image  tag to use for deploying.
-    tag: 1.1.4_dev
+    tag: 1.1.6_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -724,6 +714,15 @@ global:
     ingress: false
 
   auth-server:
+    # — Add custom annotations for kubernetes resources for the service
+    customAnnotations:
+      destinationRule: {}
+      podDisruptionBudget: {}
+      virtualService: {}
+      deployment: {}
+      horizontalPodAutoscaler: {}
+      service: {}
+      secret: {}
     # -- Name of the auth-server service. Please keep it as default.
     authServerServiceName: auth-server
     # -- Boolean flag to enable/disable auth-server chart. You should never set this to false.
@@ -750,10 +749,6 @@ global:
       persistenceDurationLogTarget: "FILE"
       # -- jans-auth_persistence_duration.log level
       persistenceDurationLogLevel: "INFO"
-      # -- jans-auth_persistence_ldap_statistics.log target
-      ldapStatsLogTarget: "FILE"
-      # -- jans-auth_persistence_ldap_statistics.log level
-      ldapStatsLogLevel: "INFO"
       # -- jans-auth_script.log target
       scriptLogTarget: "FILE"
       # -- jans-auth_script.log level
@@ -784,14 +779,63 @@ global:
       webdiscoveryEnabled: true
       # -- Enable endpoint /.well-known/fido-configuration
       u2fConfigEnabled: true
-      # -- Enable endpoint /.well-known/lock-master-configuration
+      # -- Enable endpoint /.well-known/lock-server-configuration
       lockConfigEnabled: false
+      # -- Enable endpoint /jans-lock
+      lockEnabled: false
+      # -- Lock config ingress resource labels. key app is taken
+      lockConfigLabels: { }
+      # -- Lock config ingress resource additional annotations.
+      lockConfigAdditionalAnnotations: { }
+      # -- Lock ingress resource labels. key app is taken
+      lockLabels: { }
+      # -- Lock ingress resource additional annotations.
+      lockAdditionalAnnotations: { }
+      # -- openid-configuration ingress resource labels. key app is taken
+      openidConfigLabels: { }
+      # -- openid-configuration ingress resource additional annotations.
+      openidAdditionalAnnotations: { }
+      # -- device-code ingress resource labels. key app is taken
+      deviceCodeLabels: { }
+      # -- device-code ingress resource additional annotations.
+      deviceCodeAdditionalAnnotations: { }
+      # -- Firebase Messaging ingress resource labels. key app is taken
+      firebaseMessagingLabels: { }
+      # -- Firebase Messaging ingress resource additional annotations.
+      firebaseMessagingAdditionalAnnotations: { }
+      # -- uma2 config ingress resource labels. key app is taken
+      uma2ConfigLabels: { }
+      # -- uma2 config ingress resource additional annotations.
+      uma2AdditionalAnnotations: { }
+      # -- webfinger ingress resource labels. key app is taken
+      webfingerLabels: { }
+      # -- webfinger ingress resource additional annotations.
+      webfingerAdditionalAnnotations: { }
+      # -- webdiscovery ingress resource labels. key app is taken
+      webdiscoveryLabels: { }
+      # -- webdiscovery ingress resource additional annotations.
+      webdiscoveryAdditionalAnnotations: { }
+      # -- u2f config ingress resource labels. key app is taken
+      u2fConfigLabels: { }
+      # -- u2f config ingress resource additional annotations.
+      u2fAdditionalAnnotations: { }
+      # -- Auth server ingress resource labels. key app is taken
+      authServerLabels: { }
+      # -- Auth server ingress resource additional annotations.
+      authServerAdditionalAnnotations: { }
+
+
     # -- Enable jans-lock as service running inside auth-server
     lockEnabled: false
 
   auth-server-key-rotation:
     # -- Boolean flag to enable/disable the auth-server-key rotation cronjob chart.
     enabled: true
+    # — Add custom annotations for kubernetes resources for the service
+    customAnnotations:
+      cronjob: {}
+      service: {}
+      secret: {}
     # -- The initial auth server key rotation keys life in hours
     initKeysLife: 48
   # -- Volume storage type if using AWS volumes.
@@ -801,6 +845,15 @@ global:
   # -- Azure storage kind if using Azure disks
   azureStorageKind: Managed
   casa:
+    # — Add custom annotations for kubernetes resources for the service
+    customAnnotations:
+      destinationRule: {}
+      podDisruptionBudget: {}
+      virtualService: {}
+      deployment: {}
+      horizontalPodAutoscaler: {}
+      service: {}
+      secret: {}
     # -- passing custom java options to casa. Notice you do not need to pass in any loggers options as they are introduced below in appLoggers. DO NOT PASS JAVA_OPTIONS in envs.
     cnCustomJavaOptions: ""
     # -- App loggers can be configured to define where the logs will be redirected to and the level of each in which it should be displayed.
@@ -823,6 +876,10 @@ global:
     ingress:
       # -- Enable casa endpoints /casa
       casaEnabled: false
+      # -- Casa ingress resource labels. key app is taken
+      casaLabels: { }
+      # -- Casa ingress resource additional annotations.
+      casaAdditionalAnnotations: { }
   cloud:
     # -- Boolean flag if enabled will strip resources requests and limits from all services.
     testEnviroment: false
@@ -830,9 +887,19 @@ global:
   cnPrometheusPort: ""
   # -- Document store type to use for shibboleth files DB.
   cnDocumentStoreType: DB
-  # -- Persistence backend to run Janssen with ldap|couchbase|hybrid|sql|spanner.
+  # -- Persistence backend to run Janssen with couchbase|hybrid|sql|spanner.
   cnPersistenceType: sql
   config:
+    # — Add custom annotations for kubernetes resources for the service
+    customAnnotations:
+      clusterRoleBinding: {}
+      configMap: {}
+      job: {}
+      roleBinding: {}
+      role: {}
+      secret: {}
+      service: {}
+      serviceAccount: {}
     # -- Boolean flag to enable/disable the configuration chart. This normally should never be false
     enabled: true
   # -- https://kubernetes.io/docs/concepts/workloads/controllers/ttlafterfinished/
@@ -850,6 +917,14 @@ global:
   # The location of file contains replica regions definition (if any). This file is mostly used in primary region. Example of contents of the file: `[{"Region": "us-west-1"}]`.  Used only when global.configAdapterName and global.configSecretAdapter is set to aws. Leave as this is a sensible default.
   cnAwsSecretsReplicaRegionsFile: /etc/jans/conf/aws_secrets_replica_regions
   config-api:
+    # — Add custom annotations for kubernetes resources for the service
+    customAnnotations:
+      destinationRule: {}
+      podDisruptionBudget: {}
+      virtualService: {}
+      deployment: {}
+      horizontalPodAutoscaler: {}
+      service: {}
     # -- Name of the config-api service. Please keep it as default.
     configApiServerServiceName: config-api
     # -- Boolean flag to enable/disable the config-api chart.
@@ -872,10 +947,6 @@ global:
       persistenceDurationLogTarget: "FILE"
       # -- config-api_persistence_duration.log level
       persistenceDurationLogLevel: "INFO"
-      # -- config-api_persistence_ldap_statistics.log target
-      ldapStatsLogTarget: "FILE"
-      # -- config-api_persistence_ldap_statistics.log level
-      ldapStatsLogLevel: "INFO"
       # -- config-api_script.log target
       scriptLogTarget: "FILE"
       # -- config-api_script.log level
@@ -884,11 +955,24 @@ global:
     ingress:
       # Enable config API endpoints /jans-config-api
       configApiEnabled: true
+      # -- configAPI ingress resource labels. key app is taken
+      configApiLabels: { }
+      # -- ConfigAPI ingress resource additional annotations.
+      configApiAdditionalAnnotations: { }
     # -- Comma-separated values of enabled plugins (supported plugins are "admin-ui","fido2","scim","user-mgt","jans-link","kc-saml")
     plugins: "fido2,scim,user-mgt"
   # -- Fully qualified domain name to be used for Janssen installation. This address will be used to reach Janssen services.
   fqdn: demoexample.jans.io
   fido2:
+    # — Add custom annotations for kubernetes resources for the service
+    customAnnotations:
+      destinationRule: {}
+      podDisruptionBudget: {}
+      virtualService: {}
+      deployment: {}
+      horizontalPodAutoscaler: {}
+      service: {}
+      secret: {}
     # -- Name of the fido2 service. Please keep it as default.
     fido2ServiceName: fido2
     # -- Boolean flag to enable/disable the fido2 chart.
@@ -921,6 +1005,14 @@ global:
       fido2ConfigEnabled: false
       # -- Enable endpoint /jans-fido2
       fido2Enabled: false
+      # -- fido2 config ingress resource labels. key app is taken
+      fido2ConfigLabels: { }
+      # -- fido2 config ingress resource additional annotations.
+      fido2ConfigAdditionalAnnotations: { }
+      # -- fido2 ingress resource labels. key app is taken
+      fido2Labels: { }
+      # -- fido2 ingress resource additional annotations.
+      fido2AdditionalAnnotations: { }
   # -- GCE storage kind if using Google disks
   gcePdStorageType: pd-standard
   # -- Boolean flag to enable mapping global.lbIp  to global.fqdn inside pods on clouds that provide static ip for load balancers. On cloud that provide only addresses to the LB this flag will enable a script to actively scan config.configmap.lbAddr and update the hosts file inside the pods automatically.
@@ -943,15 +1035,26 @@ global:
   nginx-ingress:
     # -- Boolean flag to enable/disable the nginx-ingress definitions chart.
     enabled: true
-  opendj:
-    # -- Boolean flag to enable/disable the OpenDJ  chart.
-    enabled: false
-    # -- Name of the OpenDJ service. Please keep it as default.
-    ldapServiceName: opendj
   persistence:
+    # — Add custom annotations for kubernetes resources for the service
+    customAnnotations:
+      job: {}
+      service: {}
+      secret: {}
     # -- Boolean flag to enable/disable the persistence chart.
     enabled: true
+  # -- service account used by Kubernetes resources
+  serviceAccountName: default
   scim:
+    # — Add custom annotations for kubernetes resources for the service
+    customAnnotations:
+      destinationRule: {}
+      podDisruptionBudget: {}
+      virtualService: {}
+      deployment: {}
+      horizontalPodAutoscaler: {}
+      service: {}
+      secret: {}
     # -- Name of the scim service. Please keep it as default.
     scimServiceName: scim
     # -- Boolean flag to enable/disable the SCIM chart.
@@ -974,10 +1077,6 @@ global:
       persistenceDurationLogTarget: "FILE"
       # -- jans-scim_persistence_duration.log level
       persistenceDurationLogLevel: "INFO"
-      # -- jans-scim_persistence_ldap_statistics.log target
-      ldapStatsLogTarget: "FILE"
-      # -- jans-scim_persistence_ldap_statistics.log level
-      ldapStatsLogLevel: "INFO"
       # -- jans-scim_script.log target
       scriptLogTarget: "FILE"
       # -- jans-scim_script.log level
@@ -988,7 +1087,15 @@ global:
       scimConfigEnabled: false
       # -- Enable SCIM endpoints /jans-scim
       scimEnabled: false
-  # -- StorageClass section for OpenDJ charts. This is not currently used by the openbanking distribution. You may specify custom parameters as needed.
+      # -- SCIM config ingress resource labels. key app is taken
+      scimConfigLabels: { }
+      # -- SCIM config ingress resource additional annotations.
+      scimConfigAdditionalAnnotations: { }
+      # -- SCIM config ingress resource labels. key app is taken
+      scimLabels: { }
+      # -- SCIM ingress resource additional annotations.
+      scimAdditionalAnnotations: { }
+  # -- StorageClass section. This is not currently used by the openbanking distribution. You may specify custom parameters as needed.
   storageClass:
     allowVolumeExpansion: true
     allowedTopologies: []
@@ -1005,6 +1112,14 @@ global:
     reclaimPolicy: Retain
     volumeBindingMode: WaitForFirstConsumer
   link:
+    # — Add custom annotations for kubernetes resources for the service
+    customAnnotations:
+      destinationRule: {}
+      podDisruptionBudget: {}
+      virtualService: {}
+      deployment: {}
+      horizontalPodAutoscaler: {}
+      service: {}
     # -- Name of the link service. Please keep it as default.
     linkServiceName: link
     # -- Boolean flag to enable/disable the link chart.
@@ -1027,10 +1142,6 @@ global:
       persistenceDurationLogTarget: "FILE"
       # -- cacherefresh_persistence_duration.log level
       persistenceDurationLogLevel: "INFO"
-      # -- cacherefresh_persistence_ldap_statistics.log target
-      ldapStatsLogTarget: "FILE"
-      # -- cacherefresh_persistence_ldap_statistics.log level
-      ldapStatsLogLevel: "INFO"
       # -- cacherefresh_script.log target
       scriptLogTarget: "FILE"
       # -- cacherefresh_script.log level
@@ -1040,6 +1151,15 @@ global:
       # Enable link endpoints /jans-link
       linkEnabled: true
   saml:
+    # — Add custom annotations for kubernetes resources for the service
+    customAnnotations:
+      destinationRule: {}
+      podDisruptionBudget: {}
+      virtualService: {}
+      deployment: {}
+      horizontalPodAutoscaler: {}
+      service: {}
+      secret: {}
     # -- Name of the saml service. Please keep it as default.
     samlServiceName: saml
     # -- Boolean flag to enable/disable the saml chart.
@@ -1048,6 +1168,10 @@ global:
     ingress:
       # Enable saml endpoints /kc
       samlEnabled: false
+      # -- SAML config ingress resource labels. key app is taken
+      samlLabels: { }
+      # -- SAML ingress resource additional annotations.
+      samlAdditionalAnnotations: { }
     # -- passing custom java options to saml. DO NOT PASS JAVA_OPTIONS in envs.
     cnCustomJavaOptions: ""
   # -- Path to SQL password file
@@ -1056,18 +1180,6 @@ global:
   cnCouchbasePasswordFile: /etc/jans/conf/couchbase_password
   # -- Path to Couchbase superuser password file
   cnCouchbaseSuperuserPasswordFile: /etc/jans/conf/couchbase_superuser_password
-  # -- Path to LDAP password file
-  cnLdapPasswordFile: /etc/jans/conf/ldap_password
-  # -- Path to LDAP truststore password file
-  cnLdapTruststorePasswordFile: /etc/jans/conf/ldap_truststore_password
-  # -- Path to OpenDJ cert file
-  cnLdapCertFile: /etc/certs/opendj.crt
-  # -- Path to OpenDJ key file
-  cnLdapKeyFile: /etc/certs/opendj.key
-  # -- Path to OpenDJ CA cert file
-  cnLdapCacertFile: /etc/certs/opendj.pem
-  # -- Path to OpenDJ truststore file
-  cnLdapTruststoreFile: /etc/certs/opendj.pkcs12
   # -- Path to file contains password for database access
   kcDbPasswordFile: /etc/jans/conf/kc_db_password
   # -- Path to file contains Keycloak admin credentials (username and password)
@@ -1075,74 +1187,14 @@ global:
   kc-scheduler:
     # -- Boolean flag to enable/disable the kc-scheduler cronjob chart.
     enabled: false
+  # -- Path to configuration schema file
+  cnConfiguratorConfigurationFile: /etc/jans/conf/configuration.json
+  # -- Path to dumped configuration schema file
+  cnConfiguratorDumpFile: /etc/jans/conf/configuration.out.json
 
 # -- Nginx ingress definitions chart
 nginx-ingress:
   ingress:
-    # -- openid-configuration ingress resource labels. key app is taken
-    openidConfigLabels: { }
-    # -- openid-configuration ingress resource additional annotations.
-    openidAdditionalAnnotations: { }
-    # -- device-code ingress resource labels. key app is taken
-    deviceCodeLabels: { }
-    # -- device-code ingress resource additional annotations.
-    deviceCodeAdditionalAnnotations: { }
-    # -- Firebase Messaging ingress resource labels. key app is taken
-    firebaseMessagingLabels: { }
-    # -- Firebase Messaging ingress resource additional annotations.
-    firebaseMessagingAdditionalAnnotations: { }
-    # -- uma2 config ingress resource labels. key app is taken
-    uma2ConfigLabels: { }
-    # -- uma2 config ingress resource additional annotations.
-    uma2AdditionalAnnotations: { }
-    # -- webfinger ingress resource labels. key app is taken
-    webfingerLabels: { }
-    # -- webfinger ingress resource additional annotations.
-    webfingerAdditionalAnnotations: { }
-    # -- webdiscovery ingress resource labels. key app is taken
-    webdiscoveryLabels: { }
-    # -- webdiscovery ingress resource additional annotations.
-    webdiscoveryAdditionalAnnotations: { }
-    # -- SCIM config ingress resource labels. key app is taken
-    scimConfigLabels: { }
-    # -- SCIM config ingress resource additional annotations.
-    scimConfigAdditionalAnnotations: { }
-    # -- SCIM config ingress resource labels. key app is taken
-    scimLabels: { }
-    # -- SCIM ingress resource additional annotations.
-    scimAdditionalAnnotations: { }
-    # -- configAPI ingress resource labels. key app is taken
-    configApiLabels: { }
-    # -- ConfigAPI ingress resource additional annotations.
-    configApiAdditionalAnnotations: { }
-    # -- u2f config ingress resource labels. key app is taken
-    u2fConfigLabels: { }
-    # -- u2f config ingress resource additional annotations.
-    u2fAdditionalAnnotations: { }
-    # -- fido2 config ingress resource labels. key app is taken
-    fido2ConfigLabels: { }
-    # -- fido2 config ingress resource additional annotations.
-    fido2ConfigAdditionalAnnotations: { }
-    # -- fido2 ingress resource labels. key app is taken
-    fido2Labels: { }
-    # -- fido2 ingress resource additional annotations.
-    fido2AdditionalAnnotations: { }
-    # -- Auth server ingress resource labels. key app is taken
-    authServerLabels: { }
-    # -- Auth server ingress resource additional annotations.
-    authServerAdditionalAnnotations: { }
-    # -- Casa ingress resource labels. key app is taken
-    casaLabels: { }
-    # -- Casa ingress resource additional annotations.
-    casaAdditionalAnnotations: { }
-    # -- SAML config ingress resource labels. key app is taken
-    samlLabels: { }
-    # -- SAML ingress resource additional annotations.
-    samlAdditionalAnnotations: { }
-    # -- Lock config ingress resource labels. key app is taken
-    lockConfigLabels: { }
-    # -- Lock config ingress resource additional annotations.
-    lockConfigAdditionalAnnotations: { }
     # -- Additional labels that will be added across all ingress definitions in the format of {mylabel: "myapp"}
     additionalLabels: { }
     # -- Additional annotations that will be added across all ingress definitions in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
@@ -1166,149 +1218,6 @@ nginx-ingress:
         hosts:
           - demoexample.jans.io
 
-# -- OpenDJ is a directory server which implements a wide range of Lightweight Directory Access Protocol and related standards, including full compliance with LDAPv3 but also support for Directory Service Markup Language (DSMLv2).Written in Java, OpenDJ offers multi-master replication, access control, and many extensions.
-opendj:
-  # -- Configure the topology spread constraints. Notice this is a map NOT a list as in the upstream API
-  # https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
-  topologySpreadConstraints: {}
-    # -- Define below as many constraints as needed. The key name should follow the structure tsc1, tsc2...etc.
-    # Do not enter the key labelSelector in the entry/entries below as that is automatically injected by the chart
-    #tsc1:
-    #  maxSkew: 1
-    #  minDomains: 1 # optional; beta since v1.25
-    #  topologyKey: kubernetes.io/hostname
-    #  whenUnsatisfiable: DoNotSchedule
-    #  matchLabelKeys: [] # optional; alpha since v1.25
-    #  nodeAffinityPolicy: [] # optional; alpha since v1.25
-    #  nodeTaintsPolicy: [] # optional; alpha since v1.25
-    #tsc2:
-      #maxSkew: 1
-  # -- Configure the PodDisruptionBudget
-  pdb:
-    enabled: true
-    maxUnavailable: 1
-  # -- Configure ldap backup cronjob
-  backup:
-    enabled: true
-    cronJobSchedule: "*/59 * * * *"
-  # -- Configure the HorizontalPodAutoscaler
-  hpa:
-    enabled: true
-    minReplicas: 1
-    maxReplicas: 10
-    targetCPUUtilizationPercentage: 50
-    # -- metrics if targetCPUUtilizationPercentage is not set
-    metrics: []
-    # -- Scaling Policies
-    behavior: {}
-  # -- Add custom normal and secret envs to the service
-  usrEnvs:
-    # -- Add custom normal envs to the service
-    # variable1: value1
-    normal: {}
-    # -- Add custom secret envs to the service
-    # variable1: value1
-    secret: {}
-  # -- Add custom dns policy
-  dnsPolicy: ""
-  # -- Add custom dns config
-  dnsConfig: {}
-  image:
-    # -- Image pullPolicy to use for deploying.
-    pullPolicy: IfNotPresent
-    # -- Image  to use for deploying.
-    repository: gluufederation/opendj
-    # -- Image  tag to use for deploying.
-    tag: 5.0.0_dev
-    # -- Image Pull Secrets
-    pullSecrets: [ ]
-
-  persistence:
-    # -- OpenDJ volume size
-    size: 5Gi
-  ports:
-    tcp-admin:
-      nodePort: ""
-      port: 4444
-      protocol: TCP
-      targetPort: 4444
-    tcp-ldap:
-      nodePort: ""
-      port: 1389
-      protocol: TCP
-      targetPort: 1389
-    tcp-ldaps:
-      nodePort: ""
-      port: 1636
-      protocol: TCP
-      targetPort: 1636
-    tcp-repl:
-      nodePort: ""
-      port: 8989
-      protocol: TCP
-      targetPort: 8989
-    tcp-serf:
-      nodePort: ""
-      port: 7946
-      protocol: TCP
-      targetPort: 7946
-    udp-serf:
-      nodePort: ""
-      port: 7946
-      protocol: UDP
-      targetPort: 7946
-  # -- Service replica number.
-  replicas: 1
-  # -- Resource specs.
-  resources:
-    limits:
-      # -- CPU limit.
-      cpu: 1500m
-      # -- Memory limit.
-      memory: 2000Mi
-    requests:
-      # -- CPU request.
-      cpu: 1500m
-      # -- Memory request.
-      memory: 2000Mi
-  # -- Configure the liveness healthcheck for OpenDJ if needed.
-  # https://github.com/GluuFederation/docker-opendj/blob/master/scripts/healthcheck.py
-  livenessProbe:
-    # -- Executes the python3 healthcheck.
-    exec:
-      command:
-      - python3
-      - /app/scripts/healthcheck.py
-    initialDelaySeconds: 30
-    periodSeconds: 30
-    timeoutSeconds: 5
-    failureThreshold: 20
-  # -- Configure the readiness healthcheck for OpenDJ if needed.
-  # https://github.com/GluuFederation/docker-opendj/blob/master/scripts/healthcheck.py
-  readinessProbe:
-    tcpSocket:
-      port: 1636
-    initialDelaySeconds: 60
-    timeoutSeconds: 5
-    periodSeconds: 25
-    failureThreshold: 20
-  # -- Configure any additional volumes that need to be attached to the pod
-  volumes: []
-  # -- Configure any additional volumesMounts that need to be attached to the containers
-  volumeMounts: []
-  lifecycle:
-    preStop:
-      exec:
-        command: ["/bin/sh", "-c", "python3 /app/scripts/deregister_peer.py 1>&/proc/1/fd/1"]
-
-  # -- Additional labels that will be added across the gateway in the format of {mylabel: "myapp"}
-  additionalLabels: { }
-  # -- Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
-  additionalAnnotations: { }
-  # -- Add custom scripts that have been mounted to run before the entrypoint.
-  # - /tmp/custom.sh
-  # - /tmp/custom2.sh
-  customScripts: [ ]
 # -- Job to generate data and initial config for Janssen Server persistence layer.
 persistence:
   # -- Add custom normal and secret envs to the service
@@ -1329,7 +1238,7 @@ persistence:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/persistence-loader
     # -- Image  tag to use for deploying.
-    tag: 1.1.4_dev
+    tag: 1.1.6_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Resource specs.
@@ -1413,7 +1322,7 @@ scim:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/scim
     # -- Image  tag to use for deploying.
-    tag: 1.1.4_dev
+    tag: 1.1.6_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -1521,7 +1430,7 @@ link:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/link
     # -- Image  tag to use for deploying.
-    tag: 1.1.4_dev
+    tag: 1.1.6_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -1628,7 +1537,7 @@ saml:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/saml
     # -- Image  tag to use for deploying.
-    tag: 1.1.4_dev
+    tag: 1.1.6_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Service replica number.
@@ -1707,7 +1616,7 @@ kc-scheduler:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/kc-scheduler
     # -- Image  tag to use for deploying.
-    tag: 1.1.4_dev
+    tag: 1.1.6_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Resource specs.

@@ -1,5 +1,6 @@
 import json
 import logging.config
+import os
 import re
 from collections import defaultdict
 from string import Template
@@ -9,6 +10,7 @@ from sqlalchemy import text
 from sqlalchemy.exc import OperationalError
 
 from jans.pycloudlib.persistence.sql import SqlClient
+from jans.pycloudlib.utils import as_boolean
 
 from settings import LOGGING_CONFIG
 from utils import prepare_template_ctx
@@ -34,7 +36,7 @@ class SQLBackend:
             self.sql_indexes = json.loads(f.read())
 
         # add missing index determined from opendj indexes
-        with open("/app/static/opendj/index.json") as f:
+        with open("/app/static/rdbm/opendj_index.json") as f:
             opendj_indexes = [attr["attribute"] for attr in json.loads(f.read())]
 
         for attr in self.client.attr_types:
@@ -46,16 +48,8 @@ class SQLBackend:
 
     def get_data_type(self, attr, table=None):
         # check from SQL data types first
-        for col in [f"{table}:{attr}", attr]:
-            type_def = self.client.sql_data_types.get(col)
-
-            if not type_def:
-                continue
-
+        if type_def := self.client.sql_data_types.get(f"{table}:{attr}") or self.client.sql_data_types.get(attr):
             type_ = type_def.get(self.client.dialect) or type_def["mysql"]
-
-            if not type_:
-                continue
 
             if table in type_.get("tables", {}):
                 type_ = type_["tables"][table]
@@ -63,7 +57,7 @@ class SQLBackend:
             data_type = type_["type"]
             if "size" in type_:
                 data_type = f"{data_type}({type_['size']})"
-            return data_type
+            return data_type  # noqa: R504
 
         # probably JSON-like data type
         if attr in self.client.sql_json_types:
@@ -85,8 +79,7 @@ class SQLBackend:
                 data_type = "TINYTEXT" if self.client.dialect == "mysql" else "TEXT"
             else:
                 data_type = "TEXT"
-
-        return data_type
+        return data_type  # noqa: R504
 
     def create_tables(self):
         table_columns = self.table_mapping_from_schema()
@@ -238,8 +231,14 @@ class SQLBackend:
 
         ctx = prepare_template_ctx(self.manager)
 
-        logger.info("Importing builtin LDIF files")
-        self.import_builtin_ldif(ctx)
+        if as_boolean(os.environ.get("CN_PERSISTENCE_IMPORT_BUILTIN_LDIF", "true")):
+            logger.info("Importing builtin LDIF files")
+            self.import_builtin_ldif(ctx)
+        else:
+            logger.warning(
+                "The builtin LDIF files will not be imported as the feature is disabled. "
+                "To enable the feature, set the environment variable CN_PERSISTENCE_IMPORT_BUILTIN_LDIF=true"
+            )
 
         logger.info("Importing custom LDIF files (if any)")
         self.import_custom_ldif(ctx)
@@ -420,11 +419,11 @@ class SQLBackend:
         custom_dir = Path("/app/custom_ldif")
 
         for file_ in custom_dir.rglob("*.ldif"):
-            self._import_ldif(file_, ctx)
+            self._import_ldif(file_, ctx, self.safe_column_mapping)
 
-    def _import_ldif(self, path, ctx):
+    def _import_ldif(self, path, ctx, transform_column_mapping=None):
         logger.info(f"Importing {path} file")
-        self.client.create_from_ldif(path, ctx)
+        self.client.create_from_ldif(path, ctx, transform_column_mapping)
 
     def table_mapping_from_schema(self):
         schemas = {}
@@ -465,3 +464,8 @@ class SQLBackend:
                 data_type = self.get_data_type(attr, table)
                 table_mapping[table].update({attr: data_type})
         return table_mapping
+
+    def safe_column_mapping(self, table_name, column_mapping):
+        if table_name == "jansToken" and "jansUsrId" in column_mapping:
+            column_mapping["usrId"] = column_mapping.pop("jansUsrId", "")
+        return column_mapping

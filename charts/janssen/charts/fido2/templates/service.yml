@@ -9,9 +9,14 @@ metadata:
 {{- if .Values.additionalLabels }}
 {{ toYaml .Values.additionalLabels | indent 4 }}
 {{- end }}
-{{- if .Values.additionalAnnotations }}
+{{- if or (.Values.additionalAnnotations) (.Values.global.fido2.customAnnotations.service) }}
   annotations:
+{{- if .Values.additionalAnnotations }}
 {{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.global.fido2.customAnnotations.service }}
+{{ toYaml .Values.global.fido2.customAnnotations.service | indent 4 }}
+{{- end }}
 {{- end }}
 spec:
   {{- if .Values.global.alb.ingress }}

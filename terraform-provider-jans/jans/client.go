@@ -12,6 +12,7 @@ import (
 	"sort"
 
 	"net/http"
+	"net/http/httputil"
 	"net/textproto"
 	"net/url"
 )
@@ -95,10 +96,19 @@ func (c *Client) getToken(ctx context.Context, scope string) (string, error) {
 		tr.TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	}
 	client := &http.Client{Transport: tr}
+
+	// b, _ := httputil.DumpRequest(req, true)
+	// tflog.Info(ctx, "Request", map[string]any{"req": string(b)})
+	// fmt.Printf("Request:\n%s\n", string(b))
+
 	resp, err := client.Do(req)
 	if err != nil {
 		return "", fmt.Errorf("could not perform request: %w", err)
 	}
+
+	// b, _ = httputil.DumpResponse(resp, true)
+	// tflog.Info(ctx, "Response", map[string]any{"resp": string(b)})
+	// fmt.Printf("Response:\n%s\n", string(b))
 
 	data, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -469,18 +479,18 @@ func (c *Client) request(ctx context.Context, params requestParams) error {
 	}
 	client := &http.Client{Transport: tr}
 
-	// b, _ := httputil.DumpRequest(req, true)
+	b, _ := httputil.DumpRequest(req, true)
 	// tflog.Info(ctx, "Request", map[string]any{"req": string(b)})
-	// fmt.Printf("Request:\n%s\n", string(b))
+	fmt.Printf("Request:\n%s\n", string(b))
 
 	resp, err := client.Do(req)
 	if err != nil {
 		return fmt.Errorf("could not perform request: %w", err)
 	}
 
-	// b, _ = httputil.DumpResponse(resp, true)
+	b, _ = httputil.DumpResponse(resp, true)
 	// tflog.Info(ctx, "Response", map[string]any{"resp": string(b)})
-	// fmt.Printf("Response:\n%s\n", string(b))
+	fmt.Printf("Response:\n%s\n", string(b))
 
 	if resp.StatusCode == 400 {
 		// try to read error message

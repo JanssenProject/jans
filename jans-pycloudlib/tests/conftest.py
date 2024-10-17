@@ -25,7 +25,7 @@ def gk8s_config():
 
 
 @pytest.fixture()
-def gvault_secret(tmpdir):
+def gvault_secret(tmpdir, monkeypatch):
     from jans.pycloudlib.secret import VaultSecret
 
     role_id_file = tmpdir.join("vault_role_id")
@@ -33,12 +33,11 @@ def gvault_secret(tmpdir):
     secret_id_file = tmpdir.join("vault_secret_id")
     secret_id_file.write("")
 
-    secret = VaultSecret()
-    secret.settings["CN_SECRET_VAULT_NAMESPACE"] = "testing"
-    secret.settings["CN_SECRET_VAULT_KV_PATH"] = "secret"
-    secret.settings["CN_SECRET_VAULT_ROLE_ID_FILE"] = str(role_id_file)
-    secret.settings["CN_SECRET_VAULT_SECRET_ID_FILE"] = str(secret_id_file)
-    yield secret
+    monkeypatch.setenv("CN_SECRET_VAULT_ROLE_ID_FILE", str(role_id_file))
+    monkeypatch.setenv("CN_SECRET_VAULT_SECRET_ID_FILE", str(secret_id_file))
+    monkeypatch.setenv("CN_SECRET_VAULT_NAMESPACE", "testing")
+    monkeypatch.setenv("CN_SECRET_VAULT_KV_PATH", "secret")
+    yield VaultSecret()
 
 
 @pytest.fixture()
@@ -61,7 +60,6 @@ def gmanager(gconsul_config, gvault_secret):
 
     def get_config(key, default=""):
         ctx = {
-            "ldap_binddn": "cn=Directory Manager",
             "couchbase_server_user": "admin",
             "jca_client_id": "1234",
         }
@@ -69,9 +67,6 @@ def gmanager(gconsul_config, gvault_secret):
 
     def get_secret(key, default=""):
         ctx = {
-            "encoded_ox_ldap_pw": ENCODED_PW,
-            "encoded_ldapTrustStorePass": ENCODED_PW,
-            "ldap_pkcs12_base64": ENCODED_PW,
             "encoded_salt": "7MEDWVFAG3DmakHRyjMqp5EE",
             "sql_password": "secret",
             "couchbase_password": "secret",
@@ -82,17 +77,16 @@ def gmanager(gconsul_config, gvault_secret):
         return ctx.get(key) or default
 
     def set_secret(key, value):
-        return
+        return True
 
     gmanager = get_manager()
 
     gconsul_config.get = get_config
-    gmanager.config.adapter = gconsul_config
+    gmanager.config.remote_adapter = gconsul_config
 
     gvault_secret.get = get_secret
     gvault_secret.set = set_secret
-    gmanager.secret.adapter = gvault_secret
-
+    gmanager.secret.remote_adapter = gvault_secret
     yield gmanager
 
 

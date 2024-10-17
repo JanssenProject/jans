@@ -10,7 +10,6 @@ import re
 import pymysql
 import psycopg2
 import inspect
-import ldap3
 import tempfile
 
 from setup_app import paths
@@ -103,34 +102,16 @@ class PropertiesUtils(SetupUtils):
                 tld = Config.hostname
             Config.admin_email = "support@%s" % tld
 
-
-        if not Config.admin_password and Config.ldapPass:
-            Config.admin_password = Config.ldapPass
-
         if not Config.admin_password:
             Config.admin_password = self.getPW()
 
         if Config.profile == 'jans':
 
-            if not (Config.cb_install or Config.rdbm_install):
-                Config.opendj_install = InstallTypes.LOCAL
-
-            if not Config.ldapPass:
-                Config.ldapPass = Config.admin_password
-
             if Config.cb_install and not Config.get('cb_password'):
                 Config.cb_password = Config.admin_password
 
-            if Config.opendj_install == InstallTypes.LOCAL and not Config.installed_instance:
-                used_ports = self.opendj_used_ports()
-                if used_ports:
-                    print(msg.used_ports.format(','.join(used_ports)))
-                    sys.exit(1)
-
             self.set_persistence_type()
 
-            if not Config.opendj_p12_pass:
-                Config.opendj_p12_pass = self.getPW()
 
         if not Config.encode_salt:
             Config.encode_salt = self.getPW() + self.getPW()
@@ -175,28 +156,17 @@ class PropertiesUtils(SetupUtils):
         except Exception:
             self.logIt("Error loading properties", True)
 
-        if p.get('ldap_type') == 'openldap':
-            self.logIt("ldap_type in setup.properties was changed from openldap to opendj")
-            p['ldap_type'] = 'opendj'
 
         if p.get('cb_install') == '0':
            p['cb_install'] = InstallTypes.NONE
 
         if p.get('cb_install'):
-            p['opendj_install'] = InstallTypes.NONE
             p['rdbm_install'] = InstallTypes.NONE
 
             for bucket in Config.couchbaseBucketDict:
                 if p.get(f'couchbase_{bucket}_mem'):
                     Config.couchbaseBucketDict[bucket]['memory_allocation'] = int(p[f'couchbase_{bucket}_mem'])
 
-
-        if p.get('opendj_install') == '0':
-            p['opendj_install'] = InstallTypes.NONE
-
-        if base.as_bool(p.get('installLdap', False)):
-            p['opendj_install'] = InstallTypes.LOCAL
-            p['rdbm_install'] = InstallTypes.NONE
 
         if p.get('enable-script'):
             base.argsp.enable_script = p['enable-script'].split()
@@ -206,6 +176,8 @@ class PropertiesUtils(SetupUtils):
 
         if p.get('rdbm_type') == 'pgsql' and not p.get('rdbm_port'):
             p['rdbm_port'] = '5432'
+        elif p.get('rdbm_type') == 'mysql' and not p.get('rdbm_port'):
+            p['rdbm_port'] = '3306'
 
         properties_list = list(p.keys())
 
@@ -231,19 +203,6 @@ class PropertiesUtils(SetupUtils):
         if prop_file.endswith('-DEC~'):
             self.run(['rm', '-f', prop_file])
 
-        if 'admin_password' not in properties_list and 'ldapPass' in p:
-            Config.admin_password = p['ldapPass']
-            
-        if p.get('ldap_hostname') != 'localhost':
-            if p.get('remoteLdap','').lower() == 'true':
-                Config.opendj_install = InstallTypes.REMOTE
-            elif p.get('opendj_install'):
-                Config.opendj_install = p['opendj_install']
-            else:
-                Config.opendj_install = InstallTypes.NONE
-
-        if map_db and 'ldap' not in map_db:
-            Config.opendj_install = InstallTypes.NONE
 
         if 'couchbase' in map_db:
             if 'remoteCouchbase' in properties_list and p.get('remoteCouchbase','').lower() == 'true':
@@ -261,23 +220,11 @@ class PropertiesUtils(SetupUtils):
                 print("Couchbase package is not available exiting.")
                 sys.exit(1)
 
-        if ('cb_password' not in properties_list) and Config.cb_install:
-            Config.cb_password = p.get('ldapPass')
-
         if Config.cb_install == InstallTypes.REMOTE:
             cbm_ = CBM(Config.couchbase_hostname, Config.couchebaseClusterAdmin, Config.cb_password)
             if not cbm_.test_connection().ok:
                 print("Can't connect to remote Couchbase Server with credentials found in setup.properties.")
                 sys.exit(1)
-
-        if Config.opendj_install == InstallTypes.REMOTE:
-            conn_check = self.check_remote_ldap(Config.ldap_hostname, Config.ldap_binddn, Config.ldapPass)
-            if not conn_check['result']:
-                print("Can't connect to remote LDAP Server with credentials found in setup.properties.")
-                sys.exit(1)
-
-        if not (Config.cb_install or Config.rdbm_install):
-            p['opendj_install'] = InstallTypes.LOCAL
 
         return p
 
@@ -341,9 +288,6 @@ class PropertiesUtils(SetupUtils):
 
         backend_types = []
 
-        if glob.glob(Config.distFolder+'/app/opendj-server-*4*.zip'):
-            backend_types.append('opendj')
-
         if glob.glob(Config.distFolder+'/couchbase/couchbase-server-enterprise*.' + base.clone_type):
             backend_types.append('couchbase')
 
@@ -406,29 +350,6 @@ class PropertiesUtils(SetupUtils):
             if result['result']:
                 break
 
-    def check_remote_ldap(self, ldap_host, ldap_binddn, ldap_password):
-
-        result = {'result': True, 'reason': ''}
-
-        ldap_server = ldap3.Server(ldap_host, port=int(Config.ldaps_port), use_ssl=True)
-        conn = ldap3.Connection(
-            ldap_server,
-            user=ldap_binddn,
-            password=ldap_password,
-            )
-
-        try:
-            conn.bind()
-        except Exception as e:
-            result['result'] = False
-            result['reason'] = str(e)
-
-        if not conn.bound:
-            result['result'] = False
-            result['reason'] = str(conn.last_error)
-
-        return result
-
 
     def promptForBackendMappings(self):
 
@@ -441,7 +362,6 @@ class PropertiesUtils(SetupUtils):
             options_text.append('({0}) {1}'.format(i+1,m))
             options.append(str(i+1))
 
-        options_text = 'Use opendj to store {}'.format(' '.join(options_text))
 
         re_pattern = '^[1-{0}]+$'.format(len(Config.couchbaseBucketDict))
 
@@ -464,15 +384,14 @@ class PropertiesUtils(SetupUtils):
     def set_persistence_type(self):
         if Config.installed_instance:
             return
-        if Config.opendj_install and (not Config.cb_install) and (not Config.rdbm_install):
-            Config.persistence_type = 'ldap'
-        elif (not Config.opendj_install) and (not Config.rdbm_install) and Config.cb_install:
+
+        if not Config.rdbm_install and Config.cb_install:
             Config.persistence_type = 'couchbase'
         elif Config.rdbm_type == 'spanner':
             Config.persistence_type = 'spanner'
-        elif (not Config.opendj_install) and Config.rdbm_install and (not Config.cb_install):
+        elif Config.rdbm_install and (not Config.cb_install):
             Config.persistence_type = 'sql'
-        elif Config.opendj_install and Config.cb_install:
+        elif Config.cb_install:
             Config.persistence_type = 'hybrid'
 
 
@@ -517,17 +436,17 @@ class PropertiesUtils(SetupUtils):
 
 
     def prompt_for_jans_link(self):
-        if Config.installed_instance and Config.install_jans_link:
+        if Config.installed_instance and Config.install_jans_ldap_link:
             return
 
-        prompt_jans_link = self.getPrompt("Install Jans Link Server?",
-                                            self.getDefaultOption(Config.install_jans_link)
+        prompt_jans_link = self.getPrompt("Install Jans LDAP Link Server?",
+                                            self.getDefaultOption(Config.install_jans_ldap_link)
                                             )[0].lower()
 
-        Config.install_jans_link = prompt_jans_link == 'y'
+        Config.install_jans_ldap_link = prompt_jans_link == 'y'
 
-        if Config.installed_instance and Config.install_jans_link:
-            Config.addPostSetupService.append('install_jans_link')
+        if Config.installed_instance and Config.install_jans_ldap_link:
+            Config.addPostSetupService.append('install_jans_ldap_link')
 
 
     def prompt_for_jans_keycloak_link(self):
@@ -678,7 +597,6 @@ class PropertiesUtils(SetupUtils):
                     BackendStrings.REMOTE_PGSQL,
                     BackendStrings.LOCAL_MYSQL,
                     BackendStrings.REMOTE_MYSQL,
-                    BackendStrings.LOCAL_OPENDJ,
                     ]
 
         backend_types += [BackendStrings.REMOTE_COUCHBASE, BackendStrings.CLOUD_SPANNER]
@@ -701,49 +619,12 @@ class PropertiesUtils(SetupUtils):
             else:
                 choice = n
 
-            if choice == 1:
-                used_ports = self.opendj_used_ports()
-                if used_ports:
-                    print(colors.DANGER, msg.used_ports.format(','.join(used_ports)), colors.ENDC)
-                    choice = None
-
             if choice:
                 break
 
         backend_type_str = backend_types[int(choice)-1]
 
-        if backend_type_str == BackendStrings.LOCAL_OPENDJ:
-            Config.opendj_install = InstallTypes.LOCAL
-            Config.rdbm_install = False
-            ldapPass = Config.ldapPass or Config.admin_password or self.getPW(special='.*=!%&+/-')
-
-            while True:
-                ldapPass = self.getPrompt("Enter Password for LDAP Admin ({})".format(Config.ldap_binddn), ldapPass)
-
-                if len(ldapPass) >= 0:
-                    break
-                else:
-                    print("Password must be at least 1 character.")
-
-            Config.ldapPass = ldapPass
-
-
-        elif backend_type_str == BackendStrings.REMOTE_OPENDJ:
-            Config.opendj_install = InstallTypes.REMOTE
-            Config.rdbm_install = False
-            while True:
-                ldapHost = self.getPrompt("    LDAP hostname")
-                ldapPass = self.getPrompt("    Password for '{0}'".format(Config.ldap_binddn))
-                conn_check = self.check_remote_ldap(ldapHost, Config.ldap_binddn, ldapPass)
-                if conn_check['result']:
-                    break
-                else:
-                    print("    {}Error connecting to LDAP server: {} {}".format(colors.FAIL, conn_check['reason'], colors.ENDC))
-
-            Config.ldapPass = ldapPass
-            Config.ldap_hostname = ldapHost
-
-        elif backend_type_str == BackendStrings.LOCAL_COUCHBASE:
+        if backend_type_str == BackendStrings.LOCAL_COUCHBASE:
             Config.rdbm_install = False
             Config.cb_install = InstallTypes.LOCAL
             Config.isCouchbaseUserAdmin = True
@@ -810,7 +691,6 @@ class PropertiesUtils(SetupUtils):
                     print("  {}Can't connect to {}: {}{}".format(colors.DANGER,Config.rdbm_type.upper(), e, colors.ENDC))
 
         elif backend_type_str == BackendStrings.CLOUD_SPANNER:
-            Config.opendj_install = InstallTypes.NONE
             Config.rdbm_type = 'spanner'
             Config.rdbm_install_type = InstallTypes.REMOTE
 
@@ -944,8 +824,7 @@ class PropertiesUtils(SetupUtils):
             self.prompt_for_http_cert_info()
             Config.jans_max_mem = self.getPrompt("Enter maximum RAM for applications in MB", str(Config.jans_max_mem))
 
-
-            admin_password =  Config.ldapPass or Config.cb_password or Config.rdbm_password or self.getPW(special='.*=!%&+/-')
+            admin_password = Config.cb_password or Config.rdbm_password or self.getPW(special='.*=!%&+/-')
 
             while True:
                 adminPass = self.getPrompt("Enter Password for Admin User", admin_password)

@@ -18,8 +18,8 @@ class JansMessageDialog:
         self,
         title: AnyFormattedText,
         body: AnyContainer,
-        buttons:Optional[Sequence[Button]] = [],
-        focus_on_exit:AnyContainer =None
+        buttons: Optional[Sequence[Button]] = [],
+        focus_on_exit: AnyContainer = None
         )-> Dialog: 
         """init for JansMessageDialog
 

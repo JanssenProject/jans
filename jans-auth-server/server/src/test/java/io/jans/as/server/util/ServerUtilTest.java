@@ -21,4 +21,14 @@ public class ServerUtilTest {
 
         assertEquals("*****", result.get("client_secret")[0]);
     }
+
+    @Test
+    public void prepareForLogs_whenCalled_shouldNotHaveClearTextPassword() {
+        Map<String, String[]> parameters = new HashMap<>();
+        parameters.put("password", new String[] {"124"});
+
+        final Map<String, String[]> result = ServerUtil.prepareForLogs(parameters);
+
+        assertEquals("*****", result.get("password")[0]);
+    }
 }

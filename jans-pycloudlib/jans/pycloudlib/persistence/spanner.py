@@ -443,3 +443,17 @@ def render_spanner_properties(manager: Manager, src: str, dest: str) -> None:
             "spanner_creds": creds,
         }
         f.write(rendered_txt)
+
+
+def sync_google_credentials(manager):
+    path = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS") or ""
+    path_exists = os.path.isfile(path)
+
+    if path_exists:
+        manager.secret.set("google_credentials", path)
+
+    # make sure file always exists (unless path is invalid and secret is empty)
+    if not path_exists and (contents := manager.secret.get("google_credentials")):
+        with suppress(FileNotFoundError):
+            with open(path, "w") as f:
+                f.write(contents)

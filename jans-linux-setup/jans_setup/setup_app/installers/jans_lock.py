@@ -1,7 +1,6 @@
 import os
 import glob
 import shutil
-import ruamel.yaml
 from pathlib import Path
 
 from setup_app import paths
@@ -87,8 +86,7 @@ class JansLockInstaller(JettyInstaller):
         scopes = [ scope_openid['dn'] ]
 
         swagger_yaml_fn = base.extract_file(base.current_app.jans_zip, 'jans-config-api/plugins/docs/lock-plugin-swagger.yaml', Config.data_dir)
-        swagger_yaml_str = self.readFile(swagger_yaml_fn)
-        swagger_yml = ruamel.yaml.load(swagger_yaml_str, ruamel.yaml.RoundTripLoader)
+        swagger_yml = base.read_yaml_file(swagger_yaml_fn)
         config_scopes = swagger_yml['components']['securitySchemes']['oauth2']['flows']['clientCredentials']['scopes']
 
         for config_scope_id in config_scopes:
@@ -157,7 +155,7 @@ class JansLockInstaller(JettyInstaller):
             proxy_port = Config.jans_auth_port
             proxy_context = 'jans-auth'
 
-        jans_lock_well_known_proxy_pass = f'    ProxyPass   /.well-known/lock-master-configuration http://localhost:{proxy_port}/{proxy_context}/v1/configuration'
+        jans_lock_well_known_proxy_pass = f'    ProxyPass   /.well-known/lock-server-configuration http://localhost:{proxy_port}/{proxy_context}/v1/configuration'
         jans_lock_well_known_proxy_pass += f'\n\n    <Location /jans-lock>\n     Header edit Set-Cookie ^((?!opbs|session_state).*)$ $1;HttpOnly\n     ProxyPass http://localhost:{proxy_port}/{proxy_context} retry=5 connectiontimeout=60 timeout=60\n     Order deny,allow\n     Allow from all\n    </Location>\n'
 
 

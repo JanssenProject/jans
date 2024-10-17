@@ -1,0 +1,26 @@
+dn: inum=%(lock_client_id)s,ou=clients,o=jans
+displayName: Jans Lock Config Api Client
+inum: %(lock_client_id)s
+jansAccessTknSigAlg: RS256
+jansClntSecret: %(lock_client_encoded_pw)s
+jansGrantTyp: authorization_code
+jansGrantTyp: refresh_token
+jansGrantTyp: client_credentials
+# the remaining scopes will be prepopulated dynamically
+jansScope: inum=F0C4,ou=scopes,o=jans
+jansSubjectTyp: pairwise
+jansTknEndpointAuthMethod: client_secret_basic
+objectClass: top
+objectClass: jansClnt
+del: false
+jansAccessTknAsJwt: false
+jansAppTyp: web
+jansAttrs: {"tlsClientAuthSubjectDn":"","runIntrospectionScriptBeforeJwtCreation":false,"keepClientAuthorizationAfterExpiration":false,"allowSpontaneousScopes":false,"spontaneousScopes":[],"spontaneousScopeScriptDns":[],"backchannelLogoutUri":[],"backchannelLogoutSessionRequired":false,"additionalAudience":[],"postAuthnScripts":[],"consentGatheringScripts":[],"introspectionScripts":[],"rptClaimsScripts":[]}
+jansDisabled: false
+jansIdTknSignedRespAlg: RS256
+jansInclClaimsInIdTkn: false
+jansLogoutSessRequired: false
+jansPersistClntAuthzs: true
+jansRptAsJwt: false
+jansTrustedClnt: false
+jansRedirectURI: https://%(hostname)s/jans-lock

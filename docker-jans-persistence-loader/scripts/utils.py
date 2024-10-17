@@ -94,11 +94,6 @@ def get_base_ctx(manager):
         "jca_pw": jca_pw,
         "jca_pw_encoded": jca_pw_encoded,
 
-        'ldap_hostname': manager.config.get('ldap_init_host'),
-        'ldaps_port': manager.config.get('ldap_init_port'),
-        'ldap_binddn': manager.config.get('ldap_binddn'),
-        "ldap_use_ssl": str(as_boolean(os.environ.get("CN_LDAP_USE_SSL", True))).lower(),
-        'encoded_ox_ldap_pw': manager.secret.get('encoded_ox_ldap_pw'),
         'jetty_base': manager.config.get('jetty_base'),
         'orgName': manager.config.get('orgName'),
         'hostname': manager.config.get('hostname'),
@@ -113,7 +108,6 @@ def get_base_ctx(manager):
         'encoded_shib_jks_pw': manager.secret.get('encoded_shib_jks_pw'),
         'shibboleth_version': manager.config.get('shibboleth_version'),
         'idp3Folder': manager.config.get('idp3Folder'),
-        'ldap_site_binddn': manager.config.get('ldap_site_binddn'),
 
         "jansScimEnabled": str(as_boolean(scim_enabled)).lower(),
 

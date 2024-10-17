@@ -9,9 +9,14 @@ metadata:
 {{- if .Values.additionalLabels }}
 {{ toYaml .Values.additionalLabels | indent 4 }}
 {{- end }}
-{{- if .Values.additionalAnnotations }}
+{{- if or (.Values.additionalAnnotations) (.Values.global.config.customAnnotations.configMap) }}
   annotations:
+{{- if .Values.additionalAnnotations }}
 {{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.global.config.customAnnotations.configMap }}
+{{ toYaml .Values.global.config.customAnnotations.configMap | indent 4 }}
+{{- end }}
 {{- end }}
 data:
   # Jetty header size in bytes in the auth server
@@ -38,14 +43,16 @@ data:
   {{ if or (eq .Values.global.configSecretAdapter "aws") (eq .Values.global.configAdapterName "aws") }}
   # [aws_envs] Envs related to using AWS
   {{- if .Values.configmap.cnAwsSecretsEndpointUrl }}
-  CN_AWS_SECRETS_ENDPOINT_URL: {{ .Values.configmap.cnAwsSecretsEndpointUrl }}
+  CN_AWS_SECRETS_ENDPOINT_URL: {{ .Values.configmap.cnAwsSecretsEndpointUrl | quote }}
   {{- end }}
-  CN_AWS_SECRETS_PREFIX: {{ .Values.configmap.cnAwsSecretsNamePrefix }}
-  CN_AWS_SECRETS_REPLICA_FILE: {{ .Values.global.cnAwsSecretsReplicaRegionsFile }}
-  AWS_DEFAULT_REGION: {{ .Values.configmap.cnAwsDefaultRegion }}
-  AWS_SHARED_CREDENTIALS_FILE: {{ .Values.global.cnAwsSharedCredentialsFile }}
-  AWS_CONFIG_FILE: {{ .Values.global.cnAwsConfigFile }}
-  #AWS_PROFILE
+  CN_AWS_SECRETS_PREFIX: {{ .Values.configmap.cnAwsSecretsNamePrefix | quote }}
+  CN_AWS_SECRETS_REPLICA_FILE: {{ .Values.global.cnAwsSecretsReplicaRegionsFile | quote }}
+  AWS_DEFAULT_REGION: {{ .Values.configmap.cnAwsDefaultRegion | quote }}
+  AWS_SHARED_CREDENTIALS_FILE: {{ .Values.global.cnAwsSharedCredentialsFile | quote }}
+  AWS_CONFIG_FILE: {{ .Values.global.cnAwsConfigFile | quote }}
+  {{- if or (ne .Values.configmap.cnAwsProfile "") (ne .Values.configmap.cnAwsProfile "default") }}
+  AWS_PROFILE: {{ .Values.configmap.cnAwsProfile | quote }}
+  {{- end }}
   # [aws_envs] END
   {{- end }}
   # [vault_envs] Envs related to Hashicorp vault
@@ -89,8 +96,6 @@ data:
   | replace "persistenceLogLevel" "persistence_log_level"
   | replace "persistenceDurationLogTarget" "persistence_duration_log_target"
   | replace "persistenceDurationLogLevel" "persistence_duration_log_level"
-  | replace "ldapStatsLogTarget" "ldap_stats_log_target"
-  | replace "ldapStatsLogLevel" "ldap_stats_log_level"
   | replace "scriptLogTarget" "script_log_target"
   | replace "scriptLogLevel" "script_log_level"
   | replace "auditStatsLogTarget" "audit_log_target"
@@ -107,8 +112,6 @@ data:
   | replace "persistenceLogLevel" "persistence_log_level"
   | replace "persistenceDurationLogTarget" "persistence_duration_log_target"
   | replace "persistenceDurationLogLevel" "persistence_duration_log_level"
-  | replace "ldapStatsLogTarget" "ldap_stats_log_target"
-  | replace "ldapStatsLogLevel" "ldap_stats_log_level"
   | replace "scriptLogTarget" "script_log_target"
   | replace "scriptLogLevel" "script_log_level"
   | replace "enableStdoutLogPrefix" "enable_stdout_log_prefix"
@@ -119,14 +122,7 @@ data:
   LB_ADDR: {{ .Values.configmap.lbAddr }}
   {{- end }}
   CN_PERSISTENCE_TYPE: {{ .Values.global.cnPersistenceType }}
-  {{- if or (eq .Values.global.cnPersistenceType "ldap") (eq .Values.global.cnPersistenceType "hybrid")  }}
-  # used only if CN_PERSISTENCE_TYPE is ldap or hybrid
-  {{- if .Values.configmap.cnLdapUrl }}
-  CN_LDAP_URL: {{ .Values.configmap.cnLdapUrl | quote }}
-  {{- else }}
-  CN_LDAP_URL: {{ cat ( .Values.global.opendj.ldapServiceName ) ":1636" | quote | nospace }}
-  {{- end }}
-  {{- else if or (eq .Values.global.cnPersistenceType "couchbase") (eq .Values.global.cnPersistenceType "hybrid") }}
+  {{- if or (eq .Values.global.cnPersistenceType "couchbase") (eq .Values.global.cnPersistenceType "hybrid") }}
   #  used only if CN_PERSISTENCE_TYPE is couchbase or hybrid
   CN_COUCHBASE_URL: {{ .Values.configmap.cnCouchbaseUrl }}
   CN_COUCHBASE_BUCKET_PREFIX: {{ .Values.configmap.cnCouchbaseBucketPrefix }}
@@ -144,9 +140,7 @@ data:
   {{- end }}
   CN_CONTAINER_MAIN_NAME: {{ .Release.Name }}-auth-server
   # options: default/user/site/cache/statistic used only if CN_PERSISTENCE_TYPE is hybrid or hybrid
-  {{- if or (eq .Values.global.cnPersistenceType "hybrid") (eq .Values.global.cnPersistenceType "ldap") }}
-   # must the same as the opendj service name
-  CN_CERT_ALT_NAME: {{ .Values.global.opendj.ldapServiceName }} #{{ template "cn.fullname" . }}-service
+  {{- if (eq .Values.global.cnPersistenceType "hybrid") }}
   CN_HYBRID_MAPPING: {{ .Values.configmap.cnPersistenceHybridMapping | quote }}
   {{- end }}
   # Auto enable installation of some services
@@ -161,7 +155,6 @@ data:
   {{- end }}
   {{- if .Values.global.istio.enabled }}
   CN_COUCHBASE_TRUSTSTORE_ENABLE: "false"
-  CN_LDAP_USE_SSL: "false"
   {{- end }}
   {{- if .Values.global.scim.enabled }}
   CN_SCIM_ENABLED: {{ .Values.global.scim.enabled | quote }}
@@ -174,8 +167,6 @@ data:
   | replace "persistenceLogLevel" "persistence_log_level"
   | replace "persistenceDurationLogTarget" "persistence_duration_log_target"
   | replace "persistenceDurationLogLevel" "persistence_duration_log_level"
-  | replace "ldapStatsLogTarget" "ldap_stats_log_target"
-  | replace "ldapStatsLogLevel" "ldap_stats_log_level"
   | replace "scriptLogTarget" "script_log_target"
   | replace "scriptLogLevel" "script_log_level"
   | replace "enableStdoutLogPrefix" "enable_stdout_log_prefix"
@@ -211,12 +202,6 @@ data:
   CN_SQL_PASSWORD_FILE: {{ .Values.global.cnSqlPasswordFile }}
   CN_COUCHBASE_PASSWORD_FILE: {{ .Values.global.cnCouchbasePasswordFile }}
   CN_COUCHBASE_SUPERUSER_PASSWORD_FILE: {{ .Values.global.cnCouchbaseSuperuserPasswordFile }}
-  CN_LDAP_PASSWORD_FILE: {{ .Values.global.cnLdapPasswordFile }}
-  CN_LDAP_TRUSTSTORE_PASSWORD_FILE: {{ .Values.global.cnLdapTruststorePasswordFile }}
-  CN_LDAP_CERT_FILE: {{ .Values.global.cnLdapCertFile }}
-  CN_LDAP_KEY_FILE: {{ .Values.global.cnLdapKeyFile }}
-  CN_LDAP_CACERT_FILE: {{ .Values.global.cnLdapCacertFile }}
-  CN_LDAP_TRUSTSTORE_FILE: {{ .Values.global.cnLdapTruststoreFile }}
   CN_CONFIG_API_PLUGINS: {{ index .Values "global" "config-api" "plugins" | quote  }}
   {{- if .Values.global.saml.enabled }}
   QUARKUS_TRANSACTION_MANAGER_ENABLE_RECOVERY: {{ .Values.configmap.quarkusTransactionEnableRecovery | quote }}
@@ -234,6 +219,8 @@ data:
   CN_LOCK_ENABLED: {{ index .Values "global" "auth-server" "lockEnabled" | quote }}
   CN_OPA_URL: {{ .Values.configmap.cnOpaUrl | quote }}
   CN_MESSAGE_TYPE: {{ .Values.configmap.cnMessageType | quote }}
+  CN_CONFIGURATOR_CONFIGURATION_FILE: {{ .Values.global.cnConfiguratorConfigurationFile | quote }}
+  CN_CONFIGURATOR_DUMP_FILE: {{ .Values.global.cnConfiguratorDumpFile | quote }}
 ---
 
 apiVersion: v1
@@ -356,9 +343,14 @@ metadata:
 {{- if .Values.additionalLabels }}
 {{ toYaml .Values.additionalLabels | indent 4 }}
 {{- end }}
-{{- if .Values.additionalAnnotations }}
+{{- if or (.Values.additionalAnnotations) (.Values.global.config.customAnnotations.configMap) }}
   annotations:
+{{- if .Values.additionalAnnotations }}
 {{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.global.config.customAnnotations.configMap }}
+{{ toYaml .Values.global.config.customAnnotations.configMap | indent 4 }}
+{{- end }}
 {{- end }}
 
 ---
@@ -453,7 +445,12 @@ metadata:
 {{- if .Values.additionalLabels }}
 {{ toYaml .Values.additionalLabels | indent 4 }}
 {{- end }}
-{{- if .Values.additionalAnnotations }}
+{{- if or (.Values.additionalAnnotations) (.Values.global.config.customAnnotations.configMap) }}
   annotations:
+{{- if .Values.additionalAnnotations }}
 {{ toYaml .Values.additionalAnnotations | indent 4 }}
+{{- end }}
+{{- if .Values.global.config.customAnnotations.configMap }}
+{{ toYaml .Values.global.config.customAnnotations.configMap | indent 4 }}
+{{- end }}
 {{- end }}

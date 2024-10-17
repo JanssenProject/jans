@@ -4,7 +4,7 @@
   "inumConfig": {
     "configId": "local_inum",
     "bindDN": "cn=directory manager",
-    "bindPassword": "%(ldap_bind_encoded_pw)s",
+    "bindPassword": "@ldap_bind_encoded_pw@",
     "servers": [
       "localhost:1636"
     ],
