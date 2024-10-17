@@ -106,11 +106,22 @@ pub struct AuthorizationLogInfo {
 }
 
 /// Cedar-policy decision of the authorization
-#[derive(Debug, Clone, PartialEq, Copy, serde::Serialize, serde::Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Copy, serde::Serialize, serde::Deserialize)]
 #[serde(rename_all = "UPPERCASE")]
 pub enum Decision {
+    /// Determined that the request should be allowed
     Allow,
+    /// Determined that the request should be denied.
     Deny,
+}
+
+impl ToString for Decision {
+    fn to_string(&self) -> String {
+        match self {
+            Decision::Allow => "ALLOW".to_string(),
+            Decision::Deny => "DENY".to_string(),
+        }
+    }
 }
 
 #[doc(hidden)]

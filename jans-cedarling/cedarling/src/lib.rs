@@ -41,7 +41,10 @@ pub use models::request::{Request, ResourceData};
 
 #[doc(hidden)]
 pub mod bindings {
-    pub use super::models::log_entry::{AuthorizationLogInfo, Diagnostics, PolicyEvaluationError};
+    pub use super::models::log_entry::{
+        AuthorizationLogInfo, Decision, Diagnostics, PolicyEvaluationError,
+    };
+    pub use cedar_policy;
 }
 
 /// Errors that can occur during initialization Cedarling.

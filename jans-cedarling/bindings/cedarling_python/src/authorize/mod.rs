@@ -7,12 +7,14 @@
 use pyo3::prelude::*;
 use pyo3::Bound;
 
+mod decision;
 mod diagnostics;
 mod policy_evaluation_error;
 
 pub fn register_entities(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<policy_evaluation_error::PolicyEvaluationError>()?;
     m.add_class::<diagnostics::Diagnostics>()?;
+    m.add_class::<decision::Decision>()?;
 
     Ok(())
 }
