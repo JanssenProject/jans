@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#this-content-is-in-progress" class="md-skip">
+        <a href="#release-process" class="md-skip">
           Skip to content
         </a>
       
@@ -8539,10 +8539,6 @@
         
           
         
-          
-        
-          
-        
       
       
         <label class="md-nav__link" for="__nav_5_4">
@@ -8561,34 +8557,6 @@
               
   
   
-  
-    <li class="md-nav__item">
-      <a href="../github-ci/" class="md-nav__link">
-        GitHub CI
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../jenkins-ci/" class="md-nav__link">
-        Jenkins CI
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
     
   
   
@@ -8597,53 +8565,12 @@
       <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
       
       
+        
       
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          Release Process
-          <span class="md-nav__icon md-icon"></span>
-        </label>
       
       <a href="./" class="md-nav__link md-nav__link--active">
         Release Process
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#this-content-is-in-progress" class="md-nav__link">
-    This content is in progress
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#have-questions-in-the-meantime" class="md-nav__link">
-    Have questions in the meantime?
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#want-to-contribute" class="md-nav__link">
-    Want to contribute?
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
       
     </li>
   
@@ -8806,35 +8733,8 @@
   
   
   
+    
   
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#this-content-is-in-progress" class="md-nav__link">
-    This content is in progress
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#have-questions-in-the-meantime" class="md-nav__link">
-    Have questions in the meantime?
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#want-to-contribute" class="md-nav__link">
-    Want to contribute?
-  </a>
-  
-</li>
-      
-    </ul>
   
 </nav>
                   </div>
@@ -8849,6 +8749,20 @@
                   
   
 
+  <nav class="md-tags" >
+    
+      
+      
+        <span class="md-tag">Release</span>
+      
+    
+      
+      
+        <span class="md-tag">faq</span>
+      
+    
+  </nav>
+
 
 
   <a href="https://github.com/JanssenProject/jans/edit/main/docs/contribute/ci-cd/release-process.md" title="Edit this page" class="md-content__button md-icon">
@@ -8857,21 +8771,30 @@
   </a>
 
 
-  <h1>Release Process</h1>
-
-<h2 id="this-content-is-in-progress">This content is in progress<a class="headerlink" href="#this-content-is-in-progress" title="Permanent link">#</a></h2>
-<p>The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.</p>
-<h2 id="have-questions-in-the-meantime">Have questions in the meantime?<a class="headerlink" href="#have-questions-in-the-meantime" title="Permanent link">#</a></h2>
-<p>While this documentation is in progress, you can ask questions through <a href="https://github.com/JanssenProject/jans/discussions">GitHub Discussions</a> or the <a href="https://gitter.im/JanssenProject/Lobby">community chat on Gitter</a>. Any questions you have will help determine what information our documentation should cover.</p>
-<h2 id="want-to-contribute">Want to contribute?<a class="headerlink" href="#want-to-contribute" title="Permanent link">#</a></h2>
-<p>If you have content you'd like to contribute to this page in the meantime, you can get started with our <a href="https://docs.jans.io/head/CONTRIBUTING/">Contribution guide</a>.</p>
+<h1 id="release-process">Release Process<a class="headerlink" href="#release-process" title="Permanent link">#</a></h1>
+<hr />
+<p>The release process starts on scheduled times detailed in the <a href="https://github.com/JanssenProject/jans/milestones">milestones</a> of the Janssen project. The release manager is responsible for coordinating the release process and ensuring that all steps are completed. The process is as follows:</p>
+<ol>
+<li><strong>Release Planning</strong>: The release manager creates a release plan that normally includes the release date, the version number, and the main features that will be included in the release. The release plan is shared with the team for review and feedback.</li>
+<li><strong>Feature Freeze</strong>: The release manager announces the feature freeze date. After this date, no new features will be added to the release. The team focuses on fixing bugs and improving the quality of the release. QA starts testing the release.</li>
+<li><strong>Code Freeze</strong>: The release manager announces the code freeze date. After this date, no new code will be added to the release. The team focuses on fixing bugs and improving the quality of the release. QA team verifies testing the release.</li>
+<li><strong>Release Candidate</strong>: The release manager creates a release candidate and shares it with the team for testing. The team tests the release candidate and reports any issues found. The release manager fixes the issues and creates a new release candidate. This process continues until the release candidate is stable. This normally done via a PR process and release branch following the structure <code>release-&lt;version&gt;</code>.</li>
+<li><strong>Release</strong>: The release manager creates the final release and shares it with the team. The team tests the final release and reports any issues found. The release manager fixes the issues and creates a new release. This process continues until the final release is stable.</li>
+<li><strong>Release Notes</strong>: The release manager creates the release notes and shares them with the team.Th The release notes include the version number, the main features included in the release, and any known issues. The release notes are shared with the community. This process is automated and picked up through conventional commits developers submit.</li>
+<li><strong>Release Announcement</strong>: The release manager announces the release to the community. The announcement includes the version number, the main features included in the release, and any known issues. The announcement is shared on the Janssen website, the Janssen blog, and social media. The release manager also sends an email to the Janssen mailing list.</li>
+<li><strong>Post-Release</strong>: The release manager monitors the release and addresses any issues that arise. The team continues to work on the next release.</li>
+<li><strong>Release Retrospective</strong>: The release manager conducts a retrospective to review the release process and identify areas for improvement. The team provides feedback on the release process. The release manager uses this feedback to improve the release process for future releases.</li>
+<li><strong>Next Release Planning</strong>: The release manager starts planning the next release. The process starts again from step 1. A branch <code>release-&lt;version&gt;</code> is created for the next dev and snapshot release with a similar process from step 1 and is merged into <code>main</code>.</li>
+</ol>
+<h1 id="future-plans">Future plans<a class="headerlink" href="#future-plans" title="Permanent link">#</a></h1>
+<p>We are planning a full move to SemVer for all Janssen projects that will be scheduled bi-weekly. In this move the google release please Github workflow  will be activated to automatically release the projects according to the conventional commits submitted. </p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2023-10-26T06:08:13+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2023-10-26</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-17T11:56:36+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-17</span>
       
         <br>
         Created:
@@ -8900,7 +8823,7 @@
     <nav class="md-footer__inner md-grid" aria-label="Footer" >
       
         
-        <a href="../jenkins-ci/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Jenkins CI" rel="prev">
+        <a href="../../implementation-design/jans-scim/" class="md-footer__link md-footer__link--prev" aria-label="Previous: jans-scim" rel="prev">
           <div class="md-footer__button md-icon">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
           </div>
@@ -8909,7 +8832,7 @@
               <span class="md-footer__direction">
                 Previous
               </span>
-              Jenkins CI
+              jans-scim
             </div>
           </div>
         </a>

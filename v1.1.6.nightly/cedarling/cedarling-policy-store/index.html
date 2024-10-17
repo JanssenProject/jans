@@ -7595,6 +7595,13 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#trusted-issuer-schema" class="md-nav__link">
+    Trusted Issuer Schema
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#policy-and-schema-authoring" class="md-nav__link">
     Policy and Schema Authoring
   </a>
@@ -8578,10 +8585,6 @@
         
           
         
-          
-        
-          
-        
       
       
         <label class="md-nav__link" for="__nav_5_4">
@@ -8595,34 +8598,6 @@
           CI-CD
         </label>
         <ul class="md-nav__list" data-md-scrollfix>
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../contribute/ci-cd/github-ci/" class="md-nav__link">
-        GitHub CI
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../contribute/ci-cd/jenkins-ci/" class="md-nav__link">
-        Jenkins CI
-      </a>
-    </li>
-  
-
-            
           
             
               
@@ -8804,6 +8779,13 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#trusted-issuer-schema" class="md-nav__link">
+    Trusted Issuer Schema
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#policy-and-schema-authoring" class="md-nav__link">
     Policy and Schema Authoring
   </a>
@@ -8886,6 +8868,37 @@ Cedarling needs to evaluate policies and verify JWT tokens:</p>
     }
 }
 </code></pre></div>
+<h2 id="trusted-issuer-schema">Trusted Issuer Schema<a class="headerlink" href="#trusted-issuer-schema" title="Permanent link">#</a></h2>
+<ul>
+<li><strong>name</strong> : (String, no spaces) The name of the trusted issuer.</li>
+<li><strong>description</strong> : (String) A brief description of the issuer, providing context for administrators.</li>
+<li><strong>openid_configuration_endpoint</strong> : (String) The HTTPS URL for the OpenID Connect configuration endpoint (usually found under /.well-known/openid-configuration).</li>
+<li><strong>access_tokens</strong> : (Object with claims) </li>
+<li><strong>trusted</strong>: (True | False) Indicates whether the issuer's access token are trusted.</li>
+<li><strong>id_tokens</strong> : (Object with claims) </li>
+<li><strong>trusted</strong>: (True | False) Indicates whether the issuer's id_token are trusted.</li>
+<li><strong>principal_identifier</strong>: the token claim used to identify the User entity (in SAML jargon it's the "NameID format"). This claim is optional--it may be present in the Userinfo token. Defaults to sub.</li>
+<li><strong>role_mapping</strong>: A list of the User's roles</li>
+<li><strong>userinfo_tokens</strong> :</li>
+<li><strong>trusted</strong>: (True | False) Indicates whether the issuer's userinfo_tokens are trusted.</li>
+<li><strong>principal_identifier</strong>: the token claim used to identify the User entity (in SAML jargon it's the "NameID format"). This claim is optional--it may be present in the Userinfo token. Defaults to sub.</li>
+<li><strong>role_mapping</strong>: A list of the User's roles</li>
+<li><strong>tx_tokens</strong> : (Object with claims)</li>
+<li><strong>trusted</strong>: (True | False)</li>
+</ul>
+<div class="highlight"><pre><span></span><code>[
+{&quot;name&quot;: &quot;Google&quot;, 
+ &quot;Description&quot;: &quot;Consumer IDP&quot;, 
+ &quot;openid_configuration_endpoint&quot;: &quot;https://accounts.google.com/.well-known/openid-configuration&quot;,
+ &quot;access_tokens&quot;: {&quot;trusted&quot;: True}, 
+ &quot;id_tokens&quot;: {&quot;trusted&quot;:True, &quot;principal_identifier&quot;: &quot;email&quot;},
+ &quot;userinfo_tokens&quot;: {&quot;trusted&quot;: True, &quot;role_mapping&quot;: &quot;role&quot;},  
+ &quot;tx_tokens&quot;: {&quot;trusted&quot;: True}
+},
+{IDP-2},
+{IDP-3}...
+]
+</code></pre></div>
 <h2 id="policy-and-schema-authoring">Policy and Schema Authoring<a class="headerlink" href="#policy-and-schema-authoring" title="Permanent link">#</a></h2>
 <p>You can hand create your Cedar policies and schema in 
 <a href="https://marketplace.visualstudio.com/items?itemName=cedar-policy.vscode-cedar">Visual Studio</a>. 
@@ -8899,7 +8912,7 @@ trusted IDPs and to publish a policy store to a Github repository.</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-09T19:16:25+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-09</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-17T18:41:31+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-17</span>
       
         <br>
         Created:
