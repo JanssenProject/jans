@@ -11,6 +11,7 @@ import static io.jans.as.model.util.Util.escapeLog;
 import io.jans.configapi.core.interceptor.RequestAuditInterceptor;
 import io.jans.configapi.core.interceptor.RequestInterceptor;
 import io.jans.configapi.core.model.ApiError;
+import io.jans.model.FilterOperator;
 import io.jans.model.SearchRequest;
 import io.jans.configapi.core.util.Util;
 import io.jans.orm.model.SortOrder;
@@ -25,7 +26,6 @@ import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -65,11 +65,11 @@ public class BaseResource {
 
     private static Logger log = LoggerFactory.getLogger(BaseResource.class);
 
-    public static final String MISSING_ATTRIBUTE_CODE = "OCA001";
-    public static final String MISSING_ATTRIBUTE_MESSAGE = "A required attribute is missing.";
-    public static final String TOKEN_DELIMITER = ",";
-    public static final String FIELD_VALUE_SEPARATOR = "=";
-    public static final List<String> FIELD_VALUE_SEPARATOR_ARR = Arrays.asList("?","<","=",">");
+    private static final String MISSING_ATTRIBUTE_CODE = "OCA001";
+    private static final String MISSING_ATTRIBUTE_MESSAGE = "A required attribute is missing.";
+    private static final String TOKEN_DELIMITER = ",";
+    private static final String FIELD_VALUE_SEPARATOR = "=";
+    private static final List<String> FIELD_VALUE_SEPARATOR_ARR = FilterOperator.getAllOperatorSign();
 
     public static <T> void checkResourceNotNull(T resource, String objectName) {
         if (resource == null) {
@@ -256,7 +256,11 @@ public class BaseResource {
         if (StringUtils.isEmpty(sortOrder) || !sortOrder.equals(SortOrder.DESCENDING.getValue())) {
             sortOrder = SortOrder.ASCENDING.getValue();
         }
-        log.debug(" util.getTokens(filter,TOKEN_DELIMITER):{} , util.getFieldValueMap(searchRequest, fieldValuePair, TOKEN_DELIMITER, FIELD_VALUE_SEPARATOR)):{}, FIELD_VALUE_SEPARATOR_ARR:{}", util.getTokens(filter, TOKEN_DELIMITER), util.getFieldValueMap(entityClass, fieldValuePair, TOKEN_DELIMITER, FIELD_VALUE_SEPARATOR), FIELD_VALUE_SEPARATOR_ARR);
+        log.debug(
+                " util.getTokens(filter,TOKEN_DELIMITER):{} , util.getFieldValueMap(searchRequest, fieldValuePair, TOKEN_DELIMITER, FIELD_VALUE_SEPARATOR)):{}, FIELD_VALUE_SEPARATOR_ARR:{}",
+                util.getTokens(filter, TOKEN_DELIMITER),
+                util.getFieldValueMap(entityClass, fieldValuePair, TOKEN_DELIMITER, FIELD_VALUE_SEPARATOR),
+                FIELD_VALUE_SEPARATOR_ARR);
         searchRequest.setSchemas(schemas);
         searchRequest.setAttributes(attrsList);
         searchRequest.setExcludedAttributes(excludedAttrsList);
@@ -267,8 +271,10 @@ public class BaseResource {
         searchRequest.setCount(count);
         searchRequest.setMaxCount(maximumRecCount);
         searchRequest.setFilterAssertionValue(util.getTokens(filter, TOKEN_DELIMITER));
-        searchRequest.setFieldValueMap((util.getFieldValueMap(entityClass, fieldValuePair, TOKEN_DELIMITER, FIELD_VALUE_SEPARATOR)));
-        searchRequest.setFieldFilterData((util.getFieldValueList(entityClass, fieldValuePair, TOKEN_DELIMITER, FIELD_VALUE_SEPARATOR_ARR)));
+        searchRequest.setFieldValueMap(
+                (util.getFieldValueMap(entityClass, fieldValuePair, TOKEN_DELIMITER, FIELD_VALUE_SEPARATOR)));
+        searchRequest.setFieldFilterData(
+                (util.getFieldValueList(entityClass, fieldValuePair, TOKEN_DELIMITER, FIELD_VALUE_SEPARATOR_ARR)));
         return searchRequest;
 
     }

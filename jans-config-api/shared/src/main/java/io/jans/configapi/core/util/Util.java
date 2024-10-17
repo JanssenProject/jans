@@ -12,7 +12,6 @@ import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.AttributesList;
 
 import java.lang.annotation.Annotation;
-import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -96,8 +95,7 @@ public class Util {
 
             if (StringUtils.isNotBlank(data) && st.hasMoreTokens()) {
                 String[] keyValue = data.split("=");
-                log.debug("fieldValueMap:{},keyValue:{}, keyValue[0]:{}, keyValue[1]):{}", fieldValueMap, keyValue,
-                        keyValue[0], keyValue[1]);
+                log.error("fieldValueMap:{},keyValue:{}", fieldValueMap, keyValue);
                 fieldValueMap.put(keyValue[0], keyValue[1]);
             }
         }
@@ -106,58 +104,49 @@ public class Util {
 
         // Replace filedValue with the DB field name
         fieldValueMap = getAttributeData(entityClass, fieldValueMap);
-        log.error("\n\n\n\n\n *****************************fieldValueMap:{}", fieldValueMap);
         return fieldValueMap;
     }
 
     public List<FieldFilterData> getFieldValueList(Class<?> entityClass, String str, String tokenizer,
             List<String> fieldValueSeparator) {
         if (log.isInfoEnabled()) {
-            log.info(" Field Value to get map - entityClass:{}, str:{}, tokenizer:{} fieldValueSeparator:{}",
+            log.info(" Get FieldValueList - entityClass:{}, str:{}, tokenizer:{} fieldValueSeparator:{}",
                     escapeLog(entityClass), escapeLog(str), escapeLog(tokenizer), escapeLog(fieldValueSeparator));
         }
 
-        /*
-         * if error puja
-         */
-        log.error("\n\n\n\n Field Value to get map - entityClass:{}, str:{}, tokenizer:{} fieldValueSeparator:{}",
-                entityClass, str, tokenizer, fieldValueSeparator);
-
-        
         List<FieldFilterData> fieldFilterDataList = new ArrayList<>();
 
         if (StringUtils.isBlank(str)) {
             return fieldFilterDataList;
         }
 
-        log.error("getTokens(str, tokenizer):{}", getTokens(str, tokenizer));
-
         List<String> fieldValueList = getTokens(str, tokenizer);
-        log.error("fieldValueList:{}", fieldValueList);
+        log.debug("After tokenizing fieldValueList:{}", fieldValueList);
 
         if (fieldValueList == null || fieldValueList.isEmpty()) {
             return fieldFilterDataList;
         }
-        
+
         Map<String, List<Annotation>> propertiesAnnotations = getPropertiesAnnotations(entityClass);
+        Map<String, String> fieldTypeMap = DataUtil.getFieldTypeMap(entityClass);
 
         for (String data : fieldValueList) {
             if (StringUtils.isNotBlank(data)) {
-                FieldFilterData fieldFilterData = this.getFieldFilterData(propertiesAnnotations, data, fieldValueSeparator);
-
-                // puja-to-test-start
+                FieldFilterData fieldFilterData = this.getFieldFilterData(propertiesAnnotations, fieldTypeMap, data,
+                        fieldValueSeparator);
                 fieldFilterDataList.add(fieldFilterData);
-                // puja-to-test-end
             }
         }
 
-        log.error("\n\n\n fieldFilterDataList:{}", fieldFilterDataList);
+        log.info("Returning fieldFilterDataList:{}", fieldFilterDataList);
 
         return fieldFilterDataList;
     }
 
-    private FieldFilterData getFieldFilterData(Map<String, List<Annotation>> propertiesAnnotations, String dataStr, List<String> fieldValueSeparator) {
-        log.error("dataStr:{} , fieldValueSeparator:{}", dataStr, fieldValueSeparator);
+    private FieldFilterData getFieldFilterData(Map<String, List<Annotation>> propertiesAnnotations,
+            Map<String, String> fieldTypeMap, String dataStr, List<String> fieldValueSeparator) {
+        log.info("Get FieldFilterData - dataStr:{} , fieldValueSeparator:{}", dataStr, fieldValueSeparator);
+
         FieldFilterData fieldFilterData = null;
         if (StringUtils.isBlank(dataStr) || fieldValueSeparator == null || fieldValueSeparator.isEmpty()) {
             return fieldFilterData;
@@ -166,19 +155,35 @@ public class Util {
             if (dataStr.contains(separator)) {
                 String[] result = dataStr.split(separator);
 
-                log.error("separator:{}, result:{}", separator, result);
+                log.debug("separator:{}, result:{}", separator, result);
                 if (result != null && result.length > 0) {
-                    fieldFilterData = new FieldFilterData(result[0], separator, result[1] , "");
+                    String fieldName = result[0];
+                    String value = result[1];
+                    String dbFieldName = getFieldDBName(fieldName, propertiesAnnotations.get(fieldName));
+                    String fieldType = getFieldDataType(fieldName, fieldTypeMap);
+                    log.debug("fieldName:{}, dbFieldName:{}, fieldType:{}, value:{}, separator:{}", fieldName,
+                            dbFieldName, fieldType, value, separator);
+                    fieldFilterData = new FieldFilterData(dbFieldName, separator, value, fieldType);
+
                 }
             }
-            log.error("dataStr:{} , fieldValueSeparator:{}, fieldFilterData:{}", dataStr, fieldValueSeparator,
-                    fieldFilterData);
+            log.info("Final fieldFilterData:{}", fieldFilterData);
         }
         return fieldFilterData;
 
     }
 
-    public Map<String, String> getAttributeData(Class<?> entityClass, Map<String, String> fieldValueMap) {
+    private String getFieldDataType(String fieldName, Map<String, String> fieldTypeMap) {
+        log.info("Get data type for fieldName:{}, fieldTypeMap:{}", fieldName, fieldTypeMap);
+        String fieldType = "String";
+        if (StringUtils.isBlank(fieldName) || fieldTypeMap == null || fieldTypeMap.isEmpty()) {
+            return fieldType;
+        }
+
+        return fieldTypeMap.get(fieldName);
+    }
+
+    private Map<String, String> getAttributeData(Class<?> entityClass, Map<String, String> fieldValueMap) {
         if (log.isInfoEnabled()) {
             log.info("AttributeData details to be fetched for entityClass:{} with fieldValueMap:{} ",
                     escapeLog(entityClass), escapeLog(fieldValueMap));
@@ -190,7 +195,7 @@ public class Util {
 
         Map<String, List<Annotation>> propertiesAnnotations = confService.getPropertiesAnnotations(entityClass,
                 LDAP_ENTRY_PROPERTY_ANNOTATIONS);
-        log.debug("Properties annotations fetched for class:{} are propertiesAnnotations:{}", entityClass,
+        log.debug("Properties annotations fetched for theClass:{} are propertiesAnnotations:{}", entityClass,
                 propertiesAnnotations);
 
         if (propertiesAnnotations == null || propertiesAnnotations.isEmpty()) {
@@ -235,8 +240,8 @@ public class Util {
         return fieldName;
     }
 
-    public Map<String, List<Annotation>> getPropertiesAnnotations(Class<?> entityClass) {
-        log.error("Get propertiesAnnotations for entityClass:{}", entityClass);
+    private Map<String, List<Annotation>> getPropertiesAnnotations(Class<?> entityClass) {
+        log.info("Get propertiesAnnotations for entityClass:{}", entityClass);
 
         Map<String, List<Annotation>> propertiesAnnotations = null;
         if (entityClass == null) {
@@ -244,33 +249,10 @@ public class Util {
         }
 
         propertiesAnnotations = confService.getPropertiesAnnotations(entityClass, LDAP_ENTRY_PROPERTY_ANNOTATIONS);
-        log.error("Properties annotations fetched for theClass:{} are propertiesAnnotations:{}", entityClass,
+        log.debug("Properties annotations fetched for theClass:{} are propertiesAnnotations:{}", entityClass,
                 propertiesAnnotations);
 
         return propertiesAnnotations;
 
-    }
-
-    public String getFieldDBName(Class<?> entityClass, Map<String, List<Annotation>> propertiesAnnotations,
-            String fieldName) {
-        log.error("DB field to be fetched for fieldName:{} from entityClass:{}", fieldName, entityClass);
-        if (StringUtils.isBlank(fieldName) || entityClass == null) {
-            return fieldName;
-        }
-
-        if (propertiesAnnotations == null || propertiesAnnotations.isEmpty()) {
-            propertiesAnnotations = this.getPropertiesAnnotations(entityClass);
-        }
-        log.error("Properties annotations fetched for theClass:{} are propertiesAnnotations:{}", entityClass,
-                propertiesAnnotations);
-
-        if (propertiesAnnotations == null || propertiesAnnotations.isEmpty()) {
-            return fieldName;
-        }
-
-        fieldName = getFieldDBName(fieldName, propertiesAnnotations.get(fieldName));
-
-        log.info("Final DB field fieldName:{} ", fieldName);
-        return fieldName;
     }
 }

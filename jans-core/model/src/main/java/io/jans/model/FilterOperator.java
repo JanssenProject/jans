@@ -6,6 +6,10 @@
 
 package io.jans.model;
 
+import java.util.List;
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
 
 public enum FilterOperator {
 
@@ -19,6 +23,10 @@ public enum FilterOperator {
 
     public final String getSign() {
         return sign;
+    }
+    
+    public static List<String> getAllOperatorSign(){
+        return Arrays.asList(values()).stream().map(FilterOperator::getSign).collect(Collectors.toList());
     }
 
 }

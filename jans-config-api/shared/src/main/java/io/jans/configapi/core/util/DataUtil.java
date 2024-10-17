@@ -17,10 +17,10 @@ import jakarta.inject.Named;
 import java.beans.Introspector;
 import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -134,24 +134,6 @@ public class DataUtil {
         return allFields;
     }
 
-    public static Map<String, String> getFieldDataType(Class<?> type, List<String> fieldList) {
-        logger.error("getFieldDataType - type:{} , fieldList:{}  ", type, fieldList);
-        Map<String, String> fieldTypeMap = null;
-        if (type == null || fieldList == null || fieldList.isEmpty()) {
-            return fieldTypeMap;
-        }
-
-        fieldTypeMap = getFieldTypeMap(type);
-        if (fieldTypeMap.isEmpty()) {
-            return fieldTypeMap;
-        }
-
-        fieldTypeMap.keySet().retainAll(fieldList);
-
-        logger.error("Final - fieldList:{} of fieldTypeMap:{}  ", fieldList, fieldTypeMap);
-        return fieldTypeMap;
-    }
-
     public static List<Field> getAllFields(List<Field> fields, Class<?> type) {
         logger.debug("Getting fields type:{} - fields:{} ", type, fields);
         fields.addAll(Arrays.asList(type.getDeclaredFields()));
@@ -175,7 +157,7 @@ public class DataUtil {
         logger.debug("AllFields:{} ", fields);
 
         for (Field field : fields) {
-            logger.error(
+            logger.debug(
                     "field:{} , field.getAnnotatedType():{}, field.getAnnotations():{} , field.getType().getAnnotations():{}, field.getType().getCanonicalName():{} , field.getType().getClass():{} , field.getType().getClasses():{} , field.getType().getComponentType():{}",
                     field, field.getAnnotatedType(), field.getAnnotations(), field.getType().getAnnotations(),
                     field.getType().getCanonicalName(), field.getType().getClass(), field.getType().getClasses(),
@@ -220,10 +202,28 @@ public class DataUtil {
         return false;
     }
 
-    public static Map<String, String> getFieldType(Class<?> type, List<FieldFilterData> fieldFilterData) {
-        logger.error("After modification type:{}, fieldFilterData:{}", type, fieldFilterData);
+    public static Map<String, String> getFieldDataType(Class<?> clazz, List<String> fieldList) {
+        logger.info("Get FieldDataType - clazz:{}, fieldList:{}", clazz, fieldList);
         Map<String, String> fieldTypeMap = null;
-        if (type == null || fieldFilterData == null || fieldFilterData.isEmpty()) {
+        if (clazz == null || fieldList == null || fieldList.isEmpty()) {
+            return fieldTypeMap;
+        }
+
+        fieldTypeMap = getFieldTypeMap(clazz);
+        if (fieldTypeMap.isEmpty()) {
+            return fieldTypeMap;
+        }
+
+        fieldTypeMap.keySet().retainAll(fieldList);
+
+        logger.info("Final - fieldList:{} of fieldTypeMap:{}  ", fieldList, fieldTypeMap);
+        return fieldTypeMap;
+    }
+
+    public static Map<String, String> getFieldType(Class<?> clazz, List<FieldFilterData> fieldFilterData) {
+        logger.info("Get field clazz:{}, fieldFilterData:{}", clazz, fieldFilterData);
+        Map<String, String> fieldTypeMap = null;
+        if (clazz == null || fieldFilterData == null || fieldFilterData.isEmpty()) {
             return fieldTypeMap;
         }
 
@@ -231,63 +231,110 @@ public class DataUtil {
         for (FieldFilterData entry : fieldFilterData) {
             fieldList.add(entry.getField());
         }
-        return getFieldDataType(type, fieldList);
+        return getFieldDataType(clazz, fieldList);
     }
 
-    public static List<Filter> createFilter(Map<String, List<Annotation>> propertiesAnnotations, List<FieldFilterData> fieldFilterData, String primaryKey,
+    public static List<Filter> createFilter(List<FieldFilterData> fieldFilterData, String primaryKey,
             PersistenceEntryManager persistenceEntryManager) {
-        logger.error("After modification propertiesAnnotations:{}, fieldFilterData:{}, primaryKey:{}, persistenceEntryManager:{}", propertiesAnnotations,
+        logger.info("Create ORM Filter for fieldFilterData:{}, primaryKey:{}, persistenceEntryManager:{}",
                 fieldFilterData, primaryKey, persistenceEntryManager);
         List<Filter> filters = new ArrayList<>();
 
-        if (propertiesAnnotations == null || propertiesAnnotations.isEmpty() || fieldFilterData == null || fieldFilterData.isEmpty() || StringUtils.isBlank(primaryKey)
+        if (fieldFilterData == null || fieldFilterData.isEmpty() || StringUtils.isBlank(primaryKey)
                 || persistenceEntryManager == null) {
             return filters;
         }
-        
-        
-
-        //puja
-        Map<String, String> dataTypeMap = getFieldType(null, fieldFilterData);
-        //logger.error(" type:{} dataTypeMap:{}", type.getCanonicalName(), dataTypeMap);
 
         for (FieldFilterData entry : fieldFilterData) {
-
+            logger.info("FieldFilterData entry:{}", entry);
             String dataType = AttributeDataType.STRING.getValue();
 
-            if (dataTypeMap != null && dataTypeMap.containsKey(entry.getField())) {
-                dataType = dataTypeMap.get(entry.getField());
+            if (StringUtils.isNotBlank(entry.getType())) {
+                dataType = entry.getType();
             }
-            logger.error("entry.getField():{}, dataType:{}", entry.getField(), dataType);
+            logger.info(
+                    "entry.getField():{}, dataType:{},  AttributeDataType.STRING.getValue():{}, AttributeDataType.DATE.getDisplayName():{}",
+                    entry.getField(), dataType, AttributeDataType.STRING.getValue(),
+                    AttributeDataType.DATE.getDisplayName());
 
             Filter dataFilter = null;
             if (AttributeDataType.STRING.getValue().equalsIgnoreCase(dataType)) {
-                logger.error("entry.getField():{}, dataType:{}, AttributeDataType.STRING.getValue():{}",
+                logger.trace("entry.getField():{}, dataType:{}, AttributeDataType.STRING.getValue():{}",
                         entry.getField(), dataType, AttributeDataType.STRING.getValue());
                 dataFilter = Filter.createEqualityFilter(entry.getField(), entry.getValue());
 
             } else if (AttributeDataType.DATE.getDisplayName().equalsIgnoreCase(dataType)) {
-                logger.error("entry.getField():{}, dataType:{}, AttributeDataType.DATE.getDisplayName():{}",
+                logger.debug("entry.getField():{}, dataType:{}, AttributeDataType.DATE.getDisplayName():{}",
                         entry.getField(), dataType, AttributeDataType.DATE.getDisplayName());
-                Date dateValue = persistenceEntryManager.decodeTime(primaryKey, entry.getValue());
+                Date dateValue = getDate(entry.getValue(), primaryKey, persistenceEntryManager);
+                logger.debug("\n\n\n dateValue:{}, entry.getValue():{}", entry.getValue(), dateValue);
+
                 if (FilterOperator.EQUALITY.getSign().equalsIgnoreCase(entry.getOperator())) {
 
                     dataFilter = Filter.createEqualityFilter(entry.getField(), dateValue);
 
-                } else if (FilterOperator.GREATER.getSign().equalsIgnoreCase(entry.getOperator())) {
+                } else if (FilterOperator.GREATER.getSign().equalsIgnoreCase(entry.getOperator())
+                        || FilterOperator.GREATER_OR_EQUAL.getSign().equalsIgnoreCase(entry.getOperator())) {
 
                     dataFilter = Filter.createGreaterOrEqualFilter(entry.getField(), dateValue);
 
-                } else if (FilterOperator.LESS.getSign().equalsIgnoreCase(entry.getOperator())) {
+                } else if (FilterOperator.LESS.getSign().equalsIgnoreCase(entry.getOperator())
+                        || FilterOperator.LESS_OR_EQUAL.getSign().equalsIgnoreCase(entry.getOperator())) {
 
                     dataFilter = Filter.createLessOrEqualFilter(entry.getField(), dateValue);
 
                 }
             }
-            logger.error("Filters for  fieldFilterData - dataFilter:{}", dataFilter);
             filters.add(dataFilter);
+            logger.info("dataFilter:{}", dataFilter);
+
         }
+        logger.info("Final Filters for  fieldFilterData - filters:{}", filters);
         return filters;
+    }
+
+    private static Date getDate(String dateString, String primaryKey, PersistenceEntryManager persistenceEntryManager) {
+        logger.info("Get Date Value for dateString:{}, primaryKey:{}, persistenceEntryManager:{}", dateString,
+                primaryKey, persistenceEntryManager);
+        Date dateValue = null;
+        if (StringUtils.isBlank(dateString) || StringUtils.isBlank(primaryKey) || persistenceEntryManager == null) {
+            return dateValue;
+        }
+
+        dateValue = persistenceEntryManager.decodeTime(primaryKey, dateString);
+        logger.debug("\n\n\n dateString:{}, dateValue:{}", dateString, dateValue);
+        if (dateValue == null) {
+            dateValue = formatStrDate(dateString, null);
+        }
+        logger.info("\n\n\n formatStrDate - dateValue:{}", dateValue);
+
+        return dateValue;
+    }
+
+    private static Date formatStrDate(String dateString, String datePattern) {
+        logger.debug("Format String Date - dateString:{}: datePattern:{}", dateString, datePattern);
+        Date date = null;
+        try {
+            if (StringUtils.isBlank(dateString)) {
+                return date;
+            }
+
+            if (StringUtils.isBlank(datePattern)) {
+                datePattern = "yyyy-MM-dd";
+            }
+
+            SimpleDateFormat dateFormat = new SimpleDateFormat(datePattern);
+            logger.debug("dateFormat:{} ", dateFormat);
+
+            date = dateFormat.parse(dateString);
+            logger.info("Returning dateFormat:{}, date:{} ", dateFormat, date);
+
+        } catch (Exception ex) {
+            logger.error("Error while formatting String Date - dateString{" + dateString + "}", ex);
+            return date;
+        }
+
+        return date;
     }
 
 }
