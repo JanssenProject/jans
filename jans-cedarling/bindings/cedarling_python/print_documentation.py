@@ -1,6 +1,7 @@
 from cedarling_python import MemoryLogConfig, DisabledLoggingConfig, StdOutLogConfig
 from cedarling_python import PolicyStoreSource, PolicyStoreConfig, BootstrapConfig
 from cedarling_python import Cedarling
+from cedarling_python import ResourceData, Request, AuthorizeResult, AuthorizeResultResponse, Decision, Diagnostics, PolicyEvaluationError
 
 import inspect
 
@@ -61,7 +62,9 @@ def print_doc(type_value):
 
 types = [MemoryLogConfig, DisabledLoggingConfig,
          StdOutLogConfig, PolicyStoreSource, PolicyStoreConfig, BootstrapConfig,
-         Cedarling]
+         Cedarling,
+         ResourceData, Request, AuthorizeResult, AuthorizeResultResponse, Decision, Diagnostics, PolicyEvaluationError,
+         ]
 
 if __name__ == "__main__":
     print_header()

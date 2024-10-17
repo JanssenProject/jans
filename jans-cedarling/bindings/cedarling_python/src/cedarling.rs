@@ -33,43 +33,31 @@ use serde_pyobject::to_pyobject;
 ///
 ///     :param config: A `BootstrapConfig` object with startup settings.
 ///
-/// .. method:: pop_logs(self)
+/// .. method:: pop_logs(self) -> List[dict]
 ///
 ///     Retrieves and removes all logs from storage.
 ///
 ///     :returns: A list of log entries as Python objects.
-///     :rtype: List[PyObject]
 ///
 ///     :raises ValueError: If an error occurs while fetching logs.
 ///
-/// .. method:: get_log_by_id(self, id)
+/// .. method:: get_log_by_id(self, id: str) -> dict|None
 ///
 ///     Gets a log entry by its ID.
 ///
 ///     :param id: The log entry ID.
-///     :type id: str
-///
-///     :returns: The log entry as a Python object or None if not found.
-///     :rtype: Optional[PyObject]
 ///
 ///     :raises ValueError: If an error occurs while fetching the log.
 ///
-/// .. method:: get_log_ids(self)
+/// .. method:: get_log_ids(self) -> List[str]
 ///
 ///     Retrieves all stored log IDs.
 ///
-///     :returns: A list of log entry IDs.
-///     :rtype: List[str]
-///
-/// .. method:: authorize(self, request)
+/// .. method:: authorize(self, request: Request) -> AuthorizeResult
 ///
 ///     Execute authorize request
 ///     :param request: Request struct for authorize.
-///     :type request: Request
 ///
-///     :returns: Response struct for authorize.
-///     :rtype: AuthorizeResult
-///      
 #[derive(Clone)]
 #[pyclass]
 pub struct Cedarling {
