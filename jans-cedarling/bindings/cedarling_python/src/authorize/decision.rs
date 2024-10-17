@@ -4,6 +4,7 @@
  *
  * Copyright (c) 2024, Gluu, Inc.
  */
+use cedarling::bindings::cedar_policy;
 use pyo3::prelude::*;
 
 /// Decision
@@ -51,8 +52,8 @@ impl Decision {
     }
 }
 
-impl From<cedarling::bindings::cedar_policy::Decision> for Decision {
-    fn from(value: cedarling::bindings::cedar_policy::Decision) -> Self {
+impl From<cedar_policy::Decision> for Decision {
+    fn from(value: cedar_policy::Decision) -> Self {
         Self {
             inner: value.into(),
         }

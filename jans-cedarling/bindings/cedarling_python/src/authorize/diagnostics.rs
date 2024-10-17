@@ -6,6 +6,7 @@
  */
 
 use super::policy_evaluation_error::PolicyEvaluationError;
+use cedarling::bindings::cedar_policy;
 use std::collections::HashSet;
 
 use pyo3::prelude::*;
@@ -32,11 +33,18 @@ pub struct Diagnostics {
     errors: Vec<PolicyEvaluationError>,
 }
 
-impl From<cedarling::bindings::Diagnostics> for Diagnostics {
-    fn from(value: cedarling::bindings::Diagnostics) -> Self {
+impl From<cedar_policy::Diagnostics> for Diagnostics {
+    fn from(value: cedar_policy::Diagnostics) -> Self {
+        // use type for logging
+        let diagnostics_info: cedarling::bindings::Diagnostics = value.into();
+
         Self {
-            reason: value.reason,
-            errors: value.errors.into_iter().map(|e| e.into()).collect(),
+            reason: diagnostics_info.reason,
+            errors: diagnostics_info
+                .errors
+                .into_iter()
+                .map(|e| e.into())
+                .collect(),
         }
     }
 }

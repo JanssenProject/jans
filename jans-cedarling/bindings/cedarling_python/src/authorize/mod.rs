@@ -7,6 +7,7 @@
 use pyo3::prelude::*;
 use pyo3::Bound;
 
+mod authorize_result_response;
 mod decision;
 mod diagnostics;
 mod policy_evaluation_error;
@@ -19,6 +20,7 @@ pub fn register_entities(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<decision::Decision>()?;
     m.add_class::<resource_data::ResourceData>()?;
     m.add_class::<request::Request>()?;
+    m.add_class::<authorize_result_response::AuthorizeResultResponse>()?;
 
     Ok(())
 }
