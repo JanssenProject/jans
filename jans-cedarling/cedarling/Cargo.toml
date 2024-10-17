@@ -1,0 +1,23 @@
+[package]
+name = "cedarling"
+version = "1.1.6"
+edition = "2021"
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+sparkv = { workspace = true }
+uuid7 = { version = "1.1.0", features = ["serde", "uuid"] }
+cedar-policy = "4.0.0"
+base64 = "0.22.1"
+url = "2.5.2"
+lazy_static = "1.5.0"
+di = { workspace = true }
+jsonwebtoken = "9.3.0"
+
+[dev-dependencies]
+# is used in testing
+test_utils = { workspace = true }
+rand = "0.8.5"
+jsonwebkey = { version = "0.3.5", features = ["generate", "jwt-convert"] }

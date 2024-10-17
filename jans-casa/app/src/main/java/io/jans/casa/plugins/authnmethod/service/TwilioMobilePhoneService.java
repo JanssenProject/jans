@@ -3,14 +3,16 @@ package io.jans.casa.plugins.authnmethod.service;
 import com.twilio.Twilio;
 import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.type.PhoneNumber;
+
 import io.jans.casa.misc.Utils;
 import io.jans.casa.plugins.authnmethod.OTPTwilioExtension;
-import org.slf4j.Logger;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import java.util.stream.Stream;
+
+import org.slf4j.Logger;
 
 /**
  * An app. scoped bean to serve the purpose of sending SMS using the Twilio service
@@ -34,18 +36,17 @@ public class TwilioMobilePhoneService extends MobilePhoneService {
     public void reloadConfiguration() {
 
         initialized = false;
-        props = persistenceService.getCustScriptConfigProperties(OTPTwilioExtension.ACR);
+        props = persistenceService.getAgamaFlowConfigProperties(OTPTwilioExtension.ACR);
 
         if (props == null) {
-            logger.warn("Config. properties for custom script '{}' could not be read. Features related to {} will not be accessible",
-                    OTPTwilioExtension.ACR, OTPTwilioExtension.ACR.toUpperCase());
+            logger.warn("Config. properties for flow '{}' could not be read", OTPTwilioExtension.ACR);
         } else {
-            String sid = props.get("twilio_sid");
-            String token = props.get("twilio_token");
-            fromNumber = props.get("from_number");
+            String sid = props.optString("twilio_sid");
+            String token = props.optString("twilio_token");
+            fromNumber = props.optString("from_number");
 
             if (Stream.of(sid, token, fromNumber).anyMatch(Utils::isEmpty)) {
-                logger.warn("Error parsing SMS settings. Please check LDAP entry of SMS custom script");
+                logger.warn("Error parsing SMS settings. Please check configuration of corresponding agama flow");
             } else {
                 try {
                     Twilio.init(sid, token);

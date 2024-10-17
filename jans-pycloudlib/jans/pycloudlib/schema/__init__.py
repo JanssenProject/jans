@@ -34,7 +34,6 @@ DEFAULT_SCOPES = (
 )
 
 OPTIONAL_SCOPES = (
-    "ldap",
     "couchbase",
     "redis",
     "sql",
@@ -92,39 +91,6 @@ class SecretSchema(Schema):
         metadata={
             "description": "Password for admin user",
         }
-    )
-
-    # previously ldap_pw
-    ldap_password = String(
-        load_default="",
-        dump_default="",
-        metadata={
-            "description": "Password for LDAP (OpenDJ) user",
-        },
-    )
-
-    ldap_truststore_pass = String(
-        load_default="",
-        dump_default="",
-        metadata={
-            "description": "Password for LDAP (OpenDJ) truststore",
-        },
-    )
-
-    ldap_ssl_cert = CertKey(
-        load_default="",
-        dump_default="",
-        metadata={
-            "description": "LDAP (OpenDJ) certificate",
-        },
-    )
-
-    ldap_ssl_key = CertKey(
-        load_default="",
-        dump_default="",
-        metadata={
-            "description": "LDAP (OpenDJ) private key",
-        },
     )
 
     # previously sql_pw
@@ -286,23 +252,7 @@ class SecretSchema(Schema):
         load_default="",
         dump_default="",
         metadata={
-            "description": "LDAP-encoded password of admin",
-        },
-    )
-
-    encoded_ox_ldap_pw = String(
-        load_default="",
-        dump_default="",
-        metadata={
-            "description": "Encoded password for Bind DN",
-        },
-    )
-
-    encoded_ldapTrustStorePass = String(
-        load_default="",
-        dump_default="",
-        metadata={
-            "description": "Encoded password for LDAP (OpenDJ) truststore",
+            "description": "Encoded password of admin",
         },
     )
 
@@ -391,14 +341,6 @@ class SecretSchema(Schema):
         dump_default="",
         metadata={
             "description": "Client secret of Keycloak scheduler API app",
-        },
-    )
-
-    ldap_pkcs12_base64 = String(
-        load_default="",
-        dump_default="",
-        metadata={
-            "description": "Private keys (keystore) of LDAP (OpenDJ)",
         },
     )
 
@@ -571,7 +513,7 @@ class SecretSchema(Schema):
     )
 
     @post_load
-    def transform_b64(self, in_data, **kwargs):
+    def transform_data(self, in_data, **kwargs):
         # list of attrs that maybe base64 string and need to be decoded
         for attr in [
             "google_credentials",
@@ -581,7 +523,7 @@ class SecretSchema(Schema):
         ]:
             with contextlib.suppress(UnicodeDecodeError, binascii.Error):
                 in_data[attr] = b64decode(in_data.get(attr, "")).decode()
-        return in_data
+        return {k: v for k, v in in_data.items() if v}
 
     @validates("encoded_salt")
     def validate_salt(self, value):
@@ -835,33 +777,6 @@ class ConfigmapSchema(Schema):
     )
 
     # @TODO: change to HARDCODED value instead
-    ldapTrustStoreFn = String(
-        load_default="",
-        dump_default="",
-        metadata={
-            "description": "Path to keystore file used for connecting to LDAP (OpenDJ)",
-        },
-    )
-
-    # @TODO: change to HARDCODED value instead
-    ldap_binddn = String(
-        load_default="",
-        dump_default="",
-        metadata={
-            "description": "Bind DN for LDAP (OpenDJ)",
-        },
-    )
-
-    # @TODO: change to HARDCODED value instead
-    ldap_site_binddn = String(
-        load_default="",
-        dump_default="",
-        metadata={
-            "description": "Bind DN for LDAP (OpenDJ)",
-        },
-    )
-
-    # @TODO: change to HARDCODED value instead
     default_openid_jks_dn_name = String(
         load_default="CN=Janssen Auth CA Certificates",
         dump_default="CN=Janssen Auth CA Certificates",
@@ -875,46 +790,6 @@ class ConfigmapSchema(Schema):
         dump_default="admin",
         metadata={
             "description": "Admin username of Keycloak",
-        },
-    )
-
-    ldap_init_host = String(
-        load_default="",
-        dump_default="",
-        metadata={
-            "description": "Initial hostname for LDAP (OpenDJ)",
-        },
-    )
-
-    ldap_init_port = String(
-        load_default="",
-        dump_default="",
-        metadata={
-            "description": "Initial port for LDAP (OpenDJ)",
-        },
-    )
-
-    ldap_peers = String(
-        load_default="",
-        dump_default="",
-        metadata={
-            "description": "Mapping of LDAP (OpenDJ) peers contains host and its ports",
-        },
-    )
-
-    ldap_port = String(
-        load_default="",
-        dump_default="",
-        metadata={
-            "description": "Port for LDAP (OpenDJ)",
-        },
-    )
-
-    ldaps_port = String(
-        load_default="",
-        dump_default="",
-        metadata={
-            "description": "Secure port for LDAP (OpenDJ)",
         },
     )
 
@@ -943,7 +818,7 @@ class ConfigmapSchema(Schema):
     def transform_data(self, in_data, **kwargs):
         in_data["auth_sig_keys"] = transform_auth_keys(in_data["auth_sig_keys"], AUTH_SIG_KEYS)
         in_data["auth_enc_keys"] = transform_auth_keys(in_data["auth_enc_keys"], AUTH_ENC_KEYS)
-        return in_data
+        return {k: v for k, v in in_data.items() if v}
 
     @validates("optional_scopes")
     def validate_optional_scopes(self, value):
@@ -992,7 +867,7 @@ class ConfigurationSchema(Schema):
     _configmap = Nested(ConfigmapSchema, required=True)
 
 
-def load_schema_from_file(path):
+def load_schema_from_file(path, exclude_configmap=False, exclude_secret=False):
     """Loads schema from file."""
     out = {}
     err = {}
@@ -1006,8 +881,23 @@ def load_schema_from_file(path):
         code = 1
         return out, err, code
 
+    # dont exclude attributes
+    exclude_attrs = False
+
+    # exclude configmap from loading mechanism
+    if exclude_configmap:
+        key = "_configmap"
+        exclude_attrs = [key]
+        docs.pop(key, None)
+
+    # exclude secret from loading mechanism
+    if exclude_secret:
+        key = "_secret"
+        exclude_attrs = [key]
+        docs.pop(key, None)
+
     try:
-        out = ConfigurationSchema().load(docs)
+        out = ConfigurationSchema().load(docs, partial=exclude_attrs)
     except ValidationError as exc:
         err = exc.messages
         code = 1

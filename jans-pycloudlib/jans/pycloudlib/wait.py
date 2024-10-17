@@ -15,7 +15,6 @@ from jans.pycloudlib.persistence.sql import SqlClient
 from jans.pycloudlib.persistence.sql import doc_id_from_dn
 from jans.pycloudlib.persistence.spanner import SpannerClient
 from jans.pycloudlib.utils import as_boolean
-from jans.pycloudlib.persistence.ldap import LdapClient
 from jans.pycloudlib.persistence.utils import PersistenceMapper
 
 if _t.TYPE_CHECKING:  # pragma: no cover
@@ -176,49 +175,6 @@ _ADMIN_GROUP_DN = "inum=60B7,ou=groups,o=jans"
 
 
 @retry_on_exception
-def wait_for_ldap(manager: Manager, **kwargs: _t.Any) -> None:
-    """Wait for readiness/availability of LDAP server based on existing entry.
-
-    Args:
-        manager: An instance of manager class.
-        **kwargs: Arbitrary keyword arguments (see Other Parameters section, if any).
-    """
-    search_mapping = {
-        "default": ("ou=jans-auth,ou=configuration,o=jans", "(objectClass=jansAppConf)"),
-        "user": (_ADMIN_GROUP_DN, "(objectClass=jansGrp)"),
-        "site": ("ou=link,o=site", "(ou=link)"),
-        "cache": ("ou=cache,o=jans", "(ou=cache)"),
-        "token": ("ou=tokens,o=jans", "(ou=tokens)"),
-        "session": ("ou=sessions,o=jans", "(ou=sessions)"),
-    }
-
-    client = LdapClient(manager)
-    try:
-        # get the first data key
-        key = PersistenceMapper().groups().get("ldap", [])[0]
-        search_base, search_filter = search_mapping[key]
-        init = bool(client.search(search_base, search_filter, attributes=["objectClass"], limit=1))
-    except (IndexError, KeyError):
-        init = client.is_connected()
-
-    if not init:
-        raise WaitError("LDAP is not fully initialized")
-
-
-@retry_on_exception
-def wait_for_ldap_conn(manager: Manager, **kwargs: _t.Any) -> None:
-    """Wait for readiness/availability of LDAP server based on connection status.
-
-    Args:
-        manager: An instance of manager class.
-        **kwargs: Arbitrary keyword arguments (see Other Parameters section, if any).
-    """
-    connected = LdapClient(manager).is_connected()
-    if not connected:
-        raise WaitError("LDAP is unreachable")
-
-
-@retry_on_exception
 def wait_for_couchbase(manager: Manager, **kwargs: _t.Any) -> None:
     """Wait for readiness/availability of Couchbase server based on existing entry.
 
@@ -353,8 +309,6 @@ def wait_for(manager: Manager, deps: _t.Union[list[str], None] = None) -> None:
 
     - `config`
     - `config_conn`
-    - `ldap`
-    - `ldap_conn`
     - `couchbase`
     - `couchbase_conn`
     - `secret`
@@ -374,7 +328,7 @@ def wait_for(manager: Manager, deps: _t.Union[list[str], None] = None) -> None:
         from jans.pycloudlib.wait import wait_for
 
         manager = get_manager()
-        deps = ["config", "secret", "ldap"]
+        deps = ["config", "secret", "sql"]
         wait_for(manager, deps)
         ```
     """
@@ -384,8 +338,6 @@ def wait_for(manager: Manager, deps: _t.Union[list[str], None] = None) -> None:
             "func": wait_for_config,
             "kwargs": {"label": "Config", "conn_only": True},
         },
-        "ldap": {"func": wait_for_ldap, "kwargs": {"label": "LDAP"}},
-        "ldap_conn": {"func": wait_for_ldap_conn, "kwargs": {"label": "LDAP"}},
         "couchbase": {"func": wait_for_couchbase, "kwargs": {"label": "Couchbase"}},
         "couchbase_conn": {
             "func": wait_for_couchbase_conn,

@@ -8,22 +8,24 @@ from functools import cached_property
 from ldif import LDIFWriter
 
 from jans.pycloudlib import get_manager
-from jans.pycloudlib.persistence import render_couchbase_properties
-from jans.pycloudlib.persistence import render_base_properties
-from jans.pycloudlib.persistence import render_hybrid_properties
-from jans.pycloudlib.persistence import render_ldap_properties
-from jans.pycloudlib.persistence import render_salt
-from jans.pycloudlib.persistence import sync_couchbase_truststore
-from jans.pycloudlib.persistence import sync_ldap_truststore
-from jans.pycloudlib.persistence import render_sql_properties
-from jans.pycloudlib.persistence import render_spanner_properties
-from jans.pycloudlib.persistence import CouchbaseClient
-from jans.pycloudlib.persistence import LdapClient
-from jans.pycloudlib.persistence import SpannerClient
-from jans.pycloudlib.persistence import SqlClient
-from jans.pycloudlib.persistence import doc_id_from_dn
-from jans.pycloudlib.persistence import id_from_dn
+from jans.pycloudlib import wait_for_persistence
+from jans.pycloudlib.persistence.couchbase import CouchbaseClient
+from jans.pycloudlib.persistence.couchbase import id_from_dn
+from jans.pycloudlib.persistence.couchbase import render_couchbase_properties
+from jans.pycloudlib.persistence.couchbase import sync_couchbase_cert
+from jans.pycloudlib.persistence.couchbase import sync_couchbase_password
+from jans.pycloudlib.persistence.couchbase import sync_couchbase_truststore
+from jans.pycloudlib.persistence.hybrid import render_hybrid_properties
+from jans.pycloudlib.persistence.spanner import render_spanner_properties
+from jans.pycloudlib.persistence.spanner import SpannerClient
+from jans.pycloudlib.persistence.spanner import sync_google_credentials
+from jans.pycloudlib.persistence.sql import doc_id_from_dn
+from jans.pycloudlib.persistence.sql import render_sql_properties
+from jans.pycloudlib.persistence.sql import SqlClient
+from jans.pycloudlib.persistence.sql import sync_sql_password
 from jans.pycloudlib.persistence.utils import PersistenceMapper
+from jans.pycloudlib.persistence.utils import render_base_properties
+from jans.pycloudlib.persistence.utils import render_salt
 from jans.pycloudlib.utils import cert_to_truststore
 from jans.pycloudlib.utils import get_random_chars
 from jans.pycloudlib.utils import encode_text
@@ -32,6 +34,10 @@ from jans.pycloudlib.utils import as_boolean
 from jans.pycloudlib.utils import get_server_certificate
 
 from settings import LOGGING_CONFIG
+from utils import generalized_time_utc
+from utils import get_ads_project_base64
+from utils import CASA_AGAMA_DEPLOYMENT_ID
+from utils import CASA_AGAMA_ARCHIVE
 
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("jans-casa")
@@ -112,7 +118,7 @@ def configure_logging():
 
 
 def main():
-    persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "ldap")
+    persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "sql")
 
     render_salt(manager, "/app/templates/salt", "/etc/jans/conf/salt")
     render_base_properties("/app/templates/jans.properties", "/etc/jans/conf/jans.properties")
@@ -123,25 +129,21 @@ def main():
     if persistence_type == "hybrid":
         render_hybrid_properties("/etc/jans/conf/jans-hybrid.properties")
 
-    if "ldap" in persistence_groups:
-        render_ldap_properties(
-            manager,
-            "/app/templates/jans-ldap.properties",
-            "/etc/jans/conf/jans-ldap.properties",
-        )
-        sync_ldap_truststore(manager)
-
     if "couchbase" in persistence_groups:
+        sync_couchbase_password(manager)
         render_couchbase_properties(
             manager,
             "/app/templates/jans-couchbase.properties",
             "/etc/jans/conf/jans-couchbase.properties",
         )
-        sync_couchbase_truststore(manager)
+
+        if as_boolean(os.environ.get("CN_COUCHBASE_TRUSTSTORE_ENABLE", "true")):
+            sync_couchbase_cert(manager)
+            sync_couchbase_truststore(manager)
 
     if "sql" in persistence_groups:
+        sync_sql_password(manager)
         db_dialect = os.environ.get("CN_SQL_DB_DIALECT", "mysql")
-
         render_sql_properties(
             manager,
             f"/app/templates/jans-{db_dialect}.properties",
@@ -154,6 +156,9 @@ def main():
             "/app/templates/jans-spanner.properties",
             "/etc/jans/conf/jans-spanner.properties",
         )
+        sync_google_credentials(manager)
+
+    wait_for_persistence(manager)
 
     if not os.path.isfile("/etc/certs/web_https.crt"):
         if as_boolean(os.environ.get("CN_SSL_CERT_FROM_SECRETS", "true")):
@@ -193,7 +198,6 @@ class PersistenceSetup:
         self.manager = manager
 
         client_classes = {
-            "ldap": LdapClient,
             "couchbase": CouchbaseClient,
             "spanner": SpannerClient,
             "sql": SqlClient,
@@ -216,10 +220,8 @@ class PersistenceSetup:
             "casa_redirect_uri": f"https://{hostname}/jans-casa",
             "casa_redirect_logout_uri": f"https://{hostname}/jans-casa/bye.zul",
             "casa_frontchannel_logout_uri": f"https://{hostname}/jans-casa/autologout",
+            "casa_agama_deployment_id": CASA_AGAMA_DEPLOYMENT_ID,
         }
-
-        with open("/app/static/extension/person_authentication/Casa.py") as f:
-            ctx["casa_person_authentication_script"] = generate_base64_contents(f.read())
 
         # Casa client
         ctx["casa_client_id"] = self.manager.config.get("casa_client_id")
@@ -242,16 +244,15 @@ class PersistenceSetup:
         with open("/app/templates/jans-casa/casa-config.json") as f:
             ctx["casa_config_base64"] = generate_base64_contents(f.read() % ctx)
 
+        ctx["jans_start_date"] = generalized_time_utc()
+        ctx["ads_prj_assets_base64"] = get_ads_project_base64(CASA_AGAMA_ARCHIVE)
+
         # finalized contexts
         return ctx
 
     @cached_property
     def ldif_files(self):
         filenames = ["configuration.ldif", "client.ldif"]
-        # add casa_person_authentication_script.ldif if there's no existing casa script in persistence to avoid error
-        # java.lang.IllegalStateException: Duplicate key casa (attempted merging values 1 and 1)
-        if not self._deprecated_script_exists():
-            filenames.append("person_authentication_script.ldif")
 
         # generate extra scopes
         self.generate_scopes_ldif()
@@ -267,21 +268,17 @@ class PersistenceSetup:
         if self.persistence_type in ("sql", "spanner"):
             return bool(self.client.get("jansCustomScr", doc_id_from_dn(id_)))
 
-        # couchbase
-        if self.persistence_type == "couchbase":
-            bucket = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
-            key = id_from_dn(id_)
-            req = self.client.exec_query(
-                f"SELECT META().id, {bucket}.* FROM {bucket} USE KEYS '{key}'"
-            )
-            try:
-                entry = req.json()["results"][0]
-                return bool(entry["id"])
-            except IndexError:
-                return False
-
-        # ldap
-        return bool(self.client.get(id_))
+        # likely couchbase
+        bucket = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
+        key = id_from_dn(id_)
+        req = self.client.exec_query(
+            f"SELECT META().id, {bucket}.* FROM {bucket} USE KEYS '{key}'"
+        )
+        try:
+            entry = req.json()["results"][0]
+            return bool(entry["id"])
+        except IndexError:
+            return False
 
     def import_ldif_files(self):
         for file_ in self.ldif_files:

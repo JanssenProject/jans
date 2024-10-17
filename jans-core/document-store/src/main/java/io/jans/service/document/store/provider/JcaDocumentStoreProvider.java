@@ -9,7 +9,6 @@ package io.jans.service.document.store.provider;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.util.List;
@@ -32,8 +31,6 @@ import javax.jcr.nodetype.ConstraintViolationException;
 import javax.jcr.nodetype.NodeType;
 import javax.jcr.version.VersionException;
 
-import io.jans.service.document.store.exception.DocumentException;
-import io.jans.service.document.store.exception.WriteDocumentException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.jackrabbit.JcrConstants;
@@ -45,6 +42,8 @@ import org.slf4j.LoggerFactory;
 import io.jans.service.document.store.conf.DocumentStoreConfiguration;
 import io.jans.service.document.store.conf.DocumentStoreType;
 import io.jans.service.document.store.conf.JcaDocumentStoreConfiguration;
+import io.jans.service.document.store.exception.DocumentException;
+import io.jans.service.document.store.exception.WriteDocumentException;
 import io.jans.util.StringHelper;
 import io.jans.util.security.StringEncrypter;
 import jakarta.annotation.PostConstruct;
@@ -56,7 +55,7 @@ import jakarta.inject.Inject;
  * @author Yuriy Movchan on 04/10/2020
  */
 @ApplicationScoped
-public class JcaDocumentStoreProvider extends DocumentStoreProvider<JcaDocumentStoreProvider> {
+public class JcaDocumentStoreProvider extends DocumentStoreProvider<String> {
 
 	@Inject
 	private Logger log;
@@ -150,7 +149,7 @@ public class JcaDocumentStoreProvider extends DocumentStoreProvider<JcaDocumentS
 	}
 
 	@Override
-	public String saveDocument(String path, String description, String documentContent, Charset charset, List<String> moduleList) {
+	public String saveDocument(String path, String description, String documentContent, Charset charset, String module) {
 		log.debug("Save document: '{}'", path);
 		
 		String normalizedPath = getNormalizedPath(path);
@@ -173,7 +172,7 @@ public class JcaDocumentStoreProvider extends DocumentStoreProvider<JcaDocumentS
 	}
 
 	@Override
-	public String saveDocumentStream(String path, String description, InputStream documentStream, List<String> moduleList) {
+	public String saveDocumentStream(String path, String description, InputStream documentStream, String module) {
 		log.debug("Save document from stream: '{}'", path);
 
 		String normalizedPath = getNormalizedPath(path);
@@ -197,7 +196,7 @@ public class JcaDocumentStoreProvider extends DocumentStoreProvider<JcaDocumentS
 
 	@Override
 	public String saveBinaryDocumentStream(String path, String description, InputStream documentStream,
-			List<String> moduleList) {
+			String module) {
 		throw new UnsupportedOperationException("Method not implemented.");
 	}
 
@@ -413,5 +412,9 @@ public class JcaDocumentStoreProvider extends DocumentStoreProvider<JcaDocumentS
 		return fileNode != null;
 	}
 
+	@Override
+	public List<String> findDocumentsByModules(List<String> moduleList, String ... attributes) {
+        throw new RuntimeException("Not yet implemented");
+	}
 
 }

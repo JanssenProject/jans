@@ -4,9 +4,6 @@ from jans.pycloudlib.persistence.couchbase import sync_couchbase_truststore  # n
 from jans.pycloudlib.persistence.couchbase import id_from_dn  # noqa: F401
 from jans.pycloudlib.persistence.couchbase import CouchbaseClient  # noqa: F401
 from jans.pycloudlib.persistence.hybrid import render_hybrid_properties  # noqa: F401
-from jans.pycloudlib.persistence.ldap import render_ldap_properties  # noqa: F401
-from jans.pycloudlib.persistence.ldap import sync_ldap_truststore  # noqa: F401
-from jans.pycloudlib.persistence.ldap import LdapClient  # noqa: F401
 from jans.pycloudlib.persistence.sql import render_sql_properties  # noqa: F401
 from jans.pycloudlib.persistence.sql import doc_id_from_dn  # noqa: F401
 from jans.pycloudlib.persistence.sql import SqlClient  # noqa: F401
@@ -26,9 +23,6 @@ __all__ = [
     "id_from_dn",
     "CouchbaseClient",
     "render_hybrid_properties",
-    "render_ldap_properties",
-    "sync_ldap_truststore",
-    "LdapClient",
     "render_sql_properties",
     "doc_id_from_dn",
     "SqlClient",

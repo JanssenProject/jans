@@ -5,12 +5,13 @@ from contextlib import suppress
 import click
 
 from jans.pycloudlib import get_manager
+from jans.pycloudlib.persistence.couchbase import sync_couchbase_password
+from jans.pycloudlib.persistence.spanner import sync_google_credentials
+from jans.pycloudlib.persistence.sql import sync_sql_password
+from jans.pycloudlib.persistence.utils import PersistenceMapper
 
 from settings import LOGGING_CONFIG
-# from ldap_handler import LdapHandler
 from auth_handler import AuthHandler
-# from oxshibboleth_handler import OxshibbolethHandler
-# from passport_handler import PassportHandler
 from web_handler import WebHandler
 
 logging.config.dictConfig(LOGGING_CONFIG)
@@ -19,10 +20,7 @@ logger = logging.getLogger("certmanager")
 #: Map between service name and its handler class
 PATCH_SERVICE_MAP = {
     "web": WebHandler,
-    # "oxshibboleth": OxshibbolethHandler,
     "auth": AuthHandler,
-    # "ldap": LdapHandler,
-    # "passport": PassportHandler,
 }
 
 PRUNE_SERVICE_MAP = {
@@ -69,6 +67,17 @@ def patch(service, dry_run, opts):
     if dry_run:
         logger.warning("Dry-run mode is enabled!")
 
+    mapper = PersistenceMapper()
+    backend_type = mapper.mapping["default"]
+
+    match backend_type:
+        case "sql":
+            sync_sql_password(manager)
+        case "couchbase":
+            sync_couchbase_password(manager)
+        case "spanner":
+            sync_google_credentials(manager)
+
     logger.info(f"Processing updates for service {service}")
     parsed_opts = _parse_opts(opts)
     callback_cls = PATCH_SERVICE_MAP[service]
@@ -93,6 +102,17 @@ def prune(service, dry_run, opts):
 
     if dry_run:
         logger.warning("Dry-run mode is enabled!")
+
+    mapper = PersistenceMapper()
+    backend_type = mapper.mapping["default"]
+
+    match backend_type:
+        case "sql":
+            sync_sql_password(manager)
+        case "couchbase":
+            sync_couchbase_password(manager)
+        case "spanner":
+            sync_google_credentials(manager)
 
     logger.info(f"Processing updates for service {service}")
     parsed_opts = _parse_opts(opts)

@@ -58,19 +58,13 @@ def test_empty_certkey():
     AWS_CONFIG,
     AWS_CONFIG_B64,
 ])
-def test_secret_transform_b64(value):
+def test_secret_transform_data(value):
     from jans.pycloudlib.schema import SecretSchema
 
-    given = SecretSchema().transform_b64({
+    given = SecretSchema().transform_data({
         "aws_config": value
     })
-    expected = {
-        "aws_config": AWS_CONFIG,
-        "google_credentials": "",
-        "aws_credentials": "",
-        "aws_replica_regions": "",
-    }
-    assert given == expected
+    assert given["aws_config"] == AWS_CONFIG
 
 
 @pytest.mark.parametrize("value", [
@@ -151,7 +145,7 @@ def test_load_schema_from_file_invalid(tmpdir, value, retcode):
 
 def test_valid_optional_scopes():
     from jans.pycloudlib.schema import ConfigmapSchema
-    assert ConfigmapSchema().validate_optional_scopes('["ldap", "couchbase", "redis", "sql"]') is None
+    assert ConfigmapSchema().validate_optional_scopes('["couchbase", "redis", "sql"]') is None
 
 
 @pytest.mark.parametrize("value", [

@@ -149,10 +149,6 @@ configmap:
   cnSecretKubernetesSecret: cn
   # -- Load balancer address for AWS if the FQDN is not registered.
   lbAddr: ""
-  # -- OpenDJ certificate string. This must be encoded using base64.
-  cnLdapCrt: SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo=
-  # -- OpenDJ key string. This must be encoded using base64.
-  cnLdapKey: SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo=
   # -- Quarkus transaction recovery. When using MySQL, there could be issue regarding XA_RECOVER_ADMIN; refer to https://dev.mysql.com/doc/refman/8.0/en/privileges-provided.html#priv_xa-recover-admin for details.
   quarkusTransactionEnableRecovery: true
   # -- Keycloak logging level
@@ -218,10 +214,6 @@ auth-server:
     persistenceDurationLogTarget: "FILE"
     # -- jans-auth_persistence_duration.log level
     persistenceDurationLogLevel: "INFO"
-    # -- jans-auth_persistence_ldap_statistics.log target
-    ldapStatsLogTarget: "FILE"
-    # -- jans-auth_persistence_ldap_statistics.log level
-    ldapStatsLogLevel: "INFO"
     # -- jans-auth_script.log target
     scriptLogTarget: "FILE"
     # -- jans-auth_script.log level
@@ -263,7 +255,7 @@ auth-server:
     # -- Lock ingress resource labels. key app is taken
     lockLabels: { }
     # -- Lock ingress resource additional annotations.
-    lockAdditionalAnnotations: { }        
+    lockAdditionalAnnotations: { }
     # -- openid-configuration ingress resource labels. key app is taken
     openidConfigLabels: { }
     # -- openid-configuration ingress resource additional annotations.
@@ -319,7 +311,7 @@ auth-server-key-rotation:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/certmanager
     # -- Image  tag to use for deploying.
-    tag: 1.1.5_dev
+    tag: 1.1.6_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Auth server key rotation keys life in hours
@@ -390,7 +382,7 @@ casa:
     # -- Casa ingress resource labels. key app is taken
     casaLabels: { }
     # -- Casa ingress resource additional annotations.
-    casaAdditionalAnnotations: { }     
+    casaAdditionalAnnotations: { }
 config-api:
   # -- Name of the config-api service. Please keep it as default.
   configApiServerServiceName: config-api
@@ -412,10 +404,6 @@ config-api:
     persistenceDurationLogTarget: "FILE"
     # -- config-api_persistence_duration.log level
     persistenceDurationLogLevel: "INFO"
-    # -- config-api_persistence_ldap_statistics.log target
-    ldapStatsLogTarget: "FILE"
-    # -- config-api_persistence_ldap_statistics.log level
-    ldapStatsLogLevel: "INFO"
     # -- config-api_script.log target
     scriptLogTarget: "FILE"
     # -- config-api_script.log level
@@ -427,7 +415,7 @@ config-api:
     # -- configAPI ingress resource labels. key app is taken
     configApiLabels: { }
     # -- ConfigAPI ingress resource additional annotations.
-    configApiAdditionalAnnotations: { }  
+    configApiAdditionalAnnotations: { }
   # -- Comma-separated values of enabled plugins (supported plugins are "admin-ui","fido2","scim","user-mgt","jans-link","kc-saml")
   plugins: "admin-ui,fido2,scim,user-mgt"
 fido2:
@@ -490,10 +478,6 @@ scim:
     persistenceDurationLogTarget: "FILE"
     # -- jans-scim_persistence_duration.log level
     persistenceDurationLogLevel: "INFO"
-    # -- jans-scim_persistence_ldap_statistics.log target
-    ldapStatsLogTarget: "FILE"
-    # -- jans-scim_persistence_ldap_statistics.log level
-    ldapStatsLogLevel: "INFO"
     # -- jans-scim_script.log target
     scriptLogTarget: "FILE"
     # -- jans-scim_script.log level
@@ -511,7 +495,7 @@ scim:
     # -- SCIM config ingress resource labels. key app is taken
     scimLabels: { }
     # -- SCIM ingress resource additional annotations.
-    scimAdditionalAnnotations: { }    
+    scimAdditionalAnnotations: { }
 link:
   # -- Name of the link service. Please keep it as default.
   linkServiceName: link
@@ -533,10 +517,6 @@ link:
     persistenceDurationLogTarget: "FILE"
     # -- cacherefresh_persistence_duration.log level
     persistenceDurationLogLevel: "INFO"
-    # -- cacherefresh_persistence_ldap_statistics.log target
-    ldapStatsLogTarget: "FILE"
-    # -- cacherefresh_persistence_ldap_statistics.log level
-    ldapStatsLogLevel: "INFO"
     # -- cacherefresh_script.log target
     scriptLogTarget: "FILE"
     # -- cacherefresh_script.log level
@@ -592,6 +572,10 @@ cnCouchbaseSuperuserPasswordFile: /etc/jans/conf/couchbase_superuser_password
 kcDbPasswordFile: /etc/jans/conf/kc_db_password
 # -- Path to file contains Keycloak admin credentials (username and password)
 kcAdminCredentialsFile: /etc/jans/conf/kc_admin_creds
+# -- Path to configuration schema file
+cnConfiguratorConfigurationFile: /etc/jans/conf/configuration.json
+# -- Path to dumped configuration schema file
+cnConfiguratorDumpFile: /etc/jans/conf/configuration.out.json
 
 # ingress properties
 istio:
@@ -700,7 +684,7 @@ image:
   # -- Image  to use for deploying.
   repository: ghcr.io/janssenproject/jans/all-in-one
   # -- Image  tag to use for deploying.
-  tag: 1.1.5_dev
+  tag: 1.1.6_dev
   # -- Image Pull Secrets
   pullSecrets: [ ]
 # -- Service replica number.
@@ -778,7 +762,7 @@ kc-scheduler:
     # -- Image  to use for deploying.
     repository: ghcr.io/janssenproject/jans/kc-scheduler
     # -- Image  tag to use for deploying.
-    tag: 1.1.5_dev
+    tag: 1.1.6_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
   # -- Resource specs.

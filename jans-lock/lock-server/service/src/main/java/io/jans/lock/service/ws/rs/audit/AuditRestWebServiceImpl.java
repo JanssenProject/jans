@@ -16,21 +16,21 @@
 
 package io.jans.lock.service.ws.rs.audit;
 
-import io.jans.lock.util.AuditService;
+import org.apache.http.entity.ContentType;
+import org.slf4j.Logger;
+
+import com.fasterxml.jackson.databind.JsonNode;
+
+import io.jans.lock.service.audit.AuditService;
 import io.jans.lock.util.ServerUtil;
-import io.jans.service.security.api.ProtectedApi;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.core.SecurityContext;
 import jakarta.ws.rs.core.Response.Status;
-
-import org.apache.http.entity.ContentType;
-import org.json.JSONObject;
-import org.slf4j.Logger;
+import jakarta.ws.rs.core.SecurityContext;
 
 /**
  * Provides interface for audit REST web services
@@ -50,38 +50,56 @@ public class AuditRestWebServiceImpl implements AuditRestWebService {
     @Override
     public Response processHealthRequest(HttpServletRequest request, HttpServletResponse response,
             SecurityContext sec) {
-        log.debug("Processing Health request - request:{}", request);
-        return processAuditRequest(request, "Health");
+        log.info("Processing Health request - request:{}", request);
+        return processAuditRequest(request, "health");
     }
+
+	@Override
+	public Response processBulkHealthRequest(HttpServletRequest request, HttpServletResponse response,
+			SecurityContext sec) {
+        log.info("Processing Bulk Health request - request:{}", request);
+        return processAuditRequest(request, "health/bulk");
+	}
 
     @Override
     public Response processLogRequest(HttpServletRequest request, HttpServletResponse response, SecurityContext sec) {
-        log.debug("Processing Log request - request:{}", request);
+        log.info("Processing Log request - request:{}", request);
         return processAuditRequest(request, "log");
 
     }
 
+	@Override
+	public Response processBulkLogRequest(HttpServletRequest request, HttpServletResponse response, SecurityContext sec) {
+        log.info("Processing Bulk Log request - request:{}", request);
+        return processAuditRequest(request, "log/bulk");
+	}
+
     @Override
-    public Response processTelemetryRequest(HttpServletRequest request, HttpServletResponse response,
-            SecurityContext sec) {
-        log.debug("Processing Telemetry request - request:{}", request);
+    public Response processTelemetryRequest(HttpServletRequest request, HttpServletResponse response, SecurityContext sec) {
+        log.info("Processing Telemetry request - request:{}", request);
         return processAuditRequest(request, "telemetry");
 
     }
 
+	@Override
+	public Response processBulkTelemetryRequest(HttpServletRequest request, HttpServletResponse response, SecurityContext sec) {
+        log.info("Processing Bulk Telemetry request - request:{}", request);
+        return processAuditRequest(request, "telemetry/bulk");
+	}
+
     private Response processAuditRequest(HttpServletRequest request, String requestType) {
-        log.debug("Processing request - request:{}, requestType:{}", request, requestType);
+        log.info("Processing request - request:{}, requestType:{}", request, requestType);
 
         Response.ResponseBuilder builder = Response.ok();
         builder.cacheControl(ServerUtil.cacheControlWithNoStoreTransformAndPrivate());
         builder.header(ServerUtil.PRAGMA, ServerUtil.NO_CACHE);
 
-        JSONObject json = this.auditService.getJSONObject(request);
+        JsonNode json = this.auditService.getJsonNode(request);
         Response response = this.auditService.post(requestType, json.toString(), ContentType.APPLICATION_JSON);
         log.debug("response:{}", response);
 
         if (response != null) {
-            log.trace(
+            log.debug(
                     "Response for Access Token -  response.getStatus():{}, response.getStatusInfo():{}, response.getEntity().getClass():{}",
                     response.getStatus(), response.getStatusInfo(), response.getEntity().getClass());
             String entity = response.readEntity(String.class);
@@ -89,7 +107,6 @@ public class AuditRestWebServiceImpl implements AuditRestWebService {
             builder.entity(entity);
 
             if (response.getStatusInfo().equals(Status.OK)) {
-
                 log.debug(" Status.CREATED:{}, entity:{}", Status.OK, entity);
             } else {
                 log.error("Error while saving audit data - response.getStatusInfo():{}, entity:{}",

@@ -8,7 +8,6 @@ from uuid import uuid4
 
 from jans.pycloudlib import get_manager
 from jans.pycloudlib.persistence.couchbase import CouchbaseClient
-from jans.pycloudlib.persistence.ldap import LdapClient
 from jans.pycloudlib.persistence.spanner import SpannerClient
 from jans.pycloudlib.persistence.sql import SqlClient
 from jans.pycloudlib.persistence.utils import PersistenceMapper
@@ -100,7 +99,6 @@ class LockPersistenceSetup:
         self.manager = manager
 
         client_classes = {
-            "ldap": LdapClient,
             "couchbase": CouchbaseClient,
             "spanner": SpannerClient,
             "sql": SqlClient,
@@ -122,7 +120,7 @@ class LockPersistenceSetup:
             "jans_opa_host": "localhost",
             "jans_opa_port": 8181,
             "base_endpoint": "jans-auth",
-            "tokenEndpoint": f"https://{hostname}/jans-auth/restv1/token",
+            "jans_auth_token_endpoint": f"https://{hostname}/jans-auth/restv1/token",
         }
 
         # client

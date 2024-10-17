@@ -75,7 +75,8 @@ This list of steps needed to do to enable Basic Multi person authentication modu
    - Custom Properties:
       - auth_configuration_file: /etc/certs/multi_auth_conf.json
    - Module Propertiest: db
-   - Script: get script and paste it here.  
+   - Script: get script and paste it here.
+   - Enable it and wait for 2 mins. 
 
  3. Test
 

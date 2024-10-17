@@ -6,8 +6,6 @@
 
 package io.jans.configapi.rest.form;
 
-import io.jans.service.document.store.service.Document;
-
 import java.io.Serializable;
 
 import jakarta.validation.constraints.NotNull;
@@ -19,6 +17,7 @@ import java.io.InputStream;
 import org.jboss.resteasy.annotations.providers.multipart.PartType;
 import jakarta.ws.rs.FormParam;
 import jakarta.ws.rs.core.MediaType;
+import io.jans.service.document.store.model.Document;
 import io.swagger.v3.oas.annotations.media.Schema;
 
 public class AssetForm implements Serializable {

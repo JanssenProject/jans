@@ -20,6 +20,7 @@ from ldif import LDIFParser
 
 from jans.pycloudlib.utils import as_boolean
 from jans.pycloudlib.utils import decode_text
+from jans.pycloudlib.utils import exec_cmd
 from jans.pycloudlib.utils import safe_render
 
 if _t.TYPE_CHECKING:  # pragma: no cover
@@ -61,19 +62,6 @@ def render_ldap_properties(manager: Manager, src: str, dest: str) -> None:
             )).lower(),
         }
         f.write(rendered_txt)
-
-
-def sync_ldap_truststore(manager: Manager, dest: str = "") -> None:
-    """Pull secret contains base64-string contents of LDAP truststore and save it as a JKS file.
-
-    Args:
-        manager: An instance of manager class.
-        dest: Absolute path where generated file is located.
-    """
-    dest = dest or manager.config.get("ldapTrustStoreFn")
-    manager.secret.to_file(
-        "ldap_pkcs12_base64", dest, decode=True, binary_mode=True,
-    )
 
 
 def extract_ldap_host(url: str) -> str:
@@ -256,3 +244,65 @@ class LdapClient:
 
                 for dn, entry in parser.parse():
                     self._add_entry(dn, entry)
+
+
+def sync_ldap_password(manager: Manager) -> None:
+    """Pull secret contains password to access LDAP server.
+
+    Args:
+        manager: An instance of manager class.
+    """
+    password_file = os.environ.get("CN_LDAP_PASSWORD_FILE", "/etc/jans/conf/ldap_password")
+
+    if not os.path.isfile(password_file):
+        manager.secret.to_file("ldap_password", password_file)
+
+
+def sync_ldap_truststore_password(manager):
+    password_file = os.environ.get("CN_LDAP_TRUSTSTORE_PASSWORD_FILE", "/etc/jans/conf/ldap_truststore_password")
+
+    if not os.path.isfile(password_file):
+        manager.secret.to_file("ldap_truststore_pass", password_file)
+    return password_file
+
+
+def sync_ldap_cert(manager):
+    cert_file = os.environ.get("CN_LDAP_CERT_FILE", "/etc/certs/opendj.crt")
+
+    if not os.path.isfile(cert_file):
+        manager.secret.to_file("ldap_ssl_cert", cert_file)
+    return cert_file
+
+
+def sync_ldap_key(manager):
+    key_file = os.environ.get("CN_LDAP_KEY_FILE", "/etc/certs/opendj.key")
+
+    if not os.path.isfile(key_file):
+        manager.secret.to_file("ldap_ssl_key", key_file)
+    return key_file
+
+
+def sync_ldap_truststore(manager):
+    truststore_file = os.environ.get("CN_LDAP_TRUSTSTORE_FILE", "/etc/certs/opendj.pkcs12")
+    truststore_password_file = sync_ldap_truststore_password(manager)
+    cert_file = sync_ldap_cert(manager)
+    key_file = sync_ldap_key(manager)
+
+    with open(truststore_password_file) as f:
+        truststore_password = f.read().strip()
+
+    cmd = " ".join([
+        "openssl pkcs12",
+        "-export",
+        f"-inkey {key_file}",
+        f"-in {cert_file}",
+        f"-out {truststore_file}",
+        "-name opendj",
+        f"-passout pass:{truststore_password}",
+    ])
+
+    out, err, code = exec_cmd(cmd)
+
+    if code != 0:
+        err = out or err
+        raise RuntimeError(f"Unable to generate {truststore_file} from {cert_file} and {key_file}; reason={err.decode()}")

@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.UUID;
+import java.util.HashMap;
 
 /**
  * @author Yuriy Z
@@ -119,10 +120,7 @@ public class AuthorizationChallenge implements AuthorizationChallengeType {
         DeviceSessionService deviceSessionService = CdiUtil.bean(DeviceSessionService.class);
         boolean newSave = deviceSessionObject == null;
         if (newSave) {
-            final String id = UUID.randomUUID().toString();
-            deviceSessionObject = new DeviceSession();
-            deviceSessionObject.setId(id);
-            deviceSessionObject.setDn(deviceSessionService.buildDn(id));
+            deviceSessionObject = deviceSessionService.newDeviceSession();
         }
 
         String username = context.getHttpRequest().getParameter(USERNAME_PARAMETER);
@@ -183,5 +181,16 @@ public class AuthorizationChallenge implements AuthorizationChallengeType {
     @Override
     public int getApiVersion() {
         return 11;
+    }
+
+    /**
+     * Returns claims represented by key-value map. Claims are added to id_token jwt.
+     *
+     * @param context external script context
+     * @return authentication method claims represented by key-value map.
+     */
+    @Override
+    public Map<String, String> getAuthenticationMethodClaims(Object context) {
+        return new HashMap<>();
     }
 }

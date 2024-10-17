@@ -30,7 +30,7 @@ To supply labels in a particular language (or even if you want to override the E
 1. Create directory `i18n` if it does not exist: `mkdir i18n`
 1. Transfer the properties files to the `i18n` folder
 1. Ensure `jetty` user has permission for reading the files
-1. [Restart](../../admin/vm-ops/restarting-services.md) casa
+1. [Restart](../../janssen-server/vm-ops/restarting-services.md) casa
 
 Log in to the application and review your work. Make necessary edits and repeat the process.
 
@@ -58,7 +58,7 @@ To add your own translation for plugin texts, proceed as follows:
 1. Create directory `i18n` if it does not exist: `mkdir i18n`
 1. Transfer the properties file to the `i18n` folder
 1. Ensure `jetty` user has permission for reading
-1. [Restart](../../admin/vm-ops/restarting-services.md) casa
+1. [Restart](../../janssen-server/vm-ops/restarting-services.md) casa
 
 !!! Note
     If your plugins have a `zk-label.properties`, you can accumulate all plugin texts into a single file, or you can use a different filename for each plugin.

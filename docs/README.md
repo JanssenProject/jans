@@ -10,10 +10,10 @@ improve it!
 
 ## Administration Guide
 
-Read the [Administration guide](admin/README.md) to learn how to deploy, operate
+Read the [Administration guide](janssen-server/README.md) to learn how to deploy, operate
 and maintain the Janssen components. Planning your solution using the
-[Deployment Guide](admin/planning/platform-goal.md). An easy way to get started
-is to try Janssen on an VM, see [Installation](admin/install/vm-install/README.md)
+[Deployment Guide](janssen-server/planning/platform-goal.md). An easy way to get started
+is to try Janssen on an VM, see [Installation](janssen-server/install/vm-install/README.md)
 or check the other docs for Kubernetes based installation.
 
 ## Contribution Guide
@@ -31,11 +31,11 @@ Interception scripts (or custom scripts) allow you to define custom business
 logic for various features in Janssen without forking the Jans Server core
 project. Interceptions scripts are available for many components, including
 Auth Server, SCIM, FIDO, and Link. The definitive location for scripts and their
-documentation is the [Script Catalog](admin/developer/scripts/README.md).
+documentation is the [Script Catalog](./janssen-server/developer/scripts/README.md).
 
 ## Agama
 
-[Agama](agama/introduction/README.md) is a domain specific language ("DSL")
+[Agama](./agama/introduction.md) is a domain specific language ("DSL")
 designed for writing web flows, and a project archive format (".gama") which
 stores all the code and web assets required for deployment of an Agama project
 by an identity provider. Although invented by Janssen, we envision many IDP's

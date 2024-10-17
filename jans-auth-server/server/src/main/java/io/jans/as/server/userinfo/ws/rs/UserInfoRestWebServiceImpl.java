@@ -66,7 +66,6 @@ import org.slf4j.Logger;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.security.PublicKey;
-import java.text.ParseException;
 import java.util.*;
 
 /**
@@ -262,7 +261,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
         return jwt.toString();
     }
 
-    private JwtClaims createJwtClaims(User user, AuthorizationGrant authorizationGrant, Collection<String> scopes) throws ParseException, InvalidClaimException {
+    private JwtClaims createJwtClaims(User user, AuthorizationGrant authorizationGrant, Collection<String> scopes) throws InvalidClaimException {
         String claimsString = getJSonResponse(user, authorizationGrant, scopes);
         JwtClaims claims = new JwtClaims(new JSONObject(claimsString));
 
@@ -274,7 +273,7 @@ public class UserInfoRestWebServiceImpl implements UserInfoRestWebService {
     public String getJweResponse(
             KeyEncryptionAlgorithm keyEncryptionAlgorithm, BlockEncryptionAlgorithm blockEncryptionAlgorithm,
             User user, AuthorizationGrant authorizationGrant, Collection<String> scopes) throws Exception {
-        log.trace("Building JWE reponse with next scopes {0} for user {1} and user custom attributes {0}", scopes, user.getUserId(), user.getCustomAttributes());
+        log.trace("Building JWE reponse with next scopes {} for user {} and user custom attributes {}", scopes, user.getUserId(), user.getCustomAttributes());
 
         Jwe jwe = new Jwe();
 

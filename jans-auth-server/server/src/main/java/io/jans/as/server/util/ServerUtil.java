@@ -75,6 +75,9 @@ public class ServerUtil {
         if (result.containsKey("client_secret")) {
             result.put("client_secret", new String[] {"*****"});
         }
+        if (result.containsKey("password")) {
+            result.put("password", new String[] {"*****"});
+        }
         return result;
     }
 

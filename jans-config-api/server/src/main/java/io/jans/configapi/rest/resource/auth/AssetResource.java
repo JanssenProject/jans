@@ -10,14 +10,13 @@ import io.jans.configapi.service.auth.AssetService;
 import io.jans.configapi.core.model.ApiError;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.rest.form.AssetForm;
-
+import io.jans.configapi.model.configuration.AssetDirMapping;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
-import io.jans.configapi.util.AttributeNames;
 import io.jans.model.JansAttribute;
 import io.jans.model.SearchRequest;
 import io.jans.orm.model.PagedResult;
-import io.jans.service.document.store.service.Document;
+import io.jans.service.document.store.model.Document;
 import io.jans.util.exception.InvalidAttributeException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -206,6 +205,26 @@ public class AssetResource extends ConfigBaseResource {
         return Response.ok(validTypes).build();
     }
 
+    @Operation(summary = "Get valid asset types", description = "Get valid asset types", operationId = "get-asset-dir-mapping", tags = {
+            "Jans Assets" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    ApiAccessConstants.JANS_ASSET_READ_ACCESS }))
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = AssetDirMapping.class)))),
+            @ApiResponse(responseCode = "401", description = "Unauthorized"),
+            @ApiResponse(responseCode = "404", description = "Not Found", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "NotFoundException"))),
+            @ApiResponse(responseCode = "500", description = "InternalServerError", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = ApiError.class, description = "InternalServerError"))) })
+    @GET
+    @ProtectedApi(scopes = { ApiAccessConstants.JANS_ASSET_READ_ACCESS }, groupScopes = {
+            ApiAccessConstants.JANS_ASSET_WRITE_ACCESS }, superScopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
+    @Path(ApiConstants.ASSET_DIR_MAPPING)
+    public Response getAssetDirMapping() {
+
+        List<AssetDirMapping> assetDirMappingList = assetService.getAssetDirMapping();
+
+        logger.info("validTypes:{}", assetDirMappingList);
+        return Response.ok(assetDirMappingList).build();
+    }
+
     @Operation(summary = "Upload new asset", description = "Upload new asset", operationId = "post-new-asset", tags = {
             "Jans Assets" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.JANS_ASSET_WRITE_ACCESS }))
@@ -230,10 +249,10 @@ public class AssetResource extends ConfigBaseResource {
         Document asset = assetForm.getDocument();
         log.info(" Create asset:{} ", asset);
         checkResourceNotNull(asset, ASSET_DATA);
-        checkNotNull(asset.getDisplayName(), AttributeNames.DISPLAY_NAME);
+        checkNotNull(asset.getFileName(), "fileName");
 
         // check if asset with same name already exist
-        List<Document> assets = assetService.getAssetByName(asset.getDisplayName());
+        List<Document> assets = assetService.getAssetByName(asset.getFileName());
         if (assets != null && !assets.isEmpty()) {
             asset.setInum(assets.get(0).getInum());
             asset.setBaseDn(assets.get(0).getBaseDn());
@@ -285,7 +304,7 @@ public class AssetResource extends ConfigBaseResource {
         log.debug(" Create asset:{} ", asset);
         checkResourceNotNull(asset, ASSET_DATA);
         checkResourceNotNull(inum, ASSET_INUM);
-        checkNotNull(asset.getDisplayName(), AttributeNames.DISPLAY_NAME);
+        checkNotNull(asset.getFileName(), "fileName");
 
         // validate if asset exist
         Document existingDoc = assetService.getAssetByInum(asset.getInum());
@@ -294,18 +313,18 @@ public class AssetResource extends ConfigBaseResource {
         }
 
         // check if asset with same name already exist
-        List<Document> assets = assetService.getAssetByName(asset.getDisplayName());
+        List<Document> assets = assetService.getAssetByName(asset.getFileName());
         log.info(
                 "Check if asset with inum different then:{} but with same name exist - asset.getDisplayName():{}, assets:{}",
-                inum, asset.getDisplayName(), assets);
+                inum, asset.getFileName(), assets);
         if (assets != null && !assets.isEmpty()) {
             List<Document> list = assets.stream().filter(e -> !e.getInum().equalsIgnoreCase(inum))
                     .collect(Collectors.toList());
-            logger.info("Other asset with same name:{} are list:{}", asset.getDisplayName(), list);
+            logger.info("Other asset with same name:{} are list:{}", asset.getFileName(), list);
             if (list != null && !list.isEmpty()) {
-                log.error("Another asset with same name:{}", asset.getDisplayName());
+                log.error("Another asset with same name:{}", asset.getFileName());
                 throwBadRequestException(ASSET_NAME_CONFLICT,
-                        String.format(ASSET_NAME_CONFLICT_MSG, asset.getDisplayName()));
+                        String.format(ASSET_NAME_CONFLICT_MSG, asset.getFileName()));
             }
         }
 

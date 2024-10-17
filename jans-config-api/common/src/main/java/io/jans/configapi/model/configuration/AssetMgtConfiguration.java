@@ -20,9 +20,6 @@ public class AssetMgtConfiguration {
     @Schema(description = "Flag indicating if service module name extension validation is enabled.")
     private boolean moduleNameValidationEnabled;
 
-    @Schema(description = "Base directory on server to upload the asset.")
-    private String assetBaseDirectory;
-
     @Schema(description = "List of supported service module where asset can be uploaded.")
     private List<String> jansServiceModule;
 
@@ -61,14 +58,6 @@ public class AssetMgtConfiguration {
         this.moduleNameValidationEnabled = moduleNameValidationEnabled;
     }
 
-    public String getAssetBaseDirectory() {
-        return assetBaseDirectory;
-    }
-
-    public void setAssetBaseDirectory(String assetBaseDirectory) {
-        this.assetBaseDirectory = assetBaseDirectory;
-    }
-
     public List<AssetDirMapping> getAssetDirMapping() {
         return assetDirMapping;
     }
@@ -77,19 +66,11 @@ public class AssetMgtConfiguration {
         this.assetDirMapping = assetDirMapping;
     }
 
-    public List<String> getJansServiceModule() {
-        return jansServiceModule;
-    }
-
-    public void setJansServiceModule(List<String> jansServiceModule) {
-        this.jansServiceModule = jansServiceModule;
-    }
-
     @Override
     public String toString() {
         return "AssetMgtConfiguration [assetMgtEnabled=" + assetMgtEnabled + ", assetServerUploadEnabled="
                 + assetServerUploadEnabled + ", fileExtensionValidationEnabled=" + fileExtensionValidationEnabled
-                + ", moduleNameValidationEnabled=" + moduleNameValidationEnabled + ", assetBaseDirectory="
-                + assetBaseDirectory + ", jansServiceModule=" + jansServiceModule + ", assetDirMapping=" + assetDirMapping + "]";
+                + ", moduleNameValidationEnabled=" + moduleNameValidationEnabled + ", jansServiceModule="
+                + jansServiceModule + ", assetDirMapping=" + assetDirMapping + "]";
     }
 }

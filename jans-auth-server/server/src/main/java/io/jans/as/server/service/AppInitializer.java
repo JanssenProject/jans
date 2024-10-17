@@ -48,6 +48,7 @@ import io.jans.service.cdi.util.CdiUtil;
 import io.jans.service.custom.lib.CustomLibrariesLoader;
 import io.jans.service.custom.script.CustomScriptActivator;
 import io.jans.service.custom.script.CustomScriptManager;
+import io.jans.service.document.store.manager.DocumentStoreManager;
 import io.jans.service.external.ExternalPersistenceExtensionService;
 import io.jans.service.metric.inject.ReportMetric;
 import io.jans.service.timer.QuartzSchedulerManager;
@@ -75,6 +76,7 @@ import org.slf4j.Logger;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -92,6 +94,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class AppInitializer {
 
     private final static int DEFAULT_INTERVAL = 30; // 30 seconds
+
+    private final static String DOCUMENT_STORE_MANAGER_JANS_AUTH_TYPE = "jans-auth"; // Module name
 
     @Inject
     private Logger log;
@@ -197,6 +201,9 @@ public class AppInitializer {
     @Inject
     private StatService statService;
 
+    @Inject
+    private DocumentStoreManager documentStoreManager;
+
     private AtomicBoolean isActive;
     private long lastFinishedTime;
     private AuthenticationMode authenticationMode;
@@ -263,6 +270,7 @@ public class AppInitializer {
         keyGeneratorTimer.initTimer();
         statTimer.initTimer();
         expirationNotificatorTimer.initTimer();
+        documentStoreManager.initTimer(Arrays.asList(DOCUMENT_STORE_MANAGER_JANS_AUTH_TYPE));
         initTimer();
         initCibaRequestsProcessor();
 

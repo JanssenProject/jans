@@ -5,12 +5,12 @@ import subprocess
 import re
 import socket
 import shutil
-import uuid
 import base64
 import json
 import string
 import random
 import hashlib
+import math
 import grp
 
 from pathlib import Path
@@ -340,18 +340,7 @@ class SetupUtils(Crypto64):
         text = '\n'.join(text)
 
         return text
-        
-    def createLdapPw(self):
-        try:
-            with open(Config.ldapPassFn, 'w') as w:
-                w.write(Config.ldapPass)
-            self.run([paths.cmd_chown, 'ldap:ldap', Config.ldapPassFn])
-        except:
-            self.logIt("Error writing temporary LDAP password.")
 
-    def deleteLdapPw(self):
-        if Config.get('ldapPassFn') and os.path.isfile(Config.ldapPassFn):
-            os.remove(Config.ldapPassFn)
 
     def getMappingType(self, mtype):
         location = []
@@ -510,15 +499,14 @@ class SetupUtils(Crypto64):
         return rendered_text
 
     def add_yacron_job(self, command, schedule, name=None, args={}):
-        import ruamel.yaml
+        from ruamel.yaml import YAML
 
         if not name:
             name = command
 
         yacron_yaml_fn = os.path.join(base.snap_common, 'etc/cron-jobs.yaml')
 
-        yml_str = self.readFile(yacron_yaml_fn)
-        yacron_yaml = ruamel.yaml.load(yml_str, ruamel.yaml.RoundTripLoader)
+        yacron_yaml = base.read_yaml_file(self.jans_scim_openapi_fn)
 
         if not yacron_yaml:
             yacron_yaml = {'jobs': []}
@@ -528,26 +516,14 @@ class SetupUtils(Crypto64):
 
         job = { 'command': command, 'schedule': schedule, 'name': name }
         job.update(args)
-        
+
         yacron_yaml['jobs'].append(job)
 
-        yml_str = ruamel.yaml.dump(yacron_yaml, Dumper=ruamel.yaml.RoundTripDumper)
-        self.writeFile(yacron_yaml_fn, yml_str)
+        yaml_obj = YAML()
 
+        with open(yacron_yaml_fn, 'w') as w:
+            yaml_obj.dump(yacron_yaml, w)
 
-    def port_used(self, port):
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        result = sock.connect_ex(('127.0.0.1', int(port)))
-        ret_val = result == 0
-        sock.close()
-        return ret_val
-
-    def opendj_used_ports(self):
-        ports = []
-        for port in (Config.ldaps_port, Config.ldap_admin_port):
-            if self.port_used(port):
-                ports.append(port)
-        return ports
 
     def chown(self, fn, user, group=None, recursive=False):
         cmd = [paths.cmd_chown]
@@ -556,3 +532,10 @@ class SetupUtils(Crypto64):
         usr_grp = '{}:{}'.format(user, group) if group else user
         cmd += [usr_grp, fn]
         self.run(cmd)
+
+    def get_ldap_time(self, timestamp=None):
+        if not timestamp:
+            timestamp = time.time()
+        microseconds, _ = math.modf(timestamp)
+        gm_time = time.gmtime(timestamp)
+        return time.strftime('%Y%m%d%H%M%S', gm_time) + f'{microseconds:.3f}Z'[1:]

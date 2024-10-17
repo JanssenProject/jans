@@ -330,7 +330,7 @@ public class IdpService {
         log.info("identityProvider:{}, samlConfigService.getIdpMetadataMandatoryAttributes():{}", identityProvider,
                 samlConfigService.getIdpMetadataMandatoryAttributes());
         boolean isValid = false;
-        if (identityProvider == null || samlConfigService.getIdpMetadataMandatoryAttributes().isEmpty()) {
+        if (identityProvider == null || samlConfigService.getIdpMetadataMandatoryAttributes() == null || samlConfigService.getIdpMetadataMandatoryAttributes().isEmpty()) {
             isValid = true;
             return isValid;
         }

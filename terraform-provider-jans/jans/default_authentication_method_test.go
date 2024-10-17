@@ -19,25 +19,14 @@ func TestAuthenticationMethod(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	am.DefaultAcr = "pwd"
+	am.DefaultAcr = "simple_password_auth"
 
 	updatedAM, err := client.UpdateDefaultAuthenticationMethod(ctx, am)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if updatedAM.DefaultAcr != "pwd" {
-		t.Fatal("DefaultAcr is not updated")
-	}
-
-	updatedAM, err = client.UpdateDefaultAuthenticationMethod(ctx, &DefaultAuthenticationMethod{
-		DefaultAcr: "token",
-	})
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if updatedAM.DefaultAcr != "token" {
+	if updatedAM.DefaultAcr != "simple_password_auth" {
 		t.Fatal("DefaultAcr is not updated")
 	}
 }

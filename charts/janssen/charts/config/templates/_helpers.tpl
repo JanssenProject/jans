@@ -81,8 +81,30 @@ Create optional scopes list
 {{ if eq .Values.global.cnPersistenceType "sql" }}
 {{ $newList = append $newList ("sql" | quote) }}
 {{- end }}
-{{- if .Values.global.opendj.enabled}}
-{{ $newList = append $newList ("ldap" | quote) }}
-{{- end}}
 {{ toJson $newList }}
+{{- end }}
+
+{{/*
+Create AWS shared credentials.
+*/}}
+{{- define "config.aws-shared-credentials" }}
+{{- $profile := .Values.configmap.cnAwsProfile }}
+{{- if not $profile }}
+{{- $profile = "default" }}
+{{- end }}
+{{- printf "[%s]\naws_access_key_id = %s\naws_secret_access_key = %s\n" $profile .Values.configmap.cnAwsAccessKeyId .Values.configmap.cnAwsSecretAccessKey }}
+{{- end }}
+
+{{/*
+Create AWS config.
+*/}}
+{{- define "config.aws-config" }}
+{{- $profile := .Values.configmap.cnAwsProfile }}
+{{- if not $profile }}
+{{- $profile = "default" }}
+{{- end }}
+{{- if ne $profile "default" }}
+{{- $profile = printf "profile %s" .Values.configmap.cnAwsProfile }}
+{{- end }}
+{{- printf "[%s]\nregion = %s\n" $profile .Values.configmap.cnAwsDefaultRegion }}
 {{- end }}

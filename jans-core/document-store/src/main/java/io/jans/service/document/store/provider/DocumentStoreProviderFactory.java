@@ -6,16 +6,16 @@
 
 package io.jans.service.document.store.provider;
 
+import org.slf4j.Logger;
+
+import io.jans.service.document.store.LocalDocumentStore;
+import io.jans.service.document.store.conf.DocumentStoreConfiguration;
+import io.jans.service.document.store.conf.DocumentStoreType;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Any;
 import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Inject;
-
-import io.jans.service.document.store.conf.DocumentStoreConfiguration;
-import io.jans.service.document.store.LocalDocumentStore;
-import io.jans.service.document.store.conf.DocumentStoreType;
-import org.slf4j.Logger;
 
 /**
  * @author Yuriy Movchan on 04/10/2020

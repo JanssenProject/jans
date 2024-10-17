@@ -148,7 +148,51 @@ Backport changes are now supported through a [workflow](https://github.com/zeebe
 For-example to backport changes in a certain PR to version `v1.0.0` a label to that PR matching the version must be added i.e `backport/v1.0.0`.
 The flow consists of creating a new branch, cherry-picking the changes of the original PR and creating a new PR to merge them.
 
+### License Header
+
+The Janssen Project uses Apache-2.0 license. Any existing or new code file 
+has to start with the license header as shown below:
+
+```Text
+/*
+ * This software is available under the Apache-2.0 license. 
+ * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+ *
+ * Copyright (c) 2024, Gluu, Inc. 
+ */
+```
+
+If the developers [sign a CLA(Contributor License Agreement)]() they can retain 
+the copyright. Once the CLA has been signed, contributions can be accepted
+from the contributor
+with the License header as below. Make sure to replace `[github-username]` with 
+contributor's GitHub username:
+
+```Text
+/*
+ * This software is available under the Apache-2.0 license. 
+ * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+ *
+ * Copyright (c) 2024, [github-username]. 
+ */
+```
+
+#### Signing the CLA
+
+The current version of CLA can be found 
+[here](https://github.com/JanssenProject/jans/blob/main/docs/governance/janssen-project-CLA-version-1.pdf). This is just for your reference.
+This same CLA will be signed digitally by following the steps below:
+
+1. The contributor sends an e-mail expressing willingness to contribute and 
+sign the CLA. In the email, mention your GitHub account 
+username from which the contributions will be made. If contributions will be
+made on behalf of an organization, then along with the GitHub username, mention the
+job title and organization's name in the email.
+2. Contributor receives an email with CLA and instructions on how to sign digitally.
+Follow the instructions and complete the signing process. 
+
 # Contributing to the documentation
+
 Great documentation is a reflection of software's maturity and the great community that stands behind it. Contributing to the Janssen Project documentation is the easiest way to learn about the Janssen Project and to get involved in the community process. 
 
 In order to ensure consistency of style, language, format, and terminology across all documents, please follow the guidelines below:
@@ -179,7 +223,7 @@ Janssen Project documentation uses Markdown. Guidelines below are intended to br
 
 !!! Testing
 
-    [Janssen Project documentation site](https://docs.jans.io) is published using MkDocs. Markdown parsers used by Github and the one used by MkDocs may have slight variations in how they generate HTML. So, for a small number of cases, document may look different between Github and [Janssen Project documentation site](https://docs.jans.io). Hence it is critical to [test documentation](contribute/testing.md#documentation-local-testing) changes locally before pushing to repository. This will ensure that final HTML rendering of documents by MkDocs is as desired.
+    [Janssen Project documentation site](https://docs.jans.io) is published using MkDocs. Markdown parsers used by Github and the one used by MkDocs may have slight variations in how they generate HTML. So, for a small number of cases, document may look different between Github and [Janssen Project documentation site](https://docs.jans.io). Hence it is critical to [test documentation](contribute/testing.md#testing-documentation-changes-locally) changes locally before pushing to repository. This will ensure that final HTML rendering of documents by MkDocs is as desired.
 
 ### Document Title
 
@@ -216,7 +260,7 @@ tags:
 
 ### Referencing Janssen Project Release in Documents
 
-We often need to reference release numbers in the documentation. For example, [Ubuntu package installation guide](admin/install/vm-install/ubuntu.md).
+We often need to reference release numbers in the documentation. For example, [Ubuntu package installation guide](./janssen-server/install/vm-install/ubuntu.md).
 In this guide, the following command is documented:
 
 ```

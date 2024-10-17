@@ -802,7 +802,7 @@
       ]
     },
     {
-      "path": "/jans-config-api/api/v1/fido2/config",
+      "path": "/jans-config-api/api/v1/fido2/fido2-config",
       "conditions": [
         {
           "httpMethods": [
@@ -838,6 +838,76 @@
             }
           ],
           "groupScopes": [],
+          "superScopes": [
+            {
+              "inum": "1800.03.2",
+              "name": "https://jans.io/oauth/config/write-all"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/jans-config-api/api/v1/fido2/registration",
+      "conditions": [
+        {
+          "httpMethods": [
+            "GET"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.19",
+              "name": "https://jans.io/oauth/config/fido2.readonly"
+            }
+          ],
+          "groupScopes": [
+            {
+              "inum": "1800.01.20",
+              "name": "https://jans.io/oauth/config/fido2.write"
+            }
+          ],
+          "superScopes": [
+            {
+              "inum": "1800.03.1",
+              "name": "https://jans.io/oauth/config/read-all"
+            }
+          ]
+        },
+        {
+          "httpMethods": [
+            "POST",
+            "PUT"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.20",
+              "name": "https://jans.io/oauth/config/fido2.write"
+            }
+          ],
+          "groupScopes": [],
+          "superScopes": [
+            {
+              "inum": "1800.03.2",
+              "name": "https://jans.io/oauth/config/write-all"
+            }
+          ]
+        },
+        {
+          "httpMethods": [
+            "DELETE"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.86",
+              "name": "https://jans.io/oauth/config/fido2.delete"
+            }
+          ],
+          "groupScopes": [
+            {
+              "inum": "1800.01.20",
+              "name": "https://jans.io/oauth/config/fido2.write"
+            }
+          ],
           "superScopes": [
             {
               "inum": "1800.03.2",
@@ -3117,6 +3187,82 @@
             {
               "inum": "1800.03.7",
               "name": "https://jans.io/oauth/lock/audit.write"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "path": "/jans-config-api/api/v1/token",
+      "conditions": [
+        {
+          "httpMethods": [
+            "GET"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.87",
+              "name": "https://jans.io/oauth/config/token.readonly"
+            }
+          ],
+          "groupScopes": [
+            {
+              "inum": "1800.01.88",
+              "name": "https://jans.io/oauth/config/token.write"
+            }
+          ],
+          "superScopes": [
+            {
+              "inum": "1800.03.1",
+              "name": "https://jans.io/oauth/config/read-all"
+            }
+          ]
+        },
+        {
+          "httpMethods": [
+            "PATCH",
+            "POST",
+            "PUT"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.88",
+              "name": "https://jans.io/oauth/config/token.write"
+            }
+          ],
+          "groupScopes": [
+            {
+              "inum": "1800.02.2",
+              "name": "https://jans.io/oauth/config/openid-write"
+            }
+          ],
+          "superScopes": [
+            {
+              "inum": "1800.03.2",
+              "name": "https://jans.io/oauth/config/write-all"
+            }
+          ]
+        },
+        {
+          "httpMethods": [
+            "DELETE"
+          ],
+          "scopes": [
+            {
+              "inum": "1800.01.89",
+              "name": "https://jans.io/oauth/config/token.delete"
+            }
+          ],
+          "groupScopes": [
+            {
+              "inum": "1800.02.3",
+              "name": "https://jans.io/oauth/config/openid-delete"
+            }
+          ],
+          "superScopes": [
+            {
+              "inum": "1800.03.3",
+              "name": "https://jans.io/oauth/config/delete-all"
             }
           ]
         }

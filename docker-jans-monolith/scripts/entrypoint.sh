@@ -11,8 +11,7 @@ set -e
 # CN_CITY: i.e Austin
 # CN_STATE: i.e TX
 # CN_COUNTRY: i.e US
-# CN_ADMIN_PASS: LDAP or MYSQL and ADMIN user password
-# CN_INSTALL_LDAP
+# CN_ADMIN_PASS: MYSQL and ADMIN user password
 # CN_INSTALL_CONFIG_API
 # CN_INSTALL_SCIM
 # RDBMS_DATABASE
@@ -33,8 +32,8 @@ install_jans() {
   echo "state=${CN_STATE}" | tee -a setup.properties > /dev/null
   echo "countryCode=${CN_COUNTRY}" | tee -a setup.properties > /dev/null
   # shellcheck disable=SC2016
-  echo "ldapPass=${CN_ADMIN_PASS}" | tee -a setup.properties > /dev/null
-  echo "installLdap=""$([[ ${CN_INSTALL_LDAP} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
+  echo "ldapPass=${CN_ADMIN_PASS}" | tee -a setup.properties > /dev/null  # @TODO: remove ldapPass after ldap support removed
+  echo "installLdap=False" | tee -a setup.properties > /dev/null  # @TODO: remove installLdap after ldap support removed
   echo "install_config_api=""$([[ ${CN_INSTALL_CONFIG_API} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
   echo "install_scim_server=""$([[ ${CN_INSTALL_SCIM} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null
   echo "installFido2=""$([[ ${CN_INSTALL_FIDO2} == true ]] && echo True || echo False)" | tee -a setup.properties > /dev/null

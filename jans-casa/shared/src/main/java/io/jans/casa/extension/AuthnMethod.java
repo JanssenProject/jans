@@ -1,22 +1,18 @@
 package io.jans.casa.extension;
 
 import io.jans.casa.credential.BasicCredential;
-import org.pf4j.ExtensionPoint;
 
 import java.util.List;
 
+import org.pf4j.ExtensionPoint;
+
 /**
- * This interface is an extension point that plugin developers can use to add/override authentication mechanisms exhibited
- * in Gluu Casa.
- * @author jgomer
+ * This interface is an extension point that plugin developers can use to add/override authentication mechanisms exhibited in Casa
  */
 public interface AuthnMethod extends ExtensionPoint {
 
     /**
-     * The <code>acr</code> value associated to this authentication method in the Gluu Server. This value must
-     * be equal to the display name of the custom script associated to this authentication method (via Admin UI).
-     * <p>To list the acr values supported in your gluu installation, visit <code>https://HOST_NAME/.well-known/openid-configuration</code>
-     * in a browser.
+     * The qualified name of the Agama flow associated to this authentication method
      * @return A String value
      */
     String getAcr();
@@ -71,8 +67,8 @@ public interface AuthnMethod extends ExtensionPoint {
     }
 
     /**
-     * A method invoked by Gluu Casa when a change in the underlying custom script of this method is detected. This
-     * allows developers to re-read configuration parameters part of the script itself that may drive the behaviour
+     * A method invoked by Casa when a change in the configuration of the associated Agama flow is detected. This
+     * allows developers to re-read configuration parameters part of the flow that may drive the behaviour
      * of the enrollment/listing functionalities or configure any other internal aspect which may result relevant when
      * configuration changes.
      */

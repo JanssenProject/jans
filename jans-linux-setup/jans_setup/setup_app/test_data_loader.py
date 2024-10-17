@@ -4,7 +4,6 @@ import glob
 import time
 import json
 import socket
-import ldap3
 import urllib.request
 import base64
 import shutil
@@ -138,11 +137,6 @@ class TestDataLoader(BaseInstaller, SetupUtils):
             'server.name=%(hostname)s\nconfig.oxauth.issuer=http://localhost:80\nconfig.oxauth.contextPath=http://localhost:80\nconfig.oxauth.salt=%(encode_salt)s\nconfig.persistence.type=%(persistence_type)s\n\n',
             self.merge_dicts(Config.__dict__, Config.templateRenderingDict)
             )
-
-        if self.getMappingType('ldap'):
-            template_text = self.readFile(os.path.join(self.template_base, 'jans-auth/server/config-jans-auth-test-ldap.properties.nrnd'))
-            rendered_text = self.fomatWithDict(template_text, self.merge_dicts(Config.__dict__, Config.templateRenderingDict))
-            config_jans_auth_test_properties += '#ldap\n' +  rendered_text
 
         if self.getMappingType('couchbase'):
             couchbaseDict = base.current_app.CouchbaseInstaller.couchbaseDict()
@@ -291,7 +285,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                                     'rejectJwtWithNoneAlg': False,
                                     'removeRefreshTokensForClientOnLogout': True,
                                     'fapiCompatibility': False,
-                                    'forceIdTokenHintPrecense': False,
+                                    'forceIdTokenHintPresence': False,
                                     'introspectionScriptBackwardCompatibility': False,
                                     'allowSpontaneousScopes': True,
                                     'spontaneousScopeLifetime': 0,
@@ -337,97 +331,10 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         # make scope offline_access as default
         self.dbUtils.set_configuration("jansDefScope", "true", "inum=C4F6,ou=scopes,o=jans")
 
-        if self.dbUtils.moddb == static.BackendTypes.LDAP:
-            # Update LDAP schema
-            Config.pbar.progress(self.service_name, "Updating schema", False)
-            openDjSchemaFolder = os.path.join(Config.ldap_base_dir, 'config/schema/')
-            self.copyFile(os.path.join(Config.output_dir, 'test/jans-auth/schema/102-jans-auth_test.ldif'), openDjSchemaFolder)
-            self.copyFile(os.path.join(Config.output_dir, 'test/scim-client/schema/103-scim_test.ldif'), openDjSchemaFolder)
-
-            schema_fn = os.path.join(openDjSchemaFolder, '77-customAttributes.ldif')
-
-            obcl_parser = myLdifParser(schema_fn)
-            obcl_parser.parse()
-
-            for i, o in enumerate(obcl_parser.entries[0][1]['objectClasses']):
-                objcl = ObjectClass(o)
-                if 'jansCustomPerson' in objcl.tokens['NAME']:
-                    may_list = list(objcl.tokens['MAY'])
-                    for a in ('scimCustomFirst','scimCustomSecond', 'scimCustomThird'):
-                        if not a in may_list:
-                            may_list.append(a)
-
-                    objcl.tokens['MAY'] = tuple(may_list)
-                    obcl_parser.entries[0][1]['objectClasses'][i] = objcl.getstr()
-
-            tmp_fn = '/tmp/77-customAttributes.ldif'
-            with open(tmp_fn, 'wb') as w:
-                ldif_writer = LDIFWriter(w)
-                for dn, entry in obcl_parser.entries:
-                    ldif_writer.unparse(dn, entry)
-
-            self.copyFile(tmp_fn, openDjSchemaFolder)
-
-            self.logIt("Making opndj listen all interfaces")
-            ldap_operation_result = self.dbUtils.ldap_conn.modify(
-                    'cn=LDAPS Connection Handler,cn=Connection Handlers,cn=config', 
-                     {'ds-cfg-listen-address': [ldap3.MODIFY_REPLACE, '0.0.0.0']}
-                    )
-
-            if not ldap_operation_result:
-                    self.logIt("Ldap modify operation failed {}".format(str(self.ldap_conn.result)))
-                    self.logIt("Ldap modify operation failed {}".format(str(self.ldap_conn.result)), True)
-
-            self.dbUtils.ldap_conn.unbind()
-
-            self.logIt("Re-starting opendj")
-            self.restart('opendj')
-
-            self.logIt("Re-binding opendj")
-            # try 5 times to re-bind opendj
-            for i in range(5):
-                time.sleep(5)
-                self.logIt("Try binding {} ...".format(i+1))
-                bind_result = self.dbUtils.ldap_conn.bind()
-                if bind_result:
-                    self.logIt("Binding to opendj was successful")
-                    break
-                self.logIt("Re-try in 5 seconds")
-            else:
-                self.logIt("Re-binding opendj FAILED")
-                sys.exit("Re-binding opendj FAILED")
-
-            for atr in ('myCustomAttr1', 'myCustomAttr2'):
-
-                dn = 'ds-cfg-attribute={},cn=Index,ds-cfg-backend-id={},cn=Backends,cn=config'.format(atr, 'userRoot')
-                entry = {
-                            'objectClass': ['top','ds-cfg-backend-index'],
-                            'ds-cfg-attribute': [atr],
-                            'ds-cfg-index-type': ['equality'],
-                            'ds-cfg-index-entry-limit': ['4000']
-                            }
-                self.logIt("Creating Index {}".format(dn))
-                ldap_operation_result = self.dbUtils.ldap_conn.add(dn, attributes=entry)
-                if not ldap_operation_result:
-                    self.logIt("Ldap modify operation failed {}".format(str(self.dbUtils.ldap_conn.result)))
-                    self.logIt("Ldap modify operation failed {}".format(str(self.dbUtils.ldap_conn.result)), True)
-
-        elif self.dbUtils.moddb in (static.BackendTypes.MYSQL, static.BackendTypes.PGSQL):
-            pass
-
-        elif self.dbUtils.moddb == static.BackendTypes.COUCHBASE:
+        if self.dbUtils.moddb == static.BackendTypes.COUCHBASE:
             self.dbUtils.cbm.exec_query('CREATE INDEX def_{0}_myCustomAttr1 ON `{0}`(myCustomAttr1) USING GSI WITH {{"defer_build":true}}'.format(Config.couchbase_bucket_prefix))
             self.dbUtils.cbm.exec_query('CREATE INDEX def_{0}_myCustomAttr2 ON `{0}`(myCustomAttr2) USING GSI WITH {{"defer_build":true}}'.format(Config.couchbase_bucket_prefix))
             self.dbUtils.cbm.exec_query('BUILD INDEX ON `{0}` (def_{0}_myCustomAttr1, def_{0}_myCustomAttr2)'.format(Config.couchbase_bucket_prefix))
-
-        if self.dbUtils.moddb == static.BackendTypes.LDAP:
-            self.dbUtils.ldap_conn.bind()
-
-            result = self.dbUtils.search('ou=configuration,o=jans', search_filter='(&(jansDbAuth=*)(objectClass=jansAppConf))', search_scope=ldap3.BASE)
-            oxIDPAuthentication = json.loads(result['jansDbAuth'])
-            oxIDPAuthentication['config']['servers'] = ['{0}:{1}'.format(Config.hostname, Config.ldaps_port)]
-            oxIDPAuthentication_js = json.dumps(oxIDPAuthentication, indent=2)
-            self.dbUtils.set_configuration('jansDbAuth', oxIDPAuthentication_js)
 
         self.create_test_client_keystore()
 

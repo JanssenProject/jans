@@ -32,7 +32,13 @@ setup(
         "python-consul>=1.0.1",
         "hvac>=0.7.0",
         "kubernetes>=11.0",
+
+        # @TODO: REMOVE after the following methods successfully ported:
+        #
+        # - `jans.pycloudlib.utils.ldap_encode`
+        # - `jans.pycloudlib.persistence.sql.doc_id_from_dn`
         "ldap3>=2.5",
+
         "backoff>=2.1.2",
         "docker>=3.7.2",
         "requests-toolbelt>=0.9.1",
@@ -52,6 +58,8 @@ setup(
         "apispec[marshmallow]>=6.6.1",
         "fqdn>=1.5.1",
         "pem>=23.1.0",
+        # extra dependency for google-cloud-secret-manager
+        "grpc-interceptor>=0.15.4",
     ],
     classifiers=[
         "Intended Audience :: Developers",
