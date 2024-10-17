@@ -91,12 +91,17 @@ public class Util {
         }
 
         for (String data : fieldValueList) {
-            StringTokenizer st = new StringTokenizer(str, fieldValueSeparator);
+            String[] result = data.split(fieldValueSeparator);
 
-            if (StringUtils.isNotBlank(data) && st.hasMoreTokens()) {
-                String[] keyValue = data.split("=");
-                log.error("fieldValueMap:{},keyValue:{}", fieldValueMap, keyValue);
-                fieldValueMap.put(keyValue[0], keyValue[1]);
+            log.debug("fieldValueSeparator:{}, result:{}", fieldValueSeparator, result);
+            if (result != null && result.length > 0) {
+                String fieldName = result[0];
+                String value = null;
+                if (result.length > 1) {
+                    value = result[1];
+                }
+                log.info("fieldName:{},value:{}", fieldName, value);
+                fieldValueMap.put(fieldName, value);
             }
         }
 
@@ -158,7 +163,10 @@ public class Util {
                 log.debug("separator:{}, result:{}", separator, result);
                 if (result != null && result.length > 0) {
                     String fieldName = result[0];
-                    String value = result[1];
+                    String value = null;
+                    if (result.length > 1) {
+                        value = result[1];
+                    }
                     String dbFieldName = getFieldDBName(fieldName, propertiesAnnotations.get(fieldName));
                     String fieldType = getFieldDataType(fieldName, fieldTypeMap);
                     log.debug("fieldName:{}, dbFieldName:{}, fieldType:{}, value:{}, separator:{}", fieldName,
