@@ -115,7 +115,5 @@ errors_functions! {
 pub fn authorize_errors_module(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add("AuthorizeError", m.py().get_type_bound::<AuthorizeError>())?;
     register_errors(m)?;
-    // m.add_function(wrap_pyfunction!(raise_myerror, m)?)?;
-    // Ok(())
     Ok(())
 }
