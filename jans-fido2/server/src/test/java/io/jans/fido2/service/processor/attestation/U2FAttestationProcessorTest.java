@@ -239,6 +239,6 @@ class U2FAttestationProcessorTest {
         verify(commonVerifiers).verifyRpIdHash(authData, "test-domain");
         verify(coseService).getPublicKeyFromUncompressedECPoint(any());
         verify(authenticatorDataVerifier).verifyPackedSurrogateAttestationSignature(authData.getAuthDataDecoded(), clientDataHash, "test-signature", publicKey, -7);
-        verifyNoInteractions(log, certificateService, certificateVerifier, appConfiguration, attestationCertificateService);
+        verifyNoInteractions(log, certificateService, certificateVerifier, appConfiguration);
     }
 }

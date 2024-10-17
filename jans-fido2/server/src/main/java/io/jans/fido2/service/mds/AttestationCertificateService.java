@@ -112,7 +112,27 @@ public class AttestationCertificateService {
 		return certificateService.getCertificates(x509certificates);
 	}
 
-	public List<X509Certificate> getAttestationRootCertificates(AuthData authData, List<X509Certificate> attestationCertificates) {
+	public String getAttestationAuthenticatorName(AuthData authData) {
+		JsonNode metadataForAuthenticator = getMetadataForAuthenticator(authData);
+		JsonNode metaDataStatement = null;
+		if ((metadataForAuthenticator != null)) {
+			if (metadataForAuthenticator.has("description")) {
+				metaDataStatement = metadataForAuthenticator;
+			} else if (metadataForAuthenticator.has("metadataStatement")) {
+				try {
+					metaDataStatement = dataMapperService.readTree(metadataForAuthenticator.get("metadataStatement").toPrettyString());
+				} catch (IOException e) {
+					log.error("Error parsing the metadata statement", e);
+				}
+			}
+		}
+		if (metadataForAuthenticator == null || metaDataStatement == null
+				|| !metaDataStatement.has("description")) {
+			return null;
+		}
+		return metaDataStatement.get("description").asText();
+	}
+	private JsonNode getMetadataForAuthenticator(AuthData authData) {
 		String aaguid = Hex.encodeHexString(authData.getAaguid());
 		Fido2Configuration fido2Configuration = appConfiguration.getFido2Configuration();
 		JsonNode metadataForAuthenticator;
@@ -126,14 +146,18 @@ public class AttestationCertificateService {
 				log.info("No Local metadata for authenticator {}. Checking for metadata MDS3 blob", aaguid);
 				JsonNode metadata = mdsService.fetchMetadata(authData.getAaguid());
 				commonVerifiers.verifyThatMetadataIsValid(metadata);
-				return getAttestationRootCertificates(metadata, attestationCertificates);
+				metadataForAuthenticator = metadata;
 			} catch (Fido2RuntimeException ex) {
 				log.warn("Failed to get metadata from Fido2 meta-data server: {}", ex.getMessage(), ex);
 
 				metadataForAuthenticator = dataMapperService.createObjectNode();
 			}
 		}
+		return metadataForAuthenticator;
+	}
 
+	public List<X509Certificate> getAttestationRootCertificates(AuthData authData, List<X509Certificate> attestationCertificates) {
+		JsonNode metadataForAuthenticator = getMetadataForAuthenticator(authData);
 		return getAttestationRootCertificates(metadataForAuthenticator, attestationCertificates);
 	}
 
