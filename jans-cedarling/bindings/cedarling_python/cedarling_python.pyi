@@ -48,10 +48,6 @@ class JwtConfig:
 
 @final
 class BootstrapConfig:
-    # under the hood next fields are optional but
-    # we want enforce to provide them
-    # and if pass not initialized field to the Cedarling it will raise error
-
     application_name: str | None
     log_config: MemoryLogConfig | StdOutLogConfig | DisabledLoggingConfig | None
     policy_store_config: PolicyStoreConfig | None
@@ -68,11 +64,12 @@ class BootstrapConfig:
 
 @final
 class Cedarling:
+
     def __init__(self, config: BootstrapConfig) -> None: ...
 
-    def pop_logs(self) -> List[dict]: ...
+    def pop_logs(self) -> List[Dict]: ...
 
-    def get_log_by_id(self, id: str) -> Optional[dict]: ...
+    def get_log_by_id(self, id: str) -> Optional[Dict]: ...
 
     def get_log_ids(self) -> List[str]: ...
 
