@@ -191,7 +191,7 @@ fn string_to_alg(algorithm: &str) -> Result<jwt::Algorithm, CreateJwtServiceErro
         "PS512" => Ok(jwt::Algorithm::PS512),
         "EdDSA" => Ok(jwt::Algorithm::EdDSA),
         _ => Err(CreateJwtServiceError::UnimplementedAlgorithm(
-            algorithm.into(),
+            algorithm.to_string(),
         )),
     }
 }

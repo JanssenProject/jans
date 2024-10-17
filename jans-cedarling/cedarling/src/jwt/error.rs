@@ -14,7 +14,7 @@ pub enum Error {
 
     /// Key could not be retrieved from the `KeyService`.
     #[error("could not get hold of a key from the KeyService: {0}")]
-    MissingKey(Box<str>),
+    MissingKey(String),
 
     /// Tried to validate a token signed with an unsupported algorithm.
     #[error("the JWT is signed with an unsupported algorithm: {0:?}")]
@@ -37,5 +37,5 @@ pub enum Error {
 pub enum CreateJwtServiceError {
     /// Config contains an unimplemented algorithm
     #[error("an algorithim defined in the config is not yet implemented: {0}")]
-    UnimplementedAlgorithm(Box<str>),
+    UnimplementedAlgorithm(String),
 }
