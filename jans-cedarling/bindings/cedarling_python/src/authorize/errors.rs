@@ -99,6 +99,9 @@ macro_rules! errors_functions {
         };
 }
 
+// We use macros to create the function `authorize_error_to_py`.
+// This function is used to convert `cedarling::AuthorizeError` to a Python exception.
+// For each possible case of `AuthorizeError`, we have created a corresponding Python exception that inherits from `cedarling::AuthorizeError`.
 errors_functions! {
     JWT => JWTError,
     AccessTokenEntities => AccessTokenEntitiesError,
