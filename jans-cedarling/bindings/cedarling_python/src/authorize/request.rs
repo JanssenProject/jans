@@ -60,19 +60,17 @@ impl Request {
     }
 }
 
-impl TryFrom<Request> for cedarling::Request {
-    type Error = PyErr;
-
-    fn try_from(value: Request) -> Result<Self, Self::Error> {
+impl Request {
+    pub fn to_cedarling(&self) -> Result<cedarling::Request, PyErr> {
         let context = Python::with_gil(|py| -> Result<serde_json::Value, PyErr> {
-            let context = value.context.into_bound(py);
+            let context = self.context.clone_ref(py).into_bound(py);
             from_pyobject(context).map_err(|err| err.0)
         })?;
 
-        Ok(Self {
-            access_token: value.access_token,
-            action: value.action,
-            resource: value.resource.into(),
+        Ok(cedarling::Request {
+            access_token: self.access_token.clone(),
+            action: self.action.clone(),
+            resource: self.resource.clone().into(),
             context,
         })
     }

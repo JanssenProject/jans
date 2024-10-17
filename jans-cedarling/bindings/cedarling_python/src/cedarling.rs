@@ -9,6 +9,8 @@ use cedarling::LogStorage;
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 
+use crate::authorize::authorize_result::AuthorizeResult;
+use crate::authorize::request::Request;
 use crate::config::bootstrap_config::BootstrapConfig;
 use serde_pyobject::to_pyobject;
 
@@ -58,6 +60,16 @@ use serde_pyobject::to_pyobject;
 ///
 ///     :returns: A list of log entry IDs.
 ///     :rtype: List[str]
+///
+/// .. method:: authorize(self, request)
+///
+///     Execute authorize request
+///     :param request: Request struct for authorize.
+///     :type request: Request
+///
+///     :returns: Response struct for authorize.
+///     :rtype: AuthorizeResult
+///      
 #[derive(Clone)]
 #[pyclass]
 pub struct Cedarling {
@@ -99,6 +111,16 @@ impl Cedarling {
     /// returns a list of all log ids
     fn get_log_ids(&self) -> Vec<String> {
         self.inner.get_log_ids()
+    }
+
+    /// Authorize request
+    fn authorize(&self, request: Bound<'_, Request>) -> Result<AuthorizeResult, PyErr> {
+        let cedarling_instance = self
+            .inner
+            .authorize(request.borrow().to_cedarling()?)
+            // TODO: convert error to correct python error
+            .map_err(|err| PyValueError::new_err(err.to_string()))?;
+        Ok(cedarling_instance.into())
     }
 }
 

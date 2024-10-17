@@ -7,12 +7,12 @@
 use pyo3::prelude::*;
 use pyo3::Bound;
 
-mod authorize_result;
+pub(crate) mod authorize_result;
 mod authorize_result_response;
 mod decision;
 mod diagnostics;
 mod policy_evaluation_error;
-mod request;
+pub(crate) mod request;
 mod resource_data;
 
 pub fn register_entities(m: &Bound<'_, PyModule>) -> PyResult<()> {
