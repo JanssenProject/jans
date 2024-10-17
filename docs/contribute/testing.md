@@ -96,16 +96,12 @@ As part of pre-release QA check, we run a set of [manual sanity checks](#sanity-
 
 | \# | OS Platform	 | Persistance Type | Deployment Type (VM/CN) | Test                            |
 |----|--------------|------------------|-------------------------|---------------------------------|
-| 1  | SUSE 15      | Opendj           | VM                      | installation and sanity testing |
 | 2  | SUSE 15      | Mysql            | VM                      | installation and sanity testing |
 | 3  | SUSE 15      | Pgsql            | VM                      | installation and sanity testing |
-| 4  | RHEL 8       | Opendj           | VM                      | installation and sanity testing |
 | 5  | RHEL 8       | Mysql            | VM                      | installation and sanity testing |
 | 6  | RHEL 8       | Pgsql            | VM                      | installation and sanity testing |
-| 7  | Ubuntu20     | Opendj           | VM                      | installation and sanity testing |
 | 8  | Ubuntu20     | Mysql            | VM                      | installation and sanity testing |
 | 9  | Ubuntu20     | Pgsql            | VM                      | installation and sanity testing |
-| 10 | Ubuntu22     | Opendj           | VM                      | installation and sanity testing |
 | 11 | Ubuntu22     | Mysql            | VM                      | installation and sanity testing |
 | 12 | Ubuntu22     | Pgsql            | VM                      | installation and sanity testing |
 

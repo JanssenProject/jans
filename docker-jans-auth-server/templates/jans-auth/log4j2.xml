@@ -53,18 +53,6 @@
 			<DefaultRolloverStrategy max="30" />
 		</RollingFile>
 
-		<RollingFile name="JANS_AUTH_PERSISTENCE_LDAP_STATISTICS_FILE" fileName="${sys:log.base}/logs/jans-auth_persistence_ldap_statistics.log"
-			filePattern="${sys:log.base}/logs/jans-auth_persistence_ldap_statistics-%d{yyyy-MM-dd}-%i.log">
-
-			<PatternLayout pattern="%d %-5p [%t] %X{X-Correlation-Id} [%C{6}] (%F:%L) - %m%n" />
-
-			<Policies>
-				<TimeBasedTriggeringPolicy interval="1" modulate="true" />
-				<SizeBasedTriggeringPolicy size="250 MB" />
-			</Policies>
-			<DefaultRolloverStrategy max="30" />
-		</RollingFile>
-
 		<RollingFile name="JANS_AUTH_SCRIPT_LOG_FILE" fileName="${sys:log.base}/logs/jans-auth_script.log" filePattern="${sys:log.base}/logs/jans-auth_script-%d{yyyy-MM-dd}-%i.log">
 
 			<PatternLayout pattern="%d %-5p [%t] %X{X-Correlation-Id} [%C{6}] (%F:%L) - %m%n" />
@@ -112,19 +100,10 @@
 			<AppenderRef ref="$persistence_log_target" />
 		</Logger>
 
-		<Logger name="com.unboundid.ldap.sdk.LDAPConnection" level="$persistence_log_level" additivity="false">
-            <Property name="auth.log.console.group">-persistence</Property>
-			<AppenderRef ref="$persistence_log_target" />
-		</Logger>
 		<logger name="com.couchbase.client" level="$persistence_log_level" additivity="false">
             <Property name="auth.log.console.group">-persistence</Property>
 			<AppenderRef ref="$persistence_log_target" />
 		</logger>
-
-		<Logger name="io.jans.orm.ldap.operation.watch" level="$persistence_duration_log_level" additivity="false">
-            <Property name="auth.log.console.group">-persistence-duration</Property>
-			<AppenderRef ref="$persistence_duration_log_target" />
-		</Logger>
 
 		<Logger name="io.jans.orm.couchbase.operation.watch" level="$persistence_duration_log_level" additivity="false">
             <Property name="auth.log.console.group">-persistence-duration</Property>
@@ -134,11 +113,6 @@
 		<Logger name="io.jans.orm.watch" level="$persistence_duration_log_level" additivity="false">
             <Property name="auth.log.console.group">-persistence-duration</Property>
 			<AppenderRef ref="$persistence_duration_log_target" />
-		</Logger>
-
-		<Logger name="io.jans.as.server.service.status.ldap" level="$ldap_stats_log_level" additivity="false">
-            <Property name="auth.log.console.group">-ldap-stats</Property>
-			<AppenderRef ref="$ldap_stats_log_target" />
 		</Logger>
 
 		<Logger name="io.jans.service.PythonService" level="$script_log_level" additivity="false">

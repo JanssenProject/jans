@@ -26,7 +26,7 @@ class SpannerBackend:
             self.sql_indexes = json.loads(f.read())
 
         # add missing index determined from opendj indexes
-        with open("/app/static/opendj/index.json") as f:
+        with open("/app/static/rdbm/opendj_index.json") as f:
             opendj_indexes = [attr["attribute"] for attr in json.loads(f.read())]
 
         for attr in self.client.attr_types:

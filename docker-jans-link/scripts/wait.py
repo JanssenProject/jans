@@ -13,7 +13,7 @@ logging.config.dictConfig(LOGGING_CONFIG)
 
 
 def main():
-    persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "ldap")
+    persistence_type = os.environ.get("CN_PERSISTENCE_TYPE", "sql")
     validate_persistence_type(persistence_type)
 
     if persistence_type == "hybrid":

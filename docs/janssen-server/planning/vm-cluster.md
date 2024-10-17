@@ -25,7 +25,7 @@ components) are stateless,  you can use any load balancer routing algorithm,
 even round robin. You can also use the load balancer to terminate SSL.
 
 1. **Database**: The web services Janssen Components share the database, so
-you'll have to use database replication (e.g. OpenDJ replication). You could
+you'll have to use database replication. You could
 also use a cloud database that takes care of replication for you.
 
 1. **Cache**: You can't use `IN-MEMORY` cache which would have no way to

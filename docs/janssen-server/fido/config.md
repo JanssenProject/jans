@@ -118,7 +118,7 @@ Response:
 
 While it is not recommended that an administrator directly edits a configuration at the persistence layer, it may be useful information for a developer.
 
-##### A. MySQL
+##### MySQL
 ```mermaid
 erDiagram
     jansAppConf {
@@ -128,10 +128,3 @@ erDiagram
     }
 ```
 
-##### B. LDAP
-
-```mermaid
-graph LR
-A[ou=jans] --> V(ou=configuration)
-     V --> V5[ou=jans-fido2]
-```

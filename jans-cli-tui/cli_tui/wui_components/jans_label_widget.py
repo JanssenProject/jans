@@ -1,3 +1,5 @@
+from functools import partial
+
 from prompt_toolkit.layout import Window
 from prompt_toolkit.widgets import Frame, Button
 from prompt_toolkit.layout.containers import VSplit, HSplit
@@ -12,14 +14,18 @@ from utils.static import cli_style
 
 
 class JansLabelWidget:
-    def __init__(self, title, values, data, label_width=None):
+    def __init__(self, title, values, data, label_width=None, add_handler=None):
 
         if not label_width:
             label_width = int(common_data.app.dialog_width*1.1) - 26
 
         self.data = data
         self.values = values
-        add_button_container = VSplit([Window(), Button(_("Add"), handler=self.add_value)])
+        if add_handler:
+            add_handler_func = partial(add_handler, self)
+        else:
+            add_handler_func = self.add_value
+        add_button_container = VSplit([Window(), Button(_("Add"), handler=add_handler_func)])
 
         initial_labels = []
         for value_id in self.values:

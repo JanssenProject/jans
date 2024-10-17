@@ -15,7 +15,6 @@ One of the main target of ORM module is to provide simple lightweight layer to a
 
 Jans has next persistence modules out-of-the-box:
 
--  [LDAP](./ldap-config.md)
 -  [Couchbase](./cb-config.md)
 -  [Spanner](./spanner-config.md)
 -  [MySQL](./mysql-config.md)

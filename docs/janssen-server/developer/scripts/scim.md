@@ -135,7 +135,7 @@ Let's alter `postSearchUsers`'s second parameter (`results`) to ensure addresses
   
 This is very straightforward code except for the usage of `jansAddres`. Shouldn't it be simply `addresses` as the known SCIM attribute?
 
-Scripts work with entities that are about to be persisted or have already been saved so they kind of resemble the database structure (schema in LDAP terms). It turns out that database attribute names rarely match with SCIM names.
+Scripts work with entities that are about to be persisted or have already been saved so they kind of resemble the database structure. It turns out that database attribute names rarely match with SCIM names.
 
 While it is easy to know the SCIM name of a database attribute, the converse requires checking the code, however since you already have the skill this shouldn't be a problem: in [this](https://github.com/JanssenProject/jans/blob/1753d430037f623cfc11b99ceaa5d172676d9ecb/jans-scim/model/src/main/java/io/jans/scim/model/scim2/user/UserResource.java) Java class you'll find the representation of a user resource in SCIM spec terms. Pay attention to the `addresses` field and its associated `StoreReference` annotation that contains the attribute where addresses are actually stored.
 

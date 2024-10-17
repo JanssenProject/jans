@@ -33,7 +33,6 @@ Installation depends on the set of environment variables shown below. These envi
 | `CN_CITY`                  | City. Used for ssl cert generation.                                                                                                                                  | `Austin`                                         |
 | `CN_STATE`                 | State. Used for ssl cert generation                                                                                                                                  | `TX`                                             |
 | `CN_COUNTRY`               | Country. Used for ssl cert generation.                                                                                                                               | `US`                                             |
-| `CN_INSTALL_LDAP`          | **NOT SUPPORRTED YET**                                                                                                                                               | `false`                                          |
 | `CN_INSTALL_MYSQL`         | Install jans with mysql as the backend                                                                                                                               | `false`                                          |
 | `CN_INSTALL_PGSQL`         | Install jans with Postgres as the backend                                                                                                                            | `false`                                          |
 | `CN_INSTALL_CONFIG_API`    | Installs the Config API service.                                                                                                                                     | `true`                                           |
@@ -51,14 +50,15 @@ Installation depends on the set of environment variables shown below. These envi
 
 ## How to run
 
-Download the compose file 
+Download the compose file of your chosen persistence from mysql or postgres
 
 ```bash
 
 wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/jans-mysql-compose.yml 
+wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/jans-postgres-compose.yml 
 ```
 
-Download the the script files 
+Download the script files 
 
 ```bash
 
@@ -74,7 +74,7 @@ This docker compose file runs two containers, the janssen monolith container and
 To start the containers.
 
 ```bash
-./up.sh
+./up.sh #You can pass mysql|postgres as an argument to the script. If you don't pass any, it will default to mysql.
 ```
 
 To view the containers running
@@ -87,19 +87,22 @@ docker compose -f jans-mysql-compose.yml ps
 To stop the containers.
 
 ```bash
-./down.sh
+./down.sh #You can pass mysql|postgres as an argument to the script. If you don't pass any, it will default to mysql.
 ```
 
 ## Configure Janssen Server
 
-```bash
+1. Access the Docker container shell using:
+    ```bash
 
-docker compose -f jans-mysql-compose.yml exec jans sh #This opens a bash terminal in the running container
+    docker compose -f jans-mysql-compose.yml exec jans /bin/bash #This opens a bash terminal in the running container
+    ```
+2. You can grab `client_id` and `client_pw`(secret) pairs and other values from `setup.properties` or `/opt/jans/jans-setup/setup.properties.last`
 
-/opt/jans/jans-cli/config-cli.py #configure using the config-cli
-
-/opt/jans/jans-cli/scim-cli.py #configure using the scim-cli
-```
+3. Use the CLI tools located under `/opt/jans/jans-cli/` to configure Gluu flex as needed. For example you can run the [TUI](https://docs.jans.io/head/admin/config-guide/config-tools/jans-tui/):
+    ```bash
+    python3 /opt/jans/jans-cli/config-cli-tui.py
+    ```
 
 ## Access endpoints externally
 
@@ -117,5 +120,5 @@ After adding the record you can hit endpoints such as https://demoexample.jans.i
 Remove setup and volumes
 
 ```bash
-./clean.sh
+./clean.sh #You can pass mysql|postgres as an argument to the script. If you don't pass any, it will default to mysql.
 ```

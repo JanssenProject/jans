@@ -55,7 +55,7 @@ public class SpontaneousScopeService {
 
         Scope scope = new Scope();
         scope.setDefaultScope(false);
-        scope.setDescription("Spontaneous scope: " + scope);
+        scope.setDescription("Spontaneous scope: " + scopeId);
         scope.setDisplayName(scopeId);
         scope.setId(scopeId);
         scope.setInum(UUID.randomUUID().toString());

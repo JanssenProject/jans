@@ -1,13 +1,11 @@
 from jans.pycloudlib.persistence.utils import PersistenceMapper
 
-from ldap_setup import LDAPBackend
 from couchbase_setup import CouchbaseBackend
 from sql_setup import SQLBackend
 from spanner_setup import SpannerBackend
 
 
 _backend_classes = {
-    "ldap": LDAPBackend,
     "couchbase": CouchbaseBackend,
     "sql": SQLBackend,
     "spanner": SpannerBackend,

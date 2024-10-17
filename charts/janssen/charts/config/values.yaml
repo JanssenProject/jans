@@ -110,18 +110,16 @@ configmap:
   # -- Path to Vault AppRole.
   cnVaultAppRolePath: approle
   # [vault_envs] END
-  # -- OpenDJ internal address. Leave as default. Used when `global.cnPersistenceType` is set to `ldap`.
-  cnLdapUrl: "opendj:1636"
   # -- Value passed to Java option -XX:MaxRAMPercentage
   cnMaxRamPercent: "75.0"
   # -- Specify data that should be saved in each persistence (one of default, user, cache, site, token, or session; default to default). Note this environment only takes effect when `global.cnPersistenceType`  is set to `hybrid`.
   #{
-  #  "default": "<couchbase|ldap|spanner|sql>",
-  #  "user": "<couchbase|ldap|spanner|sql>",
-  #  "site": "<couchbase|ldap|spanner|sql>",
-  #  "cache": "<couchbase|ldap|spanner|sql>",
-  #  "token": "<couchbase|ldap|spanner|sql>",
-  #  "session": "<couchbase|ldap|spanner|sql>",
+  #  "default": "<couchbase|spanner|sql>",
+  #  "user": "<couchbase|spanner|sql>",
+  #  "site": "<couchbase|spanner|sql>",
+  #  "cache": "<couchbase|spanner|sql>",
+  #  "token": "<couchbase|spanner|sql>",
+  #  "session": "<couchbase|spanner|sql>",
   #}
   cnPersistenceHybridMapping: "{}"
   # -- Redis Sentinel Group. Often set when `config.configmap.cnRedisType` is set to `SENTINEL`. Can be used when  `config.configmap.cnCacheType` is set to `REDIS`.
@@ -138,10 +136,6 @@ configmap:
   cnSecretKubernetesSecret: cn
   # -- Loadbalancer address for AWS if the FQDN is not registered.
   lbAddr: ""
-  # -- OpenDJ certificate string. This must be encoded using base64.
-  cnLdapCrt: SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo=
-  # -- OpenDJ key string. This must be encoded using base64.
-  cnLdapKey: SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo=
   # -- Quarkus transaction recovery. When using MySQL, there could be issue regarding XA_RECOVER_ADMIN; refer to https://dev.mysql.com/doc/refman/8.0/en/privileges-provided.html#priv_xa-recover-admin for details.
   quarkusTransactionEnableRecovery: true
   # -- Keycloak logging level
@@ -177,10 +171,6 @@ image:
   tag: 1.1.6_dev
   # -- Image Pull Secrets
   pullSecrets: [ ]
-# -- LDAP admin password if OpennDJ is used for persistence.
-ldapPassword: P@ssw0rds
-# -- LDAP truststore password if OpenDJ is used for persistence
-ldapTruststorePassword: changeit
 # -- Organization name. Used for certificate creation.
 orgName: Janssen
 # -- Redis admin password if `config.configmap.cnCacheType` is set to `REDIS`.

@@ -64,7 +64,7 @@ class PackageUtils(SetupUtils):
                     self.run(['rpm', '-i', f'https://dev.mysql.com/get/mysql80-community-release-sl{base.os_version}-{base.os_subversion}.noarch.rpm'])
                     self.run(['rpm', '--import', '/etc/RPM-GPG-KEY-mysql'])
                     self.run(['zypper', '--no-gpg-checks', '--gpg-auto-import-keys', 'refresh'])
-                    package_list[os_type_version]['mandatory'] += ' mysql-community-server'
+                    package_list[os_type_version]['mandatory'] += ' mysql-community-server-8.0.39'
                 else:
                     package_list[os_type_version]['mandatory'] += ' mysql-server'
 

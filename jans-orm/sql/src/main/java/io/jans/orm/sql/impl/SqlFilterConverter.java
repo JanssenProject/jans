@@ -146,7 +146,7 @@ public class SqlFilterConverter {
                     	continue;
                 	}
 
-                    Boolean isMultiValuedDetected = determineMultiValuedByType(tmpFilter.getAttributeName(), propertiesAnnotationsMap);
+                    Boolean isMultiValuedDetected = determineMultiValuedByType(resolveAttributeName(tableMapping, tmpFilter), propertiesAnnotationsMap);
                 	if (!Boolean.FALSE.equals(isMultiValuedDetected)) {
                 		if (!Boolean.FALSE.equals(currentGenericFilter.getMultiValued())) { 
 	                		canJoinOrFilters = false;
@@ -155,11 +155,11 @@ public class SqlFilterConverter {
                 	}
                 	
             		if (joinOrAttributeName == null) {
-            			joinOrAttributeName = tmpFilter.getAttributeName();
+            			joinOrAttributeName = resolveAttributeName(tableMapping, tmpFilter);
             			joinOrFilters.add(tmpFilter);
             			continue;
             		}
-            		if (!joinOrAttributeName.equals(tmpFilter.getAttributeName())) {
+            		if (!joinOrAttributeName.equals(resolveAttributeName(tableMapping, tmpFilter))) {
                 		canJoinOrFilters = false;
                     	continue;
             		}
@@ -184,7 +184,7 @@ public class SqlFilterConverter {
                 			rightObjs.add(assertionValue);
             			}
                 		
-                		return ConvertedExpression.build(ExpressionUtils.in(buildTypedPath(tableMapping, lastEqFilter, propertiesAnnotationsMap, jsonAttributes, processor, skipAlias), rightObjs), jsonAttributes);
+                		return ConvertedExpression.build(ExpressionUtils.in(buildTypedPath(tableMapping, lastEqFilter, propertiesAnnotationsMap, jsonAttributes, processor, skipAlias).expression(), rightObjs), jsonAttributes);
                 	} else {
                         return ConvertedExpression.build(ExpressionUtils.anyOf(expFilters), jsonAttributes);
                 	}
@@ -193,15 +193,22 @@ public class SqlFilterConverter {
         }
 
         boolean multiValued = isMultiValue(tableMapping, currentGenericFilter, propertiesAnnotationsMap);
-    	Expression columnExpression = buildTypedPath(tableMapping, currentGenericFilter, propertiesAnnotationsMap, jsonAttributes, processor, skipAlias);
+    	TypedPath typedPathColumn = buildTypedPath(tableMapping, currentGenericFilter, propertiesAnnotationsMap, jsonAttributes, processor, skipAlias);
+    	String pathAttributeName = resolvePathAttributeName(typedPathColumn, currentGenericFilter);
+    	Expression columnExpression = typedPathColumn.expression();
 
     	if (FilterType.EQUALITY == type) {
     		if (multiValued) {
     			if (SupportedDbType.POSTGRESQL == this.dbType) {
-        			Operation<Boolean> operation = ExpressionUtils.predicate(SqlOps.PGSQL_JSON_CONTAINS, columnExpression,
-        					buildTypedArrayExpression(tableMapping, currentGenericFilter));
+    				if (StringHelper.isEmpty(pathAttributeName)) {
+            			Operation<Boolean> operation = ExpressionUtils.predicate(SqlOps.PGSQL_JSON_CONTAINS, columnExpression,
+            					buildTypedArrayExpression(tableMapping, currentGenericFilter));
 
-            		return ConvertedExpression.build(operation, jsonAttributes);
+                		return ConvertedExpression.build(operation, jsonAttributes);
+    				} else {
+    	            	return buildPostgreSqlMultivaluedComparisionExpression(tableMapping, jsonAttributes,
+    							currentGenericFilter, typedPathColumn);
+    				}
     			} else {
 	    			Operation<Boolean> operation = ExpressionUtils.predicate(SqlOps.JSON_CONTAINS, columnExpression,
 	    					buildTypedArrayExpression(tableMapping, currentGenericFilter), Expressions.constant("$.v"));
@@ -220,7 +227,7 @@ public class SqlFilterConverter {
             if (multiValued) {
     			if (SupportedDbType.POSTGRESQL == this.dbType) {
 	            	return buildPostgreSqlMultivaluedComparisionExpression(tableMapping, jsonAttributes,
-							currentGenericFilter, columnExpression);
+							currentGenericFilter, typedPathColumn);
     			} else {
 	            	if (currentGenericFilter.getMultiValuedCount() > 1) {
 	                	Collection<Predicate> expressions = new ArrayList<>(currentGenericFilter.getMultiValuedCount());
@@ -252,7 +259,7 @@ public class SqlFilterConverter {
             if (multiValued) {
     			if (SupportedDbType.POSTGRESQL == this.dbType) {
 	            	return buildPostgreSqlMultivaluedComparisionExpression(tableMapping, jsonAttributes,
-							currentGenericFilter, columnExpression);
+							currentGenericFilter, typedPathColumn);
     			} else {
 	            	if (currentGenericFilter.getMultiValuedCount() > 1) {
 	                	Collection<Predicate> expressions = new ArrayList<>(currentGenericFilter.getMultiValuedCount());
@@ -344,9 +351,9 @@ public class SqlFilterConverter {
             Expression expression;
             if (multiValued) {
     			if (SupportedDbType.POSTGRESQL == this.dbType) {
-    				String likeString = "\"" + StringEscapeUtils.escapeJava(like.toString()) + "\"";
+    				String likeString = StringEscapeUtils.escapeJava(like.toString());
 	            	return buildPostgreSqlMultivaluedComparisionExpression(tableMapping, jsonAttributes,
-							currentGenericFilter, columnExpression, Expressions.constant("like_regex"),
+							currentGenericFilter, typedPathColumn, Expressions.constant("like_regex"),
 							likeString);
     			} else {
 	            	if (currentGenericFilter.getMultiValuedCount() > 1) {
@@ -382,31 +389,57 @@ public class SqlFilterConverter {
 
 	private ConvertedExpression buildPostgreSqlMultivaluedComparisionExpression(TableMapping tableMapping,
 			Map<String, Class<?>> jsonAttributes, Filter currentGenericFilter,
-			Expression columnExpression) throws SearchException {
-		Object typedArrayExpressionValue = prepareTypedArrayExpressionValue(tableMapping, currentGenericFilter);		
+			TypedPath columnExpression) throws SearchException {
+		Object typedArrayExpressionValue = prepareTypedArrayExpressionValue(tableMapping, currentGenericFilter);
+		Expression operationExpression;
+		if (FilterType.EQUALITY == currentGenericFilter.getType()) {
+			operationExpression = Expressions.constant("==");			
+		} else {
+			operationExpression = Expressions.constant(currentGenericFilter.getType().getSign());			
+		}
+
 		return buildPostgreSqlMultivaluedComparisionExpression(tableMapping, jsonAttributes, currentGenericFilter, columnExpression,
-				Expressions.constant(currentGenericFilter.getType().getSign()), typedArrayExpressionValue);
+				operationExpression, typedArrayExpressionValue);
 	}
 
 	private ConvertedExpression buildPostgreSqlMultivaluedComparisionExpression(TableMapping tableMapping,
-			Map<String, Class<?>> jsonAttributes, Filter currentGenericFilter, Expression columnExpression, Expression operationExpession, Object expressionValue) {
-		Expression<?> typedArrayExpression = expressionValue == null ? Expressions.nullExpression() : Expressions.constant(expressionValue); 
-
-		Operation<Boolean> operation = ExpressionUtils.predicate(SqlOps.PGSQL_JSON_NOT_EMPTY_ARRAY,
-				ExpressionUtils.predicate(SqlOps.PGSQL_JSON_PATH_QUERY_ARRAY,
-				columnExpression, operationExpession,
-				typedArrayExpression));
+			Map<String, Class<?>> jsonAttributes, Filter currentGenericFilter, TypedPath columnExpression, Expression operationExpession, Object expressionValue) {
+		Expression<?> typedArrayExpression;
+		if (expressionValue == null) {
+			typedArrayExpression = Expressions.nullExpression();
+		} else {
+			if (expressionValue instanceof Boolean) {
+				typedArrayExpression = Expressions.asString(((Boolean) expressionValue).toString());
+			} else if (expressionValue instanceof String) {
+				typedArrayExpression = Expressions.asString("\"" + (String) expressionValue + "\"");
+			} else {
+				typedArrayExpression = Expressions.constant(expressionValue);
+			}
+		}
+		
+		String pathAttributeName = resolvePathAttributeName(columnExpression, currentGenericFilter);
+		
+		Operation<Boolean> operation = null;
+		if (StringHelper.isEmpty(pathAttributeName)) {
+			operation = ExpressionUtils.predicate(SqlOps.PGSQL_JSON_PATH_QUERY_EXISTS,
+					columnExpression.expression, operationExpession,
+					typedArrayExpression);
+		} else {
+			operation = ExpressionUtils.predicate(SqlOps.PGSQL_JSON_PATH_MAP_QUERY_EXISTS,
+					columnExpression.expression, Expressions.constant(pathAttributeName), operationExpession,
+					typedArrayExpression);
+		}
 		return ConvertedExpression.build(operation, jsonAttributes);
 	}
 
 	protected Boolean isMultiValue(TableMapping tableMapping, Filter filter, Map<String, PropertyAnnotation> propertiesAnnotationsMap) throws SearchException {
-		String attributeName = filter.getAttributeName();
+		String attributeName = resolveAttributeName(tableMapping, filter);
 		AttributeType attributeType = null;
 		if (StringHelper.isNotEmpty(attributeName)) {
-			attributeType = getAttributeType(tableMapping, filter.getAttributeName());
+			attributeType = resolveAttributeType(tableMapping, filter);
 			if (attributeType == null) {
 				if (tableMapping != null) {
-					throw new SearchException(String.format(String.format("Failed to find attribute type for '%s'", filter.getAttributeName())));
+					throw new SearchException(String.format(String.format("Failed to find attribute type for '%s'", attributeName)));
 				}
 			}
 		}
@@ -415,7 +448,7 @@ public class SqlFilterConverter {
 			return filter.getMultiValued();
 		}
 
-		Boolean isMultiValuedDetected = determineMultiValuedByType(filter.getAttributeName(), propertiesAnnotationsMap);
+		Boolean isMultiValuedDetected = determineMultiValuedByType(attributeName, propertiesAnnotationsMap);
 		if ((Boolean.TRUE.equals(filter.getMultiValued()) || Boolean.TRUE.equals(isMultiValuedDetected))) {
 			if ((attributeType != null) && Boolean.TRUE.equals(attributeType.getMultiValued())) {
 				return true;
@@ -425,8 +458,40 @@ public class SqlFilterConverter {
 		return false;
 	}
 
-	private AttributeType getAttributeType(TableMapping tableMapping, String attributeName) throws SearchException {
-		if ((tableMapping == null) || (attributeName == null)) {
+	private AttributeType resolveAttributeType(TableMapping tableMapping, Filter filter) throws SearchException {
+		if ((tableMapping == null) || (filter == null)) {
+			return null;
+		}
+
+		String attributeName = filter.getAttributeName();
+		if (attributeName == null) {
+			return null;
+		}
+
+		String attributeNameLower = attributeName.toLowerCase();
+		AttributeType attributeType = tableMapping.getColumTypes().get(attributeNameLower);
+		if (attributeType == null) {
+			int idx = attributeNameLower.indexOf(".");
+			if (idx != -1) {
+				attributeNameLower = attributeNameLower.substring(0, idx).toLowerCase();
+				attributeType = tableMapping.getColumTypes().get(attributeNameLower);
+				if (attributeType != null) {
+					return attributeType;
+				}
+			}
+	        throw new SearchException(String.format("Unknown column name '%s' in table/child table '%s'", attributeName, tableMapping.getTableName()));
+		}
+
+		return attributeType;
+	}
+
+	private String resolveAttributeName(TableMapping tableMapping, Filter filter) throws SearchException {
+		if ((tableMapping == null) || (filter == null)) {
+			return filter.getAttributeName();
+		}
+
+		String attributeName = filter.getAttributeName();
+		if (attributeName == null) {
 			return null;
 		}
 
@@ -434,19 +499,42 @@ public class SqlFilterConverter {
 
 		AttributeType attributeType = tableMapping.getColumTypes().get(attributeNameLower);
 		if (attributeType == null) {
+			int idx = attributeName.indexOf(".");
+			if (idx != -1) {
+				attributeName = attributeName.substring(0, idx);
+				return attributeName;
+			}
 	        throw new SearchException(String.format("Unknown column name '%s' in table/child table '%s'", attributeName, tableMapping.getTableName()));
 		}
 
-		return attributeType;
+		return attributeName;
 	}
 
-	private String toInternalAttribute(String tableName, Filter filter) {
-		String attributeName = filter.getAttributeName();
+	private String resolvePathAttributeName(TypedPath typedPathColumn, Filter filter) {
+		String fullAttributeName = filter.getAttributeName();
+		
+		if (StringHelper.isEmpty(fullAttributeName)) {
+			return null;
+		}
+
+		String attributeName = typedPathColumn.attribute();
+		int jsonPathIdx = fullAttributeName.indexOf(attributeName, 0);
+		if ((jsonPathIdx > -1) && (attributeName.length() + jsonPathIdx < fullAttributeName.length())) {
+			return fullAttributeName.substring(attributeName.length() + jsonPathIdx + 1);
+		}
+		
+		return null;
+	}
+
+	private String toInternalAttribute(TableMapping tableMapping, Filter filter) throws SearchException {
+		String tableName = tableMapping == null ? null : tableMapping.getTableName();
+
+		String attributeName = resolveAttributeName(tableMapping, filter);
 
 		if (StringHelper.isEmpty(attributeName)) {
 			// Try to find inside sub-filter
 			for (Filter subFilter : filter.getFilters()) {
-				attributeName = subFilter.getAttributeName();
+				attributeName = resolveAttributeName(tableMapping, subFilter);
 				if (StringHelper.isNotEmpty(attributeName)) {
 					break;
 				}
@@ -490,11 +578,12 @@ public class SqlFilterConverter {
 
 	private Object prepareTypedExpressionValue(TableMapping tableMapping, Filter filter) throws SearchException {
 		AttributeType attributeType = null;
-		if (StringHelper.isNotEmpty(filter.getAttributeName())) {
-			attributeType = getAttributeType(tableMapping, filter.getAttributeName());
+		String attributeName = resolveAttributeName(tableMapping, filter);
+		if (StringHelper.isNotEmpty(attributeName)) {
+			attributeType = resolveAttributeType(tableMapping, filter);
 			if (attributeType == null) {
 				if (tableMapping != null) {
-					throw new SearchException(String.format(String.format("Failed to find attribute type for '%s'", filter.getAttributeName())));
+					throw new SearchException(String.format(String.format("Failed to find attribute type for '%s'", attributeName)));
 				}
 			}
 		}
@@ -540,25 +629,29 @@ public class SqlFilterConverter {
 		return assertionValue;
 	}
 
-	private Expression buildTypedPath(TableMapping tableMapping, Filter genericFilter, Map<String, PropertyAnnotation> propertiesAnnotationsMap,
+	private TypedPath buildTypedPath(TableMapping tableMapping, Filter genericFilter, Map<String, PropertyAnnotation> propertiesAnnotationsMap,
 			Map<String, Class<?>> jsonAttributes, Function<? super Filter, Boolean> processor, boolean skipAlias) throws SearchException {
     	boolean hasSubFilters = ArrayHelper.isNotEmpty(genericFilter.getFilters());
 
 		if (hasSubFilters) {
-    		return convertToSqlFilterImpl(tableMapping, genericFilter.getFilters()[0], propertiesAnnotationsMap, jsonAttributes, processor, skipAlias).expression();
+			Expression expression = convertToSqlFilterImpl(tableMapping, genericFilter.getFilters()[0], propertiesAnnotationsMap, jsonAttributes, processor, skipAlias).expression();
+			
+			return new TypedPath(null, expression);
 		}
 		
-		String tableName = tableMapping == null ? null : tableMapping.getTableName();
-		String internalAttribute = toInternalAttribute(tableName, genericFilter);
+		String internalAttribute = toInternalAttribute(tableMapping, genericFilter);
 		
-		return buildTypedPath(tableMapping, genericFilter, internalAttribute, skipAlias);
+		Expression expression = buildTypedPath(tableMapping, genericFilter, internalAttribute, skipAlias);
+		
+		return new TypedPath(internalAttribute, expression);
 	}
 
 	private Expression buildTypedPath(TableMapping tableMapping, Filter filter, String attributeName, boolean skipAlias) throws SearchException {
-		AttributeType attributeType = getAttributeType(tableMapping, filter.getAttributeName());
+
+		AttributeType attributeType = resolveAttributeType(tableMapping, filter);
 		if (attributeType == null) {
 			if (tableMapping != null) {
-				throw new SearchException(String.format(String.format("Failed to find attribute type for '%s'", filter.getAttributeName())));
+				throw new SearchException(String.format(String.format("Failed to find attribute type for '%s'", attributeName)));
 			}
 		}
 
@@ -618,7 +711,7 @@ public class SqlFilterConverter {
 
 		Class<?> parameterType = propertyAnnotation.getParameterType();
 		
-		boolean isMultiValued = parameterType.equals(Object[].class) || parameterType.equals(String[].class) || ReflectHelper.assignableFrom(parameterType, List.class) || ReflectHelper.assignableFrom(parameterType, AttributeEnum[].class);
+		boolean isMultiValued = parameterType.equals(Object[].class) || parameterType.equals(String[].class) || ReflectHelper.assignableFrom(parameterType, List.class) || ReflectHelper.assignableFrom(parameterType, Map.class) || ReflectHelper.assignableFrom(parameterType, AttributeEnum[].class);
 		
 		return isMultiValued;
 	}
@@ -641,6 +734,26 @@ public class SqlFilterConverter {
 		}
 
 		return result;
+	}
+	
+	class TypedPath {
+
+		private String attributeName;
+		private Expression expression;
+
+		public TypedPath(String attributeName, Expression expression) {
+			this.attributeName = attributeName;
+			this.expression = expression;
+		}
+
+		public String attribute() {
+			return attributeName;
+		}
+
+		public Expression expression() {
+			return expression;
+		}
+
 	}
 
 }

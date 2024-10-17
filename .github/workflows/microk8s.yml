@@ -25,7 +25,7 @@ jobs:
       matrix:
         istio: ["true", "false"]
         # add '"pgsql" when supported
-        persistence-backends: ["LDAP","MYSQL"]
+        persistence-backends: ["MYSQL"]
       fail-fast: false
     runs-on: ubuntu-latest
     steps:

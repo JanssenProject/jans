@@ -25,9 +25,6 @@ If your organization works in several regions a VM setup is almost immediately r
 #### Does my organization expect to double in growth each year? or possibly faster?
 If your organization or your customer base is growing fast rule out a VM setup.
 
-#### What's the persistence planned to be used in my Kans deployment?
-If you plan to use LDAP you are almost immediately locked to a VM setup. Our Kuberentes deployment supports an LDAP zonal setup only and we generally do not recommend it for a Kubernetes setup.
-
 #### Is this an on-premise vs hybrid vs cloud deployment?
 This question weighs on the current infrastructure of your organization. Operating on-premise Kubernetes setups needs generally more technical resources than operating a cloud setup. Comparing that to a VM setup, operating a VM setup is much easier in on-premise setups. The more the momentum of your org pulls to cloud vs onpremise the more it pulls to Kuberetnes vs a VM setup respectively.
 

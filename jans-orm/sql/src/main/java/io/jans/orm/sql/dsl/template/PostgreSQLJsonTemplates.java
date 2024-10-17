@@ -36,6 +36,8 @@ public class PostgreSQLJsonTemplates extends PostgreSQLTemplates {
 		add(SqlOps.PGSQL_JSON_CONTAINS, "{0} @> {1}::jsonb");
 //		add(SqlOps.PGSQL_JSON_PATH_QUERY_ARRAY, "jsonb_array_length(jsonb_path_query_array({0}, CONCAT('$[*] ? (@', {1}, {2}, ')')::jsonpath)) > 0");
 		add(SqlOps.PGSQL_JSON_PATH_QUERY_ARRAY, "jsonb_path_query_array({0}, CONCAT('$[*] ? (@', {1}, {2}, ')')::jsonpath)");
+		add(SqlOps.PGSQL_JSON_PATH_QUERY_EXISTS, "jsonb_path_exists({0}, CONCAT('$[*] ? (@', {1}, {2}, ')')::jsonpath)");
+		add(SqlOps.PGSQL_JSON_PATH_MAP_QUERY_EXISTS, "jsonb_path_exists({0}, CONCAT('$.', {1}, ' ? (@', {2}, {3}, ')')::jsonpath)");
 
 		add(SqlOps.PGSQL_JSON_NOT_EMPTY_ARRAY, "jsonb_array_length({0}) > 0");
 	}

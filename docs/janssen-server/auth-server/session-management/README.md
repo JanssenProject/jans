@@ -74,10 +74,6 @@ session events, see:
 
 ## Session data structure in Persistence
 
-### LDAP
-All sessions can be found under `ou=sessions,o=jans`
-Object class `janssessid` - https://github.com/JanssenProject/jans/blob/main/docs/admin/reference/database/ldap-schema.md#janssessid
-
 ### MySQL 
 All session information is saved in this table : https://github.com/JanssenProject/jans/blob/main/docs/admin/reference/database/mysql-schema.md#janssessid 
 

@@ -9,11 +9,14 @@ package io.jans.orm.sql.model;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import io.jans.orm.annotation.AttributeName;
 import io.jans.orm.annotation.AttributesList;
 import io.jans.orm.annotation.CustomObjectClass;
 import io.jans.orm.annotation.DN;
 import io.jans.orm.annotation.DataEntry;
+import io.jans.orm.annotation.JsonObject;
 import io.jans.orm.annotation.ObjectClass;
 import io.jans.orm.model.base.CustomAttribute;
 import io.jans.orm.util.StringHelper;
@@ -30,8 +33,18 @@ public class SimpleSession implements Serializable {
     @DN
     private String dn;
 
+    @AttributeName(name = "jansId")
+    private String id;
+
+    @AttributeName(name = "deviceSecret")
+    private List<String> deviceSecrets;
+
     @AttributesList(name = "name", value = "values", sortByName = true)
     private List<CustomAttribute> customAttributes = new ArrayList<CustomAttribute>();
+
+    @JsonObject
+    @AttributeName(name = "jansSessAttr")
+    private Map<String, Object> sessionAttributes;
 
     @CustomObjectClass
     private String[] customObjectClasses;
@@ -44,7 +57,31 @@ public class SimpleSession implements Serializable {
         this.dn = dn;
     }
 
-    public List<CustomAttribute> getCustomAttributes() {
+    public String getId() {
+		return id;
+	}
+
+	public void setId(String id) {
+		this.id = id;
+	}
+
+	public List<String> getDeviceSecrets() {
+		return deviceSecrets;
+	}
+
+	public void setDeviceSecrets(List<String> deviceSecrets) {
+		this.deviceSecrets = deviceSecrets;
+	}
+
+	public Map<String, Object> getSessionAttributes() {
+		return sessionAttributes;
+	}
+
+	public void setSessionAttributes(Map<String, Object> sessionAttributes) {
+		this.sessionAttributes = sessionAttributes;
+	}
+
+	public List<CustomAttribute> getCustomAttributes() {
         return customAttributes;
     }
 

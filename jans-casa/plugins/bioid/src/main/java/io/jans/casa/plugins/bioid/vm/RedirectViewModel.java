@@ -8,6 +8,8 @@ import java.util.Optional;
 import java.util.Arrays;
 import java.net.URISyntaxException;
 import java.net.URLEncoder;
+import java.util.Base64;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -119,14 +121,11 @@ public class RedirectViewModel {
 
         Map<String, String> custMap = new HashMap<>();
 
-        custMap.put("acr_values", "agama");
-        custMap.put("agama_flow", makeAgamaFlowParam(bioIdCode));
+        custMap.put("acr_values", makeAgamaFlowParam(bioIdCode));
 
         // prompt is needed because the user could have previously linked an account and
-        // in a new
-        // attempt to link at a different provider, launching an authn request will not
-        // trigger the
-        // agama flow because there is "existing" session in the AS
+        // in a new attempt to link at a different provider, launching an authn request 
+        // will not trigger the agama flow because there is "existing" session in the AS
         custMap.put("prompt", "login");
         p.setCustParamsAuthReq(custMap);
         return p;
@@ -149,10 +148,11 @@ public class RedirectViewModel {
             temp = mapper.writeValueAsString(Map.of(
                     "bioid_enrollment_code", bioIdCode,
                     "login_hint", user.getUserName()));
+            temp = new String(Base64.getUrlEncoder().encode(temp.getBytes(UTF_8)), UTF_8);
         } catch (Exception e) {
             logger.error(e.getMessage());
         }
-        return "io.jans.agama.bioid.enroll-" + temp;
+        return "agama_io.jans.agama.bioid.enroll-" + temp;
     }
 
 }

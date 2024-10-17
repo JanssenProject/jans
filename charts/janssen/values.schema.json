@@ -42,7 +42,7 @@
                         "cnSqlDbDialect": {
                             "description": "SQL dialect",
                             "type": "string",
-                            "pattern": "^(mysql|pgsql|ldap)$"
+                            "pattern": "^(mysql|pgsql)$"
                         },
                         "cnSqlDbHost": {
                             "description": "SQL server address or ip",
@@ -163,11 +163,6 @@
                             "description": "Passphrase for Janssen secret in Google Secret Manager. This is used for encrypting and decrypting data from the Google Secret Manager. Used only when global.configAdapterName and global.configSecretAdapter is set to google.",
                             "$ref": "#/definitions/password"
                         },
-                        "cnLdapUrl": {
-                            "description": "OpenDJ internal address. Leave as default. Used when `global.cnPersistenceType` is set to `ldap`.",
-                            "type": "string",
-                            "pattern": "^[a-z0-9-:]+$"
-                        },
                         "cnMaxRamPercent": {
                             "description": "Value passed to Java option -XX:MaxRAMPercentage",
                             "type": "string",
@@ -179,7 +174,7 @@
                             "pattern": "^(OAUTH|TEST|UMA)$"
                         },
                         "cnPersistenceHybridMapping": {
-                            "description": "Specify data that should be saved in LDAP (one of default, user, cache, site, token, or session; default to default). Note this environment only takes effect when `global.cnPersistenceType`  is set to `hybrid`.",
+                            "description": "Specify data that should be saved in persistence (one of default, user, cache, site, token, or session; default to default). Note this environment only takes effect when `global.cnPersistenceType`  is set to `hybrid`.",
                             "type": "string"
                         },
                         "cnRedisSentinelGroup": {
@@ -211,16 +206,6 @@
                         "lbAddr": {
                             "description": "Loadbalancer address for AWS if the FQDN is not registered.",
                             "$ref": "#/definitions/url-pattern"
-                        },
-                        "cnLdapCrt": {
-                            "description": "OpenDJ certificate string. This must be encoded using base64.",
-                            "type": "string",
-                            "pattern": "^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$"
-                        },
-                        "cnLdapKey": {
-                            "description": "OpenDJ key string. This must be encoded using base64.",
-                            "type": "string",
-                            "pattern": "^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$"
                         }
                     }
                 },
@@ -246,10 +231,6 @@
                             "pattern": "^[a-z0-9-_.]+$"
                         }
                     }
-                },
-                "ldapPassword": {
-                    "description": "LDAP admin password if OpennDJ is used for persistence.",
-                    "$ref": "#/definitions/password"
                 },
                 "orgName": {
                     "description": "Organization name. Used for certificate creation.",
@@ -381,16 +362,6 @@
                                     "type": "string",
                                     "pattern": "^(FATAL|ERROR|WARN|INFO|DEBUG|TRACE)$"
                                 },
-                                "ldapStatsLogTarget": {
-                                    "description": "jans-auth_persistence_ldap_statistics.log target",
-                                    "type": "string",
-                                    "pattern": "^(STDOUT|FILE)$"
-                                },
-                                "ldapStatsLogLevel": {
-                                    "description": "jans-auth_persistence_ldap_statistics.log level",
-                                    "type": "string",
-                                    "pattern": "^(FATAL|ERROR|WARN|INFO|DEBUG|TRACE)$"
-                                },
                                 "scriptLogTarget": {
                                     "description": "jans-auth_script.log target",
                                     "type": "string",
@@ -449,9 +420,9 @@
                     }
                 },
                 "cnPersistenceType": {
-                    "description": "Persistence backend to run Janssen with ldap|couchbase|hybrid|sql|spanner.",
+                    "description": "Persistence backend to run Janssen with couchbase|hybrid|sql|spanner.",
                     "type": "string",
-                    "pattern": "^(ldap|couchbase|hybrid|sql|spanner)$"
+                    "pattern": "^(couchbase|hybrid|sql|spanner)$"
                 },
                 "cnDocumentStoreType": {
                     "description": "Document store type to use for shibboleth files  DB.",
@@ -614,20 +585,6 @@
                         }
                     }
                 },
-                "opendj": {
-                    "type": "object",
-                    "properties": {
-                        "enabled": {
-                            "description": "Boolean flag to enable/disable the OpenDJ  chart.",
-                            "type": "boolean"
-                        },
-                        "ldapServiceName": {
-                            "description": "Name of the OpenDJ service. Please keep it as default.",
-                            "type": "string",
-                            "pattern": "^[a-z0-9-]+$"
-                        }
-                    }
-                },
                 "persistence": {
                     "type": "object",
                     "properties": {
@@ -679,16 +636,6 @@
                                 },
                                 "persistenceDurationLogLevel": {
                                     "description": "jans-scim_persistence_duration.log level",
-                                    "type": "string",
-                                    "pattern": "^(FATAL|ERROR|WARN|INFO|DEBUG|TRACE)$"
-                                },
-                                "ldapStatsLogTarget": {
-                                    "description": "jans-scim_persistence_ldap_statistics.log target",
-                                    "type": "string",
-                                    "pattern": "^(STDOUT|FILE)$"
-                                },
-                                "ldapStatsLogLevel": {
-                                    "description": "jans-scim_persistence_ldap_statistics.log level",
                                     "type": "string",
                                     "pattern": "^(FATAL|ERROR|WARN|INFO|DEBUG|TRACE)$"
                                 },
@@ -796,16 +743,6 @@
                                     "type": "string",
                                     "pattern": "^(FATAL|ERROR|WARN|INFO|DEBUG|TRACE)$"
                                 },
-                                "ldapStatsLogTarget": {
-                                    "description": "cacherefresh_persistence_ldap_statistics.log target",
-                                    "type": "string",
-                                    "pattern": "^(STDOUT|FILE)$"
-                                },
-                                "ldapStatsLogLevel": {
-                                    "description": "cacherefresh_persistence_ldap_statistics.log level",
-                                    "type": "string",
-                                    "pattern": "^(FATAL|ERROR|WARN|INFO|DEBUG|TRACE)$"
-                                },
                                 "scriptLogTarget": {
                                     "description": "cacherefresh_script.log target",
                                     "type": "string",
@@ -858,46 +795,11 @@
                     "description": "The location of the Couchbase restricted user config.configmap.cnCouchbaseSuperUser password. The file path must end with couchbase_superuser_password.",
                     "type": "string",
                     "pattern": ".*couchbase_superuser_password\\b.*"
-                },
-                "cnLdapPasswordFile": {
-                    "description": "The location of the OpenDJ user password. The file path must end with ldap_password.",
-                    "type": "string",
-                    "pattern": ".*ldap_password\\b.*"
-                },
-                "cnLdapTruststorePasswordFile": {
-                    "description": "The location of the OpenDJ truststore password file. The file path must end with ldap_truststore_password.",
-                    "type": "string",
-                    "pattern": ".*ldap_truststore_password\\b.*"
-                },
-                "cnLdapCertFile": {
-                    "description": "The location of the OpenDJ certificate file. The file path must end with opendj.crt.",
-                    "type": "string",
-                    "pattern": ".*opendj.crt\\b.*"
-                },
-                "cnLdapKeyFile": {
-                    "description": "The location of the OpenDJ certificate file. The file path must end with opendj.key.",
-                    "type": "string",
-                    "pattern": ".*opendj.key\\b.*"
-                },
-                "cnLdapCacertFile": {
-                    "description": "The location of the OpenDJ certificate file. The file path must end with opendj.pem.",
-                    "type": "string",
-                    "pattern": ".*opendj.pem\\b.*"
-                },
-                "cnLdapTruststoreFile": {
-                    "description": "The location of the OpenDJ truststore file. The file path must end with opendj.pkcs12.",
-                    "type": "string",
-                    "pattern": ".*opendj.pkcs12\\b.*"
                 }
             }
         },
         "nginx-ingress": {
             "description": "Nginx ingress definitions chart",
-            "type": "object",
-            "properties": {}
-        },
-        "opendj": {
-            "description": "OpenDJ is a directory server which implements a wide range of Lightweight Directory Access Protocol and related standards, including full compliance with LDAPv3 but also support for Directory Service Markup Language (DSMLv2).Written in Java, OpenDJ offers multi-master replication, access control, and many extensions.",
             "type": "object",
             "properties": {}
         },
@@ -940,9 +842,6 @@
         },
         {
             "$ref": "#/definitions/nginx-ingress-enabled"
-        },
-        {
-            "$ref": "#/definitions/opendj-enabled"
         },
         {
             "$ref": "#/definitions/persistence-enabled"
@@ -1785,264 +1684,6 @@
                                                     "type": "string",
                                                     "pattern": "^[a-z-]+$"
                                                 }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            "else": true
-        },
-        "opendj-enabled": {
-            "if": {
-                "properties": {
-                    "global": {
-                        "properties": {
-                            "opendj": {
-                                "properties": {
-                                    "enabled": {
-                                        "const": "true"
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            "then": {
-                "properties": {
-                    "opendj": {
-                        "required": [
-                            "image",
-                            "replicas",
-                            "resources",
-                            "service"
-                        ],
-                        "type": "object",
-                        "properties": {
-                            "hpa": {
-                                "description": "Configure the HorizontalPodAutoscaler",
-                                "type": "object",
-                                "properties": {
-                                    "enabled": {
-                                        "type": "boolean"
-                                    },
-                                    "minReplicas": {
-                                        "type": "integer"
-                                    },
-                                    "maxReplicas": {
-                                        "type": "integer"
-                                    },
-                                    "targetCPUUtilizationPercentage": {
-                                        "type": "integer"
-                                    },
-                                    "metrics": {
-                                        "description": "metrics if targetCPUUtilizationPercentage is not set",
-                                        "type": "array"
-                                    },
-                                    "behavior": {
-                                        "description": "Scaling Policies",
-                                        "type": "object"
-                                    }
-                                }
-                            },
-                            "usrEnvs": {
-                                "description": "Add custom normal and secret envs to the service",
-                                "type": "object",
-                                "properties": {
-                                    "normal": {
-                                        "description": "Add custom normal envs to the service",
-                                        "type": "object"
-                                    },
-                                    "secret": {
-                                        "description": "Add custom secret envs to the service",
-                                        "type": "object"
-                                    }
-                                }
-                            },
-                            "dnsPolicy": {
-                                "description": "Add custom dns policy",
-                                "type": "string",
-                                "pattern": "^(Default|ClusterFirst|ClusterFirstWithHostNet|None|)$"
-                            },
-                            "dnsConfig": {
-                                "description": "Add custom dns config",
-                                "type": "object"
-                            },
-                            "image": {
-                                "type": "object",
-                                "properties": {
-                                    "pullPolicy": {
-                                        "description": "Image pullPolicy to use for deploying.",
-                                        "type": "string",
-                                        "pattern": "^(Always|Never|IfNotPresent)$"
-                                    },
-                                    "repository": {
-                                        "description": "Image  to use for deploying",
-                                        "type": "string"
-                                    },
-                                    "tag": {
-                                        "description": "Image  tag to use for deploying.",
-                                        "type": "string",
-                                        "pattern": "^[a-z0-9-_.]+$"
-                                    }
-                                }
-                            },
-                            "persistence": {
-                                "type": "object",
-                                "properties": {
-                                    "size": {
-                                        "description": "OpenDJ volume size",
-                                        "type": "string",
-                                        "pattern": "^[0-9]Gi+$"
-                                    }
-                                }
-                            },
-                            "ports": {
-                                "type": "object",
-                                "properties": {
-                                    "tcp-admin": {
-                                        "type": "object",
-                                        "properties": {
-                                            "nodePort": {
-                                                "type": "string"
-                                            },
-                                            "port": {
-                                                "type": "integer"
-                                            },
-                                            "protocol": {
-                                                "type": "string"
-                                            },
-                                            "targetPort": {
-                                                "type": "integer"
-                                            }
-                                        }
-                                    },
-                                    "tcp-ldap": {
-                                        "type": "object",
-                                        "properties": {
-                                            "nodePort": {
-                                                "type": "string"
-                                            },
-                                            "port": {
-                                                "type": "integer"
-                                            },
-                                            "protocol": {
-                                                "type": "string"
-                                            },
-                                            "targetPort": {
-                                                "type": "integer"
-                                            }
-                                        }
-                                    },
-                                    "tcp-ldaps": {
-                                        "type": "object",
-                                        "properties": {
-                                            "nodePort": {
-                                                "type": "string"
-                                            },
-                                            "port": {
-                                                "type": "integer"
-                                            },
-                                            "protocol": {
-                                                "type": "string"
-                                            },
-                                            "targetPort": {
-                                                "type": "integer"
-                                            }
-                                        }
-                                    },
-                                    "tcp-repl": {
-                                        "type": "object",
-                                        "properties": {
-                                            "nodePort": {
-                                                "type": "string"
-                                            },
-                                            "port": {
-                                                "type": "integer"
-                                            },
-                                            "protocol": {
-                                                "type": "string"
-                                            },
-                                            "targetPort": {
-                                                "type": "integer"
-                                            }
-                                        }
-                                    },
-                                    "tcp-serf": {
-                                        "type": "object",
-                                        "properties": {
-                                            "nodePort": {
-                                                "type": "string"
-                                            },
-                                            "port": {
-                                                "type": "integer"
-                                            },
-                                            "protocol": {
-                                                "type": "string"
-                                            },
-                                            "targetPort": {
-                                                "type": "integer"
-                                            }
-                                        }
-                                    },
-                                    "udp-serf": {
-                                        "type": "object",
-                                        "properties": {
-                                            "nodePort": {
-                                                "type": "string"
-                                            },
-                                            "port": {
-                                                "type": "integer"
-                                            },
-                                            "protocol": {
-                                                "type": "string"
-                                            },
-                                            "targetPort": {
-                                                "type": "integer"
-                                            }
-                                        }
-                                    }
-                                }
-                            },
-                            "replicas": {
-                                "description": "Service replica number.",
-                                "type": "integer"
-                            },
-                            "resources": {
-                                "description": "Resource specs.",
-                                "type": "object",
-                                "properties": {
-                                    "limits": {
-                                        "type": "object",
-                                        "properties": {
-                                            "cpu": {
-                                                "description": "CPU limit.",
-                                                "type": "string",
-                                                "pattern": "^[0-9m]+$"
-                                            },
-                                            "memory": {
-                                                "description": "Memory limit.",
-                                                "type": "string",
-                                                "pattern": "^[0-9Mi]+$"
-                                            }
-                                        }
-                                    },
-                                    "requests": {
-                                        "type": "object",
-                                        "properties": {
-                                            "cpu": {
-                                                "description": "CPU request.",
-                                                "type": "string",
-                                                "pattern": "^[0-9m]+$"
-                                            },
-                                            "memory": {
-                                                "description": "Memory request.",
-                                                "type": "string",
-                                                "pattern": "^[0-9Mi]+$"
                                             }
                                         }
                                     }

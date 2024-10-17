@@ -280,20 +280,18 @@ config:
     # -- Path to Vault AppRole.
     cnVaultAppRolePath: approle
     # [vault_envs] END
-    # -- OpenDJ internal address. Leave as default. Used when `global.cnPersistenceType` is set to `ldap`.
-    cnLdapUrl: "opendj:1636"
     # -- Value passed to Java option -XX:MaxRAMPercentage
     cnMaxRamPercent: "75.0"
     # -- SCIM protection mode OAUTH|TEST|UMA
     cnScimProtectionMode: "OAUTH"
-    # -- Specify data that should be saved in LDAP (one of default, user, cache, site, token, or session; default to default). Note this environment only takes effect when `global.cnPersistenceType`  is set to `hybrid`.
+    # -- Specify data that should be saved in persistence (one of default, user, cache, site, token, or session; default to default). Note this environment only takes effect when `global.cnPersistenceType`  is set to `hybrid`.
     #{
-    #  "default": "<couchbase|ldap|spanner|sql>",
-    #  "user": "<couchbase|ldap|spanner|sql>",
-    #  "site": "<couchbase|ldap|spanner|sql>",
-    #  "cache": "<couchbase|ldap|spanner|sql>",
-    #  "token": "<couchbase|ldap|spanner|sql>",
-    #  "session": "<couchbase|ldap|spanner|sql>",
+    #  "default": "<couchbase|spanner|sql>",
+    #  "user": "<couchbase|spanner|sql>",
+    #  "site": "<couchbase|spanner|sql>",
+    #  "cache": "<couchbase|spanner|sql>",
+    #  "token": "<couchbase|spanner|sql>",
+    #  "session": "<couchbase|spanner|sql>",
     #}
     cnPersistenceHybridMapping: "{}"
     # -- Redis Sentinel Group. Often set when `config.configmap.cnRedisType` is set to `SENTINEL`. Can be used when  `config.configmap.cnCacheType` is set to `REDIS`.
@@ -310,10 +308,6 @@ config:
     cnSecretKubernetesSecret: cn
     # -- Load balancer address for AWS if the FQDN is not registered.
     lbAddr: ""
-    # -- OpenDJ certificate string. This must be encoded using base64.
-    cnLdapCrt: SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo=
-    # -- OpenDJ key string. This must be encoded using base64.
-    cnLdapKey: SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo=
     # -- Quarkus transaction recovery. When using MySQL, there could be issue regarding XA_RECOVER_ADMIN; refer to https://dev.mysql.com/doc/refman/8.0/en/privileges-provided.html#priv_xa-recover-admin for details.
     quarkusTransactionEnableRecovery: true
     # -- Keycloak logging level
@@ -349,10 +343,6 @@ config:
     tag: 1.1.6_dev
     # -- Image Pull Secrets
     pullSecrets: [ ]
-  # -- LDAP admin password if OpenDJ is used for persistence.
-  ldapPassword: P@ssw0rds
-  # -- LDAP truststore password if OpenDJ is used for persistence
-  ldapTruststorePassword: changeit
   # -- Organization name. Used for certificate creation.
   orgName: Janssen
   # -- Redis admin password if `config.configmap.cnCacheType` is set to `REDIS`.
@@ -759,10 +749,6 @@ global:
       persistenceDurationLogTarget: "FILE"
       # -- jans-auth_persistence_duration.log level
       persistenceDurationLogLevel: "INFO"
-      # -- jans-auth_persistence_ldap_statistics.log target
-      ldapStatsLogTarget: "FILE"
-      # -- jans-auth_persistence_ldap_statistics.log level
-      ldapStatsLogLevel: "INFO"
       # -- jans-auth_script.log target
       scriptLogTarget: "FILE"
       # -- jans-auth_script.log level
@@ -901,7 +887,7 @@ global:
   cnPrometheusPort: ""
   # -- Document store type to use for shibboleth files DB.
   cnDocumentStoreType: DB
-  # -- Persistence backend to run Janssen with ldap|couchbase|hybrid|sql|spanner.
+  # -- Persistence backend to run Janssen with couchbase|hybrid|sql|spanner.
   cnPersistenceType: sql
   config:
     # — Add custom annotations for kubernetes resources for the service
@@ -961,10 +947,6 @@ global:
       persistenceDurationLogTarget: "FILE"
       # -- config-api_persistence_duration.log level
       persistenceDurationLogLevel: "INFO"
-      # -- config-api_persistence_ldap_statistics.log target
-      ldapStatsLogTarget: "FILE"
-      # -- config-api_persistence_ldap_statistics.log level
-      ldapStatsLogLevel: "INFO"
       # -- config-api_script.log target
       scriptLogTarget: "FILE"
       # -- config-api_script.log level
@@ -1053,21 +1035,6 @@ global:
   nginx-ingress:
     # -- Boolean flag to enable/disable the nginx-ingress definitions chart.
     enabled: true
-  opendj:
-    # -- Boolean flag to enable/disable the OpenDJ  chart.
-    enabled: false
-    # -- Name of the OpenDJ service. Please keep it as default.
-    ldapServiceName: opendj
-    # — Add custom annotations for kubernetes resources for the service
-    customAnnotations:
-      cronjob: {}
-      horizontalPodAutoscaler: {}
-      destinationRule: {}
-      podDisruptionBudget: {}
-      service: {}
-      statefulset: {}
-      storageClass: {}
-      secret: {}
   persistence:
     # — Add custom annotations for kubernetes resources for the service
     customAnnotations:
@@ -1110,10 +1077,6 @@ global:
       persistenceDurationLogTarget: "FILE"
       # -- jans-scim_persistence_duration.log level
       persistenceDurationLogLevel: "INFO"
-      # -- jans-scim_persistence_ldap_statistics.log target
-      ldapStatsLogTarget: "FILE"
-      # -- jans-scim_persistence_ldap_statistics.log level
-      ldapStatsLogLevel: "INFO"
       # -- jans-scim_script.log target
       scriptLogTarget: "FILE"
       # -- jans-scim_script.log level
@@ -1132,7 +1095,7 @@ global:
       scimLabels: { }
       # -- SCIM ingress resource additional annotations.
       scimAdditionalAnnotations: { }
-  # -- StorageClass section for OpenDJ charts. This is not currently used by the openbanking distribution. You may specify custom parameters as needed.
+  # -- StorageClass section. This is not currently used by the openbanking distribution. You may specify custom parameters as needed.
   storageClass:
     allowVolumeExpansion: true
     allowedTopologies: []
@@ -1179,10 +1142,6 @@ global:
       persistenceDurationLogTarget: "FILE"
       # -- cacherefresh_persistence_duration.log level
       persistenceDurationLogLevel: "INFO"
-      # -- cacherefresh_persistence_ldap_statistics.log target
-      ldapStatsLogTarget: "FILE"
-      # -- cacherefresh_persistence_ldap_statistics.log level
-      ldapStatsLogLevel: "INFO"
       # -- cacherefresh_script.log target
       scriptLogTarget: "FILE"
       # -- cacherefresh_script.log level
@@ -1221,18 +1180,6 @@ global:
   cnCouchbasePasswordFile: /etc/jans/conf/couchbase_password
   # -- Path to Couchbase superuser password file
   cnCouchbaseSuperuserPasswordFile: /etc/jans/conf/couchbase_superuser_password
-  # -- Path to LDAP password file
-  cnLdapPasswordFile: /etc/jans/conf/ldap_password
-  # -- Path to LDAP truststore password file
-  cnLdapTruststorePasswordFile: /etc/jans/conf/ldap_truststore_password
-  # -- Path to OpenDJ cert file
-  cnLdapCertFile: /etc/certs/opendj.crt
-  # -- Path to OpenDJ key file
-  cnLdapKeyFile: /etc/certs/opendj.key
-  # -- Path to OpenDJ CA cert file
-  cnLdapCacertFile: /etc/certs/opendj.pem
-  # -- Path to OpenDJ truststore file
-  cnLdapTruststoreFile: /etc/certs/opendj.pkcs12
   # -- Path to file contains password for database access
   kcDbPasswordFile: /etc/jans/conf/kc_db_password
   # -- Path to file contains Keycloak admin credentials (username and password)
@@ -1271,149 +1218,6 @@ nginx-ingress:
         hosts:
           - demoexample.jans.io
 
-# -- OpenDJ is a directory server which implements a wide range of Lightweight Directory Access Protocol and related standards, including full compliance with LDAPv3 but also support for Directory Service Markup Language (DSMLv2).Written in Java, OpenDJ offers multi-master replication, access control, and many extensions.
-opendj:
-  # -- Configure the topology spread constraints. Notice this is a map NOT a list as in the upstream API
-  # https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
-  topologySpreadConstraints: {}
-    # -- Define below as many constraints as needed. The key name should follow the structure tsc1, tsc2...etc.
-    # Do not enter the key labelSelector in the entry/entries below as that is automatically injected by the chart
-    #tsc1:
-    #  maxSkew: 1
-    #  minDomains: 1 # optional; beta since v1.25
-    #  topologyKey: kubernetes.io/hostname
-    #  whenUnsatisfiable: DoNotSchedule
-    #  matchLabelKeys: [] # optional; alpha since v1.25
-    #  nodeAffinityPolicy: [] # optional; alpha since v1.25
-    #  nodeTaintsPolicy: [] # optional; alpha since v1.25
-    #tsc2:
-      #maxSkew: 1
-  # -- Configure the PodDisruptionBudget
-  pdb:
-    enabled: true
-    maxUnavailable: 1
-  # -- Configure ldap backup cronjob
-  backup:
-    enabled: true
-    cronJobSchedule: "*/59 * * * *"
-  # -- Configure the HorizontalPodAutoscaler
-  hpa:
-    enabled: true
-    minReplicas: 1
-    maxReplicas: 10
-    targetCPUUtilizationPercentage: 50
-    # -- metrics if targetCPUUtilizationPercentage is not set
-    metrics: []
-    # -- Scaling Policies
-    behavior: {}
-  # -- Add custom normal and secret envs to the service
-  usrEnvs:
-    # -- Add custom normal envs to the service
-    # variable1: value1
-    normal: {}
-    # -- Add custom secret envs to the service
-    # variable1: value1
-    secret: {}
-  # -- Add custom dns policy
-  dnsPolicy: ""
-  # -- Add custom dns config
-  dnsConfig: {}
-  image:
-    # -- Image pullPolicy to use for deploying.
-    pullPolicy: IfNotPresent
-    # -- Image  to use for deploying.
-    repository: gluufederation/opendj
-    # -- Image  tag to use for deploying.
-    tag: 5.0.0_dev
-    # -- Image Pull Secrets
-    pullSecrets: [ ]
-
-  persistence:
-    # -- OpenDJ volume size
-    size: 5Gi
-  ports:
-    tcp-admin:
-      nodePort: ""
-      port: 4444
-      protocol: TCP
-      targetPort: 4444
-    tcp-ldap:
-      nodePort: ""
-      port: 1389
-      protocol: TCP
-      targetPort: 1389
-    tcp-ldaps:
-      nodePort: ""
-      port: 1636
-      protocol: TCP
-      targetPort: 1636
-    tcp-repl:
-      nodePort: ""
-      port: 8989
-      protocol: TCP
-      targetPort: 8989
-    tcp-serf:
-      nodePort: ""
-      port: 7946
-      protocol: TCP
-      targetPort: 7946
-    udp-serf:
-      nodePort: ""
-      port: 7946
-      protocol: UDP
-      targetPort: 7946
-  # -- Service replica number.
-  replicas: 1
-  # -- Resource specs.
-  resources:
-    limits:
-      # -- CPU limit.
-      cpu: 1500m
-      # -- Memory limit.
-      memory: 2000Mi
-    requests:
-      # -- CPU request.
-      cpu: 1500m
-      # -- Memory request.
-      memory: 2000Mi
-  # -- Configure the liveness healthcheck for OpenDJ if needed.
-  # https://github.com/GluuFederation/docker-opendj/blob/master/scripts/healthcheck.py
-  livenessProbe:
-    # -- Executes the python3 healthcheck.
-    exec:
-      command:
-      - python3
-      - /app/scripts/healthcheck.py
-    initialDelaySeconds: 30
-    periodSeconds: 30
-    timeoutSeconds: 5
-    failureThreshold: 20
-  # -- Configure the readiness healthcheck for OpenDJ if needed.
-  # https://github.com/GluuFederation/docker-opendj/blob/master/scripts/healthcheck.py
-  readinessProbe:
-    tcpSocket:
-      port: 1636
-    initialDelaySeconds: 60
-    timeoutSeconds: 5
-    periodSeconds: 25
-    failureThreshold: 20
-  # -- Configure any additional volumes that need to be attached to the pod
-  volumes: []
-  # -- Configure any additional volumesMounts that need to be attached to the containers
-  volumeMounts: []
-  lifecycle:
-    preStop:
-      exec:
-        command: ["/bin/sh", "-c", "python3 /app/scripts/deregister_peer.py 1>&/proc/1/fd/1"]
-
-  # -- Additional labels that will be added across the gateway in the format of {mylabel: "myapp"}
-  additionalLabels: { }
-  # -- Additional annotations that will be added across the gateway in the format of {cert-manager.io/issuer: "letsencrypt-prod"}
-  additionalAnnotations: { }
-  # -- Add custom scripts that have been mounted to run before the entrypoint.
-  # - /tmp/custom.sh
-  # - /tmp/custom2.sh
-  customScripts: [ ]
 # -- Job to generate data and initial config for Janssen Server persistence layer.
 persistence:
   # -- Add custom normal and secret envs to the service

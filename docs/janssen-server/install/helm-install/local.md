@@ -20,7 +20,6 @@ Use the listing below for a detailed estimation of minimum required resources. T
 | Service           | CPU Unit | RAM   | Disk Space | Processor Type | Required                           |
 |-------------------|----------|-------|------------|----------------|------------------------------------|
 | Auth server       | 2.5      | 2.5GB | N/A        | 64 Bit         | Yes                                |
-| LDAP (OpenDJ)     | 1.5      | 2GB   | 10GB       | 64 Bit         | Only if Couchbase/SQL not installed|
 | fido2             | 0.5      | 0.5GB | N/A        | 64 Bit         | No                                 |
 | scim              | 1        | 1GB   | N/A        | 64 Bit         | No                                 |
 | config - job      | 0.3      | 0.3GB | N/A        | 64 Bit         | Yes on fresh installs              |
