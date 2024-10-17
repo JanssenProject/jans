@@ -30,15 +30,14 @@ pub use authz::AuthorizeError;
 use authz::Authz;
 use di::{DependencyMap, DependencySupplier};
 use init::policy_store::{load_policy_store, LoadPolicyStoreError};
-pub use jwt::DecodeJwtError;
-use jwt::JwtService;
 pub use log::LogStorage;
 use log::{init_logger, LogWriter};
 use models::app_types;
+pub use models::authorize_result::AuthorizeResult;
 pub use models::config::*;
 pub use models::log_entry::LogEntry;
 use models::log_entry::LogType;
-pub use models::request::Request;
+pub use models::request::{Request, ResourceData};
 
 /// Errors that can occur during initialization Cedarling.
 #[derive(Debug, thiserror::Error)]
@@ -88,7 +87,7 @@ impl Cedarling {
             })?;
         container.insert(policy_store);
 
-        let jwt_service = JwtService::new(config.jwt_config);
+        let jwt_service = jwt::JwtService::new_with_container(&container, config.jwt_config);
         log.log(
             LogEntry::new_with_container(&container, LogType::System)
                 .set_message("JWT service loaded successfully".to_string()),
@@ -105,7 +104,7 @@ impl Cedarling {
 
     /// Authorize request
     /// makes authorization decision based on the [`Request`]
-    pub fn authorize(&self, request: &Request) -> Result<(), AuthorizeError> {
+    pub fn authorize(&self, request: Request) -> Result<AuthorizeResult, AuthorizeError> {
         self.authz.authorize(request)
     }
 }

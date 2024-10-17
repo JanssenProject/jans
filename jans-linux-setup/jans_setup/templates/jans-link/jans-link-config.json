@@ -3,10 +3,10 @@
   ],
   "inumConfig": {
     "configId": "local_inum",
-    "bindDN": "%(ldap_binddn)s",
-    "bindPassword": "%(ldap_bind_encoded_pw)s",
+    "bindDN": "@ldap_binddn@",
+    "bindPassword": "@ldap_bind_encoded_pw@",
     "servers": [
-      "%(ldap_hostname)s:%(ldaps_port)s"
+      "@ldap_hostname@:@ldaps_port@"
     ],
     "maxConnections": 10,
     "useSSL": true,

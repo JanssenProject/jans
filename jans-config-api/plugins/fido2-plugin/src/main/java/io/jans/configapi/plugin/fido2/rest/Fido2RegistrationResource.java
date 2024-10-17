@@ -116,6 +116,7 @@ public class Fido2RegistrationResource extends BaseResource {
             @Parameter(description = "User name") @PathParam("username") @NotNull String username) {
         logger.info("FIDO2 registration entries by username.");
         List<Fido2RegistrationEntry> entries = fido2RegistrationService.findAllRegisteredByUsername(username);
+        logger.info("FIDO2 registration entries by entries:{}", entries);
         return Response.ok(entries).build();
     }
 

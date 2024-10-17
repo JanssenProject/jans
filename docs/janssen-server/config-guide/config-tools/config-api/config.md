@@ -351,7 +351,7 @@ configuration from the DB.
 While it is not recommended that an administrator directly edits a configuration 
 at the persistence layer, it may be useful information for a developer.
 
-#### A. MySQL
+#### MySQL
 ```mermaid
 erDiagram
  jansAppConf {
@@ -361,13 +361,6 @@ erDiagram
  }
 ```
 
-#### B. LDAP
-
-```mermaid
-graph LR
-A[ou=jans] --> V(ou=configuration)
- V --> V5[ou=jans-config-api]
-```
 
 
 ### Important attributes
@@ -508,7 +501,7 @@ and update.
 You can start TUI using the command below:
 
 ```bash title="Command"
-sudo /opt/jans/jans-cli/jans_cli_tui.py
+jans tui
 ```
 
 Navigate to `Config API` section where administrators can update 
