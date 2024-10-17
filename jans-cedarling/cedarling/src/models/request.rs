@@ -29,7 +29,7 @@ pub struct Request<'a> {
 }
 
 /// Cedar policy resource data
-/// field represent EntityUid
+/// fields represent EntityUid
 #[derive(serde::Deserialize, Debug, Clone)]
 pub struct ResourceData {
     /// entity type name
