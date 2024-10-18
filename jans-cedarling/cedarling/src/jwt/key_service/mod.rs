@@ -10,14 +10,14 @@ use jsonwebtoken::jwk::JwkSet;
 use jsonwebtoken::DecodingKey;
 use openid_config::OpenIdConfig;
 use reqwest::blocking::get;
-use std::cell::RefCell;
 use std::collections::HashMap;
-use std::rc::Rc;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use traits::HttpGet;
 
 use crate::models::policy_store::PolicyStore;
 pub use error::Error;
+
+use super::traits::GetKey;
 pub struct HttpService;
 
 impl HttpGet for HttpService {
@@ -44,7 +44,7 @@ impl HttpGet for HttpService {
 
 pub struct KeyService {
     idp_configs: HashMap<Box<str>, OpenIdConfig>, // <issuer (`iss`), OpenIdConfig>
-    http_service: Rc<RefCell<dyn HttpGet>>,
+    http_service: Arc<Mutex<dyn HttpGet>>,
 }
 
 #[allow(unused)]
@@ -52,20 +52,22 @@ impl KeyService {
     #[cfg(test)]
     pub fn new(
         openid_conf_endpoints: Vec<&str>,
-        http_service: Rc<RefCell<dyn HttpGet>>,
+        http_service: Arc<Mutex<dyn HttpGet>>,
     ) -> Result<Self, Error> {
         let mut idp_configs = HashMap::new();
 
         // fetch IDP configs
         for endpoint in &openid_conf_endpoints {
-            let conf_bytes = http_service.borrow().get(endpoint)?;
+            let http_service = http_service.lock().unwrap();
+            let conf_bytes = http_service.get(endpoint)?;
             let (issuer, conf) = OpenIdConfig::from_slice(&conf_bytes)?;
             idp_configs.insert(issuer, conf);
         }
 
         // fetch keys
         for (iss, conf) in &mut idp_configs {
-            let jwks_bytes = http_service.borrow().get(&conf.jwks_uri)?;
+            let http_service = http_service.lock().unwrap();
+            let jwks_bytes = http_service.get(&conf.jwks_uri)?;
             let jwks: JwkSet = serde_json::from_slice(&jwks_bytes)?;
             for jwk in jwks.keys {
                 let decoding_key = DecodingKey::from_jwk(&jwk)?;
@@ -116,7 +118,8 @@ impl KeyService {
 
         // fetch fresh keys
         let mut new_keys = HashMap::new();
-        let jwks_bytes = self.http_service.borrow().get(&conf.jwks_uri)?;
+        let http_service = self.http_service.lock().unwrap();
+        let jwks_bytes = http_service.get(&conf.jwks_uri)?;
         let jwks: JwkSet = serde_json::from_slice(&jwks_bytes)?;
         for jwk in jwks.keys {
             let decoding_key = DecodingKey::from_jwk(&jwk)?;
@@ -129,5 +132,17 @@ impl KeyService {
         conf.decoding_keys = new_keys;
 
         Ok(())
+    }
+}
+
+impl GetKey for KeyService {
+    fn get_key(&self, kid: &str) -> Result<&jsonwebtoken::DecodingKey, super::Error> {
+        for conf in &self.idp_configs {
+            if let Some(key) = self.get_key(&conf.0, &kid) {
+                return Ok(key);
+            }
+        }
+
+        Err(super::Error::MissingKey(kid.into()))
     }
 }
