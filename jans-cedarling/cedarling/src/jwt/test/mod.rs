@@ -11,7 +11,6 @@ mod utils;
 use super::{decoding_strategy::DecodingStrategy, JwtService};
 use jsonwebtoken::Algorithm;
 use mock_key_service::*;
-use std::sync::Arc;
 use utils::*;
 
 #[test]
@@ -91,7 +90,7 @@ fn decode_claims_with_validation() {
 
     // Setup JWT service
     let service = JwtService::new(DecodingStrategy::WithValidation {
-        key_service: Arc::new(key_service),
+        key_service: Box::new(key_service),
         supported_algs: vec![Algorithm::ES256],
     });
 
@@ -140,7 +139,7 @@ fn should_not_validate_diff_aud() {
 
     // Setup JWT service
     let service = JwtService::new(DecodingStrategy::WithValidation {
-        key_service: Arc::new(key_service),
+        key_service: Box::new(key_service),
         supported_algs: vec![Algorithm::ES256],
     });
 
@@ -187,7 +186,7 @@ fn should_panic_on_unsuppored_alg() {
 
     // Setup JWT service
     let service = JwtService::new(DecodingStrategy::WithValidation {
-        key_service: Arc::new(key_service),
+        key_service: Box::new(key_service),
         supported_algs: vec![Algorithm::HS256],
     });
 

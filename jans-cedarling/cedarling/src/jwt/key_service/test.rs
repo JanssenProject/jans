@@ -56,7 +56,9 @@ fn key_service_can_retrieve_keys() {
     let http_service = Arc::new(Mutex::new(http_service));
 
     // setup KeyService
-    let key_service = KeyService::new(vec![&openid_conf_endpoint], http_service.clone()).unwrap();
+    let key_service =
+        KeyService::new_with_http_service(vec![&openid_conf_endpoint], http_service.clone())
+            .unwrap();
 
     assert!(key_service.get_key(issuer, KEY_ID_1).is_some())
 }
@@ -82,7 +84,8 @@ fn key_service_can_update_keys() {
 
     // setup KeyService
     let mut key_service =
-        KeyService::new(vec![&openid_conf_endpoint], http_service.clone()).unwrap();
+        KeyService::new_with_http_service(vec![&openid_conf_endpoint], http_service.clone())
+            .unwrap();
 
     // this should fail first
     assert!(key_service.get_key(issuer, KEY_ID_2).is_none());
