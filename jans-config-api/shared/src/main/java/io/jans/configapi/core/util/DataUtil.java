@@ -348,7 +348,7 @@ public class DataUtil {
         Date dateValue = getDate(fieldFilterData.getValue(), primaryKey, persistenceEntryManager);
 
         if (FilterOperator.EQUALITY.getSign().equalsIgnoreCase(fieldFilterData.getOperator())) {
-            dateFilter = Filter.createEqualityFilter(fieldFilterData.getField(), dateValue);
+            dateFilter = Filter.createGreaterOrEqualFilter(fieldFilterData.getField(), dateValue);
 
         } else if (FilterOperator.GREATER.getSign().equalsIgnoreCase(fieldFilterData.getOperator())
                 || FilterOperator.GREATER_OR_EQUAL.getSign().equalsIgnoreCase(fieldFilterData.getOperator())) {

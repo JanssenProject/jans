@@ -146,7 +146,7 @@ public class Fido2RegistrationService {
                 Filter.createEqualityFilter("jansStatus", Fido2RegistrationStatus.registered.getValue()));
 
         log.info("Find Fido2 Registered by searchFilter:{}", searchFilter);
-        return persistenceEntryManager.findEntries(baseDn, Fido2RegistrationEntry.class, searchFilter);
+        return persistenceEntryManager.findEntries(getDnFido2RegistrationEntry(null), Fido2RegistrationEntry.class, searchFilter);
     }
 
     public String getBaseDnForFido2RegistrationEntries(String userInum) {
