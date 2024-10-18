@@ -28,4 +28,11 @@ pub struct PolicyStore {
     #[serde(deserialize_with = "parse_policy_set")]
     #[allow(dead_code)]
     pub policies: cedar_policy::PolicySet,
+    pub trusted_idps: Vec<TrustedIdp>,
+}
+
+/// Represents a trusted identity provider in the policy store
+#[derive(Debug, Clone, serde::Deserialize)]
+pub struct TrustedIdp {
+    pub openid_configuration_endpoint: Box<str>,
 }

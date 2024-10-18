@@ -5,6 +5,8 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
+use super::key_service;
+
 /// Error type for the JWT service.
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
@@ -31,4 +33,8 @@ pub enum Error {
     /// Config contains an unimplemented algorithm
     #[error("an algorithim defined in the config is not yet implemented: {0}")]
     UnimplementedAlgorithm(Box<str>),
+
+    /// Config contains an unimplemented algorithm
+    #[error("Error initializing KeyService: {0}")]
+    KeyServiceInitError(#[source] key_service::Error),
 }

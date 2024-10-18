@@ -5,6 +5,9 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
+use crate::models::policy_store::PolicyStore;
+
+use super::key_service::KeyService;
 use super::traits::{Decode, ExtractClaims, GetKey};
 use super::Error;
 use di::DependencySupplier;
@@ -23,7 +26,7 @@ pub enum DecodingStrategy {
 
     /// Decoding strategy that performs validation using a key service and supported algorithms.
     WithValidation {
-        key_service: Arc<dyn GetKey>,
+        key_service: Box<dyn GetKey>,
         supported_algs: Vec<jwt::Algorithm>,
     },
 }
@@ -51,14 +54,25 @@ impl DecodingStrategy {
         dep_map: &di::DependencyMap,
         config_algs: &Vec<String>,
     ) -> Result<Self, Error> {
-        let key_service: Arc<KeyServiceWrapper> = dep_map.get();
+        let config: Arc<PolicyStore> = dep_map.get();
+
+        // init key service
+        let openid_conf_endpoints = config
+            .trusted_idps
+            .iter()
+            .map(|x| x.openid_configuration_endpoint.as_ref())
+            .collect();
+        let key_service =
+            KeyService::new(openid_conf_endpoints).map_err(Error::KeyServiceInitError)?;
+
+        // get supported algorithms for validating JWT
         let mut supported_algs = vec![];
         for alg_str in config_algs {
             supported_algs.push(string_to_alg(&alg_str)?);
         }
 
         Ok(Self::WithValidation {
-            key_service: key_service.0.clone(),
+            key_service: Box::new(key_service),
             supported_algs,
         })
     }
@@ -115,7 +129,7 @@ fn decode_and_validate_jwt<T: DeserializeOwned>(
     aud: Option<impl ToString>,
     req_sub: bool,
     supported_algs: &Vec<jwt::Algorithm>,
-    key_service: &Arc<dyn GetKey>,
+    key_service: &Box<dyn GetKey>,
 ) -> Result<T, Error> {
     let header = jwt::decode_header(jwt).map_err(Error::ParsingError)?;
 
