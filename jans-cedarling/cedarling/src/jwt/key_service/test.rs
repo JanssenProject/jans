@@ -1,4 +1,7 @@
-use std::{cell::RefCell, collections::HashMap, rc::Rc};
+use std::{
+    collections::HashMap,
+    sync::{Arc, Mutex},
+};
 
 use bytes::Bytes;
 use serde::Serialize;
@@ -50,7 +53,7 @@ fn key_service_can_retrieve_keys() {
     let mut http_service = MockHttpService::new();
     http_service.set_response(&openid_conf_endpoint, mock_openid_conf_resp.into());
     http_service.set_response(&jwks_uri, JWKS_RESP_1.into());
-    let http_service = Rc::new(RefCell::new(http_service));
+    let http_service = Arc::new(Mutex::new(http_service));
 
     // setup KeyService
     let key_service = KeyService::new(vec![&openid_conf_endpoint], http_service.clone()).unwrap();
@@ -75,7 +78,7 @@ fn key_service_can_update_keys() {
     let mut http_service = MockHttpService::new();
     http_service.set_response(&openid_conf_endpoint, mock_openid_conf_resp.into());
     http_service.set_response(&jwks_uri, JWKS_RESP_1.into());
-    let http_service = Rc::new(RefCell::new(http_service));
+    let http_service = Arc::new(Mutex::new(http_service));
 
     // setup KeyService
     let mut key_service =
@@ -84,9 +87,10 @@ fn key_service_can_update_keys() {
     // this should fail first
     assert!(key_service.get_key(issuer, KEY_ID_2).is_none());
 
-    http_service
-        .borrow_mut()
-        .set_response(&jwks_uri, JWKS_RESP_2.into());
+    {
+        let mut http_service = http_service.lock().unwrap();
+        http_service.set_response(&jwks_uri, JWKS_RESP_2.into());
+    }
 
     assert!(key_service
         .get_key_or_update_jwks(issuer, KEY_ID_2)
