@@ -168,9 +168,7 @@ class Plugin(DialogUtils):
                         widget_style=cli_style.black_bg_widget
                     ),
 
-
                     get_logging_level_widget(self.data.get('loggingLevel', 'INFO')),
-
 
                     common_data.app.getTitledText(
                         title=_("Logging Layout"),
@@ -541,6 +539,9 @@ class Plugin(DialogUtils):
         self.app.show_jans_dialog(dialog)
 
     async def get_configuration(self) -> None:
+        if self.data:
+            return
+
         'Coroutine for getting Janssen Config API configuration.'
         try:
             response = self.app.cli_object.process_command_by_id(

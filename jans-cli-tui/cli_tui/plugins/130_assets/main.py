@@ -112,6 +112,18 @@ class Plugin(DialogUtils):
                 return
 
             new_data = self.make_data_from_dialog(tabs={'asset': dialog.body})
+
+            stem_, ext = os.path.splitext(new_data['fileName'])
+
+            config_api_plugin = common_data.app.get_plugin_by_id('config-api')
+            mapping_dirs = config_api_plugin.data['assetMgtConfiguration']['assetDirMapping']
+            for mapping in mapping_dirs:
+                if new_data['service'] in mapping['jansServiceModule'] and ext[1:] in mapping['type']:
+                    break
+            else:
+                self.app.show_message(common_strings.error, _("This file type is not supported by this service"), tobefocused=dialog)
+                return
+
             data.update(new_data)
 
             if not (data.get('description') and data.get('fileName')):
@@ -287,12 +299,6 @@ class Plugin(DialogUtils):
 
 
     async def get_initial_data(self) -> None:
-        if not hasattr(common_data, 'asset_services'):
-            response = await get_event_loop().run_in_executor(common_data.app.executor, common_data.app.cli_requests, {'operation_id': 'get-asset-services'})
-            try:
-                common_data.asset_services = response.json()
-            except Exception as e:
-                self.app.logger.error(f"Fail to get asset services: {e}")
 
         if not hasattr(common_data, 'asset_types'):
             response = await get_event_loop().run_in_executor(common_data.app.executor, common_data.app.cli_requests, {'operation_id': 'get-asset-types'})
