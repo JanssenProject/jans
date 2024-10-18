@@ -15,7 +15,7 @@ public class Fido2AuthenticationData extends Fido2Data {
 
     private String id;
     private String username;
-    private String domain;
+    private String origin;
     private String userId;
     private String challenge;
 
@@ -26,7 +26,7 @@ public class Fido2AuthenticationData extends Fido2Data {
 
     private Fido2AuthenticationStatus status;
 
-    private String applicationId;
+    private String rpId;
 
     public String getId() {
         return id;
@@ -44,15 +44,25 @@ public class Fido2AuthenticationData extends Fido2Data {
         this.username = username;
     }
 
-    public String getDomain() {
-        return domain;
-    }
+    
 
-    public void setDomain(String domain) {
-        this.domain = domain;
-    }
+    public String getOrigin() {
+		return origin;
+	}
 
-    public String getUserId() {
+	public void setOrigin(String origin) {
+		this.origin = origin;
+	}
+
+	public String getRpId() {
+		return rpId;
+	}
+
+	public void setRpId(String rpId) {
+		this.rpId = rpId;
+	}
+
+	public String getUserId() {
         return userId;
     }
 
@@ -100,20 +110,16 @@ public class Fido2AuthenticationData extends Fido2Data {
         this.status = status;
     }
 
-	public String getApplicationId() {
-		return applicationId;
-	}
-
-	public void setApplicationId(String applicationId) {
-		this.applicationId = applicationId;
-	}
-
 	@Override
 	public String toString() {
-		return "Fido2AuthenticationData [id=" + id + ", username=" + username + ", domain=" + domain + ", userId="
+		return "Fido2AuthenticationData [id=" + id + ", username=" + username + ", origin=" + origin + ", userId="
 				+ userId + ", challenge=" + challenge + ", assertionRequest=" + assertionRequest
 				+ ", assertionResponse=" + assertionResponse + ", userVerificationOption=" + userVerificationOption
-				+ ", status=" + status + ", applicationId=" + applicationId + "]";
+				+ ", status=" + status + ", rpId=" + rpId + "]";
 	}
+
+	
+
+	
 
 }
