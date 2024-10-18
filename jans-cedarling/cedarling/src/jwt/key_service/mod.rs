@@ -1,11 +1,12 @@
 mod error;
+mod http_service;
 mod openid_config;
 #[cfg(test)]
 mod test;
 mod traits;
 
+use super::traits::{GetKey, GetKeyMut};
 use bytes::Bytes;
-use di::{self, DependencySupplier};
 use jsonwebtoken::jwk::JwkSet;
 use jsonwebtoken::DecodingKey;
 use openid_config::OpenIdConfig;
@@ -14,10 +15,8 @@ use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 use traits::HttpGet;
 
-use crate::models::policy_store::PolicyStore;
 pub use error::Error;
 
-use super::traits::GetKey;
 pub struct HttpService;
 
 impl HttpGet for HttpService {
@@ -50,7 +49,7 @@ pub struct KeyService {
 #[allow(unused)]
 impl KeyService {
     #[cfg(test)]
-    pub fn new(
+    pub fn new_with_http_service(
         openid_conf_endpoints: Vec<&str>,
         http_service: Arc<Mutex<dyn HttpGet>>,
     ) -> Result<Self, Error> {
@@ -82,13 +81,37 @@ impl KeyService {
         })
     }
 
-    pub fn new_with_container(dep_map: &di::DependencyMap) -> Self {
-        let _policies: Arc<PolicyStore> = dep_map.get();
-        // Get idp here from the policy store
-        todo!()
+    pub fn new(openid_conf_endpoints: Vec<&str>) -> Result<Self, Error> {
+        let http_service = Arc::new(Mutex::new(HttpService));
+        let mut idp_configs = HashMap::new();
+
+        // fetch IDP configs
+        for endpoint in &openid_conf_endpoints {
+            let http_service = http_service.lock().unwrap();
+            let conf_bytes = http_service.get(endpoint)?;
+            let (issuer, conf) = OpenIdConfig::from_slice(&conf_bytes)?;
+            idp_configs.insert(issuer, conf);
+        }
+
+        // fetch keys
+        for (iss, conf) in &mut idp_configs {
+            let http_service = http_service.lock().unwrap();
+            let jwks_bytes = http_service.get(&conf.jwks_uri)?;
+            let jwks: JwkSet = serde_json::from_slice(&jwks_bytes)?;
+            for jwk in jwks.keys {
+                let decoding_key = DecodingKey::from_jwk(&jwk)?;
+                let key_id = jwk.common.key_id.ok_or(Error::JwkMissingKeyId)?;
+                conf.decoding_keys.insert(key_id.into(), decoding_key);
+            }
+        }
+
+        Ok(Self {
+            idp_configs,
+            http_service,
+        })
     }
 
-    pub fn get_key(&self, iss: &str, kid: &str) -> Option<&DecodingKey> {
+    fn get_key(&self, iss: &str, kid: &str) -> Option<&DecodingKey> {
         let idp = match self.idp_configs.get(iss) {
             Some(idp) => idp,
             None => return None,
