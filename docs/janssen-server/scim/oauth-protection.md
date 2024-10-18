@@ -4,7 +4,7 @@ tags:
   - scim
 ---
 
-## OAuth protection
+# OAuth protection
 
 The SCIM API endpoints are by default protected by (Bearer) OAuth 2.0 tokens. Depending on the operation, these tokens must have certain scopes for the operations to be authorized. The table below summarizes this fact:
 
@@ -36,11 +36,11 @@ From the "Basic" section, grab the "client id" and "client secret". This secret 
 
 This is a `curl` example of how to get a token valid for retrieving and modifying users (line breaks added for readability). Note the use of white space to separate scope names.
 
-```
+```bash title="Command"
 curl -k -u 'CLIENT_ID:DECRYPTED_CLIENT_SECRET' -k -d grant_type=client_credentials -d 
     scope='https://jans.io/scim/users.read https://jans.io/scim/users.write' 
     https://your-jans-server/jans-auth/restv1/token
-``` 
+```
 
 Grab the "access_token" from the obtained response.
 
@@ -48,7 +48,7 @@ Grab the "access_token" from the obtained response.
 
 The below is a curl example of how to call an operation by passing the previously obtained token (line breaks added for readability):
 
-```
+```bash title="Command"
 curl -k -G -H 'Authorization: Bearer ACCESS_TOKEN' --data-urlencode 'filter=displayName co "Admin"' 
     https://your-jans-server/jans-scim/restv1/v2/Users
 
