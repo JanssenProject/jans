@@ -110,6 +110,15 @@ public final class SqlSessionSample {
         Filter filterSessAttr7 = Filter.createLessOrEqualFilter("jansSessAttr.exp", expirationDate.getTimeInMillis());
         List<SimpleSession> sessAttr7 = sqlEntryManager.findEntries("o=jans", SimpleSession.class, filterSessAttr7, SearchScope.SUB, null, null, 0, 0, 0);
         LOG.info(String.format("Found sessions by exp <= %d: " + sessAttr7.size(), expirationDate.getTimeInMillis()));
-    }
 
+        // Find by json_path test=false
+        Filter filterSessAttr8 = Filter.createSubstringFilter("jansSessAttr.uid", null, new String[] { "rg" }, null);
+        List<SimpleSession> sessAttr8 = sqlEntryManager.findEntries("o=jans", SimpleSession.class, filterSessAttr8, SearchScope.SUB, null, null, 0, 0, 0);
+        LOG.info("Found sessions by uid == *rg*: " + sessAttr8.size());
+
+	    // Find by json_path test=false
+	    Filter filterSessAttr9 = Filter.createPresenceFilter("jansSessAttr.uid");
+	    List<SimpleSession> sessAttr9 = sqlEntryManager.findEntries("o=jans", SimpleSession.class, filterSessAttr9, SearchScope.SUB, null, null, 0, 0, 0);
+	    LOG.info("Found sessions by uid == *: " + sessAttr9.size());
+    }
 }
