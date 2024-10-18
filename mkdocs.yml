@@ -305,7 +305,7 @@ nav:
       - Customize Web pages: janssen-server/developer/customization/customize-web-pages.md
       - Custom client logs: janssen-server/developer/customization/custom-client-logs.md
     - Interception Scripts:
-      - script-catalog/README.md
+      - janssen-server/developer/scripts/README.md
       - Application Session: script-catalog/application_session/application-session.md
       - Authorization Challenge: script-catalog/authorization_challenge/authorization-challenge.md
       - CIBA End User Notification: script-catalog/ciba/ciba.md
