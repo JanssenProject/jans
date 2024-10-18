@@ -14,7 +14,7 @@ Interception scripts can be used to implement custom business logic for authenti
 Let's get the task information using below command:
 
 ```
-/opt/jans/jans-cli/config-cli.py --info CustomScripts
+jans cli --info CustomScripts
 ```
 
 In return we gets each of the sub-task details:
@@ -38,7 +38,7 @@ Operation ID: delete-config-scripts-by-inum
   Description: Deletes a custom script.
   url-suffix: inum
 
-To get sample schema type /opt/jans/jans-cli/config-cli.py --schema <schma>, for example /opt/jans/jans-cli/config-cli.py --schema CustomScript
+To get sample schema type jans cli --schema <schma>, for example jans cli --schema CustomScript
 ```
 
 Let's perform each of this operation.
@@ -51,7 +51,7 @@ Let's perform each of this operation.
 The command line is:
 
 ```
-/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts
+jans cli --operation-id get-config-scripts
 ```
 
 It returns all the custom scripts of the Janssen Server. 
@@ -70,7 +70,7 @@ Operation ID: post-config-scripts
 So, let's get the schema first:
 
 ```
-/opt/jans/jans-cli/config-cli.py CustomScript > /tmp/cs.json
+jans cli CustomScript > /tmp/cs.json
 ```
 
 ```
@@ -145,7 +145,7 @@ Two types of programming language available there. Those are `Python` and `JavaS
 Alright, let's add the script using the command line we have:
 
 ```
-/opt/jans/jans-cli/config-cli.py --operation-id post-config-scripts --data /tmp/cs.json
+jans cli --operation-id post-config-scripts --data /tmp/cs.json
 ```
 
 ```
@@ -222,7 +222,7 @@ As we created a custom script in the [above](custom-scripts-config.md#adds-a-new
 You can see, I have added `configurationProperties` for testing purpose only. In case you need to change the script, you can do that by changing the `script` path as well.
 
 ```
-/opt/jans/jans-cli/config-cli.py --operation-id put-config-scripts --data /tmp/cs.json
+jans cli --operation-id put-config-scripts --data /tmp/cs.json
 ```
 
 ```
@@ -273,13 +273,13 @@ Operation ID: get-config-scripts-by-type
 
 The command line is:
 ```
-/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts-by-type --url-suffix type:script-type-name
+jans cli --operation-id get-config-scripts-by-type --url-suffix type:script-type-name
 ```
 
 For an example, let's find all the scripts of `CLIENT_REGISTRATION` type. So, the command line is:
 
 ```
-/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts-by-type --url-suffix type:CLIENT_REGISTRATION
+jans cli --operation-id get-config-scripts-by-type --url-suffix type:CLIENT_REGISTRATION
 ```
 
 It returns all the custom scripts that are related to the `CLIENT_REGISTRATION` type available in the Janssen Server. You will find the name of all the types [here](custom-scripts-config.md#name-of-the-type-of-scripts)
@@ -297,7 +297,7 @@ Operation ID: get-config-scripts-by-inum
 command line:
 
 ```
-/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts-by-inum --url-suffix inum:inum_value
+jans cli --operation-id get-config-scripts-by-inum --url-suffix inum:inum_value
 ```
 
 
@@ -306,7 +306,7 @@ For example, we can show details here that we already added in the Janssen Serve
 In our case, the command line is:
 
 ```
-/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts-by-inum --url-suffix inum:61aef81b-b22d-42c0-89d5-b098c976a2b7
+jans cli --operation-id get-config-scripts-by-inum --url-suffix inum:61aef81b-b22d-42c0-89d5-b098c976a2b7
 ```
 
 It returns the configuration of the custom script matched with the given `inum` value.
@@ -353,13 +353,13 @@ Well, we can delete any custom script also in deed. In that case, we need to rem
 Command line: 
 
 ```
-/opt/jans/jans-cli/config-cli.py --operation-id delete-config-scripts-by-inum --url-suffix inum:inum_value
+jans cli --operation-id delete-config-scripts-by-inum --url-suffix inum:inum_value
 ```
 
 For example, in our case; the command line is:
 
 ```
-/opt/jans/jans-cli/config-cli.py --operation-id delete-config-scripts-by-inum --url-suffix inum:61aef81b-b22d-42c0-89d5-b098c976a2b7
+jans cli --operation-id delete-config-scripts-by-inum --url-suffix inum:61aef81b-b22d-42c0-89d5-b098c976a2b7
 ```
 
 That's all for `Custom Script` management with `CLI` feature.

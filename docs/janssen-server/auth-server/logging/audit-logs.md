@@ -43,7 +43,7 @@ Audit events:
 
 
 # Enable/Disable Audit Logs on Jans TUI
-Using Jans TUI we can easily `Enable` or `Disable` Audit Logs. Go to `/opt/jans/jans-cli/config-cli-tui.py` select `Auth Server` tab then `Properties` tab. Now set the value of  `enabledOAuthAuditLogging` pressing Enter button on your keyboard. Save it and let's see below image 
+Using Jans TUI we can easily `Enable` or `Disable` Audit Logs. Go to `jans tui` select `Auth Server` tab then `Properties` tab. Now set the value of  `enabledOAuthAuditLogging` pressing Enter button on your keyboard. Save it and let's see below image 
 
 ![auditLogs](https://github.com/JanssenProject/jans/assets/43112579/2bf87258-083c-47f5-bce5-13285582ec4b)
 

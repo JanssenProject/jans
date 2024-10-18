@@ -102,7 +102,7 @@ Use external key? [Y|n] : y
 ### Configure Certificate
 
 ```
- /opt/jans/jans-cli/config-cli.py -CC /opt/jans/jans-setup/output/CA/client.crt -CK /opt/jans/jans-setup/output/CA/client.key
+ jans cli -CC /opt/jans/jans-setup/output/CA/client.crt -CK /opt/jans/jans-setup/output/CA/client.key
 ```
 
 ## Test
@@ -116,7 +116,7 @@ After installation we have to complete device authentication to use openbanking.
 launch jans-cli using below command
 
 ```
-/opt/jans/jans-cli/config-cli.py -CC /opt/jans/jans-setup/output/CA/client.crt -CK /opt/jans/jans-setup/output/CA/client.key
+jans cli -CC /opt/jans/jans-setup/output/CA/client.crt -CK /opt/jans/jans-setup/output/CA/client.key
 ```
 further testing is same as jans server
 
@@ -125,7 +125,7 @@ further testing is same as jans server
 we can run below command at command line.
 for ex:
 ```
-/opt/jans/jans-cli/config-cli.py -CC /opt/jans/jans-setup/output/CA/client.crt -CK /opt/jans/jans-setup/output/CA/client.key –operation-id get-oauth-openid-clients
+jans cli -CC /opt/jans/jans-setup/output/CA/client.crt -CK /opt/jans/jans-setup/output/CA/client.key –operation-id get-oauth-openid-clients
 ```
 
 same way we can run  other commands.

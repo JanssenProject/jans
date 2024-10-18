@@ -9,7 +9,7 @@ tags:
 
 First thing, let's get the information for `Attribute`:
 ```shell
-/opt/jans/jans-cli/config-cli.py --info Attribute
+jans cli --info Attribute
 ```
 In return, we get a list of Operations ID as below:
 
@@ -44,7 +44,7 @@ Operation ID: patch-attributes-by-inum
   inum: Attribute Id [string]
   Schema: Array of PatchRequest
 
-To get sample schema type /opt/jans/jans-cli/config-cli.py --schema <schma>, for example /opt/jans/jans-cli/config-cli.py --schema PatchRequest
+To get sample schema type jans cli --schema <schma>, for example jans cli --schema PatchRequest
 ```
 
 We have discussed here about each of this operations ID with few examples to understand how these really works.
@@ -81,13 +81,13 @@ Operation ID: get-attributes
 
 To get all the attributes without any arguments, run the following command:
 ```commandline
-/opt/jans/jans-cli/config-cli.py --operation-id get-attributes
+jans cli --operation-id get-attributes
 ```
 
 To get attributes with passing the arguments, let's retrieve randomly limit:5:
 
 ```commandline
-/opt/jans/jans-cli/config-cli.py --operation-id get-attributes --endpoint-args limit:1
+jans cli --operation-id get-attributes --endpoint-args limit:1
 ```
 
 It will return only one attribute details randomly:
@@ -139,7 +139,7 @@ Calling with params limit=1
 To get attributes with `pattern & status`:
 
 ```commandline
-/opt/jans/jans-cli/config-cli.py --operation-id get-attributes --endpoint-args limit:3,pattern:profile,status:ACTIVE
+jans cli --operation-id get-attributes --endpoint-args limit:3,pattern:profile,status:ACTIVE
 ```
 In return, we get a list of attribute that are matched with the given `pattern` and `status`:
 
@@ -231,7 +231,7 @@ Operation ID: post-attributes
 ```
 Before adding a new attribute, let's get sample `schema`:
 ```commandline
-/opt/jans/jans-cli/config-cli.py --schema JansAttribute > /tmp/attribute.json
+jans cli --schema JansAttribute > /tmp/attribute.json
 ```  
 It will return as below:
 
@@ -299,7 +299,7 @@ nano /tmp/attribute.json
 
 Now, let's add this attribute using `post-attributes`:
 ```commandline
-/opt/jans/jans-cli/config-cli.py --operation-id post-attributes --data /tmp/attribute.json
+jans cli --operation-id post-attributes --data /tmp/attribute.json
 ```
 It will create a new attribute into the Attribute list with updated `inum & dn`:
 
@@ -344,7 +344,7 @@ It will create a new attribute into the Attribute list with updated `inum & dn`:
 This operation-id can be used to update an existing attribute information. The Janssen Server administrator can make changes to attributes, such as changing their status to `active/inactive` by using this operation-ID. Let's look at the schema:
 
 ```
-/opt/jans/jans-cli/config-cli.py --schema JansAttribute > /tmp/attrib.json
+jans cli --schema JansAttribute > /tmp/attrib.json
 ```
 
 You must see the similar schema while performed in `post-attributes` operation.
@@ -371,7 +371,7 @@ In our case, I have modified the schema file as below:
 Now if we run the below command line:
 
 ```
-/opt/jans/jans-cli/config-cli.py --operation-id put-attributes --data /tmp/attrb.json
+jans cli --operation-id put-attributes --data /tmp/attrb.json
 ```
 
 ```
@@ -423,13 +423,13 @@ As we know, There are a lot of attributes available in the Janssen Server includ
 Getting an attribute information by using its `inum` is pretty simple.
 
 ```
-/opt/jans/jans-cli/config-cli.py --operation-id get-attributes-by-inum --url-suffix inum:attribute-iunm-value
+jans cli --operation-id get-attributes-by-inum --url-suffix inum:attribute-iunm-value
 ```
 
 It will show all details information of the selected Attribute as below example.
 
 ```
-/opt/jans/jans-cli/config-cli.py --operation-id get-attributes-by-inum --url-suffix inum:b691f2ab-a7db-4725-b85b-9961575b441f
+jans cli --operation-id get-attributes-by-inum --url-suffix inum:b691f2ab-a7db-4725-b85b-9961575b441f
 
 Getting access token for scope https://jans.io/oauth/config/attributes.readonly
 {
@@ -475,7 +475,7 @@ Getting access token for scope https://jans.io/oauth/config/attributes.readonly
 For any reason, If it needs to delete any attribute, you can do that simply using its `inum` value. See below example, just change the `inum` value with one that you want to delete.
 
 ```
-/opt/jans/jans-cli/config-cli.py --operation-id delete-attributes-by-inum --url-suffix inum:b691f2ab-a7db-4725-b85b-9961575b441f
+jans cli --operation-id delete-attributes-by-inum --url-suffix inum:b691f2ab-a7db-4725-b85b-9961575b441f
 ```
 
 ## Patch Attributes
@@ -492,7 +492,7 @@ Operation ID: patch-attributes-by-inum
 If we look at the description, we see that there is a schema file. Let's get the schema file with below command:
 
 ```
-/opt/jans/jans-cli/config-cli.py --schema PatchRequest > /tmp/patch.json
+jans cli --schema PatchRequest > /tmp/patch.json
 ```
 
 ```
@@ -555,7 +555,7 @@ Before patching the attribute, its properties are:
 According to the schema file, There should be two changes, `status` and `jansHideOnDiscovery`. Let's perform the operation:
 
 ```
-/opt/jans/jans-cli/config-cli.py --operation-id patch-attributes-by-inum --url-suffix inum:6EEB --data /tmp/patch.json
+jans cli --operation-id patch-attributes-by-inum --url-suffix inum:6EEB --data /tmp/patch.json
 ```
 
 The updated attribute looks like:

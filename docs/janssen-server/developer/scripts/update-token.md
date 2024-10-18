@@ -34,7 +34,7 @@ Jans AS->>RP: return token(s) (Access token, ID token or Refresh Token) reflecti
 1. Create cs.json with the contents of a CUSTOM script. To do that, run the following command.
 
 ```
-/opt/jans/jans-cli/config-cli.py --schema CustomScript > /tmp/cs.json
+jans cli --schema CustomScript > /tmp/cs.json
 ```
 
 2. Edit the file's contents to reflect the addition of the UpdateToken custom script.
@@ -93,7 +93,7 @@ Jans AS->>RP: return token(s) (Access token, ID token or Refresh Token) reflecti
  - Add the custom script. Save the response, it will contain the inum of the newly added script.
  - 
 ```
-/opt/jans/jans-cli/config-cli.py --operation-id post-config-scripts --data /tmp/cs.json
+jans cli --operation-id post-config-scripts --data /tmp/cs.json
 ```
 
 ## Associate an Update Token script to a client (RP) [optional step]
@@ -105,7 +105,7 @@ To Associate an Update Token script to a client (RP), execute the command below 
  - inum of the update_token script
 
  ```
- /opt/jans/jans-cli/config-cli.py --operation-id patch-oauth-openid-clients-by-inum --url-suffix inum:inum_of_client
+ jans cli --operation-id patch-oauth-openid-clients-by-inum --url-suffix inum:inum_of_client
   --data '[
      {
 	"op": "add",

@@ -39,7 +39,7 @@ the custom assets, check the operations under the `JansAssets` task using the
 command below.
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --info JansAssets
+jans cli --info JansAssets
 ```
 
 ```test title="Sample Output" linenums="1"
@@ -76,7 +76,7 @@ Operation ID: post-new-asset
  Description: Upload new asset
  Schema: AssetForm
 
-To get sample schema type /opt/jans/jans-cli/config-cli.py --schema-sample <schema>, for example /opt/jans/jans-cli/config-cli.py --schema-sample AssetForm
+To get sample schema type jans cli --schema-sample <schema>, for example jans cli --schema-sample AssetForm
 ```
 
 ### Get All Current Custom Assets
@@ -85,7 +85,7 @@ Use the operation ID `get-all-assets` to get all the currently configured
 custom assets on the Janssen Server.
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --operation-id get-all-assets
+jans cli --operation-id get-all-assets
 ```
 ```json title="Sample Output" linenums="1"
 {
@@ -144,7 +144,7 @@ With `get-asset-by-inum` operation-id, we can get any specific asset matched
 with `inum`. If we know the `inum`, we can simply use the below command:
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --operation-id get-asset-by-inum \
+jans cli --operation-id get-asset-by-inum \
 --url-suffix inum:61edc29d-45f8-4ab9-8c9a-7b39e4cbe440
 ```
 It returns the details as below:
@@ -174,7 +174,7 @@ With `get-asset-by-name` operation-id, we can get any specific asset matched wit
  If we know the `name`, we can simply use the below command:
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --operation-id get-asset-by-name \
+jans cli --operation-id get-asset-by-name \
 --url-suffix name:p1.properties
 ```
 It returns the details as below:
@@ -208,7 +208,7 @@ Get the list of Janssen Server services that support custom assets
 by performing `get-asset-services` operation.
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --operation-id get-asset-services
+jans cli --operation-id get-asset-services
 ```
 
 ```text title="Sample Output" linenums="1"
@@ -231,7 +231,7 @@ Get the asset types of your Janssen Server by performing `get-asset-types`
 operation.
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --operation-id get-asset-types
+jans cli --operation-id get-asset-types
 ```
 
 ```text title="Sample Output" linenums="1"
@@ -258,7 +258,7 @@ operation requires data to be sent according to `AssetForm` schema.
 To see the schema, use the command below:
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --schema AssetForm
+jans cli --schema AssetForm
 ```
 
 For better understanding, the Janssen Server also provides a sample of data to 
@@ -266,7 +266,7 @@ be sent to the server. This sample conforms to the schema above. Use the command
 below to get the sample.
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --schema-sample AssetForm
+jans cli --schema-sample AssetForm
 ```
 
 Using the schema and the example above, we have added below data to the 
@@ -290,7 +290,7 @@ a custom asset to the `jans-auth` service.
 Now let's post this Assert to the Janssen Server to be added to the existing set:
 
 ```bash title="Command"
- /opt/jans/jans-cli/config-cli.py --operation-id post-new-asset \
+ jans cli --operation-id post-new-asset \
  --data /tmp/add-asset.json
 ```
 
@@ -347,7 +347,7 @@ content in it. Let's name this text file as `/tmp/update-asset.json`
 Now use the command below to update the asset with new value for level.
 
 ```bash title="Sample Command"
-/opt/jans/jans-cli/config-cli.py --operation-id put-asset \
+jans cli --operation-id put-asset \
 --data /tmp/update-asset.json
 ```
 
@@ -375,7 +375,7 @@ Upon successful execution, this command will return with updated asset values.
 You can delete any custom asset by its `inum` value.
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --operation-id delete-asset \
+jans cli --operation-id delete-asset \
 --url-suffix inum:61edc29d-45f8-4ab9-8c9a-7b39e4cbe440
 ```
 

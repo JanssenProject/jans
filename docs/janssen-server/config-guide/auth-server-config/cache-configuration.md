@@ -38,7 +38,7 @@ configuration, you can check the operations under `CacheConfiguration`
 using the command below:
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --info CacheConfiguration
+jans cli --info CacheConfiguration
 ```
 
 It prints below two operations:
@@ -49,7 +49,7 @@ Operation ID: patch-config-cache
   Description: Patch cache configuration
   Schema: Array of JsonPatch
 
-To get sample schema type /opt/jans/jans-cli/config-cli.py --schema <schema>, for example /opt/jans/jans-cli/config-cli.py --schema JsonPatch
+To get sample schema type jans cli --schema <schema>, for example jans cli --schema JsonPatch
 ```
 
 ### Get Cache Configuration
@@ -58,7 +58,7 @@ You can get the current Cache Configuration of your Janssen Server by
 performing this operation.
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --operation-id get-config-cache
+jans cli --operation-id get-config-cache
 ```
 
 It will show the Cache configuration details.
@@ -107,7 +107,7 @@ Operation ID: patch-config-cache
   Description: Patch cache configuration
   Schema: Array of JsonPatch
 
-To get sample schema type /opt/jans/jans-cli/config-cli.py --schema <schema>, for example /opt/jans/jans-cli/config-cli.py --schema JsonPatch
+To get sample schema type jans cli --schema <schema>, for example jans cli --schema JsonPatch
 ```
 
 The `patch-config-cache` operation uses the
@@ -136,8 +136,7 @@ Store the above JSON Patch data in a file, for instance,
 Using the above file, perform the operation as below:
 
 ```bash title="Sample Command"
-/opt/jans/jans-cli/config-cli.py --operation-id patch-config-cache \
---data /tmp/patch-cache.json
+jans cli --operation-id patch-config-cache --data /tmp/patch-cache.json
 ```
 
 ```json title="Sample Output" linenums="1"
@@ -182,7 +181,7 @@ value from `nativePersistenceConfiguration`. We can do that simply by
 the following command line:
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --operation-id patch-config-cache \
+jans cli --operation-id patch-config-cache \
 --patch-replace nativePersistenceConfiguration/defaultPutExpiration:90
 ```
 

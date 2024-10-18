@@ -13,7 +13,7 @@ In this document we will cover managing people in the Jans Server's Jans CLI and
 
 ## Manage data in Jans TUI
 
-We can easily add a user using Jans TUI. To do that, run the TUI using `/opt/jans/jans-cli/config-cli-tui.py` for example, and click on the `Users` tab.
+We can easily add a user using Jans TUI. To do that, run the TUI using `jans tui` for example, and click on the `Users` tab.
 
 ![user-tab](https://github.com/JanssenProject/jans/assets/43112579/d94916ff-82c6-4d64-bd3a-9b13f3a5038d)
 

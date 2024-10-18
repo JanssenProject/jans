@@ -35,7 +35,7 @@ tasks.
 In the Janssen Server, you can do CRUD operations for user management using its command line tool. To get the details of command line for CRUD operations relevant to User Management, you can find the `operation-id` under the `User` task using the Jans CLI in scim mode. The following command line:
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py -scim --info User
+jans cli -scim --info User
 ```
 
 ```text title="Sample Output" linenums="1"
@@ -87,7 +87,7 @@ Operation ID: search-user
   Schema: SearchRequest
   Schema: SearchRequest
 
-To get sample schema type /opt/jans/jans-cli/config-cli.py -scim --schema-sample <schema>, for example /opt/jans/jans-cli/config-cli.py -scim --schema-sample SearchRequest
+To get sample schema type jans cli -scim --schema-sample <schema>, for example jans cli -scim --schema-sample SearchRequest
 ```
 
 ### Get Users List 
@@ -95,7 +95,7 @@ To get sample schema type /opt/jans/jans-cli/config-cli.py -scim --schema-sample
 This operation is used to get list of the users and its properties. The following command line: 
   
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py -scim --operation-id get-users
+jans cli -scim --operation-id get-users
 ```
 
 ```json title="Sample Output" linenums="1"
@@ -158,7 +158,7 @@ As shown in the [output](#using-command-line) for `--info` command, `get-users` 
 This is an example with `endpoint-args`:
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py -scim --operation-id get-users --endpoint-args attributes:emails
+jans cli -scim --operation-id get-users --endpoint-args attributes:emails
 ```
 
 ```json title="Sample Output" linenums="1"
@@ -190,14 +190,14 @@ This is an example with `endpoint-args`:
 
 To create a new user using Jans CLI, we can use `create-user` operation-id. As shown in the [output](#using-command-line) for `--info` command, the `create-user` operation requires data to be sent according to `UserResource` schema. To see the schema, use the command as below:
 
-```bash title="Command" linenums="1"
-/opt/jans/jans-cli/config-cli.py -scim --schema UserResource
+```bash title="Command"
+jans cli -scim --schema UserResource
 ```
 
 The Janssen Server also provides sample data for the above schema. Let's run the following command to get the sample schema:
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py -scim --schema-sample UserResource
+jans cli -scim --schema-sample UserResource
 ```
 
 From the above example of schema file, we can fill required values in a data file `/tmp/user.json`. As we have seen in the sample schema there are lot of properties, but we are going to fill minimum to create a `test user`:
@@ -220,7 +220,7 @@ From the above example of schema file, we can fill required values in a data fil
 Let's run the following command to create user in Janssen Server:
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py -scim --operation-id create-user --data /tmp/user.json
+jans cli -scim --operation-id create-user --data /tmp/user.json
 ```
 
 ```json title="Output"
@@ -253,7 +253,8 @@ Let's run the following command to create user in Janssen Server:
 We can retrieve user details using user's `id`. For example in the above created user id is `e24c1479-4a61-4f1f-aa30-2ccc13c0b130`. To get the user details by user id, We can use the `get-user-by-id` operation as below:
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py -scim --operation-id get-user-by-id --url-suffix="id:e24c1479-4a61-4f1f-aa30-2ccc13c0b130"
+jans cli -scim --operation-id get-user-by-id \
+--url-suffix="id:e24c1479-4a61-4f1f-aa30-2ccc13c0b130"
 ```
 
 ```json title="Output"
@@ -284,15 +285,21 @@ We can retrieve user details using user's `id`. For example in the above created
 ### Update User by Id
 
 Using Jans CLI, We can update user information. As shown in the [output](#using-command-line) command, the `update-user-by-id` operation requires user data that needs to be changed. You can find details of user properties in [schema](#creating-a-new-user). Let's change the `nickname` for the above `Test user`. First,we need to put the update data into a json file `/tmp/update-user.json`:
-```json title='update-user.json
-{
+
+```json
+ {
   "nickName": "testuser"
-}
+ }
 ```
+
 Let's run the following command:
+
 ```bash title="Command"
- /opt/jans/jans-cli/config-cli.py -scim --operation-id update-user-by-id --url-suffix="id:e24c1479-4a61-4f1f-aa30-2ccc13c0b130" --data /tmp/update-user.json
+jans cli -scim --operation-id update-user-by-id \
+--url-suffix="id:e24c1479-4a61-4f1f-aa30-2ccc13c0b130" --data /tmp/update-user.json
 ```
+
+
 ```json title="Sample Output"
 {
   "schemas": [
@@ -323,7 +330,7 @@ Let's run the following command:
 Using `patch-user-by-id` operation, We can modify user properties partially. As we have seen in the [Output](#using-command-line) of `--info` command, `patch-user-by-id` operation requires `PatchRequest` [schema](../config-tools/jans-cli/README.md#about-schemas) definition for payload data. To get the sample `PatchRequest` schema, run the followwing command:
 
 ```bash titl="Command"
-/opt/jans/jans-cli/config-cli.py -scim --schema-sample PatchRequest
+jans cli -scim --schema-sample PatchRequest
 ```
 
 For example, In the above `test user`, we are going to `add` one more email, `remove` nickName and `replace` displayName. Let's put all the operations in a json file `/tmp/patch-user.json`:
@@ -358,7 +365,9 @@ For example, In the above `test user`, we are going to `add` one more email, `re
 ```
 The command line to run all of these operations:
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py -scim --operation patch-user-by-id --url-suffix="id:e24c1479-4a61-4f1f-aa30-2ccc13c0b130" --data /tmp/patch-user.json
+jans cli -scim --operation patch-user-by-id \
+--url-suffix="id:e24c1479-4a61-4f1f-aa30-2ccc13c0b130" \
+--data /tmp/patch-user.json
 ```
 
 ### Delete User by ID
@@ -366,7 +375,8 @@ The command line to run all of these operations:
 To delete the, run the following command with the specific user ID as `--url-suffix=id:user-id`. For example, let's delete the `test user` we have created earlier:
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py -scim --operation-id delete-user-by-id --url-suffix="id:e24c1479-4a61-4f1f-aa30-2ccc13c0b130"
+jans cli -scim --operation-id delete-user-by-id \
+--url-suffix="id:e24c1479-4a61-4f1f-aa30-2ccc13c0b130"
 ```
 
 ## Using Text-based UI
