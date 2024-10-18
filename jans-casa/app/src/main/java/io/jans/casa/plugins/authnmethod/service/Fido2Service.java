@@ -1,5 +1,8 @@
 package io.jans.casa.plugins.authnmethod.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import io.jans.fido2.ctap.AttestationConveyancePreference;
+import io.jans.fido2.model.attestation.AttestationOptions;
 import io.jans.orm.search.filter.Filter;
 import io.jans.fido2.client.AttestationService;
 import io.jans.orm.model.fido2.Fido2RegistrationStatus;
@@ -174,20 +177,12 @@ public class Fido2Service extends BaseService {
     }
 
     public String doRegister(String userName, String displayName, boolean platformAuthenticator) throws Exception {
+        AttestationOptions attestationOptions = new AttestationOptions();
+        attestationOptions.setUsername(userName);
+        attestationOptions.setDisplayName(displayName);
+        attestationOptions.setAttestation(AttestationConveyancePreference.direct);
 
-        Map<String, Object> map = new HashMap<>();
-        map.put("username", userName);
-        map.put("displayName", displayName);
-        map.put("attestation", "direct");
-
-        if (platformAuthenticator) {
-        	map.put("authenticatorSelection", 
-        	       Map.of("authenticatorAttachment", "platform"
-        	              , "requireResidentKey", "false"
-        	              , "userVerification", "discouraged"));
-        }
-
-        try (Response response = attestationService.register(mapper.writeValueAsString(map))) {
+        try (Response response = attestationService.register(attestationOptions)) {
             String content = response.readEntity(String.class);
             int status = response.getStatus();
 
@@ -202,8 +197,8 @@ public class Fido2Service extends BaseService {
     }
 
     public boolean verifyRegistration(String tokenResponse) throws Exception {
-    	
-    	try (Response response = attestationService.verify(tokenResponse)) {
+        JsonNode jsonObj=mapper.readTree(tokenResponse);
+    	try (Response response = attestationService.verify(mapper.convertValue(jsonObj, io.jans.fido2.model.attestation.AttestationResult.class))) {
             int status = response.getStatus();
             boolean verified = status == Response.Status.OK.getStatusCode();
             
