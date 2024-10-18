@@ -6,7 +6,7 @@
  */
 
 use super::traits::{Decode, ExtractClaims, GetKey};
-use super::Error;
+use super::{CreateJwtServiceError, Error};
 use di::DependencySupplier;
 use jsonwebtoken as jwt;
 use serde::de::DeserializeOwned;
@@ -50,7 +50,7 @@ impl DecodingStrategy {
     pub fn new_with_validation(
         dep_map: &di::DependencyMap,
         config_algs: &Vec<String>,
-    ) -> Result<Self, Error> {
+    ) -> Result<Self, CreateJwtServiceError> {
         let key_service: Arc<KeyServiceWrapper> = dep_map.get();
         let mut supported_algs = vec![];
         for alg_str in config_algs {
@@ -176,7 +176,7 @@ impl DependencySupplier<KeyServiceWrapper> for KeyServiceWrapper {
 /// This function attempts to map a string representing an algorithm (e.g., "HS256")
 /// to its corresponding `jwt::Algorithm` enum. If the algorithm is unsupported or
 /// unrecognized, an error is returned.
-fn string_to_alg(algorithm: &str) -> Result<jwt::Algorithm, Error> {
+fn string_to_alg(algorithm: &str) -> Result<jwt::Algorithm, CreateJwtServiceError> {
     match algorithm {
         "HS256" => Ok(jwt::Algorithm::HS256),
         "HS384" => Ok(jwt::Algorithm::HS384),
@@ -190,6 +190,8 @@ fn string_to_alg(algorithm: &str) -> Result<jwt::Algorithm, Error> {
         "PS384" => Ok(jwt::Algorithm::PS384),
         "PS512" => Ok(jwt::Algorithm::PS512),
         "EdDSA" => Ok(jwt::Algorithm::EdDSA),
-        _ => Err(Error::UnimplementedAlgorithm(algorithm.into())),
+        _ => Err(CreateJwtServiceError::UnimplementedAlgorithm(
+            algorithm.to_string(),
+        )),
     }
 }
