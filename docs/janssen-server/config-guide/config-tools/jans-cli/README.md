@@ -79,25 +79,22 @@ Server. Run command below
 ```
 To see all options as below:
 ```
-usage: config-cli.py [-h] [--host HOST] [--client-id CLIENT_ID]
-                     [--client_secret CLIENT_SECRET] [--plugins PLUGINS] [-debug]
-                     [--debug-log-file DEBUG_LOG_FILE]
+usage: config-cli.py [-h] [--host HOST] [--client-id CLIENT_ID] [--client-secret CLIENT_SECRET] [--access-token ACCESS_TOKEN] [--plugins PLUGINS] [-debug] [--debug-log-file DEBUG_LOG_FILE]
                      [--operation-id OPERATION_ID] [--url-suffix URL_SUFFIX]
-                     [--info {Attribute,CacheConfiguration,CacheConfigurationInMemory,CacheConfigurationMemcached,CacheConfigurationNativePersistence,CacheConfigurationRedis,ConfigurationFido2,ConfigurationJWKJSONWebKeyJWK,ConfigurationLogging,ConfigurationProperties,ConfigurationSMTP,CustomScripts,DatabaseCouchbaseConfiguration,DatabaseLDAPConfiguration,DefaultAuthenticationMethod,OAuthOpenIDConnectClients,OAuthScopes,OAuthUMAResources}]
-                     [--op-mode {get,post,put,patch,delete}]
-                     [--endpoint-args ENDPOINT_ARGS] [--schema SCHEMA]
-                     [--username USERNAME] [--password PASSWORD] [-j J]
-                     [--cert-file CERT_FILE] [--key-file KEY_FILE] [-noverify]
-                     [--patch-add PATCH_ADD] [--patch-replace PATCH_REPLACE]
-                     [--patch-remove PATCH_REMOVE] [--data DATA]
+                     [--info {AdminUiConfiguration,AdminUiLicense,AdminUiPermission,AdminUiRole,AdminUiRolePermissionsMapping,AdminUiWebhooks,Agama,AgamaConfiguration,Attribute,AuthServerHealthCheck,AuthSessionManagement,CacheConfiguration,CacheConfigurationInMemory,CacheConfigurationMemcached,CacheConfigurationNativePersistence,CacheConfigurationRedis,ClientAuthorization,ConfigurationConfigApi,ConfigurationJwkJsonWebKeyJwk,ConfigurationLogging,ConfigurationProperties,ConfigurationSmtp,ConfigurationUserManagement,CustomScripts,DatabaseLdapConfiguration,DefaultAuthenticationMethod,Fido2Configuration,Fido2Registration,HealthCheck,JansAssets,JansLinkConfiguration,KcLinkConfiguration,LockAudit,LockConfiguration,LockLog,MessageConfiguration,MessageConfigurationPostgres,MessageConfigurationRedis,OauthOpenidConnectClients,OauthScopes,OauthUmaResources,OrganizationConfiguration,Plugins,SamlConfiguration,SamlIdentityBroker,SamlTrustRelationship,ScimConfigManagement,StatisticsUser,Token}]
+                     [--op-mode {get,post,put,patch,delete}] [--endpoint-args ENDPOINT_ARGS] [--schema-sample SCHEMA_SAMPLE] [--schema SCHEMA] [-CC CONFIG_API_MTLS_CLIENT_CERT]
+                     [-CK CONFIG_API_MTLS_CLIENT_KEY] [--key-password KEY_PASSWORD] [-noverify] [-use-test-client] [--patch-add PATCH_ADD] [--patch-replace PATCH_REPLACE] [--patch-remove PATCH_REMOVE]
+                     [-no-color] [--log-dir LOG_DIR] [--tmp-dir TMP_DIR] [-revoke-session] [-scim] [-auth] [--data DATA] [--output-access-token]
 
-optional arguments:
+options:
   -h, --help            show this help message and exit
   --host HOST           Hostname of server
   --client-id CLIENT_ID
                         Jans Config Api Client ID
-  --client_secret CLIENT_SECRET
+  --client-secret CLIENT_SECRET, --client_secret CLIENT_SECRET
                         Jans Config Api Client ID secret
+  --access-token ACCESS_TOKEN
+                        JWT access token or path to file containing JWT access token
   --plugins PLUGINS     Available plugins separated by comma
   -debug                Run in debug mode
   --debug-log-file DEBUG_LOG_FILE
@@ -105,35 +102,40 @@ optional arguments:
   --operation-id OPERATION_ID
                         Operation ID to be done
   --url-suffix URL_SUFFIX
-                        Argument to be added api endpoint url. For example
-                        inum:2B29
-  --info {Attribute,CacheConfiguration,CacheConfigurationInMemory,CacheConfigurationMemcached,CacheConfigurationNativePersistence,CacheConfigurationRedis,ConfigurationFido2,ConfigurationJWKJSONWebKeyJWK,ConfigurationLogging,ConfigurationProperties,ConfigurationSMTP,CustomScripts,DatabaseCouchbaseConfiguration,DatabaseLDAPConfiguration,DefaultAuthenticationMethod,OAuthOpenIDConnectClients,OAuthScopes,OAuthUMAResources}
+                        Argument to be added api endpoint url. For example inum:2B29
+  --info {AdminUiConfiguration,AdminUiLicense,AdminUiPermission,AdminUiRole,AdminUiRolePermissionsMapping,AdminUiWebhooks,Agama,AgamaConfiguration,Attribute,AuthServerHealthCheck,AuthSessionManagement,CacheConfiguration,CacheConfigurationInMemory,CacheConfigurationMemcached,CacheConfigurationNativePersistence,CacheConfigurationRedis,ClientAuthorization,ConfigurationConfigApi,ConfigurationJwkJsonWebKeyJwk,ConfigurationLogging,ConfigurationProperties,ConfigurationSmtp,ConfigurationUserManagement,CustomScripts,DatabaseLdapConfiguration,DefaultAuthenticationMethod,Fido2Configuration,Fido2Registration,HealthCheck,JansAssets,JansLinkConfiguration,KcLinkConfiguration,LockAudit,LockConfiguration,LockLog,MessageConfiguration,MessageConfigurationPostgres,MessageConfigurationRedis,OauthOpenidConnectClients,OauthScopes,OauthUmaResources,OrganizationConfiguration,Plugins,SamlConfiguration,SamlIdentityBroker,SamlTrustRelationship,ScimConfigManagement,StatisticsUser,Token}
                         Help for operation
   --op-mode {get,post,put,patch,delete}
                         Operation mode to be done
   --endpoint-args ENDPOINT_ARGS
-                        Arguments to pass endpoint separated by comma. For
-                        example limit:5,status:INACTIVE
-  --schema SCHEMA       Get sample json schema
-  --username USERNAME   Auth username
-  --password PASSWORD   Auth password
-  -j J                  Auth password file
-  --cert-file CERT_FILE
+                        Arguments to pass endpoint separated by comma. For example limit:5,status:INACTIVE
+  --schema-sample SCHEMA_SAMPLE
+                        Get sample json schema template
+  --schema SCHEMA       Get the operation schema which describes all the keys of the schema and its values in detail.
+  -CC CONFIG_API_MTLS_CLIENT_CERT, --config-api-mtls-client-cert CONFIG_API_MTLS_CLIENT_CERT
                         Path to SSL Certificate file
-  --key-file KEY_FILE   Path to SSL Key file
+  -CK CONFIG_API_MTLS_CLIENT_KEY, --config-api-mtls-client-key CONFIG_API_MTLS_CLIENT_KEY
+                        Path to SSL Key file
+  --key-password KEY_PASSWORD
+                        Password for SSL Key file
   -noverify             Ignore verifying the SSL certificate
+  -use-test-client      Use test client without device authorization
   --patch-add PATCH_ADD
-                        Colon delimited key:value pair for add patch
-                        operation. For example loggingLevel:DEBUG
+                        Colon delimited key:value pair for add patch operation. For example loggingLevel:DEBUG
   --patch-replace PATCH_REPLACE
-                        Colon delimited key:value pair for replace patch
-                        operation. For example loggingLevel:DEBUG
+                        Colon delimited key:value pair for replace patch operation. For example loggingLevel:DEBUG
   --patch-remove PATCH_REMOVE
-                        Key for remove patch operation. For example
-                        imgLocation
+                        Key for remove patch operation. For example imgLocation
+  -no-color             Do not colorize json dumps
+  --log-dir LOG_DIR     Log directory
+  --tmp-dir TMP_DIR     Directory for storing temporary files
+  -revoke-session       Revokes session
+  -scim                 SCIM Mode
+  -auth                 Jans OAuth Server Mode
   --data DATA           Path to json data file
-  --output-access-token Prints jwt access token and exits
-root@testjans:~# 
+  --output-access-token
+                        Prints jwt access token and exits
+
 ```
 
 ## CLI Command Structure
@@ -174,13 +176,12 @@ Execute following command to see what all tasks are offered by jans-cli:
 Options listed for `--info` switch are tasks groups available. For example:
 
 ```shell
-usage: config-cli.py [-h] [--host HOST] [--client-id CLIENT_ID] [--client-secret CLIENT_SECRET] [--access-token ACCESS_TOKEN] [--plugins PLUGINS]
-                     [-debug] [--debug-log-file DEBUG_LOG_FILE] [--operation-id OPERATION_ID] [--url-suffix URL_SUFFIX]
-                     [--info {AdminUiLicense,AdminUiPermission,AdminUiRole,AdminUiRolePermissionsMapping,AdminUiWebhooks,Agama,AgamaConfiguration,Attribute,AuthServerHealthCheck,AuthSessionManagement,CacheConfiguration,CacheConfigurationInMemory,CacheConfigurationMemcached,CacheConfigurationNativePersistence,CacheConfigurationRedis,ClientAuthorization,ConfigurationConfigApi,ConfigurationJwkJsonWebKeyJwk,ConfigurationLogging,ConfigurationProperties,ConfigurationSmtp,ConfigurationUserManagement,CustomScripts,DatabaseLdapConfiguration,DefaultAuthenticationMethod,Fido2Configuration,Fido2Registration,HealthCheck,JansLinkConfiguration,MessageConfiguration,MessageConfigurationPostgres,MessageConfigurationRedis,OauthOpenidConnectClients,OauthScopes,OauthUmaResources,OrganizationConfiguration,Plugins,SamlConfiguration,SamlIdentityBroker,SamlTrustRelationship,ScimConfigManagement,StatisticsUser}]
-                     [--op-mode {get,post,put,patch,delete}] [--endpoint-args ENDPOINT_ARGS] [--schema SCHEMA] [-CC CONFIG_API_MTLS_CLIENT_CERT]
-                     [-CK CONFIG_API_MTLS_CLIENT_KEY] [--key-password KEY_PASSWORD] [-noverify] [-use-test-client] [--patch-add PATCH_ADD]
-                     [--patch-replace PATCH_REPLACE] [--patch-remove PATCH_REMOVE] [-no-color] [--log-dir LOG_DIR] [--tmp-dir TMP_DIR]
-                     [-revoke-session] [-scim] [-auth] [--data DATA] [--output-access-token]
+usage: config-cli.py [-h] [--host HOST] [--client-id CLIENT_ID] [--client-secret CLIENT_SECRET] [--access-token ACCESS_TOKEN] [--plugins PLUGINS] [-debug] [--debug-log-file DEBUG_LOG_FILE]
+                     [--operation-id OPERATION_ID] [--url-suffix URL_SUFFIX]
+                     [--info {AdminUiConfiguration,AdminUiLicense,AdminUiPermission,AdminUiRole,AdminUiRolePermissionsMapping,AdminUiWebhooks,Agama,AgamaConfiguration,Attribute,AuthServerHealthCheck,AuthSessionManagement,CacheConfiguration,CacheConfigurationInMemory,CacheConfigurationMemcached,CacheConfigurationNativePersistence,CacheConfigurationRedis,ClientAuthorization,ConfigurationConfigApi,ConfigurationJwkJsonWebKeyJwk,ConfigurationLogging,ConfigurationProperties,ConfigurationSmtp,ConfigurationUserManagement,CustomScripts,DatabaseLdapConfiguration,DefaultAuthenticationMethod,Fido2Configuration,Fido2Registration,HealthCheck,JansAssets,JansLinkConfiguration,KcLinkConfiguration,LockAudit,LockConfiguration,LockLog,MessageConfiguration,MessageConfigurationPostgres,MessageConfigurationRedis,OauthOpenidConnectClients,OauthScopes,OauthUmaResources,OrganizationConfiguration,Plugins,SamlConfiguration,SamlIdentityBroker,SamlTrustRelationship,ScimConfigManagement,StatisticsUser,Token}]
+                     [--op-mode {get,post,put,patch,delete}] [--endpoint-args ENDPOINT_ARGS] [--schema-sample SCHEMA_SAMPLE] [--schema SCHEMA] [-CC CONFIG_API_MTLS_CLIENT_CERT]
+                     [-CK CONFIG_API_MTLS_CLIENT_KEY] [--key-password KEY_PASSWORD] [-noverify] [-use-test-client] [--patch-add PATCH_ADD] [--patch-replace PATCH_REPLACE] [--patch-remove PATCH_REMOVE]
+                     [-no-color] [--log-dir LOG_DIR] [--tmp-dir TMP_DIR] [-revoke-session] [-scim] [-auth] [--data DATA] [--output-access-token]
 ```
 
 To see operation-id available under a task, execute the command below with

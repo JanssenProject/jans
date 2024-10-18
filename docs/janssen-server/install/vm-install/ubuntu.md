@@ -200,19 +200,18 @@ Which should result in the following:
 
 ```
 Reading package lists... Done
-Building dependency tree       
+Building dependency tree... Done
 Reading state information... Done
 The following packages were automatically installed and are no longer required:
-  apache2 apache2-bin apache2-data apache2-utils libapr1 libaprutil1 libaprutil1-dbd-sqlite3 libaprutil1-ldap liblua5.2-0 python3-distutils python3-ldap3 python3-lib2to3 python3-prompt-toolkit
-  python3-pyasn1 python3-pygments python3-pymysql python3-ruamel.yaml python3-wcwidth
-Use 'sudo apt autoremove' to remove them.
+  apache2 apache2-bin apache2-data apache2-utils libapr1 libaprutil1 libaprutil1-dbd-sqlite3 libaprutil1-ldap liblua5.3-0 postgresql postgresql-contrib python3-pymysql python3-ruamel.yaml
+  python3-ruamel.yaml.clib
+Use 'apt autoremove' to remove them.
 The following packages will be REMOVED:
   jans*
-0 upgraded, 0 newly installed, 1 to remove and 124 not upgraded.
-After this operation, 1,257 MB disk space will be freed.
+0 upgraded, 0 newly installed, 1 to remove and 2 not upgraded.
+After this operation, 1631 MB disk space will be freed.
 Do you want to continue? [Y/n] y
 (Reading database ... 166839 files and directories currently installed.)
 Removing jans (replace-janssen-version~ubuntu20.04) ...
 Checking to make sure service is down...
-
 ```
