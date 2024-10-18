@@ -75,7 +75,7 @@ public class TokenService {
             logger.trace("Search Token searchRequest.getFilterAssertionValue() :{}",
                     searchRequest.getFilterAssertionValue());
             for (String assertionValue : searchRequest.getFilterAssertionValue()) {
-                logger.debug("Session Search with assertionValue:{}", assertionValue);
+                logger.info("Session Search with assertionValue:{}", assertionValue);
                 String[] targetArray = new String[] { assertionValue };
                 Filter grantIdFilter = Filter.createSubstringFilter("grtId", null, targetArray, null);
                 Filter userIdFilter = Filter.createSubstringFilter("usrId", null, targetArray, null);

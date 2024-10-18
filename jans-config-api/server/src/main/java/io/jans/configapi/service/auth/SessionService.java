@@ -122,7 +122,7 @@ public class SessionService {
         if (searchRequest.getFilterAssertionValue() != null && !searchRequest.getFilterAssertionValue().isEmpty()) {
 
             for (String assertionValue : searchRequest.getFilterAssertionValue()) {
-                logger.debug("Session Search with assertionValue:{}", assertionValue);
+                logger.info("Session Search with assertionValue:{}", assertionValue);
 
                 String[] targetArray = new String[] { assertionValue };
                 Filter userFilter = Filter.createSubstringFilter(ApiConstants.JANS_USR_DN, null, targetArray, null);
@@ -143,13 +143,14 @@ public class SessionService {
         List<Filter> fieldValueFilters = new ArrayList<>();
         if (searchRequest.getFieldFilterData() != null && !searchRequest.getFieldFilterData().isEmpty()) {
             List<FieldFilterData> fieldFilterDataList = this.modifyFilter(searchRequest.getFieldFilterData());
-            fieldValueFilters = DataUtil.createFilter(fieldFilterDataList, getDnForSession(null), persistenceEntryManager);
+            fieldValueFilters = DataUtil.createFilter(fieldFilterDataList, getDnForSession(null),
+                    persistenceEntryManager);
         }
 
         fieldValueFilters.add(Filter.createORFilter(filters));
         searchFilter = Filter.createANDFilter(fieldValueFilters);
 
-        logger.debug("Session searchFilter:{}", searchFilter);
+        logger.info("Session searchFilter:{}", searchFilter);
 
         PagedResult<SessionId> pagedSessionList = persistenceEntryManager.findPagedEntries(getDnForSession(null),
                 SessionId.class, searchFilter, null, searchRequest.getSortBy(),

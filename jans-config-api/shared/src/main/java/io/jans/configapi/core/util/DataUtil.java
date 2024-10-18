@@ -240,8 +240,7 @@ public class DataUtil {
                 fieldFilterData, primaryKey, persistenceEntryManager);
         List<Filter> filters = new ArrayList<>();
 
-        if (fieldFilterData == null || fieldFilterData.isEmpty() || StringUtils.isBlank(primaryKey)
-                || persistenceEntryManager == null) {
+        if (fieldFilterData == null || fieldFilterData.isEmpty()) {
             return filters;
         }
 
@@ -253,37 +252,21 @@ public class DataUtil {
                 dataType = entry.getType();
             }
             logger.info(
-                    "entry.getField():{}, dataType:{},  AttributeDataType.STRING.getValue():{}, AttributeDataType.DATE.getDisplayName():{}",
+                    "entry.getField():{}, dataType:{},  AttributeDataType.STRING.getValue():{}, AttributeDataType.STRING.getValue():{}, AttributeDataType.DATE.getDisplayName():{}",
                     entry.getField(), dataType, AttributeDataType.STRING.getValue(),
-                    AttributeDataType.DATE.getDisplayName());
+                    AttributeDataType.STRING.getValue(), AttributeDataType.DATE.getDisplayName());
 
             Filter dataFilter = null;
             if (AttributeDataType.STRING.getValue().equalsIgnoreCase(dataType)) {
-                logger.trace("entry.getField():{}, dataType:{}, AttributeDataType.STRING.getValue():{}",
-                        entry.getField(), dataType, AttributeDataType.STRING.getValue());
                 dataFilter = Filter.createEqualityFilter(entry.getField(), entry.getValue());
-
+            } else if (AttributeDataType.BOOLEAN.getValue().equalsIgnoreCase(dataType)) {
+                dataFilter = Filter.createEqualityFilter(entry.getField(), getBooleanValue(entry.getValue()));
             } else if (AttributeDataType.DATE.getDisplayName().equalsIgnoreCase(dataType)) {
-                logger.debug("entry.getField():{}, dataType:{}, AttributeDataType.DATE.getDisplayName():{}",
-                        entry.getField(), dataType, AttributeDataType.DATE.getDisplayName());
-                Date dateValue = getDate(entry.getValue(), primaryKey, persistenceEntryManager);
-                logger.debug("\n\n\n dateValue:{}, entry.getValue():{}", entry.getValue(), dateValue);
-
-                if (FilterOperator.EQUALITY.getSign().equalsIgnoreCase(entry.getOperator())) {
-
-                    dataFilter = Filter.createEqualityFilter(entry.getField(), dateValue);
-
-                } else if (FilterOperator.GREATER.getSign().equalsIgnoreCase(entry.getOperator())
-                        || FilterOperator.GREATER_OR_EQUAL.getSign().equalsIgnoreCase(entry.getOperator())) {
-
-                    dataFilter = Filter.createGreaterOrEqualFilter(entry.getField(), dateValue);
-
-                } else if (FilterOperator.LESS.getSign().equalsIgnoreCase(entry.getOperator())
-                        || FilterOperator.LESS_OR_EQUAL.getSign().equalsIgnoreCase(entry.getOperator())) {
-
-                    dataFilter = Filter.createLessOrEqualFilter(entry.getField(), dateValue);
-
-                }
+                dataFilter = createDateFilter(entry, primaryKey, persistenceEntryManager);
+            } else if ("int".equalsIgnoreCase(dataType) || "integer".equalsIgnoreCase(dataType)) {
+                dataFilter = createIntegerFilter(entry);
+            } else {
+                dataFilter = Filter.createEqualityFilter(entry.getField(), entry.getValue());
             }
             filters.add(dataFilter);
             logger.info("dataFilter:{}", dataFilter);
@@ -291,6 +274,18 @@ public class DataUtil {
         }
         logger.info("Final Filters for  fieldFilterData - filters:{}", filters);
         return filters;
+    }
+
+    private static boolean getBooleanValue(String strValue) {
+        logger.info("Get Boolean Value for strValue:{}", strValue);
+
+        boolean value = false;
+        if (StringUtils.isBlank(strValue) || !strValue.toLowerCase().matches("true|false")) {
+            return value;
+        }
+
+        return Boolean.parseBoolean(strValue);
+
     }
 
     private static Date getDate(String dateString, String primaryKey, PersistenceEntryManager persistenceEntryManager) {
@@ -302,13 +297,13 @@ public class DataUtil {
         }
 
         dateValue = persistenceEntryManager.decodeTime(primaryKey, dateString);
-        logger.debug("\n\n\n dateString:{}, dateValue:{}", dateString, dateValue);
-        if (dateValue == null) {
-            dateValue = formatStrDate(dateString, null);
-        }
-        logger.info("\n\n\n formatStrDate - dateValue:{}", dateValue);
+        logger.info(" persistenceEntryManager.decodeTime - dateString:{}, dateValue:{}", dateString, dateValue);
+
+        dateValue = formatStrDate(dateString, null);
+        logger.info(" formatStrDate - dateValue:{}", dateValue);
 
         return dateValue;
+
     }
 
     private static Date formatStrDate(String dateString, String datePattern) {
@@ -320,7 +315,11 @@ public class DataUtil {
             }
 
             if (StringUtils.isBlank(datePattern)) {
-                datePattern = "yyyy-MM-dd";
+                if (dateString.contains(":")) {
+                    datePattern = "yyyy-MM-dd HH:mm:ss";
+                } else {
+                    datePattern = "yyyy-MM-dd";
+                }
             }
 
             SimpleDateFormat dateFormat = new SimpleDateFormat(datePattern);
@@ -335,6 +334,75 @@ public class DataUtil {
         }
 
         return date;
+    }
+
+    private static Filter createDateFilter(FieldFilterData fieldFilterData, String primaryKey,
+            PersistenceEntryManager persistenceEntryManager) {
+        logger.info("Create Date Filter for fieldFilterData:{}, primaryKey:{}, persistenceEntryManager:{}",
+                fieldFilterData, primaryKey, persistenceEntryManager);
+
+        Filter dateFilter = null;
+        if (fieldFilterData == null) {
+            return dateFilter;
+        }
+        Date dateValue = getDate(fieldFilterData.getValue(), primaryKey, persistenceEntryManager);
+
+        if (FilterOperator.EQUALITY.getSign().equalsIgnoreCase(fieldFilterData.getOperator())) {
+            dateFilter = Filter.createEqualityFilter(fieldFilterData.getField(), dateValue);
+
+        } else if (FilterOperator.GREATER.getSign().equalsIgnoreCase(fieldFilterData.getOperator())
+                || FilterOperator.GREATER_OR_EQUAL.getSign().equalsIgnoreCase(fieldFilterData.getOperator())) {
+
+            dateFilter = Filter.createGreaterOrEqualFilter(fieldFilterData.getField(), dateValue);
+
+        } else if (FilterOperator.LESS.getSign().equalsIgnoreCase(fieldFilterData.getOperator())
+                || FilterOperator.GREATER_OR_EQUAL.getSign().equalsIgnoreCase(fieldFilterData.getOperator())) {
+
+            dateFilter = Filter.createLessOrEqualFilter(fieldFilterData.getField(), dateValue);
+
+        }
+        logger.info("Final Date Filter for fieldFilterData:{}, dateFilter:{}", fieldFilterData, dateFilter);
+        return dateFilter;
+    }
+
+    private static Filter createIntegerFilter(FieldFilterData fieldFilterData) {
+        logger.info("Create Integer Filter for fieldFilterData:{}", fieldFilterData);
+
+        Filter dataFilter = null;
+        if (fieldFilterData == null) {
+            return dataFilter;
+        }
+
+        String dataValue = fieldFilterData.getValue();
+        Integer intValue = null;
+        if (StringUtils.isNotBlank(fieldFilterData.getValue())) {
+            try {
+                intValue = Integer.parseInt(fieldFilterData.getValue());
+            } catch (Exception ex) {
+                logger.error("Though Data type is numeric but value is not numeric{" + fieldFilterData.getValue() + "}",
+                        ex);
+            }
+
+        }
+        logger.info("Create Integer Filter for intValue:{}", intValue);
+
+        if (FilterOperator.EQUALITY.getSign().equalsIgnoreCase(fieldFilterData.getOperator())) {
+
+            dataFilter = Filter.createEqualityFilter(fieldFilterData.getField(), dataValue);
+
+        } else if (FilterOperator.GREATER.getSign().equalsIgnoreCase(fieldFilterData.getOperator())
+                || FilterOperator.GREATER_OR_EQUAL.getSign().equalsIgnoreCase(fieldFilterData.getOperator())) {
+
+            dataFilter = Filter.createGreaterOrEqualFilter(fieldFilterData.getField(), dataValue);
+
+        } else if (FilterOperator.LESS.getSign().equalsIgnoreCase(fieldFilterData.getOperator())
+                || FilterOperator.GREATER_OR_EQUAL.getSign().equalsIgnoreCase(fieldFilterData.getOperator())) {
+
+            dataFilter = Filter.createLessOrEqualFilter(fieldFilterData.getField(), dataValue);
+
+        }
+        logger.info("Final Date Filter for fieldFilterData:{}, dataValue:{}", fieldFilterData, dataValue);
+        return dataFilter;
     }
 
 }
