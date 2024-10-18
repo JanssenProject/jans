@@ -67,12 +67,15 @@ impl Authz {
     /// Evaluate Authorization Request
     /// - evaluate if authorization is granted for *client*
     pub fn authorize(&self, request: Request) -> Result<AuthorizeResult, AuthorizeError> {
-        let (access_token_entities, _id_token_entities) = self
+        let (access_token, _id_token) = self
             .jwt_service
-            .decode_tokens::<TokenPayload, TokenPayload>(request.access_token, request.id_token)?;
+            .decode_tokens::<TokenPayload, TokenPayload>(
+                &request.access_token,
+                &request.id_token,
+            )?;
 
         let access_token_entities =
-            create_access_token_entities(&self.policy_store.schema.json, &access_token_entities)?;
+            create_access_token_entities(&self.policy_store.schema.json, &access_token)?;
 
         // TODO: check if `request.userinfo_token.sub` == `id_token.sub`
         // Note that "Userinfo Token" isn't a JWT which is why we're not
@@ -128,7 +131,7 @@ impl Authz {
                 context: request.context,
                 decision: decision.decision().into(),
                 principal: principal_workload_uid.to_string(),
-                diagnostics: decision.diagnostics().clone().into(),
+                diagnostics: decision.diagnostics().into(),
                 resource: resource_uid.to_string(),
             })
             .set_message("Result of authorize with resource as workload entity".to_string()),

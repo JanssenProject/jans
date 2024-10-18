@@ -8,7 +8,7 @@
 use super::decoding_strategy::DecodingStrategy;
 use super::token::{AccessToken, IdToken};
 use super::traits::{Decode, ExtractClaims};
-use super::Error;
+use super::{CreateJwtServiceError, Error};
 use crate::JwtConfig;
 use serde::de::DeserializeOwned;
 
@@ -40,7 +40,7 @@ impl JwtService {
     pub fn new_with_container(
         dep_map: &di::DependencyMap,
         config: JwtConfig,
-    ) -> Result<Self, Error> {
+    ) -> Result<Self, CreateJwtServiceError> {
         match config {
             JwtConfig::Disabled => {
                 let decoding_strategy = DecodingStrategy::new_without_validation();
@@ -63,7 +63,7 @@ impl JwtService {
     /// to the rules defined by the internal `DecodingStrategy`. The `access_token` is validated
     /// first, and its `iss` and `aud` claims are used to validate the `id_token`.
     ///
-    /// # Token Validation Rules:
+    /// Token Validation Rules:
     ///     1. The `access_token` is validated first, and its `aud` (which is also the `client_id`) is stored.
     ///     2. The `id_token` is validated against the `access_token.aud` (client_id) and `access_token.iss` (issuer).
     ///     3. Return an error if `id_token.aud != access_token.client_id`.
