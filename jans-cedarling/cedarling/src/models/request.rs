@@ -12,11 +12,15 @@ use cedar_policy::{EntityId, EntityTypeName, EntityUid, ParseErrors};
 /// Box to store authorization data
 #[derive(Debug, serde::Deserialize)]
 pub struct Request<'a> {
-    /// Access token raw value
+    /// Access Token raw value
     pub access_token: &'a str,
-    // pub id_token:  &'a str,
-    // pub userinfo_token:  &'a str,
-    /// cedar_policy action
+    /// Id Token raw value
+    pub id_token: &'a str,
+    /// NOTE: the `userinfo_token` and the `tx_token` aren't a JWT.
+    /// they're typically JSON.
+    // pub userinfo_token: &'a str,
+    // pub tx_token: &'a str,
+    // cedar_policy action
     pub action: String,
     /// cedar_policy resource data
     pub resource: ResourceData,
