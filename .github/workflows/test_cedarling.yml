@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 jobs:
-  Rust Tests:
+  rust_tests:
     runs-on: ubuntu-latest
     steps:
     - name: Harden Runner
@@ -24,7 +24,7 @@ jobs:
       run: |
         cd ./jans-cedarling
         cargo test --workspace
-  Python Tests:
+  python_tests:
     runs-on: ubuntu-latest
     strategy:
       matrix:
