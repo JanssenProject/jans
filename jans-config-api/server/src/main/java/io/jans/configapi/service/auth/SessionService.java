@@ -10,6 +10,8 @@ import io.jans.as.common.model.session.SessionId;
 import io.jans.as.common.model.session.SessionIdState;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.configapi.util.ApiConstants;
+import io.jans.configapi.core.util.DataUtil;
+import io.jans.model.FieldFilterData;
 import io.jans.model.SearchRequest;
 import io.jans.model.token.TokenEntity;
 import io.jans.model.token.TokenType;
@@ -19,7 +21,6 @@ import io.jans.orm.model.SortOrder;
 import io.jans.orm.search.filter.Filter;
 import io.jans.service.CacheService;
 import io.jans.util.StringHelper;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotFoundException;
@@ -29,7 +30,6 @@ import static io.jans.as.model.util.Util.escapeLog;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -60,6 +60,15 @@ public class SessionService {
             return staticConfiguration.getBaseDn().getSessions();
         }
         return String.format("jansId=%s,%s", sessionId, staticConfiguration.getBaseDn().getSessions());
+    }
+
+    public String getDnForUser(String userInum) {
+        String peopleDn = staticConfiguration.getBaseDn().getPeople();
+        if (StringHelper.isEmpty(userInum)) {
+            return peopleDn;
+        }
+
+        return String.format("inum=%s,%s", userInum, peopleDn);
     }
 
     public SessionId getSessionBySid(String sid) {
@@ -113,40 +122,35 @@ public class SessionService {
         if (searchRequest.getFilterAssertionValue() != null && !searchRequest.getFilterAssertionValue().isEmpty()) {
 
             for (String assertionValue : searchRequest.getFilterAssertionValue()) {
-                logger.debug("Session Search with assertionValue:{}", assertionValue);
-                if (StringUtils.isNotBlank(assertionValue)) {
-                    String[] targetArray = new String[] { assertionValue };
-                    Filter userFilter = Filter.createSubstringFilter(ApiConstants.JANS_USR_DN, null, targetArray, null);
-                    Filter sidFilter = Filter.createSubstringFilter(ApiConstants.SID, null, targetArray, null);
-                    Filter sessAttrFilter = Filter.createSubstringFilter(ApiConstants.JANS_SESS_ATTR, null, targetArray,
-                            null);
-                    Filter permissionFilter = Filter.createSubstringFilter("jansPermissionGrantedMap", null,
-                            targetArray, null);
-                    Filter idFilter = Filter.createSubstringFilter(ApiConstants.JANSID, null, targetArray, null);
-                    filters.add(
-                            Filter.createORFilter(userFilter, sidFilter, sessAttrFilter, permissionFilter, idFilter));
-                }
+                logger.info("Session Search with assertionValue:{}", assertionValue);
+
+                String[] targetArray = new String[] { assertionValue };
+                Filter userFilter = Filter.createSubstringFilter(ApiConstants.JANS_USR_DN, null, targetArray, null);
+                Filter sidFilter = Filter.createSubstringFilter(ApiConstants.SID, null, targetArray, null);
+                Filter sessAttrFilter = Filter.createSubstringFilter(ApiConstants.JANS_SESS_ATTR, null, targetArray,
+                        null);
+                Filter permissionFilter = Filter.createSubstringFilter("jansPermissionGrantedMap", null, targetArray,
+                        null);
+                Filter idFilter = Filter.createSubstringFilter(ApiConstants.JANSID, null, targetArray, null);
+                filters.add(Filter.createORFilter(userFilter, sidFilter, sessAttrFilter, permissionFilter, idFilter));
+
             }
             searchFilter = Filter.createORFilter(filters);
         }
 
         logger.debug("Session pattern searchFilter:{}", searchFilter);
+
         List<Filter> fieldValueFilters = new ArrayList<>();
-        if (searchRequest.getFieldValueMap() != null && !searchRequest.getFieldValueMap().isEmpty()) {
-            for (Map.Entry<String, String> entry : searchRequest.getFieldValueMap().entrySet()) {
-                Filter dataFilter = Filter.createEqualityFilter(entry.getKey(), entry.getValue());
-                logger.trace("Session dataFilter:{}", dataFilter);
-                fieldValueFilters.add(Filter.createANDFilter(dataFilter));
-            }
-            if (filters.isEmpty()) {
-                searchFilter = Filter.createANDFilter(fieldValueFilters);
-            } else {
-                searchFilter = Filter.createANDFilter(Filter.createORFilter(filters),
-                        Filter.createANDFilter(fieldValueFilters));
-            }
+        if (searchRequest.getFieldFilterData() != null && !searchRequest.getFieldFilterData().isEmpty()) {
+            List<FieldFilterData> fieldFilterDataList = this.modifyFilter(searchRequest.getFieldFilterData());
+            fieldValueFilters = DataUtil.createFilter(fieldFilterDataList, getDnForSession(null),
+                    persistenceEntryManager);
         }
 
-        logger.debug("Session searchFilter:{}", searchFilter);
+        fieldValueFilters.add(Filter.createORFilter(filters));
+        searchFilter = Filter.createANDFilter(fieldValueFilters);
+
+        logger.info("Session searchFilter:{}", searchFilter);
 
         PagedResult<SessionId> pagedSessionList = persistenceEntryManager.findPagedEntries(getDnForSession(null),
                 SessionId.class, searchFilter, null, searchRequest.getSortBy(),
@@ -281,6 +285,26 @@ public class SessionService {
         session.getSessionAttributes().put("session_id", null);
         session.getSessionAttributes().put("old_session_id", null);
         return session;
+    }
+
+    private List<FieldFilterData> modifyFilter(List<FieldFilterData> fieldFilterDataList) {
+
+        logger.debug("modify filter - fieldFilterDataList:{}", fieldFilterDataList);
+        if (fieldFilterDataList == null || fieldFilterDataList.isEmpty()) {
+            return fieldFilterDataList;
+        }
+
+        for (FieldFilterData fieldFilterData : fieldFilterDataList) {
+            if (fieldFilterData != null && StringUtils.isNotBlank(fieldFilterData.getField())) {
+                String field = fieldFilterData.getField();
+                if ("jansUsrDN".equalsIgnoreCase(field)) {
+                    // get Dn
+                    fieldFilterData.setValue(getDnForUser(fieldFilterData.getValue()));
+                }
+            }
+        }
+
+        return fieldFilterDataList;
     }
 
 }

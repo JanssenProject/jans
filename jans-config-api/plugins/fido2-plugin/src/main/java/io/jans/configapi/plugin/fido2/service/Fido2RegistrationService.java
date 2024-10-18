@@ -10,6 +10,7 @@ import static io.jans.as.model.util.Util.escapeLog;
 import io.jans.as.common.service.OrganizationService;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.configapi.configuration.ConfigurationFactory;
+import io.jans.configapi.core.util.DataUtil;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.model.SearchRequest;
 import io.jans.orm.PersistenceEntryManager;
@@ -32,7 +33,6 @@ import org.slf4j.Logger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author Yuriy Movchan
@@ -86,48 +86,38 @@ public class Fido2RegistrationService {
         if (searchRequest.getFilterAssertionValue() != null && !searchRequest.getFilterAssertionValue().isEmpty()) {
 
             for (String assertionValue : searchRequest.getFilterAssertionValue()) {
-                log.debug(" **** Search Fido2Registration with assertionValue:{}", assertionValue);
-                if (StringUtils.isNotBlank(assertionValue)) {
-                    String[] targetArray = new String[] { assertionValue };
+                log.info(" **** Search Fido2Registration with assertionValue:{}", assertionValue);
 
-                    Filter displayNameFilter = Filter.createSubstringFilter("displayName", null, targetArray, null);
-                    Filter descriptionFilter = Filter.createSubstringFilter("jansRegistrationData", null, targetArray,
-                            null);
-                    Filter statusFilter = Filter.createSubstringFilter("jansStatus", null, targetArray, null);
-                    Filter notificationConfFilter = Filter.createSubstringFilter("jansDeviceNotificationConf", null,
-                            targetArray, null);
-                    Filter deviceDataFilter = Filter.createSubstringFilter("jansDeviceData", null, targetArray, null);
-                    Filter personInumFilter = Filter.createSubstringFilter("personInum", null, targetArray, null);
-                    Filter inumFilter = Filter.createSubstringFilter("jansId", null, targetArray, null);
+                String[] targetArray = new String[] { assertionValue };
 
-                    filters.add(Filter.createORFilter(displayNameFilter, descriptionFilter, statusFilter,
-                            notificationConfFilter, deviceDataFilter, personInumFilter, inumFilter));
-                }
+                Filter displayNameFilter = Filter.createSubstringFilter("displayName", null, targetArray, null);
+                Filter descriptionFilter = Filter.createSubstringFilter("jansRegistrationData", null, targetArray,
+                        null);
+                Filter statusFilter = Filter.createSubstringFilter("jansStatus", null, targetArray, null);
+                Filter notificationConfFilter = Filter.createSubstringFilter("jansDeviceNotificationConf", null,
+                        targetArray, null);
+                Filter deviceDataFilter = Filter.createSubstringFilter("jansDeviceData", null, targetArray, null);
+                Filter personInumFilter = Filter.createSubstringFilter("personInum", null, targetArray, null);
+                Filter inumFilter = Filter.createSubstringFilter("jansId", null, targetArray, null);
+
+                filters.add(Filter.createORFilter(displayNameFilter, descriptionFilter, statusFilter,
+                        notificationConfFilter, deviceDataFilter, personInumFilter, inumFilter));
+
             }
             searchFilter = Filter.createORFilter(filters);
         }
 
-        log.debug("\n\n\n Fido2Registration pattern searchFilter:{}", searchFilter);
+        log.debug("Fido2Registration pattern searchFilter:{}", searchFilter);
 
         List<Filter> fieldValueFilters = new ArrayList<>();
-        if (searchRequest.getFieldValueMap() != null && !searchRequest.getFieldValueMap().isEmpty()) {
-            for (Map.Entry<String, String> entry : searchRequest.getFieldValueMap().entrySet()) {
-                Filter dataFilter = Filter.createEqualityFilter(entry.getKey(), entry.getValue());
-                log.trace("Fido2Registration dataFilter:{}", dataFilter);
-                fieldValueFilters.add(Filter.createANDFilter(dataFilter));
-            }
-            
-            if(!filters.isEmpty()) {
-                searchFilter = Filter.createANDFilter(Filter.createORFilter(filters),
-                        Filter.createANDFilter(fieldValueFilters));
-            }
-            else {
-                searchFilter = Filter.createANDFilter(fieldValueFilters);
-            }
-            
+        if (searchRequest.getFieldFilterData() != null && !searchRequest.getFieldFilterData().isEmpty()) {
+            fieldValueFilters = DataUtil.createFilter(searchRequest.getFieldFilterData(),
+                    getDnFido2RegistrationEntry(null), persistenceEntryManager);
         }
 
-        log.debug(" Final - Fido2Registration searchFilter:{}", searchFilter);
+        fieldValueFilters.add(Filter.createORFilter(filters));
+
+        log.info(" Final - Fido2Registration searchFilter:{}", searchFilter);
 
         return persistenceEntryManager.findPagedEntries(getDnFido2RegistrationEntry(null), Fido2RegistrationEntry.class,
                 searchFilter, null, searchRequest.getSortBy(), SortOrder.getByValue(searchRequest.getSortOrder()),
@@ -147,15 +137,16 @@ public class Fido2RegistrationService {
         }
 
         String baseDn = getBaseDnForFido2RegistrationEntries(userInum);
-        log.debug("Find Fido2 Registered by baseDn:{}", baseDn);
+        log.info("Find Fido2 Registered by baseDn:{}", baseDn);
         if (persistenceEntryManager.hasBranchesSupport(baseDn) && !containsBranch(baseDn)) {
             return Collections.emptyList();
         }
 
-        Filter registeredFilter = Filter.createEqualityFilter("jansStatus",
-                Fido2RegistrationStatus.registered.getValue());
-        log.info("Find Fido2 Registered by registeredFilter:{}", registeredFilter);
-        return persistenceEntryManager.findEntries(baseDn, Fido2RegistrationEntry.class, registeredFilter);
+        Filter searchFilter = Filter.createANDFilter(Filter.createEqualityFilter("personInum", userInum),
+                Filter.createEqualityFilter("jansStatus", Fido2RegistrationStatus.registered.getValue()));
+
+        log.info("Find Fido2 Registered by searchFilter:{}", searchFilter);
+        return persistenceEntryManager.findEntries(getDnFido2RegistrationEntry(null), Fido2RegistrationEntry.class, searchFilter);
     }
 
     public String getBaseDnForFido2RegistrationEntries(String userInum) {
