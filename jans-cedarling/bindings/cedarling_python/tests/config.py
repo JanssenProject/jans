@@ -8,7 +8,7 @@ TEST_FILES_PATH = join(ROOT_FOLDER_PATH, "cedarling/src/init/test_files")
 
 
 # we use fixture with correct data
-# and can change some part in the specific test case
+# and you can change some part in the specific test case
 @pytest.fixture
 def sample_bootstrap_config():
     # log_config = MemoryLogConfig(log_ttl=100)
