@@ -118,8 +118,6 @@ class Plugin(DialogUtils):
                 self.app.show_message(common_strings.error, HTML(_("Please fill <b>Description</b> and <b>File Name</b>")), tobefocused=dialog)
                 return
 
-            data['service'] = [data.pop('service')]
-
             data.pop('document', None)
             form_data = {'document': data}
 
@@ -186,7 +184,7 @@ class Plugin(DialogUtils):
                                     name='service',
                                     widget=DropDownWidget(
                                         values=[(s,s) for s in common_data.asset_services],
-                                        value=data.get('service', common_data.asset_services)[0],
+                                        value=data.get('service', common_data.asset_services[0]),
                                         select_one_option=False
                                         ),
                                     jans_help=_("Select Jans Service"),

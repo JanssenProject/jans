@@ -363,7 +363,7 @@ class Plugin(DialogUtils):
                 selectes=0,
                 all_data=asset_dir_mappings,
                 underline_headings=False,
-                max_width=44,
+                max_width=110,
                 jans_name='assetDirMapping',
                 max_height=len(asset_dir_mappings)+1
                 )
