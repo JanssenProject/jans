@@ -54,7 +54,7 @@ impl DecodingStrategy {
         let key_service: Arc<KeyServiceWrapper> = dep_map.get();
         let mut supported_algs = vec![];
         for alg_str in config_algs {
-            supported_algs.push(string_to_alg(&alg_str)?);
+            supported_algs.push(string_to_alg(alg_str)?);
         }
 
         Ok(Self::WithValidation {
@@ -96,8 +96,8 @@ impl ExtractClaims for DecodingStrategy {
 
         let key = jwt::DecodingKey::from_secret("some_secret".as_ref());
 
-        let claims = jwt::decode::<T>(&jwt_str, &key, &validator)
-            .map_err(Error::ValidationError)?
+        let claims = jwt::decode::<T>(jwt_str, &key, &validator)
+            .map_err(Error::Validation)?
             .claims;
 
         Ok(claims)
@@ -114,10 +114,10 @@ fn decode_and_validate_jwt<T: DeserializeOwned>(
     iss: Option<impl ToString>,
     aud: Option<impl ToString>,
     req_sub: bool,
-    supported_algs: &Vec<jwt::Algorithm>,
+    supported_algs: &[jwt::Algorithm],
     key_service: &Arc<dyn GetKey>,
 ) -> Result<T, Error> {
-    let header = jwt::decode_header(jwt).map_err(Error::ParsingError)?;
+    let header = jwt::decode_header(jwt).map_err(Error::Parsing)?;
 
     // reject unsupported algorithms early
     if !supported_algs.contains(&header.alg) {
@@ -128,10 +128,10 @@ fn decode_and_validate_jwt<T: DeserializeOwned>(
     let mut validator = jwt::Validation::new(header.alg);
     validator.validate_nbf = true;
     if let Some(iss) = iss {
-        validator.set_issuer(&vec![iss]);
+        validator.set_issuer(&[iss]);
     }
     if let Some(aud) = aud {
-        validator.set_audience(&vec![aud]);
+        validator.set_audience(&[aud]);
     } else {
         validator.validate_aud = false;
     }
@@ -147,8 +147,8 @@ fn decode_and_validate_jwt<T: DeserializeOwned>(
     // TODO: handle tokens without a `kid` in the header
 
     // extract claims
-    let claims = jwt::decode::<T>(&jwt, &key, &validator)
-        .map_err(Error::ValidationError)?
+    let claims = jwt::decode::<T>(jwt, key, &validator)
+        .map_err(Error::Validation)?
         .claims;
     Ok(claims)
 }

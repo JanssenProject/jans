@@ -9,6 +9,7 @@
 //! The module contains structs for logging events.
 
 use std::collections::HashSet;
+use std::fmt::Display;
 use std::sync::Arc;
 use std::time::{SystemTime, UNIX_EPOCH};
 
@@ -115,11 +116,11 @@ pub enum Decision {
     Deny,
 }
 
-impl ToString for Decision {
-    fn to_string(&self) -> String {
+impl Display for Decision {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Decision::Allow => "ALLOW".to_string(),
-            Decision::Deny => "DENY".to_string(),
+            Decision::Allow => f.write_str("ALLOW"),
+            Decision::Deny => f.write_str("DENY"),
         }
     }
 }
@@ -172,13 +173,8 @@ pub struct Diagnostics {
 impl From<&cedar_policy::Diagnostics> for Diagnostics {
     fn from(value: &cedar_policy::Diagnostics) -> Self {
         Self {
-            reason: HashSet::from_iter(
-                value
-                    .reason()
-                    .into_iter()
-                    .map(|policy_id| policy_id.to_string()),
-            ),
-            errors: value.errors().into_iter().map(|err| err.into()).collect(),
+            reason: HashSet::from_iter(value.reason().map(|policy_id| policy_id.to_string())),
+            errors: value.errors().map(|err| err.into()).collect(),
         }
     }
 }

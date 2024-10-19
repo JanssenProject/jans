@@ -10,7 +10,7 @@
 pub enum Error {
     /// Failed to parse the JWT.
     #[error("error parsing the JWT: {0}")]
-    ParsingError(#[source] jsonwebtoken::errors::Error),
+    Parsing(#[source] jsonwebtoken::errors::Error),
 
     /// Key could not be retrieved from the `KeyService`.
     #[error("could not get hold of a key from the KeyService: {0}")]
@@ -26,7 +26,7 @@ pub enum Error {
 
     /// Failed to validate the JWT
     #[error("failed to validate JWT: {0}")]
-    ValidationError(#[source] jsonwebtoken::errors::Error),
+    Validation(#[source] jsonwebtoken::errors::Error),
 }
 
 /// Error type for the creating JWT service.

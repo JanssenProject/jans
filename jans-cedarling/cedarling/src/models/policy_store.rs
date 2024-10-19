@@ -21,7 +21,6 @@ pub(crate) struct PolicyStoreMap {
 pub struct PolicyStore {
     pub schema: CedarSchema,
     #[serde(deserialize_with = "deserialize_policy_set::parse")]
-    #[allow(dead_code)]
     pub policies: cedar_policy::PolicySet,
 }
 
