@@ -7,7 +7,6 @@
 
 use std::collections::HashMap;
 
-use crate::init::cedar_schema::parse_cedar_schema;
 use crate::init::policy::parse_policy_set;
 
 use super::cedar_schema::CedarSchema;
@@ -22,8 +21,6 @@ pub(crate) struct PolicyStoreMap {
 /// PolicyStore contains all the data the Cedarling needs to verify JWT tokens and evaluate policies
 #[derive(Debug, Clone, serde::Deserialize)]
 pub struct PolicyStore {
-    #[serde(deserialize_with = "parse_cedar_schema")]
-    #[allow(dead_code)]
     pub schema: CedarSchema,
     #[serde(deserialize_with = "parse_policy_set")]
     #[allow(dead_code)]
