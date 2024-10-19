@@ -1,0 +1,29 @@
+name: Ruby
+
+on:
+  push:
+    branches:
+      - master
+
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: Ruby ${{ matrix.ruby }}
+    strategy:
+      matrix:
+        ruby:
+          - '3.3.0'
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Ruby & Rust
+      uses: oxidize-rb/actions/setup-ruby-and-rust@v1
+      with:
+        ruby-version: ${{ matrix.ruby }}
+        bundler-cache: true
+        cargo-cache: true
+        rubygems: '3.5.3'
+    - name: Run the default task
+      run: bundle exec rake

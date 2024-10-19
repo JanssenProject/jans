@@ -1,0 +1,13 @@
+[package]
+name = "cedarling"
+version = "0.1.0"
+edition = "2021"
+authors = ["John Anderson <john@gluu.org>"]
+license = "MIT"
+publish = false
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+magnus = { version = "0.6.2" }
