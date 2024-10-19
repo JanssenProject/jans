@@ -8,7 +8,7 @@
 use crate::models::policy_store::PolicyStore;
 
 use super::key_service::KeyService;
-use super::traits::{Decode, ExtractClaims, GetKey};
+use super::traits::{Decode, ExtractClaims};
 use super::Error;
 use di::DependencySupplier;
 use jsonwebtoken as jwt;
@@ -26,7 +26,7 @@ pub enum DecodingStrategy {
 
     /// Decoding strategy that performs validation using a key service and supported algorithms.
     WithValidation {
-        key_service: Box<dyn GetKey>,
+        key_service: KeyService,
         supported_algs: Vec<jwt::Algorithm>,
     },
 }
@@ -72,7 +72,7 @@ impl DecodingStrategy {
         }
 
         Ok(Self::WithValidation {
-            key_service: Box::new(key_service),
+            key_service,
             supported_algs,
         })
     }
@@ -129,7 +129,7 @@ fn decode_and_validate_jwt<T: DeserializeOwned>(
     aud: Option<impl ToString>,
     req_sub: bool,
     supported_algs: &Vec<jwt::Algorithm>,
-    key_service: &Box<dyn GetKey>,
+    key_service: &KeyService,
 ) -> Result<T, Error> {
     let header = jwt::decode_header(jwt).map_err(Error::ParsingError)?;
 
@@ -157,7 +157,7 @@ fn decode_and_validate_jwt<T: DeserializeOwned>(
     let kid = &header
         .kid
         .ok_or_else(|| Error::MissingRequiredHeader("kid".into()))?;
-    let key = key_service.get_key(kid)?;
+    let key = key_service.get_key(kid).map_err(Error::KeyServiceError)?;
     // TODO: handle tokens without a `kid` in the header
 
     // extract claims
@@ -165,24 +165,6 @@ fn decode_and_validate_jwt<T: DeserializeOwned>(
         .map_err(Error::ValidationError)?
         .claims;
     Ok(claims)
-}
-
-/// A wrapper for the key service used to retrieve decoding keys.
-///
-/// This struct provides thread-safe access to the key service and is used
-/// for dependency injection in contexts where the key service is required.
-///
-/// This is required to be able to add the KeyService to the dependency map.
-pub struct KeyServiceWrapper(Arc<dyn GetKey>);
-
-impl DependencySupplier<KeyServiceWrapper> for KeyServiceWrapper {
-    /// Retrieves an instance of `KeyServiceWrapper` from the current instance.
-    ///
-    /// This method clones the underlying key service and returns a new wrapper
-    /// instance encapsulating the cloned service, allowing safe concurrent access.
-    fn get(&self) -> Arc<KeyServiceWrapper> {
-        KeyServiceWrapper(Arc::clone(&self.0)).into()
-    }
 }
 
 /// Converts a string representation of an algorithm to a `jwt::Algorithm` enum.
