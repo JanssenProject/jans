@@ -6,7 +6,7 @@
  */
 
 use super::interface::{LogStorage, LogWriter};
-use crate::models::log_config::MemoryLogConfig;
+use crate::bootstrap_config::log_config::MemoryLogConfig;
 use crate::models::log_entry::LogEntry;
 use sparkv::{Config as ConfigSparKV, SparKV};
 use std::{sync::Mutex, time::Duration};

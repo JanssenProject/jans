@@ -62,7 +62,7 @@ mod test;
 
 use std::sync::Arc;
 
-use crate::models::log_config::LogConfig;
+use crate::bootstrap_config::log_config::LogConfig;
 pub use interface::LogStorage;
 pub(crate) use interface::LogWriter;
 pub(crate) use log_strategy::LogStrategy;

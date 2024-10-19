@@ -5,8 +5,8 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
+use crate::bootstrap_config::policy_store_config::{PolicyStoreConfig, PolicyStoreSource};
 use crate::models::policy_store::{PolicyStore, PolicyStoreMap};
-use crate::models::policy_store_config::{PolicyStoreConfig, PolicyStoreSource};
 
 /// Error cases for loading policy
 #[derive(Debug, thiserror::Error)]

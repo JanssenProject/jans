@@ -14,6 +14,7 @@
 //! The Cedarling is a more productive and flexible way to handle authorization.
 
 mod authz;
+mod bootstrap_config;
 mod init;
 mod jwt;
 mod lock;
@@ -28,6 +29,7 @@ use std::sync::Arc;
 
 pub use authz::AuthorizeError;
 use authz::Authz;
+pub use bootstrap_config::*;
 use di::{DependencyMap, DependencySupplier};
 use init::policy_store::{load_policy_store, LoadPolicyStoreError};
 pub use jwt::CreateJwtServiceError;
@@ -35,7 +37,6 @@ pub use log::LogStorage;
 use log::{init_logger, LogWriter};
 use models::app_types;
 pub use models::authorize_result::AuthorizeResult;
-pub use models::config::*;
 pub use models::log_entry::LogEntry;
 use models::log_entry::LogType;
 pub use models::request::{Request, ResourceData};

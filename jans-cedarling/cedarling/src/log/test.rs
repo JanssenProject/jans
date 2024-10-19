@@ -20,7 +20,7 @@ use nop_logger::NopLogger;
 use stdout_logger::StdOutLogger;
 use uuid7::uuid7;
 
-use crate::models::log_config;
+use crate::bootstrap_config::log_config;
 
 #[test]
 fn test_new_log_strategy_off() {
