@@ -1,0 +1,19 @@
+[package]
+name = "cedarling_ruby"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name="cedarling_ruby"
+crate-type = ["cdylib"]
+
+[dependencies]
+cedarling = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+magnus = { version = "0.7.1" }
+# this depends on magnus-0.6.2, and we want magnus-0.7.1
+# serde_magnus = "0.8.1"
+# This repo has made the necessary update.
+# Lock it to the sha so we don't have other changes sneaked in to the branch
+serde_magnus = {version = "0.8.1", git = "https://github.com/sevenc-nanashi/serde-magnus", rev = "5c1db66f5059d0e2cac2f628f19f5734d2fed21e"}

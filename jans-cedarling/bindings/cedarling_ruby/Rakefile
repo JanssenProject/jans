@@ -1,0 +1,20 @@
+# frozen_string_literal: true
+
+require "bundler/gem_tasks"
+require "rspec/core/rake_task"
+
+RSpec::Core::RakeTask.new(:spec)
+
+require "rb_sys/extensiontask"
+
+task build: :compile
+
+GEMSPEC = Gem::Specification.load("cedarling.gemspec")
+
+# This is required to be 'cedarling_ruby' because otherwise it clashes with the
+# rust top-level 'cedarling' project.
+RbSys::ExtensionTask.new("cedarling_ruby", GEMSPEC) do |ext|
+  ext.lib_dir = "lib/cedarling_ruby"
+end
+
+task default: %i[compile spec]

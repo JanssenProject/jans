@@ -1,0 +1,20 @@
+# This Cargo.toml is here to let externals tools (IDEs, etc.) know that this is
+# a Rust project. Your extensions dependencies should be added to the Cargo.toml
+# in the ext/ directory.
+
+[workspace]
+members = ["./ext/cedarling"]
+resolver = "2"
+
+[workspace.dependencies]
+# Apparently it is not possible to specify workspace = true in a virtual workspace
+# So either this file must be removed, or these dependencies must be kept up to date.
+
+# cedarling = { workspace = true }
+cedarling = { path = "../../cedarling" }
+# serde = { workspace = true }
+serde = { version = "1.0", features = ["derive"] }
+# serde_json = { workspace = true }
+serde_json = "1.0"
+
+
