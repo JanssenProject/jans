@@ -14,5 +14,4 @@ pub(crate) mod cedar_schema;
 
 pub mod log_entry;
 pub mod policy_store;
-pub mod request;
 pub mod token_data;

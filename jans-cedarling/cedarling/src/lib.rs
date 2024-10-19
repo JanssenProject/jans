@@ -27,6 +27,7 @@ mod tests;
 
 use std::sync::Arc;
 
+pub use authz::request::{Request, ResourceData};
 pub use authz::AuthorizeError;
 use authz::Authz;
 pub use bootstrap_config::*;
@@ -39,7 +40,6 @@ use models::app_types;
 pub use models::authorize_result::AuthorizeResult;
 pub use models::log_entry::LogEntry;
 use models::log_entry::LogType;
-pub use models::request::{Request, ResourceData};
 
 #[doc(hidden)]
 pub mod bindings {

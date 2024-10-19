@@ -18,16 +18,17 @@ use crate::models::app_types;
 use crate::models::log_entry::AuthorizationLogInfo;
 use crate::models::log_entry::{LogEntry, LogType};
 use crate::models::policy_store::PolicyStore;
-use crate::models::request::Request;
 use crate::models::token_data::TokenPayload;
 use crate::AuthorizeResult;
 
 mod entities;
+pub(crate) mod request;
 
 use di::DependencySupplier;
 use entities::create_resource_entity;
 use entities::ResourceEntityError;
 use entities::{create_access_token_entities, AccessTokenEntitiesError};
+use request::Request;
 
 /// Authorization Service
 /// The primary service of the Cedarling application responsible for evaluating authorization requests.
