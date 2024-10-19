@@ -18,6 +18,10 @@ pub enum Error {
     #[error("could not get hold of a key from the KeyService: {0}")]
     MissingKey(Box<str>),
 
+    /// Key could not be found from the JWKS
+    #[error("key no key with the `kid`=\"{0}\" was found in the jwks")]
+    KeyNotFound(Box<str>),
+
     /// Tried to validate a token signed with an unsupported algorithm.
     #[error("the JWT is signed with an unsupported algorithm: {0:?}")]
     TokenSignedWithUnsupportedAlgorithm(jsonwebtoken::Algorithm),
@@ -34,7 +38,9 @@ pub enum Error {
     #[error("an algorithim defined in the config is not yet implemented: {0}")]
     UnimplementedAlgorithm(Box<str>),
 
-    /// Config contains an unimplemented algorithm
     #[error("Error initializing KeyService: {0}")]
     KeyServiceInitError(#[source] key_service::Error),
+
+    #[error("key service error: {0}")]
+    KeyServiceError(#[source] key_service::Error),
 }

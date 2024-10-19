@@ -1,171 +1,109 @@
+/*
+ * This software is available under the Apache-2.0 license.
+ * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+ *
+ * Copyright (c) 2024, Gluu, Inc.
+ */
+
 mod error;
-mod http_service;
 mod openid_config;
 #[cfg(test)]
 mod test;
-mod traits;
 
-use super::traits::{GetKey, GetKeyMut};
-use bytes::Bytes;
 use jsonwebtoken::jwk::JwkSet;
 use jsonwebtoken::DecodingKey;
-use openid_config::OpenIdConfig;
+use openid_config::{OpenIdConfig, OpenIdConfigSource};
 use reqwest::blocking::get;
 use std::collections::HashMap;
-use std::sync::{Arc, Mutex};
-use traits::HttpGet;
+use std::sync::Arc;
 
 pub use error::Error;
 
-pub struct HttpService;
-
-impl HttpGet for HttpService {
-    fn get(&self, uri_str: &str) -> Result<Bytes, Error> {
-        match get(uri_str)?.error_for_status() {
-            Ok(resp) => Ok(resp.bytes()?),
-            Err(e) => {
-                let url: Box<str> = e
-                    .url()
-                    .expect("http response should have a url")
-                    .as_str()
-                    .into();
-                let status: Box<str> = e
-                    .status()
-                    .expect("http response should have a status")
-                    .as_str()
-                    .into();
-
-                Err(Error::HttpGetError(url, status))
-            },
-        }
-    }
-}
-
 pub struct KeyService {
     idp_configs: HashMap<Box<str>, OpenIdConfig>, // <issuer (`iss`), OpenIdConfig>
-    http_service: Arc<Mutex<dyn HttpGet>>,
 }
 
 #[allow(unused)]
 impl KeyService {
-    #[cfg(test)]
-    pub fn new_with_http_service(
-        openid_conf_endpoints: Vec<&str>,
-        http_service: Arc<Mutex<dyn HttpGet>>,
-    ) -> Result<Self, Error> {
-        let mut idp_configs = HashMap::new();
-
-        // fetch IDP configs
-        for endpoint in &openid_conf_endpoints {
-            let http_service = http_service.lock().unwrap();
-            let conf_bytes = http_service.get(endpoint)?;
-            let (issuer, conf) = OpenIdConfig::from_slice(&conf_bytes)?;
-            idp_configs.insert(issuer, conf);
-        }
-
-        // fetch keys
-        for (iss, conf) in &mut idp_configs {
-            let http_service = http_service.lock().unwrap();
-            let jwks_bytes = http_service.get(&conf.jwks_uri)?;
-            let jwks: JwkSet = serde_json::from_slice(&jwks_bytes)?;
-            for jwk in jwks.keys {
-                let decoding_key = DecodingKey::from_jwk(&jwk)?;
-                let key_id = jwk.common.key_id.ok_or(Error::JwkMissingKeyId)?;
-                conf.decoding_keys.insert(key_id.into(), decoding_key);
-            }
-        }
-
-        Ok(Self {
-            idp_configs,
-            http_service,
-        })
-    }
-
     pub fn new(openid_conf_endpoints: Vec<&str>) -> Result<Self, Error> {
-        let http_service = Arc::new(Mutex::new(HttpService));
         let mut idp_configs = HashMap::new();
 
         // fetch IDP configs
-        for endpoint in &openid_conf_endpoints {
-            let http_service = http_service.lock().unwrap();
-            let conf_bytes = http_service.get(endpoint)?;
-            let (issuer, conf) = OpenIdConfig::from_slice(&conf_bytes)?;
+        for endpoint in openid_conf_endpoints {
+            let conf_src: OpenIdConfigSource = get(endpoint)?.json()?;
+            let (issuer, conf) = OpenIdConfig::from_source(conf_src);
+            println!("deserialized conf bytes");
             idp_configs.insert(issuer, conf);
         }
+        println!("got idp conf");
 
         // fetch keys
         for (iss, conf) in &mut idp_configs {
-            let http_service = http_service.lock().unwrap();
-            let jwks_bytes = http_service.get(&conf.jwks_uri)?;
+            let jwks_bytes = get(&*conf.jwks_uri)?.bytes()?;
+            println!("got bytes");
             let jwks: JwkSet = serde_json::from_slice(&jwks_bytes)?;
+            println!("got jwks");
+            let mut decoding_keys = conf.decoding_keys.write().unwrap();
             for jwk in jwks.keys {
                 let decoding_key = DecodingKey::from_jwk(&jwk)?;
                 let key_id = jwk.common.key_id.ok_or(Error::JwkMissingKeyId)?;
-                conf.decoding_keys.insert(key_id.into(), decoding_key);
+                decoding_keys.insert(key_id.into(), Arc::new(decoding_key));
             }
         }
 
-        Ok(Self {
-            idp_configs,
-            http_service,
-        })
+        Ok(Self { idp_configs })
     }
 
-    fn get_key(&self, iss: &str, kid: &str) -> Option<&DecodingKey> {
-        let idp = match self.idp_configs.get(iss) {
-            Some(idp) => idp,
-            None => return None,
-        };
-
-        match idp.decoding_keys.get(kid) {
-            Some(key) => Some(&key),
-            None => None,
-        }
-    }
-
-    pub fn get_key_or_update_jwks(&mut self, iss: &str, kid: &str) -> Option<&DecodingKey> {
-        match self.get_key(iss, kid) {
-            Some(_) => todo!(),
-            None => {
+    pub fn get_key(&self, kid: &str) -> Result<Arc<DecodingKey>, Error> {
+        for (iss, config) in &self.idp_configs {
+            // first try to get the key from the local keystore
+            if let Some(key) = self.get_key_from_iss(&iss, &kid) {
+                return Ok(key.clone());
+            } else {
+                // if the key is not found in the local keystore, update
+                // the local keystore and try again
                 self.update_jwks(iss);
-                self.get_key(iss, kid)
-            },
+                if let Some(key) = self.get_key_from_iss(&iss, &kid) {
+                    return Ok(key.clone());
+                }
+            }
         }
+
+        Err(Error::KeyNotFound(kid.into()))
     }
 
-    fn update_jwks(&mut self, issuer: &str) -> Result<(), Error> {
+    fn get_key_from_iss(&self, iss: &str, kid: &str) -> Option<Arc<DecodingKey>> {
+        if let Some(idp) = self.idp_configs.get(iss) {
+            let decoding_keys = idp.decoding_keys.read().unwrap();
+            if let Some(key) = decoding_keys.get(kid) {
+                return Some(key.clone());
+            }
+        }
+
+        None
+    }
+
+    fn update_jwks(&self, issuer: &str) -> Result<(), Error> {
         let conf = self
             .idp_configs
-            .get_mut(issuer)
+            .get(issuer)
             .ok_or(Error::UnknownIssuer(issuer.into()))?;
 
         // fetch fresh keys
         let mut new_keys = HashMap::new();
-        let http_service = self.http_service.lock().unwrap();
-        let jwks_bytes = http_service.get(&conf.jwks_uri)?;
+        let jwks_bytes = get(&*conf.jwks_uri)?.bytes()?;
         let jwks: JwkSet = serde_json::from_slice(&jwks_bytes)?;
         for jwk in jwks.keys {
             let decoding_key = DecodingKey::from_jwk(&jwk)?;
             let key_id = jwk.common.key_id.ok_or(Error::JwkMissingKeyId)?;
-            new_keys.insert(key_id.into(), decoding_key);
+            new_keys.insert(key_id.into(), Arc::new(decoding_key));
         }
 
         // we reassign the keys after fetching and deserializing the keys
         // so we don't lose the old ones in case the process fails
-        conf.decoding_keys = new_keys;
+        let mut decoding_keys = conf.decoding_keys.write().unwrap();
+        *decoding_keys = new_keys;
 
         Ok(())
-    }
-}
-
-impl GetKey for KeyService {
-    fn get_key(&self, kid: &str) -> Result<&jsonwebtoken::DecodingKey, super::Error> {
-        for conf in &self.idp_configs {
-            if let Some(key) = self.get_key(&conf.0, &kid) {
-                return Ok(key);
-            }
-        }
-
-        Err(super::Error::MissingKey(kid.into()))
     }
 }

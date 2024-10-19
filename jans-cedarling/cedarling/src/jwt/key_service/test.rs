@@ -1,12 +1,13 @@
-use std::{
-    collections::HashMap,
-    sync::{Arc, Mutex},
-};
+/*
+ * This software is available under the Apache-2.0 license.
+ * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+ *
+ * Copyright (c) 2024, Gluu, Inc.
+ */
 
-use bytes::Bytes;
-use serde::Serialize;
+use serde_json::json;
 
-use super::{HttpGet, KeyService};
+use super::KeyService;
 
 const JWKS_RESP_1: &str = include_str!("./test-json-responses/test-jwks-response-1.json");
 const JWKS_RESP_2: &str = include_str!("./test-json-responses/test-jwks-response-2.json");
@@ -14,96 +15,83 @@ const JWKS_RESP_2: &str = include_str!("./test-json-responses/test-jwks-response
 const KEY_ID_1: &str = "a50f6e70ef4b548a5fd9142eecd1fb8f54dce9ee";
 const KEY_ID_2: &str = "73e25f9789119c7875d58087a78ac23f5ef2eda3";
 
-struct MockHttpService {
-    responses: HashMap<Box<str>, Bytes>,
-}
-
-impl MockHttpService {
-    pub fn new() -> Self {
-        Self {
-            responses: HashMap::new(),
-        }
-    }
-
-    pub fn set_response(&mut self, uri: &str, response: Bytes) {
-        self.responses.insert(uri.into(), response);
-    }
-}
-
-impl HttpGet for MockHttpService {
-    fn get(&self, uri_str: &str) -> Result<Bytes, super::Error> {
-        Ok(self.responses.get(uri_str).expect("unknown uri").clone())
-    }
-}
-
 #[test]
 fn key_service_can_retrieve_keys() {
-    // setup mock data
-    let issuer = "some_issuer.com";
-    let jwks_uri = "https://www.googleapis.com/oauth2/v3/certs";
-    let openid_conf_endpoint = format!("https://{}/.well-known/openid-configuration", issuer);
+    // init server
+    let mut server = mockito::Server::new();
 
-    // setup mock HttpService
-    let mock_openid_conf_resp = MockOpenIdConfReponse {
-        issuer: issuer.into(),
-        jwks_uri: jwks_uri.into(),
-        unexpected: 1123124, // a random number used to represent unexpected data
-    };
-    let mock_openid_conf_resp = serde_json::to_string(&mock_openid_conf_resp).unwrap();
-    let mut http_service = MockHttpService::new();
-    http_service.set_response(&openid_conf_endpoint, mock_openid_conf_resp.into());
-    http_service.set_response(&jwks_uri, JWKS_RESP_1.into());
-    let http_service = Arc::new(Mutex::new(http_service));
+    // setup server responses
+    let openid_config_response = json!({
+        "issuer": server.url(),
+        "jwks_uri": &format!("{}/jwks", server.url()),
+        "unexpected": 123123, // a random number used to represent unexpected data
+    });
+    let openid_conf_mock = server
+        .mock("GET", "/.well-known/openid-configuration")
+        .with_status(200)
+        .with_header("content-type", "application/json")
+        .with_body(openid_config_response.to_string())
+        .create();
+    let jwks_uri_mock = server
+        .mock("GET", "/jwks")
+        .with_status(200)
+        .with_header("content-type", "application/json")
+        .with_body(JWKS_RESP_1)
+        .create();
 
     // setup KeyService
+    let openid_conf_endpoint = format!("{}/.well-known/openid-configuration", server.url());
     let key_service =
-        KeyService::new_with_http_service(vec![&openid_conf_endpoint], http_service.clone())
-            .unwrap();
+        KeyService::new(vec![&openid_conf_endpoint]).expect("should create key service");
+    openid_conf_mock.assert();
+    jwks_uri_mock.assert();
 
-    assert!(key_service.get_key(issuer, KEY_ID_1).is_some())
+    assert!(key_service.get_key(KEY_ID_1).is_ok());
 }
 
 #[test]
 fn key_service_can_update_keys() {
-    // setup mock data
-    let issuer = "some_issuer.com";
-    let jwks_uri = "https://www.googleapis.com/oauth2/v3/certs";
-    let openid_conf_endpoint = format!("https://{}/.well-known/openid-configuration", issuer);
+    // init server
+    let mut server = mockito::Server::new();
 
-    // setup mock HttpService
-    let mock_openid_conf_resp = MockOpenIdConfReponse {
-        issuer: issuer.into(),
-        jwks_uri: jwks_uri.into(),
-        unexpected: 1123124, // a random number used to represent unexpected data
-    };
-    let mock_openid_conf_resp = serde_json::to_string(&mock_openid_conf_resp).unwrap();
-    let mut http_service = MockHttpService::new();
-    http_service.set_response(&openid_conf_endpoint, mock_openid_conf_resp.into());
-    http_service.set_response(&jwks_uri, JWKS_RESP_1.into());
-    let http_service = Arc::new(Mutex::new(http_service));
+    // setup server responses
+    let openid_config_response = json!({
+        "issuer": server.url(),
+        "jwks_uri": &format!("{}/jwks", server.url()),
+        "unexpected": 123123, // a random number used to represent unexpected data
+    });
+    let openid_conf_mock = server
+        .mock("GET", "/.well-known/openid-configuration")
+        .with_status(200)
+        .with_header("content-type", "application/json")
+        .with_body(openid_config_response.to_string())
+        .create();
+    let jwks_uri_mock = server
+        .mock("GET", "/jwks")
+        .with_status(200)
+        .with_header("content-type", "application/json")
+        .with_body(JWKS_RESP_1)
+        .expect(2)
+        .create();
 
     // setup KeyService
-    let mut key_service =
-        KeyService::new_with_http_service(vec![&openid_conf_endpoint], http_service.clone())
-            .unwrap();
+    let openid_conf_endpoint = format!("{}/.well-known/openid-configuration", server.url());
+    let key_service =
+        KeyService::new(vec![&openid_conf_endpoint]).expect("should create key service");
+    openid_conf_mock.assert();
 
     // this should fail first
-    assert!(key_service.get_key(issuer, KEY_ID_2).is_none());
+    assert!(key_service.get_key(KEY_ID_2).is_err());
+    jwks_uri_mock.assert();
 
-    {
-        let mut http_service = http_service.lock().unwrap();
-        http_service.set_response(&jwks_uri, JWKS_RESP_2.into());
-    }
+    // update the mock keystore
+    let jwks_uri_mock = server
+        .mock("GET", "/jwks")
+        .with_status(200)
+        .with_header("content-type", "application/json")
+        .with_body(JWKS_RESP_2)
+        .create();
 
-    assert!(key_service
-        .get_key_or_update_jwks(issuer, KEY_ID_2)
-        .is_some());
-}
-
-#[derive(Serialize)]
-struct MockOpenIdConfReponse {
-    issuer: Box<str>,
-    jwks_uri: Box<str>,
-    unexpected: i32, // used to test if deserialzation still proceeds even if there's some
-                     // unexpected data
+    assert!(key_service.get_key(KEY_ID_2).is_ok());
+    jwks_uri_mock.assert();
 }

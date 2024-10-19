@@ -1,9 +1,17 @@
-use std::collections::HashMap;
+/*
+ * This software is available under the Apache-2.0 license.
+ * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+ *
+ * Copyright (c) 2024, Gluu, Inc.
+ */
+
+use std::{
+    collections::HashMap,
+    sync::{Arc, RwLock},
+};
 
 use jsonwebtoken::DecodingKey;
 use serde::Deserialize;
-
-use super::Error;
 
 #[derive(Deserialize)]
 #[allow(dead_code)]
@@ -28,20 +36,20 @@ pub struct OpenIdConfigSource {
 
 pub struct OpenIdConfig {
     pub jwks_uri: Box<str>,
-    pub decoding_keys: HashMap<Box<str>, DecodingKey>, // <key_id (`kid`), DecodingKey>
+    // <key_id (`kid`), DecodingKey>
+    pub decoding_keys: Arc<RwLock<HashMap<Box<str>, Arc<DecodingKey>>>>,
 }
 
 #[allow(dead_code)]
 impl OpenIdConfig {
-    pub fn from_slice(bytes: &[u8]) -> Result<(Box<str>, OpenIdConfig), Error> {
-        let conf_src: OpenIdConfigSource = serde_json::from_slice(&bytes)?;
-        let issuer = conf_src.issuer;
-        Ok((
+    pub fn from_source(src: OpenIdConfigSource) -> (Box<str>, OpenIdConfig) {
+        let issuer = src.issuer;
+        (
             issuer,
             OpenIdConfig {
-                jwks_uri: conf_src.jwks_uri,
-                decoding_keys: HashMap::new(),
+                jwks_uri: src.jwks_uri,
+                decoding_keys: Arc::new(RwLock::new(HashMap::new())),
             },
-        ))
+        )
     }
 }
