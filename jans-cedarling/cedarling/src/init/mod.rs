@@ -10,5 +10,4 @@
 //! - load Cedar Policies
 //! - get keys for JWT validation
 
-pub(crate) mod policy;
 pub(crate) mod policy_store;
