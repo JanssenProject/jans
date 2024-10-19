@@ -1,0 +1,26 @@
+# ruby-specific
+/.bundle/
+/.yardoc
+/_yardoc/
+/coverage/
+/doc/
+/pkg/
+/spec/reports/
+/tmp/
+*.bundle
+*.so
+*.o
+*.a
+mkmf.log
+target/
+
+# rspec failure tracking
+.rspec_status
+
+# do not version Gemfile.lock because this is the gem, not an app.
+Gemfile.lock
+
+# un-ignore lib, which has useful files in ruby,
+# but which is top-level ignored for python files.
+!lib/
+!bin/

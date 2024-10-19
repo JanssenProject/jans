@@ -1,0 +1,10 @@
+# frozen_string_literal: true
+
+source "https://rubygems.org"
+
+# Specify your gem's dependencies in cedarling.gemspec
+gemspec
+
+gem "rake-compiler"
+gem "rb_sys", "~> 0.9.63"
+
