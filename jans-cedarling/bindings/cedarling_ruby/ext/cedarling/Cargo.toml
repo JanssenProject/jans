@@ -1,5 +1,5 @@
 [package]
-name = "cedarling"
+name = "cedarling_ruby"
 version = "0.1.0"
 edition = "2021"
 authors = ["John Anderson <john@gluu.org>"]
@@ -7,6 +7,7 @@ license = "MIT"
 publish = false
 
 [lib]
+name="cedarling_ruby"
 crate-type = ["cdylib"]
 
 [dependencies]

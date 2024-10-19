@@ -11,8 +11,10 @@ task build: :compile
 
 GEMSPEC = Gem::Specification.load("cedarling.gemspec")
 
-RbSys::ExtensionTask.new("cedarling", GEMSPEC) do |ext|
-  ext.lib_dir = "lib/cedarling"
+# This is required to be 'cedarling_ruby' because otherwise it clashes with the
+# rust top-level 'cedarling' project.
+RbSys::ExtensionTask.new("cedarling_ruby", GEMSPEC) do |ext|
+  ext.lib_dir = "lib/cedarling_ruby"
 end
 
 task default: %i[compile spec]

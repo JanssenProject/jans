@@ -5,7 +5,7 @@ RSpec.describe Cedarling do
     expect(Cedarling::VERSION).not_to be nil
   end
 
-  it "does something useful" do
-    expect(false).to eq(true)
+  it "calls into the rust extension" do
+    expect(Cedarling::hello('Finnegan')).to eq('Hello from Rust, Finnegan!')
   end
 end

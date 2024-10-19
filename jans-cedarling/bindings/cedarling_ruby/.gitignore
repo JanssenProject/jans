@@ -16,4 +16,7 @@ target/
 # rspec failure tracking
 .rspec_status
 
+# do not version Gemfile.lock because this is the gem, not an app.
+Gemfile.lock
+
 notes
