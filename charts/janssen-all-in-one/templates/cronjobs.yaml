@@ -62,9 +62,9 @@ spec:
               {{- with (index .Values "auth-server-key-rotation" "volumeMounts") }}
 {{- toYaml . | nindent 16 }}
               {{- end }}
-                - mountPath: {{ .Values.cnConfiguratorConfigurationFile }}
-                  name: {{ .Release.Name }}-configuration-file
-                  subPath: {{ .Values.cnConfiguratorConfigurationFile | base }}
+              {{- with (include "janssen-all-in-one.config.schema" . | fromYaml).volumeMounts }}
+{{- toYaml . | nindent 16 }}
+              {{- end }}
               envFrom:
                 - configMapRef:
                     name: {{ .Release.Name }}-config-cm
@@ -87,9 +87,9 @@ spec:
           {{- with (index .Values "auth-server-key-rotation" "volumes") }}
 {{- toYaml . | nindent 12 }}
           {{- end }}
-            - name: {{ .Release.Name }}-configuration-file
-              secret:
-                secretName: {{ .Release.Name }}-configuration-file
+          {{- with (include "janssen-all-in-one.config.schema" . | fromYaml).volumes }}
+{{- toYaml . | nindent 12 }}
+          {{- end }}
           restartPolicy: Never
 {{- end }}
 
@@ -153,9 +153,9 @@ spec:
               {{- with (index .Values "kc-scheduler" "volumeMounts") }}
 {{- toYaml . | nindent 16 }}
               {{- end }}
-                - mountPath: {{ .Values.cnConfiguratorConfigurationFile }}
-                  name: {{ .Release.Name }}-configuration-file
-                  subPath: {{ .Values.cnConfiguratorConfigurationFile | base }}
+              {{- with (include "janssen-all-in-one.config.schema" . | fromYaml).volumeMounts }}
+{{- toYaml . | nindent 16 }}
+              {{- end }}
               envFrom:
                 - configMapRef:
                     name: {{ .Release.Name }}-config-cm
@@ -177,9 +177,9 @@ spec:
           {{- with (index .Values "kc-scheduler" "volumes") }}
 {{- toYaml . | nindent 12 }}
           {{- end }}
-            - name: {{ .Release.Name }}-configuration-file
-              secret:
-                secretName: {{ .Release.Name }}-configuration-file
+          {{- with (include "janssen-all-in-one.config.schema" . | fromYaml).volumes }}
+{{- toYaml . | nindent 12 }}
+          {{- end }}
           restartPolicy: Never
           {{- if not .Values.isFqdnRegistered  }}
           hostAliases:
