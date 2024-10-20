@@ -31,6 +31,38 @@ The JSON schema looks like this:
 }
 ```
 
+## Trusted Issuer Schema
+
+- **name** : (String, no spaces) The name of the trusted issuer.
+- **description** : (String) A brief description of the issuer, providing context for administrators.
+- **openid_configuration_endpoint** : (String) The HTTPS URL for the OpenID Connect configuration endpoint (usually found under /.well-known/openid-configuration).
+- **access_tokens** : (Object with claims) 
+- **trusted**: (True | False) Indicates whether the issuer's access token are trusted.
+- **id_tokens** : (Object with claims) 
+- **trusted**: (True | False) Indicates whether the issuer's id_token are trusted.
+- **principal_identifier**: the token claim used to identify the User entity (in SAML jargon it's the "NameID format"). This claim is optional--it may be present in the Userinfo token. Defaults to sub.
+- **role_mapping**: A list of the User's roles
+- **userinfo_tokens** :
+- **trusted**: (True | False) Indicates whether the issuer's userinfo_tokens are trusted.
+- **principal_identifier**: the token claim used to identify the User entity (in SAML jargon it's the "NameID format"). This claim is optional--it may be present in the Userinfo token. Defaults to sub.
+- **role_mapping**: A list of the User's roles
+- **tx_tokens** : (Object with claims)
+- **trusted**: (True | False)
+
+```
+[
+{"name": "Google", 
+ "Description": "Consumer IDP", 
+ "openid_configuration_endpoint": "https://accounts.google.com/.well-known/openid-configuration",
+ "access_tokens": {"trusted": True}, 
+ "id_tokens": {"trusted":True, "principal_identifier": "email"},
+ "userinfo_tokens": {"trusted": True, "role_mapping": "role"},  
+ "tx_tokens": {"trusted": True}
+},
+{IDP-2},
+{IDP-3}...
+]
+```
 
 ## Policy and Schema Authoring
 

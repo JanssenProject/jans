@@ -124,7 +124,6 @@ public final class SqlSample {
                 new String[] {"\"value\":\"Skype\""}, null).multiValued(), Filter.createPresenceFilter("nickname"));
         List<SimpleUser> scimSession1 = sqlEntryManager.findEntries("o=jans", SimpleUser.class, filterScimSession1, SearchScope.SUB, null, null, 0, 0, 0);
         LOG.info("Found users: " + scimSession1.size());
-
     }
 
 }

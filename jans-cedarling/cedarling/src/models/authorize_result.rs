@@ -11,7 +11,7 @@ pub struct AuthorizeResult {
 }
 
 impl AuthorizeResult {
-    /// Returns true if workload is allowed
+    /// Returns true if request is allowed
     pub fn is_allowed(&self) -> bool {
         // in future we should also check if the person is allowed
         self.workload.decision() == Decision::Allow

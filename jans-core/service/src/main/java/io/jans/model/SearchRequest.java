@@ -24,6 +24,7 @@ public class SearchRequest {
     private List<String> filterAttributeName;
     private List<String> filterAssertionValue;
     private Map<String, String> fieldValueMap;
+    private List<FieldFilterData> fieldFilterData;
 
     @JsonIgnore
     private String attributesStr;
@@ -159,14 +160,24 @@ public class SearchRequest {
         this.fieldValueMap = fieldValueMap;
     }
 
+    public List<FieldFilterData> getFieldFilterData() {
+        return fieldFilterData;
+    }
+
+    public void setFieldFilterData(List<FieldFilterData> fieldFilterData) {
+        this.fieldFilterData = fieldFilterData;
+    }
+
     @Override
     public String toString() {
         return "SearchRequest [entityClass=" + entityClass + ", schemas=" + schemas + ", attributes=" + attributes
                 + ", excludedAttributes=" + excludedAttributes + ", filter=" + filter + ", sortBy=" + sortBy
                 + ", sortOrder=" + sortOrder + ", startIndex=" + startIndex + ", count=" + count + ", maxCount="
                 + maxCount + ", filterAttributeName=" + filterAttributeName + ", filterAssertionValue="
-                + filterAssertionValue + ", fieldValueMap=" + fieldValueMap + ", attributesStr=" + attributesStr
-                + ", excludedAttributesStr=" + excludedAttributesStr + "]";
+                + filterAssertionValue + ", fieldFilterData=" + fieldFilterData + ", attributesStr=" + attributesStr
+                + ", excludedAttributesStr=" + excludedAttributesStr 
+                + ",fieldValueMap=" + fieldValueMap
+                + "]";
     }
-
+    
 }

@@ -1,4 +1,4 @@
-from typing import Optional, List, final
+from typing import Optional, List, final, Dict, Any
 
 
 @final
@@ -48,10 +48,6 @@ class JwtConfig:
 
 @final
 class BootstrapConfig:
-    # under the hood next fields are optional but
-    # we want enforce to provide them
-    # and if pass not initialized field to the Cedarling it will raise error
-
     application_name: str | None
     log_config: MemoryLogConfig | StdOutLogConfig | DisabledLoggingConfig | None
     policy_store_config: PolicyStoreConfig | None
@@ -68,10 +64,73 @@ class BootstrapConfig:
 
 @final
 class Cedarling:
+
     def __init__(self, config: BootstrapConfig) -> None: ...
 
-    def pop_logs(self) -> List[dict]: ...
+    def pop_logs(self) -> List[Dict]: ...
 
-    def get_log_by_id(self, id: str) -> Optional[dict]: ...
+    def get_log_by_id(self, id: str) -> Optional[Dict]: ...
 
     def get_log_ids(self) -> List[str]: ...
+
+    def authorize(self, request: Request) -> AuthorizeResult: ...
+
+
+@final
+class Request:
+    access_token: str
+    id_token: str
+    action: str
+    resource: ResourceData
+    context: Dict[str, Any]
+
+    def __init__(self, access_token: str,
+                 action: str,
+                 resource: ResourceData,
+                 context: Dict[str, Any]) -> None: ...
+
+
+@final
+class ResourceData:
+    resource_type: str
+    id: str
+    payload: Dict[str, Any]
+
+    def __init__(self, resource_type: str, id: str, **kwargs) -> None: ...
+
+    @classmethod
+    def from_dict(cls, value: Dict[str, Any]) -> "ResourceData": ...
+
+
+@final
+class AuthorizeResult:
+    def is_allowed(self) -> bool: ...
+
+    def workload(self) -> AuthorizeResultResponse: ...
+
+
+@final
+class AuthorizeResultResponse:
+    decision: Decision
+    diagnostics: Diagnostics
+
+
+@final
+class Decision:
+    value: str
+
+    def __str__(self) -> str: ...
+
+    def __eq__(self, value: object) -> bool: ...
+
+
+@final
+class Diagnostics:
+    reason: set[str]
+    errors: List[PolicyEvaluationError]
+
+
+@final
+class PolicyEvaluationError:
+    id: str
+    error: str
