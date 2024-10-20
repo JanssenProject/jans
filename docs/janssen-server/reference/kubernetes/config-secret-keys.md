@@ -620,10 +620,10 @@ Note that `_secret` may contain other keys depending on persistence, secrets/con
 
 ### Custom configuration
 
-!!! Note
-    We assume Jans is installed in a namespace called `jans`
-
 The default configuration is sufficient for most of the time. If there's a requirement to use custom or reusing existing configuration, user may create a custom Kubernetes object.
+
+!!! Warning
+    The custom configuration schema is a BETA feature. 
 
 1.  Prepare YAML file:
 
