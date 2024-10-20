@@ -5,16 +5,15 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
+use jsonwebtoken::DecodingKey;
+use serde::Deserialize;
 use std::{
     collections::HashMap,
     sync::{Arc, RwLock},
 };
 
-use jsonwebtoken::DecodingKey;
-use serde::Deserialize;
-
+/// represents the source data for OpenID configuration.
 #[derive(Deserialize)]
-#[allow(dead_code)]
 pub struct OpenIdConfigSource {
     issuer: Box<str>,
     jwks_uri: Box<str>,
@@ -34,14 +33,18 @@ pub struct OpenIdConfigSource {
     // claims_supported: Vec<Box<str>>,
 }
 
+/// represents the OpenID configuration for an identity provider.
 pub struct OpenIdConfig {
     pub jwks_uri: Box<str>,
     // <key_id (`kid`), DecodingKey>
     pub decoding_keys: Arc<RwLock<HashMap<Box<str>, Arc<DecodingKey>>>>,
 }
 
-#[allow(dead_code)]
 impl OpenIdConfig {
+    /// creates an `OpenIdConfig` from the provided source.
+    ///
+    /// this method extracts the issuer and constructs a new `OpenIdConfig`
+    /// instance, initializing the decoding keys storage.
     pub fn from_source(src: OpenIdConfigSource) -> (Box<str>, OpenIdConfig) {
         let issuer = src.issuer;
         (
