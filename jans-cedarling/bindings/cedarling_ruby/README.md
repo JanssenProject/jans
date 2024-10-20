@@ -1,8 +1,8 @@
 # Cedarling
 
-TODO: Delete this and the text below, and describe your gem
+This is a ruby wrapper for Cedarling.
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/cedarling`. To experiment with that code, run `bin/console` for an interactive prompt.
+For a really quick start, see 'Development' below.
 
 ## Installation
 
@@ -18,18 +18,44 @@ If bundler is not being used to manage dependencies, install the gem by executin
 
 ## Usage
 
-TODO: Write usage instructions here
+TODO: Write usage instructions here, after there is some actual code to use.
 
 ## Development
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+Install ruby >= 3.3.0 using your package manager, or from source, or whatever you want.
+
+run `bin/setup` to install dependencies
+
+run `rake spec` to run the tests
+
+You can also run `bin/console` for an interactive prompt that will allow you to experiment. Here you can say something like
+
+  Cedarling::hello "there"
+
+### development loop
+
+`rake compile:dev` will build your latest changes.
+
+If you'd like to reload the compiled lib from the `bin/console` REPL:
+TODO this doesn't work.
+```
+unload_lib_name = $LOADED_FEATURES.grep /cedarling_ruby.(so|dylib|dll)/
+$LOADED_FEATURES.delete unload_lib_name
+require 'cedarling_ruby/cedarling_ruby'
+```
+
+## Local Installation
+
+You won't want to do this, unless it fails to install via `bundler` or `Gemfile`
 
 To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/cedarling.
+Bug reports and pull requests are welcome on GitHub at https://github.com/gluu/cedarling.
 
 ## License
+
+TODO: check on gluu licencing policy and update if necessary.
 
 The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).

@@ -12,3 +12,4 @@ crate-type = ["cdylib"]
 
 [dependencies]
 magnus = { version = "0.6.2" }
+cedarling = { path = "../../../../cedarling" }
