@@ -37,3 +37,4 @@ use jsonwebtoken as jwt;
 pub(crate) use jwt::Algorithm;
 pub(crate) use jwt_service::*;
 pub(crate) use jwt_service_config::JwtServiceConfig;
+pub(crate) use traits::GetKey;

@@ -107,9 +107,10 @@ mod tests {
                 .as_secs(),
             log_kind: LogType::Decision,
             pdp_id: uuid7(),
-            application_id: "test_app".to_string(),
+            application_id: Some("test_app".to_string().into()),
             auth_info: None,
             msg: "Test message".to_string(),
+            error_msg: None,
         };
 
         // Serialize the log entry to JSON

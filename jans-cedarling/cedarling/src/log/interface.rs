@@ -29,3 +29,6 @@ pub trait LogStorage {
     /// returns a list of all log ids
     fn get_log_ids(&self) -> Vec<String>;
 }
+
+/// Super trait for logger
+pub trait Log: LogWriter + LogStorage + Send + Sync {}

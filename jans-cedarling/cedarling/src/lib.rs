@@ -31,12 +31,10 @@ pub use authz::request::{Request, ResourceData};
 pub use authz::AuthorizeError;
 use authz::Authz;
 pub use bootstrap_config::*;
-use di::{DependencyMap, DependencySupplier};
-use init::policy_store::{load_policy_store, LoadPolicyStoreError};
 use init::service_config::{ServiceConfig, ServiceConfigError};
+use init::ServiceFactory;
 
 pub use log::LogStorage;
-use log::{init_logger, LogWriter};
 use models::app_types;
 pub use models::authorize_result::AuthorizeResult;
 pub use models::log_entry::LogEntry;
@@ -56,9 +54,6 @@ pub enum InitCedarlingError {
     /// Error while preparing config for internal services
     #[error(transparent)]
     ServiceConfig(#[from] ServiceConfigError),
-    /// Error that may occur during loading the policy store.
-    #[error("Could not load policy: {0}")]
-    PolicyStore(#[from] LoadPolicyStoreError),
 }
 
 /// The instance of the Cedarling application.
@@ -74,58 +69,29 @@ impl Cedarling {
     /// Create a new instance of the Cedarling application.
     #[allow(clippy::diverging_sub_expression)]
     pub fn new(config: BootstrapConfig) -> Result<Cedarling, InitCedarlingError> {
-        let _service_config = ServiceConfig::new(&config)?;
+        let log = log::init_logger(&config.log_config);
+        let pdp_id = app_types::PdpID::new();
 
-        let mut container: DependencyMap = DependencyMap::new();
-
-        container.insert(init_logger(config.log_config));
-        let log: log::Logger = container.get();
-
-        // we use uuid v4 because it is generated based on random numbers.
-
-        container.insert(app_types::PdpID::new());
-
-        container.insert(app_types::ApplicationName(config.application_name));
-
-        let policy_store = load_policy_store(config.policy_store_config)
-           // Log success when loading the policy store
+        let service_config = ServiceConfig::new(&config)
             .inspect(|_| {
                 log.log(
-                    LogEntry::new_with_container(&container, LogType::System)
-                        .set_message("PolicyStore loaded successfully".to_string()),
-                );
+                    LogEntry::new_with_data(pdp_id, None, LogType::System)
+                        .set_message("configuration parsed successfully".to_string()),
+                )
             })
-            // Log failure when loading the policy store
             .inspect_err(|err| {
                 log.log(
-                    LogEntry::new_with_container(&container, LogType::System)
-                        .set_message(format!("Could not load PolicyStore: {}", err)),
+                    LogEntry::new_with_data(pdp_id, None, LogType::System)
+                        .set_error(err.to_string())
+                        .set_message("configuration parsed with error".to_string()),
                 )
             })?;
-        container.insert(policy_store);
 
-        #[allow(unreachable_code)]
-        #[allow(clippy::diverging_sub_expression)]
-        let jwt_config = match config.jwt_config {
-            JwtConfig::Disabled => jwt::JwtServiceConfig::WithoutValidation,
-            JwtConfig::Enabled { .. } => jwt::JwtServiceConfig::WithValidation {
-                #[allow(clippy::diverging_sub_expression)]
-                key_service: todo!(),
-                supported_algs: _service_config.jwt_algorithms.clone(),
-            },
-        };
-        let jwt_service = jwt::JwtService::new_with_config(jwt_config);
-        log.log(
-            LogEntry::new_with_container(&container, LogType::System)
-                .set_message("JWT service loaded successfully".to_string()),
-        );
-        container.insert(jwt_service);
-
-        let authz = Authz::new_with_container(&container);
+        let mut service_factory = ServiceFactory::new(&config, service_config, log.clone(), pdp_id);
 
         Ok(Cedarling {
             log,
-            authz: Arc::new(authz),
+            authz: service_factory.authz_service(),
         })
     }
 

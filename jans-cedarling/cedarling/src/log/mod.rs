@@ -64,14 +64,13 @@ use std::sync::Arc;
 
 use crate::bootstrap_config::log_config::LogConfig;
 pub use interface::LogStorage;
-pub(crate) use interface::LogWriter;
 pub(crate) use log_strategy::LogStrategy;
 
 /// Type alias for logger that is used in application
-pub(crate) type Logger = Arc<LogStrategy>;
+pub(crate) type Logger = Arc<dyn interface::Log>;
 
 /// Initialize logger.
 /// entry point for initialize logger
-pub(crate) fn init_logger(config: LogConfig) -> LogStrategy {
-    LogStrategy::new(config)
+pub(crate) fn init_logger(config: &LogConfig) -> Logger {
+    Arc::new(LogStrategy::new(config))
 }

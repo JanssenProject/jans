@@ -12,7 +12,7 @@ use super::Error;
 use super::JwtServiceConfig;
 use serde::de::DeserializeOwned;
 
-pub struct JwtService {
+pub(crate) struct JwtService {
     decoding_strategy: DecodingStrategy,
 }
 

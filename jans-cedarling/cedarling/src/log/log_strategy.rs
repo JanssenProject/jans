@@ -5,7 +5,7 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-use super::interface::{LogStorage, LogWriter};
+use super::interface::{Log, LogStorage, LogWriter};
 use super::memory_logger::MemoryLogger;
 use super::nop_logger::NopLogger;
 use super::stdout_logger::StdOutLogger;
@@ -23,7 +23,7 @@ pub(crate) enum LogStrategy {
 impl LogStrategy {
     /// Creates a new `LogStrategy` based on the provided configuration.
     /// Initializes the corresponding logger accordingly.
-    pub fn new(config: LogConfig) -> Self {
+    pub fn new(config: &LogConfig) -> Self {
         match config.log_type {
             LogTypeConfig::Off => Self::OnlyWriter(Box::new(NopLogger)),
             LogTypeConfig::Memory(config) => Self::MemoryLogger(MemoryLogger::new(config)),
@@ -67,3 +67,5 @@ impl LogStorage for LogStrategy {
         }
     }
 }
+
+impl Log for LogStrategy {}

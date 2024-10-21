@@ -103,7 +103,7 @@ mod tests {
         // create log entries
         let entry1 = LogEntry::new_with_data(
             app_types::PdpID::new(),
-            app_types::ApplicationName("app1".to_string()),
+            Some(app_types::ApplicationName("app1".to_string())),
             LogType::Decision,
         )
         .set_message("some message".to_string())
@@ -117,7 +117,7 @@ mod tests {
         });
         let entry2 = LogEntry::new_with_data(
             app_types::PdpID::new(),
-            app_types::ApplicationName("app2".to_string()),
+            Some(app_types::ApplicationName("app2".to_string())),
             LogType::System,
         );
 
@@ -158,12 +158,12 @@ mod tests {
         // create log entries
         let entry1 = LogEntry::new_with_data(
             app_types::PdpID::new(),
-            app_types::ApplicationName("app1".to_string()),
+            Some(app_types::ApplicationName("app1".to_string())),
             LogType::Decision,
         );
         let entry2 = LogEntry::new_with_data(
             app_types::PdpID::new(),
-            app_types::ApplicationName("app2".to_string()),
+            Some(app_types::ApplicationName("app2".to_string())),
             LogType::Metric,
         );
 
