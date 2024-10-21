@@ -30,7 +30,6 @@ pub use authz::AuthorizeError;
 use authz::Authz;
 use di::{DependencyMap, DependencySupplier};
 use init::policy_store::{load_policy_store, LoadPolicyStoreError};
-pub use jwt::CreateJwtServiceError;
 pub use log::LogStorage;
 use log::{init_logger, LogWriter};
 use models::app_types;
@@ -56,7 +55,7 @@ pub enum InitCedarlingError {
     PolicyStore(#[from] LoadPolicyStoreError),
     /// Error that may occur during loading the JWT service.
     #[error("Could not load JWT service: {0}")]
-    JWT(#[from] CreateJwtServiceError),
+    JWT(#[from] jwt::Error),
 }
 
 /// The instance of the Cedarling application.
