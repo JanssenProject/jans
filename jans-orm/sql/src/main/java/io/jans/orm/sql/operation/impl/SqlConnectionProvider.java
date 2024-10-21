@@ -39,8 +39,8 @@ import io.jans.orm.exception.operation.ConfigurationException;
 import io.jans.orm.exception.operation.ConnectionException;
 import io.jans.orm.model.AttributeType;
 import io.jans.orm.operation.auth.PasswordEncryptionMethod;
-import io.jans.orm.sql.dsl.template.MySQLJsonTemplates;
 import io.jans.orm.sql.dsl.template.MariaDBJsonTemplates;
+import io.jans.orm.sql.dsl.template.MySQLJsonTemplates;
 import io.jans.orm.sql.dsl.template.PostgreSQLJsonTemplates;
 import io.jans.orm.sql.model.ResultCode;
 import io.jans.orm.sql.model.TableMapping;
@@ -93,6 +93,8 @@ public class SqlConnectionProvider {
 	private Map<String, ArrayList<String>> tableJsonColumnsMap = new HashMap<>();
 	
 	private boolean disableTimeZone = false;
+	
+	private boolean skipVNode = false;
 
 	protected SqlConnectionProvider() {
 	}
@@ -519,6 +521,10 @@ public class SqlConnectionProvider {
 
 	public boolean isDisableTimeZone() {
 		return disableTimeZone;
+	}
+
+	public boolean isSkipVNode() {
+		return skipVNode;
 	}
 
 }
