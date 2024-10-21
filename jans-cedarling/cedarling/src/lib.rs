@@ -34,15 +34,15 @@ pub use bootstrap_config::*;
 use init::service_config::{ServiceConfig, ServiceConfigError};
 use init::ServiceFactory;
 
+use log::LogEntry;
 pub use log::LogStorage;
+use log::LogType;
 use models::app_types;
-pub use models::log_entry::LogEntry;
-use models::log_entry::LogType;
 
 #[doc(hidden)]
 pub mod bindings {
-    pub use super::models::log_entry::{
-        AuthorizationLogInfo, Decision, Diagnostics, PolicyEvaluationError,
+    pub use super::log::{
+        AuthorizationLogInfo, Decision, Diagnostics, LogEntry, PolicyEvaluationError,
     };
     pub use cedar_policy;
 }

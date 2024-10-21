@@ -8,7 +8,7 @@
 //! Log interface
 //! Contains the interface for logging. And getting log information from storage.
 
-use crate::models::log_entry::LogEntry;
+use super::LogEntry;
 
 /// Log Writer
 /// interface for logging events

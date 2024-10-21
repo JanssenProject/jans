@@ -6,7 +6,7 @@
  */
 
 use super::interface::LogWriter;
-use crate::models::log_entry::LogEntry;
+use super::LogEntry;
 use std::{
     io::Write,
     sync::{Arc, Mutex},
@@ -86,7 +86,7 @@ impl Write for TestWriter {
 
 #[cfg(test)]
 mod tests {
-    use crate::models::log_entry::LogType;
+    use super::super::LogType;
 
     use super::*;
     use std::{

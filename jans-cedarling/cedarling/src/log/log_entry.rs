@@ -16,7 +16,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use uuid7::uuid7;
 use uuid7::Uuid;
 
-use super::app_types::{self, ApplicationName};
+use crate::models::app_types::{self, ApplicationName};
 
 /// LogEntry is a struct that encapsulates all relevant data for logging events.
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]

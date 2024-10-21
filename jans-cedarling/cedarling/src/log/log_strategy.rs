@@ -9,9 +9,9 @@ use super::interface::{Log, LogStorage, LogWriter};
 use super::memory_logger::MemoryLogger;
 use super::nop_logger::NopLogger;
 use super::stdout_logger::StdOutLogger;
+use super::LogEntry;
 use crate::bootstrap_config::log_config::LogConfig;
 use crate::bootstrap_config::log_config::LogTypeConfig;
-use crate::models::log_entry::LogEntry;
 
 /// LogStrategy implements strategy pattern for logging.
 /// It is used to provide a single point of access for logging and same api for different loggers.

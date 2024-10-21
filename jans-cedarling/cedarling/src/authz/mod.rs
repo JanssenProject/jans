@@ -13,10 +13,8 @@ use std::str::FromStr;
 use std::sync::Arc;
 
 use crate::jwt;
-use crate::log::Logger;
+use crate::log::{AuthorizationLogInfo, LogEntry, LogType, Logger};
 use crate::models::app_types;
-use crate::models::log_entry::AuthorizationLogInfo;
-use crate::models::log_entry::{LogEntry, LogType};
 use crate::models::policy_store::PolicyStore;
 use crate::models::token_data::TokenPayload;
 

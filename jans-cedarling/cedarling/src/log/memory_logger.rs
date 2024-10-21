@@ -6,8 +6,8 @@
  */
 
 use super::interface::{LogStorage, LogWriter};
+use super::LogEntry;
 use crate::bootstrap_config::log_config::MemoryLogConfig;
-use crate::models::log_entry::LogEntry;
 use sparkv::{Config as ConfigSparKV, SparKV};
 use std::{sync::Mutex, time::Duration};
 
@@ -85,11 +85,9 @@ impl LogStorage for MemoryLogger {
 
 #[cfg(test)]
 mod tests {
+    use super::super::{AuthorizationLogInfo, Decision, LogEntry, LogType};
     use super::*;
-    use crate::models::{
-        app_types,
-        log_entry::{AuthorizationLogInfo, Decision, LogEntry, LogType},
-    };
+    use crate::models::app_types;
 
     fn create_memory_logger() -> MemoryLogger {
         let config = MemoryLogConfig { log_ttl: 60 };

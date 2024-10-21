@@ -52,10 +52,13 @@
 //!  Currently only [MemoryLogger](`memory_logger::MemoryLogger`) implement this.
 
 pub mod interface;
+mod log_entry;
 pub(crate) mod log_strategy;
 mod memory_logger;
 mod nop_logger;
 mod stdout_logger;
+
+pub use log_entry::*;
 
 #[cfg(test)]
 mod test;

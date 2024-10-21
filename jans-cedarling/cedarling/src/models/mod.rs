@@ -11,6 +11,5 @@
 pub(crate) mod app_types;
 pub(crate) mod cedar_schema;
 
-pub mod log_entry;
 pub mod policy_store;
 pub mod token_data;
