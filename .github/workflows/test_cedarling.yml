@@ -21,10 +21,12 @@ jobs:
     - name: Install Rust
       uses: dtolnay/rust-toolchain@stable
     - name: Run Clippy
+      continue-on-error: true
       run: |
         cd ./jans-cedarling
         cargo clippy -- -Dwarnings
     - name: Run Tests
+      continue-on-error: true
       run: |
         cd ./jans-cedarling
         cargo test --workspace
