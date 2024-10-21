@@ -20,16 +20,14 @@ jobs:
     - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
     - name: Install Rust
       uses: dtolnay/rust-toolchain@stable
-    - name: Run Clippy
-      continue-on-error: true
-      run: |
-        cd ./jans-cedarling
-        cargo clippy -- -Dwarnings
     - name: Run Tests
-      continue-on-error: true
       run: |
         cd ./jans-cedarling
         cargo test --workspace
+    - name: Run Clippy
+      run: |
+        cd ./jans-cedarling
+        cargo clippy -- -Dwarnings
   python_tests:
     runs-on: ubuntu-latest
     strategy:
