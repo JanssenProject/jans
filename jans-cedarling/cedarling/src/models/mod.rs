@@ -6,7 +6,7 @@
  */
 //! # Models
 //! This package provides the core data models for the *Cedarling* application,
-//! defining the structures and types essential for its functionality.
+//! defining the structures and types essential for its functionality and is used in more than one module.
 
 pub(crate) mod app_types;
 pub(crate) mod cedar_schema;
