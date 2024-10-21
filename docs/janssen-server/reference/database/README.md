@@ -28,13 +28,12 @@ the type of persistence(DB) used is specified
 in `/etc/jans/conf/jans.properties` using the entry as show below:
 
 ```
-persistence.type=ldap
+persistence.type=sql
 ```
 
 Values for property `persistence.type` is set during the installation and based
 on choice of persistence(DB) type, it can be one of these supported values:
 
-- `ldap`
 - `couchbase`
 - `sql` 
 - `spanner` 
@@ -50,7 +49,6 @@ configuration properties will be available on Janssen Server instance under
 the directory `/etc/jans/conf/`. List of configuration files for these 
 persistence types are:
 
-- `jans-ldap.properties`
 - `jans-couchbase.properties`
 - `jans-spanner.properties`
 - `jans-sql.properties`
@@ -160,13 +158,13 @@ Jans ORM has modular architecture. The are few layers in this implementation
   
 1. **jans-orm-annotation**: Define annotations which instruct ORM about how to work with beans and properties 
 
-1. **jans-orm-filter**: This module provides Filter API. The syntax is very similar to LDAP filters. The ORM layer converts them at runtime to DB query syntax: *SQL/NoSQL/LDAP*
+1. **jans-orm-filter**: This module provides Filter API. The ORM layer converts them at runtime to DB query syntax: *SQL/NoSQL*
 
 1. **jans-orm-cdi**: Provides reusable factory which can be used in CDI based projects
 
 1. **jans-orm-standalone**: Provides reusable factory for non CDI based application
 
-1. **jans-orm-ldap, jans-orm-couchbase, jans-orm-spanner, jans-orm-sql**: These are DB specific implementations.
+1. **jans-orm-couchbase, jans-orm-spanner, jans-orm-sql**: These are DB specific implementations.
 
 
 ## Sample table and ORM API

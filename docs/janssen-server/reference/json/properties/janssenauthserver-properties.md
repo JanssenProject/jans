@@ -103,7 +103,6 @@ tags:
 | grantTypesSupportedByDynamicRegistration | This list details which OAuth 2.0 grant types can be set up with the client registration API | [Details](#granttypessupportedbydynamicregistration) |
 | dynamicRegistrationAllowedPasswordGrantScopes | List of grant scopes for dynamic registration | [Details](#dynamicregistrationallowedpasswordgrantscopes) |
 | dynamicRegistrationCustomAttributes | This list details the custom attributes allowed for dynamic registration | [Details](#dynamicregistrationcustomattributes) |
-| dynamicRegistrationCustomObjectClass | LDAP custom object class for dynamic registration | [Details](#dynamicregistrationcustomobjectclass) |
 | dynamicRegistrationDefaultCustomAttributes | This map provides default custom attributes with values for dynamic registration | [Details](#dynamicregistrationdefaultcustomattributes) |
 | dynamicRegistrationExpirationTime | Expiration time in seconds for clients created with dynamic registration, 0 or -1 means never expire | [Details](#dynamicregistrationexpirationtime) |
 | dynamicRegistrationPasswordGrantTypeEnabled | Boolean value specifying whether to enable Password Grant Type during Dynamic Registration | [Details](#dynamicregistrationpasswordgranttypeenabled) |
@@ -188,7 +187,6 @@ tags:
 | openIdConfigurationEndpoint | URL for the Open ID Connect Configuration Endpoint | [Details](#openidconfigurationendpoint) |
 | openIdDiscoveryEndpoint | Discovery endpoint URL | [Details](#openiddiscoveryendpoint) |
 | openidScopeBackwardCompatibility | Set to false to only allow token endpoint request for openid scope with grant type equals to authorization_code, restrict access to userinfo to scope openid and only return id_token if scope contains openid | [Details](#openidscopebackwardcompatibility) |
-| openidSubAttribute | Specifies which LDAP attribute is used for the subject identifier claim | [Details](#openidsubattribute) |
 | opPolicyUri | URL that the OpenID Provider provides to the person registering the Client to read about the OP's requirements on how the Relying Party can use the data provided by the OP | [Details](#oppolicyuri) |
 | opTosUri | URL that the OpenID Provider provides to the person registering the Client to read about OpenID Provider's terms of service | [Details](#optosuri) |
 | pairwiseCalculationKey | Key to calculate algorithmic pairwise IDs | [Details](#pairwisecalculationkey) |
@@ -197,7 +195,6 @@ tags:
 | parEndpoint | URL for Pushed Authorisation Request (PAR) Endpoint | [Details](#parendpoint) |
 | persistIdToken | Specifies whether to persist id_token (otherwise saves into cache) | [Details](#persistidtoken) |
 | persistRefreshToken | Specifies whether to persist refresh_token (otherwise saves into cache) | [Details](#persistrefreshtoken) |
-| personCustomObjectClassList | This list details LDAP custom object classes for dynamic person enrollment | [Details](#personcustomobjectclasslist) |
 | publicSubjectIdentifierPerClientEnabled | Specifies whether public subject identifier is allowed per client | [Details](#publicsubjectidentifierperclientenabled) |
 | redirectUrisRegexEnabled | Enable/Disable redirect uris validation using regular expression | [Details](#redirecturisregexenabled) |
 | refreshTokenExtendLifetimeOnRotation | Boolean value specifying whether to extend refresh tokens on rotation | [Details](#refreshtokenextendlifetimeonrotation) |
@@ -1112,15 +1109,6 @@ tags:
 - Default value: None
 
 
-### dynamicRegistrationCustomObjectClass
-
-- Description: LDAP custom object class for dynamic registration
-
-- Required: No
-
-- Default value: None
-
-
 ### dynamicRegistrationDefaultCustomAttributes
 
 - Description: This map provides default custom attributes with values for dynamic registration
@@ -1877,15 +1865,6 @@ tags:
 - Default value: false
 
 
-### openidSubAttribute
-
-- Description: Specifies which LDAP attribute is used for the subject identifier claim
-
-- Required: No
-
-- Default value: None
-
-
 ### opPolicyUri
 
 - Description: URL that the OpenID Provider provides to the person registering the Client to read about the OP's requirements on how the Relying Party can use the data provided by the OP
@@ -1956,15 +1935,6 @@ tags:
 - Required: No
 
 - Default value: true
-
-
-### personCustomObjectClassList
-
-- Description: This list details LDAP custom object classes for dynamic person enrollment
-
-- Required: No
-
-- Default value: None
 
 
 ### publicSubjectIdentifierPerClientEnabled
