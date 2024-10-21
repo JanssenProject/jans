@@ -28,6 +28,7 @@ import jakarta.ws.rs.NotFoundException;
 import static io.jans.as.model.util.Util.escapeLog;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -39,6 +40,7 @@ public class SessionService {
 
     private static final String SID_MSG = "Get Session by sid:{}";
     private static final String SID_ERROR = "Failed to load session entry with sid ";
+    private static final List<String> SESSION_ATTR  = Arrays.asList("acr","scope","auth_user","client_id","acr_values","redirect_uri","response_type");
 
     @Inject
     private Logger logger;
@@ -289,7 +291,7 @@ public class SessionService {
 
     private List<FieldFilterData> modifyFilter(List<FieldFilterData> fieldFilterDataList) {
 
-        logger.debug("modify filter - fieldFilterDataList:{}", fieldFilterDataList);
+        logger.debug("Modify filter - fieldFilterDataList:{}", fieldFilterDataList);
         if (fieldFilterDataList == null || fieldFilterDataList.isEmpty()) {
             return fieldFilterDataList;
         }
@@ -297,13 +299,18 @@ public class SessionService {
         for (FieldFilterData fieldFilterData : fieldFilterDataList) {
             if (fieldFilterData != null && StringUtils.isNotBlank(fieldFilterData.getField())) {
                 String field = fieldFilterData.getField();
+                if(StringUtils.isBlank(field)) {
+                    continue;
+                }
                 if ("jansUsrDN".equalsIgnoreCase(field)) {
                     // get Dn
                     fieldFilterData.setValue(getDnForUser(fieldFilterData.getValue()));
+                }else if(SESSION_ATTR.contains(field)) {
+                    fieldFilterData.setField("jansSessAttr."+field);
                 }
             }
         }
-
+        logger.info("After modification of session filter - fieldFilterDataList:{}", fieldFilterDataList);
         return fieldFilterDataList;
     }
 
