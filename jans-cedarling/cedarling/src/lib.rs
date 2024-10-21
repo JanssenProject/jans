@@ -33,7 +33,8 @@ use authz::Authz;
 pub use bootstrap_config::*;
 use di::{DependencyMap, DependencySupplier};
 use init::policy_store::{load_policy_store, LoadPolicyStoreError};
-pub use jwt::CreateJwtServiceError;
+use init::service_config::{ServiceConfig, ServiceConfigError};
+
 pub use log::LogStorage;
 use log::{init_logger, LogWriter};
 use models::app_types;
@@ -52,12 +53,12 @@ pub mod bindings {
 /// Errors that can occur during initialization Cedarling.
 #[derive(Debug, thiserror::Error)]
 pub enum InitCedarlingError {
+    /// Error while preparing config for internal services
+    #[error(transparent)]
+    ServiceConfig(#[from] ServiceConfigError),
     /// Error that may occur during loading the policy store.
     #[error("Could not load policy: {0}")]
     PolicyStore(#[from] LoadPolicyStoreError),
-    /// Error that may occur during loading the JWT service.
-    #[error("Could not load JWT service: {0}")]
-    JWT(#[from] CreateJwtServiceError),
 }
 
 /// The instance of the Cedarling application.
@@ -71,7 +72,10 @@ pub struct Cedarling {
 
 impl Cedarling {
     /// Create a new instance of the Cedarling application.
+    #[allow(clippy::diverging_sub_expression)]
     pub fn new(config: BootstrapConfig) -> Result<Cedarling, InitCedarlingError> {
+        let _service_config = ServiceConfig::new(&config)?;
+
         let mut container: DependencyMap = DependencyMap::new();
 
         container.insert(init_logger(config.log_config));
@@ -100,7 +104,17 @@ impl Cedarling {
             })?;
         container.insert(policy_store);
 
-        let jwt_service = jwt::JwtService::new_with_container(&container, config.jwt_config)?;
+        #[allow(unreachable_code)]
+        #[allow(clippy::diverging_sub_expression)]
+        let jwt_config = match config.jwt_config {
+            JwtConfig::Disabled => jwt::JwtServiceConfig::WithoutValidation,
+            JwtConfig::Enabled { .. } => jwt::JwtServiceConfig::WithValidation {
+                #[allow(clippy::diverging_sub_expression)]
+                key_service: todo!(),
+                supported_algs: _service_config.jwt_algorithms.clone(),
+            },
+        };
+        let jwt_service = jwt::JwtService::new_with_config(jwt_config);
         log.log(
             LogEntry::new_with_container(&container, LogType::System)
                 .set_message("JWT service loaded successfully".to_string()),
