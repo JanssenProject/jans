@@ -28,15 +28,14 @@ mod tests;
 use std::sync::Arc;
 
 pub use authz::request::{Request, ResourceData};
-pub use authz::AuthorizeError;
 use authz::Authz;
+pub use authz::{AuthorizeError, AuthorizeResult};
 pub use bootstrap_config::*;
 use init::service_config::{ServiceConfig, ServiceConfigError};
 use init::ServiceFactory;
 
 pub use log::LogStorage;
 use models::app_types;
-pub use models::authorize_result::AuthorizeResult;
 pub use models::log_entry::LogEntry;
 use models::log_entry::LogType;
 

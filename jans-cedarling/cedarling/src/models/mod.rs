@@ -9,7 +9,6 @@
 //! defining the structures and types essential for its functionality.
 
 pub(crate) mod app_types;
-pub mod authorize_result;
 pub(crate) mod cedar_schema;
 
 pub mod log_entry;

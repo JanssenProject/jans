@@ -19,11 +19,12 @@ use crate::models::log_entry::AuthorizationLogInfo;
 use crate::models::log_entry::{LogEntry, LogType};
 use crate::models::policy_store::PolicyStore;
 use crate::models::token_data::TokenPayload;
-use crate::AuthorizeResult;
 
+mod authorize_result;
 mod entities;
 pub(crate) mod request;
 
+pub use authorize_result::AuthorizeResult;
 use entities::create_resource_entity;
 use entities::ResourceEntityError;
 use entities::{create_access_token_entities, AccessTokenEntitiesError};
