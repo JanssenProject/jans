@@ -11,11 +11,12 @@ use cedar_policy::{EntityId, EntityTypeName, EntityUid, ParseErrors};
 
 /// Box to store authorization data
 #[derive(Debug, serde::Deserialize)]
-pub struct Request<'a> {
+pub struct Request {
     /// Access token raw value
-    pub access_token: &'a str,
-    // pub id_token:  &'a str,
-    // pub userinfo_token:  &'a str,
+    pub access_token: String,
+    /// Id Token raw value
+    pub id_token: String,
+    // pub userinfo_token:  String,
     /// cedar_policy action
     pub action: String,
     /// cedar_policy resource data
@@ -25,7 +26,7 @@ pub struct Request<'a> {
 }
 
 /// Cedar policy resource data
-/// field represent EntityUid
+/// fields represent EntityUid
 #[derive(serde::Deserialize, Debug, Clone)]
 pub struct ResourceData {
     /// entity type name

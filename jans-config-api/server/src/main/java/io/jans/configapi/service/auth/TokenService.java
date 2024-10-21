@@ -1,6 +1,9 @@
 package io.jans.configapi.service.auth;
 
 import io.jans.as.common.service.OrganizationService;
+import io.jans.as.model.config.StaticConfiguration;
+import io.jans.configapi.core.util.DataUtil;
+import io.jans.model.FieldFilterData;
 import io.jans.model.SearchRequest;
 import io.jans.model.token.TokenEntity;
 import io.jans.orm.PersistenceEntryManager;
@@ -30,12 +33,24 @@ public class TokenService {
     @Inject
     private OrganizationService organizationService;
 
+    @Inject
+    StaticConfiguration staticConfiguration;
+
     public String getDnForTokenEntity(String tknCde) {
         String orgDn = organizationService.getDnForOrganization();
         if (StringHelper.isEmpty(tknCde)) {
             return String.format("ou=tokens,%s", orgDn);
         }
         return String.format("tknCde=%s,ou=tokens,%s", tknCde, orgDn);
+    }
+
+    public String getDnForUser(String userInum) {
+        String peopleDn = staticConfiguration.getBaseDn().getPeople();
+        if (StringHelper.isEmpty(userInum)) {
+            return peopleDn;
+        }
+
+        return String.format("inum=%s,%s", userInum, peopleDn);
     }
 
     public TokenEntity getTokenEntityByCode(String tknCde) {
@@ -60,20 +75,19 @@ public class TokenService {
             logger.trace("Search Token searchRequest.getFilterAssertionValue() :{}",
                     searchRequest.getFilterAssertionValue());
             for (String assertionValue : searchRequest.getFilterAssertionValue()) {
-                logger.debug("Session Search with assertionValue:{}", assertionValue);
-                if (StringUtils.isNotBlank(assertionValue)) {
-                    String[] targetArray = new String[] { assertionValue };
-                    Filter grantIdFilter = Filter.createSubstringFilter("grtId", null, targetArray, null);
-                    Filter userIdFilter = Filter.createSubstringFilter("usrId", null, targetArray, null);
-                    Filter userDnFilter = Filter.createSubstringFilter("jansUsrDN", null, targetArray, null);
-                    Filter clientIdFilter = Filter.createSubstringFilter("clnId", null, targetArray, null);
-                    Filter scopeFilter = Filter.createSubstringFilter("scp", null, targetArray, null);
-                    Filter tokenTypeFilter = Filter.createSubstringFilter("tknTyp", null, targetArray, null);
-                    Filter grantTypeFilter = Filter.createSubstringFilter("grtTyp", null, targetArray, null);
-                    Filter inumFilter = Filter.createSubstringFilter("jansId", null, targetArray, null);
-                    filters.add(Filter.createORFilter(grantIdFilter, userIdFilter, userDnFilter, clientIdFilter,
-                            scopeFilter, tokenTypeFilter, grantTypeFilter, inumFilter));
-                }
+                logger.info("Session Search with assertionValue:{}", assertionValue);
+                String[] targetArray = new String[] { assertionValue };
+                Filter grantIdFilter = Filter.createSubstringFilter("grtId", null, targetArray, null);
+                Filter userIdFilter = Filter.createSubstringFilter("usrId", null, targetArray, null);
+                Filter userDnFilter = Filter.createSubstringFilter("jansUsrDN", null, targetArray, null);
+                Filter clientIdFilter = Filter.createSubstringFilter("clnId", null, targetArray, null);
+                Filter scopeFilter = Filter.createSubstringFilter("scp", null, targetArray, null);
+                Filter tokenTypeFilter = Filter.createSubstringFilter("tknTyp", null, targetArray, null);
+                Filter grantTypeFilter = Filter.createSubstringFilter("grtTyp", null, targetArray, null);
+                Filter inumFilter = Filter.createSubstringFilter("jansId", null, targetArray, null);
+                filters.add(Filter.createORFilter(grantIdFilter, userIdFilter, userDnFilter, clientIdFilter,
+                        scopeFilter, tokenTypeFilter, grantTypeFilter, inumFilter));
+
             }
             searchFilter = Filter.createORFilter(filters);
             logger.trace("Search Token searchFilter :{}", searchFilter);
@@ -81,20 +95,14 @@ public class TokenService {
 
         logger.debug("Token pattern searchFilter:{}", searchFilter);
         List<Filter> fieldValueFilters = new ArrayList<>();
-        if (searchRequest.getFieldValueMap() != null && !searchRequest.getFieldValueMap().isEmpty()) {
-            for (Map.Entry<String, String> entry : searchRequest.getFieldValueMap().entrySet()) {
-                Filter dataFilter = Filter.createSubstringFilter(entry.getKey(), null,
-                        new String[] { entry.getValue() }, null);
-                logger.trace("Token dataFilter:{}", dataFilter);
-                fieldValueFilters.add(Filter.createANDFilter(dataFilter));
-            }
-            if (filters.isEmpty()) {
-                searchFilter = Filter.createANDFilter(fieldValueFilters);
-            } else {
-                searchFilter = Filter.createANDFilter(Filter.createORFilter(filters),
-                        Filter.createANDFilter(fieldValueFilters));
-            }
+        if (searchRequest.getFieldFilterData() != null && !searchRequest.getFieldFilterData().isEmpty()) {
+            List<FieldFilterData> fieldFilterDataList = this.modifyFilter(searchRequest.getFieldFilterData());
+            fieldValueFilters = DataUtil.createFilter(fieldFilterDataList, getDnForTokenEntity(null),
+                    persistenceEntryManager);
         }
+
+        fieldValueFilters.add(Filter.createORFilter(filters));
+        searchFilter = Filter.createANDFilter(fieldValueFilters);
 
         logger.info("Token final searchFilter:{}", searchFilter);
 
@@ -136,6 +144,26 @@ public class TokenService {
         }
 
         persistenceEntryManager.removeRecursively(tokenEntity.getDn(), TokenEntity.class);
+    }
+
+    private List<FieldFilterData> modifyFilter(List<FieldFilterData> fieldFilterDataList) {
+
+        logger.debug("modify filter - fieldFilterDataList:{}", fieldFilterDataList);
+        if (fieldFilterDataList == null || fieldFilterDataList.isEmpty()) {
+            return fieldFilterDataList;
+        }
+
+        for (FieldFilterData fieldFilterData : fieldFilterDataList) {
+            if (fieldFilterData != null && StringUtils.isNotBlank(fieldFilterData.getField())) {
+                String field = fieldFilterData.getField();
+                if ("jansUsrDN".equalsIgnoreCase(field)) {
+                    // get Dn
+                    fieldFilterData.setValue(getDnForUser(fieldFilterData.getValue()));
+                }
+            }
+        }
+
+        return fieldFilterDataList;
     }
 
 }
