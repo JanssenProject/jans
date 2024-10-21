@@ -10,12 +10,10 @@ use std::{
     str::FromStr,
 };
 
-use crate::models::{
-    cedar_schema::{
-        cedar_json::{CedarSchemaRecord, PrimitiveTypeKind},
-        CedarSchemaJson,
-    },
-    token_data::{GetTokenClaimValue, TokenPayload},
+use crate::authz::token_data::{GetTokenClaimValue, TokenPayload};
+use crate::models::cedar_schema::{
+    cedar_json::{CedarSchemaRecord, PrimitiveTypeKind},
+    CedarSchemaJson,
 };
 use cedar_policy::{EntityId, EntityTypeName, EntityUid, RestrictedExpression};
 

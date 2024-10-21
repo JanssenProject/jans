@@ -16,17 +16,18 @@ use crate::jwt;
 use crate::log::{AuthorizationLogInfo, LogEntry, LogType, Logger};
 use crate::models::app_types;
 use crate::models::policy_store::PolicyStore;
-use crate::models::token_data::TokenPayload;
 
 mod authorize_result;
 mod entities;
 pub(crate) mod request;
+mod token_data;
 
 pub use authorize_result::AuthorizeResult;
 use entities::create_resource_entity;
 use entities::ResourceEntityError;
 use entities::{create_access_token_entities, AccessTokenEntitiesError};
 use request::Request;
+use token_data::TokenPayload;
 
 /// Configuration to Authz to initialize service without errors
 pub(crate) struct AuthzConfig {
