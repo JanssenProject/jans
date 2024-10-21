@@ -17,6 +17,13 @@ struct Engine(cedarling::Cedarling);
 // TODO TtlTooLong is thrown by sparkv if this exceeds max.
 // But max should be immediately thrown out here, not over there in sparkv.
 const MAX_LOG_TTL : u64 = 60*60;
+// this env var is set by build.rs
+const CEDARLING_VERSION: &str = env!("CEDARLING_VERSION");
+
+/// Return the current version of cedarling - not the current version of the gem.
+fn version_core() -> Result<String,magnus::Error> {
+    Ok(CEDARLING_VERSION.into())
+}
 
 fn bootstrap(ruby : &magnus::Ruby, application_name : String, policy_store_text : String, log_ttl : u64) -> Result<Engine,magnus::Error> {
     if log_ttl > MAX_LOG_TTL {
@@ -57,6 +64,7 @@ fn init(ruby: &magnus::Ruby) -> Result<(), magnus::Error> {
 
     let module = ruby.define_module("Cedarling")?;
     module.define_singleton_method("bootstrap", function!(bootstrap, 3))?;
+    module.define_singleton_method("version_core", function!(version_core, 0))?;
     module.const_set("MAX_LOG_TTL", MAX_LOG_TTL)?;
 
     // definition of the Engine class, which is a facade for cedarling::Cedarling

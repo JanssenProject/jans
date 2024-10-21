@@ -17,3 +17,6 @@ magnus = { version = "0.7.1" }
 # This repo has made the necessary update.
 # Lock it to the sha so we don't have other changes sneaked in to the branch
 serde_magnus = {version = "0.8.1", git = "https://github.com/sevenc-nanashi/serde-magnus", rev = "5c1db66f5059d0e2cac2f628f19f5734d2fed21e"}
+
+[build-dependencies]
+cargo_metadata = "0.18.1"
