@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.*;
 import io.jans.fido2.ctap.AttestationConveyancePreference;
-import io.jans.fido2.ctap.AuthenticatorAttachment;
 import io.jans.fido2.ctap.TokenBindingSupport;
 import io.jans.fido2.exception.Fido2CompromisedDevice;
 import io.jans.fido2.exception.Fido2RuntimeException;
@@ -19,7 +18,6 @@ import io.jans.fido2.service.DataMapperService;
 import io.jans.fido2.service.processor.attestation.AppleAttestationProcessor;
 import io.jans.fido2.service.processor.attestation.TPMProcessor;
 import io.jans.fido2.service.processors.AttestationFormatProcessor;
-import io.jans.orm.model.fido2.UserVerification;
 import io.jans.service.net.NetworkService;
 import jakarta.enterprise.inject.Instance;
 import jakarta.ws.rs.WebApplicationException;
@@ -33,16 +31,17 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.stream.Stream;
 
-import static io.jans.fido2.service.verifier.CommonVerifiers.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class CommonVerifiersTest {
-/*
+
     private final ObjectMapper mapper = new ObjectMapper();
 
     @InjectMocks
@@ -95,8 +94,7 @@ class CommonVerifiersTest {
     void verifyRpDomain_originNotNull_valid() {
         String originsValue = "https://test.domain";
         when(networkService.getHost(originsValue)).thenReturn("test.domain");
-
-        String response = commonVerifiers.verifyRpDomain(originsValue);
+        String response = commonVerifiers.verifyRpDomain(originsValue, null);
         assertNotNull(response);
         assertEquals(response, "test.domain");
         verify(appConfiguration, never()).getIssuer();
@@ -105,10 +103,9 @@ class CommonVerifiersTest {
     @Test
     void verifyRpDomain_originIsNull_valid() {
         String issuer = "https://test.domain";
-        when(appConfiguration.getIssuer()).thenReturn(issuer);
         when(networkService.getHost(issuer)).thenReturn("test.domain");
 
-        String response = commonVerifiers.verifyRpDomain(issuer);
+        String response = commonVerifiers.verifyRpDomain(null,issuer);
         assertNotNull(response);
         assertEquals(response, "test.domain");
     }
@@ -153,7 +150,7 @@ class CommonVerifiersTest {
     void verifyAttestationOptions_paramsEmpty_fido2RuntimeException() {
         Fido2RuntimeException ex = assertThrows(Fido2RuntimeException.class, () -> commonVerifiers.verifyAttestationOptions(mock(AttestationOptions.class)));
         assertNotNull(ex);
-        assertEquals(ex.getMessage(), "Invalid parameters");
+        assertEquals(ex.getMessage(), "Username is a mandatory parameter");
     }
 
     @Test
@@ -201,7 +198,7 @@ class CommonVerifiersTest {
     void verifyBasicPayload_paramsWithValues_valid() {
         AssertionResult assertionResult =new AssertionResult();
         assertionResult.setResponse(new io.jans.fido2.model.assertion.Response());
-        assertionResult.setType("TEST-type");
+//        assertionResult.setType("TEST-type");
         assertionResult.setId("TEST-id");
 
         commonVerifiers.verifyBasicPayload(assertionResult);
@@ -483,13 +480,13 @@ class CommonVerifiersTest {
     void verifyClientJSON_ifClientJsonNodeChallengeIsNull_fido2RuntimeException() throws IOException {
         ObjectNode responseNode = mapper.createObjectNode();
         responseNode.put("clientDataJSON", "TEST-clientDataJSON");
-        when(base64Service.urlDecode("TEST-clientDataJSON")).thenReturn("TEST-clientDataJsonDecoded".getBytes());
+//        when(base64Service.urlDecode("TEST-clientDataJSON")).thenReturn("TEST-clientDataJsonDecoded".getBytes());
         ObjectNode clientJsonNode = mapper.createObjectNode();
         clientJsonNode.put("origin", "TEST-origin");
         clientJsonNode.put("type", "TEST-type");
 
         //urlEncodeToString(clientData.toString().toByteArray(StandardCharsets.UTF_8));
-        when(dataMapperService.readTree("TEST-clientDataJsonDecoded")).thenReturn(clientJsonNode);
+//        when(dataMapperService.readTree("TEST-clientDataJsonDecoded")).thenReturn(clientJsonNode);
         when(errorResponseFactory.invalidRequest(any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
         WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyClientJSON(base64Service.urlEncodeToString(clientJsonNode.toString().getBytes())));
@@ -503,11 +500,11 @@ class CommonVerifiersTest {
     void verifyClientJSON_ifClientJsonNodeOriginIsNull_fido2RuntimeException() throws IOException {
         ObjectNode responseNode = mapper.createObjectNode();
         responseNode.put("clientDataJSON", "TEST-clientDataJSON");
-        when(base64Service.urlDecode("TEST-clientDataJSON")).thenReturn("TEST-clientDataJsonDecoded".getBytes());
+//        when(base64Service.urlDecode("TEST-clientDataJSON")).thenReturn("TEST-clientDataJsonDecoded".getBytes());
         ObjectNode clientJsonNode = mapper.createObjectNode();
         clientJsonNode.put("challenge", "TEST-challenge");
         clientJsonNode.put("type", "TEST-type");
-        when(dataMapperService.readTree("TEST-clientDataJsonDecoded")).thenReturn(clientJsonNode);
+//        when(dataMapperService.readTree("TEST-clientDataJsonDecoded")).thenReturn(clientJsonNode);
         when(errorResponseFactory.invalidRequest(any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
         WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyClientJSON(base64Service.urlEncodeToString(clientJsonNode.toString().getBytes())));
@@ -521,11 +518,11 @@ class CommonVerifiersTest {
     void verifyClientJSON_ifClientJsonNodeTypeIsNull_fido2RuntimeException() throws IOException {
         ObjectNode responseNode = mapper.createObjectNode();
         responseNode.put("clientDataJSON", "TEST-clientDataJSON");
-        when(base64Service.urlDecode("TEST-clientDataJSON")).thenReturn("TEST-clientDataJsonDecoded".getBytes());
+//        when(base64Service.urlDecode("TEST-clientDataJSON")).thenReturn("TEST-clientDataJsonDecoded".getBytes());
         ObjectNode clientJsonNode = mapper.createObjectNode();
         clientJsonNode.put("challenge", "TEST-challenge");
         clientJsonNode.put("origin", "TEST-origin");
-        when(dataMapperService.readTree("TEST-clientDataJsonDecoded")).thenReturn(clientJsonNode);
+//        when(dataMapperService.readTree("TEST-clientDataJsonDecoded")).thenReturn(clientJsonNode);
         when(errorResponseFactory.invalidRequest(any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
         WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyClientJSON(base64Service.urlEncodeToString(clientJsonNode.toString().getBytes())));
@@ -537,18 +534,19 @@ class CommonVerifiersTest {
 
     @Test
     void verifyClientJSON_ifTokenBindingIsNotNull_fido2RuntimeException() throws IOException {
-        ObjectNode responseNode = mapper.createObjectNode();
-        responseNode.put("clientDataJSON", "TEST-clientDataJSON");
-        when(base64Service.urlDecode("TEST-clientDataJSON")).thenReturn("TEST-clientDataJsonDecoded".getBytes());
         ObjectNode clientJsonNode = mapper.createObjectNode();
         clientJsonNode.put("challenge", "TEST-challenge");
         clientJsonNode.put("origin", "TEST-origin");
         clientJsonNode.put("type", "TEST-type");
         clientJsonNode.put("tokenBinding", mapper.createObjectNode());
-        when(dataMapperService.readTree("TEST-clientDataJsonDecoded")).thenReturn(clientJsonNode);
+
         when(errorResponseFactory.invalidRequest(any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
-        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyClientJSON(base64Service.urlEncodeToString(clientJsonNode.toString().getBytes())));
+        String encodedClientDataJSON = base64Service.urlEncodeToString(clientJsonNode.toString().getBytes());
+
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> {commonVerifiers.verifyClientJSON(encodedClientDataJSON);});
+
+        // Assertions for the expected exception
         assertNotNull(ex);
         assertNotNull(ex.getResponse());
         assertEquals(ex.getResponse().getStatus(), 400);
@@ -557,9 +555,6 @@ class CommonVerifiersTest {
 
     @Test
     void verifyClientJSON_ifTokenBindingIsNotNullAndStatusIsNotNull_value() throws IOException {
-        ObjectNode responseNode = mapper.createObjectNode();
-        responseNode.put("clientDataJSON", "TEST-clientDataJSON");
-        when(base64Service.urlDecode("TEST-clientDataJSON")).thenReturn("TEST-clientDataJsonDecoded".getBytes());
         ObjectNode clientJsonNode = mapper.createObjectNode();
         clientJsonNode.put("challenge", "TEST-challenge");
         clientJsonNode.put("origin", "TEST-origin");
@@ -567,34 +562,21 @@ class CommonVerifiersTest {
         ObjectNode tokenBinding = mapper.createObjectNode();
         tokenBinding.put("status", "supported");
         clientJsonNode.put("tokenBinding", tokenBinding);
-        when(dataMapperService.readTree("TEST-clientDataJsonDecoded")).thenReturn(clientJsonNode);
 
-        JsonNode response = commonVerifiers.verifyClientJSON(base64Service.urlEncodeToString(clientJsonNode.toString().getBytes()));
-        assertNotNull(response);
-        assertTrue(response.has("challenge"));
-        assertTrue(response.has("origin"));
-        assertTrue(response.has("type"));
-        assertEquals(response.get("challenge").asText(), "TEST-challenge");
-        assertEquals(response.get("origin").asText(), "TEST-origin");
-        assertEquals(response.get("type").asText(), "TEST-type");
-    }
+        byte[] jsonBytes = clientJsonNode.toString().getBytes(StandardCharsets.UTF_8);
 
-    @Test
-    void verifyClientJSON_ifTokenBindingIsNotNullAndIdIsNotNull_value() throws IOException {
-        ObjectNode responseNode = mapper.createObjectNode();
-        responseNode.put("clientDataJSON", "TEST-clientDataJSON");
-        when(base64Service.urlDecode("TEST-clientDataJSON")).thenReturn("TEST-clientDataJsonDecoded".getBytes());
-        ObjectNode clientJsonNode = mapper.createObjectNode();
-        clientJsonNode.put("challenge", "TEST-challenge");
-        clientJsonNode.put("origin", "TEST-origin");
-        clientJsonNode.put("type", "TEST-type");
-        ObjectNode tokenBinding = mapper.createObjectNode();
-        tokenBinding.put("status", "supported");
-        tokenBinding.put("id", "TEST-id");
-        clientJsonNode.put("tokenBinding", tokenBinding);
-        when(dataMapperService.readTree("TEST-clientDataJsonDecoded")).thenReturn(clientJsonNode);
+        String mockEncoded = Base64.getUrlEncoder().withoutPadding().encodeToString(jsonBytes);
+        when(base64Service.encodeToString(jsonBytes)).thenReturn(Base64.getUrlEncoder().withoutPadding().encodeToString(jsonBytes));
 
-        JsonNode response = commonVerifiers.verifyClientJSON(base64Service.urlEncodeToString(clientJsonNode.toString().getBytes()));
+        when(base64Service.urlDecode(mockEncoded)).thenReturn(jsonBytes);
+
+        when(dataMapperService.readTree(new String(jsonBytes, StandardCharsets.UTF_8))).thenReturn(clientJsonNode);
+
+        String encodedClientDataJSON = base64Service.encodeToString(jsonBytes);
+
+        JsonNode response = commonVerifiers.verifyClientJSON(encodedClientDataJSON);
+
+        // Assert the expected behavior
         assertNotNull(response);
         assertTrue(response.has("challenge"));
         assertTrue(response.has("origin"));
@@ -606,17 +588,18 @@ class CommonVerifiersTest {
 
     @Test
     void verifyClientJSON_ifOriginIsEmpty_fido2RuntimeException() throws IOException {
-        ObjectNode responseNode = mapper.createObjectNode();
-        responseNode.put("clientDataJSON", "TEST-clientDataJSON");
-        when(base64Service.urlDecode("TEST-clientDataJSON")).thenReturn("TEST-clientDataJsonDecoded".getBytes());
         ObjectNode clientJsonNode = mapper.createObjectNode();
         clientJsonNode.put("challenge", "TEST-challenge");
         clientJsonNode.put("origin", "");
         clientJsonNode.put("type", "TEST-type");
-        when(dataMapperService.readTree("TEST-clientDataJsonDecoded")).thenReturn(clientJsonNode);
-        when(errorResponseFactory.invalidRequest(any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
 
-        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyClientJSON(base64Service.urlEncodeToString(clientJsonNode.toString().getBytes())));
+        when(errorResponseFactory.invalidRequest(any()))
+                .thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
+
+        WebApplicationException ex = assertThrows(WebApplicationException.class, () ->
+                commonVerifiers.verifyClientJSON(base64Service.urlEncodeToString(clientJsonNode.toString().getBytes()))
+        );
+
         assertNotNull(ex);
         assertNotNull(ex.getResponse());
         assertEquals(ex.getResponse().getStatus(), 400);
@@ -626,15 +609,25 @@ class CommonVerifiersTest {
     @Test
     void verifyClientJSON_validValues_value() throws IOException {
         ObjectNode responseNode = mapper.createObjectNode();
-        responseNode.put("clientDataJSON", "TEST-clientDataJSON");
-        when(base64Service.urlDecode("TEST-clientDataJSON")).thenReturn("TEST-clientDataJsonDecoded".getBytes());
+        responseNode.put("clientDataJSON", "TEST-challenge");
+
+        when(base64Service.urlDecode("TEST-challenge")).thenReturn("TEST-clientDataJsonDecoded".getBytes());
         ObjectNode clientJsonNode = mapper.createObjectNode();
         clientJsonNode.put("challenge", "TEST-challenge");
         clientJsonNode.put("origin", "TEST-origin");
         clientJsonNode.put("type", "TEST-type");
-        when(dataMapperService.readTree("TEST-clientDataJsonDecoded")).thenReturn(clientJsonNode);
+        byte[] jsonBytes = clientJsonNode.toString().getBytes(StandardCharsets.UTF_8);
 
-        JsonNode response = commonVerifiers.verifyClientJSON(base64Service.urlEncodeToString(clientJsonNode.toString().getBytes()));
+        String mockEncoded = Base64.getUrlEncoder().withoutPadding().encodeToString(jsonBytes);
+        when(base64Service.encodeToString(jsonBytes)).thenReturn(Base64.getUrlEncoder().withoutPadding().encodeToString(jsonBytes));
+
+        when(base64Service.urlDecode(mockEncoded)).thenReturn(jsonBytes);
+
+        when(dataMapperService.readTree(new String(jsonBytes, StandardCharsets.UTF_8))).thenReturn(clientJsonNode);
+
+        String encodedClientDataJSON = base64Service.encodeToString(jsonBytes);
+
+        JsonNode response = commonVerifiers.verifyClientJSON(encodedClientDataJSON);
         assertNotNull(response);
         assertTrue(response.has("challenge"));
         assertTrue(response.has("origin"));
@@ -677,26 +670,6 @@ class CommonVerifiersTest {
         JsonNode responseNode = new TextNode("2.0");
 
         commonVerifiers.verifyTPMVersion(responseNode);
-    }
-
-    @Test
-    void verifyAttestationConveyanceType_ifAttestationIsNotNull_valid() {
-        AttestationOptions params = new AttestationOptions();
-        params.setAttestation(AttestationConveyancePreference.indirect);
-
-
-        AttestationConveyancePreference response = commonVerifiers.verifyAttestationConveyanceType(params);
-        assertNotNull(response);
-        assertEquals(response.name(), "indirect");
-    }
-
-    @Test
-    void verifyAttestationConveyanceType_ifAttestationConveyancePreferenceIsNull_valid() {
-        AttestationOptions params = new AttestationOptions();
-
-        AttestationConveyancePreference response = commonVerifiers.verifyAttestationConveyanceType(params);
-        assertNotNull(response);
-        assertEquals(response.name(), "direct");
     }
 
     @Test
@@ -794,294 +767,4 @@ class CommonVerifiersTest {
 
         commonVerifiers.verifyThatMetadataIsValid(metadata);
     }
-
-    @Test
-    void hasSuperGluu_ifParamsContainsSuperGluuRequestAndNodeIsBooleanFalse_false() {
-        final String SUPER_GLUU_REQUEST = "super_gluu_request";
-        JsonNode params = mock(JsonNode.class);
-        JsonNode node = mock(JsonNode.class);
-        when(params.hasNonNull(SUPER_GLUU_REQUEST)).thenReturn(true);
-        when(params.get(SUPER_GLUU_REQUEST)).thenReturn(node);
-        when(node.isBoolean()).thenReturn(false);
-
-        boolean response = commonVerifiers.hasSuperGluu(params);
-        assertFalse(response);
-        verify(node, never()).asBoolean();
-    }
-
-    @Test
-    void hasSuperGluu_ifParamsContainsSuperGluuRequestAndNodeIsBooleanTrueAndNodeAsBooleanFalse_false() {
-        final String SUPER_GLUU_REQUEST = "super_gluu_request";
-        JsonNode params = mock(JsonNode.class);
-        JsonNode node = mock(JsonNode.class);
-        when(params.hasNonNull(SUPER_GLUU_REQUEST)).thenReturn(true);
-        when(params.get(SUPER_GLUU_REQUEST)).thenReturn(node);
-        when(node.isBoolean()).thenReturn(true);
-        when(node.asBoolean()).thenReturn(false);
-
-        boolean response = commonVerifiers.hasSuperGluu(params);
-        assertFalse(response);
-    }
-
-    @Test
-    void hasSuperGluu_ifParamsContainsSuperGluuRequestAndNodeIsAllTrue_false() {
-        final String SUPER_GLUU_REQUEST = "super_gluu_request";
-        JsonNode params = mock(JsonNode.class);
-        JsonNode node = mock(JsonNode.class);
-        when(params.hasNonNull(SUPER_GLUU_REQUEST)).thenReturn(true);
-        when(params.get(SUPER_GLUU_REQUEST)).thenReturn(node);
-        when(node.isBoolean()).thenReturn(true);
-        when(node.asBoolean()).thenReturn(true);
-
-        boolean response = commonVerifiers.hasSuperGluu(params);
-        assertTrue(response);
-    }
-
-    @Test
-    void hasSuperGluu_ifParamsNotContainsSuperGluuRequest_false() {
-        final String SUPER_GLUU_REQUEST = "super_gluu_request";
-        JsonNode params = mock(JsonNode.class);
-        when(params.hasNonNull(SUPER_GLUU_REQUEST)).thenReturn(false);
-
-        boolean response = commonVerifiers.hasSuperGluu(params);
-        assertFalse(response);
-        verify(params, never()).get(SUPER_GLUU_REQUEST);
-    }
-
-    @Test
-    void verifyNotUseGluuParameters_ifParamsHasNonNullSuperGluuRequestIsTrue_fido2RpRuntimeException() {
-        JsonNode params = mock(JsonNode.class);
-        when(params.hasNonNull(SUPER_GLUU_REQUEST)).thenReturn(true);
-        when(errorResponseFactory.badRequestException(any(), any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
-
-        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyNotUseGluuParameters(params));
-        assertNotNull(ex);
-        assertNotNull(ex.getResponse());
-        assertEquals(ex.getResponse().getStatus(), 400);
-        assertEquals(ex.getResponse().getEntity(), "test exception");
-
-        verify(params).hasNonNull(SUPER_GLUU_REQUEST);
-        verify(params, never()).hasNonNull(SUPER_GLUU_MODE);
-        verify(params, never()).hasNonNull(SUPER_GLUU_APP_ID);
-        verify(params, never()).hasNonNull(SUPER_GLUU_KEY_HANDLE);
-        verify(params, never()).hasNonNull(SUPER_GLUU_REQUEST_CANCEL);
-    }
-
-    @Test
-    void verifyNotUseGluuParameters_ifParamsHasNonNullSuperGluuModeIsTrue_fido2RpRuntimeException() {
-        JsonNode params = mock(JsonNode.class);
-        when(params.hasNonNull(SUPER_GLUU_REQUEST)).thenReturn(false);
-        when(params.hasNonNull(SUPER_GLUU_MODE)).thenReturn(true);
-        when(errorResponseFactory.badRequestException(any(), any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
-
-        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyNotUseGluuParameters(params));
-        assertNotNull(ex);
-        assertNotNull(ex.getResponse());
-        assertEquals(ex.getResponse().getStatus(), 400);
-        assertEquals(ex.getResponse().getEntity(), "test exception");
-
-        verify(params).hasNonNull(SUPER_GLUU_REQUEST);
-        verify(params).hasNonNull(SUPER_GLUU_MODE);
-        verify(params, never()).hasNonNull(SUPER_GLUU_APP_ID);
-        verify(params, never()).hasNonNull(SUPER_GLUU_KEY_HANDLE);
-        verify(params, never()).hasNonNull(SUPER_GLUU_REQUEST_CANCEL);
-    }
-
-    @Test
-    void verifyNotUseGluuParameters_ifParamsHasNonNullSuperGluuAppIdIsTrue_fido2RpRuntimeException() {
-        JsonNode params = mock(JsonNode.class);
-        when(params.hasNonNull(SUPER_GLUU_REQUEST)).thenReturn(false);
-        when(params.hasNonNull(SUPER_GLUU_MODE)).thenReturn(false);
-        when(params.hasNonNull(SUPER_GLUU_APP_ID)).thenReturn(true);
-        when(errorResponseFactory.badRequestException(any(), any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
-
-        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyNotUseGluuParameters(params));
-        assertNotNull(ex);
-        assertNotNull(ex.getResponse());
-        assertEquals(ex.getResponse().getStatus(), 400);
-        assertEquals(ex.getResponse().getEntity(), "test exception");
-
-        verify(params).hasNonNull(SUPER_GLUU_REQUEST);
-        verify(params).hasNonNull(SUPER_GLUU_MODE);
-        verify(params).hasNonNull(SUPER_GLUU_APP_ID);
-        verify(params, never()).hasNonNull(SUPER_GLUU_KEY_HANDLE);
-        verify(params, never()).hasNonNull(SUPER_GLUU_REQUEST_CANCEL);
-    }
-
-    @Test
-    void verifyNotUseGluuParameters_ifParamsHasNonNullSuperGluuKeyHandleIsTrue_fido2RpRuntimeException() {
-        JsonNode params = mock(JsonNode.class);
-        when(params.hasNonNull(SUPER_GLUU_REQUEST)).thenReturn(false);
-        when(params.hasNonNull(SUPER_GLUU_MODE)).thenReturn(false);
-        when(params.hasNonNull(SUPER_GLUU_APP_ID)).thenReturn(false);
-        when(params.hasNonNull(SUPER_GLUU_KEY_HANDLE)).thenReturn(true);
-        when(errorResponseFactory.badRequestException(any(), any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
-
-        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyNotUseGluuParameters(params));
-        assertNotNull(ex);
-        assertNotNull(ex.getResponse());
-        assertEquals(ex.getResponse().getStatus(), 400);
-        assertEquals(ex.getResponse().getEntity(), "test exception");
-
-        verify(params).hasNonNull(SUPER_GLUU_REQUEST);
-        verify(params).hasNonNull(SUPER_GLUU_MODE);
-        verify(params).hasNonNull(SUPER_GLUU_APP_ID);
-        verify(params).hasNonNull(SUPER_GLUU_KEY_HANDLE);
-        verify(params, never()).hasNonNull(SUPER_GLUU_REQUEST_CANCEL);
-    }
-
-    @Test
-    void verifyNotUseGluuParameters_ifParamsHasNonNullSuperGluuRequestCancelIsTrue_fido2RpRuntimeException() {
-        JsonNode params = mock(JsonNode.class);
-        when(params.hasNonNull(SUPER_GLUU_REQUEST)).thenReturn(false);
-        when(params.hasNonNull(SUPER_GLUU_MODE)).thenReturn(false);
-        when(params.hasNonNull(SUPER_GLUU_APP_ID)).thenReturn(false);
-        when(params.hasNonNull(SUPER_GLUU_KEY_HANDLE)).thenReturn(false);
-        when(params.hasNonNull(SUPER_GLUU_REQUEST_CANCEL)).thenReturn(true);
-        when(errorResponseFactory.badRequestException(any(), any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
-
-        WebApplicationException ex = assertThrows(WebApplicationException.class, () -> commonVerifiers.verifyNotUseGluuParameters(params));
-        assertNotNull(ex);
-        assertNotNull(ex.getResponse());
-        assertEquals(ex.getResponse().getStatus(), 400);
-        assertEquals(ex.getResponse().getEntity(), "test exception");
-
-        verify(params).hasNonNull(SUPER_GLUU_REQUEST);
-        verify(params).hasNonNull(SUPER_GLUU_MODE);
-        verify(params).hasNonNull(SUPER_GLUU_APP_ID);
-        verify(params).hasNonNull(SUPER_GLUU_KEY_HANDLE);
-        verify(params).hasNonNull(SUPER_GLUU_REQUEST_CANCEL);
-    }
-
-    @Test
-    void isSuperGluuOneStepMode_ifHasSuperGluuIsFalse_false() {
-        JsonNode params = mock(JsonNode.class);
-        when(params.hasNonNull(SUPER_GLUU_REQUEST)).thenReturn(false);
-
-        boolean response = commonVerifiers.isSuperGluuOneStepMode(params);
-        assertFalse(response);
-        verify(params, never()).hasNonNull(SUPER_GLUU_MODE);
-        verify(params, never()).get(SUPER_GLUU_MODE);
-    }
-
-    @Test
-    void isSuperGluuOneStepMode_ifHasNonNullSuperGluuModeIsFalse_false() {
-        JsonNode params = mock(JsonNode.class);
-        when(params.hasNonNull(SUPER_GLUU_REQUEST)).thenReturn(true);
-        when(params.get(SUPER_GLUU_REQUEST)).thenReturn(BooleanNode.TRUE);
-        when(params.hasNonNull(SUPER_GLUU_MODE)).thenReturn(false);
-
-        boolean response = commonVerifiers.isSuperGluuOneStepMode(params);
-        assertFalse(response);
-        verify(params).hasNonNull(SUPER_GLUU_MODE);
-        verify(params, never()).get(SUPER_GLUU_MODE);
-    }
-
-    @Test
-    void isSuperGluuOneStepMode_ifOneStepIsFalse_false() {
-        JsonNode params = mock(JsonNode.class);
-        when(params.hasNonNull(SUPER_GLUU_REQUEST)).thenReturn(true);
-        when(params.get(SUPER_GLUU_REQUEST)).thenReturn(BooleanNode.TRUE);
-        when(params.hasNonNull(SUPER_GLUU_MODE)).thenReturn(true);
-        when(params.get(SUPER_GLUU_MODE)).thenReturn(new TextNode("WRONG-STEP"));
-
-        boolean response = commonVerifiers.isSuperGluuOneStepMode(params);
-        assertFalse(response);
-        verify(params).hasNonNull(SUPER_GLUU_MODE);
-        verify(params).get(SUPER_GLUU_MODE);
-    }
-
-    @Test
-    void isSuperGluuOneStepMode_ifOneStepIsTrue_true() {
-        JsonNode params = mock(JsonNode.class);
-        when(params.hasNonNull(SUPER_GLUU_REQUEST)).thenReturn(true);
-        when(params.get(SUPER_GLUU_REQUEST)).thenReturn(BooleanNode.TRUE);
-        when(params.hasNonNull(SUPER_GLUU_MODE)).thenReturn(true);
-        when(params.get(SUPER_GLUU_MODE)).thenReturn(new TextNode("one_step"));
-
-        boolean response = commonVerifiers.isSuperGluuOneStepMode(params);
-        assertTrue(response);
-        verify(params).hasNonNull(SUPER_GLUU_MODE);
-        verify(params).get(SUPER_GLUU_MODE);
-    }
-
-    @Test
-    void isSuperGluuCancelRequest_ifHasSuperGluuIsFalse_false() {
-        JsonNode params = mock(JsonNode.class);
-        when(params.hasNonNull(SUPER_GLUU_REQUEST)).thenReturn(false);
-
-        boolean response = commonVerifiers.isSuperGluuCancelRequest(params);
-        assertFalse(response);
-        verify(params, never()).hasNonNull(SUPER_GLUU_REQUEST_CANCEL);
-        verify(params, never()).get(SUPER_GLUU_REQUEST_CANCEL);
-    }
-
-    @Test
-    void isSuperGluuCancelRequest_ifHasNonNullSuperGluuRequestCancelIsFalse_false() {
-        JsonNode params = mock(JsonNode.class);
-        when(params.hasNonNull(SUPER_GLUU_REQUEST)).thenReturn(true);
-        when(params.get(SUPER_GLUU_REQUEST)).thenReturn(BooleanNode.TRUE);
-        when(params.hasNonNull(SUPER_GLUU_REQUEST_CANCEL)).thenReturn(false);
-
-        boolean response = commonVerifiers.isSuperGluuCancelRequest(params);
-        assertFalse(response);
-        verify(params).hasNonNull(SUPER_GLUU_REQUEST_CANCEL);
-        verify(params, never()).get(SUPER_GLUU_REQUEST_CANCEL);
-    }
-
-    @Test
-    void isSuperGluuCancelRequest_ifNodeIsBooleanIsFalse_false() {
-        JsonNode params = mock(JsonNode.class);
-        when(params.hasNonNull(SUPER_GLUU_REQUEST)).thenReturn(true);
-        when(params.get(SUPER_GLUU_REQUEST)).thenReturn(BooleanNode.TRUE);
-        when(params.hasNonNull(SUPER_GLUU_REQUEST_CANCEL)).thenReturn(true);
-        JsonNode node = mock(JsonNode.class);
-        when(params.get(SUPER_GLUU_REQUEST_CANCEL)).thenReturn(node);
-        when(node.isBoolean()).thenReturn(false);
-
-        boolean response = commonVerifiers.isSuperGluuCancelRequest(params);
-        assertFalse(response);
-        verify(params).hasNonNull(SUPER_GLUU_REQUEST_CANCEL);
-        verify(params).get(SUPER_GLUU_REQUEST_CANCEL);
-        verify(node).isBoolean();
-        verify(node, never()).asBoolean();
-    }
-
-    @Test
-    void isSuperGluuCancelRequest_ifNodeAsBooleanIsFalse_false() {
-        JsonNode params = mock(JsonNode.class);
-        when(params.hasNonNull(SUPER_GLUU_REQUEST)).thenReturn(true);
-        when(params.get(SUPER_GLUU_REQUEST)).thenReturn(BooleanNode.TRUE);
-        when(params.hasNonNull(SUPER_GLUU_REQUEST_CANCEL)).thenReturn(true);
-        JsonNode node = mock(JsonNode.class);
-        when(params.get(SUPER_GLUU_REQUEST_CANCEL)).thenReturn(node);
-        when(node.isBoolean()).thenReturn(true);
-        when(node.asBoolean()).thenReturn(false);
-
-        boolean response = commonVerifiers.isSuperGluuCancelRequest(params);
-        assertFalse(response);
-        verify(params).hasNonNull(SUPER_GLUU_REQUEST_CANCEL);
-        verify(params).get(SUPER_GLUU_REQUEST_CANCEL);
-        verify(node).isBoolean();
-        verify(node).asBoolean();
-    }
-
-    @Test
-    void isSuperGluuCancelRequest_nodeIsBooleanAndAsBooleanIsTrue_true() {
-        JsonNode params = mock(JsonNode.class);
-        when(params.hasNonNull(SUPER_GLUU_REQUEST)).thenReturn(true);
-        when(params.get(SUPER_GLUU_REQUEST)).thenReturn(BooleanNode.TRUE);
-        when(params.hasNonNull(SUPER_GLUU_REQUEST_CANCEL)).thenReturn(true);
-        JsonNode node = mock(JsonNode.class);
-        when(params.get(SUPER_GLUU_REQUEST_CANCEL)).thenReturn(node);
-        when(node.isBoolean()).thenReturn(true);
-        when(node.asBoolean()).thenReturn(true);
-
-        boolean response = commonVerifiers.isSuperGluuCancelRequest(params);
-        assertTrue(response);
-        verify(params).hasNonNull(SUPER_GLUU_REQUEST_CANCEL);
-        verify(params).get(SUPER_GLUU_REQUEST_CANCEL);
-        verify(node).isBoolean();
-        verify(node).asBoolean();
-    }*/
 }

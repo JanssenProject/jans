@@ -7,8 +7,6 @@
 package io.jans.fido2.service.operation;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.google.common.base.Strings;
 import io.jans.entry.PublicKeyCredentialHints;
 import io.jans.entry.Transports;
 import io.jans.fido2.ctap.AttestationConveyancePreference;
@@ -44,7 +42,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.core.Context;
 import org.slf4j.Logger;
 
-import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.HashSet;
 import java.util.List;
@@ -137,6 +134,16 @@ public class AttestationService {
 
 		// Put RP
 		String origin = commonVerifiers.verifyRpDomain(attestationOptions.getOrigin(), appConfiguration.getIssuer());
+
+        // Check if the origin exists in any of the RequestedParties origins
+		boolean originExists = appConfiguration.getFido2Configuration().getRequestedParties().stream()
+				.flatMap(f -> f.getOrigins().stream())
+				.anyMatch(o -> o.equals(origin));
+
+		if (!originExists) {
+			throw errorResponseFactory.badRequestException(AttestationErrorResponseType.INVALID_ORIGIN, "The origin '" + origin + "' is not listed in the allowed origins.");
+		}
+
 		RelyingParty relyingParty = createRpDomain(origin);
 		log.debug("Relying Party: "+relyingParty);
 		
