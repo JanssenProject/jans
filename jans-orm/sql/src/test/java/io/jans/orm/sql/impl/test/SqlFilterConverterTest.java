@@ -89,21 +89,21 @@ public class SqlFilterConverterTest {
 		ConvertedExpression expressionEq1 = simpleConverter.convertToSqlFilter(null, filterEq1, null);
 
 		String queryEq1 = toSelectSQL(expressionEq1);
-		assertEquals(queryEq1, "select doc.`*` from `table` as doc where JSON_CONTAINS(doc.uid->'$.v', CAST('[\"test\"]' AS JSON))");
+		assertEquals(queryEq1, "select doc.`*` from `table` as doc where JSON_CONTAINS(doc.uid->>'$.v', CAST('[\"test\"]' AS JSON))");
 
 		// EQ -- Integer
 		Filter filterEq2 = Filter.createEqualityFilter("age", 23).multiValued();
 		ConvertedExpression expressionEq2 = simpleConverter.convertToSqlFilter(null, filterEq2, null);
 
 		String queryEq2 = toSelectSQL(expressionEq2);
-		assertEquals(queryEq2, "select doc.`*` from `table` as doc where JSON_CONTAINS(doc.age->'$.v', CAST('[23]' AS JSON))");
+		assertEquals(queryEq2, "select doc.`*` from `table` as doc where JSON_CONTAINS(doc.age->>'$.v', CAST('[23]' AS JSON))");
 
 		// EQ -- Long
 		Filter filterEq3 = Filter.createEqualityFilter("age", 23L).multiValued();
 		ConvertedExpression expressionEq3 = simpleConverter.convertToSqlFilter(null, filterEq3, null);
 
 		String queryEq3 = toSelectSQL(expressionEq3);
-		assertEquals(queryEq3, "select doc.`*` from `table` as doc where JSON_CONTAINS(doc.age->'$.v', CAST('[23]' AS JSON))");
+		assertEquals(queryEq3, "select doc.`*` from `table` as doc where JSON_CONTAINS(doc.age->>'$.v', CAST('[23]' AS JSON))");
 
 		
 
@@ -112,7 +112,7 @@ public class SqlFilterConverterTest {
 		ConvertedExpression expressionEq4 = simpleConverter.convertToSqlFilter(null, filterEq4, null);
 
 		String queryEq4 = toSelectSQL(expressionEq4);
-		assertEquals(queryEq4, "select doc.`*` from `table` as doc where JSON_CONTAINS(doc.added->'$.v', CAST('[\"2020-12-16T14:58:18.398\"]' AS JSON))");
+		assertEquals(queryEq4, "select doc.`*` from `table` as doc where JSON_CONTAINS(doc.added->>'$.v', CAST('[\"2020-12-16T14:58:18.398\"]' AS JSON))");
 	}
 
 	@Test
@@ -153,35 +153,35 @@ public class SqlFilterConverterTest {
 		ConvertedExpression expressionLe1 = simpleConverter.convertToSqlFilter(null, filterLe1, null);
 
 		String queryLe1 = toSelectSQL(expressionLe1);
-		assertEquals(queryLe1, "select doc.`*` from `table` as doc where doc.uid->'$.v[0]' <= 'test'");
+		assertEquals(queryLe1, "select doc.`*` from `table` as doc where doc.uid->>'$.v[0]' <= 'test'");
 
 		// LE -- Integer
 		Filter filterLe2 = Filter.createLessOrEqualFilter("age", 23).multiValued();
 		ConvertedExpression expressionLe2 = simpleConverter.convertToSqlFilter(null, filterLe2, null);
 
 		String queryLe2 = toSelectSQL(expressionLe2);
-		assertEquals(queryLe2, "select doc.`*` from `table` as doc where doc.age->'$.v[0]' <= 23");
+		assertEquals(queryLe2, "select doc.`*` from `table` as doc where doc.age->>'$.v[0]' <= 23");
 
 		// LE -- Long
 		Filter filterLe3 = Filter.createLessOrEqualFilter("age", 23L).multiValued();
 		ConvertedExpression expressionLe3 = simpleConverter.convertToSqlFilter(null, filterLe3, null);
 
 		String queryLe3 = toSelectSQL(expressionLe3);
-		assertEquals(queryLe3, "select doc.`*` from `table` as doc where doc.age->'$.v[0]' <= 23");
+		assertEquals(queryLe3, "select doc.`*` from `table` as doc where doc.age->>'$.v[0]' <= 23");
 
 		// LE -- Date
 		Filter filterLe4 = Filter.createLessOrEqualFilter("added", getUtcDateFromMillis(1608130698398L)).multiValued();
 		ConvertedExpression expressionLe4 = simpleConverter.convertToSqlFilter(null, filterLe4, null);
 
 		String queryLe4 = toSelectSQL(expressionLe4);
-		assertEquals(queryLe4, "select doc.`*` from `table` as doc where doc.added->'$.v[0]' <= (timestamp '2020-12-16 14:58:18')");
+		assertEquals(queryLe4, "select doc.`*` from `table` as doc where doc.added->>'$.v[0]' <= (timestamp '2020-12-16 14:58:18')");
 
 		// LE -- Date
 		Filter filterLe5 = Filter.createLessOrEqualFilter("added", getUtcDateFromMillis(1608130698398L)).multiValued(3);
 		ConvertedExpression expressionLe5 = simpleConverter.convertToSqlFilter(null, filterLe5, null);
 
 		String queryLe5 = toSelectSQL(expressionLe5);
-		assertEquals(queryLe5, "select doc.`*` from `table` as doc where doc.added->'$.v[0]' <= (timestamp '2020-12-16 14:58:18') or doc.added->'$.v[1]' <= (timestamp '2020-12-16 14:58:18') or doc.added->'$.v[2]' <= (timestamp '2020-12-16 14:58:18')");
+		assertEquals(queryLe5, "select doc.`*` from `table` as doc where doc.added->>'$.v[0]' <= (timestamp '2020-12-16 14:58:18') or doc.added->>'$.v[1]' <= (timestamp '2020-12-16 14:58:18') or doc.added->>'$.v[2]' <= (timestamp '2020-12-16 14:58:18')");
 	}
 
 	@Test
@@ -222,35 +222,35 @@ public class SqlFilterConverterTest {
 		ConvertedExpression expressionGe1 = simpleConverter.convertToSqlFilter(null, filterGe1, null);
 
 		String queryGe1 = toSelectSQL(expressionGe1);
-		assertEquals(queryGe1, "select doc.`*` from `table` as doc where doc.uid->'$.v[0]' >= 'test'");
+		assertEquals(queryGe1, "select doc.`*` from `table` as doc where doc.uid->>'$.v[0]' >= 'test'");
 
 		// GE -- Integer
 		Filter filterGe2 = Filter.createGreaterOrEqualFilter("age", 23).multiValued();
 		ConvertedExpression expressionGe2 = simpleConverter.convertToSqlFilter(null, filterGe2, null);
 
 		String queryGe2 = toSelectSQL(expressionGe2);
-		assertEquals(queryGe2, "select doc.`*` from `table` as doc where doc.age->'$.v[0]' >= 23");
+		assertEquals(queryGe2, "select doc.`*` from `table` as doc where doc.age->>'$.v[0]' >= 23");
 
 		// GE -- Long
 		Filter filterGe3 = Filter.createGreaterOrEqualFilter("age", 23L).multiValued();
 		ConvertedExpression expressionGe3 = simpleConverter.convertToSqlFilter(null, filterGe3, null);
 
 		String queryGe3 = toSelectSQL(expressionGe3);
-		assertEquals(queryGe3, "select doc.`*` from `table` as doc where doc.age->'$.v[0]' >= 23");
+		assertEquals(queryGe3, "select doc.`*` from `table` as doc where doc.age->>'$.v[0]' >= 23");
 
 		// GE -- Date
 		Filter filterGe4 = Filter.createGreaterOrEqualFilter("added", getUtcDateFromMillis(1608130698398L)).multiValued();
 		ConvertedExpression expressionGe4 = simpleConverter.convertToSqlFilter(null, filterGe4, null);
 
 		String queryGe4 = toSelectSQL(expressionGe4);
-		assertEquals(queryGe4, "select doc.`*` from `table` as doc where doc.added->'$.v[0]' >= (timestamp '2020-12-16 14:58:18')");
+		assertEquals(queryGe4, "select doc.`*` from `table` as doc where doc.added->>'$.v[0]' >= (timestamp '2020-12-16 14:58:18')");
 
 		// GE -- Date
 		Filter filterGe5 = Filter.createGreaterOrEqualFilter("added", getUtcDateFromMillis(1608130698398L)).multiValued(3);
 		ConvertedExpression expressionGe5 = simpleConverter.convertToSqlFilter(null, filterGe5, null);
 
 		String queryGe5 = toSelectSQL(expressionGe5);
-		assertEquals(queryGe5, "select doc.`*` from `table` as doc where doc.added->'$.v[0]' >= (timestamp '2020-12-16 14:58:18') or doc.added->'$.v[1]' >= (timestamp '2020-12-16 14:58:18') or doc.added->'$.v[2]' >= (timestamp '2020-12-16 14:58:18')");
+		assertEquals(queryGe5, "select doc.`*` from `table` as doc where doc.added->>'$.v[0]' >= (timestamp '2020-12-16 14:58:18') or doc.added->>'$.v[1]' >= (timestamp '2020-12-16 14:58:18') or doc.added->>'$.v[2]' >= (timestamp '2020-12-16 14:58:18')");
 	}
 
 	@Test
@@ -270,14 +270,14 @@ public class SqlFilterConverterTest {
 		ConvertedExpression expressionPresence1 = simpleConverter.convertToSqlFilter(null, filterPresence1, null);
 
 		String queryPresence1 = toSelectSQL(expressionPresence1);
-		assertEquals(queryPresence1, "select doc.`*` from `table` as doc where doc.uid->'$.v[0]' is not null");
+		assertEquals(queryPresence1, "select doc.`*` from `table` as doc where doc.uid->>'$.v[0]' is not null");
 
 		// Presence -- String -- Multivalued = 3
 		Filter filterPresence2 = Filter.createPresenceFilter("uid").multiValued(3);
 		ConvertedExpression expressionPresence2 = simpleConverter.convertToSqlFilter(null, filterPresence2, null);
 
 		String queryPresence2 = toSelectSQL(expressionPresence2);
-		assertEquals(queryPresence2, "select doc.`*` from `table` as doc where doc.uid->'$.v[0]' is not null or doc.uid->'$.v[1]' is not null or doc.uid->'$.v[2]' is not null");
+		assertEquals(queryPresence2, "select doc.`*` from `table` as doc where doc.uid->>'$.v[0]' is not null or doc.uid->>'$.v[1]' is not null or doc.uid->>'$.v[2]' is not null");
 	}
 
 	@Test
@@ -307,25 +307,25 @@ public class SqlFilterConverterTest {
 		ConvertedExpression expressionSub1 = simpleConverter.convertToSqlFilter(null, filterSub1, null);
 
 		String querySub1 = toSelectSQL(expressionSub1);
-		assertEquals(querySub1, "select doc.`*` from `table` as doc where doc.uid->'$.v[0]' like '%test%'");
+		assertEquals(querySub1, "select doc.`*` from `table` as doc where doc.uid->>'$.v[0]' like '%test%'");
 
 		Filter filterSub2 = Filter.createSubstringFilter("uid", "a", new String[] { "test" }, null).multiValued();
 		ConvertedExpression expressionSub2 = simpleConverter.convertToSqlFilter(null, filterSub2, null);
 
 		String querySub2 = toSelectSQL(expressionSub2);
-		assertEquals(querySub2, "select doc.`*` from `table` as doc where doc.uid->'$.v[0]' like 'a%test%'");
+		assertEquals(querySub2, "select doc.`*` from `table` as doc where doc.uid->>'$.v[0]' like 'a%test%'");
 
 		Filter filterSub3 = Filter.createSubstringFilter("uid", null, new String[] { "test" }, "z").multiValued();
 		ConvertedExpression expressionSub3 = simpleConverter.convertToSqlFilter(null, filterSub3, null);
 
 		String querySub3 = toSelectSQL(expressionSub3);
-		assertEquals(querySub3, "select doc.`*` from `table` as doc where doc.uid->'$.v[0]' like '%test%z'");
+		assertEquals(querySub3, "select doc.`*` from `table` as doc where doc.uid->>'$.v[0]' like '%test%z'");
 
 		Filter filterSub4 = Filter.createSubstringFilter("uid", null, new String[] { "test" }, "z").multiValued(3);
 		ConvertedExpression expressionSub4 = simpleConverter.convertToSqlFilter(null, filterSub4, null);
 
 		String querySub4 = toSelectSQL(expressionSub4);
-		assertEquals(querySub4, "select doc.`*` from `table` as doc where doc.uid->'$.v[0]' like '%test%z' or doc.uid->'$.v[1]' like '%test%z' or doc.uid->'$.v[2]' like '%test%z'");
+		assertEquals(querySub4, "select doc.`*` from `table` as doc where doc.uid->>'$.v[0]' like '%test%z' or doc.uid->>'$.v[1]' like '%test%z' or doc.uid->>'$.v[2]' like '%test%z'");
 	}
 
 	@Test
@@ -334,25 +334,25 @@ public class SqlFilterConverterTest {
 		ConvertedExpression expressionSub1 = simpleConverter.convertToSqlFilter(null, filterSub1, null);
 
 		String querySub1 = toSelectSQL(expressionSub1);
-		assertEquals(querySub1, "select doc.`*` from `table` as doc where lower(doc.uid)->'$.v[0]' like '%test%'");
+		assertEquals(querySub1, "select doc.`*` from `table` as doc where lower(doc.uid)->>'$.v[0]' like '%test%'");
 
 		Filter filterSub2 = Filter.createSubstringFilter(Filter.createLowercaseFilter("uid"), "a", new String[] { "test" }, null).multiValued();
 		ConvertedExpression expressionSub2 = simpleConverter.convertToSqlFilter(null, filterSub2, null);
 
 		String querySub2 = toSelectSQL(expressionSub2);
-		assertEquals(querySub2, "select doc.`*` from `table` as doc where lower(doc.uid)->'$.v[0]' like 'a%test%'");
+		assertEquals(querySub2, "select doc.`*` from `table` as doc where lower(doc.uid)->>'$.v[0]' like 'a%test%'");
 
 		Filter filterSub3 = Filter.createSubstringFilter(Filter.createLowercaseFilter("uid"), null, new String[] { "test" }, "z").multiValued();
 		ConvertedExpression expressionSub3 = simpleConverter.convertToSqlFilter(null, filterSub3, null);
 
 		String querySub3 = toSelectSQL(expressionSub3);
-		assertEquals(querySub3, "select doc.`*` from `table` as doc where lower(doc.uid)->'$.v[0]' like '%test%z'");
+		assertEquals(querySub3, "select doc.`*` from `table` as doc where lower(doc.uid)->>'$.v[0]' like '%test%z'");
 
 		Filter filterSub4 = Filter.createSubstringFilter(Filter.createLowercaseFilter("uid"), null, new String[] { "test" }, "z").multiValued(3);
 		ConvertedExpression expressionSub4 = simpleConverter.convertToSqlFilter(null, filterSub4, null);
 
 		String querySub4 = toSelectSQL(expressionSub4);
-		assertEquals(querySub4, "select doc.`*` from `table` as doc where lower(doc.uid)->'$.v[0]' like '%test%z' or lower(doc.uid)->'$.v[1]' like '%test%z' or lower(doc.uid)->'$.v[2]' like '%test%z'");
+		assertEquals(querySub4, "select doc.`*` from `table` as doc where lower(doc.uid)->>'$.v[0]' like '%test%z' or lower(doc.uid)->>'$.v[1]' like '%test%z' or lower(doc.uid)->>'$.v[2]' like '%test%z'");
 	}
 
 	@Test
@@ -372,7 +372,7 @@ public class SqlFilterConverterTest {
 		ConvertedExpression expressionUserUid = simpleConverter.convertToSqlFilter(null, userUidFilter, null);
 
 		String queryUserUid = toSelectSQL(expressionUserUid);
-		assertEquals(queryUserUid, "select doc.`*` from `table` as doc where JSON_CONTAINS(lower(doc.uid)->'$.v', CAST('[\"test\"]' AS JSON))");
+		assertEquals(queryUserUid, "select doc.`*` from `table` as doc where JSON_CONTAINS(lower(doc.uid)->>'$.v', CAST('[\"test\"]' AS JSON))");
 	}
 
 	@Test
