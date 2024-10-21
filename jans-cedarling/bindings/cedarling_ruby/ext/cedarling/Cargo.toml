@@ -12,4 +12,6 @@ crate-type = ["cdylib"]
 
 [dependencies]
 magnus = { version = "0.6.2" }
+serde_magnus = "0.8.1"
 cedarling = { path = "../../../../cedarling" }
+uuid7 = { version = "1.1.0", features = ["serde", "uuid"] }

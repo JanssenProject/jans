@@ -37,7 +37,7 @@ use models::app_types;
 pub use models::authorize_result::AuthorizeResult;
 pub use models::config::*;
 pub use models::log_entry::LogEntry;
-use models::log_entry::LogType;
+pub use models::log_entry::LogType;
 pub use models::request::{Request, ResourceData};
 
 #[doc(hidden)]

@@ -83,8 +83,11 @@ impl LogEntry {
 /// Type of log entry
 #[derive(Debug, Clone, Copy, PartialEq, serde::Serialize, serde::Deserialize)]
 pub enum LogType {
+    /// TODO policy allow or deny
     Decision,
+    /// TODO some kind of system event?
     System,
+    /// TODO a measurement of some kind?
     Metric,
 }
 

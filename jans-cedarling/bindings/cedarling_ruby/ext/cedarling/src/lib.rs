@@ -1,6 +1,6 @@
 extern crate cedarling;
 
-use magnus::{function, prelude::*, Ruby};
+use magnus::{function, prelude::*};
 
 // TODO this must go away fairly soon
 fn hello(subject: String) -> String {
@@ -9,7 +9,7 @@ fn hello(subject: String) -> String {
 
 static POLICY_STORE_RAW: &str = include_str!("../../../../../cedarling/src/init/test_files/policy-store_ok.json");
 
-fn bootstrap(ruby : &Ruby) -> Result<String,magnus::Error> {
+fn bootstrap(ruby : &magnus::Ruby) -> Result<String,magnus::Error> {
     let bootstrap_config = cedarling::BootstrapConfig {
         application_name: "test_app".to_string(),
         log_config: cedarling::LogConfig {
@@ -32,10 +32,33 @@ fn bootstrap(ruby : &Ruby) -> Result<String,magnus::Error> {
     }
 }
 
+fn fake_log_entry(_ruby : &magnus::Ruby) -> Result<magnus::Value,magnus::Error> {
+    let unix_time_sec = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .expect("Time went backwards")
+        .as_secs();
+
+    use cedarling::LogEntry;
+    let entry = LogEntry {
+        id: uuid7::uuid7(),
+        time: unix_time_sec,
+        log_kind: cedarling::LogType::System,
+        pdp_id: uuid7::uuid7(),
+        application_id: "redarling".into(),
+        auth_info: None,
+        msg: "Hope you're having a nice time out there in rubyland".into(),
+    };
+    println!("entry: {entry:?}");
+    let value = serde_magnus::serialize(&entry);
+    println!("value: {value:?}");
+    value
+}
+
 #[magnus::init]
-fn init(ruby: &Ruby) -> Result<(), magnus::Error> {
+fn init(ruby: &magnus::Ruby) -> Result<(), magnus::Error> {
     let module = ruby.define_module("Cedarling")?;
     module.define_singleton_method("hello", function!(hello, 1))?;
     module.define_singleton_method("bootstrap", function!(bootstrap, 0))?;
+    module.define_singleton_method("fake_log_entry", function!(fake_log_entry, 0))?;
     Ok(())
 }
