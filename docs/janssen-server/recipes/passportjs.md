@@ -24,7 +24,7 @@ After users authenticate at the external social identity provider, the control f
 ## Role of Passport-JS project and Janssen's Authentication server
 
 1. Passport-js project encrypts and signs user data before passing it to the Janssen server.
-2. Janssen Auth server verifies the received JWT, decrypts data, add/update user into LDAP, and marks the user as authenticated. 
+2. Janssen Auth server verifies the received JWT, decrypts data, add/update user into MySQL, and marks the user as authenticated. 
 Check [Script](../../script-catalog/person_authentication/passport/passport-social-jans-script.py) Code For details.
 
 [Diagram source file](../../assets/sequence-source-passport-js-data-flow.txt)
@@ -91,7 +91,7 @@ Below things need to add in Passport JS Project to setup complete auth flow with
 1. To make encoded userinfo data, use jwt private key signing technique. Check below sample code:
 
    ```js
-   // mapped user info data with ldap attributes
+   // mapped user info data with MySQL attributes
    const user = {
        uid: profile.username || profile.id,
        mail: profile.email,
