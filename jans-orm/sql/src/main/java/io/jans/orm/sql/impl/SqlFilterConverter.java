@@ -210,13 +210,20 @@ public class SqlFilterConverter {
     							currentGenericFilter, typedPathColumn);
     				}
     			} else {
-	    			Operation<Boolean> operation = ExpressionUtils.predicate(SqlOps.JSON_CONTAINS, columnExpression,
-	    					buildTypedArrayExpression(tableMapping, currentGenericFilter), Expressions.constant("$.v"));
-	
-	        		return ConvertedExpression.build(operation, jsonAttributes);
+    				if (StringHelper.isEmpty(pathAttributeName)) {
+    					Operation<Boolean> operation = ExpressionUtils.predicate(SqlOps.JSON_CONTAINS, columnExpression,
+		    					buildTypedArrayExpression(tableMapping, currentGenericFilter), buildExpressionArrayPath(pathAttributeName, -1));
+		    			return ConvertedExpression.build(operation, jsonAttributes);
+    				} else {
+    					Operation<Boolean> operation = ExpressionUtils.predicate(SqlOps.JSON_EXTRACT,
+		        				columnExpression, buildExpressionArrayPath(pathAttributeName, 0));
+		        		Expression expression = Expressions.asComparable(operation).eq(buildTypedExpression(tableMapping, currentGenericFilter, pathAttributeName));
+		        		
+		        		return ConvertedExpression.build(expression, jsonAttributes);
+    				}
     			}
             }
-    		Expression typedExpression = buildTypedExpression(tableMapping, currentGenericFilter);
+    		Expression typedExpression = buildTypedExpression(tableMapping, currentGenericFilter, pathAttributeName);
     		if (typedExpression instanceof NullExpression) {
     			return ConvertedExpression.build(ExpressionUtils.isNull(columnExpression), jsonAttributes);
     		}
@@ -233,8 +240,8 @@ public class SqlFilterConverter {
 	                	Collection<Predicate> expressions = new ArrayList<>(currentGenericFilter.getMultiValuedCount());
 	            		for (int i = 0; i < currentGenericFilter.getMultiValuedCount(); i++) {
 	                		Operation<Boolean> operation = ExpressionUtils.predicate(SqlOps.JSON_EXTRACT,
-	                				columnExpression, Expressions.constant("$.v[" + i + "]"));
-	                		Predicate predicate = Expressions.asComparable(operation).loe(buildTypedExpression(tableMapping, currentGenericFilter));
+	                				columnExpression, buildExpressionArrayPath(pathAttributeName, i));
+	                		Predicate predicate = Expressions.asComparable(operation).loe(buildTypedExpression(tableMapping, currentGenericFilter, pathAttributeName));
 	
 	                		expressions.add(predicate);
 	            		}
@@ -245,13 +252,13 @@ public class SqlFilterConverter {
 	            	}
 	
 	            	Operation<Boolean> operation = ExpressionUtils.predicate(SqlOps.JSON_EXTRACT,
-	        				columnExpression, Expressions.constant("$.v[0]"));
-	        		Expression expression = Expressions.asComparable(operation).loe(buildTypedExpression(tableMapping, currentGenericFilter));
-	
+	        				columnExpression, buildExpressionArrayPath(pathAttributeName, 0));
+	        		Expression expression = Expressions.asComparable(operation).loe(buildTypedExpression(tableMapping, currentGenericFilter, pathAttributeName));
+
 	            	return ConvertedExpression.build(expression, jsonAttributes);
     			}
             } else {
-            	return ConvertedExpression.build(Expressions.asComparable(columnExpression).loe(buildTypedExpression(tableMapping, currentGenericFilter)), jsonAttributes);
+            	return ConvertedExpression.build(Expressions.asComparable(columnExpression).loe(buildTypedExpression(tableMapping, currentGenericFilter, pathAttributeName)), jsonAttributes);
             }
         }
 
@@ -265,8 +272,8 @@ public class SqlFilterConverter {
 	                	Collection<Predicate> expressions = new ArrayList<>(currentGenericFilter.getMultiValuedCount());
 	            		for (int i = 0; i < currentGenericFilter.getMultiValuedCount(); i++) {
 	                		Operation<Boolean> operation = ExpressionUtils.predicate(SqlOps.JSON_EXTRACT,
-	                				columnExpression, Expressions.constant("$.v[" + i + "]"));
-	                		Predicate predicate = Expressions.asComparable(operation).goe(buildTypedExpression(tableMapping, currentGenericFilter));
+	                				columnExpression, buildExpressionArrayPath(pathAttributeName, i));
+	                		Predicate predicate = Expressions.asComparable(operation).goe(buildTypedExpression(tableMapping, currentGenericFilter, pathAttributeName));
 	
 	                		expressions.add(predicate);
 	            		}
@@ -276,13 +283,13 @@ public class SqlFilterConverter {
 	            	}
 	
 	            	Operation<Boolean> operation = ExpressionUtils.predicate(SqlOps.JSON_EXTRACT,
-	        				columnExpression, Expressions.constant("$.v[0]"));
-	        		Expression expression = Expressions.asComparable(operation).goe(buildTypedExpression(tableMapping, currentGenericFilter));
+	        				columnExpression, buildExpressionArrayPath(pathAttributeName, 0));
+	        		Expression expression = Expressions.asComparable(operation).goe(buildTypedExpression(tableMapping, currentGenericFilter, pathAttributeName));
 	
 	            	return ConvertedExpression.build(expression, jsonAttributes);
     			}
             } else {
-            	return ConvertedExpression.build(Expressions.asComparable(columnExpression).goe(buildTypedExpression(tableMapping, currentGenericFilter)), jsonAttributes);
+            	return ConvertedExpression.build(Expressions.asComparable(columnExpression).goe(buildTypedExpression(tableMapping, currentGenericFilter, pathAttributeName)), jsonAttributes);
             }
         }
 
@@ -298,7 +305,7 @@ public class SqlFilterConverter {
 	                	Collection<Predicate> expressions = new ArrayList<>(currentGenericFilter.getMultiValuedCount());
 	            		for (int i = 0; i < currentGenericFilter.getMultiValuedCount(); i++) {
 	            			Predicate predicate = ExpressionUtils.isNotNull(ExpressionUtils.predicate(SqlOps.JSON_EXTRACT,
-	                				columnExpression, Expressions.constant("$.v[" + i + "]")));
+	                				columnExpression, buildExpressionArrayPath(pathAttributeName, i)));
 	            			expressions.add(predicate);
 	            		}
 	            		Predicate predicate = ExpressionUtils.anyOf(expressions);
@@ -307,7 +314,7 @@ public class SqlFilterConverter {
 	            	}
 	
 	            	expression = ExpressionUtils.predicate(SqlOps.JSON_EXTRACT,
-	        				columnExpression, Expressions.constant("$.v[0]"));
+	        				columnExpression, buildExpressionArrayPath(pathAttributeName, 0));
     			}
             } else {
             	expression = columnExpression;
@@ -360,7 +367,7 @@ public class SqlFilterConverter {
 	                	Collection<Predicate> expressions = new ArrayList<>(currentGenericFilter.getMultiValuedCount());
 	            		for (int i = 0; i < currentGenericFilter.getMultiValuedCount(); i++) {
 	                		Operation<Boolean> operation = ExpressionUtils.predicate(SqlOps.JSON_EXTRACT,
-	                				columnExpression, Expressions.constant("$.v[" + i + "]"));
+	                				columnExpression, buildExpressionArrayPath(pathAttributeName, i));
 	                		Predicate predicate = Expressions.booleanOperation(Ops.LIKE, operation, Expressions.constant(like.toString()));
 	
 	                		expressions.add(predicate);
@@ -371,7 +378,7 @@ public class SqlFilterConverter {
 	            	}
 	
 	            	expression = ExpressionUtils.predicate(SqlOps.JSON_EXTRACT,
-	        				columnExpression, Expressions.constant("$.v[0]"));
+	        				columnExpression, buildExpressionArrayPath(pathAttributeName, 0));
     			}
             } else {
             	expression = columnExpression;
@@ -385,6 +392,18 @@ public class SqlFilterConverter {
         }
 
         throw new SearchException(String.format("Unknown filter type '%s'", type));
+	}
+
+	private Expression<String> buildExpressionArrayPath(String pathAttributeName, int i) {
+		if (i == -1) {
+			return Expressions.constant("$.v");
+		} else {
+			if (StringHelper.isEmpty(pathAttributeName)) {
+				return Expressions.constant(String.format("$.v[%d]", i));
+			} else {
+				return Expressions.constant(String.format("$.v[%d].%s", i, pathAttributeName));
+			}
+		}
 	}
 
 	private ConvertedExpression buildPostgreSqlMultivaluedComparisionExpression(TableMapping tableMapping,
@@ -552,9 +571,17 @@ public class SqlFilterConverter {
 		return operationService.toInternalAttribute(tableName, attributeName);
 	}
 
-	private Expression buildTypedExpression(TableMapping tableMapping, Filter filter) throws SearchException {
+	private Expression buildTypedExpression(TableMapping tableMapping, Filter filter, String pathAttributeName) throws SearchException {
 		Object expressionValue = prepareTypedExpressionValue(tableMapping, filter);
-		Expression<?> expression = expressionValue == null ? Expressions.nullExpression() : Expressions.constant(expressionValue); 
+		
+		Expression<?> expression = Expressions.nullExpression();
+		if (expressionValue != null) {
+			if (StringHelper.isNotEmpty(pathAttributeName) && (SupportedDbType.MYSQL == this.dbType) && (expressionValue instanceof Boolean)) {
+				expression = Expressions.constant(((Boolean) expressionValue).toString());
+			} else {
+				expression = Expressions.constant(expressionValue);
+			}
+		}
 		return expression;
 	}
 
