@@ -87,7 +87,7 @@ impl LogStorage for MemoryLogger {
 mod tests {
     use super::super::{AuthorizationLogInfo, Decision, LogEntry, LogType};
     use super::*;
-    use crate::models::app_types;
+    use crate::common::app_types;
 
     fn create_memory_logger() -> MemoryLogger {
         let config = MemoryLogConfig { log_ttl: 60 };

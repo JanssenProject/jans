@@ -7,7 +7,7 @@
 
 use super::jwt_algorithm::parse_jwt_algorithms;
 use super::policy_store::{load_policy_store, LoadPolicyStoreError};
-use crate::models::policy_store::PolicyStore;
+use crate::common::policy_store::PolicyStore;
 use crate::{
     bootstrap_config,
     jwt::{Algorithm, ParseAlgorithmError},

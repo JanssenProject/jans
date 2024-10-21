@@ -4,7 +4,7 @@
  *
  * Copyright (c) 2024, Gluu, Inc.
  */
-//! # Models
+//! # Common
 //! This package provides the core data models for the *Cedarling* application,
 //! defining the structures and types essential for its functionality and is used in more than one module.
 

@@ -15,11 +15,11 @@
 
 mod authz;
 mod bootstrap_config;
+mod common;
 mod init;
 mod jwt;
 mod lock;
 mod log;
-mod models;
 
 #[doc(hidden)]
 #[cfg(test)]
@@ -34,10 +34,10 @@ pub use bootstrap_config::*;
 use init::service_config::{ServiceConfig, ServiceConfigError};
 use init::ServiceFactory;
 
+use common::app_types;
 use log::LogEntry;
 pub use log::LogStorage;
 use log::LogType;
-use models::app_types;
 
 #[doc(hidden)]
 pub mod bindings {

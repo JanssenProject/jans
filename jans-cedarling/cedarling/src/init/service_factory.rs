@@ -11,12 +11,12 @@ use std::sync::Arc;
 
 use crate::bootstrap_config::BootstrapConfig;
 use crate::jwt::{self, JwtService, JwtServiceConfig};
-use crate::models::policy_store::PolicyStore;
+use crate::common::policy_store::PolicyStore;
 
 use super::service_config::ServiceConfig;
 use crate::authz::{Authz, AuthzConfig};
 use crate::log;
-use crate::models::app_types;
+use crate::common::app_types;
 
 #[derive(Clone)]
 pub(crate) struct ServiceFactory<'a> {

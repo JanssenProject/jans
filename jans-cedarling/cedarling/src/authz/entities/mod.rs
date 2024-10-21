@@ -13,7 +13,7 @@ mod meta;
 mod test_create;
 
 use crate::authz::token_data::TokenPayload;
-use crate::{models::cedar_schema::CedarSchemaJson, ResourceData};
+use crate::{common::cedar_schema::CedarSchemaJson, ResourceData};
 
 use create::{create_entity, parse_namespace_and_typename, CedarPolicyCreateTypeError};
 

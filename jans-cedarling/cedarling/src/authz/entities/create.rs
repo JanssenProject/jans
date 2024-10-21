@@ -11,7 +11,7 @@ use std::{
 };
 
 use crate::authz::token_data::{GetTokenClaimValue, TokenPayload};
-use crate::models::cedar_schema::{
+use crate::common::cedar_schema::{
     cedar_json::{CedarSchemaRecord, PrimitiveTypeKind},
     CedarSchemaJson,
 };

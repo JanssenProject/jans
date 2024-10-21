@@ -112,7 +112,7 @@ mod deserialize_policy_set {
     #[cfg(test)]
     mod tests {
         use super::*;
-        use crate::models::policy_store::PolicyStoreMap;
+        use crate::common::policy_store::PolicyStoreMap;
 
         #[test]
         fn test_ok() {

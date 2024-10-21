@@ -14,8 +14,8 @@ use std::sync::Arc;
 
 use crate::jwt;
 use crate::log::{AuthorizationLogInfo, LogEntry, LogType, Logger};
-use crate::models::app_types;
-use crate::models::policy_store::PolicyStore;
+use crate::common::app_types;
+use crate::common::policy_store::PolicyStore;
 
 mod authorize_result;
 mod entities;

@@ -8,7 +8,7 @@ use std::{
 };
 
 use super::*;
-use crate::{log::stdout_logger::TestWriter, models::app_types};
+use crate::{log::stdout_logger::TestWriter, common::app_types};
 use interface::LogWriter;
 use nop_logger::NopLogger;
 use stdout_logger::StdOutLogger;

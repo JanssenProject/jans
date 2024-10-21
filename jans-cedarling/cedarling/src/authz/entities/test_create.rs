@@ -10,7 +10,7 @@
 use test_utils::assert_eq;
 
 use crate::authz::token_data::{GetTokenClaimValue, TokenPayload};
-use crate::models::cedar_schema::CedarSchemaJson;
+use crate::common::cedar_schema::CedarSchemaJson;
 
 use super::create::*;
 use test_utils::SortedJson;
