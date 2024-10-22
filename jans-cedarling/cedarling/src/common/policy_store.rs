@@ -41,8 +41,8 @@ mod deserialize_policy_set {
         Base64,
         #[error("unable to decode policy_content to utf8 string")]
         String,
-        #[error("unable to decode policy_content from human redable format")]
-        HumanRedable,
+        #[error("unable to decode policy_content from human readable format")]
+        HumanReadable,
         #[error("could not collect policy store's to policy set")]
         CreatePolicySet,
     }
@@ -51,9 +51,6 @@ mod deserialize_policy_set {
     /// is private and used only in the [`parse_policy_set`] function
     #[derive(Debug, serde::Deserialize)]
     struct RawPolicy {
-        // unused fields
-        // pub description: String,
-        // pub creation_date: String,
         pub policy_content: String,
     }
 
@@ -103,7 +100,7 @@ mod deserialize_policy_set {
 
         let policy =
             cedar_policy::Policy::parse(Some(PolicyId::new(id)), decoded_str).map_err(|err| {
-                serde::de::Error::custom(format!("{}: {err}", ParsePolicySetMessage::HumanRedable))
+                serde::de::Error::custom(format!("{}: {err}", ParsePolicySetMessage::HumanReadable))
             })?;
 
         Ok(policy)
@@ -111,6 +108,8 @@ mod deserialize_policy_set {
 
     #[cfg(test)]
     mod tests {
+        use test_utils::assert_eq;
+
         use super::*;
         use crate::common::policy_store::PolicyStoreMap;
 
@@ -154,7 +153,7 @@ mod deserialize_policy_set {
 
             let policy_result = serde_json::from_str::<PolicyStoreMap>(POLICY_STORE_RAW);
             let err_msg = policy_result.unwrap_err().to_string();
-            assert_eq!(err_msg,"unable to decode policy with id: 840da5d85403f35ea76519ed1a18a33989f855bf1cf8, error: unable to decode policy_content from human redable format: unexpected token `)` at line 15 column 1")
+            assert_eq!(err_msg,"unable to decode policy with id: 840da5d85403f35ea76519ed1a18a33989f855bf1cf8, error: unable to decode policy_content from human readable format: unexpected token `)` at line 15 column 1")
         }
     }
 }

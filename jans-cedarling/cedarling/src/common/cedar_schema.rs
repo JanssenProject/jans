@@ -32,7 +32,7 @@ mod deserialize {
     use base64::prelude::*;
 
     #[derive(Debug, thiserror::Error)]
-    pub enum ParceCedarSchemaSetMessage {
+    pub enum ParseCedarSchemaSetMessage {
         #[error("unable to decode cedar policy schema base64")]
         Base64,
         #[error("unable to unmarshal cedar policy schema json to the structure")]
@@ -50,7 +50,7 @@ mod deserialize {
     {
         let source = <String as serde::Deserialize>::deserialize(deserializer)?;
         let decoded: Vec<u8> = BASE64_STANDARD.decode(source.as_str()).map_err(|err| {
-            serde::de::Error::custom(format!("{}: {}", ParceCedarSchemaSetMessage::Base64, err,))
+            serde::de::Error::custom(format!("{}: {}", ParseCedarSchemaSetMessage::Base64, err,))
         })?;
 
         // parse cedar policy schema to the our structure
@@ -58,7 +58,7 @@ mod deserialize {
             .map_err(|err| {
                 serde::de::Error::custom(format!(
                     "{}: {}",
-                    ParceCedarSchemaSetMessage::CedarSchemaJsonFormat,
+                    ParseCedarSchemaSetMessage::CedarSchemaJsonFormat,
                     err
                 ))
             })?;
@@ -66,7 +66,7 @@ mod deserialize {
         // parse cedar policy schema to the `cedar_policy::Schema`
         let cedar_policy_schema = cedar_policy::Schema::from_json_file(decoded.as_slice())
             .map_err(|err| {
-                serde::de::Error::custom(format!("{}: {}", ParceCedarSchemaSetMessage::Parse, err))
+                serde::de::Error::custom(format!("{}: {}", ParseCedarSchemaSetMessage::Parse, err))
             })?;
 
         Ok(CedarSchema {
@@ -98,7 +98,7 @@ mod deserialize {
             assert!(policy_result
                 .unwrap_err()
                 .to_string()
-                .contains(&ParceCedarSchemaSetMessage::Base64.to_string()));
+                .contains(&ParseCedarSchemaSetMessage::Base64.to_string()));
         }
 
         #[test]
@@ -110,7 +110,7 @@ mod deserialize {
             assert!(policy_result
                 .unwrap_err()
                 .to_string()
-                .contains(&ParceCedarSchemaSetMessage::CedarSchemaJsonFormat.to_string()));
+                .contains(&ParseCedarSchemaSetMessage::CedarSchemaJsonFormat.to_string()));
         }
 
         #[test]
