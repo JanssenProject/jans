@@ -9,6 +9,8 @@
 
 mod create;
 mod meta;
+mod trait_as_expression;
+
 #[cfg(test)]
 mod test_create;
 

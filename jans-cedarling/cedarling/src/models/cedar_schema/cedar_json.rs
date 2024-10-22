@@ -6,6 +6,15 @@
 
 use std::collections::HashMap;
 
+/// Represent `cedar-policy` schema type for external usage.
+pub enum CedarType {
+    Long,
+    String,
+    Boolean,
+    TypeName(String),
+    Set(Box<CedarType>),
+}
+
 /// JSON representation of a [`cedar_policy::Schema`]
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize, PartialEq)]
 pub(crate) struct CedarSchemaJson {
@@ -68,6 +77,16 @@ pub struct CedarSchemaEntityAttribute {
     required: bool,
 }
 
+impl CedarSchemaEntityAttribute {
+    pub fn is_required(&self) -> bool {
+        self.required
+    }
+
+    pub fn get_type(&self) -> Option<CedarType> {
+        self.cedar_type.get_type()
+    }
+}
+
 impl<'de> serde::Deserialize<'de> for CedarSchemaEntityAttribute {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
@@ -105,16 +124,12 @@ pub enum CedarSchemaEntityType {
     Primitive(PrimitiveType),
 }
 
-impl CedarSchemaEntityAttribute {
-    pub fn is_required(&self) -> bool {
-        self.required
-    }
-
-    pub fn get_type(&self) -> Option<PrimitiveTypeKind> {
-        match &self.cedar_type {
-            CedarSchemaEntityType::Set(_) => None,
-            CedarSchemaEntityType::Typed(entity_type) => entity_type.get_type(),
-            CedarSchemaEntityType::Primitive(primitive_type) => Some(primitive_type.kind.clone()),
+impl CedarSchemaEntityType {
+    pub fn get_type(&self) -> Option<CedarType> {
+        match self {
+            Self::Set(v) => Some(CedarType::Set(Box::new(v.element.get_type()?))),
+            Self::Typed(v) => v.get_type(),
+            Self::Primitive(primitive) => primitive.kind.get_type(),
         }
     }
 }
@@ -183,6 +198,18 @@ pub enum PrimitiveTypeKind {
     TypeName(String),
 }
 
+impl PrimitiveTypeKind {
+    pub fn get_type(&self) -> Option<CedarType> {
+        let value = match self {
+            PrimitiveTypeKind::Long => CedarType::Long,
+            PrimitiveTypeKind::String => CedarType::String,
+            PrimitiveTypeKind::Boolean => CedarType::Boolean,
+            PrimitiveTypeKind::TypeName(name) => CedarType::TypeName(name.to_string()),
+        };
+        Some(value)
+    }
+}
+
 /// impement custom deserialization to deserialize it correctly
 impl<'de> serde::Deserialize<'de> for PrimitiveTypeKind {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
@@ -209,13 +236,13 @@ pub struct EntityType {
 }
 
 impl EntityType {
-    pub fn get_type(&self) -> Option<PrimitiveTypeKind> {
+    pub fn get_type(&self) -> Option<CedarType> {
         if self.kind == "EntityOrCommon" {
             match self.name.as_str() {
-                "Long" => Some(PrimitiveTypeKind::Long),
-                "String" => Some(PrimitiveTypeKind::String),
-                "Boolean" => Some(PrimitiveTypeKind::Boolean),
-                type_name => Some(PrimitiveTypeKind::TypeName(type_name.to_string())),
+                "Long" => Some(CedarType::Long),
+                "String" => Some(CedarType::String),
+                "Boolean" => Some(CedarType::Boolean),
+                type_name => Some(CedarType::TypeName(type_name.to_string())),
             }
         } else {
             None
