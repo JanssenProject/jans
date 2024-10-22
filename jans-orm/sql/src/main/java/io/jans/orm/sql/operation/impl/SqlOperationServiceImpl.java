@@ -930,7 +930,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 
 	private Object convertValueToDbJson(Object propertyValue, Boolean jsonValue) {
 		try {
-			if (SupportedDbType.POSTGRESQL == connectionProvider.getDbType()) {
+			if (connectionProvider.isSimpleJson() || (SupportedDbType.POSTGRESQL == connectionProvider.getDbType())) {
 
 				Object[] attributeValue;
 				if (propertyValue == null) {
@@ -989,7 +989,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 
 	private Object[] convertDbJsonToValue(String jsonValue) {
 		try {
-			if (SupportedDbType.POSTGRESQL == connectionProvider.getDbType()) {
+			if (connectionProvider.isSimpleJson() || (SupportedDbType.POSTGRESQL == connectionProvider.getDbType())) {
 				Object[] values = JSON_OBJECT_MAPPER.readValue(jsonValue, Object[].class);
 
 				if (values != null) {

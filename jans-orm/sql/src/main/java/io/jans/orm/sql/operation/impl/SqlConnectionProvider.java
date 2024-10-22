@@ -59,6 +59,8 @@ public class SqlConnectionProvider {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SqlConnectionProvider.class);
 
+	public static String DB_PROPERTY_MYSQL_SIMPLE_JSON = "mysql.simple-json";
+
 	private static final String MYSQL_QUERY_ENGINE_TYPE = "SELECT TABLE_NAME, ENGINE FROM information_schema.tables WHERE table_schema = ?";
 
 	private static final String MYSQL_QUERY_CONSTRAINT_CHECK = "SELECT CONSTRAINT_SCHEMA AS TABLE_SCHEMA, TABLE_NAME, CONSTRAINT_NAME, CHECK_CLAUSE AS DEFINITION FROM INFORMATION_SCHEMA.CHECK_CONSTRAINTS WHERE CONSTRAINT_SCHEMA = ? ORDER BY TABLE_SCHEMA, TABLE_NAME";
@@ -94,7 +96,7 @@ public class SqlConnectionProvider {
 	
 	private boolean disableTimeZone = false;
 	
-	private boolean skipVNode = false;
+	private boolean simpleJson = false;
 
 	protected SqlConnectionProvider() {
 	}
@@ -228,6 +230,14 @@ public class SqlConnectionProvider {
 				this.dbType = SupportedDbType.MARIADB;
 			}
 			LOG.debug("Database product name: '{}'", dbType);
+
+			if (SupportedDbType.MYSQL == dbType) {
+				simpleJson = StringHelper.toBoolean(props.getProperty(DB_PROPERTY_MYSQL_SIMPLE_JSON), false);
+			}
+			if (simpleJson) {
+				LOG.debug("Using simple JSON fromat");
+			}
+
 			loadTableMetaData(databaseMetaData, con);
 		} catch (Exception ex) {
 			throw new ConnectionException("Failed to detect database product name and load metadata", ex);
@@ -523,8 +533,8 @@ public class SqlConnectionProvider {
 		return disableTimeZone;
 	}
 
-	public boolean isSkipVNode() {
-		return skipVNode;
+	public boolean isSimpleJson() {
+		return simpleJson;
 	}
 
 }
