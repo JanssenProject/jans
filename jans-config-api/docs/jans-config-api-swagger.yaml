@@ -7644,9 +7644,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/SessionId'
+                $ref: '#/components/schemas/SessionPagedResult'
               examples:
                 Response json example:
                   description: Response json example
@@ -9215,19 +9213,19 @@ components:
           type: string
         selected:
           type: boolean
-        whitePagesCanView:
+        userCanView:
+          type: boolean
+        adminCanView:
           type: boolean
         adminCanEdit:
           type: boolean
         userCanEdit:
           type: boolean
-        userCanView:
-          type: boolean
-        adminCanView:
-          type: boolean
         adminCanAccess:
           type: boolean
         userCanAccess:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -11630,10 +11628,10 @@ components:
         ttl:
           type: integer
           format: int32
-        opbrowserState:
-          type: string
         persisted:
           type: boolean
+        opbrowserState:
+          type: string
     SessionIdAccessMap:
       type: object
       properties:
@@ -11643,6 +11641,22 @@ components:
             type: boolean
           xml:
             name: map
+    SessionPagedResult:
+      type: object
+      properties:
+        start:
+          type: integer
+          format: int32
+        totalEntriesCount:
+          type: integer
+          format: int32
+        entriesCount:
+          type: integer
+          format: int32
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/SessionId'
     User:
       type: object
       properties:
@@ -11701,22 +11715,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/UserAuthenticator'
-    SessionPagedResult:
-      type: object
-      properties:
-        start:
-          type: integer
-          format: int32
-        totalEntriesCount:
-          type: integer
-          format: int32
-        entriesCount:
-          type: integer
-          format: int32
-        entries:
-          type: array
-          items:
-            $ref: '#/components/schemas/SessionId'
     TokenAttributes:
       type: object
       properties:

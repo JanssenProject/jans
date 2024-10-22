@@ -8,11 +8,11 @@
 use super::decoding_strategy::DecodingStrategy;
 use super::token::{AccessToken, IdToken};
 use super::traits::{Decode, ExtractClaims};
-use super::{CreateJwtServiceError, Error};
-use crate::JwtConfig;
+use super::Error;
+use super::JwtServiceConfig;
 use serde::de::DeserializeOwned;
 
-pub struct JwtService {
+pub(crate) struct JwtService {
     decoding_strategy: DecodingStrategy,
 }
 
@@ -34,25 +34,21 @@ impl JwtService {
     }
 
     /// Initializes a new `JwtService` instance based on the provided configuration.
-    ///
-    /// This method is used to create a `JwtService`. JWT validation can be toggled via the
-    /// provided `JwtConfig`.
-    pub fn new_with_container(
-        dep_map: &di::DependencyMap,
-        config: JwtConfig,
-    ) -> Result<Self, CreateJwtServiceError> {
+    pub(crate) fn new_with_config(config: JwtServiceConfig) -> Self {
         match config {
-            JwtConfig::Disabled => {
+            JwtServiceConfig::WithoutValidation => {
                 let decoding_strategy = DecodingStrategy::new_without_validation();
-                Ok(Self { decoding_strategy })
+                Self { decoding_strategy }
             },
-            JwtConfig::Enabled {
-                signature_algorithms,
+            JwtServiceConfig::WithValidation {
+                key_service,
+                supported_algs,
             } => {
-                let decoding_strategy =
-                    DecodingStrategy::new_with_validation(dep_map, &signature_algorithms)?;
-
-                Ok(Self { decoding_strategy })
+                let decoding_strategy = DecodingStrategy::WithValidation {
+                    key_service,
+                    supported_algs,
+                };
+                Self { decoding_strategy }
             },
         }
     }

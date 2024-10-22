@@ -4,13 +4,20 @@
  *
  * Copyright (c) 2024, Gluu, Inc.
  */
+//! Module for bootstrap configuration types
+//! to configure [`Cedarling`](crate::Cedarling)
 
-use super::jwt_config::JwtConfig;
-use super::log_config::LogConfig;
-use super::policy_store_config::PolicyStoreConfig;
+pub(crate) mod jwt_config;
+pub(crate) mod log_config;
+pub(crate) mod policy_store_config;
+
+// reimport to useful import values in root module
+pub use jwt_config::*;
+pub use log_config::*;
+pub use policy_store_config::*;
 
 /// Bootstrap configuration
-/// properties for configuration `Cedarling` application.
+/// properties for configuration [`Cedarling`](crate::Cedarling) application.
 /// [link](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) to the documentation.
 pub struct BootstrapConfig {
     /// `CEDARLING_APPLICATION_NAME` in [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) documentation.
