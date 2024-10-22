@@ -306,31 +306,31 @@ nav:
       - Custom client logs: janssen-server/developer/customization/custom-client-logs.md
     - Interception Scripts:
       - janssen-server/developer/scripts/README.md
-      - Application Session: janssen-server/developer/scripts/application-session.md
-      - Authorization Challenge: janssen-server/developer/scripts/authorization-challenge.md
-      - CIBA End User Notification: janssen-server/developer/scripts/ciba.md
-      - Client Registration: janssen-server/developer/scripts/client-registration.md
-      - Client Authentication: janssen-server/developer/scripts/client-authn.md
-      - Config API: janssen-server/developer/scripts/config-api.md
-      - Consent Gathering: janssen-server/developer/scripts/consent-gathering.md
-      - Dynamic Scope: janssen-server/developer/scripts/dynamic-scope.md
-      - End Session: janssen-server/developer/scripts/end-session.md
-      - ID Generator: janssen-server/developer/scripts/id-generator.md
-      - Introspection: janssen-server/developer/scripts/introspection.md
-      - OpenID Configuration: janssen-server/developer/scripts/discovery.md
-      - Persistence: janssen-server/developer/scripts/persistence.md
-      - Person Authentication: janssen-server/developer/scripts/person-authentication.md
-      - Post Authentication: janssen-server/developer/scripts/post-authentication.md
-      - Resource Owner Password Credentials: janssen-server/developer/scripts/ropc.md
-      - Revoke Token: janssen-server/developer/scripts/revoke-token.md
-      - SCIM: janssen-server/developer/scripts/scim.md
-      - Script Debugging: janssen-server/developer/scripts/interception-scripts-debug.md
-      - Select Account: janssen-server/developer/scripts/select-account.md
-      - Spontaneous Scope: janssen-server/developer/scripts/spontaneous-scope.md
-      - UMA Claims (JWT Transformation): janssen-server/developer/scripts/uma-claims-jwt.md
-      - UMA Claims Gathering (Web Flow): janssen-server/developer/scripts/uma-claims-web.md
-      - UMA RPT Policies: janssen-server/developer/scripts/uma-rpt.md
-      - Update Token: janssen-server/developer/scripts/update-token.md
+      - Application Session: script-catalog/application_session/application-session.md
+      - Authorization Challenge: script-catalog/authorization_challenge/authorization-challenge.md
+      - CIBA End User Notification: script-catalog/ciba/ciba.md
+      - Client Registration: script-catalog/client_registration/client-registration.md
+      - Client Authentication: script-catalog/client_authn/client-authn.md
+      - Config API: script-catalog/config_api/config-api.md
+      - Consent Gathering: script-catalog/consent_gathering/consent-gathering.md
+      - Dynamic Scope: script-catalog/dynamic_scope/dynamic-scope.md
+      - End Session: script-catalog/end_session/end-session.md
+      - ID Generator: script-catalog/id_generator/id-generator.md
+      - Introspection: script-catalog/introspection/introspection.md
+      - OpenID Configuration: script-catalog/discovery/discovery.md
+      - Persistence: script-catalog/persistence_extension/persistence.md
+      - Person Authentication: script-catalog/person_authentication/person-authentication.md
+      - Post Authentication: script-catalog/post_authn/post-authentication.md
+      - Resource Owner Password Credentials: script-catalog/resource_owner_password_credentials/ropc.md
+      - Revoke Token: script-catalog/revoke_token/revoke-token.md
+      - SCIM: script-catalog/scim/scim.md
+      - Script Debugging: script-catalog/introspection/interception-scripts-debug.md
+      - Select Account: script-catalog/select_account/select-account.md
+      - Spontaneous Scope: script-catalog/spontaneous_scope/spontaneous-scope.md
+      - UMA Claims (JWT Transformation): script-catalog/uma_rpt_claims/uma-claims-jwt.md
+      - UMA Claims Gathering (Web Flow): script-catalog/uma_claims_gathering/uma-claims-web.md
+      - UMA RPT Policies: script-catalog/uma_rpt_policy/uma-rpt.md
+      - Update Token: script-catalog/update_token/update-token.md
   - Reference Guide:
     - janssen-server/reference/README.md
     - Javadocs / OpenAPI:
