@@ -8,7 +8,7 @@
 //! Log interface
 //! Contains the interface for logging. And getting log information from storage.
 
-use crate::models::log_entry::LogEntry;
+use super::LogEntry;
 
 /// Log Writer
 /// interface for logging events
@@ -29,3 +29,6 @@ pub trait LogStorage {
     /// returns a list of all log ids
     fn get_log_ids(&self) -> Vec<String>;
 }
+
+/// Super trait for logger
+pub trait Log: LogWriter + LogStorage + Send + Sync {}
