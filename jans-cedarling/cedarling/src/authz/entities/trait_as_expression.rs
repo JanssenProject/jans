@@ -9,23 +9,23 @@ use cedar_policy::RestrictedExpression;
 
 /// Trait to cast type to [`RestrictedExpression`]
 pub(crate) trait AsExpression {
-    fn as_expression(self) -> RestrictedExpression;
+    fn to_expression(self) -> RestrictedExpression;
 }
 
 impl AsExpression for i64 {
-    fn as_expression(self) -> RestrictedExpression {
+    fn to_expression(self) -> RestrictedExpression {
         RestrictedExpression::new_long(self)
     }
 }
 
 impl AsExpression for String {
-    fn as_expression(self) -> RestrictedExpression {
+    fn to_expression(self) -> RestrictedExpression {
         RestrictedExpression::new_string(self)
     }
 }
 
 impl AsExpression for bool {
-    fn as_expression(self) -> RestrictedExpression {
+    fn to_expression(self) -> RestrictedExpression {
         RestrictedExpression::new_bool(self)
     }
 }

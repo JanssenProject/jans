@@ -96,9 +96,7 @@ impl<'a> Payload<'a> {
         self.value
             .as_i64()
             .ok_or(GetTokenClaimValue::not_correct_type(
-                &self.key,
-                "i64",
-                &self.value,
+                &self.key, "i64", self.value,
             ))
     }
 
@@ -106,9 +104,7 @@ impl<'a> Payload<'a> {
         self.value
             .as_str()
             .ok_or(GetTokenClaimValue::not_correct_type(
-                &self.key,
-                "String",
-                &self.value,
+                &self.key, "String", self.value,
             ))
     }
 
@@ -116,9 +112,7 @@ impl<'a> Payload<'a> {
         self.value
             .as_bool()
             .ok_or(GetTokenClaimValue::not_correct_type(
-                &self.key,
-                "bool",
-                &self.value,
+                &self.key, "bool", self.value,
             ))
     }
 
@@ -137,9 +131,7 @@ impl<'a> Payload<'a> {
                     .collect()
             })
             .ok_or(GetTokenClaimValue::not_correct_type(
-                &self.key,
-                "Array",
-                &self.value,
+                &self.key, "Array", self.value,
             ))
     }
 }

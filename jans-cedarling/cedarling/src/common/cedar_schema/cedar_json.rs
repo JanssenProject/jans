@@ -102,13 +102,17 @@ impl<'de> serde::Deserialize<'de> for CedarSchemaEntityAttribute {
 
         let is_required = IsRequired::deserialize(&value).map_err(|err| {
             serde::de::Error::custom(format!(
-                "could not deserialize CedarSchemaEntityAttribute, field 'is_required':{}",
+                "could not deserialize CedarSchemaEntityAttribute, field 'is_required': {}",
                 err
             ))
         })?;
 
-        let cedar_type = CedarSchemaEntityType::deserialize(value)
-            .map_err(|err| serde::de::Error::custom(err))?;
+        let cedar_type = CedarSchemaEntityType::deserialize(value).map_err(|err| {
+            serde::de::Error::custom(format!(
+                "could not deserialize CedarSchemaEntityType: {}",
+                err
+            ))
+        })?;
 
         Ok(CedarSchemaEntityAttribute {
             cedar_type,

@@ -183,11 +183,11 @@ fn token_attribute_to_cedar_exp(
 
     let token_claim_value = claim.get(token_claim_key)?;
 
-    Ok(get_expression(
+    get_expression(
         &attribute_metadata.cedar_policy_type,
         token_claim_value,
         entity_namespace,
-    )?)
+    )
 }
 
 /// Build [`RestrictedExpression`] based on input parameters.
@@ -197,9 +197,9 @@ fn get_expression(
     entity_namespace: &str,
 ) -> Result<RestrictedExpression, CedarPolicyCreateTypeError> {
     match cedar_type {
-        CedarType::String => Ok(token_claim_value.as_str()?.to_string().as_expression()),
-        CedarType::Long => Ok(token_claim_value.as_i64()?.as_expression()),
-        CedarType::Boolean => Ok(token_claim_value.as_bool()?.as_expression()),
+        CedarType::String => Ok(token_claim_value.as_str()?.to_string().to_expression()),
+        CedarType::Long => Ok(token_claim_value.as_i64()?.to_expression()),
+        CedarType::Boolean => Ok(token_claim_value.as_bool()?.to_expression()),
         CedarType::TypeName(entity_type_name) => {
             let restricted_expression = {
                 // We need concat typename of entity attribute with the namespace of entity
