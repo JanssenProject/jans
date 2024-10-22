@@ -30,6 +30,8 @@ fn successful_scenario_empty_namespace() {
         "long_key": 12345,
         "entity_uid_key": "unique_id",
         "bool_key": true,
+        "set_key": ["some_string"],
+        "set_set_key": [["some_string"]]
     });
 
     let payload: TokenPayload = serde_json::from_value(json).unwrap();
@@ -54,7 +56,9 @@ fn successful_scenario_empty_namespace() {
             },
             "long_key": 12345,
             "string_key": "test string value",
-            "bool_key": true
+            "bool_key": true,
+            "set_key": ["some_string"],
+            "set_set_key": [["some_string"]]
         },
         "parents": []
     });
@@ -125,6 +129,8 @@ fn get_token_claim_type_string_error() {
         "long_key": 12345,
         "entity_uid_key": "unique_id",
         "bool_key": true,
+        "set_key": ["some_string"],
+        "set_set_key": [["some_string"]]
     });
 
     let payload: TokenPayload = serde_json::from_value(json.clone()).unwrap();
@@ -168,6 +174,8 @@ fn get_token_claim_type_long_error() {
         "long_key": "str",
         "entity_uid_key": "unique_id",
         "bool_key": true,
+        "set_key": ["some_string"],
+        "set_set_key": [["some_string"]]
     });
 
     let payload: TokenPayload = serde_json::from_value(json.clone()).unwrap();
@@ -211,6 +219,8 @@ fn get_token_claim_type_entity_uid_error() {
         // This will trigger the type error, because it's not a String.
         "entity_uid_key": 123,
         "bool_key": true,
+        "set_key": ["some_string"],
+        "set_set_key": [["some_string"]]
     });
 
     let payload: TokenPayload = serde_json::from_value(json.clone()).unwrap();
@@ -254,6 +264,8 @@ fn get_token_claim_type_boolean_error() {
         "entity_uid_key": "ff910f15-d5a4-4227-828e-11cb8463f1b7",
         // This will trigger the type error, because it's not a bool.
         "bool_key": 123,
+        "set_key": ["some_string"],
+        "set_set_key": [["some_string"]]
     });
 
     let payload: TokenPayload = serde_json::from_value(json.clone()).unwrap();
@@ -270,6 +282,105 @@ fn get_token_claim_type_boolean_error() {
     {
         let json_attr_value = json.as_object().unwrap().get(test_key).unwrap();
         let origin_type = GetTokenClaimValue::json_value_type_name(json_attr_value);
+
+        assert!(
+            key == test_key,
+            "expected key: {test_key}, but got: {key} with schema expected_type: {expected_type}"
+        );
+        assert!(
+            got_type == origin_type,
+            "expected type: {origin_type}, but got: {got_type} with schema expected_type: {expected_type}"
+        );
+    } else {
+        panic!("expected error type: CedarPolicyCreateTypeError::GetTokenClaimValue(GetTokenClaimValue::KeyNotCorrectType), but got: {entity_creation_error}");
+    }
+}
+
+/// test wrong set type in token payload, should be array of string
+#[test]
+fn get_token_claim_type_set_error() {
+    let schema_json = include_str!("test_create_data/successful_scenario_schema.json");
+    let schema: CedarSchemaJson = serde_json::from_str(schema_json).unwrap();
+
+    let metadata = EntityMetadata::new("Test", "test_id_key");
+
+    let test_key = "set_key";
+    let json = serde_json::json!( {
+        "test_id_key": "test_id",
+        "string_key": "test string",
+        "long_key": 1234,
+        "entity_uid_key": "ff910f15-d5a4-4227-828e-11cb8463f1b7",
+        "bool_key": false,
+        // This will trigger the type error, because it's not a array of string.
+        "set_key": 1,
+        "set_set_key": [["some_string"]]
+    });
+
+    let payload: TokenPayload = serde_json::from_value(json.clone()).unwrap();
+
+    let entity_creation_error = metadata
+        .create_entity(&schema, &payload)
+        .expect_err("entity creating should throw error");
+
+    if let CedarPolicyCreateTypeError::GetTokenClaimValue(GetTokenClaimValue::KeyNotCorrectType {
+        key,
+        got_type,
+        expected_type,
+    }) = entity_creation_error
+    {
+        let json_attr_value = json.as_object().unwrap().get(test_key).unwrap();
+        let origin_type = GetTokenClaimValue::json_value_type_name(json_attr_value);
+
+        assert!(
+            key == test_key,
+            "expected key: {test_key}, but got: {key} with schema expected_type: {expected_type}"
+        );
+        assert!(
+            got_type == origin_type,
+            "expected type: {origin_type}, but got: {got_type} with schema expected_type: {expected_type}"
+        );
+    } else {
+        panic!("expected error type: CedarPolicyCreateTypeError::GetTokenClaimValue(GetTokenClaimValue::KeyNotCorrectType), but got: {entity_creation_error}");
+    }
+}
+
+/// test wrong set type in token payload, should be array of array of string
+#[test]
+fn get_token_claim_type_set_of_set_error() {
+    let schema_json = include_str!("test_create_data/successful_scenario_schema.json");
+    let schema: CedarSchemaJson = serde_json::from_str(schema_json).unwrap();
+
+    let metadata = EntityMetadata::new("Test", "test_id_key");
+
+    let json = serde_json::json!( {
+        "test_id_key": "test_id",
+        "string_key": "test string",
+        "long_key": 1234,
+        "entity_uid_key": "ff910f15-d5a4-4227-828e-11cb8463f1b7",
+        "bool_key": false,
+        "set_key": ["some_string"],
+        // This will trigger the type error, because it's not a array of array of string.
+        "set_set_key": ["some_string"]
+    });
+
+    let payload: TokenPayload = serde_json::from_value(json.clone()).unwrap();
+
+    let entity_creation_error = metadata
+        .create_entity(&schema, &payload)
+        .expect_err("entity creating should throw error");
+
+    if let CedarPolicyCreateTypeError::GetTokenClaimValue(GetTokenClaimValue::KeyNotCorrectType {
+        key,
+        got_type,
+        expected_type,
+    }) = entity_creation_error
+    {
+        let json_attr_value = json.as_object().unwrap().get("set_set_key").unwrap();
+        let origin_type =
+            GetTokenClaimValue::json_value_type_name(&json_attr_value.as_array().unwrap()[0]);
+
+        // key set_set_key and zero element in array
+        let test_key = "set_set_key[0]";
 
         assert!(
             key == test_key,
