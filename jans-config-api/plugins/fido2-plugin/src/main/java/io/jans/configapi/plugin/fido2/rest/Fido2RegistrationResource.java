@@ -15,7 +15,6 @@ import io.jans.util.exception.InvalidAttributeException;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -28,7 +27,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import java.util.List;
 
 import org.slf4j.Logger;
 
@@ -106,7 +104,7 @@ public class Fido2RegistrationResource extends BaseResource {
             "Fido2 - Registration" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     Constants.FIDO2_CONFIG_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = Fido2RegistrationEntry.class)), examples = @ExampleObject(name = "Response example", value = "example/fido2/get-all-fido2-data.json"))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Fido2RegistrationEntryPagedResult.class), examples = @ExampleObject(name = "Response example", value = "example/fido2/search-fido2-registration-data.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
@@ -115,7 +113,8 @@ public class Fido2RegistrationResource extends BaseResource {
     public Response findAllRegisteredByUsername(
             @Parameter(description = "User name") @PathParam("username") @NotNull String username) {
         logger.info("FIDO2 registration entries by username.");
-        List<Fido2RegistrationEntry> entries = fido2RegistrationService.findAllRegisteredByUsername(username);
+        checkNotNull(username, "User name");
+        PagedResult<Fido2RegistrationEntry> entries = fido2RegistrationService.getFido2RegisteredByUsername(username);
         logger.info("FIDO2 registration entries by entries:{}", entries);
         return Response.ok(entries).build();
     }
