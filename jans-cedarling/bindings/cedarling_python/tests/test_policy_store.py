@@ -17,7 +17,7 @@ test_cases_err = [
     ("policy-store_policy_err_broken_utf8.json",
      "unable to decode policy_content to utf8 string"),
     ("policy-store_policy_err_broken_policy.json",
-     'unable to decode policy with id: 840da5d85403f35ea76519ed1a18a33989f855bf1cf8, error: unable to decode policy_content from human redable format: unexpected token `)` at line 15 column 1'),
+     'unable to decode policy with id: 840da5d85403f35ea76519ed1a18a33989f855bf1cf8, error: unable to decode policy_content from human readable format: unexpected token `)` at line 15 column 1'),
     # cases with schema errors
     ("policy-store_schema_err_base64.json",
      "unable to decode cedar policy schema base64"),
