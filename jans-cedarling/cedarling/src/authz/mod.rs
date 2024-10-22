@@ -13,61 +13,59 @@ use std::str::FromStr;
 use std::sync::Arc;
 
 use crate::jwt;
-use crate::log::{LogWriter, Logger};
-use crate::models::app_types;
-use crate::models::log_entry::AuthorizationLogInfo;
-use crate::models::log_entry::{LogEntry, LogType};
-use crate::models::policy_store::PolicyStore;
-use crate::models::request::Request;
-use crate::models::token_data::TokenPayload;
-use crate::AuthorizeResult;
+use crate::log::{AuthorizationLogInfo, LogEntry, LogType, Logger};
+use crate::common::app_types;
+use crate::common::policy_store::PolicyStore;
 
+mod authorize_result;
 mod entities;
+pub(crate) mod request;
+mod token_data;
 
-use di::DependencySupplier;
+pub use authorize_result::AuthorizeResult;
 use entities::create_resource_entity;
 use entities::ResourceEntityError;
 use entities::{create_access_token_entities, AccessTokenEntitiesError};
+use request::Request;
+use token_data::TokenPayload;
+
+/// Configuration to Authz to initialize service without errors
+pub(crate) struct AuthzConfig {
+    pub log_service: Logger,
+    pub pdp_id: app_types::PdpID,
+    pub application_name: app_types::ApplicationName,
+    pub policy_store: PolicyStore,
+    pub jwt_service: Arc<jwt::JwtService>,
+}
 
 /// Authorization Service
 /// The primary service of the Cedarling application responsible for evaluating authorization requests.
 /// It leverages other services as needed to complete its evaluations.
 #[allow(dead_code)]
 pub struct Authz {
-    log_service: Logger,
-    pdp_id: app_types::PdpID,
-    application_name: app_types::ApplicationName,
-    policy_store: PolicyStore,
-    jwt_service: Arc<jwt::JwtService>,
+    config: AuthzConfig,
 }
 
 impl Authz {
     /// Create a new Authorization Service
-    pub(crate) fn new_with_container(dep_map: &di::DependencyMap) -> Self {
-        let application_name: Arc<app_types::ApplicationName> = dep_map.get();
-        let pdp_id = *dep_map.get();
-        let log: Logger = dep_map.get();
-        let policy_store: Arc<PolicyStore> = dep_map.get();
-        let jwt_service: Arc<jwt::JwtService> = dep_map.get();
-
-        log.log(
-            LogEntry::new_with_data(pdp_id, application_name.as_ref().clone(), LogType::System)
-                .set_message("Cedarling Authz initialized successfully".to_string()),
+    pub(crate) fn new(config: AuthzConfig) -> Self {
+        config.log_service.log(
+            LogEntry::new_with_data(
+                config.pdp_id,
+                Some(config.application_name.clone()),
+                LogType::System,
+            )
+            .set_message("Cedarling Authz initialized successfully".to_string()),
         );
 
-        Self {
-            log_service: log,
-            pdp_id,
-            application_name: application_name.as_ref().clone(),
-            policy_store: policy_store.as_ref().clone(),
-            jwt_service,
-        }
+        Self { config }
     }
 
     /// Evaluate Authorization Request
     /// - evaluate if authorization is granted for *client*
     pub fn authorize(&self, request: Request) -> Result<AuthorizeResult, AuthorizeError> {
         let (access_token, _id_token) = self
+            .config
             .jwt_service
             .decode_tokens::<TokenPayload, TokenPayload>(
                 &request.access_token,
@@ -75,7 +73,7 @@ impl Authz {
             )?;
 
         let access_token_entities =
-            create_access_token_entities(&self.policy_store.schema.json, &access_token)?;
+            create_access_token_entities(&self.config.policy_store.schema.json, &access_token)?;
 
         // TODO: check if `request.userinfo_token.sub` == `id_token.sub`
         // Note that "Userinfo Token" isn't a JWT which is why we're not
@@ -84,14 +82,14 @@ impl Authz {
         // `curl -X GET 'https://openidconnect.googleapis.com/v1/userinfo' -H 'Authorization: Bearer ACCESS_TOKEN'`
 
         let resource_entity =
-            create_resource_entity(request.resource, &self.policy_store.schema.json)?;
+            create_resource_entity(request.resource, &self.config.policy_store.schema.json)?;
 
         let action = cedar_policy::EntityUid::from_str(request.action.as_str())
             .map_err(AuthorizeError::Action)?;
 
         let context: cedar_policy::Context = cedar_policy::Context::from_json_value(
             request.context.clone(),
-            Some((&self.policy_store.schema.schema, &action)),
+            Some((&self.config.policy_store.schema.schema, &action)),
         )?;
 
         let principal_workload_uid = access_token_entities.workload_entity.uid();
@@ -102,7 +100,7 @@ impl Authz {
             action,
             resource_uid.clone(),
             context,
-            Some(&self.policy_store.schema.schema),
+            Some(&self.config.policy_store.schema.schema),
         )?;
 
         // collect all entities
@@ -113,17 +111,20 @@ impl Authz {
 
         let entities = cedar_policy::Entities::from_entities(
             entities_iterator,
-            Some(&self.policy_store.schema.schema),
+            Some(&self.config.policy_store.schema.schema),
         )?;
 
         let authorizer = cedar_policy::Authorizer::new();
-        let decision =
-            authorizer.is_authorized(&cedar_request, &self.policy_store.policies, &entities);
+        let decision = authorizer.is_authorized(
+            &cedar_request,
+            &self.config.policy_store.policies,
+            &entities,
+        );
 
-        self.log_service.as_ref().log(
+        self.config.log_service.as_ref().log(
             LogEntry::new_with_data(
-                self.pdp_id,
-                self.application_name.clone(),
+                self.config.pdp_id,
+                Some(self.config.application_name.clone()),
                 LogType::Decision,
             )
             .set_auth_info(AuthorizationLogInfo {

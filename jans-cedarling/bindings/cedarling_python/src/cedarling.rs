@@ -112,7 +112,7 @@ impl Cedarling {
     }
 }
 
-fn log_entry_to_py(gil: Python, entry: &cedarling::LogEntry) -> PyResult<PyObject> {
+fn log_entry_to_py(gil: Python, entry: &cedarling::bindings::LogEntry) -> PyResult<PyObject> {
     to_pyobject(gil, entry)
         .map(|v| v.unbind())
         .map_err(|err| err.0)
