@@ -145,7 +145,7 @@ public class Fido2RegistrationService {
         Filter searchFilter = Filter.createANDFilter(Filter.createEqualityFilter("personInum", userInum),
                 Filter.createEqualityFilter("jansStatus", Fido2RegistrationStatus.registered.getValue()));
 
-        log.error("\n\n New Find Fido2 Registered by searchFilter:{}", searchFilter);
+        log.info("Fido2 Registered by searchFilter:{}", searchFilter);
         return persistenceEntryManager.findEntries(getDnFido2RegistrationEntry(baseDn), Fido2RegistrationEntry.class, searchFilter);
     }
 

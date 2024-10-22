@@ -9219,9 +9219,9 @@ components:
           type: boolean
         adminCanView:
           type: boolean
-        userCanView:
-          type: boolean
         adminCanEdit:
+          type: boolean
+        userCanView:
           type: boolean
         userCanAccess:
           type: boolean
