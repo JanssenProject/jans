@@ -39,8 +39,8 @@ import io.jans.orm.exception.operation.ConfigurationException;
 import io.jans.orm.exception.operation.ConnectionException;
 import io.jans.orm.model.AttributeType;
 import io.jans.orm.operation.auth.PasswordEncryptionMethod;
-import io.jans.orm.sql.dsl.template.MySQLJsonTemplates;
 import io.jans.orm.sql.dsl.template.MariaDBJsonTemplates;
+import io.jans.orm.sql.dsl.template.MySQLJsonTemplates;
 import io.jans.orm.sql.dsl.template.PostgreSQLJsonTemplates;
 import io.jans.orm.sql.model.ResultCode;
 import io.jans.orm.sql.model.TableMapping;
@@ -58,6 +58,8 @@ import io.jans.orm.util.StringHelper;
 public class SqlConnectionProvider {
 
 	private static final Logger LOG = LoggerFactory.getLogger(SqlConnectionProvider.class);
+
+	public static String DB_PROPERTY_MYSQL_SIMPLE_JSON = "mysql.simple-json";
 
 	private static final String MYSQL_QUERY_ENGINE_TYPE = "SELECT TABLE_NAME, ENGINE FROM information_schema.tables WHERE table_schema = ?";
 
@@ -93,6 +95,8 @@ public class SqlConnectionProvider {
 	private Map<String, ArrayList<String>> tableJsonColumnsMap = new HashMap<>();
 	
 	private boolean disableTimeZone = false;
+	
+	private boolean simpleJson = false;
 
 	protected SqlConnectionProvider() {
 	}
@@ -226,6 +230,14 @@ public class SqlConnectionProvider {
 				this.dbType = SupportedDbType.MARIADB;
 			}
 			LOG.debug("Database product name: '{}'", dbType);
+
+			if (SupportedDbType.MYSQL == dbType) {
+				simpleJson = StringHelper.toBoolean(props.getProperty(DB_PROPERTY_MYSQL_SIMPLE_JSON), false);
+			}
+			if (simpleJson) {
+				LOG.debug("Using simple JSON fromat");
+			}
+
 			loadTableMetaData(databaseMetaData, con);
 		} catch (Exception ex) {
 			throw new ConnectionException("Failed to detect database product name and load metadata", ex);
@@ -519,6 +531,10 @@ public class SqlConnectionProvider {
 
 	public boolean isDisableTimeZone() {
 		return disableTimeZone;
+	}
+
+	public boolean isSimpleJson() {
+		return simpleJson;
 	}
 
 }
