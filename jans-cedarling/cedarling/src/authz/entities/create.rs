@@ -219,8 +219,8 @@ fn get_expression(
             Ok(restricted_expression)
         },
         CedarType::Set(cedar_type) => {
-            let array = token_claim_value.as_array()?;
-            let vec_of_expression = array
+            let vec_of_expression = token_claim_value
+                .as_array()?
                 .into_iter()
                 .map(|payload| get_expression(cedar_type, payload, entity_namespace))
                 .collect::<Result<Vec<_>, _>>()?;
