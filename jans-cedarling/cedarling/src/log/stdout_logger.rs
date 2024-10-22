@@ -6,7 +6,7 @@
  */
 
 use super::interface::LogWriter;
-use crate::models::log_entry::LogEntry;
+use super::LogEntry;
 use std::{
     io::Write,
     sync::{Arc, Mutex},
@@ -86,7 +86,7 @@ impl Write for TestWriter {
 
 #[cfg(test)]
 mod tests {
-    use crate::models::log_entry::LogType;
+    use super::super::LogType;
 
     use super::*;
     use std::{
@@ -107,9 +107,10 @@ mod tests {
                 .as_secs(),
             log_kind: LogType::Decision,
             pdp_id: uuid7(),
-            application_id: "test_app".to_string(),
+            application_id: Some("test_app".to_string().into()),
             auth_info: None,
             msg: "Test message".to_string(),
+            error_msg: None,
         };
 
         // Serialize the log entry to JSON

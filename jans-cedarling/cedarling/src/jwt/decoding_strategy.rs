@@ -6,8 +6,7 @@
  */
 
 use super::traits::{Decode, ExtractClaims, GetKey};
-use super::{CreateJwtServiceError, Error};
-use di::DependencySupplier;
+use super::Error;
 use jsonwebtoken as jwt;
 use serde::de::DeserializeOwned;
 use std::sync::Arc;
@@ -35,32 +34,6 @@ impl DecodingStrategy {
     /// decodes JWT tokens without any validation checks
     pub fn new_without_validation() -> Self {
         Self::WithoutValidation
-    }
-
-    /// Creates a new decoding strategy that performs validation.
-    ///
-    /// This method configures a decoding strategy where JWT tokens are validated
-    /// based on supported signature algorithms and key retrieval from a key service.
-    /// The algorithms to be supported are specified in `config_algs`, and the key
-    /// service is retrieved from a dependency map.
-    ///
-    /// # Errors
-    ///
-    /// Returns an error if the specified algorithm is unrecognized.
-    pub fn new_with_validation(
-        dep_map: &di::DependencyMap,
-        config_algs: &Vec<String>,
-    ) -> Result<Self, CreateJwtServiceError> {
-        let key_service: Arc<KeyServiceWrapper> = dep_map.get();
-        let mut supported_algs = vec![];
-        for alg_str in config_algs {
-            supported_algs.push(string_to_alg(&alg_str)?);
-        }
-
-        Ok(Self::WithValidation {
-            key_service: key_service.0.clone(),
-            supported_algs,
-        })
     }
 }
 
@@ -96,8 +69,8 @@ impl ExtractClaims for DecodingStrategy {
 
         let key = jwt::DecodingKey::from_secret("some_secret".as_ref());
 
-        let claims = jwt::decode::<T>(&jwt_str, &key, &validator)
-            .map_err(Error::ValidationError)?
+        let claims = jwt::decode::<T>(jwt_str, &key, &validator)
+            .map_err(Error::Validation)?
             .claims;
 
         Ok(claims)
@@ -114,10 +87,10 @@ fn decode_and_validate_jwt<T: DeserializeOwned>(
     iss: Option<impl ToString>,
     aud: Option<impl ToString>,
     req_sub: bool,
-    supported_algs: &Vec<jwt::Algorithm>,
+    supported_algs: &[jwt::Algorithm],
     key_service: &Arc<dyn GetKey>,
 ) -> Result<T, Error> {
-    let header = jwt::decode_header(jwt).map_err(Error::ParsingError)?;
+    let header = jwt::decode_header(jwt).map_err(Error::Parsing)?;
 
     // reject unsupported algorithms early
     if !supported_algs.contains(&header.alg) {
@@ -128,10 +101,10 @@ fn decode_and_validate_jwt<T: DeserializeOwned>(
     let mut validator = jwt::Validation::new(header.alg);
     validator.validate_nbf = true;
     if let Some(iss) = iss {
-        validator.set_issuer(&vec![iss]);
+        validator.set_issuer(&[iss]);
     }
     if let Some(aud) = aud {
-        validator.set_audience(&vec![aud]);
+        validator.set_audience(&[aud]);
     } else {
         validator.validate_aud = false;
     }
@@ -147,28 +120,17 @@ fn decode_and_validate_jwt<T: DeserializeOwned>(
     // TODO: handle tokens without a `kid` in the header
 
     // extract claims
-    let claims = jwt::decode::<T>(&jwt, &key, &validator)
-        .map_err(Error::ValidationError)?
+    let claims = jwt::decode::<T>(jwt, key, &validator)
+        .map_err(Error::Validation)?
         .claims;
     Ok(claims)
 }
 
-/// A wrapper for the key service used to retrieve decoding keys.
-///
-/// This struct provides thread-safe access to the key service and is used
-/// for dependency injection in contexts where the key service is required.
-///
-/// This is required to be able to add the KeyService to the dependency map.
-pub struct KeyServiceWrapper(Arc<dyn GetKey>);
-
-impl DependencySupplier<KeyServiceWrapper> for KeyServiceWrapper {
-    /// Retrieves an instance of `KeyServiceWrapper` from the current instance.
-    ///
-    /// This method clones the underlying key service and returns a new wrapper
-    /// instance encapsulating the cloned service, allowing safe concurrent access.
-    fn get(&self) -> Arc<KeyServiceWrapper> {
-        KeyServiceWrapper(Arc::clone(&self.0)).into()
-    }
+#[derive(thiserror::Error, Debug)]
+pub enum ParseAlgorithmError {
+    /// Config contains an unimplemented algorithm
+    #[error("algorithim is not yet implemented: {0}")]
+    UnimplementedAlgorithm(String),
 }
 
 /// Converts a string representation of an algorithm to a `jwt::Algorithm` enum.
@@ -176,7 +138,7 @@ impl DependencySupplier<KeyServiceWrapper> for KeyServiceWrapper {
 /// This function attempts to map a string representing an algorithm (e.g., "HS256")
 /// to its corresponding `jwt::Algorithm` enum. If the algorithm is unsupported or
 /// unrecognized, an error is returned.
-fn string_to_alg(algorithm: &str) -> Result<jwt::Algorithm, CreateJwtServiceError> {
+pub(crate) fn string_to_alg(algorithm: &str) -> Result<jwt::Algorithm, ParseAlgorithmError> {
     match algorithm {
         "HS256" => Ok(jwt::Algorithm::HS256),
         "HS384" => Ok(jwt::Algorithm::HS384),
@@ -190,7 +152,7 @@ fn string_to_alg(algorithm: &str) -> Result<jwt::Algorithm, CreateJwtServiceErro
         "PS384" => Ok(jwt::Algorithm::PS384),
         "PS512" => Ok(jwt::Algorithm::PS512),
         "EdDSA" => Ok(jwt::Algorithm::EdDSA),
-        _ => Err(CreateJwtServiceError::UnimplementedAlgorithm(
+        _ => Err(ParseAlgorithmError::UnimplementedAlgorithm(
             algorithm.to_string(),
         )),
     }
