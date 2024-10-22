@@ -24,10 +24,17 @@
 mod decoding_strategy;
 mod error;
 mod jwt_service;
+mod jwt_service_config;
 #[cfg(test)]
 mod test;
 mod token;
 mod traits;
 
+pub(crate) use decoding_strategy::string_to_alg;
+pub use decoding_strategy::ParseAlgorithmError;
 pub use error::*;
+use jsonwebtoken as jwt;
+pub(crate) use jwt::Algorithm;
 pub(crate) use jwt_service::*;
+pub(crate) use jwt_service_config::JwtServiceConfig;
+pub(crate) use traits::GetKey;

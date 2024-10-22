@@ -14,10 +14,9 @@ mod trait_as_expression;
 #[cfg(test)]
 mod test_create;
 
-use crate::{
-    models::{cedar_schema::CedarSchemaJson, token_data::TokenPayload},
-    ResourceData,
-};
+use crate::authz::token_data::TokenPayload;
+use crate::{common::cedar_schema::CedarSchemaJson, ResourceData};
+
 use create::{create_entity, parse_namespace_and_typename, CedarPolicyCreateTypeError};
 
 /// Describe errors on creating entites for AccessToken

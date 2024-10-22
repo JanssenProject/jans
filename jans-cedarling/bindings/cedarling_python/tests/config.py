@@ -4,7 +4,7 @@ from cedarling_python import PolicyStoreSource, PolicyStoreConfig, BootstrapConf
 import pytest
 
 ROOT_FOLDER_PATH = "../../"
-TEST_FILES_PATH = join(ROOT_FOLDER_PATH, "cedarling/src/init/test_files")
+TEST_FILES_PATH = join(ROOT_FOLDER_PATH, "test_files")
 
 # in `sample_bootstrap_config` we use policy store `policy-store_ok.json`
 # The human-readable policy and schema file is located in next folder:
