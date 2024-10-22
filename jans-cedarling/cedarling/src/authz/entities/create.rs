@@ -246,7 +246,4 @@ pub enum CedarPolicyCreateTypeError {
 
     #[error("could not get attribute value from token data error: {0}")]
     GetTokenClaimValue(#[from] GetTokenClaimValue),
-
-    #[error("could not find field with key: {0}")]
-    KeyNotFound(String),
 }
