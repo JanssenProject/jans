@@ -17,10 +17,17 @@ pub(crate) struct PdpID(pub Uuid);
 
 impl PdpID {
     pub fn new() -> Self {
+        // we use uuid v4 because it is generated based on random numbers.
         PdpID(uuid4())
     }
 }
 
 /// Name of application from configuration
-#[derive(Debug, Clone)]
-pub(crate) struct ApplicationName(pub String);
+#[derive(Debug, Clone, Default, PartialEq, serde::Serialize, serde::Deserialize)]
+pub struct ApplicationName(pub String);
+
+impl From<String> for ApplicationName {
+    fn from(value: String) -> Self {
+        Self(value)
+    }
+}

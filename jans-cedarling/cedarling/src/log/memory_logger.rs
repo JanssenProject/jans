@@ -6,8 +6,8 @@
  */
 
 use super::interface::{LogStorage, LogWriter};
-use crate::models::log_config::MemoryLogConfig;
-use crate::models::log_entry::LogEntry;
+use super::LogEntry;
+use crate::bootstrap_config::log_config::MemoryLogConfig;
 use sparkv::{Config as ConfigSparKV, SparKV};
 use std::{sync::Mutex, time::Duration};
 
@@ -85,11 +85,9 @@ impl LogStorage for MemoryLogger {
 
 #[cfg(test)]
 mod tests {
+    use super::super::{AuthorizationLogInfo, Decision, LogEntry, LogType};
     use super::*;
-    use crate::models::{
-        app_types,
-        log_entry::{AuthorizationLogInfo, Decision, LogEntry, LogType},
-    };
+    use crate::common::app_types;
 
     fn create_memory_logger() -> MemoryLogger {
         let config = MemoryLogConfig { log_ttl: 60 };
@@ -103,7 +101,7 @@ mod tests {
         // create log entries
         let entry1 = LogEntry::new_with_data(
             app_types::PdpID::new(),
-            app_types::ApplicationName("app1".to_string()),
+            Some(app_types::ApplicationName("app1".to_string())),
             LogType::Decision,
         )
         .set_message("some message".to_string())
@@ -117,7 +115,7 @@ mod tests {
         });
         let entry2 = LogEntry::new_with_data(
             app_types::PdpID::new(),
-            app_types::ApplicationName("app2".to_string()),
+            Some(app_types::ApplicationName("app2".to_string())),
             LogType::System,
         );
 
@@ -158,12 +156,12 @@ mod tests {
         // create log entries
         let entry1 = LogEntry::new_with_data(
             app_types::PdpID::new(),
-            app_types::ApplicationName("app1".to_string()),
+            Some(app_types::ApplicationName("app1".to_string())),
             LogType::Decision,
         );
         let entry2 = LogEntry::new_with_data(
             app_types::PdpID::new(),
-            app_types::ApplicationName("app2".to_string()),
+            Some(app_types::ApplicationName("app2".to_string())),
             LogType::Metric,
         );
 
