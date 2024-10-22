@@ -9,14 +9,14 @@
 //! The module contains structs for logging events.
 
 use std::collections::HashSet;
-use std::sync::Arc;
+use std::fmt::Display;
+
 use std::time::{SystemTime, UNIX_EPOCH};
 
-use di::{DependencyMap, DependencySupplier};
 use uuid7::uuid7;
 use uuid7::Uuid;
 
-use super::app_types;
+use crate::common::app_types::{self, ApplicationName};
 
 /// LogEntry is a struct that encapsulates all relevant data for logging events.
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
@@ -32,21 +32,20 @@ pub struct LogEntry {
     /// message of the event
     pub msg: String,
     /// name of application from [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties)
-    pub application_id: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub application_id: Option<ApplicationName>,
     /// authorization information of the event
     #[serde(flatten)]
     pub auth_info: Option<AuthorizationLogInfo>,
+    /// error message
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub error_msg: Option<String>,
 }
 
 impl LogEntry {
-    pub(crate) fn new_with_container(dep_map: &DependencyMap, log_kind: LogType) -> LogEntry {
-        let app_id: Arc<app_types::ApplicationName> = dep_map.get();
-        Self::new_with_data(*dep_map.get(), app_id.as_ref().clone(), log_kind)
-    }
-
     pub(crate) fn new_with_data(
         pdp_id: app_types::PdpID,
-        application_id: app_types::ApplicationName,
+        application_id: Option<app_types::ApplicationName>,
         log_kind: LogType,
     ) -> LogEntry {
         let unix_time_sec = SystemTime::now()
@@ -62,14 +61,20 @@ impl LogEntry {
             time: unix_time_sec,
             log_kind,
             pdp_id: pdp_id.0,
-            application_id: application_id.0,
+            application_id,
             auth_info: None,
             msg: String::new(),
+            error_msg: None,
         }
     }
 
     pub(crate) fn set_message(mut self, message: String) -> Self {
         self.msg = message;
+        self
+    }
+
+    pub(crate) fn set_error(mut self, error: String) -> Self {
+        self.error_msg = Some(error);
         self
     }
 
@@ -115,11 +120,11 @@ pub enum Decision {
     Deny,
 }
 
-impl ToString for Decision {
-    fn to_string(&self) -> String {
+impl Display for Decision {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Decision::Allow => "ALLOW".to_string(),
-            Decision::Deny => "DENY".to_string(),
+            Decision::Allow => f.write_str("ALLOW"),
+            Decision::Deny => f.write_str("DENY"),
         }
     }
 }
@@ -172,13 +177,8 @@ pub struct Diagnostics {
 impl From<&cedar_policy::Diagnostics> for Diagnostics {
     fn from(value: &cedar_policy::Diagnostics) -> Self {
         Self {
-            reason: HashSet::from_iter(
-                value
-                    .reason()
-                    .into_iter()
-                    .map(|policy_id| policy_id.to_string()),
-            ),
-            errors: value.errors().into_iter().map(|err| err.into()).collect(),
+            reason: HashSet::from_iter(value.reason().map(|policy_id| policy_id.to_string())),
+            errors: value.errors().map(|err| err.into()).collect(),
         }
     }
 }

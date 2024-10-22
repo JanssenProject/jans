@@ -14,11 +14,12 @@
 //! The Cedarling is a more productive and flexible way to handle authorization.
 
 mod authz;
+mod bootstrap_config;
+mod common;
 mod init;
 mod jwt;
 mod lock;
 mod log;
-mod models;
 
 #[doc(hidden)]
 #[cfg(test)]
@@ -26,24 +27,22 @@ mod tests;
 
 use std::sync::Arc;
 
-pub use authz::AuthorizeError;
+pub use authz::request::{Request, ResourceData};
 use authz::Authz;
-use di::{DependencyMap, DependencySupplier};
-use init::policy_store::{load_policy_store, LoadPolicyStoreError};
-pub use jwt::CreateJwtServiceError;
+pub use authz::{AuthorizeError, AuthorizeResult};
+pub use bootstrap_config::*;
+use init::service_config::{ServiceConfig, ServiceConfigError};
+use init::ServiceFactory;
+
+use common::app_types;
+use log::LogEntry;
 pub use log::LogStorage;
-use log::{init_logger, LogWriter};
-use models::app_types;
-pub use models::authorize_result::AuthorizeResult;
-pub use models::config::*;
-pub use models::log_entry::LogEntry;
-use models::log_entry::LogType;
-pub use models::request::{Request, ResourceData};
+use log::LogType;
 
 #[doc(hidden)]
 pub mod bindings {
-    pub use super::models::log_entry::{
-        AuthorizationLogInfo, Decision, Diagnostics, PolicyEvaluationError,
+    pub use super::log::{
+        AuthorizationLogInfo, Decision, Diagnostics, LogEntry, PolicyEvaluationError,
     };
     pub use cedar_policy;
 }
@@ -51,12 +50,9 @@ pub mod bindings {
 /// Errors that can occur during initialization Cedarling.
 #[derive(Debug, thiserror::Error)]
 pub enum InitCedarlingError {
-    /// Error that may occur during loading the policy store.
-    #[error("Could not load policy: {0}")]
-    PolicyStore(#[from] LoadPolicyStoreError),
-    /// Error that may occur during loading the JWT service.
-    #[error("Could not load JWT service: {0}")]
-    JWT(#[from] CreateJwtServiceError),
+    /// Error while preparing config for internal services
+    #[error(transparent)]
+    ServiceConfig(#[from] ServiceConfigError),
 }
 
 /// The instance of the Cedarling application.
@@ -70,47 +66,31 @@ pub struct Cedarling {
 
 impl Cedarling {
     /// Create a new instance of the Cedarling application.
+    #[allow(clippy::diverging_sub_expression)]
     pub fn new(config: BootstrapConfig) -> Result<Cedarling, InitCedarlingError> {
-        let mut container: DependencyMap = DependencyMap::new();
+        let log = log::init_logger(&config.log_config);
+        let pdp_id = app_types::PdpID::new();
 
-        container.insert(init_logger(config.log_config));
-        let log: log::Logger = container.get();
-
-        // we use uuid v4 because it is generated based on random numbers.
-
-        container.insert(app_types::PdpID::new());
-
-        container.insert(app_types::ApplicationName(config.application_name));
-
-        let policy_store = load_policy_store(config.policy_store_config)
-           // Log success when loading the policy store
+        let service_config = ServiceConfig::new(&config)
             .inspect(|_| {
                 log.log(
-                    LogEntry::new_with_container(&container, LogType::System)
-                        .set_message("PolicyStore loaded successfully".to_string()),
-                );
+                    LogEntry::new_with_data(pdp_id, None, LogType::System)
+                        .set_message("configuration parsed successfully".to_string()),
+                )
             })
-            // Log failure when loading the policy store
             .inspect_err(|err| {
                 log.log(
-                    LogEntry::new_with_container(&container, LogType::System)
-                        .set_message(format!("Could not load PolicyStore: {}", err)),
+                    LogEntry::new_with_data(pdp_id, None, LogType::System)
+                        .set_error(err.to_string())
+                        .set_message("configuration parsed with error".to_string()),
                 )
             })?;
-        container.insert(policy_store);
 
-        let jwt_service = jwt::JwtService::new_with_container(&container, config.jwt_config)?;
-        log.log(
-            LogEntry::new_with_container(&container, LogType::System)
-                .set_message("JWT service loaded successfully".to_string()),
-        );
-        container.insert(jwt_service);
-
-        let authz = Authz::new_with_container(&container);
+        let mut service_factory = ServiceFactory::new(&config, service_config, log.clone(), pdp_id);
 
         Ok(Cedarling {
             log,
-            authz: Arc::new(authz),
+            authz: service_factory.authz_service(),
         })
     }
 
