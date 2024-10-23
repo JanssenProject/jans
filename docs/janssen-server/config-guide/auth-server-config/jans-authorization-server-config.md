@@ -662,11 +662,11 @@ You can get the persistence details for jans auth server.
 /opt/jans/jans-cli/config-cli.py --operation-id get-properties-persistence
 ```
 
-Default persistence type is `LDAP`.
+Default persistence type is `MySQL`.
 ```
 Please wait while retrieving data ...
 {
-  "persistenceType": "ldap"
+  "persistenceType": "sql"
 }
 ```
 
