@@ -26,9 +26,8 @@ pub struct IdToken {
 
 #[derive(Deserialize, Serialize)]
 pub struct UserInfoToken {
-    pub iss: String,
-    pub aud: String,
     pub sub: String,
+    pub client_id: String,
     #[serde(flatten)]
     pub extra: serde_json::Value,
 }

@@ -85,10 +85,12 @@ impl Decode for DecodingStrategy {
     /// Decodes a JWT token according to the current decoding strategy.
     ///
     /// # Arguments
-    /// * `jwt` - The JWT string to decode.
-    /// * `iss` - Optional expected issuer for validation.
-    /// * `aud` - Optional expected audience for validation.
-    /// * `req_sub` - If true, requires the subject (`sub`) claim to be present.
+    /// - `jwt` - The JWT string to decode.
+    /// - `iss` - Optional expected issuer for validation.
+    /// - `aud` - Optional expected audience for validation.
+    /// - `sub` - Optional expected subject for validation.
+    /// - `validate_nbf`: A boolean indicating whether to validate the "not before" claim.
+    /// - `validate_exp`: A boolean indicating whether to validate the expiration claim.
     ///
     /// # Errors
     /// Returns an error if decoding or validation fails.
@@ -97,14 +99,25 @@ impl Decode for DecodingStrategy {
         jwt: &str,
         iss: Option<impl ToString>,
         aud: Option<impl ToString>,
-        req_sub: bool,
+        sub: Option<impl ToString>,
+        validate_nbf: bool,
+        validate_exp: bool,
     ) -> Result<T, Error> {
         match self {
             DecodingStrategy::WithoutValidation => self.extract_claims(jwt),
             DecodingStrategy::WithValidation {
                 key_service,
                 supported_algs,
-            } => decode_and_validate_jwt(jwt, iss, aud, req_sub, supported_algs, key_service),
+            } => decode_and_validate_jwt(
+                jwt,
+                iss,
+                aud,
+                sub,
+                validate_nbf,
+                validate_exp,
+                supported_algs,
+                key_service,
+            ),
         }
     }
 }
@@ -121,6 +134,7 @@ impl ExtractClaims for DecodingStrategy {
     fn extract_claims<T: DeserializeOwned>(&self, jwt_str: &str) -> Result<T, Error> {
         let mut validator = jwt::Validation::default();
         validator.insecure_disable_signature_validation();
+        validator.required_spec_claims.clear();
         validator.validate_exp = false;
         validator.validate_aud = false;
         validator.validate_nbf = false;
@@ -128,7 +142,7 @@ impl ExtractClaims for DecodingStrategy {
         let key = jwt::DecodingKey::from_secret("some_secret".as_ref());
 
         let claims = jwt::decode::<T>(&jwt_str, &key, &validator)
-            .map_err(Error::ValidationError)?
+            .map_err(|e| Error::ValidationError(e.to_string()))?
             .claims;
 
         Ok(claims)
@@ -138,12 +152,14 @@ impl ExtractClaims for DecodingStrategy {
 /// Decodes and validates a JWT token using supported algorithms and a key service.
 ///
 /// # Arguments
-/// * `jwt` - The JWT string to decode.
-/// * `iss` - Optional expected issuer for validation.
-/// * `aud` - Optional expected audience for validation.
-/// * `req_sub` - Boolean indicating whether the `sub` (subject) claim is required.
-/// * `supported_algs` - A reference to a vector of supported algorithms for validation.
-/// * `key_service` - A reference to a `KeyService` to retrieve keys for signature validation.
+/// - `jwt` - The JWT string to decode.
+/// - `iss` - Optional expected issuer for validation.
+/// - `aud` - Optional expected audience for validation.
+/// - `sub` - Optional expected subject for validation.
+/// - `validate_nbf`: A boolean indicating whether to validate the "not before" claim.
+/// - `validate_exp`: A boolean indicating whether to validate the expiration claim.
+/// - `supported_algs` - A reference to a vector of supported algorithms for validation.
+/// - `key_service` - A reference to a `KeyService` to retrieve keys for signature validation.
 ///
 /// # Errors
 /// Returns an error if the token uses an unsupported algorithm or if validation fails.
@@ -151,7 +167,9 @@ fn decode_and_validate_jwt<T: DeserializeOwned>(
     jwt: &str,
     iss: Option<impl ToString>,
     aud: Option<impl ToString>,
-    req_sub: bool,
+    sub: Option<impl ToString>,
+    validate_nbf: bool,
+    validate_exp: bool,
     supported_algs: &Vec<jwt::Algorithm>,
     key_service: &KeyService,
 ) -> Result<T, Error> {
@@ -164,18 +182,23 @@ fn decode_and_validate_jwt<T: DeserializeOwned>(
 
     // set up validation rules
     let mut validator = jwt::Validation::new(header.alg);
-    validator.validate_nbf = true;
+    validator.required_spec_claims.clear();
+    validator.validate_nbf = validate_nbf;
+    validator.validate_exp = validate_exp;
     if let Some(iss) = iss {
         validator.set_issuer(&vec![iss]);
+    } else {
+        validator.iss = None;
     }
     if let Some(aud) = aud {
         validator.set_audience(&vec![aud]);
     } else {
         validator.validate_aud = false;
     }
-    if req_sub {
-        validator.set_required_spec_claims(&["sub"]);
-    }
+    validator.sub = match sub {
+        Some(sub) => Some(sub.to_string()),
+        None => None,
+    };
 
     // fetch decoding key from the KeyService
     let kid = &header
@@ -186,7 +209,7 @@ fn decode_and_validate_jwt<T: DeserializeOwned>(
 
     // decode and validate the jwt
     let claims = jwt::decode::<T>(&jwt, &key, &validator)
-        .map_err(Error::ValidationError)?
+        .map_err(|e| Error::ValidationError(e.to_string()))?
         .claims;
     Ok(claims)
 }

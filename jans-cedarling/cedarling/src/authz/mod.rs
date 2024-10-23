@@ -67,11 +67,12 @@ impl Authz {
     /// Evaluate Authorization Request
     /// - evaluate if authorization is granted for *client*
     pub fn authorize(&self, request: Request) -> Result<AuthorizeResult, AuthorizeError> {
-        let (access_token, _id_token) = self
+        let (access_token, _id_token, _userinfo_token) = self
             .jwt_service
-            .decode_tokens::<TokenPayload, TokenPayload>(
+            .decode_tokens::<TokenPayload, TokenPayload, TokenPayload>(
                 &request.access_token,
                 &request.id_token,
+                &request.userinfo_token,
             )?;
 
         let access_token_entities =

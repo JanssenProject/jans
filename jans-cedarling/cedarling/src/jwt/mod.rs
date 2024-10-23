@@ -19,13 +19,11 @@ mod error;
 mod test;
 mod token;
 
+use crate::JwtConfig;
 use decoding_strategy::*;
 pub use error::*;
-use token::*;
-
 use serde::de::DeserializeOwned;
-
-use crate::JwtConfig;
+use token::*;
 
 pub struct JwtService {
     decoding_strategy: DecodingStrategy,
@@ -93,43 +91,71 @@ impl JwtService {
     /// 3. An error is returned if `id_token.aud` does not match `access_token.client_id`.
     ///
     /// # Parameters
-    /// - `access_token_str`: The JWT string representing the access token.
-    /// - `id_token_str`: The JWT string representing the ID token.
+    /// - `access_token`: The JWT string representing the access token.
+    /// - `id_token`: The JWT string representing the ID token.
+    /// - `userinfo_token`: The JWT string representing the Userinfo token.
     ///
     /// # Returns
-    /// A tuple containing the decoded claims for the `access_token` and `id_token`.
+    /// A tuple containing the decoded claims for the `access_token`, `id_token`, and
+    /// `userinfo_token`.
     ///
     /// # Errors
     /// Returns an error if decoding or validation of either token fails.
-    pub fn decode_tokens<A, I>(
+    pub fn decode_tokens<A, I, U>(
         &self,
-        access_token_str: &str,
-        id_token_str: &str,
-    ) -> Result<(A, I), Error>
+        access_token: &str,
+        id_token: &str,
+        userinfo_token: &str,
+    ) -> Result<(A, I, U), Error>
     where
         A: DeserializeOwned,
         I: DeserializeOwned,
+        U: DeserializeOwned,
     {
         // extract claims without validation
-        let access_token_claims = self.decoding_strategy.extract_claims(access_token_str)?;
-        let id_token_claims = self.decoding_strategy.extract_claims(id_token_str)?;
+        let access_token_claims = self.decoding_strategy.extract_claims(access_token)?;
+        let id_token_claims = self.decoding_strategy.extract_claims(id_token)?;
+        let userinfo_token_claims = self.decoding_strategy.extract_claims(userinfo_token)?;
 
         // validate access_token
         let access_token = self.decoding_strategy.decode::<AccessToken>(
-            access_token_str,
+            access_token,
             None::<String>, // TODO: validate issuer for access token
             None::<String>,
-            false,
-        )?;
-
-        // validate the id_token against the access_token's `iss` and `aud`
-        self.decoding_strategy.decode::<IdToken>(
-            id_token_str,
-            Some(&access_token.iss),
-            Some(&access_token.aud),
+            None::<String>,
+            true,
             true,
         )?;
 
-        Ok((access_token_claims, id_token_claims))
+        // validate the id_token against the access_token's `iss` and `aud`
+        let id_token = self.decoding_strategy.decode::<IdToken>(
+            id_token,
+            Some(&access_token.iss),
+            Some(&access_token.aud),
+            None::<String>,
+            true,
+            true,
+        )?;
+
+        // validate the userinfo_token
+        let userinfo_token = self.decoding_strategy.decode::<UserInfoToken>(
+            userinfo_token,
+            None::<String>,
+            None::<String>,
+            Some(id_token.sub), // validate that the `sub` is the same as with the id_token's sub
+            false,              // this token usually does not have an nbf field
+            false,              // this token usually does not have an exp field
+        )?;
+        match self.decoding_strategy {
+            DecodingStrategy::WithoutValidation => (), // do nothing
+            DecodingStrategy::WithValidation { .. } => {
+                // validate that  the userinfo_token's client_id is the same as the access_token's aud
+                if userinfo_token.client_id != access_token.aud {
+                    return Err(Error::ValidationError("the userinfo_token's `client_id` does not match with the access_token's `aud`".into()));
+                }
+            },
+        }
+
+        Ok((access_token_claims, id_token_claims, userinfo_token_claims))
     }
 }
