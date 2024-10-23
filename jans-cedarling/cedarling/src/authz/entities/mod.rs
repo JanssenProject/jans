@@ -20,13 +20,6 @@ use create::{create_entity, parse_namespace_and_typename};
 
 use super::request::ResourceData;
 
-/// Describe errors on creating entites for AccessToken
-#[derive(thiserror::Error, Debug)]
-pub enum AccessTokenEntitiesError {
-    #[error("could not create entity from access_token: {0}")]
-    Create(#[from] CedarPolicyCreateTypeError),
-}
-
 /// Access token entities
 pub(crate) struct AccessTokenEntities {
     pub workload_entity: cedar_policy::Entity,
@@ -38,6 +31,13 @@ impl AccessTokenEntities {
     pub fn into_iter(self) -> impl Iterator<Item = cedar_policy::Entity> {
         vec![self.workload_entity, self.access_token_entity].into_iter()
     }
+}
+
+/// Describe errors on creating entites for AccessToken
+#[derive(thiserror::Error, Debug)]
+pub enum AccessTokenEntitiesError {
+    #[error("could not create entity from access_token: {0}")]
+    Create(#[from] CedarPolicyCreateTypeError),
 }
 
 /// Create all entities from AccessToken
