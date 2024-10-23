@@ -15,6 +15,14 @@ pub enum CedarType {
     Set(Box<CedarType>),
 }
 
+/// Possible errors that may occur when retrieving a [`CedarType`] from cedar-policy schema.
+#[derive(Debug, thiserror::Error)]
+pub enum GetCedarTypeError {
+    /// Error while getting `cedar-policy` schema not implemented type
+    #[error("could not get cedar-policy type {0}, it is not implemented")]
+    TypeNotImplemented(String),
+}
+
 /// JSON representation of a [`cedar_policy::Schema`]
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize, PartialEq)]
 pub(crate) struct CedarSchemaJson {
@@ -82,7 +90,7 @@ impl CedarSchemaEntityAttribute {
         self.required
     }
 
-    pub fn get_type(&self) -> Option<CedarType> {
+    pub fn get_type(&self) -> Result<CedarType, GetCedarTypeError> {
         self.cedar_type.get_type()
     }
 }
@@ -129,11 +137,11 @@ pub enum CedarSchemaEntityType {
 }
 
 impl CedarSchemaEntityType {
-    pub fn get_type(&self) -> Option<CedarType> {
+    pub fn get_type(&self) -> Result<CedarType, GetCedarTypeError> {
         match self {
-            Self::Set(v) => Some(CedarType::Set(Box::new(v.element.get_type()?))),
+            Self::Set(v) => Ok(CedarType::Set(Box::new(v.element.get_type()?))),
             Self::Typed(v) => v.get_type(),
-            Self::Primitive(primitive) => primitive.kind.get_type(),
+            Self::Primitive(primitive) => Ok(primitive.kind.get_type()),
         }
     }
 }
@@ -203,14 +211,13 @@ pub enum PrimitiveTypeKind {
 }
 
 impl PrimitiveTypeKind {
-    pub fn get_type(&self) -> Option<CedarType> {
-        let value = match self {
+    pub fn get_type(&self) -> CedarType {
+        match self {
             PrimitiveTypeKind::Long => CedarType::Long,
             PrimitiveTypeKind::String => CedarType::String,
             PrimitiveTypeKind::Boolean => CedarType::Boolean,
             PrimitiveTypeKind::TypeName(name) => CedarType::TypeName(name.to_string()),
-        };
-        Some(value)
+        }
     }
 }
 
@@ -240,16 +247,16 @@ pub struct EntityType {
 }
 
 impl EntityType {
-    pub fn get_type(&self) -> Option<CedarType> {
+    pub fn get_type(&self) -> Result<CedarType, GetCedarTypeError> {
         if self.kind == "EntityOrCommon" {
             match self.name.as_str() {
-                "Long" => Some(CedarType::Long),
-                "String" => Some(CedarType::String),
-                "Boolean" => Some(CedarType::Boolean),
-                type_name => Some(CedarType::TypeName(type_name.to_string())),
+                "Long" => Ok(CedarType::Long),
+                "String" => Ok(CedarType::String),
+                "Boolean" => Ok(CedarType::Boolean),
+                type_name => Ok(CedarType::TypeName(type_name.to_string())),
             }
         } else {
-            None
+            Err(GetCedarTypeError::TypeNotImplemented(self.kind.to_string()))
         }
     }
 }

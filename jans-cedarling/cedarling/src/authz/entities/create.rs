@@ -12,7 +12,7 @@ use std::{
 
 use crate::authz::token_data::{GetTokenClaimValue, Payload, TokenPayload};
 use crate::common::cedar_schema::{
-    cedar_json::{CedarSchemaRecord, CedarType},
+    cedar_json::{CedarSchemaRecord, CedarType, GetCedarTypeError},
     CedarSchemaJson,
 };
 
@@ -116,11 +116,11 @@ fn fetch_schema_record<'a>(
 /// get mapping of the entity attributes
 fn entity_meta_attributes(
     schema_record: &CedarSchemaRecord,
-) -> impl Iterator<Item = EntityAttributeMetadata> {
+) -> Result<Vec<EntityAttributeMetadata>, GetCedarTypeError> {
     schema_record
         .attributes
         .iter()
-        .filter_map(|(attribute_name, attribute)| {
+        .map(|(attribute_name, attribute)| {
             attribute
                 .get_type()
                 .map(|attr_type| EntityAttributeMetadata {
@@ -129,6 +129,7 @@ fn entity_meta_attributes(
                     is_required: attribute.is_required(),
                 })
         })
+        .collect::<Result<Vec<_>, _>>()
 }
 
 /// Create entity from token payload data.
@@ -138,7 +139,8 @@ pub fn create_entity<'a>(
     schema_record: &'a CedarSchemaRecord,
     data: &'a TokenPayload,
 ) -> Result<cedar_policy::Entity, CedarPolicyCreateTypeError> {
-    let attr_vec = entity_meta_attributes(schema_record)
+    let attr_vec = entity_meta_attributes(schema_record)?
+        .into_iter()
         .filter_map(|attr: EntityAttributeMetadata<'a>| {
             let attr_name = attr.attribute_name;
             let cedar_exp_result = token_attribute_to_cedar_exp(&attr, data, entity_namespace);
@@ -246,4 +248,7 @@ pub enum CedarPolicyCreateTypeError {
 
     #[error("could not get attribute value from token data error: {0}")]
     GetTokenClaimValue(#[from] GetTokenClaimValue),
+
+    #[error("could not retrieve attribute from cedar-policy schema: {0}")]
+    GetCedarType(#[from] GetCedarTypeError),
 }
