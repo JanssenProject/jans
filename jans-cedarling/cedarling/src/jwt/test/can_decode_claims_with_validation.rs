@@ -37,26 +37,43 @@ fn can_decode_claims_with_validation() {
     // generate keys and setup the encoding keys and JWKS (JSON Web Key Set)
     let (encoding_keys, jwks) = generate_keys();
 
-    // setup claims for access token and ID token
-    let mut access_token_claims = AccessTokenClaims {
+    // setup token claims
+    let access_token_claims = AccessTokenClaims {
         iss: server.url(),
         aud: "some_aud".to_string(),
         sub: "some_sub".to_string(),
         scopes: "some_scope".to_string(),
-        ..Default::default()
+        iat: Timestamp::now(),
+        exp: Timestamp::one_hour_after_now(),
     };
-    let mut id_token_claims = IdTokenClaims {
+    let id_token_claims = IdTokenClaims {
         iss: server.url(),
         sub: "some_sub".to_string(),
         aud: "some_aud".to_string(),
         email: "some_email@gmail.com".to_string(),
-        ..Default::default()
+        iat: Timestamp::now(),
+        exp: Timestamp::one_hour_after_now(),
+    };
+    let userinfo_token_claims = UserinfoTokenClaims {
+        sub: "some_sub".to_string(),
+        client_id: "some_aud".to_string(),
+        name: "ferris".to_string(),
+        email: "ferris@gluu.com".to_string(),
     };
 
-    // generate the access token and ID token using ES256 algorithm and encoding keys
-    let access_token =
-        generate_access_token_using_keys(&mut access_token_claims, &encoding_keys, false);
-    let id_token = generate_id_token_using_keys(&mut id_token_claims, &encoding_keys, false);
+    // generate the signed token strings
+    let access_token = generate_token_using_claims(
+        &access_token_claims,
+        &encoding_keys[0].0,
+        &encoding_keys[0].1,
+    );
+    let id_token =
+        generate_token_using_claims(&id_token_claims, &encoding_keys[1].0, &encoding_keys[1].1);
+    let userinfo_token = generate_token_using_claims(
+        &userinfo_token_claims,
+        &encoding_keys[0].0,
+        &encoding_keys[0].1,
+    );
 
     // setup mock server responses for OpenID configuration and JWKS URIs
     let openid_config_response = json!({
@@ -88,15 +105,20 @@ fn can_decode_claims_with_validation() {
         supported_algs: vec![Algorithm::ES256],
     });
 
-    // decode and validate both the access token and the ID token
-    let (access_token_result, id_token_result) = jwt_service
-        .decode_tokens::<AccessTokenClaims, IdTokenClaims>(&access_token, &id_token)
+    // decode and validate the tokens
+    let (access_token_result, id_token_result, userinfo_token_result) = jwt_service
+        .decode_tokens::<AccessTokenClaims, IdTokenClaims, UserinfoTokenClaims>(
+            &access_token,
+            &id_token,
+            &userinfo_token,
+        )
         .expect("should decode token");
     jwks_uri_mock.assert();
 
     // assert that the decoded token claims match the expected claims
     assert_eq!(access_token_result, access_token_claims);
     assert_eq!(id_token_result, id_token_claims);
+    assert_eq!(userinfo_token_result, userinfo_token_claims);
 
     // verify openid configuration endpoint was called once
     openid_conf_mock.assert();

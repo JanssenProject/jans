@@ -35,7 +35,7 @@ pub enum Error {
     /// This occurs when JWT validation fails due to issues such as an invalid signature,
     /// claim validation failure, or other validation errors.
     #[error("Failed to validate the JWT: {0}")]
-    ValidationError(#[source] jsonwebtoken::errors::Error),
+    ValidationError(String),
 
     /// Indicates an unsupported algorithm defined in the configuration.
     ///

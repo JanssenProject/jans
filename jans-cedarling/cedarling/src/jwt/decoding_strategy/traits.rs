@@ -29,7 +29,9 @@ pub trait Decode: Send + Sync {
         jwt_str: &str,
         aud: Option<impl ToString>,
         iss: Option<impl ToString>,
-        req_sub: bool,
+        sub: Option<impl ToString>,
+        validate_nbf: bool,
+        validate_exp: bool,
     ) -> Result<T, Error>;
 }
 
