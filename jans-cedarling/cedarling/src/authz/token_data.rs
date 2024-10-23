@@ -17,12 +17,12 @@ pub(crate) struct TokenPayload {
     pub payload: HashMap<String, serde_json::Value>,
 }
 
-impl<'a> TokenPayload {
+impl TokenPayload {
     fn new(payload: HashMap<String, serde_json::Value>) -> Self {
         Self { payload }
     }
 
-    pub fn get(&'a self, key: &'a str) -> Result<Payload<'a>, GetTokenClaimValue> {
+    pub fn get(&self, key: &str) -> Result<Payload, GetTokenClaimValue> {
         self.payload
             .get(key)
             .map(|value| Payload {
