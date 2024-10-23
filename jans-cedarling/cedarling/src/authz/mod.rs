@@ -12,61 +12,60 @@
 use std::str::FromStr;
 use std::sync::Arc;
 
-use crate::jwt::JwtService;
-use crate::log::{LogWriter, Logger};
-use crate::models::app_types;
-use crate::models::log_entry::AuthorizationLogInfo;
-use crate::models::log_entry::{LogEntry, LogType};
-use crate::models::policy_store::PolicyStore;
-use crate::models::request::Request;
-use crate::AuthorizeResult;
+use crate::common::app_types;
+use crate::common::policy_store::PolicyStore;
+use crate::jwt;
+use crate::log::{AuthorizationLogInfo, LogEntry, LogType, Logger};
 
-mod decode_tokens;
+mod authorize_result;
+
 mod entities;
+pub(crate) mod request;
+mod token_data;
 
+pub use authorize_result::AuthorizeResult;
 use cedar_policy::{Entities, Entity, EntityUid};
-use decode_tokens::{decode_tokens, DecodeTokensError};
-use di::DependencySupplier;
 use entities::CedarPolicyCreateTypeError;
 use entities::ResourceEntityError;
 use entities::{
     create_access_token_entities, id_token_entity, user_entity, AccessTokenEntitiesError,
 };
 use entities::{create_resource_entity, AccessTokenEntities};
+use request::Request;
+use token_data::{AccessTokenData, IdTokenData, UserInfoTokenData};
+
+/// Configuration to Authz to initialize service without errors
+pub(crate) struct AuthzConfig {
+    pub log_service: Logger,
+    pub pdp_id: app_types::PdpID,
+    pub application_name: app_types::ApplicationName,
+    pub policy_store: PolicyStore,
+    pub jwt_service: Arc<jwt::JwtService>,
+}
 
 /// Authorization Service
 /// The primary service of the Cedarling application responsible for evaluating authorization requests.
 /// It leverages other services as needed to complete its evaluations.
 #[allow(dead_code)]
 pub struct Authz {
-    log_service: Logger,
-    pdp_id: app_types::PdpID,
-    application_name: app_types::ApplicationName,
-    policy_store: PolicyStore,
-    jwt_service: Arc<JwtService>,
+    config: AuthzConfig,
     authorizer: cedar_policy::Authorizer,
 }
 
 impl Authz {
     /// Create a new Authorization Service
-    pub(crate) fn new_with_container(dep_map: &di::DependencyMap) -> Self {
-        let application_name: Arc<app_types::ApplicationName> = dep_map.get();
-        let pdp_id = *dep_map.get();
-        let log: Logger = dep_map.get();
-        let policy_store: Arc<PolicyStore> = dep_map.get();
-        let jwt_service: Arc<JwtService> = dep_map.get();
-
-        log.log(
-            LogEntry::new_with_data(pdp_id, application_name.as_ref().clone(), LogType::System)
-                .set_message("Cedarling Authz initialized successfully".to_string()),
+    pub(crate) fn new(config: AuthzConfig) -> Self {
+        config.log_service.log(
+            LogEntry::new_with_data(
+                config.pdp_id,
+                Some(config.application_name.clone()),
+                LogType::System,
+            )
+            .set_message("Cedarling Authz initialized successfully".to_string()),
         );
 
         Self {
-            log_service: log,
-            pdp_id,
-            application_name: application_name.as_ref().clone(),
-            policy_store: policy_store.as_ref().clone(),
-            jwt_service,
+            config,
             authorizer: cedar_policy::Authorizer::new(),
         }
     }
@@ -79,7 +78,7 @@ impl Authz {
 
         let context: cedar_policy::Context = cedar_policy::Context::from_json_value(
             request.context.clone(),
-            Some((&self.policy_store.schema.schema, &action)),
+            Some((&self.config.policy_store.schema.schema, &action)),
         )?;
 
         let entities_data: AuthorizeEntitiesData = self.authorize_entities_data(&request)?;
@@ -88,7 +87,7 @@ impl Authz {
         let resource_uid = entities_data.resource_entity.uid();
         let principal_user_entity_uid = entities_data.user_entity.uid();
 
-        let entities = entities_data.entities(Some(&self.policy_store.schema.schema))?;
+        let entities = entities_data.entities(Some(&self.config.policy_store.schema.schema))?;
 
         let workload_result = self
             .execute_authorize(ExecuteAuthorizeParameters {
@@ -110,10 +109,10 @@ impl Authz {
             })
             .map_err(AuthorizeError::CreateRequestUserEntity)?;
 
-        self.log_service.log(
+        self.config.log_service.as_ref().log(
             LogEntry::new_with_data(
-                self.pdp_id,
-                self.application_name.clone(),
+                self.config.pdp_id,
+                Some(self.config.application_name.clone()),
                 LogType::Decision,
             )
             .set_auth_info(AuthorizationLogInfo {
@@ -124,8 +123,8 @@ impl Authz {
                 person_principal: principal_user_entity_uid.to_string(),
                 workload_principal: principal_workload_uid.to_string(),
 
-                person_diagnostics: person_result.diagnostics().clone().into(),
-                workload_diagnostics: workload_result.diagnostics().clone().into(),
+                person_diagnostics: person_result.diagnostics().into(),
+                workload_diagnostics: workload_result.diagnostics().into(),
 
                 person_decision: person_result.decision().into(),
                 workload_decision: workload_result.decision().into(),
@@ -150,12 +149,12 @@ impl Authz {
             parameters.action,
             parameters.resource,
             parameters.context,
-            Some(&self.policy_store.schema.schema),
+            Some(&self.config.policy_store.schema.schema),
         )?;
 
         let response = self.authorizer.is_authorized(
             &request_principal_workload,
-            &self.policy_store.policies,
+            &self.config.policy_store.policies,
             parameters.entities,
         );
 
@@ -167,29 +166,36 @@ impl Authz {
         &self,
         request: &Request,
     ) -> Result<AuthorizeEntitiesData, AuthorizeError> {
-        let decoded_tokens = decode_tokens(&request, self.jwt_service.as_ref())?;
+        let (access_token, id_token, user_info_token) = self
+            .config
+            .jwt_service
+            .decode_tokens::<AccessTokenData, IdTokenData, UserInfoTokenData>(
+                &request.access_token,
+                &request.id_token,
+                &request.userinfo_token,
+            )?;
 
         // Using the builder at compile time ensures all entities are added correctly
         let data = AuthorizeEntitiesData::builder()
             .access_token_entities(create_access_token_entities(
-                &self.policy_store.schema.json,
-                &decoded_tokens.access_token,
+                &self.config.policy_store.schema.json,
+                &access_token,
             )?)
             .id_token_entity(
-                id_token_entity(&self.policy_store.schema.json, &decoded_tokens.id_token)
+                id_token_entity(&self.config.policy_store.schema.json, &id_token)
                     .map_err(AuthorizeError::CreateIdTokenEntity)?,
             )
             .user_entity(
                 user_entity(
-                    &self.policy_store.schema.json,
-                    &decoded_tokens.id_token,
-                    &decoded_tokens.userinfo,
+                    &self.config.policy_store.schema.json,
+                    &id_token,
+                    &user_info_token,
                 )
                 .map_err(AuthorizeError::CreateUserEntity)?,
             )
             .resource_entity(create_resource_entity(
                 request.resource.clone(),
-                &self.policy_store.schema.json,
+                &self.config.policy_store.schema.json,
             )?);
 
         Ok(data.build())
@@ -239,7 +245,7 @@ impl AuthorizeEntitiesData {
 pub enum AuthorizeError {
     /// Error encountered while decoding JWT token data
     #[error(transparent)]
-    JWT(#[from] DecodeTokensError),
+    DecodeTokens(#[from] jwt::Error),
     /// Error encountered while creating access token entities
     #[error("{0}")]
     AccessTokenEntities(#[from] AccessTokenEntitiesError),

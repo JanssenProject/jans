@@ -12,11 +12,13 @@ mod meta;
 #[cfg(test)]
 mod test_create;
 
-use crate::{models::cedar_schema::CedarSchemaJson, ResourceData};
-pub(crate) use create::CedarPolicyCreateTypeError;
+use crate::common::cedar_schema::CedarSchemaJson;
+
+use crate::authz::token_data::{AccessTokenData, IdTokenData, UserInfoTokenData};
+pub use create::CedarPolicyCreateTypeError;
 use create::{create_entity, parse_namespace_and_typename};
 
-use super::decode_tokens::{AccessTokenData, IdTokenData, UserInfoTokenData};
+use super::request::ResourceData;
 
 /// Describe errors on creating entites for AccessToken
 #[derive(thiserror::Error, Debug)]
