@@ -114,7 +114,6 @@ mod test {
         };
         let result = load_policy_store(&config);
 
-        assert!(result.is_err());
         assert!(matches!(
             result,
             Err(LoadPolicyStoreError::MultipleRoleMappings(
