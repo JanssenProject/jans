@@ -168,6 +168,9 @@ and navigate to the new default method with **Up** and **Down** keys.
 To choose hit **Space** key.
 Navigate to **Save** button and hit **Enter** key
 
+!!! Note 
+    If your backend database is not LDAP, you won't see any LDAP servers 
+    related tab/items.
 
 ### Basic Authentication Method
 
@@ -179,6 +182,26 @@ You can set basic as the default authentication method by selecting
 **Default Authn Method**,
 navigate to **Save** button and hit **Enter** key
 
+### LDAP Servers As Authentication Method
+
+If your backend database is LDAP, you will have this tab where you can add and 
+modify LDAP Servers are to be used as the default authentication method. 
+See below image
+
+![image](../../../assets/tui-authn-ldap-servers.png)
+
+To add a new LDAP server, navigate to **Add Source LDAP Server** button and 
+hit **Enter**. A popup screen will
+be displayed as shown in the image below.
+
+![image](../../../assets/tui-authn-ldap-servers-add.png)
+
+Fill in the fields provided in the popup. Before saving LDAP server, it is 
+recommended to test it by navigating 
+**Test** button and hitting **Enter**. If the test is successful, chose 
+**Save** button and hit **Enter**. If you want the current edited LDAP server 
+as the default authentication method, select **Default Authn Method** before 
+saving.
 
 ### Authentication Methods Enabled By Scripts
 

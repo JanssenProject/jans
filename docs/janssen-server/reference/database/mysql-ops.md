@@ -15,7 +15,7 @@ Below operations require to log into mysql workspace first with command: `mysql`
 *  `GRANT ALL PRIVILEGES ON jansdb.* TO 'jans'@'localhost';`
 
 ### Create new user claims to `jansPerson`: 
-* You can add additional attributes to `jansPerson` table and use them. Additional attributes will not affect the server functionality.
+* You can add additional attributes to `jansPerson` table and use them. Here DB stores all the user attribute information in one entry. Additional attributes will not affect the server functionality.
 * Ensure you restart services after DB schema modification
 
 ### **Modify column size of jansPerson** :
