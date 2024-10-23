@@ -69,7 +69,7 @@ pub(crate) fn load_policy_store(
             if let Some(metadata) = &issuer.token_metadata {
                 let tokens_with_role_mapping: Vec<TokenKind> = metadata
                     .iter()
-                    .filter_map(|x| x.role_mapping.as_ref().map(|_| x.kind.clone()))
+                    .filter_map(|x| x.role_mapping.as_ref().map(|_| x.kind))
                     .collect();
 
                 // If there are more than one token with `role_mapping`, return an error
