@@ -200,14 +200,17 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Fido2RegistrationEntry'
+                $ref: '#/components/schemas/Fido2RegistrationEntryPagedResult'
               examples:
                 Response example:
                   description: Response example
                   value: |
                     {
+                        "start": 0,
+                        "totalEntriesCount": 3,
+                        "entriesCount": 3,
+                        "entries": [
+                            {
                                 "dn": "jansId=1c88c1cb-8e32-4b79-b244-c9f677ca5654,ou=fido2_register,inum=1e73f801-22c2-4c19-a757-f96a87a5c713,ou=people,o=jans",
                                 "id": "1c88c1cb-8e32-4b79-b244-c9f677ca5654",
                                 "challange": "2vCSaPMIt4tZpkO8_rDG-v3QoXBYMB1aqCAXFgA4q0Y",
@@ -321,6 +324,8 @@ paths:
                                 "registrationStatus": "registered",
                                 "baseDn": "jansId=6e196a5d-122b-4f06-8ff8-6f41b32bc2a6,ou=fido2_register,inum=1e73f801-22c2-4c19-a757-f96a87a5c713,ou=people,o=jans"
                             }
+                        ]
+                    }
         "401":
           description: Unauthorized
         "500":

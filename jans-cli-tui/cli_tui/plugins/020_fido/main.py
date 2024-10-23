@@ -12,7 +12,7 @@ from wui_components.jans_vetrical_nav import JansVerticalNav
 from wui_components.jans_cli_dialog import JansGDialog
 from utils.multi_lang import _
 from utils.utils import DialogUtils
-from utils.static import cli_style
+from utils.static import cli_style, common_strings
 
 
 class Plugin(DialogUtils):
@@ -298,7 +298,11 @@ class Plugin(DialogUtils):
             cli_args = {'operation_id': 'put-properties-fido2', 'data': fido2_config}
             self.app.start_progressing(_("Saving FIDO Configuration..."))
             response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
-            self.app.stop_progressing(_("FIDO Configuration was saved."))
+            self.app.stop_progressing(_(""))
+            if response.status_code == 200:
+                self.app.show_message(title=_(common_strings.success), message=_("FIDO configuration was saved."), tobefocused=self.main_container)
+            else:
+                self.app.show_message(title=_(common_strings.error), message=_("An error ocurred while saving FIDO configuration:\n") + response.text, tobefocused=self.main_container)
 
         asyncio.ensure_future(coroutine())
 

@@ -52,26 +52,28 @@
 //!  Currently only [MemoryLogger](`memory_logger::MemoryLogger`) implement this.
 
 pub mod interface;
+mod log_entry;
 pub(crate) mod log_strategy;
 mod memory_logger;
 mod nop_logger;
 mod stdout_logger;
+
+pub use log_entry::*;
 
 #[cfg(test)]
 mod test;
 
 use std::sync::Arc;
 
-use crate::models::log_config::LogConfig;
+use crate::bootstrap_config::log_config::LogConfig;
 pub use interface::LogStorage;
-pub(crate) use interface::LogWriter;
 pub(crate) use log_strategy::LogStrategy;
 
 /// Type alias for logger that is used in application
-pub(crate) type Logger = Arc<LogStrategy>;
+pub(crate) type Logger = Arc<dyn interface::Log>;
 
 /// Initialize logger.
 /// entry point for initialize logger
-pub(crate) fn init_logger(config: LogConfig) -> LogStrategy {
-    LogStrategy::new(config)
+pub(crate) fn init_logger(config: &LogConfig) -> Logger {
+    Arc::new(LogStrategy::new(config))
 }
