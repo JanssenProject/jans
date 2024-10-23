@@ -46,8 +46,8 @@ pub fn create_access_token_entities(
     data: &AccessTokenData,
 ) -> Result<AccessTokenEntities, AccessTokenEntitiesError> {
     Ok(AccessTokenEntities {
-        access_token_entity: meta::AccessTokenMeta.create_entity(schema, &data)?,
-        workload_entity: meta::WorkloadEntityMeta.create_entity(schema, &data)?,
+        access_token_entity: meta::AccessTokenMeta.create_entity(schema, data)?,
+        workload_entity: meta::WorkloadEntityMeta.create_entity(schema, data)?,
     })
 }
 
@@ -71,7 +71,7 @@ pub fn user_entity(
     let payload = if id_token_data.get(SUB_KEY) == userinfo_token_data.get(SUB_KEY) {
         &id_token_data.merge(userinfo_token_data)
     } else {
-        &id_token_data
+        id_token_data
     };
 
     meta::User.create_entity(schema, payload)
