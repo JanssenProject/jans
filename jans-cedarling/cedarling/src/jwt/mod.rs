@@ -87,8 +87,12 @@ impl JwtService {
     /// # Token Validation Rules:
     /// 1. The `access_token` is decoded and validated first, with its `aud` (which is also the `client_id`)
     ///    stored for later use.
-    /// 2. The `id_token` is then validated against the `access_token.aud` (client_id) and `access_token.iss` (issuer).
-    /// 3. An error is returned if `id_token.aud` does not match `access_token.client_id`.
+    /// 2. The `id_token.aud` is then validated against the `access_token.aud` and the `id_token.iss` with `access_token.iss`.
+    /// 3. An error is returned if `id_token.aud` does not match `access_token.client_id` or
+    ///    `id_token.iss` does not match with `access_token.iss`.
+    /// 4. The `userinfo_token.client_id` is then validated against the `access_token.aud` and the `userinfo_token.sub` with `id_token.sub`.
+    /// 5. An error is returned if `userinfo.client_id` does not match `access_token.aud` or
+    ///    `userinfo.sub` does not match with `id_token.sub`.
     ///
     /// # Parameters
     /// - `access_token`: The JWT string representing the access token.
