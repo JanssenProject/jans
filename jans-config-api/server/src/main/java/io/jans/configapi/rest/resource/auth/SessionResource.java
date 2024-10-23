@@ -15,7 +15,6 @@ import io.jans.model.SearchRequest;
 import io.jans.orm.model.PagedResult;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -53,16 +52,22 @@ public class SessionResource extends ConfigBaseResource {
             "Auth - Session Management" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.JANS_AUTH_SESSION_READ_ACCESS, "revoke_session" }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, array = @ArraySchema(schema = @Schema(implementation = SessionId.class)), examples = @ExampleObject(name = "Response json example", value = "example/session/get-session.json"))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = SessionPagedResult.class), examples = @ExampleObject(name = "Response json example", value = "example/session/get-session.json"))),
             @ApiResponse(responseCode = "401", description = "Unauthorized"),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.JANS_AUTH_SESSION_READ_ACCESS }, groupScopes = {}, superScopes = {
             ApiAccessConstants.SUPER_ADMIN_READ_ACCESS })
     public Response getAllSessions() {
-        final List<SessionId> sessions = sessionService.getSessions();
-        logger.debug("sessions:{}", sessions);
-        return Response.ok(sessions).build();
+
+        SearchRequest searchReq = createSearchRequest(sessionService.getDnForSession(null), null, ApiConstants.JANSID,
+                ApiConstants.ASCENDING, Integer.parseInt(ApiConstants.DEFAULT_LIST_START_INDEX),
+                Integer.parseInt(ApiConstants.DEFAULT_LIST_SIZE), null, null, this.getMaxCount(), null,
+                SessionId.class);
+
+        SessionPagedResult sessionPagedResult = searchSession(searchReq);
+        logger.info("Session fetched sessionPagedResult:{}", sessionPagedResult);
+        return Response.ok(sessionPagedResult).build();
     }
 
     @Operation(summary = "Search session", description = "Search session", operationId = "search-session", tags = {

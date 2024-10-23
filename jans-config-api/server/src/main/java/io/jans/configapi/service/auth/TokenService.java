@@ -62,6 +62,7 @@ public class TokenService {
             tokenEntity = persistenceEntryManager.find(TokenEntity.class, getDnForTokenEntity(tknCde));
         } catch (Exception ex) {
             logger.error("Failed to get Token identified by tknCde:{" + tknCde + "}", ex);
+            return tokenEntity;
         }
         return tokenEntity;
     }
