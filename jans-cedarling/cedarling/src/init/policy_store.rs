@@ -6,7 +6,7 @@
  */
 
 use crate::bootstrap_config::policy_store_config::{PolicyStoreConfig, PolicyStoreSource};
-use crate::common::policy_store::{PolicyStore, PolicyStoreMap};
+use crate::common::policy_store::{PolicyStore, PolicyStoreMap, TokenKind};
 
 /// Error cases for loading policy
 #[derive(Debug, thiserror::Error)]
@@ -19,6 +19,8 @@ pub enum LoadPolicyStoreError {
     MoreThanOnePolicy,
     #[error("could not found policy by id: {0}")]
     FindPolicy(String),
+    #[error("only one token should be assigned a `role_mapping`. The following tokens have a `role_mapping` field in your `policy_store.json`: {0}")]
+    MultipleRoleMappings(String),
 }
 
 /// Load policy store from source
@@ -60,6 +62,28 @@ pub(crate) fn load_policy_store(
             return Err(LoadPolicyStoreError::MoreThanOnePolicy);
         },
     };
+
+    // Check if there are any trusted issuers in the policy
+    if let Some(trusted_issuers) = &policy.trusted_issuers {
+        for issuer in trusted_issuers {
+            if let Some(metadata) = &issuer.token_metadata {
+                let tokens_with_role_mapping: Vec<TokenKind> = metadata
+                    .iter()
+                    .filter_map(|x| x.role_mapping.as_ref().map(|_| x.kind.clone()))
+                    .collect();
+
+                // If there are more than one token with `role_mapping`, return an error
+                if tokens_with_role_mapping.len() > 1 {
+                    let token_kinds: String = tokens_with_role_mapping
+                        .iter()
+                        .map(|token| token.to_string())
+                        .collect::<Vec<_>>()
+                        .join(", ");
+                    return Err(LoadPolicyStoreError::MultipleRoleMappings(token_kinds));
+                }
+            }
+        }
+    }
 
     Ok(policy)
 }
