@@ -278,9 +278,9 @@ To offer end-users a portal where they can manage their own account security pre
 ### Manual Device Management
 ![image](../../../assets/SG_registration.png)
 
-A user's Super Gluu device(s) can be removed by a Janssen administrator by directly locating the user entry in LDAP. For example, let's say user `abc` loses their device and wants to enroll a new device to use Super Gluu.
+A user's Super Gluu device(s) can be removed by a Janssen administrator by directly locating the user entry in MySQL. For example, let's say user `abc` loses their device and wants to enroll a new device to use Super Gluu.
 
-1. Find the `DN` of the user in LDAP
+1. Find the `DN` of the user in MySQL
 
 1. Find the registation under `ou=fido2_register` for associated with the user
 
