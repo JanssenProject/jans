@@ -27,4 +27,10 @@ pub enum Error {
     /// Indicates that the JWK is missing a `kid`.
     #[error("The JWK is missing a required `kid`.")]
     MissingKeyId,
+
+    /// Indicates that acquiring a write lock on decoding keys failed.
+    ///
+    /// This error gets returned when a lock gets poisoned.
+    #[error("Failed to acquire write lock on decoding keys.")]
+    LockError,
 }

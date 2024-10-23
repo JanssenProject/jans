@@ -60,7 +60,7 @@ impl KeyService {
                 .map_err(Error::HttpError)?
                 .json()
                 .map_err(Error::RequestDeserializationError)?;
-            let mut decoding_keys = conf.decoding_keys.write().unwrap();
+            let mut decoding_keys = conf.decoding_keys.write().map_err(|_| Error::LockError)?;
             for jwk in jwks.keys {
                 let decoding_key = DecodingKey::from_jwk(&jwk).map_err(Error::KeyParsingError)?;
                 let key_id = jwk.common.key_id.ok_or(Error::MissingKeyId)?;
@@ -82,14 +82,14 @@ impl KeyService {
     pub fn get_key(&self, kid: &str) -> Result<Arc<DecodingKey>, Error> {
         for (iss, config) in &self.idp_configs {
             // first try to get the key from the local keystore
-            if let Some(key) = self.get_key_from_iss(&iss, &kid) {
+            if let Some(key) = self.get_key_from_iss(&iss, &kid)? {
                 return Ok(key.clone());
             } else {
                 eprintln!("could not find {}, updating jwks", kid);
                 // if the key is not found in the local keystore, update
                 // the local keystore and try again
                 self.update_jwks(iss);
-                if let Some(key) = self.get_key_from_iss(&iss, &kid) {
+                if let Some(key) = self.get_key_from_iss(&iss, &kid)? {
                     return Ok(key.clone());
                 }
             }
@@ -99,15 +99,15 @@ impl KeyService {
     }
 
     /// helper function to retrieve a key for a specific issuer (`iss`).
-    fn get_key_from_iss(&self, iss: &str, kid: &str) -> Option<Arc<DecodingKey>> {
+    fn get_key_from_iss(&self, iss: &str, kid: &str) -> Result<Option<Arc<DecodingKey>>, Error> {
         if let Some(idp) = self.idp_configs.get(iss) {
-            let decoding_keys = idp.decoding_keys.read().unwrap();
+            let decoding_keys = idp.decoding_keys.read().map_err(|_| Error::LockError)?;
             if let Some(key) = decoding_keys.get(kid) {
-                return Some(key.clone());
+                return Ok(Some(key.clone()));
             }
         }
 
-        None
+        Ok(None)
     }
 
     /// updates the JWKS for a given issuer (`iss`).
@@ -140,7 +140,7 @@ impl KeyService {
 
         // we reassign the keys after fetching and deserializing the keys
         // so we don't lose the old ones in case the process fails
-        let mut decoding_keys = conf.decoding_keys.write().unwrap();
+        let mut decoding_keys = conf.decoding_keys.write().map_err(|_| Error::LockError)?;
         *decoding_keys = new_keys;
 
         Ok(())
