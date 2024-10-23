@@ -11,8 +11,6 @@ use serde::{Deserialize, Serialize};
 pub struct AccessToken {
     pub iss: String,
     pub aud: String,
-    #[serde(flatten)]
-    pub extra: serde_json::Value,
 }
 
 #[derive(Deserialize, Serialize)]
@@ -20,14 +18,10 @@ pub struct IdToken {
     pub iss: String,
     pub aud: String,
     pub sub: String,
-    #[serde(flatten)]
-    pub extra: serde_json::Value,
 }
 
 #[derive(Deserialize, Serialize)]
 pub struct UserInfoToken {
     pub sub: String,
     pub client_id: String,
-    #[serde(flatten)]
-    pub extra: serde_json::Value,
 }
