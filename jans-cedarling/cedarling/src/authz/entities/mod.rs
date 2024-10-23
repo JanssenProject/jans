@@ -46,8 +46,8 @@ pub fn create_access_token_entities(
     data: &AccessTokenData,
 ) -> Result<AccessTokenEntities, AccessTokenEntitiesError> {
     Ok(AccessTokenEntities {
-        access_token_entity: meta::AccessTokenMeta.create_entity(schema, &data.0)?,
-        workload_entity: meta::WorkloadEntityMeta.create_entity(schema, &data.0)?,
+        access_token_entity: meta::AccessTokenMeta.create_entity(schema, &data)?,
+        workload_entity: meta::WorkloadEntityMeta.create_entity(schema, &data)?,
     })
 }
 
@@ -56,7 +56,7 @@ pub fn id_token_entity(
     schema: &CedarSchemaJson,
     data: &IdTokenData,
 ) -> Result<cedar_policy::Entity, CedarPolicyCreateTypeError> {
-    meta::IdToken.create_entity(schema, &data.0)
+    meta::IdToken.create_entity(schema, data)
 }
 
 /// Create user entity
@@ -68,14 +68,13 @@ pub fn user_entity(
     const SUB_KEY: &str = "sub";
 
     // if 'sub' is not the same we discard the userinfo token
-    let data = if id_token_data.0.payload.get(SUB_KEY) == userinfo_token_data.0.payload.get(SUB_KEY)
-    {
-        &id_token_data.0.extend(userinfo_token_data.0.clone())
+    let payload = if id_token_data.get(SUB_KEY) == userinfo_token_data.get(SUB_KEY) {
+        &id_token_data.merge(userinfo_token_data)
     } else {
-        &id_token_data.0
+        &id_token_data
     };
 
-    meta::User.create_entity(schema, data)
+    meta::User.create_entity(schema, payload)
 }
 
 /// Describe errors on creating resource entity

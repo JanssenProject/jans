@@ -8,19 +8,20 @@
 use std::collections::HashMap;
 
 use cedar_policy::RestrictedExpression;
+use derive_more::Deref;
 use serde_json::Value;
 
 /// Wrapper around access token decode result
-#[derive(Clone, serde::Deserialize)]
-pub(crate) struct AccessTokenData(pub TokenPayload);
+#[derive(Clone, Deref, serde::Deserialize)]
+pub(crate) struct AccessTokenData(TokenPayload);
 
 /// Wrapper around id token decode result
-#[derive(Clone, serde::Deserialize)]
-pub(crate) struct IdTokenData(pub TokenPayload);
+#[derive(Clone, Deref, serde::Deserialize)]
+pub(crate) struct IdTokenData(TokenPayload);
 
 /// Wrapper around userinfo token decode result
-#[derive(Clone, serde::Deserialize)]
-pub(crate) struct UserInfoTokenData(pub TokenPayload);
+#[derive(Clone, Deref, serde::Deserialize)]
+pub(crate) struct UserInfoTokenData(TokenPayload);
 
 /// A container for storing token data or data attributes for the .
 /// Provides methods for retrieving payload from the token or attributes for the .
@@ -35,10 +36,15 @@ impl TokenPayload {
         Self { payload }
     }
 
-    /// Clone current value and extend with the given payload.
-    pub fn extend(&self, payload: TokenPayload) -> Self {
+    /// Get the value of a key in the payload.
+    pub fn get(&self, key: &str) -> Option<&serde_json::Value> {
+        self.payload.get(key)
+    }
+
+    /// Clone current value and merge with the given payload.
+    pub fn merge(&self, payload: &TokenPayload) -> Self {
         let mut result = self.clone();
-        result.payload.extend(payload.payload);
+        result.payload.extend(payload.payload.clone());
 
         result
     }
