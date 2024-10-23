@@ -37,6 +37,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         opendj_schema_desc_fn = os.path.join(Config.install_dir, 'schema/opendj_schema_descriptions.json')
         self.opendj_schema_descriptions = base.readJsonFile(opendj_schema_desc_fn)
 
+
     @property
     def qchar(self):
         return '`' if Config.rdbm_type in ('mysql', 'spanner') else '"'
@@ -48,15 +49,8 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         self.local_install()
         if Config.rdbm_install_type == InstallTypes.REMOTE and base.argsp.reset_rdbm_db:
             self.reset_rdbm_db()
-        jans_schema_files = []
-        self.jans_attributes = []
-        for jans_schema_fn in ('jans_schema.json', 'custom_schema.json'):
-            schema_full_path = os.path.join(Config.install_dir, 'schema', jans_schema_fn)
-            jans_schema_files.append(schema_full_path)
-            schema_ = base.readJsonFile(schema_full_path)
-            self.jans_attributes += schema_.get('attributeTypes', [])
-
-        self.create_tables(jans_schema_files)
+        self.prepare_attributes_index_list()
+        self.create_tables(self.jans_schema_files)
         self.create_subtables()
         self.import_ldif()
         self.create_indexes()
@@ -170,6 +164,30 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
         self.dbUtils.bind(force=True)
 
+    def prepare_attributes_index_list(self):
+
+        self.jans_schema_files = []
+        self.jans_attributes = []
+
+
+        for jans_schema_fn in ('jans_schema.json', 'custom_schema.json'):
+            schema_full_path = os.path.join(Config.install_dir, 'schema', jans_schema_fn)
+            self.jans_schema_files.append(schema_full_path)
+            schema_ = base.readJsonFile(schema_full_path)
+            self.jans_attributes += schema_.get('attributeTypes', [])
+
+        self.sql_indexes_fn = os.path.join(Config.static_rdbm_dir, Config.rdbm_type + '_index.json')
+        self.sql_indexes = base.readJsonFile(self.sql_indexes_fn)
+
+        # read opendj indexes and add multivalued attributes to JSON indexing
+        opendj_index = base.readJsonFile(os.path.join(Config.static_rdbm_dir, 'opendj_index.json'))
+        opendj_index_list = [ atribute['attribute'] for atribute in opendj_index ]
+
+        for attribute in self.jans_attributes:
+            if attribute.get('multivalued'):
+                for attr_name in attribute['names']:
+                    if attr_name in opendj_index_list and attr_name not in self.sql_indexes['__common__']['fields']:
+                        self.sql_indexes['__common__']['fields'].append(attr_name)
 
     def get_sql_col_type(self, attrname, table=None):
 
@@ -295,8 +313,9 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                     sql_cmd = 'CREATE TABLE `{}` (`doc_id` {} NOT NULL, `objectClass` STRING(48), dn STRING(128), {}) PRIMARY KEY (`doc_id`)'.format(sql_tbl_name, doc_id_type, ', '.join(sql_tbl_cols))
                 else:
                     sql_cmd = 'CREATE TABLE `{}` (`doc_id` {} NOT NULL UNIQUE, `objectClass` VARCHAR(48), dn VARCHAR(128), {}, PRIMARY KEY (`doc_id`));'.format(sql_tbl_name, doc_id_type, ', '.join(sql_tbl_cols))
+
                 self.dbUtils.exec_rdbm_query(sql_cmd)
-                
+
                 for comment_sql in col_comments:
                     self.dbUtils.exec_rdbm_query(comment_sql)
                     tables.append(comment_sql)
@@ -334,25 +353,10 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
     def create_indexes(self):
 
-        indexes = []
-
-        sql_indexes_fn = os.path.join(Config.static_rdbm_dir, Config.rdbm_type + '_index.json')
-        sql_indexes = base.readJsonFile(sql_indexes_fn)
-
-        # read opendj indexes and add multivalued attributes to JSON indexing
-        opendj_index = base.readJsonFile(os.path.join(Config.static_rdbm_dir, 'opendj_index.json'))
-        opendj_index_list = [ atribute['attribute'] for atribute in opendj_index ]
-
-        for attribute in self.jans_attributes:
-            if attribute.get('multivalued'):
-                for attr_name in attribute['names']:
-                    if attr_name in opendj_index_list and attr_name not in sql_indexes['__common__']['fields']:
-                        sql_indexes['__common__']['fields'].append(attr_name)
-
         if Config.rdbm_type == 'spanner':
             tables = self.dbUtils.spanner_client.get_tables()
             for tblCls in tables:
-                tbl_fields = sql_indexes.get(tblCls, {}).get('fields', []) + sql_indexes['__common__']['fields']
+                tbl_fields = self.sql_indexes.get(tblCls, {}).get('fields', []) + self.sql_indexes['__common__']['fields']
 
                 tbl_data = self.dbUtils.spanner_client.exec_sql('SELECT * FROM {} LIMIT 1'.format(tblCls))
 
@@ -375,7 +379,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                                 )
                         self.dbUtils.spanner_client.exec_sql(sql_cmd)
 
-                for i, custom_index in enumerate(sql_indexes.get(tblCls, {}).get('custom', [])):
+                for i, custom_index in enumerate(self.sql_indexes.get(tblCls, {}).get('custom', [])):
                     sql_cmd = 'CREATE INDEX `{0}_CustomIdx{1}` ON {0} ({2})'.format(
                                     tblCls,
                                     i+1, 
@@ -386,7 +390,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         else:
             for tblCls in self.dbUtils.Base.classes.keys():
                 tblObj = self.dbUtils.Base.classes[tblCls]()
-                tbl_fields = sql_indexes.get(tblCls, {}).get('fields', []) +  sql_indexes['__common__']['fields']
+                tbl_fields = self.sql_indexes.get(tblCls, {}).get('fields', []) +  self.sql_indexes['__common__']['fields']
 
                 for attr in tblObj.__table__.columns:
                     if attr.name == 'doc_id':
@@ -398,7 +402,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                     if isinstance(attr.type, self.dbUtils.json_dialects_instance):
 
                         if attr.name in tbl_fields:
-                            for i, ind_str in enumerate(sql_indexes['__common__']['JSON']):
+                            for i, ind_str in enumerate(self.sql_indexes['__common__']['JSON']):
                                 tmp_str = Template(ind_str)
                                 if Config.rdbm_type == 'mysql':
                                     sql_cmd = 'ALTER TABLE {0}.{1} ADD INDEX `{2}_json_{3}`(({4}));'.format(
@@ -419,11 +423,15 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
                     elif attr.name in tbl_fields:
                         if Config.rdbm_type == 'mysql':
-                            sql_cmd = 'ALTER TABLE {0}.{1} ADD INDEX `{1}_{2}` (`{3}`);'.format(
+                            key_lenght = ''
+                            if self.get_sql_col_type(attr.name, tblCls) == 'TEXT' and attr.name in self.sql_indexes.get(tblCls, {}).get('fields', []) + self.sql_indexes['__common__']['fields']:
+                                key_lenght = '(255)'
+                            sql_cmd = 'ALTER TABLE {0}.{1} ADD INDEX `{1}_{2}` (`{3}`{4});'.format(
                                         Config.rdbm_db,
                                         tblCls,
                                         ind_name,
-                                        attr.name
+                                        attr.name,
+                                        key_lenght
                                     )
                             self.dbUtils.exec_rdbm_query(sql_cmd)
                         elif Config.rdbm_type == 'pgsql':
@@ -433,7 +441,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                                     )
                             self.dbUtils.exec_rdbm_query(sql_cmd)
 
-                for i, custom_index in enumerate(sql_indexes.get(tblCls, {}).get('custom', [])):
+                for i, custom_index in enumerate(self.sql_indexes.get(tblCls, {}).get('custom', [])):
                     if Config.rdbm_type == 'mysql':
                         sql_cmd = 'ALTER TABLE {0}.{1} ADD INDEX `{2}` ({3});'.format(
                                         Config.rdbm_db,
