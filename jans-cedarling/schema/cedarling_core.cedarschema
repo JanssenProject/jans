@@ -86,42 +86,42 @@ namespace Jans {
     // ******  Actions  ******
     action Compare appliesTo {
         principal: [User, Role],
-        resource: Application,
+        resource: Workload,
         context: Context,
     };
     action Execute appliesTo {
         principal: [User, Role],
-        resource: Application,
+        resource: Workload,
         context: Context,
     };
     action Monitor appliesTo {
         principal: [User, Role],
-        resource: Application,
+        resource: Workload,
         context: Context,
     };
     action Read appliesTo {
         principal: [User, Role],
-        resource: Application,
+        resource: Workload,
         context: Context,
     };
     action Search appliesTo {
         principal: [User, Role],
-        resource: Application,
+        resource: Workload,
         context: Context,
     };
     action Share appliesTo {
         principal: [User, Role],
-        resource: Application,
+        resource: Workload,
         context: Context,
     };
     action Tag appliesTo {
         principal: [User, Role],
-        resource: Application,
+        resource: Workload,
         context: Context,
     };
     action Write appliesTo {
         principal: [User, Role],
-        resource: Application,
+        resource: Workload,
         context: Context,
     };
     action GET appliesTo {
