@@ -6,6 +6,7 @@
  */
 
 use super::cedar_schema::CedarSchema;
+use serde::de::Visitor;
 use serde::Deserialize;
 use std::collections::HashMap;
 use std::fmt;
@@ -39,16 +40,13 @@ pub struct TrustedIssuer {
 #[derive(Debug, Clone, Deserialize)]
 #[allow(dead_code)]
 pub struct TokenMetadata {
-    #[serde(
-        rename = "type",
-        deserialize_with = "deserialize_policy_set::parse_token_kind"
-    )]
+    #[serde(rename = "type")]
     pub kind: TokenKind,
     pub person_id: String, // the claim used to create the person entity
     pub role_mapping: Option<String>, // the claim used to create a role for the token
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone)]
 #[allow(dead_code)]
 pub enum TokenKind {
     Access,
@@ -69,15 +67,53 @@ impl fmt::Display for TokenKind {
     }
 }
 
+impl<'de> Deserialize<'de> for TokenKind {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        struct TokenKindVisitor;
+
+        impl<'de> Visitor<'de> for TokenKindVisitor {
+            type Value = TokenKind;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("a valid token kind string")
+            }
+
+            fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
+            where
+                E: serde::de::Error,
+            {
+                match value.to_lowercase().as_str() {
+                    "id" => Ok(TokenKind::Id),
+                    "userinfo" => Ok(TokenKind::Userinfo),
+                    "access" => Ok(TokenKind::Access),
+                    "transaction" => Ok(TokenKind::Transaction),
+                    _ => Err(serde::de::Error::unknown_variant(
+                        &value,
+                        &[
+                            "access_token",
+                            "id_token",
+                            "userinfo_token",
+                            "transaction_token",
+                        ],
+                    )),
+                }
+            }
+        }
+
+        deserializer.deserialize_string(TokenKindVisitor)
+    }
+}
+
 // Deserialization to [`cedar_policy::PolicySet`] moved here
 // to be close to structure where it is used.
 // And current module is small so it is OK to store it here.
 mod deserialize_policy_set {
-    use super::TokenKind;
     use base64::prelude::*;
     use cedar_policy::PolicyId;
-    use serde::{Deserialize, Deserializer};
-    use std::{collections::HashMap, str::FromStr};
+    use std::collections::HashMap;
 
     // we use camel case to show that it is like a constant
     #[derive(Debug, thiserror::Error)]
@@ -149,30 +185,6 @@ mod deserialize_policy_set {
             })?;
 
         Ok(policy)
-    }
-
-    impl FromStr for TokenKind {
-        type Err = Box<str>;
-
-        fn from_str(s: &str) -> Result<Self, Self::Err> {
-            match s.to_lowercase().as_str() {
-                "id" => Ok(TokenKind::Id),
-                "userinfo" => Ok(TokenKind::Userinfo),
-                "access" => Ok(TokenKind::Access),
-                "transaction" => Ok(TokenKind::Transaction),
-                _ => Err(s.into()),
-            }
-        }
-    }
-
-    // function to deserialize a string into `TokenKind`
-    pub fn parse_token_kind<'de, D>(deserializer: D) -> Result<TokenKind, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        let s = String::deserialize(deserializer)?;
-        TokenKind::from_str(&s)
-            .map_err(|_| serde::de::Error::custom(format!("invalid token type: `{}`", s)))
     }
 
     #[cfg(test)]
