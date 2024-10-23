@@ -46,7 +46,7 @@ pub struct TokenMetadata {
     pub role_mapping: Option<String>, // the claim used to create a role for the token
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Copy, Clone)]
 #[allow(dead_code)]
 pub enum TokenKind {
     Access,
