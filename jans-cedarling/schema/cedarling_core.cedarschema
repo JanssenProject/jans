@@ -130,27 +130,27 @@ namespace Jans {
         context: Context,
     };
     action GET appliesTo {
-          principal: [Application, Workload],
+          principal: Workload,
           resource: HTTP_Request,
           context: Context,
     };
     action PUT appliesTo {
-        principal: [Application, Workload],
+        principal: Workload,
         resource: HTTP_Request,
         context: Context,
     };
     action DELETE appliesTo {
-        principal: [Application, Workload],
+        principal: Workload,
         resource: HTTP_Request,
         context: Context,
     };
     action HEAD appliesTo {
-        principal: [Application, Workload],
+        principal: Workload,
         resource: HTTP_Request,
         context: Context,
     };
     action PATCH appliesTo {
-        principal: [Application, Workload],
+        principal: Workload,
         resource: HTTP_Request,
         context: Context,
     };
