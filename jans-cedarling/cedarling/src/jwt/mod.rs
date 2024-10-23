@@ -122,40 +122,50 @@ impl JwtService {
         let userinfo_token_claims = self.decoding_strategy.extract_claims(userinfo_token)?;
 
         // validate access_token
-        let access_token = self.decoding_strategy.decode::<AccessToken>(
-            access_token,
-            None::<String>, // TODO: validate issuer for access token
-            None::<String>,
-            None::<String>,
-            true,
-            true,
-        )?;
+        let access_token = self
+            .decoding_strategy
+            .decode::<AccessToken>(
+                access_token,
+                None::<String>, // TODO: validate issuer for access token
+                None::<String>,
+                None::<String>,
+                true,
+                true,
+            )
+            .map_err(|e| Error::InvalidAccessToken(e.into()))?;
 
         // validate the id_token against the access_token's `iss` and `aud`
-        let id_token = self.decoding_strategy.decode::<IdToken>(
-            id_token,
-            Some(&access_token.iss),
-            Some(&access_token.aud),
-            None::<String>,
-            true,
-            true,
-        )?;
+        let id_token = self
+            .decoding_strategy
+            .decode::<IdToken>(
+                id_token,
+                Some(&access_token.iss),
+                Some(&access_token.aud),
+                None::<String>,
+                true,
+                true,
+            )
+            .map_err(|e| Error::InvalidIdToken(e.into()))?;
 
         // validate the userinfo_token
-        let userinfo_token = self.decoding_strategy.decode::<UserInfoToken>(
-            userinfo_token,
-            None::<String>,
-            None::<String>,
-            Some(id_token.sub), // validate that the `sub` is the same as with the id_token's sub
-            false,              // this token usually does not have an nbf field
-            false,              // this token usually does not have an exp field
-        )?;
+        let userinfo_token = self
+            .decoding_strategy
+            .decode::<UserInfoToken>(
+                userinfo_token,
+                None::<String>,
+                None::<String>,
+                Some(id_token.sub), // validate that the `sub` is the same as with the id_token's sub
+                false,              // this token usually does not have an nbf field
+                false,              // this token usually does not have an exp field
+            )
+            .map_err(|e| Error::InvalidUserinfoToken(e.into()))?;
         match self.decoding_strategy {
             DecodingStrategy::WithoutValidation => (), // do nothing
             DecodingStrategy::WithValidation { .. } => {
                 // validate that  the userinfo_token's client_id is the same as the access_token's aud
                 if userinfo_token.client_id != access_token.aud {
-                    return Err(Error::ValidationError("the userinfo_token's `client_id` does not match with the access_token's `aud`".into()));
+                    let validation_err = Error::ValidationError("the userinfo_token's `client_id` does not match with the access_token's `aud`".into());
+                    return Err(Error::InvalidUserinfoToken(validation_err.into()));
                 }
             },
         }
