@@ -249,7 +249,7 @@ pub enum AuthorizeError {
     /// Error encountered while creating access token entities
     #[error("{0}")]
     AccessTokenEntities(#[from] AccessTokenEntitiesError),
-    /// Error encountered while creating access token entities
+    /// Error encountered while creating id token entities
     #[error("could not create Jans::id_token: {0}")]
     CreateIdTokenEntity(CedarPolicyCreateTypeError),
     /// Error encountered while creating access token entities
