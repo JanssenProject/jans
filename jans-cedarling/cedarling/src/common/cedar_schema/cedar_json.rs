@@ -180,6 +180,7 @@ impl<'de> serde::Deserialize<'de> for CedarSchemaEntityType {
             },
             _ => CedarSchemaEntityType::Primitive(PrimitiveType::deserialize(&value).map_err(
                 |err| {
+                    // will newer happen because we know that field "type" is string
                     serde::de::Error::custom(format!(
                         "failed to deserialize PrimitiveType: {}",
                         err
@@ -280,7 +281,7 @@ mod tests {
     /// to debug deserialize the schema
     #[test]
     fn parse_correct_example() {
-        let json_value = include_str!("test_data_cedar.json");
+        let json_value = include_str!("test_files/test_data_cedar.json");
 
         let parsed_cedar_schema: CedarSchemaJson =
             serde_json::from_str(json_value).expect("failed to parse json");
@@ -355,5 +356,49 @@ mod tests {
             serde_json::json!(parsed_cedar_schema).sorted(),
             serde_json::json!(schema_to_compare).sorted()
         );
+    }
+
+    /// test to check if we get error on parsing invalid `EntityOrCommon` type
+    #[test]
+    fn parse_error_entity_or_common() {
+        // In this file we skipped field `name` for `EntityOrCommon`
+        let json_value = include_str!("test_files/test_data_cedar_err_entity_or_common.json");
+
+        let parse_error =
+            serde_json::from_str::<CedarSchemaJson>(json_value).expect_err("should fail to parse");
+        assert_eq!(parse_error.to_string(),"could not deserialize CedarSchemaEntityType: failed to deserialize EntityOrCommon: missing field `name` at line 17 column 1")
+    }
+
+    /// test to check if we get error on parsing invalid `PrimitiveType` type
+    #[test]
+    fn parse_error_primitive_type() {
+        // In this file we use `"type": 123` but in OK case should be `"type": "Long"`
+        let json_value = include_str!("test_files/test_data_cedar_err_primitive_type.json");
+
+        let parse_error =
+            serde_json::from_str::<CedarSchemaJson>(json_value).expect_err("should fail to parse");
+        assert_eq!(parse_error.to_string(),"could not deserialize CedarSchemaEntityType: invalid type: integer `123`, expected a string at line 17 column 1")
+    }
+
+    /// test to check if we get error on parsing invalid nested Sets :`Set<Set<EntityOrCommon>>` type
+    #[test]
+    fn parse_error_set_entity_or_common() {
+        // In this file we skipped field `name` for `EntityOrCommon` in the nested set
+        let json_value = include_str!("test_files/test_data_cedar_err_set.json");
+
+        let parse_error =
+            serde_json::from_str::<CedarSchemaJson>(json_value).expect_err("should fail to parse");
+        assert_eq!(parse_error.to_string(),"could not deserialize CedarSchemaEntityType: failed to deserialize Set: failed to deserialize Set: failed to deserialize EntityOrCommon: missing field `name` at line 24 column 1")
+    }
+
+    /// test to check if we get error on parsing invalid type in field `is_required`
+    #[test]
+    fn parse_error_field_is_required() {
+        // In this file we use ` "required": 1234` but in OK case should be ` "required": false` or omit
+        let json_value = include_str!("test_files/test_data_cedar_err_field_is_required.json");
+
+        let parse_error =
+            serde_json::from_str::<CedarSchemaJson>(json_value).expect_err("should fail to parse");
+        assert_eq!(parse_error.to_string(),"could not deserialize CedarSchemaEntityAttribute, field 'is_required': invalid type: integer `1234`, expected a boolean at line 22 column 1")
     }
 }
