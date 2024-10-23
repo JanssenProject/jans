@@ -6,5 +6,5 @@ mypy>=0.971
 
 # internal docs generator
 mkdocstrings-python>=0.7.1
-mkdocs-material>=8.4.0
+mkdocs-material>=9.5.32
 mkdocs-click>=0.8.0
