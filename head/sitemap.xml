@@ -1836,26 +1836,6 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://jans.io/docs/head/janssen-server/reference/database/ldap-config/</loc>
-         <lastmod>2024-10-23</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/janssen-server/reference/database/ldap-namespace/</loc>
-         <lastmod>2024-10-23</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/janssen-server/reference/database/ldap-ops/</loc>
-         <lastmod>2024-10-23</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://jans.io/docs/head/janssen-server/reference/database/ldap-schema/</loc>
-         <lastmod>2024-10-23</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
          <loc>https://jans.io/docs/head/janssen-server/reference/database/mysql-config/</loc>
          <lastmod>2024-10-23</lastmod>
          <changefreq>daily</changefreq>

@@ -8768,12 +8768,11 @@
 <p>On a Janssen Server instance 
 the type of persistence(DB) used is specified 
 in <code>/etc/jans/conf/jans.properties</code> using the entry as show below:</p>
-<div class="highlight"><pre><span></span><code>persistence.type=ldap
+<div class="highlight"><pre><span></span><code>persistence.type=sql
 </code></pre></div>
 <p>Values for property <code>persistence.type</code> is set during the installation and based
 on choice of persistence(DB) type, it can be one of these supported values:</p>
 <ul>
-<li><code>ldap</code></li>
 <li><code>couchbase</code></li>
 <li><code>sql</code> </li>
 <li><code>spanner</code> </li>
@@ -8789,7 +8788,6 @@ configuration properties will be available on Janssen Server instance under
 the directory <code>/etc/jans/conf/</code>. List of configuration files for these 
 persistence types are:</p>
 <ul>
-<li><code>jans-ldap.properties</code></li>
 <li><code>jans-couchbase.properties</code></li>
 <li><code>jans-spanner.properties</code></li>
 <li><code>jans-sql.properties</code></li>
@@ -8882,7 +8880,7 @@ directory which contains config files for Janssen modules. For example
 <p><strong>jans-orm-annotation</strong>: Define annotations which instruct ORM about how to work with beans and properties </p>
 </li>
 <li>
-<p><strong>jans-orm-filter</strong>: This module provides Filter API. The syntax is very similar to LDAP filters. The ORM layer converts them at runtime to DB query syntax: <em>SQL/NoSQL/LDAP</em></p>
+<p><strong>jans-orm-filter</strong>: This module provides Filter API. The syntax is very similar to LDAP filters. The ORM layer converts them at runtime to DB query syntax: <em>SQL/NoSQL</em></p>
 </li>
 <li>
 <p><strong>jans-orm-cdi</strong>: Provides reusable factory which can be used in CDI based projects</p>
@@ -9024,7 +9022,7 @@ schema <a href="https://github.com/JanssenProject/jans/blob/main/jans-linux-setu
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-15T10:12:47+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-15</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-23T09:14:06+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-23</span>
       
         <br>
         Created:
