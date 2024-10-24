@@ -119,8 +119,7 @@ Json object containing one or more policy_id as key and policy object as value.
         },
         {
           "type": "userinfo",
-          "person_id": "email",
-          "role_mapping": "role"
+          "person_id": "email"
         }
       ]
     }
