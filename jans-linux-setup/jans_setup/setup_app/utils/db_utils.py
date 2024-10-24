@@ -494,21 +494,19 @@ class DBUtils:
                 if sqlalchemyObj.jansConfProperty:
                     jans_conf_property = copy.deepcopy(sqlalchemyObj.jansConfProperty)
                 else:
-                    jans_conf_property = {'v': []}
+                    jans_conf_property = []
 
-                ox_configuration_property_list = jans_conf_property['v'] if Config.rdbm_type == 'mysql' else jans_conf_property
-
-                for i, oxconfigprop in enumerate(ox_configuration_property_list[:]):
+                for i, oxconfigprop in enumerate(jans_conf_property[:]):
                     if isinstance(oxconfigprop, str):
                         oxconfigprop = json.loads(oxconfigprop)
                     if oxconfigprop.get('value1') == 'allowed_clients' and client_id not in oxconfigprop['value2']:
                         oxconfigprop['value2'] = self.add2strlist(client_id, oxconfigprop['value2'])
-                        ox_configuration_property_list[i] = json.dumps(oxconfigprop)
+                        jans_conf_property[i] = json.dumps(oxconfigprop)
                         break
                 else:
-                    ox_configuration_property_list.append(json.dumps({'value1': 'allowed_clients', 'value2': client_id}))
+                    jans_conf_property.append(json.dumps({'value1': 'allowed_clients', 'value2': client_id}))
 
-                sqlalchemyObj.jansConfProperty = jans_conf_property if BackendTypes.MYSQL else ox_configuration_property_list
+                sqlalchemyObj.jansConfProperty = jans_conf_property
                 self.session.commit()
 
 
@@ -565,8 +563,6 @@ class DBUtils:
             r = data.get('results', [])
             if r and r[0].get(attribute):
                 return r[0][attribute]
-
-
 
     def get_attr_syntax(self, attrname):
         for jans_attr in self.jans_attributes:
@@ -675,9 +671,9 @@ class DBUtils:
             return "{}-{}-{}{}{}:{}:{}{}{}".format(dval[0:4], dval[4:6], dval[6:8], sep, dval[8:10], dval[10:12], dval[12:14], dval[14:17], postfix)
 
         if data_type == 'JSON':
-            json_data = {'v':[]}
+            json_data = []
             for d in val:
-                json_data['v'].append(d)
+                json_data.append(d)
 
             return json_data
 
@@ -747,9 +743,6 @@ class DBUtils:
                             if isinstance(sqlalchObj.__table__.columns[attribute].type, self.json_dialects_instance):
                                 cur_val = copy.deepcopy(getattr(sqlalchObj, attribute))
                                 for val_ in new_val:
-                                    if Config.rdbm_type == 'mysql':
-                                        cur_val['v'].append(val_)
-                                    else:
                                         cur_val.append(val_)
                                 setattr(sqlalchObj, attribute, cur_val)
                             else:
@@ -804,7 +797,7 @@ class DBUtils:
 
                         for col in sqlalchCls.__table__.columns:
                             if isinstance(col.type, self.json_dialects_instance) and not col.name in vals:
-                                vals[col.name] = {'v': []} if Config.rdbm_type == 'mysql' else []
+                                vals[col.name] = []
 
                         sqlalchObj = sqlalchCls()
 
@@ -964,7 +957,7 @@ class DBUtils:
                         if isinstance(sqlalchObj.__table__.columns[attribute].type, self.json_dialects_instance):
                             cur_val = copy.deepcopy(getattr(sqlalchObj, attribute))
                             for val_ in new_val:
-                                cur_val['v'].append(val_)
+                                cur_val.append(val_)
                             setattr(sqlalchObj, attribute, cur_val)
                         else:
                             setattr(sqlalchObj, attribute, new_val)
@@ -1017,7 +1010,7 @@ class DBUtils:
 
                     for col in sqlalchCls.__table__.columns:
                         if isinstance(col.type, self.json_dialects_instance) and not col.name in vals:
-                            vals[col.name] = {'v': []}
+                            vals[col.name] = []
 
                     sqlalchObj = sqlalchCls()
 

@@ -146,7 +146,8 @@ class Plugin(DialogUtils):
             response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
             if response.status_code == 200:
                 self.data = cur_data
-                self.app.stop_progressing(_("SMTP Configuration was saved."))
+                self.app.stop_progressing("")
+                self.app.show_message(title=_(common_strings.success), message=_("SMTP configuration was saved."), tobefocused=self.app.center_container)
                 await self.get_smtp_config()
             else:
                 self.app.show_message(_(common_strings.error), _("Save failed: {}\n").format(response.text), tobefocused=self.main_container)

@@ -5,7 +5,7 @@ from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.widgets import Button,  Frame
 from wui_components.jans_drop_down import DropDownWidget
 from utils.utils import DialogUtils
-from utils.static import cli_style
+from utils.static import cli_style, common_strings
 from utils.multi_lang import _
 
 class Plugin(DialogUtils):
@@ -119,6 +119,10 @@ class Plugin(DialogUtils):
             self.app.start_progressing()
             response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
             self.app.stop_progressing()
+            if response.status_code in (200, 201):
+                self.app.show_message(title=_(common_strings.success), message=_("SCIM configuration was saved."), tobefocused=self.app.center_container)
+            else:
+                self.app.show_message(title=_(common_strings.error), message=_("An error ocurred while saving SCIM configuration:\n") + response.text, tobefocused=self.app.center_container)
 
         asyncio.ensure_future(coroutine())
 

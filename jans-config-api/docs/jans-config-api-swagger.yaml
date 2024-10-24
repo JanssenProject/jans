@@ -7644,9 +7644,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/SessionId'
+                $ref: '#/components/schemas/SessionPagedResult'
               examples:
                 Response json example:
                   description: Response json example
@@ -9215,9 +9213,9 @@ components:
           type: string
         selected:
           type: boolean
-        adminCanView:
-          type: boolean
         userCanView:
+          type: boolean
+        adminCanView:
           type: boolean
         adminCanEdit:
           type: boolean
@@ -10076,6 +10074,8 @@ components:
           type: boolean
         lockMessageConfig:
           $ref: '#/components/schemas/LockMessageConfig'
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -10085,8 +10085,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -11194,14 +11192,14 @@ components:
           type: boolean
         internal:
           type: boolean
-        locationPath:
-          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
+        locationPath:
+          type: string
         baseDn:
           type: string
     ScriptError:
@@ -11643,6 +11641,22 @@ components:
             type: boolean
           xml:
             name: map
+    SessionPagedResult:
+      type: object
+      properties:
+        start:
+          type: integer
+          format: int32
+        totalEntriesCount:
+          type: integer
+          format: int32
+        entriesCount:
+          type: integer
+          format: int32
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/SessionId'
     User:
       type: object
       properties:
@@ -11701,22 +11715,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/UserAuthenticator'
-    SessionPagedResult:
-      type: object
-      properties:
-        start:
-          type: integer
-          format: int32
-        totalEntriesCount:
-          type: integer
-          format: int32
-        entriesCount:
-          type: integer
-          format: int32
-        entries:
-          type: array
-          items:
-            $ref: '#/components/schemas/SessionId'
     TokenAttributes:
       type: object
       properties:

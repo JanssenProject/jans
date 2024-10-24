@@ -930,7 +930,36 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 
 	private Object convertValueToDbJson(Object propertyValue, Boolean jsonValue) {
 		try {
-			if (SupportedDbType.POSTGRESQL == connectionProvider.getDbType()) {
+			if (connectionProvider.isSimpleJson()) {
+				Object[] attributeValue;
+				if (propertyValue == null) {
+					attributeValue = new Object[0];
+				} if (propertyValue instanceof List) {
+					attributeValue = ((List<?>) propertyValue).toArray();
+				} else if (propertyValue.getClass().isArray()) {
+					attributeValue = (Object[]) propertyValue;
+				} else {
+					attributeValue = new Object[] { propertyValue };
+				}
+
+				if (Boolean.TRUE.equals(jsonValue)) {
+					StringBuilder jsonString = new StringBuilder("[");
+					int count = 0;
+					for (Object val : attributeValue) {
+						if (count > 0) {
+							jsonString.append(", ");
+						}
+						jsonString.append(String.format("%s", val));
+						count++;
+					}
+					jsonString.append("]");
+					return jsonString.toString();
+				}
+	
+				String value = JSON_OBJECT_MAPPER.writeValueAsString((Object[]) attributeValue);
+	
+				return value;
+			} else if (SupportedDbType.POSTGRESQL == connectionProvider.getDbType()) {
 
 				Object[] attributeValue;
 				if (propertyValue == null) {
@@ -989,7 +1018,7 @@ public class SqlOperationServiceImpl implements SqlOperationService {
 
 	private Object[] convertDbJsonToValue(String jsonValue) {
 		try {
-			if (SupportedDbType.POSTGRESQL == connectionProvider.getDbType()) {
+			if (connectionProvider.isSimpleJson() || (SupportedDbType.POSTGRESQL == connectionProvider.getDbType())) {
 				Object[] values = JSON_OBJECT_MAPPER.readValue(jsonValue, Object[].class);
 
 				if (values != null) {

@@ -7,7 +7,9 @@
 package io.jans.orm.service;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 import jakarta.enterprise.context.ApplicationScoped;
@@ -45,6 +47,9 @@ public class PersistanceFactoryService implements BaseFactoryService {
 			BASE_DIR = null;
 		}
 	}
+	
+	public static String DB_PROPERTY_MYSQL_SIMPLE_JSON = "mysql.simple-json";
+	public static List<String> ADDIONAL_ENV_DB_PROPERTIES = Arrays.asList(DB_PROPERTY_MYSQL_SIMPLE_JSON);
 
 	public static final String BASE_DIR;
 	public static final String DIR = BASE_DIR + File.separator + "conf" + File.separator;
@@ -153,7 +158,7 @@ public class PersistanceFactoryService implements BaseFactoryService {
 			PropertiesConfiguration propertiesConfiguration = persistenceFileConf.getPropertiesConfiguration();
 
 			// Allow to override values via environment variables
-			replaceWithSystemValues(propertiesConfiguration);
+			replaceWithSystemValues(propertiesConfiguration, ADDIONAL_ENV_DB_PROPERTIES);
 
 			// Allow to override values via upper cased environment variables
 			replaceWithUpperCasedSystemValues(propertiesConfiguration);
@@ -173,13 +178,22 @@ public class PersistanceFactoryService implements BaseFactoryService {
 		return persistenceConfiguration;
 	}
 
-	private void replaceWithSystemValues(PropertiesConfiguration propertiesConfiguration) {
+	private void replaceWithSystemValues(PropertiesConfiguration propertiesConfiguration, List<String> additionalKeys) {
 		Iterator<?> keys = propertiesConfiguration.getKeys();
         while (keys.hasNext()) {
             String key = (String) keys.next();
 			if (System.getenv(key) != null) {
 				propertiesConfiguration.setProperty(key, System.getenv(key));
 			}
+        }
+        
+        if (additionalKeys != null) {
+        	for (String key : additionalKeys) {
+    			if (System.getenv(key) != null) {
+    				propertiesConfiguration.setProperty(key, System.getenv(key));
+    			}
+
+        	}
         }
 	}
 

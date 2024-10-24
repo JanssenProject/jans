@@ -9,6 +9,9 @@ use cedarling::LogStorage;
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 
+use crate::authorize::authorize_result::AuthorizeResult;
+use crate::authorize::errors::authorize_error_to_py;
+use crate::authorize::request::Request;
 use crate::config::bootstrap_config::BootstrapConfig;
 use serde_pyobject::to_pyobject;
 
@@ -31,33 +34,31 @@ use serde_pyobject::to_pyobject;
 ///
 ///     :param config: A `BootstrapConfig` object with startup settings.
 ///
-/// .. method:: pop_logs(self)
+/// .. method:: pop_logs(self) -> List[dict]
 ///
 ///     Retrieves and removes all logs from storage.
 ///
 ///     :returns: A list of log entries as Python objects.
-///     :rtype: List[PyObject]
 ///
 ///     :raises ValueError: If an error occurs while fetching logs.
 ///
-/// .. method:: get_log_by_id(self, id)
+/// .. method:: get_log_by_id(self, id: str) -> dict|None
 ///
 ///     Gets a log entry by its ID.
 ///
 ///     :param id: The log entry ID.
-///     :type id: str
-///
-///     :returns: The log entry as a Python object or None if not found.
-///     :rtype: Optional[PyObject]
 ///
 ///     :raises ValueError: If an error occurs while fetching the log.
 ///
-/// .. method:: get_log_ids(self)
+/// .. method:: get_log_ids(self) -> List[str]
 ///
 ///     Retrieves all stored log IDs.
 ///
-///     :returns: A list of log entry IDs.
-///     :rtype: List[str]
+/// .. method:: authorize(self, request: Request) -> AuthorizeResult
+///
+///     Execute authorize request
+///     :param request: Request struct for authorize.
+///
 #[derive(Clone)]
 #[pyclass]
 pub struct Cedarling {
@@ -100,9 +101,18 @@ impl Cedarling {
     fn get_log_ids(&self) -> Vec<String> {
         self.inner.get_log_ids()
     }
+
+    /// Authorize request
+    fn authorize(&self, request: Bound<'_, Request>) -> Result<AuthorizeResult, PyErr> {
+        let cedarling_instance = self
+            .inner
+            .authorize(request.borrow().to_cedarling()?)
+            .map_err(authorize_error_to_py)?;
+        Ok(cedarling_instance.into())
+    }
 }
 
-fn log_entry_to_py(gil: Python, entry: &cedarling::LogEntry) -> PyResult<PyObject> {
+fn log_entry_to_py(gil: Python, entry: &cedarling::bindings::LogEntry) -> PyResult<PyObject> {
     to_pyobject(gil, entry)
         .map(|v| v.unbind())
         .map_err(|err| err.0)

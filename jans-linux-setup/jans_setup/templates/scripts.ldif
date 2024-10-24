@@ -443,7 +443,7 @@ inum: 8AF7.D82A
 jansLevel: 100
 jansModuleProperty: {"value1":"location_type","value2":"db","description":""}
 jansRevision: 1
-jansScr::%(persistence_extension_persistenceextension)s
+jansScr::%(persistence_extension_sample_script_persistenceextension)s
 jansScrTyp: persistence_extension
 objectClass: top
 objectClass: jansCustomScr

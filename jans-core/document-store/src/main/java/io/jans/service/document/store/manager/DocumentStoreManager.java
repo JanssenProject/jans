@@ -11,6 +11,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
@@ -236,7 +238,8 @@ public class DocumentStoreManager {
 		try (InputStream is = documentStoreService.readBinaryDocumentAsStream(document.getFileName())) {
 			log.info("Writing file {} as stream", document.getFileName());
 			
-			File file = new File(document.getFileName());
+			Path path = Paths.get(document.getFilePath(), document.getFileName());
+			File file = path.toFile();
 			try (OutputStream os = new BufferedOutputStream(new FileOutputStream(file))) {
 				IOUtils.copy(is, os);
 			}

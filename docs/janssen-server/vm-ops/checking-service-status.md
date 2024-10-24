@@ -29,7 +29,7 @@ SUB    = The low-level unit activation state, values depend on unit type.
 ```
 ## Other Services
 
-There are more services other than Jans services like LDAP or Apache. To get the status of those services make sure you use command like
+There are more services other than Jans services like Apache. To get the status of those services make sure you use command like
 
 ```bash
 sudo systemctl list-units --all "apache2*"

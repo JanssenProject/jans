@@ -5,7 +5,6 @@ tags:
   - database
   - additional claims to database
   - jansPerson
-  - LDAP to MySQL Migration Script
 ---
 
 Below operations require to log into mysql workspace first with command: `mysql`
@@ -16,7 +15,7 @@ Below operations require to log into mysql workspace first with command: `mysql`
 *  `GRANT ALL PRIVILEGES ON jansdb.* TO 'jans'@'localhost';`
 
 ### Create new user claims to `jansPerson`: 
-* You can add additional attributes to `jansPerson` table and use them. This will be similar to LDAP where DB stores all user attributes in one entry. Additional attributes will not affect the server functionality.
+* You can add additional attributes to `jansPerson` table and use them. Here DB stores all the user attribute information in one entry. Additional attributes will not affect the server functionality.
 * Ensure you restart services after DB schema modification
 
 ### **Modify column size of jansPerson** :
@@ -61,9 +60,7 @@ There are three steps here:
 * Restart the ConfgiApi [service](../../../janssen-server/vm-ops/restarting-services.md#restart). If you are using kubernetes please restart the [deployment](https://kubernetes.io/docs/reference/kubectl/generated/kubectl_rollout/kubectl_rollout_restart/).
 * Create attribute using the terraform provider, curl commands, or  TUI: ![tui_custom_attribute](../../../assets/TUI_CustomAttribute.png)
 
-### LDAP to MySQL Migration Script
 
-Please refer to [these steps](./converting-data.md#ldap-to-mysql-migration-script).
 
 
 !!! Contribute

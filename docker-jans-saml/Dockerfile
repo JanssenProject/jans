@@ -1,4 +1,4 @@
-FROM quay.io/keycloak/keycloak:26.0.0@sha256:6a1da18263c3717397ae9518244fc2821bbf85d0607bc09a79f074d04c29ff24 as kc-src
+FROM quay.io/keycloak/keycloak:25.0.6@sha256:82c5b7a110456dbd42b86ea572e728878549954cc8bd03cd65410d75328095d2 as kc-src
 
 FROM bellsoft/liberica-openjre-alpine:17.0.12@sha256:29cb2ee552c7c7a924b6a1b59802508dc5123e7edad1d65d575bbf07cd05fa6d
 
@@ -24,7 +24,7 @@ RUN mkdir -p /opt/keycloak/logs \
 # ==============
 
 ENV CN_VERSION=1.1.6-SNAPSHOT
-ENV CN_BUILD_DATE='2024-10-02 09:30'
+ENV CN_BUILD_DATE='2024-10-16 20:18'
 
 RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-spi/${CN_VERSION}/kc-jans-spi-${CN_VERSION}.jar -P /opt/keycloak/providers \
     && wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-spi/${CN_VERSION}/kc-jans-spi-${CN_VERSION}-deps.zip -O /tmp/kc-jans-spi.zip \

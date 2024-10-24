@@ -30,8 +30,8 @@ public class MySQLJsonTemplates extends MySQLTemplates {
     public MySQLJsonTemplates(char escape, boolean quote) {
 		super(escape, quote);
 
-		add(SqlOps.JSON_CONTAINS, "JSON_CONTAINS({0}->{2}, CAST({1} AS JSON))");
-		add(SqlOps.JSON_EXTRACT, "{0}->{1}");
+		add(SqlOps.JSON_CONTAINS, "JSON_CONTAINS({0}->>{2}, CAST({1} AS JSON))");
+		add(SqlOps.JSON_EXTRACT, "{0}->>{1}");
 	}
 
 }

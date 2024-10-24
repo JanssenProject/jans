@@ -6,7 +6,7 @@
  */
 
 use super::interface::LogWriter;
-use crate::models::log_entry::LogEntry;
+use super::LogEntry;
 
 /// A logger that do nothing.
 pub(crate) struct NopLogger;

@@ -218,7 +218,7 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Specifies how many status list indexes AS can reserve at once within pool (when status_list feature flag is enabled). Defaults to 100.")
     private int statusListIndexAllocationBlockSize = DEFAULT_STATUS_LIST_INDEX_ALLOCATION_BLOCK_SIZE;
 
-    @DocProperty(description = "Specifies which LDAP attribute is used for the subject identifier claim")
+    @DocProperty(description = "Specifies which attribute is used for the subject identifier claim")
     private String openidSubAttribute;
 
     @DocProperty(description = "Specifies whether public subject identifier is allowed per client", defaultValue = "false")
@@ -437,10 +437,10 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "List of grant scopes for dynamic registration")
     private List<String> dynamicRegistrationAllowedPasswordGrantScopes;
 
-    @DocProperty(description = "LDAP custom object class for dynamic registration")
+    @DocProperty(description = "Custom object class for dynamic registration")
     private String dynamicRegistrationCustomObjectClass;
 
-    @DocProperty(description = "This list details LDAP custom object classes for dynamic person enrollment")
+    @DocProperty(description = "This list details custom object classes for dynamic person enrollment")
     private List<String> personCustomObjectClassList;
 
     @DocProperty(description = "Specifies whether to persist id_token (otherwise saves into cache)", defaultValue = "false")

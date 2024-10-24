@@ -8,19 +8,13 @@ use std::{
 };
 
 use super::*;
-use crate::{
-    log::stdout_logger::TestWriter,
-    models::{
-        app_types,
-        log_entry::{LogEntry, LogType},
-    },
-};
+use crate::{log::stdout_logger::TestWriter, common::app_types};
 use interface::LogWriter;
 use nop_logger::NopLogger;
 use stdout_logger::StdOutLogger;
 use uuid7::uuid7;
 
-use crate::models::log_config;
+use crate::bootstrap_config::log_config;
 
 #[test]
 fn test_new_log_strategy_off() {
@@ -30,7 +24,7 @@ fn test_new_log_strategy_off() {
     };
 
     // Act
-    let strategy = LogStrategy::new(config);
+    let strategy = LogStrategy::new(&config);
 
     // Assert
     assert!(matches!(strategy, LogStrategy::OnlyWriter(_)));
@@ -44,7 +38,7 @@ fn test_new_log_strategy_memory() {
     };
 
     // Act
-    let strategy = LogStrategy::new(config);
+    let strategy = LogStrategy::new(&config);
 
     // Assert
     assert!(matches!(strategy, LogStrategy::MemoryLogger(_)));
@@ -58,7 +52,7 @@ fn test_new_logstrategy_stdout() {
     };
 
     // Act
-    let strategy = LogStrategy::new(config);
+    let strategy = LogStrategy::new(&config);
 
     // Assert
     assert!(matches!(strategy, LogStrategy::OnlyWriter(_)));
@@ -70,7 +64,7 @@ fn test_log_memory_logger() {
     let config = LogConfig {
         log_type: log_config::LogTypeConfig::Memory(log_config::MemoryLogConfig { log_ttl: 60 }),
     };
-    let strategy = LogStrategy::new(config);
+    let strategy = LogStrategy::new(&config);
     let entry = LogEntry {
         id: uuid7(),
         time: SystemTime::now()
@@ -79,9 +73,10 @@ fn test_log_memory_logger() {
             .as_secs(),
         log_kind: LogType::Decision,
         pdp_id: uuid7(),
-        application_id: "test_app".to_string(),
+        application_id: Some("test_app".to_string().into()),
         auth_info: None,
         msg: "Test message".to_string(),
+        error_msg: None,
     };
 
     // Act
@@ -103,14 +98,14 @@ fn test_log_memory_logger() {
     // create log entries
     let entry1 = LogEntry::new_with_data(
         app_types::PdpID::new(),
-        app_types::ApplicationName("app1".to_string()),
+        Some(app_types::ApplicationName("app1".to_string())),
         LogType::Decision,
     )
     .set_message("some message".to_string());
 
     let entry2 = LogEntry::new_with_data(
         app_types::PdpID::new(),
-        app_types::ApplicationName("app2".to_string()),
+        Some(app_types::ApplicationName("app2".to_string())),
         LogType::System,
     );
 
@@ -155,9 +150,10 @@ fn test_log_stdout_logger() {
             .as_secs(),
         log_kind: LogType::Decision,
         pdp_id: uuid7(),
-        application_id: "test_app".to_string(),
+        application_id: Some("test_app".to_string().into()),
         auth_info: None,
         msg: "Test message".to_string(),
+        error_msg: None,
     };
     // Serialize the log entry to JSON
     let json_str = serde_json::json!(&log_entry).to_string();
@@ -183,14 +179,14 @@ fn test_log_storage_for_only_writer() {
     // create log entries
     let entry1 = LogEntry::new_with_data(
         app_types::PdpID::new(),
-        app_types::ApplicationName("app1".to_string()),
+        Some(app_types::ApplicationName("app1".to_string())),
         LogType::Decision,
     )
     .set_message("some message".to_string());
 
     let entry2 = LogEntry::new_with_data(
         app_types::PdpID::new(),
-        app_types::ApplicationName("app2".to_string()),
+        Some(app_types::ApplicationName("app2".to_string())),
         LogType::System,
     );
 

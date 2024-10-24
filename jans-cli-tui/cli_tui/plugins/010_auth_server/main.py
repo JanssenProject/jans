@@ -1026,17 +1026,7 @@ class Plugin(DialogUtils):
                 data=pathches
                 )
             self.app.app_configuration = response.json()
+            self.app.show_message(title=_(common_strings.success), message=_("Jans authorization server application configuration logging properties were saved."), tobefocused=self.app.center_container)
 
-            body = HSplit([Label(_("Jans authorization server application configuration logging properties were saved."))])
-
-            buttons = [Button(_("Ok"))]
-            dialog = JansGDialog(self.app, title=_("Confirmation"), body=body, buttons=buttons)
-            async def coroutine():
-                focused_before = self.app.layout.current_window
-                await self.app.show_dialog_as_float(dialog)
-                try:
-                    self.app.layout.focus(focused_before)
-                except Exception:
-                    self.app.layout.focus(self.app.center_frame)
-
-            asyncio.ensure_future(coroutine())
+        else:
+            self.app.show_message(title=_(common_strings.warning), message=_("No changes were done to save."), tobefocused=self.app.center_container)

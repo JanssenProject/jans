@@ -46,7 +46,7 @@ pub fn generate_keys() -> (Vec<(String, jwt::EncodingKey)>, String) {
 
         // Generate public key
         let mut public_key =
-            serde_json::to_value(&jwk.key.to_public()).expect("should serialize public key");
+            serde_json::to_value(jwk.key.to_public()).expect("should serialize public key");
         public_key["kid"] = serde_json::Value::String(kid.to_string()); // set `kid`
         let public_key: jwt::jwk::Jwk =
             serde_json::from_value(public_key).expect("should deserialize public key");

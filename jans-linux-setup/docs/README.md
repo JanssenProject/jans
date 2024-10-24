@@ -77,14 +77,14 @@ Collection of utilities used by SetupApp.
 - `cbm.py` Couchbase management utilities. We generally don't use this module directly, instead use `DBUtils` class
    found in `db_utils.py`
 
-- `db_utils.py` Database management (both ldap and cocuhbase) class is inclueded `DBUtils` in this file. Since `DBUtils`
+- `db_utils.py` Database management (cocuhbase) class is inclueded `DBUtils` in this file. Since `DBUtils`
    class is assigned to `self.dbutils` variable in base class for installers, we generally don't include this module
    in installers. Functions in `DBUtils` class automatically determines which database to be used for operations by examining
    `mapping_locations` defined in `Config` and populated during install time (or later from `setup.properties`).
    Some most commanly functions are:
    
    - `import_lidf(ldif_files)`: imports to list of ldif files to database. It automatically determines database location 
-     (ldap or couchbase) and which bucket to import according to `dn`
+     (couchbase) and which bucket to import according to `dn`
    - `set_jans_auth_conf_dynamic(entries)`: takes entries as dctionary and updates `jans_auth_conf_dynamic` in database
    - `set_jans_auth_conf_dynamic(entries)`: the same for `jans_auth_conf_dynamic`
    - `enable_script(inum)`: enables script

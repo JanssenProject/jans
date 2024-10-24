@@ -1,6 +1,5 @@
 import copy
 import asyncio
-import json
 from collections import OrderedDict
 from typing import Any, Optional
 from functools import partial
@@ -9,7 +8,7 @@ import prompt_toolkit
 from prompt_toolkit.layout.containers import HSplit, DynamicContainer, VSplit, Window, HorizontalAlign
 from prompt_toolkit.formatted_text import HTML
 from prompt_toolkit.layout.dimension import D
-from prompt_toolkit.widgets import Button, Label, Dialog, TextArea, Box
+from prompt_toolkit.widgets import Button, Label, Dialog, TextArea, Box, Frame
 from prompt_toolkit.application import Application
 from wui_components.jans_nav_bar import JansNavBar
 from wui_components.jans_vetrical_nav import JansVerticalNav
@@ -20,6 +19,7 @@ from wui_components.jans_label_widget import JansLabelWidget
 from utils.multi_lang import _
 from utils.utils import DialogUtils, common_data
 from utils.static import cli_style, common_strings
+from utils.background_tasks import get_asset_services
 
 class Plugin(DialogUtils):
     """This is a general class for plugins 
@@ -49,6 +49,7 @@ class Plugin(DialogUtils):
         """The initialization for this plugin
         """
         self.app.create_background_task(self.get_configuration())
+        self.app.create_background_task(get_asset_services())
 
 
     def set_center_frame(self) -> None:
@@ -167,9 +168,7 @@ class Plugin(DialogUtils):
                         widget_style=cli_style.black_bg_widget
                     ),
 
-
                     get_logging_level_widget(self.data.get('loggingLevel', 'INFO')),
-
 
                     common_data.app.getTitledText(
                         title=_("Logging Layout"),
@@ -270,7 +269,7 @@ class Plugin(DialogUtils):
             common_data.app.getTitledText(
                     title=_("Ignore Http Method"),
                     name='ignoreHttpMethod',
-                    value=copy.deepcopy(self.data.get('AuditLogConf', {}).get('ignoreHttpMethod', [])),
+                    value=copy.deepcopy(self.data.get('auditLogConf', {}).get('ignoreHttpMethod', [])),
                     style=cli_style.edit_text,
                     widget_style=cli_style.black_bg_widget,
                     jans_help="Enter values each line",
@@ -286,13 +285,20 @@ class Plugin(DialogUtils):
             )
 
 
-        def edit_asset_dir_mapping(**kwargs: Any) -> None:
+        def edit_asset_dir_mapping(*args, **kwargs: Any) -> None:
+
             if kwargs:
                 title = _("Edit Mapping Properties")
-                mapping_data = (kwargs['data']['directory'], ' '.join(kwargs['data']['type']), kwargs['data']['description'])
+                mapping_data = (
+                    kwargs['data']['directory'],
+                    ' '.join(kwargs['data']['type']),
+                    kwargs['data']['description'],
+                    kwargs['data']['jansServiceModule']
+                    )
+                services = []
             else:
                 title = _("Add Mapping Properties")
-                mapping_data = ('','', '')
+                mapping_data = ('','', '', [])
 
             directory_widget = self.app.getTitledText(
                     _("Directory"),
@@ -317,12 +323,31 @@ class Plugin(DialogUtils):
                     style=cli_style.edit_text,
                     jans_help=_("Description for asset mapping")
                     )
-                    
+
+            services_widget = self.app.getTitledCheckBoxList(
+                    _("Services"),
+                    name='jansServiceModule',
+                    values=common_data.asset_services,
+                    current_values=mapping_data[3],
+                    style=cli_style.edit_text,
+                    jans_help=_("Services supported by this mapping")
+                    )
 
             def add_mapping(dialog: Dialog) -> None:
 
-                cur_widegt_data = [directory_widget.me.text, type_widget.me.text]
-                cur_mapping_data = {'directory':directory_widget.me.text, 'type':type_widget.me.text.split(), 'description':description_widget.me.text}
+                cur_widegt_data = [
+                    directory_widget.me.text,
+                    type_widget.me.text,
+                    ' '.join(services_widget.me.current_values)
+                    ]
+
+                cur_mapping_data = {
+                    'directory': directory_widget.me.text,
+                    'type': type_widget.me.text.split(),
+                    'description': description_widget.me.text,
+                    'jansServiceModule': services_widget.me.current_values
+                    }
+
                 if not kwargs.get('data'):
                     self.asset_dir_mappings_container.add_item(cur_widegt_data)
                     self.asset_dir_mappings_container.all_data.append(cur_mapping_data)
@@ -330,7 +355,7 @@ class Plugin(DialogUtils):
                     self.asset_dir_mappings_container.replace_item(kwargs['selected'], cur_widegt_data)
                     self.asset_dir_mappings_container.all_data[kwargs['selected']] = cur_mapping_data
 
-            body = HSplit([directory_widget, type_widget, description_widget])
+            body = HSplit([directory_widget, type_widget, description_widget, services_widget])
             buttons = [Button(_("Cancel")), Button(_("OK"), handler=add_mapping)]
             dialog = JansGDialog(self.app, title=title, body=body, buttons=buttons, width=self.app.dialog_width-20)
             self.app.show_jans_dialog(dialog)
@@ -339,22 +364,26 @@ class Plugin(DialogUtils):
         def delete_asset_mapping(**kwargs: Any) -> None:
             def do_delete_mapping(result):
                 self.asset_dir_mappings_container.remove_item(kwargs['selected'])
-                del self.data['assetMgtConfiguration']['assetDirMapping'][kwargs['selected_idx']]
+                del self.asset_dir_mappings_container.all_data[kwargs['selected_idx']]
 
             dialog = self.app.get_confirm_dialog(HTML(_("Are you sure want to delete mapping <b>{}</b>?".format(kwargs['selected'][0]))), confirm_handler=do_delete_mapping)
             self.app.show_jans_dialog(dialog)
 
-        asset_dir_mapping_title = _("Directory Mappings: ")
-        add_asset_dir_mapping_title = _("Add Mapping")
         add_asset_dir_mapping_properties_title = _("Mapping Properties: ")
 
         asset_dir_mappings = copy.deepcopy(self.data.get('assetMgtConfiguration', {}).get('assetDirMapping', []))
-        asset_dir_mapping_data = [(mapping['directory'], ' '.join(mapping['type'])) for mapping in asset_dir_mappings]
+        asset_dir_mapping_data = []
+        for mapping in asset_dir_mappings:
+            asset_dir_mapping_data.append((
+                        mapping['directory'],
+                        ' '.join(mapping['type']),
+                        ' '.join(mapping['jansServiceModule'])
+                        ))
 
         self.asset_dir_mappings_container = JansVerticalNav(
                 myparent=self.app,
-                headers=['Directory', 'Type'],
-                preferred_size=[60, 40],
+                headers=['Directory', 'Type', 'Services'],
+                preferred_size=[35, 30, common_data.app.output.get_size().columns -70],
                 data=asset_dir_mapping_data,
                 on_enter=edit_asset_dir_mapping,
                 on_delete=delete_asset_mapping,
@@ -363,11 +392,10 @@ class Plugin(DialogUtils):
                 selectes=0,
                 all_data=asset_dir_mappings,
                 underline_headings=False,
-                max_width=44,
+                max_width=110,
                 jans_name='assetDirMapping',
                 max_height=len(asset_dir_mappings)+1
                 )
-
 
         self.tabs['assetMgtConfiguration'] = HSplit([
             common_data.app.getTitledCheckBox(
@@ -398,32 +426,13 @@ class Plugin(DialogUtils):
                     style=cli_style.check_box,
                     widget_style=cli_style.black_bg_widget
                 ),
-            common_data.app.getTitledText(
-                    title=_("Base Directory"),
-                    name='assetBaseDirectory',
-                    value=self.data.get('assetMgtConfiguration', {}).get('assetBaseDirectory'),
-                    style=cli_style.edit_text,
-                    widget_style=cli_style.black_bg_widget
-            ),
-            common_data.app.getTitledCheckBoxList(
-                title=_("Services"),
-                name='jansServiceModule',
-                values = [ (s, s) for s in ("jans-auth", "jans-casa", "jans-config-api", "jans-fido2", "jans-link", "jans-lock", "jans-scim", "jans-keycloak-link") ],
-                current_values = self.data.get('assetMgtConfiguration', {}).get('jansServiceModule', []),
-                style=cli_style.edit_text,
-                widget_style=cli_style.black_bg_widget
-            ),
 
-            VSplit([
-                    Label(text=asset_dir_mapping_title, style='class:script-label', width=len(asset_dir_mapping_title)+1), 
+            Frame(
+                title=_("Directory Mappings"),
+                body=HSplit([
                     self.asset_dir_mappings_container,
-                    Window(width=2),
-                    HSplit([
-                        Window(height=1),
-                        Button(text=add_asset_dir_mapping_title, width=len(add_asset_dir_mapping_title)+4, handler=partial(edit_asset_dir_mapping)),
-                        ]),
-                    ],
-                    height=len(asset_dir_mappings)+2, width=D(),
+                    common_data.app.getButtonWithHandler(text=_("Add Mapping"), handler=edit_asset_dir_mapping, centered=True)
+                ]),
             ),
             Window(height=D()),
             ],
@@ -530,6 +539,9 @@ class Plugin(DialogUtils):
         self.app.show_jans_dialog(dialog)
 
     async def get_configuration(self) -> None:
+        if self.data:
+            return
+
         'Coroutine for getting Janssen Config API configuration.'
         try:
             response = self.app.cli_object.process_command_by_id(
@@ -649,9 +661,14 @@ class Plugin(DialogUtils):
         changes = []
         new_data = self.make_data_from_dialog(tabs={'main_': self.tabs['main_']})
 
+        replace = 'replace'
+        add = 'add'
+
         for prop in new_data:
             if new_data[prop] != self.data.get(prop):
-                changes.append((prop, new_data[prop]))
+                how = replace if prop in self.data else add
+                changes.append((how, prop, new_data[prop]))
+
 
         for ppath, widget in (
                 (('userExclusionAttributes',), self.user_exclusion_attributes_widget),
@@ -664,21 +681,30 @@ class Plugin(DialogUtils):
             attributes = widget.get_values()
             cur_data_, path_ =  get_cur_data_patch_path(ppath)
             if attributes != cur_data_:
-                changes.append((path_, attributes))
+                changes.append(('replace', path_, attributes))
 
-        for ctab in ('auditLogConf', 'dataFormatConversionConf', 'assetMgtConfiguration', 'plugins'):
+
+        for ctab in (
+                'auditLogConf',
+                'dataFormatConversionConf',
+                'assetMgtConfiguration',
+                'plugins',
+                ):
             data_ = self.make_data_from_dialog(tabs={ctab: self.tabs[ctab]})
             for prop in data_:
                 if data_[prop] != self.data[ctab].get(prop):
-                    changes.append(('/'.join((ctab, prop)), data_[prop]))
+                    how = replace if prop in self.data[ctab] else add
+                    changes.append((how, '/'.join((ctab, prop)), data_[prop]))
+
 
         if self.plugins_list_box.all_data != self.data['plugins']:
-            changes.append(('plugins', self.plugins_list_box.all_data))
+            changes.append((replace, 'plugins', self.plugins_list_box.all_data))
 
         if self.asset_dir_mappings_container.all_data != self.data['assetMgtConfiguration']['assetDirMapping']:
-            changes.append(('assetMgtConfiguration/assetDirMapping', self.asset_dir_mappings_container.all_data))
+            changes.append((replace, 'assetMgtConfiguration/assetDirMapping', self.asset_dir_mappings_container.all_data))
 
-        patches = [{'op': 'replace', 'path': path, 'value': val} for path, val in changes ]
+
+        patches = [{'op': how, 'path': path, 'value': val} for how, path, val in changes ]
 
         async def coroutine():
             cli_args = {'operation_id': 'patch-config-api-properties', 'data': patches}

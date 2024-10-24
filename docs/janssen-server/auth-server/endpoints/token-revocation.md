@@ -27,7 +27,7 @@ https://<jans-server-host>/jans-auth/.well-known/openid-configuration
 looks like below:
 
 ```
-https://jans-dynamic-ldap/jans-auth/restv1/revoke
+https://jans-dynamic-mysql/jans-auth/restv1/revoke
 ```
 
 More information about request and response of the revocation endpoint can be found in

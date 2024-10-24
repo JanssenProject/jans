@@ -162,6 +162,12 @@ If you only want to build the library without installing it in the Python enviro
      pytest
      ```
 
+     Or run `pytest` without capturing the output:
+
+     ```bash
+     pytest -s
+     ```
+
   1. See the results in the terminal.
   
 ### Run test with `tox`

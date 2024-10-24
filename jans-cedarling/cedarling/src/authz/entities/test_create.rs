@@ -9,10 +9,8 @@
 
 use test_utils::assert_eq;
 
-use crate::models::{
-    cedar_schema::CedarSchemaJson,
-    token_data::{GetTokenClaimValue, TokenPayload},
-};
+use crate::authz::token_data::{GetTokenClaimValue, TokenPayload};
+use crate::common::cedar_schema::CedarSchemaJson;
 
 use super::create::*;
 use test_utils::SortedJson;
@@ -122,6 +120,7 @@ fn get_token_claim_type_string_error() {
     let test_key = "string_key";
     let json = serde_json::json!( {
         "test_id_key": "test_id",
+        // This will trigger the type error, because it's not a String.
         test_key: 123,
         "long_key": 12345,
         "entity_uid_key": "unique_id",
@@ -165,6 +164,7 @@ fn get_token_claim_type_long_error() {
     let json = serde_json::json!( {
         "test_id_key": "test_id",
         "string_key": "test string",
+        // This will trigger the type error, because it's not an i64.
         "long_key": "str",
         "entity_uid_key": "unique_id",
         "bool_key": true,
@@ -208,6 +208,7 @@ fn get_token_claim_type_entity_uid_error() {
         "test_id_key": "test_id",
         "string_key": "test string",
         "long_key": 1234,
+        // This will trigger the type error, because it's not a String.
         "entity_uid_key": 123,
         "bool_key": true,
     });
@@ -250,7 +251,8 @@ fn get_token_claim_type_boolean_error() {
         "test_id_key": "test_id",
         "string_key": "test string",
         "long_key": 1234,
-        "entity_uid_key": 123,
+        "entity_uid_key": "ff910f15-d5a4-4227-828e-11cb8463f1b7",
+        // This will trigger the type error, because it's not a bool.
         "bool_key": 123,
     });
 
@@ -263,16 +265,19 @@ fn get_token_claim_type_boolean_error() {
     if let CedarPolicyCreateTypeError::GetTokenClaimValue(GetTokenClaimValue::KeyNotCorrectType {
         key,
         got_type,
-        ..
+        expected_type,
     }) = entity_creation_error
     {
         let json_attr_value = json.as_object().unwrap().get(test_key).unwrap();
         let origin_type = GetTokenClaimValue::json_value_type_name(json_attr_value);
 
-        assert!(key == test_key, "expected key: {test_key}, but got: {key}");
+        assert!(
+            key == test_key,
+            "expected key: {test_key}, but got: {key} with schema expected_type: {expected_type}"
+        );
         assert!(
             got_type == origin_type,
-            "expected type: {origin_type}, but got: {got_type}"
+            "expected type: {origin_type}, but got: {got_type} with schema expected_type: {expected_type}"
         );
     } else {
         panic!("expected error type: CedarPolicyCreateTypeError::GetTokenClaimValue(GetTokenClaimValue::KeyNotCorrectType), but got: {entity_creation_error}");
@@ -285,6 +290,7 @@ fn get_token_claim_cedar_typename_error() {
     let schema_json = include_str!("test_create_data/successful_scenario_schema.json");
     let schema: CedarSchemaJson = serde_json::from_str(schema_json).unwrap();
 
+    // Mistake in entity type name, should be `"Jans::Test"`, it will trigger error
     let metadata = EntityMetadata::new("Jans:::Test", "test_id_key");
 
     let json = serde_json::json!( {
@@ -312,6 +318,14 @@ fn get_token_claim_cedar_typename_error() {
 }
 
 /// create entity with wrong cedar typename in the attribute
+// The JSON schema contains an error.r:
+//
+// "entity_uid_key": {
+//     "type": "EntityOrCommon",
+//     "name": ":Test2"
+// },
+//
+// ":Test2" is not correct type definition, it will trigger error
 #[test]
 fn get_token_claim_cedar_typename_in_attr_error() {
     let schema_json = include_str!("test_create_data/type_error_schema.json");

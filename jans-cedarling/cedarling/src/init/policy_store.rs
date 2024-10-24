@@ -5,8 +5,8 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-use crate::models::policy_store::{PolicyStore, PolicyStoreMap};
-use crate::models::policy_store_config::{PolicyStoreConfig, PolicyStoreSource};
+use crate::bootstrap_config::policy_store_config::{PolicyStoreConfig, PolicyStoreSource};
+use crate::common::policy_store::{PolicyStore, PolicyStoreMap};
 
 /// Error cases for loading policy
 #[derive(Debug, thiserror::Error)]
@@ -23,7 +23,7 @@ pub enum LoadPolicyStoreError {
 
 /// Load policy store from source
 fn load_policy_store_map(
-    source: PolicyStoreSource,
+    source: &PolicyStoreSource,
 ) -> Result<PolicyStoreMap, LoadPolicyStoreError> {
     let policy_store_map: PolicyStoreMap = match source {
         PolicyStoreSource::Json(json_raw) => serde_json::from_str(json_raw.as_str())?,
@@ -35,15 +35,15 @@ fn load_policy_store_map(
 //
 // Unit tests will be added when will be implemented other types of sources
 pub(crate) fn load_policy_store(
-    config: PolicyStoreConfig,
+    config: &PolicyStoreConfig,
 ) -> Result<PolicyStore, LoadPolicyStoreError> {
-    let mut policy_store_map = load_policy_store_map(config.source)?;
+    let mut policy_store_map = load_policy_store_map(&config.source)?;
 
-    let policy: PolicyStore = match (config.store_id, policy_store_map.policy_stores.len()) {
+    let policy: PolicyStore = match (&config.store_id, policy_store_map.policy_stores.len()) {
         (Some(store_id), _) => policy_store_map
             .policy_stores
             .remove(store_id.as_str())
-            .ok_or(LoadPolicyStoreError::FindPolicy(store_id))?,
+            .ok_or(LoadPolicyStoreError::FindPolicy(store_id.to_string()))?,
         (None, 0) => {
             return Err(LoadPolicyStoreError::PolicyEmpty);
         },
