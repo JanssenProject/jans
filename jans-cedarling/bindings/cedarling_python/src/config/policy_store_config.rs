@@ -41,17 +41,14 @@ pub struct PolicyStoreConfig {
     /// Source - represent the place where we going to read the policy.
     /// The value is required.
     pub source: Option<PolicyStoreSource>,
-    /// `CEDARLING_POLICY_STORE_ID` in [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) documentation.
-    /// If None then we should have only one policy store in the `source`.
-    pub store_id: Option<String>,
 }
 
 #[pymethods]
 impl PolicyStoreConfig {
     #[new]
-    #[pyo3(signature = (source=None, store_id=None))]
-    fn new(source: Option<PolicyStoreSource>, store_id: Option<String>) -> PyResult<Self> {
-        Ok(PolicyStoreConfig { source, store_id })
+    #[pyo3(signature = (source=None ))]
+    fn new(source: Option<PolicyStoreSource>) -> PyResult<Self> {
+        Ok(PolicyStoreConfig { source })
     }
 }
 
@@ -66,9 +63,6 @@ impl TryInto<cedarling::PolicyStoreConfig> for PolicyStoreConfig {
             ))?
             .into();
 
-        Ok(cedarling::PolicyStoreConfig {
-            source,
-            store_id: self.store_id,
-        })
+        Ok(cedarling::PolicyStoreConfig { source })
     }
 }

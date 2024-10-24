@@ -5,162 +5,157 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
+use super::cedar_schema::CedarSchema;
+use base64::prelude::*;
+use cedar_policy::PolicyId;
 use std::collections::HashMap;
 
-use super::cedar_schema::CedarSchema;
-
-/// PolicyStoreMap it is a store for `PolicyStore` accessible by key.
-#[derive(Debug, serde::Deserialize)]
-pub(crate) struct PolicyStoreMap {
-    #[serde(flatten)]
-    pub policy_stores: HashMap<String, PolicyStore>,
-}
-
-/// PolicyStore contains all the data the Cedarling needs to verify JWT tokens and evaluate policies
+/// Represents the store of policies used for JWT validation and policy evaluation in Cedarling.
+///
+/// The `PolicyStore` contains the schema and a set of policies encoded in base64,
+/// which are parsed during deserialization.
 #[derive(Debug, Clone, serde::Deserialize)]
 pub struct PolicyStore {
-    /// The cedar schema
+    /// Cedar schema in base64-encoded string format.
     ///
-    /// This is expected to be a base64 encoded string from the `policy_store.json`
+    /// Extracted from the `policy_store.json` file.
     pub cedar_schema: CedarSchema,
 
-    /// The cedar policies
+    /// Cedar policy set in base64-encoded string format.
     ///
-    /// This is expected to be a base64 encoded string from the `policy_store.json`
-    #[serde(deserialize_with = "deserialize_policy_set::parse")]
+    /// Extracted from the `policy_store.json` file and deserialized using `deserialize_policies`.
+    #[serde(deserialize_with = "parse_cedar_policy")]
     pub cedar_policies: cedar_policy::PolicySet,
 }
 
-// Deserialization to [`cedar_policy::PolicySet`] moved here
-// to be close to structure where it is used.
-// And current module is small so it is OK to store it here.
-mod deserialize_policy_set {
+/// Enum representing the various error messages that can occur while parsing policy sets.
+///
+/// This enum is used to provide detailed error information during the deserialization
+/// of policy sets in the `PolicyStore`.
+#[derive(Debug, thiserror::Error)]
+enum ParsePolicySetMessage {
+    /// Error indicating failure to decode policy content as base64.
+    #[error("unable to decode policy_content as base64")]
+    Base64,
 
-    use std::collections::HashMap;
+    /// Error indicating failure to decode policy content to a UTF-8 string.
+    #[error("unable to decode policy_content to utf8 string")]
+    String,
 
-    use base64::prelude::*;
-    use cedar_policy::PolicyId;
+    /// Error indicating failure to decode policy content from a human-readable format.
+    #[error("unable to decode policy_content from human readable format")]
+    HumanReadable,
 
-    // we use camel case to show that it is like a constant
-    #[derive(Debug, thiserror::Error)]
-    enum ParsePolicySetMessage {
-        #[error("unable to decode policy_content as base64")]
-        Base64,
-        #[error("unable to decode policy_content to utf8 string")]
-        String,
-        #[error("unable to decode policy_content from human readable format")]
-        HumanReadable,
-        #[error("could not collect policy store's to policy set")]
-        CreatePolicySet,
-    }
+    /// Error indicating failure to collect policies into a policy set.
+    #[error("could not collect policy store's to policy set")]
+    CreatePolicySet,
+}
 
-    /// Represents a raw data of the `Policy` in the `PolicyStore`
-    /// is private and used only in the [`parse_policy_set`] function
-    #[derive(Debug, serde::Deserialize)]
-    struct RawPolicy {
-        pub policy_content: String,
-    }
+/// Represents a raw policy entry from the `PolicyStore`.
+///
+/// This is a helper struct used internally for parsing base64-encoded policies.
+#[derive(Debug, serde::Deserialize)]
+struct RawPolicy {
+    /// Base64-encoded content of the policy.
+    pub policy_content: String,
+}
 
-    /// A custom deserializer for Cedar's policy set.
-    //
-    // is used to deserialize field `policies` in `models::policy_store::PolicyStore`
-    pub(crate) fn parse<'de, D>(deserializer: D) -> Result<cedar_policy::PolicySet, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        let policies =
-            <HashMap<String, RawPolicy> as serde::Deserialize>::deserialize(deserializer)?;
+/// Custom deserializer for converting base64-encoded policies into a `PolicySet`.
+///
+/// This function is used to deserialize the `policies` field in `PolicyStore`.
+pub fn parse_cedar_policy<'de, D>(deserializer: D) -> Result<cedar_policy::PolicySet, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    let policies = <HashMap<String, RawPolicy> as serde::Deserialize>::deserialize(deserializer)?;
 
-        let policy_vec = policies
-            .into_iter()
-            .map(|(id, policy_raw)| {
-                let policy = parse_policy::<D>(&id, policy_raw).map_err(|err| {
-                    serde::de::Error::custom(format!(
-                        "unable to decode policy with id: {id}, error: {err}"
-                    ))
-                })?;
-                Ok(policy)
-            })
-            .collect::<Result<Vec<cedar_policy::Policy>, _>>()?;
-
-        cedar_policy::PolicySet::from_policies(policy_vec).map_err(|err| {
-            serde::de::Error::custom(format!("{}: {err}", ParsePolicySetMessage::CreatePolicySet))
-        })
-    }
-
-    // function to deserialize a single policy from `PolicyRaw`
-    fn parse_policy<'de, D>(
-        id: &str,
-        policy_raw: RawPolicy,
-    ) -> Result<cedar_policy::Policy, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        let decoded = BASE64_STANDARD
-            .decode(policy_raw.policy_content.as_str())
-            .map_err(|err| {
-                serde::de::Error::custom(format!("{}: {err}", ParsePolicySetMessage::Base64))
+    let policy_vec = policies
+        .into_iter()
+        .map(|(id, policy_raw)| {
+            let policy = parse_policy::<D>(&id, policy_raw).map_err(|err| {
+                serde::de::Error::custom(format!(
+                    "unable to decode policy with id: {id}, error: {err}"
+                ))
             })?;
-        let decoded_str = String::from_utf8(decoded).map_err(|err| {
-            serde::de::Error::custom(format!("{}: {err}", ParsePolicySetMessage::String))
+            Ok(policy)
+        })
+        .collect::<Result<Vec<cedar_policy::Policy>, _>>()?;
+
+    cedar_policy::PolicySet::from_policies(policy_vec).map_err(|err| {
+        serde::de::Error::custom(format!("{}: {err}", ParsePolicySetMessage::CreatePolicySet))
+    })
+}
+
+/// Parses a single policy from its base64-encoded format.
+///
+/// This function is responsible for decoding the base64-encoded policy content,
+/// converting it to a UTF-8 string, and parsing it into a `Policy`.
+fn parse_policy<'de, D>(id: &str, policy_raw: RawPolicy) -> Result<cedar_policy::Policy, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    let decoded = BASE64_STANDARD
+        .decode(policy_raw.policy_content.as_str())
+        .map_err(|err| {
+            serde::de::Error::custom(format!("{}: {err}", ParsePolicySetMessage::Base64))
+        })?;
+    let decoded_str = String::from_utf8(decoded).map_err(|err| {
+        serde::de::Error::custom(format!("{}: {err}", ParsePolicySetMessage::String))
+    })?;
+
+    let policy =
+        cedar_policy::Policy::parse(Some(PolicyId::new(id)), decoded_str).map_err(|err| {
+            serde::de::Error::custom(format!("{}: {err}", ParsePolicySetMessage::HumanReadable))
         })?;
 
-        let policy =
-            cedar_policy::Policy::parse(Some(PolicyId::new(id)), decoded_str).map_err(|err| {
-                serde::de::Error::custom(format!("{}: {err}", ParsePolicySetMessage::HumanReadable))
-            })?;
+    Ok(policy)
+}
 
-        Ok(policy)
+#[cfg(test)]
+mod test {
+    use super::ParsePolicySetMessage;
+    use super::PolicyStore;
+
+    #[test]
+    fn test_policy_store_deserialization_success() {
+        static POLICY_STORE_RAW: &str = include_str!("../../../test_files/policy-store_ok.json");
+        assert!(serde_json::from_str::<PolicyStore>(POLICY_STORE_RAW).is_ok());
     }
 
-    #[cfg(test)]
-    mod tests {
-        use test_utils::assert_eq;
+    #[test]
+    fn test_base64_decoding_error_in_policy_store() {
+        static POLICY_STORE_RAW: &str =
+            include_str!("../../../test_files/policy-store_policy_err_base64.json");
 
-        use super::*;
-        use crate::common::policy_store::PolicyStoreMap;
+        let policy_result = serde_json::from_str::<PolicyStore>(POLICY_STORE_RAW);
+        assert!(policy_result
+            .unwrap_err()
+            .to_string()
+            .contains(&ParsePolicySetMessage::Base64.to_string()));
+    }
 
-        #[test]
-        fn test_ok() {
-            static POLICY_STORE_RAW: &str =
-                include_str!("../../../test_files/policy-store_ok.json");
+    #[test]
+    fn test_policy_parsing_error_in_policy_store() {
+        static POLICY_STORE_RAW: &str =
+            include_str!("../../../test_files/policy-store_policy_err_broken_utf8.json");
 
-            let policy_result = serde_json::from_str::<PolicyStoreMap>(POLICY_STORE_RAW);
-            assert!(policy_result.is_ok());
-        }
+        let policy_result = serde_json::from_str::<PolicyStore>(POLICY_STORE_RAW);
+        assert!(policy_result
+            .unwrap_err()
+            .to_string()
+            .contains(&ParsePolicySetMessage::String.to_string()));
+    }
 
-        #[test]
-        fn test_base64_error() {
-            static POLICY_STORE_RAW: &str =
-                include_str!("../../../test_files/policy-store_policy_err_base64.json");
+    #[test]
+    fn test_broken_policy_parsing_error_in_policy_store() {
+        static POLICY_STORE_RAW: &str =
+            include_str!("../../../test_files/policy-store_policy_err_broken_policy.json");
 
-            let policy_result = serde_json::from_str::<PolicyStoreMap>(POLICY_STORE_RAW);
-            assert!(policy_result
-                .unwrap_err()
-                .to_string()
-                .contains(&ParsePolicySetMessage::Base64.to_string()));
-        }
+        let policy_result = serde_json::from_str::<PolicyStore>(POLICY_STORE_RAW);
+        let err_msg = policy_result.unwrap_err().to_string();
 
-        #[test]
-        fn test_string_error() {
-            static POLICY_STORE_RAW: &str =
-                include_str!("../../../test_files/policy-store_policy_err_broken_utf8.json");
-
-            let policy_result = serde_json::from_str::<PolicyStoreMap>(POLICY_STORE_RAW);
-            assert!(policy_result
-                .unwrap_err()
-                .to_string()
-                .contains(&ParsePolicySetMessage::String.to_string()));
-        }
-
-        #[test]
-        fn test_policy_error() {
-            static POLICY_STORE_RAW: &str =
-                include_str!("../../../test_files/policy-store_policy_err_broken_policy.json");
-
-            let policy_result = serde_json::from_str::<PolicyStoreMap>(POLICY_STORE_RAW);
-            let err_msg = policy_result.unwrap_err().to_string();
-            assert_eq!(err_msg,"unable to decode policy with id: 840da5d85403f35ea76519ed1a18a33989f855bf1cf8, error: unable to decode policy_content from human readable format: unexpected token `)` at line 15 column 1")
-        }
+        // TODO: this isn't really a human readable format so idk why the error message is
+        // like this.
+        assert_eq!(err_msg, "unable to decode policy with id: 840da5d85403f35ea76519ed1a18a33989f855bf1cf8, error: unable to decode policy_content from human readable format: unexpected token `)` at line 8 column 5")
     }
 }
