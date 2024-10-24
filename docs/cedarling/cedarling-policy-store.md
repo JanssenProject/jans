@@ -25,7 +25,7 @@ The JSON schema looks like this:
     "policies": {...},
     "schema": "...",
     "trusted_issuers": [],
-    "cedar_version": "v2.4.7"
+    "cedarling_version": "v2.4.7"
 }
 
 ```
@@ -34,7 +34,7 @@ The JSON schema looks like this:
 - **policies** : (Json) Json object containing one or more policy_id as key and policy object as value
 - **schema** : (String) Base64 encoded cedar schema
 - **trusted_issuers** : (List) List of Trusted Issuer metadata
-- **cedar_version** : (String) The version of [Cedar policy](https://docs.cedarpolicy.com/). The protocols of this version will be followed when processing Cedar schema and policies.
+- **cedarling_version** : (String) Specifies the version of cedarling used.
 
 ## Trusted Issuer Schema
 
@@ -56,12 +56,31 @@ This record contains the information needed to validate tokens from this issuer:
 - **openid_configuration_endpoint** : The HTTPS URL for the OpenID Connect configuration endpoint (usually found under /.well-known/openid-configuration).
 - **token_metadata** : (List) List of token metadata
 
+## Policies
+
+Json object containing one or more policy_id as key and policy object as value.
+
+```
+  "policies": {
+    "840da5d85403f35ea76519ed1a18a33989f855bf1cf8": {
+      "description": "simple policy example",
+      "creation_date": "2024-09-20T17:22:39.996050",
+      "policy_content": "cGVybWl0KAogICAgc..."
+    }
+  }
+```
+
+- **description** : (String) Short description of cedar policy
+- **creation_date** :  (String) Policy creating date in `YYYY-MM-DDTHH:MM:SS.ssssss`
+- **policy_content** : (String) Base64 encoded cedar schema
+
+
 ## Token Entity Schema
 
 ```
 { "type": "access"
-  "user_id": "..."},                   
-  "role_mapping": "..."},          
+  "user_id": "...",                   
+  "role_mapping": "...",          
 }
 ```
 
@@ -86,11 +105,11 @@ This record contains the information needed to validate tokens from this issuer:
   "trusted_issuers": [
     {
       "name": "Google",
-      "Description": "Consumer IDP",
+      "description": "Consumer IDP",
       "openid_configuration_endpoint": "https://accounts.google.com/.well-known/openid-configuration",
       "token_metadata": [
         {
-          "type": "id_token,
+          "type": "id_token",
           "user_id": "email",
           "role_mapping": "role"
         }
