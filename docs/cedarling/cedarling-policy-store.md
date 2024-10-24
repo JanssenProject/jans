@@ -119,7 +119,7 @@ Json object containing one or more policy_id as key and policy object as value.
         },
         {
           "type": "userinfo",
-          "person_id": "email"
+          "user_id": "email"
         }
       ]
     }
