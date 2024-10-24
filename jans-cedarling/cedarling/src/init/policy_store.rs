@@ -19,8 +19,8 @@ pub enum LoadPolicyStoreError {
     MoreThanOnePolicy,
     #[error("could not found policy by id: {0}")]
     FindPolicy(String),
-    #[error("only one token should be assigned a `role_mapping`. The following tokens have a `role_mapping` field in your `policy_store.json`: {0}")]
-    MultipleRoleMappings(String),
+    #[error("only one token should be assigned a `role_mapping`. The following tokens have a `role_mapping` field in your `policy_store.json`: {0:?}")]
+    MultipleRoleMappings(Vec<String>),
 }
 
 /// Load policy store from source
@@ -74,11 +74,10 @@ pub(crate) fn load_policy_store(
 
                 // If there are more than one token with `role_mapping`, return an error
                 if tokens_with_role_mapping.len() > 1 {
-                    let token_kinds: String = tokens_with_role_mapping
+                    let token_kinds = tokens_with_role_mapping
                         .iter()
                         .map(|token| token.to_string())
-                        .collect::<Vec<_>>()
-                        .join(", ");
+                        .collect::<Vec<String>>();
                     return Err(LoadPolicyStoreError::MultipleRoleMappings(token_kinds));
                 }
             }
@@ -118,7 +117,7 @@ mod test {
             result,
             Err(LoadPolicyStoreError::MultipleRoleMappings(
                 ref token_kinds
-            )) if token_kinds == "id, userinfo"
+            )) if token_kinds == &vec!["id, userinfo"]
         ));
     }
 }
