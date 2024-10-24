@@ -9,10 +9,10 @@ use super::decoding_strategy::DecodingStrategy;
 use super::token::{AccessToken, IdToken};
 use super::traits::{Decode, ExtractClaims};
 use super::Error;
-use crate::JwtConfig;
+use super::JwtServiceConfig;
 use serde::de::DeserializeOwned;
 
-pub struct JwtService {
+pub(crate) struct JwtService {
     decoding_strategy: DecodingStrategy,
 }
 
@@ -34,25 +34,21 @@ impl JwtService {
     }
 
     /// Initializes a new `JwtService` instance based on the provided configuration.
-    ///
-    /// This method is used to create a `JwtService`. JWT validation can be toggled via the
-    /// provided `JwtConfig`.
-    pub fn new_with_container(
-        dep_map: &di::DependencyMap,
-        config: JwtConfig,
-    ) -> Result<Self, Error> {
+    pub(crate) fn new_with_config(config: JwtServiceConfig) -> Self {
         match config {
-            JwtConfig::Disabled => {
+            JwtServiceConfig::WithoutValidation => {
                 let decoding_strategy = DecodingStrategy::new_without_validation();
-                Ok(Self { decoding_strategy })
+                Self { decoding_strategy }
             },
-            JwtConfig::Enabled {
-                signature_algorithms,
+            JwtServiceConfig::WithValidation {
+                key_service,
+                supported_algs,
             } => {
-                let decoding_strategy =
-                    DecodingStrategy::new_with_validation(dep_map, &signature_algorithms)?;
-
-                Ok(Self { decoding_strategy })
+                let decoding_strategy = DecodingStrategy::WithValidation {
+                    key_service,
+                    supported_algs,
+                };
+                Self { decoding_strategy }
             },
         }
     }
@@ -63,7 +59,7 @@ impl JwtService {
     /// to the rules defined by the internal `DecodingStrategy`. The `access_token` is validated
     /// first, and its `iss` and `aud` claims are used to validate the `id_token`.
     ///
-    /// # Token Validation Rules:
+    /// Token Validation Rules:
     ///     1. The `access_token` is validated first, and its `aud` (which is also the `client_id`) is stored.
     ///     2. The `id_token` is validated against the `access_token.aud` (client_id) and `access_token.iss` (issuer).
     ///     3. Return an error if `id_token.aud != access_token.client_id`.

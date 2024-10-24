@@ -10,11 +10,11 @@
 pub enum Error {
     /// Failed to parse the JWT.
     #[error("error parsing the JWT: {0}")]
-    ParsingError(#[source] jsonwebtoken::errors::Error),
+    Parsing(#[source] jsonwebtoken::errors::Error),
 
     /// Key could not be retrieved from the `KeyService`.
     #[error("could not get hold of a key from the KeyService: {0}")]
-    MissingKey(Box<str>),
+    MissingKey(String),
 
     /// Tried to validate a token signed with an unsupported algorithm.
     #[error("the JWT is signed with an unsupported algorithm: {0:?}")]
@@ -26,9 +26,7 @@ pub enum Error {
 
     /// Failed to validate the JWT
     #[error("failed to validate JWT: {0}")]
-    ValidationError(#[source] jsonwebtoken::errors::Error),
-
-    /// Config contains an unimplemented algorithm
-    #[error("an algorithim defined in the config is not yet implemented: {0}")]
-    UnimplementedAlgorithm(Box<str>),
+    Validation(#[source] jsonwebtoken::errors::Error),
 }
+
+

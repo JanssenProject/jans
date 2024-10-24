@@ -576,6 +576,10 @@ kcAdminCredentialsFile: /etc/jans/conf/kc_admin_creds
 cnConfiguratorConfigurationFile: /etc/jans/conf/configuration.json
 # -- Path to dumped configuration schema file
 cnConfiguratorDumpFile: /etc/jans/conf/configuration.out.json
+# -- Use custom configuration schema in existing secrets. Note, the secrets has to contain the key configuration.json or any basename as specified in cnConfiguratorConfigurationFile.
+cnConfiguratorCustomSchema:
+  # -- The name of the secrets used for storing custom configuration schema.
+  secretName: ""
 
 # ingress properties
 istio:
