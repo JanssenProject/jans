@@ -33,23 +33,43 @@ pub struct PolicyStore {
     #[serde(deserialize_with = "parse_cedar_policy")]
     pub cedar_policies: cedar_policy::PolicySet,
 
+    /// An optional list of trusted issuers.
+    ///
+    /// This field may contain issuers that are trusted to provide tokens, allowing for additional
+    /// verification and security when handling JWTs.
     #[allow(dead_code)]
     pub trusted_issuers: Option<Vec<TrustedIssuer>>,
 }
 
+/// Represents a trusted issuer that can provide JWTs.
+///
+/// This struct includes the issuer's name, description, and the OpenID configuration endpoint
+/// for discovering issuer-related information.
 #[derive(Debug, Clone, Deserialize)]
 #[allow(dead_code)]
 pub struct TrustedIssuer {
+    /// The name of the trusted issuer.
     pub name: String,
+
+    /// A brief description of the trusted issuer.
     pub description: String,
+
+    /// The OpenID configuration endpoint for the issuer.
+    ///
+    /// This endpoint is used to obtain information about the issuer's capabilities.
     pub openid_configuration_endpoint: String,
+
+    /// Optional metadata related to the tokens issued by this issuer.
+    ///
+    /// This field may include role mappings that help define the access levels for issued tokens.
     #[serde(deserialize_with = "check_token_metadata")]
     pub token_metadata: Option<Vec<TokenMetadata>>,
 }
 
-/// Used to to validate the cedar_version field.
+/// Validates the `token_metadata` field.
 ///
-/// Ensures the token_metadata only has one role_mapping
+/// This function ensures that the metadata contains at most one `TokenMetadata` with a `role_mapping`
+/// to prevent ambiguous role assignments.
 fn check_token_metadata<'de, D>(deserializer: D) -> Result<Option<Vec<TokenMetadata>>, D::Error>
 where
     D: Deserializer<'de>,
@@ -72,24 +92,41 @@ where
     Ok(token_metadata)
 }
 
+/// Represents metadata associated with a token.
+///
+/// This struct includes the type of token, the ID of the person associated with the token,
+/// and an optional role mapping for access control.
 #[derive(Debug, Clone, Deserialize)]
 #[allow(dead_code)]
 pub struct TokenMetadata {
+    /// The type of token (e.g., Access, ID, Userinfo, Transaction).
     #[serde(rename = "type")]
     pub kind: TokenKind,
-    pub person_id: String, // the claim used to create the person entity
-    pub role_mapping: Option<String>, // the claim used to create a role for the token
+
+    /// The claim used to create the person entity associated with this token.
+    pub person_id: String,
+
+    /// An optional claim used to create a role for the token.
+    pub role_mapping: Option<String>,
 }
 
 #[derive(Debug, Copy, Clone)]
 #[allow(dead_code)]
 pub enum TokenKind {
+    /// Access token used for granting access to resources.
     Access,
+
+    /// ID token used for authentication.
     Id,
+
+    /// Userinfo token containing user-specific information.
     Userinfo,
+
+    /// Transaction token used for tracking transactions.
     Transaction,
 }
 
+/// Enum representing the different kinds of tokens used by Cedarling.
 impl fmt::Display for TokenKind {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let kind_str = match self {
@@ -142,9 +179,11 @@ impl<'de> Deserialize<'de> for TokenKind {
     }
 }
 
-/// Used to to validate the cedar_version field.
+/// Validates the `cedar_version` field.
 ///
-/// Ensures the version follows the format `major.minor.patch`, where each part is a valid number.
+/// This function checks that the version string follows the format `major.minor.patch`,
+/// where each component is a valid number. This also supports having a "v" prefix in the
+/// version, e.g. `v1.0.1`.
 fn check_cedar_version<'de, D>(deserializer: D) -> Result<String, D::Error>
 where
     D: Deserializer<'de>,
@@ -182,25 +221,25 @@ where
     Ok(version)
 }
 
-/// Enum representing the various error messages that can occur while parsing policy sets.
+/// Enum representing various error messages that can occur while parsing policy sets.
 ///
 /// This enum is used to provide detailed error information during the deserialization
-/// of policy sets in the `PolicyStore`.
+/// of policy sets within the `PolicyStore`.
 #[derive(Debug, thiserror::Error)]
 enum ParsePolicySetMessage {
-    /// Error indicating failure to decode policy content as base64.
+    /// Indicates failure to decode policy content as base64.
     #[error("unable to decode policy_content as base64")]
     Base64,
 
-    /// Error indicating failure to decode policy content to a UTF-8 string.
+    /// Indicates failure to decode policy content to a UTF-8 string.
     #[error("unable to decode policy_content to utf8 string")]
     String,
 
-    /// Error indicating failure to decode policy content from a human-readable format.
+    /// Indicates failure to decode policy content from a human-readable format.
     #[error("unable to decode policy_content from human readable format")]
     HumanReadable,
 
-    /// Error indicating failure to collect policies into a policy set.
+    /// Indicates failure to collect policies into a policy set.
     #[error("could not collect policy store's to policy set")]
     CreatePolicySet,
 }
@@ -275,12 +314,14 @@ mod test {
     use crate::common::policy_store::check_cedar_version;
     use crate::common::policy_store::check_token_metadata;
 
+    /// Tests successful deserialization of a valid policy store JSON.
     #[test]
     fn test_policy_store_deserialization_success() {
         static POLICY_STORE_RAW: &str = include_str!("../../../test_files/policy-store_ok.json");
         assert!(serde_json::from_str::<PolicyStore>(POLICY_STORE_RAW).is_ok());
     }
 
+    /// Tests for base64 decoding error in the policy store.
     #[test]
     fn test_base64_decoding_error_in_policy_store() {
         static POLICY_STORE_RAW: &str =
@@ -293,6 +334,7 @@ mod test {
             .contains(&ParsePolicySetMessage::Base64.to_string()));
     }
 
+    /// Tests for parsing error due to broken UTF-8 in the policy store.
     #[test]
     fn test_policy_parsing_error_in_policy_store() {
         static POLICY_STORE_RAW: &str =
@@ -305,6 +347,7 @@ mod test {
             .contains(&ParsePolicySetMessage::String.to_string()));
     }
 
+    /// Tests for broken policy parsing error in the policy store.
     #[test]
     fn test_broken_policy_parsing_error_in_policy_store() {
         static POLICY_STORE_RAW: &str =
@@ -318,36 +361,42 @@ mod test {
         assert_eq!(err_msg, "unable to decode policy with id: 840da5d85403f35ea76519ed1a18a33989f855bf1cf8, error: unable to decode policy_content from human readable format: unexpected token `)` at line 9 column 5")
     }
 
+    /// Tests that a valid version string is accepted.
     #[test]
     fn test_valid_version() {
         let valid_version = "1.2.3".to_string();
         assert!(check_cedar_version(serde_json::Value::String(valid_version)).is_ok());
     }
 
+    /// Tests that a valid version string with 'v' prefix is accepted.
     #[test]
     fn test_valid_version_with_v() {
         let valid_version_with_v = "v1.2.3".to_string();
         assert!(check_cedar_version(serde_json::Value::String(valid_version_with_v)).is_ok());
     }
 
+    /// Tests that an invalid version format is rejected.
     #[test]
     fn test_invalid_version_format() {
         let invalid_version = "1.2".to_string();
         assert!(check_cedar_version(serde_json::Value::String(invalid_version)).is_err());
     }
 
+    /// Tests that an invalid version part (non-numeric) is rejected.
     #[test]
     fn test_invalid_version_part() {
         let invalid_version = "1.two.3".to_string();
         assert!(check_cedar_version(serde_json::Value::String(invalid_version)).is_err());
     }
 
+    /// Tests that an invalid version format with 'v' prefix is rejected.
     #[test]
     fn test_invalid_version_format_with_v() {
         let invalid_version_with_v = "v1.2".to_string();
         assert!(check_cedar_version(serde_json::Value::String(invalid_version_with_v)).is_err());
     }
 
+    /// Tests that an error is returned for multiple role mappings in token metadata.
     #[test]
     fn test_invalid_multiple_role_mappings_in_token_metadata() {
         let invalid_token_metadata = r#"[ 
@@ -365,6 +414,7 @@ mod test {
         );
     }
 
+    /// Tests successful parsing of role mappings in token metadata.
     #[test]
     fn test_successful_parsing_of_role_mappings() {
         let valid_token_metadata = r#"[ 
