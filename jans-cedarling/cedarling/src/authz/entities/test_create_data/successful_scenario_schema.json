@@ -1,6 +1,7 @@
 {
     "Jans": {
         "entityTypes": {
+            "Test2": {},
             "Test": {
                 "shape": {
                     "type": "Record",
@@ -28,8 +29,7 @@
                         }
                     }
                 }
-            },
-            "Test2": {}
+            }
         },
         "actions": {}
     },
@@ -56,6 +56,23 @@
                             "type": "EntityOrCommon",
                             "name": "String",
                             "required": false
+                        },
+                        "set_key": {
+                            "type": "Set",
+                            "element": {
+                                "type": "EntityOrCommon",
+                                "name": "String"
+                            }
+                        },
+                        "set_set_key": {
+                            "type": "Set",
+                            "element": {
+                                "type": "Set",
+                                "element": {
+                                    "type": "EntityOrCommon",
+                                    "name": "String"
+                                }
+                            }
                         },
                         "string_key": {
                             "type": "EntityOrCommon",
