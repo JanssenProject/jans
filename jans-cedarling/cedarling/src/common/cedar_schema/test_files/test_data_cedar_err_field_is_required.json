@@ -1,0 +1,22 @@
+{
+    "Jans": {
+        "entityTypes": {
+            "Access_token": {
+                "shape": {
+                    "type": "Record",
+                    "attributes": {
+                        "scope": {
+                            "type": "Set",
+                            "element": {
+                                "type": "EntityOrCommon",
+                                "name": "String"
+                            },
+                            "required": 1234
+                        }
+                    }
+                }
+            }
+        },
+        "actions": {}
+    }
+}
