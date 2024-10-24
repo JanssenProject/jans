@@ -9213,7 +9213,7 @@ components:
           type: string
         selected:
           type: boolean
-        userCanView:
+        whitePagesCanView:
           type: boolean
         adminCanView:
           type: boolean
@@ -9221,11 +9221,11 @@ components:
           type: boolean
         userCanEdit:
           type: boolean
+        userCanView:
+          type: boolean
         adminCanAccess:
           type: boolean
         userCanAccess:
-          type: boolean
-        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
