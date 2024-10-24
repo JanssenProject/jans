@@ -320,6 +320,10 @@ class Plugin(DialogUtils):
 
             self.oauth_main_area = set_area
 
+    def on_page_enter(self):
+        self.nav_bar.cur_navbar_selection = 0
+        self.oauth_nav_selection_changed(self.nav_bar.navbar_entries[0][0])
+
     def save_client_summary(self, event):
 
         def do_save(path):

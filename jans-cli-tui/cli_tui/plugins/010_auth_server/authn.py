@@ -179,6 +179,8 @@ class Authn(DialogUtils):
             # Custom scripts
             self.scripts_container.clear()
             for i, scr in enumerate(self.auth_scripts):
+                if scr['name'] == 'agama':
+                    continue
                 acr_values.append((scr['name'], scr['name'] + ' [script]'))
                 if self.default_acr == scr['name']:
                     self.acr_radio_list_widget.current_value = scr['name']
