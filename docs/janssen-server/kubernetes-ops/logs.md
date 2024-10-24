@@ -51,8 +51,6 @@ CN_AUTH_APP_LOGGERS:
 "auth_log_target":"STDOUT",
 "http_log_level":"INFO",
 "http_log_target":"FILE",
-"ldap_stats_log_level":"INFO",
-"ldap_stats_log_target":"FILE",
 "persistence_duration_log_level":"INFO",
 "persistence_duration_log_target":"FILE",
 "persistence_log_level":"INFO",
@@ -79,7 +77,6 @@ global:
       httpLogLevel: "TRACE"
       persistenceLogLevel: "TRACE"
       persistenceDurationLogLevel: "TRACE"
-      ldapStatsLogLevel: "TRACE"
       scriptLogLevel: "TRACE"
       auditStatsLogLevel: "TRACE"
 ............
@@ -108,17 +105,16 @@ kubectl get configmap -n <namspace> <helm-release-name>-config-cm -o yaml | grep
 Example output:
 ```yaml
 CN_CONFIG_API_APP_LOGGERS: 
-'{"
-config_api_log_level":"INFO",
+'{
+"config_api_log_level":"INFO",
 "config_api_log_target":"STDOUT",
-"ldap_stats_log_level":"INFO",
-"ldap_stats_log_target":"FILE",
 "persistence_duration_log_level":"INFO",
 "persistence_duration_log_target":"FILE",
 "persistence_log_level":"INFO",
 "persistence_log_target":"FILE",
 "script_log_level":"INFO",
-"script_log_target":"FILE"}'
+"script_log_target":"FILE"
+}'
 ```
 
 To override the current logging level in config-api, you can either add the desired changes to a yaml file and apply it using `helm`, or
@@ -137,7 +133,6 @@ global:
       configApiLogLevel: "TRACE"
       persistenceLogLevel: "TRACE"
       persistenceDurationLogLevel: "TRACE"
-      ldapStatsLogLevel: "TRACE"
       scriptLogLevel: "TRACE"
 ............
 ............      
@@ -165,11 +160,12 @@ kubectl get configmap -n <namespace> <helm-release-name>-config-cm -o yaml | gre
 Example output:
 ```yaml
 CN_FIDO2_APP_LOGGERS: 
-'{"
-fido2_log_level":"INFO",
+'{
+"fido2_log_level":"INFO",
 "fido2_log_target":"STDOUT",
 "persistence_log_level":"INFO",
-"persistence_log_target":"FILE"}'
+"persistence_log_target":"FILE"
+}'
 ```
 
 
@@ -214,9 +210,7 @@ kubectl get configmap -n <namespace> <helm-release-name>-config-cm -o yaml | gre
 Example output:
 ```yaml
 CN_SCIM_APP_LOGGERS: 
-'{"
-ldap_stats_log_level":"INFO",
-"ldap_stats_log_target":"FILE",
+'{
 "persistence_duration_log_level":"INFO",
 "persistence_duration_log_target":"FILE",
 "persistence_log_level":"INFO",
@@ -224,7 +218,8 @@ ldap_stats_log_level":"INFO",
 "scim_log_level":"INFO",
 "scim_log_target":"STDOUT",
 "script_log_level":"INFO",
-"script_log_target":"FILE"}'
+"script_log_target":"FILE"
+}'
 ```
 
 To override the current logging level in scim, you can either add the desired changes to a yaml file and apply it using `helm`, or
@@ -243,7 +238,6 @@ global:
       scimLogLevel: "TRACE"
       persistenceLogLevel: "TRACE"
       persistenceDurationLogLevel: "TRACE"
-      ldapStatsLogLevel: "TRACE"
       scriptLogLevel: "TRACE"
 ............
 ............      

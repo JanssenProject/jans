@@ -82,7 +82,7 @@ nav:
       - Using Rancher Marketplace: janssen-server/install/helm-install/rancher.md
     - Docker Deployments:
       - Quick Start: janssen-server/install/docker-install/quick-start.md
-      - Docker compose: janssen-server/install/docker-install/compose.md  
+      - Docker compose: janssen-server/install/docker-install/compose.md
     - Setup Instructions: janssen-server/install/setup.md
     - FAQ: janssen-server/install/install-faq.md
   - Kubernetes Operation Guide:
@@ -110,7 +110,7 @@ nav:
     - Managing Key Rotation: janssen-server/vm-ops/managing-key-rotation.md
     - Certificates: janssen-server/vm-ops/certificates.md
   - Terraform and IaC:
-    - janssen-server/terraform/README.md   
+    - janssen-server/terraform/README.md
   - Configuration Guide:
     - Configuration Tools:
       - TUI - Text-Based UI:
@@ -128,7 +128,7 @@ nav:
         - Monitoring: janssen-server/config-guide/config-tools/config-api/monitoring.md
         - Plugins: janssen-server/config-guide/config-tools/config-api/plugins.md
       - CURL: janssen-server/config-guide/config-tools/curl-guide.md
-    - Auth Server Configuration: 
+    - Auth Server Configuration:
       - OpenID Connect Client Configuration: janssen-server/config-guide/auth-server-config/openid-connect-client-configuration.md
       - OAuth Scope Management: janssen-server/config-guide/auth-server-config/oauth-scopes-config.md
       - JSON Web Key: janssen-server/config-guide/auth-server-config/json-web-key-config.md
@@ -145,7 +145,7 @@ nav:
     - FIDO2 Configuration: janssen-server/config-guide/fido2-config/janssen-fido2-configuration.md
     - SCIM Configuration:
       - SCIM User Resources: janssen-server/config-guide/scim-config/user-config.md
-      - SCIM Group Management: janssen-server/config-guide/scim-config/scim-group-config.md  
+      - SCIM Group Management: janssen-server/config-guide/scim-config/scim-group-config.md
     - Custom Scripts: janssen-server/config-guide/custom-scripts-config.md
     - SMTP Configuration: janssen-server/config-guide/smtp-configuration.md
     - Link Configuration: janssen-server/config-guide/link-configuration.md
@@ -288,7 +288,7 @@ nav:
       - Agama Best Practices:  janssen-server/developer/agama/agama-best-practices.md
       - Advanced usages: janssen-server/developer/agama/advanced-usages.md
       - Engine and bridge configurations: janssen-server/developer/agama/engine-bridge-config.md
-      - FAQ: janssen-server/developer/agama/faq.md      
+      - FAQ: janssen-server/developer/agama/faq.md
       - Quick Start Using Agama Lab: janssen-server/developer/agama/quick-start-using-agama-lab.md
     - External Libraries: janssen-server/developer/external-libraries.md
     - CORS: janssen-server/developer/cors.md
@@ -366,7 +366,6 @@ nav:
         - Monolith: janssen-server/reference/kubernetes/docker-jans-monolith.md
         - Persistence: janssen-server/reference/kubernetes/docker-jans-persistence-loader.md
         - SCIM: janssen-server/reference/kubernetes/docker-jans-scim.md
-        - Gluu OpenDJ: janssen-server/reference/kubernetes/docker-opendj.md
     - Learning Reference: janssen-server/reference/learning-reference.md
   - FIDO Admin Guide:
     - janssen-server/fido/README.md
@@ -418,7 +417,7 @@ nav:
   - JWT: 'cedarling/cedarling-jwt.md'
   - Logs: 'cedarling/cedarling-logs.md'
   - Properties: 'cedarling/cedarling-properties.md'
-  - Python: 
+  - Python:
       - cedarling/python/README.md
       - How to use: cedarling/python/usage.md
   - WASM: 'cedarling/cedarling-wasm.md'
