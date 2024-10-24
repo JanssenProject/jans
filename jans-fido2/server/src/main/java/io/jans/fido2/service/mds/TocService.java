@@ -304,7 +304,7 @@ public class TocService {
 			Document document = new Document();
 			document.setFileName("mdsToc");
 			document.setDescription("MDS TOC JWT file");
-			document.setService(new ArrayList<>(Arrays.asList("Fido2 MDS")));
+			document.setService("Fido2 MDS");
 			document.setFilePath(mdsTocFilesFolder);
 			try {
 				document.setDocument(encodedString);
@@ -397,7 +397,7 @@ public class TocService {
 				Document document = new Document();
 				document.setFileName(metadataServer + "_" + (index++));
 				document.setDescription("metadata certificate for " + metadataServer);
-				document.setService(new ArrayList<>(Arrays.asList("Fido2 MDS")));
+				document.setService("Fido2 MDS");
 				try {
 					document.setDocument(cert);
 					document.setInum(dbDocumentService.generateInumForNewDocument());
