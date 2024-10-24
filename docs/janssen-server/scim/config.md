@@ -46,7 +46,7 @@ These contents should be then passed to the `patch-scim-config` operation, e.g. 
 
 To retrieve the current server configuration using TUI proceed as below:
 
-1. Launch TUI, e.g. by running `python3 /opt/jans/jans-cli/jans_cli_tui.py`, and follow the prompts
+1. Launch TUI, e.g. by running `jans tui`, and follow the prompts
 2. Highlight the SCIM tab using your keyboard's left/right arrow key
 3. Highlight the "Get Scim Configuration" button using the tab key
 4. Press enter
