@@ -670,9 +670,14 @@ class DBUtils:
             postfix = 'Z' if rdbm_type == 'spanner' else ''
             return "{}-{}-{}{}{}:{}:{}{}{}".format(dval[0:4], dval[4:6], dval[6:8], sep, dval[8:10], dval[10:12], dval[12:14], dval[14:17], postfix)
 
-        if data_type == 'JSON':
+        if data_type in ('JSON', 'JSONB'):
             json_data = []
             for d in val:
+                if d and isinstance(d, str):
+                    try:
+                        d = json.loads(d)
+                    except Exception as e:
+                        pass
                 json_data.append(d)
 
             return json_data

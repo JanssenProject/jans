@@ -1,4 +1,5 @@
 import os
+import json
 import datetime
 import zipfile
 from setup_app import paths
@@ -47,7 +48,7 @@ class AttribDataTypes:
                 atype = syntaxType[attrib['syntax']]
             else:
                 atype = 'string'
-                
+
             for name in attrib['names']:
                 self.attribTypes[atype].append(name)
 
@@ -68,7 +69,7 @@ class AttribDataTypes:
 
     def getTypedValue(self, dtype, val):
         retVal = val
-        
+
         if dtype == 'json':
             try:
                 retVal = json.loads(val)
@@ -90,7 +91,7 @@ class AttribDataTypes:
 
                 if not val.lower().endswith('z'):
                     val += 'Z'
-                
+
                 val = datetime.datetime.strptime(val, date_format)
 
             retVal = val.strftime('%Y-%m-%dT%H:%M:%S.%f')
