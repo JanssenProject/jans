@@ -152,7 +152,7 @@ As an example, we will add text to the top of the form and change the color of t
 1.  Locate the directory that contains exploded auth-server WAR
 
     ```bash
-    kubectl exec -n <namespace> <auth-server-pod-name> -- ls /tmp
+    kubectl exec -n <namespace> <auth-server-pod-name> -- ls /opt/jetty/temp
     ```
 
     Output example:
@@ -164,26 +164,26 @@ As an example, we will add text to the top of the form and change the color of t
 1.  Get the `login.xhtml` from the auth-server pod:
 
     ```bash
-    kubectl -n jans cp <auth-server-pod-name>:tmp/jetty-0_0_0_0-8080-jans-auth_war-_jans-auth-any-15449359106458251753/webapp/login.xhtml login.xhtml
+    kubectl -n jans cp <auth-server-pod-name>:opt/jetty/temp/jetty-0_0_0_0-8080-jans-auth_war-_jans-auth-any-15449359106458251753/webapp/login.xhtml login.xhtml
     ```
 
     Modify the file locally:
 
 
     ```html
-    <h:form id="loginForm" style="padding:30px;">
-        <!-- customization -->
-        <div class="row"><p id="creds-title">Enter Credentials</p></div>
-        <!-- end of customization -->
-        <div class="row">
-            <div class="col-sm-3 col-md-3">
-                <h:outputText value="#{msgs['login.username']}" />
-            </div>
+    <h:form
+        id="loginForm"
+      class="bg-highlight position-relative d-flex flex-column align-items-center justify-content-center"
+      style="height: 100vh; gap: 2rem"
+      >
+    <!-- customization -->
+    <div class="row"><p id="creds-title">Enter Credentials</p></div>
+    <!-- end of customization -->
     ```
 
 1.  Get the `login-template.xhtml` from the auth-server pod:
     ```bash
-    kubectl -n jans cp <auth-server-pod-name>:tmp/jetty-0_0_0_0-8080-jans-auth_war-_jans-auth-any-15449359106458251753/webapp/WEB-INF/incl/layout/login-template.xhtml login-template.xhtml
+    kubectl -n jans cp <auth-server-pod-name>:opt/jetty/temp/jetty-0_0_0_0-8080-jans-auth_war-_jans-auth-any-15449359106458251753/webapp/WEB-INF/incl/layout/login-template.xhtml login-template.xhtml
     ```
     Modify the file locally:
 
@@ -203,6 +203,8 @@ As an example, we will add text to the top of the form and change the color of t
       #creds-title {
         font-style: italic;
         font-weight: bolder;
+        color: white;
+        font-size: 2em;
       }
     ```
 
@@ -266,7 +268,7 @@ As an example, we will change the color of the button to blue using the followin
 1.  Locate the directory that contains exploded auth-server WAR
 
     ```bash
-    kubectl exec -n <namespace> <auth-server-pod-name> -- ls /tmp
+    kubectl exec -n <namespace> <auth-server-pod-name> -- ls /opt/jetty/temp
     ```
 
     Output example:
@@ -278,22 +280,23 @@ As an example, we will change the color of the button to blue using the followin
 1.  Get the `device_authorization.xhtml` from the auth-server pod:
 
     ```bash
-    kubectl -n jans cp <auth-server-pod-name>:tmp/jetty-0_0_0_0-8080-jans-auth_war-_jans-auth-any-15449359106458251753/webapp/device_authorization.xhtml device_authorization.xhtml
+    kubectl -n jans cp <auth-server-pod-name>:opt/jetty/temp/jetty-0_0_0_0-8080-jans-auth_war-_jans-auth-any-15449359106458251753/webapp/device_authorization.xhtml device_authorization.xhtml
     ```
 
     Modify the file locally:
 
     ```html
-    <div class="col-sm-8 col-md-6">
-      <!-- customization -->
-      <h:commandButton id="continueButton"
-        style="background-color: red; color:white;"
-        styleClass="btn col-sm-12" value="#{msgs['device.authorization.confirm.button']}"
-        iconAwesome="fa-sign-in">
-       <!-- end of customization --> 
-        <f:ajax execute="@form" render="@form messages" listener="#{deviceAuthorizationAction.processUserCodeVerification}" />
-      </h:commandButton>
-    </div>
+    <div class="device-authz-button">
+        <div style="width: 100%">
+    <!-- customization -->        
+        <div style="text-align: center;">
+        <h:commandButton id="continueButton"
+                        style="background-color: red; color: white;" value="#{msgs['device.authorization.confirm.button']}"
+                        iconAwesome="fa-sign-in">
+            <f:ajax execute="@form" render="@form messages" listener="#{deviceAuthorizationAction.processUserCodeVerification}" />
+        </h:commandButton>
+        </div>
+    <!-- end of customization -->                                               
     ```
 
 
@@ -340,7 +343,7 @@ As an example, we will change the color of the text at the top of the error page
 1.  Locate the directory that contains exploded auth-server WAR
 
     ```bash
-    kubectl exec -n <namespace> <auth-server-pod-name> -- ls /tmp
+    kubectl exec -n <namespace> <auth-server-pod-name> -- ls /opt/jetty/temp
     ```
 
     Output example:
@@ -352,7 +355,7 @@ As an example, we will change the color of the text at the top of the error page
 1.  Get the `error.xhtml` from the auth-server pod:
 
     ```bash
-    kubectl -n jans cp <auth-server-pod-name>:tmp/jetty-0_0_0_0-8080-jans-auth_war-_jans-auth-any-15449359106458251753/webapp/error.xhtml error.xhtml
+    kubectl -n jans cp <auth-server-pod-name>:opt/jetty/temp/jetty-0_0_0_0-8080-jans-auth_war-_jans-auth-any-15449359106458251753/webapp/error.xhtml error.xhtml
     ```
 
     Modify the file locally:
