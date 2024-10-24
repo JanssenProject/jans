@@ -6509,7 +6509,7 @@
   
     <li class="md-nav__item">
       <a href="../../reference/kubernetes/config-secret-keys/" class="md-nav__link">
-        Config and Secret Keys
+        Configuration Keys
       </a>
     </li>
   
@@ -9101,7 +9101,7 @@ wget -O /opt/jans/jetty/jans-auth/custom/libs/mycustom.jar https://mydomain.com/
 <ol>
 <li>
 <p>Locate the directory that contains exploded auth-server WAR</p>
-<div class="highlight"><pre><span></span><code>kubectl <span class="nb">exec</span> -n &lt;namespace&gt; &lt;auth-server-pod-name&gt; -- ls /tmp
+<div class="highlight"><pre><span></span><code>kubectl <span class="nb">exec</span> -n &lt;namespace&gt; &lt;auth-server-pod-name&gt; -- ls /opt/jetty/temp
 </code></pre></div>
 <p>Output example:</p>
 <div class="highlight"><pre><span></span><code>jetty-0_0_0_0-8080-jans-auth_war-_jans-auth-any-15449359106458251753
@@ -9109,22 +9109,22 @@ wget -O /opt/jans/jetty/jans-auth/custom/libs/mycustom.jar https://mydomain.com/
 </li>
 <li>
 <p>Get the <code>login.xhtml</code> from the auth-server pod:</p>
-<div class="highlight"><pre><span></span><code>kubectl -n jans cp &lt;auth-server-pod-name&gt;:tmp/jetty-0_0_0_0-8080-jans-auth_war-_jans-auth-any-15449359106458251753/webapp/login.xhtml login.xhtml
+<div class="highlight"><pre><span></span><code>kubectl -n jans cp &lt;auth-server-pod-name&gt;:opt/jetty/temp/jetty-0_0_0_0-8080-jans-auth_war-_jans-auth-any-15449359106458251753/webapp/login.xhtml login.xhtml
 </code></pre></div>
 <p>Modify the file locally:</p>
-<div class="highlight"><pre><span></span><code><span class="p">&lt;</span><span class="nt">h:form</span> <span class="na">id</span><span class="o">=</span><span class="s">&quot;loginForm&quot;</span> <span class="na">style</span><span class="o">=</span><span class="s">&quot;padding:30px;&quot;</span><span class="p">&gt;</span>
-    <span class="cm">&lt;!-- customization --&gt;</span>
-    <span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;row&quot;</span><span class="p">&gt;&lt;</span><span class="nt">p</span> <span class="na">id</span><span class="o">=</span><span class="s">&quot;creds-title&quot;</span><span class="p">&gt;</span>Enter Credentials<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
-    <span class="cm">&lt;!-- end of customization --&gt;</span>
-    <span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;row&quot;</span><span class="p">&gt;</span>
-        <span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;col-sm-3 col-md-3&quot;</span><span class="p">&gt;</span>
-            <span class="p">&lt;</span><span class="nt">h:outputText</span> <span class="na">value</span><span class="o">=</span><span class="s">&quot;#{msgs[&#39;login.username&#39;]}&quot;</span> <span class="p">/&gt;</span>
-        <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+<div class="highlight"><pre><span></span><code><span class="p">&lt;</span><span class="nt">h:form</span>
+    <span class="na">id</span><span class="o">=</span><span class="s">&quot;loginForm&quot;</span>
+  <span class="na">class</span><span class="o">=</span><span class="s">&quot;bg-highlight position-relative d-flex flex-column align-items-center justify-content-center&quot;</span>
+  <span class="na">style</span><span class="o">=</span><span class="s">&quot;height: 100vh; gap: 2rem&quot;</span>
+  <span class="p">&gt;</span>
+<span class="cm">&lt;!-- customization --&gt;</span>
+<span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;row&quot;</span><span class="p">&gt;&lt;</span><span class="nt">p</span> <span class="na">id</span><span class="o">=</span><span class="s">&quot;creds-title&quot;</span><span class="p">&gt;</span>Enter Credentials<span class="p">&lt;/</span><span class="nt">p</span><span class="p">&gt;&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+<span class="cm">&lt;!-- end of customization --&gt;</span>
 </code></pre></div>
 </li>
 <li>
 <p>Get the <code>login-template.xhtml</code> from the auth-server pod:
-    <div class="highlight"><pre><span></span><code>kubectl -n jans cp &lt;auth-server-pod-name&gt;:tmp/jetty-0_0_0_0-8080-jans-auth_war-_jans-auth-any-15449359106458251753/webapp/WEB-INF/incl/layout/login-template.xhtml login-template.xhtml
+    <div class="highlight"><pre><span></span><code>kubectl -n jans cp &lt;auth-server-pod-name&gt;:opt/jetty/temp/jetty-0_0_0_0-8080-jans-auth_war-_jans-auth-any-15449359106458251753/webapp/WEB-INF/incl/layout/login-template.xhtml login-template.xhtml
 </code></pre></div>
     Modify the file locally:</p>
 <div class="highlight"><pre><span></span><code><span class="p">&lt;</span><span class="nt">h:head</span><span class="p">&gt;</span>
@@ -9140,6 +9140,8 @@ wget -O /opt/jans/jetty/jans-auth/custom/libs/mycustom.jar https://mydomain.com/
 <div class="highlight"><pre><span></span><code><span class="w">  </span><span class="p">#</span><span class="nn">creds-title</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="k">font-style</span><span class="p">:</span><span class="w"> </span><span class="kc">italic</span><span class="p">;</span><span class="w"></span>
 <span class="w">    </span><span class="k">font-weight</span><span class="p">:</span><span class="w"> </span><span class="kc">bolder</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="k">color</span><span class="p">:</span><span class="w"> </span><span class="kc">white</span><span class="p">;</span><span class="w"></span>
+<span class="w">    </span><span class="k">font-size</span><span class="p">:</span><span class="w"> </span><span class="mi">2</span><span class="kt">em</span><span class="p">;</span><span class="w"></span>
 <span class="w">  </span><span class="p">}</span><span class="w"></span>
 </code></pre></div>
 </li>
@@ -9192,7 +9194,7 @@ kubectl -n &lt;namespace&gt; create cm auth-server-custom-css --from-file<span c
 <ol>
 <li>
 <p>Locate the directory that contains exploded auth-server WAR</p>
-<div class="highlight"><pre><span></span><code>kubectl <span class="nb">exec</span> -n &lt;namespace&gt; &lt;auth-server-pod-name&gt; -- ls /tmp
+<div class="highlight"><pre><span></span><code>kubectl <span class="nb">exec</span> -n &lt;namespace&gt; &lt;auth-server-pod-name&gt; -- ls /opt/jetty/temp
 </code></pre></div>
 <p>Output example:</p>
 <div class="highlight"><pre><span></span><code>jetty-0_0_0_0-8080-jans-auth_war-_jans-auth-any-15449359106458251753
@@ -9200,19 +9202,20 @@ kubectl -n &lt;namespace&gt; create cm auth-server-custom-css --from-file<span c
 </li>
 <li>
 <p>Get the <code>device_authorization.xhtml</code> from the auth-server pod:</p>
-<div class="highlight"><pre><span></span><code>kubectl -n jans cp &lt;auth-server-pod-name&gt;:tmp/jetty-0_0_0_0-8080-jans-auth_war-_jans-auth-any-15449359106458251753/webapp/device_authorization.xhtml device_authorization.xhtml
+<div class="highlight"><pre><span></span><code>kubectl -n jans cp &lt;auth-server-pod-name&gt;:opt/jetty/temp/jetty-0_0_0_0-8080-jans-auth_war-_jans-auth-any-15449359106458251753/webapp/device_authorization.xhtml device_authorization.xhtml
 </code></pre></div>
 <p>Modify the file locally:</p>
-<div class="highlight"><pre><span></span><code><span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;col-sm-8 col-md-6&quot;</span><span class="p">&gt;</span>
-  <span class="cm">&lt;!-- customization --&gt;</span>
-  <span class="p">&lt;</span><span class="nt">h:commandButton</span> <span class="na">id</span><span class="o">=</span><span class="s">&quot;continueButton&quot;</span>
-    <span class="na">style</span><span class="o">=</span><span class="s">&quot;background-color: red; color:white;&quot;</span>
-    <span class="na">styleClass</span><span class="o">=</span><span class="s">&quot;btn col-sm-12&quot;</span> <span class="na">value</span><span class="o">=</span><span class="s">&quot;#{msgs[&#39;device.authorization.confirm.button&#39;]}&quot;</span>
-    <span class="na">iconAwesome</span><span class="o">=</span><span class="s">&quot;fa-sign-in&quot;</span><span class="p">&gt;</span>
-   <span class="cm">&lt;!-- end of customization --&gt;</span> 
-    <span class="p">&lt;</span><span class="nt">f:ajax</span> <span class="na">execute</span><span class="o">=</span><span class="s">&quot;@form&quot;</span> <span class="na">render</span><span class="o">=</span><span class="s">&quot;@form messages&quot;</span> <span class="na">listener</span><span class="o">=</span><span class="s">&quot;#{deviceAuthorizationAction.processUserCodeVerification}&quot;</span> <span class="p">/&gt;</span>
-  <span class="p">&lt;/</span><span class="nt">h:commandButton</span><span class="p">&gt;</span>
-<span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+<div class="highlight"><pre><span></span><code><span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;device-authz-button&quot;</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">div</span> <span class="na">style</span><span class="o">=</span><span class="s">&quot;width: 100%&quot;</span><span class="p">&gt;</span>
+<span class="cm">&lt;!-- customization --&gt;</span>        
+    <span class="p">&lt;</span><span class="nt">div</span> <span class="na">style</span><span class="o">=</span><span class="s">&quot;text-align: center;&quot;</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">h:commandButton</span> <span class="na">id</span><span class="o">=</span><span class="s">&quot;continueButton&quot;</span>
+                    <span class="na">style</span><span class="o">=</span><span class="s">&quot;background-color: red; color: white;&quot;</span> <span class="na">value</span><span class="o">=</span><span class="s">&quot;#{msgs[&#39;device.authorization.confirm.button&#39;]}&quot;</span>
+                    <span class="na">iconAwesome</span><span class="o">=</span><span class="s">&quot;fa-sign-in&quot;</span><span class="p">&gt;</span>
+        <span class="p">&lt;</span><span class="nt">f:ajax</span> <span class="na">execute</span><span class="o">=</span><span class="s">&quot;@form&quot;</span> <span class="na">render</span><span class="o">=</span><span class="s">&quot;@form messages&quot;</span> <span class="na">listener</span><span class="o">=</span><span class="s">&quot;#{deviceAuthorizationAction.processUserCodeVerification}&quot;</span> <span class="p">/&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">h:commandButton</span><span class="p">&gt;</span>
+    <span class="p">&lt;/</span><span class="nt">div</span><span class="p">&gt;</span>
+<span class="cm">&lt;!-- end of customization --&gt;</span>                                               
 </code></pre></div>
 </li>
 <li>
@@ -9248,7 +9251,7 @@ kubectl -n &lt;namespace&gt; create cm auth-server-custom-css --from-file<span c
 <ol>
 <li>
 <p>Locate the directory that contains exploded auth-server WAR</p>
-<div class="highlight"><pre><span></span><code>kubectl <span class="nb">exec</span> -n &lt;namespace&gt; &lt;auth-server-pod-name&gt; -- ls /tmp
+<div class="highlight"><pre><span></span><code>kubectl <span class="nb">exec</span> -n &lt;namespace&gt; &lt;auth-server-pod-name&gt; -- ls /opt/jetty/temp
 </code></pre></div>
 <p>Output example:</p>
 <div class="highlight"><pre><span></span><code>jetty-0_0_0_0-8080-jans-auth_war-_jans-auth-any-15449359106458251753
@@ -9256,7 +9259,7 @@ kubectl -n &lt;namespace&gt; create cm auth-server-custom-css --from-file<span c
 </li>
 <li>
 <p>Get the <code>error.xhtml</code> from the auth-server pod:</p>
-<div class="highlight"><pre><span></span><code>kubectl -n jans cp &lt;auth-server-pod-name&gt;:tmp/jetty-0_0_0_0-8080-jans-auth_war-_jans-auth-any-15449359106458251753/webapp/error.xhtml error.xhtml
+<div class="highlight"><pre><span></span><code>kubectl -n jans cp &lt;auth-server-pod-name&gt;:opt/jetty/temp/jetty-0_0_0_0-8080-jans-auth_war-_jans-auth-any-15449359106458251753/webapp/error.xhtml error.xhtml
 </code></pre></div>
 <p>Modify the file locally:</p>
 <div class="highlight"><pre><span></span><code><span class="p">&lt;</span><span class="nt">div</span> <span class="na">class</span><span class="o">=</span><span class="s">&quot;section&quot;</span><span class="p">&gt;</span>
@@ -9299,7 +9302,7 @@ kubectl -n &lt;namespace&gt; create cm auth-server-custom-css --from-file<span c
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-09-27T12:12:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-24T10:28:01+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-24</span>
       
         <br>
         Created:
