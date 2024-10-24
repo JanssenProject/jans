@@ -195,7 +195,7 @@ public class AcrsResource extends ConfigBaseResource {
             log.debug(" agamaDeploymentList:{},", agamaDeploymentList);
 
             Set<String> keys = getDirectLaunchFlows(agamaDeploymentList);
-            log.info("Final DirectLaunchFlows - keys:{}, authenticationMode:{}, authenticationMode.indexOf(AGAMA_PREFIX):{}, authenticationMode.indexOf(AGAMA_PREFIX_SEPERATOR):{} , authenticationMode.indexOf(AGAMA_PREFIX_SEPERATOR)+1:{}", keys, authenticationMode, authenticationMode.indexOf(AGAMA_PREFIX), authenticationMode.indexOf(AGAMA_PREFIX_SEPERATOR) , authenticationMode.indexOf(AGAMA_PREFIX_SEPERATOR)+1);
+            log.info("Final DirectLaunchFlows - keys:{}, authenticationMode:{}, authenticationMode.indexOf(AGAMA_PREFIX_SEPERATOR):{} , authenticationMode.indexOf(AGAMA_PREFIX_SEPERATOR)+1:{}", keys, authenticationMode, authenticationMode.indexOf(AGAMA_PREFIX_SEPERATOR) , authenticationMode.indexOf(AGAMA_PREFIX_SEPERATOR)+1);
             String agamaAcr = authenticationMode;
             if (authenticationMode.indexOf(AGAMA_PREFIX_SEPERATOR) > 0) {
                 agamaAcr = authenticationMode.substring(authenticationMode.indexOf(AGAMA_PREFIX_SEPERATOR)+1);
