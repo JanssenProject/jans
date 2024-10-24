@@ -7,7 +7,6 @@
 
 use std::collections::HashMap;
 
-use cedar_policy::RestrictedExpression;
 use derive_more::Deref;
 use serde_json::Value;
 
@@ -36,8 +35,8 @@ impl TokenPayload {
         Self { payload }
     }
 
-    /// Get the value of a key in the payload.
-    pub fn get(&self, key: &str) -> Option<&serde_json::Value> {
+    /// Get the json value of a key in the payload.
+    pub fn get_json_value(&self, key: &str) -> Option<&serde_json::Value> {
         self.payload.get(key)
     }
 
@@ -49,22 +48,15 @@ impl TokenPayload {
         result
     }
 
-    /// Get claim attribute value
-    /// for all types that implements `ClaimGetter<T>`
-    pub fn get_value<T>(&self, key: &str) -> Result<T, GetTokenClaimValue>
-    where
-        TokenPayload: AttributeGetter<T>,
-    {
-        self.get_attribute_value(key)
-    }
-
-    /// Get claim attribute [`RestrictedExpression`]
-    /// for all types that implements `ClaimGetter<T>`
-    pub fn get_expression<T>(&self, key: &str) -> Result<RestrictedExpression, GetTokenClaimValue>
-    where
-        TokenPayload: AttributeGetter<T>,
-    {
-        self.get_attribute_expression(key)
+    /// Get [`Payload`] structure that contain key and [serde_json::Value] value.
+    pub fn get_payload(&self, key: &str) -> Result<Payload, GetTokenClaimValue> {
+        self.payload
+            .get(key)
+            .map(|value| Payload {
+                key: key.to_string(),
+                value,
+            })
+            .ok_or(GetTokenClaimValue::KeyNotFound(key.to_string()))
     }
 }
 
@@ -72,18 +64,6 @@ impl From<HashMap<String, serde_json::Value>> for TokenPayload {
     fn from(value: HashMap<String, serde_json::Value>) -> Self {
         TokenPayload::new(value)
     }
-}
-
-/// Trait to get claim attribute value by key from token data
-pub(crate) trait AttributeGetter<T> {
-    /// Get claim attribute value
-    fn get_attribute_value(&self, key: &str) -> Result<T, GetTokenClaimValue>;
-
-    /// Get claim attribute [`RestrictedExpression`]
-    fn get_attribute_expression(
-        &self,
-        key: &str,
-    ) -> Result<RestrictedExpression, GetTokenClaimValue>;
 }
 
 /// Errors that can occur when trying to get claim attribute value from token data
@@ -94,6 +74,11 @@ pub enum GetTokenClaimValue {
     #[error("could not convert json field with key: {key} to: {expected_type}, got: {got_type}")]
     KeyNotCorrectType {
         key: String,
+        expected_type: String,
+        got_type: String,
+    },
+    #[error("could not convert json value to: {expected_type}, got: {got_type}")]
+    NotCorrectType {
         expected_type: String,
         got_type: String,
     },
@@ -128,68 +113,56 @@ impl GetTokenClaimValue {
     }
 }
 
-// impl ClaimGetter for getting `i64` value
-impl AttributeGetter<i64> for TokenPayload {
-    fn get_attribute_value(&self, key: &str) -> Result<i64, GetTokenClaimValue> {
-        if let Some(attr_value) = self.payload.get(key) {
-            attr_value
-                .as_i64()
-                .ok_or(GetTokenClaimValue::not_correct_type(key, "i64", attr_value))
-        } else {
-            Err(GetTokenClaimValue::KeyNotFound(key.to_string()))
-        }
-    }
-
-    fn get_attribute_expression(
-        &self,
-        key: &str,
-    ) -> Result<RestrictedExpression, GetTokenClaimValue> {
-        Ok(RestrictedExpression::new_long(self.get_value(key)?))
-    }
+/// Structure that contains  information about  token claims
+///
+/// Wrapper to get more readable error messages when we get not correct type of  value from json.
+/// Is used in the [`TokenPayload::get_payload`] method
+pub(crate) struct Payload<'a> {
+    key: String,
+    value: &'a serde_json::Value,
 }
 
-// impl ClaimGetter for getting `String` value
-impl AttributeGetter<String> for TokenPayload {
-    fn get_attribute_value(&self, key: &str) -> Result<String, GetTokenClaimValue> {
-        if let Some(attr_value) = self.payload.get(key) {
-            let result = attr_value
-                .as_str()
-                .ok_or(GetTokenClaimValue::not_correct_type(
-                    key, "String", attr_value,
-                ))?
-                .to_string();
-            Ok(result)
-        } else {
-            Err(GetTokenClaimValue::KeyNotFound(key.to_string()))
-        }
+impl<'a> Payload<'a> {
+    pub fn as_i64(&self) -> Result<i64, GetTokenClaimValue> {
+        self.value
+            .as_i64()
+            .ok_or(GetTokenClaimValue::not_correct_type(
+                &self.key, "i64", self.value,
+            ))
     }
 
-    fn get_attribute_expression(
-        &self,
-        key: &str,
-    ) -> Result<RestrictedExpression, GetTokenClaimValue> {
-        Ok(RestrictedExpression::new_string(self.get_value(key)?))
-    }
-}
-
-// impl ClaimGetter for getting `bool` value
-impl AttributeGetter<bool> for TokenPayload {
-    fn get_attribute_value(&self, key: &str) -> Result<bool, GetTokenClaimValue> {
-        if let Some(attr_value) = self.payload.get(key) {
-            attr_value
-                .as_bool()
-                .ok_or(GetTokenClaimValue::not_correct_type(
-                    key, "bool", attr_value,
-                ))
-        } else {
-            Err(GetTokenClaimValue::KeyNotFound(key.to_string()))
-        }
+    pub fn as_str(&self) -> Result<&str, GetTokenClaimValue> {
+        self.value
+            .as_str()
+            .ok_or(GetTokenClaimValue::not_correct_type(
+                &self.key, "String", self.value,
+            ))
     }
 
-    fn get_attribute_expression(
-        &self,
-        key: &str,
-    ) -> Result<RestrictedExpression, GetTokenClaimValue> {
-        Ok(RestrictedExpression::new_bool(self.get_value(key)?))
+    pub fn as_bool(&self) -> Result<bool, GetTokenClaimValue> {
+        self.value
+            .as_bool()
+            .ok_or(GetTokenClaimValue::not_correct_type(
+                &self.key, "bool", self.value,
+            ))
+    }
+
+    pub fn as_array(&self) -> Result<Vec<Payload>, GetTokenClaimValue> {
+        self.value
+            .as_array()
+            .map(|array| {
+                array
+                    .iter()
+                    .enumerate()
+                    .map(|(i, v)| Payload {
+                        // show current key and index in array
+                        key: format!("{}[{}]", self.key, i),
+                        value: v,
+                    })
+                    .collect()
+            })
+            .ok_or(GetTokenClaimValue::not_correct_type(
+                &self.key, "Array", self.value,
+            ))
     }
 }

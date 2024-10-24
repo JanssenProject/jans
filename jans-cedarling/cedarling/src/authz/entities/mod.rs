@@ -9,6 +9,8 @@
 
 mod create;
 mod meta;
+mod trait_as_expression;
+
 #[cfg(test)]
 mod test_create;
 
@@ -68,11 +70,12 @@ pub fn user_entity(
     const SUB_KEY: &str = "sub";
 
     // if 'sub' is not the same we discard the userinfo token
-    let payload = if id_token_data.get(SUB_KEY) == userinfo_token_data.get(SUB_KEY) {
-        &id_token_data.merge(userinfo_token_data)
-    } else {
-        id_token_data
-    };
+    let payload =
+        if id_token_data.get_json_value(SUB_KEY) == userinfo_token_data.get_json_value(SUB_KEY) {
+            &id_token_data.merge(userinfo_token_data)
+        } else {
+            id_token_data
+        };
 
     meta::User.create_entity(schema, payload)
 }
