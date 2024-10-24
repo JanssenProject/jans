@@ -355,7 +355,7 @@ nav:
     - Kubernetes:
       - janssen-server/reference/kubernetes/README.md
       - Helm Chart: janssen-server/reference/kubernetes/helm-chart.md
-      - Config and Secret Keys: janssen-server/reference/kubernetes/config-secret-keys.md
+      - Configuration Keys: janssen-server/reference/kubernetes/config-secret-keys.md
       - Image Config Properties:
         - Auth Server: janssen-server/reference/kubernetes/docker-jans-auth-server.md
         - Casa: janssen-server/reference/kubernetes/docker-jans-casa.md
