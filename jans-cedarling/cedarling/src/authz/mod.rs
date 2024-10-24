@@ -28,7 +28,8 @@ use cedar_policy::{Entities, Entity, EntityUid};
 use entities::CedarPolicyCreateTypeError;
 use entities::ResourceEntityError;
 use entities::{
-    create_access_token_entities, id_token_entity, user_entity, AccessTokenEntitiesError,
+    create_access_token_entities, create_id_token_entity, create_user_entity,
+    AccessTokenEntitiesError,
 };
 use entities::{create_resource_entity, AccessTokenEntities};
 use request::Request;
@@ -182,11 +183,11 @@ impl Authz {
                 &access_token,
             )?)
             .id_token_entity(
-                id_token_entity(&self.config.policy_store.schema.json, &id_token)
+                create_id_token_entity(&self.config.policy_store.schema.json, &id_token)
                     .map_err(AuthorizeError::CreateIdTokenEntity)?,
             )
             .user_entity(
-                user_entity(
+                create_user_entity(
                     &self.config.policy_store.schema.json,
                     &id_token,
                     &user_info_token,

@@ -54,7 +54,7 @@ pub fn create_access_token_entities(
 }
 
 /// Create id_token entity
-pub fn id_token_entity(
+pub fn create_id_token_entity(
     schema: &CedarSchemaJson,
     data: &IdTokenData,
 ) -> Result<cedar_policy::Entity, CedarPolicyCreateTypeError> {
@@ -62,7 +62,7 @@ pub fn id_token_entity(
 }
 
 /// Create user entity
-pub fn user_entity(
+pub fn create_user_entity(
     schema: &CedarSchemaJson,
     id_token_data: &IdTokenData,
     userinfo_token_data: &UserInfoTokenData,
