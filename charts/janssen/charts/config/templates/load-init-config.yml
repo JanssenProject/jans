@@ -40,9 +40,9 @@ spec:
       {{- with .Values.volumes }}
 {{- toYaml . | nindent 8 }}
       {{- end }}
-        - name: {{ .Release.Name }}-configuration-file
-          secret:
-            secretName: {{ .Release.Name }}-configuration-file
+      {{- with (include "cn.config.schema" . | fromYaml).volumes }}
+{{- toYaml . | nindent 8 }}
+      {{- end }}
         - name: {{ include "config.fullname" . }}-tls-script
           configMap:
             name: {{ include "config.fullname" . }}-tls-script
@@ -62,9 +62,9 @@ spec:
           {{- with .Values.volumeMounts }}
 {{- toYaml . | nindent 10 }}
           {{- end }}
-          - mountPath: {{ .Values.global.cnConfiguratorConfigurationFile }}
-            name: {{ .Release.Name }}-configuration-file
-            subPath: {{ .Values.global.cnConfiguratorConfigurationFile | base }}
+          {{- with (include "cn.config.schema" . | fromYaml).volumeMounts }}
+{{- toYaml . | nindent 10 }}
+          {{- end }}
           - mountPath: /scripts/tls_generator.py
             name: {{ include "config.fullname" . }}-tls-script
             subPath: tls_generator.py

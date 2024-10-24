@@ -108,9 +108,9 @@ spec:
             - name: {{ include "saml.fullname" .}}-updatelbip
               mountPath: "/scripts"
           {{- end }}
-            - mountPath: {{ .Values.global.cnConfiguratorConfigurationFile }}
-              name: {{ .Release.Name }}-configuration-file
-              subPath: {{ .Values.global.cnConfiguratorConfigurationFile | base }}
+          {{- with (include "cn.config.schema" . | fromYaml).volumeMounts }}
+{{- toYaml . | nindent 12 }}
+          {{- end }}
           livenessProbe:
 {{- toYaml .Values.livenessProbe | nindent 12 }}
           readinessProbe:
@@ -133,9 +133,9 @@ spec:
           configMap:
             name: {{ .Release.Name }}-updatelbip
       {{- end }}
-        - name: {{ .Release.Name }}-configuration-file
-          secret:
-            secretName: {{ .Release.Name }}-configuration-file
+      {- with (include "cn.config.schema" . | fromYaml).volumes }}
+{{- toYaml . | nindent 8 }}
+      {{- end }}
       {{- if not .Values.global.isFqdnRegistered }}
       hostAliases:
        - ip: {{ .Values.global.lbIp }}
