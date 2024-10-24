@@ -107,14 +107,14 @@ The designs are being rendered from the [SMS xhtml page](https://github.com/Jans
 
 ### Phone Number Enrollment
 
-The script assumes the user phone number is already stored in his corresponding LDAP entry (attribute `phoneNumberVerified`). You can change the attribute by altering the script directly (see authenticate routine).
+The script assumes the user phone number is already stored in his corresponding MySQL entry (attribute `phoneNumberVerified`). You can change the attribute by altering the script directly (see authenticate routine).
 
 ### Subsequent Logins
 All <!--subsequent--> authentications will trigger an SMS with an OTP to the registered phone number. Enter the OTP to pass authentication. 
 
 ### Credential Management
     
-A user's registered phone number can be removed by a Gluu administrator either via the jans TUI, or in LDAP under the user entry. Once the phone number has been removed from the user's account, the user can re-enroll a new phone number following the [phone number enrollment](#phone-number-enrollment) instructions above. 
+A user's registered phone number can be removed by a Gluu administrator either via the jans TUI, or in MySQL under the user entry. Once the phone number has been removed from the user's account, the user can re-enroll a new phone number following the [phone number enrollment](#phone-number-enrollment) instructions above. 
 
 ## Troubleshooting    
 If problems are encountered, take a look at the logs, specifically `/opt/jans/jetty/jans-auth/logs/jans-auth_script.log`. Inspect all messages related to Twilio. For instance, the following messages show an example of correct script initialization:
