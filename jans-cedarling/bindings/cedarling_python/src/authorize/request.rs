@@ -22,7 +22,7 @@ use serde_pyobject::from_pyobject;
 /// ----------
 /// :param access_token: The access token string.
 /// :param id_token: The id token string.
-/// :param userinfo_token: The user info token string.
+/// :param userinfo_token: The userinfo token string.
 /// :param action: The action to be authorized.
 /// :param resource: Resource data (wrapped `ResourceData` object).
 /// :param context: Python dictionary with additional context.
