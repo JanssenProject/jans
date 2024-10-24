@@ -8,6 +8,7 @@
 use super::cedar_schema::CedarSchema;
 use base64::prelude::*;
 use cedar_policy::PolicyId;
+use serde::{Deserialize, Deserializer};
 use std::collections::HashMap;
 
 /// Represents the store of policies used for JWT validation and policy evaluation in Cedarling.
@@ -16,6 +17,11 @@ use std::collections::HashMap;
 /// which are parsed during deserialization.
 #[derive(Debug, Clone, serde::Deserialize)]
 pub struct PolicyStore {
+    /// The cedar version to use when parsing the schema and policies.
+    #[serde(deserialize_with = "check_cedar_version")]
+    #[allow(dead_code)]
+    pub cedar_version: String,
+
     /// Cedar schema in base64-encoded string format.
     ///
     /// Extracted from the `policy_store.json` file.
@@ -26,6 +32,46 @@ pub struct PolicyStore {
     /// Extracted from the `policy_store.json` file and deserialized using `deserialize_policies`.
     #[serde(deserialize_with = "parse_cedar_policy")]
     pub cedar_policies: cedar_policy::PolicySet,
+}
+
+/// Used to to validate the cedar_version field.
+///
+/// Ensures the version follows the format `major.minor.patch`, where each part is a valid number.
+fn check_cedar_version<'de, D>(deserializer: D) -> Result<String, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let version: String = String::deserialize(deserializer)?;
+
+    // Check for "v" prefix
+    let stripped_version = if version.starts_with('v') {
+        &version[1..] // Remove the 'v' prefix
+    } else {
+        &version
+    };
+
+    // Split the version by '.'
+    let parts: Vec<&str> = stripped_version.split('.').collect();
+
+    // Check that we have exactly three parts (major, minor, patch)
+    if parts.len() != 3 {
+        return Err(serde::de::Error::custom(format!(
+            "invalid version format: '{}', expected 'major.minor.patch'",
+            version
+        )));
+    }
+
+    // Check that each part is a valid number
+    for part in &parts {
+        if part.parse::<u32>().is_err() {
+            return Err(serde::de::Error::custom(format!(
+                "invalid version part: '{}', expected a number",
+                part
+            )));
+        }
+    }
+
+    Ok(version)
 }
 
 /// Enum representing the various error messages that can occur while parsing policy sets.
@@ -113,6 +159,8 @@ where
 
 #[cfg(test)]
 mod test {
+    use crate::common::policy_store::check_cedar_version;
+
     use super::ParsePolicySetMessage;
     use super::PolicyStore;
 
@@ -156,6 +204,36 @@ mod test {
 
         // TODO: this isn't really a human readable format so idk why the error message is
         // like this.
-        assert_eq!(err_msg, "unable to decode policy with id: 840da5d85403f35ea76519ed1a18a33989f855bf1cf8, error: unable to decode policy_content from human readable format: unexpected token `)` at line 8 column 5")
+        assert_eq!(err_msg, "unable to decode policy with id: 840da5d85403f35ea76519ed1a18a33989f855bf1cf8, error: unable to decode policy_content from human readable format: unexpected token `)` at line 9 column 5")
+    }
+
+    #[test]
+    fn test_valid_version() {
+        let valid_version = "1.2.3".to_string();
+        assert!(check_cedar_version(serde_json::Value::String(valid_version)).is_ok());
+    }
+
+    #[test]
+    fn test_valid_version_with_v() {
+        let valid_version_with_v = "v1.2.3".to_string();
+        assert!(check_cedar_version(serde_json::Value::String(valid_version_with_v)).is_ok());
+    }
+
+    #[test]
+    fn test_invalid_version_format() {
+        let invalid_version = "1.2".to_string();
+        assert!(check_cedar_version(serde_json::Value::String(invalid_version)).is_err());
+    }
+
+    #[test]
+    fn test_invalid_version_part() {
+        let invalid_version = "1.two.3".to_string();
+        assert!(check_cedar_version(serde_json::Value::String(invalid_version)).is_err());
+    }
+
+    #[test]
+    fn test_invalid_version_format_with_v() {
+        let invalid_version_with_v = "v1.2".to_string();
+        assert!(check_cedar_version(serde_json::Value::String(invalid_version_with_v)).is_err());
     }
 }
