@@ -1,6 +1,31 @@
 {
     "Jans": {
         "commonTypes": {
+            "Url": {
+                "type": "Record",
+                "attributes": {
+                    "host": {
+                        "type": "String"
+                    },
+                    "path": {
+                        "type": "String"
+                    },
+                    "protocol": {
+                        "type": "String"
+                    }
+                }
+            },
+            "email_address": {
+                "type": "Record",
+                "attributes": {
+                    "domain": {
+                        "type": "String"
+                    },
+                    "id": {
+                        "type": "String"
+                    }
+                }
+            },
             "Context": {
                 "type": "Record",
                 "attributes": {
@@ -39,35 +64,114 @@
                         "type": "String"
                     }
                 }
-            },
-            "email_address": {
-                "type": "Record",
-                "attributes": {
-                    "domain": {
-                        "type": "String"
-                    },
-                    "id": {
-                        "type": "String"
-                    }
-                }
-            },
-            "Url": {
-                "type": "Record",
-                "attributes": {
-                    "host": {
-                        "type": "String"
-                    },
-                    "path": {
-                        "type": "String"
-                    },
-                    "protocol": {
-                        "type": "String"
-                    }
-                }
             }
         },
         "entityTypes": {
-            "Role": {},
+            "User": {
+                "memberOfTypes": [
+                    "Role"
+                ],
+                "shape": {
+                    "type": "Record",
+                    "attributes": {
+                        "email": {
+                            "type": "email_address"
+                        },
+                        "phone_number": {
+                            "type": "String"
+                        },
+                        "role": {
+                            "type": "Set",
+                            "element": {
+                                "type": "String"
+                            }
+                        },
+                        "sub": {
+                            "type": "String"
+                        },
+                        "username": {
+                            "type": "String"
+                        }
+                    }
+                }
+            },
+            "TrustedIssuer": {
+                "shape": {
+                    "type": "Record",
+                    "attributes": {
+                        "issuer_entity_id": {
+                            "type": "Url"
+                        }
+                    }
+                }
+            },
+            "Workload": {
+                "shape": {
+                    "type": "Record",
+                    "attributes": {
+                        "client_id": {
+                            "type": "String"
+                        },
+                        "iss": {
+                            "type": "Entity",
+                            "name": "TrustedIssuer"
+                        },
+                        "name": {
+                            "type": "String"
+                        },
+                        "rp_id": {
+                            "type": "String"
+                        },
+                        "spiffe_id": {
+                            "type": "String"
+                        }
+                    }
+                }
+            },
+            "Userinfo_token": {
+                "shape": {
+                    "type": "Record",
+                    "attributes": {
+                        "aud": {
+                            "type": "String"
+                        },
+                        "birthdate": {
+                            "type": "String"
+                        },
+                        "email": {
+                            "type": "email_address"
+                        },
+                        "exp": {
+                            "type": "Long"
+                        },
+                        "iat": {
+                            "type": "Long"
+                        },
+                        "iss": {
+                            "type": "Entity",
+                            "name": "TrustedIssuer"
+                        },
+                        "jti": {
+                            "type": "String"
+                        },
+                        "name": {
+                            "type": "String"
+                        },
+                        "phone_number": {
+                            "type": "String"
+                        },
+                        "role": {
+                            "type": "Set",
+                            "element": {
+                                "type": "String"
+                            }
+                        },
+                        "sub": {
+                            "type": "String"
+                        }
+                    }
+                }
+            },
             "Access_token": {
                 "shape": {
                     "type": "Record",
@@ -97,29 +201,7 @@
                     }
                 }
             },
-            "Workload": {
-                "shape": {
-                    "type": "Record",
-                    "attributes": {
-                        "client_id": {
-                            "type": "String"
-                        },
-                        "iss": {
-                            "type": "Entity",
-                            "name": "TrustedIssuer"
-                        },
-                        "name": {
-                            "type": "String"
-                        },
-                        "rp_id": {
-                            "type": "String"
-                        },
-                        "spiffe_id": {
-                            "type": "String"
-                        }
-                    }
-                }
-            },
+            "Role": {},
             "id_token": {
                 "shape": {
                     "type": "Record",
@@ -198,213 +280,24 @@
                     }
                 }
             },
-            "TrustedIssuer": {
+            "Application": {
                 "shape": {
                     "type": "Record",
                     "attributes": {
-                        "issuer_entity_id": {
-                            "type": "Url"
-                        }
-                    }
-                }
-            },
-            "User": {
-                "memberOfTypes": [
-                    "Role"
-                ],
-                "shape": {
-                    "type": "Record",
-                    "attributes": {
-                        "email": {
-                            "type": "email_address"
-                        },
-                        "phone_number": {
-                            "type": "String"
-                        },
-                        "role": {
-                            "type": "Set",
-                            "element": {
-                                "type": "String"
-                            }
-                        },
-                        "sub": {
-                            "type": "String"
-                        },
-                        "username": {
-                            "type": "String"
-                        }
-                    }
-                }
-            },
-            "Userinfo_token": {
-                "shape": {
-                    "type": "Record",
-                    "attributes": {
-                        "aud": {
-                            "type": "String"
-                        },
-                        "birthdate": {
-                            "type": "String"
-                        },
-                        "email": {
-                            "type": "email_address"
-                        },
-                        "exp": {
-                            "type": "Long"
-                        },
-                        "iat": {
-                            "type": "Long"
-                        },
-                        "iss": {
-                            "type": "Entity",
-                            "name": "TrustedIssuer"
-                        },
-                        "jti": {
+                        "app_id": {
                             "type": "String"
                         },
                         "name": {
                             "type": "String"
                         },
-                        "phone_number": {
-                            "type": "String"
-                        },
-                        "role": {
-                            "type": "Set",
-                            "element": {
-                                "type": "String"
-                            }
-                        },
-                        "sub": {
-                            "type": "String"
+                        "url": {
+                            "type": "Url"
                         }
                     }
                 }
             }
         },
         "actions": {
-            "GET": {
-                "appliesTo": {
-                    "resourceTypes": [
-                        "HTTP_Request"
-                    ],
-                    "principalTypes": [
-                        "Workload"
-                    ],
-                    "context": {
-                        "type": "Context"
-                    }
-                }
-            },
-            "Search": {
-                "appliesTo": {
-                    "resourceTypes": [
-                        "Application"
-                    ],
-                    "principalTypes": [
-                        "User",
-                        "Role"
-                    ],
-                    "context": {
-                        "type": "Context"
-                    }
-                }
-            },
-            "Tag": {
-                "appliesTo": {
-                    "resourceTypes": [
-                        "Application"
-                    ],
-                    "principalTypes": [
-                        "User",
-                        "Role"
-                    ],
-                    "context": {
-                        "type": "Context"
-                    }
-                }
-            },
-            "PATCH": {
-                "appliesTo": {
-                    "resourceTypes": [
-                        "HTTP_Request"
-                    ],
-                    "principalTypes": [
-                        "Workload"
-                    ],
-                    "context": {
-                        "type": "Context"
-                    }
-                }
-            },
-            "Read": {
-                "appliesTo": {
-                    "resourceTypes": [
-                        "Application"
-                    ],
-                    "principalTypes": [
-                        "User",
-                        "Role"
-                    ],
-                    "context": {
-                        "type": "Context"
-                    }
-                }
-            },
-            "DELETE": {
-                "appliesTo": {
-                    "resourceTypes": [
-                        "HTTP_Request"
-                    ],
-                    "principalTypes": [
-                        "Workload"
-                    ],
-                    "context": {
-                        "type": "Context"
-                    }
-                }
-            },
-            "Monitor": {
-                "appliesTo": {
-                    "resourceTypes": [
-                        "Application"
-                    ],
-                    "principalTypes": [
-                        "User",
-                        "Role"
-                    ],
-                    "context": {
-                        "type": "Context"
-                    }
-                }
-            },
-            "Compare": {
-                "appliesTo": {
-                    "resourceTypes": [
-                        "Application"
-                    ],
-                    "principalTypes": [
-                        "User",
-                        "Role"
-                    ],
-                    "context": {
-                        "type": "Context"
-                    }
-                }
-            },
-            "Write": {
-                "appliesTo": {
-                    "resourceTypes": [
-                        "Application"
-                    ],
-                    "principalTypes": [
-                        "User",
-                        "Role"
-                    ],
-                    "context": {
-                        "type": "Context"
-                    }
-                }
-            },
             "Share": {
                 "appliesTo": {
                     "resourceTypes": [
@@ -412,19 +305,7 @@
                     ],
                     "principalTypes": [
                         "User",
-                        "Role"
-                    ],
-                    "context": {
-                        "type": "Context"
-                    }
-                }
-            },
-            "PUT": {
-                "appliesTo": {
-                    "resourceTypes": [
-                        "HTTP_Request"
-                    ],
-                    "principalTypes": [
+                        "Role",
                         "Workload"
                     ],
                     "context": {
@@ -445,6 +326,47 @@
                     }
                 }
             },
+            "Compare": {
+                "appliesTo": {
+                    "resourceTypes": [
+                        "Application"
+                    ],
+                    "principalTypes": [
+                        "User",
+                        "Role",
+                        "Workload"
+                    ],
+                    "context": {
+                        "type": "Context"
+                    }
+                }
+            },
+            "PATCH": {
+                "appliesTo": {
+                    "resourceTypes": [
+                        "HTTP_Request"
+                    ],
+                    "principalTypes": [
+                        "Workload"
+                    ],
+                    "context": {
+                        "type": "Context"
+                    }
+                }
+            },
+            "PUT": {
+                "appliesTo": {
+                    "resourceTypes": [
+                        "HTTP_Request"
+                    ],
+                    "principalTypes": [
+                        "Workload"
+                    ],
+                    "context": {
+                        "type": "Context"
+                    }
+                }
+            },
             "Execute": {
                 "appliesTo": {
                     "resourceTypes": [
@@ -452,7 +374,109 @@
                     ],
                     "principalTypes": [
                         "User",
-                        "Role"
+                        "Role",
+                        "Workload"
+                    ],
+                    "context": {
+                        "type": "Context"
+                    }
+                }
+            },
+            "Read": {
+                "appliesTo": {
+                    "resourceTypes": [
+                        "Application"
+                    ],
+                    "principalTypes": [
+                        "User",
+                        "Role",
+                        "Workload"
+                    ],
+                    "context": {
+                        "type": "Context"
+                    }
+                }
+            },
+            "DELETE": {
+                "appliesTo": {
+                    "resourceTypes": [
+                        "HTTP_Request"
+                    ],
+                    "principalTypes": [
+                        "Workload"
+                    ],
+                    "context": {
+                        "type": "Context"
+                    }
+                }
+            },
+            "Search": {
+                "appliesTo": {
+                    "resourceTypes": [
+                        "Application"
+                    ],
+                    "principalTypes": [
+                        "User",
+                        "Role",
+                        "Workload"
+                    ],
+                    "context": {
+                        "type": "Context"
+                    }
+                }
+            },
+            "Tag": {
+                "appliesTo": {
+                    "resourceTypes": [
+                        "Application"
+                    ],
+                    "principalTypes": [
+                        "User",
+                        "Role",
+                        "Workload"
+                    ],
+                    "context": {
+                        "type": "Context"
+                    }
+                }
+            },
+            "Write": {
+                "appliesTo": {
+                    "resourceTypes": [
+                        "Application"
+                    ],
+                    "principalTypes": [
+                        "User",
+                        "Role",
+                        "Workload"
+                    ],
+                    "context": {
+                        "type": "Context"
+                    }
+                }
+            },
+            "GET": {
+                "appliesTo": {
+                    "resourceTypes": [
+                        "HTTP_Request"
+                    ],
+                    "principalTypes": [
+                        "Workload"
+                    ],
+                    "context": {
+                        "type": "Context"
+                    }
+                }
+            },
+            "Monitor": {
+                "appliesTo": {
+                    "resourceTypes": [
+                        "Application"
+                    ],
+                    "principalTypes": [
+                        "User",
+                        "Role",
+                        "Workload"
                     ],
                     "context": {
                         "type": "Context"
