@@ -12,10 +12,10 @@
 use std::str::FromStr;
 use std::sync::Arc;
 
-use crate::jwt;
-use crate::log::{AuthorizationLogInfo, LogEntry, LogType, Logger};
 use crate::common::app_types;
 use crate::common::policy_store::PolicyStore;
+use crate::jwt;
+use crate::log::{AuthorizationLogInfo, LogEntry, LogType, Logger};
 
 mod authorize_result;
 mod entities;
@@ -72,8 +72,10 @@ impl Authz {
                 &request.id_token,
             )?;
 
-        let access_token_entities =
-            create_access_token_entities(&self.config.policy_store.schema.json, &access_token)?;
+        let access_token_entities = create_access_token_entities(
+            &self.config.policy_store.cedar_schema.json,
+            &access_token,
+        )?;
 
         // TODO: check if `request.userinfo_token.sub` == `id_token.sub`
         // Note that "Userinfo Token" isn't a JWT which is why we're not
@@ -81,15 +83,17 @@ impl Authz {
         // userinfo endpoint. For example:
         // `curl -X GET 'https://openidconnect.googleapis.com/v1/userinfo' -H 'Authorization: Bearer ACCESS_TOKEN'`
 
-        let resource_entity =
-            create_resource_entity(request.resource, &self.config.policy_store.schema.json)?;
+        let resource_entity = create_resource_entity(
+            request.resource,
+            &self.config.policy_store.cedar_schema.json,
+        )?;
 
         let action = cedar_policy::EntityUid::from_str(request.action.as_str())
             .map_err(AuthorizeError::Action)?;
 
         let context: cedar_policy::Context = cedar_policy::Context::from_json_value(
             request.context.clone(),
-            Some((&self.config.policy_store.schema.schema, &action)),
+            Some((&self.config.policy_store.cedar_schema.schema, &action)),
         )?;
 
         let principal_workload_uid = access_token_entities.workload_entity.uid();
@@ -100,7 +104,7 @@ impl Authz {
             action,
             resource_uid.clone(),
             context,
-            Some(&self.config.policy_store.schema.schema),
+            Some(&self.config.policy_store.cedar_schema.schema),
         )?;
 
         // collect all entities
@@ -111,13 +115,13 @@ impl Authz {
 
         let entities = cedar_policy::Entities::from_entities(
             entities_iterator,
-            Some(&self.config.policy_store.schema.schema),
+            Some(&self.config.policy_store.cedar_schema.schema),
         )?;
 
         let authorizer = cedar_policy::Authorizer::new();
         let decision = authorizer.is_authorized(
             &cedar_request,
-            &self.config.policy_store.policies,
+            &self.config.policy_store.cedar_policies,
             &entities,
         );
 

@@ -2,7 +2,7 @@
     "8b805e22fdd39f3dd33a13d9fb446d8e6314153ca997": {
         "name": "gluustore",
         "description": "gluu",
-        "policies": {
+        "cedar_policies": {
             "840da5d85403f35ea76519ed1a18a33989f855bf1cf8": {
                 "description": "admin access",
                 "creation_date": "2024-09-20T17:22:39.996050",
@@ -30,6 +30,6 @@
             }
         },
         "identity_source": {},
-        "schema": "ewogICJKYW5zIjogewogICAgImNvbW1vblR5cGVzIjogewogICAgICAiQ29udGV4dCI6IHsKICAgICAgICAidHlwZSI6ICJSZWNvcmQiLAogICAgICAgICJhdHRyaWJ1dGVzIjogewogICAgICAgICAgImN1cnJlbnRfdGltZSI6IHsKICAgICAgICAgICAgInR5cGUiOiAiTG9uZyIKICAgICAgICAg"
+        "cedar_schema": "ewogICJKYW5zIjogewogICAgImNvbW1vblR5cGVzIjogewogICAgICAiQ29udGV4dCI6IHsKICAgICAgICAidHlwZSI6ICJSZWNvcmQiLAogICAgICAgICJhdHRyaWJ1dGVzIjogewogICAgICAgICAgImN1cnJlbnRfdGltZSI6IHsKICAgICAgICAgICAgInR5cGUiOiAiTG9uZyIKICAgICAgICAg"
     }
 }

@@ -19,9 +19,16 @@ pub(crate) struct PolicyStoreMap {
 /// PolicyStore contains all the data the Cedarling needs to verify JWT tokens and evaluate policies
 #[derive(Debug, Clone, serde::Deserialize)]
 pub struct PolicyStore {
-    pub schema: CedarSchema,
+    /// The cedar schema
+    ///
+    /// This is expected to be a base64 encoded string from the `policy_store.json`
+    pub cedar_schema: CedarSchema,
+
+    /// The cedar policies
+    ///
+    /// This is expected to be a base64 encoded string from the `policy_store.json`
     #[serde(deserialize_with = "deserialize_policy_set::parse")]
-    pub policies: cedar_policy::PolicySet,
+    pub cedar_policies: cedar_policy::PolicySet,
 }
 
 // Deserialization to [`cedar_policy::PolicySet`] moved here
