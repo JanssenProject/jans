@@ -72,24 +72,32 @@ impl Authz {
     }
 
     /// Evaluate Authorization Request
-    /// - evaluate if authorization is granted for *client*
+    /// - evaluate if authorization is granted for *person*
+    /// - evaluate if authorization is granted for *workload*
     pub fn authorize(&self, request: Request) -> Result<AuthorizeResult, AuthorizeError> {
+        // Parse action UID.
         let action = cedar_policy::EntityUid::from_str(request.action.as_str())
             .map_err(AuthorizeError::Action)?;
 
+        // Parse context.
         let context: cedar_policy::Context = cedar_policy::Context::from_json_value(
             request.context.clone(),
             Some((&self.config.policy_store.schema.schema, &action)),
         )?;
 
+        // Parse [`cedar_policy::Entity`]-s to [`AuthorizeEntitiesData`] that hold all entities (for usability).
         let entities_data: AuthorizeEntitiesData = self.authorize_entities_data(&request)?;
 
+        // Get entity UIDs what we will be used on authorize check
         let principal_workload_uid = entities_data.access_token_entities.workload_entity.uid();
         let resource_uid = entities_data.resource_entity.uid();
         let principal_user_entity_uid = entities_data.user_entity.uid();
 
+        // Convert [`AuthorizeEntitiesData`] to  [`cedar_policy::Entities`] structure,
+        // hold all entities that will be used on authorize check.
         let entities = entities_data.entities(Some(&self.config.policy_store.schema.schema))?;
 
+        // Check authorize where principal is `"Jans::Workload"` from cedar-policy schema.
         let workload_result = self
             .execute_authorize(ExecuteAuthorizeParameters {
                 entities: &entities,
@@ -100,6 +108,7 @@ impl Authz {
             })
             .map_err(AuthorizeError::CreateRequestWorkloadEntity)?;
 
+        // Check authorize where principal is `"Jans::User"` from cedar-policy schema.
         let person_result = self
             .execute_authorize(ExecuteAuthorizeParameters {
                 entities: &entities,
@@ -110,6 +119,8 @@ impl Authz {
             })
             .map_err(AuthorizeError::CreateRequestUserEntity)?;
 
+        // Log all result information about both authorize checks.
+        // Where principal is `"Jans::Workload"` and where principal is `"Jans::User"`.
         self.config.log_service.as_ref().log(
             LogEntry::new_with_data(
                 self.config.pdp_id,
@@ -167,7 +178,8 @@ impl Authz {
         &self,
         request: &Request,
     ) -> Result<AuthorizeEntitiesData, AuthorizeError> {
-        let (access_token, id_token, user_info_token) = self
+        // decode JWT tokens to structs AccessTokenData, IdTokenData, UserInfoTokenData using jwt service
+        let (access_token, id_token, userinfo_token) = self
             .config
             .jwt_service
             .decode_tokens::<AccessTokenData, IdTokenData, UserInfoTokenData>(
@@ -176,24 +188,28 @@ impl Authz {
                 &request.userinfo_token,
             )?;
 
-        // Using the builder at compile time ensures all entities are added correctly
+        // Populate the `AuthorizeEntitiesData` structure using the builder pattern
         let data = AuthorizeEntitiesData::builder()
+            // Populate the structure with entities derived from the access token
             .access_token_entities(create_access_token_entities(
                 &self.config.policy_store.schema.json,
                 &access_token,
             )?)
+            // Add an entity created from the ID token
             .id_token_entity(
                 create_id_token_entity(&self.config.policy_store.schema.json, &id_token)
                     .map_err(AuthorizeError::CreateIdTokenEntity)?,
             )
+            // Add an entity created from the userinfo token
             .user_entity(
                 create_user_entity(
                     &self.config.policy_store.schema.json,
                     &id_token,
-                    &user_info_token,
+                    &userinfo_token,
                 )
                 .map_err(AuthorizeError::CreateUserEntity)?,
             )
+            // Add an entity created from the resource in the request
             .resource_entity(create_resource_entity(
                 request.resource.clone(),
                 &self.config.policy_store.schema.json,
