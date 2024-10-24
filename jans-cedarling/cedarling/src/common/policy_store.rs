@@ -8,8 +8,8 @@
 use super::cedar_schema::CedarSchema;
 use base64::prelude::*;
 use cedar_policy::PolicyId;
-use serde::{Deserialize, Deserializer};
-use std::collections::HashMap;
+use serde::{de::Visitor, Deserialize, Deserializer};
+use std::{collections::HashMap, fmt};
 
 /// Represents the store of policies used for JWT validation and policy evaluation in Cedarling.
 ///
@@ -32,6 +32,88 @@ pub struct PolicyStore {
     /// Extracted from the `policy_store.json` file and deserialized using `deserialize_policies`.
     #[serde(deserialize_with = "parse_cedar_policy")]
     pub cedar_policies: cedar_policy::PolicySet,
+
+    #[allow(dead_code)]
+    pub trusted_issuers: Option<Vec<TrustedIssuer>>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[allow(dead_code)]
+pub struct TrustedIssuer {
+    pub name: String,
+    pub description: String,
+    pub openid_configuration_endpoint: String,
+    pub token_metadata: Option<Vec<TokenMetadata>>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+#[allow(dead_code)]
+pub struct TokenMetadata {
+    #[serde(rename = "type")]
+    pub kind: TokenKind,
+    pub person_id: String, // the claim used to create the person entity
+    pub role_mapping: Option<String>, // the claim used to create a role for the token
+}
+
+#[derive(Debug, Copy, Clone)]
+#[allow(dead_code)]
+pub enum TokenKind {
+    Access,
+    Id,
+    Userinfo,
+    Transaction,
+}
+
+impl fmt::Display for TokenKind {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let kind_str = match self {
+            TokenKind::Access => "access",
+            TokenKind::Id => "id",
+            TokenKind::Userinfo => "userinfo",
+            TokenKind::Transaction => "transaction",
+        };
+        write!(f, "{}", kind_str)
+    }
+}
+
+impl<'de> Deserialize<'de> for TokenKind {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        struct TokenKindVisitor;
+
+        impl<'de> Visitor<'de> for TokenKindVisitor {
+            type Value = TokenKind;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("a valid token kind string")
+            }
+
+            fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
+            where
+                E: serde::de::Error,
+            {
+                match value.to_lowercase().as_str() {
+                    "id" => Ok(TokenKind::Id),
+                    "userinfo" => Ok(TokenKind::Userinfo),
+                    "access" => Ok(TokenKind::Access),
+                    "transaction" => Ok(TokenKind::Transaction),
+                    _ => Err(serde::de::Error::unknown_variant(
+                        &value,
+                        &[
+                            "access_token",
+                            "id_token",
+                            "userinfo_token",
+                            "transaction_token",
+                        ],
+                    )),
+                }
+            }
+        }
+
+        deserializer.deserialize_string(TokenKindVisitor)
+    }
 }
 
 /// Used to to validate the cedar_version field.
