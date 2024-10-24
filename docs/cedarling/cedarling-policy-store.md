@@ -109,8 +109,17 @@ Json object containing one or more policy_id as key and policy object as value.
       "openid_configuration_endpoint": "https://accounts.google.com/.well-known/openid-configuration",
       "token_metadata": [
         {
+          "type": "access",
+          "user_id": "aud"
+        },
+        {
           "type": "id_token",
           "user_id": "email",
+          "role_mapping": "role"
+        },
+        {
+          "type": "userinfo",
+          "person_id": "email",
           "role_mapping": "role"
         }
       ]
