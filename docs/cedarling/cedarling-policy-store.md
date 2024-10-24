@@ -21,48 +21,114 @@ The JSON schema looks like this:
 
 ```
 {
-    "some_unique_identifier": {
-        "name": "...",
-        "description": "...",
-        "policies": {},
-        "identity_source": {},
-        "schema": "..."
-    }
+    "policystore_id": "...",
+    "policies": {...},
+    "schema": "...",
+    "trusted_issuers": [],
+    "cedar_version": "v1.1.5"
 }
+
 ```
+
+- **policystore_id** : (String, no spaces) The unique identifier for the policy store.
+- **policies** : (Json) Json object containing one or more policy_id as key and policy object as value
+- **schema** : (String) Base64 encoded cedar schema
+- **trusted_issuers** : (List) List of Trusted Issuer metadata
+- **cedar_version** : (String) The version of [Cedar policy](https://docs.cedarpolicy.com/). The protocols of this version will be followed when processing Cedar schema and policies.
 
 ## Trusted Issuer Schema
 
-- **name** : (String, no spaces) The name of the trusted issuer.
-- **description** : (String) A brief description of the issuer, providing context for administrators.
-- **openid_configuration_endpoint** : (String) The HTTPS URL for the OpenID Connect configuration endpoint (usually found under /.well-known/openid-configuration).
-- **access_tokens** : (Object with claims) 
-- **trusted**: (True | False) Indicates whether the issuer's access token are trusted.
-- **id_tokens** : (Object with claims) 
-- **trusted**: (True | False) Indicates whether the issuer's id_token are trusted.
-- **principal_identifier**: the token claim used to identify the User entity (in SAML jargon it's the "NameID format"). This claim is optional--it may be present in the Userinfo token. Defaults to sub.
-- **role_mapping**: A list of the User's roles
-- **userinfo_tokens** :
-- **trusted**: (True | False) Indicates whether the issuer's userinfo_tokens are trusted.
-- **principal_identifier**: the token claim used to identify the User entity (in SAML jargon it's the "NameID format"). This claim is optional--it may be present in the Userinfo token. Defaults to sub.
-- **role_mapping**: A list of the User's roles
-- **tx_tokens** : (Object with claims)
-- **trusted**: (True | False)
+This record contains the information needed to validate tokens from this issuer:
 
 ```
-[
-{"name": "Google", 
- "Description": "Consumer IDP", 
- "openid_configuration_endpoint": "https://accounts.google.com/.well-known/openid-configuration",
- "access_tokens": {"trusted": True}, 
- "id_tokens": {"trusted":True, "principal_identifier": "email"},
- "userinfo_tokens": {"trusted": True, "role_mapping": "role"},  
- "tx_tokens": {"trusted": True}
-},
-{IDP-2},
-{IDP-3}...
+"trusted_issuers": [
+    {
+         "name": "name_of_the_trusted_issuer", 
+         "description": "description_of_the_trusted_issuer", 
+         "openid_configuration_endpoint": "https://<trusted-issuer-hostname>/.well-known/openid-configuration",
+         "token_metadata": [token1_entity_schema, token2_entity_schema, ... ]
+    }
 ]
 ```
+
+- **name** : (String) Name of the trusted issuer
+- **description** : (String) Short description of the trusted issuer
+- **openid_configuration_endpoint** : The HTTPS URL for the OpenID Connect configuration endpoint (usually found under /.well-known/openid-configuration).
+- **token_metadata** : (List) List of token metadata
+
+## Policies
+
+Json object containing one or more policy_id as key and policy object as value.
+
+```
+  "policies": {
+    "840da5d85403f35ea76519ed1a18a33989f855bf1cf8": {
+      "description": "simple policy example",
+      "creation_date": "2024-09-20T17:22:39.996050",
+      "policy_content": "cGVybWl0KAogICAgc..."
+    }
+  }
+```
+
+- **description** : (String) Short description of cedar policy
+- **creation_date** :  (String) Policy creating date in `YYYY-MM-DDTHH:MM:SS.ssssss`
+- **policy_content** : (String) Base64 encoded cedar schema
+
+
+## Token Entity Schema
+
+```
+{ "type": "access"
+  "user_id": "...",                   
+  "role_mapping": "...",          
+}
+```
+
+- **type** : (String) The type of token whether `access`, `id_token`, `userinfo` or `transaction`.
+- **user_id** : (String) For id_token or userinfo tokens, the `user_id` refers to the claim used to identify the person entity. For example, in an id_token, the "user_id" could be the sub (subject) or email claim.
+- **role_mapping** : (String) The role_mapping refers to the token claim used to get role values. The default value of `role_mapping` is `role`.
+
+### Sample Policy store
+
+```
+{
+  "policystore_id": "8b805e22fdd39f3dd33a13d9fb446d8e6314153ca997",
+  "name": "gluustore",
+  "description": "gluu",
+  "policies": {
+    "840da5d85403f35ea76519ed1a18a33989f855bf1cf8": {
+      "description": "simple policy example",
+      "creation_date": "2024-09-20T17:22:39.996050",
+      "policy_content": "cGVybWl0KAogICAgc..."
+    }
+  },
+  "trusted_issuers": [
+    {
+      "name": "Google",
+      "description": "Consumer IDP",
+      "openid_configuration_endpoint": "https://accounts.google.com/.well-known/openid-configuration",
+      "token_metadata": [
+        {
+          "type": "access",
+          "user_id": "aud"
+        },
+        {
+          "type": "id_token",
+          "user_id": "email",
+          "role_mapping": "role"
+        },
+        {
+          "type": "userinfo",
+          "user_id": "email"
+        }
+      ]
+    }
+  ],
+  "schema": "ewogICAgIkphbnMiOiB...",
+  "cedar_version": "v2.4.7"
+}
+```
+
 
 ## Policy and Schema Authoring
 
