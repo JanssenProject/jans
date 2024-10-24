@@ -217,8 +217,6 @@ struct RawPolicy {
 /// Custom deserializer for converting base64-encoded policies into a `PolicySet`.
 ///
 /// This function is used to deserialize the `policies` field in `PolicyStore`.
-///
-/// TODO: remove this unused function
 pub fn parse_cedar_policy<'de, D>(deserializer: D) -> Result<cedar_policy::PolicySet, D::Error>
 where
     D: serde::Deserializer<'de>,
@@ -228,7 +226,7 @@ where
     let policy_vec = policies
         .into_iter()
         .map(|(id, policy_raw)| {
-            let policy = parse_policy::<D>(&id, policy_raw).map_err(|err| {
+            let policy = parse_single_policy::<D>(&id, policy_raw).map_err(|err| {
                 serde::de::Error::custom(format!(
                     "unable to decode policy with id: {id}, error: {err}"
                 ))
@@ -246,7 +244,10 @@ where
 ///
 /// This function is responsible for decoding the base64-encoded policy content,
 /// converting it to a UTF-8 string, and parsing it into a `Policy`.
-fn parse_policy<'de, D>(id: &str, policy_raw: RawPolicy) -> Result<cedar_policy::Policy, D::Error>
+fn parse_single_policy<'de, D>(
+    id: &str,
+    policy_raw: RawPolicy,
+) -> Result<cedar_policy::Policy, D::Error>
 where
     D: serde::Deserializer<'de>,
 {
