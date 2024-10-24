@@ -16,8 +16,6 @@
 
 package io.jans.lock.service;
 
-import java.io.IOException;
-
 import org.apache.http.HttpStatus;
 import org.slf4j.Logger;
 
@@ -28,18 +26,15 @@ import io.jans.as.client.StatusListRequest;
 import io.jans.as.client.StatusListResponse;
 import io.jans.as.model.crypto.signature.AlgorithmFamily;
 import io.jans.as.model.crypto.signature.SignatureAlgorithm;
-import io.jans.as.model.jws.*;
+import io.jans.as.model.jws.ECDSASigner;
+import io.jans.as.model.jws.JwsSigner;
+import io.jans.as.model.jws.RSASigner;
 import io.jans.as.model.jwt.Jwt;
-import io.jans.as.model.jwt.JwtClaimName;
 import io.jans.as.model.jwt.JwtHeaderName;
-import io.jans.lock.model.config.StaticConfiguration;
-import io.jans.model.tokenstatus.StatusList;
-import io.jans.model.tokenstatus.TokenStatus;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 /**
- * 
  * Token service
  *
  * @author Yuriy Movchan Date: 01/05/2024
