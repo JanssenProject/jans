@@ -25,7 +25,7 @@ The JSON schema looks like this:
     "policies": {...},
     "schema": "...",
     "trusted_issuers": [],
-    "cedarling_version": "v2.4.7"
+    "cedar_version": "v1.1.5"
 }
 
 ```
@@ -34,7 +34,7 @@ The JSON schema looks like this:
 - **policies** : (Json) Json object containing one or more policy_id as key and policy object as value
 - **schema** : (String) Base64 encoded cedar schema
 - **trusted_issuers** : (List) List of Trusted Issuer metadata
-- **cedarling_version** : (String) Specifies the version of cedarling used.
+- **cedar_version** : (String) The version of [Cedar policy](https://docs.cedarpolicy.com/). The protocols of this version will be followed when processing Cedar schema and policies.
 
 ## Trusted Issuer Schema
 
