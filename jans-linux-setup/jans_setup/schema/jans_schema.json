@@ -1779,6 +1779,7 @@
       "names": [
         "jansSmtpConf"
       ],
+      "json": true,
       "multivalued": true,
       "oid": "jansAttr",
       "substr": "caseIgnoreSubstringsMatch",
