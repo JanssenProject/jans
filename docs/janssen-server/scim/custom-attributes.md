@@ -34,7 +34,7 @@ In the JSON response, your new added attribute will appear.
 To customize the URI associated to the extension (whose default value is `urn:ietf:params:scim:schemas:extension:gluu:2.0:User`
 ), you can use TUI:
 
-* Navigate to `SCIM` using Jans TUI `/opt/jans/jans-cli/jans_cli_tui.py`
+* Navigate to `SCIM` using Jans TUI `jans tui`
 * Locate the Scim properties section
 * Set a value in the field `User Extension Schema URI`
 * Save the changes
