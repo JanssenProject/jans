@@ -43,7 +43,33 @@ pub struct TrustedIssuer {
     pub name: String,
     pub description: String,
     pub openid_configuration_endpoint: String,
+    #[serde(deserialize_with = "check_token_metadata")]
     pub token_metadata: Option<Vec<TokenMetadata>>,
+}
+
+/// Used to to validate the cedar_version field.
+///
+/// Ensures the token_metadata only has one role_mapping
+fn check_token_metadata<'de, D>(deserializer: D) -> Result<Option<Vec<TokenMetadata>>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let token_metadata: Option<Vec<TokenMetadata>> = Option::deserialize(deserializer)?;
+
+    if let Some(metadata) = &token_metadata {
+        let count = metadata
+            .iter()
+            .filter(|token| token.role_mapping.is_some())
+            .count();
+
+        if count > 1 {
+            return Err(serde::de::Error::custom(
+                "there can only be one TokenMetadata with a role_mapping".to_string(),
+            ));
+        }
+    }
+
+    Ok(token_metadata)
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -191,6 +217,8 @@ struct RawPolicy {
 /// Custom deserializer for converting base64-encoded policies into a `PolicySet`.
 ///
 /// This function is used to deserialize the `policies` field in `PolicyStore`.
+///
+/// TODO: remove this unused function
 pub fn parse_cedar_policy<'de, D>(deserializer: D) -> Result<cedar_policy::PolicySet, D::Error>
 where
     D: serde::Deserializer<'de>,
@@ -241,10 +269,10 @@ where
 
 #[cfg(test)]
 mod test {
-    use crate::common::policy_store::check_cedar_version;
-
     use super::ParsePolicySetMessage;
     use super::PolicyStore;
+    use crate::common::policy_store::check_cedar_version;
+    use crate::common::policy_store::check_token_metadata;
 
     #[test]
     fn test_policy_store_deserialization_success() {
@@ -285,7 +313,7 @@ mod test {
         let err_msg = policy_result.unwrap_err().to_string();
 
         // TODO: this isn't really a human readable format so idk why the error message is
-        // like this.
+        // like this. Look into this in the future.
         assert_eq!(err_msg, "unable to decode policy with id: 840da5d85403f35ea76519ed1a18a33989f855bf1cf8, error: unable to decode policy_content from human readable format: unexpected token `)` at line 9 column 5")
     }
 
@@ -317,5 +345,39 @@ mod test {
     fn test_invalid_version_format_with_v() {
         let invalid_version_with_v = "v1.2".to_string();
         assert!(check_cedar_version(serde_json::Value::String(invalid_version_with_v)).is_err());
+    }
+
+    #[test]
+    fn test_invalid_multiple_role_mappings_in_token_metadata() {
+        let invalid_token_metadata = r#"[ 
+            { "type": "Access", "person_id": "aud" }, 
+            { "type": "Id", "person_id": "sub", "role_mapping": "role" }, 
+            { "type": "userinfo", "person_id": "email", "role_mapping": "role" } 
+        ]"#;
+
+        let token_metadata_value: serde_json::Value =
+            serde_json::from_str(invalid_token_metadata).expect("Failed to parse JSON string");
+
+        assert!(
+            check_token_metadata(token_metadata_value).is_err(),
+            "expected an error for multiple role mappings"
+        );
+    }
+
+    #[test]
+    fn test_successful_parsing_of_role_mappings() {
+        let valid_token_metadata = r#"[ 
+            { "type": "Access", "person_id": "aud" }, 
+            { "type": "Id", "person_id": "sub", "role_mapping": "role" }, 
+            { "type": "userinfo", "person_id": "email" } 
+        ]"#;
+
+        let token_metadata_value: serde_json::Value =
+            serde_json::from_str(valid_token_metadata).expect("Failed to parse JSON string");
+
+        assert!(
+            check_token_metadata(token_metadata_value).is_ok(),
+            "expected successful parsing of role mappings"
+        );
     }
 }
