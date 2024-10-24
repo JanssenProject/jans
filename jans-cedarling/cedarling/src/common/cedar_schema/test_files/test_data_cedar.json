@@ -15,6 +15,14 @@
                         },
                         "iat": {
                             "type": "Long"
+                        },
+                        "scope": {
+                            "type": "Set",
+                            "element": {
+                                "type": "EntityOrCommon",
+                                "name": "String"
+                            },
+                            "required": false
                         }
                     }
                 }
