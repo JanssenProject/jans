@@ -80,6 +80,7 @@ class Cedarling:
 class Request:
     access_token: str
     id_token: str
+    userinfo_token: str
     action: str
     resource: ResourceData
     context: Dict[str, Any]

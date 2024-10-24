@@ -7,7 +7,20 @@
 
 use std::collections::HashMap;
 
+use derive_more::Deref;
 use serde_json::Value;
+
+/// Wrapper around access token decode result
+#[derive(Clone, Deref, serde::Deserialize)]
+pub(crate) struct AccessTokenData(TokenPayload);
+
+/// Wrapper around id token decode result
+#[derive(Clone, Deref, serde::Deserialize)]
+pub(crate) struct IdTokenData(TokenPayload);
+
+/// Wrapper around userinfo token decode result
+#[derive(Clone, Deref, serde::Deserialize)]
+pub(crate) struct UserInfoTokenData(TokenPayload);
 
 /// A container for storing token data or data attributes for the .
 /// Provides methods for retrieving payload from the token or attributes for the .
@@ -22,7 +35,21 @@ impl TokenPayload {
         Self { payload }
     }
 
-    pub fn get(&self, key: &str) -> Result<Payload, GetTokenClaimValue> {
+    /// Get the json value of a key in the payload.
+    pub fn get_json_value(&self, key: &str) -> Option<&serde_json::Value> {
+        self.payload.get(key)
+    }
+
+    /// Clone current value and merge with the given payload.
+    pub fn merge(&self, payload: &TokenPayload) -> Self {
+        let mut result = self.clone();
+        result.payload.extend(payload.payload.clone());
+
+        result
+    }
+
+    /// Get [`Payload`] structure that contain key and [serde_json::Value] value.
+    pub fn get_payload(&self, key: &str) -> Result<Payload, GetTokenClaimValue> {
         self.payload
             .get(key)
             .map(|value| Payload {
@@ -86,6 +113,10 @@ impl GetTokenClaimValue {
     }
 }
 
+/// Structure that contains  information about  token claims
+///
+/// Wrapper to get more readable error messages when we get not correct type of  value from json.
+/// Is used in the [`TokenPayload::get_payload`] method
 pub(crate) struct Payload<'a> {
     key: String,
     value: &'a serde_json::Value,

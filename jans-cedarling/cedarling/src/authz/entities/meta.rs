@@ -12,7 +12,10 @@ use super::create::EntityMetadata;
 // Represent meta information about entity from cedar-policy schema.
 lazy_static! {
     pub(crate) static ref WorkloadEntityMeta: EntityMetadata<'static> =
-        EntityMetadata::new("Jans::Workload", "client_id",);
+        EntityMetadata::new("Jans::Workload", "client_id");
     pub(crate) static ref AccessTokenMeta: EntityMetadata<'static> =
-        EntityMetadata::new("Jans::Access_token", "jti",);
+        EntityMetadata::new("Jans::Access_token", "jti");
+    pub(crate) static ref IdToken: EntityMetadata<'static> =
+        EntityMetadata::new("Jans::id_token", "jti");
+    pub(crate) static ref User: EntityMetadata<'static> = EntityMetadata::new("Jans::User", "sub");
 }

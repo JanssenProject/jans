@@ -30,6 +30,10 @@ pub struct IdTokenClaims {
     pub iat: u64,
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Default)]
+// TODO: implement
+pub struct UserInfoTokenClaims {}
+
 /// Generates a set of private and public keys using ES256
 ///
 /// Returns a tuple: (Vec<(key_id, private_key)>, jwks)

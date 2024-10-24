@@ -45,14 +45,21 @@ fn decode_claims_without_validation() {
     let access_token =
         generate_access_token_using_keys(&mut access_token_claims, &encoding_keys, true);
     let id_token = generate_id_token_using_keys(&mut id_token_claims, &encoding_keys, true);
+    // TODO: add correct implementation for user info token
+    let user_info_token = generate_id_token_using_keys(&mut id_token_claims, &encoding_keys, true);
 
     // Decode Tokens without validation
-    let (access_token_result, id_token_result) = service
-        .decode_tokens::<AccessTokenClaims, IdTokenClaims>(&access_token, &id_token)
+    let (access_token_result, id_token_result, _user_info_token) = service
+        .decode_tokens::<AccessTokenClaims, IdTokenClaims, UserInfoTokenClaims>(
+            &access_token,
+            &id_token,
+            &user_info_token,
+        )
         .expect("should decode token");
 
     assert_eq!(access_token_result, access_token_claims);
     assert_eq!(id_token_result, id_token_claims);
+    // TODO: check user_info_token
 }
 
 #[test]
@@ -85,6 +92,8 @@ fn decode_claims_with_validation() {
     let access_token =
         generate_access_token_using_keys(&mut access_token_claims, &encoding_keys, false);
     let id_token = generate_id_token_using_keys(&mut id_token_claims, &encoding_keys, false);
+    // TODO: add correct implementation for user info token
+    let user_info_token = generate_id_token_using_keys(&mut id_token_claims, &encoding_keys, false);
 
     // Setup key service
     let key_service = MockKeyService::new_from_str(&jwks);
@@ -96,12 +105,17 @@ fn decode_claims_with_validation() {
     });
 
     // Decode Tokens with validation
-    let (access_token_result, id_token_result) = service
-        .decode_tokens::<AccessTokenClaims, IdTokenClaims>(&access_token, &id_token)
+    let (access_token_result, id_token_result, _user_info_token) = service
+        .decode_tokens::<AccessTokenClaims, IdTokenClaims, UserInfoTokenClaims>(
+            &access_token,
+            &id_token,
+            &user_info_token,
+        )
         .expect("should decode token");
 
     assert_eq!(access_token_result, access_token_claims);
     assert_eq!(id_token_result, id_token_claims);
+    // TODO: check user_info_token
 }
 
 #[test]
@@ -134,6 +148,8 @@ fn should_not_validate_diff_aud() {
     let access_token =
         generate_access_token_using_keys(&mut access_token_claims, &encoding_keys, false);
     let id_token = generate_id_token_using_keys(&mut id_token_claims, &encoding_keys, false);
+    // TODO: add correct implementation for user info token
+    let user_info_token = generate_id_token_using_keys(&mut id_token_claims, &encoding_keys, true);
 
     // Setup key service
     let key_service = MockKeyService::new_from_str(&jwks);
@@ -146,8 +162,14 @@ fn should_not_validate_diff_aud() {
 
     // Decode Tokens with validation
     service
-        .decode_tokens::<AccessTokenClaims, IdTokenClaims>(&access_token, &id_token)
+        .decode_tokens::<AccessTokenClaims, IdTokenClaims, UserInfoTokenClaims>(
+            &access_token,
+            &id_token,
+            &user_info_token,
+        )
         .expect("should decode token");
+
+    // TODO: check if data in result is correct
 }
 
 #[test]
@@ -181,6 +203,8 @@ fn should_panic_on_unsuppored_alg() {
     let access_token =
         generate_access_token_using_keys(&mut access_token_claims, &encoding_keys, false);
     let id_token = generate_id_token_using_keys(&mut id_token_claims, &encoding_keys, false);
+    // TODO: add correct implementation for user info token
+    let user_info_token = generate_id_token_using_keys(&mut id_token_claims, &encoding_keys, false);
 
     // Setup key service
     let key_service = MockKeyService::new_from_str(&jwks);
@@ -193,6 +217,10 @@ fn should_panic_on_unsuppored_alg() {
 
     // Decode Tokens with validation
     service
-        .decode_tokens::<AccessTokenClaims, IdTokenClaims>(&access_token, &id_token)
+        .decode_tokens::<AccessTokenClaims, IdTokenClaims, UserInfoTokenClaims>(
+            &access_token,
+            &id_token,
+            &user_info_token,
+        )
         .expect("should decode token");
 }
