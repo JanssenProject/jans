@@ -102,8 +102,8 @@ public class TokenService {
                     persistenceEntryManager);
         }
 
-        fieldValueFilters.add(Filter.createORFilter(filters));
-        searchFilter = Filter.createANDFilter(fieldValueFilters);
+        searchFilter = Filter.createANDFilter(Filter.createORFilter(filters),
+                Filter.createANDFilter(fieldValueFilters));
 
         logger.info("Token final searchFilter:{}", searchFilter);
 
