@@ -44,6 +44,8 @@ public class TokenResource extends ConfigBaseResource {
     private class TokenEntityPagedResult extends PagedResult<TokenEntity> {
     };
 
+    private static final String TOKEN_NOT_FOUND = "Token identified by %s not found.";
+
     @Inject
     TokenService tokenService;
 
@@ -71,7 +73,9 @@ public class TokenResource extends ConfigBaseResource {
         checkNotNull(tknCde, ApiConstants.TOKEN_CODE);
 
         TokenEntity tokenEntity = this.tokenService.getTokenEntityByCode(tknCde);
-
+        if (tokenEntity == null) {
+            throwNotFoundException("Not Found", String.format(TOKEN_NOT_FOUND, tknCde));
+        }
         logger.info("Token fetched tokenEntity:{}", tokenEntity);
         return Response.ok(tokenEntity).build();
 
