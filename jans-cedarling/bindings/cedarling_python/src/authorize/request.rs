@@ -71,7 +71,7 @@ impl Request {
         let context = Python::with_gil(|py| -> Result<serde_json::Value, PyErr> {
             let context = self.context.clone_ref(py).into_bound(py);
             from_pyobject(context).map_err(|err| {
-                PyRuntimeError::new_err(format!("Failed to convert context: {}", err.to_string()))
+                PyRuntimeError::new_err(format!("Failed to convert context: {}", err))
             })
         })?;
 
