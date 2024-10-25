@@ -274,6 +274,8 @@ where
 
 #[cfg(test)]
 mod test {
+    use serde_json::json;
+
     use super::ParsePolicySetMessage;
     use super::PolicyStore;
     use crate::common::policy_store::parse_and_check_token_metadata;
@@ -364,17 +366,14 @@ mod test {
     /// Tests that an error is returned for multiple role mappings in token metadata.
     #[test]
     fn test_invalid_multiple_role_mappings_in_token_metadata() {
-        let invalid_token_metadata = r#"[ 
-            { "type": "Access", "person_id": "aud" }, 
-            { "type": "Id", "person_id": "sub", "role_mapping": "role" }, 
-            { "type": "userinfo", "person_id": "email", "role_mapping": "role" } 
-        ]"#;
-
-        let token_metadata_value: serde_json::Value =
-            serde_json::from_str(invalid_token_metadata).expect("Failed to parse JSON string");
+        let invalid_token_metadata = json!([
+            { "type": "Access", "person_id": "aud" },
+            { "type": "Id", "person_id": "sub", "role_mapping": "role" },
+            { "type": "userinfo", "person_id": "email", "role_mapping": "role" }
+        ]);
 
         assert!(
-            parse_and_check_token_metadata(token_metadata_value).is_err(),
+            parse_and_check_token_metadata(invalid_token_metadata).is_err(),
             "expected an error for multiple role mappings"
         );
     }
@@ -382,17 +381,14 @@ mod test {
     /// Tests successful parsing of role mappings in token metadata.
     #[test]
     fn test_successful_parsing_of_role_mappings() {
-        let valid_token_metadata = r#"[ 
-            { "type": "Access_token", "person_id": "aud" }, 
-            { "type": "Id_token", "person_id": "sub", "role_mapping": "role" }, 
-            { "type": "userinfo_token", "person_id": "email" } 
-        ]"#;
-
-        let token_metadata_value: serde_json::Value =
-            serde_json::from_str(valid_token_metadata).expect("Failed to parse JSON string");
+        let valid_token_metadata = json!([
+            { "type": "Access_token", "person_id": "aud" },
+            { "type": "Id_token", "person_id": "sub", "role_mapping": "role" },
+            { "type": "userinfo_token", "person_id": "email" }
+        ]);
 
         assert!(
-            parse_and_check_token_metadata(token_metadata_value).is_ok(),
+            parse_and_check_token_metadata(valid_token_metadata).is_ok(),
             "expected successful parsing of role mappings"
         );
     }
@@ -400,17 +396,14 @@ mod test {
     /// Tests unsuccessful parsing of role mappings in token metadata.
     #[test]
     fn test_error_on_invalid_token_type() {
-        let valid_token_metadata = r#"[ 
-            { "type": "Access_token", "person_id": "aud" }, 
-            { "type": "unknown_token", "person_id": "sub", "role_mapping": "role" }, 
-            { "type": "userinfo_token", "person_id": "email" } 
-        ]"#;
-
-        let token_metadata_value: serde_json::Value =
-            serde_json::from_str(valid_token_metadata).expect("Failed to parse JSON string");
+        let invalid_token_metadata = json!([
+            { "type": "Access_token", "person_id": "aud" },
+            { "type": "unknown_token", "person_id": "sub", "role_mapping": "role" },
+            { "type": "userinfo_token", "person_id": "email" }
+        ]);
 
         assert!(
-            parse_and_check_token_metadata(token_metadata_value).is_err(),
+            parse_and_check_token_metadata(invalid_token_metadata).is_err(),
             "expected unsuccessful parsing of role mappings"
         );
     }
