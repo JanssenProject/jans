@@ -62,6 +62,7 @@ public class TokenService {
             tokenEntity = persistenceEntryManager.find(TokenEntity.class, getDnForTokenEntity(tknCde));
         } catch (Exception ex) {
             logger.error("Failed to get Token identified by tknCde:{" + tknCde + "}", ex);
+            return tokenEntity;
         }
         return tokenEntity;
     }
@@ -101,8 +102,8 @@ public class TokenService {
                     persistenceEntryManager);
         }
 
-        fieldValueFilters.add(Filter.createORFilter(filters));
-        searchFilter = Filter.createANDFilter(fieldValueFilters);
+        searchFilter = Filter.createANDFilter(Filter.createORFilter(filters),
+                Filter.createANDFilter(fieldValueFilters));
 
         logger.info("Token final searchFilter:{}", searchFilter);
 

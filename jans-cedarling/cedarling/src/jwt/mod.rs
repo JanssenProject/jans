@@ -15,17 +15,18 @@
 
 mod decoding_strategy;
 mod error;
+mod jwt_service_config;
 #[cfg(test)]
 mod test;
 mod token;
 
-use decoding_strategy::*;
+pub use decoding_strategy::string_to_alg;
+use decoding_strategy::DecodingStrategy;
 pub use error::*;
-use token::*;
-
+pub use jsonwebtoken::Algorithm;
+pub use jwt_service_config::*;
 use serde::de::DeserializeOwned;
-
-use crate::JwtConfig;
+use token::*;
 
 pub struct JwtService {
     decoding_strategy: DecodingStrategy,
@@ -49,33 +50,20 @@ impl JwtService {
     }
 
     /// Initializes a new `JwtService` instance based on the provided configuration.
-    ///
-    /// This method creates a `JwtService` instance, which can either validate JWTs or
-    /// simply decode them without validation, depending on the provided `JwtConfig`.
-    /// It uses a dependency map to retrieve necessary services like key services.
-    ///
-    /// # Parameters
-    /// - `dep_map`: A dependency map providing required services.
-    /// - `config`: Configuration specifying whether JWT validation should be enabled.
-    ///
-    /// # Errors
-    /// Returns an error if any issue arises while setting up the decoding strategy.
-    pub fn new_with_container(
-        dep_map: &di::DependencyMap,
-        config: JwtConfig,
-    ) -> Result<Self, Error> {
+    pub(crate) fn new_with_config(config: JwtServiceConfig) -> Self {
         match config {
-            JwtConfig::Disabled => {
+            JwtServiceConfig::WithoutValidation => {
                 let decoding_strategy = DecodingStrategy::new_without_validation();
-                Ok(Self { decoding_strategy })
+                Self { decoding_strategy }
             },
-            JwtConfig::Enabled {
-                signature_algorithms,
+            JwtServiceConfig::WithValidation {
+                supported_algs,
+                trusted_idps,
             } => {
                 let decoding_strategy =
-                    DecodingStrategy::new_with_validation(dep_map, &signature_algorithms)?;
-
-                Ok(Self { decoding_strategy })
+                    DecodingStrategy::new_with_validation(supported_algs, trusted_idps)
+                        .expect("could not initialize decoding strategy with validation");
+                Self { decoding_strategy }
             },
         }
     }

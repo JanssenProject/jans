@@ -55,7 +55,7 @@ fn get_payload(object: Bound<'_, PyDict>) -> PyResult<PayloadType> {
     from_pyobject(object).map_err(|err| {
         PyRuntimeError::new_err(format!(
             "Failed to convert to rust HashMap<String, serde_json::Value>: {}",
-            err.to_string()
+            err
         ))
     })
 }

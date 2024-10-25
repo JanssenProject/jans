@@ -11,7 +11,7 @@ use cedarling::{
 };
 use std::env;
 
-static POLICY_STORE_RAW: &str = include_str!("../src/init/test_files/policy-store_ok.json");
+static POLICY_STORE_RAW: &str = include_str!("../../test_files/policy-store_ok.json");
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Collect command-line arguments
@@ -43,7 +43,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         log_config: LogConfig { log_type },
         policy_store_config: PolicyStoreConfig {
             source: PolicyStoreSource::Json(POLICY_STORE_RAW.to_string()),
-            store_id: None,
         },
         jwt_config: JwtConfig::Disabled,
     })?;

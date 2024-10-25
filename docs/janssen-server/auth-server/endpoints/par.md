@@ -28,7 +28,7 @@ https://janssen.server.host/jans-auth/.well-known/openid-configuration
 like below:
 
 ```
-https://jans-dynamic-ldap/jans-auth/restv1/par
+https://jans-dynamic-mysql/jans-auth/restv1/par
 ```
 
 In response to a valid request, the PAR endpoint returns `request_uri` in response similar to below:
