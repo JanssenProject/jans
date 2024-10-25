@@ -396,4 +396,22 @@ mod test {
             "expected successful parsing of role mappings"
         );
     }
+
+    /// Tests unsuccessful parsing of role mappings in token metadata.
+    #[test]
+    fn test_error_on_invalid_token_type() {
+        let valid_token_metadata = r#"[ 
+            { "type": "Access_token", "person_id": "aud" }, 
+            { "type": "unknown_token", "person_id": "sub", "role_mapping": "role" }, 
+            { "type": "userinfo_token", "person_id": "email" } 
+        ]"#;
+
+        let token_metadata_value: serde_json::Value =
+            serde_json::from_str(valid_token_metadata).expect("Failed to parse JSON string");
+
+        assert!(
+            parse_and_check_token_metadata(token_metadata_value).is_err(),
+            "expected unsuccessful parsing of role mappings"
+        );
+    }
 }
