@@ -58,15 +58,17 @@ pub struct TrustedIssuer {
     /// Optional metadata related to the tokens issued by this issuer.
     ///
     /// This field may include role mappings that help define the access levels for issued tokens.
-    #[serde(deserialize_with = "check_token_metadata")]
+    #[serde(deserialize_with = "parse_and_check_token_metadata")]
     pub token_metadata: Option<Vec<TokenMetadata>>,
 }
 
-/// Validates the `token_metadata` field.
+/// Parses and validates the `token_metadata` field.
 ///
 /// This function ensures that the metadata contains at most one `TokenMetadata` with a `role_mapping`
 /// to prevent ambiguous role assignments.
-fn check_token_metadata<'de, D>(deserializer: D) -> Result<Option<Vec<TokenMetadata>>, D::Error>
+fn parse_and_check_token_metadata<'de, D>(
+    deserializer: D,
+) -> Result<Option<Vec<TokenMetadata>>, D::Error>
 where
     D: Deserializer<'de>,
 {
@@ -308,7 +310,7 @@ mod test {
     use super::ParsePolicySetMessage;
     use super::PolicyStore;
     use crate::common::policy_store::check_cedar_version;
-    use crate::common::policy_store::check_token_metadata;
+    use crate::common::policy_store::parse_and_check_token_metadata;
 
     /// Tests successful deserialization of a valid policy store JSON.
     #[test]
@@ -405,7 +407,7 @@ mod test {
             serde_json::from_str(invalid_token_metadata).expect("Failed to parse JSON string");
 
         assert!(
-            check_token_metadata(token_metadata_value).is_err(),
+            parse_and_check_token_metadata(token_metadata_value).is_err(),
             "expected an error for multiple role mappings"
         );
     }
@@ -423,7 +425,7 @@ mod test {
             serde_json::from_str(valid_token_metadata).expect("Failed to parse JSON string");
 
         assert!(
-            check_token_metadata(token_metadata_value).is_ok(),
+            parse_and_check_token_metadata(token_metadata_value).is_ok(),
             "expected successful parsing of role mappings"
         );
     }
