@@ -103,7 +103,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/agama/fl \
     /app/static/rdbm \
     /app/schema
 
-ENV JANS_SOURCE_VERSION=79337e0dc031adae513887955d5c6be0c9e6db45
+ENV JANS_SOURCE_VERSION=2db2483ec478761037b89cbc06e1fe62f753e879
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)

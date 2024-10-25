@@ -324,7 +324,7 @@ class Upgrade:
         if not entry:
             return
 
-        if not self.backend.client.use_simple_json():
+        if not self.backend.client.use_simple_json:
             client_scopes = entry.attrs["jansScope"]["v"]
         else:
             client_scopes = entry.attrs.get("jansScope") or []
@@ -349,7 +349,7 @@ class Upgrade:
 
         # find missing scopes from the client
         if diff := list(set(new_client_scopes).difference(client_scopes)):
-            if not self.backend.client.use_simple_json():
+            if not self.backend.client.use_simple_json:
                 entry.attrs["jansScope"]["v"] = client_scopes + diff
             else:
                 entry.attrs["jansScope"] = client_scopes + diff

@@ -356,7 +356,7 @@ class Upgrade:
         should_update = False
         hostname = self.manager.config.get("hostname")
 
-        if not self.backend.client.use_simple_json():
+        if not self.backend.client.use_simple_json:
             if f"https://{hostname}/admin" not in entry.attrs["jansRedirectURI"]["v"]:
                 entry.attrs["jansRedirectURI"]["v"].append(f"https://{hostname}/admin")
                 should_update = True
@@ -414,7 +414,7 @@ class Upgrade:
         if not entry:
             return
 
-        if not self.backend.client.use_simple_json():
+        if not self.backend.client.use_simple_json:
             client_scopes = entry.attrs["jansScope"]["v"]
         else:
             client_scopes = entry.attrs["jansScope"]
@@ -428,7 +428,7 @@ class Upgrade:
 
         # find missing scopes from the client
         if diff := list(set(new_client_scopes).difference(client_scopes)):
-            if not self.backend.client.use_simple_json():
+            if not self.backend.client.use_simple_json:
                 entry.attrs["jansScope"]["v"] = client_scopes + diff
             else:
                 entry.attrs["jansScope"] = client_scopes + diff
@@ -452,7 +452,7 @@ class Upgrade:
         if not entry:
             return
 
-        if not self.backend.client.use_simple_json():
+        if not self.backend.client.use_simple_json:
             client_scopes = entry.attrs["jansScope"]["v"]
         else:
             client_scopes = entry.attrs["jansScope"]
@@ -479,7 +479,7 @@ class Upgrade:
 
         # find missing scopes from the client
         if diff := list(set(scopes).difference(client_scopes)):
-            if not self.backend.client.use_simple_json():
+            if not self.backend.client.use_simple_json:
                 entry.attrs["jansScope"]["v"] = client_scopes + diff
             else:
                 entry.attrs["jansScope"] = client_scopes + diff
@@ -495,7 +495,7 @@ class Upgrade:
         entries = self.backend.search_entries("", **kwargs)
 
         for entry in entries:
-            if not self.backend.client.use_simple_json():
+            if not self.backend.client.use_simple_json:
                 creator_attrs = (entry.attrs.get("creatorAttrs") or {}).get("v") or []
             else:
                 creator_attrs = entry.attrs.get("creatorAttrs") or []
@@ -517,7 +517,7 @@ class Upgrade:
                 new_creator_attrs.append(attr)
 
             if new_creator_attrs != creator_attrs:
-                if not self.backend.client.use_simple_json():
+                if not self.backend.client.use_simple_json:
                     entry.attrs["creatorAttrs"]["v"] = new_creator_attrs
                 else:
                     entry.attrs["creatorAttrs"] = new_creator_attrs

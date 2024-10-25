@@ -276,7 +276,7 @@ class SQLBackend:
                 else:
                     new_value = [value]
 
-                if not self.client.use_simple_json():
+                if not self.client.use_simple_json:
                     new_value = {"v": new_value}
                 self.client.update(table_name, doc_id, {col_name: new_value})
 
@@ -362,7 +362,7 @@ class SQLBackend:
 
             # pre-populate the modified column
             for doc_id, value in values.items():
-                simple_json = self.client.use_simple_json()
+                simple_json = self.client.use_simple_json
 
                 if not simple_json and value and value.get("v", []):
                     new_value = value["v"][0]
