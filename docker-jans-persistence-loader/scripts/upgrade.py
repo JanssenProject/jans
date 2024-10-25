@@ -313,7 +313,7 @@ class Upgrade:
 
         agama_entry = self.backend.get_entry(agama_id, **kwargs)
         if agama_entry:
-            if self.backend.type == "sql" and self.backend.client.dialect == "mysql":
+            if not self.backend.client.use_simple_json():
                 props = agama_entry.attrs["jansConfProperty"]["v"]
             else:
                 props = agama_entry.attrs["jansConfProperty"]
@@ -332,7 +332,7 @@ class Upgrade:
             if new_props != props:
                 new_props = [json.dumps(prop) for prop in new_props]
 
-                if self.backend.type == "sql" and self.backend.client.dialect == "mysql":
+                if not self.backend.client.use_simple_json():
                     agama_entry.attrs["jansConfProperty"]["v"] = new_props
                 else:
                     agama_entry.attrs["jansConfProperty"] = new_props
@@ -483,19 +483,16 @@ class Upgrade:
             ("jansAdminUIRole", "api-admin"),
             ("role", "CasaAdmin"),
         ]:
-            if self.user_backend.type == "sql" and self.user_backend.client.dialect == "mysql" and not entry.attrs[attr_name]["v"]:
-                entry.attrs[attr_name] = {"v": [role_name]}
+            if not self.user_backend.client.use_simple_json():
+                old_roles = entry.attrs.get(attr_name, {}).get("v", [])
+                new_roles = {"v": [role_name]}
+            else:
+                old_roles = entry.attrs.get(attr_name, [])
+                new_roles = [role_name]
+
+            if not old_roles:
+                entry.attrs[attr_name] = roles
                 should_update = True
-            if self.user_backend.type == "sql" and self.user_backend.client.dialect == "pgsql" and not entry.attrs[attr_name]:
-                entry.attrs[attr_name] = [role_name]
-                should_update = True
-            elif self.user_backend.type == "spanner" and not entry.attrs[attr_name]:
-                entry.attrs[attr_name] = [role_name]
-                should_update = True
-            else:  # couchbase
-                if attr_name not in entry.attrs:
-                    entry.attrs[attr_name] = [role_name]
-                    should_update = True
 
         # set lowercased jansStatus
         if entry.attrs["jansStatus"] == "ACTIVE":
@@ -669,7 +666,7 @@ class Upgrade:
         # add SSA scope inum=B9D2-D6E5,ou=scopes,o=jans to tui client
         ssa_scope = "inum=B9D2-D6E5,ou=scopes,o=jans"
 
-        if isinstance(entry.attrs["jansScope"], dict):  # likely mysql
+        if not self.backend.client.use_simple_json():
             if ssa_scope not in entry.attrs["jansScope"]["v"]:
                 entry.attrs["jansScope"]["v"].append(ssa_scope)
                 should_update = True
@@ -732,7 +729,7 @@ class Upgrade:
         # set jansSmtpConf if still empty
         smtp_conf = entry.attrs.get("jansSmtpConf")
 
-        if isinstance(smtp_conf, dict):  # likely mysql
+        if not self.backend.client.use_simple_json():
             if not smtp_conf["v"]:
                 entry.attrs["jansSmtpConf"]["v"].append(json.dumps(default_smtp_conf))
                 should_update = True

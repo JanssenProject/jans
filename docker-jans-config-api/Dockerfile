@@ -41,7 +41,7 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # ==========
 
 ENV CN_VERSION=1.1.6-SNAPSHOT
-ENV CN_BUILD_DATE='2024-10-02 09:23'
+ENV CN_BUILD_DATE='2024-10-25 19:52'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api-server/${CN_VERSION}/jans-config-api-server-${CN_VERSION}.war
 
@@ -78,7 +78,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-config-api/_plugins \
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=5f3b30e4b565601ccb31cd985920c09071cd1b54
+ENV JANS_SOURCE_VERSION=79337e0dc031adae513887955d5c6be0c9e6db45
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
 
@@ -226,7 +226,8 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_CONFIG_API_JETTY_PORT=8074 \
     CN_CONFIG_API_JETTY_HOST=0.0.0.0 \
     CN_JETTY_ARGS="" \
-    CN_SSL_CERT_FROM_SECRETS=true
+    CN_SSL_CERT_FROM_SECRETS=true \
+    MYSQL_SIMPLE_JSON=true
 
 # ==========
 # misc stuff

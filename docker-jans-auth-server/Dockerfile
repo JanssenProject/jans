@@ -51,7 +51,7 @@ RUN /opt/jython/bin/pip uninstall -y pip setuptools
 # ===========
 
 ENV CN_VERSION=1.1.6-SNAPSHOT
-ENV CN_BUILD_DATE='2024-10-02 13:40'
+ENV CN_BUILD_DATE='2024-10-25 19:23'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-server/${CN_VERSION}/jans-auth-server-${CN_VERSION}.war
 
@@ -103,7 +103,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/agama/fl \
     /app/static/rdbm \
     /app/schema
 
-ENV JANS_SOURCE_VERSION=5f3b30e4b565601ccb31cd985920c09071cd1b54
+ENV JANS_SOURCE_VERSION=79337e0dc031adae513887955d5c6be0c9e6db45
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -219,7 +219,8 @@ ENV CN_PERSISTENCE_TYPE=sql \
     CN_COUCHBASE_KEEPALIVE_INTERVAL=30000 \
     CN_COUCHBASE_KEEPALIVE_TIMEOUT=2500 \
     CN_GOOGLE_SPANNER_INSTANCE_ID="" \
-    CN_GOOGLE_SPANNER_DATABASE_ID=""
+    CN_GOOGLE_SPANNER_DATABASE_ID="" \
+    MYSQL_SIMPLE_JSON=true
 
 # ===========
 # Generic ENV

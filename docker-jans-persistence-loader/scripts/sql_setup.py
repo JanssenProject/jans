@@ -117,14 +117,14 @@ class SQLBackend:
             index_name = f"{table_name}_{FIELD_RE.sub('_', column_name)}"
 
             if column_type == "TEXT":
-                # set key length to 768 to accomodate charset utf8mb4
-                query = f"CREATE INDEX {self.client.quoted_id(index_name)} ON {self.client.quoted_id(table_name)} ({self.client.quoted_id(column_name)} (768))"
+                # set key length to 255
+                query = f"CREATE INDEX {self.client.quoted_id(index_name)} ON {self.client.quoted_id(table_name)} ({self.client.quoted_id(column_name)} (255))"
                 self.client.create_index(query)
             elif column_type.lower() != "json":
                 query = f"CREATE INDEX {self.client.quoted_id(index_name)} ON {self.client.quoted_id(table_name)} ({self.client.quoted_id(column_name)})"
                 self.client.create_index(query)
             else:
-                if self.client.server_version < "8.0":
+                if self.client.get_server_version() < (8, 0):
                     # prior to MySQL 8.0, CASTing on index creation will raise SQL syntax error;
                     # switch to virtual column instead
                     for i in range(4):
@@ -152,7 +152,6 @@ class SQLBackend:
 
         for i, custom in enumerate(self.sql_indexes.get(table_name, {}).get("custom", []), start=1):
             # jansPerson table has unsupported custom index expressions that need to be skipped if mysql < 8.0
-            # if table_name == "jansPerson" and self.client.server_version < "8.0":
             if table_name == "jansPerson" and self.client.get_server_version() < (8, 0):
                 continue
             name = f"{table_name}_CustomIdx{i}"
@@ -277,7 +276,7 @@ class SQLBackend:
                 else:
                     new_value = [value]
 
-                if self.client.dialect == "mysql":
+                if not self.client.use_simple_json():
                     new_value = {"v": new_value}
                 self.client.update(table_name, doc_id, {col_name: new_value})
 
@@ -363,9 +362,11 @@ class SQLBackend:
 
             # pre-populate the modified column
             for doc_id, value in values.items():
-                if self.client.dialect == "mysql" and value and value.get("v", []):
+                simple_json = self.client.use_simple_json()
+
+                if not simple_json and value and value.get("v", []):
                     new_value = value["v"][0]
-                elif self.client.dialect == "pgsql" and value:
+                elif simple_json and value:
                     new_value = value[0]
                 else:
                     new_value = ""

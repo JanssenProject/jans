@@ -16,7 +16,7 @@ RUN apk update \
 # ===========
 
 # janssenproject/jans SHA commit
-ENV JANS_SOURCE_VERSION=5f3b30e4b565601ccb31cd985920c09071cd1b54
+ENV JANS_SOURCE_VERSION=79337e0dc031adae513887955d5c6be0c9e6db45
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCRIPT_CATALOG_DIR=docs/script-catalog
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
@@ -159,7 +159,8 @@ ENV CN_CACHE_TYPE=NATIVE_PERSISTENCE \
     CN_AWS_SECRETS_PREFIX=jans \
     CN_AWS_SECRETS_REPLICA_FILE="" \
     CN_DUO_ENABLED=true \
-    CN_LOCK_ENABLED=false
+    CN_LOCK_ENABLED=false \
+    MYSQL_SIMPLE_JSON=true
 
 # ====
 # misc
