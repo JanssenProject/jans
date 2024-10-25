@@ -5,13 +5,14 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-use std::str::FromStr;
 use super::ParsePolicySetMessage;
 use super::PolicyStore;
 use crate::common::policy_store::parse_and_check_token_metadata;
 use crate::common::policy_store::parse_cedar_version;
 use base64::prelude::*;
 use serde_json::json;
+use std::str::FromStr;
+use test_utils::assert_eq;
 
 /// Tests successful deserialization of a valid policy store JSON.
 #[test]
@@ -193,14 +194,15 @@ fn test_invalid_version_format_with_v() {
 #[test]
 fn test_invalid_multiple_role_mappings_in_token_metadata() {
     let invalid_token_metadata = json!([
-        { "type": "Access", "person_id": "aud" },
-        { "type": "Id", "person_id": "sub", "role_mapping": "role" },
-        { "type": "userinfo", "person_id": "email", "role_mapping": "role" }
+        { "type": "access_token", "person_id": "aud" },
+        { "type": "id_token", "person_id": "sub", "role_mapping": "role" },
+        { "type": "userinfo_token", "person_id": "email", "role_mapping": "role" }
     ]);
 
+    let result = parse_and_check_token_metadata(invalid_token_metadata);
+
     assert!(
-        parse_and_check_token_metadata(invalid_token_metadata).is_err(),
-        "expected an error for multiple role mappings"
+        matches!(result, Err(e) if e.to_string() == "there can only be one TokenMetadata with a role_mapping")
     );
 }
 
@@ -223,13 +225,14 @@ fn test_successful_parsing_of_role_mappings() {
 #[test]
 fn test_error_on_invalid_token_type() {
     let invalid_token_metadata = json!([
-        { "type": "Access_token", "person_id": "aud" },
+        { "type": "Access", "person_id": "aud" },
         { "type": "unknown_token", "person_id": "sub", "role_mapping": "role" },
-        { "type": "userinfo_token", "person_id": "email" }
+        { "type": "userinfo", "person_id": "email" }
     ]);
 
+    let result = parse_and_check_token_metadata(invalid_token_metadata);
+
     assert!(
-        parse_and_check_token_metadata(invalid_token_metadata).is_err(),
-        "expected unsuccessful parsing of role mappings"
+        matches!(result, Err(e) if e.to_string() == "unknown variant `Access`, expected one of `access_token`, `id_token`, `userinfo_token`, `transaction_token`")
     );
 }
