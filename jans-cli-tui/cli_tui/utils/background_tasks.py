@@ -5,7 +5,8 @@ from utils.static import common_strings
 from utils.multi_lang import _
 
 common_data.background_tasks_feeds['attributes'] = []
-
+common_data.background_tasks_feeds['assets'] = []
+common_data.asset_services = []
 
 async def get_attributes_coroutine(app) -> None:
 
@@ -97,3 +98,27 @@ async def get_persistence_type() -> None:
         return
     result = response.json()
     common_data.server_persistence_type = result['persistenceType']
+
+
+async def get_asset_services() -> None:
+    'Coroutine for getting asset services'
+
+    common_data.app.logger.info("Backrgound Task: retreiving asset services")
+    cli_args = {'operation_id': 'get-asset-services'}
+    common_data.app.start_progressing(_("Retreiving asset services from server..."))
+    response = await get_event_loop().run_in_executor(common_data.app.executor, common_data.app.cli_requests, cli_args)
+    common_data.app.stop_progressing()
+    if response.status_code not in (200, 201):
+        common_data.app.show_message(
+            title=_("Error getting asset services"),
+            message=_("Error while getting asset services:\n") + str(response.text),
+            tobefocused=common_data.app.center_frame
+        )
+        return
+
+    common_data.asset_services = response.json()
+
+    for feed in common_data.background_tasks_feeds['assets']:
+        common_data.app.logger.info(f"Executing feed {feed.__name__}")
+        feed()
+

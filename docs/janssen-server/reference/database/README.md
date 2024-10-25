@@ -15,7 +15,6 @@ One of the main target of ORM module is to provide simple lightweight layer to a
 
 Jans has next persistence modules out-of-the-box:
 
--  [LDAP](./ldap-config.md)
 -  [Couchbase](./cb-config.md)
 -  [Spanner](./spanner-config.md)
 -  [MySQL](./mysql-config.md)
@@ -29,13 +28,12 @@ the type of persistence(DB) used is specified
 in `/etc/jans/conf/jans.properties` using the entry as show below:
 
 ```
-persistence.type=ldap
+persistence.type=sql
 ```
 
 Values for property `persistence.type` is set during the installation and based
 on choice of persistence(DB) type, it can be one of these supported values:
 
-- `ldap`
 - `couchbase`
 - `sql` 
 - `spanner` 
@@ -51,7 +49,6 @@ configuration properties will be available on Janssen Server instance under
 the directory `/etc/jans/conf/`. List of configuration files for these 
 persistence types are:
 
-- `jans-ldap.properties`
 - `jans-couchbase.properties`
 - `jans-spanner.properties`
 - `jans-sql.properties`
@@ -161,7 +158,7 @@ Jans ORM has modular architecture. The are few layers in this implementation
   
 1. **jans-orm-annotation**: Define annotations which instruct ORM about how to work with beans and properties 
 
-1. **jans-orm-filter**: This module provides Filter API. The syntax is very similar to LDAP filters. The ORM layer converts them at runtime to DB query syntax: *SQL/NoSQL/LDAP*
+1. **jans-orm-filter**: This module provides Filter API. The syntax is very similar to LDAP filters. The ORM layer converts them at runtime to DB query syntax: *SQL/NoSQL*
 
 1. **jans-orm-cdi**: Provides reusable factory which can be used in CDI based projects
 
