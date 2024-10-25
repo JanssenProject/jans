@@ -5,19 +5,25 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-/// PolicyStoreConfig - Configuration for the policy store.
-/// represent the place where we going to read the policy
+/// `PolicyStoreConfig` - Configuration for the policy store.
+///
+/// Defines where the policy will be retrieved from.
 pub struct PolicyStoreConfig {
-    /// Source - represent the place where we going to read the policy.
+    /// Specifies the source from which the policy will be read.
     pub source: PolicyStoreSource,
-    /// `CEDARLING_POLICY_STORE_ID` in [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) documentation.
-    /// If None then we should have only one policy store in the `source`.
-    pub store_id: Option<String>,
 }
 
-/// PolicyStoreSource - represent the place where we going to read the policy.
+/// `PolicyStoreSource` represents the source from which policies will be retrieved.
 #[derive(Debug, Clone)]
 pub enum PolicyStoreSource {
-    /// Read policy from raw JSON
+    /// Read the policy directly from a raw JSON string.
+    ///
+    /// The string contains the raw JSON data representing the policy.
     Json(String),
+
+    /// Fetch the policies from the Lock Master service using a specified identifier.
+    ///
+    /// The string contains the identifier of the policy store, which is set in the
+    /// `CEDARLING_POLICY_STORE_ID` bootstrap configuration.
+    LockMaster(String),
 }

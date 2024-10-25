@@ -6,7 +6,7 @@
  */
 
 use super::jwt_algorithm::parse_jwt_algorithms;
-use super::policy_store::{load_policy_store, LoadPolicyStoreError};
+use super::policy_store::{load_policy_store, PolicyStoreLoadError};
 use crate::common::policy_store::PolicyStore;
 use crate::{
     bootstrap_config,
@@ -28,7 +28,7 @@ pub enum ServiceConfigError {
     ParseAlgorithm(#[from] ParseAlgorithmError),
     /// Error that may occur during loading the policy store.
     #[error("Could not load policy: {0}")]
-    PolicyStore(#[from] LoadPolicyStoreError),
+    PolicyStore(#[from] PolicyStoreLoadError),
 }
 
 impl ServiceConfig {

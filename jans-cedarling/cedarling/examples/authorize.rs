@@ -21,7 +21,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         },
         policy_store_config: PolicyStoreConfig {
             source: PolicyStoreSource::Json(POLICY_STORE_RAW.to_string()),
-            store_id: None,
         },
         jwt_config: JwtConfig::Disabled,
     })?;
