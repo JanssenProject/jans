@@ -25,10 +25,10 @@ pub(crate) fn load_policy_store(
 ) -> Result<PolicyStore, PolicyStoreLoadError> {
     let policy_store = match &config.source {
         PolicyStoreSource::Json(policy_json) => {
-            load_policy_store_from_json(&policy_json).map_err(PolicyStoreLoadError::Parse)?
+            load_policy_store_from_json(policy_json).map_err(PolicyStoreLoadError::Parse)?
         },
         PolicyStoreSource::LockMaster(policy_store_id) => {
-            load_policy_store_from_lock_master(&policy_store_id)?
+            load_policy_store_from_lock_master(policy_store_id)?
         },
     };
 

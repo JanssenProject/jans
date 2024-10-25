@@ -178,13 +178,9 @@ where
     let version: String = String::deserialize(deserializer)?;
 
     // Check for "v" prefix
-    let version = if version.starts_with('v') {
-        &version[1..] // Remove the 'v' prefix
-    } else {
-        &version
-    };
+    let version = version.strip_prefix('v').unwrap_or(&version);
 
-    let version = Version::parse(&version)
+    let version = Version::parse(version)
         .map_err(|e| serde::de::Error::custom(format!("error parsing cedar version :{}", e)))?;
 
     Ok(version)
