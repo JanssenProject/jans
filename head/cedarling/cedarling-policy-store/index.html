@@ -7485,6 +7485,33 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#policies" class="md-nav__link">
+    Policies
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#token-entity-schema" class="md-nav__link">
+    Token Entity Schema
+  </a>
+  
+    <nav class="md-nav" aria-label="Token Entity Schema">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sample-policy-store" class="md-nav__link">
+    Sample Policy store
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#policy-and-schema-authoring" class="md-nav__link">
     Policy and Schema Authoring
   </a>
@@ -8669,6 +8696,33 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#policies" class="md-nav__link">
+    Policies
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#token-entity-schema" class="md-nav__link">
+    Token Entity Schema
+  </a>
+  
+    <nav class="md-nav" aria-label="Token Entity Schema">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#sample-policy-store" class="md-nav__link">
+    Sample Policy store
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#policy-and-schema-authoring" class="md-nav__link">
     Policy and Schema Authoring
   </a>
@@ -8742,45 +8796,100 @@ Cedarling needs to evaluate policies and verify JWT tokens:</p>
 </ol>
 <p>The JSON schema looks like this:</p>
 <div class="highlight"><pre><span></span><code>{
-    &quot;some_unique_identifier&quot;: {
-        &quot;name&quot;: &quot;...&quot;,
-        &quot;description&quot;: &quot;...&quot;,
-        &quot;policies&quot;: {},
-        &quot;identity_source&quot;: {},
-        &quot;schema&quot;: &quot;...&quot;
-    }
+    &quot;policystore_id&quot;: &quot;...&quot;,
+    &quot;policies&quot;: {...},
+    &quot;schema&quot;: &quot;...&quot;,
+    &quot;trusted_issuers&quot;: [],
+    &quot;cedar_version&quot;: &quot;v1.1.5&quot;
 }
 </code></pre></div>
-<h2 id="trusted-issuer-schema">Trusted Issuer Schema<a class="headerlink" href="#trusted-issuer-schema" title="Permanent link">#</a></h2>
 <ul>
-<li><strong>name</strong> : (String, no spaces) The name of the trusted issuer.</li>
-<li><strong>description</strong> : (String) A brief description of the issuer, providing context for administrators.</li>
-<li><strong>openid_configuration_endpoint</strong> : (String) The HTTPS URL for the OpenID Connect configuration endpoint (usually found under /.well-known/openid-configuration).</li>
-<li><strong>access_tokens</strong> : (Object with claims) </li>
-<li><strong>trusted</strong>: (True | False) Indicates whether the issuer's access token are trusted.</li>
-<li><strong>id_tokens</strong> : (Object with claims) </li>
-<li><strong>trusted</strong>: (True | False) Indicates whether the issuer's id_token are trusted.</li>
-<li><strong>principal_identifier</strong>: the token claim used to identify the User entity (in SAML jargon it's the "NameID format"). This claim is optional--it may be present in the Userinfo token. Defaults to sub.</li>
-<li><strong>role_mapping</strong>: A list of the User's roles</li>
-<li><strong>userinfo_tokens</strong> :</li>
-<li><strong>trusted</strong>: (True | False) Indicates whether the issuer's userinfo_tokens are trusted.</li>
-<li><strong>principal_identifier</strong>: the token claim used to identify the User entity (in SAML jargon it's the "NameID format"). This claim is optional--it may be present in the Userinfo token. Defaults to sub.</li>
-<li><strong>role_mapping</strong>: A list of the User's roles</li>
-<li><strong>tx_tokens</strong> : (Object with claims)</li>
-<li><strong>trusted</strong>: (True | False)</li>
+<li><strong>policystore_id</strong> : (String, no spaces) The unique identifier for the policy store.</li>
+<li><strong>policies</strong> : (Json) Json object containing one or more policy_id as key and policy object as value</li>
+<li><strong>schema</strong> : (String) Base64 encoded cedar schema</li>
+<li><strong>trusted_issuers</strong> : (List) List of Trusted Issuer metadata</li>
+<li><strong>cedar_version</strong> : (String) The version of <a href="https://docs.cedarpolicy.com/">Cedar policy</a>. The protocols of this version will be followed when processing Cedar schema and policies.</li>
 </ul>
-<div class="highlight"><pre><span></span><code>[
-{&quot;name&quot;: &quot;Google&quot;, 
- &quot;Description&quot;: &quot;Consumer IDP&quot;, 
- &quot;openid_configuration_endpoint&quot;: &quot;https://accounts.google.com/.well-known/openid-configuration&quot;,
- &quot;access_tokens&quot;: {&quot;trusted&quot;: True}, 
- &quot;id_tokens&quot;: {&quot;trusted&quot;:True, &quot;principal_identifier&quot;: &quot;email&quot;},
- &quot;userinfo_tokens&quot;: {&quot;trusted&quot;: True, &quot;role_mapping&quot;: &quot;role&quot;},  
- &quot;tx_tokens&quot;: {&quot;trusted&quot;: True}
-},
-{IDP-2},
-{IDP-3}...
+<h2 id="trusted-issuer-schema">Trusted Issuer Schema<a class="headerlink" href="#trusted-issuer-schema" title="Permanent link">#</a></h2>
+<p>This record contains the information needed to validate tokens from this issuer:</p>
+<div class="highlight"><pre><span></span><code>&quot;trusted_issuers&quot;: [
+    {
+         &quot;name&quot;: &quot;name_of_the_trusted_issuer&quot;, 
+         &quot;description&quot;: &quot;description_of_the_trusted_issuer&quot;, 
+         &quot;openid_configuration_endpoint&quot;: &quot;https://&lt;trusted-issuer-hostname&gt;/.well-known/openid-configuration&quot;,
+         &quot;token_metadata&quot;: [token1_entity_schema, token2_entity_schema, ... ]
+    }
 ]
+</code></pre></div>
+<ul>
+<li><strong>name</strong> : (String) Name of the trusted issuer</li>
+<li><strong>description</strong> : (String) Short description of the trusted issuer</li>
+<li><strong>openid_configuration_endpoint</strong> : The HTTPS URL for the OpenID Connect configuration endpoint (usually found under /.well-known/openid-configuration).</li>
+<li><strong>token_metadata</strong> : (List) List of token metadata</li>
+</ul>
+<h2 id="policies">Policies<a class="headerlink" href="#policies" title="Permanent link">#</a></h2>
+<p>Json object containing one or more policy_id as key and policy object as value.</p>
+<div class="highlight"><pre><span></span><code>  &quot;policies&quot;: {
+    &quot;840da5d85403f35ea76519ed1a18a33989f855bf1cf8&quot;: {
+      &quot;description&quot;: &quot;simple policy example&quot;,
+      &quot;creation_date&quot;: &quot;2024-09-20T17:22:39.996050&quot;,
+      &quot;policy_content&quot;: &quot;cGVybWl0KAogICAgc...&quot;
+    }
+  }
+</code></pre></div>
+<ul>
+<li><strong>description</strong> : (String) Short description of cedar policy</li>
+<li><strong>creation_date</strong> :  (String) Policy creating date in <code>YYYY-MM-DDTHH:MM:SS.ssssss</code></li>
+<li><strong>policy_content</strong> : (String) Base64 encoded cedar schema</li>
+</ul>
+<h2 id="token-entity-schema">Token Entity Schema<a class="headerlink" href="#token-entity-schema" title="Permanent link">#</a></h2>
+<div class="highlight"><pre><span></span><code>{ &quot;type&quot;: &quot;access&quot;
+  &quot;user_id&quot;: &quot;...&quot;,                   
+  &quot;role_mapping&quot;: &quot;...&quot;,          
+}
+</code></pre></div>
+<ul>
+<li><strong>type</strong> : (String) The type of token whether <code>access</code>, <code>id_token</code>, <code>userinfo</code> or <code>transaction</code>.</li>
+<li><strong>user_id</strong> : (String) For id_token or userinfo tokens, the <code>user_id</code> refers to the claim used to identify the person entity. For example, in an id_token, the "user_id" could be the sub (subject) or email claim.</li>
+<li><strong>role_mapping</strong> : (String) The role_mapping refers to the token claim used to get role values. The default value of <code>role_mapping</code> is <code>role</code>.</li>
+</ul>
+<h3 id="sample-policy-store">Sample Policy store<a class="headerlink" href="#sample-policy-store" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code>{
+  &quot;policystore_id&quot;: &quot;8b805e22fdd39f3dd33a13d9fb446d8e6314153ca997&quot;,
+  &quot;name&quot;: &quot;gluustore&quot;,
+  &quot;description&quot;: &quot;gluu&quot;,
+  &quot;policies&quot;: {
+    &quot;840da5d85403f35ea76519ed1a18a33989f855bf1cf8&quot;: {
+      &quot;description&quot;: &quot;simple policy example&quot;,
+      &quot;creation_date&quot;: &quot;2024-09-20T17:22:39.996050&quot;,
+      &quot;policy_content&quot;: &quot;cGVybWl0KAogICAgc...&quot;
+    }
+  },
+  &quot;trusted_issuers&quot;: [
+    {
+      &quot;name&quot;: &quot;Google&quot;,
+      &quot;description&quot;: &quot;Consumer IDP&quot;,
+      &quot;openid_configuration_endpoint&quot;: &quot;https://accounts.google.com/.well-known/openid-configuration&quot;,
+      &quot;token_metadata&quot;: [
+        {
+          &quot;type&quot;: &quot;access&quot;,
+          &quot;user_id&quot;: &quot;aud&quot;
+        },
+        {
+          &quot;type&quot;: &quot;id_token&quot;,
+          &quot;user_id&quot;: &quot;email&quot;,
+          &quot;role_mapping&quot;: &quot;role&quot;
+        },
+        {
+          &quot;type&quot;: &quot;userinfo&quot;,
+          &quot;user_id&quot;: &quot;email&quot;
+        }
+      ]
+    }
+  ],
+  &quot;schema&quot;: &quot;ewogICAgIkphbnMiOiB...&quot;,
+  &quot;cedar_version&quot;: &quot;v2.4.7&quot;
+}
 </code></pre></div>
 <h2 id="policy-and-schema-authoring">Policy and Schema Authoring<a class="headerlink" href="#policy-and-schema-authoring" title="Permanent link">#</a></h2>
 <p>You can hand create your Cedar policies and schema in 
@@ -8795,7 +8904,7 @@ trusted IDPs and to publish a policy store to a Github repository.</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-17T18:41:31+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-17</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-25T07:31:01+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-25</span>
       
         <br>
         Created:
