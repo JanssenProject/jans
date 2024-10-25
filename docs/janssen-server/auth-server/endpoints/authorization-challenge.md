@@ -11,7 +11,7 @@ tags:
 Authorization Challenge Endpoint allows first-party native client obtain authorization code which later can be exchanged on access token.
 This can provide an entirely browserless OAuth 2.0 experience suited for native applications.
 
-This endpoint conforms to [OAuth 2.0 for First-Party Native Applications](https://www.ietf.org/archive/id/draft-parecki-oauth-first-party-native-apps-00.html) specifications.
+This endpoint conforms to [OAuth 2.0 for First-Party Native Applications](https://www.ietf.org/archive/id/draft-parecki-oauth-first-party-native-apps-02.html) specifications.
 
 URL to access authorization challenge endpoint on Janssen Server is listed in the response of Janssen Server's well-known
 [configuration endpoint](./configuration.md) given below.
@@ -24,7 +24,7 @@ https://janssen.server.host/jans-auth/.well-known/openid-configuration
 challenge endpoint looks like below:
 
 ```
-https://janssen.server.host/jans-auth/restv1/authorization_challenge
+https://janssen.server.host/jans-auth/restv1/authorize-challenge
 ```
 
 In order to call Authorization Challenge Endpoint client must have `authorization_challenge` scope. 
@@ -33,7 +33,7 @@ If scope is not present AS rejects call with 401 (unauthorized) http status code
 Authorization Challenge Endpoint supports Proof Key for Code Exchange (PKCE).
 
 More information about request and response of the authorization challenge endpoint can be found in the OpenAPI specification 
-of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/Authorization_Challenge).
+of [jans-auth-server module](https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/authorize-challenge).
 
 Sample request
 ```
@@ -185,7 +185,7 @@ Sometimes it's required to send data sequentially. Step by step. Calls to Author
 Lets consider example when RP first sends `username` and then in next request `OTP`.
 
 ```text
-POST /jans-auth/restv1/authorization_challenge HTTP/1.1
+POST /jans-auth/restv1/authorize-challenge HTTP/1.1
 Host: server.example.com
 Content-Type: application/x-www-form-urlencoded
 
@@ -210,7 +210,7 @@ Cache-Control: no-store
 In next call RP can send OTP and `device_session` (AS matches user from `device_session`)
 
 ```text
-POST /jans-auth/restv1/authorization_challenge HTTP/1.1
+POST /jans-auth/restv1/authorize-challenge HTTP/1.1
 Host: server.example.com
 Content-Type: application/x-www-form-urlencoded
 
@@ -337,7 +337,7 @@ X-Xss-Protection: 1; mode=block
   "grant_types_supported" : [ "client_credentials", "urn:ietf:params:oauth:grant-type:uma-ticket", "urn:ietf:params:oauth:grant-type:device_code", "urn:ietf:params:oauth:grant-type:token-exchange", "implicit", "authorization_code", "password", "refresh_token" ],
   "ui_locales_supported" : [ "en", "bg", "de", "es", "fr", "it", "ru", "tr" ],
   "userinfo_endpoint" : "https://yuriyz-fond-skink.gluu.info/jans-auth/restv1/userinfo",
-  "authorization_challenge_endpoint" : "https://yuriyz-fond-skink.gluu.info/jans-auth/restv1/authorization_challenge",
+  "authorization_challenge_endpoint" : "https://yuriyz-fond-skink.gluu.info/jans-auth/restv1/authorize-challenge",
   "op_tos_uri" : "https://yuriyz-fond-skink.gluu.info/tos",
   "require_request_uri_registration" : false,
   "id_token_encryption_alg_values_supported" : [ "RSA1_5", "RSA-OAEP", "A128KW", "A256KW" ],
@@ -462,7 +462,7 @@ X-Xss-Protection: 1; mode=block
 -------------------------------------------------------
 REQUEST:
 -------------------------------------------------------
-POST /jans-auth/restv1/authorization_challenge HTTP/1.1
+POST /jans-auth/restv1/authorize-challenge HTTP/1.1
 Host: yuriyz-fond-skink.gluu.info
 
 client_id=999e13b8-f4a2-4fed-ad3c-6c88bd2c92ea&scope=openid+profile+address+email+phone+user_name&state=b4a41b29-51c8-4354-9c8c-fda38b4dbd43&nonce=3a56f8d0-f78e-4b15-857c-3e792801be68&prompt=&ui_locales=&claims_locales=&acr_values=&request_session_id=false&password=secret&username=admin
@@ -630,7 +630,7 @@ X-Xss-Protection: 1; mode=block
   "grant_types_supported" : [ "client_credentials", "urn:ietf:params:oauth:grant-type:uma-ticket", "urn:ietf:params:oauth:grant-type:device_code", "urn:ietf:params:oauth:grant-type:token-exchange", "implicit", "authorization_code", "password", "refresh_token" ],
   "ui_locales_supported" : [ "en", "bg", "de", "es", "fr", "it", "ru", "tr" ],
   "userinfo_endpoint" : "https://yuriyz-fond-skink.gluu.info/jans-auth/restv1/userinfo",
-  "authorization_challenge_endpoint" : "https://yuriyz-fond-skink.gluu.info/jans-auth/restv1/authorization_challenge",
+  "authorization_challenge_endpoint" : "https://yuriyz-fond-skink.gluu.info/jans-auth/restv1/authorize-challenge",
   "op_tos_uri" : "https://yuriyz-fond-skink.gluu.info/tos",
   "require_request_uri_registration" : false,
   "id_token_encryption_alg_values_supported" : [ "RSA1_5", "RSA-OAEP", "A128KW", "A256KW" ],
@@ -755,7 +755,7 @@ X-Xss-Protection: 1; mode=block
 -------------------------------------------------------
 REQUEST:
 -------------------------------------------------------
-POST /jans-auth/restv1/authorization_challenge HTTP/1.1
+POST /jans-auth/restv1/authorize-challenge HTTP/1.1
 Host: yuriyz-fond-skink.gluu.info
 
 client_id=d93a5129-1546-4b9b-bf8c-ea19e36ea2c8&scope=openid+profile+address+email+phone+user_name&state=4f925a8d-287a-4cba-a174-04d2e56109df&nonce=84c9b6dd-635c-4ca4-bba1-35c53c51a339&prompt=&ui_locales=&claims_locales=&acr_values=&request_session_id=false&password=secret&username=invalidUser

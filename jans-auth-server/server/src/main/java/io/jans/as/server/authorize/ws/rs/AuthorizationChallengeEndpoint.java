@@ -21,7 +21,7 @@ import jakarta.ws.rs.core.Response;
  *
  * @author Yuriy Z
  */
-@Path("/authorization_challenge")
+@Path("/authorize-challenge")
 public class AuthorizationChallengeEndpoint {
 
     @Inject

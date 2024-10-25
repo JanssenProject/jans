@@ -20,7 +20,7 @@ If parameter is absent or AS can't find script with this name then it falls back
 This script is provided during installation and performs basic `username`/`password` authentication.
 
 ```
-POST /jans-auth/restv1/authorization_challenge HTTP/1.1
+POST /jans-auth/restv1/authorize-challenge HTTP/1.1
 Host: yuriyz-fond-skink.gluu.info
 
 client_id=999e13b8-f4a2-4fed-ad3c-6c88bd2c92ea&scope=openid+profile+address+email+phone+user_name&state=b4a41b29-51c8-4354-9c8c-fda38b4dbd43&nonce=3a56f8d0-f78e-4b15-857c-3e792801be68&acr_values=&request_session_id=false&password=secret&username=admin
