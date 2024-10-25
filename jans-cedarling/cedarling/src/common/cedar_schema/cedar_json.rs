@@ -6,6 +6,23 @@
 
 use std::collections::HashMap;
 
+/// Represent `cedar-policy` schema type for external usage.
+pub enum CedarType {
+    Long,
+    String,
+    Boolean,
+    TypeName(String),
+    Set(Box<CedarType>),
+}
+
+/// Possible errors that may occur when retrieving a [`CedarType`] from cedar-policy schema.
+#[derive(Debug, thiserror::Error)]
+pub enum GetCedarTypeError {
+    /// Error while getting `cedar-policy` schema not implemented type
+    #[error("could not get cedar-policy type {0}, it is not implemented")]
+    TypeNotImplemented(String),
+}
+
 /// JSON representation of a [`cedar_policy::Schema`]
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize, PartialEq)]
 pub(crate) struct CedarSchemaJson {
@@ -62,27 +79,117 @@ impl CedarSchemaRecord {
 
 /// CedarSchemaRecordAttr defines possible type variants of the entity attribute.
 /// RecordAttr ::= STR ': {' Type [',' '"required"' ':' ( true | false )] '}'
-#[derive(Debug, Clone, serde::Deserialize, serde::Serialize, PartialEq)]
-#[serde(untagged)]
-pub enum CedarSchemaEntityAttribute {
-    // Typed should be first to match correct fom json
-    Typed(EntityType),
-    Primitive(PrimitiveType),
+#[derive(Debug, Clone, PartialEq, serde::Serialize)]
+pub struct CedarSchemaEntityAttribute {
+    cedar_type: CedarSchemaEntityType,
+    required: bool,
 }
 
 impl CedarSchemaEntityAttribute {
     pub fn is_required(&self) -> bool {
-        match self {
-            Self::Typed(entity_type) => entity_type.required.unwrap_or(true),
-            Self::Primitive(primitive_type) => primitive_type.required.unwrap_or(true),
-        }
+        self.required
     }
 
-    pub fn get_type(&self) -> Option<PrimitiveTypeKind> {
-        match self {
-            Self::Typed(entity_type) => entity_type.get_type(),
-            Self::Primitive(primitive_type) => Some(primitive_type.kind.clone()),
+    pub fn get_type(&self) -> Result<CedarType, GetCedarTypeError> {
+        self.cedar_type.get_type()
+    }
+}
+
+impl<'de> serde::Deserialize<'de> for CedarSchemaEntityAttribute {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let value: serde_json::Value = serde::Deserialize::deserialize(deserializer)?;
+
+        // used only for deserialization
+        #[derive(serde::Deserialize)]
+        pub struct IsRequired {
+            required: Option<bool>,
         }
+
+        let is_required = IsRequired::deserialize(&value).map_err(|err| {
+            serde::de::Error::custom(format!(
+                "could not deserialize CedarSchemaEntityAttribute, field 'is_required': {}",
+                err
+            ))
+        })?;
+
+        let cedar_type = CedarSchemaEntityType::deserialize(value).map_err(|err| {
+            serde::de::Error::custom(format!(
+                "could not deserialize CedarSchemaEntityType: {}",
+                err
+            ))
+        })?;
+
+        Ok(CedarSchemaEntityAttribute {
+            cedar_type,
+            required: is_required.required.unwrap_or(true),
+        })
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, serde::Serialize)]
+pub enum CedarSchemaEntityType {
+    Set(Box<SetEntityType>),
+    Typed(EntityType),
+    Primitive(PrimitiveType),
+}
+
+impl CedarSchemaEntityType {
+    pub fn get_type(&self) -> Result<CedarType, GetCedarTypeError> {
+        match self {
+            Self::Set(v) => Ok(CedarType::Set(Box::new(v.element.get_type()?))),
+            Self::Typed(v) => v.get_type(),
+            Self::Primitive(primitive) => Ok(primitive.kind.get_type()),
+        }
+    }
+}
+
+impl<'de> serde::Deserialize<'de> for CedarSchemaEntityType {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        // is used only on deserialization.
+        #[derive(serde::Deserialize)]
+        struct TypeStruct {
+            #[serde(rename = "type")]
+            type_name: String,
+        }
+
+        let value: serde_json::Value = serde::Deserialize::deserialize(deserializer)?;
+
+        let entity_type = match TypeStruct::deserialize(&value)
+            .map_err(serde::de::Error::custom)?
+            .type_name
+            .as_str()
+        {
+            "Set" => {
+                CedarSchemaEntityType::Set(Box::new(SetEntityType::deserialize(&value).map_err(
+                    |err| serde::de::Error::custom(format!("failed to deserialize Set: {}", err)),
+                )?))
+            },
+            "EntityOrCommon" => {
+                CedarSchemaEntityType::Typed(EntityType::deserialize(&value).map_err(|err| {
+                    serde::de::Error::custom(format!(
+                        "failed to deserialize EntityOrCommon: {}",
+                        err
+                    ))
+                })?)
+            },
+            _ => CedarSchemaEntityType::Primitive(PrimitiveType::deserialize(&value).map_err(
+                |err| {
+                    // will newer happen because we know that field "type" is string
+                    serde::de::Error::custom(format!(
+                        "failed to deserialize PrimitiveType: {}",
+                        err
+                    ))
+                },
+            )?),
+        };
+
+        Ok(entity_type)
     }
 }
 
@@ -92,18 +199,27 @@ impl CedarSchemaEntityAttribute {
 pub struct PrimitiveType {
     #[serde(rename = "type")]
     kind: PrimitiveTypeKind,
-    required: Option<bool>,
 }
 
 /// Variants of primitive type.
 /// Primitive ::= '"type":' ('"Long"' | '"String"' | '"Boolean"' | TYPENAME)  
 #[derive(Debug, Clone, serde::Serialize, PartialEq)]
-#[serde(untagged)]
 pub enum PrimitiveTypeKind {
     Long,
     String,
     Boolean,
     TypeName(String),
+}
+
+impl PrimitiveTypeKind {
+    pub fn get_type(&self) -> CedarType {
+        match self {
+            PrimitiveTypeKind::Long => CedarType::Long,
+            PrimitiveTypeKind::String => CedarType::String,
+            PrimitiveTypeKind::Boolean => CedarType::Boolean,
+            PrimitiveTypeKind::TypeName(name) => CedarType::TypeName(name.to_string()),
+        }
+    }
 }
 
 /// impement custom deserialization to deserialize it correctly
@@ -129,34 +245,43 @@ pub struct EntityType {
     #[serde(rename = "type")]
     kind: String,
     name: String,
-    required: Option<bool>,
 }
 
 impl EntityType {
-    pub fn get_type(&self) -> Option<PrimitiveTypeKind> {
+    pub fn get_type(&self) -> Result<CedarType, GetCedarTypeError> {
         if self.kind == "EntityOrCommon" {
             match self.name.as_str() {
-                "Long" => Some(PrimitiveTypeKind::Long),
-                "String" => Some(PrimitiveTypeKind::String),
-                "Boolean" => Some(PrimitiveTypeKind::Boolean),
-                type_name => Some(PrimitiveTypeKind::TypeName(type_name.to_string())),
+                "Long" => Ok(CedarType::Long),
+                "String" => Ok(CedarType::String),
+                "Boolean" => Ok(CedarType::Boolean),
+                type_name => Ok(CedarType::TypeName(type_name.to_string())),
             }
         } else {
-            None
+            Err(GetCedarTypeError::TypeNotImplemented(self.kind.to_string()))
         }
     }
+}
+
+#[derive(Debug, Clone, serde::Deserialize, PartialEq, serde::Serialize)]
+/// Describes the Set element
+/// Set ::= '"type": "Set", "element": ' TypeJson
+//
+// "type": "Set" checked during deserialization
+pub struct SetEntityType {
+    element: CedarSchemaEntityType,
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use test_utils::assert_eq;
+    use test_utils::SortedJson;
 
     /// Test to parse the cedar json schema
     /// to debug deserialize the schema
     #[test]
     fn parse_correct_example() {
-        let json_value = include_str!("test_data_cedar.json");
+        let json_value = include_str!("test_files/test_data_cedar.json");
 
         let parsed_cedar_schema: CedarSchemaJson =
             serde_json::from_str(json_value).expect("failed to parse json");
@@ -173,26 +298,51 @@ mod tests {
                                 attributes: HashMap::from_iter(vec![
                                     (
                                         "aud".to_string(),
-                                        CedarSchemaEntityAttribute::Typed(EntityType {
-                                            kind: "EntityOrCommon".to_string(),
-                                            name: "String".to_string(),
-                                            required: None,
-                                        }),
+                                        CedarSchemaEntityAttribute {
+                                            cedar_type: CedarSchemaEntityType::Typed(EntityType {
+                                                kind: "EntityOrCommon".to_string(),
+                                                name: "String".to_string(),
+                                            }),
+                                            required: true,
+                                        },
                                     ),
                                     (
                                         "exp".to_string(),
-                                        CedarSchemaEntityAttribute::Typed(EntityType {
-                                            kind: "EntityOrCommon".to_string(),
-                                            name: "Long".to_string(),
-                                            required: None,
-                                        }),
+                                        CedarSchemaEntityAttribute {
+                                            cedar_type: CedarSchemaEntityType::Typed(EntityType {
+                                                kind: "EntityOrCommon".to_string(),
+                                                name: "Long".to_string(),
+                                            }),
+                                            required: true,
+                                        },
                                     ),
                                     (
                                         "iat".to_string(),
-                                        CedarSchemaEntityAttribute::Primitive(PrimitiveType {
-                                            kind: PrimitiveTypeKind::Long,
-                                            required: None,
-                                        }),
+                                        CedarSchemaEntityAttribute {
+                                            cedar_type: CedarSchemaEntityType::Primitive(
+                                                PrimitiveType {
+                                                    kind: PrimitiveTypeKind::Long,
+                                                },
+                                            ),
+                                            required: true,
+                                        },
+                                    ),
+                                    (
+                                        "scope".to_string(),
+                                        CedarSchemaEntityAttribute {
+                                            cedar_type: CedarSchemaEntityType::Set(Box::new(
+                                                SetEntityType {
+                                                    element: CedarSchemaEntityType::Typed(
+                                                        EntityType {
+                                                            kind: "EntityOrCommon".to_string(),
+                                                            name: "String".to_string(),
+                                                        },
+                                                    ),
+                                                },
+                                            )),
+
+                                            required: false,
+                                        },
                                     ),
                                 ]),
                             }),
@@ -202,6 +352,53 @@ mod tests {
             )]),
         };
 
-        assert_eq!(parsed_cedar_schema, schema_to_compare)
+        assert_eq!(
+            serde_json::json!(parsed_cedar_schema).sorted(),
+            serde_json::json!(schema_to_compare).sorted()
+        );
+    }
+
+    /// test to check if we get error on parsing invalid `EntityOrCommon` type
+    #[test]
+    fn parse_error_entity_or_common() {
+        // In this file we skipped field `name` for `EntityOrCommon`
+        let json_value = include_str!("test_files/test_data_cedar_err_entity_or_common.json");
+
+        let parse_error =
+            serde_json::from_str::<CedarSchemaJson>(json_value).expect_err("should fail to parse");
+        assert_eq!(parse_error.to_string(),"could not deserialize CedarSchemaEntityType: failed to deserialize EntityOrCommon: missing field `name` at line 17 column 1")
+    }
+
+    /// test to check if we get error on parsing invalid `PrimitiveType` type
+    #[test]
+    fn parse_error_primitive_type() {
+        // In this file we use `"type": 123` but in OK case should be `"type": "Long"`
+        let json_value = include_str!("test_files/test_data_cedar_err_primitive_type.json");
+
+        let parse_error =
+            serde_json::from_str::<CedarSchemaJson>(json_value).expect_err("should fail to parse");
+        assert_eq!(parse_error.to_string(),"could not deserialize CedarSchemaEntityType: invalid type: integer `123`, expected a string at line 17 column 1")
+    }
+
+    /// test to check if we get error on parsing invalid nested Sets :`Set<Set<EntityOrCommon>>` type
+    #[test]
+    fn parse_error_set_entity_or_common() {
+        // In this file we skipped field `name` for `EntityOrCommon` in the nested set
+        let json_value = include_str!("test_files/test_data_cedar_err_set.json");
+
+        let parse_error =
+            serde_json::from_str::<CedarSchemaJson>(json_value).expect_err("should fail to parse");
+        assert_eq!(parse_error.to_string(),"could not deserialize CedarSchemaEntityType: failed to deserialize Set: failed to deserialize Set: failed to deserialize EntityOrCommon: missing field `name` at line 24 column 1")
+    }
+
+    /// test to check if we get error on parsing invalid type in field `is_required`
+    #[test]
+    fn parse_error_field_is_required() {
+        // In this file we use ` "required": 1234` but in OK case should be ` "required": false` or omit
+        let json_value = include_str!("test_files/test_data_cedar_err_field_is_required.json");
+
+        let parse_error =
+            serde_json::from_str::<CedarSchemaJson>(json_value).expect_err("should fail to parse");
+        assert_eq!(parse_error.to_string(),"could not deserialize CedarSchemaEntityAttribute, field 'is_required': invalid type: integer `1234`, expected a boolean at line 22 column 1")
     }
 }
