@@ -27,6 +27,7 @@ from ldap3.utils import dn as dnutils
 from jans.pycloudlib.utils import encode_text
 from jans.pycloudlib.utils import safe_render
 from jans.pycloudlib.utils import get_password_from_file
+from jans.pycloudlib.utils import as_boolean
 
 if _t.TYPE_CHECKING:  # pragma: no cover
     # imported objects for function type hint, completion, etc.
@@ -569,6 +570,13 @@ class SqlClient(SqlSchemaMixin):
         with self.engine.connect() as conn:
             result = conn.execute(query)
             return bool(result.rowcount)
+
+    @property
+    def use_simple_json(self):
+        """Determine whether to use simple JSON where values are stored as JSON array."""
+        if self.dialect in ("pgsql", "postgresql",):
+            return True
+        return as_boolean(os.environ.get("MYSQL_SIMPLE_JSON", "true"))
 
 
 def render_sql_properties(manager: Manager, src: str, dest: str) -> None:

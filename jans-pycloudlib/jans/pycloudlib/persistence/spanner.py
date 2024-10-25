@@ -416,6 +416,11 @@ class SpannerClient(SqlSchemaMixin):
             deleted = True
         return deleted
 
+    @property
+    def use_simple_json(self):
+        """Determine whether to use simple JSON where values are stored as JSON array."""
+        return True
+
 
 def render_spanner_properties(manager: Manager, src: str, dest: str) -> None:
     """Render file contains properties to connect to Spanner database.
