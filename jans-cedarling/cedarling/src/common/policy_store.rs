@@ -231,12 +231,11 @@ where
     let policy_vec = policies
         .into_iter()
         .map(|(id, policy_raw)| {
-            let policy = parse_single_policy::<D>(&id, policy_raw).map_err(|err| {
+            parse_single_policy::<D>(&id, policy_raw).map_err(|err| {
                 serde::de::Error::custom(format!(
                     "unable to decode policy with id: {id}, error: {err}"
                 ))
-            })?;
-            Ok(policy)
+            })
         })
         .collect::<Result<Vec<cedar_policy::Policy>, _>>()?;
 
