@@ -9,7 +9,7 @@ use super::cedar_schema::CedarSchema;
 use base64::prelude::*;
 use cedar_policy::PolicyId;
 use semver::Version;
-use serde::{de::Visitor, Deserialize, Deserializer};
+use serde::{Deserialize, Deserializer};
 use std::{collections::HashMap, fmt};
 
 /// Represents the store of policies used for JWT validation and policy evaluation in Cedarling.
@@ -143,38 +143,23 @@ impl<'de> Deserialize<'de> for TokenKind {
     where
         D: serde::Deserializer<'de>,
     {
-        struct TokenKindVisitor;
+        let token_kind = String::deserialize(deserializer)?;
 
-        impl<'de> Visitor<'de> for TokenKindVisitor {
-            type Value = TokenKind;
-
-            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                formatter.write_str("a valid token kind string")
-            }
-
-            fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
-            where
-                E: serde::de::Error,
-            {
-                match value.to_lowercase().as_str() {
-                    "id" => Ok(TokenKind::Id),
-                    "userinfo" => Ok(TokenKind::Userinfo),
-                    "access" => Ok(TokenKind::Access),
-                    "transaction" => Ok(TokenKind::Transaction),
-                    _ => Err(serde::de::Error::unknown_variant(
-                        &value,
-                        &[
-                            "access_token",
-                            "id_token",
-                            "userinfo_token",
-                            "transaction_token",
-                        ],
-                    )),
-                }
-            }
+        match token_kind.to_lowercase().as_str() {
+            "id_token" => Ok(TokenKind::Id),
+            "userinfo_token" => Ok(TokenKind::Userinfo),
+            "access_token" => Ok(TokenKind::Access),
+            "transaction_token" => Ok(TokenKind::Transaction),
+            _ => Err(serde::de::Error::unknown_variant(
+                &token_kind,
+                &[
+                    "access_token",
+                    "id_token",
+                    "userinfo_token",
+                    "transaction_token",
+                ],
+            )),
         }
-
-        deserializer.deserialize_string(TokenKindVisitor)
     }
 }
 
@@ -399,9 +384,9 @@ mod test {
     #[test]
     fn test_successful_parsing_of_role_mappings() {
         let valid_token_metadata = r#"[ 
-            { "type": "Access", "person_id": "aud" }, 
-            { "type": "Id", "person_id": "sub", "role_mapping": "role" }, 
-            { "type": "userinfo", "person_id": "email" } 
+            { "type": "Access_token", "person_id": "aud" }, 
+            { "type": "Id_token", "person_id": "sub", "role_mapping": "role" }, 
+            { "type": "userinfo_token", "person_id": "email" } 
         ]"#;
 
         let token_metadata_value: serde_json::Value =
