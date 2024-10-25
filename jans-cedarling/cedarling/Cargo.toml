@@ -15,6 +15,7 @@ url = "2.5.2"
 lazy_static = "1.5.0"
 jsonwebtoken = "9.3.0"
 typed-builder = "0.20.0"
+semver = "1.0.23"
 
 [dev-dependencies]
 # is used in testing

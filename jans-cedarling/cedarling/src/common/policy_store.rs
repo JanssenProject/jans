@@ -8,6 +8,7 @@
 use super::cedar_schema::CedarSchema;
 use base64::prelude::*;
 use cedar_policy::PolicyId;
+use semver::Version;
 use serde::{de::Visitor, Deserialize, Deserializer};
 use std::{collections::HashMap, fmt};
 
@@ -18,9 +19,9 @@ use std::{collections::HashMap, fmt};
 #[derive(Debug, Clone, serde::Deserialize)]
 pub struct PolicyStore {
     /// The cedar version to use when parsing the schema and policies.
-    #[serde(deserialize_with = "check_cedar_version")]
+    #[serde(deserialize_with = "parse_cedar_version")]
     #[allow(dead_code)]
-    pub cedar_version: String,
+    pub cedar_version: Version,
 
     /// Cedar schema
     pub cedar_schema: CedarSchema, // currently being loaded from a base64-encoded string
@@ -177,44 +178,26 @@ impl<'de> Deserialize<'de> for TokenKind {
     }
 }
 
-/// Validates the `cedar_version` field.
+/// Parses the `cedar_version` field.
 ///
 /// This function checks that the version string follows the format `major.minor.patch`,
 /// where each component is a valid number. This also supports having a "v" prefix in the
 /// version, e.g. `v1.0.1`.
-fn check_cedar_version<'de, D>(deserializer: D) -> Result<String, D::Error>
+fn parse_cedar_version<'de, D>(deserializer: D) -> Result<Version, D::Error>
 where
     D: Deserializer<'de>,
 {
     let version: String = String::deserialize(deserializer)?;
 
     // Check for "v" prefix
-    let stripped_version = if version.starts_with('v') {
+    let version = if version.starts_with('v') {
         &version[1..] // Remove the 'v' prefix
     } else {
         &version
     };
 
-    // Split the version by '.'
-    let parts: Vec<&str> = stripped_version.split('.').collect();
-
-    // Check that we have exactly three parts (major, minor, patch)
-    if parts.len() != 3 {
-        return Err(serde::de::Error::custom(format!(
-            "invalid version format: '{}', expected 'major.minor.patch'",
-            version
-        )));
-    }
-
-    // Check that each part is a valid number
-    for part in &parts {
-        if part.parse::<u32>().is_err() {
-            return Err(serde::de::Error::custom(format!(
-                "invalid version part: '{}', expected a number",
-                part
-            )));
-        }
-    }
+    let version = Version::parse(&version)
+        .map_err(|e| serde::de::Error::custom(format!("error parsing cedar version :{}", e)))?;
 
     Ok(version)
 }
@@ -309,8 +292,8 @@ where
 mod test {
     use super::ParsePolicySetMessage;
     use super::PolicyStore;
-    use crate::common::policy_store::check_cedar_version;
     use crate::common::policy_store::parse_and_check_token_metadata;
+    use crate::common::policy_store::parse_cedar_version;
 
     /// Tests successful deserialization of a valid policy store JSON.
     #[test]
@@ -363,35 +346,35 @@ mod test {
     #[test]
     fn test_valid_version() {
         let valid_version = "1.2.3".to_string();
-        assert!(check_cedar_version(serde_json::Value::String(valid_version)).is_ok());
+        assert!(parse_cedar_version(serde_json::Value::String(valid_version)).is_ok());
     }
 
     /// Tests that a valid version string with 'v' prefix is accepted.
     #[test]
     fn test_valid_version_with_v() {
         let valid_version_with_v = "v1.2.3".to_string();
-        assert!(check_cedar_version(serde_json::Value::String(valid_version_with_v)).is_ok());
+        assert!(parse_cedar_version(serde_json::Value::String(valid_version_with_v)).is_ok());
     }
 
     /// Tests that an invalid version format is rejected.
     #[test]
     fn test_invalid_version_format() {
         let invalid_version = "1.2".to_string();
-        assert!(check_cedar_version(serde_json::Value::String(invalid_version)).is_err());
+        assert!(parse_cedar_version(serde_json::Value::String(invalid_version)).is_err());
     }
 
     /// Tests that an invalid version part (non-numeric) is rejected.
     #[test]
     fn test_invalid_version_part() {
         let invalid_version = "1.two.3".to_string();
-        assert!(check_cedar_version(serde_json::Value::String(invalid_version)).is_err());
+        assert!(parse_cedar_version(serde_json::Value::String(invalid_version)).is_err());
     }
 
     /// Tests that an invalid version format with 'v' prefix is rejected.
     #[test]
     fn test_invalid_version_format_with_v() {
         let invalid_version_with_v = "v1.2".to_string();
-        assert!(check_cedar_version(serde_json::Value::String(invalid_version_with_v)).is_err());
+        assert!(parse_cedar_version(serde_json::Value::String(invalid_version_with_v)).is_err());
     }
 
     /// Tests that an error is returned for multiple role mappings in token metadata.
