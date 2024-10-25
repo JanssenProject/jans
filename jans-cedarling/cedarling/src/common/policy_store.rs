@@ -228,7 +228,7 @@ where
 {
     let policies = <HashMap<String, RawPolicy> as serde::Deserialize>::deserialize(deserializer)?;
 
-    let policy_vec = policies
+    let results: Vec<Result<cedar_policy::Policy, D::Error>> = policies
         .into_iter()
         .map(|(id, policy_raw)| {
             parse_single_policy::<D>(&id, policy_raw).map_err(|err| {
@@ -237,7 +237,25 @@ where
                 ))
             })
         })
-        .collect::<Result<Vec<cedar_policy::Policy>, _>>()?;
+        .collect();
+
+    let (successful_policies, errors): (Vec<_>, Vec<_>) =
+        results.into_iter().partition(Result::is_ok);
+
+    // Collect all errors into a single error message or return them as a vector.
+    if !errors.is_empty() {
+        let error_messages: Vec<D::Error> = errors.into_iter().filter_map(Result::err).collect();
+
+        return Err(serde::de::Error::custom(format!(
+            "Errors encountered while parsing policies: {:?}",
+            error_messages
+        )));
+    }
+
+    let policy_vec = successful_policies
+        .into_iter()
+        .filter_map(Result::ok)
+        .collect::<Vec<_>>();
 
     cedar_policy::PolicySet::from_policies(policy_vec).map_err(|err| {
         serde::de::Error::custom(format!("{}: {err}", ParsePolicySetMessage::CreatePolicySet))
@@ -325,7 +343,7 @@ mod test {
 
         // TODO: this isn't really a human readable format so idk why the error message is
         // like this. Look into this in the future.
-        assert_eq!(err_msg, "unable to decode policy with id: 840da5d85403f35ea76519ed1a18a33989f855bf1cf8, error: unable to decode policy_content from human readable format: unexpected token `)` at line 9 column 5")
+        assert_eq!(err_msg, "Errors encountered while parsing policies: [Error(\"unable to decode policy with id: 840da5d85403f35ea76519ed1a18a33989f855bf1cf8, error: unable to decode policy_content from human readable format: unexpected token `)`\", line: 0, column: 0)] at line 9 column 5")
     }
 
     /// Tests that a valid version string is accepted.
