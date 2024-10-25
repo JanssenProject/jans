@@ -22,16 +22,12 @@ pub struct PolicyStore {
     #[allow(dead_code)]
     pub cedar_version: String,
 
-    /// Cedar schema in base64-encoded string format.
-    ///
-    /// Extracted from the `policy_store.json` file.
-    pub cedar_schema: CedarSchema,
+    /// Cedar schema
+    pub cedar_schema: CedarSchema, // currently being loaded from a base64-encoded string
 
-    /// Cedar policy set in base64-encoded string format.
-    ///
-    /// Extracted from the `policy_store.json` file and deserialized using `deserialize_policies`.
+    /// Cedar policy set
     #[serde(deserialize_with = "parse_cedar_policy")]
-    pub cedar_policies: cedar_policy::PolicySet,
+    pub cedar_policies: cedar_policy::PolicySet, // currently being loaded from a base64-encoded string
 
     /// An optional list of trusted issuers.
     ///
