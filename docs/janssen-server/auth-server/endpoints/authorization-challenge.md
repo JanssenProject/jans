@@ -137,19 +137,19 @@ More details in [Authorization Challenge Custom Script Page](../../developer/scr
 
 Full sample script can be found [here](../../../script-catalog/authorization_challenge/AuthorizationChallenge.java)
 
-## Device session
+## Auth session
 
-Device session is optional. AS does not return it by default. 
-It's possible to pass in request `use_device_session=true` which makes AS return it in error response.
-If it is desired to use `device_session` and don't pass `client_id` (or other parameters) in next request, 
-it should be put in attributes of `device_session` object. 
-`device_session` object lifetime is set by `deviceSessionLifetimeInSeconds` AS configuration property. 
-If `deviceSessionLifetimeInSeconds` is not set then value falls back to `86400` seconds.
+Auth session is optional. AS does not return it by default. 
+It's possible to pass in request `use_auth_session=true` which makes AS return it in error response.
+If it is desired to use `auth_session` and don't pass `client_id` (or other parameters) in next request, 
+it should be put in attributes of `auth_session` object. 
+`auth_session` object lifetime is set by `authorizationChallengeSessionLifetimeInSeconds` AS configuration property. 
+If `authorizationChallengeSessionLifetimeInSeconds` is not set then value falls back to `86400` seconds.
 
 Example
 ```java
 String clientId = context.getHttpRequest().getParameter("client_id");
-deviceSessionObject.getAttributes().getAttributes().put("client_id", clientId);
+authorizationChallengeSessionObject.getAttributes().getAttributes().put("client_id", clientId);
 ``` 
 
 Full sample script can be found [here](../../../script-catalog/authorization_challenge/AuthorizationChallenge.java)
@@ -180,7 +180,7 @@ scriptLogger.trace("Created Authorization challenge session successfully");
 ## Multi-step example
 
 Sometimes it's required to send data sequentially. Step by step. Calls to Authorization Challenge Endpoint must have 
-`use_device_session=true` parameter to force tracking data between request. 
+`use_auth_session=true` parameter to force tracking data between request. 
  
 Lets consider example when RP first sends `username` and then in next request `OTP`.
 
@@ -194,7 +194,7 @@ username=alice
 &client_id=bb16c14c73415
 ```
  
-AS accepts `username` and returns back error with `device_session`.
+AS accepts `username` and returns back error with `auth_session`.
 
 ```text
 HTTP/1.1 401 Unauthorized
@@ -203,21 +203,21 @@ Cache-Control: no-store
 
 {
   "error": "otp_required",
-  "device_session": "ce6772f5e07bc8361572f"
+  "auth_session": "ce6772f5e07bc8361572f"
 }
 ```
 
-In next call RP can send OTP and `device_session` (AS matches user from `device_session`)
+In next call RP can send OTP and `auth_session` (AS matches user from `auth_session`)
 
 ```text
 POST /jans-auth/restv1/authorize-challenge HTTP/1.1
 Host: server.example.com
 Content-Type: application/x-www-form-urlencoded
 
-otp=ccnnju667d&device_session=ce6772f5e07bc8361572f
+otp=ccnnju667d&auth_session=ce6772f5e07bc8361572f
 ```
 
-In custom script it's easy to code what data has to be kept in `device_session`.
+In custom script it's easy to code what data has to be kept in `auth_session`.
 
 ```text
     private void createError(ExternalScriptContext context, String errorCode) {
@@ -228,51 +228,51 @@ In custom script it's easy to code what data has to be kept in `device_session`.
     }
 
     private String prepareDeviceSessionSubJson(ExternalScriptContext context) {
-        DeviceSession deviceSessionObject = context.getAuthzRequest().getDeviceSessionObject();
-        if (deviceSessionObject != null) {
-            prepareDeviceSession(context, deviceSessionObject);
-            return String.format(",\"device_session\":\"%s\"", deviceSessionObject.getId());
+        DeviceSession authorizationChallengeSessionObject = context.getAuthzRequest().getDeviceSessionObject();
+        if (authorizationChallengeSessionObject != null) {
+            prepareDeviceSession(context, authorizationChallengeSessionObject);
+            return String.format(",\"auth_session\":\"%s\"", authorizationChallengeSessionObject.getId());
         } else if (context.getAuthzRequest().isUseDeviceSession()) {
-            deviceSessionObject = prepareDeviceSession(context, null);
-            return String.format(",\"device_session\":\"%s\"", deviceSessionObject.getId());
+            authorizationChallengeSessionObject = prepareDeviceSession(context, null);
+            return String.format(",\"auth_session\":\"%s\"", authorizationChallengeSessionObject.getId());
         }
         return "";
     }
 
-    private DeviceSession prepareDeviceSession(ExternalScriptContext context, DeviceSession deviceSessionObject) {
+    private DeviceSession prepareDeviceSession(ExternalScriptContext context, DeviceSession authorizationChallengeSessionObject) {
         DeviceSessionService deviceSessionService = CdiUtil.bean(DeviceSessionService.class);
-        boolean newSave = deviceSessionObject == null;
+        boolean newSave = authorizationChallengeSessionObject == null;
         if (newSave) {
-            deviceSessionObject = deviceSessionService.newDeviceSession();
+            authorizationChallengeSessionObject = deviceSessionService.newDeviceSession();
         }
 
         String username = context.getHttpRequest().getParameter(USERNAME_PARAMETER);
         if (StringUtils.isNotBlank(username)) {
-            deviceSessionObject.getAttributes().getAttributes().put(USERNAME_PARAMETER, username);
+            authorizationChallengeSessionObject.getAttributes().getAttributes().put(USERNAME_PARAMETER, username);
         }
 
         String otp = context.getHttpRequest().getParameter(OTP_PARAMETER);
         if (StringUtils.isNotBlank(otp)) {
-            deviceSessionObject.getAttributes().getAttributes().put(OTP_PARAMETER, otp);
+            authorizationChallengeSessionObject.getAttributes().getAttributes().put(OTP_PARAMETER, otp);
         }
         
         String clientId = context.getHttpRequest().getParameter("client_id");
         if (StringUtils.isNotBlank(clientId)) {
-            deviceSessionObject.getAttributes().getAttributes().put("client_id", clientId);
+            authorizationChallengeSessionObject.getAttributes().getAttributes().put("client_id", clientId);
         }
         
         String acrValues = context.getHttpRequest().getParameter("acr_values");
         if (StringUtils.isNotBlank(acrValues)) {
-            deviceSessionObject.getAttributes().getAttributes().put("acr_values", acrValues);
+            authorizationChallengeSessionObject.getAttributes().getAttributes().put("acr_values", acrValues);
         }
 
         if (newSave) {
-            deviceSessionService.persist(deviceSessionObject);
+            deviceSessionService.persist(authorizationChallengeSessionObject);
         } else {
-            deviceSessionService.merge(deviceSessionObject);
+            deviceSessionService.merge(authorizationChallengeSessionObject);
         }
 
-        return deviceSessionObject;
+        return authorizationChallengeSessionObject;
     }
 ```
 

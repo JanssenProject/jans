@@ -36,8 +36,8 @@ public class AuthorizationChallengeEndpoint {
             @FormParam("client_id") String clientId,
             @FormParam("scope") String scope,
             @FormParam("acr_values") String acrValues,
-            @FormParam("device_session") String deviceSession,
-            @FormParam("use_device_session") String useDeviceSession,
+            @FormParam("auth_session") String authorizationChallengeSession,
+            @FormParam("use_auth_session") String useAuthorizationChallengeSession,
             @FormParam("prompt") String prompt,
             @FormParam("state") String state,
             @FormParam("nonce") String nonce,
@@ -52,8 +52,8 @@ public class AuthorizationChallengeEndpoint {
         authzRequest.setClientId(clientId);
         authzRequest.setScope(scope);
         authzRequest.setAcrValues(acrValues);
-        authzRequest.setDeviceSession(deviceSession);
-        authzRequest.setUseDeviceSession(Boolean.parseBoolean(useDeviceSession));
+        authzRequest.setAuthorizationChallengeSession(authorizationChallengeSession);
+        authzRequest.setUseAuthorizationChallengeSession(Boolean.parseBoolean(useAuthorizationChallengeSession));
         authzRequest.setState(state);
         authzRequest.setNonce(nonce);
         authzRequest.setPrompt(prompt);

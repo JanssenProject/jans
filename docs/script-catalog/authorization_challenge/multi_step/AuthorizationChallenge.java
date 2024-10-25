@@ -22,7 +22,7 @@ import java.util.UUID;
  * 1) First step -> send username
  * 2) Second step -> send OTP
  *
- * AS tracks data by 'device_session'. See "prepareDeviceSession()" method implemention for details.
+ * AS tracks data by 'auth_session'. See "prepareDeviceSession()" method implemention for details.
  *
  * @author Yuriy Z
  */
@@ -55,7 +55,7 @@ public class AuthorizationChallenge implements AuthorizationChallengeType {
             return false;
         }
 
-        // 2. During first execution OTP is not present, so error will be returned with device_session (which has saved username)
+        // 2. During first execution OTP is not present, so error will be returned with auth_session (which has saved username)
         //    Note: prepareDeviceSession method implemention
         final String otp = getParameterOrCreateError(context, OTP_PARAMETER);
         if (StringUtils.isBlank(otp)) {
@@ -117,10 +117,10 @@ public class AuthorizationChallenge implements AuthorizationChallengeType {
         DeviceSession deviceSessionObject = context.getAuthzRequest().getDeviceSessionObject();
         if (deviceSessionObject != null) {
             prepareDeviceSession(context, deviceSessionObject);
-            return String.format(",\"device_session\":\"%s\"", deviceSessionObject.getId());
+            return String.format(",\"auth_session\":\"%s\"", deviceSessionObject.getId());
         } else if (context.getAuthzRequest().isUseDeviceSession()) {
             deviceSessionObject = prepareDeviceSession(context, null);
-            return String.format(",\"device_session\":\"%s\"", deviceSessionObject.getId());
+            return String.format(",\"auth_session\":\"%s\"", deviceSessionObject.getId());
         }
         return "";
     }

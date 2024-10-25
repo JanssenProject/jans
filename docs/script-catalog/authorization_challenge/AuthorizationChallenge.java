@@ -108,10 +108,10 @@ public class AuthorizationChallenge implements AuthorizationChallengeType {
         DeviceSession deviceSessionObject = context.getAuthzRequest().getDeviceSessionObject();
         if (deviceSessionObject != null) {
             prepareDeviceSession(context, deviceSessionObject);
-            return String.format(",\"device_session\":\"%s\"", deviceSessionObject.getId());
+            return String.format(",\"auth_session\":\"%s\"", deviceSessionObject.getId());
         } else if (context.getAuthzRequest().isUseDeviceSession()) {
             deviceSessionObject = prepareDeviceSession(context, null);
-            return String.format(",\"device_session\":\"%s\"", deviceSessionObject.getId());
+            return String.format(",\"auth_session\":\"%s\"", deviceSessionObject.getId());
         }
         return "";
     }
