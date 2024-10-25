@@ -8,6 +8,9 @@ import pytest
 # In python unit tests we not cover all possible scenarios, but most common.
 # also we try duplicate rust test cases
 
+# in `sample_bootstrap_config` we use policy store `policy-store_ok.json`
+# The human-readable policy and schema file is located in next folder:
+# `test_files\policy-store_ok`
 
 # test cases for load policy store with error
 test_cases_err = [

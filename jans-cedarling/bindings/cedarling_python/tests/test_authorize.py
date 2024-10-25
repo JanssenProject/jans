@@ -5,6 +5,11 @@ from cedarling_python import ResourceData, Request, authorize_errors
 
 # In python unit tests we not cover all possible scenarios, but most common.
 
+# in `sample_bootstrap_config` we use policy store `policy-store_ok.json`
+# The human-readable policy and schema file is located in next folder:
+# `test_files\policy-store_ok`
+
+
 # JSON payload of access token
 # {
 #   "sub": "boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0",
