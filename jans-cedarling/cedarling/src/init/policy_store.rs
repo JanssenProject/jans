@@ -23,8 +23,6 @@ pub enum PolicyStoreLoadError {
 pub(crate) fn load_policy_store(
     config: &PolicyStoreConfig,
 ) -> Result<PolicyStore, PolicyStoreLoadError> {
-    // let mut policy_store_map = load_policy_store_map(&config.source)?;
-    //
     let policy_store = match &config.source {
         PolicyStoreSource::Json(policy_json) => {
             load_policy_store_from_json(&policy_json).map_err(PolicyStoreLoadError::Parse)?
