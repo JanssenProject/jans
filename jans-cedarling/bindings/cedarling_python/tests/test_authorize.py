@@ -5,7 +5,7 @@ from cedarling_python import ResourceData, Request, authorize_errors
 
 # In python unit tests we not cover all possible scenarios, but most common.
 
-# in `sample_bootstrap_config` we use policy store `policy-store_ok.json`
+# in fixture `sample_bootstrap_config` we use policy store `policy-store_ok.json`
 # The human-readable policy and schema file is located in next folder:
 # `test_files\policy-store_ok`
 
@@ -115,11 +115,26 @@ def test_authorize_ok(sample_bootstrap_config):
 # function that we will call in tests where check error handling
 def raise_authorize_error(sample_bootstrap_config):
     '''
-        The function attempts to make an authorized request but raises an error0 (authorize_errors.ResourceEntityError)
+        The function attempts to make an authorized request but raises an error (authorize_errors.ResourceEntityError)
         because, in the cedar-policy type Jans::Issue, field `org_id` should be a string.
+
+        Allows to check that error `ResourceEntityError` is raised 
+        and error handling implemented correctly in python bindings
+
+        This function is used in unit tests:
+        - test_resource_entity_error
+        - test_authorize_error
     '''
     instance = Cedarling(sample_bootstrap_config)
 
+    # In schema this type described as:
+    # namespace Jans{
+    #     ...
+    #     entity Issue = {"country": String, "org_id": String};
+    #     ...
+    # }
+    #
+    # org_id should be *string*
     resource = ResourceData.from_dict({
         "type": "Jans::Issue",
         "id": "random_id",
@@ -134,6 +149,8 @@ def raise_authorize_error(sample_bootstrap_config):
         action='Jans::Action::"Update"',
         context={}, resource=resource)
 
+    # here triggers `authorize_errors.ResourceEntityError`
+    # because ResourceData do not pass schema validation
     instance.authorize(request)
 
 

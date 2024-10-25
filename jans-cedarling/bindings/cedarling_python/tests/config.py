@@ -6,7 +6,7 @@ import pytest
 ROOT_FOLDER_PATH = "../../"
 TEST_FILES_PATH = join(ROOT_FOLDER_PATH, "test_files")
 
-# in `sample_bootstrap_config` we use policy store `policy-store_ok.json`
+# in fixture `sample_bootstrap_config` we use policy store `policy-store_ok.json`
 # The human-readable policy and schema file is located in next folder:
 # `test_files\policy-store_ok`
 
