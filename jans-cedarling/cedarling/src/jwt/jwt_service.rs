@@ -63,17 +63,22 @@ impl JwtService {
     ///     1. The `access_token` is validated first, and its `aud` (which is also the `client_id`) is stored.
     ///     2. The `id_token` is validated against the `access_token.aud` (client_id) and `access_token.iss` (issuer).
     ///     3. Return an error if `id_token.aud != access_token.client_id`.
-    pub fn decode_tokens<A, T>(
+    pub fn decode_tokens<Q, W, E>(
         &self,
         access_token_str: &str,
         id_token_str: &str,
-    ) -> Result<(A, T), Error>
+        user_info_token_str: &str,
+    ) -> Result<(Q, W, E), Error>
     where
-        A: DeserializeOwned,
-        T: DeserializeOwned,
+        Q: DeserializeOwned,
+        W: DeserializeOwned,
+        E: DeserializeOwned,
     {
+        // TODO: Improve error handling.
+        // Current error show same error for each JWT token. It makes almost impossible to understand what is the problem.
         let access_token_claims = self.decoding_strategy.extract_claims(access_token_str)?;
         let id_token_claims = self.decoding_strategy.extract_claims(id_token_str)?;
+        let user_info_token_claims = self.decoding_strategy.extract_claims(user_info_token_str)?;
 
         // validate access_token
         let access_token = self.decoding_strategy.decode::<AccessToken>(
@@ -92,6 +97,8 @@ impl JwtService {
             true,
         )?;
 
-        Ok((access_token_claims, id_token_claims))
+        // TODO: validate user info token
+
+        Ok((access_token_claims, id_token_claims, user_info_token_claims))
     }
 }
