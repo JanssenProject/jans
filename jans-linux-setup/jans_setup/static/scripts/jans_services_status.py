@@ -31,13 +31,16 @@ def get_endpint_data(endpoint, status_code_only=False):
         if response.status_code == 200:
             if status_code_only:
                 return {'status': 'up'}
-        return response.json()
+            if response.text.lower() == 'ok':
+                return {'status': 'ok'}
+            return response.json()
     except Exception as _:
-        return {'status': 'downn'}
+        pass
+    return {'status': 'downn'}
 
 
 def is_service_up(data):
-    if data.get('status', '').lower() in ('running', 'up'):
+    if data.get('status', '').lower() in ('running', 'up', 'ok'):
         return Status.RUNNING
     return Status.DOWN
 
