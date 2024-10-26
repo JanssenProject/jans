@@ -38,11 +38,33 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         jwt_config,
     })?;
 
+    // access_token claims:
+    // {
+    //   "iss": "https://admin-ui-test.gluu.org",
+    //   "aud": "5b4487c4-8db1-409d-a653-f907b8094039",
+    //   "exp": 2724945978, ->  May 8, 2056 01:26:18 GMT+0800
+    //   "iat": 1624832259  ->  June 28, 2021 06:17:39 GMT+0800
+    // }
     let access_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2FkbWluLXVpLXRlc3QuZ2x1dS5vcmciLCJhdWQiOiI1YjQ0ODdjNC04ZGIxLTQwOWQtYTY1My1mOTA3YjgwOTQwMzkiLCJleHAiOjI3MjQ5NDU5NzgsImlhdCI6MTYyNDgzMjI1OX0.At5FSy0vuq_IfRZqIcLSIGH9vYvWJsrnc8fcxDMcCy0".to_string();
 
+    // id_token claims:
+    // {
+    //   "iss": "https://admin-ui-test.gluu.org",
+    //   "aud": "5b4487c4-8db1-409d-a653-f907b8094039",
+    //   "sub": "boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0",
+    //   "exp": 2724945978, ->  May 8, 2056 01:26:18 GMT+0800
+    //   "iat": 1624832259  ->  June 28, 2021 06:17:39 GMT+0800
+    // }
     let id_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2FkbWluLXVpLXRlc3QuZ2x1dS5vcmciLCJhdWQiOiI1YjQ0ODdjNC04ZGIxLTQwOWQtYTY1My1mOTA3YjgwOTQwMzkiLCJzdWIiOiJib0c4ZGZjNU1LVG4zN283Z3NkQ2V5cUw4THBXUXRnb080MW0xS1p3ZHEwIiwiZXhwIjoyNzI0OTQ1OTc4LCJpYXQiOjE2MjQ4MzIyNTl9.23IyPqSAhMI7yJuHoLFtXB3Dp1Cr5j3ypwnXtAJhJQ8".to_string();
 
-    let userinfo_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJib0c4ZGZjNU1LVG4zN283Z3NkQ2V5cUw4THBXUXRnb080MW0xS1p3ZHEwIiwiY2xpZW50X2lkIjoiNWI0NDg3YzQtOGRiMS00MDlkLWE2NTMtZjkwN2I4MDk0MDM5IiwibmFtZSI6IkRlZmF1bHQgQWRtaW4gVXNlciIsImVtYWlsIjoiYWRtaW5AZ2x1dS5jb20ifQ.4fIkI6nMR3RRlSM-aYIV21DOO-yZMyRGBCysyLaYwWM".to_string();
+    // userinfo_token claims:
+    // {
+    //   "sub": "boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0",
+    //   "client_id": "5b4487c4-8db1-409d-a653-f907b8094039",
+    //   "name": "Default Admin User",
+    //   "email": "admin@gluu.org"
+    // }
+    let userinfo_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJib0c4ZGZjNU1LVG4zN283Z3NkQ2V5cUw4THBXUXRnb080MW0xS1p3ZHEwIiwiY2xpZW50X2lkIjoiNWI0NDg3YzQtOGRiMS00MDlkLWE2NTMtZjkwN2I4MDk0MDM5IiwibmFtZSI6IkRlZmF1bHQgQWRtaW4gVXNlciIsImVtYWlsIjoiYWRtaW5AZ2x1dS5vcmcifQ.O83TgC0D5R5wFTl19NiXVb-gnQ9XyGX8xquUWat1vzY".to_string();
 
     let result = cedarling.authorize(Request {
         access_token,

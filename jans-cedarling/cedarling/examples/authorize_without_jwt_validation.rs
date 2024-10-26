@@ -25,10 +25,75 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         jwt_config: JwtConfig::Disabled,
     })?;
 
-    // expired tokens
-    let access_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2FkbWluLXVpLXRlc3QuZ2x1dS5vcmciLCJhdWQiOiI1YjQ0ODdjNC04ZGIxLTQwOWQtYTY1My1mOTA3YjgwOTQwMzkiLCJleHAiOjE3MjQ3NDU5NzgsImlhdCI6MTcyNDgzMjI1OX0.CkLHouxdoNMlRP46kf-1qkV7UZxPbxJ0CPOPFWc01Q0".to_string();
-    let id_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJodHRwczovL2FkbWluLXVpLXRlc3QuZ2x1dS5vcmciLCJhdWQiOiI1YjQ0ODdjNC04ZGIxLTQwOWQtYTY1My1mOTA3YjgwOTQwMzkiLCJzdWIiOiJib0c4ZGZjNU1LVG4zN283Z3NkQ2V5cUw4THBXUXRnb080MW0xS1p3ZHEwIiwiZXhwIjoyNzI0NzQ1OTc4LCJpYXQiOjE2MjQ4MzIyNTl9.WdV2qzkJJ1R_ALFFJXYQWZfxtJhryfVdpmhE4-o943o".to_string();
-    let userinfo_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJib0c4ZGZjNU1LVG4zN283Z3NkQ2V5cUw4THBXUXRnb080MW0xS1p3ZHEwIiwiY2xpZW50X2lkIjoiNWI0NDg3YzQtOGRiMS00MDlkLWE2NTMtZjkwN2I4MDk0MDM5IiwibmFtZSI6IkRlZmF1bHQgQWRtaW4gVXNlciIsImVtYWlsIjoiYWRtaW5AZ2x1dS5jb20ifQ.4fIkI6nMR3RRlSM-aYIV21DOO-yZMyRGBCysyLaYwWM".to_string();
+    // the following tokens are expired
+
+    // access_token claims:
+    // {
+    //   "sub": "boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0",
+    //   "code": "bf1934f6-3905-420a-8299-6b2e3ffddd6e",
+    //   "iss": "https://admin-ui-test.gluu.org",
+    //   "token_type": "Bearer",
+    //   "client_id": "5b4487c4-8db1-409d-a653-f907b8094039",
+    //   "aud": "5b4487c4-8db1-409d-a653-f907b8094039",
+    //   "acr": "basic",
+    //   "x5t#S256": "",
+    //   "scope": [
+    //     "openid",
+    //     "profile"
+    //   ],
+    //   "org_id": "some_long_id",
+    //   "auth_time": 1724830746,
+    //   "exp": 1724945978, -> Aug 29, 2024 23:39:38 GMT+0800
+    //   "iat": 1724832259, -> Aug 28, 2024 16:0419 GMT+0800
+    //   "jti": "lxTmCVRFTxOjJgvEEpozMQ",
+    //   "name": "Default Admin User",
+    //   "status": {
+    //     "status_list": {
+    //       "idx": 201,
+    //       "uri": "https://admin-ui-test.gluu.org/jans-auth/restv1/status_list"
+    //     }
+    //   }
+    // }
+    let access_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJib0c4ZGZjNU1LVG4zN283Z3NkQ2V5cUw4THBXUXRnb080MW0xS1p3ZHEwIiwiY29kZSI6ImJmMTkzNGY2LTM5MDUtNDIwYS04Mjk5LTZiMmUzZmZkZGQ2ZSIsImlzcyI6Imh0dHBzOi8vYWRtaW4tdWktdGVzdC5nbHV1Lm9yZyIsInRva2VuX3R5cGUiOiJCZWFyZXIiLCJjbGllbnRfaWQiOiI1YjQ0ODdjNC04ZGIxLTQwOWQtYTY1My1mOTA3YjgwOTQwMzkiLCJhdWQiOiI1YjQ0ODdjNC04ZGIxLTQwOWQtYTY1My1mOTA3YjgwOTQwMzkiLCJhY3IiOiJiYXNpYyIsIng1dCNTMjU2IjoiIiwic2NvcGUiOlsib3BlbmlkIiwicHJvZmlsZSJdLCJvcmdfaWQiOiJzb21lX2xvbmdfaWQiLCJhdXRoX3RpbWUiOjE3MjQ4MzA3NDYsImV4cCI6MTcyNDk0NTk3OCwiaWF0IjoxNzI0ODMyMjU5LCJqdGkiOiJseFRtQ1ZSRlR4T2pKZ3ZFRXBvek1RIiwibmFtZSI6IkRlZmF1bHQgQWRtaW4gVXNlciIsInN0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjIwMSwidXJpIjoiaHR0cHM6Ly9hZG1pbi11aS10ZXN0LmdsdXUub3JnL2phbnMtYXV0aC9yZXN0djEvc3RhdHVzX2xpc3QifX19._eQT-DsfE_kgdhA0YOyFxxPEMNw44iwoelWa5iU1n9s".to_string();
+
+    // id_token claims:
+    // {
+    //   "sub": "boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0",
+    //   "code": "bf1934f6-3905-420a-8299-6b2e3ffddd6e",
+    //   "iss": "https://admin-ui-test.gluu.org",
+    //   "token_type": "Bearer",
+    //   "client_id": "5b4487c4-8db1-409d-a653-f907b8094039",
+    //   "aud": "5b4487c4-8db1-409d-a653-f907b8094039",
+    //   "acr": "basic",
+    //   "x5t#S256": "",
+    //   "scope": [
+    //     "openid",
+    //     "profile"
+    //   ],
+    //   "org_id": "some_long_id",
+    //   "auth_time": 1724830746,
+    //   "exp": 1724945978, -> Aug 29, 2024 23:39:38 GMT+0800
+    //   "iat": 1724832259, -> Aug 28, 2024 16:0419 GMT+0800
+    //   "jti": "lxTmCVRFTxOjJgvEEpozMQ",
+    //   "name": "Default Admin User",
+    //   "status": {
+    //     "status_list": {
+    //       "idx": 201,
+    //       "uri": "https://admin-ui-test.gluu.org/jans-auth/restv1/status_list"
+    //     }
+    //   }
+    // }
+    let id_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJib0c4ZGZjNU1LVG4zN283Z3NkQ2V5cUw4THBXUXRnb080MW0xS1p3ZHEwIiwiY29kZSI6ImJmMTkzNGY2LTM5MDUtNDIwYS04Mjk5LTZiMmUzZmZkZGQ2ZSIsImlzcyI6Imh0dHBzOi8vYWRtaW4tdWktdGVzdC5nbHV1Lm9yZyIsInRva2VuX3R5cGUiOiJCZWFyZXIiLCJjbGllbnRfaWQiOiI1YjQ0ODdjNC04ZGIxLTQwOWQtYTY1My1mOTA3YjgwOTQwMzkiLCJhdWQiOiI1YjQ0ODdjNC04ZGIxLTQwOWQtYTY1My1mOTA3YjgwOTQwMzkiLCJhY3IiOiJiYXNpYyIsIng1dCNTMjU2IjoiIiwic2NvcGUiOlsib3BlbmlkIiwicHJvZmlsZSJdLCJvcmdfaWQiOiJzb21lX2xvbmdfaWQiLCJhdXRoX3RpbWUiOjE3MjQ4MzA3NDYsImV4cCI6MTcyNDk0NTk3OCwiaWF0IjoxNzI0ODMyMjU5LCJqdGkiOiJseFRtQ1ZSRlR4T2pKZ3ZFRXBvek1RIiwibmFtZSI6IkRlZmF1bHQgQWRtaW4gVXNlciIsInN0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjIwMSwidXJpIjoiaHR0cHM6Ly9hZG1pbi11aS10ZXN0LmdsdXUub3JnL2phbnMtYXV0aC9yZXN0djEvc3RhdHVzX2xpc3QifX19._eQT-DsfE_kgdhA0YOyFxxPEMNw44iwoelWa5iU1n9s".to_string();
+
+    // userinfo_token claims:
+    // {
+    //   "sub": "boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0",
+    //   "client_id": "5b4487c4-8db1-409d-a653-f907b8094039",
+    //   "aud": "5b4487c4-8db1-409d-a653-f907b8094039",
+    //   "name": "Default Admin User",
+    //   "email": "admin@gluu.org"
+    // }
+    let userinfo_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJib0c4ZGZjNU1LVG4zN283Z3NkQ2V5cUw4THBXUXRnb080MW0xS1p3ZHEwIiwiY2xpZW50X2lkIjoiNWI0NDg3YzQtOGRiMS00MDlkLWE2NTMtZjkwN2I4MDk0MDM5IiwiYXVkIjoiNWI0NDg3YzQtOGRiMS00MDlkLWE2NTMtZjkwN2I4MDk0MDM5IiwibmFtZSI6IkRlZmF1bHQgQWRtaW4gVXNlciIsImVtYWlsIjoiYWRtaW5AZ2x1dS5vcmcifQ.MNebnjubvPtn9eq5j4RvWOTw7NBkjqt2Z8hTyFSJz0w".to_string();
 
     let result = cedarling.authorize(Request {
         access_token,
