@@ -11,20 +11,17 @@ use cedarling::{
 };
 use std::collections::HashMap;
 
-static POLICY_STORE_RAW: &str = include_str!("../../test_files/policy-store_ok.json");
+static POLICY_STORE_RAW: &str =
+    include_str!("../../test_files/policy-store_with_trusted_issuers_ok.json");
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Configure the JwtService to validate signatures using the specified algorithms:
-    // `HS256`, `RS256`, and `EC256`.
+    // `HS256` and `RS256`.
     //
     // Tokens signed with an algorithm not in `signature_algorithms`
     // will be automatically marked as invalid.
     let jwt_config = JwtConfig::Enabled {
-        signature_algorithms: vec![
-            "HS256".to_string(),
-            "RS256".to_string(),
-            "EC256".to_string(),
-        ],
+        signature_algorithms: vec!["HS256".to_string(), "RS256".to_string()],
     };
 
     let cedarling = Cedarling::new(BootstrapConfig {
