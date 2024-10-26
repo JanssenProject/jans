@@ -29,6 +29,7 @@ The JSON Schema is for the `policy_store.json` defined as follows:
     "cedar_schema": "cedar_schema_encoded_in_base64",
     "trusted_issuers": [ ... ]
 }
+
 ```
 
 - **cedar_version** : (*String*) The version of [Cedar policy](https://docs.cedarpolicy.com/). The protocols of this version will be followed when processing Cedar schema and policies.
@@ -80,11 +81,6 @@ Here is a non-normative example of the `cedar_policies` field:
 This record contains the information needed to validate tokens from this issuer:
 
 ```json
-"trusted_issuers": [
-    {
-         "name": "name_of_the_trusted_issuer", 
-         "description": "description_of_the_trusted_issuer", 
-         "openid_configuration_endpoint": "https://<trusted-issuer-hostname>/.well-known/openid-configuration",
          "token_metadata": [ ... ]
     }
 ]

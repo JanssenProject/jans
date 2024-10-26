@@ -46,6 +46,7 @@ public class HealthCheckController {
 
 	@Inject
 	private PersistenceEntryManager persistenceEntryManager;
+
     @Inject
     Logger logger;
 

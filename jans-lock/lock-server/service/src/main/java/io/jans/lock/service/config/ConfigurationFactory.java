@@ -57,6 +57,8 @@ import jakarta.inject.Inject;
 @ApplicationScoped
 public class ConfigurationFactory extends ApplicationConfigurationFactory {
 
+    public final static String DOCUMENT_STORE_MANAGER_JANS_LOCK_TYPE = "jans-lock"; // Module name
+    
 	@Inject
 	private Logger log;
 
