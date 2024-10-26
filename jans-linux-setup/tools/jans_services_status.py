@@ -82,7 +82,7 @@ if __name__ == '__main__':
         print(header)
         print('-'*len(header))
 
-        for service in services_status:
+        for service in sorted(services_status.keys()):
             print(service.ljust(max_service_str_lenght + 3) + services_status[service])
 
     else:
