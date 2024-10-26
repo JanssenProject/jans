@@ -6,16 +6,12 @@
  */
 
 pub mod key_service;
-mod traits;
+use crate::common::policy_store::TrustedIssuer;
 
 use super::Error;
-use crate::models::policy_store::PolicyStore;
-use di::DependencySupplier;
 use jsonwebtoken as jwt;
 pub use key_service::*;
 use serde::de::DeserializeOwned;
-use std::sync::Arc;
-pub use traits::*;
 
 /// Represents the decoding strategy for JWT tokens.
 ///
@@ -34,10 +30,7 @@ pub enum DecodingStrategy {
 }
 
 impl DecodingStrategy {
-    /// Creates a new decoding strategy that does not perform any validation.
-    ///
-    /// This strategy is useful for cases where token validation is not required,
-    /// but claims still need to be extracted.
+    /// Creates a new decoding strategy that does not perform validation.
     pub fn new_without_validation() -> Self {
         Self::WithoutValidation
     }
@@ -54,34 +47,22 @@ impl DecodingStrategy {
     /// # Errors
     /// Returns an error if the specified algorithm is unrecognized or the key service initialization fails.
     pub fn new_with_validation(
-        dep_map: &di::DependencyMap,
-        config_algs: &Vec<String>,
+        config_algs: Vec<jwt::Algorithm>,
+        trusted_idps: Vec<TrustedIssuer>,
     ) -> Result<Self, Error> {
-        let config: Arc<PolicyStore> = dep_map.get();
-
         // initialize the key service with OpenID configuration endpoints
-        let openid_conf_endpoints = config
-            .trusted_idps
+        let openid_conf_endpoints = trusted_idps
             .iter()
             .map(|x| x.openid_configuration_endpoint.as_ref())
             .collect();
         let key_service = KeyService::new(openid_conf_endpoints).map_err(Error::KeyServiceError)?;
 
-        // convert provided algorithm strings into `jwt::Algorithm` and collect them
-        let mut supported_algs = vec![];
-        for alg_str in config_algs {
-            supported_algs.push(string_to_alg(&alg_str)?);
-        }
-
         Ok(Self::WithValidation {
             key_service,
-            supported_algs,
+            supported_algs: config_algs,
         })
     }
-}
 
-/// Trait implementation for decoding a JWT token.
-impl Decode for DecodingStrategy {
     /// Decodes a JWT token according to the current decoding strategy.
     ///
     /// # Arguments
@@ -94,7 +75,7 @@ impl Decode for DecodingStrategy {
     ///
     /// # Errors
     /// Returns an error if decoding or validation fails.
-    fn decode<T: DeserializeOwned>(
+    pub fn decode<T: DeserializeOwned>(
         &self,
         jwt: &str,
         iss: Option<impl ToString>,
@@ -120,10 +101,7 @@ impl Decode for DecodingStrategy {
             ),
         }
     }
-}
 
-/// Trait implementation for extracting claims without validation.
-impl ExtractClaims for DecodingStrategy {
     /// Extracts the claims from a JWT token without performing validation.
     ///
     /// This method uses a default insecure validator that skips signature
@@ -131,7 +109,7 @@ impl ExtractClaims for DecodingStrategy {
     ///
     /// # Errors
     /// Returns an error if the claims cannot be extracted.
-    fn extract_claims<T: DeserializeOwned>(&self, jwt_str: &str) -> Result<T, Error> {
+    pub fn extract_claims<T: DeserializeOwned>(&self, jwt_str: &str) -> Result<T, Error> {
         let mut validator = jwt::Validation::default();
         validator.insecure_disable_signature_validation();
         validator.required_spec_claims.clear();
@@ -191,7 +169,7 @@ fn decode_and_validate_jwt<T: DeserializeOwned>(
         validator.iss = None;
     }
     if let Some(aud) = aud {
-        validator.set_audience(&vec![aud]);
+        validator.set_audience(&[aud]);
     } else {
         validator.validate_aud = false;
     }
@@ -224,7 +202,7 @@ fn decode_and_validate_jwt<T: DeserializeOwned>(
 ///
 /// # Errors
 /// Returns an error if the algorithm is not implemented.
-fn string_to_alg(algorithm: &str) -> Result<jwt::Algorithm, Error> {
+pub fn string_to_alg(algorithm: &str) -> Result<jwt::Algorithm, Error> {
     match algorithm {
         "HS256" => Ok(jwt::Algorithm::HS256),
         "HS384" => Ok(jwt::Algorithm::HS384),

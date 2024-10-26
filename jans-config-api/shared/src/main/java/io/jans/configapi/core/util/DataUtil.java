@@ -234,6 +234,36 @@ public class DataUtil {
         return getFieldDataType(clazz, fieldList);
     }
 
+    public static Date formatStrDate(String dateString, String datePattern) {
+        logger.debug("Format String Date - dateString:{}: datePattern:{}", dateString, datePattern);
+        Date date = null;
+        try {
+            if (StringUtils.isBlank(dateString)) {
+                return date;
+            }
+
+            if (StringUtils.isBlank(datePattern)) {
+                if (dateString.contains(":")) {
+                    datePattern = "yyyy-MM-dd HH:mm:ss Z";
+                } else {
+                    datePattern = "yyyy-MM-dd";
+                }
+            }
+
+            SimpleDateFormat dateFormat = new SimpleDateFormat(datePattern);
+            logger.debug("datePattern:{}, dateFormat:{} ", datePattern, dateFormat);
+
+            date = dateFormat.parse(dateString);
+            logger.debug("Returning dateFormat:{}, date:{} ", dateFormat, date);
+
+        } catch (Exception ex) {
+            logger.error("Error while formatting String Date - dateString{" + dateString + "}", ex);
+            return date;
+        }
+
+        return date;
+    }
+
     public static List<Filter> createFilter(List<FieldFilterData> fieldFilterData, String primaryKey,
             PersistenceEntryManager persistenceEntryManager) {
         logger.info("Create ORM Filter for fieldFilterData:{}, primaryKey:{}, persistenceEntryManager:{}",
@@ -288,8 +318,24 @@ public class DataUtil {
 
     }
 
-    private static Date getDate(String dateString, String primaryKey, PersistenceEntryManager persistenceEntryManager) {
-        logger.info("Get Date Value for dateString:{}, primaryKey:{}, persistenceEntryManager:{}", dateString,
+    private static String encodeDate(Date date, String primaryKey, PersistenceEntryManager persistenceEntryManager) {
+        logger.info("Encode String Date - date:{}, primaryKey:{}, persistenceEntryManager:{}", date, primaryKey,
+                persistenceEntryManager);
+        String dateValue = null;
+        if (date == null || StringUtils.isBlank(primaryKey) || persistenceEntryManager == null) {
+            return dateValue;
+        }
+
+        dateValue = persistenceEntryManager.encodeTime(primaryKey, date);
+        logger.info(" persistenceEntryManager.decodeTime - date:{}, dateValue:{}", date, dateValue);
+
+        return dateValue;
+
+    }
+
+    private static Date decodeStringDate(String dateString, String primaryKey,
+            PersistenceEntryManager persistenceEntryManager) {
+        logger.info("Decode String Date - dateString:{}, primaryKey:{}, persistenceEntryManager:{}", dateString,
                 primaryKey, persistenceEntryManager);
         Date dateValue = null;
         if (StringUtils.isBlank(dateString) || StringUtils.isBlank(primaryKey) || persistenceEntryManager == null) {
@@ -299,41 +345,8 @@ public class DataUtil {
         dateValue = persistenceEntryManager.decodeTime(primaryKey, dateString);
         logger.info(" persistenceEntryManager.decodeTime - dateString:{}, dateValue:{}", dateString, dateValue);
 
-        dateValue = formatStrDate(dateString, null);
-        logger.info(" formatStrDate - dateValue:{}", dateValue);
-
         return dateValue;
 
-    }
-
-    private static Date formatStrDate(String dateString, String datePattern) {
-        logger.debug("Format String Date - dateString:{}: datePattern:{}", dateString, datePattern);
-        Date date = null;
-        try {
-            if (StringUtils.isBlank(dateString)) {
-                return date;
-            }
-
-            if (StringUtils.isBlank(datePattern)) {
-                if (dateString.contains(":")) {
-                    datePattern = "yyyy-MM-dd HH:mm:ss";
-                } else {
-                    datePattern = "yyyy-MM-dd";
-                }
-            }
-
-            SimpleDateFormat dateFormat = new SimpleDateFormat(datePattern);
-            logger.debug("dateFormat:{} ", dateFormat);
-
-            date = dateFormat.parse(dateString);
-            logger.info("Returning dateFormat:{}, date:{} ", dateFormat, date);
-
-        } catch (Exception ex) {
-            logger.error("Error while formatting String Date - dateString{" + dateString + "}", ex);
-            return date;
-        }
-
-        return date;
     }
 
     private static Filter createDateFilter(FieldFilterData fieldFilterData, String primaryKey,
@@ -345,10 +358,13 @@ public class DataUtil {
         if (fieldFilterData == null) {
             return dateFilter;
         }
-        Date dateValue = getDate(fieldFilterData.getValue(), primaryKey, persistenceEntryManager);
+
+        Date dateValue = decodeStringDate(fieldFilterData.getValue(), primaryKey, persistenceEntryManager);
+        logger.info(" fieldFilterData.getField():{}, fieldFilterData.getValue():{}, dateValue:{}",
+                fieldFilterData.getField(), fieldFilterData.getValue(), dateValue);
 
         if (FilterOperator.EQUALITY.getSign().equalsIgnoreCase(fieldFilterData.getOperator())) {
-            dateFilter = Filter.createGreaterOrEqualFilter(fieldFilterData.getField(), dateValue);
+            dateFilter = Filter.createEqualityFilter(fieldFilterData.getField(), dateValue);
 
         } else if (FilterOperator.GREATER.getSign().equalsIgnoreCase(fieldFilterData.getOperator())
                 || FilterOperator.GREATER_OR_EQUAL.getSign().equalsIgnoreCase(fieldFilterData.getOperator())) {

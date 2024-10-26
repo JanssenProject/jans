@@ -14,7 +14,8 @@ Once complete, start the PyDev debug server:
 ### Development & Debugging
 1. Now we are ready to perform script development and debugging. Here is a quick overview:
 1. In order to simplify development, put the script into a shared folder like /root/eclipse-workspace
-1. Then instruct jans-auth to load the script from the file system instead of LDAP
+1. Then instruct jans-auth to load the script from the file system instead of 
+Janssen Server persistence store
 1. Add debug instructions to the script, as specified in the next section
 1. Execute the script
 

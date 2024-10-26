@@ -12,12 +12,13 @@ pub use error::Error;
 use jsonwebtoken::jwk::JwkSet;
 use jsonwebtoken::DecodingKey;
 use openid_config::*;
-use reqwest::blocking::get;
+use reqwest::blocking::Client;
 use std::collections::HashMap;
 use std::sync::Arc;
 
 pub struct KeyService {
     idp_configs: HashMap<Box<str>, OpenIdConfig>, // <issuer (`iss`), OpenIdConfig>
+    http_client: Client,
 }
 
 #[allow(unused)]
@@ -29,11 +30,13 @@ impl KeyService {
     /// failures will return a corresponding `Error`.
     pub fn new(openid_conf_endpoints: Vec<&str>) -> Result<Self, Error> {
         let mut idp_configs = HashMap::new();
+        let http_client = Client::builder().build().map_err(Error::HttpError)?;
 
         // fetch IDP configs
         for endpoint in openid_conf_endpoints {
-            // TODO: use a reusable client when making requests
-            let conf_src: OpenIdConfigSource = get(endpoint)
+            let conf_src: OpenIdConfigSource = http_client
+                .get(endpoint)
+                .send()
                 .map_err(Error::HttpError)?
                 .error_for_status()
                 .map_err(Error::HttpError)?
@@ -49,13 +52,15 @@ impl KeyService {
         /// is not found, it will refresh the JWKS and try again. if the key is still not found,
         /// an error of type `KeyNotFound` is returned.
         for (iss, conf) in &mut idp_configs {
-            let jwks: JwkSet = get(&*conf.jwks_uri)
+            let jwks: JwkSet = http_client
+                .get(&*conf.jwks_uri)
+                .send()
                 .map_err(Error::HttpError)?
                 .error_for_status()
                 .map_err(Error::HttpError)?
                 .json()
                 .map_err(Error::RequestDeserializationError)?;
-            let mut decoding_keys = conf.decoding_keys.write().unwrap();
+            let mut decoding_keys = conf.decoding_keys.write().map_err(|_| Error::LockError)?;
             for jwk in jwks.keys {
                 let decoding_key = DecodingKey::from_jwk(&jwk).map_err(Error::KeyParsingError)?;
                 let key_id = jwk.common.key_id.ok_or(Error::MissingKeyId)?;
@@ -63,7 +68,10 @@ impl KeyService {
             }
         }
 
-        Ok(Self { idp_configs })
+        Ok(Self {
+            idp_configs,
+            http_client,
+        })
     }
 
     /// retrieves a decoding key based on the provided key ID (`kid`).
@@ -74,14 +82,14 @@ impl KeyService {
     pub fn get_key(&self, kid: &str) -> Result<Arc<DecodingKey>, Error> {
         for (iss, config) in &self.idp_configs {
             // first try to get the key from the local keystore
-            if let Some(key) = self.get_key_from_iss(&iss, &kid) {
+            if let Some(key) = self.get_key_from_iss(&iss, &kid)? {
                 return Ok(key.clone());
             } else {
-                println!("could not find {}, updating jwks", kid);
+                eprintln!("could not find {}, updating jwks", kid);
                 // if the key is not found in the local keystore, update
                 // the local keystore and try again
                 self.update_jwks(iss);
-                if let Some(key) = self.get_key_from_iss(&iss, &kid) {
+                if let Some(key) = self.get_key_from_iss(&iss, &kid)? {
                     return Ok(key.clone());
                 }
             }
@@ -91,15 +99,15 @@ impl KeyService {
     }
 
     /// helper function to retrieve a key for a specific issuer (`iss`).
-    fn get_key_from_iss(&self, iss: &str, kid: &str) -> Option<Arc<DecodingKey>> {
+    fn get_key_from_iss(&self, iss: &str, kid: &str) -> Result<Option<Arc<DecodingKey>>, Error> {
         if let Some(idp) = self.idp_configs.get(iss) {
-            let decoding_keys = idp.decoding_keys.read().unwrap();
+            let decoding_keys = idp.decoding_keys.read().map_err(|_| Error::LockError)?;
             if let Some(key) = decoding_keys.get(kid) {
-                return Some(key.clone());
+                return Ok(Some(key.clone()));
             }
         }
 
-        None
+        Ok(None)
     }
 
     /// updates the JWKS for a given issuer (`iss`).
@@ -115,7 +123,10 @@ impl KeyService {
 
         // fetch fresh keys
         let mut new_keys = HashMap::new();
-        let jwks: JwkSet = get(&*conf.jwks_uri)
+        let jwks: JwkSet = self
+            .http_client
+            .get(&*conf.jwks_uri)
+            .send()
             .map_err(Error::HttpError)?
             .error_for_status()
             .map_err(Error::HttpError)?
@@ -129,7 +140,7 @@ impl KeyService {
 
         // we reassign the keys after fetching and deserializing the keys
         // so we don't lose the old ones in case the process fails
-        let mut decoding_keys = conf.decoding_keys.write().unwrap();
+        let mut decoding_keys = conf.decoding_keys.write().map_err(|_| Error::LockError)?;
         *decoding_keys = new_keys;
 
         Ok(())
