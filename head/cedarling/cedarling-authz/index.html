@@ -8668,64 +8668,64 @@
 
 
 <h1 id="authorization-using-cedarling">Authorization Using Cedarling<a class="headerlink" href="#authorization-using-cedarling" title="Permanent link">#</a></h1>
-<p>The <strong>Policy Store</strong> contains the Cedar Policies, Cedar Schema, and optionally, a list of the 
+<p>The <strong>Policy Store</strong> contains the Cedar Policies, Cedar Schema, and optionally, a list of the
 Trusted IDPs. The Cedarling loads its Policy Store during initialization as a static JSON file
 or fetched via HTTPS. In enterprise deployments, the Cedarling can retrieve its Policy Store from
 a Jans Lock Server OAuth protected endpoint.</p>
-<p>Developers need to define Cedar Schema that makes sense for their application. For example, a 
+<p>Developers need to define Cedar Schema that makes sense for their application. For example, a
 developer writing a customer support application might define an "Issue" Resource and Actions like
-"Reply" or "Close". Once the schema is defined, developers can author policies to model the fine 
+"Reply" or "Close". Once the schema is defined, developers can author policies to model the fine
 grain access controls needed to implement the business rules of their application. The easiest way
-to define schema and policies is to use the <a href="https://cloud.gluu.org/agama-lab">AgamaLab</a> Policy 
+to define schema and policies is to use the <a href="https://cloud.gluu.org/agama-lab">AgamaLab</a> Policy
 Designer. This is a free developer tool hosted by <a href="https://gluu.org">Gluu</a>.</p>
 <p><img alt="" src="../../assets/lock-cedarling-diagram-2.jpg" /></p>
-<p>The JWTs, Resource, Action, and Context are sent in the authz request. Cedar Pricipals entities 
-are derived from JWT tokens. The OpenID Connect ("OIDC") JWTs are joined by the Cedarling to create 
-User and Role entities; the OAuth access token is used to create a Workload entity, which is the 
+<p>The JWTs, Resource, Action, and Context are sent in the authz request. Cedar Pricipals entities
+are derived from JWT tokens. The OpenID Connect ("OIDC") JWTs are joined by the Cedarling to create
+User and Role entities; the OAuth access token is used to create a Workload entity, which is the
 software that is acting on behalf of the Person (or autonomously). The Cedarling validates that
 given its policies, both the Person and Workload are authorized.</p>
 <p>The Cedarling maps "Roles" out-of-the-box. In Cedar, Roles are a special kind of Principal. Instead
-of saying "User can perform action", we can say "Role can perform action"--a convenient way to 
+of saying "User can perform action", we can say "Role can perform action"--a convenient way to
 implement RBAC. Developers can specify which JWT claim is used to map Cedar Roles. For example, one
-domain may use the <code>role</code> user claim of the OpenID Userinfo token; another domain may use the 
+domain may use the <code>role</code> user claim of the OpenID Userinfo token; another domain may use the
 <code>memberOf</code> claim in the OIDC id_token.</p>
-<p>Developers can also express a variety of policies beyond the limitations of RBAC by expressing ABAC 
-conditions, or combining ABAC and RBAC conditions. For example, a policy like Admins can access a 
-"private" Resource from the private network, during business hours. In this case "Admins" is the role, 
-but the other conditions are ABAC. Policy evaluation is fast because Cedar uses the RBAC role to 
+<p>Developers can also express a variety of policies beyond the limitations of RBAC by expressing ABAC
+conditions, or combining ABAC and RBAC conditions. For example, a policy like Admins can access a
+"private" Resource from the private network, during business hours. In this case "Admins" is the role,
+but the other conditions are ABAC. Policy evaluation is fast because Cedar uses the RBAC role to
 "slice" the data, minimizing the number of entries on which to evaluate the ABAC conditions.</p>
-<p>The OIDC id_token JWT represents a Person authentication event. The access token JWT represents a 
-Workload authentication event. These tokens contain other interesting contextual data. The id_token 
-tells you who authenticated, when they authenticated, how they authenticatated, and optionally other 
-claims like the User's roles. An OAuth access token can tell you information about the Workload that 
-obtained the JWT, its extent of access as defined by the OAuth Authorization Server (<em>i.e.</em> the 
+<p>The OIDC <code>id_token</code> JWT represents a Person authentication event. The access token JWT represents a
+Workload authentication event. These tokens contain other interesting contextual data. The <code>id_token</code>
+tells you who authenticated, when they authenticated, how they authenticatated, and optionally other
+claims like the User's roles. An OAuth access token can tell you information about the Workload that
+obtained the JWT, its extent of access as defined by the OAuth Authorization Server (<em>i.e.</em> the
 values of the <code>scope</code> claim), or other claims--domains frequently enhance the access token to
 contain business specific data needed for policy evaluation.</p>
-<p>The Cedarling authorizes a Person using a certain piece of software, which is called a "Workload". 
-From a logical perspective, <code>person_allowed AND workload_allowed</code> must be <code>True</code>. The JWT's, 
-Action, Resource and Context is sent by the application in the authorization request. For example, 
+<p>The Cedarling authorizes a Person using a certain piece of software, which is called a "Workload".
+From a logical perspective, <code>person_allowed</code> AND <code>workload_allowed</code> must be <code>True</code>. The JWT's,
+Action, Resource and Context is sent by the application in the authorization request. For example,
 this is a sample request from a hypothetical application:</p>
-<div class="highlight"><pre><span></span><code>input = { 
-           &quot;access_token&quot;: &quot;eyJhbGc....&quot;, 
-           &quot;id_token&quot;: &quot;eyJjbGc...&quot;, 
-           &quot;userinfo_token&quot;: &quot;eyJjbGc...&quot;,
-           &quot;tx_token&quot;: &quot;eyJjbGc...&quot;,
-           &quot;action&quot;: &quot;View&quot;,
-           &quot;resource&quot;: {&quot;Ticket&quot;: {
-                                  &quot;id&quot;: &quot;ticket-10101&quot;, 
-                                  &quot;owner&quot;: &quot;bob@acme.com&quot;, 
-                                  &quot;org_id&quot;: &quot;Acme&quot;
-                                  }
-                        },
-           &quot;context&quot;: {
-                       &quot;ip_address&quot;: &quot;54.9.21.201&quot;,
-                       &quot;network_type&quot;: &quot;VPN&quot;,
-                       &quot;user_agent&quot;: &quot;Chrome 125.0.6422.77 (Official Build) (arm64)&quot;,
-                       &quot;time&quot;: &quot;1719266610.98636&quot;,
-                      }
-         }
+<div class="highlight"><pre><span></span><code><span class="nx">input</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span>
+<span class="w">           </span><span class="s2">&quot;access_token&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;eyJhbGc....&quot;</span><span class="p">,</span><span class="w"> </span>
+<span class="w">           </span><span class="s2">&quot;id_token&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;eyJjbGc...&quot;</span><span class="p">,</span><span class="w"> </span>
+<span class="w">           </span><span class="s2">&quot;userinfo_token&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;eyJjbGc...&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">           </span><span class="s2">&quot;tx_token&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;eyJjbGc...&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">           </span><span class="s2">&quot;action&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;View&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">           </span><span class="s2">&quot;resource&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                          </span><span class="s2">&quot;id&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;ticket-10101&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                          </span><span class="s2">&quot;type&quot;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Ticket&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                          </span><span class="s2">&quot;owner&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;bob@acme.com&quot;</span><span class="p">,</span><span class="w"> </span>
+<span class="w">                          </span><span class="s2">&quot;org_id&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Acme&quot;</span><span class="w"></span>
+<span class="w">                        </span><span class="p">},</span><span class="w"></span>
+<span class="w">           </span><span class="s2">&quot;context&quot;</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">                       </span><span class="s2">&quot;ip_address&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;54.9.21.201&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                       </span><span class="s2">&quot;network_type&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;VPN&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                       </span><span class="s2">&quot;user_agent&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;Chrome 125.0.6422.77 (Official Build) (arm64)&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                       </span><span class="s2">&quot;time&quot;</span><span class="o">:</span><span class="w"> </span><span class="s2">&quot;1719266610.98636&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                      </span><span class="p">}</span><span class="w"></span>
+<span class="w">         </span><span class="p">}</span><span class="w"></span>
 
-decision_result = authz(input)
+<span class="nx">decision_result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">authz</span><span class="p">(</span><span class="nx">input</span><span class="p">)</span><span class="w"></span>
 </code></pre></div>
 
   <hr>
@@ -8733,7 +8733,7 @@ decision_result = authz(input)
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-08T06:55:54+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-08</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-26T19:12:11+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-26</span>
       
         <br>
         Created:
