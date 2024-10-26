@@ -187,6 +187,13 @@ fn decode_and_validate_jwt<T: DeserializeOwned>(args: DecodeAndValidateArgs) -> 
     Ok(claims)
 }
 
+#[derive(thiserror::Error, Debug)]
+pub enum ParseAlgorithmError {
+    /// Config contains an unimplemented algorithm
+    #[error("algorithim is not yet implemented: {0}")]
+    UnimplementedAlgorithm(String),
+}
+
 /// Converts a string representation of an algorithm to a `jwt::Algorithm` enum.
 ///
 /// This function maps algorithm names (e.g., "HS256", "RS256") to corresponding
@@ -194,7 +201,7 @@ fn decode_and_validate_jwt<T: DeserializeOwned>(args: DecodeAndValidateArgs) -> 
 ///
 /// # Errors
 /// Returns an error if the algorithm is not implemented.
-pub fn string_to_alg(algorithm: &str) -> Result<jwt::Algorithm, Error> {
+pub fn string_to_alg(algorithm: &str) -> Result<jwt::Algorithm, ParseAlgorithmError> {
     match algorithm {
         "HS256" => Ok(jwt::Algorithm::HS256),
         "HS384" => Ok(jwt::Algorithm::HS384),
@@ -208,6 +215,8 @@ pub fn string_to_alg(algorithm: &str) -> Result<jwt::Algorithm, Error> {
         "PS384" => Ok(jwt::Algorithm::PS384),
         "PS512" => Ok(jwt::Algorithm::PS512),
         "EdDSA" => Ok(jwt::Algorithm::EdDSA),
-        _ => Err(Error::UnimplementedAlgorithm(algorithm.into())),
+        _ => Err(ParseAlgorithmError::UnimplementedAlgorithm(
+            algorithm.into(),
+        )),
     }
 }
