@@ -8743,7 +8743,7 @@
           <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
     <span class="n">policy_raw_json</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">This policy store contains one policy as such:</span>
+<span class="sd">This policy store contains 2 policy as such:</span>
 <span class="sd">permit(</span>
 <span class="sd">    principal is Jans::Workload,</span>
 <span class="sd">    action in [Jans::Action::&quot;Update&quot;],</span>
@@ -8751,14 +8751,20 @@
 <span class="sd">)when{</span>
 <span class="sd">    principal.org_id == resource.org_id</span>
 <span class="sd">};</span>
+
+<span class="sd">permit(</span>
+<span class="sd">    principal is Jans::User,</span>
+<span class="sd">    action in [Jans::Action::&quot;Update&quot;],</span>
+<span class="sd">    resource is Jans::Issue</span>
+<span class="sd">)when{</span>
+<span class="sd">    principal.country == resource.country</span>
+<span class="sd">};</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="c1"># for now we support only json source</span>
 <span class="n">policy_source</span> <span class="o">=</span> <span class="n">PolicyStoreSource</span><span class="p">(</span><span class="n">json</span><span class="o">=</span><span class="n">policy_raw_json</span><span class="p">)</span>
 
-<span class="n">policy_store_config</span> <span class="o">=</span> <span class="n">PolicyStoreConfig</span><span class="p">(</span>
-    <span class="n">source</span><span class="o">=</span><span class="n">policy_source</span><span class="p">,</span> <span class="n">store_id</span><span class="o">=</span><span class="s2">&quot;8b805e22fdd39f3dd33a13d9fb446d8e6314153ca997&quot;</span><span class="p">)</span>
-<span class="c1"># if we have only one policy store in file we can avoid using store id</span>
-<span class="n">policy_store_config</span><span class="o">.</span><span class="n">store_id</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">policy_store_config</span> <span class="o">=</span> <span class="n">PolicyStoreConfig</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">policy_source</span><span class="p">)</span>
+
 
 <span class="c1"># Create jwt configuration</span>
 <span class="c1"># do not validate JWT tokens</span>
@@ -8794,17 +8800,19 @@
 <span class="c1"># field resource_type and id is mandatory</span>
 <span class="c1"># other fields are attributes of the resource.</span>
 <span class="n">resource</span> <span class="o">=</span> <span class="n">ResourceData</span><span class="p">(</span><span class="n">resource_type</span><span class="o">=</span><span class="s2">&quot;Jans::Issue&quot;</span><span class="p">,</span>
-                        <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;random_id&quot;</span><span class="p">,</span> <span class="n">org_id</span><span class="o">=</span><span class="s2">&quot;some_long_id&quot;</span><span class="p">)</span>
+                        <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;random_id&quot;</span><span class="p">,</span> <span class="n">org_id</span><span class="o">=</span><span class="s2">&quot;some_long_id&quot;</span><span class="p">,</span> <span class="n">country</span><span class="o">=</span><span class="s2">&quot;US&quot;</span><span class="p">)</span>
 <span class="c1"># or we can init resource using dict</span>
 <span class="n">resource</span> <span class="o">=</span> <span class="n">ResourceData</span><span class="o">.</span><span class="n">from_dict</span><span class="p">({</span>
     <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;Jans::Issue&quot;</span><span class="p">,</span>
     <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;random_id&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;org_id&quot;</span><span class="p">:</span> <span class="s2">&quot;some_long_id&quot;</span>
+    <span class="s2">&quot;org_id&quot;</span><span class="p">:</span> <span class="s2">&quot;some_long_id&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;country&quot;</span><span class="p">:</span> <span class="s2">&quot;US&quot;</span>
 <span class="p">})</span>
+
 
 <span class="n">action_token</span> <span class="o">=</span> <span class="s2">&quot;eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJib0c4ZGZjNU1LVG4zN283Z3NkQ2V5cUw4THBXUXRnb080MW0xS1p3ZHEwIiwiY29kZSI6ImJmMTkzNGY2LTM5MDUtNDIwYS04Mjk5LTZiMmUzZmZkZGQ2ZSIsImlzcyI6Imh0dHBzOi8vYWRtaW4tdWktdGVzdC5nbHV1Lm9yZyIsInRva2VuX3R5cGUiOiJCZWFyZXIiLCJjbGllbnRfaWQiOiI1YjQ0ODdjNC04ZGIxLTQwOWQtYTY1My1mOTA3YjgwOTQwMzkiLCJhdWQiOiI1YjQ0ODdjNC04ZGIxLTQwOWQtYTY1My1mOTA3YjgwOTQwMzkiLCJhY3IiOiJiYXNpYyIsIng1dCNTMjU2IjoiIiwic2NvcGUiOlsib3BlbmlkIiwicHJvZmlsZSJdLCJvcmdfaWQiOiJzb21lX2xvbmdfaWQiLCJhdXRoX3RpbWUiOjE3MjQ4MzA3NDYsImV4cCI6MTcyNDk0NTk3OCwiaWF0IjoxNzI0ODMyMjU5LCJqdGkiOiJseFRtQ1ZSRlR4T2pKZ3ZFRXBvek1RIiwibmFtZSI6IkRlZmF1bHQgQWRtaW4gVXNlciIsInN0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjIwMSwidXJpIjoiaHR0cHM6Ly9hZG1pbi11aS10ZXN0LmdsdXUub3JnL2phbnMtYXV0aC9yZXN0djEvc3RhdHVzX2xpc3QifX19._eQT-DsfE_kgdhA0YOyFxxPEMNw44iwoelWa5iU1n9s&quot;</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Decoded access token:</span>
+<span class="sd">JSON payload of access token</span>
 <span class="sd">{</span>
 <span class="sd">  &quot;sub&quot;: &quot;boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0&quot;,</span>
 <span class="sd">  &quot;code&quot;: &quot;bf1934f6-3905-420a-8299-6b2e3ffddd6e&quot;,</span>
@@ -8833,9 +8841,65 @@
 <span class="sd">}</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
+<span class="n">id_token</span> <span class="o">=</span> <span class="s2">&quot;eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY3IiOiJiYXNpYyIsImFtciI6IjEwIiwiYXVkIjoiNWI0NDg3YzQtOGRiMS00MDlkLWE2NTMtZjkwN2I4MDk0MDM5IiwiZXhwIjoxNzI0ODM1ODU5LCJpYXQiOjE3MjQ4MzIyNTksInN1YiI6ImJvRzhkZmM1TUtUbjM3bzdnc2RDZXlxTDhMcFdRdGdvTzQxbTFLWndkcTAiLCJpc3MiOiJodHRwczovL2FkbWluLXVpLXRlc3QuZ2x1dS5vcmciLCJqdGkiOiJzazNUNDBOWVNZdWs1c2FIWk5wa1p3Iiwibm9uY2UiOiJjMzg3MmFmOS1hMGY1LTRjM2YtYTFhZi1mOWQwZTg4NDZlODEiLCJzaWQiOiI2YTdmZTUwYS1kODEwLTQ1NGQtYmU1ZC01NDlkMjk1OTVhMDkiLCJqYW5zT3BlbklEQ29ubmVjdFZlcnNpb24iOiJvcGVuaWRjb25uZWN0LTEuMCIsImNfaGFzaCI6InBHb0s2WV9SS2NXSGtVZWNNOXV3NlEiLCJhdXRoX3RpbWUiOjE3MjQ4MzA3NDYsImdyYW50IjoiYXV0aG9yaXphdGlvbl9jb2RlIiwic3RhdHVzIjp7InN0YXR1c19saXN0Ijp7ImlkeCI6MjAyLCJ1cmkiOiJodHRwczovL2FkbWluLXVpLXRlc3QuZ2x1dS5vcmcvamFucy1hdXRoL3Jlc3R2MS9zdGF0dXNfbGlzdCJ9fX0.8BwLLGkFpWGx8wGpvVmNk_Ao8nZrP_WT-zoo-MY4zqY&quot;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">JSON payload of id token</span>
+<span class="sd">{</span>
+<span class="sd">  &quot;acr&quot;: &quot;basic&quot;,</span>
+<span class="sd">  &quot;amr&quot;: &quot;10&quot;,</span>
+<span class="sd">  &quot;aud&quot;: &quot;5b4487c4-8db1-409d-a653-f907b8094039&quot;,</span>
+<span class="sd">  &quot;exp&quot;: 1724835859,</span>
+<span class="sd">  &quot;iat&quot;: 1724832259,</span>
+<span class="sd">  &quot;sub&quot;: &quot;boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0&quot;,</span>
+<span class="sd">  &quot;iss&quot;: &quot;https://admin-ui-test.gluu.org&quot;,</span>
+<span class="sd">  &quot;jti&quot;: &quot;sk3T40NYSYuk5saHZNpkZw&quot;,</span>
+<span class="sd">  &quot;nonce&quot;: &quot;c3872af9-a0f5-4c3f-a1af-f9d0e8846e81&quot;,</span>
+<span class="sd">  &quot;sid&quot;: &quot;6a7fe50a-d810-454d-be5d-549d29595a09&quot;,</span>
+<span class="sd">  &quot;jansOpenIDConnectVersion&quot;: &quot;openidconnect-1.0&quot;,</span>
+<span class="sd">  &quot;c_hash&quot;: &quot;pGoK6Y_RKcWHkUecM9uw6Q&quot;,</span>
+<span class="sd">  &quot;auth_time&quot;: 1724830746,</span>
+<span class="sd">  &quot;grant&quot;: &quot;authorization_code&quot;,</span>
+<span class="sd">  &quot;status&quot;: {</span>
+<span class="sd">    &quot;status_list&quot;: {</span>
+<span class="sd">      &quot;idx&quot;: 202,</span>
+<span class="sd">      &quot;uri&quot;: &quot;https://admin-ui-test.gluu.org/jans-auth/restv1/status_list&quot;</span>
+<span class="sd">    }</span>
+<span class="sd">  }</span>
+<span class="sd">}</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="n">userinfo_token</span> <span class="o">=</span> <span class="s2">&quot;eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb3VudHJ5IjoiVVMiLCJlbWFpbCI6InVzZXJAZXhhbXBsZS5jb20iLCJ1c2VybmFtZSI6IlVzZXJOYW1lRXhhbXBsZSIsInN1YiI6ImJvRzhkZmM1TUtUbjM3bzdnc2RDZXlxTDhMcFdRdGdvTzQxbTFLWndkcTAiLCJpc3MiOiJodHRwczovL2FkbWluLXVpLXRlc3QuZ2x1dS5vcmciLCJnaXZlbl9uYW1lIjoiQWRtaW4iLCJtaWRkbGVfbmFtZSI6IkFkbWluIiwiaW51bSI6IjhkMWNkZTZhLTE0NDctNDc2Ni1iM2M4LTE2NjYzZTEzYjQ1OCIsImNsaWVudF9pZCI6IjViNDQ4N2M0LThkYjEtNDA5ZC1hNjUzLWY5MDdiODA5NDAzOSIsImF1ZCI6IjViNDQ4N2M0LThkYjEtNDA5ZC1hNjUzLWY5MDdiODA5NDAzOSIsInVwZGF0ZWRfYXQiOjE3MjQ3Nzg1OTEsIm5hbWUiOiJEZWZhdWx0IEFkbWluIFVzZXIiLCJuaWNrbmFtZSI6IkFkbWluIiwiZmFtaWx5X25hbWUiOiJVc2VyIiwianRpIjoiZmFpWXZhWUlUMGNEQVQ3Rm93MHBRdyIsImphbnNBZG1pblVJUm9sZSI6WyJhcGktYWRtaW4iXSwiZXhwIjoxNzI0OTQ1OTc4fQ.3LTc8YLvEeb7ONZp_FKA7yPP7S6e_VTzwhvAWUJrL4M&quot;</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">JSON payload of userinfo token</span>
+<span class="sd">{</span>
+<span class="sd">  &quot;country&quot;: &quot;US&quot;,</span>
+<span class="sd">  &quot;email&quot;: &quot;user@example.com&quot;,</span>
+<span class="sd">  &quot;username&quot;: &quot;UserNameExample&quot;,</span>
+<span class="sd">  &quot;sub&quot;: &quot;boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0&quot;,</span>
+<span class="sd">  &quot;iss&quot;: &quot;https://admin-ui-test.gluu.org&quot;,</span>
+<span class="sd">  &quot;given_name&quot;: &quot;Admin&quot;,</span>
+<span class="sd">  &quot;middle_name&quot;: &quot;Admin&quot;,</span>
+<span class="sd">  &quot;inum&quot;: &quot;8d1cde6a-1447-4766-b3c8-16663e13b458&quot;,</span>
+<span class="sd">  &quot;client_id&quot;: &quot;5b4487c4-8db1-409d-a653-f907b8094039&quot;,</span>
+<span class="sd">  &quot;aud&quot;: &quot;5b4487c4-8db1-409d-a653-f907b8094039&quot;,</span>
+<span class="sd">  &quot;updated_at&quot;: 1724778591,</span>
+<span class="sd">  &quot;name&quot;: &quot;Default Admin User&quot;,</span>
+<span class="sd">  &quot;nickname&quot;: &quot;Admin&quot;,</span>
+<span class="sd">  &quot;family_name&quot;: &quot;User&quot;,</span>
+<span class="sd">  &quot;jti&quot;: &quot;faiYvaYIT0cDAT7Fow0pQw&quot;,</span>
+<span class="sd">  &quot;jansAdminUIRole&quot;: [</span>
+<span class="sd">    &quot;api-admin&quot;</span>
+<span class="sd">  ],</span>
+<span class="sd">  &quot;exp&quot;: 1724945978</span>
+<span class="sd">}</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
 <span class="c1"># Creating cedarling request</span>
 <span class="n">request</span> <span class="o">=</span> <span class="n">Request</span><span class="p">(</span>
     <span class="n">action_token</span><span class="p">,</span>
+    <span class="n">id_token</span><span class="p">,</span>
+    <span class="n">userinfo_token</span><span class="p">,</span>
     <span class="n">action</span><span class="o">=</span><span class="s1">&#39;Jans::Action::&quot;Update&quot;&#39;</span><span class="p">,</span>
     <span class="n">context</span><span class="o">=</span><span class="p">{},</span> <span class="n">resource</span><span class="o">=</span><span class="n">resource</span><span class="p">)</span>
 
@@ -8885,7 +8949,7 @@ Logs stored in memory:
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-18T15:54:26+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-18</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-26T19:12:11+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-26</span>
       
         <br>
         Created:
