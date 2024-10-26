@@ -41,8 +41,8 @@ conditions, or combining ABAC and RBAC conditions. For example, a policy like Ad
 but the other conditions are ABAC. Policy evaluation is fast because Cedar uses the RBAC role to
 "slice" the data, minimizing the number of entries on which to evaluate the ABAC conditions.
 
-The OIDC id_token JWT represents a Person authentication event. The access token JWT represents a
-Workload authentication event. These tokens contain other interesting contextual data. The id_token
+The OIDC `id_token` JWT represents a Person authentication event. The access token JWT represents a
+Workload authentication event. These tokens contain other interesting contextual data. The `id_token`
 tells you who authenticated, when they authenticated, how they authenticatated, and optionally other
 claims like the User's roles. An OAuth access token can tell you information about the Workload that
 obtained the JWT, its extent of access as defined by the OAuth Authorization Server (*i.e.* the
@@ -50,11 +50,11 @@ values of the `scope` claim), or other claims--domains frequently enhance the ac
 contain business specific data needed for policy evaluation.
 
 The Cedarling authorizes a Person using a certain piece of software, which is called a "Workload".
-From a logical perspective, `person_allowed AND workload_allowed` must be `True`. The JWT's,
+From a logical perspective, `person_allowed` AND `workload_allowed` must be `True`. The JWT's,
 Action, Resource and Context is sent by the application in the authorization request. For example,
 this is a sample request from a hypothetical application:
 
-```
+```js
 input = { 
            "access_token": "eyJhbGc....", 
            "id_token": "eyJjbGc...", 
