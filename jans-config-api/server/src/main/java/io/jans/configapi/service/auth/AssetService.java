@@ -54,7 +54,7 @@ import org.slf4j.Logger;
 public class AssetService {
 
     private static final String ASSET_DIR_STR = "AssetDirMapping for [";
-    private static final String NOT_DEFINED_IN_CONFIG = "] is not defined in config!";
+    private static final String NOT_DEFINED_IN_CONFIG = " is not defined in config!";
 
     @Inject
     Logger log;
@@ -438,7 +438,7 @@ public class AssetService {
 
         if (StringUtils.isBlank(assetDir)) {
             throw new InvalidConfigurationException(
-                    "Directory to save asset [" + assetFileName + NOT_DEFINED_IN_CONFIG);
+                    "Directory to save asset [" + assetFileName +"]"+ NOT_DEFINED_IN_CONFIG);
         }
 
         StringBuilder sb = new StringBuilder();
@@ -480,7 +480,7 @@ public class AssetService {
         log.info("Asset dirMapping :{}", dirMapping);
 
         if (StringUtils.isBlank(dirMapping)) {
-            throw new InvalidConfigurationException(ASSET_DIR_STR + serviceModule + NOT_DEFINED_IN_CONFIG);
+            throw new InvalidConfigurationException(ASSET_DIR_STR + serviceModule +"] for asset type ["+fileExtension+"]"+ NOT_DEFINED_IN_CONFIG);
         }
 
         serviceDir = String.format(dirMapping, serviceModule);
