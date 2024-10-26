@@ -154,7 +154,7 @@ impl JwtService {
             DecodingStrategy::WithValidation { .. } => {
                 // validate that  the userinfo_token's client_id is the same as the access_token's aud
                 if userinfo_token.client_id != access_token.aud {
-                    let validation_err = Error::ValidationError("the userinfo_token's `client_id` does not match with the access_token's `aud`".into());
+                    let validation_err = Error::Validation("the userinfo_token's `client_id` does not match with the access_token's `aud`".into());
                     return Err(Error::InvalidUserinfoToken(validation_err.into()));
                 }
             },

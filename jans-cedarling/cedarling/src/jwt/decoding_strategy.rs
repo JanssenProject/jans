@@ -51,7 +51,7 @@ impl DecodingStrategy {
             .iter()
             .map(|x| x.openid_configuration_endpoint.as_ref())
             .collect();
-        let key_service = KeyService::new(openid_conf_endpoints).map_err(Error::KeyServiceError)?;
+        let key_service = KeyService::new(openid_conf_endpoints).map_err(Error::KeyService)?;
 
         Ok(Self::WithValidation {
             key_service,
@@ -85,16 +85,16 @@ impl DecodingStrategy {
             DecodingStrategy::WithValidation {
                 key_service,
                 supported_algs,
-            } => decode_and_validate_jwt(
+            } => decode_and_validate_jwt(DecodeAndValidateArgs {
                 jwt,
-                iss,
-                aud,
-                sub,
+                iss: iss.map(|iss| iss.to_string()),
+                aud: aud.map(|aud| aud.to_string()),
+                sub: sub.map(|sub| sub.to_string()),
                 validate_nbf,
                 validate_exp,
                 supported_algs,
                 key_service,
-            ),
+            }),
         }
     }
 
@@ -115,12 +115,23 @@ impl DecodingStrategy {
 
         let key = jwt::DecodingKey::from_secret("some_secret".as_ref());
 
-        let claims = jwt::decode::<T>(&jwt_str, &key, &validator)
-            .map_err(|e| Error::ValidationError(e.to_string()))?
+        let claims = jwt::decode::<T>(jwt_str, &key, &validator)
+            .map_err(|e| Error::Validation(e.to_string()))?
             .claims;
 
         Ok(claims)
     }
+}
+
+struct DecodeAndValidateArgs<'a> {
+    jwt: &'a str,
+    iss: Option<String>,
+    aud: Option<String>,
+    sub: Option<String>,
+    validate_nbf: bool,
+    validate_exp: bool,
+    supported_algs: &'a Vec<jwt::Algorithm>,
+    key_service: &'a KeyService,
 }
 
 /// Decodes and validates a JWT token using supported algorithms and a key service.
@@ -137,53 +148,41 @@ impl DecodingStrategy {
 ///
 /// # Errors
 /// Returns an error if the token uses an unsupported algorithm or if validation fails.
-fn decode_and_validate_jwt<T: DeserializeOwned>(
-    jwt: &str,
-    iss: Option<impl ToString>,
-    aud: Option<impl ToString>,
-    sub: Option<impl ToString>,
-    validate_nbf: bool,
-    validate_exp: bool,
-    supported_algs: &Vec<jwt::Algorithm>,
-    key_service: &KeyService,
-) -> Result<T, Error> {
-    let header = jwt::decode_header(jwt).map_err(Error::ParsingError)?;
+fn decode_and_validate_jwt<T: DeserializeOwned>(args: DecodeAndValidateArgs) -> Result<T, Error> {
+    let header = jwt::decode_header(args.jwt).map_err(Error::Parsing)?;
 
     // reject unsupported algorithms early
-    if !supported_algs.contains(&header.alg) {
+    if !args.supported_algs.contains(&header.alg) {
         return Err(Error::TokenSignedWithUnsupportedAlgorithm(header.alg));
     }
 
     // set up validation rules
     let mut validator = jwt::Validation::new(header.alg);
     validator.required_spec_claims.clear();
-    validator.validate_nbf = validate_nbf;
-    validator.validate_exp = validate_exp;
-    if let Some(iss) = iss {
-        validator.set_issuer(&vec![iss]);
+    validator.validate_nbf = args.validate_nbf;
+    validator.validate_exp = args.validate_exp;
+    if let Some(iss) = args.iss {
+        validator.set_issuer(&[iss]);
     } else {
         validator.iss = None;
     }
-    if let Some(aud) = aud {
+    if let Some(aud) = args.aud {
         validator.set_audience(&[aud]);
     } else {
         validator.validate_aud = false;
     }
-    validator.sub = match sub {
-        Some(sub) => Some(sub.to_string()),
-        None => None,
-    };
+    validator.sub = args.sub.map(|sub| sub.to_string());
 
     // fetch decoding key from the KeyService
     let kid = &header
         .kid
         .ok_or_else(|| Error::MissingRequiredHeader("kid".into()))?;
-    let key = key_service.get_key(kid).map_err(Error::KeyServiceError)?;
+    let key = args.key_service.get_key(kid).map_err(Error::KeyService)?;
     // TODO: handle tokens without a `kid` in the header
 
     // decode and validate the jwt
-    let claims = jwt::decode::<T>(&jwt, &key, &validator)
-        .map_err(|e| Error::ValidationError(e.to_string()))?
+    let claims = jwt::decode::<T>(args.jwt, &key, &validator)
+        .map_err(|e| Error::Validation(e.to_string()))?
         .claims;
     Ok(claims)
 }
