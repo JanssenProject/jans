@@ -107,9 +107,9 @@ impl JwtService {
         U: DeserializeOwned,
     {
         // extract claims without validation
-        let access_token_claims = self.decoding_strategy.extract_claims(access_token)?;
-        let id_token_claims = self.decoding_strategy.extract_claims(id_token)?;
-        let userinfo_token_claims = self.decoding_strategy.extract_claims(userinfo_token)?;
+        let access_token_claims = DecodingStrategy::extract_claims(access_token)?;
+        let id_token_claims = DecodingStrategy::extract_claims(id_token)?;
+        let userinfo_token_claims = DecodingStrategy::extract_claims(userinfo_token)?;
 
         // validate access_token
         let access_token = self

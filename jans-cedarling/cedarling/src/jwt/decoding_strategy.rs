@@ -81,7 +81,7 @@ impl DecodingStrategy {
         validate_exp: bool,
     ) -> Result<T, Error> {
         match self {
-            DecodingStrategy::WithoutValidation => self.extract_claims(jwt),
+            DecodingStrategy::WithoutValidation => Self::extract_claims(jwt),
             DecodingStrategy::WithValidation {
                 key_service,
                 supported_algs,
@@ -105,7 +105,7 @@ impl DecodingStrategy {
     ///
     /// # Errors
     /// Returns an error if the claims cannot be extracted.
-    pub fn extract_claims<T: DeserializeOwned>(&self, jwt_str: &str) -> Result<T, Error> {
+    pub fn extract_claims<T: DeserializeOwned>(jwt_str: &str) -> Result<T, Error> {
         let mut validator = jwt::Validation::default();
         validator.insecure_disable_signature_validation();
         validator.required_spec_claims.clear();
