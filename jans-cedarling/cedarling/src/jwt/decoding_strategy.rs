@@ -40,10 +40,6 @@ impl DecodingStrategy {
     /// This strategy uses the provided dependency map to configure a key service
     /// and validates tokens based on the specified algorithms.
     ///
-    /// # Arguments
-    /// * `dep_map` - A reference to the dependency map containing necessary services.
-    /// * `config_algs` - A vector of strings representing supported algorithms for validation.
-    ///
     /// # Errors
     /// Returns an error if the specified algorithm is unrecognized or the key service initialization fails.
     pub fn new_with_validation(
@@ -196,9 +192,6 @@ fn decode_and_validate_jwt<T: DeserializeOwned>(
 ///
 /// This function maps algorithm names (e.g., "HS256", "RS256") to corresponding
 /// `jwt::Algorithm` enum values. Returns an error if the algorithm is unsupported.
-///
-/// # Arguments
-/// * `algorithm` - The string representing the algorithm to convert.
 ///
 /// # Errors
 /// Returns an error if the algorithm is not implemented.
