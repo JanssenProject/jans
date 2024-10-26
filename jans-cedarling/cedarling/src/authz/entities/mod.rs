@@ -14,17 +14,13 @@ mod trait_as_expression;
 #[cfg(test)]
 mod test_create;
 
-use crate::authz::token_data::TokenPayload;
-use crate::{common::cedar_schema::CedarSchemaJson, ResourceData};
+use crate::common::cedar_schema::CedarSchemaJson;
 
-use create::{create_entity, parse_namespace_and_typename, CedarPolicyCreateTypeError};
+use crate::authz::token_data::{AccessTokenData, IdTokenData, UserInfoTokenData};
+pub use create::CedarPolicyCreateTypeError;
+use create::{create_entity, parse_namespace_and_typename};
 
-/// Describe errors on creating entites for AccessToken
-#[derive(thiserror::Error, Debug)]
-pub enum AccessTokenEntitiesError {
-    #[error("could not create entity from access_token: {0}")]
-    Create(#[from] CedarPolicyCreateTypeError),
-}
+use super::request::ResourceData;
 
 /// Access token entities
 pub(crate) struct AccessTokenEntities {
@@ -34,20 +30,54 @@ pub(crate) struct AccessTokenEntities {
 
 impl AccessTokenEntities {
     /// Map all values to vector of cedar-policy entities
-    pub fn entities(self) -> Vec<cedar_policy::Entity> {
-        vec![self.workload_entity, self.access_token_entity]
+    pub fn into_iter(self) -> impl Iterator<Item = cedar_policy::Entity> {
+        vec![self.workload_entity, self.access_token_entity].into_iter()
     }
+}
+
+/// Describe errors on creating entites for AccessToken
+#[derive(thiserror::Error, Debug)]
+pub enum AccessTokenEntitiesError {
+    #[error("could not create entity from access_token: {0}")]
+    Create(#[from] CedarPolicyCreateTypeError),
 }
 
 /// Create all entities from AccessToken
 pub fn create_access_token_entities(
     schema: &CedarSchemaJson,
-    data: &TokenPayload,
+    data: &AccessTokenData,
 ) -> Result<AccessTokenEntities, AccessTokenEntitiesError> {
     Ok(AccessTokenEntities {
         access_token_entity: meta::AccessTokenMeta.create_entity(schema, data)?,
         workload_entity: meta::WorkloadEntityMeta.create_entity(schema, data)?,
     })
+}
+
+/// Create id_token entity
+pub fn create_id_token_entity(
+    schema: &CedarSchemaJson,
+    data: &IdTokenData,
+) -> Result<cedar_policy::Entity, CedarPolicyCreateTypeError> {
+    meta::IdToken.create_entity(schema, data)
+}
+
+/// Create user entity
+pub fn create_user_entity(
+    schema: &CedarSchemaJson,
+    id_token_data: &IdTokenData,
+    userinfo_token_data: &UserInfoTokenData,
+) -> Result<cedar_policy::Entity, CedarPolicyCreateTypeError> {
+    const SUB_KEY: &str = "sub";
+
+    // if 'sub' is not the same we discard the userinfo token
+    let payload =
+        if id_token_data.get_json_value(SUB_KEY) == userinfo_token_data.get_json_value(SUB_KEY) {
+            &id_token_data.merge(userinfo_token_data)
+        } else {
+            id_token_data
+        };
+
+    meta::User.create_entity(schema, payload)
 }
 
 /// Describe errors on creating resource entity
