@@ -50,7 +50,7 @@ impl<'a> EntityMetadata<'a> {
             EntityTypeName::from_str(self.entity_type).map_err(|err| {
                 CedarPolicyCreateTypeError::EntityTypeName(self.entity_type.to_string(), err)
             })?,
-            EntityId::new(data.get(self.entity_id_data_key)?.as_str()?),
+            EntityId::new(data.get_payload(self.entity_id_data_key)?.as_str()?),
         );
 
         let parsed_typename = parse_namespace_and_typename(self.entity_type);
@@ -183,7 +183,7 @@ fn token_attribute_to_cedar_exp(
 ) -> Result<RestrictedExpression, CedarPolicyCreateTypeError> {
     let token_claim_key = attribute_metadata.attribute_name;
 
-    let token_claim_value = claim.get(token_claim_key)?;
+    let token_claim_value = claim.get_payload(token_claim_key)?;
 
     get_expression(
         &attribute_metadata.cedar_policy_type,
