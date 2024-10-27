@@ -102,7 +102,7 @@ fn can_update_local_jwks() {
         .decode_tokens::<AccessTokenClaims, IdTokenClaims, UserinfoTokenClaims>(
             &access_token,
             &id_token,
-            &userinfo_token,
+            &userinfo_token
         )
         .is_err());
     jwks_uri_mock.assert();

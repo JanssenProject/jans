@@ -85,11 +85,6 @@ impl JwtService {
     /// 5. An error is returned if `userinfo.client_id` does not match `access_token.aud` or
     ///    `userinfo.sub` does not match with `id_token.sub`.
     ///
-    /// # Parameters
-    /// - `access_token`: The JWT string representing the access token.
-    /// - `id_token`: The JWT string representing the ID token.
-    /// - `userinfo_token`: The JWT string representing the Userinfo token.
-    ///
     /// # Returns
     /// A tuple containing the decoded claims for the `access_token`, `id_token`, and
     /// `userinfo_token`.

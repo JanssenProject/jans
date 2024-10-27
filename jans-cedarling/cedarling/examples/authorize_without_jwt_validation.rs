@@ -11,6 +11,8 @@ use cedarling::{
 };
 use std::collections::HashMap;
 
+// The human-readable policy and schema file is located in next folder:
+// `test_files\policy-store_ok`
 static POLICY_STORE_RAW: &str = include_str!("../../test_files/policy-store_ok.json");
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -95,6 +97,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // }
     let userinfo_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJib0c4ZGZjNU1LVG4zN283Z3NkQ2V5cUw4THBXUXRnb080MW0xS1p3ZHEwIiwiY2xpZW50X2lkIjoiNWI0NDg3YzQtOGRiMS00MDlkLWE2NTMtZjkwN2I4MDk0MDM5IiwiYXVkIjoiNWI0NDg3YzQtOGRiMS00MDlkLWE2NTMtZjkwN2I4MDk0MDM5IiwibmFtZSI6IkRlZmF1bHQgQWRtaW4gVXNlciIsImVtYWlsIjoiYWRtaW5AZ2x1dS5vcmcifQ.MNebnjubvPtn9eq5j4RvWOTw7NBkjqt2Z8hTyFSJz0w".to_string();
 
+    // TODO: make access_token, id_token, and userinfo_token optional since they are not needed
+    // when validation is off
     let result = cedarling.authorize(Request {
         access_token,
         id_token,
@@ -104,14 +108,24 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         resource: ResourceData {
             id: "random_id".to_string(),
             resource_type: "Jans::Issue".to_string(),
-            payload: HashMap::from_iter([(
-                "org_id".to_string(),
-                serde_json::Value::String("some_long_id".to_string()),
-            )]),
+            payload: HashMap::from_iter([
+                (
+                    "org_id".to_string(),
+                    serde_json::Value::String("some_long_id".to_string()),
+                ),
+                (
+                    "country".to_string(),
+                    serde_json::Value::String("US".to_string()),
+                ),
+            ]),
         },
     });
-    if let Err(ref e) = &result {
-        eprintln!("Error while authorizing: {:?}\n\n", e)
+
+    match result {
+        Ok(result) => {
+            println!("\n\nis allowed: {}", result.is_allowed());
+        },
+        Err(e) => eprintln!("Error while authorizing: {}\n {:?}\n\n", e.to_string(), e),
     }
 
     Ok(())

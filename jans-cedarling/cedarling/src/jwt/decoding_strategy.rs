@@ -116,7 +116,7 @@ impl DecodingStrategy {
         let key = jwt::DecodingKey::from_secret("some_secret".as_ref());
 
         let claims = jwt::decode::<T>(jwt_str, &key, &validator)
-            .map_err(|e| Error::Validation(e.to_string()))?
+            .map_err(Error::Parsing)?
             .claims;
 
         Ok(claims)
