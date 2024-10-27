@@ -16,6 +16,7 @@ lazy_static = "1.5.0"
 jsonwebtoken = "9.3.0"
 typed-builder = "0.20.0"
 semver = "1.0.23"
+derive_more = { version = "1.0.0", features = ["deref"] }
 
 [dev-dependencies]
 # is used in testing
