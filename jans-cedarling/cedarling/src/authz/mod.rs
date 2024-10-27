@@ -95,7 +95,8 @@ impl Authz {
 
         // Convert [`AuthorizeEntitiesData`] to  [`cedar_policy::Entities`] structure,
         // hold all entities that will be used on authorize check.
-        let entities = entities_data.entities(Some(&self.config.policy_store.cedar_schema.schema))?;
+        let entities =
+            entities_data.entities(Some(&self.config.policy_store.cedar_schema.schema))?;
 
         // Check authorize where principal is `"Jans::Workload"` from cedar-policy schema.
         let workload_result = self
