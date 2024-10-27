@@ -46,7 +46,7 @@ EXPOSE 443 8080 1636
 # jans-linux-setup
 # =====================
 
-ENV JANS_SOURCE_VERSION=5f3b30e4b565601ccb31cd985920c09071cd1b54
+ENV JANS_SOURCE_VERSION=fecffe9d5896534665136e5aadd0d7173d0b3efb
 
 # cleanup
 RUN rm -rf /tmp/jans
