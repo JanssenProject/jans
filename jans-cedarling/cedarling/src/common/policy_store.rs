@@ -288,3 +288,55 @@ where
 
     Ok(policy)
 }
+
+#[cfg(test)]
+mod tests {
+    use test_utils::assert_eq;
+
+    use super::*;
+    use crate::common::policy_store::PolicyStore;
+
+    #[test]
+    fn test_ok() {
+        // The human-readable policy and schema file is located in next folder:
+        // `test_files\policy-store_ok`
+        static POLICY_STORE_RAW: &str = include_str!("../../../test_files/policy-store_ok.json");
+
+        let policy_result = serde_json::from_str::<PolicyStore>(POLICY_STORE_RAW);
+        assert!(policy_result.is_ok());
+    }
+
+    #[test]
+    fn test_base64_error() {
+        static POLICY_STORE_RAW: &str =
+            include_str!("../../../test_files/policy-store_policy_err_base64.json");
+
+        let policy_result = serde_json::from_str::<PolicyStore>(POLICY_STORE_RAW);
+        assert!(policy_result
+            .unwrap_err()
+            .to_string()
+            .contains(&ParsePolicySetMessage::Base64.to_string()));
+    }
+
+    #[test]
+    fn test_string_error() {
+        static POLICY_STORE_RAW: &str =
+            include_str!("../../../test_files/policy-store_policy_err_broken_utf8.json");
+
+        let policy_result = serde_json::from_str::<PolicyStore>(POLICY_STORE_RAW);
+        assert!(policy_result
+            .unwrap_err()
+            .to_string()
+            .contains(&ParsePolicySetMessage::String.to_string()));
+    }
+
+    #[test]
+    fn test_policy_error() {
+        static POLICY_STORE_RAW: &str =
+            include_str!("../../../test_files/policy-store_policy_err_broken_policy.json");
+
+        let policy_result = serde_json::from_str::<PolicyStore>(POLICY_STORE_RAW);
+        let err_msg = policy_result.unwrap_err().to_string();
+        assert_eq!(err_msg,"Errors encountered while parsing policies: [Error(\"unable to decode policy with id: 840da5d85403f35ea76519ed1a18a33989f855bf1cf8, error: unable to decode policy_content from human readable format: unexpected token `)`\", line: 0, column: 0)] at line 9 column 5")
+    }
+}

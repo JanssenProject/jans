@@ -47,6 +47,8 @@ fn errors_on_invalid_aud() {
     let access_token =
         generate_access_token_using_keys(&mut access_token_claims, &encoding_keys, false);
     let id_token = generate_id_token_using_keys(&mut id_token_claims, &encoding_keys, false);
+    // TODO: add correct implementation for userinfo token
+    let userinfo_token = generate_id_token_using_keys(&mut id_token_claims, &encoding_keys, false);
 
     // setup mock server responses for OpenID configuration and JWKS URIs
     let openid_config_response = json!({
@@ -80,7 +82,11 @@ fn errors_on_invalid_aud() {
 
     // assert that the decoding fails due to mismatched aud
     assert!(jwt_service
-        .decode_tokens::<AccessTokenClaims, IdTokenClaims>(&access_token, &id_token)
+        .decode_tokens::<AccessTokenClaims, IdTokenClaims, UserInfoTokenClaims>(
+            &access_token,
+            &id_token,
+            &userinfo_token
+        )
         .is_err());
     jwks_uri_mock.assert();
 

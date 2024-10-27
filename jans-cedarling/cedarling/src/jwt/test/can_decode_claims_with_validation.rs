@@ -57,6 +57,8 @@ fn can_decode_claims_with_validation() {
     let access_token =
         generate_access_token_using_keys(&mut access_token_claims, &encoding_keys, false);
     let id_token = generate_id_token_using_keys(&mut id_token_claims, &encoding_keys, false);
+    // TODO: add correct implementation for userinfo token
+    let userinfo_token = generate_id_token_using_keys(&mut id_token_claims, &encoding_keys, false);
 
     // setup mock server responses for OpenID configuration and JWKS URIs
     let openid_config_response = json!({
@@ -89,8 +91,12 @@ fn can_decode_claims_with_validation() {
     });
 
     // decode and validate both the access token and the ID token
-    let (access_token_result, id_token_result) = jwt_service
-        .decode_tokens::<AccessTokenClaims, IdTokenClaims>(&access_token, &id_token)
+    let (access_token_result, id_token_result, _userinfo_token_result) = jwt_service
+        .decode_tokens::<AccessTokenClaims, IdTokenClaims, UserInfoTokenClaims>(
+            &access_token,
+            &id_token,
+            &userinfo_token,
+        )
         .expect("should decode token");
     jwks_uri_mock.assert();
 

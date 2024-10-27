@@ -29,6 +29,7 @@ The JSON Schema is for the `policy_store.json` defined as follows:
     "cedar_schema": "cedar_schema_encoded_in_base64",
     "trusted_issuers": [ ... ]
 }
+
 ```
 
 - **cedar_version** : (*String*) The version of [Cedar policy](https://docs.cedarpolicy.com/). The protocols of this version will be followed when processing Cedar schema and policies.

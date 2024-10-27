@@ -40,10 +40,16 @@ fn can_decode_claims_without_validation() {
     let access_token =
         generate_access_token_using_keys(&mut access_token_claims, &encoding_keys, true);
     let id_token = generate_id_token_using_keys(&mut id_token_claims, &encoding_keys, true);
+    // TODO: add correct implementation for userinfo token
+    let userinfo_token = generate_id_token_using_keys(&mut id_token_claims.clone(), &encoding_keys, false);
 
     // decode and validate both the access token and the ID token
-    let (access_token_result, id_token_result) = jwt_service
-        .decode_tokens::<AccessTokenClaims, IdTokenClaims>(&access_token, &id_token)
+    let (access_token_result, id_token_result, _userinfo_token_result) = jwt_service
+        .decode_tokens::<AccessTokenClaims, IdTokenClaims, UserInfoTokenClaims>(
+            &access_token,
+            &id_token,
+            &userinfo_token,
+        )
         .expect("should decode token");
 
     // assert that the decoded token claims match the expected claims
