@@ -14,7 +14,7 @@ pub enum Error {
     ///
     /// This variant occurs when the provided JWT cannot be properly parsed.
     #[error("Error parsing the JWT: {0}")]
-    ParsingError(#[source] jsonwebtoken::errors::Error),
+    Parsing(#[source] jsonwebtoken::errors::Error),
 
     /// Indicates that the token was signed with an unsupported algorithm.
     ///
@@ -35,7 +35,7 @@ pub enum Error {
     /// This occurs when JWT validation fails due to issues such as an invalid signature,
     /// claim validation failure, or other validation errors.
     #[error("Failed to validate the JWT: {0}")]
-    ValidationError(#[source] jsonwebtoken::errors::Error),
+    Validation(#[source] jsonwebtoken::errors::Error),
 
     /// Indicates an unsupported algorithm defined in the configuration.
     ///
@@ -49,5 +49,5 @@ pub enum Error {
     /// This occurs when the `KeyService` fails to retrieve a required key or encounters
     /// another key-related issue during JWT validation.
     #[error("Key service error: {0}")]
-    KeyServiceError(#[from] key_service::Error),
+    KeyService(#[from] key_service::Error),
 }

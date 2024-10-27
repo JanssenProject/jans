@@ -30,18 +30,18 @@ impl KeyService {
     /// failures will return a corresponding `Error`.
     pub fn new(openid_conf_endpoints: Vec<&str>) -> Result<Self, Error> {
         let mut idp_configs = HashMap::new();
-        let http_client = Client::builder().build().map_err(Error::HttpError)?;
+        let http_client = Client::builder().build().map_err(Error::Http)?;
 
         // fetch IDP configs
         for endpoint in openid_conf_endpoints {
             let conf_src: OpenIdConfigSource = http_client
                 .get(endpoint)
                 .send()
-                .map_err(Error::HttpError)?
+                .map_err(Error::Http)?
                 .error_for_status()
-                .map_err(Error::HttpError)?
+                .map_err(Error::Http)?
                 .json()
-                .map_err(Error::RequestDeserializationError)?;
+                .map_err(Error::RequestDeserialization)?;
             let (issuer, conf) = OpenIdConfig::from_source(conf_src);
             idp_configs.insert(issuer, conf);
         }
@@ -55,14 +55,14 @@ impl KeyService {
             let jwks: JwkSet = http_client
                 .get(&*conf.jwks_uri)
                 .send()
-                .map_err(Error::HttpError)?
+                .map_err(Error::Http)?
                 .error_for_status()
-                .map_err(Error::HttpError)?
+                .map_err(Error::Http)?
                 .json()
-                .map_err(Error::RequestDeserializationError)?;
-            let mut decoding_keys = conf.decoding_keys.write().map_err(|_| Error::LockError)?;
+                .map_err(Error::RequestDeserialization)?;
+            let mut decoding_keys = conf.decoding_keys.write().map_err(|_| Error::Lock)?;
             for jwk in jwks.keys {
-                let decoding_key = DecodingKey::from_jwk(&jwk).map_err(Error::KeyParsingError)?;
+                let decoding_key = DecodingKey::from_jwk(&jwk).map_err(Error::KeyParsing)?;
                 let key_id = jwk.common.key_id.ok_or(Error::MissingKeyId)?;
                 decoding_keys.insert(key_id.into(), Arc::new(decoding_key));
             }
@@ -82,14 +82,14 @@ impl KeyService {
     pub fn get_key(&self, kid: &str) -> Result<Arc<DecodingKey>, Error> {
         for (iss, config) in &self.idp_configs {
             // first try to get the key from the local keystore
-            if let Some(key) = self.get_key_from_iss(&iss, &kid)? {
+            if let Some(key) = self.get_key_from_iss(iss, kid)? {
                 return Ok(key.clone());
             } else {
                 eprintln!("could not find {}, updating jwks", kid);
                 // if the key is not found in the local keystore, update
                 // the local keystore and try again
                 self.update_jwks(iss);
-                if let Some(key) = self.get_key_from_iss(&iss, &kid)? {
+                if let Some(key) = self.get_key_from_iss(iss, kid)? {
                     return Ok(key.clone());
                 }
             }
@@ -101,7 +101,7 @@ impl KeyService {
     /// helper function to retrieve a key for a specific issuer (`iss`).
     fn get_key_from_iss(&self, iss: &str, kid: &str) -> Result<Option<Arc<DecodingKey>>, Error> {
         if let Some(idp) = self.idp_configs.get(iss) {
-            let decoding_keys = idp.decoding_keys.read().map_err(|_| Error::LockError)?;
+            let decoding_keys = idp.decoding_keys.read().map_err(|_| Error::Lock)?;
             if let Some(key) = decoding_keys.get(kid) {
                 return Ok(Some(key.clone()));
             }
@@ -127,20 +127,20 @@ impl KeyService {
             .http_client
             .get(&*conf.jwks_uri)
             .send()
-            .map_err(Error::HttpError)?
+            .map_err(Error::Http)?
             .error_for_status()
-            .map_err(Error::HttpError)?
+            .map_err(Error::Http)?
             .json()
-            .map_err(Error::RequestDeserializationError)?;
+            .map_err(Error::RequestDeserialization)?;
         for jwk in jwks.keys {
-            let decoding_key = DecodingKey::from_jwk(&jwk).map_err(Error::KeyParsingError)?;
+            let decoding_key = DecodingKey::from_jwk(&jwk).map_err(Error::KeyParsing)?;
             let key_id = jwk.common.key_id.ok_or(Error::MissingKeyId)?;
             new_keys.insert(key_id.into(), Arc::new(decoding_key));
         }
 
         // we reassign the keys after fetching and deserializing the keys
         // so we don't lose the old ones in case the process fails
-        let mut decoding_keys = conf.decoding_keys.write().map_err(|_| Error::LockError)?;
+        let mut decoding_keys = conf.decoding_keys.write().map_err(|_| Error::Lock)?;
         *decoding_keys = new_keys;
 
         Ok(())

@@ -55,7 +55,7 @@ impl DecodingStrategy {
             .iter()
             .map(|x| x.openid_configuration_endpoint.as_ref())
             .collect();
-        let key_service = KeyService::new(openid_conf_endpoints).map_err(Error::KeyServiceError)?;
+        let key_service = KeyService::new(openid_conf_endpoints).map_err(Error::KeyService)?;
 
         Ok(Self::WithValidation {
             key_service,
@@ -96,7 +96,7 @@ impl DecodingStrategy {
         let key = jwt::DecodingKey::from_secret("some_secret".as_ref());
 
         let claims = jwt::decode::<T>(jwt_str, &key, &validator)
-            .map_err(Error::ValidationError)?
+            .map_err(Error::Validation)?
             .claims;
 
         Ok(claims)
@@ -120,10 +120,10 @@ fn decode_and_validate_jwt<T: DeserializeOwned>(
     iss: Option<impl ToString>,
     aud: Option<impl ToString>,
     req_sub: bool,
-    supported_algs: &Vec<jwt::Algorithm>,
+    supported_algs: &[jwt::Algorithm],
     key_service: &KeyService,
 ) -> Result<T, Error> {
-    let header = jwt::decode_header(jwt).map_err(Error::ParsingError)?;
+    let header = jwt::decode_header(jwt).map_err(Error::Parsing)?;
 
     // reject unsupported algorithms early
     if !supported_algs.contains(&header.alg) {
@@ -149,12 +149,12 @@ fn decode_and_validate_jwt<T: DeserializeOwned>(
     let kid = &header
         .kid
         .ok_or_else(|| Error::MissingRequiredHeader("kid".into()))?;
-    let key = key_service.get_key(kid).map_err(Error::KeyServiceError)?;
+    let key = key_service.get_key(kid).map_err(Error::KeyService)?;
     // TODO: handle tokens without a `kid` in the header
 
     // decode and validate the jwt
-    let claims = jwt::decode::<T>(&jwt, &key, &validator)
-        .map_err(Error::ValidationError)?
+    let claims = jwt::decode::<T>(jwt, &key, &validator)
+        .map_err(Error::Validation)?
         .claims;
     Ok(claims)
 }

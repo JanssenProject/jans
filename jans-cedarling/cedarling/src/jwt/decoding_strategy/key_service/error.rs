@@ -14,15 +14,15 @@ pub enum Error {
 
     /// Represents an HTTP error during the request.
     #[error("HTTP error occurred: {0}")]
-    HttpError(#[source] reqwest::Error),
+    Http(#[source] reqwest::Error),
 
     /// Indicates failure to deserialize the response from the HTTP request.
     #[error("Failed to deserialize the response from the HTTP request: {0}")]
-    RequestDeserializationError(#[source] reqwest::Error),
+    RequestDeserialization(#[source] reqwest::Error),
 
     /// Indicates an error in parsing the decoding key from the JWKS JSON.
     #[error("Error parsing decoding key from JWKS JSON: {0}")]
-    KeyParsingError(#[source] jsonwebtoken::errors::Error),
+    KeyParsing(#[source] jsonwebtoken::errors::Error),
 
     /// Indicates that the JWK is missing a `kid`.
     #[error("The JWK is missing a required `kid`.")]
@@ -32,5 +32,5 @@ pub enum Error {
     ///
     /// This error gets returned when a lock gets poisoned.
     #[error("Failed to acquire write lock on decoding keys.")]
-    LockError,
+    Lock,
 }
