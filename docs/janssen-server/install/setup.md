@@ -43,7 +43,7 @@ tags:
 Install Jans Config API? [Yes] : 
 Install Scim Server? [Yes] : 
 Install Fido2 Server? [Yes] : 
-Install Jans LDAP Link Server? [Yes] : 
+Install Jans Link Server? [Yes] : 
 Install Gluu Casa? [No] :
   ```
    
@@ -69,39 +69,56 @@ Avoid setup issues by acknowledging the following:
 ## Script Command Line Options
 
 To check usage of this script run help command
+```
+python3 /opt/jans/jans-setup/setup.py --help
+```
 
 ```
-    python3 /opt/jans/jans-setup/setup.py --help
-
-    usage: setup.py [-h] [--version] [-c] [-d D] [-f F] [-n] [-N] [-u] [-csx] [-encode-salt ENCODE_SALT]
+usage: setup.py [-h] [--version] [-c] [-d D] [-f F] [-n] [-N] [-u] [-csx]
+                [-encode-salt ENCODE_SALT]
                 [-remote-rdbm {mysql,pgsql,spanner} | -local-rdbm {mysql,pgsql}]
-                [-ip-address IP_ADDRESS] [-host-name HOST_NAME] [-org-name ORG_NAME] [-email EMAIL]
-                [-city CITY] [-state STATE] [-country COUNTRY] [-rdbm-user RDBM_USER]
-                [-rdbm-password RDBM_PASSWORD] [-rdbm-port RDBM_PORT] [-rdbm-db RDBM_DB]
-                [-rdbm-host RDBM_HOST] [--reset-rdbm-db] [--shell] [--dump-config-on-error]
-                [--no-progress] [-admin-password ADMIN_PASSWORD] [-jans-max-mem JANS_MAX_MEM]
-                [-properties-password PROPERTIES_PASSWORD] [-approved-issuer APPROVED_ISSUER]
-                [--force-download] [--download-exit] [-jans-app-version JANS_APP_VERSION]
-                [-jans-build JANS_BUILD] [-setup-branch SETUP_BRANCH] [--disable-config-api-security]
-                [--cli-test-client] [--import-ldif IMPORT_LDIF] [-enable-script ENABLE_SCRIPT]
-                [-disable-script DISABLE_SCRIPT] [-java-version {11,17}] [-stm] [-w] [-t] [-x]
-                [--allow-pre-released-features] [--remote-couchbase] [--local-couchbase]
+                [-ip-address IP_ADDRESS] [-host-name HOST_NAME]
+                [-org-name ORG_NAME] [-email EMAIL] [-city CITY]
+                [-state STATE] [-country COUNTRY] [-rdbm-user RDBM_USER]
+                [-rdbm-password RDBM_PASSWORD] [-rdbm-port RDBM_PORT]
+                [-rdbm-db RDBM_DB] [-rdbm-host RDBM_HOST] [--reset-rdbm-db]
+                [--shell] [--dump-config-on-error] [--no-progress]
+                [-admin-password ADMIN_PASSWORD] [-jans-max-mem JANS_MAX_MEM]
+                [-properties-password PROPERTIES_PASSWORD]
+                [-approved-issuer APPROVED_ISSUER] [--force-download]
+                [--download-exit] [-jans-app-version JANS_APP_VERSION]
+                [-jans-build JANS_BUILD] [-setup-branch SETUP_BRANCH]
+                [--disable-config-api-security] [--cli-test-client]
+                [--import-ldif IMPORT_LDIF] [-enable-script ENABLE_SCRIPT]
+                [-disable-script DISABLE_SCRIPT] [-java-version {11,17}]
+                [-stm] [-w] [-t] [-x] [--allow-pre-released-features]
+                [--local-ldap] [--listen_all_interfaces]
+                [--remote-ldap | --disable-local-ldap] [--remote-couchbase]
+                [--local-couchbase]
                 [-couchbase-admin-user COUCHBASE_ADMIN_USER]
                 [-couchbase-admin-password COUCHBASE_ADMIN_PASSWORD]
                 [-couchbase-bucket-prefix COUCHBASE_BUCKET_PREFIX]
-                [-couchbase-hostname COUCHBASE_HOSTNAME] [-couchbase-default-mem COUCHBASE_DEFAULT_MEM]
-                [-couchbase-user-mem COUCHBASE_USER_MEM] [-couchbase-site-mem COUCHBASE_SITE_MEM]
-                [-couchbase-cache-mem COUCHBASE_CACHE_MEM] [-couchbase-token-mem COUCHBASE_TOKEN_MEM]
-                [-couchbase-session-mem COUCHBASE_SESSION_MEM] [--no-data] [--no-jsauth]
-                [--no-config-api] [--no-scim] [--no-fido2] [--install-jans-ldap-link]
-                [--install-jans-keycloak-link] [--with-casa] [--install-jans-saml]
-                [--install-jans-lock] [--install-opa] [--load-config-api-test]
-                [-config-patch-creds CONFIG_PATCH_CREDS] [-spanner-project SPANNER_PROJECT]
-                [-spanner-instance SPANNER_INSTANCE] [-spanner-database SPANNER_DATABASE]
+                [-couchbase-hostname COUCHBASE_HOSTNAME]
+                [-couchbase-default-mem COUCHBASE_DEFAULT_MEM]
+                [-couchbase-user-mem COUCHBASE_USER_MEM]
+                [-couchbase-site-mem COUCHBASE_SITE_MEM]
+                [-couchbase-cache-mem COUCHBASE_CACHE_MEM]
+                [-couchbase-token-mem COUCHBASE_TOKEN_MEM]
+                [-couchbase-session-mem COUCHBASE_SESSION_MEM] [--no-data]
+                [--no-jsauth] [-ldap-admin-password LDAP_ADMIN_PASSWORD]
+                [--no-config-api] [--no-scim] [--no-fido2]
+                [--install-jans-ldap-link] [--install-jans-keycloak-link]
+                [--with-casa] [--install-jans-saml] [--install-jans-lock]
+                [--install-opa] [--load-config-api-test]
+                [-config-patch-creds CONFIG_PATCH_CREDS]
+                [-spanner-project SPANNER_PROJECT]
+                [-spanner-instance SPANNER_INSTANCE]
+                [-spanner-database SPANNER_DATABASE]
                 [-spanner-emulator-host SPANNER_EMULATOR_HOST | -google-application-credentials GOOGLE_APPLICATION_CREDENTIALS]
-                [-test-client-id TEST_CLIENT_ID] [-test-client-pw TEST_CLIENT_PW]
-                [-test-client-redirect-uri TEST_CLIENT_REDIRECT_URI] [--test-client-trusted]
-
+                [-test-client-id TEST_CLIENT_ID]
+                [-test-client-pw TEST_CLIENT_PW]
+                [-test-client-redirect-uri TEST_CLIENT_REDIRECT_URI]
+                [--test-client-trusted]
 ```
 
 Use this script to configure your Jans Server and to add initial data. If setup.properties is found in this folder, these properties will automatically be used instead of the interactive setup.
