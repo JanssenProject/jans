@@ -54,6 +54,10 @@
                     <groupId>com.fasterxml.jackson.module</groupId>
                     <artifactId>jackson-module-jaxb-annotations</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>commons-io</groupId>
+                    <artifactId>commons-io</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
@@ -168,11 +172,6 @@
             <groupId>org.zkoss.common</groupId>
             <artifactId>zel</artifactId>
             <version>${zk.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.zkoss.theme</groupId>
-            <artifactId>breeze</artifactId>
-            <version>9.6.0.2</version>
         </dependency>
 
         <!-- LOGGING -->
