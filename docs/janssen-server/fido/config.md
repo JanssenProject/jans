@@ -21,7 +21,6 @@ tags:
 | metricReporterInterval      | 300                                      | The interval for metric reporter in seconds.                                                                                    |
 | metricReporterKeepDataDays  | 15                                       | The number of days to retain metric reported data in the system                                                                 |
 | metricReporterEnabled       | true                                     | Boolean value specifying whether to enable Metric Reporter                                                                      |
-| personCustomObjectClassList | ["jansCustomPerson", "jansPerson"  ]     | LDAP custom object class list for dynamic person enrollment.                                                                    |
 | fido2Configuration          | See JSON contents in the below example   | FIDO2 Configuration                                                                                                             |
 
 #### Fido2Configuration structure
