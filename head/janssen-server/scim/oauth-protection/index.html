@@ -6861,6 +6861,8 @@
       <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
       
       
+        
+      
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
           OAuth Protection
@@ -6877,19 +6879,14 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
       Table of contents
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#oauth-protection" class="md-nav__link">
-    OAuth protection
-  </a>
-  
-</li>
       
         <li class="md-nav__item">
   <a href="#client-details" class="md-nav__link">
@@ -8671,19 +8668,14 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
       Table of contents
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#oauth-protection" class="md-nav__link">
-    OAuth protection
-  </a>
-  
-</li>
       
         <li class="md-nav__item">
   <a href="#client-details" class="md-nav__link">
@@ -8750,9 +8742,7 @@
   </a>
 
 
-  <h1>OAuth Protection</h1>
-
-<h2 id="oauth-protection">OAuth protection<a class="headerlink" href="#oauth-protection" title="Permanent link">#</a></h2>
+<h1 id="oauth-protection">OAuth protection<a class="headerlink" href="#oauth-protection" title="Permanent link">#</a></h1>
 <p>The SCIM API endpoints are by default protected by (Bearer) OAuth 2.0 tokens. Depending on the operation, these tokens must have certain scopes for the operations to be authorized. The table below summarizes this fact:</p>
 <table>
 <thead>
@@ -8811,14 +8801,14 @@
 <p>From the "Basic" section, grab the "client id" and "client secret". This secret is encrypted, to decrypt it, in a terminal run <code>/opt/jans/bin/encode.py -D ENCRYPTED-SECRET-HERE</code>.</p>
 <h2 id="getting-a-token">Getting a token<a class="headerlink" href="#getting-a-token" title="Permanent link">#</a></h2>
 <p>This is a <code>curl</code> example of how to get a token valid for retrieving and modifying users (line breaks added for readability). Note the use of white space to separate scope names.</p>
-<div class="highlight"><pre><span></span><code>curl -k -u &#39;CLIENT_ID:DECRYPTED_CLIENT_SECRET&#39; -k -d grant_type=client_credentials -d 
-    scope=&#39;https://jans.io/scim/users.read https://jans.io/scim/users.write&#39; 
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>curl -k -u <span class="s1">&#39;CLIENT_ID:DECRYPTED_CLIENT_SECRET&#39;</span> -k -d <span class="nv">grant_type</span><span class="o">=</span>client_credentials -d 
+    <span class="nv">scope</span><span class="o">=</span><span class="s1">&#39;https://jans.io/scim/users.read https://jans.io/scim/users.write&#39;</span> 
     https://your-jans-server/jans-auth/restv1/token
 </code></pre></div>
 <p>Grab the "access_token" from the obtained response.</p>
 <h2 id="issue-a-request-to-the-service">Issue a request to the service<a class="headerlink" href="#issue-a-request-to-the-service" title="Permanent link">#</a></h2>
 <p>The below is a curl example of how to call an operation by passing the previously obtained token (line breaks added for readability):</p>
-<div class="highlight"><pre><span></span><code>curl -k -G -H &#39;Authorization: Bearer ACCESS_TOKEN&#39; --data-urlencode &#39;filter=displayName co &quot;Admin&quot;&#39; 
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>curl -k -G -H <span class="s1">&#39;Authorization: Bearer ACCESS_TOKEN&#39;</span> --data-urlencode <span class="s1">&#39;filter=displayName co &quot;Admin&quot;&#39;</span> 
     https://your-jans-server/jans-scim/restv1/v2/Users
 </code></pre></div>
 <p>The output should show valid SCIM (JSON) output. Account the access token is short-lived: once it expires you will get a status response of 401 and need to re-request the token as in the previous step.</p>
@@ -8831,7 +8821,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-09-27T12:12:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-28T05:09:15+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-28</span>
       
         <br>
         Created:

@@ -77,6 +77,11 @@
     <label class="md-overlay" for="__drawer"></label>
     <div data-md-component="skip">
       
+        
+        <a href="#monitoring" class="md-skip">
+          Skip to content
+        </a>
+      
     </div>
     <div data-md-component="announce">
       
@@ -6697,10 +6702,63 @@
       <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
       
       
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Monitoring
+          <span class="md-nav__icon md-icon"></span>
+        </label>
       
       <a href="./" class="md-nav__link md-nav__link--active">
         Monitoring
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#fido-devices" class="md-nav__link">
+    FIDO Devices
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fido2-devices" class="md-nav__link">
+    FIDO2 devices
+  </a>
+  
+    <nav class="md-nav" aria-label="FIDO2 devices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-querying-enrolled-devices" class="md-nav__link">
+    Example: Querying Enrolled Devices
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -8609,6 +8667,43 @@
   
   
   
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#fido-devices" class="md-nav__link">
+    FIDO Devices
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#fido2-devices" class="md-nav__link">
+    FIDO2 devices
+  </a>
+  
+    <nav class="md-nav" aria-label="FIDO2 devices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-querying-enrolled-devices" class="md-nav__link">
+    Example: Querying Enrolled Devices
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
   
 </nav>
                   </div>
@@ -8645,16 +8740,49 @@
   </a>
 
 
-  <h1>Monitoring</h1>
-
-<p>This page will be the landing page for the Janssen Project admin documentation</p>
+<h1 id="monitoring">Monitoring<a class="headerlink" href="#monitoring" title="Permanent link">#</a></h1>
+<h2 id="fido-devices">FIDO Devices<a class="headerlink" href="#fido-devices" title="Permanent link">#</a></h2>
+<p>A FIDO device represents a user credential stored in the Jans Server database that is compliant with the <a href="https://fidoalliance.org/">FIDO</a> standard. These devices are used as a second factor in a setting of strong authentication.</p>
+<p>FIDO devices were superseded by <a href="#fido2-devices">FIDO 2</a> devices in Jans Server.</p>
+<h2 id="fido2-devices">FIDO2 devices<a class="headerlink" href="#fido2-devices" title="Permanent link">#</a></h2>
+<p>FIDO2 devices are credentials that adhere to the more current Fido 2.0 initiative (WebAuthn + CTAP). Examples of FIDO2 devices are USB security keys and Super Gluu devices.</p>
+<p>The SCIM endpoints for FIDO 2 allow application developers to query, update and delete already existing devices. Addition of devices do not take place through the service since this process requires direct end-user interaction, ie. device enrolling.</p>
+<p>The schema attributes for a device of this kind can be found by hitting the URL  <code>https://&lt;jans-server&gt;/jans-scim/restv1/v2/Schemas/urn:ietf:params:scim:schemas:core:2.0:Fido2Device</code></p>
+<p>To distinguish between regular FIDO2 and SuperGluu devices, note only SuperGluu entries have the attribute <code>deviceData</code> populated (i.e. not null)</p>
+<h3 id="example-querying-enrolled-devices">Example: Querying Enrolled Devices<a class="headerlink" href="#example-querying-enrolled-devices" title="Permanent link">#</a></h3>
+<p>Say we are interested in having a list of Super Gluu devices users have enrolled and whose operating system is iOS. We may issue a query like this:</p>
+<div class="highlight"><pre><span></span><code>curl -k -G -H &#39;Authorization: Bearer ACCESS_TOKEN&#39; --data-urlencode 
+&#39;filter=deviceData co &quot;ios&quot;&#39; -d count=10 https://&lt;jans-server&gt;/jans-scim/restv1/v2/Fido2Devices
+</code></pre></div>
+<p>The response will be like:</p>
+<div class="highlight"><pre><span></span><code>{
+  &quot;totalResults&quot;: ...,
+  &quot;itemsPerPage&quot;: ...,
+  &quot;startIndex&quot;: 1,
+  &quot;schemas&quot;: [
+    &quot;urn:ietf:params:scim:api:messages:2.0:ListResponse&quot;
+  ],
+  &quot;Resources&quot;: [
+    {
+      &quot;id&quot;: &quot;...&quot;,
+      &quot;meta&quot;: {...},
+      &quot;schemas&quot;: [&quot;urn:ietf:params:scim:schemas:core:2.0:Fido2Device&quot;],
+      &quot;userId&quot;: &quot;...&quot;,
+      ...
+      &quot;deviceData&quot;: &quot;{...}&quot;,
+      &quot;displayName&quot;: ...,
+    },
+    ...
+  ]
+}
+</code></pre></div>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-09-27T12:12:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-28T05:09:15+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-28</span>
       
         <br>
         Created:

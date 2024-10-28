@@ -2535,8 +2535,22 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#add-update-delete-user" class="md-nav__link">
-    Add / Update / Delete User
+  <a href="#add-user" class="md-nav__link">
+    Add User
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#update-user" class="md-nav__link">
+    Update User
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#delete-user" class="md-nav__link">
+    Delete User
   </a>
   
 </li>
@@ -2550,6 +2564,61 @@
   <a href="#using-configuration-rest-api" class="md-nav__link">
     Using Configuration REST API
   </a>
+  
+    <nav class="md-nav" aria-label="Using Configuration REST API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#get-scim-client" class="md-nav__link">
+    Get SCIM Client
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get-access-token" class="md-nav__link">
+    Get Access token
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#retrive-existing-user" class="md-nav__link">
+    Retrive existing User
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-an-user" class="md-nav__link">
+    Create an User
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#updating-a-userput" class="md-nav__link">
+    Updating a User(PUT)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#updating-a-user-patch" class="md-nav__link">
+    Updating a User (PATCH)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#deleting-users" class="md-nav__link">
+    Deleting Users
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -8797,8 +8866,22 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#add-update-delete-user" class="md-nav__link">
-    Add / Update / Delete User
+  <a href="#add-user" class="md-nav__link">
+    Add User
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#update-user" class="md-nav__link">
+    Update User
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#delete-user" class="md-nav__link">
+    Delete User
   </a>
   
 </li>
@@ -8812,6 +8895,61 @@
   <a href="#using-configuration-rest-api" class="md-nav__link">
     Using Configuration REST API
   </a>
+  
+    <nav class="md-nav" aria-label="Using Configuration REST API">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#get-scim-client" class="md-nav__link">
+    Get SCIM Client
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get-access-token" class="md-nav__link">
+    Get Access token
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#retrive-existing-user" class="md-nav__link">
+    Retrive existing User
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-an-user" class="md-nav__link">
+    Create an User
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#updating-a-userput" class="md-nav__link">
+    Updating a User(PUT)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#updating-a-user-patch" class="md-nav__link">
+    Updating a User (PATCH)
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#deleting-users" class="md-nav__link">
+    Deleting Users
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -9139,7 +9277,7 @@ To get sample schema type /opt/jans/jans-cli/config-cli.py -scim --schema-sample
 <div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py -scim --schema-sample UserResource
 </code></pre></div>
 <p>From the above example of schema file, we can fill required values in a data file <code>/tmp/user.json</code>. As we have seen in the sample schema there are lot of properties, but we are going to fill minimum to create a <code>test user</code>:</p>
-<p><div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">user.json</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">user.json</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
 <span class="normal"> 3</span>
 <span class="normal"> 4</span>
@@ -9165,7 +9303,7 @@ To get sample schema type /opt/jans/jans-cli/config-cli.py -scim --schema-sample
 <span class="w">  </span><span class="p">]</span><span class="w"></span>
 <span class="p">}</span><span class="w"></span>
 </code></pre></div></td></tr></table></div>
-Let's run the following command to create user in Janssen Server:</p>
+<p>Let's run the following command to create user in Janssen Server:</p>
 <div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py -scim --operation-id create-user --data /tmp/user.json
 </code></pre></div>
 <div class="highlight"><span class="filename">Output</span><pre><span></span><code><span class="p">{</span><span class="w"></span>
@@ -9219,15 +9357,16 @@ Let's run the following command to create user in Janssen Server:</p>
 <span class="p">}</span><span class="w"></span>
 </code></pre></div>
 <h3 id="update-user-by-id">Update User by Id<a class="headerlink" href="#update-user-by-id" title="Permanent link">#</a></h3>
-<p>Using Jans CLI, We can update user information. As shown in the <a href="#using-command-line">output</a> command, the <code>update-user-by-id</code> operation requires user data that needs to be changed. You can find details of user properties in <a href="#creating-a-new-user">schema</a>. Let's change the <code>nickname</code> for the above <code>Test user</code>. First,we need to put the update data into a json file <code>/tmp/update-user.json</code>:
-```json title='update-user.json
+<p>Using Jans CLI, We can update user information. As shown in the <a href="#using-command-line">output</a> command, the <code>update-user-by-id</code> operation requires user data that needs to be changed. You can find details of user properties in <a href="#creating-a-new-user">schema</a>. Let's change the <code>nickname</code> for the above <code>Test user</code>. First,we need to put the update data into a json file <code>/tmp/update-user.json</code>:</p>
+<p>```json title='update-user.json
 {
   "nickName": "testuser"
 }
 <div class="highlight"><pre><span></span><code>Let&#39;s run the following command:
+
 ```bash title=&quot;Command&quot;
  /opt/jans/jans-cli/config-cli.py -scim --operation-id update-user-by-id --url-suffix=&quot;id:e24c1479-4a61-4f1f-aa30-2ccc13c0b130&quot; --data /tmp/update-user.json
-</code></pre></div>
+</code></pre></div></p>
 <div class="highlight"><span class="filename">Sample Output</span><pre><span></span><code><span class="p">{</span><span class="w"></span>
 <span class="w">  </span><span class="nt">&quot;schemas&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
 <span class="w">    </span><span class="s2">&quot;urn:ietf:params:scim:schemas:core:2.0:User&quot;</span><span class="w"></span>
@@ -9250,7 +9389,7 @@ Let's run the following command to create user in Janssen Server:</p>
 <span class="w">    </span><span class="p">}</span><span class="w"></span>
 <span class="w">  </span><span class="p">]</span><span class="w"></span>
 <span class="p">}</span><span class="w"></span>
-</code></pre></div></p>
+</code></pre></div>
 <h3 id="patch-user-by-id">Patch User by Id<a class="headerlink" href="#patch-user-by-id" title="Permanent link">#</a></h3>
 <p>Using <code>patch-user-by-id</code> operation, We can modify user properties partially. As we have seen in the <a href="#using-command-line">Output</a> of <code>--info</code> command, <code>patch-user-by-id</code> operation requires <code>PatchRequest</code> <a href="../../config-tools/jans-cli/#about-schemas">schema</a> definition for payload data. To get the sample <code>PatchRequest</code> schema, run the followwing command:</p>
 <p>```bash titl="Command"
@@ -9284,48 +9423,455 @@ Let's run the following command to create user in Janssen Server:</p>
         }
     ]
 }
-</code></pre></div>
-The command line to run all of these operations:
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py -scim --operation patch-user-by-id --url-suffix<span class="o">=</span><span class="s2">&quot;id:e24c1479-4a61-4f1f-aa30-2ccc13c0b130&quot;</span> --data /tmp/patch-user.json
 </code></pre></div></p>
+<p>The command line to run all of these operations:</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py -scim --operation patch-user-by-id --url-suffix<span class="o">=</span><span class="s2">&quot;id:e24c1479-4a61-4f1f-aa30-2ccc13c0b130&quot;</span> --data /tmp/patch-user.json
+</code></pre></div>
 <h3 id="delete-user-by-id">Delete User by ID<a class="headerlink" href="#delete-user-by-id" title="Permanent link">#</a></h3>
 <p>To delete the, run the following command with the specific user ID as <code>--url-suffix=id:user-id</code>. For example, let's delete the <code>test user</code> we have created earlier:</p>
 <div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py -scim --operation-id delete-user-by-id --url-suffix<span class="o">=</span><span class="s2">&quot;id:e24c1479-4a61-4f1f-aa30-2ccc13c0b130&quot;</span>
 </code></pre></div>
 <h2 id="using-text-based-ui">Using Text-based UI<a class="headerlink" href="#using-text-based-ui" title="Permanent link">#</a></h2>
-<p>Start TUI using the command below:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans tui
+<p>Using TUI, We can add, update and deleter users in the Janssen Server. To do that, Let's start TUI using the command below:</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/jans_cli_tui.py
 </code></pre></div>
 <p>Navigate to <code>Users</code> to open the users tab as shown in the image below:</p>
-<p><img alt="" src="../../../../assets/jans-tui-user-mgt.png" /></p>
+<p><img alt="manage-user-in-tui" src="../../../../assets/jans-tui-user-mgt.png" /></p>
 <ul>
 <li>We can see the list of users from search option</li>
-<li>To get the list of users available in the Janssen Server, bring the control to <code>Search</code> box (using <code>tab</code> key) and press <code>Enter</code> key. </li>
+<li>To get the list of users available in the Janssen Server, bring the control to <code>Search</code> box (using <code>tab</code> key) and press <code>Enter</code> key.</li>
 </ul>
-<h3 id="add-update-delete-user">Add / Update / Delete User<a class="headerlink" href="#add-update-delete-user" title="Permanent link">#</a></h3>
-<ol>
-<li>To add user into server, hit <code>Enter</code> on <code>Add Users</code> button, fill up user details and press <code>Save</code> button to save it. Please check image below:</li>
-</ol>
+<p>Let's see at a glance of available user attributes.</p>
+<table>
+<thead>
+<tr>
+<th>Attributes</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Username</td>
+<td>...</td>
+</tr>
+<tr>
+<td>Password</td>
+<td>...</td>
+</tr>
+<tr>
+<td>First Name</td>
+<td>...</td>
+</tr>
+<tr>
+<td>Middle Name</td>
+<td>...</td>
+</tr>
+<tr>
+<td>Last Name</td>
+<td>...</td>
+</tr>
+<tr>
+<td>Display Name</td>
+<td>...</td>
+</tr>
+<tr>
+<td>Email</td>
+<td>...</td>
+</tr>
+<tr>
+<td>Active</td>
+<td>...</td>
+</tr>
+<tr>
+<td>Nickname</td>
+<td>...</td>
+</tr>
+<tr>
+<td>CIBA Device Registration Token</td>
+<td>...</td>
+</tr>
+<tr>
+<td>CIBA User code</td>
+<td>...</td>
+</tr>
+<tr>
+<td>Locale</td>
+<td>...</td>
+</tr>
+<tr>
+<td>Website URL</td>
+<td>...</td>
+</tr>
+<tr>
+<td>IMAP Data</td>
+<td>...</td>
+</tr>
+<tr>
+<td>jansAdminUIRole</td>
+<td>...</td>
+</tr>
+<tr>
+<td>Enrollment code</td>
+<td>...</td>
+</tr>
+<tr>
+<td>User Permission</td>
+<td>...</td>
+</tr>
+<tr>
+<td>Preferred Language</td>
+<td>...</td>
+</tr>
+<tr>
+<td>Profile URL</td>
+<td>...</td>
+</tr>
+<tr>
+<td>Secret Question</td>
+<td>...</td>
+</tr>
+<tr>
+<td>Email Verified</td>
+<td>...</td>
+</tr>
+<tr>
+<td>Birthdate</td>
+<td>...</td>
+</tr>
+<tr>
+<td>Time zone info</td>
+<td>...</td>
+</tr>
+<tr>
+<td>Phone Number verified</td>
+<td>...</td>
+</tr>
+<tr>
+<td>Preferred Username</td>
+<td>...</td>
+</tr>
+<tr>
+<td>TransientId</td>
+<td>...</td>
+</tr>
+<tr>
+<td>PersistentId</td>
+<td>...</td>
+</tr>
+<tr>
+<td>Country</td>
+<td>...</td>
+</tr>
+<tr>
+<td>Secret Answer</td>
+<td>...</td>
+</tr>
+<tr>
+<td>OpenID Connect JSON formatted address</td>
+<td>...</td>
+</tr>
+<tr>
+<td>User certificate</td>
+<td>...</td>
+</tr>
+<tr>
+<td>Organization</td>
+<td>...</td>
+</tr>
+<tr>
+<td>Picture URL</td>
+<td>...</td>
+</tr>
+</tbody>
+</table>
+<h3 id="add-user">Add User<a class="headerlink" href="#add-user" title="Permanent link">#</a></h3>
+<p>Let's add an user by selecting <code>Add Users</code> tab. Initially we can provide bellow attributes value,</p>
 <p><img alt="add-user" src="../../../../assets/jans-tui-create-user.png" /></p>
-<ol>
-<li>To modify any user properties, find the user from search box and hit <code>Enter</code> to pop-up user details, update user details and finally hit on <code>Save</code> button to update the changes. </li>
-</ol>
+<p>We can add extra claims simply by slecting <code>Add Claim</code></p>
+<p><img alt="add-claim" src="../../../../assets/jans-tui-add-user-claims.png" /></p>
+<p>Finally <code>save</code> and exit. We will get an unique <code>inum</code></p>
+<h3 id="update-user">Update User<a class="headerlink" href="#update-user" title="Permanent link">#</a></h3>
+<p>To modify any user properties, find the user from search box and hit <code>Enter</code> to pop-up user details, update user details and finally hit on <code>Save</code> button to update the changes. </p>
 <p><img alt="update-user" src="../../../../assets/jans-tui-update-user.png" /></p>
-<ol>
-<li>To delete user, bring the control on the specific user row and press <code>delete</code> or <code>d</code> key from keyboard. It will show a pop-up for confirmation as below:</li>
-</ol>
+<h3 id="delete-user">Delete User<a class="headerlink" href="#delete-user" title="Permanent link">#</a></h3>
+<p>To delete user, bring the control on the specific user row and press <code>delete</code> or <code>d</code> key from keyboard. It will show a pop-up for confirmation as below:</p>
 <p><img alt="delete-user" src="../../../../assets/jans-tui-delete-user.png" /></p>
 <h2 id="using-configuration-rest-api">Using Configuration REST API<a class="headerlink" href="#using-configuration-rest-api" title="Permanent link">#</a></h2>
 <p>Janssen Server Configuration REST API exposes relevant endpoints for managing
 and configuring the OpenID Connect Client. Endpoint details are published in the <a href="../../../reference/openapi/">Swagger
 document</a>.</p>
+<h3 id="get-scim-client">Get SCIM Client<a class="headerlink" href="#get-scim-client" title="Permanent link">#</a></h3>
+<p>Let's obtain the credentials of this client first. In TUI, navigate to <code>Auth Server &gt; Clients</code>. In the search field type SCIM (uppercase). Highlight the row that matches a client named "SCIM Client" and press Enter. To see in <code>JSON</code> formate please press <code>d</code>.</p>
+<p>From the "Basic" section, grab the "client id" and "client secret". This secret is encrypted, to decrypt it, in a terminal run <code>/opt/jans/bin/encode.py -D ENCRYPTED-SECRET-HERE</code>.</p>
+<h3 id="get-access-token">Get Access token<a class="headerlink" href="#get-access-token" title="Permanent link">#</a></h3>
+<p>Let's get a token,</p>
+<div class="highlight"><pre><span></span><code>curl -k -u &#39;CLIENT_ID:DECRYPTED_CLIENT_SECRET&#39; -k -d grant_type=client_credentials -d scope=&#39;https://jans.io/scim/users.read https://jans.io/scim/users write&#39; https://&lt;jans-server&gt;/jans-auth/restv1/token &gt; /tmp/token.json
+</code></pre></div>
+<p>In response <code>token.json</code> we will get <code>access_token</code></p>
+<div class="highlight"><pre><span></span><code>{
+&quot;access_token&quot;:&quot;11a76589-7955-4247-9ca5-f3ad7884305...&quot;,
+&quot;scope&quot;:&quot;https://jans.io/scim/users.read&quot;,
+&quot;token_type&quot;:&quot;Bearer&quot;,
+&quot;expires_in&quot;:299
+}
+</code></pre></div>
+<h3 id="retrive-existing-user">Retrive existing User<a class="headerlink" href="#retrive-existing-user" title="Permanent link">#</a></h3>
+<p>To get an existing user </p>
+<p><div class="highlight"><pre><span></span><code>curl -k -G -H &#39;Authorization: Bearer ACCESS_TOKEN&#39; --data-urlencode &#39;filter=displayName co &quot;Admin&quot;&#39; https://&lt;jans-server&gt;/jans-scim/restv1/v2/Users &gt; /tmp/user.json
+</code></pre></div>
+In response <code>user.json</code> we will get 
+<div class="highlight"><pre><span></span><code>{
+  &quot;schemas&quot;: [
+    &quot;urn:ietf:params:scim:api:messages:2.0:ListResponse&quot;
+  ],
+  &quot;totalResults&quot;: 1,
+  &quot;startIndex&quot;: 1,
+  &quot;itemsPerPage&quot;: 1,
+  &quot;Resources&quot;: [
+    {
+      &quot;schemas&quot;: [
+        &quot;urn:ietf:params:scim:schemas:core:2.0:User&quot;
+      ],
+      &quot;id&quot;: &quot;5fdbb720-a1fd-477f-af92-b7c054f02c98&quot;,
+      &quot;meta&quot;: {
+        &quot;resourceType&quot;: &quot;User&quot;,
+        &quot;created&quot;: &quot;2023-06-12T14:54:09.531Z&quot;,
+        &quot;location&quot;: &quot;https://raju.jans13.me/jans-scim/restv1/v2/Users/5fdbb720-a1fd-477f-af92-b7c054f02c98&quot;
+      },
+      &quot;userName&quot;: &quot;admin&quot;,
+      &quot;name&quot;: {
+        &quot;familyName&quot;: &quot;...&quot;,
+        &quot;givenName&quot;: &quot;...&quot;,
+        &quot;middleName&quot;: &quot;...&quot;,
+        &quot;formatted&quot;: &quot;...&quot;
+      },
+      &quot;displayName&quot;: &quot;Admin&quot;,
+      &quot;active&quot;: true,
+      &quot;emails&quot;: [
+        {
+          &quot;value&quot;: &quot;example@gluu.org&quot;,
+          &quot;primary&quot;: false
+        }
+      ],
+      &quot;groups&quot;: [
+        {
+          &quot;value&quot;: &quot;60B7&quot;,
+          &quot;display&quot;: &quot;Jannsen Manager Group&quot;,
+          &quot;type&quot;: &quot;direct&quot;,
+          &quot;$ref&quot;: &quot;https://raju.jans13.me/jans-scim/restv1/v2/Groups/60B7&quot;
+        }
+      ]
+    }
+  ]
+}
+</code></pre></div></p>
+<h3 id="create-an-user">Create an User<a class="headerlink" href="#create-an-user" title="Permanent link">#</a></h3>
+<p>Let's start creating a dummy user. A client sends a POST request containing a "User" to the "/Users" endpoint. 
+<div class="highlight"><pre><span></span><code>POST /Users  HTTP/1.1
+Host: example.com
+Accept: application/scim+json
+Content-Type: application/scim+json
+Authorization: Bearer h480djs93hd8..
+Content-Length: ...
+
+{
+  &quot;schemas&quot;: [
+    &quot;urn:ietf:params:scim:schemas:core:2.0:User&quot;
+  ],
+  &quot;userName&quot;: &quot;bjensen&quot;,
+  &quot;externalId&quot;: &quot;bjensen&quot;,
+  &quot;name&quot;: {
+    &quot;formatted&quot;: &quot;Ms. Barbara J Jensen III&quot;,
+    &quot;familyName&quot;: &quot;Jensen&quot;,
+    &quot;givenName&quot;: &quot;Barbara&quot;
+  }
+}
+</code></pre></div>
+Open a text editor and copy paste the json body, name as <code>input.json</code>.
+Hit on your terminal with bellow command.
+<div class="highlight"><pre><span></span><code>curl -k -H &#39;Authorization: Bearer ACCESS_TOKEN&#39; -H &#39;Content-Type: application/scim+json&#39; -d @input.json -o output.json https://&lt;jans-server&gt;/jans-scim/restv1/v2/Users
+</code></pre></div>
+response looks like 
+<div class="highlight"><pre><span></span><code>{
+    &quot;schemas&quot;: [
+        &quot;urn:ietf:params:scim:schemas:core:2.0:User&quot;
+    ],
+    &quot;id&quot;: &quot;e3009115-b890-4d8b-bd63-bbfef34aa583&quot;,
+    &quot;externalId&quot;: &quot;bjensen&quot;,
+    &quot;meta&quot;: {
+        &quot;resourceType&quot;: &quot;User&quot;,
+        &quot;created&quot;: &quot;2023-06-26T19:43:32.945Z&quot;,
+        &quot;lastModified&quot;: &quot;2023-06-26T19:43:32.945Z&quot;,
+        &quot;location&quot;: &quot;https://raju.jans13.me/jans-scim/restv1/v2/Users/e3009115-b890-4d8b-bd63-bbfef34aa583&quot;
+    },
+    &quot;userName&quot;: &quot;bjensen&quot;,
+    &quot;name&quot;: {
+        &quot;familyName&quot;: &quot;Jensen&quot;,
+        &quot;givenName&quot;: &quot;Barbara&quot;,
+        &quot;formatted&quot;: &quot;Ms. Barbara J Jensen III&quot;
+    }
+}
+</code></pre></div></p>
+<p>This new user has been given an <code>id</code>. If possible, inspect your <code>ou=people</code> branch and find the entry whose <code>inum</code> matches the <code>id</code> given. An easier option would be to via <strong>Jans TUI</strong> and go to <code>Users</code> and search "bjensen" to see the recently created user.</p>
+<h3 id="updating-a-userput">Updating a User(PUT)<a class="headerlink" href="#updating-a-userput" title="Permanent link">#</a></h3>
+<p>Overwrite your <code>input.json</code> with the following. Replace content in angle brackets accordingly:</p>
+<div class="highlight"><pre><span></span><code>{
+  &quot;schemas&quot;: [
+    &quot;urn:ietf:params:scim:schemas:core:2.0:User&quot;
+  ],
+  &quot;id&quot;: &quot;e3009115-b890-4d8b-bd63-bbfef34aa583&quot;,
+  &quot;userName&quot;: &quot;bjensen&quot;,
+  &quot;externalId&quot;: &quot;bjensen&quot;,
+  &quot;name&quot;: {
+    &quot;formatted&quot;: &quot;Ms. Barbara J Jensen III&quot;,
+    &quot;familyName&quot;: &quot;Jensen&quot;,
+    &quot;givenName&quot;: &quot;Barbara&quot;
+  },
+  &quot;displayName&quot;: &quot;Jensen Barbara&quot;,
+  &quot;emails&quot;: [
+    {
+      &quot;value&quot;: &quot;jensen@example.com&quot;,
+      &quot;type&quot;: &quot;work&quot;,
+      &quot;primary&quot;: true
+    }
+  ]
+}
+</code></pre></div>
+<p><strong>PUT with curl</strong>:</p>
+<div class="highlight"><pre><span></span><code>curl -k -X PUT -H &#39;Authorization: Bearer ACCESS_TOKEN&#39; -H &#39;Content-Type: application/scim+json&#39; -d @input.json -o output.json https://&lt;jans-server&gt;/jans-scim/restv1/v2/Users/&lt;user-inum&gt;
+</code></pre></div>
+<p>Response <code>(output.json)</code> will show the same contents of a full retrieval.</p>
+<p>Please verify changes were applied whether by inspecting LDAP or issuing a GET. If you have followed the steps properly, you should notice a new e-mail added and the change in <code>displayName</code> attribute</p>
+<h3 id="updating-a-user-patch">Updating a User (PATCH)<a class="headerlink" href="#updating-a-user-patch" title="Permanent link">#</a></h3>
+<p>With patching, you can be very precise about the modifications you want to apply. Patching syntax follows JSON Patch spec (RFC 6902) closely. While it's not a must to read the RFC to learn how patch works, see section 3.5.2 of SCIM protocol (RFC 7644) to get the grasp.</p>
+<p>If you prefer reading code, <a href="https://github.com/JanssenProject/jans/tree/main/jans-scim/client/src/test/java/io/jans/scim2/client/patch">patch test cases</a> found in the Java scim-client project are worth to look at.</p>
+<p>The following is a simple example that illustrates the kind of modifications developers can achieve via <code>PATCH</code>. Overwrite your <code>input.json</code> with the following:</p>
+<div class="highlight"><pre><span></span><code>{
+  &quot;schemas&quot;: [
+    &quot;urn:ietf:params:scim:api:messages:2.0:PatchOp&quot;
+  ],
+  &quot;Operations&quot;: [
+    {
+      &quot;op&quot;: &quot;replace&quot;,
+      &quot;value&quot;: {
+        &quot;name&quot;: {
+          &quot;givenName&quot;: &quot;Joey&quot;
+        }
+      }
+    },
+    {
+      &quot;op&quot;: &quot;replace&quot;,
+      &quot;path&quot;: &quot;emails[type eq \&quot;work\&quot; or primary eq false].value&quot;,
+      &quot;value&quot;: &quot;jensen@example.com&quot;
+    },
+    {
+      &quot;op&quot;: &quot;add&quot;,
+      &quot;value&quot;: {
+        &quot;name&quot;: {
+          &quot;middleName&quot;: &quot;Jhon&quot;
+        }
+      }
+    },
+    {
+      &quot;op&quot;: &quot;add&quot;,
+      &quot;value&quot;: {
+        &quot;emails&quot;: [
+          {
+            &quot;primary&quot;: true,
+            &quot;value&quot;: &quot;my@own.mail&quot;
+          }
+        ],
+        &quot;phoneNumbers&quot;: [
+          {
+            &quot;type&quot;: &quot;home&quot;,
+            &quot;value&quot;: &quot;5 123 8901&quot;
+          },
+          {
+            &quot;value&quot;: &quot;5 123 8902&quot;
+          }
+        ]
+      }
+    },
+    {
+      &quot;op&quot;: &quot;remove&quot;,
+      &quot;path&quot;: &quot;name.middleName&quot;
+    },
+    {
+      &quot;op&quot;: &quot;remove&quot;,
+      &quot;path&quot;: &quot;phoneNumbers[value ew \&quot;01\&quot;].type&quot;
+    }
+  ]
+}
+</code></pre></div>
+<p>A collection of modification are provided under "Operations". They are processed in order of appearance. Also, every operation has a type; patching supports add, remove and replace.</p>
+<p>The first operations states the following: replace the value of <code>givenName</code> subattribute (that belongs to complex attribute <code>name</code>) with the string "Joey".</p>
+<p>Operations are easier to understand when using a "path". The second operation replaces the value subattribute inside the complex multi-valued attribute emails. Inside the square brackets, we find a filter expression, so the replacement does not apply to all emails in the list but only to those matching the criterion.</p>
+<p>So the second operation can be read as "set the value of value subattribute to string <code>jensen@example.com</code> where the type subattribute of the <code>email</code> equals to string "work" or if primary attribute is false".</p>
+<p>The third operation is similar to the first. It sets the value of a subattribute which was unassigned (null). You could have used "replace" operation in this case and results would have been identical.</p>
+<p>The fourth operation is more interesting. It adds to the current list of emails a new one. It supplies a couple of subattributes for the email to include: primary and value. Additionally, we set the value of (previously unassigned) phoneNumbers multi-valued attribute passing a list of elements.</p>
+<p>In the fifth operation, we remove the <code>middleName</code> attribute that was set in operation three. Note how we make explicit the path of data to nullify: "name.middleName".</p>
+<p>The sixth operation allows us to remove a specific subattribute of <code>phoneNumbers</code>. The aim is to nullify the "type" of the item whose phone number value ends with "01". The remove operation can also be used to remove a complete item from a list, or empty the whole list by providing a suitable value for "path".</p>
+<p>Now let's see it in action:</p>
+<div class="highlight"><pre><span></span><code>curl -k -X PATCH -H &#39;Authorization: Bearer ACCESS_TOKEN&#39; -H &#39;Content-Type: application/scim+json&#39; -d @input.json -o output.json https://&lt;jans-server&gt;/jans-scim/restv1/v2/Users/&lt;user-inum&gt;
+</code></pre></div>
+<p>So far our resource look like this</p>
+<div class="highlight"><pre><span></span><code>{
+  &quot;schemas&quot;: [
+    &quot;urn:ietf:params:scim:schemas:core:2.0:User&quot;
+  ],
+  &quot;id&quot;: &quot;e3009115-b890-4d8b-bd63-bbfef34aa583&quot;,
+  &quot;externalId&quot;: &quot;bjensen&quot;,
+  &quot;meta&quot;: {
+    &quot;resourceType&quot;: &quot;User&quot;,
+    &quot;created&quot;: &quot;2023-06-26T19:43:32.945Z&quot;,
+    &quot;lastModified&quot;: &quot;2023-06-26T22:34:27.465Z&quot;,
+    &quot;location&quot;: &quot;https://raju.jans13.me/jans-scim/restv1/v2/Users/e3009115-b890-4d8b-bd63-bbfef34aa583&quot;
+  },
+  &quot;userName&quot;: &quot;bjensen&quot;,
+  &quot;name&quot;: {
+    &quot;familyName&quot;: &quot;Jensen&quot;,
+    &quot;givenName&quot;: &quot;Joey&quot;,
+    &quot;formatted&quot;: &quot;Ms. Barbara J Jensen III&quot;
+  },
+  &quot;displayName&quot;: &quot;Jensen Barbara&quot;,
+  &quot;active&quot;: false,
+  &quot;emails&quot;: [
+    {
+      &quot;value&quot;: &quot;my@own.mail&quot;,
+      &quot;primary&quot;: true
+    },
+    {
+      &quot;value&quot;: &quot;jensen@example.com&quot;,
+      &quot;type&quot;: &quot;work&quot;,
+      &quot;primary&quot;: false
+    }
+  ],
+  &quot;phoneNumbers&quot;: [
+    {
+      &quot;value&quot;: &quot;5 123 8901&quot;
+    },
+    {
+      &quot;value&quot;: &quot;5 123 8902&quot;
+    }
+  ]
+}
+</code></pre></div>
+<p>Note the primary subattribute accompanying <code>email</code> "my@own.mail" is false but when inserted we provided <code>true</code>. This is because the SCIM specification states that after modifications are applied to resources <strong>(PUT or PATCH)</strong>, there cannot be more than one item in a multi-valued attribute with primary value set as <code>true</code>.</p>
+<p>To see more sample <code>JSON</code> payloads, check the <code>.json</code> files used by the scim-client test cases referenced above.</p>
+<h3 id="deleting-users">Deleting Users<a class="headerlink" href="#deleting-users" title="Permanent link">#</a></h3>
+<p>For deleting, the <code>DELETE</code>method of <code>HTTP</code> is used.</p>
+<p>No input file is used in this case. A delete request could be the following:</p>
+<div class="highlight"><pre><span></span><code>curl -k -X DELETE -H &#39;Authorization: Bearer ACCESS_TOKEN&#39; https://&lt;jans-server&gt;/jans-scim/restv1/v2/Users/&lt;user-inum&gt;
+</code></pre></div>
+<p>Use the inum of our dummy user, <strong>Jensen Barbara</strong>.</p>
+<p>Check your LDAP or via Jans TUI to see that <strong>Bjensen</strong> is gone.</p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-10T06:11:59+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-10</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-28T05:09:15+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-28</span>
       
         <br>
         Created:
