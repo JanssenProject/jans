@@ -105,8 +105,8 @@ pub struct TokenMetadata {
     #[serde(rename = "type")]
     pub kind: TokenKind,
 
-    /// The claim used to create the person entity associated with this token.
-    pub person_id: String,
+    /// The claim used to create the user entity associated with this token.
+    pub user_id: String,
 
     /// An optional claim used to create a role for the token.
     pub role_mapping: Option<String>,
