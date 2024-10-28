@@ -16,16 +16,16 @@
             "openid_configuration_endpoint": "https://test-casa.gluu.info/.well-known/openid-configuration",
             "token_metadata": [
                 {
-                    "type": "access_token",
-                    "person_id": "aud"
+                    "type": "Access",
+                    "user_id": "aud"
                 },
                 {
-                    "type": "id_token",
-                    "person_id": "sub"
+                    "type": "Id",
+                    "user_id": "sub"
                 },
                 {
-                    "type": "userinfo_token",
-                    "person_id": "email",
+                    "type": "userinfo",
+                    "user_id": "email",
                     "role_mapping": "role"
                 }
             ]
