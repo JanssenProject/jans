@@ -82,6 +82,8 @@ mod deserialize {
 
         #[test]
         fn test_read_ok() {
+            // The human-readable policy and schema file is located in next folder:
+            // `test_files\policy-store_ok`
             static POLICY_STORE_RAW: &str =
                 include_str!("../../../test_files/policy-store_ok.json");
 
