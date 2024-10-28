@@ -81,6 +81,11 @@ Here is a non-normative example of the `cedar_policies` field:
 This record contains the information needed to validate tokens from this issuer:
 
 ```json
+"trusted_issuers": [
+    {
+         "name": "name_of_the_trusted_issuer", 
+         "description": "description_of_the_trusted_issuer", 
+         "openid_configuration_endpoint": "https://<trusted-issuer-hostname>/.well-known/openid-configuration",
          "token_metadata": [ ... ]
     }
 ]
