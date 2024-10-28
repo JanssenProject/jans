@@ -5,11 +5,9 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 use crate::bootstrap_config::BootstrapConfig;
-use crate::jwt::{string_to_alg, Algorithm, ParseAlgorithmError};
+use crate::jwt::{self, string_to_alg, Algorithm};
 
-pub(crate) fn parse_jwt_algorithms(
-    config: &BootstrapConfig,
-) -> Result<Vec<Algorithm>, ParseAlgorithmError> {
+pub(crate) fn parse_jwt_algorithms(config: &BootstrapConfig) -> Result<Vec<Algorithm>, jwt::Error> {
     match &config.jwt_config {
         crate::JwtConfig::Disabled => Ok(Vec::new()),
         crate::JwtConfig::Enabled {
