@@ -16,16 +16,16 @@
             "token_metadata": [
                 {
                     "type": "Access",
-                    "person_id": "aud"
+                    "user_id": "aud"
                 },
                 {
                     "type": "Id",
-                    "person_id": "sub",
+                    "user_id": "sub",
                     "role_mapping": "role"
                 },
                 {
                     "type": "userinfo",
-                    "person_id": "email",
+                    "user_id": "email",
                     "role_mapping": "role"
                 }
             ]

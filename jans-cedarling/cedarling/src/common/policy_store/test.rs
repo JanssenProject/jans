@@ -194,9 +194,9 @@ fn test_invalid_version_format_with_v() {
 #[test]
 fn test_invalid_multiple_role_mappings_in_token_metadata() {
     let invalid_token_metadata = json!([
-        { "type": "access_token", "person_id": "aud" },
-        { "type": "id_token", "person_id": "sub", "role_mapping": "role" },
-        { "type": "userinfo_token", "person_id": "email", "role_mapping": "role" }
+        { "type": "access_token", "user_id": "aud" },
+        { "type": "id_token", "user_id": "sub", "role_mapping": "role" },
+        { "type": "userinfo_token", "user_id": "email", "role_mapping": "role" }
     ]);
 
     let result = parse_and_check_token_metadata(invalid_token_metadata);
@@ -210,9 +210,9 @@ fn test_invalid_multiple_role_mappings_in_token_metadata() {
 #[test]
 fn test_successful_parsing_of_role_mappings() {
     let valid_token_metadata = json!([
-        { "type": "Access_token", "person_id": "aud" },
-        { "type": "Id_token", "person_id": "sub", "role_mapping": "role" },
-        { "type": "userinfo_token", "person_id": "email" }
+        { "type": "Access_token", "user_id": "aud" },
+        { "type": "Id_token", "user_id": "sub", "role_mapping": "role" },
+        { "type": "userinfo_token", "user_id": "email" }
     ]);
 
     assert!(
@@ -225,9 +225,9 @@ fn test_successful_parsing_of_role_mappings() {
 #[test]
 fn test_error_on_invalid_token_type() {
     let invalid_token_metadata = json!([
-        { "type": "Access", "person_id": "aud" },
-        { "type": "unknown_token", "person_id": "sub", "role_mapping": "role" },
-        { "type": "userinfo", "person_id": "email" }
+        { "type": "Access", "user_id": "aud" },
+        { "type": "unknown_token", "user_id": "sub", "role_mapping": "role" },
+        { "type": "userinfo", "user_id": "email" }
     ]);
 
     let result = parse_and_check_token_metadata(invalid_token_metadata);

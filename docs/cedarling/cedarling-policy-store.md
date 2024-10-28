@@ -131,15 +131,15 @@ Here is a non-normative example of a `cedarling_store.json` file:
             "token_metadata": [
                 {
                     "type": "Access",
-                    "person_id": "aud"
+                    "user_id": "aud"
                 },
                 {
                     "type": "Id",
-                    "person_id": "sub"
+                    "user_id": "sub"
                 },
                 {
                     "type": "userinfo",
-                    "person_id": "email",
+                    "user_id": "email",
                     "role_mapping": "role"
                 }
             ]
