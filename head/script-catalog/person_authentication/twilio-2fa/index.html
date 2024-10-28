@@ -8852,11 +8852,11 @@ Follow the steps below to enable <code>twilio_sms</code> authentication:
 <p>The designs are being rendered from the <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/server/src/main/webapp/auth/otp_sms/otp_sms.xhtml">SMS xhtml page</a>. To customize the look and feel of the pages, follow the <a href="https://github.com/JanssenProject/jans/blob/main/docs/admin/developer/customization/customize-web-pages.md">customization guide</a>.</p>
 <h2 id="using-sms-otp">Using SMS OTP<a class="headerlink" href="#using-sms-otp" title="Permanent link">#</a></h2>
 <h3 id="phone-number-enrollment">Phone Number Enrollment<a class="headerlink" href="#phone-number-enrollment" title="Permanent link">#</a></h3>
-<p>The script assumes the user phone number is already stored in his corresponding LDAP entry (attribute <code>phoneNumberVerified</code>). You can change the attribute by altering the script directly (see authenticate routine).</p>
+<p>The script assumes the user phone number is already stored in his corresponding MySQL entry (attribute <code>phoneNumberVerified</code>). You can change the attribute by altering the script directly (see authenticate routine).</p>
 <h3 id="subsequent-logins">Subsequent Logins<a class="headerlink" href="#subsequent-logins" title="Permanent link">#</a></h3>
 <p>All <!--subsequent--> authentications will trigger an SMS with an OTP to the registered phone number. Enter the OTP to pass authentication. </p>
 <h3 id="credential-management">Credential Management<a class="headerlink" href="#credential-management" title="Permanent link">#</a></h3>
-<p>A user's registered phone number can be removed by a Gluu administrator either via the jans TUI, or in LDAP under the user entry. Once the phone number has been removed from the user's account, the user can re-enroll a new phone number following the <a href="#phone-number-enrollment">phone number enrollment</a> instructions above. </p>
+<p>A user's registered phone number can be removed by a Gluu administrator either via the jans TUI, or in MySQL under the user entry. Once the phone number has been removed from the user's account, the user can re-enroll a new phone number following the <a href="#phone-number-enrollment">phone number enrollment</a> instructions above. </p>
 <h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">#</a></h2>
 <p>If problems are encountered, take a look at the logs, specifically <code>/opt/jans/jetty/jans-auth/logs/jans-auth_script.log</code>. Inspect all messages related to Twilio. For instance, the following messages show an example of correct script initialization:</p>
 <div class="highlight"><pre><span></span><code>Twilio SMS. Initialization
@@ -8871,7 +8871,7 @@ Twilio SMS. Initialized successfully
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-09-27T11:45:09+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-28T09:05:20+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-28</span>
       
         <br>
         Created:

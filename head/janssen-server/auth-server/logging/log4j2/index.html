@@ -8779,17 +8779,7 @@ AS is configured by <a href="https://github.com/JanssenProject/jans/blob/main/ja
             <span class="nt">&lt;DefaultRolloverStrategy</span> <span class="na">max=</span><span class="s">&quot;30&quot;</span> <span class="nt">/&gt;</span>
         <span class="nt">&lt;/RollingFile&gt;</span>
 
-        <span class="nt">&lt;RollingFile</span> <span class="na">name=</span><span class="s">&quot;JANS_AUTH_PERSISTENCE_LDAP_STATISTICS_FILE&quot;</span> <span class="na">fileName=</span><span class="s">&quot;${sys:log.base}/logs/jans-auth_persistence_ldap_statistics.log&quot;</span>
-            <span class="na">filePattern=</span><span class="s">&quot;${sys:log.base}/logs/jans-auth_persistence_ldap_statistics-%d{yyyy-MM-dd}-%i.log&quot;</span><span class="nt">&gt;</span>
 
-            <span class="nt">&lt;PatternLayout</span> <span class="na">pattern=</span><span class="s">&quot;%d %-5p [%t] %X{X-Correlation-Id} [%C{6}] (%F:%L) - %m%n&quot;</span> <span class="nt">/&gt;</span>
-
-            <span class="nt">&lt;Policies&gt;</span>
-                <span class="nt">&lt;TimeBasedTriggeringPolicy</span> <span class="na">interval=</span><span class="s">&quot;1&quot;</span> <span class="na">modulate=</span><span class="s">&quot;true&quot;</span> <span class="nt">/&gt;</span>
-                <span class="nt">&lt;SizeBasedTriggeringPolicy</span> <span class="na">size=</span><span class="s">&quot;250 MB&quot;</span> <span class="nt">/&gt;</span>
-            <span class="nt">&lt;/Policies&gt;</span>
-            <span class="nt">&lt;DefaultRolloverStrategy</span> <span class="na">max=</span><span class="s">&quot;30&quot;</span> <span class="nt">/&gt;</span>
-        <span class="nt">&lt;/RollingFile&gt;</span>
 
         <span class="nt">&lt;RollingFile</span> <span class="na">name=</span><span class="s">&quot;JANS_AUTH_SCRIPT_LOG_FILE&quot;</span> <span class="na">fileName=</span><span class="s">&quot;${sys:log.base}/logs/jans-auth_script.log&quot;</span> <span class="na">filePattern=</span><span class="s">&quot;${sys:log.base}/logs/jans-auth_script-%d{yyyy-MM-dd}-%i.log&quot;</span><span class="nt">&gt;</span>
 
@@ -8834,16 +8824,12 @@ AS is configured by <a href="https://github.com/JanssenProject/jans/blob/main/ja
             <span class="nt">&lt;AppenderRef</span> <span class="na">ref=</span><span class="s">&quot;JANS_AUTH_PERSISTENCE_FILE&quot;</span> <span class="nt">/&gt;</span>
         <span class="nt">&lt;/Logger&gt;</span>
 
-        <span class="nt">&lt;Logger</span> <span class="na">name=</span><span class="s">&quot;com.unboundid.ldap.sdk.LDAPConnection&quot;</span> <span class="na">level=</span><span class="s">&quot;${log4j.default.log.level}&quot;</span> <span class="na">additivity=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;</span>
-            <span class="nt">&lt;AppenderRef</span> <span class="na">ref=</span><span class="s">&quot;JANS_AUTH_PERSISTENCE_FILE&quot;</span> <span class="nt">/&gt;</span>
-        <span class="nt">&lt;/Logger&gt;</span>
+
         <span class="nt">&lt;logger</span> <span class="na">name=</span><span class="s">&quot;com.couchbase.client&quot;</span> <span class="na">level=</span><span class="s">&quot;${log4j.default.log.level}&quot;</span> <span class="na">additivity=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;</span>
             <span class="nt">&lt;AppenderRef</span> <span class="na">ref=</span><span class="s">&quot;JANS_AUTH_PERSISTENCE_FILE&quot;</span> <span class="nt">/&gt;</span>
         <span class="nt">&lt;/logger&gt;</span>
 
-        <span class="nt">&lt;Logger</span> <span class="na">name=</span><span class="s">&quot;io.jans.orm.ldap.operation.watch&quot;</span> <span class="na">level=</span><span class="s">&quot;${log4j.default.log.level}&quot;</span> <span class="na">additivity=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;</span>
-            <span class="nt">&lt;AppenderRef</span> <span class="na">ref=</span><span class="s">&quot;JANS_AUTH_PERSISTENCE_DURATION_FILE&quot;</span> <span class="nt">/&gt;</span>
-        <span class="nt">&lt;/Logger&gt;</span>
+
 
         <span class="nt">&lt;Logger</span> <span class="na">name=</span><span class="s">&quot;io.jans.orm.couchbase.operation.watch&quot;</span> <span class="na">level=</span><span class="s">&quot;${log4j.default.log.level}&quot;</span> <span class="na">additivity=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;</span>
             <span class="nt">&lt;AppenderRef</span> <span class="na">ref=</span><span class="s">&quot;JANS_AUTH_PERSISTENCE_DURATION_FILE&quot;</span> <span class="nt">/&gt;</span>
@@ -8853,9 +8839,7 @@ AS is configured by <a href="https://github.com/JanssenProject/jans/blob/main/ja
             <span class="nt">&lt;AppenderRef</span> <span class="na">ref=</span><span class="s">&quot;JANS_AUTH_PERSISTENCE_DURATION_FILE&quot;</span> <span class="nt">/&gt;</span>
         <span class="nt">&lt;/Logger&gt;</span>
 
-        <span class="nt">&lt;Logger</span> <span class="na">name=</span><span class="s">&quot;io.jans.as.server.service.status.ldap&quot;</span> <span class="na">level=</span><span class="s">&quot;${log4j.default.log.level}&quot;</span> <span class="na">additivity=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;</span>
-            <span class="nt">&lt;AppenderRef</span> <span class="na">ref=</span><span class="s">&quot;JANS_AUTH_PERSISTENCE_LDAP_STATISTICS_FILE&quot;</span> <span class="nt">/&gt;</span>
-        <span class="nt">&lt;/Logger&gt;</span>
+
 
         <span class="nt">&lt;Logger</span> <span class="na">name=</span><span class="s">&quot;io.jans.service.PythonService&quot;</span> <span class="na">level=</span><span class="s">&quot;${log4j.default.log.level}&quot;</span> <span class="na">additivity=</span><span class="s">&quot;false&quot;</span><span class="nt">&gt;</span>
             <span class="nt">&lt;AppenderRef</span> <span class="na">ref=</span><span class="s">&quot;JANS_AUTH_SCRIPT_LOG_FILE&quot;</span> <span class="nt">/&gt;</span>
@@ -8894,7 +8878,7 @@ AS is configured by <a href="https://github.com/JanssenProject/jans/blob/main/ja
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-09-27T12:12:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-28T09:05:20+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-28</span>
       
         <br>
         Created:

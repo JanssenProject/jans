@@ -7478,36 +7478,56 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#trusted-issuer-schema" class="md-nav__link">
-    Trusted Issuer Schema
+  <a href="#json-schema" class="md-nav__link">
+    JSON Schema
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#policies" class="md-nav__link">
-    Policies
+  <a href="#cedar-policies-schema" class="md-nav__link">
+    Cedar Policies Schema
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#token-entity-schema" class="md-nav__link">
-    Token Entity Schema
-  </a>
-  
-    <nav class="md-nav" aria-label="Token Entity Schema">
+    <nav class="md-nav" aria-label="Cedar Policies Schema">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#sample-policy-store" class="md-nav__link">
-    Sample Policy store
+  <a href="#example-of-cedar_policies" class="md-nav__link">
+    Example of cedar_policies
   </a>
   
 </li>
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trusted-issuer-schema" class="md-nav__link">
+    Trusted Issuer Schema
+  </a>
+  
+    <nav class="md-nav" aria-label="Trusted Issuer Schema">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#token-metadata-schema" class="md-nav__link">
+    Token Metadata Schema
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example-policy-store" class="md-nav__link">
+    Example Policy store
+  </a>
   
 </li>
       
@@ -8689,36 +8709,56 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#trusted-issuer-schema" class="md-nav__link">
-    Trusted Issuer Schema
+  <a href="#json-schema" class="md-nav__link">
+    JSON Schema
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#policies" class="md-nav__link">
-    Policies
+  <a href="#cedar-policies-schema" class="md-nav__link">
+    Cedar Policies Schema
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#token-entity-schema" class="md-nav__link">
-    Token Entity Schema
-  </a>
-  
-    <nav class="md-nav" aria-label="Token Entity Schema">
+    <nav class="md-nav" aria-label="Cedar Policies Schema">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#sample-policy-store" class="md-nav__link">
-    Sample Policy store
+  <a href="#example-of-cedar_policies" class="md-nav__link">
+    Example of cedar_policies
   </a>
   
 </li>
         
       </ul>
     </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#trusted-issuer-schema" class="md-nav__link">
+    Trusted Issuer Schema
+  </a>
+  
+    <nav class="md-nav" aria-label="Trusted Issuer Schema">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#token-metadata-schema" class="md-nav__link">
+    Token Metadata Schema
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example-policy-store" class="md-nav__link">
+    Example Policy store
+  </a>
   
 </li>
       
@@ -8787,109 +8827,119 @@
 
 
 <h1 id="cedarling-policy-store">Cedarling Policy Store<a class="headerlink" href="#cedarling-policy-store" title="Permanent link">#</a></h1>
-<p>By convention, the filename is <code>cedarling_store.json</code>. It contains all the data the 
-Cedarling needs to evaluate policies and verify JWT tokens:</p>
+<p>The Cedarling Policy Store uses a JSON file named <code>cedarling_store.json</code> to store all necessary data for evaluating policies and verifying JWT tokens. The structure includes the following key components:</p>
 <ol>
-<li>Cedar Schema - Base64 encoded human format</li>
-<li>Cedar Policies - Base64 encoded human format</li>
-<li>Trusted Issuers - See below syntax</li>
+<li><strong>Cedar Schema</strong>: The Cedar schema encoded in Base64.</li>
+<li><strong>Cedar Policies</strong>: The Cedar policies encoded in Base64.</li>
+<li><strong>Trusted Issuers</strong>: Details about the trusted issuers (see <a href="#trusted-issuer-schema">below</a> for syntax).</li>
 </ol>
-<p>The JSON schema looks like this:</p>
-<div class="highlight"><pre><span></span><code>{
-    &quot;policystore_id&quot;: &quot;...&quot;,
-    &quot;policies&quot;: {...},
-    &quot;schema&quot;: &quot;...&quot;,
-    &quot;trusted_issuers&quot;: [],
-    &quot;cedar_version&quot;: &quot;v1.1.5&quot;
-}
+<p><strong>Note:</strong> The <code>cedarling_store.json</code> file is only needed if the bootstrap properties: <code>CEDARLING_LOCK</code>; <code>CEDARLING_POLICY_STORE_URI</code>; and <code>CEDARLING_POLICY_STORE_ID</code> are not set to a local location. If you're fetching the policies remotely, you don't need a <code>cedarling_store.json</code> file.</p>
+<h3 id="json-schema">JSON Schema<a class="headerlink" href="#json-schema" title="Permanent link">#</a></h3>
+<p>The JSON Schema is for the <code>policy_store.json</code> defined as follows:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;cedar_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;v2.4.7&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;cedar_policies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">},</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;cedar_schema&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cedar_schema_encoded_in_base64&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;trusted_issuers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">]</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 </code></pre></div>
 <ul>
-<li><strong>policystore_id</strong> : (String, no spaces) The unique identifier for the policy store.</li>
-<li><strong>policies</strong> : (Json) Json object containing one or more policy_id as key and policy object as value</li>
-<li><strong>schema</strong> : (String) Base64 encoded cedar schema</li>
-<li><strong>trusted_issuers</strong> : (List) List of Trusted Issuer metadata</li>
-<li><strong>cedar_version</strong> : (String) The version of <a href="https://docs.cedarpolicy.com/">Cedar policy</a>. The protocols of this version will be followed when processing Cedar schema and policies.</li>
+<li><strong>cedar_version</strong> : (<em>String</em>) The version of <a href="https://docs.cedarpolicy.com/">Cedar policy</a>. The protocols of this version will be followed when processing Cedar schema and policies.</li>
+<li><strong>cedar_policies</strong> : (<em>Object</em>) Object containing one or more policy IDs as keys, with their corresponding objects as values. See: <a href="#cedar-policies-schema">cedar_policies schema</a>.</li>
+<li><strong>cedar_schema</strong> : (<em>String</em>) The Cedar schema, encoded in Base64 format.</li>
+<li><strong>trusted_issuers</strong> : (<em>Array of <a href="#trusted-issuer-schema">TrustedIssuer</a></em>) List of metadata for Trusted Issuers.</li>
 </ul>
+<h2 id="cedar-policies-schema">Cedar Policies Schema<a class="headerlink" href="#cedar-policies-schema" title="Permanent link">#</a></h2>
+<p>The <code>cedar_policies</code> field outlines the Cedar policies that will be used in Cedarling. Multiple policies can be defined, with policy requiring a unique <code>policy_id</code>.</p>
+<p><div class="highlight"><pre><span></span><code><span class="w">  </span><span class="nt">&quot;cedar_policies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;a_unique_policy_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;simple policy example&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;creation_date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-09-20T17:22:39.996050&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;policy_content&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cGVybWl0KAogICAgc...&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">},</span><span class="w"></span>
+<span class="w">    </span><span class="err">...</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+</code></pre></div>
+- <strong>unique_policy_id</strong>: (<em>String</em>) A uniqe policy ID used to for tracking and auditing purposes.
+- <strong>description</strong> : (<em>String</em>) A brief description of cedar policy
+- <strong>creation_date</strong> :  (<em>String</em>) Policy creating date in <code>YYYY-MM-DDTHH:MM:SS.ssssss</code>
+- <strong>policy_content</strong> : (<em>String</em>) The policy content, encoded in Base64 format.</p>
+<h3 id="example-of-cedar_policies">Example of <code>cedar_policies</code><a class="headerlink" href="#example-of-cedar_policies" title="Permanent link">#</a></h3>
+<p>Here is a non-normative example of the <code>cedar_policies</code> field:</p>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="nt">&quot;cedar_policies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;840da5d85403f35ea76519ed1a18a33989f855bf1cf8&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;simple policy example&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;creation_date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-09-20T17:22:39.996050&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;policy_content&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cGVybWl0KAogICAgc...&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">},</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;0fo1kl928Afa0sc9123scma0123891asklajsh1233ab&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;another policy example&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;creation_date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-09-20T18:22:39.192051&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;policy_content&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;kJW1bWl0KA0g3CAxa...&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">},</span><span class="w"></span>
+<span class="w">    </span><span class="err">...</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+</code></pre></div>
 <h2 id="trusted-issuer-schema">Trusted Issuer Schema<a class="headerlink" href="#trusted-issuer-schema" title="Permanent link">#</a></h2>
 <p>This record contains the information needed to validate tokens from this issuer:</p>
-<div class="highlight"><pre><span></span><code>&quot;trusted_issuers&quot;: [
-    {
-         &quot;name&quot;: &quot;name_of_the_trusted_issuer&quot;, 
-         &quot;description&quot;: &quot;description_of_the_trusted_issuer&quot;, 
-         &quot;openid_configuration_endpoint&quot;: &quot;https://&lt;trusted-issuer-hostname&gt;/.well-known/openid-configuration&quot;,
-         &quot;token_metadata&quot;: [token1_entity_schema, token2_entity_schema, ... ]
-    }
-]
+<div class="highlight"><pre><span></span><code><span class="w">         </span><span class="nt">&quot;token_metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">]</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="p">]</span><span class="w"></span>
 </code></pre></div>
 <ul>
-<li><strong>name</strong> : (String) Name of the trusted issuer</li>
-<li><strong>description</strong> : (String) Short description of the trusted issuer</li>
-<li><strong>openid_configuration_endpoint</strong> : The HTTPS URL for the OpenID Connect configuration endpoint (usually found under /.well-known/openid-configuration).</li>
-<li><strong>token_metadata</strong> : (List) List of token metadata</li>
+<li><strong>name</strong> : (<em>String</em>) The name of the trusted issuer.</li>
+<li><strong>description</strong> : (<em>String</em>) A brief description of the trusted issuer, providing context for administrators.</li>
+<li><strong>openid_configuration_endpoint</strong> : (<em>String</em>) The HTTPS URL for the OpenID Connect configuration endpoint (usually found at <code>/.well-known/openid-configuration</code>).</li>
+<li><strong>token_metadata</strong> : (<em>Array of <a href="#token-metadata-schema">TokenMetadata</a></em>, <em>optional</em>) Metadata related to the tokens issued by this issuer.</li>
 </ul>
-<h2 id="policies">Policies<a class="headerlink" href="#policies" title="Permanent link">#</a></h2>
-<p>Json object containing one or more policy_id as key and policy object as value.</p>
-<div class="highlight"><pre><span></span><code>  &quot;policies&quot;: {
-    &quot;840da5d85403f35ea76519ed1a18a33989f855bf1cf8&quot;: {
-      &quot;description&quot;: &quot;simple policy example&quot;,
-      &quot;creation_date&quot;: &quot;2024-09-20T17:22:39.996050&quot;,
-      &quot;policy_content&quot;: &quot;cGVybWl0KAogICAgc...&quot;
-    }
-  }
+<h3 id="token-metadata-schema">Token Metadata Schema<a class="headerlink" href="#token-metadata-schema" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="nt">&quot;access_token&quot;</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;user_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_user123&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;role_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;role&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 </code></pre></div>
 <ul>
-<li><strong>description</strong> : (String) Short description of cedar policy</li>
-<li><strong>creation_date</strong> :  (String) Policy creating date in <code>YYYY-MM-DDTHH:MM:SS.ssssss</code></li>
-<li><strong>policy_content</strong> : (String) Base64 encoded cedar schema</li>
+<li><strong>type</strong> : (String, no spaces) The type of token (e.g., Access, ID, Userinfo, Transaction).</li>
+<li><strong>user_id</strong> : (String) The claim used to create the Cedar entity associated with this token.</li>
+<li><strong>role_mapping</strong> : (String, <em>optional</em>) The claim used to create a role for the token. The default value of <code>role_mapping</code> is <code>role</code>.</li>
 </ul>
-<h2 id="token-entity-schema">Token Entity Schema<a class="headerlink" href="#token-entity-schema" title="Permanent link">#</a></h2>
-<div class="highlight"><pre><span></span><code>{ &quot;type&quot;: &quot;access&quot;
-  &quot;user_id&quot;: &quot;...&quot;,                   
-  &quot;role_mapping&quot;: &quot;...&quot;,          
-}
-</code></pre></div>
-<ul>
-<li><strong>type</strong> : (String) The type of token whether <code>access</code>, <code>id_token</code>, <code>userinfo</code> or <code>transaction</code>.</li>
-<li><strong>user_id</strong> : (String) For id_token or userinfo tokens, the <code>user_id</code> refers to the claim used to identify the person entity. For example, in an id_token, the "user_id" could be the sub (subject) or email claim.</li>
-<li><strong>role_mapping</strong> : (String) The role_mapping refers to the token claim used to get role values. The default value of <code>role_mapping</code> is <code>role</code>.</li>
-</ul>
-<h3 id="sample-policy-store">Sample Policy store<a class="headerlink" href="#sample-policy-store" title="Permanent link">#</a></h3>
-<div class="highlight"><pre><span></span><code>{
-  &quot;policystore_id&quot;: &quot;8b805e22fdd39f3dd33a13d9fb446d8e6314153ca997&quot;,
-  &quot;name&quot;: &quot;gluustore&quot;,
-  &quot;description&quot;: &quot;gluu&quot;,
-  &quot;policies&quot;: {
-    &quot;840da5d85403f35ea76519ed1a18a33989f855bf1cf8&quot;: {
-      &quot;description&quot;: &quot;simple policy example&quot;,
-      &quot;creation_date&quot;: &quot;2024-09-20T17:22:39.996050&quot;,
-      &quot;policy_content&quot;: &quot;cGVybWl0KAogICAgc...&quot;
-    }
-  },
-  &quot;trusted_issuers&quot;: [
-    {
-      &quot;name&quot;: &quot;Google&quot;,
-      &quot;description&quot;: &quot;Consumer IDP&quot;,
-      &quot;openid_configuration_endpoint&quot;: &quot;https://accounts.google.com/.well-known/openid-configuration&quot;,
-      &quot;token_metadata&quot;: [
-        {
-          &quot;type&quot;: &quot;access&quot;,
-          &quot;user_id&quot;: &quot;aud&quot;
-        },
-        {
-          &quot;type&quot;: &quot;id_token&quot;,
-          &quot;user_id&quot;: &quot;email&quot;,
-          &quot;role_mapping&quot;: &quot;role&quot;
-        },
-        {
-          &quot;type&quot;: &quot;userinfo&quot;,
-          &quot;user_id&quot;: &quot;email&quot;
-        }
-      ]
-    }
-  ],
-  &quot;schema&quot;: &quot;ewogICAgIkphbnMiOiB...&quot;,
-  &quot;cedar_version&quot;: &quot;v2.4.7&quot;
-}
+<p><strong>Note</strong>: Only one token should include the <code>role_mapping</code> field in the list of <code>token_metadata</code>.</p>
+<h2 id="example-policy-store">Example Policy store<a class="headerlink" href="#example-policy-store" title="Permanent link">#</a></h2>
+<p>Here is a non-normative example of a <code>cedarling_store.json</code> file:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;cedar_version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;v2.4.7&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;cedar_policies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;840da5d85403f35ea76519ed1a18a33989f855bf1cf8&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;simple policy example&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;creation_date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-09-20T17:22:39.996050&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;policy_content&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cedar_policy_encoded_in_base64&quot;</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="p">},</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;cedar_schema&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cedar_schema_encoded_in_base64&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;trusted_issuers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">        </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Google&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Consumer IDP&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;openid_configuration_endpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://accounts.google.com/.well-known/openid-configuration&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="nt">&quot;token_metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">                </span><span class="p">{</span><span class="w"></span>
+<span class="w">                    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;access_token&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                    </span><span class="nt">&quot;user_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;aud&quot;</span><span class="w"></span>
+<span class="w">                </span><span class="p">},</span><span class="w"></span>
+<span class="w">                </span><span class="p">{</span><span class="w"></span>
+<span class="w">                    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;id_token&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                    </span><span class="nt">&quot;user_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sub&quot;</span><span class="w"></span>
+<span class="w">                </span><span class="p">},</span><span class="w"></span>
+<span class="w">                </span><span class="p">{</span><span class="w"></span>
+<span class="w">                    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;userinfo_token&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                    </span><span class="nt">&quot;user_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;email&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">                    </span><span class="nt">&quot;role_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;role&quot;</span><span class="w"></span>
+<span class="w">                </span><span class="p">}</span><span class="w"></span>
+<span class="w">            </span><span class="p">]</span><span class="w"></span>
+<span class="w">        </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="p">]</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 </code></pre></div>
 <h2 id="policy-and-schema-authoring">Policy and Schema Authoring<a class="headerlink" href="#policy-and-schema-authoring" title="Permanent link">#</a></h2>
 <p>You can hand create your Cedar policies and schema in 
@@ -8904,7 +8954,7 @@ trusted IDPs and to publish a policy store to a Github repository.</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-25T07:31:01+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-25</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-28T08:26:42+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-28</span>
       
         <br>
         Created:
