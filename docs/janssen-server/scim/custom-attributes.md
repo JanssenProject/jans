@@ -11,9 +11,9 @@ tags:
 
 Although the schema covers many attributes one might think of, at times you will need to add your own attributes for specific needs. This is where user extensions pitch in, they allow you to create custom attributes for SCIM. To do so, you will have to:
 
-* Add an attribute to LDAP schema
+* Add an attribute to schema
 
-* Include the new attribute in an LDAP's object class such as jansPerson
+* Include the new attribute in an object class such as jansPerson
 
 * Register and activate your new attribute through **Jans TUI**.
 
