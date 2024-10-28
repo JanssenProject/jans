@@ -6,17 +6,20 @@
 
 package io.jans.configapi.rest.resource.auth;
 
+import io.jans.ads.model.Deployment;
 import io.jans.config.GluuConfiguration;
 import io.jans.configapi.core.model.ApiError;
 import io.jans.configapi.core.rest.ProtectedApi;
 import io.jans.configapi.model.configuration.ApiAppConfiguration;
 import io.jans.configapi.rest.model.AuthenticationMethod;
+import io.jans.configapi.service.auth.AgamaDeploymentsService;
 import io.jans.configapi.service.auth.ConfigurationService;
 import io.jans.configapi.service.auth.LdapConfigurationService;
 import io.jans.configapi.util.ApiAccessConstants;
 import io.jans.configapi.util.ApiConstants;
 import io.jans.model.custom.script.model.CustomScript;
 import io.jans.model.ldap.GluuLdapConfiguration;
+import io.jans.orm.model.PagedResult;
 import io.jans.service.custom.CustomScriptService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
@@ -28,6 +31,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.*;
 
 import java.util.List;
+import java.util.Set;
 import java.util.Optional;
 
 import org.apache.commons.lang.StringUtils;
@@ -48,6 +52,9 @@ import org.slf4j.Logger;
 @Produces(MediaType.APPLICATION_JSON)
 public class AcrsResource extends ConfigBaseResource {
 
+    private static final String AGAMA_PREFIX = "agama_";
+    private static final String AGAMA_PREFIX_SEPERATOR = "_";
+
     @Inject
     Logger log;
 
@@ -59,6 +66,9 @@ public class AcrsResource extends ConfigBaseResource {
 
     @Inject
     CustomScriptService customScriptService;
+
+    @Inject
+    AgamaDeploymentsService agamaDeploymentsService;
 
     @Inject
     LdapConfigurationService ldapConfigurationService;
@@ -101,7 +111,7 @@ public class AcrsResource extends ConfigBaseResource {
             throwBadRequestException("Default authentication method should not be null or empty !");
         }
 
-        if (StringUtils.isNotBlank(authenticationMethod.getDefaultAcr())) {
+        if (authenticationMethod != null && StringUtils.isNotBlank(authenticationMethod.getDefaultAcr())) {
             validateAuthenticationMethod(authenticationMethod.getDefaultAcr());
 
             final GluuConfiguration gluuConfiguration = configurationService.findGluuConfiguration();
@@ -117,7 +127,7 @@ public class AcrsResource extends ConfigBaseResource {
 
         // if authentication validation check is enabled then validate
         boolean isAcrValid = isAcrValid(authenticationMode);
-        log.debug("isAcrValid:{}",isAcrValid);
+        log.debug("isAcrValid:{}", isAcrValid);
         if (appConfiguration.isAcrValidationEnabled() && (!isAcrValid)) {
             throwBadRequestException("INVALID_ACR",
                     String.format("Authentication script {%s} is not valid/active", authenticationMode));
@@ -127,12 +137,18 @@ public class AcrsResource extends ConfigBaseResource {
 
     private boolean isAcrValid(String authenticationMode) {
         boolean isValid = false;
-        log.debug(" Validate ACR being set - authenticationMethod:{}, appConfiguration.getAcrExclusionList():{}", authenticationMode,
-                appConfiguration.getAcrExclusionList());
+        log.info(" Validate ACR being set - authenticationMethod:{}, appConfiguration.getAcrExclusionList():{}",
+                authenticationMode, appConfiguration.getAcrExclusionList());
 
         if (appConfiguration.getAcrExclusionList() != null
                 && appConfiguration.getAcrExclusionList().contains(authenticationMode)) {
             return true;
+        }
+
+        // Agama Flow
+        if (StringUtils.isNotBlank(authenticationMode) && authenticationMode.startsWith(AGAMA_PREFIX)) {
+            log.debug(" Agama authenticationMethod provided.");
+            return isValidAgamaDeployment(authenticationMode);
         }
 
         List<GluuLdapConfiguration> ldapConfigurations = ldapConfigurationService.findLdapConfigurations();
@@ -152,7 +168,7 @@ public class AcrsResource extends ConfigBaseResource {
 
         // if ACR being set is a script then it should be active
         CustomScript script = customScriptService.getScriptByDisplayName(authenticationMode);
-        log.debug(" script:{}", script);
+        log.debug(" CustomScript:{}", script);
         if (script != null && script.isEnabled()) {
             log.debug(" script:{}, script.isEnabled():{}", script, script.isEnabled());
             return true;
@@ -160,6 +176,65 @@ public class AcrsResource extends ConfigBaseResource {
         log.debug(" isValid:{}", isValid);
 
         return isValid;
+    }
+
+    public boolean isValidAgamaDeployment(String authenticationMode) {
+        boolean isValid = false;
+        log.info(" Validate Agama ACR - authenticationMode:{},", authenticationMode);
+        if (StringUtils.isBlank(authenticationMode)) {
+            return isValid;
+        }
+
+        // Get deployed agama projects
+        PagedResult<Deployment> deploymentPagedResult = agamaDeploymentsService.list(0, 0, getMaxCount());
+        log.info(" Agama Deployments - deploymentPagedResult:{},", deploymentPagedResult);
+
+        if (deploymentPagedResult != null && deploymentPagedResult.getEntries() != null
+                && !deploymentPagedResult.getEntries().isEmpty()) {
+            List<Deployment> agamaDeploymentList = deploymentPagedResult.getEntries();
+            log.debug(" agamaDeploymentList:{},", agamaDeploymentList);
+
+            Set<String> keys = getDirectLaunchFlows(agamaDeploymentList);
+            log.info("Final DirectLaunchFlows - keys:{}, authenticationMode:{}, authenticationMode.indexOf(AGAMA_PREFIX_SEPERATOR):{} , authenticationMode.indexOf(AGAMA_PREFIX_SEPERATOR)+1:{}", keys, authenticationMode, authenticationMode.indexOf(AGAMA_PREFIX_SEPERATOR) , authenticationMode.indexOf(AGAMA_PREFIX_SEPERATOR)+1);
+            String agamaAcr = authenticationMode;
+            if (authenticationMode.indexOf(AGAMA_PREFIX_SEPERATOR) > 0) {
+                agamaAcr = authenticationMode.substring(authenticationMode.indexOf(AGAMA_PREFIX_SEPERATOR)+1);
+            }
+            log.info(" agamaAcr:{},", agamaAcr);
+
+            if (keys != null && !keys.isEmpty() && keys.contains(agamaAcr)) {
+                log.debug(" keys.contains(agamaAcr):{},", keys.contains(agamaAcr));
+                isValid = true;
+            }
+        }
+        log.info(" isValidAgamaDeployment - isValid:{}", isValid);
+        return isValid;
+    }
+
+    private Set<String> getDirectLaunchFlows(List<Deployment> agamaDeploymentList) {
+        log.info(" agamaDeploymentList:{}", agamaDeploymentList);
+        Set<String> keys = null;
+        List<String> noDirectLaunchFlows = null;
+        if (agamaDeploymentList == null || agamaDeploymentList.isEmpty()) {
+            return keys;
+        }
+        for (Deployment deployment : agamaDeploymentList) {
+            log.debug("Agama deployment:{},", deployment);
+            if (deployment.getDetails() != null && deployment.getDetails().getFlowsError() != null) {
+                keys = deployment.getDetails().getFlowsError().keySet();
+                log.debug(" Agama flow keys:{},", keys);
+
+                if (deployment.getDetails().getProjectMetadata() != null) {
+                    noDirectLaunchFlows = deployment.getDetails().getProjectMetadata().getNoDirectLaunchFlows();
+                }
+            }
+        }
+        log.debug("All deployed agama keys:{}, noDirectLaunchFlows:{}", keys, noDirectLaunchFlows);
+        if (keys != null && !keys.isEmpty() && noDirectLaunchFlows != null) {
+            keys.removeAll(noDirectLaunchFlows);
+        }
+        log.info("Final agama main flow keys:{}", keys);
+        return keys;
     }
 
 }
