@@ -13,7 +13,8 @@ Although the schema covers many attributes one might think of, at times you will
 
 * Add an attribute to Database schema
 
-* Include the new attribute in an LDAP's object class such as jansPerson
+
+* Include the new attribute in an object class such as jansPerson
 
 * Register and activate your new attribute through **Jans TUI**.
 
