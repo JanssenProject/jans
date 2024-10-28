@@ -20,9 +20,9 @@ NOTICE!!! Here is assumed that  your cedarling repository existed on the path: /
    ```
 
    If Rust is not installed, you can install it from [here](https://www.rust-lang.org/tools/install)
-   If Rust is installed but not accessed globally then perform command:
+   If Rust is installed but can not be accessed globally then perform command:
    ```bash
-   export PATH="/home/lomaka1/.cargo/bin:$PATH" 
+   export PATH="path_to_cargo_bin/.cargo/bin:$PATH" 
    ```
 3. Build project
    ```bash
