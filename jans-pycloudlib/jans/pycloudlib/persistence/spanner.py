@@ -328,7 +328,7 @@ class SpannerClient(SqlSchemaMixin):
             )
 
         if data_type == "JSON":
-            return {"v": values}
+            return values
 
         if data_type == "ARRAY<STRING(MAX)>":
             return values

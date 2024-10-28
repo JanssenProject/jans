@@ -372,7 +372,10 @@ class SqlClient(SqlSchemaMixin):
 
             if self.dialect == "mysql":
                 json_type = "json"
-                json_default_values: dict[str, _t.Any] | list[_t.Any] = {"v": []}
+                if self.use_simple_json:
+                    json_default_values = []
+                else:
+                    json_default_values: dict[str, _t.Any] | list[_t.Any] = {"v": []}
             else:
                 json_type = "jsonb"
                 json_default_values = []
@@ -486,7 +489,9 @@ class SqlClient(SqlSchemaMixin):
             )
 
         if data_type == "JSON":
-            return {"v": values}
+            if not self.use_simple_json:
+                return {"v": values}
+            return values
 
         if data_type == "JSONB":
             return values
