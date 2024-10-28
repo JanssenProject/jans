@@ -8767,8 +8767,8 @@ Jans AS-&gt;User agent: 10. write Jans session cookie
 </code></pre></div>
 <img alt="Social Sign-In" src="https://github.com/JanssenProject/jans/raw/main/docs/assets/SocialSignIn.png" /></p>
 <h3 id="user-provisioning">User provisioning<a class="headerlink" href="#user-provisioning" title="Permanent link">#</a></h3>
-<p>After a user has logged in at an external provider a new record is added in local LDAP - or updated if the user is known.</p>
-<p>To determine if a user was already added, a string is composed with the provider name and the user ID. For example, if user "MrBrown123" has logged in at Twitter, the string would look like <code>passport-twitter:mrbrown123</code>. An LDAP search is performed for a match in the people branch for an entry where attribute <code>jansExtUid</code> equals <code>passport-twitter:mrbrown123</code>.</p>
+<p>After a user has logged in at an external provider a new record is added in local database - or updated if the user is known.</p>
+<p>To determine if a user was already added, a string is composed with the provider name and the user ID. For example, if user "MrBrown123" has logged in at Twitter, the string would look like <code>passport-twitter:mrbrown123</code>. A database search is performed for a match in the people branch for an entry where attribute <code>jansExtUid</code> equals <code>passport-twitter:mrbrown123</code>.</p>
 <p>If there are no matches, an entry is added using the values received from the external provider (after having applied the corresponding attribute mapping) attaching the computed value for <code>jansExtUid</code>. The user profile can contain single or multivalued attributes.</p>
 <p>📝 The prefix <code>passport-&lt;provider-name&gt;</code> is used to keep the code compatible with the Passport.js implementation for Inbound Identity</p>
 
@@ -8777,7 +8777,7 @@ Jans AS-&gt;User agent: 10. write Jans session cookie
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-09-27T12:12:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-28T09:05:20+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-28</span>
       
         <br>
         Created:

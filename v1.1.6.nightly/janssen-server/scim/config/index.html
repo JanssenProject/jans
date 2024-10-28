@@ -6861,6 +6861,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#scim-operations-guide-using-cli-tui-and-api" class="md-nav__link">
+    SCIM Operations Guide using CLI, TUI and API
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#when-will-changes-take-effect" class="md-nav__link">
     When will changes take effect?
   </a>
@@ -8685,6 +8692,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#scim-operations-guide-using-cli-tui-and-api" class="md-nav__link">
+    SCIM Operations Guide using CLI, TUI and API
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#when-will-changes-take-effect" class="md-nav__link">
     When will changes take effect?
   </a>
@@ -8779,18 +8793,18 @@
 <h2 id="configuration-management-using-cli">Configuration management using CLI<a class="headerlink" href="#configuration-management-using-cli" title="Permanent link">#</a></h2>
 <p>To retrieve the current server configuration run the command <code>python3 /opt/jans/jans-cli/config-cli.py --operation-id get-scim-config</code></p>
 <p>To modify some aspect of the retrieved configuration prepare a PATCH request in JSON format. For instance:</p>
-<div class="highlight"><pre><span></span><code>[
-{ 
-  &quot;op&quot;:&quot;replace&quot;,
-  &quot;path&quot;: &quot;bulkMaxOperations&quot;,
-  &quot;value&quot;: 100
-},
-{ 
-  &quot;op&quot;:&quot;replace&quot;,
-  &quot;path&quot;: &quot;loggingLevel&quot;,
-  &quot;value&quot;: &quot;DEBUG&quot;
-}
-]
+<div class="highlight"><span class="filename">PATCH</span><pre><span></span><code><span class="p">[</span><span class="w"></span>
+<span class="p">{</span><span class="w"> </span>
+<span class="w">  </span><span class="nt">&quot;op&quot;</span><span class="p">:</span><span class="s2">&quot;replace&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;bulkMaxOperations&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">100</span><span class="w"></span>
+<span class="p">},</span><span class="w"></span>
+<span class="p">{</span><span class="w"> </span>
+<span class="w">  </span><span class="nt">&quot;op&quot;</span><span class="p">:</span><span class="s2">&quot;replace&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;loggingLevel&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;value&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;DEBUG&quot;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
+<span class="p">]</span><span class="w"></span>
 </code></pre></div>
 <p>These contents should be then passed to the <code>patch-scim-config</code> operation, e.g. <code>python3 /opt/jans/jans-cli/config-cli.py --operation-id patch-scim-config --data &lt;path-to-JSON-file&gt;</code>.</p>
 <h2 id="configuration-management-using-tui">Configuration management using TUI<a class="headerlink" href="#configuration-management-using-tui" title="Permanent link">#</a></h2>
@@ -8801,16 +8815,18 @@
 <li>Highlight the "Get Scim Configuration" button using the tab key</li>
 <li>Press enter</li>
 </ol>
-<p>You can modify the configuration in place by editing the fields of your interest. To persist the changes, highlight the "Save" button at the bottom and press enter </p>
+<p>You can modify the configuration in place by editing the fields of your interest. To persist the changes, highlight the "Save" button at the bottom and press enter.</p>
+<h2 id="scim-operations-guide-using-cli-tui-and-api">SCIM Operations Guide using CLI, TUI and API<a class="headerlink" href="#scim-operations-guide-using-cli-tui-and-api" title="Permanent link">#</a></h2>
+<p>SCIM operations support mutiple options. Please check out this <a href="../../config-guide/scim-config/user-config/">documentation</a> for guidelines of scim operations.</p>
 <h2 id="when-will-changes-take-effect">When will changes take effect?<a class="headerlink" href="#when-will-changes-take-effect" title="Permanent link">#</a></h2>
-<p>Any configuration update will take effect one minute after it has been applied whether via CLI or TUI. </p>
+<p>Any configuration update will take effect one minute after it has been applied whether via CLI or TUI.</p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-10T06:11:59+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-10</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-28T05:09:15+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-28</span>
       
         <br>
         Created:

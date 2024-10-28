@@ -19,7 +19,7 @@
     
     
       
-        <title>Index - Janssen Documentation</title>
+        <title>Local User Management - Janssen Documentation</title>
       
     
     
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#this-content-is-in-progress" class="md-skip">
+        <a href="#local-user-management" class="md-skip">
           Skip to content
         </a>
       
@@ -128,7 +128,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Index
+              Local User Management
             
           </span>
         </div>
@@ -8606,6 +8606,8 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
@@ -8614,16 +8616,36 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#this-content-is-in-progress" class="md-nav__link">
-    This content is in progress
+  <a href="#manage-data-in-rdbms" class="md-nav__link">
+    Manage Data in RDBMS
+  </a>
+  
+    <nav class="md-nav" aria-label="Manage Data in RDBMS">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#get-postgresql-db-information" class="md-nav__link">
+    Get PostgreSQL DB Information
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#have-questions-in-the-meantime" class="md-nav__link">
-    Have questions in the meantime?
+        
+          <li class="md-nav__item">
+  <a href="#create-ssh-tunnel" class="md-nav__link">
+    Create SSH Tunnel
   </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#add-database-in-pgadmin" class="md-nav__link">
+    Add Database in pgAdmin
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -8671,12 +8693,51 @@
   </a>
 
 
-  <h1>Index</h1>
-
-<h2 id="this-content-is-in-progress">This content is in progress<a class="headerlink" href="#this-content-is-in-progress" title="Permanent link">#</a></h2>
-<p>The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.</p>
-<h2 id="have-questions-in-the-meantime">Have questions in the meantime?<a class="headerlink" href="#have-questions-in-the-meantime" title="Permanent link">#</a></h2>
-<p>While this documentation is in progress, you can ask questions through <a href="https://github.com/JanssenProject/jans/discussions">GitHub Discussions</a> or the <a href="https://gitter.im/JanssenProject/Lobby">community chat on Gitter</a>. Any questions you have will help determine what information our documentation should cover.</p>
+<h1 id="local-user-management">Local User Management<a class="headerlink" href="#local-user-management" title="Permanent link">#</a></h1>
+<p>In this document we will cover managing people in the Jans Server's LDAP Directory, Jans CLI / TUI and using SCIM.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Manage Data using DB Browser</label><label for="__tabbed_1_2">User Management using SCIM</label><label for="__tabbed_1_3">Manage External Data Sources Using Link</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<p>You can manage your Janssen Server's data using external tool provided by specific DB. Jump into <a href="#manage-data-in-rdbms">Manage RDBMS Data</a> section for guidelines to explore Janssen Server's data using <a href="https://www.pgadmin.org/">pgAdmin</a>.</p>
+</div>
+<div class="tabbed-block">
+<p>SCIM allows many ways to manage users data. Jump into the <a href="../config-guide/scim-config/user-config/">SCIM User Management</a> for guidelines of SCIM operations. To know how SCIM works in Janssen Server, read more from <a href="../scim/">here</a>.</p>
+</div>
+<div class="tabbed-block">
+<p>Janssen Server allows connecting external data sources using Jans Link. Syncing people and attributes from a backend server speeds up authentication transactions. It is possible to perform attribute transformations, changing the name of attributes, or even using an interception script to change the values. Transformations are stored locally in Janssen Server. Read out <a href="../link/">Link Guide</a> to know more details on it.</p>
+</div>
+</div>
+</div>
+<h2 id="manage-data-in-rdbms">Manage Data in RDBMS<a class="headerlink" href="#manage-data-in-rdbms" title="Permanent link">#</a></h2>
+<p>During the Janssen server installation, you can choose any of the supported RDBMS from the list; like mysql, or postgreSQL. In this article, We will connect postgreSQL database locally to explore <code>jansDB</code>. Let's see how we can connect PostgreSQL DB from jans server to your local PC.</p>
+<h3 id="get-postgresql-db-information">Get PostgreSQL DB Information<a class="headerlink" href="#get-postgresql-db-information" title="Permanent link">#</a></h3>
+<p>Let's get the postgreSQL databse information from the Janssen server properties which is located in <code>/opt/jans/jans-setup/setup.properties.last</code>. Run the following command:</p>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>cat /opt/jans/jans-setup/setup.properties.last <span class="p">|</span> grep <span class="s1">&#39;rdbm_&#39;</span>
+</code></pre></div>
+<p>It should print details like below:</p>
+<div class="highlight"><span class="filename">Output</span><pre><span></span><code>rdbm_db=jansdb
+rdbm_host=localhost
+rdbm_install=True
+rdbm_install_type=1
+rdbm_password=xxxxxxxx
+rdbm_password_enc=xxxxxxxxxxxxx\=\=
+rdbm_port=5432
+rdbm_type=pgsql
+rdbm_user=jans
+static_rdbm_dir=/opt/jans/jans-setup/static/rdbm
+</code></pre></div>
+<h3 id="create-ssh-tunnel">Create SSH Tunnel<a class="headerlink" href="#create-ssh-tunnel" title="Permanent link">#</a></h3>
+<p>You can create a SSH tunnel with the Janssen Server's database using the following command:</p>
+<div class="highlight"><pre><span></span><code>ssh -fNL 5432:localhost:5432 [user]@[janssen-server-host]
+</code></pre></div>
+<p>Or using <code>pgAdmin</code>'s SSH tunnel option:</p>
+<p><img alt="pgAdmin-SSH-Tunnel" src="../../assets/pgAdmin-ssh-tunnel.png" /></p>
+<h3 id="add-database-in-pgadmin">Add Database in <strong><code>pgAdmin</code></strong><a class="headerlink" href="#add-database-in-pgadmin" title="Permanent link">#</a></h3>
+<p>Let's open pgAdmin in your local pc, and add a server.</p>
+<p><img alt="add-server" src="../../assets/pgAdmin-server-name.png" /></p>
+<p>Go to <code>Connection</code> tab add the database as following in the image below:</p>
+<p><img alt="add-db-in-pgadmin" src="../../assets/pgAdmin-connection.png" /></p>
+<p>Finally, save it and explore.</p>
 <h2 id="want-to-contribute">Want to contribute?<a class="headerlink" href="#want-to-contribute" title="Permanent link">#</a></h2>
 <p>If you have content you'd like to contribute to this page in the meantime, you can get started with our <a href="https://docs.jans.io/head/CONTRIBUTING/">Contribution guide</a>.</p>
 
@@ -8685,7 +8746,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-09-27T12:12:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-28T05:09:15+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-28</span>
       
         <br>
         Created:

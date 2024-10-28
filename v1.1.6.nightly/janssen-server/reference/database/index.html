@@ -8902,7 +8902,7 @@ public class SimpleUser implements Serializable {
 
     private static final long serialVersionUID = -1634191420188575733L;
 
-    // Define entry primary key. In LDAP terminology it&#39;s DN
+    // Define entry primary key. i.e a distinguished name, DN
     @DN
     private String dn;
 
@@ -8930,11 +8930,6 @@ public class SimpleUser implements Serializable {
     // This is convenient for custom attributes
     @AttributesList(name = &quot;name&quot;, value = &quot;values&quot;, multiValued = &quot;multiValued&quot;, sortByName = true)
     protected List&lt;CustomObjectAttribute&gt; customAttributes = new ArrayList&lt;CustomObjectAttribute&gt;();
-
-    // Specify additional objecClass
-    // This is needed for LDAP only
-    @CustomObjectClass
-    private String[] customObjectClasses;
 
     ...
 </code></pre></div>
@@ -9022,7 +9017,7 @@ schema <a href="https://github.com/JanssenProject/jans/blob/main/jans-linux-setu
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-23T09:14:06+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-23</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-28T09:05:20+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-28</span>
       
         <br>
         Created:

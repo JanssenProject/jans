@@ -6903,39 +6903,12 @@
       <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
       
       
+        
       
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          Adding Custom Attributes
-          <span class="md-nav__icon md-icon"></span>
-        </label>
       
       <a href="./" class="md-nav__link md-nav__link--active">
         Adding Custom Attributes
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#custom-attributes" class="md-nav__link">
-    Custom Attributes
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
       
     </li>
   
@@ -8643,21 +8616,8 @@
   
   
   
+    
   
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#custom-attributes" class="md-nav__link">
-    Custom Attributes
-  </a>
-  
-</li>
-      
-    </ul>
   
 </nav>
                   </div>
@@ -8699,28 +8659,26 @@
   </a>
 
 
-  <h1>Adding Custom Attributes</h1>
-
-<h2 id="custom-attributes">Custom Attributes<a class="headerlink" href="#custom-attributes" title="Permanent link">#</a></h2>
+<h1 id="custom-attributes">Custom Attributes<a class="headerlink" href="#custom-attributes" title="Permanent link">#</a></h1>
 <p><a href="https://datatracker.ietf.org/doc/html/rfc7643">RFC 7643</a> defines the schema for resource types in SCIM (see section 3.3). In other words, it defines structures in terms of attributes to represent users and groups as well as attribute types, mutability, cardinality, and so on.</p>
 <p>Although the schema covers many attributes one might think of, at times you will need to add your own attributes for specific needs. This is where user extensions pitch in, they allow you to create custom attributes for SCIM. To do so, you will have to:</p>
 <ul>
 <li>
-<p>Add an attribute to LDAP schema</p>
+<p>Add an attribute to Database schema</p>
 </li>
 <li>
-<p>Include the new attribute in an LDAP's object class such as jansPerson</p>
+<p>Include the new attribute in an object class such as jansPerson</p>
 </li>
 <li>
 <p>Register and activate your new attribute through <strong>Jans TUI</strong>.</p>
 </li>
 </ul>
-<p>Please visit this <a href="https://docs.jans.io/head/admin/config-guide/attribute-configuration/">page</a> for a more detailed explanation. When registering the attribute in the <strong>TUI</strong>, please ensure you have set the <code>Include in SCIM Extension</code> parameter to <code>true</code>.</p>
-<p><img alt="attribute" src="https://github.com/JanssenProject/jans/assets/43112579/61d0aff6-75fa-4e6b-8db6-2eeb3332cfe5" /></p>
+<p>Please visit this <a href="../../config-guide/auth-server-config/attribute-configuration/">page</a> for a more detailed explanation. When registering the attribute in the <strong>TUI</strong>, please ensure you have set the <code>Include in SCIM Extension</code> parameter to <code>true</code>.</p>
+<p><img alt="attribute" src="../../../assets/tui-attribute.png" /></p>
 <p>Once you submit this form, your attribute will be part of the <code>User Extension</code>. You can verify this by inspecting the <code>Schema</code> endpoint:</p>
-<div class="highlight"><pre><span></span><code>https://&lt;host-name&gt;/jans-scim/restv1/v2/Schemas/urn:ietf:params:scim:schemas:extension:gluu:2.0:User
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>https://&lt;host-name&gt;/jans-scim/restv1/v2/Schemas/urn:ietf:params:scim:schemas:extension:gluu:2.0:User
 </code></pre></div>
-<p><img alt="output-json" src="https://github.com/JanssenProject/jans/assets/43112579/41804347-4084-4bb4-8bc5-05fc220ae394" /></p>
+<p><img alt="output-json" src="../../../assets/scim-attribute-retrieve.png" /></p>
 <p>In the JSON response, your new added attribute will appear.</p>
 <p>To customize the URI associated to the extension (whose default value is <code>urn:ietf:params:scim:schemas:extension:gluu:2.0:User</code>
 ), you can use TUI:</p>
@@ -8730,14 +8688,14 @@
 <li>Set a value in the field <code>User Extension Schema URI</code></li>
 <li>Save the changes</li>
 </ul>
-<p><img alt="scim-extension" src="https://github.com/JanssenProject/jans/assets/43112579/fb5b9d5c-8b17-4be0-af6c-d36389de82d2" /></p>
+<p><img alt="scim-extension" src="../../../assets/jans-tui-scim-config.png" /></p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-10T06:11:59+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-10</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-28T09:05:20+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-28</span>
       
         <br>
         Created:

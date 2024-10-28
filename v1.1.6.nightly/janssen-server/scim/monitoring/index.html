@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#this-content-is-in-progress" class="md-skip">
+        <a href="#how-is-scim-data-stored" class="md-skip">
           Skip to content
         </a>
       
@@ -6847,6 +6847,8 @@
       <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
       
       
+        
+      
       
         <label class="md-nav__link md-nav__link--active" for="__toc">
           Monitoring
@@ -6863,19 +6865,14 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
       Table of contents
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#this-content-is-in-progress" class="md-nav__link">
-    This content is in progress
-  </a>
-  
-</li>
       
         <li class="md-nav__item">
   <a href="#have-questions-in-the-meantime" class="md-nav__link">
@@ -8657,19 +8654,14 @@
   
   
   
+    
+  
   
     <label class="md-nav__title" for="__toc">
       <span class="md-nav__icon md-icon"></span>
       Table of contents
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#this-content-is-in-progress" class="md-nav__link">
-    This content is in progress
-  </a>
-  
-</li>
       
         <li class="md-nav__item">
   <a href="#have-questions-in-the-meantime" class="md-nav__link">
@@ -8722,10 +8714,9 @@
   </a>
 
 
-  <h1>Monitoring</h1>
-
-<h2 id="this-content-is-in-progress">This content is in progress<a class="headerlink" href="#this-content-is-in-progress" title="Permanent link">#</a></h2>
-<p>The Janssen Project documentation is currently in development. Topic pages are being created in order of broadest relevance, and this page is coming in the near future.</p>
+<h1 id="how-is-scim-data-stored">How is SCIM data stored?<a class="headerlink" href="#how-is-scim-data-stored" title="Permanent link">#</a></h1>
+<p>SCIM <a href="https://datatracker.ietf.org/doc/html/rfc7643">schema spec</a> does not use LDAP attribute names but a different naming convention for resource attributes (note this is not the case of custom attributes where the SCIM name used is that of the LDAP attribute).</p>
+<p>It is possible to determine if a given LDAP attribute is being mapped to a SCIM attribute. For that you need to check in Jans TUI <code>Auth-Server &gt;&gt; Attributes</code> and click on any attributes. Check <code>Include in SCIM Extension:</code> is <code>true</code> or <code>false</code>. Whenever you try to map any LDAP attribute to a SCIM attribute keep it's value <code>true</code>.</p>
 <h2 id="have-questions-in-the-meantime">Have questions in the meantime?<a class="headerlink" href="#have-questions-in-the-meantime" title="Permanent link">#</a></h2>
 <p>While this documentation is in progress, you can ask questions through <a href="https://github.com/JanssenProject/jans/discussions">GitHub Discussions</a> or the <a href="https://gitter.im/JanssenProject/Lobby">community chat on Gitter</a>. Any questions you have will help determine what information our documentation should cover.</p>
 <h2 id="want-to-contribute">Want to contribute?<a class="headerlink" href="#want-to-contribute" title="Permanent link">#</a></h2>
@@ -8736,7 +8727,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-09-27T12:12:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-28T05:09:15+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-28</span>
       
         <br>
         Created:
