@@ -135,15 +135,15 @@ Here is a non-normative example of a `cedarling_store.json` file:
             "openid_configuration_endpoint": "https://accounts.google.com/.well-known/openid-configuration",
             "token_metadata": [
                 {
-                    "type": "Access",
+                    "type": "access_token",
                     "user_id": "aud"
                 },
                 {
-                    "type": "Id",
+                    "type": "id_token",
                     "user_id": "sub"
                 },
                 {
-                    "type": "userinfo",
+                    "type": "userinfo_token",
                     "user_id": "email",
                     "role_mapping": "role"
                 }

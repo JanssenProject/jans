@@ -69,17 +69,7 @@ Sample
 			<DefaultRolloverStrategy max="30" />
 		</RollingFile>
 
-		<RollingFile name="JANS_AUTH_PERSISTENCE_LDAP_STATISTICS_FILE" fileName="${sys:log.base}/logs/jans-auth_persistence_ldap_statistics.log"
-			filePattern="${sys:log.base}/logs/jans-auth_persistence_ldap_statistics-%d{yyyy-MM-dd}-%i.log">
-
-			<PatternLayout pattern="%d %-5p [%t] %X{X-Correlation-Id} [%C{6}] (%F:%L) - %m%n" />
-
-			<Policies>
-				<TimeBasedTriggeringPolicy interval="1" modulate="true" />
-				<SizeBasedTriggeringPolicy size="250 MB" />
-			</Policies>
-			<DefaultRolloverStrategy max="30" />
-		</RollingFile>
+	
 
 		<RollingFile name="JANS_AUTH_SCRIPT_LOG_FILE" fileName="${sys:log.base}/logs/jans-auth_script.log" filePattern="${sys:log.base}/logs/jans-auth_script-%d{yyyy-MM-dd}-%i.log">
 
@@ -124,16 +114,12 @@ Sample
 			<AppenderRef ref="JANS_AUTH_PERSISTENCE_FILE" />
 		</Logger>
 
-		<Logger name="com.unboundid.ldap.sdk.LDAPConnection" level="${log4j.default.log.level}" additivity="false">
-			<AppenderRef ref="JANS_AUTH_PERSISTENCE_FILE" />
-		</Logger>
+		
 		<logger name="com.couchbase.client" level="${log4j.default.log.level}" additivity="false">
 			<AppenderRef ref="JANS_AUTH_PERSISTENCE_FILE" />
 		</logger>
 
-		<Logger name="io.jans.orm.ldap.operation.watch" level="${log4j.default.log.level}" additivity="false">
-			<AppenderRef ref="JANS_AUTH_PERSISTENCE_DURATION_FILE" />
-		</Logger>
+	
 
 		<Logger name="io.jans.orm.couchbase.operation.watch" level="${log4j.default.log.level}" additivity="false">
 			<AppenderRef ref="JANS_AUTH_PERSISTENCE_DURATION_FILE" />
@@ -143,9 +129,7 @@ Sample
 			<AppenderRef ref="JANS_AUTH_PERSISTENCE_DURATION_FILE" />
 		</Logger>
 
-		<Logger name="io.jans.as.server.service.status.ldap" level="${log4j.default.log.level}" additivity="false">
-			<AppenderRef ref="JANS_AUTH_PERSISTENCE_LDAP_STATISTICS_FILE" />
-		</Logger>
+
 
 		<Logger name="io.jans.service.PythonService" level="${log4j.default.log.level}" additivity="false">
 			<AppenderRef ref="JANS_AUTH_SCRIPT_LOG_FILE" />
