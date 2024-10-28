@@ -10,122 +10,141 @@ tags:
 
 # Cedarling Policy Store
 
-By convention, the filename is `cedarling_store.json`. It contains all the data the 
-Cedarling needs to evaluate policies and verify JWT tokens:
+The Cedarling Policy Store uses a JSON file named `cedarling_store.json` to store all necessary data for evaluating policies and verifying JWT tokens. The structure includes the following key components:
 
-1. Cedar Schema - Base64 encoded human format
-2. Cedar Policies - Base64 encoded human format
-3. Trusted Issuers - See below syntax
+1. **Cedar Schema**: The Cedar schema encoded in Base64.
+2. **Cedar Policies**: The Cedar policies encoded in Base64.
+3. **Trusted Issuers**: Details about the trusted issuers (see [below](#trusted-issuer-schema) for syntax).
 
-The JSON schema looks like this:
+**Note:** The `cedarling_store.json` file is only needed if the bootstrap properties: `CEDARLING_LOCK`; `CEDARLING_POLICY_STORE_URI`; and `CEDARLING_POLICY_STORE_ID` are not set to a local location. If you're fetching the policies remotely, you don't need a `cedarling_store.json` file.
 
-```
+### JSON Schema
+
+The JSON Schema is for the `policy_store.json` defined as follows:
+
+```json
 {
-    "policystore_id": "...",
-    "policies": {...},
-    "schema": "...",
-    "trusted_issuers": [],
-    "cedar_version": "v1.1.5"
+    "cedar_version": "v2.4.7",
+    "cedar_policies": { ... },
+    "cedar_schema": "cedar_schema_encoded_in_base64",
+    "trusted_issuers": [ ... ]
 }
 
 ```
 
-- **policystore_id** : (String, no spaces) The unique identifier for the policy store.
-- **policies** : (Json) Json object containing one or more policy_id as key and policy object as value
-- **schema** : (String) Base64 encoded cedar schema
-- **trusted_issuers** : (List) List of Trusted Issuer metadata
-- **cedar_version** : (String) The version of [Cedar policy](https://docs.cedarpolicy.com/). The protocols of this version will be followed when processing Cedar schema and policies.
+- **cedar_version** : (*String*) The version of [Cedar policy](https://docs.cedarpolicy.com/). The protocols of this version will be followed when processing Cedar schema and policies.
+- **cedar_policies** : (*Object*) Object containing one or more policy IDs as keys, with their corresponding objects as values. See: [cedar_policies schema](#cedar-policies-schema).
+- **cedar_schema** : (*String*) The Cedar schema, encoded in Base64 format.
+- **trusted_issuers** : (*Array of [TrustedIssuer](#trusted-issuer-schema)*) List of metadata for Trusted Issuers.
+
+## Cedar Policies Schema
+
+The `cedar_policies` field outlines the Cedar policies that will be used in Cedarling. Multiple policies can be defined, with policy requiring a unique `policy_id`.
+
+```json
+  "cedar_policies": {
+    "a_unique_policy_id": {
+      "description": "simple policy example",
+      "creation_date": "2024-09-20T17:22:39.996050",
+      "policy_content": "cGVybWl0KAogICAgc..."
+    },
+    ...
+  }
+```
+- **unique_policy_id**: (*String*) A uniqe policy ID used to for tracking and auditing purposes.
+- **description** : (*String*) A brief description of cedar policy
+- **creation_date** :  (*String*) Policy creating date in `YYYY-MM-DDTHH:MM:SS.ssssss`
+- **policy_content** : (*String*) The policy content, encoded in Base64 format.
+
+### Example of `cedar_policies`
+
+Here is a non-normative example of the `cedar_policies` field:
+
+```json
+  "cedar_policies": {
+    "840da5d85403f35ea76519ed1a18a33989f855bf1cf8": {
+      "description": "simple policy example",
+      "creation_date": "2024-09-20T17:22:39.996050",
+      "policy_content": "cGVybWl0KAogICAgc..."
+    },
+    "0fo1kl928Afa0sc9123scma0123891asklajsh1233ab": {
+      "description": "another policy example",
+      "creation_date": "2024-09-20T18:22:39.192051",
+      "policy_content": "kJW1bWl0KA0g3CAxa..."
+    },
+    ...
+  }
+```
 
 ## Trusted Issuer Schema
 
 This record contains the information needed to validate tokens from this issuer:
 
-```
-"trusted_issuers": [
-    {
-         "name": "name_of_the_trusted_issuer", 
-         "description": "description_of_the_trusted_issuer", 
-         "openid_configuration_endpoint": "https://<trusted-issuer-hostname>/.well-known/openid-configuration",
-         "token_metadata": [token1_entity_schema, token2_entity_schema, ... ]
+```json
+         "token_metadata": [ ... ]
     }
 ]
 ```
 
-- **name** : (String) Name of the trusted issuer
-- **description** : (String) Short description of the trusted issuer
-- **openid_configuration_endpoint** : The HTTPS URL for the OpenID Connect configuration endpoint (usually found under /.well-known/openid-configuration).
-- **token_metadata** : (List) List of token metadata
+- **name** : (*String*) The name of the trusted issuer.
+- **description** : (*String*) A brief description of the trusted issuer, providing context for administrators.
+- **openid_configuration_endpoint** : (*String*) The HTTPS URL for the OpenID Connect configuration endpoint (usually found at `/.well-known/openid-configuration`).
+- **token_metadata** : (*Array of [TokenMetadata](#token-metadata-schema)*, *optional*) Metadata related to the tokens issued by this issuer.
 
-## Policies
-
-Json object containing one or more policy_id as key and policy object as value.
-
-```
-  "policies": {
-    "840da5d85403f35ea76519ed1a18a33989f855bf1cf8": {
-      "description": "simple policy example",
-      "creation_date": "2024-09-20T17:22:39.996050",
-      "policy_content": "cGVybWl0KAogICAgc..."
-    }
-  }
-```
-
-- **description** : (String) Short description of cedar policy
-- **creation_date** :  (String) Policy creating date in `YYYY-MM-DDTHH:MM:SS.ssssss`
-- **policy_content** : (String) Base64 encoded cedar schema
+### Token Metadata Schema
 
 
-## Token Entity Schema
-
-```
-{ "type": "access"
-  "user_id": "...",                   
-  "role_mapping": "...",          
+```json 
+{
+  "type": "access_token"
+  "user_id": "some_user123",
+  "role_mapping": "role",
 }
 ```
 
-- **type** : (String) The type of token whether `access`, `id_token`, `userinfo` or `transaction`.
-- **user_id** : (String) For id_token or userinfo tokens, the `user_id` refers to the claim used to identify the person entity. For example, in an id_token, the "user_id" could be the sub (subject) or email claim.
-- **role_mapping** : (String) The role_mapping refers to the token claim used to get role values. The default value of `role_mapping` is `role`.
+- **type** : (String, no spaces) The type of token (e.g., Access, ID, Userinfo, Transaction).
+- **user_id** : (String) The claim used to create the Cedar entity associated with this token.
+- **role_mapping** : (String, *optional*) The claim used to create a role for the token. The default value of `role_mapping` is `role`.
 
-### Sample Policy store
+**Note**: Only one token should include the `role_mapping` field in the list of `token_metadata`.
 
-```
+## Example Policy store
+
+Here is a non-normative example of a `cedarling_store.json` file:
+
+```json
 {
-  "policystore_id": "8b805e22fdd39f3dd33a13d9fb446d8e6314153ca997",
-  "name": "gluustore",
-  "description": "gluu",
-  "policies": {
-    "840da5d85403f35ea76519ed1a18a33989f855bf1cf8": {
-      "description": "simple policy example",
-      "creation_date": "2024-09-20T17:22:39.996050",
-      "policy_content": "cGVybWl0KAogICAgc..."
-    }
-  },
-  "trusted_issuers": [
-    {
-      "name": "Google",
-      "description": "Consumer IDP",
-      "openid_configuration_endpoint": "https://accounts.google.com/.well-known/openid-configuration",
-      "token_metadata": [
-        {
-          "type": "access",
-          "user_id": "aud"
-        },
-        {
-          "type": "id_token",
-          "user_id": "email",
-          "role_mapping": "role"
-        },
-        {
-          "type": "userinfo",
-          "user_id": "email"
+    "cedar_version": "v2.4.7",
+    "cedar_policies": {
+        "840da5d85403f35ea76519ed1a18a33989f855bf1cf8": {
+            "description": "simple policy example",
+            "creation_date": "2024-09-20T17:22:39.996050",
+            "policy_content": "cedar_policy_encoded_in_base64"
         }
-      ]
-    }
-  ],
-  "schema": "ewogICAgIkphbnMiOiB...",
-  "cedar_version": "v2.4.7"
+    },
+    "cedar_schema": "cedar_schema_encoded_in_base64",
+    "trusted_issuers": [
+        {
+            "name": "Google",
+            "description": "Consumer IDP",
+            "openid_configuration_endpoint": "https://accounts.google.com/.well-known/openid-configuration",
+            "token_metadata": [
+                {
+                    "type": "access_token",
+                    "user_id": "aud"
+                },
+                {
+                    "type": "id_token",
+                    "user_id": "sub"
+                },
+                {
+                    "type": "userinfo_token",
+                    "user_id": "email",
+                    "role_mapping": "role"
+                }
+            ]
+        }
+    ]
 }
 ```
 
