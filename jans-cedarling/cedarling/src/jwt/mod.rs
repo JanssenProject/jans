@@ -20,9 +20,8 @@ mod jwt_service_config;
 mod test;
 mod token;
 
-pub use decoding_strategy::string_to_alg;
 use decoding_strategy::DecodingStrategy;
-pub use decoding_strategy::ParseAlgorithmError;
+pub use decoding_strategy::{string_to_alg, ParseAlgorithmError};
 pub use error::*;
 pub use jsonwebtoken::Algorithm;
 pub use jwt_service_config::*;

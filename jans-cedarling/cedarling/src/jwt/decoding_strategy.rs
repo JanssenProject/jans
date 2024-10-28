@@ -63,9 +63,9 @@ impl DecodingStrategy {
     ///
     /// # Arguments
     /// - `jwt` - The JWT string to decode.
-    /// - `iss` - Optional expected issuer for validation.
-    /// - `aud` - Optional expected audience for validation.
-    /// - `sub` - Optional expected subject for validation.
+    /// - `iss` - Optional expected issuer for validation - use None for no validation.
+    /// - `aud` - Optional expected audience for validation - use None for no validation.
+    /// - `sub` - Optional expected subject for validation - use None for no validation.
     /// - `validate_nbf`: A boolean indicating whether to validate the "not before" claim.
     /// - `validate_exp`: A boolean indicating whether to validate the expiration claim.
     ///
@@ -198,6 +198,9 @@ pub enum ParseAlgorithmError {
 ///
 /// This function maps algorithm names (e.g., "HS256", "RS256") to corresponding
 /// `jwt::Algorithm` enum values. Returns an error if the algorithm is unsupported.
+///
+/// # Arguments
+/// * `algorithm` - The string representing the algorithm to convert.
 ///
 /// # Errors
 /// Returns an error if the algorithm is not implemented.
