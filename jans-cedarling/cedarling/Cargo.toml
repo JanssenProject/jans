@@ -14,6 +14,8 @@ base64 = "0.22.1"
 url = "2.5.2"
 lazy_static = "1.5.0"
 jsonwebtoken = "9.3.0"
+reqwest = { version = "0.12.8", features = ["blocking", "json"] }
+bytes = "1.7.2"
 typed-builder = "0.20.0"
 semver = "1.0.23"
 derive_more = { version = "1.0.0", features = ["deref"] }
@@ -23,3 +25,4 @@ derive_more = { version = "1.0.0", features = ["deref"] }
 test_utils = { workspace = true }
 rand = "0.8.5"
 jsonwebkey = { version = "0.3.5", features = ["generate", "jwt-convert"] }
+mockito = "1.5.0"

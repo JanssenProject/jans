@@ -10,13 +10,13 @@
 use std::sync::Arc;
 
 use crate::bootstrap_config::BootstrapConfig;
-use crate::jwt::{self, JwtService, JwtServiceConfig};
 use crate::common::policy_store::PolicyStore;
+use crate::jwt::{JwtService, JwtServiceConfig};
 
 use super::service_config::ServiceConfig;
 use crate::authz::{Authz, AuthzConfig};
-use crate::log;
 use crate::common::app_types;
+use crate::log;
 
 #[derive(Clone)]
 pub(crate) struct ServiceFactory<'a> {
@@ -73,12 +73,6 @@ impl<'a> ServiceFactory<'a> {
         self.log_service.clone()
     }
 
-    // get unimplemented jwt::GetKey
-    pub fn jwt_get_key_service(&mut self) -> Arc<dyn jwt::GetKey> {
-        // maybe we can initialize this during creating the Jwt service?
-        todo!("is not implemented")
-    }
-
     // get jwt service
     pub fn jwt_service(&mut self) -> Arc<JwtService> {
         if let Some(jwt_service) = &self.container.jwt_service {
@@ -87,8 +81,8 @@ impl<'a> ServiceFactory<'a> {
             let config = match self.bootstrap_config.jwt_config {
                 crate::JwtConfig::Disabled => JwtServiceConfig::WithoutValidation,
                 crate::JwtConfig::Enabled { .. } => JwtServiceConfig::WithValidation {
-                    key_service: self.jwt_get_key_service(),
                     supported_algs: self.service_config.jwt_algorithms.clone(),
+                    trusted_idps: self.policy_store().trusted_issuers.expect("Expected trusted issuers to be present for JWT validation, but found None. Ensure that the policy store is properly initialized with trusted issuers before using JWT validation.").clone(),
                 },
             };
 
