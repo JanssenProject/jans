@@ -35,7 +35,7 @@ RUN wget -q https://jenkins.jans.io/maven/io/jans/kc-jans-spi/${CN_VERSION}/kc-j
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=fecffe9d5896534665136e5aadd0d7173d0b3efb
+ENV JANS_SOURCE_VERSION=db07dc8cb8378d3372af7027cf1875ff1a2a7891
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
