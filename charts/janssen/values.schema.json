@@ -206,6 +206,10 @@
                         "lbAddr": {
                             "description": "Loadbalancer address for AWS if the FQDN is not registered.",
                             "$ref": "#/definitions/url-pattern"
+                        },
+                        "cnSqlSimpleJson": {
+                            "description": "Enable simple JSON data format of multivalued columns (JSON array instead of object) in MySQL. Default to true. Existing installation should set the value to false.",
+                            "type": "boolean"
                         }
                     }
                 },
