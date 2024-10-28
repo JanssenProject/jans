@@ -8882,7 +8882,12 @@
 </code></pre></div>
 <h2 id="trusted-issuer-schema">Trusted Issuer Schema<a class="headerlink" href="#trusted-issuer-schema" title="Permanent link">#</a></h2>
 <p>This record contains the information needed to validate tokens from this issuer:</p>
-<div class="highlight"><pre><span></span><code><span class="w">         </span><span class="nt">&quot;token_metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">]</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nt">&quot;trusted_issuers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">    </span><span class="p">{</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;name_of_the_trusted_issuer&quot;</span><span class="p">,</span><span class="w"> </span>
+<span class="w">         </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;description_of_the_trusted_issuer&quot;</span><span class="p">,</span><span class="w"> </span>
+<span class="w">         </span><span class="nt">&quot;openid_configuration_endpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://&lt;trusted-issuer-hostname&gt;/.well-known/openid-configuration&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">         </span><span class="nt">&quot;token_metadata&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">]</span><span class="w"></span>
 <span class="w">    </span><span class="p">}</span><span class="w"></span>
 <span class="p">]</span><span class="w"></span>
 </code></pre></div>
@@ -8954,7 +8959,7 @@ trusted IDPs and to publish a policy store to a Github repository.</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-28T08:26:42+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-28</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-28T13:18:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-28</span>
       
         <br>
         Created:
