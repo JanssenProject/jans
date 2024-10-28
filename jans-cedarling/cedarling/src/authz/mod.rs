@@ -82,7 +82,7 @@ impl Authz {
         // Parse context.
         let context: cedar_policy::Context = cedar_policy::Context::from_json_value(
             request.context.clone(),
-            Some((&self.config.policy_store.schema.schema, &action)),
+            Some((&self.config.policy_store.cedar_schema.schema, &action)),
         )?;
 
         // Parse [`cedar_policy::Entity`]-s to [`AuthorizeEntitiesData`] that hold all entities (for usability).
@@ -95,7 +95,8 @@ impl Authz {
 
         // Convert [`AuthorizeEntitiesData`] to  [`cedar_policy::Entities`] structure,
         // hold all entities that will be used on authorize check.
-        let entities = entities_data.entities(Some(&self.config.policy_store.schema.schema))?;
+        let entities =
+            entities_data.entities(Some(&self.config.policy_store.cedar_schema.schema))?;
 
         // Check authorize where principal is `"Jans::Workload"` from cedar-policy schema.
         let workload_result = self
@@ -161,12 +162,12 @@ impl Authz {
             parameters.action,
             parameters.resource,
             parameters.context,
-            Some(&self.config.policy_store.schema.schema),
+            Some(&self.config.policy_store.cedar_schema.schema),
         )?;
 
         let response = self.authorizer.is_authorized(
             &request_principal_workload,
-            &self.config.policy_store.policies,
+            &self.config.policy_store.cedar_policies,
             parameters.entities,
         );
 
@@ -192,18 +193,18 @@ impl Authz {
         let data = AuthorizeEntitiesData::builder()
             // Populate the structure with entities derived from the access token
             .access_token_entities(create_access_token_entities(
-                &self.config.policy_store.schema.json,
+                &self.config.policy_store.cedar_schema.json,
                 &access_token,
             )?)
             // Add an entity created from the ID token
             .id_token_entity(
-                create_id_token_entity(&self.config.policy_store.schema.json, &id_token)
+                create_id_token_entity(&self.config.policy_store.cedar_schema.json, &id_token)
                     .map_err(AuthorizeError::CreateIdTokenEntity)?,
             )
             // Add an entity created from the userinfo token
             .user_entity(
                 create_user_entity(
-                    &self.config.policy_store.schema.json,
+                    &self.config.policy_store.cedar_schema.json,
                     &id_token,
                     &userinfo_token,
                 )
@@ -212,7 +213,7 @@ impl Authz {
             // Add an entity created from the resource in the request
             .resource_entity(create_resource_entity(
                 request.resource.clone(),
-                &self.config.policy_store.schema.json,
+                &self.config.policy_store.cedar_schema.json,
             )?);
 
         Ok(data.build())
