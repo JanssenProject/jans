@@ -56,9 +56,9 @@ admin_email=flex@gluu.org
 city=Austin
 state=Texas
 countryCode=US
-install=True
+installLdap=True
 admin_password=MyAdminPassword
-Pass=MyPassword
+ldapPass=MyLdapPassword
 casa_client_id=3000.7986c837-2a8f-4c31-9c63-1bd2f6abce77
 casa_client_pw=MyCasaClientSecret
 ```
