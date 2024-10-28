@@ -244,14 +244,13 @@ public class DataUtil {
 
             if (StringUtils.isBlank(datePattern)) {
                 if (dateString.contains(":")) {
-                    datePattern = "yyyy-MM-dd HH:mm:ss Z";
+                    datePattern = "yyyy-MM-dd'T'HH:mm:ss";
                 } else {
                     datePattern = "yyyy-MM-dd";
                 }
             }
-
             SimpleDateFormat dateFormat = new SimpleDateFormat(datePattern);
-            logger.debug("datePattern:{}, dateFormat:{} ", datePattern, dateFormat);
+            logger.debug("Returning datePattern:{}, dateFormat:{} ", datePattern, dateFormat);
 
             date = dateFormat.parse(dateString);
             logger.debug("Returning dateFormat:{}, date:{} ", dateFormat, date);
@@ -318,37 +317,6 @@ public class DataUtil {
 
     }
 
-    private static String encodeDate(Date date, String primaryKey, PersistenceEntryManager persistenceEntryManager) {
-        logger.info("Encode String Date - date:{}, primaryKey:{}, persistenceEntryManager:{}", date, primaryKey,
-                persistenceEntryManager);
-        String dateValue = null;
-        if (date == null || StringUtils.isBlank(primaryKey) || persistenceEntryManager == null) {
-            return dateValue;
-        }
-
-        dateValue = persistenceEntryManager.encodeTime(primaryKey, date);
-        logger.info(" persistenceEntryManager.decodeTime - date:{}, dateValue:{}", date, dateValue);
-
-        return dateValue;
-
-    }
-
-    private static Date decodeStringDate(String dateString, String primaryKey,
-            PersistenceEntryManager persistenceEntryManager) {
-        logger.info("Decode String Date - dateString:{}, primaryKey:{}, persistenceEntryManager:{}", dateString,
-                primaryKey, persistenceEntryManager);
-        Date dateValue = null;
-        if (StringUtils.isBlank(dateString) || StringUtils.isBlank(primaryKey) || persistenceEntryManager == null) {
-            return dateValue;
-        }
-
-        dateValue = persistenceEntryManager.decodeTime(primaryKey, dateString);
-        logger.info(" persistenceEntryManager.decodeTime - dateString:{}, dateValue:{}", dateString, dateValue);
-
-        return dateValue;
-
-    }
-
     private static Filter createDateFilter(FieldFilterData fieldFilterData, String primaryKey,
             PersistenceEntryManager persistenceEntryManager) {
         logger.info("Create Date Filter for fieldFilterData:{}, primaryKey:{}, persistenceEntryManager:{}",
@@ -359,7 +327,7 @@ public class DataUtil {
             return dateFilter;
         }
 
-        Date dateValue = decodeStringDate(fieldFilterData.getValue(), primaryKey, persistenceEntryManager);
+        Date dateValue = formatStrDate(fieldFilterData.getValue(), null);
         logger.info(" fieldFilterData.getField():{}, fieldFilterData.getValue():{}, dateValue:{}",
                 fieldFilterData.getField(), fieldFilterData.getValue(), dateValue);
 
