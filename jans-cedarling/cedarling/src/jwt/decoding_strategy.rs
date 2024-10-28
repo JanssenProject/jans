@@ -5,42 +5,65 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-use super::traits::{Decode, ExtractClaims, GetKey};
+pub mod key_service;
+use crate::common::policy_store::TrustedIssuer;
+
 use super::Error;
 use jsonwebtoken as jwt;
+pub use key_service::*;
 use serde::de::DeserializeOwned;
-use std::sync::Arc;
 
 /// Represents the decoding strategy for JWT tokens.
 ///
-/// This enum determines how JWT tokens are decoded, either without validation
-/// or with validation using specified algorithms and a key service. The
-/// appropriate strategy can be selected based on the bootstrap config.
+/// This enum defines two strategies for decoding JWT tokens: `WithoutValidation`
+/// for decoding without validation and `WithValidation` for decoding with validation
+/// using a key service and supported algorithms.
 pub enum DecodingStrategy {
-    /// Decoding strategy that does not perform validation.
+    /// Decoding strategy that skips all validation.
     WithoutValidation,
 
     /// Decoding strategy that performs validation using a key service and supported algorithms.
     WithValidation {
-        key_service: Arc<dyn GetKey>,
+        key_service: KeyService,
         supported_algs: Vec<jwt::Algorithm>,
     },
 }
 
 impl DecodingStrategy {
-    /// Creates a new decoding strategy that skips validation.
-    ///
-    /// This method initializes the `WithoutValidation` strategy, which
-    /// decodes JWT tokens without any validation checks
+    /// Creates a new decoding strategy that does not perform validation.
     pub fn new_without_validation() -> Self {
         Self::WithoutValidation
     }
-}
 
-/// Trait implementation for decoding a JWT token.
-impl Decode for DecodingStrategy {
-    // Decode a JWT according to the current decoding strategy.
-    fn decode<T: DeserializeOwned>(
+    /// Creates a new decoding strategy that performs validation.
+    ///
+    /// This strategy uses the provided dependency map to configure a key service
+    /// and validates tokens based on the specified algorithms.
+    ///
+    /// # Arguments
+    /// * `dep_map` - A reference to the dependency map containing necessary services.
+    /// * `config_algs` - A vector of strings representing supported algorithms for validation.
+    ///
+    /// # Errors
+    /// Returns an error if the specified algorithm is unrecognized or the key service initialization fails.
+    pub fn new_with_validation(
+        config_algs: Vec<jwt::Algorithm>,
+        trusted_idps: Vec<TrustedIssuer>,
+    ) -> Result<Self, Error> {
+        // initialize the key service with OpenID configuration endpoints
+        let openid_conf_endpoints = trusted_idps
+            .iter()
+            .map(|x| x.openid_configuration_endpoint.as_ref())
+            .collect();
+        let key_service = KeyService::new(openid_conf_endpoints).map_err(Error::KeyService)?;
+
+        Ok(Self::WithValidation {
+            key_service,
+            supported_algs: config_algs,
+        })
+    }
+
+    pub fn decode<T: DeserializeOwned>(
         &self,
         jwt: &str,
         iss: Option<impl ToString>,
@@ -55,12 +78,15 @@ impl Decode for DecodingStrategy {
             } => decode_and_validate_jwt(jwt, iss, aud, req_sub, supported_algs, key_service),
         }
     }
-}
 
-/// Trait implementation for extracting claims without validation.
-impl ExtractClaims for DecodingStrategy {
-    /// Extracts the claims from a JWT token without validation.
-    fn extract_claims<T: DeserializeOwned>(&self, jwt_str: &str) -> Result<T, Error> {
+    /// Extracts the claims from a JWT token without performing validation.
+    ///
+    /// This method uses a default insecure validator that skips signature
+    /// validation and other checks (e.g., expiration). Only use in trusted environments.
+    ///
+    /// # Errors
+    /// Returns an error if the claims cannot be extracted.
+    pub fn extract_claims<T: DeserializeOwned>(&self, jwt_str: &str) -> Result<T, Error> {
         let mut validator = jwt::Validation::default();
         validator.insecure_disable_signature_validation();
         validator.validate_exp = false;
@@ -77,18 +103,25 @@ impl ExtractClaims for DecodingStrategy {
     }
 }
 
-/// Decodes and validates a JWT token based on supported algorithms and a key service.
+/// Decodes and validates a JWT token using supported algorithms and a key service.
+///
+/// # Arguments
+/// * `jwt` - The JWT string to decode.
+/// * `iss` - Optional expected issuer for validation.
+/// * `aud` - Optional expected audience for validation.
+/// * `req_sub` - Boolean indicating whether the `sub` (subject) claim is required.
+/// * `supported_algs` - A reference to a vector of supported algorithms for validation.
+/// * `key_service` - A reference to a `KeyService` to retrieve keys for signature validation.
 ///
 /// # Errors
-/// - Returns an error if the JWT header specifies an unsupported algorithm.
-/// - Returns an error if validation fails due to signature mismatch or claim validation failure.
+/// Returns an error if the token uses an unsupported algorithm or if validation fails.
 fn decode_and_validate_jwt<T: DeserializeOwned>(
     jwt: &str,
     iss: Option<impl ToString>,
     aud: Option<impl ToString>,
     req_sub: bool,
     supported_algs: &[jwt::Algorithm],
-    key_service: &Arc<dyn GetKey>,
+    key_service: &KeyService,
 ) -> Result<T, Error> {
     let header = jwt::decode_header(jwt).map_err(Error::Parsing)?;
 
@@ -97,7 +130,7 @@ fn decode_and_validate_jwt<T: DeserializeOwned>(
         return Err(Error::TokenSignedWithUnsupportedAlgorithm(header.alg));
     }
 
-    // Set validator configs
+    // set up validation rules
     let mut validator = jwt::Validation::new(header.alg);
     validator.validate_nbf = true;
     if let Some(iss) = iss {
@@ -116,29 +149,27 @@ fn decode_and_validate_jwt<T: DeserializeOwned>(
     let kid = &header
         .kid
         .ok_or_else(|| Error::MissingRequiredHeader("kid".into()))?;
-    let key = key_service.get_key(kid)?;
+    let key = key_service.get_key(kid).map_err(Error::KeyService)?;
     // TODO: handle tokens without a `kid` in the header
 
-    // extract claims
-    let claims = jwt::decode::<T>(jwt, key, &validator)
+    // decode and validate the jwt
+    let claims = jwt::decode::<T>(jwt, &key, &validator)
         .map_err(Error::Validation)?
         .claims;
     Ok(claims)
 }
 
-#[derive(thiserror::Error, Debug)]
-pub enum ParseAlgorithmError {
-    /// Config contains an unimplemented algorithm
-    #[error("algorithim is not yet implemented: {0}")]
-    UnimplementedAlgorithm(String),
-}
-
 /// Converts a string representation of an algorithm to a `jwt::Algorithm` enum.
 ///
-/// This function attempts to map a string representing an algorithm (e.g., "HS256")
-/// to its corresponding `jwt::Algorithm` enum. If the algorithm is unsupported or
-/// unrecognized, an error is returned.
-pub(crate) fn string_to_alg(algorithm: &str) -> Result<jwt::Algorithm, ParseAlgorithmError> {
+/// This function maps algorithm names (e.g., "HS256", "RS256") to corresponding
+/// `jwt::Algorithm` enum values. Returns an error if the algorithm is unsupported.
+///
+/// # Arguments
+/// * `algorithm` - The string representing the algorithm to convert.
+///
+/// # Errors
+/// Returns an error if the algorithm is not implemented.
+pub fn string_to_alg(algorithm: &str) -> Result<jwt::Algorithm, Error> {
     match algorithm {
         "HS256" => Ok(jwt::Algorithm::HS256),
         "HS384" => Ok(jwt::Algorithm::HS384),
@@ -152,8 +183,6 @@ pub(crate) fn string_to_alg(algorithm: &str) -> Result<jwt::Algorithm, ParseAlgo
         "PS384" => Ok(jwt::Algorithm::PS384),
         "PS512" => Ok(jwt::Algorithm::PS512),
         "EdDSA" => Ok(jwt::Algorithm::EdDSA),
-        _ => Err(ParseAlgorithmError::UnimplementedAlgorithm(
-            algorithm.to_string(),
-        )),
+        _ => Err(Error::UnimplementedAlgorithm(algorithm.into())),
     }
 }
