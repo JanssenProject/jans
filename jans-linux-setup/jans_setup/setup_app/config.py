@@ -241,6 +241,7 @@ class Config:
                             os.path.join(self.install_dir, 'static/scripts/logmanager.sh'),
                             os.path.join(self.install_dir, 'static/scripts/testBind.py'),
                             os.path.join(self.install_dir, 'static/scripts/jans'),
+                            os.path.join(self.install_dir, 'static/scripts/jans_services_status.py'),
                             ]
 
         self.redhat_services = ['httpd', 'rsyslog']
