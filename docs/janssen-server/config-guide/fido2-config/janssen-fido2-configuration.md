@@ -40,7 +40,7 @@ command below:
 
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --info Fido2Configuration
+jans cli --info Fido2Configuration
 ```
 
 It will show the details of the available operation-ids for Fido2.
@@ -52,7 +52,7 @@ Operation ID: put-properties-fido2
   Description: Updates Fido2 configuration properties
   Schema: Fido2:AppConfiguration
 
-To get sample schema type /opt/jans/jans-cli/config-cli.py --schema <schema>, for example /opt/jans/jans-cli/config-cli.py --schema Fido2:AppConfiguration
+To get sample schema type jans cli --schema <schema>, for example jans cli --schema Fido2:AppConfiguration
 ```
 
 ### Get The Current Fido2 Configuration
@@ -60,7 +60,7 @@ To get sample schema type /opt/jans/jans-cli/config-cli.py --schema <schema>, fo
 To get the properties of Janssen Fido2 Configuration, run the command below:
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --operation-id get-properties-fido2
+jans cli --operation-id get-properties-fido2
 ```
 
 It will return the result as below:
@@ -122,12 +122,11 @@ To update the configuration follow the steps below.
 1. [Get the current configuration](#get-the-current-fido2-configuration) and store it into a file for editing
 2. Edit and update the desired configuration values in the file while keeping other properties and values unchanged. Updates must adhere to the `Fido2:AppConfiguration` schema as mentioned [here](#using-command-line). The schema details can be retrieved using the command below. The schema defines what values and datatypes are acceptable for each property value.
  ```text title="Command"
- /opt/jans/jans-cli/config-cli.py --schema Fido2:AppConfiguration
+ jans cli --schema Fido2:AppConfiguration
  ```
 3. Use the updated file to send the update to the Janssen Server using the command below
  ```bash title="Command"
-  /opt/jans/jans-cli/config-cli.py --operation-id put-properties-fido2 \
-  --data /tmp/conf-data.json
+  jans cli --operation-id put-properties-fido2 --data /tmp/conf-data.json
  ```
  Upon successful execution of the update, the Janssen Server responds with updated configuration.
 
