@@ -7,7 +7,9 @@
 use crate::bootstrap_config::BootstrapConfig;
 use crate::jwt::{self, string_to_alg, Algorithm};
 
-pub(crate) fn parse_jwt_algorithms(config: &BootstrapConfig) -> Result<Vec<Algorithm>, jwt::ParseAlgorithmError> {
+pub(crate) fn parse_jwt_algorithms(
+    config: &BootstrapConfig,
+) -> Result<Vec<Algorithm>, jwt::ParseAlgorithmError> {
     match &config.jwt_config {
         crate::JwtConfig::Disabled => Ok(Vec::new()),
         crate::JwtConfig::Enabled {

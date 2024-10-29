@@ -95,65 +95,71 @@ impl JwtService {
         access_token: &str,
         id_token: &str,
         userinfo_token: &str,
-    ) -> Result<(A, I, U), Error>
+    ) -> Result<(A, I, U), JwtDecodingError>
     where
         A: DeserializeOwned,
         I: DeserializeOwned,
         U: DeserializeOwned,
     {
         // extract claims without validation
-        let access_token_claims = DecodingStrategy::extract_claims(access_token)?;
-        let id_token_claims = DecodingStrategy::extract_claims(id_token)?;
-        let userinfo_token_claims = DecodingStrategy::extract_claims(userinfo_token)?;
+        let access_token_claims = DecodingStrategy::extract_claims(access_token)
+            .map_err(JwtDecodingError::InvalidAccessToken)?;
+        let id_token_claims =
+            DecodingStrategy::extract_claims(id_token).map_err(JwtDecodingError::InvalidIdToken)?;
+        let userinfo_token_claims = DecodingStrategy::extract_claims(userinfo_token)
+            .map_err(JwtDecodingError::InvalidUserinfoToken)?;
 
-        // validate access_token
+        // Validate the `access_token`.
+        //
+        // Context: This token is being used as proof of authentication (AuthN).
+        // Validating the `iss` and `aud` claims can help ensure that the token is issued by a
+        // trusted source and is intended for the client that is making the request.
         let access_token = self
             .decoding_strategy
             .decode::<AccessToken>(
                 access_token,
-                None::<String>, // TODO: validate issuer for access token
+                None::<String>,
                 None::<String>,
                 None::<String>,
                 true,
                 true,
             )
-            .map_err(|e| Error::InvalidAccessToken(e.into()))?;
+            .map_err(JwtDecodingError::InvalidAccessToken)?;
 
-        // validate the id_token against the access_token's `iss` and `aud`
+        // Validate the `id_token` against the `access_token`'s `iss` (issuer) and `aud` (audience).
+        // This ensures that the `id_token` was issued by the same entity (`iss`) and intended for
+        // the same audience (`aud`) as the `access_token`.
         let id_token = self
             .decoding_strategy
             .decode::<IdToken>(
                 id_token,
                 Some(&access_token.iss),
                 Some(&access_token.aud),
+                // we don't validate the `sub` (subject) here, as it is typically checked when
+                // validating the `userinfo_token`. The `sub` claim identifies the end user.
                 None::<String>,
                 true,
                 true,
             )
-            .map_err(|e| Error::InvalidIdToken(e.into()))?;
+            .map_err(JwtDecodingError::InvalidIdToken)?;
 
-        // validate the userinfo_token
-        let userinfo_token = self
-            .decoding_strategy
+        // validate the `userinfo_token`.
+        // - The `aud` (audience) should match the `access_token`'s `aud` to ensure it was issued
+        //   for the same client.
+        // - The `iss` (issuer) should match the `access_token`'s `iss` to ensure it comes from
+        //   the same trusted identity provider.
+        // - We validate that the `sub` (subject) in the `userinfo_token` matches the `id_token`'s `sub`,
+        //   confirming the tokens are referring to the same user.
+        self.decoding_strategy
             .decode::<UserInfoToken>(
                 userinfo_token,
-                None::<String>,
-                None::<String>,
-                Some(id_token.sub), // validate that the `sub` is the same as with the id_token's sub
+                Some(access_token.aud),
+                Some(access_token.iss),
+                Some(id_token.sub), // ensure that the `sub` is the same as with the id_token's sub
                 false,              // this token usually does not have an nbf field
                 false,              // this token usually does not have an exp field
             )
-            .map_err(|e| Error::InvalidUserinfoToken(e.into()))?;
-        match self.decoding_strategy {
-            DecodingStrategy::WithoutValidation => (), // do nothing
-            DecodingStrategy::WithValidation { .. } => {
-                // validate that  the userinfo_token's client_id is the same as the access_token's aud
-                if userinfo_token.client_id != access_token.aud {
-                    let validation_err = Error::Validation("the userinfo_token's `client_id` does not match with the access_token's `aud`".into());
-                    return Err(Error::InvalidUserinfoToken(validation_err.into()));
-                }
-            },
-        }
+            .map_err(JwtDecodingError::InvalidUserinfoToken)?;
 
         Ok((access_token_claims, id_token_claims, userinfo_token_claims))
     }

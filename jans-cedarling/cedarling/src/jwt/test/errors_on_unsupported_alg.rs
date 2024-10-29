@@ -5,6 +5,8 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
+use crate::jwt;
+
 use super::{
     super::{
         decoding_strategy::{DecodingStrategy, KeyService},
@@ -98,13 +100,18 @@ fn errors_on_unsuppored_alg() {
 
     // assert that the validation fails due to the tokens being signed with an
     // unsupported algorithm
-    assert!(jwt_service
+    let validation_result = jwt_service
         .decode_tokens::<AccessTokenClaims, IdTokenClaims, UserinfoTokenClaims>(
             &access_token,
             &id_token,
-            &userinfo_token
-        )
-        .is_err());
+            &userinfo_token,
+        );
+    assert!(matches!(
+        validation_result,
+        Err(jwt::JwtDecodingError::InvalidAccessToken(
+            jwt::TokenValidationError::TokenSignedWithUnsupportedAlgorithm(_)
+        ))
+    ));
     jwks_uri_mock.assert();
 
     // check if the openid_conf_endpoint got called exactly once

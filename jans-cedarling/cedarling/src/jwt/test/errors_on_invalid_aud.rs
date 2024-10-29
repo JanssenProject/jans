@@ -5,6 +5,8 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
+use crate::jwt;
+
 use super::{
     super::{
         decoding_strategy::{DecodingStrategy, KeyService},
@@ -18,8 +20,8 @@ use serde_json::json;
 #[test]
 /// Tests if JWT validation fails due to mismatched audience (`aud`).
 ///
-/// This test verifies that the `JwtService` correctly fails validation when the `aud` claim in the id token
-/// does not match the expected audience (`aud`). the decode operation is expected to return an error.
+/// This test verifies that the `JwtService` correctly fails validation when the `aud` claim in the id_token
+/// does not match the `aud` in the access_token.
 fn errors_on_invalid_aud() {
     // initialize mock server to simulate OpenID configuration and JWKS responses
     let mut server = mockito::Server::new();
@@ -39,7 +41,7 @@ fn errors_on_invalid_aud() {
     let id_token_claims = IdTokenClaims {
         iss: server.url(),
         sub: "some_sub".to_string(),
-        aud: "some_aud".to_string(),
+        aud: "another_aud".to_string(),
         email: "some_email@gmail.com".to_string(),
         iat: Timestamp::now(),
         exp: Timestamp::one_hour_after_now(),
@@ -95,14 +97,16 @@ fn errors_on_invalid_aud() {
         supported_algs: vec![Algorithm::ES256],
     });
 
-    // assert that the decoding fails due to mismatched aud
-    assert!(jwt_service
+    let decode_result = jwt_service
         .decode_tokens::<AccessTokenClaims, IdTokenClaims, UserinfoTokenClaims>(
             &access_token,
             &id_token,
-            &userinfo_token
-        )
-        .is_err());
+            &userinfo_token,
+        );
+    assert!(matches!(
+        decode_result,
+        Err(jwt::JwtDecodingError::InvalidIdToken(_))
+    ));
     jwks_uri_mock.assert();
 
     // verify openid configuration endpoint was called once

@@ -5,10 +5,15 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
+use crate::jwt::TokenValidationError;
+
 use super::{
     super::{
-        decoding_strategy::{DecodingStrategy, KeyService},
-        JwtService,
+        decoding_strategy::{
+            key_service::{self, KeyService},
+            DecodingStrategy,
+        },
+        JwtDecodingError, JwtService,
     },
     *,
 };
@@ -98,13 +103,18 @@ fn can_update_local_jwks() {
 
     // assert that first call attempt to validate the token fails since a
     // decoding key with the same `kid` could not be retrieved
-    assert!(jwt_service
+    let decode_result = jwt_service
         .decode_tokens::<AccessTokenClaims, IdTokenClaims, UserinfoTokenClaims>(
             &access_token,
             &id_token,
-            &userinfo_token
-        )
-        .is_err());
+            &userinfo_token,
+        );
+    assert!(matches!(
+        decode_result,
+        Err(JwtDecodingError::InvalidAccessToken(
+            TokenValidationError::KeyService(key_service::Error::KeyNotFound(_))
+        ))
+    ));
     jwks_uri_mock.assert();
 
     // update the mock server's response for the jwks_uri
