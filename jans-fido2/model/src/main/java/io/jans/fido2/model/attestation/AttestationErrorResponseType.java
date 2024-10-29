@@ -54,6 +54,11 @@ public enum AttestationErrorResponseType implements IErrorType {
      * Fido U2F validation error
      */
     FIDO_U2F_ERROR("fido_u2f_error"),
+
+    /**
+     * Attestation Origin validation error
+     */
+    INVALID_ORIGIN("invalid_origin"),
     ;
 
     private final String paramName;

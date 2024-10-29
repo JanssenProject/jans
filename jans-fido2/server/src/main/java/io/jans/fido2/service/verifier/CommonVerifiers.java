@@ -22,6 +22,7 @@ import io.jans.fido2.model.attestation.AttestationErrorResponseType;
 import io.jans.fido2.model.attestation.AttestationOptions;
 import io.jans.fido2.model.attestation.AttestationResult;
 import io.jans.fido2.model.attestation.Response;
+import io.jans.fido2.model.conf.RequestedParty;
 import io.jans.fido2.model.error.ErrorResponseFactory;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -85,13 +86,25 @@ public class CommonVerifiers {
         }
     }
 
-    public String verifyRpDomain(String origin, String rpId) {
-    	
-        if (Strings.isNullOrEmpty(origin)) {
-            origin = rpId;
-        }
+    public String verifyRpDomain(String origin, String rpId, List<RequestedParty> requestedParties) {
+
+        origin = Strings.isNullOrEmpty(origin) ? rpId : origin;
         origin = networkService.getHost(origin);
-        log.debug("Returning rp id : "+ origin);
+        log.debug("Resolved origin to RP ID: " + origin);
+
+        // Check if requestedParties is null or empty
+        if (requestedParties == null || requestedParties.isEmpty()) {
+            return origin; // or handle accordingly, depending on requirements
+        }
+        // Check if the origin exists in any of the RequestedParties origins
+        String finalOrigin = origin;
+        boolean originExists = requestedParties.stream()
+                .flatMap(requestedParty -> requestedParty.getOrigins().stream())
+                .anyMatch(allowedOrigin -> allowedOrigin.equals(finalOrigin));
+
+        if (!originExists) {
+            throw errorResponseFactory.badRequestException(AttestationErrorResponseType.INVALID_ORIGIN, "The origin '" + origin + "' is not listed in the allowed origins.");
+        }
         return origin;
     }
 
