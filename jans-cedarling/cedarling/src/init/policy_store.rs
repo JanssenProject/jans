@@ -6,60 +6,48 @@
  */
 
 use crate::bootstrap_config::policy_store_config::{PolicyStoreConfig, PolicyStoreSource};
-use crate::common::policy_store::{PolicyStore, PolicyStoreMap};
+use crate::common::policy_store::PolicyStore;
 
-/// Error cases for loading policy
+/// Errors that can occur when loading a policy store.
 #[derive(Debug, thiserror::Error)]
-pub enum LoadPolicyStoreError {
-    #[error("{0}")]
+pub enum PolicyStoreLoadError {
+    #[error("failed to parse the policy store from `policy_store.json`: {0}")]
     Parse(#[from] serde_json::Error),
-    #[error("store policy is empty")]
-    PolicyEmpty,
-    #[error("the `store_key` is not specified and the count on policies more than 1")]
-    MoreThanOnePolicy,
-    #[error("could not found policy by id: {0}")]
-    FindPolicy(String),
+    #[error("failed to fetch the policy store from the lock server")]
+    FetchFromLockServer,
 }
 
-/// Load policy store from source
-fn load_policy_store_map(
-    source: &PolicyStoreSource,
-) -> Result<PolicyStoreMap, LoadPolicyStoreError> {
-    let policy_store_map: PolicyStoreMap = match source {
-        PolicyStoreSource::Json(json_raw) => serde_json::from_str(json_raw.as_str())?,
-    };
-    Ok(policy_store_map)
-}
-
-/// Load policy store based on config
-//
-// Unit tests will be added when will be implemented other types of sources
+/// Loads the policy store based on the provided configuration.
+///
+/// This function supports multiple sources for loading policies.
 pub(crate) fn load_policy_store(
     config: &PolicyStoreConfig,
-) -> Result<PolicyStore, LoadPolicyStoreError> {
-    let mut policy_store_map = load_policy_store_map(&config.source)?;
-
-    let policy: PolicyStore = match (&config.store_id, policy_store_map.policy_stores.len()) {
-        (Some(store_id), _) => policy_store_map
-            .policy_stores
-            .remove(store_id.as_str())
-            .ok_or(LoadPolicyStoreError::FindPolicy(store_id.to_string()))?,
-        (None, 0) => {
-            return Err(LoadPolicyStoreError::PolicyEmpty);
+) -> Result<PolicyStore, PolicyStoreLoadError> {
+    let policy_store = match &config.source {
+        PolicyStoreSource::Json(policy_json) => {
+            load_policy_store_from_json(policy_json).map_err(PolicyStoreLoadError::Parse)?
         },
-        (None, 1) => {
-            // getting first element and we know it is save to use unwrap here,
-            // because we know that there is only one element in the map
-            policy_store_map
-                .policy_stores
-                .into_values()
-                .next()
-                .expect("In policy store map field policy_stores should be one element")
-        },
-        (None, 2..) => {
-            return Err(LoadPolicyStoreError::MoreThanOnePolicy);
+        PolicyStoreSource::LockMaster(policy_store_id) => {
+            load_policy_store_from_lock_master(policy_store_id)?
         },
     };
 
-    Ok(policy)
+    Ok(policy_store)
+}
+
+/// Loads the policy store from a JSON string.
+fn load_policy_store_from_json(policies_json: &str) -> Result<PolicyStore, serde_json::Error> {
+    let policy_store = serde_json::from_str::<PolicyStore>(policies_json)?;
+
+    Ok(policy_store)
+}
+
+/// Loads the policy store from the Lock Master service.
+///
+/// TODO: implement this function once integration with the lock
+/// service has been established
+fn load_policy_store_from_lock_master(
+    _policy_store_id: &str,
+) -> Result<PolicyStore, PolicyStoreLoadError> {
+    todo!()
 }

@@ -18,7 +18,7 @@ create_exception!(
 
 create_exception!(
     authorize_errors,
-    JWTError,
+    DecodeTokens,
     AuthorizeError,
     "Error encountered while decoding JWT token data"
 );
@@ -28,6 +28,20 @@ create_exception!(
     AccessTokenEntitiesError,
     AuthorizeError,
     "Error encountered while creating access token entities"
+);
+
+create_exception!(
+    authorize_errors,
+    CreateIdTokenEntityError,
+    AuthorizeError,
+    "Error encountered while creating id token entities"
+);
+
+create_exception!(
+    authorize_errors,
+    CreateUserEntityError,
+    AuthorizeError,
+    "Error encountered while creating id token entities"
 );
 
 create_exception!(
@@ -53,9 +67,16 @@ create_exception!(
 
 create_exception!(
     authorize_errors,
-    CreateRequestError,
+    CreateRequestWorkloadEntityError,
     AuthorizeError,
-    "Error encountered while creating cedar_policy::Request"
+    "Error encountered while creating cedar_policy::Request for workload entity principal"
+);
+
+create_exception!(
+    authorize_errors,
+    CreateRequestUserEntityError,
+    AuthorizeError,
+    "Error encountered while creating cedar_policy::Request for user entity principal"
 );
 
 create_exception!(
@@ -103,12 +124,15 @@ macro_rules! errors_functions {
 // This function is used to convert `cedarling::AuthorizeError` to a Python exception.
 // For each possible case of `AuthorizeError`, we have created a corresponding Python exception that inherits from `cedarling::AuthorizeError`.
 errors_functions! {
-    JWT => JWTError,
+    DecodeTokens => DecodeTokens,
     AccessTokenEntities => AccessTokenEntitiesError,
+    CreateIdTokenEntity => CreateIdTokenEntityError,
+    CreateUserEntity => CreateUserEntityError,
     ResourceEntity => ResourceEntityError,
     Action => ActionError,
     CreateContext => CreateContextError,
-    CreateRequest => CreateRequestError,
+    CreateRequestWorkloadEntity => CreateRequestWorkloadEntityError,
+    CreateRequestUserEntity => CreateRequestUserEntityError,
     Entities => EntitiesError
 }
 

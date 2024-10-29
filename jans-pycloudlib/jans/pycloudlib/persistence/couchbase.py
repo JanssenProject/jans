@@ -788,6 +788,11 @@ class CouchbaseClient:
             return False
         return bool(req.json()["status"] == "success")
 
+    @property
+    def use_simple_json(self):
+        """Determine whether to use simple JSON where values are stored as JSON array."""
+        return True
+
 
 # backward-compat
 def suppress_verification_warning() -> None:

@@ -26,7 +26,7 @@ The following log levels can be configured through the configuration CLI:
 ### Configuring Log Levels
 Use the following commands to get information on the logging module configuration:
 
-- To get the logging configuration operation ID: `/opt/jans/jans-cli/config-cli.py --info ConfigurationLogging`
+- To get the logging configuration operation ID: `jans cli --info ConfigurationLogging`
   - Output would be: 
     ```
     # Log configuration operations
@@ -36,8 +36,8 @@ Use the following commands to get information on the logging module configuratio
     Description: Updates Jans Authorization Server logging settings.
     Schema: /components/schemas/LoggingConfiguration
     ```
-- To get sample schema type /opt/jans/jans-cli/config-cli.py --schema <schma>, 
-  for example `/opt/jans/jans-cli/config-cli.py --schema /components/schemas/LoggingConfiguration`
+- To get sample schema type `jans cli --schema <schma>`, 
+  for example `jans cli --schema /components/schemas/LoggingConfiguration`
    - Output: 
     ```
     # Generic configuration schema
@@ -54,7 +54,7 @@ Use the following commands to get information on the logging module configuratio
        ]
      }
     ``` 
-- Status of current configuration logging: `/opt/jans/jans-cli/config-cli.py --operation-id get-config-logging`
+- Status of current configuration logging: `jans cli --operation-id get-config-logging`
   - Output: 
     ``` 
       # Current log configuration
@@ -83,7 +83,7 @@ Let's assume we want to update logging configuration to `TRACE`. To do this, cre
 ```
 And use the PUT operation with this file as the payload:
 ```
-/opt/jans/jans-cli/config-cli.py --operation-id put-config-logging --data /tmp/log.json
+jans cli --operation-id put-config-logging --data /tmp/log.json
 ```
 The server will now have logs set to TRACE.
 
@@ -104,9 +104,8 @@ The available logs for Jans server are listed below:
 | Log File | Description |  
 |--------- |-------------|
 | **configapi.log** | Config API main log |
-| **configapi_persistence.log** | Config API LDAP log |
-| **configapi_persistence_duration.log** | Config API LDAP operation duration log |
-| **configapi_persistence_ldap_statistics.log**| Config API LDAP statistics |
+| **configapi_persistence.log** | Config API persistence log |
+| **configapi_persistence_duration.log** | Config API persistence operation duration log |
 | **[date].jetty.log** | Config API Jetty log |
 | **configapi_script.log** | Config API custom script log |
 

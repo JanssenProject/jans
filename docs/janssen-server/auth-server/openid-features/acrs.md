@@ -45,7 +45,7 @@ against the backend datastore.
 
 All Janssen Server deployments have `default_ldap_server` ACR which can be enabled to perform authentication against a
 remote LDAP-based IDP (e.g. ActiveDirectory). By default, this ACR is disabled. This ACR can only authenticate against
-LDAP-based IDP or a local LDAP.
+LDAP-based IDP.
 
 Use the instructions provided in jans-cli [LDAP configuration options](../../config-guide/auth-server-config/ldap-configuration.md) documentation to learn how to enable and configure ACRs that use external LDAP as IDP.
 

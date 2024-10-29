@@ -328,7 +328,7 @@ class SpannerClient(SqlSchemaMixin):
             )
 
         if data_type == "JSON":
-            return {"v": values}
+            return values
 
         if data_type == "ARRAY<STRING(MAX)>":
             return values
@@ -415,6 +415,11 @@ class SpannerClient(SqlSchemaMixin):
             batch.delete(table_name, KeySet([[id_]]))
             deleted = True
         return deleted
+
+    @property
+    def use_simple_json(self):
+        """Determine whether to use simple JSON where values are stored as JSON array."""
+        return True
 
 
 def render_spanner_properties(manager: Manager, src: str, dest: str) -> None:

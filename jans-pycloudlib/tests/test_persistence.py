@@ -852,3 +852,26 @@ def test_get_server_version(gmanager, given, expected):
     SqlClient.server_version = property(patched_server_version)
     client = SqlClient(gmanager)
     assert client.get_server_version() == expected
+
+
+@pytest.mark.parametrize("dialect, expected", [
+    ("pgsql", True),
+    ("postgresql", True),
+])
+def test_simple_json_postgres(monkeypatch, gmanager, dialect, expected):
+    from jans.pycloudlib.persistence.sql import SqlClient
+
+    monkeypatch.setenv("CN_SQL_DB_DIALECT", dialect)
+    assert SqlClient(gmanager).use_simple_json is expected
+
+
+@pytest.mark.parametrize("env_value, expected", [
+    ("true", True),
+    ("false", False),
+])
+def test_simple_json_mysql(monkeypatch, gmanager, env_value, expected):
+    from jans.pycloudlib.persistence.sql import SqlClient
+
+    monkeypatch.setenv("CN_SQL_DB_DIALECT", "mysql")
+    monkeypatch.setenv("MYSQL_SIMPLE_JSON", env_value)
+    assert SqlClient(gmanager).use_simple_json is expected
