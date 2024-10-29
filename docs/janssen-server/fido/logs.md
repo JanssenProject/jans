@@ -15,7 +15,7 @@ tags:
 
 Use the following command to obtain configuration parameters:
 
-`/opt/jans/jans-cli/config-cli.py --operation-id get-properties-fido2`
+`jans cli --operation-id get-properties-fido2`
 
 Response:
 ```
@@ -68,7 +68,7 @@ Response:
      - edit `loggingLayout` to `text` or `json`
 
   B. Use the following command to update the logging level
-  `/opt/jans/jans-cli/config-cli.py --operation-id post-config-scripts --data /tmp/config_values.json`
+  `jans cli --operation-id post-config-scripts --data /tmp/config_values.json`
 
   C. restart `jans-fido2`
      `service fido2 restart` or `systemctl restart fido2`

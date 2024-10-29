@@ -37,7 +37,7 @@ UMA Resource, you can check the operations under the `OauthUmaResources` task us
 command below.
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --info OauthUmaResources
+jans cli --info OauthUmaResources
 ```
 
 ```text title="Sample Output"
@@ -74,7 +74,7 @@ Operation ID: get-oauth-uma-resources-by-clientid
   Parameters:
   clientId: Client ID [string]
 
-To get sample schema type /opt/jans/jans-cli/config-cli.py --schema-sample <schema>, for example /opt/jans/jans-cli/config-cli.py --schema-sample JsonPatch
+To get sample schema type jans cli --schema-sample <schema>, for example jans cli --schema-sample JsonPatch
 ```
 
 ## Get List of UMA Resources
@@ -87,7 +87,7 @@ To find the existing UMA Resources, let's run the following command:
 
 To get a list of UMA resources:
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --operation-id get-oauth-uma-resources
+jans cli --operation-id get-oauth-uma-resources
 ```
 ```json title="Sample Output"
 {
@@ -135,7 +135,7 @@ To get a list of UMA resources:
 To search using multiple arguments, you can change pattern that you want to find:
 
 ```bash 
-/opt/jans/jans-cli/config-cli.py --operation-id get-oauth-uma-resources \
+jans cli --operation-id get-oauth-uma-resources \
 --endpoint-args limit:1,pattern:"Jans Cofig Api Uma Resource /jans-config-api/api/v1/attributes"
 ```
 
@@ -175,7 +175,7 @@ With `get-oauth-uma-resources-by-id` operation-id, we can get any specific
 uma Resource matched with `ID`. If we know the `ID`, we can simply use the below command:
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --operation-id get-oauth-uma-resources-by-id \
+jans cli --operation-id get-oauth-uma-resources-by-id \
 --url-suffix id:361e1db0-19b4-4d83-9cb8-616dda8292b7
 ```
 
@@ -238,7 +238,7 @@ Now let's do the operation with the command line.
 
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --operation-id patch-oauth-uma-resources-by-id \
+jans cli --operation-id patch-oauth-uma-resources-by-id \
 --url-suffix id:c0204b2a-4047-4c2b-86a8-a088e2ee54de --data /tmp/patch-uma.json
 ```
 ```json title="Sample Output"
@@ -277,14 +277,14 @@ according to `UmaResource` schema.
 To see the schema, use the command below:
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --schema UmaResource
+jans cli --schema UmaResource
 ```
 
 The Janssen Server also provides an example of data that adheres to
 the above schema. To fetch the example, use the command below.
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --schema-sample UmaResource
+jans cli --schema-sample UmaResource
 ```
 
 Using the schema and the example above, we have added below data to the file `/tmp/uma.json`.
@@ -313,8 +313,7 @@ Using the schema and the example above, we have added below data to the file `/t
 Now let's post this uma to the Janssen Server to be added to the existing set:
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --operation-id post-oauth-uma-resources \
---data /tmp/uma.json
+jans cli --operation-id post-oauth-uma-resources --data /tmp/uma.json
 ```
 
 ## Updates an UMA resource
@@ -324,7 +323,7 @@ To update the uma resource follow the steps below.
 1. [Get Oauth UMA Resource by ID](#get-oauth-uma-resource-by-id) and store it into a file for editing.
    The following command will retrieve the existing Uma resource in the schema file.
   ```bash title="Sample Command"
-  /opt/jans/jans-cli/config-cli.py -no-color --operation-id get-oauth-uma-resources-by-id \
+  jans cli -no-color --operation-id get-oauth-uma-resources-by-id \
   --url-suffix id:c70c3b5c-d543-4dec-923c-4035bdce52bb > /tmp/update-uma.json
   ```
 2. Edit and update the desired configuration values in the file while keeping other
@@ -333,8 +332,7 @@ To update the uma resource follow the steps below.
 3. We have changed only the `true` to `false` for `deletable` in existing uma resource.
    Use the updated file to send the update to the Janssen Server using the command below
    ```bash title="Command"
-   /opt/jans/jans-cli/config-cli.py --operation-id put-oauth-uma-resources \
-   --data /tmp/update-uma.json
+   jans cli --operation-id put-oauth-uma-resources --data /tmp/update-uma.json
    ```
 This will updated the existing uma resource matched with id.
 
@@ -347,7 +345,7 @@ With `get-oauth-uma-resources-by-clientid` operation-id, we can get any specific
 uma Resource matched with `clientid`. If we know the `clientid`, we can simply use the below command:
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --operation-id get-oauth-uma-resources-by-clientid \
+jans cli --operation-id get-oauth-uma-resources-by-clientid \
 --url-suffix client id:361e1db0-19b4-4d83-9cb8-616dda8292b7
 ```
 
@@ -380,7 +378,7 @@ uma Resource matched with `clientid`. If we know the `clientid`, we can simply u
 You can delete any Uma Resource by its `id` value.
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --operation-id delete-oauth-uma-resources-by-id \
+jans cli --operation-id delete-oauth-uma-resources-by-id \
 --url-suffix id:c0204b2a-4047-4c2b-86a8-a088e2ee54de
 ```
 
