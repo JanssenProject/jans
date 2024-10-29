@@ -44,7 +44,7 @@ command below:
 
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --info ConfigurationJwkJsonWebKeyJwk
+jans cli --info ConfigurationJwkJsonWebKeyJwk
 ```
 
 ```text title="Sample Output"
@@ -73,7 +73,7 @@ Operation ID: post-config-jwks-key
  Description: Configuration – JWK - JSON Web Key (JWK)
  Schema: JSONWebKey
 
-To get sample schema type /opt/jans/jans-cli/config-cli.py --schema <schema>, for example /opt/jans/jans-cli/config-cli.py --schema JSONWebKey
+To get sample schema type jans cli --schema <schema>, for example jans cli --schema JSONWebKey
 ```
 
 
@@ -82,7 +82,7 @@ To get sample schema type /opt/jans/jans-cli/config-cli.py --schema <schema>, fo
 We can get list of all configurations of the jwk configuration using a command like this:
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --operation-id get-config-jwks
+jans cli --operation-id get-config-jwks
 ```
 It will return all the jwk configuration information as below:
 
@@ -136,13 +136,13 @@ As shown in the [output](#using-command-line) for `--info` command, the
 To see the schema, use the command below:
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --schema JSONWebKey
+jans cli --schema JSONWebKey
 ```
 The Janssen Server also provides an example of data that adheres to 
 the above schema. To fetch the example, use the command below.
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --schema-sample JSONWebKey
+jans cli --schema-sample JSONWebKey
 ```
 Using the schema and the example above, we have added below key data to the file `/tmp/jwk.json`.
 
@@ -168,7 +168,7 @@ Using the schema and the example above, we have added below key data to the file
 Now let's post this key to the Janssen Server to be added to the existing set:
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --operation-id post-config-jwks-key --data /tmp/jwk.json
+jans cli --operation-id post-config-jwks-key --data /tmp/jwk.json
 ```
 
 ## Replace JSON Web Key Set
@@ -185,7 +185,7 @@ This operation replaces the current set of JWK with the provided set.
 To get the schema file:
 
 ```bash title="Command"
- /opt/jans/jans-cli/config-cli.py --schema WebKeysConfiguration
+ jans cli --schema WebKeysConfiguration
 ```
 
 As suggested in the schema, we have to provide an array of keys in a json 
@@ -239,7 +239,7 @@ Let's update the json file to create a new key configuration.
        "connect"
        ],
      "kid": "connect_e47fd367-51d6-4d17-811d-adb1f1a0b723_sig_rs256",
-     "x5c": [
+     "x5c": [/janssen-server/config-guide/auth-server-config/json-web-key-config
          "MIIDCjCCAfKgAwIBAgIhAInuAAbxL2O7H+/V0lm3bbEdCmdPdgJh+OqljtWpwi7wMA0GCSqGSIb3DQEBCwUAMCQxIjAgBgNVBAMMGUphbnMgQXV0aCBDQSBDZXJ0aWZpY2F0ZXMwHhcNMjQwNjIxMDg0ODE5WhcNMjQwNjIzMDg0ODI4WjAkMSIwIAYDVQQDDBlKYW5zIEF1dGggQ0EgQ2VydGlmaWNhdGVzMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1RCY0ZfJ/SHZ+jojCyStBjIh4upkLXuMgZLi6b7k0fQ8/oNmCBEsOKMPUubHFEHrDHZLbXj7w5gEdMPZOiLaBP8Pv0JD8IbOUtoSXEawE33LRldKiof296nlBJFsX00ipiLq3ANXuTDXtP4+pd+lvIufv1nBXpqqrN4MOsSsKuvKvxRPCg6JusHVU5hsiqbwh9y3X7sPFwqw4LJFa0U3Z4RoX7vCsS/axPPSyUi9x0zsF4S7ZGHclBReC6IipOnGyGeSEQdpuchhoZs382md+wejIf4hVtusRbEHz+wwZFhnrfh/nvHCvrWCcxBgeEntAin+ig1RlR8N4x9Ox9K01wIDAQABoycwJTAjBgNVHSUEHDAaBggrBgEFBQcDAQYIKwYBBQUHAwIGBFUdJQAwDQYJKoZIhvcNAQELBQADggEBACkrKROjAIf6n1PKpXFTRQVov32EFcwhi1YSao/MZHURV2ruYXjh/S6HuvHWWofV8R6muLnD938GytS2mRjr+X7DOZj/bsDT7amd810SDvFUCh6IoPt46FeXFZMV4XyL4DQKoNxOEGGDVnD41NVC6k5GLzPwcVBwX11+b7wRfy/KoPP9aoSXjyWnNbhwClFQ9oTJYkNtaNeh2kJZ2j1UIqO51vyhUjpSM9awqV2u+ouxDKCT4h9xRcDwkOUlVXtBwn+dfJHnG6riLzT59MiPtWeo037hESUxIvJxLQP6jV97eEi/CMhSb1y6YJPFjnTBmCpzeHRp5+DNu65KPaGntB8="
          ],
      "name": "Connect RS256 Sign Key",
@@ -256,8 +256,7 @@ Let's update the json file to create a new key configuration.
 Now let's put the new keys into the Janssen server.
 
 ```bash title="Command"
- /opt/jans/jans-cli/config-cli.py --operation-id put-config-jwks \
- --data /tmp/path-jwk.json
+ jans cli --operation-id put-config-jwks --data /tmp/path-jwk.json
 ```
 
 Please remember that this operation replaces all JWKs in
@@ -308,7 +307,7 @@ With `get-jwk-by-kid` operation-id, we can get any specific jwk matched with `ki
 If we know the `kid`, we can simply use the below command:
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --operation-id get-jwk-by-kid \
+jans cli --operation-id get-jwk/janssen-server/config-guide/auth-server-config/json-web-key-config-by-kid \
 --url-suffix kid:dd550214-7969-41b9-b919-2a0cfa36047b_enc_rsa1_5
 
 ```
@@ -360,7 +359,7 @@ In this example; We will change the value of the property `use` from `enc` to `s
 Now let's do the operation with the command line.
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --operation-id patch-config-jwk-kid \
+jans cli --operation-id patch-config-jwk-kid \
 --url-suffix kid:dd550214-7969-41b9-b919-2a0cfa36047b_enc_rsa1_5 --data /tmp/schema.json
 ```
 
@@ -392,7 +391,7 @@ You can get some idea of how this patch method works to modify particular proper
 It's pretty simple to delete json web key using its `kid`. The command line is:
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --operation-id delete-config-jwk-kid \
+jans cli --operation-id delete-config-jwk-kid \
 --url-suffix kid:dd550214-7969-41b9-b919-2a0cfa36047b_enc_rsa1_5
 ```
 
