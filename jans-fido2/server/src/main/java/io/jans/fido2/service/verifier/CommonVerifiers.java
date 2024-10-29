@@ -89,12 +89,15 @@ public class CommonVerifiers {
     public String verifyRpDomain(String origin, String rpId, List<RequestedParty> requestedParties) {
 
         origin = Strings.isNullOrEmpty(origin) ? rpId : origin;
+        if (!origin.startsWith("http://") && !origin.startsWith("https://")) {
+            origin = "https://" + origin;
+        }
         origin = networkService.getHost(origin);
         log.debug("Resolved origin to RP ID: " + origin);
 
         // Check if requestedParties is null or empty
         if (requestedParties == null || requestedParties.isEmpty()) {
-            return origin; // or handle accordingly, depending on requirements
+            return origin;
         }
         // Check if the origin exists in any of the RequestedParties origins
         String finalOrigin = origin;
