@@ -8802,7 +8802,7 @@ Postman. Learn how to use Janssen Server Config API
 command line. To get the details of Janssen command line operations relevant to
 FIDO2 Configuration, you can check the operations under <code>Fido2Configuration</code> task using the
 command below:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --info Fido2Configuration
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --info Fido2Configuration
 </code></pre></div>
 <p>It will show the details of the available operation-ids for Fido2.</p>
 <div class="highlight"><span class="filename">Sample Output</span><pre><span></span><code>Operation ID: get-properties-fido2
@@ -8811,11 +8811,11 @@ Operation ID: put-properties-fido2
   Description: Updates Fido2 configuration properties
   Schema: Fido2:AppConfiguration
 
-To get sample schema type /opt/jans/jans-cli/config-cli.py --schema &lt;schema&gt;, for example /opt/jans/jans-cli/config-cli.py --schema Fido2:AppConfiguration
+To get sample schema type jans cli --schema &lt;schema&gt;, for example jans cli --schema Fido2:AppConfiguration
 </code></pre></div>
 <h3 id="get-the-current-fido2-configuration">Get The Current Fido2 Configuration<a class="headerlink" href="#get-the-current-fido2-configuration" title="Permanent link">#</a></h3>
 <p>To get the properties of Janssen Fido2 Configuration, run the command below:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-properties-fido2
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id get-properties-fido2
 </code></pre></div>
 <p>It will return the result as below:</p>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -8915,11 +8915,10 @@ To get sample schema type /opt/jans/jans-cli/config-cli.py --schema &lt;schema&g
 <ol>
 <li><a href="#get-the-current-fido2-configuration">Get the current configuration</a> and store it into a file for editing</li>
 <li>Edit and update the desired configuration values in the file while keeping other properties and values unchanged. Updates must adhere to the <code>Fido2:AppConfiguration</code> schema as mentioned <a href="#using-command-line">here</a>. The schema details can be retrieved using the command below. The schema defines what values and datatypes are acceptable for each property value.
- <div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --schema Fido2:AppConfiguration
+ <div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --schema Fido2:AppConfiguration
 </code></pre></div></li>
 <li>Use the updated file to send the update to the Janssen Server using the command below
- <div class="highlight"><span class="filename">Command</span><pre><span></span><code> /opt/jans/jans-cli/config-cli.py --operation-id put-properties-fido2 <span class="se">\</span>
- --data /tmp/conf-data.json
+ <div class="highlight"><span class="filename">Command</span><pre><span></span><code> jans cli --operation-id put-properties-fido2 --data /tmp/conf-data.json
 </code></pre></div>
  Upon successful execution of the update, the Janssen Server responds with updated configuration.</li>
 </ol>
@@ -8942,7 +8941,7 @@ are published in the <a href="../../../reference/openapi/">Swagger document</a>.
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-10T06:11:59+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-10</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-29T09:13:16+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-29</span>
       
         <br>
         Created:

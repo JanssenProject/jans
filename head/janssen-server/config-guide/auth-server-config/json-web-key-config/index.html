@@ -8922,7 +8922,7 @@ Postman. Learn how to use Janssen Server Config API
 command Line. To get the details of Janssen command line operations relevant to
 JSON Web Key, you can check the operations under <code>ConfigurationJwkJsonWebKeyJwk</code> task using the
 command below:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --info ConfigurationJwkJsonWebKeyJwk
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --info ConfigurationJwkJsonWebKeyJwk
 </code></pre></div>
 <div class="highlight"><span class="filename">Sample Output</span><pre><span></span><code>Operation ID: get-jwk-by-kid
  Description: Get a JSON Web Key based on kid
@@ -8949,11 +8949,11 @@ Operation ID: post-config-jwks-key
  Description: Configuration – JWK - JSON Web Key (JWK)
  Schema: JSONWebKey
 
-To get sample schema type /opt/jans/jans-cli/config-cli.py --schema &lt;schema&gt;, for example /opt/jans/jans-cli/config-cli.py --schema JSONWebKey
+To get sample schema type jans cli --schema &lt;schema&gt;, for example jans cli --schema JSONWebKey
 </code></pre></div>
 <h3 id="get-configurations-list-of-jwks">Get Configurations list of JWKs<a class="headerlink" href="#get-configurations-list-of-jwks" title="Permanent link">#</a></h3>
 <p>We can get list of all configurations of the jwk configuration using a command like this:</p>
-<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-config-jwks
+<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id get-config-jwks
 </code></pre></div>
 It will return all the jwk configuration information as below:</p>
 <div class="highlight"><span class="filename">Sample Output</span><pre><span></span><code><span class="p">{</span><span class="w"></span>
@@ -9000,11 +9000,11 @@ As shown in the <a href="#using-command-line">output</a> for <code>--info</code>
  <code>post-config-jwks-key</code> operation requires data to be sent 
  according to <code>JSONWebKey</code> schema.</p>
 <p>To see the schema, use the command below:</p>
-<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --schema JSONWebKey
+<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --schema JSONWebKey
 </code></pre></div>
 The Janssen Server also provides an example of data that adheres to 
 the above schema. To fetch the example, use the command below.</p>
-<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --schema-sample JSONWebKey
+<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --schema-sample JSONWebKey
 </code></pre></div>
 Using the schema and the example above, we have added below key data to the file <code>/tmp/jwk.json</code>.</p>
 <div class="highlight"><span class="filename">Input</span><pre><span></span><code><span class="s2">&quot;name&quot;</span>: <span class="s2">&quot;Connect RSA-OAEP Encryption Key 2&quot;</span>,
@@ -9024,7 +9024,7 @@ Using the schema and the example above, we have added below key data to the file
 <span class="s2">&quot;y&quot;</span>: null
 </code></pre></div>
 <p>Now let's post this key to the Janssen Server to be added to the existing set:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id post-config-jwks-key --data /tmp/jwk.json
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id post-config-jwks-key --data /tmp/jwk.json
 </code></pre></div>
 <h2 id="replace-json-web-key-set">Replace JSON Web Key Set<a class="headerlink" href="#replace-json-web-key-set" title="Permanent link">#</a></h2>
 <p>To replace the current JWKS configuration, use the <code>put-config-jwks</code> operation.
@@ -9034,7 +9034,7 @@ This operation replaces the current set of JWK with the provided set.</p>
  Schema: WebKeysConfiguration
 </code></pre></div>
 <p>To get the schema file:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code> /opt/jans/jans-cli/config-cli.py --schema WebKeysConfiguration
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code> jans cli --schema WebKeysConfiguration
 </code></pre></div>
 <p>As suggested in the schema, we have to provide an array of keys in a json 
 file containing <code>key-value</code> pairs. The properties in the key are defined by 
@@ -9122,7 +9122,7 @@ and for algorithm-specific properties, in <a href="https://datatracker.ietf.org/
 <span class="w">       </span><span class="s2">&quot;connect&quot;</span><span class="w"></span>
 <span class="w">       </span><span class="p">],</span><span class="w"></span>
 <span class="w">     </span><span class="nt">&quot;kid&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;connect_e47fd367-51d6-4d17-811d-adb1f1a0b723_sig_rs256&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">     </span><span class="nt">&quot;x5c&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
+<span class="w">     </span><span class="nt">&quot;x5c&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="err">/ja</span><span class="kc">nssen</span><span class="mi">-</span><span class="err">server/co</span><span class="kc">nf</span><span class="err">ig</span><span class="mi">-</span><span class="err">guide/au</span><span class="kc">t</span><span class="err">h</span><span class="mi">-</span><span class="err">server</span><span class="mi">-</span><span class="err">co</span><span class="kc">nf</span><span class="err">ig/jso</span><span class="kc">n</span><span class="mi">-</span><span class="err">web</span><span class="mi">-</span><span class="err">key</span><span class="mi">-</span><span class="err">co</span><span class="kc">nf</span><span class="err">ig</span><span class="w"></span>
 <span class="w">         </span><span class="s2">&quot;MIIDCjCCAfKgAwIBAgIhAInuAAbxL2O7H+/V0lm3bbEdCmdPdgJh+OqljtWpwi7wMA0GCSqGSIb3DQEBCwUAMCQxIjAgBgNVBAMMGUphbnMgQXV0aCBDQSBDZXJ0aWZpY2F0ZXMwHhcNMjQwNjIxMDg0ODE5WhcNMjQwNjIzMDg0ODI4WjAkMSIwIAYDVQQDDBlKYW5zIEF1dGggQ0EgQ2VydGlmaWNhdGVzMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA1RCY0ZfJ/SHZ+jojCyStBjIh4upkLXuMgZLi6b7k0fQ8/oNmCBEsOKMPUubHFEHrDHZLbXj7w5gEdMPZOiLaBP8Pv0JD8IbOUtoSXEawE33LRldKiof296nlBJFsX00ipiLq3ANXuTDXtP4+pd+lvIufv1nBXpqqrN4MOsSsKuvKvxRPCg6JusHVU5hsiqbwh9y3X7sPFwqw4LJFa0U3Z4RoX7vCsS/axPPSyUi9x0zsF4S7ZGHclBReC6IipOnGyGeSEQdpuchhoZs382md+wejIf4hVtusRbEHz+wwZFhnrfh/nvHCvrWCcxBgeEntAin+ig1RlR8N4x9Ox9K01wIDAQABoycwJTAjBgNVHSUEHDAaBggrBgEFBQcDAQYIKwYBBQUHAwIGBFUdJQAwDQYJKoZIhvcNAQELBQADggEBACkrKROjAIf6n1PKpXFTRQVov32EFcwhi1YSao/MZHURV2ruYXjh/S6HuvHWWofV8R6muLnD938GytS2mRjr+X7DOZj/bsDT7amd810SDvFUCh6IoPt46FeXFZMV4XyL4DQKoNxOEGGDVnD41NVC6k5GLzPwcVBwX11+b7wRfy/KoPP9aoSXjyWnNbhwClFQ9oTJYkNtaNeh2kJZ2j1UIqO51vyhUjpSM9awqV2u+ouxDKCT4h9xRcDwkOUlVXtBwn+dfJHnG6riLzT59MiPtWeo037hESUxIvJxLQP6jV97eEi/CMhSb1y6YJPFjnTBmCpzeHRp5+DNu65KPaGntB8=&quot;</span><span class="w"></span>
 <span class="w">         </span><span class="p">],</span><span class="w"></span>
 <span class="w">     </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Connect RS256 Sign Key&quot;</span><span class="p">,</span><span class="w"></span>
@@ -9136,8 +9136,7 @@ and for algorithm-specific properties, in <a href="https://datatracker.ietf.org/
 <span class="p">}</span><span class="w"></span>
 </code></pre></div>
 <p>Now let's put the new keys into the Janssen server.</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code> /opt/jans/jans-cli/config-cli.py --operation-id put-config-jwks <span class="se">\</span>
- --data /tmp/path-jwk.json
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code> jans cli --operation-id put-config-jwks --data /tmp/path-jwk.json
 </code></pre></div>
 <p>Please remember that this operation replaces all JWKs in
 the Janssen server with new ones. So, in this case,
@@ -9181,7 +9180,7 @@ Now use the <a href="#get-configurations-list-of-jwks">Get Configurations list o
 <h3 id="get-a-json-web-key-based-on-kid">Get a JSON Web Key Based on kid<a class="headerlink" href="#get-a-json-web-key-based-on-kid" title="Permanent link">#</a></h3>
 <p>With <code>get-jwk-by-kid</code> operation-id, we can get any specific jwk matched with <code>kid</code>.
 If we know the <code>kid</code>, we can simply use the below command:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-jwk-by-kid <span class="se">\</span>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id get-jwk/janssen-server/config-guide/auth-server-config/json-web-key-config-by-kid <span class="se">\</span>
 --url-suffix kid:dd550214-7969-41b9-b919-2a0cfa36047b_enc_rsa1_5
 </code></pre></div>
 <p>It returns the details as below:</p>
@@ -9217,7 +9216,7 @@ Refer <a href="https://docs.jans.io/vreplace-janssen-version/admin/config-guide/
 <span class="p">]</span><span class="w"></span>
 </code></pre></div>
 <p>Now let's do the operation with the command line.</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id patch-config-jwk-kid <span class="se">\</span>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id patch-config-jwk-kid <span class="se">\</span>
 --url-suffix kid:dd550214-7969-41b9-b919-2a0cfa36047b_enc_rsa1_5 --data /tmp/schema.json
 </code></pre></div>
 <p>Updated Json Web Key:</p>
@@ -9239,7 +9238,7 @@ Refer <a href="https://docs.jans.io/vreplace-janssen-version/admin/config-guide/
 You can get some idea of how this patch method works to modify particular properties of any task.</p>
 <h3 id="delete-json-web-key-using-kid">Delete Json Web Key using kid<a class="headerlink" href="#delete-json-web-key-using-kid" title="Permanent link">#</a></h3>
 <p>It's pretty simple to delete json web key using its <code>kid</code>. The command line is:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id delete-config-jwk-kid <span class="se">\</span>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id delete-config-jwk-kid <span class="se">\</span>
 --url-suffix kid:dd550214-7969-41b9-b919-2a0cfa36047b_enc_rsa1_5
 </code></pre></div>
 <p>It will delete the jwk if it matches with the given <code>kid</code>.</p>
@@ -9272,7 +9271,7 @@ and configuring the Json Web key. Endpoint details are published in the
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-10T06:11:59+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-10</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-29T09:13:16+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-29</span>
       
         <br>
         Created:

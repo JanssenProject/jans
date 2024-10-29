@@ -8663,7 +8663,7 @@
 
 <h1 id="attribute">Attribute<a class="headerlink" href="#attribute" title="Permanent link">#</a></h1>
 <p>First thing, let's get the information for <code>Attribute</code>:
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --info Attribute
+<div class="highlight"><pre><span></span><code>jans cli --info Attribute
 </code></pre></div>
 In return, we get a list of Operations ID as below:</p>
 <div class="highlight"><pre><span></span><code>Operation ID: get-attributes
@@ -8696,7 +8696,7 @@ Operation ID: patch-attributes-by-inum
   inum: Attribute Id [string]
   Schema: Array of PatchRequest
 
-To get sample schema type /opt/jans/jans-cli/config-cli.py --schema &lt;schma&gt;, for example /opt/jans/jans-cli/config-cli.py --schema PatchRequest
+To get sample schema type jans cli --schema &lt;schma&gt;, for example jans cli --schema PatchRequest
 </code></pre></div>
 <p>We have discussed here about each of this operations ID with few examples to understand how these really works.</p>
 <h1 id="table-of-contents">Table of Contents<a class="headerlink" href="#table-of-contents" title="Permanent link">#</a></h1>
@@ -8726,10 +8726,10 @@ To get sample schema type /opt/jans/jans-cli/config-cli.py --schema &lt;schma&gt
   fieldValuePair: Field and value pair for seraching [string]
 </code></pre></div>
 <p>To get all the attributes without any arguments, run the following command:
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-attributes
+<div class="highlight"><pre><span></span><code>jans cli --operation-id get-attributes
 </code></pre></div></p>
 <p>To get attributes with passing the arguments, let's retrieve randomly limit:5:</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-attributes --endpoint-args limit:1
+<div class="highlight"><pre><span></span><code>jans cli --operation-id get-attributes --endpoint-args limit:1
 </code></pre></div>
 <p>It will return only one attribute details randomly:
 <div class="highlight"><pre><span></span><code>Getting access token for scope https://jans.io/oauth/config/attributes.readonly
@@ -8775,7 +8775,7 @@ Calling with params limit=1
 }
 </code></pre></div></p>
 <p>To get attributes with <code>pattern &amp; status</code>:</p>
-<p><div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-attributes --endpoint-args limit:3,pattern:profile,status:ACTIVE
+<p><div class="highlight"><pre><span></span><code>jans cli --operation-id get-attributes --endpoint-args limit:3,pattern:profile,status:ACTIVE
 </code></pre></div>
 In return, we get a list of attribute that are matched with the given <code>pattern</code> and <code>status</code>:</p>
 <div class="highlight"><pre><span></span><code>Please wait while retrieving data ...
@@ -8860,7 +8860,7 @@ In return, we get a list of attribute that are matched with the given <code>patt
   Schema: JansAttribute
 </code></pre></div>
 Before adding a new attribute, let's get sample <code>schema</code>:
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --schema JansAttribute &gt; /tmp/attribute.json
+<div class="highlight"><pre><span></span><code>jans cli --schema JansAttribute &gt; /tmp/attribute.json
 </code></pre></div>
 It will return as below:</p>
 <p><div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
@@ -8922,7 +8922,7 @@ Modify it to update attribute <code>name</code>, <code>display name</code>, <cod
 </code></pre></div></p>
 <p><img alt="post-attribute.png" src="../../../../assets/image-cl-post-attribute-03042021.png" /></p>
 <p>Now, let's add this attribute using <code>post-attributes</code>:
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id post-attributes --data /tmp/attribute.json
+<div class="highlight"><pre><span></span><code>jans cli --operation-id post-attributes --data /tmp/attribute.json
 </code></pre></div>
 It will create a new attribute into the Attribute list with updated <code>inum &amp; dn</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
@@ -8961,7 +8961,7 @@ It will create a new attribute into the Attribute list with updated <code>inum &
 </code></pre></div>
 <h2 id="updating-an-attribute">Updating an Attribute<a class="headerlink" href="#updating-an-attribute" title="Permanent link">#</a></h2>
 <p>This operation-id can be used to update an existing attribute information. The Janssen Server administrator can make changes to attributes, such as changing their status to <code>active/inactive</code> by using this operation-ID. Let's look at the schema:</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --schema JansAttribute &gt; /tmp/attrib.json
+<div class="highlight"><pre><span></span><code>jans cli --schema JansAttribute &gt; /tmp/attrib.json
 </code></pre></div>
 <p>You must see the similar schema while performed in <code>post-attributes</code> operation.</p>
 <p>To update an existing attribute, we have to ensure following properties in the schema file.</p>
@@ -8980,7 +8980,7 @@ It will create a new attribute into the Attribute list with updated <code>inum &
 }
 </code></pre></div>
 <p>Now if we run the below command line:</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id put-attributes --data /tmp/attrb.json
+<div class="highlight"><pre><span></span><code>jans cli --operation-id put-attributes --data /tmp/attrb.json
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>Getting access token for scope https://jans.io/oauth/config/attributes.write
 Server Response:
@@ -9025,10 +9025,10 @@ Server Response:
 <h2 id="get-attribute-by-inum">Get Attribute by <code>inum</code><a class="headerlink" href="#get-attribute-by-inum" title="Permanent link">#</a></h2>
 <p>As we know, There are a lot of attributes available in the Janssen Server including custom attributes as well. You may want to know details information for a single attribute uniquely identified by <code>inum</code>.
 Getting an attribute information by using its <code>inum</code> is pretty simple.</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-attributes-by-inum --url-suffix inum:attribute-iunm-value
+<div class="highlight"><pre><span></span><code>jans cli --operation-id get-attributes-by-inum --url-suffix inum:attribute-iunm-value
 </code></pre></div>
 <p>It will show all details information of the selected Attribute as below example.</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-attributes-by-inum --url-suffix inum:b691f2ab-a7db-4725-b85b-9961575b441f
+<div class="highlight"><pre><span></span><code>jans cli --operation-id get-attributes-by-inum --url-suffix inum:b691f2ab-a7db-4725-b85b-9961575b441f
 
 Getting access token for scope https://jans.io/oauth/config/attributes.readonly
 {
@@ -9070,7 +9070,7 @@ Getting access token for scope https://jans.io/oauth/config/attributes.readonly
 </code></pre></div>
 <h2 id="delete-attributes">Delete Attributes<a class="headerlink" href="#delete-attributes" title="Permanent link">#</a></h2>
 <p>For any reason, If it needs to delete any attribute, you can do that simply using its <code>inum</code> value. See below example, just change the <code>inum</code> value with one that you want to delete.</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id delete-attributes-by-inum --url-suffix inum:b691f2ab-a7db-4725-b85b-9961575b441f
+<div class="highlight"><pre><span></span><code>jans cli --operation-id delete-attributes-by-inum --url-suffix inum:b691f2ab-a7db-4725-b85b-9961575b441f
 </code></pre></div>
 <h2 id="patch-attributes">Patch Attributes<a class="headerlink" href="#patch-attributes" title="Permanent link">#</a></h2>
 <p>This operation can also used for updating an existing attribute by using its <code>inum</code> value.</p>
@@ -9080,7 +9080,7 @@ Getting access token for scope https://jans.io/oauth/config/attributes.readonly
   Schema: Array of PatchRequest
 </code></pre></div>
 <p>If we look at the description, we see that there is a schema file. Let's get the schema file with below command:</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --schema PatchRequest &gt; /tmp/patch.json
+<div class="highlight"><pre><span></span><code>jans cli --schema PatchRequest &gt; /tmp/patch.json
 </code></pre></div>
 <div class="highlight"><pre><span></span><code># cat /tmp/patch.json
 
@@ -9132,7 +9132,7 @@ Getting access token for scope https://jans.io/oauth/config/attributes.readonly
 }
 </code></pre></div>
 According to the schema file, There should be two changes, <code>status</code> and <code>jansHideOnDiscovery</code>. Let's perform the operation:</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id patch-attributes-by-inum --url-suffix inum:6EEB --data /tmp/patch.json
+<div class="highlight"><pre><span></span><code>jans cli --operation-id patch-attributes-by-inum --url-suffix inum:6EEB --data /tmp/patch.json
 </code></pre></div>
 <p>The updated attribute looks like:</p>
 <div class="highlight"><pre><span></span><code>Getting access token for scope https://jans.io/oauth/config/attributes.write
@@ -9180,7 +9180,7 @@ Server Response:
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-01T08:56:03+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-01</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-29T09:13:16+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-29</span>
       
         <br>
         Created:

@@ -8666,7 +8666,7 @@
 <p>Prerequisite: Know how to use the Janssen CLI in <a href="../../config-tools/jans-cli/">command-line mode</a></p>
 </blockquote>
 <p>To get info about Jans Authorization Server operations:</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --info ConfigurationProperties
+<div class="highlight"><pre><span></span><code>jans cli --info ConfigurationProperties
 
 
 Operation ID: get-properties
@@ -8677,7 +8677,7 @@ Operation ID: patch-properties
 Operation ID: get-properties-persistence
   Description: Returns persistence type configured for Jans authorization server.
 
-To get sample schema type /opt/jans/jans-cli/config-cli.py --schema &lt;schma&gt;, for example /opt/jans/jans-cli/config-cli.py --schema JsonPatch
+To get sample schema type jans cli --schema &lt;schma&gt;, for example jans cli --schema JsonPatch
 </code></pre></div>
 <p>Jans Authorization server has two operations <code>id</code> to <code>get/modify</code> its properties.</p>
 <h1 id="table-of-contents">Table of Contents<a class="headerlink" href="#table-of-contents" title="Permanent link">#</a></h1>
@@ -8690,7 +8690,7 @@ To get sample schema type /opt/jans/jans-cli/config-cli.py --schema &lt;schma&gt
 </ul>
 <h2 id="get-all-jans-auth-server-configuration-properties">Get All Jans Auth Server Configuration Properties<a class="headerlink" href="#get-all-jans-auth-server-configuration-properties" title="Permanent link">#</a></h2>
 <p>It returns all the information of the Jans Authorization server.</p>
-<div class="highlight"><pre><span></span><code> /opt/jans/jans-cli/config-cli.py --operation-id get-properties
+<div class="highlight"><pre><span></span><code> jans cli --operation-id get-properties
  ```
 
  You will get output like below
@@ -9256,10 +9256,10 @@ To get sample schema type /opt/jans/jans-cli/config-cli.py --schema &lt;schma&gt
   Description: Partially modifies Jans authorization server AppConfiguration properties.
   Schema: Array of /components/schemas/PatchRequest
 
-To get sample shema type /opt/jans/jans-cli/config-cli.py --schema &lt;schma&gt;, for example /opt/jans/jans-cli/config-cli.py --schema /components/schemas/PatchRequest
+To get sample shema type jans cli --schema &lt;schma&gt;, for example jans cli --schema /components/schemas/PatchRequest
 </code></pre></div>
 Let's look at the schema first:</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --schema /components/schemas/PatchRequest &gt; /tmp/patch-jans-auth.json
+<div class="highlight"><pre><span></span><code>jans cli --schema /components/schemas/PatchRequest &gt; /tmp/patch-jans-auth.json
 </code></pre></div>
 <p>It will create a <code>.json</code> file in <code>/tmp</code> with schema.</p>
 <p>Let's modify this schema:
@@ -9278,13 +9278,13 @@ So, the <code>.json</code> file will look like this:</p>
 </code></pre></div>
 <p>Don't forget to use <strong>square brackets</strong> (<code>[]</code>). Otherwise, it won't work.</p>
 <p>Now, let's do the operation.</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id patch-properties --data /tmp/patch-jans-auth.json
+<div class="highlight"><pre><span></span><code>jans cli --operation-id patch-properties --data /tmp/patch-jans-auth.json
 </code></pre></div>
 <p>If you run the following command line, you must see that <code>cibaEnabled</code> is <code>true</code>:</p>
 <p><img alt="Update result Jans Auth" src="../../../../assets/image-cl-update-jans-auth-03042021.png" /></p>
 <h2 id="get-persistence-type-for-jans-auth-configuration">Get Persistence type for Jans Auth Configuration<a class="headerlink" href="#get-persistence-type-for-jans-auth-configuration" title="Permanent link">#</a></h2>
 <p>You can get the persistence details for jans auth server.
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-properties-persistence
+<div class="highlight"><pre><span></span><code>jans cli --operation-id get-properties-persistence
 </code></pre></div></p>
 <p>Default persistence type is <code>MySQL</code>.
 <div class="highlight"><pre><span></span><code>Please wait while retrieving data ...
@@ -9298,7 +9298,7 @@ So, the <code>.json</code> file will look like this:</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-23T08:45:31+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-23</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-29T09:13:16+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-29</span>
       
         <br>
         Created:

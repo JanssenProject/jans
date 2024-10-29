@@ -8997,7 +8997,7 @@ Postman. Learn how to use Janssen Server Config API
 command line. To get the details of Janssen command line operations relevant to
 Agama projects, you can check the operations under <code>Agama</code> task using the
 command below:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --info Agama
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --info Agama
 </code></pre></div>
 <p>It will show the details of the available operation-ids for Agama.</p>
 <div class="highlight"><pre><span></span><code>Operation ID: get-agama-prj-by-name
@@ -9034,7 +9034,7 @@ projects via the command line using the above operations.</p>
 <h3 id="list-deployed-projects">List Deployed Projects<a class="headerlink" href="#list-deployed-projects" title="Permanent link">#</a></h3>
 <p>Use the <code>get-agama-prj</code> operation to retrieve the list of deployed Agama
 projects:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-agama-prj
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id get-agama-prj
 </code></pre></div>
 <p>The output will list Agama projects that are added to this Janssen Server
 deployment.</p>
@@ -9115,8 +9115,7 @@ how and what data to retrieve or process.</p>
 </ul>
 <p>For example, to fetch details of the project at index 1 only, use the command
 below.</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-agama-prj <span class="se">\</span>
---endpoint-args start:1,count:1
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id get-agama-prj --endpoint-args start:1,count:1
 </code></pre></div>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
@@ -9167,12 +9166,10 @@ below.</p>
 <h3 id="view-agama-project-by-name">View Agama Project By Name<a class="headerlink" href="#view-agama-project-by-name" title="Permanent link">#</a></h3>
 <p>You can get the details of an Agama project deployed in the Janssen Server
 by the project name. The command line for this operation is as below:</p>
-<div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-agama-prj-by-name <span class="se">\</span>
---url-suffix<span class="o">=</span><span class="s2">&quot;agama-project-name&quot;</span>
+<div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>jans cli --operation-id get-agama-prj-by-name --url-suffix<span class="o">=</span><span class="s2">&quot;agama-project-name&quot;</span>
 </code></pre></div>
 <p><strong>Example:</strong>
-<div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-agama-prj-by-name <span class="se">\</span>
---url-suffix<span class="o">=</span><span class="s2">&quot;testAuth&quot;</span>
+<div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>jans cli --operation-id get-agama-prj-by-name --url-suffix<span class="o">=</span><span class="s2">&quot;testAuth&quot;</span>
 </code></pre></div></p>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
@@ -9229,7 +9226,7 @@ by the project name. The command line for this operation is as below:</p>
 using the <code>post-agama-prj</code> operation. Here the <code>agama-project-file</code> is an
 archive file that holds the bundled Agama project and follows the
 <a href="../../../../agama/gama-format/">.gama</a> specification.</p>
-<div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id post-agama-prj <span class="se">\</span>
+<div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>jans cli --operation-id post-agama-prj <span class="se">\</span>
 --url-suffix<span class="o">=</span><span class="s2">&quot;name:project-name&quot;</span> --data agama-project-file
 </code></pre></div>
 <p><strong>Example:</strong></p>
@@ -9239,7 +9236,7 @@ specification.
 Assuming that the zip file has been downloaded in the folder at
 path <code>/tmp/journey.zip</code>, the command below will upload a new Agama project with
 specified name in the Janssen Server.</p>
-<div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id<span class="o">=</span>post-agama-prj <span class="se">\</span>
+<div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>jans cli --operation-id<span class="o">=</span>post-agama-prj <span class="se">\</span>
 --url-suffix<span class="o">=</span><span class="s2">&quot;name:Agama Lab Journey&quot;</span> --data /tmp/journey.zip
 </code></pre></div>
 <div class="highlight"><span class="filename">Sample Output</span><pre><span></span><code><span class="p">{</span><span class="w"></span>
@@ -9251,7 +9248,7 @@ specified name in the Janssen Server.</p>
 <h3 id="retrieve-agama-project-configuration">Retrieve Agama Project Configuration<a class="headerlink" href="#retrieve-agama-project-configuration" title="Permanent link">#</a></h3>
 <p>To retrieve the Agama project configuration, use the <code>get-agama-prj-configs</code>
 operation.</p>
-<div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-agama-prj-configs <span class="se">\</span>
+<div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>jans cli --operation-id get-agama-prj-configs <span class="se">\</span>
 --url-suffix<span class="o">=</span><span class="s2">&quot;name:agama-project-name&quot;</span>
 </code></pre></div>
 <h3 id="update-agama-project">Update Agama Project<a class="headerlink" href="#update-agama-project" title="Permanent link">#</a></h3>
@@ -9262,7 +9259,7 @@ operation.</p>
 keep it under <code>/tmp/journey-configs.json</code>.</p>
 <p>Make a few test changes to the configuration and run the command below to
 update the configuration:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id<span class="o">=</span>put-agama-prj <span class="se">\</span>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id<span class="o">=</span>put-agama-prj <span class="se">\</span>
 --url-suffix <span class="s2">&quot;name:Agama Lab Journey&quot;</span> --data /tmp/journey-configs.json 
 </code></pre></div>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
@@ -9283,13 +9280,12 @@ update the configuration:</p>
 </code></pre></div></td></tr></table></div>
 <h3 id="delete-agama-project">Delete Agama Project<a class="headerlink" href="#delete-agama-project" title="Permanent link">#</a></h3>
 <p>To delete an Agama project by its name, use the <code>delete-agama-prj</code> operation.</p>
-<div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id delete-agama-prj <span class="se">\</span>
---url-suffix<span class="o">=</span><span class="s2">&quot;agama-project-name&quot;</span>
+<div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>jans cli --operation-id delete-agama-prj --url-suffix<span class="o">=</span><span class="s2">&quot;agama-project-name&quot;</span>
 </code></pre></div>
 <h3 id="agama-flow-configuration">Agama Flow Configuration<a class="headerlink" href="#agama-flow-configuration" title="Permanent link">#</a></h3>
 <p><code>AgamaConfiguration</code> task groups operations that help understand the correctness
 of the deployed Agama project configuration.</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --info AgamaConfiguration
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --info AgamaConfiguration
 </code></pre></div>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
 <span class="normal">2</span>
@@ -9302,12 +9298,11 @@ of the deployed Agama project configuration.</p>
 <h4 id="agama-flow-dsl-syntax">Agama Flow DSL Syntax<a class="headerlink" href="#agama-flow-dsl-syntax" title="Permanent link">#</a></h4>
 <p>To check if a deployed Agama project is running into Agama
 DSL related errors, use the <code>agama-syntax-check</code> operation as below:</p>
-<div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id agama-syntax-check <span class="se">\</span>
+<div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>jans cli --operation-id agama-syntax-check <span class="se">\</span>
 --url-suffix qname:<span class="s2">&quot;fully-qualified-flow-name&quot;</span>
 </code></pre></div>
 <p><strong><em>Example</em></strong>:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id agama-syntax-check <span class="se">\</span>
---url-suffix qname:<span class="s2">&quot;imShakil.co.test&quot;</span>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id agama-syntax-check --url-suffix qname:<span class="s2">&quot;imShakil.co.test&quot;</span>
 </code></pre></div>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
 <span class="normal">2</span>
@@ -9397,7 +9392,7 @@ document</a>.</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-10T06:11:59+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-10</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-29T09:13:16+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-29</span>
       
         <br>
         Created:

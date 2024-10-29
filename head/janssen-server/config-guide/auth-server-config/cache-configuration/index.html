@@ -8800,7 +8800,7 @@ Postman. Learn how to use Janssen Server Config API
 <p>To get the details of Janssen command line operations relevant to the cache
 configuration, you can check the operations under <code>CacheConfiguration</code>
 using the command below:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --info CacheConfiguration
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --info CacheConfiguration
 </code></pre></div>
 <p>It prints below two operations:
 <div class="highlight"><span class="filename">Output</span><pre><span></span><code>Operation ID: get-config-cache
@@ -8809,12 +8809,12 @@ Operation ID: patch-config-cache
   Description: Patch cache configuration
   Schema: Array of JsonPatch
 
-To get sample schema type /opt/jans/jans-cli/config-cli.py --schema &lt;schema&gt;, for example /opt/jans/jans-cli/config-cli.py --schema JsonPatch
+To get sample schema type jans cli --schema &lt;schema&gt;, for example jans cli --schema JsonPatch
 </code></pre></div></p>
 <h3 id="get-cache-configuration">Get Cache Configuration<a class="headerlink" href="#get-cache-configuration" title="Permanent link">#</a></h3>
 <p>You can get the current Cache Configuration of your Janssen Server by
 performing this operation.</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-config-cache
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id get-config-cache
 </code></pre></div>
 <p>It will show the Cache configuration details.</p>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -8884,7 +8884,7 @@ performing this operation.</p>
   Description: Patch cache configuration
   Schema: Array of JsonPatch
 
-To get sample schema type /opt/jans/jans-cli/config-cli.py --schema &lt;schema&gt;, for example /opt/jans/jans-cli/config-cli.py --schema JsonPatch
+To get sample schema type jans cli --schema &lt;schema&gt;, for example jans cli --schema JsonPatch
 </code></pre></div>
 <p>The <code>patch-config-cache</code> operation uses the
 <a href="https://jsonpatch.com/#the-patch">JSON Patch</a> schema to describe
@@ -8905,8 +8905,7 @@ the JSON Patch data would look like below:</p>
 <p>Store the above JSON Patch data in a file, for instance,
 <code>/tmp/patch-cache.json</code></p>
 <p>Using the above file, perform the operation as below:</p>
-<div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id patch-config-cache <span class="se">\</span>
---data /tmp/patch-cache.json
+<div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>jans cli --operation-id patch-config-cache --data /tmp/patch-cache.json
 </code></pre></div>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
@@ -8973,7 +8972,7 @@ the JSON Patch data would look like below:</p>
 For example, let's say we would like to replace <code>defaultPutExpiration</code>
 value from <code>nativePersistenceConfiguration</code>. We can do that simply by
 the following command line:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id patch-config-cache <span class="se">\</span>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id patch-config-cache <span class="se">\</span>
 --patch-replace nativePersistenceConfiguration/defaultPutExpiration:90
 </code></pre></div>
 <p>It will change the value with the given one. There are few options to do
@@ -8988,7 +8987,7 @@ and configuring Cache. Endpoint details are published in the
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-09-27T12:12:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-29T09:13:16+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-29</span>
       
         <br>
         Created:

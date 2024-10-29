@@ -8966,7 +8966,7 @@ you as a quick reference to generate Let's Encrypt CA certificates.</p>
   Openbanking Key Alias [ob-gluu-test] : 
 </code></pre></div>
 <h3 id="configure-certificate">Configure Certificate<a class="headerlink" href="#configure-certificate" title="Permanent link">#</a></h3>
-<div class="highlight"><pre><span></span><code> /opt/jans/jans-cli/config-cli.py -CC /opt/jans/jans-setup/output/CA/client.crt -CK /opt/jans/jans-setup/output/CA/client.key
+<div class="highlight"><pre><span></span><code> jans cli -CC /opt/jans/jans-setup/output/CA/client.crt -CK /opt/jans/jans-setup/output/CA/client.key
 </code></pre></div>
 <h2 id="test">Test<a class="headerlink" href="#test" title="Permanent link">#</a></h2>
 <p>This test uses Gluu Testing certificate.</p>
@@ -8974,13 +8974,13 @@ you as a quick reference to generate Let's Encrypt CA certificates.</p>
 <p>After installation we have to complete device authentication to use openbanking.</p>
 <h3 id="testing-using-im-mode">Testing using IM mode<a class="headerlink" href="#testing-using-im-mode" title="Permanent link">#</a></h3>
 <p>launch jans-cli using below command</p>
-<p><div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py -CC /opt/jans/jans-setup/output/CA/client.crt -CK /opt/jans/jans-setup/output/CA/client.key
+<p><div class="highlight"><pre><span></span><code>jans cli -CC /opt/jans/jans-setup/output/CA/client.crt -CK /opt/jans/jans-setup/output/CA/client.key
 </code></pre></div>
 further testing is same as jans server</p>
 <h3 id="testing-using-command-line-mode">Testing using command line mode<a class="headerlink" href="#testing-using-command-line-mode" title="Permanent link">#</a></h3>
 <p>we can run below command at command line.
 for ex:
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py -CC /opt/jans/jans-setup/output/CA/client.crt -CK /opt/jans/jans-setup/output/CA/client.key –operation-id get-oauth-openid-clients
+<div class="highlight"><pre><span></span><code>jans cli -CC /opt/jans/jans-setup/output/CA/client.crt -CK /opt/jans/jans-setup/output/CA/client.key –operation-id get-oauth-openid-clients
 </code></pre></div></p>
 <p>same way we can run  other commands.
 rest is same for jans and openbanking</p>
@@ -8990,7 +8990,7 @@ rest is same for jans and openbanking</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-01T08:56:03+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-01</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-29T09:13:16+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-29</span>
       
         <br>
         Created:

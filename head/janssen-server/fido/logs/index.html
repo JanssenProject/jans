@@ -8774,7 +8774,7 @@
 </table>
 <h4 id="1-read-configuration-parameters">1. Read Configuration parameters:<a class="headerlink" href="#1-read-configuration-parameters" title="Permanent link">#</a></h4>
 <p>Use the following command to obtain configuration parameters:</p>
-<p><code>/opt/jans/jans-cli/config-cli.py --operation-id get-properties-fido2</code></p>
+<p><code>jans cli --operation-id get-properties-fido2</code></p>
 <p>Response:
 <div class="highlight"><pre><span></span><code>{
    &quot;issuer&quot;:&quot;https://.jans.io&quot;,
@@ -8822,7 +8822,7 @@
      - edit <code>loggingLevel</code> to <code>TRACE</code> or <code>DEBUG</code> or <code>INFO</code>
      - edit <code>loggingLayout</code> to <code>text</code> or <code>json</code></p>
 <p>B. Use the following command to update the logging level
-  <code>/opt/jans/jans-cli/config-cli.py --operation-id post-config-scripts --data /tmp/config_values.json</code></p>
+  <code>jans cli --operation-id post-config-scripts --data /tmp/config_values.json</code></p>
 <p>C. restart <code>jans-fido2</code>
      <code>service fido2 restart</code> or <code>systemctl restart fido2</code></p>
 <h3 id="location-of-logs-in-fido2-server">Location of logs in FIDO2 server:<a class="headerlink" href="#location-of-logs-in-fido2-server" title="Permanent link">#</a></h3>
@@ -8833,7 +8833,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-09-27T12:12:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-29T09:13:16+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-29</span>
       
         <br>
         Created:

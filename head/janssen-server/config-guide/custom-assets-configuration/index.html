@@ -8912,7 +8912,7 @@ Postman. Learn how to use Janssen Server Config API
 command line. To get the details of Janssen command line operations relevant to
 the custom assets, check the operations under the <code>JansAssets</code> task using the
 command below.</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --info JansAssets
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --info JansAssets
 </code></pre></div>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
@@ -8980,12 +8980,12 @@ Operation ID: post-new-asset
  Description: Upload new asset
  Schema: AssetForm
 
-To get sample schema type /opt/jans/jans-cli/config-cli.py --schema-sample &lt;schema&gt;, for example /opt/jans/jans-cli/config-cli.py --schema-sample AssetForm
+To get sample schema type jans cli --schema-sample &lt;schema&gt;, for example jans cli --schema-sample AssetForm
 </code></pre></div></td></tr></table></div>
 <h3 id="get-all-current-custom-assets">Get All Current Custom Assets<a class="headerlink" href="#get-all-current-custom-assets" title="Permanent link">#</a></h3>
 <p>Use the operation ID <code>get-all-assets</code> to get all the currently configured 
 custom assets on the Janssen Server.</p>
-<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-all-assets
+<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id get-all-assets
 </code></pre></div>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
@@ -9084,7 +9084,7 @@ custom assets on the Janssen Server.</p>
 <h3 id="get-custom-asset-by-inum">Get Custom Asset By inum<a class="headerlink" href="#get-custom-asset-by-inum" title="Permanent link">#</a></h3>
 <p>With <code>get-asset-by-inum</code> operation-id, we can get any specific asset matched 
 with <code>inum</code>. If we know the <code>inum</code>, we can simply use the below command:</p>
-<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-asset-by-inum <span class="se">\</span>
+<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id get-asset-by-inum <span class="se">\</span>
 --url-suffix inum:61edc29d-45f8-4ab9-8c9a-7b39e4cbe440
 </code></pre></div>
 It returns the details as below:</p>
@@ -9119,7 +9119,7 @@ It returns the details as below:</p>
 <h3 id="get-custom-asset-by-name">Get Custom Asset By Name<a class="headerlink" href="#get-custom-asset-by-name" title="Permanent link">#</a></h3>
 <p>With <code>get-asset-by-name</code> operation-id, we can get any specific asset matched with <code>name</code>.
  If we know the <code>name</code>, we can simply use the below command:</p>
-<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-asset-by-name <span class="se">\</span>
+<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id get-asset-by-name <span class="se">\</span>
 --url-suffix name:p1.properties
 </code></pre></div>
 It returns the details as below:</p>
@@ -9164,7 +9164,7 @@ It returns the details as below:</p>
 <h3 id="get-services">Get Services<a class="headerlink" href="#get-services" title="Permanent link">#</a></h3>
 <p>Get the list of Janssen Server services that support custom assets 
 by performing <code>get-asset-services</code> operation.</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-asset-services
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id get-asset-services
 </code></pre></div>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
@@ -9189,7 +9189,7 @@ by performing <code>get-asset-services</code> operation.</p>
 <h3 id="get-valid-asset-types">Get Valid Asset Types<a class="headerlink" href="#get-valid-asset-types" title="Permanent link">#</a></h3>
 <p>Get the asset types of your Janssen Server by performing <code>get-asset-types</code> 
 operation.</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-asset-types
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id get-asset-types
 </code></pre></div>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
@@ -9218,12 +9218,12 @@ operation.</p>
 the <a href="#using-the-command-line">output</a> for <code>--info</code> command, the <code>post-new-asset</code> 
 operation requires data to be sent according to <code>AssetForm</code> schema.</p>
 <p>To see the schema, use the command below:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --schema AssetForm
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --schema AssetForm
 </code></pre></div>
 <p>For better understanding, the Janssen Server also provides a sample of data to 
 be sent to the server. This sample conforms to the schema above. Use the command 
 below to get the sample.</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --schema-sample AssetForm
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --schema-sample AssetForm
 </code></pre></div>
 <p>Using the schema and the example above, we have added below data to the 
 file <code>/tmp/add-asset.json</code>. Example below will load <code>p3.properties</code> file as
@@ -9253,7 +9253,7 @@ a custom asset to the <code>jans-auth</code> service.</p>
 <span class="p">}</span><span class="w"></span>
 </code></pre></div></td></tr></table></div>
 Now let's post this Assert to the Janssen Server to be added to the existing set:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code> /opt/jans/jans-cli/config-cli.py --operation-id post-new-asset <span class="se">\</span>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code> jans cli --operation-id post-new-asset <span class="se">\</span>
  --data /tmp/add-asset.json
 </code></pre></div>
 <h3 id="update-existing-custom-assets">Update Existing Custom Assets<a class="headerlink" href="#update-existing-custom-assets" title="Permanent link">#</a></h3>
@@ -9327,7 +9327,7 @@ content in it. Let's name this text file as <code>/tmp/update-asset.json</code><
 <span class="p">}</span><span class="w"></span>
 </code></pre></div></td></tr></table></div>
 <p>Now use the command below to update the asset with new value for level.</p>
-<div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id put-asset <span class="se">\</span>
+<div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>jans cli --operation-id put-asset <span class="se">\</span>
 --data /tmp/update-asset.json
 </code></pre></div>
 <p>Upon successful execution, this command will return with updated asset values.</p>
@@ -9361,7 +9361,7 @@ content in it. Let's name this text file as <code>/tmp/update-asset.json</code><
 </code></pre></div></td></tr></table></div>
 <h3 id="delete-custom-asset">Delete Custom Asset<a class="headerlink" href="#delete-custom-asset" title="Permanent link">#</a></h3>
 <p>You can delete any custom asset by its <code>inum</code> value.</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id delete-asset <span class="se">\</span>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id delete-asset <span class="se">\</span>
 --url-suffix inum:61edc29d-45f8-4ab9-8c9a-7b39e4cbe440
 </code></pre></div>
 <h2 id="using-text-based-ui">Using Text-based UI<a class="headerlink" href="#using-text-based-ui" title="Permanent link">#</a></h2>
@@ -9394,7 +9394,7 @@ document</a>.</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-10T06:11:59+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-10</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-29T09:13:16+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-29</span>
       
         <br>
         Created:

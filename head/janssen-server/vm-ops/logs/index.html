@@ -8903,7 +8903,7 @@
 <h3 id="configuring-log-levels">Configuring Log Levels<a class="headerlink" href="#configuring-log-levels" title="Permanent link">#</a></h3>
 <p>Use the following commands to get information on the logging module configuration:</p>
 <ul>
-<li>To get the logging configuration operation ID: <code>/opt/jans/jans-cli/config-cli.py --info ConfigurationLogging</code></li>
+<li>To get the logging configuration operation ID: <code>jans cli --info ConfigurationLogging</code></li>
 <li>Output would be: 
     <div class="highlight"><pre><span></span><code># Log configuration operations
 Operation ID: get-config-logging
@@ -8912,8 +8912,8 @@ Operation ID: put-config-logging
 Description: Updates Jans Authorization Server logging settings.
 Schema: /components/schemas/LoggingConfiguration
 </code></pre></div></li>
-<li>To get sample schema type /opt/jans/jans-cli/config-cli.py --schema <schma>, 
-  for example <code>/opt/jans/jans-cli/config-cli.py --schema /components/schemas/LoggingConfiguration</code></li>
+<li>To get sample schema type <code>jans cli --schema &lt;schma&gt;</code>, 
+  for example <code>jans cli --schema /components/schemas/LoggingConfiguration</code></li>
 <li>Output: 
     <div class="highlight"><pre><span></span><code># Generic configuration schema
  {
@@ -8929,7 +8929,7 @@ Schema: /components/schemas/LoggingConfiguration
    ]
  }
 </code></pre></div></li>
-<li>Status of current configuration logging: <code>/opt/jans/jans-cli/config-cli.py --operation-id get-config-logging</code></li>
+<li>Status of current configuration logging: <code>jans cli --operation-id get-config-logging</code></li>
 <li>Output: 
     <div class="highlight"><pre><span></span><code>  # Current log configuration
   {
@@ -8955,7 +8955,7 @@ Schema: /components/schemas/LoggingConfiguration
 <span class="p">}</span><span class="w"></span>
 </code></pre></div>
 And use the PUT operation with this file as the payload:
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id put-config-logging --data /tmp/log.json
+<div class="highlight"><pre><span></span><code>jans cli --operation-id put-config-logging --data /tmp/log.json
 </code></pre></div>
 The server will now have logs set to TRACE.</p>
 <h2 id="setup-logs">Setup Logs<a class="headerlink" href="#setup-logs" title="Permanent link">#</a></h2>
@@ -9038,7 +9038,7 @@ The server will now have logs set to TRACE.</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-28T09:05:20+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-28</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-29T09:13:16+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-29</span>
       
         <br>
         Created:
