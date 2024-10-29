@@ -6,7 +6,6 @@
  */
 
 use super::Error;
-use jsonwebtoken as jwt;
 use serde::de::DeserializeOwned;
 
 /// Trait for decoding a JWT token from a string representation.
@@ -47,14 +46,4 @@ pub trait ExtractClaims: Send + Sync {
     /// Returns an error if the decoding process fails or if the claims cannot
     /// be extracted.
     fn extract_claims<T: DeserializeOwned>(&self, jwt: &str) -> Result<T, Error>;
-}
-
-/// Trait for managing cryptographic keys used in JWT operations.
-///
-/// # Usage
-/// Use this trait when implementing a key service that provides decoding keys
-/// for verifying JWTs based on their header information (i.e., `kid`).
-pub trait GetKey: Send + Sync {
-    /// Retrieves the decoding key associated with the specified key identifier (`kid`).
-    fn get_key(&self, kid: &str) -> Result<&jwt::DecodingKey, Error>;
 }

@@ -104,9 +104,8 @@ The available logs for Jans server are listed below:
 | Log File | Description |  
 |--------- |-------------|
 | **configapi.log** | Config API main log |
-| **configapi_persistence.log** | Config API LDAP log |
-| **configapi_persistence_duration.log** | Config API LDAP operation duration log |
-| **configapi_persistence_ldap_statistics.log**| Config API LDAP statistics |
+| **configapi_persistence.log** | Config API persistence log |
+| **configapi_persistence_duration.log** | Config API persistence operation duration log |
 | **[date].jetty.log** | Config API Jetty log |
 | **configapi_script.log** | Config API custom script log |
 
