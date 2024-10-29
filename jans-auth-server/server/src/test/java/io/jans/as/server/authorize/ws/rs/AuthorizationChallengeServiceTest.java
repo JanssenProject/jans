@@ -1,6 +1,6 @@
 package io.jans.as.server.authorize.ws.rs;
 
-import io.jans.as.common.model.session.DeviceSession;
+import io.jans.as.common.model.session.AuthorizationChallengeSession;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.error.ErrorResponseFactory;
 import io.jans.as.server.audit.ApplicationAuditLogger;
@@ -59,7 +59,7 @@ public class AuthorizationChallengeServiceTest {
     private ErrorResponseFactory errorResponseFactory;
 
     @Mock
-    private DeviceSessionService deviceSessionService;
+    private AuthorizationChallengeSessionService authorizationChallengeSessionService;
 
     @Mock
     private Identity identity;
@@ -78,17 +78,17 @@ public class AuthorizationChallengeServiceTest {
 
     @Test
     public void prepareAuthzRequest_whenClientIdStoredInAttributes_shouldPopulateAuthzRequest() {
-        final String deviceSessionId = "device_session_1234";
+        final String authorizationChallengeSessionId = "auth_session_1234";
 
-        final DeviceSession deviceSession = new DeviceSession();
-        deviceSession.setId(deviceSessionId);
-        deviceSession.getAttributes().getAttributes().put("client_id", "1234");
+        final AuthorizationChallengeSession authorizationChallengeSession = new AuthorizationChallengeSession();
+        authorizationChallengeSession.setId(authorizationChallengeSessionId);
+        authorizationChallengeSession.getAttributes().getAttributes().put("client_id", "1234");
 
         final AuthzRequest authzRequest = new AuthzRequest();
-        authzRequest.setDeviceSession(deviceSessionId);
+        authzRequest.setAuthorizationChallengeSession(authorizationChallengeSessionId);
         assertNull(authzRequest.getClientId());
 
-        when(deviceSessionService.getDeviceSession(deviceSessionId)).thenReturn(deviceSession);
+        when(authorizationChallengeSessionService.getAuthorizationChallengeSession(authorizationChallengeSessionId)).thenReturn(authorizationChallengeSession);
 
         authorizationChallengeService.prepareAuthzRequest(authzRequest);
         assertEquals("1234", authzRequest.getClientId());

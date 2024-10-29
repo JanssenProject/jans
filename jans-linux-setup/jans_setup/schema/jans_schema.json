@@ -4654,7 +4654,7 @@
         "objectclass"
       ],
       "names": [
-        "jansDeviceSess"
+        "jansAuthChallSess"
       ],
       "oid": "jansObjClass",
       "sup": [
