@@ -175,6 +175,8 @@ class JansInstaller(BaseInstaller, SetupUtils):
             self.run([paths.cmd_chmod, '551', Config.certFolder])
             self.run([paths.cmd_chmod, 'ga+w', "/tmp"]) # Allow write to /tmp
 
+        self.chown(Config.jansOptBinFolder, user=Config.root_user, group=Config.jetty_user)
+
 
     def customiseSystem(self):
         if not base.snap:
@@ -300,6 +302,11 @@ class JansInstaller(BaseInstaller, SetupUtils):
             self.copyFile(script, Config.jansOptBinFolder)
             self.run([paths.cmd_chmod, '+x', script])
 
+
+        health_services_script_fn = os.path.join(Config.jansOptBinFolder, os.path.basename(Config.jansScriptFiles[3]))
+        self.chown(health_services_script_fn, user=Config.root_user, group=Config.jetty_user)
+        self.run([paths.cmd_chmod, '0750', health_services_script_fn])
+
         self.logIt("Rendering encode.py")
         encode_script = self.readFile(os.path.join(Config.templateFolder, 'encode.py'))
         encode_script = encode_script % self.merge_dicts(Config.__dict__, Config.templateRenderingDict)
@@ -339,7 +346,7 @@ class JansInstaller(BaseInstaller, SetupUtils):
                 else:
                     scr_content.insert(0, first_line)
                 self.writeFile(scr_path, '\n'.join(scr_content), backup=False)
-            if scr.name == show_version_s:
+            if scr.name in (show_version_s, os.path.basename(health_services_script_fn)):
                 continue
             self.run([paths.cmd_chmod, '700', scr_path])
 

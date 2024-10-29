@@ -29,11 +29,6 @@
         <value>true</value>
     </library-property>
 
-    <library-property>
-        <name>org.zkoss.theme.preferred</name>
-        <value>breeze</value>   <!-- preserve the theme used in first version of the app -->
-    </library-property>
-
     <desktop-config>
         <file-check-period>86400</file-check-period>
     </desktop-config>

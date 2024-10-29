@@ -180,7 +180,7 @@ public class SimpleUser implements Serializable {
 
     private static final long serialVersionUID = -1634191420188575733L;
   
-    // Define entry primary key. In LDAP terminology it's DN
+    // Define entry primary key. i.e a distinguished name, DN
     @DN
     private String dn;
 
@@ -208,11 +208,6 @@ public class SimpleUser implements Serializable {
     // This is convenient for custom attributes
     @AttributesList(name = "name", value = "values", multiValued = "multiValued", sortByName = true)
     protected List<CustomObjectAttribute> customAttributes = new ArrayList<CustomObjectAttribute>();
-
-    // Specify additional objecClass
-    // This is needed for LDAP only
-    @CustomObjectClass
-    private String[] customObjectClasses;
 
     ...
 ```

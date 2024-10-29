@@ -6,29 +6,26 @@
  */
 
 use super::jwt_algorithm::parse_jwt_algorithms;
-use super::policy_store::{load_policy_store, LoadPolicyStoreError};
+use super::policy_store::{load_policy_store, PolicyStoreLoadError};
 use crate::common::policy_store::PolicyStore;
-use crate::{
-    bootstrap_config,
-    jwt::{Algorithm, ParseAlgorithmError},
-};
+use crate::{bootstrap_config, jwt};
 use bootstrap_config::BootstrapConfig;
 
 /// Configuration that hold validated infomation from bootstrap config
 #[derive(typed_builder::TypedBuilder, Clone)]
 pub(crate) struct ServiceConfig {
-    pub jwt_algorithms: Vec<Algorithm>,
     pub policy_store: PolicyStore,
+    pub jwt_algorithms: Vec<jwt::Algorithm>,
 }
 
 #[derive(thiserror::Error, Debug)]
 pub enum ServiceConfigError {
     /// Parse jwt algorithm error.
     #[error("could not parse an algorithim defined in the config: {0}")]
-    ParseAlgorithm(#[from] ParseAlgorithmError),
+    ParseAlgorithm(#[from] jwt::Error),
     /// Error that may occur during loading the policy store.
     #[error("Could not load policy: {0}")]
-    PolicyStore(#[from] LoadPolicyStoreError),
+    PolicyStore(#[from] PolicyStoreLoadError),
 }
 
 impl ServiceConfig {
