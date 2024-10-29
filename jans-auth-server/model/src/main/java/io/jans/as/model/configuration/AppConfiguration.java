@@ -33,7 +33,7 @@ import java.util.*;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AppConfiguration implements Configuration {
 
-    public static final int DEFAULT_DEVICE_SESSION_LIFETIME = 86400;
+    public static final int DEFAULT_AUTHORIZATION_CHALLENGE_SESSION_LIFETIME = 86400;
     public static final int DEFAULT_SESSION_ID_LIFETIME = 86400;
     public static final KeySelectionStrategy DEFAULT_KEY_SELECTION_STRATEGY = KeySelectionStrategy.OLDER;
     public static final String DEFAULT_STAT_SCOPE = "jans_stat";
@@ -693,8 +693,8 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Choose whether to disable U2F endpoints", defaultValue = "false")
     private Boolean disableU2fEndpoint = false;
 
-    @DocProperty(description = "Device session lifetime in seconds")
-    private Integer deviceSessionLifetimeInSeconds;
+    @DocProperty(description = "Authorization challenge session lifetime in seconds")
+    private Integer authorizationChallengeSessionLifetimeInSeconds;
 
     // Token Exchange
     @DocProperty(description = "", defaultValue = "false")
@@ -1028,15 +1028,15 @@ public class AppConfiguration implements Configuration {
         this.returnDeviceSecretFromAuthzEndpoint = returnDeviceSecretFromAuthzEndpoint;
     }
 
-    public Integer getDeviceSessionLifetimeInSeconds() {
-        if (deviceSessionLifetimeInSeconds == null) {
-           deviceSessionLifetimeInSeconds = DEFAULT_DEVICE_SESSION_LIFETIME;
+    public Integer getAuthorizationChallengeSessionLifetimeInSeconds() {
+        if (authorizationChallengeSessionLifetimeInSeconds == null) {
+           authorizationChallengeSessionLifetimeInSeconds = DEFAULT_AUTHORIZATION_CHALLENGE_SESSION_LIFETIME;
         }
-        return deviceSessionLifetimeInSeconds;
+        return authorizationChallengeSessionLifetimeInSeconds;
     }
 
-    public void setDeviceSessionLifetimeInSeconds(Integer deviceSessionLifetimeInSeconds) {
-        this.deviceSessionLifetimeInSeconds = deviceSessionLifetimeInSeconds;
+    public void setAuthorizationChallengeSessionLifetimeInSeconds(Integer authorizationChallengeSessionLifetimeInSeconds) {
+        this.authorizationChallengeSessionLifetimeInSeconds = authorizationChallengeSessionLifetimeInSeconds;
     }
 
     public Boolean getRotateDeviceSecret() {

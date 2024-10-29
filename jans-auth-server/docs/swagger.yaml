@@ -19,7 +19,7 @@ tags:
     description: Janssen Authorization Server is an open source OpenID Connect Provider (OP) and UMA Authorization Server (AS). The project also includes OpenID Connect Client code which can be used by websites to validate tokens. Server currently implements all required aspects of the OpenID Connect stack, including an OAuth 2.0 authorization server, Simple Web Discovery, Dynamic Client Registration, JSON Web Tokens, JSON Web Keys, and User Info Endpoint.
 
 paths:
-  /authorization_challenge:
+  /authorize-challenge:
     post:
       tags:
         - Authorization Challenge
@@ -41,12 +41,12 @@ paths:
                 scope:
                   type: string
                   description: OpenID Connect requests MUST contain the openid scope value. If the openid scope value is not present, the behavior is entirely unspecified. Other scope values MAY be present.
-                device_session:
+                auth_session:
                   type: string
-                  description: If the client has previously obtained a device session
-                use_device_session:
+                  description: If the client has previously obtained a auth session
+                use_auth_session:
                   type: boolean
-                  description: If return back in response device_session. By default AS does not return device_session
+                  description: If return back in response auth_session. By default AS does not return auth_session
                 state:
                   type: string
                   description: Opaque value used to maintain state between the request and the callback.
