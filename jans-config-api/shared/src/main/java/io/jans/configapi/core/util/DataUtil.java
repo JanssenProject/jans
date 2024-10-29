@@ -1,5 +1,6 @@
 package io.jans.configapi.core.util;
 
+
 import io.jans.as.model.json.JsonApplier;
 import io.jans.model.FieldFilterData;
 import io.jans.model.FilterOperator;
@@ -30,6 +31,9 @@ import java.util.Map;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeFormatter;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -252,8 +256,7 @@ public class DataUtil {
                     datePattern = "yyyy-MM-dd";
                 }
             }
-            
-            
+
             SimpleDateFormat dateFormat = new SimpleDateFormat(datePattern);
             logger.debug("Returning datePattern:{}, dateFormat:{} ", datePattern, dateFormat);
             date = dateFormat.parse(dateString);
@@ -295,7 +298,7 @@ public class DataUtil {
             } else if (AttributeDataType.BOOLEAN.getValue().equalsIgnoreCase(dataType)) {
                 dataFilter = Filter.createEqualityFilter(entry.getField(), getBooleanValue(entry.getValue()));
             } else if (AttributeDataType.DATE.getDisplayName().equalsIgnoreCase(dataType)) {
-               dataFilter = createDateFilter(entry, primaryKey, persistenceEntryManager);
+                dataFilter = createDateFilter(entry, primaryKey, persistenceEntryManager);
             } else if ("int".equalsIgnoreCase(dataType) || "integer".equalsIgnoreCase(dataType)) {
                 dataFilter = createIntegerFilter(entry);
             } else {
@@ -321,7 +324,7 @@ public class DataUtil {
 
     }
 
-    private static Filter createDateEqualFilter(FieldFilterData fieldFilterData) {
+    private static Filter createDateEqualFilter_1(FieldFilterData fieldFilterData) {
         logger.info("Create Date Filter for fieldFilterData:{}", fieldFilterData);
         Filter dateFilter = null;
         if (fieldFilterData == null) {
@@ -339,8 +342,8 @@ public class DataUtil {
 
             // Format the LocalDateTime object back to an ISO 8601 string
             String isoDateString = dateTime.format(formatter);
-            
-           if (dateString.contains(":")) {
+
+            if (dateString.contains(":")) {
                 logger.error("DateTime - dateString.contains(:)");
 
                 dateFilter = Filter.createEqualityFilter(dateField, isoDateString);
@@ -366,6 +369,77 @@ public class DataUtil {
         return dateFilter;
     }
 
+    private static Filter createDateEqualFilter_2(FieldFilterData fieldFilterData) {
+        logger.info("Create Date Filter for fieldFilterData:{}", fieldFilterData);
+        Filter dateFilter = null;
+        if (fieldFilterData == null) {
+            return dateFilter;
+        }
+
+        String dateField = fieldFilterData.getField();
+        String dateString = fieldFilterData.getValue();
+        String dateZ = dateString.endsWith("Z") ? dateString : dateString + "Z";
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
+
+        logger.error("dateField:{}, dateString:{}, dateZ:{}, formatter:{} ", dateField, dateString, dateZ, formatter);
+        try {
+
+            // Parse the string into an OffsetDateTime object
+            OffsetDateTime offsetDateTime = OffsetDateTime.parse(dateString);
+            logger.error("dateString:{}, offsetDateTime:{} ", dateString, offsetDateTime);
+
+            // Format the OffsetDateTime object back to an ISO 8601 string
+            String isoString = offsetDateTime.format(formatter);
+
+            dateFilter = Filter.createEqualityFilter(dateField, isoString);
+            logger.error("Date Filter -  isoString:{}, dateFilter:{} ", isoString, dateFilter);
+
+        } catch (Exception ex) {
+            logger.error(
+                    "Error while creating Date filter for {" + dateField + "} with value as {" + dateString + "} is",
+                    ex);
+            dateFilter = Filter.createEqualityFilter(dateField, dateString);
+            return dateFilter;
+
+        }
+        return dateFilter;
+    }
+    
+    private static Filter createDateEqualFilter(FieldFilterData fieldFilterData) {
+        logger.info("Create Date Filter for fieldFilterData:{}", fieldFilterData);
+        Filter dateFilter = null;
+        if (fieldFilterData == null) {
+            return dateFilter;
+        }
+
+        String dateField = fieldFilterData.getField();
+        String dateString = fieldFilterData.getValue();
+        String dateZ = dateString.endsWith("Z") ? dateString : dateString + "Z";
+        DateTimeFormatter sourceFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        DateTimeFormatter targetFormat  = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        logger.error("dateField:{}, dateString:{}, dateZ:{}, sourceFormat:{} ", dateField, dateString, dateZ, sourceFormat);
+        try {
+           
+            LocalDateTime dateTime  = LocalDateTime.parse(dateZ, sourceFormat);
+            logger.error("dateZ:{}, sourceFormat:{}, dateTime:{} ", dateZ, sourceFormat, dateTime);
+            
+            String formatedDateTime  = dateTime.atZone(ZoneId.of("UTC")).format(targetFormat);
+            logger.error("dateZ:{}, formatedDateTime:{}, targetFormat:{}", dateZ, formatedDateTime, targetFormat);
+            
+            dateFilter = Filter.createEqualityFilter(dateField, formatedDateTime);
+            logger.error("dateString:{}, dateFilter:{} ", dateString, dateFilter);
+            
+        } catch (Exception ex) {
+            logger.error(
+                    "Error while creating Date filter for {" + dateField + "} with value as {" + dateString + "} is",
+                    ex);
+            dateFilter = Filter.createEqualityFilter(dateField, dateString);
+            return dateFilter;
+
+        }
+        return dateFilter;
+    }
+
     private static Filter createDateFilter(FieldFilterData fieldFilterData, String primaryKey,
             PersistenceEntryManager persistenceEntryManager) {
         logger.info("Create Date Filter for fieldFilterData:{}, primaryKey:{}, persistenceEntryManager:{}",
@@ -380,11 +454,11 @@ public class DataUtil {
         String strDateValue = fieldFilterData.getValue();
         String dateZ = strDateValue.endsWith("Z") ? strDateValue : strDateValue + "Z";
         Date dateValue = formatStrDate(dateZ, null);
-        logger.info(" strDateField:{}, fieldFilterData.getValue():{}, dateValue:{}",
-                strDateField, fieldFilterData.getValue(), dateValue);
+        logger.info(" strDateField:{}, fieldFilterData.getValue():{}, dateValue:{}", strDateField,
+                fieldFilterData.getValue(), dateValue);
 
         if (FilterOperator.EQUALITY.getSign().equalsIgnoreCase(fieldFilterData.getOperator())) {
-            //dateFilter = Filter.createEqualityFilter(strDateField, dateValue);
+            // dateFilter = Filter.createEqualityFilter(strDateField, dateValue);
             dateFilter = createDateEqualFilter(fieldFilterData);
         } else if (FilterOperator.GREATER.getSign().equalsIgnoreCase(fieldFilterData.getOperator())
                 || FilterOperator.GREATER_OR_EQUAL.getSign().equalsIgnoreCase(fieldFilterData.getOperator())) {
