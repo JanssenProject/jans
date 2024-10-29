@@ -1,8 +1,9 @@
 import io.jans.as.common.model.common.User;
-import io.jans.as.common.model.session.DeviceSession;
-import io.jans.as.server.authorize.ws.rs.DeviceSessionService;
+import io.jans.as.common.model.session.AuthorizationChallengeSession;
+import io.jans.as.server.authorize.ws.rs.AuthorizationChallengeSessionService;
 import io.jans.as.server.service.UserService;
 import io.jans.as.server.service.external.context.ExternalScriptContext;
+import io.jans.model.GluuStatus;
 import io.jans.model.SimpleCustomProperty;
 import io.jans.model.custom.script.model.CustomScript;
 import io.jans.model.custom.script.type.authzchallenge.AuthorizationChallengeType;
@@ -13,9 +14,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Map;
-import java.util.UUID;
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Yuriy Z
@@ -67,6 +67,14 @@ public class AuthorizationChallenge implements AuthorizationChallengeType {
             return false;
         }
 
+        boolean isUserActive = user.getStatus() == GluuStatus.ACTIVE;
+        if (!isUserActive){
+            scriptLogger.trace("User is not active, username {}", username);
+            createError(context, "username_inactive");
+            return false;
+        }
+
+        // for simplicity OTP is here just username password but in real world scenario real OTP validation is needed.
         final boolean ok = entryManager.authenticate(user.getDn(), User.class, password);
         if (ok) {
             context.getExecutionContext().setUser(user); // <- IMPORTANT : without user set, user relation will not be associated with token
@@ -85,7 +93,7 @@ public class AuthorizationChallenge implements AuthorizationChallengeType {
 
         if (StringUtils.isBlank(value)) {
             scriptLogger.trace("No '{}' parameter in request", parameterName);
-            value = getParameterFromDeviceSession(context, parameterName);
+            value = getParameterFromAuthorizationChallengeSession(context, parameterName);
         }
 
         if (StringUtils.isBlank(value)) {
@@ -98,64 +106,64 @@ public class AuthorizationChallenge implements AuthorizationChallengeType {
     }
 
     private void createError(ExternalScriptContext context, String errorCode) {
-        String deviceSessionPart = prepareDeviceSessionSubJson(context);
+        String sessionPart = prepareAuthorizationChallengeSessionSubJson(context);
 
-        final String entity = String.format("{\"error\": \"%s\"%s}", errorCode, deviceSessionPart);
+        final String entity = String.format("{\"error\": \"%s\"%s}", errorCode, sessionPart);
         context.createWebApplicationException(401, entity);
     }
 
-    private String prepareDeviceSessionSubJson(ExternalScriptContext context) {
-        DeviceSession deviceSessionObject = context.getAuthzRequest().getDeviceSessionObject();
-        if (deviceSessionObject != null) {
-            prepareDeviceSession(context, deviceSessionObject);
-            return String.format(",\"device_session\":\"%s\"", deviceSessionObject.getId());
-        } else if (context.getAuthzRequest().isUseDeviceSession()) {
-            deviceSessionObject = prepareDeviceSession(context, null);
-            return String.format(",\"device_session\":\"%s\"", deviceSessionObject.getId());
+    private String prepareAuthorizationChallengeSessionSubJson(ExternalScriptContext context) {
+        AuthorizationChallengeSession sessionObject = context.getAuthzRequest().getAuthorizationChallengeSessionObject();
+        if (sessionObject != null) {
+            prepareAuthorizationChallengeSession(context, sessionObject);
+            return String.format(",\"auth_session\":\"%s\"", sessionObject.getId());
+        } else if (context.getAuthzRequest().isUseAuthorizationChallengeSession()) {
+            sessionObject = prepareAuthorizationChallengeSession(context, null);
+            return String.format(",\"auth_session\":\"%s\"", sessionObject.getId());
         }
         return "";
     }
 
-    private DeviceSession prepareDeviceSession(ExternalScriptContext context, DeviceSession deviceSessionObject) {
-        DeviceSessionService deviceSessionService = CdiUtil.bean(DeviceSessionService.class);
-        boolean newSave = deviceSessionObject == null;
+    private AuthorizationChallengeSession prepareAuthorizationChallengeSession(ExternalScriptContext context, AuthorizationChallengeSession authorizationChallengeSessionObject) {
+        AuthorizationChallengeSessionService authorizationChallengeSessionService = CdiUtil.bean(AuthorizationChallengeSessionService.class);
+        boolean newSave = authorizationChallengeSessionObject == null;
         if (newSave) {
-            deviceSessionObject = deviceSessionService.newDeviceSession();
+//            authorizationChallengeSessionObject = authorizationChallengeSessionService.newAuthorizationChallengeSession();
         }
 
         String username = context.getHttpRequest().getParameter(USERNAME_PARAMETER);
         if (StringUtils.isNotBlank(username)) {
-            deviceSessionObject.getAttributes().getAttributes().put(USERNAME_PARAMETER, username);
+            authorizationChallengeSessionObject.getAttributes().getAttributes().put(USERNAME_PARAMETER, username);
         }
 
         String password = context.getHttpRequest().getParameter(PASSWORD_PARAMETER);
         if (StringUtils.isNotBlank(password)) {
-            deviceSessionObject.getAttributes().getAttributes().put(PASSWORD_PARAMETER, password);
+            authorizationChallengeSessionObject.getAttributes().getAttributes().put(PASSWORD_PARAMETER, password);
         }
 
         String clientId = context.getHttpRequest().getParameter("client_id");
         if (StringUtils.isNotBlank(clientId)) {
-            deviceSessionObject.getAttributes().getAttributes().put("client_id", clientId);
+            authorizationChallengeSessionObject.getAttributes().getAttributes().put("client_id", clientId);
         }
 
         String acrValues = context.getHttpRequest().getParameter("acr_values");
         if (StringUtils.isNotBlank(acrValues)) {
-            deviceSessionObject.getAttributes().getAttributes().put("acr_values", acrValues);
+            authorizationChallengeSessionObject.getAttributes().getAttributes().put("acr_values", acrValues);
         }
 
         if (newSave) {
-            deviceSessionService.persist(deviceSessionObject);
+            authorizationChallengeSessionService.persist(authorizationChallengeSessionObject);
         } else {
-            deviceSessionService.merge(deviceSessionObject);
+            authorizationChallengeSessionService.merge(authorizationChallengeSessionObject);
         }
 
-        return deviceSessionObject;
+        return authorizationChallengeSessionObject;
     }
 
-    private String getParameterFromDeviceSession(ExternalScriptContext context, String parameterName) {
-        final DeviceSession deviceSessionObject = context.getAuthzRequest().getDeviceSessionObject();
-        if (deviceSessionObject != null) {
-            return deviceSessionObject.getAttributes().getAttributes().get(parameterName);
+    private String getParameterFromAuthorizationChallengeSession(ExternalScriptContext context, String parameterName) {
+        final AuthorizationChallengeSession sessionObject = context.getAuthzRequest().getAuthorizationChallengeSessionObject();
+        if (sessionObject != null) {
+            return sessionObject.getAttributes().getAttributes().get(parameterName);
         }
         return null;
     }

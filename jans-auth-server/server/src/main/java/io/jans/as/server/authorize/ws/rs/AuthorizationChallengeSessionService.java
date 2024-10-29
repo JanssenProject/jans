@@ -1,6 +1,6 @@
 package io.jans.as.server.authorize.ws.rs;
 
-import io.jans.as.common.model.session.DeviceSession;
+import io.jans.as.common.model.session.AuthorizationChallengeSession;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.orm.PersistenceEntryManager;
@@ -17,7 +17,7 @@ import java.util.*;
  */
 @Named
 @ApplicationScoped
-public class DeviceSessionService {
+public class AuthorizationChallengeSessionService {
 
     @Inject
     private Logger log;
@@ -31,57 +31,57 @@ public class DeviceSessionService {
     @Inject
     private StaticConfiguration staticConfiguration;
 
-    public DeviceSession newDeviceSession() {
+    public AuthorizationChallengeSession newAuthorizationChallengeSession() {
         final String id = UUID.randomUUID().toString();
-        return newDeviceSession(id);
+        return newAuthorizationChallengeSession(id);
     }
 
-    public DeviceSession newDeviceSession(String id) {
-        int lifetimeInSeconds = appConfiguration.getDeviceSessionLifetimeInSeconds();
+    public AuthorizationChallengeSession newAuthorizationChallengeSession(String id) {
+        int lifetimeInSeconds = appConfiguration.getAuthorizationChallengeSessionLifetimeInSeconds();
 
         final Calendar calendar = new GregorianCalendar();
         final Date creationDate = calendar.getTime();
         calendar.add(Calendar.SECOND, lifetimeInSeconds);
         final Date expirationDate = calendar.getTime();
 
-        DeviceSession deviceSession = new DeviceSession();
-        deviceSession.setId(id);
-        deviceSession.setDn(buildDn(id));
-        deviceSession.setDeletable(true);
-        deviceSession.setTtl(lifetimeInSeconds);
-        deviceSession.setCreationDate(creationDate);
-        deviceSession.setExpirationDate(expirationDate);
-        return deviceSession;
+        AuthorizationChallengeSession session = new AuthorizationChallengeSession();
+        session.setId(id);
+        session.setDn(buildDn(id));
+        session.setDeletable(true);
+        session.setTtl(lifetimeInSeconds);
+        session.setCreationDate(creationDate);
+        session.setExpirationDate(expirationDate);
+        return session;
     }
 
     public String buildDn(String id) {
         return String.format("jansId=%s,%s", id, staticConfiguration.getBaseDn().getSessions());
     }
 
-    public DeviceSession getDeviceSessionByDn(String dn) {
+    public AuthorizationChallengeSession getAuthorizationChallengeSessionByDn(String dn) {
         try {
-            return persistenceEntryManager.find(DeviceSession.class, dn);
+            return persistenceEntryManager.find(AuthorizationChallengeSession.class, dn);
         } catch (Exception e) {
             log.trace(e.getMessage(), e);
             return null;
         }
     }
 
-    public DeviceSession getDeviceSession(String id) {
+    public AuthorizationChallengeSession getAuthorizationChallengeSession(String id) {
         if (StringUtils.isNotBlank(id)) {
-            DeviceSession result = getDeviceSessionByDn(buildDn(id));
-            log.debug("Found {} entries for deviceSession id = {}", result != null ? 1 : 0, id);
+            AuthorizationChallengeSession result = getAuthorizationChallengeSessionByDn(buildDn(id));
+            log.debug("Found {} entries for authorizationChallengeSession id = {}", result != null ? 1 : 0, id);
 
             return result;
         }
         return null;
     }
 
-    public void persist(DeviceSession entity) {
+    public void persist(AuthorizationChallengeSession entity) {
         persistenceEntryManager.persist(entity);
     }
 
-    public void merge(DeviceSession entity) {
+    public void merge(AuthorizationChallengeSession entity) {
         persistenceEntryManager.merge(entity);
     }
 }
