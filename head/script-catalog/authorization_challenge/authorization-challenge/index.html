@@ -8885,13 +8885,13 @@
 
 <h1 id="authorization-challenge-custom-script">Authorization Challenge Custom Script<a class="headerlink" href="#authorization-challenge-custom-script" title="Permanent link">#</a></h1>
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">#</a></h2>
-<p>The Jans-Auth server implements <a href="https://www.ietf.org/archive/id/draft-parecki-oauth-first-party-native-apps-00.html">OAuth 2.0 for First-Party Native Applications</a>.
+<p>The Jans-Auth server implements <a href="https://www.ietf.org/archive/id/draft-parecki-oauth-first-party-native-apps-02.html">OAuth 2.0 for First-Party Native Applications</a>.
 This script is used to control/customize Authorization Challenge Endpoint.</p>
 <h2 id="behavior">Behavior<a class="headerlink" href="#behavior" title="Permanent link">#</a></h2>
 <p>In request to Authorization Challenge Endpoint to is expected to have <code>acr_values</code> request parameter which specifies name of the custom script.
 If parameter is absent or AS can't find script with this name then it falls back to script with name <code>default_challenge</code>.</p>
 <p>This script is provided during installation and performs basic <code>username</code>/<code>password</code> authentication.</p>
-<div class="highlight"><pre><span></span><code>POST /jans-auth/restv1/authorization_challenge HTTP/1.1
+<div class="highlight"><pre><span></span><code>POST /jans-auth/restv1/authorize-challenge HTTP/1.1
 Host: yuriyz-fond-skink.gluu.info
 
 client_id=999e13b8-f4a2-4fed-ad3c-6c88bd2c92ea&amp;scope=openid+profile+address+email+phone+user_name&amp;state=b4a41b29-51c8-4354-9c8c-fda38b4dbd43&amp;nonce=3a56f8d0-f78e-4b15-857c-3e792801be68&amp;acr_values=&amp;request_session_id=false&amp;password=secret&amp;username=admin
@@ -9072,57 +9072,57 @@ If all is good script has to return <code>true</code> and it's strongly recommen
 <span class="w">    </span><span class="p">}</span><span class="w"></span>
 
 <span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">prepareDeviceSessionSubJson</span><span class="p">(</span><span class="n">ExternalScriptContext</span><span class="w"> </span><span class="n">context</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="n">DeviceSession</span><span class="w"> </span><span class="n">deviceSessionObject</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">context</span><span class="p">.</span><span class="na">getAuthzRequest</span><span class="p">().</span><span class="na">getDeviceSessionObject</span><span class="p">();</span><span class="w"></span>
-<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">deviceSessionObject</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="n">prepareDeviceSession</span><span class="p">(</span><span class="n">context</span><span class="p">,</span><span class="w"> </span><span class="n">deviceSessionObject</span><span class="p">);</span><span class="w"></span>
-<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">String</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="s">&quot;,\&quot;device_session\&quot;:\&quot;%s\&quot;&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">deviceSessionObject</span><span class="p">.</span><span class="na">getId</span><span class="p">());</span><span class="w"></span>
+<span class="w">        </span><span class="n">DeviceSession</span><span class="w"> </span><span class="n">authorizationChallengeSessionObject</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">context</span><span class="p">.</span><span class="na">getAuthzRequest</span><span class="p">().</span><span class="na">getDeviceSessionObject</span><span class="p">();</span><span class="w"></span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">authorizationChallengeSessionObject</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="n">prepareDeviceSession</span><span class="p">(</span><span class="n">context</span><span class="p">,</span><span class="w"> </span><span class="n">authorizationChallengeSessionObject</span><span class="p">);</span><span class="w"></span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">String</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="s">&quot;,\&quot;auth_session\&quot;:\&quot;%s\&quot;&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">authorizationChallengeSessionObject</span><span class="p">.</span><span class="na">getId</span><span class="p">());</span><span class="w"></span>
 <span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">context</span><span class="p">.</span><span class="na">getAuthzRequest</span><span class="p">().</span><span class="na">isUseDeviceSession</span><span class="p">())</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="n">deviceSessionObject</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">prepareDeviceSession</span><span class="p">(</span><span class="n">context</span><span class="p">,</span><span class="w"> </span><span class="kc">null</span><span class="p">);</span><span class="w"></span>
-<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">String</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="s">&quot;,\&quot;device_session\&quot;:\&quot;%s\&quot;&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">deviceSessionObject</span><span class="p">.</span><span class="na">getId</span><span class="p">());</span><span class="w"></span>
+<span class="w">            </span><span class="n">authorizationChallengeSessionObject</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">prepareDeviceSession</span><span class="p">(</span><span class="n">context</span><span class="p">,</span><span class="w"> </span><span class="kc">null</span><span class="p">);</span><span class="w"></span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">String</span><span class="p">.</span><span class="na">format</span><span class="p">(</span><span class="s">&quot;,\&quot;auth_session\&quot;:\&quot;%s\&quot;&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">authorizationChallengeSessionObject</span><span class="p">.</span><span class="na">getId</span><span class="p">());</span><span class="w"></span>
 <span class="w">        </span><span class="p">}</span><span class="w"></span>
 <span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="s">&quot;&quot;</span><span class="p">;</span><span class="w"></span>
 <span class="w">    </span><span class="p">}</span><span class="w"></span>
 
-<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">DeviceSession</span><span class="w"> </span><span class="nf">prepareDeviceSession</span><span class="p">(</span><span class="n">ExternalScriptContext</span><span class="w"> </span><span class="n">context</span><span class="p">,</span><span class="w"> </span><span class="n">DeviceSession</span><span class="w"> </span><span class="n">deviceSessionObject</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">DeviceSession</span><span class="w"> </span><span class="nf">prepareDeviceSession</span><span class="p">(</span><span class="n">ExternalScriptContext</span><span class="w"> </span><span class="n">context</span><span class="p">,</span><span class="w"> </span><span class="n">DeviceSession</span><span class="w"> </span><span class="n">authorizationChallengeSessionObject</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">        </span><span class="n">DeviceSessionService</span><span class="w"> </span><span class="n">deviceSessionService</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CdiUtil</span><span class="p">.</span><span class="na">bean</span><span class="p">(</span><span class="n">DeviceSessionService</span><span class="p">.</span><span class="na">class</span><span class="p">);</span><span class="w"></span>
-<span class="w">        </span><span class="kt">boolean</span><span class="w"> </span><span class="n">newSave</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">deviceSessionObject</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="kt">boolean</span><span class="w"> </span><span class="n">newSave</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">authorizationChallengeSessionObject</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span><span class="w"></span>
 <span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">newSave</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="n">deviceSessionObject</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">deviceSessionService</span><span class="p">.</span><span class="na">newDeviceSession</span><span class="p">();</span><span class="w"></span>
+<span class="w">            </span><span class="n">authorizationChallengeSessionObject</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">deviceSessionService</span><span class="p">.</span><span class="na">newDeviceSession</span><span class="p">();</span><span class="w"></span>
 <span class="w">        </span><span class="p">}</span><span class="w"></span>
 
 <span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">username</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">context</span><span class="p">.</span><span class="na">getHttpRequest</span><span class="p">().</span><span class="na">getParameter</span><span class="p">(</span><span class="n">USERNAME_PARAMETER</span><span class="p">);</span><span class="w"></span>
 <span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">StringUtils</span><span class="p">.</span><span class="na">isNotBlank</span><span class="p">(</span><span class="n">username</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="n">deviceSessionObject</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">put</span><span class="p">(</span><span class="n">USERNAME_PARAMETER</span><span class="p">,</span><span class="w"> </span><span class="n">username</span><span class="p">);</span><span class="w"></span>
+<span class="w">            </span><span class="n">authorizationChallengeSessionObject</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">put</span><span class="p">(</span><span class="n">USERNAME_PARAMETER</span><span class="p">,</span><span class="w"> </span><span class="n">username</span><span class="p">);</span><span class="w"></span>
 <span class="w">        </span><span class="p">}</span><span class="w"></span>
 
 <span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">password</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">context</span><span class="p">.</span><span class="na">getHttpRequest</span><span class="p">().</span><span class="na">getParameter</span><span class="p">(</span><span class="n">PASSWORD_PARAMETER</span><span class="p">);</span><span class="w"></span>
 <span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">StringUtils</span><span class="p">.</span><span class="na">isNotBlank</span><span class="p">(</span><span class="n">password</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="n">deviceSessionObject</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">put</span><span class="p">(</span><span class="n">PASSWORD_PARAMETER</span><span class="p">,</span><span class="w"> </span><span class="n">password</span><span class="p">);</span><span class="w"></span>
+<span class="w">            </span><span class="n">authorizationChallengeSessionObject</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">put</span><span class="p">(</span><span class="n">PASSWORD_PARAMETER</span><span class="p">,</span><span class="w"> </span><span class="n">password</span><span class="p">);</span><span class="w"></span>
 <span class="w">        </span><span class="p">}</span><span class="w"></span>
 
 <span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">clientId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">context</span><span class="p">.</span><span class="na">getHttpRequest</span><span class="p">().</span><span class="na">getParameter</span><span class="p">(</span><span class="s">&quot;client_id&quot;</span><span class="p">);</span><span class="w"></span>
 <span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">StringUtils</span><span class="p">.</span><span class="na">isNotBlank</span><span class="p">(</span><span class="n">clientId</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="n">deviceSessionObject</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">put</span><span class="p">(</span><span class="s">&quot;client_id&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">clientId</span><span class="p">);</span><span class="w"></span>
+<span class="w">            </span><span class="n">authorizationChallengeSessionObject</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">put</span><span class="p">(</span><span class="s">&quot;client_id&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">clientId</span><span class="p">);</span><span class="w"></span>
 <span class="w">        </span><span class="p">}</span><span class="w"></span>
 
 <span class="w">        </span><span class="n">String</span><span class="w"> </span><span class="n">acrValues</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">context</span><span class="p">.</span><span class="na">getHttpRequest</span><span class="p">().</span><span class="na">getParameter</span><span class="p">(</span><span class="s">&quot;acr_values&quot;</span><span class="p">);</span><span class="w"></span>
 <span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">StringUtils</span><span class="p">.</span><span class="na">isNotBlank</span><span class="p">(</span><span class="n">acrValues</span><span class="p">))</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="n">deviceSessionObject</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">put</span><span class="p">(</span><span class="s">&quot;acr_values&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">acrValues</span><span class="p">);</span><span class="w"></span>
+<span class="w">            </span><span class="n">authorizationChallengeSessionObject</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">put</span><span class="p">(</span><span class="s">&quot;acr_values&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">acrValues</span><span class="p">);</span><span class="w"></span>
 <span class="w">        </span><span class="p">}</span><span class="w"></span>
 
 <span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">newSave</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="n">deviceSessionService</span><span class="p">.</span><span class="na">persist</span><span class="p">(</span><span class="n">deviceSessionObject</span><span class="p">);</span><span class="w"></span>
+<span class="w">            </span><span class="n">deviceSessionService</span><span class="p">.</span><span class="na">persist</span><span class="p">(</span><span class="n">authorizationChallengeSessionObject</span><span class="p">);</span><span class="w"></span>
 <span class="w">        </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="n">deviceSessionService</span><span class="p">.</span><span class="na">merge</span><span class="p">(</span><span class="n">deviceSessionObject</span><span class="p">);</span><span class="w"></span>
+<span class="w">            </span><span class="n">deviceSessionService</span><span class="p">.</span><span class="na">merge</span><span class="p">(</span><span class="n">authorizationChallengeSessionObject</span><span class="p">);</span><span class="w"></span>
 <span class="w">        </span><span class="p">}</span><span class="w"></span>
 
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">deviceSessionObject</span><span class="p">;</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">authorizationChallengeSessionObject</span><span class="p">;</span><span class="w"></span>
 <span class="w">    </span><span class="p">}</span><span class="w"></span>
 
 <span class="w">    </span><span class="kd">private</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="nf">getParameterFromDeviceSession</span><span class="p">(</span><span class="n">ExternalScriptContext</span><span class="w"> </span><span class="n">context</span><span class="p">,</span><span class="w"> </span><span class="n">String</span><span class="w"> </span><span class="n">parameterName</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="kd">final</span><span class="w"> </span><span class="n">DeviceSession</span><span class="w"> </span><span class="n">deviceSessionObject</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">context</span><span class="p">.</span><span class="na">getAuthzRequest</span><span class="p">().</span><span class="na">getDeviceSessionObject</span><span class="p">();</span><span class="w"></span>
-<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">deviceSessionObject</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">deviceSessionObject</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">get</span><span class="p">(</span><span class="n">parameterName</span><span class="p">);</span><span class="w"></span>
+<span class="w">        </span><span class="kd">final</span><span class="w"> </span><span class="n">DeviceSession</span><span class="w"> </span><span class="n">authorizationChallengeSessionObject</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">context</span><span class="p">.</span><span class="na">getAuthzRequest</span><span class="p">().</span><span class="na">getDeviceSessionObject</span><span class="p">();</span><span class="w"></span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">authorizationChallengeSessionObject</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="kc">null</span><span class="p">)</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">authorizationChallengeSessionObject</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">get</span><span class="p">(</span><span class="n">parameterName</span><span class="p">);</span><span class="w"></span>
 <span class="w">        </span><span class="p">}</span><span class="w"></span>
 <span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="kc">null</span><span class="p">;</span><span class="w"></span>
 <span class="w">    </span><span class="p">}</span><span class="w"></span>
@@ -9182,7 +9182,7 @@ import java.util.UUID;
  * 1) First step -&gt; send username
  * 2) Second step -&gt; send OTP
  *
- * AS tracks data by &#39;device_session&#39;. See &quot;prepareDeviceSession()&quot; method implemention for details.
+ * AS tracks data by &#39;auth_session&#39;. See &quot;prepareDeviceSession()&quot; method implemention for details.
  *
  * @author Yuriy Z
  */
@@ -9215,7 +9215,7 @@ public class AuthorizationChallenge implements AuthorizationChallengeType {
             return false;
         }
 
-        // 2. During first execution OTP is not present, so error will be returned with device_session (which has saved username)
+        // 2. During first execution OTP is not present, so error will be returned with auth_session (which has saved username)
         //    Note: prepareDeviceSession method implemention
         final String otp = getParameterOrCreateError(context, OTP_PARAMETER);
         if (StringUtils.isBlank(otp)) {
@@ -9274,57 +9274,57 @@ public class AuthorizationChallenge implements AuthorizationChallengeType {
     }
 
     private String prepareDeviceSessionSubJson(ExternalScriptContext context) {
-        DeviceSession deviceSessionObject = context.getAuthzRequest().getDeviceSessionObject();
-        if (deviceSessionObject != null) {
-            prepareDeviceSession(context, deviceSessionObject);
-            return String.format(&quot;,\&quot;device_session\&quot;:\&quot;%s\&quot;&quot;, deviceSessionObject.getId());
+        DeviceSession authorizationChallengeSessionObject = context.getAuthzRequest().getDeviceSessionObject();
+        if (authorizationChallengeSessionObject != null) {
+            prepareDeviceSession(context, authorizationChallengeSessionObject);
+            return String.format(&quot;,\&quot;auth_session\&quot;:\&quot;%s\&quot;&quot;, authorizationChallengeSessionObject.getId());
         } else if (context.getAuthzRequest().isUseDeviceSession()) {
-            deviceSessionObject = prepareDeviceSession(context, null);
-            return String.format(&quot;,\&quot;device_session\&quot;:\&quot;%s\&quot;&quot;, deviceSessionObject.getId());
+            authorizationChallengeSessionObject = prepareDeviceSession(context, null);
+            return String.format(&quot;,\&quot;auth_session\&quot;:\&quot;%s\&quot;&quot;, authorizationChallengeSessionObject.getId());
         }
         return &quot;&quot;;
     }
 
-    private DeviceSession prepareDeviceSession(ExternalScriptContext context, DeviceSession deviceSessionObject) {
+    private DeviceSession prepareDeviceSession(ExternalScriptContext context, DeviceSession authorizationChallengeSessionObject) {
         DeviceSessionService deviceSessionService = CdiUtil.bean(DeviceSessionService.class);
-        boolean newSave = deviceSessionObject == null;
+        boolean newSave = authorizationChallengeSessionObject == null;
         if (newSave) {
-            deviceSessionObject = deviceSessionService.newDeviceSession();
+            authorizationChallengeSessionObject = deviceSessionService.newDeviceSession();
         }
 
         String username = context.getHttpRequest().getParameter(USERNAME_PARAMETER);
         if (StringUtils.isNotBlank(username)) {
-            deviceSessionObject.getAttributes().getAttributes().put(USERNAME_PARAMETER, username);
+            authorizationChallengeSessionObject.getAttributes().getAttributes().put(USERNAME_PARAMETER, username);
         }
 
         String otp = context.getHttpRequest().getParameter(OTP_PARAMETER);
         if (StringUtils.isNotBlank(otp)) {
-            deviceSessionObject.getAttributes().getAttributes().put(OTP_PARAMETER, otp);
+            authorizationChallengeSessionObject.getAttributes().getAttributes().put(OTP_PARAMETER, otp);
         }
 
         String clientId = context.getHttpRequest().getParameter(&quot;client_id&quot;);
         if (StringUtils.isNotBlank(clientId)) {
-            deviceSessionObject.getAttributes().getAttributes().put(&quot;client_id&quot;, clientId);
+            authorizationChallengeSessionObject.getAttributes().getAttributes().put(&quot;client_id&quot;, clientId);
         }
 
         String acrValues = context.getHttpRequest().getParameter(&quot;acr_values&quot;);
         if (StringUtils.isNotBlank(acrValues)) {
-            deviceSessionObject.getAttributes().getAttributes().put(&quot;acr_values&quot;, acrValues);
+            authorizationChallengeSessionObject.getAttributes().getAttributes().put(&quot;acr_values&quot;, acrValues);
         }
 
         if (newSave) {
-            deviceSessionService.persist(deviceSessionObject);
+            deviceSessionService.persist(authorizationChallengeSessionObject);
         } else {
-            deviceSessionService.merge(deviceSessionObject);
+            deviceSessionService.merge(authorizationChallengeSessionObject);
         }
 
-        return deviceSessionObject;
+        return authorizationChallengeSessionObject;
     }
 
     private String getParameterFromDeviceSession(ExternalScriptContext context, String parameterName) {
-        final DeviceSession deviceSessionObject = context.getAuthzRequest().getDeviceSessionObject();
-        if (deviceSessionObject != null) {
-            return deviceSessionObject.getAttributes().getAttributes().get(parameterName);
+        final DeviceSession authorizationChallengeSessionObject = context.getAuthzRequest().getDeviceSessionObject();
+        if (authorizationChallengeSessionObject != null) {
+            return authorizationChallengeSessionObject.getAttributes().getAttributes().get(parameterName);
         }
         return null;
     }
@@ -9369,7 +9369,7 @@ public class AuthorizationChallenge implements AuthorizationChallengeType {
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-21T08:21:28+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-21</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-29T13:14:25+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-29</span>
       
         <br>
         Created:
