@@ -121,9 +121,7 @@ impl KeyService {
                 eprintln!("could not find {}, updating jwks", kid);
                 // if the key is not found in the local keystore, update
                 // the local keystore and try again
-
-                // TODO: handle result
-                _ = self.update_jwks(iss);
+                self.update_jwks_for_iss(iss)?;
                 if let Some(key) = self.get_key_from_iss(iss, kid)? {
                     return Ok(key.clone());
                 }
@@ -156,18 +154,22 @@ impl KeyService {
     ///
     /// this method fetches a fresh set of keys from the JWKS URI of the given issuer
     /// and updates the local key store.
-    fn update_jwks(&self, iss: &str) -> Result<(), KeyServiceError> {
-        let conf = match self.idp_configs.get(iss) {
-            Some(conf) => conf,
+    fn update_jwks_for_iss(&self, iss: &str) -> Result<(), KeyServiceError> {
+        match self.idp_configs.get(iss) {
+            Some(conf) => Ok(Self::update_decoding_keys(&self.http_client, conf)?),
             // do nothing if the issuer isn't in the current store
             None => return Ok(()),
-        };
+        }
+    }
 
-        // fetch fresh keys
-        let mut new_keys = HashMap::new();
+    /// Updates the keys in the given config
+    fn update_decoding_keys(
+        http_client: &reqwest::blocking::Client,
+        conf: &OpenIdConfig,
+    ) -> Result<(), KeyServiceError> {
+        let mut fetched_keys = HashMap::new();
 
-        let jwks: Jwks = self
-            .http_client
+        let jwks: Jwks = http_client
             .get(&*conf.jwks_uri)
             .send()
             .map_err(KeyServiceError::Http)?
@@ -188,7 +190,7 @@ impl KeyService {
                     let key_id = jwk.common.key_id.ok_or(KeyServiceError::MissingKeyId)?;
 
                     // insert the key into the map, using the key ID as the map's key
-                    new_keys.insert(key_id.into(), Arc::new(decoding_key));
+                    fetched_keys.insert(key_id.into(), Arc::new(decoding_key));
                 },
                 Err(e) => {
                     // if the error indicates an unknown variant, we can safely ignore it.
@@ -201,13 +203,11 @@ impl KeyService {
             };
         }
 
-        // we reassign the keys after fetching and deserializing the keys
-        // so we don't lose the old ones in case the process fails
         let mut decoding_keys = conf
             .decoding_keys
             .write()
             .map_err(|_| KeyServiceError::Lock)?;
-        *decoding_keys = new_keys;
+        *decoding_keys = fetched_keys;
 
         Ok(())
     }
