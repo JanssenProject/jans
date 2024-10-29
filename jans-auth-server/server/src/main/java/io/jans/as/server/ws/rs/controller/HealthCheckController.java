@@ -76,7 +76,7 @@ public class HealthCheckController {
     		String healthCheckService = healthCheckPluginService.provideServiceName();
     		String healthCheckData = healthCheckPluginService.provideHealthCheckData();
     		if (StringHelper.isNotEmpty(healthCheckService) && StringHelper.isNotEmpty(healthCheckData)) {
-        		sb.append(String.format("\"%s\": %s", healthCheckService, healthCheckData));
+        		sb.append(String.format(", \"%s\": %s", healthCheckService, healthCheckData));
     		}
     	}
     	
