@@ -9069,21 +9069,20 @@ Postman. Learn how to use Janssen Server Config API
 using the command line. To get the details of Janssen command line operations 
 relevant to Config-API Configuration, you can check the operations under 
 <code>ConfigurationConfigApi</code> task using the command below:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --info ConfigurationConfigApi
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans tui --info ConfigurationConfigApi
 </code></pre></div>
 <p>It will show the details of the available operation-ids for Config-API.</p>
-<div class="highlight"><span class="filename">Sample Output</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --info ConfigurationConfigApi
-Operation ID: get-config-api-properties
+<div class="highlight"><span class="filename">Sample Output</span><pre><span></span><code>Operation ID: get-config-api-properties
  Description: Gets config-api configuration properties.
 Operation ID: patch-config-api-properties
  Description: Partially modifies config-api Configuration properties.
  Schema: Array of JsonPatch
 
-To get sample schema type /opt/jans/jans-cli/config-cli.py --schema-sample &lt;schema&gt;, for example /opt/jans/jans-cli/config-cli.py --schema-sample JsonPatch
+To get sample schema type jans tui --schema-sample &lt;schema&gt;, for example jans tui --schema-sample JsonPatch
 </code></pre></div>
 <h3 id="get-the-current-config-api-configuration">Get The Current Config-API Configuration<a class="headerlink" href="#get-the-current-config-api-configuration" title="Permanent link">#</a></h3>
 <p>Configuration for Config-API is a set of key-value pairs, called properties. When we retrieve the configuration, these properties and their current values are returned as a JSON document. To get the properties of Janssen Config-API Configuration, run the command below:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id<span class="o">=</span>get-config-api-properties
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans tui --operation-id<span class="o">=</span>get-config-api-properties
 </code></pre></div>
 <p>It will return the result as below:</p>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">  1</span>
@@ -9441,7 +9440,7 @@ setting the <code>fileExtensionValidationEnabled</code> property to
 <span class="p">]</span><span class="w"></span>
 </code></pre></div></td></tr></table></div>
 <p>Now, execute the following command to apply this patch:
- <div class="highlight"><span class="filename">Command</span><pre><span></span><code> /opt/jans/jans-cli/config-cli.py <span class="se">\</span>
+ <div class="highlight"><span class="filename">Command</span><pre><span></span><code> jans tui <span class="se">\</span>
 --operation-id<span class="o">=</span>patch-config-api-properties --data ./config-api-assetmgt-patch.json
 </code></pre></div>
  Upon successful execution of the update, the Janssen Server responds with 
@@ -9484,7 +9483,7 @@ to the Janssen Server. Let's do this step-by-step:</p>
 <span class="p">]</span><span class="w"></span>
 </code></pre></div></td></tr></table></div>
 <p>Now, execute the following command to apply this patch:
- <div class="highlight"><span class="filename">Command</span><pre><span></span><code> /opt/jans/jans-cli/config-cli.py <span class="se">\</span>
+ <div class="highlight"><span class="filename">Command</span><pre><span></span><code> jans tui <span class="se">\</span>
 --operation-id<span class="o">=</span>patch-config-api-properties --data ./config-api-patch.json
 </code></pre></div></p>
 <h3 id="config-api-configuration-parameters">Config API Configuration Parameters:<a class="headerlink" href="#config-api-configuration-parameters" title="Permanent link">#</a></h3>
@@ -9744,7 +9743,7 @@ see endpoint <code>/api/v1/api-config</code></p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-15T10:12:47+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-15</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-29T09:13:16+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-29</span>
       
         <br>
         Created:

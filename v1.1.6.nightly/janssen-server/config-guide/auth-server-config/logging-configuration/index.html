@@ -8904,7 +8904,7 @@ using the command line. To get the details of Janssen command line operations
 relevant to Logging configuration, you can check the operations under 
 <code>ConfigurationLogging</code> task using the
 command below:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --info ConfigurationLogging
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --info ConfigurationLogging
 </code></pre></div>
 <div class="highlight"><span class="filename">Sample Output</span><pre><span></span><code>Operation ID: get-config-logging
   Description: Returns Jans Authorization Server logging settings
@@ -8912,10 +8912,10 @@ Operation ID: put-config-logging
   Description: Updates Jans Authorization Server logging settings
   Schema: Logging
 
-To get sample schema type /opt/jans/jans-cli/config-cli.py --schema &lt;schema&gt;, for example /opt/jans/jans-cli/config-cli.py --schema Logging
+To get sample schema type jans cli --schema &lt;schema&gt;, for example jans cli --schema Logging
 </code></pre></div>
 <h3 id="find-logging-configuration">Find Logging Configuration<a class="headerlink" href="#find-logging-configuration" title="Permanent link">#</a></h3>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-config-logging
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id get-config-logging
 </code></pre></div>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
@@ -8945,8 +8945,7 @@ To get sample schema type /opt/jans/jans-cli/config-cli.py --schema &lt;schema&g
 <li>Get the current logging configuration and store it in a file for editing.
    The following command will retrieve the current logging configuration and 
    store it in a file.
-   <div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py -no-color <span class="se">\</span>
---operation-id get-config-logging &gt; /tmp/log-config.json
+   <div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli -no-color --operation-id get-config-logging &gt; /tmp/log-config.json
 </code></pre></div></li>
 <li>Update the configuration with desired value in the file while 
       keeping other properties and values unchanged. Updates must adhere to the
@@ -8954,12 +8953,11 @@ To get sample schema type /opt/jans/jans-cli/config-cli.py --schema &lt;schema&g
       The schema details can be retrieved using the command below.
       The schema defines what values and datatypes are acceptable for each 
       property value.
-   <div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --schema Logging 
+   <div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --schema Logging 
 </code></pre></div></li>
 <li>Use the updated file to send the update to the Janssen Server using the 
     command below
-   <div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id put-config-logging <span class="se">\</span>
---data /tmp/log-config.json
+   <div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id put-config-logging --data /tmp/log-config.json
 </code></pre></div>
    Upon successful execution of the update, the Janssen Server responds with 
    updated configuration.</li>
@@ -9004,7 +9002,7 @@ are generated under <code>/opt/jans/jetty/jans-fido2/logs/</code> and
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-10T06:11:59+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-10</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-29T09:13:16+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-29</span>
       
         <br>
         Created:

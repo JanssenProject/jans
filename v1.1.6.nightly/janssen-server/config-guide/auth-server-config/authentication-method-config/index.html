@@ -8928,7 +8928,7 @@ checks if the same authentication is available and active.</p>
 <p>Operations to manage the default authentication method are grouped under the
 <code>DefaultAuthenticationMethod</code> task. To get information about those operations
 use the command below.</p>
-<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --info DefaultAuthenticationMethod
+<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --info DefaultAuthenticationMethod
 </code></pre></div>
 <div class="highlight"><span class="filename">Output</span><pre><span></span><code>Operation ID: get-acrs
  Description: Gets default authentication method.
@@ -8936,11 +8936,11 @@ Operation ID: put-acrs
  Description: Updates default authentication method.
  Schema: AuthenticationMethod
 
-To get sample schema type /opt/jans/jans-cli/config-cli.py --schema &lt;schma&gt;, for example /opt/jans/jans-cli/config-cli.py --schema /components/schemas/AuthenticationMethod
+To get sample schema type jans cli --schema &lt;schma&gt;, for example jans cli --schema /components/schemas/AuthenticationMethod
 </code></pre></div></p>
 <h3 id="find-current-authentication-method">Find Current Authentication Method<a class="headerlink" href="#find-current-authentication-method" title="Permanent link">#</a></h3>
 <p>To get the current default authentication method use the command below.
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-acrs
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id get-acrs
 </code></pre></div>
 <div class="highlight"><span class="filename">Sample Output</span><pre><span></span><code><span class="p">{</span><span class="w"></span>
 <span class="w">  </span><span class="nt">&quot;defaultAcr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;simple_password_auth&quot;</span><span class="w"></span>
@@ -8950,8 +8950,7 @@ To get sample schema type /opt/jans/jans-cli/config-cli.py --schema &lt;schma&gt
 <p>Let's update the <em>Default Authentication Method</em> using the Janssen CLI command line.
 To perform the <em>put-acrs</em> operation, we have to use its schema.
 To get its schema:</p>
-<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --schema AuthenticationMethod <span class="se">\</span>
-&gt; /tmp/patch-default-auth.json
+<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --schema AuthenticationMethod &gt; /tmp/patch-default-auth.json
 </code></pre></div>
 The schema can now be found in the patch-default-auth.json file.</p>
 <p>For your information, you can obtain the format of the <code>AuthenticationMethod</code>
@@ -8959,7 +8958,7 @@ schema by running the aforementioned command without a file.</p>
 <p><div class="highlight"><span class="filename">Schema Format</span><pre><span></span><code>defaultAcr   string
 </code></pre></div>
 you can also use the following command for <code>AuthenticationMethod</code> schema example.</p>
-<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --schema-sample AuthenticationMethod
+<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --schema-sample AuthenticationMethod
 </code></pre></div>
 <div class="highlight"><span class="filename">Schema Example</span><pre><span></span><code><span class="p">{</span><span class="w"></span>
 <span class="nt">&quot;defaultAcr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;string&quot;</span><span class="w"></span>
@@ -8973,8 +8972,7 @@ We are going to update it with <code>passport_saml</code> authentication method.
 <span class="p">}</span><span class="w"></span>
 </code></pre></div>
 <p>Now let's trigger the operation using the above file.</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id put-acrs <span class="se">\</span>
---data /tmp/patch-default-auth.json
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id put-acrs --data /tmp/patch-default-auth.json
 </code></pre></div>
 <p>It will show the updated result.</p>
 <div class="highlight"><span class="filename">Sample Output</span><pre><span></span><code><span class="p">{</span><span class="w"></span>
@@ -9047,7 +9045,7 @@ in the <a href="../../../reference/openapi/">Swagger document</a>.</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-22T08:35:14+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-22</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-29T09:13:16+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-29</span>
       
         <br>
         Created:

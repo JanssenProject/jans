@@ -9021,7 +9021,7 @@ Postman. Learn how to use Janssen Server Config API
 </div>
 <h2 id="using-command-line">Using Command Line<a class="headerlink" href="#using-command-line" title="Permanent link">#</a></h2>
 <p>In the Janssen Server, you can do CRUD operations for user management using its command line tool. To get the details of command line for CRUD operations relevant to User Management, you can find the <code>operation-id</code> under the <code>User</code> task using the Jans CLI in scim mode. The following command line:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py -scim --info User
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli -scim --info User
 </code></pre></div>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
@@ -9119,11 +9119,11 @@ Operation ID: search-user
   Schema: SearchRequest
   Schema: SearchRequest
 
-To get sample schema type /opt/jans/jans-cli/config-cli.py -scim --schema-sample &lt;schema&gt;, for example /opt/jans/jans-cli/config-cli.py -scim --schema-sample SearchRequest
+To get sample schema type jans cli -scim --schema-sample &lt;schema&gt;, for example jans cli -scim --schema-sample SearchRequest
 </code></pre></div></td></tr></table></div>
 <h3 id="get-users-list">Get Users List<a class="headerlink" href="#get-users-list" title="Permanent link">#</a></h3>
 <p>This operation is used to get list of the users and its properties. The following command line: </p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py -scim --operation-id get-users
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli -scim --operation-id get-users
 </code></pre></div>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
@@ -9223,7 +9223,7 @@ To get sample schema type /opt/jans/jans-cli/config-cli.py -scim --schema-sample
 </code></pre></div>
 
 <p>This is an example with <code>endpoint-args</code>:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py -scim --operation-id get-users --endpoint-args attributes:emails
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli -scim --operation-id get-users --endpoint-args attributes:emails
 </code></pre></div>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
@@ -9271,10 +9271,10 @@ To get sample schema type /opt/jans/jans-cli/config-cli.py -scim --schema-sample
 </code></pre></div></td></tr></table></div>
 <h3 id="creating-a-new-user">Creating a New User<a class="headerlink" href="#creating-a-new-user" title="Permanent link">#</a></h3>
 <p>To create a new user using Jans CLI, we can use <code>create-user</code> operation-id. As shown in the <a href="#using-command-line">output</a> for <code>--info</code> command, the <code>create-user</code> operation requires data to be sent according to <code>UserResource</code> schema. To see the schema, use the command as below:</p>
-<div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Command</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>/opt/jans/jans-cli/config-cli.py -scim --schema UserResource
-</code></pre></div></td></tr></table></div>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli -scim --schema UserResource
+</code></pre></div>
 <p>The Janssen Server also provides sample data for the above schema. Let's run the following command to get the sample schema:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py -scim --schema-sample UserResource
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli -scim --schema-sample UserResource
 </code></pre></div>
 <p>From the above example of schema file, we can fill required values in a data file <code>/tmp/user.json</code>. As we have seen in the sample schema there are lot of properties, but we are going to fill minimum to create a <code>test user</code>:</p>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">user.json</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -9304,7 +9304,7 @@ To get sample schema type /opt/jans/jans-cli/config-cli.py -scim --schema-sample
 <span class="p">}</span><span class="w"></span>
 </code></pre></div></td></tr></table></div>
 <p>Let's run the following command to create user in Janssen Server:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py -scim --operation-id create-user --data /tmp/user.json
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli -scim --operation-id create-user --data /tmp/user.json
 </code></pre></div>
 <div class="highlight"><span class="filename">Output</span><pre><span></span><code><span class="p">{</span><span class="w"></span>
 <span class="w">  </span><span class="nt">&quot;schemas&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
@@ -9331,7 +9331,8 @@ To get sample schema type /opt/jans/jans-cli/config-cli.py -scim --schema-sample
 </code></pre></div>
 <h3 id="find-user-by-id">Find User by Id<a class="headerlink" href="#find-user-by-id" title="Permanent link">#</a></h3>
 <p>We can retrieve user details using user's <code>id</code>. For example in the above created user id is <code>e24c1479-4a61-4f1f-aa30-2ccc13c0b130</code>. To get the user details by user id, We can use the <code>get-user-by-id</code> operation as below:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py -scim --operation-id get-user-by-id --url-suffix<span class="o">=</span><span class="s2">&quot;id:e24c1479-4a61-4f1f-aa30-2ccc13c0b130&quot;</span>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli -scim --operation-id get-user-by-id <span class="se">\</span>
+--url-suffix<span class="o">=</span><span class="s2">&quot;id:e24c1479-4a61-4f1f-aa30-2ccc13c0b130&quot;</span>
 </code></pre></div>
 <div class="highlight"><span class="filename">Output</span><pre><span></span><code><span class="p">{</span><span class="w"></span>
 <span class="w">  </span><span class="nt">&quot;schemas&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
@@ -9361,11 +9362,12 @@ To get sample schema type /opt/jans/jans-cli/config-cli.py -scim --schema-sample
 <p>```json title='update-user.json
 {
   "nickName": "testuser"
-}
+ }
 <div class="highlight"><pre><span></span><code>Let&#39;s run the following command:
 
 ```bash title=&quot;Command&quot;
- /opt/jans/jans-cli/config-cli.py -scim --operation-id update-user-by-id --url-suffix=&quot;id:e24c1479-4a61-4f1f-aa30-2ccc13c0b130&quot; --data /tmp/update-user.json
+jans cli -scim --operation-id update-user-by-id \
+--url-suffix=&quot;id:e24c1479-4a61-4f1f-aa30-2ccc13c0b130&quot; --data /tmp/update-user.json
 </code></pre></div></p>
 <div class="highlight"><span class="filename">Sample Output</span><pre><span></span><code><span class="p">{</span><span class="w"></span>
 <span class="w">  </span><span class="nt">&quot;schemas&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="w"></span>
@@ -9393,7 +9395,7 @@ To get sample schema type /opt/jans/jans-cli/config-cli.py -scim --schema-sample
 <h3 id="patch-user-by-id">Patch User by Id<a class="headerlink" href="#patch-user-by-id" title="Permanent link">#</a></h3>
 <p>Using <code>patch-user-by-id</code> operation, We can modify user properties partially. As we have seen in the <a href="#using-command-line">Output</a> of <code>--info</code> command, <code>patch-user-by-id</code> operation requires <code>PatchRequest</code> <a href="../../config-tools/jans-cli/#about-schemas">schema</a> definition for payload data. To get the sample <code>PatchRequest</code> schema, run the followwing command:</p>
 <p>```bash titl="Command"
-/opt/jans/jans-cli/config-cli.py -scim --schema-sample PatchRequest
+jans cli -scim --schema-sample PatchRequest
 <div class="highlight"><pre><span></span><code>For example, In the above `test user`, we are going to `add` one more email, `remove` nickName and `replace` displayName. Let&#39;s put all the operations in a json file `/tmp/patch-user.json`:
 
 ```json title=&quot;patch-user.json&quot;
@@ -9425,11 +9427,14 @@ To get sample schema type /opt/jans/jans-cli/config-cli.py -scim --schema-sample
 }
 </code></pre></div></p>
 <p>The command line to run all of these operations:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py -scim --operation patch-user-by-id --url-suffix<span class="o">=</span><span class="s2">&quot;id:e24c1479-4a61-4f1f-aa30-2ccc13c0b130&quot;</span> --data /tmp/patch-user.json
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli -scim --operation patch-user-by-id <span class="se">\</span>
+--url-suffix<span class="o">=</span><span class="s2">&quot;id:e24c1479-4a61-4f1f-aa30-2ccc13c0b130&quot;</span> <span class="se">\</span>
+--data /tmp/patch-user.json
 </code></pre></div>
 <h3 id="delete-user-by-id">Delete User by ID<a class="headerlink" href="#delete-user-by-id" title="Permanent link">#</a></h3>
 <p>To delete the, run the following command with the specific user ID as <code>--url-suffix=id:user-id</code>. For example, let's delete the <code>test user</code> we have created earlier:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py -scim --operation-id delete-user-by-id --url-suffix<span class="o">=</span><span class="s2">&quot;id:e24c1479-4a61-4f1f-aa30-2ccc13c0b130&quot;</span>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli -scim --operation-id delete-user-by-id <span class="se">\</span>
+--url-suffix<span class="o">=</span><span class="s2">&quot;id:e24c1479-4a61-4f1f-aa30-2ccc13c0b130&quot;</span>
 </code></pre></div>
 <h2 id="using-text-based-ui">Using Text-based UI<a class="headerlink" href="#using-text-based-ui" title="Permanent link">#</a></h2>
 <p>Using TUI, We can add, update and deleter users in the Janssen Server. To do that, Let's start TUI using the command below:</p>
@@ -9871,7 +9876,7 @@ response looks like
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-28T05:09:15+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-28</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-29T09:13:16+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-29</span>
       
         <br>
         Created:

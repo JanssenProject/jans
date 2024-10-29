@@ -8742,12 +8742,12 @@ By default, the password attribute validation is not enabled.</p>
 <ol>
 <li>
 <p>Obtain the unique ID, that is inum for <code>userPassword</code> attribute.
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-attributes --endpoint-args pattern:userPassword
+<div class="highlight"><pre><span></span><code>jans cli --operation-id get-attributes --endpoint-args pattern:userPassword
 </code></pre></div></p>
 </li>
 <li>
 <p>Obatin the PatchRequest schema
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --schema PatchRequest &gt; /tmp/patch.json
+<div class="highlight"><pre><span></span><code>jans cli --schema PatchRequest &gt; /tmp/patch.json
 </code></pre></div></p>
 </li>
 <li>
@@ -8774,7 +8774,8 @@ maximum 20 characters and should be alphanumeric with special characters.
 </li>
 <li>
 <p>Execute patch operation for <code>userPassword</code> attribute.
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id patch-attributes-by-inum --url-suffix<span class="o">=</span><span class="s2">&quot;inum:AAEE&quot;</span> --data /tmp/patch.json
+<div class="highlight"><pre><span></span><code>jans cli --operation-id patch-attributes-by-inum <span class="se">\</span>
+--url-suffix<span class="o">=</span><span class="s2">&quot;inum:AAEE&quot;</span> --data /tmp/patch.json
 </code></pre></div>
 <img alt="update default authentication method" src="../../../assets/image-pwd-enable-custom-validation-jans-cli.png" /></p>
 </li>
@@ -8849,7 +8850,7 @@ maximum 20 characters and should be alphanumeric with special characters.
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-09-27T12:12:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-29T09:13:16+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-29</span>
       
         <br>
         Created:

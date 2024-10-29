@@ -8768,7 +8768,7 @@
 <p>Prerequisite: Know how to use the Janssen CLI in <a href="../../config-tools/jans-cli/">command-line mode</a></p>
 </blockquote>
 <p>Let's get the couchbase database configuration operations details:</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --info DatabaseCouchbaseConfiguration
+<div class="highlight"><pre><span></span><code>jans tui --info DatabaseCouchbaseConfiguration
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>Operation ID: get-config-database-couchbase
   Description: Gets list of existing Couchbase configurations.
@@ -8792,28 +8792,28 @@ Operation ID: post-config-database-couchbase-test
   Description: Tests a Couchbase configuration.
   Schema: /components/schemas/CouchbaseConfiguration
 
-To get sample schema type /opt/jans/jans-cli/config-cli.py --schema &lt;schma&gt;, for example /opt/jans/jans-cli/config-cli.py --schema /components/schemas/CouchbaseConfiguration
+To get sample schema type jans cli --schema &lt;schma&gt;, for example jans cli --schema /components/schemas/CouchbaseConfiguration
 </code></pre></div>
 <h2 id="get-couchbase-database-configuration-details">Get Couchbase Database Configuration details<a class="headerlink" href="#get-couchbase-database-configuration-details" title="Permanent link">#</a></h2>
 <p>To get the database configuration details, run the following command:</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-config-database-couchbase
+<div class="highlight"><pre><span></span><code>jans cli --operation-id get-config-database-couchbase
 </code></pre></div>
 <h2 id="adds-new-database-configurations">Adds new Database Configurations<a class="headerlink" href="#adds-new-database-configurations" title="Permanent link">#</a></h2>
 <p>To add a new couchbase database configuration into the janssen server:</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id post-config-database-couchbase --data data.json
+<div class="highlight"><pre><span></span><code>jans cli --operation-id post-config-database-couchbase --data data.json
 </code></pre></div>
 <h2 id="updatereplace-old-couchbase-database-configurations">Update/Replace old couchbase database configurations<a class="headerlink" href="#updatereplace-old-couchbase-database-configurations" title="Permanent link">#</a></h2>
 <p>To update or replace an couchbase database configuration:</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id put-config-database-couchbase --data data.json
+<div class="highlight"><pre><span></span><code>jans cli --operation-id put-config-database-couchbase --data data.json
 </code></pre></div>
 <h2 id="gets-couchbase-database-configuration-by-its-name">Gets Couchbase Database Configuration by its name<a class="headerlink" href="#gets-couchbase-database-configuration-by-its-name" title="Permanent link">#</a></h2>
 <p>To get the couchbase database configuration by its configId:</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-config-database-couchbase-by-name --url-suffix name:configId-name
+<div class="highlight"><pre><span></span><code>jans cli --operation-id get-config-database-couchbase-by-name --url-suffix name:configId-name
 </code></pre></div>
 <h2 id="delete-couchbase-database-configuration">Delete Couchbase Database Configuration<a class="headerlink" href="#delete-couchbase-database-configuration" title="Permanent link">#</a></h2>
 <p>You can delete the couchbase database configuration by its name.
 The command line is:</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id delete-config-database-couchbase-by-name --url-suffix name:configId-name
+<div class="highlight"><pre><span></span><code>jans cli --operation-id delete-config-database-couchbase-by-name --url-suffix name:configId-name
 </code></pre></div>
 
   <hr>
@@ -8821,7 +8821,7 @@ The command line is:</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-23T08:45:31+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-23</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-29T09:13:16+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-29</span>
       
         <br>
         Created:

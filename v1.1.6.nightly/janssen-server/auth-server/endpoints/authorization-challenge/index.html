@@ -3489,8 +3489,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#device-session" class="md-nav__link">
-    Device session
+  <a href="#auth-session" class="md-nav__link">
+    Auth session
   </a>
   
 </li>
@@ -8715,8 +8715,8 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#device-session" class="md-nav__link">
-    Device session
+  <a href="#auth-session" class="md-nav__link">
+    Auth session
   </a>
   
 </li>
@@ -8799,20 +8799,20 @@
 <h1 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">#</a></h1>
 <p>Authorization Challenge Endpoint allows first-party native client obtain authorization code which later can be exchanged on access token.
 This can provide an entirely browserless OAuth 2.0 experience suited for native applications.</p>
-<p>This endpoint conforms to <a href="https://www.ietf.org/archive/id/draft-parecki-oauth-first-party-native-apps-00.html">OAuth 2.0 for First-Party Native Applications</a> specifications.</p>
+<p>This endpoint conforms to <a href="https://www.ietf.org/archive/id/draft-parecki-oauth-first-party-native-apps-02.html">OAuth 2.0 for First-Party Native Applications</a> specifications.</p>
 <p>URL to access authorization challenge endpoint on Janssen Server is listed in the response of Janssen Server's well-known
 <a href="../configuration/">configuration endpoint</a> given below.</p>
 <div class="highlight"><pre><span></span><code>https://janssen.server.host/jans-auth/.well-known/openid-configuration
 </code></pre></div>
 <p><code>authorization_challenge_endpoint</code> claim in the response specifies the URL for authorization challenge endpoint. By default, authorization 
 challenge endpoint looks like below:</p>
-<div class="highlight"><pre><span></span><code>https://janssen.server.host/jans-auth/restv1/authorization_challenge
+<div class="highlight"><pre><span></span><code>https://janssen.server.host/jans-auth/restv1/authorize-challenge
 </code></pre></div>
 <p>In order to call Authorization Challenge Endpoint client must have <code>authorization_challenge</code> scope. 
 If scope is not present AS rejects call with 401 (unauthorized) http status code. </p>
 <p>Authorization Challenge Endpoint supports Proof Key for Code Exchange (PKCE).</p>
 <p>More information about request and response of the authorization challenge endpoint can be found in the OpenAPI specification 
-of <a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/v1.1.6.nightly/jans-auth-server/docs/swagger.yaml#/Authorization_Challenge">jans-auth-server module</a>.</p>
+of <a href="https://gluu.org/swagger-ui/?url=https://raw.githubusercontent.com/JanssenProject/jans/vreplace-janssen-version/jans-auth-server/docs/swagger.yaml#/authorize-challenge">jans-auth-server module</a>.</p>
 <p>Sample request
 <div class="highlight"><pre><span></span><code>POST /authorize HTTP/1.1
 Host: server.example.com
@@ -8897,16 +8897,16 @@ If all is good script has to return <code>true</code> and it's strongly recommen
 </code></pre></div>
 <p>More details in <a href="../../developer/scripts/authorization-challenge.md">Authorization Challenge Custom Script Page</a>.</p>
 <p>Full sample script can be found <a href="../../../../script-catalog/authorization_challenge/AuthorizationChallenge.java">here</a></p>
-<h2 id="device-session">Device session<a class="headerlink" href="#device-session" title="Permanent link">#</a></h2>
-<p>Device session is optional. AS does not return it by default. 
-It's possible to pass in request <code>use_device_session=true</code> which makes AS return it in error response.
-If it is desired to use <code>device_session</code> and don't pass <code>client_id</code> (or other parameters) in next request, 
-it should be put in attributes of <code>device_session</code> object. 
-<code>device_session</code> object lifetime is set by <code>deviceSessionLifetimeInSeconds</code> AS configuration property. 
-If <code>deviceSessionLifetimeInSeconds</code> is not set then value falls back to <code>86400</code> seconds.</p>
+<h2 id="auth-session">Auth session<a class="headerlink" href="#auth-session" title="Permanent link">#</a></h2>
+<p>Auth session is optional. AS does not return it by default. 
+It's possible to pass in request <code>use_auth_session=true</code> which makes AS return it in error response.
+If it is desired to use <code>auth_session</code> and don't pass <code>client_id</code> (or other parameters) in next request, 
+it should be put in attributes of <code>auth_session</code> object. 
+<code>auth_session</code> object lifetime is set by <code>authorizationChallengeSessionLifetimeInSeconds</code> AS configuration property. 
+If <code>authorizationChallengeSessionLifetimeInSeconds</code> is not set then value falls back to <code>86400</code> seconds.</p>
 <p>Example
 <div class="highlight"><pre><span></span><code><span class="n">String</span><span class="w"> </span><span class="n">clientId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">context</span><span class="p">.</span><span class="na">getHttpRequest</span><span class="p">().</span><span class="na">getParameter</span><span class="p">(</span><span class="s">&quot;client_id&quot;</span><span class="p">);</span><span class="w"></span>
-<span class="n">deviceSessionObject</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">put</span><span class="p">(</span><span class="s">&quot;client_id&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">clientId</span><span class="p">);</span><span class="w"></span>
+<span class="n">authorizationChallengeSessionObject</span><span class="p">.</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">getAttributes</span><span class="p">().</span><span class="na">put</span><span class="p">(</span><span class="s">&quot;client_id&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">clientId</span><span class="p">);</span><span class="w"></span>
 </code></pre></div></p>
 <p>Full sample script can be found <a href="../../../../script-catalog/authorization_challenge/AuthorizationChallenge.java">here</a></p>
 <h2 id="web-session">Web session<a class="headerlink" href="#web-session" title="Permanent link">#</a></h2>
@@ -8929,9 +8929,9 @@ in script and set it into context. Example:</p>
 </code></pre></div>
 <h2 id="multi-step-example">Multi-step example<a class="headerlink" href="#multi-step-example" title="Permanent link">#</a></h2>
 <p>Sometimes it's required to send data sequentially. Step by step. Calls to Authorization Challenge Endpoint must have 
-<code>use_device_session=true</code> parameter to force tracking data between request. </p>
+<code>use_auth_session=true</code> parameter to force tracking data between request. </p>
 <p>Lets consider example when RP first sends <code>username</code> and then in next request <code>OTP</code>.</p>
-<div class="highlight"><pre><span></span><code>POST /jans-auth/restv1/authorization_challenge HTTP/1.1
+<div class="highlight"><pre><span></span><code>POST /jans-auth/restv1/authorize-challenge HTTP/1.1
 Host: server.example.com
 Content-Type: application/x-www-form-urlencoded
 
@@ -8939,24 +8939,24 @@ username=alice
 &amp;scope=photos
 &amp;client_id=bb16c14c73415
 </code></pre></div>
-<p>AS accepts <code>username</code> and returns back error with <code>device_session</code>.</p>
+<p>AS accepts <code>username</code> and returns back error with <code>auth_session</code>.</p>
 <div class="highlight"><pre><span></span><code>HTTP/1.1 401 Unauthorized
 Content-Type: application/json
 Cache-Control: no-store
 
 {
   &quot;error&quot;: &quot;otp_required&quot;,
-  &quot;device_session&quot;: &quot;ce6772f5e07bc8361572f&quot;
+  &quot;auth_session&quot;: &quot;ce6772f5e07bc8361572f&quot;
 }
 </code></pre></div>
-<p>In next call RP can send OTP and <code>device_session</code> (AS matches user from <code>device_session</code>)</p>
-<div class="highlight"><pre><span></span><code>POST /jans-auth/restv1/authorization_challenge HTTP/1.1
+<p>In next call RP can send OTP and <code>auth_session</code> (AS matches user from <code>auth_session</code>)</p>
+<div class="highlight"><pre><span></span><code>POST /jans-auth/restv1/authorize-challenge HTTP/1.1
 Host: server.example.com
 Content-Type: application/x-www-form-urlencoded
 
-otp=ccnnju667d&amp;device_session=ce6772f5e07bc8361572f
+otp=ccnnju667d&amp;auth_session=ce6772f5e07bc8361572f
 </code></pre></div>
-<p>In custom script it's easy to code what data has to be kept in <code>device_session</code>.</p>
+<p>In custom script it's easy to code what data has to be kept in <code>auth_session</code>.</p>
 <div class="highlight"><pre><span></span><code>    private void createError(ExternalScriptContext context, String errorCode) {
         String deviceSessionPart = prepareDeviceSessionSubJson(context);
 
@@ -8965,51 +8965,51 @@ otp=ccnnju667d&amp;device_session=ce6772f5e07bc8361572f
     }
 
     private String prepareDeviceSessionSubJson(ExternalScriptContext context) {
-        DeviceSession deviceSessionObject = context.getAuthzRequest().getDeviceSessionObject();
-        if (deviceSessionObject != null) {
-            prepareDeviceSession(context, deviceSessionObject);
-            return String.format(&quot;,\&quot;device_session\&quot;:\&quot;%s\&quot;&quot;, deviceSessionObject.getId());
+        DeviceSession authorizationChallengeSessionObject = context.getAuthzRequest().getDeviceSessionObject();
+        if (authorizationChallengeSessionObject != null) {
+            prepareDeviceSession(context, authorizationChallengeSessionObject);
+            return String.format(&quot;,\&quot;auth_session\&quot;:\&quot;%s\&quot;&quot;, authorizationChallengeSessionObject.getId());
         } else if (context.getAuthzRequest().isUseDeviceSession()) {
-            deviceSessionObject = prepareDeviceSession(context, null);
-            return String.format(&quot;,\&quot;device_session\&quot;:\&quot;%s\&quot;&quot;, deviceSessionObject.getId());
+            authorizationChallengeSessionObject = prepareDeviceSession(context, null);
+            return String.format(&quot;,\&quot;auth_session\&quot;:\&quot;%s\&quot;&quot;, authorizationChallengeSessionObject.getId());
         }
         return &quot;&quot;;
     }
 
-    private DeviceSession prepareDeviceSession(ExternalScriptContext context, DeviceSession deviceSessionObject) {
+    private DeviceSession prepareDeviceSession(ExternalScriptContext context, DeviceSession authorizationChallengeSessionObject) {
         DeviceSessionService deviceSessionService = CdiUtil.bean(DeviceSessionService.class);
-        boolean newSave = deviceSessionObject == null;
+        boolean newSave = authorizationChallengeSessionObject == null;
         if (newSave) {
-            deviceSessionObject = deviceSessionService.newDeviceSession();
+            authorizationChallengeSessionObject = deviceSessionService.newDeviceSession();
         }
 
         String username = context.getHttpRequest().getParameter(USERNAME_PARAMETER);
         if (StringUtils.isNotBlank(username)) {
-            deviceSessionObject.getAttributes().getAttributes().put(USERNAME_PARAMETER, username);
+            authorizationChallengeSessionObject.getAttributes().getAttributes().put(USERNAME_PARAMETER, username);
         }
 
         String otp = context.getHttpRequest().getParameter(OTP_PARAMETER);
         if (StringUtils.isNotBlank(otp)) {
-            deviceSessionObject.getAttributes().getAttributes().put(OTP_PARAMETER, otp);
+            authorizationChallengeSessionObject.getAttributes().getAttributes().put(OTP_PARAMETER, otp);
         }
 
         String clientId = context.getHttpRequest().getParameter(&quot;client_id&quot;);
         if (StringUtils.isNotBlank(clientId)) {
-            deviceSessionObject.getAttributes().getAttributes().put(&quot;client_id&quot;, clientId);
+            authorizationChallengeSessionObject.getAttributes().getAttributes().put(&quot;client_id&quot;, clientId);
         }
 
         String acrValues = context.getHttpRequest().getParameter(&quot;acr_values&quot;);
         if (StringUtils.isNotBlank(acrValues)) {
-            deviceSessionObject.getAttributes().getAttributes().put(&quot;acr_values&quot;, acrValues);
+            authorizationChallengeSessionObject.getAttributes().getAttributes().put(&quot;acr_values&quot;, acrValues);
         }
 
         if (newSave) {
-            deviceSessionService.persist(deviceSessionObject);
+            deviceSessionService.persist(authorizationChallengeSessionObject);
         } else {
-            deviceSessionService.merge(deviceSessionObject);
+            deviceSessionService.merge(authorizationChallengeSessionObject);
         }
 
-        return deviceSessionObject;
+        return authorizationChallengeSessionObject;
     }
 </code></pre></div>
 <p>More details in <a href="../../developer/scripts/authorization-challenge.md">Authorization Challenge Custom Script Page</a>.</p>
@@ -9066,7 +9066,7 @@ X-Xss-Protection: 1; mode=block
   &quot;grant_types_supported&quot; : [ &quot;client_credentials&quot;, &quot;urn:ietf:params:oauth:grant-type:uma-ticket&quot;, &quot;urn:ietf:params:oauth:grant-type:device_code&quot;, &quot;urn:ietf:params:oauth:grant-type:token-exchange&quot;, &quot;implicit&quot;, &quot;authorization_code&quot;, &quot;password&quot;, &quot;refresh_token&quot; ],
   &quot;ui_locales_supported&quot; : [ &quot;en&quot;, &quot;bg&quot;, &quot;de&quot;, &quot;es&quot;, &quot;fr&quot;, &quot;it&quot;, &quot;ru&quot;, &quot;tr&quot; ],
   &quot;userinfo_endpoint&quot; : &quot;https://yuriyz-fond-skink.gluu.info/jans-auth/restv1/userinfo&quot;,
-  &quot;authorization_challenge_endpoint&quot; : &quot;https://yuriyz-fond-skink.gluu.info/jans-auth/restv1/authorization_challenge&quot;,
+  &quot;authorization_challenge_endpoint&quot; : &quot;https://yuriyz-fond-skink.gluu.info/jans-auth/restv1/authorize-challenge&quot;,
   &quot;op_tos_uri&quot; : &quot;https://yuriyz-fond-skink.gluu.info/tos&quot;,
   &quot;require_request_uri_registration&quot; : false,
   &quot;id_token_encryption_alg_values_supported&quot; : [ &quot;RSA1_5&quot;, &quot;RSA-OAEP&quot;, &quot;A128KW&quot;, &quot;A256KW&quot; ],
@@ -9191,7 +9191,7 @@ X-Xss-Protection: 1; mode=block
 -------------------------------------------------------
 REQUEST:
 -------------------------------------------------------
-POST /jans-auth/restv1/authorization_challenge HTTP/1.1
+POST /jans-auth/restv1/authorize-challenge HTTP/1.1
 Host: yuriyz-fond-skink.gluu.info
 
 client_id=999e13b8-f4a2-4fed-ad3c-6c88bd2c92ea&amp;scope=openid+profile+address+email+phone+user_name&amp;state=b4a41b29-51c8-4354-9c8c-fda38b4dbd43&amp;nonce=3a56f8d0-f78e-4b15-857c-3e792801be68&amp;prompt=&amp;ui_locales=&amp;claims_locales=&amp;acr_values=&amp;request_session_id=false&amp;password=secret&amp;username=admin
@@ -9355,7 +9355,7 @@ X-Xss-Protection: 1; mode=block
   &quot;grant_types_supported&quot; : [ &quot;client_credentials&quot;, &quot;urn:ietf:params:oauth:grant-type:uma-ticket&quot;, &quot;urn:ietf:params:oauth:grant-type:device_code&quot;, &quot;urn:ietf:params:oauth:grant-type:token-exchange&quot;, &quot;implicit&quot;, &quot;authorization_code&quot;, &quot;password&quot;, &quot;refresh_token&quot; ],
   &quot;ui_locales_supported&quot; : [ &quot;en&quot;, &quot;bg&quot;, &quot;de&quot;, &quot;es&quot;, &quot;fr&quot;, &quot;it&quot;, &quot;ru&quot;, &quot;tr&quot; ],
   &quot;userinfo_endpoint&quot; : &quot;https://yuriyz-fond-skink.gluu.info/jans-auth/restv1/userinfo&quot;,
-  &quot;authorization_challenge_endpoint&quot; : &quot;https://yuriyz-fond-skink.gluu.info/jans-auth/restv1/authorization_challenge&quot;,
+  &quot;authorization_challenge_endpoint&quot; : &quot;https://yuriyz-fond-skink.gluu.info/jans-auth/restv1/authorize-challenge&quot;,
   &quot;op_tos_uri&quot; : &quot;https://yuriyz-fond-skink.gluu.info/tos&quot;,
   &quot;require_request_uri_registration&quot; : false,
   &quot;id_token_encryption_alg_values_supported&quot; : [ &quot;RSA1_5&quot;, &quot;RSA-OAEP&quot;, &quot;A128KW&quot;, &quot;A256KW&quot; ],
@@ -9480,7 +9480,7 @@ X-Xss-Protection: 1; mode=block
 -------------------------------------------------------
 REQUEST:
 -------------------------------------------------------
-POST /jans-auth/restv1/authorization_challenge HTTP/1.1
+POST /jans-auth/restv1/authorize-challenge HTTP/1.1
 Host: yuriyz-fond-skink.gluu.info
 
 client_id=d93a5129-1546-4b9b-bf8c-ea19e36ea2c8&amp;scope=openid+profile+address+email+phone+user_name&amp;state=4f925a8d-287a-4cba-a174-04d2e56109df&amp;nonce=84c9b6dd-635c-4ca4-bba1-35c53c51a339&amp;prompt=&amp;ui_locales=&amp;claims_locales=&amp;acr_values=&amp;request_session_id=false&amp;password=secret&amp;username=invalidUser
@@ -9510,7 +9510,7 @@ X-Xss-Protection: 1; mode=block
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-09-27T12:12:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-29T13:14:25+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-29</span>
       
         <br>
         Created:

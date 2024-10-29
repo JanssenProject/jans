@@ -8791,7 +8791,9 @@
 </tbody>
 </table>
 <h2 id="configuration-management-using-cli">Configuration management using CLI<a class="headerlink" href="#configuration-management-using-cli" title="Permanent link">#</a></h2>
-<p>To retrieve the current server configuration run the command <code>python3 /opt/jans/jans-cli/config-cli.py --operation-id get-scim-config</code></p>
+<p>To retrieve the current server configuration run the command 
+<div class="highlight"><pre><span></span><code>python3 jans cli --operation-id get-scim-config
+</code></pre></div></p>
 <p>To modify some aspect of the retrieved configuration prepare a PATCH request in JSON format. For instance:</p>
 <div class="highlight"><span class="filename">PATCH</span><pre><span></span><code><span class="p">[</span><span class="w"></span>
 <span class="p">{</span><span class="w"> </span>
@@ -8806,7 +8808,9 @@
 <span class="p">}</span><span class="w"></span>
 <span class="p">]</span><span class="w"></span>
 </code></pre></div>
-<p>These contents should be then passed to the <code>patch-scim-config</code> operation, e.g. <code>python3 /opt/jans/jans-cli/config-cli.py --operation-id patch-scim-config --data &lt;path-to-JSON-file&gt;</code>.</p>
+<p>These contents should be then passed to the <code>patch-scim-config</code> operation, e.g. </p>
+<div class="highlight"><pre><span></span><code>python3 jans cli --operation-id patch-scim-config --data &lt;path-to-JSON-file&gt;
+</code></pre></div>
 <h2 id="configuration-management-using-tui">Configuration management using TUI<a class="headerlink" href="#configuration-management-using-tui" title="Permanent link">#</a></h2>
 <p>To retrieve the current server configuration using TUI proceed as below:</p>
 <ol>
@@ -8826,7 +8830,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-28T05:09:15+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-28</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-29T09:13:16+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-29</span>
       
         <br>
         Created:

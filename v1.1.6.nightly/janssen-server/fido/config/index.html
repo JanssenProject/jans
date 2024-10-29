@@ -8987,7 +8987,7 @@
 <h3 id="configuring-the-fido2-server">Configuring the FIDO2 server:<a class="headerlink" href="#configuring-the-fido2-server" title="Permanent link">#</a></h3>
 <h4 id="1-read-configuration-parameters">1. Read Configuration parameters:<a class="headerlink" href="#1-read-configuration-parameters" title="Permanent link">#</a></h4>
 <p>Use the following command to obtain configuration parameters:</p>
-<p><code>/opt/jans/jans-cli/config-cli.py --operation-id get-properties-fido2</code></p>
+<p><code>jans cli --operation-id get-properties-fido2</code></p>
 <p>Response:
 <div class="highlight"><pre><span></span><code>{
   &quot;issuer&quot;: &quot;https://my.jans.server&quot;,
@@ -9040,12 +9040,12 @@
 <p>Steps:
   A. Create a JSON file say <code>/tmp/config_values.json</code> by editing the JSON from Point 1
   B. Use the following command
-  <code>/opt/jans/jans-cli/config-cli.py --operation-id post-config-scripts --data /tmp/config_values.json</code></p>
+  <code>jans cli --operation-id post-config-scripts --data /tmp/config_values.json</code></p>
 <h4 id="3-change-log-level-of-fido2-server">3. Change log level of FIDO2 server<a class="headerlink" href="#3-change-log-level-of-fido2-server" title="Permanent link">#</a></h4>
 <p>Steps:
   A. Create a JSON file say <code>/tmp/config_values.json</code> by editing the JSON from Point 1. Edit <code>loggingLevel</code> to <code>TRACE</code> or <code>DEBUG</code> or <code>INFO</code>
   B. Use the following command
-    <code>/opt/jans/jans-cli/config-cli.py --operation-id put-properties-fido --data /tmp/config_values.json</code></p>
+    <code>jans cli --operation-id put-properties-fido --data /tmp/config_values.json</code></p>
 <h4 id="4-locating-fido2-configuration-in-persistence-layer">4. Locating FIDO2 configuration in Persistence Layer<a class="headerlink" href="#4-locating-fido2-configuration-in-persistence-layer" title="Permanent link">#</a></h4>
 <p>While it is not recommended that an administrator directly edits a configuration at the persistence layer, it may be useful information for a developer.</p>
 <h5 id="mysql">MySQL<a class="headerlink" href="#mysql" title="Permanent link">#</a></h5>
@@ -9061,7 +9061,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-28T09:05:20+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-28</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-29T09:13:16+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-29</span>
       
         <br>
         Created:

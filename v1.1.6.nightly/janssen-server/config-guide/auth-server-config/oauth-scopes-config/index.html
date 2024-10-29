@@ -8900,7 +8900,7 @@ Postman. Learn how to use Janssen Server Config API
 command line. To get the details of Janssen command line operations relevant to
 OAuth Scope, you can check the operations under the <code>OauthScopes</code> task using the
 command below.</p>
-<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --info OauthScopes
+<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --info OauthScopes
 </code></pre></div>
 <div class="highlight"><span class="filename">Sample Output</span><pre><span></span><code>Operation ID: get-oauth-scopes
   Description: Gets list of Scopes
@@ -8942,13 +8942,13 @@ Operation ID: get-scope-by-type
   Parameters:
   type: Type of the scope [string]
 
-To get sample schema type /opt/jans/jans-cli/config-cli.py --schema-sample &lt;schema&gt;, for example /opt/jans/jans-cli/config-cli.py --schema-sample JsonPatch
+To get sample schema type jans cli --schema-sample &lt;schema&gt;, for example jans cli --schema-sample JsonPatch
 </code></pre></div></p>
 <h3 id="findview-oauth-scopes">Find/View OAuth Scopes<a class="headerlink" href="#findview-oauth-scopes" title="Permanent link">#</a></h3>
 <p>Use the operation ID <code>get-oauth-scopes</code> to find and view the current scopes. Let's retrieve 3 scopes that
 contain <code>view</code> in the description and <code>openid</code> as the Type.</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code> /opt/jans/jans-cli/config-cli.py --operation-id get-oauth-scopes <span class="se">\</span>
---endpoint-args limit:3,pattern:view,type:openid
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code> jans cli --operation-id get-oauth-scopes <span class="se">\</span>
+ --endpoint-args limit:3,pattern:view,type:openid
 </code></pre></div>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
@@ -9110,11 +9110,11 @@ contain <code>view</code> in the description and <code>openid</code> as the Type
 <p>To create a new scope, we can use <code>post-oauth-scopes</code> operation id. As shown in the <a href="#using-command-line">output</a>
 for <code>--info</code> command, the <code>post-oauth-scopes</code> operation requires data to be sent according to <code>Scope</code> schema.</p>
 <p>To see the schema, use the command below:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --schema Scope
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --schema Scope
 </code></pre></div>
 <p>For better understanding, the Janssen Server also provides an sample of data to be sent to the server. 
 This sample conforms to the schema above. Use the command below to get the sample.</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --schema-sample Scope
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --schema-sample Scope
 </code></pre></div>
 <p>Using the schema and the example above, we have added below key data to the file <code>/tmp/scope.json</code></p>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Input</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -9156,7 +9156,7 @@ This sample conforms to the schema above. Use the command below to get the sampl
 <span class="p">}</span><span class="w"></span>
 </code></pre></div></td></tr></table></div>
 <p>Now let's post this scope to the Janssen Server to be added to the existing set:</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code> /opt/jans/jans-cli/config-cli.py --operation-id post-oauth-scopes <span class="se">\</span>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code> jans cli --operation-id post-oauth-scopes <span class="se">\</span>
  --data /tmp/scope.json 
 </code></pre></div>
 <h3 id="update-existing-oauth-scopes">Update Existing OAuth Scopes<a class="headerlink" href="#update-existing-oauth-scopes" title="Permanent link">#</a></h3>
@@ -9165,7 +9165,7 @@ This sample conforms to the schema above. Use the command below to get the sampl
 <li>
 <p><a href="#find-oauth-scopes-by-inum">Get the existing OAuth Scope</a> and store it into a file for editing.
   The following command will retrieve the existing OAuth Scope in the schema file.
-  <div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py -no-color --operation-id get-oauth-scopes-by-inum <span class="se">\</span>
+  <div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>jans cli -no-color --operation-id get-oauth-scopes-by-inum <span class="se">\</span>
 --url-suffix inum:8eb2b0c0-d1d9-453d-8364-e2809ce857f2 &gt; /tmp/scopdata.json
 </code></pre></div></p>
 </li>
@@ -9177,8 +9177,7 @@ This sample conforms to the schema above. Use the command below to get the sampl
 <li>
 <p>We have changed only the <code>scopeType</code> to <code>dynamic</code> in existing OAuth Scope.
    Use the updated file to send the update to the Janssen Server using the command below
-   <div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id put-oauth-scopes <span class="se">\</span>
---data /tmp/scope.json
+   <div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id put-oauth-scopes --data /tmp/scope.json
 </code></pre></div>
 This will updated the existing oauth scopes matched with inum value.</p>
 </li>
@@ -9195,7 +9194,7 @@ Remember when we queried info for the task <strong>OAuthScopes</strong> it print
 The <code>patch-oauth-scopes-by-id</code> operation uses the <a href="https://jsonpatch.com/#the-patch">JSON Patch</a> schema to describe 
 the configuration change. Refer <a href="../../config-tools/jans-cli/#patch-request-schema">here</a> 
 to know more about schema.</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --schema JsonPatch &gt; /tmp/patch.json
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --schema JsonPatch &gt; /tmp/patch.json
 </code></pre></div>
 <p>For instance, to perform a <code>replace</code> operation at <code>iconUrl</code> 
 and change it from <code>null</code> to <code>https://www.jans.io/icon.png</code>, 
@@ -9210,7 +9209,7 @@ the JSON Patch data would look like below:</p>
 </code></pre></div>
 Store the above JSON Patch data in a file, for instance, <code>/tmp/patch.json</code></p>
 <p>Let's do the operation:
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id patch-oauth-scopes-by-id <span class="se">\</span>
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id patch-oauth-scopes-by-id <span class="se">\</span>
 --url-suffix inum:8eb2b0c0-d1d9-453d-8364-e2809ce857f2 --data /tmp/patch.json 
 </code></pre></div></p>
 <div class="highlight"><table class="highlighttable"><tr><th colspan="2" class="filename"><span class="filename">Sample Output</span></th></tr><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
@@ -9254,11 +9253,10 @@ Store the above JSON Patch data in a file, for instance, <code>/tmp/patch.json</
   withAssociatedClients: No description is provided for this parameter [boolean]
 </code></pre></div>
 <p>We can use the <code>url-suffix</code> for the <code>inum</code> value.
-<div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-oauth-scopes-by-inum <span class="se">\</span>
---url-suffix inum:value
+<div class="highlight"><span class="filename">Sample Command</span><pre><span></span><code>jans cli --operation-id get-oauth-scopes-by-inum --url-suffix inum:value
 </code></pre></div></p>
 <p>For example:</p>
-<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-oauth-scopes-by-inum <span class="se">\</span>
+<p><div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id get-oauth-scopes-by-inum <span class="se">\</span>
 --url-suffix inum:8eb2b0c0-d1d9-453d-8364-e2809ce857f2
 </code></pre></div>
 It returns the details of the scope matched with the <code>inum</code> value.</p>
@@ -9296,7 +9294,8 @@ It returns the details of the scope matched with the <code>inum</code> value.</p
 </code></pre></div></td></tr></table></div>
 <h3 id="delete-oauth-scopes-by-inum">Delete OAuth Scopes by <code>inum</code><a class="headerlink" href="#delete-oauth-scopes-by-inum" title="Permanent link">#</a></h3>
 <p>You can delete any OAuth Scopes by its <code>inum</code> value.</p>
-<div class="highlight"><span class="filename">Command</span><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id delete-oauth-scopes-by-inum --url-suffix inum:8eb2b0c0-d1d9-453d-8364-e2809ce857f2
+<div class="highlight"><span class="filename">Command</span><pre><span></span><code>jans cli --operation-id delete-oauth-scopes-by-inum <span class="se">\</span>
+--url-suffix inum:8eb2b0c0-d1d9-453d-8364-e2809ce857f2
 </code></pre></div>
 <p>Just change the <code>inum</code> value to your own according to which one you want to delete.</p>
 <h2 id="using-text-based-ui">Using Text-based UI<a class="headerlink" href="#using-text-based-ui" title="Permanent link">#</a></h2>
@@ -9328,7 +9327,7 @@ document</a>.</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-10T06:11:59+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-10</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-29T09:13:16+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-29</span>
       
         <br>
         Created:

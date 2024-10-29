@@ -8821,7 +8821,7 @@
 </blockquote>
 <p>Interception scripts can be used to implement custom business logic for authentication, authorization, and more in a way that is upgrade-proof and doesn't require forking the Gluu Server code. Using Janssen CLI, we can manage custom scripts as well.</p>
 <p>Let's get the task information using below command:</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --info CustomScripts
+<div class="highlight"><pre><span></span><code>jans cli --info CustomScripts
 </code></pre></div>
 <p>In return we gets each of the sub-task details:</p>
 <div class="highlight"><pre><span></span><code>Operation ID: get-config-scripts
@@ -8842,13 +8842,13 @@ Operation ID: delete-config-scripts-by-inum
   Description: Deletes a custom script.
   url-suffix: inum
 
-To get sample schema type /opt/jans/jans-cli/config-cli.py --schema &lt;schma&gt;, for example /opt/jans/jans-cli/config-cli.py --schema CustomScript
+To get sample schema type jans cli --schema &lt;schma&gt;, for example jans cli --schema CustomScript
 </code></pre></div>
 <p>Let's perform each of this operation.</p>
 <h2 id="find-list-of-custom-scripts">Find list of Custom scripts<a class="headerlink" href="#find-list-of-custom-scripts" title="Permanent link">#</a></h2>
 <p><code>get-config-scripts</code> operation id can be used to get a list of custom scripts of the Janssen Server.</p>
 <p>The command line is:</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts
+<div class="highlight"><pre><span></span><code>jans cli --operation-id get-config-scripts
 </code></pre></div>
 <p>It returns all the custom scripts of the Janssen Server. </p>
 <h2 id="adds-a-new-custom-script">Adds a New Custom Script<a class="headerlink" href="#adds-a-new-custom-script" title="Permanent link">#</a></h2>
@@ -8858,7 +8858,7 @@ To get sample schema type /opt/jans/jans-cli/config-cli.py --schema &lt;schma&gt
   Schema: /components/schemas/CustomScript
 </code></pre></div>
 <p>So, let's get the schema first:</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py CustomScript &gt; /tmp/cs.json
+<div class="highlight"><pre><span></span><code>jans cli CustomScript &gt; /tmp/cs.json
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>{
   &quot;dn&quot;: null,
@@ -8920,7 +8920,7 @@ We can remove <code>dn</code>, <code>inum</code>. As because these two items are
 <h3 id="programming-language">Programming Language<a class="headerlink" href="#programming-language" title="Permanent link">#</a></h3>
 <p>Two types of programming language available there. Those are <code>Python</code> and <code>JavaScript</code>. We can choose any of them regarding the script we need to add.</p>
 <p>Alright, let's add the script using the command line we have:</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id post-config-scripts --data /tmp/cs.json
+<div class="highlight"><pre><span></span><code>jans cli --operation-id post-config-scripts --data /tmp/cs.json
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>Getting access token for scope https://jans.io/oauth/config/scripts.write
 Server Response:
@@ -8985,7 +8985,7 @@ As we created a custom script in the <a href="./#adds-a-new-custom-script">above
 }
 </code></pre></div>
 <p>You can see, I have added <code>configurationProperties</code> for testing purpose only. In case you need to change the script, you can do that by changing the <code>script</code> path as well.</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id put-config-scripts --data /tmp/cs.json
+<div class="highlight"><pre><span></span><code>jans cli --operation-id put-config-scripts --data /tmp/cs.json
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>Getting access token for scope https://jans.io/oauth/config/scripts.write
 Server Response:
@@ -9028,10 +9028,10 @@ Server Response:
   url-suffix: type
 </code></pre></div>
 <p>The command line is:
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts-by-type --url-suffix type:script-type-name
+<div class="highlight"><pre><span></span><code>jans cli --operation-id get-config-scripts-by-type --url-suffix type:script-type-name
 </code></pre></div></p>
 <p>For an example, let's find all the scripts of <code>CLIENT_REGISTRATION</code> type. So, the command line is:</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts-by-type --url-suffix type:CLIENT_REGISTRATION
+<div class="highlight"><pre><span></span><code>jans cli --operation-id get-config-scripts-by-type --url-suffix type:CLIENT_REGISTRATION
 </code></pre></div>
 <p>It returns all the custom scripts that are related to the <code>CLIENT_REGISTRATION</code> type available in the Janssen Server. You will find the name of all the types <a href="./#name-of-the-type-of-scripts">here</a></p>
 <h2 id="get-custom-scripts-by-its-inum">Get Custom Scripts by it's <code>inum</code><a class="headerlink" href="#get-custom-scripts-by-its-inum" title="Permanent link">#</a></h2>
@@ -9041,11 +9041,11 @@ Server Response:
   url-suffix: inum
 </code></pre></div>
 <p>command line:</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts-by-inum --url-suffix inum:inum_value
+<div class="highlight"><pre><span></span><code>jans cli --operation-id get-config-scripts-by-inum --url-suffix inum:inum_value
 </code></pre></div>
 <p>For example, we can show details here that we already added in the Janssen Server and we know it's <code>inum</code> value is <code>61aef81b-b22d-42c0-89d5-b098c976a2b7</code>.</p>
 <p>In our case, the command line is:</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id get-config-scripts-by-inum --url-suffix inum:61aef81b-b22d-42c0-89d5-b098c976a2b7
+<div class="highlight"><pre><span></span><code>jans cli --operation-id get-config-scripts-by-inum --url-suffix inum:61aef81b-b22d-42c0-89d5-b098c976a2b7
 </code></pre></div>
 <p>It returns the configuration of the custom script matched with the given <code>inum</code> value.</p>
 <div class="highlight"><pre><span></span><code>Getting access token for scope https://jans.io/oauth/config/scripts.readonly
@@ -9084,10 +9084,10 @@ Server Response:
 <h2 id="how-to-delete-custom-script">How to delete Custom Script?<a class="headerlink" href="#how-to-delete-custom-script" title="Permanent link">#</a></h2>
 <p>Well, we can delete any custom script also in deed. In that case, we need to remember the <code>inum</code> value of the custom script we want to delete. In the above we <a href="./#adds-a-new-custom-script">added</a>, <a href="./#update-an-existing-custom-script">updated</a> a custom script. We know the <code>inum</code> value, so let's delete this one.</p>
 <p>Command line: </p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id delete-config-scripts-by-inum --url-suffix inum:inum_value
+<div class="highlight"><pre><span></span><code>jans cli --operation-id delete-config-scripts-by-inum --url-suffix inum:inum_value
 </code></pre></div>
 <p>For example, in our case; the command line is:</p>
-<div class="highlight"><pre><span></span><code>/opt/jans/jans-cli/config-cli.py --operation-id delete-config-scripts-by-inum --url-suffix inum:61aef81b-b22d-42c0-89d5-b098c976a2b7
+<div class="highlight"><pre><span></span><code>jans cli --operation-id delete-config-scripts-by-inum --url-suffix inum:61aef81b-b22d-42c0-89d5-b098c976a2b7
 </code></pre></div>
 <p>That's all for <code>Custom Script</code> management with <code>CLI</code> feature.</p>
 <div class="admonition note">
@@ -9100,7 +9100,7 @@ Server Response:
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-09-27T12:12:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-29T09:13:16+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-29</span>
       
         <br>
         Created:
