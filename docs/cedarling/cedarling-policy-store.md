@@ -43,7 +43,7 @@ The `cedar_policies` field outlines the Cedar policies that will be used in Ceda
 
 ```json
   "cedar_policies": {
-    "a_unique_policy_id": {
+    "unique_policy_id": {
       "description": "simple policy example",
       "creation_date": "2024-09-20T17:22:39.996050",
       "policy_content": "cGVybWl0KAogICAgc..."
@@ -75,11 +75,6 @@ Here is a non-normative example of the `cedar_policies` field:
     ...
   }
 ```
-- **policystore_id** : (String, no spaces) The unique identifier for the policy store.
-- **policies** : (Json) Json object containing one or more policy_id as key and policy object as value
-- **schema** : (String) Base64 encoded cedar schema
-- **trusted_issuers** : (List) List of Trusted Issuer metadata
-- **cedar_version** : (String) The version of [Cedar policy](https://docs.cedarpolicy.com/). The protocols of this version will be followed when processing Cedar schema and policies.
 
 ## Trusted Issuer Schema
 
