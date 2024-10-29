@@ -1,0 +1,144 @@
+#!/usr/bin/env python3
+
+import sys
+
+if '--version' in sys.argv:
+    print("3.10.0")
+    sys.exit()
+
+import os
+import time
+import json
+import shutil
+import socket
+import fcntl
+import struct
+
+disk = os.environ.get('SNAP_COMMON', '/')
+
+try:
+    loadavg = os. getloadavg()
+except:
+    loadavg = (0,0,0)
+
+try:
+    du=shutil.disk_usage(disk)
+    free_disk_space = '{}%'.format(round((du.free/du.total) * 100, 1))
+except:
+    free_disk_space = '0%'
+
+swapsize = 1
+swapfree = 0
+memoryfree = 0
+memorysize = 1
+uptime = 0
+ip_addr = ''
+hostname = ''
+
+try:
+    with open('/proc/meminfo') as f:
+        for l in f:
+            if l.startswith('SwapTotal'):
+                swapsize = int(l.split(':')[1].split()[0]) / 1024.0
+            elif l.startswith('SwapFree'):
+                swapfree = int(l.split(':')[1].split()[0]) / 1024.0
+            elif l.startswith('MemTotal'):
+                memorysize = int(l.split(':')[1].split()[0]) / 1024.0
+            elif l.startswith('MemAvailable'):
+                memoryfree = int(l.split(':')[1].split()[0]) / 1024.0
+except:
+    pass
+
+try:
+    with open('/proc/uptime') as f:
+        uptime = int(float(f.read().strip().split()[0]))
+except:
+    pass
+
+try:
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    sock.connect(("8.8.8.8", 80))
+    ip_addr = sock.getsockname()[0]
+    sock.close()
+except:
+    try:
+        net_if_list = socket.if_nameindex()
+
+        for netif in net_if_list[:]:
+            if netif[0] == 'lo':
+                net_if_list
+        for netif in net_if_list:
+            if netif[1].startswith('enp') or netif[1].startswith('eth'):
+                iface = netif[1]
+                break
+        else:
+            net_if_list.sort()
+            iface = net_if_list[0][1]    
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        sockfd = sock.fileno()
+        SIOCGIFADDR = 0x8915
+        ifreq = struct.pack(b'16sH14s', iface.encode(), socket.AF_INET, b'\x00'*14)
+        res = fcntl.ioctl(sockfd, SIOCGIFADDR, ifreq) 
+        ip = struct.unpack('16sH2x4s8x', res)[2]
+        ip_addr = socket.inet_ntoa(ip)
+        sock.close()
+    except:
+        pass
+
+try:
+    hostname = socket.gethostbyaddr(ip_addr)[0]
+except:
+    try:
+        hostname = socket.gethostname()
+    except:
+        pass
+
+if swapsize == 0:
+    swapsize = 1
+
+memfree_p = '{}%' .format(round((memoryfree/memorysize)*100, 1))
+swapfree_p = '{}%'.format(round((swapfree/swapsize)*100, 1))
+
+d, h = divmod(uptime, 86400)
+h, m = divmod(h, 3600)
+m, s = divmod(m, 60)
+
+if not d:
+    day_s = ''
+elif d == 1:
+    day_s = '1 day, '
+else:
+    day_s = '{} days, '.format(d)
+
+uptime_s = '{}{}:{:02d}'.format(day_s, h, m, s)
+
+if '-j' in sys.argv:
+    data = {
+        'memoryfree' : memfree_p,
+        'swapfree':  swapfree_p,
+        'hostname': hostname,
+        'ipaddress':ip_addr,
+        'uptime': uptime_s,
+        'free_disk_space': free_disk_space,
+        'load_average': loadavg[2],
+        }
+
+    print(json.dumps(data, indent=2))
+
+else:
+    data = '''memoryfree => {0}
+swapfree => {1}
+hostname => {2}
+ipaddress => {3}
+uptime => {4}
+free_disk_space => {5}
+load_average => {6}'''.format(
+    memfree_p,
+    swapfree_p,
+    hostname,
+    ip_addr,
+    uptime_s,
+    free_disk_space,
+    loadavg[2],
+)
+    print(data)

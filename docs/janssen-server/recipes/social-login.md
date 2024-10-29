@@ -41,9 +41,9 @@ Jans AS->User agent: 10. write Jans session cookie
 
 ### User provisioning
 
-After a user has logged in at an external provider a new record is added in local LDAP - or updated if the user is known.
+After a user has logged in at an external provider a new record is added in local database - or updated if the user is known.
 
-To determine if a user was already added, a string is composed with the provider name and the user ID. For example, if user "MrBrown123" has logged in at Twitter, the string would look like `passport-twitter:mrbrown123`. An LDAP search is performed for a match in the people branch for an entry where attribute `jansExtUid` equals `passport-twitter:mrbrown123`.
+To determine if a user was already added, a string is composed with the provider name and the user ID. For example, if user "MrBrown123" has logged in at Twitter, the string would look like `passport-twitter:mrbrown123`. A database search is performed for a match in the people branch for an entry where attribute `jansExtUid` equals `passport-twitter:mrbrown123`.
 
 If there are no matches, an entry is added using the values received from the external provider (after having applied the corresponding attribute mapping) attaching the computed value for `jansExtUid`. The user profile can contain single or multivalued attributes.
 
