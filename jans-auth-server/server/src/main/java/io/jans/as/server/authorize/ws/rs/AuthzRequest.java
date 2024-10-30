@@ -3,7 +3,7 @@ package io.jans.as.server.authorize.ws.rs;
 import com.google.common.collect.Sets;
 import io.jans.as.model.authzdetails.AuthzDetails;
 import io.jans.as.common.model.registration.Client;
-import io.jans.as.common.model.session.DeviceSession;
+import io.jans.as.common.model.session.AuthorizationChallengeSession;
 import io.jans.as.model.common.Prompt;
 import io.jans.as.model.common.ResponseMode;
 import io.jans.as.model.common.ResponseType;
@@ -58,9 +58,9 @@ public class AuthzRequest {
     private String authzDetailsString;
     private AuthzDetails authzDetails;
     private String httpMethod;
-    private String deviceSession;
-    private DeviceSession deviceSessionObject;
-    private boolean useDeviceSession;
+    private String authorizationChallengeSession;
+    private AuthorizationChallengeSession authorizationChallengeSessionObject;
+    private boolean useAuthorizationChallengeSession;
     private HttpServletRequest httpRequest;
     private HttpServletResponse httpResponse;
     private SecurityContext securityContext;
@@ -95,28 +95,28 @@ public class AuthzRequest {
         this.dpopJkt = dpopJkt;
     }
 
-    public DeviceSession getDeviceSessionObject() {
-        return deviceSessionObject;
+    public AuthorizationChallengeSession getAuthorizationChallengeSessionObject() {
+        return authorizationChallengeSessionObject;
     }
 
-    public void setDeviceSessionObject(DeviceSession deviceSessionObject) {
-        this.deviceSessionObject = deviceSessionObject;
+    public void setAuthorizationChallengeSessionObject(AuthorizationChallengeSession authorizationChallengeSessionObject) {
+        this.authorizationChallengeSessionObject = authorizationChallengeSessionObject;
     }
 
-    public boolean isUseDeviceSession() {
-        return useDeviceSession;
+    public boolean isUseAuthorizationChallengeSession() {
+        return useAuthorizationChallengeSession;
     }
 
-    public void setUseDeviceSession(boolean useDeviceSession) {
-        this.useDeviceSession = useDeviceSession;
+    public void setUseAuthorizationChallengeSession(boolean useAuthorizationChallengeSession) {
+        this.useAuthorizationChallengeSession = useAuthorizationChallengeSession;
     }
 
-    public String getDeviceSession() {
-        return deviceSession;
+    public String getAuthorizationChallengeSession() {
+        return authorizationChallengeSession;
     }
 
-    public void setDeviceSession(String deviceSession) {
-        this.deviceSession = deviceSession;
+    public void setAuthorizationChallengeSession(String authorizationChallengeSession) {
+        this.authorizationChallengeSession = authorizationChallengeSession;
     }
 
     public boolean isPromptFromJwt() {
@@ -450,7 +450,7 @@ public class AuthzRequest {
                 ", idTokenHint='" + idTokenHint + '\'' +
                 ", loginHint='" + loginHint + '\'' +
                 ", acrValues='" + acrValues + '\'' +
-                ", deviceSession='" + deviceSession + '\'' +
+                ", authorizationChallengeSession='" + authorizationChallengeSession + '\'' +
                 ", amrValues='" + amrValues + '\'' +
                 ", request='" + request + '\'' +
                 ", requestUri='" + requestUri + '\'' +

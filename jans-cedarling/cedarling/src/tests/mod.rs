@@ -107,7 +107,6 @@ fn success_test() {
         },
         policy_store_config: PolicyStoreConfig {
             source: PolicyStoreSource::Json(POLICY_STORE_RAW.to_string()),
-            store_id: None,
         },
         jwt_config: JwtConfig::Disabled,
     })
@@ -140,3 +139,4 @@ fn success_test() {
 
 // TODO: add fail test case
 // To test all failure scenarios, we need to create a special issue, as there are many possible cases to consider.
+

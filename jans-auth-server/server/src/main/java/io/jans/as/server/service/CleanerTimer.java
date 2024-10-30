@@ -10,7 +10,7 @@ import com.google.common.base.Stopwatch;
 import com.google.common.collect.Maps;
 import io.jans.as.common.model.common.ArchivedJwk;
 import io.jans.as.common.model.registration.Client;
-import io.jans.as.common.model.session.DeviceSession;
+import io.jans.as.common.model.session.AuthorizationChallengeSession;
 import io.jans.as.common.model.session.SessionId;
 import io.jans.as.model.config.StaticConfiguration;
 import io.jans.as.model.configuration.AppConfiguration;
@@ -217,7 +217,7 @@ public class CleanerTimer {
         cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getAuthorizations(), ClientAuthorization.class);
         cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getScopes(), Scope.class);
         cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getSessions(), SessionId.class);
-        cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getSessions(), DeviceSession.class);
+        cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getSessions(), AuthorizationChallengeSession.class);
         cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getPar(), Par.class);
         cleanServiceBaseDns.put(staticConfiguration.getBaseDn().getArchivedJwks(), ArchivedJwk.class);
 
