@@ -177,7 +177,7 @@ class PersonAuthentication(PersonAuthenticationType):
 
                 try:
                     assertionService = Fido2ClientFactory.instance().createAssertionService(metaDataConfiguration)
-                    assertionRequest = json.dumps({'username': userName}, separators=(',', ':'))
+                    assertionRequest = json.dumps({'username': userName, 'origin', domain}, separators=(',', ':'))
                     assertionResponse = assertionService.authenticate(assertionRequest).readEntity(java.lang.String)
                     print "assertionResponse %s " % assertionResponse
 
@@ -190,7 +190,7 @@ class PersonAuthentication(PersonAuthenticationType):
                 try:
                     attestationService = Fido2ClientFactory.instance().createAttestationService(metaDataConfiguration)
                     
-                    basic_json = {'username': userName, 'displayName': userName}
+                    basic_json = {'username': userName, 'displayName': userName, 'origin', domain}
                     
                     
                     print " basic_json %s" % basic_json
