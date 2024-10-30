@@ -85,6 +85,7 @@ impl KeyService {
             if let Some(key) = self.get_key_from_iss(iss, kid)? {
                 return Ok(key.clone());
             } else {
+                // TODO: pass this on to the logger
                 eprintln!("could not find {}, updating jwks", kid);
                 // if the key is not found in the local keystore, update
                 // the local keystore and try again

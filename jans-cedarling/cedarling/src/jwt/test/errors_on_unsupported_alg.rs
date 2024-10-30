@@ -5,6 +5,8 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
+use crate::jwt;
+
 use super::{
     super::{
         decoding_strategy::{DecodingStrategy, KeyService},
@@ -21,7 +23,7 @@ use serde_json::json;
 /// This test verifies that the `JwtService` correctly fails validation when the token
 /// is signed with an unsupported algorithm. the service is configured to support `HS256`,
 /// but the token is signed with `ES256`.
-fn errors_on_unsuppored_alg() {
+fn errors_on_unsupported_alg() {
     // initialize mock server to simulate OpenID configuration and JWKS responses
     let mut server = mockito::Server::new();
 
@@ -29,27 +31,42 @@ fn errors_on_unsuppored_alg() {
     let (encoding_keys, jwks) = generate_keys();
 
     // setup claims for access token and ID token
-    let mut access_token_claims = AccessTokenClaims {
+    let access_token_claims = AccessTokenClaims {
         iss: server.url(),
         aud: "some_aud".to_string(),
         sub: "some_sub".to_string(),
         scopes: "some_scope".to_string(),
-        ..Default::default()
+        iat: Timestamp::now(),
+        exp: Timestamp::one_hour_after_now(),
     };
-    let mut id_token_claims = IdTokenClaims {
+    let id_token_claims = IdTokenClaims {
         iss: server.url(),
-        aud: "some_aud".to_string(),
         sub: "some_sub".to_string(),
+        aud: "some_aud".to_string(),
         email: "some_email@gmail.com".to_string(),
-        ..Default::default()
+        iat: Timestamp::now(),
+        exp: Timestamp::one_hour_after_now(),
+    };
+    let userinfo_token_claims = UserinfoTokenClaims {
+        sub: "some_sub".to_string(),
+        client_id: "some_client_id".to_string(),
+        name: "ferris".to_string(),
+        email: "ferris@gluu.com".to_string(),
     };
 
-    // generate the access token and ID token using ES256 algorithm and encoding keys
-    let access_token =
-        generate_access_token_using_keys(&mut access_token_claims, &encoding_keys, false);
-    let id_token = generate_id_token_using_keys(&mut id_token_claims, &encoding_keys, false);
-    // TODO: add correct implementation for userinfo token
-    let userinfo_token = generate_id_token_using_keys(&mut id_token_claims, &encoding_keys, false);
+    // generate the signed token strings
+    let access_token = generate_token_using_claims(
+        &access_token_claims,
+        &encoding_keys[0].0,
+        &encoding_keys[0].1,
+    );
+    let id_token =
+        generate_token_using_claims(&id_token_claims, &encoding_keys[1].0, &encoding_keys[1].1);
+    let userinfo_token = generate_token_using_claims(
+        &userinfo_token_claims,
+        &encoding_keys[0].0,
+        &encoding_keys[0].1,
+    );
 
     // setup mock server responses for OpenID configuration and JWKS URIs
     let openid_config_response = json!({
@@ -83,13 +100,23 @@ fn errors_on_unsuppored_alg() {
 
     // assert that the validation fails due to the tokens being signed with an
     // unsupported algorithm
-    assert!(jwt_service
-        .decode_tokens::<AccessTokenClaims, IdTokenClaims, UserInfoTokenClaims>(
+    let validation_result = jwt_service
+        .decode_tokens::<AccessTokenClaims, IdTokenClaims, UserinfoTokenClaims>(
             &access_token,
             &id_token,
-            &userinfo_token
-        )
-        .is_err());
+            &userinfo_token,
+        );
+    assert!(
+        matches!(
+            validation_result,
+            Err(jwt::JwtDecodingError::InvalidAccessToken(
+                jwt::TokenValidationError::TokenSignedWithUnsupportedAlgorithm(
+                    jsonwebtoken::Algorithm::ES256
+                )
+            ))
+        ),
+        "Validation expected to failed due to unsupported algorithm"
+    );
     jwks_uri_mock.assert();
 
     // check if the openid_conf_endpoint got called exactly once
