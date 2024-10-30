@@ -18,7 +18,6 @@ from jans.pycloudlib import wait_for_persistence
 from jans.pycloudlib.persistence.couchbase import CouchbaseClient
 from jans.pycloudlib.persistence.couchbase import render_couchbase_properties
 from jans.pycloudlib.persistence.couchbase import sync_couchbase_cert
-from jans.pycloudlib.persistence.couchbase import sync_couchbase_password
 from jans.pycloudlib.persistence.couchbase import sync_couchbase_truststore
 from jans.pycloudlib.persistence.hybrid import render_hybrid_properties
 from jans.pycloudlib.persistence.spanner import render_spanner_properties
@@ -26,7 +25,6 @@ from jans.pycloudlib.persistence.spanner import SpannerClient
 from jans.pycloudlib.persistence.spanner import sync_google_credentials
 from jans.pycloudlib.persistence.sql import SqlClient
 from jans.pycloudlib.persistence.sql import render_sql_properties
-from jans.pycloudlib.persistence.sql import sync_sql_password
 from jans.pycloudlib.persistence.utils import PersistenceMapper
 from jans.pycloudlib.persistence.utils import render_base_properties
 from jans.pycloudlib.persistence.utils import render_salt
@@ -87,7 +85,6 @@ def main():
             render_hybrid_properties(hybrid_prop)
 
     if "couchbase" in persistence_groups:
-        sync_couchbase_password(manager)
         render_couchbase_properties(
             manager,
             "/app/templates/jans-couchbase.properties",
@@ -100,7 +97,6 @@ def main():
         extract_common_libs("couchbase")
 
     if "sql" in persistence_groups:
-        sync_sql_password(manager)
         db_dialect = os.environ.get("CN_SQL_DB_DIALECT", "mysql")
         render_sql_properties(
             manager,

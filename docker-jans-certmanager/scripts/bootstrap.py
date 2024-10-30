@@ -5,9 +5,7 @@ from contextlib import suppress
 import click
 
 from jans.pycloudlib import get_manager
-from jans.pycloudlib.persistence.couchbase import sync_couchbase_password
 from jans.pycloudlib.persistence.spanner import sync_google_credentials
-from jans.pycloudlib.persistence.sql import sync_sql_password
 from jans.pycloudlib.persistence.utils import PersistenceMapper
 
 from settings import LOGGING_CONFIG
@@ -71,10 +69,6 @@ def patch(service, dry_run, opts):
     backend_type = mapper.mapping["default"]
 
     match backend_type:
-        case "sql":
-            sync_sql_password(manager)
-        case "couchbase":
-            sync_couchbase_password(manager)
         case "spanner":
             sync_google_credentials(manager)
 
@@ -107,10 +101,6 @@ def prune(service, dry_run, opts):
     backend_type = mapper.mapping["default"]
 
     match backend_type:
-        case "sql":
-            sync_sql_password(manager)
-        case "couchbase":
-            sync_couchbase_password(manager)
         case "spanner":
             sync_google_credentials(manager)
 

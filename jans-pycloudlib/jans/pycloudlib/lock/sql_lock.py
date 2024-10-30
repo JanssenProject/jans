@@ -20,6 +20,7 @@ from sqlalchemy.sql import select
 
 from jans.pycloudlib.lock.base_lock import BaseLock
 from jans.pycloudlib.utils import get_password_from_file
+from jans.pycloudlib.persistence.sql import get_sql_password
 
 if _t.TYPE_CHECKING:  # pragma: no cover
     # imported objects for function type hint, completion, etc.
@@ -31,9 +32,10 @@ logger = logging.getLogger(__name__)
 
 
 class SqlLock(BaseLock):
-    def __init__(self) -> None:
+    def __init__(self, manager) -> None:
         self._metadata: _t.Optional[MetaData] = None
         self._dialect = os.environ.get("CN_SQL_DB_DIALECT", "mysql")
+        super().__init__(manager)
 
     @cached_property
     def engine(self) -> Engine:
@@ -51,9 +53,10 @@ class SqlLock(BaseLock):
 
         user = os.environ.get("CN_SQL_DB_USER", "jans")
 
-        password_file = os.environ.get("CN_SQL_PASSWORD_FILE", "/etc/jans/conf/sql_password")
+        # password_file = os.environ.get("CN_SQL_PASSWORD_FILE", "/etc/jans/conf/sql_password")
 
-        password = get_password_from_file(password_file)
+        # password = get_password_from_file(password_file)
+        password = get_sql_password(self.manager)
 
         if self._dialect in ("pgsql", "postgresql"):
             connector = "postgresql+psycopg2"

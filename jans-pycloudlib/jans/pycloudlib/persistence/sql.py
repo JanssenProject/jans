@@ -633,24 +633,9 @@ def get_sql_password_file():
     return os.environ.get("CN_SQL_PASSWORD_FILE", "/etc/jans/conf/sql_password")
 
 
-def sync_sql_password(manager: Manager) -> None:
-    """Pull secret contains password to access RDBM server.
-
-    Args:
-        manager: An instance of manager class.
-    """
-    password_file = get_sql_password_file()
-
-    # previous version may not have sql_password secret hence we're pre-populating
-    # the value from mounted password file (if any)
-    if os.path.isfile(password_file):
-        manager.secret.set("sql_password", get_password_from_file(password_file))
-
-    # make sure password file always exists
-    if not os.path.isfile(password_file):
-        manager.secret.to_file("sql_password", password_file)
-
-
 def get_sql_password(manager: Manager | None = None):
     password_file = get_sql_password_file()
-    return get_password_from_file(password_file)
+
+    if os.path.isfile(password_file):
+        return get_password_from_file(password_file)
+    return manager.secret.get("sql_password")

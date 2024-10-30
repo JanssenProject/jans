@@ -9,7 +9,8 @@ import urllib3
 
 from jans.pycloudlib.lock.base_lock import BaseLock
 from jans.pycloudlib.utils import as_boolean
-from jans.pycloudlib.utils import get_password_from_file
+from jans.pycloudlib.persistence.couchbase import get_couchbase_superuser_password
+from jans.pycloudlib.persistence.couchbase import get_couchbase_password
 
 logger = logging.getLogger(__name__)
 
@@ -26,13 +27,13 @@ def _handle_failed_request(resp) -> None:
 
 
 class CouchbaseLock(BaseLock):
-    def __init__(self):
+    def __init__(self, manager):
         self.bucket_exists = False
-
         self.host = os.environ.get("CN_COUCHBASE_URL", "localhost")
 
         prefix = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
         self.bucket = f"{prefix}_oci_lock"
+        super().__init__(manager)
 
     @cached_property
     def n1ql_port(self):
@@ -186,15 +187,15 @@ class CouchbaseLock(BaseLock):
                 resp.raise_for_status()
 
     def _resolve_auth(self):
-        superuser_password_file = os.environ.get("CN_COUCHBASE_SUPERUSER_PASSWORD_FILE", "/etc/jans/conf/couchbase_superuser_password")
-        password_file = os.environ.get("CN_COUCHBASE_PASSWORD_FILE", "/etc/jans/conf/couchbase_password")
+        user = ""
+        password = ""  # nosec: B105
 
-        if os.path.isfile(superuser_password_file):
-            user = os.environ.get("CN_COUCHBASE_SUPERUSER", "admin")
-            password = get_password_from_file(superuser_password_file)
-        elif os.path.isfile(password_file):
-            user = os.environ.get("CN_COUCHBASE_USER", "jans")
-            password = get_password_from_file(password_file)
+        if superuser_from_env := os.environ.get("CN_COUCHBASE_SUPERUSER", ""):
+            user = superuser_from_env
+            password = get_couchbase_superuser_password(self.manager)
+        elif user_from_env := os.environ.get("CN_COUCHBASE_USER", ""):
+            user = user_from_env
+            password = get_couchbase_password(self.manager)
         else:
             user = ""
             password = ""  # nosec: B105

@@ -78,13 +78,13 @@ def test_get_couchbase_user(monkeypatch):
     assert get_couchbase_user() == "root"
 
 
-def test_get_couchbase_password_from_file(monkeypatch, tmpdir):
+def test_get_couchbase_password(monkeypatch, tmpdir, gmanager):
     from jans.pycloudlib.persistence.couchbase import get_couchbase_password
 
     passwd_file = tmpdir.join("couchbase_password")
     passwd_file.write("secret")
     monkeypatch.setenv("CN_COUCHBASE_PASSWORD_FILE", str(passwd_file))
-    assert get_couchbase_password() == "secret"
+    assert get_couchbase_password(gmanager) == "secret"
 
 
 def test_get_couchbase_superuser(monkeypatch):
@@ -94,14 +94,14 @@ def test_get_couchbase_superuser(monkeypatch):
     assert get_couchbase_superuser() == "admin"
 
 
-def test_get_couchbase_superuser_password(monkeypatch, tmpdir):
+def test_get_couchbase_superuser_password(monkeypatch, tmpdir, gmanager):
     from jans.pycloudlib.persistence.couchbase import get_couchbase_superuser_password
 
     passwd_file = tmpdir.join("couchbase_superuser_password")
     passwd_file.write("secret")
 
     monkeypatch.setenv("CN_COUCHBASE_SUPERUSER_PASSWORD_FILE", str(passwd_file))
-    assert get_couchbase_superuser_password() == "secret"
+    assert get_couchbase_superuser_password(gmanager) == "secret"
 
 
 @pytest.mark.skipif(

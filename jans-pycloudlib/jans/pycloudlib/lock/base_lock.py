@@ -11,6 +11,9 @@ class BaseLock(ABC):
     Must be sub-classed per implementation details.
     """
 
+    def __init__(self, manager):
+        self.manager = manager
+
     @property
     def type(self) -> str:
         """Name of the configuration type.

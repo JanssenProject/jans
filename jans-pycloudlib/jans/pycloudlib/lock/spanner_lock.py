@@ -24,6 +24,9 @@ logger = logging.getLogger(__name__)
 
 
 class SpannerLock(BaseLock):
+    def __init__(self, manager):
+        super().__init__(manager)
+
     @property
     def table_name(self):
         return "jansOciLock"

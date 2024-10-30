@@ -85,6 +85,9 @@ def _on_connection_giveup(details: Details) -> None:
 
 
 class LockManager:
+    def __init__(self, manager):
+        self.manager = manager
+
     @property
     def lock_enabled(self):
         return as_boolean(os.environ.get("CN_OCI_LOCK_ENABLED", "true"))
@@ -150,7 +153,7 @@ class LockManager:
         if self.lock_enabled:
             lock_cls = LockRecord
 
-        lock = lock_cls(name, owner, ttl, retry_delay, max_start_delay)
+        lock = lock_cls(name, owner, ttl, retry_delay, max_start_delay, self.manager)
 
         # pre-flight connection checking
         self.check_connection(lock)
@@ -169,6 +172,7 @@ class BaseLockRecord(ABC):
         ttl: int,
         retry_delay: float = 5.0,
         max_start_delay: float = 0.0,
+        manager = None,
     ):
         # name of the lock
         self.name = name
@@ -187,6 +191,8 @@ class BaseLockRecord(ABC):
 
         # event object to stop renew lock
         self._renew_stop_event = None
+
+        self.manager = manager
 
     def __enter__(self):
         if not self.acquire():
@@ -257,13 +263,13 @@ class LockRecord(BaseLockRecord):
         _adapter = os.environ.get("CN_OCI_LOCK_ADAPTER") or PersistenceMapper().mapping["default"]
 
         if _adapter == "sql":
-            return SqlLock()
+            return SqlLock(self.manager)
 
         if _adapter == "spanner":
-            return SpannerLock()
+            return SpannerLock(self.manager)
 
         if _adapter == "couchbase":
-            return CouchbaseLock()
+            return CouchbaseLock(self.manager)
 
         # unsupported adapter
         raise ValueError(f"Unsupported lock adapter {_adapter!r}")

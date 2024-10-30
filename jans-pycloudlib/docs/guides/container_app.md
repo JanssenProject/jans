@@ -137,7 +137,6 @@ from jans.pycloudlib import get_manager
 from jans.pycloudlib.persistence.utils import render_salt
 from jans.pycloudlib.persistence.utils import render_base_properties
 from jans.pycloudlib.persistence.sql import render_sql_properties
-from jans.pycloudlib.persistence.sql import sync_sql_password
 
 
 def create_manager():
@@ -162,7 +161,6 @@ def configure_persistence(manager):
         "/app/templates/jans-mysql.properties",
         "/etc/jans/conf/jans-mysql.properties",
     )
-    sync_sql_password(manager)
 
 
 if __name__ == "__main__":

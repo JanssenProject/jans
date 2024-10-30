@@ -46,15 +46,6 @@ def get_couchbase_user() -> str:
     return os.environ.get("CN_COUCHBASE_USER", "jans")
 
 
-def get_couchbase_password() -> str:
-    """Get Couchbase user's password from file.
-
-    Returns:
-        Plaintext password.
-    """
-    return get_password_from_file(get_couchbase_password_file())
-
-
 def get_couchbase_superuser() -> str:
     """Get Couchbase username from `CN_COUCHBASE_SUPERUSER` environment variable (default to empty-string).
 
@@ -62,15 +53,6 @@ def get_couchbase_superuser() -> str:
         Couchbase username.
     """
     return os.environ.get("CN_COUCHBASE_SUPERUSER", "admin")
-
-
-def get_couchbase_superuser_password() -> str:
-    """Get Couchbase superuser's password from file.
-
-    Returns:
-        Plaintext password.
-    """
-    return get_password_from_file(get_couchbase_superuser_password_file())
 
 
 def get_couchbase_conn_timeout() -> int:
@@ -182,7 +164,7 @@ def render_couchbase_properties(manager: Manager, src: str, dest: str) -> None:
             "hostname": hostname,
             "couchbase_server_user": get_couchbase_user(),
             "encoded_couchbase_server_pw": encode_text(
-                get_couchbase_password(),
+                get_couchbase_password(manager),
                 manager.secret.get("encoded_salt"),
             ).decode(),
             "couchbase_buckets": ", ".join(couchbase_buckets),
@@ -528,8 +510,8 @@ class CouchbaseClient:
 
         password = kwargs.get("password", "")
         with contextlib.suppress(FileNotFoundError):
-            password = get_couchbase_superuser_password()
-        self.password: str = password or get_couchbase_password()
+            password = get_couchbase_superuser_password(manager)
+        self.password: str = password or get_couchbase_password(manager)
 
         self.attr_processor = AttrProcessor()
 
@@ -906,31 +888,28 @@ def get_couchbase_superuser_password_file():
     return os.environ.get("CN_COUCHBASE_SUPERUSER_PASSWORD_FILE", "/etc/jans/conf/couchbase_superuser_password")
 
 
-def _sync_cb_password(manager, password_file, secret_name):
+def _get_cb_password(manager, password_file, secret_name):
     if os.path.isfile(password_file):
-        manager.secret.set(secret_name, get_password_from_file(password_file))
-
-    # make sure password file always exists
-    if not os.path.isfile(password_file):
-        manager.secret.to_file(secret_name, password_file)
+        return get_password_from_file(password_file)
+    return manager.secret.get(secret_name)
 
 
-def sync_couchbase_password(manager):
+def get_couchbase_password(manager):
     """Pull secret contains password to access Couchbase server as non-superuser.
 
     Args:
         manager: An instance of manager class.
     """
-    _sync_cb_password(manager, get_couchbase_password_file(), "couchbase_password")
+    return _get_cb_password(manager, get_couchbase_password_file(), "couchbase_password")
 
 
-def sync_couchbase_superuser_password(manager):
+def get_couchbase_superuser_password(manager):
     """Pull secret contains password to access Couchbase server as superuser.
 
     Args:
         manager: An instance of manager class.
     """
-    _sync_cb_password(manager, get_couchbase_superuser_password_file(), "couchbase_superuser_password")
+    return _get_cb_password(manager, get_couchbase_superuser_password_file(), "couchbase_superuser_password")
 
 
 def get_couchbase_cert_file():

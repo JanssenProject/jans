@@ -374,7 +374,7 @@ class Manager:
     def __init__(self):
         self.config = ConfigManager()
         self.secret = SecretManager()
-        self.lock = LockManager()
+        self.lock = LockManager(self)
 
     def _bootstrap_assets(self, adapter):
         assets = self._bootstrap_asset_mappings.get(adapter) or []
