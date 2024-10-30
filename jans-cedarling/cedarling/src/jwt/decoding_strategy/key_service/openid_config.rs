@@ -14,9 +14,9 @@ use std::{
 
 /// represents the source data for OpenID configuration.
 #[derive(Deserialize)]
-pub struct OpenIdConfigSource {
-    issuer: Box<str>,
-    jwks_uri: Box<str>,
+pub(crate) struct OpenIdConfigSource {
+    pub issuer: Box<str>,
+    pub jwks_uri: Box<str>,
     // The following values are also normally returned when sending
     // a GET request to the `openid_configuration_endpoint` but are
     // not currently being used.
@@ -35,6 +35,7 @@ pub struct OpenIdConfigSource {
 
 /// represents the OpenID configuration for an identity provider.
 pub struct OpenIdConfig {
+    pub issuer: Box<str>,
     pub jwks_uri: Box<str>,
     // <key_id (`kid`), DecodingKey>
     pub decoding_keys: Arc<RwLock<HashMap<Box<str>, Arc<DecodingKey>>>>,
@@ -45,14 +46,19 @@ impl OpenIdConfig {
     ///
     /// this method extracts the issuer and constructs a new `OpenIdConfig`
     /// instance, initializing the decoding keys storage.
-    pub fn from_source(src: OpenIdConfigSource) -> (Box<str>, OpenIdConfig) {
-        let issuer = src.issuer;
-        (
-            issuer,
-            OpenIdConfig {
-                jwks_uri: src.jwks_uri,
-                decoding_keys: Arc::new(RwLock::new(HashMap::new())),
-            },
-        )
+    pub fn from_source(
+        src: OpenIdConfigSource,
+        decoding_keys: HashMap<Box<str>, DecodingKey>,
+    ) -> OpenIdConfig {
+        OpenIdConfig {
+            issuer: src.issuer,
+            jwks_uri: src.jwks_uri,
+            decoding_keys: Arc::new(RwLock::new(
+                decoding_keys
+                    .into_iter()
+                    .map(|(k, v)| (k, Arc::new(v)))
+                    .collect(),
+            )),
+        }
     }
 }

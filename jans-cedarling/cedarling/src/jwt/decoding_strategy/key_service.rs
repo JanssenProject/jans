@@ -16,12 +16,51 @@ use reqwest::blocking::Client;
 use std::collections::HashMap;
 use std::sync::Arc;
 
+/// Retrieves a [`DecodingKey`]-s based on the provided jwks_uri.
+fn fetch_decoding_keys(
+    jwks_uri: &str,
+    http_client: &Client,
+) -> Result<HashMap<Box<str>, DecodingKey>, Error> {
+    let jwks: JwkSet = http_client
+        .get(jwks_uri)
+        .send()
+        .map_err(Error::Http)?
+        .error_for_status()
+        .map_err(Error::Http)?
+        .json()
+        .map_err(Error::RequestDeserialization)?;
+
+    let mut decoding_keys = HashMap::new();
+    for jwk in jwks.keys {
+        let decoding_key = DecodingKey::from_jwk(&jwk).map_err(Error::KeyParsing)?;
+        let key_id = jwk.common.key_id.ok_or(Error::MissingKeyId)?;
+        decoding_keys.insert(key_id.into_boxed_str(), decoding_key);
+    }
+
+    Ok(decoding_keys)
+}
+
+/// Retrieves a [`OpenIdConfig`] based on the provided openid uri endpoint.
+fn fetch_openid_config(openid_endpoint: &str, http_client: &Client) -> Result<OpenIdConfig, Error> {
+    let conf_src: OpenIdConfigSource = http_client
+        .get(openid_endpoint)
+        .send()
+        .map_err(Error::Http)?
+        .error_for_status()
+        .map_err(Error::Http)?
+        .json()
+        .map_err(Error::RequestDeserialization)?;
+
+    let decoding_keys = fetch_decoding_keys(&conf_src.jwks_uri, &http_client)?;
+
+    Ok(OpenIdConfig::from_source(conf_src, decoding_keys))
+}
+
 pub struct KeyService {
     idp_configs: HashMap<Box<str>, OpenIdConfig>, // <issuer (`iss`), OpenIdConfig>
     http_client: Client,
 }
 
-// #[allow(unused)]
 impl KeyService {
     /// initializes a new `KeyService` with the provided OpenID configuration endpoints.
     ///
@@ -34,38 +73,8 @@ impl KeyService {
 
         // fetch IDP configs
         for endpoint in openid_conf_endpoints {
-            let conf_src: OpenIdConfigSource = http_client
-                .get(endpoint)
-                .send()
-                .map_err(Error::Http)?
-                .error_for_status()
-                .map_err(Error::Http)?
-                .json()
-                .map_err(Error::RequestDeserialization)?;
-            let (issuer, conf) = OpenIdConfig::from_source(conf_src);
-            idp_configs.insert(issuer, conf);
-        }
-
-        // retrieves a decoding key based on the provided key ID (`kid`).
-        //
-        // this method first attempts to retrieve the key from the local key store. if the key
-        // is not found, it will refresh the JWKS and try again. if the key is still not found,
-        // an error of type `KeyNotFound` is returned.
-        for (_iss, conf) in &mut idp_configs {
-            let jwks: JwkSet = http_client
-                .get(&*conf.jwks_uri)
-                .send()
-                .map_err(Error::Http)?
-                .error_for_status()
-                .map_err(Error::Http)?
-                .json()
-                .map_err(Error::RequestDeserialization)?;
-            let mut decoding_keys = conf.decoding_keys.write().map_err(|_| Error::Lock)?;
-            for jwk in jwks.keys {
-                let decoding_key = DecodingKey::from_jwk(&jwk).map_err(Error::KeyParsing)?;
-                let key_id = jwk.common.key_id.ok_or(Error::MissingKeyId)?;
-                decoding_keys.insert(key_id.into(), Arc::new(decoding_key));
-            }
+            let conf = fetch_openid_config(&endpoint, &http_client)?;
+            idp_configs.insert(conf.issuer.clone(), conf);
         }
 
         Ok(Self {

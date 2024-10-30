@@ -18,7 +18,7 @@ reqwest = { version = "0.12.8", features = ["blocking", "json"] }
 bytes = "1.7.2"
 typed-builder = "0.20.0"
 semver = "1.0.23"
-derive_more = { version = "1.0.0", features = ["deref"] }
+derive_more = { version = "1.0.0", features = ["deref", "from"] }
 
 [dev-dependencies]
 # is used in testing
