@@ -23,7 +23,7 @@ use serde_json::json;
 /// This test verifies that the `JwtService` correctly fails validation when the token
 /// is signed with an unsupported algorithm. the service is configured to support `HS256`,
 /// but the token is signed with `ES256`.
-fn errors_on_unsuppored_alg() {
+fn errors_on_unsupported_alg() {
     // initialize mock server to simulate OpenID configuration and JWKS responses
     let mut server = mockito::Server::new();
 
