@@ -136,7 +136,7 @@ public class AttestationService {
 		pubKeyCredParams.stream().forEach(ele -> log.debug("Put pubKeyCredParam {}", ele.toString()));
 
 		// Put RP
-		String origin = commonVerifiers.verifyRpDomain(attestationOptions.getOrigin(), appConfiguration.getIssuer());
+		String origin = commonVerifiers.verifyRpDomain(attestationOptions.getOrigin(), appConfiguration.getIssuer(), appConfiguration.getFido2Configuration().getRequestedParties());
 		RelyingParty relyingParty = createRpDomain(origin);
 		log.debug("Relying Party: "+relyingParty);
 		
