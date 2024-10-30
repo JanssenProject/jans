@@ -78,7 +78,7 @@ pub fn generate_keys() -> (Vec<EncodingKey>, String) {
         algorithm: jwt::Algorithm::HS256,
     });
 
-    // serialize pulic keys
+    // serialize public keys
     let public_keys = serde_json::to_string(&public_keys).expect("should serialize keyset");
     (encoding_keys, public_keys)
 }
