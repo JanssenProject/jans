@@ -106,12 +106,17 @@ fn errors_on_unsupported_alg() {
             &id_token,
             &userinfo_token,
         );
-    assert!(matches!(
-        validation_result,
-        Err(jwt::JwtDecodingError::InvalidAccessToken(
-            jwt::TokenValidationError::TokenSignedWithUnsupportedAlgorithm(_)
-        ))
-    ));
+    assert!(
+        matches!(
+            validation_result,
+            Err(jwt::JwtDecodingError::InvalidAccessToken(
+                jwt::TokenValidationError::TokenSignedWithUnsupportedAlgorithm(
+                    jsonwebtoken::Algorithm::ES256
+                )
+            ))
+        ),
+        "Validation expected to failed due to unsupported algorithm"
+    );
     jwks_uri_mock.assert();
 
     // check if the openid_conf_endpoint got called exactly once
