@@ -1,6 +1,5 @@
 package io.jans.configapi.core.util;
 
-
 import io.jans.as.model.json.JsonApplier;
 import io.jans.model.FieldFilterData;
 import io.jans.model.FilterOperator;
@@ -28,6 +27,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -404,7 +404,43 @@ public class DataUtil {
         }
         return dateFilter;
     }
-    
+
+    private static Filter createDateEqualFilter_3(FieldFilterData fieldFilterData) {
+        logger.info("Create Date Filter for fieldFilterData:{}", fieldFilterData);
+        Filter dateFilter = null;
+        if (fieldFilterData == null) {
+            return dateFilter;
+        }
+
+        String dateField = fieldFilterData.getField();
+        String dateString = fieldFilterData.getValue();
+        String dateZ = dateString.endsWith("Z") ? dateString : dateString + "Z";
+        DateTimeFormatter sourceFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
+        DateTimeFormatter targetFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        logger.error("dateField:{}, dateString:{}, dateZ:{}, sourceFormat:{} ", dateField, dateString, dateZ,
+                sourceFormat);
+        try {
+
+            LocalDateTime dateTime = LocalDateTime.parse(dateZ, sourceFormat);
+            logger.error("dateZ:{}, sourceFormat:{}, dateTime:{} ", dateZ, sourceFormat, dateTime);
+
+            String formatedDateTime = dateTime.atZone(ZoneId.of("UTC")).format(targetFormat);
+            logger.error("dateZ:{}, formatedDateTime:{}, targetFormat:{}", dateZ, formatedDateTime, targetFormat);
+
+            dateFilter = Filter.createEqualityFilter(dateField, formatedDateTime);
+            logger.error("dateString:{}, dateFilter:{} ", dateString, dateFilter);
+
+        } catch (Exception ex) {
+            logger.error(
+                    "Error while creating Date filter for {" + dateField + "} with value as {" + dateString + "} is",
+                    ex);
+            dateFilter = Filter.createEqualityFilter(dateField, dateString);
+            return dateFilter;
+
+        }
+        return dateFilter;
+    }
+
     private static Filter createDateEqualFilter(FieldFilterData fieldFilterData) {
         logger.info("Create Date Filter for fieldFilterData:{}", fieldFilterData);
         Filter dateFilter = null;
@@ -416,19 +452,20 @@ public class DataUtil {
         String dateString = fieldFilterData.getValue();
         String dateZ = dateString.endsWith("Z") ? dateString : dateString + "Z";
         DateTimeFormatter sourceFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss'Z'");
-        DateTimeFormatter targetFormat  = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-        logger.error("dateField:{}, dateString:{}, dateZ:{}, sourceFormat:{} ", dateField, dateString, dateZ, sourceFormat);
+        DateTimeFormatter targetFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        logger.error("dateField:{}, dateString:{}, dateZ:{}, sourceFormat:{} ", dateField, dateString, dateZ,
+                sourceFormat);
         try {
-           
-            LocalDateTime dateTime  = LocalDateTime.parse(dateZ, sourceFormat);
+
+            LocalDateTime dateTime = LocalDateTime.parse(dateZ, sourceFormat);
             logger.error("dateZ:{}, sourceFormat:{}, dateTime:{} ", dateZ, sourceFormat, dateTime);
-            
-            String formatedDateTime  = dateTime.atZone(ZoneId.of("UTC")).format(targetFormat);
+
+            String formatedDateTime = dateTime.atZone(ZoneId.of("UTC")).format(targetFormat);
             logger.error("dateZ:{}, formatedDateTime:{}, targetFormat:{}", dateZ, formatedDateTime, targetFormat);
-            
+
             dateFilter = Filter.createEqualityFilter(dateField, formatedDateTime);
             logger.error("dateString:{}, dateFilter:{} ", dateString, dateFilter);
-            
+
         } catch (Exception ex) {
             logger.error(
                     "Error while creating Date filter for {" + dateField + "} with value as {" + dateString + "} is",
@@ -438,6 +475,26 @@ public class DataUtil {
 
         }
         return dateFilter;
+    }
+
+    public Date decodeTime(String strDate) {
+        logger.error("decodeTime - strDate:{} ", strDate);
+        Date date = null;
+        if (StringHelper.isEmpty(strDate)) {
+            return date;
+        }
+        try {
+            // Add ending Z if necessary
+            String dateZ = strDate.endsWith("Z") ? strDate : strDate + "Z";
+            logger.error("decodeTime - dateZ:{} ", dateZ);
+            date = new Date(Instant.parse(dateZ).toEpochMilli());
+            logger.error("decodeTime - date:{} ", date);
+
+        } catch (Exception ex) {
+
+            return date;
+        }
+        return date;
     }
 
     private static Filter createDateFilter(FieldFilterData fieldFilterData, String primaryKey,
