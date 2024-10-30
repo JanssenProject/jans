@@ -135,15 +135,6 @@ public class AttestationService {
 		// Put RP
 		String origin = commonVerifiers.verifyRpDomain(attestationOptions.getOrigin(), appConfiguration.getIssuer());
 
-        // Check if the origin exists in any of the RequestedParties origins
-		boolean originExists = appConfiguration.getFido2Configuration().getRequestedParties().stream()
-				.flatMap(f -> f.getOrigins().stream())
-				.anyMatch(o -> o.equals(origin));
-
-		if (!originExists) {
-			throw errorResponseFactory.badRequestException(AttestationErrorResponseType.INVALID_ORIGIN, "The origin '" + origin + "' is not listed in the allowed origins.");
-		}
-
 		RelyingParty relyingParty = createRpDomain(origin);
 		log.debug("Relying Party: "+relyingParty);
 		
