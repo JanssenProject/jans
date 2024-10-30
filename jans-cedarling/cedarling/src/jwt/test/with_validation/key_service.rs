@@ -69,6 +69,7 @@ fn errors_when_no_key_found() {
         &EncodingKey {
             key_id: "some_key_id_not_in_the_jwks".to_string(), // we set an non-existing `kid` for the access_token
             key: encoding_keys[0].key.clone(),
+            algorithm: encoding_keys[0].algorithm,
         },
     );
     let id_token = generate_token_using_claims(&id_token_claims, &encoding_keys[1]);
@@ -287,7 +288,7 @@ fn can_update_local_jwks() {
 
     // initialize JwtService with validation enabled and ES256 as the supported algorithm
     let jwt_service = JwtService::new_with_config(crate::jwt::JwtServiceConfig::WithValidation {
-        supported_algs: vec![Algorithm::ES256],
+        supported_algs: vec![Algorithm::ES256, Algorithm::HS256],
         trusted_idps: vec![trusted_idp],
     });
 

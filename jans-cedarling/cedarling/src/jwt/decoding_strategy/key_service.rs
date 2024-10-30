@@ -9,10 +9,11 @@ mod error;
 mod openid_config;
 
 pub use error::KeyServiceError;
-use jsonwebtoken::jwk::JwkSet;
+use jsonwebtoken::jwk::Jwk;
 use jsonwebtoken::DecodingKey;
 pub(crate) use openid_config::*;
 use reqwest::blocking::Client;
+use serde::Deserialize;
 use std::collections::HashMap;
 use std::sync::Arc;
 
@@ -21,7 +22,7 @@ fn fetch_decoding_keys(
     jwks_uri: &str,
     http_client: &Client,
 ) -> Result<HashMap<Box<str>, DecodingKey>, KeyServiceError> {
-    let jwks: JwkSet = http_client
+    let jwks: Jwks = http_client
         .get(jwks_uri)
         .send()
         .map_err(KeyServiceError::Http)?
@@ -32,9 +33,28 @@ fn fetch_decoding_keys(
 
     let mut decoding_keys = HashMap::new();
     for jwk in jwks.keys {
-        let decoding_key = DecodingKey::from_jwk(&jwk).map_err(KeyServiceError::KeyParsing)?;
-        let key_id = jwk.common.key_id.ok_or(KeyServiceError::MissingKeyId)?;
-        decoding_keys.insert(key_id.into_boxed_str(), decoding_key);
+        let jwk = serde_json::from_str::<Jwk>(&jwk.to_string());
+
+        match jwk {
+            Ok(jwk) => {
+                // convert the parsed JWK to a DecodingKey and insert it into the decoding_keys map
+                // if the JWK does not have a key ID (kid), return a MissingKeyId error
+                let decoding_key =
+                    DecodingKey::from_jwk(&jwk).map_err(KeyServiceError::KeyParsing)?;
+                let key_id = jwk.common.key_id.ok_or(KeyServiceError::MissingKeyId)?;
+
+                // insert the key into the map, using the key ID as the map's key
+                decoding_keys.insert(key_id.into(), decoding_key);
+            },
+            Err(e) => {
+                // if the error indicates an unknown variant, we can safely ignore it.
+                //
+                // TODO: also print it in the logging
+                if !e.to_string().contains("unknown variant") {
+                    return Err(KeyServiceError::KeyParsing(e.into()));
+                }
+            },
+        };
     }
 
     Ok(decoding_keys)
@@ -145,7 +165,8 @@ impl KeyService {
 
         // fetch fresh keys
         let mut new_keys = HashMap::new();
-        let jwks: JwkSet = self
+
+        let jwks: Jwks = self
             .http_client
             .get(&*conf.jwks_uri)
             .send()
@@ -154,10 +175,30 @@ impl KeyService {
             .map_err(KeyServiceError::Http)?
             .json()
             .map_err(KeyServiceError::RequestDeserialization)?;
+
         for jwk in jwks.keys {
-            let decoding_key = DecodingKey::from_jwk(&jwk).map_err(KeyServiceError::KeyParsing)?;
-            let key_id = jwk.common.key_id.ok_or(KeyServiceError::MissingKeyId)?;
-            new_keys.insert(key_id.into(), Arc::new(decoding_key));
+            let jwk = serde_json::from_str::<Jwk>(&jwk.to_string());
+
+            match jwk {
+                Ok(jwk) => {
+                    // convert the parsed JWK to a DecodingKey and insert it into the decoding_keys map
+                    // if the JWK does not have a key ID (kid), return a MissingKeyId error
+                    let decoding_key =
+                        DecodingKey::from_jwk(&jwk).map_err(KeyServiceError::KeyParsing)?;
+                    let key_id = jwk.common.key_id.ok_or(KeyServiceError::MissingKeyId)?;
+
+                    // insert the key into the map, using the key ID as the map's key
+                    new_keys.insert(key_id.into(), Arc::new(decoding_key));
+                },
+                Err(e) => {
+                    // if the error indicates an unknown variant, we can safely ignore it.
+                    //
+                    // TODO: also print it in the logging
+                    if !e.to_string().contains("unknown variant") {
+                        return Err(KeyServiceError::KeyParsing(e.into()));
+                    }
+                },
+            };
         }
 
         // we reassign the keys after fetching and deserializing the keys
@@ -170,4 +211,15 @@ impl KeyService {
 
         Ok(())
     }
+}
+
+/// A simple struct to deserialize a collection of JWKs (JSON Web Keys).
+///
+/// This struct holds the raw keys in a vector of `serde_json::Value`, allowing
+/// the keys to be processed or validated individually. It is primarily used
+/// as an intermediary step for deserialization before iterating over each key
+/// to check for errors or unsupported algorithms and skipping any invalid keys.
+#[derive(Deserialize)]
+struct Jwks {
+    keys: Vec<serde_json::Value>,
 }

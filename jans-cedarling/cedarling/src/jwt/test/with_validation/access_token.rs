@@ -530,7 +530,7 @@ fn errors_on_token_used_before_nbf() {
 
     // initialize JwtService with validation enabled and ES256 as the supported algorithm
     let jwt_service = JwtService::new_with_config(crate::jwt::JwtServiceConfig::WithValidation {
-        supported_algs: vec![Algorithm::ES256],
+        supported_algs: vec![Algorithm::ES256, Algorithm::HS256],
         trusted_idps: vec![trusted_idp],
     });
 
