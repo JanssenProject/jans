@@ -6479,8 +6479,6 @@
         
           
         
-          
-        
       
       
         <label class="md-nav__link" for="__nav_1_12_4_4">
@@ -6615,20 +6613,6 @@
     <li class="md-nav__item">
       <a href="../../reference/kubernetes/docker-jans-scim/" class="md-nav__link">
         SCIM
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/kubernetes/docker-opendj.md" class="md-nav__link">
-        Gluu OpenDJ
       </a>
     </li>
   
@@ -8877,8 +8861,6 @@
 <span class="s">&quot;auth_log_target&quot;:&quot;STDOUT&quot;,</span><span class="w"></span>
 <span class="s">&quot;http_log_level&quot;:&quot;INFO&quot;,</span><span class="w"></span>
 <span class="s">&quot;http_log_target&quot;:&quot;FILE&quot;,</span><span class="w"></span>
-<span class="s">&quot;ldap_stats_log_level&quot;:&quot;INFO&quot;,</span><span class="w"></span>
-<span class="s">&quot;ldap_stats_log_target&quot;:&quot;FILE&quot;,</span><span class="w"></span>
 <span class="s">&quot;persistence_duration_log_level&quot;:&quot;INFO&quot;,</span><span class="w"></span>
 <span class="s">&quot;persistence_duration_log_target&quot;:&quot;FILE&quot;,</span><span class="w"></span>
 <span class="s">&quot;persistence_log_level&quot;:&quot;INFO&quot;,</span><span class="w"></span>
@@ -8902,7 +8884,6 @@ change it directly using <a href="#hack-it">kubectl edit</a> command:</p>
 <span class="w">      </span><span class="nt">httpLogLevel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;TRACE&quot;</span><span class="w"></span>
 <span class="w">      </span><span class="nt">persistenceLogLevel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;TRACE&quot;</span><span class="w"></span>
 <span class="w">      </span><span class="nt">persistenceDurationLogLevel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;TRACE&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">ldapStatsLogLevel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;TRACE&quot;</span><span class="w"></span>
 <span class="w">      </span><span class="nt">scriptLogLevel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;TRACE&quot;</span><span class="w"></span>
 <span class="w">      </span><span class="nt">auditStatsLogLevel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;TRACE&quot;</span><span class="w"></span>
 <span class="l l-Scalar l-Scalar-Plain">............</span><span class="w"></span>
@@ -8920,17 +8901,16 @@ change it directly using <a href="#hack-it">kubectl edit</a> command:</p>
 </code></pre></div>
 <p>Example output:
 <div class="highlight"><pre><span></span><code><span class="nt">CN_CONFIG_API_APP_LOGGERS</span><span class="p">:</span><span class="w"> </span>
-<span class="s">&#39;{&quot;</span><span class="w"></span>
-<span class="s">config_api_log_level&quot;:&quot;INFO&quot;,</span><span class="w"></span>
+<span class="s">&#39;{</span><span class="w"></span>
+<span class="s">&quot;config_api_log_level&quot;:&quot;INFO&quot;,</span><span class="w"></span>
 <span class="s">&quot;config_api_log_target&quot;:&quot;STDOUT&quot;,</span><span class="w"></span>
-<span class="s">&quot;ldap_stats_log_level&quot;:&quot;INFO&quot;,</span><span class="w"></span>
-<span class="s">&quot;ldap_stats_log_target&quot;:&quot;FILE&quot;,</span><span class="w"></span>
 <span class="s">&quot;persistence_duration_log_level&quot;:&quot;INFO&quot;,</span><span class="w"></span>
 <span class="s">&quot;persistence_duration_log_target&quot;:&quot;FILE&quot;,</span><span class="w"></span>
 <span class="s">&quot;persistence_log_level&quot;:&quot;INFO&quot;,</span><span class="w"></span>
 <span class="s">&quot;persistence_log_target&quot;:&quot;FILE&quot;,</span><span class="w"></span>
 <span class="s">&quot;script_log_level&quot;:&quot;INFO&quot;,</span><span class="w"></span>
-<span class="s">&quot;script_log_target&quot;:&quot;FILE&quot;}&#39;</span><span class="w"></span>
+<span class="s">&quot;script_log_target&quot;:&quot;FILE&quot;</span><span class="w"></span>
+<span class="s">}&#39;</span><span class="w"></span>
 </code></pre></div></p>
 <p>To override the current logging level in config-api, you can either add the desired changes to a yaml file and apply it using <code>helm</code>, or
 change it directly using <a href="#hack-it">kubectl edit</a> command:</p>
@@ -8946,7 +8926,6 @@ change it directly using <a href="#hack-it">kubectl edit</a> command:</p>
 <span class="w">      </span><span class="nt">configApiLogLevel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;TRACE&quot;</span><span class="w"></span>
 <span class="w">      </span><span class="nt">persistenceLogLevel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;TRACE&quot;</span><span class="w"></span>
 <span class="w">      </span><span class="nt">persistenceDurationLogLevel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;TRACE&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">ldapStatsLogLevel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;TRACE&quot;</span><span class="w"></span>
 <span class="w">      </span><span class="nt">scriptLogLevel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;TRACE&quot;</span><span class="w"></span>
 <span class="l l-Scalar l-Scalar-Plain">............</span><span class="w"></span>
 <span class="l l-Scalar l-Scalar-Plain">............</span><span class="w">      </span>
@@ -8963,11 +8942,12 @@ change it directly using <a href="#hack-it">kubectl edit</a> command:</p>
 </code></pre></div>
 <p>Example output:
 <div class="highlight"><pre><span></span><code><span class="nt">CN_FIDO2_APP_LOGGERS</span><span class="p">:</span><span class="w"> </span>
-<span class="s">&#39;{&quot;</span><span class="w"></span>
-<span class="s">fido2_log_level&quot;:&quot;INFO&quot;,</span><span class="w"></span>
+<span class="s">&#39;{</span><span class="w"></span>
+<span class="s">&quot;fido2_log_level&quot;:&quot;INFO&quot;,</span><span class="w"></span>
 <span class="s">&quot;fido2_log_target&quot;:&quot;STDOUT&quot;,</span><span class="w"></span>
 <span class="s">&quot;persistence_log_level&quot;:&quot;INFO&quot;,</span><span class="w"></span>
-<span class="s">&quot;persistence_log_target&quot;:&quot;FILE&quot;}&#39;</span><span class="w"></span>
+<span class="s">&quot;persistence_log_target&quot;:&quot;FILE&quot;</span><span class="w"></span>
+<span class="s">}&#39;</span><span class="w"></span>
 </code></pre></div></p>
 <p>To override the current logging level in fido2, you can either add the desired changes to a yaml file and apply it using <code>helm</code>, or
 change it directly using <a href="#hack-it">kubectl edit</a> command:</p>
@@ -8997,9 +8977,7 @@ change it directly using <a href="#hack-it">kubectl edit</a> command:</p>
 </code></pre></div>
 <p>Example output:
 <div class="highlight"><pre><span></span><code><span class="nt">CN_SCIM_APP_LOGGERS</span><span class="p">:</span><span class="w"> </span>
-<span class="s">&#39;{&quot;</span><span class="w"></span>
-<span class="s">ldap_stats_log_level&quot;:&quot;INFO&quot;,</span><span class="w"></span>
-<span class="s">&quot;ldap_stats_log_target&quot;:&quot;FILE&quot;,</span><span class="w"></span>
+<span class="s">&#39;{</span><span class="w"></span>
 <span class="s">&quot;persistence_duration_log_level&quot;:&quot;INFO&quot;,</span><span class="w"></span>
 <span class="s">&quot;persistence_duration_log_target&quot;:&quot;FILE&quot;,</span><span class="w"></span>
 <span class="s">&quot;persistence_log_level&quot;:&quot;INFO&quot;,</span><span class="w"></span>
@@ -9007,7 +8985,8 @@ change it directly using <a href="#hack-it">kubectl edit</a> command:</p>
 <span class="s">&quot;scim_log_level&quot;:&quot;INFO&quot;,</span><span class="w"></span>
 <span class="s">&quot;scim_log_target&quot;:&quot;STDOUT&quot;,</span><span class="w"></span>
 <span class="s">&quot;script_log_level&quot;:&quot;INFO&quot;,</span><span class="w"></span>
-<span class="s">&quot;script_log_target&quot;:&quot;FILE&quot;}&#39;</span><span class="w"></span>
+<span class="s">&quot;script_log_target&quot;:&quot;FILE&quot;</span><span class="w"></span>
+<span class="s">}&#39;</span><span class="w"></span>
 </code></pre></div></p>
 <p>To override the current logging level in scim, you can either add the desired changes to a yaml file and apply it using <code>helm</code>, or
 change it directly using <a href="#hack-it">kubectl edit</a> command:</p>
@@ -9023,7 +9002,6 @@ change it directly using <a href="#hack-it">kubectl edit</a> command:</p>
 <span class="w">      </span><span class="nt">scimLogLevel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;TRACE&quot;</span><span class="w"></span>
 <span class="w">      </span><span class="nt">persistenceLogLevel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;TRACE&quot;</span><span class="w"></span>
 <span class="w">      </span><span class="nt">persistenceDurationLogLevel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;TRACE&quot;</span><span class="w"></span>
-<span class="w">      </span><span class="nt">ldapStatsLogLevel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;TRACE&quot;</span><span class="w"></span>
 <span class="w">      </span><span class="nt">scriptLogLevel</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;TRACE&quot;</span><span class="w"></span>
 <span class="l l-Scalar l-Scalar-Plain">............</span><span class="w"></span>
 <span class="l l-Scalar l-Scalar-Plain">............</span><span class="w">      </span>
@@ -9051,7 +9029,7 @@ This can cause deployments to break, but if you wish you may edit it directly an
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-09-27T12:12:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-30T06:58:42+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-30</span>
       
         <br>
         Created:
