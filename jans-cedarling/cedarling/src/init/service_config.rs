@@ -22,7 +22,7 @@ pub(crate) struct ServiceConfig {
 pub enum ServiceConfigError {
     /// Parse jwt algorithm error.
     #[error("could not parse an algorithim defined in the config: {0}")]
-    ParseAlgorithm(#[from] jwt::Error),
+    ParseAlgorithm(#[from] jwt::ParseAlgorithmError),
     /// Error that may occur during loading the policy store.
     #[error("Could not load policy: {0}")]
     PolicyStore(#[from] PolicyStoreLoadError),

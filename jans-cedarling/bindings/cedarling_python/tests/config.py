@@ -29,7 +29,7 @@ def sample_bootstrap_config():
     policy_source = PolicyStoreSource(json=policy_raw_json)
 
     policy_store_config = PolicyStoreConfig(
-        source=policy_source, store_id=None)
+        source=policy_source)
 
     jwt_config = JwtConfig(enabled=False)
 
