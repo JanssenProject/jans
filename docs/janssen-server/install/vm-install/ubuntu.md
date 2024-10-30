@@ -21,7 +21,7 @@ Before you install, check the [VM system requirements](vm-requirements.md).
 wget https://github.com/JanssenProject/jans/files/11814522/automation-jans-public-gpg.zip
 ```
 
-```shell
+```shell title="Command"
 unzip automation-jans-public-gpg.zip
 ```
 
