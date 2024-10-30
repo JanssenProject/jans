@@ -8,9 +8,9 @@
 pub mod key_service;
 use crate::common::policy_store::TrustedIssuer;
 
-use super::Error;
+use super::InitError;
 use jsonwebtoken as jwt;
-pub use key_service::*;
+pub use key_service::KeyService;
 use serde::de::DeserializeOwned;
 
 /// Represents the decoding strategy for JWT tokens.
@@ -47,15 +47,17 @@ impl DecodingStrategy {
     /// # Errors
     /// Returns an error if the specified algorithm is unrecognized or the key service initialization fails.
     pub fn new_with_validation(
-        config_algs: Vec<jwt::Algorithm>,
+        config_algs: Vec<String>,
         trusted_idps: Vec<TrustedIssuer>,
-    ) -> Result<Self, Error> {
+    ) -> Result<Self, InitError> {
         // initialize the key service with OpenID configuration endpoints
         let openid_conf_endpoints = trusted_idps
             .iter()
             .map(|x| x.openid_configuration_endpoint.as_ref())
             .collect();
-        let key_service = KeyService::new(openid_conf_endpoints).map_err(Error::KeyService)?;
+        let key_service = KeyService::new(openid_conf_endpoints)?;
+
+        let config_algs = parse_jwt_algorithms(config_algs).map_err(InitError::DecodingStrategy)?;
 
         Ok(Self::WithValidation {
             key_service,
@@ -69,7 +71,7 @@ impl DecodingStrategy {
         iss: Option<impl ToString>,
         aud: Option<impl ToString>,
         req_sub: bool,
-    ) -> Result<T, Error> {
+    ) -> Result<T, super::Error> {
         match self {
             DecodingStrategy::WithoutValidation => self.extract_claims(jwt),
             DecodingStrategy::WithValidation {
@@ -86,7 +88,7 @@ impl DecodingStrategy {
     ///
     /// # Errors
     /// Returns an error if the claims cannot be extracted.
-    pub fn extract_claims<T: DeserializeOwned>(&self, jwt_str: &str) -> Result<T, Error> {
+    pub fn extract_claims<T: DeserializeOwned>(&self, jwt_str: &str) -> Result<T, super::Error> {
         let mut validator = jwt::Validation::default();
         validator.insecure_disable_signature_validation();
         validator.validate_exp = false;
@@ -122,12 +124,12 @@ fn decode_and_validate_jwt<T: DeserializeOwned>(
     req_sub: bool,
     supported_algs: &[jwt::Algorithm],
     key_service: &KeyService,
-) -> Result<T, Error> {
+) -> Result<T, super::Error> {
     let header = jwt::decode_header(jwt).map_err(Error::Parsing)?;
 
     // reject unsupported algorithms early
     if !supported_algs.contains(&header.alg) {
-        return Err(Error::TokenSignedWithUnsupportedAlgorithm(header.alg));
+        return Err(Error::TokenSignedWithUnsupportedAlgorithm(header.alg).into());
     }
 
     // set up validation rules
@@ -149,14 +151,42 @@ fn decode_and_validate_jwt<T: DeserializeOwned>(
     let kid = &header
         .kid
         .ok_or_else(|| Error::MissingRequiredHeader("kid".into()))?;
-    let key = key_service.get_key(kid).map_err(Error::KeyService)?;
-    // TODO: handle tokens without a `kid` in the header
+    let key = key_service.get_key(kid)?;
+    // TODO: figure out how to handle tokens without a `kid` in the header
+    // there's no plans yet if we need to support this or not.
 
     // decode and validate the jwt
     let claims = jwt::decode::<T>(jwt, &key, &validator)
         .map_err(Error::Validation)?
         .claims;
     Ok(claims)
+}
+
+fn parse_jwt_algorithms(algorithms: Vec<String>) -> Result<Vec<jwt::Algorithm>, Error> {
+    let parsing_results = algorithms
+        .iter()
+        .map(|alg| string_to_alg(alg))
+        .collect::<Vec<Result<jwt::Algorithm, Box<str>>>>();
+
+    let (successes, errors): (Vec<_>, Vec<_>) =
+        parsing_results.into_iter().partition(Result::is_ok);
+
+    // Collect all errors into a single error message or return them as a vector.
+    if !errors.is_empty() {
+        let unsupported_algs = errors
+            .into_iter()
+            .filter_map(Result::err)
+            .collect::<Vec<Box<str>>>()
+            .join(", ");
+        return Err(Error::UnimplementedAlgorithm(unsupported_algs));
+    }
+
+    let algorithms = successes
+        .into_iter()
+        .filter_map(Result::ok)
+        .collect::<Vec<jwt::Algorithm>>();
+
+    Ok(algorithms)
 }
 
 /// Converts a string representation of an algorithm to a `jwt::Algorithm` enum.
@@ -169,7 +199,7 @@ fn decode_and_validate_jwt<T: DeserializeOwned>(
 ///
 /// # Errors
 /// Returns an error if the algorithm is not implemented.
-pub fn string_to_alg(algorithm: &str) -> Result<jwt::Algorithm, Error> {
+pub fn string_to_alg(algorithm: &str) -> Result<jwt::Algorithm, Box<str>> {
     match algorithm {
         "HS256" => Ok(jwt::Algorithm::HS256),
         "HS384" => Ok(jwt::Algorithm::HS384),
@@ -183,6 +213,58 @@ pub fn string_to_alg(algorithm: &str) -> Result<jwt::Algorithm, Error> {
         "PS384" => Ok(jwt::Algorithm::PS384),
         "PS512" => Ok(jwt::Algorithm::PS512),
         "EdDSA" => Ok(jwt::Algorithm::EdDSA),
-        _ => Err(Error::UnimplementedAlgorithm(algorithm.into())),
+        _ => Err(algorithm.into()),
     }
+}
+
+/// Error type for issues encountered during JWT decoding and validation.
+///
+/// The `DecodingStrategy` is responsible for parsing, validating, and verifying JWTs.
+/// This enum represents various errors that can occur during these processes, such as
+/// issues with parsing the token, unsupported algorithms, or validation failures.
+#[derive(thiserror::Error, Debug)]
+pub enum Error {
+    /// An error occurred while parsing the JWT.
+    ///
+    /// This error occurs when the provided JWT cannot be properly parsed.
+    /// This might happen if the token is malformed or contains invalid data
+    /// that does not conform to the JWT structure.
+    #[error("Error parsing the JWT: {0}")]
+    Parsing(#[source] jsonwebtoken::errors::Error),
+
+    /// The token was signed using an unsupported algorithm.
+    ///
+    /// This error occurs when the JWT's header specifies an algorithm that
+    /// is not supported by the current validation configuration. Common causes
+    /// include encountering an algorithm that is disallowed or not yet implemented
+    /// by the decoding strategy.
+    #[error("The JWT is signed with an unsupported algorithm: {0:?}")]
+    TokenSignedWithUnsupportedAlgorithm(jsonwebtoken::Algorithm),
+
+    /// A required header is missing from the JWT.
+    ///
+    /// This error occurs when a necessary header is missing from the JWT's header section,
+    /// preventing proper verification or validation of the token.
+    ///
+    /// *Certain headers, such as `kid` (Key ID), are required for proper JWT processing.*
+    #[error("The JWT is missing a required header: {0}")]
+    MissingRequiredHeader(String),
+
+    /// JWT validation failed.
+    ///
+    /// This error occurs when the JWT fails to pass validation checks. Common causes
+    /// include an invalid signature, expired tokens, or claims that do not meet
+    /// the expected criteria. The underlying validation error provides more context
+    /// on why the token was considered invalid.
+    #[error("Failed to validate the JWT: {0}")]
+    Validation(#[source] jsonwebtoken::errors::Error),
+
+    /// The configuration defines an unsupported or unimplemented algorithm.
+    ///
+    /// This error occurs when the validation configuration specifies an algorithm
+    /// that is either not implemented by the `DecodingStrategy` or not recognized
+    /// by the JWT service. This typically happens when the application tries to use
+    /// a newer or less common algorithm that has not been added to the supported set.
+    #[error("An algorithm(s) defined in the configuration is not yet implemented: {0}")]
+    UnimplementedAlgorithm(String),
 }

@@ -78,17 +78,20 @@ impl<'a> ServiceFactory<'a> {
         if let Some(jwt_service) = &self.container.jwt_service {
             jwt_service.clone()
         } else {
-            let config = match self.bootstrap_config.jwt_config {
+            let config = match &self.bootstrap_config.jwt_config {
                 crate::JwtConfig::Disabled => JwtServiceConfig::WithoutValidation,
-                crate::JwtConfig::Enabled { .. } => JwtServiceConfig::WithValidation {
-                    supported_algs: self.service_config.jwt_algorithms.clone(),
+                crate::JwtConfig::Enabled { signature_algorithms } => JwtServiceConfig::WithValidation {
+                    supported_algs: signature_algorithms.to_vec(),
                     trusted_idps: self.policy_store().trusted_issuers.expect("Expected trusted issuers to be present for JWT validation, but found None. Ensure that the policy store is properly initialized with trusted issuers before using JWT validation.").clone(),
                 },
             };
-
-            let service = Arc::new(JwtService::new_with_config(config));
-            self.container.jwt_service = Some(service.clone());
-            service
+            
+            // TODO: handle intialization errors 
+            let jwt_service = Arc::new(
+                JwtService::new_with_config(config).expect("should initialize jwt service"),
+            );
+            self.container.jwt_service = Some(jwt_service.clone());
+            jwt_service
         }
     }
 

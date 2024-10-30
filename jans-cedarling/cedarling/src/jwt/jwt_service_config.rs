@@ -9,7 +9,6 @@
 //! This configuration allows to initialize service without any errors.
 
 use crate::common::policy_store::TrustedIssuer;
-use crate::jwt;
 
 /// Configuration for JWT service
 pub enum JwtServiceConfig {
@@ -18,7 +17,7 @@ pub enum JwtServiceConfig {
 
     /// Decoding strategy that performs validation using a key service and supported algorithms.
     WithValidation {
-        supported_algs: Vec<jwt::Algorithm>,
+        supported_algs: Vec<String>,
         trusted_idps: Vec<TrustedIssuer>,
     },
 }

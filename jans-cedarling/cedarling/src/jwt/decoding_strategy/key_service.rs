@@ -5,16 +5,59 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-mod error;
-mod openid_config;
-
-pub use error::Error;
+use super::super::InitError;
 use jsonwebtoken::jwk::JwkSet;
 use jsonwebtoken::DecodingKey;
-use openid_config::*;
 use reqwest::blocking::Client;
+use serde::Deserialize;
 use std::collections::HashMap;
 use std::sync::Arc;
+use std::sync::RwLock;
+
+/// represents the source data for OpenID configuration.
+#[derive(Deserialize)]
+pub struct OpenIdConfigSource {
+    issuer: Box<str>,
+    jwks_uri: Box<str>,
+    // The following values are also normally returned when sending
+    // a GET request to the `openid_configuration_endpoint` but are
+    // not currently being used.
+    //
+    // authorization_endpoint: Box<str>,
+    // device_authorization_endpoint: Box<str>,
+    // token_endpoint: Box<str>,
+    // userinfo_endpoint: Box<str>,
+    // revocation_endpoint: Box<str>,
+    // response_types_supported: Vec<Box<str>>,
+    // subject_types_supported: Vec<Box<str>>,
+    // id_token_signing_algs_values_supported: Vec<Box<str>>,
+    // scopes_supported: Vec<Box<str>>,
+    // claims_supported: Vec<Box<str>>,
+}
+
+/// represents the OpenID configuration for an identity provider.
+pub struct OpenIdConfig {
+    pub jwks_uri: Box<str>,
+    // <key_id (`kid`), DecodingKey>
+    pub decoding_keys: Arc<RwLock<HashMap<Box<str>, Arc<DecodingKey>>>>,
+}
+
+impl OpenIdConfig {
+    /// creates an `OpenIdConfig` from the provided source.
+    ///
+    /// this method extracts the issuer and constructs a new `OpenIdConfig`
+    /// instance, initializing the decoding keys storage.
+    pub fn from_source(src: OpenIdConfigSource) -> (Box<str>, OpenIdConfig) {
+        let issuer = src.issuer;
+        (
+            issuer,
+            OpenIdConfig {
+                jwks_uri: src.jwks_uri,
+                decoding_keys: Arc::new(RwLock::new(HashMap::new())),
+            },
+        )
+    }
+}
 
 pub struct KeyService {
     idp_configs: HashMap<Box<str>, OpenIdConfig>, // <issuer (`iss`), OpenIdConfig>
@@ -28,20 +71,22 @@ impl KeyService {
     /// this method fetches the OpenID configuration and the associated keys (JWKS) for each
     /// endpoint, populating the internal `idp_configs` map. any HTTP errors or parsing
     /// failures will return a corresponding `Error`.
-    pub fn new(openid_conf_endpoints: Vec<&str>) -> Result<Self, Error> {
+    pub fn new(openid_conf_endpoints: Vec<&str>) -> Result<Self, InitError> {
         let mut idp_configs = HashMap::new();
-        let http_client = Client::builder().build().map_err(Error::Http)?;
+        let http_client = Client::builder()
+            .build()
+            .map_err(|e| InitError::KeyService(Error::Http(e)))?;
 
         // fetch IDP configs
         for endpoint in openid_conf_endpoints {
             let conf_src: OpenIdConfigSource = http_client
                 .get(endpoint)
                 .send()
-                .map_err(Error::Http)?
+                .map_err(|e| InitError::KeyService(Error::Http(e)))?
                 .error_for_status()
-                .map_err(Error::Http)?
+                .map_err(|e| InitError::KeyService(Error::Http(e)))?
                 .json()
-                .map_err(Error::RequestDeserialization)?;
+                .map_err(|e| InitError::KeyService(Error::RequestDeserialization(e)))?;
             let (issuer, conf) = OpenIdConfig::from_source(conf_src);
             idp_configs.insert(issuer, conf);
         }
@@ -55,15 +100,22 @@ impl KeyService {
             let jwks: JwkSet = http_client
                 .get(&*conf.jwks_uri)
                 .send()
-                .map_err(Error::Http)?
+                .map_err(|e| InitError::KeyService(Error::Http(e)))?
                 .error_for_status()
-                .map_err(Error::Http)?
+                .map_err(|e| InitError::KeyService(Error::Http(e)))?
                 .json()
-                .map_err(Error::RequestDeserialization)?;
-            let mut decoding_keys = conf.decoding_keys.write().map_err(|_| Error::Lock)?;
+                .map_err(|e| InitError::KeyService(Error::RequestDeserialization(e)))?;
+            let mut decoding_keys = conf
+                .decoding_keys
+                .write()
+                .map_err(|_| InitError::KeyService(Error::Lock))?;
             for jwk in jwks.keys {
-                let decoding_key = DecodingKey::from_jwk(&jwk).map_err(Error::KeyParsing)?;
-                let key_id = jwk.common.key_id.ok_or(Error::MissingKeyId)?;
+                let decoding_key = DecodingKey::from_jwk(&jwk)
+                    .map_err(|e| InitError::KeyService(Error::KeyParsing(e)))?;
+                let key_id = jwk
+                    .common
+                    .key_id
+                    .ok_or(InitError::KeyService(Error::MissingKeyId))?;
                 decoding_keys.insert(key_id.into(), Arc::new(decoding_key));
             }
         }
@@ -145,4 +197,59 @@ impl KeyService {
 
         Ok(())
     }
+}
+
+/// Error type for issues encountered in the Key Service.
+///
+/// The `KeyService` is responsible for retrieving and managing keys, used to
+/// decode JWTs. This enum represents the various errors that can occur when 
+/// interacting with the key service, including network issues, parsing problems, 
+/// and other key-related errors.
+#[derive(thiserror::Error, Debug)]
+
+pub enum Error {
+    /// The specified key ID (`kid`) was not found in the JSON Web Key Set (JWKS).
+    ///
+    /// This error occurs when the JWKS does not contain a key matching the provided
+    /// `kid`, which is required for verifying JWTs.
+    #[error("No key with `kid`=\"{0}\" found in the JWKS.")]
+    KeyNotFound(Box<str>),
+
+    /// An HTTP error occurred during the request to fetch the JWKS.
+    ///
+    /// This error occurs when the `KeyService` makes an HTTP request to retrieve
+    /// the JWKS and encounters issues such as connectivity failures, timeouts, or 
+    /// invalid responses.
+    #[error("HTTP error occurred: {0}")]
+    Http(#[source] reqwest::Error),
+
+    /// Failed to deserialize the HTTP response when fetching the JWKS.
+    ///
+    /// This error occurs when the response body from the HTTP request cannot be
+    /// deserialized into the expected JSON format, possibly due to invalid or
+    /// malformed data from the server.
+    #[error("Failed to deserialize the response from the HTTP request: {0}")]
+    RequestDeserialization(#[source] reqwest::Error),
+
+    /// Failed to parse a decoding key from the JWKS JSON data.
+    ///
+    /// This error occurs when the JWKS contains invalid or unsupported key data
+    /// making it impossible to parse a valid key that can be used for JWT decoding.
+    #[error("Error parsing decoding key from JWKS JSON: {0}")]
+    KeyParsing(#[source] jsonwebtoken::errors::Error),
+
+    /// The JSON Web Key (JWK) is missing the required `kid` field.
+    ///
+    /// The `kid` (Key ID) is necessary to identify the correct key in the JWKS
+    /// when verifying a JWT. This error occurs if the JWK does not contain a `kid`.
+    #[error("The JWK is missing a required `kid`.")]
+    MissingKeyId,
+
+    /// Failed to acquire a write lock on the decoding keys.
+    ///
+    /// This error is occurs when the service attempts to acquire a write lock
+    /// on the set of decoding keys, but the lock is poisoned (e.g., due to a panic
+    /// in another thread), making it unsafe to proceed.
+    #[error("Failed to acquire write lock on decoding keys.")]
+    Lock,
 }

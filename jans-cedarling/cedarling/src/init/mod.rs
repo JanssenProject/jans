@@ -10,9 +10,7 @@
 //! - load Cedar Policies
 //! - get keys for JWT validation
 
-mod jwt_algorithm;
 pub(crate) mod policy_store;
 pub(crate) mod service_config;
 pub(crate) mod service_factory;
-
 pub(crate) use service_factory::ServiceFactory;

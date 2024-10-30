@@ -14,16 +14,12 @@
 //! - Verifying the validity of JWTs based on claims such as expiration time and audience.
 
 mod decoding_strategy;
-mod error;
 mod jwt_service_config;
 #[cfg(test)]
 mod test;
 mod token;
 
-pub use decoding_strategy::string_to_alg;
-use decoding_strategy::DecodingStrategy;
-pub use error::*;
-pub use jsonwebtoken::Algorithm;
+use decoding_strategy::{key_service, DecodingStrategy};
 pub use jwt_service_config::*;
 use serde::de::DeserializeOwned;
 use token::*;
@@ -50,20 +46,20 @@ impl JwtService {
     }
 
     /// Initializes a new `JwtService` instance based on the provided configuration.
-    pub(crate) fn new_with_config(config: JwtServiceConfig) -> Self {
+    pub(crate) fn new_with_config(config: JwtServiceConfig) -> Result<Self, InitError> {
         match config {
             JwtServiceConfig::WithoutValidation => {
                 let decoding_strategy = DecodingStrategy::new_without_validation();
-                Self { decoding_strategy }
+                Ok(Self { decoding_strategy })
             },
             JwtServiceConfig::WithValidation {
                 supported_algs,
                 trusted_idps,
             } => {
                 let decoding_strategy =
-                    DecodingStrategy::new_with_validation(supported_algs, trusted_idps)
-                        .expect("could not initialize decoding strategy with validation");
-                Self { decoding_strategy }
+                    DecodingStrategy::new_with_validation(supported_algs, trusted_idps)?;
+
+                Ok(Self { decoding_strategy })
             },
         }
     }
@@ -123,4 +119,53 @@ impl JwtService {
         // TODO: validate user info token
         Ok((access_token_claims, id_token_claims, userinfo_token_claims))
     }
+}
+
+/// Error type for initialization failures in the JWT service.
+///
+/// This enum represents errors that may occur during the initialization of
+/// components within the JWT service, such as the decoding strategy and key service.
+/// It provides a way to propagate errors from lower-level modules to the top level.
+#[derive(thiserror::Error, Debug)]
+pub enum InitError {
+    /// An error occurred while initializing the decoding strategy.
+    ///
+    /// This error occurs when the `DecodingStrategy` failed to initialize,
+    /// potentially due to issues such as invalid configuration, missing keys, or
+    /// other initialization errors.
+    #[error("Error initializing Decoding Strategy: {0}")]
+    DecodingStrategy(#[from] decoding_strategy::Error),
+
+    /// An error occurred while initializing the key service.
+    ///
+    /// This error occurs when the `KeyService` could not be initialized,
+    /// which may happen due to problems like failing to retrieve necessary keys
+    /// or encountering network errors while accessing a key provider.
+    #[error("Error initializing Key Service: {0}")]
+    KeyService(#[from] key_service::Error),
+}
+
+/// Error type for issues encountered in the JWT service.
+///
+/// This enum encapsulates various errors that may arise while decoding or
+/// validating JWTs within the service. It serves as a central point for
+/// handling errors related to JWT processing, allowing easy propagation
+/// of errors from lower-level components.
+#[derive(thiserror::Error, Debug)]
+pub enum Error {
+    /// An error occurred during JWT decoding.
+    ///
+    /// This error occurs when the JWT could not be decoded properly,
+    /// which may be due to issues such as malformed tokens or unsupported
+    /// algorithms in the JWT header.
+    #[error("Error decoding JWT: {0}")]
+    Decoding(#[from] decoding_strategy::Error),
+
+    /// An error from the key service occurred while processing JWTs.
+    ///
+    /// This error occurs when there was an issue related to key retrieval,
+    /// management, or validation during JWT processing, originating from the
+    /// `KeyService`.
+    #[error("Key Service error: {0}")]
+    KeyService(#[from] key_service::Error),
 }
