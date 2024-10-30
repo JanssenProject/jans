@@ -16,7 +16,7 @@ pub struct Request {
     pub access_token: String,
     /// Id Token raw value
     pub id_token: String,
-    /// User info token raw value
+    /// Userinfo Token raw value
     pub userinfo_token: String,
     /// cedar_policy action
     pub action: String,

@@ -13,18 +13,18 @@
         {
             "name": "IDP1",
             "description": "some idp",
-            "openid_configuration_endpoint": "https://www.idp.com/.well-known/openid-configuration",
+            "openid_configuration_endpoint": "https://test-casa.gluu.info/.well-known/openid-configuration",
             "token_metadata": [
                 {
-                    "type": "Access",
+                    "type": "access_token",
                     "user_id": "aud"
                 },
                 {
-                    "type": "Id",
+                    "type": "id_token",
                     "user_id": "sub"
                 },
                 {
-                    "type": "userinfo",
+                    "type": "userinfo_token",
                     "user_id": "email",
                     "role_mapping": "role"
                 }

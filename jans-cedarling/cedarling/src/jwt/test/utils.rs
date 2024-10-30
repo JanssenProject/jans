@@ -8,7 +8,10 @@
 use jsonwebkey as jwk;
 use jsonwebtoken as jwt;
 use serde::{Deserialize, Serialize};
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::{
+    time::{SystemTime, UNIX_EPOCH},
+    u64,
+};
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Default)]
 pub struct AccessTokenClaims {
@@ -31,8 +34,12 @@ pub struct IdTokenClaims {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Default)]
-// TODO: implement
-pub struct UserInfoTokenClaims {}
+pub struct UserinfoTokenClaims {
+    pub sub: String,
+    pub client_id: String,
+    pub name: String,
+    pub email: String,
+}
 
 /// Generates a set of private and public keys using ES256
 ///
@@ -65,70 +72,41 @@ pub fn generate_keys() -> (Vec<(String, jwt::EncodingKey)>, String) {
     (private_keys, public_keys)
 }
 
-/// Generates an access_token using a ket from a keyset
-pub fn generate_access_token_using_keys(
-    claims: &mut AccessTokenClaims,
-    encoding_keys: &Vec<(String, jwt::EncodingKey)>,
-    expired: bool,
-) -> String {
-    // set expiration
-    if expired {
-        // generate an expired token
-        claims.iat = 1695198692; // Wed Sep 20 2023 08:31:32 GMT+0000
-        claims.exp = 1695195092; // Wed Sep 20 2023 07:31:32 GMT+0000
-    } else {
-        // Set expiration 1 hour from now
+pub struct Timestamp;
+
+impl Timestamp {
+    pub fn now() -> u64 {
         let now = SystemTime::now();
-        claims.iat = now.duration_since(UNIX_EPOCH).unwrap().as_secs();
-        claims.exp = claims.iat + 3600;
+        now.duration_since(UNIX_EPOCH).unwrap().as_secs()
     }
 
-    // select a key from the keyset
-    // for simplicity, were just choosing the first one
-    let key_id = encoding_keys[0].0.clone();
-    let enc_key = &encoding_keys[0].1;
+    pub fn one_hour_before_now() -> u64 {
+        let now = SystemTime::now();
+        now.duration_since(UNIX_EPOCH).unwrap().as_secs() - 3600
+    }
 
-    // specify the header
-    let header = jwt::Header {
-        alg: jwt::Algorithm::ES256,
-        kid: Some(key_id),
-        ..Default::default()
-    };
-
-    // serialize token to a string
-    jwt::encode(&header, &claims, enc_key).expect("should generate token")
+    pub fn one_hour_after_now() -> u64 {
+        let now = SystemTime::now();
+        now.duration_since(UNIX_EPOCH).unwrap().as_secs() + 3600
+    }
 }
 
-/// Generates an access_token using a ket from a keyset
-pub fn generate_id_token_using_keys(
-    claims: &mut IdTokenClaims,
-    encoding_keys: &Vec<(String, jwt::EncodingKey)>,
-    expired: bool,
+/// Generates a token string signed with ES256
+pub fn generate_token_using_claims(
+    claims: &impl Serialize,
+    key_id: impl ToString,
+    encoding_key: &jwt::EncodingKey,
 ) -> String {
-    // set expiration
-    if expired {
-        // generate an expired token
-        claims.iat = 1695198692; // Wed Sep 20 2023 08:31:32 GMT+0000
-        claims.exp = 1695195092; // Wed Sep 20 2023 07:31:32 GMT+0000
-    } else {
-        // Set expiration 1 hour from now
-        let now = SystemTime::now();
-        claims.iat = now.duration_since(UNIX_EPOCH).unwrap().as_secs();
-        claims.exp = claims.iat + 3600;
-    }
-
     // select a key from the keyset
     // for simplicity, were just choosing the second one
-    let key_id = encoding_keys[1].0.clone();
-    let enc_key = &encoding_keys[1].1;
 
     // specify the header
     let header = jwt::Header {
         alg: jwt::Algorithm::ES256,
-        kid: Some(key_id),
+        kid: Some(key_id.to_string()),
         ..Default::default()
     };
 
     // serialize token to a string
-    jwt::encode(&header, &claims, enc_key).expect("should generate token")
+    jwt::encode(&header, &claims, encoding_key).expect("should generate token")
 }
