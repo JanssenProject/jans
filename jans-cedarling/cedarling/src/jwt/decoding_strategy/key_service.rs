@@ -21,7 +21,7 @@ pub struct KeyService {
     http_client: Client,
 }
 
-#[allow(unused)]
+// #[allow(unused)]
 impl KeyService {
     /// initializes a new `KeyService` with the provided OpenID configuration endpoints.
     ///
@@ -46,12 +46,12 @@ impl KeyService {
             idp_configs.insert(issuer, conf);
         }
 
-        /// retrieves a decoding key based on the provided key ID (`kid`).
-        ///
-        /// this method first attempts to retrieve the key from the local key store. if the key
-        /// is not found, it will refresh the JWKS and try again. if the key is still not found,
-        /// an error of type `KeyNotFound` is returned.
-        for (iss, conf) in &mut idp_configs {
+        // retrieves a decoding key based on the provided key ID (`kid`).
+        //
+        // this method first attempts to retrieve the key from the local key store. if the key
+        // is not found, it will refresh the JWKS and try again. if the key is still not found,
+        // an error of type `KeyNotFound` is returned.
+        for (_iss, conf) in &mut idp_configs {
             let jwks: JwkSet = http_client
                 .get(&*conf.jwks_uri)
                 .send()
@@ -80,7 +80,7 @@ impl KeyService {
     /// is not found, it will refresh the JWKS and try again. if the key is still not found,
     /// an error of type `KeyNotFound` is returned.
     pub fn get_key(&self, kid: &str) -> Result<Arc<DecodingKey>, Error> {
-        for (iss, config) in &self.idp_configs {
+        for (iss, _config) in &self.idp_configs {
             // first try to get the key from the local keystore
             if let Some(key) = self.get_key_from_iss(iss, kid)? {
                 return Ok(key.clone());
@@ -89,7 +89,9 @@ impl KeyService {
                 eprintln!("could not find {}, updating jwks", kid);
                 // if the key is not found in the local keystore, update
                 // the local keystore and try again
-                self.update_jwks(iss);
+
+                // TODO: handle result
+                _ = self.update_jwks(iss);
                 if let Some(key) = self.get_key_from_iss(iss, kid)? {
                     return Ok(key.clone());
                 }
