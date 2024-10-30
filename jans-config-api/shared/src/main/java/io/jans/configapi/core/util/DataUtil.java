@@ -27,17 +27,24 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.TimeZone;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatterBuilder;
+import java.time.temporal.TemporalAccessor;
 import java.time.format.DateTimeFormatter;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.unboundid.util.StaticUtils;
 
 @ApplicationScoped
 @Named("dataUtil")
@@ -241,26 +248,33 @@ public class DataUtil {
         return getFieldDataType(clazz, fieldList);
     }
 
-    public static Date formatStrDate(String dateString, String datePattern) {
+    public static String formatStrDate(String dateString, String datePattern) {
         logger.debug("Format String Date - dateString:{}: datePattern:{}", dateString, datePattern);
-        Date date = null;
+        String date = null;
         try {
             if (StringUtils.isBlank(dateString)) {
                 return date;
             }
 
             if (StringUtils.isBlank(datePattern)) {
-                if (dateString.contains(":")) {
+                if (dateString.contains("T")) {
                     datePattern = "yyyy-MM-dd'T'HH:mm:ss";
+                } else if (dateString.contains(":")) {
+                    datePattern = "yyyy-MM-dd HH:mm:ss";
                 } else {
                     datePattern = "yyyy-MM-dd";
                 }
             }
 
             SimpleDateFormat dateFormat = new SimpleDateFormat(datePattern);
-            logger.debug("Returning datePattern:{}, dateFormat:{} ", datePattern, dateFormat);
-            date = dateFormat.parse(dateString);
-            logger.debug("Returning dateFormat:{}, date:{} ", dateFormat, date);
+            logger.error("\n\n Date format datePattern:{}, dateFormat:{} ", datePattern, dateFormat);
+
+            // format in (almost) ISO8601 format
+            String dateStr = dateFormat.parse(dateString).toString();
+            logger.error("\n\n  datePattern:{}, dateFormat:{} ", datePattern, dateFormat);
+            // remap the timezone from 0000 to 00:00 (starts at char 22)
+            date = dateStr.substring(0, 22) + ":" + dateStr.substring(22);
+            logger.error("\n\n\n Returning dateFormat:{}, date:{} ", dateFormat, date);
 
         } catch (Exception ex) {
             logger.error("Error while formatting String Date - dateString{" + dateString + "}", ex);
@@ -477,7 +491,7 @@ public class DataUtil {
         return dateFilter;
     }
 
-    public Date decodeTime(String strDate) {
+    public static Date decodeTime(String strDate) {
         logger.error("decodeTime - strDate:{} ", strDate);
         Date date = null;
         if (StringHelper.isEmpty(strDate)) {
@@ -509,14 +523,18 @@ public class DataUtil {
 
         String strDateField = fieldFilterData.getField();
         String strDateValue = fieldFilterData.getValue();
-        String dateZ = strDateValue.endsWith("Z") ? strDateValue : strDateValue + "Z";
-        Date dateValue = formatStrDate(dateZ, null);
-        logger.info(" strDateField:{}, fieldFilterData.getValue():{}, dateValue:{}", strDateField,
+        String dateValue = getIso8601Date(strDateValue, null);
+        logger.error(" *** \n\n\n strDateField:{}, fieldFilterData.getValue():{}, dateValue:{}", strDateField,
                 fieldFilterData.getValue(), dateValue);
 
+        if (StringUtils.isNotBlank(dateValue) && dateValue.contains("Z")) {
+            dateValue = dateValue.replaceAll("Z", "");
+        }
+        logger.error(" *** \n\n\n New strDateField:{}, dateValue:{}", strDateField, dateValue + "\n\n");
+
         if (FilterOperator.EQUALITY.getSign().equalsIgnoreCase(fieldFilterData.getOperator())) {
-            // dateFilter = Filter.createEqualityFilter(strDateField, dateValue);
-            dateFilter = createDateEqualFilter(fieldFilterData);
+            dateFilter = Filter.createEqualityFilter(strDateField, dateValue);
+            // dateFilter = createDateEqualFilter(fieldFilterData);
         } else if (FilterOperator.GREATER.getSign().equalsIgnoreCase(fieldFilterData.getOperator())
                 || FilterOperator.GREATER_OR_EQUAL.getSign().equalsIgnoreCase(fieldFilterData.getOperator())) {
 
@@ -570,6 +588,50 @@ public class DataUtil {
         }
         logger.info("Final Date Filter for fieldFilterData:{}, dataValue:{}", fieldFilterData, dataValue);
         return dataFilter;
+    }
+
+    public static Long ISOToMillis(String strDate) {
+
+        TemporalAccessor ta;
+        try {
+            ta = ZonedDateTime.parse(strDate);
+        } catch (Exception e) {
+            try {
+                LocalDateTime.parse(strDate);
+                // Assume local zone...
+                String zoneId = ZoneOffset.ofTotalSeconds(TimeZone.getDefault().getRawOffset() / 1000).toString();
+                ta = ZonedDateTime.parse(strDate + zoneId);
+            } catch (Exception e1) {
+                return null;
+            }
+        }
+
+        try {
+            return Instant.from(ta).toEpochMilli();
+        } catch (Exception e) {
+            return null;
+        }
+
+    }
+
+    public static String ISOToGeneralizedStringDate(String strDate) {
+        return Optional.ofNullable(ISOToMillis(strDate)).map(StaticUtils::encodeGeneralizedTime).orElse(null);
+    }
+
+    public static String convertToIso8601(String dateString, String pattern) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
+        LocalDateTime dateTime = LocalDateTime.parse(dateString, formatter);
+        return dateTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+    }
+
+    public static String getIso8601Date(String dateString, String pattern) {
+        logger.error("\n\n getIso8601Date for dateString:{}, pattern:{}", dateString, pattern);
+        if (StringUtils.isBlank(pattern)) {
+            pattern = "yyyy-MM-dd'T'HH:mm:ss";
+        }
+        String iso8601String = convertToIso8601(dateString, pattern);
+        logger.error("\n\n getIso8601Date for iso8601String:{}", iso8601String); // Output: 2023-12-31T23:59:59
+        return iso8601String;
     }
 
 }
