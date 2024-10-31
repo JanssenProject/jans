@@ -65,14 +65,11 @@ impl JwtService {
     /// `id_token` is validated against claims from the `access_token`.
     ///
     /// # Token Validation Rules:
-    /// 1. The `access_token` is decoded and validated first, with its `aud` (which is also the `client_id`)
-    ///    stored for later use.
-    /// 2. The `id_token.aud` is then validated against the `access_token.aud` and the `id_token.iss` with `access_token.iss`.
-    /// 3. An error is returned if `id_token.aud` does not match `access_token.client_id` or
-    ///    `id_token.iss` does not match with `access_token.iss`.
-    /// 4. The `userinfo_token.client_id` is then validated against the `access_token.aud` and the `userinfo_token.sub` with `id_token.sub`.
-    /// 5. An error is returned if `userinfo.client_id` does not match `access_token.aud` or
-    ///    `userinfo.sub` does not match with `id_token.sub`.
+    /// - `access_token.iss` == `id_token.iss` == `userinfo_token.iss`
+    /// - `access_token.aud` == `id_token.aud` == `userinfo_token.aud`
+    /// - `id_token.sub` == `userinfo_token.sub`
+    /// - token must not be expired.
+    /// - token must not be used before the `nbf` timestamp.
     ///
     /// # Returns
     /// A tuple containing the decoded claims for the `access_token`, `id_token`, and

@@ -152,11 +152,9 @@ fn decode_and_validate_jwt<T: DeserializeOwned>(
     validator.sub = decoding_args.sub.map(|sub| sub.to_string());
 
     // fetch decoding key from the KeyService
-    let kid = &header
-        .kid
-        .ok_or_else(|| Error::JwkMissingRequiredHeader("kid".into()))?;
+    let kid = &header.kid.ok_or_else(|| Error::JwtMissingKeyId)?;
     let key = key_service.get_key(kid).map_err(Error::KeyService)?;
-    // TODO: handle tokens without a `kid` in the header
+    // TODO: potentially handle JWTs without a `kid` in the future
 
     // decode and validate the jwt
     let claims = jwt::decode::<T>(decoding_args.jwt, &key, &validator)

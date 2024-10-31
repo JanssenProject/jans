@@ -1,34 +1,46 @@
 use super::key_service;
 use jsonwebtoken as jwt;
 
-/// Error type for the JWT service.
+/// Error type for JWT decoding_strategy operations.
+///
+/// This enum defines errors that can occur during the parsing, validation,
+/// and processing of JWTs, including issues with the key service and unsupported
+/// algorithms.
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
-    /// Indicates an error encountered while parsing the JWT.
+    /// Error encountered while parsing the JWT.
     ///
-    /// This variant occurs when the provided JWT cannot be properly parsed.
+    /// This error occurs when the provided JWT cannot be properly parsed,
+    /// possibly due to malformed structure or invalid encoding.
     #[error("Error parsing the JWT: {0}")]
     Parsing(#[source] jwt::errors::Error),
 
-    /// Indicates that a required header is missing from the JWK.
+    /// Missing required `kid` header in the JWT.
     ///
-    /// The `kid` header is used to identify which key should be used to validate
-    /// Json Web Tokens. Currently, handling Json Web Keys
-    /// without a `kid` is not supported.
-    #[error("The JWK is missing a required header: {0}")]
-    JwkMissingRequiredHeader(String),
+    /// The `kid` (Key ID) header is essential for identifying the correct key
+    /// for JWT validation. Handling of JWTs without a `kid` is currently unsupported.
+    #[error("The JWT is missing a required `kid` header: `kid`")]
+    JwtMissingKeyId,
 
-    /// Indicates that the token was signed with an unsupported algorithm.
+    /// Token signed with an unsupported algorithm.
     ///
-    /// This occurs when the JWT header specifies an algorithm that is not supported
-    /// by the current validation configuration.
+    /// This error occurs when the JWT specifies a signing algorithm that is not
+    /// supported by the current validation configuration, making it invalid.
     #[error("The JWT is signed with an unsupported algorithm: {0:?}")]
     TokenSignedWithUnsupportedAlgorithm(jwt::Algorithm),
 
-    /// Indicates that the token failed the validation
+    /// Token failed validation.
+    ///
+    /// This error indicates that the token did not meet the necessary validation
+    /// criteria, which may involve signature verification, claim checks, or other
+    /// validation requirements.
     #[error("Token validation failed: {0}")]
     Validation(#[source] jwt::errors::Error),
 
+    /// Error encountered in the Key Service.
+    ///
+    /// This error is returned when an issue arises with the Key Service, which
+    /// manages keys for signing and verifying JWTs.
     #[error("There was an error with the Key Service: {0}")]
     KeyService(#[from] key_service::Error),
 }

@@ -16,6 +16,7 @@ pub enum Error {
     /// it has an invalid signature, has expired, or contains incorrect claims.
     #[error("The `access_token` is invalid or has failed validation: {0}")]
     InvalidAccessToken(#[source] decoding_strategy::Error),
+
     /// Error indicating that the provided id token is invalid.
     ///
     /// This occurs when the given id token fails validation, such as when
