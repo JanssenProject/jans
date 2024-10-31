@@ -171,8 +171,7 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     KC_DB_URL_PORT=3306 \
     KC_DB_URL_DATABASE=keycloak \
     KC_DB_URL_PROPERTIES=?useUnicode=true&characterEncoding=UTF-8&character_set_server=utf8mb4 \
-    QUARKUS_TRANSACTION_MANAGER_ENABLE_RECOVERY=false \
-    MYSQL_SIMPLE_JSON=true
+    QUARKUS_TRANSACTION_MANAGER_ENABLE_RECOVERY=false
 
 # ==========
 # misc stuff

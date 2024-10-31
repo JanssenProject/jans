@@ -197,7 +197,6 @@ Kubernetes: `>=v1.22.0-0`
 | configmap.cnSqlDbSchema | string | `""` | Schema name used by SQL database (default to empty-string; if using MySQL, the schema name will be resolved as the database name, whereas in PostgreSQL the schema name will be resolved as `"public"`). |
 | configmap.cnSqlDbTimezone | string | `"UTC"` | SQL database timezone. |
 | configmap.cnSqlDbUser | string | `"jans"` | SQL database username. |
-| configmap.cnSqlSimpleJson | bool | `true` | Enable simple JSON data format of multivalued columns (JSON array instead of object) in MySQL. Default to true. Existing installation should set the value to false. |
 | configmap.cnSqldbUserPassword | string | `"Test1234#"` | SQL password  injected the secrets . |
 | configmap.cnVaultAddr | string | `"http://localhost:8200"` | Base URL of Vault. |
 | configmap.cnVaultAppRolePath | string | `"approle"` | Path to Vault AppRole. |

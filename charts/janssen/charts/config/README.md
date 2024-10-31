@@ -69,7 +69,6 @@ Kubernetes: `>=v1.22.0-0`
 | configmap.cnSqlDbPort | int | `3306` | SQL database port. |
 | configmap.cnSqlDbTimezone | string | `"UTC"` | SQL database timezone. |
 | configmap.cnSqlDbUser | string | `"jans"` | SQL database username. |
-| configmap.cnSqlSimpleJson | bool | `true` | Enable simple JSON data format of multivalued columns (JSON array instead of object) in MySQL. Default to true. Existing installation should set the value to false. |
 | configmap.cnSqldbUserPassword | string | `"Test1234#"` | SQL password  injected in the secrets. |
 | configmap.cnVaultAddr | string | `"http://localhost:8200"` | Base URL of Vault. |
 | configmap.cnVaultAppRolePath | string | `"approle"` | Path to Vault AppRole. |

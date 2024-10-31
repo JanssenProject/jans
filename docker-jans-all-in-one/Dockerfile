@@ -229,8 +229,7 @@ ENV JETTY_BASE=/opt/jans/jetty \
     KC_DB_URL_PORT=3306 \
     KC_DB_URL_DATABASE=keycloak \
     KC_DB_URL_PROPERTIES=?useUnicode=true&characterEncoding=UTF-8&character_set_server=utf8mb4 \
-    QUARKUS_TRANSACTION_MANAGER_ENABLE_RECOVERY=false \
-    MYSQL_SIMPLE_JSON=true
+    QUARKUS_TRANSACTION_MANAGER_ENABLE_RECOVERY=false
 
 LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/all-in-one" \
     org.opencontainers.image.authors="Janssen Project <support@jans.io>" \

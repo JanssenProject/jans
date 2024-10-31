@@ -202,8 +202,7 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_SCIM_JETTY_PORT=8080 \
     CN_SCIM_JETTY_HOST=0.0.0.0 \
     CN_JETTY_ARGS="" \
-    CN_SSL_CERT_FROM_SECRETS=true \
-    MYSQL_SIMPLE_JSON=true
+    CN_SSL_CERT_FROM_SECRETS=true
 
 # ==========
 # misc stuff

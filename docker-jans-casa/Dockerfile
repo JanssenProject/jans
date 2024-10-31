@@ -206,8 +206,7 @@ ENV CN_MAX_RAM_PERCENTAGE=75.0 \
     CN_CASA_JETTY_HOST=0.0.0.0 \
     CN_SHARE_AUTH_CONF=true \
     CN_JETTY_ARGS="" \
-    CN_SSL_CERT_FROM_SECRETS=true \
-    MYSQL_SIMPLE_JSON=true
+    CN_SSL_CERT_FROM_SECRETS=true
 
 # ==========
 # misc stuff
