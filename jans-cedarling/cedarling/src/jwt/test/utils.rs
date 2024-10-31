@@ -7,39 +7,11 @@
 
 use jsonwebkey as jwk;
 use jsonwebtoken as jwt;
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use std::{
     time::{SystemTime, UNIX_EPOCH},
     u64,
 };
-
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Default)]
-pub struct AccessTokenClaims {
-    pub iss: String,
-    pub aud: String,
-    pub sub: String,
-    pub scopes: String,
-    pub exp: u64,
-    pub iat: u64,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Default)]
-pub struct IdTokenClaims {
-    pub iss: String,
-    pub sub: String,
-    pub aud: String,
-    pub email: String,
-    pub exp: u64,
-    pub iat: u64,
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Default)]
-pub struct UserinfoTokenClaims {
-    pub sub: String,
-    pub client_id: String,
-    pub name: String,
-    pub email: String,
-}
 
 /// Generates a set of private and public keys using ES256
 ///

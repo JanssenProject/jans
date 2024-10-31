@@ -30,28 +30,28 @@ fn errors_on_invalid_aud() {
     let (encoding_keys, jwks) = generate_keys();
 
     // setup token claims
-    let access_token_claims = AccessTokenClaims {
-        iss: server.url(),
-        aud: "some_aud".to_string(),
-        sub: "some_sub".to_string(),
-        scopes: "some_scope".to_string(),
-        iat: Timestamp::now(),
-        exp: Timestamp::one_hour_after_now(),
-    };
-    let id_token_claims = IdTokenClaims {
-        iss: server.url(),
-        sub: "some_sub".to_string(),
-        aud: "another_aud".to_string(),
-        email: "some_email@gmail.com".to_string(),
-        iat: Timestamp::now(),
-        exp: Timestamp::one_hour_after_now(),
-    };
-    let userinfo_token_claims = UserinfoTokenClaims {
-        sub: "some_sub".to_string(),
-        client_id: "some_client_id".to_string(),
-        name: "ferris".to_string(),
-        email: "ferris@gluu.com".to_string(),
-    };
+    let access_token_claims = json!({
+        "iss": server.url(),
+        "aud": "some_aud".to_string(),
+        "sub": "some_sub".to_string(),
+        "scopes": "some_scope".to_string(),
+        "iat": Timestamp::now(),
+        "exp": Timestamp::one_hour_after_now(),
+    });
+    let id_token_claims = json!({
+        "iss": server.url(),
+        "sub": "some_sub".to_string(),
+        "aud": "another_aud".to_string(),
+        "email": "some_email@gmail.com".to_string(),
+        "iat": Timestamp::now(),
+        "exp": Timestamp::one_hour_after_now(),
+    });
+    let userinfo_token_claims = json!({
+        "sub": "some_sub".to_string(),
+        "client_id": "some_client_id".to_string(),
+        "name": "ferris".to_string(),
+        "email": "ferris@gluu.com".to_string(),
+    });
 
     // generate the signed token strings
     let access_token = generate_token_using_claims(
@@ -98,7 +98,7 @@ fn errors_on_invalid_aud() {
     });
 
     let decode_result = jwt_service
-        .decode_tokens::<AccessTokenClaims, IdTokenClaims, UserinfoTokenClaims>(
+        .decode_tokens::<serde_json::Value, serde_json::Value, serde_json::Value>(
             &access_token,
             &id_token,
             &userinfo_token,

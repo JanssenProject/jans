@@ -6,6 +6,7 @@
  */
 
 use super::{super::decoding_strategy::DecodingStrategy, super::JwtService, *};
+use serde_json::json;
 
 #[test]
 /// Tests decoding JWT token claims without validation.
@@ -21,28 +22,28 @@ fn can_decode_claims_without_validation() {
     let (encoding_keys, _jwks) = generate_keys();
 
     // setup claims for access token and ID token
-    let access_token_claims = AccessTokenClaims {
-        iss: "https://accounts.google.com".to_string(),
-        aud: "some_other_aud".to_string(),
-        sub: "some_sub".to_string(),
-        scopes: "some_scope".to_string(),
-        exp: Timestamp::now(),
-        iat: Timestamp::one_hour_before_now(), // expired token
-    };
-    let id_token_claims = IdTokenClaims {
-        iss: "https://accounts.facebook.com".to_string(),
-        sub: "some_sub".to_string(),
-        aud: "some_aud".to_string(),
-        email: "some_email@gmail.com".to_string(),
-        exp: Timestamp::now(),
-        iat: Timestamp::one_hour_before_now(), // expired token
-    };
-    let userinfo_token_claims = UserinfoTokenClaims {
-        sub: "another_sub".to_string(),
-        client_id: "some_client_id".to_string(),
-        name: "ferris".to_string(),
-        email: "ferris@gluu.com".to_string(),
-    };
+    let access_token_claims = json!({
+        "iss": "https://accounts.google.com".to_string(),
+        "aud": "some_other_aud".to_string(),
+        "sub": "some_sub".to_string(),
+        "scopes": "some_scope".to_string(),
+        "exp": Timestamp::now(),
+        "iat": Timestamp::one_hour_before_now(), // expired token
+    });
+    let id_token_claims = json!({
+        "iss": "https://accounts.facebook.com".to_string(),
+        "sub": "some_sub".to_string(),
+        "aud": "some_aud".to_string(),
+        "email": "some_email@gmail.com".to_string(),
+        "exp": Timestamp::now(),
+        "iat": Timestamp::one_hour_before_now(), // expired token
+    });
+    let userinfo_token_claims = json!({
+        "sub": "another_sub".to_string(),
+        "client_id": "some_client_id".to_string(),
+        "name": "ferris".to_string(),
+        "email": "ferris@gluu.com".to_string(),
+    });
 
     // generate the signed token strings
     let access_token = generate_token_using_claims(
@@ -60,7 +61,7 @@ fn can_decode_claims_without_validation() {
 
     // decode and validate both the access token and the ID token
     let (access_token_result, id_token_result, userinfo_token_result) = jwt_service
-        .decode_tokens::<AccessTokenClaims, IdTokenClaims, UserinfoTokenClaims>(
+        .decode_tokens::<serde_json::Value, serde_json::Value, serde_json::Value>(
             &access_token,
             &id_token,
             &userinfo_token,

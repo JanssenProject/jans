@@ -5,8 +5,6 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-use crate::jwt::TokenValidationError;
-
 use super::{
     super::{
         decoding_strategy::{
@@ -17,6 +15,7 @@ use super::{
     },
     *,
 };
+use crate::jwt::TokenValidationError;
 use jsonwebtoken::Algorithm;
 use serde_json::json;
 
@@ -33,28 +32,28 @@ fn can_update_local_jwks() {
     let (encoding_keys, jwks) = generate_keys();
 
     // setup claims for access token and ID token
-    let access_token_claims = AccessTokenClaims {
-        iss: server.url(),
-        aud: "some_aud".to_string(),
-        sub: "some_sub".to_string(),
-        scopes: "some_scope".to_string(),
-        iat: Timestamp::now(),
-        exp: Timestamp::one_hour_after_now(),
-    };
-    let id_token_claims = IdTokenClaims {
-        iss: server.url(),
-        sub: "some_sub".to_string(),
-        aud: "some_aud".to_string(),
-        email: "some_email@gmail.com".to_string(),
-        iat: Timestamp::now(),
-        exp: Timestamp::one_hour_after_now(),
-    };
-    let userinfo_token_claims = UserinfoTokenClaims {
-        sub: "some_sub".to_string(),
-        client_id: "some_aud".to_string(),
-        name: "ferris".to_string(),
-        email: "ferris@gluu.com".to_string(),
-    };
+    let access_token_claims = json!({
+        "iss": server.url(),
+        "aud": "some_aud".to_string(),
+        "sub": "some_sub".to_string(),
+        "scopes": "some_scope".to_string(),
+        "iat": Timestamp::now(),
+        "exp": Timestamp::one_hour_after_now(),
+    });
+    let id_token_claims = json!({
+        "iss": server.url(),
+        "sub": "some_sub".to_string(),
+        "aud": "some_aud".to_string(),
+        "email": "some_email@gmail.com".to_string(),
+        "iat": Timestamp::now(),
+        "exp": Timestamp::one_hour_after_now(),
+    });
+    let userinfo_token_claims = json!({
+        "sub": "some_sub".to_string(),
+        "client_id": "some_aud".to_string(),
+        "name": "ferris".to_string(),
+        "email": "ferris@gluu.com".to_string(),
+    });
 
     // generate the signed token strings
     let access_token = generate_token_using_claims(
@@ -104,7 +103,7 @@ fn can_update_local_jwks() {
     // assert that first call attempt to validate the token fails since a
     // decoding key with the same `kid` could not be retrieved
     let decode_result = jwt_service
-        .decode_tokens::<AccessTokenClaims, IdTokenClaims, UserinfoTokenClaims>(
+        .decode_tokens::<serde_json::Value, serde_json::Value, serde_json::Value>(
             &access_token,
             &id_token,
             &userinfo_token,
@@ -128,7 +127,7 @@ fn can_update_local_jwks() {
 
     // decode and validate the tokens again
     let (access_token_result, id_token_result, userinfo_token_result) = jwt_service
-        .decode_tokens::<AccessTokenClaims, IdTokenClaims, UserinfoTokenClaims>(
+        .decode_tokens::<serde_json::Value, serde_json::Value, serde_json::Value>(
             &access_token,
             &id_token,
             &userinfo_token,
