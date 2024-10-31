@@ -8,6 +8,7 @@
 //! This test module includes tests for when validation is on.
 
 mod access_token;
+mod id_token;
 
 use super::*;
 use crate::common::policy_store::TrustedIssuer;
