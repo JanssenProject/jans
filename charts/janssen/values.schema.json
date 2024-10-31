@@ -658,7 +658,7 @@
                     }
                 },
                 "storageClass": {
-                    "description": "StorageClass section for OpenDJ charts. This is not currently used by the openbanking distribution. You may specify custom parameters as needed.",
+                    "description": "StorageClass section. This is not currently used by the openbanking distribution. You may specify custom parameters as needed.",
                     "type": "object",
                     "properties": {
                         "allowVolumeExpansion": {

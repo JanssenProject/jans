@@ -84,8 +84,8 @@ public class ExternalAuthorizationChallengeService extends ExternalScriptService
                     .build());
         }
 
-        log.trace("Executing python 'authorize' method, script name: {}, clientId: {}, scope: {}, deviceSession: {}",
-                script.getName(), executionContext.getAuthzRequest().getClientId(), executionContext.getAuthzRequest().getScope(), executionContext.getAuthzRequest().getDeviceSession());
+        log.trace("Executing python 'authorize' method, script name: {}, clientId: {}, scope: {}, authorizationChallengeSession: {}",
+                script.getName(), executionContext.getAuthzRequest().getClientId(), executionContext.getAuthzRequest().getScope(), executionContext.getAuthzRequest().getAuthorizationChallengeSession());
 
         executionContext.setScript(script);
 

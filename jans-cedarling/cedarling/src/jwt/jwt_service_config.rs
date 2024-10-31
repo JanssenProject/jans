@@ -8,18 +8,17 @@
 //! Module that contains strong typed configuaration for the JWT service.
 //! This configuration allows to initialize service without any errors.
 
-use std::sync::Arc;
-
-use super::{traits::GetKey, Algorithm};
+use crate::common::policy_store::TrustedIssuer;
+use crate::jwt;
 
 /// Configuration for JWT service
-pub(crate) enum JwtServiceConfig {
+pub enum JwtServiceConfig {
     /// Decoding strategy that does not perform validation.
     WithoutValidation,
 
     /// Decoding strategy that performs validation using a key service and supported algorithms.
     WithValidation {
-        key_service: Arc<dyn GetKey>,
-        supported_algs: Vec<Algorithm>,
+        supported_algs: Vec<jwt::Algorithm>,
+        trusted_idps: Vec<TrustedIssuer>,
     },
 }
