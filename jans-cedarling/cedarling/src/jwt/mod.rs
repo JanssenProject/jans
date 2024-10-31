@@ -143,8 +143,8 @@ impl JwtService {
         self.decoding_strategy
             .decode::<UserInfoToken>(
                 userinfo_token,
-                Some(access_token.aud),
                 Some(access_token.iss),
+                Some(access_token.aud),
                 Some(id_token.sub), // ensure that the `sub` is the same as with the id_token's sub
                 false,              // this token usually does not have an nbf field
                 false,              // this token usually does not have an exp field
