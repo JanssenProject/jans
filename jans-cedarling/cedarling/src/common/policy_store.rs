@@ -132,9 +132,6 @@ pub enum TokenKind {
 
     /// Userinfo token containing user-specific information.
     Userinfo,
-
-    /// Transaction token used for tracking transactions.
-    Transaction,
 }
 
 /// Enum representing the different kinds of tokens used by Cedarling.
@@ -144,7 +141,6 @@ impl fmt::Display for TokenKind {
             TokenKind::Access => "access",
             TokenKind::Id => "id",
             TokenKind::Userinfo => "userinfo",
-            TokenKind::Transaction => "transaction",
         };
         write!(f, "{}", kind_str)
     }
@@ -161,15 +157,9 @@ impl<'de> Deserialize<'de> for TokenKind {
             "id_token" => Ok(TokenKind::Id),
             "userinfo_token" => Ok(TokenKind::Userinfo),
             "access_token" => Ok(TokenKind::Access),
-            "transaction_token" => Ok(TokenKind::Transaction),
             _ => Err(serde::de::Error::unknown_variant(
                 &token_kind,
-                &[
-                    "access_token",
-                    "id_token",
-                    "userinfo_token",
-                    "transaction_token",
-                ],
+                &["access_token", "id_token", "userinfo_token"],
             )),
         }
     }
