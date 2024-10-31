@@ -9,6 +9,7 @@
 
 mod access_token;
 mod id_token;
+mod userinfo_token;
 
 use super::*;
 use crate::common::policy_store::TrustedIssuer;
