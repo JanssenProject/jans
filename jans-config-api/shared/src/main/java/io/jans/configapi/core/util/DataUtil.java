@@ -644,7 +644,7 @@ public class DataUtil {
             }
         } else if (dateString.length() == 22) {
             logger.error(" 3 \n");
-            fomatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            fomatter = DateTimeFormatter.ofPattern("yyyy-MM-dd' 'HH:mm:ss");
         } else if (dateString.length() == 23) {
             logger.error(" 4 \n");
             fomatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:sss");

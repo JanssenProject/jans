@@ -48,6 +48,7 @@ public class StatusCheckerTimer {
     private static final int DEFAULT_INTERVAL = 5 * 60; // 1 minute
     public static final String PROGRAM_FACTER = "facter";
     public static final String PROGRAM_SHOW_VERSION = "/opt/jans/printVersion.py";
+    public static final String SERVICE_STATUS = "/opt/jans/bin/jans_services_status.py";
 
     @Inject
     private Logger log;
@@ -202,6 +203,47 @@ public class StatusCheckerTimer {
         }
         log.debug("Server application version - appVersion:{}", appVersion);
         return appVersion;
+    }
+    
+    public JsonNode getServiceStatus(String serviceName) {
+        log.debug("Getting status for serviceName:{}", serviceName);
+       
+        JsonNode serviceStatus = null;
+        if (!isLinux()) {
+            return serviceStatus;
+        }
+
+        CommandLine commandLine = new CommandLine(SERVICE_STATUS);
+        if(StringUtils.isNotBlank(serviceName) && !serviceName.equalsIgnoreCase(ApiConstants.ALL)) {
+            commandLine.addArgument("-artifact="+serviceName);
+        }
+        commandLine.addArgument("--json");
+        log.debug("Getting service status for commandLine:{}", commandLine);
+        
+        String resultOutput;
+        try (ByteArrayOutputStream bos = new ByteArrayOutputStream(4096);) {
+            
+            boolean result = ProcessHelper.executeProgram(commandLine, false, 0, bos);
+            if (!result) {
+                return serviceStatus;
+            }
+            
+            resultOutput = new String(bos.toByteArray(), UTF_8);
+            log.debug("resultOutput:{}", resultOutput);
+            
+            if(StringUtils.isNotBlank(resultOutput)) {
+                serviceStatus = Jackson.asJsonNode(resultOutput);
+            }
+            
+        } catch (UnsupportedEncodingException uex) {
+            log.debug("Failed to parse program {} output", SERVICE_STATUS, uex);
+            return serviceStatus;
+        } catch (Exception ex) {
+            log.error("Failed to execute program {} output", SERVICE_STATUS, ex);
+            return serviceStatus;
+        }
+        log.debug("Server application version - appVersion:{}", serviceStatus);
+        return serviceStatus;
     }
 
     private void printDirectory() {

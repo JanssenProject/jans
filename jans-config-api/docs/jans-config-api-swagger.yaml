@@ -48,7 +48,7 @@ paths:
       - Health - Check
       summary: Returns application version
       description: Returns application version
-      operationId: get-app-version
+      operationId: get-app-version_1
       parameters:
       - name: artifact
         in: query
@@ -74,7 +74,7 @@ paths:
       - Health - Check
       summary: Returns application health status
       description: Returns application health status
-      operationId: get-config-health
+      operationId: get-config-health_1
       responses:
         "200":
           description: Ok
@@ -92,7 +92,7 @@ paths:
       - Health - Check
       summary: Returns application liveness status
       description: Returns application liveness status
-      operationId: get-config-health-live
+      operationId: get-config-health-live_1
       responses:
         "200":
           description: Ok
@@ -108,7 +108,7 @@ paths:
       - Health - Check
       summary: Returns application readiness status
       description: Returns application readiness status
-      operationId: get-config-health-ready
+      operationId: get-config-health-ready_1
       responses:
         "200":
           description: Ok
@@ -124,7 +124,7 @@ paths:
       - Health - Check
       summary: Returns application server status
       description: Returns application server status
-      operationId: get-server-stat
+      operationId: get-server-stat_1
       responses:
         "200":
           description: Ok
@@ -9215,15 +9215,15 @@ components:
           type: boolean
         userCanView:
           type: boolean
-        adminCanEdit:
+        userCanEdit:
           type: boolean
         adminCanView:
           type: boolean
-        userCanEdit:
-          type: boolean
-        userCanAccess:
+        adminCanEdit:
           type: boolean
         adminCanAccess:
+          type: boolean
+        userCanAccess:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -11192,14 +11192,14 @@ components:
           type: boolean
         internal:
           type: boolean
+        locationPath:
+          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
-        locationPath:
-          type: string
         baseDn:
           type: string
     ScriptError:
@@ -11628,10 +11628,10 @@ components:
         ttl:
           type: integer
           format: int32
-        opbrowserState:
-          type: string
         persisted:
           type: boolean
+        opbrowserState:
+          type: string
     SessionIdAccessMap:
       type: object
       properties:
