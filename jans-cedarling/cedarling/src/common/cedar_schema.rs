@@ -6,31 +6,112 @@
  */
 
 pub(crate) use cedar_json::CedarSchemaJson;
-
 pub(crate) mod cedar_json;
+
+/// cedar_schema value which specifies both encoding and content_type
+///
+/// encoding is one of none or base64
+/// content_type is one of cedar or cedar-json#[derive(Debug, Clone, serde::Deserialize)]
+#[derive(Debug, Clone, serde::Deserialize)]
+struct EncodedSchema {
+    pub encoding : super::Encoding,
+    pub content_type : super::ContentType,
+    pub body : String,
+}
+
+/// Intermediate struct to handle both kinds of cedar_schema values.
+///
+/// Either
+///   "cedar_schema": "cGVybWl0KA..."
+/// OR
+///   "cedar_schema": { "encoding": "...", "content_type": "...", "body": "permit(...)"}#[derive(Debug, Clone, serde::Deserialize)]
+#[derive(Debug, Clone, serde::Deserialize)]
+#[serde(untagged)]
+enum MaybeEncoded {
+    Plain(String),
+    Tagged(EncodedSchema)
+}
 
 /// Box that holds the [`cedar_policy::Schema`] and
 /// JSON representation that is used to create entities from the schema in the policy store.
 #[derive(Debug, Clone)]
-#[allow(dead_code)]
 pub(crate) struct CedarSchema {
     pub schema: cedar_policy::Schema,
     pub json: cedar_json::CedarSchemaJson,
 }
 
 impl<'de> serde::Deserialize<'de> for CedarSchema {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: serde::Deserializer<'de>,
+    fn deserialize<D : serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error>
     {
-        deserialize::parse_cedar_schema(deserializer)
+        //  Read the next thing as either a String or a Map, using the MaybeEncoded enum to distinguish
+        let encoded_schema = match <MaybeEncoded as serde::Deserialize>::deserialize(deserializer)? {
+            MaybeEncoded::Plain(body) => EncodedSchema{
+                // These are the default if the encoding is not specified.
+                encoding: super::Encoding::Base64,
+                content_type: super::ContentType::CedarJson,
+                body
+            },
+            MaybeEncoded::Tagged(encoded_schema) => encoded_schema,
+        };
+
+        let decoded_body = match encoded_schema.encoding {
+            super::Encoding::None => encoded_schema.body,
+            super::Encoding::Base64 => {
+                use base64::prelude::*;
+                let buf = BASE64_STANDARD.decode(encoded_schema.body).map_err(|err| {
+                    return serde::de::Error::custom(format!("{}: {}", deserialize::ParseCedarSchemaSetMessage::Base64, err))
+                })?;
+                String::from_utf8(buf).map_err(|err| {
+                    return serde::de::Error::custom(format!("{}: {}", deserialize::ParseCedarSchemaSetMessage::Utf8, err))
+                })?
+            }
+        };
+
+        // Need both of these because CedarSchema wants both.
+        let (schema_fragment, json_string) = match encoded_schema.content_type {
+            super::ContentType::Cedar => {
+                // parse cedar policy from the cedar representation
+                // TODO must log warnings or something
+                let (schema_fragment, _warning) = cedar_policy::SchemaFragment::from_cedarschema_str(&decoded_body)
+                    .map_err(|err| {
+                        serde::de::Error::custom(format!("{}: {}", deserialize::ParseCedarSchemaSetMessage::Parse, err))
+                    })?;
+
+                // urgh now recreate the json representation
+                let json_string = schema_fragment.to_json_string()
+                    .map_err(|err| {
+                        serde::de::Error::custom(format!("{}: {}", deserialize::ParseCedarSchemaSetMessage::CedarSchemaJsonFormat, err))
+                    })?;
+
+                (schema_fragment, json_string)
+            }
+            super::ContentType::CedarJson => {
+                // parse cedar policy from the json representation
+                let schema_fragment = cedar_policy::SchemaFragment::from_json_str(&decoded_body)
+                    .map_err(|err| {
+                        serde::de::Error::custom(format!("{}: {}", deserialize::ParseCedarSchemaSetMessage::CedarSchemaJsonFormat, err))
+                    })?;
+                (schema_fragment, decoded_body)
+            }
+        };
+
+        // create the schema
+        let fragment_iter = std::iter::once(schema_fragment);
+        let schema = cedar_policy::Schema::from_schema_fragments(fragment_iter.into_iter())
+            .map_err(|err| {
+                serde::de::Error::custom(format!("{}: {}", deserialize::ParseCedarSchemaSetMessage::Parse, err))
+            })?;
+
+        let json = serde_json::from_str(&json_string)
+            .map_err(|err| {
+                serde::de::Error::custom(format!("{}: {}", deserialize::ParseCedarSchemaSetMessage::CedarSchemaJsonFormat, err ))
+            })?;
+
+        Ok(CedarSchema{schema, json})
     }
 }
 
 mod deserialize {
-    use super::*;
-    use base64::prelude::*;
-
     #[derive(Debug, thiserror::Error)]
     pub enum ParseCedarSchemaSetMessage {
         #[error("unable to decode cedar policy schema base64")]
@@ -39,40 +120,8 @@ mod deserialize {
         CedarSchemaJsonFormat,
         #[error("unable to parse cedar policy schema json")]
         Parse,
-    }
-
-    /// A custom deserializer for Cedar's Schema.
-    //
-    // is used to deserialize field `cedar_schema` in `PolicyStore` from base64 and get [`cedar_policy::Schema`]
-    pub(crate) fn parse_cedar_schema<'de, D>(deserializer: D) -> Result<CedarSchema, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        let source = <String as serde::Deserialize>::deserialize(deserializer)?;
-        let decoded: Vec<u8> = BASE64_STANDARD.decode(source.as_str()).map_err(|err| {
-            serde::de::Error::custom(format!("{}: {}", ParseCedarSchemaSetMessage::Base64, err,))
-        })?;
-
-        // parse cedar policy schema to the our structure
-        let cedar_policy_json: CedarSchemaJson = serde_json::from_reader(decoded.as_slice())
-            .map_err(|err| {
-                serde::de::Error::custom(format!(
-                    "{}: {}",
-                    ParseCedarSchemaSetMessage::CedarSchemaJsonFormat,
-                    err
-                ))
-            })?;
-
-        // parse cedar policy schema to the `cedar_policy::Schema`
-        let cedar_policy_schema = cedar_policy::Schema::from_json_file(decoded.as_slice())
-            .map_err(|err| {
-                serde::de::Error::custom(format!("{}: {}", ParseCedarSchemaSetMessage::Parse, err))
-            })?;
-
-        Ok(CedarSchema {
-            schema: cedar_policy_schema,
-            json: cedar_policy_json,
-        })
+        #[error("invalid utf8 detected while decoding cedar policy")]
+        Utf8,
     }
 
     #[cfg(test)]
@@ -89,7 +138,16 @@ mod deserialize {
                 include_str!("../../../test_files/policy-store_ok.json");
 
             let policy_result = serde_json::from_str::<PolicyStore>(POLICY_STORE_RAW);
-            assert!(policy_result.is_ok());
+            assert!(policy_result.is_ok(), "{:?}", policy_result.unwrap_err());
+        }
+
+        #[test]
+        fn test_readable_ok() {
+            static POLICY_STORE_RAW: &str =
+                include_str!("../../../test_files/policy-store_readable.json");
+
+            let policy_result = serde_json::from_str::<PolicyStore>(POLICY_STORE_RAW);
+            assert!(policy_result.is_ok(), "{:?}", policy_result.unwrap_err());
         }
 
         #[test]
@@ -98,10 +156,9 @@ mod deserialize {
                 include_str!("../../../test_files/policy-store_schema_err_base64.json");
 
             let policy_result = serde_json::from_str::<PolicyStore>(POLICY_STORE_RAW);
-            assert!(policy_result
-                .unwrap_err()
-                .to_string()
-                .contains(&ParseCedarSchemaSetMessage::Base64.to_string()));
+            let err = policy_result.unwrap_err();
+            let msg = err.to_string();
+            assert!(msg.contains(&ParseCedarSchemaSetMessage::Base64.to_string()), "{err:?}");
         }
 
         #[test]
@@ -110,10 +167,9 @@ mod deserialize {
                 include_str!("../../../test_files/policy-store_schema_err_json.json");
 
             let policy_result = serde_json::from_str::<PolicyStore>(POLICY_STORE_RAW);
-            assert!(policy_result
-                .unwrap_err()
-                .to_string()
-                .contains(&ParseCedarSchemaSetMessage::CedarSchemaJsonFormat.to_string()));
+            let err = policy_result.unwrap_err();
+            let msg = err.to_string();
+            assert!(msg.contains("unable to unmarshal cedar policy schema json"), "{err:?}");
         }
 
         #[test]

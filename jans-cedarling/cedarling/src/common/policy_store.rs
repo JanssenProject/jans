@@ -27,7 +27,7 @@ pub struct PolicyStore {
     pub cedar_version: Version,
 
     /// Cedar schema
-    pub cedar_schema: CedarSchema, // currently being loaded from a base64-encoded string
+    pub cedar_schema: CedarSchema,
 
     /// Cedar policy set
     #[serde(deserialize_with = "parse_cedar_policy")]
