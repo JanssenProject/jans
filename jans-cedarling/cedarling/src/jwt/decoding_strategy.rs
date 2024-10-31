@@ -124,7 +124,7 @@ impl DecodingStrategy {
 /// Returns an error if the token uses an unsupported algorithm or if validation fails.
 fn decode_and_validate_jwt<T: DeserializeOwned>(
     decoding_args: DecodingArgs,
-    supported_algs: &Vec<jwt::Algorithm>,
+    supported_algs: &[jwt::Algorithm],
     key_service: &KeyService,
 ) -> Result<T, Error> {
     let header = jwt::decode_header(decoding_args.jwt).map_err(Error::Parsing)?;

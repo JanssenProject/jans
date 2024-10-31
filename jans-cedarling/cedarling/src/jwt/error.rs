@@ -9,6 +9,7 @@ use super::decoding_strategy;
 
 /// Error type for the JWT service.
 #[derive(thiserror::Error, Debug)]
+#[allow(clippy::enum_variant_names)]
 pub enum Error {
     /// Error indicating that the provided access token is invalid.
     ///
