@@ -21,7 +21,6 @@ tags:
 | metricReporterInterval      | 300                                      | The interval for metric reporter in seconds.                                                                                    |
 | metricReporterKeepDataDays  | 15                                       | The number of days to retain metric reported data in the system                                                                 |
 | metricReporterEnabled       | true                                     | Boolean value specifying whether to enable Metric Reporter                                                                      |
-| personCustomObjectClassList | ["jansCustomPerson", "jansPerson"  ]     | LDAP custom object class list for dynamic person enrollment.                                                                    |
 | fido2Configuration          | See JSON contents in the below example   | FIDO2 Configuration                                                                                                             |
 
 #### Fido2Configuration structure
@@ -47,7 +46,7 @@ tags:
 
 Use the following command to obtain configuration parameters:
 
-`/opt/jans/jans-cli/config-cli.py --operation-id get-properties-fido2`
+`jans cli --operation-id get-properties-fido2`
 
 Response:
 ```
@@ -97,8 +96,6 @@ Response:
     ]
   }
 }
-
-
 ```
 
 
@@ -106,13 +103,13 @@ Response:
   Steps:
   A. Create a JSON file say `/tmp/config_values.json` by editing the JSON from Point 1
   B. Use the following command
-  `/opt/jans/jans-cli/config-cli.py --operation-id post-config-scripts --data /tmp/config_values.json`
+  `jans cli --operation-id post-config-scripts --data /tmp/config_values.json`
 
 #### 3. Change log level of FIDO2 server
   Steps:
   A. Create a JSON file say `/tmp/config_values.json` by editing the JSON from Point 1. Edit `loggingLevel` to `TRACE` or `DEBUG` or `INFO`
   B. Use the following command
-    `/opt/jans/jans-cli/config-cli.py --operation-id put-properties-fido --data /tmp/config_values.json`
+    `jans cli --operation-id put-properties-fido --data /tmp/config_values.json`
 
 #### 4. Locating FIDO2 configuration in Persistence Layer
 

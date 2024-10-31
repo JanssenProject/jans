@@ -27,7 +27,7 @@
     "authorizationPage":"${config.oxauth.contextPath}/authorize.htm",
     "baseEndpoint":"${config.oxauth.contextPath}/restv1",
     "authorizationEndpoint":"${config.oxauth.contextPath}/restv1/authorize",
-    "authorizationChallengeEndpoint":"${config.oxauth.contextPath}/restv1/authorization_challenge",
+    "authorizationChallengeEndpoint":"${config.oxauth.contextPath}/restv1/authorize-challenge",
     "tokenEndpoint":"${config.oxauth.contextPath}/restv1/token",
     "tokenRevocationEndpoint": "${config.oxauth.contextPath}/restv1/revoke",
     "userInfoEndpoint":"${config.oxauth.contextPath}/restv1/userinfo",

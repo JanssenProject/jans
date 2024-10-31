@@ -22,6 +22,7 @@ use serde_pyobject::from_pyobject;
 /// ----------
 /// :param access_token: The access token string.
 /// :param id_token: The id token string.
+/// :param userinfo_token: The userinfo token string.
 /// :param action: The action to be authorized.
 /// :param resource: Resource data (wrapped `ResourceData` object).
 /// :param context: Python dictionary with additional context.
@@ -38,6 +39,8 @@ pub struct Request {
     pub access_token: String,
     /// Id token raw value
     pub id_token: String,
+    /// Userinfo token raw value
+    pub userinfo_token: String,
     /// cedar_policy action
     pub action: String,
     /// cedar_policy resource data
@@ -52,6 +55,7 @@ impl Request {
     fn new(
         access_token: String,
         id_token: String,
+        userinfo_token: String,
         action: String,
         resource: ResourceData,
         context: Py<PyDict>,
@@ -59,6 +63,7 @@ impl Request {
         Self {
             access_token,
             id_token,
+            userinfo_token,
             action,
             resource,
             context,
@@ -78,6 +83,7 @@ impl Request {
         Ok(cedarling::Request {
             access_token: self.access_token.clone(),
             id_token: self.id_token.clone(),
+            userinfo_token: self.userinfo_token.clone(),
             action: self.action.clone(),
             resource: self.resource.clone().into(),
             context,

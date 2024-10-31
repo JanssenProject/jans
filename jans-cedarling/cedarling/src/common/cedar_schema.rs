@@ -43,7 +43,7 @@ mod deserialize {
 
     /// A custom deserializer for Cedar's Schema.
     //
-    // is used to deserialize field `schema` in `PolicyStore` from base64 and get [`cedar_policy::Schema`]
+    // is used to deserialize field `cedar_schema` in `PolicyStore` from base64 and get [`cedar_policy::Schema`]
     pub(crate) fn parse_cedar_schema<'de, D>(deserializer: D) -> Result<CedarSchema, D::Error>
     where
         D: serde::Deserializer<'de>,
@@ -77,15 +77,18 @@ mod deserialize {
 
     #[cfg(test)]
     mod tests {
+        use crate::common::policy_store::PolicyStore;
+
         use super::*;
-        use crate::common::policy_store::PolicyStoreMap;
 
         #[test]
         fn test_read_ok() {
+            // The human-readable policy and schema file is located in next folder:
+            // `test_files\policy-store_ok`
             static POLICY_STORE_RAW: &str =
                 include_str!("../../../test_files/policy-store_ok.json");
 
-            let policy_result = serde_json::from_str::<PolicyStoreMap>(POLICY_STORE_RAW);
+            let policy_result = serde_json::from_str::<PolicyStore>(POLICY_STORE_RAW);
             assert!(policy_result.is_ok());
         }
 
@@ -94,7 +97,7 @@ mod deserialize {
             static POLICY_STORE_RAW: &str =
                 include_str!("../../../test_files/policy-store_schema_err_base64.json");
 
-            let policy_result = serde_json::from_str::<PolicyStoreMap>(POLICY_STORE_RAW);
+            let policy_result = serde_json::from_str::<PolicyStore>(POLICY_STORE_RAW);
             assert!(policy_result
                 .unwrap_err()
                 .to_string()
@@ -106,7 +109,7 @@ mod deserialize {
             static POLICY_STORE_RAW: &str =
                 include_str!("../../../test_files/policy-store_schema_err_json.json");
 
-            let policy_result = serde_json::from_str::<PolicyStoreMap>(POLICY_STORE_RAW);
+            let policy_result = serde_json::from_str::<PolicyStore>(POLICY_STORE_RAW);
             assert!(policy_result
                 .unwrap_err()
                 .to_string()
@@ -118,11 +121,11 @@ mod deserialize {
             static POLICY_STORE_RAW: &str =
                 include_str!("../../../test_files/policy-store_schema_err_cedar_mistake.json");
 
-            let policy_result = serde_json::from_str::<PolicyStoreMap>(POLICY_STORE_RAW);
+            let policy_result = serde_json::from_str::<PolicyStore>(POLICY_STORE_RAW);
             let err_msg = policy_result.unwrap_err().to_string();
             assert_eq!(
                 err_msg,
-                "unable to parse cedar policy schema json: failed to resolve type: User_TypeNotExist at line 35 column 1"
+                "unable to parse cedar policy schema json: failed to resolve type: User_TypeNotExist at line 32 column 1"
             );
         }
     }

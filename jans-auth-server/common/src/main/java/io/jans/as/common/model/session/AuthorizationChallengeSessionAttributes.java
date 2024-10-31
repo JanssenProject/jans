@@ -13,7 +13,7 @@ import java.util.Map;
 @JsonIgnoreProperties(
         ignoreUnknown = true
 )
-public class DeviceSessionAttributes implements Serializable {
+public class AuthorizationChallengeSessionAttributes implements Serializable {
 
     @JsonProperty("acr_values")
     private String acrValues;

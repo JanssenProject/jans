@@ -215,6 +215,7 @@ Attributes
 ----------  
 :param access_token: The access token string.  
 :param id_token: The id token string.  
+:param userinfo_token: The user info token string.  
 :param action: The action to be authorized.  
 :param resource: Resource data (wrapped `ResourceData` object).  
 :param context: Python dictionary with additional context.
@@ -314,16 +315,28 @@ ___
 Error encountered while validating context according to the schema
 ___
 
-# authorize_errors.CreateRequestError
-Error encountered while creating cedar_policy::Request
+# authorize_errors.CreateIdTokenEntityError
+Error encountered while creating id token entities
+___
+
+# authorize_errors.CreateRequestUserEntityError
+Error encountered while creating cedar_policy::Request for user entity principal
+___
+
+# authorize_errors.CreateRequestWorkloadEntityError
+Error encountered while creating cedar_policy::Request for workload entity principal
+___
+
+# authorize_errors.CreateUserEntityError
+Error encountered while creating id token entities
+___
+
+# authorize_errors.DecodeTokens
+Error encountered while decoding JWT token data
 ___
 
 # authorize_errors.EntitiesError
 Error encountered while collecting all entities
-___
-
-# authorize_errors.JWTError
-Error encountered while decoding JWT token data
 ___
 
 # authorize_errors.ResourceEntityError
