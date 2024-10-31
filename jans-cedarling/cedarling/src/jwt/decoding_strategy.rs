@@ -159,7 +159,7 @@ fn decode_and_validate_jwt<T: DeserializeOwned>(
     // fetch decoding key from the KeyService
     let kid = &header
         .kid
-        .ok_or_else(|| TokenValidationError::MissingRequiredHeader("kid".into()))?;
+        .ok_or_else(|| TokenValidationError::JwkMissingRequiredHeader("kid".into()))?;
     let key = key_service
         .get_key(kid)
         .map_err(TokenValidationError::KeyService)?;

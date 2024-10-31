@@ -52,12 +52,13 @@ pub enum TokenValidationError {
     #[error("Error parsing the JWT: {0}")]
     Parsing(#[source] jwt::errors::Error),
 
-    /// Indicates that a required header is missing from the JWT.
+    /// Indicates that a required header is missing from the JWK.
     ///
-    /// The JWT specification requires certain headers (e.g., `kid` for key identification).
-    /// This error is returned if any of those required headers are missing.
-    #[error("The JWT is missing a required header: {0}")]
-    MissingRequiredHeader(String),
+    /// The `kid` header is used to identify which key should be used to validate
+    /// Json Web Tokens. Currently, handling Json Web Keys
+    /// without a `kid` is not supported.
+    #[error("The JWK is missing a required header: {0}")]
+    JwkMissingRequiredHeader(String),
 
     /// Indicates that the token was signed with an unsupported algorithm.
     ///

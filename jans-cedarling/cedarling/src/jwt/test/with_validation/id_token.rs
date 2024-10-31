@@ -23,7 +23,7 @@
 
 use super::super::*;
 use crate::common::policy_store::TrustedIssuer;
-use crate::jwt::JwtService;
+use crate::jwt::{self, JwtService};
 use jsonwebtoken::Algorithm;
 use serde_json::json;
 
@@ -163,13 +163,15 @@ fn test_missing_claim(missing_claim: &str) {
             &userinfo_token,
         );
 
-    // assert that decoding resulted in an error due to missing claims
-    // TODO: make this error more specific
     assert!(
-        decode_result.is_err(),
-        "Expected an error due to missing `{}` from `id_token` during token decoding: {:?}",
-        missing_claim,
-        decode_result.err()
+        matches!(
+            decode_result,
+            Err(jwt::JwtDecodingError::InvalidIdToken(
+                jwt::TokenValidationError::Validation(_)
+            )),
+        ),
+        "Expected decoding to fail due to `id_token` missing a required header: {:?}",
+        decode_result
     );
 
     // assert that there aren't any additional calls to the mock server
@@ -289,12 +291,15 @@ fn errors_on_invalid_signature() {
             &userinfo_token,
         );
 
-    // assert that decoding resulted in an error due to missing claims
-    // TODO: make this error more specific
     assert!(
-        decode_result.is_err(),
-        "Expected an error due to invalid signature from `id_token` during token decoding: {:?}",
-        decode_result.err()
+        matches!(
+            decode_result,
+            Err(jwt::JwtDecodingError::InvalidIdToken(
+                jwt::TokenValidationError::Validation(_)
+            )),
+        ),
+        "Expected decoding to fail due to `id_token` having an invalid signature: {:?}",
+        decode_result
     );
 
     // assert that there aren't any additional calls to the mock server
@@ -401,12 +406,15 @@ fn errors_on_expired_token() {
             &userinfo_token,
         );
 
-    // assert that decoding resulted in an error due to missing claims
-    // TODO: make this error more specific
     assert!(
-        decode_result.is_err(),
-        "Expected an error due to expired `id_token` during token decoding: {:?}",
-        decode_result.err()
+        matches!(
+            decode_result,
+            Err(jwt::JwtDecodingError::InvalidIdToken(
+                jwt::TokenValidationError::Validation(_)
+            )),
+        ),
+        "Expected decoding to fail due to `id_token` being expired: {:?}",
+        decode_result
     );
 
     // assert that there aren't any additional calls to the mock server
@@ -514,12 +522,15 @@ fn errors_on_invalid_iss() {
             &userinfo_token,
         );
 
-    // assert that decoding resulted in an error due to missing claims
-    // TODO: make this error more specific
     assert!(
-        decode_result.is_err(),
-        "Expected an error due to `id_token` not having the same `iss` as `access_token`: {:?}",
-        decode_result.err()
+        matches!(
+            decode_result,
+            Err(jwt::JwtDecodingError::InvalidIdToken(
+                jwt::TokenValidationError::Validation(_)
+            )),
+        ),
+        "Expected decoding to fail due to `id_token` not having the same `iss` as `access_token`: {:?}",
+        decode_result
     );
 
     // assert that there aren't any additional calls to the mock server
@@ -627,12 +638,15 @@ fn errors_on_invalid_aud() {
             &userinfo_token,
         );
 
-    // assert that decoding resulted in an error due to missing claims
-    // TODO: make this error more specific
     assert!(
-        decode_result.is_err(),
-        "Expected an error due to `id_token` not having the same `aud` as `access_token`: {:?}",
-        decode_result.err()
+        matches!(
+            decode_result,
+            Err(jwt::JwtDecodingError::InvalidIdToken(
+                jwt::TokenValidationError::Validation(_)
+            )),
+        ),
+        "Expected decoding to fail due to `id_token` not having the same `aud` as `access_token`: {:?}",
+        decode_result
     );
 
     // assert that there aren't any additional calls to the mock server

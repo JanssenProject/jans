@@ -21,7 +21,7 @@
 
 use super::super::*;
 use crate::common::policy_store::TrustedIssuer;
-use crate::jwt::JwtService;
+use crate::jwt::{self, JwtService};
 use jsonwebtoken::Algorithm;
 use serde_json::json;
 
@@ -162,13 +162,15 @@ fn test_missing_claim(missing_claim: &str) {
             &userinfo_token,
         );
 
-    // assert that decoding resulted in an error due to missing claims
-    // TODO: make this error more specific
     assert!(
-        decode_result.is_err(),
-        "Expected an error due to missing `{}` from `access_token` during token decoding: {:?}",
-        missing_claim,
-        decode_result.err()
+        matches!(
+            decode_result,
+            Err(jwt::JwtDecodingError::InvalidAccessToken(
+                jwt::TokenValidationError::Validation(_)
+            )),
+        ),
+        "Expected decoding to fail due to `access_token` missing a required header: {:?}",
+        decode_result
     );
 
     // assert that there aren't any additional calls to the mock server
@@ -287,12 +289,15 @@ fn errors_on_invalid_signature() {
             &userinfo_token,
         );
 
-    // assert that decoding resulted in an error due to missing claims
-    // TODO: make this error more specific
     assert!(
-        decode_result.is_err(),
-        "Expected an error due to invalid signature from `access_token` during token decoding: {:?}",
-        decode_result.err()
+        matches!(
+            decode_result,
+            Err(jwt::JwtDecodingError::InvalidAccessToken(
+                jwt::TokenValidationError::Validation(_)
+            )),
+        ),
+        "Expected decoding to fail due to `access_token` hanving an invalid signature: {:?}",
+        decode_result
     );
 
     // assert that there aren't any additional calls to the mock server
@@ -399,12 +404,15 @@ fn errors_on_expired_token() {
             &userinfo_token,
         );
 
-    // assert that decoding resulted in an error due to missing claims
-    // TODO: make this error more specific
     assert!(
-        decode_result.is_err(),
-        "Expected an error due to expired `access_token` during token decoding: {:?}",
-        decode_result.err()
+        matches!(
+            decode_result,
+            Err(jwt::JwtDecodingError::InvalidAccessToken(
+                jwt::TokenValidationError::Validation(_)
+            )),
+        ),
+        "Expected decoding to fail due to `access_token` having an invalid signature: {:?}",
+        decode_result
     );
 
     // assert that there aren't any additional calls to the mock server
