@@ -9,7 +9,6 @@
 mod test;
 
 use super::cedar_schema::CedarSchema;
-use base64::prelude::*;
 use cedar_policy::PolicyId;
 use semver::Version;
 use serde::{Deserialize, Deserializer};
@@ -31,7 +30,7 @@ pub struct PolicyStore {
 
     /// Cedar policy set
     #[serde(deserialize_with = "parse_cedar_policy")]
-    pub cedar_policies: cedar_policy::PolicySet, // currently being loaded from a base64-encoded string
+    pub cedar_policies: cedar_policy::PolicySet,
 
     /// An optional list of trusted issuers.
     ///
@@ -209,13 +208,37 @@ enum ParsePolicySetMessage {
     CreatePolicySet,
 }
 
+/// policy_content value which specifies both encoding and content_type
+///
+/// encoding is one of none or base64
+/// content_type is one of cedar or cedar-json
+#[derive(Debug, Clone, serde::Deserialize)]
+struct EncodedPolicy {
+    pub encoding : super::Encoding,
+    pub content_type : super::ContentType,
+    pub body : String,
+}
+
+/// Intermediate struct to handler both kinds of policy_content values.
+///
+/// Either
+///   "policy_content": "cGVybWl0KA..."
+/// OR
+///   "policy_content": { "encoding": "...", "content_type": "...", "body": "permit(...)"}
+#[derive(Debug, Clone, serde::Deserialize)]
+#[serde(untagged)]
+enum MaybeEncoded {
+    Plain(String),
+    Tagged(EncodedPolicy)
+}
+
 /// Represents a raw policy entry from the `PolicyStore`.
 ///
 /// This is a helper struct used internally for parsing base64-encoded policies.
 #[derive(Debug, serde::Deserialize)]
 struct RawPolicy {
     /// Base64-encoded content of the policy.
-    pub policy_content: String,
+    pub policy_content: MaybeEncoded,
 }
 
 /// Custom deserializer for converting base64-encoded policies into a `PolicySet`.
@@ -272,17 +295,31 @@ fn parse_single_policy<'de, D>(
 where
     D: serde::Deserializer<'de>,
 {
-    let decoded = BASE64_STANDARD
-        .decode(policy_raw.policy_content.as_str())
-        .map_err(|err| {
-            serde::de::Error::custom(format!("{}: {err}", ParsePolicySetMessage::Base64))
-        })?;
-    let decoded_str = String::from_utf8(decoded).map_err(|err| {
-        serde::de::Error::custom(format!("{}: {err}", ParsePolicySetMessage::String))
-    })?;
+    let policy_with_metadata = match policy_raw.policy_content {
+        // It's a plain string, so assume its cedar inside base64
+        MaybeEncoded::Plain(base64_encoded) => EncodedPolicy{
+            encoding: super::Encoding::Base64,
+            content_type: super::ContentType::Cedar,
+            body: base64_encoded,
+        },
+        MaybeEncoded::Tagged(policy_with_metadata) => policy_with_metadata,
+    };
+
+    let decoded_body = match policy_with_metadata.encoding {
+        super::Encoding::None => policy_with_metadata.body,
+        super::Encoding::Base64 => {
+            use base64::prelude::*;
+            let buf = BASE64_STANDARD.decode(policy_with_metadata.body).map_err(|err| {
+                return serde::de::Error::custom(format!("{}: {}", ParsePolicySetMessage::Base64, err))
+            })?;
+            String::from_utf8(buf).map_err(|err| {
+                return serde::de::Error::custom(format!("{}: {}", ParsePolicySetMessage::String, err))
+            })?
+        }
+    };
 
     let policy =
-        cedar_policy::Policy::parse(Some(PolicyId::new(id)), decoded_str).map_err(|err| {
+        cedar_policy::Policy::parse(Some(PolicyId::new(id)), decoded_body).map_err(|err| {
             serde::de::Error::custom(format!("{}: {err}", ParsePolicySetMessage::HumanReadable))
         })?;
 
