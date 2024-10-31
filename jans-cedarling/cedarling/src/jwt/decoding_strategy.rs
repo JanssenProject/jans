@@ -32,7 +32,7 @@ pub enum DecodingStrategy {
 /// Arguments for decoding a JWT (JSON Web Token).
 ///
 /// This struct allows you to specify parameters for decoding and validating a JWT.
-/// 
+///
 /// - Use `iss: Some("some_iss")` to enforce validation of the `iss` (issuer) claim.
 /// - Use `iss: None` to skip validation of the `iss` claim.
 ///
@@ -141,7 +141,7 @@ fn decode_and_validate_jwt<T: DeserializeOwned>(
 
     // set up validation rules
     let mut validator = jwt::Validation::new(header.alg);
-    validator.required_spec_claims.clear();
+    validator.set_required_spec_claims(&["iss", "sub", "aud", "exp"]);
     validator.validate_nbf = decoding_args.validate_nbf;
     validator.validate_exp = decoding_args.validate_exp;
     if let Some(iss) = decoding_args.iss {

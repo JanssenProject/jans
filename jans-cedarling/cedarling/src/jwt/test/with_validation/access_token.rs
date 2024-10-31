@@ -13,7 +13,6 @@
 //!   - Tests for errors when the `iss` (Issuer) claim is missing.
 //!   - Tests for errors when the `aud` (Audience) claim is missing.
 //!   - Tests for errors when the `sub` (Subject) claim is missing.
-//!   - Tests for errors when the `iat` (Issued At) claim is missing.
 //!   - Tests for errors when the `exp` (Expiration) claim is missing.
 //!
 //! - **Invalid Signature**:
@@ -49,13 +48,6 @@ fn errors_on_missing_sub() {
 
 #[test]
 /// Tests that [`JwtService::decode_claims`] returns an error when the `access_token`
-/// is missing an `iat` claim.
-fn errors_on_missing_iat() {
-    test_missing_claim("iat");
-}
-
-#[test]
-/// Tests that [`JwtService::decode_claims`] returns an error when the `access_token`
 /// is missing an `exp` claim.
 fn errors_on_missing_exp() {
     test_missing_claim("exp");
@@ -71,6 +63,7 @@ fn test_missing_claim(missing_claim: &str) {
     // Invalid access_token claims (missing `iss` field)
     let mut access_token_claims = json!({
         "scopes": "some_scope".to_string(),
+        "iat": Timestamp::now(),
     });
 
     // add claims incrementally if they're not set to missing
@@ -82,9 +75,6 @@ fn test_missing_claim(missing_claim: &str) {
     }
     if missing_claim != "sub" {
         access_token_claims["sub"] = serde_json::Value::String("some_sub".to_string());
-    }
-    if missing_claim != "iat" {
-        access_token_claims["iat"] = serde_json::Value::Number(Timestamp::now().into());
     }
     if missing_claim != "exp" {
         access_token_claims["exp"] =
