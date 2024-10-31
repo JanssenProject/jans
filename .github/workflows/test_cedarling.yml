@@ -13,8 +13,8 @@ jobs:
   rust_tests:
     runs-on: ubuntu-20.04
     steps:
-    - name: Install Dependencies
-      run: sudo apt update && sudo apt install -y php libapache2-mod-php7.4 libapache2-mod-php php-cli
+    #- name: Install Dependencies
+    #  run: sudo apt update && sudo apt install -y php libapache2-mod-php7.4 libapache2-mod-php php-cli
     - name: Harden Runner
       uses: step-security/harden-runner@a4aa98b93cab29d9b1101a6143fb8bce00e2eac4 # v2.7.1
       with:
