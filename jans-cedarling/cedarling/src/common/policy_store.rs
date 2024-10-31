@@ -62,6 +62,8 @@ pub struct TrustedIssuer {
     /// Optional metadata related to the tokens issued by this issuer.
     ///
     /// This field may include role mappings that help define the access levels for issued tokens.
+    ///
+    /// TODO: currently unused in any validation checks
     #[serde(deserialize_with = "parse_and_check_token_metadata")]
     pub token_metadata: Option<Vec<TokenMetadata>>,
 }

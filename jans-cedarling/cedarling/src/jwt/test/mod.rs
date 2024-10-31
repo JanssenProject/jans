@@ -11,5 +11,6 @@ mod can_update_local_jwks;
 mod errors_on_invalid_aud;
 mod errors_on_unsupported_alg;
 mod utils;
+mod with_validation;
 
 use utils::*;
