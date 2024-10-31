@@ -93,10 +93,14 @@ fn errors_on_unsupported_alg() {
         KeyService::new(vec![&openid_conf_endpoint]).expect("should create key service");
 
     // initialize JwtService with validation enabled and ES256 as the supported algorithm
-    let jwt_service = JwtService::new(DecodingStrategy::WithValidation {
-        key_service,
-        supported_algs: vec![Algorithm::HS256],
-    });
+    let jwt_service = JwtService::new(
+        DecodingStrategy::WithValidation {
+            key_service,
+            supported_algs: vec![Algorithm::HS256],
+        },
+        // TODO: add values
+        Vec::new(),
+    );
 
     // assert that the validation fails due to the tokens being signed with an
     // unsupported algorithm

@@ -66,6 +66,15 @@ pub struct TrustedIssuer {
     pub token_metadata: Option<Vec<TokenMetadata>>,
 }
 
+impl TrustedIssuer {
+    pub fn get_token_metadata(&self, token_type: TokenKind) -> Option<&TokenMetadata> {
+        self.token_metadata
+            .as_ref()?
+            .iter()
+            .find(|&metadata| metadata.kind == token_type)
+    }
+}
+
 /// Parses and validates the `token_metadata` field.
 ///
 /// This function ensures that the metadata contains at most one `TokenMetadata` with a `role_mapping`
@@ -112,7 +121,7 @@ pub struct TokenMetadata {
     pub role_mapping: Option<String>,
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 #[allow(dead_code)]
 pub enum TokenKind {
     /// Access token used for granting access to resources.

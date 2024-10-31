@@ -34,6 +34,7 @@ pub(crate) struct OpenIdConfigSource {
 }
 
 /// represents the OpenID configuration for an identity provider.
+#[derive(Clone)]
 pub struct OpenIdConfig {
     pub issuer: Box<str>,
     pub jwks_uri: Box<str>,

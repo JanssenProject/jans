@@ -96,10 +96,14 @@ fn can_update_local_jwks() {
         KeyService::new(vec![&openid_conf_endpoint]).expect("should create key service");
 
     // initialize JwtService with validation enabled and ES256 as the supported algorithm
-    let jwt_service = JwtService::new(DecodingStrategy::WithValidation {
-        key_service,
-        supported_algs: vec![Algorithm::ES256],
-    });
+    let jwt_service = JwtService::new(
+        DecodingStrategy::WithValidation {
+            key_service,
+            supported_algs: vec![Algorithm::ES256],
+        },
+        // TODO: add values
+        Vec::new(),
+    );
 
     // assert that first call attempt to validate the token fails since a
     // decoding key with the same `kid` could not be retrieved
@@ -127,7 +131,7 @@ fn can_update_local_jwks() {
         .create();
 
     // decode and validate the tokens again
-    let (access_token_result, id_token_result, userinfo_token_result) = jwt_service
+    let decode_result = jwt_service
         .decode_tokens::<AccessTokenClaims, IdTokenClaims, UserinfoTokenClaims>(
             &access_token,
             &id_token,
@@ -137,9 +141,9 @@ fn can_update_local_jwks() {
     jwks_uri_mock.assert();
 
     // assert that the decoded token claims match the expected claims
-    assert_eq!(access_token_result, access_token_claims);
-    assert_eq!(id_token_result, id_token_claims);
-    assert_eq!(userinfo_token_result, userinfo_token_claims);
+    assert_eq!(decode_result.access_token, access_token_claims);
+    assert_eq!(decode_result.id_token, id_token_claims);
+    assert_eq!(decode_result.userinfo_token, userinfo_token_claims);
 
     // verify that the OpenID configuration endpoints was called exactly once
     openid_conf_mock.assert();

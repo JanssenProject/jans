@@ -15,7 +15,11 @@ use super::{super::decoding_strategy::DecodingStrategy, super::JwtService, *};
 /// The decoded claims are compared to the expected claims to ensure correctness.
 fn can_decode_claims_without_validation() {
     // initialize JwtService with validation disabled
-    let jwt_service = JwtService::new(DecodingStrategy::WithoutValidation);
+    let jwt_service = JwtService::new(
+        DecodingStrategy::WithoutValidation,
+        // TODO: add values
+        Vec::new(),
+    );
 
     // generate keys and setup the encoding keys and JWKS (JSON Web Key Set)
     let (encoding_keys, _jwks) = generate_keys();
@@ -59,7 +63,7 @@ fn can_decode_claims_without_validation() {
     );
 
     // decode and validate both the access token and the ID token
-    let (access_token_result, id_token_result, userinfo_token_result) = jwt_service
+    let decode_result = jwt_service
         .decode_tokens::<AccessTokenClaims, IdTokenClaims, UserinfoTokenClaims>(
             &access_token,
             &id_token,
@@ -68,7 +72,7 @@ fn can_decode_claims_without_validation() {
         .expect("should decode token");
 
     // assert that the decoded token claims match the expected claims
-    assert_eq!(access_token_result, access_token_claims);
-    assert_eq!(id_token_result, id_token_claims);
-    assert_eq!(userinfo_token_result, userinfo_token_claims);
+    assert_eq!(decode_result.access_token, access_token_claims);
+    assert_eq!(decode_result.id_token, id_token_claims);
+    assert_eq!(decode_result.userinfo_token, userinfo_token_claims);
 }

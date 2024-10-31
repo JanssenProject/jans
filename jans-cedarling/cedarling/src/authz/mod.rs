@@ -180,7 +180,7 @@ impl Authz {
         request: &Request,
     ) -> Result<AuthorizeEntitiesData, AuthorizeError> {
         // decode JWT tokens to structs AccessTokenData, IdTokenData, UserInfoTokenData using jwt service
-        let (access_token, id_token, userinfo_token) = self
+        let decode_result = self
             .config
             .jwt_service
             .decode_tokens::<AccessTokenData, IdTokenData, UserInfoTokenData>(
@@ -194,19 +194,19 @@ impl Authz {
             // Populate the structure with entities derived from the access token
             .access_token_entities(create_access_token_entities(
                 &self.config.policy_store.cedar_schema.json,
-                &access_token,
+                &decode_result.access_token,
             )?)
             // Add an entity created from the ID token
             .id_token_entity(
-                create_id_token_entity(&self.config.policy_store.cedar_schema.json, &id_token)
+                create_id_token_entity(&self.config.policy_store.cedar_schema.json, &decode_result.id_token)
                     .map_err(AuthorizeError::CreateIdTokenEntity)?,
             )
             // Add an entity created from the userinfo token
             .user_entity(
                 create_user_entity(
                     &self.config.policy_store.cedar_schema.json,
-                    &id_token,
-                    &userinfo_token,
+                    &decode_result.id_token,
+                    &decode_result.userinfo_token,
                 )
                 .map_err(AuthorizeError::CreateUserEntity)?,
             )
