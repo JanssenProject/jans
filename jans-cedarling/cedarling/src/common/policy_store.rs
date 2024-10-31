@@ -18,7 +18,7 @@ use std::{collections::HashMap, fmt};
 ///
 /// The `PolicyStore` contains the schema and a set of policies encoded in base64,
 /// which are parsed during deserialization.
-#[derive(Debug, Clone, serde::Deserialize)]
+#[derive(Debug, Clone, serde::Deserialize, PartialEq)]
 pub struct PolicyStore {
     /// The cedar version to use when parsing the schema and policies.
     #[serde(deserialize_with = "parse_cedar_version")]
@@ -44,7 +44,7 @@ pub struct PolicyStore {
 ///
 /// This struct includes the issuer's name, description, and the OpenID configuration endpoint
 /// for discovering issuer-related information.
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize,PartialEq)]
 #[allow(dead_code)]
 pub struct TrustedIssuer {
     /// The name of the trusted issuer.
@@ -97,7 +97,7 @@ where
 ///
 /// This struct includes the type of token, the ID of the person associated with the token,
 /// and an optional role mapping for access control.
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, PartialEq)]
 #[allow(dead_code)]
 pub struct TokenMetadata {
     /// The type of token (e.g., Access, ID, Userinfo, Transaction).
@@ -111,7 +111,7 @@ pub struct TokenMetadata {
     pub role_mapping: Option<String>,
 }
 
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq)]
 #[allow(dead_code)]
 pub enum TokenKind {
     /// Access token used for granting access to resources.

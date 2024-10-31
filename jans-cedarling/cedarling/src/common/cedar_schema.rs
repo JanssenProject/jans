@@ -40,6 +40,47 @@ pub(crate) struct CedarSchema {
     pub json: cedar_json::CedarSchemaJson,
 }
 
+impl PartialEq for CedarSchema {
+    fn eq(&self, other: &Self) -> bool {
+        // Have to check principals, resources, action_groups, entity_types,
+        // actions. Those can contain duplicates, and are not stored in comparison order.
+        // So use HashSet to compare them.
+
+        let self_principals = self.schema.principals().collect::<std::collections::HashSet<_>>();
+        let other_principals = other.schema.principals().collect::<std::collections::HashSet<_>>();
+        if self_principals != other_principals {
+            return false
+        }
+
+        let self_resources = self.schema.resources().collect::<std::collections::HashSet<_>>();
+        let other_resources = other.schema.resources().collect::<std::collections::HashSet<_>>();
+        if self_resources != other_resources {
+            return false
+        }
+
+        let self_action_groups = self.schema.action_groups().collect::<std::collections::HashSet<_>>();
+        let other_action_groups = other.schema.action_groups().collect::<std::collections::HashSet<_>>();
+        if self_action_groups != other_action_groups {
+            return false
+        }
+
+        let self_entity_types = self.schema.entity_types().collect::<std::collections::HashSet<_>>();
+        let other_entity_types = other.schema.entity_types().collect::<std::collections::HashSet<_>>();
+        if self_entity_types != other_entity_types {
+            return false
+        }
+
+        let self_actions = self.schema.actions().collect::<std::collections::HashSet<_>>();
+        let other_actions = other.schema.actions().collect::<std::collections::HashSet<_>>();
+        if self_actions != other_actions {
+            return false
+        }
+
+        // and this only checks the schema anyway
+        self.json == other.json
+    }
+}
+
 impl<'de> serde::Deserialize<'de> for CedarSchema {
     fn deserialize<D : serde::Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error>
     {
@@ -151,6 +192,23 @@ mod deserialize {
         }
 
         #[test]
+        fn test_readable_yaml_ok() {
+            static YAML_POLICY_STORE: &str = include_str!("../../../test_files/policy-store_readable.yaml");
+            let yaml_policy_result = serde_yml::from_str::<PolicyStore>(YAML_POLICY_STORE);
+            assert!(yaml_policy_result.is_ok(), "{:?}", yaml_policy_result.unwrap_err());
+        }
+
+        #[test]
+        fn test_readable_yaml_identical_readable_json() {
+            static YAML_POLICY_STORE: &str = include_str!("../../../test_files/policy-store_readable.yaml");
+            let yaml_policy_result = serde_yml::from_str::<PolicyStore>(YAML_POLICY_STORE);
+
+            static JSON_POLICY_STORE: &str = include_str!("../../../test_files/policy-store_readable.json");
+            let json_policy_result = serde_yml::from_str::<PolicyStore>(JSON_POLICY_STORE);
+
+            assert_eq!(yaml_policy_result.unwrap(), json_policy_result.unwrap());
+        }
+
         // In fact this fails because of limitations in cedar_policy::Policy::from_json
         // see PolicyContentType
         fn test_both_ok() {
