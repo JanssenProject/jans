@@ -55,7 +55,7 @@ public class DocumentStoreManager {
 	public static final String DOCUMENT_DATA_MODIFIED_EVENT_TYPE = "documentDataModifiedEvent";
 	public static final int DEFAULT_INTERVAL = 30; // 30 seconds
 
-	protected static final String[] CUSTOM_SCRIPT_CHECK_ATTRIBUTES = { "dn", "inum", "creationDate", "jansRevision", "jansEnabled", "displayName" };
+	protected static final String[] CUSTOM_SCRIPT_CHECK_ATTRIBUTES = { "dn", "inum", "creationDate", "jansRevision", "jansEnabled", "jansFilePath", "displayName" };
 	@Inject
 	protected Logger log;
 
