@@ -170,8 +170,8 @@ fn test_missing_claim(missing_claim: &str) {
     assert!(
         matches!(
             decode_result,
-            Err(jwt::JwtDecodingError::InvalidUserinfoToken(
-                jwt::TokenValidationError::Validation(_)
+            Err(jwt::Error::InvalidUserinfoToken(
+                jwt::decoding_strategy::Error::Validation(_)
             )),
         ),
         "Expected decoding to fail due to missing a required header: {:?}",
@@ -299,8 +299,8 @@ fn errors_on_invalid_signature() {
     assert!(
         matches!(
             decode_result,
-            Err(jwt::JwtDecodingError::InvalidUserinfoToken(
-                jwt::TokenValidationError::Validation(_)
+            Err(jwt::Error::InvalidUserinfoToken(
+                jwt::decoding_strategy::Error::Validation(_)
             )),
         ),
         "Expected error due to invalid signature from `userinfo_token` during token decoding: {:?}",
@@ -415,8 +415,8 @@ fn errors_on_expired_token() {
     assert!(
         matches!(
             decode_result,
-            Err(jwt::JwtDecodingError::InvalidUserinfoToken(
-                jwt::TokenValidationError::Validation(_)
+            Err(jwt::Error::InvalidUserinfoToken(
+                jwt::decoding_strategy::Error::Validation(_)
             )),
         ),
         "Expected error due to expired `userinfo_token` during token decoding: {:?}",
@@ -531,8 +531,8 @@ fn errors_on_invalid_iss() {
     assert!(
         matches!(
             decode_result,
-            Err(jwt::JwtDecodingError::InvalidUserinfoToken(
-                jwt::TokenValidationError::Validation(_)
+            Err(jwt::Error::InvalidUserinfoToken(
+                jwt::decoding_strategy::Error::Validation(_)
             )),
         ),
         "Expected decoding to fail due to `userinfo_token` not having the same `iss` as `access_token`: {:?}",
@@ -647,8 +647,8 @@ fn errors_on_invalid_aud() {
     assert!(
         matches!(
             decode_result,
-            Err(jwt::JwtDecodingError::InvalidUserinfoToken(
-                jwt::TokenValidationError::Validation(_)
+            Err(jwt::Error::InvalidUserinfoToken(
+                jwt::decoding_strategy::Error::Validation(_)
             )),
         ),
         "Expected decoding to fail due to `userinfo_token` not having the same `aud` as `access_token`: {:?}",
@@ -763,8 +763,8 @@ fn errors_on_invalid_sub() {
     assert!(
         matches!(
             decode_result,
-            Err(jwt::JwtDecodingError::InvalidUserinfoToken(
-                jwt::TokenValidationError::Validation(_)
+            Err(jwt::Error::InvalidUserinfoToken(
+                jwt::decoding_strategy::Error::Validation(_)
             )),
         ),
         "Expected decoding to fail due to `userinfo_token` not having the same `sub` as `access_token`: {:?}",

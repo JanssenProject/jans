@@ -165,8 +165,8 @@ fn test_missing_claim(missing_claim: &str) {
     assert!(
         matches!(
             decode_result,
-            Err(jwt::JwtDecodingError::InvalidAccessToken(
-                jwt::TokenValidationError::Validation(_)
+            Err(jwt::Error::InvalidAccessToken(
+                jwt::decoding_strategy::Error::Validation(_)
             )),
         ),
         "Expected decoding to fail due to `access_token` missing a required header: {:?}",
@@ -292,8 +292,8 @@ fn errors_on_invalid_signature() {
     assert!(
         matches!(
             decode_result,
-            Err(jwt::JwtDecodingError::InvalidAccessToken(
-                jwt::TokenValidationError::Validation(_)
+            Err(jwt::Error::InvalidAccessToken(
+                jwt::decoding_strategy::Error::Validation(_)
             )),
         ),
         "Expected decoding to fail due to `access_token` hanving an invalid signature: {:?}",
@@ -407,8 +407,8 @@ fn errors_on_expired_token() {
     assert!(
         matches!(
             decode_result,
-            Err(jwt::JwtDecodingError::InvalidAccessToken(
-                jwt::TokenValidationError::Validation(_)
+            Err(jwt::Error::InvalidAccessToken(
+                jwt::decoding_strategy::Error::Validation(_)
             )),
         ),
         "Expected decoding to fail due to `access_token` having an invalid signature: {:?}",

@@ -22,7 +22,7 @@ mod token;
 
 pub use decoding_strategy::{string_to_alg, ParseAlgorithmError};
 use decoding_strategy::{DecodingArgs, DecodingStrategy};
-pub use error::*;
+pub use error::Error;
 pub use jsonwebtoken::Algorithm;
 pub use jwt_service_config::*;
 use serde::de::DeserializeOwned;
@@ -85,19 +85,19 @@ impl JwtService {
         access_token: &str,
         id_token: &str,
         userinfo_token: &str,
-    ) -> Result<(A, I, U), JwtDecodingError>
+    ) -> Result<(A, I, U), Error>
     where
         A: DeserializeOwned,
         I: DeserializeOwned,
         U: DeserializeOwned,
     {
         // extract claims without validation
-        let access_token_claims = DecodingStrategy::extract_claims(access_token)
-            .map_err(JwtDecodingError::InvalidAccessToken)?;
+        let access_token_claims =
+            DecodingStrategy::extract_claims(access_token).map_err(Error::InvalidAccessToken)?;
         let id_token_claims =
-            DecodingStrategy::extract_claims(id_token).map_err(JwtDecodingError::InvalidIdToken)?;
+            DecodingStrategy::extract_claims(id_token).map_err(Error::InvalidIdToken)?;
         let userinfo_token_claims = DecodingStrategy::extract_claims(userinfo_token)
-            .map_err(JwtDecodingError::InvalidUserinfoToken)?;
+            .map_err(Error::InvalidUserinfoToken)?;
 
         // Validate the `access_token`.
         //
@@ -119,7 +119,7 @@ impl JwtService {
                 validate_nbf: true,
                 validate_exp: true,
             })
-            .map_err(JwtDecodingError::InvalidAccessToken)?;
+            .map_err(Error::InvalidAccessToken)?;
 
         // Validate the `id_token`
         // - checks if id_token.iss == access_token.iss
@@ -136,7 +136,7 @@ impl JwtService {
                 validate_nbf: true,
                 validate_exp: true,
             })
-            .map_err(JwtDecodingError::InvalidIdToken)?;
+            .map_err(Error::InvalidIdToken)?;
 
         // validate the `userinfo_token`.
         // - checks if userinfo_token.iss == access_token.iss
@@ -153,7 +153,7 @@ impl JwtService {
                 validate_nbf: true,
                 validate_exp: true,
             })
-            .map_err(JwtDecodingError::InvalidUserinfoToken)?;
+            .map_err(Error::InvalidUserinfoToken)?;
 
         Ok((access_token_claims, id_token_claims, userinfo_token_claims))
     }

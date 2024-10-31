@@ -166,8 +166,8 @@ fn test_missing_claim(missing_claim: &str) {
     assert!(
         matches!(
             decode_result,
-            Err(jwt::JwtDecodingError::InvalidIdToken(
-                jwt::TokenValidationError::Validation(_)
+            Err(jwt::Error::InvalidIdToken(
+                jwt::decoding_strategy::Error::Validation(_)
             )),
         ),
         "Expected decoding to fail due to `id_token` missing a required header: {:?}",
@@ -294,8 +294,8 @@ fn errors_on_invalid_signature() {
     assert!(
         matches!(
             decode_result,
-            Err(jwt::JwtDecodingError::InvalidIdToken(
-                jwt::TokenValidationError::Validation(_)
+            Err(jwt::Error::InvalidIdToken(
+                jwt::decoding_strategy::Error::Validation(_)
             )),
         ),
         "Expected decoding to fail due to `id_token` having an invalid signature: {:?}",
@@ -409,8 +409,8 @@ fn errors_on_expired_token() {
     assert!(
         matches!(
             decode_result,
-            Err(jwt::JwtDecodingError::InvalidIdToken(
-                jwt::TokenValidationError::Validation(_)
+            Err(jwt::Error::InvalidIdToken(
+                jwt::decoding_strategy::Error::Validation(_)
             )),
         ),
         "Expected decoding to fail due to `id_token` being expired: {:?}",
@@ -525,8 +525,8 @@ fn errors_on_invalid_iss() {
     assert!(
         matches!(
             decode_result,
-            Err(jwt::JwtDecodingError::InvalidIdToken(
-                jwt::TokenValidationError::Validation(_)
+            Err(jwt::Error::InvalidIdToken(
+                jwt::decoding_strategy::Error::Validation(_)
             )),
         ),
         "Expected decoding to fail due to `id_token` not having the same `iss` as `access_token`: {:?}",
@@ -641,8 +641,8 @@ fn errors_on_invalid_aud() {
     assert!(
         matches!(
             decode_result,
-            Err(jwt::JwtDecodingError::InvalidIdToken(
-                jwt::TokenValidationError::Validation(_)
+            Err(jwt::Error::InvalidIdToken(
+                jwt::decoding_strategy::Error::Validation(_)
             )),
         ),
         "Expected decoding to fail due to `id_token` not having the same `aud` as `access_token`: {:?}",

@@ -231,8 +231,8 @@ fn errors_on_unsupported_alg() {
     assert!(
         matches!(
             validation_result,
-            Err(jwt::JwtDecodingError::InvalidAccessToken(
-                jwt::TokenValidationError::TokenSignedWithUnsupportedAlgorithm(
+            Err(jwt::Error::InvalidAccessToken(
+                jwt::decoding_strategy::Error::TokenSignedWithUnsupportedAlgorithm(
                     jsonwebtoken::Algorithm::ES256
                 )
             ))
@@ -343,8 +343,8 @@ fn can_update_local_jwks() {
         );
     assert!(matches!(
         decode_result,
-        Err(jwt::JwtDecodingError::InvalidAccessToken(
-            jwt::TokenValidationError::KeyService(
+        Err(jwt::Error::InvalidAccessToken(
+            jwt::decoding_strategy::Error::KeyService(
                 jwt::decoding_strategy::key_service::Error::KeyNotFound(_)
             )
         ))

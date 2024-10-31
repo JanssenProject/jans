@@ -5,10 +5,11 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
+mod error;
 pub mod key_service;
-use crate::common::policy_store::TrustedIssuer;
 
-use super::TokenValidationError;
+use crate::common::policy_store::TrustedIssuer;
+pub use error::Error;
 use jsonwebtoken as jwt;
 pub use key_service::KeyService;
 use serde::de::DeserializeOwned;
@@ -64,14 +65,13 @@ impl DecodingStrategy {
     pub fn new_with_validation(
         config_algs: Vec<jwt::Algorithm>,
         trusted_idps: Vec<TrustedIssuer>,
-    ) -> Result<Self, TokenValidationError> {
+    ) -> Result<Self, Error> {
         // initialize the key service with OpenID configuration endpoints
         let openid_conf_endpoints = trusted_idps
             .iter()
             .map(|x| x.openid_configuration_endpoint.as_ref())
             .collect();
-        let key_service =
-            KeyService::new(openid_conf_endpoints).map_err(TokenValidationError::KeyService)?;
+        let key_service = KeyService::new(openid_conf_endpoints)?;
 
         Ok(Self::WithValidation {
             key_service,
@@ -83,10 +83,7 @@ impl DecodingStrategy {
     ///
     /// # Errors
     /// Returns an error if decoding or validation fails.
-    pub fn decode<T: DeserializeOwned>(
-        &self,
-        decoding_args: DecodingArgs,
-    ) -> Result<T, TokenValidationError> {
+    pub fn decode<T: DeserializeOwned>(&self, decoding_args: DecodingArgs) -> Result<T, Error> {
         match self {
             DecodingStrategy::WithoutValidation => Self::extract_claims(decoding_args.jwt),
             DecodingStrategy::WithValidation {
@@ -103,7 +100,7 @@ impl DecodingStrategy {
     ///
     /// # Errors
     /// Returns an error if the claims cannot be extracted.
-    pub fn extract_claims<T: DeserializeOwned>(jwt_str: &str) -> Result<T, TokenValidationError> {
+    pub fn extract_claims<T: DeserializeOwned>(jwt_str: &str) -> Result<T, Error> {
         let mut validator = jwt::Validation::default();
         validator.insecure_disable_signature_validation();
         validator.required_spec_claims.clear();
@@ -114,7 +111,7 @@ impl DecodingStrategy {
         let key = jwt::DecodingKey::from_secret("some_secret".as_ref());
 
         let claims = jwt::decode::<T>(jwt_str, &key, &validator)
-            .map_err(TokenValidationError::Parsing)?
+            .map_err(Error::Parsing)?
             .claims;
 
         Ok(claims)
@@ -129,14 +126,12 @@ fn decode_and_validate_jwt<T: DeserializeOwned>(
     decoding_args: DecodingArgs,
     supported_algs: &Vec<jwt::Algorithm>,
     key_service: &KeyService,
-) -> Result<T, TokenValidationError> {
-    let header = jwt::decode_header(decoding_args.jwt).map_err(TokenValidationError::Parsing)?;
+) -> Result<T, Error> {
+    let header = jwt::decode_header(decoding_args.jwt).map_err(Error::Parsing)?;
 
     // reject unsupported algorithms early
     if !supported_algs.contains(&header.alg) {
-        return Err(TokenValidationError::TokenSignedWithUnsupportedAlgorithm(
-            header.alg,
-        ));
+        return Err(Error::TokenSignedWithUnsupportedAlgorithm(header.alg));
     }
 
     // set up validation rules
@@ -159,15 +154,13 @@ fn decode_and_validate_jwt<T: DeserializeOwned>(
     // fetch decoding key from the KeyService
     let kid = &header
         .kid
-        .ok_or_else(|| TokenValidationError::JwkMissingRequiredHeader("kid".into()))?;
-    let key = key_service
-        .get_key(kid)
-        .map_err(TokenValidationError::KeyService)?;
+        .ok_or_else(|| Error::JwkMissingRequiredHeader("kid".into()))?;
+    let key = key_service.get_key(kid).map_err(Error::KeyService)?;
     // TODO: handle tokens without a `kid` in the header
 
     // decode and validate the jwt
     let claims = jwt::decode::<T>(decoding_args.jwt, &key, &validator)
-        .map_err(TokenValidationError::Validation)?
+        .map_err(Error::Validation)?
         .claims;
     Ok(claims)
 }
