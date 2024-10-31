@@ -230,9 +230,11 @@ fn test_error_on_invalid_token_type() {
         { "type": "userinfo", "user_id": "email" }
     ]);
 
-    let result = parse_and_check_token_metadata(invalid_token_metadata);
+    let result =
+        parse_and_check_token_metadata(invalid_token_metadata).expect_err("should throw error");
 
-    assert!(
-        matches!(result, Err(e) if e.to_string() == "unknown variant `Access`, expected one of `access_token`, `id_token`, `userinfo_token`, `transaction_token`")
+    assert_eq!(
+        result.to_string(),
+        "unknown variant `Access`, expected one of `access_token`, `id_token`, `userinfo_token`"
     );
 }
