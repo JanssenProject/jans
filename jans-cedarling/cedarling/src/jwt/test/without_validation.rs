@@ -5,7 +5,7 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-use super::{super::decoding_strategy::DecodingStrategy, super::JwtService, *};
+use super::{super::JwtService, *};
 use serde_json::json;
 
 #[test]
@@ -16,7 +16,8 @@ use serde_json::json;
 /// The decoded claims are compared to the expected claims to ensure correctness.
 fn can_decode_claims_without_validation() {
     // initialize JwtService with validation disabled
-    let jwt_service = JwtService::new(DecodingStrategy::WithoutValidation);
+    let jwt_service =
+        JwtService::new_with_config(crate::jwt::JwtServiceConfig::WithoutValidation {});
 
     // generate keys and setup the encoding keys and JWKS (JSON Web Key Set)
     let (encoding_keys, _jwks) = generate_keys();

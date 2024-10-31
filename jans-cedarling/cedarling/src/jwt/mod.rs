@@ -39,16 +39,6 @@ pub struct JwtService {
 /// perform validation or to decode without validation, depending on the provided
 /// configuration. It is an internal module used by other components of the library.
 impl JwtService {
-    /// Creates a new instance of `JwtService` for testing purposes.
-    ///
-    /// This constructor allows for the injection of a specific decoding strategy,
-    /// facilitating unit testing by simulating different decoding and validation scenarios.
-    /// It is useful for testing both successful and failing cases for various token types.
-    #[cfg(test)]
-    pub fn new(decoding_strategy: DecodingStrategy) -> Self {
-        Self { decoding_strategy }
-    }
-
     /// Initializes a new `JwtService` instance based on the provided configuration.
     pub(crate) fn new_with_config(config: JwtServiceConfig) -> Self {
         match config {
