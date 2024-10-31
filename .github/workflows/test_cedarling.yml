@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   rust_tests:
-    runs-on: ubuntu-24.04 [Beta]
+    runs-on: ubuntu-20.04
     steps:
     - name: Install Dependencies
       run: sudo apt install php libapache2-mod-php php-cli
