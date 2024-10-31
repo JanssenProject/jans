@@ -42,7 +42,7 @@ task using the command below:
 
 Let's get the information about OpenID Connect Client Configuration:
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --info OauthOpenidConnectClients
+jans cli --info OauthOpenidConnectClients
 ```
 ```text title="Sample Output" linenums="1"
 Operation ID: get-oauth-openid-clients
@@ -74,7 +74,7 @@ Operation ID: patch-oauth-openid-client-by-inum
  inum: Client identifier [string]
  Schema: Array of JsonPatch
 
-To get sample schema type /opt/jans/jans-cli/config-cli.py --schema-sample <schema>, for example /opt/jans/jans-cli/config-cli.py --schema-sample JsonPatch
+To get sample schema type jans cli --schema-sample <schema>, for example jans cli --schema-sample JsonPatch
 ```
 
 ### Get List of OpenID Connect Clients
@@ -82,7 +82,7 @@ To get sample schema type /opt/jans/jans-cli/config-cli.py --schema-sample <sche
 To get the list of OpenID Connect clients, run the following command:
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --operation-id get-oauth-openid-clients
+jans cli --operation-id get-oauth-openid-clients
 ```
 
 ```json title="Sample Output" linenums="1"
@@ -199,7 +199,7 @@ To get the list of OpenID Connect clients, run the following command:
 To search using parameters, use the command below:
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --operation-id get-oauth-openid-clients \
+jans cli --operation-id get-oauth-openid-clients \
 --endpoint-args limit:2
 ```
 
@@ -214,14 +214,14 @@ according to `Client` schema.
 To see the schema, use the command below:
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --schema Client
+jans cli --schema Client
 ```
 
 The Janssen Server also provides an example of data that adheres to
 the above schema. To fetch the example, use the command below.
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --schema-sample Client
+jans cli --schema-sample Client
 ```
 
 Using the schema and the example above, we have added OpenID Connect 
@@ -238,7 +238,7 @@ Now let's post an OpenID Connect client to the Janssen Server to be
 added to the existing set:
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --operation-id post-oauth-openid-client \
+jans cli --operation-id post-oauth-openid-client \
 --data /tmp/openid-connect.json
 ```
 
@@ -250,7 +250,7 @@ To update the configuration follow the steps below.
 it into a file for editing. The following command will retrieve the existing 
 OpenID Connect Client in the schema file.
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py -no-color \
+jans cli -no-color \
 --operation-id get-oauth-openid-clients-by-inum \
 --url-suffix inum:1800.ca57f8f8-e163-4cdc-96f2-e2760e627bfe > /tmp/update-client.json
 ```
@@ -260,7 +260,7 @@ OpenID Connect Client in the schema file.
 3. We have changed in `parLifetime` only the `600` to `700`. Use the updated file 
 to send the update to the Janssen Server using the command below
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --operation-id put-oauth-openid-client \
+jans cli --operation-id put-oauth-openid-client \
 --data /tmp/update-client.json
 ```
 
@@ -294,7 +294,7 @@ from `web` to `native`.
 Now let's do the operation with the command line.
 
 ```bash 
-/opt/jans/jans-cli/config-cli.py \
+jans cli \
 --operation-id patch-oauth-openid-client-by-inum \
 --url-suffix inum:1800.ca57f8f8-e163-4cdc-96f2-e2760e627bfe --data /tmp/schema.json
 ```
@@ -307,7 +307,7 @@ below command:
 
 
 ```bash 
-/opt/jans/jans-cli/config-cli.py \
+jans cli \
 --operation-id get-oauth-openid-clients-by-inum \
 --url-suffix inum:1800.ca57f8f8-e163-4cdc-96f2-e2760e627bfe
 ```
@@ -320,7 +320,7 @@ The result will only show details of client with
 Delete the OpenID Connect client using its `inum`. The command line is:
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py \
+jans cli \
 --operation-id delete-oauth-openid-client-by-inum \
 --url-suffix inum:a89b5c29-2a91-48b5-bf27-1bf786954a06
 ```
@@ -331,7 +331,7 @@ It will delete the OpenID Connect client if it matches with the given `inum`.
 Start TUI using the command below:
 
 ```bash title="Command"
-sudo /opt/jans/jans-cli/jans_cli_tui.py
+jans tui
 ```
 
 ### Client Screen

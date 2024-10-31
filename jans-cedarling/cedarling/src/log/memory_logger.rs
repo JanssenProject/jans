@@ -6,8 +6,8 @@
  */
 
 use super::interface::{LogStorage, LogWriter};
-use crate::models::log_config::MemoryLogConfig;
-use crate::models::log_entry::LogEntry;
+use super::LogEntry;
+use crate::bootstrap_config::log_config::MemoryLogConfig;
 use sparkv::{Config as ConfigSparKV, SparKV};
 use std::{sync::Mutex, time::Duration};
 
@@ -85,9 +85,9 @@ impl LogStorage for MemoryLogger {
 
 #[cfg(test)]
 mod tests {
+    use super::super::{AuthorizationLogInfo, Decision, LogEntry, LogType};
     use super::*;
-    use crate::models::log_entry::{AuthorizationLogInfo, Decision, LogEntry, LogType};
-    use uuid7::uuid7;
+    use crate::common::app_types;
 
     fn create_memory_logger() -> MemoryLogger {
         let config = MemoryLogConfig { log_ttl: 60 };
@@ -99,17 +99,31 @@ mod tests {
         let logger = create_memory_logger();
 
         // create log entries
-        let entry1 = LogEntry::new_with_data(uuid7(), "app1".to_string(), LogType::Decision)
-            .set_message("some message".to_string())
-            .set_auth_info(AuthorizationLogInfo {
-                principal: "test_principal".to_string(),
-                action: "test_action".to_string(),
-                resource: "test_resource".to_string(),
-                context: "{}".to_string(),
-                decision: Decision::Allow,
-                diagnostics: "test diagnostic info".to_string(),
-            });
-        let entry2 = LogEntry::new_with_data(uuid7(), "app2".to_string(), LogType::System);
+        let entry1 = LogEntry::new_with_data(
+            app_types::PdpID::new(),
+            Some(app_types::ApplicationName("app1".to_string())),
+            LogType::Decision,
+        )
+        .set_message("some message".to_string())
+        .set_auth_info(AuthorizationLogInfo {
+            action: "test_action".to_string(),
+            resource: "test_resource".to_string(),
+            context: serde_json::json!({}),
+
+            person_principal: "test_person_principal".to_string(),
+            workload_principal: "test_workload_principal".to_string(),
+
+            person_diagnostics: Default::default(),
+            workload_diagnostics: Default::default(),
+
+            person_decision: Decision::Allow,
+            workload_decision: Decision::Allow,
+        });
+        let entry2 = LogEntry::new_with_data(
+            app_types::PdpID::new(),
+            Some(app_types::ApplicationName("app2".to_string())),
+            LogType::System,
+        );
 
         // log entries
         logger.log(entry1.clone());
@@ -146,8 +160,16 @@ mod tests {
         let logger = create_memory_logger();
 
         // create log entries
-        let entry1 = LogEntry::new_with_data(uuid7(), "app1".to_string(), LogType::Decision);
-        let entry2 = LogEntry::new_with_data(uuid7(), "app2".to_string(), LogType::Metric);
+        let entry1 = LogEntry::new_with_data(
+            app_types::PdpID::new(),
+            Some(app_types::ApplicationName("app1".to_string())),
+            LogType::Decision,
+        );
+        let entry2 = LogEntry::new_with_data(
+            app_types::PdpID::new(),
+            Some(app_types::ApplicationName("app2".to_string())),
+            LogType::Metric,
+        );
 
         // log entries
         logger.log(entry1.clone());

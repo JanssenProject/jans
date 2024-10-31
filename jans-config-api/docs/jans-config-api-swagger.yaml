@@ -615,6 +615,39 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/jans_asset-read
+  /api/v1/jans-assets/asset-dir-mapping:
+    get:
+      tags:
+      - Jans Assets
+      summary: Get valid asset types
+      description: Get valid asset types
+      operationId: get-asset-dir-mapping
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AssetDirMapping'
+        "401":
+          description: Unauthorized
+        "404":
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/jans_asset-read
   /api/v1/jans-assets:
     get:
       tags:
@@ -7510,7 +7543,7 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/scopes.readonly
-  /api/v1/jans-auth-server/session/id/{jansId}:
+  /api/v1/jans-auth-server/session/sid/{sid}:
     get:
       tags:
       - Auth - Session Management
@@ -7518,9 +7551,9 @@ paths:
       description: Get session by id.
       operationId: get-session-by-id
       parameters:
-      - name: jansId
+      - name: sid
         in: path
-        description: Session Unique identifier.
+        description: Session identifier.
         required: true
         schema:
           type: string
@@ -7552,15 +7585,15 @@ paths:
       description: Delete a session.
       operationId: delete-session
       parameters:
-      - name: jansId
+      - name: sid
         in: path
-        description: Session Unique identifier.
+        description: Session identifier.
         required: true
         schema:
           type: string
       responses:
-        "200":
-          description: Ok
+        "204":
+          description: No Content
         "401":
           description: Unauthorized
         "404":
@@ -7586,8 +7619,8 @@ paths:
         schema:
           type: string
       responses:
-        "200":
-          description: Ok
+        "204":
+          description: No Content
         "401":
           description: Unauthorized
         "404":
@@ -7611,9 +7644,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/SessionId'
+                $ref: '#/components/schemas/SessionPagedResult'
               examples:
                 Response json example:
                   description: Response json example
@@ -9009,9 +9040,7 @@ components:
           type: string
           format: date-time
         service:
-          type: array
-          items:
-            type: string
+          type: string
         level:
           type: integer
           format: int32
@@ -9040,6 +9069,28 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Document'
+    AssetDirMapping:
+      type: object
+      properties:
+        directory:
+          type: string
+          description: Relative path to asset base directory.
+        type:
+          type: array
+          description: List of file extention that are stored in directory.
+          items:
+            type: string
+            description: List of file extention that are stored in directory.
+        description:
+          type: string
+          description: Description of assets stored in directory.
+        jansServiceModule:
+          type: array
+          description: List of supported service module where asset can be uploaded.
+          items:
+            type: string
+            description: List of supported service module where asset can be uploaded.
+      description: Asset type mapped to server directory.
     AssetForm:
       required:
       - assetFile
@@ -9162,19 +9213,19 @@ components:
           type: string
         selected:
           type: boolean
-        adminCanView:
+        whitePagesCanView:
           type: boolean
-        userCanView:
+        adminCanView:
           type: boolean
         adminCanEdit:
           type: boolean
         userCanEdit:
           type: boolean
+        userCanView:
+          type: boolean
         adminCanAccess:
           type: boolean
         userCanAccess:
-          type: boolean
-        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -10948,22 +10999,6 @@ components:
             $ref: '#/components/schemas/PluginConf'
         assetMgtConfiguration:
           $ref: '#/components/schemas/AssetMgtConfiguration'
-    AssetDirMapping:
-      type: object
-      properties:
-        directory:
-          type: string
-          description: Relative path to asset base directory.
-        type:
-          type: array
-          description: List of file extention that are stored in directory.
-          items:
-            type: string
-            description: List of file extention that are stored in directory.
-        description:
-          type: string
-          description: Description of assets stored in directory.
-      description: Asset type mapped to server directory.
     AssetMgtConfiguration:
       type: object
       properties:
@@ -10980,15 +11015,6 @@ components:
           type: boolean
           description: Flag indicating if service module name extension validation
             is enabled.
-        assetBaseDirectory:
-          type: string
-          description: Base directory on server to upload the asset.
-        jansServiceModule:
-          type: array
-          description: List of supported service module where asset can be uploaded.
-          items:
-            type: string
-            description: List of supported service module where asset can be uploaded.
         assetDirMapping:
           type: array
           description: Asset type mapped to server directory.
@@ -11602,10 +11628,10 @@ components:
         ttl:
           type: integer
           format: int32
-        opbrowserState:
-          type: string
         persisted:
           type: boolean
+        opbrowserState:
+          type: string
     SessionIdAccessMap:
       type: object
       properties:
@@ -11615,6 +11641,22 @@ components:
             type: boolean
           xml:
             name: map
+    SessionPagedResult:
+      type: object
+      properties:
+        start:
+          type: integer
+          format: int32
+        totalEntriesCount:
+          type: integer
+          format: int32
+        entriesCount:
+          type: integer
+          format: int32
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/SessionId'
     User:
       type: object
       properties:
@@ -11673,22 +11715,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/UserAuthenticator'
-    SessionPagedResult:
-      type: object
-      properties:
-        start:
-          type: integer
-          format: int32
-        totalEntriesCount:
-          type: integer
-          format: int32
-        entriesCount:
-          type: integer
-          format: int32
-        entries:
-          type: array
-          items:
-            $ref: '#/components/schemas/SessionId'
     TokenAttributes:
       type: object
       properties:

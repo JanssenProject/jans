@@ -14,11 +14,12 @@
 //! The Cedarling is a more productive and flexible way to handle authorization.
 
 mod authz;
+mod bootstrap_config;
+mod common;
 mod init;
 mod jwt;
 mod lock;
 mod log;
-mod models;
 
 #[doc(hidden)]
 #[cfg(test)]
@@ -26,21 +27,32 @@ mod tests;
 
 use std::sync::Arc;
 
+pub use authz::request::{Request, ResourceData};
 use authz::Authz;
-use init::policy_store::{load_policy_store, LoadPolicyStoreError};
+pub use authz::{AuthorizeError, AuthorizeResult};
+pub use bootstrap_config::*;
+use init::service_config::{ServiceConfig, ServiceConfigError};
+use init::ServiceFactory;
+
+use common::app_types;
+use log::LogEntry;
 pub use log::LogStorage;
-use log::{init_logger, LogWriter};
-pub use models::config::*;
-pub use models::log_entry::LogEntry;
-use models::log_entry::LogType;
-use uuid7::uuid4;
+use log::LogType;
+
+#[doc(hidden)]
+pub mod bindings {
+    pub use super::log::{
+        AuthorizationLogInfo, Decision, Diagnostics, LogEntry, PolicyEvaluationError,
+    };
+    pub use cedar_policy;
+}
 
 /// Errors that can occur during initialization Cedarling.
 #[derive(Debug, thiserror::Error)]
 pub enum InitCedarlingError {
-    /// Error that may occur during loading the policy store.
-    #[error("Could not load policy: {0}")]
-    PolicyStore(#[from] LoadPolicyStoreError),
+    /// Error while preparing config for internal services
+    #[error(transparent)]
+    ServiceConfig(#[from] ServiceConfigError),
 }
 
 /// The instance of the Cedarling application.
@@ -55,33 +67,36 @@ pub struct Cedarling {
 impl Cedarling {
     /// Create a new instance of the Cedarling application.
     pub fn new(config: BootstrapConfig) -> Result<Cedarling, InitCedarlingError> {
-        let log = init_logger(config.log_config);
-        // we use uuid v4 because it is generated based on random numbers.
-        let pdp_id = uuid4();
-        let application_id = config.authz_config.application_name.clone();
+        let log = log::init_logger(&config.log_config);
+        let pdp_id = app_types::PdpID::new();
 
-        let policy_store = load_policy_store(config.policy_store_config)
-           // Log success when loading the policy store
+        let service_config = ServiceConfig::new(&config)
             .inspect(|_| {
                 log.log(
-                    LogEntry::new_with_data(pdp_id, application_id.clone(), LogType::System)
-                        .set_message("PolicyStore loaded successfully".to_string()),
-                );
+                    LogEntry::new_with_data(pdp_id, None, LogType::System)
+                        .set_message("configuration parsed successfully".to_string()),
+                )
             })
-            // Log failure when loading the policy store
             .inspect_err(|err| {
                 log.log(
-                    LogEntry::new_with_data(pdp_id, application_id, LogType::System)
-                        .set_message(format!("Could not load PolicyStore: {}", err)),
+                    LogEntry::new_with_data(pdp_id, None, LogType::System)
+                        .set_error(err.to_string())
+                        .set_message("configuration parsed with error".to_string()),
                 )
             })?;
 
-        let authz = Authz::new(config.authz_config, pdp_id, log.clone(), policy_store);
+        let mut service_factory = ServiceFactory::new(&config, service_config, log.clone(), pdp_id);
 
         Ok(Cedarling {
             log,
-            authz: Arc::new(authz),
+            authz: service_factory.authz_service(),
         })
+    }
+
+    /// Authorize request
+    /// makes authorization decision based on the [`Request`]
+    pub fn authorize(&self, request: Request) -> Result<AuthorizeResult, AuthorizeError> {
+        self.authz.authorize(request)
     }
 }
 

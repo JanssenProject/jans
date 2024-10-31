@@ -62,7 +62,7 @@ Operations to manage the default authentication method are grouped under the
 use the command below.
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --info DefaultAuthenticationMethod
+jans cli --info DefaultAuthenticationMethod
 ```
 ```text title="Output"
 Operation ID: get-acrs
@@ -71,14 +71,14 @@ Operation ID: put-acrs
  Description: Updates default authentication method.
  Schema: AuthenticationMethod
 
-To get sample schema type /opt/jans/jans-cli/config-cli.py --schema <schma>, for example /opt/jans/jans-cli/config-cli.py --schema /components/schemas/AuthenticationMethod
+To get sample schema type jans cli --schema <schma>, for example jans cli --schema /components/schemas/AuthenticationMethod
 ```
 
 ### Find Current Authentication Method
 
 To get the current default authentication method use the command below.
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --operation-id get-acrs
+jans cli --operation-id get-acrs
 ```
 ```json title="Sample Output"
 {
@@ -93,8 +93,7 @@ To perform the _put-acrs_ operation, we have to use its schema.
 To get its schema:
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --schema AuthenticationMethod \
-> /tmp/patch-default-auth.json
+jans cli --schema AuthenticationMethod > /tmp/patch-default-auth.json
 ```
 The schema can now be found in the patch-default-auth.json file.
 
@@ -107,7 +106,7 @@ defaultAcr   string
 you can also use the following command for `AuthenticationMethod` schema example.
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --schema-sample AuthenticationMethod
+jans cli --schema-sample AuthenticationMethod
 ```
 ```json title="Schema Example"
 {
@@ -129,8 +128,7 @@ We are going to update it with `passport_saml` authentication method.
 Now let's trigger the operation using the above file.
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --operation-id put-acrs \
---data /tmp/patch-default-auth.json
+jans cli --operation-id put-acrs --data /tmp/patch-default-auth.json
 ```
 
 It will show the updated result.
@@ -139,7 +137,6 @@ It will show the updated result.
 {
   "defaultAcr": "passport_saml"
 }
-
 ```
 
 ##  Using Text-based UI
@@ -150,7 +147,7 @@ the [Text-Based UI](../config-tools/jans-tui/README.md) also.
 You can start TUI using the command below:
 
 ```bash title="Command"
-sudo /opt/jans/jans-cli/jans_cli_tui.py
+jans tui
 ```
 
 ### Find Current Default Authentication Method
@@ -168,9 +165,6 @@ and navigate to the new default method with **Up** and **Down** keys.
 To choose hit **Space** key.
 Navigate to **Save** button and hit **Enter** key
 
-!!! Note 
-    If your backend database is not LDAP, you won't see any LDAP servers 
-    related tab/items.
 
 ### Basic Authentication Method
 
@@ -184,9 +178,8 @@ navigate to **Save** button and hit **Enter** key
 
 ### LDAP Servers As Authentication Method
 
-If your backend database is LDAP, you will have this tab where you can add and 
-modify LDAP Servers are to be used as the default authentication method. 
-See below image
+In this tab you can add and modify LDAP Servers are to be used as the
+default authentication method. See below image
 
 ![image](../../../assets/tui-authn-ldap-servers.png)
 

@@ -1,4 +1,4 @@
-from cedarling_python import AuthzConfig, MemoryLogConfig, DisabledLoggingConfig, StdOutLogConfig
+from cedarling_python import MemoryLogConfig, DisabledLoggingConfig, StdOutLogConfig
 from cedarling_python import PolicyStoreSource, PolicyStoreConfig, BootstrapConfig
 from cedarling_python import Cedarling
 from config import TEST_FILES_PATH, sample_bootstrap_config
@@ -8,6 +8,9 @@ import pytest
 # In python unit tests we not cover all possible scenarios, but most common.
 # also we try duplicate rust test cases
 
+# in fixture `sample_bootstrap_config` we use policy store `policy-store_ok.json`
+# The human-readable policy and schema file is located in next folder:
+# `test_files\policy-store_ok`
 
 # test cases for load policy store with error
 test_cases_err = [
@@ -17,14 +20,14 @@ test_cases_err = [
     ("policy-store_policy_err_broken_utf8.json",
      "unable to decode policy_content to utf8 string"),
     ("policy-store_policy_err_broken_policy.json",
-     'unable to decode policy with id: 840da5d85403f35ea76519ed1a18a33989f855bf1cf8, error: unable to decode policy_content from human redable format: unexpected token `)` at line 15 column 1'),
+     "unable to decode policy with id: 840da5d85403f35ea76519ed1a18a33989f855bf1cf8, error: unable to decode policy_content from human readable format: unexpected token `)`"),
     # cases with schema errors
     ("policy-store_schema_err_base64.json",
      "unable to decode cedar policy schema base64"),
     ("policy-store_schema_err_json.json",
-     "unable to decode cedar policy schema json"),
+     "unable to unmarshal cedar policy schema json to the structure"),
     ("policy-store_schema_err_cedar_mistake.json",
-     "unable to decode cedar policy schema json: failed to resolve type: User_TypeNotExist at line 35 column 1"),
+     "Could not load policy: failed to parse the policy store from `policy_store.json`: unable to parse cedar policy schema json: failed to resolve type: User_TypeNotExist at line 32 column 1"),
 ]
 
 

@@ -44,7 +44,7 @@ relevant to Logging configuration, you can check the operations under
 command below:
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --info ConfigurationLogging
+jans cli --info ConfigurationLogging
 ```
 
 ```text title="Sample Output"
@@ -54,13 +54,13 @@ Operation ID: put-config-logging
   Description: Updates Jans Authorization Server logging settings
   Schema: Logging
 
-To get sample schema type /opt/jans/jans-cli/config-cli.py --schema <schema>, for example /opt/jans/jans-cli/config-cli.py --schema Logging
+To get sample schema type jans cli --schema <schema>, for example jans cli --schema Logging
 ```
 
 ### Find Logging Configuration
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --operation-id get-config-logging
+jans cli --operation-id get-config-logging
 ```
 
 ```json title="Sample Output" linenums="1"
@@ -87,8 +87,7 @@ To update the configuration follow the steps below.
    The following command will retrieve the current logging configuration and 
    store it in a file.
    ```bash title="Command"
-   /opt/jans/jans-cli/config-cli.py -no-color \
-   --operation-id get-config-logging > /tmp/log-config.json
+   jans cli -no-color --operation-id get-config-logging > /tmp/log-config.json
    ```
 2. Update the configuration with desired value in the file while 
       keeping other properties and values unchanged. Updates must adhere to the
@@ -97,13 +96,12 @@ To update the configuration follow the steps below.
       The schema defines what values and datatypes are acceptable for each 
       property value.
    ```bash title="Command"
-   /opt/jans/jans-cli/config-cli.py --schema Logging 
+   jans cli --schema Logging 
    ```
 3. Use the updated file to send the update to the Janssen Server using the 
     command below
    ```bash title="Command"
-   /opt/jans/jans-cli/config-cli.py --operation-id put-config-logging \
-   --data /tmp/log-config.json
+   jans cli --operation-id put-config-logging --data /tmp/log-config.json
    ```
    Upon successful execution of the update, the Janssen Server responds with 
    updated configuration.
@@ -113,7 +111,7 @@ To update the configuration follow the steps below.
 Start TUI using the command below:
 
 ```bash title="Command"
-sudo /opt/jans/jans-cli/jans_cli_tui.py
+jans tui
 ```
 ### Logging Configuration for Auth Server
 

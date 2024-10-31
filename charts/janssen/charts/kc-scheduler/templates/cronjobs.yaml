@@ -57,9 +57,9 @@ spec:
               {{- with .Values.volumeMounts }}
 {{- toYaml . | nindent 16 }}
               {{- end }}
-                - mountPath: {{ .Values.global.cnConfiguratorConfigurationFile }}
-                  name: {{ .Release.Name }}-configuration-file
-                  subPath: {{ .Values.global.cnConfiguratorConfigurationFile | base }}
+              {{- with (include "cn.config.schema" . | fromYaml).volumeMounts }}
+{{- toYaml . | nindent 16 }}
+              {{- end }}
               envFrom:
                 - configMapRef:
                     name: {{ .Release.Name }}-config-cm
@@ -71,9 +71,7 @@ spec:
                 - configMapRef:
                     name: {{ .Release.Name }}-global-user-custom-envs
                 {{- end }}
-              {{- if and ( .Values.global.opendj.enabled ) (or (eq .Values.global.storageClass.provisioner "microk8s.io/hostpath" ) (eq .Values.global.storageClass.provisioner "k8s.io/minikube-hostpath")) }}
-              resources: {}
-              {{- else if .Values.global.cloud.testEnviroment }}
+              {{- if .Values.global.cloud.testEnviroment }}
               resources: {}
               {{- else }}
               resources:
@@ -83,9 +81,9 @@ spec:
           {{- with .Values.volumes }}
 {{- toYaml . | nindent 12 }}
           {{- end }}
-            - name: {{ .Release.Name }}-configuration-file
-              secret:
-                secretName: {{ .Release.Name }}-configuration-file
+          {{- with (include "cn.config.schema" . | fromYaml).volumes }}
+{{- toYaml . | nindent 12 }}
+          {{- end }}
           restartPolicy: Never
           {{- if not .Values.global.isFqdnRegistered }}
           hostAliases:

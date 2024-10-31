@@ -51,8 +51,8 @@ class JansNavBar():
         self.navbar_entries = entries
         self.cur_navbar_selection = select
         self.selection_changed = selection_changed
-        self.jans_name = jans_name
         self.last_to_right = last_to_right
+        self.jans_name = jans_name
         self.cur_tab = entries[self.cur_navbar_selection][0]
         self.create_window()
 
@@ -109,6 +109,32 @@ class JansNavBar():
         self.myparent.bindings.add('escape', shorcut_key.lower())(self._go_tab)
 
 
+    def get_row_lenght(self, row):
+        l = 0
+        for entry in row:
+            if isinstance(entry, HTML):
+                for ft in entry.formatted_text:
+                    l += len(ft[1])
+            else:
+                l += len(entry)
+        return l
+
+    def get_nav_bar_entry(self, entry, selected):
+        display_text = entry[1]
+        re_search = shortcut_re.search(display_text)
+
+        if re_search:
+            sc, ec = re_search.span()
+            shorcut_key = re_search.group(1)
+            display_text = display_text[:sc]+ '<style fg="{}">'.format(cli_style.shorcut_color) + shorcut_key + '</style>' +display_text[ec:]
+            self.add_key_binding(shorcut_key.lower())
+
+        if selected:
+            return HTML('<style fg="{}" bg="{}">{}</style>'.format(cli_style.sub_navbar_selected_bgcolor, cli_style.sub_navbar_selected_fgcolor, display_text))
+        else:
+            return HTML('<b>{}</b>'.format(display_text))
+
+
     def get_navbar_entries(self)-> AnyFormattedText:
         """Get all selective entries
 
@@ -119,29 +145,47 @@ class JansNavBar():
         result = []
         nitems = len(self.navbar_entries)
         total_text_lenght = 0
-        
-        for i, entry in enumerate(self.navbar_entries):
-            display_text = entry[1]
-            re_search = shortcut_re.search(display_text)
-            if re_search:
-                sc, ec = re_search.span()
-                shorcut_key = re_search.group(1)
-                display_text = display_text[:sc]+ '<style fg="{}">'.format(cli_style.shorcut_color) + shorcut_key + '</style>' +display_text[ec:]
-                self.add_key_binding(shorcut_key.lower())
+        rows = []
+        row = []
+        screen_width = self.myparent.output.get_size().columns
+        last_item = self.navbar_entries[-1] if self.last_to_right else None
+        iterate_entries = self.navbar_entries[:-1] if last_item else self.navbar_entries
 
-            total_text_lenght += len(entry[1].replace('[','').replace(']',''))
-            if i == self.cur_navbar_selection:
-                result.append(HTML('<style fg="{}" bg="{}">{}</style>'.format(cli_style.sub_navbar_selected_bgcolor, cli_style.sub_navbar_selected_fgcolor, display_text)))
-            else:
-                result.append(HTML('<b>{}</b>'.format(display_text)))
-            if self.last_to_right and i+2 == nitems:
-                screen_width = self.myparent.output.get_size().columns
-                remaining_space = (screen_width - total_text_lenght - len(self.navbar_entries[-1][1].replace('[','').replace(']','')) - 2)
-                sep_space = ' ' * remaining_space
-            else:
-                sep_space = '   '
-            total_text_lenght += len(sep_space)
-            result.append(sep_space)
+        for i, entry in enumerate(iterate_entries):
+
+            nav_bar_entry = self.get_nav_bar_entry(entry, i == self.cur_navbar_selection)
+
+            if self.get_row_lenght(row) + self.get_row_lenght([nav_bar_entry]) + 2 > screen_width:
+                rows.append(row[:])
+                row.clear()
+
+            row.append(nav_bar_entry)
+            sep_space = '   '
+            row.append(sep_space)
+
+        if last_item:
+            last_entry = self.get_nav_bar_entry(last_item, self.cur_navbar_selection == len(self.navbar_entries) -1 )
+            row_length = self.get_row_lenght(row)
+            last_entry_lenght = self.get_row_lenght([last_entry])
+            if row_length + last_entry_lenght + 2> screen_width:
+                rows.append(row[:])
+                row.clear()
+            remaining_space = screen_width - row_length - last_entry_lenght - 2
+            row.append(' ' * remaining_space)
+            row.append(last_entry)
+
+
+        for row_ in rows:
+            row_[-1] += '\n'
+            result += row_
+
+        w_height = len(rows)
+
+        if row:
+            result += row
+            w_height += 1
+
+        self.nav_window.height = w_height
 
         return merge_formatted_text(result)
 
@@ -160,12 +204,12 @@ class JansNavBar():
         kb = KeyBindings()
 
         @kb.add('left')
-        def _go_up(event) -> None:
+        def _go_left(event) -> None:
             self.cur_navbar_selection = (self.cur_navbar_selection - 1) % len(self.navbar_entries)
             self._set_selection()
 
         @kb.add('right')
-        def _go_up(event) -> None:
+        def _go_right(event) -> None:
             self.cur_navbar_selection = (self.cur_navbar_selection + 1) % len(self.navbar_entries)
             self._set_selection()
 

@@ -267,7 +267,7 @@ class Plugin(DialogUtils):
         #self.oauth_containers['message'] = self.message.main_container
 
         self.oauth_main_container = HSplit([
-                                        Box(self.nav_bar.nav_window, style='class:sub-navbar', height=1),
+                                        VSplit([self.nav_bar.nav_window], width=D(), align=HorizontalAlign.CENTER, style='class:sub-navbar'),
                                         DynamicContainer(lambda: self.oauth_main_area),
                                         ],
                                     height=D(),
@@ -319,6 +319,10 @@ class Plugin(DialogUtils):
                 set_area.on_page_enter()
 
             self.oauth_main_area = set_area
+
+    def on_page_enter(self):
+        self.nav_bar.cur_navbar_selection = 0
+        self.oauth_nav_selection_changed(self.nav_bar.navbar_entries[0][0])
 
     def save_client_summary(self, event):
 
@@ -1026,17 +1030,7 @@ class Plugin(DialogUtils):
                 data=pathches
                 )
             self.app.app_configuration = response.json()
+            self.app.show_message(title=_(common_strings.success), message=_("Jans authorization server application configuration logging properties were saved."), tobefocused=self.app.center_container)
 
-            body = HSplit([Label(_("Jans authorization server application configuration logging properties were saved."))])
-
-            buttons = [Button(_("Ok"))]
-            dialog = JansGDialog(self.app, title=_("Confirmation"), body=body, buttons=buttons)
-            async def coroutine():
-                focused_before = self.app.layout.current_window
-                await self.app.show_dialog_as_float(dialog)
-                try:
-                    self.app.layout.focus(focused_before)
-                except Exception:
-                    self.app.layout.focus(self.app.center_frame)
-
-            asyncio.ensure_future(coroutine())
+        else:
+            self.app.show_message(title=_(common_strings.warning), message=_("No changes were done to save."), tobefocused=self.app.center_container)

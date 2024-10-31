@@ -53,7 +53,7 @@ Sample server status response
 HTTP/1.1 200 OK
 Content-Type: application/json
 {
-    "dbType":"ldap",
+    "dbType":"MySQL",
 	"lastUpdate":"2023-03-16T03:17:44",
 	"facterData":
 	{

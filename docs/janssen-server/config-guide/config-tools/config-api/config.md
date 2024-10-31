@@ -48,20 +48,19 @@ relevant to Config-API Configuration, you can check the operations under
 
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --info ConfigurationConfigApi
+jans tui --info ConfigurationConfigApi
 ```
 
 It will show the details of the available operation-ids for Config-API.
 
 ```text title="Sample Output"
-/opt/jans/jans-cli/config-cli.py --info ConfigurationConfigApi
 Operation ID: get-config-api-properties
  Description: Gets config-api configuration properties.
 Operation ID: patch-config-api-properties
  Description: Partially modifies config-api Configuration properties.
  Schema: Array of JsonPatch
 
-To get sample schema type /opt/jans/jans-cli/config-cli.py --schema-sample <schema>, for example /opt/jans/jans-cli/config-cli.py --schema-sample JsonPatch
+To get sample schema type jans tui --schema-sample <schema>, for example jans tui --schema-sample JsonPatch
 ```
 
 ### Get The Current Config-API Configuration
@@ -69,7 +68,7 @@ To get sample schema type /opt/jans/jans-cli/config-cli.py --schema-sample <sche
 Configuration for Config-API is a set of key-value pairs, called properties. When we retrieve the configuration, these properties and their current values are returned as a JSON document. To get the properties of Janssen Config-API Configuration, run the command below:
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --operation-id=get-config-api-properties
+jans tui --operation-id=get-config-api-properties
 ```
 
 It will return the result as below:
@@ -265,7 +264,7 @@ setting the `fileExtensionValidationEnabled` property to
 
 Now, execute the following command to apply this patch:
  ```bash title="Command"
-  /opt/jans/jans-cli/config-cli.py \
+  jans tui \
  --operation-id=patch-config-api-properties --data ./config-api-assetmgt-patch.json
  ```
  Upon successful execution of the update, the Janssen Server responds with 
@@ -300,7 +299,7 @@ to the Janssen Server. Let's do this step-by-step:
  
 Now, execute the following command to apply this patch:
  ```bash title="Command"
-  /opt/jans/jans-cli/config-cli.py \
+  jans tui \
  --operation-id=patch-config-api-properties --data ./config-api-patch.json
  ```
 
@@ -351,7 +350,7 @@ configuration from the DB.
 While it is not recommended that an administrator directly edits a configuration 
 at the persistence layer, it may be useful information for a developer.
 
-#### A. MySQL
+#### MySQL
 ```mermaid
 erDiagram
  jansAppConf {
@@ -361,13 +360,6 @@ erDiagram
  }
 ```
 
-#### B. LDAP
-
-```mermaid
-graph LR
-A[ou=jans] --> V(ou=configuration)
- V --> V5[ou=jans-config-api]
-```
 
 
 ### Important attributes
@@ -508,7 +500,7 @@ and update.
 You can start TUI using the command below:
 
 ```bash title="Command"
-sudo /opt/jans/jans-cli/jans_cli_tui.py
+jans tui
 ```
 
 Navigate to `Config API` section where administrators can update 

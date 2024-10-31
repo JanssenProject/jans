@@ -45,7 +45,7 @@ Agama projects, you can check the operations under `Agama` task using the
 command below:
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --info Agama
+jans cli --info Agama
 ```
 
 It will show the details of the available operation-ids for Agama.
@@ -90,7 +90,7 @@ Use the `get-agama-prj` operation to retrieve the list of deployed Agama
 projects:
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --operation-id get-agama-prj
+jans cli --operation-id get-agama-prj
 ```
 
 The output will list Agama projects that are added to this Janssen Server
@@ -146,8 +146,7 @@ For example, to fetch details of the project at index 1 only, use the command
 below.
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --operation-id get-agama-prj \
---endpoint-args start:1,count:1
+jans cli --operation-id get-agama-prj --endpoint-args start:1,count:1
 ```
 
 ```json title="Sample Output" linenums="1"
@@ -183,14 +182,12 @@ You can get the details of an Agama project deployed in the Janssen Server
 by the project name. The command line for this operation is as below:
 
 ```bash title="Sample Command"
-/opt/jans/jans-cli/config-cli.py --operation-id get-agama-prj-by-name \
---url-suffix="agama-project-name"
+jans cli --operation-id get-agama-prj-by-name --url-suffix="agama-project-name"
 ```
 
 **Example:**
 ```bash title="Sample Command"
-/opt/jans/jans-cli/config-cli.py --operation-id get-agama-prj-by-name \
---url-suffix="testAuth"
+jans cli --operation-id get-agama-prj-by-name --url-suffix="testAuth"
 ```
 
 ```json title="Sample Output" linenums="1"
@@ -229,7 +226,7 @@ archive file that holds the bundled Agama project and follows the
 [.gama](../../../agama/gama-format.md) specification.
 
 ```bash title="Sample Command"
-/opt/jans/jans-cli/config-cli.py --operation-id post-agama-prj \
+jans cli --operation-id post-agama-prj \
 --url-suffix="name:project-name" --data agama-project-file
 ```
 
@@ -243,7 +240,7 @@ path `/tmp/journey.zip`, the command below will upload a new Agama project with
 specified name in the Janssen Server.
 
 ```bash title="Sample Command"
-/opt/jans/jans-cli/config-cli.py --operation-id=post-agama-prj \
+jans cli --operation-id=post-agama-prj \
 --url-suffix="name:Agama Lab Journey" --data /tmp/journey.zip
 ```
 
@@ -262,7 +259,7 @@ To retrieve the Agama project configuration, use the `get-agama-prj-configs`
 operation.
 
 ```bash title="Sample Command"
-/opt/jans/jans-cli/config-cli.py --operation-id get-agama-prj-configs \
+jans cli --operation-id get-agama-prj-configs \
 --url-suffix="name:agama-project-name"
 ```
 
@@ -279,7 +276,7 @@ Make a few test changes to the configuration and run the command below to
 update the configuration:
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --operation-id=put-agama-prj \
+jans cli --operation-id=put-agama-prj \
 --url-suffix "name:Agama Lab Journey" --data /tmp/journey-configs.json 
 ```
 
@@ -300,8 +297,7 @@ update the configuration:
 To delete an Agama project by its name, use the `delete-agama-prj` operation.
 
 ```bash title="Sample Command"
-/opt/jans/jans-cli/config-cli.py --operation-id delete-agama-prj \
---url-suffix="agama-project-name"
+jans cli --operation-id delete-agama-prj --url-suffix="agama-project-name"
 ```
 
 ### Agama Flow Configuration
@@ -310,7 +306,7 @@ To delete an Agama project by its name, use the `delete-agama-prj` operation.
 of the deployed Agama project configuration.
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --info AgamaConfiguration
+jans cli --info AgamaConfiguration
 ```
 
 ```text title="Sample Output" linenums="1"
@@ -326,15 +322,14 @@ To check if a deployed Agama project is running into Agama
 DSL related errors, use the `agama-syntax-check` operation as below:
 
 ```bash title="Sample Command"
-/opt/jans/jans-cli/config-cli.py --operation-id agama-syntax-check \
+jans cli --operation-id agama-syntax-check \
 --url-suffix qname:"fully-qualified-flow-name"
 ```
 
 ***Example***:
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --operation-id agama-syntax-check \
---url-suffix qname:"imShakil.co.test"
+jans cli --operation-id agama-syntax-check --url-suffix qname:"imShakil.co.test"
 ```
 
 ```json title="Sample Output" linenums="1"
@@ -355,7 +350,7 @@ the [Text-Based UI](../config-tools/jans-tui/README.md) also.
 You can start TUI using the command below:
 
 ```bash title="Command"
-sudo /opt/jans/jans-cli/jans_cli_tui.py
+jans tui
 ```
 
 ### Agama Project Screen

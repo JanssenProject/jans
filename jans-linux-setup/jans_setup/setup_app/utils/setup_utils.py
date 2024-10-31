@@ -340,18 +340,7 @@ class SetupUtils(Crypto64):
         text = '\n'.join(text)
 
         return text
-        
-    def createLdapPw(self):
-        try:
-            with open(Config.ldapPassFn, 'w') as w:
-                w.write(Config.ldapPass)
-            self.run([paths.cmd_chown, 'ldap:ldap', Config.ldapPassFn])
-        except:
-            self.logIt("Error writing temporary LDAP password.")
 
-    def deleteLdapPw(self):
-        if Config.get('ldapPassFn') and os.path.isfile(Config.ldapPassFn):
-            os.remove(Config.ldapPassFn)
 
     def getMappingType(self, mtype):
         location = []
@@ -535,20 +524,6 @@ class SetupUtils(Crypto64):
         with open(yacron_yaml_fn, 'w') as w:
             yaml_obj.dump(yacron_yaml, w)
 
-
-    def port_used(self, port):
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        result = sock.connect_ex(('127.0.0.1', int(port)))
-        ret_val = result == 0
-        sock.close()
-        return ret_val
-
-    def opendj_used_ports(self):
-        ports = []
-        for port in (Config.ldaps_port, Config.ldap_admin_port):
-            if self.port_used(port):
-                ports.append(port)
-        return ports
 
     def chown(self, fn, user, group=None, recursive=False):
         cmd = [paths.cmd_chown]

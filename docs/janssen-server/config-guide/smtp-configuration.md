@@ -42,7 +42,7 @@ SMTP Configuration, you can check the operations under `ConfigurationSmtp`
 task using the command below:
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --info ConfigurationSmtp
+jans cli --info ConfigurationSmtp
 ```
 
 
@@ -68,7 +68,7 @@ Operation ID: test-config-smtp
 To view the current SMTP server configuration, run the following command line:
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --operation-id get-config-smtp
+jans cli --operation-id get-config-smtp
 ```
 
 It will show the SMTP server configuration as below:
@@ -97,14 +97,14 @@ according to the `SmtpConfiguration` schema.
 
 To see the schema, use the command below:
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --schema SmtpConfiguration 
+jans cli --schema SmtpConfiguration 
 ```
 
 The Janssen Server also provides an example of data that adheres to the above schema.
 To fetch the example, use the command below.
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --schema-sample SmtpConfiguration 
+jans cli --schema-sample SmtpConfiguration 
 ```
 
 Using the schema and the example above, we have added below  data to the file 
@@ -133,7 +133,7 @@ Using the schema and the example above, we have added below  data to the file
 To setup a new SMTP server configuration, run the following command:
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --operation-id post-config-smtp \
+jans cli --operation-id post-config-smtp \
 --data /tmp/smtp.json
 ```
 
@@ -167,7 +167,7 @@ command:
 In that file, update the value `false` to `true` of the `trust_host` field.
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --operation-id put-config-smtp \
+jans cli --operation-id put-config-smtp \
 --data /tmp/smtp.json
 ```
 It will update the information.
@@ -180,7 +180,7 @@ To delete the SMTP Sever, we can use the `delete-config-smtp` operation id.
 run the following command
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --operation-id delete-config-smtp
+jans cli --operation-id delete-config-smtp
 ```
 
 
@@ -191,7 +191,7 @@ scope is required. To test the SMTP server configuration update, change any info
 on the `/tmp/smtp.json` file with test data and run the following command:
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --operation-id test-config-smtp \
+jans cli --operation-id test-config-smtp \
 --data /tmp/smtp.json
 ```
 This will return status code 200 with a response as true or false based on the 
@@ -205,7 +205,7 @@ Note:  `SMTP Password` should be an App password and not a web login password.
 Start TUI using the command below:
 
 ```bash title="Command"
-sudo /opt/jans/jans-cli/jans_cli_tui.py
+jans tui
 ```
 
 ### SMPT Screen

@@ -17,7 +17,6 @@ from jans.pycloudlib import get_manager
 from jans.pycloudlib import wait_for
 from jans.pycloudlib.persistence.couchbase import sync_couchbase_password
 from jans.pycloudlib.persistence.couchbase import sync_couchbase_superuser_password
-from jans.pycloudlib.persistence.ldap import sync_ldap_password
 from jans.pycloudlib.persistence.spanner import sync_google_credentials
 from jans.pycloudlib.persistence.sql import sync_sql_password
 from jans.pycloudlib.persistence.utils import PersistenceMapper
@@ -196,17 +195,6 @@ class CtxGenerator:
         opt_scopes = self.configmap_params["optional_scopes"]
         self.set_config("optional_scopes", opt_scopes, False)
 
-    def transform_ldap_ctx(self):
-        encoded_salt = self.get_secret("encoded_salt")
-
-        self.set_secret(
-            "encoded_ox_ldap_pw",
-            partial(encode_text, self.secret_params.get("ldap_password", ""), encoded_salt),
-        )
-
-        self.set_config("ldap_binddn", "cn=Directory Manager")
-        self.set_config("ldap_site_binddn", "cn=Directory Manager")
-
     def transform_redis_ctx(self):
         self.set_secret("redis_password", self.secret_params.get("redis_password", ""))
 
@@ -373,9 +361,6 @@ class CtxGenerator:
         self.transform_auth_ctx()
         self.transform_web_ctx()
 
-        if "ldap" in opt_scopes:
-            self.transform_ldap_ctx()
-
         if "redis" in opt_scopes:
             self.transform_redis_ctx()
 
@@ -541,8 +526,6 @@ def load(configuration_file, dump_file):
     backend_type = mapper.mapping["default"]
 
     match backend_type:
-        case "ldap":
-            sync_ldap_password(manager)
         case "sql":
             sync_sql_password(manager)
         case "couchbase":
@@ -592,8 +575,6 @@ def dump(dump_file):
     backend_type = mapper.mapping["default"]
 
     match backend_type:
-        case "ldap":
-            sync_ldap_password(manager)
         case "sql":
             sync_sql_password(manager)
         case "couchbase":

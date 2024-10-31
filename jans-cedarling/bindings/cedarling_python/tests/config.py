@@ -1,21 +1,25 @@
 from os.path import join
-from cedarling_python import AuthzConfig, MemoryLogConfig, DisabledLoggingConfig, StdOutLogConfig
-from cedarling_python import PolicyStoreSource, PolicyStoreConfig, BootstrapConfig
+from cedarling_python import MemoryLogConfig, DisabledLoggingConfig, StdOutLogConfig
+from cedarling_python import PolicyStoreSource, PolicyStoreConfig, BootstrapConfig, JwtConfig
 import pytest
 
 ROOT_FOLDER_PATH = "../../"
-TEST_FILES_PATH = join(ROOT_FOLDER_PATH, "cedarling/src/init/test_files")
+TEST_FILES_PATH = join(ROOT_FOLDER_PATH, "test_files")
+
+# in fixture `sample_bootstrap_config` we use policy store `policy-store_ok.json`
+# The human-readable policy and schema file is located in next folder:
+# `test_files\policy-store_ok`
 
 
-# we use fixture with correct data
-# and can change some part in the specific test case
 @pytest.fixture
 def sample_bootstrap_config():
-    authz_config = AuthzConfig(application_name="example_app_name")
-
+    '''
+    Fixture with correct data of BootstrapConfig.
+    You can change some part in the specific test case.
+    '''
     # log_config = MemoryLogConfig(log_ttl=100)
-    # log_config = StdOutLogConfig()
-    log_config = DisabledLoggingConfig()
+    log_config = StdOutLogConfig()
+    # log_config = DisabledLoggingConfig()
 
     # Create policy source configuration
     with open(join(TEST_FILES_PATH, "policy-store_ok.json"),
@@ -25,11 +29,15 @@ def sample_bootstrap_config():
     policy_source = PolicyStoreSource(json=policy_raw_json)
 
     policy_store_config = PolicyStoreConfig(
-        source=policy_source, store_id=None)
+        source=policy_source)
+
+    jwt_config = JwtConfig(enabled=False)
 
     # collect all in the BootstrapConfig
     bootstrap_config = BootstrapConfig(
-        authz_config=authz_config,
+        application_name="example_app_name",
         log_config=log_config,
-        policy_store_config=policy_store_config)
+        policy_store_config=policy_store_config,
+        jwt_config=jwt_config
+    )
     return bootstrap_config

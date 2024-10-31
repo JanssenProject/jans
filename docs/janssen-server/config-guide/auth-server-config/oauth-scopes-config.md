@@ -44,7 +44,7 @@ command below.
 
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --info OauthScopes
+jans cli --info OauthScopes
 ```
 ```text title="Sample Output"
 Operation ID: get-oauth-scopes
@@ -87,7 +87,7 @@ Operation ID: get-scope-by-type
   Parameters:
   type: Type of the scope [string]
 
-To get sample schema type /opt/jans/jans-cli/config-cli.py --schema-sample <schema>, for example /opt/jans/jans-cli/config-cli.py --schema-sample JsonPatch
+To get sample schema type jans cli --schema-sample <schema>, for example jans cli --schema-sample JsonPatch
 ```
 
 ### Find/View OAuth Scopes
@@ -96,8 +96,8 @@ Use the operation ID `get-oauth-scopes` to find and view the current scopes. Let
 contain `view` in the description and `openid` as the Type.
 
 ```bash title="Command"
- /opt/jans/jans-cli/config-cli.py --operation-id get-oauth-scopes \
---endpoint-args limit:3,pattern:view,type:openid
+ jans cli --operation-id get-oauth-scopes \
+ --endpoint-args limit:3,pattern:view,type:openid
 ```
  
 ```text title="Sample Output" linenums="1"
@@ -189,14 +189,14 @@ for `--info` command, the `post-oauth-scopes` operation requires data to be sent
 To see the schema, use the command below:
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --schema Scope
+jans cli --schema Scope
 ```
 
 For better understanding, the Janssen Server also provides an sample of data to be sent to the server. 
 This sample conforms to the schema above. Use the command below to get the sample.
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --schema-sample Scope
+jans cli --schema-sample Scope
 ```
 
 Using the schema and the example above, we have added below key data to the file `/tmp/scope.json`
@@ -227,7 +227,7 @@ Using the schema and the example above, we have added below key data to the file
 Now let's post this scope to the Janssen Server to be added to the existing set:
 
 ```bash title="Command"
- /opt/jans/jans-cli/config-cli.py --operation-id post-oauth-scopes \
+ jans cli --operation-id post-oauth-scopes \
  --data /tmp/scope.json 
 ```
 
@@ -239,7 +239,7 @@ To update the configuration follow the steps below.
 1. [Get the existing OAuth Scope](#find-oauth-scopes-by-inum) and store it into a file for editing.
   The following command will retrieve the existing OAuth Scope in the schema file.
   ```bash title="Sample Command"
-  /opt/jans/jans-cli/config-cli.py -no-color --operation-id get-oauth-scopes-by-inum \
+  jans cli -no-color --operation-id get-oauth-scopes-by-inum \
   --url-suffix inum:8eb2b0c0-d1d9-453d-8364-e2809ce857f2 > /tmp/scopdata.json
   ```
 
@@ -250,8 +250,7 @@ To update the configuration follow the steps below.
 3. We have changed only the `scopeType` to `dynamic` in existing OAuth Scope.
    Use the updated file to send the update to the Janssen Server using the command below
    ```bash title="Command"
-   /opt/jans/jans-cli/config-cli.py --operation-id put-oauth-scopes \
-   --data /tmp/scope.json
+   jans cli --operation-id put-oauth-scopes --data /tmp/scope.json
    ```
 This will updated the existing oauth scopes matched with inum value.
 
@@ -273,7 +272,7 @@ to know more about schema.
 
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --schema JsonPatch > /tmp/patch.json
+jans cli --schema JsonPatch > /tmp/patch.json
 ```
 
 For instance, to perform a `replace` operation at `iconUrl` 
@@ -293,7 +292,7 @@ Store the above JSON Patch data in a file, for instance, `/tmp/patch.json`
 
 Let's do the operation:
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --operation-id patch-oauth-scopes-by-id \
+jans cli --operation-id patch-oauth-scopes-by-id \
 --url-suffix inum:8eb2b0c0-d1d9-453d-8364-e2809ce857f2 --data /tmp/patch.json 
 ```
 
@@ -332,14 +331,13 @@ Operation ID: get-oauth-scopes-by-inum
 
 We can use the `url-suffix` for the `inum` value.
 ```bash title="Sample Command"
-/opt/jans/jans-cli/config-cli.py --operation-id get-oauth-scopes-by-inum \
---url-suffix inum:value
+jans cli --operation-id get-oauth-scopes-by-inum --url-suffix inum:value
 ```
 
 For example:
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --operation-id get-oauth-scopes-by-inum \
+jans cli --operation-id get-oauth-scopes-by-inum \
 --url-suffix inum:8eb2b0c0-d1d9-453d-8364-e2809ce857f2
 ```
 It returns the details of the scope matched with the `inum` value.
@@ -368,7 +366,8 @@ It returns the details of the scope matched with the `inum` value.
 You can delete any OAuth Scopes by its `inum` value.
 
 ```bash title="Command"
-/opt/jans/jans-cli/config-cli.py --operation-id delete-oauth-scopes-by-inum --url-suffix inum:8eb2b0c0-d1d9-453d-8364-e2809ce857f2
+jans cli --operation-id delete-oauth-scopes-by-inum \
+--url-suffix inum:8eb2b0c0-d1d9-453d-8364-e2809ce857f2
 ```
 
 Just change the `inum` value to your own according to which one you want to delete.
@@ -379,7 +378,7 @@ Just change the `inum` value to your own according to which one you want to dele
 You can start TUI using the command below:
 
 ```bash title="Command"
-sudo /opt/jans/jans-cli/jans_cli_tui.py
+jans tui
 ```
 
 ### Scope Screen 
