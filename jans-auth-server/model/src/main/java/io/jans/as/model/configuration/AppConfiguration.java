@@ -33,7 +33,7 @@ import java.util.*;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AppConfiguration implements Configuration {
 
-    public static final int DEFAULT_DEVICE_SESSION_LIFETIME = 86400;
+    public static final int DEFAULT_AUTHORIZATION_CHALLENGE_SESSION_LIFETIME = 86400;
     public static final int DEFAULT_SESSION_ID_LIFETIME = 86400;
     public static final KeySelectionStrategy DEFAULT_KEY_SELECTION_STRATEGY = KeySelectionStrategy.OLDER;
     public static final String DEFAULT_STAT_SCOPE = "jans_stat";
@@ -218,7 +218,7 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Specifies how many status list indexes AS can reserve at once within pool (when status_list feature flag is enabled). Defaults to 100.")
     private int statusListIndexAllocationBlockSize = DEFAULT_STATUS_LIST_INDEX_ALLOCATION_BLOCK_SIZE;
 
-    @DocProperty(description = "Specifies which LDAP attribute is used for the subject identifier claim")
+    @DocProperty(description = "Specifies which attribute is used for the subject identifier claim")
     private String openidSubAttribute;
 
     @DocProperty(description = "Specifies whether public subject identifier is allowed per client", defaultValue = "false")
@@ -437,10 +437,10 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "List of grant scopes for dynamic registration")
     private List<String> dynamicRegistrationAllowedPasswordGrantScopes;
 
-    @DocProperty(description = "LDAP custom object class for dynamic registration")
+    @DocProperty(description = "Custom object class for dynamic registration")
     private String dynamicRegistrationCustomObjectClass;
 
-    @DocProperty(description = "This list details LDAP custom object classes for dynamic person enrollment")
+    @DocProperty(description = "This list details custom object classes for dynamic person enrollment")
     private List<String> personCustomObjectClassList;
 
     @DocProperty(description = "Specifies whether to persist id_token (otherwise saves into cache)", defaultValue = "false")
@@ -693,8 +693,8 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Choose whether to disable U2F endpoints", defaultValue = "false")
     private Boolean disableU2fEndpoint = false;
 
-    @DocProperty(description = "Device session lifetime in seconds")
-    private Integer deviceSessionLifetimeInSeconds;
+    @DocProperty(description = "Authorization challenge session lifetime in seconds")
+    private Integer authorizationChallengeSessionLifetimeInSeconds;
 
     // Token Exchange
     @DocProperty(description = "", defaultValue = "false")
@@ -1028,15 +1028,15 @@ public class AppConfiguration implements Configuration {
         this.returnDeviceSecretFromAuthzEndpoint = returnDeviceSecretFromAuthzEndpoint;
     }
 
-    public Integer getDeviceSessionLifetimeInSeconds() {
-        if (deviceSessionLifetimeInSeconds == null) {
-           deviceSessionLifetimeInSeconds = DEFAULT_DEVICE_SESSION_LIFETIME;
+    public Integer getAuthorizationChallengeSessionLifetimeInSeconds() {
+        if (authorizationChallengeSessionLifetimeInSeconds == null) {
+           authorizationChallengeSessionLifetimeInSeconds = DEFAULT_AUTHORIZATION_CHALLENGE_SESSION_LIFETIME;
         }
-        return deviceSessionLifetimeInSeconds;
+        return authorizationChallengeSessionLifetimeInSeconds;
     }
 
-    public void setDeviceSessionLifetimeInSeconds(Integer deviceSessionLifetimeInSeconds) {
-        this.deviceSessionLifetimeInSeconds = deviceSessionLifetimeInSeconds;
+    public void setAuthorizationChallengeSessionLifetimeInSeconds(Integer authorizationChallengeSessionLifetimeInSeconds) {
+        this.authorizationChallengeSessionLifetimeInSeconds = authorizationChallengeSessionLifetimeInSeconds;
     }
 
     public Boolean getRotateDeviceSecret() {

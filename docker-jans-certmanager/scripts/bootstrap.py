@@ -6,16 +6,12 @@ import click
 
 from jans.pycloudlib import get_manager
 from jans.pycloudlib.persistence.couchbase import sync_couchbase_password
-from jans.pycloudlib.persistence.ldap import sync_ldap_password
 from jans.pycloudlib.persistence.spanner import sync_google_credentials
 from jans.pycloudlib.persistence.sql import sync_sql_password
 from jans.pycloudlib.persistence.utils import PersistenceMapper
 
 from settings import LOGGING_CONFIG
-# from ldap_handler import LdapHandler
 from auth_handler import AuthHandler
-# from oxshibboleth_handler import OxshibbolethHandler
-# from passport_handler import PassportHandler
 from web_handler import WebHandler
 
 logging.config.dictConfig(LOGGING_CONFIG)
@@ -24,10 +20,7 @@ logger = logging.getLogger("certmanager")
 #: Map between service name and its handler class
 PATCH_SERVICE_MAP = {
     "web": WebHandler,
-    # "oxshibboleth": OxshibbolethHandler,
     "auth": AuthHandler,
-    # "ldap": LdapHandler,
-    # "passport": PassportHandler,
 }
 
 PRUNE_SERVICE_MAP = {
@@ -78,8 +71,6 @@ def patch(service, dry_run, opts):
     backend_type = mapper.mapping["default"]
 
     match backend_type:
-        case "ldap":
-            sync_ldap_password(manager)
         case "sql":
             sync_sql_password(manager)
         case "couchbase":
@@ -116,8 +107,6 @@ def prune(service, dry_run, opts):
     backend_type = mapper.mapping["default"]
 
     match backend_type:
-        case "ldap":
-            sync_ldap_password(manager)
         case "sql":
             sync_sql_password(manager)
         case "couchbase":

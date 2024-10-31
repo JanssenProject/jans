@@ -2,30 +2,17 @@
 
 import argparse
 import os
+import sys
 import subprocess
 from pathlib import Path
 from collections import OrderedDict
 
 JANS_JETTY_DIR = '/opt/jans/jetty'
-JANS_SERVICES_ = os.listdir(JANS_JETTY_DIR)
-HEALTH_ENDPOINTS = OrderedDict((
-            ('jans-auth', 'http://localhost:8081/jans-auth/sys/health-check'),
-            ('jans-config-api', 'http://localhost:8074/jans-config-api/api/v1/health/live'),
-            ('jans-casa', 'http://localhost:8080/jans-casa/health-check'),
-            ('jans-fido2', 'http://localhost:8073/jans-fido2/sys/health-check'),
-            ('jans-scim', 'http://localhost:8087/jans-scim/sys/health-check'),
-            ('jans-link', 'http://localhost:9091/jans-link/sys/health-check'),
-            ('jans-lock', 'http://localhost:8076/jans-lock/sys/health-check')
-        ))
+JANS_SERVICES = os.listdir(JANS_JETTY_DIR)
 
-JANS_SERVICES = []
-for k in HEALTH_ENDPOINTS:
-    if k in JANS_SERVICES_:
-        JANS_SERVICES.append(k)
-
-for i in JANS_SERVICES_:
-    if not i in JANS_SERVICES:
-        JANS_SERVICES.append(i)
+if len(sys.argv) > 1 and sys.argv[1] == 'cli':
+    cli_args = sys.argv[2:]
+    sys.argv = sys.argv[:2]
 
 parser = argparse.ArgumentParser(description="A top-level wrapper script for Janssen")
 subparsers = parser.add_subparsers(dest='command')
@@ -40,15 +27,17 @@ stop_service_parser = subparsers.add_parser('stop', help="Stops services for Jan
 stop_service_parser.add_argument('-service', choices=JANS_SERVICES)
 restart_service_parser = subparsers.add_parser('restart', help="restarts services for Janssen Server ( -service=<service-name> if you want to restart just one specific service)")
 restart_service_parser.add_argument('-service', choices=JANS_SERVICES)
-health_parser = subparsers.add_parser('health', help="gets output from Janssen services `health-check` endpoint ( -service=<service-name> if you want to get health status of just one specific service)")
+health_parser = subparsers.add_parser('health', help="Prints health status of Janssen services and components")
 health_parser.add_argument('-service', choices=JANS_SERVICES)
 subparsers.add_parser('info', help="lists important URLs (like .well-known, Casa etc)")
 argsp = parser.parse_args()
 
 
-
 def status():
     subprocess.run('sudo systemctl list-units --all "jans*"', shell=True)
+
+def cli():
+    subprocess.run('/opt/jans/jans-cli/config-cli.py ' + ' '.join(cli_args), shell=True)
 
 def tui():
     subprocess.run('/opt/jans/jans-cli/jans_cli_tui.py', shell=True)
@@ -87,19 +76,7 @@ def restart():
     service_command('restart')
 
 def health():
-
-
-    services = [argsp.service] if argsp.service else JANS_SERVICES
-
-    for jservice in HEALTH_ENDPOINTS:
-        if jservice in services:
-            print(f"Checking health status for {jservice}")
-            cmd = f'curl -s {HEALTH_ENDPOINTS[jservice]}'
-            print(f"  Executing {cmd}")
-            out = subprocess.getoutput(cmd).strip()
-            if out:
-                print(f"  Command output: {out}")
-
+    os.system('/opt/jans/bin/jans_services_status.py --as-table')
     print()
 
 def get_hostname():

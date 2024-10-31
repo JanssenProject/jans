@@ -9,6 +9,7 @@ import re
 import typing as _t
 import warnings
 from collections import defaultdict
+from collections.abc import Callable
 from functools import cached_property
 from tempfile import NamedTemporaryFile
 
@@ -26,6 +27,7 @@ from ldap3.utils import dn as dnutils
 from jans.pycloudlib.utils import encode_text
 from jans.pycloudlib.utils import safe_render
 from jans.pycloudlib.utils import get_password_from_file
+from jans.pycloudlib.utils import as_boolean
 
 if _t.TYPE_CHECKING:  # pragma: no cover
     # imported objects for function type hint, completion, etc.
@@ -370,7 +372,10 @@ class SqlClient(SqlSchemaMixin):
 
             if self.dialect == "mysql":
                 json_type = "json"
-                json_default_values: dict[str, _t.Any] | list[_t.Any] = {"v": []}
+                if self.use_simple_json:
+                    json_default_values = []
+                else:
+                    json_default_values: dict[str, _t.Any] | list[_t.Any] = {"v": []}
             else:
                 json_type = "jsonb"
                 json_default_values = []
@@ -484,7 +489,9 @@ class SqlClient(SqlSchemaMixin):
             )
 
         if data_type == "JSON":
-            return {"v": values}
+            if not self.use_simple_json:
+                return {"v": values}
+            return values
 
         if data_type == "JSONB":
             return values
@@ -528,7 +535,12 @@ class SqlClient(SqlSchemaMixin):
                     attr_mapping[attr] = self._transform_value(attr, entry[attr])
                 yield table_name, attr_mapping
 
-    def create_from_ldif(self, filepath: str, ctx: dict[str, _t.Any]) -> None:
+    def create_from_ldif(
+        self,
+        filepath: str,
+        ctx: dict[str, _t.Any],
+        transform_column_mapping: None | Callable[[str, dict], dict] = None,
+    ) -> None:
         """Create entry with data loaded from an LDIF template file.
 
         Args:
@@ -541,6 +553,8 @@ class SqlClient(SqlSchemaMixin):
             dst.flush()
 
             for table_name, column_mapping in self._data_from_ldif(dst.name):
+                if callable(transform_column_mapping):
+                    column_mapping = transform_column_mapping(table_name, column_mapping)
                 self.insert_into(table_name, column_mapping)
 
     def get_server_version(self) -> tuple[int, ...]:
@@ -561,6 +575,13 @@ class SqlClient(SqlSchemaMixin):
         with self.engine.connect() as conn:
             result = conn.execute(query)
             return bool(result.rowcount)
+
+    @property
+    def use_simple_json(self):
+        """Determine whether to use simple JSON where values are stored as JSON array."""
+        if self.dialect in ("pgsql", "postgresql",):
+            return True
+        return as_boolean(os.environ.get("MYSQL_SIMPLE_JSON", "true"))
 
 
 def render_sql_properties(manager: Manager, src: str, dest: str) -> None:

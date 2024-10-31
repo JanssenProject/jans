@@ -9,12 +9,11 @@ tags:
 
 > Prerequisite: Know how to use the Janssen CLI in [command-line mode](../config-tools/jans-cli/README.md)
 
-If your janssen server backend is connected with couchbase database then you can go with these operations instead of [LDAP configuration](ldap-configuration.md).
 
 Let's get the couchbase database configuration operations details:
 
 ```
-/opt/jans/jans-cli/config-cli.py --info DatabaseCouchbaseConfiguration
+jans tui --info DatabaseCouchbaseConfiguration
 ```
 
 ```
@@ -40,7 +39,7 @@ Operation ID: post-config-database-couchbase-test
   Description: Tests a Couchbase configuration.
   Schema: /components/schemas/CouchbaseConfiguration
 
-To get sample schema type /opt/jans/jans-cli/config-cli.py --schema <schma>, for example /opt/jans/jans-cli/config-cli.py --schema /components/schemas/CouchbaseConfiguration
+To get sample schema type jans cli --schema <schma>, for example jans cli --schema /components/schemas/CouchbaseConfiguration
 
 ```
 
@@ -49,7 +48,7 @@ To get sample schema type /opt/jans/jans-cli/config-cli.py --schema <schma>, for
 To get the database configuration details, run the following command:
 
 ```
-/opt/jans/jans-cli/config-cli.py --operation-id get-config-database-couchbase
+jans cli --operation-id get-config-database-couchbase
 ```
 
 ## Adds new Database Configurations
@@ -57,7 +56,7 @@ To get the database configuration details, run the following command:
 To add a new couchbase database configuration into the janssen server:
 
 ```
-/opt/jans/jans-cli/config-cli.py --operation-id post-config-database-couchbase --data data.json
+jans cli --operation-id post-config-database-couchbase --data data.json
 ```
 
 
@@ -66,7 +65,7 @@ To add a new couchbase database configuration into the janssen server:
 To update or replace an couchbase database configuration:
 
 ```
-/opt/jans/jans-cli/config-cli.py --operation-id put-config-database-couchbase --data data.json
+jans cli --operation-id put-config-database-couchbase --data data.json
 ```
 
 
@@ -75,7 +74,7 @@ To update or replace an couchbase database configuration:
 To get the couchbase database configuration by its configId:
 
 ```
-/opt/jans/jans-cli/config-cli.py --operation-id get-config-database-couchbase-by-name --url-suffix name:configId-name
+jans cli --operation-id get-config-database-couchbase-by-name --url-suffix name:configId-name
 ```
 
 ## Delete Couchbase Database Configuration
@@ -84,6 +83,6 @@ You can delete the couchbase database configuration by its name.
 The command line is:
 
 ```
-/opt/jans/jans-cli/config-cli.py --operation-id delete-config-database-couchbase-by-name --url-suffix name:configId-name
+jans cli --operation-id delete-config-database-couchbase-by-name --url-suffix name:configId-name
 ```
 

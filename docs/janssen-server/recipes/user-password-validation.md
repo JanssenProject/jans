@@ -15,12 +15,12 @@ By default, the password attribute validation is not enabled.
 ## Enable user password validation through Command Line Tool (CLI)
 1. Obtain the unique ID, that is inum for `userPassword` attribute.
 ```shell
-/opt/jans/jans-cli/config-cli.py --operation-id get-attributes --endpoint-args pattern:userPassword
+jans cli --operation-id get-attributes --endpoint-args pattern:userPassword
 ```
 
 2. Obatin the PatchRequest schema
 ```shell
-/opt/jans/jans-cli/config-cli.py --schema PatchRequest > /tmp/patch.json
+jans cli --schema PatchRequest > /tmp/patch.json
 ```
 
 3. Update `/tmp/patch.json` with user password validation details
@@ -46,7 +46,8 @@ By default, the password attribute validation is not enabled.
 
 4. Execute patch operation for `userPassword` attribute.
 ```shell
-/opt/jans/jans-cli/config-cli.py --operation-id patch-attributes-by-inum --url-suffix="inum:AAEE" --data /tmp/patch.json
+jans cli --operation-id patch-attributes-by-inum \
+--url-suffix="inum:AAEE" --data /tmp/patch.json
 ```
 ![update default authentication method](../../assets/image-pwd-enable-custom-validation-jans-cli.png)
 

@@ -411,7 +411,7 @@ The Janssen Server supports many different Operating Systems (e.g. Ubuntu, SUSE 
 In documenting a process that involves a service restart, the Service Command documentation is linked:  
 
 ```  
-## Add the attribute to LDAP
+## Add the attribute to MySQL
 
  - Add custom attribute 
  - [Restart](https://jans.io/docs/vm-ops/restarting-services/) the `jans-auth.service` service.

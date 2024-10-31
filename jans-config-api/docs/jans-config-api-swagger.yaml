@@ -7543,7 +7543,7 @@ paths:
       security:
       - oauth2:
         - https://jans.io/oauth/config/scopes.readonly
-  /api/v1/jans-auth-server/session/id/{jansId}:
+  /api/v1/jans-auth-server/session/sid/{sid}:
     get:
       tags:
       - Auth - Session Management
@@ -7551,9 +7551,9 @@ paths:
       description: Get session by id.
       operationId: get-session-by-id
       parameters:
-      - name: jansId
+      - name: sid
         in: path
-        description: Session Unique identifier.
+        description: Session identifier.
         required: true
         schema:
           type: string
@@ -7585,15 +7585,15 @@ paths:
       description: Delete a session.
       operationId: delete-session
       parameters:
-      - name: jansId
+      - name: sid
         in: path
-        description: Session Unique identifier.
+        description: Session identifier.
         required: true
         schema:
           type: string
       responses:
-        "200":
-          description: Ok
+        "204":
+          description: No Content
         "401":
           description: Unauthorized
         "404":
@@ -7619,8 +7619,8 @@ paths:
         schema:
           type: string
       responses:
-        "200":
-          description: Ok
+        "204":
+          description: No Content
         "401":
           description: Unauthorized
         "404":
@@ -7644,9 +7644,7 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/SessionId'
+                $ref: '#/components/schemas/SessionPagedResult'
               examples:
                 Response json example:
                   description: Response json example
@@ -9042,9 +9040,7 @@ components:
           type: string
           format: date-time
         service:
-          type: array
-          items:
-            type: string
+          type: string
         level:
           type: integer
           format: int32
@@ -9219,17 +9215,17 @@ components:
           type: boolean
         whitePagesCanView:
           type: boolean
-        adminCanEdit:
+        adminCanView:
           type: boolean
-        userCanView:
+        adminCanEdit:
           type: boolean
         userCanEdit:
           type: boolean
-        adminCanView:
-          type: boolean
-        userCanAccess:
+        userCanView:
           type: boolean
         adminCanAccess:
+          type: boolean
+        userCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -10078,6 +10074,8 @@ components:
           type: boolean
         lockMessageConfig:
           $ref: '#/components/schemas/LockMessageConfig'
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -10087,8 +10085,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -11645,6 +11641,22 @@ components:
             type: boolean
           xml:
             name: map
+    SessionPagedResult:
+      type: object
+      properties:
+        start:
+          type: integer
+          format: int32
+        totalEntriesCount:
+          type: integer
+          format: int32
+        entriesCount:
+          type: integer
+          format: int32
+        entries:
+          type: array
+          items:
+            $ref: '#/components/schemas/SessionId'
     User:
       type: object
       properties:
@@ -11703,22 +11715,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/UserAuthenticator'
-    SessionPagedResult:
-      type: object
-      properties:
-        start:
-          type: integer
-          format: int32
-        totalEntriesCount:
-          type: integer
-          format: int32
-        entriesCount:
-          type: integer
-          format: int32
-        entries:
-          type: array
-          items:
-            $ref: '#/components/schemas/SessionId'
     TokenAttributes:
       type: object
       properties:
