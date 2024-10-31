@@ -275,10 +275,14 @@ fn can_update_local_jwks() {
         "exp": Timestamp::one_hour_after_now(),
     });
     let userinfo_token_claims = json!({
+        "iss": server.url(),
         "sub": "some_sub".to_string(),
+        "aud": "some_aud".to_string(),
         "client_id": "some_aud".to_string(),
         "name": "ferris".to_string(),
         "email": "ferris@gluu.com".to_string(),
+        "iat": Timestamp::now(),
+        "exp": Timestamp::one_hour_after_now(),
     });
 
     // generate the signed token strings
