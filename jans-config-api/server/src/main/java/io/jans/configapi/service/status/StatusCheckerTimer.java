@@ -26,6 +26,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import jakarta.annotation.PostConstruct;
@@ -204,45 +205,46 @@ public class StatusCheckerTimer {
         log.debug("Server application version - appVersion:{}", appVersion);
         return appVersion;
     }
-    
-    public JsonNode getServiceStatus(String serviceName) {
-        log.debug("Getting status for serviceName:{}", serviceName);
-       
-        JsonNode serviceStatus = null;
+
+    public Map<String, String> getServiceStatus(String serviceName) {
+        log.info("Getting status for serviceName:{}", serviceName);
+
+        Map<String, String> serviceStatus = null;
+        ObjectMapper mapper = new ObjectMapper();
         if (!isLinux()) {
             return serviceStatus;
         }
 
         CommandLine commandLine = new CommandLine(SERVICE_STATUS);
-        if(StringUtils.isNotBlank(serviceName) && !serviceName.equalsIgnoreCase(ApiConstants.ALL)) {
-            commandLine.addArgument("-artifact="+serviceName);
+        if (StringUtils.isNotBlank(serviceName) && !serviceName.equalsIgnoreCase(ApiConstants.ALL)) {
+            commandLine.addArgument(" " + serviceName);
         }
         commandLine.addArgument("--json");
         log.debug("Getting service status for commandLine:{}", commandLine);
-        
+
         String resultOutput;
         try (ByteArrayOutputStream bos = new ByteArrayOutputStream(4096);) {
-            
+
             boolean result = ProcessHelper.executeProgram(commandLine, false, 0, bos);
             if (!result) {
                 return serviceStatus;
             }
-            
+
             resultOutput = new String(bos.toByteArray(), UTF_8);
-            log.debug("resultOutput:{}", resultOutput);
-            
-            if(StringUtils.isNotBlank(resultOutput)) {
-                serviceStatus = Jackson.asJsonNode(resultOutput);
+            log.info("resultOutput:{}", resultOutput);
+
+            if (StringUtils.isNotBlank(resultOutput)) {
+                serviceStatus = mapper.readValue(resultOutput, Map.class);
             }
-            
+
         } catch (UnsupportedEncodingException uex) {
-            log.debug("Failed to parse program {} output", SERVICE_STATUS, uex);
+            log.error("Failed to parse serviceStatus data program {} output", SERVICE_STATUS, uex);
             return serviceStatus;
         } catch (Exception ex) {
-            log.error("Failed to execute program {} output", SERVICE_STATUS, ex);
+            log.error("Failed to execute serviceStatus program {} output", SERVICE_STATUS, ex);
             return serviceStatus;
         }
-        log.debug("Server application version - appVersion:{}", serviceStatus);
+        log.debug("Service Status data - serviceStatus:{}", serviceStatus);
         return serviceStatus;
     }
 

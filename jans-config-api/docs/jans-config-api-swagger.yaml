@@ -48,7 +48,7 @@ paths:
       - Health - Check
       summary: Returns application version
       description: Returns application version
-      operationId: get-app-version_1
+      operationId: get-app-version
       parameters:
       - name: artifact
         in: query
@@ -74,7 +74,7 @@ paths:
       - Health - Check
       summary: Returns application health status
       description: Returns application health status
-      operationId: get-config-health_1
+      operationId: get-config-health
       responses:
         "200":
           description: Ok
@@ -92,7 +92,7 @@ paths:
       - Health - Check
       summary: Returns application liveness status
       description: Returns application liveness status
-      operationId: get-config-health-live_1
+      operationId: get-config-health-live
       responses:
         "200":
           description: Ok
@@ -108,7 +108,7 @@ paths:
       - Health - Check
       summary: Returns application readiness status
       description: Returns application readiness status
-      operationId: get-config-health-ready_1
+      operationId: get-config-health-ready
       responses:
         "200":
           description: Ok
@@ -124,7 +124,7 @@ paths:
       - Health - Check
       summary: Returns application server status
       description: Returns application server status
-      operationId: get-server-stat_1
+      operationId: get-server-stat
       responses:
         "200":
           description: Ok
@@ -132,6 +132,60 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/StatsData'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    {
+                        "dbType": "sql",
+                        "lastUpdate": "2024-11-01T12:11:01",
+                        "facterData": {
+                            "memoryfree": "39.7%",
+                            "swapfree": "0.0%",
+                            "hostname": "pujavs-amazed-rat.gluu.info",
+                            "ipaddress": "167.99.13.66",
+                            "uptime": "1 day, 3:54",
+                            "free_disk_space": "95.4%",
+                            "load_average": "0.13623046875"
+                        }
+                    }
+        "500":
+          description: InternalServerError
+  /api/v1/health/service-status:
+    get:
+      tags:
+      - Health - Check
+      summary: Fetch service status
+      description: Fetch service status
+      operationId: get-service-status
+      parameters:
+      - name: service
+        in: query
+        description: Service name to check status
+        schema:
+          type: string
+          default: all
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: string
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    {
+                      "jans-auth": "Running",
+                      "jans-config-api": "Down",
+                      "jans-casa": "Not present",
+                      "jans-fido2": "Running",
+                      "jans-scim": "Running",
+                      "jans-link": "Running",
+                      "jans-lock": "Running",
+                      "keycloak": "Running"
+                    }
         "500":
           description: InternalServerError
   /api/v1/acrs:
@@ -9213,19 +9267,19 @@ components:
           type: string
         selected:
           type: boolean
-        userCanView:
+        whitePagesCanView:
           type: boolean
         userCanEdit:
           type: boolean
+        adminCanEdit:
+          type: boolean
         adminCanView:
           type: boolean
-        adminCanEdit:
+        userCanView:
           type: boolean
         adminCanAccess:
           type: boolean
         userCanAccess:
-          type: boolean
-        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -11192,14 +11246,14 @@ components:
           type: boolean
         internal:
           type: boolean
-        locationPath:
-          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
+        locationPath:
+          type: string
         baseDn:
           type: string
     ScriptError:
