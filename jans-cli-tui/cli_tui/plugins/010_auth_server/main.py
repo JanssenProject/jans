@@ -267,7 +267,7 @@ class Plugin(DialogUtils):
         #self.oauth_containers['message'] = self.message.main_container
 
         self.oauth_main_container = HSplit([
-                                        Box(self.nav_bar.nav_window, style='class:sub-navbar', height=1),
+                                        VSplit([self.nav_bar.nav_window], width=D(), align=HorizontalAlign.CENTER, style='class:sub-navbar'),
                                         DynamicContainer(lambda: self.oauth_main_area),
                                         ],
                                     height=D(),
