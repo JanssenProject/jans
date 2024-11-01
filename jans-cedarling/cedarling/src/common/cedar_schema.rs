@@ -45,33 +45,34 @@ impl PartialEq for CedarSchema {
         // Have to check principals, resources, action_groups, entity_types,
         // actions. Those can contain duplicates, and are not stored in comparison order.
         // So use HashSet to compare them.
+        use std::collections::HashSet;
 
-        let self_principals = self.schema.principals().collect::<std::collections::HashSet<_>>();
-        let other_principals = other.schema.principals().collect::<std::collections::HashSet<_>>();
+        let self_principals = self.schema.principals().collect::<HashSet<_>>();
+        let other_principals = other.schema.principals().collect::<HashSet<_>>();
         if self_principals != other_principals {
             return false
         }
 
-        let self_resources = self.schema.resources().collect::<std::collections::HashSet<_>>();
-        let other_resources = other.schema.resources().collect::<std::collections::HashSet<_>>();
+        let self_resources = self.schema.resources().collect::<HashSet<_>>();
+        let other_resources = other.schema.resources().collect::<HashSet<_>>();
         if self_resources != other_resources {
             return false
         }
 
-        let self_action_groups = self.schema.action_groups().collect::<std::collections::HashSet<_>>();
-        let other_action_groups = other.schema.action_groups().collect::<std::collections::HashSet<_>>();
+        let self_action_groups = self.schema.action_groups().collect::<HashSet<_>>();
+        let other_action_groups = other.schema.action_groups().collect::<HashSet<_>>();
         if self_action_groups != other_action_groups {
             return false
         }
 
-        let self_entity_types = self.schema.entity_types().collect::<std::collections::HashSet<_>>();
-        let other_entity_types = other.schema.entity_types().collect::<std::collections::HashSet<_>>();
+        let self_entity_types = self.schema.entity_types().collect::<HashSet<_>>();
+        let other_entity_types = other.schema.entity_types().collect::<HashSet<_>>();
         if self_entity_types != other_entity_types {
             return false
         }
 
-        let self_actions = self.schema.actions().collect::<std::collections::HashSet<_>>();
-        let other_actions = other.schema.actions().collect::<std::collections::HashSet<_>>();
+        let self_actions = self.schema.actions().collect::<HashSet<_>>();
+        let other_actions = other.schema.actions().collect::<HashSet<_>>();
         if self_actions != other_actions {
             return false
         }
