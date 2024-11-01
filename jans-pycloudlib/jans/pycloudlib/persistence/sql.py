@@ -23,6 +23,7 @@ from sqlalchemy import delete
 from sqlalchemy import event
 from ldif import LDIFParser
 from ldap3.utils import dn as dnutils
+from pymysql.err import ProgrammingError
 
 from jans.pycloudlib.utils import encode_text
 from jans.pycloudlib.utils import safe_render
@@ -265,6 +266,7 @@ class SqlClient(SqlSchemaMixin):
 
             if self.dialect == "mysql":
                 event.listen(self._engine, "first_connect", set_mysql_strict_mode)
+                event.listen(self._engine, "first_connect", maybe_simple_json)
 
         # initialized engine
         return self._engine
@@ -654,3 +656,46 @@ def sync_sql_password(manager: Manager) -> None:
 def get_sql_password(manager: Manager | None = None):
     password_file = get_sql_password_file()
     return get_password_from_file(password_file)
+
+
+def maybe_simple_json(dbapi_connection, connection_record):
+    if "MYSQL_SIMPLE_JSON" in os.environ or os.path.isfile("/tmp/mysql_simple_json.sh"):  # nosec: B108
+        return
+
+    logger.info("Checking for JSON data format to determine MYSQL_SIMPLE_JSON env var")
+
+    is_simple_json = True
+    cursor = dbapi_connection.cursor()
+
+    try:
+        # extract the value of `jansAppConf.jansSmtpConf` of jans-auth to check the data format, whether it's using legacy `{"v": []}` or new `[]` format;
+        # note that we choose `jansAppConf.jansSmtpConf` column for several reasons:
+        #
+        # - it's one of few JSON columns available in the table alongside `jansDbAuth` (deprecated) and `jansEmail`
+        # - the column is likely will not be removed/changed
+        cursor.execute("SELECT jansSmtpConf FROM jansAppConf WHERE doc_id='jans-auth';")
+
+        if result := cursor.fetchone():
+            for value in result:
+                if isinstance(json.loads(value), dict):
+                    is_simple_json = False
+                break
+    except ProgrammingError as exc:
+        # missing table or column will raise ProgrammingError
+        logger.warning(f"Unable to detect JSON data format automatically; reason={exc.args[1]}; fallback to default value")
+    finally:
+        # cleanup resource
+        cursor.close()
+
+    # configure env var
+    env_value = str(is_simple_json).lower()
+
+    logger.info(f"Configuring env var MYSQL_SIMPLE_JSON={env_value}")
+
+    # set env var for current python process
+    os.environ["MYSQL_SIMPLE_JSON"] = env_value
+
+    # write the source file since we cannot set env var directly to parent process
+    # the source file need to be executed externally
+    with open("/tmp/mysql_simple_json.sh", "w") as f:  # nosec: B108
+        f.write(f"export MYSQL_SIMPLE_JSON={env_value}")
