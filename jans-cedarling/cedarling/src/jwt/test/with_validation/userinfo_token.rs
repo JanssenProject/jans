@@ -24,6 +24,7 @@
 //!   - Tests for errors when the `nbf` has not passed yet.
 
 use super::super::*;
+use super::invalidate_token;
 use crate::common::policy_store::TrustedIssuer;
 use crate::jwt::{self, JwtService};
 use jsonwebtoken::Algorithm;
@@ -167,17 +168,41 @@ fn test_missing_claim(missing_claim: &str) {
             &userinfo_token,
         );
 
-    // assert that decoding resulted in an error due to missing claims
-    assert!(
-        matches!(
-            decode_result,
-            Err(jwt::Error::InvalidUserinfoToken(
-                jwt::decoding_strategy::Error::Validation(_)
-            )),
-        ),
-        "Expected decoding to fail due to missing a required header: {:?}",
-        decode_result
-    );
+    // the jsonwebtoken crate checks for missing claims differently depending on
+    // the claim so we need to split these asserts into two, unfortunately.
+    //
+    // - the first case is triggered when deserializing the token onto a struct
+    // - the second case is triggered when checking if the claim in the token is equal to the
+    //   expected value
+    if ["sub"].contains(&missing_claim) {
+        let err_string = format!("missing field `{}`", missing_claim);
+        assert!(
+            matches!(
+                decode_result,
+                Err(jwt::Error::InvalidUserinfoToken(
+                    jwt::decoding_strategy::Error::Validation(ref e)
+                )) if matches!(e.kind(), jsonwebtoken::errors::ErrorKind::Json(json_err)
+                    if json_err.to_string().contains(&err_string))
+            ),
+            "Expected decoding to fail due to `userinfo_token` missing a required header: {:?}",
+            decode_result
+        );
+    // for missing `exp`, `aud`, and `iss`
+    } else {
+        assert!(
+            matches!(
+                decode_result,
+                Err(jwt::Error::InvalidUserinfoToken(
+                    jwt::decoding_strategy::Error::Validation(ref e)
+                )) if matches!(
+                    e.kind(),
+                    jsonwebtoken::errors::ErrorKind::MissingRequiredClaim(req_claim) if req_claim == missing_claim
+                ),
+            ),
+            "Expected decoding to fail due to `userinfo_token` missing a required header: {:?}",
+            decode_result
+        );
+    }
 
     // assert that there aren't any additional calls to the mock server
     openid_conf_mock.assert();
@@ -238,17 +263,12 @@ fn errors_on_invalid_signature() {
         generate_token_using_claims(&id_token_claims, &encoding_keys[1].0, &encoding_keys[1].1);
 
     // generate signed userinfo_token
-    let mut userinfo_token = generate_token_using_claims(
+    let userinfo_token = generate_token_using_claims(
         &userinfo_token_claims,
         &encoding_keys[0].0,
         &encoding_keys[0].1,
     );
-    // invalidate the token's signature by changing it
-    let mut token_parts: Vec<&str> = userinfo_token.split('.').collect();
-    if token_parts.len() == 3 {
-        token_parts[2] = "invalid_signature";
-        userinfo_token = token_parts.join(".");
-    }
+    let userinfo_token = invalidate_token(userinfo_token);
 
     // setup mock server responses for OpenID configuration and JWKS URIs
     let openid_config_response = json!({
@@ -301,8 +321,11 @@ fn errors_on_invalid_signature() {
         matches!(
             decode_result,
             Err(jwt::Error::InvalidUserinfoToken(
-                jwt::decoding_strategy::Error::Validation(_)
-            )),
+                jwt::decoding_strategy::Error::Validation(ref e)
+            )) if matches!(
+                e.kind(),
+                jsonwebtoken::errors::ErrorKind::InvalidSignature
+            ),
         ),
         "Expected error due to invalid signature from `userinfo_token` during token decoding: {:?}",
         decode_result,
@@ -417,8 +440,11 @@ fn errors_on_expired_token() {
         matches!(
             decode_result,
             Err(jwt::Error::InvalidUserinfoToken(
-                jwt::decoding_strategy::Error::Validation(_)
-            )),
+                jwt::decoding_strategy::Error::Validation(ref e)
+            )) if matches!(
+                e.kind(),
+                jsonwebtoken::errors::ErrorKind::ExpiredSignature
+            ),
         ),
         "Expected error due to expired `userinfo_token` during token decoding: {:?}",
         decode_result,
@@ -533,8 +559,11 @@ fn errors_on_invalid_iss() {
         matches!(
             decode_result,
             Err(jwt::Error::InvalidUserinfoToken(
-                jwt::decoding_strategy::Error::Validation(_)
-            )),
+                jwt::decoding_strategy::Error::Validation(ref e)
+            )) if matches!(
+                e.kind(),
+                jsonwebtoken::errors::ErrorKind::InvalidIssuer
+            ),
         ),
         "Expected decoding to fail due to `userinfo_token` not having the same `iss` as `access_token`: {:?}",
         decode_result
@@ -649,8 +678,11 @@ fn errors_on_invalid_aud() {
         matches!(
             decode_result,
             Err(jwt::Error::InvalidUserinfoToken(
-                jwt::decoding_strategy::Error::Validation(_)
-            )),
+                jwt::decoding_strategy::Error::Validation(ref e)
+            )) if matches!(
+                e.kind(),
+                jsonwebtoken::errors::ErrorKind::InvalidAudience
+            ),
         ),
         "Expected decoding to fail due to `userinfo_token` not having the same `aud` as `access_token`: {:?}",
         decode_result
@@ -765,8 +797,11 @@ fn errors_on_invalid_sub() {
         matches!(
             decode_result,
             Err(jwt::Error::InvalidUserinfoToken(
-                jwt::decoding_strategy::Error::Validation(_)
-            )),
+                jwt::decoding_strategy::Error::Validation(ref e)
+            )) if matches!(
+                e.kind(),
+                jsonwebtoken::errors::ErrorKind::InvalidSubject,
+            ),
         ),
         "Expected decoding to fail due to `userinfo_token` not having the same `sub` as `access_token`: {:?}",
         decode_result
@@ -882,8 +917,11 @@ fn errors_on_token_used_before_nbf() {
         matches!(
             decode_result,
             Err(jwt::Error::InvalidUserinfoToken(
-                jwt::decoding_strategy::Error::Validation(_)
-            )),
+                jwt::decoding_strategy::Error::Validation(ref e)
+            )) if matches!(
+                e.kind(),
+                jsonwebtoken::errors::ErrorKind::ImmatureSignature,
+            ),
         ),
         "Expected decoding to fail due to `userinfo_token` being used before the `nbf` timestamp: {:?}",
         decode_result

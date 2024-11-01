@@ -21,6 +21,7 @@
 //!   - Tests for errors when the `nbf` has not passed yet.
 
 use super::super::*;
+use super::invalidate_token;
 use crate::common::policy_store::TrustedIssuer;
 use crate::jwt::{self, JwtService};
 use jsonwebtoken::Algorithm;
@@ -54,7 +55,7 @@ fn errors_on_missing_exp() {
     test_missing_claim("exp");
 }
 
-fn test_missing_claim(missing_claim: &str) {
+fn test_missing_claim(missing_claim: &'static str) {
     // initialize mock server to simulate OpenID configuration and JWKS responses
     let mut server = mockito::Server::new();
 
@@ -121,7 +122,6 @@ fn test_missing_claim(missing_claim: &str) {
     let openid_config_response = json!({
         "issuer": server.url(),
         "jwks_uri": &format!("{}/jwks", server.url()),
-        "unexpected": 123123, // a random number used to simulate having unexpected fields in the response
     });
     let openid_conf_mock = server
         .mock("GET", "/.well-known/openid-configuration")
@@ -163,16 +163,45 @@ fn test_missing_claim(missing_claim: &str) {
             &userinfo_token,
         );
 
-    assert!(
-        matches!(
-            decode_result,
-            Err(jwt::Error::InvalidAccessToken(
-                jwt::decoding_strategy::Error::Validation(_)
-            )),
-        ),
-        "Expected decoding to fail due to `access_token` missing a required header: {:?}",
-        decode_result
-    );
+    if let Err(ref e) = decode_result {
+        println!("err: {}", e.to_string());
+    }
+
+    // the jsonwebtoken crate checks for missing claims differently depending on
+    // the claim so we need to split these asserts into two, unfortunately.
+    //
+    // - the first case is triggered when deserializing the token onto a struct
+    // - the second case is triggered when checking if the claim in the token is equal to the
+    //   expected value
+    if ["iss", "aud"].contains(&missing_claim) {
+        let err_string = format!("missing field `{}`", missing_claim);
+        assert!(
+            matches!(
+                decode_result,
+                Err(jwt::Error::InvalidAccessToken(
+                    jwt::decoding_strategy::Error::Validation(ref e)
+                )) if matches!(e.kind(), jsonwebtoken::errors::ErrorKind::Json(json_err)
+                    if json_err.to_string().contains(&err_string))
+            ),
+            "Expected decoding to fail due to `access_token` missing a required claim: {:?}",
+            decode_result
+        );
+    // for missing `exp` and `sub`
+    } else {
+        assert!(
+            matches!(
+                decode_result,
+                Err(jwt::Error::InvalidAccessToken(
+                    jwt::decoding_strategy::Error::Validation(ref e)
+                )) if matches!(
+                    e.kind(),
+                    jsonwebtoken::errors::ErrorKind::MissingRequiredClaim(req_claim) if req_claim == missing_claim,
+                )
+            ),
+            "Expected decoding to fail due to `access_token` missing a required claim: {:?}",
+            decode_result
+        );
+    }
 
     // assert that there aren't any additional calls to the mock server
     openid_conf_mock.assert();
@@ -221,17 +250,12 @@ fn errors_on_invalid_signature() {
     });
 
     // generate the signed access_token
-    let mut access_token = generate_token_using_claims(
+    let access_token = generate_token_using_claims(
         &access_token_claims,
         &encoding_keys[0].0,
         &encoding_keys[0].1,
     );
-    // invalidate the token's signature by changing it
-    let mut token_parts: Vec<&str> = access_token.split('.').collect();
-    if token_parts.len() == 3 {
-        token_parts[2] = "invalid_signature";
-        access_token = token_parts.join(".");
-    }
+    let access_token = invalidate_token(access_token);
 
     // generate the signed id_token
     let id_token =
@@ -248,7 +272,6 @@ fn errors_on_invalid_signature() {
     let openid_config_response = json!({
         "issuer": server.url(),
         "jwks_uri": &format!("{}/jwks", server.url()),
-        "unexpected": 123123, // a random number used to simulate having unexpected fields in the response
     });
     let openid_conf_mock = server
         .mock("GET", "/.well-known/openid-configuration")
@@ -294,10 +317,10 @@ fn errors_on_invalid_signature() {
         matches!(
             decode_result,
             Err(jwt::Error::InvalidAccessToken(
-                jwt::decoding_strategy::Error::Validation(_)
-            )),
+                jwt::decoding_strategy::Error::Validation(ref e)
+            )) if *e.kind() == jsonwebtoken::errors::ErrorKind::InvalidSignature,
         ),
-        "Expected decoding to fail due to `access_token` hanving an invalid signature: {:?}",
+        "Expected decoding to fail due to `access_token` having an invalid signature: {:?}",
         decode_result
     );
 
@@ -363,7 +386,6 @@ fn errors_on_expired_token() {
     let openid_config_response = json!({
         "issuer": server.url(),
         "jwks_uri": &format!("{}/jwks", server.url()),
-        "unexpected": 123123, // a random number used to simulate having unexpected fields in the response
     });
     let openid_conf_mock = server
         .mock("GET", "/.well-known/openid-configuration")
@@ -409,10 +431,10 @@ fn errors_on_expired_token() {
         matches!(
             decode_result,
             Err(jwt::Error::InvalidAccessToken(
-                jwt::decoding_strategy::Error::Validation(_)
-            )),
+                jwt::decoding_strategy::Error::Validation(ref e)
+            )) if *e.kind() == jsonwebtoken::errors::ErrorKind::ExpiredSignature,
         ),
-        "Expected decoding to fail due to `access_token` having an invalid signature: {:?}",
+        "Expected decoding to fail due to `access_token` being expired: {:?}",
         decode_result
     );
 
@@ -480,7 +502,6 @@ fn errors_on_token_used_before_nbf() {
     let openid_config_response = json!({
         "issuer": server.url(),
         "jwks_uri": &format!("{}/jwks", server.url()),
-        "unexpected": 123123, // a random number used to simulate having unexpected fields in the response
     });
     let openid_conf_mock = server
         .mock("GET", "/.well-known/openid-configuration")
@@ -526,8 +547,8 @@ fn errors_on_token_used_before_nbf() {
         matches!(
             decode_result,
             Err(jwt::Error::InvalidAccessToken(
-                jwt::decoding_strategy::Error::Validation(_)
-            )),
+                jwt::decoding_strategy::Error::Validation(ref e)
+            )) if *e.kind() == jsonwebtoken::errors::ErrorKind::ImmatureSignature,
         ),
         "Expected decoding to fail due to `access_token` being used before the `nbf` timestamp: {:?}",
         decode_result
