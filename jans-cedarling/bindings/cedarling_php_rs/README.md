@@ -9,7 +9,7 @@ NOTICE!!! Here is assumed that  your cedarling repository existed on the path: /
 1. 
    
    ```bash
-   cd /var/www/html/cedarling/jans/jans-cedarling/bindings/cedarling_ext_php_rs
+   cd /var/www/html/cedarling/jans/jans-cedarling/bindings/cedarling_php_rs
    ```
 
 2. 
@@ -33,8 +33,17 @@ NOTICE!!! Here is assumed that  your cedarling repository existed on the path: /
    - Run test : 
 
      ```bash
-     php -d extension=/var/www/html/cedarling/jans/jans-cedarling/target/debug/libext_php_rs_test.so /var/www/html/cedarling/jans/jans-cedarling/bindings/cedarling_ext_php_rs/test.php
+     php -d extension=/var/www/html/cedarling/jans/jans-cedarling/target/debug/libcedarling_php_rs.so /var/www/html/cedarling/jans/jans-cedarling/bindings/cedarling_php_rs/test.php
      ```
      
-5.      You can find php extension library on the path /var/www/html/cedarling/jans/jans-cedarling/target/debug/libext_php_rs_test.so and use it . Function cedarling_authorize_test($token, $payload_str); will be accessible in your php code. 
+5.      You can find php extension library on the path /var/www/html/cedarling/jans/jans-cedarling/target/debug/libcedarling_php_rs.so and use it by adding to php.ini. Typical example of using:
+
+$cedarling = new Cedarling();
+$access_token = "you_access_token";
+$id_token = "your_id_token";
+$org_id = "some_long_id";
+
+$result = $cedarling->authz($access_token, $id_token, $org_id);
+var_dump($result);
+
 
