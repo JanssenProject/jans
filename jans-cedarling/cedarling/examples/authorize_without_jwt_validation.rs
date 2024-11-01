@@ -128,7 +128,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         Ok(result) => {
             println!("\n\nis allowed: {}", result.is_allowed());
         },
-        Err(e) => eprintln!("Error while authorizing: {}\n {:?}\n\n", e.to_string(), e),
+        Err(e) => eprintln!("Error while authorizing: {}\n {:?}\n\n", e, e),
     }
 
     Ok(())

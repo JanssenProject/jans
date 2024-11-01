@@ -109,7 +109,7 @@ pub fn create_resource_entity(
     let parsed_typename = parse_namespace_and_typename(&resource.resource_type);
     // fetch the schema record from the json-schema.
     let schema_record = schema
-        .entity_schema_record(&parsed_typename.namespace(), parsed_typename.typename)
+        .entity_schema(&parsed_typename.namespace(), parsed_typename.typename)
         .ok_or(CedarPolicyCreateTypeError::CouldNotFindEntity(
             entity_uid.to_string(),
         ))?;
