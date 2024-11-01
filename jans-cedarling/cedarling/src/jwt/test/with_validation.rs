@@ -18,7 +18,7 @@ use jsonwebtoken::Algorithm;
 use serde_json::json;
 
 #[test]
-/// Tests if [`JwtService::decode_claims`] can successfully decode tokens valid claims
+/// Tests if [`JwtService::decode_tokens`] can successfully decode tokens valid claims
 fn can_decode_claims_with_validation() {
     // initialize mock server to simulate OpenID configuration and JWKS responses
     let mut server = mockito::Server::new();

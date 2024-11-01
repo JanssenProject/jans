@@ -30,28 +30,28 @@ use jsonwebtoken::Algorithm;
 use serde_json::json;
 
 #[test]
-/// Tests that [`JwtService::decode_claims`] returns an error when the `userinfo_token`
+/// Tests that [`JwtService::decode_tokens`] returns an error when the `userinfo_token`
 /// is missing an `iss` claim.
 fn errors_on_missing_iss() {
     test_missing_claim("iss");
 }
 
 #[test]
-/// Tests that [`JwtService::decode_claims`] returns an error when the `userinfo_token`
+/// Tests that [`JwtService::decode_tokens`] returns an error when the `userinfo_token`
 /// is missing an `aud` claim.
 fn errors_on_missing_aud() {
     test_missing_claim("aud");
 }
 
 #[test]
-/// Tests that [`JwtService::decode_claims`] returns an error when the `userinfo_token`
+/// Tests that [`JwtService::decode_tokens`] returns an error when the `userinfo_token`
 /// is missing a `sub` claim.
 fn errors_on_missing_sub() {
     test_missing_claim("sub");
 }
 
 #[test]
-/// Tests that [`JwtService::decode_claims`] returns an error when the `userinfo_token`
+/// Tests that [`JwtService::decode_tokens`] returns an error when the `userinfo_token`
 /// is missing an `exp` claim.
 fn errors_on_missing_exp() {
     test_missing_claim("exp");
@@ -185,7 +185,7 @@ fn test_missing_claim(missing_claim: &str) {
 }
 
 #[test]
-/// Tests that [`JwtService::decode_claims`] returns an error when the `userinfo_token`
+/// Tests that [`JwtService::decode_tokens`] returns an error when the `userinfo_token`
 /// has an invalid signature
 fn errors_on_invalid_signature() {
     // initialize mock server to simulate OpenID configuration and JWKS responses
@@ -314,7 +314,7 @@ fn errors_on_invalid_signature() {
 }
 
 #[test]
-/// Tests that [`JwtService::decode_claims`] returns an error when the `userinfo_token` is expired
+/// Tests that [`JwtService::decode_tokens`] returns an error when the `userinfo_token` is expired
 fn errors_on_expired_token() {
     // initialize mock server to simulate OpenID configuration and JWKS responses
     let mut server = mockito::Server::new();
@@ -430,7 +430,7 @@ fn errors_on_expired_token() {
 }
 
 #[test]
-/// Tests that [`JwtService::decode_claims`] returns an error when the `userinfo_token`'s issuer claim is
+/// Tests that [`JwtService::decode_tokens`] returns an error when the `userinfo_token`'s issuer claim is
 /// not the same as the `access_token`'s issuer
 fn errors_on_invalid_iss() {
     // initialize mock server to simulate OpenID configuration and JWKS responses
@@ -546,7 +546,7 @@ fn errors_on_invalid_iss() {
 }
 
 #[test]
-/// Tests that [`JwtService::decode_claims`] returns an error when the `userinfo_token`'s audience claim is
+/// Tests that [`JwtService::decode_tokens`] returns an error when the `userinfo_token`'s audience claim is
 /// not the same as the `access_token`'s issuer
 fn errors_on_invalid_aud() {
     // initialize mock server to simulate OpenID configuration and JWKS responses
@@ -662,7 +662,7 @@ fn errors_on_invalid_aud() {
 }
 
 #[test]
-/// Tests that [`JwtService::decode_claims`] returns an error when the `userinfo_token`'s subject claim is
+/// Tests that [`JwtService::decode_tokens`] returns an error when the `userinfo_token`'s subject claim is
 /// not the same as the `userinfo_token`'s subject
 fn errors_on_invalid_sub() {
     // initialize mock server to simulate OpenID configuration and JWKS responses
@@ -778,7 +778,7 @@ fn errors_on_invalid_sub() {
 }
 
 #[test]
-/// Tests that [`JwtService::decode_claims`] returns an error when the `id_token` is used
+/// Tests that [`JwtService::decode_tokens`] returns an error when the `id_token` is used
 /// before the `nbf` timestamp
 fn errors_on_token_used_before_nbf() {
     // initialize mock server to simulate OpenID configuration and JWKS responses
