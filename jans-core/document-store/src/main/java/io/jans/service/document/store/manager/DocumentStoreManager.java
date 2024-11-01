@@ -73,7 +73,7 @@ public class DocumentStoreManager {
 	private long lastFinishedTime;
 	
     private boolean initialized = false;
-	private List<String> supportedServiceTypes;
+	private List<String> supportedServiceTypes = new ArrayList();
 	private DocumentStoreType previousServiceType;
 	
 	private Map<String, Object> loadedDocumentsStore = new TreeMap<String, Object>();
@@ -85,7 +85,7 @@ public class DocumentStoreManager {
 
 	@Asynchronous
 	public void initTimer(List<String> serviceTypes, int interval) {
-		this.supportedServiceTypes = serviceTypes;
+		this.supportedServiceTypes.addAll(serviceTypes);
 
 		configure();
 
