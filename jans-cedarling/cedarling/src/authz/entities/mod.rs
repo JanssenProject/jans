@@ -158,6 +158,6 @@ pub fn create_role_entity(
         .create_entity(schema, token_data, HashSet::new())
         .map_err(|err| RoleEntityError::Create {
             error: err,
-            token_kind: TokenKind::Access,
+            token_kind: role_mapping.kind,
         })
 }
