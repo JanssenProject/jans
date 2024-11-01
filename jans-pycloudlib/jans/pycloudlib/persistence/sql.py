@@ -39,6 +39,8 @@ if _t.TYPE_CHECKING:  # pragma: no cover
 logger = logging.getLogger(__name__)
 
 SERVER_VERSION_RE = re.compile(r"[\d.]+")
+SIMPLE_JSON_RE = re.compile(r"(mysql.simple-json)(=)(.*)")
+SQL_OVERRIDES_FILE = "/etc/jans/conf/sql-overrides.json"
 
 
 class PostgresqlAdapter:
@@ -266,7 +268,7 @@ class SqlClient(SqlSchemaMixin):
 
             if self.dialect == "mysql":
                 event.listen(self._engine, "first_connect", set_mysql_strict_mode)
-                event.listen(self._engine, "first_connect", maybe_simple_json)
+                event.listen(self._engine, "first_connect", preconfigure_simple_json)
 
         # initialized engine
         return self._engine
@@ -583,7 +585,12 @@ class SqlClient(SqlSchemaMixin):
         """Determine whether to use simple JSON where values are stored as JSON array."""
         if self.dialect in ("pgsql", "postgresql",):
             return True
-        return as_boolean(os.environ.get("MYSQL_SIMPLE_JSON", "true"))
+
+        if "MYSQL_SIMPLE_JSON" in os.environ:
+            return as_boolean(os.environ["MYSQL_SIMPLE_JSON"])
+
+        sql_overrides = load_sql_overrides()
+        return as_boolean(sql_overrides.get("MYSQL_SIMPLE_JSON", "true"))
 
 
 def render_sql_properties(manager: Manager, src: str, dest: str) -> None:
@@ -658,17 +665,25 @@ def get_sql_password(manager: Manager | None = None):
     return get_password_from_file(password_file)
 
 
-def maybe_simple_json(dbapi_connection, connection_record):
-    if "MYSQL_SIMPLE_JSON" in os.environ or os.path.isfile("/tmp/mysql_simple_json.sh"):  # nosec: B108
+def preconfigure_simple_json(dbapi_connection, connection_record):
+    # if env var is available, skip the remaining process
+    if "MYSQL_SIMPLE_JSON" in os.environ:
         return
 
-    logger.info("Checking for JSON data format to determine MYSQL_SIMPLE_JSON env var")
+    # preconfigure MYSQL_SIMPLE_JSON overrides (if necessary)
+    data = load_sql_overrides()
 
+    if "MYSQL_SIMPLE_JSON" in data:
+        return
+
+    logger.info("Preconfiguring MYSQL_SIMPLE_JSON")
     is_simple_json = True
     cursor = dbapi_connection.cursor()
 
     try:
-        # extract the value of `jansAppConf.jansSmtpConf` of jans-auth to check the data format, whether it's using legacy `{"v": []}` or new `[]` format;
+        # extract the value of `jansAppConf.jansSmtpConf` of jans-auth to check the data format,
+        # whether it's using legacy `{"v": []}` or new `[]` format;
+        #
         # note that we choose `jansAppConf.jansSmtpConf` column for several reasons:
         #
         # - it's one of few JSON columns available in the table alongside `jansDbAuth` (deprecated) and `jansEmail`
@@ -680,22 +695,41 @@ def maybe_simple_json(dbapi_connection, connection_record):
                 if isinstance(json.loads(value), dict):
                     is_simple_json = False
                 break
+
     except ProgrammingError as exc:
         # missing table or column will raise ProgrammingError
         logger.warning(f"Unable to detect JSON data format automatically; reason={exc.args[1]}; fallback to default value")
+
     finally:
         # cleanup resource
         cursor.close()
 
-    # configure env var
     env_value = str(is_simple_json).lower()
+    data["MYSQL_SIMPLE_JSON"] = env_value
+    dump_sql_overrides(data)
 
-    logger.info(f"Configuring env var MYSQL_SIMPLE_JSON={env_value}")
 
-    # set env var for current python process
-    os.environ["MYSQL_SIMPLE_JSON"] = env_value
+def override_simple_json_property(sql_prop_file):
+    # skip the override if env var is available
+    if "MYSQL_SIMPLE_JSON" in os.environ:
+        return
 
-    # write the source file since we cannot set env var directly to parent process
-    # the source file need to be executed externally
-    with open("/tmp/mysql_simple_json.sh", "w") as f:  # nosec: B108
-        f.write(f"export MYSQL_SIMPLE_JSON={env_value}")
+    data = load_sql_overrides()
+
+    if "MYSQL_SIMPLE_JSON" in data and os.path.isfile(sql_prop_file):
+        with open(sql_prop_file) as f:
+            txt = SIMPLE_JSON_RE.sub(fr"\1\2{data['MYSQL_SIMPLE_JSON']}", f.read())
+
+        with open(sql_prop_file, "w") as f:
+            f.write(txt)
+
+def load_sql_overrides():
+    if os.path.isfile(SQL_OVERRIDES_FILE):
+        with open(SQL_OVERRIDES_FILE) as f:
+            return json.loads(f.read())
+    return {}
+
+
+def dump_sql_overrides(data):
+    with open(SQL_OVERRIDES_FILE, "w") as f:
+        f.write(json.dumps(data))
