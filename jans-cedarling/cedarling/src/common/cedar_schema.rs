@@ -151,6 +151,19 @@ mod deserialize {
         }
 
         #[test]
+        // In fact this fails because of limitations in cedar_policy::Policy::from_json
+        // see PolicyContentType
+        fn test_both_ok() {
+            static POLICY_STORE_RAW: &str =
+                include_str!("../../../test_files/policy-store_blobby.json");
+
+            let policy_result = serde_json::from_str::<PolicyStore>(POLICY_STORE_RAW);
+            let err = policy_result.unwrap_err();
+            let msg = err.to_string();
+            assert!(msg.contains("data did not match any variant of untagged enum MaybeEncoded"));
+        }
+
+        #[test]
         fn test_read_base64_error() {
             static POLICY_STORE_RAW: &str =
                 include_str!("../../../test_files/policy-store_schema_err_base64.json");

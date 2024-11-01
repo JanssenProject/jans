@@ -208,6 +208,20 @@ enum ParsePolicySetMessage {
     CreatePolicySet,
 }
 
+/// content_type for the policy_content field.
+///
+/// Only contains a single member, because as of 31-Oct-2024, cedar-policy 4.2.1
+/// cedar_policy::Policy:from_json does not work with a single policy.
+///
+/// NOTE if/when cedar_policy::Policy:from_json gains this ability, this type
+/// can be replaced by super::ContentType
+#[derive(Debug, Clone, serde::Deserialize)]
+enum PolicyContentType {
+    /// indicates that the related value is in the cedar policy / schema language
+    #[serde(rename = "cedar")]
+    Cedar,
+}
+
 /// policy_content value which specifies both encoding and content_type
 ///
 /// encoding is one of none or base64
@@ -215,7 +229,7 @@ enum ParsePolicySetMessage {
 #[derive(Debug, Clone, serde::Deserialize)]
 struct EncodedPolicy {
     pub encoding : super::Encoding,
-    pub content_type : super::ContentType,
+    pub content_type : PolicyContentType,
     pub body : String,
 }
 
@@ -299,7 +313,7 @@ where
         // It's a plain string, so assume its cedar inside base64
         MaybeEncoded::Plain(base64_encoded) => EncodedPolicy{
             encoding: super::Encoding::Base64,
-            content_type: super::ContentType::Cedar,
+            content_type: PolicyContentType::Cedar,
             body: base64_encoded,
         },
         MaybeEncoded::Tagged(policy_with_metadata) => policy_with_metadata,
@@ -318,10 +332,24 @@ where
         }
     };
 
-    let policy =
-        cedar_policy::Policy::parse(Some(PolicyId::new(id)), decoded_body).map_err(|err| {
-            serde::de::Error::custom(format!("{}: {err}", ParsePolicySetMessage::HumanReadable))
-        })?;
+    let policy = match policy_with_metadata.content_type {
+        PolicyContentType::Cedar => {
+            cedar_policy::Policy::parse(Some(PolicyId::new(id)), decoded_body).map_err(|err| {
+                serde::de::Error::custom(format!("{}: {err}", ParsePolicySetMessage::HumanReadable))
+            })?
+        }
+        /* see comments for PolicyContentType
+        PolicyContentType::CedarJson => {
+            let body_value : serde_json::Value = serde_json::from_str(&decoded_body).map_err(|err| {
+                serde::de::Error::custom(format!("{}: {err}", ParsePolicySetMessage::CreatePolicySet))
+            })?;
+
+            cedar_policy::Policy::from_json(Some(PolicyId::new(id)), body_value).map_err(|err| {
+                serde::de::Error::custom(format!("{}: {err}", ParsePolicySetMessage::CreatePolicySet))
+            })?
+        },
+        */
+    };
 
     Ok(policy)
 }
