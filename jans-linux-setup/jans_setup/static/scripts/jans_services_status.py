@@ -11,6 +11,7 @@ class Status:
     RUNNING = 'Running'
 
 _JANS_LOCK_SERVICE_ = 'jans-lock'
+_KEYCLOAK_ = 'keycloak'
 JANS_JETTY_DIR = '/opt/jans/jetty'
 
 HEALTH_ENDPOINTS = {
@@ -21,7 +22,6 @@ HEALTH_ENDPOINTS = {
             'jans-scim': ['http://localhost:8087/jans-scim/sys/health-check', []],
             'jans-link': ['http://localhost:9091/jans-link/sys/health-check', []],
         }
-
 
 services_status = {}
 
@@ -55,24 +55,35 @@ def check_jans_service_health(endpoint, status_code_only=False):
 
 def get_service_status():
 
-    if os.path.exists(os.path.join(JANS_JETTY_DIR, _JANS_LOCK_SERVICE_)):
-        HEALTH_ENDPOINTS[_JANS_LOCK_SERVICE_] = ['http://localhost:8076/jans-lock/sys/health-check', []]
-    elif os.path.exists(os.path.join(JANS_JETTY_DIR, 'jans-auth/custom/libs/jans-lock-service.jar')):
-        HEALTH_ENDPOINTS['jans-auth'][1].append(_JANS_LOCK_SERVICE_)
-    else:
-        services_status[_JANS_LOCK_SERVICE_] = Status.NOT_PRESENT
+    service_list = list(HEALTH_ENDPOINTS.keys())
+    for jservice in HEALTH_ENDPOINTS:
+        service_list += HEALTH_ENDPOINTS[jservice][1]
+    service_list.append(_JANS_LOCK_SERVICE_)
+    service_list.append(_KEYCLOAK_)
+
+    check_services = [sys.argv[1]] if len(sys.argv) > 1 and sys.argv[1] in service_list else []
+
+    if (check_services and _JANS_LOCK_SERVICE_ in check_services) or not check_services:
+        if os.path.exists(os.path.join(JANS_JETTY_DIR, _JANS_LOCK_SERVICE_)):
+            HEALTH_ENDPOINTS[_JANS_LOCK_SERVICE_] = ['http://localhost:8076/jans-lock/sys/health-check', []]
+        elif os.path.exists(os.path.join(JANS_JETTY_DIR, 'jans-auth/custom/libs/jans-lock-service.jar')):
+            HEALTH_ENDPOINTS['jans-auth'][1].append(_JANS_LOCK_SERVICE_)
+        else:
+            services_status[_JANS_LOCK_SERVICE_] = Status.NOT_PRESENT
 
     for jservice in HEALTH_ENDPOINTS:
-
+        if check_services and jservice not in check_services:
+            continue
         if os.path.exists(os.path.join(JANS_JETTY_DIR, jservice)):
             services_status[jservice] = check_jans_service_health(HEALTH_ENDPOINTS[jservice])
         else:
             services_status[jservice] = Status.NOT_PRESENT
 
-    if os.path.exists('/opt/keycloak'):
-        services_status['keycloak'] = check_jans_service_health(['http://localhost:8083/kc/admin/master/console/', []], True)
-    else:
-         services_status['keycloak'] = Status.NOT_PRESENT
+    if (check_services and _KEYCLOAK_ in check_services) or not check_services:
+        if os.path.exists('/opt/keycloak'):
+            services_status[_KEYCLOAK_] = check_jans_service_health(['http://localhost:8083/kc/admin/master/console/', []], True)
+        else:
+             services_status[_KEYCLOAK_] = Status.NOT_PRESENT
 
 if __name__ == '__main__':
     get_service_status()
