@@ -96,18 +96,27 @@ pub enum LogType {
 /// Log information about authorization request
 #[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
 pub struct AuthorizationLogInfo {
-    /// cedar-policy principal
-    pub principal: String,
     /// cedar-policy action
     pub action: String,
     /// cedar-policy resource
     pub resource: String,
     /// cedar-policy context
     pub context: serde_json::Value,
-    /// cedar-policy decision
-    pub decision: Decision,
-    /// cedar-policy diagnostics information
-    pub diagnostics: Diagnostics,
+
+    /// cedar-policy user/person principal
+    pub person_principal: String,
+    /// cedar-policy workload principal
+    pub workload_principal: String,
+
+    /// cedar-policy user/person diagnostics information
+    pub person_diagnostics: Diagnostics,
+    /// cedar-policy workload diagnostics information
+    pub workload_diagnostics: Diagnostics,
+
+    /// cedar-policy user/person decision
+    pub person_decision: Decision,
+    /// cedar-policy workload decision
+    pub workload_decision: Decision,
 }
 
 /// Cedar-policy decision of the authorization

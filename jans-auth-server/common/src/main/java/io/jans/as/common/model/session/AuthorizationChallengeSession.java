@@ -10,8 +10,8 @@ import java.util.Date;
  * @author Yuriy Z
  */
 @DataEntry
-@ObjectClass(value = "jansDeviceSess")
-public class DeviceSession extends DeletableEntity implements Serializable {
+@ObjectClass(value = "jansAuthChallSess")
+public class AuthorizationChallengeSession extends DeletableEntity implements Serializable {
 
     @DN
     private String dn;
@@ -30,7 +30,7 @@ public class DeviceSession extends DeletableEntity implements Serializable {
 
     @AttributeName(name = "attr")
     @JsonObject
-    private DeviceSessionAttributes attributes;
+    private AuthorizationChallengeSessionAttributes attributes;
 
     @Expiration
     private int ttl;
@@ -78,12 +78,12 @@ public class DeviceSession extends DeletableEntity implements Serializable {
         this.clientId = clientId;
     }
 
-    public DeviceSessionAttributes getAttributes() {
-        if (attributes == null) attributes = new DeviceSessionAttributes();
+    public AuthorizationChallengeSessionAttributes getAttributes() {
+        if (attributes == null) attributes = new AuthorizationChallengeSessionAttributes();
         return attributes;
     }
 
-    public void setAttributes(DeviceSessionAttributes attributes) {
+    public void setAttributes(AuthorizationChallengeSessionAttributes attributes) {
         this.attributes = attributes;
     }
 
@@ -97,7 +97,7 @@ public class DeviceSession extends DeletableEntity implements Serializable {
 
     @Override
     public String toString() {
-        return "DeviceSession{" +
+        return "AuthorizationChallengeSession{" +
                 "dn='" + dn + '\'' +
                 ", id='" + id + '\'' +
                 ", userDn='" + userDn + '\'' +

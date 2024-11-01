@@ -6,9 +6,9 @@ import pytest
 ROOT_FOLDER_PATH = "../../"
 TEST_FILES_PATH = join(ROOT_FOLDER_PATH, "test_files")
 
-# in `sample_bootstrap_config` we use policy store `policy-store_ok.json`
+# in fixture `sample_bootstrap_config` we use policy store `policy-store_ok.json`
 # The human-readable policy and schema file is located in next folder:
-# `../..cedarling/src/init/test_files/policy-store_ok`
+# `test_files\policy-store_ok`
 
 
 @pytest.fixture
@@ -29,7 +29,7 @@ def sample_bootstrap_config():
     policy_source = PolicyStoreSource(json=policy_raw_json)
 
     policy_store_config = PolicyStoreConfig(
-        source=policy_source, store_id=None)
+        source=policy_source)
 
     jwt_config = JwtConfig(enabled=False)
 
