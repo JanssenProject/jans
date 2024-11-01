@@ -6,9 +6,12 @@
 
 package io.jans.configapi.service.status;
 
-import io.jans.util.process.ProcessHelper;
+
 
 import com.fasterxml.jackson.databind.JsonNode;
+
+import static io.jans.as.model.util.Util.escapeLog;
+
 import io.jans.configapi.configuration.ConfigurationFactory;
 import io.jans.configapi.core.util.Jackson;
 import io.jans.configapi.model.status.StatsData;
@@ -21,6 +24,7 @@ import io.jans.service.cdi.event.Scheduled;
 import io.jans.service.timer.event.TimerEvent;
 import io.jans.service.timer.schedule.TimerSchedule;
 import io.jans.util.StringHelper;
+import io.jans.util.process.ProcessHelper;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import java.io.ByteArrayOutputStream;
@@ -166,7 +170,9 @@ public class StatusCheckerTimer {
     }
     
     public JsonNode getAppVersionData(String artifact) {
-        log.debug("Getting application version for artifact:{}", artifact);
+        if (log.isInfoEnabled()) {
+            log.debug("Getting application version for artifact:{}", escapeLog(artifact));
+        }
        
         JsonNode appVersion = null;
         if (!isLinux()) {
@@ -207,7 +213,9 @@ public class StatusCheckerTimer {
     }
 
     public Map<String, String> getServiceStatus(String serviceName) {
-        log.info("Getting status for serviceName:{}", serviceName);
+        if (log.isInfoEnabled()) {
+            log.info("Getting status for serviceName:{}", escapeLog(serviceName));
+        }
 
         Map<String, String> serviceStatus = null;
         ObjectMapper mapper = new ObjectMapper();

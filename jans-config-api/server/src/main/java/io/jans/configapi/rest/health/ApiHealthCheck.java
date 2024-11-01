@@ -6,6 +6,8 @@
 
 package io.jans.configapi.rest.health;
 
+import static io.jans.as.model.util.Util.escapeLog;
+
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.jans.configapi.core.model.HealthStatus;
@@ -171,7 +173,10 @@ public class ApiHealthCheck  {
     @Path(ApiConstants.SERVICE_STATUS_PATH)
     public Response getServiceStatus(
             @Parameter(description = "Service name to check status") @DefaultValue(ApiConstants.ALL) @QueryParam(value = ApiConstants.JANS_SERVICE_NAME) String service) {
-        logger.info("Fetch ServiceStatus info - service:{}", service);
+        if (logger.isInfoEnabled()) {
+            logger.info("Fetch ServiceStatus info - service:{}", escapeLog(service));
+        }
+        
         Map<String, String> serviceStatus = statusCheckerTimer.getServiceStatus(service);
         logger.debug("serviceStatus:{}", serviceStatus);
         return Response.ok(serviceStatus).build();
