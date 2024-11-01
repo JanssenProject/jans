@@ -181,3 +181,11 @@ for i, error in enumerate(workload_diagnostic.errors):
     if i == 0:
         print("errors:")
     print("id:", error.id, "error:", error.error)
+
+
+# watch on the decision for person
+print(authorize_result.person().decision)
+
+
+# watch on the decision for role
+print(authorize_result.role().decision)

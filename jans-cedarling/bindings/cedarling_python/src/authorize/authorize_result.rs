@@ -37,6 +37,16 @@ impl AuthorizeResult {
     fn workload(&self) -> AuthorizeResultResponse {
         self.inner.workload.clone().into()
     }
+
+    /// Get the decision value for person/user
+    fn person(&self) -> AuthorizeResultResponse {
+        self.inner.person.clone().into()
+    }
+
+    /// Get the decision value for role
+    fn role(&self) -> AuthorizeResultResponse {
+        self.inner.workload.clone().into()
+    }
 }
 
 impl From<cedarling::AuthorizeResult> for AuthorizeResult {
