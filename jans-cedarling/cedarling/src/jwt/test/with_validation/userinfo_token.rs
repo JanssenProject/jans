@@ -5,7 +5,7 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-//! This module contains negative tests for the `useinfo_token` validation.
+//! This module contains negative tests for the `userinfo_token` validation.
 //!
 //! ## Tests Included
 //!

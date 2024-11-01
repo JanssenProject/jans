@@ -123,7 +123,6 @@ fn test_missing_claim(missing_claim: &str) {
     let openid_config_response = json!({
         "issuer": server.url(),
         "jwks_uri": &format!("{}/jwks", server.url()),
-        "unexpected": 123123, // a random number used to simulate having unexpected fields in the response
     });
     let openid_conf_mock = server
         .mock("GET", "/.well-known/openid-configuration")
@@ -267,7 +266,6 @@ fn errors_on_invalid_signature() {
     let openid_config_response = json!({
         "issuer": server.url(),
         "jwks_uri": &format!("{}/jwks", server.url()),
-        "unexpected": 123123, // a random number used to simulate having unexpected fields in the response
     });
     let openid_conf_mock = server
         .mock("GET", "/.well-known/openid-configuration")
@@ -382,7 +380,6 @@ fn errors_on_expired_token() {
     let openid_config_response = json!({
         "issuer": server.url(),
         "jwks_uri": &format!("{}/jwks", server.url()),
-        "unexpected": 123123, // a random number used to simulate having unexpected fields in the response
     });
     let openid_conf_mock = server
         .mock("GET", "/.well-known/openid-configuration")
@@ -498,7 +495,6 @@ fn errors_on_invalid_iss() {
     let openid_config_response = json!({
         "issuer": server.url(),
         "jwks_uri": &format!("{}/jwks", server.url()),
-        "unexpected": 123123, // a random number used to simulate having unexpected fields in the response
     });
     let openid_conf_mock = server
         .mock("GET", "/.well-known/openid-configuration")
@@ -614,7 +610,6 @@ fn errors_on_invalid_aud() {
     let openid_config_response = json!({
         "issuer": server.url(),
         "jwks_uri": &format!("{}/jwks", server.url()),
-        "unexpected": 123123, // a random number used to simulate having unexpected fields in the response
     });
     let openid_conf_mock = server
         .mock("GET", "/.well-known/openid-configuration")
@@ -731,7 +726,6 @@ fn errors_on_token_used_before_nbf() {
     let openid_config_response = json!({
         "issuer": server.url(),
         "jwks_uri": &format!("{}/jwks", server.url()),
-        "unexpected": 123123, // a random number used to simulate having unexpected fields in the response
     });
     let openid_conf_mock = server
         .mock("GET", "/.well-known/openid-configuration")

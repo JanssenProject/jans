@@ -192,7 +192,6 @@ fn errors_on_unsupported_alg() {
     let openid_config_response = json!({
         "issuer": server.url(),
         "jwks_uri": &format!("{}/jwks", server.url()),
-        "unexpected": 123123, // a random number used to represent unexpected data
     });
     let openid_conf_mock = server
         .mock("GET", "/.well-known/openid-configuration")

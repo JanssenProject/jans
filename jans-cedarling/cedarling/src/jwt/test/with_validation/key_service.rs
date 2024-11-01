@@ -1,9 +1,18 @@
+/*
+ * This software is available under the Apache-2.0 license.
+ * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+ *
+ * Copyright (c) 2024, Gluu, Inc.
+ */
+
 //! This module contains negative tests for the validation involving
 //! [`jwt::decoding_strategy::KeyService`]
 //!
 //! ## Tests Included
 //!
-//! - Test for missing keys
+//! - Test expecting error when a key can't be found
+//! - Test expecting panic for not being able to fetch openid configuration on [`JwtService::new_with_config`] init
+//! - Test expecting panic for not being able to fetch JWKS [`JwtService::new_with_config`] init
 
 use super::super::*;
 use crate::common::policy_store::TrustedIssuer;
@@ -69,7 +78,6 @@ fn errors_when_no_key_found() {
     let openid_config_response = json!({
         "issuer": server.url(),
         "jwks_uri": &format!("{}/jwks", server.url()),
-        "unexpected": 123123, // a random number used to simulate having unexpected fields in the response
     });
     let openid_conf_mock = server
         .mock("GET", "/.well-known/openid-configuration")
@@ -147,7 +155,6 @@ fn panics_when_cant_fetch_jwks_uri() {
     let openid_config_response = json!({
         "issuer": server.url(),
         "jwks_uri": &format!("{}/jwks", server.url()),
-        "unexpected": 123123, // a random number used to simulate having unexpected fields in the response
     });
     let _openid_conf_mock = server
         .mock("GET", "/.well-known/openid-configuration")
@@ -260,7 +267,6 @@ fn can_update_local_jwks() {
     let openid_config_response = json!({
         "issuer": server.url(),
         "jwks_uri": &format!("{}/jwks", server.url()),
-        "unexpected": 123123, // a random number used to represent unexpected data
     });
     let openid_conf_mock = server
         .mock("GET", "/.well-known/openid-configuration")
