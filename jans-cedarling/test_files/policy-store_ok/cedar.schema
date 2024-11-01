@@ -8,7 +8,7 @@ entity User in [Role] = {"country": String, "email": String, "sub": String, "use
 entity Workload = {"client_id": String, "iss": TrustedIssuer, "name": String, "org_id": String};
 entity Access_token = {"aud": String, "exp": Long, "iat": Long, "iss": TrustedIssuer, "jti": String};
 action "Update" appliesTo {
-  principal: [Workload, User],
+  principal: [Workload, User, Role],
   resource: [Issue],
   context: {}
 };

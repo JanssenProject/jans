@@ -93,6 +93,7 @@ impl Authz {
         let principal_workload_uid = entities_data.access_token_entities.workload_entity.uid();
         let resource_uid = entities_data.resource_entity.uid();
         let principal_user_entity_uid = entities_data.user_entity.uid();
+        let principal_role_entity_uid = entities_data.role_entity.uid();
 
         // Convert [`AuthorizeEntitiesData`] to  [`cedar_policy::Entities`] structure,
         // hold all entities that will be used on authorize check.
@@ -115,11 +116,28 @@ impl Authz {
             .execute_authorize(ExecuteAuthorizeParameters {
                 entities: &entities,
                 principal: principal_user_entity_uid.clone(),
+                action: action.clone(),
+                resource: resource_uid.clone(),
+                context: context.clone(),
+            })
+            .map_err(AuthorizeError::CreateRequestUserEntity)?;
+
+        // Check authorize where principal is `"Jans::User"` from cedar-policy schema.
+        let role_result = self
+            .execute_authorize(ExecuteAuthorizeParameters {
+                entities: &entities,
+                principal: principal_role_entity_uid.clone(),
                 action,
                 resource: resource_uid.clone(),
                 context,
             })
             .map_err(AuthorizeError::CreateRequestUserEntity)?;
+
+        let result = AuthorizeResult {
+            workload: workload_result,
+            person: person_result,
+            role: role_result,
+        };
 
         // Log all result information about both authorize checks.
         // Where principal is `"Jans::Workload"` and where principal is `"Jans::User"`.
@@ -136,20 +154,22 @@ impl Authz {
 
                 person_principal: principal_user_entity_uid.to_string(),
                 workload_principal: principal_workload_uid.to_string(),
+                role_principal: principal_role_entity_uid.to_string(),
 
-                person_diagnostics: person_result.diagnostics().into(),
-                workload_diagnostics: workload_result.diagnostics().into(),
+                person_diagnostics: result.person.diagnostics().into(),
+                workload_diagnostics: result.workload.diagnostics().into(),
+                role_diagnostics: result.role.diagnostics().into(),
 
-                person_decision: person_result.decision().into(),
-                workload_decision: workload_result.decision().into(),
+                person_decision: result.person.decision().into(),
+                workload_decision: result.workload.decision().into(),
+                role_decision: result.role.decision().into(),
+
+                authorized: result.is_allowed(),
             })
             .set_message("Result of authorize.".to_string()),
         );
 
-        Ok(AuthorizeResult {
-            workload: workload_result,
-            person: person_result,
-        })
+        Ok(result)
     }
 
     /// Execute cedar policy is_authorized method to check

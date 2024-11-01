@@ -112,12 +112,17 @@ mod tests {
 
             person_principal: "test_person_principal".to_string(),
             workload_principal: "test_workload_principal".to_string(),
+            role_principal: "test_role_principal".to_string(),
 
             person_diagnostics: Default::default(),
             workload_diagnostics: Default::default(),
+            role_diagnostics: Default::default(),
 
             person_decision: Decision::Allow,
             workload_decision: Decision::Allow,
+            role_decision: Decision::Allow,
+
+            authorized: true,
         });
         let entry2 = LogEntry::new_with_data(
             app_types::PdpID::new(),

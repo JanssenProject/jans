@@ -20,17 +20,13 @@
             }
         },
         "entityTypes": {
-            "Issue": {
+            "TrustedIssuer": {
                 "shape": {
                     "type": "Record",
                     "attributes": {
-                        "country": {
+                        "issuer_entity_id": {
                             "type": "EntityOrCommon",
-                            "name": "String"
-                        },
-                        "org_id": {
-                            "type": "EntityOrCommon",
-                            "name": "String"
+                            "name": "Url"
                         }
                     }
                 }
@@ -84,17 +80,6 @@
                     }
                 }
             },
-            "TrustedIssuer": {
-                "shape": {
-                    "type": "Record",
-                    "attributes": {
-                        "issuer_entity_id": {
-                            "type": "EntityOrCommon",
-                            "name": "Url"
-                        }
-                    }
-                }
-            },
             "Access_token": {
                 "shape": {
                     "type": "Record",
@@ -122,7 +107,6 @@
                     }
                 }
             },
-            "Role": {},
             "id_token": {
                 "shape": {
                     "type": "Record",
@@ -161,7 +145,23 @@
                         }
                     }
                 }
-            }
+            },
+            "Issue": {
+                "shape": {
+                    "type": "Record",
+                    "attributes": {
+                        "country": {
+                            "type": "EntityOrCommon",
+                            "name": "String"
+                        },
+                        "org_id": {
+                            "type": "EntityOrCommon",
+                            "name": "String"
+                        }
+                    }
+                }
+            },
+            "Role": {}
         },
         "actions": {
             "Update": {
@@ -171,7 +171,8 @@
                     ],
                     "principalTypes": [
                         "Workload",
-                        "User"
+                        "User",
+                        "Role"
                     ]
                 }
             }

@@ -107,16 +107,25 @@ pub struct AuthorizationLogInfo {
     pub person_principal: String,
     /// cedar-policy workload principal
     pub workload_principal: String,
+    /// cedar-policy `role` principal
+    pub role_principal: String,
 
     /// cedar-policy user/person diagnostics information
     pub person_diagnostics: Diagnostics,
     /// cedar-policy workload diagnostics information
     pub workload_diagnostics: Diagnostics,
+    /// cedar-policy `role` diagnostics information
+    pub role_diagnostics: Diagnostics,
 
     /// cedar-policy user/person decision
     pub person_decision: Decision,
     /// cedar-policy workload decision
     pub workload_decision: Decision,
+    /// cedar-policy role decision
+    pub role_decision: Decision,
+
+    /// is authorized
+    pub authorized: bool
 }
 
 /// Cedar-policy decision of the authorization
