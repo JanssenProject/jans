@@ -30,7 +30,6 @@ export_keycloak_admin_creds() {
 }
 
 python3 "$basedir/wait.py"
-sh "$basedir/poll_simple_json.sh" &
 python3 "$basedir/bootstrap.py"
 python3 "$basedir/configure_kc.py" &
 python3 "$basedir/upgrade.py"

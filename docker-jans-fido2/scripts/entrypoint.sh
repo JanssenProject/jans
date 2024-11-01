@@ -51,7 +51,6 @@ get_jetty_args() {
 
 get_prometheus_lib
 python3 "$basedir/wait.py"
-sh "$basedir/poll_simple_json.sh" &
 python3 "$basedir/bootstrap.py"
 python3 "$basedir/mod_context.py" jans-fido2
 python3 "$basedir/upgrade.py"

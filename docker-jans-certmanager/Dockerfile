@@ -25,7 +25,7 @@ RUN wget -q ${CN_SOURCE_URL} -P /app/javalibs/
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=5e51befcd66061272d43803488183d801ba17d50
+ENV JANS_SOURCE_VERSION=f096bef2da529c8d52f3807bda41daae36554687
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the assets
