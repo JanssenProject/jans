@@ -324,10 +324,10 @@ where
         super::Encoding::Base64 => {
             use base64::prelude::*;
             let buf = BASE64_STANDARD.decode(policy_with_metadata.body).map_err(|err| {
-                return serde::de::Error::custom(format!("{}: {}", ParsePolicySetMessage::Base64, err))
+                serde::de::Error::custom(format!("{}: {}", ParsePolicySetMessage::Base64, err))
             })?;
             String::from_utf8(buf).map_err(|err| {
-                return serde::de::Error::custom(format!("{}: {}", ParsePolicySetMessage::String, err))
+                serde::de::Error::custom(format!("{}: {}", ParsePolicySetMessage::String, err))
             })?
         }
     };
