@@ -10,7 +10,7 @@
 pub enum Error {
     /// Indicates that a key with the specified `kid` was not found in the JWKS.
     #[error("No key with `kid`=\"{0}\" found in the JWKS.")]
-    KeyNotFound(Box<str>),
+    KeyNotFound(String),
 
     /// Represents an HTTP error during the request.
     #[error("HTTP error occurred: {0}")]

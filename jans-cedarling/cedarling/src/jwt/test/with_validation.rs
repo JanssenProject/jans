@@ -9,6 +9,7 @@
 
 mod access_token;
 mod id_token;
+mod key_service;
 mod userinfo_token;
 
 use super::*;
