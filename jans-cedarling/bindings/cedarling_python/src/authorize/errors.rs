@@ -53,6 +53,13 @@ create_exception!(
 
 create_exception!(
     authorize_errors,
+    RoleEntityError,
+    AuthorizeError,
+    "Error encountered while creating role entity"
+);
+
+create_exception!(
+    authorize_errors,
     ActionError,
     AuthorizeError,
     "Error encountered while parsing Action to EntityUid"
@@ -129,6 +136,7 @@ errors_functions! {
     CreateIdTokenEntity => CreateIdTokenEntityError,
     CreateUserEntity => CreateUserEntityError,
     ResourceEntity => ResourceEntityError,
+    RoleEntity => RoleEntityError,
     Action => ActionError,
     CreateContext => CreateContextError,
     CreateRequestWorkloadEntity => CreateRequestWorkloadEntityError,

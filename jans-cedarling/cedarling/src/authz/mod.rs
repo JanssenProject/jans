@@ -26,10 +26,11 @@ mod token_data;
 pub use authorize_result::AuthorizeResult;
 use cedar_policy::{Entities, Entity, EntityUid};
 use entities::CedarPolicyCreateTypeError;
+use entities::DecodeTokensResult;
 use entities::ResourceEntityError;
 use entities::{
-    create_access_token_entities, create_id_token_entity, create_user_entity,
-    AccessTokenEntitiesError,
+    create_access_token_entities, create_id_token_entity, create_role_entity, create_user_entity,
+    AccessTokenEntitiesError, RoleEntityError,
 };
 use entities::{create_resource_entity, AccessTokenEntities};
 use request::Request;
@@ -179,8 +180,10 @@ impl Authz {
         &self,
         request: &Request,
     ) -> Result<AuthorizeEntitiesData, AuthorizeError> {
+        let schema = &self.config.policy_store.cedar_schema.json;
+
         // decode JWT tokens to structs AccessTokenData, IdTokenData, UserInfoTokenData using jwt service
-        let decode_result = self
+        let decode_result: DecodeTokensResult = self
             .config
             .jwt_service
             .decode_tokens::<AccessTokenData, IdTokenData, UserInfoTokenData>(
@@ -189,24 +192,27 @@ impl Authz {
                 &request.userinfo_token,
             )?;
 
+        let role_entity = create_role_entity(schema, &decode_result)?;
+
         // Populate the `AuthorizeEntitiesData` structure using the builder pattern
         let data = AuthorizeEntitiesData::builder()
             // Populate the structure with entities derived from the access token
             .access_token_entities(create_access_token_entities(
-                &self.config.policy_store.cedar_schema.json,
+                schema,
                 &decode_result.access_token,
             )?)
             // Add an entity created from the ID token
             .id_token_entity(
-                create_id_token_entity(&self.config.policy_store.cedar_schema.json, &decode_result.id_token)
+                create_id_token_entity(schema, &decode_result.id_token)
                     .map_err(AuthorizeError::CreateIdTokenEntity)?,
             )
             // Add an entity created from the userinfo token
             .user_entity(
                 create_user_entity(
-                    &self.config.policy_store.cedar_schema.json,
+                    schema,
                     &decode_result.id_token,
                     &decode_result.userinfo_token,
+                    role_entity.uid(),
                 )
                 .map_err(AuthorizeError::CreateUserEntity)?,
             )
@@ -214,7 +220,9 @@ impl Authz {
             .resource_entity(create_resource_entity(
                 request.resource.clone(),
                 &self.config.policy_store.cedar_schema.json,
-            )?);
+            )?)
+            // Add Jans::Role entity
+            .role_entity(role_entity);
 
         Ok(data.build())
     }
@@ -239,12 +247,19 @@ struct AuthorizeEntitiesData {
     id_token_entity: Entity,
     user_entity: Entity,
     resource_entity: Entity,
+    role_entity: Entity,
 }
 
 impl AuthorizeEntitiesData {
     /// Create iterator to get all entities
     fn into_iter(self) -> impl Iterator<Item = Entity> {
-        let iter = vec![self.id_token_entity, self.user_entity, self.resource_entity].into_iter();
+        let iter = vec![
+            self.id_token_entity,
+            self.user_entity,
+            self.resource_entity,
+            self.role_entity,
+        ]
+        .into_iter();
 
         self.access_token_entities.into_iter().chain(iter)
     }
@@ -276,6 +291,9 @@ pub enum AuthorizeError {
     /// Error encountered while creating resource entity
     #[error("{0}")]
     ResourceEntity(#[from] ResourceEntityError),
+    /// Error encountered while creating role entity
+    #[error(transparent)]
+    RoleEntity(#[from] RoleEntityError),
     /// Error encountered while parsing Action to EntityUid
     #[error("could not parse action: {0}")]
     Action(cedar_policy::ParseErrors),

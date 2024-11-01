@@ -14,13 +14,22 @@ mod trait_as_expression;
 #[cfg(test)]
 mod test_create;
 
+use std::collections::HashSet;
+
 use crate::common::cedar_schema::CedarSchemaJson;
 
 use crate::authz::token_data::{AccessTokenData, IdTokenData, UserInfoTokenData};
+use crate::common::policy_store::TokenKind;
+use crate::jwt;
+use cedar_policy::EntityUid;
 pub use create::CedarPolicyCreateTypeError;
-use create::{create_entity, parse_namespace_and_typename};
+use create::{create_entity, parse_namespace_and_typename, EntityMetadata};
 
 use super::request::ResourceData;
+use super::token_data::TokenPayload;
+
+pub(crate) type DecodeTokensResult<'a> =
+    jwt::DecodeTokensResult<'a, AccessTokenData, IdTokenData, UserInfoTokenData>;
 
 /// Access token entities
 pub(crate) struct AccessTokenEntities {
@@ -48,8 +57,8 @@ pub fn create_access_token_entities(
     data: &AccessTokenData,
 ) -> Result<AccessTokenEntities, AccessTokenEntitiesError> {
     Ok(AccessTokenEntities {
-        access_token_entity: meta::AccessTokenMeta.create_entity(schema, data)?,
-        workload_entity: meta::WorkloadEntityMeta.create_entity(schema, data)?,
+        access_token_entity: meta::AccessTokenMeta.create_entity(schema, data, HashSet::new())?,
+        workload_entity: meta::WorkloadEntityMeta.create_entity(schema, data, HashSet::new())?,
     })
 }
 
@@ -58,7 +67,7 @@ pub fn create_id_token_entity(
     schema: &CedarSchemaJson,
     data: &IdTokenData,
 ) -> Result<cedar_policy::Entity, CedarPolicyCreateTypeError> {
-    meta::IdToken.create_entity(schema, data)
+    meta::IdToken.create_entity(schema, data, HashSet::new())
 }
 
 /// Create user entity
@@ -66,6 +75,7 @@ pub fn create_user_entity(
     schema: &CedarSchemaJson,
     id_token_data: &IdTokenData,
     userinfo_token_data: &UserInfoTokenData,
+    role_uid: EntityUid,
 ) -> Result<cedar_policy::Entity, CedarPolicyCreateTypeError> {
     const SUB_KEY: &str = "sub";
 
@@ -77,7 +87,7 @@ pub fn create_user_entity(
             id_token_data
         };
 
-    meta::User.create_entity(schema, payload)
+    meta::User.create_entity(schema, payload, HashSet::from_iter(vec![role_uid]))
 }
 
 /// Describe errors on creating resource entity
@@ -109,5 +119,45 @@ pub fn create_resource_entity(
         &parsed_typename.namespace(),
         schema_record,
         &resource.payload.into(),
+        HashSet::new(),
     )?)
+}
+
+/// Describe errors on creating role entity
+#[derive(thiserror::Error, Debug)]
+pub enum RoleEntityError {
+    #[error("could not create Jans::Role entity from {token_kind} token: {error}")]
+    Create {
+        error: CedarPolicyCreateTypeError,
+        token_kind: TokenKind,
+    },
+}
+
+/// Create `Role` entity from based on `TrustedIssuer` or default value of `RoleMapping`
+pub fn create_role_entity(
+    schema: &CedarSchemaJson,
+    tokens: &DecodeTokensResult,
+) -> Result<cedar_policy::Entity, RoleEntityError> {
+    // get role mapping or default value
+    let role_mapping = tokens
+        .trusted_issuer
+        .map(|trusted_issuer| trusted_issuer.get_role_mapping().unwrap_or_default())
+        .unwrap_or_default();
+
+    let role_entity_type: &str = "Jans::Role";
+    let entity_metadata = EntityMetadata::new(role_entity_type, role_mapping.role_mapping_field);
+
+    // map payload from token
+    let token_data: &'_ TokenPayload = match role_mapping.kind {
+        TokenKind::Access => &tokens.access_token,
+        TokenKind::Id => &tokens.id_token,
+        TokenKind::Userinfo => &tokens.userinfo_token,
+    };
+
+    entity_metadata
+        .create_entity(schema, token_data, HashSet::new())
+        .map_err(|err| RoleEntityError::Create {
+            error: err,
+            token_kind: TokenKind::Access,
+        })
 }

@@ -45,6 +45,7 @@ impl<'a> EntityMetadata<'a> {
         &'a self,
         schema: &'a CedarSchemaJson,
         data: &'a TokenPayload,
+        parents: HashSet<EntityUid>,
     ) -> Result<cedar_policy::Entity, CedarPolicyCreateTypeError> {
         let entity_uid = EntityUid::from_type_name_and_id(
             EntityTypeName::from_str(self.entity_type).map_err(|err| {
@@ -66,6 +67,7 @@ impl<'a> EntityMetadata<'a> {
             &parsed_typename.namespace(),
             entity_schema_record,
             data,
+            parents,
         )
     }
 }
@@ -138,6 +140,7 @@ pub fn create_entity<'a>(
     entity_namespace: &str,
     schema_record: &'a CedarSchemaRecord,
     data: &'a TokenPayload,
+    parents: HashSet<EntityUid>,
 ) -> Result<cedar_policy::Entity, CedarPolicyCreateTypeError> {
     let attr_vec = entity_meta_attributes(schema_record)?
         .into_iter()
@@ -160,7 +163,7 @@ pub fn create_entity<'a>(
 
     let attrs: HashMap<String, RestrictedExpression> = HashMap::from_iter(attr_vec);
 
-    cedar_policy::Entity::new(entity_uid.clone(), attrs, HashSet::new())
+    cedar_policy::Entity::new(entity_uid.clone(), attrs, parents)
         .map_err(|err| CedarPolicyCreateTypeError::CreateEntity(entity_uid.to_string(), err))
 }
 

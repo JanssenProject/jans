@@ -66,12 +66,37 @@ pub struct TrustedIssuer {
     pub token_metadata: Option<Vec<TokenMetadata>>,
 }
 
+/// Structure define the source from which role mappings are retrieved.
+pub struct RoleMapping<'a> {
+    pub kind: TokenKind,
+    pub role_mapping_field: &'a str,
+}
+
+// By default we need to search role in the Id token
+impl Default for RoleMapping<'_> {
+    fn default() -> Self {
+        Self {
+            kind: TokenKind::Id,
+            role_mapping_field: "role",
+        }
+    }
+}
+
 impl TrustedIssuer {
-    pub fn get_token_metadata(&self, token_type: TokenKind) -> Option<&TokenMetadata> {
-        self.token_metadata
-            .as_ref()?
-            .iter()
-            .find(|&metadata| metadata.kind == token_type)
+    /// Retrieves the available `RoleMapping` from the token metadata.
+    //
+    // in `token_metadata` list only one element with mapping
+    // it is maximum 3 elements in list so iterating is efficient enouf
+    pub fn get_role_mapping(&self) -> Option<RoleMapping> {
+        for metadata in self.token_metadata.as_ref()? {
+            if let Some(role_mapping_field) = &metadata.role_mapping {
+                return Some(RoleMapping {
+                    kind: metadata.kind,
+                    role_mapping_field,
+                });
+            }
+        }
+        None
     }
 }
 
