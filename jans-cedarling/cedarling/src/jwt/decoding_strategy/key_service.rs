@@ -16,18 +16,16 @@ use reqwest::blocking::Client;
 use serde::Deserialize;
 use std::collections::HashMap;
 use std::sync::Arc;
+use std::thread::sleep;
+use std::time::Duration;
 
 /// Retrieves a [`DecodingKey`]-s based on the provided jwks_uri.
 fn fetch_decoding_keys(
     jwks_uri: &str,
-    http_client: &Client,
+    http_client: &HttpClient,
 ) -> Result<HashMap<Box<str>, DecodingKey>, KeyServiceError> {
     let jwks: Jwks = http_client
-        .get(jwks_uri)
-        .send()
-        .map_err(KeyServiceError::Http)?
-        .error_for_status()
-        .map_err(KeyServiceError::Http)?
+        .get(jwks_uri)?
         .json()
         .map_err(KeyServiceError::RequestDeserialization)?;
 
@@ -63,14 +61,10 @@ fn fetch_decoding_keys(
 /// Retrieves a [`OpenIdConfig`] based on the provided openid uri endpoint.
 pub(crate) fn fetch_openid_config(
     openid_endpoint: &str,
-    http_client: &Client,
+    http_client: &HttpClient,
 ) -> Result<OpenIdConfig, KeyServiceError> {
     let conf_src: OpenIdConfigSource = http_client
-        .get(openid_endpoint)
-        .send()
-        .map_err(KeyServiceError::Http)?
-        .error_for_status()
-        .map_err(KeyServiceError::Http)?
+        .get(openid_endpoint)?
         .json()
         .map_err(KeyServiceError::RequestDeserialization)?;
 
@@ -79,9 +73,59 @@ pub(crate) fn fetch_openid_config(
     Ok(OpenIdConfig::from_source(conf_src, decoding_keys))
 }
 
+/// A wrapper around `reqwest::blocking::Client` providing HTTP request functionality with retry logic.
+///
+/// The `HttpClient` struct allows for sending GET requests with a retry mechanism that attempts to
+/// fetch the requested resource up to a maximum number of times if an error occurs.
+pub struct HttpClient(reqwest::blocking::Client);
+
+impl HttpClient {
+    pub fn new() -> Result<Self, KeyServiceError> {
+        Ok(Self(
+            Client::builder()
+                .build()
+                .map_err(KeyServiceError::HttpClientInitialization)?,
+        ))
+    }
+
+    /// Sends a GET request to the specified URI with retry logic.
+    ///
+    /// This method will attempt to fetch the resource up to `MAX_RETRIES` times, with an increasing delay
+    /// between each attempt. The delay duration is adjusted for testing and non-testing environments.
+    fn get(&self, uri: &str) -> Result<reqwest::blocking::Response, KeyServiceError> {
+        const MAX_RETRIES: u32 = 3;
+        #[cfg(test)]
+        const RETRY_DELAY: Duration = Duration::from_millis(10);
+        #[cfg(not(test))]
+        const RETRY_DELAY: Duration = Duration::from_secs(1);
+
+        // Fetch the JWKS from the jwks_uri
+        let mut attempts = 0;
+        let response = loop {
+            match self.0.get(uri).send() {
+                Ok(response) => break response, // Exit loop on success
+                Err(e) if attempts < MAX_RETRIES => {
+                    attempts += 1;
+                    // TODO: pass this message to the logger
+                    eprintln!(
+                        "Request failed (attempt {} of {}): {}. Retrying...",
+                        attempts, MAX_RETRIES, e
+                    );
+                    sleep(RETRY_DELAY * attempts);
+                },
+                Err(e) => return Err(KeyServiceError::MaxHttpRetriesReached(e)), // Exit if max retries exceeded
+            }
+        };
+        Ok(response
+            .error_for_status()
+            .map_err(KeyServiceError::HttpStatus)?)
+    }
+}
+
+/// A service that manages key retrieval and caching for OpenID Connect configurations.
 pub struct KeyService {
     idp_configs: HashMap<Box<str>, OpenIdConfig>, // <issuer (`iss`), OpenIdConfig>
-    http_client: Client,
+    http_client: HttpClient,
 }
 
 impl KeyService {
@@ -92,7 +136,11 @@ impl KeyService {
     /// failures will return a corresponding `Error`.
     pub fn new(openid_conf_endpoints: Vec<&str>) -> Result<Self, KeyServiceError> {
         let mut idp_configs = HashMap::new();
-        let http_client = Client::builder().build().map_err(KeyServiceError::Http)?;
+        let http_client = HttpClient(
+            Client::builder()
+                .build()
+                .map_err(KeyServiceError::HttpClientInitialization)?,
+        );
 
         // fetch IDP configs
         for endpoint in openid_conf_endpoints {
@@ -164,20 +212,20 @@ impl KeyService {
 
     /// Updates the keys in the given config
     fn update_decoding_keys(
-        http_client: &reqwest::blocking::Client,
+        http_client: &HttpClient,
         conf: &OpenIdConfig,
     ) -> Result<(), KeyServiceError> {
         let mut fetched_keys = HashMap::new();
 
-        let jwks: Jwks = http_client
-            .get(&*conf.jwks_uri)
-            .send()
-            .map_err(KeyServiceError::Http)?
-            .error_for_status()
-            .map_err(KeyServiceError::Http)?
+        // Fetch the JWKS from the jwks_uri
+        let response = http_client.get(&*conf.jwks_uri)?;
+
+        // Deserialize the response into a Jwks
+        let jwks: Jwks = response
             .json()
             .map_err(KeyServiceError::RequestDeserialization)?;
 
+        // Deserialize the Jwk into multiple Decoding Keys then store them
         for jwk in jwks.keys {
             let jwk = serde_json::from_str::<Jwk>(&jwk.to_string());
 

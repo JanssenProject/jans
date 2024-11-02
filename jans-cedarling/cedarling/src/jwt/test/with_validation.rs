@@ -14,7 +14,7 @@ mod userinfo_token;
 
 use super::*;
 use crate::common::policy_store::TrustedIssuer;
-use crate::jwt::{self, JwtService, JwtServiceError, TrustedIssuerAndOpenIdConfig};
+use crate::jwt::{self, HttpClient, JwtService, JwtServiceError, TrustedIssuerAndOpenIdConfig};
 use jsonwebtoken::Algorithm;
 use serde_json::json;
 
@@ -98,7 +98,7 @@ fn can_decode_claims_with_validation() {
             ),
             token_metadata: None,
         },
-        &reqwest::blocking::Client::new(),
+        &HttpClient::new().expect("should create http client"),
     )
     .expect("openid config should be fetched successfully");
 
@@ -218,7 +218,7 @@ fn errors_on_unsupported_alg() {
             ),
             token_metadata: None,
         },
-        &reqwest::blocking::Client::new(),
+        &HttpClient::new().expect("should create http client"),
     )
     .expect("openid config should be fetched successfully");
 
@@ -358,7 +358,7 @@ fn can_gracefully_handle_unsupported_algorithms_from_jwks() {
             ),
             token_metadata: None,
         },
-        &reqwest::blocking::Client::new(),
+        &HttpClient::new().expect("should create http client"),
     )
     .expect("openid config should be fetched successfully");
 

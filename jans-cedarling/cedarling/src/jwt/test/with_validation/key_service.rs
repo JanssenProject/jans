@@ -18,8 +18,8 @@ use super::super::*;
 use crate::common::policy_store::TrustedIssuer;
 use crate::jwt::decoding_strategy::key_service::KeyService;
 use crate::jwt::decoding_strategy::JwtDecodingError;
-use crate::jwt::TrustedIssuerAndOpenIdConfig;
-use crate::jwt::{self, JwtService};
+use crate::jwt::{self, HttpClient, JwtService};
+use crate::jwt::{KeyServiceError, TrustedIssuerAndOpenIdConfig};
 use jsonwebtoken::Algorithm;
 use serde_json::json;
 
@@ -110,7 +110,7 @@ fn errors_when_no_key_found() {
             ),
             token_metadata: None,
         },
-        &reqwest::blocking::Client::new(),
+        &HttpClient::new().expect("should create http client"),
     )
     .expect("openid config should be fetched successfully");
 
@@ -174,11 +174,11 @@ fn errors_when_cant_fetch_jwks_uri() {
         .create();
 
     let openid_conf_endpoint = format!("{}/.well-known/openid-configuration", server.url());
-    let key_service = KeyService::new(vec![&openid_conf_endpoint]);
+    let result = KeyService::new(vec![&openid_conf_endpoint]);
 
     assert!(
-        matches!(key_service, Err(jwt::KeyServiceError::Http(_)),),
-        "Expected to error because the JWKS cant be fetched from the `jwks_uri`"
+        matches!(result, Err(jwt::KeyServiceError::HttpStatus(_)),),
+        "Expected to error because the JWKS cant be fetched from the `jwks_uri`",
     );
 
     openid_conf_mock.assert();
@@ -201,7 +201,7 @@ fn errors_when_cant_fetch_openid_configuration() {
     let key_service = KeyService::new(vec![&openid_conf_endpoint]);
 
     assert!(
-        matches!(key_service, Err(jwt::KeyServiceError::Http(_)),),
+        matches!(key_service, Err(jwt::KeyServiceError::HttpStatus(_)),),
         "Expected to error because the openid configuration cant be fetched from the `jwks_uri`"
     );
 
@@ -288,7 +288,7 @@ fn can_update_local_jwks() {
             ),
             token_metadata: None,
         },
-        &reqwest::blocking::Client::new(),
+        &HttpClient::new().expect("should create http client"),
     )
     .expect("openid config should be fetched successfully");
 
@@ -345,5 +345,37 @@ fn can_update_local_jwks() {
     assert_eq!(result.userinfo_token, userinfo_token_claims);
 
     // verify that the OpenID configuration endpoints was called exactly once
+    openid_conf_mock.assert();
+}
+
+#[test]
+/// Verifies that [`KeyService::new`] returns an error when the maximum number of HTTP retries
+/// is reached without a successful response.
+fn errors_when_max_http_retries_exceeded() {
+    let openid_conf_endpoint = "0.0.0.0";
+    let key_service = KeyService::new(vec![&openid_conf_endpoint]);
+
+    assert!(matches!(
+        key_service,
+        Err(KeyServiceError::MaxHttpRetriesReached(_))
+    ));
+}
+
+#[test]
+/// Verifies that [`KeyService::new`] returns an error when the OpenID configuration endpoint
+/// responds with an HTTP error status code (e.g., 500).
+fn errors_on_http_error_status_from_endpoint() {
+    // initialize mock server to simulate OpenID configuration and JWKS responses
+    let mut server = mockito::Server::new();
+    let openid_conf_mock = server
+        .mock("GET", "/.well-known/openid-configuration")
+        .with_status(500)
+        .create();
+
+    let openid_conf_endpoint = format!("{}/.well-known/openid-configuration", server.url());
+    let key_service = KeyService::new(vec![&openid_conf_endpoint]);
+
+    assert!(matches!(key_service, Err(KeyServiceError::HttpStatus(_))));
+
     openid_conf_mock.assert();
 }

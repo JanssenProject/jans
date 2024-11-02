@@ -23,7 +23,7 @@
 use super::super::*;
 use crate::common::policy_store::TrustedIssuer;
 use crate::jwt::decoding_strategy::JwtDecodingError;
-use crate::jwt::{self, JwtService, TrustedIssuerAndOpenIdConfig};
+use crate::jwt::{self, HttpClient, JwtService, TrustedIssuerAndOpenIdConfig};
 use jsonwebtoken::Algorithm;
 use serde_json::json;
 
@@ -144,7 +144,7 @@ fn test_missing_claim(missing_claim: &'static str) {
             ),
             token_metadata: None,
         },
-        &reqwest::blocking::Client::new(),
+        &HttpClient::new().expect("should create http client"),
     )
     .expect("openid config should be fetched successfully");
 
@@ -298,7 +298,7 @@ fn errors_on_invalid_signature() {
             ),
             token_metadata: None,
         },
-        &reqwest::blocking::Client::new(),
+        &HttpClient::new().expect("should create http client"),
     )
     .expect("openid config should be fetched successfully");
 
@@ -416,7 +416,7 @@ fn errors_on_expired_token() {
             ),
             token_metadata: None,
         },
-        &reqwest::blocking::Client::new(),
+        &HttpClient::new().expect("should create http client"),
     )
     .expect("openid config should be fetched successfully");
 
@@ -536,7 +536,7 @@ fn errors_on_token_used_before_nbf() {
             ),
             token_metadata: None,
         },
-        &reqwest::blocking::Client::new(),
+        &HttpClient::new().expect("should create http client"),
     )
     .expect("openid config should be fetched successfully");
 
