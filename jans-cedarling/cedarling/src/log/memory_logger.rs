@@ -112,7 +112,7 @@ mod tests {
 
             person_principal: "test_person_principal".to_string(),
             workload_principal: "test_workload_principal".to_string(),
-            role_principal: "test_role_principal".to_string(),
+            role_principal: Some("test_role_principal".to_string()),
 
             person_diagnostics: Default::default(),
             workload_diagnostics: Default::default(),
@@ -120,7 +120,7 @@ mod tests {
 
             person_decision: Decision::Allow,
             workload_decision: Decision::Allow,
-            role_decision: Decision::Allow,
+            role_decision: Some(Decision::Allow),
 
             authorized: true,
         });

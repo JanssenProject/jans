@@ -88,6 +88,13 @@ create_exception!(
 
 create_exception!(
     authorize_errors,
+    CreateRequestRoleEntityError,
+    AuthorizeError,
+    "Error encountered while creating cedar_policy::Request for role entity principal"
+);
+
+create_exception!(
+    authorize_errors,
     EntitiesError,
     AuthorizeError,
     "Error encountered while collecting all entities"
@@ -141,6 +148,7 @@ errors_functions! {
     CreateContext => CreateContextError,
     CreateRequestWorkloadEntity => CreateRequestWorkloadEntityError,
     CreateRequestUserEntity => CreateRequestUserEntityError,
+    CreateRequestRoleEntity => CreateRequestRoleEntityError,
     Entities => EntitiesError
 }
 

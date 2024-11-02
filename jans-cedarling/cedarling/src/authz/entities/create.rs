@@ -50,29 +50,29 @@ impl<'a> EntityMetadata<'a> {
         data: &'a TokenPayload,
         parents: HashSet<EntityUid>,
     ) -> Result<cedar_policy::Entity, CedarPolicyCreateTypeError> {
-        let entity_uid = EntityUid::from_type_name_and_id(
-            EntityTypeName::from_str(self.entity_type).map_err(|err| {
-                CedarPolicyCreateTypeError::EntityTypeName(self.entity_type.to_string(), err)
-            })?,
-            EntityId::new(data.get_payload(self.entity_id_data_key)?.as_str()?),
-        );
-
-        let parsed_typename = parse_namespace_and_typename(self.entity_type);
-        // fetch the schema record from the json-schema.
-        let entity_schema_record = fetch_schema_record(
-            &parsed_typename.namespace(),
-            parsed_typename.typename,
-            schema,
+        let entity_uid = build_entity_uid(
+            self.entity_type,
+            data.get_payload(self.entity_id_data_key)?.as_str()?,
         )?;
 
-        create_entity(
-            entity_uid,
-            &parsed_typename.namespace(),
-            entity_schema_record,
-            data,
-            parents,
-        )
+        let parsed_typename = parse_namespace_and_typename(self.entity_type);
+        create_entity(entity_uid, &parsed_typename, schema, data, parents)
     }
+}
+
+/// build [`EntityUid`] based on input parameters
+pub(crate) fn build_entity_uid(
+    entity_type: &str,
+    entity_id: &str,
+) -> Result<EntityUid, CedarPolicyCreateTypeError> {
+    let entity_uid = EntityUid::from_type_name_and_id(
+        EntityTypeName::from_str(entity_type).map_err(|err| {
+            CedarPolicyCreateTypeError::EntityTypeName(entity_type.to_string(), err)
+        })?,
+        EntityId::new(entity_id),
+    );
+
+    Ok(entity_uid)
 }
 
 /// Parsed result of entity type name and namespace.
@@ -175,12 +175,17 @@ fn build_entity_attributes(
 /// Create entity from token payload data.
 pub fn create_entity<'a>(
     entity_uid: EntityUid,
-    entity_namespace: &str,
-    schema_shape: &'a CedarSchemaEntityShape,
+    parsed_typename: &EntityParsedTypeName,
+    schema: &'a CedarSchemaJson,
     data: &'a TokenPayload,
     parents: HashSet<EntityUid>,
 ) -> Result<cedar_policy::Entity, CedarPolicyCreateTypeError> {
-    let attrs = build_entity_attributes(schema_shape, data, entity_namespace)?;
+    let entity_namespace = parsed_typename.namespace();
+
+    // fetch the schema entity shape from the json-schema.
+    let schema_shape = fetch_schema_record(&entity_namespace, parsed_typename.typename, schema)?;
+
+    let attrs = build_entity_attributes(schema_shape, data, &entity_namespace)?;
 
     cedar_policy::Entity::new(entity_uid.clone(), attrs, parents)
         .map_err(|err| CedarPolicyCreateTypeError::CreateEntity(entity_uid.to_string(), err))

@@ -23,7 +23,7 @@ use crate::common::policy_store::TokenKind;
 use crate::jwt;
 use cedar_policy::EntityUid;
 pub use create::CedarPolicyCreateTypeError;
-use create::{create_entity, parse_namespace_and_typename, EntityMetadata};
+use create::{build_entity_uid, create_entity, parse_namespace_and_typename};
 
 use super::request::ResourceData;
 use super::token_data::TokenPayload;
@@ -75,7 +75,7 @@ pub fn create_user_entity(
     schema: &CedarSchemaJson,
     id_token_data: &IdTokenData,
     userinfo_token_data: &UserInfoTokenData,
-    role_uid: EntityUid,
+    parents: HashSet<EntityUid>,
 ) -> Result<cedar_policy::Entity, CedarPolicyCreateTypeError> {
     const SUB_KEY: &str = "sub";
 
@@ -87,7 +87,7 @@ pub fn create_user_entity(
             id_token_data
         };
 
-    meta::User.create_entity(schema, payload, HashSet::from_iter(vec![role_uid]))
+    meta::User.create_entity(schema, payload, parents)
 }
 
 /// Describe errors on creating resource entity
@@ -107,17 +107,11 @@ pub fn create_resource_entity(
     })?;
 
     let parsed_typename = parse_namespace_and_typename(&resource.resource_type);
-    // fetch the schema record from the json-schema.
-    let schema_record = schema
-        .entity_schema(&parsed_typename.namespace(), parsed_typename.typename)
-        .ok_or(CedarPolicyCreateTypeError::CouldNotFindEntity(
-            entity_uid.to_string(),
-        ))?;
 
     Ok(create_entity(
         entity_uid,
-        &parsed_typename.namespace(),
-        schema_record,
+        &parsed_typename,
+        schema,
         &resource.payload.into(),
         HashSet::new(),
     )?)
@@ -134,10 +128,10 @@ pub enum RoleEntityError {
 }
 
 /// Create `Role` entity from based on `TrustedIssuer` or default value of `RoleMapping`
-pub fn create_role_entity(
+pub fn create_role_entities(
     schema: &CedarSchemaJson,
     tokens: &DecodeTokensResult,
-) -> Result<cedar_policy::Entity, RoleEntityError> {
+) -> Result<Vec<cedar_policy::Entity>, RoleEntityError> {
     // get role mapping or default value
     let role_mapping = tokens
         .trusted_issuer
@@ -145,7 +139,7 @@ pub fn create_role_entity(
         .unwrap_or_default();
 
     let role_entity_type: &str = "Jans::Role";
-    let entity_metadata = EntityMetadata::new(role_entity_type, role_mapping.role_mapping_field);
+    let parsed_typename = parse_namespace_and_typename(role_entity_type);
 
     // map payload from token
     let token_data: &'_ TokenPayload = match role_mapping.kind {
@@ -154,10 +148,63 @@ pub fn create_role_entity(
         TokenKind::Userinfo => &tokens.userinfo_token,
     };
 
-    entity_metadata
-        .create_entity(schema, token_data, HashSet::new())
-        .map_err(|err| RoleEntityError::Create {
-            error: err,
-            token_kind: role_mapping.kind,
+    // get payload of role id in JWT token data
+    let Ok(payload) = token_data.get_payload(role_mapping.role_mapping_field) else {
+        // if key not found we return empty vector
+        return Ok(Vec::new());
+    };
+
+    // it can be 2 scenario when field is array or field is string
+    let entity_uid_vec: Vec<EntityUid> = if let Ok(payload_str) = payload.as_str() {
+        // case if it string
+        let entity_uid = build_entity_uid(role_entity_type, payload_str).map_err(|err| {
+            RoleEntityError::Create {
+                error: err,
+                token_kind: role_mapping.kind,
+            }
+        })?;
+        vec![entity_uid]
+    } else {
+        // case if it array of string
+        payload
+            // get as array
+            .as_array()
+            .map_err(|err| RoleEntityError::Create {
+                error: err.into(),
+                token_kind: role_mapping.kind,
+            })?
+            .iter()
+            .map(|payload_el| {
+                // get each element of array as `str`
+                payload_el.as_str().map_err(|err| RoleEntityError::Create {
+                    error: err.into(),
+                    token_kind: role_mapping.kind,
+                })
+                // build entity uid 
+                .and_then(|name| build_entity_uid(role_entity_type, name)
+                .map_err(|err| RoleEntityError::Create {
+                    error: err,
+                    token_kind: role_mapping.kind,
+                }))
+            })
+            .collect::<Result<Vec<_>, _>>()?
+    };
+
+    // create role entity for each entity uid
+    entity_uid_vec
+        .into_iter()
+        .map(|entity_uid| {
+            create_entity(
+                entity_uid,
+                &parsed_typename,
+                schema,
+                token_data,
+                HashSet::new(),
+            )
+            .map_err(|err| RoleEntityError::Create {
+                error: err,
+                token_kind: role_mapping.kind,
+            })
         })
+        .collect::<Result<Vec<_>, _>>()
 }
