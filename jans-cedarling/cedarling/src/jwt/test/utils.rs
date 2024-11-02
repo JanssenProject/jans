@@ -13,12 +13,17 @@ use std::{
     u64,
 };
 
+pub struct EncodingKey {
+    pub key_id: String,
+    pub key: jwt::EncodingKey,
+}
+
 /// Generates a set of private and public keys using ES256
 ///
-/// Returns a tuple: (Vec<(key_id, private_key)>, jwks)
-pub fn generate_keys() -> (Vec<(String, jwt::EncodingKey)>, String) {
+/// Returns a tuple: (encoding_keys, jwks as a string)
+pub fn generate_keys() -> (Vec<EncodingKey>, String) {
     let mut public_keys = jwt::jwk::JwkSet { keys: vec![] };
-    let mut private_keys = vec![];
+    let mut encoding_keys = vec![];
 
     for kid in 1..=2 {
         // Generate a private key
@@ -35,13 +40,16 @@ pub fn generate_keys() -> (Vec<(String, jwt::EncodingKey)>, String) {
             serde_json::from_value(public_key).expect("should deserialize public key");
         public_keys.keys.push(public_key);
 
-        let private_key = jwt::EncodingKey::from_ec_pem(jwk.key.to_pem().as_bytes())
+        let encoding_key = jwt::EncodingKey::from_ec_pem(jwk.key.to_pem().as_bytes())
             .expect("should generate encoding key");
-        private_keys.push((kid.to_string(), private_key));
+        encoding_keys.push(EncodingKey {
+            key_id: kid.to_string(),
+            key: encoding_key,
+        });
     }
 
     let public_keys = serde_json::to_string(&public_keys).expect("should serialize keyset");
-    (private_keys, public_keys)
+    (encoding_keys, public_keys)
 }
 
 pub struct Timestamp;
@@ -66,8 +74,7 @@ impl Timestamp {
 /// Generates a token string signed with ES256
 pub fn generate_token_using_claims(
     claims: &impl Serialize,
-    key_id: impl ToString,
-    encoding_key: &jwt::EncodingKey,
+    encodking_key: &EncodingKey,
 ) -> String {
     // select a key from the keyset
     // for simplicity, were just choosing the second one
@@ -75,10 +82,10 @@ pub fn generate_token_using_claims(
     // specify the header
     let header = jwt::Header {
         alg: jwt::Algorithm::ES256,
-        kid: Some(key_id.to_string()),
+        kid: Some(encodking_key.key_id.clone()),
         ..Default::default()
     };
 
     // serialize token to a string
-    jwt::encode(&header, &claims, encoding_key).expect("should generate token")
+    jwt::encode(&header, &claims, &encodking_key.key).expect("should generate token")
 }

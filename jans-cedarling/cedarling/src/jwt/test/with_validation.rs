@@ -58,18 +58,9 @@ fn can_decode_claims_with_validation() {
     });
 
     // generate the signed token strings
-    let access_token = generate_token_using_claims(
-        &access_token_claims,
-        &encoding_keys[0].0,
-        &encoding_keys[0].1,
-    );
-    let id_token =
-        generate_token_using_claims(&id_token_claims, &encoding_keys[1].0, &encoding_keys[1].1);
-    let userinfo_token = generate_token_using_claims(
-        &userinfo_token_claims,
-        &encoding_keys[0].0,
-        &encoding_keys[0].1,
-    );
+    let access_token = generate_token_using_claims(&access_token_claims, &encoding_keys[0]);
+    let id_token = generate_token_using_claims(&id_token_claims, &encoding_keys[1]);
+    let userinfo_token = generate_token_using_claims(&userinfo_token_claims, &encoding_keys[0]);
 
     // setup mock server responses for OpenID configuration and JWKS URIs
     let openid_config_response = json!({
@@ -175,18 +166,9 @@ fn errors_on_unsupported_alg() {
     });
 
     // generate the signed token strings
-    let access_token = generate_token_using_claims(
-        &access_token_claims,
-        &encoding_keys[0].0,
-        &encoding_keys[0].1,
-    );
-    let id_token =
-        generate_token_using_claims(&id_token_claims, &encoding_keys[1].0, &encoding_keys[1].1);
-    let userinfo_token = generate_token_using_claims(
-        &userinfo_token_claims,
-        &encoding_keys[0].0,
-        &encoding_keys[0].1,
-    );
+    let access_token = generate_token_using_claims(&access_token_claims, &encoding_keys[0]);
+    let id_token = generate_token_using_claims(&id_token_claims, &encoding_keys[1]);
+    let userinfo_token = generate_token_using_claims(&userinfo_token_claims, &encoding_keys[0]);
 
     // setup mock server responses for OpenID configuration and JWKS URIs
     let openid_config_response = json!({

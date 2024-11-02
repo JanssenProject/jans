@@ -47,18 +47,9 @@ fn can_decode_claims_without_validation() {
     });
 
     // generate the signed token strings
-    let access_token = generate_token_using_claims(
-        &access_token_claims,
-        &encoding_keys[0].0,
-        &encoding_keys[0].1,
-    );
-    let id_token =
-        generate_token_using_claims(&id_token_claims, &encoding_keys[0].0, &encoding_keys[0].1);
-    let userinfo_token = generate_token_using_claims(
-        &userinfo_token_claims,
-        &encoding_keys[0].0,
-        &encoding_keys[0].1,
-    );
+    let access_token = generate_token_using_claims(&access_token_claims, &encoding_keys[0]);
+    let id_token = generate_token_using_claims(&id_token_claims, &encoding_keys[0]);
+    let userinfo_token = generate_token_using_claims(&userinfo_token_claims, &encoding_keys[0]);
 
     // decode and validate both the access token and the ID token
     let (access_token_result, id_token_result, userinfo_token_result) = jwt_service

@@ -63,16 +63,13 @@ fn errors_when_no_key_found() {
     // generate the signed token strings
     let access_token = generate_token_using_claims(
         &access_token_claims,
-        "some_key_id_not_in_the_jwks", // we set an non-existing `kid` for the access_token
-        &encoding_keys[0].1,
+        &EncodingKey {
+            key_id: "some_key_id_not_in_the_jwks".to_string(), // we set an non-existing `kid` for the access_token
+            key: encoding_keys[0].key.clone(),
+        },
     );
-    let id_token =
-        generate_token_using_claims(&id_token_claims, &encoding_keys[1].0, &encoding_keys[1].1);
-    let userinfo_token = generate_token_using_claims(
-        &userinfo_token_claims,
-        &encoding_keys[0].0,
-        &encoding_keys[0].1,
-    );
+    let id_token = generate_token_using_claims(&id_token_claims, &encoding_keys[1]);
+    let userinfo_token = generate_token_using_claims(&userinfo_token_claims, &encoding_keys[0]);
 
     // setup mock server responses for OpenID configuration and JWKS URIs
     let openid_config_response = json!({
@@ -250,18 +247,9 @@ fn can_update_local_jwks() {
     });
 
     // generate the signed token strings
-    let access_token = generate_token_using_claims(
-        &access_token_claims,
-        &encoding_keys[0].0,
-        &encoding_keys[0].1,
-    );
-    let id_token =
-        generate_token_using_claims(&id_token_claims, &encoding_keys[1].0, &encoding_keys[1].1);
-    let userinfo_token = generate_token_using_claims(
-        &userinfo_token_claims,
-        &encoding_keys[0].0,
-        &encoding_keys[0].1,
-    );
+    let access_token = generate_token_using_claims(&access_token_claims, &encoding_keys[0]);
+    let id_token = generate_token_using_claims(&id_token_claims, &encoding_keys[1]);
+    let userinfo_token = generate_token_using_claims(&userinfo_token_claims, &encoding_keys[0]);
 
     // setup mock server responses for OpenID configuration and JWKS URIs
     let openid_config_response = json!({
@@ -311,7 +299,7 @@ fn can_update_local_jwks() {
                 jwt::decoding_strategy::Error::KeyService(
                     jwt::decoding_strategy::key_service::Error::KeyNotFound(ref key_id)
                 )
-            )) if key_id == &encoding_keys[0].0,
+            )) if key_id == &encoding_keys[0].key_id,
         ),
         "Expected decoding to fail due to missing key: {:?}",
         decode_result
