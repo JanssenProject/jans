@@ -79,7 +79,7 @@ pub fn generate_token_using_claims(claims: impl serde::Serialize) -> String {
 }
 
 /// create [`Cedarling`] from [`PolicyStoreSource`]
-fn get_cedarling(policy_source: PolicyStoreSource) -> Cedarling {
+pub fn get_cedarling(policy_source: PolicyStoreSource) -> Cedarling {
     Cedarling::new(BootstrapConfig {
         application_name: "test_app".to_string(),
         log_config: LogConfig {
