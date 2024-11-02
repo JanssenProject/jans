@@ -44,8 +44,8 @@ impl AuthorizeResult {
     }
 
     /// Get the decision value for role
-    fn role(&self) -> AuthorizeResultResponse {
-        self.inner.workload.clone().into()
+    fn role(&self) -> Option<AuthorizeResultResponse> {
+        self.inner.role.clone().map(|response| response.into())
     }
 }
 

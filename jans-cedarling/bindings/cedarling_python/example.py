@@ -187,5 +187,7 @@ for i, error in enumerate(workload_diagnostic.errors):
 print(authorize_result.person().decision)
 
 
-# watch on the decision for role
-print(authorize_result.role().decision)
+# watch on the decision for role if present
+role_result = authorize_result.role()
+if role_result is not None:
+    print(authorize_result.role().decision)
