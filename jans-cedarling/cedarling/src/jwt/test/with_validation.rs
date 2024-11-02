@@ -58,9 +58,12 @@ fn can_decode_claims_with_validation() {
     });
 
     // generate the signed token strings
-    let access_token = generate_token_using_claims(&access_token_claims, &encoding_keys[0]);
-    let id_token = generate_token_using_claims(&id_token_claims, &encoding_keys[1]);
-    let userinfo_token = generate_token_using_claims(&userinfo_token_claims, &encoding_keys[0]);
+    let access_token = generate_token_using_claims(&access_token_claims, &encoding_keys[0])
+        .unwrap_or_else(|e| panic!("Failed to generate access_token: {:?}", e));
+    let id_token = generate_token_using_claims(&id_token_claims, &encoding_keys[1])
+        .unwrap_or_else(|e| panic!("Failed to generate id_token: {:?}", e));
+    let userinfo_token = generate_token_using_claims(&userinfo_token_claims, &encoding_keys[0])
+        .unwrap_or_else(|e| panic!("Failed to generate userinfo_token: {:?}", e));
 
     // setup mock server responses for OpenID configuration and JWKS URIs
     let openid_config_response = json!({
@@ -176,9 +179,12 @@ fn errors_on_unsupported_alg() {
     });
 
     // generate the signed token strings
-    let access_token = generate_token_using_claims(&access_token_claims, &encoding_keys[0]);
-    let id_token = generate_token_using_claims(&id_token_claims, &encoding_keys[1]);
-    let userinfo_token = generate_token_using_claims(&userinfo_token_claims, &encoding_keys[0]);
+    let access_token = generate_token_using_claims(&access_token_claims, &encoding_keys[0])
+        .unwrap_or_else(|e| panic!("Failed to generate access_token: {:?}", e));
+    let id_token = generate_token_using_claims(&id_token_claims, &encoding_keys[1])
+        .unwrap_or_else(|e| panic!("Failed to generate id_token: {:?}", e));
+    let userinfo_token = generate_token_using_claims(&userinfo_token_claims, &encoding_keys[0])
+        .unwrap_or_else(|e| panic!("Failed to generate userinfo_token: {:?}", e));
 
     // setup mock server responses for OpenID configuration and JWKS URIs
     let openid_config_response = json!({
@@ -293,9 +299,12 @@ fn can_gracefully_handle_unsupported_algorithms_from_jwks() {
     });
 
     // generate the signed token strings
-    let access_token = generate_token_using_claims(&access_token_claims, &encoding_keys[1]);
-    let id_token = generate_token_using_claims(&id_token_claims, &encoding_keys[1]);
-    let userinfo_token = generate_token_using_claims(&userinfo_token_claims, &encoding_keys[1]);
+    let access_token = generate_token_using_claims(&access_token_claims, &encoding_keys[1])
+        .unwrap_or_else(|e| panic!("Failed to generate access_token: {:?}", e));
+    let id_token = generate_token_using_claims(&id_token_claims, &encoding_keys[1])
+        .unwrap_or_else(|e| panic!("Failed to generate id_token: {:?}", e));
+    let userinfo_token = generate_token_using_claims(&userinfo_token_claims, &encoding_keys[1])
+        .unwrap_or_else(|e| panic!("Failed to generate userinfo_token: {:?}", e));
 
     // setup mock server responses for OpenID configuration and JWKS URIs
     let openid_config_response = json!({

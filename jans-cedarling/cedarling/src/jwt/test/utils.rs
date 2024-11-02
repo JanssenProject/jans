@@ -70,7 +70,8 @@ pub fn generate_keys() -> (Vec<EncodingKey>, String) {
 
     let private_key = match *jwk.key {
         jsonwebkey::Key::Symmetric { key } => jwt::EncodingKey::from_secret(&key),
-        _ => panic!("Expected symmetric key for HS256"),
+        _ => panic!("Expected symmetric key for HS256"), // this shouldn't really happen unless
+                                                         // code within this function changes
     };
     encoding_keys.push(EncodingKey {
         key_id: kid.to_string(),
@@ -103,7 +104,10 @@ impl Timestamp {
 }
 
 /// Generates a token string signed with ES256
-pub fn generate_token_using_claims(claims: &impl Serialize, encoding_key: &EncodingKey) -> String {
+pub fn generate_token_using_claims(
+    claims: &impl Serialize,
+    encoding_key: &EncodingKey,
+) -> Result<String, jwt::errors::Error> {
     // select a key from the keyset
     // for simplicity, were just choosing the second one
 
@@ -115,7 +119,7 @@ pub fn generate_token_using_claims(claims: &impl Serialize, encoding_key: &Encod
     };
 
     // serialize token to a string
-    jwt::encode(&header, &claims, &encoding_key.key).expect("should generate token")
+    Ok(jwt::encode(&header, &claims, &encoding_key.key)?)
 }
 
 /// Invalidates a JWT Token by altering the first two characters in its signature
