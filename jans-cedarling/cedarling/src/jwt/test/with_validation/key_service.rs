@@ -16,6 +16,7 @@
 
 use super::super::*;
 use crate::common::policy_store::TrustedIssuer;
+use crate::jwt::decoding_strategy::{key_service, KeyService};
 use crate::jwt::{self, JwtService};
 use jsonwebtoken::Algorithm;
 use serde_json::json;
@@ -135,13 +136,9 @@ fn errors_when_no_key_found() {
 }
 
 #[test]
-#[should_panic]
-/// Tests if [`JwtService::new_with_config`] panics if the JWKS cant be fetched
+/// Tests if [`JwtService::new_with_config`] returns an error if the JWKS cant be fetched
 /// from the `jwks_uri`.
-///
-/// TODO: change this to check for an error instead of a panic once returning a `Result` for
-/// the initialization for JwtService becomes supported
-fn panics_when_cant_fetch_jwks_uri() {
+fn errors_when_cant_fetch_jwks_uri() {
     // initialize mock server to simulate OpenID configuration and JWKS responses
     let mut server = mockito::Server::new();
 
@@ -153,57 +150,45 @@ fn panics_when_cant_fetch_jwks_uri() {
         "issuer": server.url(),
         "jwks_uri": &format!("{}/jwks", server.url()),
     });
-    let _openid_conf_mock = server
+    let openid_conf_mock = server
         .mock("GET", "/.well-known/openid-configuration")
         .with_status(200)
         .with_header("content-type", "application/json")
         .with_body(openid_config_response.to_string())
         .create();
 
-    // initialize JwtService with validation enabled and ES256 as the supported algorithm
-    let _jwt_service = JwtService::new_with_config(crate::jwt::JwtServiceConfig::WithValidation {
-        supported_algs: vec![Algorithm::ES256],
-        trusted_idps: vec![TrustedIssuer {
-            name: "some_idp".to_string(),
-            description: "some_desc".to_string(),
-            openid_configuration_endpoint: format!(
-                "{}/.well-known/openid-configuration",
-                server.url()
-            ),
-            token_metadata: None,
-        }],
-    });
+    let openid_conf_endpoint = format!("{}/.well-known/openid-configuration", server.url());
+    let key_service = KeyService::new(vec![&openid_conf_endpoint]);
+
+    assert!(
+        matches!(key_service, Err(key_service::KeyServiceError::Http(_)),),
+        "Expected to error because the JWKS cant be fetched from the `jwks_uri`"
+    );
+
+    openid_conf_mock.assert();
 }
 
 #[test]
-#[should_panic]
-/// Tests if [`JwtService::new_with_config`] panics if the openid_configuration
+/// Tests if [`JwtService::new_with_config`] returns an error if the openid_configuration
 /// cant be fetched from the `openid_configuration_endpoint`
-///
-/// TODO: change this to check for an error instead of a panic once returning a `Result` for
-/// the initialization for JwtService becomes supported
-fn panics_when_cant_fetch_openid_configuration() {
+fn errors_when_cant_fetch_openid_configuration() {
     // initialize mock server to simulate OpenID configuration and JWKS responses
     let mut server = mockito::Server::new();
 
-    let _openid_conf_mock = server
+    let openid_conf_mock = server
         .mock("GET", "/.well-known/openid-configuration")
         .with_status(500)
         .create();
 
-    // initialize JwtService with validation enabled and ES256 as the supported algorithm
-    let _jwt_service = JwtService::new_with_config(crate::jwt::JwtServiceConfig::WithValidation {
-        supported_algs: vec![Algorithm::ES256],
-        trusted_idps: vec![TrustedIssuer {
-            name: "some_idp".to_string(),
-            description: "some_desc".to_string(),
-            openid_configuration_endpoint: format!(
-                "{}/.well-known/openid-configuration",
-                server.url()
-            ),
-            token_metadata: None,
-        }],
-    });
+    let openid_conf_endpoint = format!("{}/.well-known/openid-configuration", server.url());
+    let key_service = KeyService::new(vec![&openid_conf_endpoint]);
+
+    assert!(
+        matches!(key_service, Err(key_service::KeyServiceError::Http(_)),),
+        "Expected to error because the openid configuration cant be fetched from the `jwks_uri`"
+    );
+
+    openid_conf_mock.assert();
 }
 
 #[test]
