@@ -387,6 +387,7 @@ fn can_gracefully_handle_unsupported_algorithms_from_jwks() {
         "decoded id_token claims did not match the input claims"
     );
 
-    // verify openid configuration endpoint was called once
+    // assert that there aren't any additional calls to the mock server
     openid_conf_mock.assert();
+    jwks_uri_mock.assert();
 }
