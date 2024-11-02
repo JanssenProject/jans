@@ -206,7 +206,7 @@ impl KeyService {
         match self.idp_configs.get(iss) {
             Some(conf) => Ok(Self::update_decoding_keys(&self.http_client, conf)?),
             // do nothing if the issuer isn't in the current store
-            None => return Ok(()),
+            None => Ok(()),
         }
     }
 
@@ -218,7 +218,7 @@ impl KeyService {
         let mut fetched_keys = HashMap::new();
 
         // Fetch the JWKS from the jwks_uri
-        let response = http_client.get(&*conf.jwks_uri)?;
+        let response = http_client.get(&conf.jwks_uri)?;
 
         // Deserialize the response into a Jwks
         let jwks: Jwks = response
