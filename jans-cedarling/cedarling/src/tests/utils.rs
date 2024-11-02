@@ -11,6 +11,7 @@ pub use crate::{
 };
 pub use serde::Deserialize;
 
+pub use cedar_policy::Decision;
 use jsonwebkey as jwk;
 use jsonwebtoken as jwt;
 pub use serde_json::json;

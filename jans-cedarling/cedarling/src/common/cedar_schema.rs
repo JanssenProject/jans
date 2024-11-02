@@ -188,7 +188,7 @@ mod deserialize {
         Base64,
         #[error("unable to unmarshal cedar policy schema json to the structure")]
         CedarSchemaJsonFormat,
-        #[error("unable to parse cedar policy schema json")]
+        #[error("unable to parse cedar policy schema")]
         Parse,
         #[error("invalid utf8 detected while decoding cedar policy")]
         Utf8,
@@ -196,6 +196,8 @@ mod deserialize {
 
     #[cfg(test)]
     mod tests {
+        use test_utils::assert_eq;
+
         use crate::common::policy_store::PolicyStore;
 
         use super::*;
@@ -295,7 +297,7 @@ mod deserialize {
             let err_msg = policy_result.unwrap_err().to_string();
             assert_eq!(
                 err_msg,
-                "unable to parse cedar policy schema json: failed to resolve type: User_TypeNotExist at line 32 column 1"
+                "unable to parse cedar policy schema: failed to resolve type: User_TypeNotExist at line 32 column 1"
             );
         }
     }

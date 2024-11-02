@@ -10,3 +10,4 @@
 mod utils;
 
 mod success_test_json;
+mod cases_authorize_without_check_jwt;
