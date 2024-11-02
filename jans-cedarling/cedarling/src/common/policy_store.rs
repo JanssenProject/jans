@@ -72,11 +72,11 @@ pub struct RoleMapping<'a> {
     pub role_mapping_field: &'a str,
 }
 
-// By default we need to search role in the Id token
+// By default we will search role in the User token
 impl Default for RoleMapping<'_> {
     fn default() -> Self {
         Self {
-            kind: TokenKind::Id,
+            kind: TokenKind::Userinfo,
             role_mapping_field: "role",
         }
     }
