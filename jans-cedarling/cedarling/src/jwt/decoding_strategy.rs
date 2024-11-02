@@ -142,7 +142,11 @@ fn decode_and_validate_jwt<T: DeserializeOwned>(
 
     // set up validation rules
     let mut validator = jwt::Validation::new(header.alg);
-    validator.set_required_spec_claims(&["iss", "sub", "aud", "exp"]);
+    let mut required_spec_claims = vec!["iss", "sub", "aud"];
+    if decoding_args.validate_exp {
+        required_spec_claims.push("exp");
+    }
+    validator.set_required_spec_claims(&required_spec_claims);
     validator.validate_nbf = decoding_args.validate_nbf;
     validator.validate_exp = decoding_args.validate_exp;
     if let Some(iss) = decoding_args.iss {
