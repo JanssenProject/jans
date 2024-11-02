@@ -70,7 +70,7 @@ pub fn generate_keys() -> (Vec<EncodingKey>, String) {
 
     let private_key = match *jwk.key {
         jsonwebkey::Key::Symmetric { key } => jwt::EncodingKey::from_secret(&key),
-        _ => panic!("this shouldn't happen"),
+        _ => panic!("Expected symmetric key for HS256"),
     };
     encoding_keys.push(EncodingKey {
         key_id: kid.to_string(),
