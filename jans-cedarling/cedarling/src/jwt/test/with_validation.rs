@@ -214,7 +214,7 @@ fn errors_on_unsupported_alg() {
         matches!(
             validation_result,
             Err(jwt::Error::InvalidAccessToken(
-                jwt::decoding_strategy::Error::TokenSignedWithUnsupportedAlgorithm(
+                jwt::decoding_strategy::DecodingError::TokenSignedWithUnsupportedAlgorithm(
                     jsonwebtoken::Algorithm::ES256
                 )
             ))

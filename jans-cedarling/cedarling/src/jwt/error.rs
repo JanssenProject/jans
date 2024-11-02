@@ -16,19 +16,19 @@ pub enum Error {
     /// This occurs when the given access token fails validation, such as when
     /// it has an invalid signature, has expired, or contains incorrect claims.
     #[error("The `access_token` is invalid or has failed validation: {0}")]
-    InvalidAccessToken(#[source] decoding_strategy::Error),
+    InvalidAccessToken(#[source] decoding_strategy::DecodingError),
 
     /// Error indicating that the provided id token is invalid.
     ///
     /// This occurs when the given id token fails validation, such as when
     /// it has an invali d signature, has expired, or contains incorrect claims.
     #[error("The `id_token` is invalid or has failed validation: {0}")]
-    InvalidIdToken(#[source] decoding_strategy::Error),
+    InvalidIdToken(#[source] decoding_strategy::DecodingError),
 
     /// Error indicating that the provided userinfo token is invalid.
     ///
     /// This occurs when the given userinfo token fails validation, such as when
     /// it has an invalid signature, has expired, or contains incorrect claims.
     #[error("The `userinfo_token` is invalid or has failed validation: {0}")]
-    InvalidUserinfoToken(#[source] decoding_strategy::Error),
+    InvalidUserinfoToken(#[source] decoding_strategy::DecodingError),
 }

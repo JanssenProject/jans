@@ -120,7 +120,7 @@ fn errors_when_no_key_found() {
         matches!(
             decode_result,
             Err(jwt::Error::InvalidAccessToken(
-                jwt::decoding_strategy::Error::KeyService(jwt::decoding_strategy::key_service::Error::KeyNotFound(ref e))
+                jwt::decoding_strategy::DecodingError::KeyService(jwt::decoding_strategy::key_service::KeyServiceError::KeyNotFound(ref e))
             )) if **e == *"some_key_id_not_in_the_jwks",
         ),
         "Expected decoding to fail due to not being able to find a key to validate `access_token`: {:?}",
@@ -296,8 +296,8 @@ fn can_update_local_jwks() {
         matches!(
             decode_result,
             Err(jwt::Error::InvalidAccessToken(
-                jwt::decoding_strategy::Error::KeyService(
-                    jwt::decoding_strategy::key_service::Error::KeyNotFound(ref key_id)
+                jwt::decoding_strategy::DecodingError::KeyService(
+                    jwt::decoding_strategy::key_service::KeyServiceError::KeyNotFound(ref key_id)
                 )
             )) if key_id == &encoding_keys[0].key_id,
         ),
