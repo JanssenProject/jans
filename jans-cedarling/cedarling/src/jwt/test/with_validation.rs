@@ -226,17 +226,3 @@ fn errors_on_unsupported_alg() {
     // check if the openid_conf_endpoint got called exactly once
     openid_conf_mock.assert();
 }
-
-/// Invalidates a JWT Token by swapping the first two characters in it's signature
-pub fn invalidate_token(token: String) -> String {
-    // Invalidate the token's signature by altering it slightly
-    let mut token_parts: Vec<&str> = token.split('.').collect();
-    let mut new_signature = token_parts[2].to_string();
-
-    // Swap the first two characters
-    let chars: Vec<char> = new_signature.chars().collect();
-    new_signature = format!("{}{}{}", chars[1], chars[0], &new_signature[2..]);
-    token_parts[2] = &new_signature;
-
-    token_parts.join(".")
-}

@@ -5,6 +5,7 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
+use core::panic;
 use jsonwebkey as jwk;
 use jsonwebtoken as jwt;
 use serde::Serialize;
@@ -72,10 +73,7 @@ impl Timestamp {
 }
 
 /// Generates a token string signed with ES256
-pub fn generate_token_using_claims(
-    claims: &impl Serialize,
-    encodking_key: &EncodingKey,
-) -> String {
+pub fn generate_token_using_claims(claims: &impl Serialize, encodking_key: &EncodingKey) -> String {
     // select a key from the keyset
     // for simplicity, were just choosing the second one
 
@@ -88,4 +86,39 @@ pub fn generate_token_using_claims(
 
     // serialize token to a string
     jwt::encode(&header, &claims, &encodking_key.key).expect("should generate token")
+}
+
+/// Invalidates a JWT Token by altering the first two characters in its signature
+///
+/// # Panics
+/// 
+/// Panics when the input token is malformed.
+pub fn invalidate_token(token: String) -> String {
+    let mut token_parts: Vec<&str> = token.split('.').collect();
+
+    if token_parts.len() < 3 {
+        panic!("Token is malformed")
+    }
+
+    let mut new_signature = token_parts[2].to_string();
+    let mut chars: Vec<char> = new_signature.chars().collect();
+
+    if chars.len() >= 2 {
+        // Ensure the first character is different from the second
+        if chars[0] == chars[1] {
+            let mut new_char = 'A';
+            // Find a character that differs from the second character
+            while new_char == chars[1] {
+                new_char = (new_char as u8 + 1) as char; // Cycle through ASCII values
+            }
+            chars[0] = new_char;
+        } else {
+            // Swap the first two characters if they're already different
+            chars.swap(0, 1);
+        }
+        new_signature = chars.into_iter().collect();
+    }
+
+    token_parts[2] = &new_signature;
+    token_parts.join(".")
 }

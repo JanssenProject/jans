@@ -23,7 +23,6 @@
 //!   - Tests for errors when the `nbf` has not passed yet.
 
 use super::super::*;
-use super::invalidate_token;
 use crate::common::policy_store::TrustedIssuer;
 use crate::jwt::{self, JwtService};
 use jsonwebtoken::Algorithm;
