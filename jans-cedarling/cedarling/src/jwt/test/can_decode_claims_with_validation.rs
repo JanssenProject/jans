@@ -5,13 +5,9 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-use super::{
-    super::{
-        decoding_strategy::{DecodingStrategy, KeyService},
-        JwtService,
-    },
-    *,
-};
+use super::{super::*, *};
+use crate::jwt::decoding_strategy::KeyService;
+use crate::jwt::JsonWebToken;
 use jsonwebtoken::Algorithm;
 use serde_json::json;
 
@@ -48,13 +44,15 @@ fn can_decode_claims_with_validation() {
     };
     let id_token_claims = IdTokenClaims {
         iss: server.url(),
-        sub: "some_sub".to_string(),
         aud: "some_aud".to_string(),
+        sub: "some_sub".to_string(),
         email: "some_email@gmail.com".to_string(),
         iat: Timestamp::now(),
         exp: Timestamp::one_hour_after_now(),
     };
     let userinfo_token_claims = UserinfoTokenClaims {
+        iss: server.url(),
+        aud: "some_aud".to_string(),
         sub: "some_sub".to_string(),
         client_id: "some_aud".to_string(),
         name: "ferris".to_string(),
@@ -107,18 +105,14 @@ fn can_decode_claims_with_validation() {
 
     // decode and validate the tokens
     let (access_token_result, id_token_result, userinfo_token_result) = jwt_service
-        .decode_tokens::<AccessTokenClaims, IdTokenClaims, UserinfoTokenClaims>(
-            &access_token,
-            &id_token,
-            &userinfo_token,
-        )
+        .decode_tokens(&access_token, &id_token, &userinfo_token)
         .expect("should decode token");
     jwks_uri_mock.assert();
 
     // assert that the decoded token claims match the expected claims
-    assert_eq!(access_token_result, access_token_claims);
-    assert_eq!(id_token_result, id_token_claims);
-    assert_eq!(userinfo_token_result, userinfo_token_claims);
+    assert_eq!(access_token_result.claims(), access_token_claims.into());
+    assert_eq!(id_token_result.claims(), id_token_claims.into());
+    assert_eq!(userinfo_token_result.claims(), userinfo_token_claims.into());
 
     // verify openid configuration endpoint was called once
     openid_conf_mock.assert();

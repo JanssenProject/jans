@@ -8,7 +8,9 @@
 use jsonwebkey as jwk;
 use jsonwebtoken as jwt;
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use std::{
+    collections::HashMap,
     time::{SystemTime, UNIX_EPOCH},
     u64,
 };
@@ -23,6 +25,19 @@ pub struct AccessTokenClaims {
     pub iat: u64,
 }
 
+impl Into<HashMap<String, Value>> for AccessTokenClaims {
+    fn into(self) -> HashMap<String, Value> {
+        let mut map = HashMap::new();
+        map.insert("iss".to_string(), Value::String(self.iss));
+        map.insert("aud".to_string(), Value::String(self.aud));
+        map.insert("sub".to_string(), Value::String(self.sub));
+        map.insert("scopes".to_string(), Value::String(self.scopes));
+        map.insert("exp".to_string(), Value::Number(self.exp.into()));
+        map.insert("iat".to_string(), Value::Number(self.iat.into()));
+        map
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Default)]
 pub struct IdTokenClaims {
     pub iss: String,
@@ -33,12 +48,40 @@ pub struct IdTokenClaims {
     pub iat: u64,
 }
 
+impl Into<HashMap<String, Value>> for IdTokenClaims {
+    fn into(self) -> HashMap<String, Value> {
+        let mut map = HashMap::new();
+        map.insert("iss".to_string(), Value::String(self.iss));
+        map.insert("aud".to_string(), Value::String(self.aud));
+        map.insert("sub".to_string(), Value::String(self.sub));
+        map.insert("email".to_string(), Value::String(self.email));
+        map.insert("exp".to_string(), Value::Number(self.exp.into()));
+        map.insert("iat".to_string(), Value::Number(self.iat.into()));
+        map
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Default)]
 pub struct UserinfoTokenClaims {
+    pub iss: String,
     pub sub: String,
+    pub aud: String,
     pub client_id: String,
     pub name: String,
     pub email: String,
+}
+
+impl Into<HashMap<String, Value>> for UserinfoTokenClaims {
+    fn into(self) -> HashMap<String, Value> {
+        let mut map = HashMap::new();
+        map.insert("iss".to_string(), Value::String(self.iss));
+        map.insert("aud".to_string(), Value::String(self.aud));
+        map.insert("sub".to_string(), Value::String(self.sub));
+        map.insert("client_id".to_string(), Value::String(self.client_id));
+        map.insert("name".to_string(), Value::String(self.name));
+        map.insert("email".to_string(), Value::String(self.email));
+        map
+    }
 }
 
 /// Generates a set of private and public keys using ES256

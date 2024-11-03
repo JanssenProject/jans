@@ -33,7 +33,7 @@ use entities::{
 };
 use entities::{create_resource_entity, AccessTokenEntities};
 use request::Request;
-use token_data::{AccessTokenData, IdTokenData, UserInfoTokenData};
+pub(crate) use token_data::{AccessTokenData, IdTokenData, TokenPayload, UserInfoTokenData};
 
 /// Configuration to Authz to initialize service without errors
 pub(crate) struct AuthzConfig {
@@ -180,14 +180,14 @@ impl Authz {
         request: &Request,
     ) -> Result<AuthorizeEntitiesData, AuthorizeError> {
         // decode JWT tokens to structs AccessTokenData, IdTokenData, UserInfoTokenData using jwt service
-        let (access_token, id_token, userinfo_token) = self
-            .config
-            .jwt_service
-            .decode_tokens::<AccessTokenData, IdTokenData, UserInfoTokenData>(
-                &request.access_token,
-                &request.id_token,
-                &request.userinfo_token,
-            )?;
+        let (access_token, id_token, userinfo_token) = self.config.jwt_service.decode_tokens(
+            &request.access_token,
+            &request.id_token,
+            &request.userinfo_token,
+        )?;
+        let access_token: AccessTokenData = access_token.into();
+        let id_token: IdTokenData = id_token.into();
+        let userinfo_token: UserInfoTokenData = userinfo_token.into();
 
         // Populate the `AuthorizeEntitiesData` structure using the builder pattern
         let data = AuthorizeEntitiesData::builder()

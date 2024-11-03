@@ -5,8 +5,6 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-use crate::jwt::TokenValidationError;
-
 use super::{
     super::{
         decoding_strategy::{
@@ -17,6 +15,7 @@ use super::{
     },
     *,
 };
+use crate::jwt::{JsonWebToken, TokenValidationError};
 use jsonwebtoken::Algorithm;
 use serde_json::json;
 
@@ -43,13 +42,15 @@ fn can_update_local_jwks() {
     };
     let id_token_claims = IdTokenClaims {
         iss: server.url(),
-        sub: "some_sub".to_string(),
         aud: "some_aud".to_string(),
+        sub: "some_sub".to_string(),
         email: "some_email@gmail.com".to_string(),
         iat: Timestamp::now(),
         exp: Timestamp::one_hour_after_now(),
     };
     let userinfo_token_claims = UserinfoTokenClaims {
+        iss: server.url(),
+        aud: "some_aud".to_string(),
         sub: "some_sub".to_string(),
         client_id: "some_aud".to_string(),
         name: "ferris".to_string(),
@@ -103,12 +104,7 @@ fn can_update_local_jwks() {
 
     // assert that first call attempt to validate the token fails since a
     // decoding key with the same `kid` could not be retrieved
-    let decode_result = jwt_service
-        .decode_tokens::<AccessTokenClaims, IdTokenClaims, UserinfoTokenClaims>(
-            &access_token,
-            &id_token,
-            &userinfo_token,
-        );
+    let decode_result = jwt_service.decode_tokens(&access_token, &id_token, &userinfo_token);
     assert!(matches!(
         decode_result,
         Err(JwtDecodingError::InvalidAccessToken(
@@ -128,18 +124,14 @@ fn can_update_local_jwks() {
 
     // decode and validate the tokens again
     let (access_token_result, id_token_result, userinfo_token_result) = jwt_service
-        .decode_tokens::<AccessTokenClaims, IdTokenClaims, UserinfoTokenClaims>(
-            &access_token,
-            &id_token,
-            &userinfo_token,
-        )
+        .decode_tokens(&access_token, &id_token, &userinfo_token)
         .expect("should decode token");
     jwks_uri_mock.assert();
 
     // assert that the decoded token claims match the expected claims
-    assert_eq!(access_token_result, access_token_claims);
-    assert_eq!(id_token_result, id_token_claims);
-    assert_eq!(userinfo_token_result, userinfo_token_claims);
+    assert_eq!(access_token_result.claims(), access_token_claims.into());
+    assert_eq!(id_token_result.claims(), id_token_claims.into());
+    assert_eq!(userinfo_token_result.claims(), userinfo_token_claims.into());
 
     // verify that the OpenID configuration endpoints was called exactly once
     openid_conf_mock.assert();

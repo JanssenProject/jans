@@ -40,13 +40,15 @@ fn errors_on_invalid_aud() {
     };
     let id_token_claims = IdTokenClaims {
         iss: server.url(),
-        sub: "some_sub".to_string(),
         aud: "another_aud".to_string(),
+        sub: "some_sub".to_string(),
         email: "some_email@gmail.com".to_string(),
         iat: Timestamp::now(),
         exp: Timestamp::one_hour_after_now(),
     };
     let userinfo_token_claims = UserinfoTokenClaims {
+        iss: server.url(),
+        aud: "another_aud".to_string(),
         sub: "some_sub".to_string(),
         client_id: "some_client_id".to_string(),
         name: "ferris".to_string(),
@@ -97,12 +99,7 @@ fn errors_on_invalid_aud() {
         supported_algs: vec![Algorithm::ES256],
     });
 
-    let decode_result = jwt_service
-        .decode_tokens::<AccessTokenClaims, IdTokenClaims, UserinfoTokenClaims>(
-            &access_token,
-            &id_token,
-            &userinfo_token,
-        );
+    let decode_result = jwt_service.decode_tokens(&access_token, &id_token, &userinfo_token);
     assert!(matches!(
         decode_result,
         Err(jwt::JwtDecodingError::InvalidIdToken(_))

@@ -25,8 +25,7 @@ pub use decoding_strategy::{string_to_alg, ParseAlgorithmError};
 pub use error::*;
 pub use jsonwebtoken::Algorithm;
 pub use jwt_service_config::*;
-use serde::de::DeserializeOwned;
-use token::*;
+pub use token::*;
 
 pub struct JwtService {
     decoding_strategy: DecodingStrategy,
@@ -90,25 +89,12 @@ impl JwtService {
     ///
     /// # Errors
     /// Returns an error if decoding or validation of either token fails.
-    pub fn decode_tokens<A, I, U>(
+    pub fn decode_tokens(
         &self,
         access_token: &str,
         id_token: &str,
         userinfo_token: &str,
-    ) -> Result<(A, I, U), JwtDecodingError>
-    where
-        A: DeserializeOwned,
-        I: DeserializeOwned,
-        U: DeserializeOwned,
-    {
-        // extract claims without validation
-        let access_token_claims = DecodingStrategy::extract_claims(access_token)
-            .map_err(JwtDecodingError::InvalidAccessToken)?;
-        let id_token_claims =
-            DecodingStrategy::extract_claims(id_token).map_err(JwtDecodingError::InvalidIdToken)?;
-        let userinfo_token_claims = DecodingStrategy::extract_claims(userinfo_token)
-            .map_err(JwtDecodingError::InvalidUserinfoToken)?;
-
+    ) -> Result<(AccessToken, IdToken, UserInfoToken), JwtDecodingError> {
         // Validate the `access_token`.
         //
         // Context: This token is being used as proof of authentication (AuthN).
@@ -150,17 +136,18 @@ impl JwtService {
         //   the same trusted identity provider.
         // - We validate that the `sub` (subject) in the `userinfo_token` matches the `id_token`'s `sub`,
         //   confirming the tokens are referring to the same user.
-        self.decoding_strategy
+        let userinfo_token = self
+            .decoding_strategy
             .decode::<UserInfoToken>(
                 userinfo_token,
-                Some(access_token.aud),
-                Some(access_token.iss),
-                Some(id_token.sub), // ensure that the `sub` is the same as with the id_token's sub
-                false,              // this token usually does not have an nbf field
-                false,              // this token usually does not have an exp field
+                Some(&access_token.iss),
+                Some(&access_token.aud),
+                Some(&id_token.sub), // ensure that the `sub` is the same as with the id_token's sub
+                false,               // this token usually does not have an nbf field
+                false,               // this token usually does not have an exp field
             )
             .map_err(JwtDecodingError::InvalidUserinfoToken)?;
 
-        Ok((access_token_claims, id_token_claims, userinfo_token_claims))
+        Ok((access_token, id_token, userinfo_token))
     }
 }

@@ -5,22 +5,21 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-use std::collections::HashMap;
-
 use derive_more::Deref;
 use serde_json::Value;
+use std::collections::HashMap;
 
 /// Wrapper around access token decode result
 #[derive(Clone, Deref, serde::Deserialize)]
-pub(crate) struct AccessTokenData(TokenPayload);
+pub(crate) struct AccessTokenData(pub TokenPayload);
 
 /// Wrapper around id token decode result
 #[derive(Clone, Deref, serde::Deserialize)]
-pub(crate) struct IdTokenData(TokenPayload);
+pub(crate) struct IdTokenData(pub TokenPayload);
 
 /// Wrapper around userinfo token decode result
 #[derive(Clone, Deref, serde::Deserialize)]
-pub(crate) struct UserInfoTokenData(TokenPayload);
+pub(crate) struct UserInfoTokenData(pub TokenPayload);
 
 /// A container for storing token data or data attributes for the .
 /// Provides methods for retrieving payload from the token or attributes for the .

@@ -167,16 +167,26 @@ fn decode_and_validate_jwt<T: DeserializeOwned>(
     validator.validate_nbf = args.validate_nbf;
     validator.validate_exp = args.validate_exp;
     if let Some(iss) = args.iss {
+        let mut iss = iss.strip_prefix("\"").unwrap_or(&iss);
+        iss = iss.strip_suffix("\"").unwrap_or(&iss);
         validator.set_issuer(&[iss]);
     } else {
         validator.iss = None;
     }
     if let Some(aud) = args.aud {
+        let mut aud = aud.strip_prefix("\"").unwrap_or(&aud);
+        aud = aud.strip_suffix("\"").unwrap_or(&aud);
         validator.set_audience(&[aud]);
     } else {
         validator.validate_aud = false;
     }
-    validator.sub = args.sub.map(|sub| sub.to_string());
+    if let Some(sub) = args.sub {
+        let mut sub = sub.strip_prefix("\"").unwrap_or(&sub);
+        sub = sub.strip_suffix("\"").unwrap_or(&sub);
+        validator.sub = Some(sub.to_string());
+    } else {
+        validator.sub = None;
+    }
 
     // fetch decoding key from the KeyService
     let kid = &header

@@ -5,7 +5,7 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-use super::{super::decoding_strategy::DecodingStrategy, super::JwtService, *};
+use super::{super::*, *};
 
 #[test]
 /// Tests decoding JWT token claims without validation.
@@ -30,14 +30,16 @@ fn can_decode_claims_without_validation() {
         iat: Timestamp::one_hour_before_now(), // expired token
     };
     let id_token_claims = IdTokenClaims {
+        aud: "some_aud".to_string(),
         iss: "https://accounts.facebook.com".to_string(),
         sub: "some_sub".to_string(),
-        aud: "some_aud".to_string(),
         email: "some_email@gmail.com".to_string(),
         exp: Timestamp::now(),
         iat: Timestamp::one_hour_before_now(), // expired token
     };
     let userinfo_token_claims = UserinfoTokenClaims {
+        aud: "some_other_aud".to_string(),
+        iss: "https://accounts.youtube.com".to_string(),
         sub: "another_sub".to_string(),
         client_id: "some_client_id".to_string(),
         name: "ferris".to_string(),
@@ -60,15 +62,11 @@ fn can_decode_claims_without_validation() {
 
     // decode and validate both the access token and the ID token
     let (access_token_result, id_token_result, userinfo_token_result) = jwt_service
-        .decode_tokens::<AccessTokenClaims, IdTokenClaims, UserinfoTokenClaims>(
-            &access_token,
-            &id_token,
-            &userinfo_token,
-        )
+        .decode_tokens(&access_token, &id_token, &userinfo_token)
         .expect("should decode token");
 
     // assert that the decoded token claims match the expected claims
-    assert_eq!(access_token_result, access_token_claims);
-    assert_eq!(id_token_result, id_token_claims);
-    assert_eq!(userinfo_token_result, userinfo_token_claims);
+    assert_eq!(access_token_result.claims(), access_token_claims.into());
+    assert_eq!(id_token_result.claims(), id_token_claims.into());
+    assert_eq!(userinfo_token_result.claims(), userinfo_token_claims.into());
 }

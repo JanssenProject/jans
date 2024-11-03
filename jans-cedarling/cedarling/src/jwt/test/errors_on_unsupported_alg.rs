@@ -41,13 +41,15 @@ fn errors_on_unsupported_alg() {
     };
     let id_token_claims = IdTokenClaims {
         iss: server.url(),
-        sub: "some_sub".to_string(),
         aud: "some_aud".to_string(),
+        sub: "some_sub".to_string(),
         email: "some_email@gmail.com".to_string(),
         iat: Timestamp::now(),
         exp: Timestamp::one_hour_after_now(),
     };
     let userinfo_token_claims = UserinfoTokenClaims {
+        iss: server.url(),
+        aud: "some_aud".to_string(),
         sub: "some_sub".to_string(),
         client_id: "some_client_id".to_string(),
         name: "ferris".to_string(),
@@ -100,12 +102,7 @@ fn errors_on_unsupported_alg() {
 
     // assert that the validation fails due to the tokens being signed with an
     // unsupported algorithm
-    let validation_result = jwt_service
-        .decode_tokens::<AccessTokenClaims, IdTokenClaims, UserinfoTokenClaims>(
-            &access_token,
-            &id_token,
-            &userinfo_token,
-        );
+    let validation_result = jwt_service.decode_tokens(&access_token, &id_token, &userinfo_token);
     assert!(
         matches!(
             validation_result,
