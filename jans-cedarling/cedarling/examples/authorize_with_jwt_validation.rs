@@ -11,8 +11,8 @@ use cedarling::{
 };
 use std::collections::HashMap;
 
-static POLICY_STORE_RAW: &str =
-    include_str!("../../test_files/policy-store_with_trusted_issuers_ok.json");
+static POLICY_STORE_RAW_YAML: &str =
+    include_str!("../../test_files/policy-store_with_trusted_issuers_ok.yaml");
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Configure the JwtService to validate signatures using the specified algorithms:
@@ -30,7 +30,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             log_type: LogTypeConfig::StdOut,
         },
         policy_store_config: PolicyStoreConfig {
-            source: PolicyStoreSource::Json(POLICY_STORE_RAW.to_string()),
+            source: PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()),
         },
         jwt_config,
     })?;

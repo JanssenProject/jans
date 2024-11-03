@@ -208,7 +208,7 @@ mod deserialize {
             // The human-readable policy and schema file is located in next folder:
             // `test_files\policy-store_ok`
             static POLICY_STORE_RAW: &str =
-                include_str!("../../../test_files/policy-store_ok.json");
+                include_str!("../../../test_files/policy-store_ok.yaml");
 
             let policy_result = serde_json::from_str::<AgamaPolicyStore>(POLICY_STORE_RAW);
             assert!(policy_result.is_ok(), "{:?}", policy_result.unwrap_err());
@@ -224,7 +224,7 @@ mod deserialize {
         }
 
         #[test]
-        fn test_readable_ok() {
+        fn test_readable_json_ok() {
             static POLICY_STORE_RAW: &str =
                 include_str!("../../../test_files/policy-store_readable.json");
 
@@ -286,28 +286,28 @@ mod deserialize {
 
         #[test]
         fn test_read_json_error() {
-            static POLICY_STORE_RAW: &str =
-                include_str!("../../../test_files/policy-store_schema_err_json.json");
+            static POLICY_STORE_RAW_YAML: &str =
+                include_str!("../../../test_files/policy-store_schema_err.yaml");
 
-            let policy_result = serde_json::from_str::<PolicyStore>(POLICY_STORE_RAW);
+            let policy_result = serde_yml::from_str::<PolicyStore>(POLICY_STORE_RAW_YAML);
             let err = policy_result.unwrap_err();
             let msg = err.to_string();
             assert!(
-                msg.contains("unable to unmarshal cedar policy schema json"),
+                msg.contains("unable to parse cedar policy schema: error parsing schema: unexpected end of input"),
                 "{err:?}"
             );
         }
 
         #[test]
         fn test_parse_cedar_error() {
-            static POLICY_STORE_RAW: &str =
-                include_str!("../../../test_files/policy-store_schema_err_cedar_mistake.json");
+            static POLICY_STORE_RAW_YAML: &str =
+                include_str!("../../../test_files/policy-store_schema_err_cedar_mistake.yaml");
 
-            let policy_result = serde_json::from_str::<PolicyStore>(POLICY_STORE_RAW);
+            let policy_result = serde_yml::from_str::<PolicyStore>(POLICY_STORE_RAW_YAML);
             let err_msg = policy_result.unwrap_err().to_string();
             assert_eq!(
                 err_msg,
-                "unable to parse cedar policy schema: failed to resolve type: User_TypeNotExist at line 32 column 1"
+                "unable to parse cedar policy schema: failed to resolve type: User_TypeNotExist at line 2 column 1"
             );
         }
     }
