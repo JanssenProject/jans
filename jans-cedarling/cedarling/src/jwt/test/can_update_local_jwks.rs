@@ -15,7 +15,7 @@ use super::{
     },
     *,
 };
-use crate::jwt::{JsonWebToken, TokenValidationError};
+use crate::jwt::{Claims, TokenValidationError};
 use jsonwebtoken::Algorithm;
 use serde_json::json;
 

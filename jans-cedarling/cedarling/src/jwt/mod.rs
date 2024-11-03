@@ -94,7 +94,7 @@ impl JwtService {
         access_token: &str,
         id_token: &str,
         userinfo_token: &str,
-    ) -> Result<(AccessToken, IdToken, UserInfoToken), JwtDecodingError> {
+    ) -> Result<(AccessToken, IdToken, UserinfoToken), JwtDecodingError> {
         // Validate the `access_token`.
         //
         // Context: This token is being used as proof of authentication (AuthN).
@@ -119,8 +119,8 @@ impl JwtService {
             .decoding_strategy
             .decode::<IdToken>(
                 id_token,
-                Some(&access_token.iss),
-                Some(&access_token.aud),
+                Some(&access_token.0.iss),
+                Some(&access_token.0.aud),
                 // we don't validate the `sub` (subject) here, as it is typically checked when
                 // validating the `userinfo_token`. The `sub` claim identifies the end user.
                 None::<String>,
@@ -138,13 +138,13 @@ impl JwtService {
         //   confirming the tokens are referring to the same user.
         let userinfo_token = self
             .decoding_strategy
-            .decode::<UserInfoToken>(
+            .decode::<UserinfoToken>(
                 userinfo_token,
-                Some(&access_token.iss),
-                Some(&access_token.aud),
-                Some(&id_token.sub), // ensure that the `sub` is the same as with the id_token's sub
-                false,               // this token usually does not have an nbf field
-                false,               // this token usually does not have an exp field
+                Some(&access_token.0.iss),
+                Some(&access_token.0.aud),
+                Some(&id_token.0.sub), // ensure that the `sub` is the same as with the id_token's sub
+                false,                 // this token usually does not have an nbf field
+                false,                 // this token usually does not have an exp field
             )
             .map_err(JwtDecodingError::InvalidUserinfoToken)?;
 

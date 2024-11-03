@@ -7,7 +7,7 @@
 
 use super::{super::*, *};
 use crate::jwt::decoding_strategy::KeyService;
-use crate::jwt::JsonWebToken;
+use crate::jwt::Claims;
 use jsonwebtoken::Algorithm;
 use serde_json::json;
 
