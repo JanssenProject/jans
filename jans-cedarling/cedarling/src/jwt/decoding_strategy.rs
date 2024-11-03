@@ -6,6 +6,8 @@
  */
 
 pub mod key_service;
+use std::collections::HashSet;
+
 use crate::common::policy_store::TrustedIssuer;
 
 use super::TokenValidationError;
@@ -166,27 +168,13 @@ fn decode_and_validate_jwt<T: DeserializeOwned>(
     validator.required_spec_claims.clear();
     validator.validate_nbf = args.validate_nbf;
     validator.validate_exp = args.validate_exp;
-    if let Some(iss) = args.iss {
-        let mut iss = iss.strip_prefix("\"").unwrap_or(&iss);
-        iss = iss.strip_suffix("\"").unwrap_or(&iss);
-        validator.set_issuer(&[iss]);
-    } else {
-        validator.iss = None;
-    }
-    if let Some(aud) = args.aud {
-        let mut aud = aud.strip_prefix("\"").unwrap_or(&aud);
-        aud = aud.strip_suffix("\"").unwrap_or(&aud);
-        validator.set_audience(&[aud]);
-    } else {
+    if args.aud.is_none() {
         validator.validate_aud = false;
-    }
-    if let Some(sub) = args.sub {
-        let mut sub = sub.strip_prefix("\"").unwrap_or(&sub);
-        sub = sub.strip_suffix("\"").unwrap_or(&sub);
-        validator.sub = Some(sub.to_string());
     } else {
-        validator.sub = None;
+        validator.aud.set_optional_claim(args.aud);
     }
+    validator.iss.set_optional_claim(args.iss);
+    validator.sub.set_optional_claim(args.sub);
 
     // fetch decoding key from the KeyService
     let kid = &header
@@ -239,5 +227,36 @@ pub fn string_to_alg(algorithm: &str) -> Result<jwt::Algorithm, ParseAlgorithmEr
         _ => Err(ParseAlgorithmError::UnimplementedAlgorithm(
             algorithm.into(),
         )),
+    }
+}
+
+/// A trait to set optional claims with different behaviors based on the target type
+trait SetOptionalClaim {
+    fn set_optional_claim(&mut self, value: Option<String>);
+}
+
+impl SetOptionalClaim for Option<HashSet<String>> {
+    fn set_optional_claim(&mut self, value: Option<String>) {
+        // if value is Some(String), set self to Some(HashSet) containing the value,
+        // otherwise, set self to None.
+        match value {
+            Some(value) => {
+                if let Some(hash_set) = self.as_mut() {
+                    hash_set.clear();
+                    hash_set.insert(value);
+                } else {
+                    let mut hash_set = HashSet::new();
+                    hash_set.insert(value);
+                    *self = Some(hash_set);
+                }
+            },
+            None => *self = None,
+        };
+    }
+}
+
+impl SetOptionalClaim for Option<String> {
+    fn set_optional_claim(&mut self, value: Option<String>) {
+        *self = value;
     }
 }
