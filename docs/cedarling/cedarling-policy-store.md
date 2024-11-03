@@ -26,27 +26,43 @@ The JSON Schema is for the `policy_store.json` defined as follows:
 {
     "cedar_version": "v2.4.7",
     "cedar_policies": { ... },
-    "cedar_schema": "cedar_schema_encoded_in_base64",
+    "cedar_schema": { ... },
     "trusted_issuers": [ ... ]
 }
-
 ```
 
 - **cedar_version** : (*String*) The version of [Cedar policy](https://docs.cedarpolicy.com/). The protocols of this version will be followed when processing Cedar schema and policies.
 - **cedar_policies** : (*Object*) Object containing one or more policy IDs as keys, with their corresponding objects as values. See: [cedar_policies schema](#cedar-policies-schema).
-- **cedar_schema** : (*String*) The Cedar schema, encoded in Base64 format.
+- **cedar_schema** : (*String* | *Object*) The Cedar Schema. See [cedar_schema](#cedar_schema) below.
 - **trusted_issuers** : (*Array of [TrustedIssuer](#trusted-issuer-schema)*) List of metadata for Trusted Issuers.
+
+### `cedar_schema`
+Either *String* or *Object*, where *Object* is preferred.
+
+Where *Object* - An object with `encoding`, `content_type` and `body` keys. For example:
+
+``` json
+"cedar_schema": {
+    "encoding": "none", // can be one of "none" or "base64"
+    "content_type": "cedar", // can be one of "cedar" or "cedar-json"
+    "body": "namespace Jans {\ntype Url = {"host": String, "path": String, "protocol": String};..."
+}
+```
+  Where *String* - The schema in cedar-json format, encoded as Base64. For example:
+``` json
+"cedar_schema": "cGVybWl0KAogICAgc..."
+```
 
 ## Cedar Policies Schema
 
-The `cedar_policies` field outlines the Cedar policies that will be used in Cedarling. Multiple policies can be defined, with policy requiring a unique `policy_id`.
+The `cedar_policies` field describes the Cedar policies that will be used in Cedarling. Multiple policies can be defined, with policy requiring a unique `policy_id`.
 
 ```json
   "cedar_policies": {
     "unique_policy_id": {
       "description": "simple policy example",
       "creation_date": "2024-09-20T17:22:39.996050",
-      "policy_content": "cGVybWl0KAogICAgc..."
+      "policy_content": { ... },
     },
     ...
   }
@@ -55,7 +71,24 @@ The `cedar_policies` field outlines the Cedar policies that will be used in Ceda
 - **unique_policy_id**: (*String*) A uniqe policy ID used to for tracking and auditing purposes.
 - **description** : (*String*) A brief description of cedar policy
 - **creation_date** :  (*String*) Policy creating date in `YYYY-MM-DDTHH:MM:SS.ssssss`
-- **policy_content** : (*String*) The policy content, encoded in Base64 format.
+- **policy_content** : (*String* | *Object*) The Cedar Policy. See [policy_content](#policy_content) below.
+
+### `policy_content`
+Either *String* or *Object*, where *Object* is preferred.
+
+Where *Object* - An object with `encoding`, `content_type` and `body` keys. For example:
+
+``` json
+"policy_content": {
+    "encoding": "none", // can be one of "none" or "base64"
+    "content_type": "cedar", // ONLY "cedar" for now due to limitations in cedar-policy crate
+    "body": "permit(\n    principal is Jans::User,\n    action in [Jans::Action::\"Update\"],\n    resource is Jans::Issue\n)when{\n    principal.country == resource.country\n};"
+}
+```
+  Where *String* - The policy in cedar format, encoded as Base64. For example:
+``` json
+"policy_content": "cGVybWl0KAogICAgc..."
+```
 
 ### Example of `cedar_policies`
 
@@ -73,6 +106,24 @@ Here is a non-normative example of the `cedar_policies` field:
       "creation_date": "2024-09-20T18:22:39.192051",
       "policy_content": "kJW1bWl0KA0g3CAxa..."
     },
+    "1fo1kl928Afa0sc9123scma0123891asklajsh1233ac": {
+      "description": "another policy example",
+      "creation_date": "2024-09-20T18:22:39.192051",
+      "policy_content": {
+        "encoding": "none",
+        "content_type" : "cedar",
+        "body": "permit(...) where {...}"
+      }
+    },
+    "2fo1kl928Afa0sc9123scma0123891asklajsh1233ad": {
+      "description": "another policy example",
+      "creation_date": "2024-09-20T18:22:39.192051",
+      "policy_content": {
+        "encoding": "base64",
+        "content_type" : "cedar",
+        "body": "kJW1bWl0KA0g3CAxa..."
+      }
+    },
     ...
   }
 ```
@@ -84,8 +135,8 @@ This record contains the information needed to validate tokens from this issuer:
 ```json
 "trusted_issuers": [
     {
-         "name": "name_of_the_trusted_issuer", 
-         "description": "description_of_the_trusted_issuer", 
+         "name": "name_of_the_trusted_issuer",
+         "description": "description_of_the_trusted_issuer",
          "openid_configuration_endpoint": "https://<trusted-issuer-hostname>/.well-known/openid-configuration",
          "token_metadata": [ ... ]
     }
