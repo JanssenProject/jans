@@ -209,7 +209,17 @@ public class RegisterValidator {
         log.trace("Request object validation result: {}", validSignature);
         if (validSignature) {
             return;
+        } else {
+            String url = httpRequest.getRequestURL().toString();
+            List<String> disallowedUrls = appConfiguration.getBlockedUrls();
+            for (String disallowedUrl : disallowedUrls) {
+                if (url.contains(disallowedUrl)) {
+                    log.error("URL '{}' is disallowed.", url);
+                    throw new InvalidJwtException("The request object contains a disallowed URL: " + url);
+                }
+            }
         }
+
         throw new InvalidJwtException("Invalid cryptographic segment in the request object.");
     }
 
