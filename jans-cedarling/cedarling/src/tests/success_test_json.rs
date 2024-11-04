@@ -109,6 +109,3 @@ fn success_test_json() {
 
     assert!(result.is_allowed(), "request result should be allowed");
 }
-
-// TODO: add fail test case
-// To test all failure scenarios, we need to create a special issue, as there are many possible cases to consider.
