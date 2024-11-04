@@ -14,7 +14,7 @@ import io.jans.casa.misc.Utils;
 public class ClientAuthorization extends Entry {
 
     @AttributeName
-    private String jansClntId;
+    private String clnId;
 
     @AttributeName(name = "jansScope")
     private List<String> scopes;
