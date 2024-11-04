@@ -109,7 +109,7 @@ This record contains the information needed to validate tokens from this issuer:
 
 - **type** : (String, no spaces) The type of token (e.g., Access, ID, Userinfo, Transaction).
 - **user_id** : (String) The claim used to create the Cedar entity associated with this token.
-- **role_mapping** : (String, *optional*) The claim used to create a role for the token. The default value of `role_mapping` is `role`.
+- **role_mapping** : (String, *optional*) The claim used to create a role for the token. The default value of `role_mapping` is `role`. The claim can be string or array of string.
 
 **Note**: Only one token should include the `role_mapping` field in the list of `token_metadata`.
 
@@ -162,3 +162,49 @@ Make sure you run the cedar command line tool to validate both your schema and p
 The easiest way to author your policy store is to use the Policy Designer in
 [Agama Lab](https://cloud.gluu.org/agama-lab). This tool helps you define the policies, schema and
 trusted IDPs and to publish a policy store to a Github repository.
+
+### Minimum supported `cedar-policy schema`
+
+Here is example of a minimum supported `cedar-policy schema`:
+
+```cedar-policy_schema
+namespace Jans {
+entity id_token = {"aud": String,"iss": String, "sub": String};
+entity Role;
+entity User in [Role] = {};
+entity Access_token = {"aud": String,"iss": String, "jti": String, "client_id": String};
+entity Workload = {};
+
+entity Issue = {};
+action "Update" appliesTo {
+  principal: [Workload, User, Role],
+  resource: [Issue],
+  context: {}
+};
+}
+```
+
+You can extend all of this entites and add your own.
+
+Mandatory entities is: `id_token`, `Role`, `User`, `Access_token`, `Workload`.  
+`Issue` entity and `Update` action are optinal. Is created for example, you can create others for your needs.
+
+`Context` and `Resource` entities you can pass during authorization request and next entites creating based on the JWT tokens:
+
+- `id_token` - entity based on the `id` JWT token fields.
+  - ID for entity based in `jti` field.
+
+- `Role` - define role of user.
+  - Mapping defined in `Token Metadata Schema`.
+  - Claim in JWT usually is string or array of string.
+  - If many roles present, the `cedarling` will try each to find first permit case.
+
+- `User` - entity based on the `id`and `userinfo` JWT token fields.
+  - If `id`and `userinfo` JWT token fields has different `sub` value, `userinfo` JWT token will be ignored.
+  - ID for entity based in `sub` field. (will be changed in future)
+
+- `Access_token` - entity based on the `access` JWT token fields.
+  - ID for entity based in `jti` field.
+
+- `Workload` - entity based on the `access` JWT token fields.
+  - ID for entity based in `client_id` field.
