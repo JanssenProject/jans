@@ -7,7 +7,7 @@ use jsonwebtoken as jwt;
 /// and processing of JWTs, including issues with the key service and unsupported
 /// algorithms.
 #[derive(thiserror::Error, Debug)]
-pub enum DecodingError {
+pub enum JwtDecodingError {
     /// Error encountered while parsing the JWT.
     ///
     /// This error occurs when the provided JWT cannot be properly parsed,

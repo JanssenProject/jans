@@ -16,7 +16,7 @@
 
 use super::super::*;
 use crate::common::policy_store::TrustedIssuer;
-use crate::jwt::decoding_strategy::{key_service, KeyService};
+use crate::jwt::KeyService;
 use crate::jwt::{self, JwtService};
 use jsonwebtoken::Algorithm;
 use serde_json::json;
@@ -120,8 +120,8 @@ fn errors_when_no_key_found() {
     assert!(
         matches!(
             decode_result,
-            Err(jwt::Error::InvalidAccessToken(
-                jwt::decoding_strategy::DecodingError::KeyService(jwt::decoding_strategy::key_service::KeyServiceError::KeyNotFound(ref e))
+            Err(jwt::JwtServiceError::InvalidAccessToken(
+                jwt::JwtDecodingError::KeyService(jwt::decoding_strategy::key_service::KeyServiceError::KeyNotFound(ref e))
             )) if **e == *"some_key_id_not_in_the_jwks",
         ),
         "Expected decoding to fail due to not being able to find a key to validate `access_token`: {:?}",
@@ -161,7 +161,7 @@ fn errors_when_cant_fetch_jwks_uri() {
     let key_service = KeyService::new(vec![&openid_conf_endpoint]);
 
     assert!(
-        matches!(key_service, Err(key_service::KeyServiceError::Http(_)),),
+        matches!(key_service, Err(jwt::KeyServiceError::Http(_)),),
         "Expected to error because the JWKS cant be fetched from the `jwks_uri`"
     );
 
@@ -184,7 +184,7 @@ fn errors_when_cant_fetch_openid_configuration() {
     let key_service = KeyService::new(vec![&openid_conf_endpoint]);
 
     assert!(
-        matches!(key_service, Err(key_service::KeyServiceError::Http(_)),),
+        matches!(key_service, Err(jwt::KeyServiceError::Http(_)),),
         "Expected to error because the openid configuration cant be fetched from the `jwks_uri`"
     );
 
@@ -280,8 +280,8 @@ fn can_update_local_jwks() {
     assert!(
         matches!(
             decode_result,
-            Err(jwt::Error::InvalidAccessToken(
-                jwt::decoding_strategy::DecodingError::KeyService(
+            Err(jwt::JwtServiceError::InvalidAccessToken(
+                jwt::JwtDecodingError::KeyService(
                     jwt::decoding_strategy::key_service::KeyServiceError::KeyNotFound(ref key_id)
                 )
             )) if key_id == &encoding_keys[0].key_id,

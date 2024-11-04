@@ -13,16 +13,22 @@
 //! - Validating the signatures of JWTs to ensure their integrity and authenticity.
 //! - Verifying the validity of JWTs based on claims such as expiration time and audience.
 
+#[cfg(test)]
+mod test;
+#[cfg(test)]
+pub use decoding_strategy::{
+    key_service::{KeyService, KeyServiceError},
+    JwtDecodingError,
+};
+
 mod decoding_strategy;
 mod error;
 mod jwt_service_config;
-#[cfg(test)]
-mod test;
 mod token;
 
 pub use decoding_strategy::{string_to_alg, ParseAlgorithmError};
 use decoding_strategy::{DecodingArgs, DecodingStrategy};
-pub use error::Error;
+pub use error::JwtServiceError;
 pub use jsonwebtoken::Algorithm;
 pub use jwt_service_config::*;
 use serde::de::DeserializeOwned;
@@ -82,19 +88,19 @@ impl JwtService {
         access_token: &str,
         id_token: &str,
         userinfo_token: &str,
-    ) -> Result<(A, I, U), Error>
+    ) -> Result<(A, I, U), JwtServiceError>
     where
         A: DeserializeOwned,
         I: DeserializeOwned,
         U: DeserializeOwned,
     {
         // extract claims without validation
-        let access_token_claims =
-            DecodingStrategy::extract_claims(access_token).map_err(Error::InvalidAccessToken)?;
+        let access_token_claims = DecodingStrategy::extract_claims(access_token)
+            .map_err(JwtServiceError::InvalidAccessToken)?;
         let id_token_claims =
-            DecodingStrategy::extract_claims(id_token).map_err(Error::InvalidIdToken)?;
+            DecodingStrategy::extract_claims(id_token).map_err(JwtServiceError::InvalidIdToken)?;
         let userinfo_token_claims = DecodingStrategy::extract_claims(userinfo_token)
-            .map_err(Error::InvalidUserinfoToken)?;
+            .map_err(JwtServiceError::InvalidUserinfoToken)?;
 
         // Validate the `access_token`.
         //
@@ -116,7 +122,7 @@ impl JwtService {
                 validate_nbf: true,
                 validate_exp: true,
             })
-            .map_err(Error::InvalidAccessToken)?;
+            .map_err(JwtServiceError::InvalidAccessToken)?;
 
         // Validate the `id_token`
         // - checks if id_token.iss == access_token.iss
@@ -133,7 +139,7 @@ impl JwtService {
                 validate_nbf: true,
                 validate_exp: true,
             })
-            .map_err(Error::InvalidIdToken)?;
+            .map_err(JwtServiceError::InvalidIdToken)?;
 
         // validate the `userinfo_token`.
         // - checks if userinfo_token.iss == access_token.iss
@@ -150,7 +156,7 @@ impl JwtService {
                 validate_nbf: true,
                 validate_exp: true,
             })
-            .map_err(Error::InvalidUserinfoToken)?;
+            .map_err(JwtServiceError::InvalidUserinfoToken)?;
 
         Ok((access_token_claims, id_token_claims, userinfo_token_claims))
     }

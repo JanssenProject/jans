@@ -168,8 +168,8 @@ fn test_missing_claim(missing_claim: &'static str) {
         assert!(
             matches!(
                 decode_result,
-                Err(jwt::Error::InvalidAccessToken(
-                    jwt::decoding_strategy::DecodingError::Validation(ref e)
+                Err(jwt::JwtServiceError::InvalidAccessToken(
+                    jwt::JwtDecodingError::Validation(ref e)
                 )) if matches!(e.kind(), jsonwebtoken::errors::ErrorKind::Json(json_err)
                     if json_err.to_string().contains(&err_string))
             ),
@@ -181,8 +181,8 @@ fn test_missing_claim(missing_claim: &'static str) {
         assert!(
             matches!(
                 decode_result,
-                Err(jwt::Error::InvalidAccessToken(
-                    jwt::decoding_strategy::DecodingError::Validation(ref e)
+                Err(jwt::JwtServiceError::InvalidAccessToken(
+                    jwt::decoding_strategy::JwtDecodingError::Validation(ref e)
                 )) if matches!(
                     e.kind(),
                     jsonwebtoken::errors::ErrorKind::MissingRequiredClaim(req_claim) if req_claim == missing_claim,
@@ -297,8 +297,8 @@ fn errors_on_invalid_signature() {
     assert!(
         matches!(
             decode_result,
-            Err(jwt::Error::InvalidAccessToken(
-                jwt::decoding_strategy::DecodingError::Validation(ref e)
+            Err(jwt::JwtServiceError::InvalidAccessToken(
+                jwt::decoding_strategy::JwtDecodingError::Validation(ref e)
             )) if *e.kind() == jsonwebtoken::errors::ErrorKind::InvalidSignature,
         ),
         "Expected decoding to fail due to `access_token` having an invalid signature: {:?}",
@@ -402,8 +402,8 @@ fn errors_on_expired_token() {
     assert!(
         matches!(
             decode_result,
-            Err(jwt::Error::InvalidAccessToken(
-                jwt::decoding_strategy::DecodingError::Validation(ref e)
+            Err(jwt::JwtServiceError::InvalidAccessToken(
+                jwt::JwtDecodingError::Validation(ref e)
             )) if *e.kind() == jsonwebtoken::errors::ErrorKind::ExpiredSignature,
         ),
         "Expected decoding to fail due to `access_token` being expired: {:?}",
@@ -509,8 +509,8 @@ fn errors_on_token_used_before_nbf() {
     assert!(
         matches!(
             decode_result,
-            Err(jwt::Error::InvalidAccessToken(
-                jwt::decoding_strategy::DecodingError::Validation(ref e)
+            Err(jwt::JwtServiceError::InvalidAccessToken(
+                jwt::JwtDecodingError::Validation(ref e)
             )) if *e.kind() == jsonwebtoken::errors::ErrorKind::ImmatureSignature,
         ),
         "Expected decoding to fail due to `access_token` being used before the `nbf` timestamp: {:?}",

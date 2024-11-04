@@ -169,8 +169,8 @@ fn test_missing_claim(missing_claim: &str) {
         assert!(
             matches!(
                 decode_result,
-                Err(jwt::Error::InvalidUserinfoToken(
-                    jwt::decoding_strategy::DecodingError::Validation(ref e)
+                Err(jwt::JwtServiceError::InvalidUserinfoToken(
+                    jwt::JwtDecodingError::Validation(ref e)
                 )) if matches!(e.kind(), jsonwebtoken::errors::ErrorKind::Json(json_err)
                     if json_err.to_string().contains(&err_string))
             ),
@@ -182,8 +182,8 @@ fn test_missing_claim(missing_claim: &str) {
         assert!(
             matches!(
                 decode_result,
-                Err(jwt::Error::InvalidUserinfoToken(
-                    jwt::decoding_strategy::DecodingError::Validation(ref e)
+                Err(jwt::JwtServiceError::InvalidUserinfoToken(
+                    jwt::JwtDecodingError::Validation(ref e)
                 )) if matches!(
                     e.kind(),
                     jsonwebtoken::errors::ErrorKind::MissingRequiredClaim(req_claim) if req_claim == missing_claim
@@ -301,8 +301,8 @@ fn errors_on_invalid_signature() {
     assert!(
         matches!(
             decode_result,
-            Err(jwt::Error::InvalidUserinfoToken(
-                jwt::decoding_strategy::DecodingError::Validation(ref e)
+            Err(jwt::JwtServiceError::InvalidUserinfoToken(
+                jwt::JwtDecodingError::Validation(ref e)
             )) if matches!(
                 e.kind(),
                 jsonwebtoken::errors::ErrorKind::InvalidSignature
@@ -411,8 +411,8 @@ fn errors_on_expired_token() {
     assert!(
         matches!(
             decode_result,
-            Err(jwt::Error::InvalidUserinfoToken(
-                jwt::decoding_strategy::DecodingError::Validation(ref e)
+            Err(jwt::JwtServiceError::InvalidUserinfoToken(
+                jwt::JwtDecodingError::Validation(ref e)
             )) if matches!(
                 e.kind(),
                 jsonwebtoken::errors::ErrorKind::ExpiredSignature
@@ -521,8 +521,8 @@ fn errors_on_invalid_iss() {
     assert!(
         matches!(
             decode_result,
-            Err(jwt::Error::InvalidUserinfoToken(
-                jwt::decoding_strategy::DecodingError::Validation(ref e)
+            Err(jwt::JwtServiceError::InvalidUserinfoToken(
+                jwt::JwtDecodingError::Validation(ref e)
             )) if matches!(
                 e.kind(),
                 jsonwebtoken::errors::ErrorKind::InvalidIssuer
@@ -631,8 +631,8 @@ fn errors_on_invalid_aud() {
     assert!(
         matches!(
             decode_result,
-            Err(jwt::Error::InvalidUserinfoToken(
-                jwt::decoding_strategy::DecodingError::Validation(ref e)
+            Err(jwt::JwtServiceError::InvalidUserinfoToken(
+                jwt::JwtDecodingError::Validation(ref e)
             )) if matches!(
                 e.kind(),
                 jsonwebtoken::errors::ErrorKind::InvalidAudience
@@ -741,8 +741,8 @@ fn errors_on_invalid_sub() {
     assert!(
         matches!(
             decode_result,
-            Err(jwt::Error::InvalidUserinfoToken(
-                jwt::decoding_strategy::DecodingError::Validation(ref e)
+            Err(jwt::JwtServiceError::InvalidUserinfoToken(
+                jwt::JwtDecodingError::Validation(ref e)
             )) if matches!(
                 e.kind(),
                 jsonwebtoken::errors::ErrorKind::InvalidSubject,
@@ -852,8 +852,8 @@ fn errors_on_token_used_before_nbf() {
     assert!(
         matches!(
             decode_result,
-            Err(jwt::Error::InvalidUserinfoToken(
-                jwt::decoding_strategy::DecodingError::Validation(ref e)
+            Err(jwt::JwtServiceError::InvalidUserinfoToken(
+                jwt::JwtDecodingError::Validation(ref e)
             )) if matches!(
                 e.kind(),
                 jsonwebtoken::errors::ErrorKind::ImmatureSignature,

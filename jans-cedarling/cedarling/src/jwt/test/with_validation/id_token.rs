@@ -161,8 +161,8 @@ fn test_missing_claim(missing_claim: &str) {
         assert!(
             matches!(
                 decode_result,
-                Err(jwt::Error::InvalidIdToken(
-                    jwt::decoding_strategy::DecodingError::Validation(ref e)
+                Err(jwt::JwtServiceError::InvalidIdToken(
+                    jwt::JwtDecodingError::Validation(ref e)
                 )) if matches!(e.kind(), jsonwebtoken::errors::ErrorKind::Json(json_err)
                     if json_err.to_string().contains(&err_string))
             ),
@@ -174,8 +174,8 @@ fn test_missing_claim(missing_claim: &str) {
         assert!(
             matches!(
                 decode_result,
-                Err(jwt::Error::InvalidIdToken(
-                    jwt::decoding_strategy::DecodingError::Validation(ref e)
+                Err(jwt::JwtServiceError::InvalidIdToken(
+                    jwt::JwtDecodingError::Validation(ref e)
                 )) if matches!(
                     e.kind(),
                     jsonwebtoken::errors::ErrorKind::MissingRequiredClaim(req_claim) if req_claim == missing_claim
@@ -291,8 +291,8 @@ fn errors_on_invalid_signature() {
     assert!(
         matches!(
             decode_result,
-            Err(jwt::Error::InvalidIdToken(
-                jwt::decoding_strategy::DecodingError::Validation(ref e)
+            Err(jwt::JwtServiceError::InvalidIdToken(
+                jwt::JwtDecodingError::Validation(ref e)
             )) if *e.kind() == jsonwebtoken::errors::ErrorKind::InvalidSignature,
         ),
         "Expected decoding to fail due to `id_token` having an invalid signature: {:?}",
@@ -396,8 +396,8 @@ fn errors_on_expired_token() {
     assert!(
         matches!(
             decode_result,
-            Err(jwt::Error::InvalidIdToken(
-                jwt::decoding_strategy::DecodingError::Validation(ref e)
+            Err(jwt::JwtServiceError::InvalidIdToken(
+                jwt::JwtDecodingError::Validation(ref e)
             )) if matches!(e.kind(), jsonwebtoken::errors::ErrorKind::ExpiredSignature),
         ),
         "Expected decoding to fail due to `id_token` being expired: {:?}",
@@ -502,8 +502,8 @@ fn errors_on_invalid_iss() {
     assert!(
         matches!(
             decode_result,
-            Err(jwt::Error::InvalidIdToken(
-                jwt::decoding_strategy::DecodingError::Validation(ref e)
+            Err(jwt::JwtServiceError::InvalidIdToken(
+                jwt::JwtDecodingError::Validation(ref e)
             )) if matches!(e.kind(), jsonwebtoken::errors::ErrorKind::InvalidIssuer),
         ),
         "Expected decoding to fail due to `id_token` not having the same `iss` as `access_token`: {:?}",
@@ -608,8 +608,8 @@ fn errors_on_invalid_aud() {
     assert!(
         matches!(
             decode_result,
-            Err(jwt::Error::InvalidIdToken(
-                jwt::decoding_strategy::DecodingError::Validation(ref e)
+            Err(jwt::JwtServiceError::InvalidIdToken(
+                jwt::JwtDecodingError::Validation(ref e)
             )) if matches!(e.kind(), jsonwebtoken::errors::ErrorKind::InvalidAudience),
         ),
         "Expected decoding to fail due to `id_token` not having the same `aud` as `access_token`: {:?}",
@@ -715,8 +715,8 @@ fn errors_on_token_used_before_nbf() {
     assert!(
         matches!(
             decode_result,
-            Err(jwt::Error::InvalidIdToken(
-                jwt::decoding_strategy::DecodingError::Validation(ref e)
+            Err(jwt::JwtServiceError::InvalidIdToken(
+                jwt::JwtDecodingError::Validation(ref e)
             )) if matches!(e.kind(), jsonwebtoken::errors::ErrorKind::ImmatureSignature),
         ),
         "Expected decoding to fail due to `id_token` being used before the `nbf` timestamp: {:?}",

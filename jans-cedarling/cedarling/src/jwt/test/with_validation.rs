@@ -14,7 +14,7 @@ mod userinfo_token;
 
 use super::*;
 use crate::common::policy_store::TrustedIssuer;
-use crate::jwt::{self, JwtService};
+use crate::jwt::{self, JwtService, JwtServiceError};
 use jsonwebtoken::Algorithm;
 use serde_json::json;
 
@@ -213,8 +213,8 @@ fn errors_on_unsupported_alg() {
     assert!(
         matches!(
             validation_result,
-            Err(jwt::Error::InvalidAccessToken(
-                jwt::decoding_strategy::DecodingError::TokenSignedWithUnsupportedAlgorithm(
+            Err(JwtServiceError::InvalidAccessToken(
+                jwt::decoding_strategy::JwtDecodingError::TokenSignedWithUnsupportedAlgorithm(
                     jsonwebtoken::Algorithm::ES256
                 )
             ))
