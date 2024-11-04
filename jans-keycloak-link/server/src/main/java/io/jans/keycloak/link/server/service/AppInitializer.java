@@ -7,6 +7,7 @@
 package io.jans.keycloak.link.server.service;
 
 import java.lang.annotation.Annotation;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
 
@@ -29,6 +30,7 @@ import io.jans.service.cdi.event.ApplicationInitializedEvent;
 import io.jans.service.cdi.event.LdapConfigurationReload;
 import io.jans.service.cdi.util.CdiUtil;
 import io.jans.service.custom.script.CustomScriptManager;
+import io.jans.service.document.store.manager.DocumentStoreManager;
 import io.jans.service.metric.inject.ReportMetric;
 import io.jans.service.timer.QuartzSchedulerManager;
 import io.jans.util.StringHelper;
@@ -54,6 +56,8 @@ import jakarta.inject.Named;
  */
 @ApplicationScoped
 public class AppInitializer {
+
+    private final static String DOCUMENT_STORE_MANAGER_JANS_KEYCLOAK_LINK_TYPE = "jans-keycloak-link"; // Module name
 
 	@Inject
 	private Logger log;
@@ -92,6 +96,9 @@ public class AppInitializer {
 	@Inject
 	private JansKeycloakLinkTimer jansKeycloakLinkTimer;
 
+    @Inject
+    private DocumentStoreManager documentStoreManager;
+
 	@PostConstruct
 	public void createApplicationComponents() {
 		try {
@@ -127,6 +134,10 @@ public class AppInitializer {
 		loggerService.initTimer();
 		customScriptManager.initTimer(supportedCustomScriptTypes);
 		jansKeycloakLinkTimer.initTimer();
+
+        // Initialize Document Store Manager
+        documentStoreManager.initTimer(Arrays.asList(DOCUMENT_STORE_MANAGER_JANS_KEYCLOAK_LINK_TYPE));
+
 		// Notify plugins about finish application initialization
 		eventApplicationInitialized.select(ApplicationInitialized.Literal.APPLICATION)
 				.fire(new ApplicationInitializedEvent());

@@ -43,7 +43,7 @@ The `cedar_policies` field outlines the Cedar policies that will be used in Ceda
 
 ```json
   "cedar_policies": {
-    "a_unique_policy_id": {
+    "unique_policy_id": {
       "description": "simple policy example",
       "creation_date": "2024-09-20T17:22:39.996050",
       "policy_content": "cGVybWl0KAogICAgc..."
