@@ -5,6 +5,8 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
+use crate::jwt::JwtServiceConfig;
+
 use super::{super::JwtService, *};
 use serde_json::json;
 
@@ -16,8 +18,9 @@ use serde_json::json;
 /// The decoded claims are compared to the expected claims to ensure correctness.
 fn can_decode_claims_without_validation() {
     // initialize JwtService with validation disabled
-    let jwt_service =
-        JwtService::new_with_config(crate::jwt::JwtServiceConfig::WithoutValidation {});
+    let jwt_service = JwtService::new_with_config(JwtServiceConfig::WithoutValidation {
+        trusted_idps: Vec::new(),
+    });
 
     // generate keys and setup the encoding keys and JWKS (JSON Web Key Set)
     let (encoding_keys, _jwks) = generate_keys();
@@ -52,7 +55,7 @@ fn can_decode_claims_without_validation() {
     let userinfo_token = generate_token_using_claims(&userinfo_token_claims, &encoding_keys[0]);
 
     // decode and validate both the access token and the ID token
-    let (access_token_result, id_token_result, userinfo_token_result) = jwt_service
+    let result = jwt_service
         .decode_tokens::<serde_json::Value, serde_json::Value, serde_json::Value>(
             &access_token,
             &id_token,
@@ -61,7 +64,7 @@ fn can_decode_claims_without_validation() {
         .expect("should decode token");
 
     // assert that the decoded token claims match the expected claims
-    assert_eq!(access_token_result, access_token_claims);
-    assert_eq!(id_token_result, id_token_claims);
-    assert_eq!(userinfo_token_result, userinfo_token_claims);
+    assert_eq!(result.access_token, access_token_claims);
+    assert_eq!(result.id_token, id_token_claims);
+    assert_eq!(result.userinfo_token, userinfo_token_claims);
 }

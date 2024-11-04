@@ -27,7 +27,7 @@ The JWTs, Resource, Action, and Context are sent in the authz request. Cedar Pri
 are derived from JWT tokens. The OpenID Connect ("OIDC") JWTs are joined by the Cedarling to create
 User and Role entities; the OAuth access token is used to create a Workload entity, which is the
 software that is acting on behalf of the Person (or autonomously). The Cedarling validates that
-given its policies, both the Person and Workload are authorized.
+given its policies, Role, Person and Workload are authorized. If one of Role or Person and Workload is authorized then the request is allowed to proceed.
 
 The Cedarling maps "Roles" out-of-the-box. In Cedar, Roles are a special kind of Principal. Instead
 of saying "User can perform action", we can say "Role can perform action"--a convenient way to
@@ -50,7 +50,7 @@ values of the `scope` claim), or other claims--domains frequently enhance the ac
 contain business specific data needed for policy evaluation.
 
 The Cedarling authorizes a Person using a certain piece of software, which is called a "Workload".
-From a logical perspective, `person_allowed` AND `workload_allowed` must be `True`. The JWT's,
+From a logical perspective, (`person_allowed` AND `workload_allowed`) OR (`role_allowed` AND `workload_allowed`) must be `True`. The JWT's,
 Action, Resource and Context is sent by the application in the authorization request. For example,
 this is a sample request from a hypothetical application:
 
