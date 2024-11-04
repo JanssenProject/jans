@@ -25,54 +25,53 @@
 
         <!-- drop-down menu -->
         <nav class="ph3">
-         <z:div class="dropdown" viewModel="@('io.jans.casa.ui.vm.HeaderViewModel')">
-    <a href="javascript:;" class="dropdown-toggle text-secondary" role="button" id="dropdownMenu"
-       data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-        <span class="pr-2">
-            <z:zk if="${empty sessionContext.user.pictureURL}">
-                <i class="fas fa-user fs-2 pt-1"></i>
-            </z:zk>
-            <z:zk unless="${empty sessionContext.user.pictureURL}">
-                <img src="${sessionContext.user.pictureURL}" class="w-25 rounded-circle min-w-25"/>
-            </z:zk>
-        </span>
-        <span class="d-none d-md-inline fs-6">
-            ${c:escapeXML(
-            empty sessionContext.user.lastName ?
-            (empty sessionContext.user.givenName ? c:l('general.welcome') : c:cat4(c:l('general.welcome'), ' ', sessionContext.user.givenName, ' '))
-            : c:cat4(sessionContext.user.givenName, ' ', sessionContext.user.lastName, ' ')
-            )}
-            <i class="fas fa-chevron-down fs-7" style="padding-top:2px"></i>
-        </span>
-    </a>
-    <ul class="dropdown-menu dropdown-menu-end fs-7 shadow-sm rounded-1 mt-2 border-0 min-w-50 w-100" aria-labelledby="dropdownMenu">
-        <li class="py-1 ps-2 pe-3 bg-light">
-            <a class="text-decoration-none text-secondary d-block" href="#" target="_blank">
-                <i class="fas fa-question-circle"></i>&nbsp; ${labels.general.help}
-            </a>
-        </li>
-
-        <z:div children="@load(vm.contextMenuItems)">
-            <zk:template name="children">
-                <z:include src="${c:cat3(each.x, '/', each.y.contentsUrl)}">
-                    <zk:attribute name="base">${each.x}</zk:attribute>
-                    <zk:attribute name="priority">${each.y.priority}</zk:attribute>
-                </z:include>
-            </zk:template>
-        </z:div>
-
-        <div class="dropdown-divider"></div>
-
-        <li class="py-1 ps-2 pe-3 bg-light">
-            <z:span onClick="@('logoutFromAuthzServer')">
-                <a class="text-decoration-none text-secondary d-block" href="javascript:;">
-                    <i class="fas fa-sign-out-alt"></i>&nbsp; ${labels.general.logout}
+            <z:div class="dropdown" viewModel="@('io.jans.casa.ui.vm.HeaderViewModel')">
+                <a href="javascript:;" class="dropdown-toggle gray hover-dark-gray" role="button" id="dropdownMenu"
+                   data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                    <span class="ps-2">
+                        <z:zk if="${empty sessionContext.user.pictureURL}">
+                            <i class="fas fa-user f2-cust pt1" />
+                        </z:zk>
+                        <z:zk unless="${empty sessionContext.user.pictureURL}">
+                            <img src="${sessionContext.user.pictureURL}" class="w2 br-100 miw-2r"/>
+                        </z:zk>
+                    </span>
+                    <span class="dn di-ns f6">
+                        ${c:escapeXML(
+                        empty sessionContext.user.lastName ?
+                        (empty sessionContext.user.givenName ? c:l('general.welcome') : c:cat4(c:l('general.welcome'), ' ', sessionContext.user.givenName, ' '))
+                        : c:cat4(sessionContext.user.givenName, ' ', sessionContext.user.lastName, ' ')
+                        )}
+                        <i class="fas fa-chevron-down f7" style="padding-top:2px" />
+                    </span>
                 </a>
-            </z:span>
-        </li>
-    </ul>
-</z:div>
+                <ul class="dropdown-menu dropdown-menu-end f7 shadow-5 br1 mt2 bw0 miw-2r w4" aria-labelledby="dropdownMenu">
+                    <li class="pv1 pl2 pr3 bg-white-70">
+                        <a class="link hover-green gray db" href="#" target="_blank">
+                            <i class="fas fa-question-circle" />&amp;nbsp; ${labels.general.help}
+                        </a>
+                    </li>
 
+                    <z:div children="@load(vm.contextMenuItems)">
+                        <zk:template name="children">
+                            <z:include src="${c:cat3(each.x, '/', each.y.contentsUrl)}">
+                                <zk:attribute name="base">${each.x}</zk:attribute>
+                                <zk:attribute name="priority">${each.y.priority}</zk:attribute>
+                            </z:include>
+                        </zk:template>
+                    </z:div>
+
+                    <div class="dropdown-divider" />
+
+                    <li class="pv1 pl2 pr3 bg-white-70">
+                        <z:span onClick="@('logoutFromAuthzServer')">
+                            <a class="link hover-green gray db" href="javascript:;">
+                                <i class="fas fa-sign-out-alt" />&amp;nbsp; ${labels.general.logout}
+                            </a>
+                        </z:span>
+                    </li>
+                </ul>
+            </z:div>
         </nav>
 
     </header>
