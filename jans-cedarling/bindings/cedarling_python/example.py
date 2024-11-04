@@ -49,7 +49,7 @@ instance = Cedarling(bootstrap_config)
 
 # show logs
 print("Logs stored in memory:")
-print(*instance.pop_logs(), sep="\n\n")
+print(*instance.pop_logs())
 
 
 # //// Execute authentication request ////
@@ -151,6 +151,27 @@ JSON payload of userinfo token
 }
 """
 
+"""
+Policies used:
+@840da5d85403f35ea76519ed1a18a33989f855bf1cf8
+permit(
+    principal is Jans::Workload,
+    action in [Jans::Action::"Update"],
+    resource is Jans::Issue
+)when{
+    principal.org_id == resource.org_id
+};
+
+@444da5d85403f35ea76519ed1a18a33989f855bf1cf8
+permit(
+    principal is Jans::User,
+    action in [Jans::Action::"Update"],
+    resource is Jans::Issue
+)when{
+    principal.country == resource.country
+};
+"""
+
 # Creating cedarling request
 request = Request(
     action_token,
@@ -161,30 +182,39 @@ request = Request(
 
 # Authorize call
 authorize_result = instance.authorize(request)
-print(*instance.pop_logs(), sep="\n\n")
+print(*instance.pop_logs())
 
 # if you change org_id result will be false
 assert authorize_result.is_allowed()
 
+
 # watch on the decision for workload
 workload_result = authorize_result.workload()
-print(workload_result.decision)
+print(f"Result of workload authorization: {workload_result.decision}")
 
 # show diagnostic information
 workload_diagnostic = workload_result.diagnostics
-for i, reason in enumerate(workload_diagnostic.reason):
-    if i == 0:
-        print("reason policies:")
-    print(reason)
+print("Policy ID(s) used:")
+for diagnostic in workload_diagnostic.reason:
+    print(diagnostic)
 
-for i, error in enumerate(workload_diagnostic.errors):
-    if i == 0:
-        print("errors:")
-    print("id:", error.id, "error:", error.error)
+print("Errors during authorization:")
+for diagnostic in workload_diagnostic.errors:
+    print(diagnostic)
 
+print()
 
 # watch on the decision for person
-print(authorize_result.person().decision)
+person_result = authorize_result.person()
+print(f"Result of person authorization: {person_result.decision}")
+person_diagnostic = person_result.diagnostics
+print("Policy ID(s) used:")
+for diagnostic in person_diagnostic.reason:
+    print(diagnostic)
+
+print("Errors during authorization:")
+for diagnostic in person_diagnostic.errors:
+    print(diagnostic)
 
 
 # watch on the decision for role if present
