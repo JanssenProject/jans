@@ -25,7 +25,7 @@ public class PairwiseIdentifier extends BaseEntry {
     @AttributeName(name = "jansSectorIdentifier")
     private String sectorIdentifier;
 
-    @AttributeName(name = "jansClntId")
+    @AttributeName(name = "clnId")
     private String clientId;
 
     @AttributeName(name = "jansUsrId")

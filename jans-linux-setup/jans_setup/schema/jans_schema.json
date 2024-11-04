@@ -4139,7 +4139,7 @@
       "may": [
         "jansId",
         "jansSectorIdentifier",
-        "jansClntId",
+        "clnId",
         "jansUsrId"
       ],
       "must": [
@@ -5005,7 +5005,7 @@
       "kind": "STRUCTURAL",
       "may": [
         "jansId",
-        "jansClntId",
+        "clnId",
         "jansUsrId",
         "exp",
         "del",
