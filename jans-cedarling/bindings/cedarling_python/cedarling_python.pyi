@@ -21,7 +21,7 @@ class DisabledLoggingConfig:
 
 @final
 class PolicyStoreSource:
-    def __init__(self, json: Optional[str] = None) -> None: ...
+    def __init__(self, json: Optional[str] = None, yaml: Optional[str] = None) -> None: ...
 
 
 @final
