@@ -52,13 +52,22 @@ But actually the example execute very fast, so we no need to wait.
 cargo run -p cedarling --example log_init -- lock
 ```
 
-### Example of authorize evaluation
+### Authorization Evaluation Examples
 
-File with example is `authorize.rs`.
-To run example you need execute next command:
+#### Running Without JWT validation
+
+To evaluate authorization without validating JWT tokens, use the following command:
 
 ```bash
-cargo run -p cedarling --example authorize
+cargo run -p cedarling --example authorize_without_jwt_validation
+```
+
+#### Running with JWT validation
+
+To include JWT validation in the authorization evaluation, use this command:
+
+```bash
+cargo run -p cedarling --example authorize_with_jwt_validation
 ```
 
 ## Unit tests
