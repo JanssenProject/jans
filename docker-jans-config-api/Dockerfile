@@ -41,7 +41,7 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # ==========
 
 ENV CN_VERSION=1.1.6-SNAPSHOT
-ENV CN_BUILD_DATE='2024-10-02 09:23'
+ENV CN_BUILD_DATE='2024-10-26 09:14'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api-server/${CN_VERSION}/jans-config-api-server-${CN_VERSION}.war
 
@@ -55,14 +55,6 @@ RUN mkdir -p ${JETTY_BASE}/jans-config-api/webapps \
     && cp jans-config-api.war ${JETTY_BASE}/jans-config-api/webapps/jans-config-api.war \
     && java -jar ${JETTY_HOME}/start.jar jetty.home=${JETTY_HOME} jetty.base=${JETTY_BASE}/jans-config-api --add-module=server,deploy,annotations,resources,http,http-forwarded,threadpool,jsp,websocket,cdi-decorate,jmx,stats,logging-log4j2 --approve-all-licenses \
     && rm -rf /tmp/jans-config-api.war /tmp/WEB-INF
-
-# ======
-# Facter
-# ======
-
-ARG PYFACTER_VERSION=9d8478ee47dc5498a766e010e8d3a3451b46e541
-RUN wget -q https://github.com/GluuFederation/gluu-snap/raw/${PYFACTER_VERSION}/facter/facter -O /usr/bin/facter \
-    && chmod +x /usr/bin/facter
 
 # =======
 # Plugins
@@ -78,7 +70,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-config-api/_plugins \
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=5f3b30e4b565601ccb31cd985920c09071cd1b54
+ENV JANS_SOURCE_VERSION=4f155cfe9e197b15d65be6aa938276862fe36a06
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
 
@@ -115,7 +107,9 @@ RUN cd /tmp/jans \
     && cp ${JANS_CONFIG_API_RESOURCES}/config-api-rs-protect.json /app/templates/jans-config-api/ \
     && mkdir -p org/eclipse/jetty \
     && cp ${JANS_SETUP_DIR}/static/favicon.ico org/eclipse/jetty/favicon.ico \
-    && zip -r ${JETTY_HOME}/lib/jetty-server-${JETTY_VERSION}.jar org/eclipse/jetty/favicon.ico
+    && zip -r ${JETTY_HOME}/lib/jetty-server-${JETTY_VERSION}.jar org/eclipse/jetty/favicon.ico \
+    && cp ${JANS_SETUP_DIR}/static/scripts/facter /usr/bin/facter \
+    && chmod +x /usr/bin/facter
 
 # ======
 # Python
