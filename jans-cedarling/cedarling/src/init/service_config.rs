@@ -30,7 +30,7 @@ pub enum ServiceConfigError {
     PolicyStore(#[from] PolicyStoreLoadError),
     #[error("Could not load openid config: {0}")]
     // TODO: refactor error when remove panicking on init JWT server
-    OpenIdConfig(#[from] jwt::decoding_strategy::key_service::Error),
+    OpenIdConfig(#[from] jwt::decoding_strategy::key_service::KeyServiceError),
 }
 
 impl ServiceConfig {

@@ -330,7 +330,7 @@ impl AuthorizeEntitiesData {
 pub enum AuthorizeError {
     /// Error encountered while decoding JWT token data
     #[error(transparent)]
-    DecodeTokens(#[from] jwt::JwtDecodingError),
+    DecodeTokens(#[from] jwt::JwtServiceError),
     /// Error encountered while creating access token entities
     #[error("{0}")]
     AccessTokenEntities(#[from] AccessTokenEntitiesError),

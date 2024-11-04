@@ -8,8 +8,6 @@
 //! Module that contains strong typed configuaration for the JWT service.
 //! This configuration allows to initialize service without any errors.
 
-use super::decoding_strategy::key_service;
-
 use crate::common::policy_store::TrustedIssuer;
 use crate::jwt;
 
@@ -41,7 +39,7 @@ impl TrustedIssuerAndOpenIdConfig {
     pub fn fetch(
         trusted_issuer: TrustedIssuer,
         client: &reqwest::blocking::Client,
-    ) -> Result<Self, key_service::Error> {
+    ) -> Result<Self, jwt::KeyServiceError> {
         let openid_config = fetch_openid_config(
             trusted_issuer.openid_configuration_endpoint.as_str(),
             client,
