@@ -20,6 +20,7 @@ def merge_auth_keystore_ctx_hook(manager, ctx: dict[str, _t.Any]) -> dict[str, _
 def transform_auth_dynamic_config_hook(conf, manager):
     should_update = False
     hostname = manager.config.get("hostname")
+    auth_challenge_endpoint = f"https://{hostname}/jans-auth/restv1/authorize-challenge"
 
     # add missing top-level keys
     for missing_key, value in [
@@ -66,7 +67,7 @@ def transform_auth_dynamic_config_hook(conf, manager):
                 "Cache-Control": "max-age=0, no-store",
             },
         }),
-        ("authorizationChallengeEndpoint", f"https://{hostname}/jans-auth/restv1/authorization_challenge"),
+        ("authorizationChallengeEndpoint", auth_challenge_endpoint),
         ("archivedJwksUri", f"https://{hostname}/jans-auth/restv1/jwks/archived"),
         ("featureFlags", []),
         ("lockMessageConfig", {
@@ -300,6 +301,10 @@ def transform_auth_dynamic_config_hook(conf, manager):
         if "tx_token" in conf[attr]:
             conf[attr].remove("tx_token")
             should_update = True
+
+    if conf["authorizationChallengeEndpoint"] != auth_challenge_endpoint:
+        conf["authorizationChallengeEndpoint"] = auth_challenge_endpoint
+        should_update = True
 
     # return the conf and flag to determine whether it needs update or not
     return conf, should_update
