@@ -8667,7 +8667,7 @@ Designer. This is a free developer tool hosted by <a href="https://gluu.org">Glu
 are derived from JWT tokens. The OpenID Connect ("OIDC") JWTs are joined by the Cedarling to create
 User and Role entities; the OAuth access token is used to create a Workload entity, which is the
 software that is acting on behalf of the Person (or autonomously). The Cedarling validates that
-given its policies, both the Person and Workload are authorized.</p>
+given its policies, Role, Person and Workload are authorized. If one of Role or Person and Workload is authorized then the request is allowed to proceed.</p>
 <p>The Cedarling maps "Roles" out-of-the-box. In Cedar, Roles are a special kind of Principal. Instead
 of saying "User can perform action", we can say "Role can perform action"--a convenient way to
 implement RBAC. Developers can specify which JWT claim is used to map Cedar Roles. For example, one
@@ -8686,7 +8686,7 @@ obtained the JWT, its extent of access as defined by the OAuth Authorization Ser
 values of the <code>scope</code> claim), or other claims--domains frequently enhance the access token to
 contain business specific data needed for policy evaluation.</p>
 <p>The Cedarling authorizes a Person using a certain piece of software, which is called a "Workload".
-From a logical perspective, <code>person_allowed</code> AND <code>workload_allowed</code> must be <code>True</code>. The JWT's,
+From a logical perspective, (<code>person_allowed</code> AND <code>workload_allowed</code>) OR (<code>role_allowed</code> AND <code>workload_allowed</code>) must be <code>True</code>. The JWT's,
 Action, Resource and Context is sent by the application in the authorization request. For example,
 this is a sample request from a hypothetical application:</p>
 <div class="highlight"><pre><span></span><code><span class="nx">input</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="w"> </span>
@@ -8717,7 +8717,7 @@ this is a sample request from a hypothetical application:</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-26T19:12:11+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-26</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-11-04T21:16:43+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-11-04</span>
       
         <br>
         Created:
