@@ -187,8 +187,9 @@ pub fn create_entity<'a>(
 
     let attrs = build_entity_attributes(schema_shape, data, &entity_namespace)?;
 
-    cedar_policy::Entity::new(entity_uid.clone(), attrs, parents)
-        .map_err(|err| CedarPolicyCreateTypeError::CreateEntity(entity_uid.to_string(), err))
+    let entity_uid_string = entity_uid.to_string();
+    cedar_policy::Entity::new(entity_uid, attrs, parents)
+        .map_err(|err| CedarPolicyCreateTypeError::CreateEntity(entity_uid_string, err))
 }
 
 /// Meta information about an attribute for cedar policy.
