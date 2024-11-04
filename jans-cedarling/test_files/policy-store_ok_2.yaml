@@ -1,7 +1,7 @@
 cedar_version: v2.4.7
 cedar_policies:
   1:
-    description: simple policy example for pricipal workload, permit when workload org_id same with resource
+    description: simple policy example for principal workload, permit when workload org_id same with resource
     creation_date: '2024-09-20T17:22:39.996050'
     policy_content:
       encoding: none
@@ -15,7 +15,7 @@ cedar_policies:
             principal.org_id == resource.org_id
         };
   2:
-    description: simple policy example for pricipal user, permit if user country same with the issue
+    description: simple policy example for principal user, permit if user country same with the issue
     creation_date: '2024-09-20T17:22:39.996050'
     policy_content:
       encoding: none
@@ -29,7 +29,7 @@ cedar_policies:
             principal.country == resource.country
         };
   3:
-    description: simple policy example for pricipal role, permit when Admin
+    description: simple policy example for principal role, permit when Admin
     creation_date: '2024-09-20T17:22:39.996050'
     policy_content:
       encoding: none
