@@ -51,6 +51,7 @@ The `cedar_policies` field outlines the Cedar policies that will be used in Ceda
     ...
   }
 ```
+
 - **unique_policy_id**: (*String*) A uniqe policy ID used to for tracking and auditing purposes.
 - **description** : (*String*) A brief description of cedar policy
 - **creation_date** :  (*String*) Policy creating date in `YYYY-MM-DDTHH:MM:SS.ssssss`
@@ -98,8 +99,7 @@ This record contains the information needed to validate tokens from this issuer:
 
 ### Token Metadata Schema
 
-
-```json 
+```json
 {
   "type": "access_token"
   "user_id": "some_user123",
@@ -153,13 +153,12 @@ Here is a non-normative example of a `cedarling_store.json` file:
 }
 ```
 
-
 ## Policy and Schema Authoring
 
-You can hand create your Cedar policies and schema in 
-[Visual Studio](https://marketplace.visualstudio.com/items?itemName=cedar-policy.vscode-cedar). 
-Make sure you run the cedar command line tool to validate both your schema and policies. 
+You can hand create your Cedar policies and schema in
+[Visual Studio](https://marketplace.visualstudio.com/items?itemName=cedar-policy.vscode-cedar).
+Make sure you run the cedar command line tool to validate both your schema and policies.
 
-The easiest way to author your policy store is to use the Policy Designer in 
+The easiest way to author your policy store is to use the Policy Designer in
 [Agama Lab](https://cloud.gluu.org/agama-lab). This tool helps you define the policies, schema and
 trusted IDPs and to publish a policy store to a Github repository.
