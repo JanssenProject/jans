@@ -166,28 +166,36 @@ pub fn create_role_entities(
         vec![entity_uid]
     } else {
         // case if it array of string
-        payload
+        match payload
             // get as array
             .as_array()
-            .map_err(|err| RoleEntityError::Create {
-                error: err.into(),
-                token_kind: role_mapping.kind,
-            })?
-            .iter()
-            .map(|payload_el| {
-                // get each element of array as `str`
-                payload_el.as_str().map_err(|err| RoleEntityError::Create {
+        {
+            Ok(payload_vec) => {
+                payload_vec
+                    .iter()
+                    .map(|payload_el| {
+                        // get each element of array as `str`
+                        payload_el.as_str().map_err(|err| RoleEntityError::Create {
+                            error: err.into(),
+                            token_kind: role_mapping.kind,
+                        })
+                        // build entity uid 
+                        .and_then(|name| build_entity_uid(role_entity_type, name)
+                        .map_err(|err| RoleEntityError::Create {
+                            error: err,
+                            token_kind: role_mapping.kind,
+                        }))
+                    })
+                    .collect::<Result<Vec<_>, _>>()?
+            },
+            Err(err) => {
+                // Handle the case where the payload is neither a string nor an array
+                return Err(RoleEntityError::Create {
                     error: err.into(),
                     token_kind: role_mapping.kind,
-                })
-                // build entity uid 
-                .and_then(|name| build_entity_uid(role_entity_type, name)
-                .map_err(|err| RoleEntityError::Create {
-                    error: err,
-                    token_kind: role_mapping.kind,
-                }))
-            })
-            .collect::<Result<Vec<_>, _>>()?
+                });
+            },
+        }
     };
 
     // create role entity for each entity uid
