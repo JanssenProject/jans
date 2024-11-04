@@ -172,7 +172,7 @@ class Upgrade:
         if not entry:
             return
 
-        if self.backend.type == "sql" and self.backend.client.dialect == "mysql":
+        if not self.backend.client.use_simple_json:
             client_scopes = entry.attrs["jansScope"]["v"]
         else:
             client_scopes = entry.attrs["jansScope"]
@@ -188,10 +188,8 @@ class Upgrade:
             ]
 
         # find missing scopes from the client
-        diff = list(set(new_client_scopes).difference(client_scopes))
-
-        if diff:
-            if self.backend.type == "sql" and self.backend.client.dialect == "mysql":
+        if diff := list(set(new_client_scopes).difference(client_scopes)):
+            if not self.backend.client.use_simple_json:
                 entry.attrs["jansScope"]["v"] = client_scopes + diff
             else:
                 entry.attrs["jansScope"] = client_scopes + diff
@@ -264,7 +262,7 @@ class Upgrade:
         }
 
         for key, uri in uri_mapping.items():
-            if self.backend.type == "sql" and self.backend.client.dialect == "mysql":
+            if not self.backend.client.use_simple_json:
                 client_uris = entry.attrs[key]["v"]
             else:
                 client_uris = entry.attrs[key]
@@ -275,7 +273,7 @@ class Upgrade:
             if uri not in client_uris:
                 client_uris.append(uri)
 
-                if self.backend.type == "sql" and self.backend.client.dialect == "mysql":
+                if not self.backend.client.use_simple_json:
                     entry.attrs[key]["v"] = client_uris
                 else:
                     entry.attrs[key] = client_uris
