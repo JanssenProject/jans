@@ -19,6 +19,7 @@ from jans.pycloudlib.persistence.spanner import SpannerClient
 from jans.pycloudlib.persistence.spanner import sync_google_credentials
 from jans.pycloudlib.persistence.sql import SqlClient
 from jans.pycloudlib.persistence.sql import render_sql_properties
+from jans.pycloudlib.persistence.sql import override_simple_json_property
 from jans.pycloudlib.persistence.utils import PersistenceMapper
 from jans.pycloudlib.persistence.utils import render_base_properties
 from jans.pycloudlib.persistence.utils import render_salt
@@ -91,6 +92,7 @@ def main():
             get_server_certificate(hostname, 443, "/etc/certs/web_https.crt")
 
     wait_for_persistence(manager)
+    override_simple_json_property("/etc/jans/conf/jans-sql.properties")
 
     cert_to_truststore(
         "web_https",
