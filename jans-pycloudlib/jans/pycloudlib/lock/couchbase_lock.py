@@ -187,9 +187,6 @@ class CouchbaseLock(BaseLock):
                 resp.raise_for_status()
 
     def _resolve_auth(self):
-        user = ""
-        password = ""  # nosec: B105
-
         if superuser_from_env := os.environ.get("CN_COUCHBASE_SUPERUSER", ""):
             user = superuser_from_env
             password = get_couchbase_superuser_password(self.manager)

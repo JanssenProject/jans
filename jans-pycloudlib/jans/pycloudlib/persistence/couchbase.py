@@ -504,15 +504,9 @@ class CouchbaseClient:
 
     def __init__(self, manager: Manager, *args: _t.Any, **kwargs: _t.Any) -> None:
         self.manager = manager
-
         self.hosts = kwargs.get("hosts", "") or os.environ.get("CN_COUCHBASE_URL", "localhost")
         self.user = kwargs.get("user", "") or get_couchbase_superuser() or get_couchbase_user()
-
-        password = kwargs.get("password", "")
-        with contextlib.suppress(FileNotFoundError):
-            password = get_couchbase_superuser_password(manager)
-        self.password: str = password or get_couchbase_password(manager)
-
+        self.password = kwargs.get("password", "") or get_couchbase_superuser_password(manager) or get_couchbase_password(manager)
         self.attr_processor = AttrProcessor()
 
     @cached_property
