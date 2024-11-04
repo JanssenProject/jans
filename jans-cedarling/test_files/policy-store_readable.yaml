@@ -31,7 +31,7 @@ cedar_policies:
 cedar_schema:
   encoding: none
   content_type: cedar
-  body: |
+  body: |-
     namespace Jans {
     type Url = {"host": String, "path": String, "protocol": String};
     entity Access_token = {"aud": String, "exp": Long, "iat": Long, "iss": TrustedIssuer, "jti": String};

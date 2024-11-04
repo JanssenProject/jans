@@ -44,7 +44,7 @@ cedar_schema:
   encoding: none
   content_type: cedar
   # we minimize amount of field in entites to simplify test cases
-  body: |
+  body: |-
     namespace Jans {
     type Url = {"host": String, "path": String, "protocol": String};
     entity TrustedIssuer = {"issuer_entity_id": Url};
