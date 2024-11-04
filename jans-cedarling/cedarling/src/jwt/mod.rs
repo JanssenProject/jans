@@ -15,27 +15,27 @@
 
 #[cfg(test)]
 mod test;
-#[cfg(test)]
-pub use decoding_strategy::{
-    key_service::{KeyService, KeyServiceError},
-    JwtDecodingError,
-};
 
-mod decoding_strategy;
+pub use decoding_strategy::key_service::KeyServiceError;
+
+pub(crate) mod decoding_strategy;
 mod error;
 mod jwt_service_config;
 mod token;
 
+use decoding_strategy::{open_id_storage::OpenIdStorage, DecodingArgs, DecodingStrategy};
 pub use decoding_strategy::{string_to_alg, ParseAlgorithmError};
-use decoding_strategy::{DecodingArgs, DecodingStrategy};
 pub use error::JwtServiceError;
 pub use jsonwebtoken::Algorithm;
 pub use jwt_service_config::*;
 use serde::de::DeserializeOwned;
 use token::*;
 
+use crate::common::policy_store::TrustedIssuer;
+
 pub struct JwtService {
     decoding_strategy: DecodingStrategy,
+    open_id_storage: OpenIdStorage,
 }
 
 /// A service for handling JSON Web Tokens (JWT).
@@ -48,18 +48,32 @@ impl JwtService {
     /// Initializes a new `JwtService` instance based on the provided configuration.
     pub(crate) fn new_with_config(config: JwtServiceConfig) -> Self {
         match config {
-            JwtServiceConfig::WithoutValidation => {
+            JwtServiceConfig::WithoutValidation { trusted_idps } => {
                 let decoding_strategy = DecodingStrategy::new_without_validation();
-                Self { decoding_strategy }
+                Self {
+                    decoding_strategy,
+                    open_id_storage: OpenIdStorage::new(trusted_idps),
+                }
             },
             JwtServiceConfig::WithValidation {
                 supported_algs,
                 trusted_idps,
             } => {
-                let decoding_strategy =
-                    DecodingStrategy::new_with_validation(supported_algs, trusted_idps)
-                        .expect("could not initialize decoding strategy with validation");
-                Self { decoding_strategy }
+                let decoding_strategy = DecodingStrategy::new_with_validation(
+                    supported_algs,
+                    // TODO: found the way to use `OpenIdStorage` in the decoding strategy.
+                    // Or use more suitable structure
+                    trusted_idps
+                        .iter()
+                        .map(|v| v.trusted_issuer.clone())
+                        .collect(),
+                )
+                // TODO: remove expect here and all data should be already in the `JwtServiceConfig`
+                .expect("could not initialize decoding strategy with validation");
+                Self {
+                    decoding_strategy,
+                    open_id_storage: OpenIdStorage::new(trusted_idps),
+                }
             },
         }
     }
@@ -88,7 +102,7 @@ impl JwtService {
         access_token: &str,
         id_token: &str,
         userinfo_token: &str,
-    ) -> Result<(A, I, U), JwtServiceError>
+    ) -> Result<DecodeTokensResult<A, I, U>, JwtServiceError>
     where
         A: DeserializeOwned,
         I: DeserializeOwned,
@@ -150,6 +164,10 @@ impl JwtService {
         self.decoding_strategy
             .decode::<UserInfoToken>(DecodingArgs {
                 jwt: userinfo_token,
+                // Getting next values from access token looks little strange for me
+                // TODO: add comment here why we are doing in this way
+                // We also need to check if `Userinfo token` not associated with a sub from the `id_token`
+                // https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#cedarling-token-validation
                 iss: Some(&access_token.iss),
                 aud: Some(&access_token.aud),
                 sub: Some(&id_token.sub),
@@ -158,6 +176,27 @@ impl JwtService {
             })
             .map_err(JwtServiceError::InvalidUserinfoToken)?;
 
-        Ok((access_token_claims, id_token_claims, userinfo_token_claims))
+        // assume that all tokens has the same `iss` (issuer) so we get config only for one JWT token
+        // this behavior can be changed in future
+        let trusted_issuer = self
+            .open_id_storage
+            .get(access_token.iss.as_str())
+            .map(|config| &config.trusted_issuer);
+
+        Ok(DecodeTokensResult {
+            access_token: access_token_claims,
+            id_token: id_token_claims,
+            userinfo_token: userinfo_token_claims,
+            trusted_issuer,
+        })
     }
+}
+
+#[derive(Debug)]
+pub struct DecodeTokensResult<'a, A, I, U> {
+    pub access_token: A,
+    pub id_token: I,
+    pub userinfo_token: U,
+
+    pub trusted_issuer: Option<&'a TrustedIssuer>,
 }
