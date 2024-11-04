@@ -53,6 +53,13 @@ create_exception!(
 
 create_exception!(
     authorize_errors,
+    RoleEntityError,
+    AuthorizeError,
+    "Error encountered while creating role entity"
+);
+
+create_exception!(
+    authorize_errors,
     ActionError,
     AuthorizeError,
     "Error encountered while parsing Action to EntityUid"
@@ -77,6 +84,13 @@ create_exception!(
     CreateRequestUserEntityError,
     AuthorizeError,
     "Error encountered while creating cedar_policy::Request for user entity principal"
+);
+
+create_exception!(
+    authorize_errors,
+    CreateRequestRoleEntityError,
+    AuthorizeError,
+    "Error encountered while creating cedar_policy::Request for role entity principal"
 );
 
 create_exception!(
@@ -129,10 +143,12 @@ errors_functions! {
     CreateIdTokenEntity => CreateIdTokenEntityError,
     CreateUserEntity => CreateUserEntityError,
     ResourceEntity => ResourceEntityError,
+    RoleEntity => RoleEntityError,
     Action => ActionError,
     CreateContext => CreateContextError,
     CreateRequestWorkloadEntity => CreateRequestWorkloadEntityError,
     CreateRequestUserEntity => CreateRequestUserEntityError,
+    CreateRequestRoleEntity => CreateRequestRoleEntityError,
     Entities => EntitiesError
 }
 

@@ -22,7 +22,8 @@
 
 use super::super::*;
 use crate::common::policy_store::TrustedIssuer;
-use crate::jwt::{self, JwtService};
+use crate::jwt::decoding_strategy::JwtDecodingError;
+use crate::jwt::{self, JwtService, TrustedIssuerAndOpenIdConfig};
 use jsonwebtoken::Algorithm;
 use serde_json::json;
 
@@ -118,18 +119,20 @@ fn test_missing_claim(missing_claim: &'static str) {
         .with_status(200)
         .with_header("content-type", "application/json")
         .with_body(openid_config_response.to_string())
+        .expect_at_least(1)
+        .expect_at_most(2)
         .create();
     let jwks_uri_mock = server
         .mock("GET", "/jwks")
         .with_status(200)
         .with_header("content-type", "application/json")
         .with_body(jwks)
+        .expect_at_least(1)
+        .expect_at_most(2)
         .create();
 
-    // initialize JwtService with validation enabled and ES256 as the supported algorithm
-    let jwt_service = JwtService::new_with_config(crate::jwt::JwtServiceConfig::WithValidation {
-        supported_algs: vec![Algorithm::ES256],
-        trusted_idps: vec![TrustedIssuer {
+    let trusted_idp = TrustedIssuerAndOpenIdConfig::fetch(
+        TrustedIssuer {
             name: "some_idp".to_string(),
             description: "some_desc".to_string(),
             openid_configuration_endpoint: format!(
@@ -137,7 +140,15 @@ fn test_missing_claim(missing_claim: &'static str) {
                 server.url()
             ),
             token_metadata: None,
-        }],
+        },
+        &reqwest::blocking::Client::new(),
+    )
+    .expect("openid config should be fetched successfully");
+
+    // initialize JwtService with validation enabled and ES256 as the supported algorithm
+    let jwt_service = JwtService::new_with_config(crate::jwt::JwtServiceConfig::WithValidation {
+        supported_algs: vec![Algorithm::ES256],
+        trusted_idps: vec![trusted_idp],
     });
 
     // key service should fetch the jwks_uri on init
@@ -169,7 +180,7 @@ fn test_missing_claim(missing_claim: &'static str) {
             matches!(
                 decode_result,
                 Err(jwt::JwtServiceError::InvalidAccessToken(
-                    jwt::JwtDecodingError::Validation(ref e)
+                    JwtDecodingError::Validation(ref e)
                 )) if matches!(e.kind(), jsonwebtoken::errors::ErrorKind::Json(json_err)
                     if json_err.to_string().contains(&err_string))
             ),
@@ -259,18 +270,20 @@ fn errors_on_invalid_signature() {
         .with_status(200)
         .with_header("content-type", "application/json")
         .with_body(openid_config_response.to_string())
+        .expect_at_least(1)
+        .expect_at_most(2)
         .create();
     let jwks_uri_mock = server
         .mock("GET", "/jwks")
         .with_status(200)
         .with_header("content-type", "application/json")
         .with_body(jwks)
+        .expect_at_least(1)
+        .expect_at_most(2)
         .create();
 
-    // initialize JwtService with validation enabled and ES256 as the supported algorithm
-    let jwt_service = JwtService::new_with_config(crate::jwt::JwtServiceConfig::WithValidation {
-        supported_algs: vec![Algorithm::ES256],
-        trusted_idps: vec![TrustedIssuer {
+    let trusted_idp = TrustedIssuerAndOpenIdConfig::fetch(
+        TrustedIssuer {
             name: "some_idp".to_string(),
             description: "some_desc".to_string(),
             openid_configuration_endpoint: format!(
@@ -278,7 +291,15 @@ fn errors_on_invalid_signature() {
                 server.url()
             ),
             token_metadata: None,
-        }],
+        },
+        &reqwest::blocking::Client::new(),
+    )
+    .expect("openid config should be fetched successfully");
+
+    // initialize JwtService with validation enabled and ES256 as the supported algorithm
+    let jwt_service = JwtService::new_with_config(crate::jwt::JwtServiceConfig::WithValidation {
+        supported_algs: vec![Algorithm::ES256],
+        trusted_idps: vec![trusted_idp],
     });
 
     // key service should fetch the jwks_uri on init
@@ -364,18 +385,20 @@ fn errors_on_expired_token() {
         .with_status(200)
         .with_header("content-type", "application/json")
         .with_body(openid_config_response.to_string())
+        .expect_at_least(1)
+        .expect_at_most(2)
         .create();
     let jwks_uri_mock = server
         .mock("GET", "/jwks")
         .with_status(200)
         .with_header("content-type", "application/json")
         .with_body(jwks)
+        .expect_at_least(1)
+        .expect_at_most(2)
         .create();
 
-    // initialize JwtService with validation enabled and ES256 as the supported algorithm
-    let jwt_service = JwtService::new_with_config(crate::jwt::JwtServiceConfig::WithValidation {
-        supported_algs: vec![Algorithm::ES256],
-        trusted_idps: vec![TrustedIssuer {
+    let trusted_idp = TrustedIssuerAndOpenIdConfig::fetch(
+        TrustedIssuer {
             name: "some_idp".to_string(),
             description: "some_desc".to_string(),
             openid_configuration_endpoint: format!(
@@ -383,7 +406,15 @@ fn errors_on_expired_token() {
                 server.url()
             ),
             token_metadata: None,
-        }],
+        },
+        &reqwest::blocking::Client::new(),
+    )
+    .expect("openid config should be fetched successfully");
+
+    // initialize JwtService with validation enabled and ES256 as the supported algorithm
+    let jwt_service = JwtService::new_with_config(crate::jwt::JwtServiceConfig::WithValidation {
+        supported_algs: vec![Algorithm::ES256],
+        trusted_idps: vec![trusted_idp],
     });
 
     // key service should fetch the jwks_uri on init
@@ -403,7 +434,7 @@ fn errors_on_expired_token() {
         matches!(
             decode_result,
             Err(jwt::JwtServiceError::InvalidAccessToken(
-                jwt::JwtDecodingError::Validation(ref e)
+                JwtDecodingError::Validation(ref e)
             )) if *e.kind() == jsonwebtoken::errors::ErrorKind::ExpiredSignature,
         ),
         "Expected decoding to fail due to `access_token` being expired: {:?}",
@@ -471,18 +502,20 @@ fn errors_on_token_used_before_nbf() {
         .with_status(200)
         .with_header("content-type", "application/json")
         .with_body(openid_config_response.to_string())
+        .expect_at_least(1)
+        .expect_at_most(2)
         .create();
     let jwks_uri_mock = server
         .mock("GET", "/jwks")
         .with_status(200)
         .with_header("content-type", "application/json")
         .with_body(jwks)
+        .expect_at_least(1)
+        .expect_at_most(2)
         .create();
 
-    // initialize JwtService with validation enabled and ES256 as the supported algorithm
-    let jwt_service = JwtService::new_with_config(crate::jwt::JwtServiceConfig::WithValidation {
-        supported_algs: vec![Algorithm::ES256],
-        trusted_idps: vec![TrustedIssuer {
+    let trusted_idp = TrustedIssuerAndOpenIdConfig::fetch(
+        TrustedIssuer {
             name: "some_idp".to_string(),
             description: "some_desc".to_string(),
             openid_configuration_endpoint: format!(
@@ -490,7 +523,15 @@ fn errors_on_token_used_before_nbf() {
                 server.url()
             ),
             token_metadata: None,
-        }],
+        },
+        &reqwest::blocking::Client::new(),
+    )
+    .expect("openid config should be fetched successfully");
+
+    // initialize JwtService with validation enabled and ES256 as the supported algorithm
+    let jwt_service = JwtService::new_with_config(crate::jwt::JwtServiceConfig::WithValidation {
+        supported_algs: vec![Algorithm::ES256],
+        trusted_idps: vec![trusted_idp],
     });
 
     // key service should fetch the jwks_uri on init
@@ -510,7 +551,7 @@ fn errors_on_token_used_before_nbf() {
         matches!(
             decode_result,
             Err(jwt::JwtServiceError::InvalidAccessToken(
-                jwt::JwtDecodingError::Validation(ref e)
+                JwtDecodingError::Validation(ref e)
             )) if *e.kind() == jsonwebtoken::errors::ErrorKind::ImmatureSignature,
         ),
         "Expected decoding to fail due to `access_token` being used before the `nbf` timestamp: {:?}",

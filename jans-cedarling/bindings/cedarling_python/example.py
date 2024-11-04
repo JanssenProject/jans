@@ -49,7 +49,7 @@ instance = Cedarling(bootstrap_config)
 
 # show logs
 print("Logs stored in memory:")
-print(*instance.pop_logs(), sep="\n\n")
+print(*instance.pop_logs())
 
 
 # //// Execute authentication request ////
@@ -97,7 +97,7 @@ JSON payload of access token
 }
 """
 
-id_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY3IiOiJiYXNpYyIsImFtciI6IjEwIiwiYXVkIjoiNWI0NDg3YzQtOGRiMS00MDlkLWE2NTMtZjkwN2I4MDk0MDM5IiwiZXhwIjoxNzI0ODM1ODU5LCJpYXQiOjE3MjQ4MzIyNTksInN1YiI6ImJvRzhkZmM1TUtUbjM3bzdnc2RDZXlxTDhMcFdRdGdvTzQxbTFLWndkcTAiLCJpc3MiOiJodHRwczovL2FkbWluLXVpLXRlc3QuZ2x1dS5vcmciLCJqdGkiOiJzazNUNDBOWVNZdWs1c2FIWk5wa1p3Iiwibm9uY2UiOiJjMzg3MmFmOS1hMGY1LTRjM2YtYTFhZi1mOWQwZTg4NDZlODEiLCJzaWQiOiI2YTdmZTUwYS1kODEwLTQ1NGQtYmU1ZC01NDlkMjk1OTVhMDkiLCJqYW5zT3BlbklEQ29ubmVjdFZlcnNpb24iOiJvcGVuaWRjb25uZWN0LTEuMCIsImNfaGFzaCI6InBHb0s2WV9SS2NXSGtVZWNNOXV3NlEiLCJhdXRoX3RpbWUiOjE3MjQ4MzA3NDYsImdyYW50IjoiYXV0aG9yaXphdGlvbl9jb2RlIiwic3RhdHVzIjp7InN0YXR1c19saXN0Ijp7ImlkeCI6MjAyLCJ1cmkiOiJodHRwczovL2FkbWluLXVpLXRlc3QuZ2x1dS5vcmcvamFucy1hdXRoL3Jlc3R2MS9zdGF0dXNfbGlzdCJ9fX0.8BwLLGkFpWGx8wGpvVmNk_Ao8nZrP_WT-zoo-MY4zqY"
+id_token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY3IiOiJiYXNpYyIsImFtciI6IjEwIiwiYXVkIjoiNWI0NDg3YzQtOGRiMS00MDlkLWE2NTMtZjkwN2I4MDk0MDM5IiwiZXhwIjoxNzI0ODM1ODU5LCJpYXQiOjE3MjQ4MzIyNTksInN1YiI6ImJvRzhkZmM1TUtUbjM3bzdnc2RDZXlxTDhMcFdRdGdvTzQxbTFLWndkcTAiLCJpc3MiOiJodHRwczovL2FkbWluLXVpLXRlc3QuZ2x1dS5vcmciLCJqdGkiOiJzazNUNDBOWVNZdWs1c2FIWk5wa1p3Iiwibm9uY2UiOiJjMzg3MmFmOS1hMGY1LTRjM2YtYTFhZi1mOWQwZTg4NDZlODEiLCJzaWQiOiI2YTdmZTUwYS1kODEwLTQ1NGQtYmU1ZC01NDlkMjk1OTVhMDkiLCJqYW5zT3BlbklEQ29ubmVjdFZlcnNpb24iOiJvcGVuaWRjb25uZWN0LTEuMCIsImNfaGFzaCI6InBHb0s2WV9SS2NXSGtVZWNNOXV3NlEiLCJhdXRoX3RpbWUiOjE3MjQ4MzA3NDYsImdyYW50IjoiYXV0aG9yaXphdGlvbl9jb2RlIiwic3RhdHVzIjp7InN0YXR1c19saXN0Ijp7ImlkeCI6MjAyLCJ1cmkiOiJodHRwczovL2FkbWluLXVpLXRlc3QuZ2x1dS5vcmcvamFucy1hdXRoL3Jlc3R2MS9zdGF0dXNfbGlzdCJ9fSwicm9sZSI6IkFkbWluIn0.pU6-2tleV9OzpIMH4coVzu9kmh6Po6VPMchoRGYFYjQ"
 """
 JSON payload of id token
 {
@@ -120,7 +120,8 @@ JSON payload of id token
       "idx": 202,
       "uri": "https://admin-ui-test.gluu.org/jans-auth/restv1/status_list"
     }
-  }
+  },
+  "role": "Admin"
 }
 """
 
@@ -150,6 +151,27 @@ JSON payload of userinfo token
 }
 """
 
+"""
+Policies used:
+@840da5d85403f35ea76519ed1a18a33989f855bf1cf8
+permit(
+    principal is Jans::Workload,
+    action in [Jans::Action::"Update"],
+    resource is Jans::Issue
+)when{
+    principal.org_id == resource.org_id
+};
+
+@444da5d85403f35ea76519ed1a18a33989f855bf1cf8
+permit(
+    principal is Jans::User,
+    action in [Jans::Action::"Update"],
+    resource is Jans::Issue
+)when{
+    principal.country == resource.country
+};
+"""
+
 # Creating cedarling request
 request = Request(
     action_token,
@@ -160,23 +182,42 @@ request = Request(
 
 # Authorize call
 authorize_result = instance.authorize(request)
-print(*instance.pop_logs(), sep="\n\n")
+print(*instance.pop_logs())
 
 # if you change org_id result will be false
 assert authorize_result.is_allowed()
 
+
 # watch on the decision for workload
 workload_result = authorize_result.workload()
-print(workload_result.decision)
+print(f"Result of workload authorization: {workload_result.decision}")
 
 # show diagnostic information
 workload_diagnostic = workload_result.diagnostics
-for i, reason in enumerate(workload_diagnostic.reason):
-    if i == 0:
-        print("reason policies:")
-    print(reason)
+print("Policy ID(s) used:")
+for diagnostic in workload_diagnostic.reason:
+    print(diagnostic)
 
-for i, error in enumerate(workload_diagnostic.errors):
-    if i == 0:
-        print("errors:")
-    print("id:", error.id, "error:", error.error)
+print("Errors during authorization:")
+for diagnostic in workload_diagnostic.errors:
+    print(diagnostic)
+
+print()
+
+# watch on the decision for person
+person_result = authorize_result.person()
+print(f"Result of person authorization: {person_result.decision}")
+person_diagnostic = person_result.diagnostics
+print("Policy ID(s) used:")
+for diagnostic in person_diagnostic.reason:
+    print(diagnostic)
+
+print("Errors during authorization:")
+for diagnostic in person_diagnostic.errors:
+    print(diagnostic)
+
+
+# watch on the decision for role if present
+role_result = authorize_result.role()
+if role_result is not None:
+    print(authorize_result.role().decision)

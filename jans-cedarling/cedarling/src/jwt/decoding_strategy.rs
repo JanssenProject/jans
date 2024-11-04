@@ -8,6 +8,7 @@
 pub mod error;
 pub mod key_service;
 
+pub mod open_id_storage;
 use crate::common::policy_store::TrustedIssuer;
 pub use error::JwtDecodingError;
 use jsonwebtoken as jwt;

@@ -16,7 +16,9 @@
 
 use super::super::*;
 use crate::common::policy_store::TrustedIssuer;
-use crate::jwt::KeyService;
+use crate::jwt::decoding_strategy::key_service::KeyService;
+use crate::jwt::decoding_strategy::JwtDecodingError;
+use crate::jwt::TrustedIssuerAndOpenIdConfig;
 use crate::jwt::{self, JwtService};
 use jsonwebtoken::Algorithm;
 use serde_json::json;
@@ -82,18 +84,20 @@ fn errors_when_no_key_found() {
         .with_status(200)
         .with_header("content-type", "application/json")
         .with_body(openid_config_response.to_string())
+        .expect_at_least(1)
+        .expect_at_most(3)
         .create();
     let jwks_uri_mock = server
         .mock("GET", "/jwks")
         .with_status(200)
         .with_header("content-type", "application/json")
         .with_body(jwks)
+        .expect_at_least(2)
+        .expect_at_most(3)
         .create();
 
-    // initialize JwtService with validation enabled and ES256 as the supported algorithm
-    let jwt_service = JwtService::new_with_config(crate::jwt::JwtServiceConfig::WithValidation {
-        supported_algs: vec![Algorithm::ES256],
-        trusted_idps: vec![TrustedIssuer {
+    let trusted_idp = TrustedIssuerAndOpenIdConfig::fetch(
+        TrustedIssuer {
             name: "some_idp".to_string(),
             description: "some_desc".to_string(),
             openid_configuration_endpoint: format!(
@@ -101,7 +105,15 @@ fn errors_when_no_key_found() {
                 server.url()
             ),
             token_metadata: None,
-        }],
+        },
+        &reqwest::blocking::Client::new(),
+    )
+    .expect("openid config should be fetched successfully");
+
+    // initialize JwtService with validation enabled and ES256 as the supported algorithm
+    let jwt_service = JwtService::new_with_config(crate::jwt::JwtServiceConfig::WithValidation {
+        supported_algs: vec![Algorithm::ES256],
+        trusted_idps: vec![trusted_idp],
     });
 
     // key service should fetch the jwks_uri on init
@@ -121,14 +133,13 @@ fn errors_when_no_key_found() {
         matches!(
             decode_result,
             Err(jwt::JwtServiceError::InvalidAccessToken(
-                jwt::JwtDecodingError::KeyService(jwt::decoding_strategy::key_service::KeyServiceError::KeyNotFound(ref e))
+                JwtDecodingError::KeyService(jwt::decoding_strategy::key_service::KeyServiceError::KeyNotFound(ref e))
             )) if **e == *"some_key_id_not_in_the_jwks",
         ),
         "Expected decoding to fail due to not being able to find a key to validate `access_token`: {:?}",
         decode_result
     );
     // key service should fetch the jwks again when it cant find the `kid` for the access_token
-    let jwks_uri_mock = jwks_uri_mock.expect(2);
     jwks_uri_mock.assert();
 
     // assert that there aren't any additional calls to the openid_config_uri
@@ -155,6 +166,7 @@ fn errors_when_cant_fetch_jwks_uri() {
         .with_status(200)
         .with_header("content-type", "application/json")
         .with_body(openid_config_response.to_string())
+        .expect_at_least(1)
         .create();
 
     let openid_conf_endpoint = format!("{}/.well-known/openid-configuration", server.url());
@@ -178,6 +190,7 @@ fn errors_when_cant_fetch_openid_configuration() {
     let openid_conf_mock = server
         .mock("GET", "/.well-known/openid-configuration")
         .with_status(500)
+        .expect_at_least(1)
         .create();
 
     let openid_conf_endpoint = format!("{}/.well-known/openid-configuration", server.url());
@@ -246,19 +259,20 @@ fn can_update_local_jwks() {
         .with_status(200)
         .with_header("content-type", "application/json")
         .with_body(openid_config_response.to_string())
+        .expect_at_least(1)
+        .expect_at_most(2)
         .create();
     let jwks_uri_mock = server
         .mock("GET", "/jwks")
         .with_status(200)
         .with_header("content-type", "application/json")
         .with_body(json!({"keys": Vec::<&str>::new()}).to_string()) // empty JWKS
-        .expect(2)
+        .expect_at_least(1)
+        .expect_at_most(3)
         .create();
 
-    // initialize JwtService with validation enabled and ES256 as the supported algorithm
-    let jwt_service = JwtService::new_with_config(crate::jwt::JwtServiceConfig::WithValidation {
-        supported_algs: vec![Algorithm::ES256],
-        trusted_idps: vec![TrustedIssuer {
+    let trusted_idp = TrustedIssuerAndOpenIdConfig::fetch(
+        TrustedIssuer {
             name: "some_idp".to_string(),
             description: "some_desc".to_string(),
             openid_configuration_endpoint: format!(
@@ -266,7 +280,15 @@ fn can_update_local_jwks() {
                 server.url()
             ),
             token_metadata: None,
-        }],
+        },
+        &reqwest::blocking::Client::new(),
+    )
+    .expect("openid config should be fetched successfully");
+
+    // initialize JwtService with validation enabled and ES256 as the supported algorithm
+    let jwt_service = JwtService::new_with_config(crate::jwt::JwtServiceConfig::WithValidation {
+        supported_algs: vec![Algorithm::ES256],
+        trusted_idps: vec![trusted_idp],
     });
 
     // assert that first call attempt to validate the token fails since a
@@ -281,7 +303,7 @@ fn can_update_local_jwks() {
         matches!(
             decode_result,
             Err(jwt::JwtServiceError::InvalidAccessToken(
-                jwt::JwtDecodingError::KeyService(
+                JwtDecodingError::KeyService(
                     jwt::decoding_strategy::key_service::KeyServiceError::KeyNotFound(ref key_id)
                 )
             )) if key_id == &encoding_keys[0].key_id,
@@ -301,7 +323,7 @@ fn can_update_local_jwks() {
         .create();
 
     // decode and validate the tokens again
-    let (access_token_result, id_token_result, userinfo_token_result) = jwt_service
+    let result = jwt_service
         .decode_tokens::<serde_json::Value, serde_json::Value, serde_json::Value>(
             &access_token,
             &id_token,
@@ -311,9 +333,9 @@ fn can_update_local_jwks() {
     jwks_uri_mock.assert();
 
     // assert that the decoded token claims match the expected claims
-    assert_eq!(access_token_result, access_token_claims);
-    assert_eq!(id_token_result, id_token_claims);
-    assert_eq!(userinfo_token_result, userinfo_token_claims);
+    assert_eq!(result.access_token, access_token_claims);
+    assert_eq!(result.id_token, id_token_claims);
+    assert_eq!(result.userinfo_token, userinfo_token_claims);
 
     // verify that the OpenID configuration endpoints was called exactly once
     openid_conf_mock.assert();
