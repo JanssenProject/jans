@@ -13,8 +13,8 @@ import io.jans.casa.misc.Utils;
 @ObjectClass("jansClntAuthz")
 public class ClientAuthorization extends Entry {
 
-    @AttributeName
-    private String clnId;
+    @AttributeName(name = "clnId")
+    private String jansClntId;
 
     @AttributeName(name = "jansScope")
     private List<String> scopes;
