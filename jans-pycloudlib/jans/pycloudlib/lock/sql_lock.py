@@ -46,16 +46,9 @@ class SqlLock(BaseLock):
     def engine_url(self) -> str:
         """Engine connection URL."""
         host = os.environ.get("CN_SQL_DB_HOST", "localhost")
-
         port = os.environ.get("CN_SQL_DB_PORT", 3306)
-
         database = os.environ.get("CN_SQL_DB_NAME", "jans")
-
         user = os.environ.get("CN_SQL_DB_USER", "jans")
-
-        # password_file = os.environ.get("CN_SQL_PASSWORD_FILE", "/etc/jans/conf/sql_password")
-
-        # password = get_password_from_file(password_file)
         password = get_sql_password(self.manager)
 
         if self._dialect in ("pgsql", "postgresql"):
