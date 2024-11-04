@@ -7520,6 +7520,19 @@
     Policy and Schema Authoring
   </a>
   
+    <nav class="md-nav" aria-label="Policy and Schema Authoring">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#minimum-supported-cedar-policy-schema" class="md-nav__link">
+    Minimum supported cedar-policy schema
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -8751,6 +8764,19 @@
     Policy and Schema Authoring
   </a>
   
+    <nav class="md-nav" aria-label="Policy and Schema Authoring">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#minimum-supported-cedar-policy-schema" class="md-nav__link">
+    Minimum supported cedar-policy schema
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -8835,7 +8861,7 @@
 </ul>
 <h2 id="cedar-policies-schema">Cedar Policies Schema<a class="headerlink" href="#cedar-policies-schema" title="Permanent link">#</a></h2>
 <p>The <code>cedar_policies</code> field outlines the Cedar policies that will be used in Cedarling. Multiple policies can be defined, with policy requiring a unique <code>policy_id</code>.</p>
-<p><div class="highlight"><pre><span></span><code><span class="w">  </span><span class="nt">&quot;cedar_policies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="w">  </span><span class="nt">&quot;cedar_policies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;unique_policy_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;simple policy example&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">      </span><span class="nt">&quot;creation_date&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2024-09-20T17:22:39.996050&quot;</span><span class="p">,</span><span class="w"></span>
@@ -8844,10 +8870,12 @@
 <span class="w">    </span><span class="err">...</span><span class="w"></span>
 <span class="w">  </span><span class="p">}</span><span class="w"></span>
 </code></pre></div>
-- <strong>unique_policy_id</strong>: (<em>String</em>) A uniqe policy ID used to for tracking and auditing purposes.
-- <strong>description</strong> : (<em>String</em>) A brief description of cedar policy
-- <strong>creation_date</strong> :  (<em>String</em>) Policy creating date in <code>YYYY-MM-DDTHH:MM:SS.ssssss</code>
-- <strong>policy_content</strong> : (<em>String</em>) The policy content, encoded in Base64 format.</p>
+<ul>
+<li><strong>unique_policy_id</strong>: (<em>String</em>) A uniqe policy ID used to for tracking and auditing purposes.</li>
+<li><strong>description</strong> : (<em>String</em>) A brief description of cedar policy</li>
+<li><strong>creation_date</strong> :  (<em>String</em>) Policy creating date in <code>YYYY-MM-DDTHH:MM:SS.ssssss</code></li>
+<li><strong>policy_content</strong> : (<em>String</em>) The policy content, encoded in Base64 format.</li>
+</ul>
 <h3 id="example-of-cedar_policies">Example of <code>cedar_policies</code><a class="headerlink" href="#example-of-cedar_policies" title="Permanent link">#</a></h3>
 <p>Here is a non-normative example of the <code>cedar_policies</code> field:</p>
 <div class="highlight"><pre><span></span><code><span class="w">  </span><span class="nt">&quot;cedar_policies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
@@ -8891,7 +8919,7 @@
 <ul>
 <li><strong>type</strong> : (String, no spaces) The type of token (e.g., Access, ID, Userinfo, Transaction).</li>
 <li><strong>user_id</strong> : (String) The claim used to create the Cedar entity associated with this token.</li>
-<li><strong>role_mapping</strong> : (String, <em>optional</em>) The claim used to create a role for the token. The default value of <code>role_mapping</code> is <code>role</code>.</li>
+<li><strong>role_mapping</strong> : (String, <em>optional</em>) The claim used to create a role for the token. The default value of <code>role_mapping</code> is <code>role</code>. The claim can be string or array of string.</li>
 </ul>
 <p><strong>Note</strong>: Only one token should include the <code>role_mapping</code> field in the list of <code>token_metadata</code>.</p>
 <h2 id="example-policy-store">Example Policy store<a class="headerlink" href="#example-policy-store" title="Permanent link">#</a></h2>
@@ -8931,19 +8959,71 @@
 <span class="p">}</span><span class="w"></span>
 </code></pre></div>
 <h2 id="policy-and-schema-authoring">Policy and Schema Authoring<a class="headerlink" href="#policy-and-schema-authoring" title="Permanent link">#</a></h2>
-<p>You can hand create your Cedar policies and schema in 
-<a href="https://marketplace.visualstudio.com/items?itemName=cedar-policy.vscode-cedar">Visual Studio</a>. 
-Make sure you run the cedar command line tool to validate both your schema and policies. </p>
-<p>The easiest way to author your policy store is to use the Policy Designer in 
+<p>You can hand create your Cedar policies and schema in
+<a href="https://marketplace.visualstudio.com/items?itemName=cedar-policy.vscode-cedar">Visual Studio</a>.
+Make sure you run the cedar command line tool to validate both your schema and policies.</p>
+<p>The easiest way to author your policy store is to use the Policy Designer in
 <a href="https://cloud.gluu.org/agama-lab">Agama Lab</a>. This tool helps you define the policies, schema and
 trusted IDPs and to publish a policy store to a Github repository.</p>
+<h3 id="minimum-supported-cedar-policy-schema">Minimum supported <code>cedar-policy schema</code><a class="headerlink" href="#minimum-supported-cedar-policy-schema" title="Permanent link">#</a></h3>
+<p>Here is example of a minimum supported <code>cedar-policy schema</code>:</p>
+<div class="highlight"><pre><span></span><code>namespace Jans {
+entity id_token = {&quot;aud&quot;: String,&quot;iss&quot;: String, &quot;sub&quot;: String};
+entity Role;
+entity User in [Role] = {};
+entity Access_token = {&quot;aud&quot;: String,&quot;iss&quot;: String, &quot;jti&quot;: String, &quot;client_id&quot;: String};
+entity Workload = {};
+
+entity Issue = {};
+action &quot;Update&quot; appliesTo {
+  principal: [Workload, User, Role],
+  resource: [Issue],
+  context: {}
+};
+}
+</code></pre></div>
+<p>You can extend all of this entites and add your own.</p>
+<p>Mandatory entities is: <code>id_token</code>, <code>Role</code>, <code>User</code>, <code>Access_token</code>, <code>Workload</code>.<br />
+<code>Issue</code> entity and <code>Update</code> action are optinal. Is created for example, you can create others for your needs.</p>
+<p><code>Context</code> and <code>Resource</code> entities you can pass during authorization request and next entites creating based on the JWT tokens:</p>
+<ul>
+<li><code>id_token</code> - entity based on the <code>id</code> JWT token fields.</li>
+<li>
+<p>ID for entity based in <code>jti</code> field.</p>
+</li>
+<li>
+<p><code>Role</code> - define role of user.</p>
+</li>
+<li>Mapping defined in <code>Token Metadata Schema</code>.</li>
+<li>Claim in JWT usually is string or array of string.</li>
+<li>
+<p>If many roles present, the <code>cedarling</code> will try each to find first permit case.</p>
+</li>
+<li>
+<p><code>User</code> - entity based on the <code>id</code>and <code>userinfo</code> JWT token fields.</p>
+</li>
+<li>If <code>id</code>and <code>userinfo</code> JWT token fields has different <code>sub</code> value, <code>userinfo</code> JWT token will be ignored.</li>
+<li>
+<p>ID for entity based in <code>sub</code> field. (will be changed in future)</p>
+</li>
+<li>
+<p><code>Access_token</code> - entity based on the <code>access</code> JWT token fields.</p>
+</li>
+<li>
+<p>ID for entity based in <code>jti</code> field.</p>
+</li>
+<li>
+<p><code>Workload</code> - entity based on the <code>access</code> JWT token fields.</p>
+</li>
+<li>ID for entity based in <code>client_id</code> field.</li>
+</ul>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-30T17:01:05+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-30</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-11-04T21:16:43+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-11-04</span>
       
         <br>
         Created:
