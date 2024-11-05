@@ -106,8 +106,8 @@ impl HttpClient {
 
     /// Sends a GET request to the specified URI with retry logic.
     ///
-    /// This method will attempt to fetch the resource up to `MAX_RETRIES` times, with an increasing delay
-    /// between each attempt. The delay duration is adjusted for testing and non-testing environments.
+    /// This method will attempt to fetch the resource up to 3 times, with an increasing delay
+    /// between each attempt.
     fn get(&self, uri: &str) -> Result<reqwest::blocking::Response, KeyServiceError> {
         // Fetch the JWKS from the jwks_uri
         let mut attempts = 0;
