@@ -38,7 +38,7 @@ pub struct PolicyStore {
     /// This field may contain issuers that are trusted to provide tokens, allowing for additional
     /// verification and security when handling JWTs.
     #[allow(dead_code)]
-    #[serde(alias = "trusted_issuers")]
+    #[serde(alias = "identity_source")]
     pub trusted_issuers: Option<Vec<TrustedIssuer>>,
 }
 
