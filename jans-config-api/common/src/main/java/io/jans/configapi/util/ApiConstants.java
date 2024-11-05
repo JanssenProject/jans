@@ -90,6 +90,7 @@ public class ApiConstants {
     public static final String SEARCH = "/search";
     public static final String JANSID_PATH = "/id";
     public static final String SID_PATH = "/sid";
+    public static final String SERVICE_STATUS_PATH = "/service-status";
         
     public static final String APP_VERSION = "/app-version";
     public static final String SERVER_STAT = "/server-stat";
@@ -145,6 +146,7 @@ public class ApiConstants {
     public static final String TOKEN_CODE = "tknCde";
     public static final String OUTSIDE_SID = "outsideSid";
     public static final String JANS_SESS_ATTR = "jansSessAttr";
+    public static final String JANS_SERVICE_NAME = "service";
 
 
     public static final String ALL = "all";

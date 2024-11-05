@@ -28,6 +28,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -318,7 +320,7 @@ public class DataUtil {
 
     }
 
-    private static String encodeDate(Date date, String primaryKey, PersistenceEntryManager persistenceEntryManager) {
+    public static String encodeDate(Date date, String primaryKey, PersistenceEntryManager persistenceEntryManager) {
         logger.info("Encode String Date - date:{}, primaryKey:{}, persistenceEntryManager:{}", date, primaryKey,
                 persistenceEntryManager);
         String dateValue = null;
@@ -333,7 +335,7 @@ public class DataUtil {
 
     }
 
-    private static Date decodeStringDate(String dateString, String primaryKey,
+    public static Date decodeStringDate(String dateString, String primaryKey,
             PersistenceEntryManager persistenceEntryManager) {
         logger.info("Decode String Date - dateString:{}, primaryKey:{}, persistenceEntryManager:{}", dateString,
                 primaryKey, persistenceEntryManager);
@@ -359,22 +361,25 @@ public class DataUtil {
             return dateFilter;
         }
 
-        Date dateValue = decodeStringDate(fieldFilterData.getValue(), primaryKey, persistenceEntryManager);
-        logger.info(" fieldFilterData.getField():{}, fieldFilterData.getValue():{}, dateValue:{}",
-                fieldFilterData.getField(), fieldFilterData.getValue(), dateValue);
+        String strDateField = fieldFilterData.getField();
+        String strDateValue = fieldFilterData.getValue();
+        LocalDateTime dateValue = getIso8601Date(strDateValue, null);
+        logger.info(" strDateField:{}, fieldFilterData.getValue():{}, dateValue:{}",
+                strDateField, fieldFilterData.getValue(), dateValue);
+
+        logger.debug(" Final strDateField:{}, dateValue:{}", strDateField, dateValue );
 
         if (FilterOperator.EQUALITY.getSign().equalsIgnoreCase(fieldFilterData.getOperator())) {
-            dateFilter = Filter.createEqualityFilter(fieldFilterData.getField(), dateValue);
-
+            dateFilter = Filter.createEqualityFilter(strDateField, dateValue);
         } else if (FilterOperator.GREATER.getSign().equalsIgnoreCase(fieldFilterData.getOperator())
                 || FilterOperator.GREATER_OR_EQUAL.getSign().equalsIgnoreCase(fieldFilterData.getOperator())) {
 
-            dateFilter = Filter.createGreaterOrEqualFilter(fieldFilterData.getField(), dateValue);
+            dateFilter = Filter.createGreaterOrEqualFilter(strDateField, dateValue);
 
         } else if (FilterOperator.LESS.getSign().equalsIgnoreCase(fieldFilterData.getOperator())
                 || FilterOperator.GREATER_OR_EQUAL.getSign().equalsIgnoreCase(fieldFilterData.getOperator())) {
 
-            dateFilter = Filter.createLessOrEqualFilter(fieldFilterData.getField(), dateValue);
+            dateFilter = Filter.createLessOrEqualFilter(strDateField, dateValue);
 
         }
         logger.info("Final Date Filter for fieldFilterData:{}, dateFilter:{}", fieldFilterData, dateFilter);
@@ -419,6 +424,70 @@ public class DataUtil {
         }
         logger.info("Final Date Filter for fieldFilterData:{}, dataValue:{}", fieldFilterData, dataValue);
         return dataFilter;
+    }
+
+    public static LocalDateTime getIso8601Date(String dateString, String pattern) {
+        logger.info(" getIso8601Date for dateString:{}, pattern:{}", dateString, pattern);
+        DateTimeFormatter formatter = null;
+        LocalDateTime date = null;
+        try {
+
+            if (StringUtils.isBlank(pattern)) {
+                formatter = getDateFormat(dateString);
+            }
+
+            logger.debug("getIso8601Date for dateString:{}, formatter:{}", dateString, formatter);
+            date = LocalDateTime.parse(dateString, formatter);
+            logger.info("\n\n getIso8601Date for dateString:{}, formatter:{}", dateString, formatter);
+
+        } catch (Exception ex) {
+            logger.error(" Error while parsing dateString:{}, format:{}", dateString, formatter, ex);
+        }
+        return date;
+    }
+
+    private static DateTimeFormatter getDateFormat(String dateString) {
+        logger.info("\n\n Get Date Format for dateString:{}", dateString);
+        DateTimeFormatter fomatter = null;
+        if (StringUtils.isBlank(dateString)) {
+            return fomatter;
+        }
+        logger.debug(
+                "\n\n Get Date Format for dateString:{}, dateString.length():{}, dateString.contains(T):{}, dateString.contains(Z):{}",
+                dateString, dateString.length(), dateString.contains("T"), dateString.contains("Z"));
+        if (dateString.contains("T") && dateString.indexOf("Z") <= 0) {
+            logger.trace(" 1 \n");
+            if (dateString.length() == 22) {
+                logger.trace(" 1.1 \n");
+                fomatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME; // '2011-12-03T10:15:30'
+            } else if (dateString.length() == 23) {
+                logger.trace(" 1.2 \n");
+                fomatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:sss");
+            } else if (dateString.length() > 23) {
+                logger.trace(" 1.3 \n");
+                fomatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME; // '2011-12-03T10:15:30+01:00'
+            }
+        } else if (dateString.contains("T") && dateString.contains("Z")) {
+            logger.trace(" 2 \n");
+            if (dateString.length() == 23) {
+                logger.trace(" 2.1 \n");
+                fomatter = DateTimeFormatter.ISO_INSTANT; // '2011-12-03T10:15:30Z'
+            }else {
+                logger.trace(" 2.3 \n");
+                fomatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:sssZ");
+            }
+        } else if (dateString.length() == 22) {
+            logger.trace(" 3 \n");
+            fomatter = DateTimeFormatter.ofPattern("yyyy-MM-dd' 'HH:mm:ss");
+        } else if (dateString.length() == 23) {
+            logger.trace(" 4 \n");
+            fomatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:sss");
+        } else if (dateString.length() == 10) {
+            logger.trace(" 5 \n");
+            fomatter = DateTimeFormatter.ISO_LOCAL_DATE; // '2011-12-03'
+        }
+        logger.info("\n\n Final Date Format for dateString:{}, fomatter:{}", dateString, fomatter);
+        return fomatter;
     }
 
 }
