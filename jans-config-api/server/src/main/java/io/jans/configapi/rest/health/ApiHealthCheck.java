@@ -6,6 +6,8 @@
 
 package io.jans.configapi.rest.health;
 
+import static io.jans.as.model.util.Util.escapeLog;
+
 import com.fasterxml.jackson.databind.JsonNode;
 
 import io.jans.configapi.core.model.HealthStatus;
@@ -21,6 +23,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -32,6 +35,7 @@ import jakarta.ws.rs.core.Response;
 
 import org.slf4j.Logger;
 import java.util.ArrayList;
+import java.util.Map;
 
 @Path(ApiConstants.HEALTH)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -133,7 +137,7 @@ public class ApiHealthCheck  {
     @Operation(summary = "Returns application server status", description = "Returns application server status", operationId = "get-server-stat", tags = {
     "Health - Check" })
     @ApiResponses(value = {
-    @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = StatsData.class))),
+    @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = StatsData.class), examples = @ExampleObject(name = "Response json example", value = "example/health/server-stat.json"))),
     @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @Path(ApiConstants.SERVER_STAT)
@@ -160,7 +164,25 @@ public class ApiHealthCheck  {
         return Response.ok(statusCheckerTimer.getAppVersionData(artifact)).build();
     }
 
-    
+    @Operation(summary = "Fetch service status", description = "Fetch service status", operationId = "get-service-status", tags = {
+            "Health - Check" })
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Map.class), examples = @ExampleObject(name = "Response json example", value = "example/health/service-status.json"))),
+            @ApiResponse(responseCode = "500", description = "InternalServerError") })
+    @GET
+    @ProtectedApi(scopes = { ApiAccessConstants.SUPER_ADMIN_READ_ACCESS }, groupScopes = {}, superScopes = {})
+    @Path(ApiConstants.SERVICE_STATUS_PATH)
+    public Response getServiceStatus(
+            @Parameter(description = "Service name to check status") @DefaultValue(ApiConstants.ALL) @QueryParam(value = ApiConstants.JANS_SERVICE_NAME) String service) {
+        if (logger.isInfoEnabled()) {
+            logger.info("Fetch ServiceStatus info - service:{}", escapeLog(service));
+        }
+        
+        Map<String, String> serviceStatus = statusCheckerTimer.getServiceStatus(service);
+        logger.debug("serviceStatus:{}", serviceStatus);
+        return Response.ok(serviceStatus).build();
+    }
+
     private void checkDatabaseConnection() {
         configurationService.findConf();
     }

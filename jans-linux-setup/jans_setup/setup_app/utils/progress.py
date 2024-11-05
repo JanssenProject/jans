@@ -22,7 +22,7 @@ except:
 
 
 class ShowProgress(Thread):
-    def __init__(self, services, queue, timeout=15):
+    def __init__(self, services, queue, timeout=30):
         Thread.__init__(self)
         self.services = services
         self.service_names = [s['name'] for s in services]

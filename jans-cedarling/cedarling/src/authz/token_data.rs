@@ -77,11 +77,6 @@ pub enum GetTokenClaimValue {
         expected_type: String,
         got_type: String,
     },
-    #[error("could not convert json value to: {expected_type}, got: {got_type}")]
-    NotCorrectType {
-        expected_type: String,
-        got_type: String,
-    },
 }
 
 impl GetTokenClaimValue {

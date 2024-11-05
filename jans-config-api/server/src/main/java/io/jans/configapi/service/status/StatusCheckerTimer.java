@@ -6,9 +6,12 @@
 
 package io.jans.configapi.service.status;
 
-import io.jans.util.process.ProcessHelper;
+
 
 import com.fasterxml.jackson.databind.JsonNode;
+
+import static io.jans.as.model.util.Util.escapeLog;
+
 import io.jans.configapi.configuration.ConfigurationFactory;
 import io.jans.configapi.core.util.Jackson;
 import io.jans.configapi.model.status.StatsData;
@@ -21,11 +24,13 @@ import io.jans.service.cdi.event.Scheduled;
 import io.jans.service.timer.event.TimerEvent;
 import io.jans.service.timer.schedule.TimerSchedule;
 import io.jans.util.StringHelper;
+import io.jans.util.process.ProcessHelper;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import java.io.ByteArrayOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.Date;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import jakarta.annotation.PostConstruct;
@@ -48,6 +53,7 @@ public class StatusCheckerTimer {
     private static final int DEFAULT_INTERVAL = 5 * 60; // 1 minute
     public static final String PROGRAM_FACTER = "facter";
     public static final String PROGRAM_SHOW_VERSION = "/opt/jans/printVersion.py";
+    public static final String SERVICE_STATUS = "/opt/jans/bin/jans_services_status.py";
 
     @Inject
     private Logger log;
@@ -164,7 +170,9 @@ public class StatusCheckerTimer {
     }
     
     public JsonNode getAppVersionData(String artifact) {
-        log.debug("Getting application version for artifact:{}", artifact);
+        if (log.isInfoEnabled()) {
+            log.debug("Getting application version for artifact:{}", escapeLog(artifact));
+        }
        
         JsonNode appVersion = null;
         if (!isLinux()) {
@@ -202,6 +210,50 @@ public class StatusCheckerTimer {
         }
         log.debug("Server application version - appVersion:{}", appVersion);
         return appVersion;
+    }
+
+    public Map<String, String> getServiceStatus(String serviceName) {
+        if (log.isInfoEnabled()) {
+            log.info("Getting status for serviceName:{}", escapeLog(serviceName));
+        }
+
+        Map<String, String> serviceStatus = null;
+        ObjectMapper mapper = new ObjectMapper();
+        if (!isLinux()) {
+            return serviceStatus;
+        }
+
+        CommandLine commandLine = new CommandLine(SERVICE_STATUS);
+        if (StringUtils.isNotBlank(serviceName) && !serviceName.equalsIgnoreCase(ApiConstants.ALL)) {
+            commandLine.addArgument(" " + serviceName);
+        }
+        commandLine.addArgument("--json");
+        log.debug("Getting service status for commandLine:{}", commandLine);
+
+        String resultOutput;
+        try (ByteArrayOutputStream bos = new ByteArrayOutputStream(4096);) {
+
+            boolean result = ProcessHelper.executeProgram(commandLine, false, 0, bos);
+            if (!result) {
+                return serviceStatus;
+            }
+
+            resultOutput = new String(bos.toByteArray(), UTF_8);
+            log.info("resultOutput:{}", resultOutput);
+
+            if (StringUtils.isNotBlank(resultOutput)) {
+                serviceStatus = mapper.readValue(resultOutput, Map.class);
+            }
+
+        } catch (UnsupportedEncodingException uex) {
+            log.error("Failed to parse serviceStatus data program {} output", SERVICE_STATUS, uex);
+            return serviceStatus;
+        } catch (Exception ex) {
+            log.error("Failed to execute serviceStatus program {} output", SERVICE_STATUS, ex);
+            return serviceStatus;
+        }
+        log.debug("Service Status data - serviceStatus:{}", serviceStatus);
+        return serviceStatus;
     }
 
     private void printDirectory() {

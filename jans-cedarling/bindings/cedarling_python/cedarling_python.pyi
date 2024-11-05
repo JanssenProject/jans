@@ -109,6 +109,10 @@ class AuthorizeResult:
 
     def workload(self) -> AuthorizeResultResponse: ...
 
+    def person(self) -> AuthorizeResultResponse: ...
+
+    def role(self) -> AuthorizeResultResponse | None: ...
+
 
 @final
 class AuthorizeResultResponse:

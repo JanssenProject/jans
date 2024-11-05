@@ -51,6 +51,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
 
 @Path(ApiConstants.CONFIG + ApiConstants.SCRIPTS)
@@ -58,6 +59,7 @@ import org.apache.commons.lang.StringUtils;
 @Produces(MediaType.APPLICATION_JSON)
 public class CustomScriptResource extends ConfigBaseResource {
 
+    private static final String CUSTOM_FILE_SCRIPT_DEFAULT_LOCATION = "/opt/jans/jetty/jans-auth/custom/script/";
     private static final String CUSTOM_SCRIPT = "custom script";
     private static final String PATH_SEPARATOR = "/";
 
@@ -220,6 +222,10 @@ public class CustomScriptResource extends ConfigBaseResource {
         updateRevision(customScript, null);
         customScript.setDn(customScriptService.buildDn(inum));
         customScript.setInum(inum);
+        
+        //custom handling of if ScriptLocationType.FILE - issues#9979
+        updateFileTypeCustomScript(customScript);
+        
         customScriptService.add(customScript);
         logger.debug("Custom Script added {}", customScript);
         return Response.status(Response.Status.CREATED).entity(customScript).build();
@@ -245,6 +251,9 @@ public class CustomScriptResource extends ConfigBaseResource {
         updateRevision(customScript, existingScript);
         logger.debug("Custom Script to be updated {}", customScript);
 
+        //custom handling of if ScriptLocationType.FILE - issues#9979
+        updateFileTypeCustomScript(customScript);
+        
         customScriptService.update(customScript);
         
         logger.debug("Check if script is enabled:{}", existingScript.isEnabled());
@@ -467,6 +476,26 @@ public class CustomScriptResource extends ConfigBaseResource {
         final GluuConfiguration gluuConfiguration = configurationService.findGluuConfiguration();
         gluuConfiguration.setAuthenticationMode(null);
         configurationService.merge(gluuConfiguration);
+    }
+
+    private CustomScript updateFileTypeCustomScript(CustomScript customScript) {
+        logger.info("Handling CustomScript if location type is File - customScript:{}", customScript);
+        // Handling for File type customScript
+        if (customScript == null) {
+            return customScript;
+        }
+        logger.info("Handling CustomScript if location type is File - customScript.getLocationType().getValue():{}, customScript.getLocationPath():{}", customScript.getLocationType().getValue(), customScript.getLocationPath());
+        if (ScriptLocationType.FILE.getValue().equalsIgnoreCase(customScript.getLocationType().getValue())) {
+            logger.info("Modifying customScript as getLocationType is File - customScript:{}", customScript);
+            String fileName = CUSTOM_FILE_SCRIPT_DEFAULT_LOCATION;
+            if (StringUtils.isNotBlank(customScript.getLocationPath())) {
+                fileName = fileName + FilenameUtils.getName(customScript.getLocationPath());
+                customScript.setLocationPath(fileName);
+            }
+        }
+        
+        logger.info("Handling CustomScript if location type is File - customScript.getLocationType().getValue():{}, customScript.getLocationPath():{}", customScript.getLocationType().getValue(), customScript.getLocationPath());
+        return customScript;
     }
 
 }
