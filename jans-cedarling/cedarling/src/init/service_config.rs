@@ -50,6 +50,19 @@ impl ServiceConfig {
             })
             .collect::<Result<Vec<_>, _>>()?;
 
+        // TODO Is this where identity_source should be handled?
+        let _identity_source_and_openid = policy_store
+            .identity_source
+            .clone()  // we need clone to avoid borrowing
+            .unwrap_or_default()
+            .values()
+            .map(|identity_source| {
+                // TODO This will need to be generalised.
+                // TrustedIssuerAndOpenIdConfig::fetch(identity_source.clone(), &client)
+                Ok(identity_source.openid_configuration_endpoint.clone())
+            })
+            .collect::<Result<Vec<String>, jwt::KeyServiceError>>()?;
+
         let builder = ServiceConfig::builder()
             .jwt_algorithms(parse_jwt_algorithms(bootstrap)?)
             .policy_store(policy_store)
