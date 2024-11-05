@@ -7,13 +7,14 @@
 
 use core::panic;
 use jsonwebkey as jwk;
-use jsonwebtoken as jwt;
+use jsonwebtoken::{self as jwt};
 use serde::Serialize;
 use std::{
     time::{SystemTime, UNIX_EPOCH},
     u64,
 };
 
+#[derive(Clone)]
 pub struct EncodingKey {
     pub key_id: String,
     pub key: jwt::EncodingKey,
@@ -101,6 +102,35 @@ impl Timestamp {
         let now = SystemTime::now();
         now.duration_since(UNIX_EPOCH).unwrap().as_secs() + 3600
     }
+}
+
+/// The arguments for [`generate_token_using_claims`]
+pub struct GenerateTokensArgs {
+    pub access_token_claims: serde_json::Value,
+    pub id_token_claims: serde_json::Value,
+    pub userinfo_token_claims: serde_json::Value,
+    pub encoding_keys: Vec<EncodingKey>,
+}
+
+/// Generates tokens using the given encoding keys.
+///
+/// The `access_token` and `userinfo_token` will be encoded by the first key in the
+/// `Vec` and the `id_token` will be encoded by the second.
+///
+/// # Panics
+///
+/// Panics when a token cannot be encoded.
+pub fn generate_tokens_using_claims(args: GenerateTokensArgs) -> (String, String, String) {
+    let access_token =
+        generate_token_using_claims(&args.access_token_claims, &args.encoding_keys[0])
+            .unwrap_or_else(|e| panic!("Failed to generate access_token: {:?}", e));
+    let id_token = generate_token_using_claims(&args.id_token_claims, &args.encoding_keys[1])
+        .unwrap_or_else(|e| panic!("Failed to generate id_token: {:?}", e));
+    let userinfo_token =
+        generate_token_using_claims(&args.userinfo_token_claims, &args.encoding_keys[0])
+            .unwrap_or_else(|e| panic!("Failed to generate userinfo_token: {:?}", e));
+
+    (access_token, id_token, userinfo_token)
 }
 
 /// Generates a token string signed with ES256

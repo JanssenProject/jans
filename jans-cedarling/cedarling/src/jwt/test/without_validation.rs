@@ -50,12 +50,13 @@ fn can_decode_claims_without_validation() {
     });
 
     // generate the signed token strings
-    let access_token = generate_token_using_claims(&access_token_claims, &encoding_keys[0])
-        .unwrap_or_else(|e| panic!("Failed to generate access_token: {:?}", e));
-    let id_token = generate_token_using_claims(&id_token_claims, &encoding_keys[1])
-        .unwrap_or_else(|e| panic!("Failed to generate id_token: {:?}", e));
-    let userinfo_token = generate_token_using_claims(&userinfo_token_claims, &encoding_keys[0])
-        .unwrap_or_else(|e| panic!("Failed to generate userinfo_token: {:?}", e));
+    let (access_token, id_token, userinfo_token) =
+        generate_tokens_using_claims(GenerateTokensArgs {
+            access_token_claims: access_token_claims.clone(),
+            id_token_claims: id_token_claims.clone(),
+            userinfo_token_claims: userinfo_token_claims.clone(),
+            encoding_keys,
+        });
 
     // decode and validate both the access token and the ID token
     let result = jwt_service
