@@ -27,7 +27,7 @@ test_cases_err = [
     ("policy-store_schema_err_json.json",
      "unable to unmarshal cedar policy schema json to the structure"),
     ("policy-store_schema_err_cedar_mistake.json",
-     "Could not load policy: failed to parse the policy store from `policy_store.json`: unable to parse cedar policy schema json: failed to resolve type: User_TypeNotExist at line 32 column 1"),
+     "Could not load policy: failed to parse the policy store from policy_store json: unable to parse cedar policy schema: failed to resolve type: User_TypeNotExist at line 32 column 1"),
 ]
 
 
@@ -56,7 +56,8 @@ def test_load_policy_store(sample_bootstrap_config, policy_file_name, expected_e
         error_message = str(e)
         assert error_message != "", "error message should not be empty"
 
-        assert expected_error in error_message, "expected error message not found"
+        assert expected_error in error_message, "expected error message not found, but: {}".format(
+            error_message)
     else:
         raise Exception("expected error not found")
 

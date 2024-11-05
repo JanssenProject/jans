@@ -11,14 +11,43 @@
 use crate::common::policy_store::TrustedIssuer;
 use crate::jwt;
 
+use super::decoding_strategy::key_service::{fetch_openid_config, OpenIdConfig};
+
 /// Configuration for JWT service
 pub enum JwtServiceConfig {
     /// Decoding strategy that does not perform validation.
-    WithoutValidation,
+    WithoutValidation {
+        trusted_idps: Vec<TrustedIssuerAndOpenIdConfig>,
+    },
 
     /// Decoding strategy that performs validation using a key service and supported algorithms.
     WithValidation {
         supported_algs: Vec<jwt::Algorithm>,
-        trusted_idps: Vec<TrustedIssuer>,
+        trusted_idps: Vec<TrustedIssuerAndOpenIdConfig>,
     },
+}
+
+/// Structure to store `TrustedIssuer` and `OpenIdConfig` in one place.
+#[derive(Clone)]
+pub struct TrustedIssuerAndOpenIdConfig {
+    pub trusted_issuer: TrustedIssuer,
+    pub openid_config: OpenIdConfig,
+}
+
+impl TrustedIssuerAndOpenIdConfig {
+    /// Fetch openid configuration based on the `TrustedIssuer` and return config
+    pub fn fetch(
+        trusted_issuer: TrustedIssuer,
+        client: &reqwest::blocking::Client,
+    ) -> Result<Self, jwt::KeyServiceError> {
+        let openid_config = fetch_openid_config(
+            trusted_issuer.openid_configuration_endpoint.as_str(),
+            client,
+        )?;
+
+        Ok(Self {
+            trusted_issuer,
+            openid_config,
+        })
+    }
 }

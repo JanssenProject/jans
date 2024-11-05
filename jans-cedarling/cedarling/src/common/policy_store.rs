@@ -67,6 +67,40 @@ pub struct TrustedIssuer {
     pub token_metadata: Option<Vec<TokenMetadata>>,
 }
 
+/// Structure define the source from which role mappings are retrieved.
+pub struct RoleMapping<'a> {
+    pub kind: TokenKind,
+    pub role_mapping_field: &'a str,
+}
+
+// By default we will search role in the User token
+impl Default for RoleMapping<'_> {
+    fn default() -> Self {
+        Self {
+            kind: TokenKind::Userinfo,
+            role_mapping_field: "role",
+        }
+    }
+}
+
+impl TrustedIssuer {
+    /// Retrieves the available `RoleMapping` from the token metadata.
+    //
+    // in `token_metadata` list only one element with mapping
+    // it is maximum 3 elements in list so iterating is efficient enouf
+    pub fn get_role_mapping(&self) -> Option<RoleMapping> {
+        for metadata in self.token_metadata.as_ref()? {
+            if let Some(role_mapping_field) = &metadata.role_mapping {
+                return Some(RoleMapping {
+                    kind: metadata.kind,
+                    role_mapping_field,
+                });
+            }
+        }
+        None
+    }
+}
+
 /// Parses and validates the `token_metadata` field.
 ///
 /// This function ensures that the metadata contains at most one `TokenMetadata` with a `role_mapping`
@@ -113,7 +147,7 @@ pub struct TokenMetadata {
     pub role_mapping: Option<String>,
 }
 
-#[derive(Debug, Copy, Clone, PartialEq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 #[allow(dead_code)]
 pub enum TokenKind {
     /// Access token used for granting access to resources.
@@ -124,9 +158,6 @@ pub enum TokenKind {
 
     /// Userinfo token containing user-specific information.
     Userinfo,
-
-    /// Transaction token used for tracking transactions.
-    Transaction,
 }
 
 /// Enum representing the different kinds of tokens used by Cedarling.
@@ -136,7 +167,6 @@ impl fmt::Display for TokenKind {
             TokenKind::Access => "access",
             TokenKind::Id => "id",
             TokenKind::Userinfo => "userinfo",
-            TokenKind::Transaction => "transaction",
         };
         write!(f, "{}", kind_str)
     }
@@ -153,15 +183,9 @@ impl<'de> Deserialize<'de> for TokenKind {
             "id_token" => Ok(TokenKind::Id),
             "userinfo_token" => Ok(TokenKind::Userinfo),
             "access_token" => Ok(TokenKind::Access),
-            "transaction_token" => Ok(TokenKind::Transaction),
             _ => Err(serde::de::Error::unknown_variant(
                 &token_kind,
-                &[
-                    "access_token",
-                    "id_token",
-                    "userinfo_token",
-                    "transaction_token",
-                ],
+                &["access_token", "id_token", "userinfo_token"],
             )),
         }
     }

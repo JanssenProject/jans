@@ -11,8 +11,10 @@ use crate::common::policy_store::PolicyStore;
 /// Errors that can occur when loading a policy store.
 #[derive(Debug, thiserror::Error)]
 pub enum PolicyStoreLoadError {
-    #[error("failed to parse the policy store from `policy_store.json`: {0}")]
-    Parse(#[from] serde_json::Error),
+    #[error("failed to parse the policy store from policy_store json: {0}")]
+    ParseJson(#[from] serde_json::Error),
+    #[error("failed to parse the policy store from policy_store yaml: {0}")]
+    ParseYaml(#[from] serde_yml::Error),
     #[error("failed to fetch the policy store from the lock server")]
     FetchFromLockServer,
 }
@@ -25,7 +27,10 @@ pub(crate) fn load_policy_store(
 ) -> Result<PolicyStore, PolicyStoreLoadError> {
     let policy_store = match &config.source {
         PolicyStoreSource::Json(policy_json) => {
-            load_policy_store_from_json(policy_json).map_err(PolicyStoreLoadError::Parse)?
+            load_policy_store_from_json(policy_json).map_err(PolicyStoreLoadError::ParseJson)?
+        },
+        PolicyStoreSource::Yaml(policy_yaml) => {
+            serde_yml::from_str(policy_yaml).map_err(PolicyStoreLoadError::ParseYaml)?
         },
         PolicyStoreSource::LockMaster(policy_store_id) => {
             load_policy_store_from_lock_master(policy_store_id)?

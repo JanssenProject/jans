@@ -11,17 +11,59 @@ mod openid_config;
 pub use error::KeyServiceError;
 use jsonwebtoken::jwk::JwkSet;
 use jsonwebtoken::DecodingKey;
-use openid_config::*;
+pub(crate) use openid_config::*;
 use reqwest::blocking::Client;
 use std::collections::HashMap;
 use std::sync::Arc;
+
+/// Retrieves a [`DecodingKey`]-s based on the provided jwks_uri.
+fn fetch_decoding_keys(
+    jwks_uri: &str,
+    http_client: &Client,
+) -> Result<HashMap<Box<str>, DecodingKey>, KeyServiceError> {
+    let jwks: JwkSet = http_client
+        .get(jwks_uri)
+        .send()
+        .map_err(KeyServiceError::Http)?
+        .error_for_status()
+        .map_err(KeyServiceError::Http)?
+        .json()
+        .map_err(KeyServiceError::RequestDeserialization)?;
+
+    let mut decoding_keys = HashMap::new();
+    for jwk in jwks.keys {
+        let decoding_key = DecodingKey::from_jwk(&jwk).map_err(KeyServiceError::KeyParsing)?;
+        let key_id = jwk.common.key_id.ok_or(KeyServiceError::MissingKeyId)?;
+        decoding_keys.insert(key_id.into_boxed_str(), decoding_key);
+    }
+
+    Ok(decoding_keys)
+}
+
+/// Retrieves a [`OpenIdConfig`] based on the provided openid uri endpoint.
+pub(crate) fn fetch_openid_config(
+    openid_endpoint: &str,
+    http_client: &Client,
+) -> Result<OpenIdConfig, KeyServiceError> {
+    let conf_src: OpenIdConfigSource = http_client
+        .get(openid_endpoint)
+        .send()
+        .map_err(KeyServiceError::Http)?
+        .error_for_status()
+        .map_err(KeyServiceError::Http)?
+        .json()
+        .map_err(KeyServiceError::RequestDeserialization)?;
+
+    let decoding_keys = fetch_decoding_keys(&conf_src.jwks_uri, http_client)?;
+
+    Ok(OpenIdConfig::from_source(conf_src, decoding_keys))
+}
 
 pub struct KeyService {
     idp_configs: HashMap<Box<str>, OpenIdConfig>, // <issuer (`iss`), OpenIdConfig>
     http_client: Client,
 }
 
-#[allow(unused)]
 impl KeyService {
     /// initializes a new `KeyService` with the provided OpenID configuration endpoints.
     ///
@@ -34,42 +76,8 @@ impl KeyService {
 
         // fetch IDP configs
         for endpoint in openid_conf_endpoints {
-            let conf_src: OpenIdConfigSource = http_client
-                .get(endpoint)
-                .send()
-                .map_err(KeyServiceError::Http)?
-                .error_for_status()
-                .map_err(KeyServiceError::Http)?
-                .json()
-                .map_err(KeyServiceError::RequestDeserialization)?;
-            let (issuer, conf) = OpenIdConfig::from_source(conf_src);
-            idp_configs.insert(issuer, conf);
-        }
-
-        /// retrieves a decoding key based on the provided key ID (`kid`).
-        ///
-        /// this method first attempts to retrieve the key from the local key store. if the key
-        /// is not found, it will refresh the JWKS and try again. if the key is still not found,
-        /// an error of type `KeyNotFound` is returned.
-        for (iss, conf) in &mut idp_configs {
-            let jwks: JwkSet = http_client
-                .get(&*conf.jwks_uri)
-                .send()
-                .map_err(KeyServiceError::Http)?
-                .error_for_status()
-                .map_err(KeyServiceError::Http)?
-                .json()
-                .map_err(KeyServiceError::RequestDeserialization)?;
-            let mut decoding_keys = conf
-                .decoding_keys
-                .write()
-                .map_err(|_| KeyServiceError::Lock)?;
-            for jwk in jwks.keys {
-                let decoding_key =
-                    DecodingKey::from_jwk(&jwk).map_err(KeyServiceError::KeyParsing)?;
-                let key_id = jwk.common.key_id.ok_or(KeyServiceError::MissingKeyId)?;
-                decoding_keys.insert(key_id.into(), Arc::new(decoding_key));
-            }
+            let conf = fetch_openid_config(endpoint, &http_client)?;
+            idp_configs.insert(conf.issuer.clone(), conf);
         }
 
         Ok(Self {
@@ -84,7 +92,7 @@ impl KeyService {
     /// is not found, it will refresh the JWKS and try again. if the key is still not found,
     /// an error of type `KeyNotFound` is returned.
     pub fn get_key(&self, kid: &str) -> Result<Arc<DecodingKey>, KeyServiceError> {
-        for (iss, config) in &self.idp_configs {
+        for iss in self.idp_configs.keys() {
             // first try to get the key from the local keystore
             if let Some(key) = self.get_key_from_iss(iss, kid)? {
                 return Ok(key.clone());
@@ -93,7 +101,9 @@ impl KeyService {
                 eprintln!("could not find {}, updating jwks", kid);
                 // if the key is not found in the local keystore, update
                 // the local keystore and try again
-                self.update_jwks(iss);
+
+                // TODO: handle result
+                _ = self.update_jwks(iss);
                 if let Some(key) = self.get_key_from_iss(iss, kid)? {
                     return Ok(key.clone());
                 }
