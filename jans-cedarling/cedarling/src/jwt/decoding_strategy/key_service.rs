@@ -77,15 +77,31 @@ pub(crate) fn fetch_openid_config(
 ///
 /// The `HttpClient` struct allows for sending GET requests with a retry mechanism that attempts to
 /// fetch the requested resource up to a maximum number of times if an error occurs.
-pub struct HttpClient(reqwest::blocking::Client);
+pub struct HttpClient {
+    client: reqwest::blocking::Client,
+    max_retries: u32,
+    retry_delay: Duration,
+}
 
 impl HttpClient {
     pub fn new() -> Result<Self, KeyServiceError> {
-        Ok(Self(
-            Client::builder()
-                .build()
-                .map_err(KeyServiceError::HttpClientInitialization)?,
-        ))
+        let client = Client::builder()
+            .build()
+            .map_err(KeyServiceError::HttpClientInitialization)?;
+        
+        // We're doing this for now since `ServiceConfig::new` is also calling this
+        // which is slowing down the tests. This would probably disappear once we
+        // implement lazy loading.
+        #[cfg(test)]
+        let retry_delay = Duration::from_millis(10);
+        #[cfg(not(test))]
+        let retry_delay = Duration::from_secs(1);
+
+        Ok(Self {
+            client,
+            max_retries: 3,
+            retry_delay,
+        })
     }
 
     /// Sends a GET request to the specified URI with retry logic.
@@ -93,25 +109,19 @@ impl HttpClient {
     /// This method will attempt to fetch the resource up to `MAX_RETRIES` times, with an increasing delay
     /// between each attempt. The delay duration is adjusted for testing and non-testing environments.
     fn get(&self, uri: &str) -> Result<reqwest::blocking::Response, KeyServiceError> {
-        const MAX_RETRIES: u32 = 3;
-        #[cfg(test)]
-        const RETRY_DELAY: Duration = Duration::from_millis(10);
-        #[cfg(not(test))]
-        const RETRY_DELAY: Duration = Duration::from_secs(1);
-
         // Fetch the JWKS from the jwks_uri
         let mut attempts = 0;
         let response = loop {
-            match self.0.get(uri).send() {
+            match self.client.get(uri).send() {
                 Ok(response) => break response, // Exit loop on success
-                Err(e) if attempts < MAX_RETRIES => {
+                Err(e) if attempts < self.max_retries => {
                     attempts += 1;
                     // TODO: pass this message to the logger
                     eprintln!(
                         "Request failed (attempt {} of {}): {}. Retrying...",
-                        attempts, MAX_RETRIES, e
+                        attempts, self.max_retries, e
                     );
-                    sleep(RETRY_DELAY * attempts);
+                    sleep(self.retry_delay * attempts);
                 },
                 Err(e) => return Err(KeyServiceError::MaxHttpRetriesReached(e)), // Exit if max retries exceeded
             }
@@ -136,11 +146,7 @@ impl KeyService {
     /// failures will return a corresponding `Error`.
     pub fn new(openid_conf_endpoints: Vec<&str>) -> Result<Self, KeyServiceError> {
         let mut idp_configs = HashMap::new();
-        let http_client = HttpClient(
-            Client::builder()
-                .build()
-                .map_err(KeyServiceError::HttpClientInitialization)?,
-        );
+        let http_client = HttpClient::new()?;
 
         // fetch IDP configs
         for endpoint in openid_conf_endpoints {

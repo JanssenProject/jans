@@ -301,13 +301,12 @@ fn can_gracefully_handle_unsupported_algorithms_from_jwks() {
     });
 
     // generate the signed token strings
-    let (access_token, id_token, userinfo_token) =
-        generate_tokens_using_claims(GenerateTokensArgs {
-            access_token_claims: access_token_claims.clone(),
-            id_token_claims: id_token_claims.clone(),
-            userinfo_token_claims: userinfo_token_claims.clone(),
-            encoding_keys,
-        });
+    let access_token = generate_token_using_claims(&access_token_claims, &encoding_keys[1])
+        .expect("should generate access_token");
+    let id_token = generate_token_using_claims(&id_token_claims, &encoding_keys[1])
+        .expect("should generate id_token");
+    let userinfo_token = generate_token_using_claims(&userinfo_token_claims, &encoding_keys[1])
+        .expect("should generate userinfo_token");
 
     // setup mock server responses for OpenID configuration and JWKS URIs
     let openid_config_response = json!({
