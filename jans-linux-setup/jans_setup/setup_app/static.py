@@ -20,20 +20,15 @@ class colors:
     DANGER      = '\033[31m'
 
 class BackendTypes:
-    LDAP      = 1
     COUCHBASE = 2
     MYSQL     = 3
     PGSQL     = 4
-    SPANNER   = 5
 
 class BackendStrings:
-    REMOTE_OPENDJ    = 'Remote OpenDj'
     LOCAL_COUCHBASE  = 'Local Couchbase'
     REMOTE_COUCHBASE = 'Remote Couchbase'
     LOCAL_MYSQL      = 'Local MySQL'
     REMOTE_MYSQL     = 'Remote MySQL'
-    CLOUD_SPANNER    = 'Cloud Spanner'
-    SAPNNER_EMULATOR = 'Spanner Emulator'
     LOCAL_PGSQL      = 'Local PgSQL'
     REMOTE_PGSQL      = 'Remote PgSQL'
 
