@@ -46,9 +46,14 @@ pub(crate) fn load_policy_store(
 fn load_policy_store_from_json(policies_json: &str) -> Result<PolicyStore, serde_json::Error> {
     let policy_store = match serde_json::from_str::<PolicyStore>(policies_json) {
         Ok(policy_store) => policy_store,
-        Err(_err) => {
+        Err(err) => {
             // try to decode compatible to agama-lab
-            let result_map = serde_json::from_str::<HashMap<String, PolicyStore>>(policies_json)?;
+            let Ok(result_map) =
+                serde_json::from_str::<HashMap<String, PolicyStore>>(policies_json)
+            else {
+                // return previous error to be unit test compatible
+                return Err(err);
+            };
             if result_map.len() != 1 {
                 return Err(serde::de::Error::custom(
                     "currently we support only one policy store",
