@@ -20,6 +20,11 @@ pub enum PolicyStoreSource {
     ///
     /// The string contains the raw JSON data representing the policy.
     Json(String),
+    /// Read the policy directly from a raw YAML string.
+    ///
+    /// The string contains the raw YAML data representing the policy.
+    /// Mostly used only for testing purposes.
+    Yaml(String),
 
     /// Fetch the policies from the Lock Master service using a specified identifier.
     ///

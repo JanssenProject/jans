@@ -1,0 +1,13 @@
+{
+    "dbType": "sql",
+    "lastUpdate": "2024-11-01T12:11:01",
+    "facterData": {
+        "memoryfree": "39.7%",
+        "swapfree": "0.0%",
+        "hostname": "pujavs-amazed-rat.gluu.info",
+        "ipaddress": "167.99.13.66",
+        "uptime": "1 day, 3:54",
+        "free_disk_space": "95.4%",
+        "load_average": "0.13623046875"
+    }
+}

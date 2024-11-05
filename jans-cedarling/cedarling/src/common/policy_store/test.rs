@@ -63,7 +63,7 @@ fn test_base64_decoding_error_in_policy_store() {
     "#;
     // check if the string is a valid policy
     cedar_policy::Policy::from_str(policy).expect("invalid cedar policy");
-    let mut encoded_policy = BASE64_STANDARD.encode(&policy);
+    let mut encoded_policy = BASE64_STANDARD.encode(policy);
     // simulate an invalid base64 encoding by adding an invalid character
     encoded_policy.push('!');
 
@@ -107,7 +107,7 @@ fn test_policy_parsing_error_in_policy_store() {
     cedar_policy::Policy::from_str(policy).expect("invalid cedar policy");
 
     // base64 encode the policy
-    let mut encoded_policy = BASE64_STANDARD.encode(&policy);
+    let mut encoded_policy = BASE64_STANDARD.encode(policy);
 
     // Simulate invalid UTF-8 by manually inserting invalid byte sequences
     let mut invalid_utf8_bytes = BASE64_STANDARD
@@ -230,9 +230,11 @@ fn test_error_on_invalid_token_type() {
         { "type": "userinfo", "user_id": "email" }
     ]);
 
-    let result = parse_and_check_token_metadata(invalid_token_metadata);
+    let result =
+        parse_and_check_token_metadata(invalid_token_metadata).expect_err("should throw error");
 
-    assert!(
-        matches!(result, Err(e) if e.to_string() == "unknown variant `Access`, expected one of `access_token`, `id_token`, `userinfo_token`, `transaction_token`")
+    assert_eq!(
+        result.to_string(),
+        "unknown variant `Access`, expected one of `access_token`, `id_token`, `userinfo_token`"
     );
 }

@@ -26,7 +26,7 @@ public class ClientAuthorization implements Serializable {
     @AttributeName(name = "jansId")
     private String id;
 
-    @AttributeName(name = "jansClntId", consistency = true)
+    @AttributeName(name = "clnId", consistency = true)
     private String clientId;
 
     @AttributeName(name = "jansUsrId", consistency = true)

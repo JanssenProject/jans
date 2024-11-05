@@ -42,7 +42,7 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 
 
 ENV CN_VERSION=1.1.6-SNAPSHOT
-ENV CN_BUILD_DATE='2024-10-02 09:20'
+ENV CN_BUILD_DATE='2024-10-27 08:02'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-keycloak-link-server/${CN_VERSION}/jans-keycloak-link-server-${CN_VERSION}.war
 
@@ -61,7 +61,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-keycloak-link/webapps \
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=5f3b30e4b565601ccb31cd985920c09071cd1b54
+ENV JANS_SOURCE_VERSION=4f155cfe9e197b15d65be6aa938276862fe36a06
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
