@@ -49,8 +49,10 @@ pub struct PolicyStore {
     /// This field may contain issuers that are trusted to provide tokens, allowing for additional
     /// verification and security when handling JWTs.
     #[allow(dead_code)]
-    #[serde(alias = "identity_source")]
     pub trusted_issuers: Option<Vec<TrustedIssuer>>,
+
+    #[allow(dead_code)]
+    pub identity_source: Option<HashMap<String,IdentitySource>>,
 }
 
 /// Represents a trusted issuer that can provide JWTs.
@@ -78,6 +80,38 @@ pub struct TrustedIssuer {
     /// TODO: currently unused in any validation checks
     #[serde(deserialize_with = "parse_and_check_token_metadata")]
     pub token_metadata: Option<Vec<TokenMetadata>>,
+}
+
+#[derive(Debug, Clone, Deserialize, PartialEq)]
+pub struct IdentitySourceToken {
+    pub trusted: bool,
+    pub principal_identifier: String,
+    pub role_mapping: String, // TODO should this be a Role type?
+}
+
+/// Represents a trusted issuer that can provide JWTs.
+///
+/// This struct includes the issuer's name, description, and the OpenID configuration endpoint
+/// for discovering issuer-related information.
+#[derive(Debug, Clone, Deserialize, PartialEq)]
+#[allow(dead_code)]
+pub struct IdentitySource {
+    /// The name of the identity source.
+    pub name: String,
+
+    /// A brief description of the identity source.
+    pub description: String,
+
+    /// The OpenID configuration endpoint for the issuer.
+    ///
+    /// This endpoint is used to obtain information about the issuer's capabilities.
+    pub openid_configuration_endpoint: String,
+
+    // TODO comments for these
+    pub access_tokens: IdentitySourceToken,
+    pub id_tokens: IdentitySourceToken,
+    pub userinfo_tokens: IdentitySourceToken,
+    pub tx_tokens: IdentitySourceToken,
 }
 
 /// Structure define the source from which role mappings are retrieved.

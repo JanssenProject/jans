@@ -215,6 +215,15 @@ mod deserialize {
         }
 
         #[test]
+        fn test_agama_ok() {
+            static POLICY_STORE_RAW: &str =
+                include_str!("../../../test_files/agama-store.yaml");
+
+            let policy_result = serde_yml::from_str::<AgamaPolicyStore>(POLICY_STORE_RAW);
+            assert!(policy_result.is_ok(), "{:?}", policy_result.unwrap_err());
+        }
+
+        #[test]
         fn test_readable_ok() {
             static POLICY_STORE_RAW: &str =
                 include_str!("../../../test_files/policy-store_readable.json");
