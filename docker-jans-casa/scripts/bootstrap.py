@@ -23,6 +23,7 @@ from jans.pycloudlib.persistence.sql import doc_id_from_dn
 from jans.pycloudlib.persistence.sql import render_sql_properties
 from jans.pycloudlib.persistence.sql import SqlClient
 from jans.pycloudlib.persistence.sql import sync_sql_password
+from jans.pycloudlib.persistence.sql import override_simple_json_property
 from jans.pycloudlib.persistence.utils import PersistenceMapper
 from jans.pycloudlib.persistence.utils import render_base_properties
 from jans.pycloudlib.persistence.utils import render_salt
@@ -159,6 +160,7 @@ def main():
         sync_google_credentials(manager)
 
     wait_for_persistence(manager)
+    override_simple_json_property("/etc/jans/conf/jans-sql.properties")
 
     if not os.path.isfile("/etc/certs/web_https.crt"):
         if as_boolean(os.environ.get("CN_SSL_CERT_FROM_SECRETS", "true")):
