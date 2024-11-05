@@ -38,6 +38,7 @@ pub struct PolicyStore {
     /// This field may contain issuers that are trusted to provide tokens, allowing for additional
     /// verification and security when handling JWTs.
     #[allow(dead_code)]
+    #[serde(alias = "trusted_issuers")]
     pub trusted_issuers: Option<Vec<TrustedIssuer>>,
 }
 
@@ -45,7 +46,7 @@ pub struct PolicyStore {
 ///
 /// This struct includes the issuer's name, description, and the OpenID configuration endpoint
 /// for discovering issuer-related information.
-#[derive(Debug, Clone, Deserialize,PartialEq)]
+#[derive(Debug, Clone, Deserialize, PartialEq)]
 #[allow(dead_code)]
 pub struct TrustedIssuer {
     /// The name of the trusted issuer.
@@ -255,9 +256,9 @@ enum PolicyContentType {
 /// content_type is one of cedar or cedar-json
 #[derive(Debug, Clone, serde::Deserialize)]
 struct EncodedPolicy {
-    pub encoding : super::Encoding,
-    pub content_type : PolicyContentType,
-    pub body : String,
+    pub encoding: super::Encoding,
+    pub content_type: PolicyContentType,
+    pub body: String,
 }
 
 /// Intermediate struct to handler both kinds of policy_content values.
@@ -270,7 +271,7 @@ struct EncodedPolicy {
 #[serde(untagged)]
 enum MaybeEncoded {
     Plain(String),
-    Tagged(EncodedPolicy)
+    Tagged(EncodedPolicy),
 }
 
 /// Represents a raw policy entry from the `PolicyStore`.
@@ -338,7 +339,7 @@ where
 {
     let policy_with_metadata = match policy_raw.policy_content {
         // It's a plain string, so assume its cedar inside base64
-        MaybeEncoded::Plain(base64_encoded) => EncodedPolicy{
+        MaybeEncoded::Plain(base64_encoded) => EncodedPolicy {
             encoding: super::Encoding::Base64,
             content_type: PolicyContentType::Cedar,
             body: base64_encoded,
@@ -350,13 +351,15 @@ where
         super::Encoding::None => policy_with_metadata.body,
         super::Encoding::Base64 => {
             use base64::prelude::*;
-            let buf = BASE64_STANDARD.decode(policy_with_metadata.body).map_err(|err| {
-                serde::de::Error::custom(format!("{}: {}", ParsePolicySetMessage::Base64, err))
-            })?;
+            let buf = BASE64_STANDARD
+                .decode(policy_with_metadata.body)
+                .map_err(|err| {
+                    serde::de::Error::custom(format!("{}: {}", ParsePolicySetMessage::Base64, err))
+                })?;
             String::from_utf8(buf).map_err(|err| {
                 serde::de::Error::custom(format!("{}: {}", ParsePolicySetMessage::String, err))
             })?
-        }
+        },
     };
 
     let policy = match policy_with_metadata.content_type {
@@ -364,18 +367,17 @@ where
             cedar_policy::Policy::parse(Some(PolicyId::new(id)), decoded_body).map_err(|err| {
                 serde::de::Error::custom(format!("{}: {err}", ParsePolicySetMessage::HumanReadable))
             })?
-        }
-        /* see comments for PolicyContentType
-        PolicyContentType::CedarJson => {
-            let body_value : serde_json::Value = serde_json::from_str(&decoded_body).map_err(|err| {
-                serde::de::Error::custom(format!("{}: {err}", ParsePolicySetMessage::CreatePolicySet))
-            })?;
+        }, /* see comments for PolicyContentType
+           PolicyContentType::CedarJson => {
+               let body_value : serde_json::Value = serde_json::from_str(&decoded_body).map_err(|err| {
+                   serde::de::Error::custom(format!("{}: {err}", ParsePolicySetMessage::CreatePolicySet))
+               })?;
 
-            cedar_policy::Policy::from_json(Some(PolicyId::new(id)), body_value).map_err(|err| {
-                serde::de::Error::custom(format!("{}: {err}", ParsePolicySetMessage::CreatePolicySet))
-            })?
-        },
-        */
+               cedar_policy::Policy::from_json(Some(PolicyId::new(id)), body_value).map_err(|err| {
+                   serde::de::Error::custom(format!("{}: {err}", ParsePolicySetMessage::CreatePolicySet))
+               })?
+           },
+           */
     };
 
     Ok(policy)

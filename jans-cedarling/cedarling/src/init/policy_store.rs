@@ -5,6 +5,8 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
+use std::collections::HashMap;
+
 use crate::bootstrap_config::policy_store_config::{PolicyStoreConfig, PolicyStoreSource};
 use crate::common::policy_store::PolicyStore;
 
@@ -42,7 +44,23 @@ pub(crate) fn load_policy_store(
 
 /// Loads the policy store from a JSON string.
 fn load_policy_store_from_json(policies_json: &str) -> Result<PolicyStore, serde_json::Error> {
-    let policy_store = serde_json::from_str::<PolicyStore>(policies_json)?;
+    let policy_store = match serde_json::from_str::<PolicyStore>(policies_json) {
+        Ok(policy_store) => policy_store,
+        Err(_err) => {
+            // try to decode compatible to agama-lab
+            let result_map = serde_json::from_str::<HashMap<String, PolicyStore>>(policies_json)?;
+            if result_map.len() != 1 {
+                return Err(serde::de::Error::custom(
+                    "currently we support only one policy store",
+                ));
+            }
+            let policy_store = result_map
+                .into_values()
+                .next()
+                .expect("value should be present in the iterator");
+            policy_store
+        },
+    };
 
     Ok(policy_store)
 }
