@@ -54,11 +54,10 @@ fn load_policy_store_from_json(policies_json: &str) -> Result<PolicyStore, serde
                     "currently we support only one policy store",
                 ));
             }
-            let policy_store = result_map
+            result_map
                 .into_values()
                 .next()
-                .expect("value should be present in the iterator");
-            policy_store
+                .expect("value should be present in the iterator")
         },
     };
 
