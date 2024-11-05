@@ -396,12 +396,12 @@ public class SqlFilterConverter {
 
 	private Expression<String> buildExpressionArrayPath(String pathAttributeName, int i) {
 		if (i == -1) {
-			return Expressions.constant("$.v");
+			return Expressions.constant("$");
 		} else {
 			if (StringHelper.isEmpty(pathAttributeName)) {
-				return Expressions.constant(String.format("$.v[%d]", i));
+				return Expressions.constant(String.format("$[%d]", i));
 			} else {
-				return Expressions.constant(String.format("$.v[%d].%s", i, pathAttributeName));
+				return Expressions.constant(String.format("$[%d].%s", i, pathAttributeName));
 			}
 		}
 	}
