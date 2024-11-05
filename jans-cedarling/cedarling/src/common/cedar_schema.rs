@@ -198,6 +198,7 @@ mod deserialize {
     mod tests {
         use test_utils::assert_eq;
 
+        use crate::common::policy_store::AgamaPolicyStore;
         use crate::common::policy_store::PolicyStore;
 
         use super::*;
@@ -209,7 +210,7 @@ mod deserialize {
             static POLICY_STORE_RAW: &str =
                 include_str!("../../../test_files/policy-store_ok.json");
 
-            let policy_result = serde_json::from_str::<PolicyStore>(POLICY_STORE_RAW);
+            let policy_result = serde_json::from_str::<AgamaPolicyStore>(POLICY_STORE_RAW);
             assert!(policy_result.is_ok(), "{:?}", policy_result.unwrap_err());
         }
 

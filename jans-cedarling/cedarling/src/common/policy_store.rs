@@ -14,6 +14,11 @@ use semver::Version;
 use serde::{Deserialize, Deserializer};
 use std::{collections::HashMap, fmt};
 
+/// The PolicySTore in Agama format, which has the extra top-level key
+#[derive(Debug, Clone, serde::Deserialize, PartialEq)]
+#[serde(transparent)]
+pub struct AgamaPolicyStore(HashMap<String,PolicyStore>);
+
 /// Represents the store of policies used for JWT validation and policy evaluation in Cedarling.
 ///
 /// The `PolicyStore` contains the schema and a set of policies encoded in base64,
