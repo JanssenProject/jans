@@ -20,6 +20,12 @@ use std::{collections::HashMap, fmt};
 /// which are parsed during deserialization.
 #[derive(Debug, Clone, serde::Deserialize, PartialEq)]
 pub struct PolicyStore {
+    #[serde(default)]
+    pub name: Option<String>,
+
+    #[serde(default)]
+    pub description: Option<String>,
+
     /// The cedar version to use when parsing the schema and policies.
     #[serde(deserialize_with = "parse_cedar_version")]
     #[allow(dead_code)]
