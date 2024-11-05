@@ -26,7 +26,7 @@
         <!-- drop-down menu -->
         <nav class="ph3">
             <z:div class="dropdown" viewModel="@('io.jans.casa.ui.vm.HeaderViewModel')">
-                <a href="javascript:;" class="dropdown-toggle gray hover-dark-gray" role="button" id="dropdownMenu"
+                <a href="javascript:;" class="dropdown-toggle gray hover-dark-gray text-decoration-none" role="button" id="dropdownMenu"
                    data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
                     <span class="ps-2">
                         <z:zk if="${empty sessionContext.user.pictureURL}">
