@@ -26,10 +26,11 @@ pub struct PolicyStore {
     pub cedar_version: Version,
 
     /// Cedar schema
+    #[serde(alias = "schema")]
     pub cedar_schema: CedarSchema,
 
     /// Cedar policy set
-    #[serde(deserialize_with = "parse_cedar_policy")]
+    #[serde(alias = "policies", deserialize_with = "parse_cedar_policy")]
     pub cedar_policies: cedar_policy::PolicySet,
 
     /// An optional list of trusted issuers.
