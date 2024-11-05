@@ -27,9 +27,9 @@ pub struct PolicyStore {
     pub description: Option<String>,
 
     /// The cedar version to use when parsing the schema and policies.
-    #[serde(deserialize_with = "parse_cedar_version")]
+    #[serde(deserialize_with = "parse_maybe_cedar_version", default)]
     #[allow(dead_code)]
-    pub cedar_version: Version,
+    pub cedar_version: Option<Version>,
 
     /// Cedar schema
     #[serde(alias = "schema")]
@@ -204,6 +204,7 @@ impl<'de> Deserialize<'de> for TokenKind {
 /// This function checks that the version string follows the format `major.minor.patch`,
 /// where each component is a valid number. This also supports having a "v" prefix in the
 /// version, e.g. `v1.0.1`.
+#[allow(dead_code)]
 fn parse_cedar_version<'de, D>(deserializer: D) -> Result<Version, D::Error>
 where
     D: Deserializer<'de>,
@@ -217,6 +218,31 @@ where
         .map_err(|e| serde::de::Error::custom(format!("error parsing cedar version :{}", e)))?;
 
     Ok(version)
+}
+
+/// Parses the optional `cedar_version` field.
+///
+/// This function checks that the version string follows the format `major.minor.patch`,
+/// where each component is a valid number. This also supports having a "v" prefix in the
+/// version, e.g. `v1.0.1`.
+fn parse_maybe_cedar_version<'de, D>(deserializer: D) -> Result<Option<Version>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let maybe_version: Option<String> = Option::<String>::deserialize(deserializer)?;
+
+    match maybe_version {
+        Some(version) => {
+            // Check for "v" prefix
+            let version = version.strip_prefix('v').unwrap_or(&version);
+
+            let version = Version::parse(version)
+                .map_err(|e| serde::de::Error::custom(format!("error parsing cedar version :{}", e)))?;
+
+            Ok(Some(version))
+        }
+        None => Ok(None)
+    }
 }
 
 /// Enum representing various error messages that can occur while parsing policy sets.
