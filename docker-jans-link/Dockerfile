@@ -61,7 +61,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-link/webapps \
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=4f155cfe9e197b15d65be6aa938276862fe36a06
+ENV JANS_SOURCE_VERSION=7862e460c72f438a2ab1c4543eb0f6f8b3184eea
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -218,7 +218,6 @@ LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/link" \
 RUN mkdir -p /etc/certs \
     ${JETTY_BASE}/jans-link/logs \
     ${JETTY_BASE}/jans-link/custom/libs \
-    ${JETTY_BASE}/common/libs/spanner \
     ${JETTY_BASE}/common/libs/couchbase \
     ${JETTY_HOME}/temp \
     /usr/share/java \
