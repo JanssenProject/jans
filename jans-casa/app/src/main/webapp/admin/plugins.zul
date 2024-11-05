@@ -24,15 +24,15 @@
                 <div class="${css.panel}">
                     <h:table class="table table-hover table-sm" visible="@load(not empty vm.pluginList)">
                         <thead>
-                            <tr>
-                                <th scope="col" class="w4-ns">${labels.adm.plugins_pluginId}</th>
+                            <tr class="bg-light">
+                                <th scope="col" class="w-23 w-sm-50 w-md-75">${labels.adm.plugins_pluginId}</th>
                                 <th scope="col" class="dtc-ns">${labels.adm.plugins_implements}</th>
-                                <th scope="col" class="w3"></th>
+                                <th scope="col" class="w-25"></th>
                             </tr>
                         </thead>
                         <h:tbody children="@load(vm.pluginList)" sclass="f7">
                             <zk:template name="children">
-                                <h:tr sclass="pointer" onClick="@('showPlugin', each.descriptor.pluginId)">
+                                <h:tr sclass="pointer bg-light" onClick="@('showPlugin', each.descriptor.pluginId)">
                                     <td><z:label value="@load(c:cat3(each.descriptor.pluginId, ' ', each.descriptor.version))" /></td>
                                     <td class="dn dtc-ns">
                                         <z:div children="@load(each.extensions)">
@@ -72,11 +72,11 @@
                             <table class="table table-sm">
                                 <tbody class="f7">
                                     <tr>
-                                        <td>${labels.adm.plugins_pluginId}</td>
+                                        <td class="bg-light">${labels.adm.plugins_pluginId}</td>
                                         <td><z:label sclass="dark-gray" value="@load(vm.pluginToShow.descriptor.pluginId)" /></td>
                                     </tr>
                                     <tr>
-                                        <td>${labels.adm.plugins_version}</td>
+                                        <td class="bg-light">${labels.adm.plugins_version}</td>
                                         <td><z:label sclass="dark-gray" value="@load(vm.pluginToShow.descriptor.version)" /></td>
                                     </tr>
                                     <tr>
@@ -92,7 +92,7 @@
                                         </z:div>
                                     </td>
                                     <tr>
-                                        <td>${labels.adm.plugins_developer}</td>
+                                        <td  class="bg-light">${labels.adm.plugins_developer}</td>
                                         <td><z:label sclass="dark-gray" value="@load(empty vm.pluginToShow.descriptor.provider ? c:l('adm.plugins_nodata') : vm.pluginToShow.descriptor.provider)" /></td>
                                     </tr>
                                     <tr>
@@ -100,7 +100,7 @@
                                         <td><z:label sclass="dark-gray" value="@load(empty vm.pluginToShow.descriptor.pluginDescription ? c:l('adm.plugins_nodata') : vm.pluginToShow.descriptor.pluginDescription)" /></td>
                                     </tr>
                                     <tr>
-                                        <td>${labels.adm.plugins_license}</td>
+                                        <td  class="bg-light">${labels.adm.plugins_license}</td>
                                         <td><z:label sclass="dark-gray" value="@load(empty vm.pluginToShow.descriptor.license ? c:l('adm.plugins_nodata') : vm.pluginToShow.descriptor.license)" /></td>
                                     </tr>
                                 </tbody>
