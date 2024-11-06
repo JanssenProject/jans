@@ -9,25 +9,12 @@ use cedarling::{
     BootstrapConfig, Cedarling, JwtConfig, LogConfig, LogTypeConfig, PolicyStoreConfig,
     PolicyStoreSource, Request, ResourceData,
 };
-use serde::Deserialize;
 use std::collections::HashMap;
 
 // Load a JSON policy store file, containing policies and trusted issuers, at compile time.
 // This file defines access control policies for different resources and actions.
 static POLICY_STORE_RAW: &str =
     include_str!("../../test_files/policy-store_with_trusted_issuers_ok.json");
-
-// Load example tokens from a JSON file, also at compile time.
-// NOTE: `tokens.json` is ignored in version control for security reasons.
-// To run this example, create a `tokens.json` file based on `tokens.example.json`.
-static TOKENS: &str = include_str!("./tokens.json");
-
-#[derive(Deserialize)]
-struct Tokens {
-    access_token: String,
-    userinfo_token: String,
-    id_token: String,
-}
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Configure JWT validation settings. Enable the JwtService to validate JWT tokens
@@ -36,6 +23,11 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     let jwt_config = JwtConfig::Enabled {
         signature_algorithms: vec!["HS256".to_string(), "RS256".to_string()],
     };
+
+    // You must change this with your own tokens
+    let access_token = "your_access_token_here".to_string();
+    let id_token = "your_id_token_here".to_string();
+    let userinfo_token = "your_userinfo_token_here".to_string();
 
     // Initialize the main Cedarling instance, responsible for policy-based authorization.
     // This setup includes basic application information, logging configuration, and
@@ -51,18 +43,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         jwt_config,
     })?;
 
-    // Parse the tokens from the JSON string loaded from `tokens.json`.
-    // This will create a `Tokens` struct populated with `access_token`, `userinfo_token`, and `id_token`.
-    let tokens = serde_json::from_str::<Tokens>(TOKENS).expect("should deserialize tokens");
-
     // Perform an authorization request to Cedarling.
     // This request checks if the provided tokens have sufficient permission to perform an action
     // on a specific resource. Each token (access, ID, and userinfo) is required for the
     // authorization process, alongside resource and action details.
     let result = cedarling.authorize(Request {
-        access_token: tokens.access_token,
-        id_token: tokens.id_token,
-        userinfo_token: tokens.userinfo_token,
+        access_token,
+        id_token,
+        userinfo_token,
         action: "Jans::Action::\"Update\"".to_string(),
         context: serde_json::json!({}),
         resource: ResourceData {
