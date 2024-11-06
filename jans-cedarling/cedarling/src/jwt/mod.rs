@@ -169,8 +169,8 @@ impl JwtService {
                 iss: Some(&access_token.iss),
                 aud: Some(&access_token.aud),
                 sub: Some(&id_token.sub),
-                validate_nbf: false, 
-                validate_exp: false,
+                validate_nbf: false, // userinfo tokens do not have a `nbf` claim
+                validate_exp: false, // userinfo tokens do not have an `exp` claim
             })
             .map_err(JwtServiceError::InvalidUserinfoToken)?;
 
