@@ -249,13 +249,12 @@ fn can_update_local_jwks() {
     });
 
     // generate the signed token strings
-    let (access_token, id_token, userinfo_token) =
-        generate_tokens_using_claims(GenerateTokensArgs {
-            access_token_claims: access_token_claims.clone(),
-            id_token_claims: id_token_claims.clone(),
-            userinfo_token_claims: userinfo_token_claims.clone(),
-            encoding_keys: encoding_keys.clone(),
-        });
+    let tokens = generate_tokens_using_claims(GenerateTokensArgs {
+        access_token_claims: access_token_claims.clone(),
+        id_token_claims: id_token_claims.clone(),
+        userinfo_token_claims: userinfo_token_claims.clone(),
+        encoding_keys: encoding_keys.clone(),
+    });
 
     // setup mock server responses for OpenID configuration and JWKS URIs
     let openid_config_response = json!({
@@ -303,9 +302,9 @@ fn can_update_local_jwks() {
     // decoding key with the same `kid` could not be retrieved
     let decode_result = jwt_service
         .decode_tokens::<serde_json::Value, serde_json::Value, serde_json::Value>(
-            &access_token,
-            &id_token,
-            &userinfo_token,
+            &tokens.access_token,
+            &tokens.id_token,
+            &tokens.userinfo_token,
         );
     assert!(
         matches!(
@@ -333,9 +332,9 @@ fn can_update_local_jwks() {
     // decode and validate the tokens again
     let result = jwt_service
         .decode_tokens::<serde_json::Value, serde_json::Value, serde_json::Value>(
-            &access_token,
-            &id_token,
-            &userinfo_token,
+            &tokens.access_token,
+            &tokens.id_token,
+            &tokens.userinfo_token,
         )
         .expect("should decode token");
     jwks_uri_mock.assert();

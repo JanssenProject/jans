@@ -112,6 +112,12 @@ pub struct GenerateTokensArgs {
     pub encoding_keys: Vec<EncodingKey>,
 }
 
+pub struct GeneratedTokens {
+    pub access_token: String,
+    pub id_token: String,
+    pub userinfo_token: String,
+}
+
 /// Generates tokens using the given encoding keys.
 ///
 /// The `access_token` and `userinfo_token` will be encoded by the first key in the
@@ -120,7 +126,7 @@ pub struct GenerateTokensArgs {
 /// # Panics
 ///
 /// Panics when a token cannot be encoded.
-pub fn generate_tokens_using_claims(args: GenerateTokensArgs) -> (String, String, String) {
+pub fn generate_tokens_using_claims(args: GenerateTokensArgs) -> GeneratedTokens {
     let access_token =
         generate_token_using_claims(&args.access_token_claims, &args.encoding_keys[0])
             .expect("Should generate access_token");
@@ -130,7 +136,11 @@ pub fn generate_tokens_using_claims(args: GenerateTokensArgs) -> (String, String
         generate_token_using_claims(&args.userinfo_token_claims, &args.encoding_keys[0])
             .expect("Should generate userinfo_token");
 
-    (access_token, id_token, userinfo_token)
+    GeneratedTokens {
+        access_token,
+        id_token,
+        userinfo_token,
+    }
 }
 
 /// Generates a token string signed with ES256

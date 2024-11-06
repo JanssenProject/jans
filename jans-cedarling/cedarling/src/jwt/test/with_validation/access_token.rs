@@ -105,13 +105,12 @@ fn test_missing_claim(missing_claim: &'static str) {
     });
 
     // generate the signed token strings
-    let (access_token, id_token, userinfo_token) =
-        generate_tokens_using_claims(GenerateTokensArgs {
-            access_token_claims,
-            id_token_claims,
-            userinfo_token_claims,
-            encoding_keys,
-        });
+    let tokens = generate_tokens_using_claims(GenerateTokensArgs {
+        access_token_claims,
+        id_token_claims,
+        userinfo_token_claims,
+        encoding_keys,
+    });
 
     // setup mock server responses for OpenID configuration and JWKS URIs
     let openid_config_response = json!({
@@ -163,9 +162,9 @@ fn test_missing_claim(missing_claim: &'static str) {
     // decode and validate the tokens
     let decode_result = jwt_service
         .decode_tokens::<serde_json::Value, serde_json::Value, serde_json::Value>(
-            &access_token,
-            &id_token,
-            &userinfo_token,
+            &tokens.access_token,
+            &tokens.id_token,
+            &tokens.userinfo_token,
         );
 
     if let Err(ref e) = decode_result {
@@ -378,13 +377,12 @@ fn errors_on_expired_token() {
     });
 
     // generate the signed token strings
-    let (access_token, id_token, userinfo_token) =
-        generate_tokens_using_claims(GenerateTokensArgs {
-            access_token_claims,
-            id_token_claims,
-            userinfo_token_claims,
-            encoding_keys,
-        });
+    let tokens = generate_tokens_using_claims(GenerateTokensArgs {
+        access_token_claims,
+        id_token_claims,
+        userinfo_token_claims,
+        encoding_keys,
+    });
 
     // setup mock server responses for OpenID configuration and JWKS URIs
     let openid_config_response = json!({
@@ -436,9 +434,9 @@ fn errors_on_expired_token() {
     // decode and validate the tokens
     let decode_result = jwt_service
         .decode_tokens::<serde_json::Value, serde_json::Value, serde_json::Value>(
-            &access_token,
-            &id_token,
-            &userinfo_token,
+            &tokens.access_token,
+            &tokens.id_token,
+            &tokens.userinfo_token,
         );
 
     assert!(
@@ -499,13 +497,12 @@ fn errors_on_token_used_before_nbf() {
     });
 
     // generate the signed token strings
-    let (access_token, id_token, userinfo_token) =
-        generate_tokens_using_claims(GenerateTokensArgs {
-            access_token_claims,
-            id_token_claims,
-            userinfo_token_claims,
-            encoding_keys,
-        });
+    let tokens = generate_tokens_using_claims(GenerateTokensArgs {
+        access_token_claims,
+        id_token_claims,
+        userinfo_token_claims,
+        encoding_keys,
+    });
 
     // setup mock server responses for OpenID configuration and JWKS URIs
     let openid_config_response = json!({
@@ -557,9 +554,9 @@ fn errors_on_token_used_before_nbf() {
     // decode and validate the tokens
     let decode_result = jwt_service
         .decode_tokens::<serde_json::Value, serde_json::Value, serde_json::Value>(
-            &access_token,
-            &id_token,
-            &userinfo_token,
+            &tokens.access_token,
+            &tokens.id_token,
+            &tokens.userinfo_token,
         );
 
     assert!(

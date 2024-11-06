@@ -58,13 +58,12 @@ fn can_decode_claims_with_validation() {
     });
 
     // generate the signed token strings
-    let (access_token, id_token, userinfo_token) =
-        generate_tokens_using_claims(GenerateTokensArgs {
-            access_token_claims: access_token_claims.clone(),
-            id_token_claims: id_token_claims.clone(),
-            userinfo_token_claims: userinfo_token_claims.clone(),
-            encoding_keys: encoding_keys.clone(),
-        });
+    let tokens = generate_tokens_using_claims(GenerateTokensArgs {
+        access_token_claims: access_token_claims.clone(),
+        id_token_claims: id_token_claims.clone(),
+        userinfo_token_claims: userinfo_token_claims.clone(),
+        encoding_keys: encoding_keys.clone(),
+    });
 
     // setup mock server responses for OpenID configuration and JWKS URIs
     let openid_config_response = json!({
@@ -117,9 +116,9 @@ fn can_decode_claims_with_validation() {
     // decode and validate the tokens
     let result = jwt_service
         .decode_tokens::<serde_json::Value, serde_json::Value, serde_json::Value>(
-            &access_token,
-            &id_token,
-            &userinfo_token,
+            &tokens.access_token,
+            &tokens.id_token,
+            &tokens.userinfo_token,
         )
         .expect("should decode token");
 
@@ -180,13 +179,12 @@ fn errors_on_unsupported_alg() {
     });
 
     // generate the signed token strings
-    let (access_token, id_token, userinfo_token) =
-        generate_tokens_using_claims(GenerateTokensArgs {
-            access_token_claims,
-            id_token_claims,
-            userinfo_token_claims,
-            encoding_keys,
-        });
+    let tokens = generate_tokens_using_claims(GenerateTokensArgs {
+        access_token_claims,
+        id_token_claims,
+        userinfo_token_claims,
+        encoding_keys,
+    });
 
     // setup mock server responses for OpenID configuration and JWKS URIs
     let openid_config_response = json!({
@@ -234,9 +232,9 @@ fn errors_on_unsupported_alg() {
     // unsupported algorithm
     let validation_result = jwt_service
         .decode_tokens::<serde_json::Value, serde_json::Value, serde_json::Value>(
-            &access_token,
-            &id_token,
-            &userinfo_token,
+            &tokens.access_token,
+            &tokens.id_token,
+            &tokens.userinfo_token,
         );
     assert!(
         matches!(

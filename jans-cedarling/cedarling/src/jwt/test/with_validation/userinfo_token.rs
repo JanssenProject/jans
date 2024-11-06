@@ -100,13 +100,12 @@ fn test_missing_claim(missing_claim: &str) {
     }
 
     // generate the signed token strings
-    let (access_token, id_token, userinfo_token) =
-        generate_tokens_using_claims(GenerateTokensArgs {
-            access_token_claims,
-            id_token_claims,
-            userinfo_token_claims,
-            encoding_keys,
-        });
+    let tokens = generate_tokens_using_claims(GenerateTokensArgs {
+        access_token_claims,
+        id_token_claims,
+        userinfo_token_claims,
+        encoding_keys,
+    });
 
     // setup mock server responses for OpenID configuration and JWKS URIs
     let openid_config_response = json!({
@@ -159,9 +158,9 @@ fn test_missing_claim(missing_claim: &str) {
     // decode and validate the tokens
     let decode_result = jwt_service
         .decode_tokens::<serde_json::Value, serde_json::Value, serde_json::Value>(
-            &access_token,
-            &id_token,
-            &userinfo_token,
+            &tokens.access_token,
+            &tokens.id_token,
+            &tokens.userinfo_token,
         );
 
     // the jsonwebtoken crate checks for missing claims differently depending on
