@@ -204,63 +204,12 @@ def test_wait_for_sql_conn(monkeypatch, gmanager):
         wait_for_sql_conn(gmanager)
 
 
-def test_wait_for_spanner(monkeypatch, gmanager):
-    from jans.pycloudlib.wait import wait_for_spanner
-
-    monkeypatch.setenv("CN_WAIT_MAX_TIME", "0")
-    monkeypatch.setenv("CN_PERSISTENCE_TYPE", "spanner")
-
-    monkeypatch.setattr(
-        "jans.pycloudlib.persistence.spanner.SpannerClient.row_exists",
-        lambda cls, t, i: False
-    )
-
-    with pytest.raises(Exception):
-        wait_for_spanner(gmanager)
-
-
-def test_wait_for_spanner_no_search_mapping(monkeypatch, gmanager):
-    from jans.pycloudlib.wait import wait_for_spanner
-
-    monkeypatch.setenv("CN_WAIT_MAX_TIME", "0")
-    monkeypatch.setenv("CN_PERSISTENCE_TYPE", "spanner")
-
-    monkeypatch.setattr(
-        _PERSISTENCE_MAPPER_GROUP_FUNC,
-        lambda cls: {"spanner": ["random"]}
-    )
-
-    monkeypatch.setattr(
-        "jans.pycloudlib.persistence.spanner.SpannerClient.connected",
-        lambda cls: False
-    )
-
-    with pytest.raises(Exception):
-        wait_for_spanner(gmanager)
-
-
-def test_wait_for_spanner_conn(monkeypatch, gmanager):
-    from jans.pycloudlib.wait import wait_for_spanner_conn
-
-    monkeypatch.setenv("CN_WAIT_MAX_TIME", "0")
-    monkeypatch.setenv("CN_PERSISTENCE_TYPE", "spanner")
-
-    monkeypatch.setattr(
-        "jans.pycloudlib.persistence.spanner.SpannerClient.connected",
-        lambda cls: False
-    )
-
-    with pytest.raises(Exception):
-        wait_for_spanner_conn(gmanager)
-
-
 _WAIT_FOR_FUNC = "jans.pycloudlib.wait.wait_for"
 
 
 @pytest.mark.parametrize("persistence_type, deps", [
     ("couchbase", ["couchbase"]),
     ("sql", ["sql"]),
-    ("spanner", ["spanner"]),
 ])
 def test_wait_for_persistence(monkeypatch, gmanager, persistence_type, deps):
     from jans.pycloudlib.wait import wait_for_persistence
@@ -280,7 +229,7 @@ def test_wait_for_persistence_hybrid(monkeypatch, gmanager):
         "CN_HYBRID_MAPPING",
         json.dumps({
             "default": "sql",
-            "user": "spanner",
+            "user": "sql",
             "site": "sql",
             "cache": "sql",
             "token": "couchbase",
@@ -290,13 +239,12 @@ def test_wait_for_persistence_hybrid(monkeypatch, gmanager):
 
     with patch(_WAIT_FOR_FUNC, autospec=True) as patched:
         wait_for_persistence(gmanager)
-        patched.assert_called_with(gmanager, ["couchbase", "spanner", "sql"])
+        patched.assert_called_with(gmanager, ["couchbase", "sql"])
 
 
 @pytest.mark.parametrize("persistence_type, deps", [
     ("couchbase", ["couchbase_conn"]),
     ("sql", ["sql_conn"]),
-    ("spanner", ["spanner_conn"]),
 ])
 def test_wait_for_persistence_conn(monkeypatch, gmanager, persistence_type, deps):
     from jans.pycloudlib.wait import wait_for_persistence_conn
@@ -316,7 +264,7 @@ def test_wait_for_persistence_conn_hybrid(monkeypatch, gmanager):
         "CN_HYBRID_MAPPING",
         json.dumps({
             "default": "sql",
-            "user": "spanner",
+            "user": "sql",
             "site": "sql",
             "cache": "sql",
             "token": "couchbase",
@@ -326,7 +274,7 @@ def test_wait_for_persistence_conn_hybrid(monkeypatch, gmanager):
 
     with patch(_WAIT_FOR_FUNC, autospec=True) as patched:
         wait_for_persistence_conn(gmanager)
-        patched.assert_called_with(gmanager, ["couchbase_conn", "spanner_conn", "sql_conn"])
+        patched.assert_called_with(gmanager, ["couchbase_conn", "sql_conn"])
 
 
 def test_wait_for(gmanager):

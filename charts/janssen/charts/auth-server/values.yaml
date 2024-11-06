@@ -92,3 +92,5 @@ additionalLabels: { }
 additionalAnnotations: { }
 # -- Add custom scripts that have been mounted to run before the entrypoint.
 customScripts: []
+# -- Add custom pod's command. If passed, it will override the default conditional command.
+customCommand: []

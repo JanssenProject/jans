@@ -58,7 +58,6 @@ def render_base_properties(src: str, dest: str) -> None:
 PERSISTENCE_TYPES = (
     "couchbase",
     "sql",
-    "spanner",
     "hybrid",
 )
 """Supported persistence types."""
@@ -127,7 +126,6 @@ class PersistenceMapper:
     os.environ["CN_PERSISTENCE_TYPE"] = "hybrid"
     os.environ["CN_HYBRID_MAPPING"] = json.loads({
         "default": "sql",
-        "user": "spanner",
         "site": "sql",
         "cache": "sql",
         "token": "sql",
@@ -144,7 +142,7 @@ class PersistenceMapper:
     ```py
     {
         "default": "sql",
-        "user": "spanner",
+        "user": "sql",
         "site": "sql",
         "cache": "sql",
         "token": "sql",
@@ -168,7 +166,7 @@ class PersistenceMapper:
         ```py
         {
             "default": "sql",
-            "user": "spanner",
+            "user": "sql",
             "site": "sql",
             "cache": "sql",
             "token": "sql",
@@ -190,9 +188,8 @@ class PersistenceMapper:
 
         ```py
         {
-            "sql": ["cache", "default", "session", "site"],
+            "sql": ["cache", "default", "session", "site", "token"],
             "couchbase": ["user"],
-            "spanner": ["token"],
         }
         ```
         """
@@ -209,9 +206,8 @@ class PersistenceMapper:
 
         ```py
         {
-            "sql": ["cache", "", "sessions", "link"],
+            "sql": ["cache", "", "sessions", "link", "tokens"],
             "couchbase": ["people, groups, authorizations"],
-            "spanner": ["tokens"],
         }
         ```
         """

@@ -13,7 +13,6 @@ from jans.pycloudlib.persistence.couchbase import CouchbaseClient
 from jans.pycloudlib.persistence.couchbase import id_from_dn
 from jans.pycloudlib.persistence.sql import SqlClient
 from jans.pycloudlib.persistence.sql import doc_id_from_dn
-from jans.pycloudlib.persistence.spanner import SpannerClient
 from jans.pycloudlib.utils import as_boolean
 from jans.pycloudlib.persistence.utils import PersistenceMapper
 
@@ -256,46 +255,6 @@ def wait_for_sql(manager: Manager, **kwargs: _t.Any) -> None:
         raise WaitError("SQL backend is not fully initialized")
 
 
-@retry_on_exception
-def wait_for_spanner_conn(manager: Manager, **kwargs: _t.Any) -> None:
-    """Wait for readiness/liveness of an Spanner database connection.
-
-    Args:
-        manager: An instance of manager class.
-        **kwargs: Arbitrary keyword arguments (see Other Parameters section, if any).
-    """
-    # checking connection
-    init = SpannerClient(manager).connected()
-    if not init:
-        raise WaitError("Spanner backend is unreachable")
-
-
-@retry_on_exception
-def wait_for_spanner(manager: Manager, **kwargs: _t.Any) -> None:
-    """Wait for readiness/liveness of an Spanner database.
-
-    Args:
-        manager: An instance of manager class.
-        **kwargs: Arbitrary keyword arguments (see Other Parameters section, if any).
-    """
-    search_mapping = {
-        "default": (doc_id_from_dn("ou=jans-auth,ou=configuration,o=jans"), "jansAppConf"),
-        "user": (doc_id_from_dn(_ADMIN_GROUP_DN), "jansGrp"),
-    }
-
-    client = SpannerClient(manager)
-    try:
-        # get the first data key
-        key = PersistenceMapper().groups().get("spanner", [])[0]
-        doc_id, table_name = search_mapping[key]
-        init = client.row_exists(table_name, doc_id)
-    except (IndexError, KeyError):
-        init = client.connected()
-
-    if not init:
-        raise WaitError("Spanner backend is not fully initialized")
-
-
 WaitCallback = _t.TypedDict("WaitCallback", {
     "func": _t.Callable[..., None],
     "kwargs": dict[str, _t.Any],
@@ -315,8 +274,6 @@ def wait_for(manager: Manager, deps: _t.Union[list[str], None] = None) -> None:
     - `secret_conn`
     - `sql`
     - `sql_conn`
-    - `spanner`
-    - `spanner_conn`
 
     Args:
         manager: An instance of manager class.
@@ -350,8 +307,6 @@ def wait_for(manager: Manager, deps: _t.Union[list[str], None] = None) -> None:
         },
         "sql_conn": {"func": wait_for_sql_conn, "kwargs": {"label": "SQL"}},
         "sql": {"func": wait_for_sql, "kwargs": {"label": "SQL"}},
-        "spanner_conn": {"func": wait_for_spanner_conn, "kwargs": {"label": "Spanner"}},
-        "spanner": {"func": wait_for_spanner, "kwargs": {"label": "Spanner"}},
     }
 
     dependencies = deps or []

@@ -41,8 +41,11 @@ spec:
           serviceAccountName: {{ .Values.serviceAccountName }}
           containers:
             - name: {{ include "janssen-all-in-one.name" . }}-as-key-rotation
-              {{- if (index .Values "auth-server-key-rotation" "customScripts") }}
+              {{- if or (index .Values "auth-server-key-rotation" "customScripts") (index .Values "auth-server-key-rotation" "customCommand") }}
               command:
+                {{- if index .Values "auth-server-key-rotation" "customCommand" }}
+                {{- toYaml (index .Values "auth-server-key-rotation" "customCommand") | nindent 18 }}
+                {{- else }}
                 - /bin/sh
                 - -c
                 - |
@@ -50,6 +53,7 @@ spec:
                     {{- toYaml . | replace "- " "" | nindent 20}}
                     {{- end }}
                     /app/bin/entrypoint.sh
+                {{- end}}
               {{- end}}
               image: "{{ index .Values "auth-server-key-rotation" "image" "repository" }}:{{ index .Values "auth-server-key-rotation" "image" "tag" }}"
               env:
@@ -132,8 +136,11 @@ spec:
         {{- end }}
           containers:
             - name: {{ include "janssen-all-in-one.name" . }}-kc-scheduler
-              {{- if (index .Values "kc-scheduler" "customScripts") }}
+              {{- if or (index .Values "kc-scheduler" "customScripts") (index .Values "kc-scheduler" "customCommand") }}
               command:
+                {{- if index .Values "kc-scheduler" "customCommand" }}
+                {{- toYaml (index .Values "kc-scheduler" "customCommand") | nindent 18 }}
+                {{- else }}
                 - /bin/sh
                 - -c
                 - |
@@ -141,6 +148,7 @@ spec:
                     {{- toYaml . | replace "- " "" | nindent 20}}
                     {{- end }}
                     /app/bin/entrypoint.sh
+                {{- end}}    
               {{- end}}
               image: "{{ index .Values "kc-scheduler" "image" "repository" }}:{{ index .Values "kc-scheduler" "image" "tag" }}"
               env:

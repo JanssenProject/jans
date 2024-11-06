@@ -26,9 +26,9 @@
         <!-- drop-down menu -->
         <nav class="ph3">
             <z:div class="dropdown" viewModel="@('io.jans.casa.ui.vm.HeaderViewModel')">
-                <a href="javascript:;" class="dropdown-toggle gray hover-dark-gray" role="button" id="dropdownMenu"
-                   data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
-                    <span class="pr1">
+                <a href="javascript:;" class="dropdown-toggle gray hover-dark-gray text-decoration-none" role="button" id="dropdownMenu"
+                   data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+                    <span class="ps-2">
                         <z:zk if="${empty sessionContext.user.pictureURL}">
                             <i class="fas fa-user f2-cust pt1" />
                         </z:zk>
@@ -45,7 +45,7 @@
                         <i class="fas fa-chevron-down f7" style="padding-top:2px" />
                     </span>
                 </a>
-                <ul class="dropdown-menu dropdown-menu-right f7 shadow-5 br1 mt2 bw0 miw-2r w4" aria-labelledby="dropdownMenu">
+                <ul class="dropdown-menu dropdown-menu-end f7 shadow-5 br1 mt2 bw0 miw-2r w4" aria-labelledby="dropdownMenu">
                     <li class="pv1 pl2 pr3 bg-white-70">
                         <a class="link hover-green gray db" href="#" target="_blank">
                             <i class="fas fa-question-circle" />&amp;nbsp; ${labels.general.help}
