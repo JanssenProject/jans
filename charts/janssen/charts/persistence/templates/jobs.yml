@@ -47,8 +47,11 @@ spec:
         env:
           {{- include "persistence.usr-envs" . | indent 12 }}
           {{- include "persistence.usr-secret-envs" . | indent 12 }}
-        {{- if or ( .Values.global.istio.enabled ) ( .Values.customScripts )}}
+        {{- if or ( .Values.global.istio.enabled ) ( .Values.customScripts ) (.Values.customCommand) }}
         command:
+          {{- if .Values.customCommand }}
+          {{- toYaml .Values.customCommand | nindent 10 }}
+          {{- else }}
           - tini
           - -g
           - --
@@ -62,6 +65,7 @@ spec:
             {{- if .Values.global.istio.enabled }}
             curl -X POST http://localhost:15020/quitquitquit
             {{- end }}
+          {{- end }}
         {{- end }}
         envFrom:
         - configMapRef:
