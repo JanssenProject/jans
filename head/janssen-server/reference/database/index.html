@@ -2556,8 +2556,6 @@
         
           
         
-          
-        
       
       
         
@@ -2780,100 +2778,17 @@
         
           
         
+          
+        
       
       
         <label class="md-nav__link" for="__nav_1_8_5">
-          Spanner
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="Spanner" data-md-level="3">
-        <label class="md-nav__title" for="__nav_1_8_5">
-          <span class="md-nav__icon md-icon"></span>
-          Spanner
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="spanner-schema/" class="md-nav__link">
-        Spanner Schema
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="spanner-config/" class="md-nav__link">
-        Spanner Configuration
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="spanner-ops/" class="md-nav__link">
-        Spanner Operation
-      </a>
-    </li>
-  
-
-            
-          
-        </ul>
-      </nav>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_8_6" type="checkbox" id="__nav_1_8_6" >
-      
-      
-      
-        
-          
-        
-          
-        
-          
-        
-          
-        
-      
-      
-        <label class="md-nav__link" for="__nav_1_8_6">
           PostgreSQL
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <nav class="md-nav" aria-label="PostgreSQL" data-md-level="3">
-        <label class="md-nav__title" for="__nav_1_8_6">
+        <label class="md-nav__title" for="__nav_1_8_5">
           <span class="md-nav__icon md-icon"></span>
           PostgreSQL
         </label>
@@ -8743,7 +8658,6 @@
 <p>Jans has next persistence modules out-of-the-box:</p>
 <ul>
 <li><a href="cb-config/">Couchbase</a></li>
-<li><a href="spanner-config/">Spanner</a></li>
 <li><a href="mysql-config/">MySQL</a></li>
 <li><a href="pgsql-config/">PostgreSQL</a></li>
 <li><a href="pgsql-config/">Hybrid</a>. This is virtual DB layer which allows to combine few DB types based on record type.</li>
@@ -8759,7 +8673,6 @@ on choice of persistence(DB) type, it can be one of these supported values:</p>
 <ul>
 <li><code>couchbase</code></li>
 <li><code>sql</code> </li>
-<li><code>spanner</code> </li>
 <li><code>hybrid</code>. </li>
 </ul>
 <div class="admonition abstract">
@@ -8773,7 +8686,6 @@ the directory <code>/etc/jans/conf/</code>. List of configuration files for thes
 persistence types are:</p>
 <ul>
 <li><code>jans-couchbase.properties</code></li>
-<li><code>jans-spanner.properties</code></li>
 <li><code>jans-sql.properties</code></li>
 <li><code>jans-hybrid.properties</code></li>
 </ul>
@@ -8873,7 +8785,7 @@ directory which contains config files for Janssen modules. For example
 <p><strong>jans-orm-standalone</strong>: Provides reusable factory for non CDI based application</p>
 </li>
 <li>
-<p><strong>jans-orm-ldap, jans-orm-couchbase, jans-orm-spanner, jans-orm-sql</strong>: These are DB specific implementations.</p>
+<p><strong>jans-orm-ldap, jans-orm-couchbase, jans-orm-sql</strong>: These are DB specific implementations.</p>
 </li>
 </ol>
 <h2 id="sample-table-and-orm-api">Sample table and ORM API<a class="headerlink" href="#sample-table-and-orm-api" title="Permanent link">#</a></h2>
@@ -8994,14 +8906,14 @@ public class SimpleUser implements Serializable {
 <p>The DB schema and beans definitions should match each other. During deployment setup generates schema and indexes based on rules in 
 schema <a href="https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/schema/jans_schema.json">file</a>. The data types defined in it setup map to DB SQL types based on default <a href="https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/rdbm/ldap_sql_data_type_mapping.json">rules</a>.</p>
 <p>It's possible to override default generation rules. For this case there is next <a href="https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/rdbm/sql_data_types.json">file</a>.</p>
-<p>Default indexes defined in next files: <a href="https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/couchbase/index.json">coubase_index.json</a>, <a href="https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/rdbm/spanner_index.json">spanner_index.json</a>, <a href="https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/rdbm/mysql_index.json">mysql_index.json</a>, <a href="https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/rdbm/pgsql_index.json">pgsql_index.json</a> </p>
+<p>Default indexes defined in next files: <a href="https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/couchbase/index.json">coubase_index.json</a>, <a href="https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/rdbm/mysql_index.json">mysql_index.json</a>, <a href="https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/rdbm/pgsql_index.json">pgsql_index.json</a> </p>
 
   <hr>
 <div class="md-source-file">
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-28T09:05:20+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-28</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-11-06T15:27:25+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-11-06</span>
       
         <br>
         Created:
