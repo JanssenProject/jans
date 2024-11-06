@@ -167,10 +167,6 @@ fn test_missing_claim(missing_claim: &'static str) {
             &tokens.userinfo_token,
         );
 
-    if let Err(ref e) = decode_result {
-        println!("err: {}", e.to_string());
-    }
-
     // the jsonwebtoken crate checks for missing claims differently depending on
     // the claim so we need to split these asserts into two, unfortunately.
     //
