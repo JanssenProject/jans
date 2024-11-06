@@ -16,7 +16,6 @@ One of the main target of ORM module is to provide simple lightweight layer to a
 Jans has next persistence modules out-of-the-box:
 
 -  [Couchbase](./cb-config.md)
--  [Spanner](./spanner-config.md)
 -  [MySQL](./mysql-config.md)
 -  [PostgreSQL](./pgsql-config.md)
 -  [Hybrid](./pgsql-config.md). This is virtual DB layer which allows to combine few DB types based on record type.
@@ -36,7 +35,6 @@ on choice of persistence(DB) type, it can be one of these supported values:
 
 - `couchbase`
 - `sql` 
-- `spanner` 
 - `hybrid`. 
 
 !!! abstract "Code Connect"
@@ -50,7 +48,6 @@ the directory `/etc/jans/conf/`. List of configuration files for these
 persistence types are:
 
 - `jans-couchbase.properties`
-- `jans-spanner.properties`
 - `jans-sql.properties`
 - `jans-hybrid.properties`
 
@@ -164,7 +161,7 @@ Jans ORM has modular architecture. The are few layers in this implementation
 
 1. **jans-orm-standalone**: Provides reusable factory for non CDI based application
 
-1. **jans-orm-ldap, jans-orm-couchbase, jans-orm-spanner, jans-orm-sql**: These are DB specific implementations.
+1. **jans-orm-ldap, jans-orm-couchbase, jans-orm-sql**: These are DB specific implementations.
 
 
 ## Sample table and ORM API
@@ -293,4 +290,4 @@ schema [file](https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/
 
 It's possible to override default generation rules. For this case there is next [file](https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/rdbm/sql_data_types.json).
 
-Default indexes defined in next files: [coubase_index.json](https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/couchbase/index.json), [spanner_index.json](https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/rdbm/spanner_index.json), [mysql_index.json](https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/rdbm/mysql_index.json), [pgsql_index.json](https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/rdbm/pgsql_index.json) 
+Default indexes defined in next files: [coubase_index.json](https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/couchbase/index.json), [mysql_index.json](https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/rdbm/mysql_index.json), [pgsql_index.json](https://github.com/JanssenProject/jans/blob/main/jans-linux-setup/jans_setup/static/rdbm/pgsql_index.json) 
