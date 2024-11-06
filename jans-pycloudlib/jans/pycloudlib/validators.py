@@ -12,7 +12,6 @@ def validate_persistence_type(type_: str) -> None:
 
     - `couchbase`
     - `hybrid`
-    - `spanner`
     - `sql`
 
     Args:
