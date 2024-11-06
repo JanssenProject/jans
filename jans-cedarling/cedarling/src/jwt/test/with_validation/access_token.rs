@@ -256,16 +256,16 @@ fn errors_on_invalid_signature() {
 
     // generate the access_token with invalid signature
     let access_token = generate_token_using_claims(&access_token_claims, &encoding_keys[0])
-        .unwrap_or_else(|e| panic!("Failed to generate access_token: {:?}", e));
+        .expect("Should generate access_token");
     let access_token = invalidate_token(access_token);
 
     // generate the signed id_token
     let id_token = generate_token_using_claims(&id_token_claims, &encoding_keys[1])
-        .unwrap_or_else(|e| panic!("Failed to generate id_token: {:?}", e));
+        .expect("Should generate id_token");
 
     // generate the signed userinfo_token
     let userinfo_token = generate_token_using_claims(&userinfo_token_claims, &encoding_keys[0])
-        .unwrap_or_else(|e| panic!("Failed to generate userinfo_token: {:?}", e));
+        .expect("Should generate userinfo_token");
 
     // setup mock server responses for OpenID configuration and JWKS URIs
     let openid_config_response = json!({

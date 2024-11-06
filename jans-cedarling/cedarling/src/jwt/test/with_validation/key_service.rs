@@ -72,11 +72,11 @@ fn errors_when_no_key_found() {
             algorithm: encoding_keys[0].algorithm,
         },
     )
-    .unwrap_or_else(|e| panic!("Failed to generate access_token: {:?}", e));
+    .expect("Should generate access_token");
     let id_token = generate_token_using_claims(&id_token_claims, &encoding_keys[1])
-        .unwrap_or_else(|e| panic!("Failed to generate id_token: {:?}", e));
+        .expect("Should generate id_token");
     let userinfo_token = generate_token_using_claims(&userinfo_token_claims, &encoding_keys[0])
-        .unwrap_or_else(|e| panic!("Failed to generate userinfo_token: {:?}", e));
+        .expect("Should generate userinfo_token");
 
     // setup mock server responses for OpenID configuration and JWKS URIs
     let openid_config_response = json!({

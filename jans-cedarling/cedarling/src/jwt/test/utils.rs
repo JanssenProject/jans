@@ -123,12 +123,12 @@ pub struct GenerateTokensArgs {
 pub fn generate_tokens_using_claims(args: GenerateTokensArgs) -> (String, String, String) {
     let access_token =
         generate_token_using_claims(&args.access_token_claims, &args.encoding_keys[0])
-            .unwrap_or_else(|e| panic!("Failed to generate access_token: {:?}", e));
+            .expect("Should generate access_token");
     let id_token = generate_token_using_claims(&args.id_token_claims, &args.encoding_keys[1])
-        .unwrap_or_else(|e| panic!("Failed to generate id_token: {:?}", e));
+        .expect("Should generate id_token");
     let userinfo_token =
         generate_token_using_claims(&args.userinfo_token_claims, &args.encoding_keys[0])
-            .unwrap_or_else(|e| panic!("Failed to generate userinfo_token: {:?}", e));
+            .expect("Should generate userinfo_token");
 
     (access_token, id_token, userinfo_token)
 }
