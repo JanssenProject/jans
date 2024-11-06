@@ -14,7 +14,7 @@ orgName: Janssen
 # -- Resource specs.
 # -- State code. Used for certificate creation.
 state: TX
-# -- Persistence backend to run Janssen with couchbase|hybrid|sql|spanner.
+# -- Persistence backend to run Janssen with couchbase|hybrid|sql.
 cnPersistenceType: sql
 # -- Salt. Used for encoding/decoding sensitive data. If omitted or set to empty string, the value will be self-generated. Otherwise, a 24 alphanumeric characters are allowed as its value.
 salt: ""
@@ -79,12 +79,6 @@ configmap:
   cnGoogleSecretManagerServiceAccount: SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo=
   # -- Project id of the Google project the secret manager belongs to. Used only when configAdapterName and configSecretAdapter is set to google.
   cnGoogleProjectId: google-project-to-save-config-and-secrets-to
-  # [google_spanner_envs] Envs related to using Google Secret Manager to store config and secret layer
-  # -- Google Spanner ID. Used only when cnPersistenceType is spanner.
-  cnGoogleSpannerInstanceId: ""
-  # -- Google Spanner Database ID. Used only when cnPersistenceType is spanner.
-  cnGoogleSpannerDatabaseId: ""
-  # [google_spanner_envs] END
   # [google_secret_manager_envs] Envs related to using Google Secret Manager to store config and secret layer
   # -- Secret version to be used for secret configuration. Defaults to latest and should normally always stay that way. Used only when configAdapterName and configSecretAdapter is set to google.
   cnGoogleSecretVersionId: "latest"
@@ -553,7 +547,7 @@ testEnviroment: false
 configAdapterName: kubernetes
 # -- The config backend adapter that will hold Janssen secret layer. vault|aws|google|kubernetes
 configSecretAdapter: kubernetes
-# -- Base64 encoded service account. The sa must have roles/secretmanager.admin to use Google secrets and roles/spanner.databaseUser to use Spanner. Leave as this is a sensible default.
+# -- Base64 encoded service account. The sa must have roles/secretmanager.admin to use Google secrets. Leave as this is a sensible default.
 cnGoogleApplicationCredentials: /etc/jans/conf/google-credentials.json
 # The location of the shared credentials file used by the client (see https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html).Leave as this is a sensible default.
 cnAwsSharedCredentialsFile: /etc/jans/conf/aws_shared_credential_file
