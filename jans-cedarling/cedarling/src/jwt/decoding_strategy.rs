@@ -235,12 +235,12 @@ trait SetOptionalClaim {
 }
 
 impl SetOptionalClaim for Option<HashSet<String>> {
+    /// Add the given value to the optional claims
     fn set_optional_claim(&mut self, value: Option<String>) {
-        // if value is Some(String), set self to Some(HashSet) containing the value,
-        // otherwise, set self to None.
         match value {
             Some(value) => {
                 if let Some(hash_set) = self.as_mut() {
+                    // we clear the hash_set because the validator requires `exp` by default
                     hash_set.clear();
                     hash_set.insert(value);
                 } else {
