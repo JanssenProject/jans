@@ -168,11 +168,10 @@ fn decode_and_validate_jwt<T: DeserializeOwned>(
     validator.required_spec_claims.clear();
     validator.validate_nbf = args.validate_nbf;
     validator.validate_exp = args.validate_exp;
-    if args.aud.is_none() {
-        validator.validate_aud = false;
-    } else {
-        validator.aud.set_optional_claim(args.aud);
-    }
+    match args.aud {
+        Some(_) => validator.aud.set_optional_claim(args.aud),
+        None => validator.validate_aud = false,
+    };
     validator.iss.set_optional_claim(args.iss);
     validator.sub.set_optional_claim(args.sub);
 
