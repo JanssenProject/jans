@@ -5,7 +5,6 @@ import pytest
     "couchbase",
     "hybrid",
     "sql",
-    "spanner",
 ])
 def test_validate_persistence_type(type_):
     from jans.pycloudlib.validators import validate_persistence_type
