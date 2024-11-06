@@ -104,6 +104,8 @@ auth-server:
   # - /tmp/custom.sh
   # - /tmp/custom2.sh
   customScripts: []
+  # -- Add custom pod's command. If passed, it will override the default conditional command.
+  customCommand: []
 # -- Responsible for regenerating auth-keys per x hours
 auth-server-key-rotation:
   # -- Add custom normal and secret envs to the service
@@ -167,6 +169,8 @@ auth-server-key-rotation:
   # - /tmp/custom.sh
   # - /tmp/custom2.sh
   customScripts: []
+  # -- Add custom job's command. If passed, it will override the default conditional command.
+  customCommand: []
 # -- Configuration parameters for setup and initial configuration secret and config layers used by Janssen services.
 config:
   # -- Add custom normal and secret envs to the service.
@@ -383,6 +387,8 @@ config:
   # - /tmp/custom.sh
   # - /tmp/custom2.sh
   customScripts: [ ]
+  # -- Add custom job's command. If passed, it will override the default conditional command.
+  customCommand: []
 # -- Config Api endpoints can be used to configure the auth-server, which is an open-source OpenID Connect Provider (OP) and UMA Authorization Server (AS).
 config-api:
   # -- Configure the topology spread constraints. Notice this is a map NOT a list as in the upstream API
@@ -486,6 +492,8 @@ config-api:
   # - /tmp/custom.sh
   # - /tmp/custom2.sh
   customScripts: [ ]
+  # -- Add custom pod's command. If passed, it will override the default conditional command.
+  customCommand: []
 # -- FIDO 2.0 (FIDO2) is an open authentication standard that enables leveraging common devices to authenticate to online services in both mobile and desktop environments.
 fido2:
   # -- Configure the topology spread constraints. Notice this is a map NOT a list as in the upstream API
@@ -594,6 +602,8 @@ fido2:
   # - /tmp/custom.sh
   # - /tmp/custom2.sh
   customScripts: [ ]
+  # -- Add custom pod's command. If passed, it will override the default conditional command.
+  customCommand: []
 # -- Janssen Casa ("Casa") is a self-service web portal for end-users to manage authentication and authorization preferences for their account in a Janssen Auth Server.
 casa:
   # -- Configure the topology spread constraints. Notice this is a map NOT a list as in the upstream API
@@ -698,6 +708,8 @@ casa:
   # - /tmp/custom.sh
   # - /tmp/custom2.sh
   customScripts: []
+  # -- Add custom pod's command. If passed, it will override the default conditional command.
+  customCommand: []
 # -- Parameters used globally across all services helm charts.
 global:
   # -- Add custom normal and secret envs to the service.
@@ -719,6 +731,7 @@ global:
       destinationRule: {}
       podDisruptionBudget: {}
       virtualService: {}
+      pod: {}
       deployment: {}
       horizontalPodAutoscaler: {}
       service: {}
@@ -850,6 +863,7 @@ global:
       destinationRule: {}
       podDisruptionBudget: {}
       virtualService: {}
+      pod: {}
       deployment: {}
       horizontalPodAutoscaler: {}
       service: {}
@@ -922,6 +936,7 @@ global:
       destinationRule: {}
       podDisruptionBudget: {}
       virtualService: {}
+      pod: {}
       deployment: {}
       horizontalPodAutoscaler: {}
       service: {}
@@ -969,6 +984,7 @@ global:
       destinationRule: {}
       podDisruptionBudget: {}
       virtualService: {}
+      pod: {}
       deployment: {}
       horizontalPodAutoscaler: {}
       service: {}
@@ -1051,6 +1067,7 @@ global:
       destinationRule: {}
       podDisruptionBudget: {}
       virtualService: {}
+      pod: {}
       deployment: {}
       horizontalPodAutoscaler: {}
       service: {}
@@ -1117,6 +1134,7 @@ global:
       destinationRule: {}
       podDisruptionBudget: {}
       virtualService: {}
+      pod: {}
       deployment: {}
       horizontalPodAutoscaler: {}
       service: {}
@@ -1156,6 +1174,7 @@ global:
       destinationRule: {}
       podDisruptionBudget: {}
       virtualService: {}
+      pod: {}
       deployment: {}
       horizontalPodAutoscaler: {}
       service: {}
@@ -1277,6 +1296,8 @@ persistence:
   # - /tmp/custom.sh
   # - /tmp/custom2.sh
   customScripts: [ ]
+  # -- Add custom job's command. If passed, it will override the default conditional command.
+  customCommand: []
 # -- System for Cross-domain Identity Management (SCIM) version 2.0
 scim:
   # -- Configure the topology spread constraints. Notice this is a map NOT a list as in the upstream API
@@ -1385,6 +1406,8 @@ scim:
   # - /tmp/custom.sh
   # - /tmp/custom2.sh
   customScripts: [ ]
+  # -- Add custom pod's command. If passed, it will override the default conditional command.
+  customCommand: []
 # -- Link.
 link:
   # -- Configure the topology spread constraints. Notice this is a map NOT a list as in the upstream API
@@ -1492,6 +1515,8 @@ link:
   # - /tmp/custom.sh
   # - /tmp/custom2.sh
   customScripts: [ ]
+  # -- Add custom pod's command. If passed, it will override the default conditional command.
+  customCommand: []
 # -- SAML.
 saml:
   # -- Configure the topology spread constraints. Notice this is a map NOT a list as in the upstream API
@@ -1599,6 +1624,8 @@ saml:
   # - /tmp/custom.sh
   # - /tmp/custom2.sh
   customScripts: [ ]
+  # -- Add custom pod's command. If passed, it will override the default conditional command.
+  customCommand: []
 
 # -- Responsible for synchronizing Keycloak SAML clients
 kc-scheduler:
@@ -1656,3 +1683,5 @@ kc-scheduler:
   # - /tmp/custom.sh
   # - /tmp/custom2.sh
   customScripts: []
+  # -- Add custom job's command. If passed, it will override the default conditional command.
+  customCommand: []
