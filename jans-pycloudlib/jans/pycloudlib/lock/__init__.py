@@ -19,6 +19,7 @@ from functools import cached_property
 import backoff
 
 from jans.pycloudlib.lock.couchbase_lock import CouchbaseLock
+from jans.pycloudlib.lock.spanner_lock import SpannerLock
 from jans.pycloudlib.lock.sql_lock import SqlLock
 from jans.pycloudlib.utils import as_boolean
 from jans.pycloudlib.persistence.utils import PersistenceMapper
@@ -32,12 +33,13 @@ logger = logging.getLogger(__name__)
 
 _DATETIME_FMT = "%Y-%m-%dT%H:%M:%S.%fZ"
 
-LockAdapter = _t.Union[SqlLock, CouchbaseLock]
+LockAdapter = _t.Union[SqlLock, SpannerLock, CouchbaseLock]
 """Lock adapter type.
 
 Currently supports the following classes:
 
 * [SqlLock][jans.pycloudlib.lock.sql_lock.SqlLock]
+* [SpannerLock][jans.pycloudlib.lock.spanner_lock.SpannerLock]
 * [CouchbaseLock][jans.pycloudlib.lock.couchbase_lock.CouchbaseLock]
 """
 
@@ -249,12 +251,16 @@ class LockRecord(BaseLockRecord):
         Supported lock adapter name:
 
         - `sql`: returns an instance of [SqlLock][jans.pycloudlib.lock.sql_lock.SqlLock]
+        - `spanner`: returns and instance of [SpannerLock][jans.pycloudlib.lock.spanner_lock.SpannerLock]
         - `couchbase`: returns and instance of [CouchbaseLock][jans.pycloudlib.lock.couchbase_lock.CouchbaseLock]
         """
         _adapter = os.environ.get("CN_OCI_LOCK_ADAPTER") or PersistenceMapper().mapping["default"]
 
         if _adapter == "sql":
             return SqlLock()
+
+        if _adapter == "spanner":
+            return SpannerLock()
 
         if _adapter == "couchbase":
             return CouchbaseLock()
@@ -438,6 +444,7 @@ class FakeLockRecord(BaseLockRecord):
 # avoid implicit reexport disabled error
 __all__ = [
     "LockManager",
+    "SpannerLock",
     "SqlLock",
     "CouchbaseLock",
 ]

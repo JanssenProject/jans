@@ -211,6 +211,7 @@ class SqlSchemaMixin:
                 json_types[attr] = {
                     "mysql": {"type": "JSON"},
                     "pgsql": {"type": "JSONB"},
+                    "spanner": {"type": "ARRAY<STRING(MAX)>"},
                 }
         return json_types
 

@@ -20,6 +20,10 @@
 
 ::: jans.pycloudlib.wait.wait_for_couchbase_conn
 
+::: jans.pycloudlib.wait.wait_for_spanner
+
+::: jans.pycloudlib.wait.wait_for_spanner_conn
+
 ::: jans.pycloudlib.wait.wait_for_sql
 
 ::: jans.pycloudlib.wait.wait_for_sql_conn

@@ -60,7 +60,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-scim/webapps \
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=4f155cfe9e197b15d65be6aa938276862fe36a06
+ENV JANS_SOURCE_VERSION=030ea2548f8dc365d98157f82c4edd169db5aec7
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCIM_RESOURCE_DIR=jans-scim/server/src/main/resources
 
@@ -220,7 +220,6 @@ LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/scim" \
 RUN mkdir -p /etc/certs \
     ${JETTY_BASE}/jans-scim/logs \
     ${JETTY_BASE}/jans-scim/custom/libs \
-    ${JETTY_BASE}/common/libs/spanner \
     ${JETTY_BASE}/common/libs/couchbase \
     ${JETTY_HOME}/temp \
     /usr/share/java
