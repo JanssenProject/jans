@@ -100,3 +100,5 @@ additionalAnnotations: { }
 # - /tmp/custom.sh
 # - /tmp/custom2.sh
 customScripts: [ ]
+# -- Add custom pod's command. If passed, it will override the default conditional command.
+customCommand: []
