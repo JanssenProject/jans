@@ -43,19 +43,22 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         self.local_install()
         if Config.rdbm_install_type == InstallTypes.REMOTE and base.argsp.reset_rdbm_db:
             self.reset_rdbm_db()
-        jans_schema_files = []
-        self.jans_attributes = []
-        for jans_schema_fn in ('jans_schema.json', 'custom_schema.json'):
-            schema_full_path = os.path.join(Config.install_dir, 'schema', jans_schema_fn)
-            jans_schema_files.append(schema_full_path)
-            schema_ = base.readJsonFile(schema_full_path)
-            self.jans_attributes += schema_.get('attributeTypes', [])
 
-        self.create_tables(jans_schema_files)
+        self.prepare_jans_attributes()
+        self.create_tables(self.jans_schema_files)
         self.import_ldif()
         self.create_indexes()
         self.create_unique_indexes()
         self.rdbmProperties()
+
+    def prepare_jans_attributes(self):
+        self.jans_schema_files = []
+        self.jans_attributes = []
+        for jans_schema_fn in ('jans_schema.json', 'custom_schema.json'):
+            schema_full_path = os.path.join(Config.install_dir, 'schema', jans_schema_fn)
+            self.jans_schema_files.append(schema_full_path)
+            schema_ = base.readJsonFile(schema_full_path)
+            self.jans_attributes += schema_.get('attributeTypes', [])
 
     def reset_rdbm_db(self):
         self.logIt("Resetting DB {}".format(Config.rdbm_db))
@@ -351,11 +354,16 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
                 elif attr.name in tbl_fields:
                     if Config.rdbm_type == 'mysql':
-                        sql_cmd = 'ALTER TABLE {0}.{1} ADD INDEX `{1}_{2}` (`{3}`);'.format(
+                        key_lenght = ''
+                        if self.get_sql_col_type(attr.name, tblCls) == 'TEXT' and attr.name in sql_indexes.get(tblCls, {}).get('fields', []) + sql_indexes['__common__']['fields']:
+                            key_lenght = '(255)'
+
+                        sql_cmd = 'ALTER TABLE {0}.{1} ADD INDEX `{1}_{2}` (`{3}`{4});'.format(
                                     Config.rdbm_db,
                                     tblCls,
                                     ind_name,
-                                    attr.name
+                                    attr.name,
+                                    key_lenght
                                 )
                         self.dbUtils.exec_rdbm_query(sql_cmd)
                     elif Config.rdbm_type == 'pgsql':
