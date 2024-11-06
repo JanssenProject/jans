@@ -28,9 +28,14 @@ spec:
       labels:
         app: {{ .Release.Name }}-{{ include "link.name" . }}
         release: {{ .Release.Name }}
-      {{- if .Values.global.istio.ingress }}
+      {{- if or (.Values.global.istio.ingress) (.Values.global.link.customAnnotations.pod) }}
       annotations:
+      {{- if .Values.global.istio.ingress }}
         sidecar.istio.io/rewriteAppHTTPProbers: "true"
+      {{- end }}
+      {{- if .Values.global.link.customAnnotations.pod }}
+      {{ toYaml .Values.global.link.customAnnotations.pod | indent 4 }}
+      {{- end }}
       {{- end }}
     spec:
     {{- with .Values.image.pullSecrets }}
@@ -59,8 +64,11 @@ spec:
             runAsUser: 1000
             runAsNonRoot: true
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          {{- if or (eq .Values.global.storageClass.provisioner "kubernetes.io/aws-ebs") (eq .Values.global.storageClass.provisioner "openebs.io/local") ( .Values.customScripts) }}
+          {{- if or (eq .Values.global.storageClass.provisioner "kubernetes.io/aws-ebs") (eq .Values.global.storageClass.provisioner "openebs.io/local") ( .Values.customScripts) (.Values.customCommand) }}
           command:
+            {{- if .Values.customCommand }}
+            {{- toYaml .Values.customCommand | nindent 14 }}
+            {{- else }}
             - /bin/sh
             - -c
             - |
@@ -71,6 +79,7 @@ spec:
                 /usr/bin/python3 /scripts/updatelbip.py &
                 {{- end}}
                 /app/scripts/entrypoint.sh
+            {{- end}}
           {{- end}}
           ports:
             - containerPort: 9091
