@@ -14,14 +14,15 @@ fn load_agama_policy_store_json() {
         "cedar_version": "v4.0.0",
         "policy_stores": {
             "fbcd361d3243f4808d5e6f89ca81eaf4ca03900b407e": {
-                "cedar_version": "v2.4.7",
                 "policies": {
                     "840da5d85403f35ea76519ed1a18a33989f855bf1cf8": {
+                        "cedar_version": "v2.4.7",
                         "description": "simple policy example for principal workload",
                         "creation_date": "2024-09-20T17:22:39.996050",
                         "policy_content": "cGVybWl0KAogICAgcHJpbmNpcGFsIGlzIEphbnM6Oldvcmtsb2FkLAogICAgYWN0aW9uIGluIFtKYW5zOjpBY3Rpb246OiJVcGRhdGUiXSwKICAgIHJlc291cmNlIGlzIEphbnM6Oklzc3VlCil3aGVuewogICAgcHJpbmNpcGFsLm9yZ19pZCA9PSByZXNvdXJjZS5vcmdfaWQKfTs="
                     },
                     "444da5d85403f35ea76519ed1a18a33989f855bf1cf8": {
+                        "cedar_version": "v2.4.7",
                         "description": "simple policy example for principal user",
                         "creation_date": "2024-09-20T17:22:39.996050",
                         "policy_content": "cGVybWl0KAogICAgcHJpbmNpcGFsIGlzIEphbnM6OlVzZXIsCiAgICBhY3Rpb24gaW4gW0phbnM6OkFjdGlvbjo6IlVwZGF0ZSJdLAogICAgcmVzb3VyY2UgaXMgSmFuczo6SXNzdWUKKXdoZW57CiAgICBwcmluY2lwYWwuY291bnRyeSA9PSByZXNvdXJjZS5jb3VudHJ5Cn07"
@@ -31,7 +32,7 @@ fn load_agama_policy_store_json() {
                 "identity_source": {}
             }
         }
-    }).to_string();
+    });
 
     let cedarling = get_cedarling(PolicyStoreSource::Json(agama_policy_store.to_string()));
 
