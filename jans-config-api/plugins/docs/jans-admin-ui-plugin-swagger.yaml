@@ -1580,6 +1580,9 @@ components:
           type: integer
           description: Admin UI Session Timeout
           format: int32
+        allowSmtpKeystoreEdit:
+          type: boolean
+          description: Admin UI allow SMTP Keystore Edit
         additionalParameters:
           type: array
           description: Additional Authentication Parameters

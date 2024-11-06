@@ -77,7 +77,7 @@ public class AdminUIService {
                 auiConfigurationService.getAUIConfiguration().setAdditionalParameters(appConfigResponse.getAdditionalParameters());
             }
             if (appConfigResponse.getAllowSmtpKeystoreEdit() != null) {
-                adminConf.getMainSettings().getUiConfig().setAllowSMTPKeystoreEdit(appConfigResponse.getAllowSmtpKeystoreEdit());
+                adminConf.getMainSettings().getUiConfig().setAllowSmtpKeystoreEdit(appConfigResponse.getAllowSmtpKeystoreEdit());
                 auiConfigurationService.getAUIConfiguration().setAllowSmtpKeystoreEdit(appConfigResponse.getAllowSmtpKeystoreEdit());
             }
             entryManager.merge(adminConf);
