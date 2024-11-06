@@ -1886,6 +1886,21 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
+         <loc>https://jans.io/docs/head/janssen-server/reference/database/spanner-config/</loc>
+         <lastmod>2024-11-06</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/head/janssen-server/reference/database/spanner-ops/</loc>
+         <lastmod>2024-11-06</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://jans.io/docs/head/janssen-server/reference/database/spanner-schema/</loc>
+         <lastmod>2024-11-06</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
          <loc>https://jans.io/docs/head/janssen-server/reference/json/</loc>
          <lastmod>2024-11-06</lastmod>
          <changefreq>daily</changefreq>
