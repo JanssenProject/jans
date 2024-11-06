@@ -112,16 +112,6 @@ def google_creds(tmpdir):
 
 
 @pytest.fixture
-def spanner_client(gmanager, monkeypatch, google_creds):
-    from jans.pycloudlib.persistence.spanner import SpannerClient
-
-    monkeypatch.setenv("GOOGLE_APPLICATION_CREDENTIALS", str(google_creds))
-
-    client = SpannerClient(gmanager)
-    yield client
-
-
-@pytest.fixture
 def sql_client(gmanager):
     from jans.pycloudlib.persistence.sql import SqlClient
 
