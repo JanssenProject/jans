@@ -23,9 +23,6 @@ from setup_app.utils.setup_utils import SetupUtils
 from setup_app.utils.db_utils import dbUtils
 from setup_app.pylib.jproperties import Properties
 
-if base.current_app.profile == 'jans':
-    from setup_app.utils.spanner_rest_client import SpannerClient
-
 
 class PropertiesUtils(SetupUtils):
 
@@ -387,8 +384,6 @@ class PropertiesUtils(SetupUtils):
 
         if not Config.rdbm_install and Config.cb_install:
             Config.persistence_type = 'couchbase'
-        elif Config.rdbm_type == 'spanner':
-            Config.persistence_type = 'spanner'
         elif Config.rdbm_install and (not Config.cb_install):
             Config.persistence_type = 'sql'
         elif Config.cb_install:
@@ -599,7 +594,7 @@ class PropertiesUtils(SetupUtils):
                     BackendStrings.REMOTE_MYSQL,
                     ]
 
-        backend_types += [BackendStrings.REMOTE_COUCHBASE, BackendStrings.CLOUD_SPANNER]
+        backend_types += [BackendStrings.REMOTE_COUCHBASE]
         if 'couchbase' in self.getBackendTypes():
             backend_types.insert(2, BackendStrings.LOCAL_COUCHBASE)
 
@@ -689,45 +684,6 @@ class PropertiesUtils(SetupUtils):
                     break
                 except Exception as e:
                     print("  {}Can't connect to {}: {}{}".format(colors.DANGER,Config.rdbm_type.upper(), e, colors.ENDC))
-
-        elif backend_type_str == BackendStrings.CLOUD_SPANNER:
-            Config.rdbm_type = 'spanner'
-            Config.rdbm_install_type = InstallTypes.REMOTE
-
-            emulator = self.getPrompt("  Is it emulator?", "N|y")[0].lower()
-            if emulator == 'y':
-                Config.spanner_emulator_host = self.getPrompt("  Emulator host", Config.get('spanner_emulator_host'))
-
-            Config.spanner_project = self.getPrompt("  Spanner project", Config.get('spanner_project'))
-            Config.spanner_instance = self.getPrompt("  Spanner instance", Config.get('spanner_instance'))
-            Config.spanner_database = self.getPrompt("  Spanner database", Config.get('spanner_database'))
-            if not Config.get('spanner_emulator_host'):
-                while True:
-                    cred_fn = self.getPrompt("  Google application creditentals file", Config.get('google_application_credentials'))
-                    if os.path.exists(cred_fn):
-                        try:
-                            with open(cred_fn) as f:
-                                json.load(f)
-                                break
-                        except:
-                            pass
-                    print("  Please enter valid json path")
-                Config.google_application_credentials = cred_fn
-
-            print("  Checking spanner connection")
-            try:
-                SpannerClient(
-                            project_id=Config.spanner_project,
-                            instance_id=Config.spanner_instance,
-                            database_id=Config.spanner_database,
-                            google_application_credentials=Config.google_application_credentials,
-                            emulator_host=Config.spanner_emulator_host,
-                            log_dir=os.path.join(Config.install_dir, 'logs')
-                    )
-                print("  {}Spanner connection was successfull{}".format(colors.OKGREEN, colors.ENDC))
-            except Exception as e:
-                print("{}ERROR getting session from spanner: {}{}".format(colors.DANGER, e, colors.ENDC))
-                sys.exit()
 
     def openbanking_properties(self):
 

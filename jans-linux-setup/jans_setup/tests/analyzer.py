@@ -70,7 +70,7 @@ def print_result(result, k, heading):
 
     columnsl = columns[:]
     #columnsl.remove('operation')
-    if backend in ('sql', 'spanner'):
+    if backend in ('sql',):
         columnsl.insert(-1, 'table')
     sort_result(result)
 

@@ -20,9 +20,7 @@ from setup_app.utils.package_utils import packageUtils
 
 class RDBMInstaller(BaseInstaller, SetupUtils):
 
-    source_files = [
-                    (os.path.join(Config.dist_jans_dir, 'jans-orm-spanner-libs-distribution.zip'), os.path.join(base.current_app.app_info['JANS_MAVEN'], 'maven/io/jans/jans-orm-spanner-libs/{0}/jans-orm-spanner-libs-{0}-distribution.zip'.format(base.current_app.app_info['jans_version']))),
-                    ]
+    source_files = []
 
     def __init__(self):
         setattr(base.current_app, self.__class__.__name__, self)
@@ -33,35 +31,34 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         self.install_var = 'rdbm_install'
         self.register_progess()
         self.output_dir = os.path.join(Config.output_dir, Config.rdbm_type)
-        self.common_lib_dir = os.path.join(Config.jetty_base, 'common/libs/spanner')
         opendj_schema_desc_fn = os.path.join(Config.install_dir, 'schema/opendj_schema_descriptions.json')
         self.opendj_schema_descriptions = base.readJsonFile(opendj_schema_desc_fn)
 
     @property
     def qchar(self):
-        return '`' if Config.rdbm_type in ('mysql', 'spanner') else '"'
+        return '`' if Config.rdbm_type in ('mysql',) else '"'
 
     def install(self):
 
-        if Config.rdbm_type == 'spanner':
-            self.extract_libs()
         self.local_install()
         if Config.rdbm_install_type == InstallTypes.REMOTE and base.argsp.reset_rdbm_db:
             self.reset_rdbm_db()
-        jans_schema_files = []
-        self.jans_attributes = []
-        for jans_schema_fn in ('jans_schema.json', 'custom_schema.json'):
-            schema_full_path = os.path.join(Config.install_dir, 'schema', jans_schema_fn)
-            jans_schema_files.append(schema_full_path)
-            schema_ = base.readJsonFile(schema_full_path)
-            self.jans_attributes += schema_.get('attributeTypes', [])
 
-        self.create_tables(jans_schema_files)
-        self.create_subtables()
+        self.prepare_jans_attributes()
+        self.create_tables(self.jans_schema_files)
         self.import_ldif()
         self.create_indexes()
         self.create_unique_indexes()
         self.rdbmProperties()
+
+    def prepare_jans_attributes(self):
+        self.jans_schema_files = []
+        self.jans_attributes = []
+        for jans_schema_fn in ('jans_schema.json', 'custom_schema.json'):
+            schema_full_path = os.path.join(Config.install_dir, 'schema', jans_schema_fn)
+            self.jans_schema_files.append(schema_full_path)
+            schema_ = base.readJsonFile(schema_full_path)
+            self.jans_attributes += schema_.get('attributeTypes', [])
 
     def reset_rdbm_db(self):
         self.logIt("Resetting DB {}".format(Config.rdbm_db))
@@ -178,8 +175,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
             if table in type_.get('tables', {}):
                 type_ = type_['tables'][table]
             if 'size' in type_:
-                dtype = 'STRING' if type_['type'] and Config.rdbm_type == 'spanner' else type_['type']
-                data_type = '{}({})'.format(dtype, type_['size'])
+                data_type = '{}({})'.format(type_['type'], type_['size'])
             else:
                 data_type = type_['type']
 
@@ -190,7 +186,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
             attr_syntax = self.dbUtils.get_attr_syntax(attrname)
             type_ = self.dbUtils.ldap_sql_data_type_mapping[attr_syntax].get(Config.rdbm_type) or self.dbUtils.ldap_sql_data_type_mapping[attr_syntax]['mysql']
 
-            char_type = 'STRING' if Config.rdbm_type == 'spanner' else 'VARCHAR'
+            char_type = 'VARCHAR'
 
             if type_['type'] in char_type:
                 if type_['size'] <= 127:
@@ -201,9 +197,6 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                     data_type = 'TEXT'
             else:
                 data_type = type_['type']
-
-        if data_type == 'TEXT' and Config.rdbm_type == 'spanner':
-            data_type = 'STRING(MAX)'
 
         return data_type
 
@@ -234,8 +227,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
         tables = []
         all_schema = {}
         all_attribs = {}
-        column_add = 'COLUMN ' if Config.rdbm_type == 'spanner' else ''
-        alter_table_sql_cmd = 'ALTER TABLE %s{}%s ADD %s{};' % (self.qchar, self.qchar, column_add)
+        alter_table_sql_cmd = 'ALTER TABLE %s{}%s ADD {};' % (self.qchar, self.qchar)
 
         for jans_schema_fn in jans_schema_files:
             jans_schema = base.readJsonFile(jans_schema_fn)
@@ -244,9 +236,6 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
             for attr in jans_schema['attributeTypes']:
                 all_attribs[attr['names'][0]] = attr
 
-        subtable_attrs = {}
-        for stbl in self.dbUtils.sub_tables.get(Config.rdbm_type):
-            subtable_attrs[stbl] = [ scol[0] for scol in self.dbUtils.sub_tables[Config.rdbm_type][stbl] ]
 
         for obj_name in all_schema:
             obj = all_schema[obj_name]
@@ -275,9 +264,6 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                 if attrname in cols_:
                     continue
 
-                if attrname in subtable_attrs.get(sql_tbl_name, []):
-                    continue
-
                 cols_.append(attrname)
                 col_def = self.get_col_def(attrname, sql_tbl_name) 
                 sql_tbl_cols.append(col_def)
@@ -291,8 +277,6 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                 doc_id_type = self.get_sql_col_type('doc_id', sql_tbl_name)
                 if Config.rdbm_type == 'pgsql':
                     sql_cmd = 'CREATE TABLE "{}" (doc_id {} NOT NULL UNIQUE, "objectClass" VARCHAR(48), dn VARCHAR(128), {}, PRIMARY KEY (doc_id));'.format(sql_tbl_name, doc_id_type, ', '.join(sql_tbl_cols))
-                elif Config.rdbm_type == 'spanner':
-                    sql_cmd = 'CREATE TABLE `{}` (`doc_id` {} NOT NULL, `objectClass` STRING(48), dn STRING(128), {}) PRIMARY KEY (`doc_id`)'.format(sql_tbl_name, doc_id_type, ', '.join(sql_tbl_cols))
                 else:
                     sql_cmd = 'CREATE TABLE `{}` (`doc_id` {} NOT NULL UNIQUE, `objectClass` VARCHAR(48), dn VARCHAR(128), {}, PRIMARY KEY (`doc_id`));'.format(sql_tbl_name, doc_id_type, ', '.join(sql_tbl_cols))
                 self.dbUtils.exec_rdbm_query(sql_cmd)
@@ -308,24 +292,10 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
             if attr.get('sql', {}).get('add_table'):
                 col_def = self.get_col_def(attrname, sql_tbl_name)
                 sql_cmd = alter_table_sql_cmd.format(attr['sql']['add_table'], col_def)
-
-                if Config.rdbm_type == 'spanner':
-                    req = self.dbUtils.spanner_client.exec_sql(sql_cmd.strip(';'))
-                else:
-                    self.dbUtils.exec_rdbm_query(sql_cmd)
+                self.dbUtils.exec_rdbm_query(sql_cmd)
                 tables.append(sql_cmd)
 
         self.writeFile(os.path.join(self.output_dir, 'jans_tables.sql'), '\n'.join(tables))
-
-    def create_subtables(self):
-
-        for subtable in self.dbUtils.sub_tables.get(Config.rdbm_type, {}):
-            for sattr, sdt in self.dbUtils.sub_tables[Config.rdbm_type][subtable]:
-                subtable_columns = []
-                sql_cmd = 'CREATE TABLE `{0}_{1}` (`doc_id` STRING(64) NOT NULL, `dict_doc_id` STRING(64), `{1}` {2}) PRIMARY KEY (`doc_id`, `dict_doc_id`), INTERLEAVE IN PARENT `{0}` ON DELETE CASCADE'.format(subtable, sattr, sdt)
-                self.dbUtils.spanner_client.exec_sql(sql_cmd)
-                sql_cmd_index = 'CREATE INDEX `{0}_{1}Idx` ON `{0}_{1}` (`{1}`)'.format(subtable, sattr)
-                self.dbUtils.spanner_client.exec_sql(sql_cmd_index)
 
 
     def get_index_name(self, attrname):
@@ -349,110 +319,80 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                     if attr_name in opendj_index_list and attr_name not in sql_indexes['__common__']['fields']:
                         sql_indexes['__common__']['fields'].append(attr_name)
 
-        if Config.rdbm_type == 'spanner':
-            tables = self.dbUtils.spanner_client.get_tables()
-            for tblCls in tables:
-                tbl_fields = sql_indexes.get(tblCls, {}).get('fields', []) + sql_indexes['__common__']['fields']
+        for tblCls in self.dbUtils.Base.classes.keys():
+            tblObj = self.dbUtils.Base.classes[tblCls]()
+            tbl_fields = sql_indexes.get(tblCls, {}).get('fields', []) +  sql_indexes['__common__']['fields']
 
-                tbl_data = self.dbUtils.spanner_client.exec_sql('SELECT * FROM {} LIMIT 1'.format(tblCls))
+            for attr in tblObj.__table__.columns:
+                if attr.name == 'doc_id':
+                    continue
+                ind_name = self.get_index_name(attr.name)
+                data_type = self.get_sql_col_type(attr, tblCls)
+                data_type = data_type.replace('VARCHAR', 'CHAR')
 
-                for attr in tbl_data.get('fields', []):
-                    if attr['name'] == 'doc_id':
-                        continue
-                    attr_name = attr['name']
-                    ind_name = self.get_index_name(attr['name'])
-                    data_type = attr['type']
+                if isinstance(attr.type, self.dbUtils.json_dialects_instance):
 
-                    if data_type == 'ARRAY':
-                        # How to index for ARRAY types in spanner?
-                        pass
-
-                    elif attr_name in tbl_fields:
-                        sql_cmd = 'CREATE INDEX `{1}_{0}Idx` ON `{1}` (`{2}`)'.format(
-                                    ind_name,
-                                    tblCls,
-                                    attr_name
-                                )
-                        self.dbUtils.spanner_client.exec_sql(sql_cmd)
-
-                for i, custom_index in enumerate(sql_indexes.get(tblCls, {}).get('custom', [])):
-                    sql_cmd = 'CREATE INDEX `{0}_CustomIdx{1}` ON {0} ({2})'.format(
-                                    tblCls,
-                                    i+1, 
-                                    custom_index
-                                )
-                    self.dbUtils.spanner_client.exec_sql(sql_cmd)
-
-        else:
-            for tblCls in self.dbUtils.Base.classes.keys():
-                tblObj = self.dbUtils.Base.classes[tblCls]()
-                tbl_fields = sql_indexes.get(tblCls, {}).get('fields', []) +  sql_indexes['__common__']['fields']
-
-                for attr in tblObj.__table__.columns:
-                    if attr.name == 'doc_id':
-                        continue
-                    ind_name = self.get_index_name(attr.name)
-                    data_type = self.get_sql_col_type(attr, tblCls)
-                    data_type = data_type.replace('VARCHAR', 'CHAR')
-
-                    if isinstance(attr.type, self.dbUtils.json_dialects_instance):
-
-                        if attr.name in tbl_fields:
-                            for i, ind_str in enumerate(sql_indexes['__common__']['JSON']):
-                                tmp_str = Template(ind_str)
-                                if Config.rdbm_type == 'mysql':
-                                    sql_cmd = 'ALTER TABLE {0}.{1} ADD INDEX `{2}_json_{3}`(({4}));'.format(
-                                            Config.rdbm_db,
-                                            tblCls,
-                                            ind_name,
-                                            i+1,
-                                            tmp_str.safe_substitute({'field':attr.name})
-                                            )
-                                    self.dbUtils.exec_rdbm_query(sql_cmd)
-                                elif Config.rdbm_type == 'pgsql':
-                                    sql_cmd ='CREATE INDEX ON "{}" {};'.format(
-                                            tblCls,
-                                            tmp_str.safe_substitute({'field':attr.name})
-                                            )
-                                    self.dbUtils.exec_rdbm_query(sql_cmd)
-
-
-                    elif attr.name in tbl_fields:
-                        if Config.rdbm_type == 'mysql':
-                            sql_cmd = 'ALTER TABLE {0}.{1} ADD INDEX `{1}_{2}` (`{3}`);'.format(
+                    if attr.name in tbl_fields:
+                        for i, ind_str in enumerate(sql_indexes['__common__']['JSON']):
+                            tmp_str = Template(ind_str)
+                            if Config.rdbm_type == 'mysql':
+                                sql_cmd = 'ALTER TABLE {0}.{1} ADD INDEX `{2}_json_{3}`(({4}));'.format(
                                         Config.rdbm_db,
                                         tblCls,
                                         ind_name,
-                                        attr.name
-                                    )
-                            self.dbUtils.exec_rdbm_query(sql_cmd)
-                        elif Config.rdbm_type == 'pgsql':
-                            sql_cmd = 'CREATE INDEX ON "{}" ("{}");'.format(
+                                        i+1,
+                                        tmp_str.safe_substitute({'field':attr.name})
+                                        )
+                                self.dbUtils.exec_rdbm_query(sql_cmd)
+                            elif Config.rdbm_type == 'pgsql':
+                                sql_cmd ='CREATE INDEX ON "{}" {};'.format(
                                         tblCls,
-                                        attr.name
-                                    )
-                            self.dbUtils.exec_rdbm_query(sql_cmd)
+                                        tmp_str.safe_substitute({'field':attr.name})
+                                        )
+                                self.dbUtils.exec_rdbm_query(sql_cmd)
 
-                for i, custom_index in enumerate(sql_indexes.get(tblCls, {}).get('custom', [])):
+
+                elif attr.name in tbl_fields:
                     if Config.rdbm_type == 'mysql':
-                        sql_cmd = 'ALTER TABLE {0}.{1} ADD INDEX `{2}` ({3});'.format(
-                                        Config.rdbm_db,
-                                        tblCls,
-                                        '{}_CustomIdx{}'.format(tblCls, i+1),
-                                        custom_index
-                                    )
+                        key_lenght = ''
+                        if self.get_sql_col_type(attr.name, tblCls) == 'TEXT' and attr.name in sql_indexes.get(tblCls, {}).get('fields', []) + sql_indexes['__common__']['fields']:
+                            key_lenght = '(255)'
+
+                        sql_cmd = 'ALTER TABLE {0}.{1} ADD INDEX `{1}_{2}` (`{3}`{4});'.format(
+                                    Config.rdbm_db,
+                                    tblCls,
+                                    ind_name,
+                                    attr.name,
+                                    key_lenght
+                                )
                         self.dbUtils.exec_rdbm_query(sql_cmd)
                     elif Config.rdbm_type == 'pgsql':
-                        sql_cmd = 'CREATE INDEX ON "{}" {};'.format(
+                        sql_cmd = 'CREATE INDEX ON "{}" ("{}");'.format(
                                     tblCls,
-                                    custom_index
-                                    )
+                                    attr.name
+                                )
                         self.dbUtils.exec_rdbm_query(sql_cmd)
+
+            for i, custom_index in enumerate(sql_indexes.get(tblCls, {}).get('custom', [])):
+                if Config.rdbm_type == 'mysql':
+                    sql_cmd = 'ALTER TABLE {0}.{1} ADD INDEX `{2}` ({3});'.format(
+                                    Config.rdbm_db,
+                                    tblCls,
+                                    '{}_CustomIdx{}'.format(tblCls, i+1),
+                                    custom_index
+                                )
+                    self.dbUtils.exec_rdbm_query(sql_cmd)
+                elif Config.rdbm_type == 'pgsql':
+                    sql_cmd = 'CREATE INDEX ON "{}" {};'.format(
+                                tblCls,
+                                custom_index
+                                )
+                    self.dbUtils.exec_rdbm_query(sql_cmd)
 
     def create_unique_indexes(self):
         #Create uniqueness for columns jansPerson.uid and jansPerson.mail
         for table, column in (('jansPerson', 'mail'), ('jansPerson', 'uid')):
-            if Config.rdbm_type in ('mysql', 'spanner'):
+            if Config.rdbm_type in ('mysql',):
                 sql_cmd = f'CREATE UNIQUE INDEX `{table.lower()}_{column.lower()}_unique_idx` ON `{table}` (`{column}`)'
             elif Config.rdbm_type == 'pgsql':
                 sql_cmd = f'CREATE UNIQUE INDEX {table.lower()}_{column.lower()}_unique_idx ON "{table}"("{column}")'
@@ -482,8 +422,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                 force = BackendTypes.MYSQL
             elif Config.rdbm_type == 'pgsql':
                 force = BackendTypes.PGSQL
-            elif Config.rdbm_type == 'spanner':
-                force = BackendTypes.SPANNER
+
             self.dbUtils.import_ldif([Config.ldif_base], force=force)
 
         self.dbUtils.import_ldif(ldif_files)
@@ -496,25 +435,9 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
             rendered_tmp = self.render_template(src_temp_fn)
             self.writeFile(targtet_fn, rendered_tmp)
 
-        elif Config.rdbm_type == 'spanner':
-            if Config.spanner_emulator_host:
-                Config.templateRenderingDict['spanner_creds'] = 'connection.emulator-host={}:9010'.format(Config.spanner_emulator_host)
-            else:
-                auth_cred_target_fn = os.path.join(Config.configFolder, 'google_application_credentials.json')
-                shutil.copy(Config.google_application_credentials, auth_cred_target_fn)
-                Config.templateRenderingDict['spanner_creds'] = 'connection.credentials-file={}'.format(auth_cred_target_fn)
-
-            self.renderTemplateInOut(Config.jansSpannerProperties, Config.templateFolder, Config.configFolder)
 
     def create_folders(self):
         self.createDirs(Config.static_rdbm_dir)
-
-    def extract_libs(self):
-        self.logIt("Extracting {}".format(self.source_files[0][0]))
-        if not os.path.exists(self.common_lib_dir):
-            self.createDirs(self.common_lib_dir)
-        shutil.unpack_archive(self.source_files[0][0], self.common_lib_dir)
-        self.chown(os.path.join(Config.jetty_base, 'common'), Config.jetty_user, Config.jetty_user, True)
 
 
     def installed(self):

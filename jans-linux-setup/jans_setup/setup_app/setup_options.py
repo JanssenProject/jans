@@ -37,8 +37,7 @@ def get_setup_options():
     if base.argsp.remote_rdbm:
         setupOptions['rdbm_install_type'] = InstallTypes.REMOTE
         setupOptions['rdbm_type'] = base.argsp.remote_rdbm
-        if not base.argsp.remote_rdbm == 'spanner':
-            setupOptions['rdbm_host'] = base.argsp.rdbm_host
+        setupOptions['rdbm_host'] = base.argsp.rdbm_host
 
     else:
         setupOptions['rdbm_install_type'] = InstallTypes.LOCAL
@@ -57,19 +56,6 @@ def get_setup_options():
         setupOptions['rdbm_user'] = base.argsp.rdbm_user
     if base.argsp.rdbm_password:
         setupOptions['rdbm_password'] = base.argsp.rdbm_password
-
-    if base.current_app.profile == 'jans':
-        if base.argsp.spanner_project:
-            setupOptions['spanner_project'] = base.argsp.spanner_project
-        if base.argsp.spanner_instance:
-            setupOptions['spanner_instance'] = base.argsp.spanner_instance
-        if base.argsp.spanner_database:
-            setupOptions['spanner_database'] = base.argsp.spanner_database
-        if base.argsp.spanner_emulator_host:
-            setupOptions['spanner_emulator_host'] = base.argsp.spanner_emulator_host
-        if base.argsp.google_application_credentials:
-            setupOptions['google_application_credentials'] = base.argsp.google_application_credentials
-
 
     if base.current_app.profile == 'jans':
 
