@@ -118,6 +118,7 @@ public class AUIConfigurationService extends BaseService {
         auiConfig.setAuiBackendApiServerIntrospectionEndpoint(appConf.getMainSettings().getOidcConfig().getAuiBackendApiClient().getIntrospectionEndpoint());
 
         auiConfig.setSessionTimeoutInMins(appConf.getMainSettings().getUiConfig().getSessionTimeoutInMins());
+        auiConfig.setAllowSmtpKeystoreEdit(appConf.getMainSettings().getUiConfig().getAllowSMTPKeystoreEdit());
         auiConfig.setAdditionalParameters(appConf.getMainSettings().getOidcConfig().getAuiWebClient().getAdditionalParameters());
         return auiConfig;
     }

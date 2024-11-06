@@ -51,6 +51,7 @@ public class AdminUIService {
             appConfigResponse.setPostLogoutRedirectUri(auiConfiguration.getAuiWebServerPostLogoutRedirectUri());
             appConfigResponse.setEndSessionEndpoint(auiConfiguration.getAuiWebServerEndSessionEndpoint());
             appConfigResponse.setSessionTimeoutInMins(auiConfiguration.getSessionTimeoutInMins());
+            appConfigResponse.setAllowSmtpKeystoreEdit(auiConfiguration.getAllowSmtpKeystoreEdit());
             appConfigResponse.setAdditionalParameters(auiConfiguration.getAdditionalParameters());
 
             return appConfigResponse;
@@ -74,6 +75,10 @@ public class AdminUIService {
             if (!CollectionUtils.isEmpty(appConfigResponse.getAdditionalParameters())) {
                 adminConf.getMainSettings().getOidcConfig().getAuiWebClient().setAdditionalParameters(appConfigResponse.getAdditionalParameters());
                 auiConfigurationService.getAUIConfiguration().setAdditionalParameters(appConfigResponse.getAdditionalParameters());
+            }
+            if (appConfigResponse.getAllowSmtpKeystoreEdit() != null) {
+                adminConf.getMainSettings().getUiConfig().setAllowSMTPKeystoreEdit(appConfigResponse.getAllowSmtpKeystoreEdit());
+                auiConfigurationService.getAUIConfiguration().setAllowSmtpKeystoreEdit(appConfigResponse.getAllowSmtpKeystoreEdit());
             }
             entryManager.merge(adminConf);
             return getAdminUIEditableConfiguration();

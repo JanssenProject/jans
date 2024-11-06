@@ -30,6 +30,8 @@ public class AppConfigResponse {
     private String endSessionEndpoint;
     @Schema(description = "Admin UI Session Timeout", accessMode = Schema.AccessMode.READ_WRITE)
     private Integer sessionTimeoutInMins;
+    @Schema(description = "Admin UI allow SMTP Keystore Edit", accessMode = Schema.AccessMode.READ_WRITE)
+    private Boolean allowSmtpKeystoreEdit;
     @Schema(description = "Additional Authentication Parameters", accessMode = Schema.AccessMode.READ_WRITE)
     private List<KeyValuePair> additionalParameters;
 
@@ -47,6 +49,14 @@ public class AppConfigResponse {
 
     public void setSessionTimeoutInMins(Integer sessionTimeoutInMins) {
         this.sessionTimeoutInMins = sessionTimeoutInMins;
+    }
+
+    public Boolean getAllowSmtpKeystoreEdit() {
+        return allowSmtpKeystoreEdit;
+    }
+
+    public void setAllowSmtpKeystoreEdit(Boolean allowSmtpKeystoreEdit) {
+        this.allowSmtpKeystoreEdit = allowSmtpKeystoreEdit;
     }
 
     public String getAuthServerHost() {
