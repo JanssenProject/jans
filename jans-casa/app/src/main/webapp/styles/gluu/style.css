@@ -111,15 +111,15 @@ button:disabled {
 }
 
 .bg-bsgreen-success {
-    background-color: #28a745;
+    background-color: #28a745 !important;
 }
 
 .hover-bsgreen-success:hover {
-    background-color: #449d44;
+    background-color: #449d44 !important;
 }
 
 .hover-bsgreen-success:focus {
-    background-color: #449d44;
+    background-color: #449d44 !important;
 }
 
 .tooltip-inner {
