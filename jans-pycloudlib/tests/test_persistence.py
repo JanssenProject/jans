@@ -414,18 +414,17 @@ def test_resolve_hybrid_storages(monkeypatch):
     monkeypatch.setenv("CN_PERSISTENCE_TYPE", "hybrid")
     monkeypatch.setenv("CN_HYBRID_MAPPING", json.dumps({
         "default": "sql",
-        "user": "spanner",
+        "user": "sql",
         "site": "couchbase",
         "cache": "sql",
         "token": "sql",
         "session": "sql",
     }))
     expected = {
-        "storages": "couchbase, spanner, sql",
+        "storages": "couchbase, sql",
         "storage.default": "sql",
         "storage.couchbase.mapping": "link",
-        "storage.spanner.mapping": "people, groups, authorizations",
-        "storage.sql.mapping": "cache, tokens, sessions",
+        "storage.sql.mapping": "people, groups, authorizations, cache, tokens, sessions",
     }
     mapper = PersistenceMapper()
     assert resolve_hybrid_storages(mapper) == expected
@@ -442,17 +441,16 @@ def test_render_hybrid_properties(monkeypatch, tmpdir):
             "user": "couchbase",
             "site": "sql",
             "cache": "sql",
-            "token": "spanner",
+            "token": "sql",
             "session": "sql",
         })
     )
 
     expected = """
-storages: couchbase, spanner, sql
+storages: couchbase, sql
 storage.default: sql
 storage.couchbase.mapping: people, groups, authorizations
-storage.spanner.mapping: tokens
-storage.sql.mapping: link, cache, sessions
+storage.sql.mapping: link, cache, tokens, sessions
 """.strip()
 
     dest = tmpdir.join("jans-hybrid.properties")
@@ -647,95 +645,6 @@ def test_sql_opendj_attr_types(monkeypatch):
     assert SqlSchemaMixin().opendj_attr_types == json.loads(types_str)
 
 
-# =======
-# SPANNER
-# =======
-
-
-def test_render_spanner_properties(monkeypatch, tmpdir, gmanager, google_creds):
-    from jans.pycloudlib.persistence.spanner import render_spanner_properties
-
-    monkeypatch.setenv("GOOGLE_APPLICATION_CREDENTIALS", str(google_creds))
-    monkeypatch.setenv("GOOGLE_PROJECT_ID", "testing-project")
-    monkeypatch.setenv("CN_GOOGLE_SPANNER_INSTANCE_ID", "testing-instance")
-    monkeypatch.setenv("CN_GOOGLE_SPANNER_DATABASE_ID", "testing-db")
-
-    tmpl = """
-connection.project=%(spanner_project)s
-connection.instance=%(spanner_instance)s
-connection.database=%(spanner_database)s
-%(spanner_creds)s
-""".strip()
-
-    expected = """
-connection.project=testing-project
-connection.instance=testing-instance
-connection.database=testing-db
-connection.credentials-file={}
-""".format(str(google_creds)).strip()
-
-    src = tmpdir.join("jans-spanner.properties.tmpl")
-    src.write(tmpl)
-    dest = tmpdir.join("jans-spanner.properties")
-
-    render_spanner_properties(gmanager, str(src), str(dest))
-    assert dest.read() == expected
-
-
-def test_render_spanner_properties_emulator(monkeypatch, tmpdir, gmanager):
-    from jans.pycloudlib.persistence.spanner import render_spanner_properties
-
-    monkeypatch.setenv("SPANNER_EMULATOR_HOST", "localhost:9010")
-    monkeypatch.setenv("GOOGLE_PROJECT_ID", "testing-project")
-    monkeypatch.setenv("CN_GOOGLE_SPANNER_INSTANCE_ID", "testing-instance")
-    monkeypatch.setenv("CN_GOOGLE_SPANNER_DATABASE_ID", "testing-db")
-
-    tmpl = """
-connection.project=%(spanner_project)s
-connection.instance=%(spanner_instance)s
-connection.database=%(spanner_database)s
-%(spanner_creds)s
-""".strip()
-
-    expected = """
-connection.project=testing-project
-connection.instance=testing-instance
-connection.database=testing-db
-connection.emulator-host=localhost:9010
-""".strip()
-
-    src = tmpdir.join("jans-spanner.properties.tmpl")
-    src.write(tmpl)
-    dest = tmpdir.join("jans-spanner.properties")
-
-    render_spanner_properties(gmanager, str(src), str(dest))
-    assert dest.read() == expected
-
-
-def test_spanner_quoted_id(spanner_client):
-    assert spanner_client.quoted_id("random") == "`random`"
-
-
-def test_spanner_sub_tables(monkeypatch, spanner_client):
-    monkeypatch.setattr(BUILTINS_OPEN, lambda p: StringIO("{}"))
-    assert isinstance(spanner_client.sub_tables, dict)
-
-
-def test_spanner_client_prop(spanner_client):
-    from google.cloud.spanner_v1.client import Client
-    assert isinstance(spanner_client.client, Client)
-
-
-def test_spanner_instance_prop(spanner_client):
-    from google.cloud.spanner_v1.instance import Instance
-    assert isinstance(spanner_client.instance, Instance)
-
-
-def test_spanner_database_prop(spanner_client):
-    from google.cloud.spanner_v1.database import Database
-    assert isinstance(spanner_client.database, Database)
-
-
 # =====
 # utils
 # =====
@@ -744,7 +653,6 @@ def test_spanner_database_prop(spanner_client):
 @pytest.mark.parametrize("type_", [
     "couchbase",
     "sql",
-    "spanner",
 ])
 def test_persistence_mapper_mapping(monkeypatch, type_):
     from jans.pycloudlib.persistence import PersistenceMapper
@@ -766,7 +674,7 @@ def test_persistence_mapper_hybrid_mapping(monkeypatch):
 
     mapping = {
         "default": "sql",
-        "user": "spanner",
+        "user": "sql",
         "site": "sql",
         "cache": "sql",
         "token": "couchbase",
@@ -783,8 +691,8 @@ def test_persistence_mapper_hybrid_mapping(monkeypatch):
     "[]",
     "{}",  # empty dict
     {"user": "sql"},  # missing remaining keys
-    {"default": "sql", "user": "spanner", "cache": "sql", "site": "couchbase", "token": "sql", "session": "random"},  # invalid type
-    {"default": "sql", "user": "spanner", "cache": "sql", "site": "couchbase", "token": "sql", "foo": "sql"},  # invalid key
+    {"default": "sql", "user": "sql", "cache": "sql", "site": "couchbase", "token": "sql", "session": "random"},  # invalid type
+    {"default": "sql", "user": "sql", "cache": "sql", "site": "couchbase", "token": "sql", "foo": "sql"},  # invalid key
 ])
 def test_persistence_mapper_validate_hybrid_mapping(monkeypatch, mapping):
     from jans.pycloudlib.persistence.utils import PersistenceMapper
@@ -802,7 +710,7 @@ def test_persistence_mapper_groups(monkeypatch):
     monkeypatch.setenv("CN_PERSISTENCE_TYPE", "hybrid")
     monkeypatch.setenv("CN_HYBRID_MAPPING", json.dumps({
         "default": "sql",
-        "user": "spanner",
+        "user": "sql",
         "site": "sql",
         "cache": "sql",
         "token": "couchbase",
@@ -811,8 +719,7 @@ def test_persistence_mapper_groups(monkeypatch):
 
     groups = {
         "couchbase": ["token"],
-        "spanner": ["user"],
-        "sql": ["default", "site", "cache", "session"],
+        "sql": ["default", "user", "site", "cache", "session"],
     }
     assert PersistenceMapper().groups() == groups
 
@@ -823,7 +730,7 @@ def test_persistence_mapper_groups_rdn(monkeypatch):
     monkeypatch.setenv("CN_PERSISTENCE_TYPE", "hybrid")
     monkeypatch.setenv("CN_HYBRID_MAPPING", json.dumps({
         "default": "sql",
-        "user": "spanner",
+        "user": "sql",
         "site": "sql",
         "cache": "sql",
         "token": "couchbase",
@@ -832,8 +739,7 @@ def test_persistence_mapper_groups_rdn(monkeypatch):
 
     groups = {
         "couchbase": ["tokens"],
-        "spanner": ["people, groups, authorizations"],
-        "sql": ["", "link", "cache", "sessions"],
+        "sql": ["", "people, groups, authorizations", "link", "cache", "sessions"],
     }
     assert PersistenceMapper().groups_with_rdn() == groups
 
