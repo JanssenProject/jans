@@ -175,7 +175,6 @@ Removing /etc/default/jans-auth
 Stopping jans-auth
 Removing /etc/default/jans-client-api
 Stopping jans-client-api
-Stopping OpenDj Server
 Executing rm -r -f /etc/certs
 Executing rm -r -f /etc/jans
 Executing rm -r -f /opt/jans
@@ -184,7 +183,6 @@ Executing rm -r -f /opt/jre
 Executing rm -r -f /opt/node*
 Executing rm -r -f /opt/jetty*
 Executing rm -r -f /opt/jython*
-Executing rm -r -f /opt/opendj
 Executing rm -r -f /opt/dist
 Removing /etc/apache2/sites-enabled/https_jans.conf
 Removing /etc/apache2/sites-available/https_jans.conf
