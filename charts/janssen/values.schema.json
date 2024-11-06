@@ -139,16 +139,6 @@
                             "type": "string",
                             "pattern": ""
                         },
-                        "cnGoogleSpannerInstanceId": {
-                            "description": "Google Spanner ID. Used only when global.cnPersistenceType is spanner.",
-                            "type": "string",
-                            "pattern": "^([a-z0-9\\-])*$"
-                        },
-                        "cnGoogleSpannerDatabaseId": {
-                            "description": "Google Spanner Database ID. Used only when global.cnPersistenceType is spanner.",
-                            "type": "string",
-                            "pattern": "^[a-z0-9\\-]*$"
-                        },
                         "cnGoogleSecretVersionId": {
                             "description": "Secret version to be used for secret configuration. Defaults to latest and should normally always stay that way. Used only when global.configAdapterName and global.configSecretAdapter is set to google.",
                             "type": "string",
@@ -420,9 +410,9 @@
                     }
                 },
                 "cnPersistenceType": {
-                    "description": "Persistence backend to run Janssen with couchbase|hybrid|sql|spanner.",
+                    "description": "Persistence backend to run Janssen with couchbase|hybrid|sql.",
                     "type": "string",
-                    "pattern": "^(couchbase|hybrid|sql|spanner)$"
+                    "pattern": "^(couchbase|hybrid|sql)$"
                 },
                 "cnDocumentStoreType": {
                     "description": "Document store type to use for shibboleth files  DB.",
@@ -449,7 +439,7 @@
                     "pattern": "^(kubernetes|google|aws|vault)$"
                 },
                 "cnGoogleApplicationCredentials": {
-                    "description": "Base64 encoded service account. The sa must have roles/secretmanager.admin to use Google secrets and roles/spanner.databaseUser to use Spanner.",
+                    "description": "Base64 encoded service account. The sa must have roles/secretmanager.admin to use Google secrets.",
                     "type": "string",
                     "pattern": ".*google-credentials.json\\b.*"
                 },
