@@ -16,8 +16,6 @@
 #[cfg(test)]
 mod test;
 
-pub(crate) mod decoding_strategy;
-
 mod error;
 mod jwt_service_config;
 mod token;
@@ -32,6 +30,7 @@ pub use decoding_strategy::{string_to_alg, ParseAlgorithmError};
 pub use error::JwtServiceError;
 pub use jsonwebtoken::Algorithm;
 pub use jwt_service_config::*;
+pub(crate) mod decoding_strategy;
 
 pub struct JwtService {
     decoding_strategy: DecodingStrategy,
