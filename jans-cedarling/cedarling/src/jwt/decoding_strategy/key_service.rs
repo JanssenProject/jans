@@ -88,7 +88,7 @@ impl HttpClient {
         let client = Client::builder()
             .build()
             .map_err(KeyServiceError::HttpClientInitialization)?;
-        
+
         // We're doing this for now since `ServiceConfig::new` is also calling this
         // which is slowing down the tests. This would probably disappear once we
         // implement lazy loading.
