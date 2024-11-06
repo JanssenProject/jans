@@ -14,10 +14,16 @@ use semver::Version;
 use serde::{Deserialize, Deserializer};
 use std::{collections::HashMap, fmt};
 
-/// The PolicySTore in Agama format, which has the extra top-level key
+/// This is the top-level struct in compliance with the Agama Lab Policy Designer format.
 #[derive(Debug, Clone, serde::Deserialize, PartialEq)]
-#[serde(transparent)]
-pub struct AgamaPolicyStore(HashMap<String,PolicyStore>);
+pub struct AgamaPolicyStore {
+    /// The cedar version to use when parsing the schema and policies.
+    #[serde(deserialize_with = "parse_cedar_version")]
+    #[allow(dead_code)]
+    pub cedar_version: Version,
+
+    pub policy_stores : HashMap<String,PolicyStore>,
+}
 
 /// Represents the store of policies used for JWT validation and policy evaluation in Cedarling.
 ///

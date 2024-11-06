@@ -9,6 +9,7 @@ use std::collections::HashMap;
 
 use crate::bootstrap_config::policy_store_config::{PolicyStoreConfig, PolicyStoreSource};
 use crate::common::policy_store::PolicyStore;
+use crate::common::policy_store::AgamaPolicyStore;
 
 /// Errors that can occur when loading a policy store.
 #[derive(Debug, thiserror::Error)]
@@ -19,6 +20,8 @@ pub enum PolicyStoreLoadError {
     ParseYaml(#[from] serde_yml::Error),
     #[error("failed to fetch the policy store from the lock server")]
     FetchFromLockServer,
+    #[error("Policy Store does not contain correct structure: {0}")]
+    InvalidStore(String),
 }
 
 /// Loads the policy store based on the provided configuration.
@@ -32,7 +35,17 @@ pub(crate) fn load_policy_store(
             load_policy_store_from_json(policy_json).map_err(PolicyStoreLoadError::ParseJson)?
         },
         PolicyStoreSource::Yaml(policy_yaml) => {
-            serde_yml::from_str(policy_yaml).map_err(PolicyStoreLoadError::ParseYaml)?
+            let agama_policy_store = serde_yml::from_str::<AgamaPolicyStore>(policy_yaml)
+                .map_err(PolicyStoreLoadError::ParseYaml)?;
+            if agama_policy_store.policy_stores.len() != 1 {
+                return Err(PolicyStoreLoadError::InvalidStore(format!("expected exactly one 'policy_stores' entry, but found {:?}", agama_policy_store.policy_stores.len())))
+            }
+            // extract exactly the first policy store in the struct
+            let mut policy_stores = agama_policy_store.policy_stores.into_values().take(1).collect::<Vec<_>>();
+            match policy_stores.pop() {
+                Some(policy_store) => policy_store,
+                None => return Err(PolicyStoreLoadError::InvalidStore(format!("error retrieving first policy_stores element"))),
+            }
         },
         PolicyStoreSource::LockMaster(policy_store_id) => {
             load_policy_store_from_lock_master(policy_store_id)?

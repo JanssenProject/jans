@@ -289,7 +289,7 @@ mod deserialize {
             static POLICY_STORE_RAW_YAML: &str =
                 include_str!("../../../test_files/policy-store_schema_err.yaml");
 
-            let policy_result = serde_yml::from_str::<PolicyStore>(POLICY_STORE_RAW_YAML);
+            let policy_result = serde_yml::from_str::<AgamaPolicyStore>(POLICY_STORE_RAW_YAML);
             let err = policy_result.unwrap_err();
             let msg = err.to_string();
             assert!(
