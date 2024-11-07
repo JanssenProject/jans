@@ -11,10 +11,8 @@ use cedarling::{
 };
 use std::collections::HashMap;
 
-// Load a JSON policy store file, containing policies and trusted issuers, at compile time.
-// This file defines access control policies for different resources and actions.
-static POLICY_STORE_RAW: &str =
-    include_str!("../../test_files/policy-store_with_trusted_issuers_ok.json");
+static POLICY_STORE_RAW_YAML: &str =
+    include_str!("../../test_files/policy-store_with_trusted_issuers_ok.yaml");
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Configure JWT validation settings. Enable the JwtService to validate JWT tokens
@@ -38,7 +36,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             log_type: LogTypeConfig::StdOut,
         },
         policy_store_config: PolicyStoreConfig {
-            source: PolicyStoreSource::Json(POLICY_STORE_RAW.to_string()),
+            source: PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()),
         },
         jwt_config,
     })?;

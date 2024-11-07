@@ -13,7 +13,7 @@ use std::env;
 
 // The human-readable policy and schema file is located in next folder:
 // `test_files\policy-store_ok`
-static POLICY_STORE_RAW: &str = include_str!("../../test_files/policy-store_ok.json");
+static POLICY_STORE_RAW: &str = include_str!("../../test_files/policy-store_ok.yaml");
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Collect command-line arguments
@@ -44,7 +44,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         application_name: "test_app".to_string(),
         log_config: LogConfig { log_type },
         policy_store_config: PolicyStoreConfig {
-            source: PolicyStoreSource::Json(POLICY_STORE_RAW.to_string()),
+            source: PolicyStoreSource::Yaml(POLICY_STORE_RAW.to_string()),
         },
         jwt_config: JwtConfig::Disabled,
     })?;
