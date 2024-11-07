@@ -7,6 +7,7 @@
 
 use crate::bootstrap_config::policy_store_config::{PolicyStoreConfig, PolicyStoreSource};
 use crate::common::policy_store::PolicyStore;
+use crate::common::policy_store::AgamaPolicyStore;
 
 /// Errors that can occur when loading a policy store.
 #[derive(Debug, thiserror::Error)]
@@ -17,6 +18,23 @@ pub enum PolicyStoreLoadError {
     ParseYaml(#[from] serde_yml::Error),
     #[error("failed to fetch the policy store from the lock server")]
     FetchFromLockServer,
+    #[error("Policy Store does not contain correct structure: {0}")]
+    InvalidStore(String),
+}
+
+// AgamaPolicyStore contains the structure to accommodate several policies,
+// and this code for now assumes that there is only ever one policy store,
+// extract the first 'policy_stores' entry.
+fn extract_first_policy_store(agama_policy_store: &AgamaPolicyStore) -> Result<PolicyStore,PolicyStoreLoadError> {
+    if agama_policy_store.policy_stores.len() != 1 {
+        return Err(PolicyStoreLoadError::InvalidStore(format!("expected exactly one 'policy_stores' entry, but found {:?}", agama_policy_store.policy_stores.len())))
+    }
+    // extract exactly the first policy store in the struct
+    let mut policy_stores = agama_policy_store.policy_stores.values().take(1).collect::<Vec<_>>();
+    match policy_stores.pop() {
+        Some(policy_store) => Ok(policy_store.clone()),
+        None => Err(PolicyStoreLoadError::InvalidStore("error retrieving first policy_stores element".into())),
+    }
 }
 
 /// Loads the policy store based on the provided configuration.
@@ -27,22 +45,19 @@ pub(crate) fn load_policy_store(
 ) -> Result<PolicyStore, PolicyStoreLoadError> {
     let policy_store = match &config.source {
         PolicyStoreSource::Json(policy_json) => {
-            load_policy_store_from_json(policy_json).map_err(PolicyStoreLoadError::ParseJson)?
+            let agama_policy_store = serde_json::from_str::<AgamaPolicyStore>(policy_json)
+                .map_err(PolicyStoreLoadError::ParseJson)?;
+            extract_first_policy_store(&agama_policy_store)?
         },
         PolicyStoreSource::Yaml(policy_yaml) => {
-            serde_yml::from_str(policy_yaml).map_err(PolicyStoreLoadError::ParseYaml)?
+            let agama_policy_store = serde_yml::from_str::<AgamaPolicyStore>(policy_yaml)
+                .map_err(PolicyStoreLoadError::ParseYaml)?;
+            extract_first_policy_store(&agama_policy_store)?
         },
         PolicyStoreSource::LockMaster(policy_store_id) => {
             load_policy_store_from_lock_master(policy_store_id)?
         },
     };
-
-    Ok(policy_store)
-}
-
-/// Loads the policy store from a JSON string.
-fn load_policy_store_from_json(policies_json: &str) -> Result<PolicyStore, serde_json::Error> {
-    let policy_store = serde_json::from_str::<PolicyStore>(policies_json)?;
 
     Ok(policy_store)
 }

@@ -9,5 +9,6 @@
 
 mod utils;
 
-mod success_test_json;
+mod agama_policy_test;
 mod cases_authorize_without_check_jwt;
+mod success_test_json;
