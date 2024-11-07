@@ -1,0 +1,179 @@
+name: Jans Full Build
+
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: '0 8 * * *'
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+
+jobs:
+  full-build-with-disabled-tests:
+    runs-on: ubuntu-20.04
+    permissions:
+      contents: read
+      packages: write
+    env:
+      VERSION_NAME: main
+      MAVEN_SKIP_TESTS: true
+      PROFILE_NAME: "default"
+
+    strategy:
+      max-parallel: 1
+      matrix:
+        service:
+          - "jans-bom"
+          - "jans-orm"
+          - "jans-core"
+          - "jans-lock/lock-server"
+          - "agama"
+          - "jans-auth-server"
+          - "jans-link"
+          - "jans-fido2"
+          - "jans-scim"
+          - "jans-keycloak-link"
+          - "jans-config-api"
+          - "jans-keycloak-integration"
+          - "jans-casa"
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ github.event.inputs.branch }}
+
+    - name: Set up Java 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'adopt'
+
+    - name: Set up Maven
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'adopt'
+        cache: 'maven'
+
+    - name: Build ${{ matrix.service }}
+      run: |
+        if [ "${{ github.event_name }}" == "pull_request" ]; then
+          mvn -f ${{ matrix.service }}/pom.xml -Dcfg=${{ env.PROFILE_NAME }} -Dmaven.test.skip=${{ env.MAVEN_SKIP_TESTS }} clean install -Drevision=${{ github.head_ref }}-SNAPSHOT
+        else
+          mvn -f ${{ matrix.service }}/pom.xml -Dcfg=${{ env.PROFILE_NAME }} -Dmaven.test.skip=${{ env.MAVEN_SKIP_TESTS }} clean install
+        fi
+
+    - name: Publish to GitHub Packages
+      run: mvn -B deploy -Dmaven.test.skip=${{ env.MAVEN_SKIP_TESTS }} -Dcfg=${{ env.PROFILE_NAME }}
+      working-directory: ${{ matrix.service }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.JANS_TOKEN }}
+
+    - name: Archive results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-results
+        path: ${{ matrix.service }}/target
+
+    - name: Send notification on failure
+      if: failure()
+      run: echo "Build failed"
+
+  cleanup:
+    if: github.event_name == 'push' && github.event.ref == 'refs/heads/main'
+    runs-on: ubuntu-20.04
+    steps:
+
+    - name: Clean up PR assets
+      run: |
+        # List all SNAPSHOT versions
+        versions=$(curl -s -H "Authorization: token ${{ secrets.JANS_TOKEN }}" "https://maven.pkg.github.com/JanssenProject/jans/maven-metadata.xml" | grep -oP '(?<=<version>)[^<]+')
+        
+        for version in $versions; do
+          if [[ $version == *-SNAPSHOT ]]; then
+            # Delete the version from GitHub Packages
+            curl -X DELETE -H "Authorization: token ${{ secrets.JANS_TOKEN }}" "https://maven.pkg.github.com/JanssenProject/jans/io/jans/${{ matrix.service }}/$version"
+          fi
+        done
+
+  run-tests:
+    permissions: write-all
+    runs-on: ubuntu-20.04
+    env:
+      MAVEN_SKIP_TESTS: false
+      CONTAINER_NAME_SPANNER: ubuntu20-spanner
+      CONTAINER_NAME_CB: ubuntu20-couchbase
+      CONTAINER_NAME_LDAP: ubuntu20-ldap
+      CONTAINER_NAME_MYSQL: ubuntu20-mysql
+      CONTAINER_NAME_POSTGRESQL: ubuntu20-postgresql
+      DEVELOPMENT_BUILD: true
+      SKIP_FINDBUGS: true
+      DEPENDENCY_CHECK: true
+      VERSION_NAME: main
+      PROFILE_NAME: default
+    strategy:
+      max-parallel: 5
+      matrix:
+        persistence:
+          - "MYSQL"
+          - "PGSQL"
+      fail-fast: false
+    steps:
+
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ github.event.inputs.branch }}
+
+    - name: Set up Java 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'adopt'
+
+    - name: Set up Maven
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'adopt'
+        cache: 'maven'
+
+    - name: Run Jans Monolith
+      env:
+        JANS_FQDN: demoexample.jans.io
+        EXT_IP: $(ifconfig eth0 | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1')
+        JANS_BUILD_COMMIT: main
+      run: |
+        export ip=$(ifconfig eth0 | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1')
+        sudo chmod a+x automation/startjanssenmonolithdemo.sh
+        sudo RUN_TESTS=true bash ./automation/startjanssenmonolithdemo.sh "demoexample.jans.io" "${{ matrix.persistence }}" "$ip" "${{ github.sha }}"
+
+    - name: List Reports
+      run: |
+        ls /tmp/reports/
+
+    - name: Upload Test Results
+      uses: actions/upload-artifact@v4
+      with:
+        name: ${{ matrix.persistence }}-test-results
+        path: /tmp/reports
+
+    - name: Publish Test Report ${{ matrix.persistence }}
+      uses: starburstdata/action-testng-report@v1
+      with:
+          report_paths: /tmp/reports/${{ matrix.persistence }}*.xml
+          github_token: ${{ github.token }}
+          fail_if_empty: false
+
+    # - name: Publish Test Report Surefire
+    #   uses: scacap/action-surefire-report@v1
+    #   if: success() || failure()
+    #   with:
+    #     github_token: ${{ github.token }}
+    #     report_paths: /tmp/reports/**.xml
