@@ -82,6 +82,9 @@ spec:
         resources:
 {{- toYaml .Values.resources | nindent 10 }}
         command:
+          {{- if .Values.customCommand }}
+          {{- toYaml .Values.customCommand | nindent 12 }}
+          {{- else }}
           - tini
           - -g
           - --
@@ -99,4 +102,5 @@ spec:
               {{- if .Values.global.istio.enabled }}
               curl -X POST http://localhost:15020/quitquitquit
               {{- end }}
+          {{- end}}     
       restartPolicy: Never

@@ -36,8 +36,11 @@ spec:
         {{- end }}
           containers:
             - name: {{ include "kc-scheduler.name" . }}
-              {{- if .Values.customScripts }}
+              {{- if or (.Values.customScripts) (.Values.customCommand) }}
               command:
+                {{- if .Values.customCommand }}
+                {{- toYaml .Values.customCommand | nindent 18 }}
+                {{- else }}
                 - /bin/sh
                 - -c
                 - |
@@ -45,6 +48,7 @@ spec:
                     {{- toYaml . | replace "- " "" | nindent 20}}
                     {{- end }}
                     /app/scripts/entrypoint.sh
+                {{- end}}
               {{- end}}
               image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
               env:
