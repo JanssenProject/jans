@@ -4,8 +4,7 @@ import pytest
 @pytest.mark.parametrize("type_", [
     "couchbase",
     "hybrid",
-    "sql",
-    "spanner",
+    "sql"
 ])
 def test_validate_persistence_type(type_):
     from jans.pycloudlib.validators import validate_persistence_type
