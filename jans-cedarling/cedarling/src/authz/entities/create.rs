@@ -10,13 +10,10 @@ use std::{
     str::FromStr,
 };
 
+use crate::authz::token_data::{GetTokenClaimValue, Payload, TokenPayload};
 use crate::common::cedar_schema::{
-    cedar_json::{CedarSchemaRecord, CedarType, GetCedarTypeError},
+    cedar_json::{CedarSchemaEntityShape, CedarSchemaRecord, CedarType, GetCedarTypeError},
     CedarSchemaJson,
-};
-use crate::{
-    authz::token_data::{GetTokenClaimValue, Payload, TokenPayload},
-    common::cedar_schema::cedar_json::CedarSchemaEntityShape,
 };
 
 use cedar_policy::{EntityId, EntityTypeName, EntityUid, RestrictedExpression};
