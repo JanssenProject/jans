@@ -12,7 +12,7 @@ if [[ ! "$JANS_FQDN" ]]; then
   read -rp "Enter Hostname [demoexample.jans.io]:                           " JANS_FQDN
 fi
 if [[ ! "$JANS_PERSISTENCE" ]]; then
-  read -rp "Enter persistence type [MYSQL|PGSQL|COUCHBASE[TEST]|SPANNER[TEST]]:                            " JANS_PERSISTENCE
+  read -rp "Enter persistence type [MYSQL|PGSQL]:                            " JANS_PERSISTENCE
 fi
 
 if [[ -z $EXT_IP ]]; then

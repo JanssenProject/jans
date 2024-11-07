@@ -58,11 +58,10 @@ questions:
   type: enum
   group: "Persistence"
   label: Gluu Persistence backend
-  description: "Persistence backend to run Gluu with couchbase|hybrid|sql|spanner"
+  description: "Persistence backend to run Gluu with couchbase|sql|"
   options:
     - "couchbase"
     - "hybrid"
-    - "spanner"
     - "sql"
 
 # Hybrid

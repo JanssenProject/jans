@@ -6,7 +6,6 @@ tags:
   - MySQL
   - Couchbase
   - Aurora
-  - Spanner
   - Postgres
   - database
 ---
