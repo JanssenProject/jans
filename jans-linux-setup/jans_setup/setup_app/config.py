@@ -45,7 +45,7 @@ class Config:
 
     @classmethod
     def set_mapping_locations(self):
-        ptype = 'rdbm' if self.persistence_type in ('sql', 'spanner') else self.persistence_type
+        ptype = 'rdbm' if self.persistence_type in ('sql',) else self.persistence_type
         self.mapping_locations = { group: ptype for group in self.couchbaseBucketDict }
 
     @classmethod
@@ -167,13 +167,6 @@ class Config:
         self.rdbm_password_enc = ''
         self.static_rdbm_dir = os.path.join(self.install_dir, 'static/rdbm')
 
-        #spanner
-        self.spanner_project = 'jans-project'
-        self.spanner_instance = 'jans-instance'
-        self.spanner_database = 'jansdb' 
-        self.spanner_emulator_host = None
-        self.google_application_credentials = None
-
         # Jans components installation status
         self.loadData = True
         self.install_jans = True
@@ -256,7 +249,6 @@ class Config:
         self.jans_python_readme = os.path.join(self.jansOptPythonFolder, 'libs/python.txt')
         self.jansCouchebaseProperties = os.path.join(self.configFolder, 'jans-couchbase.properties')
         self.jansRDBMProperties = os.path.join(self.configFolder, 'jans-sql.properties')
-        self.jansSpannerProperties = os.path.join(self.configFolder, 'jans-spanner.properties')
 
         self.ldif_base = os.path.join(self.output_dir, 'base.ldif')
         self.ldif_attributes = os.path.join(self.output_dir, 'attributes.ldif')
