@@ -105,8 +105,6 @@ Here is a non-normative example of the `policies` field:
 
 ```json
   "policies": {
-    "name": "non-normative",
-    "description": "An example of the structure for the policies field",
     "840da5d85403f35ea76519ed1a18a33989f855bf1cf8": {
       "cedar_version": "v2.7.4",
       "name": "Policy-the-first",
@@ -152,35 +150,34 @@ Here is a non-normative example of the `policies` field:
 This record contains the information needed to validate tokens from this issuer:
 
 ```json
-"identity_source": {
-    "some_unique_id" :
-    {
-        "name": "name_of_the_trusted_issuer",
-        "description": "description for the trusted issuer",
-        "openid_configuration_endpoint": "https://<trusted-issuer-hostname>/.well-known/openid-configuration",
-        "access_tokens": {
-          "trusted": true,
-          "principal_identifier": "",
-          "role_mapping": "",
-        },
-        "id_tokens": {
-          "trusted": true,
-          "principal_identifier": "sub",
-          "role_mapping": "",
-        },
-        "userinfo_tokens": {
-          "trusted": true,
-          "principal_identifier": "",
-          "role_mapping": "role",
-        },
-        "tx_tokens": {
-          "trusted": true,
-          "principal_identifier": "",
-          "role_mapping": "",
-        },
+  "identity_source": {
+    "some_unique_id" : {
+      "name": "name_of_the_trusted_issuer",
+      "description": "description for the trusted issuer",
+      "openid_configuration_endpoint": "https://<trusted-issuer-hostname>/.well-known/openid-configuration",
+      "access_tokens": {
+        "trusted": true,
+        "principal_identifier": "",
+        "role_mapping": "",
+      },
+      "id_tokens": {
+        "trusted": true,
+        "principal_identifier": "sub",
+        "role_mapping": "",
+      },
+      "userinfo_tokens": {
+        "trusted": true,
+        "principal_identifier": "",
+        "role_mapping": "role",
+      },
+      "tx_tokens": {
+        "trusted": true,
+        "principal_identifier": "",
+        "role_mapping": "",
+      },
     }
     ...
-}
+  }
 ```
 
 - **name** : (*String*) The name of the trusted issuer.
@@ -224,28 +221,26 @@ Here is a non-normative example of a `cedarling_store.json` file:
             "name": "Google",
             "description": "Consumer IDP",
             "openid_configuration_endpoint": "https://accounts.google.com/.well-known/openid-configuration",
-            "identity_source": {
-                "access_tokens": {
-                  "trusted": true,
-                  "principal_identifier": "",
-                  "role_mapping": "",
-                },
-                "id_tokens": {
-                  "trusted": true,
-                  "principal_identifier": "sub",
-                  "role_mapping": "",
-                },
-                "userinfo_tokens": {
-                  "trusted": true,
-                  "principal_identifier": "",
-                  "role_mapping": "role",
-                },
-                "tx_tokens": {
-                  "trusted": true,
-                  "principal_identifier": "",
-                  "role_mapping": "",
-                },
-            }
+            "access_tokens": {
+              "trusted": true,
+              "principal_identifier": "",
+              "role_mapping": "",
+            },
+            "id_tokens": {
+              "trusted": true,
+              "principal_identifier": "sub",
+              "role_mapping": "",
+            },
+            "userinfo_tokens": {
+              "trusted": true,
+              "principal_identifier": "",
+              "role_mapping": "role",
+            },
+            "tx_tokens": {
+              "trusted": true,
+              "principal_identifier": "",
+              "role_mapping": "",
+            },            
         }
     }
 }
