@@ -207,8 +207,7 @@ class JansAuthInstaller(JettyInstaller):
         common_lib_dir = None
         if Config.cb_install:
             common_lib_dir = base.current_app.CouchbaseInstaller.common_lib_dir
-        elif Config.rdbm_install and Config.rdbm_type == 'spanner':
-            common_lib_dir = base.current_app.RDBMInstaller.common_lib_dir
+
         if common_lib_dir:
             class_path = os.path.join(common_lib_dir, '*')
             current_plugins = self.get_plugins(paths=True)

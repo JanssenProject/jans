@@ -28,7 +28,7 @@ parser.add_argument('-csx', help="Collect setup properties, save and exit", acti
 parser.add_argument('-encode-salt', help="24 characters length string to be used for encoding passwords")
 
 rdbm_group = parser.add_mutually_exclusive_group()
-rdbm_group.add_argument('-remote-rdbm', choices=['mysql', 'pgsql', 'spanner'], help="Enables using remote RDBM server")
+rdbm_group.add_argument('-remote-rdbm', choices=['mysql', 'pgsql'], help="Enables using remote RDBM server")
 rdbm_group.add_argument('-local-rdbm', choices=['mysql', 'pgsql'], help="Enables installing/configuring local RDBM server", default='pgsql')
 parser.add_argument('-ip-address', help="Used primarily by Apache httpd for the Listen directive")
 parser.add_argument('-host-name', help="Internet-facing FQDN that is used to generate certificates and metadata.")
@@ -106,14 +106,6 @@ if PROFILE != OPENBANKING_PROFILE:
     parser.add_argument('--load-config-api-test', help="Load Config Api Test Data", action='store_true')
 
     parser.add_argument('-config-patch-creds', help="password:username for downloading auto test ciba password")
-
-    # spanner options
-    parser.add_argument('-spanner-project', help="Spanner project name")
-    parser.add_argument('-spanner-instance', help="Spanner instance name")
-    parser.add_argument('-spanner-database', help="Spanner database name")
-    spanner_cred_group = parser.add_mutually_exclusive_group()
-    spanner_cred_group.add_argument('-spanner-emulator-host', help="Use Spanner emulator host")
-    spanner_cred_group.add_argument('-google-application-credentials', help="Path to Google application credentials json file")
 
     # test-client
     parser.add_argument('-test-client-id', help="ID of test client which has all available scopes. Must be in UUID format.")
