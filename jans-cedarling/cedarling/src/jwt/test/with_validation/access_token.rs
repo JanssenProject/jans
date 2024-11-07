@@ -23,7 +23,7 @@
 use super::super::*;
 use crate::common::policy_store::TrustedIssuer;
 use crate::jwt::decoding_strategy::JwtDecodingError;
-use crate::jwt::{self, JwtService, TrustedIssuerAndOpenIdConfig};
+use crate::jwt::{self, HttpClient, JwtService, TrustedIssuerAndOpenIdConfig};
 use jsonwebtoken::Algorithm;
 use serde_json::json;
 
@@ -105,9 +105,12 @@ fn test_missing_claim(missing_claim: &'static str) {
     });
 
     // generate the signed token strings
-    let access_token = generate_token_using_claims(&access_token_claims, &encoding_keys[0]);
-    let id_token = generate_token_using_claims(&id_token_claims, &encoding_keys[1]);
-    let userinfo_token = generate_token_using_claims(&userinfo_token_claims, &encoding_keys[0]);
+    let tokens = generate_tokens_using_claims(GenerateTokensArgs {
+        access_token_claims,
+        id_token_claims,
+        userinfo_token_claims,
+        encoding_keys,
+    });
 
     // setup mock server responses for OpenID configuration and JWKS URIs
     let openid_config_response = json!({
@@ -141,7 +144,7 @@ fn test_missing_claim(missing_claim: &'static str) {
             ),
             token_metadata: None,
         },
-        &reqwest::blocking::Client::new(),
+        &HttpClient::new().expect("should create http client"),
     )
     .expect("openid config should be fetched successfully");
 
@@ -159,14 +162,10 @@ fn test_missing_claim(missing_claim: &'static str) {
     // decode and validate the tokens
     let decode_result = jwt_service
         .decode_tokens::<serde_json::Value, serde_json::Value, serde_json::Value>(
-            &access_token,
-            &id_token,
-            &userinfo_token,
+            &tokens.access_token,
+            &tokens.id_token,
+            &tokens.userinfo_token,
         );
-
-    if let Err(ref e) = decode_result {
-        println!("err: {}", e.to_string());
-    }
 
     // the jsonwebtoken crate checks for missing claims differently depending on
     // the claim so we need to split these asserts into two, unfortunately.
@@ -250,15 +249,18 @@ fn errors_on_invalid_signature() {
         "exp": Timestamp::one_hour_after_now(),
     });
 
-    // generate the signed access_token
-    let access_token = generate_token_using_claims(&access_token_claims, &encoding_keys[0]);
+    // generate the access_token with invalid signature
+    let access_token = generate_token_using_claims(&access_token_claims, &encoding_keys[0])
+        .expect("Should generate access_token");
     let access_token = invalidate_token(access_token);
 
     // generate the signed id_token
-    let id_token = generate_token_using_claims(&id_token_claims, &encoding_keys[1]);
+    let id_token = generate_token_using_claims(&id_token_claims, &encoding_keys[1])
+        .expect("Should generate id_token");
 
     // generate the signed userinfo_token
-    let userinfo_token = generate_token_using_claims(&userinfo_token_claims, &encoding_keys[0]);
+    let userinfo_token = generate_token_using_claims(&userinfo_token_claims, &encoding_keys[0])
+        .expect("Should generate userinfo_token");
 
     // setup mock server responses for OpenID configuration and JWKS URIs
     let openid_config_response = json!({
@@ -292,7 +294,7 @@ fn errors_on_invalid_signature() {
             ),
             token_metadata: None,
         },
-        &reqwest::blocking::Client::new(),
+        &HttpClient::new().expect("should create http client"),
     )
     .expect("openid config should be fetched successfully");
 
@@ -371,9 +373,12 @@ fn errors_on_expired_token() {
     });
 
     // generate the signed token strings
-    let access_token = generate_token_using_claims(&access_token_claims, &encoding_keys[0]);
-    let id_token = generate_token_using_claims(&id_token_claims, &encoding_keys[1]);
-    let userinfo_token = generate_token_using_claims(&userinfo_token_claims, &encoding_keys[0]);
+    let tokens = generate_tokens_using_claims(GenerateTokensArgs {
+        access_token_claims,
+        id_token_claims,
+        userinfo_token_claims,
+        encoding_keys,
+    });
 
     // setup mock server responses for OpenID configuration and JWKS URIs
     let openid_config_response = json!({
@@ -407,7 +412,7 @@ fn errors_on_expired_token() {
             ),
             token_metadata: None,
         },
-        &reqwest::blocking::Client::new(),
+        &HttpClient::new().expect("should create http client"),
     )
     .expect("openid config should be fetched successfully");
 
@@ -425,9 +430,9 @@ fn errors_on_expired_token() {
     // decode and validate the tokens
     let decode_result = jwt_service
         .decode_tokens::<serde_json::Value, serde_json::Value, serde_json::Value>(
-            &access_token,
-            &id_token,
-            &userinfo_token,
+            &tokens.access_token,
+            &tokens.id_token,
+            &tokens.userinfo_token,
         );
 
     assert!(
@@ -488,9 +493,12 @@ fn errors_on_token_used_before_nbf() {
     });
 
     // generate the signed token strings
-    let access_token = generate_token_using_claims(&access_token_claims, &encoding_keys[0]);
-    let id_token = generate_token_using_claims(&id_token_claims, &encoding_keys[1]);
-    let userinfo_token = generate_token_using_claims(&userinfo_token_claims, &encoding_keys[0]);
+    let tokens = generate_tokens_using_claims(GenerateTokensArgs {
+        access_token_claims,
+        id_token_claims,
+        userinfo_token_claims,
+        encoding_keys,
+    });
 
     // setup mock server responses for OpenID configuration and JWKS URIs
     let openid_config_response = json!({
@@ -524,13 +532,13 @@ fn errors_on_token_used_before_nbf() {
             ),
             token_metadata: None,
         },
-        &reqwest::blocking::Client::new(),
+        &HttpClient::new().expect("should create http client"),
     )
     .expect("openid config should be fetched successfully");
 
     // initialize JwtService with validation enabled and ES256 as the supported algorithm
     let jwt_service = JwtService::new_with_config(crate::jwt::JwtServiceConfig::WithValidation {
-        supported_algs: vec![Algorithm::ES256],
+        supported_algs: vec![Algorithm::ES256, Algorithm::HS256],
         trusted_idps: vec![trusted_idp],
     });
 
@@ -542,9 +550,9 @@ fn errors_on_token_used_before_nbf() {
     // decode and validate the tokens
     let decode_result = jwt_service
         .decode_tokens::<serde_json::Value, serde_json::Value, serde_json::Value>(
-            &access_token,
-            &id_token,
-            &userinfo_token,
+            &tokens.access_token,
+            &tokens.id_token,
+            &tokens.userinfo_token,
         );
 
     assert!(
