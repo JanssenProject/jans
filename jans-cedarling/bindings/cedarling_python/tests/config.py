@@ -22,6 +22,7 @@ def sample_bootstrap_config():
     # log_config = DisabledLoggingConfig()
 
     # Create policy source configuration
+    # NOTE yaml is only used for test fixtures. Real imports use json.
     with open(join(TEST_FILES_PATH, "policy-store_ok.yaml"),
               mode="r", encoding="utf8") as f:
         policy_raw = f.read()
