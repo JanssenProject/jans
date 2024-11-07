@@ -1,7 +1,7 @@
 cedar_version: v4.0.0
 policy_stores:
   ba1f39115ed86ed760ee0bea1d529b52189e5a117474:
-    cedar_version: v2.4.7
+    cedar_version: v4.0.0
     name: PolicyStoreOk
     description: Syntax error in policy
     cedar_policies:

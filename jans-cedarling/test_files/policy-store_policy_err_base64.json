@@ -2,7 +2,7 @@
     "cedar_version": "v4.0.0",
     "policy_stores": {
         "23641abe5787e6276852e4c0d37c881e6814e4ecf2e8ffebff3c88a9d9bf1975": {
-            "cedar_version": "v2.4.7",
+            "cedar_version": "v4.0.0",
             "cedar_policies": {
                 "840da5d85403f35ea76519ed1a18a33989f855bf1cf8": {
                     "description": "admin access",

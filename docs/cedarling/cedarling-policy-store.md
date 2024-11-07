@@ -66,7 +66,7 @@ The `policies` field describes the Cedar policies that will be used in Cedarling
 ```json
   "policies": {
     "unique_policy_id": {
-      "cedar_version" : "v2.4.7",
+      "cedar_version" : "v4.0.0",
       "name": "Policy for Unique Id",
       "description": "simple policy example",
       "creation_date": "2024-09-20T17:22:39.996050",
@@ -207,7 +207,7 @@ Here is a non-normative example of a `cedarling_store.json` file:
 
 ```json
 {
-    "cedar_version": "v2.4.7",
+    "cedar_version": "v4.0.0",
     "policies": {
         "840da5d85403f35ea76519ed1a18a33989f855bf1cf8": {
             "description": "simple policy example",
