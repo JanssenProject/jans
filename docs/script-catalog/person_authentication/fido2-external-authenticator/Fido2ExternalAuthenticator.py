@@ -143,6 +143,8 @@ class PersonAuthentication(PersonAuthenticationType):
         identity = CdiUtil.bean(Identity)
 
         if step == 1:
+            #TODO: this one will change
+            identity.setWorkingParameter("fido2_assertion_request", "")
             return True
         elif step == 2:
             print "Fido2. Prepare for step 2"

@@ -45,6 +45,8 @@ public class Fido2RegistrationData extends Fido2Data {
 
 	private String authentictatorAttachment;
 	
+	private String credId;
+	
     public String getUsername() {
         return username;
     }
@@ -141,8 +143,6 @@ public class Fido2RegistrationData extends Fido2Data {
         this.signatureAlgorithm = signatureAlgorithm;
     }
 
-   
-
     public boolean getBackupStateFlag() {
         return this.backupStateFlag;
     }
@@ -215,6 +215,14 @@ public class Fido2RegistrationData extends Fido2Data {
 		this.authentictatorAttachment = authentictatorAttachment;
 	}
 
+	public String getCredId() {
+		return credId;
+	}
+
+	public void setCredId(String credId) {
+		this.credId = credId;
+	}
+
 	@Override
 	public String toString() {
 		return "Fido2RegistrationData [username=" + username + ", origin=" + origin + ", userId=" + userId
@@ -225,10 +233,7 @@ public class Fido2RegistrationData extends Fido2Data {
 				+ ", backupStateFlag=" + backupStateFlag + ", backupEligibilityFlag=" + backupEligibilityFlag
 				+ ", attestedCredentialDataFlag=" + attestedCredentialDataFlag + ", extensionDataFlag="
 				+ extensionDataFlag + ", userVerifiedFlag=" + userVerifiedFlag + ", userPresentFlag=" + userPresentFlag
-				+ ", authentictatorAttachment=" + authentictatorAttachment + "]";
+				+ ", authentictatorAttachment=" + authentictatorAttachment + ", credId=" + credId + "]";
 	}
-
-	
-
 	
 }

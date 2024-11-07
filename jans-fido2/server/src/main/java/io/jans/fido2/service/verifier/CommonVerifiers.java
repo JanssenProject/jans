@@ -145,7 +145,7 @@ public class CommonVerifiers {
         long count = Collections.singletonList(!Strings.isNullOrEmpty(assertionOptions.getUsername()))
                 .parallelStream().filter(f -> !f).count();
         if (count != 0) {
-            throw errorResponseFactory.invalidRequest("Invalid parameters");
+            throw errorResponseFactory.invalidRequest("Invalid parameters : verifyAssertionOptions");
         }
     }
 
@@ -155,7 +155,7 @@ public class CommonVerifiers {
                 !Strings.isNullOrEmpty(assertionResult.getId())
         ).parallelStream().filter(f -> !f).count();
         if (count != 0) {
-            throw errorResponseFactory.invalidRequest("Invalid parameters");
+            throw errorResponseFactory.invalidRequest("Invalid parameters : verifyBasicPayload");
         }
     }
 
@@ -165,7 +165,7 @@ public class CommonVerifiers {
                 !Strings.isNullOrEmpty(attestationResult.getId())
         ).parallelStream().filter(f -> !f).count();
         if (count != 0) {
-            throw errorResponseFactory.invalidRequest("Invalid parameters");
+            throw errorResponseFactory.invalidRequest("Invalid parameters : verifyBasicAttestationResultRequest");
         }
     }
 
@@ -304,17 +304,21 @@ public class CommonVerifiers {
     }
 
     public JsonNode verifyClientJSON(String clientDataJSON) {
+    	log.debug("clientDataJSON : "+ clientDataJSON);
         JsonNode clientJsonNode = null;
         try {
             if (Strings.isNullOrEmpty(clientDataJSON)) {
+            	log.error("Client data JSON is missing");
                 throw errorResponseFactory.invalidRequest("Client data JSON is missing");
             }
             clientJsonNode = dataMapperService
                     .readTree(new String(base64Service.urlDecode(clientDataJSON), StandardCharsets.UTF_8));
             if (clientJsonNode == null) {
+            	log.error("Client data JSON is empty");
                 throw errorResponseFactory.invalidRequest("Client data JSON is empty");
             }
         } catch (IOException e) {
+        	log.error(e.getMessage());
             throw errorResponseFactory.invalidRequest("Can't parse message");
         }
 
@@ -332,6 +336,7 @@ public class CommonVerifiers {
                 String status = verifyThatFieldString(tokenBindingNode, "status");
                 verifyTokenBindingSupport(status);
             } else {
+            	log.error("Invalid tokenBinding entry. it should contains status");
                 throw errorResponseFactory.invalidRequest("Invalid tokenBinding entry. it should contains status");
             }
             if (tokenBindingNode.hasNonNull("id")) {
@@ -341,6 +346,7 @@ public class CommonVerifiers {
 
         String origin = verifyThatFieldString(clientJsonNode, "origin");
         if (origin.isEmpty()) {
+        	log.error("Client data origin parameter should be string");
             throw errorResponseFactory.invalidRequest("Client data origin parameter should be string");
         }
         

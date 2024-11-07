@@ -14,6 +14,8 @@ public class AssertionOptions  {
     private Long timeout;
     @JsonProperty(value = "session_id")
     private String sessionId;
+    private String credentialId;
+    
 
     public String getUsername() {
         return username;
@@ -63,14 +65,19 @@ public class AssertionOptions  {
         this.sessionId = sessionId;
     }
 
-    @Override
-    public String toString() {
-        return "AssertionOptions{" +
-                "username='" + username + '\'' +
-                ", userVerification=" + userVerification +
-                ", origin='" + origin + '\'' +
-                ", extensions='" + extensions + '\'' +
-                ", timeout=" + timeout +
-                '}';
-    }
+    public String getCredentialId() {
+		return credentialId;
+	}
+
+	public void setCredentialId(String credentialId) {
+		this.credentialId = credentialId;
+	}
+
+	@Override
+	public String toString() {
+		return "AssertionOptions [username=" + username + ", origin=" + origin + ", timeout=" + timeout + ", sessionId="
+				+ sessionId + ", credentialId=" + credentialId + "]";
+	}
+
+	
 }

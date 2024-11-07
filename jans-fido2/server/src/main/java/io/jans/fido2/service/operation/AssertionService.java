@@ -193,7 +193,7 @@ public class AssertionService {
 		entity.setUserVerificationOption(userVerification);
 		entity.setStatus(Fido2AuthenticationStatus.pending);
 		entity.setRpId(origin);
-		
+		entity.setCredId(assertionOptions.getCredentialId());
 
 		// Store original request
 		entity.setAssertionRequest(CommonUtilService.toJsonNode(assertionOptions).toString());

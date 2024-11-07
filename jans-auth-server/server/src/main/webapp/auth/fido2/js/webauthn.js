@@ -120,6 +120,14 @@
     });
   }
 
+ function getAssertionConditional(request) {
+    console.log('Get assertion conditional', request);
+    return navigator.credentials.get({
+      publicKey: decodePublicKeyCredentialRequestOptions(request),
+	   mediation: "conditional",
+
+    });
+  }
 
   /** Turn a PublicKeyCredential object into a plain object with base64url encoded binary values */
   function responseToObject(response) {
@@ -131,16 +139,27 @@
     } catch (e) {
       console.error('getClientExtensionResults failed', e);
     }
-
+	console.log("Response : "+response);
+	console.log("JSON.stringify: "+ JSON.stringify(response));
+	
+	
+	
     if (response.response.attestationObject) {
       return {
         type: response.type,
         id: response.id,
+		rawId: base64url.fromByteArray(response.rawId),
         response: {
           attestationObject: base64url.fromByteArray(response.response.attestationObject),
+		  authenticatorData: base64url.fromByteArray(response.response.getAuthenticatorData()),
           clientDataJSON: base64url.fromByteArray(response.response.clientDataJSON),
+		  publicKey : base64url.fromByteArray(response.response.getPublicKey()),
+		  publicKeyAlgorithm : response.response.getPublicKeyAlgorithm(),
+		  transports : response.response.getTransports(),
         },
         clientExtensionResults,
+		authenticatorAttachment : response.authenticatorAttachment,
+		
       };
     } else {
       return {
@@ -154,6 +173,7 @@
           userHandle: response.response.userHandle && base64url.fromByteArray(response.response.userHandle),
         },
         clientExtensionResults,
+		authenticatorAttachment : response.authenticatorAttachment,
       };
     }
   }

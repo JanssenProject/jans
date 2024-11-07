@@ -68,46 +68,33 @@
                         }
 
                         function startAssertion() {
-                                console.log('Executing get assertion Fido2 request', assertion_request);
+                               console.log('Executing get assertion Fido2 request', assertion_request);
 
-                                if (assertion_request.indexOf("internal") !== -1 )
-                                	{
-                                                parentNode = document.getElementsByClassName('container')[0]; //.style.display = 'none';
-                                                document.getElementsByClassName('step_bx')[0].style.display = "none";
+                                
+							   request = JSON.parse(assertion_request);
+							   webauthn.getAssertion(request).then(data => {
+									   setStatus('Get assertion key data.');
+									   document.getElementById('tokenResponse').value = JSON.stringify(webauthn.responseToObject(data));
+									   document.getElementById('authMethod').value = 'authenticate';
+									   
+									   document.getElementById('fido2_form').submit();
+							   }).catch((err) => {
+									   setStatus('Authentication failed.');
+									   console.error('Authentication failed', err);
 
-                                	 	//const el = document.getElementById('messages');
-                          			const p = document.createElement('p');
-                        			p.appendChild(document.createTextNode("Platform authenticator (Touch ID) used to register this user is not present on this device. "));
-			                        parentNode.appendChild(p);
-						console.log ("Platform authenticator not present");
-						return false;
-                                	}
-                                else
-                                	{
-	                                	   request = JSON.parse(assertion_request);
-	                                       webauthn.getAssertion(request).then(data => {
-	                                               setStatus('Get assertion key data.');
-	                                               document.getElementById('tokenResponse').value = JSON.stringify(webauthn.responseToObject(data));
-	                                               document.getElementById('authMethod').value = 'authenticate';
-	
-	                                               document.getElementById('fido2_form').submit();
-	                                       }).catch((err) => {
-	                                               setStatus('Authentication failed.');
-	                                               console.error('Authentication failed', err);
-	
-	                                               if (err.name === 'InvalidStateError') {
-	                                                       addMessage("This authenticator is not registered for the account '${identity.user.userId}'. Please try again with a registered authenticator.");
-	                                               } else if (err.name === 'AbortError') {
-	                                                   addMessage('This operation is canceled by user.');
-	                                       } else if (err.message) {
-	                                                   addMessage(err.name + ' : ' + err.message);
-	                                       } else if (err.messages) {
-	                                                   addMessages(err.messages);
-	                                       }
-	
-	                                           return false;
-	                                   });
-                                	}
+									   if (err.name === 'InvalidStateError') {
+											   addMessage("This authenticator is not registered for the account '${identity.user.userId}'. Please try again with a registered authenticator.");
+									   } else if (err.name === 'AbortError') {
+										   addMessage('This operation is canceled by user.');
+							   } else if (err.message) {
+										   addMessage(err.name + ' : ' + err.message);
+							   } else if (err.messages) {
+										   addMessages(err.messages);
+							   }
+
+								   return false;
+						   });
+                                	
                     }
         window.onload = function() {
                     if (assertion_request != null) {

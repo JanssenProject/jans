@@ -18,6 +18,7 @@ public class Fido2AuthenticationData extends Fido2Data {
     private String origin;
     private String userId;
     private String challenge;
+    private String credId;
 
     private String assertionRequest;
     private String assertionResponse;
@@ -110,16 +111,19 @@ public class Fido2AuthenticationData extends Fido2Data {
         this.status = status;
     }
 
+	public String getCredId() {
+		return credId;
+	}
+
+	public void setCredId(String credId) {
+		this.credId = credId;
+	}
+
 	@Override
 	public String toString() {
 		return "Fido2AuthenticationData [id=" + id + ", username=" + username + ", origin=" + origin + ", userId="
-				+ userId + ", challenge=" + challenge + ", assertionRequest=" + assertionRequest
+				+ userId + ", challenge=" + challenge + ", credId=" + credId + ", assertionRequest=" + assertionRequest
 				+ ", assertionResponse=" + assertionResponse + ", userVerificationOption=" + userVerificationOption
 				+ ", status=" + status + ", rpId=" + rpId + "]";
 	}
-
-	
-
-	
-
 }
