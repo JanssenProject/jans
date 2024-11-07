@@ -81,7 +81,7 @@ In order to support transparency for end applications and allow data migration f
 
 Each table in **jansdb** MySQL schema follow next rules:
 
-1. one table for every LDAP **objectClass**
+1. one table for every **objectClass**
 1. has 2 mandatory column `DN` and `doc_id`
 1. Index for primary key
 
