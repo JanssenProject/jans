@@ -103,7 +103,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-auth/agama/fl \
     /app/static/rdbm \
     /app/schema
 
-ENV JANS_SOURCE_VERSION=030ea2548f8dc365d98157f82c4edd169db5aec7
+ENV JANS_SOURCE_VERSION=6e00e723a99d700a4f82713b0c25b2d6e3ef5775
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
@@ -119,7 +119,6 @@ RUN git clone --depth 500 --filter blob:none --no-checkout https://github.com/ja
     && cp ${JANS_SETUP_DIR}/static/rdbm/sql_data_types.json /app/static/rdbm/ \
     && cp ${JANS_SETUP_DIR}/static/rdbm/ldap_sql_data_type_mapping.json /app/static/rdbm/ \
     && cp ${JANS_SETUP_DIR}/static/rdbm/opendj_attributes_syntax.json /app/static/rdbm/ \
-    && cp ${JANS_SETUP_DIR}/static/rdbm/sub_tables.json /app/static/rdbm/ \
     && cp ${JANS_SETUP_DIR}/schema/jans_schema.json /app/schema/ \
     && cp ${JANS_SETUP_DIR}/schema/custom_schema.json /app/schema/ \
     && cp ${JANS_SETUP_DIR}/schema/opendj_types.json /app/schema/ \
