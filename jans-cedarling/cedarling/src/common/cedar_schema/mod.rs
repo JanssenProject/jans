@@ -207,7 +207,7 @@ mod deserialize {
             // The human-readable policy and schema file is located in next folder:
             // `test_files\policy-store_ok`
             static POLICY_STORE_RAW: &str =
-                include_str!("../../../test_files/policy-store_ok.json");
+                include_str!("../../../../test_files/policy-store_ok.json");
 
             let policy_result = serde_json::from_str::<PolicyStore>(POLICY_STORE_RAW);
             assert!(policy_result.is_ok(), "{:?}", policy_result.unwrap_err());
@@ -216,7 +216,7 @@ mod deserialize {
         #[test]
         fn test_readable_ok() {
             static POLICY_STORE_RAW: &str =
-                include_str!("../../../test_files/policy-store_readable.json");
+                include_str!("../../../../test_files/policy-store_readable.json");
 
             let policy_result = serde_json::from_str::<PolicyStore>(POLICY_STORE_RAW);
             assert!(policy_result.is_ok(), "{:?}", policy_result.unwrap_err());
@@ -225,7 +225,7 @@ mod deserialize {
         #[test]
         fn test_readable_yaml_ok() {
             static YAML_POLICY_STORE: &str =
-                include_str!("../../../test_files/policy-store_readable.yaml");
+                include_str!("../../../../test_files/policy-store_readable.yaml");
             let yaml_policy_result = serde_yml::from_str::<PolicyStore>(YAML_POLICY_STORE);
             assert!(
                 yaml_policy_result.is_ok(),
@@ -237,11 +237,11 @@ mod deserialize {
         #[test]
         fn test_readable_yaml_identical_readable_json() {
             static YAML_POLICY_STORE: &str =
-                include_str!("../../../test_files/policy-store_readable.yaml");
+                include_str!("../../../../test_files/policy-store_readable.yaml");
             let yaml_policy_result = serde_yml::from_str::<PolicyStore>(YAML_POLICY_STORE);
 
             static JSON_POLICY_STORE: &str =
-                include_str!("../../../test_files/policy-store_readable.json");
+                include_str!("../../../../test_files/policy-store_readable.json");
             let json_policy_result = serde_yml::from_str::<PolicyStore>(JSON_POLICY_STORE);
 
             assert_eq!(yaml_policy_result.unwrap(), json_policy_result.unwrap());
@@ -252,7 +252,7 @@ mod deserialize {
         #[allow(dead_code)]
         fn test_both_ok() {
             static POLICY_STORE_RAW: &str =
-                include_str!("../../../test_files/policy-store_blobby.json");
+                include_str!("../../../../test_files/policy-store_blobby.json");
 
             let policy_result = serde_json::from_str::<PolicyStore>(POLICY_STORE_RAW);
             let err = policy_result.unwrap_err();
@@ -263,7 +263,7 @@ mod deserialize {
         #[test]
         fn test_read_base64_error() {
             static POLICY_STORE_RAW: &str =
-                include_str!("../../../test_files/policy-store_schema_err_base64.json");
+                include_str!("../../../../test_files/policy-store_schema_err_base64.json");
 
             let policy_result = serde_json::from_str::<PolicyStore>(POLICY_STORE_RAW);
             let err = policy_result.unwrap_err();
@@ -277,7 +277,7 @@ mod deserialize {
         #[test]
         fn test_read_json_error() {
             static POLICY_STORE_RAW: &str =
-                include_str!("../../../test_files/policy-store_schema_err_json.json");
+                include_str!("../../../../test_files/policy-store_schema_err_json.json");
 
             let policy_result = serde_json::from_str::<PolicyStore>(POLICY_STORE_RAW);
             let err = policy_result.unwrap_err();
@@ -291,7 +291,7 @@ mod deserialize {
         #[test]
         fn test_parse_cedar_error() {
             static POLICY_STORE_RAW: &str =
-                include_str!("../../../test_files/policy-store_schema_err_cedar_mistake.json");
+                include_str!("../../../../test_files/policy-store_schema_err_cedar_mistake.json");
 
             let policy_result = serde_json::from_str::<PolicyStore>(POLICY_STORE_RAW);
             let err_msg = policy_result.unwrap_err().to_string();
