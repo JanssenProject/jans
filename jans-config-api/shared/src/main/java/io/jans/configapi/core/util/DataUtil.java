@@ -11,7 +11,7 @@ import io.jans.orm.reflect.property.Setter;
 import io.jans.orm.reflect.util.ReflectHelper;
 import io.jans.orm.search.filter.Filter;
 import io.jans.util.StringHelper;
-
+import io.jans.util.exception.InvalidAttributeException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Named;
 import java.beans.Introspector;
@@ -29,6 +29,8 @@ import java.util.List;
 import java.util.Map;
 
 import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -39,6 +41,9 @@ import org.slf4j.LoggerFactory;
 public class DataUtil {
 
     private static final Logger logger = LoggerFactory.getLogger(DataUtil.class);
+    private static final String DATE_FORMAT = "yyyy-MM-dd";
+    private static final String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    private static final String DATE_TIME_FRACTION_OF_SECOND_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
 
     public static Class<?> getPropertType(String className, String name) throws MappingException {
         logger.debug("className:{} , name:{} ", className, name);
@@ -248,7 +253,7 @@ public class DataUtil {
                 if (dateString.contains(":")) {
                     datePattern = "yyyy-MM-dd HH:mm:ss Z";
                 } else {
-                    datePattern = "yyyy-MM-dd";
+                    datePattern = DATE_FORMAT;
                 }
             }
 
@@ -364,20 +369,31 @@ public class DataUtil {
         String strDateField = fieldFilterData.getField();
         String strDateValue = fieldFilterData.getValue();
         LocalDateTime dateValue = getIso8601Date(strDateValue, null);
-        logger.info(" strDateField:{}, fieldFilterData.getValue():{}, dateValue:{}",
-                strDateField, fieldFilterData.getValue(), dateValue);
+        logger.debug(" strDateField:{}, fieldFilterData.getValue():{}, dateValue:{}", strDateField,
+                fieldFilterData.getValue(), dateValue);
 
-        logger.debug(" Final strDateField:{}, dateValue:{}", strDateField, dateValue );
+        logger.info(" Create Filter for  strDateField:{}, dateValue:{}", strDateField, dateValue);
 
         if (FilterOperator.EQUALITY.getSign().equalsIgnoreCase(fieldFilterData.getOperator())) {
-            dateFilter = Filter.createEqualityFilter(strDateField, dateValue);
+            if (StringUtils.isNotBlank(strDateValue) && strDateValue.length() == 10) {
+                LocalDateTime endOfDay = getEndOfDay(dateValue);
+                logger.trace(
+                        " Only Date of format YYYY-MM-DD -  strDateField:{}, strDateValue:{}, dateValue:{}, endOfDay:{}",
+                        strDateField, strDateValue, dateValue, endOfDay);
+                dateFilter = Filter.createANDFilter(Filter.createGreaterOrEqualFilter(strDateField, dateValue),
+                        Filter.createLessOrEqualFilter(strDateField, endOfDay));
+            } else {
+                logger.trace(" DateTime format strDateField:{}, strDateValue:{}, dateValue:{}", strDateField,
+                        strDateValue, dateValue);
+                dateFilter = Filter.createEqualityFilter(strDateField, dateValue);
+            }
         } else if (FilterOperator.GREATER.getSign().equalsIgnoreCase(fieldFilterData.getOperator())
                 || FilterOperator.GREATER_OR_EQUAL.getSign().equalsIgnoreCase(fieldFilterData.getOperator())) {
 
             dateFilter = Filter.createGreaterOrEqualFilter(strDateField, dateValue);
 
         } else if (FilterOperator.LESS.getSign().equalsIgnoreCase(fieldFilterData.getOperator())
-                || FilterOperator.GREATER_OR_EQUAL.getSign().equalsIgnoreCase(fieldFilterData.getOperator())) {
+                || FilterOperator.LESS_OR_EQUAL.getSign().equalsIgnoreCase(fieldFilterData.getOperator())) {
 
             dateFilter = Filter.createLessOrEqualFilter(strDateField, dateValue);
 
@@ -400,10 +416,9 @@ public class DataUtil {
             try {
                 intValue = Integer.parseInt(fieldFilterData.getValue());
             } catch (Exception ex) {
-                logger.error("Though Data type is numeric but value is not numeric{" + fieldFilterData.getValue() + "}",
+                logger.info("Though Data type is numeric but value is not numeric{" + fieldFilterData.getValue() + "}",
                         ex);
             }
-
         }
         logger.info("Create Integer Filter for intValue:{}", intValue);
 
@@ -428,66 +443,82 @@ public class DataUtil {
 
     public static LocalDateTime getIso8601Date(String dateString, String pattern) {
         logger.info(" getIso8601Date for dateString:{}, pattern:{}", dateString, pattern);
+        String formatPattern = null;
         DateTimeFormatter formatter = null;
-        LocalDateTime date = null;
+        LocalDateTime localDateTime = null;
         try {
 
             if (StringUtils.isBlank(pattern)) {
-                formatter = getDateFormat(dateString);
+                formatPattern = getDateFormatPattern(dateString);
             }
 
-            logger.debug("getIso8601Date for dateString:{}, formatter:{}", dateString, formatter);
-            date = LocalDateTime.parse(dateString, formatter);
-            logger.info("\n\n getIso8601Date for dateString:{}, formatter:{}", dateString, formatter);
+            logger.info("getIso8601Date for dateString:{}, formatPattern:{}", dateString, formatPattern);
+            if (StringUtils.isBlank(formatPattern)) {
+                throw new InvalidAttributeException("Date Format incorrect - Please use {'" + DATE_FORMAT + "','"
+                        + DATE_TIME_FORMAT + "','" + DATE_TIME_FRACTION_OF_SECOND_FORMAT + "'}");
+            }
+
+            formatter = DateTimeFormatter.ofPattern(formatPattern);
+
+            if (formatter != null && DATE_FORMAT.equalsIgnoreCase(formatPattern)) {
+                LocalDate localDate = LocalDate.parse(dateString, formatter);
+                logger.debug("Only DateFormat for localDate:{}, formatter:{}", localDate, formatter);
+                localDateTime = LocalDateTime.of(localDate.getYear(), localDate.getMonth(), localDate.getDayOfMonth(),
+                        0, 0, 0);
+            } else {
+                logger.debug("DateTime format for dateString:{}, formatter:{}", dateString, formatter);
+                localDateTime = LocalDateTime.parse(dateString, formatter);
+            }
+
+            logger.info("getIso8601Date for dateString:{}, formatter:{}", dateString, formatter);
 
         } catch (Exception ex) {
             logger.error(" Error while parsing dateString:{}, format:{}", dateString, formatter, ex);
         }
-        return date;
+        return localDateTime;
     }
 
-    private static DateTimeFormatter getDateFormat(String dateString) {
-        logger.info("\n\n Get Date Format for dateString:{}", dateString);
-        DateTimeFormatter fomatter = null;
-        if (StringUtils.isBlank(dateString)) {
-            return fomatter;
+    private static LocalDateTime getEndOfDay(LocalDateTime localDateTime) {
+        if (localDateTime == null) {
+            return localDateTime;
         }
-        logger.debug(
-                "\n\n Get Date Format for dateString:{}, dateString.length():{}, dateString.contains(T):{}, dateString.contains(Z):{}",
+        return localDateTime.toLocalDate().atTime(LocalTime.MAX);
+    }
+
+    private static String getDateFormatPattern(String dateString) {
+        logger.info("Get Date Format for dateString:{}", dateString);
+        String formatPattern = null;
+        if (StringUtils.isBlank(dateString)) {
+            return formatPattern;
+        }
+        logger.info(
+                "Get Date Format for dateString:{}, dateString.length():{}, dateString.contains(T):{}, dateString.contains(Z):{}",
                 dateString, dateString.length(), dateString.contains("T"), dateString.contains("Z"));
+
         if (dateString.contains("T") && dateString.indexOf("Z") <= 0) {
-            logger.trace(" 1 \n");
-            if (dateString.length() == 22) {
-                logger.trace(" 1.1 \n");
-                fomatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME; // '2011-12-03T10:15:30'
+            if (dateString.length() == 19) {
+                formatPattern = "yyyy-MM-dd'T'HH:mm:ss";
             } else if (dateString.length() == 23) {
-                logger.trace(" 1.2 \n");
-                fomatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:sss");
+                formatPattern = "yyyy-MM-dd'T'HH:mm:ss.SSS";
             } else if (dateString.length() > 23) {
-                logger.trace(" 1.3 \n");
-                fomatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME; // '2011-12-03T10:15:30+01:00'
+                formatPattern = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
             }
         } else if (dateString.contains("T") && dateString.contains("Z")) {
-            logger.trace(" 2 \n");
-            if (dateString.length() == 23) {
-                logger.trace(" 2.1 \n");
-                fomatter = DateTimeFormatter.ISO_INSTANT; // '2011-12-03T10:15:30Z'
-            }else {
-                logger.trace(" 2.3 \n");
-                fomatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:sssZ");
+            if (dateString.length() == 20) {
+                formatPattern = "yyyy-MM-dd'T'HH:mm:ssZ";
+            } else {
+                formatPattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
             }
-        } else if (dateString.length() == 22) {
-            logger.trace(" 3 \n");
-            fomatter = DateTimeFormatter.ofPattern("yyyy-MM-dd' 'HH:mm:ss");
-        } else if (dateString.length() == 23) {
-            logger.trace(" 4 \n");
-            fomatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:sss");
         } else if (dateString.length() == 10) {
-            logger.trace(" 5 \n");
-            fomatter = DateTimeFormatter.ISO_LOCAL_DATE; // '2011-12-03'
+            formatPattern = DATE_FORMAT;
+        } else if (dateString.length() == 19) {
+            formatPattern = DATE_TIME_FORMAT;
+        } else if (dateString.length() == 23) {
+            formatPattern = DATE_TIME_FRACTION_OF_SECOND_FORMAT;
         }
-        logger.info("\n\n Final Date Format for dateString:{}, fomatter:{}", dateString, fomatter);
-        return fomatter;
+
+        logger.info("Final Date Format for dateString:{}, formatPattern:{}", dateString, formatPattern);
+        return formatPattern;
     }
 
 }
