@@ -126,9 +126,6 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         Config.pbar.progress(self.service_name, "Rendering templates", False)
         self.logIt("Rendering test templates")
 
-        if Config.rdbm_type == 'spanner':
-            Config.rdbm_password_enc = ''
-
         Config.templateRenderingDict['config_jans_auth_test_ldap'] = '# Not available'
         Config.templateRenderingDict['config_jans_auth_test_couchbase'] = '# Not available'
 
@@ -146,16 +143,9 @@ class TestDataLoader(BaseInstaller, SetupUtils):
 
 
         if self.getMappingType('rdbm'):
-
-            if Config.rdbm_type == 'spanner': 
-                template_text = self.readFile(os.path.join(self.template_base, 'jans-auth/server/config-jans-auth-test-spanner.properties.nrnd'))
-                rendered_text = self.fomatWithDict(template_text, self.merge_dicts(Config.__dict__, Config.templateRenderingDict))
-                config_jans_auth_test_properties += '\n#spanner\n' +  rendered_text
-
-            else:
-                template_text = self.readFile(os.path.join(self.template_base, 'jans-auth/server/config-jans-auth-test-sql.properties.nrnd'))
-                rendered_text = self.fomatWithDict(template_text, self.merge_dicts(Config.__dict__, Config.templateRenderingDict))
-                config_jans_auth_test_properties += '\n#sql\n' +  rendered_text
+            template_text = self.readFile(os.path.join(self.template_base, 'jans-auth/server/config-jans-auth-test-sql.properties.nrnd'))
+            rendered_text = self.fomatWithDict(template_text, self.merge_dicts(Config.__dict__, Config.templateRenderingDict))
+            config_jans_auth_test_properties += '\n#sql\n' +  rendered_text
 
             self.logIt("Adding custom attributs and indexes")
 
@@ -193,11 +183,8 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                 json.dump(scim_schema, w, indent=2)
 
             self.dbUtils.read_jans_schema(others=jans_schema_json_files)
-
             base.current_app.RDBMInstaller.create_tables(jans_schema_json_files)
-
-            if Config.rdbm_type != 'spanner': 
-                self.dbUtils.rdm_automapper(force=True)
+            self.dbUtils.rdm_automapper(force=True)
 
         self.writeFile(
             os.path.join(Config.output_dir, 'test/jans-auth/server/config-jans-auth-test.properties'),
@@ -292,7 +279,7 @@ class TestDataLoader(BaseInstaller, SetupUtils):
                                     'tokenEndpointAuthMethodsSupported': [ 'client_secret_basic', 'client_secret_post', 'client_secret_jwt', 'private_key_jwt', 'tls_client_auth', 'self_signed_tls_client_auth', 'none' ],
                                     'sessionIdRequestParameterEnabled': True,
                                     'skipRefreshTokenDuringRefreshing': False,
-                                    'featureFlags': ['unknown', 'health_check', 'userinfo', 'clientinfo', 'id_generation', 'registration', 'introspection', 'revoke_token', 'revoke_session', 'global_token_revocation', 'end_session', 'status_session', 'jans_configuration', 'ciba', 'uma', 'u2f', 'device_authz', 'stat', 'par', 'ssa', 'status_list', 'access_evaluation'],
+                                    'featureFlags': ['unknown', 'health_check', 'userinfo', 'clientinfo', 'id_generation', 'registration', 'introspection', 'revoke_token', 'revoke_session', 'global_token_revocation', 'end_session', 'status_session', 'jans_configuration', 'ciba', 'uma', 'u2f', 'device_authz', 'stat', 'par', 'ssa', 'status_list'],
                                     'cleanServiceInterval':7200,
                                     'loggingLevel': 'TRACE',
                                     }

@@ -940,7 +940,7 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "Force Authentication Filtker to process OPTIONS request", defaultValue = "true")
     private Boolean skipAuthenticationFilterOptionsMethod = true;
-    
+
     @DocProperty(description = "Lock message Pub configuration", defaultValue = "false")
     private LockMessageConfig lockMessageConfig;
 

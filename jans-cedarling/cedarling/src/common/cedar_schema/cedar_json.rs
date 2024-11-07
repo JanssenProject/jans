@@ -32,15 +32,13 @@ pub(crate) struct CedarSchemaJson {
 
 impl CedarSchemaJson {
     /// Get schema record by namespace name and entity type name
-    pub fn entity_schema_record(
+    pub fn entity_schema(
         &self,
         namespace: &str,
         typename: &str,
-    ) -> Option<&CedarSchemaRecord> {
+    ) -> Option<&CedarSchemaEntityShape> {
         let namespace = self.namespace.get(namespace)?;
-        let entity_shape = namespace.entity_types.get(typename)?;
-
-        entity_shape.shape.as_ref()
+        namespace.entity_types.get(typename)
     }
 }
 
@@ -290,64 +288,71 @@ mod tests {
             namespace: HashMap::from_iter(vec![(
                 "Jans".to_string(),
                 CedarSchemaEntities {
-                    entity_types: HashMap::from_iter(vec![(
-                        "Access_token".to_string(),
-                        CedarSchemaEntityShape {
-                            shape: Some(CedarSchemaRecord {
-                                entity_type: "Record".to_string(),
-                                attributes: HashMap::from_iter(vec![
-                                    (
-                                        "aud".to_string(),
-                                        CedarSchemaEntityAttribute {
-                                            cedar_type: CedarSchemaEntityType::Typed(EntityType {
-                                                kind: "EntityOrCommon".to_string(),
-                                                name: "String".to_string(),
-                                            }),
-                                            required: true,
-                                        },
-                                    ),
-                                    (
-                                        "exp".to_string(),
-                                        CedarSchemaEntityAttribute {
-                                            cedar_type: CedarSchemaEntityType::Typed(EntityType {
-                                                kind: "EntityOrCommon".to_string(),
-                                                name: "Long".to_string(),
-                                            }),
-                                            required: true,
-                                        },
-                                    ),
-                                    (
-                                        "iat".to_string(),
-                                        CedarSchemaEntityAttribute {
-                                            cedar_type: CedarSchemaEntityType::Primitive(
-                                                PrimitiveType {
-                                                    kind: PrimitiveTypeKind::Long,
-                                                },
-                                            ),
-                                            required: true,
-                                        },
-                                    ),
-                                    (
-                                        "scope".to_string(),
-                                        CedarSchemaEntityAttribute {
-                                            cedar_type: CedarSchemaEntityType::Set(Box::new(
-                                                SetEntityType {
-                                                    element: CedarSchemaEntityType::Typed(
-                                                        EntityType {
-                                                            kind: "EntityOrCommon".to_string(),
-                                                            name: "String".to_string(),
-                                                        },
-                                                    ),
-                                                },
-                                            )),
+                    entity_types: HashMap::from_iter(vec![
+                        (
+                            "Access_token".to_string(),
+                            CedarSchemaEntityShape {
+                                shape: Some(CedarSchemaRecord {
+                                    entity_type: "Record".to_string(),
+                                    attributes: HashMap::from_iter(vec![
+                                        (
+                                            "aud".to_string(),
+                                            CedarSchemaEntityAttribute {
+                                                cedar_type: CedarSchemaEntityType::Typed(
+                                                    EntityType {
+                                                        kind: "EntityOrCommon".to_string(),
+                                                        name: "String".to_string(),
+                                                    },
+                                                ),
+                                                required: true,
+                                            },
+                                        ),
+                                        (
+                                            "exp".to_string(),
+                                            CedarSchemaEntityAttribute {
+                                                cedar_type: CedarSchemaEntityType::Typed(
+                                                    EntityType {
+                                                        kind: "EntityOrCommon".to_string(),
+                                                        name: "Long".to_string(),
+                                                    },
+                                                ),
+                                                required: true,
+                                            },
+                                        ),
+                                        (
+                                            "iat".to_string(),
+                                            CedarSchemaEntityAttribute {
+                                                cedar_type: CedarSchemaEntityType::Primitive(
+                                                    PrimitiveType {
+                                                        kind: PrimitiveTypeKind::Long,
+                                                    },
+                                                ),
+                                                required: true,
+                                            },
+                                        ),
+                                        (
+                                            "scope".to_string(),
+                                            CedarSchemaEntityAttribute {
+                                                cedar_type: CedarSchemaEntityType::Set(Box::new(
+                                                    SetEntityType {
+                                                        element: CedarSchemaEntityType::Typed(
+                                                            EntityType {
+                                                                kind: "EntityOrCommon".to_string(),
+                                                                name: "String".to_string(),
+                                                            },
+                                                        ),
+                                                    },
+                                                )),
 
-                                            required: false,
-                                        },
-                                    ),
-                                ]),
-                            }),
-                        },
-                    )]),
+                                                required: false,
+                                            },
+                                        ),
+                                    ]),
+                                }),
+                            },
+                        ),
+                        ("Role".to_string(), CedarSchemaEntityShape { shape: None }),
+                    ]),
                 },
             )]),
         };

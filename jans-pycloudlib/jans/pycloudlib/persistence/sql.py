@@ -23,6 +23,7 @@ from sqlalchemy import delete
 from sqlalchemy import event
 from ldif import LDIFParser
 from ldap3.utils import dn as dnutils
+from pymysql.err import ProgrammingError
 
 from jans.pycloudlib.utils import encode_text
 from jans.pycloudlib.utils import safe_render
@@ -38,6 +39,8 @@ if _t.TYPE_CHECKING:  # pragma: no cover
 logger = logging.getLogger(__name__)
 
 SERVER_VERSION_RE = re.compile(r"[\d.]+")
+SIMPLE_JSON_RE = re.compile(r"(mysql.simple-json)(=)(.*)")
+SQL_OVERRIDES_FILE = "/etc/jans/conf/sql-overrides.json"
 
 
 class PostgresqlAdapter:
@@ -208,7 +211,6 @@ class SqlSchemaMixin:
                 json_types[attr] = {
                     "mysql": {"type": "JSON"},
                     "pgsql": {"type": "JSONB"},
-                    "spanner": {"type": "ARRAY<STRING(MAX)>"},
                 }
         return json_types
 
@@ -265,6 +267,7 @@ class SqlClient(SqlSchemaMixin):
 
             if self.dialect == "mysql":
                 event.listen(self._engine, "first_connect", set_mysql_strict_mode)
+                event.listen(self._engine, "first_connect", preconfigure_simple_json)
 
         # initialized engine
         return self._engine
@@ -581,7 +584,12 @@ class SqlClient(SqlSchemaMixin):
         """Determine whether to use simple JSON where values are stored as JSON array."""
         if self.dialect in ("pgsql", "postgresql",):
             return True
-        return as_boolean(os.environ.get("MYSQL_SIMPLE_JSON", "true"))
+
+        if "MYSQL_SIMPLE_JSON" in os.environ:
+            return as_boolean(os.environ["MYSQL_SIMPLE_JSON"])
+
+        sql_overrides = load_sql_overrides()
+        return as_boolean(sql_overrides.get("MYSQL_SIMPLE_JSON", "true"))
 
 
 def render_sql_properties(manager: Manager, src: str, dest: str) -> None:
@@ -654,3 +662,73 @@ def sync_sql_password(manager: Manager) -> None:
 def get_sql_password(manager: Manager | None = None):
     password_file = get_sql_password_file()
     return get_password_from_file(password_file)
+
+
+def preconfigure_simple_json(dbapi_connection, connection_record):
+    # if env var is available, skip the remaining process
+    if "MYSQL_SIMPLE_JSON" in os.environ:
+        return
+
+    # preconfigure MYSQL_SIMPLE_JSON overrides (if necessary)
+    data = load_sql_overrides()
+
+    if "MYSQL_SIMPLE_JSON" in data:
+        return
+
+    logger.info("Preconfiguring MYSQL_SIMPLE_JSON")
+    is_simple_json = True
+    cursor = dbapi_connection.cursor()
+
+    try:
+        # extract the value of `jansAppConf.jansSmtpConf` of jans-auth to check the data format,
+        # whether it's using legacy `{"v": []}` or new `[]` format;
+        #
+        # note that we choose `jansAppConf.jansSmtpConf` column for several reasons:
+        #
+        # - it's one of few JSON columns available in the table alongside `jansDbAuth` (deprecated) and `jansEmail`
+        # - the column is likely will not be removed/changed
+        cursor.execute("SELECT jansSmtpConf FROM jansAppConf WHERE doc_id='jans-auth';")
+
+        if result := cursor.fetchone():
+            for value in result:
+                if isinstance(json.loads(value), dict):
+                    is_simple_json = False
+                break
+
+    except ProgrammingError as exc:
+        # missing table or column will raise ProgrammingError
+        logger.warning(f"Unable to detect JSON data format automatically; reason={exc.args[1]}; fallback to default value")
+
+    finally:
+        # cleanup resource
+        cursor.close()
+
+    env_value = str(is_simple_json).lower()
+    data["MYSQL_SIMPLE_JSON"] = env_value
+    dump_sql_overrides(data)
+
+
+def override_simple_json_property(sql_prop_file):
+    # skip the override if env var is available
+    if "MYSQL_SIMPLE_JSON" in os.environ:
+        return
+
+    data = load_sql_overrides()
+
+    if "MYSQL_SIMPLE_JSON" in data and os.path.isfile(sql_prop_file):
+        with open(sql_prop_file) as f:
+            txt = SIMPLE_JSON_RE.sub(fr"\1\2{data['MYSQL_SIMPLE_JSON']}", f.read())
+
+        with open(sql_prop_file, "w") as f:
+            f.write(txt)
+
+def load_sql_overrides():
+    if os.path.isfile(SQL_OVERRIDES_FILE):
+        with open(SQL_OVERRIDES_FILE) as f:
+            return json.loads(f.read())
+    return {}
+
+
+def dump_sql_overrides(data):
+    with open(SQL_OVERRIDES_FILE, "w") as f:
+        f.write(json.dumps(data))

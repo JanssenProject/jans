@@ -132,6 +132,60 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/StatsData'
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    {
+                        "dbType": "sql",
+                        "lastUpdate": "2024-11-01T12:11:01",
+                        "facterData": {
+                            "memoryfree": "39.7%",
+                            "swapfree": "0.0%",
+                            "hostname": "pujavs-amazed-rat.gluu.info",
+                            "ipaddress": "167.99.13.66",
+                            "uptime": "1 day, 3:54",
+                            "free_disk_space": "95.4%",
+                            "load_average": "0.13623046875"
+                        }
+                    }
+        "500":
+          description: InternalServerError
+  /api/v1/health/service-status:
+    get:
+      tags:
+      - Health - Check
+      summary: Fetch service status
+      description: Fetch service status
+      operationId: get-service-status
+      parameters:
+      - name: service
+        in: query
+        description: Service name to check status
+        schema:
+          type: string
+          default: all
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: string
+              examples:
+                Response json example:
+                  description: Response json example
+                  value: |
+                    {
+                      "jans-auth": "Running",
+                      "jans-config-api": "Down",
+                      "jans-casa": "Not present",
+                      "jans-fido2": "Running",
+                      "jans-scim": "Running",
+                      "jans-link": "Running",
+                      "jans-lock": "Running",
+                      "keycloak": "Running"
+                    }
         "500":
           description: InternalServerError
   /api/v1/acrs:
@@ -9217,11 +9271,11 @@ components:
           type: boolean
         adminCanView:
           type: boolean
+        userCanView:
+          type: boolean
         adminCanEdit:
           type: boolean
         userCanEdit:
-          type: boolean
-        userCanView:
           type: boolean
         adminCanAccess:
           type: boolean
@@ -9851,7 +9905,7 @@ components:
           type: boolean
         disableU2fEndpoint:
           type: boolean
-        deviceSessionLifetimeInSeconds:
+        authorizationChallengeSessionLifetimeInSeconds:
           type: integer
           format: int32
         rotateDeviceSecret:
@@ -10074,8 +10128,6 @@ components:
           type: boolean
         lockMessageConfig:
           $ref: '#/components/schemas/LockMessageConfig'
-        fapi:
-          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -10085,6 +10137,8 @@ components:
             - code
             - token
             - id_token
+        fapi:
+          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -11628,10 +11682,10 @@ components:
         ttl:
           type: integer
           format: int32
-        persisted:
-          type: boolean
         opbrowserState:
           type: string
+        persisted:
+          type: boolean
     SessionIdAccessMap:
       type: object
       properties:
