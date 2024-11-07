@@ -126,9 +126,9 @@ impl HttpClient {
                 Err(e) => return Err(KeyServiceError::MaxHttpRetriesReached(e)), // Exit if max retries exceeded
             }
         };
-        Ok(response
+        response
             .error_for_status()
-            .map_err(KeyServiceError::HttpStatus)?)
+            .map_err(KeyServiceError::HttpStatus)
     }
 }
 
