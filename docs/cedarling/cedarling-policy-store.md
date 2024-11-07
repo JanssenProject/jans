@@ -26,9 +26,9 @@ The JSON Schema accepted by cedarling is defined as follows:
 {
   "cedar_version": "v4.0.0",
   "policy_stores": {
-      "name": "TestPolicy",
-      "description": "Once upon a time there was a Policy, that lived in a Store.",
       "some_unique_string_id": {
+          "name": "TestPolicy",
+          "description": "Once upon a time there was a Policy, that lived in a Store.",
           "policies": { ... },
           "schema": { ... },
           "identity_source": { ... }
