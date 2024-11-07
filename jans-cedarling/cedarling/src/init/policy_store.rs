@@ -33,7 +33,7 @@ fn extract_first_policy_store(agama_policy_store: &AgamaPolicyStore) -> Result<P
     let mut policy_stores = agama_policy_store.policy_stores.values().take(1).collect::<Vec<_>>();
     match policy_stores.pop() {
         Some(policy_store) => Ok(policy_store.clone()),
-        None => Err(PolicyStoreLoadError::InvalidStore(format!("error retrieving first policy_stores element"))),
+        None => Err(PolicyStoreLoadError::InvalidStore("error retrieving first policy_stores element".into())),
     }
 }
 
