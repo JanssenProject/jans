@@ -2552,8 +2552,6 @@
         
           
         
-          
-        
       
       
         
@@ -2776,100 +2774,17 @@
         
           
         
+          
+        
       
       
         <label class="md-nav__link" for="__nav_1_8_5">
-          Spanner
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="Spanner" data-md-level="3">
-        <label class="md-nav__title" for="__nav_1_8_5">
-          <span class="md-nav__icon md-icon"></span>
-          Spanner
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../../janssen-server/reference/database/spanner-schema/" class="md-nav__link">
-        Spanner Schema
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../../janssen-server/reference/database/spanner-config/" class="md-nav__link">
-        Spanner Configuration
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../../janssen-server/reference/database/spanner-ops/" class="md-nav__link">
-        Spanner Operation
-      </a>
-    </li>
-  
-
-            
-          
-        </ul>
-      </nav>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_8_6" type="checkbox" id="__nav_1_8_6" >
-      
-      
-      
-        
-          
-        
-          
-        
-          
-        
-          
-        
-      
-      
-        <label class="md-nav__link" for="__nav_1_8_6">
           PostgreSQL
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <nav class="md-nav" aria-label="PostgreSQL" data-md-level="3">
-        <label class="md-nav__title" for="__nav_1_8_6">
+        <label class="md-nav__title" for="__nav_1_8_5">
           <span class="md-nav__icon md-icon"></span>
           PostgreSQL
         </label>
@@ -8745,10 +8660,10 @@
 <p>In the following, it is assumed you have a VM-based installation of Jans Server (or Gluu Flex) available with Casa installed. In a separate machine, ensure you have SSH/SCP/SFTP access to such server and <code>git</code> installed. </p>
 <ol>
 <li>
-<p>Download the plugin jar file <code>https://maven.jans.io/maven/io/jans/casa/plugins/acct-linking/1.1.6.nightly/acct-linking-1.1.6.nightly-jar-with-dependencies.jar</code> and copy to your server's <code>/opt/jans/jetty/jans-casa/plugins</code></p>
+<p>Download the plugin jar file <code>https://maven.jans.io/maven/io/jans/casa/plugins/acct-linking/replace-janssen-version/acct-linking-replace-janssen-version-jar-with-dependencies.jar</code> and copy to your server's <code>/opt/jans/jetty/jans-casa/plugins</code></p>
 </li>
 <li>
-<p>Download the utility jar file <code>https://maven.jans.io/maven/io/jans/agama-inbound/1.1.6.nightly/agama-inbound-1.1.6.nightly.jar</code> and copy to your server's <code>/opt/jans/jetty/jans-auth/custom/libs</code></p>
+<p>Download the utility jar file <code>https://maven.jans.io/maven/io/jans/agama-inbound/replace-janssen-version/agama-inbound-replace-janssen-version.jar</code> and copy to your server's <code>/opt/jans/jetty/jans-auth/custom/libs</code></p>
 </li>
 <li>
 <p>In TUI, visit the Clients screen, locate the client labeled "Client for Casa". Add the following redirect URI to the list: <code>https://&lt;your-jans-host&gt;/jans-casa/pl/acct-linking/user/interlude.zul</code>. Replace the name of your Jans server accordingly </p>
@@ -8765,7 +8680,7 @@ zip -r inbound.zip *
 </code></pre></div>
 </li>
 <li>
-<p>Download the Casa accounts linking Agama project <code>https://maven.jans.io/maven/io/jans/casa/plugins/acct-linking-agama/1.1.6.nightly/acct-linking-agama-1.1.6.nightly-project.zip</code></p>
+<p>Download the Casa accounts linking Agama project <code>https://maven.jans.io/maven/io/jans/casa/plugins/acct-linking-agama/replace-janssen-version/acct-linking-agama-replace-janssen-version-project.zip</code></p>
 </li>
 <li>
 <p>Transfer the two zip files to a location in the server, deploy both archives using TUI (Agama menu)</p>

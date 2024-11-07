@@ -2641,8 +2641,6 @@
         
           
         
-          
-        
       
       
         
@@ -2865,100 +2863,17 @@
         
           
         
+          
+        
       
       
         <label class="md-nav__link" for="__nav_1_8_5">
-          Spanner
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="Spanner" data-md-level="3">
-        <label class="md-nav__title" for="__nav_1_8_5">
-          <span class="md-nav__icon md-icon"></span>
-          Spanner
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../reference/database/spanner-schema/" class="md-nav__link">
-        Spanner Schema
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../reference/database/spanner-config/" class="md-nav__link">
-        Spanner Configuration
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../reference/database/spanner-ops/" class="md-nav__link">
-        Spanner Operation
-      </a>
-    </li>
-  
-
-            
-          
-        </ul>
-      </nav>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_8_6" type="checkbox" id="__nav_1_8_6" >
-      
-      
-      
-        
-          
-        
-          
-        
-          
-        
-          
-        
-      
-      
-        <label class="md-nav__link" for="__nav_1_8_6">
           PostgreSQL
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <nav class="md-nav" aria-label="PostgreSQL" data-md-level="3">
-        <label class="md-nav__title" for="__nav_1_8_6">
+        <label class="md-nav__title" for="__nav_1_8_5">
           <span class="md-nav__icon md-icon"></span>
           PostgreSQL
         </label>
@@ -8806,26 +8721,26 @@ sudo yum -y module enable mod_auth_openidc
 <li>Download the release package from the Github Janssen Project
   <a href="https://github.com/JanssenProject/jans/releases">Releases</a></li>
 </ul>
-<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/v1.1.6.nightly/jans-1.1.6.nightly-el8.x86_64.rpm -P ~/
+<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-el8.x86_64.rpm -P ~/
 </code></pre></div>
 <ul>
 <li>
 <p>Verify integrity of the downloaded package using published <code>sha256sum</code>.</p>
 <p>Download <code>sha256sum</code> file for the package</p>
-<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/v1.1.6.nightly/jans-1.1.6.nightly-el8.x86_64.rpm.sha256sum -P ~/
+<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans-replace-janssen-version-el8.x86_64.rpm.sha256sum -P ~/
 </code></pre></div>
 <p>Check the hash if it is matching.</p>
-<div class="highlight"><pre><span></span><code>sha256sum -c jans-1.1.6.nightly-el8.x86_64.rpm.sha256sum
+<div class="highlight"><pre><span></span><code>sha256sum -c jans-replace-janssen-version-el8.x86_64.rpm.sha256sum
 </code></pre></div>
 <p>Output similar to below should confirm the integrity of the downloaded package.</p>
-<div class="highlight"><pre><span></span><code>jans-1.1.6.nightly-el8.x86_64.rpm: OK
+<div class="highlight"><pre><span></span><code>jans-replace-janssen-version-el8.x86_64.rpm: OK
 </code></pre></div>
 </li>
 <li>
 <p>Install the package</p>
 </li>
 </ul>
-<div class="highlight"><pre><span></span><code>sudo yum install ~/jans-1.1.6.nightly-el8.x86_64.rpm
+<div class="highlight"><pre><span></span><code>sudo yum install ~/jans-replace-janssen-version-el8.x86_64.rpm
 </code></pre></div>
 <h2 id="run-the-setup-script">Run the setup script<a class="headerlink" href="#run-the-setup-script" title="Permanent link">#</a></h2>
 <ul>

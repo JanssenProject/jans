@@ -2617,8 +2617,6 @@
         
           
         
-          
-        
       
       
         
@@ -2841,100 +2839,17 @@
         
           
         
+          
+        
       
       
         <label class="md-nav__link" for="__nav_1_8_5">
-          Spanner
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="Spanner" data-md-level="3">
-        <label class="md-nav__title" for="__nav_1_8_5">
-          <span class="md-nav__icon md-icon"></span>
-          Spanner
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/database/spanner-schema/" class="md-nav__link">
-        Spanner Schema
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/database/spanner-config/" class="md-nav__link">
-        Spanner Configuration
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/database/spanner-ops/" class="md-nav__link">
-        Spanner Operation
-      </a>
-    </li>
-  
-
-            
-          
-        </ul>
-      </nav>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_8_6" type="checkbox" id="__nav_1_8_6" >
-      
-      
-      
-        
-          
-        
-          
-        
-          
-        
-          
-        
-      
-      
-        <label class="md-nav__link" for="__nav_1_8_6">
           PostgreSQL
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <nav class="md-nav" aria-label="PostgreSQL" data-md-level="3">
-        <label class="md-nav__title" for="__nav_1_8_6">
+        <label class="md-nav__title" for="__nav_1_8_5">
           <span class="md-nav__icon md-icon"></span>
           PostgreSQL
         </label>
@@ -8798,7 +8713,7 @@ Install Gluu Casa? [No] :</code></p>
 <p>To check usage of this script run help command
 <div class="highlight"><pre><span></span><code>python3 /opt/jans/jans-setup/setup.py --help
 </code></pre></div></p>
-<div class="highlight"><pre><span></span><code>usage: setup.py [-h] [--version] [-c] [-d D] [-f F] [-n] [-N] [-u] [-csx] [-encode-salt ENCODE_SALT] [-remote-rdbm {mysql,pgsql,spanner} | -local-rdbm {mysql,pgsql}] [-ip-address IP_ADDRESS]
+<div class="highlight"><pre><span></span><code>usage: setup.py [-h] [--version] [-c] [-d D] [-f F] [-n] [-N] [-u] [-csx] [-encode-salt ENCODE_SALT] [-remote-rdbm {mysql,pgsql} | -local-rdbm {mysql,pgsql}] [-ip-address IP_ADDRESS]
                 [-host-name HOST_NAME] [-org-name ORG_NAME] [-email EMAIL] [-city CITY] [-state STATE] [-country COUNTRY] [-rdbm-user RDBM_USER] [-rdbm-password RDBM_PASSWORD] [-rdbm-port RDBM_PORT]
                 [-rdbm-db RDBM_DB] [-rdbm-host RDBM_HOST] [--reset-rdbm-db] [--shell] [--dump-config-on-error] [--no-progress] [-admin-password ADMIN_PASSWORD] [-jans-max-mem JANS_MAX_MEM]
                 [-properties-password PROPERTIES_PASSWORD] [-approved-issuer APPROVED_ISSUER] [--force-download] [--download-exit] [-jans-app-version JANS_APP_VERSION] [-jans-build JANS_BUILD]
@@ -8808,8 +8723,7 @@ Install Gluu Casa? [No] :</code></p>
                 [-couchbase-default-mem COUCHBASE_DEFAULT_MEM] [-couchbase-user-mem COUCHBASE_USER_MEM] [-couchbase-site-mem COUCHBASE_SITE_MEM] [-couchbase-cache-mem COUCHBASE_CACHE_MEM]
                 [-couchbase-token-mem COUCHBASE_TOKEN_MEM] [-couchbase-session-mem COUCHBASE_SESSION_MEM] [--no-data] [--no-jsauth] [--no-config-api] [--no-scim] [--no-fido2] [--install-jans-ldap-link]
                 [--install-jans-keycloak-link] [--with-casa] [--install-jans-saml] [--install-jans-lock] [--install-opa] [--load-config-api-test] [-config-patch-creds CONFIG_PATCH_CREDS]
-                [-spanner-project SPANNER_PROJECT] [-spanner-instance SPANNER_INSTANCE] [-spanner-database SPANNER_DATABASE]
-                [-spanner-emulator-host SPANNER_EMULATOR_HOST | -google-application-credentials GOOGLE_APPLICATION_CREDENTIALS] [-test-client-id TEST_CLIENT_ID] [-test-client-pw TEST_CLIENT_PW]
+                 [-test-client-id TEST_CLIENT_ID] [-test-client-pw TEST_CLIENT_PW]
                 [-test-client-redirect-uri TEST_CLIENT_REDIRECT_URI] [--test-client-trusted]
 </code></pre></div>
 <p>Use this script to configure your Jans Server and to add initial data. If setup.properties is found in this folder, these properties will automatically be used instead of the interactive setup.</p>
@@ -8859,7 +8773,7 @@ Install Gluu Casa? [No] :</code></p>
 <td>Collect setup properties, save and exit</td>
 </tr>
 <tr>
-<td mysql_pgsql_spanner="mysql,pgsql,spanner">-remote-rdbm</td>
+<td mysql_pgsql="mysql,pgsql">-remote-rdbm</td>
 <td>Enables using remote RDBM server</td>
 </tr>
 <tr>
@@ -9075,26 +8989,6 @@ Install Gluu Casa? [No] :</code></p>
 <td>password:username for downloading auto test ciba password</td>
 </tr>
 <tr>
-<td>-spanner-project SPANNER_PROJECT</td>
-<td>Spanner project name</td>
-</tr>
-<tr>
-<td>-spanner-instance SPANNER_INSTANCE</td>
-<td>Spanner instance name</td>
-</tr>
-<tr>
-<td>-spanner-database SPANNER_DATABASE</td>
-<td>Spanner database name</td>
-</tr>
-<tr>
-<td>-spanner-emulator-host SPANNER_EMULATOR_HOST</td>
-<td>Use Spanner emulator host</td>
-</tr>
-<tr>
-<td>-google-application-credentials GOOGLE_APPLICATION_CREDENTIALS</td>
-<td>Path to Google application credentials json file</td>
-</tr>
-<tr>
 <td>-test-client-id TEST_CLIENT_ID</td>
 <td>ID of test client which has all available scopes. Must be in UUID format.</td>
 </tr>
@@ -9118,7 +9012,7 @@ Install Gluu Casa? [No] :</code></p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-28T09:05:20+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-28</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-11-07T09:23:20+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-11-07</span>
       
         <br>
         Created:
