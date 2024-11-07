@@ -189,7 +189,7 @@ public class RegisterValidator {
         return false;
     }
 
-    private void validateRequestObjectHmac(HttpServletRequest httpRequest, SsaValidationConfigContext ssaContext) throws CryptoProviderException, InvalidJwtException {
+    protected void validateRequestObjectHmac(HttpServletRequest httpRequest, SsaValidationConfigContext ssaContext) throws CryptoProviderException, InvalidJwtException {
         final Jwt jwt = ssaContext.getJwt();
 
         if (ssaValidationConfigService.isHmacValid(ssaContext)) {
