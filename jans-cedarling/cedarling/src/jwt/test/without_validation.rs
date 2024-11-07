@@ -50,16 +50,19 @@ fn can_decode_claims_without_validation() {
     });
 
     // generate the signed token strings
-    let access_token = generate_token_using_claims(&access_token_claims, &encoding_keys[0]);
-    let id_token = generate_token_using_claims(&id_token_claims, &encoding_keys[0]);
-    let userinfo_token = generate_token_using_claims(&userinfo_token_claims, &encoding_keys[0]);
+    let tokens = generate_tokens_using_claims(GenerateTokensArgs {
+        access_token_claims: access_token_claims.clone(),
+        id_token_claims: id_token_claims.clone(),
+        userinfo_token_claims: userinfo_token_claims.clone(),
+        encoding_keys,
+    });
 
     // decode and validate both the access token and the ID token
     let result = jwt_service
         .decode_tokens::<serde_json::Value, serde_json::Value, serde_json::Value>(
-            &access_token,
-            &id_token,
-            &userinfo_token,
+            &tokens.access_token,
+            &tokens.id_token,
+            &tokens.userinfo_token,
         )
         .expect("should decode token");
 

@@ -16,22 +16,21 @@
 #[cfg(test)]
 mod test;
 
-pub use decoding_strategy::key_service::KeyServiceError;
-
-pub(crate) mod decoding_strategy;
 mod error;
 mod jwt_service_config;
 mod token;
 
+use crate::common::policy_store::TrustedIssuer;
 use decoding_strategy::{open_id_storage::OpenIdStorage, DecodingArgs, DecodingStrategy};
+use serde::de::DeserializeOwned;
+use token::*;
+
+pub use decoding_strategy::key_service::{HttpClient, KeyServiceError};
 pub use decoding_strategy::{string_to_alg, ParseAlgorithmError};
 pub use error::JwtServiceError;
 pub use jsonwebtoken::Algorithm;
 pub use jwt_service_config::*;
-use serde::de::DeserializeOwned;
-use token::*;
-
-use crate::common::policy_store::TrustedIssuer;
+pub(crate) mod decoding_strategy;
 
 pub struct JwtService {
     decoding_strategy: DecodingStrategy,
@@ -159,8 +158,6 @@ impl JwtService {
         // - checks if userinfo_token.iss == access_token.iss
         // - checks if userinfo_token.aud == access_token.aud
         // - checks if userinfo_token.sub == access_token.sub
-        // - checks if `nbf` has passed
-        // - checks if token is not expired
         self.decoding_strategy
             .decode::<UserInfoToken>(DecodingArgs {
                 jwt: userinfo_token,
@@ -171,8 +168,8 @@ impl JwtService {
                 iss: Some(&access_token.iss),
                 aud: Some(&access_token.aud),
                 sub: Some(&id_token.sub),
-                validate_nbf: true,
-                validate_exp: true,
+                validate_nbf: false, // userinfo tokens do not have a `nbf` claim
+                validate_exp: false, // userinfo tokens do not have an `exp` claim
             })
             .map_err(JwtServiceError::InvalidUserinfoToken)?;
 

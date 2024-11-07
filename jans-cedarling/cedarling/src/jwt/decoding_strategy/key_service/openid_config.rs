@@ -38,8 +38,7 @@ pub(crate) struct OpenIdConfigSource {
 pub struct OpenIdConfig {
     pub issuer: Box<str>,
     pub jwks_uri: Box<str>,
-    // <key_id (`kid`), DecodingKey>
-    pub decoding_keys: Arc<RwLock<HashMap<Box<str>, Arc<DecodingKey>>>>,
+    pub decoding_keys: Arc<RwLock<HashMap<Box<str>, Arc<DecodingKey>>>>, // <key_id (`kid`), DecodingKey>
 }
 
 impl OpenIdConfig {

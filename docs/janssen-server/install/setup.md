@@ -74,7 +74,7 @@ python3 /opt/jans/jans-setup/setup.py --help
 ```
 
 ```
-usage: setup.py [-h] [--version] [-c] [-d D] [-f F] [-n] [-N] [-u] [-csx] [-encode-salt ENCODE_SALT] [-remote-rdbm {mysql,pgsql,spanner} | -local-rdbm {mysql,pgsql}] [-ip-address IP_ADDRESS]
+usage: setup.py [-h] [--version] [-c] [-d D] [-f F] [-n] [-N] [-u] [-csx] [-encode-salt ENCODE_SALT] [-remote-rdbm {mysql,pgsql} | -local-rdbm {mysql,pgsql}] [-ip-address IP_ADDRESS]
                 [-host-name HOST_NAME] [-org-name ORG_NAME] [-email EMAIL] [-city CITY] [-state STATE] [-country COUNTRY] [-rdbm-user RDBM_USER] [-rdbm-password RDBM_PASSWORD] [-rdbm-port RDBM_PORT]
                 [-rdbm-db RDBM_DB] [-rdbm-host RDBM_HOST] [--reset-rdbm-db] [--shell] [--dump-config-on-error] [--no-progress] [-admin-password ADMIN_PASSWORD] [-jans-max-mem JANS_MAX_MEM]
                 [-properties-password PROPERTIES_PASSWORD] [-approved-issuer APPROVED_ISSUER] [--force-download] [--download-exit] [-jans-app-version JANS_APP_VERSION] [-jans-build JANS_BUILD]
@@ -84,8 +84,7 @@ usage: setup.py [-h] [--version] [-c] [-d D] [-f F] [-n] [-N] [-u] [-csx] [-enco
                 [-couchbase-default-mem COUCHBASE_DEFAULT_MEM] [-couchbase-user-mem COUCHBASE_USER_MEM] [-couchbase-site-mem COUCHBASE_SITE_MEM] [-couchbase-cache-mem COUCHBASE_CACHE_MEM]
                 [-couchbase-token-mem COUCHBASE_TOKEN_MEM] [-couchbase-session-mem COUCHBASE_SESSION_MEM] [--no-data] [--no-jsauth] [--no-config-api] [--no-scim] [--no-fido2] [--install-jans-ldap-link]
                 [--install-jans-keycloak-link] [--with-casa] [--install-jans-saml] [--install-jans-lock] [--install-opa] [--load-config-api-test] [-config-patch-creds CONFIG_PATCH_CREDS]
-                [-spanner-project SPANNER_PROJECT] [-spanner-instance SPANNER_INSTANCE] [-spanner-database SPANNER_DATABASE]
-                [-spanner-emulator-host SPANNER_EMULATOR_HOST | -google-application-credentials GOOGLE_APPLICATION_CREDENTIALS] [-test-client-id TEST_CLIENT_ID] [-test-client-pw TEST_CLIENT_PW]
+                 [-test-client-id TEST_CLIENT_ID] [-test-client-pw TEST_CLIENT_PW]
                 [-test-client-redirect-uri TEST_CLIENT_REDIRECT_URI] [--test-client-trusted]
 ```
 
@@ -104,7 +103,7 @@ Below are the optional arguments:
 | -N, --no-httpd | No apache httpd server |
 | -u | Update hosts file with IP address / hostname |
 | -csx | Collect setup properties, save and exit |
-| -remote-rdbm {mysql,pgsql,spanner} | Enables using remote RDBM server |
+| -remote-rdbm {mysql,pgsql} | Enables using remote RDBM server |
 | -local-rdbm {mysql,pgsql} | Enables installing/configuring local RDBM server |
 | -ip-address IP_ADDRESS | Used primarily by Apache httpd for the Listen directive |
 | -host-name HOST_NAME | Internet-facing FQDN that is used to generate certificates and metadata. |
@@ -158,11 +157,6 @@ Below are the optional arguments:
 | --load-config-api-test | Load Config Api Test Data |
 | --install-cache-refresh | Install Cache Refresh Server |
 | -config-patch-creds CONFIG_PATCH_CREDS | password:username for downloading auto test ciba password |
-| -spanner-project SPANNER_PROJECT | Spanner project name |
-| -spanner-instance SPANNER_INSTANCE | Spanner instance name |
-| -spanner-database SPANNER_DATABASE | Spanner database name |
-| -spanner-emulator-host SPANNER_EMULATOR_HOST | Use Spanner emulator host |
-| -google-application-credentials GOOGLE_APPLICATION_CREDENTIALS | Path to Google application credentials json file |
 | -test-client-id TEST_CLIENT_ID | ID of test client which has all available scopes. Must be in UUID format. |
 | -test-client-pw TEST_CLIENT_PW | Secret for test client |
 | -test-client-redirect-uri TEST_CLIENT_REDIRECT_URI | Redirect URI for test client |

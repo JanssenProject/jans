@@ -7,16 +7,18 @@
 
 use core::panic;
 use jsonwebkey as jwk;
-use jsonwebtoken as jwt;
+use jsonwebtoken::{self as jwt};
 use serde::Serialize;
 use std::{
     time::{SystemTime, UNIX_EPOCH},
     u64,
 };
 
+#[derive(Clone)]
 pub struct EncodingKey {
     pub key_id: String,
     pub key: jwt::EncodingKey,
+    pub algorithm: jwt::Algorithm,
 }
 
 /// Generates a set of private and public keys using ES256
@@ -26,29 +28,59 @@ pub fn generate_keys() -> (Vec<EncodingKey>, String) {
     let mut public_keys = jwt::jwk::JwkSet { keys: vec![] };
     let mut encoding_keys = vec![];
 
-    for kid in 1..=2 {
-        // Generate a private key
-        let mut jwk = jwk::JsonWebKey::new(jwk::Key::generate_p256());
-        jwk.set_algorithm(jwk::Algorithm::ES256)
-            .expect("should set encryption algorithm");
-        jwk.key_id = Some("some_id".to_string());
+    // Generate a private key using ES256
+    let kid = 1;
+    let mut jwk = jwk::JsonWebKey::new(jwk::Key::generate_p256());
+    jwk.set_algorithm(jwk::Algorithm::ES256)
+        .expect("should set encryption algorithm");
+    jwk.key_id = Some("some_id".to_string());
 
-        // Generate public key
-        let mut public_key =
-            serde_json::to_value(jwk.key.to_public()).expect("should serialize public key");
-        public_key["kid"] = serde_json::Value::String(kid.to_string()); // set `kid`
-        let public_key: jwt::jwk::Jwk =
-            serde_json::from_value(public_key).expect("should deserialize public key");
-        public_keys.keys.push(public_key);
+    // Generate public key
+    let mut public_key =
+        serde_json::to_value(jwk.key.to_public()).expect("should serialize public key");
+    public_key["kid"] = serde_json::Value::String(kid.to_string()); // set `kid`
+    let public_key: jwt::jwk::Jwk =
+        serde_json::from_value(public_key).expect("should deserialize public key");
+    public_keys.keys.push(public_key);
 
-        let encoding_key = jwt::EncodingKey::from_ec_pem(jwk.key.to_pem().as_bytes())
-            .expect("should generate encoding key");
-        encoding_keys.push(EncodingKey {
-            key_id: kid.to_string(),
-            key: encoding_key,
-        });
-    }
+    let encoding_key = jwt::EncodingKey::from_ec_pem(jwk.key.to_pem().as_bytes())
+        .expect("should generate encoding key");
+    encoding_keys.push(EncodingKey {
+        key_id: kid.to_string(),
+        key: encoding_key,
+        algorithm: jwt::Algorithm::ES256,
+    });
 
+    // Generate another private key using HS256
+    let kid = 2;
+    let mut jwk = jwk::JsonWebKey::new(jwk::Key::generate_symmetric(256));
+    jwk.set_algorithm(jwk::Algorithm::HS256)
+        .expect("should set encryption algorithm");
+    jwk.key_id = Some("some_id".to_string());
+
+    // since this is a symmetric key, the public key is the same as the private
+    let mut public_key =
+        serde_json::to_value(jwk.key.clone()).expect("should serialize public key");
+
+    // set the key parameters
+    public_key["kid"] = serde_json::Value::String(kid.to_string()); // set `kid`
+    let mut public_key: jwt::jwk::Jwk =
+        serde_json::from_value(public_key).expect("should deserialize public key");
+    public_key.common.key_algorithm = Some(jwt::jwk::KeyAlgorithm::HS256);
+    public_keys.keys.push(public_key);
+
+    let private_key = match *jwk.key {
+        jsonwebkey::Key::Symmetric { key } => jwt::EncodingKey::from_secret(&key),
+        _ => panic!("Expected symmetric key for HS256"), // this shouldn't really happen unless
+                                                         // code within this function changes
+    };
+    encoding_keys.push(EncodingKey {
+        key_id: kid.to_string(),
+        key: private_key,
+        algorithm: jwt::Algorithm::HS256,
+    });
+
+    // serialize public keys
     let public_keys = serde_json::to_string(&public_keys).expect("should serialize keyset");
     (encoding_keys, public_keys)
 }
@@ -72,26 +104,68 @@ impl Timestamp {
     }
 }
 
+/// The arguments for [`generate_token_using_claims`]
+pub struct GenerateTokensArgs {
+    pub access_token_claims: serde_json::Value,
+    pub id_token_claims: serde_json::Value,
+    pub userinfo_token_claims: serde_json::Value,
+    pub encoding_keys: Vec<EncodingKey>,
+}
+
+pub struct GeneratedTokens {
+    pub access_token: String,
+    pub id_token: String,
+    pub userinfo_token: String,
+}
+
+/// Generates tokens using the given encoding keys.
+///
+/// The `access_token` and `userinfo_token` will be encoded by the first key in the
+/// `Vec` and the `id_token` will be encoded by the second.
+///
+/// # Panics
+///
+/// Panics when a token cannot be encoded.
+pub fn generate_tokens_using_claims(args: GenerateTokensArgs) -> GeneratedTokens {
+    let access_token =
+        generate_token_using_claims(&args.access_token_claims, &args.encoding_keys[0])
+            .expect("Should generate access_token");
+    let id_token = generate_token_using_claims(&args.id_token_claims, &args.encoding_keys[1])
+        .expect("Should generate id_token");
+    let userinfo_token =
+        generate_token_using_claims(&args.userinfo_token_claims, &args.encoding_keys[0])
+            .expect("Should generate userinfo_token");
+
+    GeneratedTokens {
+        access_token,
+        id_token,
+        userinfo_token,
+    }
+}
+
 /// Generates a token string signed with ES256
-pub fn generate_token_using_claims(claims: &impl Serialize, encodking_key: &EncodingKey) -> String {
+pub fn generate_token_using_claims(
+    claims: &impl Serialize,
+    encoding_key: &EncodingKey,
+) -> Result<String, jwt::errors::Error> {
     // select a key from the keyset
     // for simplicity, were just choosing the second one
 
     // specify the header
     let header = jwt::Header {
-        alg: jwt::Algorithm::ES256,
-        kid: Some(encodking_key.key_id.clone()),
+        alg: encoding_key.algorithm,
+        kid: Some(encoding_key.key_id.clone()),
         ..Default::default()
     };
 
     // serialize token to a string
-    jwt::encode(&header, &claims, &encodking_key.key).expect("should generate token")
+    Ok(jwt::encode(&header, &claims, &encoding_key.key)?)
 }
 
 /// Invalidates a JWT Token by altering the first two characters in its signature
 ///
 /// # Panics
-/// 
+///
 /// Panics when the input token is malformed.
 pub fn invalidate_token(token: String) -> String {
     let mut token_parts: Vec<&str> = token.split('.').collect();
