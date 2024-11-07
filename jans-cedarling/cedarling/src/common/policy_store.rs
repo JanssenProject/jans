@@ -440,21 +440,12 @@ where
     };
 
     let policy = match policy_with_metadata.content_type {
+        // see comments for PolicyContentType
         PolicyContentType::Cedar => {
             cedar_policy::Policy::parse(Some(PolicyId::new(id)), decoded_body).map_err(|err| {
                 serde::de::Error::custom(format!("{}: {err}", ParsePolicySetMessage::HumanReadable))
             })?
-        }, /* see comments for PolicyContentType
-           PolicyContentType::CedarJson => {
-               let body_value : serde_json::Value = serde_json::from_str(&decoded_body).map_err(|err| {
-                   serde::de::Error::custom(format!("{}: {err}", ParsePolicySetMessage::CreatePolicySet))
-               })?;
-
-               cedar_policy::Policy::from_json(Some(PolicyId::new(id)), body_value).map_err(|err| {
-                   serde::de::Error::custom(format!("{}: {err}", ParsePolicySetMessage::CreatePolicySet))
-               })?
-           },
-           */
+        }
     };
 
     Ok(policy)
