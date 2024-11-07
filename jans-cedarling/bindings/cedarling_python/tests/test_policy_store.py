@@ -39,9 +39,9 @@ def test_load_policy_store(sample_bootstrap_config, policy_file_name, expected_e
     with open(join(TEST_FILES_PATH, policy_file_name),
               mode="r", encoding="utf8") as f:
         policy_raw = f.read()
-    if policy_file_name[-4:] == "json":
+    if policy_file_name.endswith("json"):
         policy_source = PolicyStoreSource(json=policy_raw)
-    elif policy_file_name[-4:] == "yaml":
+    elif policy_file_name.endswith("yaml"):
         policy_source = PolicyStoreSource(yaml=policy_raw)
     else:
         raise f"unknown file extension {policy_file_name}"
