@@ -85,9 +85,9 @@ public class AccessEvaluationService {
             log.trace("Unable to find grant by bearer access token.");
         }
 
-        log.info("accessEvaluationAllowBasicClientAuthorization {}, authorization {}, isBasic {}", appConfiguration.getAccessEvaluationAllowBasicClientAuthorization(), authorization, tokenService.isBasicAuthToken(authorization));
+        log.info("accessEvaluationAllowBasicClientAuthorization {}, authorization {}, isBasic {}", isTrue(appConfiguration.getAccessEvaluationAllowBasicClientAuthorization()), authorization, tokenService.isBasicAuthToken(authorization));
         if (isTrue(appConfiguration.getAccessEvaluationAllowBasicClientAuthorization()) && tokenService.isBasicAuthToken(authorization)) {
-            log.trace("Trying to perform basic client authorization ...");
+            log.info("Trying to perform basic client authorization ...");
             String encodedCredentials = tokenService.getBasicToken(authorization);
 
             String token = new String(Base64.decodeBase64(encodedCredentials), StandardCharsets.UTF_8);
@@ -95,21 +95,23 @@ public class AccessEvaluationService {
             int delim = token.indexOf(":");
 
             if (delim != -1) {
+                log.info("Delimited");
+
                 String clientId = URLDecoder.decode(token.substring(0, delim), StandardCharsets.UTF_8);
                 String password = URLDecoder.decode(token.substring(delim + 1), StandardCharsets.UTF_8);
                 if (clientService.authenticate(clientId, password)) {
-                    log.trace("Authorized with basic client authentication.");
+                    log.info("Authorized with basic client authentication.");
 
                     final Client client = clientService.getClient(clientId);
                     if (ArrayUtils.contains(client.getScopes(), ACCESS_EVALUATION_SCOPE)) {
-                        log.trace("Granted access to /evaluation endpoint. Client {} has scope {}.", clientId, ACCESS_EVALUATION_SCOPE);
+                        log.info("Granted access to /evaluation endpoint. Client {} has scope {}.", clientId, ACCESS_EVALUATION_SCOPE);
                         return;
                     } else {
-                        log.trace("Access denied to /evaluation endpoint. Client {} has no scope {}.", clientId, ACCESS_EVALUATION_SCOPE);
+                        log.info("Access denied to /evaluation endpoint. Client {} has no scope {}.", clientId, ACCESS_EVALUATION_SCOPE);
                     }
                 }
             }
-            log.trace("Unable to perform basic client authorization.");
+            log.info("Unable to perform basic client authorization.");
         }
 
         final String msg = "Authorization is not valid. Please provide valid authorization in 'Authorization' header.";
