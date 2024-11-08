@@ -8,6 +8,7 @@ import io.jans.as.server.model.common.AbstractToken;
 import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.as.server.model.common.ExecutionContext;
 import io.jans.as.server.service.ClientService;
+import io.jans.as.server.service.ScopeService;
 import io.jans.as.server.service.external.ExternalAccessEvaluationService;
 import io.jans.as.server.service.token.TokenService;
 import io.jans.model.authzen.AccessEvaluationRequest;
@@ -18,11 +19,13 @@ import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang.ArrayUtils;
 import org.slf4j.Logger;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
@@ -54,6 +57,9 @@ public class AccessEvaluationService {
 
     @Inject
     private AppConfiguration appConfiguration;
+
+    @Inject
+    private ScopeService scopeService;
 
     public AccessEvaluationResponse evaluation(AccessEvaluationRequest request, ExecutionContext executionContext) {
         errorResponseFactory.validateFeatureEnabled(FeatureFlagType.ACCESS_EVALUATION);
@@ -103,7 +109,8 @@ public class AccessEvaluationService {
                     log.info("Authorized with basic client authentication.");
 
                     final Client client = clientService.getClient(clientId);
-                    if (ArrayUtils.contains(client.getScopes(), ACCESS_EVALUATION_SCOPE)) {
+                    List<String> clientScopes = scopeService.getScopeIdsByDns(client.getScopes() != null ? Arrays.asList(client.getScopes()) : new ArrayList<>());
+                    if (clientScopes.contains(ACCESS_EVALUATION_SCOPE)) {
                         log.info("Granted access to /evaluation endpoint. Client {} has scope {}.", clientId, ACCESS_EVALUATION_SCOPE);
                         return;
                     } else {
