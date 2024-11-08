@@ -79,21 +79,20 @@ public class AccessEvaluationService {
             final AbstractToken accessTokenObject = grant.getAccessToken(authorizationAccessToken);
             if (accessTokenObject != null && accessTokenObject.isValid()) {
                 if (grant.getScopes() != null && grant.getScopes().contains(ACCESS_EVALUATION_SCOPE)) {
-                    log.trace("Authorized with bearer token.");
+                    log.debug("Authorized with bearer token.");
                     return;
                 } else {
                     log.error("access_token does not have {} scope.", ACCESS_EVALUATION_SCOPE);
                 }
             } else {
-                log.trace("Unable to find valid access token.");
+                log.debug("Unable to find valid access token.");
             }
         } else {
-            log.trace("Unable to find grant by bearer access token.");
+            log.debug("Unable to find grant by bearer access token.");
         }
 
-        log.info("accessEvaluationAllowBasicClientAuthorization {}, authorization {}, isBasic {}", isTrue(appConfiguration.getAccessEvaluationAllowBasicClientAuthorization()), authorization, tokenService.isBasicAuthToken(authorization));
         if (isTrue(appConfiguration.getAccessEvaluationAllowBasicClientAuthorization()) && tokenService.isBasicAuthToken(authorization)) {
-            log.info("Trying to perform basic client authorization ...");
+            log.debug("Trying to perform basic client authorization ...");
             String encodedCredentials = tokenService.getBasicToken(authorization);
 
             String token = new String(Base64.decodeBase64(encodedCredentials), StandardCharsets.UTF_8);
@@ -101,24 +100,22 @@ public class AccessEvaluationService {
             int delim = token.indexOf(":");
 
             if (delim != -1) {
-                log.info("Delimited");
-
                 String clientId = URLDecoder.decode(token.substring(0, delim), StandardCharsets.UTF_8);
                 String password = URLDecoder.decode(token.substring(delim + 1), StandardCharsets.UTF_8);
                 if (clientService.authenticate(clientId, password)) {
-                    log.info("Authorized with basic client authentication.");
+                    log.debug("Authorized with basic client authentication successfully. client_id: {}", clientId);
 
                     final Client client = clientService.getClient(clientId);
                     List<String> clientScopes = scopeService.getScopeIdsByDns(client.getScopes() != null ? Arrays.asList(client.getScopes()) : new ArrayList<>());
                     if (clientScopes.contains(ACCESS_EVALUATION_SCOPE)) {
-                        log.info("Granted access to /evaluation endpoint. Client {} has scope {}.", clientId, ACCESS_EVALUATION_SCOPE);
+                        log.debug("Granted access to /evaluation endpoint. Client {} has scope {}.", clientId, ACCESS_EVALUATION_SCOPE);
                         return;
                     } else {
-                        log.info("Access denied to /evaluation endpoint. Client {} has no scope {}.", clientId, ACCESS_EVALUATION_SCOPE);
+                        log.debug("Access denied to /evaluation endpoint. Client {} has no scope {}.", clientId, ACCESS_EVALUATION_SCOPE);
                     }
                 }
             }
-            log.info("Unable to perform basic client authorization.");
+            log.debug("Unable to perform basic client authorization.");
         }
 
         final String msg = "Authorization is not valid. Please provide valid authorization in 'Authorization' header.";
