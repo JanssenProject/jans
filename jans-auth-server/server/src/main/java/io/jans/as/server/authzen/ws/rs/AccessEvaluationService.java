@@ -85,7 +85,7 @@ public class AccessEvaluationService {
             log.trace("Unable to find grant by bearer access token.");
         }
 
-        log.info("accessEvaluationAllowBasicClientAuthorization {}, authorization: {}", appConfiguration.getAccessEvaluationAllowBasicClientAuthorization(), authorization);
+        log.info("accessEvaluationAllowBasicClientAuthorization {}, authorization {}, isBasic {}", appConfiguration.getAccessEvaluationAllowBasicClientAuthorization(), authorization, tokenService.isBasicAuthToken(authorization));
         if (isTrue(appConfiguration.getAccessEvaluationAllowBasicClientAuthorization()) && tokenService.isBasicAuthToken(authorization)) {
             log.trace("Trying to perform basic client authorization ...");
             String encodedCredentials = tokenService.getBasicToken(authorization);
