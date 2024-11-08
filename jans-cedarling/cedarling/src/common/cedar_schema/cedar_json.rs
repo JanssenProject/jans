@@ -12,7 +12,9 @@
 //! [cedar json schema grammar](https://docs.cedarpolicy.com/schema/json-schema-grammar.html) - documentation about json structure of cedar schema.
 
 use std::collections::HashMap;
+mod action_types;
 mod entity_types;
+use action_types::CedarActionElement;
 pub use entity_types::{CedarSchemaEntityShape, CedarSchemaRecord};
 
 /// Represent `cedar-policy` schema type for external usage.
@@ -58,11 +60,16 @@ impl CedarSchemaJson {
 pub struct CedarSchemaEntities {
     #[serde(rename = "entityTypes")]
     pub entity_types: HashMap<String, CedarSchemaEntityShape>,
+    pub actions: HashMap<String, CedarActionElement>,
 }
 
 #[cfg(test)]
 mod tests {
+    use std::collections::HashSet;
+
+    use super::action_types::*;
     use super::entity_types::*;
+
     use super::*;
     use test_utils::assert_eq;
     use test_utils::SortedJson;
@@ -144,7 +151,20 @@ mod tests {
                             },
                         ),
                         ("Role".to_string(), CedarSchemaEntityShape { shape: None }),
+                        ("Issue".to_string(), CedarSchemaEntityShape { shape: None }),
                     ]),
+                    actions: HashMap::from_iter(vec![(
+                        "Update".to_string(),
+                        CedarActionElement {
+                            applies_to: CedarActionAppliesTo {
+                                principal_types: HashSet::from_iter(vec![
+                                    "Access_token".to_string(),
+                                    "Role".to_string(),
+                                ]),
+                                resource_types: HashSet::from_iter(vec!["Issue".to_string()]),
+                            },
+                        },
+                    )]),
                 },
             )]),
         };
