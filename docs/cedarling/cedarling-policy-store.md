@@ -176,20 +176,6 @@ This record contains the information needed to validate tokens from this issuer:
 - **openid_configuration_endpoint** : (*String*) The HTTPS URL for the OpenID Connect configuration endpoint (usually found at `/.well-known/openid-configuration`).
 - **`access_tokens`, `id_tokens`, `userinfo_tokens`, `tx_tokens`** : (*Object*) Metadata for each toke type. See: [Token Metadata Schema](#token-metadata-schema).
 
-##### Token Metadata Schema
-
-```json
-{
-  "trusted": true|false
-  "principal_identifier": "some_user123",
-  "role_mapping": "role",
-}
-```
-
-- **trusted** : (Boolean) The type of token
-- **principal_id** : (String) The claim used to create the Cedar entity associated with this token.
-- **role_mapping** : (String, *optional*) The claim used to create a role for the token. The default value of `role_mapping` is `role`. The claim can be string or array of string.
-
 ##### Token Entity Metadata Schema
 
 Each token entity defines metadata and mappings needed to transform a tokenΓÇÖs claims into a Cedar role.
