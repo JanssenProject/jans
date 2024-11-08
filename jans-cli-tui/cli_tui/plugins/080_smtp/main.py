@@ -176,10 +176,32 @@ class Plugin(DialogUtils):
             response = await self.app.loop.run_in_executor(self.app.executor, self.app.cli_requests, cli_args)
             self.app.stop_progressing(_("SMTP Configuration test was completed."))
 
-            if response.status_code == 200 and response.json() == True:
-                self.app.show_message(_(common_strings.info), _("SMTP configuration test was successfull."), tobefocused=self.main_container)
-            else:
-                self.app.show_message(_(common_strings.info), _("SMTP configuration test was failed:\nStatus code: {}\nServer response: {}").format(response.status_code, response.json()), tobefocused=self.main_container)
+            try:
+                result = response.json()
+            except Exception:
+                result = response.text
+
+            if response.status_code == 200:
+                if result == True:
+                    self.app.show_message(
+                        _(common_strings.info),
+                        _("SMTP configuration test was successfull."),
+                        tobefocused=self.main_container
+                        )
+                    return
+                elif result == False:
+                    self.app.show_message(
+                        _(common_strings.warning),
+                        _("SMTP configuration test was failed. Please check you settings."),
+                        tobefocused=self.main_container
+                        )
+                    return
+
+            self.app.show_message(
+                    _(common_strings.error),
+                    _("SMTP configuration test was failed. The server returns unexpected data:\n{}").format(result),
+                    tobefocused=self.main_container
+                    )
 
         asyncio.ensure_future(coroutine())
 
