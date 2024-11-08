@@ -249,21 +249,15 @@ Below is a non-normative example of a `cedarling_store.json` file:
   "name": "Jans::store",
   "description": "a simple policy example",
   "policies": { 
-    "b6391dbcd7...": {
-      "name": "somecompany::store",
-      "description": "",
-      "policies": {
-          "fbd921a51b...": {
-              "description": "Admin",
-              "creation_date": "2024-11-07T07:49:11.813002",
-              "policy_content": "QGlkKCJBZG..."
-          },
-          "1a2dd16865...": {
-              "description": "Member",
-              "creation_date": "2024-11-07T07:50:05.520757",
-              "policy_content": "QGlkKCJNZW..."
-          }
-      },
+    "fbd921a51b...": {
+        "description": "Admin",
+        "creation_date": "2024-11-07T07:49:11.813002",
+        "policy_content": "QGlkKCJBZG..."
+    },
+    "1a2dd16865...": {
+        "description": "Member",
+        "creation_date": "2024-11-07T07:50:05.520757",
+        "policy_content": "QGlkKCJNZW..."
     }
   },
   "trusted_issuers": {
