@@ -104,8 +104,6 @@ For fresh installation, generate the initial configuration by creating `/path/to
 2.  `_secret`:
 
     - `sql_password`: user's password to access SQL database (only used if `optional_scopes` list contains `sql` scope)
-    - `couchbase_password`: user's password to access Couchbase database (only used if `optional_scopes` list contains `couchbase` scope)
-    - `couchbase_superuser_password`: superusers password to access Couchbase database (only used if `optional_scopes` list contains `couchbase` scope)
     - `encoded_salt`: user-defined salt (24 characters length); if omitted, salt will be generated automatically
 
     Example of generating `encoded_salt` value:

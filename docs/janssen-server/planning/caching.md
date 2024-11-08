@@ -4,7 +4,6 @@ tags:
   - planning
   - caching
   - Redis
-  - Couchbase
   - Memcached
 ---
 
@@ -22,10 +21,6 @@ switch to another cache mechanism.
 1. **Database** A "database cache" is an oxymoron. But in cases where you don't
 want another component or service, but you need the session replication for a
 cluster, it may be convenient to persist the "cache" data in the database.
-
-1. **Couchbase**  If you are already using Couchbase for persistence, then
-Janssen Auth Server can use "ephemeral buckets", which exist only in memory,
-for caching.
 
 1. **Redis** The best choice if you need a cache service for RDBMS,
 or Spanner. Great performance and low cache miss rate. Commercial Redis

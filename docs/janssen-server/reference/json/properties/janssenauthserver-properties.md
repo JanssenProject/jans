@@ -115,7 +115,7 @@ tags:
 | endSessionWithAccessToken | Choose whether to accept access tokens to call end_session endpoint | [Details](#endsessionwithaccesstoken) |
 | errorHandlingMethod | A list of possible error handling methods. Possible values: remote (send error back to RP), internal (show error page) | [Details](#errorhandlingmethod) |
 | errorReasonEnabled | Boolean value specifying whether to return detailed reason of the error from AS. Default value is false | [Details](#errorreasonenabled) |
-| expirationNotificatorEnabled | Boolean value specifying whether expiration notificator is enabled (used to identify expiration for persistence that support TTL, like Couchbase) | [Details](#expirationnotificatorenabled) |
+| expirationNotificatorEnabled | Boolean value specifying whether expiration notificator is enabled (used to identify expiration for persistence that support TTL) | [Details](#expirationnotificatorenabled) |
 | expirationNotificatorIntervalInSeconds | The expiration notificator interval in second | [Details](#expirationnotificatorintervalinseconds) |
 | expirationNotificatorMapSizeLimit | The expiration notificator maximum size limit | [Details](#expirationnotificatormapsizelimit) |
 | externalLoggerConfiguration | The path to the external log4j2 logging configuration | [Details](#externalloggerconfiguration) |
