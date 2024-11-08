@@ -39,6 +39,7 @@ public class AUIConfiguration {
     private LicenseConfiguration licenseConfiguration;
     //UI session timeout
     private Integer sessionTimeoutInMins;
+    private Boolean allowSmtpKeystoreEdit;
     private List<KeyValuePair> additionalParameters;
 
     public List<KeyValuePair> getAdditionalParameters() {
@@ -273,4 +274,11 @@ public class AUIConfiguration {
         this.licenseConfiguration = licenseConfiguration;
     }
 
+    public Boolean getAllowSmtpKeystoreEdit() {
+        return allowSmtpKeystoreEdit;
+    }
+
+    public void setAllowSmtpKeystoreEdit(Boolean allowSmtpKeystoreEdit) {
+        this.allowSmtpKeystoreEdit = allowSmtpKeystoreEdit;
+    }
 }
