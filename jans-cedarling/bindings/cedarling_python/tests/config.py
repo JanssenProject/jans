@@ -22,11 +22,11 @@ def sample_bootstrap_config():
     # log_config = DisabledLoggingConfig()
 
     # Create policy source configuration
-    with open(join(TEST_FILES_PATH, "policy-store_ok.json"),
+    # NOTE yaml is only used for test fixtures. Real imports use json.
+    with open(join(TEST_FILES_PATH, "policy-store_ok.yaml"),
               mode="r", encoding="utf8") as f:
-        policy_raw_json = f.read()
-    # for now we support only json source
-    policy_source = PolicyStoreSource(json=policy_raw_json)
+        policy_raw = f.read()
+    policy_source = PolicyStoreSource(yaml=policy_raw)
 
     policy_store_config = PolicyStoreConfig(
         source=policy_source)

@@ -12,13 +12,21 @@ pub enum KeyServiceError {
     #[error("No key with `kid`=\"{0}\" found in the JWKS.")]
     KeyNotFound(String),
 
-    /// Represents an HTTP error during the request.
-    #[error("HTTP error occurred: {0}")]
-    Http(#[source] reqwest::Error),
+    /// Indicates an HTTP error response received from an endpoint.
+    #[error("Received error HTTP status: {0}")]
+    HttpStatus(#[source] reqwest::Error),
+
+    /// Indicates a failure to reach the endpoint after 3 attempts.
+    #[error("Could not reach endpoint after trying 3 times: {0}")]
+    MaxHttpRetriesReached(#[source] reqwest::Error),
 
     /// Indicates failure to deserialize the response from the HTTP request.
     #[error("Failed to deserialize the response from the HTTP request: {0}")]
     RequestDeserialization(#[source] reqwest::Error),
+
+    /// Indicates failure to initialize the HTTP client.
+    #[error("Failed to initilize HTTP client: {0}")]
+    HttpClientInitialization(#[source] reqwest::Error),
 
     /// Indicates an error in parsing the decoding key from the JWKS JSON.
     #[error("Error parsing decoding key from JWKS JSON: {0}")]

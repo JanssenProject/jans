@@ -25,7 +25,7 @@
 use super::super::*;
 use crate::common::policy_store::TrustedIssuer;
 use crate::jwt::decoding_strategy::JwtDecodingError;
-use crate::jwt::{self, JwtService, TrustedIssuerAndOpenIdConfig};
+use crate::jwt::{self, HttpClient, JwtService, TrustedIssuerAndOpenIdConfig};
 use jsonwebtoken::Algorithm;
 use serde_json::json;
 
@@ -106,9 +106,12 @@ fn test_missing_claim(missing_claim: &str) {
     });
 
     // generate the signed token strings
-    let access_token = generate_token_using_claims(&access_token_claims, &encoding_keys[0]);
-    let id_token = generate_token_using_claims(&id_token_claims, &encoding_keys[1]);
-    let userinfo_token = generate_token_using_claims(&userinfo_token_claims, &encoding_keys[0]);
+    let tokens = generate_tokens_using_claims(GenerateTokensArgs {
+        access_token_claims,
+        id_token_claims,
+        userinfo_token_claims,
+        encoding_keys,
+    });
 
     // setup mock server responses for OpenID configuration and JWKS URIs
     let openid_config_response = json!({
@@ -142,13 +145,13 @@ fn test_missing_claim(missing_claim: &str) {
             ),
             token_metadata: None,
         },
-        &reqwest::blocking::Client::new(),
+        &HttpClient::new().expect("should create http client"),
     )
     .expect("openid config should be fetched successfully");
 
     // initialize JwtService with validation enabled and ES256 as the supported algorithm
     let jwt_service = JwtService::new_with_config(crate::jwt::JwtServiceConfig::WithValidation {
-        supported_algs: vec![Algorithm::ES256],
+        supported_algs: vec![Algorithm::ES256, Algorithm::HS256],
         trusted_idps: vec![trusted_idp],
     });
 
@@ -160,9 +163,9 @@ fn test_missing_claim(missing_claim: &str) {
     // decode and validate the tokens
     let decode_result = jwt_service
         .decode_tokens::<serde_json::Value, serde_json::Value, serde_json::Value>(
-            &access_token,
-            &id_token,
-            &userinfo_token,
+            &tokens.access_token,
+            &tokens.id_token,
+            &tokens.userinfo_token,
         );
 
     // the jsonwebtoken crate checks for missing claims differently depending on
@@ -245,14 +248,17 @@ fn errors_on_invalid_signature() {
     });
 
     // generate the signed access_token
-    let access_token = generate_token_using_claims(&access_token_claims, &encoding_keys[0]);
+    let access_token = generate_token_using_claims(&access_token_claims, &encoding_keys[0])
+        .expect("Should generate access_token");
 
-    // generate signed id_token
-    let id_token = generate_token_using_claims(&id_token_claims, &encoding_keys[1]);
+    // generate id_token with invalid signature
+    let id_token = generate_token_using_claims(&id_token_claims, &encoding_keys[1])
+        .expect("Should generate id_token");
     let id_token = invalidate_token(id_token);
 
     // generate signed userinfo_token
-    let userinfo_token = generate_token_using_claims(&userinfo_token_claims, &encoding_keys[0]);
+    let userinfo_token = generate_token_using_claims(&userinfo_token_claims, &encoding_keys[0])
+        .expect("Should generate userinfo_token");
 
     // setup mock server responses for OpenID configuration and JWKS URIs
     let openid_config_response = json!({
@@ -286,13 +292,13 @@ fn errors_on_invalid_signature() {
             ),
             token_metadata: None,
         },
-        &reqwest::blocking::Client::new(),
+        &HttpClient::new().expect("should create http client"),
     )
     .expect("openid config should be fetched successfully");
 
     // initialize JwtService with validation enabled and ES256 as the supported algorithm
     let jwt_service = JwtService::new_with_config(crate::jwt::JwtServiceConfig::WithValidation {
-        supported_algs: vec![Algorithm::ES256],
+        supported_algs: vec![Algorithm::ES256, Algorithm::HS256],
         trusted_idps: vec![trusted_idp],
     });
 
@@ -365,9 +371,12 @@ fn errors_on_expired_token() {
     });
 
     // generate the signed token strings
-    let access_token = generate_token_using_claims(&access_token_claims, &encoding_keys[0]);
-    let id_token = generate_token_using_claims(&id_token_claims, &encoding_keys[1]);
-    let userinfo_token = generate_token_using_claims(&userinfo_token_claims, &encoding_keys[0]);
+    let tokens = generate_tokens_using_claims(GenerateTokensArgs {
+        access_token_claims,
+        id_token_claims,
+        userinfo_token_claims,
+        encoding_keys,
+    });
 
     // setup mock server responses for OpenID configuration and JWKS URIs
     let openid_config_response = json!({
@@ -401,13 +410,13 @@ fn errors_on_expired_token() {
             ),
             token_metadata: None,
         },
-        &reqwest::blocking::Client::new(),
+        &HttpClient::new().expect("should create http client"),
     )
     .expect("openid config should be fetched successfully");
 
     // initialize JwtService with validation enabled and ES256 as the supported algorithm
     let jwt_service = JwtService::new_with_config(crate::jwt::JwtServiceConfig::WithValidation {
-        supported_algs: vec![Algorithm::ES256],
+        supported_algs: vec![Algorithm::ES256, Algorithm::HS256],
         trusted_idps: vec![trusted_idp],
     });
 
@@ -419,9 +428,9 @@ fn errors_on_expired_token() {
     // decode and validate the tokens
     let decode_result = jwt_service
         .decode_tokens::<serde_json::Value, serde_json::Value, serde_json::Value>(
-            &access_token,
-            &id_token,
-            &userinfo_token,
+            &tokens.access_token,
+            &tokens.id_token,
+            &tokens.userinfo_token,
         );
 
     assert!(
@@ -481,9 +490,12 @@ fn errors_on_invalid_iss() {
     });
 
     // generate the signed token strings
-    let access_token = generate_token_using_claims(&access_token_claims, &encoding_keys[0]);
-    let id_token = generate_token_using_claims(&id_token_claims, &encoding_keys[1]);
-    let userinfo_token = generate_token_using_claims(&userinfo_token_claims, &encoding_keys[0]);
+    let tokens = generate_tokens_using_claims(GenerateTokensArgs {
+        access_token_claims,
+        id_token_claims,
+        userinfo_token_claims,
+        encoding_keys,
+    });
 
     // setup mock server responses for OpenID configuration and JWKS URIs
     let openid_config_response = json!({
@@ -517,13 +529,13 @@ fn errors_on_invalid_iss() {
             ),
             token_metadata: None,
         },
-        &reqwest::blocking::Client::new(),
+        &HttpClient::new().expect("should create http client"),
     )
     .expect("openid config should be fetched successfully");
 
     // initialize JwtService with validation enabled and ES256 as the supported algorithm
     let jwt_service = JwtService::new_with_config(crate::jwt::JwtServiceConfig::WithValidation {
-        supported_algs: vec![Algorithm::ES256],
+        supported_algs: vec![Algorithm::ES256, Algorithm::HS256],
         trusted_idps: vec![trusted_idp],
     });
 
@@ -535,9 +547,9 @@ fn errors_on_invalid_iss() {
     // decode and validate the tokens
     let decode_result = jwt_service
         .decode_tokens::<serde_json::Value, serde_json::Value, serde_json::Value>(
-            &access_token,
-            &id_token,
-            &userinfo_token,
+            &tokens.access_token,
+            &tokens.id_token,
+            &tokens.userinfo_token,
         );
 
     assert!(
@@ -597,9 +609,12 @@ fn errors_on_invalid_aud() {
     });
 
     // generate the signed token strings
-    let access_token = generate_token_using_claims(&access_token_claims, &encoding_keys[0]);
-    let id_token = generate_token_using_claims(&id_token_claims, &encoding_keys[1]);
-    let userinfo_token = generate_token_using_claims(&userinfo_token_claims, &encoding_keys[0]);
+    let tokens = generate_tokens_using_claims(GenerateTokensArgs {
+        access_token_claims,
+        id_token_claims,
+        userinfo_token_claims,
+        encoding_keys,
+    });
 
     // setup mock server responses for OpenID configuration and JWKS URIs
     let openid_config_response = json!({
@@ -633,13 +648,13 @@ fn errors_on_invalid_aud() {
             ),
             token_metadata: None,
         },
-        &reqwest::blocking::Client::new(),
+        &HttpClient::new().expect("should create http client"),
     )
     .expect("openid config should be fetched successfully");
 
     // initialize JwtService with validation enabled and ES256 as the supported algorithm
     let jwt_service = JwtService::new_with_config(crate::jwt::JwtServiceConfig::WithValidation {
-        supported_algs: vec![Algorithm::ES256],
+        supported_algs: vec![Algorithm::ES256, Algorithm::HS256],
         trusted_idps: vec![trusted_idp],
     });
 
@@ -651,9 +666,9 @@ fn errors_on_invalid_aud() {
     // decode and validate the tokens
     let decode_result = jwt_service
         .decode_tokens::<serde_json::Value, serde_json::Value, serde_json::Value>(
-            &access_token,
-            &id_token,
-            &userinfo_token,
+            &tokens.access_token,
+            &tokens.id_token,
+            &tokens.userinfo_token,
         );
 
     assert!(
@@ -714,9 +729,12 @@ fn errors_on_token_used_before_nbf() {
     });
 
     // generate the signed token strings
-    let access_token = generate_token_using_claims(&access_token_claims, &encoding_keys[0]);
-    let id_token = generate_token_using_claims(&id_token_claims, &encoding_keys[1]);
-    let userinfo_token = generate_token_using_claims(&userinfo_token_claims, &encoding_keys[0]);
+    let tokens = generate_tokens_using_claims(GenerateTokensArgs {
+        access_token_claims,
+        id_token_claims,
+        userinfo_token_claims,
+        encoding_keys,
+    });
 
     // setup mock server responses for OpenID configuration and JWKS URIs
     let openid_config_response = json!({
@@ -750,13 +768,13 @@ fn errors_on_token_used_before_nbf() {
             ),
             token_metadata: None,
         },
-        &reqwest::blocking::Client::new(),
+        &HttpClient::new().expect("should create http client"),
     )
     .expect("openid config should be fetched successfully");
 
     // initialize JwtService with validation enabled and ES256 as the supported algorithm
     let jwt_service = JwtService::new_with_config(crate::jwt::JwtServiceConfig::WithValidation {
-        supported_algs: vec![Algorithm::ES256],
+        supported_algs: vec![Algorithm::ES256, Algorithm::HS256],
         trusted_idps: vec![trusted_idp],
     });
 
@@ -768,9 +786,9 @@ fn errors_on_token_used_before_nbf() {
     // decode and validate the tokens
     let decode_result = jwt_service
         .decode_tokens::<serde_json::Value, serde_json::Value, serde_json::Value>(
-            &access_token,
-            &id_token,
-            &userinfo_token,
+            &tokens.access_token,
+            &tokens.id_token,
+            &tokens.userinfo_token,
         );
 
     assert!(

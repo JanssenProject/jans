@@ -447,9 +447,6 @@ class JettyInstaller(BaseInstaller, SetupUtils):
         if Config.cb_install:
             common_lib_dir = base.current_app.CouchbaseInstaller.common_lib_dir
 
-        elif Config.rdbm_install and Config.rdbm_type == 'spanner':
-            common_lib_dir = base.current_app.RDBMInstaller.common_lib_dir
-
         if common_lib_dir:
 
             add_custom_lib_dir = []

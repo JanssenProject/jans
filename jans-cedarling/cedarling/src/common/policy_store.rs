@@ -14,10 +14,16 @@ use semver::Version;
 use serde::{Deserialize, Deserializer};
 use std::{collections::HashMap, fmt};
 
-/// The PolicySTore in Agama format, which has the extra top-level key
+/// This is the top-level struct in compliance with the Agama Lab Policy Designer format.
 #[derive(Debug, Clone, serde::Deserialize, PartialEq)]
-#[serde(transparent)]
-pub struct AgamaPolicyStore(HashMap<String,PolicyStore>);
+pub struct AgamaPolicyStore {
+    /// The cedar version to use when parsing the schema and policies.
+    #[serde(deserialize_with = "parse_cedar_version")]
+    #[allow(dead_code)]
+    pub cedar_version: Version,
+
+    pub policy_stores: HashMap<String, PolicyStore>,
+}
 
 /// Represents the store of policies used for JWT validation and policy evaluation in Cedarling.
 ///
@@ -52,7 +58,7 @@ pub struct PolicyStore {
     pub trusted_issuers: Option<Vec<TrustedIssuer>>,
 
     #[allow(dead_code)]
-    pub identity_source: Option<HashMap<String,IdentitySource>>,
+    pub identity_source: Option<HashMap<String, IdentitySource>>,
 }
 
 /// Represents a trusted issuer that can provide JWTs.
@@ -275,12 +281,13 @@ where
             // Check for "v" prefix
             let version = version.strip_prefix('v').unwrap_or(&version);
 
-            let version = Version::parse(version)
-                .map_err(|e| serde::de::Error::custom(format!("error parsing cedar version :{}", e)))?;
+            let version = Version::parse(version).map_err(|e| {
+                serde::de::Error::custom(format!("error parsing cedar version :{}", e))
+            })?;
 
             Ok(Some(version))
-        }
-        None => Ok(None)
+        },
+        None => Ok(None),
     }
 }
 
@@ -434,21 +441,12 @@ where
     };
 
     let policy = match policy_with_metadata.content_type {
+        // see comments for PolicyContentType
         PolicyContentType::Cedar => {
             cedar_policy::Policy::parse(Some(PolicyId::new(id)), decoded_body).map_err(|err| {
                 serde::de::Error::custom(format!("{}: {err}", ParsePolicySetMessage::HumanReadable))
             })?
-        }, /* see comments for PolicyContentType
-           PolicyContentType::CedarJson => {
-               let body_value : serde_json::Value = serde_json::from_str(&decoded_body).map_err(|err| {
-                   serde::de::Error::custom(format!("{}: {err}", ParsePolicySetMessage::CreatePolicySet))
-               })?;
-
-               cedar_policy::Policy::from_json(Some(PolicyId::new(id)), body_value).map_err(|err| {
-                   serde::de::Error::custom(format!("{}: {err}", ParsePolicySetMessage::CreatePolicySet))
-               })?
-           },
-           */
+        },
     };
 
     Ok(policy)

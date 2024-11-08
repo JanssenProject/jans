@@ -35,7 +35,7 @@ pub enum ServiceConfigError {
 
 impl ServiceConfig {
     pub fn new(bootstrap: &BootstrapConfig) -> Result<Self, ServiceConfigError> {
-        let client = reqwest::blocking::Client::new();
+        let client = jwt::HttpClient::new()?;
         let policy_store = load_policy_store(&bootstrap.policy_store_config)?;
 
         // We  fetch `OpenidConfig` using `TrustedIssuer`
