@@ -6,9 +6,9 @@ use std::collections::HashMap;
 #[derive(Debug, PartialEq)]
 #[allow(dead_code)]
 pub struct TokenEntityMetadata {
-    user_id: Option<String>,
-    role_mapping: Option<String>,
-    claim_mapping: HashMap<String, ClaimMapping>,
+    pub user_id: Option<String>,
+    pub role_mapping: Option<String>,
+    pub claim_mapping: HashMap<String, ClaimMapping>,
 }
 
 impl<'de> Deserialize<'de> for TokenEntityMetadata {
@@ -110,7 +110,7 @@ mod test {
         // Assert if the JSON got parsed correctly
         assert_eq!(
             parsed, expected,
-            "Expected the Token Entity Metadata To be parsed correctly: {:?}",
+            "Expected the Token Entity Metadata to be parsed correctly: {:?}",
             parsed
         );
     }

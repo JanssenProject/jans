@@ -7,6 +7,7 @@
 
 mod claim_mapping;
 mod token_entity_metadata;
+mod trusted_issuer_metadata;
 #[cfg(test)]
 mod test;
 
