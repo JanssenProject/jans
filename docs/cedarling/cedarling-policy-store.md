@@ -31,7 +31,7 @@ The JSON Schema accepted by cedarling is defined as follows:
           "description": "Once upon a time there was a Policy, that lived in a Store.",
           "policies": { ... },
           "schema": { ... },
-          "identity_source": { ... }
+          "trusted_issuers": { ... }
       }
   }
 }
@@ -40,7 +40,7 @@ The JSON Schema accepted by cedarling is defined as follows:
 - **cedar_version** : (*String*) The version of [Cedar policy](https://docs.cedarpolicy.com/). The protocols of this version will be followed when processing Cedar schema and policies.
 - **policies** : (*Object*) Object containing one or more policy IDs as keys, with their corresponding objects as values. See: [policies schema](#cedar-policies-schema).
 - **schema** : (*String* | *Object*) The Cedar Schema. See [schema](#schema) below.
-- **identity_source** : (*Object of {unique_id => IdentitySource}(#trusted-issuer-schema)*) List of metadata for Identity Sources.
+- **trusted_issuers** : (*Object of {unique_id => IdentitySource}(#trusted-issuer-schema)*) List of metadata for Identity Sources.
 
 ### `schema`
 Either *String* or *Object*, where *Object* is preferred.
@@ -61,7 +61,7 @@ Where *Object* - An object with `encoding`, `content_type` and `body` keys. For 
 
 ## Cedar Policies Schema
 
-The `policies` field describes the Cedar policies that will be used in Cedarling. Multiple policies can be defined, with each policy requiring a `unique_policy_id`.
+The `policies` field describes the Cedar policies that will be used in Cedarling. Currently, Cedarling only supports having one policy store -- however the policy still requires a `unique_policy_id`.
 
 ```json
   "policies": {
@@ -72,7 +72,6 @@ The `policies` field describes the Cedar policies that will be used in Cedarling
       "creation_date": "2024-09-20T17:22:39.996050",
       "policy_content": { ... },
     },
-    ...
   }
 ```
 
@@ -145,61 +144,99 @@ Here is a non-normative example of the `policies` field:
   }
 ```
 
-## Identity Source Schema
+## Trusted Issuers Schema
 
 This record contains the information needed to validate tokens from this issuer:
 
 ```json
-  "identity_source": {
-    "some_unique_id" : {
-      "name": "name_of_the_trusted_issuer",
-      "description": "description for the trusted issuer",
-      "openid_configuration_endpoint": "https://<trusted-issuer-hostname>/.well-known/openid-configuration",
-      "access_tokens": {
-        "trusted": true,
-        "principal_identifier": "",
-        "role_mapping": "",
-      },
-      "id_tokens": {
-        "trusted": true,
-        "principal_identifier": "sub",
-        "role_mapping": "",
-      },
-      "userinfo_tokens": {
-        "trusted": true,
-        "principal_identifier": "",
-        "role_mapping": "role",
-      },
-      "tx_tokens": {
-        "trusted": true,
-        "principal_identifier": "",
-        "role_mapping": "",
-      },
-    }
-    ...
-  }
+"trusted_issuers": {
+  "some_unique_id" : {
+    "name": "name_of_the_trusted_issuer",
+    "description": "description for the trusted issuer",
+    "openid_configuration_endpoint": "https://<trusted-issuer-hostname>/.well-known/openid-configuration",
+    "access_tokens": { ... },
+    "id_tokens": { ... },
+    "userinfo_tokens": { ... },
+    "tx_tokens": { ... },
+  },
+  ...
+}
 ```
 
 - **name** : (*String*) The name of the trusted issuer.
 - **description** : (*String*) A brief description of the trusted issuer, providing context for administrators.
 - **openid_configuration_endpoint** : (*String*) The HTTPS URL for the OpenID Connect configuration endpoint (usually found at `/.well-known/openid-configuration`).
 - **identity_source** : (*Object*, *optional*) Metadata related to the tokens issued by this issuer.
+- **`access_tokens`, `id_tokens`, `userinfo_tokens`, `tx_tokens`** : (*Object*, *optional*) Metadata related to the tokens issued by this issuer. See schema [below](#token-entity-metadata-schema)
 
-### Token Metadata Schema
+
+### Token Entity Metadata Schema
+
+The Token Entity Metadata Schema defines how tokens are mapped, parsed, and transformed within Cedarling. It allows you to specify how to extract user IDs, roles, and other claims from a token using customizable parsers.
 
 ```json
 {
-  "trusted": true|false
-  "principal_identifier": "some_user123",
-  "role_mapping": "role",
+  "token_type": {
+    "user_id": "<field name in token (e.g., 'email', 'sub', 'uid', etc.) or '' if not used>",
+    "role_mapping": "<field for role assignment (e.g., 'role', 'memberOf', etc.) or '' if not used>",
+    "claim_mapping": {
+      "mapping_target": {
+        "parser": "<type of parser ('regex' or 'json')>",
+        "type": "<type identifier (e.g., 'Acme::Email')>",
+        "...": "Additional configurations specific to the parser"
+      },
+    },
+  }
 }
 ```
 
-- **trusted** : (Boolean) The type of token
-- **principal_id** : (String) The claim used to create the Cedar entity associated with this token.
-- **role_mapping** : (String, *optional*) The claim used to create a role for the token. The default value of `role_mapping` is `role`. The claim can be string or array of string.
+**Fields**
 
-**Note**: Only one token should include the `role_mapping` field in the list of `token_metadata`.
+- **token_type:** The type of token being processed, such as `access_tokens`, `id_tokens`, `userinfo_tokens`, and `tx_tokens`.
+- **user_id (_Optional_):** The field in the token used to identify the user. If not needed, set to an empty string (`""`).
+- **role_mapping (_Optional_):** Indicates which field in the token should be used for role-based access control. If not needed, set to an empty string (`""`).
+- **claim_mapping:** Defines how to extract and transform specific claims from the token. Each claim can have its own parser (`regex` or `json`) and type (`Acme::Email`, `Acme::URI`, etc.).
+
+#### Token Entity Metadata Schema Example
+
+Below is a non-normative example of a **Token Entity Metadata** for `id_tokens`.
+
+```json
+"id_tokens": {
+  "user_id": "sub",
+  "role_mapping": "",
+  "claim_mapping": {
+    "email": {
+      "parser": "regex",
+      "type": "Acme::Email",
+      "regex_expression": "^(?P<UID>[^@]+)@(?P<DOMAIN>.+)$",
+    },
+    "profile": {
+      "parser": "regex", 
+      "type": "Acme::URI", 
+      "regex_expression": "(?x) ^(?P<SCHEME>[a-zA-Z][a-zA-Z0-9+.-]*):\/\/ (?P<HOST>[^\/:#?]+) (?::(?P<PORT>\d+))?  (?P<PATH>\/[^?#]*)? (?:\?(?P<QUERY>[^#]*))?  (?:#(?P<FRAGMENT>.*))?$",
+      "SCHEME": {"attr": "scheme", "type":"string"}, 
+      "HOST": {"attr": "host", "type":"string"}, 
+      "PORT": {"attr": "port", "type":"string"}, 
+      "PATH": {"attr": "path", "type":"string"}, 
+      "QUERY": {"attr": "query", "type":"string"}, 
+      "FRAGMENT": {"attr": "fragment", "type":"string"}
+    },
+    "dolphin": {
+      "parser": "json",
+      "type": "Acme::Dolphin"
+    }
+  },
+}
+```
+
+**Explanation for the example:**
+
+- `id_tokens.user_id`: Extracts the user ID from the `"sub"` field of the token.
+- `id_tokens.role_mapping`: Not used, so set to an empty string (`""`).
+- `claim_mapping.email`: Uses a regex parser to extract the `UID` and `DOMAIN` components from an email address.
+- `claim_mapping.profile`: Uses a regex parser to extract various components of a URI (e.g., `scheme`, `host`, `path`).
+- `claim_mapping.dolphin`: Uses a JSON parser to interpret the claim as a custom type (`Acme::Dolphin`).
 
 ## Example Policy store
 
@@ -207,42 +244,67 @@ Here is a non-normative example of a `cedarling_store.json` file:
 
 ```json
 {
-    "cedar_version": "v4.0.0",
-    "policies": {
-        "840da5d85403f35ea76519ed1a18a33989f855bf1cf8": {
-            "description": "simple policy example",
-            "creation_date": "2024-09-20T17:22:39.996050",
-            "policy_content": "cedar_policy_encoded_in_base64"
-        }
-    },
-    "schema": "schema_encoded_in_base64",
-    "identity_source": {
-        "08c6c18a654f492adcf3fe069d729b4d9e6bf82605cb" : {
-            "name": "Google",
-            "description": "Consumer IDP",
-            "openid_configuration_endpoint": "https://accounts.google.com/.well-known/openid-configuration",
-            "access_tokens": {
-              "trusted": true,
-              "principal_identifier": "",
-              "role_mapping": "",
+  "cedar_version": "v4.0.0",
+  "policy_stores": {
+    "b6391dbcd7..." : {
+        "name": "somecompany::store",
+        "description": "",
+        "policies": {
+            "fbd921a51b8b78b3b8af5f93e94fbdc57f3e2238b29f": {
+                "description": "Admin",
+                "creation_date": "2024-11-07T07:49:11.813002",
+                "policy_content": "QGlkKCJBZG..."
             },
-            "id_tokens": {
-              "trusted": true,
-              "principal_identifier": "sub",
-              "role_mapping": "",
-            },
-            "userinfo_tokens": {
-              "trusted": true,
-              "principal_identifier": "",
-              "role_mapping": "role",
-            },
-            "tx_tokens": {
-              "trusted": true,
-              "principal_identifier": "",
-              "role_mapping": "",
-            },            
-        }
+
+            "1a2dd16865cf220ea9807608c6648a457bdf4057c4a4": {
+                "description": "Member",
+                "creation_date": "2024-11-07T07:50:05.520757",
+                "policy_content": "QGlkKCJNZW..."
+            }
+        },
+        "identity_source": {
+            "630d232db3...": {
+                "name": "test",
+                "description": "test",
+                "openid_configuration_endpoint": "https://test-casa.gluu.info/.well-known/openid-configuration",
+                "access_tokens": {
+                  "user_id": "",
+                  "role_mapping": "",
+                  "claim_mapping": {},
+                },
+                "id_tokens": {
+                  "user_id": "sub",
+                  "role_mapping": "",
+                  "claim_mapping": {
+                    "email": {
+                      "parser": "regex",
+                      "type": "Acme::Email",
+                      "regex_expression": "^(?P<UID>[^@]+)@(?P<DOMAIN>.+)$",
+                    },
+                    "profile": {
+                      "parser": "regex", 
+                      "type": "Acme::URI", 
+                      "regex_expression": "(?x) ^(?P<SCHEME>[a-zA-Z][a-zA-Z0-9+.-]*):\/\/ (?P<HOST>[^\/:#?]+) (?::(?P<PORT>\d+))?  (?P<PATH>\/[^?#]*)? (?:\?(?P<QUERY>[^#]*))?  (?:#(?P<FRAGMENT>.*))?$",
+                      "SCHEME": {"attr": "scheme", "type":"string"}, 
+                      "HOST": {"attr": "host", "type":"string"}, 
+                      "PORT": {"attr": "port", "type":"string"}, 
+                      "PATH": {"attr": "path", "type":"string"}, 
+                      "QUERY": {"attr": "query", "type":"string"}, 
+                      "FRAGMENT": {"attr": "fragment", "type":"string"}
+                    },
+                    "dolphin": {
+                      "parser": "json",
+                      "type": "Acme::Dolphin"
+                    }
+                  },
+                },
+                "userinfo_tokens": {},
+                "tx_tokens": {}
+            }
+        },
+        "schema": "ewogICAgIn..."
     }
+  },
 }
 ```
 
