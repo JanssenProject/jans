@@ -5,6 +5,7 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
+mod claim_mapping;
 #[cfg(test)]
 mod test;
 
@@ -22,7 +23,7 @@ pub struct AgamaPolicyStore {
     #[allow(dead_code)]
     pub cedar_version: Version,
 
-    pub policy_stores : HashMap<String,PolicyStore>,
+    pub policy_stores: HashMap<String, PolicyStore>,
 }
 
 /// Represents the store of policies used for JWT validation and policy evaluation in Cedarling.
@@ -58,7 +59,7 @@ pub struct PolicyStore {
     pub trusted_issuers: Option<Vec<TrustedIssuer>>,
 
     #[allow(dead_code)]
-    pub identity_source: Option<HashMap<String,IdentitySource>>,
+    pub identity_source: Option<HashMap<String, IdentitySource>>,
 }
 
 /// Represents a trusted issuer that can provide JWTs.
@@ -281,12 +282,13 @@ where
             // Check for "v" prefix
             let version = version.strip_prefix('v').unwrap_or(&version);
 
-            let version = Version::parse(version)
-                .map_err(|e| serde::de::Error::custom(format!("error parsing cedar version :{}", e)))?;
+            let version = Version::parse(version).map_err(|e| {
+                serde::de::Error::custom(format!("error parsing cedar version :{}", e))
+            })?;
 
             Ok(Some(version))
-        }
-        None => Ok(None)
+        },
+        None => Ok(None),
     }
 }
 
@@ -445,7 +447,7 @@ where
             cedar_policy::Policy::parse(Some(PolicyId::new(id)), decoded_body).map_err(|err| {
                 serde::de::Error::custom(format!("{}: {err}", ParsePolicySetMessage::HumanReadable))
             })?
-        }
+        },
     };
 
     Ok(policy)
