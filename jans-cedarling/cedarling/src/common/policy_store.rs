@@ -6,6 +6,7 @@
  */
 
 mod claim_mapping;
+mod token_entity_metadata;
 #[cfg(test)]
 mod test;
 
