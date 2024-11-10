@@ -121,6 +121,7 @@ type AppConfiguration struct {
 	EndSessionEndpoint                                        string                                `schema:"end_session_endpoint" json:"endSessionEndpoint"`
 	RegistrationEndpoint                                      string                                `schema:"registration_endpoint" json:"registrationEndpoint"`
 	JwksUri                                                   string                                `schema:"jwks_uri" json:"jwksUri"`
+	BlockedUrls                                               string                                `schema:"blockedUrls" json:"blockedUrls"`
 	ArchivedJwksUri                                           string                                `schema:"archived_jwks_uri" json:"archivedJwksUri"`
 	OpenIDDiscoveryEndpoint                                   string                                `schema:"openid_discovery_endpoint" json:"openIdDiscoveryEndpoint"`
 	OpenIDConfigurationEndpoint                               string                                `schema:"openid_configuration_endpoint" json:"openIdConfigurationEndpoint"`

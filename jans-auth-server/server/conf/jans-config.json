@@ -35,6 +35,14 @@
     "checkSessionIFrame":"${config.oxauth.contextPath}/opiframe.htm",
     "endSessionEndpoint":"${config.oxauth.contextPath}/restv1/end_session",
     "jwksUri":"${config.oxauth.contextPath}/restv1/jwks",
+    "blockedUrls": [
+        "http://",
+        "file://",
+        "localhost",
+        "127.0.",
+        "192.168.",
+        "172."
+    ],
     "archivedJwksUri":"${config.oxauth.contextPath}/restv1/jwks/archived",
     "registrationEndpoint":"${config.oxauth.contextPath}/restv1/register",
     "openIdDiscoveryEndpoint":"${config.oxauth.issuer}/.well-known/webfinger",

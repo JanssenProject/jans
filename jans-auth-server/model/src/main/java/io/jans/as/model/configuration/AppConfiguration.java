@@ -179,6 +179,9 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "UMA PCT lifetime")
     private int umaPctLifetime;
 
+    @DocProperty(description = "Provide a list of the urls we want to block")
+    private List<String> blockedUrls;
+
     @DocProperty(description = "UMA Resource lifetime")
     private int umaResourceLifetime;
 
@@ -2436,6 +2439,14 @@ public class AppConfiguration implements Configuration {
 
     public void setUmaPctLifetime(int umaPctLifetime) {
         this.umaPctLifetime = umaPctLifetime;
+    }
+
+    public List<String> getBlockedUrls() {
+        return blockedUrls;
+    }
+
+    public void setBlockedUrls(List<String> blockedUrls) {
+        this.blockedUrls = blockedUrls;
     }
 
     public Boolean getAllowSpontaneousScopes() {

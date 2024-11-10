@@ -9317,6 +9317,8 @@ components:
           type: string
         jwksUri:
           type: string
+        blockedUrls:
+          type: string
         archivedJwksUri:
           type: string
         registrationEndpoint:

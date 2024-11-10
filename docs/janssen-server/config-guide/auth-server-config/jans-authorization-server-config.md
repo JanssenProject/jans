@@ -60,6 +60,14 @@ It returns all the information of the Jans Authorization server.
   "checkSessionIFrame": "https://example.jans.io/jans-auth/opiframe.htm",
   "endSessionEndpoint": "https://example.jans.io/jans-auth/restv1/end_session",
   "jwksUri": "https://example.jans.io/jans-auth/restv1/jwks",
+  "blockedUrls": [
+    "http://",
+    "file://",
+    "localhost",
+    "127.0.",
+    "192.168.",
+    "172."
+  ],
   "registrationEndpoint": "https://example.jans.io/jans-auth/restv1/register",
   "openIdDiscoveryEndpoint": "https://example.jans.io/.well-known/webfinger",
   "openIdConfigurationEndpoint": "https://example.jans.io/.well-known/openid-configuration",

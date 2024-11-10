@@ -33,6 +33,14 @@
     "checkSessionIFrame":"https://%(hostname)s/jans-auth/opiframe.htm",
     "endSessionEndpoint":"https://%(hostname)s/jans-auth/restv1/end_session",
     "jwksUri":"https://%(hostname)s/jans-auth/restv1/jwks",
+    "blockedUrls": [
+        "http://",
+        "file://",
+        "localhost",
+        "127.0.",
+        "192.168.",
+        "172."
+    ],
     "archivedJwksUri":"https://%(hostname)s/jans-auth/restv1/jwks/archived",
     "registrationEndpoint":"https://%(hostname)s/jans-auth/restv1/register",
     "openIdDiscoveryEndpoint":"https://%(hostname)s/.well-known/webfinger",

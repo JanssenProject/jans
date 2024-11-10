@@ -71,6 +71,7 @@ public class DiscoveryService {
         jsonObj.put(AUTHORIZATION_CHALLENGE_ENDPOINT, appConfiguration.getAuthorizationChallengeEndpoint());
         jsonObj.put(TOKEN_ENDPOINT, appConfiguration.getTokenEndpoint());
         jsonObj.put(JWKS_URI, appConfiguration.getJwksUri());
+        jsonObj.put(BLOCKED_URL, appConfiguration.getBlockedUrls());
         jsonObj.put(ARCHIVED_JWKS_URI, appConfiguration.getArchivedJwksUri());
         jsonObj.put(CHECK_SESSION_IFRAME, appConfiguration.getCheckSessionIFrame());
 

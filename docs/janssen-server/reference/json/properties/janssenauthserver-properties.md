@@ -1588,6 +1588,14 @@ tags:
 
 - Default value: None
 
+###  blockedUrls
+
+- Description: A list of URLs that should be blocked from access. This parameter is used to prevent access to unwanted resources or domains, which may include unsafe protocols
+
+- Required: No
+
+- Default value: ["http://", "file://", "localhost", "127.0.", "192.168.", "172."]
+
 
 ### keepAuthenticatorAttributesOnAcrChange
 
