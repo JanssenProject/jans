@@ -1,4 +1,7 @@
-use super::trusted_issuer_metadata::TrustedIssuerMetadata;
+use super::{
+    super::cedar_schema::CedarSchemaJson, trusted_issuer_metadata::TrustedIssuerMetadata,
+    CedarSchema,
+};
 use base64::prelude::*;
 use cedar_policy::{Policy, PolicyId, Schema};
 use semver::Version;
@@ -13,13 +16,14 @@ pub struct AgamaPolicyStore {
     pub description: Option<String>,
     pub cedar_version: Option<Version>,
     pub policies: HashMap<String, AgamaPolicyContent>,
-    pub schema: Schema,
+    pub cedar_schema: CedarSchema,
     pub trusted_issuers: HashMap<String, TrustedIssuerMetadata>,
 }
 
 impl PartialEq for AgamaPolicyStore {
     fn eq(&self, other: &Self) -> bool {
-        // skip checking Schema since it doesn't implement PartialEq
+        // We need to implement this custom check since cedar_policy::Schema
+        // does not implement PartialEq
         //
         // TODO: update this if ever cedar policy implements PartialEq
         // on cedar_policy::Schema since this is too difficult to check
@@ -29,6 +33,7 @@ impl PartialEq for AgamaPolicyStore {
             && self.cedar_version == other.cedar_version
             && self.policies == other.policies
             && self.trusted_issuers == other.trusted_issuers
+            && self.cedar_schema.json == other.cedar_schema.json
     }
 }
 
@@ -116,6 +121,9 @@ impl<'de> Deserialize<'de> for AgamaPolicyStore {
 
             let decoded_schema = decode_b64_string::<D>(policy_store.encoded_schema)?;
             let schema = Schema::from_json_str(&decoded_schema).map_err(de::Error::custom)?;
+            let json = serde_json::from_str::<CedarSchemaJson>(&decoded_schema)
+                .map_err(de::Error::custom)?;
+            let cedar_schema = CedarSchema { schema, json };
 
             // We return early since should only be getting one policy
             // store from Agama and Cedarling only supports using
@@ -125,7 +133,7 @@ impl<'de> Deserialize<'de> for AgamaPolicyStore {
                 description,
                 cedar_version,
                 policies,
-                schema,
+                cedar_schema,
                 trusted_issuers: policy_store.trusted_issuers,
             });
         }
@@ -138,6 +146,7 @@ impl<'de> Deserialize<'de> for AgamaPolicyStore {
 
 #[cfg(test)]
 mod test {
+    use super::super::super::{cedar_schema::CedarSchemaJson, policy_store::CedarSchema};
     use super::{AgamaPolicyContent, AgamaPolicyStore};
     use cedar_policy::{Policy, PolicyId, Schema};
     use semver::Version;
@@ -194,8 +203,12 @@ permit
             },
         );
 
-        let schema = Schema::from_json_str(include_str!("./test_agama_cedar_schema.json"))
-            .expect("Should parse Cedar schema from JSON");
+        let schema_json = include_str!("./test_agama_cedar_schema.json");
+        let schema =
+            Schema::from_json_str(schema_json).expect("Should parse Cedar schema from JSON");
+        let json = serde_json::from_str::<CedarSchemaJson>(schema_json)
+            .expect("Should parse cedar schema JSON");
+        let cedar_schema = CedarSchema { schema, json };
 
         // No need to test parsing trusted_issuers here since we
         // already have tests in trusted_issuer_metadata.rs
@@ -206,7 +219,7 @@ permit
             description: None,
             cedar_version: Some(Version::new(4, 0, 0)),
             policies,
-            schema,
+            cedar_schema,
             trusted_issuers,
         };
 
