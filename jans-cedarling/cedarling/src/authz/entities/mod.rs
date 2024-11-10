@@ -146,6 +146,7 @@ pub fn create_role_entities(
         TokenKind::Access => &tokens.access_token,
         TokenKind::Id => &tokens.id_token,
         TokenKind::Userinfo => &tokens.userinfo_token,
+        TokenKind::Transaction => unimplemented!(),
     };
 
     // get payload of role id in JWT token data

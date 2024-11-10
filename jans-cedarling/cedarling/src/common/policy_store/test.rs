@@ -5,10 +5,9 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
+use super::AgamaPolicyStore;
 use super::ParsePolicySetMessage;
 use super::PolicyStore;
-use super::AgamaPolicyStore;
-use crate::common::policy_store::parse_and_check_token_metadata;
 use crate::common::policy_store::parse_cedar_version;
 use base64::prelude::*;
 use serde_json::json;
@@ -189,53 +188,4 @@ fn test_invalid_version_part() {
 fn test_invalid_version_format_with_v() {
     let invalid_version_with_v = "v1.2".to_string();
     assert!(parse_cedar_version(serde_json::Value::String(invalid_version_with_v)).is_err());
-}
-
-/// Tests that an error is returned for multiple role mappings in token metadata.
-#[test]
-fn test_invalid_multiple_role_mappings_in_token_metadata() {
-    let invalid_token_metadata = json!([
-        { "type": "access_token", "user_id": "aud" },
-        { "type": "id_token", "user_id": "sub", "role_mapping": "role" },
-        { "type": "userinfo_token", "user_id": "email", "role_mapping": "role" }
-    ]);
-
-    let result = parse_and_check_token_metadata(invalid_token_metadata);
-
-    assert!(
-        matches!(result, Err(e) if e.to_string() == "there can only be one TokenMetadata with a role_mapping")
-    );
-}
-
-/// Tests successful parsing of role mappings in token metadata.
-#[test]
-fn test_successful_parsing_of_role_mappings() {
-    let valid_token_metadata = json!([
-        { "type": "Access_token", "user_id": "aud" },
-        { "type": "Id_token", "user_id": "sub", "role_mapping": "role" },
-        { "type": "userinfo_token", "user_id": "email" }
-    ]);
-
-    assert!(
-        parse_and_check_token_metadata(valid_token_metadata).is_ok(),
-        "expected successful parsing of role mappings"
-    );
-}
-
-/// Tests unsuccessful parsing of role mappings in token metadata.
-#[test]
-fn test_error_on_invalid_token_type() {
-    let invalid_token_metadata = json!([
-        { "type": "Access", "user_id": "aud" },
-        { "type": "unknown_token", "user_id": "sub", "role_mapping": "role" },
-        { "type": "userinfo", "user_id": "email" }
-    ]);
-
-    let result =
-        parse_and_check_token_metadata(invalid_token_metadata).expect_err("should throw error");
-
-    assert_eq!(
-        result.to_string(),
-        "unknown variant `Access`, expected one of `access_token`, `id_token`, `userinfo_token`"
-    );
 }

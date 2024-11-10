@@ -17,6 +17,7 @@ use cedar_policy::PolicyId;
 use semver::Version;
 use serde::{Deserialize, Deserializer};
 use std::{collections::HashMap, fmt};
+use token_entity_metadata::TokenEntityMetadata;
 
 /// This is the top-level struct in compliance with the Agama Lab Policy Designer format.
 #[derive(Debug, Clone, serde::Deserialize, PartialEq)]
@@ -85,10 +86,7 @@ pub struct TrustedIssuer {
     /// Optional metadata related to the tokens issued by this issuer.
     ///
     /// This field may include role mappings that help define the access levels for issued tokens.
-    ///
-    /// TODO: currently unused in any validation checks
-    #[serde(deserialize_with = "parse_and_check_token_metadata")]
-    pub token_metadata: Option<Vec<TokenMetadata>>,
+    pub token_metadata: Option<HashMap<TokenKind, TokenEntityMetadata>>,
 }
 
 #[derive(Debug, Clone, Deserialize, PartialEq)]
@@ -103,7 +101,6 @@ pub struct IdentitySourceToken {
 /// This struct includes the issuer's name, description, and the OpenID configuration endpoint
 /// for discovering issuer-related information.
 #[derive(Debug, Clone, Deserialize, PartialEq)]
-#[allow(dead_code)]
 pub struct IdentitySource {
     /// The name of the identity source.
     pub name: String,
@@ -145,44 +142,20 @@ impl TrustedIssuer {
     // in `token_metadata` list only one element with mapping
     // it is maximum 3 elements in list so iterating is efficient enouf
     pub fn get_role_mapping(&self) -> Option<RoleMapping> {
-        for metadata in self.token_metadata.as_ref()? {
-            if let Some(role_mapping_field) = &metadata.role_mapping {
-                return Some(RoleMapping {
-                    kind: metadata.kind,
-                    role_mapping_field,
-                });
+        if let Some(token_metadata) = &self.token_metadata {
+            for (token_kind, metadata) in token_metadata {
+                if let Some(role_mapping_field) = &metadata.role_mapping {
+                    // TODO: why are we only returning the first one here?
+                    return Some(RoleMapping {
+                        kind: *token_kind,
+                        role_mapping_field: &role_mapping_field,
+                    });
+                }
             }
         }
+
         None
     }
-}
-
-/// Parses and validates the `token_metadata` field.
-///
-/// This function ensures that the metadata contains at most one `TokenMetadata` with a `role_mapping`
-/// to prevent ambiguous role assignments.
-fn parse_and_check_token_metadata<'de, D>(
-    deserializer: D,
-) -> Result<Option<Vec<TokenMetadata>>, D::Error>
-where
-    D: Deserializer<'de>,
-{
-    let token_metadata: Option<Vec<TokenMetadata>> = Option::deserialize(deserializer)?;
-
-    if let Some(metadata) = &token_metadata {
-        let count = metadata
-            .iter()
-            .filter(|token| token.role_mapping.is_some())
-            .count();
-
-        if count > 1 {
-            return Err(serde::de::Error::custom(
-                "there can only be one TokenMetadata with a role_mapping".to_string(),
-            ));
-        }
-    }
-
-    Ok(token_metadata)
 }
 
 /// Represents metadata associated with a token.
@@ -203,7 +176,7 @@ pub struct TokenMetadata {
     pub role_mapping: Option<String>,
 }
 
-#[derive(Debug, Copy, Clone, PartialEq, Eq)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
 #[allow(dead_code)]
 pub enum TokenKind {
     /// Access token used for granting access to resources.
@@ -214,6 +187,9 @@ pub enum TokenKind {
 
     /// Userinfo token containing user-specific information.
     Userinfo,
+
+    /// Transaction token containing transaction-specific information.
+    Transaction,
 }
 
 /// Enum representing the different kinds of tokens used by Cedarling.
@@ -223,6 +199,7 @@ impl fmt::Display for TokenKind {
             TokenKind::Access => "access",
             TokenKind::Id => "id",
             TokenKind::Userinfo => "userinfo",
+            TokenKind::Transaction => "transacton",
         };
         write!(f, "{}", kind_str)
     }

@@ -2,7 +2,7 @@ use serde::{de, Deserialize};
 use serde_json::Value;
 use std::collections::HashMap;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 #[allow(dead_code)]
 pub enum ClaimMapping {
     Regex {
@@ -71,7 +71,7 @@ impl<'de> Deserialize<'de> for ClaimMapping {
     }
 }
 
-#[derive(Debug, PartialEq, Deserialize)]
+#[derive(Debug, PartialEq, Deserialize, Clone)]
 pub struct RegexField {
     pub attr: String,
     pub r#type: String,
