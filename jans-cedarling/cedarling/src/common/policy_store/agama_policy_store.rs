@@ -1,9 +1,9 @@
 use super::{
     super::cedar_schema::CedarSchemaJson, trusted_issuer_metadata::TrustedIssuerMetadata,
-    CedarSchema,
+    CedarSchema, PolicyStore, TokenKind, TrustedIssuer,
 };
 use base64::prelude::*;
-use cedar_policy::{Policy, PolicyId, Schema};
+use cedar_policy::{Policy, PolicyId, PolicySet, Schema};
 use semver::Version;
 use serde::{de, Deserialize};
 use std::{collections::HashMap, str::FromStr};
@@ -141,6 +141,44 @@ impl<'de> Deserialize<'de> for AgamaPolicyStore {
         return Err(de::Error::custom(
             "Failed to deserialize Agama Policy Store: No policy store found in the `policies` field.",
         ));
+    }
+}
+
+impl From<AgamaPolicyStore> for PolicyStore {
+    fn from(agama_store: AgamaPolicyStore) -> Self {
+        let mut policy_set = PolicySet::new();
+        for (_id, policy) in agama_store.policies {
+            policy_set
+                .add(policy.policy_content)
+                .expect("A non-template linked policy should be used");
+        }
+
+        let mut trusted_issuers = Vec::new();
+        // we lose the issuer id in this operation so we probably
+        // need to update the main policy store as well so wen can log that
+        for (_iss_id, iss_metadata) in agama_store.trusted_issuers {
+            let mut token_metadata = HashMap::new();
+            token_metadata.insert(TokenKind::Access, iss_metadata.access_tokens);
+            token_metadata.insert(TokenKind::Id, iss_metadata.id_tokens);
+            token_metadata.insert(TokenKind::Userinfo, iss_metadata.userinfo_tokens);
+            token_metadata.insert(TokenKind::Transaction, iss_metadata.tx_tokens);
+
+            trusted_issuers.push(TrustedIssuer {
+                name: iss_metadata.name,
+                description: iss_metadata.description,
+                openid_configuration_endpoint: iss_metadata.openid_configuration_endpoint,
+                token_metadata: Some(token_metadata),
+            });
+        }
+
+        PolicyStore {
+            name: Some(agama_store.name),
+            description: agama_store.description,
+            cedar_version: agama_store.cedar_version,
+            cedar_schema: agama_store.cedar_schema,
+            cedar_policies: policy_set,
+            trusted_issuers: None,
+        }
     }
 }
 
