@@ -5,11 +5,12 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
+mod agama_policy_store;
 mod claim_mapping;
-mod token_entity_metadata;
-mod trusted_issuer_metadata;
 #[cfg(test)]
 mod test;
+mod token_entity_metadata;
+mod trusted_issuer_metadata;
 
 use super::cedar_schema::CedarSchema;
 use cedar_policy::PolicyId;
@@ -24,7 +25,6 @@ pub struct AgamaPolicyStore {
     #[serde(deserialize_with = "parse_cedar_version")]
     #[allow(dead_code)]
     pub cedar_version: Version,
-
     pub policy_stores: HashMap<String, PolicyStore>,
 }
 
