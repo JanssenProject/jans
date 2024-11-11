@@ -38,7 +38,6 @@ from jans.pycloudlib.utils import get_random_chars
 from jans.pycloudlib.utils import exec_cmd
 
 from settings import LOGGING_CONFIG
-from utils import get_kc_db_password
 
 if _t.TYPE_CHECKING:  # pragma: no cover
     # imported objects for function type hint, completion, etc.
@@ -60,7 +59,7 @@ def render_keycloak_conf():
     ctx = {
         "hostname": hostname,
         "kc_hostname": hostname,
-        "kc_db_password": get_kc_db_password(),
+        "kc_db_password": os.environ.get("KC_DB_PASSWORD") or manager.secret.get("kc_db_password"),
         "idp_config_http_port": os.environ.get("CN_SAML_HTTP_PORT", "8083"),
         "idp_config_http_host": os.environ.get("CN_SAML_HTTP_HOST", "0.0.0.0"),   # nosec: B104
         "idp_config_data_dir": "/opt/keycloak",
