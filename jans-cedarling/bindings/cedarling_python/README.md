@@ -17,7 +17,7 @@ This project uses `maturin` to create a Python library from Rust code. Follow th
    Arch Linux:
 
    ```
-   sudo pacman -S build-essential
+   sudo pacman -S base-devel
    ```
 
    RHEL/CentOS/Fedora:
