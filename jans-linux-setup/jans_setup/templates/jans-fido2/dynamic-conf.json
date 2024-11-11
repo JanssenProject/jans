@@ -24,10 +24,10 @@
       "mdsCertsFolder":"%(fido2ConfigFolder)s/mds/cert",
       "mdsTocsFolder":"%(fido2ConfigFolder)s/mds/toc",
       "serverMetadataFolder":"%(fido2ConfigFolder)s/server_metadata",
-      "requestedCredentialTypes":[
-         "RS256",
-         "ES256","Ed25519"
-      ],
+      "enabledFidoAlgorithms": [
+             "RS256",
+             "ES256"
+         ],
       "rp":[
          {
             "id":"https://%(hostname)s",
