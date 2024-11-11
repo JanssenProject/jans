@@ -75,26 +75,14 @@ mod test {
             description: "Consumer IDP".to_string(),
             openid_configuration_endpoint:
                 "https://accounts.google.com/.well-known/openid-configuration".to_string(),
-            access_tokens: TokenEntityMetadata {
-                user_id: None,
-                role_mapping: None,
-                claim_mapping: None,
-            },
+            access_tokens: TokenEntityMetadata::default(),
             id_tokens: TokenEntityMetadata {
                 user_id: Some("sub".to_string()),
                 role_mapping: Some("role".to_string()),
                 claim_mapping: None,
             },
-            userinfo_tokens: TokenEntityMetadata {
-                user_id: None,
-                role_mapping: None,
-                claim_mapping: None,
-            },
-            tx_tokens: TokenEntityMetadata {
-                user_id: None,
-                role_mapping: None,
-                claim_mapping: None,
-            },
+            userinfo_tokens: TokenEntityMetadata::default(),
+            tx_tokens: TokenEntityMetadata::default(),
         };
 
         assert_eq!(

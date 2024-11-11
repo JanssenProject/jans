@@ -3,7 +3,7 @@ use serde::{de, Deserialize};
 use serde_json::Value;
 use std::collections::HashMap;
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, Default)]
 #[allow(dead_code)]
 pub struct TokenEntityMetadata {
     pub user_id: Option<String>,
