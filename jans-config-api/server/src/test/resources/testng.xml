@@ -1,0 +1,24 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+
+<suite name="Config-API" parallel="false">
+
+    <parameter name="propertiesFile" value="target/test-classes/testng.properties" />
+    
+
+    <test name="Metric Test" enabled="true">
+        <classes>
+            <class name="io.jans.configapi.metric.ATest" />
+            <class name="io.jans.configapi.metric.BTest" />
+        </classes>
+    </test>
+
+    <test name="Health Test" enabled="true">
+        <classes>
+             <class name="io.jans.configapi.health.LiveTest" />
+            <class name="io.jans.configapi.health.ReadyTest" />
+        </classes>
+    </test>
+
+   
+
+</suite>

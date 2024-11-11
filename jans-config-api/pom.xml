@@ -42,6 +42,7 @@
 
 		<rest-assured.version>5.0.1</rest-assured.version>
 		<karate.version>0.9.5</karate.version>
+		<testng.version>7.8.0</testng.version>
 		<snake.version>2.0</snake.version>
 		<jupiter.version>5.7.0</jupiter.version>
 		<cucumber.version>3.8.0</cucumber.version>
@@ -88,11 +89,7 @@
 			<name>Bouncy Castle</name>
 			<url>https://repo1.maven.org/maven2/org/bouncycastle</url>
 		</repository>
-		<repository>
-			<id>repository.jboss.org</id>
-			<name>JBoss Repository</name>
-			<url>https://repository.jboss.org/nexus/content/groups/public-jboss/</url>
-		</repository>
+
 	</repositories>
 
 	<scm>
@@ -104,13 +101,13 @@
 	<dependencyManagement>
 		<dependencies>
 
-			<dependency>
-				<groupId>io.jans</groupId>
-				<artifactId>jans-bom</artifactId>
-				<version>${jans.version}</version>
-				<scope>import</scope>
-				<type>pom</type>
-			</dependency>
+            <dependency>
+                <groupId>io.jans</groupId>
+                <artifactId>jans-bom</artifactId>
+                <version>${jans.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
+            </dependency>
 			<dependency>
 				<groupId>com.fasterxml.jackson</groupId>
 				<artifactId>jackson-bom</artifactId>
@@ -327,6 +324,13 @@
 				<version>${rest-assured.version}</version>
 				<scope>test</scope>
 			</dependency>
+			<dependency>
+				<groupId>org.testng</groupId>
+				<artifactId>testng</artifactId>
+				<version>${testng.version}</version>
+	            <scope>test</scope>
+		    </dependency>
+		    
 			<dependency>
 				<groupId>com.intuit.karate</groupId>
 				<artifactId>karate-junit5</artifactId>
