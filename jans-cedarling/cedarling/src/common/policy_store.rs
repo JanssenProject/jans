@@ -14,22 +14,40 @@ use semver::Version;
 use serde::{Deserialize, Deserializer};
 use std::{collections::HashMap, fmt};
 
+/// This is the top-level struct in compliance with the Agama Lab Policy Designer format.
+#[derive(Debug, Clone, serde::Deserialize, PartialEq)]
+pub struct AgamaPolicyStore {
+    /// The cedar version to use when parsing the schema and policies.
+    #[serde(deserialize_with = "parse_cedar_version")]
+    #[allow(dead_code)]
+    pub cedar_version: Version,
+
+    pub policy_stores : HashMap<String,PolicyStore>,
+}
+
 /// Represents the store of policies used for JWT validation and policy evaluation in Cedarling.
 ///
 /// The `PolicyStore` contains the schema and a set of policies encoded in base64,
 /// which are parsed during deserialization.
 #[derive(Debug, Clone, serde::Deserialize, PartialEq)]
 pub struct PolicyStore {
+    #[serde(default)]
+    pub name: Option<String>,
+
+    #[serde(default)]
+    pub description: Option<String>,
+
     /// The cedar version to use when parsing the schema and policies.
-    #[serde(deserialize_with = "parse_cedar_version")]
+    #[serde(deserialize_with = "parse_maybe_cedar_version", default)]
     #[allow(dead_code)]
-    pub cedar_version: Version,
+    pub cedar_version: Option<Version>,
 
     /// Cedar schema
+    #[serde(alias = "schema")]
     pub cedar_schema: CedarSchema,
 
     /// Cedar policy set
-    #[serde(deserialize_with = "parse_cedar_policy")]
+    #[serde(alias = "policies", deserialize_with = "parse_cedar_policy")]
     pub cedar_policies: cedar_policy::PolicySet,
 
     /// An optional list of trusted issuers.
@@ -38,13 +56,16 @@ pub struct PolicyStore {
     /// verification and security when handling JWTs.
     #[allow(dead_code)]
     pub trusted_issuers: Option<Vec<TrustedIssuer>>,
+
+    #[allow(dead_code)]
+    pub identity_source: Option<HashMap<String,IdentitySource>>,
 }
 
 /// Represents a trusted issuer that can provide JWTs.
 ///
 /// This struct includes the issuer's name, description, and the OpenID configuration endpoint
 /// for discovering issuer-related information.
-#[derive(Debug, Clone, Deserialize,PartialEq)]
+#[derive(Debug, Clone, Deserialize, PartialEq)]
 #[allow(dead_code)]
 pub struct TrustedIssuer {
     /// The name of the trusted issuer.
@@ -65,6 +86,38 @@ pub struct TrustedIssuer {
     /// TODO: currently unused in any validation checks
     #[serde(deserialize_with = "parse_and_check_token_metadata")]
     pub token_metadata: Option<Vec<TokenMetadata>>,
+}
+
+#[derive(Debug, Clone, Deserialize, PartialEq)]
+pub struct IdentitySourceToken {
+    pub trusted: bool,
+    pub principal_identifier: String,
+    pub role_mapping: String, // TODO should this be a Role type?
+}
+
+/// Represents a trusted issuer that can provide JWTs.
+///
+/// This struct includes the issuer's name, description, and the OpenID configuration endpoint
+/// for discovering issuer-related information.
+#[derive(Debug, Clone, Deserialize, PartialEq)]
+#[allow(dead_code)]
+pub struct IdentitySource {
+    /// The name of the identity source.
+    pub name: String,
+
+    /// A brief description of the identity source.
+    pub description: String,
+
+    /// The OpenID configuration endpoint for the issuer.
+    ///
+    /// This endpoint is used to obtain information about the issuer's capabilities.
+    pub openid_configuration_endpoint: String,
+
+    // TODO comments for these
+    pub access_tokens: IdentitySourceToken,
+    pub id_tokens: IdentitySourceToken,
+    pub userinfo_tokens: IdentitySourceToken,
+    pub tx_tokens: IdentitySourceToken,
 }
 
 /// Structure define the source from which role mappings are retrieved.
@@ -196,6 +249,7 @@ impl<'de> Deserialize<'de> for TokenKind {
 /// This function checks that the version string follows the format `major.minor.patch`,
 /// where each component is a valid number. This also supports having a "v" prefix in the
 /// version, e.g. `v1.0.1`.
+#[allow(dead_code)]
 fn parse_cedar_version<'de, D>(deserializer: D) -> Result<Version, D::Error>
 where
     D: Deserializer<'de>,
@@ -209,6 +263,31 @@ where
         .map_err(|e| serde::de::Error::custom(format!("error parsing cedar version :{}", e)))?;
 
     Ok(version)
+}
+
+/// Parses the optional `cedar_version` field.
+///
+/// This function checks that the version string follows the format `major.minor.patch`,
+/// where each component is a valid number. This also supports having a "v" prefix in the
+/// version, e.g. `v1.0.1`.
+fn parse_maybe_cedar_version<'de, D>(deserializer: D) -> Result<Option<Version>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let maybe_version: Option<String> = Option::<String>::deserialize(deserializer)?;
+
+    match maybe_version {
+        Some(version) => {
+            // Check for "v" prefix
+            let version = version.strip_prefix('v').unwrap_or(&version);
+
+            let version = Version::parse(version)
+                .map_err(|e| serde::de::Error::custom(format!("error parsing cedar version :{}", e)))?;
+
+            Ok(Some(version))
+        }
+        None => Ok(None)
+    }
 }
 
 /// Enum representing various error messages that can occur while parsing policy sets.
@@ -254,9 +333,9 @@ enum PolicyContentType {
 /// content_type is one of cedar or cedar-json
 #[derive(Debug, Clone, serde::Deserialize)]
 struct EncodedPolicy {
-    pub encoding : super::Encoding,
-    pub content_type : PolicyContentType,
-    pub body : String,
+    pub encoding: super::Encoding,
+    pub content_type: PolicyContentType,
+    pub body: String,
 }
 
 /// Intermediate struct to handler both kinds of policy_content values.
@@ -269,7 +348,7 @@ struct EncodedPolicy {
 #[serde(untagged)]
 enum MaybeEncoded {
     Plain(String),
-    Tagged(EncodedPolicy)
+    Tagged(EncodedPolicy),
 }
 
 /// Represents a raw policy entry from the `PolicyStore`.
@@ -337,7 +416,7 @@ where
 {
     let policy_with_metadata = match policy_raw.policy_content {
         // It's a plain string, so assume its cedar inside base64
-        MaybeEncoded::Plain(base64_encoded) => EncodedPolicy{
+        MaybeEncoded::Plain(base64_encoded) => EncodedPolicy {
             encoding: super::Encoding::Base64,
             content_type: PolicyContentType::Cedar,
             body: base64_encoded,
@@ -349,32 +428,24 @@ where
         super::Encoding::None => policy_with_metadata.body,
         super::Encoding::Base64 => {
             use base64::prelude::*;
-            let buf = BASE64_STANDARD.decode(policy_with_metadata.body).map_err(|err| {
-                serde::de::Error::custom(format!("{}: {}", ParsePolicySetMessage::Base64, err))
-            })?;
+            let buf = BASE64_STANDARD
+                .decode(policy_with_metadata.body)
+                .map_err(|err| {
+                    serde::de::Error::custom(format!("{}: {}", ParsePolicySetMessage::Base64, err))
+                })?;
             String::from_utf8(buf).map_err(|err| {
                 serde::de::Error::custom(format!("{}: {}", ParsePolicySetMessage::String, err))
             })?
-        }
+        },
     };
 
     let policy = match policy_with_metadata.content_type {
+        // see comments for PolicyContentType
         PolicyContentType::Cedar => {
             cedar_policy::Policy::parse(Some(PolicyId::new(id)), decoded_body).map_err(|err| {
                 serde::de::Error::custom(format!("{}: {err}", ParsePolicySetMessage::HumanReadable))
             })?
         }
-        /* see comments for PolicyContentType
-        PolicyContentType::CedarJson => {
-            let body_value : serde_json::Value = serde_json::from_str(&decoded_body).map_err(|err| {
-                serde::de::Error::custom(format!("{}: {err}", ParsePolicySetMessage::CreatePolicySet))
-            })?;
-
-            cedar_policy::Policy::from_json(Some(PolicyId::new(id)), body_value).map_err(|err| {
-                serde::de::Error::custom(format!("{}: {err}", ParsePolicySetMessage::CreatePolicySet))
-            })?
-        },
-        */
     };
 
     Ok(policy)

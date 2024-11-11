@@ -7,6 +7,7 @@
 
 use super::ParsePolicySetMessage;
 use super::PolicyStore;
+use super::AgamaPolicyStore;
 use crate::common::policy_store::parse_and_check_token_metadata;
 use crate::common::policy_store::parse_cedar_version;
 use base64::prelude::*;
@@ -35,7 +36,7 @@ fn test_policy_store_deserialization_success() {
 
     // represents the `policy_store.json`
     let policy_store_json = json!({
-        "cedar_version": "v2.4.7",
+        "cedar_version": "v4.0.0",
         "cedar_policies": {
             "840da5d85403f35ea76519ed1a18a33989f855bf1cf8": {
                 "description": "simple policy example",
@@ -73,7 +74,7 @@ fn test_base64_decoding_error_in_policy_store() {
 
     // represents the `policy_store.json`
     let policy_store_json = json!({
-        "cedar_version": "v2.4.7",
+        "cedar_version": "v4.0.0",
         "cedar_policies": {
             "840da5d85403f35ea76519ed1a18a33989f855bf1cf8": {
                 "description": "simple policy example",
@@ -122,7 +123,7 @@ fn test_policy_parsing_error_in_policy_store() {
 
     // represents the `policy_store.json`
     let policy_store_json = json!({
-        "cedar_version": "v2.4.7",
+        "cedar_version": "v4.0.0",
         "cedar_policies": {
             "840da5d85403f35ea76519ed1a18a33989f855bf1cf8": {
                 "description": "simple policy example",
@@ -143,16 +144,16 @@ fn test_policy_parsing_error_in_policy_store() {
 /// Tests for broken policy parsing error in the policy store.
 #[test]
 fn test_broken_policy_parsing_error_in_policy_store() {
-    static POLICY_STORE_RAW: &str =
-        include_str!("../../../../test_files/policy-store_policy_err_broken_policy.json");
+    static POLICY_STORE_RAW_YAML: &str =
+        include_str!("../../../../test_files/policy-store_policy_err_broken_policy.yaml");
 
-    let policy_result = serde_json::from_str::<PolicyStore>(POLICY_STORE_RAW);
+    let policy_result = serde_yml::from_str::<AgamaPolicyStore>(POLICY_STORE_RAW_YAML);
     let err_msg = policy_result.unwrap_err().to_string();
 
     // TODO: this isn't really a human readable format but the current plan is to fetch it from
     // a which will respond with the policy encoded in base64. This could probably be improved
     // in the future once the structure of the project is clearer.
-    assert_eq!(err_msg, "Errors encountered while parsing policies: [Error(\"unable to decode policy with id: 840da5d85403f35ea76519ed1a18a33989f855bf1cf8, error: unable to decode policy_content from human readable format: unexpected token `)`\", line: 0, column: 0)] at line 9 column 5")
+    assert_eq!(err_msg, "policy_stores.ba1f39115ed86ed760ee0bea1d529b52189e5a117474: Errors encountered while parsing policies: [Error(\"unable to decode policy with id: 840da5d85403f35ea76519ed1a18a33989f855bf1cf8, error: unable to decode policy_content from human readable format: unexpected token `)`\")] at line 4 column 5")
 }
 
 /// Tests that a valid version string is accepted.

@@ -1,7 +1,0 @@
-permit(
-    principal is Jans::User,
-    action in [Jans::Action::"Update"],
-    resource is Jans::Issue
-)when{
-    principal.country == resource.country
-};
