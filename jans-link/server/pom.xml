@@ -17,10 +17,6 @@
     <dependencies>
         <dependency>
             <groupId>io.jans</groupId>
-	    	<artifactId>jans-core-document-store</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.jans</groupId>
             <artifactId>jans-link-model</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -37,16 +33,48 @@
         <dependency>
         	<groupId>io.jans</groupId>
         	<artifactId>jans-core-service</artifactId>
-        	<exclusions>
-        		<exclusion>
-        			<groupId>io.jans</groupId>
-        			<artifactId>jans-core-document-store</artifactId>
-        		</exclusion>
-                	<exclusion>
-                    		<groupId>io.jans</groupId>
-                    		<artifactId>jans-core-message</artifactId>
-                	</exclusion>
-        	</exclusions>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.jans</groupId>
+                    <artifactId>jans-core-message</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-core-document-store</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-core-service</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-core-script</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-core-timer-weld</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-core-timer-weld</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.36</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.jans</groupId>
+            <artifactId>jans-orm-core</artifactId>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
     <build>
