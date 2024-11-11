@@ -397,3 +397,54 @@ where
 
     Ok(policy)
 }
+
+/// Custom deserializer for converting base64-encoded policies into a `PolicySet`.
+///
+/// This function is used to deserialize the `policies` field in `PolicyStore`.
+#[allow(dead_code)]
+pub fn parse_cedar_policy_new<'de, D>(deserializer: D) -> Result<cedar_policy::PolicySet, D::Error>
+where
+    D: serde::Deserializer<'de>,
+{
+    #[derive(Deserialize)]
+    #[allow(dead_code)]
+    struct RawPolicy {
+        description: String,
+        creation_date: String,
+        policy_content: String,
+    }
+
+    let policies = <HashMap<String, RawPolicy> as serde::Deserialize>::deserialize(deserializer)?;
+
+    let results: Vec<Result<cedar_policy::Policy, D::Error>> = policies
+        .into_iter()
+        .map(|(id, policy_raw)| {
+            println!("parsing: {:?}", id);
+            let policy_id = Some(PolicyId::new(id));
+            cedar_policy::Policy::parse(policy_id, policy_raw.policy_content)
+                .map_err(serde::de::Error::custom)
+        })
+        .collect();
+
+    let (successful_policies, errors): (Vec<_>, Vec<_>) =
+        results.into_iter().partition(Result::is_ok);
+
+    // Collect all errors into a single error message or return them as a vector.
+    if !errors.is_empty() {
+        let error_messages: Vec<D::Error> = errors.into_iter().filter_map(Result::err).collect();
+
+        return Err(serde::de::Error::custom(format!(
+            "Errors encountered while parsing cedar policies: {:?}",
+            error_messages
+        )));
+    }
+
+    let policy_vec = successful_policies
+        .into_iter()
+        .filter_map(Result::ok)
+        .collect::<Vec<_>>();
+
+    cedar_policy::PolicySet::from_policies(policy_vec).map_err(|err| {
+        serde::de::Error::custom(format!("{}: {err}", ParsePolicySetMessage::CreatePolicySet))
+    })
+}
