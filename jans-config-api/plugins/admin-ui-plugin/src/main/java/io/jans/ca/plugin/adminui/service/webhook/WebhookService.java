@@ -342,6 +342,10 @@ public class WebhookService {
             log.error(ErrorResponse.WEBHOOK_URL_BLOCKED.getDescription());
             throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.WEBHOOK_URL_BLOCKED.getDescription());
         }
+        if (!webhookEntry.getUrl().startsWith("https://")) {
+            log.error(ErrorResponse.WEBHOOK_URL_PREFIX.getDescription());
+            throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.WEBHOOK_URL_PREFIX.getDescription());
+        }
     }
 
     /**

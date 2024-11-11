@@ -47,6 +47,7 @@ public enum ErrorResponse {
     WEBHOOK_NAME_EMPTY("Webhook name is required."),
     WEBHOOK_URL_EMPTY("Webhook URL is required."),
     WEBHOOK_URL_BLOCKED("Webhook URL is disallowed."),
+    WEBHOOK_URL_PREFIX("Webhook URL must start with 'https://."),
     WEBHOOK_HTTP_METHOD_EMPTY("HTTP method for webhook is required."),
     WEBHOOK_REQUEST_BODY_EMPTY("HTTP request-body for webhook is required for POST/PUT/PATCH request."),
     WEBHOOK_REQUEST_BODY_PARSING_ERROR("Error in parsing request body."),
