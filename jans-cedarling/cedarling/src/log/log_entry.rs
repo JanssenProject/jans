@@ -112,8 +112,8 @@ pub struct AuthorizationLogInfo {
     #[serde(flatten)]
     pub workload_authorize_info: Option<WorkloadAuthorizeInfo>,
     /// Role authorize info
-    #[serde(flatten)]
-    pub role_authorize_info: Option<RoleAuthorizeInfo>,
+    /// can be many results because can be many roles.
+    pub role_authorize_info: Vec<RoleAuthorizeInfo>,
 
     /// is authorized
     pub authorized: bool,

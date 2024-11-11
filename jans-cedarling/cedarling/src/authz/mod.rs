@@ -131,7 +131,7 @@ impl Authz {
             .map_err(AuthorizeError::CreateRequestUserEntity)?;
 
         // role result for logging
-        let mut role_authorize_log_result: Option<RoleAuthorizeInfo> = None;
+        let mut role_authorize_log_results: Vec<RoleAuthorizeInfo> = Vec::new();
 
         // Check authorize for each principal `"Jans::Role"` from cedar-policy schema.
         // Return last used or None if vector empty
@@ -157,7 +157,7 @@ impl Authz {
 
                 let decision = tmp_result.decision();
 
-                role_authorize_log_result = Some(RoleAuthorizeInfo {
+                role_authorize_log_results.push(RoleAuthorizeInfo {
                     role_principal: role_uid.to_string(),
                     role_decision: decision.into(),
                     role_diagnostics: tmp_result.diagnostics().into(),
@@ -205,7 +205,7 @@ impl Authz {
                     workload_decision: result.workload.decision().into(),
                 }),
 
-                role_authorize_info: role_authorize_log_result,
+                role_authorize_info: role_authorize_log_results,
 
                 authorized: result.is_allowed(),
             })
