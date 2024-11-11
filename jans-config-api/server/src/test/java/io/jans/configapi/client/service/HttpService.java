@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.configapi.client;
+package io.jans.configapi.client.service;
 
 
 import java.io.File;
@@ -59,7 +59,7 @@ import org.apache.commons.lang.StringUtils;
 import org.json.JSONObject;
 
 
-public abstract class BaseHttpService implements Serializable {
+public abstract class HttpService implements Serializable {
 
 	private static final long serialVersionUID = -2398422090669045605L;
 
