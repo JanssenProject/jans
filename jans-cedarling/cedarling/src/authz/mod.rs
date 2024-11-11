@@ -16,7 +16,10 @@ use std::sync::Arc;
 use crate::common::app_types;
 use crate::common::policy_store::PolicyStore;
 use crate::jwt;
-use crate::log::{AuthorizationLogInfo, LogEntry, LogType, Logger};
+use crate::log::{
+    AuthorizationLogInfo, LogEntry, LogType, Logger, PersonAuthorizeInfo, RoleAuthorizeInfo,
+    WorkloadAuthorizeInfo,
+};
 
 mod authorize_result;
 
@@ -127,8 +130,8 @@ impl Authz {
             })
             .map_err(AuthorizeError::CreateRequestUserEntity)?;
 
-        // Variable holds last used `EntityUid`role or None
-        let mut principal_role_entity_uid = None;
+        // role result for logging
+        let mut role_authorize_log_result: Option<RoleAuthorizeInfo> = None;
 
         // Check authorize for each principal `"Jans::Role"` from cedar-policy schema.
         // Return last used or None if vector empty
@@ -153,7 +156,12 @@ impl Authz {
                     })?;
 
                 let decision = tmp_result.decision();
-                principal_role_entity_uid = Some(role_uid);
+
+                role_authorize_log_result = Some(RoleAuthorizeInfo {
+                    role_principal: role_uid.to_string(),
+                    role_decision: decision.into(),
+                    role_diagnostics: tmp_result.diagnostics().into(),
+                });
                 result = Some(tmp_result);
 
                 // if succeed then we no need iterate to next
@@ -185,20 +193,19 @@ impl Authz {
                 context: request.context,
                 resource: resource_uid.to_string(),
 
-                person_principal: principal_user_entity_uid.to_string(),
-                workload_principal: principal_workload_uid.to_string(),
-                role_principal: principal_role_entity_uid.map(|v| v.to_string()),
+                person_authorize_info: Some(PersonAuthorizeInfo {
+                    person_principal: principal_user_entity_uid.to_string(),
+                    person_diagnostics: result.person.diagnostics().into(),
+                    person_decision: result.person.decision().into(),
+                }),
 
-                person_diagnostics: result.person.diagnostics().into(),
-                workload_diagnostics: result.workload.diagnostics().into(),
-                role_diagnostics: result
-                    .role
-                    .as_ref()
-                    .map(|result| result.diagnostics().into()),
+                workload_authorize_info: Some(WorkloadAuthorizeInfo {
+                    workload_principal: principal_workload_uid.to_string(),
+                    workload_diagnostics: result.workload.diagnostics().into(),
+                    workload_decision: result.workload.decision().into(),
+                }),
 
-                person_decision: result.person.decision().into(),
-                workload_decision: result.workload.decision().into(),
-                role_decision: result.role.as_ref().map(|result| result.decision().into()),
+                role_authorize_info: role_authorize_log_result,
 
                 authorized: result.is_allowed(),
             })
