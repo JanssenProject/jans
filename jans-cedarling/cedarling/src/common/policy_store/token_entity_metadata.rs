@@ -8,7 +8,7 @@ use std::collections::HashMap;
 pub struct TokenEntityMetadata {
     pub user_id: Option<String>,
     pub role_mapping: Option<String>,
-    pub claim_mapping: HashMap<String, ClaimMapping>,
+    pub claim_mapping: Option<HashMap<String, ClaimMapping>>,
 }
 
 impl<'de> Deserialize<'de> for TokenEntityMetadata {
@@ -58,6 +58,7 @@ impl<'de> Deserialize<'de> for TokenEntityMetadata {
                 claim_mapping.insert(key.to_string(), mapping);
             }
         }
+        let claim_mapping = (!claim_mapping.is_empty()).then_some(claim_mapping);
 
         Ok(TokenEntityMetadata {
             user_id,
@@ -69,12 +70,10 @@ impl<'de> Deserialize<'de> for TokenEntityMetadata {
 
 #[cfg(test)]
 mod test {
-    use std::collections::HashMap;
-
-    use crate::common::policy_store::claim_mapping::ClaimMapping;
-
     use super::TokenEntityMetadata;
+    use crate::common::policy_store::claim_mapping::ClaimMapping;
     use serde_json::json;
+    use std::collections::HashMap;
     use test_utils::assert_eq;
 
     #[test]
@@ -94,13 +93,17 @@ mod test {
         let parsed = serde_json::from_str::<TokenEntityMetadata>(&metadata_json)
             .expect("Should deserialize Token Entity Metadata JSON");
 
-        let mut claim_mapping = HashMap::new();
-        claim_mapping.insert(
-            "dolphin".to_string(),
-            ClaimMapping::Json {
-                r#type: "Acme::Dolphin".to_string(),
-            },
+        let claim_mapping = Some(
+            [(
+                "dolphin".to_string(),
+                ClaimMapping::Json {
+                    r#type: "Acme::Dolphin".to_string(),
+                },
+            )]
+            .into_iter()
+            .collect::<HashMap<_, _>>(),
         );
+
         let expected = TokenEntityMetadata {
             user_id: Some("sub".to_string()),
             role_mapping: None,

@@ -34,8 +34,6 @@ pub struct TrustedIssuerMetadata {
 
 #[cfg(test)]
 mod test {
-    use std::collections::HashMap;
-
     use crate::common::policy_store::token_entity_metadata::TokenEntityMetadata;
 
     use super::TrustedIssuerMetadata;
@@ -80,22 +78,22 @@ mod test {
             access_tokens: TokenEntityMetadata {
                 user_id: None,
                 role_mapping: None,
-                claim_mapping: HashMap::new(),
+                claim_mapping: None,
             },
             id_tokens: TokenEntityMetadata {
                 user_id: Some("sub".to_string()),
                 role_mapping: Some("role".to_string()),
-                claim_mapping: HashMap::new(),
+                claim_mapping: None,
             },
             userinfo_tokens: TokenEntityMetadata {
                 user_id: None,
                 role_mapping: None,
-                claim_mapping: HashMap::new(),
+                claim_mapping: None,
             },
             tx_tokens: TokenEntityMetadata {
                 user_id: None,
                 role_mapping: None,
-                claim_mapping: HashMap::new(),
+                claim_mapping: None,
             },
         };
 
