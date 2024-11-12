@@ -163,6 +163,8 @@ impl From<AgamaPolicyStore> for PolicyStore {
 mod test {
     use super::super::super::{cedar_schema::CedarSchemaJson, policy_store::CedarSchema};
     use super::{AgamaPolicyContent, AgamaPolicyStore};
+    use crate::common::policy_store::token_entity_metadata::TokenEntityMetadata;
+    use crate::common::policy_store::trusted_issuer_metadata::TrustedIssuerMetadata;
     use cedar_policy::{Policy, PolicyId, Schema};
     use semver::Version;
     use std::collections::HashMap;
@@ -225,9 +227,23 @@ permit
             .expect("Should parse cedar schema JSON");
         let cedar_schema = CedarSchema { schema, json };
 
-        // No need to test parsing trusted_issuers here since we
-        // already have tests in trusted_issuer_metadata.rs
-        let trusted_issuers = HashMap::new();
+        let trusted_issuers = HashMap::from([(
+            "630d232db3fc29502317559e0e968d9a83a8ccd29c3f".to_string(),
+            TrustedIssuerMetadata {
+                name: "Test IDP".to_string(),
+                description: "This is a test IDP".to_string(),
+                openid_configuration_endpoint: "https://some_idp/.well-known/openid-configuration"
+                    .to_string(),
+                access_tokens: TokenEntityMetadata::default(),
+                id_tokens: TokenEntityMetadata {
+                    user_id: Some("sub".to_string()),
+                    role_mapping: Some("role".to_string()),
+                    claim_mapping: None,
+                },
+                userinfo_tokens: TokenEntityMetadata::default(),
+                tx_tokens: TokenEntityMetadata::default(),
+            },
+        )]);
 
         let expected = AgamaPolicyStore {
             name: "jans::store".to_string(),
@@ -238,9 +254,37 @@ permit
             trusted_issuers,
         };
 
+        // We will split the asserts into multiple smaller steps since the struct is
+        // huge and the error message that gets printed is more than 1.5k lines.
+
         assert_eq!(
-            parsed, expected,
-            "Expected to parse AgamaPolicyStore from YAML correctly."
+            parsed.name, expected.name,
+            "Expected to parse name from JSON correctly."
+        );
+
+        assert_eq!(
+            parsed.description, expected.description,
+            "Expected to parse description from JSON correctly."
+        );
+
+        assert_eq!(
+            parsed.cedar_version, expected.cedar_version,
+            "Expected to parse cedar_version from JSON correctly."
+        );
+
+        assert_eq!(
+            parsed.policies, expected.policies,
+            "Expected to parse policies from JSON correctly."
+        );
+
+        assert_eq!(
+            parsed.cedar_schema, expected.cedar_schema,
+            "Expected to parse policies from JSON correctly."
+        );
+
+        assert_eq!(
+            parsed.trusted_issuers, expected.trusted_issuers,
+            "Expected to parse policies from JSON correctly."
         );
     }
 }
