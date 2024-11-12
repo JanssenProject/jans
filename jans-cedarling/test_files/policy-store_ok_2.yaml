@@ -2,6 +2,7 @@ cedar_version: v4.0.0
 policy_stores:
   a1bf93115de86de760ee0bea1d529b521489e5a11747:
     cedar_version: v4.0.0
+    name: "Jans"
     policies:
       1:
         description: simple policy example for principal workload, permit when workload org_id same with resource
