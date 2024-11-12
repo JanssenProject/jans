@@ -262,7 +262,7 @@ impl Authz {
         &self,
         request: &Request,
     ) -> Result<AuthorizeEntitiesData, AuthorizeError> {
-        let schema = &self.config.policy_store.cedar_schema.json;
+        let policy_store = &self.config.policy_store;
 
         // decode JWT tokens to structs AccessTokenData, IdTokenData, UserInfoTokenData using jwt service
         let decode_result: DecodeTokensResult = self
@@ -274,24 +274,24 @@ impl Authz {
                 &request.userinfo_token,
             )?;
 
-        let role_entities = create_role_entities(schema, &decode_result)?;
+        let role_entities = create_role_entities(policy_store, &decode_result)?;
 
         // Populate the `AuthorizeEntitiesData` structure using the builder pattern
         let data = AuthorizeEntitiesData::builder()
             // Populate the structure with entities derived from the access token
             .access_token_entities(create_access_token_entities(
-                schema,
+                policy_store,
                 &decode_result.access_token,
             )?)
             // Add an entity created from the ID token
             .id_token_entity(
-                create_id_token_entity(schema, &decode_result.id_token)
+                create_id_token_entity(policy_store, &decode_result.id_token)
                     .map_err(AuthorizeError::CreateIdTokenEntity)?,
             )
             // Add an entity created from the userinfo token
             .user_entity(
                 create_user_entity(
-                    schema,
+                    policy_store,
                     &decode_result.id_token,
                     &decode_result.userinfo_token,
                     // parents for Jans::User entity

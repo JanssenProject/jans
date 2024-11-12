@@ -20,18 +20,18 @@ use cedar_policy::{EntityId, EntityTypeName, EntityUid, RestrictedExpression};
 
 use super::trait_as_expression::AsExpression;
 
-const CEDAR_POLICY_SEPARATOR: &str = "::";
+pub const CEDAR_POLICY_SEPARATOR: &str = "::";
 
 /// Meta information about an entity type.
 /// Is used to store in `static` variable.
 pub(crate) struct EntityMetadata<'a> {
-    pub entity_type: &'a str,
+    pub entity_type: EntityParsedTypeName<'a>,
     pub entity_id_data_key: &'a str,
 }
 
 impl<'a> EntityMetadata<'a> {
     /// create new instance of EntityMetadata.
-    pub fn new(entity_type: &'a str, entity_id_data_key: &'a str) -> Self {
+    pub fn new(entity_type: EntityParsedTypeName<'a>, entity_id_data_key: &'a str) -> Self {
         Self {
             entity_type,
             entity_id_data_key,
@@ -48,12 +48,11 @@ impl<'a> EntityMetadata<'a> {
         parents: HashSet<EntityUid>,
     ) -> Result<cedar_policy::Entity, CedarPolicyCreateTypeError> {
         let entity_uid = build_entity_uid(
-            self.entity_type,
+            self.entity_type.full_type_name().as_str(),
             data.get_payload(self.entity_id_data_key)?.as_str()?,
         )?;
 
-        let parsed_typename = parse_namespace_and_typename(self.entity_type);
-        create_entity(entity_uid, &parsed_typename, schema, data, parents)
+        create_entity(entity_uid, &self.entity_type, schema, data, parents)
     }
 }
 
@@ -76,34 +75,43 @@ pub(crate) fn build_entity_uid(
 /// Analog to the internal cedar_policy type `InternalName`
 pub(crate) struct EntityParsedTypeName<'a> {
     pub typename: &'a str,
-    path: Vec<&'a str>,
+    pub namespace: &'a str,
 }
 impl<'a> EntityParsedTypeName<'a> {
-    pub fn namespace(&self) -> String {
-        self.path.join(CEDAR_POLICY_SEPARATOR)
+    pub fn new(typename: &'a str, namespace: &'a str) -> Self {
+        EntityParsedTypeName {
+            typename,
+            namespace,
+        }
+    }
+
+    pub fn full_type_name(&self) -> String {
+        if self.namespace.is_empty() {
+            self.typename.to_string()
+        } else {
+            vec![self.namespace, self.typename].join(CEDAR_POLICY_SEPARATOR)
+        }
     }
 }
 
 /// Parse entity type name and namespace from entity type string.
-pub fn parse_namespace_and_typename(entity_type: &str) -> EntityParsedTypeName {
-    let mut raw_path: Vec<&str> = entity_type.split(CEDAR_POLICY_SEPARATOR).collect();
+/// return (typename, namespace)
+pub fn parse_namespace_and_typename(raw_entity_type: &str) -> (&str, String) {
+    let mut raw_path: Vec<&str> = raw_entity_type.split(CEDAR_POLICY_SEPARATOR).collect();
     let typename = raw_path.pop().unwrap_or_default();
-    EntityParsedTypeName {
-        typename,
-        path: raw_path,
-    }
+    let namespace = raw_path.join(CEDAR_POLICY_SEPARATOR);
+    (typename, namespace)
 }
 
 /// fetch the schema record for a given entity type from the cedar schema json
 fn fetch_schema_record<'a>(
-    entity_namespace: &str,
-    entity_typename: &str,
+    entity_info: &EntityParsedTypeName,
     schema: &'a CedarSchemaJson,
 ) -> Result<&'a CedarSchemaEntityShape, CedarPolicyCreateTypeError> {
     let entity_shape = schema
-        .entity_schema(entity_namespace, entity_typename)
+        .entity_schema(&entity_info.namespace, entity_info.typename)
         .ok_or(CedarPolicyCreateTypeError::CouldNotFindEntity(
-            entity_typename.to_string(),
+            entity_info.typename.to_string(),
         ))?;
 
     // just to check if the entity is a record to be sure
@@ -111,7 +119,7 @@ fn fetch_schema_record<'a>(
     if let Some(entity_record) = &entity_shape.shape {
         if !entity_record.is_record() {
             return Err(CedarPolicyCreateTypeError::NotRecord(
-                entity_typename.to_string(),
+                entity_info.typename.to_string(),
             ));
         };
     }
@@ -177,12 +185,10 @@ pub fn create_entity<'a>(
     data: &'a TokenPayload,
     parents: HashSet<EntityUid>,
 ) -> Result<cedar_policy::Entity, CedarPolicyCreateTypeError> {
-    let entity_namespace = parsed_typename.namespace();
-
     // fetch the schema entity shape from the json-schema.
-    let schema_shape = fetch_schema_record(&entity_namespace, parsed_typename.typename, schema)?;
+    let schema_shape = fetch_schema_record(&parsed_typename, schema)?;
 
-    let attrs = build_entity_attributes(schema_shape, data, &entity_namespace)?;
+    let attrs = build_entity_attributes(schema_shape, data, &parsed_typename.namespace)?;
 
     let entity_uid_string = entity_uid.to_string();
     cedar_policy::Entity::new(entity_uid, attrs, parents)
