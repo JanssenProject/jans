@@ -8706,7 +8706,7 @@
 <li><code>CN_REDIS_URL</code>: URL of Redis server, format is host:port (optional; default to <code>localhost:6379</code>).</li>
 <li><code>CN_REDIS_TYPE</code>: Redis service type, either <code>STANDALONE</code> or <code>CLUSTER</code> (optional; default to <code>STANDALONE</code>).</li>
 <li><code>CN_MEMCACHED_URL</code>: URL of Memcache server, format is host:port (optional; default to <code>localhost:11211</code>).</li>
-<li><code>CN_PERSISTENCE_TYPE</code>: Persistence backend being used (<code>couchbase</code>, <code>sql</code>, <code>spanner</code>, or <code>hybrid</code>; default to <code>sql</code>).</li>
+<li><code>CN_PERSISTENCE_TYPE</code>: Persistence backend being used (<code>couchbase</code>, <code>sql</code>, or <code>hybrid</code>; default to <code>sql</code>).</li>
 <li><code>CN_HYBRID_MAPPING</code>: Specify data mapping for each persistence (default to <code>"{}"</code>). Note this environment only takes effect when <code>CN_PERSISTENCE_TYPE</code> is set to <code>hybrid</code>. See <a href="#hybrid-mapping">hybrid mapping</a> section for details.</li>
 <li><code>CN_PERSISTENCE_SKIP_INITIALIZED</code>: skip initialization if backend already initialized (default to <code>false</code>).</li>
 <li><code>CN_PERSISTENCE_UPDATE_AUTH_DYNAMIC_CONFIG</code>: Whether to allow automatic updates of <code>jans-auth</code> configuration (default to <code>true</code>).</li>
@@ -8725,8 +8725,6 @@
 <li><code>CN_GOOGLE_SECRET_VERSION_ID</code>: Janssen secret version ID in Google Secret Manager. Defaults to <code>latest</code>, which is recommended.</li>
 <li><code>CN_GOOGLE_SECRET_NAME_PREFIX</code>: Prefix for Janssen secret in Google Secret Manager. Defaults to <code>jans</code>. If left <code>jans-secret</code> secret will be created.</li>
 <li><code>CN_GOOGLE_SECRET_MANAGER_PASSPHRASE</code>: Passphrase for Janssen secret in Google Secret Manager. This is recommended to be changed and defaults to <code>secret</code>.</li>
-<li><code>CN_GOOGLE_SPANNER_INSTANCE_ID</code>: Google Spanner instance ID.</li>
-<li><code>CN_GOOGLE_SPANNER_DATABASE_ID</code>: Google Spanner database ID.</li>
 <li><code>CN_SQL_DB_HOST</code>: Hostname of the SQL database (default to <code>localhost</code>).</li>
 <li><code>CN_SQL_DB_PORT</code>: Port of the SQL database (default to <code>3306</code> for MySQL).</li>
 <li><code>CN_SQL_DB_NAME</code>: SQL database name (default to <code>jans</code>).</li>
@@ -8752,22 +8750,22 @@
 <li>
 <p>Set <code>CN_HYBRID_MAPPING</code> with the following format:</p>
 <div class="highlight"><pre><span></span><code>{
-    &quot;default&quot;: &quot;&lt;couchbase|spanner|sql&gt;&quot;,
-    &quot;user&quot;: &quot;&lt;couchbase|spanner|sql&gt;&quot;,
-    &quot;site&quot;: &quot;&lt;couchbase|spanner|sql&gt;&quot;,
-    &quot;cache&quot;: &quot;&lt;couchbase|spanner|sql&gt;&quot;,
-    &quot;token&quot;: &quot;&lt;couchbase|spanner|sql&gt;&quot;,
-    &quot;session&quot;: &quot;&lt;couchbase|spanner|sql&gt;&quot;,
+    &quot;default&quot;: &quot;&lt;couchbase|sql&gt;&quot;,
+    &quot;user&quot;: &quot;&lt;couchbase|sql&gt;&quot;,
+    &quot;site&quot;: &quot;&lt;couchbase|sql&gt;&quot;,
+    &quot;cache&quot;: &quot;&lt;couchbase|sql&gt;&quot;,
+    &quot;token&quot;: &quot;&lt;couchbase|sql&gt;&quot;,
+    &quot;session&quot;: &quot;&lt;couchbase|sql&gt;&quot;,
 }
 </code></pre></div>
 <p>Example:</p>
 <div class="highlight"><pre><span></span><code>{
     &quot;default&quot;: &quot;sql&quot;,
-    &quot;user&quot;: &quot;spanner&quot;,
+    &quot;user&quot;: &quot;sql&quot;,
     &quot;site&quot;: &quot;sql&quot;,
     &quot;cache&quot;: &quot;sql&quot;,
     &quot;token&quot;: &quot;couchbase&quot;,
-    &quot;session&quot;: &quot;spanner&quot;,
+    &quot;session&quot;: &quot;sql&quot;,
 }
 </code></pre></div>
 </li>
@@ -8778,7 +8776,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-15T10:12:47+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-15</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-11-12T03:49:37+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-11-12</span>
       
         <br>
         Created:

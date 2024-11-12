@@ -8705,7 +8705,7 @@
 <li><code>CN_WAIT_MAX_TIME</code>: How long the startup "health checks" should run (default to <code>300</code> seconds).</li>
 <li><code>CN_WAIT_SLEEP_DURATION</code>: Delay between startup "health checks" (default to <code>10</code> seconds).</li>
 <li><code>CN_MAX_RAM_PERCENTAGE</code>: Value passed to Java option <code>-XX:MaxRAMPercentage</code>.</li>
-<li><code>CN_PERSISTENCE_TYPE</code>: Persistence backend being used (one of <code>sql</code>, <code>couchbase</code>, <code>spanner</code>, or <code>hybrid</code>; default to <code>sql</code>).</li>
+<li><code>CN_PERSISTENCE_TYPE</code>: Persistence backend being used (one of <code>sql</code>, <code>couchbase</code>, or <code>hybrid</code>; default to <code>sql</code>).</li>
 <li><code>CN_HYBRID_MAPPING</code>: Specify data mapping for each persistence (default to <code>"{}"</code>). Note this environment only takes effect when <code>CN_PERSISTENCE_TYPE</code> is set to <code>hybrid</code>. See <a href="#hybrid-mapping">hybrid mapping</a> section for details.</li>
 <li><code>CN_COUCHBASE_URL</code>: Address of Couchbase server (default to <code>localhost</code>); required if <code>CN_PERSISTENCE_TYPE</code> is set to <code>couchbase</code> or <code>hybrid</code>.</li>
 <li><code>CN_COUCHBASE_USER</code>: Username of Couchbase server (default to <code>admin</code>); required if <code>CN_PERSISTENCE_TYPE</code> is set to <code>couchbase</code> or <code>hybrid</code>.</li>
@@ -8728,8 +8728,6 @@
 <li><code>CN_SQL_DB_PORT</code>: Port of SQL backend (default to <code>3306</code>).</li>
 <li><code>CN_SQL_DB_NAME</code>: Database name (default to <code>jans</code>)</li>
 <li><code>CN_SQL_DB_USER</code>: Username to interact with SQL backend (default to <code>jans</code>).</li>
-<li><code>CN_GOOGLE_SPANNER_INSTANCE_ID</code>: Instance ID of Google Spanner (default to empty string).</li>
-<li><code>CN_GOOGLE_SPANNER_DATABASE_ID</code>: Database ID of Google Spanner (default to empty string).</li>
 <li><code>GOOGLE_APPLICATION_CREDENTIALS</code>: Optional JSON file (contains Google credentials) that can be injected into container for authentication. Refer to https://cloud.google.com/docs/authentication/provide-credentials-adc#how-to for supported credentials.</li>
 <li><code>GOOGLE_PROJECT_ID</code>: ID of Google project.</li>
 <li><code>CN_GOOGLE_SECRET_VERSION_ID</code>: Janssen secret version ID in Google Secret Manager. Defaults to <code>latest</code>, which is recommended.</li>
@@ -8785,22 +8783,22 @@ To customize the config, mount custom config file to <code>/opt/prometheus/prome
 <li>
 <p>Set <code>CN_HYBRID_MAPPING</code> with the following format:</p>
 <div class="highlight"><pre><span></span><code>{
-    &quot;default&quot;: &quot;&lt;couchbase|spanner|sql&gt;&quot;,
-    &quot;user&quot;: &quot;&lt;couchbase|spanner|sql&gt;&quot;,
-    &quot;site&quot;: &quot;&lt;couchbase|spanner|sql&gt;&quot;,
-    &quot;cache&quot;: &quot;&lt;couchbase|spanner|sql&gt;&quot;,
-    &quot;token&quot;: &quot;&lt;couchbase|spanner|sql&gt;&quot;,
-    &quot;session&quot;: &quot;&lt;couchbase|spanner|sql&gt;&quot;,
+    &quot;default&quot;: &quot;&lt;couchbase|sql&gt;&quot;,
+    &quot;user&quot;: &quot;&lt;couchbase|sql&gt;&quot;,
+    &quot;site&quot;: &quot;&lt;couchbase|sql&gt;&quot;,
+    &quot;cache&quot;: &quot;&lt;couchbase|sql&gt;&quot;,
+    &quot;token&quot;: &quot;&lt;couchbase|sql&gt;&quot;,
+    &quot;session&quot;: &quot;&lt;couchbase|sql&gt;&quot;,
 }
 </code></pre></div>
 <p>Example:</p>
 <div class="highlight"><pre><span></span><code>{
     &quot;default&quot;: &quot;sql&quot;,
-    &quot;user&quot;: &quot;spanner&quot;,
+    &quot;user&quot;: &quot;sql&quot;,
     &quot;site&quot;: &quot;sql&quot;,
     &quot;cache&quot;: &quot;sql&quot;,
     &quot;token&quot;: &quot;couchbase&quot;,
-    &quot;session&quot;: &quot;spanner&quot;,
+    &quot;session&quot;: &quot;sql&quot;,
 }
 </code></pre></div>
 </li>
@@ -8811,7 +8809,7 @@ To customize the config, mount custom config file to <code>/opt/prometheus/prome
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-15T10:12:47+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-15</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-11-12T03:49:37+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-11-12</span>
       
         <br>
         Created:
