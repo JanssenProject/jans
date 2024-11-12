@@ -6,40 +6,8 @@
  */
 
 use super::utils::*;
+use crate::{cmp_decision, cmp_policy}; // macros is defined in the cedarling\src\tests\utils\cedarling_util.rs
 use test_utils::assert_eq;
-
-/// util function for convenient conversion Reason ID to string
-fn get_policy_id(resp: &Option<cedar_policy::Response>) -> Option<Vec<String>> {
-    resp.as_ref().map(|v| {
-        v.diagnostics()
-            .reason()
-            .map(|policy_id| policy_id.to_string())
-            .collect::<Vec<_>>()
-    })
-}
-
-// macro to remove code duplication when compare policy_id-s
-macro_rules! cmp_policy {
-    ($resp:expr, $vec_policy_id:expr, $msg:expr) => {
-        assert_eq!(
-            get_policy_id(&$resp),
-            Some($vec_policy_id.iter().map(|v| v.to_string()).collect()),
-            $msg
-        )
-    };
-}
-
-/// util function for convenient conversion Decision
-fn get_decision(resp: &Option<cedar_policy::Response>) -> Option<cedar_policy::Decision> {
-    resp.as_ref().map(|v| v.decision())
-}
-
-// macro to remove code duplication when compare decision
-macro_rules! cmp_decision {
-    ($resp:expr, $decision:expr, $msg:expr) => {
-        assert_eq!(get_decision(&$resp), Some($decision), $msg)
-    };
-}
 
 static POLICY_STORE_RAW_YAML: &str = include_str!("../../../test_files/policy-store_ok_2.yaml");
 

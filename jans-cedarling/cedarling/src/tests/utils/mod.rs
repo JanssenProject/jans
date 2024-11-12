@@ -10,7 +10,7 @@ pub use cedar_policy::Decision;
 pub use serde::Deserialize;
 pub use serde_json::json;
 
-mod cedarling_util;
+pub mod cedarling_util;
 pub mod token_claims;
 pub use cedarling_util::get_cedarling;
 pub use token_claims::generate_token_using_claims;

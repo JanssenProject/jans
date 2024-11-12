@@ -24,3 +24,47 @@ pub fn get_cedarling(policy_source: PolicyStoreSource) -> Cedarling {
     })
     .expect("bootstrap config should initialize correctly")
 }
+
+/// util function for convenient conversion Reason ID to string
+pub fn get_policy_id(resp: &Option<cedar_policy::Response>) -> Option<Vec<String>> {
+    resp.as_ref().map(|v| {
+        v.diagnostics()
+            .reason()
+            .map(|policy_id| policy_id.to_string())
+            .collect::<Vec<_>>()
+    })
+}
+
+// macro to remove code duplication when compare policy_id-s
+//
+// macro is always defined in the root space.
+// to avoid problems with functions calling better to use full path
+#[doc(hidden)]
+#[macro_export]
+macro_rules! cmp_policy {
+    ($resp:expr, $vec_policy_id:expr, $msg:expr) => {
+        assert_eq!(
+            crate::tests::utils::cedarling_util::get_policy_id(&$resp),
+            Some($vec_policy_id.iter().map(|v| v.to_string()).collect()),
+            $msg
+        )
+    };
+}
+
+/// util function for convenient conversion Decision
+pub fn get_decision(resp: &Option<cedar_policy::Response>) -> Option<cedar_policy::Decision> {
+    resp.as_ref().map(|v| v.decision())
+}
+
+// macro to remove code duplication when compare decision
+#[doc(hidden)]
+#[macro_export]
+macro_rules! cmp_decision {
+    ($resp:expr, $decision:expr, $msg:expr) => {
+        assert_eq!(
+            crate::tests::utils::cedarling_util::get_decision(&$resp),
+            Some($decision),
+            $msg
+        )
+    };
+}
