@@ -6,7 +6,6 @@ from collections import namedtuple
 
 from jans.pycloudlib import get_manager
 from jans.pycloudlib.persistence.couchbase import CouchbaseClient
-from jans.pycloudlib.persistence.spanner import SpannerClient
 from jans.pycloudlib.persistence.sql import SqlClient
 from jans.pycloudlib.persistence.utils import PersistenceMapper
 from jans.pycloudlib.persistence.sql import doc_id_from_dn
@@ -280,38 +279,9 @@ class CouchbaseBackend:
         return entries
 
 
-class SpannerBackend:
-    def __init__(self, manager):
-        self.manager = manager
-        self.client = SpannerClient(manager)
-        self.type = "spanner"
-
-    def get_entry(self, key, filter_="", attrs=None, **kwargs):
-        table_name = kwargs.get("table_name")
-        entry = self.client.get(table_name, key, attrs)
-
-        if not entry:
-            return None
-        return Entry(key, entry)
-
-    def modify_entry(self, key, attrs=None, **kwargs):
-        attrs = attrs or {}
-        table_name = kwargs.get("table_name")
-        return self.client.update(table_name, key, attrs), ""
-
-    def search_entries(self, key, filter_="", attrs=None, **kwargs):
-        attrs = attrs or {}
-        table_name = kwargs.get("table_name")
-        return [
-            Entry(entry["doc_id"], entry)
-            for entry in self.client.search(table_name, attrs)
-        ]
-
-
 BACKEND_CLASSES = {
     "sql": SQLBackend,
     "couchbase": CouchbaseBackend,
-    "spanner": SpannerBackend,
 }
 
 
@@ -341,7 +311,7 @@ class Upgrade:
         jca_client_id = self.manager.config.get("jca_client_id")
         id_ = f"inum={jca_client_id},ou=clients,o=jans"
 
-        if self.backend.type in ("sql", "spanner"):
+        if self.backend.type == "sql":
             kwargs = {"table_name": "jansClnt"}
             id_ = doc_id_from_dn(id_)
         elif self.backend.type == "couchbase":
@@ -360,7 +330,8 @@ class Upgrade:
             if f"https://{hostname}/admin" not in entry.attrs["jansRedirectURI"]["v"]:
                 entry.attrs["jansRedirectURI"]["v"].append(f"https://{hostname}/admin")
                 should_update = True
-        else:  # likely couchbase or spanner
+        else:
+            # likely couchbase
             if f"https://{hostname}/admin" not in entry.attrs["jansRedirectURI"]:
                 entry.attrs["jansRedirectURI"].append(f"https://{hostname}/admin")
                 should_update = True
@@ -372,7 +343,7 @@ class Upgrade:
         kwargs = {}
         id_ = "ou=jans-config-api,ou=configuration,o=jans"
 
-        if self.backend.type in ("sql", "spanner"):
+        if self.backend.type == "sql":
             kwargs = {"table_name": "jansAppConf"}
             id_ = doc_id_from_dn(id_)
         elif self.backend.type == "couchbase":
@@ -402,7 +373,7 @@ class Upgrade:
         client_id = self.manager.config.get("jca_client_id")
         id_ = f"inum={client_id},ou=clients,o=jans"
 
-        if self.backend.type in ("sql", "spanner"):
+        if self.backend.type == "sql":
             kwargs = {"table_name": "jansClnt"}
             id_ = doc_id_from_dn(id_)
         elif self.backend.type == "couchbase":
@@ -439,8 +410,7 @@ class Upgrade:
         id_ = f"inum={test_client_id},ou=clients,o=jans"
         kwargs = {}
 
-        # search_entries(self, key, filter_="", attrs=None, **kwargs)
-        if self.backend.type in ("sql", "spanner"):
+        if self.backend.type == "sql":
             id_ = doc_id_from_dn(id_)
             kwargs = {"table_name": "jansClnt"}
         elif self.backend.type == "couchbase":
@@ -460,7 +430,7 @@ class Upgrade:
         if not isinstance(client_scopes, list):
             client_scopes = [client_scopes]
 
-        if self.backend.type in ("sql", "spanner"):
+        if self.backend.type == "sql":
             scopes = [
                 scope_entry.attrs["dn"]
                 for scope_entry in self.backend.search_entries("", **{"table_name": "jansScope"})
