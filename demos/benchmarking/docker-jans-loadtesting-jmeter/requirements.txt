@@ -3,10 +3,6 @@ joblib
 pygtail
 psycopg2-binary
 PyMySQL
-# =======================
-# Install Spanner package
-# =======================
-google-cloud-spanner
 # ===============
 # Install Couchbase Client
 # ===============

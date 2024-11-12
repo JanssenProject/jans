@@ -6,7 +6,6 @@ tags:
   - MySQL
   - Couchbase
   - Aurora
-  - Spanner
   - Postgres
   - database
 ---
@@ -48,8 +47,4 @@ Scalability is excellent and multi-region deployments are [possible](https://aws
 The main catch is that write operations are limited to one region, with the
 ability to failover to another region. But to accomplish this, you need a cloud
 engineer to implement it.
-
-1. **Spanner** Google's multi-region cloud database as a service, Spanner
-was purpose-built for auto-scaling, and multi-region persistence. It has its own
-API, although recently Google added support for MySQL and Postgres drivers.
 

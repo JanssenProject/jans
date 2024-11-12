@@ -18,9 +18,6 @@ from jans.pycloudlib.persistence.couchbase import sync_couchbase_cert
 from jans.pycloudlib.persistence.couchbase import sync_couchbase_password
 from jans.pycloudlib.persistence.couchbase import sync_couchbase_truststore
 from jans.pycloudlib.persistence.hybrid import render_hybrid_properties
-from jans.pycloudlib.persistence.spanner import render_spanner_properties
-from jans.pycloudlib.persistence.spanner import SpannerClient
-from jans.pycloudlib.persistence.spanner import sync_google_credentials
 from jans.pycloudlib.persistence.sql import render_sql_properties
 from jans.pycloudlib.persistence.sql import SqlClient
 from jans.pycloudlib.persistence.sql import sync_sql_password
@@ -84,14 +81,6 @@ def main():
             f"/app/templates/jans-{db_dialect}.properties",
             "/etc/jans/conf/jans-sql.properties",
         )
-
-    if "spanner" in persistence_groups:
-        render_spanner_properties(
-            manager,
-            "/app/templates/jans-spanner.properties",
-            "/etc/jans/conf/jans-spanner.properties",
-        )
-        sync_google_credentials(manager)
 
     wait_for_persistence(manager)
     override_simple_json_property("/etc/jans/conf/jans-sql.properties")
@@ -197,7 +186,6 @@ class PersistenceSetup:
 
         client_classes = {
             "couchbase": CouchbaseClient,
-            "spanner": SpannerClient,
             "sql": SqlClient,
         }
 
@@ -263,7 +251,7 @@ class PersistenceSetup:
             self.client.create_from_ldif(file_, self.ctx)
 
     def get_scope_jans_ids(self):
-        if self.persistence_type in ("sql", "spanner"):
+        if self.persistence_type == "sql":
             entries = self.client.search("jansScope", ["jansId"])
             return [entry["jansId"] for entry in entries]
 
