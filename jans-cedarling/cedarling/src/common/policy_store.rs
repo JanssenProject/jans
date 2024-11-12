@@ -448,3 +448,33 @@ where
         serde::de::Error::custom(format!("{}: {err}", ParsePolicySetMessage::CreatePolicySet))
     })
 }
+
+/// Custom parser for an Option<String> which return None if the string is empty.
+pub fn parse_option_string<'de, D>(deserializer: D) -> Result<Option<String>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let value = Option::<String>::deserialize(deserializer)?;
+
+    Ok(value.filter(|s| !s.is_empty()))
+}
+
+/// Custom parser for Option<HashMap<_, _>> which returns None if the HashMap is empty
+pub fn parse_option_hashmap<'de, D, K, V>(
+    deserializer: D,
+) -> Result<Option<HashMap<K, V>>, D::Error>
+where
+    D: Deserializer<'de>,
+    K: Eq + std::hash::Hash + Deserialize<'de>,
+    V: Deserialize<'de>,
+{
+    let option = Option::<HashMap<K, V>>::deserialize(deserializer)?;
+
+    match option {
+        Some(ref hashmap) => match hashmap.is_empty() {
+            true => Ok(None),
+            false => Ok(option),
+        },
+        None => Ok(None),
+    }
+}
