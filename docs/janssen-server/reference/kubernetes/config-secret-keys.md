@@ -591,7 +591,7 @@ Note that `_secret` may contain other keys depending on persistence, secrets/con
     }
     ```
 
-1.  Persistence is set to `spanner` or secrets/configmaps backend is set to `google`:
+1.  Secrets/configmaps backend is set to `google`:
 
     ```json
     "_secret": {

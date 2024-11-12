@@ -16,7 +16,7 @@ RUN apk update \
 # ===========
 
 # janssenproject/jans SHA commit
-ENV JANS_SOURCE_VERSION=4f155cfe9e197b15d65be6aa938276862fe36a06
+ENV JANS_SOURCE_VERSION=6e00e723a99d700a4f82713b0c25b2d6e3ef5775
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCRIPT_CATALOG_DIR=docs/script-catalog
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
@@ -127,9 +127,7 @@ ENV CN_PERSISTENCE_TYPE=couchbase \
     CN_COUCHBASE_SUPERUSER_PASSWORD_FILE=/etc/jans/conf/couchbase_superuser_password \
     CN_COUCHBASE_INDEX_NUM_REPLICA=0 \
     CN_LDAP_URL=localhost:1636 \
-    CN_LDAP_USE_SSL=true \
-    CN_GOOGLE_SPANNER_INSTANCE_ID="" \
-    CN_GOOGLE_SPANNER_DATABASE_ID=""
+    CN_LDAP_USE_SSL=true
 
 # ===========
 # Generic ENV

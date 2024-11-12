@@ -6,7 +6,6 @@ import click
 
 from jans.pycloudlib import get_manager
 from jans.pycloudlib.persistence.couchbase import sync_couchbase_password
-from jans.pycloudlib.persistence.spanner import sync_google_credentials
 from jans.pycloudlib.persistence.sql import sync_sql_password
 from jans.pycloudlib.persistence.utils import PersistenceMapper
 
@@ -75,8 +74,6 @@ def patch(service, dry_run, opts):
             sync_sql_password(manager)
         case "couchbase":
             sync_couchbase_password(manager)
-        case "spanner":
-            sync_google_credentials(manager)
 
     logger.info(f"Processing updates for service {service}")
     parsed_opts = _parse_opts(opts)
@@ -111,8 +108,6 @@ def prune(service, dry_run, opts):
             sync_sql_password(manager)
         case "couchbase":
             sync_couchbase_password(manager)
-        case "spanner":
-            sync_google_credentials(manager)
 
     logger.info(f"Processing updates for service {service}")
     parsed_opts = _parse_opts(opts)

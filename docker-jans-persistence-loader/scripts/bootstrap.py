@@ -4,14 +4,12 @@ from jans.pycloudlib import get_manager
 from jans.pycloudlib import wait_for_persistence_conn
 from jans.pycloudlib.persistence.couchbase import sync_couchbase_password
 from jans.pycloudlib.persistence.couchbase import sync_couchbase_superuser_password
-from jans.pycloudlib.persistence.spanner import sync_google_credentials
 from jans.pycloudlib.persistence.sql import sync_sql_password
 from jans.pycloudlib.persistence.utils import PersistenceMapper
 
 from hybrid_setup import HybridBackend
 from couchbase_setup import CouchbaseBackend
 from sql_setup import SQLBackend
-from spanner_setup import SpannerBackend
 from upgrade import Upgrade
 
 
@@ -22,7 +20,6 @@ def main():
         "couchbase": CouchbaseBackend,
         "hybrid": HybridBackend,
         "sql": SQLBackend,
-        "spanner": SpannerBackend,
     }
 
     # initialize the backend
@@ -40,9 +37,6 @@ def main():
         # superuser is required to create buckets, etc.
         sync_couchbase_superuser_password(manager)
         sync_couchbase_password(manager)
-
-    if "spanner" in persistence_groups:
-        sync_google_credentials(manager)
 
     wait_for_persistence_conn(manager)
 
