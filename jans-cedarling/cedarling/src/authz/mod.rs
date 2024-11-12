@@ -80,6 +80,8 @@ impl Authz {
     /// - evaluate if authorization is granted for *person*
     /// - evaluate if authorization is granted for *workload*
     pub fn authorize(&self, request: Request) -> Result<AuthorizeResult, AuthorizeError> {
+        let schema = &self.config.policy_store.cedar_schema;
+
         // Parse action UID.
         let action = cedar_policy::EntityUid::from_str(request.action.as_str())
             .map_err(AuthorizeError::Action)?;
@@ -87,7 +89,7 @@ impl Authz {
         // Parse context.
         let context: cedar_policy::Context = cedar_policy::Context::from_json_value(
             request.context.clone(),
-            Some((&self.config.policy_store.cedar_schema.schema, &action)),
+            Some((&schema.schema, &action)),
         )?;
 
         // Parse [`cedar_policy::Entity`]-s to [`AuthorizeEntitiesData`] that hold all entities (for usability).
@@ -105,30 +107,37 @@ impl Authz {
 
         // Convert [`AuthorizeEntitiesData`] to  [`cedar_policy::Entities`] structure,
         // hold all entities that will be used on authorize check.
-        let entities =
-            entities_data.entities(Some(&self.config.policy_store.cedar_schema.schema))?;
+        let entities = entities_data.entities(Some(&schema.schema))?;
 
         // Check authorize where principal is `"Jans::Workload"` from cedar-policy schema.
-        let workload_result = self
-            .execute_authorize(ExecuteAuthorizeParameters {
-                entities: &entities,
-                principal: principal_workload_uid.clone(),
-                action: action.clone(),
-                resource: resource_uid.clone(),
-                context: context.clone(),
-            })
-            .map_err(AuthorizeError::CreateRequestWorkloadEntity)?;
+        let workload_result = schema
+            .is_applies_to_action(&action, &principal_workload_uid)
+            .then_some(
+                //  if principal can be applied then make check
+                self.execute_authorize(ExecuteAuthorizeParameters {
+                    entities: &entities,
+                    principal: principal_workload_uid.clone(),
+                    action: action.clone(),
+                    resource: resource_uid.clone(),
+                    context: context.clone(),
+                })
+                .map_err(AuthorizeError::CreateRequestWorkloadEntity)?,
+            );
 
         // Check authorize where principal is `"Jans::User"` from cedar-policy schema.
-        let person_result = self
-            .execute_authorize(ExecuteAuthorizeParameters {
-                entities: &entities,
-                principal: principal_user_entity_uid.clone(),
-                action: action.clone(),
-                resource: resource_uid.clone(),
-                context: context.clone(),
-            })
-            .map_err(AuthorizeError::CreateRequestUserEntity)?;
+        let person_result = schema
+            .is_applies_to_action(&action, &principal_user_entity_uid)
+            .then_some(
+                //  if principal can be applied then make check
+                self.execute_authorize(ExecuteAuthorizeParameters {
+                    entities: &entities,
+                    principal: principal_user_entity_uid.clone(),
+                    action: action.clone(),
+                    resource: resource_uid.clone(),
+                    context: context.clone(),
+                })
+                .map_err(AuthorizeError::CreateRequestUserEntity)?,
+            );
 
         // role result for logging
         let mut role_authorize_log_results: Vec<RoleAuthorizeInfo> = Vec::new();
@@ -193,16 +202,18 @@ impl Authz {
                 context: request.context,
                 resource: resource_uid.to_string(),
 
-                person_authorize_info: Some(PersonAuthorizeInfo {
+                person_authorize_info: result.person.as_ref().map(|response| PersonAuthorizeInfo {
                     person_principal: principal_user_entity_uid.to_string(),
-                    person_diagnostics: result.person.diagnostics().into(),
-                    person_decision: result.person.decision().into(),
+                    person_diagnostics: response.diagnostics().into(),
+                    person_decision: response.decision().into(),
                 }),
 
-                workload_authorize_info: Some(WorkloadAuthorizeInfo {
-                    workload_principal: principal_workload_uid.to_string(),
-                    workload_diagnostics: result.workload.diagnostics().into(),
-                    workload_decision: result.workload.decision().into(),
+                workload_authorize_info: result.workload.as_ref().map(|response| {
+                    WorkloadAuthorizeInfo {
+                        workload_principal: principal_workload_uid.to_string(),
+                        workload_diagnostics: response.diagnostics().into(),
+                        workload_decision: response.decision().into(),
+                    }
                 }),
 
                 role_authorize_info: role_authorize_log_results,

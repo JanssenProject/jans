@@ -192,29 +192,32 @@ assert authorize_result.is_allowed()
 workload_result = authorize_result.workload()
 print(f"Result of workload authorization: {workload_result.decision}")
 
-# show diagnostic information
-workload_diagnostic = workload_result.diagnostics
-print("Policy ID(s) used:")
-for diagnostic in workload_diagnostic.reason:
-    print(diagnostic)
+if workload_result is not None:
+    # show diagnostic information
+    workload_diagnostic = workload_result.diagnostics
+    print("Policy ID(s) used:")
+    for diagnostic in workload_diagnostic.reason:
+        print(diagnostic)
 
-print("Errors during authorization:")
-for diagnostic in workload_diagnostic.errors:
-    print(diagnostic)
+    print("Errors during authorization:")
+    for diagnostic in workload_diagnostic.errors:
+        print(diagnostic)
 
 print()
 
 # watch on the decision for person
 person_result = authorize_result.person()
 print(f"Result of person authorization: {person_result.decision}")
-person_diagnostic = person_result.diagnostics
-print("Policy ID(s) used:")
-for diagnostic in person_diagnostic.reason:
-    print(diagnostic)
 
-print("Errors during authorization:")
-for diagnostic in person_diagnostic.errors:
-    print(diagnostic)
+if person_result is not None:
+    person_diagnostic = person_result.diagnostics
+    print("Policy ID(s) used:")
+    for diagnostic in person_diagnostic.reason:
+        print(diagnostic)
+
+    print("Errors during authorization:")
+    for diagnostic in person_diagnostic.errors:
+        print(diagnostic)
 
 
 # watch on the decision for role if present

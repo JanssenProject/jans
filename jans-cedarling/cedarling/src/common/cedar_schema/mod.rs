@@ -6,6 +6,7 @@
  */
 
 pub(crate) use cedar_json::CedarSchemaJson;
+use cedar_policy::EntityUid;
 pub(crate) mod cedar_json;
 
 /// cedar_schema value which specifies both encoding and content_type
@@ -24,7 +25,7 @@ struct EncodedSchema {
 /// Either
 ///   "cedar_schema": "cGVybWl0KA..."
 /// OR
-///   "cedar_schema": { "encoding": "...", "content_type": "...", "body": "permit(...)"}#[derive(Debug, Clone, serde::Deserialize)]
+///   "cedar_schema": { "encoding": "...", "content_type": "...", "body": "permit(...)"}
 #[derive(Debug, Clone, serde::Deserialize)]
 #[serde(untagged)]
 enum MaybeEncoded {
@@ -38,6 +39,13 @@ enum MaybeEncoded {
 pub(crate) struct CedarSchema {
     pub schema: cedar_policy::Schema,
     pub json: cedar_json::CedarSchemaJson,
+}
+
+impl CedarSchema {
+    /// check if action applies to entity uid
+    pub fn is_applies_to_action(&self, action_uid: &EntityUid, entity_uid: &EntityUid) -> bool {
+        self.json.is_applies_to_action(action_uid, entity_uid)
+    }
 }
 
 impl PartialEq for CedarSchema {
