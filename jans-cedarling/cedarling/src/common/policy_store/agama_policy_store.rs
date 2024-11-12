@@ -177,7 +177,7 @@ impl From<AgamaPolicyStore> for PolicyStore {
             cedar_version: agama_store.cedar_version,
             cedar_schema: agama_store.cedar_schema,
             cedar_policies: policy_set,
-            trusted_issuers: None,
+            trusted_issuers: Some(trusted_issuers),
         }
     }
 }
