@@ -131,6 +131,7 @@ class Plugin(DialogUtils):
                 return
 
             data.pop('document', None)
+            data.pop('filePath', None)
             form_data = {'document': data}
 
             if self.asset_file_path:

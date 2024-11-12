@@ -8,7 +8,6 @@ from ldif import LDIFParser
 
 from jans.pycloudlib import get_manager
 from jans.pycloudlib.persistence.couchbase import CouchbaseClient
-from jans.pycloudlib.persistence.spanner import SpannerClient
 from jans.pycloudlib.persistence.sql import SqlClient
 from jans.pycloudlib.persistence.sql import doc_id_from_dn
 from jans.pycloudlib.persistence.couchbase import id_from_dn
@@ -204,34 +203,9 @@ class CouchbaseBackend:
         return self.client.delete(bucket, key)
 
 
-class SpannerBackend:
-    def __init__(self, manager):
-        self.manager = manager
-        self.client = SpannerClient(manager)
-        self.type = "spanner"
-
-    def get_entry(self, key, filter_="", attrs=None, **kwargs):
-        table_name = kwargs.get("table_name")
-        entry = self.client.get(table_name, key, attrs)
-
-        if not entry:
-            return None
-        return Entry(key, entry)
-
-    def modify_entry(self, key, attrs=None, **kwargs):
-        attrs = attrs or {}
-        table_name = kwargs.get("table_name")
-        return self.client.update(table_name, key, attrs), ""
-
-    def delete_entry(self, key, **kwargs):
-        table_name = kwargs.get("table_name")
-        return self.client.delete(table_name, key)
-
-
 BACKEND_CLASSES = {
     "sql": SQLBackend,
     "couchbase": CouchbaseBackend,
-    "spanner": SpannerBackend,
 }
 
 
@@ -276,7 +250,7 @@ class Upgrade:
         duo_id = "inum=5018-F9CF,ou=scripts,o=jans"
         agama_id = "inum=BADA-BADA,ou=scripts,o=jans"
 
-        if self.backend.type in ("sql", "spanner"):
+        if self.backend.type == "sql":
             kwargs = {"table_name": "jansCustomScr"}
             scim_id = doc_id_from_dn(scim_id)
             basic_id = doc_id_from_dn(basic_id)
@@ -344,7 +318,7 @@ class Upgrade:
         kwargs = {}
         id_ = JANS_AUTH_CONFIG_DN
 
-        if self.backend.type in ("sql", "spanner"):
+        if self.backend.type == "sql":
             kwargs = {"table_name": "jansAppConf"}
             id_ = doc_id_from_dn(id_)
         elif self.backend.type == "couchbase":
@@ -374,7 +348,7 @@ class Upgrade:
             rows = collect_claim_names()
 
             for id_, claim_name in rows.items():
-                if self.backend.type in ("sql", "spanner"):
+                if self.backend.type == "sql":
                     id_ = doc_id_from_dn(id_)
                     kwargs = {"table_name": "jansAttr"}
                 elif self.backend.type == "couchbase":
@@ -397,7 +371,7 @@ class Upgrade:
             kwargs = {}
             id_ = "inum=6DA6,ou=attributes,o=jans"
 
-            if self.backend.type in ("sql", "spanner"):
+            if self.backend.type == "sql":
                 id_ = doc_id_from_dn(id_)
                 kwargs = {"table_name": "jansAttr"}
             elif self.backend.type == "couchbase":
@@ -421,7 +395,7 @@ class Upgrade:
 
         # add jansAttrs to SCIM users.read and users.write scopes
         for id_ in [JANS_SCIM_USERS_READ_SCOPE_DN, JANS_SCIM_USERS_WRITE_SCOPE_DN]:
-            if self.backend.type in ("sql", "spanner"):
+            if self.backend.type == "sql":
                 kwargs = {"table_name": "jansScope"}
                 id_ = doc_id_from_dn(id_)
             elif self.backend.type == "couchbase":
@@ -441,7 +415,7 @@ class Upgrade:
         kwargs = {}
         id_ = JANS_PROFILE_SCOPE_DN
 
-        if self.backend.type in ("sql", "spanner"):
+        if self.backend.type == "sql":
             kwargs = {"table_name": "jansScope"}
             id_ = doc_id_from_dn(id_)
         elif self.backend.type == "couchbase":
@@ -463,7 +437,7 @@ class Upgrade:
         id_ = f"inum={admin_inum},ou=people,o=jans"
         kwargs = {}
 
-        if self.user_backend.type in ("sql", "spanner"):
+        if self.user_backend.type == "sql":
             id_ = doc_id_from_dn(id_)
             kwargs = {"table_name": "jansPerson"}
         elif self.user_backend.type == "couchbase":
@@ -514,7 +488,7 @@ class Upgrade:
 
             id_ = f"inum={token_server_admin_ui_client_id},ou=clients,o=jans"
 
-            if self.backend.type in ("sql", "spanner"):
+            if self.backend.type == "sql":
                 kwargs = {"table_name": "jansClnt"}
                 id_ = doc_id_from_dn(id_)
             elif self.backend.type == "couchbase":
@@ -537,7 +511,7 @@ class Upgrade:
         kwargs = {}
         id_ = "ou=admin-ui,ou=configuration,o=jans"
 
-        if self.backend.type in ("sql", "spanner"):
+        if self.backend.type == "sql":
             kwargs = {"table_name": "jansAppConf"}
             id_ = doc_id_from_dn(id_)
         elif self.backend.type == "couchbase":
@@ -576,7 +550,7 @@ class Upgrade:
         kwargs = {}
         id_ = JANS_AUTH_CONFIG_DN
 
-        if self.backend.type in ("sql", "spanner"):
+        if self.backend.type == "sql":
             kwargs = {"table_name": "jansAppConf"}
             id_ = doc_id_from_dn(id_)
         elif self.backend.type == "couchbase":
@@ -612,7 +586,7 @@ class Upgrade:
         kwargs = {}
         id_ = JANS_AUTH_CONFIG_DN
 
-        if self.backend.type in ("sql", "spanner"):
+        if self.backend.type == "sql":
             kwargs = {"table_name": "jansAppConf"}
             id_ = doc_id_from_dn(id_)
         elif self.backend.type == "couchbase":
@@ -649,7 +623,7 @@ class Upgrade:
         tui_client_id = self.manager.config.get("tui_client_id")
         id_ = f"inum={tui_client_id},ou=clients,o=jans"
 
-        if self.backend.type in ("sql", "spanner"):
+        if self.backend.type == "sql":
             kwargs = {"table_name": "jansClnt"}
             id_ = doc_id_from_dn(id_)
         elif self.backend.type == "couchbase":
@@ -699,7 +673,7 @@ class Upgrade:
         kwargs = {}
         id_ = "ou=configuration,o=jans"
 
-        if self.backend.type in ("sql", "spanner"):
+        if self.backend.type == "sql":
             kwargs = {"table_name": "jansAppConf"}
             id_ = doc_id_from_dn(id_)
         elif self.backend.type == "couchbase":

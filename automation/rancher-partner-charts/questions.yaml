@@ -58,11 +58,10 @@ questions:
   type: enum
   group: "Persistence"
   label: Gluu Persistence backend
-  description: "Persistence backend to run Gluu with couchbase|hybrid|sql|spanner"
+  description: "Persistence backend to run Gluu with couchbase|sql|"
   options:
     - "couchbase"
     - "hybrid"
-    - "spanner"
     - "sql"
 
 # Hybrid
@@ -132,35 +131,6 @@ questions:
   type: string
   label: SQL database name
   show_if: "global.cnPersistenceType=sql"
-# Spanner
-- variable: config.configmap.cnGoogleSpannerInstanceId
-  default: ""
-  group: "Persistence"
-  description: "The google spanner instance ID"
-  type: string
-  label: Google Spanner Instance ID
-  show_if: "global.cnPersistenceType=spanner"
-- variable: config.configmap.cnGoogleSpannerDatabaseId
-  default: ""
-  group: "Persistence"
-  description: "The google spanner database ID"
-  type: string
-  label: Google Spanner Database ID
-  show_if: "global.cnPersistenceType=spanner"
-- variable: config.configmap.cnGoogleSecretManagerServiceAccount
-  default: ""
-  group: "Persistence"
-  description: "The service account with access roles/secretmanager.admin to use Google secret manager and/or roles/spanner.databaseUser to use Spanner."
-  type: multiline
-  label: Google Spanner Service Account json
-  show_if: "global.cnPersistenceType=spanner"
-- variable: config.configmap.cnGoogleProjectId
-  default: ""
-  group: "Persistence"
-  description: "The Google Project ID"
-  type: string
-  label: Google Project ID
-  show_if: "global.cnPersistenceType=spanner"
 #Couchbase
 - variable: config.configmap.cnCouchbaseCrt
   default: ""

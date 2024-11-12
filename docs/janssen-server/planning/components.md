@@ -19,7 +19,7 @@ assertions. This service must be Internet-facing.
 persistence service to store configuration and other entity data (client,
 person, scope, attribute, FIDO device, etc.) As different databases are
 good for different deployments, Janssen supports a number of options:
-MySQL, Postgres, Couchbase, Google Spanner, and Amazon Aurora. Other
+MySQL, Postgres, Couchbase, and Amazon Aurora. Other
 databases may be added in the future.
 
 1. **Cache**: Getting data from a disk is still the slowest part of any
