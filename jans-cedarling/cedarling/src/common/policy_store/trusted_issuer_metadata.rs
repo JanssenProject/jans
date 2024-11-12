@@ -18,15 +18,19 @@ pub struct TrustedIssuerMetadata {
     pub openid_configuration_endpoint: String,
 
     /// Token Entity Metadata for Access Tokens.
+    #[serde(default)]
     pub access_tokens: TokenEntityMetadata,
 
     /// Token Entity Metadata for ID Tokens.
+    #[serde(default)]
     pub id_tokens: TokenEntityMetadata,
 
     /// Token Entity Metadata for Userinfo Tokens.
+    #[serde(default)]
     pub userinfo_tokens: TokenEntityMetadata,
 
     /// Token Entity Metadata for Transaction Tokens.
+    #[serde(default)]
     pub tx_tokens: TokenEntityMetadata,
 }
 
@@ -38,7 +42,7 @@ mod test {
     use serde_json::json;
 
     #[test]
-    fn can_parse_trusted_issuer_metadata() {
+    fn can_parse_from_json() {
         let metadata_json = json!({
             "name": "Google",
             "description": "Consumer IDP",
@@ -54,11 +58,6 @@ mod test {
                 "claim_mapping": {},
             },
             "userinfo_tokens": {
-                "user_id": "",
-                "role_mapping": "",
-                "claim_mapping": {},
-            },
-            "tx_tokens": {
                 "user_id": "",
                 "role_mapping": "",
                 "claim_mapping": {},
