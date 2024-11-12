@@ -1,12 +1,13 @@
 use super::{
-    super::cedar_schema::CedarSchemaJson, trusted_issuer_metadata::TrustedIssuerMetadata,
-    CedarSchema, PolicyStore, TokenKind, TrustedIssuer,
+    super::cedar_schema::CedarSchemaJson, parse_maybe_cedar_version, parse_option_string,
+    trusted_issuer_metadata::TrustedIssuerMetadata, CedarSchema, PolicyStore, TokenKind,
+    TrustedIssuer,
 };
 use base64::prelude::*;
 use cedar_policy::{Policy, PolicyId, PolicySet, Schema};
 use semver::Version;
 use serde::{de, Deserialize};
-use std::{collections::HashMap, str::FromStr};
+use std::collections::HashMap;
 
 // Policy Stores from the Agama Policy Designer
 #[derive(Debug, PartialEq)]
@@ -30,13 +31,15 @@ pub struct AgamaPolicyContent {
 
 #[derive(Deserialize)]
 struct RawAgamaPolicyStores {
-    cedar_version: Option<String>,
+    #[serde(deserialize_with = "parse_maybe_cedar_version")]
+    cedar_version: Option<Version>,
     policy_stores: HashMap<String, RawAgamaPolicyStore>,
 }
 
 #[derive(Deserialize)]
 struct RawAgamaPolicyStore {
     pub name: String,
+    #[serde(deserialize_with = "parse_option_string")]
     pub description: Option<String>,
     policies: HashMap<String, RawAgamaCedarPolicy>,
     /// Base64 encoded JSON Cedar Schema
@@ -91,17 +94,8 @@ impl<'de> Deserialize<'de> for AgamaPolicyStore {
             }
 
             let name = policy_store.name;
-            let description = policy_store.description.filter(|v| v != "");
 
-            // Convert String to Semver
-            let cedar_version = match raw_policy_stores.cedar_version {
-                Some(version) => {
-                    let version = version.strip_prefix('v').unwrap_or(&version);
-                    Some(Version::from_str(version).map_err(de::Error::custom)?)
-                },
-                None => None,
-            };
-
+            // Deserialize Base64 encoded schema into CedarSchema
             let decoded_schema = decode_b64_string::<D>(policy_store.encoded_schema)?;
             let schema = Schema::from_json_str(&decoded_schema).map_err(de::Error::custom)?;
             let json = serde_json::from_str::<CedarSchemaJson>(&decoded_schema)
@@ -113,8 +107,8 @@ impl<'de> Deserialize<'de> for AgamaPolicyStore {
             // one policy store at a time.
             return Ok(AgamaPolicyStore {
                 name,
-                description,
-                cedar_version,
+                description: policy_store.description,
+                cedar_version: raw_policy_stores.cedar_version,
                 policies,
                 cedar_schema,
                 trusted_issuers: policy_store.trusted_issuers,
