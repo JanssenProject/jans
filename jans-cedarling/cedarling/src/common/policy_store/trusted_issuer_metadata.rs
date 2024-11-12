@@ -84,7 +84,52 @@ mod test {
 
         assert_eq!(
             parsed, expected,
-            "Expected to parse Trusted Issuer Metadata to be parsed correctly: {:?}",
+            "Expected to parse Trusted Issuer Metadata to be parsed correctly from JSON: {:?}",
+            parsed
+        );
+    }
+
+    #[test]
+    fn can_parse_from_yaml() {
+        let metadata_yaml = "
+            name: 'Google'
+            description: 'Consumer IDP'
+            openid_configuration_endpoint: 'https://accounts.google.com/.well-known/openid-configuration'
+            access_tokens:
+                user_id: ''
+                role_mapping: ''
+                claim_mapping: {}
+            id_tokens:
+                user_id: 'sub'
+                role_mapping: 'role'
+                claim_mapping: {}
+            userinfo_tokens:
+                user_id: ''
+                role_mapping: ''
+                claim_mapping: {}
+        ";
+
+        let parsed = serde_yml::from_str::<TrustedIssuerMetadata>(&metadata_yaml)
+            .expect("Should parse Trusted Issuer Metadata JSON");
+
+        let expected = TrustedIssuerMetadata {
+            name: "Google".to_string(),
+            description: "Consumer IDP".to_string(),
+            openid_configuration_endpoint:
+                "https://accounts.google.com/.well-known/openid-configuration".to_string(),
+            access_tokens: TokenEntityMetadata::default(),
+            id_tokens: TokenEntityMetadata {
+                user_id: Some("sub".to_string()),
+                role_mapping: Some("role".to_string()),
+                claim_mapping: None,
+            },
+            userinfo_tokens: TokenEntityMetadata::default(),
+            tx_tokens: TokenEntityMetadata::default(),
+        };
+
+        assert_eq!(
+            parsed, expected,
+            "Expected to parse Trusted Issuer Metadata to be parsed correctly from YAML: {:?}",
             parsed
         );
     }
