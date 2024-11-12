@@ -14,8 +14,6 @@ pub struct TrustedIssuerMetadata {
     /// A brief description of the trusted issuer.
     pub description: String,
 
-    /// The OpenID configuration endpoint for the issuer.
-
     /// This endpoint is used to obtain information about the issuer's capabilities.
     pub openid_configuration_endpoint: String,
 
