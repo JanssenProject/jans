@@ -86,29 +86,29 @@ mod test {
     use test_utils::assert_eq;
 
     #[test]
-    /// Tests if a token entity metadata with a regex parser can be parsed
+    /// Tests if a token entity metadata with a RegEx parser can be parsed
     /// from a JSON string
-    fn can_parse_token_entity_metadata_regex() {
+    fn can_parse_regex_from_json() {
         // Setup expected output
-        let mut expected_fields = HashMap::new();
-        expected_fields.insert(
-            "UID".to_string(),
-            RegexField {
-                attr: "uid".to_string(),
-                r#type: "string".to_string(),
-            },
-        );
-        expected_fields.insert(
-            "DOMAIN".to_string(),
-            RegexField {
-                attr: "domain".to_string(),
-                r#type: "string".to_string(),
-            },
-        );
         let expected = ClaimMapping::Regex {
             r#type: "Acme::Email".to_string(),
             regex_expression: r#"^(?P<UID>[^@]+)@(?P<DOMAIN>.+)$"#.to_string(),
-            fields: expected_fields,
+            fields: HashMap::from([
+                (
+                    "UID".to_string(),
+                    RegexField {
+                        attr: "uid".to_string(),
+                        r#type: "string".to_string(),
+                    },
+                ),
+                (
+                    "DOMAIN".to_string(),
+                    RegexField {
+                        attr: "domain".to_string(),
+                        r#type: "string".to_string(),
+                    },
+                ),
+            ]),
         };
 
         // Setup JSON
@@ -136,7 +136,7 @@ mod test {
     #[test]
     /// Tests if a token entity metadata with a JSON parser can be parsed
     /// from a JSON string
-    fn can_parse_token_entity_metadata_json() {
+    fn can_parse_json_from_json() {
         // Setup expected output
         let expected = ClaimMapping::Json {
             r#type: "Acme::Dolphin".to_string(),
@@ -154,6 +154,85 @@ mod test {
             .expect("should parse token entity metadata");
 
         // Assert if the JSON got parsed correctly
+        assert_eq!(
+            parsed, expected,
+            "Expected the Claim Mapping to be parsed correctly: {:?}",
+            parsed
+        );
+    }
+
+    #[test]
+    /// Tests if a token entity metadata with a RegEx parser can be parsed
+    /// from a YAML string
+    fn can_parse_regex_from_yaml() {
+        // Setup expected output
+        let expected = ClaimMapping::Regex {
+            r#type: "Acme::Email".to_string(),
+            regex_expression: r#"^(?P<UID>[^@]+)@(?P<DOMAIN>.+)$"#.to_string(),
+            fields: HashMap::from([
+                (
+                    "UID".to_string(),
+                    RegexField {
+                        attr: "uid".to_string(),
+                        r#type: "string".to_string(),
+                    },
+                ),
+                (
+                    "DOMAIN".to_string(),
+                    RegexField {
+                        attr: "domain".to_string(),
+                        r#type: "string".to_string(),
+                    },
+                ),
+            ]),
+        };
+
+        // Setup Yaml
+        let claim_mapping_json = "
+            parser: 'regex'
+            type: 'Acme::Email'
+            regex_expression: '^(?P<UID>[^@]+)@(?P<DOMAIN>.+)$'
+            UID:
+                attr: 'uid'
+                type: 'string'
+            DOMAIN:
+                attr: 'domain'
+                type: 'string'
+        ";
+
+        // Parse YAML
+        let parsed = serde_yml::from_str::<ClaimMapping>(&claim_mapping_json)
+            .expect("should parse token entity metadata");
+
+        // Assert if the JSON got parsed correctly
+        assert_eq!(
+            parsed, expected,
+            "Expected the Claim Mapping to be parsed correctly: {:?}",
+            parsed
+        );
+    }
+
+    #[test]
+    /// Tests if a token entity metadata with a JSON parser can be parsed
+    /// from a YAML string
+    fn can_parse_json_from_yaml() {
+        // Setup expected output
+        let expected = ClaimMapping::Json {
+            r#type: "Acme::Dolphin".to_string(),
+        };
+
+        // Setup YAML
+        let claim_mapping_yaml = "
+          parser: 'json'
+          type: 'Acme::Dolphin'
+        "
+        .to_string();
+
+        // Parse YAML
+        let parsed = serde_yml::from_str::<ClaimMapping>(&claim_mapping_yaml)
+            .expect("should parse token entity metadata");
+
+        // Assert if the YAML got parsed correctly
         assert_eq!(
             parsed, expected,
             "Expected the Claim Mapping to be parsed correctly: {:?}",
