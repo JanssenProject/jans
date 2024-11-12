@@ -9,7 +9,7 @@ use serde::{de, Deserialize};
 use std::{collections::HashMap, str::FromStr};
 
 // Policy Stores from the Agama Policy Designer
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 #[allow(dead_code)]
 pub struct AgamaPolicyStore {
     pub name: String,
@@ -18,23 +18,6 @@ pub struct AgamaPolicyStore {
     pub policies: HashMap<String, AgamaPolicyContent>,
     pub cedar_schema: CedarSchema,
     pub trusted_issuers: HashMap<String, TrustedIssuerMetadata>,
-}
-
-impl PartialEq for AgamaPolicyStore {
-    fn eq(&self, other: &Self) -> bool {
-        // We need to implement this custom check since cedar_policy::Schema
-        // does not implement PartialEq
-        //
-        // TODO: update this if ever cedar policy implements PartialEq
-        // on cedar_policy::Schema since this is too difficult to check
-        // right now... comparing the debug strings doesn't work either.
-        self.name == other.name
-            && self.description == other.description
-            && self.cedar_version == other.cedar_version
-            && self.policies == other.policies
-            && self.trusted_issuers == other.trusted_issuers
-            && self.cedar_schema.json == other.cedar_schema.json
-    }
 }
 
 // Policy Store from the Agama Policy Designer
@@ -261,52 +244,9 @@ permit
             trusted_issuers,
         };
 
-        // We split the asserts into multiple steps since it's
-        // difficult to read the error message for a struct this big
-        // whenever the assertion fails.
-
         assert_eq!(
-            parsed.name, expected.name,
-            "Expected name to be parsed correctly: {:?}",
-            parsed.name
+            parsed, expected,
+            "Expected to parse AgamaPolicyStore from YAML correctly."
         );
-
-        assert_eq!(
-            parsed.description, expected.description,
-            "Expected description to be parsed correctly: {:?}",
-            parsed.description
-        );
-
-        assert_eq!(
-            parsed.cedar_version, expected.cedar_version,
-            "Expected Cedar Version to be parsed correctly: {:?}",
-            parsed.cedar_version
-        );
-
-        for (policy_store_id, policy_store) in &expected.policies {
-            let parsed_policy_store = parsed
-                .policies
-                .get(&policy_store_id.clone())
-                .expect("Expected to find a policy store with the same id.");
-
-            assert_eq!(parsed_policy_store.description, policy_store.description);
-            assert_eq!(
-                parsed_policy_store.creation_date,
-                policy_store.creation_date
-            );
-            assert_eq!(
-                parsed_policy_store.policy_content,
-                policy_store.policy_content
-            );
-        }
-
-        for (trusted_issuer_id, trusted_issuer) in &expected.trusted_issuers {
-            let parsed_trusted_issuer = parsed
-                .trusted_issuers
-                .get(&trusted_issuer_id.clone())
-                .expect("Expected to find a trusted issuer with the same id.");
-
-            assert_eq!(parsed_trusted_issuer, trusted_issuer);
-        }
     }
 }
