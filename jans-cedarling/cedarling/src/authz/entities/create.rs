@@ -89,7 +89,7 @@ impl<'a> EntityParsedTypeName<'a> {
         if self.namespace.is_empty() {
             self.typename.to_string()
         } else {
-            vec![self.namespace, self.typename].join(CEDAR_POLICY_SEPARATOR)
+            [self.namespace, self.typename].join(CEDAR_POLICY_SEPARATOR)
         }
     }
 }
@@ -109,7 +109,7 @@ fn fetch_schema_record<'a>(
     schema: &'a CedarSchemaJson,
 ) -> Result<&'a CedarSchemaEntityShape, CedarPolicyCreateTypeError> {
     let entity_shape = schema
-        .entity_schema(&entity_info.namespace, entity_info.typename)
+        .entity_schema(entity_info.namespace, entity_info.typename)
         .ok_or(CedarPolicyCreateTypeError::CouldNotFindEntity(
             entity_info.typename.to_string(),
         ))?;
@@ -186,9 +186,9 @@ pub fn create_entity<'a>(
     parents: HashSet<EntityUid>,
 ) -> Result<cedar_policy::Entity, CedarPolicyCreateTypeError> {
     // fetch the schema entity shape from the json-schema.
-    let schema_shape = fetch_schema_record(&parsed_typename, schema)?;
+    let schema_shape = fetch_schema_record(parsed_typename, schema)?;
 
-    let attrs = build_entity_attributes(schema_shape, data, &parsed_typename.namespace)?;
+    let attrs = build_entity_attributes(schema_shape, data, parsed_typename.namespace)?;
 
     let entity_uid_string = entity_uid.to_string();
     cedar_policy::Entity::new(entity_uid, attrs, parents)
