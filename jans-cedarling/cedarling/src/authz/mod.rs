@@ -28,7 +28,7 @@ pub(crate) mod request;
 mod token_data;
 
 pub use authorize_result::AuthorizeResult;
-use cedar_policy::{Entities, Entity, EntityUid};
+use cedar_policy::{Entities, Entity, EntityUid, RequestValidationError, Response};
 use entities::CedarPolicyCreateTypeError;
 use entities::DecodeTokensResult;
 use entities::ResourceEntityError;
@@ -110,34 +110,34 @@ impl Authz {
         let entities = entities_data.entities(Some(&schema.schema))?;
 
         // Check authorize where principal is `"Jans::Workload"` from cedar-policy schema.
-        let workload_result = schema
-            .is_applies_to_action(&action, &principal_workload_uid)
-            .then_some(
-                //  if principal can be applied then make check
-                self.execute_authorize(ExecuteAuthorizeParameters {
-                    entities: &entities,
-                    principal: principal_workload_uid.clone(),
-                    action: action.clone(),
-                    resource: resource_uid.clone(),
-                    context: context.clone(),
-                })
-                .map_err(AuthorizeError::CreateRequestWorkloadEntity)?,
-            );
+        let workload_result: Option<Response> =
+            match self.execute_authorize(ExecuteAuthorizeParameters {
+                entities: &entities,
+                principal: principal_workload_uid.clone(),
+                action: action.clone(),
+                resource: resource_uid.clone(),
+                context: context.clone(),
+            }) {
+                Ok(resp) => Some(resp),
+                // if invalid principal than we no need result
+                Err(RequestValidationError::InvalidPrincipalType(_)) => None,
+                Err(err) => return Err(AuthorizeError::CreateRequestWorkloadEntity(err)),
+            };
 
         // Check authorize where principal is `"Jans::User"` from cedar-policy schema.
-        let person_result = schema
-            .is_applies_to_action(&action, &principal_user_entity_uid)
-            .then_some(
-                //  if principal can be applied then make check
-                self.execute_authorize(ExecuteAuthorizeParameters {
-                    entities: &entities,
-                    principal: principal_user_entity_uid.clone(),
-                    action: action.clone(),
-                    resource: resource_uid.clone(),
-                    context: context.clone(),
-                })
-                .map_err(AuthorizeError::CreateRequestUserEntity)?,
-            );
+        let person_result: Option<Response> =
+            match self.execute_authorize(ExecuteAuthorizeParameters {
+                entities: &entities,
+                principal: principal_user_entity_uid.clone(),
+                action: action.clone(),
+                resource: resource_uid.clone(),
+                context: context.clone(),
+            }) {
+                Ok(resp) => Some(resp),
+                // if invalid principal than we no need result
+                Err(RequestValidationError::InvalidPrincipalType(_)) => None,
+                Err(err) => return Err(AuthorizeError::CreateRequestUserEntity(err)),
+            };
 
         // role result for logging
         let mut role_authorize_log_results: Vec<RoleAuthorizeInfo> = Vec::new();
@@ -149,20 +149,28 @@ impl Authz {
 
             // iterate over list of role uids
             for role_uid in principal_role_entity_uids {
-                let tmp_result = self
-                    .execute_authorize(ExecuteAuthorizeParameters {
-                        entities: &entities,
-                        principal: role_uid.clone(),
-                        action: action.clone(),
-                        resource: resource_uid.clone(),
-                        context: context.clone(),
-                    })
-                    .map_err(|err| {
-                        AuthorizeError::CreateRequestRoleEntity(CreateRequestRoleError {
-                            uid: role_uid.clone(),
-                            err,
-                        })
-                    })?;
+                let tmp_result = match self.execute_authorize(ExecuteAuthorizeParameters {
+                    entities: &entities,
+                    principal: role_uid.clone(),
+                    action: action.clone(),
+                    resource: resource_uid.clone(),
+                    context: context.clone(),
+                }) {
+                    Ok(resp) => resp,
+                    // if invalid principal than we no need result
+                    Err(RequestValidationError::InvalidPrincipalType(_)) => {
+                        result = None;
+                        break;
+                    },
+                    Err(err) => {
+                        return Err(AuthorizeError::CreateRequestRoleEntity(
+                            CreateRequestRoleError {
+                                uid: role_uid.clone(),
+                                err,
+                            },
+                        ));
+                    },
+                };
 
                 let decision = tmp_result.decision();
 

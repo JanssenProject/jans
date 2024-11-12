@@ -12,10 +12,8 @@
 //! [cedar json schema grammar](https://docs.cedarpolicy.com/schema/json-schema-grammar.html) - documentation about json structure of cedar schema.
 
 use std::collections::HashMap;
-mod action_types;
 mod entity_types;
-use action_types::CedarActionElement;
-use cedar_policy::EntityUid;
+
 pub use entity_types::{CedarSchemaEntityShape, CedarSchemaRecord};
 
 /// Represent `cedar-policy` schema type for external usage.
@@ -52,39 +50,6 @@ impl CedarSchemaJson {
         let namespace = self.namespace.get(namespace)?;
         namespace.entity_types.get(typename)
     }
-
-    /// check if action applies to entity uid
-    pub fn is_applies_to_action(&self, action_uid: &EntityUid, entity_uid: &EntityUid) -> bool {
-        let action_typename = action_uid.type_name();
-        let element = entity_uid.type_name();
-
-        let action_namespace = action_typename.namespace();
-        if action_namespace == element.namespace() {
-            return true;
-        }
-
-        if let Some(namespace_entities) = self.namespace.get(action_namespace.as_str()) {
-            if let Some(action_element) = namespace_entities.actions.get(action_typename.basename())
-            {
-                // check if element is can be applied to resource of action
-                let resource_exist = action_element
-                    .applies_to
-                    .resource_types
-                    .contains(element.basename());
-
-                // check if element is can be applied to principal of action
-                let principal_exist = action_element
-                    .applies_to
-                    .principal_types
-                    .contains(element.basename());
-
-                // return true if any of values is true
-                return resource_exist || principal_exist;
-            }
-        }
-
-        false
-    }
 }
 
 /// CedarSchemaEntities hold all entities and their shapes in the namespace.
@@ -94,14 +59,11 @@ impl CedarSchemaJson {
 pub struct CedarSchemaEntities {
     #[serde(rename = "entityTypes")]
     pub entity_types: HashMap<String, CedarSchemaEntityShape>,
-    pub actions: HashMap<String, CedarActionElement>,
 }
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashSet;
 
-    use super::action_types::*;
     use super::entity_types::*;
 
     use super::*;
@@ -187,18 +149,6 @@ mod tests {
                         ("Role".to_string(), CedarSchemaEntityShape { shape: None }),
                         ("Issue".to_string(), CedarSchemaEntityShape { shape: None }),
                     ]),
-                    actions: HashMap::from_iter(vec![(
-                        "Update".to_string(),
-                        CedarActionElement {
-                            applies_to: CedarActionAppliesTo {
-                                principal_types: HashSet::from_iter(vec![
-                                    "Access_token".to_string(),
-                                    "Role".to_string(),
-                                ]),
-                                resource_types: HashSet::from_iter(vec!["Issue".to_string()]),
-                            },
-                        },
-                    )]),
                 },
             )]),
         };
