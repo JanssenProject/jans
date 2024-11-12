@@ -147,7 +147,7 @@ def merge_extension_ctx(ctx: dict[str, _t.Any]) -> dict[str, _t.Any]:
 
 
 def merge_auth_ctx(ctx):
-    if os.environ.get("CN_PERSISTENCE_TYPE") in ("sql", "spanner"):
+    if os.environ.get("CN_PERSISTENCE_TYPE") == "sql":
         ctx["person_custom_object_class_list"] = "[]"
     else:
         ctx["person_custom_object_class_list"] = '["jansCustomPerson", "jansPerson"]'

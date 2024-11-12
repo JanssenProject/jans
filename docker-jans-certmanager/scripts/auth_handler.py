@@ -8,7 +8,6 @@ from collections import deque
 
 from jans.pycloudlib.persistence.couchbase import CouchbaseClient
 from jans.pycloudlib.persistence.sql import SqlClient
-from jans.pycloudlib.persistence.spanner import SpannerClient
 from jans.pycloudlib.persistence.utils import PersistenceMapper
 from jans.pycloudlib.utils import encode_text
 from jans.pycloudlib.utils import exec_cmd
@@ -138,15 +137,9 @@ class SqlPersistence(BasePersistence):
         return modified
 
 
-class SpannerPersistence(SqlPersistence):
-    def __init__(self, manager):
-        self.client = SpannerClient(manager)
-
-
 _backend_classes = {
     "couchbase": CouchbasePersistence,
     "sql": SqlPersistence,
-    "spanner": SpannerPersistence,
 }
 
 

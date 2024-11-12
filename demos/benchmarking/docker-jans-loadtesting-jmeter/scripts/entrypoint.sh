@@ -8,12 +8,6 @@ if [[ "$LOAD_USERS_TO_COUCHBASE" = "true" ]]; then
   /usr/bin/python3 /scripts/add_users_couchbase.py
   exit 0
 # ================================================================================================ #
-# Check if this is a  user loading job to  the backend spanner                                     #
-# ================================================================================================ #
-elif [[ "$LOAD_USERS_TO_SPANNER" = "true" ]]; then
-  /usr/bin/python3 /scripts/add_users_spanner.py
-  exit 0
-# ================================================================================================ #
 # Check if this is a  user loading job to  the backend RDBMS                                     #
 # ================================================================================================ #
 elif [[ "$LOAD_USERS_TO_RDBMS" = "true" ]]; then
