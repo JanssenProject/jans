@@ -12,7 +12,9 @@ import io.jans.as.model.common.GrantType;
 import io.jans.as.model.common.ScopeType;
 import io.jans.as.model.uma.wrapper.Token;
 import io.jans.as.model.util.Util;
+import io.jans.configapi.service.HttpService;
 import io.jans.configapi.service.ResteasyService;
+
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -105,11 +107,15 @@ public class BaseTest {
     private Base64 base64;
     private static Map<String, String> propertiesMap = null;
     private ResteasyService resteasyService;
+    private HttpService httpService;
+    protected String accessToken; 
 
     @BeforeSuite
     public void initTestSuite(ITestContext context) throws Exception {
 
         resteasyService = new ResteasyService();
+        httpService = new HttpService();
+         
         log.info("Invoked initTestSuite of '{}'", context.getCurrentXmlTest().getName());
         String propertiesFile = context.getCurrentXmlTest().getParameter("propertiesFile");
         Properties prop = new Properties();
@@ -118,6 +124,9 @@ public class BaseTest {
         propertiesMap = new Hashtable<>();
         prop.forEach((key, value) -> propertiesMap.put(key.toString(), value.toString()));
         context.getSuite().getXmlSuite().setParameters(propertiesMap);
+        
+        //accessToken
+        
 
     }
 
@@ -128,7 +137,7 @@ public class BaseTest {
     }
 
     @BeforeTest
-    public String getAccessToken() throws Exception {
+    public void getAccessToken() throws Exception {
         String tokenUrl = propertiesMap.get("token.endpoint");
         String strGrantType = propertiesMap.get("token.grant.type");
         String clientId = propertiesMap.get("test.client.id");
@@ -139,8 +148,8 @@ public class BaseTest {
         String token = new String(Base64.decodeBase64(authStr), StandardCharsets.UTF_8);
         String encodedScopes = URLDecoder.decode(scopes, "UTF-8");
         GrantType grantType = GrantType.fromString(strGrantType);
-        String accessToken = getToken(tokenUrl, clientId, clientSecret, grantType, scopes);
-       return accessToken;
+        accessToken = getToken(tokenUrl, clientId, clientSecret, grantType, scopes);
+        log.error("accessToken:{}", accessToken);
     }
     
     public String getToken(final String tokenUrl, final String clientId, final String clientSecret,
@@ -190,5 +199,16 @@ public class BaseTest {
         }
         return null;
     }
+    
+    
+    protected HttpService getHttpService() {
+        return this.httpService;
+    }
+    
+    
+    protected ResteasyService getResteasyService() {
+        return this.resteasyService;
+    }
+    
 
 }

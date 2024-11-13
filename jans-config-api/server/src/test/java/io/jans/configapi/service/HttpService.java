@@ -160,6 +160,10 @@ public class HttpService implements Serializable {
         if (StringHelper.isNotEmpty(authData)) {
             httpPost.setHeader("Authorization", authType + authData);
         }
+        
+        if(contentType==null) {
+            contentType = ContentType.APPLICATION_JSON;
+        }
 
         if (headers != null) {
             for (Entry<String, String> headerEntry : headers.entrySet()) {

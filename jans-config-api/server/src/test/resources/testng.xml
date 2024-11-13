@@ -2,20 +2,18 @@
 
 <suite name="Config-API" parallel="false">
 
-    <parameter name="propertiesFile" value="target/test-classes/testng.properties" />
+    <parameter name="propertiesFile" value="target/test-classes/config-api-test.properties" />
     
 
-    <test name="Metric Test" enabled="true">
+    <test name="Auth Server Config" enabled="true">
         <classes>
-            <class name="io.jans.configapi.metric.ATest" />
-            <class name="io.jans.configapi.metric.BTest" />
+            <class name="io.jans.configapi.test.ConfigResourceTest" />
         </classes>
     </test>
 
-    <test name="Health Test" enabled="true">
+    <test name="Openid Client" enabled="true">
         <classes>
-             <class name="io.jans.configapi.health.LiveTest" />
-            <class name="io.jans.configapi.health.ReadyTest" />
+             <class name="io.jans.configapi.test.ClientResourceTest" />
         </classes>
     </test>
 
