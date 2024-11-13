@@ -2309,8 +2309,6 @@
         
           
         
-          
-        
       
       
         <label class="md-nav__link" for="__nav_1_7_2">
@@ -2459,20 +2457,6 @@
     <li class="md-nav__item">
       <a href="../../../auth-server-config/cache-configuration/" class="md-nav__link">
         Cache Configuration
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../auth-server-config/couchbase-configuration/" class="md-nav__link">
-        Couchbase Configuration
       </a>
     </li>
   
@@ -2670,8 +2654,6 @@
         
           
         
-          
-        
       
       
         
@@ -2731,95 +2713,12 @@
       
       
         <label class="md-nav__link" for="__nav_1_8_3">
-          Couchbase
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="Couchbase" data-md-level="3">
-        <label class="md-nav__title" for="__nav_1_8_3">
-          <span class="md-nav__icon md-icon"></span>
-          Couchbase
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../../reference/database/cb-config/" class="md-nav__link">
-        Couchbase Configuration
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../../reference/database/cb-ops/" class="md-nav__link">
-        Couchbase Operation
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../../reference/database/cb-buckets/" class="md-nav__link">
-        Couchbase Buckets
-      </a>
-    </li>
-  
-
-            
-          
-        </ul>
-      </nav>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_8_4" type="checkbox" id="__nav_1_8_4" >
-      
-      
-      
-        
-          
-        
-          
-        
-          
-        
-      
-      
-        <label class="md-nav__link" for="__nav_1_8_4">
           MySQL
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <nav class="md-nav" aria-label="MySQL" data-md-level="3">
-        <label class="md-nav__title" for="__nav_1_8_4">
+        <label class="md-nav__title" for="__nav_1_8_3">
           <span class="md-nav__icon md-icon"></span>
           MySQL
         </label>
@@ -2883,7 +2782,7 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_8_5" type="checkbox" id="__nav_1_8_5" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_8_4" type="checkbox" id="__nav_1_8_4" >
       
       
       
@@ -2898,13 +2797,13 @@
         
       
       
-        <label class="md-nav__link" for="__nav_1_8_5">
+        <label class="md-nav__link" for="__nav_1_8_4">
           PostgreSQL
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <nav class="md-nav" aria-label="PostgreSQL" data-md-level="3">
-        <label class="md-nav__title" for="__nav_1_8_5">
+        <label class="md-nav__title" for="__nav_1_8_4">
           <span class="md-nav__icon md-icon"></span>
           PostgreSQL
         </label>
@@ -8760,7 +8659,7 @@
   <h1>Plugins</h1>
 
 <h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">#</a></h2>
-<p><a href="https://github.com/JanssenProject/jans/tree/v1.1.6.nightly/jans-config-api">Jans Config Api</a> is a REST application that is developed using Weld 4.x (JSR-365) and JAX-RS. Its endpoint can be used to manage configuration and other properties of <a href="https://github.com/JanssenProject/jans/tree/v1.1.6.nightly/jans-auth-server">Jans Auth Server</a>.</p>
+<p><a href="https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-config-api">Jans Config Api</a> is a REST application that is developed using Weld 4.x (JSR-365) and JAX-RS. Its endpoint can be used to manage configuration and other properties of <a href="https://github.com/JanssenProject/jans/tree/vreplace-janssen-version/jans-auth-server">Jans Auth Server</a>.</p>
 <h2 id="jans-config-api-plugins">Jans Config API Plugins<a class="headerlink" href="#jans-config-api-plugins" title="Permanent link">#</a></h2>
 <p>Jans Config API follow a flexible plugin architecture in which the new features can be added using extensions called plugins without altering the application itself. In this section, we will discuss the steps to develop and add plugins in Jans Config API.</p>
 <p>The plugin architecture implemented in Jans Config API allows the deployer to add/remove new rest APIs (plugin) without changing the core application. 

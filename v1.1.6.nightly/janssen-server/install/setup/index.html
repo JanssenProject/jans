@@ -2254,8 +2254,6 @@
         
           
         
-          
-        
       
       
         <label class="md-nav__link" for="__nav_1_7_2">
@@ -2404,20 +2402,6 @@
     <li class="md-nav__item">
       <a href="../../config-guide/auth-server-config/cache-configuration/" class="md-nav__link">
         Cache Configuration
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../config-guide/auth-server-config/couchbase-configuration/" class="md-nav__link">
-        Couchbase Configuration
       </a>
     </li>
   
@@ -2615,8 +2599,6 @@
         
           
         
-          
-        
       
       
         
@@ -2676,95 +2658,12 @@
       
       
         <label class="md-nav__link" for="__nav_1_8_3">
-          Couchbase
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="Couchbase" data-md-level="3">
-        <label class="md-nav__title" for="__nav_1_8_3">
-          <span class="md-nav__icon md-icon"></span>
-          Couchbase
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/database/cb-config/" class="md-nav__link">
-        Couchbase Configuration
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/database/cb-ops/" class="md-nav__link">
-        Couchbase Operation
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../reference/database/cb-buckets/" class="md-nav__link">
-        Couchbase Buckets
-      </a>
-    </li>
-  
-
-            
-          
-        </ul>
-      </nav>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_8_4" type="checkbox" id="__nav_1_8_4" >
-      
-      
-      
-        
-          
-        
-          
-        
-          
-        
-      
-      
-        <label class="md-nav__link" for="__nav_1_8_4">
           MySQL
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <nav class="md-nav" aria-label="MySQL" data-md-level="3">
-        <label class="md-nav__title" for="__nav_1_8_4">
+        <label class="md-nav__title" for="__nav_1_8_3">
           <span class="md-nav__icon md-icon"></span>
           MySQL
         </label>
@@ -2828,7 +2727,7 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_8_5" type="checkbox" id="__nav_1_8_5" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_8_4" type="checkbox" id="__nav_1_8_4" >
       
       
       
@@ -2843,13 +2742,13 @@
         
       
       
-        <label class="md-nav__link" for="__nav_1_8_5">
+        <label class="md-nav__link" for="__nav_1_8_4">
           PostgreSQL
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <nav class="md-nav" aria-label="PostgreSQL" data-md-level="3">
-        <label class="md-nav__title" for="__nav_1_8_5">
+        <label class="md-nav__title" for="__nav_1_8_4">
           <span class="md-nav__icon md-icon"></span>
           PostgreSQL
         </label>
@@ -8671,7 +8570,7 @@ Enter Password <span class="k">for</span> Admin User:
 </code></pre></div>
 <ol>
 <li>
-<p>Next, pick a persistence mechanism. Choose from MySQL, PGSql that can be installed locally or remotely, or Couchbase, an enterprise NoSQL cloud database.</p>
+<p>Next, pick a persistence mechanism. Choose from MySQL, PGSql that can be installed locally or remotely.</p>
 </li>
 <li>
 <p>Next, pick which services should be installed for this deployment:</p>
@@ -8713,18 +8612,22 @@ Install Gluu Casa? [No] :</code></p>
 <p>To check usage of this script run help command
 <div class="highlight"><pre><span></span><code>python3 /opt/jans/jans-setup/setup.py --help
 </code></pre></div></p>
-<div class="highlight"><pre><span></span><code>usage: setup.py [-h] [--version] [-c] [-d D] [-f F] [-n] [-N] [-u] [-csx] [-encode-salt ENCODE_SALT] [-remote-rdbm {mysql,pgsql} | -local-rdbm {mysql,pgsql}] [-ip-address IP_ADDRESS]
-                [-host-name HOST_NAME] [-org-name ORG_NAME] [-email EMAIL] [-city CITY] [-state STATE] [-country COUNTRY] [-rdbm-user RDBM_USER] [-rdbm-password RDBM_PASSWORD] [-rdbm-port RDBM_PORT]
-                [-rdbm-db RDBM_DB] [-rdbm-host RDBM_HOST] [--reset-rdbm-db] [--shell] [--dump-config-on-error] [--no-progress] [-admin-password ADMIN_PASSWORD] [-jans-max-mem JANS_MAX_MEM]
-                [-properties-password PROPERTIES_PASSWORD] [-approved-issuer APPROVED_ISSUER] [--force-download] [--download-exit] [-jans-app-version JANS_APP_VERSION] [-jans-build JANS_BUILD]
-                [-setup-branch SETUP_BRANCH] [--disable-config-api-security] [--cli-test-client] [--import-ldif IMPORT_LDIF] [-enable-script ENABLE_SCRIPT] [-disable-script DISABLE_SCRIPT]
-                [-java-version {11,17}] [-stm] [-w] [-t] [-x] [--allow-pre-released-features] [--remote-couchbase] [--local-couchbase] [-couchbase-admin-user COUCHBASE_ADMIN_USER]
-                [-couchbase-admin-password COUCHBASE_ADMIN_PASSWORD] [-couchbase-bucket-prefix COUCHBASE_BUCKET_PREFIX] [-couchbase-hostname COUCHBASE_HOSTNAME]
-                [-couchbase-default-mem COUCHBASE_DEFAULT_MEM] [-couchbase-user-mem COUCHBASE_USER_MEM] [-couchbase-site-mem COUCHBASE_SITE_MEM] [-couchbase-cache-mem COUCHBASE_CACHE_MEM]
-                [-couchbase-token-mem COUCHBASE_TOKEN_MEM] [-couchbase-session-mem COUCHBASE_SESSION_MEM] [--no-data] [--no-jsauth] [--no-config-api] [--no-scim] [--no-fido2] [--install-jans-ldap-link]
-                [--install-jans-keycloak-link] [--with-casa] [--install-jans-saml] [--install-jans-lock] [--install-opa] [--load-config-api-test] [-config-patch-creds CONFIG_PATCH_CREDS]
-                 [-test-client-id TEST_CLIENT_ID] [-test-client-pw TEST_CLIENT_PW]
-                [-test-client-redirect-uri TEST_CLIENT_REDIRECT_URI] [--test-client-trusted]
+<div class="highlight"><pre><span></span><code>usage: jans_setup.py [-h] [--version] [-c] [-d D] [-f F] [-n] [-N] [-u] [-csx] [-encode-salt ENCODE_SALT]
+                     [-remote-rdbm {mysql,pgsql} | -local-rdbm {mysql,pgsql}] [-ip-address IP_ADDRESS]
+                     [-host-name HOST_NAME] [-org-name ORG_NAME] [-email EMAIL] [-city CITY] [-state STATE]
+                     [-country COUNTRY] [-rdbm-user RDBM_USER] [-rdbm-password RDBM_PASSWORD] [-rdbm-port RDBM_PORT]
+                     [-rdbm-db RDBM_DB] [-rdbm-host RDBM_HOST] [--reset-rdbm-db] [--shell] [--dump-config-on-error]
+                     [--no-progress] [-admin-password ADMIN_PASSWORD] [-jans-max-mem JANS_MAX_MEM]
+                     [-properties-password PROPERTIES_PASSWORD] [-approved-issuer APPROVED_ISSUER] [--force-download]
+                     [--download-exit] [-jans-app-version JANS_APP_VERSION] [-jans-build JANS_BUILD]
+                     [-setup-branch SETUP_BRANCH] [--disable-config-api-security] [--cli-test-client]
+                     [--import-ldif IMPORT_LDIF] [-enable-script ENABLE_SCRIPT] [-disable-script DISABLE_SCRIPT]
+                     [-java-version {11,17}] [-stm] [-w] [-t] [-x] [--allow-pre-released-features] [--no-data]
+                     [--no-jsauth] [--no-config-api] [--no-scim] [--no-fido2] [--install-jans-ldap-link]
+                     [--install-jans-keycloak-link] [--with-casa] [--install-jans-saml] [--install-jans-lock]
+                     [--install-opa] [--load-config-api-test] [-config-patch-creds CONFIG_PATCH_CREDS]
+                     [-test-client-id TEST_CLIENT_ID] [-test-client-pw TEST_CLIENT_PW]
+                     [-test-client-redirect-uri TEST_CLIENT_REDIRECT_URI] [--test-client-trusted]
 </code></pre></div>
 <p>Use this script to configure your Jans Server and to add initial data. If setup.properties is found in this folder, these properties will automatically be used instead of the interactive setup.</p>
 <p>Below are the optional arguments:</p>
@@ -8925,30 +8828,6 @@ Install Gluu Casa? [No] :</code></p>
 <td>Enable options to install experimental features, not yet officially supported</td>
 </tr>
 <tr>
-<td>--remote-couchbase</td>
-<td>Enables using remote couchbase server</td>
-</tr>
-<tr>
-<td>--local-couchbase</td>
-<td>Enables installing couchbase server</td>
-</tr>
-<tr>
-<td>-couchbase-admin-user COUCHBASE_ADMIN_USER</td>
-<td>Couchbase admin user</td>
-</tr>
-<tr>
-<td>-couchbase-admin-password COUCHBASE_ADMIN_PASSWORD</td>
-<td>Couchbase admin user password</td>
-</tr>
-<tr>
-<td>-couchbase-bucket-prefix COUCHBASE_BUCKET_PREFIX</td>
-<td>Set prefix for couchbase buckets</td>
-</tr>
-<tr>
-<td>-couchbase-hostname COUCHBASE_HOSTNAME</td>
-<td>Remote couchbase server hostname</td>
-</tr>
-<tr>
 <td>--no-data</td>
 <td>Do not import any data to database backend, used for clustering</td>
 </tr>
@@ -9012,7 +8891,7 @@ Install Gluu Casa? [No] :</code></p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-11-07T09:23:20+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-11-07</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-11-13T10:58:04+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-11-13</span>
       
         <br>
         Created:

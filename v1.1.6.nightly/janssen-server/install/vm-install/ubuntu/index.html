@@ -2298,8 +2298,6 @@
         
           
         
-          
-        
       
       
         <label class="md-nav__link" for="__nav_1_7_2">
@@ -2448,20 +2446,6 @@
     <li class="md-nav__item">
       <a href="../../../config-guide/auth-server-config/cache-configuration/" class="md-nav__link">
         Cache Configuration
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../config-guide/auth-server-config/couchbase-configuration/" class="md-nav__link">
-        Couchbase Configuration
       </a>
     </li>
   
@@ -2659,8 +2643,6 @@
         
           
         
-          
-        
       
       
         
@@ -2720,95 +2702,12 @@
       
       
         <label class="md-nav__link" for="__nav_1_8_3">
-          Couchbase
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="Couchbase" data-md-level="3">
-        <label class="md-nav__title" for="__nav_1_8_3">
-          <span class="md-nav__icon md-icon"></span>
-          Couchbase
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../reference/database/cb-config/" class="md-nav__link">
-        Couchbase Configuration
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../reference/database/cb-ops/" class="md-nav__link">
-        Couchbase Operation
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../../reference/database/cb-buckets/" class="md-nav__link">
-        Couchbase Buckets
-      </a>
-    </li>
-  
-
-            
-          
-        </ul>
-      </nav>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_8_4" type="checkbox" id="__nav_1_8_4" >
-      
-      
-      
-        
-          
-        
-          
-        
-          
-        
-      
-      
-        <label class="md-nav__link" for="__nav_1_8_4">
           MySQL
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <nav class="md-nav" aria-label="MySQL" data-md-level="3">
-        <label class="md-nav__title" for="__nav_1_8_4">
+        <label class="md-nav__title" for="__nav_1_8_3">
           <span class="md-nav__icon md-icon"></span>
           MySQL
         </label>
@@ -2872,7 +2771,7 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_8_5" type="checkbox" id="__nav_1_8_5" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_8_4" type="checkbox" id="__nav_1_8_4" >
       
       
       
@@ -2887,13 +2786,13 @@
         
       
       
-        <label class="md-nav__link" for="__nav_1_8_5">
+        <label class="md-nav__link" for="__nav_1_8_4">
           PostgreSQL
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <nav class="md-nav" aria-label="PostgreSQL" data-md-level="3">
-        <label class="md-nav__title" for="__nav_1_8_5">
+        <label class="md-nav__title" for="__nav_1_8_4">
           <span class="md-nav__icon md-icon"></span>
           PostgreSQL
         </label>
@@ -8757,54 +8656,54 @@
 <li>Download the release package from the Github Janssen Project
 <a href="https://github.com/JanssenProject/jans/releases">Releases</a></li>
 </ul>
-<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/v1.1.6.nightly/jans_1.1.6.nightly.ubuntu22.04_amd64.deb -P /tmp
+<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version.ubuntu22.04_amd64.deb -P /tmp
 </code></pre></div>
 <ul>
 <li>
 <p>Verify integrity of the downloaded package by verifying published <code>sha256sum</code>.   </p>
 <p>Download <code>sha256sum</code> file for the package</p>
-<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/v1.1.6.nightly/jans_1.1.6.nightly.ubuntu22.04_amd64.deb.sha256sum -P /tmp
+<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version.ubuntu22.04_amd64.deb.sha256sum -P /tmp
 </code></pre></div>
 <p>Check the hash if it is matching.</p>
 <div class="highlight"><pre><span></span><code><span class="nb">cd</span> /tmp
-sha256sum -c jans_1.1.6.nightly.ubuntu22.04_amd64.deb.sha256sum
+sha256sum -c jans_replace-janssen-version.ubuntu22.04_amd64.deb.sha256sum
 </code></pre></div>
 <p>Output similar to below should confirm the integrity of the downloaded package.</p>
-<div class="highlight"><pre><span></span><code>jans_1.1.6.nightly.ubuntu22.04_amd64.deb.sha256sum: OK
+<div class="highlight"><pre><span></span><code>jans_replace-janssen-version.ubuntu22.04_amd64.deb.sha256sum: OK
 </code></pre></div>
 </li>
 <li>
 <p>Install the package</p>
 </li>
 </ul>
-<div class="highlight"><pre><span></span><code>sudo apt install  ./jans_1.1.6.nightly.ubuntu22.04_amd64.deb
+<div class="highlight"><pre><span></span><code>sudo apt install  ./jans_replace-janssen-version.ubuntu22.04_amd64.deb
 </code></pre></div>
 <h3 id="ubuntu-2004">Ubuntu 20.04<a class="headerlink" href="#ubuntu-2004" title="Permanent link">#</a></h3>
 <ul>
 <li>Download the release package from the Github Janssen Project
 <a href="https://github.com/JanssenProject/jans/releases">Releases</a></li>
 </ul>
-<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/v1.1.6.nightly/jans_1.1.6.nightly.ubuntu20.04_amd64.deb -P /tmp
+<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version.ubuntu20.04_amd64.deb -P /tmp
 </code></pre></div>
 <ul>
 <li>
 <p>Verify integrity of the downloaded package by verifying published <code>sha256sum</code>.   </p>
 <p>Download <code>sha256sum</code> file for the package</p>
-<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/v1.1.6.nightly/jans_1.1.6.nightly.ubuntu20.04_amd64.deb.sha256sum -P /tmp
+<div class="highlight"><pre><span></span><code>wget https://github.com/JanssenProject/jans/releases/download/vreplace-janssen-version/jans_replace-janssen-version.ubuntu20.04_amd64.deb.sha256sum -P /tmp
 </code></pre></div>
 <p>Check the hash if it is matching.</p>
 <div class="highlight"><pre><span></span><code><span class="nb">cd</span> /tmp
-sha256sum -c jans_1.1.6.nightly.ubuntu20.04_amd64.deb.sha256sum
+sha256sum -c jans_replace-janssen-version.ubuntu20.04_amd64.deb.sha256sum
 </code></pre></div>
 <p>Output similar to below should confirm the integrity of the downloaded package.</p>
-<div class="highlight"><pre><span></span><code>jans_1.1.6.nightly.ubuntu20.04_amd64.deb.sha256sum: OK
+<div class="highlight"><pre><span></span><code>jans_replace-janssen-version.ubuntu20.04_amd64.deb.sha256sum: OK
 </code></pre></div>
 </li>
 <li>
 <p>Install the package</p>
 </li>
 </ul>
-<div class="highlight"><pre><span></span><code>sudo apt install  ./jans_1.1.6.nightly.ubuntu20.04_amd64.deb
+<div class="highlight"><pre><span></span><code>sudo apt install  ./jans_replace-janssen-version.ubuntu20.04_amd64.deb
 </code></pre></div>
 <h2 id="run-the-setup-script">Run the setup script<a class="headerlink" href="#run-the-setup-script" title="Permanent link">#</a></h2>
 <ul>
@@ -8888,7 +8787,7 @@ The following packages will be REMOVED:
 After this operation, 1631 MB disk space will be freed.
 Do you want to continue? [Y/n] y
 (Reading database ... 166839 files and directories currently installed.)
-Removing jans (1.1.6.nightly~ubuntu20.04) ...
+Removing jans (replace-janssen-version~ubuntu20.04) ...
 Checking to make sure service is down...
 </code></pre></div>
 
