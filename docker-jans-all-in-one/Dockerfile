@@ -58,7 +58,7 @@ RUN apk update \
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=6e00e723a99d700a4f82713b0c25b2d6e3ef5775
+ENV JANS_SOURCE_VERSION=89f42d9272fc2ba34f98d16d8b3cc2b07dc49ae8
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the assets
@@ -211,8 +211,6 @@ ENV JETTY_BASE=/opt/jans/jetty \
     CN_LINK_JAVA_OPTIONS="" \
     CN_SHARE_AUTH_CONF=false \
     CN_SQL_PASSWORD_FILE=/etc/jans/conf/sql_password \
-    CN_COUCHBASE_PASSWORD_FILE=/etc/jans/conf/couchbase_password \
-    CN_COUCHBASE_SUPERUSER_PASSWORD_FILE=/etc/jans/conf/couchbase_superuser_password \
     CN_KEYCLOAK_LINK_JETTY_HOST=127.0.0.1 \
     CN_KEYCLOAK_LINK_JETTY_PORT=9092 \
     CN_KEYCLOAK_LINK_JAVA_OPTIONS="" \

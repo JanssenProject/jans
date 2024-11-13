@@ -9,11 +9,6 @@ from string import Template
 
 from jans.pycloudlib import get_manager
 from jans.pycloudlib import wait_for_persistence
-from jans.pycloudlib.persistence.couchbase import CouchbaseClient
-from jans.pycloudlib.persistence.couchbase import render_couchbase_properties
-from jans.pycloudlib.persistence.couchbase import sync_couchbase_cert
-from jans.pycloudlib.persistence.couchbase import sync_couchbase_password
-from jans.pycloudlib.persistence.couchbase import sync_couchbase_truststore
 from jans.pycloudlib.persistence.hybrid import render_hybrid_properties
 from jans.pycloudlib.persistence.sql import render_sql_properties
 from jans.pycloudlib.persistence.sql import SqlClient
@@ -55,18 +50,6 @@ def main():
         hybrid_prop = "/etc/jans/conf/jans-hybrid.properties"
         if not os.path.exists(hybrid_prop):
             render_hybrid_properties(hybrid_prop)
-
-    if "couchbase" in persistence_groups:
-        sync_couchbase_password(manager)
-        render_couchbase_properties(
-            manager,
-            "/app/templates/jans-couchbase.properties",
-            "/etc/jans/conf/jans-couchbase.properties",
-        )
-
-        if as_boolean(os.environ.get("CN_COUCHBASE_TRUSTSTORE_ENABLE", "true")):
-            sync_couchbase_cert(manager)
-            sync_couchbase_truststore(manager)
 
     if "sql" in persistence_groups:
         sync_sql_password(manager)
@@ -180,7 +163,6 @@ class PersistenceSetup:
         self.manager = manager
 
         client_classes = {
-            "couchbase": CouchbaseClient,
             "sql": SqlClient,
         }
 
