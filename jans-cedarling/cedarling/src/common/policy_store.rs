@@ -56,14 +56,14 @@ pub struct PolicyStore {
 impl PolicyStore {
     /// Loads a `PolicyStore` from a JSON string.
     pub fn load_from_json(json: &str) -> Result<Self, LoadPolicyStoreError> {
-        let json_store = serde_json::from_str::<PolicyStoreJson>(&json)
+        let json_store = serde_json::from_str::<PolicyStoreJson>(json)
             .map_err(LoadFromJsonError::Deserialization)?;
         json_store.try_into().map_err(LoadPolicyStoreError::Json)
     }
 
     /// Loads a `PolicyStore` from a YAML string.
     pub fn load_from_yaml(yaml: &str) -> Result<Self, LoadPolicyStoreError> {
-        let yaml_store = serde_yml::from_str::<PolicyStoreYaml>(&yaml)
+        let yaml_store = serde_yml::from_str::<PolicyStoreYaml>(yaml)
             .map_err(LoadFromYamlError::Deserialization)?;
         Ok(yaml_store.into())
     }

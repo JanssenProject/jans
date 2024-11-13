@@ -42,10 +42,8 @@ impl ServiceConfig {
         // and store both in the `TrustedIssuerAndOpenIdConfig` structure.
         let trusted_issuers_and_openid = policy_store
             .trusted_issuers
-            .iter()
-            .map(|(_iss_id, iss_metadata)| {
-                TrustedIssuerAndOpenIdConfig::fetch(iss_metadata.clone(), &client)
-            })
+            .values()
+            .map(|iss_metadata| TrustedIssuerAndOpenIdConfig::fetch(iss_metadata.clone(), &client))
             .collect::<Result<Vec<_>, _>>()?;
 
         let builder = ServiceConfig::builder()

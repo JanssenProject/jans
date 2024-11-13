@@ -103,7 +103,7 @@ where
 impl From<PolicyStoreYaml> for PolicyStore {
     fn from(yaml_store: PolicyStoreYaml) -> Self {
         let mut policy_set = PolicySet::new();
-        for (_id, policy) in &yaml_store.policies {
+        for policy in yaml_store.policies.values() {
             // this expect should never be called because we defined our
             // own policies when we parsed the policy store and they
             // never are template-linked.

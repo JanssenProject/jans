@@ -224,7 +224,7 @@ impl Authz {
 
         let response = self.authorizer.is_authorized(
             &request_principal_workload,
-            &self.config.policy_store.policy_set(),
+            self.config.policy_store.policy_set(),
             parameters.entities,
         );
 

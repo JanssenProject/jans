@@ -45,7 +45,7 @@ impl TryFrom<PolicyStoreJson> for PolicyStore {
                     .expect("Should have one policy store");
 
                 let mut policy_set = PolicySet::new();
-                for (_id, policy) in &store.policies {
+                for policy in store.policies.values() {
                     // this expect should never be called because we defined our
                     // own policies when we parsed the policy store and they
                     // never are template-linked.
