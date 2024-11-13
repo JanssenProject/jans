@@ -47,7 +47,6 @@ nav:
       - "Config": api/config.md
       - "Secret": api/secret.md
       - "Persistence":
-          - "Couchbase": api/persistence/couchbase.md
           - "SQL": api/persistence/sql.md
           - "Hybrid": api/persistence/hybrid.md
           - "Utilities": api/persistence/utils.md
