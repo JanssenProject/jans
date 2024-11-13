@@ -60,7 +60,6 @@ def gmanager(gconsul_config, gvault_secret):
 
     def get_config(key, default=""):
         ctx = {
-            "couchbase_server_user": "admin",
             "jca_client_id": "1234",
         }
         return ctx.get(key) or default
@@ -69,10 +68,7 @@ def gmanager(gconsul_config, gvault_secret):
         ctx = {
             "encoded_salt": "7MEDWVFAG3DmakHRyjMqp5EE",
             "sql_password": "secret",
-            "couchbase_password": "secret",
-            "couchbase_superuser_password": "secret",
             "random": ENCODED_PW,
-            "couchbase_truststore_pw": "newsecret",
         }
         return ctx.get(key) or default
 

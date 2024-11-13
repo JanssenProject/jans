@@ -1,8 +1,4 @@
 # noqa: D104
-from jans.pycloudlib.persistence.couchbase import render_couchbase_properties  # noqa: F401
-from jans.pycloudlib.persistence.couchbase import sync_couchbase_truststore  # noqa: F401
-from jans.pycloudlib.persistence.couchbase import id_from_dn  # noqa: F401
-from jans.pycloudlib.persistence.couchbase import CouchbaseClient  # noqa: F401
 from jans.pycloudlib.persistence.hybrid import render_hybrid_properties  # noqa: F401
 from jans.pycloudlib.persistence.sql import render_sql_properties  # noqa: F401
 from jans.pycloudlib.persistence.sql import doc_id_from_dn  # noqa: F401
@@ -16,10 +12,6 @@ from jans.pycloudlib.persistence.utils import render_base_properties  # noqa: F4
 
 # avoid implicit reexport disabled error
 __all__ = [
-    "render_couchbase_properties",
-    "sync_couchbase_truststore",
-    "id_from_dn",
-    "CouchbaseClient",
     "render_hybrid_properties",
     "render_sql_properties",
     "doc_id_from_dn",
