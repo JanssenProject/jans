@@ -1,11 +1,19 @@
+/*
+ * This software is available under the Apache-2.0 license.
+ * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+ *
+ * Copyright (c) 2024, Gluu, Inc.
+ */
+
 use super::parse_option_string;
 use super::token_entity_metadata::TokenEntityMetadata;
 use serde::Deserialize;
 
-/// Represents a trusted issuer that can provide JWTs.
+/// Represents metadata for a trusted issuer that can provide JWTs.
 ///
-/// This struct includes the issuer's name, description, and the OpenID configuration endpoint
-/// for discovering issuer-related information.
+/// This struct includes information about the issuer, such as its name, a description,
+/// and its OpenID configuration endpoint. It also contains metadata about different types
+/// of tokens (access, ID, userinfo, and transaction tokens) issued by this issuer.
 #[derive(Debug, Deserialize, PartialEq, Clone, Default)]
 #[allow(dead_code)]
 pub struct TrustedIssuerMetadata {
@@ -18,29 +26,36 @@ pub struct TrustedIssuerMetadata {
     /// This endpoint is used to obtain information about the issuer's capabilities.
     pub openid_configuration_endpoint: String,
 
-    /// Token Entity Metadata for Access Tokens.
+    /// Metadata for access tokens issued by the trusted issuer.
     #[serde(default)]
     pub access_tokens: AccessTokenMetadata,
 
-    /// Token Entity Metadata for ID Tokens.
+    /// Metadata for ID tokens issued by the trusted issuer.
     #[serde(default)]
     pub id_tokens: TokenEntityMetadata,
 
-    /// Token Entity Metadata for Userinfo Tokens.
+    /// Metadata for userinfo tokens issued by the trusted issuer.
     #[serde(default)]
     pub userinfo_tokens: TokenEntityMetadata,
 
-    /// Token Entity Metadata for Transaction Tokens.
+    /// Metadata for transaction tokens issued by the trusted issuer.
     #[serde(default)]
     pub tx_tokens: TokenEntityMetadata,
 }
 
+/// Represents metadata related to access tokens issued by a trusted issuer.
+///
+/// This struct includes information on whether the access token is trusted, the principal
+/// identifier, and additional entity metadata.
 #[derive(Deserialize, Clone, PartialEq, Default, Debug)]
 pub struct AccessTokenMetadata {
+    /// Indicates if the access token is trusted.
     #[serde(default)]
     pub trusted: bool,
     #[serde(default, deserialize_with = "parse_option_string")]
+    /// An optional string representing the principal identifier (e.g., `jti`).
     pub principal_identifier: Option<String>,
+    /// Additional metadata associated with the access token.
     #[serde(default, flatten)]
     pub entity_metadata: TokenEntityMetadata,
 }

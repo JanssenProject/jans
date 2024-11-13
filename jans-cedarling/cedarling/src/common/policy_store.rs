@@ -22,60 +22,78 @@ use std::{collections::HashMap, fmt};
 pub use trusted_issuer_metadata::TrustedIssuerMetadata;
 use yaml_store::{LoadFromYamlError, PolicyStoreYaml};
 
+/// Represents errors that can occur when loading a policy store.
 #[derive(Debug, thiserror::Error)]
 pub enum LoadPolicyStoreError {
+    /// Error when loading policy store from JSON.
     #[error("Failed to load policy store from JSON: {0}")]
     Json(#[from] LoadFromJsonError),
+    /// Error when loading policy store from YAML.
     #[error("Failed to load policy store from YAML: {0}")]
     Yaml(#[from] LoadFromYamlError),
 }
 
-// Policy Stores from the Agama Policy Designer
+/// Represents the store of policies used for JWT validation and policy evaluation in Cedarling.
 #[derive(Debug, PartialEq, Clone)]
 #[allow(dead_code)]
 pub struct PolicyStore {
+    /// Optional name of the policy store.
     pub name: Option<String>,
+    /// Optional description of the policy store.
     pub description: Option<String>,
+    /// Optional version of Cedar being used.
     pub cedar_version: Option<Version>,
+    /// A map of policy names to their content.
     pub policies: HashMap<String, PolicyContent>,
+    /// The schema used for Cedar policies.
     pub cedar_schema: CedarSchema,
+    /// A map of trusted issuers and their metadata.
     pub trusted_issuers: HashMap<String, TrustedIssuerMetadata>,
+    /// The set of policies loaded in the store.
     policy_set: PolicySet,
 }
 
 impl PolicyStore {
+    /// Loads a `PolicyStore` from a JSON string.
     pub fn load_from_json(json: &str) -> Result<Self, LoadPolicyStoreError> {
         let json_store = serde_json::from_str::<PolicyStoreJson>(&json)
             .map_err(LoadFromJsonError::Deserialization)?;
         json_store.try_into().map_err(LoadPolicyStoreError::Json)
     }
 
+    /// Loads a `PolicyStore` from a YAML string.
     pub fn load_from_yaml(yaml: &str) -> Result<Self, LoadPolicyStoreError> {
         let yaml_store = serde_yml::from_str::<PolicyStoreYaml>(&yaml)
             .map_err(LoadFromYamlError::Deserialization)?;
         Ok(yaml_store.into())
     }
 
+    /// Retrieves a reference to the policy set.
     pub fn policy_set(&self) -> &PolicySet {
         &self.policy_set
     }
 }
 
-// Policy Store from the Agama Policy Designer
+/// Represents the content of a policy, including its description, creation date, and policy definition.
 #[derive(Debug, PartialEq, Clone)]
 pub struct PolicyContent {
+    /// A description of the policy.
     pub description: String,
+    /// The date the policy was created.
     pub creation_date: String,
+    /// The actual content of the policy.
     pub policy_content: Policy,
 }
 
-/// Structure define the source from which role mappings are retrieved.
+/// Defines the source from which role mappings are retrieved.
 pub struct RoleMapping<'a> {
+    /// The type of token (e.g., Access, ID, Userinfo, Transaction).
     pub kind: TokenKind,
+    /// The field used to extract the role mapping.
     pub role_mapping_field: &'a str,
 }
 
-// By default we will search role in the User token
+/// Provides a default `RoleMapping` which looks for the role in the Userinfo token.
 impl Default for RoleMapping<'_> {
     fn default() -> Self {
         Self {
@@ -87,9 +105,8 @@ impl Default for RoleMapping<'_> {
 
 impl TrustedIssuerMetadata {
     /// Retrieves the available `RoleMapping` from the token metadata.
-    //
-    // We're just checking each token metadata right now and returning the
-    // first one with a role_mapping field.
+    ///
+    /// Checks each token metadata and returns the first one found with a `role_mapping` field.
     pub fn get_role_mapping(&self) -> Option<RoleMapping> {
         if let Some(role_mapping) = &self.access_tokens.entity_metadata.role_mapping {
             return Some(RoleMapping {
@@ -202,7 +219,7 @@ where
     }
 }
 
-/// Custom parser for an Option<String> which return None if the string is empty.
+/// Custom parser for an Option<String> which returns `None` if the string is empty.
 pub fn parse_option_string<'de, D>(deserializer: D) -> Result<Option<String>, D::Error>
 where
     D: Deserializer<'de>,
@@ -212,7 +229,7 @@ where
     Ok(value.filter(|s| !s.is_empty()))
 }
 
-/// Custom parser for Option<HashMap<_, _>> which returns None if the HashMap is empty
+/// Custom parser for Option<HashMap<_, _>> which returns `None` if the HashMap is empty
 pub fn parse_option_hashmap<'de, D, K, V>(
     deserializer: D,
 ) -> Result<Option<HashMap<K, V>>, D::Error>

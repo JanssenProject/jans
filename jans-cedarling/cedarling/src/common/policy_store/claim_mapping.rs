@@ -1,21 +1,53 @@
+/*
+ * This software is available under the Apache-2.0 license.
+ * See https://www.apache.org/licenses/LICENSE-2.0.txt for full text.
+ *
+ * Copyright (c) 2024, Gluu, Inc.
+ */
+
 use serde::{de, Deserialize};
 use serde_json::Value;
 use std::collections::HashMap;
 
+/// Represents the mapping of claims based on the parser type.
+///
+/// This enum can either be:
+/// - `Regex`: For extracting claims using regular expressions with fields.
+/// - `Json`: For extracting claims using a JSON parser.
 #[derive(Debug, PartialEq, Clone)]
 #[allow(dead_code)]
 pub enum ClaimMapping {
+    /// Represents a claim mapping using regular expressions.
+    ///
+    /// # Fields
+    /// - `type`: The type of the claim (e.g., "Acme::Email").
+    /// - `regex_expression`: The regular expression used to extract fields.
+    /// - `fields`: A map of field names to `RegexField` values.
     Regex {
         r#type: String,
         regex_expression: String,
         fields: HashMap<String, RegexField>,
     },
-    Json {
-        r#type: String,
-    },
+    /// Represents a claim mapping using a JSON parser.
+    ///
+    /// # Fields
+    /// - `type`: The type of the claim (e.g., "Acme::Dolphin").
+    Json { r#type: String },
 }
 
 impl<'de> Deserialize<'de> for ClaimMapping {
+    /// Custom deserialization logic for `ClaimMapping`.
+    ///
+    /// Parses a JSON object to determine whether the parser type is `regex` or `json`.
+    /// Depending on the parser type, it deserializes the corresponding fields into
+    /// either a `Regex` or `Json` variant of the `ClaimMapping` enum.
+    ///
+    /// # Errors
+    /// Returns a deserialization error if:
+    /// - The `parser` field is missing.
+    /// - The `type` field is missing.
+    /// - The `regex_expression` field is missing for `regex` type.
+    /// - The parser type is unrecognized.
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
@@ -71,6 +103,11 @@ impl<'de> Deserialize<'de> for ClaimMapping {
     }
 }
 
+/// Represents a field extracted using a regular expression.
+///
+/// # Fields
+/// - `attr`: The attribute name associated with the field (e.g., "uid").
+/// - `type`: The type of the attribute (e.g., "string").
 #[derive(Debug, PartialEq, Deserialize, Clone)]
 pub struct RegexField {
     pub attr: String,
@@ -85,9 +122,9 @@ mod test {
     use std::collections::HashMap;
     use test_utils::assert_eq;
 
-    #[test]
     /// Tests if a token entity metadata with a RegEx parser can be parsed
     /// from a JSON string
+    #[test]
     fn can_parse_regex_from_json() {
         // Setup expected output
         let expected = ClaimMapping::Regex {
@@ -133,9 +170,9 @@ mod test {
         );
     }
 
-    #[test]
     /// Tests if a token entity metadata with a JSON parser can be parsed
     /// from a JSON string
+    #[test]
     fn can_parse_json_from_json() {
         // Setup expected output
         let expected = ClaimMapping::Json {
@@ -161,9 +198,9 @@ mod test {
         );
     }
 
-    #[test]
     /// Tests if a token entity metadata with a RegEx parser can be parsed
     /// from a YAML string
+    #[test]
     fn can_parse_regex_from_yaml() {
         // Setup expected output
         let expected = ClaimMapping::Regex {
@@ -212,9 +249,9 @@ mod test {
         );
     }
 
-    #[test]
     /// Tests if a token entity metadata with a JSON parser can be parsed
     /// from a YAML string
+    #[test]
     fn can_parse_json_from_yaml() {
         // Setup expected output
         let expected = ClaimMapping::Json {
@@ -240,8 +277,8 @@ mod test {
         );
     }
 
-    #[test]
     /// Tests if an error is thrown for an unknown parser type
+    #[test]
     fn errors_on_unkown_parser_type() {
         // Setup JSON
         let claim_mapping_json = json!({
