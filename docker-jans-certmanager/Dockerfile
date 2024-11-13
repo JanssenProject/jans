@@ -25,7 +25,7 @@ RUN wget -q ${CN_SOURCE_URL} -P /app/javalibs/
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=4f155cfe9e197b15d65be6aa938276862fe36a06
+ENV JANS_SOURCE_VERSION=6e00e723a99d700a4f82713b0c25b2d6e3ef5775
 
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the assets
@@ -114,9 +114,7 @@ ENV CN_PERSISTENCE_TYPE=sql \
     CN_COUCHBASE_BUCKET_PREFIX=jans \
     CN_COUCHBASE_TRUSTSTORE_ENABLE=true \
     CN_COUCHBASE_KEEPALIVE_INTERVAL=30000 \
-    CN_COUCHBASE_KEEPALIVE_TIMEOUT=2500 \
-    CN_GOOGLE_SPANNER_INSTANCE_ID="" \
-    CN_GOOGLE_SPANNER_DATABASE_ID=""
+    CN_COUCHBASE_KEEPALIVE_TIMEOUT=2500
 
 # ===========
 # Generic ENV

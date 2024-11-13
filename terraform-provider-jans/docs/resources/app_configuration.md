@@ -145,7 +145,7 @@ resource "jans_app_configuration" "global" {
 - `end_session_with_access_token` (Boolean) Accept access token to call end_session endpoint.
 - `error_handling_method` (String) A list of possible error handling methods.
 - `error_reason_enabled` (Boolean) Boolean value specifying whether to return detailed reason of the error from AS..
-- `expiration_notificator_enabled` (Boolean) Boolean value specifying whether expiration notificator is enabled (used to identify expiration for persistence that support TTL, like Couchbase).
+- `expiration_notificator_enabled` (Boolean) Boolean value specifying whether expiration notificator is enabled (used to identify expiration for persistence that support TTL).
 - `expiration_notificator_interval_in_seconds` (Number) The expiration notificator interval in seconds. Example: 600
 - `expiration_notificator_map_size_limit` (Number) The expiration notificator maximum size limit. Example: 100000
 - `external_logger_configuration` (String) Path to external log4j2 logging configuration. Example: /identity/logviewer/configure

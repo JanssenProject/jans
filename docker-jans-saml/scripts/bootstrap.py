@@ -21,9 +21,6 @@ from jans.pycloudlib.persistence.couchbase import sync_couchbase_cert
 from jans.pycloudlib.persistence.couchbase import sync_couchbase_password
 from jans.pycloudlib.persistence.couchbase import sync_couchbase_truststore
 from jans.pycloudlib.persistence.hybrid import render_hybrid_properties
-from jans.pycloudlib.persistence.spanner import render_spanner_properties
-from jans.pycloudlib.persistence.spanner import SpannerClient
-from jans.pycloudlib.persistence.spanner import sync_google_credentials
 from jans.pycloudlib.persistence.sql import SqlClient
 from jans.pycloudlib.persistence.sql import render_sql_properties
 from jans.pycloudlib.persistence.sql import sync_sql_password
@@ -38,7 +35,6 @@ from jans.pycloudlib.utils import get_random_chars
 from jans.pycloudlib.utils import exec_cmd
 
 from settings import LOGGING_CONFIG
-from utils import get_kc_db_password
 
 if _t.TYPE_CHECKING:  # pragma: no cover
     # imported objects for function type hint, completion, etc.
@@ -60,7 +56,7 @@ def render_keycloak_conf():
     ctx = {
         "hostname": hostname,
         "kc_hostname": hostname,
-        "kc_db_password": get_kc_db_password(),
+        "kc_db_password": os.environ.get("KC_DB_PASSWORD") or manager.secret.get("kc_db_password"),
         "idp_config_http_port": os.environ.get("CN_SAML_HTTP_PORT", "8083"),
         "idp_config_http_host": os.environ.get("CN_SAML_HTTP_HOST", "0.0.0.0"),   # nosec: B104
         "idp_config_data_dir": "/opt/keycloak",
@@ -109,15 +105,6 @@ def main():
             "/etc/jans/conf/jans-sql.properties",
         )
 
-    if "spanner" in persistence_groups:
-        render_spanner_properties(
-            manager,
-            "/app/templates/jans-spanner.properties",
-            "/etc/jans/conf/jans-spanner.properties",
-        )
-        extract_common_libs("spanner")
-        sync_google_credentials(manager)
-
     wait_for_persistence(manager)
     override_simple_json_property("/etc/jans/conf/jans-sql.properties")
 
@@ -139,7 +126,6 @@ class PersistenceSetup:
 
         client_classes = {
             "couchbase": CouchbaseClient,
-            "spanner": SpannerClient,
             "sql": SqlClient,
         }
 

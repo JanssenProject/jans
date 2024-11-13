@@ -49,7 +49,7 @@ The following environment variables are supported by the container:
 - `CN_WAIT_MAX_TIME`: How long the startup "health checks" should run (default to `300` seconds).
 - `CN_WAIT_SLEEP_DURATION`: Delay between startup "health checks" (default to `10` seconds).
 - `CN_MAX_RAM_PERCENTAGE`: Value passed to Java option `-XX:MaxRAMPercentage`.
-- `CN_PERSISTENCE_TYPE`: Persistence backend being used (one of `couchbase`, `sql`, `spanner`, or `hybrid`; default to `sql`).
+- `CN_PERSISTENCE_TYPE`: Persistence backend being used (one of `couchbase`, `sql`, or `hybrid`; default to `sql`).
 - `CN_HYBRID_MAPPING`: Specify data mapping for each persistence (default to `"{}"`). Note this environment only takes effect when `CN_PERSISTENCE_TYPE` is set to `hybrid`. See [hybrid mapping](#hybrid-mapping) section for details.
 - `CN_COUCHBASE_URL`: Address of Couchbase server (default to `localhost`).
 - `CN_COUCHBASE_USER`: Username of Couchbase server (default to `admin`).
@@ -70,8 +70,6 @@ The following environment variables are supported by the container:
 - `CN_GOOGLE_SECRET_VERSION_ID`: Janssen secret version ID in Google Secret Manager. Defaults to `latest`, which is recommended.
 - `CN_GOOGLE_SECRET_NAME_PREFIX`: Prefix for Janssen secret in Google Secret Manager. Defaults to `jans`. If left `jans-secret` secret will be created.
 - `CN_GOOGLE_SECRET_MANAGER_PASSPHRASE`: Passphrase for Janssen secret in Google Secret Manager. This is recommended to be changed and defaults to `secret`.
-- `CN_GOOGLE_SPANNER_INSTANCE_ID`: Google Spanner instance ID.
-- `CN_GOOGLE_SPANNER_DATABASE_ID`: Google Spanner database ID.
 - `CN_CONFIG_API_APP_LOGGERS`: Custom logging configuration in JSON-string format with hash type (see [Configure app loggers](#configure-app-loggers) section for details).
 - `CN_CONFIG_API_PLUGINS`: Comma-separated plugin names that should be enabled (available plugins are `admin-ui`, `scim`, `fido2`, `user-mgt`, `jans-link`, `kc-saml`, `kc-link`, `lock`). Note that unknown plugin name will be ignored.
 - `CN_TOKEN_SERVER_BASE_URL`: Base URL of token server (default to empty).
@@ -180,12 +178,12 @@ As per v1.0.1, hybrid persistence supports all available persistence types. To c
 
     ```
     {
-        "default": "<couchbase|spanner|sql>",
-        "user": "<couchbase|spanner|sql>",
-        "site": "<couchbase|spanner|sql>",
-        "cache": "<couchbase|spanner|sql>",
-        "token": "<couchbase|spanner|sql>",
-        "session": "<couchbase|spanner|sql>",
+        "default": "<couchbase|sql>",
+        "user": "<couchbase|sql>",
+        "site": "<couchbase|sql>",
+        "cache": "<couchbase|sql>",
+        "token": "<couchbase|sql>",
+        "session": "<couchbase|sql>",
     }
     ```
 
@@ -194,11 +192,11 @@ As per v1.0.1, hybrid persistence supports all available persistence types. To c
     ```
     {
         "default": "sql",
-        "user": "spanner",
+        "user": "sql",
         "site": "sql",
         "cache": "sql",
         "token": "couchbase",
-        "session": "spanner",
+        "session": "sql",
     }
     ```
 

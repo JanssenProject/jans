@@ -49,7 +49,7 @@ The following environment variables are supported by the container:
 - `CN_WAIT_MAX_TIME`: How long the startup "health checks" should run (default to `300` seconds).
 - `CN_WAIT_SLEEP_DURATION`: Delay between startup "health checks" (default to `10` seconds).
 - `CN_MAX_RAM_PERCENTAGE`: Value passed to Java option `-XX:MaxRAMPercentage`.
-- `CN_PERSISTENCE_TYPE`: Persistence backend being used (one of `sql`, `couchbase`, `spanner`, or `hybrid`; default to `sql`).
+- `CN_PERSISTENCE_TYPE`: Persistence backend being used (one of `sql`, `couchbase`, or `hybrid`; default to `sql`).
 - `CN_HYBRID_MAPPING`: Specify data mapping for each persistence (default to `"{}"`). Note this environment only takes effect when `CN_PERSISTENCE_TYPE` is set to `hybrid`. See [hybrid mapping](#hybrid-mapping) section for details.
 - `CN_COUCHBASE_URL`: Address of Couchbase server (default to `localhost`).
 - `CN_COUCHBASE_USER`: Username of Couchbase server (default to `admin`).
@@ -62,13 +62,13 @@ The following environment variables are supported by the container:
 - `CN_COUCHBASE_TRUSTSTORE_ENABLE`: Enable truststore for encrypted Couchbase connection (default to `true`).
 - `CN_COUCHBASE_KEEPALIVE_INTERVAL`: Keep-alive interval for Couchbase connection (default to `30000` milliseconds).
 - `CN_COUCHBASE_KEEPALIVE_TIMEOUT`: Keep-alive timeout for Couchbase connection (default to `2500` milliseconds).
-- `CN_LINK_JAVA_OPTIONS`: Java options passed to entrypoint, i.e. `-Xmx1024m` (default to empty-string).
+- `CN_KEYCLOAK_LINK_JAVA_OPTIONS`: Java options passed to entrypoint, i.e. `-Xmx1024m` (default to empty-string).
 - `GOOGLE_APPLICATION_CREDENTIALS`: Optional JSON file (contains Google credentials) that can be injected into container for authentication. Refer to https://cloud.google.com/docs/authentication/provide-credentials-adc#how-to for supported credentials.
 - `GOOGLE_PROJECT_ID`: ID of Google project.
 - `CN_GOOGLE_SECRET_VERSION_ID`: Janssen secret version ID in Google Secret Manager. Defaults to `latest`, which is recommended.
 - `CN_GOOGLE_SECRET_NAME_PREFIX`: Prefix for Janssen secret in Google Secret Manager. Defaults to `jans`. If left `jans-secret` secret will be created.
 - `CN_GOOGLE_SECRET_MANAGER_PASSPHRASE`: Passphrase for Janssen secret in Google Secret Manager. This is recommended to be changed and defaults to `secret`.
-- `CN_LINK_APP_LOGGERS`: Custom logging configuration in JSON-string format with hash type (see [Configure app loggers](#configure-app-loggers) section for details).
+- `CN_CACHE_REFRESH_APP_LOGGERS`: Custom logging configuration in JSON-string format with hash type (see [Configure app loggers](#configure-app-loggers) section for details).
 - `CN_PROMETHEUS_PORT`: Port used by Prometheus JMX agent (default to empty string). To enable Prometheus JMX agent, set the value to a number. See [Exposing metrics](#exposing-metrics) for details.
 - `CN_SQL_DB_HOST`: Hostname of the SQL database (default to `localhost`).
 - `CN_SQL_DB_PORT`: Port of the SQL database (default to `3306` for MySQL).
@@ -135,12 +135,12 @@ As per v1.0.1, hybrid persistence supports all available persistence types. To c
 
     ```
     {
-        "default": "<couchbase|spanner|sql>",
-        "user": "<couchbase|spanner|sql>",
-        "site": "<couchbase|spanner|sql>",
-        "cache": "<couchbase|spanner|sql>",
-        "token": "<couchbase|spanner|sql>",
-        "session": "<couchbase|spanner|sql>",
+        "default": "<couchbase|sql>",
+        "user": "<couchbase|sql>",
+        "site": "<couchbase|sql>",
+        "cache": "<couchbase|sql>",
+        "token": "<couchbase|sql>",
+        "session": "<couchbase|sql>",
     }
     ```
 
@@ -149,11 +149,11 @@ As per v1.0.1, hybrid persistence supports all available persistence types. To c
     ```
     {
         "default": "sql",
-        "user": "spanner",
+        "user": "sql",
         "site": "sql",
         "cache": "sql",
         "token": "couchbase",
-        "session": "spanner",
+        "session": "sql",
     }
     ```
 
@@ -166,4 +166,3 @@ i.e. `http://container:9093/metrics`.
 
 Note that Prometheus JMX exporter uses pre-defined config file (see `conf/prometheus-config.yaml`).
 To customize the config, mount custom config file to `/opt/prometheus/prometheus-config.yaml` inside the container.
-
