@@ -10,7 +10,6 @@ def validate_persistence_type(type_: str) -> None:
 
     Supported types:
 
-    - `couchbase`
     - `hybrid`
     - `sql`
 
