@@ -5,8 +5,6 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-use super::AgamaPolicyStore;
-use super::ParsePolicySetMessage;
 use super::PolicyStore;
 use super::{parse_option_hashmap, parse_option_string};
 use crate::common::policy_store::parse_cedar_version;
@@ -39,17 +37,24 @@ fn test_policy_store_deserialization_success() {
     // represents the `policy_store.json`
     let policy_store_json = json!({
         "cedar_version": "v4.0.0",
-        "cedar_policies": {
-            "840da5d85403f35ea76519ed1a18a33989f855bf1cf8": {
-                "description": "simple policy example",
-                "creation_date": "2024-09-20T17:22:39.996050",
-                "policy_content": BASE64_STANDARD.encode(policy)
+        "policy_stores": {
+            "123123": {
+                "name": "Some policy store",
+                "description": "",
+                "policies": {
+                    "840da5d85403f35ea76519ed1a18a33989f855bf1cf8": {
+                        "description": "simple policy example",
+                        "creation_date": "2024-09-20T17:22:39.996050",
+                        "policy_content": BASE64_STANDARD.encode(policy)
+                    }
+                },
+                "schema": BASE64_STANDARD.encode(schema),
+                "trusted_issuers": {},
             }
         },
-        "cedar_schema": BASE64_STANDARD.encode(schema),
     });
 
-    serde_json::from_str::<PolicyStore>(policy_store_json.to_string().as_str()).unwrap();
+    PolicyStore::load_from_json(policy_store_json.to_string().as_str()).unwrap();
 }
 
 #[test]
@@ -77,21 +82,26 @@ fn test_base64_decoding_error_in_policy_store() {
     // represents the `policy_store.json`
     let policy_store_json = json!({
         "cedar_version": "v4.0.0",
-        "cedar_policies": {
-            "840da5d85403f35ea76519ed1a18a33989f855bf1cf8": {
-                "description": "simple policy example",
-                "creation_date": "2024-09-20T17:22:39.996050",
-                "policy_content": encoded_policy,
+        "policy_stores": {
+            "1231231": {
+                "name": "Jans",
+                "policies": {
+                    "840da5d85403f35ea76519ed1a18a33989f855bf1cf8": {
+                        "description": "simple policy example",
+                        "creation_date": "2024-09-20T17:22:39.996050",
+                        "policy_content": encoded_policy,
+                    }
+                },
+                "schema": BASE64_STANDARD.encode(schema),
             }
-        },
-        "cedar_schema": BASE64_STANDARD.encode(schema),
+        }
     });
 
-    let policy_result = serde_json::from_str::<PolicyStore>(policy_store_json.to_string().as_str());
-    assert!(policy_result
-        .unwrap_err()
-        .to_string()
-        .contains(&ParsePolicySetMessage::Base64.to_string()));
+    let policy_result = PolicyStore::load_from_json(policy_store_json.to_string().as_str());
+    assert!(
+        matches!(&policy_result, Err(ref e) if e.to_string().contains("Failed to decode Base64 encoded string")),
+        "Expected an error due to Base64 encoding: {policy_result:?}"
+    )
 }
 
 /// Tests for parsing error due to broken UTF-8 in the policy store.
@@ -126,21 +136,28 @@ fn test_policy_parsing_error_in_policy_store() {
     // represents the `policy_store.json`
     let policy_store_json = json!({
         "cedar_version": "v4.0.0",
-        "cedar_policies": {
-            "840da5d85403f35ea76519ed1a18a33989f855bf1cf8": {
-                "description": "simple policy example",
-                "creation_date": "2024-09-20T17:22:39.996050",
-                "policy_content": encoded_policy,
+        "policy_stores": {
+            "123123": {
+                "policies": {
+                    "840da5d85403f35ea76519ed1a18a33989f855bf1cf8": {
+                        "description": "simple policy example",
+                        "creation_date": "2024-09-20T17:22:39.996050",
+                        "policy_content": encoded_policy,
+                    }
+                },
+                "schema": BASE64_STANDARD.encode(schema),
             }
-        },
-        "cedar_schema": BASE64_STANDARD.encode(schema),
+        }
     });
 
-    let policy_result = serde_json::from_str::<PolicyStore>(policy_store_json.to_string().as_str());
-    assert!(policy_result
-        .unwrap_err()
-        .to_string()
-        .contains(&ParsePolicySetMessage::String.to_string()));
+    let policy_result = PolicyStore::load_from_json(policy_store_json.to_string().as_str());
+    assert!(
+        matches!(
+        &policy_result,
+        Err(e) if e.to_string().contains(&"invalid utf-8 sequence"),
+        ),
+        "Expected an error due to a broken UTF-8: {policy_result:?}"
+    );
 }
 
 /// Tests for broken policy parsing error in the policy store.
@@ -149,13 +166,13 @@ fn test_broken_policy_parsing_error_in_policy_store() {
     static POLICY_STORE_RAW_YAML: &str =
         include_str!("../../../../test_files/policy-store_policy_err_broken_policy.yaml");
 
-    let policy_result = serde_yml::from_str::<AgamaPolicyStore>(POLICY_STORE_RAW_YAML);
+    let policy_result = PolicyStore::load_from_yaml(POLICY_STORE_RAW_YAML);
     let err_msg = policy_result.unwrap_err().to_string();
 
-    // TODO: this isn't really a human readable format but the current plan is to fetch it from
-    // a which will respond with the policy encoded in base64. This could probably be improved
-    // in the future once the structure of the project is clearer.
-    assert_eq!(err_msg, "policy_stores.ba1f39115ed86ed760ee0bea1d529b52189e5a117474: Errors encountered while parsing policies: [Error(\"unable to decode policy with id: 840da5d85403f35ea76519ed1a18a33989f855bf1cf8, error: unable to decode policy_content from human readable format: unexpected token `)`\")] at line 4 column 5")
+    assert!(
+        err_msg.contains(&"unexpected token `)`"),
+        "Expected loading the policy store to fail due to an unxpected token: {err_msg:?}"
+    )
 }
 
 /// Tests that a valid version string is accepted.

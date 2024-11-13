@@ -17,15 +17,17 @@ use std::{collections::HashMap, str::FromStr};
 /// Cedar policies and schema.
 #[derive(Deserialize)]
 pub struct PolicyStoreSourceYaml {
+    #[serde(default)]
     pub name: String,
-    #[serde(deserialize_with = "parse_option_string")]
+    #[serde(deserialize_with = "parse_option_string", default)]
     pub description: Option<String>,
-    #[serde(deserialize_with = "parse_maybe_cedar_version")]
+    #[serde(deserialize_with = "parse_maybe_cedar_version", default)]
     pub cedar_version: Option<Version>,
-    #[serde(deserialize_with = "parse_human_readable_policies")]
+    #[serde(deserialize_with = "parse_human_readable_policies", default)]
     pub policies: HashMap<String, PolicyContent>,
     #[serde(alias = "schema", deserialize_with = "parse_human_readable_schema")]
     pub cedar_schema: CedarSchema,
+    #[serde(default)]
     pub trusted_issuers: HashMap<String, TrustedIssuerMetadata>,
 }
 
@@ -109,7 +111,7 @@ impl From<PolicyStoreSourceYaml> for PolicyStoreSource {
 
 #[derive(Debug, thiserror::Error)]
 pub enum LoadFromYamlError {
-    #[error("Failed to load policy store from YAML: {0:?}")]
+    #[error("Failed to load policy store from YAML: {0}")]
     Deserialization(serde_yml::Error),
 }
 

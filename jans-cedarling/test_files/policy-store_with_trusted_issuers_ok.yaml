@@ -1,4 +1,3 @@
----
 cedar_version: v4.0.0
 cedar_policies:
   840da5d85403f35ea76519ed1a18a33989f855bf1cf8:
@@ -16,10 +15,7 @@ cedar_policies:
             principal.org_id == resource.org_id
         };
 identity_source: {}
-cedar_schema:
-  encoding: none
-  content_type: cedar
-  body: |-
+cedar_schema: |-
   namespace Jans {
     type Url = {"host": String, "path": String, "protocol": String};
     entity Access_token = {"aud": String, "exp": Long, "iat": Long, "iss": TrustedIssuer, "jti": String};

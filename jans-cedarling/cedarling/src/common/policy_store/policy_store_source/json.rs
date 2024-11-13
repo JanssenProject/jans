@@ -49,12 +49,13 @@ impl TryFrom<PolicyStoreSourceJson> for PolicyStoreSource {
 #[allow(dead_code)]
 pub struct PolicyStoreDataJson {
     pub name: String,
-    #[serde(deserialize_with = "parse_option_string")]
+    #[serde(deserialize_with = "parse_option_string", default)]
     pub description: Option<String>,
     #[serde(deserialize_with = "parse_encoded_policies")]
     pub policies: HashMap<String, PolicyContent>,
     #[serde(alias = "schema", deserialize_with = "parse_encoded_schema")]
     pub cedar_schema: CedarSchema,
+    #[serde(default)]
     pub trusted_issuers: HashMap<String, TrustedIssuerMetadata>,
 }
 
@@ -127,7 +128,7 @@ pub enum LoadFromJsonError {
     NoPolicyStore,
     #[error("The JSON policy stores contain more than one policy store.")]
     MoreThanOnePolicyStore,
-    #[error("Failed to load policy store from JSON: {0:?}")]
+    #[error("Failed to load policy store from JSON: {0}")]
     Deserialization(serde_json::Error),
 }
 

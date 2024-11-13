@@ -14,6 +14,7 @@ fn load_agama_policy_store_json() {
         "cedar_version": "v4.0.0",
         "policy_stores": {
             "fbcd361d3243f4808d5e6f89ca81eaf4ca03900b407e": {
+                "name": "JansTest",
                 "policies": {
                     "840da5d85403f35ea76519ed1a18a33989f855bf1cf8": {
                         "cedar_version": "v4.0.0",

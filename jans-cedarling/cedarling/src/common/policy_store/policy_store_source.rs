@@ -12,11 +12,11 @@ use std::collections::HashMap;
 use yaml::{LoadFromYamlError, PolicyStoreSourceYaml};
 
 #[derive(Debug, thiserror::Error)]
-pub enum SourcePolicyStoreError {
-    #[error("Failed to load policy store from JSON: {0:?}")]
-    LoadFromJson(#[from] LoadFromJsonError),
-    #[error("Failed to load policy store from YAML: {0:?}")]
-    LoadFromYaml(#[from] LoadFromYamlError),
+pub enum LoadPolicyStoreError {
+    #[error("Failed to load policy store from JSON: {0}")]
+    Json(#[from] LoadFromJsonError),
+    #[error("Failed to load policy store from YAML: {0}")]
+    Yaml(#[from] LoadFromYamlError),
 }
 
 // Policy Stores from the Agama Policy Designer
@@ -32,15 +32,13 @@ pub struct PolicyStoreSource {
 }
 
 impl PolicyStoreSource {
-    pub fn load_from_json(json: &str) -> Result<Self, SourcePolicyStoreError> {
+    pub fn load_from_json(json: &str) -> Result<Self, LoadPolicyStoreError> {
         let json_store = serde_json::from_str::<PolicyStoreSourceJson>(&json)
             .map_err(LoadFromJsonError::Deserialization)?;
-        json_store
-            .try_into()
-            .map_err(SourcePolicyStoreError::LoadFromJson)
+        json_store.try_into().map_err(LoadPolicyStoreError::Json)
     }
 
-    pub fn load_from_yaml(yaml: &str) -> Result<Self, SourcePolicyStoreError> {
+    pub fn load_from_yaml(yaml: &str) -> Result<Self, LoadPolicyStoreError> {
         let yaml_store = serde_yml::from_str::<PolicyStoreSourceYaml>(&yaml)
             .map_err(LoadFromYamlError::Deserialization)?;
         Ok(yaml_store.into())
