@@ -15,7 +15,6 @@ import tempfile
 from setup_app import paths
 from setup_app.messages import msg
 from setup_app.utils import base
-from setup_app.utils.cbm import CBM
 from setup_app.static import InstallTypes, colors, BackendStrings
 
 from setup_app.config import Config
@@ -103,10 +102,6 @@ class PropertiesUtils(SetupUtils):
             Config.admin_password = self.getPW()
 
         if Config.profile == 'jans':
-
-            if Config.cb_install and not Config.get('cb_password'):
-                Config.cb_password = Config.admin_password
-
             self.set_persistence_type()
 
 
@@ -154,17 +149,6 @@ class PropertiesUtils(SetupUtils):
             self.logIt("Error loading properties", True)
 
 
-        if p.get('cb_install') == '0':
-           p['cb_install'] = InstallTypes.NONE
-
-        if p.get('cb_install'):
-            p['rdbm_install'] = InstallTypes.NONE
-
-            for bucket in Config.couchbaseBucketDict:
-                if p.get(f'couchbase_{bucket}_mem'):
-                    Config.couchbaseBucketDict[bucket]['memory_allocation'] = int(p[f'couchbase_{bucket}_mem'])
-
-
         if p.get('enable-script'):
             base.argsp.enable_script = p['enable-script'].split()
 
@@ -183,12 +167,6 @@ class PropertiesUtils(SetupUtils):
                 continue
             try:
                 setattr(Config, prop, p[prop])
-                if prop == 'mapping_locations':
-                    mapping_locations = json.loads(p[prop])
-                    setattr(Config, prop, mapping_locations)
-                    for l in mapping_locations:
-                        if mapping_locations[l] not in map_db:
-                            map_db.append(mapping_locations[l])
 
                 if p[prop] == 'True':
                     setattr(Config, prop, True)
@@ -199,29 +177,6 @@ class PropertiesUtils(SetupUtils):
 
         if prop_file.endswith('-DEC~'):
             self.run(['rm', '-f', prop_file])
-
-
-        if 'couchbase' in map_db:
-            if 'remoteCouchbase' in properties_list and p.get('remoteCouchbase','').lower() == 'true':
-                Config.cb_install = InstallTypes.REMOTE
-            elif p.get('cb_install'):
-                Config.cb_install = p['cb_install']
-            elif 'persistence_type' in properties_list and p.get('persistence_type') in ('couchbase', 'hybrid'):
-                Config.cb_install = InstallTypes.LOCAL
-            else:
-                Config.cb_install = InstallTypes.NONE
-
-        if Config.cb_install == InstallTypes.LOCAL:
-            available_backends = self.getBackendTypes()
-            if 'couchbase' not in available_backends:
-                print("Couchbase package is not available exiting.")
-                sys.exit(1)
-
-        if Config.cb_install == InstallTypes.REMOTE:
-            cbm_ = CBM(Config.couchbase_hostname, Config.couchebaseClusterAdmin, Config.cb_password)
-            if not cbm_.test_connection().ok:
-                print("Can't connect to remote Couchbase Server with credentials found in setup.properties.")
-                sys.exit(1)
 
         return p
 
@@ -247,20 +202,16 @@ class PropertiesUtils(SetupUtils):
             p = Properties()
             for obj_name, obj in inspect.getmembers(Config):
                 obj_name = str(obj_name)
-                if obj_name in ('couchbaseInstallOutput', 'post_messages', 'properties_password', 'non_setup_properties', 'addPostSetupService'):
+                if obj_name in ('post_messages', 'properties_password', 'non_setup_properties', 'addPostSetupService'):
                     continue
 
                 if obj_name.startswith('cmd_'):
                     continue
 
                 if not obj_name.startswith('__') and (not callable(obj)):
-
-                    if obj_name == 'mapping_locations':
-                        p[obj_name] = json.dumps(obj)
-                    else:
-                        value = get_string(obj)
-                        if value != '':
-                            p[obj_name] = value
+                    value = get_string(obj)
+                    if value != '':
+                        p[obj_name] = value
 
             with open(prop_fn, 'wb') as f:
                 p.store(f, encoding="utf-8")
@@ -281,113 +232,12 @@ class PropertiesUtils(SetupUtils):
         except Exception:
             self.logIt("Error saving properties", True)
 
-    def getBackendTypes(self):
-
-        backend_types = []
-
-        if glob.glob(Config.distFolder+'/couchbase/couchbase-server-enterprise*.' + base.clone_type):
-            backend_types.append('couchbase')
-
-        return backend_types
-
-
-
-    def test_cb_servers(self, couchbase_hostname):
-        cb_hosts = base.re_split_host.findall(couchbase_hostname)
-
-        retval = {'result': True, 'reason': ''}
-
-        for i, cb_host in enumerate(cb_hosts):
-
-                cbm_ = CBM(cb_host, Config.couchebaseClusterAdmin, Config.cb_password)
-                if not Config.thread_queue:
-                    print("    Checking Couchbase connection for " + cb_host)
-
-                cbm_result = cbm_.test_connection()
-                if not cbm_result.ok:
-                    if not Config.thread_queue:
-                        print("    Can't establish connection to Couchbase server with given parameters.")
-                        print("**", cbm_result.reason)
-                    retval['result'] = False
-                    retval['reason'] = cb_host + ': ' + cbm_result.reason
-                    return retval
-                try:
-                    result = cbm_.get_services()
-                    if result.ok:
-                        data = result.json()
-                        for node in data.get('nodesExt', []):
-                            if node.get('thisNode'):
-                                if 'n1qlSSL' in node.get('services', []):
-                                    Config.cb_query_node = cb_host
-                                    retval['result'] = True
-                                    if not Config.thread_queue:
-                                        print("{}    Successfully connected to Couchbase server{}".format(colors.OKGREEN, colors.ENDC))
-                                    return retval
-                except Exception:
-                    pass
-
-
-        if not Config.thread_queue:
-            print("Can't find any query node")
-
-        retval['result'] = False
-        retval['reason'] = "Can't find any query node"
-
-        return retval
-
-    def prompt_remote_couchbase(self):
-
-        while True:
-            Config.couchbase_hostname = self.getPrompt("    Couchbase hosts", Config.get('couchbase_hostname'))
-            Config.couchebaseClusterAdmin = self.getPrompt("    Couchbase User", Config.get('couchebaseClusterAdmin'))
-            Config.cb_password =self.getPrompt("    Couchbase Password", Config.get('cb_password'))
-
-            result = self.test_cb_servers(Config.get('couchbase_hostname'))
-
-            if result['result']:
-                break
-
-
-    def promptForBackendMappings(self):
-
-        options = []
-        options_text = []
-        
-        bucket_list = list(Config.couchbaseBucketDict.keys())
-
-        for i, m in enumerate(bucket_list):
-            options_text.append('({0}) {1}'.format(i+1,m))
-            options.append(str(i+1))
-
-
-        re_pattern = '^[1-{0}]+$'.format(len(Config.couchbaseBucketDict))
-
-        while True:
-            prompt = self.getPrompt(options_text)
-            if re.match(re_pattern, prompt):
-                break
-            else:
-                print("Please select one of {0}.".format(", ".join(options)))
-
-        couchbase_mappings = bucket_list[:]
-
-        for i in prompt:
-            m = bucket_list[int(i)-1]
-            couchbase_mappings.remove(m)
-
-        for m in couchbase_mappings:
-            Config.mapping_locations[m] = 'couchbase'
 
     def set_persistence_type(self):
         if Config.installed_instance:
             return
 
-        if not Config.rdbm_install and Config.cb_install:
-            Config.persistence_type = 'couchbase'
-        elif Config.rdbm_install and (not Config.cb_install):
-            Config.persistence_type = 'sql'
-        elif Config.cb_install:
-            Config.persistence_type = 'hybrid'
+        Config.persistence_type = 'sql'
 
 
     def promptForHTTPD(self):
@@ -594,10 +444,6 @@ class PropertiesUtils(SetupUtils):
                     BackendStrings.REMOTE_MYSQL,
                     ]
 
-        backend_types += [BackendStrings.REMOTE_COUCHBASE]
-        if 'couchbase' in self.getBackendTypes():
-            backend_types.insert(2, BackendStrings.LOCAL_COUCHBASE)
-
         nlist = []
         for i, btype in enumerate(backend_types):
             nn = i+1
@@ -619,34 +465,7 @@ class PropertiesUtils(SetupUtils):
 
         backend_type_str = backend_types[int(choice)-1]
 
-        if backend_type_str == BackendStrings.LOCAL_COUCHBASE:
-            Config.rdbm_install = False
-            Config.cb_install = InstallTypes.LOCAL
-            Config.isCouchbaseUserAdmin = True
-
-            while True:
-                cbPass = self.getPrompt("Enter Password for Couchbase {}admin{} user".format(colors.BOLD, colors.ENDC), Config.admin_password)
-
-                if self.checkPassword(cbPass):
-                    break
-                else:
-                    print("Password must be at least 6 characters and include one uppercase letter, one lowercase letter, one digit, and one special character.")
-
-            Config.cb_password = cbPass
-
-        elif backend_type_str == BackendStrings.REMOTE_COUCHBASE:
-            Config.rdbm_install = False
-            Config.cb_install = InstallTypes.REMOTE
-
-            while True:
-                Config.couchbase_hostname = self.getPrompt("  Couchbase hosts", Config.get('couchbase_hostname'))
-                Config.couchebaseClusterAdmin = self.getPrompt("  Couchbase User", Config.get('couchebaseClusterAdmin'))
-                Config.cb_password =self.getPrompt("  Couchbase Password", Config.get('cb_password'))
-                result = self.test_cb_servers(Config.get('couchbase_hostname'))
-                if result['result']:
-                    break
-
-        elif backend_type_str in (BackendStrings.LOCAL_MYSQL, BackendStrings.LOCAL_PGSQL):
+        if backend_type_str in (BackendStrings.LOCAL_MYSQL, BackendStrings.LOCAL_PGSQL):
             Config.rdbm_install = True
             Config.rdbm_install_type = InstallTypes.LOCAL
             if backend_type_str == BackendStrings.LOCAL_MYSQL:
@@ -780,7 +599,7 @@ class PropertiesUtils(SetupUtils):
             self.prompt_for_http_cert_info()
             Config.jans_max_mem = self.getPrompt("Enter maximum RAM for applications in MB", str(Config.jans_max_mem))
 
-            admin_password = Config.cb_password or Config.rdbm_password or self.getPW(special='.*=!%&+/-')
+            admin_password = Config.rdbm_password or self.getPW(special='.*=!%&+/-')
 
             while True:
                 adminPass = self.getPrompt("Enter Password for Admin User", admin_password)

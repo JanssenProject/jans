@@ -441,21 +441,3 @@ class JettyInstaller(BaseInstaller, SetupUtils):
             for fn in builtin_libs:
                 if fn.startswith(name):
                      return fn
-
-        common_lib_dir = None
-
-        if Config.cb_install:
-            common_lib_dir = base.current_app.CouchbaseInstaller.common_lib_dir
-
-        if common_lib_dir:
-
-            add_custom_lib_dir = []
-            for extra_lib_fn in os.listdir(common_lib_dir):
-                version_search = version_rec.search(extra_lib_fn)
-                if version_search:
-                    version_start_index = version_search.start()
-                    name = extra_lib_fn[:version_start_index]
-                    if not in_war(name):
-                        add_custom_lib_dir.append(os.path.join(common_lib_dir, extra_lib_fn))
-
-            self.add_extra_class(','.join(add_custom_lib_dir))
