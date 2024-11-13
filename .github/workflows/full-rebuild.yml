@@ -29,9 +29,7 @@ on:
           - "jans-casa"
         description: 'Service'
         required: true
-        default: 'jans-bom jans-orm jans-core jans-lock/lock-server agama jans-auth-server jans-link jans-fido2 
-        jans-scim jans-keycloak-link jans-config-api jans-keycloak-integration jans-casa'
-
+        default: 'jans-bom jans-orm jans-core jans-lock/lock-server agama jans-auth-server jans-link jans-fido2 jans-scim jans-keycloak-link jans-config-api jans-keycloak-integration jans-casa'
 
 jobs:
   full-build-with-disabled-tests:
@@ -47,7 +45,7 @@ jobs:
     strategy:
       max-parallel: 1
       matrix:
-        service: ${{ github.event.inputs.services }}
+        service: ${{ github.event.inputs.type }}
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
