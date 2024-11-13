@@ -35,7 +35,7 @@ tags:
   Enter Password for Admin User:
   ```
   
-3. Next, pick a persistence mechanism. Choose from MySQL, PGSql that can be installed locally or remotely, or Couchbase, an enterprise NoSQL cloud database.
+3. Next, pick a persistence mechanism. Choose from MySQL, PGSql that can be installed locally or remotely.
     
 4. Next, pick which services should be installed for this deployment:
 
@@ -74,18 +74,22 @@ python3 /opt/jans/jans-setup/setup.py --help
 ```
 
 ```
-usage: setup.py [-h] [--version] [-c] [-d D] [-f F] [-n] [-N] [-u] [-csx] [-encode-salt ENCODE_SALT] [-remote-rdbm {mysql,pgsql} | -local-rdbm {mysql,pgsql}] [-ip-address IP_ADDRESS]
-                [-host-name HOST_NAME] [-org-name ORG_NAME] [-email EMAIL] [-city CITY] [-state STATE] [-country COUNTRY] [-rdbm-user RDBM_USER] [-rdbm-password RDBM_PASSWORD] [-rdbm-port RDBM_PORT]
-                [-rdbm-db RDBM_DB] [-rdbm-host RDBM_HOST] [--reset-rdbm-db] [--shell] [--dump-config-on-error] [--no-progress] [-admin-password ADMIN_PASSWORD] [-jans-max-mem JANS_MAX_MEM]
-                [-properties-password PROPERTIES_PASSWORD] [-approved-issuer APPROVED_ISSUER] [--force-download] [--download-exit] [-jans-app-version JANS_APP_VERSION] [-jans-build JANS_BUILD]
-                [-setup-branch SETUP_BRANCH] [--disable-config-api-security] [--cli-test-client] [--import-ldif IMPORT_LDIF] [-enable-script ENABLE_SCRIPT] [-disable-script DISABLE_SCRIPT]
-                [-java-version {11,17}] [-stm] [-w] [-t] [-x] [--allow-pre-released-features] [--remote-couchbase] [--local-couchbase] [-couchbase-admin-user COUCHBASE_ADMIN_USER]
-                [-couchbase-admin-password COUCHBASE_ADMIN_PASSWORD] [-couchbase-bucket-prefix COUCHBASE_BUCKET_PREFIX] [-couchbase-hostname COUCHBASE_HOSTNAME]
-                [-couchbase-default-mem COUCHBASE_DEFAULT_MEM] [-couchbase-user-mem COUCHBASE_USER_MEM] [-couchbase-site-mem COUCHBASE_SITE_MEM] [-couchbase-cache-mem COUCHBASE_CACHE_MEM]
-                [-couchbase-token-mem COUCHBASE_TOKEN_MEM] [-couchbase-session-mem COUCHBASE_SESSION_MEM] [--no-data] [--no-jsauth] [--no-config-api] [--no-scim] [--no-fido2] [--install-jans-ldap-link]
-                [--install-jans-keycloak-link] [--with-casa] [--install-jans-saml] [--install-jans-lock] [--install-opa] [--load-config-api-test] [-config-patch-creds CONFIG_PATCH_CREDS]
-                 [-test-client-id TEST_CLIENT_ID] [-test-client-pw TEST_CLIENT_PW]
-                [-test-client-redirect-uri TEST_CLIENT_REDIRECT_URI] [--test-client-trusted]
+usage: jans_setup.py [-h] [--version] [-c] [-d D] [-f F] [-n] [-N] [-u] [-csx] [-encode-salt ENCODE_SALT]
+                     [-remote-rdbm {mysql,pgsql} | -local-rdbm {mysql,pgsql}] [-ip-address IP_ADDRESS]
+                     [-host-name HOST_NAME] [-org-name ORG_NAME] [-email EMAIL] [-city CITY] [-state STATE]
+                     [-country COUNTRY] [-rdbm-user RDBM_USER] [-rdbm-password RDBM_PASSWORD] [-rdbm-port RDBM_PORT]
+                     [-rdbm-db RDBM_DB] [-rdbm-host RDBM_HOST] [--reset-rdbm-db] [--shell] [--dump-config-on-error]
+                     [--no-progress] [-admin-password ADMIN_PASSWORD] [-jans-max-mem JANS_MAX_MEM]
+                     [-properties-password PROPERTIES_PASSWORD] [-approved-issuer APPROVED_ISSUER] [--force-download]
+                     [--download-exit] [-jans-app-version JANS_APP_VERSION] [-jans-build JANS_BUILD]
+                     [-setup-branch SETUP_BRANCH] [--disable-config-api-security] [--cli-test-client]
+                     [--import-ldif IMPORT_LDIF] [-enable-script ENABLE_SCRIPT] [-disable-script DISABLE_SCRIPT]
+                     [-java-version {11,17}] [-stm] [-w] [-t] [-x] [--allow-pre-released-features] [--no-data]
+                     [--no-jsauth] [--no-config-api] [--no-scim] [--no-fido2] [--install-jans-ldap-link]
+                     [--install-jans-keycloak-link] [--with-casa] [--install-jans-saml] [--install-jans-lock]
+                     [--install-opa] [--load-config-api-test] [-config-patch-creds CONFIG_PATCH_CREDS]
+                     [-test-client-id TEST_CLIENT_ID] [-test-client-pw TEST_CLIENT_PW]
+                     [-test-client-redirect-uri TEST_CLIENT_REDIRECT_URI] [--test-client-trusted]
 ```
 
 Use this script to configure your Jans Server and to add initial data. If setup.properties is found in this folder, these properties will automatically be used instead of the interactive setup.
@@ -141,12 +145,6 @@ Below are the optional arguments:
 | -t | Load test data |
 | -x | Load test data and exit |
 | --allow-pre-released-features | Enable options to install experimental features, not yet officially supported |
-| --remote-couchbase | Enables using remote couchbase server |
-| --local-couchbase | Enables installing couchbase server |
-| -couchbase-admin-user COUCHBASE_ADMIN_USER | Couchbase admin user |
-| -couchbase-admin-password COUCHBASE_ADMIN_PASSWORD | Couchbase admin user password |
-| -couchbase-bucket-prefix COUCHBASE_BUCKET_PREFIX | Set prefix for couchbase buckets |
-| -couchbase-hostname COUCHBASE_HOSTNAME | Remote couchbase server hostname |
 | --no-data | Do not import any data to database backend, used for clustering |
 | --no-jsauth | Do not install OAuth2 Authorization Server |
 | --no-config-api | Do not install Jans Auth Config Api |

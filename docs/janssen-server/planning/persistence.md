@@ -4,7 +4,6 @@ tags:
   - planning
   - persistence
   - MySQL
-  - Couchbase
   - Aurora
   - Postgres
   - database
@@ -34,12 +33,6 @@ you'll have to figure out a plan for replication, and horizontal scaling.
 1. **Postgres** Same as MySQL above, but there are some great commercial
 distributions of Postgres like [EnterpriseDB](https://www.enterprisedb.com/). **Postgres is our default 
 persistence for VM based non-production deployments**.
-
-1. **Couchbase** A JSON NoSQL database that supports automatic distribution
-of data for auto-scaling multi-region sharded cloud-native deployments. Janssen
-only supports the commercial distribution--but the previously mentioned database
-properties are enterprise class. If you need to host your own database, and you
-need infinite horizontal scalability, Couchbase should be your go-to choice.
 
 1. **Aurora** So you want MySQL, but you want Amazon to handle some of the care
 and feeding? Aurora enables you to consume database as a cloud service.
