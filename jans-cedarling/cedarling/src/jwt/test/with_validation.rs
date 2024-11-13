@@ -13,7 +13,7 @@ mod key_service;
 mod userinfo_token;
 
 use super::*;
-use crate::common::policy_store::TrustedIssuer;
+use crate::common::policy_store::TrustedIssuerMetadata;
 use crate::jwt::{self, HttpClient, JwtService, JwtServiceError, TrustedIssuerAndOpenIdConfig};
 use jsonwebtoken::Algorithm;
 use serde_json::json;
@@ -89,14 +89,14 @@ fn can_decode_claims_with_validation() {
         .create();
 
     let trusted_idp = TrustedIssuerAndOpenIdConfig::fetch(
-        TrustedIssuer {
+        TrustedIssuerMetadata {
             name: "some_idp".to_string(),
             description: "some_desc".to_string(),
             openid_configuration_endpoint: format!(
                 "{}/.well-known/openid-configuration",
                 server.url()
             ),
-            token_metadata: None,
+            ..Default::default()
         },
         &HttpClient::new().expect("should create http client"),
     )
@@ -209,14 +209,14 @@ fn errors_on_unsupported_alg() {
         .create();
 
     let trusted_idp = TrustedIssuerAndOpenIdConfig::fetch(
-        TrustedIssuer {
+        TrustedIssuerMetadata {
             name: "some_idp".to_string(),
             description: "some_desc".to_string(),
             openid_configuration_endpoint: format!(
                 "{}/.well-known/openid-configuration",
                 server.url()
             ),
-            token_metadata: None,
+            ..Default::default()
         },
         &HttpClient::new().expect("should create http client"),
     )
@@ -349,14 +349,14 @@ fn can_gracefully_handle_unsupported_algorithms_from_jwks() {
         .create();
 
     let trusted_idp = TrustedIssuerAndOpenIdConfig::fetch(
-        TrustedIssuer {
+        TrustedIssuerMetadata {
             name: "some_idp".to_string(),
             description: "some_desc".to_string(),
             openid_configuration_endpoint: format!(
                 "{}/.well-known/openid-configuration",
                 server.url()
             ),
-            token_metadata: None,
+            ..Default::default()
         },
         &HttpClient::new().expect("should create http client"),
     )

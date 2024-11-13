@@ -7,7 +7,7 @@
 
 use super::PolicyStore;
 use super::{parse_option_hashmap, parse_option_string};
-use crate::common::policy_store::parse_cedar_version;
+use crate::common::policy_store::parse_maybe_cedar_version;
 use base64::prelude::*;
 use serde::Deserialize;
 use serde_json::json;
@@ -179,35 +179,45 @@ fn test_broken_policy_parsing_error_in_policy_store() {
 #[test]
 fn test_valid_version() {
     let valid_version = "1.2.3".to_string();
-    assert!(parse_cedar_version(serde_json::Value::String(valid_version)).is_ok());
+    assert!(parse_maybe_cedar_version(serde_json::Value::String(valid_version)).is_ok());
 }
 
 /// Tests that a valid version string with 'v' prefix is accepted.
 #[test]
 fn test_valid_version_with_v() {
     let valid_version_with_v = "v1.2.3".to_string();
-    assert!(parse_cedar_version(serde_json::Value::String(valid_version_with_v)).is_ok());
+    assert!(parse_maybe_cedar_version(serde_json::Value::String(valid_version_with_v)).is_ok());
 }
 
 /// Tests that an invalid version format is rejected.
 #[test]
 fn test_invalid_version_format() {
     let invalid_version = "1.2".to_string();
-    assert!(parse_cedar_version(serde_json::Value::String(invalid_version)).is_err());
+    assert!(parse_maybe_cedar_version(serde_json::Value::String(invalid_version)).is_err());
 }
 
 /// Tests that an invalid version part (non-numeric) is rejected.
 #[test]
 fn test_invalid_version_part() {
     let invalid_version = "1.two.3".to_string();
-    assert!(parse_cedar_version(serde_json::Value::String(invalid_version)).is_err());
+    assert!(parse_maybe_cedar_version(serde_json::Value::String(invalid_version)).is_err());
 }
 
 /// Tests that an invalid version format with 'v' prefix is rejected.
 #[test]
 fn test_invalid_version_format_with_v() {
     let invalid_version_with_v = "v1.2".to_string();
-    assert!(parse_cedar_version(serde_json::Value::String(invalid_version_with_v)).is_err());
+    assert!(parse_maybe_cedar_version(serde_json::Value::String(invalid_version_with_v)).is_err());
+}
+
+/// Tests that an invalid version format with 'v' prefix is rejected.
+#[test]
+fn test_empty_string_version() {
+    let empty_string_version = "".to_string();
+    assert_eq!(
+        parse_maybe_cedar_version(serde_json::Value::String(empty_string_version)).unwrap(),
+        None
+    );
 }
 
 #[test]

@@ -8,7 +8,7 @@
 //! Module that contains strong typed configuaration for the JWT service.
 //! This configuration allows to initialize service without any errors.
 
-use crate::common::policy_store::TrustedIssuer;
+use crate::common::policy_store::TrustedIssuerMetadata;
 use crate::jwt;
 
 use super::decoding_strategy::key_service::{fetch_openid_config, OpenIdConfig};
@@ -30,14 +30,14 @@ pub enum JwtServiceConfig {
 /// Structure to store `TrustedIssuer` and `OpenIdConfig` in one place.
 #[derive(Clone)]
 pub struct TrustedIssuerAndOpenIdConfig {
-    pub trusted_issuer: TrustedIssuer,
+    pub trusted_issuer: TrustedIssuerMetadata,
     pub openid_config: OpenIdConfig,
 }
 
 impl TrustedIssuerAndOpenIdConfig {
     /// Fetch openid configuration based on the `TrustedIssuer` and return config
     pub fn fetch(
-        trusted_issuer: TrustedIssuer,
+        trusted_issuer: TrustedIssuerMetadata,
         client: &jwt::HttpClient,
     ) -> Result<Self, jwt::KeyServiceError> {
         let openid_config = fetch_openid_config(

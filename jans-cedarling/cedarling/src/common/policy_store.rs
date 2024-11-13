@@ -6,76 +6,67 @@
  */
 
 mod claim_mapping;
-pub mod policy_store_source;
+mod json_store;
 #[cfg(test)]
 mod test;
 mod token_entity_metadata;
 mod trusted_issuer_metadata;
+mod yaml_store;
 
 use super::cedar_schema::CedarSchema;
-pub use policy_store_source::LoadPolicyStoreError;
+use cedar_policy::{Policy, PolicySet};
+use json_store::{LoadFromJsonError, PolicyStoreJson};
 use semver::Version;
 use serde::{Deserialize, Deserializer};
 use std::{collections::HashMap, fmt};
-use token_entity_metadata::TokenEntityMetadata;
+pub use trusted_issuer_metadata::TrustedIssuerMetadata;
+use yaml_store::{LoadFromYamlError, PolicyStoreYaml};
 
-/// Represents the store of policies used for JWT validation and policy evaluation in Cedarling.
-///
-/// The `PolicyStore` contains the schema and a set of policies encoded in base64,
-/// which are parsed during deserialization.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, thiserror::Error)]
+pub enum LoadPolicyStoreError {
+    #[error("Failed to load policy store from JSON: {0}")]
+    Json(#[from] LoadFromJsonError),
+    #[error("Failed to load policy store from YAML: {0}")]
+    Yaml(#[from] LoadFromYamlError),
+}
+
+// Policy Stores from the Agama Policy Designer
+#[derive(Debug, PartialEq, Clone)]
+#[allow(dead_code)]
 pub struct PolicyStore {
     pub name: Option<String>,
     pub description: Option<String>,
-    /// The cedar version to use when parsing the schema and policies.
-    #[allow(dead_code)]
     pub cedar_version: Option<Version>,
-    /// Cedar schema
+    pub policies: HashMap<String, PolicyContent>,
     pub cedar_schema: CedarSchema,
-    /// Cedar policy set
-    pub cedar_policies: cedar_policy::PolicySet,
-    /// An optional list of trusted issuers.
-    ///
-    /// This field may contain issuers that are trusted to provide tokens, allowing for additional
-    /// verification and security when handling JWTs.
-    #[allow(dead_code)]
-    pub trusted_issuers: Option<Vec<TrustedIssuer>>,
+    pub trusted_issuers: HashMap<String, TrustedIssuerMetadata>,
+    policy_set: PolicySet,
 }
 
 impl PolicyStore {
     pub fn load_from_json(json: &str) -> Result<Self, LoadPolicyStoreError> {
-        let source = policy_store_source::PolicyStoreSource::load_from_json(json)?;
-        Ok(source.into())
+        let json_store = serde_json::from_str::<PolicyStoreJson>(&json)
+            .map_err(LoadFromJsonError::Deserialization)?;
+        json_store.try_into().map_err(LoadPolicyStoreError::Json)
     }
 
     pub fn load_from_yaml(yaml: &str) -> Result<Self, LoadPolicyStoreError> {
-        let source = policy_store_source::PolicyStoreSource::load_from_yaml(yaml)?;
-        Ok(source.into())
+        let yaml_store = serde_yml::from_str::<PolicyStoreYaml>(&yaml)
+            .map_err(LoadFromYamlError::Deserialization)?;
+        Ok(yaml_store.into())
+    }
+
+    pub fn policy_set(&self) -> &PolicySet {
+        &self.policy_set
     }
 }
 
-/// Represents a trusted issuer that can provide JWTs.
-///
-/// This struct includes the issuer's name, description, and the OpenID configuration endpoint
-/// for discovering issuer-related information.
-#[derive(Debug, Clone, Deserialize, PartialEq)]
-#[allow(dead_code)]
-pub struct TrustedIssuer {
-    /// The name of the trusted issuer.
-    pub name: String,
-
-    /// A brief description of the trusted issuer.
+// Policy Store from the Agama Policy Designer
+#[derive(Debug, PartialEq, Clone)]
+pub struct PolicyContent {
     pub description: String,
-
-    /// The OpenID configuration endpoint for the issuer.
-    ///
-    /// This endpoint is used to obtain information about the issuer's capabilities.
-    pub openid_configuration_endpoint: String,
-
-    /// Optional metadata related to the tokens issued by this issuer.
-    ///
-    /// This field may include role mappings that help define the access levels for issued tokens.
-    pub token_metadata: Option<HashMap<TokenKind, TokenEntityMetadata>>,
+    pub creation_date: String,
+    pub policy_content: Policy,
 }
 
 /// Structure define the source from which role mappings are retrieved.
@@ -94,44 +85,42 @@ impl Default for RoleMapping<'_> {
     }
 }
 
-impl TrustedIssuer {
+impl TrustedIssuerMetadata {
     /// Retrieves the available `RoleMapping` from the token metadata.
     //
-    // in `token_metadata` list only one element with mapping
-    // it is maximum 3 elements in list so iterating is efficient enouf
+    // We're just checking each token metadata right now and returning the
+    // first one with a role_mapping field.
     pub fn get_role_mapping(&self) -> Option<RoleMapping> {
-        if let Some(token_metadata) = &self.token_metadata {
-            for (token_kind, metadata) in token_metadata {
-                if let Some(role_mapping_field) = &metadata.role_mapping {
-                    // TODO: why are we only returning the first one here?
-                    return Some(RoleMapping {
-                        kind: *token_kind,
-                        role_mapping_field: &role_mapping_field,
-                    });
-                }
-            }
+        if let Some(role_mapping) = &self.access_tokens.role_mapping {
+            return Some(RoleMapping {
+                kind: TokenKind::Access,
+                role_mapping_field: role_mapping.as_str(),
+            });
+        }
+
+        if let Some(role_mapping) = &self.id_tokens.role_mapping {
+            return Some(RoleMapping {
+                kind: TokenKind::Id,
+                role_mapping_field: role_mapping.as_str(),
+            });
+        }
+
+        if let Some(role_mapping) = &self.userinfo_tokens.role_mapping {
+            return Some(RoleMapping {
+                kind: TokenKind::Userinfo,
+                role_mapping_field: role_mapping.as_str(),
+            });
+        }
+
+        if let Some(role_mapping) = &self.tx_tokens.role_mapping {
+            return Some(RoleMapping {
+                kind: TokenKind::Transaction,
+                role_mapping_field: role_mapping.as_str(),
+            });
         }
 
         None
     }
-}
-
-/// Represents metadata associated with a token.
-///
-/// This struct includes the type of token, the ID of the person associated with the token,
-/// and an optional role mapping for access control.
-#[derive(Debug, Clone, Deserialize, PartialEq)]
-#[allow(dead_code)]
-pub struct TokenMetadata {
-    /// The type of token (e.g., Access, ID, Userinfo, Transaction).
-    #[serde(rename = "type")]
-    pub kind: TokenKind,
-
-    /// The claim used to create the user entity associated with this token.
-    pub user_id: String,
-
-    /// An optional claim used to create a role for the token.
-    pub role_mapping: Option<String>,
 }
 
 #[derive(Debug, Copy, Clone, PartialEq, Eq, Hash)]
@@ -182,27 +171,6 @@ impl<'de> Deserialize<'de> for TokenKind {
     }
 }
 
-/// Parses the `cedar_version` field.
-///
-/// This function checks that the version string follows the format `major.minor.patch`,
-/// where each component is a valid number. This also supports having a "v" prefix in the
-/// version, e.g. `v1.0.1`.
-#[allow(dead_code)]
-fn parse_cedar_version<'de, D>(deserializer: D) -> Result<Version, D::Error>
-where
-    D: Deserializer<'de>,
-{
-    let version: String = String::deserialize(deserializer)?;
-
-    // Check for "v" prefix
-    let version = version.strip_prefix('v').unwrap_or(&version);
-
-    let version = Version::parse(version)
-        .map_err(|e| serde::de::Error::custom(format!("error parsing cedar version :{}", e)))?;
-
-    Ok(version)
-}
-
 /// Parses the optional `cedar_version` field.
 ///
 /// This function checks that the version string follows the format `major.minor.patch`,
@@ -216,6 +184,11 @@ where
 
     match maybe_version {
         Some(version) => {
+            // return None for an empty string
+            if version.is_empty() {
+                return Ok(None);
+            }
+
             // Check for "v" prefix
             let version = version.strip_prefix('v').unwrap_or(&version);
 
@@ -227,20 +200,6 @@ where
         },
         None => Ok(None),
     }
-}
-
-/// content_type for the policy_content field.
-///
-/// Only contains a single member, because as of 31-Oct-2024, cedar-policy 4.2.1
-/// cedar_policy::Policy:from_json does not work with a single policy.
-///
-/// NOTE if/when cedar_policy::Policy:from_json gains this ability, this type
-/// can be replaced by super::ContentType
-#[derive(Debug, Clone, serde::Deserialize)]
-enum PolicyContentType {
-    /// indicates that the related value is in the cedar policy / schema language
-    #[serde(rename = "cedar")]
-    Cedar,
 }
 
 /// Custom parser for an Option<String> which return None if the string is empty.

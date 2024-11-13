@@ -22,7 +22,7 @@
 //!   - Tests for errors when the `userinfo_token` has a different `sub` with the id_token
 
 use super::super::*;
-use crate::common::policy_store::TrustedIssuer;
+use crate::common::policy_store::TrustedIssuerMetadata;
 use crate::jwt::decoding_strategy::JwtDecodingError;
 use crate::jwt::{self, HttpClient, JwtService, TrustedIssuerAndOpenIdConfig};
 use jsonwebtoken::Algorithm;
@@ -131,14 +131,14 @@ fn test_missing_claim(missing_claim: &str) {
         .create();
 
     let trusted_idp = TrustedIssuerAndOpenIdConfig::fetch(
-        TrustedIssuer {
+        TrustedIssuerMetadata {
             name: "some_idp".to_string(),
             description: "some_desc".to_string(),
             openid_configuration_endpoint: format!(
                 "{}/.well-known/openid-configuration",
                 server.url()
             ),
-            token_metadata: None,
+            ..Default::default()
         },
         &HttpClient::new().expect("should create http client"),
     )
@@ -283,14 +283,14 @@ fn errors_on_invalid_signature() {
         .create();
 
     let trusted_idp = TrustedIssuerAndOpenIdConfig::fetch(
-        TrustedIssuer {
+        TrustedIssuerMetadata {
             name: "some_idp".to_string(),
             description: "some_desc".to_string(),
             openid_configuration_endpoint: format!(
                 "{}/.well-known/openid-configuration",
                 server.url()
             ),
-            token_metadata: None,
+            ..Default::default()
         },
         &HttpClient::new().expect("should create http client"),
     )

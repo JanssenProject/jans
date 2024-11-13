@@ -9,11 +9,12 @@ pub mod error;
 pub mod key_service;
 
 pub mod open_id_storage;
-use crate::common::policy_store::TrustedIssuer;
 pub use error::JwtDecodingError;
 use jsonwebtoken as jwt;
 use key_service::KeyService;
 use serde::de::DeserializeOwned;
+
+use crate::common::policy_store::TrustedIssuerMetadata;
 
 /// Represents the decoding strategy for JWT tokens.
 ///
@@ -65,7 +66,7 @@ impl DecodingStrategy {
     /// Returns an error if the specified algorithm is unrecognized or the key service initialization fails.
     pub fn new_with_validation(
         config_algs: Vec<jwt::Algorithm>,
-        trusted_idps: Vec<TrustedIssuer>,
+        trusted_idps: Vec<TrustedIssuerMetadata>,
     ) -> Result<Self, JwtDecodingError> {
         // initialize the key service with OpenID configuration endpoints
         let openid_conf_endpoints = trusted_idps

@@ -15,7 +15,7 @@
 //! - Test expecting panic for not being able to fetch JWKS [`JwtService::new_with_config`] init
 
 use super::super::*;
-use crate::common::policy_store::TrustedIssuer;
+use crate::common::policy_store::TrustedIssuerMetadata;
 use crate::jwt::decoding_strategy::key_service::KeyService;
 use crate::jwt::decoding_strategy::JwtDecodingError;
 use crate::jwt::{self, HttpClient, JwtService};
@@ -101,14 +101,14 @@ fn errors_when_no_key_found() {
         .create();
 
     let trusted_idp = TrustedIssuerAndOpenIdConfig::fetch(
-        TrustedIssuer {
+        TrustedIssuerMetadata {
             name: "some_idp".to_string(),
             description: "some_desc".to_string(),
             openid_configuration_endpoint: format!(
                 "{}/.well-known/openid-configuration",
                 server.url()
             ),
-            token_metadata: None,
+            ..Default::default()
         },
         &HttpClient::new().expect("should create http client"),
     )
@@ -279,14 +279,14 @@ fn can_update_local_jwks() {
         .create();
 
     let trusted_idp = TrustedIssuerAndOpenIdConfig::fetch(
-        TrustedIssuer {
+        TrustedIssuerMetadata {
             name: "some_idp".to_string(),
             description: "some_desc".to_string(),
             openid_configuration_endpoint: format!(
                 "{}/.well-known/openid-configuration",
                 server.url()
             ),
-            token_metadata: None,
+            ..Default::default()
         },
         &HttpClient::new().expect("should create http client"),
     )

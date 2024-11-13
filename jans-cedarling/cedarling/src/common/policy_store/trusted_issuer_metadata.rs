@@ -5,7 +5,7 @@ use serde::Deserialize;
 ///
 /// This struct includes the issuer's name, description, and the OpenID configuration endpoint
 /// for discovering issuer-related information.
-#[derive(Debug, Deserialize, PartialEq)]
+#[derive(Debug, Deserialize, PartialEq, Clone, Default)]
 #[allow(dead_code)]
 pub struct TrustedIssuerMetadata {
     /// The name of the trusted issuer.

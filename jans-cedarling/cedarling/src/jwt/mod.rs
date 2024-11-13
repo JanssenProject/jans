@@ -20,7 +20,6 @@ mod error;
 mod jwt_service_config;
 mod token;
 
-use crate::common::policy_store::TrustedIssuer;
 use decoding_strategy::{open_id_storage::OpenIdStorage, DecodingArgs, DecodingStrategy};
 use serde::de::DeserializeOwned;
 use token::*;
@@ -30,6 +29,8 @@ pub use decoding_strategy::{string_to_alg, ParseAlgorithmError};
 pub use error::JwtServiceError;
 pub use jsonwebtoken::Algorithm;
 pub use jwt_service_config::*;
+
+use crate::common::policy_store::TrustedIssuerMetadata;
 pub(crate) mod decoding_strategy;
 
 pub struct JwtService {
@@ -194,6 +195,5 @@ pub struct DecodeTokensResult<'a, A, I, U> {
     pub access_token: A,
     pub id_token: I,
     pub userinfo_token: U,
-
-    pub trusted_issuer: Option<&'a TrustedIssuer>,
+    pub trusted_issuer: Option<&'a TrustedIssuerMetadata>,
 }
