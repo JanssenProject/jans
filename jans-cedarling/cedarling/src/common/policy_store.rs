@@ -5,8 +5,8 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-mod agama_policy_store;
 mod claim_mapping;
+mod policy_store_source;
 #[cfg(test)]
 mod test;
 mod token_entity_metadata;

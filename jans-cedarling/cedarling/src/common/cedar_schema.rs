@@ -5,11 +5,7 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-use std::str::FromStr;
-
 pub(crate) use cedar_json::CedarSchemaJson;
-use cedar_policy::{ffi, Schema};
-use serde::Deserialize;
 pub(crate) mod cedar_json;
 
 /// cedar_schema value which specifies both encoding and content_type
