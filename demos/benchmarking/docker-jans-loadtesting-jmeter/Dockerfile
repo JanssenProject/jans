@@ -34,17 +34,8 @@ ENV FQDN="https://demoexample.jans.io" \
     USER_NUMBER_STARTING_POINT=0 \
     USER_NUMBER_ENDING_POINT=50000000 \
     LOAD_USERS_TO_COUCHBASE=false \
-    LOAD_USERS_TO_LDAP=false \
-    LOAD_USERS_TO_SPANNER=false \
     LOAD_USERS_TO_RDBMS=false \
     USER_SPLIT_PARALLEL_THREADS=20 \
-    GOOGLE_APPLICATION_CREDENTIALS=""\
-    GOOGLE_PROJECT_ID=""\
-    GOOGLE_SPANNER_INSTANCE_ID=""\
-    GOOGLE_SPANNER_DATABASE_ID=""\
-    LDAP_URL="opendj:1636" \
-    LDAP_PW="" \
-    LDAP_DN="cn=directory manager" \
     # pgsql or mysql
     RDBMS_TYPE="mysql" \
     RDBMS_DB="jans" \

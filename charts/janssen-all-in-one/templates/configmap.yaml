@@ -202,8 +202,6 @@ data:
   KC_DB_URL_PORT: {{ .Values.configmap.kcDbUrlPort | quote }}
   KC_DB_URL_DATABASE: {{ .Values.configmap.kcDbUrlDatabase | quote }}
   KC_DB_URL_PROPERTIES: {{ .Values.configmap.kcDbUrlProperties | quote }}
-  CN_SAML_KC_DB_PASSWORD_FILE: {{ .Values.kcDbPasswordFile | quote }}
-  CN_SAML_KC_ADMIN_CREDENTIALS_FILE: {{ .Values.kcAdminCredentialsFile | quote }}
   {{- end }}
   CN_LOCK_ENABLED: {{ index .Values "auth-server" "lockEnabled" | quote }}
   CN_OPA_URL: {{ .Values.configmap.cnOpaUrl | quote }}

@@ -8,7 +8,6 @@ from collections import namedtuple
 from jans.pycloudlib import get_manager
 from jans.pycloudlib.persistence.couchbase import CouchbaseClient
 from jans.pycloudlib.persistence.couchbase import id_from_dn
-from jans.pycloudlib.persistence.spanner import SpannerClient
 from jans.pycloudlib.persistence.sql import SqlClient
 from jans.pycloudlib.persistence.sql import doc_id_from_dn
 from jans.pycloudlib.persistence.utils import PersistenceMapper
@@ -212,38 +211,9 @@ class CouchbaseBackend:
         return entries
 
 
-class SpannerBackend:
-    def __init__(self, manager):
-        self.manager = manager
-        self.client = SpannerClient(manager)
-        self.type = "spanner"
-
-    def get_entry(self, key, filter_="", attrs=None, **kwargs):
-        table_name = kwargs.get("table_name")
-        entry = self.client.get(table_name, key, attrs)
-
-        if not entry:
-            return None
-        return Entry(key, entry)
-
-    def modify_entry(self, key, attrs=None, **kwargs):
-        attrs = attrs or {}
-        table_name = kwargs.get("table_name")
-        return self.client.update(table_name, key, attrs), ""
-
-    def search_entries(self, key, filter_="", attrs=None, **kwargs):
-        attrs = attrs or {}
-        table_name = kwargs.get("table_name")
-        return [
-            Entry(entry["doc_id"], entry)
-            for entry in self.client.search(table_name, attrs)
-        ]
-
-
 BACKEND_CLASSES = {
     "sql": SQLBackend,
     "couchbase": CouchbaseBackend,
-    "spanner": SpannerBackend,
 }
 
 
@@ -267,7 +237,7 @@ class Upgrade:
         kwargs = {}
         id_ = "ou=jans-lock,ou=configuration,o=jans"
 
-        if self.backend.type in ("sql", "spanner"):
+        if self.backend.type == "sql":
             kwargs = {"table_name": "jansAppConf"}
             id_ = doc_id_from_dn(id_)
         elif self.backend.type == "couchbase":
@@ -293,7 +263,7 @@ class Upgrade:
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
 
     def get_all_scopes(self):
-        if self.backend.type in ("sql", "spanner"):
+        if self.backend.type == "sql":
             kwargs = {"table_name": "jansScope"}
             entries = self.backend.search_entries(None, **kwargs)
         else: # likely couchbase
@@ -312,7 +282,7 @@ class Upgrade:
         client_id = self.manager.config.get("lock_client_id")
         id_ = f"inum={client_id},ou=clients,o=jans"
 
-        if self.backend.type in ("sql", "spanner"):
+        if self.backend.type == "sql":
             kwargs = {"table_name": "jansClnt"}
             id_ = doc_id_from_dn(id_)
         else: # likely couchbase
