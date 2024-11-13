@@ -35,10 +35,21 @@ pub fn get_policy_id(resp: &Option<cedar_policy::Response>) -> Option<Vec<String
     })
 }
 
-// macro to remove code duplication when compare policy_id-s
-//
-// macro is always defined in the root space.
-// to avoid problems with functions calling better to use full path
+/// This macro removes code duplication when comparing policy IDs.
+///
+/// It is designed to assert that the policy ID retrieved from a response
+/// matches a vector of policy IDs (converted to a specific format).
+///
+/// # Arguments
+///
+/// - `$resp`: The response object that contains the policy ID.
+/// - `$vec_policy_id`: A vector of policy IDs to compare against.
+/// - `$msg`: A custom error message that will be shown if the assertion fails.
+///
+/// # Example usage:
+/// ```rust
+/// cmp_policy!(response, policy_ids, "Policy IDs do not match");
+/// ```
 #[doc(hidden)]
 #[macro_export]
 macro_rules! cmp_policy {
@@ -56,7 +67,21 @@ pub fn get_decision(resp: &Option<cedar_policy::Response>) -> Option<cedar_polic
     resp.as_ref().map(|v| v.decision())
 }
 
-// macro to remove code duplication when compare decision
+/// This macro removes code duplication when comparing a decision in tests.
+///
+/// It simplifies the process of asserting that the decision retrieved from
+/// a response matches the expected value.
+///
+/// # Arguments
+///
+/// - `$resp`: The response object that contains the decision to be checked.
+/// - `$decision`: The expected decision value that should match the one in `$resp`.
+/// - `$msg`: A custom error message that will be displayed if the assertion fails.
+///
+/// # Example usage:
+/// ```rust
+/// cmp_decision!(response, expected_decision, "Decision does not match");
+/// ```
 #[doc(hidden)]
 #[macro_export]
 macro_rules! cmp_decision {
