@@ -48,7 +48,8 @@ impl TryFrom<PolicyStoreSourceJson> for PolicyStoreSource {
 #[derive(Debug, PartialEq, Deserialize)]
 #[allow(dead_code)]
 pub struct PolicyStoreDataJson {
-    pub name: String,
+    #[serde(deserialize_with = "parse_option_string", default)]
+    pub name: Option<String>,
     #[serde(deserialize_with = "parse_option_string", default)]
     pub description: Option<String>,
     #[serde(deserialize_with = "parse_encoded_policies")]

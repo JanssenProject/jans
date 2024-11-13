@@ -23,7 +23,7 @@ pub enum LoadPolicyStoreError {
 #[derive(Debug, PartialEq)]
 #[allow(dead_code)]
 pub struct PolicyStoreSource {
-    pub name: String,
+    pub name: Option<String>,
     pub description: Option<String>,
     pub cedar_version: Option<Version>,
     pub policies: HashMap<String, PolicyContent>,
@@ -81,7 +81,7 @@ impl From<PolicyStoreSource> for PolicyStore {
         }
 
         PolicyStore {
-            name: Some(agama_store.name),
+            name: agama_store.name,
             description: agama_store.description,
             cedar_version: agama_store.cedar_version,
             cedar_schema: agama_store.cedar_schema,

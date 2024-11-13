@@ -17,8 +17,8 @@ use std::{collections::HashMap, str::FromStr};
 /// Cedar policies and schema.
 #[derive(Deserialize)]
 pub struct PolicyStoreSourceYaml {
-    #[serde(default)]
-    pub name: String,
+    #[serde(deserialize_with = "parse_option_string", default)]
+    pub name: Option<String>,
     #[serde(deserialize_with = "parse_option_string", default)]
     pub description: Option<String>,
     #[serde(deserialize_with = "parse_maybe_cedar_version", default)]
