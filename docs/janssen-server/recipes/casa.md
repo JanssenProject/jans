@@ -75,7 +75,7 @@ casa_client_pw=MyCasaClientSecret
 
 ## Enabling Authentication methods
 
-1. [Enable authentication mechanisms](../../janssen-server/developer/scripts/person-authentication#enabling-an-authentication-mechanism) in Jan-auth server like `otp`, `fido2`, `email_otp`.
+1. [Enable authentication mechanisms](../../script-catalog/person_authentication/person-authentication.md#enabling-an-authentication-mechanism) in Jan-auth server like `otp`, `fido2`, `email_otp`.
 2. launch jans-cli-tui to enable scripts in Jans-auth server
 3. search for script, open script and navigate to enable section and press 
    enter at enable then press save.
