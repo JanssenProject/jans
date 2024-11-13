@@ -2,8 +2,7 @@
     "cedar_version": "v4.0.0",
     "policy_stores": {
         "050bc9c1b1c08eb4b95b1da310c5d17a69be17f7a13c206d868853232edb57bb": {
-            "cedar_version": "v4.0.0",
-            "cedar_policies": {
+            "policies": {
                 "840da5d85403f35ea76519ed1a18a33989f855bf1cf8": {
                     "description": "admin access",
                     "creation_date": "2024-09-20T17:22:39.996050",

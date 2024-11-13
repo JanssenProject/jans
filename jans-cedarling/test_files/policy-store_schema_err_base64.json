@@ -3,7 +3,7 @@
     "policy_stores": {
         "8ec39ee717927663bd9b18246f0479491051bb5af15a": {
             "cedar_version": "v4.0.0",
-            "cedar_policies": {
+            "policies": {
                 "840da5d85403f35ea76519ed1a18a33989f855bf1cf8": {
                     "description": "admin access",
                     "creation_date": "2024-09-20T17:22:39.996050",
@@ -31,7 +31,7 @@
                 }
             },
             "identity_source": {},
-            "cedar_schema": "ewogICJKYW...gfQp9"
+            "schema": "ewogICJKYW...gfQp9"
         }
     }
 }
