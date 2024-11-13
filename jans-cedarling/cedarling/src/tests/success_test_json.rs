@@ -14,9 +14,9 @@ fn success_test_json() {
     // The human-readable policy and schema file is located in next folder:
     // `test_files\policy-store_ok`
     // Is used to check that the JSON policy is loaded correctly
-    static POLICY_STORE_RAW_JSON: &str = include_str!("../../../test_files/policy-store_ok.json");
+    static POLICY_STORE_RAW_JSON: &str = include_str!("../../../test_files/policy-store_ok.yaml");
 
-    let cedarling = get_cedarling(PolicyStoreSource::Json(POLICY_STORE_RAW_JSON.to_string()));
+    let cedarling = get_cedarling(PolicyStoreSource::Yaml(POLICY_STORE_RAW_JSON.to_string()));
 
     // deserialize `Request` from json
     let request = Request::deserialize(serde_json::json!(

@@ -38,7 +38,7 @@ impl TrustedIssuerAndOpenIdConfig {
     /// Fetch openid configuration based on the `TrustedIssuer` and return config
     pub fn fetch(
         trusted_issuer: TrustedIssuer,
-        client: &reqwest::blocking::Client,
+        client: &jwt::HttpClient,
     ) -> Result<Self, jwt::KeyServiceError> {
         let openid_config = fetch_openid_config(
             trusted_issuer.openid_configuration_endpoint.as_str(),

@@ -22,13 +22,8 @@ Installation depends on the set of environment variables shown below. These envi
 | `USER_NUMBER_STARTING_POINT`     | The user number to start from . This is appended to the username i.e test_user0                               | `0`                    |
 | `USER_NUMBER_ENDING_POINT`       | The user number to end at.                                                                                    | `50000000`             |
 | `LOAD_USERS_TO_COUCHBASE`        | Enable loading users to Couchbase persistence. `true` or `false` == ``                                        | `false`                |
-| `LOAD_USERS_TO_SPANNER`          | Enable loading users to Spanner persistence. `true` or `false` == ``                                          | `false`                |
 | `LOAD_USERS_TO_RDBMS`            | Enable loading users to RDBMS persistence. `true` or `false` == ``                                            | `false`                |
 | `USER_SPLIT_PARALLEL_THREADS`    | The number of parallel threads to break the total number users across. This number heavily effects CPU usage. | `20`                   |
-| `GOOGLE_APPLICATION_CREDENTIALS` | Google Credentials JSON SA file. **Used with Spanner**                                                        | ``                     |
-| `GOOGLE_PROJECT_ID`              | Google Project ID. **Used with Spanner**                                                                      | ``                     |
-| `GOOGLE_SPANNER_INSTANCE_ID`     | Google Spanner Instance ID. **Used with Spanner**                                                             | ``                     |
-| `GOOGLE_SPANNER_DATABASE_ID`     | Google Spanner Database ID. **Used with Spanner**                                                             | ``                     |
 | `RDBMS_TYPE`                     | RDBMS type if `mysql` or `pgsql` is the persistence to load users in.                                         | `mysql`                |
 | `RDBMS_DB`                       | RDBMS Database name if `mysql` or `pgsql` is the persistence to load users in.                                | `jans`                 |
 | `RDBMS_USER`                     | RDBMS user if `mysql` or `pgsql` is the persistence to load users in.                                         | `jans`                 |

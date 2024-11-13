@@ -17,7 +17,6 @@ from jans.pycloudlib import get_manager
 from jans.pycloudlib import wait_for
 from jans.pycloudlib.persistence.couchbase import sync_couchbase_password
 from jans.pycloudlib.persistence.couchbase import sync_couchbase_superuser_password
-from jans.pycloudlib.persistence.spanner import sync_google_credentials
 from jans.pycloudlib.persistence.sql import sync_sql_password
 from jans.pycloudlib.persistence.utils import PersistenceMapper
 from jans.pycloudlib.utils import get_random_chars
@@ -531,8 +530,6 @@ def load(configuration_file, dump_file):
         case "couchbase":
             sync_couchbase_superuser_password(manager)
             sync_couchbase_password(manager)
-        case "spanner":
-            sync_google_credentials(manager)
 
     # check whether config and secret in backend have been initialized
     should_skip = as_boolean(os.environ.get("CN_CONFIGURATOR_SKIP_INITIALIZED", False))
@@ -580,8 +577,6 @@ def dump(dump_file):
         case "couchbase":
             sync_couchbase_superuser_password(manager)
             sync_couchbase_password(manager)
-        case "spanner":
-            sync_google_credentials(manager)
 
     # dump all configuration from remote backend to file
     dump_to_file(manager, dump_file)

@@ -41,5 +41,3 @@ The main catch is that write operations are limited to one region, with the
 ability to failover to another region. But to accomplish this, you need a cloud
 engineer to implement it.
 
-
-

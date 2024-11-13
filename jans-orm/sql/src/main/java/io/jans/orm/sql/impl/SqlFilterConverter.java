@@ -515,6 +515,10 @@ public class SqlFilterConverter {
 		}
 
 		String attributeNameLower = attributeName.toLowerCase();
+		
+		if (tableMapping.getColumTypes() == null) {
+			 throw new SearchException(String.format("Unknown table '%s' and it's column '%s'", tableMapping.getTableName(), attributeName));
+		}
 
 		AttributeType attributeType = tableMapping.getColumTypes().get(attributeNameLower);
 		if (attributeType == null) {
