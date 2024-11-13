@@ -223,18 +223,6 @@
       "tag": "cache"
     },
     {
-      "permission": "https://jans.io/oauth/config/database/couchbase.readonly",
-      "description": null,
-      "defaultPermissionInToken": false,
-      "tag": "couchbase"
-    },
-    {
-      "permission": "https://jans.io/oauth/config/database/couchbase.write",
-      "description": null,
-      "defaultPermissionInToken": false,
-      "tag": "couchbase"
-    },
-    {
       "permission": "https://jans.io/oauth/config/database/sql.readonly",
       "description": null,
       "defaultPermissionInToken": false,
@@ -523,7 +511,6 @@
         "https://jans.io/oauth/config/message.readonly",
         "https://jans.io/oauth/config/cache.readonly",
         "https://jans.io/oauth/jans-auth-server/config/properties.readonly",
-        "https://jans.io/oauth/config/database/couchbase.readonly",
         "https://jans.io/oauth/config/database/sql.readonly",
         "https://jans.io/oauth/config/stats.readonly",
         "https://jans.io/oauth/jans-auth-server/config/adminui/properties.readonly",
@@ -559,8 +546,6 @@
         "https://jans.io/oauth/config/message.write",
         "https://jans.io/oauth/config/cache.readonly",
         "https://jans.io/oauth/config/cache.write",
-        "https://jans.io/oauth/config/database/couchbase.readonly",
-        "https://jans.io/oauth/config/database/couchbase.write",
         "https://jans.io/oauth/config/database/sql.readonly",
         "https://jans.io/oauth/config/database/sql.write",
         "readonly",
@@ -607,8 +592,6 @@
         "https://jans.io/oauth/config/message.write",
         "https://jans.io/oauth/config/cache.readonly",
         "https://jans.io/oauth/config/cache.write",
-        "https://jans.io/oauth/config/database/couchbase.readonly",
-        "https://jans.io/oauth/config/database/couchbase.write",
         "https://jans.io/oauth/config/database/sql.readonly",
         "https://jans.io/oauth/config/database/sql.write",
         "readonly",
@@ -655,8 +638,6 @@
         "https://jans.io/oauth/config/message.write",
         "https://jans.io/oauth/config/cache.readonly",
         "https://jans.io/oauth/config/cache.write",
-        "https://jans.io/oauth/config/database/couchbase.readonly",
-        "https://jans.io/oauth/config/database/couchbase.write",
         "https://jans.io/oauth/config/database/sql.readonly",
         "https://jans.io/oauth/config/database/sql.write",
         "readonly",
