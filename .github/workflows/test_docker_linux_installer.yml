@@ -21,7 +21,7 @@ jobs:
       max-parallel: 6
       matrix:
         # add '"pgsql" when supported
-        persistence-backends: ["MYSQL", "PGSQL", "COUCHBASE"]
+        persistence-backends: ["MYSQL", "PGSQL"]
         python-version: ["3.7"]
       fail-fast: false
     steps:
@@ -78,8 +78,8 @@ jobs:
         MESSAGE="fix(docs): autogenerate ${{ matrix.persistence-backends }} RDBMS docs"
         gh pr create --body "Auto generated RDBMS docs" --title "${MESSAGE}" || echo "PR exists"
         cd ..
-        echo "generating rdbms docs for ${{ matrix.persistence-backends }} done"   
-        
+        echo "generating rdbms docs for ${{ matrix.persistence-backends }} done"
+
         export JANS_URL=https://demoexample.jans.io
         export JANS_CLIENT_ID=9876baac-de39-4c23-8a78-674b59df8c09
         export JANS_CLIENT_SECRET=1t5Fin3#security
