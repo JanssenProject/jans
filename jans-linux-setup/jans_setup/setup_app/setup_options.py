@@ -30,10 +30,6 @@ def get_setup_options():
     }
 
 
-    if getattr(base.argsp, 'remote_couchbase', None):
-        setupOptions['cb_install'] = InstallTypes.REMOTE
-        setupOptions['rdbm_install'] = False
-
     if base.argsp.remote_rdbm:
         setupOptions['rdbm_install_type'] = InstallTypes.REMOTE
         setupOptions['rdbm_type'] = base.argsp.remote_rdbm
@@ -58,19 +54,6 @@ def get_setup_options():
         setupOptions['rdbm_password'] = base.argsp.rdbm_password
 
     if base.current_app.profile == 'jans':
-
-        if base.argsp.local_couchbase:
-            setupOptions['cb_install'] = InstallTypes.LOCAL
-            setupOptions['rdbm_install'] = False
-
-        setupOptions['couchbase_bucket_prefix'] = base.argsp.couchbase_bucket_prefix
-        setupOptions['cb_password'] = base.argsp.couchbase_admin_password
-        setupOptions['couchebaseClusterAdmin'] = base.argsp.couchbase_admin_user
-        if base.argsp.couchbase_hostname:
-            setupOptions['couchbase_hostname'] = base.argsp.couchbase_hostname
-
-        for bucket in base.coucbase_bucket_dict:
-            base.coucbase_bucket_dict[bucket]['memory_allocation'] = getattr(base.argsp, f'couchbase_{bucket}_mem')
 
         if base.argsp.no_jsauth:
             setupOptions['install_jans_auth'] = False
