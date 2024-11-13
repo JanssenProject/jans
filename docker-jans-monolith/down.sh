@@ -5,7 +5,7 @@ if [ -z "$1" ]; then
     yaml="jans-mysql-compose.yml"
 else
 	case "$1" in
-		mysql|postgres|couchbase|spanner)
+		mysql|postgres|couchbase)
 			yaml="jans-${1}-compose.yml"
 			;;
 		*)
