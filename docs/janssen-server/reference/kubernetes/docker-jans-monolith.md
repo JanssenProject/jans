@@ -53,6 +53,7 @@ Installation depends on the set of environment variables shown below. These envi
 Download the compose file of your chosen persistence from mysql or postgres
 
 ```bash
+
 wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/jans-mysql-compose.yml 
 wget https://raw.githubusercontent.com/JanssenProject/jans/main/docker-jans-monolith/jans-postgres-compose.yml 
 ```
@@ -100,7 +101,7 @@ To stop the containers.
 
 3. Use the CLI tools located under `/opt/jans/jans-cli/` to configure Gluu flex as needed. For example you can run the [TUI](https://docs.jans.io/head/admin/config-guide/config-tools/jans-tui/):
     ```bash
-    jans tui
+    python3 /opt/jans/jans-cli/config-cli-tui.py
     ```
 
 ## Access endpoints externally

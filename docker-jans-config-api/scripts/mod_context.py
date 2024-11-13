@@ -87,7 +87,7 @@ def modify_app_xml(app_name):
     mapper = PersistenceMapper()
     persistence_groups = mapper.groups().keys()
 
-    for persistence_type in ["spanner", "couchbase"]:
+    for persistence_type in ["couchbase"]:
         if persistence_type not in persistence_groups:
             continue
 
