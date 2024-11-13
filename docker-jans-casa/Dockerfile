@@ -60,7 +60,7 @@ RUN mkdir -p /usr/share/java \
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=89f42d9272fc2ba34f98d16d8b3cc2b07dc49ae8
+ENV JANS_SOURCE_VERSION=871c36da8a2550ee2febd7c0d72c521898b226c3
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 
 # note that as we're pulling from a monorepo (with multiple project in it)
