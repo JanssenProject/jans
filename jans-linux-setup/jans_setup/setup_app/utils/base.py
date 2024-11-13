@@ -468,8 +468,6 @@ def unpack_zip(zip_fn, extract_dir, with_par_dir=True):
 app_info_fn = os.environ.get('JANS_APP_INFO') or os.path.join(par_dir, 'app_info.json')
 current_app.app_info = readJsonFile(app_info_fn)
 current_app.jans_zip = os.path.join(Config.distFolder, 'jans/jans.zip')
-coucbase_bucket_dict = readJsonFile(os.path.join(paths.APP_ROOT, 'data/couchbase_buckets.json'), ordered=True)
-Config.couchbaseBucketDict = coucbase_bucket_dict
 
 def as_bool(val):
     return str(val).lower() in ('t', 'true', 'y', 'yes', 'on', 'ok', '1')

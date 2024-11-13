@@ -20,7 +20,6 @@ from setup_app import static
 from setup_app.config import Config
 from setup_app.static import InstallTypes, BackendTypes, colors, SearchScopes
 from setup_app.utils import base
-from setup_app.utils.cbm import CBM
 from setup_app.utils import ldif_utils
 from setup_app.utils.attributes import attribDataTypes
 
@@ -56,28 +55,15 @@ class DBUtils:
                 format='%(asctime)s %(levelname)s - %(message)s'
                 )
 
-        if Config.mapping_locations['default'] == 'rdbm':
-            self.read_jans_schema()
-            if Config.rdbm_type == 'mysql':
-                self.moddb = BackendTypes.MYSQL
-            elif Config.rdbm_type == 'pgsql':
-                self.moddb = BackendTypes.PGSQL
-        else:
-            self.moddb = BackendTypes.COUCHBASE
+        self.read_jans_schema()
 
         if not self.session or force:
-            for group in Config.mapping_locations:
-                if Config.mapping_locations[group] == 'rdbm':
-                    if Config.rdbm_type in ('mysql', 'pgsql'):
-                        base.logIt("Making {} Conncetion".format(Config.rdbm_type))
-                        result = self.mysqlconnection()
-                        if not result[0]:
-                            print("{}FATAL: {}{}".format(colors.FAIL, result[1], colors.ENDC))
-                        break
-
-        self.set_cbm()
-        self.default_bucket = Config.get('couchbase_bucket_prefix', 'jans')
-
+            if Config.rdbm_type in ('mysql', 'pgsql'):
+                base.logIt("Making {} Conncetion".format(Config.rdbm_type))
+                result = self.sqlconnection()
+                if not result[0]:
+                    print("{}FATAL: {}{}".format(colors.FAIL, result[1], colors.ENDC))
+                    sys.exit()
 
     def sqlconnection(self, log=True):
         base.logIt("Making {} Connection to {}:{}/{} with user {}".format(Config.rdbm_type.upper(), Config.rdbm_host, Config.rdbm_port, Config.rdbm_db, Config.rdbm_user))
@@ -127,9 +113,6 @@ class DBUtils:
     def json_dialects_instance(self):
         return sqlalchemy.dialects.mysql.json.JSON if Config.rdbm_type == 'mysql' else sqlalchemy.dialects.postgresql.json.JSONB
 
-    def mysqlconnection(self, log=True):
-        return self.sqlconnection(log)
-
     def read_jans_schema(self, others=[]):
         self.jans_attributes = []
 
@@ -161,63 +144,42 @@ class DBUtils:
                 elif getresult:
                     return qresult.fetchall()
 
-    def set_cbm(self):
-        self.cbm = CBM(Config.get('cb_query_node'), Config.get('couchebaseClusterAdmin'), Config.get('cb_password'))
-
     def get_jans_auth_conf_dynamic(self):
-        if self.moddb in (BackendTypes.MYSQL, BackendTypes.PGSQL):
+        if Config.rdbm_type in ('mysql', 'pgsql'):
             result = self.search(search_base='ou=jans-auth,ou=configuration,o=jans', search_filter='(objectClass=jansAppConf)', search_scope=SearchScopes.BASE)
             dn = result['dn'] 
             jans_auth_conf_dynamic = json.loads(result['jansConfDyn'])
-
-        elif self.moddb == BackendTypes.COUCHBASE:
-            n1ql = 'SELECT * FROM `{}` USE KEYS "configuration_jans-auth"'.format(self.default_bucket)
-            result = self.cbm.exec_query(n1ql)
-            js = result.json()
-            dn = js['results'][0][self.default_bucket]['dn']
-            jans_auth_conf_dynamic = js['results'][0][self.default_bucket]['jansConfDyn']
 
         return dn, jans_auth_conf_dynamic
 
 
     def set_jans_auth_conf_dynamic(self, entries):
-        if self.moddb in (BackendTypes.MYSQL, BackendTypes.PGSQL):
+        if Config.rdbm_type in ('mysql', 'pgsql'):
             dn, jans_auth_conf_dynamic = self.get_jans_auth_conf_dynamic()
             jans_auth_conf_dynamic.update(entries)
             sqlalchemyObj = self.get_sqlalchObj_for_dn(dn)
             sqlalchemyObj.jansConfDyn = json.dumps(jans_auth_conf_dynamic, indent=2)
             self.session.commit()
 
-        elif self.moddb == BackendTypes.COUCHBASE:
-            for k in entries:
-                n1ql = 'UPDATE `{}` USE KEYS "configuration_jans-auth" SET jansConfDyn.{}={}'.format(self.default_bucket, k, json.dumps(entries[k]))
-                self.cbm.exec_query(n1ql)
-
 
     def enable_script(self, inum, enable=True):
         base.logIt("Enabling script {}".format(inum))
-        if self.moddb in (BackendTypes.MYSQL, BackendTypes.PGSQL):
+        if Config.rdbm_type in ('mysql', 'pgsql'):
             dn = SCRIPTS_DN_TMP.format(inum)
             sqlalchemyObj = self.get_sqlalchObj_for_dn(dn)
             sqlalchemyObj.jansEnabled = 1 if enable else 0
             self.session.commit()
 
-        elif self.moddb == BackendTypes.COUCHBASE:
-            n1ql = 'UPDATE `{}` USE KEYS "scripts_{}" SET jansEnabled=true'.format(self.default_bucket, inum)
-            self.cbm.exec_query(n1ql)
 
     def enable_service(self, service):
-        if self.moddb in (BackendTypes.MYSQL, BackendTypes.PGSQL):
+        if Config.rdbm_type in ('mysql', 'pgsql'):
             sqlalchemyObj = self.get_sqlalchObj_for_dn('ou=configuration,o=jans')
             setattr(sqlalchemyObj, service, 1)
             self.session.commit()
 
-        elif self.moddb == BackendTypes.COUCHBASE:
-            n1ql = 'UPDATE `{}` USE KEYS "configuration" SET {}=true'.format(self.default_bucket, service)
-            self.cbm.exec_query(n1ql)
 
     def set_configuration(self, component, value, dn='ou=configuration,o=jans'):
-        if self.moddb in (BackendTypes.MYSQL, BackendTypes.PGSQL):
+        if Config.rdbm_type in ('mysql', 'pgsql'):
             typed_val = self.get_rdbm_val(component, value)
             result = self.get_sqlalchObj_for_dn(dn)
             table_name = result.objectClass
@@ -226,11 +188,6 @@ class DBUtils:
             cur_val = getattr(sqlalchemyObj, component)
             setattr(sqlalchemyObj, component, typed_val)
             self.session.commit()
-
-        elif self.moddb == BackendTypes.COUCHBASE:
-            key = ldif_utils.get_key_from(dn)
-            n1ql = 'UPDATE `{}` USE KEYS "{}" SET {}={}'.format(self.default_bucket, key, component, value)
-            self.cbm.exec_query(n1ql)
 
 
     def dn_exists(self, dn):
@@ -327,41 +284,6 @@ class DBUtils:
                     return result.__dict__
 
 
-        if backend_location == BackendTypes.COUCHBASE:
-            key = ldif_utils.get_key_from(search_base)
-            bucket = self.get_bucket_for_key(key)
-
-            if search_scope == SearchScopes.BASE:
-                n1ql = 'SELECT * FROM `{}` USE KEYS "{}"'.format(bucket, key)
-            else:
-
-                if '&' in search_filter:
-                    re_match = re.match('\(&\((.*?)\)\((.*?)\)\)', search_filter)
-                    if re_match:
-                        re_list = re_match.groups()
-                        dn_to_parse = re_list[0] if 'objectclass' in re_list[1].lower() else re_list[1]
-                else:
-                    dn_to_parse = search_filter.strip('(').strip(')')
-
-                parsed_dn = parse_dn(dn_to_parse)
-                attr = parsed_dn[0][0]
-                val = parsed_dn[0][1]
-                if '*' in val:
-                    search_clause = 'LIKE "{}"'.format(val.replace('*', '%'))
-                else:
-                    search_clause = '="{}"'.format(val.replace('*', '%'))
-
-                n1ql = 'SELECT * FROM `{}` WHERE `{}` {}'.format(bucket, attr, search_clause)
-
-            result = self.cbm.exec_query(n1ql)
-            if result.ok:
-                data = result.json()
-                if data.get('results'):
-                    if fetchmany:
-                        return [ (ldif_utils.get_key_from(item[bucket]['dn']), item[bucket]) for item in data['results'] ]
-                    else:
-                        return data['results'][0][bucket]
-
 
     def add2strlist(self, client_id, strlist):
         value2 = []
@@ -372,6 +294,13 @@ class DBUtils:
 
         return  ','.join(value2)
 
+
+    def get_backend_location_for_dn(self, dn):
+        if Config.rdbm_type == 'mysql':
+            return static.BackendTypes.MYSQL
+        elif Config.rdbm_type == 'pgsql':
+            return static.BackendTypes.PGSQL
+
     def delete_dn(self, dn):
         if self.dn_exists(dn):
             backend_location = self.get_backend_location_for_dn(dn)
@@ -381,12 +310,6 @@ class DBUtils:
                 if sqlalchemy_obj:
                     self.session.delete(sqlalchemy_obj)
                     self.session.commit()
-
-            elif backend_location == BackendTypes.COUCHBASE:
-                key = ldif_utils.get_key_from(dn)
-                bucket =self.get_bucket_for_key(key)
-                n1ql = 'DELETE FROM `{}` USE KEYS "{}"'.format(bucket, key)
-                self.cbm.exec_query(n1ql)
 
     def add_client2script(self, script_inum, client_id):
         dn = SCRIPTS_DN_TMP.format(script_inum)
@@ -414,38 +337,11 @@ class DBUtils:
                 sqlalchemyObj.jansConfProperty = jans_conf_property
                 self.session.commit()
 
-        elif backend_location == BackendTypes.COUCHBASE:
-            bucket = self.get_bucket_for_dn(dn)
-            n1ql = 'SELECT jansConfProperty FROM `{}` USE KEYS "scripts_{}"'.format(bucket, script_inum)
-            result = self.cbm.exec_query(n1ql)
-            js = result.json()
-
-            oxConfigurationProperties = js['results'][0]['jansConfProperty']
-            for i, oxconfigprop_str in enumerate(oxConfigurationProperties):
-                oxconfigprop = json.loads(oxconfigprop_str)
-                if oxconfigprop.get('value1') == 'allowed_clients' and not client_id in oxconfigprop['value2']:
-                    oxconfigprop['value2'] = self.add2strlist(client_id, oxconfigprop['value2'])
-                    oxConfigurationProperties[i] = json.dumps(oxconfigprop)
-                    break
-            else:
-                return
-
-            n1ql = 'UPDATE `{}` USE KEYS "scripts_{}" SET `jansConfProperty`={}'.format(bucket, script_inum, json.dumps(oxConfigurationProperties))
-            self.cbm.exec_query(n1ql)
 
     def get_key_prefix(self, key):
         n = key.find('_')
         return key[:n+1]
 
-    def check_attribute_exists(self, key, attribute):
-        bucket = self.get_bucket_for_key(key)
-        n1ql = 'SELECT `{}` FROM `{}` USE KEYS "{}"'.format(attribute, bucket, key)
-        result = self.cbm.exec_query(n1ql)
-        if result.ok:
-            data = result.json()
-            r = data.get('results', [])
-            if r and r[0].get(attribute):
-                return r[0][attribute]
 
     def get_attr_syntax(self, attrname):
         for jans_attr in self.jans_attributes:
@@ -686,46 +582,6 @@ class DBUtils:
                         self.session.add(sqlalchObj)
                         self.session.commit()
 
-                elif backend_location == BackendTypes.COUCHBASE:
-                    if len(entry) < 3:
-                        continue
-                    key, document = ldif_utils.get_document_from_entry(dn, entry)
-                    cur_bucket = bucket if bucket else self.get_bucket_for_dn(dn)
-                    base.logIt("Addnig document {} to Couchebase bucket {}".format(key, cur_bucket))
-
-                    n1ql_list = []
-
-                    if 'changetype' in document:
-                        if 'replace' in document:
-                            attribute = document['replace']
-                            n1ql_list.append('UPDATE `%s` USE KEYS "%s" SET `%s`=%s' % (cur_bucket, key, attribute, json.dumps(document[attribute])))
-                        elif 'add' in document:
-                            attribute = document['add']
-                            result = self.check_attribute_exists(key, attribute)
-                            data = document[attribute]
-                            if result:
-                                if isinstance(data, list):
-                                    for d in data:
-                                        n1ql_list.append('UPDATE `%s` USE KEYS "%s" SET `%s`=ARRAY_APPEND(`%s`, %s)' % (cur_bucket, key, attribute, attribute, json.dumps(d)))
-                                else:
-                                    n1ql_list.append('UPDATE `%s` USE KEYS "%s" SET `%s`=ARRAY_APPEND(`%s`, %s)' % (cur_bucket, key, attribute, attribute, json.dumps(data)))
-                            else:
-                                if attribute in attribDataTypes.listAttributes and not isinstance(data, list):
-                                    data = [data]
-                                n1ql_list.append('UPDATE `%s` USE KEYS "%s" SET `%s`=%s' % (cur_bucket, key, attribute, json.dumps(data)))
-                    else:
-                        for k in document:
-                            try:
-                                kdata = json.loads(document[k])
-                                if isinstance(kdata, dict):
-                                    document[k] = kdata
-                            except:
-                                pass
-
-                        n1ql_list.append('UPSERT INTO `%s` (KEY, VALUE) VALUES ("%s", %s)' % (cur_bucket, key, json.dumps(document)))
-
-                    for q in n1ql_list:
-                        self.cbm.exec_query(q)
 
     def import_templates(self, templates):
 
@@ -813,76 +669,6 @@ class DBUtils:
                     base.logIt("Adding {}".format(sqlalchObj.doc_id))
                     self.session.add(sqlalchObj)
                     self.session.commit()
-
-
-    def get_group_for_key(self, key):
-        key_prefix = self.get_key_prefix(key)
-        for group in Config.get('couchbaseBucketDict', {}):
-            if key_prefix in Config.couchbaseBucketDict[group]['document_key_prefix']:
-                break
-        else:
-            group = 'default'
-
-        return group
-
-    def get_bucket_for_key(self, key):
-        group = self.get_group_for_key(key)
-        if group == 'default':
-            return Config.couchbase_bucket_prefix
-
-        return Config.couchbase_bucket_prefix + '_' + group
-
-    def get_bucket_for_dn(self, dn):
-        key = ldif_utils.get_key_from(dn)
-        return self.get_bucket_for_key(key)
-
-    def get_backend_location_for_dn(self, dn):
-        key = ldif_utils.get_key_from(dn)
-        group = self.get_group_for_key(key)
-
-
-        if Config.mapping_locations[group] == 'rdbm':
-            if Config.rdbm_type == 'mysql':
-                return static.BackendTypes.MYSQL
-            elif Config.rdbm_type == 'pgsql':
-                return static.BackendTypes.PGSQL
-
-        if Config.mapping_locations[group] == 'couchbase':
-            return static.BackendTypes.COUCHBASE
-
-
-    def checkCBRoles(self, buckets=[]):
-
-        self.cb_bucket_roles = ['bucket_admin', 'query_delete', 'query_select', 
-                            'query_update', 'query_insert',
-                            'query_manage_index']
-
-        result = self.cbm.whoami()
-        bc = buckets[:]
-        bucket_roles = {}
-        if 'roles' in result:
-
-            for role in result['roles']:
-                if role['role'] == 'admin':
-                    Config.isCouchbaseUserAdmin = True
-                    return True, None
-
-                if not role['bucket_name'] in bucket_roles:
-                    bucket_roles[role['bucket_name']] = []
-
-                bucket_roles[role['bucket_name']].append(role['role'])
-
-        for b_ in bc[:]:
-            for r_ in self.cb_bucket_roles:
-                if not r_ in bucket_roles[b_]:
-                    break
-            else:
-                bc.remove(b_)
-
-        if bc:
-            return False, bc
-
-        return True, None
 
 
     def get_scopes(self):

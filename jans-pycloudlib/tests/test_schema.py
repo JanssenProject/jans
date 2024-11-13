@@ -145,7 +145,7 @@ def test_load_schema_from_file_invalid(tmpdir, value, retcode):
 
 def test_valid_optional_scopes():
     from jans.pycloudlib.schema import ConfigmapSchema
-    assert ConfigmapSchema().validate_optional_scopes('["couchbase", "redis", "sql"]') is None
+    assert ConfigmapSchema().validate_optional_scopes('["redis", "sql"]') is None
 
 
 @pytest.mark.parametrize("value", [
