@@ -14,7 +14,6 @@ policies:
           principal.org_id == resource.org_id
       };
   444da5d85403f35ea76519ed1a18a33989f855bf1cf8:
-    cedar_version: v4.0.0
     description: simple policy example for principal user
     creation_date: '2024-09-20T17:22:39.996050'
     policy_content: |-

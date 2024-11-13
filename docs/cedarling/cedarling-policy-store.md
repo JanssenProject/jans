@@ -39,25 +39,8 @@ The JSON Schema accepted by cedarling is defined as follows:
 
 - **cedar_version** : (*String*) The version of [Cedar policy](https://docs.cedarpolicy.com/). The protocols of this version will be followed when processing Cedar schema and policies.
 - **policies** : (*Object*) Object containing one or more policy IDs as keys, with their corresponding objects as values. See: [policies schema](#cedar-policies-schema).
-- **schema** : (*String* | *Object*) The Cedar Schema. See [schema](#schema) below.
+- **schema** : (*String*) The JSON Cedar Schema encoded in Base64.
 - **trusted_issuers** : (*Object of {unique_id => IdentitySource}(#trusted-issuer-schema)*) List of metadata for Identity Sources.
-
-### `schema`
-Either *String* or *Object*, where *Object* is preferred.
-
-Where *Object* - An object with `encoding`, `content_type` and `body` keys. For example:
-
-``` json
-"schema": {
-    "encoding": "none", // can be one of "none" or "base64"
-    "content_type": "cedar", // can be one of "cedar" or "cedar-json"
-    "body": "namespace Jans {\ntype Url = {"host": String, "path": String, "protocol": String};..."
-}
-```
-  Where *String* - The schema in cedar-json format, encoded as Base64. For example:
-``` json
-"schema": "cGVybWl0KAogICAgc..."
-```
 
 ## Cedar Policies Schema
 
@@ -66,7 +49,6 @@ The `policies` field describes the Cedar policies that will be used in Cedarling
 ```json
   "policies": {
     "unique_policy_id": {
-      "cedar_version" : "v4.0.0",
       "name": "Policy for Unique Id",
       "description": "simple policy example",
       "creation_date": "2024-09-20T17:22:39.996050",
@@ -79,24 +61,7 @@ The `policies` field describes the Cedar policies that will be used in Cedarling
 - **name** : (*String*) A name for the policy
 - **description** : (*String*) A brief description of cedar policy
 - **creation_date** :  (*String*) Policy creating date in `YYYY-MM-DDTHH:MM:SS.ssssss`
-- **policy_content** : (*String* | *Object*) The Cedar Policy. See [policy_content](#policy_content) below.
-
-### `policy_content`
-Either *String* or *Object*, where *Object* is preferred.
-
-Where *Object* - An object with `encoding`, `content_type` and `body` keys. For example:
-
-``` json
-"policy_content": {
-    "encoding": "none", // can be one of "none" or "base64"
-    "content_type": "cedar", // ONLY "cedar" for now due to limitations in cedar-policy crate
-    "body": "permit(\n    principal is Jans::User,\n    action in [Jans::Action::\"Update\"],\n    resource is Jans::Issue\n)when{\n    principal.country == resource.country\n};"
-}
-```
-  Where *String* - The policy in cedar format, encoded as Base64. For example:
-``` json
-"policy_content": "cGVybWl0KAogICAgc..."
-```
+- **policy_content** : (*String*) The Cedar Policy Encoded in Base64.
 
 ### Example of `policies`
 
@@ -123,22 +88,14 @@ Here is a non-normative example of the `policies` field:
       "name": "Policy-the-third",
       "description": "another policy example",
       "creation_date": "2024-09-20T18:22:39.192051",
-      "policy_content": {
-        "encoding": "none",
-        "content_type" : "cedar",
-        "body": "permit(...) where {...}"
-      }
+      "policy_content": "oiAwjAlk1kJ2oiklD..."
     },
     "2fo1kl928Afa0sc9123scma0123891asklajsh1233ad": {
       "cedar_version": "v2.7.4",
       "name": "Policy-the-fourth",
       "description": "another policy example",
       "creation_date": "2024-09-20T18:22:39.192051",
-      "policy_content": {
-        "encoding": "base64",
-        "content_type" : "cedar",
-        "body": "kJW1bWl0KA0g3CAxa..."
-      }
+      "policy_content": "kJW1bWl0KA0g3CAxa..."
     },
     ...
   }
@@ -154,7 +111,11 @@ This record contains the information needed to validate tokens from this issuer:
     "name": "name_of_the_trusted_issuer",
     "description": "description for the trusted issuer",
     "openid_configuration_endpoint": "https://<trusted-issuer-hostname>/.well-known/openid-configuration",
-    "access_tokens": { ... },
+    "access_tokens": { 
+      "trusted": true,
+      "principlal_identifier": "jti",
+      ...
+    },
     "id_tokens": { ... },
     "userinfo_tokens": { ... },
     "tx_tokens": { ... },
@@ -167,7 +128,7 @@ This record contains the information needed to validate tokens from this issuer:
 - **description** : (*String*) A brief description of the trusted issuer, providing context for administrators.
 - **openid_configuration_endpoint** : (*String*) The HTTPS URL for the OpenID Connect configuration endpoint (usually found at `/.well-known/openid-configuration`).
 - **identity_source** : (*Object*, *optional*) Metadata related to the tokens issued by this issuer.
-- **`access_tokens`, `id_tokens`, `userinfo_tokens`, `tx_tokens`** : (*Object*, *optional*) Metadata related to the tokens issued by this issuer. See schema [below](#token-entity-metadata-schema)
+- **`access_tokens`, `id_tokens`, `userinfo_tokens`, `tx_tokens`** : (*Object*, *optional*) Metadata related to the tokens issued by this issuer. See schema [below](#token-entity-metadata-schema). **NOTE**: The `access_tokens` field contains the additional fields: `trusted` and `principal_identifier` in addition to the fields from it's `TokenEntityMetadata`.
 
 
 ### Token Entity Metadata Schema
@@ -371,3 +332,65 @@ You will notice that test fixtures in the cedarling code base are quite often in
 yaml is intended for **cedarling internal use only**.
 
 The rationale is that yaml has excellent support for embedded, indented, multiline string values. That is far easier to read than base64 encoded json strings, and is beneficial for debugging and validation that test cases are correct.
+
+### Example YAML policy store:
+
+Here is a non-normative example of a YAML policy store:
+
+```yaml
+cedar_version: v4.0.0
+name: PolicyStoreOk
+description: A test policy store where everything is fine.
+policies:
+  840da5d85403f35ea76519ed1a18a33989f855bf1cf8:
+    description: simple policy example for principal workload
+    creation_date: '2024-09-20T17:22:39.996050'
+    policy_content: |-
+      permit(
+          principal is Jans::Workload,
+          action in [Jans::Action::"Update"],
+          resource is Jans::Issue
+      )when{
+          principal.org_id == resource.org_id
+      };
+  444da5d85403f35ea76519ed1a18a33989f855bf1cf8:
+    description: simple policy example for principal user
+    creation_date: '2024-09-20T17:22:39.996050'
+    policy_content: |-
+      permit(
+          principal is Jans::User,
+          action in [Jans::Action::"Update"],
+          resource is Jans::Issue
+      )when{
+          principal.country == resource.country
+      };
+schema: |-
+  namespace Jans {
+    type Url = {"host": String, "path": String, "protocol": String};
+    entity Access_token = {"aud": String, "exp": Long, "iat": Long, "iss": TrustedIssuer, "jti": String};
+    entity Issue = {"country": String, "org_id": String};
+    entity Role;
+    entity TrustedIssuer = {"issuer_entity_id": Url};
+    entity User in [Role] = {"country": String, "email": String, "sub": String, "username": String};
+    entity Workload = {"client_id": String, "iss": TrustedIssuer, "name": String, "org_id": String};
+    entity id_token = {"acr": String, "amr": String, "aud": String, "exp": Long, "iat": Long, "iss": TrustedIssuer, "jti": String, "sub": String};
+    action "Update" appliesTo {
+
+      principal: [Workload, User, Role],
+      resource: [Issue],
+      context: {}
+    };
+  }
+trusted_issuers:
+  IDP1:
+    name: 'Google'
+    description: 'Consumer IDP'
+    openid_configuration_endpoint: 'https://accounts.google.com/.well-known/openid-configuration'
+    access_tokens:
+        trusted: true
+        principal_identifier: jti
+    id_tokens:
+        user_id: 'sub'
+        role_mapping: 'role'
+        claim_mapping: {}
+```
