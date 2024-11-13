@@ -16,18 +16,19 @@ import pytest
 test_cases_err = [
     # cases with policy errors
     ("policy-store_policy_err_base64.json",
-     "unable to decode policy_content as base64"),
+     "Failed to decode Base64 encoded string"),
     ("policy-store_policy_err_broken_utf8.json",
-     "unable to decode policy_content to utf8 string"),
+     "invalid utf-8 sequence"),
     ("policy-store_policy_err_broken_policy.yaml",
-     "unable to decode policy with id: 840da5d85403f35ea76519ed1a18a33989f855bf1cf8, error: unable to decode policy_content from human readable format: unexpected token `)`"),
+     "Failed to load policy store from YAML: unexpected token `)`"),
     # cases with schema errors
     ("policy-store_schema_err_base64.json",
-     "unable to decode cedar policy schema base64"),
+     "Failed to decode Base64 encoded string"),
     ("policy-store_schema_err.yaml",
-     "Could not load policy: failed to parse the policy store from policy_store yaml: policy_stores.e8c39ee71792766d3b9b12846f0479419051bb5fafff: unable to parse cedar policy schema: error parsing schema: unexpected end of input at line 4 column 5"),
+     "Failed to load policy store from YAML: unexpected end of input"),
     ("policy-store_schema_err_cedar_mistake.yaml",
-     "Could not load policy: failed to parse the policy store from policy_store yaml: policy_stores.a1bf93115de86de760ee0bea1d529b521489e5a11747: unable to parse cedar policy schema: failed to resolve type: User_TypeNotExist at line 4 column 5"),
+     "Failed to load policy store from YAML: Failed to load Schema from JSON: Schema(TypeNotDefined(TypeNotDefinedError"
+    ),
 ]
 
 
