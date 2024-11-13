@@ -40,4 +40,23 @@ schema: |-
       context: {}
     };
   }
-trusted_issuers: {}
+trusted_issuers: 
+  some_unique_issuer_id:
+    name: 'Google'
+    description: 'Consumer IDP'
+    openid_configuration_endpoint: 'https://accounts.google.com/.well-known/openid-configuration'
+    access_tokens:
+        trusted: true
+        principal_identifier: jti
+        user_id: ''
+        role_mapping: ''
+        claim_mapping: {}
+    id_tokens:
+        user_id: 'sub'
+        role_mapping: 'role'
+        claim_mapping: {}
+    userinfo_tokens:
+        user_id: ''
+        role_mapping: ''
+        claim_mapping: {}
+
