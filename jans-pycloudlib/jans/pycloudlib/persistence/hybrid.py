@@ -1,4 +1,4 @@
-"""This module contains various helpers related to hybrid (LDAP + Couchbase) persistence."""
+"""This module contains various helpers related to hybrid persistence."""
 
 from jans.pycloudlib.persistence.utils import PersistenceMapper
 
