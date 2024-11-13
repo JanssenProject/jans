@@ -5,7 +5,11 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
+use std::str::FromStr;
+
 pub(crate) use cedar_json::CedarSchemaJson;
+use cedar_policy::{ffi, Schema};
+use serde::Deserialize;
 pub(crate) mod cedar_json;
 
 /// cedar_schema value which specifies both encoding and content_type
@@ -216,8 +220,7 @@ mod deserialize {
 
         #[test]
         fn test_agama_ok() {
-            static POLICY_STORE_RAW: &str =
-                include_str!("../../../test_files/agama-store.yaml");
+            static POLICY_STORE_RAW: &str = include_str!("../../../test_files/agama-store.yaml");
 
             let policy_result = serde_yml::from_str::<AgamaPolicyStore>(POLICY_STORE_RAW);
             assert!(policy_result.is_ok(), "{:?}", policy_result.unwrap_err());

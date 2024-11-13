@@ -1,23 +1,23 @@
 {
     "cedar_version": "v4.0.0",
     "policy_stores": {
-        "b6391dbcd766e4983cbdfad8652602d1e3c25803eb95": {
+        "some_policy_store_id": {
             "name": "jans::store",
             "description": "",
             "policies": {
-                "fbd921a51b8b78b3b8af5f93e94fbdc57f3e2238b29f": {
+                "some_policy_id": {
                     "description": "Admin",
                     "creation_date": "2024-11-07T07:49:11.813002",
                     "policy_content": "QGlkKCJBZG1pbiIpCnBlcm1pdAooCiBwcmluY2lwYWwgPT0gc29tZWNvbXBhbnk6OnN0b3JlOjpSb2xlOjoiQWRtaW4iLAogYWN0aW9uIGluIFtzb21lY29tcGFueTo6c3RvcmU6OkFjdGlvbjo6IkRFTEVURSIsc29tZWNvbXBhbnk6OnN0b3JlOjpBY3Rpb246OiJHRVQiLHNvbWVjb21wYW55OjpzdG9yZTo6QWN0aW9uOjoiUFVUIl0sCiByZXNvdXJjZSA9PSBzb21lY29tcGFueTo6c3RvcmU6OkhUVFBfUmVxdWVzdDo6InJvb3QiCikKOw=="
                 },
-                "1a2dd16865cf220ea9807608c6648a457bdf4057c4a4": {
+                "another_policy_id": {
                     "description": "Member",
                     "creation_date": "2024-11-07T07:50:05.520757",
                     "policy_content": "QGlkKCJNZW1iZXIiKQpwZXJtaXQKKAogcHJpbmNpcGFsID09IHNvbWVjb21wYW55OjpzdG9yZTo6Um9sZTo6Ik1lbWJlciIsCiBhY3Rpb24gaW4gW3NvbWVjb21wYW55OjpzdG9yZTo6QWN0aW9uOjoiUFVUIl0sCiByZXNvdXJjZSA9PSBzb21lY29tcGFueTo6c3RvcmU6OkhUVFBfUmVxdWVzdDo6InJvb3QiCikKOw=="
                 }
             },
             "trusted_issuers": {
-                "630d232db3fc29502317559e0e968d9a83a8ccd29c3f": {
+                "some_trusted_issuer_id": {
                     "name": "Test IDP",
                     "description": "This is a test IDP",
                     "openid_configuration_endpoint": "https://some_idp/.well-known/openid-configuration",

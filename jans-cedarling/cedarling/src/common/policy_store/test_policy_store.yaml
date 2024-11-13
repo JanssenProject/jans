@@ -1,0 +1,113 @@
+cedar_version: v4.0.0
+name: jans::store
+description: ''
+policies:
+  some_policy_id:
+    description: Admin
+    creation_date: 2024-11-07T07:49:11.813002
+    policy_content: |-
+      @id("Admin")
+      permit (
+       principal == somecompany::store::Role::"Admin",
+       action in [somecompany::store::Action::"DELETE",somecompany::store::Action::"GET",somecompany::store::Action::"PUT"],
+       resource == somecompany::store::HTTP_Request::"root"
+      );
+  another_policy_id:
+    description: Member
+    creation_date: 2024-11-07T07:50:05.520757
+    policy_content: |-
+      @id("Member")
+      permit (
+       principal == somecompany::store::Role::"Member",
+       action in [somecompany::store::Action::"PUT"],
+       resource == somecompany::store::HTTP_Request::"root"
+      );
+trusted_issuers:
+  some_trusted_issuer_id:
+    name: Test IDP
+    description: This is a test IDP
+    openid_configuration_endpoint: https://some_idp/.well-known/openid-configuration
+    id_tokens:
+      user_id: sub
+      role_mapping: role
+      claim_mapping: {}
+schema: |-
+  namespace somecompany::store {
+    type Context = {"current_time": __cedar::Long, "device_health": Set < __cedar::String >, "fraud_indicators": Set < __cedar::String >, "geolocation": Set < __cedar::String >, "network": __cedar::ipaddr, "network_type": __cedar::String, "operating_system": __cedar::String, "user_agent": __cedar::String};
+    type Url = {"host": __cedar::String, "path": __cedar::String, "protocol": __cedar::String};
+    type email_address = {"domain": __cedar::String, "id": __cedar::String};
+    entity Access_token = {"aud": __cedar::String, "exp": __cedar::Long, "iat": __cedar::Long, "iss": TrustedIssuer, "jti": __cedar::String, "nbf": __cedar::Long, "scope": __cedar::String};
+    entity Application = {"app_id": __cedar::String, "name": __cedar::String, "url": Url};
+    entity HTTP_Request = {"accept": Set < __cedar::String >, "header": Set < __cedar::String >, "url": Url};
+    entity Role;
+    entity TrustedIssuer = {"issuer_entity_id": Url};
+    entity User in [Role] = {"email": email_address, "phone_number": __cedar::String, "role": Set < __cedar::String >, "sub": __cedar::String, "username": __cedar::String};
+    entity Userinfo_token = {"aud": __cedar::String, "birthdate": __cedar::String, "email": email_address, "exp": __cedar::Long, "iat": __cedar::Long, "iss": TrustedIssuer, "jti": __cedar::String, "name": __cedar::String, "phone_number": __cedar::String, "role": Set < __cedar::String >, "sub": __cedar::String};
+    entity Workload = {"client_id": __cedar::String, "iss": TrustedIssuer, "name": __cedar::String, "rp_id": __cedar::String, "spiffe_id": __cedar::String};
+    entity id_token = {"acr": Set < __cedar::String >, "amr": __cedar::String, "aud": __cedar::String, "azp": __cedar::String, "birthdate": __cedar::String, "email": email_address, "exp": __cedar::Long, "iat": __cedar::Long, "iss": TrustedIssuer, "jti": __cedar::String, "name": __cedar::String, "phone_number": __cedar::String, "role": Set < __cedar::String >, "sub": __cedar::String};
+    action "Compare" appliesTo {
+      principal: [User, Role, Workload],
+      resource: [Application],
+      context: Context
+    };
+    action "DELETE" appliesTo {
+      principal: [Workload],
+      resource: [HTTP_Request],
+      context: Context
+    };
+    action "Execute" appliesTo {
+      principal: [User, Role, Workload],
+      resource: [Application],
+      context: Context
+    };
+    action "GET" appliesTo {
+      principal: [Workload],
+      resource: [HTTP_Request],
+      context: Context
+    };
+    action "HEAD" appliesTo {
+      principal: [Workload],
+      resource: [HTTP_Request],
+      context: Context
+    };
+    action "Monitor" appliesTo {
+      principal: [User, Role, Workload],
+      resource: [Application],
+      context: Context
+    };
+    action "PATCH" appliesTo {
+      principal: [Workload],
+      resource: [HTTP_Request],
+      context: Context
+    };
+    action "PUT" appliesTo {
+      principal: [Workload],
+      resource: [HTTP_Request],
+      context: Context
+    };
+    action "Read" appliesTo {
+      principal: [User, Role, Workload],
+      resource: [Application],
+      context: Context
+    };
+    action "Search" appliesTo {
+      principal: [User, Role, Workload],
+      resource: [Application],
+      context: Context
+    };
+    action "Share" appliesTo {
+      principal: [User, Role, Workload],
+      resource: [Application],
+      context: Context
+    };
+    action "Tag" appliesTo {
+      principal: [User, Role, Workload],
+      resource: [Application],
+      context: Context
+    };
+    action "Write" appliesTo {
+      principal: [User, Role, Workload],
+      resource: [Application],
+      context: Context
+    };
+  }

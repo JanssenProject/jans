@@ -310,7 +310,6 @@
             "Share": {
                 "appliesTo": {
                     "resourceTypes": [
-
                         "Application"
                     ],
                     "principalTypes": [
@@ -390,7 +389,6 @@
                     "context": {
                         "type": "Context"
                     }
-
                 }
             },
             "Read": {
@@ -424,6 +422,7 @@
             "Search": {
                 "appliesTo": {
                     "resourceTypes": [
+
                         "Application"
                     ],
                     "principalTypes": [
@@ -438,8 +437,10 @@
             },
             "Tag": {
                 "appliesTo": {
+
                     "resourceTypes": [
                         "Application"
+
                     ],
                     "principalTypes": [
                         "User",
@@ -456,15 +457,20 @@
                     "resourceTypes": [
                         "Application"
                     ],
+
                     "principalTypes": [
                         "User",
                         "Role",
+
                         "Workload"
+
                     ],
                     "context": {
+
                         "type": "Context"
                     }
                 }
+
             },
             "GET": {
                 "appliesTo": {
@@ -482,7 +488,6 @@
             "Monitor": {
                 "appliesTo": {
                     "resourceTypes": [
-
                         "Application"
                     ],
                     "principalTypes": [

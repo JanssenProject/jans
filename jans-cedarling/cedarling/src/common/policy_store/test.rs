@@ -11,8 +11,6 @@ use super::PolicyStore;
 use super::{parse_option_hashmap, parse_option_string};
 use crate::common::policy_store::parse_cedar_version;
 use base64::prelude::*;
-use cedar_policy::Policy;
-use cedar_policy::PolicyId;
 use serde::Deserialize;
 use serde_json::json;
 use std::collections::HashMap;
@@ -193,60 +191,6 @@ fn test_invalid_version_part() {
 fn test_invalid_version_format_with_v() {
     let invalid_version_with_v = "v1.2".to_string();
     assert!(parse_cedar_version(serde_json::Value::String(invalid_version_with_v)).is_err());
-}
-
-#[test]
-fn test_parsing_policy_store_from_yaml() {
-    use super::parse_cedar_policy_new;
-
-    let expected_policies = Vec::from([
-        Policy::parse(
-            Some(PolicyId::new("some_policy_id")),
-            r#"permit(
-  principal is Jans::Workload,
-  action in [Jans::Action::"Update"],
-  resource is Jans::Issue
-)when{
-  principal.org_id == resource.org_id
-};"#,
-        )
-        .expect("Should parse Cedar policy."),
-        Policy::parse(
-            Some(PolicyId::new("another_policy_id")),
-            r#"permit(
-  principal is Jans::User,
-  action in [Jans::Action::"Update"],
-  resource is Jans::Issue
-)when{
-  principal.country == resource.country
-};"#,
-        )
-        .expect("Should parse Cedar policy."),
-    ]);
-
-    #[derive(Debug, Deserialize)]
-    struct TestPolicyStore {
-        #[serde(alias = "policies", deserialize_with = "parse_cedar_policy_new")]
-        pub cedar_policies: cedar_policy::PolicySet,
-    }
-
-    static POLICY_STORE_RAW_YAML: &str = include_str!("./policy-store_ok.yaml");
-    let parsed = serde_yml::from_str::<TestPolicyStore>(POLICY_STORE_RAW_YAML)
-        .expect("should parse policy store from YAML");
-    let parsed_policies = parsed
-        .cedar_policies
-        .policies()
-        .cloned()
-        .collect::<Vec<Policy>>();
-
-    // Check that all expected policies are found in the parsed set
-    for policy in &expected_policies {
-        assert!(
-            parsed_policies.contains(policy),
-            "Expected to find policy in the parsed policies: {:?}",
-            policy.id()
-        );
-    }
 }
 
 #[test]
