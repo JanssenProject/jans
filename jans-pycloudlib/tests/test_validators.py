@@ -2,7 +2,6 @@ import pytest
 
 
 @pytest.mark.parametrize("type_", [
-    "couchbase",
     "hybrid",
     "sql",
 ])

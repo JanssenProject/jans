@@ -9,8 +9,6 @@ import typing as _t
 
 import backoff
 
-from jans.pycloudlib.persistence.couchbase import CouchbaseClient
-from jans.pycloudlib.persistence.couchbase import id_from_dn
 from jans.pycloudlib.persistence.sql import SqlClient
 from jans.pycloudlib.persistence.sql import doc_id_from_dn
 from jans.pycloudlib.utils import as_boolean
@@ -174,48 +172,6 @@ _ADMIN_GROUP_DN = "inum=60B7,ou=groups,o=jans"
 
 
 @retry_on_exception
-def wait_for_couchbase(manager: Manager, **kwargs: _t.Any) -> None:
-    """Wait for readiness/availability of Couchbase server based on existing entry.
-
-    Args:
-        manager: An instance of manager class.
-        **kwargs: Arbitrary keyword arguments (see Other Parameters section, if any).
-    """
-    bucket_prefix = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
-    search_mapping = {
-        "default": (id_from_dn("ou=jans-auth,ou=configuration,o=jans"), f"{bucket_prefix}"),
-        "user": (id_from_dn(_ADMIN_GROUP_DN), f"{bucket_prefix}_user"),
-    }
-
-    client = CouchbaseClient(manager)
-    try:
-        # get the first data key
-        key = PersistenceMapper().groups().get("couchbase", [])[0]
-        id_, bucket = search_mapping[key]
-        init = client.doc_exists(bucket, id_)
-    except (IndexError, KeyError):
-        init = client.get_buckets().ok
-
-    if not init:
-        raise WaitError("Couchbase backend is not fully initialized")
-
-
-@retry_on_exception
-def wait_for_couchbase_conn(manager: Manager, **kwargs: _t.Any) -> None:
-    """Wait for readiness/availability of Couchbase server based on connection status.
-
-    Args:
-        manager: An instance of manager class.
-        **kwargs: Arbitrary keyword arguments (see Other Parameters section, if any).
-    """
-    cb_client = CouchbaseClient(manager)
-    req = cb_client.get_buckets()
-
-    if not req.ok:
-        raise WaitError(f"Unable to connect to host in {cb_client.hosts} list")
-
-
-@retry_on_exception
 def wait_for_sql_conn(manager: Manager, **kwargs: _t.Any) -> None:
     """Wait for readiness/liveness of an SQL database connection.
 
@@ -268,8 +224,6 @@ def wait_for(manager: Manager, deps: _t.Union[list[str], None] = None) -> None:
 
     - `config`
     - `config_conn`
-    - `couchbase`
-    - `couchbase_conn`
     - `secret`
     - `secret_conn`
     - `sql`
@@ -294,11 +248,6 @@ def wait_for(manager: Manager, deps: _t.Union[list[str], None] = None) -> None:
         "config_conn": {
             "func": wait_for_config,
             "kwargs": {"label": "Config", "conn_only": True},
-        },
-        "couchbase": {"func": wait_for_couchbase, "kwargs": {"label": "Couchbase"}},
-        "couchbase_conn": {
-            "func": wait_for_couchbase_conn,
-            "kwargs": {"label": "Couchbase"},
         },
         "secret": {"func": wait_for_secret, "kwargs": {"label": "Secret"}},
         "secret_conn": {
