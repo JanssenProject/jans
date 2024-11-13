@@ -27,9 +27,9 @@ cluster, it may be convenient to persist the "cache" data in the database.
 Janssen Auth Server can use "ephemeral buckets", which exist only in memory,
 for caching.
 
-1. **Redis** The best choice if you need a cache service for RDBMS,
-or Spanner. Great performance and low cache miss rate. Commercial Redis
-supports TLS, which is a good option if you need secure communication.
+1. **Redis** The best choice if you need a cache service for RDBMS. Great performance
+and low cache miss rate. Commercial Redis supports TLS, which is a good option if you 
+need secure communication.
 
 1. **Memcached** Still a good choice, especially if that's what you already
 run for other applications. We have observed a slightly higher cache miss

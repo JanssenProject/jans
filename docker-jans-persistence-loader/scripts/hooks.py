@@ -200,7 +200,7 @@ def transform_auth_dynamic_config_hook(conf, manager):
         should_update = True
 
     if all([
-        os.environ.get("CN_PERSISTENCE_TYPE") in ("sql", "spanner"),
+        os.environ.get("CN_PERSISTENCE_TYPE") == "sql",
         conf["personCustomObjectClassList"]
     ]):
         conf["personCustomObjectClassList"] = []

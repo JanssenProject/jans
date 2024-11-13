@@ -16,9 +16,6 @@ from jans.pycloudlib.persistence.couchbase import sync_couchbase_cert
 from jans.pycloudlib.persistence.couchbase import sync_couchbase_password
 from jans.pycloudlib.persistence.couchbase import sync_couchbase_truststore
 from jans.pycloudlib.persistence.hybrid import render_hybrid_properties
-from jans.pycloudlib.persistence.spanner import render_spanner_properties
-from jans.pycloudlib.persistence.spanner import SpannerClient
-from jans.pycloudlib.persistence.spanner import sync_google_credentials
 from jans.pycloudlib.persistence.sql import doc_id_from_dn
 from jans.pycloudlib.persistence.sql import render_sql_properties
 from jans.pycloudlib.persistence.sql import SqlClient
@@ -151,14 +148,6 @@ def main():
             "/etc/jans/conf/jans-sql.properties",
         )
 
-    if "spanner" in persistence_groups:
-        render_spanner_properties(
-            manager,
-            "/app/templates/jans-spanner.properties",
-            "/etc/jans/conf/jans-spanner.properties",
-        )
-        sync_google_credentials(manager)
-
     wait_for_persistence(manager)
     override_simple_json_property("/etc/jans/conf/jans-sql.properties")
 
@@ -201,7 +190,6 @@ class PersistenceSetup:
 
         client_classes = {
             "couchbase": CouchbaseClient,
-            "spanner": SpannerClient,
             "sql": SqlClient,
         }
 
@@ -266,8 +254,8 @@ class PersistenceSetup:
         # deprecated Casa script DN
         id_ = "inum=BABA-CACA,ou=scripts,o=jans"
 
-        # sql and spanner
-        if self.persistence_type in ("sql", "spanner"):
+        # sql
+        if self.persistence_type == "sql":
             return bool(self.client.get("jansCustomScr", doc_id_from_dn(id_)))
 
         # likely couchbase

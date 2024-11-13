@@ -19,7 +19,6 @@ from jans.pycloudlib.wait import get_wait_interval
 
 from healthcheck import run_healthcheck
 from settings import LOGGING_CONFIG
-from utils import get_kc_db_password
 
 logging.config.dictConfig(LOGGING_CONFIG)
 logger = logging.getLogger("jans-saml")
@@ -257,12 +256,12 @@ class KC:
             if code != 0:
                 logger.warning(f"Unable to create execution config specified in {config_fn}; reason={err.decode()}")
 
-    def grant_xa_transaction_privilege(self):
+    def grant_xa_transaction_privilege(self, manager):
         recovery_enabled = as_boolean(os.environ.get("QUARKUS_TRANSACTION_MANAGER_ENABLE_RECOVERY", "false"))
         db_vendor = os.environ.get("KC_DB", "mysql")
 
         if recovery_enabled and db_vendor == "mysql":
-            mysql_kc = MysqlKeycloak()
+            mysql_kc = MysqlKeycloak(manager)
 
             if not mysql_kc.check_xa_recover_admin():
                 mysql_kc.grant_xa_recover_admin()
@@ -346,12 +345,12 @@ class KC:
 
 
 class MysqlKeycloak:
-    def __init__(self):
+    def __init__(self, manager):
         host = os.environ.get("KC_DB_URL_HOST", "localhost")
         port = os.environ.get("KC_DB_URL_PORT", "3306")
         database = os.environ.get("KC_DB_URL_DATABASE", "keycloak")
         self.user = os.environ.get("KC_DB_USERNAME", "keycloak")
-        password = get_kc_db_password()
+        password = os.environ.get("KC_DB_PASSWORD") or manager.secret.get("kc_db_password")
 
         self.engine = create_engine(
             f"mysql+pymysql://{self.user}:{password}@{host}:{port}/{database}",
@@ -464,7 +463,7 @@ def main():
         kc.disable_first_login_update_profile()
 
         # grant privilege (if required)
-        kc.grant_xa_transaction_privilege()
+        kc.grant_xa_transaction_privilege(manager)
 
 
 if __name__ == "__main__":
