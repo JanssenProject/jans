@@ -10,7 +10,7 @@ namespace Jans {
         domain: String,
     };
     type Context = {
-            network: ipaddr,
+            network: String,
             network_type: String,
             user_agent: String, 
             operating_system: String,
