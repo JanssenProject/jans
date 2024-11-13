@@ -30,7 +30,7 @@ fn test_policy_store_deserialization_success() {
     // check if the string is a valid policy
     cedar_policy::Policy::from_str(policy).expect("invalid cedar policy");
 
-    let schema = include_str!("./cedar-schema.json");
+    let schema = include_str!("../../../../test_files/cedar-schema.json");
     // check if the string is a valid schema
     cedar_policy::Schema::from_json_str(schema).expect("invalid cedar schema");
 
@@ -75,7 +75,7 @@ fn test_base64_decoding_error_in_policy_store() {
     // simulate an invalid base64 encoding by adding an invalid character
     encoded_policy.push('!');
 
-    let schema = include_str!("./cedar-schema.json");
+    let schema = include_str!("../../../../test_files/cedar-schema.json");
     // check if the string is a valid schema
     cedar_policy::Schema::from_json_str(schema).expect("invalid cedar schema");
 
@@ -129,7 +129,7 @@ fn test_policy_parsing_error_in_policy_store() {
     invalid_utf8_bytes[10] = 0xFF; // inserting invalid byte
     encoded_policy = BASE64_STANDARD.encode(&invalid_utf8_bytes); // re-encode with invalid UTF-8
 
-    let schema = include_str!("./cedar-schema.json");
+    let schema = include_str!("../../../../test_files/cedar-schema.json");
     // check if the string is a valid schema
     cedar_policy::Schema::from_json_str(schema).expect("invalid cedar schema");
 
