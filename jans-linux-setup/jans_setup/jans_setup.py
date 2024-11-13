@@ -137,7 +137,6 @@ from setup_app.installers.jython import JythonInstaller
 from setup_app.installers.jans_auth import JansAuthInstaller
 
 if base.current_app.profile == 'jans':
-    from setup_app.installers.couchbase import CouchbaseInstaller
     from setup_app.installers.scim import ScimInstaller
     from setup_app.installers.fido import FidoInstaller
     from setup_app.installers.jans_link import JansLinkInstaller
@@ -248,10 +247,6 @@ propertiesUtils.check_properties()
 jreInstaller = JreInstaller()
 jettyInstaller = JettyInstaller()
 jythonInstaller = JythonInstaller()
-
-if Config.profile == 'jans':
-    couchbaseInstaller = CouchbaseInstaller()
-
 rdbmInstaller = RDBMInstaller()
 httpdinstaller = HttpdInstaller()
 jansAuthInstaller = JansAuthInstaller()
@@ -269,10 +264,6 @@ if Config.profile == 'jans':
 jansCliInstaller = JansCliInstaller()
 
 rdbmInstaller.packageUtils = packageUtils
-
-if not Config.installed_instance:
-    Config.set_mapping_locations()
-
 
 if Config.installed_instance:
 
@@ -348,10 +339,6 @@ def main():
         if Config.rdbm_install_type == static.InstallTypes.LOCAL:
             packageUtils.check_and_install_packages()
 
-    if Config.cb_install == static.InstallTypes.LOCAL:
-        print("Please wait while setup is installing couchbase package ...")
-        couchbaseInstaller.couchbaseInstall()
-
     # register post setup progress
     class PostSetup:
         service_name = 'post-setup'
@@ -394,12 +381,6 @@ def main():
 
                 jansInstaller.copy_output()
                 jansInstaller.setup_init_scripts()
-
-                # Installing jans components
-                if Config.profile == 'jans':
-
-                    if Config.cb_install:
-                        couchbaseInstaller.start_installation()
 
                 if Config.rdbm_install:
                     rdbmInstaller.start_installation()

@@ -14,7 +14,7 @@ Janssen's FIDO2 server - a component inside the Janssen project enables users of
 
 1. The FIDO2 server uses REST endpoints to communicate with an RP via an https connection.
 2. The FIDO2 server implements the [FIDO Metadata Service (MDS3)](https://fidoalliance.org/metadata/metadata-service-overview/) defined by FIDO Alliance.
-3. The FIDO2 server stores user data into the same persistence store as the Jans-Auth server. (PostgreSQL, MYSQL, Couchbase etc.)
+3. The FIDO2 server stores user data into the same persistence store as the Jans-Auth server. (PostgreSQL, MYSQL etc.)
 
 Janssen's FIDO server is a standalone server communicates with the RP using an API which can be obtained by querying the following URL :
 

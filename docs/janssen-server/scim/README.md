@@ -37,7 +37,7 @@ To know more about OAuth protection mode please visit [here](./oauth-protection.
 
 ## API documentation at a glance
 
-[SCIM API](../../admin/reference/openapi.md) doc page describes about our implementation of SCIM. The API has also been documented using OpenAPI (swagger) specification for the interested.
+[SCIM API](../../janssen-server/reference/openapi.md) doc page describes about our implementation of SCIM. The API has also been documented using OpenAPI (swagger) specification for the interested.
 
 ## Potential performance issues with Group endpoints
 

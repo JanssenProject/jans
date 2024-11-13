@@ -124,7 +124,7 @@ class JansAuthInstaller(JettyInstaller):
 
         self.role_scope_mappings()
 
-        Config.templateRenderingDict['person_custom_object_class_list'] = '[]' if Config.mapping_locations['default'] == 'rdbm' else '["jansCustomPerson", "jansPerson"]'
+        Config.templateRenderingDict['person_custom_object_class_list'] = '[]'
 
         templates = [self.jans_auth_config_json, self.ldif_people]
 
@@ -202,18 +202,6 @@ class JansAuthInstaller(JettyInstaller):
             self.copyFile(extra_lib, self.custom_lib_dir)
             extra_lib_path = os.path.join(self.custom_lib_dir, os.path.basename(extra_lib))
             self.chown(extra_lib_path, Config.jetty_user, Config.jetty_group)
-
-        # add custom libs if any
-        common_lib_dir = None
-        if Config.cb_install:
-            common_lib_dir = base.current_app.CouchbaseInstaller.common_lib_dir
-
-        if common_lib_dir:
-            class_path = os.path.join(common_lib_dir, '*')
-            current_plugins = self.get_plugins(paths=True)
-            if not class_path in current_plugins:
-                current_plugins.append(class_path)
-                self.set_class_path(current_plugins)
 
     def setup_agama(self):
         self.createDirs(self.agama_root)

@@ -2,13 +2,11 @@ from jans.pycloudlib.persistence.utils import PersistenceMapper
 
 from couchbase_setup import CouchbaseBackend
 from sql_setup import SQLBackend
-from spanner_setup import SpannerBackend
 
 
 _backend_classes = {
     "couchbase": CouchbaseBackend,
     "sql": SQLBackend,
-    "spanner": SpannerBackend,
 }
 
 

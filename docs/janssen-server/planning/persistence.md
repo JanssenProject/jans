@@ -4,9 +4,7 @@ tags:
   - planning
   - persistence
   - MySQL
-  - Couchbase
   - Aurora
-  - Spanner
   - Postgres
   - database
 ---
@@ -36,20 +34,10 @@ you'll have to figure out a plan for replication, and horizontal scaling.
 distributions of Postgres like [EnterpriseDB](https://www.enterprisedb.com/). **Postgres is our default 
 persistence for VM based non-production deployments**.
 
-1. **Couchbase** A JSON NoSQL database that supports automatic distribution
-of data for auto-scaling multi-region sharded cloud-native deployments. Janssen
-only supports the commercial distribution--but the previously mentioned database
-properties are enterprise class. If you need to host your own database, and you
-need infinite horizontal scalability, Couchbase should be your go-to choice.
-
 1. **Aurora** So you want MySQL, but you want Amazon to handle some of the care
 and feeding? Aurora enables you to consume database as a cloud service.
 Scalability is excellent and multi-region deployments are [possible](https://aws.amazon.com/blogs/database/deploy-multi-region-amazon-aurora-applications-with-a-failover-blueprint/).
 The main catch is that write operations are limited to one region, with the
 ability to failover to another region. But to accomplish this, you need a cloud
 engineer to implement it.
-
-1. **Spanner** Google's multi-region cloud database as a service, Spanner
-was purpose-built for auto-scaling, and multi-region persistence. It has its own
-API, although recently Google added support for MySQL and Postgres drivers.
 

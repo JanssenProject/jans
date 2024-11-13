@@ -400,15 +400,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
 
     def import_ldif(self):
-        ldif_files = []
-
-        if Config.mapping_locations['default'] == 'rdbm':
-            ldif_files += Config.couchbaseBucketDict['default']['ldif']
-
-        ldap_mappings = self.getMappingType('rdbm')
-
-        for group in ldap_mappings:
-            ldif_files +=  Config.couchbaseBucketDict[group]['ldif']
+        ldif_files = Config.ldif_files[:]
 
         if Config.get('ldif_metric') in ldif_files:
             ldif_files.remove(Config.ldif_metric)
