@@ -67,7 +67,6 @@ ENV CN_HOSTNAME="demoexample.jans.io" \
     TEST_CLIENT_ID="9876baac-de39-4c23-8a78-674b59df8c09" \
     TEST_CLIENT_SECRET="" \
     TEST_CLIENT_TRUSTED="true" \
-    CN_INSTALL_COUCHBASE="false" \
     CN_INSTALL_MYSQL="false" \
     CN_INSTALL_PGSQL="false" \
     CN_INSTALL_CONFIG_API="true" \
