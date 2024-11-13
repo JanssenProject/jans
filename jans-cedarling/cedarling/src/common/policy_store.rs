@@ -91,7 +91,7 @@ impl TrustedIssuerMetadata {
     // We're just checking each token metadata right now and returning the
     // first one with a role_mapping field.
     pub fn get_role_mapping(&self) -> Option<RoleMapping> {
-        if let Some(role_mapping) = &self.access_tokens.role_mapping {
+        if let Some(role_mapping) = &self.access_tokens.entity_metadata.role_mapping {
             return Some(RoleMapping {
                 kind: TokenKind::Access,
                 role_mapping_field: role_mapping.as_str(),

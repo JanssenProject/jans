@@ -1,3 +1,4 @@
+use super::parse_option_string;
 use super::token_entity_metadata::TokenEntityMetadata;
 use serde::Deserialize;
 
@@ -19,7 +20,7 @@ pub struct TrustedIssuerMetadata {
 
     /// Token Entity Metadata for Access Tokens.
     #[serde(default)]
-    pub access_tokens: TokenEntityMetadata,
+    pub access_tokens: AccessTokenMetadata,
 
     /// Token Entity Metadata for ID Tokens.
     #[serde(default)]
@@ -34,9 +35,21 @@ pub struct TrustedIssuerMetadata {
     pub tx_tokens: TokenEntityMetadata,
 }
 
+#[derive(Deserialize, Clone, PartialEq, Default, Debug)]
+pub struct AccessTokenMetadata {
+    #[serde(default)]
+    pub trusted: bool,
+    #[serde(default, deserialize_with = "parse_option_string")]
+    pub principal_identifier: Option<String>,
+    #[serde(default, flatten)]
+    pub entity_metadata: TokenEntityMetadata,
+}
+
 #[cfg(test)]
 mod test {
-    use crate::common::policy_store::token_entity_metadata::TokenEntityMetadata;
+    use crate::common::policy_store::{
+        token_entity_metadata::TokenEntityMetadata, trusted_issuer_metadata::AccessTokenMetadata,
+    };
 
     use super::TrustedIssuerMetadata;
     use serde_json::json;
@@ -48,6 +61,8 @@ mod test {
             "description": "Consumer IDP",
             "openid_configuration_endpoint": "https://accounts.google.com/.well-known/openid-configuration",
             "access_tokens": {
+                "trusted": true,
+                "principal_identifier": "jti",
                 "user_id": "",
                 "role_mapping": "",
                 "claim_mapping": {},
@@ -72,7 +87,11 @@ mod test {
             description: "Consumer IDP".to_string(),
             openid_configuration_endpoint:
                 "https://accounts.google.com/.well-known/openid-configuration".to_string(),
-            access_tokens: TokenEntityMetadata::default(),
+            access_tokens: AccessTokenMetadata {
+                trusted: true,
+                principal_identifier: Some("jti".to_string()),
+                entity_metadata: TokenEntityMetadata::default(),
+            },
             id_tokens: TokenEntityMetadata {
                 user_id: Some("sub".to_string()),
                 role_mapping: Some("role".to_string()),
@@ -96,6 +115,8 @@ mod test {
             description: 'Consumer IDP'
             openid_configuration_endpoint: 'https://accounts.google.com/.well-known/openid-configuration'
             access_tokens:
+                trusted: true
+                principal_identifier: jti
                 user_id: ''
                 role_mapping: ''
                 claim_mapping: {}
@@ -117,7 +138,11 @@ mod test {
             description: "Consumer IDP".to_string(),
             openid_configuration_endpoint:
                 "https://accounts.google.com/.well-known/openid-configuration".to_string(),
-            access_tokens: TokenEntityMetadata::default(),
+            access_tokens: AccessTokenMetadata {
+                trusted: true,
+                principal_identifier: Some("jti".to_string()),
+                entity_metadata: TokenEntityMetadata::default(),
+            },
             id_tokens: TokenEntityMetadata {
                 user_id: Some("sub".to_string()),
                 role_mapping: Some("role".to_string()),
