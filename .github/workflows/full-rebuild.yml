@@ -11,7 +11,7 @@ on:
       - main
   workflow_dispatch:
     inputs:
-      type:
+      project:
         type: choice
         options:
           - "jans-bom"
@@ -27,13 +27,34 @@ on:
           - "jans-config-api"
           - "jans-keycloak-integration"
           - "jans-casa"
+          - "jans-bom jans-orm jans-core jans-lock/lock-server agama jans-auth-server jans-link jans-fido2 jans-scim jans-keycloak-link jans-config-api jans-keycloak-integration jans-casa"
         description: 'Service'
         required: true
-        default: 'jans-bom jans-orm jans-core jans-lock/lock-server agama jans-auth-server jans-link jans-fido2 jans-scim jans-keycloak-link jans-config-api jans-keycloak-integration jans-casa'
+        default: "jans-bom jans-orm jans-core jans-lock/lock-server agama jans-auth-server jans-link jans-fido2 jans-scim jans-keycloak-link jans-config-api jans-keycloak-integration jans-casa"
 
 jobs:
+  prep-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - id: set-matrix
+        run: |
+            projects="${{ github.event.inputs.project }}"
+            if [ -z "$projects" ]; then
+              projects="jans-bom jans-orm jans-core jans-lock/lock-server agama jans-auth-server jans-link jans-fido2 jans-scim jans-keycloak-link jans-config-api jans-keycloak-integration jans-casa"
+            fi
+            matrix="{\"include\":["
+            for project in $projects; do
+              matrix="$matrix{\"service\":\"$project\",\"maven_skip_tests\":true},"
+            done
+            matrix="${matrix%,}]}"
+            echo $matrix
+            echo "matrix=$matrix" >> $GITHUB_OUTPUT
+
   full-build-with-disabled-tests:
     runs-on: ubuntu-20.04
+    needs: prep-matrix
     permissions:
       contents: read
       packages: write
@@ -44,8 +65,8 @@ jobs:
 
     strategy:
       max-parallel: 1
-      matrix:
-        service: ${{ github.event.inputs.type }}
+      matrix: ${{ fromJson(needs.prep-matrix.outputs.matrix) }}
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -68,13 +89,13 @@ jobs:
     - name: Build ${{ matrix.service }}
       run: |
         if [ "${{ github.event_name }}" == "pull_request" ]; then
-          mvn -f ${{ matrix.service }}/pom.xml -Dcfg=${{ env.PROFILE_NAME }} -Dmaven.test.skip=${{ env.MAVEN_SKIP_TESTS }} clean install -Drevision=${{ github.head_ref }}-SNAPSHOT
+          mvn -f ${{ matrix.service }}/pom.xml -Dcfg=${{ env.PROFILE_NAME }} -Dmaven.test.skip=${{ matrix.maven_skip_tests }} clean install -Drevision=${{ github.head_ref }}-SNAPSHOT
         else
-          mvn -f ${{ matrix.service }}/pom.xml -Dcfg=${{ env.PROFILE_NAME }} -Dmaven.test.skip=${{ env.MAVEN_SKIP_TESTS }} clean install
+          mvn -f ${{ matrix.service }}/pom.xml -Dcfg=${{ env.PROFILE_NAME }} -Dmaven.test.skip=${{ matrix.maven_skip_tests }} clean install
         fi
 
     - name: Publish to GitHub Packages
-      run: mvn -B deploy -Dmaven.test.skip=${{ env.MAVEN_SKIP_TESTS }} -Dcfg=${{ env.PROFILE_NAME }}
+      run: mvn -B deploy -Dmaven.test.skip=${{ matrix.maven_skip_tests }} -Dcfg=${{ env.PROFILE_NAME }}
       working-directory: ${{ matrix.service }}
       env:
         GITHUB_TOKEN: ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}
@@ -99,15 +120,16 @@ jobs:
       run: |
         # List all SNAPSHOT versions
         versions=$(curl -s -H "Authorization: token ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" "https://maven.pkg.github.com/JanssenProject/jans/maven-metadata.xml" | grep -oP '(?<=<version>)[^<]+')
-        
+
         for version in $versions; do
           if [[ $version == *-SNAPSHOT ]]; then
             # Delete the version from GitHub Packages
-            curl -X DELETE -H "Authorization: token ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" "https://maven.pkg.github.com/JanssenProject/jans/io/jans/${{ matrix.service }}/$version"
+            curl -X DELETE -H "Authorization: token ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" "https://maven.pkg.github.com/JanssenProject/jans/io/jans/${{ matrix.service.project }}/$version"
           fi
         done
 
   run-tests:
+    if: github.event_name == 'push' || github.event_name == 'pull_request' || (github.event_name == 'workflow_dispatch' && github.event.inputs.project == 'jans-bom, jans-orm, jans-core, jans-lock/lock-server, agama, jans-auth-server, jans-link, jans-fido2, jans-scim, jans-keycloak-link, jans-config-api, jans-keycloak-integration, jans-casa')
     permissions: write-all
     runs-on: ubuntu-20.04
     env:
