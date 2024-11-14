@@ -77,17 +77,6 @@ if PROFILE != OPENBANKING_PROFILE:
     parser.add_argument('-x', help="Load test data and exit", action='store_true')
     parser.add_argument('--allow-pre-released-features', help="Enable options to install experimental features, not yet officially supported", action='store_true')
 
-
-    parser.add_argument('--remote-couchbase', help="Enables using remote couchbase server", action='store_true')
-    parser.add_argument('--local-couchbase', help="Enables installing couchbase server", action='store_true')
-    parser.add_argument('-couchbase-admin-user', help="Couchbase admin user")
-    parser.add_argument('-couchbase-admin-password', help="Couchbase admin user password")
-    parser.add_argument('-couchbase-bucket-prefix', help="Set prefix for couchbase buckets", default='jans')
-    parser.add_argument('-couchbase-hostname', help="Remote couchbase server hostname")
-
-    for bucket in base.coucbase_bucket_dict:
-        parser.add_argument(f'-couchbase-{bucket}-mem', help=f"Memory allocation in MB for Couchbase bucket {bucket}", default=base.coucbase_bucket_dict[bucket]['memory_allocation'], type=int)
-
     parser.add_argument('--no-data', help="Do not import any data to database backend, used for clustering", action='store_true')
     parser.add_argument('--no-jsauth', help="Do not install OAuth2 Authorization Server", action='store_true')
 

@@ -20,13 +20,10 @@ class colors:
     DANGER      = '\033[31m'
 
 class BackendTypes:
-    COUCHBASE = 2
     MYSQL     = 3
     PGSQL     = 4
 
 class BackendStrings:
-    LOCAL_COUCHBASE  = 'Local Couchbase'
-    REMOTE_COUCHBASE = 'Remote Couchbase'
     LOCAL_MYSQL      = 'Local MySQL'
     REMOTE_MYSQL     = 'Remote MySQL'
     LOCAL_PGSQL      = 'Local PgSQL'

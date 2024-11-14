@@ -33,7 +33,7 @@ The Janssen Server provides multiple configuration tools to perform these tasks.
  ```
 
  Also, to understand how Janssen Server picks the authentication method *in the absence* of the default authentication method, refer to 
- [ACR documentation](../../auth-server/openid-features/acrs.md#flowchart--how-the-jans-as-derives-an-acr-value-for-a-user-session)
+ [ACR documentation](../../auth-server/openid-features/acrs.md)
 
 === "Use Command-line"
 

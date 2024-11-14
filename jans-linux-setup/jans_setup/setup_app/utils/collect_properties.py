@@ -41,33 +41,8 @@ class CollectProperties(SetupUtils, BaseInstaller):
         jans_auth_ConfigurationEntryDN = jans_prop['jansAuth_ConfigurationEntryDN']
         jans_ConfigurationDN = 'ou=configuration,o=jans'
 
-        if Config.persistence_type in ('couchbase', 'sql'):
-            default_storage = Config.persistence_type
 
-        if os.path.exists(Config.jansCouchebaseProperties):
-            jans_cb_prop = base.read_properties_file(Config.jansCouchebaseProperties)
-
-            Config.couchebaseClusterAdmin = jans_cb_prop['auth.userName']
-            Config.encoded_cb_password = jans_cb_prop['auth.userPassword']
-            Config.cb_password = self.unobscure(jans_cb_prop['auth.userPassword'])
-            Config.couchbase_bucket_prefix = jans_cb_prop['bucket.default']
-
-            Config.couchbase_hostname = jans_cb_prop['servers'].split(',')[0].strip()
-            Config.encoded_couchbaseTrustStorePass = jans_cb_prop['ssl.trustStore.pin']
-            Config.couchbaseTrustStorePass = self.unobscure(jans_cb_prop['ssl.trustStore.pin'])
-            Config.cb_query_node = Config.couchbase_hostname
-            Config.couchbase_buckets = [b.strip() for b in jans_cb_prop['buckets'].split(',')]
-
-        if not Config.persistence_type in ('couchbase', 'sql') and os.path.exists(Config.ox_ldap_properties):
-            jans_ldap_prop = base.read_properties_file(Config.ox_ldap_properties)
-            Config.ldap_binddn = jans_ldap_prop['bindDN']
-            Config.ldap_bind_encoded_pw = jans_ldap_prop['bindPassword']
-            Config.ldapPass = self.unobscure(Config.ldap_bind_encoded_pw)
-            Config.opendj_p12_pass = self.unobscure(jans_ldap_prop['ssl.trustStorePin'])
-            Config.ldap_hostname, Config.ldaps_port = jans_ldap_prop['servers'].split(',')[0].split(':')
-
-
-        if not Config.persistence_type in ('couchbase', 'ldap') and os.path.exists(Config.jansRDBMProperties):
+        if os.path.exists(Config.jansRDBMProperties):
             jans_sql_prop = base.read_properties_file(Config.jansRDBMProperties)
 
             uri_re = re.match('jdbc:(.*?)://(.*?):(.*?)/(.*)', jans_sql_prop['connection.uri'])
@@ -81,12 +56,6 @@ class CollectProperties(SetupUtils, BaseInstaller):
             Config.rdbm_password = self.unobscure(Config.rdbm_password_enc)
             if Config.rdbm_type == 'postgresql':
                 Config.rdbm_type = 'pgsql'
-
-        if not Config.get('couchbase_bucket_prefix'):
-            Config.couchbase_bucket_prefix = 'jans'
-
-
-        Config.set_mapping_locations()
 
         # It is time to bind database
         dbUtils.bind()
@@ -155,12 +124,6 @@ class CollectProperties(SetupUtils, BaseInstaller):
         Config.city = ssl_subj.get('localityName', '')
         Config.admin_email = ssl_subj.get('emailAddress', '')
 
-         #this is not good, but there is no way to retreive password from ldap
-        if not Config.get('admin_password'):
-            if Config.get('ldapPass'):
-                Config.admin_password = Config.ldapPass
-            elif Config.get('cb_password'):
-                Config.admin_password = Config.cb_password
 
         if not Config.get('orgName'):
             Config.orgName = ssl_subj.get('organizationName', '')

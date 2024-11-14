@@ -127,22 +127,13 @@ class TestDataLoader(BaseInstaller, SetupUtils):
         self.logIt("Rendering test templates")
 
         Config.templateRenderingDict['config_jans_auth_test_ldap'] = '# Not available'
-        Config.templateRenderingDict['config_jans_auth_test_couchbase'] = '# Not available'
-
 
         config_jans_auth_test_properties = self.fomatWithDict(
             'server.name=%(hostname)s\nconfig.oxauth.issuer=http://localhost:80\nconfig.oxauth.contextPath=http://localhost:80\nconfig.oxauth.salt=%(encode_salt)s\nconfig.persistence.type=%(persistence_type)s\n\n',
             self.merge_dicts(Config.__dict__, Config.templateRenderingDict)
             )
 
-        if self.getMappingType('couchbase'):
-            couchbaseDict = base.current_app.CouchbaseInstaller.couchbaseDict()
-            template_text = self.readFile(os.path.join(self.template_base, 'jans-auth/server/config-jans-auth-test-couchbase.properties.nrnd'))
-            rendered_text = self.fomatWithDict(template_text, self.merge_dicts(Config.__dict__, Config.templateRenderingDict, couchbaseDict))
-            config_jans_auth_test_properties += '\n#couchbase\n' +  rendered_text
-
-
-        if self.getMappingType('rdbm'):
+        if Config.rdbm_type in ('mysql', 'pgsql'):
             template_text = self.readFile(os.path.join(self.template_base, 'jans-auth/server/config-jans-auth-test-sql.properties.nrnd'))
             rendered_text = self.fomatWithDict(template_text, self.merge_dicts(Config.__dict__, Config.templateRenderingDict))
             config_jans_auth_test_properties += '\n#sql\n' +  rendered_text
@@ -317,11 +308,6 @@ class TestDataLoader(BaseInstaller, SetupUtils):
 
         # make scope offline_access as default
         self.dbUtils.set_configuration("jansDefScope", "true", "inum=C4F6,ou=scopes,o=jans")
-
-        if self.dbUtils.moddb == static.BackendTypes.COUCHBASE:
-            self.dbUtils.cbm.exec_query('CREATE INDEX def_{0}_myCustomAttr1 ON `{0}`(myCustomAttr1) USING GSI WITH {{"defer_build":true}}'.format(Config.couchbase_bucket_prefix))
-            self.dbUtils.cbm.exec_query('CREATE INDEX def_{0}_myCustomAttr2 ON `{0}`(myCustomAttr2) USING GSI WITH {{"defer_build":true}}'.format(Config.couchbase_bucket_prefix))
-            self.dbUtils.cbm.exec_query('BUILD INDEX ON `{0}` (def_{0}_myCustomAttr1, def_{0}_myCustomAttr2)'.format(Config.couchbase_bucket_prefix))
 
         self.create_test_client_keystore()
 

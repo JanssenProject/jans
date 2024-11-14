@@ -341,15 +341,6 @@ class SetupUtils(Crypto64):
 
         return text
 
-
-    def getMappingType(self, mtype):
-        location = []
-        for group in Config.mapping_locations:
-            if group != 'default' and Config.mapping_locations[group] == mtype:
-                location.append(group)
-
-        return location
-
     def merge_dicts(self, *dict_args):
         result = {}
         for dictionary in dict_args:
@@ -450,7 +441,6 @@ class SetupUtils(Crypto64):
 
     def render_templates_folder(self, templatesFolder, ignoredirs=[], ignorefiles=[]):
         self.logIt("Rendering templates folder: %s" % templatesFolder)
-        #coucbase_dict = self.couchbaseDict()
 
         def in_ignoredirs(p):
             for idir in ignoredirs:
