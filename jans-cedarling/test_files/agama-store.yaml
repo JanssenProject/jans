@@ -19,7 +19,7 @@ policy_stores:
              resource in TestPolicy::Application::"Application"
             )
             ;
-    identity_source:
+    trusted_issuers:
       7ca8ccc6e8682ad91f47e651cf7e3dcea4f8133663ae:
         name: Test
         description: '1'
