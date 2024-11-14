@@ -1,0 +1,14 @@
+[
+    {
+        "name": "fido2",
+        "description": "fido2 plugin"
+    },
+    {
+        "name": "scim",
+        "description": "scim plugin"
+    },
+    {
+        "name": "user-management",
+        "description": "user-management plugin"
+    }
+]

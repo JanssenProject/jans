@@ -1,0 +1,6 @@
+{
+  "cleanServiceBatchChunkSize": 10000,
+  "cleanServiceInterval": 60,
+  "cleanServiceBaseDns": [
+  ]
+}
