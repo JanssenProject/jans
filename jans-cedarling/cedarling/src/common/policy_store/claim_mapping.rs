@@ -5,6 +5,8 @@
 * Copyright (c) 2024, Gluu, Inc.
 */
 
+use regex;
+use regex::Regex;
 use serde::{de, Deserialize};
 use serde_json::Value;
 use std::collections::HashMap;
@@ -17,22 +19,55 @@ use std::collections::HashMap;
 #[derive(Debug, PartialEq, Clone)]
 pub enum ClaimMapping {
     /// Represents a claim mapping using regular expressions.
-    ///
-    /// # Fields
-    /// - `type`: The type of the claim (e.g., "Acme::Email").
-    /// - `regex_expression`: The regular expression used to extract fields.
-    /// - `fields`: A map of field names to `RegexField` values.
-    Regex {
-        r#type: String,
-        regex_expression: String,
-        fields: HashMap<String, RegexField>,
-    },
+    Regex(RegexpMapping),
 
     /// Represents a claim mapping using a JSON parser.
     ///
     /// # Fields
     /// - `type`: The type of the claim (e.g., "Acme::Dolphin").
     Json { r#type: String },
+}
+
+/// Represents a claim mapping using regular expressions.
+///
+/// # Fields
+/// - `type`: The type of the claim (e.g., "Acme::Email").
+/// - `regex_expression`: The regular expression used to extract fields.
+/// - `fields`: A map of field names to `RegexField` values.
+#[derive(Debug, Clone)]
+pub struct RegexpMapping {
+    cedar_policy_type: String,
+    regex_expression: String,
+    regex: Regex,
+    fields: HashMap<String, RegexField>,
+}
+
+impl RegexpMapping {
+    // builder function, used in testing
+    #[allow(dead_code)]
+    fn new(
+        cedar_policy_type: String,
+        regex_expression: String,
+
+        fields: HashMap<String, RegexField>,
+    ) -> Result<Self, regex::Error> {
+        Ok(Self {
+            regex: Regex::new(regex_expression.as_str())?,
+            cedar_policy_type,
+            regex_expression,
+            fields,
+        })
+    }
+}
+
+impl PartialEq for RegexpMapping {
+    // impl operator "==" to compare struct in test cases
+    // `regex` is ignored because it is result of `regex_expression` string and actually not comparable
+    fn eq(&self, other: &Self) -> bool {
+        self.cedar_policy_type == other.cedar_policy_type
+            && self.regex_expression == other.regex_expression
+            && self.fields == other.fields
+    }
 }
 
 impl<'de> Deserialize<'de> for ClaimMapping {
@@ -52,42 +87,51 @@ impl<'de> Deserialize<'de> for ClaimMapping {
     where
         D: serde::Deserializer<'de>,
     {
+        const PARSER_KEY: &str = "parser";
+        const TYPE_KEY: &str = "type";
+        const REGEX_EXPRESSION_KEY: &str = "regex_expression";
+
         let value = Value::deserialize(deserializer)?;
 
         let parser = value
-            .get("parser")
+            .get(PARSER_KEY)
             .and_then(|v| v.as_str())
-            .ok_or_else(|| de::Error::missing_field("parser"))?;
+            .ok_or_else(|| de::Error::missing_field(PARSER_KEY))?;
 
         match parser {
             "regex" => {
                 let r#type = value
-                    .get("type")
+                    .get(TYPE_KEY)
                     .and_then(|v| v.as_str())
-                    .ok_or(de::Error::missing_field("type"))?
+                    .ok_or(de::Error::missing_field(TYPE_KEY))?
                     .to_string();
 
                 let regex_expression = value
-                    .get("regex_expression")
+                    .get(REGEX_EXPRESSION_KEY)
                     .and_then(|v| v.as_str())
-                    .ok_or(de::Error::missing_field("regex_expression"))?
+                    .ok_or(de::Error::missing_field(REGEX_EXPRESSION_KEY))?
                     .to_string();
 
                 let mut fields = HashMap::new();
                 if let Some(obj) = value.as_object() {
                     for (key, val) in obj.iter() {
                         if key != "parser" && key != "type" && key != "regex_expression" {
-                            let field = serde_json::from_value::<RegexField>(val.clone())
+                            let field = serde_json::from_value::<RegexField>(val.to_owned())
                                 .map_err(de::Error::custom)?;
                             fields.insert(key.clone(), field);
                         }
                     }
                 }
-                Ok(ClaimMapping::Regex {
-                    r#type,
+                Ok(ClaimMapping::Regex(RegexpMapping {
+                    regex: Regex::new(&regex_expression).map_err(|err| {
+                        de::Error::custom(format!(
+                            "could not parse field regex as regular expression:{err}"
+                        ))
+                    })?,
+                    cedar_policy_type: r#type,
                     regex_expression,
                     fields,
-                })
+                }))
             },
             "json" => {
                 let r#type = value
@@ -117,7 +161,7 @@ pub struct RegexField {
 
 #[cfg(test)]
 mod test {
-    use super::ClaimMapping;
+    use super::{ClaimMapping, RegexpMapping};
     use crate::common::policy_store::claim_mapping::RegexField;
     use serde_json::json;
     use std::collections::HashMap;
@@ -127,11 +171,10 @@ mod test {
     /// from a JSON string
     #[test]
     fn can_parse_regex_from_json() {
-        // Setup expected output
-        let expected = ClaimMapping::Regex {
-            r#type: "Acme::Email".to_string(),
-            regex_expression: r#"^(?P<UID>[^@]+)@(?P<DOMAIN>.+)$"#.to_string(),
-            fields: HashMap::from([
+        let re_mapping = RegexpMapping::new(
+            "Acme::Email".to_string(),
+            r#"^(?P<UID>[^@]+)@(?P<DOMAIN>.+)$"#.to_string(),
+            HashMap::from([
                 (
                     "UID".to_string(),
                     RegexField {
@@ -147,7 +190,11 @@ mod test {
                     },
                 ),
             ]),
-        };
+        )
+        .expect("regexp should parse correctly");
+
+        // Setup expected output
+        let expected = ClaimMapping::Regex(re_mapping);
 
         // Setup JSON
         let claim_mapping_json = json!({
@@ -205,11 +252,10 @@ mod test {
     #[test]
 
     fn can_parse_regex_from_yaml() {
-        // Setup expected output
-        let expected = ClaimMapping::Regex {
-            r#type: "Acme::Email".to_string(),
-            regex_expression: r#"^(?P<UID>[^@]+)@(?P<DOMAIN>.+)$"#.to_string(),
-            fields: HashMap::from([
+        let re_mapping = RegexpMapping::new(
+            "Acme::Email".to_string(),
+            r#"^(?P<UID>[^@]+)@(?P<DOMAIN>.+)$"#.to_string(),
+            HashMap::from([
                 (
                     "UID".to_string(),
                     RegexField {
@@ -226,10 +272,14 @@ mod test {
                     },
                 ),
             ]),
-        };
+        )
+        .expect("regexp should parse correctly");
+
+        // Setup expected output
+        let expected = ClaimMapping::Regex(re_mapping);
 
         // Setup Yaml
-        let claim_mapping_json = "
+        let claim_mapping_yaml = "
             parser: 'regex'
             type: 'Acme::Email'
             regex_expression: '^(?P<UID>[^@]+)@(?P<DOMAIN>.+)$'
@@ -242,7 +292,7 @@ mod test {
         ";
 
         // Parse YAML
-        let parsed = serde_yml::from_str::<ClaimMapping>(&claim_mapping_json)
+        let parsed = serde_yml::from_str::<ClaimMapping>(&claim_mapping_yaml)
             .expect("should parse token entity metadata");
 
         // Assert if the JSON got parsed correctly
