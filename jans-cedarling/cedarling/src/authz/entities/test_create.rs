@@ -24,7 +24,13 @@ fn successful_scenario_empty_namespace() {
     let schema_json = include_str!("test_create_data/successful_scenario_schema.json");
     let schema: CedarSchemaJson = serde_json::from_str(schema_json).unwrap();
 
-    let metadata = EntityMetadata::new("Test", "test_id_key");
+    let metadata = EntityMetadata::new(
+        EntityParsedTypeName {
+            namespace: "",
+            typename: "Test",
+        },
+        "test_id_key",
+    );
 
     let json = serde_json::json!( {
         "test_id_key": "test_id",
@@ -75,7 +81,13 @@ fn successful_scenario_not_empty_namespace() {
     let schema_json = include_str!("test_create_data/successful_scenario_schema.json");
     let schema: CedarSchemaJson = serde_json::from_str(schema_json).unwrap();
 
-    let metadata = EntityMetadata::new("Jans::Test", "test_id_key");
+    let metadata = EntityMetadata::new(
+        EntityParsedTypeName {
+            namespace: "Jans",
+            typename: "Test",
+        },
+        "test_id_key",
+    );
 
     let json = serde_json::json!( {
         "test_id_key": "test_id",
@@ -121,7 +133,13 @@ fn get_token_claim_type_string_error() {
     let schema_json = include_str!("test_create_data/successful_scenario_schema.json");
     let schema: CedarSchemaJson = serde_json::from_str(schema_json).unwrap();
 
-    let metadata = EntityMetadata::new("Test", "test_id_key");
+    let metadata = EntityMetadata::new(
+        EntityParsedTypeName {
+            namespace: "",
+            typename: "Test",
+        },
+        "test_id_key",
+    );
 
     let test_key = "string_key";
     let json = serde_json::json!( {
@@ -166,7 +184,13 @@ fn get_token_claim_type_long_error() {
     let schema_json = include_str!("test_create_data/successful_scenario_schema.json");
     let schema: CedarSchemaJson = serde_json::from_str(schema_json).unwrap();
 
-    let metadata = EntityMetadata::new("Test", "test_id_key");
+    let metadata = EntityMetadata::new(
+        EntityParsedTypeName {
+            namespace: "",
+            typename: "Test",
+        },
+        "test_id_key",
+    );
 
     let test_key = "long_key";
     let json = serde_json::json!( {
@@ -211,7 +235,13 @@ fn get_token_claim_type_entity_uid_error() {
     let schema_json = include_str!("test_create_data/successful_scenario_schema.json");
     let schema: CedarSchemaJson = serde_json::from_str(schema_json).unwrap();
 
-    let metadata = EntityMetadata::new("Test", "test_id_key");
+    let metadata = EntityMetadata::new(
+        EntityParsedTypeName {
+            namespace: "",
+            typename: "Test",
+        },
+        "test_id_key",
+    );
 
     let test_key = "entity_uid_key";
     let json = serde_json::json!( {
@@ -256,7 +286,13 @@ fn get_token_claim_type_boolean_error() {
     let schema_json = include_str!("test_create_data/successful_scenario_schema.json");
     let schema: CedarSchemaJson = serde_json::from_str(schema_json).unwrap();
 
-    let metadata = EntityMetadata::new("Test", "test_id_key");
+    let metadata = EntityMetadata::new(
+        EntityParsedTypeName {
+            namespace: "",
+            typename: "Test",
+        },
+        "test_id_key",
+    );
 
     let test_key = "bool_key";
     let json = serde_json::json!( {
@@ -304,7 +340,13 @@ fn get_token_claim_type_set_error() {
     let schema_json = include_str!("test_create_data/successful_scenario_schema.json");
     let schema: CedarSchemaJson = serde_json::from_str(schema_json).unwrap();
 
-    let metadata = EntityMetadata::new("Test", "test_id_key");
+    let metadata = EntityMetadata::new(
+        EntityParsedTypeName {
+            namespace: "",
+            typename: "Test",
+        },
+        "test_id_key",
+    );
 
     let test_key = "set_key";
     let json = serde_json::json!( {
@@ -352,7 +394,13 @@ fn get_token_claim_type_set_of_set_error() {
     let schema_json = include_str!("test_create_data/successful_scenario_schema.json");
     let schema: CedarSchemaJson = serde_json::from_str(schema_json).unwrap();
 
-    let metadata = EntityMetadata::new("Test", "test_id_key");
+    let metadata = EntityMetadata::new(
+        EntityParsedTypeName {
+            namespace: "",
+            typename: "Test",
+        },
+        "test_id_key",
+    );
 
     let json = serde_json::json!( {
         "test_id_key": "test_id",
@@ -404,7 +452,14 @@ fn get_token_claim_cedar_typename_error() {
     let schema: CedarSchemaJson = serde_json::from_str(schema_json).unwrap();
 
     // Mistake in entity type name, should be `"Jans::Test"`, it will trigger error
-    let metadata = EntityMetadata::new("Jans:::Test", "test_id_key");
+    let (typename, namespace) = parse_namespace_and_typename("Jans:::Test");
+    let metadata = EntityMetadata::new(
+        EntityParsedTypeName {
+            namespace: &namespace,
+            typename,
+        },
+        "test_id_key",
+    );
 
     let json = serde_json::json!( {
         "test_id_key": "test_id",
@@ -444,7 +499,13 @@ fn get_token_claim_cedar_typename_in_attr_error() {
     let schema_json = include_str!("test_create_data/type_error_schema.json");
     let schema: CedarSchemaJson = serde_json::from_str(schema_json).unwrap();
 
-    let metadata = EntityMetadata::new("Jans::Test", "test_id_key");
+    let metadata = EntityMetadata::new(
+        EntityParsedTypeName {
+            namespace: "Jans",
+            typename: "Test",
+        },
+        "test_id_key",
+    );
 
     let json = serde_json::json!( {
         "test_id_key": "test_id",

@@ -10,7 +10,7 @@ use std::{collections::HashMap, str::FromStr};
 use cedar_policy::{EntityId, EntityTypeName, EntityUid, ParseErrors};
 
 /// Box to store authorization data
-#[derive(Debug, serde::Deserialize)]
+#[derive(Debug, Clone, serde::Deserialize)]
 pub struct Request {
     /// Access token raw value
     pub access_token: String,

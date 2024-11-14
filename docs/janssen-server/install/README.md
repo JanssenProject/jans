@@ -31,8 +31,9 @@ configuration tool to perform any other last mile configuration.
 
 ## Databases
 
-The Janssen Project gives you a few options to store data: MySQL, Postgres,
-Couchbase, Amazon Aurora, and Spanner. You can also configure an in-memory cache
+The Janssen Project gives you a few options to store data: MySQL, Postgres.
+MySQL is recommended for production deployments while Postgres for development. 
+You can also configure an in-memory cache
 server like Redis. Sometimes installation and configuration of this database
 is included in the setup process. Sometimes, you need to setup the database
 ahead of time. Please refer to the database instructions specific for your

@@ -33,8 +33,8 @@ pub struct AgamaPolicyStore {
 /// which are parsed during deserialization.
 #[derive(Debug, Clone, serde::Deserialize, PartialEq)]
 pub struct PolicyStore {
-    #[serde(default)]
-    pub name: Option<String>,
+    /// Name is also name of namespace in `cedar-policy`
+    pub name: String,
 
     #[serde(default)]
     pub description: Option<String>,
@@ -56,6 +56,12 @@ pub struct PolicyStore {
     /// This field may contain issuers that are trusted to provide tokens, allowing for additional
     /// verification and security when handling JWTs.
     pub trusted_issuers: Option<HashMap<String, TrustedIssuer>>,
+}
+
+impl PolicyStore {
+    pub fn namespace(&self) -> &str {
+        &self.name
+    }
 }
 
 /// Represents a trusted issuer that can provide JWTs.

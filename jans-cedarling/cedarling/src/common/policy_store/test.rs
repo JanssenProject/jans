@@ -40,6 +40,7 @@ fn test_policy_store_deserialization_success() {
     // represents the `policy_store.json`
     let policy_store_json = json!({
         "cedar_version": "v4.0.0",
+        "name": "Jans",
         "cedar_policies": {
             "840da5d85403f35ea76519ed1a18a33989f855bf1cf8": {
                 "description": "simple policy example",
@@ -78,6 +79,7 @@ fn test_base64_decoding_error_in_policy_store() {
     // represents the `policy_store.json`
     let policy_store_json = json!({
         "cedar_version": "v4.0.0",
+        "name": "Jans",
         "cedar_policies": {
             "840da5d85403f35ea76519ed1a18a33989f855bf1cf8": {
                 "description": "simple policy example",
@@ -127,6 +129,7 @@ fn test_policy_parsing_error_in_policy_store() {
     // represents the `policy_store.json`
     let policy_store_json = json!({
         "cedar_version": "v4.0.0",
+        "name": "Jans",
         "cedar_policies": {
             "840da5d85403f35ea76519ed1a18a33989f855bf1cf8": {
                 "description": "simple policy example",

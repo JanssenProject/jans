@@ -41,12 +41,6 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
                 bc = []
 
-                if Config.get('cb_install'):
-                    t_ = 'couchbase'
-                    if Config.cb_install == InstallTypes.REMOTE:
-                        t_ += '[R]'
-                    bc.append(t_)
-
                 if Config.rdbm_install:
                     t_ = Config.rdbm_type
                     if Config.rdbm_install_type == InstallTypes.REMOTE:
@@ -139,9 +133,6 @@ class JansInstaller(BaseInstaller, SetupUtils):
         if not base.snap:
             self.createGroup('jans')
         self.makeFolders()
-
-        if Config.persistence_type == 'hybrid':
-            self.writeHybridProperties()
 
         # set systemd start timeout to 5 mins
         for sys_prefix in ('/etc', '/usr/lib'):
@@ -245,35 +236,6 @@ class JansInstaller(BaseInstaller, SetupUtils):
 
         testTepmplatesFolder = os.path.join(self.templateFolder, 'test')
         self.render_templates_folder(testTepmplatesFolder)
-
-    def writeHybridProperties(self):
-
-        couchbase_mappings = self.getMappingType('couchbase')
-        
-        for group in Config.mapping_locations:
-            if group == 'default':
-                default_mapping = Config.mapping_locations[group]
-                break
-
-        storages = set(Config.mapping_locations.values())
-
-        jans_hybrid_roperties = [
-                        'storages: {0}'.format(', '.join(storages)),
-                        'storage.default: {0}'.format(default_mapping),
-                        ]
-
-        if couchbase_mappings:
-            cb_map_list = []
-            for m in couchbase_mappings:
-                if m != 'default':
-                    cb_map_list.append(Config.couchbaseBucketDict[m]['mapping'])
-            cb_map_str = ', '.join(cb_map_list)
-            jans_hybrid_roperties.append('storage.couchbase.mapping: {0}'.format(cb_map_str))
-
-        jans_hybrid_roperties_content = '\n'.join(jans_hybrid_roperties)
-
-        self.writeFile(Config.jans_hybrid_roperties_fn, jans_hybrid_roperties_content)
-
 
     def setup_init_scripts(self):
         self.logIt("Setting up init scripts")

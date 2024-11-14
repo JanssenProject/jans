@@ -7,8 +7,6 @@ from string import Template
 from uuid import uuid4
 
 from jans.pycloudlib import get_manager
-from jans.pycloudlib.persistence.couchbase import CouchbaseClient
-from jans.pycloudlib.persistence.spanner import SpannerClient
 from jans.pycloudlib.persistence.sql import SqlClient
 from jans.pycloudlib.persistence.utils import PersistenceMapper
 from jans.pycloudlib.utils import generate_base64_contents
@@ -99,8 +97,6 @@ class LockPersistenceSetup:
         self.manager = manager
 
         client_classes = {
-            "couchbase": CouchbaseClient,
-            "spanner": SpannerClient,
             "sql": SqlClient,
         }
 

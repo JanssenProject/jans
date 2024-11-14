@@ -56,7 +56,6 @@ def render_base_properties(src: str, dest: str) -> None:
 
 #: Supported persistence types.
 PERSISTENCE_TYPES = (
-    "couchbase",
     "sql",
     "hybrid",
 )
@@ -188,8 +187,7 @@ class PersistenceMapper:
 
         ```py
         {
-            "sql": ["cache", "default", "session", "site", "token"],
-            "couchbase": ["user"],
+            "sql": ["cache", "default", "session", "site", "token", "user"],
         }
         ```
         """
@@ -206,8 +204,7 @@ class PersistenceMapper:
 
         ```py
         {
-            "sql": ["cache", "", "sessions", "link", "tokens"],
-            "couchbase": ["people, groups, authorizations"],
+            "sql": ["cache", "", "sessions", "link", "tokens", "people, groups, authorizations"],
         }
         ```
         """

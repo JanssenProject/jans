@@ -44,11 +44,6 @@ class Config:
         return getattr(self, attr) if hasattr(self, attr) else default
 
     @classmethod
-    def set_mapping_locations(self):
-        ptype = 'rdbm' if self.persistence_type in ('sql',) else self.persistence_type
-        self.mapping_locations = { group: ptype for group in self.couchbaseBucketDict }
-
-    @classmethod
     def dump(self, dumpFile=False):
         if self.dump_config_on_error:
             return
@@ -147,14 +142,9 @@ class Config:
 
         #passwords
         self.admin_password = ''
-        self.cb_password = None
-        self.encoded_cb_password = ''
 
         #DB installation types
-        self.cb_install = InstallTypes.NONE
         self.rdbm_install = InstallTypes.LOCAL
-
-        self.couchbase_buckets = []
 
         #rdbm
         self.rdbm_install_type = InstallTypes.LOCAL
@@ -247,7 +237,6 @@ class Config:
         # reflect final path if the file must be copied after its rendered.
 
         self.jans_python_readme = os.path.join(self.jansOptPythonFolder, 'libs/python.txt')
-        self.jansCouchebaseProperties = os.path.join(self.configFolder, 'jans-couchbase.properties')
         self.jansRDBMProperties = os.path.join(self.configFolder, 'jans-sql.properties')
 
         self.ldif_base = os.path.join(self.output_dir, 'base.ldif')
@@ -319,12 +308,5 @@ class Config:
         self.non_setup_properties = {
             'jans_auth_client_jar_fn': os.path.join(self.dist_jans_dir, 'jans-auth-client-jar-with-dependencies.jar')
                 }
-
-        #re-map couchbase buckets ldif
-        for bucket in self.couchbaseBucketDict:
-            for i, ldifs in enumerate(self.couchbaseBucketDict[bucket]['ldif']):
-                self.couchbaseBucketDict[bucket]['ldif'][i] = getattr(self, ldifs)
-
-        self.mapping_locations = { group: 'rdbm' for group in self.couchbaseBucketDict }
 
         Config.addPostSetupService = []

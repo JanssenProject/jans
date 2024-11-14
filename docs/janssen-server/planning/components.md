@@ -18,9 +18,8 @@ assertions. This service must be Internet-facing.
 1. **Database**: Like most IAM platforms, Janssen requires some kind of
 persistence service to store configuration and other entity data (client,
 person, scope, attribute, FIDO device, etc.) As different databases are
-good for different deployments, Janssen supports a number of options:
-MySQL, Postgres, Couchbase, Google Spanner, and Amazon Aurora. Other
-databases may be added in the future.
+good for different deployments, Janssen supports MySQL and Postgres.
+
 
 1. **Cache**: Getting data from a disk is still the slowest part of any
 web platform. If you want higher transaction speeds, one strategy is to
