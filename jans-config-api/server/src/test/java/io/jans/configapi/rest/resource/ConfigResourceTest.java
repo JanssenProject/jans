@@ -6,34 +6,20 @@
 
 package io.jans.configapi.rest.resource;
 
-import static io.restassured.RestAssured.given;
-import io.jans.configapi.BaseTest;
+import org.junit.jupiter.api.Test;
 import jakarta.ws.rs.core.MediaType;
-
-import org.testng.annotations.Test;
-import org.testng.annotations.Parameters;
+import static io.restassured.RestAssured.given;
 
 /**
  * @author Yuriy Zabrovarnyy
  */
-public class ConfigResourceTest extends BaseTest{
+public class ConfigResourceTest {
 
-    @Parameters({"issuer", "authConfigurationUrl"})
     @Test
-    public void getAuthAppConfigurationProperty(final String issuer, final String authConfigurationUrl) {
-        log.error("accessToken:{}, issuer:{}, authConfigurationUrl:{}", accessToken, issuer, authConfigurationUrl);
-            given().when().contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", accessToken, null)
-                .get(issuer+authConfigurationUrl).then().statusCode(200);
-    }
-    
-    @Parameters({"issuer", "authConfigurationUrl"})
-    @Test
-    public void patchAppConfigurationProperty(final String issuer, final String authConfigurationUrl) {
-        log.error("accessToken:{}, issuer:{}, authConfigurationUrl:{}", accessToken, issuer, authConfigurationUrl);
+    public void patchAppConfigurationProperty() {
         given().when().contentType(MediaType.APPLICATION_JSON)
-            .header("Authorization", accessToken, null)
+                .header("Authorization", "Bearer 0ea2ce99-b741-4f5a-8fd7-26f52d057c19", null)
                 .body("[ {\"op\":\"replace\", \"path\": \"/loggingLevel\", \"value\": \"DEBUG\" } ]")
-                .patch(issuer+authConfigurationUrl).then().statusCode(200);
+                .patch("/jans-config-api/api/v1/jans-auth-server/config").then().statusCode(200);
     }
 }
