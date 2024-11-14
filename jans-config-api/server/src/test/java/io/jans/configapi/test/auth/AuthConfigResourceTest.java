@@ -14,7 +14,7 @@ import org.testng.annotations.Test;
 import org.testng.annotations.Parameters;
 
 
-public class ConfigResourceTest extends BaseTest{
+public class AuhConfigResourceTest extends BaseTest{
 
     @Parameters({"issuer", "authConfigurationUrl"})
     @Test

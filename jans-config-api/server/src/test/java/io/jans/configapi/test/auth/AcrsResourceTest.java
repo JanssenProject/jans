@@ -13,7 +13,7 @@ import jakarta.ws.rs.core.MediaType;
 import org.testng.annotations.Test;
 import org.testng.annotations.Parameters;
 
-public class AcrsTest extends BaseTest{
+public class AcrsResourceTest extends BaseTest{
 
     @Parameters({"issuer", "acrsUrl"})
     @Test
