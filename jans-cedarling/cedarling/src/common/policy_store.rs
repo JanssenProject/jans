@@ -422,21 +422,12 @@ where
 }
 
 /// Custom parser for Option<HashMap<_, _>> which returns `None` if the HashMap is empty
-pub fn parse_option_hashmap<'de, D, K, V>(
-    deserializer: D,
-) -> Result<Option<HashMap<K, V>>, D::Error>
+pub fn parse_default_hashmap<'de, D, K, V>(deserializer: D) -> Result<HashMap<K, V>, D::Error>
 where
     D: Deserializer<'de>,
     K: Eq + std::hash::Hash + Deserialize<'de>,
     V: Deserialize<'de>,
 {
     let option = Option::<HashMap<K, V>>::deserialize(deserializer)?;
-
-    match option {
-        Some(ref hashmap) => match hashmap.is_empty() {
-            true => Ok(None),
-            false => Ok(option),
-        },
-        None => Ok(None),
-    }
+    Ok(option.unwrap_or_default())
 }

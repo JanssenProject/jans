@@ -5,7 +5,7 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-use super::parse_option_hashmap;
+use super::parse_default_hashmap;
 use super::parse_option_string;
 use super::AgamaPolicyStore;
 use super::ParsePolicySetMessage;
@@ -232,29 +232,29 @@ fn test_parse_option_string() {
 }
 
 #[test]
-fn test_parse_option_hashmap() {
+fn test_parse_default_hashmap() {
     #[derive(Deserialize)]
     struct Data {
-        #[serde(deserialize_with = "parse_option_hashmap", default)]
-        maybe_hashmap: Option<HashMap<String, String>>,
+        #[serde(deserialize_with = "parse_default_hashmap", default)]
+        maybe_hashmap: HashMap<String, String>,
     }
 
     // If key can not be found in the JSON, we expect it to be
 
-    // deserialized into None.
+    // deserialized into empty HashMap.
     let json = json!({});
     let deserialized = serde_json::from_value::<Data>(json).expect("Should parse JSON");
-    assert_eq!(deserialized.maybe_hashmap, None);
+    assert_eq!(deserialized.maybe_hashmap, HashMap::new());
 
     // If the value is an empty Object, we expect it to be
-    // deserialized into None.
+    // deserialized into empty HashMap.
 
     let json = json!({
         "maybe_hashmap": {}
 
     });
     let deserialized = serde_json::from_value::<Data>(json).expect("Should parse JSON");
-    assert_eq!(deserialized.maybe_hashmap, None);
+    assert_eq!(deserialized.maybe_hashmap, HashMap::new());
 
     // If the value is a non-empty String, we expect it to be
     // deserialized into Some(String).
@@ -266,9 +266,6 @@ fn test_parse_option_hashmap() {
 
     assert_eq!(
         deserialized.maybe_hashmap,
-        Some(HashMap::from([(
-            "some_key".to_string(),
-            "some_value".to_string()
-        )]))
+        HashMap::from([("some_key".to_string(), "some_value".to_string())])
     );
 }
