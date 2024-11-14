@@ -2193,8 +2193,6 @@
         
           
         
-          
-        
       
       
         <label class="md-nav__link" for="__nav_1_7_2">
@@ -2343,20 +2341,6 @@
     <li class="md-nav__item">
       <a href="../config-guide/auth-server-config/cache-configuration/" class="md-nav__link">
         Cache Configuration
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../config-guide/auth-server-config/couchbase-configuration/" class="md-nav__link">
-        Couchbase Configuration
       </a>
     </li>
   
@@ -2554,8 +2538,6 @@
         
           
         
-          
-        
       
       
         
@@ -2615,95 +2597,12 @@
       
       
         <label class="md-nav__link" for="__nav_1_8_3">
-          Couchbase
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="Couchbase" data-md-level="3">
-        <label class="md-nav__title" for="__nav_1_8_3">
-          <span class="md-nav__icon md-icon"></span>
-          Couchbase
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../reference/database/cb-config/" class="md-nav__link">
-        Couchbase Configuration
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../reference/database/cb-ops/" class="md-nav__link">
-        Couchbase Operation
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../reference/database/cb-buckets/" class="md-nav__link">
-        Couchbase Buckets
-      </a>
-    </li>
-  
-
-            
-          
-        </ul>
-      </nav>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_8_4" type="checkbox" id="__nav_1_8_4" >
-      
-      
-      
-        
-          
-        
-          
-        
-          
-        
-      
-      
-        <label class="md-nav__link" for="__nav_1_8_4">
           MySQL
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <nav class="md-nav" aria-label="MySQL" data-md-level="3">
-        <label class="md-nav__title" for="__nav_1_8_4">
+        <label class="md-nav__title" for="__nav_1_8_3">
           <span class="md-nav__icon md-icon"></span>
           MySQL
         </label>
@@ -2767,7 +2666,7 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_8_5" type="checkbox" id="__nav_1_8_5" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_8_4" type="checkbox" id="__nav_1_8_4" >
       
       
       
@@ -2782,13 +2681,13 @@
         
       
       
-        <label class="md-nav__link" for="__nav_1_8_5">
+        <label class="md-nav__link" for="__nav_1_8_4">
           PostgreSQL
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <nav class="md-nav" aria-label="PostgreSQL" data-md-level="3">
-        <label class="md-nav__title" for="__nav_1_8_5">
+        <label class="md-nav__title" for="__nav_1_8_4">
           <span class="md-nav__icon md-icon"></span>
           PostgreSQL
         </label>
@@ -8601,8 +8500,9 @@ three step process. Step 1, install the bits. Step 2, run "setup" and answer
 some basic question (like the hostname of your IDP). Step 3, fire up a
 configuration tool to perform any other last mile configuration.</p>
 <h2 id="databases">Databases<a class="headerlink" href="#databases" title="Permanent link">#</a></h2>
-<p>The Janssen Project gives you a few options to store data: MySQL, Postgres,
-Couchbase, and Amazon Aurora. You can also configure an in-memory cache
+<p>The Janssen Project gives you a few options to store data: MySQL, Postgres.
+MySQL is recommended for production deployments while Postgres for development. 
+You can also configure an in-memory cache
 server like Redis. Sometimes installation and configuration of this database
 is included in the setup process. Sometimes, you need to setup the database
 ahead of time. Please refer to the database instructions specific for your
@@ -8629,7 +8529,7 @@ Therefore setup script adds the following SELinux policy:</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-11-12T03:49:37+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-11-12</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-11-13T10:58:04+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-11-13</span>
       
         <br>
         Created:

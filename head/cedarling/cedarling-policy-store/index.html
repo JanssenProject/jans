@@ -2189,8 +2189,6 @@
         
           
         
-          
-        
       
       
         <label class="md-nav__link" for="__nav_1_7_2">
@@ -2339,20 +2337,6 @@
     <li class="md-nav__item">
       <a href="../../janssen-server/config-guide/auth-server-config/cache-configuration/" class="md-nav__link">
         Cache Configuration
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../janssen-server/config-guide/auth-server-config/couchbase-configuration/" class="md-nav__link">
-        Couchbase Configuration
       </a>
     </li>
   
@@ -2550,8 +2534,6 @@
         
           
         
-          
-        
       
       
         
@@ -2611,95 +2593,12 @@
       
       
         <label class="md-nav__link" for="__nav_1_8_3">
-          Couchbase
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="Couchbase" data-md-level="3">
-        <label class="md-nav__title" for="__nav_1_8_3">
-          <span class="md-nav__icon md-icon"></span>
-          Couchbase
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../janssen-server/reference/database/cb-config/" class="md-nav__link">
-        Couchbase Configuration
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../janssen-server/reference/database/cb-ops/" class="md-nav__link">
-        Couchbase Operation
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../janssen-server/reference/database/cb-buckets/" class="md-nav__link">
-        Couchbase Buckets
-      </a>
-    </li>
-  
-
-            
-          
-        </ul>
-      </nav>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_8_4" type="checkbox" id="__nav_1_8_4" >
-      
-      
-      
-        
-          
-        
-          
-        
-          
-        
-      
-      
-        <label class="md-nav__link" for="__nav_1_8_4">
           MySQL
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <nav class="md-nav" aria-label="MySQL" data-md-level="3">
-        <label class="md-nav__title" for="__nav_1_8_4">
+        <label class="md-nav__title" for="__nav_1_8_3">
           <span class="md-nav__icon md-icon"></span>
           MySQL
         </label>
@@ -2763,7 +2662,7 @@
     <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_8_5" type="checkbox" id="__nav_1_8_5" >
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_1_8_4" type="checkbox" id="__nav_1_8_4" >
       
       
       
@@ -2778,13 +2677,13 @@
         
       
       
-        <label class="md-nav__link" for="__nav_1_8_5">
+        <label class="md-nav__link" for="__nav_1_8_4">
           PostgreSQL
           <span class="md-nav__icon md-icon"></span>
         </label>
       
       <nav class="md-nav" aria-label="PostgreSQL" data-md-level="3">
-        <label class="md-nav__title" for="__nav_1_8_5">
+        <label class="md-nav__title" for="__nav_1_8_4">
           <span class="md-nav__icon md-icon"></span>
           PostgreSQL
         </label>
@@ -7418,11 +7317,11 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#identity-source-schema" class="md-nav__link">
-    Identity Source Schema
+  <a href="#trusted-issuers-schema" class="md-nav__link">
+    Trusted Issuers Schema
   </a>
   
-    <nav class="md-nav" aria-label="Identity Source Schema">
+    <nav class="md-nav" aria-label="Trusted Issuers Schema">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -8683,11 +8582,11 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#identity-source-schema" class="md-nav__link">
-    Identity Source Schema
+  <a href="#trusted-issuers-schema" class="md-nav__link">
+    Trusted Issuers Schema
   </a>
   
-    <nav class="md-nav" aria-label="Identity Source Schema">
+    <nav class="md-nav" aria-label="Trusted Issuers Schema">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -8798,7 +8697,7 @@
 <ol>
 <li><strong>Cedar Schema</strong>: The Cedar schema encoded in Base64.</li>
 <li><strong>Cedar Policies</strong>: The Cedar policies encoded in Base64.</li>
-<li><strong>Identity Source</strong>: Details about the trusted issuers (see <a href="#identity-source-schema">below</a> for syntax).</li>
+<li><strong>Trusted Issuers</strong>: Details about the trusted issuers (see <a href="#trusted-issuers-schema">below</a> for syntax).</li>
 </ol>
 <p><strong>Note:</strong> The <code>cedarling_store.json</code> file is only needed if the bootstrap properties: <code>CEDARLING_LOCK</code>; <code>CEDARLING_POLICY_STORE_URI</code>; and <code>CEDARLING_POLICY_STORE_ID</code> are not set to a local location. If you're fetching the policies remotely, you don't need a <code>cedarling_store.json</code> file.</p>
 <h3 id="json-schema">JSON Schema<a class="headerlink" href="#json-schema" title="Permanent link">#</a></h3>
@@ -8811,7 +8710,7 @@
 <span class="w">          </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Once upon a time there was a Policy, that lived in a Store.&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">          </span><span class="nt">&quot;policies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">},</span><span class="w"></span>
 <span class="w">          </span><span class="nt">&quot;schema&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">},</span><span class="w"></span>
-<span class="w">          </span><span class="nt">&quot;identity_source&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
+<span class="w">          </span><span class="nt">&quot;trusted_issuers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">}</span><span class="w"></span>
 <span class="w">      </span><span class="p">}</span><span class="w"></span>
 <span class="w">  </span><span class="p">}</span><span class="w"></span>
 <span class="p">}</span><span class="w"></span>
@@ -8820,7 +8719,7 @@
 <li><strong>cedar_version</strong> : (<em>String</em>) The version of <a href="https://docs.cedarpolicy.com/">Cedar policy</a>. The protocols of this version will be followed when processing Cedar schema and policies.</li>
 <li><strong>policies</strong> : (<em>Object</em>) Object containing one or more policy IDs as keys, with their corresponding objects as values. See: <a href="#cedar-policies-schema">policies schema</a>.</li>
 <li><strong>schema</strong> : (<em>String</em> | <em>Object</em>) The Cedar Schema. See <a href="#schema">schema</a> below.</li>
-<li><strong>identity_source</strong> : (<em>Object of {unique_id =&gt; IdentitySource}(#trusted-issuer-schema)</em>) List of metadata for Identity Sources.</li>
+<li><strong>trusted_issuers</strong> : (<em>Object of {unique_id =&gt; IdentitySource}(#trusted-issuer-schema)</em>) List of metadata for Identity Sources.</li>
 </ul>
 <h3 id="schema"><code>schema</code><a class="headerlink" href="#schema" title="Permanent link">#</a></h3>
 <p>Either <em>String</em> or <em>Object</em>, where <em>Object</em> is preferred.</p>
@@ -8908,7 +8807,7 @@
 <span class="w">    </span><span class="err">...</span><span class="w"></span>
 <span class="w">  </span><span class="p">}</span><span class="w"></span>
 </code></pre></div>
-<h2 id="identity-source-schema">Identity Source Schema<a class="headerlink" href="#identity-source-schema" title="Permanent link">#</a></h2>
+<h2 id="trusted-issuers-schema">Trusted Issuers Schema<a class="headerlink" href="#trusted-issuers-schema" title="Permanent link">#</a></h2>
 <p>This record contains the information needed to validate tokens from this issuer:</p>
 <div class="highlight"><pre><span></span><code><span class="w">  </span><span class="nt">&quot;identity_source&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;some_unique_id&quot;</span><span class="w"> </span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
@@ -8917,24 +8816,12 @@
 <span class="w">      </span><span class="nt">&quot;openid_configuration_endpoint&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;https://&lt;trusted-issuer-hostname&gt;/.well-known/openid-configuration&quot;</span><span class="p">,</span><span class="w"></span>
 <span class="w">      </span><span class="nt">&quot;access_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">        </span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;principal_identifier&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;role_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;principal_identifier&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;jti&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="err">...</span><span class="w"></span>
 <span class="w">      </span><span class="p">},</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;id_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;principal_identifier&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;sub&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;role_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="p">},</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;userinfo_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;principal_identifier&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;role_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;role&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="p">},</span><span class="w"></span>
-<span class="w">      </span><span class="nt">&quot;tx_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;principal_identifier&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;role_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">      </span><span class="p">},</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;id_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">},</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;userinfo_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">},</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;tx_tokens&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="err">...</span><span class="w"> </span><span class="p">},</span><span class="w"></span>
 <span class="w">    </span><span class="p">}</span><span class="w"></span>
 <span class="w">    </span><span class="err">...</span><span class="w"></span>
 <span class="w">  </span><span class="p">}</span><span class="w"></span>
@@ -8945,19 +8832,34 @@
 <li><strong>openid_configuration_endpoint</strong> : (<em>String</em>) The HTTPS URL for the OpenID Connect configuration endpoint (usually found at <code>/.well-known/openid-configuration</code>).</li>
 <li><strong>identity_source</strong> : (<em>Object</em>, <em>optional</em>) Metadata related to the tokens issued by this issuer.</li>
 </ul>
+<p><strong>Notes</strong>: 
+- The <code>access_tokens</code>, <code>id_tokens</code>, <code>userinfo_tokens</code>, and <code>tx_tokens</code> fields will follow the <a href="#token-metadata-schema">Token Metadata Schema</a>.
+- The <code>access_tokens</code> will contain a <code>trusted</code> and <code>principal_identifier</code> field in addition to the fields from the <code>Token Metadata Schema</code>.</p>
 <h3 id="token-metadata-schema">Token Metadata Schema<a class="headerlink" href="#token-metadata-schema" title="Permanent link">#</a></h3>
+<p>The Token Entity Metadata Schema defines how tokens are mapped, parsed, and transformed within Cedarling. It allows you to specify how to extract user IDs, roles, and other claims from a token using customizable parsers.</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;trusted&quot;</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="err">|</span><span class="kc">false</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;principal_identifier&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;some_user123&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">  </span><span class="nt">&quot;role_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;role&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;user_id&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;field name in token (e.g., &#39;email&#39;, &#39;sub&#39;, &#39;uid&#39;, etc.) or &#39;&#39; if not used&gt;&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;role_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;field for role assignment (e.g., &#39;role&#39;, &#39;memberOf&#39;, etc.) or &#39;&#39; if not used&gt;&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;claim_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;mapping_target&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;parser&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;type of parser (&#39;regex&#39; or &#39;json&#39;)&gt;&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;type identifier (e.g., &#39;Acme::Email&#39;)&gt;&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;...&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Additional configurations specific to the parser&quot;</span><span class="w"></span>
+<span class="w">    </span><span class="p">},</span><span class="w"></span>
+<span class="w">  </span><span class="p">},</span><span class="w"></span>
 <span class="p">}</span><span class="w"></span>
 </code></pre></div>
 <ul>
-<li><strong>trusted</strong> : (Boolean) The type of token</li>
-<li><strong>principal_id</strong> : (String) The claim used to create the Cedar entity associated with this token.</li>
-<li><strong>role_mapping</strong> : (String, <em>optional</em>) The claim used to create a role for the token. The default value of <code>role_mapping</code> is <code>role</code>. The claim can be string or array of string.</li>
+<li><strong>role_mapping</strong>: (String, <em>Optional</em>) Indicates which field in the token should be used for role-based access control. If not needed, set to an empty string (<code>""</code>).</li>
+<li><strong>claim_mapping:</strong> Defines how to extract and transform specific claims from the token. Each claim can have its own parser (<code>regex</code> or <code>json</code>) and type (<code>Acme::Email</code>, <code>Acme::URI</code>, etc.).</li>
 </ul>
-<p><strong>Note</strong>: Only one token should include the <code>role_mapping</code> field in the list of <code>token_metadata</code>.</p>
+<p><strong>Note</strong>: You can include a <code>role_mapping</code> in each token but only the first one that get parsed will be recognized by Cedarling. Cedarling parses the <code>role_mapping</code>s for each token in this order:</p>
+<ol>
+<li><code>access_tokens</code></li>
+<li><code>id_tokens</code></li>
+<li><code>userinfo_tokens</code></li>
+<li><code>tx_tokens</code></li>
+</ol>
 <h2 id="example-policy-store">Example Policy store<a class="headerlink" href="#example-policy-store" title="Permanent link">#</a></h2>
 <p>Here is a non-normative example of a <code>cedarling_store.json</code> file:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
@@ -9068,7 +8970,7 @@ action &quot;Update&quot; appliesTo {
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-11-07T15:51:35+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-11-07</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-11-14T14:44:20+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-11-14</span>
       
         <br>
         Created:
