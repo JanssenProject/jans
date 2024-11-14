@@ -7,6 +7,14 @@
     <packaging>jar</packaging>
     <!--name>Supporting classes for inbound identity using Agama flows</name-->
 
+	<distributionManagement>
+ 		<repository>
+ 		<id>github</id>
+ 		<name>Github Packages</name>
+ 		<url>https://maven.pkg.github.com/JanssenProject/jans</url>
+ 		</repository>
+   	</distributionManagement>
+
     <parent>
         <groupId>io.jans</groupId>
         <artifactId>jans-auth-server-parent</artifactId>
@@ -21,6 +29,11 @@
     </properties>
 
     <repositories>
+        <repository>
+           <id>github</id>
+           <name>GitHub Packages</name>
+           <url>https://maven.pkg.github.com/JanssenProject/jans</url>
+        </repository>
         <repository>
             <id>jans</id>
             <name>Jans repository</name>
