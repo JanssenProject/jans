@@ -4,6 +4,8 @@ from cedarling_python import Cedarling
 from cedarling_python import ResourceData, Request
 import os
 
+DEFAULT_POLICY_STORE_PATH = "example_files/policy-store.json"
+
 # use log config to store logs in memory with a time-to-live of 120 seconds
 # by default it is 60 seconds
 log_config = MemoryLogConfig(log_ttl=100)
@@ -16,13 +18,16 @@ log_config = MemoryLogConfig(log_ttl=100)
 # use log config to print logs to stdout
 log_config = StdOutLogConfig()
 
-# Read policy store from file 
+# Read policy store from file
 policy_store_location = os.getenv("CEDARLING_LOCAL_POLICY_STORE", None)
 if policy_store_location is None:
-    print("Policy store location not provided")
-    exit(1)
+    print("Policy store location not provided, use 'CEDARLING_LOCAL_POLICY_STORE' enviroment variable")
+    print("used default policy store path", DEFAULT_POLICY_STORE_PATH)
+    print()
+    policy_store_location = DEFAULT_POLICY_STORE_PATH
 with open(policy_store_location, "r") as f:
     policy_raw_json = f.read()
+
 # for now we support only json source
 policy_source = PolicyStoreSource(json=policy_raw_json)
 
@@ -196,32 +201,29 @@ assert authorize_result.is_allowed()
 workload_result = authorize_result.workload()
 print(f"Result of workload authorization: {workload_result.decision}")
 
-if workload_result is not None:
-    # show diagnostic information
-    workload_diagnostic = workload_result.diagnostics
-    print("Policy ID(s) used:")
-    for diagnostic in workload_diagnostic.reason:
-        print(diagnostic)
+# show diagnostic information
+workload_diagnostic = workload_result.diagnostics
+print("Policy ID(s) used:")
+for diagnostic in workload_diagnostic.reason:
+    print(diagnostic)
 
-    print("Errors during authorization:")
-    for diagnostic in workload_diagnostic.errors:
-        print(diagnostic)
+print("Errors during authorization:")
+for diagnostic in workload_diagnostic.errors:
+    print(diagnostic)
 
 print()
 
 # watch on the decision for person
 person_result = authorize_result.person()
 print(f"Result of person authorization: {person_result.decision}")
+person_diagnostic = person_result.diagnostics
+print("Policy ID(s) used:")
+for diagnostic in person_diagnostic.reason:
+    print(diagnostic)
 
-if person_result is not None:
-    person_diagnostic = person_result.diagnostics
-    print("Policy ID(s) used:")
-    for diagnostic in person_diagnostic.reason:
-        print(diagnostic)
-
-    print("Errors during authorization:")
-    for diagnostic in person_diagnostic.errors:
-        print(diagnostic)
+print("Errors during authorization:")
+for diagnostic in person_diagnostic.errors:
+    print(diagnostic)
 
 
 # watch on the decision for role if present
