@@ -41,6 +41,11 @@
 
 	<repositories>
 		<repository>
+			<id>github</id>
+			<name>GitHub Packages</name>
+			<url>https://maven.pkg.github.com/JanssenProject/jans</url>
+		</repository>
+		<repository>
 			<id>repository.jboss.org</id>
 			<name>JBoss Repository</name>
 			<url>https://repository.jboss.org/nexus/content/groups/public-jboss/</url>

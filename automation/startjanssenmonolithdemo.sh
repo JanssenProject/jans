@@ -49,7 +49,7 @@ WORKING_DIRECTORY=$PWD
 # note that as we're pulling from a monorepo (with multiple project in it)
 # we are using partial-clone and sparse-checkout to get the docker-jans-monolith code
 rm -rf /tmp/jans || echo "/tmp/jans doesn't exist"
-git clone --filter blob:none --no-checkout https://github.com/janssenproject/jans /tmp/jans \
+git clone --filter blob:none --no-checkout https://github.com/JanssenProject/jans /tmp/jans \
     && cd /tmp/jans \
     && git sparse-checkout init --cone \
     && git checkout "$JANS_BUILD_COMMIT" \
@@ -129,15 +129,35 @@ while [ $SECONDS -lt $end ]; do
   sleep 10
 done
 echo -e "Running build.. \n"
+docker exec -w /tmp/jans/jans-orm docker-jans-monolith-jans-1 mvn -Dcfg="$JANS_FQDN" -Dmaven.test.skip=true clean compile install
 docker exec -w /tmp/jans/jans-auth-server docker-jans-monolith-jans-1 mvn -Dcfg="$JANS_FQDN" -Dmaven.test.skip=true -fae clean compile install
+docker exec -w /tmp/jans/jans-auth-server/agama docker-jans-monolith-jans-1 mvn -Dcfg="$JANS_FQDN" -Dmaven.test.skip=true -fae clean compile install
+docker exec -w /tmp/jans/jans-scim docker-jans-monolith-jans-1 mvn -Dcfg="$JANS_FQDN" -Dmaven.test.skip=true clean compile install site
+docker exec -w /tmp/jans/jans-config-api docker-jans-monolith-jans-1 mvn -Dcfg="$JANS_FQDN" -Dmaven.test.skip=true clean compile install
+docker exec -w /tmp/jans/jans-fido2 docker-jans-monolith-jans-1 mvn -Dcfg="$JANS_FQDN" -Dmaven.test.skip=true clean compile install
 echo -e "Running tests.. \n"
+docker exec -w /tmp/jans/jans-orm docker-jans-monolith-jans-1 mvn -Dcfg="$JANS_FQDN" -Dmaven.test.skip=false test
 docker exec -w /tmp/jans/jans-auth-server docker-jans-monolith-jans-1 mvn -Dcfg="$JANS_FQDN" -Dmaven.test.skip=false test
+docker exec -w /tmp/jans/jans-auth-server/agama docker-jans-monolith-jans-1 mvn -Dcfg="$JANS_FQDN" -Dmaven.test.skip=false test
+docker exec -w /tmp/jans/jans-scim docker-jans-monolith-jans-1 mvn -Dcfg="$JANS_FQDN" -Dmaven.test.skip=false test
+docker exec -w /tmp/jans/jans-config-api docker-jans-monolith-jans-1 mvn -Dcfg="$JANS_FQDN" -Dmaven.test.skip=false -DfailIfNoTests=false -Dtest=io.jans.configapi.JenkinsTestRunner test
+docker exec -w /tmp/jans/jans-fido2 docker-jans-monolith-jans-1 mvn -Dcfg="$JANS_FQDN" -Dmaven.test.skip=false test
 echo -e "copying reports.. \n"
 docker cp docker-jans-monolith-jans-1:/tmp/jans/jans-auth-server/client/target/surefire-reports/testng-results.xml /tmp/reports/$JANS_PERSISTENCE-jans-auth-client-testng-results.xml
 docker cp docker-jans-monolith-jans-1:/tmp/jans/jans-auth-server/agama/model/target/surefire-reports/testng-results.xml /tmp/reports/$JANS_PERSISTENCE-jans-auth-agama-model-testng-results.xml
 docker cp docker-jans-monolith-jans-1:/tmp/jans/jans-auth-server/test-model/target/surefire-reports/testng-results.xml /tmp/reports/$JANS_PERSISTENCE-jans-auth-test-model-testng-results.xml
 docker cp docker-jans-monolith-jans-1:/tmp/jans/jans-auth-server/model/target/surefire-reports/testng-results.xml /tmp/reports/$JANS_PERSISTENCE-jans-auth-model-testng-results.xml
-
+docker cp docker-jans-monolith-jans-1:/tmp/jans/jans-orm/couchbase/target/surefire-reports/testng-results.xml /tmp/reports/$JANS_PERSISTENCE-jans-orm-couchbase-testng-results.xml
+docker cp docker-jans-monolith-jans-1:/tmp/jans/jans-orm/spanner-sample/target/surefire-reports/testng-results.xml /tmp/reports/$JANS_PERSISTENCE-jans-orm-spanner-sample-testng-results.xml
+docker cp docker-jans-monolith-jans-1:/tmp/jans/jans-orm/couchbase-sample/target/surefire-reports/testng-results.xml /tmp/reports/$JANS_PERSISTENCE-jans-orm-couchbase-sample-testng-results.xml
+docker cp docker-jans-monolith-jans-1:/tmp/jans/jans-orm/sql-sample/target/surefire-reports/testng-results.xml /tmp/reports/$JANS_PERSISTENCE-jans-orm-sql-sample-testng-results.xml
+docker cp docker-jans-monolith-jans-1:/tmp/jans/jans-orm/sql/target/surefire-reports/testng-results.xml /tmp/reports/$JANS_PERSISTENCE-jans-orm-sql-testng-results.xml
+docker cp docker-jans-monolith-jans-1:/tmp/jans/jans-orm/spanner/target/surefire-reports/testng-results.xml /tmp/reports/$JANS_PERSISTENCE-jans-orm-spanner-testng-results.xml
+docker cp docker-jans-monolith-jans-1:/tmp/jans/jans-orm/util/target/surefire-reports/testng-results.xml /tmp/reports/$JANS_PERSISTENCE-jans-orm-util-testng-results.xml
+docker cp docker-jans-monolith-jans-1:/tmp/jans/jans-orm/model/target/surefire-reports/testng-results.xml /tmp/reports/$JANS_PERSISTENCE-jans-orm-model-testng-results.xml
+docker cp docker-jans-monolith-jans-1:/tmp/jans/jans-orm/filter/target/surefire-reports/testng-results.xml /tmp/reports/$JANS_PERSISTENCE-jans-orm-filter-testng-results.xml
+docker cp docker-jans-monolith-jans-1:/tmp/jans/jans-scim/client/target/surefire-reports/testng-results.xml /tmp/reports/$JANS_PERSISTENCE-jans-scim-client-testng-results.xml
+docker cp docker-jans-monolith-jans-1:/tmp/jans/jans-config-api/server/target/surefire-reports/results-json.txt /tmp/reports/$JANS_PERSISTENCE-jans-config-api-server-testng-results.xml
 EOF
 if [[ "$RUN_TESTS" == "true" ]]; then
   sudo bash testendpoints.sh
