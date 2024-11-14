@@ -1,6 +1,7 @@
 cedar_version: v4.0.0
 policy_stores:
   8ec39ee717927663db9b18246f0479419051bb5af15a:
+    name: "Jans"
     policies:
       840daed85403f35ea76519ed1a18a44778f855bf18fc:
         cedar_version: ''
