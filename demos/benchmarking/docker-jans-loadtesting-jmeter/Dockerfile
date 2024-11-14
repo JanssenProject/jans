@@ -29,11 +29,8 @@ ENV FQDN="https://demoexample.jans.io" \
     RUN_DCR_TEST=false \
     TEST_USERS_PREFIX_STRING="test_user" \
     THREAD_COUNT=200 \
-    COUCHBASE_URL="" \
-    COUCHBASE_PW="" \
     USER_NUMBER_STARTING_POINT=0 \
     USER_NUMBER_ENDING_POINT=50000000 \
-    LOAD_USERS_TO_COUCHBASE=false \
     LOAD_USERS_TO_RDBMS=false \
     USER_SPLIT_PARALLEL_THREADS=20 \
     # pgsql or mysql
