@@ -9,6 +9,7 @@ import com.example.fido2.usecase.GetTokenUseCase
 import com.example.fido2.usecase.GetUserInfoUseCase
 import com.example.fido2.usecase.LoginUseCase
 import com.example.fido2.usecase.LogoutUseCase
+import com.example.fido2.usecase.SettingsUseCase
 import org.koin.core.module.Module
 import org.koin.dsl.module
 
@@ -22,4 +23,5 @@ val useCasesModule: Module = module {
     factory { FidoAssertionUseCase(get()) }
     factory { FidoAttestationUseCase(get()) }
     factory { DCRClientUseCase(get(), get()) }
+    factory { SettingsUseCase(get()) }
 }

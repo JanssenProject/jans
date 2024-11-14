@@ -1,25 +1,17 @@
 package com.example.fido2.modules
 
-import com.example.fido2.database.local.LocalDataSource
-import com.example.fido2.database.local.LocalDataSourceImpl
+import com.example.fido2.database.local.*
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
-import com.example.fido2.repository.dcr.DCRRepository
-import com.example.fido2.repository.dcr.DCRRepositoryImpl
-import com.example.fido2.repository.fidoAssertion.FidoAssertionRepository
-import com.example.fido2.repository.fidoAssertion.FidoAssertionRepositoryImpl
-import com.example.fido2.repository.fidoAttestation.FidoAttestationRepository
-import com.example.fido2.repository.fidoAttestation.FidoAttestationRepositoryImpl
-import com.example.fido2.repository.login.LoginRepository
-import com.example.fido2.repository.login.LoginRepositoryImpl
-import com.example.fido2.repository.logout.LogoutRepository
-import com.example.fido2.repository.logout.LogoutRepositoryImpl
-import com.example.fido2.repository.main.MainRepository
-import com.example.fido2.repository.main.MainRepositoryImpl
-import com.example.fido2.repository.token.TokenRepository
-import com.example.fido2.repository.token.TokenRepositoryImpl
-import com.example.fido2.repository.userinfo.UserInfoRepository
-import com.example.fido2.repository.userinfo.UserInfoRepositoryImpl
+import com.example.fido2.repository.dcr.*
+import com.example.fido2.repository.fidoAssertion.*
+import com.example.fido2.repository.fidoAttestation.*
+import com.example.fido2.repository.login.*
+import com.example.fido2.repository.logout.*
+import com.example.fido2.repository.main.*
+import com.example.fido2.repository.settings.*
+import com.example.fido2.repository.token.*
+import com.example.fido2.repository.userinfo.*
 import com.example.fido2.retrofit.ApiClient
 
 val repositoryModule = module {
@@ -31,6 +23,7 @@ val repositoryModule = module {
     single<FidoAssertionRepository> { FidoAssertionRepositoryImpl(get(), get()) }
     single<FidoAttestationRepository> { FidoAttestationRepositoryImpl(get(), get()) }
     single<DCRRepository> { DCRRepositoryImpl(get(), get()) }
+    single<SettingsRepository> { SettingsRepositoryImpl(get()) }
     single<ApiClient> { ApiClient() }
     single<LocalDataSource> { LocalDataSourceImpl(get(), get(named(Dispatcher.IO))) }
 }

@@ -8,6 +8,7 @@ sealed class NavigationRoutes {
         object NavigationRoute : Unauthenticated(route = "unauthenticated")
         object Login : Unauthenticated(route = "login")
         object Registration : Unauthenticated(route = "registration")
+        object Settings: Unauthenticated(route = "settings")
     }
 
     // Authenticated Routes

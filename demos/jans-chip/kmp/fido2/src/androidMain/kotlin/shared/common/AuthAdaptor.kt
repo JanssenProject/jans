@@ -44,6 +44,10 @@ class AuthenticationAdaptor(context: Context): AuthenticationProvider {
         return authAdaptor?.getAllCredentials()
     }
 
+    override fun deleteAllKeys() {
+        authAdaptor?.deleteAllCredentials()
+    }
+
     override suspend fun register(
         responseFromAPI: AttestationOptionResponse?,
         origin: String?
@@ -94,6 +98,11 @@ class AuthAdaptor(context: Context) {
                 it.keyUseCounter
             )
         }
+    }
+
+    fun deleteAllCredentials() {
+        val credentialSafe: CredentialSafe? = authenticator?.credentialSafe
+        credentialSafe?.deleteAllCredentials()
     }
 
     fun isCredentialsPresent(username: String): Boolean {
@@ -158,14 +167,14 @@ class AuthAdaptor(context: Context) {
                 "webauthn.create",
                 origin
             )
-            val response = clientDataJSON?.let {
-                com.example.fido2.model.fido.attestation.result.Response(
+            val attestationResponse = clientDataJSON?.let {
+                com.example.fido2.model.fido.attestation.result.AttestationResponse(
                     urlEncodeToString(attestationObjectBytes).replace("\n", ""),
                     it
                 )
             }
 
-            val attestationResultRequest = response?.let {
+            val attestationResultRequest = attestationResponse?.let {
                 AttestationResultRequest(
                     urlEncodeToString(attestationObject?.credentialId).replace("\n", "")
                         .replace("=", ""),
@@ -178,8 +187,8 @@ class AuthAdaptor(context: Context) {
                     .replace("=", "")
             attestationResultRequest?.type = "public-key"
 
-            if (response != null) {
-                attestationResultRequest?.response = response
+            if (attestationResponse != null) {
+                attestationResultRequest?.response = attestationResponse
             }
             return attestationResultRequest
         } catch (e: Exception) {

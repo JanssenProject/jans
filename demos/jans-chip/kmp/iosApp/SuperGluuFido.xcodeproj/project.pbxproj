@@ -12,6 +12,59 @@
 		2152FB042600AC8F00CF470E /* SuperGluuFidoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2152FB032600AC8F00CF470E /* SuperGluuFidoApp.swift */; };
 		30B9EE4A2CBE6D9200527B66 /* AuthenticationAdaptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30B9EE492CBE6D9200527B66 /* AuthenticationAdaptor.swift */; };
 		30B9EE4C2CBE6E7F00527B66 /* DPoPProofFactoryAdaptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30B9EE4B2CBE6E7F00527B66 /* DPoPProofFactoryAdaptor.swift */; };
+		30CB6D8A2CC7A2D900BFCDB7 /* Authenticator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CB6D432CC7A2D900BFCDB7 /* Authenticator.swift */; };
+		30CB6D8B2CC7A2D900BFCDB7 /* AuthenticatorExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CB6D442CC7A2D900BFCDB7 /* AuthenticatorExtensions.swift */; };
+		30CB6D8C2CC7A2D900BFCDB7 /* AuthenticatorResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CB6D452CC7A2D900BFCDB7 /* AuthenticatorResult.swift */; };
+		30CB6D8D2CC7A2D900BFCDB7 /* AuthenticatorType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CB6D462CC7A2D900BFCDB7 /* AuthenticatorType.swift */; };
+		30CB6D8E2CC7A2D900BFCDB7 /* BiometricAuthenticator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CB6D472CC7A2D900BFCDB7 /* BiometricAuthenticator.swift */; };
+		30CB6D8F2CC7A2D900BFCDB7 /* DeviceCredentialAuthenticator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CB6D482CC7A2D900BFCDB7 /* DeviceCredentialAuthenticator.swift */; };
+		30CB6D902CC7A2D900BFCDB7 /* AttestationConveyancePreference+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CB6D4A2CC7A2D900BFCDB7 /* AttestationConveyancePreference+Extension.swift */; };
+		30CB6D912CC7A2D900BFCDB7 /* AuthenticatorAttachment+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CB6D4B2CC7A2D900BFCDB7 /* AuthenticatorAttachment+Extension.swift */; };
+		30CB6D922CC7A2D900BFCDB7 /* AuthenticatorType+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CB6D4C2CC7A2D900BFCDB7 /* AuthenticatorType+Extension.swift */; };
+		30CB6D932CC7A2D900BFCDB7 /* PublicKeyCredential+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CB6D4D2CC7A2D900BFCDB7 /* PublicKeyCredential+Extension.swift */; };
+		30CB6D942CC7A2D900BFCDB7 /* UserVerificationRequirement+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CB6D4E2CC7A2D900BFCDB7 /* UserVerificationRequirement+Extension.swift */; };
+		30CB6D9A2CC7A2D900BFCDB7 /* CredentialSourceStorage+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CB6D562CC7A2D900BFCDB7 /* CredentialSourceStorage+Extension.swift */; };
+		30CB6D9B2CC7A2D900BFCDB7 /* CoreError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CB6D592CC7A2D900BFCDB7 /* CoreError.swift */; };
+		30CB6D9C2CC7A2D900BFCDB7 /* KeyStorageError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CB6D5A2CC7A2D900BFCDB7 /* KeyStorageError.swift */; };
+		30CB6D9D2CC7A2D900BFCDB7 /* WebAuthnError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CB6D5B2CC7A2D900BFCDB7 /* WebAuthnError.swift */; };
+		30CB6D9E2CC7A2D900BFCDB7 /* AttestationConveyancePreference.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CB6D5D2CC7A2D900BFCDB7 /* AttestationConveyancePreference.swift */; };
+		30CB6D9F2CC7A2D900BFCDB7 /* AttestationObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CB6D5E2CC7A2D900BFCDB7 /* AttestationObject.swift */; };
+		30CB6DA02CC7A2D900BFCDB7 /* AttestationStatement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CB6D5F2CC7A2D900BFCDB7 /* AttestationStatement.swift */; };
+		30CB6DA12CC7A2D900BFCDB7 /* AttestedCredentialData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CB6D602CC7A2D900BFCDB7 /* AttestedCredentialData.swift */; };
+		30CB6DA22CC7A2D900BFCDB7 /* AuthenticatorAttachment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CB6D612CC7A2D900BFCDB7 /* AuthenticatorAttachment.swift */; };
+		30CB6DA32CC7A2D900BFCDB7 /* AuthenticatorData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CB6D622CC7A2D900BFCDB7 /* AuthenticatorData.swift */; };
+		30CB6DA42CC7A2D900BFCDB7 /* AuthenticatorSelectionCriteria.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CB6D632CC7A2D900BFCDB7 /* AuthenticatorSelectionCriteria.swift */; };
+		30CB6DA52CC7A2D900BFCDB7 /* CollectedClientData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CB6D642CC7A2D900BFCDB7 /* CollectedClientData.swift */; };
+		30CB6DA62CC7A2D900BFCDB7 /* COSEAlgorithmIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CB6D652CC7A2D900BFCDB7 /* COSEAlgorithmIdentifier.swift */; };
+		30CB6DA72CC7A2D900BFCDB7 /* EC2COSEKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CB6D662CC7A2D900BFCDB7 /* EC2COSEKey.swift */; };
+		30CB6DA82CC7A2D900BFCDB7 /* PublicKeyCredentialCreationOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CB6D672CC7A2D900BFCDB7 /* PublicKeyCredentialCreationOptions.swift */; };
+		30CB6DA92CC7A2D900BFCDB7 /* PublicKeyCredentialDescriptor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CB6D682CC7A2D900BFCDB7 /* PublicKeyCredentialDescriptor.swift */; };
+		30CB6DAA2CC7A2D900BFCDB7 /* PublicKeyCredentialParameters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CB6D692CC7A2D900BFCDB7 /* PublicKeyCredentialParameters.swift */; };
+		30CB6DAB2CC7A2D900BFCDB7 /* PublicKeyCredentialRequestOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CB6D6A2CC7A2D900BFCDB7 /* PublicKeyCredentialRequestOptions.swift */; };
+		30CB6DAC2CC7A2D900BFCDB7 /* PublicKeyCredentialRpEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CB6D6B2CC7A2D900BFCDB7 /* PublicKeyCredentialRpEntity.swift */; };
+		30CB6DAD2CC7A2D900BFCDB7 /* PublicKeyCredentialSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CB6D6C2CC7A2D900BFCDB7 /* PublicKeyCredentialSource.swift */; };
+		30CB6DAE2CC7A2D900BFCDB7 /* PublicKeyCredentialUserEntity.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CB6D6D2CC7A2D900BFCDB7 /* PublicKeyCredentialUserEntity.swift */; };
+		30CB6DAF2CC7A2D900BFCDB7 /* Transport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CB6D6E2CC7A2D900BFCDB7 /* Transport.swift */; };
+		30CB6DB02CC7A2D900BFCDB7 /* UserVerificationRequirement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CB6D6F2CC7A2D900BFCDB7 /* UserVerificationRequirement.swift */; };
+		30CB6DB12CC7A2D900BFCDB7 /* Biometric.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CB6D712CC7A2D900BFCDB7 /* Biometric.swift */; };
+		30CB6DB22CC7A2D900BFCDB7 /* ClientExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CB6D722CC7A2D900BFCDB7 /* ClientExtensions.swift */; };
+		30CB6DB32CC7A2D900BFCDB7 /* DeviceCredential.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CB6D732CC7A2D900BFCDB7 /* DeviceCredential.swift */; };
+		30CB6DB42CC7A2D900BFCDB7 /* PublicKeyCredential.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CB6D742CC7A2D900BFCDB7 /* PublicKeyCredential.swift */; };
+		30CB6DB52CC7A2D900BFCDB7 /* PublicKeyCredentialResult.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CB6D752CC7A2D900BFCDB7 /* PublicKeyCredentialResult.swift */; };
+		30CB6DB72CC7A2D900BFCDB7 /* CredentialSourceStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CB6D792CC7A2D900BFCDB7 /* CredentialSourceStorage.swift */; };
+		30CB6DB82CC7A2D900BFCDB7 /* Keychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CB6D7A2CC7A2D900BFCDB7 /* Keychain.swift */; };
+		30CB6DB92CC7A2D900BFCDB7 /* KeyStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CB6D7B2CC7A2D900BFCDB7 /* KeyStorage.swift */; };
+		30CB6DBA2CC7A2D900BFCDB7 /* Data.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CB6D7D2CC7A2D900BFCDB7 /* Data.swift */; };
+		30CB6DBB2CC7A2D900BFCDB7 /* String.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CB6D7E2CC7A2D900BFCDB7 /* String.swift */; };
+		30CB6DBC2CC7A2D900BFCDB7 /* UInt8.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CB6D7F2CC7A2D900BFCDB7 /* UInt8.swift */; };
+		30CB6DBD2CC7A2D900BFCDB7 /* UInt16.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CB6D802CC7A2D900BFCDB7 /* UInt16.swift */; };
+		30CB6DBE2CC7A2D900BFCDB7 /* UInt32.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CB6D812CC7A2D900BFCDB7 /* UInt32.swift */; };
+		30CB6DBF2CC7A2D900BFCDB7 /* UUID.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CB6D822CC7A2D900BFCDB7 /* UUID.swift */; };
+		30CB6DC12CC7A2D900BFCDB7 /* KeyHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CB6D852CC7A2D900BFCDB7 /* KeyHelper.swift */; };
+		30CB6DC22CC7A2D900BFCDB7 /* LocalAuthentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CB6D862CC7A2D900BFCDB7 /* LocalAuthentication.swift */; };
+		30CB6DC32CC7A2D900BFCDB7 /* Misc.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CB6D872CC7A2D900BFCDB7 /* Misc.swift */; };
+		30CB6DC62CC7A30B00BFCDB7 /* SwiftCBOR in Frameworks */ = {isa = PBXBuildFile; productRef = 30CB6DC52CC7A30B00BFCDB7 /* SwiftCBOR */; };
+		30CB6DE32CC7E3C500BFCDB7 /* KotlinByteArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30CB6DE22CC7E3C500BFCDB7 /* KotlinByteArray.swift */; };
 		30EE15412CAC39260071756C /* AnalyticImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30EE15402CAC39260071756C /* AnalyticImpl.swift */; };
 		30EE15452CAC39500071756C /* KoinHelpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30EE15422CAC39500071756C /* KoinHelpers.swift */; };
 		30EE15462CAC39500071756C /* nativeModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30EE15432CAC39500071756C /* nativeModule.swift */; };
@@ -24,6 +77,58 @@
 		2152FB032600AC8F00CF470E /* SuperGluuFidoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuperGluuFidoApp.swift; sourceTree = "<group>"; };
 		30B9EE492CBE6D9200527B66 /* AuthenticationAdaptor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationAdaptor.swift; sourceTree = "<group>"; };
 		30B9EE4B2CBE6E7F00527B66 /* DPoPProofFactoryAdaptor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DPoPProofFactoryAdaptor.swift; sourceTree = "<group>"; };
+		30CB6D432CC7A2D900BFCDB7 /* Authenticator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Authenticator.swift; sourceTree = "<group>"; };
+		30CB6D442CC7A2D900BFCDB7 /* AuthenticatorExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AuthenticatorExtensions.swift; sourceTree = "<group>"; };
+		30CB6D452CC7A2D900BFCDB7 /* AuthenticatorResult.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AuthenticatorResult.swift; sourceTree = "<group>"; };
+		30CB6D462CC7A2D900BFCDB7 /* AuthenticatorType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AuthenticatorType.swift; sourceTree = "<group>"; };
+		30CB6D472CC7A2D900BFCDB7 /* BiometricAuthenticator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BiometricAuthenticator.swift; sourceTree = "<group>"; };
+		30CB6D482CC7A2D900BFCDB7 /* DeviceCredentialAuthenticator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeviceCredentialAuthenticator.swift; sourceTree = "<group>"; };
+		30CB6D4A2CC7A2D900BFCDB7 /* AttestationConveyancePreference+Extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "AttestationConveyancePreference+Extension.swift"; sourceTree = "<group>"; };
+		30CB6D4B2CC7A2D900BFCDB7 /* AuthenticatorAttachment+Extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "AuthenticatorAttachment+Extension.swift"; sourceTree = "<group>"; };
+		30CB6D4C2CC7A2D900BFCDB7 /* AuthenticatorType+Extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "AuthenticatorType+Extension.swift"; sourceTree = "<group>"; };
+		30CB6D4D2CC7A2D900BFCDB7 /* PublicKeyCredential+Extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "PublicKeyCredential+Extension.swift"; sourceTree = "<group>"; };
+		30CB6D4E2CC7A2D900BFCDB7 /* UserVerificationRequirement+Extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UserVerificationRequirement+Extension.swift"; sourceTree = "<group>"; };
+		30CB6D562CC7A2D900BFCDB7 /* CredentialSourceStorage+Extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CredentialSourceStorage+Extension.swift"; sourceTree = "<group>"; };
+		30CB6D592CC7A2D900BFCDB7 /* CoreError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreError.swift; sourceTree = "<group>"; };
+		30CB6D5A2CC7A2D900BFCDB7 /* KeyStorageError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = KeyStorageError.swift; sourceTree = "<group>"; };
+		30CB6D5B2CC7A2D900BFCDB7 /* WebAuthnError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebAuthnError.swift; sourceTree = "<group>"; };
+		30CB6D5D2CC7A2D900BFCDB7 /* AttestationConveyancePreference.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AttestationConveyancePreference.swift; sourceTree = "<group>"; };
+		30CB6D5E2CC7A2D900BFCDB7 /* AttestationObject.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AttestationObject.swift; sourceTree = "<group>"; };
+		30CB6D5F2CC7A2D900BFCDB7 /* AttestationStatement.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AttestationStatement.swift; sourceTree = "<group>"; };
+		30CB6D602CC7A2D900BFCDB7 /* AttestedCredentialData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AttestedCredentialData.swift; sourceTree = "<group>"; };
+		30CB6D612CC7A2D900BFCDB7 /* AuthenticatorAttachment.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AuthenticatorAttachment.swift; sourceTree = "<group>"; };
+		30CB6D622CC7A2D900BFCDB7 /* AuthenticatorData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AuthenticatorData.swift; sourceTree = "<group>"; };
+		30CB6D632CC7A2D900BFCDB7 /* AuthenticatorSelectionCriteria.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AuthenticatorSelectionCriteria.swift; sourceTree = "<group>"; };
+		30CB6D642CC7A2D900BFCDB7 /* CollectedClientData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CollectedClientData.swift; sourceTree = "<group>"; };
+		30CB6D652CC7A2D900BFCDB7 /* COSEAlgorithmIdentifier.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = COSEAlgorithmIdentifier.swift; sourceTree = "<group>"; };
+		30CB6D662CC7A2D900BFCDB7 /* EC2COSEKey.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EC2COSEKey.swift; sourceTree = "<group>"; };
+		30CB6D672CC7A2D900BFCDB7 /* PublicKeyCredentialCreationOptions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PublicKeyCredentialCreationOptions.swift; sourceTree = "<group>"; };
+		30CB6D682CC7A2D900BFCDB7 /* PublicKeyCredentialDescriptor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PublicKeyCredentialDescriptor.swift; sourceTree = "<group>"; };
+		30CB6D692CC7A2D900BFCDB7 /* PublicKeyCredentialParameters.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PublicKeyCredentialParameters.swift; sourceTree = "<group>"; };
+		30CB6D6A2CC7A2D900BFCDB7 /* PublicKeyCredentialRequestOptions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PublicKeyCredentialRequestOptions.swift; sourceTree = "<group>"; };
+		30CB6D6B2CC7A2D900BFCDB7 /* PublicKeyCredentialRpEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PublicKeyCredentialRpEntity.swift; sourceTree = "<group>"; };
+		30CB6D6C2CC7A2D900BFCDB7 /* PublicKeyCredentialSource.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PublicKeyCredentialSource.swift; sourceTree = "<group>"; };
+		30CB6D6D2CC7A2D900BFCDB7 /* PublicKeyCredentialUserEntity.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PublicKeyCredentialUserEntity.swift; sourceTree = "<group>"; };
+		30CB6D6E2CC7A2D900BFCDB7 /* Transport.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Transport.swift; sourceTree = "<group>"; };
+		30CB6D6F2CC7A2D900BFCDB7 /* UserVerificationRequirement.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserVerificationRequirement.swift; sourceTree = "<group>"; };
+		30CB6D712CC7A2D900BFCDB7 /* Biometric.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Biometric.swift; sourceTree = "<group>"; };
+		30CB6D722CC7A2D900BFCDB7 /* ClientExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ClientExtensions.swift; sourceTree = "<group>"; };
+		30CB6D732CC7A2D900BFCDB7 /* DeviceCredential.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeviceCredential.swift; sourceTree = "<group>"; };
+		30CB6D742CC7A2D900BFCDB7 /* PublicKeyCredential.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PublicKeyCredential.swift; sourceTree = "<group>"; };
+		30CB6D752CC7A2D900BFCDB7 /* PublicKeyCredentialResult.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PublicKeyCredentialResult.swift; sourceTree = "<group>"; };
+		30CB6D792CC7A2D900BFCDB7 /* CredentialSourceStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CredentialSourceStorage.swift; sourceTree = "<group>"; };
+		30CB6D7A2CC7A2D900BFCDB7 /* Keychain.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Keychain.swift; sourceTree = "<group>"; };
+		30CB6D7B2CC7A2D900BFCDB7 /* KeyStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = KeyStorage.swift; sourceTree = "<group>"; };
+		30CB6D7D2CC7A2D900BFCDB7 /* Data.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Data.swift; sourceTree = "<group>"; };
+		30CB6D7E2CC7A2D900BFCDB7 /* String.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = String.swift; sourceTree = "<group>"; };
+		30CB6D7F2CC7A2D900BFCDB7 /* UInt8.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UInt8.swift; sourceTree = "<group>"; };
+		30CB6D802CC7A2D900BFCDB7 /* UInt16.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UInt16.swift; sourceTree = "<group>"; };
+		30CB6D812CC7A2D900BFCDB7 /* UInt32.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UInt32.swift; sourceTree = "<group>"; };
+		30CB6D822CC7A2D900BFCDB7 /* UUID.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UUID.swift; sourceTree = "<group>"; };
+		30CB6D852CC7A2D900BFCDB7 /* KeyHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = KeyHelper.swift; sourceTree = "<group>"; };
+		30CB6D862CC7A2D900BFCDB7 /* LocalAuthentication.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocalAuthentication.swift; sourceTree = "<group>"; };
+		30CB6D872CC7A2D900BFCDB7 /* Misc.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Misc.swift; sourceTree = "<group>"; };
+		30CB6DE22CC7E3C500BFCDB7 /* KotlinByteArray.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KotlinByteArray.swift; sourceTree = "<group>"; };
 		30EE15402CAC39260071756C /* AnalyticImpl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticImpl.swift; sourceTree = "<group>"; };
 		30EE15422CAC39500071756C /* KoinHelpers.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = KoinHelpers.swift; sourceTree = "<group>"; };
 		30EE15432CAC39500071756C /* nativeModule.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = nativeModule.swift; sourceTree = "<group>"; };
@@ -37,6 +142,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				30CB6DC62CC7A30B00BFCDB7 /* SwiftCBOR in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -49,6 +155,145 @@
 				058557D8273AAEEB004C7B11 /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		30CB6D492CC7A2D900BFCDB7 /* Authenticator */ = {
+			isa = PBXGroup;
+			children = (
+				30CB6D432CC7A2D900BFCDB7 /* Authenticator.swift */,
+				30CB6D442CC7A2D900BFCDB7 /* AuthenticatorExtensions.swift */,
+				30CB6D452CC7A2D900BFCDB7 /* AuthenticatorResult.swift */,
+				30CB6D462CC7A2D900BFCDB7 /* AuthenticatorType.swift */,
+				30CB6D472CC7A2D900BFCDB7 /* BiometricAuthenticator.swift */,
+				30CB6D482CC7A2D900BFCDB7 /* DeviceCredentialAuthenticator.swift */,
+			);
+			path = Authenticator;
+			sourceTree = "<group>";
+		};
+		30CB6D4F2CC7A2D900BFCDB7 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				30CB6D4A2CC7A2D900BFCDB7 /* AttestationConveyancePreference+Extension.swift */,
+				30CB6D4B2CC7A2D900BFCDB7 /* AuthenticatorAttachment+Extension.swift */,
+				30CB6D4C2CC7A2D900BFCDB7 /* AuthenticatorType+Extension.swift */,
+				30CB6D4D2CC7A2D900BFCDB7 /* PublicKeyCredential+Extension.swift */,
+				30CB6D4E2CC7A2D900BFCDB7 /* UserVerificationRequirement+Extension.swift */,
+				30CB6DE22CC7E3C500BFCDB7 /* KotlinByteArray.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
+		30CB6D572CC7A2D900BFCDB7 /* Storage */ = {
+			isa = PBXGroup;
+			children = (
+				30CB6D562CC7A2D900BFCDB7 /* CredentialSourceStorage+Extension.swift */,
+			);
+			path = Storage;
+			sourceTree = "<group>";
+		};
+		30CB6D582CC7A2D900BFCDB7 /* AuthnHelper */ = {
+			isa = PBXGroup;
+			children = (
+				30CB6D4F2CC7A2D900BFCDB7 /* Extensions */,
+				30CB6D572CC7A2D900BFCDB7 /* Storage */,
+			);
+			path = AuthnHelper;
+			sourceTree = "<group>";
+		};
+		30CB6D5C2CC7A2D900BFCDB7 /* Error */ = {
+			isa = PBXGroup;
+			children = (
+				30CB6D592CC7A2D900BFCDB7 /* CoreError.swift */,
+				30CB6D5A2CC7A2D900BFCDB7 /* KeyStorageError.swift */,
+				30CB6D5B2CC7A2D900BFCDB7 /* WebAuthnError.swift */,
+			);
+			path = Error;
+			sourceTree = "<group>";
+		};
+		30CB6D702CC7A2D900BFCDB7 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				30CB6D5D2CC7A2D900BFCDB7 /* AttestationConveyancePreference.swift */,
+				30CB6D5E2CC7A2D900BFCDB7 /* AttestationObject.swift */,
+				30CB6D5F2CC7A2D900BFCDB7 /* AttestationStatement.swift */,
+				30CB6D602CC7A2D900BFCDB7 /* AttestedCredentialData.swift */,
+				30CB6D612CC7A2D900BFCDB7 /* AuthenticatorAttachment.swift */,
+				30CB6D622CC7A2D900BFCDB7 /* AuthenticatorData.swift */,
+				30CB6D632CC7A2D900BFCDB7 /* AuthenticatorSelectionCriteria.swift */,
+				30CB6D642CC7A2D900BFCDB7 /* CollectedClientData.swift */,
+				30CB6D652CC7A2D900BFCDB7 /* COSEAlgorithmIdentifier.swift */,
+				30CB6D662CC7A2D900BFCDB7 /* EC2COSEKey.swift */,
+				30CB6D672CC7A2D900BFCDB7 /* PublicKeyCredentialCreationOptions.swift */,
+				30CB6D682CC7A2D900BFCDB7 /* PublicKeyCredentialDescriptor.swift */,
+				30CB6D692CC7A2D900BFCDB7 /* PublicKeyCredentialParameters.swift */,
+				30CB6D6A2CC7A2D900BFCDB7 /* PublicKeyCredentialRequestOptions.swift */,
+				30CB6D6B2CC7A2D900BFCDB7 /* PublicKeyCredentialRpEntity.swift */,
+				30CB6D6C2CC7A2D900BFCDB7 /* PublicKeyCredentialSource.swift */,
+				30CB6D6D2CC7A2D900BFCDB7 /* PublicKeyCredentialUserEntity.swift */,
+				30CB6D6E2CC7A2D900BFCDB7 /* Transport.swift */,
+				30CB6D6F2CC7A2D900BFCDB7 /* UserVerificationRequirement.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		30CB6D762CC7A2D900BFCDB7 /* PublicKeyCredential */ = {
+			isa = PBXGroup;
+			children = (
+				30CB6D712CC7A2D900BFCDB7 /* Biometric.swift */,
+				30CB6D722CC7A2D900BFCDB7 /* ClientExtensions.swift */,
+				30CB6D732CC7A2D900BFCDB7 /* DeviceCredential.swift */,
+				30CB6D742CC7A2D900BFCDB7 /* PublicKeyCredential.swift */,
+				30CB6D752CC7A2D900BFCDB7 /* PublicKeyCredentialResult.swift */,
+			);
+			path = PublicKeyCredential;
+			sourceTree = "<group>";
+		};
+		30CB6D7C2CC7A2D900BFCDB7 /* Storage */ = {
+			isa = PBXGroup;
+			children = (
+				30CB6D792CC7A2D900BFCDB7 /* CredentialSourceStorage.swift */,
+				30CB6D7A2CC7A2D900BFCDB7 /* Keychain.swift */,
+				30CB6D7B2CC7A2D900BFCDB7 /* KeyStorage.swift */,
+			);
+			path = Storage;
+			sourceTree = "<group>";
+		};
+		30CB6D832CC7A2D900BFCDB7 /* Extension */ = {
+			isa = PBXGroup;
+			children = (
+				30CB6D7D2CC7A2D900BFCDB7 /* Data.swift */,
+				30CB6D7E2CC7A2D900BFCDB7 /* String.swift */,
+				30CB6D7F2CC7A2D900BFCDB7 /* UInt8.swift */,
+				30CB6D802CC7A2D900BFCDB7 /* UInt16.swift */,
+				30CB6D812CC7A2D900BFCDB7 /* UInt32.swift */,
+				30CB6D822CC7A2D900BFCDB7 /* UUID.swift */,
+			);
+			path = Extension;
+			sourceTree = "<group>";
+		};
+		30CB6D882CC7A2D900BFCDB7 /* Utility */ = {
+			isa = PBXGroup;
+			children = (
+				30CB6D832CC7A2D900BFCDB7 /* Extension */,
+				30CB6D852CC7A2D900BFCDB7 /* KeyHelper.swift */,
+				30CB6D862CC7A2D900BFCDB7 /* LocalAuthentication.swift */,
+				30CB6D872CC7A2D900BFCDB7 /* Misc.swift */,
+			);
+			path = Utility;
+			sourceTree = "<group>";
+		};
+		30CB6D892CC7A2D900BFCDB7 /* WebAuthn */ = {
+			isa = PBXGroup;
+			children = (
+				30CB6D492CC7A2D900BFCDB7 /* Authenticator */,
+				30CB6D582CC7A2D900BFCDB7 /* AuthnHelper */,
+				30CB6D5C2CC7A2D900BFCDB7 /* Error */,
+				30CB6D702CC7A2D900BFCDB7 /* Model */,
+				30CB6D762CC7A2D900BFCDB7 /* PublicKeyCredential */,
+				30CB6D7C2CC7A2D900BFCDB7 /* Storage */,
+				30CB6D882CC7A2D900BFCDB7 /* Utility */,
+			);
+			path = WebAuthn;
 			sourceTree = "<group>";
 		};
 		30EE153F2CAC391A0071756C /* Services */ = {
@@ -97,6 +342,7 @@
 		7555FF7D242A565900829871 /* SuperGluuFido */ = {
 			isa = PBXGroup;
 			children = (
+				30CB6D892CC7A2D900BFCDB7 /* WebAuthn */,
 				30EE15442CAC39500071756C /* DI */,
 				30EE153F2CAC391A0071756C /* Services */,
 				058557BA273AAA24004C7B11 /* Assets.xcassets */,
@@ -126,6 +372,7 @@
 			);
 			name = SuperGluuFido;
 			packageProductDependencies = (
+				30CB6DC52CC7A30B00BFCDB7 /* SwiftCBOR */,
 			);
 			productName = iosApp;
 			productReference = 7555FF7B242A565900829871 /* SuperGluuFido.app */;
@@ -157,6 +404,7 @@
 			);
 			mainGroup = 7555FF72242A565900829871;
 			packageReferences = (
+				30CB6DC42CC7A30B00BFCDB7 /* XCRemoteSwiftPackageReference "SwiftCBOR" */,
 			);
 			productRefGroup = 7555FF7C242A565900829871 /* Products */;
 			projectDirPath = "";
@@ -205,13 +453,65 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				30CB6DBB2CC7A2D900BFCDB7 /* String.swift in Sources */,
+				30CB6D8C2CC7A2D900BFCDB7 /* AuthenticatorResult.swift in Sources */,
 				30EE15452CAC39500071756C /* KoinHelpers.swift in Sources */,
+				30CB6D8B2CC7A2D900BFCDB7 /* AuthenticatorExtensions.swift in Sources */,
+				30CB6DBD2CC7A2D900BFCDB7 /* UInt16.swift in Sources */,
+				30CB6DA92CC7A2D900BFCDB7 /* PublicKeyCredentialDescriptor.swift in Sources */,
+				30CB6DB32CC7A2D900BFCDB7 /* DeviceCredential.swift in Sources */,
+				30CB6D9A2CC7A2D900BFCDB7 /* CredentialSourceStorage+Extension.swift in Sources */,
+				30CB6DA62CC7A2D900BFCDB7 /* COSEAlgorithmIdentifier.swift in Sources */,
+				30CB6DBA2CC7A2D900BFCDB7 /* Data.swift in Sources */,
+				30CB6D942CC7A2D900BFCDB7 /* UserVerificationRequirement+Extension.swift in Sources */,
+				30CB6DB92CC7A2D900BFCDB7 /* KeyStorage.swift in Sources */,
+				30CB6DAB2CC7A2D900BFCDB7 /* PublicKeyCredentialRequestOptions.swift in Sources */,
+				30CB6DB72CC7A2D900BFCDB7 /* CredentialSourceStorage.swift in Sources */,
+				30CB6D922CC7A2D900BFCDB7 /* AuthenticatorType+Extension.swift in Sources */,
+				30CB6D8D2CC7A2D900BFCDB7 /* AuthenticatorType.swift in Sources */,
+				30CB6DBF2CC7A2D900BFCDB7 /* UUID.swift in Sources */,
+				30CB6DC32CC7A2D900BFCDB7 /* Misc.swift in Sources */,
+				30CB6DB12CC7A2D900BFCDB7 /* Biometric.swift in Sources */,
+				30CB6D902CC7A2D900BFCDB7 /* AttestationConveyancePreference+Extension.swift in Sources */,
+				30CB6DB02CC7A2D900BFCDB7 /* UserVerificationRequirement.swift in Sources */,
+				30CB6D9C2CC7A2D900BFCDB7 /* KeyStorageError.swift in Sources */,
+				30CB6D8A2CC7A2D900BFCDB7 /* Authenticator.swift in Sources */,
 				2152FB042600AC8F00CF470E /* SuperGluuFidoApp.swift in Sources */,
+				30CB6DB22CC7A2D900BFCDB7 /* ClientExtensions.swift in Sources */,
+				30CB6DBE2CC7A2D900BFCDB7 /* UInt32.swift in Sources */,
+				30CB6DE32CC7E3C500BFCDB7 /* KotlinByteArray.swift in Sources */,
+				30CB6DA72CC7A2D900BFCDB7 /* EC2COSEKey.swift in Sources */,
+				30CB6DA52CC7A2D900BFCDB7 /* CollectedClientData.swift in Sources */,
+				30CB6D932CC7A2D900BFCDB7 /* PublicKeyCredential+Extension.swift in Sources */,
+				30CB6DAE2CC7A2D900BFCDB7 /* PublicKeyCredentialUserEntity.swift in Sources */,
+				30CB6DAD2CC7A2D900BFCDB7 /* PublicKeyCredentialSource.swift in Sources */,
+				30CB6DC22CC7A2D900BFCDB7 /* LocalAuthentication.swift in Sources */,
+				30CB6DBC2CC7A2D900BFCDB7 /* UInt8.swift in Sources */,
+				30CB6DB52CC7A2D900BFCDB7 /* PublicKeyCredentialResult.swift in Sources */,
 				30EE15412CAC39260071756C /* AnalyticImpl.swift in Sources */,
+				30CB6DA82CC7A2D900BFCDB7 /* PublicKeyCredentialCreationOptions.swift in Sources */,
 				30B9EE4A2CBE6D9200527B66 /* AuthenticationAdaptor.swift in Sources */,
+				30CB6DA02CC7A2D900BFCDB7 /* AttestationStatement.swift in Sources */,
+				30CB6D8E2CC7A2D900BFCDB7 /* BiometricAuthenticator.swift in Sources */,
+				30CB6D9B2CC7A2D900BFCDB7 /* CoreError.swift in Sources */,
+				30CB6DAC2CC7A2D900BFCDB7 /* PublicKeyCredentialRpEntity.swift in Sources */,
+				30CB6DA12CC7A2D900BFCDB7 /* AttestedCredentialData.swift in Sources */,
 				30B9EE4C2CBE6E7F00527B66 /* DPoPProofFactoryAdaptor.swift in Sources */,
+				30CB6DC12CC7A2D900BFCDB7 /* KeyHelper.swift in Sources */,
+				30CB6D9D2CC7A2D900BFCDB7 /* WebAuthnError.swift in Sources */,
+				30CB6D9E2CC7A2D900BFCDB7 /* AttestationConveyancePreference.swift in Sources */,
+				30CB6DB82CC7A2D900BFCDB7 /* Keychain.swift in Sources */,
 				7555FF83242A565900829871 /* ContentView.swift in Sources */,
+				30CB6D912CC7A2D900BFCDB7 /* AuthenticatorAttachment+Extension.swift in Sources */,
+				30CB6DB42CC7A2D900BFCDB7 /* PublicKeyCredential.swift in Sources */,
+				30CB6DAF2CC7A2D900BFCDB7 /* Transport.swift in Sources */,
+				30CB6DA22CC7A2D900BFCDB7 /* AuthenticatorAttachment.swift in Sources */,
 				30EE15462CAC39500071756C /* nativeModule.swift in Sources */,
+				30CB6DA32CC7A2D900BFCDB7 /* AuthenticatorData.swift in Sources */,
+				30CB6DA42CC7A2D900BFCDB7 /* AuthenticatorSelectionCriteria.swift in Sources */,
+				30CB6DAA2CC7A2D900BFCDB7 /* PublicKeyCredentialParameters.swift in Sources */,
+				30CB6D8F2CC7A2D900BFCDB7 /* DeviceCredentialAuthenticator.swift in Sources */,
+				30CB6D9F2CC7A2D900BFCDB7 /* AttestationObject.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -349,7 +649,7 @@
 				);
 				INFOPLIST_FILE = SuperGluuFido/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = SuperGluuFido;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -382,7 +682,7 @@
 				);
 				INFOPLIST_FILE = SuperGluuFido/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = SuperGluuFido;
-				IPHONEOS_DEPLOYMENT_TARGET = 15.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -422,6 +722,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		30CB6DC42CC7A30B00BFCDB7 /* XCRemoteSwiftPackageReference "SwiftCBOR" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/valpackett/SwiftCBOR";
+			requirement = {
+				kind = exactVersion;
+				version = 0.4.6;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		30CB6DC52CC7A30B00BFCDB7 /* SwiftCBOR */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 30CB6DC42CC7A30B00BFCDB7 /* XCRemoteSwiftPackageReference "SwiftCBOR" */;
+			productName = SwiftCBOR;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 7555FF73242A565900829871 /* Project object */;
 }

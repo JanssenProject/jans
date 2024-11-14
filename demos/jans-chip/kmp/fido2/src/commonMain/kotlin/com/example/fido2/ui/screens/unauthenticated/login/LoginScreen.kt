@@ -4,12 +4,14 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -29,7 +31,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.fido2.AppAlertDialog
 import com.example.fido2.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -41,6 +42,8 @@ import com.example.fido2.model.TokenResponse
 import com.example.fido2.model.UserInfoResponse
 import com.example.fido2.model.fido.assertion.option.AssertionOptionResponse
 import com.example.fido2.model.fido.assertion.result.AssertionResultRequest
+import com.example.fido2.ui.common.customComposableViews.AppAlertDialog
+import com.example.fido2.ui.common.customComposableViews.AppAlertDialogWithTwoButtons
 import com.example.fido2.ui.common.customComposableViews.TitleText
 import com.example.fido2.ui.screens.unauthenticated.login.state.LoginUiEvent
 import com.example.fido2.ui.theme.AppTheme
@@ -56,10 +59,19 @@ fun LoginScreen(
 ) {
     val isBiometricAvailable = true // remember { BiometricHelper.isBiometricAvailable(context) }
     val shouldShowDialog = remember { mutableStateOf(false) }
+    val shouldShowDeleteKeysDialog = remember { mutableStateOf(false) }
     val dialogContent = remember { mutableStateOf("") }
     val creds: List<KtPublicKeyCredentialSource>? = viewModel.getAllCredentials()
     var loginState by remember {
         loginViewModel.loginState
+    }
+
+    fun getHorizontalArrangement(): Arrangement.Horizontal {
+        if (creds != null && creds.isEmpty()) {
+            return Arrangement.End
+        }
+
+        return Arrangement.SpaceBetween
     }
 
     if (loginState.isLoginSuccessful) {
@@ -75,6 +87,12 @@ fun LoginScreen(
             shouldShowDialog = shouldShowDialog,
             content = dialogContent
         )
+        AppAlertDialogWithTwoButtons(
+            shouldShowDialog = shouldShowDeleteKeysDialog,
+            text = stringResource(Res.string.delete_all_dialog_title)
+        ) {
+            viewModel.deleteAllKeys()
+        }
         if (loginState.isLoading) {
             Column(
                 modifier = Modifier
@@ -103,16 +121,22 @@ fun LoginScreen(
             ) {
                 // Register Section
                 Row(
-                    modifier = Modifier.padding(AppTheme.dimens.paddingNormal),
-                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.padding(AppTheme.dimens.paddingNormal).fillMaxWidth(),
+                    horizontalArrangement = getHorizontalArrangement(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Don't have an account?
-                    Text(
-                        text = stringResource(Res.string.do_not_have_account),
-                        color = MaterialTheme.colors.primary
-                    )
-
+                    if (creds?.isEmpty() == false) {
+                        Text(
+                            modifier = Modifier
+                                .padding(start = AppTheme.dimens.paddingExtraSmall)
+                                .clickable {
+                                    shouldShowDeleteKeysDialog.value = true
+                                },
+                            fontWeight = FontWeight.Bold,
+                            text = stringResource(Res.string.delete_all),
+                            color = MaterialTheme.colors.primary
+                        )
+                    }
                     //Register
                     Text(
                         modifier = Modifier
@@ -171,7 +195,7 @@ fun LoginScreen(
                                     loginState = loginState,
                                     heading = ele.userDisplayName ?: "none",
                                     subheading = ele.rpId ?: "unknown",
-//                                    icon = R.drawable.passkey_icon,
+//                                    icon = Res.drawable.passkey_icon,
                                     onContinueClick = {
 
                                         if (isBiometricAvailable) {
@@ -240,12 +264,15 @@ fun LoginScreen(
                                                         }.await()
 
                                                     if (loginResponse?.isSuccessful == false) {
+                                                        loginState =
+                                                            loginState.copy(isLoading = false, isLoginSuccessful = false)
                                                         shouldShowDialog.value = true
                                                         dialogContent.value =
                                                             loginResponse.errorMessage.toString()
-                                                        loginState =
-                                                            loginState.copy(isLoading = false)
                                                         return@launch
+                                                    } else {
+                                                        loginState =
+                                                            loginState.copy(isLoading = false, isLoginSuccessful = true)
                                                     }
                                                     //exchange token for code
                                                     val tokenResponse: TokenResponse? =

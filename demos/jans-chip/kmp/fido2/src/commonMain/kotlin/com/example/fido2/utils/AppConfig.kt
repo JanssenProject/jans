@@ -2,14 +2,14 @@ package com.example.fido2.utils
 
 class AppConfig {
     companion object {
-        const val SERVER_BASE_URL = "https://mzico-learning-ant.gluu.info"
+        const val SERVER_BASE_URL = "https://admin-ui-test.gluu.org"
         const val INTEGRITY_APP_SERVER_URL = "https://play-integrity-checker-server-2eua-3ndysngub.vercel.app"
         const val GOOGLE_CLOUD_PROJECT_ID = 618764598105L
         const val SQLITE_DB_NAME = "chipDB"
         const val APP_NAME = "jans-chip"
         const val APP_PACKAGE = "com.jans.chip"
         const val DEFAULT_S_NO = "1"
-        const val ROOM_DATABASE_VERSION = 1
+        const val ROOM_DATABASE_VERSION = 2
         const val FIDO_CONFIG_URL = "/jans-fido2/restv1/configuration"
         const val OP_CONFIG_URL = "/.well-known/openid-configuration"
 

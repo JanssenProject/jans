@@ -1,11 +1,13 @@
 package com.example.fido2.database.local
 
 import com.example.fido2.database.AppDatabase
+import com.example.fido2.model.AppSettings
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import com.example.fido2.model.OIDCClient
 import com.example.fido2.model.OPConfiguration
 import com.example.fido2.model.fido.config.FidoConfiguration
+import com.example.fido2.utils.AppConfig
 
 class LocalDataSourceImpl(
     private val db: AppDatabase,
@@ -78,6 +80,29 @@ class LocalDataSourceImpl(
     override suspend fun saveFidoConfiguration(fidoConfiguration: FidoConfiguration) {
         withContext(dispatcher) {
             db.fidoConfigurationDao().insert(fidoConfiguration)
+        }
+    }
+
+    override suspend fun getServerUrl(): String {
+        return withContext(dispatcher) {
+            val settings = db.serverUrlDao().getAll()
+            if (settings.isEmpty()) {
+                ""
+            } else {
+                settings.first().serverUrl
+            }
+        }
+    }
+
+    override suspend fun saveServerUrl(serverUrl: String) {
+        withContext(dispatcher) {
+            val settings = db.serverUrlDao().getAll()
+            if (settings.isEmpty()) {
+                db.serverUrlDao().insert(AppSettings(serverUrl))
+            } else {
+                db.serverUrlDao().delete()
+                db.serverUrlDao().insert(AppSettings(serverUrl))
+            }
         }
     }
 }

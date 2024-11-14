@@ -54,6 +54,17 @@ class RegistrationViewModel : ViewModel() {
                 )
             }
 
+            is RegistrationUiEvent.ValidateInputs -> {
+                val inputsValidated = validateInputs()
+                if (inputsValidated) {
+                    // TODO Trigger registration in authentication flow
+                    registrationState.value =
+                        registrationState.value.copy(isValidationSuccessful = inputsValidated)
+                } else {
+                    return false
+                }
+            }
+
             // Submit Registration event
             is RegistrationUiEvent.Submit -> {
                 val inputsValidated = validateInputs()

@@ -14,9 +14,9 @@ data class Assertion(
     @SerialName("options_endpoint")
     var optionsEndpoint: String?,
 
-    @ColumnInfo(name = "OPTIONS_GENERATE_ENDPOINT")
-    @SerialName("options_generate_endpoint")
-    var optionsGenerateEndpoint: String?,
+//    @ColumnInfo(name = "OPTIONS_GENERATE_ENDPOINT")
+//    @SerialName("options_generate_endpoint")
+//    var optionsGenerateEndpoint: String?,
 
     @ColumnInfo(name = "RESULT_ENDPOINT")
     @SerialName("result_endpoint")

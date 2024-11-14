@@ -13,6 +13,10 @@ interface LocalDataSource {
     suspend fun getOPConfiguration(): OPConfiguration?
     suspend fun saveOPConfiguration(opConfiguration: OPConfiguration)
     suspend fun updateOPConfiguration(opConfiguration: OPConfiguration)
+
     suspend fun getFidoConfiguration(): FidoConfiguration?
     suspend fun saveFidoConfiguration(fidoConfiguration: FidoConfiguration)
+
+    suspend fun getServerUrl(): String?
+    suspend fun saveServerUrl(serverUrl: String)
 }

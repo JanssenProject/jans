@@ -19,10 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.fido2.AppAlertDialog
-import com.example.fido2.LogButton
 import com.example.fido2.*
-import com.example.fido2.UserInfoRow
 import com.example.fido2.ui.common.customComposableViews.TitleText
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -31,6 +28,9 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import com.example.fido2.model.LogoutResponse
 import com.example.fido2.model.UserDetails
+import com.example.fido2.ui.common.customComposableViews.AppAlertDialog
+import com.example.fido2.ui.common.customComposableViews.LogButton
+import com.example.fido2.ui.common.customComposableViews.UserInfoRow
 import com.example.fido2.ui.screens.unauthenticated.login.LoginViewModel
 import com.example.fido2.ui.screens.unauthenticated.login.state.LoginUiEvent
 import com.example.fido2.viewmodel.MainViewModel

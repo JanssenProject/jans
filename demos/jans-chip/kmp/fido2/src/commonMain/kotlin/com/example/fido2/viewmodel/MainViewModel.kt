@@ -3,7 +3,9 @@ package com.example.fido2.viewmodel
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.room.RoomDatabase
 import com.example.fido2.authAdaptor.AuthenticationProvider
 import com.example.fido2.model.KtPublicKeyCredentialSource
 import kotlinx.coroutines.CoroutineScope
@@ -26,6 +28,8 @@ import com.example.fido2.model.fido.attestation.result.AttestationResultRequest
 import com.example.fido2.model.fido.attestation.result.AttestationResultResponse
 import com.example.fido2.model.fido.config.FidoConfiguration
 import com.example.fido2.repository.PlayIntegrityRepository
+import com.example.fido2.ui.screens.unauthenticated.registration.RegistrationViewModel
+import com.example.fido2.ui.screens.unauthenticated.registration.state.RegistrationUiEvent
 import com.example.fido2.usecase.DCRClientUseCase
 import com.example.fido2.usecase.FidoAssertionUseCase
 import com.example.fido2.usecase.FidoAttestationUseCase
@@ -37,6 +41,7 @@ import com.example.fido2.usecase.LoginUseCase
 import com.example.fido2.usecase.LogoutUseCase
 import com.example.fido2.viewmodel.state.MainState
 import kotlinx.coroutines.IO
+import kotlinx.coroutines.cancel
 
 class MainViewModel(
     private val getOPConfigurationUseCase: GetOPConfigurationUseCase,
@@ -62,12 +67,22 @@ class MainViewModel(
 
     val isBiometricAvailable = true // remember { BiometricHelper.isBiometricAvailable(context) }
 
+    val shouldShowDialog = mutableStateOf(false)
+    val shouldQRCodeScanning = mutableStateOf(false)
+    val dialogContent = mutableStateOf("")
+
     suspend fun getOIDCClient(): OIDCClient? {
         return dcrClientUseCase.invoke().getOrNull()
     }
 
     fun getAllCredentials(): List<KtPublicKeyCredentialSource>? {
         return authenticator.getAllCredentials()
+    }
+
+    fun deleteAllKeys() {
+        mainState = mainState.copy(isLoading = true)
+        authenticator.deleteAllKeys()
+        mainState = mainState.copy(isLoading = false)
     }
 
     suspend fun authenticate(
@@ -103,30 +118,33 @@ class MainViewModel(
         return userInfoResponse
     }
 
-    fun loadAppTasks(shouldShowDialog: MutableState<Boolean>, dialogContent: MutableState<String>) {
+    suspend fun loadAppTasks(shouldShowDialog: MutableState<Boolean>, dialogContent: MutableState<String>, callback: (success: Boolean) -> Unit) {
         CoroutineScope(Dispatchers.IO).launch {
             //get openid configuration
-            try {
+//            try {
                 mainState = mainState.copy(isLoading = true)
-                val opConfiguration: OPConfiguration? = async { getOPConfiguration() }.await()
+                val opConfiguration: OPConfiguration? = getOPConfiguration() // async { getOPConfiguration() }.await()
                 println("opConfiguration --> $opConfiguration")
-                if (opConfiguration?.isSuccessful == false) {
-                    mainState = mainState.copy(errorInLoading = true)
-                    mainState = mainState.copy(loadingErrorMessage = "Error in fetching OP Configuration")
+                if (opConfiguration == null) {
+                    showError(shouldShowDialog, dialogContent, "Error in fetching OP Configuration")
+                    callback(false)
+                    return@launch
                 }
 
                 //get FIDO configuration
-                val fidoConfiguration: FidoConfiguration? = async { getFIDOConfiguration() }.await()
-                if (fidoConfiguration?.isSuccessful == false) {
-                    mainState = mainState.copy(errorInLoading = true)
-                    mainState = mainState.copy(loadingErrorMessage = "Error in fetching FIDO Configuration")
+                val fidoConfiguration: FidoConfiguration? = getFIDOConfiguration() // async { getFIDOConfiguration() }.await()
+                if (fidoConfiguration == null) {
+                    showError(shouldShowDialog, dialogContent, "Error in fetching FIDO Configuration")
+                    callback(false)
+                    return@launch
                 }
 
                 //check OIDC client
-                val oidcClient: OIDCClient? = async { getOIDCClient() }.await()
-                if (oidcClient?.isSuccessful == false) {
-                    mainState = mainState.copy(errorInLoading = true)
-                    mainState = mainState.copy(loadingErrorMessage = "Error in registering OIDC Client")
+                val oidcClient: OIDCClient? = getOIDCClient() // async { getOIDCClient() }.await()
+                if (oidcClient == null) {
+                    showError(shouldShowDialog, dialogContent, "Error in registering OIDC Client")
+                    callback(false)
+                    return@launch
                 } else {
                     mainState = mainState.copy(isClientRegistered = true)
                 }
@@ -136,48 +154,51 @@ class MainViewModel(
                     setUserInfoResponse(userInfoResponse)
                 }
                 //checking app integrity
-                val appIntegrityEntity: String? = async { checkAppIntegrityFromDatabase() }.await()
+                val appIntegrityEntity: String? = checkAppIntegrityFromDatabase() // async { checkAppIntegrityFromDatabase() }.await()
                 if (appIntegrityEntity == null) {
-                    val appIntegrityResponse: AppIntegrityResponse? = async { checkAppIntegrity() }.await()
+                    val appIntegrityResponse: AppIntegrityResponse? = checkAppIntegrity() // async { checkAppIntegrity() }.await()
                     if (appIntegrityResponse != null) {
-                        mainState = mainState.copy(errorInLoading = true)
-                        mainState = mainState.copy(
-                            loadingErrorMessage = appIntegrityResponse.appIntegrity?.appRecognitionVerdict
-                                ?: "Unable to fetch App Integrity from Google Play Integrity"
-                        )
+                        showError(shouldShowDialog, dialogContent, appIntegrityResponse.appIntegrity?.appRecognitionVerdict ?: "Unable to fetch App Integrity from Google Play Integrity")
+                        callback(false)
+                        return@launch
                     }
-                } else {
-                    mainState = mainState.copy(errorInLoading = true)
-                    mainState = mainState.copy(loadingErrorMessage = "App Integrity: $appIntegrityEntity")
                 }
+//                else {
+//                    mainState = mainState.copy(errorInLoading = true)
+//                    mainState = mainState.copy(loadingErrorMessage = "App Integrity: $appIntegrityEntity")
+//                    shouldShowDialog.value = mainState.errorInLoading
+//                    dialogContent.value = mainState.loadingErrorMessage
+//                    return@launch
+//                }
                 shouldShowDialog.value = mainState.errorInLoading
                 dialogContent.value = mainState.loadingErrorMessage
 
                 mainState = mainState.copy(isLoading = false)
-            } catch (e: Exception) {
-                //catching exception
-                mainState = mainState.copy(isLoading = false)
-                mainState = mainState.copy(errorInLoading = true)
-                mainState = mainState.copy(loadingErrorMessage = "Error in loading app: ${e.message}")
-                e.printStackTrace()
-            }
+                callback(true)
+                return@launch
+//            } catch (e: Exception) {
+//                //catching exception
+//                e.printStackTrace()
+//                showError(shouldShowDialog, dialogContent, "Error in loading app: ${e.message}")
+//                return@launch
+//            }
         }
     }
 
-    fun proceedRegistration(callback: (shouldShowDialogValue: Boolean, dialogContentValue: String?, success: Boolean) -> Unit) {
+    fun proceedRegistration(registrationViewModel: RegistrationViewModel, shouldShowDialog: MutableState<Boolean>, dialogContent: MutableState<String>) {
         if (getUsername().isEmpty()) {
-            callback.invoke(true, "Username cannot be empty", false)
+            showError(shouldShowDialog, dialogContent, "Username cannot be empty")
             return
         }
         if (getPassword().isEmpty()) {
-            callback.invoke(true, "Password cannot be empty", false)
+            showError(shouldShowDialog, dialogContent, "Password cannot be empty")
             return
         }
         //create authenticator instance
         val authAdaptor = authenticator
         //check if selected  enrolled credential present in database
         if(authAdaptor?.isCredentialsPresent(getUsername()) == true) {
-            callback.invoke(true, "Username already enrolled", false)
+            showError(shouldShowDialog, dialogContent, "Username already enrolled")
             return
         }
         if (isBiometricAvailable) {
@@ -193,7 +214,7 @@ class MainViewModel(
                 }.await()
                 println("loginResponse ---> $loginResponse")
                 if (loginResponse?.isSuccessful == false) {
-                    callback.invoke(true, loginResponse.errorMessage.toString(), false)
+                    showError(shouldShowDialog, dialogContent, loginResponse.errorMessage.toString())
                     return@launch
                 }
                 //exchange token for code
@@ -204,7 +225,7 @@ class MainViewModel(
                 }.await()
                 println("tokenResponse --> $tokenResponse")
                 if (tokenResponse?.isSuccessful == false) {
-                    callback.invoke(true, tokenResponse.errorMessage.toString(), false)
+                    showError(shouldShowDialog, dialogContent, tokenResponse.errorMessage.toString())
                     return@launch
                 }
                 //exchange user-info for token
@@ -216,13 +237,13 @@ class MainViewModel(
                     )
                 }
                 if (userInfoResponse?.isSuccessful == false) {
-                    callback.invoke(true, userInfoResponse.errorMessage.toString(), false)
+                    showError(shouldShowDialog, dialogContent, userInfoResponse.errorMessage.toString())
                     return@launch
                 }
                 //get fido configuration
                 val fidoConfiguration: FidoConfiguration? = async { getFIDOConfiguration() }.await()
                 if (fidoConfiguration?.isSuccessful == false) {
-                    callback.invoke(true, fidoConfiguration?.errorMessage.toString(), false)
+                    showError(shouldShowDialog, dialogContent, fidoConfiguration?.errorMessage.toString())
                     return@launch
                 }
                 //call /attestation/option
@@ -232,7 +253,7 @@ class MainViewModel(
                     }.await()
                 println("attestationOptionResponse --> $attestationOptionResponse")
                 if (attestationOptionResponse?.isSuccessful == false) {
-                    callback.invoke(true, attestationOptionResponse?.errorMessage.toString(), false)
+                    showError(shouldShowDialog, dialogContent, attestationOptionResponse?.errorMessage.toString())
                     return@launch
                 }
                 //show biometric prompt
@@ -249,7 +270,7 @@ class MainViewModel(
                             )
                         }.await()
                     if (attestationResultRequest?.isSuccessful == false) {
-                        callback.invoke(true, attestationResultRequest.errorMessage.toString(), false)
+                        showError(shouldShowDialog, dialogContent, attestationResultRequest.errorMessage.toString())
                         return@launch
                     }
                     //call /attestation/result
@@ -260,19 +281,21 @@ class MainViewModel(
                             )
                         }.await()
                         if (attestationResultResponse?.isSuccessful == false) {
-                            callback.invoke(true, attestationResultRequestObject.errorMessage.toString(), false)
+                            showError(shouldShowDialog, dialogContent, attestationResultRequestObject.errorMessage.toString())
                             return@launch
                         }
                         mainState = mainState.copy(attestationOptionSuccess = true)
                         mainState = mainState.copy(attestationResultSuccess = true)
 
-                        callback.invoke(false, null, true)
+                        registrationViewModel.onUiEvent(
+                            registrationUiEvent = RegistrationUiEvent.Submit
+                        )
                     }
                 }
 //              })
             }
         } else {
-            callback.invoke(true, "Biometric authentication is not available!", false)
+            showError(shouldShowDialog, dialogContent, "Biometric authentication is not available!")
         }
     }
 
@@ -356,5 +379,11 @@ class MainViewModel(
     suspend fun getUserInfo(accessToken: String?): UserInfoResponse? {
         val oidcClient = getOIDCClient()
         return getUserInfoCase.invoke(accessToken, oidcClient?.clientId ?: "", oidcClient?.clientSecret ?: "").getOrNull()
+    }
+
+    fun showError(shouldShowDialog: MutableState<Boolean>, dialogContent: MutableState<String>, error: String) {
+        mainState = mainState.copy(isLoading = false, errorInLoading = true, loadingErrorMessage = error)
+        shouldShowDialog.value = mainState.errorInLoading
+        dialogContent.value = mainState.loadingErrorMessage
     }
 }

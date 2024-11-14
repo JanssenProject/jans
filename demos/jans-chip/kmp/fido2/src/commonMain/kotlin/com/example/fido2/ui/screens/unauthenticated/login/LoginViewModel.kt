@@ -27,7 +27,8 @@ class LoginViewModel : ViewModel() {
                 //val inputsValidated = validateInputs()
                 //if (inputsValidated) {
                 // TODO Trigger login in authentication flow
-                loginState.value = loginState.value.copy(isLoginSuccessful = true)
+                loginState.value = loginState.value.copy(isLoading = true)
+//                loginState.value = loginState.value.copy(isLoginSuccessful = true)
                 //}
             }
 
@@ -35,7 +36,8 @@ class LoginViewModel : ViewModel() {
                 //val inputsValidated = validateInputs()
                 //if (inputsValidated) {
                 // TODO Trigger login in authentication flow
-                loginState.value = loginState.value.copy(isLoginSuccessful = false)
+                loginState.value = loginState.value.copy(isLoading = false)
+//                loginState.value = loginState.value.copy(isLoginSuccessful = false)
                 //}
             }
 

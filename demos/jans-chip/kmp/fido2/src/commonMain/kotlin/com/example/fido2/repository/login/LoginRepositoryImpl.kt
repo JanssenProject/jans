@@ -18,14 +18,21 @@ class LoginRepositoryImpl(
         // Get OPConfiguration and OIDCClient
         try {
             val oidcClient = localDataSource.getOIDCClient()
+            if (oidcClient == null) {
+                loginResponse.isSuccessful = false
+                loginResponse.errorMessage =
+                    "Error in login. oidcClient is null"
+                return loginResponse
+            }
             println("oidcClient --> $oidcClient")
             val opConfiguration: OPConfiguration? = localDataSource.getOPConfiguration()
             println("opConfiguration --> $opConfiguration")
+            println("authMethod --> $authMethod")
             // Create a call to request an authorization challenge
             val response = apiService.getAuthorizationChallenge(
                 oidcClient?.clientId ?: "",
                 usernameText,
-                passwordText ?: "",
+                passwordText ?: "Gluu1234.",
                 "",
                 "",
                 true,
@@ -40,9 +47,9 @@ class LoginRepositoryImpl(
                 val backendError: BackendError = response.body()
                 loginResponse.isSuccessful = false
                 loginResponse.errorMessage =
-                    "Error in login. Reason ${backendError.reason}"
+                    "Error in login. Reason ${backendError.error}"
                 println(
-                    "Error in login. ErrorCode : ${backendError.reason} and ErrorMessage: ${backendError.error_description}"
+                    "Error in login. ErrorCode : ${backendError.error} and ErrorMessage: ${backendError.error_description}"
                 )
                 return loginResponse
             }

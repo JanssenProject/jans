@@ -51,4 +51,12 @@
     <string name="registration_error_msg_empty_password">Please enter your password</string>
     <string name="registration_error_msg_empty_confirm_password">Please confirm your password</string>
     <string name="registration_error_msg_password_mismatch">Please enter the same password here as above</string>
+
+    <string name="delete_all">Delete all</string>
+    <string name="delete_all_dialog_title">Do you want to Delete all keys?</string>
+    <string name="cancel">Cancel</string>
+    <string name="yes">Yes</string>
+    <string name="enter_url">Enter authentication server url</string>
+    <string name="url_empty">Server url cannot be empty</string>
+    <string name="save">Save</string>
 </resources>

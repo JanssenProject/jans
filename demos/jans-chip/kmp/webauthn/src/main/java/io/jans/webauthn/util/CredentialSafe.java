@@ -137,6 +137,10 @@ public class CredentialSafe {
         db.credentialDao().delete(credentialSource);
     }
 
+    public void deleteAllCredentials() {
+        db.credentialDao().getAll().forEach( item -> deleteCredential(item));
+    }
+
 
     /**
      * Get keys belonging to this RP ID.

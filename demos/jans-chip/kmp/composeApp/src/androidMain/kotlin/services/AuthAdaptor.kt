@@ -25,6 +25,10 @@ class AuthAdaptor(context: Context): AuthenticationProvider {
         return authAdaptor?.getAllCredentials()
     }
 
+    override fun deleteAllKeys() {
+        authAdaptor?.deleteAllKeys()
+    }
+
     override suspend fun register(
         responseFromAPI: AttestationOptionResponse?,
         origin: String?

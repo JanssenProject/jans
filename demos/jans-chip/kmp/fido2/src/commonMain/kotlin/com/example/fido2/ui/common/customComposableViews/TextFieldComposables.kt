@@ -84,19 +84,16 @@ fun PasswordTextField(
         keyboardActions = KeyboardActions(onDone = {
             keyboardController?.hide()
         }),
-        isError = isError,
-        /*supportingText = {
-            if (isError) {
-                ErrorTextInputField(text = errorText)
-            }
-        }*/
+        isError = isError
     )
+    if (isError) {
+        ErrorTextInputField(text = errorText)
+    }
 }
 
 /**
  * Email Text Field
  */
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun EmailTextField(
     modifier: Modifier = Modifier,
@@ -121,14 +118,11 @@ fun EmailTextField(
             keyboardType = KeyboardType.Email,
             imeAction = imeAction
         ),
-        isError = isError,
-//        supportingText = {
-//            if (isError) {
-//                ErrorTextInputField(text = errorText)
-//            }
-//        }
+        isError = isError
     )
-
+    if (isError) {
+        ErrorTextInputField(text = errorText)
+    }
 }
 
 /**
@@ -159,11 +153,6 @@ fun MobileNumberTextField(
             imeAction = imeAction
         ),
         isError = isError
-//        supportingText = {
-//            if (isError) {
-//                ErrorTextInputField(text = errorText)
-//            }
-//        }
     )
 
 }

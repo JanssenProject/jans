@@ -19,11 +19,12 @@ class MainRepositoryImpl(
 
     override suspend fun getOPConfiguration(analytic: Analytic): OPConfiguration {
         var opConfiguration = localDataSource.getOPConfiguration()
+        val configurationUrl = localDataSource.getServerUrl() + AppConfig.OP_CONFIG_URL
         analytic.logEvent("getOPConfiguration from DB $opConfiguration")
         if (opConfiguration == null) {
             opConfiguration =
                 OPConfiguration("", null, null, null, null, null, null)
-            val result: OPConfiguration? = apiOPConfigurationFetch(AppConfig.SERVER_BASE_URL + AppConfig.OP_CONFIG_URL, opConfiguration)
+            val result: OPConfiguration? = apiOPConfigurationFetch(configurationUrl, opConfiguration)
             println("getOPConfiguration from API $result")
             if (result != null) {
                 result.isSuccessful = true
@@ -40,9 +41,9 @@ class MainRepositoryImpl(
         var fidoConfiguration = localDataSource.getFidoConfiguration()
         if (fidoConfiguration == null) {
             println("getFidoConfiguration from DB --> $fidoConfiguration")
+            val configurationUrl = localDataSource.getServerUrl() + AppConfig.FIDO_CONFIG_URL
             fidoConfiguration = FidoConfiguration("", null, null, null, null, null)
-            val fidoConfigurationResponse: FidoConfigurationResponse? = apiFidoConfigurationFetch(
-                AppConfig.SERVER_BASE_URL + AppConfig.FIDO_CONFIG_URL)
+            val fidoConfigurationResponse: FidoConfigurationResponse? = apiFidoConfigurationFetch(configurationUrl)
             println("getFidoConfiguration from API --> $fidoConfigurationResponse")
             if (fidoConfigurationResponse == null) {
                 fidoConfiguration.isSuccessful = false

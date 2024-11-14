@@ -18,9 +18,6 @@ public abstract class CredentialDao {
     @Query("SELECT * FROM credentials")
     public abstract List<PublicKeyCredentialSource> getAll();
 
-//    @Query("SELECT * FROM credentials")
-//    public abstract LiveData<List<PublicKeyCredentialSource>> getAllLive();
-
     @Query("SELECT * FROM credentials WHERE rpId = :rpId")
     public abstract List<PublicKeyCredentialSource> getAllByRpId(String rpId);
 

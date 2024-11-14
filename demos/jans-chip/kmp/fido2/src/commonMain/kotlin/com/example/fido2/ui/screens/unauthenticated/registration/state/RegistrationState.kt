@@ -10,6 +10,7 @@ data class RegistrationState(
     val password: String = "",
     val errorState: RegistrationErrorState = RegistrationErrorState(),
     val isRegistrationSuccessful: Boolean = false,
+    val isValidationSuccessful: Boolean = false,
     val isLoading: Boolean = false
 )
 

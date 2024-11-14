@@ -10,7 +10,7 @@ data class AttestationResultRequest(
 
     var type: String?,
 
-    var response: Response?,
+    var response: AttestationResponse?,
 ) {
     @Ignore
     var isSuccessful: Boolean? = true

@@ -16,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowDropDown
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,16 +27,24 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.fido2.AppAlertDialog
 import com.example.fido2.*
-import com.example.fido2.authAdaptor.AuthenticationProvider
+import com.example.fido2.modules.Dispatcher
 import com.example.fido2.ui.common.customComposableViews.MediumTitleText
 import com.example.fido2.ui.common.customComposableViews.SmallClickableWithIconAndText
 import com.example.fido2.ui.common.customComposableViews.TitleText
 import com.example.fido2.ui.screens.unauthenticated.registration.state.RegistrationUiEvent
 import com.example.fido2.ui.theme.AppTheme
 import com.example.fido2.ui.common.QrScannerView
+import com.example.fido2.ui.common.customComposableViews.AppAlertDialog
+import com.example.fido2.ui.screens.unauthenticated.registration.state.RegistrationState
 import com.example.fido2.viewmodel.MainViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -46,9 +55,9 @@ fun RegistrationScreen(
     onNavigateToAuthenticatedRoute: () -> Unit,
     onQRCodeScanClose: () -> Unit
 ) {
-    val shouldShowDialog = remember { mutableStateOf(false) }
-    val shouldQRCodeScanning = remember { mutableStateOf(false) }
-    val dialogContent = remember { mutableStateOf("") }
+    val shouldShowDialog = remember { viewModel.shouldShowDialog }
+    val shouldQRCodeScanning = remember { viewModel.shouldQRCodeScanning }
+    val dialogContent = remember { viewModel.dialogContent }
     var registrationState by remember {
         registrationViewModel.registrationState
     }
@@ -156,21 +165,35 @@ fun RegistrationScreen(
                             },
 
                             onSubmit = {
-                                registrationState = registrationState.copy(isLoading = true)
-                                viewModel.proceedRegistration() { shouldShowDialogValue, dialogContentValue, success ->
-                                    if (success) {
-                                        registrationViewModel.onUiEvent(
-                                            registrationUiEvent = RegistrationUiEvent.Submit
-                                        )
+                                registrationViewModel.onUiEvent(
+                                    registrationUiEvent = RegistrationUiEvent.ValidateInputs
+                                )
+                                if (registrationState.isValidationSuccessful) {
+//                                    LaunchedEffect(true) {
+//                                        viewModel.loadAppTasks(shouldShowDialog, dialogContent)
+//                                    }
+                                    onSubmitAction(viewModel = viewModel, registrationViewModel = registrationViewModel, shouldShowDialog = shouldShowDialog, dialogContent = dialogContent)
+                                    /*
+                                    viewModel.loadAppTasks(shouldShowDialog, dialogContent)
+                                    registrationState =
+                                        registrationState.copy(isLoading = true)
+                                    viewModel.proceedRegistration { shouldShowDialogValue, dialogContentValue, success ->
+                                        if (success) {
+                                            registrationViewModel.onUiEvent(
+                                                registrationUiEvent = RegistrationUiEvent.Submit
+                                            )
 
+                                            registrationState =
+                                                registrationState.copy(isLoading = false)
+                                            return@proceedRegistration
+                                        }
+                                        shouldShowDialog.value = shouldShowDialogValue
+                                        dialogContent.value = dialogContentValue ?: ""
                                         registrationState =
                                             registrationState.copy(isLoading = false)
                                         return@proceedRegistration
                                     }
-                                    shouldShowDialog.value = shouldShowDialogValue
-                                    dialogContent.value = dialogContentValue ?: ""
-                                    registrationState = registrationState.copy(isLoading = false)
-                                    return@proceedRegistration
+                                     */
                                 }
                             },
 
@@ -180,6 +203,20 @@ fun RegistrationScreen(
                         )
                     }
                 }
+            }
+        }
+    }
+}
+
+fun onSubmitAction(viewModel: MainViewModel, registrationViewModel: RegistrationViewModel, shouldShowDialog: MutableState<Boolean>, dialogContent: MutableState<String>) {
+    CoroutineScope(Dispatchers.IO).launch {
+        viewModel.loadAppTasks(shouldShowDialog, dialogContent) { success ->
+            if (success) {
+                viewModel.proceedRegistration(
+                    registrationViewModel,
+                    shouldShowDialog,
+                    dialogContent
+                )
             }
         }
     }

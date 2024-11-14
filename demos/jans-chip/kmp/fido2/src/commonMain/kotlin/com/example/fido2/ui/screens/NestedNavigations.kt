@@ -6,6 +6,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.example.fido2.authAdaptor.AuthenticationProvider
 import com.example.fido2.ui.screens.dashboard.DashboardScreen
+import com.example.fido2.ui.screens.settings.SettingsScreen
 import com.example.fido2.ui.screens.unauthenticated.login.LoginScreen
 import com.example.fido2.ui.screens.unauthenticated.registration.RegistrationScreen
 import com.example.fido2.viewmodel.MainViewModel
@@ -60,6 +61,10 @@ fun NavGraphBuilder.unauthenticatedGraph(
                     navController.navigate(route = NavigationRoutes.Unauthenticated.Registration.route)
                 }
             )
+        }
+        // Settings
+        composable(route = NavigationRoutes.Unauthenticated.Settings.route) {
+            SettingsScreen()
         }
     }
 }

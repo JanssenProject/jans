@@ -1,0 +1,229 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 2,
+    "identityHash": "c960be5ec2ab82257354deb4a18de6c4",
+    "entities": [
+      {
+        "tableName": "OIDC_CLIENT",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`sno` TEXT NOT NULL, `CLIENT_NAME` TEXT, `CLIENT_ID` TEXT, `CLIENT_SECRET` TEXT, `RECENT_GENERATED_ID_TOKEN` TEXT, `RECENT_GENERATED_ACCESS_TOKEN` TEXT, `scope` TEXT, PRIMARY KEY(`sno`))",
+        "fields": [
+          {
+            "fieldPath": "sno",
+            "columnName": "sno",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientName",
+            "columnName": "CLIENT_NAME",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "CLIENT_ID",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "clientSecret",
+            "columnName": "CLIENT_SECRET",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "recentGeneratedIdToken",
+            "columnName": "RECENT_GENERATED_ID_TOKEN",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "recentGeneratedAccessToken",
+            "columnName": "RECENT_GENERATED_ACCESS_TOKEN",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "scope",
+            "columnName": "scope",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "sno"
+          ]
+        }
+      },
+      {
+        "tableName": "OP_CONFIGURATION",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`sno` TEXT NOT NULL, `ISSUER` TEXT, `REGISTRATION_ENDPOINT` TEXT, `TOKEN_ENDPOINT` TEXT, `USERINFO_ENDPOINT` TEXT, `AUTHORIZATION_CHALLENGE_ENDPOINT` TEXT, `REVOCATION_ENDPOINT` TEXT, `BIOMETRIC_ENROLLED` INTEGER NOT NULL, `FIDO_URL` TEXT, PRIMARY KEY(`sno`))",
+        "fields": [
+          {
+            "fieldPath": "sno",
+            "columnName": "sno",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "issuer",
+            "columnName": "ISSUER",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "registrationEndpoint",
+            "columnName": "REGISTRATION_ENDPOINT",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "tokenEndpoint",
+            "columnName": "TOKEN_ENDPOINT",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "userinfoEndpoint",
+            "columnName": "USERINFO_ENDPOINT",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "authorizationChallengeEndpoint",
+            "columnName": "AUTHORIZATION_CHALLENGE_ENDPOINT",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "revocationEndpoint",
+            "columnName": "REVOCATION_ENDPOINT",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "biometricEnrolled",
+            "columnName": "BIOMETRIC_ENROLLED",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fidoUrl",
+            "columnName": "FIDO_URL",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "sno"
+          ]
+        }
+      },
+      {
+        "tableName": "FIDO_CONFIGURATION",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`sno` TEXT NOT NULL, `ISSUER` TEXT, `ATTESTATION_OPTIONS_ENDPOINT` TEXT, `ATTESTATION_RESULT_ENDPOINT` TEXT, `ASSERTION_OPTIONS_ENDPOINT` TEXT, `ASSERTION_RESULT_ENDPOINT` TEXT, PRIMARY KEY(`sno`))",
+        "fields": [
+          {
+            "fieldPath": "sno",
+            "columnName": "sno",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "issuer",
+            "columnName": "ISSUER",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "attestationOptionsEndpoint",
+            "columnName": "ATTESTATION_OPTIONS_ENDPOINT",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "attestationResultEndpoint",
+            "columnName": "ATTESTATION_RESULT_ENDPOINT",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "assertionOptionsEndpoint",
+            "columnName": "ASSERTION_OPTIONS_ENDPOINT",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "assertionResultEndpoint",
+            "columnName": "ASSERTION_RESULT_ENDPOINT",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "sno"
+          ]
+        }
+      },
+      {
+        "tableName": "APP_INTEGRITY",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`sno` TEXT NOT NULL, `APP_INTEGRITY` TEXT, `DEVICE_INTEGRITY` TEXT, `APP_LICENSING_VERDICT` TEXT, `REQUEST_PACKAGE_NAME` TEXT, `NONCE` TEXT, `ERROR` TEXT, PRIMARY KEY(`sno`))",
+        "fields": [
+          {
+            "fieldPath": "sno",
+            "columnName": "sno",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "appIntegrity",
+            "columnName": "APP_INTEGRITY",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "deviceIntegrity",
+            "columnName": "DEVICE_INTEGRITY",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "appLicensingVerdict",
+            "columnName": "APP_LICENSING_VERDICT",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "requestPackageName",
+            "columnName": "REQUEST_PACKAGE_NAME",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "nonce",
+            "columnName": "NONCE",
+            "affinity": "TEXT"
+          },
+          {
+            "fieldPath": "error",
+            "columnName": "ERROR",
+            "affinity": "TEXT"
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "sno"
+          ]
+        }
+      },
+      {
+        "tableName": "APP_SETTINGS",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`serverUrl` TEXT NOT NULL, PRIMARY KEY(`serverUrl`))",
+        "fields": [
+          {
+            "fieldPath": "serverUrl",
+            "columnName": "serverUrl",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "serverUrl"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'c960be5ec2ab82257354deb4a18de6c4')"
+    ]
+  }
+}
