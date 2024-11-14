@@ -87,13 +87,6 @@ def modify_app_xml(app_name):
     mapper = PersistenceMapper()
     persistence_groups = mapper.groups().keys()
 
-    for persistence_type in ["couchbase"]:
-        if persistence_type not in persistence_groups:
-            continue
-
-        extract_common_libs(persistence_type)
-        custom_libs += get_registered_common_libs(app_name, persistence_type)
-
     # render custom xml
     fn = f"/opt/jans/jetty/{app_name}/webapps/{app_name}.xml"
 
