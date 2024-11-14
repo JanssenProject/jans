@@ -15,11 +15,6 @@ from uuid import uuid4
 
 from jans.pycloudlib import get_manager
 from jans.pycloudlib import wait_for_persistence
-from jans.pycloudlib.persistence.couchbase import CouchbaseClient
-from jans.pycloudlib.persistence.couchbase import render_couchbase_properties
-from jans.pycloudlib.persistence.couchbase import sync_couchbase_cert
-from jans.pycloudlib.persistence.couchbase import sync_couchbase_password
-from jans.pycloudlib.persistence.couchbase import sync_couchbase_truststore
 from jans.pycloudlib.persistence.hybrid import render_hybrid_properties
 from jans.pycloudlib.persistence.sql import SqlClient
 from jans.pycloudlib.persistence.sql import render_sql_properties
@@ -35,7 +30,6 @@ from jans.pycloudlib.utils import get_random_chars
 from jans.pycloudlib.utils import exec_cmd
 
 from settings import LOGGING_CONFIG
-from utils import get_kc_db_password
 
 if _t.TYPE_CHECKING:  # pragma: no cover
     # imported objects for function type hint, completion, etc.
@@ -57,7 +51,7 @@ def render_keycloak_conf():
     ctx = {
         "hostname": hostname,
         "kc_hostname": hostname,
-        "kc_db_password": get_kc_db_password(),
+        "kc_db_password": os.environ.get("KC_DB_PASSWORD") or manager.secret.get("kc_db_password"),
         "idp_config_http_port": os.environ.get("CN_SAML_HTTP_PORT", "8083"),
         "idp_config_http_host": os.environ.get("CN_SAML_HTTP_HOST", "0.0.0.0"),   # nosec: B104
         "idp_config_data_dir": "/opt/keycloak",
@@ -83,19 +77,6 @@ def main():
         hybrid_prop = "/etc/jans/conf/jans-hybrid.properties"
         if not os.path.exists(hybrid_prop):
             render_hybrid_properties(hybrid_prop)
-
-    if "couchbase" in persistence_groups:
-        sync_couchbase_password(manager)
-        render_couchbase_properties(
-            manager,
-            "/app/templates/jans-couchbase.properties",
-            "/etc/jans/conf/jans-couchbase.properties",
-        )
-
-        if as_boolean(os.environ.get("CN_COUCHBASE_TRUSTSTORE_ENABLE", "true")):
-            sync_couchbase_cert(manager)
-            sync_couchbase_truststore(manager)
-        extract_common_libs("couchbase")
 
     if "sql" in persistence_groups:
         sync_sql_password(manager)
@@ -126,7 +107,6 @@ class PersistenceSetup:
         self.manager = manager
 
         client_classes = {
-            "couchbase": CouchbaseClient,
             "sql": SqlClient,
         }
 

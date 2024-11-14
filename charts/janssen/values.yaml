@@ -308,6 +308,10 @@ config:
     lbAddr: ""
     # -- Quarkus transaction recovery. When using MySQL, there could be issue regarding XA_RECOVER_ADMIN; refer to https://dev.mysql.com/doc/refman/8.0/en/privileges-provided.html#priv_xa-recover-admin for details.
     quarkusTransactionEnableRecovery: true
+    # -- Keycloak  admin UI password
+    kcAdminPassword: Test1234#
+    # -- Keycloak admin UI username
+    kcAdminUsername: admin
     # -- Keycloak logging level
     kcLogLevel: INFO
     # -- Keycloak database vendor name (default to MySQL server). To use PostgreSQL server, change the value to postgres.
@@ -1193,10 +1197,6 @@ global:
   cnCouchbasePasswordFile: /etc/jans/conf/couchbase_password
   # -- Path to Couchbase superuser password file
   cnCouchbaseSuperuserPasswordFile: /etc/jans/conf/couchbase_superuser_password
-  # -- Path to file contains password for database access
-  kcDbPasswordFile: /etc/jans/conf/kc_db_password
-  # -- Path to file contains Keycloak admin credentials (username and password)
-  kcAdminCredentialsFile: /etc/jans/conf/kc_admin_creds
   kc-scheduler:
     # -- Boolean flag to enable/disable the kc-scheduler cronjob chart.
     enabled: false

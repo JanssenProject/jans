@@ -7,8 +7,6 @@ from urllib.parse import urlparse
 from urllib.parse import urlunparse
 
 from jans.pycloudlib import get_manager
-from jans.pycloudlib.persistence.couchbase import CouchbaseClient
-from jans.pycloudlib.persistence.couchbase import id_from_dn
 from jans.pycloudlib.persistence.sql import SqlClient
 from jans.pycloudlib.persistence.sql import doc_id_from_dn
 from jans.pycloudlib.persistence.utils import PersistenceMapper
@@ -52,63 +50,9 @@ class SQLBackend:
         return self.client.delete(table_name, key)
 
 
-class CouchbaseBackend:
-    def __init__(self, manager):
-        self.manager = manager
-        self.client = CouchbaseClient(manager)
-        self.type = "couchbase"
-
-    def get_entry(self, key, filter_="", attrs=None, **kwargs):
-        bucket = kwargs.get("bucket")
-        req = self.client.exec_query(
-            f"SELECT META().id, {bucket}.* FROM {bucket} USE KEYS '{key}'"
-        )
-        if not req.ok:
-            return None
-
-        try:
-            _attrs = req.json()["results"][0]
-            id_ = _attrs.pop("id")
-            entry = Entry(id_, _attrs)
-        except IndexError:
-            entry = None
-        return entry
-
-    def modify_entry(self, key, attrs=None, **kwargs):
-        bucket = kwargs.get("bucket")
-        del_flag = kwargs.get("delete_attr", False)
-        attrs = attrs or {}
-
-        if del_flag:
-            kv = ",".join(attrs.keys())
-            mod_kv = f"UNSET {kv}"
-        else:
-            kv = ",".join([
-                "{}={}".format(k, json.dumps(v))
-                for k, v in attrs.items()
-            ])
-            mod_kv = f"SET {kv}"
-
-        query = f"UPDATE {bucket} USE KEYS '{key}' {mod_kv}"
-        req = self.client.exec_query(query)
-
-        if req.ok:
-            resp = req.json()
-            status = bool(resp["status"] == "success")
-            message = resp["status"]
-        else:
-            status = False
-            message = req.text or req.reason
-        return status, message
-
-    def delete_entry(self, key, **kwargs):
-        bucket = kwargs.get("bucket")
-        return self.client.delete(bucket, key)
-
 
 BACKEND_CLASSES = {
     "sql": SQLBackend,
-    "couchbase": CouchbaseBackend,
 }
 
 
@@ -130,16 +74,9 @@ class Upgrade:
         self.update_agama_deployment()
 
     def update_client_scopes(self):
-        kwargs = {}
+        kwargs = {"table_name": "jansClnt"}
         client_id = self.manager.config.get("casa_client_id")
-        id_ = f"inum={client_id},ou=clients,o=jans"
-
-        if self.backend.type == "sql":
-            kwargs = {"table_name": "jansClnt"}
-            id_ = doc_id_from_dn(id_)
-        elif self.backend.type == "couchbase":
-            kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
-            id_ = id_from_dn(id_)
+        id_ = doc_id_from_dn(f"inum={client_id},ou=clients,o=jans")
 
         entry = self.backend.get_entry(id_, **kwargs)
 
@@ -170,15 +107,8 @@ class Upgrade:
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
 
     def update_conf_app(self):
-        kwargs = {}
-        id_ = "ou=casa,ou=configuration,o=jans"
-
-        if self.backend.type == "sql":
-            kwargs = {"table_name": "jansAppConf"}
-            id_ = doc_id_from_dn(id_)
-        elif self.backend.type == "couchbase":
-            kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
-            id_ = id_from_dn(id_)
+        kwargs = {"table_name": "jansAppConf"}
+        id_ = doc_id_from_dn("ou=casa,ou=configuration,o=jans")
 
         entry = self.backend.get_entry(id_, **kwargs)
 
@@ -187,9 +117,8 @@ class Upgrade:
 
         should_update = False
 
-        if self.backend.type != "couchbase":
-            with suppress(json.decoder.JSONDecodeError):
-                entry.attrs["jansConfApp"] = json.loads(entry.attrs["jansConfApp"])
+        with suppress(json.decoder.JSONDecodeError):
+            entry.attrs["jansConfApp"] = json.loads(entry.attrs["jansConfApp"])
 
         for key in ["authz_redirect_uri", "post_logout_uri", "frontchannel_logout_uri"]:
             parsed_url = urlparse(entry.attrs["jansConfApp"]["oidc_config"][key])
@@ -206,21 +135,13 @@ class Upgrade:
                 should_update = True
 
         if should_update:
-            if self.backend.type != "couchbase":
-                entry.attrs["jansConfApp"] = json.dumps(entry.attrs["jansConfApp"])
+            entry.attrs["jansConfApp"] = json.dumps(entry.attrs["jansConfApp"])
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
 
     def update_client_uris(self):
-        kwargs = {}
+        kwargs = {"table_name": "jansClnt"}
         client_id = self.manager.config.get("casa_client_id")
-        id_ = f"inum={client_id},ou=clients,o=jans"
-
-        if self.backend.type == "sql":
-            kwargs = {"table_name": "jansClnt"}
-            id_ = doc_id_from_dn(id_)
-        elif self.backend.type == "couchbase":
-            kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
-            id_ = id_from_dn(id_)
+        id_ = doc_id_from_dn(f"inum={client_id},ou=clients,o=jans")
 
         entry = self.backend.get_entry(id_, **kwargs)
 
@@ -257,15 +178,8 @@ class Upgrade:
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
 
     def update_agama_script(self):
-        kwargs = {}
-        agama_id = "inum=BADA-BADA,ou=scripts,o=jans"
-
-        if self.backend.type == "sql":
-            kwargs = {"table_name": "jansCustomScr"}
-            agama_id = doc_id_from_dn(agama_id)
-        elif self.backend.type == "couchbase":
-            kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
-            agama_id = id_from_dn(agama_id)
+        kwargs = {"table_name": "jansCustomScr"}
+        agama_id = doc_id_from_dn("inum=BADA-BADA,ou=scripts,o=jans")
 
         # enable agama script
         entry = self.backend.get_entry(agama_id, **kwargs)
@@ -277,14 +191,8 @@ class Upgrade:
 
     def update_agama_deployment(self):
         casa_agama_deployment_id = CASA_AGAMA_DEPLOYMENT_ID
-        deploy_id = f"jansId={casa_agama_deployment_id},ou=deployments,ou=agama,o=jans"
-
-        if self.backend.type == "sql":
-            kwargs = {"table_name": "adsPrjDeployment"}
-            deploy_id = doc_id_from_dn(deploy_id)
-        else: # likely couchbase
-            kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
-            deploy_id = id_from_dn(deploy_id)
+        deploy_id = doc_id_from_dn(f"jansId={casa_agama_deployment_id},ou=deployments,ou=agama,o=jans")
+        kwargs = {"table_name": "adsPrjDeployment"}
 
         entry = self.backend.get_entry(deploy_id, **kwargs)
         proj_archive = CASA_AGAMA_ARCHIVE
@@ -299,13 +207,8 @@ class Upgrade:
             entry.attrs["jansActive"] = False
             start_date = utcnow()
 
-            if self.backend.type == "sql":
-                entry.attrs["jansStartDate"] = start_date
-                entry.attrs["jansEndDate"] = None
-            else: # likely couchbase
-                entry.attrs["jansStartDate"] = start_date.strftime("%Y-%m-%dT%H:%M:%SZ")
-                entry.attrs["jansEndDate"] = ""
-                entry.attrs["adsPrjDeplDetails"] = {"projectMetadata": {"projectName": "casa"}}
+            entry.attrs["jansStartDate"] = start_date
+            entry.attrs["jansEndDate"] = None
 
             if self.backend.modify_entry(entry.id, entry.attrs, **kwargs):
                 self.manager.config.set("casa_agama_md5sum", assets_md5)

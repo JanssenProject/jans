@@ -10,7 +10,9 @@ tags:
 
 A person may have several accounts on a single Jans Auth Server instance. For example, it is common to have several Gmail accounts. Jans Auth Server uses two cookies to track which accounts are associated with a browser: `session_id` and `current_sessions`.
 
-Please check [Multiple Sessions In One Browser Overview](../../auth-server/session-management/multiple-sessions-one-browser.md)
+Please check [Multiple Sessions In One Browser Overview](../../janssen-server/auth-server/session-management/multiple-sessions-one-browser.md)
+
+
 
 Select Account interception script can be used to customize account selection behavior. E.g. redirect to external page or change text representation of sessions on page.
 

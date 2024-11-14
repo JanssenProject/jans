@@ -11,12 +11,6 @@ from ldif import LDIFWriter
 
 from jans.pycloudlib import get_manager
 from jans.pycloudlib import wait_for_persistence
-from jans.pycloudlib.persistence.couchbase import CouchbaseClient
-from jans.pycloudlib.persistence.couchbase import id_from_dn
-from jans.pycloudlib.persistence.couchbase import render_couchbase_properties
-from jans.pycloudlib.persistence.couchbase import sync_couchbase_cert
-from jans.pycloudlib.persistence.couchbase import sync_couchbase_password
-from jans.pycloudlib.persistence.couchbase import sync_couchbase_truststore
 from jans.pycloudlib.persistence.hybrid import render_hybrid_properties
 from jans.pycloudlib.persistence.sql import doc_id_from_dn
 from jans.pycloudlib.persistence.sql import SqlClient
@@ -56,18 +50,6 @@ def main():
         hybrid_prop = "etc/jans/conf/jans-hybrid.properties"
         if not os.path.exists(hybrid_prop):
             render_hybrid_properties(hybrid_prop)
-
-    if "couchbase" in persistence_groups:
-        sync_couchbase_password(manager)
-        render_couchbase_properties(
-            manager,
-            "/app/templates/jans-couchbase.properties",
-            "/etc/jans/conf/jans-couchbase.properties",
-        )
-
-        if as_boolean(os.environ.get("CN_COUCHBASE_TRUSTSTORE_ENABLE", "true")):
-            sync_couchbase_cert(manager)
-            sync_couchbase_truststore(manager)
 
     if "sql" in persistence_groups:
         sync_sql_password(manager)
@@ -281,7 +263,6 @@ class PersistenceSetup:
         self.manager = manager
 
         client_classes = {
-            "couchbase": CouchbaseClient,
             "sql": SqlClient,
         }
 
@@ -295,20 +276,8 @@ class PersistenceSetup:
 
     def get_auth_config(self):
         dn = "ou=jans-auth,ou=configuration,o=jans"
-
-        # sql
-        if self.persistence_type == "sql":
-            entry = self.client.get("jansAppConf", doc_id_from_dn(dn))
-            return json.loads(entry["jansConfDyn"])
-
-        # likely couchbase
-        key = id_from_dn(dn)
-        bucket = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
-        req = self.client.exec_query(
-            f"SELECT META().id, {bucket}.* FROM {bucket} USE KEYS '{key}'"  # nosec:  608
-        )
-        attrs = req.json()["results"][0]
-        return attrs["jansConfDyn"]
+        entry = self.client.get("jansAppConf", doc_id_from_dn(dn))
+        return json.loads(entry["jansConfDyn"])
 
     def transform_url(self, url):
         auth_server_url = os.environ.get("CN_AUTH_SERVER_URL", "")

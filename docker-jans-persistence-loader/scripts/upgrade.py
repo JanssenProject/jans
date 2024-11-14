@@ -7,10 +7,8 @@ from collections import namedtuple
 from ldif import LDIFParser
 
 from jans.pycloudlib import get_manager
-from jans.pycloudlib.persistence.couchbase import CouchbaseClient
 from jans.pycloudlib.persistence.sql import SqlClient
 from jans.pycloudlib.persistence.sql import doc_id_from_dn
-from jans.pycloudlib.persistence.couchbase import id_from_dn
 from jans.pycloudlib.persistence.utils import PersistenceMapper
 from jans.pycloudlib.persistence.sql import get_sql_password
 from jans.pycloudlib.utils import as_boolean
@@ -128,84 +126,8 @@ class SQLBackend:
         return self.client.delete(table_name, key)
 
 
-class CouchbaseBackend:
-    def __init__(self, manager):
-        self.manager = manager
-        self.client = CouchbaseClient(manager)
-        self.type = "couchbase"
-
-    def get_entry(self, key, filter_="", attrs=None, **kwargs):
-        bucket = kwargs.get("bucket")
-        req = self.client.exec_query(
-            f"SELECT META().id, {bucket}.* FROM {bucket} USE KEYS '{key}'"  # nosec: B608
-        )
-        if not req.ok:
-            return None
-
-        try:
-            _attrs = req.json()["results"][0]
-            id_ = _attrs.pop("id")
-            entry = Entry(id_, _attrs)
-        except IndexError:
-            entry = None
-        return entry
-
-    def modify_entry(self, key, attrs=None, **kwargs):
-        bucket = kwargs.get("bucket")
-        del_flag = kwargs.get("delete_attr", False)
-        attrs = attrs or {}
-
-        if del_flag:
-            kv = ",".join(attrs.keys())
-            mod_kv = f"UNSET {kv}"
-        else:
-            kv = ",".join([
-                "{}={}".format(k, json.dumps(v))
-                for k, v in attrs.items()
-            ])
-            mod_kv = f"SET {kv}"
-
-        query = f"UPDATE {bucket} USE KEYS '{key}' {mod_kv}"
-        req = self.client.exec_query(query)
-
-        if req.ok:
-            resp = req.json()
-            status = bool(resp["status"] == "success")
-            message = resp["status"]
-        else:
-            status = False
-            message = req.text or req.reason
-        return status, message
-
-    def update_misc(self):
-        # 1 - fix objectclass for scim and config-api where it has lowecased objectclass instead of objectClass
-        bucket = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
-
-        # create the index for query
-        self.client.exec_query(f'CREATE INDEX `def_jans_fix_oc` ON `{bucket}`(`objectclass`)')
-
-        # get all scopes that has objectclass instead of objectClass
-        req = self.client.exec_query(f"SELECT META().id, {bucket}.* FROM {bucket} WHERE `objectclass` IS NOT MISSING")
-        if req.ok:
-            resp = req.json()
-            for doc in resp["results"]:
-                id_ = doc.pop("id")
-                doc["objectClass"] = doc["objectclass"][-1]
-                self.modify_entry(id_, doc, **{"bucket": bucket})
-                # remove the objectclass attribute so the query above wont return results
-                self.modify_entry(id_, {"objectclass": []}, **{"bucket": bucket, "delete_attr": True})
-
-        # drop the index
-        self.client.exec_query(f'DROP INDEX `{bucket}`.`def_jans_fix_oc`')
-
-    def delete_entry(self, key, **kwargs):
-        bucket = kwargs.get("bucket")
-        return self.client.delete(bucket, key)
-
-
 BACKEND_CLASSES = {
     "sql": SQLBackend,
-    "couchbase": CouchbaseBackend,
 }
 
 
@@ -245,23 +167,11 @@ class Upgrade:
 
     def update_scripts_entries(self):
         kwargs = {}
-        scim_id = JANS_SCIM_SCRIPT_DN
-        basic_id = JANS_BASIC_SCRIPT_DN
-        duo_id = "inum=5018-F9CF,ou=scripts,o=jans"
-        agama_id = "inum=BADA-BADA,ou=scripts,o=jans"
-
-        if self.backend.type == "sql":
-            kwargs = {"table_name": "jansCustomScr"}
-            scim_id = doc_id_from_dn(scim_id)
-            basic_id = doc_id_from_dn(basic_id)
-            duo_id = doc_id_from_dn(duo_id)
-            agama_id = doc_id_from_dn(agama_id)
-        elif self.backend.type == "couchbase":
-            kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
-            scim_id = id_from_dn(scim_id)
-            basic_id = id_from_dn(basic_id)
-            duo_id = id_from_dn(duo_id)
-            agama_id = id_from_dn(agama_id)
+        scim_id = doc_id_from_dn(JANS_SCIM_SCRIPT_DN)
+        basic_id = doc_id_from_dn(JANS_BASIC_SCRIPT_DN)
+        duo_id = doc_id_from_dn("inum=5018-F9CF,ou=scripts,o=jans")
+        agama_id = doc_id_from_dn("inum=BADA-BADA,ou=scripts,o=jans")
+        kwargs = {"table_name": "jansCustomScr"}
 
         # toggle scim script
         scim_entry = self.backend.get_entry(scim_id, **kwargs)
@@ -315,45 +225,29 @@ class Upgrade:
                 self.backend.modify_entry(agama_entry.id, agama_entry.attrs, **kwargs)
 
     def update_auth_dynamic_config(self):
-        kwargs = {}
-        id_ = JANS_AUTH_CONFIG_DN
-
-        if self.backend.type == "sql":
-            kwargs = {"table_name": "jansAppConf"}
-            id_ = doc_id_from_dn(id_)
-        elif self.backend.type == "couchbase":
-            kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
-            id_ = id_from_dn(id_)
+        kwargs = {"table_name": "jansAppConf"}
+        id_ = doc_id_from_dn(JANS_AUTH_CONFIG_DN)
 
         entry = self.backend.get_entry(id_, **kwargs)
 
         if not entry:
             return
 
-        if self.backend.type != "couchbase":
-            entry.attrs["jansConfDyn"] = json.loads(entry.attrs["jansConfDyn"])
-
+        entry.attrs["jansConfDyn"] = json.loads(entry.attrs["jansConfDyn"])
         conf, should_update = transform_auth_dynamic_config_hook(entry.attrs["jansConfDyn"], self.manager)
 
         if should_update:
-            if self.backend.type != "couchbase":
-                entry.attrs["jansConfDyn"] = json.dumps(conf)
-
+            entry.attrs["jansConfDyn"] = json.dumps(conf)
             entry.attrs["jansRevision"] += 1
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
 
     def update_attributes_entries(self):
         def _update_claim_names():
-            kwargs = {}
             rows = collect_claim_names()
 
             for id_, claim_name in rows.items():
-                if self.backend.type == "sql":
-                    id_ = doc_id_from_dn(id_)
-                    kwargs = {"table_name": "jansAttr"}
-                elif self.backend.type == "couchbase":
-                    id_ = id_from_dn(id_)
-                    kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
+                id_ = doc_id_from_dn(id_)
+                kwargs = {"table_name": "jansAttr"}
 
                 entry = self.backend.get_entry(id_, **kwargs)
 
@@ -368,15 +262,8 @@ class Upgrade:
                 self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
 
         def _update_mobile_attr():
-            kwargs = {}
-            id_ = "inum=6DA6,ou=attributes,o=jans"
-
-            if self.backend.type == "sql":
-                id_ = doc_id_from_dn(id_)
-                kwargs = {"table_name": "jansAttr"}
-            elif self.backend.type == "couchbase":
-                id_ = id_from_dn(id_)
-                kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
+            kwargs = {"table_name": "jansAttr"}
+            id_ = doc_id_from_dn("inum=6DA6,ou=attributes,o=jans")
 
             entry = self.backend.get_entry(id_, **kwargs)
 
@@ -391,16 +278,10 @@ class Upgrade:
         _update_mobile_attr()
 
     def update_scim_scopes_entries(self):
-        kwargs = {}
-
         # add jansAttrs to SCIM users.read and users.write scopes
         for id_ in [JANS_SCIM_USERS_READ_SCOPE_DN, JANS_SCIM_USERS_WRITE_SCOPE_DN]:
-            if self.backend.type == "sql":
-                kwargs = {"table_name": "jansScope"}
-                id_ = doc_id_from_dn(id_)
-            elif self.backend.type == "couchbase":
-                kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
-                id_ = id_from_dn(id_)
+            kwargs = {"table_name": "jansScope"}
+            id_ = doc_id_from_dn(id_)
 
             entry = self.backend.get_entry(id_, **kwargs)
 
@@ -412,15 +293,8 @@ class Upgrade:
                 self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
 
     def update_scopes_entries(self):
-        kwargs = {}
-        id_ = JANS_PROFILE_SCOPE_DN
-
-        if self.backend.type == "sql":
-            kwargs = {"table_name": "jansScope"}
-            id_ = doc_id_from_dn(id_)
-        elif self.backend.type == "couchbase":
-            kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
-            id_ = id_from_dn(id_)
+        kwargs = {"table_name": "jansScope"}
+        id_ = doc_id_from_dn(JANS_PROFILE_SCOPE_DN)
 
         entry = self.backend.get_entry(id_, **kwargs)
 
@@ -434,16 +308,8 @@ class Upgrade:
     def update_people_entries(self):
         admin_inum = self.manager.config.get("admin_inum")
 
-        id_ = f"inum={admin_inum},ou=people,o=jans"
-        kwargs = {}
-
-        if self.user_backend.type == "sql":
-            id_ = doc_id_from_dn(id_)
-            kwargs = {"table_name": "jansPerson"}
-        elif self.user_backend.type == "couchbase":
-            id_ = id_from_dn(id_)
-            bucket = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
-            kwargs = {"bucket": f"{bucket}_user"}
+        id_ = doc_id_from_dn(f"inum={admin_inum},ou=people,o=jans")
+        kwargs = {"table_name": "jansPerson"}
 
         entry = self.user_backend.get_entry(id_, **kwargs)
 
@@ -479,21 +345,14 @@ class Upgrade:
     def update_clients_entries(self):
         # modify introspection script for token server client
         def _update_token_server_client():
-            kwargs = {}
+            kwargs = {"table_name": "jansClnt"}
             token_server_admin_ui_client_id = self.manager.config.get("token_server_admin_ui_client_id")
 
             # admin-ui is not available
             if not token_server_admin_ui_client_id:
                 return
 
-            id_ = f"inum={token_server_admin_ui_client_id},ou=clients,o=jans"
-
-            if self.backend.type == "sql":
-                kwargs = {"table_name": "jansClnt"}
-                id_ = doc_id_from_dn(id_)
-            elif self.backend.type == "couchbase":
-                kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
-                id_ = id_from_dn(id_)
+            id_ = doc_id_from_dn(f"inum={token_server_admin_ui_client_id},ou=clients,o=jans")
 
             entry = self.backend.get_entry(id_, **kwargs)
 
@@ -508,15 +367,8 @@ class Upgrade:
         _update_token_server_client()
 
     def update_admin_ui_config(self):
-        kwargs = {}
-        id_ = "ou=admin-ui,ou=configuration,o=jans"
-
-        if self.backend.type == "sql":
-            kwargs = {"table_name": "jansAppConf"}
-            id_ = doc_id_from_dn(id_)
-        elif self.backend.type == "couchbase":
-            kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
-            id_ = id_from_dn(id_)
+        kwargs = {"table_name": "jansAppConf"}
+        id_ = doc_id_from_dn("ou=admin-ui,ou=configuration,o=jans")
 
         entry = self.backend.get_entry(id_, **kwargs)
 
@@ -547,23 +399,15 @@ class Upgrade:
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
 
     def update_auth_errors_config(self):
-        kwargs = {}
-        id_ = JANS_AUTH_CONFIG_DN
-
-        if self.backend.type == "sql":
-            kwargs = {"table_name": "jansAppConf"}
-            id_ = doc_id_from_dn(id_)
-        elif self.backend.type == "couchbase":
-            kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
-            id_ = id_from_dn(id_)
+        kwargs = {"table_name": "jansAppConf"}
+        id_ = doc_id_from_dn(JANS_AUTH_CONFIG_DN)
 
         entry = self.backend.get_entry(id_, **kwargs)
 
         if not entry:
             return
 
-        if self.backend.type != "couchbase":
-            entry.attrs["jansConfErrors"] = json.loads(entry.attrs["jansConfErrors"])
+        entry.attrs["jansConfErrors"] = json.loads(entry.attrs["jansConfErrors"])
 
         should_update = False
 
@@ -576,30 +420,20 @@ class Upgrade:
                 should_update = True
 
         if should_update:
-            if self.backend.type != "couchbase":
-                entry.attrs["jansConfErrors"] = json.dumps(entry.attrs["jansConfErrors"])
-
+            entry.attrs["jansConfErrors"] = json.dumps(entry.attrs["jansConfErrors"])
             entry.attrs["jansRevision"] += 1
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
 
     def update_auth_static_config(self):
-        kwargs = {}
-        id_ = JANS_AUTH_CONFIG_DN
-
-        if self.backend.type == "sql":
-            kwargs = {"table_name": "jansAppConf"}
-            id_ = doc_id_from_dn(id_)
-        elif self.backend.type == "couchbase":
-            kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
-            id_ = id_from_dn(id_)
+        kwargs = {"table_name": "jansAppConf"}
+        id_ = doc_id_from_dn(JANS_AUTH_CONFIG_DN)
 
         entry = self.backend.get_entry(id_, **kwargs)
 
         if not entry:
             return
 
-        if self.backend.type != "couchbase":
-            entry.attrs["jansConfStatic"] = json.loads(entry.attrs["jansConfStatic"])
+        entry.attrs["jansConfStatic"] = json.loads(entry.attrs["jansConfStatic"])
 
         should_update = False
 
@@ -612,23 +446,14 @@ class Upgrade:
                 should_update = True
 
         if should_update:
-            if self.backend.type != "couchbase":
-                entry.attrs["jansConfStatic"] = json.dumps(entry.attrs["jansConfStatic"])
-
+            entry.attrs["jansConfStatic"] = json.dumps(entry.attrs["jansConfStatic"])
             entry.attrs["jansRevision"] += 1
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
 
     def update_tui_client(self):
-        kwargs = {}
+        kwargs = {"table_name": "jansClnt"}
         tui_client_id = self.manager.config.get("tui_client_id")
-        id_ = f"inum={tui_client_id},ou=clients,o=jans"
-
-        if self.backend.type == "sql":
-            kwargs = {"table_name": "jansClnt"}
-            id_ = doc_id_from_dn(id_)
-        elif self.backend.type == "couchbase":
-            kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
-            id_ = id_from_dn(id_)
+        id_ = doc_id_from_dn(f"inum={tui_client_id},ou=clients,o=jans")
 
         entry = self.backend.get_entry(id_, **kwargs)
 
@@ -670,15 +495,8 @@ class Upgrade:
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
 
     def update_config(self):
-        kwargs = {}
-        id_ = "ou=configuration,o=jans"
-
-        if self.backend.type == "sql":
-            kwargs = {"table_name": "jansAppConf"}
-            id_ = doc_id_from_dn(id_)
-        elif self.backend.type == "couchbase":
-            kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
-            id_ = id_from_dn(id_)
+        kwargs = {"table_name": "jansAppConf"}
+        id_ = doc_id_from_dn("ou=configuration,o=jans")
 
         entry = self.backend.get_entry(id_, **kwargs)
 
@@ -751,10 +569,8 @@ class Upgrade:
             should_update = True
 
         if should_update:
-            if self.backend.type != "couchbase":
-                entry.attrs["jansMessageConf"] = json.dumps(entry.attrs["jansMessageConf"])
-                entry.attrs["jansDocStoreConf"] = json.dumps(entry.attrs["jansDocStoreConf"])
-
+            entry.attrs["jansMessageConf"] = json.dumps(entry.attrs["jansMessageConf"])
+            entry.attrs["jansDocStoreConf"] = json.dumps(entry.attrs["jansDocStoreConf"])
             revision = entry.attrs.get("jansRevision") or 1
             entry.attrs["jansRevision"] = revision + 1
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)

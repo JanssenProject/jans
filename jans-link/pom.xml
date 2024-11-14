@@ -20,6 +20,14 @@
 	<name>jans link server parent</name>
 	<url>http://maven.apache.org</url>
 
+  <distributionManagement>
+     <repository>
+       <id>github</id>
+       <name>Github Packages</name>
+       <url>https://maven.pkg.github.com/JanssenProject/jans</url>
+     </repository>
+   </distributionManagement>
+
 	<properties>
 		<janssen.version>${project.version}</janssen.version>
 
@@ -41,6 +49,11 @@
 	</scm>
 
 	<repositories>
+		<repository>
+			<id>github</id>
+			<name>GitHub Packages</name>
+			<url>https://maven.pkg.github.com/JanssenProject/jans</url>
+		</repository>
 		<repository>
 			<id>mavencentral</id>
 			<name>maven central</name>
