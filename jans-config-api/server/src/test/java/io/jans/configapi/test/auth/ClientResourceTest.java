@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.configapi.test.resource;
+package io.jans.configapi.test.auth;
 
 import static io.restassured.RestAssured.given;
 import io.jans.configapi.BaseTest;
