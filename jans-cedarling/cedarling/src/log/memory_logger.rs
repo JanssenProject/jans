@@ -85,9 +85,10 @@ impl LogStorage for MemoryLogger {
 
 #[cfg(test)]
 mod tests {
-    use super::super::{AuthorizationLogInfo, Decision, LogEntry, LogType};
+    use super::super::{AuthorizationLogInfo, LogEntry, LogType};
     use super::*;
     use crate::common::app_types;
+    use test_utils::assert_eq;
 
     fn create_memory_logger() -> MemoryLogger {
         let config = MemoryLogConfig { log_ttl: 60 };
@@ -109,19 +110,9 @@ mod tests {
             action: "test_action".to_string(),
             resource: "test_resource".to_string(),
             context: serde_json::json!({}),
-
-            person_principal: "test_person_principal".to_string(),
-            workload_principal: "test_workload_principal".to_string(),
-            role_principal: Some("test_role_principal".to_string()),
-
-            person_diagnostics: Default::default(),
-            workload_diagnostics: Default::default(),
-            role_diagnostics: Default::default(),
-
-            person_decision: Decision::Allow,
-            workload_decision: Decision::Allow,
-            role_decision: Some(Decision::Allow),
-
+            person_authorize_info: Default::default(),
+            role_authorize_info: Default::default(),
+            workload_authorize_info: Default::default(),
             authorized: true,
         });
         let entry2 = LogEntry::new_with_data(
