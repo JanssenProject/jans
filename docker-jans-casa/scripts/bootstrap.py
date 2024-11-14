@@ -9,12 +9,6 @@ from ldif import LDIFWriter
 
 from jans.pycloudlib import get_manager
 from jans.pycloudlib import wait_for_persistence
-from jans.pycloudlib.persistence.couchbase import CouchbaseClient
-from jans.pycloudlib.persistence.couchbase import id_from_dn
-from jans.pycloudlib.persistence.couchbase import render_couchbase_properties
-from jans.pycloudlib.persistence.couchbase import sync_couchbase_cert
-from jans.pycloudlib.persistence.couchbase import sync_couchbase_password
-from jans.pycloudlib.persistence.couchbase import sync_couchbase_truststore
 from jans.pycloudlib.persistence.hybrid import render_hybrid_properties
 from jans.pycloudlib.persistence.sql import doc_id_from_dn
 from jans.pycloudlib.persistence.sql import render_sql_properties
@@ -127,18 +121,6 @@ def main():
     if persistence_type == "hybrid":
         render_hybrid_properties("/etc/jans/conf/jans-hybrid.properties")
 
-    if "couchbase" in persistence_groups:
-        sync_couchbase_password(manager)
-        render_couchbase_properties(
-            manager,
-            "/app/templates/jans-couchbase.properties",
-            "/etc/jans/conf/jans-couchbase.properties",
-        )
-
-        if as_boolean(os.environ.get("CN_COUCHBASE_TRUSTSTORE_ENABLE", "true")):
-            sync_couchbase_cert(manager)
-            sync_couchbase_truststore(manager)
-
     if "sql" in persistence_groups:
         sync_sql_password(manager)
         db_dialect = os.environ.get("CN_SQL_DB_DIALECT", "mysql")
@@ -189,7 +171,6 @@ class PersistenceSetup:
         self.manager = manager
 
         client_classes = {
-            "couchbase": CouchbaseClient,
             "sql": SqlClient,
         }
 
@@ -253,22 +234,7 @@ class PersistenceSetup:
     def _deprecated_script_exists(self):
         # deprecated Casa script DN
         id_ = "inum=BABA-CACA,ou=scripts,o=jans"
-
-        # sql
-        if self.persistence_type == "sql":
-            return bool(self.client.get("jansCustomScr", doc_id_from_dn(id_)))
-
-        # likely couchbase
-        bucket = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
-        key = id_from_dn(id_)
-        req = self.client.exec_query(
-            f"SELECT META().id, {bucket}.* FROM {bucket} USE KEYS '{key}'"
-        )
-        try:
-            entry = req.json()["results"][0]
-            return bool(entry["id"])
-        except IndexError:
-            return False
+        return bool(self.client.get("jansCustomScr", doc_id_from_dn(id_)))
 
     def import_ldif_files(self):
         for file_ in self.ldif_files:
