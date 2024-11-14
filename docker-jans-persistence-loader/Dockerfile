@@ -16,7 +16,7 @@ RUN apk update \
 # ===========
 
 # janssenproject/jans SHA commit
-ENV JANS_SOURCE_VERSION=6e00e723a99d700a4f82713b0c25b2d6e3ef5775
+ENV JANS_SOURCE_VERSION=871c36da8a2550ee2febd7c0d72c521898b226c3
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCRIPT_CATALOG_DIR=docs/script-catalog
 ARG JANS_CONFIG_API_RESOURCES=jans-config-api/server/src/main/resources
@@ -32,12 +32,11 @@ RUN git clone --depth 500 --filter blob:none --no-checkout https://github.com/ja
     && git sparse-checkout add ${JANS_CONFIG_API_RESOURCES} \
     && git sparse-checkout add jans-pycloudlib
 
-RUN mkdir -p /app/static /app/static/couchbase /app/schema /app/static/opendj /app/templates
+RUN mkdir -p /app/static /app/schema /app/static/opendj /app/templates
 
 # sync static files from linux-setup
 RUN cd /tmp/jans \
     && cp -R ${JANS_SETUP_DIR}/static/extension /app/static/extension \
-    && cp ${JANS_SETUP_DIR}/static/couchbase/index.json /app/static/couchbase/index.json \
     && cp ${JANS_SETUP_DIR}/schema/opendj_types.json /app/schema/opendj_types.json \
     && cp -R ${JANS_SETUP_DIR}/static/rdbm /app/static/rdbm \
     && cp ${JANS_SETUP_DIR}/schema/jans_schema.json /app/schema/ \
@@ -117,17 +116,8 @@ ENV CN_SECRET_ADAPTER=vault \
 # Persistence ENV
 # ===============
 
-ENV CN_PERSISTENCE_TYPE=couchbase \
-    CN_HYBRID_MAPPING="{}" \
-    CN_COUCHBASE_URL=localhost \
-    CN_COUCHBASE_USER=admin \
-    CN_COUCHBASE_CERT_FILE=/etc/certs/couchbase.crt \
-    CN_COUCHBASE_PASSWORD_FILE=/etc/jans/conf/couchbase_password \
-    CN_COUCHBASE_SUPERUSER="" \
-    CN_COUCHBASE_SUPERUSER_PASSWORD_FILE=/etc/jans/conf/couchbase_superuser_password \
-    CN_COUCHBASE_INDEX_NUM_REPLICA=0 \
-    CN_LDAP_URL=localhost:1636 \
-    CN_LDAP_USE_SSL=true
+ENV CN_PERSISTENCE_TYPE=sql \
+    CN_HYBRID_MAPPING="{}"
 
 # ===========
 # Generic ENV

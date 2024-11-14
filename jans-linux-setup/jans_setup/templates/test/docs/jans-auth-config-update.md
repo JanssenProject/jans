@@ -57,7 +57,7 @@ V. Update system configuration
 
 VI. Restart oxAuth server
 
-VII. Update LDAP schema (this is not needed for Couchbase)
+VII. Update LDAP schema
 1. cp ./output/test/oxauth/schema/102-jans-auth_test.ldif /opt/opendj/config/schema/
 2. cp ./output/test/scim-client/schema/103-scim_test.ldif /opt/opendj/config/schema/
 3. Apply manual schema changes described in ./output/test/scim-client/schema/scim_test_manual_update.schema
