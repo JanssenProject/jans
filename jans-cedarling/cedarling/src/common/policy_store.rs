@@ -5,14 +5,17 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
+mod claim_mapping;
 #[cfg(test)]
 mod test;
+mod token_entity_metadata;
 
 use super::cedar_schema::CedarSchema;
 use cedar_policy::PolicyId;
 use semver::Version;
 use serde::{Deserialize, Deserializer};
 use std::{collections::HashMap, fmt};
+use token_entity_metadata::{AccessTokenEntityMetadata, TokenEntityMetadata};
 
 /// This is the top-level struct in compliance with the Agama Lab Policy Designer format.
 #[derive(Debug, Clone, serde::Deserialize, PartialEq)]
@@ -22,7 +25,7 @@ pub struct AgamaPolicyStore {
     #[allow(dead_code)]
     pub cedar_version: Version,
 
-    pub policy_stores : HashMap<String,PolicyStore>,
+    pub policy_stores: HashMap<String, PolicyStore>,
 }
 
 /// Represents the store of policies used for JWT validation and policy evaluation in Cedarling.
@@ -58,7 +61,7 @@ pub struct PolicyStore {
     pub trusted_issuers: Option<Vec<TrustedIssuer>>,
 
     #[allow(dead_code)]
-    pub identity_source: Option<HashMap<String,IdentitySource>>,
+    pub identity_source: Option<HashMap<String, IdentitySource>>,
 }
 
 /// Represents a trusted issuer that can provide JWTs.
@@ -88,13 +91,6 @@ pub struct TrustedIssuer {
     pub token_metadata: Option<Vec<TokenMetadata>>,
 }
 
-#[derive(Debug, Clone, Deserialize, PartialEq)]
-pub struct IdentitySourceToken {
-    pub trusted: bool,
-    pub principal_identifier: String,
-    pub role_mapping: String, // TODO should this be a Role type?
-}
-
 /// Represents a trusted issuer that can provide JWTs.
 ///
 /// This struct includes the issuer's name, description, and the OpenID configuration endpoint
@@ -113,11 +109,21 @@ pub struct IdentitySource {
     /// This endpoint is used to obtain information about the issuer's capabilities.
     pub openid_configuration_endpoint: String,
 
-    // TODO comments for these
-    pub access_tokens: IdentitySourceToken,
-    pub id_tokens: IdentitySourceToken,
-    pub userinfo_tokens: IdentitySourceToken,
-    pub tx_tokens: IdentitySourceToken,
+    /// Metadata for access tokens issued by the trusted issuer.
+    #[serde(default)]
+    pub access_tokens: AccessTokenEntityMetadata,
+
+    /// Metadata for ID tokens issued by the trusted issuer.
+    #[serde(default)]
+    pub id_tokens: TokenEntityMetadata,
+
+    /// Metadata for userinfo tokens issued by the trusted issuer.
+    #[serde(default)]
+    pub userinfo_tokens: TokenEntityMetadata,
+
+    /// Metadata for transaction tokens issued by the trusted issuer.
+    #[serde(default)]
+    pub tx_tokens: TokenEntityMetadata,
 }
 
 /// Structure define the source from which role mappings are retrieved.
@@ -281,12 +287,13 @@ where
             // Check for "v" prefix
             let version = version.strip_prefix('v').unwrap_or(&version);
 
-            let version = Version::parse(version)
-                .map_err(|e| serde::de::Error::custom(format!("error parsing cedar version :{}", e)))?;
+            let version = Version::parse(version).map_err(|e| {
+                serde::de::Error::custom(format!("error parsing cedar version :{}", e))
+            })?;
 
             Ok(Some(version))
-        }
-        None => Ok(None)
+        },
+        None => Ok(None),
     }
 }
 
@@ -445,8 +452,38 @@ where
             cedar_policy::Policy::parse(Some(PolicyId::new(id)), decoded_body).map_err(|err| {
                 serde::de::Error::custom(format!("{}: {err}", ParsePolicySetMessage::HumanReadable))
             })?
-        }
+        },
     };
 
     Ok(policy)
+}
+
+/// Custom parser for an Option<String> which returns `None` if the string is empty.
+pub fn parse_option_string<'de, D>(deserializer: D) -> Result<Option<String>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let value = Option::<String>::deserialize(deserializer)?;
+
+    Ok(value.filter(|s| !s.is_empty()))
+}
+
+/// Custom parser for Option<HashMap<_, _>> which returns `None` if the HashMap is empty
+pub fn parse_option_hashmap<'de, D, K, V>(
+    deserializer: D,
+) -> Result<Option<HashMap<K, V>>, D::Error>
+where
+    D: Deserializer<'de>,
+    K: Eq + std::hash::Hash + Deserialize<'de>,
+    V: Deserialize<'de>,
+{
+    let option = Option::<HashMap<K, V>>::deserialize(deserializer)?;
+
+    match option {
+        Some(ref hashmap) => match hashmap.is_empty() {
+            true => Ok(None),
+            false => Ok(option),
+        },
+        None => Ok(None),
+    }
 }
