@@ -32,7 +32,6 @@ pub struct AccessTokenEntityMetadata {
 /// Metadata associated with a token entity, which includes user identification,
 /// role mappings, and claim mappings.
 #[derive(Debug, PartialEq, Clone, Default, Deserialize)]
-#[allow(dead_code)]
 pub struct TokenEntityMetadata {
     /// An optional user identifier extracted from the token metadata.
     #[serde(deserialize_with = "parse_option_string", default)]

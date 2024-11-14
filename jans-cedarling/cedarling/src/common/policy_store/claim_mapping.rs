@@ -15,10 +15,8 @@ use std::collections::HashMap;
 /// - `Regex`: For extracting claims using regular expressions with fields.
 /// - `Json`: For extracting claims using a JSON parser.
 #[derive(Debug, PartialEq, Clone)]
-#[allow(dead_code)]
 pub enum ClaimMapping {
     /// Represents a claim mapping using regular expressions.
-
     ///
     /// # Fields
     /// - `type`: The type of the claim (e.g., "Acme::Email").
@@ -127,7 +125,6 @@ mod test {
 
     /// Tests if a token entity metadata with a RegEx parser can be parsed
     /// from a JSON string
-
     #[test]
     fn can_parse_regex_from_json() {
         // Setup expected output
@@ -180,15 +177,12 @@ mod test {
     #[test]
     fn can_parse_json_from_json() {
         // Setup expected output
-
         let expected = ClaimMapping::Json {
             r#type: "Acme::Dolphin".to_string(),
         };
 
         // Setup JSON
-
         let claim_mapping_json = json!({
-
             "parser": "json",
             "type": "Acme::Dolphin",
         })
@@ -271,7 +265,6 @@ mod test {
         // Setup YAML
         let claim_mapping_yaml = "
           parser: 'json'
-
           type: 'Acme::Dolphin'
         "
         .to_string();

@@ -90,7 +90,7 @@ policy_stores:
             {
               Jans::Access_token::"xxx".exp>123 && Jans::Access_token::"aaa".exp<321 || Jans::Access_token::"aaa".iat>=111
             };
-    identity_source: {}
+    trusted_issuers: {}
     schema:
       encoding: none
       content_type: cedar
