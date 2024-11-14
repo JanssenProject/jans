@@ -13,7 +13,7 @@
 	
     <test name="Agama Deployments" enabled="true">
         <classes>
-             <class name="io.jans.configapi.test.auth.AgamaDeploymentsResource" />
+             <class name="io.jans.configapi.test.auth.AgamaDeploymentsResourceTest" />
         </classes>
     </test>
 

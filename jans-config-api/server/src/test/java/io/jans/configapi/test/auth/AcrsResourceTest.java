@@ -27,8 +27,8 @@ public class AcrsResourceTest extends BaseTest{
 	
 	@Parameters({"issuer", "acrsUrl", "default_acr1"})
     @Test
-    public void postClient(final String issuer, final String openidClientsUrl, final String json) {
-        log.error("accessToken:{}, issuer:{}, openidClientsUrl:{}, json:{}", accessToken, issuer, openidClientsUrl, json);
+    public void postClient(final String issuer, final String acrsUrl, final String json) {
+        log.error("accessToken:{}, issuer:{}, acrsUrl:{}, json:{}", accessToken, issuer, acrsUrl, json);
         log.info("Creating client using json string");
 
          given().when().contentType(MediaType.APPLICATION_JSON)
