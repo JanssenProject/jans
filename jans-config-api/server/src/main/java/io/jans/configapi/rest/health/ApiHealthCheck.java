@@ -165,7 +165,8 @@ public class ApiHealthCheck  {
     }
 
     @Operation(summary = "Fetch service status", description = "Fetch service status", operationId = "get-service-status", tags = {
-            "Health - Check" })
+            "Health - Check" }, security = @SecurityRequirement(name = "oauth2", scopes = {
+                    ApiAccessConstants.APP_VERSION_READ_ACCESS }))
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Map.class), examples = @ExampleObject(name = "Response json example", value = "example/health/service-status.json"))),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })

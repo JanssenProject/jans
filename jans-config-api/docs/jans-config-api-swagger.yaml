@@ -188,6 +188,9 @@ paths:
                     }
         "500":
           description: InternalServerError
+      security:
+      - oauth2:
+        - https://jans.io/oauth/config/app-version.readonly
   /api/v1/acrs:
     get:
       tags:
@@ -9267,7 +9270,7 @@ components:
           type: string
         selected:
           type: boolean
-        whitePagesCanView:
+        userCanEdit:
           type: boolean
         adminCanEdit:
           type: boolean
@@ -9275,11 +9278,11 @@ components:
           type: boolean
         adminCanView:
           type: boolean
-        userCanEdit:
-          type: boolean
         userCanAccess:
           type: boolean
         adminCanAccess:
+          type: boolean
+        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -11246,14 +11249,14 @@ components:
           type: boolean
         internal:
           type: boolean
+        locationPath:
+          type: string
         locationType:
           type: string
           enum:
           - ldap
           - db
           - file
-        locationPath:
-          type: string
         baseDn:
           type: string
     ScriptError:
@@ -11682,10 +11685,10 @@ components:
         ttl:
           type: integer
           format: int32
-        opbrowserState:
-          type: string
         persisted:
           type: boolean
+        opbrowserState:
+          type: string
     SessionIdAccessMap:
       type: object
       properties:
