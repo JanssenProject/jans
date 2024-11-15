@@ -140,17 +140,18 @@ public class BaseTest {
     @BeforeTest
     public void getAccessToken() throws Exception {
         log.error("getAccessToken - propertiesMap:{}", propertiesMap);
-        String tokenUrl = propertiesMap.get("token.endpoint");
-        String strGrantType = propertiesMap.get("token.grant.type");
-        String clientId = propertiesMap.get("test.client.id");
-        String clientSecret = propertiesMap.get("test.client.secret");
-        String scopes = propertiesMap.get("test.scopes");
+        
+        //accessToken = "ad00f5cc-3221-4d31-8318-aa3642f5ed00";
+       
+        String tokenUrl = propertiesMap.get("tokenEndpoint");
+        String strGrantType = propertiesMap.get("tokenGrantType");
+        String clientId = propertiesMap.get("clientId");
+        String clientSecret = propertiesMap.get("clientSecret");
+        String scopes = propertiesMap.get("scopes");
         String authStr = clientId + ':' + clientSecret;
 
-        String token = new String(Base64.decodeBase64(authStr), StandardCharsets.UTF_8);
-        String encodedScopes = URLDecoder.decode(scopes, "UTF-8");
-        GrantType grantType = GrantType.fromString(strGrantType);
-        accessToken = getToken(tokenUrl, clientId, clientSecret, grantType, encodedScopes);
+       GrantType grantType = GrantType.fromString(strGrantType);
+        accessToken = getToken(tokenUrl, clientId, clientSecret, grantType, scopes);
         log.error("accessToken:{}", accessToken);
     }
     
