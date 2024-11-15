@@ -5,18 +5,10 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-pub use crate::{
-    BootstrapConfig, Cedarling, JwtConfig, LogConfig, LogTypeConfig, PolicyStoreConfig,
-    PolicyStoreSource, Request,
-};
-pub use serde::Deserialize;
+use lazy_static::lazy_static;
 
-pub use cedar_policy::Decision;
 use jsonwebkey as jwk;
 use jsonwebtoken as jwt;
-pub use serde_json::json;
-
-use lazy_static::lazy_static;
 
 // Represent meta information about entity from cedar-policy schema.
 lazy_static! {
@@ -77,19 +69,4 @@ pub fn generate_token_using_claims(claims: impl serde::Serialize) -> String {
 
     // serialize token to a string
     jwt::encode(&header, &claims, encoding_key).expect("should generate token")
-}
-
-/// create [`Cedarling`] from [`PolicyStoreSource`]
-pub fn get_cedarling(policy_source: PolicyStoreSource) -> Cedarling {
-    Cedarling::new(BootstrapConfig {
-        application_name: "test_app".to_string(),
-        log_config: LogConfig {
-            log_type: LogTypeConfig::StdOut,
-        },
-        policy_store_config: PolicyStoreConfig {
-            source: policy_source,
-        },
-        jwt_config: JwtConfig::Disabled,
-    })
-    .expect("boostrap config should initialize correctly")
 }

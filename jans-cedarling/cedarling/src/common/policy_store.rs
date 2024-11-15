@@ -5,24 +5,26 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
+mod claim_mapping;
 #[cfg(test)]
 mod test;
+mod token_entity_metadata;
 
 use super::cedar_schema::CedarSchema;
 use cedar_policy::PolicyId;
 use semver::Version;
 use serde::{Deserialize, Deserializer};
 use std::{collections::HashMap, fmt};
+use token_entity_metadata::{AccessTokenEntityMetadata, TokenEntityMetadata};
 
 /// This is the top-level struct in compliance with the Agama Lab Policy Designer format.
 #[derive(Debug, Clone, serde::Deserialize, PartialEq)]
 pub struct AgamaPolicyStore {
     /// The cedar version to use when parsing the schema and policies.
     #[serde(deserialize_with = "parse_cedar_version")]
-    #[allow(dead_code)]
     pub cedar_version: Version,
 
-    pub policy_stores : HashMap<String,PolicyStore>,
+    pub policy_stores: HashMap<String, PolicyStore>,
 }
 
 /// Represents the store of policies used for JWT validation and policy evaluation in Cedarling.
@@ -31,15 +33,14 @@ pub struct AgamaPolicyStore {
 /// which are parsed during deserialization.
 #[derive(Debug, Clone, serde::Deserialize, PartialEq)]
 pub struct PolicyStore {
-    #[serde(default)]
-    pub name: Option<String>,
+    /// Name is also name of namespace in `cedar-policy`
+    pub name: String,
 
     #[serde(default)]
     pub description: Option<String>,
 
     /// The cedar version to use when parsing the schema and policies.
     #[serde(deserialize_with = "parse_maybe_cedar_version", default)]
-    #[allow(dead_code)]
     pub cedar_version: Option<Version>,
 
     /// Cedar schema
@@ -50,23 +51,24 @@ pub struct PolicyStore {
     #[serde(alias = "policies", deserialize_with = "parse_cedar_policy")]
     pub cedar_policies: cedar_policy::PolicySet,
 
-    /// An optional list of trusted issuers.
+    /// An optional HashMap of trusted issuers.
     ///
     /// This field may contain issuers that are trusted to provide tokens, allowing for additional
     /// verification and security when handling JWTs.
-    #[allow(dead_code)]
-    pub trusted_issuers: Option<Vec<TrustedIssuer>>,
+    pub trusted_issuers: Option<HashMap<String, TrustedIssuer>>,
+}
 
-    #[allow(dead_code)]
-    pub identity_source: Option<HashMap<String,IdentitySource>>,
+impl PolicyStore {
+    pub fn namespace(&self) -> &str {
+        &self.name
+    }
 }
 
 /// Represents a trusted issuer that can provide JWTs.
 ///
 /// This struct includes the issuer's name, description, and the OpenID configuration endpoint
 /// for discovering issuer-related information.
-#[derive(Debug, Clone, Deserialize, PartialEq)]
-#[allow(dead_code)]
+#[derive(Debug, Clone, Deserialize, PartialEq, Default)]
 pub struct TrustedIssuer {
     /// The name of the trusted issuer.
     pub name: String,
@@ -79,45 +81,21 @@ pub struct TrustedIssuer {
     /// This endpoint is used to obtain information about the issuer's capabilities.
     pub openid_configuration_endpoint: String,
 
-    /// Optional metadata related to the tokens issued by this issuer.
-    ///
-    /// This field may include role mappings that help define the access levels for issued tokens.
-    ///
-    /// TODO: currently unused in any validation checks
-    #[serde(deserialize_with = "parse_and_check_token_metadata")]
-    pub token_metadata: Option<Vec<TokenMetadata>>,
-}
+    /// Metadata for access tokens issued by the trusted issuer.
+    #[serde(default)]
+    pub access_tokens: AccessTokenEntityMetadata,
 
-#[derive(Debug, Clone, Deserialize, PartialEq)]
-pub struct IdentitySourceToken {
-    pub trusted: bool,
-    pub principal_identifier: String,
-    pub role_mapping: String, // TODO should this be a Role type?
-}
+    /// Metadata for ID tokens issued by the trusted issuer.
+    #[serde(default)]
+    pub id_tokens: TokenEntityMetadata,
 
-/// Represents a trusted issuer that can provide JWTs.
-///
-/// This struct includes the issuer's name, description, and the OpenID configuration endpoint
-/// for discovering issuer-related information.
-#[derive(Debug, Clone, Deserialize, PartialEq)]
-#[allow(dead_code)]
-pub struct IdentitySource {
-    /// The name of the identity source.
-    pub name: String,
+    /// Metadata for userinfo tokens issued by the trusted issuer.
+    #[serde(default)]
+    pub userinfo_tokens: TokenEntityMetadata,
 
-    /// A brief description of the identity source.
-    pub description: String,
-
-    /// The OpenID configuration endpoint for the issuer.
-    ///
-    /// This endpoint is used to obtain information about the issuer's capabilities.
-    pub openid_configuration_endpoint: String,
-
-    // TODO comments for these
-    pub access_tokens: IdentitySourceToken,
-    pub id_tokens: IdentitySourceToken,
-    pub userinfo_tokens: IdentitySourceToken,
-    pub tx_tokens: IdentitySourceToken,
+    /// Metadata for transaction tokens issued by the trusted issuer.
+    #[serde(default)]
+    pub tx_tokens: TokenEntityMetadata,
 }
 
 /// Structure define the source from which role mappings are retrieved.
@@ -138,70 +116,48 @@ impl Default for RoleMapping<'_> {
 
 impl TrustedIssuer {
     /// Retrieves the available `RoleMapping` from the token metadata.
-    //
-    // in `token_metadata` list only one element with mapping
-    // it is maximum 3 elements in list so iterating is efficient enouf
+    ///
+    /// Checks each token metadata and returns the first one found with a `role_mapping` field.
+    ///
+    /// The checks happen in this order:
+    ///     1. access_token
+    ///     2. id_token
+    ///     3. userinfo_token
+    ///     4. tx_token
     pub fn get_role_mapping(&self) -> Option<RoleMapping> {
-        for metadata in self.token_metadata.as_ref()? {
-            if let Some(role_mapping_field) = &metadata.role_mapping {
-                return Some(RoleMapping {
-                    kind: metadata.kind,
-                    role_mapping_field,
-                });
-            }
+        if let Some(role_mapping) = &self.access_tokens.entity_metadata.role_mapping {
+            return Some(RoleMapping {
+                kind: TokenKind::Access,
+                role_mapping_field: role_mapping.as_str(),
+            });
         }
+
+        if let Some(role_mapping) = &self.id_tokens.role_mapping {
+            return Some(RoleMapping {
+                kind: TokenKind::Id,
+                role_mapping_field: role_mapping.as_str(),
+            });
+        }
+
+        if let Some(role_mapping) = &self.userinfo_tokens.role_mapping {
+            return Some(RoleMapping {
+                kind: TokenKind::Userinfo,
+                role_mapping_field: role_mapping.as_str(),
+            });
+        }
+
+        if let Some(role_mapping) = &self.tx_tokens.role_mapping {
+            return Some(RoleMapping {
+                kind: TokenKind::Transaction,
+                role_mapping_field: role_mapping.as_str(),
+            });
+        }
+
         None
     }
 }
 
-/// Parses and validates the `token_metadata` field.
-///
-/// This function ensures that the metadata contains at most one `TokenMetadata` with a `role_mapping`
-/// to prevent ambiguous role assignments.
-fn parse_and_check_token_metadata<'de, D>(
-    deserializer: D,
-) -> Result<Option<Vec<TokenMetadata>>, D::Error>
-where
-    D: Deserializer<'de>,
-{
-    let token_metadata: Option<Vec<TokenMetadata>> = Option::deserialize(deserializer)?;
-
-    if let Some(metadata) = &token_metadata {
-        let count = metadata
-            .iter()
-            .filter(|token| token.role_mapping.is_some())
-            .count();
-
-        if count > 1 {
-            return Err(serde::de::Error::custom(
-                "there can only be one TokenMetadata with a role_mapping".to_string(),
-            ));
-        }
-    }
-
-    Ok(token_metadata)
-}
-
-/// Represents metadata associated with a token.
-///
-/// This struct includes the type of token, the ID of the person associated with the token,
-/// and an optional role mapping for access control.
-#[derive(Debug, Clone, Deserialize, PartialEq)]
-#[allow(dead_code)]
-pub struct TokenMetadata {
-    /// The type of token (e.g., Access, ID, Userinfo, Transaction).
-    #[serde(rename = "type")]
-    pub kind: TokenKind,
-
-    /// The claim used to create the user entity associated with this token.
-    pub user_id: String,
-
-    /// An optional claim used to create a role for the token.
-    pub role_mapping: Option<String>,
-}
-
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
-#[allow(dead_code)]
 pub enum TokenKind {
     /// Access token used for granting access to resources.
     Access,
@@ -211,6 +167,9 @@ pub enum TokenKind {
 
     /// Userinfo token containing user-specific information.
     Userinfo,
+
+    /// Token containing transaction-specific information.
+    Transaction,
 }
 
 /// Enum representing the different kinds of tokens used by Cedarling.
@@ -220,6 +179,7 @@ impl fmt::Display for TokenKind {
             TokenKind::Access => "access",
             TokenKind::Id => "id",
             TokenKind::Userinfo => "userinfo",
+            TokenKind::Transaction => "transaction",
         };
         write!(f, "{}", kind_str)
     }
@@ -249,7 +209,6 @@ impl<'de> Deserialize<'de> for TokenKind {
 /// This function checks that the version string follows the format `major.minor.patch`,
 /// where each component is a valid number. This also supports having a "v" prefix in the
 /// version, e.g. `v1.0.1`.
-#[allow(dead_code)]
 fn parse_cedar_version<'de, D>(deserializer: D) -> Result<Version, D::Error>
 where
     D: Deserializer<'de>,
@@ -281,12 +240,13 @@ where
             // Check for "v" prefix
             let version = version.strip_prefix('v').unwrap_or(&version);
 
-            let version = Version::parse(version)
-                .map_err(|e| serde::de::Error::custom(format!("error parsing cedar version :{}", e)))?;
+            let version = Version::parse(version).map_err(|e| {
+                serde::de::Error::custom(format!("error parsing cedar version :{}", e))
+            })?;
 
             Ok(Some(version))
-        }
-        None => Ok(None)
+        },
+        None => Ok(None),
     }
 }
 
@@ -445,8 +405,38 @@ where
             cedar_policy::Policy::parse(Some(PolicyId::new(id)), decoded_body).map_err(|err| {
                 serde::de::Error::custom(format!("{}: {err}", ParsePolicySetMessage::HumanReadable))
             })?
-        }
+        },
     };
 
     Ok(policy)
+}
+
+/// Custom parser for an Option<String> which returns `None` if the string is empty.
+pub fn parse_option_string<'de, D>(deserializer: D) -> Result<Option<String>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let value = Option::<String>::deserialize(deserializer)?;
+
+    Ok(value.filter(|s| !s.is_empty()))
+}
+
+/// Custom parser for Option<HashMap<_, _>> which returns `None` if the HashMap is empty
+pub fn parse_option_hashmap<'de, D, K, V>(
+    deserializer: D,
+) -> Result<Option<HashMap<K, V>>, D::Error>
+where
+    D: Deserializer<'de>,
+    K: Eq + std::hash::Hash + Deserialize<'de>,
+    V: Deserialize<'de>,
+{
+    let option = Option::<HashMap<K, V>>::deserialize(deserializer)?;
+
+    match option {
+        Some(ref hashmap) => match hashmap.is_empty() {
+            true => Ok(None),
+            false => Ok(option),
+        },
+        None => Ok(None),
+    }
 }

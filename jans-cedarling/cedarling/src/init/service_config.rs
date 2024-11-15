@@ -44,7 +44,7 @@ impl ServiceConfig {
             .trusted_issuers
             .clone()  // we need clone to avoid borrowing
             .unwrap_or_default()
-            .iter()
+            .values()
             .map(|trusted_issuer| {
                 TrustedIssuerAndOpenIdConfig::fetch(trusted_issuer.clone(), &client)
             })
