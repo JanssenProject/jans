@@ -521,7 +521,7 @@ fn get_token_claim_cedar_typename_in_attr_error() {
         .create_entity(&schema, &payload, HashSet::new())
         .expect_err("entity creating should throw error");
 
-    if let CedarPolicyCreateTypeError::EntityTypeName(typename, _) = &entity_creation_error {
+    if let CedarPolicyCreateTypeError::FindType(typename) = &entity_creation_error {
         assert_eq!("Jans:::Test2", typename);
     } else {
         panic!(

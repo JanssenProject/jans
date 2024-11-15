@@ -33,6 +33,14 @@ pub enum GetCedarTypeError {
     TypeNotImplemented(String),
 }
 
+/// Enum to get info about type based on name.
+/// Is used as a result in [`CedarSchemaJson::find_type`]
+pub enum SchemaDefinedType<'a> {
+    #[allow(dead_code)]
+    Entity(&'a CedarSchemaEntityShape),
+    CommonType(&'a CedarSchemaRecord),
+}
+
 /// JSON representation of a [`cedar_policy::Schema`]
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize, PartialEq)]
 pub(crate) struct CedarSchemaJson {
@@ -50,6 +58,17 @@ impl CedarSchemaJson {
         let namespace = self.namespace.get(namespace)?;
         namespace.entity_types.get(typename)
     }
+
+    pub fn find_type(&self, type_name: &str, namespace: &str) -> Option<SchemaDefinedType> {
+        let namespace = self.namespace.get(namespace)?;
+        if let Some(common_type) = namespace.common_types.get(type_name).as_ref() {
+            Some(SchemaDefinedType::CommonType(common_type))
+        } else if let Some(entity) = namespace.entity_types.get(type_name).as_ref() {
+            Some(SchemaDefinedType::Entity(entity))
+        } else {
+            None
+        }
+    }
 }
 
 /// CedarSchemaEntities hold all entities and their shapes in the namespace.
@@ -57,9 +76,9 @@ impl CedarSchemaJson {
 // It may contain more fields, but we don't need all of them.
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize, PartialEq)]
 pub struct CedarSchemaEntities {
-    #[serde(rename = "entityTypes")]
+    #[serde(rename = "entityTypes", default)]
     pub entity_types: HashMap<String, CedarSchemaEntityShape>,
-    #[serde(rename = "commonTypes")]
+    #[serde(rename = "commonTypes", default)]
     pub common_types: HashMap<String, CedarSchemaRecord>,
 }
 

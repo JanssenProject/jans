@@ -10,10 +10,13 @@ use std::{
     str::FromStr,
 };
 
-use crate::authz::token_data::{GetTokenClaimValue, Payload, TokenPayload};
 use crate::common::cedar_schema::{
     cedar_json::{CedarSchemaEntityShape, CedarSchemaRecord, CedarType, GetCedarTypeError},
     CedarSchemaJson,
+};
+use crate::{
+    authz::token_data::{GetTokenClaimValue, Payload, TokenPayload},
+    common::cedar_schema::cedar_json::SchemaDefinedType,
 };
 
 use cedar_policy::{EntityId, EntityTypeName, EntityUid, RestrictedExpression};
@@ -148,16 +151,20 @@ fn entity_meta_attributes(
 
 /// Build attributes for the entity
 fn build_entity_attributes(
-    schema_shape: &CedarSchemaEntityShape,
+    schema: &CedarSchemaJson,
+    parsed_typename: &EntityParsedTypeName,
     data: &TokenPayload,
-    entity_namespace: &str,
 ) -> Result<HashMap<String, RestrictedExpression>, CedarPolicyCreateTypeError> {
+    // fetch the schema entity shape from the json-schema.
+    let schema_shape = fetch_schema_record(parsed_typename, schema)?;
+
     if let Some(schema_record) = &schema_shape.shape {
         let attr_vec = entity_meta_attributes(schema_record)?
             .into_iter()
             .filter_map(|attr: EntityAttributeMetadata| {
                 let attr_name = attr.attribute_name;
-                let cedar_exp_result = token_attribute_to_cedar_exp(&attr, data, entity_namespace);
+                let cedar_exp_result =
+                    token_attribute_to_cedar_exp(&attr, data, parsed_typename, schema);
                 match (cedar_exp_result, attr.is_required) {
                     (Ok(cedar_exp), _) => Some(Ok((attr_name.to_string(), cedar_exp))),
                     (
@@ -178,17 +185,14 @@ fn build_entity_attributes(
 }
 
 /// Create entity from token payload data.
-pub fn create_entity<'a>(
+pub fn create_entity(
     entity_uid: EntityUid,
     parsed_typename: &EntityParsedTypeName,
-    schema: &'a CedarSchemaJson,
-    data: &'a TokenPayload,
+    schema: &CedarSchemaJson,
+    data: &TokenPayload,
     parents: HashSet<EntityUid>,
 ) -> Result<cedar_policy::Entity, CedarPolicyCreateTypeError> {
-    // fetch the schema entity shape from the json-schema.
-    let schema_shape = fetch_schema_record(parsed_typename, schema)?;
-
-    let attrs = build_entity_attributes(schema_shape, data, parsed_typename.namespace)?;
+    let attrs = build_entity_attributes(schema, parsed_typename, data)?;
 
     let entity_uid_string = entity_uid.to_string();
     cedar_policy::Entity::new(entity_uid, attrs, parents)
@@ -210,7 +214,8 @@ pub struct EntityAttributeMetadata<'a> {
 fn token_attribute_to_cedar_exp(
     attribute_metadata: &EntityAttributeMetadata,
     claim: &TokenPayload,
-    entity_namespace: &str,
+    entity_typename: &EntityParsedTypeName,
+    schema: &CedarSchemaJson,
 ) -> Result<RestrictedExpression, CedarPolicyCreateTypeError> {
     let token_claim_key = attribute_metadata.attribute_name;
 
@@ -219,7 +224,9 @@ fn token_attribute_to_cedar_exp(
     get_expression(
         &attribute_metadata.cedar_policy_type,
         token_claim_value,
-        entity_namespace,
+        claim,
+        entity_typename,
+        schema,
     )
 }
 
@@ -227,35 +234,91 @@ fn token_attribute_to_cedar_exp(
 fn get_expression(
     cedar_type: &CedarType,
     token_claim_value: Payload,
-    entity_namespace: &str,
+    claim: &TokenPayload,
+    base_entity_typename: &EntityParsedTypeName,
+    schema: &CedarSchemaJson,
 ) -> Result<RestrictedExpression, CedarPolicyCreateTypeError> {
     match cedar_type {
         CedarType::String => Ok(token_claim_value.as_str()?.to_string().to_expression()),
         CedarType::Long => Ok(token_claim_value.as_i64()?.to_expression()),
         CedarType::Boolean => Ok(token_claim_value.as_bool()?.to_expression()),
-        CedarType::TypeName(entity_type_name) => {
-            let restricted_expression = {
-                // We need concat typename of entity attribute with the namespace of entity
-                let entity_type = if !entity_namespace.is_empty() {
-                    format!("{entity_namespace}{CEDAR_POLICY_SEPARATOR}{entity_type_name}")
-                } else {
-                    entity_type_name.to_string()
-                };
-                let uid = EntityUid::from_type_name_and_id(
-                    EntityTypeName::from_str(entity_type.as_str()).map_err(|err| {
-                        CedarPolicyCreateTypeError::EntityTypeName(entity_type.to_string(), err)
-                    })?,
-                    EntityId::new(token_claim_value.as_str()?),
-                );
-                RestrictedExpression::new_entity_uid(uid)
-            };
-            Ok(restricted_expression)
+        CedarType::TypeName(cedar_typename) => {
+            // TODO: extract 2 functions
+            match schema.find_type(cedar_typename, base_entity_typename.namespace) {
+                Some(SchemaDefinedType::Entity(_)) => {
+                    let restricted_expression = {
+                        let entity_full_type_name = EntityParsedTypeName::new(
+                            cedar_typename,
+                            base_entity_typename.namespace,
+                        )
+                        .full_type_name();
+
+                        let uid = EntityUid::from_type_name_and_id(
+                            EntityTypeName::from_str(entity_full_type_name.as_str()).map_err(
+                                |err| {
+                                    CedarPolicyCreateTypeError::EntityTypeName(
+                                        entity_full_type_name.to_string(),
+                                        err,
+                                    )
+                                },
+                            )?,
+                            EntityId::new(token_claim_value.as_str()?),
+                        );
+                        RestrictedExpression::new_entity_uid(uid)
+                    };
+                    Ok(restricted_expression)
+                },
+                Some(SchemaDefinedType::CommonType(record)) => {
+                    // TODO: check if we have mapping for current type
+                    // in payload we have key
+                    let mapped_claim: TokenPayload = todo!();
+
+                    let mut record_restricted_exps = Vec::new();
+
+                    for (attribute_key, entity_attribute) in record.attributes.iter() {
+                        let attribute_type = entity_attribute.get_type()?;
+
+                        let base_entity_typename = EntityParsedTypeName::new(
+                            cedar_typename,
+                            base_entity_typename.namespace,
+                        );
+
+                        let exp = get_expression(
+                            &attribute_type,
+                            token_claim_value,
+                            &mapped_claim,
+                            &base_entity_typename,
+                            schema,
+                        )
+                        .map_err(|err| {
+                            CedarPolicyCreateTypeError::BuildAttribute(
+                                base_entity_typename.full_type_name(),
+                                attribute_key.to_string(),
+                                Box::new(err),
+                            )
+                        })?;
+
+                        record_restricted_exps.push((attribute_key.to_string(), exp));
+                    }
+
+                    let restricted_expression =
+                        RestrictedExpression::new_record(record_restricted_exps.into_iter())
+                            .map_err(|err| CedarPolicyCreateTypeError::CreateRecord(err))?;
+                    Ok(restricted_expression)
+                },
+                None => Err(CedarPolicyCreateTypeError::FindType(
+                    EntityParsedTypeName::new(cedar_typename, base_entity_typename.namespace)
+                        .full_type_name(),
+                )),
+            }
         },
         CedarType::Set(cedar_type) => {
             let vec_of_expression = token_claim_value
                 .as_array()?
                 .into_iter()
-                .map(|payload| get_expression(cedar_type, payload, entity_namespace))
+                .map(|payload| {
+                    get_expression(cedar_type, payload, claim, base_entity_typename, schema)
+                })
                 .collect::<Result<Vec<_>, _>>()?;
 
             Ok(RestrictedExpression::new_set(vec_of_expression))
@@ -282,4 +345,13 @@ pub enum CedarPolicyCreateTypeError {
 
     #[error("could not retrieve attribute from cedar-policy schema: {0}")]
     GetCedarType(#[from] GetCedarTypeError),
+
+    #[error("err build cedar-policy type: {0}, mapped JWT attribute `{1}`: {2}")]
+    BuildAttribute(String, String, Box<CedarPolicyCreateTypeError>),
+
+    #[error("could not create `cedar-policy` record/type: {0}")]
+    CreateRecord(cedar_policy::ExpressionConstructionError),
+
+    #[error("could find record/type: {0}")]
+    FindType(String),
 }
