@@ -14,7 +14,7 @@ use std::str::FromStr;
 use std::sync::Arc;
 
 use crate::common::app_types;
-use crate::common::policy_store::{AccessTokenEntityMetadata, PolicyStore, TokenEntityMetadata};
+use crate::common::policy_store::PolicyStore;
 use crate::jwt;
 use crate::log::{
     AuthorizationLogInfo, LogEntry, LogType, Logger, PersonAuthorizeInfo, RoleAuthorizeInfo,

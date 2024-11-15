@@ -19,7 +19,7 @@ use crate::common::cedar_schema::CedarSchemaJson;
 
 use crate::authz::token_data::{AccessTokenData, IdTokenData, UserInfoTokenData};
 use crate::common::policy_store::{
-    AccessTokenEntityMetadata, ClaimMappings, PolicyStore, TokenEntityMetadata, TokenKind,
+    AccessTokenEntityMetadata, ClaimMappings, PolicyStore, TokenKind,
 };
 use crate::jwt;
 use cedar_policy::EntityUid;
@@ -67,10 +67,7 @@ pub fn create_access_token_entities(
             typename: "Access_token",
             namespace,
         },
-        meta.principal_identifier
-            .as_ref()
-            .map(|v| v.as_str())
-            .unwrap_or("jti"),
+        meta.principal_identifier.as_deref().unwrap_or("jti"),
     );
 
     let workload_entity_meta = EntityMetadata::new(
@@ -122,9 +119,9 @@ pub fn create_user_entity(
 
     // payload for getting user ID
     let payload_for_id: &TokenPayload = match user_id_mapping.kind {
-        TokenKind::Access => &*tokens.access_token,
-        TokenKind::Id => &*tokens.id_token,
-        TokenKind::Userinfo => &*tokens.userinfo_token,
+        TokenKind::Access => &tokens.access_token,
+        TokenKind::Id => &tokens.id_token,
+        TokenKind::Userinfo => &tokens.userinfo_token,
         TokenKind::Transaction => return Err(CedarPolicyCreateTypeError::TransactionToken),
     };
 

@@ -114,7 +114,7 @@ impl Default for TrustedIssuer {
 
 impl Default for &TrustedIssuer {
     fn default() -> Self {
-        static DEFAULT: LazyLock<TrustedIssuer> = LazyLock::new(|| TrustedIssuer::default());
+        static DEFAULT: LazyLock<TrustedIssuer> = LazyLock::new(TrustedIssuer::default);
         &DEFAULT
     }
 }
@@ -234,7 +234,7 @@ impl TrustedIssuer {
         None
     }
 
-    pub fn tokens_metadata<'a>(&'a self) -> TokensMetadata<'a> {
+    pub fn tokens_metadata(&self) -> TokensMetadata<'_> {
         TokensMetadata {
             access_tokens: &self.access_tokens,
             id_tokens: &self.id_tokens,

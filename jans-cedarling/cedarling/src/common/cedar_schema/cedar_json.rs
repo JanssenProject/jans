@@ -59,15 +59,30 @@ impl CedarSchemaJson {
         namespace.entity_types.get(typename)
     }
 
+    // #[allow(clippy::manual_map)]
     pub fn find_type(&self, type_name: &str, namespace: &str) -> Option<SchemaDefinedType> {
         let namespace = self.namespace.get(namespace)?;
-        if let Some(common_type) = namespace.common_types.get(type_name).as_ref() {
-            Some(SchemaDefinedType::CommonType(common_type))
-        } else if let Some(entity) = namespace.entity_types.get(type_name).as_ref() {
-            Some(SchemaDefinedType::Entity(entity))
-        } else {
-            None
+
+        let schema_type = namespace
+            .common_types
+            .get(type_name)
+            .as_ref()
+            .map(|common_type| SchemaDefinedType::CommonType(common_type));
+
+        if schema_type.is_some() {
+            return schema_type;
         }
+
+        let schema_type = namespace
+            .entity_types
+            .get(type_name)
+            .as_ref()
+            .map(|entity| SchemaDefinedType::Entity(entity));
+        if schema_type.is_some() {
+            return schema_type;
+        }
+
+        None
     }
 }
 

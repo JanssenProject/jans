@@ -276,7 +276,7 @@ fn get_expression(
 
 /// Create [`RestrictedExpression`] with entity UID as token_claim_value
 fn get_entity_expression(
-    cedar_typename: &String,
+    cedar_typename: &str,
     base_entity_typename: &EntityParsedTypeName<'_>,
     token_claim_value: &Payload<'_>,
 ) -> Result<RestrictedExpression, CedarPolicyCreateTypeError> {
@@ -300,7 +300,7 @@ fn get_entity_expression(
 /// It tries to find mapping and apply it to `token_claim_value` json value.
 fn get_record_expression(
     record: &CedarSchemaRecord,
-    cedar_typename: &String,
+    cedar_typename: &str,
     base_entity_typename: &EntityParsedTypeName<'_>,
     token_claim_value: &Payload<'_>,
     schema: &CedarSchemaJson,
@@ -337,7 +337,7 @@ fn get_record_expression(
 
     let restricted_expression =
         RestrictedExpression::new_record(record_restricted_exps.into_iter())
-            .map_err(|err| CedarPolicyCreateTypeError::CreateRecord(err))?;
+            .map_err(CedarPolicyCreateTypeError::CreateRecord)?;
     Ok(restricted_expression)
 }
 
