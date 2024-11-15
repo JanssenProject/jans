@@ -66,6 +66,8 @@ class MainViewModel(
 
     val shouldShowDialog = mutableStateOf(false)
     val shouldQRCodeScanning = mutableStateOf(false)
+    val isRegistrationSuccessful = mutableStateOf(false)
+    val isLogoutSuccessful = mutableStateOf(false)
     val dialogContent = mutableStateOf("")
 
     suspend fun getOIDCClient(): OIDCClient? {
@@ -115,7 +117,7 @@ class MainViewModel(
         return userInfoResponse
     }
 
-    suspend fun loadAppTasks(shouldShowDialog: MutableState<Boolean>, dialogContent: MutableState<String>, callback: (success: Boolean) -> Unit) {
+    fun loadAppTasks(shouldShowDialog: MutableState<Boolean>, dialogContent: MutableState<String>, callback: (success: Boolean) -> Unit) {
         CoroutineScope(Dispatchers.IO).launch {
             //get openid configuration
 //            try {
@@ -281,9 +283,8 @@ class MainViewModel(
                             showError(shouldShowDialog, dialogContent, attestationResultRequestObject.errorMessage.toString())
                             return@launch
                         }
-                        mainState = mainState.copy(attestationOptionSuccess = true)
-                        mainState = mainState.copy(attestationResultSuccess = true)
-
+                        mainState = mainState.copy(attestationOptionSuccess = true, attestationResultSuccess = true)
+                        isRegistrationSuccessful.value = true
                         registrationViewModel.onUiEvent(
                             registrationUiEvent = RegistrationUiEvent.Submit
                         )

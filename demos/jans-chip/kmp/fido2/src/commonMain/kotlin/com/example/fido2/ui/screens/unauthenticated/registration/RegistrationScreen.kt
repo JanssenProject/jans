@@ -57,12 +57,13 @@ fun RegistrationScreen(
 ) {
     val shouldShowDialog = remember { viewModel.shouldShowDialog }
     val shouldQRCodeScanning = remember { viewModel.shouldQRCodeScanning }
+    val isRegistrationSuccessful = remember { viewModel.isRegistrationSuccessful }
     val dialogContent = remember { viewModel.dialogContent }
     var registrationState by remember {
         registrationViewModel.registrationState
     }
 
-    if (registrationState.isRegistrationSuccessful) {
+    if (isRegistrationSuccessful.value) {
         LaunchedEffect(key1 = true) {
             onNavigateToAuthenticatedRoute.invoke()
         }
@@ -185,7 +186,7 @@ fun RegistrationScreen(
 }
 
 fun onSubmitAction(viewModel: MainViewModel, registrationViewModel: RegistrationViewModel, shouldShowDialog: MutableState<Boolean>, dialogContent: MutableState<String>) {
-    CoroutineScope(Dispatchers.IO).launch {
+//    CoroutineScope(Dispatchers.Main).launch {
         viewModel.loadAppTasks(shouldShowDialog, dialogContent) { success ->
             if (success) {
                 viewModel.proceedRegistration(
@@ -195,5 +196,5 @@ fun onSubmitAction(viewModel: MainViewModel, registrationViewModel: Registration
                 )
             }
         }
-    }
+//    }
 }

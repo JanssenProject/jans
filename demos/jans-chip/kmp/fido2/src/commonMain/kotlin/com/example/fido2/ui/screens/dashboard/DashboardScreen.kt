@@ -78,10 +78,14 @@ fun DashboardScreen(
                             if (logoutResponse?.isSuccessful != true) {
                                 shouldShowDialog.value = true
                                 dialogContent.value = logoutResponse?.errorMessage.toString()
+                            } else {
+                                viewModel.isRegistrationSuccessful.value = false
+                                viewModel.isLogoutSuccessful.value = true
+                                loginViewModel.onUiEvent(loginUiEvent = LoginUiEvent.Logout)
+                                onNavigateToUnAuthenticatedRoute.invoke()
+
+                                loading = false
                             }
-                            loginViewModel.onUiEvent(loginUiEvent = LoginUiEvent.Logout)
-                            onNavigateToUnAuthenticatedRoute.invoke()
-                            loading = false
                         }
                     }
                 )
