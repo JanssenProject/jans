@@ -42,6 +42,7 @@ import javax.net.ssl.SSLContext;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
@@ -102,7 +103,7 @@ public class BaseTest {
 
     private static final String CONTENT_TYPE = "Content-Type";
     private static final String AUTHORIZATION = "Authorization";
-    private static final long serialVersionUID = -2398422090669045605L;
+
     protected Logger log = LogManager.getLogger(getClass());
     private Base64 base64;
     private static Map<String, String> propertiesMap = null;
@@ -116,7 +117,7 @@ public class BaseTest {
         resteasyService = new ResteasyService();
         httpService = new HttpService();
          
-        log.info("Invoked initTestSuite of '{}'", context.getCurrentXmlTest().getName());
+        log.error("Invoked initTestSuite of '{}'", context.getCurrentXmlTest().getName());
         String propertiesFile = context.getCurrentXmlTest().getParameter("propertiesFile");
         Properties prop = new Properties();
         prop.load(Files.newBufferedReader(Paths.get(propertiesFile), UTF_8));
@@ -125,7 +126,7 @@ public class BaseTest {
         prop.forEach((key, value) -> propertiesMap.put(key.toString(), value.toString()));
         context.getSuite().getXmlSuite().setParameters(propertiesMap);
         
-        //accessToken
+        log.error("End initTestSuite propertiesMap: {}", propertiesMap);
         
 
     }
@@ -138,6 +139,7 @@ public class BaseTest {
 
     @BeforeTest
     public void getAccessToken() throws Exception {
+        log.error("getAccessToken - propertiesMap:{}", propertiesMap);
         String tokenUrl = propertiesMap.get("token.endpoint");
         String strGrantType = propertiesMap.get("token.grant.type");
         String clientId = propertiesMap.get("test.client.id");
@@ -148,7 +150,7 @@ public class BaseTest {
         String token = new String(Base64.decodeBase64(authStr), StandardCharsets.UTF_8);
         String encodedScopes = URLDecoder.decode(scopes, "UTF-8");
         GrantType grantType = GrantType.fromString(strGrantType);
-        accessToken = getToken(tokenUrl, clientId, clientSecret, grantType, scopes);
+        accessToken = getToken(tokenUrl, clientId, clientSecret, grantType, encodedScopes);
         log.error("accessToken:{}", accessToken);
     }
     
