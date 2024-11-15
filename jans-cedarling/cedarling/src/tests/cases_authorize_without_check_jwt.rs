@@ -6,6 +6,7 @@
  */
 
 use super::utils::*;
+use crate::{cmp_decision, cmp_policy}; // macros is defined in the cedarling\src\tests\utils\cedarling_util.rs
 use test_utils::assert_eq;
 
 static POLICY_STORE_RAW_YAML: &str = include_str!("../../../test_files/policy-store_ok_2.yaml");
@@ -59,51 +60,41 @@ fn success_test_role_string() {
         .authorize(request)
         .expect("request should be parsed without errors");
 
-    assert_eq!(
-        result.workload.decision(),
+    cmp_decision!(
+        result.workload,
         Decision::Allow,
         "request result should be allowed for workload"
     );
-    assert_eq!(
-        result
-            .workload
-            .diagnostics()
-            .reason()
-            .map(|policy_id| policy_id.to_string())
-            .collect::<Vec<_>>(),
+    cmp_policy!(
+        result.workload,
         vec!["1"],
         "reason of permit workload should be '1'"
     );
-    assert_eq!(
-        result.person.decision(),
+
+    cmp_decision!(
+        result.person,
         Decision::Allow,
         "request result should be allowed for person"
     );
-    assert_eq!(
-        result
-            .person
-            .diagnostics()
-            .reason()
-            .map(|policy_id| policy_id.to_string())
-            .collect::<Vec<_>>(),
+
+    cmp_policy!(
+        result.person,
         vec!["2"],
         "reason of permit person should be '2'"
     );
-    let role_result = result.role.as_ref().expect("role result should present");
-    assert_eq!(
-        role_result.decision(),
+
+    cmp_decision!(
+        result.role,
         Decision::Allow,
         "request result should be allowed for role"
     );
-    assert_eq!(
-        role_result
-            .diagnostics()
-            .reason()
-            .map(|policy_id| policy_id.to_string())
-            .collect::<Vec<_>>(),
+
+    cmp_policy!(
+        result.role,
         vec!["3"],
         "reason of permit role should be '3'"
     );
+
     assert!(result.is_allowed(), "request result should be allowed");
 }
 
@@ -156,51 +147,42 @@ fn success_test_role_array() {
         .authorize(request)
         .expect("request should be parsed without errors");
 
-    assert_eq!(
-        result.workload.decision(),
+    cmp_decision!(
+        result.workload,
         Decision::Allow,
         "request result should be allowed for workload"
     );
-    assert_eq!(
-        result
-            .workload
-            .diagnostics()
-            .reason()
-            .map(|policy_id| policy_id.to_string())
-            .collect::<Vec<_>>(),
+
+    cmp_policy!(
+        result.workload,
         vec!["1"],
         "reason of permit workload should be '1'"
     );
-    assert_eq!(
-        result.person.decision(),
+
+    cmp_decision!(
+        result.person,
         Decision::Allow,
         "request result should be allowed for person"
     );
-    assert_eq!(
-        result
-            .person
-            .diagnostics()
-            .reason()
-            .map(|policy_id| policy_id.to_string())
-            .collect::<Vec<_>>(),
+
+    cmp_policy!(
+        result.person,
         vec!["2"],
         "reason of permit person should be '2'"
     );
-    let role_result = result.role.as_ref().expect("role result should present");
-    assert_eq!(
-        role_result.decision(),
+
+    cmp_decision!(
+        result.role,
         Decision::Allow,
         "request result should be allowed for role"
     );
-    assert_eq!(
-        role_result
-            .diagnostics()
-            .reason()
-            .map(|policy_id| policy_id.to_string())
-            .collect::<Vec<_>>(),
+
+    cmp_policy!(
+        result.role,
         vec!["3"],
         "reason of permit role should be '3'"
     );
+
     assert!(result.is_allowed(), "request result should be allowed");
 }
 
@@ -254,33 +236,26 @@ fn success_test_no_role() {
         .authorize(request)
         .expect("request should be parsed without errors");
 
-    assert_eq!(
-        result.workload.decision(),
+    cmp_decision!(
+        result.workload,
         Decision::Allow,
         "request result should be allowed for workload"
     );
-    assert_eq!(
-        result
-            .workload
-            .diagnostics()
-            .reason()
-            .map(|policy_id| policy_id.to_string())
-            .collect::<Vec<_>>(),
+
+    cmp_policy!(
+        result.workload,
         vec!["1"],
         "reason of permit workload should be '1'"
     );
-    assert_eq!(
-        result.person.decision(),
+
+    cmp_decision!(
+        result.person,
         Decision::Allow,
         "request result should be allowed for person"
     );
-    assert_eq!(
-        result
-            .person
-            .diagnostics()
-            .reason()
-            .map(|policy_id| policy_id.to_string())
-            .collect::<Vec<_>>(),
+
+    cmp_policy!(
+        result.person,
         vec!["2"],
         "reason of permit person should be '2'"
     );
@@ -340,51 +315,42 @@ fn success_test_user_data_in_id_token() {
         .authorize(request)
         .expect("request should be parsed without errors");
 
-    assert_eq!(
-        result.workload.decision(),
+    cmp_decision!(
+        result.workload,
         Decision::Allow,
         "request result should be allowed for workload"
     );
-    assert_eq!(
-        result
-            .workload
-            .diagnostics()
-            .reason()
-            .map(|policy_id| policy_id.to_string())
-            .collect::<Vec<_>>(),
+
+    cmp_policy!(
+        result.workload,
         vec!["1"],
         "reason of permit workload should be '1'"
     );
-    assert_eq!(
-        result.person.decision(),
+
+    cmp_decision!(
+        result.person,
         Decision::Allow,
         "request result should be allowed for person"
     );
-    assert_eq!(
-        result
-            .person
-            .diagnostics()
-            .reason()
-            .map(|policy_id| policy_id.to_string())
-            .collect::<Vec<_>>(),
+
+    cmp_policy!(
+        result.person,
         vec!["2"],
         "reason of permit person should be '2'"
     );
-    let role_result = result.role.as_ref().expect("role result should present");
-    assert_eq!(
-        role_result.decision(),
+
+    cmp_decision!(
+        result.role,
         Decision::Allow,
         "request result should be allowed for role"
     );
-    assert_eq!(
-        role_result
-            .diagnostics()
-            .reason()
-            .map(|policy_id| policy_id.to_string())
-            .collect::<Vec<_>>(),
+
+    cmp_policy!(
+        result.role,
         vec!["3"],
         "reason of permit role should be '3'"
     );
+
     assert!(result.is_allowed(), "request result should be allowed");
 }
 
@@ -435,51 +401,42 @@ fn all_forbid() {
         .authorize(request)
         .expect("request should be parsed without errors");
 
-    assert_eq!(
-        result.workload.decision(),
+    cmp_decision!(
+        result.workload,
         Decision::Deny,
         "request result should be forbidden for workload"
     );
-    assert_eq!(
-        result
-            .workload
-            .diagnostics()
-            .reason()
-            .map(|policy_id| policy_id.to_string())
-            .collect::<Vec<_>>(),
+
+    cmp_policy!(
+        result.workload,
         Vec::new() as Vec<String>,
         "reason of permit workload should be empty"
     );
-    assert_eq!(
-        result.person.decision(),
+
+    cmp_decision!(
+        result.person,
         Decision::Deny,
         "request result should be forbidden for person"
     );
-    assert_eq!(
-        result
-            .person
-            .diagnostics()
-            .reason()
-            .map(|policy_id| policy_id.to_string())
-            .collect::<Vec<_>>(),
+
+    cmp_policy!(
+        result.person,
         Vec::new() as Vec<String>,
         "reason of forbid person should empty, no forbid rule"
     );
-    let role_result = result.role.as_ref().expect("role result should present");
-    assert_eq!(
-        role_result.decision(),
+
+    cmp_decision!(
+        result.role,
         Decision::Deny,
         "request result should be forbidden for role"
     );
-    assert_eq!(
-        role_result
-            .diagnostics()
-            .reason()
-            .map(|policy_id| policy_id.to_string())
-            .collect::<Vec<_>>(),
+
+    cmp_policy!(
+        result.role,
         Vec::new() as Vec<String>,
         "reason of forbid role should be empty"
     );
+
     assert!(!result.is_allowed(), "request result should be not allowed");
 }
 
@@ -529,51 +486,48 @@ fn only_principal_permit() {
         .authorize(request)
         .expect("request should be parsed without errors");
 
-    assert_eq!(
-        result.workload.decision(),
+    cmp_decision!(
+        result.workload,
         Decision::Allow,
         "request result should be allowed for workload"
     );
-    assert_eq!(
-        result
-            .workload
-            .diagnostics()
-            .reason()
-            .map(|policy_id| policy_id.to_string())
-            .collect::<Vec<_>>(),
+
+    cmp_policy!(
+        result.workload,
         vec!["1"],
         "reason of permit workload should be '1'"
     );
-    assert_eq!(
-        result.person.decision(),
+
+    cmp_decision!(
+        result.person,
         Decision::Deny,
         "request result should be forbidden for person"
     );
-    assert_eq!(
-        result
-            .person
-            .diagnostics()
-            .reason()
-            .map(|policy_id| policy_id.to_string())
-            .collect::<Vec<_>>(),
+
+    cmp_decision!(
+        result.person,
+        Decision::Deny,
+        "request result should be forbidden for person"
+    );
+
+    cmp_policy!(
+        result.person,
         Vec::new() as Vec<String>,
         "reason of forbid person should empty, no forbid rule"
     );
-    let role_result = result.role.as_ref().expect("role result should present");
-    assert_eq!(
-        role_result.decision(),
+
+    cmp_decision!(
+        result.role,
         Decision::Deny,
         "request result should be forbidden for role"
     );
-    assert_eq!(
-        role_result
-            .diagnostics()
-            .reason()
-            .map(|policy_id| policy_id.to_string())
-            .collect::<Vec<_>>(),
+
+    cmp_policy!(
+        result.role,
         Vec::new() as Vec<String>,
         "reason of forbid role should be empty"
     );
+
     assert!(!result.is_allowed(), "request result should be not allowed");
 }
 
@@ -624,51 +578,42 @@ fn only_person_permit() {
         .authorize(request)
         .expect("request should be parsed without errors");
 
-    assert_eq!(
-        result.workload.decision(),
+    cmp_decision!(
+        result.workload,
         Decision::Deny,
         "request result should be forbidden for workload"
     );
-    assert_eq!(
-        result
-            .workload
-            .diagnostics()
-            .reason()
-            .map(|policy_id| policy_id.to_string())
-            .collect::<Vec<_>>(),
+
+    cmp_policy!(
+        result.workload,
         Vec::new() as Vec<String>,
         "reason of permit workload should be empty"
     );
-    assert_eq!(
-        result.person.decision(),
+
+    cmp_decision!(
+        result.person,
         Decision::Allow,
         "request result should be allowed for person"
     );
-    assert_eq!(
-        result
-            .person
-            .diagnostics()
-            .reason()
-            .map(|policy_id| policy_id.to_string())
-            .collect::<Vec<_>>(),
+
+    cmp_policy!(
+        result.person,
         vec!["2"],
         "reason of forbid person should '2'"
     );
-    let role_result = result.role.as_ref().expect("role result should present");
-    assert_eq!(
-        role_result.decision(),
+
+    cmp_decision!(
+        result.role,
         Decision::Deny,
         "request result should be forbidden for role"
     );
-    assert_eq!(
-        role_result
-            .diagnostics()
-            .reason()
-            .map(|policy_id| policy_id.to_string())
-            .collect::<Vec<_>>(),
+
+    cmp_policy!(
+        result.role,
         Vec::new() as Vec<String>,
         "reason of forbid role should be empty"
     );
+
     assert!(!result.is_allowed(), "request result should be not allowed");
 }
 
@@ -718,51 +663,42 @@ fn only_role_permit() {
         .authorize(request)
         .expect("request should be parsed without errors");
 
-    assert_eq!(
-        result.workload.decision(),
+    cmp_decision!(
+        result.workload,
         Decision::Deny,
         "request result should be forbidden for workload"
     );
-    assert_eq!(
-        result
-            .workload
-            .diagnostics()
-            .reason()
-            .map(|policy_id| policy_id.to_string())
-            .collect::<Vec<_>>(),
+
+    cmp_policy!(
+        result.workload,
         Vec::new() as Vec<String>,
         "reason of permit workload should be empty"
     );
-    assert_eq!(
-        result.person.decision(),
+
+    cmp_decision!(
+        result.person,
         Decision::Deny,
         "request result should be forbidden for person"
     );
-    assert_eq!(
-        result
-            .person
-            .diagnostics()
-            .reason()
-            .map(|policy_id| policy_id.to_string())
-            .collect::<Vec<_>>(),
+
+    cmp_policy!(
+        result.person,
         Vec::new() as Vec<String>,
         "reason of forbid person should empty, no forbid rule"
     );
-    let role_result = result.role.as_ref().expect("role result should present");
-    assert_eq!(
-        role_result.decision(),
+
+    cmp_decision!(
+        result.role,
         Decision::Allow,
         "request result should be permit for role"
     );
-    assert_eq!(
-        role_result
-            .diagnostics()
-            .reason()
-            .map(|policy_id| policy_id.to_string())
-            .collect::<Vec<_>>(),
+
+    cmp_policy!(
+        result.role,
         vec!["3"],
         "reason of permit role should be '3'"
     );
+
     assert!(!result.is_allowed(), "request result should be not allowed");
 }
 
@@ -811,51 +747,42 @@ fn only_workload_and_person_permit() {
         .authorize(request)
         .expect("request should be parsed without errors");
 
-    assert_eq!(
-        result.workload.decision(),
+    cmp_decision!(
+        result.workload,
         Decision::Allow,
         "request result should be allowed for workload"
     );
-    assert_eq!(
-        result
-            .workload
-            .diagnostics()
-            .reason()
-            .map(|policy_id| policy_id.to_string())
-            .collect::<Vec<_>>(),
+
+    cmp_policy!(
+        result.workload,
         vec!["1"],
         "reason of permit workload should be '1'"
     );
-    assert_eq!(
-        result.person.decision(),
+
+    cmp_decision!(
+        result.person,
         Decision::Allow,
         "request result should be allowed for person"
     );
-    assert_eq!(
-        result
-            .person
-            .diagnostics()
-            .reason()
-            .map(|policy_id| policy_id.to_string())
-            .collect::<Vec<_>>(),
+
+    cmp_policy!(
+        result.person,
         vec!["2"],
         "reason of permit person should '2'"
     );
-    let role_result = result.role.as_ref().expect("role result should present");
-    assert_eq!(
-        role_result.decision(),
+
+    cmp_decision!(
+        result.role,
         Decision::Deny,
         "request result should be forbidden for role"
     );
-    assert_eq!(
-        role_result
-            .diagnostics()
-            .reason()
-            .map(|policy_id| policy_id.to_string())
-            .collect::<Vec<_>>(),
+
+    cmp_policy!(
+        result.role,
         Vec::new() as Vec<String>,
         "reason of forbid role should be empty"
     );
+
     assert!(result.is_allowed(), "request result should be allowed");
 }
 
@@ -904,50 +831,41 @@ fn only_workload_and_role_permit() {
         .authorize(request)
         .expect("request should be parsed without errors");
 
-    assert_eq!(
-        result.workload.decision(),
+    cmp_decision!(
+        result.workload,
         Decision::Allow,
         "request result should be allowed for workload"
     );
-    assert_eq!(
-        result
-            .workload
-            .diagnostics()
-            .reason()
-            .map(|policy_id| policy_id.to_string())
-            .collect::<Vec<_>>(),
+
+    cmp_policy!(
+        result.workload,
         vec!["1"],
         "reason of permit workload should be '1'"
     );
-    assert_eq!(
-        result.person.decision(),
+
+    cmp_decision!(
+        result.person,
         Decision::Deny,
         "request result should be not allowed for person"
     );
-    assert_eq!(
-        result
-            .person
-            .diagnostics()
-            .reason()
-            .map(|policy_id| policy_id.to_string())
-            .collect::<Vec<_>>(),
+
+    cmp_policy!(
+        result.person,
         Vec::new() as Vec<String>,
         "reason of forbid person should be none"
     );
-    let role_result = result.role.as_ref().expect("role result should present");
-    assert_eq!(
-        role_result.decision(),
+
+    cmp_decision!(
+        result.role,
         Decision::Allow,
         "request result should be allowed for role"
     );
-    assert_eq!(
-        role_result
-            .diagnostics()
-            .reason()
-            .map(|policy_id| policy_id.to_string())
-            .collect::<Vec<_>>(),
+
+    cmp_policy!(
+        result.role,
         vec!["3"],
         "reason of permit role should be '3'"
     );
+
     assert!(result.is_allowed(), "request result should be allowed");
 }
