@@ -14,7 +14,7 @@ use std::str::FromStr;
 use std::sync::Arc;
 
 use crate::common::app_types;
-use crate::common::policy_store::PolicyStore;
+use crate::common::policy_store::{AccessTokenEntityMetadata, PolicyStore, TokenEntityMetadata};
 use crate::jwt;
 use crate::log::{
     AuthorizationLogInfo, LogEntry, LogType, Logger, PersonAuthorizeInfo, RoleAuthorizeInfo,
@@ -276,26 +276,29 @@ impl Authz {
 
         let role_entities = create_role_entities(policy_store, &decode_result)?;
 
+        let trusted_issuer = decode_result.trusted_issuer.unwrap_or_default();
+        let tokens_metadata = trusted_issuer.tokens_metadata();
+
         // Populate the `AuthorizeEntitiesData` structure using the builder pattern
         let data = AuthorizeEntitiesData::builder()
             // Populate the structure with entities derived from the access token
             .access_token_entities(create_access_token_entities(
                 policy_store,
                 &decode_result.access_token,
+                tokens_metadata.access_tokens
             )?)
             // Add an entity created from the ID token
             .id_token_entity(
-                create_id_token_entity(policy_store, &decode_result.id_token)
+                create_id_token_entity(policy_store, &decode_result.id_token, &tokens_metadata.id_tokens.claim_mapping)
                     .map_err(AuthorizeError::CreateIdTokenEntity)?,
             )
             // Add an entity created from the userinfo token
             .user_entity(
                 create_user_entity(
                     policy_store,
-                    &decode_result.id_token,
-                    &decode_result.userinfo_token,
+                    &decode_result,
                     // parents for Jans::User entity
-                     HashSet::from_iter(role_entities.iter().map(|e|e.uid())),
+                    HashSet::from_iter(role_entities.iter().map(|e|e.uid())),
                 )
                 .map_err(AuthorizeError::CreateUserEntity)?,
             )

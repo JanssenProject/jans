@@ -7,7 +7,7 @@
  */
 
 use super::claim_mapping::ClaimMapping;
-use super::{parse_default_hashmap, parse_option_string};
+use super::parse_option_string;
 use serde::Deserialize;
 use std::collections::HashMap;
 
@@ -29,6 +29,12 @@ pub struct AccessTokenEntityMetadata {
     pub entity_metadata: TokenEntityMetadata,
 }
 
+
+
+#[derive(Debug, Default, PartialEq, Clone, Deserialize)]
+pub struct ClaimMappings(HashMap<String, ClaimMapping>);
+
+
 /// Metadata associated with a token entity, which includes user identification,
 /// role mappings, and claim mappings.
 #[derive(Debug, PartialEq, Clone, Default, Deserialize)]
@@ -42,14 +48,15 @@ pub struct TokenEntityMetadata {
     /// An optional mapping of claims to their values. Each claim is represented
     /// by a key-value pair where the key is the claim name and the value is
     /// a `ClaimMapping` struct.
-    #[serde(deserialize_with = "parse_default_hashmap", default)]
-    pub claim_mapping: HashMap<String, ClaimMapping>,
+    #[serde(default)]
+    pub claim_mapping: ClaimMappings,
 }
+
+
+
 
 #[cfg(test)]
 mod test {
-    use std::collections::HashMap;
-
     use super::TokenEntityMetadata;
     use serde_json::json;
 
@@ -79,7 +86,7 @@ mod test {
             TokenEntityMetadata { 
                 user_id: Some("sub".into()), 
                 role_mapping: None, 
-                claim_mapping: HashMap::new() 
+                claim_mapping: Default::default() 
             }, 
             "Expected JSON with user_id and empty role_mapping to be parsed into TokenEntityMetadata"
         );
@@ -111,7 +118,7 @@ mod test {
             TokenEntityMetadata { 
                 user_id: Some("sub".into()), 
                 role_mapping: None, 
-                claim_mapping: HashMap::new() 
+                claim_mapping: Default::default()
             }, 
             "Expected YAML with user_id and empty role_mapping to be parsed into TokenEntityMetadata"
         );

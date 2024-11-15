@@ -369,4 +369,6 @@ pub enum CedarPolicyCreateTypeError {
 
     #[error("could find record/type: {0}")]
     FindType(String),
+    #[error("transaction token not implemented")]
+    TransactionToken,
 }

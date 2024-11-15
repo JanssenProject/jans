@@ -40,6 +40,17 @@ impl TokenPayload {
         self.payload.get(key)
     }
 
+    /// Extract key and value to create new [`TokenPayload`] with this values only.
+    pub fn extract_kv(&self, key: &str) -> Self {
+        Self {
+            payload: self
+                .payload
+                .get_key_value(key)
+                .map(|(key, value)| HashMap::from_iter([(key.to_owned(), value.to_owned())]))
+                .unwrap_or_default(),
+        }
+    }
+
     /// Clone current value and merge with the given payload.
     pub fn merge(&self, payload: &TokenPayload) -> Self {
         let mut result = self.clone();
