@@ -243,69 +243,17 @@ fn get_expression(
         CedarType::Long => Ok(token_claim_value.as_i64()?.to_expression()),
         CedarType::Boolean => Ok(token_claim_value.as_bool()?.to_expression()),
         CedarType::TypeName(cedar_typename) => {
-            // TODO: extract 2 functions
             match schema.find_type(cedar_typename, base_entity_typename.namespace) {
                 Some(SchemaDefinedType::Entity(_)) => {
-                    let restricted_expression = {
-                        let entity_full_type_name = EntityParsedTypeName::new(
-                            cedar_typename,
-                            base_entity_typename.namespace,
-                        )
-                        .full_type_name();
-
-                        let uid = EntityUid::from_type_name_and_id(
-                            EntityTypeName::from_str(entity_full_type_name.as_str()).map_err(
-                                |err| {
-                                    CedarPolicyCreateTypeError::EntityTypeName(
-                                        entity_full_type_name.to_string(),
-                                        err,
-                                    )
-                                },
-                            )?,
-                            EntityId::new(token_claim_value.as_str()?),
-                        );
-                        RestrictedExpression::new_entity_uid(uid)
-                    };
-                    Ok(restricted_expression)
+                    get_entity_expression(cedar_typename, base_entity_typename, &token_claim_value)
                 },
-                Some(SchemaDefinedType::CommonType(record)) => {
-                    // TODO: check if we have mapping for current type
-                    // in payload we have key
-                    let mapped_claim: TokenPayload = todo!();
-
-                    let mut record_restricted_exps = Vec::new();
-
-                    for (attribute_key, entity_attribute) in record.attributes.iter() {
-                        let attribute_type = entity_attribute.get_type()?;
-
-                        let base_entity_typename = EntityParsedTypeName::new(
-                            cedar_typename,
-                            base_entity_typename.namespace,
-                        );
-
-                        let exp = get_expression(
-                            &attribute_type,
-                            token_claim_value,
-                            &mapped_claim,
-                            &base_entity_typename,
-                            schema,
-                        )
-                        .map_err(|err| {
-                            CedarPolicyCreateTypeError::BuildAttribute(
-                                base_entity_typename.full_type_name(),
-                                attribute_key.to_string(),
-                                Box::new(err),
-                            )
-                        })?;
-
-                        record_restricted_exps.push((attribute_key.to_string(), exp));
-                    }
-
-                    let restricted_expression =
-                        RestrictedExpression::new_record(record_restricted_exps.into_iter())
-                            .map_err(|err| CedarPolicyCreateTypeError::CreateRecord(err))?;
-                    Ok(restricted_expression)
-                },
+                Some(SchemaDefinedType::CommonType(record)) => get_record_expression(
+                    record,
+                    cedar_typename,
+                    base_entity_typename,
+                    &token_claim_value,
+                    schema,
+                ),
                 None => Err(CedarPolicyCreateTypeError::FindType(
                     EntityParsedTypeName::new(cedar_typename, base_entity_typename.namespace)
                         .full_type_name(),
@@ -324,6 +272,73 @@ fn get_expression(
             Ok(RestrictedExpression::new_set(vec_of_expression))
         },
     }
+}
+
+/// Create [`RestrictedExpression`] with entity UID as token_claim_value
+fn get_entity_expression(
+    cedar_typename: &String,
+    base_entity_typename: &EntityParsedTypeName<'_>,
+    token_claim_value: &Payload<'_>,
+) -> Result<RestrictedExpression, CedarPolicyCreateTypeError> {
+    let restricted_expression = {
+        let entity_full_type_name =
+            EntityParsedTypeName::new(cedar_typename, base_entity_typename.namespace)
+                .full_type_name();
+
+        let uid = EntityUid::from_type_name_and_id(
+            EntityTypeName::from_str(entity_full_type_name.as_str()).map_err(|err| {
+                CedarPolicyCreateTypeError::EntityTypeName(entity_full_type_name.to_string(), err)
+            })?,
+            EntityId::new(token_claim_value.as_str()?),
+        );
+        RestrictedExpression::new_entity_uid(uid)
+    };
+    Ok(restricted_expression)
+}
+
+/// Build [`RestrictedExpression`] based on token_claim_value.
+/// It tries to find mapping and apply it to `token_claim_value` json value.
+fn get_record_expression(
+    record: &CedarSchemaRecord,
+    cedar_typename: &String,
+    base_entity_typename: &EntityParsedTypeName<'_>,
+    token_claim_value: &Payload<'_>,
+    schema: &CedarSchemaJson,
+) -> Result<RestrictedExpression, CedarPolicyCreateTypeError> {
+    // TODO: check if we have mapping for current type
+    // in payload we have key
+    let mapped_claim: TokenPayload = todo!();
+
+    let mut record_restricted_exps = Vec::new();
+
+    for (attribute_key, entity_attribute) in record.attributes.iter() {
+        let attribute_type = entity_attribute.get_type()?;
+
+        let base_entity_typename =
+            EntityParsedTypeName::new(cedar_typename, base_entity_typename.namespace);
+
+        let exp = get_expression(
+            &attribute_type,
+            *token_claim_value,
+            &mapped_claim,
+            &base_entity_typename,
+            schema,
+        )
+        .map_err(|err| {
+            CedarPolicyCreateTypeError::BuildAttribute(
+                base_entity_typename.full_type_name(),
+                attribute_key.to_string(),
+                Box::new(err),
+            )
+        })?;
+
+        record_restricted_exps.push((attribute_key.to_string(), exp));
+    }
+
+    let restricted_expression =
+        RestrictedExpression::new_record(record_restricted_exps.into_iter())
+            .map_err(|err| CedarPolicyCreateTypeError::CreateRecord(err))?;
+    Ok(restricted_expression)
 }
 
 /// Describe errors on creating entity
