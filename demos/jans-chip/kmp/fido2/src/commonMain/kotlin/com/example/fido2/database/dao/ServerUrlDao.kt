@@ -22,5 +22,5 @@ interface ServerUrlDao {
     suspend fun getAll(): List<AppSettings>
 
     @Query("DELETE FROM APP_SETTINGS")
-    suspend fun delete()
+    suspend fun deleteAll()
 }

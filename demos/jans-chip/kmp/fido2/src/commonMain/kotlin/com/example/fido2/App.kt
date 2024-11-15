@@ -69,9 +69,6 @@ fun App() {
             ) {
                 val shouldShowDialog = remember { mutableStateOf(false) }
                 val dialogContent = remember { mutableStateOf("") }
-//                LaunchedEffect(true) {
-//                    viewModel.loadAppTasks(shouldShowDialog, dialogContent)
-//                }
                 AppAlertDialog(
                     shouldShowDialog = shouldShowDialog,
                     content = dialogContent

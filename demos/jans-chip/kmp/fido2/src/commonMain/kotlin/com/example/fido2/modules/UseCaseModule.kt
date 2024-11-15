@@ -1,5 +1,6 @@
 package com.example.fido2.modules
 
+import com.example.fido2.usecase.AllDataUseCase
 import com.example.fido2.usecase.DCRClientUseCase
 import com.example.fido2.usecase.FidoAssertionUseCase
 import com.example.fido2.usecase.FidoAttestationUseCase
@@ -24,4 +25,5 @@ val useCasesModule: Module = module {
     factory { FidoAttestationUseCase(get()) }
     factory { DCRClientUseCase(get(), get()) }
     factory { SettingsUseCase(get()) }
+    factory { AllDataUseCase(get()) }
 }

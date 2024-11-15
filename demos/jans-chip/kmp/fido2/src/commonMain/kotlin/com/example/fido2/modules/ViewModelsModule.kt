@@ -8,5 +8,5 @@ val viewModelModule = module {
     factory {
         MainViewModel(get(), get(), get(), get(), get(), get(), get(), get(), get(), get())
     }
-    factory { SettingsScreenViewModel(get()) }
+    factory { SettingsScreenViewModel(get(), get()) }
 }

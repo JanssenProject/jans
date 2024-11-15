@@ -3,9 +3,7 @@ package com.example.fido2.viewmodel
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.room.RoomDatabase
 import com.example.fido2.authAdaptor.AuthenticationProvider
 import com.example.fido2.model.KtPublicKeyCredentialSource
 import kotlinx.coroutines.CoroutineScope
@@ -41,7 +39,6 @@ import com.example.fido2.usecase.LoginUseCase
 import com.example.fido2.usecase.LogoutUseCase
 import com.example.fido2.viewmodel.state.MainState
 import kotlinx.coroutines.IO
-import kotlinx.coroutines.cancel
 
 class MainViewModel(
     private val getOPConfigurationUseCase: GetOPConfigurationUseCase,
@@ -198,7 +195,7 @@ class MainViewModel(
         val authAdaptor = authenticator
         //check if selected  enrolled credential present in database
         if(authAdaptor?.isCredentialsPresent(getUsername()) == true) {
-            showError(shouldShowDialog, dialogContent, "Username already enrolled")
+            showError(shouldShowDialog, dialogContent, "Username is already enrolled") //stringResource(Res.string.username_already_enrolled))
             return
         }
         if (isBiometricAvailable) {

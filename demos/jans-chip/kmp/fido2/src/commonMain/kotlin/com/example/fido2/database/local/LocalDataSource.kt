@@ -19,4 +19,6 @@ interface LocalDataSource {
 
     suspend fun getServerUrl(): String?
     suspend fun saveServerUrl(serverUrl: String)
+
+    suspend fun clearAll()
 }

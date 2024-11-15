@@ -32,7 +32,7 @@ class LoginRepositoryImpl(
             val response = apiService.getAuthorizationChallenge(
                 oidcClient?.clientId ?: "",
                 usernameText,
-                passwordText ?: "Gluu1234.",
+                passwordText ?: "",
                 "",
                 "",
                 true,

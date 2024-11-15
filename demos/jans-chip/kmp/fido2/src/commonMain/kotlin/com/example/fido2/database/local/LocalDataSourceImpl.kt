@@ -100,9 +100,19 @@ class LocalDataSourceImpl(
             if (settings.isEmpty()) {
                 db.serverUrlDao().insert(AppSettings(serverUrl))
             } else {
-                db.serverUrlDao().delete()
+                db.serverUrlDao().deleteAll()
                 db.serverUrlDao().insert(AppSettings(serverUrl))
             }
+        }
+    }
+
+    override suspend fun clearAll() {
+        withContext(dispatcher) {
+            db.oidcClientDao().deleteAll()
+            db.serverUrlDao().deleteAll()
+            db.appIntegrityDao().deleteAll()
+            db.opConfigurationDao().deleteAll()
+            db.fidoConfigurationDao().deleteAll()
         }
     }
 }

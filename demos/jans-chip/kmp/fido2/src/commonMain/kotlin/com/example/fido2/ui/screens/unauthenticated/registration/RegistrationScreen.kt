@@ -169,31 +169,7 @@ fun RegistrationScreen(
                                     registrationUiEvent = RegistrationUiEvent.ValidateInputs
                                 )
                                 if (registrationState.isValidationSuccessful) {
-//                                    LaunchedEffect(true) {
-//                                        viewModel.loadAppTasks(shouldShowDialog, dialogContent)
-//                                    }
                                     onSubmitAction(viewModel = viewModel, registrationViewModel = registrationViewModel, shouldShowDialog = shouldShowDialog, dialogContent = dialogContent)
-                                    /*
-                                    viewModel.loadAppTasks(shouldShowDialog, dialogContent)
-                                    registrationState =
-                                        registrationState.copy(isLoading = true)
-                                    viewModel.proceedRegistration { shouldShowDialogValue, dialogContentValue, success ->
-                                        if (success) {
-                                            registrationViewModel.onUiEvent(
-                                                registrationUiEvent = RegistrationUiEvent.Submit
-                                            )
-
-                                            registrationState =
-                                                registrationState.copy(isLoading = false)
-                                            return@proceedRegistration
-                                        }
-                                        shouldShowDialog.value = shouldShowDialogValue
-                                        dialogContent.value = dialogContentValue ?: ""
-                                        registrationState =
-                                            registrationState.copy(isLoading = false)
-                                        return@proceedRegistration
-                                    }
-                                     */
                                 }
                             },
 

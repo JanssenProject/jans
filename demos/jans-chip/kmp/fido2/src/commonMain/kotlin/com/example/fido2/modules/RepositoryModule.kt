@@ -24,6 +24,7 @@ val repositoryModule = module {
     single<FidoAttestationRepository> { FidoAttestationRepositoryImpl(get(), get()) }
     single<DCRRepository> { DCRRepositoryImpl(get(), get()) }
     single<SettingsRepository> { SettingsRepositoryImpl(get()) }
+    single<AllDataRepository> { AllDataRepositoryImpl(get()) }
     single<ApiClient> { ApiClient() }
     single<LocalDataSource> { LocalDataSourceImpl(get(), get(named(Dispatcher.IO))) }
 }
