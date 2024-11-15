@@ -13,11 +13,11 @@
 //! - Validating the signatures of JWTs to ensure their integrity and authenticity.
 //! - Verifying the validity of JWTs based on claims such as expiration time and audience.
 
+mod error;
+mod http_client;
+mod jwt_service_config;
 #[cfg(test)]
 mod test;
-
-mod error;
-mod jwt_service_config;
 mod token;
 
 use crate::common::policy_store::TrustedIssuer;
