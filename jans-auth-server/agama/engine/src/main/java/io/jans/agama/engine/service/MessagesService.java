@@ -1,25 +1,22 @@
-package io.jans.agama.engine.page;
+package io.jans.agama.engine.service;
 
-import jakarta.enterprise.context.RequestScoped;
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import java.util.AbstractMap;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.ResourceBundle;
-import java.util.Set;
 
+import java.util.*;
+import java.util.*;
+
+import io.jans.agama.engine.service.*;
 import io.jans.jsf2.i18n.ExtendedResourceBundle;
+import io.jans.service.cdi.util.CdiUtil;
 
 import org.slf4j.Logger;
 
 //This is not a real Map but pretends to look like one so in Freemarker, templates expressions of the form 
 //msgs.KEY or msgs["KEY"] can be used. A HashMap would have led to more concise code but Weld complains
 //at startup due to the presence of a final method in it. This leads to proxying issues  
-@RequestScoped
-public class Labels extends AbstractMap<String, String> {
+@ApplicationScoped
+public class MessagesService extends AbstractMap<String, String> {
 
     public static final String BUNDLE_ID = "msgs";
 
@@ -45,21 +42,19 @@ public class Labels extends AbstractMap<String, String> {
     public String get(Object key) {
         
         try {
-            //See #1527
+            //lang is never null if the call originates from an HTTP request
+            String lang = CdiUtil.bean(WebContext.class).getLocale().getLanguage();
+            //This re-creates a resource bundle instance. However this is cheap because the underlying
+            //implementation makes use of Resource#getBundle (by default provides caching)
+            //and uses watchers to detect changes in properties files
+            exrBundle = new ExtendedResourceBundle(BUNDLE_BASE_NAME, new Locale(lang));
             return exrBundle.getString(key.toString());
         } catch (Exception e) {
             logger.error("Failed to lookup bundle by key '{}': {}", key.toString(), e.getMessage());
-            //Prefer empty string over null (null causes templates to crash  by definition in freemarker)
-            return "";
+            //Prefer "null" over null (null usage causes templates to crash in freemarker)
+            return "null";
         }
 
-    }
-
-    public void useLocale(Locale locale) {
-        //This re-creates a resource bundle instance. This is cheap because the underlying
-        //implementation makes use of Resource#getBundle (by default provides caching)
-        //and uses watchers to detect changes in properties files        
-        exrBundle = new ExtendedResourceBundle(BUNDLE_BASE_NAME, locale);
     }
 
 }
