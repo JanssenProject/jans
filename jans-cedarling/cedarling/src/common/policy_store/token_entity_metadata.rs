@@ -31,12 +31,18 @@ pub struct AccessTokenEntityMetadata {
 
 
 
+/// Structure for storing `claim mappings`
+/// 
+/// wrapper around hash map 
 #[derive(Debug, Default, PartialEq, Clone, Deserialize)]
 pub struct ClaimMappings(HashMap<String, ClaimMapping>);
 
 
-/// Metadata associated with a token entity, which includes user identification,
-/// role mappings, and claim mappings.
+///  Structure for storing mapping JWT claims to `cedar-policy` custom defined types in the `schema`.
+/// 
+/// An optional mapping of claims to their values. Each claim is represented
+/// by a key-value pair where the key is the claim name and the value is
+/// a `ClaimMapping` struct.
 #[derive(Debug, PartialEq, Clone, Default, Deserialize)]
 pub struct TokenEntityMetadata {
     /// An optional user identifier extracted from the token metadata.
