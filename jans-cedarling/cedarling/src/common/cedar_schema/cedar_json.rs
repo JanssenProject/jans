@@ -59,7 +59,7 @@ impl CedarSchemaJson {
         namespace.entity_types.get(typename)
     }
 
-    // #[allow(clippy::manual_map)]
+    /// Find the typename if exist in the schema and return it definition
     pub fn find_type(&self, type_name: &str, namespace: &str) -> Option<SchemaDefinedType> {
         let namespace = self.namespace.get(namespace)?;
 
