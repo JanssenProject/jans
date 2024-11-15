@@ -342,7 +342,7 @@ paths:
         examples:
           Field value example:
             description: Field value example
-            value: "applicationType=web,persistClientAuthorizations=true"
+            value: "displayName=saml-idp,realm=jans"
       responses:
         "200":
           description: Ok
