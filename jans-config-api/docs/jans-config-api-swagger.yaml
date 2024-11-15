@@ -190,7 +190,7 @@ paths:
           description: InternalServerError
       security:
       - oauth2:
-        - https://jans.io/oauth/config/app-version.readonly
+        - https://jans.io/oauth/config/data.readonly
   /api/v1/acrs:
     get:
       tags:
@@ -7844,7 +7844,7 @@ paths:
         examples:
           Field value example:
             description: Field value example
-            value: "applicationType=web,persistClientAuthorizations=true"
+            value: "userDn=d5552516-4436-4908-ab36-3e9725246304,expirationDate>2025-09-25,expirationDate<2026-10-15"
       responses:
         "200":
           description: Ok
@@ -9270,17 +9270,17 @@ components:
           type: string
         selected:
           type: boolean
+        userCanView:
+          type: boolean
         userCanEdit:
           type: boolean
         adminCanEdit:
           type: boolean
-        userCanView:
-          type: boolean
         adminCanView:
           type: boolean
-        userCanAccess:
-          type: boolean
         adminCanAccess:
+          type: boolean
+        userCanAccess:
           type: boolean
         whitePagesCanView:
           type: boolean
@@ -10131,6 +10131,8 @@ components:
           type: boolean
         lockMessageConfig:
           $ref: '#/components/schemas/LockMessageConfig'
+        fapi:
+          type: boolean
         allResponseTypesSupported:
           uniqueItems: true
           type: array
@@ -10140,8 +10142,6 @@ components:
             - code
             - token
             - id_token
-        fapi:
-          type: boolean
     AuthenticationFilter:
       required:
       - baseDn
@@ -12007,3 +12007,4 @@ components:
             https://jans.io/oauth/config/token.readonly: View Token details
             https://jans.io/oauth/config/token.write: Manage Token details
             https://jans.io/oauth/config/token.delete: Delete Token details
+            https://jans.io/oauth/config/data.readonly: View Config-API related data
