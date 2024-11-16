@@ -126,34 +126,19 @@ pub fn create_user_entity(
     let schema: &CedarSchemaJson = &policy_store.cedar_schema.json;
     let namespace = policy_store.namespace();
 
-    // payload for getting user ID
-    let (payload_for_id, claim_mapping): (&TokenPayload, &ClaimMappings) =
-        match user_id_mapping.kind {
-            TokenKind::Access => (
-                &tokens.access_token,
-                &trusted_issuer.access_tokens.entity_metadata.claim_mapping,
-            ),
-            TokenKind::Id => (&tokens.id_token, &trusted_issuer.id_tokens.claim_mapping),
-            TokenKind::Userinfo => (
-                &tokens.userinfo_token,
-                &trusted_issuer.id_tokens.claim_mapping,
-            ),
-            TokenKind::Transaction => return Err(CedarPolicyCreateTypeError::TransactionToken),
-        };
-
-    const SUB_KEY: &str = "sub";
-
-    // if 'sub' is not the same we discard the userinfo token
-    let payload = if tokens.id_token.get_json_value(SUB_KEY)
-        == tokens.userinfo_token.get_json_value(SUB_KEY)
-    {
-        &tokens.id_token.merge(&tokens.userinfo_token)
-    } else {
-        &*tokens.id_token
+    // payload and claim mapping for getting user ID
+    let (payload, claim_mapping): (&TokenPayload, &ClaimMappings) = match user_id_mapping.kind {
+        TokenKind::Access => (
+            &tokens.access_token,
+            &trusted_issuer.access_tokens.entity_metadata.claim_mapping,
+        ),
+        TokenKind::Id => (&tokens.id_token, &trusted_issuer.id_tokens.claim_mapping),
+        TokenKind::Userinfo => (
+            &tokens.userinfo_token,
+            &trusted_issuer.id_tokens.claim_mapping,
+        ),
+        TokenKind::Transaction => return Err(CedarPolicyCreateTypeError::TransactionToken),
     };
-
-    // merge payload with payload with one key (key for user ID)
-    let payload = payload.merge(&payload_for_id.extract_kv(user_id_mapping.role_mapping_field));
 
     EntityMetadata::new(
         EntityParsedTypeName {
