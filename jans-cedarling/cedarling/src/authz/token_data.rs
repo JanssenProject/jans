@@ -24,7 +24,7 @@ pub(crate) struct UserInfoTokenData(TokenPayload);
 
 /// A container for storing token data or data attributes for the .
 /// Provides methods for retrieving payload from the token or attributes for the .
-#[derive(Debug, Clone, serde::Deserialize)]
+#[derive(Debug, Clone, Default, serde::Deserialize)]
 pub(crate) struct TokenPayload {
     #[serde(flatten)]
     pub payload: HashMap<String, serde_json::Value>,
@@ -129,6 +129,16 @@ pub(crate) struct Payload<'a> {
 }
 
 impl<'a> Payload<'a> {
+    /// Get key value of payload
+    pub fn get_key(&self) -> &str {
+        &self.key
+    }
+
+    /// Get value of payload
+    pub fn get_value(&self) -> &serde_json::Value {
+        &self.value
+    }
+
     pub fn as_i64(&self) -> Result<i64, GetTokenClaimValue> {
         self.value
             .as_i64()

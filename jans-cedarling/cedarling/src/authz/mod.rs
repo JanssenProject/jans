@@ -274,10 +274,10 @@ impl Authz {
                 &request.userinfo_token,
             )?;
 
-        let role_entities = create_role_entities(policy_store, &decode_result)?;
-
         let trusted_issuer = decode_result.trusted_issuer.unwrap_or_default();
         let tokens_metadata = trusted_issuer.tokens_metadata();
+
+        let role_entities = create_role_entities(policy_store, &decode_result, &trusted_issuer)?;
 
         // Populate the `AuthorizeEntitiesData` structure using the builder pattern
         let data = AuthorizeEntitiesData::builder()
@@ -299,6 +299,7 @@ impl Authz {
                     &decode_result,
                     // parents for Jans::User entity
                     HashSet::from_iter(role_entities.iter().map(|e|e.uid())),
+                    trusted_issuer
                 )
                 .map_err(AuthorizeError::CreateUserEntity)?,
             )

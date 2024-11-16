@@ -10,9 +10,12 @@ use std::{
     str::FromStr,
 };
 
-use crate::common::cedar_schema::{
-    cedar_json::{CedarSchemaEntityShape, CedarSchemaRecord, CedarType, GetCedarTypeError},
-    CedarSchemaJson,
+use crate::common::{
+    cedar_schema::{
+        cedar_json::{CedarSchemaEntityShape, CedarSchemaRecord, CedarType, GetCedarTypeError},
+        CedarSchemaJson,
+    },
+    policy_store::ClaimMappings,
 };
 use crate::{
     authz::token_data::{GetTokenClaimValue, Payload, TokenPayload},
@@ -49,13 +52,21 @@ impl<'a> EntityMetadata<'a> {
         schema: &'a CedarSchemaJson,
         data: &'a TokenPayload,
         parents: HashSet<EntityUid>,
+        claim_mapping: &ClaimMappings,
     ) -> Result<cedar_policy::Entity, CedarPolicyCreateTypeError> {
         let entity_uid = build_entity_uid(
             self.entity_type.full_type_name().as_str(),
             data.get_payload(self.entity_id_data_key)?.as_str()?,
         )?;
 
-        create_entity(entity_uid, &self.entity_type, schema, data, parents)
+        create_entity(
+            entity_uid,
+            &self.entity_type,
+            schema,
+            data,
+            parents,
+            claim_mapping,
+        )
     }
 }
 
@@ -154,6 +165,7 @@ fn build_entity_attributes(
     schema: &CedarSchemaJson,
     parsed_typename: &EntityParsedTypeName,
     data: &TokenPayload,
+    claim_mapping: &ClaimMappings,
 ) -> Result<HashMap<String, RestrictedExpression>, CedarPolicyCreateTypeError> {
     // fetch the schema entity shape from the json-schema.
     let schema_shape = fetch_schema_record(parsed_typename, schema)?;
@@ -163,8 +175,13 @@ fn build_entity_attributes(
             .into_iter()
             .filter_map(|attr: EntityAttributeMetadata| {
                 let attr_name = attr.attribute_name;
-                let cedar_exp_result =
-                    token_attribute_to_cedar_exp(&attr, data, parsed_typename, schema);
+                let cedar_exp_result = token_attribute_to_cedar_exp(
+                    &attr,
+                    data,
+                    parsed_typename,
+                    schema,
+                    claim_mapping,
+                );
                 match (cedar_exp_result, attr.is_required) {
                     (Ok(cedar_exp), _) => Some(Ok((attr_name.to_string(), cedar_exp))),
                     (
@@ -191,8 +208,9 @@ pub fn create_entity(
     schema: &CedarSchemaJson,
     data: &TokenPayload,
     parents: HashSet<EntityUid>,
+    claim_mapping: &ClaimMappings,
 ) -> Result<cedar_policy::Entity, CedarPolicyCreateTypeError> {
-    let attrs = build_entity_attributes(schema, parsed_typename, data)?;
+    let attrs = build_entity_attributes(schema, parsed_typename, data, claim_mapping)?;
 
     let entity_uid_string = entity_uid.to_string();
     cedar_policy::Entity::new(entity_uid, attrs, parents)
@@ -216,6 +234,7 @@ fn token_attribute_to_cedar_exp(
     claim: &TokenPayload,
     entity_typename: &EntityParsedTypeName,
     schema: &CedarSchemaJson,
+    claim_mapping: &ClaimMappings,
 ) -> Result<RestrictedExpression, CedarPolicyCreateTypeError> {
     let token_claim_key = attribute_metadata.attribute_name;
 
@@ -223,20 +242,22 @@ fn token_attribute_to_cedar_exp(
 
     get_expression(
         &attribute_metadata.cedar_policy_type,
-        token_claim_value,
+        &token_claim_value,
         claim,
         entity_typename,
         schema,
+        claim_mapping,
     )
 }
 
 /// Build [`RestrictedExpression`] based on input parameters.
 fn get_expression(
     cedar_type: &CedarType,
-    token_claim_value: Payload,
+    token_claim_value: &Payload,
     claim: &TokenPayload,
     base_entity_typename: &EntityParsedTypeName,
     schema: &CedarSchemaJson,
+    claim_mapping: &ClaimMappings,
 ) -> Result<RestrictedExpression, CedarPolicyCreateTypeError> {
     match cedar_type {
         CedarType::String => Ok(token_claim_value.as_str()?.to_string().to_expression()),
@@ -253,6 +274,7 @@ fn get_expression(
                     base_entity_typename,
                     &token_claim_value,
                     schema,
+                    claim_mapping,
                 ),
                 None => Err(CedarPolicyCreateTypeError::FindType(
                     EntityParsedTypeName::new(cedar_typename, base_entity_typename.namespace)
@@ -265,7 +287,14 @@ fn get_expression(
                 .as_array()?
                 .into_iter()
                 .map(|payload| {
-                    get_expression(cedar_type, payload, claim, base_entity_typename, schema)
+                    get_expression(
+                        cedar_type,
+                        &payload,
+                        claim,
+                        base_entity_typename,
+                        schema,
+                        claim_mapping,
+                    )
                 })
                 .collect::<Result<Vec<_>, _>>()?;
 
@@ -304,10 +333,16 @@ fn get_record_expression(
     base_entity_typename: &EntityParsedTypeName<'_>,
     token_claim_value: &Payload<'_>,
     schema: &CedarSchemaJson,
+    claim_mapping: &ClaimMappings,
 ) -> Result<RestrictedExpression, CedarPolicyCreateTypeError> {
-    // TODO: check if we have mapping for current type
-    // in payload we have key
-    let mapped_claim: TokenPayload = todo!();
+    let mapped_claim: TokenPayload = match claim_mapping.get_mapping(
+        token_claim_value.get_key(),
+        &base_entity_typename.full_type_name(),
+    ) {
+        Some(m) => m.apply_mapping(token_claim_value.get_value()).into(),
+        // if we do not have mapping, use empty payload
+        None => TokenPayload::default(),
+    };
 
     let mut record_restricted_exps = Vec::new();
 
@@ -319,10 +354,11 @@ fn get_record_expression(
 
         let exp = get_expression(
             &attribute_type,
-            *token_claim_value,
+            &token_claim_value,
             &mapped_claim,
             &base_entity_typename,
             schema,
+            claim_mapping,
         )
         .map_err(|err| {
             CedarPolicyCreateTypeError::BuildAttribute(
@@ -369,6 +405,7 @@ pub enum CedarPolicyCreateTypeError {
 
     #[error("could find record/type: {0}")]
     FindType(String),
+
     #[error("transaction token not implemented")]
     TransactionToken,
 }

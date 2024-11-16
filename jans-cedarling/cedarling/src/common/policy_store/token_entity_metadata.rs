@@ -6,10 +6,9 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-use super::claim_mapping::ClaimMapping;
+pub use super::claim_mapping::ClaimMappings;
 use super::parse_option_string;
 use serde::Deserialize;
-use std::collections::HashMap;
 
 /// Represents metadata related to access tokens issued by a trusted issuer.
 ///
@@ -28,15 +27,6 @@ pub struct AccessTokenEntityMetadata {
     #[serde(default, flatten)]
     pub entity_metadata: TokenEntityMetadata,
 }
-
-
-
-/// Structure for storing `claim mappings`
-/// 
-/// wrapper around hash map 
-#[derive(Debug, Default, PartialEq, Clone, Deserialize)]
-pub struct ClaimMappings(HashMap<String, ClaimMapping>);
-
 
 ///  Structure for storing mapping JWT claims to `cedar-policy` custom defined types in the `schema`.
 /// 
@@ -57,8 +47,6 @@ pub struct TokenEntityMetadata {
     #[serde(default)]
     pub claim_mapping: ClaimMappings,
 }
-
-
 
 
 #[cfg(test)]

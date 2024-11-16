@@ -13,7 +13,6 @@ use crate::common::policy_store::parse_cedar_version;
 use base64::prelude::*;
 use serde::Deserialize;
 use serde_json::json;
-use std::collections::HashMap;
 use std::str::FromStr;
 use test_utils::assert_eq;
 
