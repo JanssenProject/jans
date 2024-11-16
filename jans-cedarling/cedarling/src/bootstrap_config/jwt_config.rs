@@ -29,9 +29,9 @@ pub struct NewJwtConfig {
     ///
     /// This setting overrides the `iss` validation settings in the following:
     ///
-    /// - [`AccessTokenValidationConfig`]
-    /// - [`IdTokenValidationConfig`]
-    /// - [`UserinfoTokenValidationConfig`]
+    /// - `access_token_config`
+    /// - `id_token_config`
+    /// - `userinfo_token_config`
     pub jwt_sig_validation: bool,
     /// Whether to check the status of the JWT.
     ///
@@ -194,50 +194,6 @@ impl TokenValidationConfig {
         self.nbf_validation = true;
         self
     }
-}
-
-/// Validation options related to the Access token
-pub struct AccessTokenValidationConfig {
-    /// Requires the `iss` claim to be present in the Access token
-    /// and the scheme must be `https`
-    pub iss_validation: bool,
-    /// Requires the `jti` claim to be present in the Access token
-    pub jti_validation: bool,
-    /// Requires the `exp` claim to be present in the Access token and
-    /// the current timestamp isn't past the specified timestamp in the token.
-    pub exp_validation: bool,
-    /// Requires the `nbf` claim to be present in the Access token
-    pub nbf_validation: bool,
-}
-
-/// Validation options related to the Id token
-pub struct IdTokenValidationConfig {
-    /// Requires the `iss` claim to be present in the Id token
-    /// and the scheme must be `https`
-    pub iss_validation: bool,
-    /// Requires the `sub` claim to be present in the Access token
-    pub sub_validation: bool,
-    /// Requires the `iat` claim to be present in the Id token
-    pub iat_validation: bool,
-    /// Requires the `aud` claim to be present in the Id token
-    pub aud_validation: bool,
-    /// Requires the `exp` claim to be present in the Id token and
-    /// the current timestamp isn't past the specified timestamp in the token.
-    pub exp_validation: bool,
-}
-
-/// Validation options related to the Userinfo token
-pub struct UserinfoTokenValidationConfig {
-    /// Requires the `iss` claim to be present in the Userinfo token
-    /// and the scheme must be `https`
-    pub iss_validation: bool,
-    /// Requires the `sub` claim to be present in the userinfo token
-    pub sub_validation: bool,
-    /// Requires the `aud` claim to be present in the userinfo token
-    pub aud_validation: bool,
-    /// Requires the `exp` claim to be present in the Userinfo token and
-    /// the current timestamp isn't past the specified timestamp in the token.
-    pub exp_validation: bool,
 }
 
 /// Defines the level of validation for ID tokens.
