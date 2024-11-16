@@ -131,8 +131,18 @@ impl JwkStore {
     }
 
     /// Returns a &Vec of all the keys without a `kid` (Key ID).
-    pub fn keys_without_id(&self) -> &Vec<DecodingKey> {
-        &self.keys_without_id
+    pub fn get_keys_without_id(&self) -> Vec<&DecodingKey> {
+        self.keys_without_id.iter().collect()
+    }
+
+    /// Returns a Vec containing a reference to all of the keys.
+    pub fn get_keys(&self) -> Vec<&DecodingKey> {
+        // PERF: We can cache the returned Vec so it doesn't
+        // get created every time this function is called.
+        let mut keys = Vec::new();
+        self.keys.values().for_each(|key| keys.push(key));
+        self.keys_without_id.iter().for_each(|key| keys.push(key));
+        keys
     }
 }
 
@@ -380,5 +390,37 @@ mod test {
         };
 
         assert_eq!(expected, result);
+    }
+
+    #[test]
+    fn can_get_a_reference_to_all_keys() {
+        let keys_json = json!([
+            {
+                "use": "sig",
+                "e": "AQAB",
+                "alg": "RS256",
+                "n": "4VI56fF0rcWHHVgHFLHrmEO5w8oN9gbSQ9TEQnlIKRg0zCtl2dLKtt0hC6WMrTA9cF7fnK4CLNkfV_Mytk-rydu2qRV_kah62v9uZmpbS5dcz5OMXmPuQdV8fDVIvscDK5dzkwD3_XJ2mzupvQN2reiYgce6-is23vwOyuT-n4vlxSqR7dWdssK5sj9mhPBEIlfbuKNykX5W6Rgu-DyuoKRc_aukWnLxWN-yoroP2IHYdCQm7Ol08vAXmrwMyDfvsmqdXUEx4om1UZ5WLf-JNaZp4lXhgF7Cur5066213jwpp4f_D3MyR-oa43fSa91gqp2berUgUyOWdYSIshABVQ",
+                "kty": "RSA",
+                "kid": "some_random_key_id",
+            },
+            {
+                "n": "tMXbmw7xEDVLLkAJdxpI-6pGywn0x9fHbD_mfgtFGZEs1LDjhDAJq6c-SoODeWQstjpetTgNqVCKOuU6zGyFPNtkDjhJqDW6THy06uJ8I85crILo3h-6NPclZ3bK9OzN5bIbzjbSvxrIM7ORZOlWzByOn5qGsMvI3aDrZ0lXNC1eCDWJpoJznG1fWcHYxbUy_CHDC3Cd26jX19aRALEEQU-y-wi9pv86qxEmrYMLsVN3__eWNNPkzxgf0eSOWFDv5_19YK7irYztqiwin6abxr9RHj3Qs21hpJ9A-YfsfmNkxmifgDeiTnXpZY8yfVTCJTtkgT7sjdU1lvhsMa4Z0w",
+                "e": "AQAB",
+                "use": "sig",
+                "alg": "RS256",
+                "kty": "RSA",
+            }
+        ]);
+
+        let jwkset = serde_json::from_value::<JwkSet>(json!({"keys": keys_json.clone()}))
+            .expect("Should create JwkSet");
+
+        let mut result =
+            JwkStore::new_from_jwkset("test".into(), &jwkset).expect("Should create JwkStore");
+        // We edit the `last_updated` from the result so that the comparison
+        // wont fail because of the timestamp.
+        result.last_updated = OffsetDateTime::from_unix_timestamp(0).unwrap();
+
+        assert_eq!(result.get_keys().len(), 2, "Expected 2 keys");
     }
 }

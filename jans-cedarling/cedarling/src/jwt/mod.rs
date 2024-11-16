@@ -17,6 +17,7 @@ mod error;
 mod http_client;
 mod jwk_store;
 mod jwt_service_config;
+mod new_key_service;
 #[cfg(test)]
 mod test;
 mod token;
