@@ -24,10 +24,8 @@ mod token;
 use crate::common::policy_store::TrustedIssuer;
 use crate::NewJwtConfig;
 use decoding_strategy::{open_id_storage::OpenIdStorage, DecodingArgs, DecodingStrategy};
-use jwk_store::{load_local_store, load_openid_stores, JwkStore, JwksLoadingError};
 use serde::de::DeserializeOwned;
-use std::collections::HashMap;
-use std::time::Duration;
+use std::rc::Rc;
 use token::*;
 
 pub use decoding_strategy::key_service::{HttpClient, KeyServiceError};
@@ -38,59 +36,25 @@ pub use jwt_service_config::*;
 pub(crate) mod decoding_strategy;
 
 /// Type alias for Trusted Issuers' ID.
-#[allow(dead_code)]
-type TrustedIssuerId = String;
+type TrustedIssuerId = Rc<str>;
+
+/// Type alias for a Json Web Key ID (`kid`).
+type KeyId = Box<str>;
 
 #[derive(Debug, thiserror::Error)]
+#[allow(dead_code)]
 pub enum NewJwtServiceError {
-    #[error("Failed to initialize JWT Service: {0}")]
-    Init(#[from] JwksLoadingError),
+    #[error("Failed to initialize JWT Service")]
+    Init,
 }
 
 #[derive(Default)]
-pub struct NewJwtService {
-    http_client: Option<http_client::HttpClient>,
-    key_stores: Option<HashMap<TrustedIssuerId, JwkStore>>,
-}
+pub struct NewJwtService;
 
 #[allow(dead_code)]
 impl NewJwtService {
-    pub fn new_from_config(mut config: NewJwtConfig) -> Result<Self, NewJwtServiceError> {
-        let mut new_service = Self::default();
-        new_service.load_key_stores(&mut config)?;
+    pub fn new_from_config(mut _config: NewJwtConfig) -> Result<Self, NewJwtServiceError> {
         todo!("Implement NewJwtService Init implementation.")
-    }
-
-    /// Loads key stores based on the provided configuration.
-    fn load_key_stores(&mut self, config: &mut NewJwtConfig) -> Result<(), JwksLoadingError> {
-        match (config.local_jwks.take(), config.trusted_issuers.take()) {
-            // Case: No local JWKS or trusted issuers provided.
-            (None, None) => Err(JwksLoadingError::MissingConfig),
-
-            // Case: Only trusted issuers are provided.
-            (None, Some(trusted_issuers)) => {
-                self.key_stores = match &self.http_client {
-                    Some(http_client) => Some(load_openid_stores(http_client, trusted_issuers)?),
-                    None => {
-                        let http_client = http_client::HttpClient::new(1, Duration::from_secs(1))?;
-                        let key_stores = load_openid_stores(&http_client, trusted_issuers)?;
-                        self.http_client = Some(http_client);
-                        Some(key_stores)
-                    },
-                };
-
-                Ok(())
-            },
-
-            // Case: Only local JWKS is provided.
-            (Some(jwks), None) => {
-                self.key_stores = Some(load_local_store(jwks)?);
-                Ok(())
-            },
-
-            // Case: Both local JWKS and trusted issuers are provided (invalid configuration).
-            (Some(_), Some(_)) => Err(JwksLoadingError::InvalidConfig)?,
-        }
     }
 }
 
