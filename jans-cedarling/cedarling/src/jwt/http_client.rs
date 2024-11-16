@@ -1,6 +1,5 @@
-use std::{thread::sleep, time::Duration};
-
 use reqwest::blocking::Client;
+use std::{thread::sleep, time::Duration};
 
 /// A wrapper around `reqwest::blocking::Client` providing HTTP request functionality
 /// with retry logic.
@@ -29,10 +28,10 @@ impl HttpClient {
     }
 
     /// Sends a GET request to the specified URI with retry logic.
-    ///1
+    ///
     /// This method will attempt to fetch the resource up to 3 times, with an increasing delay
     /// between each attempt.
-    fn get(&self, uri: &str) -> Result<reqwest::blocking::Response, HttpClientError> {
+    pub fn get(&self, uri: &str) -> Result<reqwest::blocking::Response, HttpClientError> {
         // Fetch the JWKS from the jwks_uri
         let mut attempts = 0;
         let response = loop {
@@ -66,7 +65,6 @@ pub enum HttpClientError {
     /// Indicates failure to initialize the HTTP client.
     #[error("Failed to initilize HTTP client: {0}")]
     Initialization(#[source] reqwest::Error),
-
     /// Indicates an HTTP error response received from an endpoint.
     #[error("Received error HTTP status: {0}")]
     HttpStatus(#[source] reqwest::Error),
@@ -78,7 +76,7 @@ pub enum HttpClientError {
 
 #[cfg(test)]
 mod test {
-    use crate::jwt::http_client::{self, HttpClientError};
+    use crate::jwt::http_client::HttpClientError;
 
     use super::HttpClient;
     use mockito::Server;
@@ -87,7 +85,7 @@ mod test {
     use test_utils::assert_eq;
 
     #[test]
-    fn can_fetch_from_uri() {
+    fn can_fetch() {
         let mut mock_server = Server::new();
 
         let expected = json!({
