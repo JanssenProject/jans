@@ -19,8 +19,8 @@ pub struct NewJwtConfig {
     ///
     /// Each entry in the map associates an `IssuerId` with a `TrustedIssuer` instance,
     /// representing metadata for the corresponding issuer. This metadata may include
-    /// information retrieved from a `.well-known/...` endpoint for validating tokens
-    /// and establishing trust with the issuer.
+    /// information retrieved from a `.well-known/openid-configuration` endpoint 
+    /// for validating tokens and establishing trust with the issuer.
     pub trusted_issuers: Option<HashMap<IssuerId, TrustedIssuer>>,
     /// Check the signature for all the Json Web Tokens.
     ///
