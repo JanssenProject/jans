@@ -296,15 +296,6 @@ impl NewJwtConfig {
     ///
     /// This method clears the current list of supported algorithms and sets it to
     /// allow all algorithms.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// let config = TokenValidationConfig::default()
-    ///     .allow_all_algorithms();
-    ///
-    /// assert_eq!(config.signature_algorithms_supported, vec!["*"]);
-    /// ```
     pub fn allow_all_algorithms(mut self) -> Self {
         self.signature_algorithms_supported.clear();
         self.signature_algorithms_supported.push("*".into());
@@ -316,28 +307,6 @@ impl NewJwtConfig {
     /// The JWKS is a collection of public keys used to validate the signature of
     /// incoming JWTs. This method sets the `local_jwks` field to a specific JWKS
     /// in the form of a JSON string.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// let jwks = r#"{
-    ///     "keys": [
-    ///         {
-    ///             "kty": "RSA",
-    ///             "kid": "12345",
-    ///             "use": "sig",
-    ///             "n": "modulus",
-    ///             "e": "exponent"
-    ///         }
-    ///     ]
-    /// }"#.to_string();
-    ///
-    /// let config = TokenValidationConfig::default()
-    ///     .set_local_jwks(jwks);
-    ///
-    /// assert_eq!(config.local_jwks.is_some(), true);
-    /// assert_eq!(config.local_jwks.unwrap(), jwks);
-    /// ```
     pub fn set_local_jwks(mut self, jwks: String) -> Self {
         self.local_jwks = Some(jwks);
         self

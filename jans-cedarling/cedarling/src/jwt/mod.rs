@@ -27,7 +27,6 @@ use decoding_strategy::{open_id_storage::OpenIdStorage, DecodingArgs, DecodingSt
 use jwk_store::{load_local_store, load_openid_stores, JwkStore, JwksLoadingError};
 use serde::de::DeserializeOwned;
 use std::collections::HashMap;
-use std::default;
 use std::time::Duration;
 use token::*;
 
