@@ -17,20 +17,6 @@ use std::{
 #[derive(Default)]
 #[allow(dead_code)]
 pub struct JwtValidatorConfig {
-    /// Requires the `iss` claim to be present in the JWT, the scheme
-    /// must be `https`, and the `iss` to be in the `trusted_issuers`.
-    pub iss_validation: bool,
-    /// Requires the `aud` claim to be present in the JWT.
-    pub aud_validation: bool,
-    /// Requires the `sub` claim to be present in the JWT.
-    pub sub_validation: bool,
-    /// Requires the `jti` claim to be present in the JWT.
-    pub jti_validation: bool,
-    /// Requires the `exp` claim to be present in the JWT and the current
-    /// timestamp isn't past the specified timestamp in the token.
-    pub exp_validation: bool,
-    /// Requires the `nbf` claim to be present in the JWT.
-    pub nbf_validation: bool,
     /// Validate the signature of the JWT.
     pub sig_validation: Rc<bool>,
     /// Validate the status of the JWT.
@@ -40,8 +26,16 @@ pub struct JwtValidatorConfig {
     ///
     /// [`IETF Draft`]: https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/
     pub status_validation: Rc<bool>,
+    /// List of trusted issuers used to obtain the JWKS.
     pub trusted_issuers: Rc<Option<HashMap<IssuerId, TrustedIssuer>>>,
+    /// Algorithms supported as defined in the Bootstrap properties.
+    ///
+    /// Tokens not signed with an algorithm within this HashSet will immediately be invalid.
     pub algs_supported: Rc<HashSet<Algorithm>>,
+    /// Required claims that the JWTs are required to have.
+    //
+    /// Tokens with a missing required claim will immediately be invalid.
+    pub required_claims: HashSet<Box<str>>,
 }
 
 #[allow(dead_code)]
@@ -62,16 +56,11 @@ impl JwtValidatorConfig {
         algs_supported: Rc<HashSet<Algorithm>>,
     ) -> Self {
         Self {
-            iss_validation: true,
-            aud_validation: false,
-            sub_validation: false,
-            jti_validation: true,
-            exp_validation: true,
-            nbf_validation: false,
             sig_validation,
             status_validation,
             trusted_issuers,
             algs_supported,
+            required_claims: HashSet::from(["iss", "jti", "exp"].map(|x| x.into())),
         }
     }
 
@@ -91,16 +80,11 @@ impl JwtValidatorConfig {
         algs_supported: Rc<HashSet<Algorithm>>,
     ) -> Self {
         Self {
-            iss_validation: true,
-            aud_validation: true,
-            sub_validation: true,
-            jti_validation: false,
-            exp_validation: true,
-            nbf_validation: false,
             sig_validation,
             status_validation,
             trusted_issuers,
             algs_supported,
+            required_claims: HashSet::from(["iss", "aud", "sub", "exp"].map(|x| x.into())),
         }
     }
 
@@ -120,52 +104,11 @@ impl JwtValidatorConfig {
         algs_supported: Rc<HashSet<Algorithm>>,
     ) -> Self {
         Self {
-            iss_validation: true,
-            aud_validation: true,
-            sub_validation: true,
-            jti_validation: false,
-            exp_validation: true,
-            nbf_validation: false,
             sig_validation,
             status_validation,
             trusted_issuers,
             algs_supported,
+            required_claims: HashSet::from(["iss", "aud", "sub", "exp"].map(|x| x.into())),
         }
-    }
-
-    /// Enables the validation of the `iss` claim (issuer).
-    fn validate_iss(mut self) -> Self {
-        self.iss_validation = true;
-        self
-    }
-
-    /// Enables the validation of the `aud` claim (audience).
-    fn validate_aud(mut self) -> Self {
-        self.aud_validation = true;
-        self
-    }
-
-    /// Enables the validation of the `sub` claim (subject).
-    fn validate_sub(mut self) -> Self {
-        self.sub_validation = true;
-        self
-    }
-
-    /// Enables the validation of the `jti` claim (JWT ID).
-    fn validate_jti(mut self) -> Self {
-        self.jti_validation = true;
-        self
-    }
-
-    /// Enables the validation of the `exp` claim (expiration).
-    fn validate_exp(mut self) -> Self {
-        self.exp_validation = true;
-        self
-    }
-
-    /// Enables the validation of the `nbf` claim (not before).
-    fn validate_nbf(mut self) -> Self {
-        self.nbf_validation = true;
-        self
     }
 }
