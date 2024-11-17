@@ -21,6 +21,7 @@ mod new_key_service;
 #[cfg(test)]
 mod test;
 mod token;
+mod validator;
 
 use crate::common::policy_store::TrustedIssuer;
 use crate::NewJwtConfig;
