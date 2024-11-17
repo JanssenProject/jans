@@ -39,9 +39,10 @@ impl JwtValidator {
             false => decode(jwt)?,
         };
 
-        check_missing_claims(&token_claims)?;
-
-        Ok(token_claims)
+        Ok(check_missing_claims(
+            token_claims,
+            &self.config.required_claims,
+        )?)
     }
 }
 
@@ -125,8 +126,21 @@ fn decode_and_validate_token(
     }
 }
 
-fn check_missing_claims(_claims: &TokenClaims) -> Result<(), JwtValidatorError> {
-    todo!("Implement missing claims check")
+fn check_missing_claims(
+    claims: TokenClaims,
+    required_claims: &HashSet<Box<str>>,
+) -> Result<TokenClaims, JwtValidatorError> {
+    let missing_claims = required_claims
+        .iter()
+        .filter(|claim| claims.get(claim.as_ref()).is_none())
+        .cloned()
+        .collect::<Vec<Box<str>>>();
+
+    if missing_claims.len() > 0 {
+        Err(JwtValidatorError::MissingClaims(missing_claims))?
+    }
+
+    Ok(claims)
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -152,6 +166,6 @@ pub enum JwtValidatorError {
     ImmatureToken,
     #[error("An unexpected error occured while validating the JWT: {0}")]
     Unexpected(#[source] jwt::errors::Error),
-    #[error("Validation failed since the JWT is missing the following required claims: {0:?}")]
-    MissingClaims(Vec<String>),
+    #[error("Validation failed since the JWT is missing the following required claims: {0:#?}")]
+    MissingClaims(Vec<Box<str>>),
 }
