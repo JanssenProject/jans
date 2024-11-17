@@ -80,7 +80,7 @@ impl Authz {
     /// - evaluate if authorization is granted for *person*
     /// - evaluate if authorization is granted for *workload*
     pub fn authorize(&self, request: Request) -> Result<AuthorizeResult, AuthorizeError> {
-        let schema = &self.config.policy_store.cedar_schema;
+        let schema = &self.config.policy_store.schema;
 
         // Parse action UID.
         let action = cedar_policy::EntityUid::from_str(request.action.as_str())
@@ -245,12 +245,12 @@ impl Authz {
             parameters.action,
             parameters.resource,
             parameters.context,
-            Some(&self.config.policy_store.cedar_schema.schema),
+            Some(&self.config.policy_store.schema.schema),
         )?;
 
         let response = self.authorizer.is_authorized(
             &request_principal_workload,
-            &self.config.policy_store.cedar_policies,
+            &self.config.policy_store.policies,
             parameters.entities,
         );
 
@@ -306,7 +306,7 @@ impl Authz {
             // Add an entity created from the resource in the request
             .resource_entity(create_resource_entity(
                 request.resource.clone(),
-                &self.config.policy_store.cedar_schema.json,
+                &self.config.policy_store.schema.json,
             )?)
             // Add Jans::Role entities
             .role_entities(role_entities);

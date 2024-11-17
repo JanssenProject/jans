@@ -59,7 +59,7 @@ pub fn create_access_token_entities(
     data: &AccessTokenData,
     meta: &AccessTokenEntityMetadata,
 ) -> Result<AccessTokenEntities, AccessTokenEntitiesError> {
-    let schema = &policy_store.cedar_schema.json;
+    let schema = &policy_store.schema.json;
     let namespace = policy_store.namespace();
     let claim_mapping = &meta.entity_metadata.claim_mapping;
 
@@ -101,7 +101,7 @@ pub fn create_id_token_entity(
     data: &IdTokenData,
     claim_mapping: &ClaimMappings,
 ) -> Result<cedar_policy::Entity, CedarPolicyCreateTypeError> {
-    let schema = &policy_store.cedar_schema.json;
+    let schema = &policy_store.schema.json;
     let namespace = policy_store.namespace();
 
     EntityMetadata::new(
@@ -123,7 +123,7 @@ pub fn create_user_entity(
 ) -> Result<cedar_policy::Entity, CedarPolicyCreateTypeError> {
     let user_id_mapping = trusted_issuer.get_user_id_mapping().unwrap_or_default();
 
-    let schema: &CedarSchemaJson = &policy_store.cedar_schema.json;
+    let schema: &CedarSchemaJson = &policy_store.schema.json;
     let namespace = policy_store.namespace();
 
     // payload and claim mapping for getting user ID
@@ -278,7 +278,7 @@ pub fn create_role_entities(
         }
     };
 
-    let schema = &policy_store.cedar_schema.json;
+    let schema = &policy_store.schema.json;
 
     // create role entity for each entity uid
     entity_uid_vec

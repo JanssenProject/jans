@@ -44,12 +44,12 @@ pub struct PolicyStore {
     pub cedar_version: Option<Version>,
 
     /// Cedar schema
-    #[serde(alias = "schema")]
-    pub cedar_schema: CedarSchema,
+    #[serde(alias = "cedar_schema")]
+    pub schema: CedarSchema,
 
     /// Cedar policy set
-    #[serde(alias = "policies", deserialize_with = "parse_cedar_policy")]
-    pub cedar_policies: cedar_policy::PolicySet,
+    #[serde(alias = "cedar_policies", deserialize_with = "parse_cedar_policy")]
+    pub policies: cedar_policy::PolicySet,
 
     /// An optional HashMap of trusted issuers.
     ///
