@@ -272,6 +272,8 @@ fn success_test_no_role() {
 ///
 /// we check here that field for `Jans::User` is present in `id_token`
 /// it is `country` field of `Jans::User`
+///
+/// THIS TEST CAN BE OUTDATED
 #[test]
 fn success_test_user_data_in_id_token() {
     let cedarling = get_cedarling(PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()));
@@ -298,6 +300,7 @@ fn success_test_user_data_in_id_token() {
                     "iss": "some_iss",
                     "client_id": "some_client_id",
                     "role": ["Admin"],
+                    "country": "US",
                   })),
             "action": "Jans::Action::\"Update\"",
             "resource": {
