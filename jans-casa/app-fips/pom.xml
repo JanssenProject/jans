@@ -259,13 +259,6 @@
             <artifactId>tika-core</artifactId>
         </dependency>
 
-        <!-- SMPP -->
-    	<dependency>
-            <groupId>org.jsmpp</groupId>
-            <artifactId>jsmpp</artifactId>
-            <version>3.0.0</version>
-        </dependency>
-
         <!-- QUARTZ -->
         <dependency>
             <groupId>org.quartz-scheduler</groupId>
