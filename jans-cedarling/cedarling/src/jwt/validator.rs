@@ -10,7 +10,7 @@ pub use config::*;
 use jsonwebtoken::{self as jwt};
 use jsonwebtoken::{decode_header, Algorithm, Validation};
 use serde_json::Value;
-use std::collections::HashSet;
+use std::collections::HashMap;
 use std::rc::Rc;
 
 type IssuerId = String;
@@ -21,28 +21,107 @@ type TokenClaims = Value;
 struct JwtValidator {
     config: JwtValidatorConfig,
     key_service: Rc<NewKeyService>,
+    validators: HashMap<Algorithm, Validation>,
 }
 
 #[allow(dead_code)]
 impl JwtValidator {
     pub fn new(config: JwtValidatorConfig, key_service: Rc<NewKeyService>) -> Self {
+        // we define all the signature validators at startup so we can reuse them.
+        let validators = config
+            .algs_supported
+            .iter()
+            .map(|alg| {
+                let mut validation = Validation::new(*alg);
+
+                validation.validate_exp = config.validate_exp;
+                validation.validate_nbf = config.validate_nbf;
+
+                // we will validate the missing claims in another function but this
+                // defaults to true so we need to set it to false.
+                validation.required_spec_claims.clear();
+                validation.validate_aud = false;
+
+                (*alg, validation)
+            })
+            .collect::<HashMap<Algorithm, Validation>>();
+
         Self {
             config,
             key_service,
+            validators,
         }
     }
 
     /// Decodes the JWT and optionally validates it depending on the config.
     pub fn process_jwt(&self, jwt: &str) -> Result<TokenClaims, JwtValidatorError> {
         let token_claims = match *self.config.sig_validation {
-            true => decode_and_validate_token(jwt, &self.config.algs_supported, &self.key_service)?,
+            true => self.decode_and_validate_token(jwt)?,
             false => decode(jwt)?,
         };
 
-        Ok(check_missing_claims(
-            token_claims,
-            &self.config.required_claims,
-        )?)
+        Ok(self.check_missing_claims(token_claims)?)
+    }
+
+    /// Decodes and validates the JWT's signature and optionally, the `exp` and `nbf` claims.
+    fn decode_and_validate_token(&self, jwt: &str) -> Result<TokenClaims, JwtValidatorError> {
+        let header = decode_header(jwt).map_err(JwtValidatorError::DecodeHeader)?;
+
+        // since we already initialized all the validators on startup, not finding one
+        // for a certain algorithm means it's unsupported.
+        let validation = self.validators.get(&header.alg).ok_or(
+            JwtValidatorError::JwtSignedWithUnsupportedAlgorithm(header.alg),
+        )?;
+
+        let decoding_key = match header.kid {
+            Some(kid) => self
+                .key_service
+                .get_key(&kid)
+                .ok_or(JwtValidatorError::MissingDecodingKey(kid))?,
+            None => unimplemented!("Handling JWTs without `kid`s hasn't been implemented yet."),
+        };
+
+        let decode_result = jsonwebtoken::decode::<TokenClaims>(jwt, decoding_key, &validation);
+
+        match decode_result {
+            Ok(token_data) => Ok(token_data.claims),
+            Err(err) => match err.kind() {
+                jsonwebtoken::errors::ErrorKind::InvalidToken => {
+                    Err(JwtValidatorError::InvalidShape)
+                },
+                jsonwebtoken::errors::ErrorKind::InvalidSignature => {
+                    Err(JwtValidatorError::InvalidSignature(err))
+                },
+                jsonwebtoken::errors::ErrorKind::ExpiredSignature => {
+                    Err(JwtValidatorError::ExpiredToken)
+                },
+                jsonwebtoken::errors::ErrorKind::ImmatureSignature => {
+                    Err(JwtValidatorError::ImmatureToken)
+                },
+                jsonwebtoken::errors::ErrorKind::Base64(decode_error) => {
+                    Err(JwtValidatorError::DecodeJwt(decode_error.to_string()))
+                },
+                // the jsonwebtoken crate placed all it's errors onto a single enum, even the errors
+                // that wouldn't be returned when we call `decode`.
+                _ => Err(JwtValidatorError::Unexpected(err)),
+            },
+        }
+    }
+
+    fn check_missing_claims(&self, claims: TokenClaims) -> Result<TokenClaims, JwtValidatorError> {
+        let missing_claims = self
+            .config
+            .required_claims
+            .iter()
+            .filter(|claim| claims.get(claim.as_ref()).is_none())
+            .cloned()
+            .collect::<Vec<Box<str>>>();
+
+        if missing_claims.len() > 0 {
+            Err(JwtValidatorError::MissingClaims(missing_claims))?
+        }
+
+        Ok(claims)
     }
 }
 
@@ -62,83 +141,6 @@ fn decode(jwt: &str) -> Result<TokenClaims, JwtValidatorError> {
     // Deserialize the claims into a Value
     let claims = serde_json::from_slice::<TokenClaims>(&decoded_payload)
         .map_err(JwtValidatorError::DeserializeJwt)?;
-
-    Ok(claims)
-}
-
-/// Decodes and validates the JWT's signature and optionally, the `exp` and `nbf` claims.
-fn decode_and_validate_token(
-    jwt: &str,
-    supported_algs: &HashSet<Algorithm>,
-    key_service: &NewKeyService,
-) -> Result<TokenClaims, JwtValidatorError> {
-    let header = decode_header(jwt).map_err(JwtValidatorError::DecodeHeader)?;
-
-    // reject unsupported algorithms early
-    if !supported_algs.contains(&header.alg) {
-        return Err(JwtValidatorError::JwtSignedWithUnsupportedAlgorithm(
-            header.alg,
-        ));
-    }
-
-    // PERF: create multiple `Validation`s on startup then just reuse them.
-    let mut validation = Validation::new(header.alg);
-
-    // these settings should only validate the `exp` and `nbf` if the
-    // claim is in the token -- otherwise, they shouldn't do anything.
-    validation.validate_exp = true;
-    validation.validate_nbf = true;
-
-    // we will validate the missing claims in another function but this
-    // defaults to true so we need to set it to false.
-    validation.required_spec_claims.clear();
-    validation.validate_aud = false;
-
-    let decoding_key = match header.kid {
-        Some(kid) => key_service
-            .get_key(&kid)
-            .ok_or(JwtValidatorError::MissingDecodingKey(kid))?,
-        None => unimplemented!("Handling JWTs without `kid`s hasn't been implemented yet."),
-    };
-
-    let decode_result = jsonwebtoken::decode::<TokenClaims>(jwt, decoding_key, &validation);
-
-    match decode_result {
-        Ok(token_data) => Ok(token_data.claims),
-        Err(err) => match err.kind() {
-            jsonwebtoken::errors::ErrorKind::InvalidToken => Err(JwtValidatorError::InvalidShape),
-            jsonwebtoken::errors::ErrorKind::InvalidSignature => {
-                Err(JwtValidatorError::InvalidSignature(err))
-            },
-            jsonwebtoken::errors::ErrorKind::ExpiredSignature => {
-                Err(JwtValidatorError::ExpiredToken)
-            },
-            jsonwebtoken::errors::ErrorKind::ImmatureSignature => {
-                Err(JwtValidatorError::ImmatureToken)
-            },
-            jsonwebtoken::errors::ErrorKind::Base64(decode_error) => {
-                Err(JwtValidatorError::DecodeJwt(decode_error.to_string()))
-            },
-            // the jsonwebtoken crate placed all it's errors onto a single enum, even the errors
-            // that wouldn't be returned when we call `decode`.
-            _ => Err(JwtValidatorError::Unexpected(err)),
-        },
-    }
-}
-
-fn check_missing_claims(
-    claims: TokenClaims,
-    required_claims: &HashSet<Box<str>>,
-) -> Result<TokenClaims, JwtValidatorError> {
-    let missing_claims = required_claims
-        .iter()
-        .filter(|claim| claims.get(claim.as_ref()).is_none())
-        .cloned()
-        .collect::<Vec<Box<str>>>();
-
-    if missing_claims.len() > 0 {
-        Err(JwtValidatorError::MissingClaims(missing_claims))?
-    }
 
     Ok(claims)
 }

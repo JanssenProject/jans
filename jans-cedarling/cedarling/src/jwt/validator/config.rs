@@ -26,7 +26,7 @@ pub struct JwtValidatorConfig {
     ///
     /// [`IETF Draft`]: https://datatracker.ietf.org/doc/draft-ietf-oauth-status-list/
     pub status_validation: Rc<bool>,
-    /// List of trusted issuers used to obtain the JWKS.
+    /// List of trusted issuers used to check the JWT status.
     pub trusted_issuers: Rc<Option<HashMap<IssuerId, TrustedIssuer>>>,
     /// Algorithms supported as defined in the Bootstrap properties.
     ///
@@ -36,6 +36,10 @@ pub struct JwtValidatorConfig {
     //
     /// Tokens with a missing required claim will immediately be invalid.
     pub required_claims: HashSet<Box<str>>,
+    /// Validate the `exp` (Expiration) claim of the token if it's present.
+    pub validate_exp: bool,
+    /// Validate the `nbf` (Not Before) claim of the token if it's present.
+    pub validate_nbf: bool,
 }
 
 #[allow(dead_code)]
@@ -61,6 +65,8 @@ impl JwtValidatorConfig {
             trusted_issuers,
             algs_supported,
             required_claims: HashSet::from(["iss", "jti", "exp"].map(|x| x.into())),
+            validate_exp: true,
+            validate_nbf: true,
         }
     }
 
@@ -85,6 +91,8 @@ impl JwtValidatorConfig {
             trusted_issuers,
             algs_supported,
             required_claims: HashSet::from(["iss", "aud", "sub", "exp"].map(|x| x.into())),
+            validate_exp: true,
+            validate_nbf: true,
         }
     }
 
@@ -109,6 +117,8 @@ impl JwtValidatorConfig {
             trusted_issuers,
             algs_supported,
             required_claims: HashSet::from(["iss", "aud", "sub", "exp"].map(|x| x.into())),
+            validate_exp: true,
+            validate_nbf: true,
         }
     }
 }

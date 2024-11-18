@@ -1,12 +1,9 @@
-use super::check_missing_claims;
-use super::decode;
-use super::decode_and_validate_token;
-use super::test_utils::*;
-use super::JwtValidatorError;
+use super::{decode, test_utils::*, JwtValidator, JwtValidatorConfig, JwtValidatorError};
 use crate::jwt::new_key_service::NewKeyService;
 use jsonwebtoken::Algorithm;
 use serde_json::json;
 use std::collections::HashSet;
+use std::rc::Rc;
 use test_utils::assert_eq;
 
 #[test]
@@ -48,9 +45,22 @@ fn can_decode_and_validate_jwt() {
     )
     .expect("Should create KeyService");
 
-    let result =
-        decode_and_validate_token(&token, &HashSet::from([Algorithm::HS256]), &key_service)
-            .expect("Should decode and validate token");
+    let validator = JwtValidator::new(
+        JwtValidatorConfig {
+            sig_validation: true.into(),
+            status_validation: false.into(),
+            trusted_issuers: None.into(),
+            algs_supported: HashSet::from([Algorithm::HS256]).into(),
+            required_claims: HashSet::new(),
+            validate_exp: true,
+            validate_nbf: true,
+        },
+        key_service.into(),
+    );
+
+    let result = validator
+        .process_jwt(&token)
+        .expect("Should successfully process JWT");
 
     assert_eq!(result, claims);
 }
@@ -78,8 +88,20 @@ fn errors_on_expired_token() {
     )
     .expect("Should create KeyService");
 
-    let result =
-        decode_and_validate_token(&token, &HashSet::from([Algorithm::HS256]), &key_service);
+    let validator = JwtValidator::new(
+        JwtValidatorConfig {
+            sig_validation: true.into(),
+            status_validation: false.into(),
+            trusted_issuers: None.into(),
+            algs_supported: HashSet::from([Algorithm::HS256]).into(),
+            required_claims: HashSet::new(),
+            validate_exp: true,
+            validate_nbf: true,
+        },
+        key_service.into(),
+    );
+
+    let result = validator.process_jwt(&token);
 
     assert!(
         matches!(result, Err(JwtValidatorError::ExpiredToken)),
@@ -110,8 +132,20 @@ fn errors_on_immature_token() {
     )
     .expect("Should create KeyService");
 
-    let result =
-        decode_and_validate_token(&token, &HashSet::from([Algorithm::HS256]), &key_service);
+    let validator = JwtValidator::new(
+        JwtValidatorConfig {
+            sig_validation: true.into(),
+            status_validation: false.into(),
+            trusted_issuers: None.into(),
+            algs_supported: HashSet::from([Algorithm::HS256]).into(),
+            required_claims: HashSet::new(),
+            validate_exp: true,
+            validate_nbf: true,
+        },
+        key_service.into(),
+    );
+
+    let result = validator.process_jwt(&token);
 
     assert!(
         matches!(result, Err(JwtValidatorError::ImmatureToken)),
@@ -121,21 +155,59 @@ fn errors_on_immature_token() {
 
 #[test]
 fn can_check_missing_claims() {
+    // Generate token
+    let keys = generate_keypair_hs256(Some("some_hs256_key")).expect("Should generate keys");
     let claims = json!({
         "sub": "1234567890",
         "name": "John Doe",
         "iat": 1516239022,
     });
+    let token =
+        generate_token_using_claims(&claims, &keys).expect("Should generate token using keys");
+
+    // Prepare Key Service
+    let jwks = generate_jwks(&vec![keys]);
+    let key_service: Rc<NewKeyService> = NewKeyService::new_from_str(
+        &json!({
+            "test_idp": jwks.keys,
+        })
+        .to_string(),
+    )
+    .expect("Should create KeyService")
+    .into();
 
     // Base case where all required claims are present
-    let required_claims = HashSet::from(["sub", "name", "iat"].map(|x| x.into()));
-    let result = check_missing_claims(claims.clone(), &required_claims)
-        .expect("Expected check to be successful");
+    let validator = JwtValidator::new(
+        JwtValidatorConfig {
+            sig_validation: true.into(),
+            status_validation: false.into(),
+            trusted_issuers: None.into(),
+            algs_supported: HashSet::from([Algorithm::HS256]).into(),
+            required_claims: HashSet::from(["sub", "name", "iat"].map(|x| x.into())),
+            validate_exp: true,
+            validate_nbf: true,
+        },
+        key_service.clone(),
+    );
+    let result = validator
+        .process_jwt(&token)
+        .expect("Should process JWT successfully");
     assert_eq!(result, claims);
 
     // Error case where `nbf` is missing from the token.
-    let required_claims = HashSet::from(["sub", "name", "iat", "nbf"].map(|x| x.into()));
-    let result = check_missing_claims(claims.clone(), &required_claims);
+    let validator = JwtValidator::new(
+        JwtValidatorConfig {
+            sig_validation: true.into(),
+            status_validation: false.into(),
+            trusted_issuers: None.into(),
+            algs_supported: HashSet::from([Algorithm::HS256]).into(),
+            required_claims: HashSet::from(["sub", "name", "iat", "nbf"].map(|x| x.into())),
+            validate_exp: true,
+            validate_nbf: true,
+        },
+        key_service.clone(),
+    );
+    let result = validator.process_jwt(&token);
     assert!(
         matches!(
             result,
