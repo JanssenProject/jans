@@ -13,7 +13,7 @@ RUN apk update \
 # Jetty
 # =====
 
-ARG JETTY_VERSION=11.0.20
+ARG JETTY_VERSION=11.0.24
 ARG JETTY_HOME=/opt/jetty
 ARG JETTY_BASE=/opt/jans/jetty
 ARG JETTY_USER_HOME_LIB=/home/jetty/lib
@@ -51,7 +51,7 @@ RUN /opt/jython/bin/pip uninstall -y pip setuptools
 # ===========
 
 ENV CN_VERSION=1.1.6-SNAPSHOT
-ENV CN_BUILD_DATE='2024-10-29 17:28'
+ENV CN_BUILD_DATE='2024-11-15 08:48'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-auth-server/${CN_VERSION}/jans-auth-server-${CN_VERSION}.war
 
