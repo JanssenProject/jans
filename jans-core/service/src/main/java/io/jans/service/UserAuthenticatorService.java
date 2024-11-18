@@ -33,7 +33,7 @@ public class UserAuthenticatorService {
 	private static final UserAuthenticatorList EMPTY_USER_AUTHENTICATOR_LIST = new UserAuthenticatorList(Collections.emptyList());
 
 	public UserAuthenticatorList getUserAuthenticatorList(SimpleUser user) {
-		if ((user == null) || (user.getAuthenticator() == null)) {
+		if ((user == null) || (user.getAuthenticator() == null) || (user.getAuthenticator().getAuthenticators() == null)) {
 			return EMPTY_USER_AUTHENTICATOR_LIST;
 		}
 
