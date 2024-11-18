@@ -124,7 +124,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                 else:
                     Config.backend_service = 'mysql.service'
 
-                result, conn = self.dbUtils.mysqlconnection(log=False)
+                result, conn = self.dbUtils.sqlconnection(log=False)
                 user_passwd_str = f"-u root -p'{Config.mysql_root_password}' " if base.os_type == 'suse' else ''
                 if not result:
                     sql_cmd_list = [
