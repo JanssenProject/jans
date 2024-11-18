@@ -4,7 +4,7 @@ use super::{
     TrustedIssuerId,
 };
 use crate::common::policy_store::TrustedIssuer;
-use jsonwebtoken::{jwk::JwkSet, DecodingKey};
+use jsonwebtoken::DecodingKey;
 use serde_json::{json, Value};
 use std::{collections::HashMap, rc::Rc, time::Duration};
 
@@ -46,9 +46,8 @@ impl NewKeyService {
         let mut key_stores = HashMap::new();
         for (iss_id, keys) in &parsed_stores {
             let iss_id = TrustedIssuerId::from(iss_id.as_str());
-            let jwkset = serde_json::from_value::<JwkSet>(json!({"keys": keys}))
-                .map_err(KeyServiceError::DecodeJwkSet)?;
-            key_stores.insert(iss_id.clone(), JwkStore::new_from_jwkset(iss_id, &jwkset)?);
+            let jwks = json!({"keys": keys});
+            key_stores.insert(iss_id.clone(), JwkStore::new_from_jwks_value(iss_id, jwks)?);
         }
         Ok(Self {
             http_client: None,
@@ -110,8 +109,6 @@ impl NewKeyService {
 pub enum KeyServiceError {
     #[error("Failed to decode JWK Stores from string: {0}")]
     DecodeJwkStores(#[source] serde_json::Error),
-    #[error("Failed to decode JwkSet from Value: {0}")]
-    DecodeJwkSet(#[source] serde_json::Error),
     #[error("Failed to make HTTP Request: {0}")]
     Http(#[from] HttpClientError),
     #[error("Failed to load JWKS: {0}")]
