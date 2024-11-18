@@ -1,8 +1,25 @@
 {
     "Jans": {
+        "commonTypes": {
+            "Url": {
+                "type": "Record",
+                "attributes": {
+                    "host": {
+                        "type": "EntityOrCommon",
+                        "name": "String"
+                    },
+                    "path": {
+                        "type": "EntityOrCommon",
+                        "name": "String"
+                    },
+                    "protocol": {
+                        "type": "EntityOrCommon",
+                        "name": "String"
+                    }
+                }
+            }
+        },
         "entityTypes": {
-            "Role": {},
-            "Issue": {},
             "Access_token": {
                 "shape": {
                     "type": "Record",
@@ -28,7 +45,20 @@
                         }
                     }
                 }
-            }
+            },
+            "TrustedIssuer": {
+                "shape": {
+                    "type": "Record",
+                    "attributes": {
+                        "issuer_entity_id": {
+                            "type": "EntityOrCommon",
+                            "name": "Url"
+                        }
+                    }
+                }
+            },
+            "Issue": {},
+            "Role": {}
         },
         "actions": {
             "Update": {

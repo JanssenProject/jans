@@ -39,6 +39,7 @@ fn test_namespace_jans2() {
                     "country": "US",
                     "sub": "some_sub",
                     "iss": "some_iss",
+                    "jti": "some_jti",
                     "client_id": "some_client_id",
                     "role": ["Admin"],
                   })),

@@ -25,6 +25,7 @@ derive_more = { version = "1.0.0", features = [
     "display",
     "error",
 ] }
+regex = "1.11.1"
 
 [dev-dependencies]
 # is used in testing

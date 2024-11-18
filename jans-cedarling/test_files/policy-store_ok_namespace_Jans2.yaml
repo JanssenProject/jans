@@ -54,6 +54,7 @@ policy_stores:
           entity TrustedIssuer = {"issuer_entity_id": Url};
           entity Issue = {"country": String, "org_id": String};
           entity id_token = {"aud": String,"iss": String, "sub": String};
+          entity Userinfo_token  = {"iss": String, "jti": String, "client_id": String,"role": Set<String>};
           entity Role;
           entity User in [Role] = {"country": String};
           entity Workload = {"org_id": String};
