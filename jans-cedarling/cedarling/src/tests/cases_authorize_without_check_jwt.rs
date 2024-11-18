@@ -38,6 +38,7 @@ fn success_test_role_string() {
                     "sub": "some_sub",
                   })),
             "userinfo_token":  generate_token_using_claims(json!({
+                    "jti": "some_jti",
                     "country": "US",
                     "sub": "some_sub",
                     "iss": "some_iss",
@@ -125,6 +126,7 @@ fn success_test_role_array() {
                     "sub": "some_sub",
                   })),
             "userinfo_token":  generate_token_using_claims(json!({
+                    "jti": "some_jti",
                     "country": "US",
                     "sub": "some_sub",
                     "iss": "some_iss",
@@ -213,6 +215,7 @@ fn success_test_no_role() {
                     "sub": "some_sub",
                   })),
             "userinfo_token":  generate_token_using_claims(json!({
+                    "jti": "some_jti",
                     "country": "US",
                     "sub": "some_sub",
                     "iss": "some_iss",
@@ -296,6 +299,7 @@ fn success_test_user_data_in_id_token() {
                     "country": "US",
                   })),
             "userinfo_token":  generate_token_using_claims(json!({
+                    "jti": "some_jti",
                     "sub": "some_sub",
                     "iss": "some_iss",
                     "client_id": "some_client_id",
@@ -380,10 +384,12 @@ fn all_forbid() {
                     "sub": "some_sub",
                   })),
             "userinfo_token":  generate_token_using_claims(json!({
+                    "jti": "some_jti",
                   // country different from resource
                     "country": "UK",
                     "sub": "some_sub",
                     "iss": "some_iss",
+                    "jti": "some_jti",
                     "client_id": "some_client_id",
                     // role not Admin
                     "role": ["Guest"],
@@ -465,6 +471,7 @@ fn only_principal_permit() {
                     "sub": "some_sub",
                   })),
             "userinfo_token":  generate_token_using_claims(json!({
+                    "jti": "some_jti",
                   // country different from resource
                     "country": "UK",
                     "sub": "some_sub",
@@ -557,6 +564,7 @@ fn only_person_permit() {
                     "sub": "some_sub",
                   })),
             "userinfo_token":  generate_token_using_claims(json!({
+                    "jti": "some_jti",
                   // country different from resource
                     "country": "US",
                     "sub": "some_sub",
@@ -643,6 +651,7 @@ fn only_role_permit() {
                     "sub": "some_sub",
                   })),
             "userinfo_token":  generate_token_using_claims(json!({
+                    "jti": "some_jti",
                   // country different from resource
                     "country": "UK",
                     "sub": "some_sub",
@@ -727,6 +736,7 @@ fn only_workload_and_person_permit() {
                     "sub": "some_sub",
                   })),
             "userinfo_token":  generate_token_using_claims(json!({
+                    "jti": "some_jti",
                     "country": "US",
                     "sub": "some_sub",
                     "iss": "some_iss",
@@ -811,6 +821,7 @@ fn only_workload_and_role_permit() {
                     "sub": "some_sub",
                   })),
             "userinfo_token":  generate_token_using_claims(json!({
+                    "jti": "some_jti",
                   // country different from resource
                     "country": "UK",
                     "sub": "some_sub",

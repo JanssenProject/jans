@@ -150,6 +150,25 @@ pub fn create_user_entity(
     .create_entity(schema, payload, parents, claim_mapping)
 }
 
+/// Create `Userinfo_token` entity
+pub fn create_userinfo_token_entity(
+    policy_store: &PolicyStore,
+    data: &UserInfoTokenData,
+    claim_mapping: &ClaimMappings,
+) -> Result<cedar_policy::Entity, CedarPolicyCreateTypeError> {
+    let schema = &policy_store.schema.json;
+    let namespace = policy_store.namespace();
+
+    EntityMetadata::new(
+        EntityParsedTypeName {
+            typename: "Userinfo_token",
+            namespace,
+        },
+        "jti",
+    )
+    .create_entity(schema, data, HashSet::new(), claim_mapping)
+}
+
 /// Describe errors on creating resource entity
 #[derive(thiserror::Error, Debug)]
 pub enum ResourceEntityError {

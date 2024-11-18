@@ -85,7 +85,7 @@ policy_stores:
           entity User in [Role] = {"email": email_address, "phone_number"?: String, "role": Set < String >, "sub": String, "username"?: String};
           entity HTTP_Request = {"accept": Set < String >, "header": Set < String >, "url": Url};
           entity Role;
-          entity Userinfo_token = {"aud": String, "birthdate": String, "email"?: email_address, "exp": Long, "iat": Long, "iss": TrustedIssuer, "jti": String, "name": String, "phone_number"?: String, "role": Set < String >, "sub": String};
+          entity Userinfo_token = {"aud": String, "birthdate"?: String, "email"?: email_address, "exp"?: Long, "iat"?: Long, "iss": TrustedIssuer, "jti": String, "name"?: String, "phone_number"?: String, "role"?: Set < String >, "sub": String};
           entity TrustedIssuer = {"issuer_entity_id": Url};
           entity Application = {"app_id": String, "name": String, "url": Url};
           entity id_token = {"acr": String, "amr": Set<String>, "aud": String, "azp"?: String, "birthdate"?: String, "email"?: email_address, "exp": Long, "iat": Long, "iss": TrustedIssuer, "jti": String, "name"?: String, "phone_number"?: String, "role"?: Set < String >, "sub": String};

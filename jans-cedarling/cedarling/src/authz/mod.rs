@@ -34,7 +34,7 @@ use entities::DecodeTokensResult;
 use entities::ResourceEntityError;
 use entities::{
     create_access_token_entities, create_id_token_entity, create_role_entities, create_user_entity,
-    AccessTokenEntitiesError, RoleEntityError,
+    create_userinfo_token_entity, AccessTokenEntitiesError, RoleEntityError,
 };
 use entities::{create_resource_entity, AccessTokenEntities};
 use request::Request;
@@ -293,6 +293,11 @@ impl Authz {
                     .map_err(AuthorizeError::CreateIdTokenEntity)?,
             )
             // Add an entity created from the userinfo token
+            .userinfo_token(
+                create_userinfo_token_entity(policy_store, &decode_result.userinfo_token, &tokens_metadata.userinfo_tokens.claim_mapping)
+                .map_err(AuthorizeError::CreateUserinfoTokenEntity)?
+            )
+            // Add an entity created from the userinfo token
             .user_entity(
                 create_user_entity(
                     policy_store,
@@ -332,6 +337,7 @@ struct ExecuteAuthorizeParameters<'a> {
 pub struct AuthorizeEntitiesData {
     pub access_token_entities: AccessTokenEntities,
     pub id_token_entity: Entity,
+    pub userinfo_token: Entity,
     pub user_entity: Entity,
     pub resource_entity: Entity,
     pub role_entities: Vec<Entity>,
@@ -340,10 +346,15 @@ pub struct AuthorizeEntitiesData {
 impl AuthorizeEntitiesData {
     /// Create iterator to get all entities
     fn into_iter(self) -> impl Iterator<Item = Entity> {
-        vec![self.id_token_entity, self.user_entity, self.resource_entity]
-            .into_iter()
-            .chain(self.access_token_entities.into_iter())
-            .chain(self.role_entities)
+        vec![
+            self.id_token_entity,
+            self.userinfo_token,
+            self.user_entity,
+            self.resource_entity,
+        ]
+        .into_iter()
+        .chain(self.access_token_entities.into_iter())
+        .chain(self.role_entities)
     }
 
     /// Collect all entities to [`cedar_policy::Entities`]
@@ -367,6 +378,9 @@ pub enum AuthorizeError {
     /// Error encountered while creating id token entities
     #[error("could not create id_token entity: {0}")]
     CreateIdTokenEntity(CedarPolicyCreateTypeError),
+    /// Error encountered while creating userinfo token entities
+    #[error("could not create userinfo entity: {0}")]
+    CreateUserinfoTokenEntity(CedarPolicyCreateTypeError),
     /// Error encountered while creating access token entities
     #[error("could not create User entity: {0}")]
     CreateUserEntity(CedarPolicyCreateTypeError),
