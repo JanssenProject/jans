@@ -44,6 +44,8 @@ from agama import Agama
 from authn import Authn
 #from message import Message
 from attributes import Attributes
+from sessions import Sessions
+
 
 from prompt_toolkit.widgets import (
     HorizontalLine,
@@ -73,6 +75,8 @@ class Plugin(DialogUtils):
         self.authn = Authn(app)
         #self.message = Message()
         self.attributes = Attributes(app)
+        self.sessions = Sessions()
+
         self.oauth_containers = {}
 
         self.oauth_prepare_navbar()
@@ -263,6 +267,7 @@ class Plugin(DialogUtils):
         self.oauth_containers['agama'] = self.agama.main_container
         self.oauth_containers['authn'] = self.authn.main_container
         self.oauth_containers['attributes'] = self.attributes.main_container
+        self.oauth_containers['sessions'] = self.sessions.main_container
         self.oauth_containers['logging'] = DynamicContainer(lambda: self.oauth_data_container['logging'])
         #self.oauth_containers['message'] = self.message.main_container
 
@@ -290,6 +295,7 @@ class Plugin(DialogUtils):
                         ('ssa', '[S]SA'),
                         ('agama', 'Aga[m]a'),
                         ('attributes', 'Attri[b]utes'),
+                        ('sessions', 'Sess[i]ons'),
                         ],
                     selection_changed=self.oauth_nav_selection_changed,
                     select=0,

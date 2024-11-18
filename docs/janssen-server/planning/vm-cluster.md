@@ -31,8 +31,7 @@ also use a cloud database that takes care of replication for you.
 1. **Cache**: You can't use `IN-MEMORY` cache which would have no way to
 replicate to the other nodes in the network. You could use the Database
 for caching, although this will impact performance, although it's only an
-issue for high concurrency use cases. If you are using Couchbase, it has
-caching built-in. But if you are another database and need high concurrency,
+issue for high concurrency use cases. But if you really need a very high concurrency,
 our recommendation is to use Redis for caching, which has less cache hit
 misses than Memcached.
 
