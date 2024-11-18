@@ -3,18 +3,19 @@ package io.jans.agama.engine.page;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.util.HashMap;
-import java.util.Map;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.RequestScoped;
 import jakarta.inject.Inject;
 
-import io.jans.agama.engine.service.WebContext;
+import java.util.HashMap;
+import java.util.Map;
+
+import io.jans.agama.engine.service.*;
 import io.jans.service.CacheService;
 
 @RequestScoped
 public class Page {
-    
+
     private static final String WEB_CTX_KEY = "webCtx";
     private static final String CACHE_KEY = "cache";
     
@@ -25,7 +26,10 @@ public class Page {
     private ObjectMapper mapper;
     
     @Inject
-    private Labels labels;
+    private MessagesService msgsService;
+
+    @Inject
+    private LabelsService labelsService;
 
     @Inject
     private CacheService cache;
@@ -48,9 +52,9 @@ public class Page {
             if (dataModel != null) {
 
                 dataModel.putIfAbsent(WEB_CTX_KEY, webContext);
-                dataModel.putIfAbsent(Labels.BUNDLE_ID, labels);
+                dataModel.putIfAbsent(MessagesService.BUNDLE_ID, msgsService);
+                dataModel.putIfAbsent(LabelsService.METHOD_NAME, labelsService);
                 dataModel.putIfAbsent(CACHE_KEY, cache);
-                labels.useLocale(webContext.getLocale());
                 return dataModel;
 
             } else return new Object();
