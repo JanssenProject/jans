@@ -34,7 +34,7 @@ use entities::DecodeTokensResult;
 use entities::ResourceEntityError;
 use entities::{
     create_access_token_entities, create_id_token_entity, create_role_entities, create_user_entity,
-    AccessTokenEntitiesError, RoleEntityError,
+    create_userinfo_token_entity, AccessTokenEntitiesError, RoleEntityError,
 };
 use entities::{create_resource_entity, AccessTokenEntities};
 use request::Request;
@@ -80,7 +80,7 @@ impl Authz {
     /// - evaluate if authorization is granted for *person*
     /// - evaluate if authorization is granted for *workload*
     pub fn authorize(&self, request: Request) -> Result<AuthorizeResult, AuthorizeError> {
-        let schema = &self.config.policy_store.cedar_schema;
+        let schema = &self.config.policy_store.schema;
 
         // Parse action UID.
         let action = cedar_policy::EntityUid::from_str(request.action.as_str())
@@ -245,12 +245,12 @@ impl Authz {
             parameters.action,
             parameters.resource,
             parameters.context,
-            Some(&self.config.policy_store.cedar_schema.schema),
+            Some(&self.config.policy_store.schema.schema),
         )?;
 
         let response = self.authorizer.is_authorized(
             &request_principal_workload,
-            &self.config.policy_store.cedar_policies,
+            &self.config.policy_store.policies,
             parameters.entities,
         );
 
@@ -258,7 +258,7 @@ impl Authz {
     }
 
     /// Create all [`Entity`]-s from [`Request`]
-    fn authorize_entities_data(
+    pub fn authorize_entities_data(
         &self,
         request: &Request,
     ) -> Result<AuthorizeEntitiesData, AuthorizeError> {
@@ -274,7 +274,10 @@ impl Authz {
                 &request.userinfo_token,
             )?;
 
-        let role_entities = create_role_entities(policy_store, &decode_result)?;
+        let trusted_issuer = decode_result.trusted_issuer.unwrap_or_default();
+        let tokens_metadata = trusted_issuer.tokens_metadata();
+
+        let role_entities = create_role_entities(policy_store, &decode_result, trusted_issuer)?;
 
         // Populate the `AuthorizeEntitiesData` structure using the builder pattern
         let data = AuthorizeEntitiesData::builder()
@@ -282,27 +285,33 @@ impl Authz {
             .access_token_entities(create_access_token_entities(
                 policy_store,
                 &decode_result.access_token,
+                tokens_metadata.access_tokens
             )?)
             // Add an entity created from the ID token
             .id_token_entity(
-                create_id_token_entity(policy_store, &decode_result.id_token)
+                create_id_token_entity(policy_store, &decode_result.id_token, &tokens_metadata.id_tokens.claim_mapping)
                     .map_err(AuthorizeError::CreateIdTokenEntity)?,
+            )
+            // Add an entity created from the userinfo token
+            .userinfo_token(
+                create_userinfo_token_entity(policy_store, &decode_result.userinfo_token, &tokens_metadata.userinfo_tokens.claim_mapping)
+                .map_err(AuthorizeError::CreateUserinfoTokenEntity)?
             )
             // Add an entity created from the userinfo token
             .user_entity(
                 create_user_entity(
                     policy_store,
-                    &decode_result.id_token,
-                    &decode_result.userinfo_token,
+                    &decode_result,
                     // parents for Jans::User entity
-                     HashSet::from_iter(role_entities.iter().map(|e|e.uid())),
+                    HashSet::from_iter(role_entities.iter().map(|e|e.uid())),
+                    trusted_issuer
                 )
                 .map_err(AuthorizeError::CreateUserEntity)?,
             )
             // Add an entity created from the resource in the request
             .resource_entity(create_resource_entity(
                 request.resource.clone(),
-                &self.config.policy_store.cedar_schema.json,
+                &self.config.policy_store.schema.json,
             )?)
             // Add Jans::Role entities
             .role_entities(role_entities);
@@ -325,21 +334,27 @@ struct ExecuteAuthorizeParameters<'a> {
 // we can't use simple vector because we need use uid-s
 // from some entities to check authorizations
 #[derive(typed_builder::TypedBuilder)]
-struct AuthorizeEntitiesData {
-    access_token_entities: AccessTokenEntities,
-    id_token_entity: Entity,
-    user_entity: Entity,
-    resource_entity: Entity,
-    role_entities: Vec<Entity>,
+pub struct AuthorizeEntitiesData {
+    pub access_token_entities: AccessTokenEntities,
+    pub id_token_entity: Entity,
+    pub userinfo_token: Entity,
+    pub user_entity: Entity,
+    pub resource_entity: Entity,
+    pub role_entities: Vec<Entity>,
 }
 
 impl AuthorizeEntitiesData {
     /// Create iterator to get all entities
     fn into_iter(self) -> impl Iterator<Item = Entity> {
-        vec![self.id_token_entity, self.user_entity, self.resource_entity]
-            .into_iter()
-            .chain(self.access_token_entities.into_iter())
-            .chain(self.role_entities)
+        vec![
+            self.id_token_entity,
+            self.userinfo_token,
+            self.user_entity,
+            self.resource_entity,
+        ]
+        .into_iter()
+        .chain(self.access_token_entities.into_iter())
+        .chain(self.role_entities)
     }
 
     /// Collect all entities to [`cedar_policy::Entities`]
@@ -361,10 +376,13 @@ pub enum AuthorizeError {
     #[error("{0}")]
     AccessTokenEntities(#[from] AccessTokenEntitiesError),
     /// Error encountered while creating id token entities
-    #[error("could not create Jans::id_token: {0}")]
+    #[error("could not create id_token entity: {0}")]
     CreateIdTokenEntity(CedarPolicyCreateTypeError),
+    /// Error encountered while creating userinfo token entities
+    #[error("could not create userinfo entity: {0}")]
+    CreateUserinfoTokenEntity(CedarPolicyCreateTypeError),
     /// Error encountered while creating access token entities
-    #[error("could not create Jans::User: {0}")]
+    #[error("could not create User entity: {0}")]
     CreateUserEntity(CedarPolicyCreateTypeError),
     /// Error encountered while creating resource entity
     #[error("{0}")]
