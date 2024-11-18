@@ -138,7 +138,7 @@ fn test_missing_claim(missing_claim: &str) {
                 "{}/.well-known/openid-configuration",
                 server.url()
             ),
-            token_metadata: None,
+            ..Default::default()
         },
         &HttpClient::new().expect("should create http client"),
     )
@@ -290,7 +290,7 @@ fn errors_on_invalid_signature() {
                 "{}/.well-known/openid-configuration",
                 server.url()
             ),
-            token_metadata: None,
+            ..Default::default()
         },
         &HttpClient::new().expect("should create http client"),
     )

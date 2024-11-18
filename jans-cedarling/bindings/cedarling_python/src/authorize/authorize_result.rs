@@ -34,13 +34,13 @@ impl AuthorizeResult {
     }
 
     /// Get the decision value for workload
-    fn workload(&self) -> AuthorizeResultResponse {
-        self.inner.workload.clone().into()
+    fn workload(&self) -> Option<AuthorizeResultResponse> {
+        self.inner.workload.clone().map(|v| v.into())
     }
 
     /// Get the decision value for person/user
-    fn person(&self) -> AuthorizeResultResponse {
-        self.inner.person.clone().into()
+    fn person(&self) -> Option<AuthorizeResultResponse> {
+        self.inner.person.clone().map(|v| v.into())
     }
 
     /// Get the decision value for role
