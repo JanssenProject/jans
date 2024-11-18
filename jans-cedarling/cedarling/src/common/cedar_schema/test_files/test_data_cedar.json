@@ -1,6 +1,8 @@
 {
     "Jans": {
         "entityTypes": {
+            "Role": {},
+            "Issue": {},
             "Access_token": {
                 "shape": {
                     "type": "Record",
@@ -26,9 +28,20 @@
                         }
                     }
                 }
-            },
-            "Role": {}
+            }
         },
-        "actions": {}
+        "actions": {
+            "Update": {
+                "appliesTo": {
+                    "resourceTypes": [
+                        "Issue"
+                    ],
+                    "principalTypes": [
+                        "Access_token",
+                        "Role"
+                    ]
+                }
+            }
+        }
     }
 }

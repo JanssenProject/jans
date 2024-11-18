@@ -1,4 +1,11 @@
 namespace Jans {
 entity Access_token = {"aud": String, "exp": Long, "iat": Long, scope?: Set<String> };
 entity Role;
+entity Issue = {};
+
+action "Update" appliesTo {
+    principal: [Access_token,Role],
+    resource: [Issue],
+    context: {}
+};
 }
