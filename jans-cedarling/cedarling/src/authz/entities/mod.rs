@@ -147,7 +147,7 @@ pub fn create_user_entity(
         },
         user_id_mapping.mapping_field,
     )
-    .create_entity(schema, &payload, parents, claim_mapping)
+    .create_entity(schema, payload, parents, claim_mapping)
 }
 
 /// Describe errors on creating resource entity

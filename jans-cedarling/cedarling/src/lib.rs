@@ -28,7 +28,7 @@ mod tests;
 use std::sync::Arc;
 
 pub use authz::request::{Request, ResourceData};
-use authz::{AuthorizeEntitiesData, Authz};
+use authz::Authz;
 pub use authz::{AuthorizeError, AuthorizeResult};
 pub use bootstrap_config::*;
 use init::service_config::{ServiceConfig, ServiceConfigError};
@@ -38,6 +38,9 @@ use common::app_types;
 use log::LogEntry;
 pub use log::LogStorage;
 use log::LogType;
+
+#[cfg(test)]
+use authz::AuthorizeEntitiesData;
 
 #[doc(hidden)]
 pub mod bindings {

@@ -59,7 +59,7 @@ impl ClaimMapping {
                 // convert JSON object to HashMap or return empty HashMap
                 return value
                     .as_object()
-                    .map(|v| HashMap::from_iter(v.to_owned().into_iter()))
+                    .map(|v| HashMap::from_iter(v.to_owned()))
                     .unwrap_or_default();
             },
         }

@@ -36,31 +36,7 @@ impl TokenPayload {
     }
 
     pub fn from_json_map(map: serde_json::Map<String, serde_json::Value>) -> Self {
-        Self::new(HashMap::from_iter(map.into_iter()))
-    }
-
-    /// Get the json value of a key in the payload.
-    pub fn get_json_value(&self, key: &str) -> Option<&serde_json::Value> {
-        self.payload.get(key)
-    }
-
-    /// Extract key and value to create new [`TokenPayload`] with this values only.
-    pub fn extract_kv(&self, key: &str) -> Self {
-        Self {
-            payload: self
-                .payload
-                .get_key_value(key)
-                .map(|(key, value)| HashMap::from_iter([(key.to_owned(), value.to_owned())]))
-                .unwrap_or_default(),
-        }
-    }
-
-    /// Clone current value and merge with the given payload.
-    pub fn merge(&self, payload: &TokenPayload) -> Self {
-        let mut result = self.clone();
-        result.payload.extend(payload.payload.clone());
-
-        result
+        Self::new(HashMap::from_iter(map))
     }
 
     /// Get [`Payload`] structure that contain key and [serde_json::Value] value.
@@ -141,7 +117,7 @@ impl<'a> Payload<'a> {
 
     /// Get value of payload
     pub fn get_value(&self) -> &serde_json::Value {
-        &self.value
+        self.value
     }
 
     pub fn as_i64(&self) -> Result<i64, GetTokenClaimValue> {

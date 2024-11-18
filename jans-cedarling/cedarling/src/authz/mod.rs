@@ -277,7 +277,7 @@ impl Authz {
         let trusted_issuer = decode_result.trusted_issuer.unwrap_or_default();
         let tokens_metadata = trusted_issuer.tokens_metadata();
 
-        let role_entities = create_role_entities(policy_store, &decode_result, &trusted_issuer)?;
+        let role_entities = create_role_entities(policy_store, &decode_result, trusted_issuer)?;
 
         // Populate the `AuthorizeEntitiesData` structure using the builder pattern
         let data = AuthorizeEntitiesData::builder()

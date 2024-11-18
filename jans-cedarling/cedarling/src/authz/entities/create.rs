@@ -264,16 +264,16 @@ fn get_expression(
         CedarType::TypeName(cedar_typename) => {
             match schema.find_type(cedar_typename, base_entity_typename.namespace) {
                 Some(SchemaDefinedType::Entity(_)) => {
-                    get_entity_expression(cedar_typename, base_entity_typename, &token_claim_value)
+                    get_entity_expression(cedar_typename, base_entity_typename, token_claim_value)
                 },
                 Some(SchemaDefinedType::CommonType(record)) => {
                     let record_typename =
-                        EntityParsedTypeName::new(&cedar_typename, base_entity_typename.namespace);
+                        EntityParsedTypeName::new(cedar_typename, base_entity_typename.namespace);
 
                     get_record_expression(
                         record,
                         &record_typename,
-                        &token_claim_value,
+                        token_claim_value,
                         schema,
                         claim_mapping,
                     )
@@ -368,7 +368,7 @@ fn get_record_expression(
         let exp = get_expression(
             &attribute_type,
             &mapped_claim_value,
-            &cedar_record_type,
+            cedar_record_type,
             schema,
             claim_mapping,
         )
