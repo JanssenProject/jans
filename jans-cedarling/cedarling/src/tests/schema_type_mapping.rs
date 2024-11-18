@@ -10,7 +10,7 @@ use test_utils::{assert_eq, SortedJson};
 
 static POLICY_STORE_RAW_YAML: &str = include_str!("../../../test_files/agama-store_2.yaml");
 
-/// Test loading policy store with mappings
+/// Test loading policy store with mappings JWT payload to custom `cedar-entities` types in schema
 #[test]
 fn check_mapping_tokens_data() {
     let cedarling = get_cedarling(PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()));
