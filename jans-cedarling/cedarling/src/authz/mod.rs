@@ -258,7 +258,7 @@ impl Authz {
     }
 
     /// Create all [`Entity`]-s from [`Request`]
-    fn authorize_entities_data(
+    pub fn authorize_entities_data(
         &self,
         request: &Request,
     ) -> Result<AuthorizeEntitiesData, AuthorizeError> {
@@ -329,12 +329,12 @@ struct ExecuteAuthorizeParameters<'a> {
 // we can't use simple vector because we need use uid-s
 // from some entities to check authorizations
 #[derive(typed_builder::TypedBuilder)]
-struct AuthorizeEntitiesData {
-    access_token_entities: AccessTokenEntities,
-    id_token_entity: Entity,
-    user_entity: Entity,
-    resource_entity: Entity,
-    role_entities: Vec<Entity>,
+pub struct AuthorizeEntitiesData {
+    pub access_token_entities: AccessTokenEntities,
+    pub id_token_entity: Entity,
+    pub user_entity: Entity,
+    pub resource_entity: Entity,
+    pub role_entities: Vec<Entity>,
 }
 
 impl AuthorizeEntitiesData {
@@ -365,10 +365,10 @@ pub enum AuthorizeError {
     #[error("{0}")]
     AccessTokenEntities(#[from] AccessTokenEntitiesError),
     /// Error encountered while creating id token entities
-    #[error("could not create Jans::id_token: {0}")]
+    #[error("could not create id_token entity: {0}")]
     CreateIdTokenEntity(CedarPolicyCreateTypeError),
     /// Error encountered while creating access token entities
-    #[error("could not create Jans::User: {0}")]
+    #[error("could not create User entity: {0}")]
     CreateUserEntity(CedarPolicyCreateTypeError),
     /// Error encountered while creating resource entity
     #[error("{0}")]

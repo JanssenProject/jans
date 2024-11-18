@@ -38,7 +38,7 @@ impl ClaimMappings {
 #[derive(Debug, PartialEq, Clone)]
 pub enum ClaimMapping {
     /// Represents a claim mapping using regular expressions.
-    Regex(RegexpMapping),
+    Regex(RegexMapping),
 
     /// Represents a claim mapping using a JSON parser.
     ///
@@ -73,7 +73,7 @@ impl ClaimMapping {
 /// - `regex_expression`: The regular expression used to extract fields.
 /// - `fields`: A map of field names to `RegexField` values.
 #[derive(Debug, Clone)]
-pub struct RegexpMapping {
+pub struct RegexMapping {
     cedar_policy_type: String,
     regex_expression: String,
     regex: Regex,
@@ -83,7 +83,7 @@ pub struct RegexpMapping {
     regex_group_mapping: HashMap<String, RegexFieldMapping>,
 }
 
-impl RegexpMapping {
+impl RegexMapping {
     // builder function, used in testing
     #[allow(dead_code)]
     fn new(
@@ -100,8 +100,18 @@ impl RegexpMapping {
         })
     }
 
+    /// Apply regex mapping to json value
+    ///
+    /// the function tries to map json value to string before search values using regex
     fn apply_mapping(&self, value: &serde_json::Value) -> HashMap<String, serde_json::Value> {
-        let str_value = value.to_string();
+        let str_value = match value {
+            Value::Number(number) => number.to_string(),
+            // we need manually map value to string instead calling `serde_json::Value::to_string()` method
+            // to avoid having `"` quotes in start and end of string
+            Value::String(string_value) => string_value.to_owned(),
+            v => v.to_string(),
+        };
+
         // we use only first capture
         let Some(captures) = self.regex.captures(str_value.as_str()) else {
             // if we no have capture return empty json object
@@ -123,7 +133,7 @@ impl RegexpMapping {
     }
 }
 
-impl PartialEq for RegexpMapping {
+impl PartialEq for RegexMapping {
     // impl operator "==" to compare struct in test cases
     // `regex` is ignored because it is result of `regex_expression` string and actually not comparable
     fn eq(&self, other: &Self) -> bool {
@@ -185,7 +195,7 @@ impl<'de> Deserialize<'de> for ClaimMapping {
                         }
                     }
                 }
-                Ok(ClaimMapping::Regex(RegexpMapping {
+                Ok(ClaimMapping::Regex(RegexMapping {
                     regex: Regex::new(&regex_expression).map_err(|err| {
                         de::Error::custom(format!(
                             "could not parse field regex as regular expression:{err}"
@@ -257,7 +267,7 @@ impl RegexFieldMappingType {
 #[cfg(test)]
 mod test {
     use super::*;
-    use super::{ClaimMapping, RegexpMapping};
+    use super::{ClaimMapping, RegexMapping};
     use crate::common::policy_store::claim_mapping::RegexFieldMapping;
     use serde_json::json;
     use std::collections::HashMap;
@@ -267,7 +277,7 @@ mod test {
     /// from a JSON string
     #[test]
     fn can_parse_regex_from_json() {
-        let re_mapping = RegexpMapping::new(
+        let re_mapping = RegexMapping::new(
             "Acme::Email".to_string(),
             r#"^(?P<UID>[^@]+)@(?P<DOMAIN>.+)$"#.to_string(),
             HashMap::from([
@@ -347,7 +357,7 @@ mod test {
     /// from a YAML string
     #[test]
     fn can_parse_regex_from_yaml() {
-        let re_mapping = RegexpMapping::new(
+        let re_mapping = RegexMapping::new(
             "Acme::Email".to_string(),
             r#"^(?P<UID>[^@]+)@(?P<DOMAIN>.+)$"#.to_string(),
             HashMap::from([

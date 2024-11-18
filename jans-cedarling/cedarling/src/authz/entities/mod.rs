@@ -34,7 +34,7 @@ pub(crate) type DecodeTokensResult<'a> =
     jwt::DecodeTokensResult<'a, AccessTokenData, IdTokenData, UserInfoTokenData>;
 
 /// Access token entities
-pub(crate) struct AccessTokenEntities {
+pub struct AccessTokenEntities {
     pub workload_entity: cedar_policy::Entity,
     pub access_token_entity: cedar_policy::Entity,
 }
@@ -135,7 +135,7 @@ pub fn create_user_entity(
         TokenKind::Id => (&tokens.id_token, &trusted_issuer.id_tokens.claim_mapping),
         TokenKind::Userinfo => (
             &tokens.userinfo_token,
-            &trusted_issuer.id_tokens.claim_mapping,
+            &trusted_issuer.userinfo_tokens.claim_mapping,
         ),
         TokenKind::Transaction => return Err(CedarPolicyCreateTypeError::TransactionToken),
     };
@@ -145,7 +145,7 @@ pub fn create_user_entity(
             typename: "User",
             namespace,
         },
-        user_id_mapping.role_mapping_field,
+        user_id_mapping.mapping_field,
     )
     .create_entity(schema, &payload, parents, claim_mapping)
 }
@@ -228,7 +228,7 @@ pub fn create_role_entities(
     };
 
     // get payload of role id in JWT token data
-    let Ok(payload) = token_data.get_payload(role_mapping.role_mapping_field) else {
+    let Ok(payload) = token_data.get_payload(role_mapping.mapping_field) else {
         // if key not found we return empty vector
         return Ok(Vec::new());
     };

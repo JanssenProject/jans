@@ -28,7 +28,7 @@ mod tests;
 use std::sync::Arc;
 
 pub use authz::request::{Request, ResourceData};
-use authz::Authz;
+use authz::{AuthorizeEntitiesData, Authz};
 pub use authz::{AuthorizeError, AuthorizeResult};
 pub use bootstrap_config::*;
 use init::service_config::{ServiceConfig, ServiceConfigError};
@@ -97,6 +97,16 @@ impl Cedarling {
     /// makes authorization decision based on the [`Request`]
     pub fn authorize(&self, request: Request) -> Result<AuthorizeResult, AuthorizeError> {
         self.authz.authorize(request)
+    }
+
+    /// Get entites derived from `cedar-policy` schema and tokens for `authorize` request.
+    #[doc(hidden)]
+    #[cfg(test)]
+    pub fn authorize_entities_data(
+        &self,
+        request: &Request,
+    ) -> Result<AuthorizeEntitiesData, AuthorizeError> {
+        self.authz.authorize_entities_data(request)
     }
 }
 

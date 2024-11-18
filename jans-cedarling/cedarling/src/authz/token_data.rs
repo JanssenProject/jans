@@ -24,15 +24,19 @@ pub(crate) struct UserInfoTokenData(TokenPayload);
 
 /// A container for storing token data or data attributes for the .
 /// Provides methods for retrieving payload from the token or attributes for the .
-#[derive(Debug, Clone, Default, serde::Deserialize)]
+#[derive(Debug, Clone, Default, serde::Deserialize, serde::Serialize)]
 pub(crate) struct TokenPayload {
     #[serde(flatten)]
     pub payload: HashMap<String, serde_json::Value>,
 }
 
 impl TokenPayload {
-    fn new(payload: HashMap<String, serde_json::Value>) -> Self {
+    pub fn new(payload: HashMap<String, serde_json::Value>) -> Self {
         Self { payload }
+    }
+
+    pub fn from_json_map(map: serde_json::Map<String, serde_json::Value>) -> Self {
+        Self::new(HashMap::from_iter(map.into_iter()))
     }
 
     /// Get the json value of a key in the payload.
@@ -119,7 +123,8 @@ impl GetTokenClaimValue {
     }
 }
 
-/// Structure that contains  information about  token claims
+/// Structure that contains  information about token claim, only about one attribute
+/// key and json value
 ///
 /// Wrapper to get more readable error messages when we get not correct type of  value from json.
 /// Is used in the [`TokenPayload::get_payload`] method

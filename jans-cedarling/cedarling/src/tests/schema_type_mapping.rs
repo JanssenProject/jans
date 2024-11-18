@@ -6,27 +6,95 @@
  */
 
 use super::utils::*;
+use test_utils::{assert_eq, SortedJson};
 
 static POLICY_STORE_RAW_YAML: &str = include_str!("../../../test_files/agama-store_2.yaml");
 
-/// Test loading real policy store from agama lab
+/// Test loading policy store with mappings
 #[test]
-fn load_agama_policy_store() {
+fn check_mapping_tokens_data() {
     let cedarling = get_cedarling(PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()));
 
     // deserialize `Request` from json
+    // JWT tokens payload from using `tarp` with `https://test-casa.gluu.info/.well-known/openid-configuration`
     let request = Request::deserialize(serde_json::json!(
         {
-            "access_token": "eyJraWQiOiJjb25uZWN0X2JmZmVhYzA4LTEyZTgtNGJiYy04YjA3LTAxOTk0NGI3MjJlNF9zaWdfcnMyNTYiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJKM0JtdG5QUEI4QmpNYlNjV21SOGNqVDlnV0NDVEhLZlNmMGRrYk92aEdnIiwiY29kZSI6IjY5N2RhODBkLTE2YWQtNDFmOC1hZDhlLWM3MWY4ODFjNTQ3MyIsImlzcyI6Imh0dHBzOi8vdGVzdC1jYXNhLmdsdXUuaW5mbyIsInRva2VuX3R5cGUiOiJCZWFyZXIiLCJjbGllbnRfaWQiOiI5NWJkNjNkMi04NWVkLTQwYWQtYmQwMy0zYzE4YWY3OTdjYTQiLCJhdWQiOiI5NWJkNjNkMi04NWVkLTQwYWQtYmQwMy0zYzE4YWY3OTdjYTQiLCJhY3IiOiJzaW1wbGVfcGFzc3dvcmRfYXV0aCIsIng1dCNTMjU2IjoiIiwibmJmIjoxNzMwNDk0NTQzLCJzY29wZSI6WyJyb2xlIiwib3BlbmlkIl0sImF1dGhfdGltZSI6MTczMDQ5NDU0MiwiZXhwIjoxNzMwNTc0MjQ1LCJpYXQiOjE3MzA0OTQ1NDMsImp0aSI6InFwQ3U1MlowUzh5bmZaN3VmQ1hRb3ciLCJ1c2VybmFtZSI6Ik9sZWggQm96aG9rIiwic3RhdHVzIjp7InN0YXR1c19saXN0Ijp7ImlkeCI6MTAwMywidXJpIjoiaHR0cHM6Ly90ZXN0LWNhc2EuZ2x1dS5pbmZvL2phbnMtYXV0aC9yZXN0djEvc3RhdHVzX2xpc3QifX19.A-k8fP9yqF-LwyNniohlLzwy2y0smbkavubNHKiNn8zAWAz0PFcQXnDKJEpcigXS7iwBRieHcEAgCrBCbsPKZDHOohwx2CFNPK1AvECRmd0U69siaEJqljECiUHqLkHOT9LD89Ag752QNauuQvXnHKuVIKJ7ykg7Jcc5-gi_mH_OfGAz-yYPYJLy0tBiT9LDFu1sQT04P5MqzrSxwBk3PW7Af3W0Dl-hl77SSAAKy7TkYuTEPWLat0nMwuLNzgBkmsGwPdPGmZl5YqMv1VOpr19Xjopr8lMAHN1CdEEFCXoBZewwXGPQFzoF_J9CW95tx_T16Z6iM2EXoIJyplgSwg".to_string(),
-            "id_token": "eyJraWQiOiJjb25uZWN0X2JmZmVhYzA4LTEyZTgtNGJiYy04YjA3LTAxOTk0NGI3MjJlNF9zaWdfcnMyNTYiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdF9oYXNoIjoiemFqTC1JRVBiSjdYcHJiQWdpNUxBZyIsInN1YiI6IkozQm10blBQQjhCak1iU2NXbVI4Y2pUOWdXQ0NUSEtmU2YwZGtiT3ZoR2ciLCJhbXIiOltdLCJpc3MiOiJodHRwczovL3Rlc3QtY2FzYS5nbHV1LmluZm8iLCJub25jZSI6ImI5YjZkZjUxLWEwNGEtNDc1YS05MTQxLTNmZTU4OWMyYWFiOCIsInNpZCI6IjcxZWVkYjNhLTdjMTgtNDIwYy05ZmVhLTM3ZDY1MzI5OTBlNiIsImphbnNPcGVuSURDb25uZWN0VmVyc2lvbiI6Im9wZW5pZGNvbm5lY3QtMS4wIiwiYXVkIjoiOTViZDYzZDItODVlZC00MGFkLWJkMDMtM2MxOGFmNzk3Y2E0IiwiYWNyIjoic2ltcGxlX3Bhc3N3b3JkX2F1dGgiLCJjX2hhc2giOiJwUWk5cllxbVNDVmMzdEstLTJBZ2lBIiwibmJmIjoxNzMwNDk0NTQzLCJhdXRoX3RpbWUiOjE3MzA0OTQ1NDIsImV4cCI6MTczMDQ5ODE0MywiZ3JhbnQiOiJhdXRob3JpemF0aW9uX2NvZGUiLCJpYXQiOjE3MzA0OTQ1NDMsImp0aSI6InYyU1dHZkFFUUdXWjFtUERTSlB2YmciLCJzdGF0dXMiOnsic3RhdHVzX2xpc3QiOnsiaWR4IjoxMDA0LCJ1cmkiOiJodHRwczovL3Rlc3QtY2FzYS5nbHV1LmluZm8vamFucy1hdXRoL3Jlc3R2MS9zdGF0dXNfbGlzdCJ9fX0.Ot6WNQlg4hVPA4b6dRPO-tr6V20EzEm_3SMN-qRkfpkWQ-GSccFLed5G4sBLh_YIN-qh-P7gsFGg7Y6QS7tsR6CgNB0uVu3lqpqqrkvwxUw0DS4DYQFZ2pZygfVqQc9o7V9JThdVG7VG_SZXnKa8H8ORmp9JbTOTrLqAOgoQ1YdFfcceWob5BcFLCOXXOao90ESC5ntIHXm4lVwjN19odJHgoJ9qRFE69pm4vgqZ211cbfkoA_D12TDEaVmJ5n_982i7OvwK2zdNHlqlVTKN9Ncy6gvvRHb1RsgaVjp5Nd--oMdlb76wy94VIqdbFqDAXpogzS-K2m5n0yGfOhchAw".to_string(),
-            "userinfo_token":  "eyJraWQiOiJjb25uZWN0X2JmZmVhYzA4LTEyZTgtNGJiYy04YjA3LTAxOTk0NGI3MjJlNF9zaWdfcnMyNTYiLCJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJKM0JtdG5QUEI4QmpNYlNjV21SOGNqVDlnV0NDVEhLZlNmMGRrYk92aEdnIiwiYXVkIjoiOTViZDYzZDItODVlZC00MGFkLWJkMDMtM2MxOGFmNzk3Y2E0Iiwicm9sZSI6WyJNYW5hZ2VyIiwiU3VwcG9ydCJdLCJpc3MiOiJodHRwczovL3Rlc3QtY2FzYS5nbHV1LmluZm8iLCJqdGkiOiJxT3hrbE1ZZlNmcWRZZ1hsMDFqOXdBIiwiY2xpZW50X2lkIjoiOTViZDYzZDItODVlZC00MGFkLWJkMDMtM2MxOGFmNzk3Y2E0In0.DyXs_NEN6-KMebTHJu1_54CXOlrEWube85pV4ZIoNz_EqePZnirSydfNQJZMf1RLXauZIhug0EOpGxbIqRMfGTOlHqTc9nwXN82lRSkF0ctUkl-t3jeJNOXmQQLjDGEhI2IXjmDcIwvms1qy-QUtct9ccniEt6SdfROnSYhY8rAVYLaf34UJmUCav01Q9iGBn5E_ASr4G8zZibq4b9z_AX6DNZilmVeJIy4HLPRNdAtsJs6YHuQDN1QzQNJiFxrJlytMXwdMh1mXRIADBFVsIVte0fHOJBqhPS60t81qsa4r9tE9tJ-li5yRLGNFgab0zdUjPp0M6DrKUigq-nPBQg".to_string(),
+            "access_token": generate_token_using_claims(json!({
+                "sub": "J3BmtnPPB8BjMbScWmR8cjT9gWCCTHKfSf0dkbOvhGg",
+                "code": "697da80d-16ad-41f8-ad8e-c71f881c5473",
+                "iss": "https://test-casa.gluu.info",
+                "token_type": "Bearer",
+                "client_id": "95bd63d2-85ed-40ad-bd03-3c18af797ca4",
+                "aud": "95bd63d2-85ed-40ad-bd03-3c18af797ca4",
+                "acr": "simple_password_auth",
+                "x5t#S256": "",
+                "nbf": 1730494543,
+                "scope": [
+                    "role",
+                    "openid"
+                ],
+                "auth_time": 1730494542,
+                "exp": 1730574245,
+                "iat": 1730494543,
+                "jti": "qpCu52Z0S8ynfZ7ufCXQow",
+                "username": "John Smith",
+                "status": {
+                    "status_list": {
+                        "idx": 1003,
+                        "uri": "https://test-casa.gluu.info/jans-auth/restv1/status_list"
+                    }
+                }
+            })),
+            "id_token": generate_token_using_claims(json!({
+                "at_hash": "zajL-IEPbJ7XprbAgi5LAg",
+                "sub": "J3BmtnPPB8BjMbScWmR8cjT9gWCCTHKfSf0dkbOvhGg",
+                "amr": [],
+                "iss": "https://test-casa.gluu.info",
+                "nonce": "b9b6df51-a04a-475a-9141-3fe589c2aab8",
+                "sid": "71eedb3a-7c18-420c-9fea-37d6532990e6",
+                "jansOpenIDConnectVersion": "openidconnect-1.0",
+                "aud": "95bd63d2-85ed-40ad-bd03-3c18af797ca4",
+                "acr": "simple_password_auth",
+                "c_hash": "pQi9rYqmSCVc3tK--2AgiA",
+                "nbf": 1730494543,
+                "auth_time": 1730494542,
+                "exp": 1730498143,
+                "grant": "authorization_code",
+                "iat": 1730494543,
+                "jti": "v2SWGfAEQGWZ1mPDSJPvbg",
+                "status": {
+                    "status_list": {
+                        "idx": 1004,
+                        "uri": "https://test-casa.gluu.info/jans-auth/restv1/status_list"
+                    }
+                }
+            })),
+            "userinfo_token":  generate_token_using_claims(json!({
+                "sub": "J3BmtnPPB8BjMbScWmR8cjT9gWCCTHKfSf0dkbOvhGg",
+                "aud": "95bd63d2-85ed-40ad-bd03-3c18af797ca4",
+                "role": [
+                    "Manager",
+                    "Support"
+                ],
+                "iss": "https://test-casa.gluu.info",
+                "jti": "qOxklMYfSfqdYgXl01j9wA",
+                "client_id": "95bd63d2-85ed-40ad-bd03-3c18af797ca4",
+                "email":"user@example.com",
+            })),
             "action": "Test::Action::\"Search\"",
             "resource": {
                 "id": "SomeID",
-                "type": "Test::Empty",
+                "type": "Test::Application",
+                "app_id":"1234",
+                "name": "some_app",
+                "url":{
+                    "host": "test-casa.gluu.info",
+                    "path":"/",
+                    "protocol":"https",
+                }
             },
             "context": {
-                "current_time":"1",
+                "current_time":1731812031,
                 "device_health": [],
                 "fraud_indicators": [],
                 "geolocation": [],
@@ -39,9 +107,26 @@ fn load_agama_policy_store() {
     ))
     .expect("Request should be deserialized from json");
 
-    let result = cedarling
-        .authorize(request)
+    let entities = cedarling
+        .authorize_entities_data(&request)
+        // log err to be human readable
+        .inspect_err(|err| println!("Error: {}", err.to_string()))
         .expect("request should be parsed without errors");
 
-    assert!(result.is_allowed(), "request result should be allowed");
+    // check value of resource entity
+    let expected_resource = json!({"uid":{"type":"Test::Application","id":"SomeID"},"attrs":{"url":{"host":"test-casa.gluu.info","path":"/","protocol":"https"},"app_id":"1234","name":"some_app"},"parents":[]}).sorted();
+    assert_eq!(
+        expected_resource,
+        entities.resource_entity.to_json_value().unwrap().sorted(),
+        "derived resource_entity is not equal to the expected"
+    );
+
+    // check value of user entity
+    // managed mapping of email
+    let expected_user = json!({"attrs":{"email":{"domain":"example.com", "uid":"user"},"role":["Manager","Support"],"sub":"J3BmtnPPB8BjMbScWmR8cjT9gWCCTHKfSf0dkbOvhGg"},"parents":[{"id":"Manager","type":"Test::Role"},{"id":"Support","type":"Test::Role"}],"uid":{"id":"J3BmtnPPB8BjMbScWmR8cjT9gWCCTHKfSf0dkbOvhGg","type":"Test::User"}}).sorted();
+    assert_eq!(
+        expected_user,
+        entities.user_entity.to_json_value().unwrap().sorted(),
+        "derived user_entity is not equal to the expected"
+    );
 }

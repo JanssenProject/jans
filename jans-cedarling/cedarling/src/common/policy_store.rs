@@ -122,7 +122,7 @@ impl Default for &TrustedIssuer {
 /// Structure define the source from where role mappings are retrieved.
 pub struct RoleMapping<'a> {
     pub kind: TokenKind,
-    pub role_mapping_field: &'a str,
+    pub mapping_field: &'a str,
 }
 
 // By default we will search role in the User token
@@ -130,7 +130,7 @@ impl Default for RoleMapping<'_> {
     fn default() -> Self {
         Self {
             kind: TokenKind::Userinfo,
-            role_mapping_field: "role",
+            mapping_field: "role",
         }
     }
 }
@@ -138,7 +138,7 @@ impl Default for RoleMapping<'_> {
 /// Structure define the source from where user mappings are retrieved.
 pub struct UserMapping<'a> {
     pub kind: TokenKind,
-    pub role_mapping_field: &'a str,
+    pub mapping_field: &'a str,
 }
 
 // By default we will search role in the User token
@@ -146,7 +146,7 @@ impl Default for UserMapping<'_> {
     fn default() -> Self {
         Self {
             kind: TokenKind::Userinfo,
-            role_mapping_field: "sub",
+            mapping_field: "sub",
         }
     }
 }
@@ -165,28 +165,28 @@ impl TrustedIssuer {
         if let Some(role_mapping) = &self.access_tokens.entity_metadata.role_mapping {
             return Some(RoleMapping {
                 kind: TokenKind::Access,
-                role_mapping_field: role_mapping.as_str(),
+                mapping_field: role_mapping.as_str(),
             });
         }
 
         if let Some(role_mapping) = &self.id_tokens.role_mapping {
             return Some(RoleMapping {
                 kind: TokenKind::Id,
-                role_mapping_field: role_mapping.as_str(),
+                mapping_field: role_mapping.as_str(),
             });
         }
 
         if let Some(role_mapping) = &self.userinfo_tokens.role_mapping {
             return Some(RoleMapping {
                 kind: TokenKind::Userinfo,
-                role_mapping_field: role_mapping.as_str(),
+                mapping_field: role_mapping.as_str(),
             });
         }
 
         if let Some(role_mapping) = &self.tx_tokens.role_mapping {
             return Some(RoleMapping {
                 kind: TokenKind::Transaction,
-                role_mapping_field: role_mapping.as_str(),
+                mapping_field: role_mapping.as_str(),
             });
         }
 
@@ -206,28 +206,28 @@ impl TrustedIssuer {
         if let Some(user_mapping) = &self.access_tokens.entity_metadata.user_id {
             return Some(UserMapping {
                 kind: TokenKind::Access,
-                role_mapping_field: user_mapping.as_str(),
+                mapping_field: user_mapping.as_str(),
             });
         }
 
         if let Some(user_mapping) = &self.id_tokens.user_id {
             return Some(UserMapping {
                 kind: TokenKind::Id,
-                role_mapping_field: user_mapping.as_str(),
+                mapping_field: user_mapping.as_str(),
             });
         }
 
         if let Some(user_mapping) = &self.userinfo_tokens.user_id {
             return Some(UserMapping {
                 kind: TokenKind::Userinfo,
-                role_mapping_field: user_mapping.as_str(),
+                mapping_field: user_mapping.as_str(),
             });
         }
 
         if let Some(user_mapping) = &self.tx_tokens.user_id {
             return Some(UserMapping {
                 kind: TokenKind::Transaction,
-                role_mapping_field: user_mapping.as_str(),
+                mapping_field: user_mapping.as_str(),
             });
         }
 
