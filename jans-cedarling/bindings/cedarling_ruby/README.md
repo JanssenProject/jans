@@ -2,7 +2,7 @@
 
 This is a ruby wrapper for Cedarling.
 
-For a really quick start, see 'Development' below.
+For a really quick start, see [development](#development) below.
 
 ## Installation
 
@@ -35,23 +35,28 @@ cdl.authorize auth_request
 
 ## Development
 
-Install ruby >= 3.3.0 using your package manager, or from rbenv, or from rvm, or whatever you want.
+[Install ruby](https://www.ruby-lang.org/en/downloads/) with version >= 3.3.0. You can use your package manager, or [rbenv](https://github.com/rbenv/rbenv?tab=readme-ov-file#seamlessly-manage-your-apps-ruby-environment-with-rbenv), or [rvm](http://rvm.io/), or whatever you want.
 
-run `bin/setup` to install dependencies
+Once you have a working ruby installation:
 
-run `rake spec` to run the tests
+1) `bin/setup` to install dependencies
 
-You can also run `bin/console` for an interactive prompt that will allow you to experiment. Here you can say something like
+2) `rake compile` to compile the rust binding
+
+3) `bin/console` for an interactive prompt that will allow you to experiment.
+
+In the console you can do the following:
 
 ```
-# the gem version
-Cedarling::VERSION 
-
-# the core cedarling
-Cedarling.version_core
-
-cdl = Cedarling::new policy_store: {yaml: File.read('../../test_files/policy-store_ok.yaml')}
-cdl.authorize(...)
+$ bin/console
+3.3.0 :001 > Cedarling::VERSION 
+ => "0.1.0" 
+3.3.0 :002 > Cedarling.version_core
+ => "1.1.6" 
+3.3.0 :003 > cdl = Cedarling::new policy_store: {yaml: File.read('../../test_files/policy-s
+tore_ok.yaml')}
+ => #<Engine:0x00007f8f184c7b70> 
+3.3.0 :004 > 
 ```
 
 ### development loop
