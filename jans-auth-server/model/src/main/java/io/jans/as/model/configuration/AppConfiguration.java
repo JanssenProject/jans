@@ -146,6 +146,12 @@ public class AppConfiguration implements Configuration {
     @DocProperty(description = "Mutual TLS (mTLS) device authorization endpoint URL")
     private String mtlsDeviceAuthzEndpoint;
 
+    @DocProperty(description = "Allow basic client authorization for access evaluation endpoint.", defaultValue = "false")
+    private Boolean accessEvaluationAllowBasicClientAuthorization;
+
+    @DocProperty(description = "Access evaluation custom script name.")
+    private String accessEvaluationScriptName;
+
     @DocProperty(description = "Boolean value true encrypts request object", defaultValue = "false")
     private Boolean requireRequestObjectEncryption = false;
 
@@ -934,7 +940,7 @@ public class AppConfiguration implements Configuration {
 
     @DocProperty(description = "Force Authentication Filtker to process OPTIONS request", defaultValue = "true")
     private Boolean skipAuthenticationFilterOptionsMethod = true;
-    
+
     @DocProperty(description = "Lock message Pub configuration", defaultValue = "false")
     private LockMessageConfig lockMessageConfig;
 
@@ -3501,6 +3507,25 @@ public class AppConfiguration implements Configuration {
 
     public void setMtlsDeviceAuthzEndpoint(String mtlsDeviceAuthzEndpoint) {
         this.mtlsDeviceAuthzEndpoint = mtlsDeviceAuthzEndpoint;
+    }
+
+    public Boolean getAccessEvaluationAllowBasicClientAuthorization() {
+        return accessEvaluationAllowBasicClientAuthorization;
+    }
+
+    public AppConfiguration setAccessEvaluationAllowBasicClientAuthorization(Boolean accessEvaluationAllowBasicClientAuthorization) {
+        if (accessEvaluationAllowBasicClientAuthorization == null) accessEvaluationAllowBasicClientAuthorization = false;
+        this.accessEvaluationAllowBasicClientAuthorization = accessEvaluationAllowBasicClientAuthorization;
+        return this;
+    }
+
+    public String getAccessEvaluationScriptName() {
+        return accessEvaluationScriptName;
+    }
+
+    public AppConfiguration setAccessEvaluationScriptName(String accessEvaluationScriptName) {
+        this.accessEvaluationScriptName = accessEvaluationScriptName;
+        return this;
     }
 
     public List<String> getDpopSigningAlgValuesSupported() {

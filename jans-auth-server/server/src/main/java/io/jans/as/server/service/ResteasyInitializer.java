@@ -9,6 +9,7 @@ package io.jans.as.server.service;
 import io.jans.as.server.authorize.ws.rs.AuthorizationChallengeEndpoint;
 import io.jans.as.server.authorize.ws.rs.AuthorizeRestWebServiceImpl;
 import io.jans.as.server.authorize.ws.rs.DeviceAuthorizationRestWebServiceImpl;
+import io.jans.as.server.authzen.ws.rs.AccessEvaluationRestWebServiceImplV1;
 import io.jans.as.server.bcauthorize.ws.rs.BackchannelAuthorizeRestWebServiceImpl;
 import io.jans.as.server.bcauthorize.ws.rs.BackchannelDeviceRegistrationRestWebServiceImpl;
 import io.jans.as.server.clientinfo.ws.rs.ClientInfoRestWebServiceImpl;
@@ -52,6 +53,7 @@ public class ResteasyInitializer extends Application {
 
         classes.add(AuthorizeRestWebServiceImpl.class);
         classes.add(AuthorizationChallengeEndpoint.class);
+        classes.add(AccessEvaluationRestWebServiceImplV1.class);
         classes.add(RegisterRestWebServiceImpl.class);
         classes.add(ClientInfoRestWebServiceImpl.class);
         classes.add(RevokeRestWebServiceImpl.class);

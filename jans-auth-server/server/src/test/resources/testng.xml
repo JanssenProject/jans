@@ -47,6 +47,10 @@
             <class name="io.jans.as.server.authorize.ws.rs.AuthzDetailsServiceTest" />
             <class name="io.jans.as.server.authorize.ws.rs.AuthorizationChallengeServiceTest" />
 
+            <!-- AuthZEN: Access Evaluation -->
+            <class name="io.jans.as.server.authzen.ws.rs.AccessEvaluationRestWebServiceImplV1Test" />
+            <class name="io.jans.as.server.authzen.ws.rs.AccessEvaluationValidatorTest" />
+
             <!-- REVOKE -->
             <class name="io.jans.as.server.revoke.RevokeRestWebServiceImplTest" />
 
