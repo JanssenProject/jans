@@ -43,7 +43,7 @@ RSpec.describe Cedarling do
     it 'fails for incorrect signature algorithms' do
       expect do
         Cedarling::new signature_algorithms: %w[HS123 RS456], policy_store: {yaml: policy_store_yaml}
-      end.to raise_error(Cedarling::Error, /algorithim is not yet implemented: HS123/)
+      end.to raise_error(Cedarling::Error, /algorithm is not yet implemented: HS123/)
     end
 
     it 'fails with excessive log_ttl' do
@@ -65,7 +65,7 @@ RSpec.describe Cedarling do
     it 'fails with bad signature algorithms' do
       expect do
         Cedarling::new signature_algorithms: %w[HS123], policy_store: {yaml: policy_store_yaml}
-      end.to raise_error(Cedarling::Error, /algorithim is not yet implemented: HS123/)
+      end.to raise_error(Cedarling::Error, /algorithm is not yet implemented: HS123/)
     end
   end
 
