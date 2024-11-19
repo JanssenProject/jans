@@ -35,6 +35,7 @@ lazy_static! {
                     "sub": "some_sub",
                   })),
             "userinfo_token":  generate_token_using_claims(json!({
+                    "jti": "some_jti",
                     "country": "US",
                     "sub": "some_sub",
                     "iss": "some_iss",
