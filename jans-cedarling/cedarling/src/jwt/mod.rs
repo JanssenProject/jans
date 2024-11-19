@@ -15,6 +15,7 @@
 
 mod error;
 mod http_client;
+mod issuer;
 mod jwk_store;
 mod jwt_service_config;
 mod new_key_service;
@@ -33,14 +34,13 @@ use serde::de::DeserializeOwned;
 use std::collections::HashSet;
 use std::rc::Rc;
 use token::*;
-use validator::{JwtValidator, JwtValidatorConfig, JwtValidatorError};
+use validator::{JwtValidator, JwtValidatorConfig, JwtValidatorError, ProcessedJwt};
 
 pub use decoding_strategy::key_service::{HttpClient, KeyServiceError};
 pub use decoding_strategy::{string_to_alg, ParseAlgorithmError};
 pub use error::JwtServiceError;
 pub use jsonwebtoken::Algorithm;
 pub use jwt_service_config::*;
-pub use validator::TokenClaims;
 pub(crate) mod decoding_strategy;
 
 /// Type alias for Trusted Issuers' ID.
@@ -100,10 +100,11 @@ pub struct NewJwtService {
     id_token_trust_mode: IdTokenTrustMode,
 }
 
-pub struct ProcessJwtResult {
-    pub access_token: Option<TokenClaims>,
-    pub id_token: Option<TokenClaims>,
-    pub userinfo_token: Option<TokenClaims>,
+#[allow(dead_code)]
+pub struct ProcessJwtResult<'a> {
+    pub access_token: Option<ProcessedJwt<'a>>,
+    pub id_token: Option<ProcessedJwt<'a>>,
+    pub userinfo_token: Option<ProcessedJwt<'a>>,
 }
 
 #[allow(dead_code)]
@@ -180,11 +181,11 @@ impl NewJwtService {
         })
     }
 
-    pub fn process_tokens(
-        &self,
-        access_token: Option<&str>,
-        id_token: Option<&str>,
-        userinfo_token: Option<&str>,
+    pub fn process_tokens<'a>(
+        &'a self,
+        access_token: Option<&'a str>,
+        id_token: Option<&'a str>,
+        userinfo_token: Option<&'a str>,
     ) -> Result<ProcessJwtResult, NewJwtServiceError> {
         let access_token = access_token
             .map(|jwt| self.access_tkn_validator.process_jwt(jwt))
@@ -205,6 +206,7 @@ impl NewJwtService {
             let id_tkn_aud = id_token
                 .as_ref()
                 .ok_or(NewJwtServiceError::MissingIdTokenInStrictMode)?
+                .claims
                 .get("aud")
                 .ok_or(NewJwtServiceError::MissingClaimsInStrictMode(
                     "id_token", "aud",
@@ -212,6 +214,7 @@ impl NewJwtService {
             let access_tkn_client_id = access_token
                 .as_ref()
                 .ok_or(NewJwtServiceError::MissingAccessTokenInStrictMode)?
+                .claims
                 .get("client_id")
                 .ok_or(NewJwtServiceError::MissingClaimsInStrictMode(
                     "access_token",
@@ -227,21 +230,18 @@ impl NewJwtService {
             // If userinfo token is present, check if:
             // 1. userinfo_token.sub == id_token.sub
             // 2. userinfo_token.aud == access_token.client_id
-            if let Some(claims) = &userinfo_token {
+            if let Some(token) = &userinfo_token {
                 let id_tkn_sub = id_token
                     .as_ref()
                     .ok_or(NewJwtServiceError::MissingIdTokenInStrictMode)?
+                    .claims
                     .get("sub")
                     .ok_or(NewJwtServiceError::MissingClaimsInStrictMode(
                         "ID Token", "sub",
                     ))?;
-                let usrinfo_sub =
-                    claims
-                        .get("sub")
-                        .ok_or(NewJwtServiceError::MissingClaimsInStrictMode(
-                            "Userinfo Token",
-                            "sub",
-                        ))?;
+                let usrinfo_sub = token.claims.get("sub").ok_or(
+                    NewJwtServiceError::MissingClaimsInStrictMode("Userinfo Token", "sub"),
+                )?;
                 if usrinfo_sub != id_tkn_sub {
                     Err(NewJwtServiceError::UserinfoSubMismatch(
                         serde_json::from_value::<String>(usrinfo_sub.clone())?,
@@ -249,13 +249,9 @@ impl NewJwtService {
                     ))?
                 }
 
-                let usrinfo_aud =
-                    claims
-                        .get("aud")
-                        .ok_or(NewJwtServiceError::MissingClaimsInStrictMode(
-                            "Userinfo Token",
-                            "aud",
-                        ))?;
+                let usrinfo_aud = token.claims.get("aud").ok_or(
+                    NewJwtServiceError::MissingClaimsInStrictMode("Userinfo Token", "aud"),
+                )?;
                 if usrinfo_aud != access_tkn_client_id {
                     Err(NewJwtServiceError::UserinfoAudienceMismatch(
                         serde_json::from_value::<String>(usrinfo_aud.clone())?,

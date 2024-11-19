@@ -1,6 +1,7 @@
 use super::super::test_utils::*;
 use super::{decode, JwtValidator, JwtValidatorConfig, JwtValidatorError};
 use crate::jwt::new_key_service::NewKeyService;
+use crate::jwt::validator::ProcessedJwt;
 use jsonwebtoken::Algorithm;
 use serde_json::json;
 use std::collections::HashSet;
@@ -21,7 +22,12 @@ fn can_decode_jwt() {
 
     let result = decode(&token).expect("Should decode JWT");
 
-    assert_eq!(result, claims);
+    let expected = ProcessedJwt {
+        claims,
+        key_iss: None,
+    };
+
+    assert_eq!(result, expected);
 }
 
 #[test]
@@ -63,7 +69,12 @@ fn can_decode_and_validate_jwt() {
         .process_jwt(&token)
         .expect("Should successfully process JWT");
 
-    assert_eq!(result, claims);
+    let expected = ProcessedJwt {
+        claims,
+        key_iss: None,
+    };
+
+    assert_eq!(result, expected);
 }
 
 #[test]
@@ -193,7 +204,13 @@ fn can_check_missing_claims() {
     let result = validator
         .process_jwt(&token)
         .expect("Should process JWT successfully");
-    assert_eq!(result, claims);
+
+    let expected = ProcessedJwt {
+        claims,
+        key_iss: None,
+    };
+
+    assert_eq!(result, expected);
 
     // Error case where `nbf` is missing from the token.
     let validator = JwtValidator::new(

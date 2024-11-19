@@ -8,6 +8,13 @@ use jsonwebtoken::DecodingKey;
 use serde_json::{json, Value};
 use std::{collections::HashMap, rc::Rc, time::Duration};
 
+pub struct DecodingKeyWithIss<'a> {
+    /// The decoding key used to validate JWT signatures.
+    pub key: &'a DecodingKey,
+    /// The Trusted Issuer where the Key was fetched.
+    pub key_iss: Option<&'a TrustedIssuer>,
+}
+
 /// Manages Json Web Keys (JWK).
 // TODO: periodically update the key stores to ensure keys are valid.
 pub struct NewKeyService {
@@ -78,12 +85,16 @@ impl NewKeyService {
         })
     }
 
-    pub fn get_key(&self, key_id: &str) -> Option<&DecodingKey> {
+    /// Gets the decoding key with the given key ID from the store with it's Trusted Issuer.
+    pub fn get_key(&self, key_id: &str) -> Option<DecodingKeyWithIss> {
         // PERF: We can add a reference of all the keys into a HashMap
         // so we do not need to loop through all of these.
         for store in self.key_stores.values() {
             if let Some(key) = store.get(key_id) {
-                return Some(key);
+                return Some(DecodingKeyWithIss {
+                    key,
+                    key_iss: store.source_iss(),
+                });
             }
         }
 
@@ -93,6 +104,7 @@ impl NewKeyService {
     /// Returns a Vec containing a reference to all of the keys.
     ///
     /// Useful if the keys from the JWKS do not have a `kid` (Key ID).
+    // TODO: we probably also need TrustedIssuer information from this
     pub fn get_keys(&self) -> Vec<&DecodingKey> {
         // PERF: We can cache the returned Vec so it doesn't
         // get created every time this function is called.

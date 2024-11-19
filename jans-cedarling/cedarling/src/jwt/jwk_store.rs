@@ -24,7 +24,7 @@ struct OpenIdConfig {
 pub struct JwkStore {
     /// A unique identifier for the store.
     store_id: Rc<str>,
-    /// Optional issuer associated with the store.
+    /// The issuer response from the IDP.
     issuer: Option<Box<str>>,
     /// A map of keys indexed by their `KeyId`.
     keys: HashMap<KeyId, DecodingKey>,
@@ -32,6 +32,8 @@ pub struct JwkStore {
     keys_without_id: Vec<DecodingKey>,
     /// The timestamp indicating when the store was last updated.
     last_updated: OffsetDateTime,
+    /// From which TrustedIssuer this struct was built (if applicable).
+    source_iss: Option<TrustedIssuer>,
 }
 
 // We cannot derive from Debug directly because DecodingKey does not implement Debug.
@@ -135,6 +137,7 @@ impl JwkStore {
             keys,
             keys_without_id,
             last_updated: OffsetDateTime::now_utc(),
+            source_iss: None,
         })
     }
 
@@ -157,8 +160,14 @@ impl JwkStore {
 
         let mut store = Self::new_from_jwks_str(store_id, &jwks)?;
         store.issuer = Some(openid_config.issuer.into());
+        store.source_iss = Some(issuer.clone());
 
         Ok(store)
+    }
+
+    /// Returns a reference to the source [`TrustedIssuer`] this struct was built on.
+    pub fn source_iss(&self) -> Option<&TrustedIssuer> {
+        self.source_iss.as_ref()
     }
 
     /// Retrieves a Decoding Key from the store
@@ -270,6 +279,7 @@ mod test {
             keys: expected_keys,
             keys_without_id: Vec::new(),
             last_updated: OffsetDateTime::from_unix_timestamp(0).unwrap(),
+            source_iss: None,
         };
 
         assert_eq!(expected, result);
@@ -339,20 +349,19 @@ mod test {
         let http_client =
             HttpClient::new(3, Duration::from_millis(1)).expect("Should create HttpClient");
 
-        let mut result = JwkStore::new_from_trusted_issuer(
-            "test".into(),
-            &TrustedIssuer {
-                name: "Test Trusted Issuer".to_string(),
-                description: "This is a test trusted issuer".to_string(),
-                openid_configuration_endpoint: format!(
-                    "{}/.well-known/openid-configuration",
-                    mock_server.url()
-                ),
-                ..Default::default()
-            },
-            &http_client,
-        )
-        .expect("Should load JwkStore from Trusted Issuer");
+        let source_iss = TrustedIssuer {
+            name: "Test Trusted Issuer".to_string(),
+            description: "This is a test trusted issuer".to_string(),
+            openid_configuration_endpoint: format!(
+                "{}/.well-known/openid-configuration",
+                mock_server.url()
+            ),
+            ..Default::default()
+        };
+
+        let mut result =
+            JwkStore::new_from_trusted_issuer("test".into(), &source_iss, &http_client)
+                .expect("Should load JwkStore from Trusted Issuer");
         // We edit the `last_updated` from the result so that the comparison
         // wont fail because of the timestamp.
         result.last_updated = OffsetDateTime::from_unix_timestamp(0).unwrap();
@@ -376,6 +385,7 @@ mod test {
             keys: expected_keys,
             keys_without_id: Vec::new(),
             last_updated: OffsetDateTime::from_unix_timestamp(0).unwrap(),
+            source_iss: Some(source_iss),
         };
 
         assert_eq!(expected, result);
@@ -438,6 +448,7 @@ mod test {
             keys: HashMap::new(),
             keys_without_id: expected_keys,
             last_updated: OffsetDateTime::from_unix_timestamp(0).unwrap(),
+            source_iss: None,
         };
 
         assert_eq!(expected, result);
@@ -555,6 +566,7 @@ mod test {
             keys: expected_keys,
             keys_without_id: Vec::new(),
             last_updated: OffsetDateTime::from_unix_timestamp(0).unwrap(),
+            source_iss: None,
         };
 
         assert_eq!(expected, result);

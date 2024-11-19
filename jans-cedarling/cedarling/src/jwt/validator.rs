@@ -2,6 +2,8 @@ mod config;
 #[cfg(test)]
 mod test;
 
+use crate::common::policy_store::TrustedIssuer;
+
 use super::new_key_service::NewKeyService;
 use base64::prelude::*;
 pub use config::*;
@@ -12,8 +14,6 @@ use std::collections::HashMap;
 use std::rc::Rc;
 
 type IssuerId = String;
-
-/// JWT Token Claims
 pub type TokenClaims = Value;
 
 /// Validates Json Web Tokens.
@@ -22,6 +22,12 @@ pub struct JwtValidator {
     config: JwtValidatorConfig,
     key_service: Rc<NewKeyService>,
     validators: HashMap<Algorithm, Validation>,
+}
+
+#[derive(Debug, PartialEq)]
+pub struct ProcessedJwt<'a> {
+    pub claims: TokenClaims,
+    pub key_iss: Option<&'a TrustedIssuer>,
 }
 
 #[allow(dead_code)]
@@ -54,17 +60,19 @@ impl JwtValidator {
     }
 
     /// Decodes the JWT and optionally validates it depending on the config.
-    pub fn process_jwt(&self, jwt: &str) -> Result<TokenClaims, JwtValidatorError> {
-        let token_claims = match *self.config.sig_validation {
+    pub fn process_jwt<'a>(&'a self, jwt: &'a str) -> Result<ProcessedJwt<'a>, JwtValidatorError> {
+        let processed_jwt = match *self.config.sig_validation {
             true => self.decode_and_validate_token(jwt)?,
             false => decode(jwt)?,
         };
 
-        self.check_missing_claims(token_claims)
+        self.check_missing_claims(&processed_jwt.claims)?;
+
+        Ok(processed_jwt)
     }
 
     /// Decodes and validates the JWT's signature and optionally, the `exp` and `nbf` claims.
-    fn decode_and_validate_token(&self, jwt: &str) -> Result<TokenClaims, JwtValidatorError> {
+    fn decode_and_validate_token(&self, jwt: &str) -> Result<ProcessedJwt, JwtValidatorError> {
         let header = decode_header(jwt).map_err(JwtValidatorError::DecodeHeader)?;
 
         // since we already initialized all the validators on startup, not finding one
@@ -81,34 +89,33 @@ impl JwtValidator {
             None => unimplemented!("Handling JWTs without `kid`s hasn't been implemented yet."),
         };
 
-        let decode_result = jsonwebtoken::decode::<TokenClaims>(jwt, decoding_key, validation);
-
-        match decode_result {
-            Ok(token_data) => Ok(token_data.claims),
-            Err(err) => match err.kind() {
-                jsonwebtoken::errors::ErrorKind::InvalidToken => {
-                    Err(JwtValidatorError::InvalidShape)
-                },
+        let decode_result = jsonwebtoken::decode::<TokenClaims>(jwt, decoding_key.key, validation)
+            .map_err(|e| match e.kind() {
+                jsonwebtoken::errors::ErrorKind::InvalidToken => JwtValidatorError::InvalidShape,
                 jsonwebtoken::errors::ErrorKind::InvalidSignature => {
-                    Err(JwtValidatorError::InvalidSignature(err))
+                    JwtValidatorError::InvalidSignature(e)
                 },
                 jsonwebtoken::errors::ErrorKind::ExpiredSignature => {
-                    Err(JwtValidatorError::ExpiredToken)
+                    JwtValidatorError::ExpiredToken
                 },
                 jsonwebtoken::errors::ErrorKind::ImmatureSignature => {
-                    Err(JwtValidatorError::ImmatureToken)
+                    JwtValidatorError::ImmatureToken
                 },
                 jsonwebtoken::errors::ErrorKind::Base64(decode_error) => {
-                    Err(JwtValidatorError::DecodeJwt(decode_error.to_string()))
+                    JwtValidatorError::DecodeJwt(decode_error.to_string())
                 },
                 // the jsonwebtoken crate placed all it's errors onto a single enum, even the errors
                 // that wouldn't be returned when we call `decode`.
-                _ => Err(JwtValidatorError::Unexpected(err)),
-            },
-        }
+                _ => JwtValidatorError::Unexpected(e),
+            })?;
+
+        Ok(ProcessedJwt {
+            claims: decode_result.claims,
+            key_iss: decoding_key.key_iss,
+        })
     }
 
-    fn check_missing_claims(&self, claims: TokenClaims) -> Result<TokenClaims, JwtValidatorError> {
+    fn check_missing_claims(&self, claims: &TokenClaims) -> Result<(), JwtValidatorError> {
         let missing_claims = self
             .config
             .required_claims
@@ -121,12 +128,12 @@ impl JwtValidator {
             Err(JwtValidatorError::MissingClaims(missing_claims))?
         }
 
-        Ok(claims)
+        Ok(())
     }
 }
 
 /// Decodes a JWT without validating the signature.
-fn decode(jwt: &str) -> Result<TokenClaims, JwtValidatorError> {
+fn decode(jwt: &str) -> Result<ProcessedJwt, JwtValidatorError> {
     // Split the token into its three parts
     let parts = jwt.split('.').collect::<Vec<&str>>();
     if parts.len() != 3 {
@@ -142,7 +149,10 @@ fn decode(jwt: &str) -> Result<TokenClaims, JwtValidatorError> {
     let claims = serde_json::from_slice::<TokenClaims>(&decoded_payload)
         .map_err(JwtValidatorError::DeserializeJwt)?;
 
-    Ok(claims)
+    Ok(ProcessedJwt {
+        claims,
+        key_iss: None,
+    })
 }
 
 #[derive(Debug, thiserror::Error)]
