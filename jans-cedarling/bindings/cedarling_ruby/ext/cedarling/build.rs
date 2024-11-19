@@ -123,7 +123,8 @@ fn ruby_extension_dylib_path() {
     // Ensure that lib/cedarling_ruby dir exists, otherwise linker fails.
     // TODO was this maybe also causing the trouble with the gem package and gem install?
     if !std::fs::exists(&lib_dir).unwrap() {
-        std::fs::create_dir(&lib_dir).expect(&format!("cannot create directory {lib_dir:?}"));
+        std::fs::create_dir(&lib_dir)
+            .unwrap_or_else(|err| panic!("cannot create directory {lib_dir:?} {err}"));
     }
     let lib_dir = lib_dir.canonicalize().unwrap();
 

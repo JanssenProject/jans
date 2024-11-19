@@ -57,18 +57,18 @@ fn policy_store_source_of_hash(ruby : &magnus::Ruby, policy_store_value : Option
     use magnus::prelude::*;
 
     let policy_store_value = policy_store_value
-        .ok_or(cedarling_ruby_exception(ruby, format!("policy_store: hash required wth either json: or yaml: key")))?;
+        .ok_or(cedarling_ruby_exception(ruby, "policy_store: hash required wth either json: or yaml: key".into()))?;
 
     if policy_store_value.is_kind_of(ruby.class_hash()) {
         use magnus::r_hash::RHash;
-        let ruby_hash = RHash::from_value(policy_store_value).ok_or(cedarling_ruby_exception(ruby, format!("Failed to convert policy_store: to a hash")))?;
+        let ruby_hash = RHash::from_value(policy_store_value).ok_or(cedarling_ruby_exception(ruby, "Failed to convert policy_store: to a hash".into()))?;
 
         if let Ok(json) = ruby_hash.lookup::<_, String>(ruby.to_symbol("json")) {
             Ok(cedarling::PolicyStoreSource::Json(json.clone()))
         } else if let Ok(yaml) = ruby_hash.lookup::<_, String>(ruby.to_symbol("yaml")) {
             Ok(cedarling::PolicyStoreSource::Yaml(yaml.clone()))
         } else {
-            Err(cedarling_ruby_exception(ruby, format!("policy_store: neither json: nor yaml: specified")))
+            Err(cedarling_ruby_exception(ruby, "policy_store: neither json: nor yaml: specified".into()))
         }
     } else {
         // Just convert to a string, and for now assume it's yaml
@@ -134,8 +134,8 @@ fn instantiate_engine(ruby : &magnus::Ruby, args: &[magnus::Value])
         Err(cedarling_ruby_exception(ruby, format!("log_ttl: {log_ttl} exceeds max of {MAX_LOG_TTL}")))?
     }
 
-    if log_ttl <= 0 {
-        Err(cedarling_ruby_exception(ruby, format!("log_ttl: must be at minimum 1")))?
+    if log_ttl == 0 {
+        Err(cedarling_ruby_exception(ruby, "log_ttl: must be at minimum 1".into()))?
     }
 
     let policy_store_source = policy_store_source_of_hash(ruby, policy_store)?;
@@ -149,7 +149,7 @@ fn instantiate_engine(ruby : &magnus::Ruby, args: &[magnus::Value])
         policy_store_config: cedarling::PolicyStoreConfig {
             source: policy_store_source,
         },
-        jwt_config: jwt_config,
+        jwt_config,
     };
 
     // construct the actual cedarling instance
@@ -213,15 +213,15 @@ impl serde::Serialize for AuthorizeResult {
         let mut map = serializer.serialize_map(Some(3))?;
 
         if let Some(response) = &self.0.workload {
-            map.serialize_entry("workload", &(Response(&response)))?;
+            map.serialize_entry("workload", &Response(response))?;
         }
 
         if let Some(response) = &self.0.person {
-            map.serialize_entry("person", &(Response(&response)))?;
+            map.serialize_entry("person", &(Response(response)))?;
         }
 
         if let Some(response) = &self.0.role {
-            map.serialize_entry("role", &(Response(&response)))?;
+            map.serialize_entry("role", &(Response(response)))?;
         }
 
         map.end()
@@ -230,7 +230,7 @@ impl serde::Serialize for AuthorizeResult {
 
 impl AuthorizeResult {
     fn to_h(&self) -> Result<magnus::Value, magnus::Error> {
-        Ok(serde_magnus::serialize(&self)?)
+        serde_magnus::serialize(&self)
     }
 }
 
