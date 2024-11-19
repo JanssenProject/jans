@@ -8,7 +8,7 @@ from prompt_toolkit.layout.dimension import D
 from prompt_toolkit.layout.containers import HSplit, VSplit, DynamicContainer, HorizontalAlign, Window
 from prompt_toolkit.widgets import TextArea, Button, Label
 from prompt_toolkit.buffer import Buffer
-from prompt_toolkit.formatted_text import HTML, merge_formatted_text
+from prompt_toolkit.formatted_text import HTML
 
 from utils.multi_lang import _
 from utils.utils import common_data

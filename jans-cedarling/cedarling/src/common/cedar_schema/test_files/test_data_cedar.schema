@@ -1,4 +1,6 @@
 namespace Jans {
+type Url = {protocol: String,host: String,path: String};
+entity TrustedIssuer = {issuer_entity_id: Url};
 entity Access_token = {"aud": String, "exp": Long, "iat": Long, scope?: Set<String> };
 entity Role;
 entity Issue = {};
