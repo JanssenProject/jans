@@ -40,6 +40,8 @@ public enum ErrorResponse {
     ISS_CLAIM_NOT_FOUND("ISS claim not fount in jwt"),
     ERROR_IN_DCR("Error in DCR using SSA."),
     LICENSE_NOT_PRESENT("Active license not present."),
+    LICENSE_IS_EXPIRED("The license is expired."),
+    LICENSE_DATA_MISSING("The %s fields are missing in response from license API."),
     LICENSE_ALREADY_ACTIVE("The license has been already activated."),
     LICENSE_CONFIG_ABSENT("License configuration is not present."),
     SCAN_HOSTNAME_MISSING("SCAN api hostname is missing in configuration."),

@@ -1628,6 +1628,8 @@ components:
           type: string
         customerLastName:
           type: string
+        licenseExpired:
+          type: boolean
     SSARequest:
       type: object
       properties:
