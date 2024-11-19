@@ -4,6 +4,9 @@ members = ["bindings/cedarling_python", "bindings/cedarling_ruby/ext/cedarling",
 # leave out ruby unless its specified
 default-members = ["bindings/cedarling_python", "cedarling", "sparkv", "test_utils"]
 
+[workspace.package]
+version = "1.1.6"
+
 [workspace.dependencies]
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
@@ -12,7 +15,6 @@ cedar-policy = "4.0.0" # needed by ruby bindings package
 sparkv = { path = "sparkv" }
 cedarling = { path = "cedarling" }
 test_utils = { path = "test_utils" }
-
 
 [profile.release]
 strip = "symbols"
