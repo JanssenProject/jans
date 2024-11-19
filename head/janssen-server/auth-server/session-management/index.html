@@ -8444,6 +8444,13 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#tui" class="md-nav__link">
+    TUI
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -8586,6 +8593,14 @@ session events, see:</p>
 <h2 id="session-data-structure-in-persistence">Session data structure in Persistence<a class="headerlink" href="#session-data-structure-in-persistence" title="Permanent link">#</a></h2>
 <h3 id="mysql">MySQL<a class="headerlink" href="#mysql" title="Permanent link">#</a></h3>
 <p>All session information is saved in this table : https://github.com/JanssenProject/jans/blob/main/docs/admin/reference/database/mysql-schema.md#janssessid </p>
+<h3 id="tui">TUI<a class="headerlink" href="#tui" title="Permanent link">#</a></h3>
+<p>To start searching and deleting sessions, navigate to
+<code>Auth Server</code>-&gt;<code>Sessions</code>.  This brings up a screen as shown below
+with searching and deleting sessions.</p>
+<p><img alt="Searching Sessions" src="../../../assets/tui-auth-server-sessions.png" /></p>
+<p>After entering search criterias, navigate to <strong>&lt; Search &gt;</strong> button end press <strong>Enter</strong>.
+To delete a session, select it and press <strong>delete</strong> key.</p>
+<p>Refer to complete documentation <a href="../../config-guide/config-tools/jans-tui/">here</a></p>
 <h2 id="faq">FAQ<a class="headerlink" href="#faq" title="Permanent link">#</a></h2>
 <h3 id="how-can-we-force-the-user-to-log-out-if-the-user-is-idle-on-the-rp-for-4-hours">How can we force the user to log out if the user is idle on the RP for 4 hours?<a class="headerlink" href="#how-can-we-force-the-user-to-log-out-if-the-user-is-idle-on-the-rp-for-4-hours" title="Permanent link">#</a></h3>
 <p>The OP doesn't know anything about end-user activity on the RP. Therefore, the RP has to track activity internally, and when the inactivity period is reached (in this case, 4 hours) the RP should perform front-channel logout.</p>
@@ -8600,7 +8615,7 @@ undesirable default browser behavior.</p>
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-15T10:12:47+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-15</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-11-18T09:49:11+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-11-18</span>
       
         <br>
         Created:

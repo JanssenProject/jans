@@ -8663,13 +8663,13 @@ RRF &quot;pages/login.ftl&quot; obj
 <p>The data model (injected <em>map</em>) is attached some additional keys for convenience:</p>
 <ul>
 <li>
-<p><code>webCtx</code>. It gives easy access to often needed bits like current path, locale, etc. This is a Java object you can inspect <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/agama/engine/src/main/java/io/jans/agama/engine/service/WebContext.java">here</a>. Take a look at the getters; writing <code>${webCtx.contextPath}</code> in a template will insert the result of calling method <code>getContextPath</code> - normally the string <code>/jans-auth</code>.</p>
+<p><code>webCtx</code>. It gives easy access to often needed bits like current path, locale, etc. This is a Java object you can inspect <a href="https://github.com/JanssenProject/jans/blob/main/jans-auth-server/agama/engine/src/main/java/io/jans/agama/engine/service/WebContext.java">here</a>. Take a look at the getters; writing <code>${webCtx.contextPath}</code> in a template will insert the result of calling method <code>getContextPath</code> - normally the string <code>/jans-auth</code></p>
 </li>
 <li>
-<p><code>msgs</code>. It gives access to the localized messages of jans-auth application. Some developers might know this as the "internationalization labels" or "resource bundle" of an application. This is a collection of <code>.properties</code> files where common UI-related messages in different languages can be found. A message (label) is identified by a key, so in a template <code>${msgs.&lt;KEY&gt;}</code> could be used. As most keys in resource bundles have dot characters, the alternative notation <code>${webCtx["KEY"]}</code> works better for FreeMarker, for example <code>${msgs["login.errorMessage"]}</code>.</p>
+<p><code>cache</code>. Allows developers to retrieve values already stored in the Jans configured cache, e.g. <code>${cache.myKey}</code>. To avoid template errors in case of a cache miss, you can use Freemarker's safeguard <a href="https://freemarker.apache.org/docs/dgui_template_exp.html#dgui_template_exp_missing">expressions</a>. Note you cannot store/modify values in the cache from templates</p>
 </li>
 <li>
-<p><code>cache</code>. Allows developers to retrieve values already stored in the Jans configured cache, e.g. <code>${cache.myKey}</code>. To avoid template errors in case of a cache miss, you can use Freemarker's safeguard <a href="https://freemarker.apache.org/docs/dgui_template_exp.html#dgui_template_exp_missing">expressions</a>. Note you cannot store/modify values in the cache from templates.</p>
+<p><code>labels</code> and <code>msgs</code>. These give access to localized messages. They are useful when templates have to render different texts depening on user context, such as country and language. Learn more <a href="../advanced-usages/#localization-and-internationalization">here</a></p>
 </li>
 </ul>
 <h3 id="assets-handling">Assets handling<a class="headerlink" href="#assets-handling" title="Permanent link">#</a></h3>
@@ -8710,7 +8710,7 @@ credentials = RRF &quot;pages/login.ftl&quot; obj
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-09-27T12:12:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-11-18T09:56:37+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-11-18</span>
       
         <br>
         Created:

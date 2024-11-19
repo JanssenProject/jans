@@ -8755,32 +8755,6 @@ helm install nginx ingress-nginx/ingress-nginx
 </code></pre></div>
 </li>
 <li>
-<p>Couchbase for pesistence storage</p>
-<p>Add the following yaml snippet to your <code>override.yaml</code> file:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">global</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">cnPersistenceType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">couchbase</span><span class="w"></span>
-
-<span class="nt">config</span><span class="p">:</span><span class="w"></span>
-<span class="w">  </span><span class="nt">configmap</span><span class="p">:</span><span class="w"></span>
-<span class="w">    </span><span class="c1"># The prefix of couchbase buckets. This helps with separation in between different environments and allows for the same couchbase cluster to be used by different setups of Janssen.</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnCouchbaseBucketPrefix</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">jans</span><span class="w"></span>
-<span class="w">    </span><span class="c1"># -- Couchbase certificate authority string. This must be encoded using base64. This can also be found in your couchbase UI Security &gt; Root Certificate. In mTLS setups this is not required.</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnCouchbaseCrt</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo=</span><span class="w"></span>
-<span class="w">    </span><span class="c1"># -- The number of replicas per index created. Please note that the number of index nodes must be one greater than the number of index replicas. That means if your couchbase cluster only has 2 index nodes you cannot place the number of replicas to be higher than 1.</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnCouchbaseIndexNumReplica</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0</span><span class="w"></span>
-<span class="w">    </span><span class="c1"># -- Couchbase password for the restricted user config.configmap.cnCouchbaseUser that is often used inside the services. The password must contain one digit, one uppercase letter, one lower case letter and one symbol</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnCouchbasePassword</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">P@ssw0rd</span><span class="w"></span>
-<span class="w">    </span><span class="c1"># -- The Couchbase super user (admin) username. This user is used during initialization only.</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnCouchbaseSuperUser</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">admin</span><span class="w"></span>
-<span class="w">    </span><span class="c1"># -- Couchbase password for the superuser config.configmap.cnCouchbaseSuperUser that is used during the initialization process. The password must contain one digit, one uppercase letter, one lower case letter and one symbol</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnCouchbaseSuperUserPassword</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Test1234#</span><span class="w"></span>
-<span class="w">    </span><span class="c1"># -- Couchbase URL. This should be in FQDN format for either remote or local Couchbase clusters. The address can be an internal address inside the kubernetes cluster</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnCouchbaseUrl</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cbjanssen.default.svc.cluster.local</span><span class="w"></span>
-<span class="w">    </span><span class="c1"># -- Couchbase restricted user</span><span class="w"></span>
-<span class="w">    </span><span class="nt">cnCouchbaseUser</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">janssen</span><span class="w"></span>
-</code></pre></div>
-</li>
-<li>
 <p>PostgreSQL for persistence storage</p>
 <p>In a production environment, a production grade PostgreSQL server should be used such as <code>Amazon RDS</code></p>
 <p>For testing purposes, you can deploy it on the EKS cluster using the following command:</p>
@@ -8864,7 +8838,7 @@ helm install janssen janssen/janssen -n jans -f override.yaml
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-15T10:12:47+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-15</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-11-18T05:38:21+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-11-18</span>
       
         <br>
         Created:

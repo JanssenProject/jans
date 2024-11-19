@@ -4976,6 +4976,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#internationalization-labels" class="md-nav__link">
+    Internationalization labels
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#oop-prose-warning" class="md-nav__link">
     OOP prose warning
   </a>
@@ -8513,6 +8520,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#internationalization-labels" class="md-nav__link">
+    Internationalization labels
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#oop-prose-warning" class="md-nav__link">
     OOP prose warning
   </a>
@@ -8591,6 +8605,8 @@
 <h2 id="about-crashes">About crashes<a class="headerlink" href="#about-crashes" title="Permanent link">#</a></h2>
 <p>As a flow executes things can go wrong for reasons that developers cannot foresee. A database may have crashed, a connection to an external system may have failed, the flow itself may have some bug, etc. When an abnormal situation is presented, a flow simply crashes.</p>
 <p>If a flow crashes, its parent flows (or flow) if they exist, crash as well. Trying to handle crashes involves a lot of planning and work which is too costly and will unlikely account for the so many things that might fail in a real setting. Thus, coding defensively is not recommended. While it is possible to deal with Java exceptions (product of <code>Call</code>s) and other abnormalities when <code>Trigger</code>ing flows, these features should be used sparingly.</p>
+<h2 id="internationalization-labels">Internationalization labels<a class="headerlink" href="#internationalization-labels" title="Permanent link">#</a></h2>
+<p>When using <a href="../advanced-usages/#localization-and-internationalization">localization and internationalization</a> use meaningful label keys and prefix all of them with the name of the project in question. If your project is called <code>magicAuthnJourneys</code>, then <code>magicAuthnJourneys.image.caption</code> and <code>magicAuthnJourneys.start_button_label</code> are good examples. This is a strategy that avoids possible name collisions in labels. </p>
 <h2 id="oop-prose-warning">OOP prose warning<a class="headerlink" href="#oop-prose-warning" title="Permanent link">#</a></h2>
 <p>Java support adds the ability to execute pieces of business logic required to build up a flow. These “pieces of logic” match well to Java methods, however situations like this must be avoided:</p>
 <div class="highlight"><pre><span></span><code>x = … // A java object obtained in some way
@@ -8614,7 +8630,7 @@ Call x methodD … z …
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-09-27T12:12:23+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-09-27</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-11-18T09:56:37+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-11-18</span>
       
         <br>
         Created:
