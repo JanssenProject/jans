@@ -1,7 +1,6 @@
-use jsonwebtoken::Algorithm;
-
 use super::IssuerId;
 use crate::common::policy_store::TrustedIssuer;
+use jsonwebtoken::Algorithm;
 use std::{
     collections::{HashMap, HashSet},
     rc::Rc,

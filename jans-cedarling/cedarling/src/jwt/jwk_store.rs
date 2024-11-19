@@ -80,7 +80,7 @@ impl JwkStore {
     }
     /// Creates a JwkStore from a [`String`]
     pub fn new_from_jwks_str(store_id: Rc<str>, jwks: &str) -> Result<Self, JwkStoreError> {
-        let jwks = serde_json::from_str::<IntermediateJwks>(&jwks)?;
+        let jwks = serde_json::from_str::<IntermediateJwks>(jwks)?;
         Self::new_from_jwks(store_id, jwks)
     }
 
@@ -105,7 +105,7 @@ impl JwkStore {
                         // TODO: pass this message to the logger
                         eprintln!(
                             "Encountered a JWK with an unsupported algorithm, ignoring it: {}",
-                            e.to_string()
+                            e
                         );
                         continue;
                     } else {

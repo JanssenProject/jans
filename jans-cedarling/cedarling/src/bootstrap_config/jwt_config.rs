@@ -6,7 +6,8 @@
  */
 
 use crate::common::policy_store::TrustedIssuer;
-use std::collections::HashMap;
+use jsonwebtoken::Algorithm;
+use std::collections::{HashMap, HashSet};
 type IssuerId = String;
 
 /// The set of Bootstrap properties related to JWT validation.
@@ -19,7 +20,7 @@ pub struct NewJwtConfig {
     ///
     /// Each entry in the map associates an `IssuerId` with a `TrustedIssuer` instance,
     /// representing metadata for the corresponding issuer. This metadata may include
-    /// information retrieved from a `.well-known/openid-configuration` endpoint 
+    /// information retrieved from a `.well-known/openid-configuration` endpoint
     /// for validating tokens and establishing trust with the issuer.
     pub trusted_issuers: Option<HashMap<IssuerId, TrustedIssuer>>,
     /// Check the signature for all the Json Web Tokens.
@@ -61,9 +62,7 @@ pub struct NewJwtConfig {
     /// [`Strict`]: IdTokenTrustMode::Strict
     pub id_token_trust_mode: IdTokenTrustMode,
     /// Only tokens signed with algorithms in this list can be valid.
-    ///
-    /// Set this to a [`Vec`] containing `'*'` to allow all algorithms.
-    pub signature_algorithms_supported: Vec<String>,
+    pub signature_algorithms_supported: HashSet<Algorithm>,
     /// Validation options related to the Access token
     pub access_token_config: TokenValidationConfig,
     /// Validation options related to the Id token
@@ -99,6 +98,30 @@ pub struct TokenValidationConfig {
 
 #[allow(dead_code)]
 impl TokenValidationConfig {
+    /// Collects all the required claims into a HashSet.
+    pub fn required_claims(&self) -> HashSet<Box<str>> {
+        let mut req_claims = HashSet::new();
+        if self.iss_validation {
+            req_claims.insert("iss".into());
+        }
+        if self.aud_validation {
+            req_claims.insert("aud".into());
+        }
+        if self.sub_validation {
+            req_claims.insert("sub".into());
+        }
+        if self.jti_validation {
+            req_claims.insert("jti".into());
+        }
+        if self.exp_validation {
+            req_claims.insert("exp".into());
+        }
+        if self.nbf_validation {
+            req_claims.insert("nbf".into());
+        }
+        req_claims
+    }
+
     /// Returns a default configuration for validating Access Tokens.
     ///
     /// This configuration requires the following:
@@ -108,7 +131,7 @@ impl TokenValidationConfig {
     ///
     /// Claims like `aud` (audience) and `sub` (subject) are not required for
     /// Access Tokens.
-    fn access_token() -> Self {
+    pub fn access_token() -> Self {
         Self {
             iss_validation: true,
             aud_validation: false,
@@ -128,7 +151,7 @@ impl TokenValidationConfig {
     /// - `exp` (expiration) validation
     ///
     /// `jti` (JWT ID) and `nbf` (not before) are not required for ID Tokens.
-    fn id_token() -> Self {
+    pub fn id_token() -> Self {
         Self {
             iss_validation: true,
             aud_validation: true,
@@ -148,7 +171,7 @@ impl TokenValidationConfig {
     /// - `exp` (expiration) validation
     ///
     /// `jti` (JWT ID) and `nbf` (not before) are not required for Userinfo Tokens.
-    fn userinfo_token() -> Self {
+    pub fn userinfo_token() -> Self {
         Self {
             iss_validation: true,
             aud_validation: true,
@@ -222,7 +245,7 @@ impl Default for NewJwtConfig {
             jwt_sig_validation: true,
             jwt_status_validation: true,
             id_token_trust_mode: IdTokenTrustMode::Strict,
-            signature_algorithms_supported: Vec::new(),
+            signature_algorithms_supported: HashSet::new(),
             access_token_config: TokenValidationConfig::access_token(),
             id_token_config: TokenValidationConfig::id_token(),
             userinfo_token_config: TokenValidationConfig::userinfo_token(),
@@ -240,21 +263,30 @@ impl NewJwtConfig {
             jwt_sig_validation: false,
             jwt_status_validation: false,
             id_token_trust_mode: IdTokenTrustMode::None,
-            signature_algorithms_supported: vec!["*".into()],
+            signature_algorithms_supported: HashSet::new(),
             access_token_config: TokenValidationConfig::default(),
             id_token_config: TokenValidationConfig::default(),
             userinfo_token_config: TokenValidationConfig::default(),
         }
+        .allow_all_algorithms()
     }
 
-    /// Allows all signature algorithms by setting the `signature_algorithms_supported`
-    /// to `vec!["*"]`.
-    ///
-    /// This method clears the current list of supported algorithms and sets it to
-    /// allow all algorithms.
+    /// Adds all supported algorithms to to `signature_algorithms_supported`.
     pub fn allow_all_algorithms(mut self) -> Self {
-        self.signature_algorithms_supported.clear();
-        self.signature_algorithms_supported.push("*".into());
+        self.signature_algorithms_supported = HashSet::from_iter([
+            Algorithm::HS256,
+            Algorithm::HS384,
+            Algorithm::HS512,
+            Algorithm::ES256,
+            Algorithm::ES384,
+            Algorithm::RS256,
+            Algorithm::RS384,
+            Algorithm::RS512,
+            Algorithm::PS256,
+            Algorithm::PS384,
+            Algorithm::PS512,
+            Algorithm::EdDSA,
+        ]);
         self
     }
 

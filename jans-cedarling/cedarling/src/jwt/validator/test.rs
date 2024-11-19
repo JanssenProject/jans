@@ -1,4 +1,5 @@
-use super::{decode, test_utils::*, JwtValidator, JwtValidatorConfig, JwtValidatorError};
+use super::super::test_utils::*;
+use super::{decode, JwtValidator, JwtValidatorConfig, JwtValidatorError};
 use crate::jwt::new_key_service::NewKeyService;
 use jsonwebtoken::Algorithm;
 use serde_json::json;

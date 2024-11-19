@@ -40,9 +40,9 @@ impl NewKeyService {
     /// rotate the keys.
     ///
     /// [`RFC 7517`]: https://datatracker.ietf.org/doc/html/rfc7517
-    pub fn new_from_str(key_stores: &str) -> Result<Self, KeyServiceError> {
+    pub fn new_from_str(key_stores: &str) -> Result<Self, NewKeyServiceError> {
         let parsed_stores = serde_json::from_str::<HashMap<String, Value>>(key_stores)
-            .map_err(KeyServiceError::DecodeJwkStores)?;
+            .map_err(NewKeyServiceError::DecodeJwkStores)?;
         let mut key_stores = HashMap::new();
         for (iss_id, keys) in &parsed_stores {
             let iss_id = TrustedIssuerId::from(iss_id.as_str());
@@ -60,7 +60,7 @@ impl NewKeyService {
     /// Enables loading key stores from a local JSON file.
     pub fn new_from_trusted_issuers(
         trusted_issuers: &HashMap<String, TrustedIssuer>,
-    ) -> Result<Self, KeyServiceError> {
+    ) -> Result<Self, NewKeyServiceError> {
         let http_client = HttpClient::new(3, Duration::from_secs(3))?;
 
         let mut key_stores = HashMap::new();
@@ -82,9 +82,8 @@ impl NewKeyService {
         // PERF: We can add a reference of all the keys into a HashMap
         // so we do not need to loop through all of these.
         for store in self.key_stores.values() {
-            match store.get(key_id) {
-                Some(key) => return Some(key),
-                None => (),
+            if let Some(key) = store.get(key_id) {
+                return Some(key);
             }
         }
 
@@ -106,7 +105,7 @@ impl NewKeyService {
 }
 
 #[derive(thiserror::Error, Debug)]
-pub enum KeyServiceError {
+pub enum NewKeyServiceError {
     #[error("Failed to decode JWK Stores from string: {0}")]
     DecodeJwkStores(#[source] serde_json::Error),
     #[error("Failed to make HTTP Request: {0}")]

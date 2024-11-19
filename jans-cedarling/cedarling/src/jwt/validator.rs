@@ -1,8 +1,6 @@
 mod config;
 #[cfg(test)]
 mod test;
-#[cfg(test)]
-mod test_utils;
 
 use super::new_key_service::NewKeyService;
 use base64::prelude::*;
@@ -14,11 +12,13 @@ use std::collections::HashMap;
 use std::rc::Rc;
 
 type IssuerId = String;
-type TokenClaims = Value;
+
+/// JWT Token Claims
+pub type TokenClaims = Value;
 
 /// Validates Json Web Tokens.
 #[allow(dead_code)]
-struct JwtValidator {
+pub struct JwtValidator {
     config: JwtValidatorConfig,
     key_service: Rc<NewKeyService>,
     validators: HashMap<Algorithm, Validation>,
@@ -60,7 +60,7 @@ impl JwtValidator {
             false => decode(jwt)?,
         };
 
-        Ok(self.check_missing_claims(token_claims)?)
+        self.check_missing_claims(token_claims)
     }
 
     /// Decodes and validates the JWT's signature and optionally, the `exp` and `nbf` claims.
@@ -81,7 +81,7 @@ impl JwtValidator {
             None => unimplemented!("Handling JWTs without `kid`s hasn't been implemented yet."),
         };
 
-        let decode_result = jsonwebtoken::decode::<TokenClaims>(jwt, decoding_key, &validation);
+        let decode_result = jsonwebtoken::decode::<TokenClaims>(jwt, decoding_key, validation);
 
         match decode_result {
             Ok(token_data) => Ok(token_data.claims),
@@ -117,7 +117,7 @@ impl JwtValidator {
             .cloned()
             .collect::<Vec<Box<str>>>();
 
-        if missing_claims.len() > 0 {
+        if !missing_claims.is_empty() {
             Err(JwtValidatorError::MissingClaims(missing_claims))?
         }
 
