@@ -7329,6 +7329,26 @@
     Token Metadata Schema
   </a>
   
+    <nav class="md-nav" aria-label="Token Metadata Schema">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#role-mapping" class="md-nav__link">
+    Role mapping
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#claim-mapping" class="md-nav__link">
+    Claim mapping
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
       </ul>
@@ -8594,6 +8614,26 @@
     Token Metadata Schema
   </a>
   
+    <nav class="md-nav" aria-label="Token Metadata Schema">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#role-mapping" class="md-nav__link">
+    Role mapping
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#claim-mapping" class="md-nav__link">
+    Claim mapping
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
       </ul>
@@ -8724,15 +8764,15 @@
 <h3 id="schema"><code>schema</code><a class="headerlink" href="#schema" title="Permanent link">#</a></h3>
 <p>Either <em>String</em> or <em>Object</em>, where <em>Object</em> is preferred.</p>
 <p>Where <em>Object</em> - An object with <code>encoding</code>, <code>content_type</code> and <code>body</code> keys. For example:</p>
-<p><div class="highlight"><pre><span></span><code><span class="nt">&quot;schema&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nt">&quot;schema&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;encoding&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;none&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// can be one of &quot;none&quot; or &quot;base64&quot;</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;content_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cedar&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// can be one of &quot;cedar&quot; or &quot;cedar-json&quot;</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;body&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;namespace Jans {\ntype Url = {&quot;</span><span class="err">hos</span><span class="kc">t</span><span class="s2">&quot;: String, &quot;</span><span class="err">pa</span><span class="kc">t</span><span class="err">h</span><span class="s2">&quot;: String, &quot;</span><span class="err">pro</span><span class="kc">t</span><span class="err">ocol</span><span class="s2">&quot;: String};...&quot;</span><span class="w"></span>
 <span class="p">}</span><span class="w"></span>
 </code></pre></div>
-  Where <em>String</em> - The schema in cedar-json format, encoded as Base64. For example:
+<p>Where <em>String</em> - The schema in cedar-json format, encoded as Base64. For example:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">&quot;schema&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cGVybWl0KAogICAgc...&quot;</span><span class="w"></span>
-</code></pre></div></p>
+</code></pre></div>
 <h2 id="cedar-policies-schema">Cedar Policies Schema<a class="headerlink" href="#cedar-policies-schema" title="Permanent link">#</a></h2>
 <p>The <code>policies</code> field describes the Cedar policies that will be used in Cedarling. Multiple policies can be defined, with each policy requiring a <code>unique_policy_id</code>.</p>
 <div class="highlight"><pre><span></span><code><span class="w">  </span><span class="nt">&quot;policies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
@@ -8756,15 +8796,15 @@
 <h3 id="policy_content"><code>policy_content</code><a class="headerlink" href="#policy_content" title="Permanent link">#</a></h3>
 <p>Either <em>String</em> or <em>Object</em>, where <em>Object</em> is preferred.</p>
 <p>Where <em>Object</em> - An object with <code>encoding</code>, <code>content_type</code> and <code>body</code> keys. For example:</p>
-<p><div class="highlight"><pre><span></span><code><span class="nt">&quot;policy_content&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="nt">&quot;policy_content&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;encoding&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;none&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// can be one of &quot;none&quot; or &quot;base64&quot;</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;content_type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cedar&quot;</span><span class="p">,</span><span class="w"> </span><span class="c1">// ONLY &quot;cedar&quot; for now due to limitations in cedar-policy crate</span><span class="w"></span>
 <span class="w">    </span><span class="nt">&quot;body&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;permit(\n    principal is Jans::User,\n    action in [Jans::Action::\&quot;Update\&quot;],\n    resource is Jans::Issue\n)when{\n    principal.country == resource.country\n};&quot;</span><span class="w"></span>
 <span class="p">}</span><span class="w"></span>
 </code></pre></div>
-  Where <em>String</em> - The policy in cedar format, encoded as Base64. For example:
+<p>Where <em>String</em> - The policy in cedar format, encoded as Base64. For example:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">&quot;policy_content&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;cGVybWl0KAogICAgc...&quot;</span><span class="w"></span>
-</code></pre></div></p>
+</code></pre></div>
 <h3 id="example-of-policies">Example of <code>policies</code><a class="headerlink" href="#example-of-policies" title="Permanent link">#</a></h3>
 <p>Here is a non-normative example of the <code>policies</code> field:</p>
 <div class="highlight"><pre><span></span><code><span class="w">  </span><span class="nt">&quot;policies&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
@@ -8832,9 +8872,11 @@
 <li><strong>openid_configuration_endpoint</strong> : (<em>String</em>) The HTTPS URL for the OpenID Connect configuration endpoint (usually found at <code>/.well-known/openid-configuration</code>).</li>
 <li><strong>identity_source</strong> : (<em>Object</em>, <em>optional</em>) Metadata related to the tokens issued by this issuer.</li>
 </ul>
-<p><strong>Notes</strong>: 
-- The <code>access_tokens</code>, <code>id_tokens</code>, <code>userinfo_tokens</code>, and <code>tx_tokens</code> fields will follow the <a href="#token-metadata-schema">Token Metadata Schema</a>.
-- The <code>access_tokens</code> will contain a <code>trusted</code> and <code>principal_identifier</code> field in addition to the fields from the <code>Token Metadata Schema</code>.</p>
+<p><strong>Notes</strong>:</p>
+<ul>
+<li>The <code>access_tokens</code>, <code>id_tokens</code>, <code>userinfo_tokens</code>, and <code>tx_tokens</code> fields will follow the <a href="#token-metadata-schema">Token Metadata Schema</a>.</li>
+<li>The <code>access_tokens</code> will contain a <code>trusted</code> and <code>principal_identifier</code> field in addition to the fields from the <code>Token Metadata Schema</code>.</li>
+</ul>
 <h3 id="token-metadata-schema">Token Metadata Schema<a class="headerlink" href="#token-metadata-schema" title="Permanent link">#</a></h3>
 <p>The Token Entity Metadata Schema defines how tokens are mapped, parsed, and transformed within Cedarling. It allows you to specify how to extract user IDs, roles, and other claims from a token using customizable parsers.</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
@@ -8849,17 +8891,77 @@
 <span class="w">  </span><span class="p">},</span><span class="w"></span>
 <span class="p">}</span><span class="w"></span>
 </code></pre></div>
+<h4 id="role-mapping">Role mapping<a class="headerlink" href="#role-mapping" title="Permanent link">#</a></h4>
 <ul>
-<li><strong>role_mapping</strong>: (String, <em>Optional</em>) Indicates which field in the token should be used for role-based access control. If not needed, set to an empty string (<code>""</code>).</li>
-<li><strong>claim_mapping:</strong> Defines how to extract and transform specific claims from the token. Each claim can have its own parser (<code>regex</code> or <code>json</code>) and type (<code>Acme::Email</code>, <code>Acme::URI</code>, etc.).</li>
+<li><strong>role_mapping</strong>: (String OR Array of String, <em>Optional</em>) Indicates which field in the token should be used for role-based access control. If not needed, set to an empty string (<code>""</code>).</li>
 </ul>
-<p><strong>Note</strong>: You can include a <code>role_mapping</code> in each token but only the first one that get parsed will be recognized by Cedarling. Cedarling parses the <code>role_mapping</code>s for each token in this order:</p>
+<p>You can include a <code>role_mapping</code> in each token but only the first one that get parsed will be recognized by Cedarling. Cedarling parses the <code>role_mapping</code>s for each token in this order:</p>
 <ol>
 <li><code>access_tokens</code></li>
 <li><code>id_tokens</code></li>
 <li><code>userinfo_tokens</code></li>
 <li><code>tx_tokens</code></li>
 </ol>
+<h4 id="claim-mapping">Claim mapping<a class="headerlink" href="#claim-mapping" title="Permanent link">#</a></h4>
+<ul>
+<li><strong>claim_mapping:</strong> Defines how to extract and transform specific claims from the token. Each claim can have its own parser (<code>regex</code> or <code>json</code>) and type (<code>Acme::email_address</code>, <code>Acme::Url</code>, etc.).</li>
+</ul>
+<p>In regex attribute mapping like <code>"UID": {"attr": "uid", "type":"String"},</code>, <code>type</code> field can contain possible variants:</p>
+<ul>
+<li><code>String</code> - to string without transformation,</li>
+<li><code>Number</code> -  parse string to float64 (JSON number) if error returns default value</li>
+<li><code>Boolean</code> - if string NOT empty map to true else false</li>
+</ul>
+<p>Note, use of regex <strong>named capture groups</strong> which is more readable by referring to parts of a regex match by descriptive names rather than numbers. For example, <code>(?P&lt;name&gt;...)</code> defines a named capture group where name is the identifier, and ... is the regex pattern for what you want to capture.</p>
+<p>When you use <code>(?x)</code> modifier in regexp, ensure that you escaped character <code>#</code> =&gt; <code>\#</code>.</p>
+<p>example of mapping <code>email_address</code> and <code>Url</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="err">...</span><span class="w"></span>
+<span class="w">  </span><span class="nt">&quot;claim_mapping&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;email&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;parser&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;regex&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Test::email_address&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;regex_expression&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;^(?P&lt;UID&gt;[^@]+)@(?P&lt;DOMAIN&gt;.+)$&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;UID&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;attr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;uid&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;String&quot;</span><span class="w"></span>
+<span class="w">      </span><span class="p">},</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;DOMAIN&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;attr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;domain&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;String&quot;</span><span class="w"></span>
+<span class="w">      </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="p">},</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;profile&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;parser&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;regex&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Test::Url&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;regex_expression&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;(?x) ^(?P&lt;SCHEME&gt;[a-zA-Z][a-zA-Z0-9+.-]*):\\/\\/(?P&lt;HOST&gt;[^\\/:\\#?]+)(?::(?&lt;PORT&gt;\\d+))?(?P&lt;PATH&gt;\\/[^?\\#]*)?(?:\\?(?P&lt;QUERY&gt;[^\\#]*))?(?:(?P&lt;FRAGMENT&gt;.*))?&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;SCHEME&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;attr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;scheme&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;String&quot;</span><span class="w"></span>
+<span class="w">      </span><span class="p">},</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;HOST&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;attr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;host&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;String&quot;</span><span class="w"></span>
+<span class="w">      </span><span class="p">},</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;PORT&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;attr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;port&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;String&quot;</span><span class="w"></span>
+<span class="w">      </span><span class="p">},</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;PATH&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;attr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;path&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;String&quot;</span><span class="w"></span>
+<span class="w">      </span><span class="p">},</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;QUERY&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;attr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;query&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;String&quot;</span><span class="w"></span>
+<span class="w">      </span><span class="p">},</span><span class="w"></span>
+<span class="w">      </span><span class="nt">&quot;FRAGMENT&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;attr&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;fragment&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;String&quot;</span><span class="w"></span>
+<span class="w">      </span><span class="p">}</span><span class="w"></span>
+<span class="w">    </span><span class="p">}</span><span class="w"></span>
+<span class="w">  </span><span class="p">}</span><span class="w"></span>
+<span class="err">...</span><span class="w"></span>
+</code></pre></div>
 <h2 id="example-policy-store">Example Policy store<a class="headerlink" href="#example-policy-store" title="Permanent link">#</a></h2>
 <p>Here is a non-normative example of a <code>cedarling_store.json</code> file:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
@@ -8970,7 +9072,7 @@ action &quot;Update&quot; appliesTo {
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-11-14T14:44:20+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-11-14</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-11-18T19:46:49+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-11-18</span>
       
         <br>
         Created:
