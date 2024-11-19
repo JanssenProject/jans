@@ -124,7 +124,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
                 else:
                     Config.backend_service = 'mysql.service'
 
-                result, conn = self.dbUtils.mysqlconnection(log=False)
+                result, conn = self.dbUtils.sqlconnection(log=False)
                 user_passwd_str = f"-u root -p'{Config.mysql_root_password}' " if base.os_type == 'suse' else ''
                 if not result:
                     sql_cmd_list = [
@@ -400,15 +400,7 @@ class RDBMInstaller(BaseInstaller, SetupUtils):
 
 
     def import_ldif(self):
-        ldif_files = []
-
-        if Config.mapping_locations['default'] == 'rdbm':
-            ldif_files += Config.couchbaseBucketDict['default']['ldif']
-
-        ldap_mappings = self.getMappingType('rdbm')
-
-        for group in ldap_mappings:
-            ldif_files +=  Config.couchbaseBucketDict[group]['ldif']
+        ldif_files = Config.ldif_files[:]
 
         if Config.get('ldif_metric') in ldif_files:
             ldif_files.remove(Config.ldif_metric)

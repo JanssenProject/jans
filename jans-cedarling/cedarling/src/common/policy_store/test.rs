@@ -5,12 +5,13 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
+use super::parse_option_string;
+use super::AgamaPolicyStore;
 use super::ParsePolicySetMessage;
 use super::PolicyStore;
-use super::AgamaPolicyStore;
-use crate::common::policy_store::parse_and_check_token_metadata;
 use crate::common::policy_store::parse_cedar_version;
 use base64::prelude::*;
+use serde::Deserialize;
 use serde_json::json;
 use std::str::FromStr;
 use test_utils::assert_eq;
@@ -37,6 +38,7 @@ fn test_policy_store_deserialization_success() {
     // represents the `policy_store.json`
     let policy_store_json = json!({
         "cedar_version": "v4.0.0",
+        "name": "Jans",
         "cedar_policies": {
             "840da5d85403f35ea76519ed1a18a33989f855bf1cf8": {
                 "description": "simple policy example",
@@ -75,6 +77,7 @@ fn test_base64_decoding_error_in_policy_store() {
     // represents the `policy_store.json`
     let policy_store_json = json!({
         "cedar_version": "v4.0.0",
+        "name": "Jans",
         "cedar_policies": {
             "840da5d85403f35ea76519ed1a18a33989f855bf1cf8": {
                 "description": "simple policy example",
@@ -124,6 +127,7 @@ fn test_policy_parsing_error_in_policy_store() {
     // represents the `policy_store.json`
     let policy_store_json = json!({
         "cedar_version": "v4.0.0",
+        "name": "Jans",
         "cedar_policies": {
             "840da5d85403f35ea76519ed1a18a33989f855bf1cf8": {
                 "description": "simple policy example",
@@ -191,51 +195,36 @@ fn test_invalid_version_format_with_v() {
     assert!(parse_cedar_version(serde_json::Value::String(invalid_version_with_v)).is_err());
 }
 
-/// Tests that an error is returned for multiple role mappings in token metadata.
 #[test]
-fn test_invalid_multiple_role_mappings_in_token_metadata() {
-    let invalid_token_metadata = json!([
-        { "type": "access_token", "user_id": "aud" },
-        { "type": "id_token", "user_id": "sub", "role_mapping": "role" },
-        { "type": "userinfo_token", "user_id": "email", "role_mapping": "role" }
-    ]);
+fn test_parse_option_string() {
+    #[derive(Deserialize)]
+    struct Data {
+        #[serde(deserialize_with = "parse_option_string", default)]
+        maybe_string: Option<String>,
+    }
 
-    let result = parse_and_check_token_metadata(invalid_token_metadata);
+    // If key can not be found in the JSON, we expect it to be
+    // deserialized into None.
+    let json = json!({});
+    let deserialized = serde_json::from_value::<Data>(json).expect("Should parse JSON");
+    assert_eq!(deserialized.maybe_string, None);
 
-    assert!(
-        matches!(result, Err(e) if e.to_string() == "there can only be one TokenMetadata with a role_mapping")
-    );
-}
+    // If the value is an empty String, we expect it to be
+    // deserialized into None.
 
-/// Tests successful parsing of role mappings in token metadata.
-#[test]
-fn test_successful_parsing_of_role_mappings() {
-    let valid_token_metadata = json!([
-        { "type": "Access_token", "user_id": "aud" },
-        { "type": "Id_token", "user_id": "sub", "role_mapping": "role" },
-        { "type": "userinfo_token", "user_id": "email" }
-    ]);
+    let json = json!({
+        "maybe_string": ""
+    });
+    let deserialized = serde_json::from_value::<Data>(json).expect("Should parse JSON");
+    assert_eq!(deserialized.maybe_string, None);
 
-    assert!(
-        parse_and_check_token_metadata(valid_token_metadata).is_ok(),
-        "expected successful parsing of role mappings"
-    );
-}
+    // If the value is a non-empty String, we expect it to be
 
-/// Tests unsuccessful parsing of role mappings in token metadata.
-#[test]
-fn test_error_on_invalid_token_type() {
-    let invalid_token_metadata = json!([
-        { "type": "Access", "user_id": "aud" },
-        { "type": "unknown_token", "user_id": "sub", "role_mapping": "role" },
-        { "type": "userinfo", "user_id": "email" }
-    ]);
+    // deserialized into Some(String).
+    let json = json!({
+        "maybe_string": "some_string"
 
-    let result =
-        parse_and_check_token_metadata(invalid_token_metadata).expect_err("should throw error");
-
-    assert_eq!(
-        result.to_string(),
-        "unknown variant `Access`, expected one of `access_token`, `id_token`, `userinfo_token`"
-    );
+    });
+    let deserialized = serde_json::from_value::<Data>(json).expect("Should parse JSON");
+    assert_eq!(deserialized.maybe_string, Some("some_string".to_string()));
 }

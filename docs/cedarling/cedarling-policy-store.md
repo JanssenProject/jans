@@ -14,7 +14,7 @@ The Cedarling Policy Store uses a JSON file named `cedarling_store.json` to stor
 
 1. **Cedar Schema**: The Cedar schema encoded in Base64.
 2. **Cedar Policies**: The Cedar policies encoded in Base64.
-3. **Identity Source**: Details about the trusted issuers (see [below](#identity-source-schema) for syntax).
+3. **Trusted Issuers**: Details about the trusted issuers (see [below](#trusted-issuers-schema) for syntax).
 
 **Note:** The `cedarling_store.json` file is only needed if the bootstrap properties: `CEDARLING_LOCK`; `CEDARLING_POLICY_STORE_URI`; and `CEDARLING_POLICY_STORE_ID` are not set to a local location. If you're fetching the policies remotely, you don't need a `cedarling_store.json` file.
 
@@ -31,7 +31,7 @@ The JSON Schema accepted by cedarling is defined as follows:
           "description": "Once upon a time there was a Policy, that lived in a Store.",
           "policies": { ... },
           "schema": { ... },
-          "identity_source": { ... }
+          "trusted_issuers": { ... }
       }
   }
 }
@@ -40,9 +40,10 @@ The JSON Schema accepted by cedarling is defined as follows:
 - **cedar_version** : (*String*) The version of [Cedar policy](https://docs.cedarpolicy.com/). The protocols of this version will be followed when processing Cedar schema and policies.
 - **policies** : (*Object*) Object containing one or more policy IDs as keys, with their corresponding objects as values. See: [policies schema](#cedar-policies-schema).
 - **schema** : (*String* | *Object*) The Cedar Schema. See [schema](#schema) below.
-- **identity_source** : (*Object of {unique_id => IdentitySource}(#trusted-issuer-schema)*) List of metadata for Identity Sources.
+- **trusted_issuers** : (*Object of {unique_id => IdentitySource}(#trusted-issuer-schema)*) List of metadata for Identity Sources.
 
 ### `schema`
+
 Either *String* or *Object*, where *Object* is preferred.
 
 Where *Object* - An object with `encoding`, `content_type` and `body` keys. For example:
@@ -54,7 +55,9 @@ Where *Object* - An object with `encoding`, `content_type` and `body` keys. For 
     "body": "namespace Jans {\ntype Url = {"host": String, "path": String, "protocol": String};..."
 }
 ```
+
   Where *String* - The schema in cedar-json format, encoded as Base64. For example:
+
 ``` json
 "schema": "cGVybWl0KAogICAgc..."
 ```
@@ -83,6 +86,7 @@ The `policies` field describes the Cedar policies that will be used in Cedarling
 - **policy_content** : (*String* | *Object*) The Cedar Policy. See [policy_content](#policy_content) below.
 
 ### `policy_content`
+
 Either *String* or *Object*, where *Object* is preferred.
 
 Where *Object* - An object with `encoding`, `content_type` and `body` keys. For example:
@@ -94,7 +98,9 @@ Where *Object* - An object with `encoding`, `content_type` and `body` keys. For 
     "body": "permit(\n    principal is Jans::User,\n    action in [Jans::Action::\"Update\"],\n    resource is Jans::Issue\n)when{\n    principal.country == resource.country\n};"
 }
 ```
+
   Where *String* - The policy in cedar format, encoded as Base64. For example:
+
 ``` json
 "policy_content": "cGVybWl0KAogICAgc..."
 ```
@@ -145,7 +151,7 @@ Here is a non-normative example of the `policies` field:
   }
 ```
 
-## Identity Source Schema
+## Trusted Issuers Schema
 
 This record contains the information needed to validate tokens from this issuer:
 
@@ -157,24 +163,12 @@ This record contains the information needed to validate tokens from this issuer:
       "openid_configuration_endpoint": "https://<trusted-issuer-hostname>/.well-known/openid-configuration",
       "access_tokens": {
         "trusted": true,
-        "principal_identifier": "",
-        "role_mapping": "",
+        "principal_identifier": "jti",
+        ...
       },
-      "id_tokens": {
-        "trusted": true,
-        "principal_identifier": "sub",
-        "role_mapping": "",
-      },
-      "userinfo_tokens": {
-        "trusted": true,
-        "principal_identifier": "",
-        "role_mapping": "role",
-      },
-      "tx_tokens": {
-        "trusted": true,
-        "principal_identifier": "",
-        "role_mapping": "",
-      },
+      "id_tokens": { ... },
+      "userinfo_tokens": { ... },
+      "tx_tokens": { ... },
     }
     ...
   }
@@ -185,21 +179,104 @@ This record contains the information needed to validate tokens from this issuer:
 - **openid_configuration_endpoint** : (*String*) The HTTPS URL for the OpenID Connect configuration endpoint (usually found at `/.well-known/openid-configuration`).
 - **identity_source** : (*Object*, *optional*) Metadata related to the tokens issued by this issuer.
 
+**Notes**:
+
+- The `access_tokens`, `id_tokens`, `userinfo_tokens`, and `tx_tokens` fields will follow the [Token Metadata Schema](#token-metadata-schema).
+- The `access_tokens` will contain a `trusted` and `principal_identifier` field in addition to the fields from the `Token Metadata Schema`.
+
 ### Token Metadata Schema
+
+The Token Entity Metadata Schema defines how tokens are mapped, parsed, and transformed within Cedarling. It allows you to specify how to extract user IDs, roles, and other claims from a token using customizable parsers.
 
 ```json
 {
-  "trusted": true|false
-  "principal_identifier": "some_user123",
-  "role_mapping": "role",
+  "user_id": "<field name in token (e.g., 'email', 'sub', 'uid', etc.) or '' if not used>",
+  "role_mapping": "<field for role assignment (e.g., 'role', 'memberOf', etc.) or '' if not used>",
+  "claim_mapping": {
+    "mapping_target": {
+      "parser": "<type of parser ('regex' or 'json')>",
+      "type": "<type identifier (e.g., 'Acme::Email')>",
+      "...": "Additional configurations specific to the parser"
+    },
+  },
 }
 ```
 
-- **trusted** : (Boolean) The type of token
-- **principal_id** : (String) The claim used to create the Cedar entity associated with this token.
-- **role_mapping** : (String, *optional*) The claim used to create a role for the token. The default value of `role_mapping` is `role`. The claim can be string or array of string.
+#### Role mapping
 
-**Note**: Only one token should include the `role_mapping` field in the list of `token_metadata`.
+- **role_mapping**: (String OR Array of String, *Optional*) Indicates which field in the token should be used for role-based access control. If not needed, set to an empty string (`""`).
+
+You can include a `role_mapping` in each token but only the first one that get parsed will be recognized by Cedarling. Cedarling parses the `role_mapping`s for each token in this order:
+
+1. `access_tokens`
+2. `id_tokens`
+3. `userinfo_tokens`
+4. `tx_tokens`
+
+#### Claim mapping
+
+- **claim_mapping:** Defines how to extract and transform specific claims from the token. Each claim can have its own parser (`regex` or `json`) and type (`Acme::email_address`, `Acme::Url`, etc.).
+
+In regex attribute mapping like `"UID": {"attr": "uid", "type":"String"},`, `type` field can contain possible variants:
+
+- `String` - to string without transformation,
+- `Number` -  parse string to float64 (JSON number) if error returns default value
+- `Boolean` - if string NOT empty map to true else false
+
+Note, use of regex **named capture groups** which is more readable by referring to parts of a regex match by descriptive names rather than numbers. For example, `(?P<name>...)` defines a named capture group where name is the identifier, and ... is the regex pattern for what you want to capture.
+
+When you use `(?x)` modifier in regexp, ensure that you escaped character `#` => `\#`.
+
+example of mapping `email_address` and `Url`:
+
+```json
+...
+  "claim_mapping": {
+    "email": {
+      "parser": "regex",
+      "type": "Test::email_address",
+      "regex_expression": "^(?P<UID>[^@]+)@(?P<DOMAIN>.+)$",
+      "UID": {
+        "attr": "uid",
+        "type": "String"
+      },
+      "DOMAIN": {
+        "attr": "domain",
+        "type": "String"
+      }
+    },
+    "profile": {
+      "parser": "regex",
+      "type": "Test::Url",
+      "regex_expression": "(?x) ^(?P<SCHEME>[a-zA-Z][a-zA-Z0-9+.-]*):\\/\\/(?P<HOST>[^\\/:\\#?]+)(?::(?<PORT>\\d+))?(?P<PATH>\\/[^?\\#]*)?(?:\\?(?P<QUERY>[^\\#]*))?(?:(?P<FRAGMENT>.*))?",
+      "SCHEME": {
+        "attr": "scheme",
+        "type": "String"
+      },
+      "HOST": {
+        "attr": "host",
+        "type": "String"
+      },
+      "PORT": {
+        "attr": "port",
+        "type": "String"
+      },
+      "PATH": {
+        "attr": "path",
+        "type": "String"
+      },
+      "QUERY": {
+        "attr": "query",
+        "type": "String"
+      },
+      "FRAGMENT": {
+        "attr": "fragment",
+        "type": "String"
+      }
+    }
+  }
+...
+```
 
 ## Example Policy store
 

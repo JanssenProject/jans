@@ -103,29 +103,53 @@ pub struct AuthorizationLogInfo {
     /// cedar-policy context
     pub context: serde_json::Value,
 
-    /// cedar-policy user/person principal
-    pub person_principal: String,
-    /// cedar-policy workload principal
-    pub workload_principal: String,
-    /// cedar-policy `role` principal
-    pub role_principal: Option<String>,
-
-    /// cedar-policy user/person diagnostics information
-    pub person_diagnostics: Diagnostics,
-    /// cedar-policy workload diagnostics information
-    pub workload_diagnostics: Diagnostics,
-    /// cedar-policy `role` diagnostics information
-    pub role_diagnostics: Option<Diagnostics>,
-
-    /// cedar-policy user/person decision
-    pub person_decision: Decision,
-    /// cedar-policy workload decision
-    pub workload_decision: Decision,
-    /// cedar-policy role decision
-    pub role_decision: Option<Decision>,
+    // We use actually same structures but with different unique field names.
+    // It allow deserialize json to flatten structure.
+    /// Person authorize info
+    #[serde(flatten)]
+    pub person_authorize_info: Option<PersonAuthorizeInfo>,
+    /// Workload authorize info
+    #[serde(flatten)]
+    pub workload_authorize_info: Option<WorkloadAuthorizeInfo>,
+    /// Role authorize info
+    /// can be many results because can be many roles.
+    pub role_authorize_info: Vec<RoleAuthorizeInfo>,
 
     /// is authorized
     pub authorized: bool,
+}
+
+/// Person authorize info
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+pub struct PersonAuthorizeInfo {
+    /// cedar-policy user/person principal
+    pub person_principal: String,
+    /// cedar-policy user/person diagnostics information
+    pub person_diagnostics: Diagnostics,
+    /// cedar-policy user/person decision
+    pub person_decision: Decision,
+}
+
+/// Workload authorize info
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+pub struct WorkloadAuthorizeInfo {
+    /// cedar-policy workload principal
+    pub workload_principal: String,
+    /// cedar-policy workload diagnostics information
+    pub workload_diagnostics: Diagnostics,
+    /// cedar-policy workload decision
+    pub workload_decision: Decision,
+}
+
+/// Workload authorize info
+#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
+pub struct RoleAuthorizeInfo {
+    /// cedar-policy `role` principal
+    pub role_principal: String,
+    /// cedar-policy `role` diagnostics information
+    pub role_diagnostics: Diagnostics,
+    /// cedar-policy role decision
+    pub role_decision: Decision,
 }
 
 /// Cedar-policy decision of the authorization

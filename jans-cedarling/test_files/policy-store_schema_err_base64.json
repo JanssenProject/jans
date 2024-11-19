@@ -30,7 +30,7 @@
                     "policy_content": "QGlkKCJmb3JiaWQiKQpmb3JiaWQKKAogcHJpbmNpcGFsIGluIEphbnM6OlJvbGU6OiJBZG1pbiIsCiBhY3Rpb24gaW4gW0phbnM6OkFjdGlvbjo6IlNlYXJjaCIsSmFuczo6QWN0aW9uOjoiVGFnIl0sCiByZXNvdXJjZSBpbiBKYW5zOjpBcHBsaWNhdGlvbjo6IkFkbWluUG9ydGFsIgopCndoZW4KewogSmFuczo6QWNjZXNzX3Rva2VuOjoieHh4Ii5leHA+MTIzICYmIEphbnM6OkFjY2Vzc190b2tlbjo6ImFhYSIuZXhwPDMyMSB8fCBKYW5zOjpBY2Nlc3NfdG9rZW46OiJhYWEiLmlhdD49MTExICAKfTs="
                 }
             },
-            "identity_source": {},
+            "trusted_issuers": {},
             "cedar_schema": "ewogICJKYW...gfQp9"
         }
     }

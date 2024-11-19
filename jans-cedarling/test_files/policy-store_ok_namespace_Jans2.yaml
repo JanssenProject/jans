@@ -1,0 +1,67 @@
+cedar_version: v4.0.0
+policy_stores:
+  a1bf93115de86de760ee0bea1d529b521489e5a11747:
+    cedar_version: v4.0.0
+    name: "Jans2"
+    description: A test policy store where everything is fine.
+    policies:
+      1:
+        description: simple policy example for principal workload, permit when workload org_id same with resource
+        creation_date: '2024-09-20T17:22:39.996050'
+        policy_content:
+          encoding: none
+          content_type: cedar
+          body: |-
+            permit(
+                principal is Jans2::Workload,
+                action in [Jans2::Action::"Update"],
+                resource is Jans2::Issue
+            )when{
+                principal.org_id == resource.org_id
+            };
+      2:
+        description: simple policy example for principal user, permit if user country same with the issue
+        creation_date: '2024-09-20T17:22:39.996050'
+        policy_content:
+          encoding: none
+          content_type: cedar
+          body: |-
+            permit(
+                principal is Jans2::User,
+                action in [Jans2::Action::"Update"],
+                resource is Jans2::Issue
+            )when{
+                principal.country == resource.country
+            };
+      3:
+        description: simple policy example for principal role, permit when Admin
+        creation_date: '2024-09-20T17:22:39.996050'
+        policy_content:
+          encoding: none
+          content_type: cedar
+          body: |-
+            permit(
+                principal == Jans2::Role::"Admin",
+                action in [Jans2::Action::"Update"],
+                resource is Jans2::Issue
+            );
+    schema:
+      encoding: none
+      content_type: cedar
+      body: |-
+        namespace Jans2 {
+          type Url = {"host": String, "path": String, "protocol": String};
+          entity TrustedIssuer = {"issuer_entity_id": Url};
+          entity Issue = {"country": String, "org_id": String};
+          entity id_token = {"aud": String,"iss": String, "sub": String};
+          entity Userinfo_token  = {"iss": String, "jti": String, "client_id": String,"role": Set<String>};
+          entity Role;
+          entity User in [Role] = {"country": String};
+          entity Workload = {"org_id": String};
+          entity Access_token = {"aud": String,"iss": String, "jti": String, "client_id": String,"org_id": String};
+          action "Update" appliesTo {
+            principal: [Workload, User, Role],
+            resource: [Issue],
+            context: {}
+          };
+        }

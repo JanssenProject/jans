@@ -8,6 +8,14 @@
 	<version>1.1.6-SNAPSHOT</version>
     <packaging>pom</packaging>
 
+    <distributionManagement>
+	  <repository>
+          <id>github</id>
+          <name>GitHub Packages</name>
+          <url>https://maven.pkg.github.com/JanssenProject/jans</url>
+      </repository>
+    </distributionManagement>
+
     <prerequisites>
         <maven>${maven.min-version}</maven>
     </prerequisites>
@@ -34,6 +42,11 @@
     </properties>
 
     <repositories>
+        <repository>
+           <id>github</id>
+           <name>GitHub Packages</name>
+           <url>https://maven.pkg.github.com/JanssenProject/jans</url>
+        </repository>
         <repository>
             <id>jans</id>
             <name>Janssen project repository</name>

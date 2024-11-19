@@ -10,15 +10,19 @@
     <name>jans link server</name>
     <url>http://maven.apache.org</url>
 
+	<distributionManagement>
+ 		<repository>
+ 		<id>github</id>
+ 		<name>Github Packages</name>
+ 		<url>https://maven.pkg.github.com/JanssenProject/jans</url>
+ 		</repository>
+   	</distributionManagement>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>io.jans</groupId>
-	    	<artifactId>jans-core-document-store</artifactId>
-        </dependency>
         <dependency>
             <groupId>io.jans</groupId>
             <artifactId>jans-link-model</artifactId>
@@ -30,23 +34,13 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+        	<groupId>io.jans</groupId>
+        	<artifactId>jans-core-service</artifactId>
+        </dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-        	<groupId>io.jans</groupId>
-        	<artifactId>jans-core-service</artifactId>
-        	<exclusions>
-        		<exclusion>
-        			<groupId>io.jans</groupId>
-        			<artifactId>jans-core-document-store</artifactId>
-        		</exclusion>
-                	<exclusion>
-                    		<groupId>io.jans</groupId>
-                    		<artifactId>jans-core-message</artifactId>
-                	</exclusion>
-        	</exclusions>
         </dependency>
     </dependencies>
     <build>

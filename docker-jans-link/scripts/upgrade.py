@@ -4,8 +4,6 @@ import os
 from collections import namedtuple
 
 from jans.pycloudlib import get_manager
-from jans.pycloudlib.persistence.couchbase import CouchbaseClient
-from jans.pycloudlib.persistence.couchbase import id_from_dn
 from jans.pycloudlib.persistence.sql import doc_id_from_dn
 from jans.pycloudlib.persistence.sql import SqlClient
 from jans.pycloudlib.persistence.utils import PersistenceMapper
@@ -38,59 +36,8 @@ class SQLBackend:
         return self.client.update(table_name, key, attrs), ""
 
 
-class CouchbaseBackend:
-    def __init__(self, manager):
-        self.manager = manager
-        self.client = CouchbaseClient(manager)
-        self.type = "couchbase"
-
-    def get_entry(self, key, filter_="", attrs=None, **kwargs):
-        bucket = kwargs.get("bucket")
-        req = self.client.exec_query(
-            f"SELECT META().id, {bucket}.* FROM {bucket} USE KEYS '{key}'"  # nosec: B608
-        )
-        if not req.ok:
-            return None
-
-        try:
-            _attrs = req.json()["results"][0]
-            id_ = _attrs.pop("id")
-            entry = Entry(id_, _attrs)
-        except IndexError:
-            entry = None
-        return entry
-
-    def modify_entry(self, key, attrs=None, **kwargs):
-        bucket = kwargs.get("bucket")
-        del_flag = kwargs.get("delete_attr", False)
-        attrs = attrs or {}
-
-        if del_flag:
-            kv = ",".join(attrs.keys())
-            mod_kv = f"UNSET {kv}"
-        else:
-            kv = ",".join([
-                "{}={}".format(k, json.dumps(v))
-                for k, v in attrs.items()
-            ])
-            mod_kv = f"SET {kv}"
-
-        query = f"UPDATE {bucket} USE KEYS '{key}' {mod_kv}"
-        req = self.client.exec_query(query)
-
-        if req.ok:
-            resp = req.json()
-            status = bool(resp["status"] == "success")
-            message = resp["status"]
-        else:
-            status = False
-            message = req.text or req.reason
-        return status, message
-
-
 BACKEND_CLASSES = {
     "sql": SQLBackend,
-    "couchbase": CouchbaseBackend,
 }
 
 
@@ -108,16 +55,8 @@ class Upgrade:
         self.enable_ext_script()
 
     def enable_ext_script(self):
-        kwargs = {}
-        script_id = "inum=13D3-E7AD,ou=scripts,o=jans"
-
-        if self.backend.type == "sql":
-            kwargs = {"table_name": "jansCustomScr"}
-            script_id = doc_id_from_dn(script_id)
-
-        else: # likely couchbase
-            kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
-            script_id = id_from_dn(script_id)
+        kwargs = {"table_name": "jansCustomScr"}
+        script_id = doc_id_from_dn("inum=13D3-E7AD,ou=scripts,o=jans")
 
         # toggle cache-refresh script
         entry = self.backend.get_entry(script_id, **kwargs)

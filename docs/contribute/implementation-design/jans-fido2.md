@@ -13,7 +13,7 @@ FIDO2 as an open standard for authentication is based on public key cryptography
 Janssen's FIDO2 server - a component inside the Janssen project enables users of RPs to enroll and authenticate themselves using U2F keys, FIDO2 keys or inbuilt platform authenticator.
 1. The FIDO2 server uses REST endpoints to communicate with an RP via an https connection.
 2. The FIDO2 server implements the [FIDO Metadata Service (MDS3)](https://fidoalliance.org/metadata/metadata-service-overview/) defined by FIDO Alliance.
-3. The FIDO2 server stores user data into the same persistence store as the Jans-Auth server. (PostgreSQL, MYSQL, Couchbase etc.)
+3. The FIDO2 server stores user data into the same persistence store as the Jans-Auth server. (PostgreSQL, MYSQL etc.)
 
 ### Components of the FIDO2 ecosystem in Janssen
 

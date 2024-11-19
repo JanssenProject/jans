@@ -62,7 +62,7 @@ Note that each key in configmaps is based on the schema below:
     "type": "string",
     "default": "[]",
     "description": "List of optional scopes of components as string",
-    "example": "[\"couchbase\", \"redis\", \"sql\"]"
+    "example": "[\"redis\", \"sql\"]"
   },
   "auth_sig_keys": {
     "type": "string",
@@ -239,22 +239,6 @@ Note that each key in secrets is based on the schema below:
     "type": "string",
     "default": "",
     "description": "Password for SQL (RDBMS) user"
-  },
-  "couchbase_password": {
-    "type": "string",
-    "default": "",
-    "description": "Password for Couchbase user"
-  },
-  "couchbase_superuser_password": {
-    "type": "string",
-    "default": "",
-    "description": "Password for Couchbase superuser"
-  },
-  "couchbase_cert": {
-    "type": "string",
-    "default": "",
-    "description": "Couchbase certificate",
-    "example": "-----BEGIN CERTIFICATE-----\nMIIDITCCAgmgAwIBAgIIF/+iXc7yIcVvg==\n-----END CERTIFICATE-----\n"
   },
   "encoded_salt": {
     "type": "string",
@@ -568,7 +552,7 @@ stringData:
         "orgName": "Janssen",
         "auth_sig_keys": "RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512",
         "auth_enc_keys": "RSA1_5 RSA-OAEP ECDH-ES",
-        "optional_scopes": "[\"couchbase\", \"redis\", \"sql\"]",
+        "optional_scopes": "[\"redis\", \"sql\"]",
         "init_keys_exp": 48
       },
       "_secret": {
@@ -580,16 +564,6 @@ stringData:
 ```
 
 Note that `_secret` may contain other keys depending on persistence, secrets/configmaps backend, etc. See examples below:
-
-1.  Persistence is set to `couchbase`:
-
-    ```json
-    "_secret": {
-        "couchbase_password": "Test1234#",
-        "couchbase_superuser_password": "Test1234#",
-        "couchbase_cert": "-----BEGIN CERTIFICATE-----\nMIIDNjCCAh6g\n-----END CERTIFICATE-----\n"
-    }
-    ```
 
 1.  Secrets/configmaps backend is set to `google`:
 

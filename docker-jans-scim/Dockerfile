@@ -13,7 +13,7 @@ RUN apk update \
 # Jetty
 # =====
 
-ARG JETTY_VERSION=11.0.20
+ARG JETTY_VERSION=11.0.24
 ARG JETTY_HOME=/opt/jetty
 ARG JETTY_BASE=/opt/jans/jetty
 ARG JETTY_USER_HOME_LIB=/home/jetty/lib
@@ -41,7 +41,7 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # ====
 
 ENV CN_VERSION=1.1.6-SNAPSHOT
-ENV CN_BUILD_DATE='2024-10-27 08:48'
+ENV CN_BUILD_DATE='2024-11-15 09:15'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-scim-server/${CN_VERSION}/jans-scim-server-${CN_VERSION}.war
 
@@ -60,7 +60,7 @@ RUN mkdir -p ${JETTY_BASE}/jans-scim/webapps \
 # Assets sync
 # ===========
 
-ENV JANS_SOURCE_VERSION=6e00e723a99d700a4f82713b0c25b2d6e3ef5775
+ENV JANS_SOURCE_VERSION=871c36da8a2550ee2febd7c0d72c521898b226c3
 ARG JANS_SETUP_DIR=jans-linux-setup/jans_setup
 ARG JANS_SCIM_RESOURCE_DIR=jans-scim/server/src/main/resources
 
@@ -169,18 +169,7 @@ ENV CN_SECRET_ADAPTER=vault \
 # ===============
 
 ENV CN_PERSISTENCE_TYPE=sql \
-    CN_HYBRID_MAPPING="{}" \
-    CN_COUCHBASE_URL=localhost \
-    CN_COUCHBASE_USER=admin \
-    CN_COUCHBASE_CERT_FILE=/etc/certs/couchbase.crt \
-    CN_COUCHBASE_PASSWORD_FILE=/etc/jans/conf/couchbase_password \
-    CN_COUCHBASE_CONN_TIMEOUT=10000 \
-    CN_COUCHBASE_CONN_MAX_WAIT=20000 \
-    CN_COUCHBASE_SCAN_CONSISTENCY=not_bounded \
-    CN_COUCHBASE_BUCKET_PREFIX=jans \
-    CN_COUCHBASE_TRUSTSTORE_ENABLE=true \
-    CN_COUCHBASE_KEEPALIVE_INTERVAL=30000 \
-    CN_COUCHBASE_KEEPALIVE_TIMEOUT=2500
+    CN_HYBRID_MAPPING="{}"
 
 # ===========
 # Generic ENV
@@ -219,7 +208,7 @@ LABEL org.opencontainers.image.url="ghcr.io/janssenproject/jans/scim" \
 RUN mkdir -p /etc/certs \
     ${JETTY_BASE}/jans-scim/logs \
     ${JETTY_BASE}/jans-scim/custom/libs \
-    ${JETTY_BASE}/common/libs/couchbase \
+    ${JETTY_BASE}/common/libs \
     ${JETTY_HOME}/temp \
     /usr/share/java
 

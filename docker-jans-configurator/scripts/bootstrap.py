@@ -15,8 +15,6 @@ from cryptography.x509.oid import NameOID
 
 from jans.pycloudlib import get_manager
 from jans.pycloudlib import wait_for
-from jans.pycloudlib.persistence.couchbase import sync_couchbase_password
-from jans.pycloudlib.persistence.couchbase import sync_couchbase_superuser_password
 from jans.pycloudlib.persistence.sql import sync_sql_password
 from jans.pycloudlib.persistence.utils import PersistenceMapper
 from jans.pycloudlib.utils import get_random_chars
@@ -331,13 +329,6 @@ class CtxGenerator:
         with open(ssl_key) as f:
             self.set_secret("ssl_key", f.read)
 
-    def transform_couchbase_ctx(self):
-        # TODO: move this to persistence-loader?
-        self.set_config("couchbaseTrustStoreFn", "/etc/certs/couchbase.pkcs12")
-        self.set_secret("couchbase_shib_user_password", get_random_chars)
-        self.set_secret("couchbase_password", self.secret_params.get("couchbase_password", ""))
-        self.set_secret("couchbase_superuser_password", self.secret_params.get("couchbase_superuser_password", ""))
-
     def transform_sql_ctx(self):
         self.set_secret("sql_password", self.secret_params.get("sql_password", ""))
 
@@ -362,9 +353,6 @@ class CtxGenerator:
 
         if "redis" in opt_scopes:
             self.transform_redis_ctx()
-
-        if "couchbase" in opt_scopes:
-            self.transform_couchbase_ctx()
 
         if "sql" in opt_scopes:
             self.transform_sql_ctx()
@@ -527,9 +515,6 @@ def load(configuration_file, dump_file):
     match backend_type:
         case "sql":
             sync_sql_password(manager)
-        case "couchbase":
-            sync_couchbase_superuser_password(manager)
-            sync_couchbase_password(manager)
 
     # check whether config and secret in backend have been initialized
     should_skip = as_boolean(os.environ.get("CN_CONFIGURATOR_SKIP_INITIALIZED", False))
@@ -574,9 +559,6 @@ def dump(dump_file):
     match backend_type:
         case "sql":
             sync_sql_password(manager)
-        case "couchbase":
-            sync_couchbase_superuser_password(manager)
-            sync_couchbase_password(manager)
 
     # dump all configuration from remote backend to file
     dump_to_file(manager, dump_file)

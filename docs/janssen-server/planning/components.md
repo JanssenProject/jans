@@ -18,9 +18,8 @@ assertions. This service must be Internet-facing.
 1. **Database**: Like most IAM platforms, Janssen requires some kind of
 persistence service to store configuration and other entity data (client,
 person, scope, attribute, FIDO device, etc.) As different databases are
-good for different deployments, Janssen supports a number of options:
-MySQL, Postgres, Couchbase, and Amazon Aurora. Other
-databases may be added in the future.
+good for different deployments, Janssen supports MySQL and Postgres.
+
 
 1. **Cache**: Getting data from a disk is still the slowest part of any
 web platform. If you want higher transaction speeds, one strategy is to
@@ -69,7 +68,7 @@ projects. You will most likely need this project when you build other Janssen
 components.
 
 1. **Jans ORM**: This is the library for persistence and caching implementations
-in Janssen. Currently, RDBMS and Couchbase are supported. 
+in Janssen. Currently,only RDBMS is supported. 
 
 1. **Agama**: The Agama module offers an alternative way to build authentication
 flows in Janssen Server. With Agama, flows are coded in a DSL (domain specific

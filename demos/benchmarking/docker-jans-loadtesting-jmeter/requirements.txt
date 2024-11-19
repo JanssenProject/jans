@@ -3,7 +3,3 @@ joblib
 pygtail
 psycopg2-binary
 PyMySQL
-# ===============
-# Install Couchbase Client
-# ===============
-couchbase
