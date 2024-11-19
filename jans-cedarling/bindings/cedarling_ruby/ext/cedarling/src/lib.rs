@@ -94,9 +94,7 @@ fn policy_store_source_of_hash(ruby : &magnus::Ruby, policy_store_value : Option
 */
 fn instantiate_engine(ruby : &magnus::Ruby, args: &[magnus::Value])
 -> Result<Engine,magnus::Error> {
-    use magnus::{
-        scan_args::{get_kwargs, scan_args},
-    };
+    use magnus::scan_args::{get_kwargs, scan_args};
 
     let args = scan_args::<(), (), (), (), _, ()>(args)?;
     let kwargs = get_kwargs::<_, (), (Option<magnus::Value>, Option<String>, Option<u64>, Option<Vec<String>>), ()>(
@@ -147,35 +145,105 @@ fn instantiate_engine(ruby : &magnus::Ruby, args: &[magnus::Value])
     }
 }
 
-impl Engine {
-    pub fn authorize( &self, access_token : String, id_token : String, userinfo_token : String )
-    -> Result<String, magnus::Error> {
-        let Engine(cedarling) = self;
-        let result = cedarling.authorize(cedarling::Request {
-            access_token,
-            id_token,
-            userinfo_token,
-            action: "Jans::Action::\"Update\"".to_string(),
-            context: serde_json::json!({}),
-            resource: cedarling::ResourceData {
-                id: "random_id".to_string(),
-                resource_type: "Jans::Issue".to_string(),
-                payload: std::collections::HashMap::from_iter([
-                    (
-                        "org_id".to_string(),
-                        serde_json::Value::String("some_long_id".to_string()),
-                    ),
-                    (
-                        "country".to_string(),
-                        serde_json::Value::String("US".to_string()),
-                    ),
-                ]),
-            },
-        });
+/// Wrapper to facilitate working with the `cedarling::Request` object
+/// but without unnecessarily attaching ruby-specific functionality to it.
+#[magnus::wrap(class="AuthorizeRequest")]
+#[derive(serde::Deserialize, Debug, PartialEq)]
+struct AuthorizeRequest(cedarling::Request);
 
-        match result {
-            Ok(result) => Ok(format!("is allowed: {}", result.is_allowed())),
-            Err(e) => Ok(format!("Error while authorizing: {}\n {:?}\n\n", e, e).into()),
+impl std::fmt::Display for AuthorizeRequest {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f,"{:?}", self.0)
+    }
+}
+
+/// Wrapper for `cedarling::AuthorizeResult` for ruby.
+#[magnus::wrap(class="AuthorizeResult")]
+struct AuthorizeResult(cedarling::AuthorizeResult);
+
+impl std::fmt::Display for AuthorizeResult {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f,"workload: {:#?}\nperson: {:#?}\nrole: {:#?}", self.0.workload, self.0.person, self.0.role)
+    }
+}
+
+/// Wrapper for to facilitate working with `cedar_policy::Response`.
+/// Primarily used to provide diagnostics.
+struct Response<'a>(&'a cedar_policy::Response);
+
+impl serde::Serialize for Response<'_> {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where S: serde::Serializer {
+        use serde::ser::SerializeMap;
+
+        let mut map = serializer.serialize_map(Some(3))?;
+
+        map.serialize_entry("allow", &(self.0.decision() == cedar_policy::Decision::Allow))?;
+
+        let diags = self.0.diagnostics();
+        let policy_ids = diags.reason().map(|d| d.to_string()).collect::<Vec<_>>();
+        map.serialize_entry("policy_ids", &policy_ids)?;
+
+        let errors = diags.errors().map(|d| d.to_string()).collect::<Vec<_>>();
+        if !errors.is_empty() {map.serialize_entry("errors", &errors)?;}
+
+        map.end()
+    }
+}
+
+impl serde::Serialize for AuthorizeResult {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where S: serde::Serializer {
+        use serde::ser::SerializeMap;
+
+        let mut map = serializer.serialize_map(Some(3))?;
+
+        if let Some(response) = &self.0.workload {
+            map.serialize_entry("workload", &(Response(&response)))?;
+        }
+
+        if let Some(response) = &self.0.person {
+            map.serialize_entry("person", &(Response(&response)))?;
+        }
+
+        if let Some(response) = &self.0.role {
+            map.serialize_entry("role", &(Response(&response)))?;
+        }
+
+        map.end()
+    }
+}
+
+impl AuthorizeResult {
+    fn to_h(&self) -> Result<magnus::Value, magnus::Error> {
+        Ok(serde_magnus::serialize(&self)?)
+    }
+}
+
+/**
+    Perform an authorize request.
+
+    Ruby example:
+
+    cedarling = Cedarling.new(...)
+    cedarling.authorize(
+        access_token:,
+        id_token:,
+        userinfo_token:,
+        action: %q(Jans::Action::"Update"),
+        resource: {type: 'Jans::Issue', id: 'random_id', org_id: 'some_long_id', country: 'US'},
+        context: {}
+    )
+*/
+fn authorize(ruby : &magnus::Ruby, engine : &Engine, request : magnus::Value)
+-> Result<AuthorizeResult, magnus::Error> {
+    let Engine(cedarling) = engine;
+    let AuthorizeRequest(request) = serde_magnus::deserialize(request)?;
+    match cedarling.authorize(request) {
+        Ok(cedarling_auth_result) => Ok(AuthorizeResult(cedarling_auth_result)),
+        Err(err) => {
+            let msg = format!("Error while authorizing: {}\n {:#?}\n\n", err, err);
+            Err(magnus::Error::new(ruby.exception_runtime_error(), msg))
         }
     }
 }
@@ -183,7 +251,7 @@ impl Engine {
 /// Create ruby classes and their methods.
 #[magnus::init]
 fn init(ruby: &magnus::Ruby) -> Result<(), magnus::Error> {
-    use magnus::{function, prelude::*};
+    use magnus::{function, method, prelude::*};
 
     let module = ruby.define_module("Cedarling")?;
     module.define_singleton_method("version_core", function!(version_core, 0))?;
@@ -191,7 +259,18 @@ fn init(ruby: &magnus::Ruby) -> Result<(), magnus::Error> {
     module.const_set("MAX_LOG_TTL", MAX_LOG_TTL)?;
 
     // definition of the Engine class, which is a facade for cedarling::Cedarling
-    let _class = ruby.define_class("Engine", ruby.class_object())?;
+    let class = ruby.define_class("Engine", ruby.class_object())?;
+    class.define_method("authorize", method!(authorize, 1))?;
+
+    let authorize_request_class = ruby.define_class("AuthorizeRequest", ruby.class_object())?;
+    authorize_request_class.define_method("to_s", method!(AuthorizeRequest::to_string, 0))?;
+    authorize_request_class.define_method("inspect", method!(AuthorizeRequest::to_string, 0))?;
+
+    let authorize_result_class = ruby.define_class("AuthorizeResult", ruby.class_object())?;
+    authorize_result_class.define_method("allowed?", method!(|inst : &AuthorizeResult| inst.0.is_allowed(), 0))?;
+    authorize_result_class.define_method("to_s", method!(AuthorizeResult::to_string, 0))?;
+    authorize_result_class.define_method("inspect", method!(|inst : &AuthorizeResult| format!("{}", inst), 0))?;
+    authorize_result_class.define_method("to_h", method!(AuthorizeResult::to_h, 0))?;
 
     Ok(())
 }

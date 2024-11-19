@@ -10,7 +10,7 @@ use std::{collections::HashMap, str::FromStr};
 use cedar_policy::{EntityId, EntityTypeName, EntityUid, ParseErrors};
 
 /// Box to store authorization data
-#[derive(Debug, Clone, serde::Deserialize)]
+#[derive(Debug, Clone, serde::Deserialize, PartialEq)]
 pub struct Request {
     /// Access token raw value
     pub access_token: String,
@@ -28,7 +28,7 @@ pub struct Request {
 
 /// Cedar policy resource data
 /// fields represent EntityUid
-#[derive(serde::Deserialize, Debug, Clone)]
+#[derive(serde::Deserialize, Debug, Clone, PartialEq)]
 pub struct ResourceData {
     /// entity type name
     #[serde(rename = "type")]

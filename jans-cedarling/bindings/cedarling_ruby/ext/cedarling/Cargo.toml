@@ -11,6 +11,7 @@ crate-type = ["cdylib"]
 cedarling = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
+cedar-policy = { workspace = true }
 magnus = { version = "0.7.1" }
 # this depends on magnus-0.6.2, and we want magnus-0.7.1
 # serde_magnus = "0.8.1"
