@@ -153,7 +153,7 @@ RSpec.describe Cedarling do
       JWT.encode(userinfo_payload, nil, 'HS256') # nil means no password
     end
 
-    let :request_no_tokens do
+    let :auth_request do
       {
         access_token:,
         id_token:,
@@ -164,20 +164,12 @@ RSpec.describe Cedarling do
       }
     end
 
-    let :request_with_tokens do
-      request = request_no_tokens.dup
-      request[:access_token] = access_token
-      request[:userinfo_token] = userinfo_token
-      request[:id_token] = id_token
-      request
-    end
-
     it 'fails with invalid token encoding and without validation' do
       engine = Cedarling::new policy_store: {yaml: policy_store_yaml}
       broken_access_token = "borked" + access_token
-      request_no_tokens[:access_token] = broken_access_token
+      auth_request[:access_token] = broken_access_token
       expect do
-        engine.authorize(request_no_tokens)
+        engine.authorize(auth_request)
       end.to raise_error(RuntimeError, /Error parsing the JWT: Base64 error: Invalid last symbol/)
     end
 
@@ -185,9 +177,9 @@ RSpec.describe Cedarling do
       engine = Cedarling::new policy_store: {yaml: policy_store_yaml}
       access_token_payload[:org_id] = 'incorrect_id'
       modified_access_token = JWT.encode(access_token_payload, nil, 'HS256')
-      request_with_tokens[:access_token] = modified_access_token
+      auth_request[:access_token] = modified_access_token
 
-      rsp = engine.authorize(request_with_tokens)
+      rsp = engine.authorize(auth_request)
       rsp.should_not be_allowed
 
       rsp.to_h.should == {
@@ -199,13 +191,13 @@ RSpec.describe Cedarling do
     describe 'allowed with no validation' do
       it 'no tokens' do
         engine = Cedarling::new policy_store: {yaml: policy_store_yaml}
-        rsp = engine.authorize(request_no_tokens)
+        rsp = engine.authorize(auth_request)
         rsp.should be_allowed
       end
 
       it 'to_h shows policies and errors' do
         engine = Cedarling::new policy_store: {yaml: policy_store_yaml}
-        rsp = engine.authorize(request_no_tokens)
+        rsp = engine.authorize(auth_request)
         rsp.to_h.should == {
           "workload" => {"allow"=>true, "policy_ids"=>["840da5d85403f35ea76519ed1a18a33989f855bf1cf8"]},
           "person"   => {"allow"=>true, "policy_ids"=>["444da5d85403f35ea76519ed1a18a33989f855bf1cf8"]},
@@ -217,7 +209,7 @@ RSpec.describe Cedarling do
       # requires Cedarling to be set up with the relevant keys referenced by kid in key header
       engine = Cedarling::new signature_algorithms: %w[HS256 RS256], policy_store: {yaml: policy_store_yaml}
       require 'pry'; binding.pry
-      rsp = engine.authorize(request_with_tokens)
+      rsp = engine.authorize(auth_request)
       rsp.should be_allowed
     end
   end
