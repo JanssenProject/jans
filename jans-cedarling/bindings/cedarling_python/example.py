@@ -21,7 +21,7 @@ log_config = StdOutLogConfig()
 # Read policy store from file
 policy_store_location = os.getenv("CEDARLING_LOCAL_POLICY_STORE", None)
 if policy_store_location is None:
-    print("Policy store location not provided, use 'CEDARLING_LOCAL_POLICY_STORE' enviroment variable")
+    print("Policy store location not provided, use 'CEDARLING_LOCAL_POLICY_STORE' environment variable")
     print(f"Used default policy store path: {DEFAULT_POLICY_STORE_PATH}\n")
     policy_store_location = DEFAULT_POLICY_STORE_PATH
 with open(policy_store_location, "r") as f:

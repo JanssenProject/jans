@@ -15,7 +15,7 @@ In this example, we will show an example Python script that calls the `cedarling
 ## Output 
 ```
 (venv) $ python example.py
-Policy store location not provided, use 'CEDARLING_LOCAL_POLICY_STORE' enviroment variable
+Policy store location not provided, use 'CEDARLING_LOCAL_POLICY_STORE' environment variable
 Used default policy store path: example_files/policy-store.json
 
 {"id":"0193414e-9672-786a-986c-57f48d41c4e4","time":1731967489,"log_kind":"System","pdp_id":"c0ec33ff-9482-4bdc-83f6-2925a41a3280","msg":"configuration parsed successfully"}
