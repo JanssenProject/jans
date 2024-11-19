@@ -18,11 +18,24 @@ If bundler is not being used to manage dependencies, install the gem by executin
 
 ## Usage
 
-TODO: Write usage instructions here, after there is some actual code to use.
+```
+cdl = Cedarling::new policy_store: {yaml: File.read('../../test_files/policy-store_ok.yaml')}
+
+auth_request = {
+  access_token: your_access_token_here,
+  id_token: your_id_token_here,
+  userinfo_token: your_userinfo_token_here,
+  action: %q(Jans::Action::"Update"),
+  resource: {type: 'Jans::Issue', id: 'random_id', org_id: 'some_long_id', country: 'US'},
+  context: {}
+}
+
+cdl.authorize auth_request
+```
 
 ## Development
 
-Install ruby >= 3.3.0 using your package manager, or from source, or whatever you want.
+Install ruby >= 3.3.0 using your package manager, or from rbenv, or from rvm, or whatever you want.
 
 run `bin/setup` to install dependencies
 
@@ -30,15 +43,30 @@ run `rake spec` to run the tests
 
 You can also run `bin/console` for an interactive prompt that will allow you to experiment. Here you can say something like
 
-  Cedarling::hello "there"
+```
+# the gem version
+Cedarling::VERSION 
+
+# the core cedarling
+Cedarling.version_core
+
+cdl = Cedarling::new policy_store: {yaml: File.read('../../test_files/policy-store_ok.yaml')}
+cdl.authorize(...)
+```
 
 ### development loop
 
-`cargo build -p cedarling_ruby` will build your latest changes.
+The simplest is to just say `rake`, which will build the necessary rust code, and run the ruby specs.
 
-So you can say `cargo build -p cedarling_ruby && rake spec`
+Effectively, it does `cargo build -p cedarling_ruby` and then `rspec`.
+
+You could also say, for example: `cargo build -p cedarling_ruby && rspec`.
+
+Or even just `rspec` if you want a really tight loop on the specs. Of course that won't build the rust code.
 
 ## Local Installation
+
+NOTE not working yet.
 
 You won't want to do this, unless it fails to install via `bundler` or `Gemfile`
 
@@ -50,6 +78,4 @@ Bug reports and pull requests are welcome on GitHub at https://github.com/gluu/c
 
 ## License
 
-TODO: check on gluu licencing policy and update if necessary.
-
-The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
+The gem is available as open source under the terms of the Apache License. See the [copy in jans project](https://github.com/JanssenProject/jans/blob/main/LICENSE).
