@@ -13,6 +13,7 @@ public class LicenseResponse {
     private String customerEmail;
     private String customerFirstName;
     private String customerLastName;
+    private boolean licenseExpired;
 
     public boolean isLicenseEnabled() {
         return licenseEnabled;
@@ -110,6 +111,14 @@ public class LicenseResponse {
         this.customerLastName = customerLastName;
     }
 
+    public boolean getLicenseExpired() {
+        return licenseExpired;
+    }
+
+    public void setLicenseExpired(boolean licenseExpired) {
+        this.licenseExpired = licenseExpired;
+    }
+
     @Override
     public String toString() {
         return "LicenseResponse{" +
@@ -125,6 +134,7 @@ public class LicenseResponse {
                 ", customerEmail='" + customerEmail + '\'' +
                 ", customerFirstName='" + customerFirstName + '\'' +
                 ", customerLastName='" + customerLastName + '\'' +
+                ", licenseExpired='" + licenseExpired + '\'' +
                 '}';
     }
 }
