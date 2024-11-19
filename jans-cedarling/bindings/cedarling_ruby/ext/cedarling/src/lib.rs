@@ -5,8 +5,13 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
+extern crate cedarling;
+
 #[magnus::init]
 fn init(ruby: &magnus::Ruby) -> Result<(), magnus::Error> {
-    let _module = ruby.define_module("Cedarling")?;
+    use magnus::{function, prelude::*};
+
+    let module = ruby.define_module("Cedarling")?;
+
     Ok(())
 }
