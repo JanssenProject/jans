@@ -15,7 +15,7 @@
         "spontaneousScopes": []
     },
     "claimRedirectURI": [
-        "https://gluu.gasmyr.com/jans-auth/restv1/uma/gather_claims"
+        "https://gluu.server.com/jans-auth/restv1/uma/gather_claims"
     ],
     "deletable": false,
     "disabled": false,
@@ -29,15 +29,15 @@
     "idTokenSignedResponseAlg": "HS256",
     "logoutSessionRequired": true,
     "logoutUri": [
-        "https://gluu.gasmyr.com/identity/ssologout.htm"
+        "https://gluu.server.com/identity/ssologout.htm"
     ],
     "jansAppTyp": "WEB",
     "jansPersistClntAuthzs": false,
     "jansPostLogoutRedirectURI": [
-        "https://gluu.gasmyr.com/identity/finishlogout.htm"
+        "https://gluu.server.com/identity/finishlogout.htm"
     ],
     "jansRedirectURI": [
-        "https://gluu.gasmyr.com/identity/uri1"
+        "https://gluu.server.com/identity/uri1"
     ],
     "jansScope": [
         "inum=F0C4,ou=scopes,o=gluu"

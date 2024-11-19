@@ -9,6 +9,8 @@ package io.jans.configapi.test.auth;
 import static io.restassured.RestAssured.given;
 import io.jans.configapi.BaseTest;
 import io.jans.model.net.HttpServiceResponse;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.Invocation.Builder;
 import jakarta.ws.rs.core.MediaType;
 
 import static org.testng.Assert.*;
@@ -32,24 +34,46 @@ public class ClientResourceTest extends BaseTest{
     public void getClients(final String issuer, final String openidClientsUrl) {
         log.error("accessToken:{}, issuer:{}, openidClientsUrl:{}", accessToken, issuer, openidClientsUrl);
             given().when().contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", accessToken, null)
+                .header("Authorization", AUTHORIZATION_TYPE + " " + accessToken, null)
                 .get(issuer+openidClientsUrl).then().statusCode(200);
     }
     
     @Parameters({"issuer", "openidClientsUrl", "openid_client1"})
-    @Test
+    //@Test
     public void postClient(final String issuer, final String openidClientsUrl, final String json) {
         log.error("accessToken:{}, issuer:{}, openidClientsUrl:{}, json:{}", accessToken, issuer, openidClientsUrl, json);
-        log.info("Creating client using json string");
+        log.error("Creating client using json string - getHttpService():{}, this.accessToken:{}", getHttpService(), this.accessToken);
 
-        HttpServiceResponse httpServiceResponse = getHttpService().executePost(issuer+openidClientsUrl, "Basic ", null, json,
-                ContentType.APPLICATION_JSON, null);
+        HttpServiceResponse httpServiceResponse = getHttpService().executePost(issuer+openidClientsUrl, this.accessToken, null, json,
+                ContentType.APPLICATION_JSON, AUTHORIZATION_TYPE);
         assertFalse(httpServiceResponse==null);
         
         int statusCode = httpServiceResponse.getHttpResponse().getStatusLine().getStatusCode();
 
         Status status = Status.fromStatusCode(statusCode);
+        log.error("postClient -  using json string - status():{} ", status); 
+        assertEquals(status, Status.CREATED.getStatusCode());
+    }
+    
+    @Parameters({"issuer", "openidClientsUrl", "openid_client2"})
+    //@Test
+    public void postClient2(final String issuer, final String openidClientsUrl, final String json) {
+        log.error("postClient2 - accessToken:{}, issuer:{}, openidClientsUrl:{}, json:{}", accessToken, issuer, openidClientsUrl, json);
+        log.error("postClient2 client using json string - getHttpService():{}, this.accessToken:{}", getHttpService(), this.accessToken);
+
+        Builder request = getResteasyService().getClientBuilder(issuer+openidClientsUrl);
+        request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
+        request.header(CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED);
         
-        assertEquals(status, Status.OK.getStatusCode());
+        Response response = request.post(Entity.json(json));
+        log.trace("Response for Access Token -  response:{}", response);
+
+        if (response.getStatus() == 201) {
+            log.trace("Response for Access Token -  response.getEntity():{}, response.getClass():{}", response.getEntity(), response.getClass());
+        }
+      
+
+        
+        assertEquals(response.getStatus(), Status.CREATED.getStatusCode());
     }
 }

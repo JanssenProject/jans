@@ -147,7 +147,7 @@ public class HttpService implements Serializable {
                 .setConnectionManager(connectionManager).build();
     }
 
-    public HttpServiceResponse executePost(HttpClient httpClient, String uri, String authData,
+    public HttpServiceResponse executePost(HttpClient httpClient, String uri, String authCode,
             Map<String, String> headers, String postData, ContentType contentType, String authType) {
 
         HttpPost httpPost = new HttpPost(uri);
@@ -157,8 +157,8 @@ public class HttpService implements Serializable {
         } else {
             authType = authType + " ";
         }
-        if (StringHelper.isNotEmpty(authData)) {
-            httpPost.setHeader("Authorization", authType + authData);
+        if (StringHelper.isNotEmpty(authCode)) {
+            httpPost.setHeader("Authorization", authType + authCode);
         }
         
         if(contentType==null) {
@@ -185,19 +185,19 @@ public class HttpService implements Serializable {
         return null;
     }
 
-    public HttpServiceResponse executePost(HttpClient httpClient, String uri, String authData,
+    public HttpServiceResponse executePost(HttpClient httpClient, String uri, String authCode,
             Map<String, String> headers, String postData) {
-        return executePost(httpClient, uri, authData, headers, postData, null, null);
+        return executePost(httpClient, uri, authCode, headers, postData, null, null);
     }
 
-    public HttpServiceResponse executePost(HttpClient httpClient, String uri, String authData, String postData,
+    public HttpServiceResponse executePost(HttpClient httpClient, String uri, String authCode, String postData,
             ContentType contentType) {
-        return executePost(httpClient, uri, authData, null, postData, contentType, null);
+        return executePost(httpClient, uri, authCode, null, postData, contentType, null);
     }
 
-    public HttpServiceResponse executePost(String uri, String authData, Map<String, String> headers, String postData,
+    public HttpServiceResponse executePost(String uri, String authCode, Map<String, String> headers, String postData,
             ContentType contentType, String authType) {
-        return executePost(this.getHttpsClient(), uri, authData, null, postData, contentType, authType);
+        return executePost(this.getHttpsClient(), uri, authCode, null, postData, contentType, authType);
     }
 
     public String encodeBase64(String value) {

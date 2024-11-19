@@ -86,6 +86,7 @@ import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 
 import org.testng.ITestContext;
 import org.testng.annotations.AfterSuite;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.BeforeTest;
 
@@ -101,22 +102,20 @@ import jakarta.ws.rs.core.Response.Status;
 
 public class BaseTest {
 
-    private static final String CONTENT_TYPE = "Content-Type";
-    private static final String AUTHORIZATION = "Authorization";
-
+    protected static final String CONTENT_TYPE = "Content-Type";
+    protected static final String AUTHORIZATION = "Authorization";
+    protected static final String AUTHORIZATION_TYPE = "Bearer";
     protected Logger log = LogManager.getLogger(getClass());
-    private Base64 base64;
-    private static Map<String, String> propertiesMap = null;
-    private ResteasyService resteasyService;
-    private HttpService httpService;
+    protected Base64 base64;
+    protected static Map<String, String> propertiesMap = null;
+    protected ResteasyService resteasyService = new ResteasyService();;
+    protected HttpService httpService = new HttpService();
     protected String accessToken; 
 
     @BeforeSuite
     public void initTestSuite(ITestContext context) throws Exception {
 
-        resteasyService = new ResteasyService();
-        httpService = new HttpService();
-         
+      
         log.error("Invoked initTestSuite of '{}'", context.getCurrentXmlTest().getName());
         String propertiesFile = context.getCurrentXmlTest().getParameter("propertiesFile");
         Properties prop = new Properties();
@@ -137,11 +136,9 @@ public class BaseTest {
         log.info("After Suite finalize'");
     }
 
-    @BeforeTest
+    @BeforeMethod
     public void getAccessToken() throws Exception {
         log.error("getAccessToken - propertiesMap:{}", propertiesMap);
-        
-        //accessToken = "ad00f5cc-3221-4d31-8318-aa3642f5ed00";
        
         String tokenUrl = propertiesMap.get("tokenEndpoint");
         String strGrantType = propertiesMap.get("tokenGrantType");
@@ -151,7 +148,7 @@ public class BaseTest {
         String authStr = clientId + ':' + clientSecret;
 
        GrantType grantType = GrantType.fromString(strGrantType);
-        accessToken = getToken(tokenUrl, clientId, clientSecret, grantType, scopes);
+       this.accessToken = getToken(tokenUrl, clientId, clientSecret, grantType, scopes);
         log.error("accessToken:{}", accessToken);
     }
     
@@ -211,6 +208,31 @@ public class BaseTest {
     
     protected ResteasyService getResteasyService() {
         return this.resteasyService;
+    }
+    
+    protected String getCredentials(final String clientId, final String clientSecret) throws UnsupportedEncodingException {
+        return URLEncoder.encode(clientId, Util.UTF8_STRING_ENCODING)
+                + ":"
+                + URLEncoder.encode(clientSecret, Util.UTF8_STRING_ENCODING);
+    }
+    
+    /**
+     * Returns the client credentials encoded using base64.
+     *
+     * @return The encoded client credentials.
+     */
+    protected String getEncodedCredentials() {
+        try {
+            String clientId = propertiesMap.get("clientId");
+            String clientSecret = propertiesMap.get("clientSecret");
+            if (StringUtils.isNotBlank(clientId) && StringUtils.isNotBlank(clientSecret)) {
+                return Base64.encodeBase64String(Util.getBytes(getCredentials(clientId, clientSecret)));
+            }
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
     
 

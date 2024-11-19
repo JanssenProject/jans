@@ -20,7 +20,7 @@ public class AcrsResourceTest extends BaseTest{
     public void getDefaultAuthenticationMethod(final String issuer, final String acrsUrl) {
         log.error("accessToken:{}, issuer:{}, acrsUrl:{}", accessToken, issuer, acrsUrl);
             given().when().contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", accessToken, null)
+                .header("Authorization",AUTHORIZATION_TYPE + " "+ accessToken, null)
                 .get(issuer+acrsUrl).then().statusCode(200);
     }
     
@@ -32,7 +32,7 @@ public class AcrsResourceTest extends BaseTest{
         log.info("Creating client using json string");
 
          given().when().contentType(MediaType.APPLICATION_JSON)
-            .header("Authorization", accessToken, null)
+            .header("Authorization", AUTHORIZATION_TYPE + " "+ accessToken, null)
                 .body(json)
                 .put(issuer+acrsUrl).then().statusCode(200);
     }

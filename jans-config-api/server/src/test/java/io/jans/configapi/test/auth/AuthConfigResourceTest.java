@@ -21,7 +21,7 @@ public class AuthConfigResourceTest extends BaseTest{
     public void getAuthAppConfigurationProperty(final String issuer, final String authConfigurationUrl) {
         log.error("accessToken:{}, issuer:{}, authConfigurationUrl:{}", accessToken, issuer, authConfigurationUrl);
             given().when().contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", accessToken, null)
+                .header("Authorization", AUTHORIZATION_TYPE + " "+ accessToken, null)
                 .get(issuer+authConfigurationUrl).then().statusCode(200);
     }
     
@@ -30,7 +30,7 @@ public class AuthConfigResourceTest extends BaseTest{
     public void patchAppConfigurationProperty(final String issuer, final String authConfigurationUrl) {
         log.error("accessToken:{}, issuer:{}, authConfigurationUrl:{}", accessToken, issuer, authConfigurationUrl);
         given().when().contentType(MediaType.APPLICATION_JSON)
-            .header("Authorization", accessToken, null)
+            .header("Authorization", AUTHORIZATION_TYPE + " "+ accessToken, null)
                 .body("[ {\"op\":\"replace\", \"path\": \"/loggingLevel\", \"value\": \"DEBUG\" } ]")
                 .patch(issuer+authConfigurationUrl).then().statusCode(200);
     }

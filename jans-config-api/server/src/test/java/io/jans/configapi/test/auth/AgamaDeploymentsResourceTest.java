@@ -20,7 +20,7 @@ public class AgamaDeploymentsResourceTest extends BaseTest{
     public void getDeployments(final String issuer, final String agamaDeploymentUrl) {
         log.error("accessToken:{}, issuer:{}, agamaDeploymentUrl:{}", accessToken, issuer, agamaDeploymentUrl);
             given().when().contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", accessToken, null)
+                .header("Authorization", AUTHORIZATION_TYPE + " "+ accessToken, null)
                 .get(issuer+agamaDeploymentUrl).then().statusCode(200);
     }
     

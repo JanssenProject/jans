@@ -20,7 +20,7 @@ public class ApiHealthTest extends BaseTest{
     public void getHealthResponse(final String issuer, final String healthUrl) {
         log.error("accessToken:{}, issuer:{}, healthUrl:{}", accessToken, issuer, healthUrl);
             given().when().contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", accessToken, null)
+                .header("Authorization", AUTHORIZATION_TYPE + " "+ accessToken, null)
                 .get(issuer+healthUrl).then().statusCode(200);
     }
     
@@ -30,7 +30,7 @@ public class ApiHealthTest extends BaseTest{
     public void getServerStat(final String issuer, final String healthUrl) {
         log.error("accessToken:{}, issuer:{}, healthUrl:{}", accessToken, issuer, healthUrl);
             given().when().contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", accessToken, null)
+                .header("Authorization", AUTHORIZATION_TYPE + " "+ accessToken, null)
                 .get(issuer+healthUrl+"/server-stat").then().statusCode(200);
     }
 	
@@ -39,7 +39,7 @@ public class ApiHealthTest extends BaseTest{
     public void getApplicationVersion(final String issuer, final String healthUrl) {
         log.error("accessToken:{}, issuer:{}, healthUrl:{}", accessToken, issuer, healthUrl);
             given().when().contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", accessToken, null)
+                .header("Authorization", AUTHORIZATION_TYPE + " "+ accessToken, null)
                 .get(issuer+healthUrl+"/app-version").then().statusCode(200);
     }
 	
@@ -48,7 +48,7 @@ public class ApiHealthTest extends BaseTest{
     public void getServiceStatus(final String issuer, final String healthUrl) {
         log.error("accessToken:{}, issuer:{}, healthUrl:{}", accessToken, issuer, healthUrl);
             given().when().contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", accessToken, null)
+                .header("Authorization", AUTHORIZATION_TYPE + " "+ accessToken, null)
                 .get(issuer+healthUrl+"/service-status").then().statusCode(200);
     }
 }
