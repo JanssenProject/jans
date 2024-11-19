@@ -116,7 +116,7 @@ public class UserServiceTest {
     	User user = new User();
         user.setDn(userDn);
         user.setUserId(userId);
-        user.getCustomAttributes().add(new CustomObjectAttribute("jansAddres", Arrays.asList("New York", "Texas")));
+        user.getCustomAttributes().add(new CustomObjectAttribute("jansAddress", Arrays.asList("New York", "Texas")));
         userAuthenticatorService.addUserAuthenticator(user, new UserAuthenticator("id1", "type1"));
         persistenceEntryManager.persist(user);
     }
@@ -141,7 +141,7 @@ public class UserServiceTest {
 
         assertNotNull(user.getCustomAttributes());
         assertEquals(user.getCustomAttributes().size(), 1);
-        assertEquals(user.getAttributeValues("jansAddres"), Arrays.asList("New York", "Texas"));
+        assertEquals(user.getAttributeValues("jansAddress"), Arrays.asList("New York", "Texas"));
     }
 
     @Test
@@ -167,7 +167,7 @@ public class UserServiceTest {
 
         assertNotNull(user.getCustomAttributes());
         assertEquals(user.getCustomAttributes().size(), 1);
-        assertEquals(user.getAttributeValues("jansAddres"), Arrays.asList("New York", "Texas"));
+        assertEquals(user.getAttributeValues("jansAddress"), Arrays.asList("New York", "Texas"));
     }
 
     @Test
@@ -193,7 +193,7 @@ public class UserServiceTest {
 
         assertNotNull(user.getCustomAttributes());
         assertEquals(user.getCustomAttributes().size(), 1);
-        assertEquals(user.getAttributeValues("jansAddres"), Arrays.asList("New York", "Texas"));
+        assertEquals(user.getAttributeValues("jansAddress"), Arrays.asList("New York", "Texas"));
     }
 
     @Test
@@ -219,7 +219,7 @@ public class UserServiceTest {
 
         assertNotNull(user.getCustomAttributes());
         assertEquals(user.getCustomAttributes().size(), 2);
-        assertEquals(user.getAttributeValues("jansAddres"), Arrays.asList("New York", "Texas"));
+        assertEquals(user.getAttributeValues("jansAddress"), Arrays.asList("New York", "Texas"));
         assertEquals(user.getAttributeValues("transientId"), Arrays.asList("transientId"));
     }
 
@@ -227,7 +227,7 @@ public class UserServiceTest {
 	@Order(9)
     public void testUserRemoveCustomAttribute1() {
         User user = persistenceEntryManager.find(User.class, userDn);
-        user.removeAttributeValue("jansAddres");
+        user.removeAttributeValue("jansAddress");
 
         persistenceEntryManager.merge(user);
     }
