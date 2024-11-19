@@ -31,7 +31,7 @@ import com.example.fido2.Res
 import com.example.fido2.enter_url
 import com.example.fido2.loading
 import com.example.fido2.save
-import com.example.fido2.ui.common.customComposableViews.EmailTextField
+import com.example.fido2.ui.common.customComposableViews.CustomTextField
 import com.example.fido2.ui.common.customComposableViews.LogButton
 import com.example.fido2.ui.theme.AppTheme
 import kotlinx.coroutines.CoroutineScope
@@ -89,7 +89,7 @@ fun SettingsScreen(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            EmailTextField(
+            CustomTextField(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = AppTheme.dimens.paddingLarge),

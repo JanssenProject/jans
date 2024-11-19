@@ -4,6 +4,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 
 @Composable
@@ -16,8 +17,8 @@ fun TitleText(
         modifier = modifier,
         text = text,
         textAlign = textAlign,
-        style = MaterialTheme.typography.subtitle1,
-        color = MaterialTheme.colors.secondary
+        style = MaterialTheme.typography.h6,
+        color = Color.DarkGray
     )
 }
 
@@ -30,8 +31,8 @@ fun MediumTitleText(
     Text(
         modifier = modifier,
         text = text,
-        style = MaterialTheme.typography.h2,
-        color = MaterialTheme.colors.primary,
+        style = MaterialTheme.typography.h3,
+        color = Color.DarkGray,
         textAlign = textAlign
     )
 }

@@ -2,7 +2,7 @@
     <string name="app_name">SuperGluuFido</string>
     <string name="enrol_account">Enrol Account</string>
     <string name="enrol">Enrol</string>
-    <string name="janssen">Janssen</string>
+    <string name="janssen">janssen</string>
     <string name="login_button_text">Login</string>
     <string name="use_saved_passkey">Choose your passkey</string>
     <!--Registration Error Messages-->

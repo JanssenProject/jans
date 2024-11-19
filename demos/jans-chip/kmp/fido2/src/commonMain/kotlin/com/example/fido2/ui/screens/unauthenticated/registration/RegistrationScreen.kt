@@ -1,5 +1,6 @@
 package com.example.fido2.ui.screens.unauthenticated.registration
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,6 +24,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -45,6 +47,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -110,75 +113,80 @@ fun RegistrationScreen(
                     onClick = onNavigateBack
                 )
 
-                // Main card Content for Registration
-                Card(
+                // Main Content for Registration
+
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(AppTheme.dimens.paddingLarge)
+                        .padding(horizontal = AppTheme.dimens.paddingLarge)
+                        .padding(bottom = AppTheme.dimens.paddingExtraLarge)
                 ) {
-
-                    Column(
+                    // Heading Jetpack Compose
+                    Image(
+                        painter = painterResource(Res.drawable.janssen_logo),
+                        contentDescription = null,
                         modifier = Modifier
-                            .padding(horizontal = AppTheme.dimens.paddingLarge)
-                            .padding(bottom = AppTheme.dimens.paddingExtraLarge)
-                    ) {
-                        // Heading Jetpack Compose
-                        MediumTitleText(
-                            modifier = Modifier
-                                .padding(top = AppTheme.dimens.paddingLarge)
-                                .fillMaxWidth(),
-                            text = stringResource(Res.string.janssen),
-                            textAlign = TextAlign.Center
-                        )
+                            .fillMaxSize()
+                            .padding(top = AppTheme.dimens.paddingLarge)
+                    )
 
-                        // Heading Registration
-                        TitleText(
-                            modifier = Modifier.padding(top = AppTheme.dimens.paddingLarge),
-                            text = stringResource(Res.string.enrol_account)
-                        )
+                    // Heading Registration
+                    TitleText(
+                        modifier = Modifier
+                            .padding(
+                                top = AppTheme.dimens.paddingLarge,
+                                bottom = AppTheme.dimens.paddingLarge
+                            )
+                            .fillMaxWidth(),
+                        text = stringResource(Res.string.enrol_account),
+                        textAlign = TextAlign.Center
+                    )
 
-                        /**
-                         * Registration Inputs Composable
-                         */
-                        RegistrationInputs(
-                            registrationState = registrationState,
+                    /**
+                     * Registration Inputs Composable
+                     */
+                    RegistrationInputs(
+                        registrationState = registrationState,
 
-                            onEmailIdChange = { inputString ->
-                                val result = registrationViewModel.onUiEvent(
-                                    registrationUiEvent = RegistrationUiEvent.UsernameChanged(
-                                        inputValue = inputString
-                                    )
+                        onEmailIdChange = { inputString ->
+                            val result = registrationViewModel.onUiEvent(
+                                registrationUiEvent = RegistrationUiEvent.UsernameChanged(
+                                    inputValue = inputString
                                 )
-                                if (result) {
-                                    viewModel.setUsername(inputString)
-                                }
-                            },
-
-                            onPasswordChange = { inputString ->
-                                val result = registrationViewModel.onUiEvent(
-                                    registrationUiEvent = RegistrationUiEvent.PasswordChanged(
-                                        inputValue = inputString
-                                    )
-                                )
-                                if (result) {
-                                    viewModel.setPassword(inputString)
-                                }
-                            },
-
-                            onSubmit = {
-                                registrationViewModel.onUiEvent(
-                                    registrationUiEvent = RegistrationUiEvent.ValidateInputs
-                                )
-                                if (registrationState.isValidationSuccessful) {
-                                    onSubmitAction(viewModel = viewModel, registrationViewModel = registrationViewModel, shouldShowDialog = shouldShowDialog, dialogContent = dialogContent)
-                                }
-                            },
-
-                            onQrCodeSubmit = {
-                                shouldQRCodeScanning.value = true
+                            )
+                            if (result) {
+                                viewModel.setUsername(inputString)
                             }
-                        )
-                    }
+                        },
+
+                        onPasswordChange = { inputString ->
+                            val result = registrationViewModel.onUiEvent(
+                                registrationUiEvent = RegistrationUiEvent.PasswordChanged(
+                                    inputValue = inputString
+                                )
+                            )
+                            if (result) {
+                                viewModel.setPassword(inputString)
+                            }
+                        },
+
+                        onSubmit = {
+                            registrationViewModel.onUiEvent(
+                                registrationUiEvent = RegistrationUiEvent.ValidateInputs
+                            )
+                            if (registrationState.isValidationSuccessful) {
+                                onSubmitAction(
+                                    viewModel = viewModel,
+                                    registrationViewModel = registrationViewModel,
+                                    shouldShowDialog = shouldShowDialog,
+                                    dialogContent = dialogContent
+                                )
+                            }
+                        },
+
+                        onQrCodeSubmit = {
+                            shouldQRCodeScanning.value = true
+                        }
+                    )
                 }
             }
         }

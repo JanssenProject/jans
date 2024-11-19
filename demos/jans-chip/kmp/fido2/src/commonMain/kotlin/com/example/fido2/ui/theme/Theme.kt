@@ -7,7 +7,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 
-private val LightColors = lightColors(
+val LightColors = lightColors(
     primary = md_theme_light_primary,
     onPrimary = md_theme_light_onPrimary,
     secondary = md_theme_light_secondary,
@@ -16,8 +16,8 @@ private val LightColors = lightColors(
     onError = md_theme_light_onError,
     background = md_theme_light_background,
     onBackground = md_theme_light_onBackground,
-    surface = md_theme_light_surface,
-    onSurface = md_theme_light_onSurface,
+    surface = md_gluu_green,
+    onSurface = md_theme_light_onSurface
 )
 
 private val DarkColors = darkColors(
