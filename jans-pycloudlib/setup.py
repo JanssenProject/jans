@@ -33,10 +33,13 @@ setup(
         "hvac>=0.7.0",
         "kubernetes>=11.0",
 
-        # @TODO: REMOVE after the following methods successfully ported:
+        # the ldap3 library is not removed for the following reasons:
         #
-        # - `jans.pycloudlib.utils.ldap_encode`
-        # - `jans.pycloudlib.persistence.sql.doc_id_from_dn`
+        # - it's still used by `jans.pycloudlib.utils.ldap_encode` (hashed function)
+        # - it's still used by `jans.pycloudlib.persistence.sql.doc_id_from_dn` (parse_dn function)
+        # - vendoring hashed and parse_dn functions from ldap3 library will need testcases, which we can avoid by reusing the original functions
+        # - LDAP/LDIF DN is still used heavily in Janssen data design
+        #
         "ldap3>=2.5",
 
         "backoff>=2.1.2",
