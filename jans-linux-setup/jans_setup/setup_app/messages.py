@@ -3,7 +3,6 @@ class msg:
     MAIN_label = "System Information"
     HostForm_label = "Gathering Information"
     ServicesForm_label = "Select Services to Install"
-    DBBackendForm_label = "Choose to Store in OpenDJ"
     StorageSelectionForm_label = "Hybrid Storage Selection"
     InstallStepsForm_label = "Installing Janssen Server"
     DisplaySummaryForm_label = "Janssen Server Installation Summary"
@@ -29,7 +28,6 @@ class msg:
     backend_types_label = "Backend Types"
     java_type_label = "Java Type"
     install_httpd_label = "Install Apache"
-    opendj_storages_label = "Store on OpenDJ"
     installing_label = "Current"
     install_casa_label = "Install Casa"
     install_scim_server_label = "Install Scim"
@@ -68,18 +66,11 @@ class msg:
 
     ask_install_httpd = "Install Apache HTTPD Server"
     ask_install_casa = "Install Casa"
-    ask_opendj_install = "Install OpenDJ"
     ask_install_scim_server = "Install Scim Server"
     ask_install_fido2 = "Install Fido2"
 
-    opendj_install_options = ["Don't Install","Install Locally","Use Remote OpenDJ"]
-
-    ask_cb_install = "Couchbase Installation"
-    cb_install_options = ["Don't Install","Install Locally","Use Remote Couchbase"]
-
     notify_select_backend = "Please select one of the backends either local install or remote" 
     weak_password = "Password for {} must be at least 6 characters and include one uppercase letter, one lowercase letter, one digit, and one special character."
-    unselected_storages = "Note: Unselected storages will go Couchbase Server"
 
     no_help = "No help is provided for this screen."
 

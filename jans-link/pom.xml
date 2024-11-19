@@ -3,6 +3,13 @@
 	<groupId>io.jans</groupId>
 	<artifactId>jans-link-server-parent</artifactId>
 	<version>1.1.6-SNAPSHOT</version>
+
+    <parent>
+	    <groupId>io.jans</groupId>
+	    <artifactId>jans-bom</artifactId>
+	    <version>1.1.6-SNAPSHOT</version>
+    </parent>
+
 	<modules>
 		<module>model</module>
 		<module>service</module>
@@ -12,6 +19,14 @@
 	<packaging>pom</packaging>
 	<name>jans link server parent</name>
 	<url>http://maven.apache.org</url>
+
+  <distributionManagement>
+     <repository>
+       <id>github</id>
+       <name>Github Packages</name>
+       <url>https://maven.pkg.github.com/JanssenProject/jans</url>
+     </repository>
+   </distributionManagement>
 
 	<properties>
 		<janssen.version>${project.version}</janssen.version>
@@ -34,6 +49,11 @@
 	</scm>
 
 	<repositories>
+		<repository>
+			<id>github</id>
+			<name>GitHub Packages</name>
+			<url>https://maven.pkg.github.com/JanssenProject/jans</url>
+		</repository>
 		<repository>
 			<id>mavencentral</id>
 			<name>maven central</name>
@@ -124,24 +144,5 @@
 		</dependency>
 
 	</dependencies>
-
-	<build>
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-antrun-plugin</artifactId>
-					<version>3.1.0</version>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-javadoc-plugin</artifactId>
-					<configuration>
-						<additionalJOption>-Xdoclint:none</additionalJOption>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
-	</build>
 
 </project>

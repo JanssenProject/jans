@@ -5,12 +5,9 @@ import os
 from collections import namedtuple
 
 from jans.pycloudlib import get_manager
-from jans.pycloudlib.persistence.couchbase import CouchbaseClient
-from jans.pycloudlib.persistence.spanner import SpannerClient
 from jans.pycloudlib.persistence.sql import SqlClient
 from jans.pycloudlib.persistence.utils import PersistenceMapper
 from jans.pycloudlib.persistence.sql import doc_id_from_dn
-from jans.pycloudlib.persistence.couchbase import id_from_dn
 
 from settings import LOGGING_CONFIG
 from utils import get_config_api_scope_mapping
@@ -216,102 +213,8 @@ class SQLBackend:
         ]
 
 
-class CouchbaseBackend:
-    def __init__(self, manager):
-        self.manager = manager
-        self.client = CouchbaseClient(manager)
-        self.type = "couchbase"
-
-    def get_entry(self, key, filter_="", attrs=None, **kwargs):
-        bucket = kwargs.get("bucket")
-        req = self.client.exec_query(
-            f"SELECT META().id, {bucket}.* FROM {bucket} USE KEYS '{key}'"  # nosec: B608
-        )
-        if not req.ok:
-            return None
-
-        try:
-            _attrs = req.json()["results"][0]
-            id_ = _attrs.pop("id")
-            entry = Entry(id_, _attrs)
-        except IndexError:
-            entry = None
-        return entry
-
-    def modify_entry(self, key, attrs=None, **kwargs):
-        bucket = kwargs.get("bucket")
-        del_flag = kwargs.get("delete_attr", False)
-        attrs = attrs or {}
-
-        if del_flag:
-            kv = ",".join(attrs.keys())
-            mod_kv = f"UNSET {kv}"
-        else:
-            kv = ",".join([
-                "{}={}".format(k, json.dumps(v))
-                for k, v in attrs.items()
-            ])
-            mod_kv = f"SET {kv}"
-
-        query = f"UPDATE {bucket} USE KEYS '{key}' {mod_kv}"
-        req = self.client.exec_query(query)
-
-        if req.ok:
-            resp = req.json()
-            status = bool(resp["status"] == "success")
-            message = resp["status"]
-        else:
-            status = False
-            message = req.text or req.reason
-        return status, message
-
-    def search_entries(self, key, filter_="", attrs=None, **kwargs):
-        bucket = kwargs.get("bucket")
-        req = self.client.exec_query(
-            f"SELECT META().id, {bucket}.* FROM {bucket} {filter_}"  # nosec: B608
-        )
-        if not req.ok:
-            return []
-
-        entries = []
-        for item in req.json()["results"]:
-            id_ = item.pop("id")
-            entries.append(Entry(id_, item))
-        return entries
-
-
-class SpannerBackend:
-    def __init__(self, manager):
-        self.manager = manager
-        self.client = SpannerClient(manager)
-        self.type = "spanner"
-
-    def get_entry(self, key, filter_="", attrs=None, **kwargs):
-        table_name = kwargs.get("table_name")
-        entry = self.client.get(table_name, key, attrs)
-
-        if not entry:
-            return None
-        return Entry(key, entry)
-
-    def modify_entry(self, key, attrs=None, **kwargs):
-        attrs = attrs or {}
-        table_name = kwargs.get("table_name")
-        return self.client.update(table_name, key, attrs), ""
-
-    def search_entries(self, key, filter_="", attrs=None, **kwargs):
-        attrs = attrs or {}
-        table_name = kwargs.get("table_name")
-        return [
-            Entry(entry["doc_id"], entry)
-            for entry in self.client.search(table_name, attrs)
-        ]
-
-
 BACKEND_CLASSES = {
     "sql": SQLBackend,
-    "couchbase": CouchbaseBackend,
-    "spanner": SpannerBackend,
 }
 
 
@@ -337,16 +240,9 @@ class Upgrade:
         self.update_scope_creator_attrs()
 
     def update_client_redirect_uri(self):
-        kwargs = {}
+        kwargs = {"table_name": "jansClnt"}
         jca_client_id = self.manager.config.get("jca_client_id")
-        id_ = f"inum={jca_client_id},ou=clients,o=jans"
-
-        if self.backend.type in ("sql", "spanner"):
-            kwargs = {"table_name": "jansClnt"}
-            id_ = doc_id_from_dn(id_)
-        elif self.backend.type == "couchbase":
-            kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
-            id_ = id_from_dn(id_)
+        id_ = doc_id_from_dn(f"inum={jca_client_id},ou=clients,o=jans")
 
         entry = self.backend.get_entry(id_, **kwargs)
 
@@ -360,7 +256,7 @@ class Upgrade:
             if f"https://{hostname}/admin" not in entry.attrs["jansRedirectURI"]["v"]:
                 entry.attrs["jansRedirectURI"]["v"].append(f"https://{hostname}/admin")
                 should_update = True
-        else:  # likely couchbase or spanner
+        else:
             if f"https://{hostname}/admin" not in entry.attrs["jansRedirectURI"]:
                 entry.attrs["jansRedirectURI"].append(f"https://{hostname}/admin")
                 should_update = True
@@ -369,45 +265,28 @@ class Upgrade:
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
 
     def update_api_dynamic_config(self):
-        kwargs = {}
-        id_ = "ou=jans-config-api,ou=configuration,o=jans"
-
-        if self.backend.type in ("sql", "spanner"):
-            kwargs = {"table_name": "jansAppConf"}
-            id_ = doc_id_from_dn(id_)
-        elif self.backend.type == "couchbase":
-            kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
-            id_ = id_from_dn(id_)
+        kwargs = {"table_name": "jansAppConf"}
+        id_ = doc_id_from_dn("ou=jans-config-api,ou=configuration,o=jans")
 
         entry = self.backend.get_entry(id_, **kwargs)
 
         if not entry:
             return
 
-        if self.backend.type != "couchbase":
-            with contextlib.suppress(json.decoder.JSONDecodeError):
-                entry.attrs["jansConfDyn"] = json.loads(entry.attrs["jansConfDyn"])
+        with contextlib.suppress(json.decoder.JSONDecodeError):
+            entry.attrs["jansConfDyn"] = json.loads(entry.attrs["jansConfDyn"])
 
         conf, should_update = _transform_api_dynamic_config(entry.attrs["jansConfDyn"])
 
         if should_update:
-            if self.backend.type != "couchbase":
-                entry.attrs["jansConfDyn"] = json.dumps(conf)
-
+            entry.attrs["jansConfDyn"] = json.dumps(conf)
             entry.attrs["jansRevision"] += 1
             self.backend.modify_entry(entry.id, entry.attrs, **kwargs)
 
     def update_client_scopes(self):
-        kwargs = {}
+        kwargs = {"table_name": "jansClnt"}
         client_id = self.manager.config.get("jca_client_id")
-        id_ = f"inum={client_id},ou=clients,o=jans"
-
-        if self.backend.type in ("sql", "spanner"):
-            kwargs = {"table_name": "jansClnt"}
-            id_ = doc_id_from_dn(id_)
-        elif self.backend.type == "couchbase":
-            kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
-            id_ = id_from_dn(id_)
+        id_ = doc_id_from_dn(f"inum={client_id},ou=clients,o=jans")
 
         entry = self.backend.get_entry(id_, **kwargs)
 
@@ -436,16 +315,8 @@ class Upgrade:
 
     def update_test_client_scopes(self):
         test_client_id = self.manager.config.get("test_client_id")
-        id_ = f"inum={test_client_id},ou=clients,o=jans"
-        kwargs = {}
-
-        # search_entries(self, key, filter_="", attrs=None, **kwargs)
-        if self.backend.type in ("sql", "spanner"):
-            id_ = doc_id_from_dn(id_)
-            kwargs = {"table_name": "jansClnt"}
-        elif self.backend.type == "couchbase":
-            id_ = id_from_dn(id_)
-            kwargs = {"bucket": os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")}
+        id_ = doc_id_from_dn(f"inum={test_client_id},ou=clients,o=jans")
+        kwargs = {"table_name": "jansClnt"}
 
         entry = self.backend.get_entry(id_, **kwargs)
 
@@ -460,16 +331,10 @@ class Upgrade:
         if not isinstance(client_scopes, list):
             client_scopes = [client_scopes]
 
-        if self.backend.type in ("sql", "spanner"):
+        if self.backend.type == "sql":
             scopes = [
                 scope_entry.attrs["dn"]
                 for scope_entry in self.backend.search_entries("", **{"table_name": "jansScope"})
-            ]
-        elif self.backend.type == "couchbase":
-            bucket = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
-            scopes = [
-                scope_entry.attrs["dn"]
-                for scope_entry in self.backend.search_entries("", filter_="WHERE objectClass='jansScope'", **{"bucket": bucket})
             ]
         else:
             scopes = [

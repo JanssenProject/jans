@@ -259,13 +259,6 @@
             <artifactId>tika-core</artifactId>
         </dependency>
 
-        <!-- SMPP -->
-    	<dependency>
-            <groupId>org.jsmpp</groupId>
-            <artifactId>jsmpp</artifactId>
-            <version>3.0.0</version>
-        </dependency>
-
         <!-- QUARTZ -->
         <dependency>
             <groupId>org.quartz-scheduler</groupId>
@@ -360,7 +353,7 @@
             <plugin>
                 <artifactId>maven-war-plugin</artifactId>
                 <groupId>org.apache.maven.plugins</groupId>
-                <version>2.3</version>
+                <version>3.3.2</version>
                 <configuration>
                     <failOnMissingWebXml>false</failOnMissingWebXml>
                     <archive>

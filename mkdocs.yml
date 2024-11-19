@@ -140,7 +140,6 @@ nav:
       - Agama Project Configuration: janssen-server/config-guide/auth-server-config/agama-project-configuration.md
       - Attribute: janssen-server/config-guide/auth-server-config/attribute-configuration.md
       - Cache Configuration: janssen-server/config-guide/auth-server-config/cache-configuration.md
-      - Couchbase Configuration: janssen-server/config-guide/auth-server-config/couchbase-configuration.md
       - UMA Management: janssen-server/config-guide/auth-server-config/oauth-umaresources-config.md
     - FIDO2 Configuration: janssen-server/config-guide/fido2-config/janssen-fido2-configuration.md
     - SCIM Configuration:
@@ -153,10 +152,7 @@ nav:
   - Database Guide:
     - janssen-server/reference/database/README.md
     - RDBMS Erwin Table: janssen-server/reference/database/rdbms-erwin.md
-    - Couchbase:
-      - Couchbase Configuration: janssen-server/reference/database/cb-config.md
-      - Couchbase Operation: janssen-server/reference/database/cb-ops.md
-      - Couchbase Buckets: janssen-server/reference/database/cb-buckets.md
+  
     - MySQL:
       - MySQL Schema: janssen-server/reference/database/mysql-schema.md
       - MySQL Configuration: janssen-server/reference/database/mysql-config.md

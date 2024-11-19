@@ -33,9 +33,6 @@ RUN systemctl set-default multi-user.target \
 RUN rm -f /lib/systemd/system/systemd*udev* \
     && rm -f /lib/systemd/system/getty.target
 
-# Install google cloud client
-RUN curl https://sdk.cloud.google.com > install.sh && bash install.sh --disable-prompts
-
 HEALTHCHECK --interval=35s --timeout=4s CMD /opt/dist/scripts/jans-auth check | grep "Jetty running pid" || exit 1
 
 # Ports required by jetty
@@ -45,7 +42,7 @@ EXPOSE 443 8080 1636
 # jans-linux-setup
 # =====================
 
-ENV JANS_SOURCE_VERSION=4f155cfe9e197b15d65be6aa938276862fe36a06
+ENV JANS_SOURCE_VERSION=871c36da8a2550ee2febd7c0d72c521898b226c3
 
 # cleanup
 RUN rm -rf /tmp/jans
@@ -70,8 +67,6 @@ ENV CN_HOSTNAME="demoexample.jans.io" \
     TEST_CLIENT_ID="9876baac-de39-4c23-8a78-674b59df8c09" \
     TEST_CLIENT_SECRET="" \
     TEST_CLIENT_TRUSTED="true" \
-    CN_INSTALL_COUCHBASE="false" \
-    CN_INSTALL_SPANNER="false" \
     CN_INSTALL_MYSQL="false" \
     CN_INSTALL_PGSQL="false" \
     CN_INSTALL_CONFIG_API="true" \

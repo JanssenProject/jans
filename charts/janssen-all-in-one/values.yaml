@@ -14,7 +14,7 @@ orgName: Janssen
 # -- Resource specs.
 # -- State code. Used for certificate creation.
 state: TX
-# -- Persistence backend to run Janssen with couchbase|hybrid|sql.
+# -- Persistence backend to run Janssen with hybrid|sql.
 cnPersistenceType: sql
 # -- Salt. Used for encoding/decoding sensitive data. If omitted or set to empty string, the value will be self-generated. Otherwise, a 24 alphanumeric characters are allowed as its value.
 salt: ""
@@ -58,22 +58,6 @@ configmap:
   containerMetadataName: kubernetes
   # -- The name of the Kubernetes ConfigMap that will hold the configuration layer
   cnConfigKubernetesConfigMap: cn
-  # -- The prefix of couchbase buckets. This helps with separation in between different environments and allows for the same couchbase cluster to be used by different setups of Janssen.
-  cnCouchbaseBucketPrefix: jans
-  # -- Couchbase certificate authority string. This must be encoded using base64. This can also be found in your couchbase UI Security > Root Certificate. In mTLS setups this is not required.
-  cnCouchbaseCrt: SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo=
-  # -- The number of replicas per index created. Please note that the number of index nodes must be one greater than the number of index replicas. That means if your couchbase cluster only has 2 index nodes you cannot place the number of replicas to be higher than 1.
-  cnCouchbaseIndexNumReplica: 0
-  # -- Couchbase password for the restricted user config.configmap.cnCouchbaseUser  that is often used inside the services. The password must contain one digit, one uppercase letter, one lower case letter and one symbol .
-  cnCouchbasePassword: P@ssw0rd
-  # -- The Couchbase super user (admin) username. This user is used during initialization only.
-  cnCouchbaseSuperUser: admin
-  # -- Couchbase password for the superuser config.configmap.cnCouchbaseSuperUser  that is used during the initialization process. The password must contain one digit, one uppercase letter, one lower case letter and one symbol
-  cnCouchbaseSuperUserPassword: Test1234#
-  # -- Couchbase URL. Used only when cnPersistenceType is hybrid or couchbase. This should be in FQDN format for either remote or local Couchbase clusters. The address can be an internal address inside the kubernetes cluster
-  cnCouchbaseUrl: cbjanssen.default.svc.cluster.local
-  # -- Couchbase restricted user. Used only when cnPersistenceType is hybrid or couchbase.
-  cnCouchbaseUser: janssen
   # [google_envs] Envs related to using Google
   # -- Service account with roles roles/secretmanager.admin base64 encoded string. This is used often inside the services to reach the configuration layer. Used only when configAdapterName and configSecretAdapter is set to google.
   cnGoogleSecretManagerServiceAccount: SWFtTm90YVNlcnZpY2VBY2NvdW50Q2hhbmdlTWV0b09uZQo=
@@ -146,6 +130,10 @@ configmap:
   lbAddr: ""
   # -- Quarkus transaction recovery. When using MySQL, there could be issue regarding XA_RECOVER_ADMIN; refer to https://dev.mysql.com/doc/refman/8.0/en/privileges-provided.html#priv_xa-recover-admin for details.
   quarkusTransactionEnableRecovery: true
+  # -- Keycloak  admin UI password
+  kcAdminPassword: Test1234#
+  # -- Keycloak admin UI username
+  kcAdminUsername: admin
   # -- Keycloak logging level
   kcLogLevel: INFO
   # -- Keycloak database vendor name (default to MySQL server). To use PostgreSQL server, change the value to postgres.
@@ -561,14 +549,6 @@ cnPrometheusPort: ""
 cnDocumentStoreType: DB
 # -- Path to SQL password file
 cnSqlPasswordFile: /etc/jans/conf/sql_password
-# -- Path to Couchbase password file
-cnCouchbasePasswordFile: /etc/jans/conf/couchbase_password
-# -- Path to Couchbase superuser password file
-cnCouchbaseSuperuserPasswordFile: /etc/jans/conf/couchbase_superuser_password
-# -- Path to file contains password for database access
-kcDbPasswordFile: /etc/jans/conf/kc_db_password
-# -- Path to file contains Keycloak admin credentials (username and password)
-kcAdminCredentialsFile: /etc/jans/conf/kc_admin_creds
 # -- Path to configuration schema file
 cnConfiguratorConfigurationFile: /etc/jans/conf/configuration.json
 # -- Path to dumped configuration schema file

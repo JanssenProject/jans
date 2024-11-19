@@ -1,5 +1,5 @@
 {
-    "cedar_version": "v2.4.7",
+    "cedar_version": "v4.0.0",
     "cedar_policies": {
         "840da5d85403f35ea76519ed1a18a33989f855bf1cf8": {
             "description": "simple policy example for principal workload",

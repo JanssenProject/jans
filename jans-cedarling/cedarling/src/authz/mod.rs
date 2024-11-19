@@ -16,7 +16,10 @@ use std::sync::Arc;
 use crate::common::app_types;
 use crate::common::policy_store::PolicyStore;
 use crate::jwt;
-use crate::log::{AuthorizationLogInfo, LogEntry, LogType, Logger};
+use crate::log::{
+    AuthorizationLogInfo, LogEntry, LogType, Logger, PersonAuthorizeInfo, RoleAuthorizeInfo,
+    WorkloadAuthorizeInfo,
+};
 
 mod authorize_result;
 
@@ -25,13 +28,13 @@ pub(crate) mod request;
 mod token_data;
 
 pub use authorize_result::AuthorizeResult;
-use cedar_policy::{Entities, Entity, EntityUid};
+use cedar_policy::{Entities, Entity, EntityUid, RequestValidationError, Response};
 use entities::CedarPolicyCreateTypeError;
 use entities::DecodeTokensResult;
 use entities::ResourceEntityError;
 use entities::{
     create_access_token_entities, create_id_token_entity, create_role_entities, create_user_entity,
-    AccessTokenEntitiesError, RoleEntityError,
+    create_userinfo_token_entity, AccessTokenEntitiesError, RoleEntityError,
 };
 use entities::{create_resource_entity, AccessTokenEntities};
 use request::Request;
@@ -77,6 +80,8 @@ impl Authz {
     /// - evaluate if authorization is granted for *person*
     /// - evaluate if authorization is granted for *workload*
     pub fn authorize(&self, request: Request) -> Result<AuthorizeResult, AuthorizeError> {
+        let schema = &self.config.policy_store.schema;
+
         // Parse action UID.
         let action = cedar_policy::EntityUid::from_str(request.action.as_str())
             .map_err(AuthorizeError::Action)?;
@@ -84,7 +89,7 @@ impl Authz {
         // Parse context.
         let context: cedar_policy::Context = cedar_policy::Context::from_json_value(
             request.context.clone(),
-            Some((&self.config.policy_store.cedar_schema.schema, &action)),
+            Some((&schema.schema, &action)),
         )?;
 
         // Parse [`cedar_policy::Entity`]-s to [`AuthorizeEntitiesData`] that hold all entities (for usability).
@@ -102,33 +107,40 @@ impl Authz {
 
         // Convert [`AuthorizeEntitiesData`] to  [`cedar_policy::Entities`] structure,
         // hold all entities that will be used on authorize check.
-        let entities =
-            entities_data.entities(Some(&self.config.policy_store.cedar_schema.schema))?;
+        let entities = entities_data.entities(Some(&schema.schema))?;
 
         // Check authorize where principal is `"Jans::Workload"` from cedar-policy schema.
-        let workload_result = self
-            .execute_authorize(ExecuteAuthorizeParameters {
+        let workload_result: Option<Response> =
+            match self.execute_authorize(ExecuteAuthorizeParameters {
                 entities: &entities,
                 principal: principal_workload_uid.clone(),
                 action: action.clone(),
                 resource: resource_uid.clone(),
                 context: context.clone(),
-            })
-            .map_err(AuthorizeError::CreateRequestWorkloadEntity)?;
+            }) {
+                Ok(resp) => Some(resp),
+                // if invalid principal than we no need result
+                Err(RequestValidationError::InvalidPrincipalType(_)) => None,
+                Err(err) => return Err(AuthorizeError::CreateRequestWorkloadEntity(err)),
+            };
 
         // Check authorize where principal is `"Jans::User"` from cedar-policy schema.
-        let person_result = self
-            .execute_authorize(ExecuteAuthorizeParameters {
+        let person_result: Option<Response> =
+            match self.execute_authorize(ExecuteAuthorizeParameters {
                 entities: &entities,
                 principal: principal_user_entity_uid.clone(),
                 action: action.clone(),
                 resource: resource_uid.clone(),
                 context: context.clone(),
-            })
-            .map_err(AuthorizeError::CreateRequestUserEntity)?;
+            }) {
+                Ok(resp) => Some(resp),
+                // if invalid principal than we no need result
+                Err(RequestValidationError::InvalidPrincipalType(_)) => None,
+                Err(err) => return Err(AuthorizeError::CreateRequestUserEntity(err)),
+            };
 
-        // Variable holds last used `EntityUid`role or None
-        let mut principal_role_entity_uid = None;
+        // role result for logging
+        let mut role_authorize_log_results: Vec<RoleAuthorizeInfo> = Vec::new();
 
         // Check authorize for each principal `"Jans::Role"` from cedar-policy schema.
         // Return last used or None if vector empty
@@ -137,23 +149,36 @@ impl Authz {
 
             // iterate over list of role uids
             for role_uid in principal_role_entity_uids {
-                let tmp_result = self
-                    .execute_authorize(ExecuteAuthorizeParameters {
-                        entities: &entities,
-                        principal: role_uid.clone(),
-                        action: action.clone(),
-                        resource: resource_uid.clone(),
-                        context: context.clone(),
-                    })
-                    .map_err(|err| {
-                        AuthorizeError::CreateRequestRoleEntity(CreateRequestRoleError {
-                            uid: role_uid.clone(),
-                            err,
-                        })
-                    })?;
+                let tmp_result = match self.execute_authorize(ExecuteAuthorizeParameters {
+                    entities: &entities,
+                    principal: role_uid.clone(),
+                    action: action.clone(),
+                    resource: resource_uid.clone(),
+                    context: context.clone(),
+                }) {
+                    Ok(resp) => resp,
+                    // if invalid principal than we no need result
+                    Err(RequestValidationError::InvalidPrincipalType(_)) => {
+                        result = None;
+                        break;
+                    },
+                    Err(err) => {
+                        return Err(AuthorizeError::CreateRequestRoleEntity(
+                            CreateRequestRoleError {
+                                uid: role_uid.clone(),
+                                err,
+                            },
+                        ));
+                    },
+                };
 
                 let decision = tmp_result.decision();
-                principal_role_entity_uid = Some(role_uid);
+
+                role_authorize_log_results.push(RoleAuthorizeInfo {
+                    role_principal: role_uid.to_string(),
+                    role_decision: decision.into(),
+                    role_diagnostics: tmp_result.diagnostics().into(),
+                });
                 result = Some(tmp_result);
 
                 // if succeed then we no need iterate to next
@@ -185,20 +210,21 @@ impl Authz {
                 context: request.context,
                 resource: resource_uid.to_string(),
 
-                person_principal: principal_user_entity_uid.to_string(),
-                workload_principal: principal_workload_uid.to_string(),
-                role_principal: principal_role_entity_uid.map(|v| v.to_string()),
+                person_authorize_info: result.person.as_ref().map(|response| PersonAuthorizeInfo {
+                    person_principal: principal_user_entity_uid.to_string(),
+                    person_diagnostics: response.diagnostics().into(),
+                    person_decision: response.decision().into(),
+                }),
 
-                person_diagnostics: result.person.diagnostics().into(),
-                workload_diagnostics: result.workload.diagnostics().into(),
-                role_diagnostics: result
-                    .role
-                    .as_ref()
-                    .map(|result| result.diagnostics().into()),
+                workload_authorize_info: result.workload.as_ref().map(|response| {
+                    WorkloadAuthorizeInfo {
+                        workload_principal: principal_workload_uid.to_string(),
+                        workload_diagnostics: response.diagnostics().into(),
+                        workload_decision: response.decision().into(),
+                    }
+                }),
 
-                person_decision: result.person.decision().into(),
-                workload_decision: result.workload.decision().into(),
-                role_decision: result.role.as_ref().map(|result| result.decision().into()),
+                role_authorize_info: role_authorize_log_results,
 
                 authorized: result.is_allowed(),
             })
@@ -219,12 +245,12 @@ impl Authz {
             parameters.action,
             parameters.resource,
             parameters.context,
-            Some(&self.config.policy_store.cedar_schema.schema),
+            Some(&self.config.policy_store.schema.schema),
         )?;
 
         let response = self.authorizer.is_authorized(
             &request_principal_workload,
-            &self.config.policy_store.cedar_policies,
+            &self.config.policy_store.policies,
             parameters.entities,
         );
 
@@ -232,11 +258,11 @@ impl Authz {
     }
 
     /// Create all [`Entity`]-s from [`Request`]
-    fn authorize_entities_data(
+    pub fn authorize_entities_data(
         &self,
         request: &Request,
     ) -> Result<AuthorizeEntitiesData, AuthorizeError> {
-        let schema = &self.config.policy_store.cedar_schema.json;
+        let policy_store = &self.config.policy_store;
 
         // decode JWT tokens to structs AccessTokenData, IdTokenData, UserInfoTokenData using jwt service
         let decode_result: DecodeTokensResult = self
@@ -248,35 +274,44 @@ impl Authz {
                 &request.userinfo_token,
             )?;
 
-        let role_entities = create_role_entities(schema, &decode_result)?;
+        let trusted_issuer = decode_result.trusted_issuer.unwrap_or_default();
+        let tokens_metadata = trusted_issuer.tokens_metadata();
+
+        let role_entities = create_role_entities(policy_store, &decode_result, trusted_issuer)?;
 
         // Populate the `AuthorizeEntitiesData` structure using the builder pattern
         let data = AuthorizeEntitiesData::builder()
             // Populate the structure with entities derived from the access token
             .access_token_entities(create_access_token_entities(
-                schema,
+                policy_store,
                 &decode_result.access_token,
+                tokens_metadata.access_tokens
             )?)
             // Add an entity created from the ID token
             .id_token_entity(
-                create_id_token_entity(schema, &decode_result.id_token)
+                create_id_token_entity(policy_store, &decode_result.id_token, &tokens_metadata.id_tokens.claim_mapping)
                     .map_err(AuthorizeError::CreateIdTokenEntity)?,
+            )
+            // Add an entity created from the userinfo token
+            .userinfo_token(
+                create_userinfo_token_entity(policy_store, &decode_result.userinfo_token, &tokens_metadata.userinfo_tokens.claim_mapping)
+                .map_err(AuthorizeError::CreateUserinfoTokenEntity)?
             )
             // Add an entity created from the userinfo token
             .user_entity(
                 create_user_entity(
-                    schema,
-                    &decode_result.id_token,
-                    &decode_result.userinfo_token,
+                    policy_store,
+                    &decode_result,
                     // parents for Jans::User entity
-                     HashSet::from_iter(role_entities.iter().map(|e|e.uid())),
+                    HashSet::from_iter(role_entities.iter().map(|e|e.uid())),
+                    trusted_issuer
                 )
                 .map_err(AuthorizeError::CreateUserEntity)?,
             )
             // Add an entity created from the resource in the request
             .resource_entity(create_resource_entity(
                 request.resource.clone(),
-                &self.config.policy_store.cedar_schema.json,
+                &self.config.policy_store.schema.json,
             )?)
             // Add Jans::Role entities
             .role_entities(role_entities);
@@ -299,21 +334,27 @@ struct ExecuteAuthorizeParameters<'a> {
 // we can't use simple vector because we need use uid-s
 // from some entities to check authorizations
 #[derive(typed_builder::TypedBuilder)]
-struct AuthorizeEntitiesData {
-    access_token_entities: AccessTokenEntities,
-    id_token_entity: Entity,
-    user_entity: Entity,
-    resource_entity: Entity,
-    role_entities: Vec<Entity>,
+pub struct AuthorizeEntitiesData {
+    pub access_token_entities: AccessTokenEntities,
+    pub id_token_entity: Entity,
+    pub userinfo_token: Entity,
+    pub user_entity: Entity,
+    pub resource_entity: Entity,
+    pub role_entities: Vec<Entity>,
 }
 
 impl AuthorizeEntitiesData {
     /// Create iterator to get all entities
     fn into_iter(self) -> impl Iterator<Item = Entity> {
-        vec![self.id_token_entity, self.user_entity, self.resource_entity]
-            .into_iter()
-            .chain(self.access_token_entities.into_iter())
-            .chain(self.role_entities)
+        vec![
+            self.id_token_entity,
+            self.userinfo_token,
+            self.user_entity,
+            self.resource_entity,
+        ]
+        .into_iter()
+        .chain(self.access_token_entities.into_iter())
+        .chain(self.role_entities)
     }
 
     /// Collect all entities to [`cedar_policy::Entities`]
@@ -335,10 +376,13 @@ pub enum AuthorizeError {
     #[error("{0}")]
     AccessTokenEntities(#[from] AccessTokenEntitiesError),
     /// Error encountered while creating id token entities
-    #[error("could not create Jans::id_token: {0}")]
+    #[error("could not create id_token entity: {0}")]
     CreateIdTokenEntity(CedarPolicyCreateTypeError),
+    /// Error encountered while creating userinfo token entities
+    #[error("could not create userinfo entity: {0}")]
+    CreateUserinfoTokenEntity(CedarPolicyCreateTypeError),
     /// Error encountered while creating access token entities
-    #[error("could not create Jans::User: {0}")]
+    #[error("could not create User entity: {0}")]
     CreateUserEntity(CedarPolicyCreateTypeError),
     /// Error encountered while creating resource entity
     #[error("{0}")]

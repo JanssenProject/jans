@@ -6,9 +6,7 @@ import time
 from collections import Counter
 from collections import deque
 
-from jans.pycloudlib.persistence.couchbase import CouchbaseClient
 from jans.pycloudlib.persistence.sql import SqlClient
-from jans.pycloudlib.persistence.spanner import SpannerClient
 from jans.pycloudlib.persistence.utils import PersistenceMapper
 from jans.pycloudlib.utils import encode_text
 from jans.pycloudlib.utils import exec_cmd
@@ -74,45 +72,6 @@ class BasePersistence:
         raise NotImplementedError
 
 
-class CouchbasePersistence(BasePersistence):
-    def __init__(self, manager):
-        self.client = CouchbaseClient(manager)
-
-    def get_auth_config(self):
-        bucket = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
-        req = self.client.exec_query(
-            "SELECT jansRevision, jansConfDyn, jansConfWebKeys "  # nosec: B608
-            f"FROM `{bucket}` "
-            "USE KEYS 'configuration_jans-auth'",
-        )
-        if not req.ok:
-            return {}
-
-        config = req.json()["results"][0]
-
-        if not config:
-            return {}
-
-        config.update({"id": "configuration_jans-auth"})
-        return config
-
-    def modify_auth_config(self, id_, rev, conf_dynamic, conf_webkeys):
-        conf_dynamic = json.dumps(conf_dynamic)
-        conf_webkeys = json.dumps(conf_webkeys)
-        bucket = os.environ.get("CN_COUCHBASE_BUCKET_PREFIX", "jans")
-
-        req = self.client.exec_query(
-            f"UPDATE `{bucket}` USE KEYS '{id_}' "
-            f"SET jansRevision={rev}, jansConfDyn={conf_dynamic}, "
-            f"jansConfWebKeys={conf_webkeys} "
-            "RETURNING jansRevision"
-        )
-
-        if not req.ok:
-            return False
-        return True
-
-
 class SqlPersistence(BasePersistence):
     def __init__(self, manager):
         self.client = SqlClient(manager)
@@ -138,15 +97,8 @@ class SqlPersistence(BasePersistence):
         return modified
 
 
-class SpannerPersistence(SqlPersistence):
-    def __init__(self, manager):
-        self.client = SpannerClient(manager)
-
-
 _backend_classes = {
-    "couchbase": CouchbasePersistence,
     "sql": SqlPersistence,
-    "spanner": SpannerPersistence,
 }
 
 
