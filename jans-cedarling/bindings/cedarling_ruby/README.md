@@ -36,6 +36,8 @@ You can also run `bin/console` for an interactive prompt that will allow you to 
 
 `cargo build -p cedarling_ruby` will build your latest changes.
 
+So you can say `cargo build -p cedarling_ruby && rake spec`
+
 ## Local Installation
 
 You won't want to do this, unless it fails to install via `bundler` or `Gemfile`
