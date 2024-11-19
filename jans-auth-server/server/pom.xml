@@ -594,10 +594,11 @@
             <version>6.14.3</version> <!-- we need 6.14.3 due to Arquillian -->
 		</dependency>
 		<dependency>
-            <groupId>jakarta.websocket</groupId>
-            <artifactId>jakarta.websocket-api</artifactId>
+			<groupId>org.jboss.weld</groupId>
+			<artifactId>weld-junit5</artifactId>
 			<scope>test</scope>
 		</dependency>
+
 		<dependency>
 			<groupId>javax.xml.bind</groupId>
 			<artifactId>jaxb-api</artifactId>
