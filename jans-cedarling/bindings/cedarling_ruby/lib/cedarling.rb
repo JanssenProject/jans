@@ -5,6 +5,4 @@ require_relative "cedarling/version"
 require_relative "cedarling_ruby/cedarling_ruby"
 
 module Cedarling
-  class Error < StandardError; end
-  # Your code goes here...
 end

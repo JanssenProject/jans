@@ -26,6 +26,28 @@ struct Engine(cedarling::Cedarling);
 // But max should be immediately thrown out here, not over there in sparkv.
 const MAX_LOG_TTL : u64 = 60*60;
 
+/// Helper method to retrieve the Cedarling::Error class.
+fn cedarling_ruby_exception(ruby : &magnus::Ruby, msg : String) -> magnus::Error {
+    // srsly? Is eval the only way to do this?
+    let cedarling_error_class = match ruby.eval::<magnus::Value>("Cedarling::Error") {
+        Ok(cedarling_error_class) => cedarling_error_class,
+        Err(err) => {
+            return magnus::Error::new(
+                ruby.exception_runtime_error(),
+                format!("Could not find class Cedarling::Error: {err}. Original error was {msg}"))
+        },
+    };
+    let cedarling_exception = match magnus::ExceptionClass::from_value(cedarling_error_class) {
+        Some(cedarling_exception) => cedarling_exception,
+        None => {
+            return magnus::Error::new(
+                ruby.exception_runtime_error(),
+                format!("Could not find class Cedarling::Error. Original error was {msg}"))
+        },
+    };
+    magnus::Error::new(cedarling_exception, msg)
+}
+
 /**
     Helper function to convert a `magnus::Value` ruby object into a
     `cedarling::PolicyStoreSource`. See instantiate_engine for details.
@@ -35,22 +57,18 @@ fn policy_store_source_of_hash(ruby : &magnus::Ruby, policy_store_value : Option
     use magnus::prelude::*;
 
     let policy_store_value = policy_store_value
-        .ok_or(magnus::Error::new(ruby.exception_runtime_error(), "policy_store: hash required wth either json: or yaml: key"))?;
+        .ok_or(cedarling_ruby_exception(ruby, format!("policy_store: hash required wth either json: or yaml: key")))?;
 
     if policy_store_value.is_kind_of(ruby.class_hash()) {
         use magnus::r_hash::RHash;
-        let ruby_hash = RHash::from_value(policy_store_value).ok_or_else(|| {
-            magnus::Error::new(
-                ruby.exception_runtime_error(),
-                format!("Failed to convert policy_store: to a hash"))
-        })?;
+        let ruby_hash = RHash::from_value(policy_store_value).ok_or(cedarling_ruby_exception(ruby, format!("Failed to convert policy_store: to a hash")))?;
 
         if let Ok(json) = ruby_hash.lookup::<_, String>(ruby.to_symbol("json")) {
             Ok(cedarling::PolicyStoreSource::Json(json.clone()))
         } else if let Ok(yaml) = ruby_hash.lookup::<_, String>(ruby.to_symbol("yaml")) {
             Ok(cedarling::PolicyStoreSource::Yaml(yaml.clone()))
         } else {
-            Err(magnus::Error::new(ruby.exception_runtime_error(), "policy_store: neither json: nor yaml: specified"))
+            Err(cedarling_ruby_exception(ruby, format!("policy_store: neither json: nor yaml: specified")))
         }
     } else {
         // Just convert to a string, and for now assume it's yaml
@@ -113,13 +131,11 @@ fn instantiate_engine(ruby : &magnus::Ruby, args: &[magnus::Value])
     };
 
     if log_ttl > MAX_LOG_TTL {
-        let err = magnus::Error::new(ruby.exception_runtime_error(), format!("log_ttl: {log_ttl} exceeds max of {MAX_LOG_TTL}"));
-        return Err(err)
+        Err(cedarling_ruby_exception(ruby, format!("log_ttl: {log_ttl} exceeds max of {MAX_LOG_TTL}")))?
     }
 
     if log_ttl <= 0 {
-        let err = magnus::Error::new(ruby.exception_runtime_error(), format!("log_ttl: must be at minimum 1"));
-        return Err(err)
+        Err(cedarling_ruby_exception(ruby, format!("log_ttl: must be at minimum 1")))?
     }
 
     let policy_store_source = policy_store_source_of_hash(ruby, policy_store)?;
@@ -139,9 +155,7 @@ fn instantiate_engine(ruby : &magnus::Ruby, args: &[magnus::Value])
     // construct the actual cedarling instance
     match cedarling::Cedarling::new(bootstrap_config) {
         Ok(instance) => Ok(Engine(instance)),
-        // TODO might need a custom ruby exception for this.
-        // in the meantime RuntimeError will do
-        Err(err) => Err(magnus::Error::new(ruby.exception_runtime_error(), format!("{err:?}")))
+        Err(err) => Err(cedarling_ruby_exception(ruby, format!("Cannot create cedarling: {err}")))
     }
 }
 
@@ -241,10 +255,7 @@ fn authorize(ruby : &magnus::Ruby, engine : &Engine, request : magnus::Value)
     let AuthorizeRequest(request) = serde_magnus::deserialize(request)?;
     match cedarling.authorize(request) {
         Ok(cedarling_auth_result) => Ok(AuthorizeResult(cedarling_auth_result)),
-        Err(err) => {
-            let msg = format!("Error while authorizing: {}\n {:#?}\n\n", err, err);
-            Err(magnus::Error::new(ruby.exception_runtime_error(), msg))
-        }
+        Err(err) => Err(cedarling_ruby_exception(ruby, format!("Error while authorizing: {}\n {:#?}\n\n", err, err)))
     }
 }
 
@@ -257,6 +268,8 @@ fn init(ruby: &magnus::Ruby) -> Result<(), magnus::Error> {
     module.define_singleton_method("version_core", function!(version_core, 0))?;
     module.define_singleton_method("new", function!(instantiate_engine, -1))?;
     module.const_set("MAX_LOG_TTL", MAX_LOG_TTL)?;
+    // define Cedarling::Error exception base class
+    module.define_error("Error", ruby.exception_runtime_error())?;
 
     // definition of the Engine class, which is a facade for cedarling::Cedarling
     let class = ruby.define_class("Engine", ruby.class_object())?;
