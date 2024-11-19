@@ -1820,7 +1820,7 @@
     {
       "equality": "caseIgnoreMatch",
       "names": [
-        "jansAddres"
+        "jansAddress"
       ],
       "multivalued": true,
       "oid": "jansAttr",
@@ -4175,7 +4175,7 @@
         "jansOTPCache",
         "jansLastLogonTime",
         "jansActive",
-        "jansAddres",
+        "jansAddress",
         "jansEmail",
         "jansEntitlements",
         "jansExtId",
