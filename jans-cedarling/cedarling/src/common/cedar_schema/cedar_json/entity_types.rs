@@ -22,6 +22,7 @@ pub struct CedarSchemaRecord {
     pub entity_type: String,
     // represent RecordAttr
     // RecordAttr ::= STR ': {' Type [',' '"required"' ':' ( true | false )] '}'
+    // attributes as key is used attribute name
     pub attributes: HashMap<String, CedarSchemaEntityAttribute>,
 }
 

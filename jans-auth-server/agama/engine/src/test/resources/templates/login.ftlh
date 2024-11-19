@@ -25,25 +25,25 @@
 			<p class="fs-4 mb-5">Welcome</p>
 			
 			<#if !(success!true)>
-			    <p class="fs-6 text-danger mb-3">${msgs["login.errorMessage"]}</p>
+			    <p class="fs-6 text-danger mb-3">Incorrect username or password</p>
 			</#if>
 
 			<form method="post" enctype="application/x-www-form-urlencoded">
 				<div class="mb-3 row">
-					<label for="username" class="col-md-3 col-form-label">${msgs["login.username"]}</label>
+					<label for="username" class="col-md-3 col-form-label">Username</label>
 					<div class="col-md-9">
 						<input type="text" class="form-control" name="username" id="username" value="${uid!}" required>
 					</div>
 				</div>
 				<div class="mb-4 row">
-					<label for="password" class="col-md-3 col-form-label">${msgs["login.password"]}</label>
+					<label for="password" class="col-md-3 col-form-label">Password</label>
 					<div class="col-md-9">
 						<input type="password" class="form-control" id="password" name="password">
 					</div>
 				  </div>
 				<div class="row">
 					<div class="col-md-12 d-flex justify-content-end">
-						<input type="submit" class="btn btn-success px-4" value="${msgs["login.login"]}">
+						<input type="submit" class="btn btn-success px-4" value="Login">
 					</div>
 				</div>
 			</form>
