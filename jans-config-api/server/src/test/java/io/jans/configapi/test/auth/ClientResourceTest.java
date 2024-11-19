@@ -38,25 +38,21 @@ public class ClientResourceTest extends BaseTest{
                 .get(issuer+openidClientsUrl).then().statusCode(200);
     }
     
-    @Parameters({"issuer", "openidClientsUrl", "openid_client1"})
-    //@Test
-    public void postClient(final String issuer, final String openidClientsUrl, final String json) {
-        log.error("accessToken:{}, issuer:{}, openidClientsUrl:{}, json:{}", accessToken, issuer, openidClientsUrl, json);
-        log.error("Creating client using json string - getHttpService():{}, this.accessToken:{}", getHttpService(), this.accessToken);
-
-        HttpServiceResponse httpServiceResponse = getHttpService().executePost(issuer+openidClientsUrl, this.accessToken, null, json,
-                ContentType.APPLICATION_JSON, AUTHORIZATION_TYPE);
-        assertFalse(httpServiceResponse==null);
+    @Parameters({"issuer", "openidClientsUrl"})
+    @Test
+    public void getAllClient(final String issuer, final String openidClientsUrl) {
+        log.error("getAllClient() - accessToken:{}, issuer:{}, openidClientsUrl:{}", accessToken, issuer, openidClientsUrl);
+        Builder request = getResteasyService().getClientBuilder(issuer+openidClientsUrl);
+        request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
+        request.header(CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED);
         
-        int statusCode = httpServiceResponse.getHttpResponse().getStatusLine().getStatusCode();
+        Response response = request.get();
+        log.error("Response for Access Token -  response:{}", response);
 
-        Status status = Status.fromStatusCode(statusCode);
-        log.error("postClient -  using json string - status():{} ", status); 
-        assertEquals(status, Status.CREATED.getStatusCode());
     }
-    
+
     @Parameters({"issuer", "openidClientsUrl", "openid_client2"})
-    //@Test
+    @Test
     public void postClient2(final String issuer, final String openidClientsUrl, final String json) {
         log.error("postClient2 - accessToken:{}, issuer:{}, openidClientsUrl:{}, json:{}", accessToken, issuer, openidClientsUrl, json);
         log.error("postClient2 client using json string - getHttpService():{}, this.accessToken:{}", getHttpService(), this.accessToken);
@@ -65,7 +61,8 @@ public class ClientResourceTest extends BaseTest{
         request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
         request.header(CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED);
         
-        Response response = request.post(Entity.json(json));
+        //Response response = request.post(Entity.json(json));
+        Response response = request.post(Entity.entity(json, MediaType.APPLICATION_JSON));
         log.trace("Response for Access Token -  response:{}", response);
 
         if (response.getStatus() == 201) {
