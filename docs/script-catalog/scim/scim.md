@@ -131,9 +131,9 @@ Assume you are maintaining a user base of secret agents that work for your compa
 Let's alter `postSearchUsers`'s second parameter (`results`) to ensure addresses are not leaked:  
   
     for user in results.getEntries():
-        user.setAttribute("jansAddres", None)
+        user.setAttribute("jansAddress", None)
   
-This is very straightforward code except for the usage of `jansAddres`. Shouldn't it be simply `addresses` as the known SCIM attribute?
+This is very straightforward code except for the usage of `jansAddress`. Shouldn't it be simply `addresses` as the known SCIM attribute?
 
 Scripts work with entities that are about to be persisted or have already been saved so they kind of resemble the database structure (schema in MySQL terms). It turns out that database attribute names rarely match with SCIM names.
 
@@ -144,7 +144,7 @@ With that said, save your modifications. You may like the idea of adding some pr
     print "%d entries returned of %d" % (results.getEntriesCount(), results.getTotalEntriesCount())
     for user in results.getEntries():
         print "Flushing addresses for user %s" % user.getUid() 
-        user.setAttribute("jansAddres", None)
+        user.setAttribute("jansAddress", None)
   
 Ensure no addresses are returned anymore in your SCIM user searches. Happy testing!
 
