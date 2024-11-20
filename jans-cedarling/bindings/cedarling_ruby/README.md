@@ -67,12 +67,20 @@ tore_ok.yaml')}
 
 The simplest is to just say `rake`, which will build the necessary rust code, and run the ruby specs.
 
-Effectively, it does `cargo build -p cedarling_ruby` and then `rspec`.
+Effectively, it does `CEDARLING_RUBY_PATH_DYLIB=yes cargo build -p cedarling_ruby` and then `rspec`.
 
-You could also say, for example: `cargo build -p cedarling_ruby && rspec`.
+You could also say, for example: `CEDARLING_RUBY_PATH_DYLIB=yes cargo build -p cedarling_ruby && rspec`.
 
 Or even just `rspec` if you want a really tight loop on the specs. Of course that won't build the rust code.
 
+### env in config.toml
+If you want to avoid repeatedly specifying `CEDARLING_RUBY_PATH_DYLIB=yes`, you can put the following in `.cargo/config.toml`:
+```
+[env]
+CEDARLING_RUBY_PATH_DYLIB = "yes"
+```
+HOWEVER that will break `cargo test` in the `ext/` directory, and will break `cargo
+test --workspace`. YMMV
 ## Local Installation
 
 NOTE not working yet.

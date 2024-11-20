@@ -116,9 +116,9 @@ fn ruby_extension_dylib_path() {
     // Apparently this is the only way to retrieve the platform appropriate
     // cdylib file extension. It's not so great.
     let cdylib_extension = match &std::env::var("CARGO_CFG_TARGET_OS").unwrap()[..] {
-        "linux" => ".so",
-        "windows" => ".dll",
-        "macos" => ".dylib",
+        "linux" => "so",
+        "windows" => "dll",
+        "macos" => "dylib",
         other => panic!("Attempting to calculate cdylib file extension, but unknown CARGO_CFG_TARGET_OS encountered: {other}"),
     };
 
@@ -134,7 +134,7 @@ fn ruby_extension_dylib_path() {
     let lib_dir = lib_dir.canonicalize().expect(format!("cannot determine full path for {:?}", lib_dir).as_str());
 
     // Finally, specify the output name of the file.
-    let cedarling_ruby_dylib = lib_dir.join(format!("cedarling_ruby{cdylib_extension}"));
+    let cedarling_ruby_dylib = lib_dir.join("cedarling_ruby").with_extension(cdylib_extension);
 
     // Tell the linker the dylib path to write.
     // NOTE the lib_ prefix of the file is absent, as required by ruby extension loading.
@@ -146,5 +146,8 @@ fn ruby_extension_dylib_path() {
 fn main() {
     cedarling_version_in_env();
     ruby_extension_link_options();
-    ruby_extension_dylib_path();
+
+    if option_env!("CEDARLING_RUBY_PATH_DYLIB") == Some("yes") {
+        ruby_extension_dylib_path();
+    }
 }

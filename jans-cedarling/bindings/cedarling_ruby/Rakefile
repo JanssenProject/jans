@@ -9,6 +9,8 @@ RSpec::Core::RakeTask.new(:spec)
 # always rebuilds entirely from scratch.
 desc 'compile with cargo'
 task :compile do |t|
+  # ensure that dylib is copied to a path where ruby will find it
+  ENV['CEDARLING_RUBY_PATH_DYLIB'] = 'yes'
   sh 'cargo build --package cedarling_ruby'
 end
 

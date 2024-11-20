@@ -24,3 +24,6 @@ Gemfile.lock
 # but which is top-level ignored for python files.
 !lib/
 !bin/
+
+# ignore .cargo/config.toml to allow for local config
+**/.cargo/config.toml
