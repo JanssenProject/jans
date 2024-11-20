@@ -6,8 +6,8 @@
  */
 
 use crate::bootstrap_config::policy_store_config::{PolicyStoreConfig, PolicyStoreSource};
-use crate::common::policy_store::PolicyStore;
 use crate::common::policy_store::AgamaPolicyStore;
+use crate::common::policy_store::PolicyStore;
 
 /// Errors that can occur when loading a policy store.
 #[derive(Debug, thiserror::Error)]
@@ -25,15 +25,26 @@ pub enum PolicyStoreLoadError {
 // AgamaPolicyStore contains the structure to accommodate several policies,
 // and this code for now assumes that there is only ever one policy store,
 // extract the first 'policy_stores' entry.
-fn extract_first_policy_store(agama_policy_store: &AgamaPolicyStore) -> Result<PolicyStore,PolicyStoreLoadError> {
+fn extract_first_policy_store(
+    agama_policy_store: &AgamaPolicyStore,
+) -> Result<PolicyStore, PolicyStoreLoadError> {
     if agama_policy_store.policy_stores.len() != 1 {
-        return Err(PolicyStoreLoadError::InvalidStore(format!("expected exactly one 'policy_stores' entry, but found {:?}", agama_policy_store.policy_stores.len())))
+        return Err(PolicyStoreLoadError::InvalidStore(format!(
+            "expected exactly one 'policy_stores' entry, but found {:?}",
+            agama_policy_store.policy_stores.len()
+        )));
     }
     // extract exactly the first policy store in the struct
-    let mut policy_stores = agama_policy_store.policy_stores.values().take(1).collect::<Vec<_>>();
+    let mut policy_stores = agama_policy_store
+        .policy_stores
+        .values()
+        .take(1)
+        .collect::<Vec<_>>();
     match policy_stores.pop() {
         Some(policy_store) => Ok(policy_store.clone()),
-        None => Err(PolicyStoreLoadError::InvalidStore("error retrieving first policy_stores element".into())),
+        None => Err(PolicyStoreLoadError::InvalidStore(
+            "error retrieving first policy_stores element".into(),
+        )),
     }
 }
 

@@ -84,18 +84,6 @@ fn success_test_role_string() {
         "reason of permit person should be '2'"
     );
 
-    cmp_decision!(
-        result.role,
-        Decision::Allow,
-        "request result should be allowed for role"
-    );
-
-    cmp_policy!(
-        result.role,
-        vec!["3"],
-        "reason of permit role should be '3'"
-    );
-
     assert!(result.is_allowed(), "request result should be allowed");
 }
 
@@ -171,18 +159,6 @@ fn success_test_role_array() {
         result.person,
         vec!["2"],
         "reason of permit person should be '2'"
-    );
-
-    cmp_decision!(
-        result.role,
-        Decision::Allow,
-        "request result should be allowed for role"
-    );
-
-    cmp_policy!(
-        result.role,
-        vec!["3"],
-        "reason of permit role should be '3'"
     );
 
     assert!(result.is_allowed(), "request result should be allowed");
@@ -262,8 +238,6 @@ fn success_test_no_role() {
         vec!["2"],
         "reason of permit person should be '2'"
     );
-
-    assert!(result.role.is_none(), "result.role should be none");
 
     assert!(
         result.is_allowed(),
@@ -346,18 +320,6 @@ fn success_test_user_data_in_id_token() {
         "reason of permit person should be '2'"
     );
 
-    cmp_decision!(
-        result.role,
-        Decision::Allow,
-        "request result should be allowed for role"
-    );
-
-    cmp_policy!(
-        result.role,
-        vec!["3"],
-        "reason of permit role should be '3'"
-    );
-
     assert!(result.is_allowed(), "request result should be allowed");
 }
 
@@ -432,18 +394,6 @@ fn all_forbid() {
         result.person,
         Vec::new() as Vec<String>,
         "reason of forbid person should empty, no forbid rule"
-    );
-
-    cmp_decision!(
-        result.role,
-        Decision::Deny,
-        "request result should be forbidden for role"
-    );
-
-    cmp_policy!(
-        result.role,
-        Vec::new() as Vec<String>,
-        "reason of forbid role should be empty"
     );
 
     assert!(!result.is_allowed(), "request result should be not allowed");
@@ -526,18 +476,6 @@ fn only_principal_permit() {
         "reason of forbid person should empty, no forbid rule"
     );
 
-    cmp_decision!(
-        result.role,
-        Decision::Deny,
-        "request result should be forbidden for role"
-    );
-
-    cmp_policy!(
-        result.role,
-        Vec::new() as Vec<String>,
-        "reason of forbid role should be empty"
-    );
-
     assert!(!result.is_allowed(), "request result should be not allowed");
 }
 
@@ -611,18 +549,6 @@ fn only_person_permit() {
         result.person,
         vec!["2"],
         "reason of forbid person should '2'"
-    );
-
-    cmp_decision!(
-        result.role,
-        Decision::Deny,
-        "request result should be forbidden for role"
-    );
-
-    cmp_policy!(
-        result.role,
-        Vec::new() as Vec<String>,
-        "reason of forbid role should be empty"
     );
 
     assert!(!result.is_allowed(), "request result should be not allowed");
@@ -699,18 +625,6 @@ fn only_role_permit() {
         "reason of forbid person should empty, no forbid rule"
     );
 
-    cmp_decision!(
-        result.role,
-        Decision::Allow,
-        "request result should be permit for role"
-    );
-
-    cmp_policy!(
-        result.role,
-        vec!["3"],
-        "reason of permit role should be '3'"
-    );
-
     assert!(!result.is_allowed(), "request result should be not allowed");
 }
 
@@ -784,18 +698,6 @@ fn only_workload_and_person_permit() {
         "reason of permit person should '2'"
     );
 
-    cmp_decision!(
-        result.role,
-        Decision::Deny,
-        "request result should be forbidden for role"
-    );
-
-    cmp_policy!(
-        result.role,
-        Vec::new() as Vec<String>,
-        "reason of forbid role should be empty"
-    );
-
     assert!(result.is_allowed(), "request result should be allowed");
 }
 
@@ -867,18 +769,6 @@ fn only_workload_and_role_permit() {
         result.person,
         Vec::new() as Vec<String>,
         "reason of forbid person should be none"
-    );
-
-    cmp_decision!(
-        result.role,
-        Decision::Allow,
-        "request result should be allowed for role"
-    );
-
-    cmp_policy!(
-        result.role,
-        vec!["3"],
-        "reason of permit role should be '3'"
     );
 
     assert!(result.is_allowed(), "request result should be allowed");

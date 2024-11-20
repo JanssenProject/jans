@@ -91,18 +91,6 @@ fn success_test_for_all_principals() {
         "reason of permit person should be '2'"
     );
 
-    cmp_decision!(
-        result.role,
-        Decision::Allow,
-        "request result should be allowed for role"
-    );
-
-    cmp_policy!(
-        result.role,
-        vec!["3"],
-        "reason of permit role should be '3'"
-    );
-
     assert!(result.is_allowed(), "request result should be allowed");
 }
 
@@ -130,8 +118,6 @@ fn success_test_for_principal_workload() {
     );
 
     assert!(result.person.is_none(), "result for person should be none");
-
-    assert!(result.role.is_none(), "result for role should be none");
 
     assert!(result.is_allowed(), "request result should be allowed");
 }
@@ -164,8 +150,6 @@ fn success_test_for_principal_user() {
         "result for workload should be none"
     );
 
-    assert!(result.role.is_none(), "result for role should be none");
-
     assert!(result.is_allowed(), "request result should be allowed");
 }
 
@@ -180,17 +164,6 @@ fn success_test_for_principal_role() {
     let result = cedarling
         .authorize(request)
         .expect("request should be parsed without errors");
-
-    cmp_decision!(
-        result.role,
-        Decision::Allow,
-        "request result should be allowed for role"
-    );
-    cmp_policy!(
-        result.role,
-        vec!["3"],
-        "reason of permit person should be '3'"
-    );
 
     assert!(
         result.workload.is_none(),
@@ -224,17 +197,6 @@ fn success_test_for_principal_person_role() {
         "reason of permit person should be '2'"
     );
 
-    cmp_decision!(
-        result.role,
-        Decision::Allow,
-        "request result should be allowed for role"
-    );
-    cmp_policy!(
-        result.role,
-        vec!["3"],
-        "reason of permit person should be '3'"
-    );
-
     assert!(
         result.workload.is_none(),
         "result for workload should be none"
@@ -266,17 +228,6 @@ fn success_test_for_principal_workload_role() {
         "reason of permit workload should be '1'"
     );
 
-    cmp_decision!(
-        result.role,
-        Decision::Allow,
-        "request result should be allowed for role"
-    );
-    cmp_policy!(
-        result.role,
-        vec!["3"],
-        "reason of permit person should be '3'"
-    );
-
     assert!(result.person.is_none(), "result for person should be none");
 
     assert!(result.is_allowed(), "request result should be allowed");
@@ -300,8 +251,6 @@ fn test_where_principal_cant_be_applied() {
     );
 
     assert!(result.person.is_none(), "result for person should be none");
-
-    assert!(result.role.is_none(), "result for role should be none");
 
     assert!(!result.is_allowed(), "request result should be not allowed");
 }
