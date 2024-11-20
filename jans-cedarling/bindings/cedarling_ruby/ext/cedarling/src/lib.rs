@@ -7,6 +7,8 @@
 
 extern crate cedarling;
 
+use cedarling::bindings::cedar_policy;
+
 // this env var is set by build.rs
 const CEDARLING_VERSION: &str = env!("CEDARLING_VERSION");
 
@@ -15,7 +17,6 @@ fn version_core() -> Result<String,magnus::Error> {
     Ok(CEDARLING_VERSION.into())
 }
 
-// #[derive(Debug)]
 #[magnus::wrap(class = "Engine")]
 // silence "warning: field 0 is never read"
 // because this goes back to ruby and accesses will come from there.

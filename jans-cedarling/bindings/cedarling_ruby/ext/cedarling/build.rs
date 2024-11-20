@@ -14,10 +14,16 @@ fn manifest_dir() -> std::path::PathBuf {
 // side of the ruby binding.
 fn cedarling_version_in_env() {
     // Fetch cedarling version from its Cargo.toml
-    //
+
+    let cedarling_cargo_toml : &str = "../../../../cedarling/Cargo.toml";
     // This will panic if cwd contains non-utf8 characters. But it's a build
     // script, so we can assume that a failure here is not catastrophic.
-    let cedarling_cargo_toml = manifest_dir().join("../../../../cedarling/Cargo.toml").canonicalize().unwrap();
+    let cedarling_cargo_toml = manifest_dir()
+        .join(cedarling_cargo_toml)
+        .canonicalize()
+        .unwrap_or_else(|err|
+            format!("cannot find full path for {:?} because {}", cedarling_cargo_toml, err).into()
+        );
     let meta = cargo_metadata::MetadataCommand::new()
         .manifest_path(&cedarling_cargo_toml)
         .current_dir(manifest_dir())
@@ -60,7 +66,7 @@ fn ruby_extension_link_options() {
         .stdin(std::process::Stdio::piped()) // send script as stdin
         .stdout(std::process::Stdio::piped()) // Capture standard output
         .spawn()
-        .unwrap();
+        .expect("cannot find ruby executable");
 
     // This is effectively two lines of a ruby script, which output the relevant values.
     // Send script to the ruby process on its stdin
@@ -121,12 +127,11 @@ fn ruby_extension_dylib_path() {
     let lib_dir = manifest_dir().join("../../lib/cedarling_ruby");
 
     // Ensure that lib/cedarling_ruby dir exists, otherwise linker fails.
-    // TODO was this maybe also causing the trouble with the gem package and gem install?
-    if !std::fs::exists(&lib_dir).unwrap() {
+    if !std::fs::exists(&lib_dir).expect(format!("cannot find {:?} - possibly permissions are not correct", lib_dir).as_str()) {
         std::fs::create_dir(&lib_dir)
             .unwrap_or_else(|err| panic!("cannot create directory {lib_dir:?} {err}"));
     }
-    let lib_dir = lib_dir.canonicalize().unwrap();
+    let lib_dir = lib_dir.canonicalize().expect(format!("cannot determine full path for {:?}", lib_dir).as_str());
 
     // Finally, specify the output name of the file.
     let cedarling_ruby_dylib = lib_dir.join(format!("cedarling_ruby{cdylib_extension}"));
