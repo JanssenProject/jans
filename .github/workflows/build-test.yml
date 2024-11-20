@@ -4,11 +4,17 @@ on:
   push:
     branches:
       - main
+    paths:
+      - "jans-**"
+      - "agama"
   schedule:
     - cron: '0 8 * * *'
   pull_request:
     branches:
       - main
+    paths:
+      - "jans-**"
+      - "agama"
   workflow_dispatch:
     inputs:
       project:
@@ -48,8 +54,19 @@ jobs:
             if [ -z "$projects" ]; then
               projects="jans-bom jans-orm jans-core jans-lock/lock-server agama jans-auth-server jans-link jans-fido2 jans-scim jans-keycloak-link jans-config-api jans-keycloak-integration jans-casa"
             fi
+            pull_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
+            DIRECTORIES_CHANGED=$(gh pr view $pull_number --json files --jq '.files.[].path' | cut -d/ -f1 | sort -u | grep "jans-" || echo "$projects")
+            changed_projects=""
+            for dir in $DIRECTORIES_CHANGED; do
+              for project in $projects; do
+                if [[ "$dir" == "$project" ]]; then
+                  changed_projects="$changed_projects $project"
+                fi
+              done
+            done
+            echo "Changed projects: $changed_projects"          
             matrix="{\"include\":["
-            for project in $projects; do
+            for project in $changed_projects; do
               matrix="$matrix{\"service\":\"$project\",\"maven_skip_tests\":true},"
             done
             matrix="${matrix%,}]}"
