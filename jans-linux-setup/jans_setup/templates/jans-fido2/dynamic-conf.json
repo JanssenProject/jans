@@ -15,9 +15,7 @@
       "jansCustomPerson",
       "jansPerson"
    ],
-   "superGluuEnabled": false,
    "sessionIdPersistInCache": false,
-   "oldU2fMigrationEnabled": true,
    "errorReasonEnabled": false,
    "fido2Configuration":{
       "authenticatorCertsFolder":"%(fido2ConfigFolder)s/authenticator_cert",
@@ -36,6 +34,7 @@
             ]
          }
       ],
+      "metadataServers":[{"url": "https://mds.fidoalliance.org/" }],
       "userAutoEnrollment":false,
       "unfinishedRequestExpiration":180,
       "authenticationHistoryExpiration":1296000,

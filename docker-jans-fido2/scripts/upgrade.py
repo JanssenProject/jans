@@ -24,7 +24,6 @@ def _transform_fido2_dynamic_config(conf):
     # add missing config (if not exist)
     for k, v in [
         ("superGluuEnabled", False),
-        ("oldU2fMigrationEnabled", True),
         ("metadataUrlsProvider", ""),
         ("errorReasonEnabled", False),
         ("skipDownloadMdsEnabled", False),

@@ -82,9 +82,7 @@ It will return the result as below:
     "jansCustomPerson",
     "jansPerson"
   ],
-  "superGluuEnabled": false,
   "sessionIdPersistInCache": false,
-  "oldU2fMigrationEnabled": true,
   "errorReasonEnabled": false,
   "fido2Configuration": {
     "authenticatorCertsFolder": "/etc/jans/conf/fido2/authenticator_cert",
