@@ -24,7 +24,6 @@ jobs:
       max-parallel: 6
       matrix:
         istio: ["true", "false"]
-        #TODO: add '"pgsql"
         persistence-backends: ["MYSQL"]
       fail-fast: false
     runs-on: ubuntu-latest
