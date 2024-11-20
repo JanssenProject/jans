@@ -564,8 +564,6 @@ components:
           type: boolean
         sessionIdPersistInCache:
           type: boolean
-        oldU2fMigrationEnabled:
-          type: boolean
         errorReasonEnabled:
           type: boolean
         fido2Configuration:

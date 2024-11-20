@@ -75,9 +75,6 @@ public class AppConfiguration implements Configuration, Serializable {
     @DocProperty(description = "Boolean value specifying whether to persist session_id in cache", defaultValue = "false")
     private Boolean sessionIdPersistInCache = false;
 	
-	@DocProperty(description = "Boolean value to enable disable old oxAuth U2F enrollments migration")
-    private boolean oldU2fMigrationEnabled;
-	
 	@DocProperty(description = "Boolean value specifying whether to return detailed reason of the error from Fido2. Default value is false", defaultValue = "false")
 	private Boolean errorReasonEnabled = false;
 
@@ -204,14 +201,6 @@ public class AppConfiguration implements Configuration, Serializable {
     public void setSessionIdPersistInCache(Boolean sessionIdPersistInCache) {
         this.sessionIdPersistInCache = sessionIdPersistInCache;
     }
-
-	public boolean isOldU2fMigrationEnabled() {
-		return oldU2fMigrationEnabled;
-	}
-
-	public void setOldU2fMigrationEnabled(boolean oldU2fMigrationEnabled) {
-		this.oldU2fMigrationEnabled = oldU2fMigrationEnabled;
-	}
 
 	public Boolean getErrorReasonEnabled() {
 		return errorReasonEnabled;

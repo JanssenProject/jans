@@ -47,8 +47,7 @@ func TestResourceFido2Config_Mapping(t *testing.T) {
 			AuthenticationHistoryExpiration: 1296000,
 			enabledFidoAlgorithms:           []string{"RS256", "ES256"},
 		},
-		SuperGluuEnabled:       true,
-		OldU2fMigrationEnabled: true,
+
 	}
 
 	if err := toSchemaResource(data, cfg); err != nil {
