@@ -40,7 +40,7 @@ RUN wget -q https://maven.jans.io/maven/io/jans/jython-installer/${JYTHON_VERSIO
 # Config API
 # ==========
 
-ENV CN_VERSION=1.1.6-SNAPSHOT
+ENV CN_VERSION=1.1.6
 ENV CN_BUILD_DATE='2024-11-15 09:19'
 
 ENV CN_SOURCE_URL=https://jenkins.jans.io/maven/io/jans/jans-config-api-server/${CN_VERSION}/jans-config-api-server-${CN_VERSION}.war

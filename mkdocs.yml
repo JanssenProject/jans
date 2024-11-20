@@ -187,6 +187,7 @@ nav:
       - Client Authentication: janssen-server/auth-server/endpoints/client-authn.md
       - Authorization: janssen-server/auth-server/endpoints/authorization.md
       - Authorization Challenge: janssen-server/auth-server/endpoints/authorization-challenge.md
+      - Access Evaluation: janssen-server/auth-server/endpoints/access-evaluation.md
       - Token: janssen-server/auth-server/endpoints/token.md
       - SSA: janssen-server/auth-server/endpoints/ssa.md
       - Userinfo: janssen-server/auth-server/endpoints/userinfo.md

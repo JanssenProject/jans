@@ -6,10 +6,9 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-use super::claim_mapping::ClaimMapping;
-use super::{parse_option_hashmap, parse_option_string};
+pub use super::claim_mapping::ClaimMappings;
+use super::parse_option_string;
 use serde::Deserialize;
-use std::collections::HashMap;
 
 /// Represents metadata related to access tokens issued by a trusted issuer.
 ///
@@ -29,8 +28,11 @@ pub struct AccessTokenEntityMetadata {
     pub entity_metadata: TokenEntityMetadata,
 }
 
-/// Metadata associated with a token entity, which includes user identification,
-/// role mappings, and claim mappings.
+///  Structure for storing mapping JWT claims to `cedar-policy` custom defined types in the `schema`.
+/// 
+/// An optional mapping of claims to their values. Each claim is represented
+/// by a key-value pair where the key is the claim name and the value is
+/// a `ClaimMapping` struct.
 #[derive(Debug, PartialEq, Clone, Default, Deserialize)]
 pub struct TokenEntityMetadata {
     /// An optional user identifier extracted from the token metadata.
@@ -42,9 +44,10 @@ pub struct TokenEntityMetadata {
     /// An optional mapping of claims to their values. Each claim is represented
     /// by a key-value pair where the key is the claim name and the value is
     /// a `ClaimMapping` struct.
-    #[serde(deserialize_with = "parse_option_hashmap", default)]
-    pub claim_mapping: Option<HashMap<String, ClaimMapping>>,
+    #[serde(default)]
+    pub claim_mapping: ClaimMappings,
 }
+
 
 #[cfg(test)]
 mod test {
@@ -77,7 +80,7 @@ mod test {
             TokenEntityMetadata { 
                 user_id: Some("sub".into()), 
                 role_mapping: None, 
-                claim_mapping: None 
+                claim_mapping: Default::default() 
             }, 
             "Expected JSON with user_id and empty role_mapping to be parsed into TokenEntityMetadata"
         );
@@ -109,7 +112,7 @@ mod test {
             TokenEntityMetadata { 
                 user_id: Some("sub".into()), 
                 role_mapping: None, 
-                claim_mapping: None 
+                claim_mapping: Default::default()
             }, 
             "Expected YAML with user_id and empty role_mapping to be parsed into TokenEntityMetadata"
         );

@@ -18,7 +18,9 @@ use std::collections::HashSet;
 use crate::common::cedar_schema::CedarSchemaJson;
 
 use crate::authz::token_data::{AccessTokenData, IdTokenData, UserInfoTokenData};
-use crate::common::policy_store::{PolicyStore, TokenKind};
+use crate::common::policy_store::{
+    AccessTokenEntityMetadata, ClaimMappings, PolicyStore, TokenKind, TrustedIssuer,
+};
 use crate::jwt;
 use cedar_policy::EntityUid;
 pub use create::CedarPolicyCreateTypeError;
@@ -32,7 +34,7 @@ pub(crate) type DecodeTokensResult<'a> =
     jwt::DecodeTokensResult<'a, AccessTokenData, IdTokenData, UserInfoTokenData>;
 
 /// Access token entities
-pub(crate) struct AccessTokenEntities {
+pub struct AccessTokenEntities {
     pub workload_entity: cedar_policy::Entity,
     pub access_token_entity: cedar_policy::Entity,
 }
@@ -55,18 +57,18 @@ pub enum AccessTokenEntitiesError {
 pub fn create_access_token_entities(
     policy_store: &PolicyStore,
     data: &AccessTokenData,
+    meta: &AccessTokenEntityMetadata,
 ) -> Result<AccessTokenEntities, AccessTokenEntitiesError> {
-    let schema = &policy_store.cedar_schema.json;
+    let schema = &policy_store.schema.json;
     let namespace = policy_store.namespace();
+    let claim_mapping = &meta.entity_metadata.claim_mapping;
 
     let access_entity_meta = EntityMetadata::new(
         EntityParsedTypeName {
             typename: "Access_token",
             namespace,
         },
-        // TODO: get key from `Trusted Issuer:access_tokens:principal_identifier`
-        // field not implemented jet
-        "jti",
+        meta.principal_identifier.as_deref().unwrap_or("jti"),
     );
 
     let workload_entity_meta = EntityMetadata::new(
@@ -78,8 +80,18 @@ pub fn create_access_token_entities(
     );
 
     Ok(AccessTokenEntities {
-        access_token_entity: access_entity_meta.create_entity(schema, data, HashSet::new())?,
-        workload_entity: workload_entity_meta.create_entity(schema, data, HashSet::new())?,
+        access_token_entity: access_entity_meta.create_entity(
+            schema,
+            data,
+            HashSet::new(),
+            claim_mapping,
+        )?,
+        workload_entity: workload_entity_meta.create_entity(
+            schema,
+            data,
+            HashSet::new(),
+            claim_mapping,
+        )?,
     })
 }
 
@@ -87,8 +99,9 @@ pub fn create_access_token_entities(
 pub fn create_id_token_entity(
     policy_store: &PolicyStore,
     data: &IdTokenData,
+    claim_mapping: &ClaimMappings,
 ) -> Result<cedar_policy::Entity, CedarPolicyCreateTypeError> {
-    let schema = &policy_store.cedar_schema.json;
+    let schema = &policy_store.schema.json;
     let namespace = policy_store.namespace();
 
     EntityMetadata::new(
@@ -98,38 +111,62 @@ pub fn create_id_token_entity(
         },
         "jti",
     )
-    .create_entity(schema, data, HashSet::new())
+    .create_entity(schema, data, HashSet::new(), claim_mapping)
 }
 
 /// Create user entity
 pub fn create_user_entity(
     policy_store: &PolicyStore,
-    id_token_data: &IdTokenData,
-    userinfo_token_data: &UserInfoTokenData,
+    tokens: &DecodeTokensResult,
     parents: HashSet<EntityUid>,
+    trusted_issuer: &TrustedIssuer,
 ) -> Result<cedar_policy::Entity, CedarPolicyCreateTypeError> {
-    let schema = &policy_store.cedar_schema.json;
+    let user_id_mapping = trusted_issuer.get_user_id_mapping().unwrap_or_default();
+
+    let schema: &CedarSchemaJson = &policy_store.schema.json;
     let namespace = policy_store.namespace();
 
-    const SUB_KEY: &str = "sub";
-
-    // if 'sub' is not the same we discard the userinfo token
-    let payload =
-        if id_token_data.get_json_value(SUB_KEY) == userinfo_token_data.get_json_value(SUB_KEY) {
-            &id_token_data.merge(userinfo_token_data)
-        } else {
-            id_token_data
-        };
+    // payload and claim mapping for getting user ID
+    let (payload, claim_mapping): (&TokenPayload, &ClaimMappings) = match user_id_mapping.kind {
+        TokenKind::Access => (
+            &tokens.access_token,
+            &trusted_issuer.access_tokens.entity_metadata.claim_mapping,
+        ),
+        TokenKind::Id => (&tokens.id_token, &trusted_issuer.id_tokens.claim_mapping),
+        TokenKind::Userinfo => (
+            &tokens.userinfo_token,
+            &trusted_issuer.userinfo_tokens.claim_mapping,
+        ),
+        TokenKind::Transaction => return Err(CedarPolicyCreateTypeError::TransactionToken),
+    };
 
     EntityMetadata::new(
         EntityParsedTypeName {
             typename: "User",
             namespace,
         },
-        // TODO: load key from `Token Entity Metadata`
-        "sub",
+        user_id_mapping.mapping_field,
     )
-    .create_entity(schema, payload, parents)
+    .create_entity(schema, payload, parents, claim_mapping)
+}
+
+/// Create `Userinfo_token` entity
+pub fn create_userinfo_token_entity(
+    policy_store: &PolicyStore,
+    data: &UserInfoTokenData,
+    claim_mapping: &ClaimMappings,
+) -> Result<cedar_policy::Entity, CedarPolicyCreateTypeError> {
+    let schema = &policy_store.schema.json;
+    let namespace = policy_store.namespace();
+
+    EntityMetadata::new(
+        EntityParsedTypeName {
+            typename: "Userinfo_token",
+            namespace,
+        },
+        "jti",
+    )
+    .create_entity(schema, data, HashSet::new(), claim_mapping)
 }
 
 /// Describe errors on creating resource entity
@@ -156,6 +193,8 @@ pub fn create_resource_entity(
         schema,
         &resource.payload.into(),
         HashSet::new(),
+        // we no need mapping for resource because user put json structure and it should be correct
+        &ClaimMappings::default(),
     )?)
 }
 
@@ -173,12 +212,10 @@ pub enum RoleEntityError {
 pub fn create_role_entities(
     policy_store: &PolicyStore,
     tokens: &DecodeTokensResult,
+    trusted_issuer: &TrustedIssuer,
 ) -> Result<Vec<cedar_policy::Entity>, RoleEntityError> {
     // get role mapping or default value
-    let role_mapping = tokens
-        .trusted_issuer
-        .map(|trusted_issuer| trusted_issuer.get_role_mapping().unwrap_or_default())
-        .unwrap_or_default();
+    let role_mapping = trusted_issuer.get_role_mapping().unwrap_or_default();
 
     let parsed_typename = EntityParsedTypeName::new("Role", policy_store.namespace());
     let role_entity_type = parsed_typename.full_type_name();
@@ -188,11 +225,29 @@ pub fn create_role_entities(
         TokenKind::Access => &tokens.access_token,
         TokenKind::Id => &tokens.id_token,
         TokenKind::Userinfo => &tokens.userinfo_token,
-        TokenKind::Transaction => unimplemented!(),
+        TokenKind::Transaction => {
+            return Err(RoleEntityError::Create {
+                error: CedarPolicyCreateTypeError::TransactionToken,
+                token_kind: TokenKind::Transaction,
+            })
+        },
+    };
+
+    // we don't really need mapping for `role` but if user specify custom role with
+    let token_mapping = match role_mapping.kind {
+        TokenKind::Access => &trusted_issuer.access_tokens.entity_metadata.claim_mapping,
+        TokenKind::Id => &trusted_issuer.id_tokens.claim_mapping,
+        TokenKind::Userinfo => &trusted_issuer.userinfo_tokens.claim_mapping,
+        TokenKind::Transaction => {
+            return Err(RoleEntityError::Create {
+                error: CedarPolicyCreateTypeError::TransactionToken,
+                token_kind: TokenKind::Transaction,
+            })
+        },
     };
 
     // get payload of role id in JWT token data
-    let Ok(payload) = token_data.get_payload(role_mapping.role_mapping_field) else {
+    let Ok(payload) = token_data.get_payload(role_mapping.mapping_field) else {
         // if key not found we return empty vector
         return Ok(Vec::new());
     };
@@ -242,7 +297,7 @@ pub fn create_role_entities(
         }
     };
 
-    let schema = &policy_store.cedar_schema.json;
+    let schema = &policy_store.schema.json;
 
     // create role entity for each entity uid
     entity_uid_vec
@@ -254,6 +309,7 @@ pub fn create_role_entities(
                 schema,
                 token_data,
                 HashSet::new(),
+                token_mapping,
             )
             .map_err(|err| RoleEntityError::Create {
                 error: err,

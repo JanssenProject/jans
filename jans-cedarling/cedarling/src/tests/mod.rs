@@ -9,8 +9,8 @@
 
 mod utils;
 
-mod agama_policy_test;
 mod cases_authorize_different_principals;
 mod cases_authorize_namespace_jans2;
 mod cases_authorize_without_check_jwt;
+mod schema_type_mapping;
 mod success_test_json;
