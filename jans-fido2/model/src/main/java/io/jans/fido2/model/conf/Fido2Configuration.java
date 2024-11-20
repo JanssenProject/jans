@@ -53,8 +53,8 @@ public class Fido2Configuration {
     private List<String> hints = new ArrayList<String>();
     @DocProperty(description = "If authenticators have been enabled for use in a specific protected envt (enterprise authenticators)")
     private boolean enterpriseAttestation = false;
-    @DocProperty(description = "Enum value indicating whether MDS validation should be omitted during attestation")
-    private String attestationMode;
+    @DocProperty(description = "String value indicating whether MDS validation should be omitted during attestation")
+    private String attestationMode = "monitor";
 
     public String getAuthenticatorCertsFolder() {
         return authenticatorCertsFolder;

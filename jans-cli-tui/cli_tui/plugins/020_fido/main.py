@@ -127,7 +127,6 @@ class Plugin(DialogUtils):
                                             style='class:outh-scope-text'
                                             ,widget_style=cli_style.black_bg_widget
                                             ),
-                                self.app.getTitledCheckBox(_("Enable Super Gluu"), name='superGluuEnabled', checked=self.data.get('superGluuEnabled'), jans_help=self.app.get_help_from_schema(self.schema, 'superGluuEnabled'), style=cli_style.check_box, widget_style=cli_style.black_bg_widget),
                                 Window(height=1),
                                 VSplit([Window(),
                                 HSplit([Button(_("Save"), handler=self.save_config)]),
