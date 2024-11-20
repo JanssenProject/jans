@@ -6,6 +6,10 @@ For a really quick start, see [development](#development) below.
 
 ## Installation
 
+See [development](#development) below.
+
+NOTE this part is not active yet and will not work. Leaving it here as a reminder.
+
 TODO: Replace `UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG` with your gem name right after releasing it to RubyGems.org. Please do not do it earlier due to security reasons. Alternatively, replace this section with instructions to install your gem from git if you don't plan to release to RubyGems.org.
 
 Install the gem and add to the application's Gemfile by executing:
@@ -51,7 +55,9 @@ Once you have a working ruby installation:
 
 In the console you can do the following:
 
-```
+NOTE: Ignore the warning `Ignoring cedarling-0.1.0 because its extensions are not built. Try: gem pristine cedarling --version 0.1.0`. It will be silenced.
+
+```ruby
 $ bin/console
 3.3.0 :001 > Cedarling::VERSION 
  => "0.1.0" 
@@ -81,6 +87,7 @@ CEDARLING_RUBY_PATH_DYLIB = "yes"
 ```
 HOWEVER that will break `cargo test` in the `ext/` directory, and will break `cargo
 test --workspace`. YMMV
+
 ## Local Installation
 
 NOTE not working yet.
