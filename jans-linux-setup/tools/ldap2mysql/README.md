@@ -3,7 +3,7 @@
 
 This script migrates data from ldap to MySQL.
 
-1. To use this script, firt install **python3-ldap** module
+1. To use this script, first install **python3-ldap** module
   `apt install python3-ldap`
 
 2. Install MySQL Server, create a database (namely **jansdb**), add a user (namely **jans**) and

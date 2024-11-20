@@ -86,7 +86,10 @@ class Request:
     resource: ResourceData
     context: Dict[str, Any]
 
-    def __init__(self, access_token: str,
+    def __init__(self, 
+                 access_token: str,
+                 id_token: str,
+                 userinfo_token: str,
                  action: str,
                  resource: ResourceData,
                  context: Dict[str, Any]) -> None: ...

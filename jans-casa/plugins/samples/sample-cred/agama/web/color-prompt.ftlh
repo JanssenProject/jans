@@ -20,7 +20,7 @@
             </div>
             <div class="flex justify-end mt2">
                 <input type="submit" class="f7-cust bw0 br1 ph4 pv2 bg-bsgreen-success white hover-bsgreen-success hover-white btn cust-primary-button"
-                    value="${msgs['login.login']}">
+                    value="Login">
             </div>        
         </form>
         

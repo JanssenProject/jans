@@ -146,7 +146,7 @@ If you only want to build the library without installing it in the Python enviro
 
   To run the tests, with `pytest`:
   
-  1. Make sure that you have installed the `cedarling_python` package in your virtual enviroment or system.
+  1. Make sure that you have installed the `cedarling_python` package in your virtual environment or system.
   1. Install `pytest`:
 
      ```bash
