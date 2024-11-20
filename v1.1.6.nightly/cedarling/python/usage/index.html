@@ -7376,8 +7376,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#demo-script" class="md-nav__link">
-    Demo script
+  <a href="#output" class="md-nav__link">
+    Output
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#explanation" class="md-nav__link">
+    Explanation
   </a>
   
 </li>
@@ -8462,8 +8469,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#demo-script" class="md-nav__link">
-    Demo script
+  <a href="#output" class="md-nav__link">
+    Output
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#explanation" class="md-nav__link">
+    Explanation
   </a>
   
 </li>
@@ -8518,227 +8532,92 @@
 
 
 <h1 id="python-usage">Python usage<a class="headerlink" href="#python-usage" title="Permanent link">#</a></h1>
-<p>In this example, we will show an example Python script that calls the <code>cedarling_python</code> module and calls the <code>authz</code> function. Before beginning, ensure that you have completed the <a href="../#building">building steps</a> and are currently in a virtual Python environment that has the <code>cedarling_python</code> module installed.</p>
-<h2 id="demo-script">Demo script<a class="headerlink" href="#demo-script" title="Permanent link">#</a></h2>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">cedarling_python</span> <span class="kn">import</span> <span class="n">MemoryLogConfig</span><span class="p">,</span> <span class="n">DisabledLoggingConfig</span><span class="p">,</span> <span class="n">StdOutLogConfig</span>
-<span class="kn">from</span> <span class="nn">cedarling_python</span> <span class="kn">import</span> <span class="n">PolicyStoreSource</span><span class="p">,</span> <span class="n">PolicyStoreConfig</span><span class="p">,</span> <span class="n">BootstrapConfig</span><span class="p">,</span> <span class="n">JwtConfig</span>
-<span class="kn">from</span> <span class="nn">cedarling_python</span> <span class="kn">import</span> <span class="n">Cedarling</span><span class="p">,</span> <span class="n">ResourceData</span><span class="p">,</span> <span class="n">Request</span>
+<p>In this example, we will show an example Python script that calls the <code>cedarling_python</code> module and calls the <code>authorize()</code> function.</p>
+<ul>
+<li>Before beginning, ensure that you have completed the <a href="../#building">building steps</a> and are currently in a virtual Python environment that has the <code>cedarling_python</code> module installed. You can confirm this with <code>pip list</code>.</li>
+<li>Run the script <code>jans/jans-cedarling/bindings/cedarling_python/example.py</code> from within the virtual environment.</li>
+</ul>
+<h2 id="output">Output<a class="headerlink" href="#output" title="Permanent link">#</a></h2>
+<div class="highlight"><pre><span></span><code>(venv) $ python example.py
+Policy store location not provided, use &#39;CEDARLING_LOCAL_POLICY_STORE&#39; environment variable
+Used default policy store path: example_files/policy-store.json
 
-<span class="c1"># use MemoryLogConfig to store logs in memory with a time-to-live of 120 seconds</span>
-<span class="c1"># by default it is 60 seconds</span>
-<span class="n">log_config</span> <span class="o">=</span> <span class="n">MemoryLogConfig</span><span class="p">(</span><span class="n">log_ttl</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
-<span class="c1"># we can also set value to as property</span>
-<span class="c1"># log_config.log_ttl = 120</span>
+{&quot;id&quot;:&quot;0193414e-9672-786a-986c-57f48d41c4e4&quot;,&quot;time&quot;:1731967489,&quot;log_kind&quot;:&quot;System&quot;,&quot;pdp_id&quot;:&quot;c0ec33ff-9482-4bdc-83f6-2925a41a3280&quot;,&quot;msg&quot;:&quot;configuration parsed successfully&quot;}
+{&quot;id&quot;:&quot;0193414e-9672-786a-986c-57f5379086c3&quot;,&quot;time&quot;:1731967489,&quot;log_kind&quot;:&quot;System&quot;,&quot;pdp_id&quot;:&quot;c0ec33ff-9482-4bdc-83f6-2925a41a3280&quot;,&quot;msg&quot;:&quot;Cedarling Authz initialized successfully&quot;,&quot;application_id&quot;:&quot;TestApp&quot;}
+{&quot;id&quot;:&quot;0193414e-9676-7d8a-b55b-3f0097355851&quot;,&quot;time&quot;:1731967489,&quot;log_kind&quot;:&quot;Decision&quot;,&quot;pdp_id&quot;:&quot;c0ec33ff-9482-4bdc-83f6-2925a41a3280&quot;,&quot;msg&quot;:&quot;Result of authorize.&quot;,&quot;application_id&quot;:&quot;TestApp&quot;,&quot;action&quot;:&quot;Jans::Action::\&quot;Read\&quot;&quot;,&quot;resource&quot;:&quot;Jans::Application::\&quot;some_id\&quot;&quot;,&quot;context&quot;:{&quot;user_agent&quot;:&quot;Linux&quot;,&quot;operating_system&quot;:&quot;Linux&quot;,&quot;network_type&quot;:&quot;Local&quot;,&quot;network&quot;:&quot;127.0.0.1&quot;,&quot;geolocation&quot;:[&quot;America&quot;],&quot;fraud_indicators&quot;:[&quot;Allowed&quot;],&quot;device_health&quot;:[&quot;Healthy&quot;],&quot;current_time&quot;:1731967489},&quot;person_principal&quot;:&quot;Jans::User::\&quot;qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0\&quot;&quot;,&quot;person_diagnostics&quot;:{&quot;reason&quot;:[&quot;840da5d85403f35ea76519ed1a18a33989f855bf1cf8&quot;],&quot;errors&quot;:[]},&quot;person_decision&quot;:&quot;ALLOW&quot;,&quot;workload_principal&quot;:&quot;Jans::Workload::\&quot;d7f71bea-c38d-4caf-a1ba-e43c74a11a62\&quot;&quot;,&quot;workload_diagnostics&quot;:{&quot;reason&quot;:[&quot;444da5d85403f35ea76519ed1a18a33989f855bf1cf8&quot;],&quot;errors&quot;:[]},&quot;workload_decision&quot;:&quot;ALLOW&quot;,&quot;role_authorize_info&quot;:[{&quot;role_principal&quot;:&quot;Jans::Role::\&quot;CasaAdmin\&quot;&quot;,&quot;role_diagnostics&quot;:{&quot;reason&quot;:[],&quot;errors&quot;:[]},&quot;role_decision&quot;:&quot;DENY&quot;}],&quot;authorized&quot;:true}
+Result of workload authorization: ALLOW
+Policy ID used:
+444da5d85403f35ea76519ed1a18a33989f855bf1cf8
+Errors during authorization: 0
 
-<span class="c1"># use DisabledLoggingConfig to ignore all logging</span>
-<span class="c1"># log_config = DisabledLoggingConfig()</span>
+Result of person authorization: ALLOW
+Policy ID used:
+840da5d85403f35ea76519ed1a18a33989f855bf1cf8
+Errors during authorization: 0
 
-<span class="c1"># use StdOutLogConfig to print logs to stdout</span>
-<span class="n">log_config</span> <span class="o">=</span> <span class="n">StdOutLogConfig</span><span class="p">()</span>
+Role authorization present
+Role authorization result: DENY
+Errors during authorization: 0
+</code></pre></div>
+<h2 id="explanation">Explanation<a class="headerlink" href="#explanation" title="Permanent link">#</a></h2>
+<p>Cedarling creates principal entities from the access, ID and userinfo tokens. The action, resource and context entities are declared in code. These four entities together form the <code>PARC</code> format that cedarling evaluates against policies provided in the policy store. The principal entities can be either User, Workload or Role. After forming the entities, cedarling evaluates them against the policies provided in the policy store. If entity is explicitly permitted by a policy, the result of the evaluation is <code>ALLOW</code>, otherwise it is <code>DENY</code>.</p>
+<p>In this case there are two policies in the store, one for User entities and one for Workload entities:</p>
+<div class="highlight"><pre><span></span><code>@444da5d85403f35ea76519ed1a18a33989f855bf1cf8
+permit(
+    principal is Jans::Workload,
+    action in [Jans::Action::&quot;Read&quot;],
+    resource is Jans::Application
+)when{
+    resource.name == &quot;Some Application&quot;
+};
 
-<span class="c1"># Create policy source configuration</span>
-<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&quot;policy-store.json&quot;</span><span class="p">,</span>
-          <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;r&quot;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-    <span class="n">policy_raw_json</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">This policy store contains 2 policy as such:</span>
-<span class="sd">permit(</span>
-<span class="sd">    principal is Jans::Workload,</span>
-<span class="sd">    action in [Jans::Action::&quot;Update&quot;],</span>
-<span class="sd">    resource is Jans::Issue</span>
-<span class="sd">)when{</span>
-<span class="sd">    principal.org_id == resource.org_id</span>
-<span class="sd">};</span>
+@840da5d85403f35ea76519ed1a18a33989f855bf1cf8
+permit(
+    principal is Jans::User,
+    action in [Jans::Action::&quot;Read&quot;],
+    resource is Jans::Application
+)when{
+    resource.name == &quot;Some Application&quot;
+};
+</code></pre></div>
+<p>These two policies say that a Principal entity (User or Workload) is allowed to execute a <code>Read</code> action on an Application resource when the resource is named "Some Application". As there are no policies for Role entities, the result of the evaluation for the Role entity is <code>DENY</code>.</p>
+<p>In the script, the action, resource and context entities are used to create the request and execute the <code>authorize()</code> call:</p>
+<p><div class="highlight"><pre><span></span><code><span class="n">action</span> <span class="o">=</span> <span class="s1">&#39;Jans::Action::&quot;Read&quot;&#39;</span>
 
-<span class="sd">permit(</span>
-<span class="sd">    principal is Jans::User,</span>
-<span class="sd">    action in [Jans::Action::&quot;Update&quot;],</span>
-<span class="sd">    resource is Jans::Issue</span>
-<span class="sd">)when{</span>
-<span class="sd">    principal.country == resource.country</span>
-<span class="sd">};</span>
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="c1"># for now we support only json source</span>
-<span class="n">policy_source</span> <span class="o">=</span> <span class="n">PolicyStoreSource</span><span class="p">(</span><span class="n">json</span><span class="o">=</span><span class="n">policy_raw_json</span><span class="p">)</span>
-
-<span class="n">policy_store_config</span> <span class="o">=</span> <span class="n">PolicyStoreConfig</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">policy_source</span><span class="p">)</span>
-
-
-<span class="c1"># Create jwt configuration</span>
-<span class="c1"># do not validate JWT tokens</span>
-<span class="n">jwt_config</span> <span class="o">=</span> <span class="n">JwtConfig</span><span class="p">(</span><span class="n">enabled</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-
-<span class="c1"># collect all in the BootstrapConfig</span>
-<span class="n">bootstrap_config</span> <span class="o">=</span> <span class="n">BootstrapConfig</span><span class="p">(</span>
-    <span class="n">application_name</span><span class="o">=</span><span class="s2">&quot;TestApp&quot;</span><span class="p">,</span>
-    <span class="n">log_config</span><span class="o">=</span><span class="n">log_config</span><span class="p">,</span>
-    <span class="n">policy_store_config</span><span class="o">=</span><span class="n">policy_store_config</span><span class="p">,</span>
-    <span class="n">jwt_config</span><span class="o">=</span><span class="n">jwt_config</span>
-<span class="p">)</span>
-
-<span class="c1"># initialize cedarling instance</span>
-<span class="c1"># all values in the bootstrap_config is parsed and validated at this step.</span>
-<span class="n">instance</span> <span class="o">=</span> <span class="n">Cedarling</span><span class="p">(</span><span class="n">bootstrap_config</span><span class="p">)</span>
-
-<span class="c1"># returns a list of all active log ids</span>
-<span class="c1"># active_log_ids = instance.get_log_ids()</span>
-
-<span class="c1"># get log entry by id</span>
-<span class="c1"># log_entry = instance.get_log_by_id(active_log_ids[0])</span>
-
-
-<span class="c1"># show logs</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Logs stored in memory:&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="o">*</span><span class="n">instance</span><span class="o">.</span><span class="n">pop_logs</span><span class="p">(),</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
-
-
-<span class="c1"># //// Execute authentication request ////</span>
-
-<span class="c1"># Creating cedar resource object.</span>
-<span class="c1"># field resource_type and id is mandatory</span>
-<span class="c1"># other fields are attributes of the resource.</span>
-<span class="n">resource</span> <span class="o">=</span> <span class="n">ResourceData</span><span class="p">(</span><span class="n">resource_type</span><span class="o">=</span><span class="s2">&quot;Jans::Issue&quot;</span><span class="p">,</span>
-                        <span class="nb">id</span><span class="o">=</span><span class="s2">&quot;random_id&quot;</span><span class="p">,</span> <span class="n">org_id</span><span class="o">=</span><span class="s2">&quot;some_long_id&quot;</span><span class="p">,</span> <span class="n">country</span><span class="o">=</span><span class="s2">&quot;US&quot;</span><span class="p">)</span>
-<span class="c1"># or we can init resource using dict</span>
 <span class="n">resource</span> <span class="o">=</span> <span class="n">ResourceData</span><span class="o">.</span><span class="n">from_dict</span><span class="p">({</span>
-    <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;Jans::Issue&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;random_id&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;org_id&quot;</span><span class="p">:</span> <span class="s2">&quot;some_long_id&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;country&quot;</span><span class="p">:</span> <span class="s2">&quot;US&quot;</span>
+    <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;Jans::Application&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="s2">&quot;some_id&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;app_id&quot;</span><span class="p">:</span> <span class="s2">&quot;application_id&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Some Application&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s2">&quot;host&quot;</span><span class="p">:</span> <span class="s2">&quot;jans.test&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="s2">&quot;/protected-endpoint&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;protocol&quot;</span><span class="p">:</span> <span class="s2">&quot;http&quot;</span>
+    <span class="p">}</span>
 <span class="p">})</span>
 
+<span class="n">context</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;current_time&quot;</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()),</span>
+    <span class="s2">&quot;device_health&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Healthy&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;fraud_indicators&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Allowed&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;geolocation&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;America&quot;</span><span class="p">],</span>
+    <span class="s2">&quot;network&quot;</span><span class="p">:</span> <span class="s2">&quot;127.0.0.1&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;network_type&quot;</span><span class="p">:</span> <span class="s2">&quot;Local&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;operating_system&quot;</span><span class="p">:</span> <span class="s2">&quot;Linux&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;user_agent&quot;</span><span class="p">:</span> <span class="s2">&quot;Linux&quot;</span>
+<span class="p">}</span>
 
-<span class="n">action_token</span> <span class="o">=</span> <span class="s2">&quot;eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJib0c4ZGZjNU1LVG4zN283Z3NkQ2V5cUw4THBXUXRnb080MW0xS1p3ZHEwIiwiY29kZSI6ImJmMTkzNGY2LTM5MDUtNDIwYS04Mjk5LTZiMmUzZmZkZGQ2ZSIsImlzcyI6Imh0dHBzOi8vYWRtaW4tdWktdGVzdC5nbHV1Lm9yZyIsInRva2VuX3R5cGUiOiJCZWFyZXIiLCJjbGllbnRfaWQiOiI1YjQ0ODdjNC04ZGIxLTQwOWQtYTY1My1mOTA3YjgwOTQwMzkiLCJhdWQiOiI1YjQ0ODdjNC04ZGIxLTQwOWQtYTY1My1mOTA3YjgwOTQwMzkiLCJhY3IiOiJiYXNpYyIsIng1dCNTMjU2IjoiIiwic2NvcGUiOlsib3BlbmlkIiwicHJvZmlsZSJdLCJvcmdfaWQiOiJzb21lX2xvbmdfaWQiLCJhdXRoX3RpbWUiOjE3MjQ4MzA3NDYsImV4cCI6MTcyNDk0NTk3OCwiaWF0IjoxNzI0ODMyMjU5LCJqdGkiOiJseFRtQ1ZSRlR4T2pKZ3ZFRXBvek1RIiwibmFtZSI6IkRlZmF1bHQgQWRtaW4gVXNlciIsInN0YXR1cyI6eyJzdGF0dXNfbGlzdCI6eyJpZHgiOjIwMSwidXJpIjoiaHR0cHM6Ly9hZG1pbi11aS10ZXN0LmdsdXUub3JnL2phbnMtYXV0aC9yZXN0djEvc3RhdHVzX2xpc3QifX19._eQT-DsfE_kgdhA0YOyFxxPEMNw44iwoelWa5iU1n9s&quot;</span>
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">JSON payload of access token</span>
-<span class="sd">{</span>
-<span class="sd">  &quot;sub&quot;: &quot;boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0&quot;,</span>
-<span class="sd">  &quot;code&quot;: &quot;bf1934f6-3905-420a-8299-6b2e3ffddd6e&quot;,</span>
-<span class="sd">  &quot;iss&quot;: &quot;https://admin-ui-test.gluu.org&quot;,</span>
-<span class="sd">  &quot;token_type&quot;: &quot;Bearer&quot;,</span>
-<span class="sd">  &quot;client_id&quot;: &quot;5b4487c4-8db1-409d-a653-f907b8094039&quot;,</span>
-<span class="sd">  &quot;aud&quot;: &quot;5b4487c4-8db1-409d-a653-f907b8094039&quot;,</span>
-<span class="sd">  &quot;acr&quot;: &quot;basic&quot;,</span>
-<span class="sd">  &quot;x5t#S256&quot;: &quot;&quot;,</span>
-<span class="sd">  &quot;scope&quot;: [</span>
-<span class="sd">    &quot;openid&quot;,</span>
-<span class="sd">    &quot;profile&quot;</span>
-<span class="sd">  ],</span>
-<span class="sd">  &quot;org_id&quot;: &quot;some_long_id&quot;,</span>
-<span class="sd">  &quot;auth_time&quot;: 1724830746,</span>
-<span class="sd">  &quot;exp&quot;: 1724945978,</span>
-<span class="sd">  &quot;iat&quot;: 1724832259,</span>
-<span class="sd">  &quot;jti&quot;: &quot;lxTmCVRFTxOjJgvEEpozMQ&quot;,</span>
-<span class="sd">  &quot;name&quot;: &quot;Default Admin User&quot;,</span>
-<span class="sd">  &quot;status&quot;: {</span>
-<span class="sd">    &quot;status_list&quot;: {</span>
-<span class="sd">      &quot;idx&quot;: 201,</span>
-<span class="sd">      &quot;uri&quot;: &quot;https://admin-ui-test.gluu.org/jans-auth/restv1/status_list&quot;</span>
-<span class="sd">    }</span>
-<span class="sd">  }</span>
-<span class="sd">}</span>
-<span class="sd">&quot;&quot;&quot;</span>
-
-<span class="n">id_token</span> <span class="o">=</span> <span class="s2">&quot;eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhY3IiOiJiYXNpYyIsImFtciI6IjEwIiwiYXVkIjoiNWI0NDg3YzQtOGRiMS00MDlkLWE2NTMtZjkwN2I4MDk0MDM5IiwiZXhwIjoxNzI0ODM1ODU5LCJpYXQiOjE3MjQ4MzIyNTksInN1YiI6ImJvRzhkZmM1TUtUbjM3bzdnc2RDZXlxTDhMcFdRdGdvTzQxbTFLWndkcTAiLCJpc3MiOiJodHRwczovL2FkbWluLXVpLXRlc3QuZ2x1dS5vcmciLCJqdGkiOiJzazNUNDBOWVNZdWs1c2FIWk5wa1p3Iiwibm9uY2UiOiJjMzg3MmFmOS1hMGY1LTRjM2YtYTFhZi1mOWQwZTg4NDZlODEiLCJzaWQiOiI2YTdmZTUwYS1kODEwLTQ1NGQtYmU1ZC01NDlkMjk1OTVhMDkiLCJqYW5zT3BlbklEQ29ubmVjdFZlcnNpb24iOiJvcGVuaWRjb25uZWN0LTEuMCIsImNfaGFzaCI6InBHb0s2WV9SS2NXSGtVZWNNOXV3NlEiLCJhdXRoX3RpbWUiOjE3MjQ4MzA3NDYsImdyYW50IjoiYXV0aG9yaXphdGlvbl9jb2RlIiwic3RhdHVzIjp7InN0YXR1c19saXN0Ijp7ImlkeCI6MjAyLCJ1cmkiOiJodHRwczovL2FkbWluLXVpLXRlc3QuZ2x1dS5vcmcvamFucy1hdXRoL3Jlc3R2MS9zdGF0dXNfbGlzdCJ9fX0.8BwLLGkFpWGx8wGpvVmNk_Ao8nZrP_WT-zoo-MY4zqY&quot;</span>
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">JSON payload of id token</span>
-<span class="sd">{</span>
-<span class="sd">  &quot;acr&quot;: &quot;basic&quot;,</span>
-<span class="sd">  &quot;amr&quot;: &quot;10&quot;,</span>
-<span class="sd">  &quot;aud&quot;: &quot;5b4487c4-8db1-409d-a653-f907b8094039&quot;,</span>
-<span class="sd">  &quot;exp&quot;: 1724835859,</span>
-<span class="sd">  &quot;iat&quot;: 1724832259,</span>
-<span class="sd">  &quot;sub&quot;: &quot;boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0&quot;,</span>
-<span class="sd">  &quot;iss&quot;: &quot;https://admin-ui-test.gluu.org&quot;,</span>
-<span class="sd">  &quot;jti&quot;: &quot;sk3T40NYSYuk5saHZNpkZw&quot;,</span>
-<span class="sd">  &quot;nonce&quot;: &quot;c3872af9-a0f5-4c3f-a1af-f9d0e8846e81&quot;,</span>
-<span class="sd">  &quot;sid&quot;: &quot;6a7fe50a-d810-454d-be5d-549d29595a09&quot;,</span>
-<span class="sd">  &quot;jansOpenIDConnectVersion&quot;: &quot;openidconnect-1.0&quot;,</span>
-<span class="sd">  &quot;c_hash&quot;: &quot;pGoK6Y_RKcWHkUecM9uw6Q&quot;,</span>
-<span class="sd">  &quot;auth_time&quot;: 1724830746,</span>
-<span class="sd">  &quot;grant&quot;: &quot;authorization_code&quot;,</span>
-<span class="sd">  &quot;status&quot;: {</span>
-<span class="sd">    &quot;status_list&quot;: {</span>
-<span class="sd">      &quot;idx&quot;: 202,</span>
-<span class="sd">      &quot;uri&quot;: &quot;https://admin-ui-test.gluu.org/jans-auth/restv1/status_list&quot;</span>
-<span class="sd">    }</span>
-<span class="sd">  }</span>
-<span class="sd">}</span>
-<span class="sd">&quot;&quot;&quot;</span>
-
-<span class="n">userinfo_token</span> <span class="o">=</span> <span class="s2">&quot;eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjb3VudHJ5IjoiVVMiLCJlbWFpbCI6InVzZXJAZXhhbXBsZS5jb20iLCJ1c2VybmFtZSI6IlVzZXJOYW1lRXhhbXBsZSIsInN1YiI6ImJvRzhkZmM1TUtUbjM3bzdnc2RDZXlxTDhMcFdRdGdvTzQxbTFLWndkcTAiLCJpc3MiOiJodHRwczovL2FkbWluLXVpLXRlc3QuZ2x1dS5vcmciLCJnaXZlbl9uYW1lIjoiQWRtaW4iLCJtaWRkbGVfbmFtZSI6IkFkbWluIiwiaW51bSI6IjhkMWNkZTZhLTE0NDctNDc2Ni1iM2M4LTE2NjYzZTEzYjQ1OCIsImNsaWVudF9pZCI6IjViNDQ4N2M0LThkYjEtNDA5ZC1hNjUzLWY5MDdiODA5NDAzOSIsImF1ZCI6IjViNDQ4N2M0LThkYjEtNDA5ZC1hNjUzLWY5MDdiODA5NDAzOSIsInVwZGF0ZWRfYXQiOjE3MjQ3Nzg1OTEsIm5hbWUiOiJEZWZhdWx0IEFkbWluIFVzZXIiLCJuaWNrbmFtZSI6IkFkbWluIiwiZmFtaWx5X25hbWUiOiJVc2VyIiwianRpIjoiZmFpWXZhWUlUMGNEQVQ3Rm93MHBRdyIsImphbnNBZG1pblVJUm9sZSI6WyJhcGktYWRtaW4iXSwiZXhwIjoxNzI0OTQ1OTc4fQ.3LTc8YLvEeb7ONZp_FKA7yPP7S6e_VTzwhvAWUJrL4M&quot;</span>
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">JSON payload of userinfo token</span>
-<span class="sd">{</span>
-<span class="sd">  &quot;country&quot;: &quot;US&quot;,</span>
-<span class="sd">  &quot;email&quot;: &quot;user@example.com&quot;,</span>
-<span class="sd">  &quot;username&quot;: &quot;UserNameExample&quot;,</span>
-<span class="sd">  &quot;sub&quot;: &quot;boG8dfc5MKTn37o7gsdCeyqL8LpWQtgoO41m1KZwdq0&quot;,</span>
-<span class="sd">  &quot;iss&quot;: &quot;https://admin-ui-test.gluu.org&quot;,</span>
-<span class="sd">  &quot;given_name&quot;: &quot;Admin&quot;,</span>
-<span class="sd">  &quot;middle_name&quot;: &quot;Admin&quot;,</span>
-<span class="sd">  &quot;inum&quot;: &quot;8d1cde6a-1447-4766-b3c8-16663e13b458&quot;,</span>
-<span class="sd">  &quot;client_id&quot;: &quot;5b4487c4-8db1-409d-a653-f907b8094039&quot;,</span>
-<span class="sd">  &quot;aud&quot;: &quot;5b4487c4-8db1-409d-a653-f907b8094039&quot;,</span>
-<span class="sd">  &quot;updated_at&quot;: 1724778591,</span>
-<span class="sd">  &quot;name&quot;: &quot;Default Admin User&quot;,</span>
-<span class="sd">  &quot;nickname&quot;: &quot;Admin&quot;,</span>
-<span class="sd">  &quot;family_name&quot;: &quot;User&quot;,</span>
-<span class="sd">  &quot;jti&quot;: &quot;faiYvaYIT0cDAT7Fow0pQw&quot;,</span>
-<span class="sd">  &quot;jansAdminUIRole&quot;: [</span>
-<span class="sd">    &quot;api-admin&quot;</span>
-<span class="sd">  ],</span>
-<span class="sd">  &quot;exp&quot;: 1724945978</span>
-<span class="sd">}</span>
-<span class="sd">&quot;&quot;&quot;</span>
-
-
-<span class="c1"># Creating cedarling request</span>
 <span class="n">request</span> <span class="o">=</span> <span class="n">Request</span><span class="p">(</span>
-    <span class="n">action_token</span><span class="p">,</span>
+    <span class="n">access_token</span><span class="p">,</span>
     <span class="n">id_token</span><span class="p">,</span>
     <span class="n">userinfo_token</span><span class="p">,</span>
-    <span class="n">action</span><span class="o">=</span><span class="s1">&#39;Jans::Action::&quot;Update&quot;&#39;</span><span class="p">,</span>
-    <span class="n">context</span><span class="o">=</span><span class="p">{},</span> <span class="n">resource</span><span class="o">=</span><span class="n">resource</span><span class="p">)</span>
+    <span class="n">action</span><span class="o">=</span><span class="n">action</span><span class="p">,</span>
+    <span class="n">resource</span><span class="o">=</span><span class="n">resource</span><span class="p">,</span> <span class="n">context</span><span class="o">=</span><span class="n">context</span><span class="p">)</span>
 
-<span class="c1"># Authorize call</span>
 <span class="n">authorize_result</span> <span class="o">=</span> <span class="n">instance</span><span class="o">.</span><span class="n">authorize</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="o">*</span><span class="n">instance</span><span class="o">.</span><span class="n">pop_logs</span><span class="p">(),</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
-
-<span class="c1"># if you change org_id result will be false</span>
 <span class="k">assert</span> <span class="n">authorize_result</span><span class="o">.</span><span class="n">is_allowed</span><span class="p">()</span>
-
-<span class="c1"># watch on the decision for workload</span>
-<span class="n">workload_result</span> <span class="o">=</span> <span class="n">authorize_result</span><span class="o">.</span><span class="n">workload</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">workload_result</span><span class="o">.</span><span class="n">decision</span><span class="p">)</span>
-
-<span class="c1"># show diagnostic information</span>
-<span class="n">workload_diagnostic</span> <span class="o">=</span> <span class="n">workload_result</span><span class="o">.</span><span class="n">diagnostics</span>
-<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">reason</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">workload_diagnostic</span><span class="o">.</span><span class="n">reason</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;reason policies:&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">reason</span><span class="p">)</span>
-
-<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">error</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">workload_diagnostic</span><span class="o">.</span><span class="n">errors</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;errors:&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;id:&quot;</span><span class="p">,</span> <span class="n">error</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="s2">&quot;error:&quot;</span><span class="p">,</span> <span class="n">error</span><span class="o">.</span><span class="n">error</span><span class="p">)</span>
 </code></pre></div>
-<ul>
-<li>Save the script in a file called <code>example.py</code></li>
-<li>Save <a href="https://github.com/JanssenProject/jans/blob/main/jans-cedarling/bindings/cedarling_python/example_files/policy-store.json">this</a> demo policy store file to <code>policy-store.json</code> in the same location</li>
-<li>Run the example script:</li>
-</ul>
-<div class="highlight"><pre><span></span><code>(venv) $ python example.py
-Logs stored in memory:
-{&quot;id&quot;:&quot;01929b39-b7d9-7e58-8abb-329c19c3d821&quot;,&quot;time&quot;:1729181104,&quot;log_kind&quot;:&quot;System&quot;,&quot;pdp_id&quot;:&quot;1039a067-88de-4e8b-8d5f-421fc912b94f&quot;,&quot;msg&quot;:&quot;PolicyStore loaded successfully&quot;,&quot;application_id&quot;:&quot;TestApp&quot;}
-{&quot;id&quot;:&quot;01929b39-b7d9-7e58-8abb-329dfb797de1&quot;,&quot;time&quot;:1729181104,&quot;log_kind&quot;:&quot;System&quot;,&quot;pdp_id&quot;:&quot;1039a067-88de-4e8b-8d5f-421fc912b94f&quot;,&quot;msg&quot;:&quot;JWT service loaded successfully&quot;,&quot;application_id&quot;:&quot;TestApp&quot;}
-{&quot;id&quot;:&quot;01929b39-b7d9-7e58-8abb-329e91d2b37f&quot;,&quot;time&quot;:1729181104,&quot;log_kind&quot;:&quot;System&quot;,&quot;pdp_id&quot;:&quot;1039a067-88de-4e8b-8d5f-421fc912b94f&quot;,&quot;msg&quot;:&quot;Cedarling Authz initialized successfully&quot;,&quot;application_id&quot;:&quot;TestApp&quot;}
-Logs stored in memory:
-
-{&quot;id&quot;:&quot;01929b39-b7db-766c-95a8-4790ff90532d&quot;,&quot;time&quot;:1729181104,&quot;log_kind&quot;:&quot;Decision&quot;,&quot;pdp_id&quot;:&quot;1039a067-88de-4e8b-8d5f-421fc912b94f&quot;,&quot;msg&quot;:&quot;Result of authorize with resource as workload entity&quot;,&quot;application_id&quot;:&quot;TestApp&quot;,&quot;principal&quot;:&quot;Jans::Workload::\&quot;5b4487c4-8db1-409d-a653-f907b8094039\&quot;&quot;,&quot;action&quot;:&quot;Jans::Action::\&quot;Update\&quot;&quot;,&quot;resource&quot;:&quot;Jans::Issue::\&quot;random_id\&quot;&quot;,&quot;context&quot;:{},&quot;decision&quot;:&quot;ALLOW&quot;,&quot;diagnostics&quot;:{&quot;reason&quot;:[&quot;840da5d85403f35ea76519ed1a18a33989f855bf1cf8&quot;],&quot;errors&quot;:[]}}
-</code></pre></div>
-<p>As you can see, the logs from cedarling's initialization and the result of the authorize call is printed to the console.</p>
+Cedarling will return <code>is_allowed()</code> as <code>True</code> only if both the User and Workload entity evaluations are <code>ALLOW</code>.</p>
 <h2 id="exposed-functions">Exposed functions<a class="headerlink" href="#exposed-functions" title="Permanent link">#</a></h2>
 <p>The <code>pyo3</code> binding for cedarling exposes a number of cedarling functions for you to use. The documentation on this can be found <a href="https://github.com/JanssenProject/jans/blob/main/jans-cedarling/bindings/cedarling_python/PYTHON_TYPES.md">here</a>.</p>
 
@@ -8747,7 +8626,7 @@ Logs stored in memory:
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-26T19:12:11+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-26</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-11-19T16:59:15+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-11-19</span>
       
         <br>
         Created:
