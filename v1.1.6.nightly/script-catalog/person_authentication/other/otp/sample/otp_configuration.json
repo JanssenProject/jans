@@ -1,0 +1,13 @@
+{
+    "htop":{
+        "keyLength":20,
+        "digits":6,
+        "lookAheadWindow":1
+    },
+    "totp":{
+        "keyLength":20,
+        "digits":6,
+        "timeStep":30,
+        "hmacShaAlgorithm": "sha1"
+    }
+}
