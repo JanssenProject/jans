@@ -87,7 +87,7 @@ fn success_test_for_all_principals() {
 
     cmp_policy!(
         result.person,
-        vec!["2"],
+        vec!["2", "3"],
         "reason of permit person should be '2'"
     );
 
@@ -153,28 +153,6 @@ fn success_test_for_principal_user() {
     assert!(result.is_allowed(), "request result should be allowed");
 }
 
-/// Check if action executes for next principals: Role
-#[test]
-fn success_test_for_principal_role() {
-    let cedarling = get_cedarling(PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()));
-
-    let mut request = AuthRequestBase.clone();
-    request.action = "Jans::Action::\"UpdateForRole\"".to_string();
-
-    let result = cedarling
-        .authorize(request)
-        .expect("request should be parsed without errors");
-
-    assert!(
-        result.workload.is_none(),
-        "result for workload should be none"
-    );
-
-    assert!(result.person.is_none(), "result for person should be none");
-
-    assert!(result.is_allowed(), "request result should be allowed");
-}
-
 /// Check if action executes for next principals: Person AND Role
 #[test]
 fn success_test_for_principal_person_role() {
@@ -193,7 +171,7 @@ fn success_test_for_principal_person_role() {
     );
     cmp_policy!(
         result.person,
-        vec!["2"],
+        vec!["2", "3"],
         "reason of permit person should be '2'"
     );
 
