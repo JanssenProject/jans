@@ -11,6 +11,8 @@ pub(crate) mod jwt_config;
 pub(crate) mod log_config;
 pub(crate) mod policy_store_config;
 
+use std::{fs, io};
+
 // reimport to useful import values in root module
 pub use jwt_config::*;
 pub use log_config::*;
@@ -30,6 +32,68 @@ pub struct BootstrapConfig {
     pub policy_store_config: PolicyStoreConfig,
     /// A set of properties used to configure JWT in the `Cedarling` application.
     pub jwt_config: JwtConfig,
+}
+
+impl BootstrapConfig {
+    /// Loads a `BootstrapConfig` from a file.
+    ///
+    /// The file format is determined based on its extension:
+    /// - `.json`: Parses the file as JSON.
+    /// - `.yaml` or `.yml`: Parses the file as YAML.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use cedarling::BootstrapConfig;
+    ///
+    /// let config = BootstrapConfig::load_from_file("config.json")
+    ///     .expect("Failed to load configuration");
+    /// ```
+    pub fn load_from_file(path: &str) -> Result<Self, BootstrapConfigLoadingError> {
+        let config = match path.to_lowercase().as_str() {
+            _ if path.ends_with(".json") => {
+                let config_json = fs::read_to_string(path)
+                    .map_err(|e| BootstrapConfigLoadingError::ReadFile(path.to_string(), e))?;
+                serde_json::from_str::<BootstrapConfig>(&config_json)?
+            },
+            _ if path.ends_with(".yaml") || path.ends_with(".yml") => {
+                let config_json = fs::read_to_string(path)
+                    .map_err(|e| BootstrapConfigLoadingError::ReadFile(path.to_string(), e))?;
+                serde_yml::from_str::<BootstrapConfig>(&config_json)?
+            },
+            _ => Err(BootstrapConfigLoadingError::InvalidFileFormat(
+                path.to_string(),
+            ))?,
+        };
+
+        Ok(config)
+    }
+}
+
+/// Represents errors that may occur while loading a `BootstrapConfig` from a file.
+#[derive(Debug, thiserror::Error)]
+pub enum BootstrapConfigLoadingError {
+    /// Error returned when the file format is unsupported.
+    ///
+    /// Supported formats include:
+    /// - `.json`
+    /// - `.yaml` or `.yml`
+    #[error(
+        "Unsupported bootstrap config file format for: {0}. Supported formats include: JSON, YAML"
+    )]
+    InvalidFileFormat(String),
+    #[error("Failed to read {0}: {1}")]
+
+    /// Error returned when the file cannot be read.
+    ReadFile(String, io::Error),
+
+    /// Error returned when parsing the file as JSON fails.
+    #[error("Failed to decode JSON string into BootstrapConfig: {0}")]
+    DecodingJSON(#[from] serde_json::Error),
+
+    /// Error returned when parsing the file as YAML fails.
+    #[error("Failed to decode YAML string into BootstrapConfig: {0}")]
+    DecodingYAML(#[from] serde_yml::Error),
 }
 
 #[cfg(test)]
@@ -63,8 +127,8 @@ mod test {
 
     #[test]
     fn can_deserialize_from_yaml() {
-        let config_json = include_str!("../../../test_files/bootstrap_jwt_disabled.yaml");
-        let deserialized = serde_yml::from_str::<BootstrapConfig>(config_json)
+        let config_yaml = include_str!("../../../test_files/bootstrap_jwt_disabled.yaml");
+        let deserialized = serde_yml::from_str::<BootstrapConfig>(config_yaml)
             .expect("Should deserialize bootstrap config from YAML");
 
         let expected = BootstrapConfig {
