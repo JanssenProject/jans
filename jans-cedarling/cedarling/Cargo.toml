@@ -1,7 +1,6 @@
 [package]
 name = "cedarling"
 version.workspace = true
-version = "0.0.0-nightly"
 edition = "2021"
 
 [dependencies]

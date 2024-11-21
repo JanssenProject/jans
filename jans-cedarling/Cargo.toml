@@ -5,7 +5,7 @@ members = ["bindings/cedarling_python", "bindings/cedarling_ruby/ext/cedarling",
 default-members = ["bindings/cedarling_python", "cedarling", "sparkv", "test_utils"]
 
 [workspace.package]
-version = "1.1.6"
+version = "0.0.0-nightly"
 
 [workspace.dependencies]
 serde = { version = "1.0", features = ["derive"] }
