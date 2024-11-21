@@ -58,7 +58,7 @@ policy_stores:
           entity Workload = {"client_id": __cedar::String, "iss": TrustedIssuer, "name": __cedar::String, "rp_id": __cedar::String, "spiffe_id": __cedar::String};
           entity id_token = {"acr": Set < __cedar::String >, "amr": __cedar::String, "aud": __cedar::String, "azp": __cedar::String, "birthdate": __cedar::String, "email": email_address, "exp": __cedar::Long, "iat": __cedar::Long, "iss": TrustedIssuer, "jti": __cedar::String, "name": __cedar::String, "phone_number": __cedar::String, "role": Set < __cedar::String >, "sub": __cedar::String};
           action "Compare" appliesTo {
-            principal: [User, Role, Workload],
+            principal: [User, Workload],
             resource: [Application],
             context: Context
           };
@@ -68,7 +68,7 @@ policy_stores:
             context: Context
           };
           action "Execute" appliesTo {
-            principal: [User, Role, Workload],
+            principal: [User, Workload],
             resource: [Application],
             context: Context
           };
@@ -83,7 +83,7 @@ policy_stores:
             context: Context
           };
           action "Monitor" appliesTo {
-            principal: [User, Role, Workload],
+            principal: [User, Workload],
             resource: [Application],
             context: Context
           };
@@ -98,27 +98,27 @@ policy_stores:
             context: Context
           };
           action "Read" appliesTo {
-            principal: [User, Role, Workload],
+            principal: [User, Workload],
             resource: [Application],
             context: Context
           };
           action "Search" appliesTo {
-            principal: [User, Role, Workload],
+            principal: [User, Workload],
             resource: [Application],
             context: Context
           };
           action "Share" appliesTo {
-            principal: [User, Role, Workload],
+            principal: [User, Workload],
             resource: [Application],
             context: Context
           };
           action "Tag" appliesTo {
-            principal: [User, Role, Workload],
+            principal: [User, Workload],
             resource: [Application],
             context: Context
           };
           action "Write" appliesTo {
-            principal: [User, Role, Workload],
+            principal: [User, Workload],
             resource: [Application],
             context: Context
           };

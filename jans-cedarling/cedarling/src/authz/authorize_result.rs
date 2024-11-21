@@ -7,8 +7,6 @@ pub struct AuthorizeResult {
     pub workload: Option<cedar_policy::Response>,
     /// Result of authorization where principal is `Jans::User`
     pub person: Option<cedar_policy::Response>,
-    /// Result of authorization where principal is `Jans::Role`
-    pub role: Option<cedar_policy::Response>,
 }
 
 impl AuthorizeResult {
@@ -32,21 +30,12 @@ impl AuthorizeResult {
             .as_ref()
             .map(|response| response.decision() == Decision::Allow);
 
-        let role_allowed = self
-            .role
-            .as_ref()
-            .map(|response| response.decision() == Decision::Allow);
-
         // cover each possible case when any of value is Some or None
-        match (workload_allowed, person_allowed, role_allowed) {
-            (None, None, None) => false,
-            (None, None, Some(role)) => role,
-            (None, Some(person), None) => person,
-            (None, Some(person), Some(role)) => person || role,
-            (Some(workload), None, None) => workload,
-            (Some(workload), None, Some(role)) => workload && role,
-            (Some(workload), Some(person), None) => workload && person,
-            (Some(workload), Some(person), Some(role)) => workload && (person || role),
+        match (workload_allowed, person_allowed) {
+            (None, None) => false,
+            (None, Some(person)) => person,
+            (Some(workload), None) => workload,
+            (Some(workload), Some(person)) => workload && person,
         }
     }
 }
