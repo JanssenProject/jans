@@ -9,19 +9,12 @@ package io.jans.configapi;
 import io.jans.as.client.TokenRequest;
 import io.jans.as.client.TokenResponse;
 import io.jans.as.model.common.GrantType;
-import io.jans.as.model.common.ScopeType;
-import io.jans.as.model.uma.wrapper.Token;
 import io.jans.as.model.util.Util;
+import io.jans.configapi.core.util.Jackson;
 import io.jans.configapi.service.HttpService;
 import io.jans.configapi.service.ResteasyService;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import io.jans.model.net.HttpServiceResponse;
-
 import static java.nio.charset.StandardCharsets.UTF_8;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.KeyManagementException;
@@ -34,16 +27,17 @@ import java.util.Map;
 import java.util.Properties;
 import java.net.URLEncoder;
 import java.io.UnsupportedEncodingException;
-
-import jakarta.servlet.http.HttpServletRequest;
-
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Serializable;
 import java.net.URLDecoder;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.cert.CertificateException;
@@ -51,6 +45,8 @@ import java.security.cert.X509Certificate;
 import java.time.Duration;
 import java.util.*;
 import java.util.Map.Entry;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -84,6 +80,8 @@ import org.jboss.resteasy.client.jaxrs.ResteasyClient;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.jboss.resteasy.client.jaxrs.ResteasyWebTarget;
 
+import org.json.JSONObject;
+import org.json.JSONException;
 import org.testng.ITestContext;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeMethod;
@@ -102,6 +100,10 @@ import jakarta.ws.rs.core.Response.Status;
 
 public class BaseTest {
 
+    private static final String FILE_PREFIX = "file:";
+    private static final Charset DEFAULT_CHARSET = Charset.forName("UTF-8");
+    private static final String NEW_LINE = System.getProperty("line.separator");
+
     protected static final String CONTENT_TYPE = "Content-Type";
     protected static final String AUTHORIZATION = "Authorization";
     protected static final String AUTHORIZATION_TYPE = "Bearer";
@@ -110,23 +112,23 @@ public class BaseTest {
     protected static Map<String, String> propertiesMap = null;
     protected ResteasyService resteasyService = new ResteasyService();;
     protected HttpService httpService = new HttpService();
-    protected String accessToken; 
+    protected String accessToken;
 
     @BeforeSuite
     public void initTestSuite(ITestContext context) throws Exception {
 
-      
         log.error("Invoked initTestSuite of '{}'", context.getCurrentXmlTest().getName());
         String propertiesFile = context.getCurrentXmlTest().getParameter("propertiesFile");
+        log.error("Invoked initTestSuite propertiesFile '{}'", propertiesFile);
+
         Properties prop = new Properties();
         prop.load(Files.newBufferedReader(Paths.get(propertiesFile), UTF_8));
 
         propertiesMap = new Hashtable<>();
         prop.forEach((key, value) -> propertiesMap.put(key.toString(), value.toString()));
         context.getSuite().getXmlSuite().setParameters(propertiesMap);
-        
+
         log.error("End initTestSuite propertiesMap: {}", propertiesMap);
-        
 
     }
 
@@ -139,7 +141,7 @@ public class BaseTest {
     @BeforeMethod
     public void getAccessToken() throws Exception {
         log.error("getAccessToken - propertiesMap:{}", propertiesMap);
-       
+
         String tokenUrl = propertiesMap.get("tokenEndpoint");
         String strGrantType = propertiesMap.get("tokenGrantType");
         String clientId = propertiesMap.get("clientId");
@@ -147,19 +149,20 @@ public class BaseTest {
         String scopes = propertiesMap.get("scopes");
         String authStr = clientId + ':' + clientSecret;
 
-       GrantType grantType = GrantType.fromString(strGrantType);
-       this.accessToken = getToken(tokenUrl, clientId, clientSecret, grantType, scopes);
+        GrantType grantType = GrantType.fromString(strGrantType);
+        this.accessToken = getToken(tokenUrl, clientId, clientSecret, grantType, scopes);
         log.error("accessToken:{}", accessToken);
     }
-    
-    public String getToken(final String tokenUrl, final String clientId, final String clientSecret,
-            GrantType grantType, final String scopes) {
-        log.info("Request for token tokenUrl:{}, clientId:{}, grantType:{}, scopes:{}", tokenUrl, clientId, grantType, scopes);
+
+    public String getToken(final String tokenUrl, final String clientId, final String clientSecret, GrantType grantType,
+            final String scopes) {
+        log.info("Request for token tokenUrl:{}, clientId:{}, grantType:{}, scopes:{}", tokenUrl, clientId, grantType,
+                scopes);
         String accessToken = null;
         TokenResponse tokenResponse = this.requestAccessToken(tokenUrl, clientId, clientSecret, grantType, scopes);
         if (tokenResponse != null) {
             accessToken = tokenResponse.getAccessToken();
-            log.trace("accessToken:{}, ", accessToken);           
+            log.trace("accessToken:{}, ", accessToken);
         }
 
         return accessToken;
@@ -170,7 +173,7 @@ public class BaseTest {
         log.info("Request for access token tokenUrl:{}, clientId:{},scope:{}", tokenUrl, clientId, scope);
         Response response = null;
         try {
-            if (grantType==null) {
+            if (grantType == null) {
                 grantType = GrantType.CLIENT_CREDENTIALS;
             }
             TokenRequest tokenRequest = new TokenRequest(grantType);
@@ -199,23 +202,21 @@ public class BaseTest {
         }
         return null;
     }
-    
-    
+
     protected HttpService getHttpService() {
         return this.httpService;
     }
-    
-    
+
     protected ResteasyService getResteasyService() {
         return this.resteasyService;
     }
-    
-    protected String getCredentials(final String clientId, final String clientSecret) throws UnsupportedEncodingException {
-        return URLEncoder.encode(clientId, Util.UTF8_STRING_ENCODING)
-                + ":"
+
+    protected String getCredentials(final String clientId, final String clientSecret)
+            throws UnsupportedEncodingException {
+        return URLEncoder.encode(clientId, Util.UTF8_STRING_ENCODING) + ":"
                 + URLEncoder.encode(clientSecret, Util.UTF8_STRING_ENCODING);
     }
-    
+
     /**
      * Returns the client credentials encoded using base64.
      *
@@ -234,6 +235,26 @@ public class BaseTest {
 
         return null;
     }
-    
 
+    protected String decodeFileValue(String value) {
+        log.error("\n\n decodeFileValue");
+        String decoded = value;
+        if (value.startsWith(FILE_PREFIX)) {
+            value = value.substring(FILE_PREFIX.length()); // remove the prefix
+
+            try (BufferedReader bfr = Files.newBufferedReader(Paths.get(value), DEFAULT_CHARSET)) { // create reader
+                // appends every line after another
+                decoded = bfr.lines().reduce("", (partial, next) -> partial + NEW_LINE + next);
+                if (decoded.length() == 0)
+                    log.warn("Key '{}' is empty", value);
+            } catch (IOException e) {
+                log.error(e.getMessage(), e);
+                decoded = null;
+            }
+        }
+
+        log.error("\n\n decodeFileValue - decoded:{}", decoded);
+        return decoded;
+
+    }
 }
