@@ -90,7 +90,7 @@ fn ruby_extension_link_options() {
         // NOTE this might be linux-only, but it's for dev and won't be used for the main build.
         let _n = reader.read_line(&mut line).unwrap();
         // output a separate cargo link command for each found ruby lib
-        for lib_name in line.trim().replace("-l","").split(" ") {
+        for lib_name in line.trim().replace("-l","").split_whitespace() {
             println!("cargo::rustc-link-lib={lib_name}");
         }
 
@@ -127,10 +127,10 @@ fn ruby_extension_dylib_path() {
     let lib_dir = manifest_dir().join("../../lib/cedarling_ruby");
 
     // Ensure that lib/cedarling_ruby dir exists, otherwise linker fails.
-    if !std::fs::exists(&lib_dir).expect(format!("cannot find {:?} - possibly permissions are not correct", lib_dir).as_str()) {
-        std::fs::create_dir(&lib_dir)
-            .unwrap_or_else(|err| panic!("cannot create directory {lib_dir:?} {err}"));
+    if let Err(err) = std::fs::create_dir_all(&lib_dir) {
+        panic!("Failed to create directory {:?}: {}", lib_dir, err);
     }
+
     let lib_dir = lib_dir.canonicalize().expect(format!("cannot determine full path for {:?}", lib_dir).as_str());
 
     // Finally, specify the output name of the file.
