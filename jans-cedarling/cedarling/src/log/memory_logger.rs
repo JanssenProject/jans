@@ -111,7 +111,6 @@ mod tests {
             resource: "test_resource".to_string(),
             context: serde_json::json!({}),
             person_authorize_info: Default::default(),
-            role_authorize_info: Default::default(),
             workload_authorize_info: Default::default(),
             authorized: true,
         });

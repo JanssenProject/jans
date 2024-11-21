@@ -87,20 +87,8 @@ fn success_test_for_all_principals() {
 
     cmp_policy!(
         result.person,
-        vec!["2"],
+        vec!["2", "3"],
         "reason of permit person should be '2'"
-    );
-
-    cmp_decision!(
-        result.role,
-        Decision::Allow,
-        "request result should be allowed for role"
-    );
-
-    cmp_policy!(
-        result.role,
-        vec!["3"],
-        "reason of permit role should be '3'"
     );
 
     assert!(result.is_allowed(), "request result should be allowed");
@@ -130,8 +118,6 @@ fn success_test_for_principal_workload() {
     );
 
     assert!(result.person.is_none(), "result for person should be none");
-
-    assert!(result.role.is_none(), "result for role should be none");
 
     assert!(result.is_allowed(), "request result should be allowed");
 }
@@ -164,41 +150,6 @@ fn success_test_for_principal_user() {
         "result for workload should be none"
     );
 
-    assert!(result.role.is_none(), "result for role should be none");
-
-    assert!(result.is_allowed(), "request result should be allowed");
-}
-
-/// Check if action executes for next principals: Role
-#[test]
-fn success_test_for_principal_role() {
-    let cedarling = get_cedarling(PolicyStoreSource::Yaml(POLICY_STORE_RAW_YAML.to_string()));
-
-    let mut request = AuthRequestBase.clone();
-    request.action = "Jans::Action::\"UpdateForRole\"".to_string();
-
-    let result = cedarling
-        .authorize(request)
-        .expect("request should be parsed without errors");
-
-    cmp_decision!(
-        result.role,
-        Decision::Allow,
-        "request result should be allowed for role"
-    );
-    cmp_policy!(
-        result.role,
-        vec!["3"],
-        "reason of permit person should be '3'"
-    );
-
-    assert!(
-        result.workload.is_none(),
-        "result for workload should be none"
-    );
-
-    assert!(result.person.is_none(), "result for person should be none");
-
     assert!(result.is_allowed(), "request result should be allowed");
 }
 
@@ -220,19 +171,8 @@ fn success_test_for_principal_person_role() {
     );
     cmp_policy!(
         result.person,
-        vec!["2"],
+        vec!["2", "3"],
         "reason of permit person should be '2'"
-    );
-
-    cmp_decision!(
-        result.role,
-        Decision::Allow,
-        "request result should be allowed for role"
-    );
-    cmp_policy!(
-        result.role,
-        vec!["3"],
-        "reason of permit person should be '3'"
     );
 
     assert!(
@@ -266,17 +206,6 @@ fn success_test_for_principal_workload_role() {
         "reason of permit workload should be '1'"
     );
 
-    cmp_decision!(
-        result.role,
-        Decision::Allow,
-        "request result should be allowed for role"
-    );
-    cmp_policy!(
-        result.role,
-        vec!["3"],
-        "reason of permit person should be '3'"
-    );
-
     assert!(result.person.is_none(), "result for person should be none");
 
     assert!(result.is_allowed(), "request result should be allowed");
@@ -300,8 +229,6 @@ fn test_where_principal_cant_be_applied() {
     );
 
     assert!(result.person.is_none(), "result for person should be none");
-
-    assert!(result.role.is_none(), "result for role should be none");
 
     assert!(!result.is_allowed(), "request result should be not allowed");
 }
