@@ -537,6 +537,7 @@ public abstract class BaseTest {
         HtmlUnitDriver currentDriver;
         if (useNewDriver) {
             currentDriver = new HtmlUnitDriver(true);
+            currentDriver.getWebClient().getOptions().setThrowExceptionOnScriptError(false);
         } else {
             startSelenium();
             currentDriver = driver;

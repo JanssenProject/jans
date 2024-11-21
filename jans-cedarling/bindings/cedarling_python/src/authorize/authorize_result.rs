@@ -42,11 +42,6 @@ impl AuthorizeResult {
     fn person(&self) -> Option<AuthorizeResultResponse> {
         self.inner.person.clone().map(|v| v.into())
     }
-
-    /// Get the decision value for role
-    fn role(&self) -> Option<AuthorizeResultResponse> {
-        self.inner.role.clone().map(|response| response.into())
-    }
 }
 
 impl From<cedarling::AuthorizeResult> for AuthorizeResult {

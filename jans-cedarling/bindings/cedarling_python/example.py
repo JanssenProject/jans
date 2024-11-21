@@ -2,7 +2,8 @@ from cedarling_python import MemoryLogConfig, DisabledLoggingConfig, StdOutLogCo
 from cedarling_python import PolicyStoreSource, PolicyStoreConfig, BootstrapConfig, JwtConfig
 from cedarling_python import Cedarling
 from cedarling_python import ResourceData, Request
-import os, time
+import os
+import time
 
 DEFAULT_POLICY_STORE_PATH = "example_files/policy-store.json"
 
@@ -56,8 +57,8 @@ instance = Cedarling(bootstrap_config)
 
 
 # show logs; only applicable to MemoryLogConfig logger
-#print("Logs stored in memory:")
-#print(*instance.pop_logs())
+# print("Logs stored in memory:")
+# print(*instance.pop_logs())
 
 
 # //// Execute authentication request ////
@@ -66,13 +67,13 @@ instance = Cedarling(bootstrap_config)
 # other fields are attributes of the resource.
 resource = ResourceData(resource_type="Jans::Application",
                         id="random_id",
-                        app_id="application_id", 
+                        app_id="application_id",
                         name="Some Application",
                         url={
-                                "host": "jans.test",
-                                "path": "/protected-endpoint",
-                                "protocol": "http"
-                            }
+                            "host": "jans.test",
+                            "path": "/protected-endpoint",
+                            "protocol": "http"
+                        }
                         )
 
 # or we can init resource using dict
@@ -232,7 +233,7 @@ request = Request(
 authorize_result = instance.authorize(request)
 
 # Print logs from MemoryLogConfig
-#print(*instance.pop_logs())
+# print(*instance.pop_logs())
 
 """
 authorize_result.is_allowed() only returns true if 
@@ -270,14 +271,3 @@ for diagnostic in person_diagnostic.errors:
     print(diagnostic)
 
 print()
-
-# watch on the decision for role if present
-role_result = authorize_result.role()
-if role_result is None:
-    print("Role authorization absent")
-else:
-    print("Role authorization present")
-    print(f"Role authorization result: {role_result.decision}")
-    print(f"Errors during authorization: {len(role_result.diagnostics.errors)}")
-    for diagnostic in role_result.diagnostics.errors:
-        print(diagnostic)

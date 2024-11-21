@@ -168,7 +168,7 @@ public class ApiHealthCheck  {
             "Health - Check" }, security = @SecurityRequirement(name = "oauth2", scopes = {
                     ApiAccessConstants.APP_DATA_READ_ACCESS }))
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = Map.class), examples = @ExampleObject(name = "Response json example", value = "example/health/service-status.json"))),
+            @ApiResponse(responseCode = "200", description = "Ok", content = @Content(mediaType = MediaType.APPLICATION_JSON, schema = @Schema(implementation = JsonNode.class), examples = @ExampleObject(name = "Response json example", value = "example/health/service-status.json"))),
             @ApiResponse(responseCode = "500", description = "InternalServerError") })
     @GET
     @ProtectedApi(scopes = { ApiAccessConstants.APP_DATA_READ_ACCESS }, groupScopes = {}, superScopes = {ApiAccessConstants.SUPER_ADMIN_READ_ACCESS})
@@ -179,7 +179,7 @@ public class ApiHealthCheck  {
             logger.info("Fetch ServiceStatus info - service:{}", escapeLog(service));
         }
         
-        Map<String, String> serviceStatus = statusCheckerTimer.getServiceStatus(service);
+        JsonNode serviceStatus = statusCheckerTimer.getServiceStatus(service);
         logger.debug("serviceStatus:{}", serviceStatus);
         return Response.ok(serviceStatus).build();
     }
