@@ -24,6 +24,7 @@ public class PublicKeyCredentialDescriptor {
 
     private String type;
     private String[] transports;
+    // rawId
     private String id;
 
     public PublicKeyCredentialDescriptor(String id) {

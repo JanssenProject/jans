@@ -1,11 +1,14 @@
 package io.jans.fido2.model.assertion;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JsonNode;
 
+import io.jans.fido2.model.common.PublicKeyCredentialDescriptor;
 import io.jans.orm.model.fido2.UserVerification;
 @JsonIgnoreProperties(ignoreUnknown = true)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class AssertionOptions  {
     private String username;
     private UserVerification userVerification;
@@ -14,6 +17,10 @@ public class AssertionOptions  {
     private Long timeout;
     @JsonProperty(value = "session_id")
     private String sessionId;
+    
+    // 1. allowCredentials (An array of objects used to restrict the list of acceptable credentials. An empty array indicates that any credential is acceptable.)
+    private PublicKeyCredentialDescriptor allowCredentials;
+    // rawid
     private String credentialId;
     
 

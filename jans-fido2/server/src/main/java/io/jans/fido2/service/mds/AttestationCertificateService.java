@@ -144,9 +144,17 @@ public class AttestationCertificateService {
 		} else {
 			try {
 				log.info("No Local metadata for authenticator {}. Checking for metadata MDS3 blob", aaguid);
-				JsonNode metadata = mdsService.fetchMetadata(authData.getAaguid());
-				commonVerifiers.verifyThatMetadataIsValid(metadata);
-				metadataForAuthenticator = metadata;
+				if (fido2Configuration.isDisableMetadataService() == false)
+				{
+					JsonNode metadata = mdsService.fetchMetadata(authData.getAaguid());
+					commonVerifiers.verifyThatMetadataIsValid(metadata);
+					metadataForAuthenticator = metadata;
+				}
+				else
+				{
+					metadataForAuthenticator = dataMapperService.createObjectNode();
+					log.debug("disableMetadataService has been configured as true");
+				}
 			} catch (Fido2RuntimeException ex) {
 				log.warn("Failed to get metadata from Fido2 meta-data server: {}", ex.getMessage(), ex);
 

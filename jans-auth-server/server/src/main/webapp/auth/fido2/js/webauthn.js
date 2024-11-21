@@ -22,6 +22,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+const authAbortController = new AbortController();
+
 (function(root, factory) {
   if (typeof define === 'function' && define.amd) {
     define(['base64url'], factory);
@@ -121,11 +123,14 @@
   }
 
  function getAssertionConditional(request) {
+	
+	const authAbortSignal = authAbortController.signal;
+			
     console.log('Get assertion conditional', request);
     return navigator.credentials.get({
-      publicKey: decodePublicKeyCredentialRequestOptions(request),
+       publicKey: decodePublicKeyCredentialRequestOptions(request),
 	   mediation: "conditional",
-
+	   signal : authAbortSignal,
     });
   }
 
@@ -141,8 +146,6 @@
     }
 	console.log("Response : "+response);
 	console.log("JSON.stringify: "+ JSON.stringify(response));
-	
-	
 	
     if (response.response.attestationObject) {
       return {
@@ -183,6 +186,7 @@
     decodePublicKeyCredentialRequestOptions,
     createCredential,
     getAssertion,
+	getAssertionConditional,
     responseToObject,
   };
 

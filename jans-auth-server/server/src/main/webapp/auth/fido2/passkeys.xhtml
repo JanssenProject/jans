@@ -10,9 +10,9 @@
                         if="#{not identity.loggedIn}" />
         </f:metadata>
         <ui:define name="head">
-                <script src="js/base64js.js" />
-                <script src="js/base64url.js" />
-                <script src="js/webauthn.js" />
+                <script src="/jans-auth/ext/resources/js/base64js.js" />
+				<script src="/jans-auth/ext/resources/js/base64url.js" />
+				<script src="/jans-auth/ext/resources/js/webauthn.js" />
 
                 <script>
                         var assertion_request = ${identity.getWorkingParameter('fido2_assertion_request')};
@@ -37,7 +37,7 @@
                                 console.log('Executing get attestation Fido2 request', attestation_request);
 
                                 request = JSON.parse(attestation_request);
-				alert("Request : "+ request);
+				
                                 webauthn.createCredential(request).then(data => {
                                         setStatus('Get attestation key data.');
                                         document.getElementById('tokenResponse').value = JSON.stringify(webauthn.responseToObject(data));
@@ -140,7 +140,7 @@ body {
 </style>
         </ui:define>
 
-        <ui:define name="pageTitle">oxAuth - Fido2 Login</ui:define>
+        <ui:define name="pageTitle"> Fido2 Login</ui:define>
         <ui:define name="body">
                 <form method="post"     id="fido2_form" action="#{request.contextPath}/postlogin.htm" onsubmit="return false;">
                         <input type="hidden" name="authMethod" id="authMethod" />

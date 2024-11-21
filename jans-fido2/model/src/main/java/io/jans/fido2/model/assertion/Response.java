@@ -1,85 +1,63 @@
 package io.jans.fido2.model.assertion;
 
 public class Response {
-    private String authenticatorData;
-    private String signature;
-    private String clientDataJSON;
-    private String userHandle;
-    private String deviceData;
-    private String attestationObject;
+	private String authenticatorData;
+	private String signature;
+	private String clientDataJSON;
+	private String userHandle;
 
-    public Response() {
-    }
+	public Response() {
+	}
 
-    public Response(String authenticatorData, String signature, String clientDataJSON, String userHandle, String deviceData, String attestationObject) {
-        this.authenticatorData = authenticatorData;
-        this.signature = signature;
-        this.clientDataJSON = clientDataJSON;
-        this.userHandle = userHandle;
-        this.deviceData = deviceData;
-        this.attestationObject = attestationObject;
-    }
+	public Response(String authenticatorData, String signature, String clientDataJSON, String userHandle) {
+		this.authenticatorData = authenticatorData;
+		this.signature = signature;
+		this.clientDataJSON = clientDataJSON;
+		this.userHandle = userHandle;
 
-    public String getAuthenticatorData() {
-        return authenticatorData;
-    }
+	}
 
-    public void setAuthenticatorData(String authenticatorData) {
-        this.authenticatorData = authenticatorData;
-    }
+	public String getAuthenticatorData() {
+		return authenticatorData;
+	}
 
-    public String getSignature() {
-        return signature;
-    }
+	public void setAuthenticatorData(String authenticatorData) {
+		this.authenticatorData = authenticatorData;
+	}
 
-    public void setSignature(String signature) {
-        this.signature = signature;
-    }
+	public String getSignature() {
+		return signature;
+	}
 
-    public String getClientDataJSON() {
-        return clientDataJSON;
-    }
+	public void setSignature(String signature) {
+		this.signature = signature;
+	}
 
-    public void setClientDataJSON(String clientDataJSON) {
-        this.clientDataJSON = clientDataJSON;
-    }
+	public String getClientDataJSON() {
+		return clientDataJSON;
+	}
 
-    public String getUserHandle() {
-        return userHandle;
-    }
+	public void setClientDataJSON(String clientDataJSON) {
+		this.clientDataJSON = clientDataJSON;
+	}
 
-    public void setUserHandle(String userHandle) {
-        this.userHandle = userHandle;
-    }
+	public String getUserHandle() {
+		return userHandle;
+	}
 
-    public String getDeviceData() {
-        return deviceData;
-    }
+	public void setUserHandle(String userHandle) {
+		this.userHandle = userHandle;
+	}
 
-    public void setDeviceData(String deviceData) {
-        this.deviceData = deviceData;
-    }
+	public static Response createResponse(String authenticatorData, String signature, String clientDataJSON,
+			String userHandle) {
+		return new Response(authenticatorData, signature, clientDataJSON, userHandle);
+	}
 
-    public String getAttestationObject() {
-        return attestationObject;
-    }
+	@Override
+	public String toString() {
+		return "Response [authenticatorData=" + authenticatorData + ", signature=" + signature + ", clientDataJSON="
+				+ clientDataJSON + ", userHandle=" + userHandle + "]";
+	}
 
-    public void setAttestationObject(String attestationObject) {
-        this.attestationObject = attestationObject;
-    }
-
-    public static Response createResponse(String authenticatorData, String signature, String clientDataJSON, String userHandle, String deviceData, String attestationObject) {
-        return new Response(authenticatorData, signature, clientDataJSON, userHandle, deviceData, attestationObject);
-    }
-
-    @Override
-    public String toString() {
-        return "Response{" +
-                "authenticatorData='" + authenticatorData + '\'' +
-                ", signature='" + signature + '\'' +
-                ", clientDataJSON='" + clientDataJSON + '\'' +
-                ", userHandle='" + userHandle + '\'' +
-                ", deviceData='" + deviceData + '\'' +
-                '}';
-    }
 }

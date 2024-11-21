@@ -158,57 +158,16 @@ public class AttestationService {
 		excludedCredentials.stream().forEach(ele -> log.debug("Put excludeCredentials {}", ele.toString()));
 		
 		
-		// Put authenticatorSelection
-		credentialCreationOptions.setAuthenticatorSelection(new AuthenticatorSelection());
-		
 		//set hints - client-device, security key, hybrid
 		List<String> hints = appConfiguration.getFido2Configuration().getHints();
 		
 		credentialCreationOptions.setHints(new HashSet<String>(hints));
-		// only platform 
-		if(hints.contains(PublicKeyCredentialHints.CLIENT_DEVICE) && hints.size() == 1)
-		{
-			credentialCreationOptions.getAuthenticatorSelection().setAuthenticatorAttachment(AuthenticatorAttachment.PLATFORM);
-			credentialCreationOptions.getAuthenticatorSelection().setUserVerification(UserVerification.preferred); 
-			credentialCreationOptions.getAuthenticatorSelection().setRequireResidentKey(true);
-			credentialCreationOptions.getAuthenticatorSelection().setResidentKey(UserVerification.preferred);
-			
-		}
-		else
-		{
-			credentialCreationOptions.getAuthenticatorSelection().setAuthenticatorAttachment(AuthenticatorAttachment.CROSS_PLATFORM);
-			credentialCreationOptions.getAuthenticatorSelection().setUserVerification(UserVerification.required); 
-			credentialCreationOptions.getAuthenticatorSelection().setRequireResidentKey(false);
-		}
-		log.debug("Put authenticatorSelection {}", credentialCreationOptions.getAuthenticatorSelection());
-		// set attestation - enterprise, none, direct
-		boolean enterpriseAttestation = appConfiguration.getFido2Configuration().isEnterpriseAttestation();
-		if (enterpriseAttestation)
-		{
-			credentialCreationOptions.setAttestation(AttestationConveyancePreference.enterprise);
-		}
-		// only platform authn, no other types of authenticators are allowed
-		else if(hints.contains(PublicKeyCredentialHints.CLIENT_DEVICE.getValue()) && hints.size()== 1)
-		{
-			credentialCreationOptions.setAttestation(AttestationConveyancePreference.none);
-		}
-		else if(appConfiguration.getFido2Configuration().getAttestationMode().equals(AttestationMode.DISABLED.getValue()))
-		{
-			credentialCreationOptions.setAttestation(AttestationConveyancePreference.none);
-		}
 		
-		// the priority of this check is last
-		else if(hints.contains(PublicKeyCredentialHints.SECURITY_KEY.getValue()) || hints.contains(PublicKeyCredentialHints.HYBRID.getValue()))
-		{
-			credentialCreationOptions.setAttestation(AttestationConveyancePreference.direct);
-		}
-		//TODO: this else does not make sense
-		else
-		{
-			credentialCreationOptions.setAttestation(AttestationConveyancePreference.direct);
-		}
+		//TODO: check if authenticatorSelection can be set in attestation options as well specially incase of platform
+		prepareAuthenticatorSelection( credentialCreationOptions,attestationOptions) ;
 		
-		log.debug("Put attestation {}", credentialCreationOptions.getAttestation());
+		prepareAttestation(credentialCreationOptions);
+		
 		
 		// Copy extensions
 		if (attestationOptions.getExtensions() != null) {
@@ -224,10 +183,9 @@ public class AttestationService {
 		entity.setChallenge(challenge);
 		entity.setOrigin(origin);
 		entity.setStatus(Fido2RegistrationStatus.pending);
+		entity.setAuthentictatorAttachment(credentialCreationOptions.getAuthenticatorSelection().getAuthenticatorAttachment().getAttachment());
+		entity.setRpId(origin);
 		
-		// TODO: this can be removed out in the future
-			entity.setRpId(origin);
-		//}
 
 		// Store original requests
 		entity.setAttestationRequest(CommonUtilService.toJsonNode(attestationOptions).toString());
@@ -345,15 +303,18 @@ public class AttestationService {
             userSessionIdService.updateUserSessionIdOnFinishRequest(sessionStateId, registrationEntry.getUserInum(), registrationEntry, true);
         }
 
-		// Create result object
-        AttestationOrAssertionResponse attestationResultResponse = new AttestationOrAssertionResponse();
 
 		PublicKeyCredentialDescriptor credentialDescriptor = new PublicKeyCredentialDescriptor(
 				registrationData.getPublicKeyId());
-		attestationResultResponse.setCredentials(credentialDescriptor);
-		attestationResultResponse.setStatus("ok");
-		attestationResultResponse.setErrorMessage("");
-		attestationResultResponse.setAuthenticatorName(attestationData.getAuthenticatorName());
+		
+		// Create result object
+        AttestationOrAssertionResponse attestationResultResponse = new AttestationOrAssertionResponse(
+				credentialDescriptor, "ok", "", registrationData.getUsername(),
+				registrationData.getAuthentictatorAttachment().toString(), String.valueOf(registrationData.isUserPresentFlag()), true,
+				registrationData.getBackupStateFlag(), registrationData.getBackupEligibilityFlag(),
+				registrationData.getType().toString(), true, "level", "aaguid", "authenticatorName", registrationData.getOrigin(),
+				"hint", registrationData.getChallenge(), registrationData.getRpId(), null, Long.valueOf(9000), null);
+        
 
 		externalFido2InterceptionContext.addToContext(registrationEntry, null);
 		externalFido2InterceptionService.verifyAttestationFinish(CommonUtilService.toJsonNode(attestationResult), externalFido2InterceptionContext);
@@ -361,23 +322,68 @@ public class AttestationService {
 		return attestationResultResponse;
 	}
 
-	private void prepareAuthenticatorSelection(PublicKeyCredentialCreationOptions credentialCreationOptions, AttestationOptions attestationOptions) {
+	private void prepareAuthenticatorSelection(PublicKeyCredentialCreationOptions credentialCreationOptions,
+			AttestationOptions attestationOptions) {
 
-		// default is cross platform
-		AuthenticatorAttachment authenticatorAttachment = AuthenticatorAttachment.CROSS_PLATFORM;
-		UserVerification userVerification = UserVerification.preferred;
-		UserVerification residentKey = UserVerification.preferred;
+		// set hints - client-device, security key, hybrid
+		List<String> hints = appConfiguration.getFido2Configuration().getHints();
+		
+		//TODO: crosscheck this set hints, do we need to set this here?, i guess yes, cross check before discounting this
+		credentialCreationOptions.setHints(new HashSet<String>(hints));
+		
+		credentialCreationOptions.setAuthenticatorSelection(new AuthenticatorSelection());
+		// only platform
+		if (hints.contains(PublicKeyCredentialHints.CLIENT_DEVICE) && hints.size() == 1) {
+			credentialCreationOptions.getAuthenticatorSelection()
+					.setAuthenticatorAttachment(AuthenticatorAttachment.PLATFORM);
+			credentialCreationOptions.getAuthenticatorSelection().setUserVerification(UserVerification.preferred);
+			credentialCreationOptions.getAuthenticatorSelection().setRequireResidentKey(true);
+			credentialCreationOptions.getAuthenticatorSelection().setResidentKey(UserVerification.preferred);
 
-		Boolean requireResidentKey = false;
-
-		if (attestationOptions.getAuthenticatorSelection() != null) {
-			return;
+		} else {
+			credentialCreationOptions.getAuthenticatorSelection()
+					.setAuthenticatorAttachment(AuthenticatorAttachment.CROSS_PLATFORM);
+			credentialCreationOptions.getAuthenticatorSelection().setUserVerification(UserVerification.required);
+			credentialCreationOptions.getAuthenticatorSelection().setRequireResidentKey(false);
 		}
-		log.debug("authenticatorSelection is not null");
-		AuthenticatorSelection authenticatorSelection = attestationOptions.getAuthenticatorSelection();
-		credentialCreationOptions.setAuthenticatorSelection(authenticatorSelection);
+		log.debug("Put authenticatorSelection {}", credentialCreationOptions.getAuthenticatorSelection());
 	}
 
+	private void prepareAttestation(PublicKeyCredentialCreationOptions credentialCreationOptions) {
+		
+		List<String> hints = appConfiguration.getFido2Configuration().getHints();
+		// set attestation - enterprise, none, direct
+				boolean enterpriseAttestation = appConfiguration.getFido2Configuration().isEnterpriseAttestation();
+				if (enterpriseAttestation)
+				{
+					credentialCreationOptions.setAttestation(AttestationConveyancePreference.enterprise);
+				}
+				// only platform authn, no other types of authenticators are allowed
+				else if(hints.contains(PublicKeyCredentialHints.CLIENT_DEVICE.getValue()) && hints.size()== 1)
+				{
+					credentialCreationOptions.setAttestation(AttestationConveyancePreference.none);
+				}
+				else if(appConfiguration.getFido2Configuration().getAttestationMode().equals(AttestationMode.DISABLED.getValue()))
+				{
+					credentialCreationOptions.setAttestation(AttestationConveyancePreference.none);
+				}
+				
+				// the priority of this check is last
+				else if(hints.contains(PublicKeyCredentialHints.SECURITY_KEY.getValue()) || hints.contains(PublicKeyCredentialHints.HYBRID.getValue()))
+				{
+					credentialCreationOptions.setAttestation(AttestationConveyancePreference.direct);
+				}
+				//TODO: this else does not make sense
+				else
+				{
+					credentialCreationOptions.setAttestation(AttestationConveyancePreference.direct);
+				}
+				
+				log.debug("Put attestation {}", credentialCreationOptions.getAttestation());
+		
+	}
+	
+	
 	private Set<PublicKeyCredentialParameters> preparePublicKeyCredentialSelection() {
 		List<String> enabledFidoAlgorithms = appConfiguration.getFido2Configuration().getEnabledFidoAlgorithms();
 

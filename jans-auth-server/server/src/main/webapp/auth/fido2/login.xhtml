@@ -4,18 +4,135 @@
 	xmlns:f="http://xmlns.jcp.org/jsf/core"
 	xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
 	xmlns:h="http://xmlns.jcp.org/jsf/html"
-	template="/WEB-INF/incl/layout/login-template.xhtml">
+	template="/WEB-INF/incl/layout/login-extended-template.xhtml">
 	<f:metadata>
 		<f:viewAction action="#{authenticator.prepareAuthenticationForStep}" />
 		<f:viewParam name="login_hint" value="#{loginAction.loginHint}" />
 	</f:metadata>
 	<ui:define name="head">
+	
 		<meta name="description" content="Janssen Project" />
+		<script src="/jans-auth/ext/resources/js/base64js.js" />
+        <script src="/jans-auth/ext/resources/js/base64url.js" />
+        <script src="/jans-auth/ext/resources/js/webauthn.js" />
+		<script type="text/javascript">
+
+			
+			var assertion_request = ${identity.getWorkingParameter('fido2_assertion_request')};
+			
+            window.onload = function () {
+				
+				console.log ("assertion_request: "+"assertion_request")
+						
+			
+                var userNameField = document.getElementById("loginForm:username");
+                var passwordField = document.getElementById("loginForm:password");
+
+                passwordField.value = "";
+                var userName = '#{!empty loginAction.loginHint ? loginAction.loginHint : ""}';
+                if (userName) {
+                    userNameField.value = userName;
+                    passwordField.focus();
+                } else {
+                    userNameField.focus();
+                }
+
+                var displayRegister = #{display_register_action or identity.sessionId.sessionAttributes['display_register_action']};
+                if (displayRegister) {
+                    var registerButton = document.getElementById("loginForm:registerId");
+                    if (registerButton != null) {
+                        registerButton.style.display = 'inline';
+                    }
+                }
+				
+				if (assertion_request != null) 
+				{
+				    if ( window.PublicKeyCredential &amp;&amp; PublicKeyCredential.isConditionalMediationAvailable)
+					{
+					   console.log("PublicKeyCredential.isConditionalMediationAvailable");
+                       startAssertion();
+					}
+					else
+					{
+						console.log("PublicKeyCredential not ConditionalMediationAvailable");
+					}
+                } 
+					
+            };
+
+    		$(document).ready(function () {
+    			$('.other').click(function(){
+    				$('#social_new').toggle();
+    			});
+                if (localStorage.chkbx &amp;&amp; localStorage.chkbx != '') {
+                    $('#rememberme').attr('checked', 'checked')
+                    document.getElementById("loginForm:username").value = localStorage.usrname;
+                } else {
+                    $('#rememberme').removeAttr('checked');
+                    document.getElementById("loginForm:username").value = "";
+                }
+
+                $('#rememberme').click(function() {
+                    checkRemembeMe();
+                });
+
+                
+    		});
+
+    		function checkRemembeMe() {
+                if ($('#rememberme').is(':checked')) {
+                    localStorage.usrname = document.getElementById("loginForm:username").value;
+                    localStorage.chkbx = $('#rememberme').val();
+                } else {
+                    localStorage.usrname = '';
+                    localStorage.chkbx = '';
+                }
+				console.log("Aborting this Conditional UI")
+				authAbortController.abort();
+			}
+
+            
+            function startAssertion() 
+			{
+				
+			   console.log ("assertion_request: "+"assertion_request")
+			   console.log('Executing Conditional UI get assertion Fido2 request', assertion_request);
+			   request = JSON.parse(assertion_request);
+			   webauthn.getAssertionConditional(request).then(data => {
+					   
+					   document.getElementById('tokenResponse').value = JSON.stringify(webauthn.responseToObject(data));
+					   document.getElementById('authMethod').value = 'authenticate';
+					   
+					   document.getElementById('fido2_form').submit();
+			   }).catch((err) => {
+					   
+					   console.error('Authentication failed', err);
+
+					   if (err.name === 'InvalidStateError') {
+							   console.error("This authenticator is not registered for the account '${identity.user.userId}'. Please try again with a registered authenticator.");
+					    } else if (err.name === 'AbortError') {
+						   console.error('This operation is canceled by user.');
+					    } else if (err.message) {
+						   console.error(err.name + ' : ' + err.message);
+						} else if (err.messages) {
+						   console.error(err.messages);
+						}
+						return false;
+		        });
+                                	
+                    }
+			
+        </script>
 	</ui:define>
 	<ui:define name="pageTitle">
 		<h:outputText value="#{msgs['login.pageTitle']}" />
 	</ui:define>
 	<ui:define name="body">
+		<form method="post"     id="fido2_form" action="#{request.contextPath}/postlogin.htm" onsubmit="return false;">
+			<input type="hidden" name="authMethod" id="authMethod" />
+            <input type="hidden" name="tokenResponse" id="tokenResponse" />
+        </form>
+	
 		<div class="container">
 			<h:panelGroup rendered="true">
 				<div class="login_bx_1"
@@ -33,11 +150,13 @@
 							<div class="col-sm-9 col-md-9">
 								<h:inputText placeholder="#{msgs['login.username']}"
 									id="username" name="username" required="true" colMd="10"
-									labelColMd="2" autocomplete="username webauthn"
+									labelColMd="2" 
 									value="#{credentials.username}" styleClass="form-control"
 									style="width:100%">
+									<f:passThroughAttribute name="autocomplete" value="username webauthn"/>
 								</h:inputText>
 							</div>
+							
 						</div>
 						<div class="form-group row"></div>
 						<div class="row">
@@ -105,98 +224,14 @@
 								</a>
 							</div>
 						</h:panelGroup>
+						<h:panelGroup>
+                            <p id="status"></p>
+                            <div id="messages"></div>
+                        </h:panelGroup>
 					</div>
 				</div>
 			</h:panelGroup>
 		</div>
-		<script type="text/javascript">
-
-            window.onload = function () {
-                var userNameField = document.getElementById("loginForm:username");
-                var passwordField = document.getElementById("loginForm:password");
-
-                passwordField.value = "";
-                var userName = '#{!empty loginAction.loginHint ? loginAction.loginHint : ""}';
-                if (userName) {
-                    userNameField.value = userName;
-                    passwordField.focus();
-                } else {
-                    userNameField.focus();
-                }
-
-                var displayRegister = #{display_register_action or identity.sessionId.sessionAttributes['display_register_action']};
-                if (displayRegister) {
-                    var registerButton = document.getElementById("loginForm:registerId");
-                    if (registerButton != null) {
-                        registerButton.style.display = 'inline';
-                    }
-                }
-            };
-
-    		$(document).ready(function () {
-    			$('.other').click(function(){
-    				$('#social_new').toggle();
-    			});
-                if (localStorage.chkbx &amp;&amp; localStorage.chkbx != '') {
-                    $('#rememberme').attr('checked', 'checked')
-                    document.getElementById("loginForm:username").value = localStorage.usrname;
-                } else {
-                    $('#rememberme').removeAttr('checked');
-                    document.getElementById("loginForm:username").value = "";
-                }
-
-                $('#rememberme').click(function() {
-                    checkRemembeMe();
-                });
-
-                
-    		});
-
-    		function checkRemembeMe() {
-                if ($('#rememberme').is(':checked')) {
-                    localStorage.usrname = document.getElementById("loginForm:username").value;
-                    localStorage.chkbx = $('#rememberme').val();
-                } else {
-                    localStorage.usrname = '';
-                    localStorage.chkbx = '';
-                }
-			}
-
-            
-            function startAssertion() 
-			{
-			   console.log('Executing get assertion Fido2 request', assertion_request);
-			   request = JSON.parse(assertion_request);
-			   webauthn.getAssertionConditional(request).then(data => {
-					   setStatus('Get assertion key data.');
-					   document.getElementById('tokenResponse').value = JSON.stringify(webauthn.responseToObject(data));
-					   document.getElementById('authMethod').value = 'authenticate';
-					   
-					   document.getElementById('fido2_form').submit();
-			   }).catch((err) => {
-					   setStatus('Authentication failed.');
-					   console.error('Authentication failed', err);
-
-					   if (err.name === 'InvalidStateError') {
-							   addMessage("This authenticator is not registered for the account '${identity.user.userId}'. Please try again with a registered authenticator.");
-					    } else if (err.name === 'AbortError') {
-						   addMessage('This operation is canceled by user.');
-					    } else if (err.message) {
-						   addMessage(err.name + ' : ' + err.message);
-						} else if (err.messages) {
-						   addMessages(err.messages);
-						}
-						return false;
-		        });
-                                	
-                    }
-			window.onload = function() {
-                    if (assertion_request != null) {
-					        if ( window.PublicKeyCredential &amp;&amp; PublicKeyCredential.isConditionalMediationAvailable)
-                            startAssertion();
-                    } 
-
-            
-        </script>
+		
 	</ui:define>
 </ui:composition>

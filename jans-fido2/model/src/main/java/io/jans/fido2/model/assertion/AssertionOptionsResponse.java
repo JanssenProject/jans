@@ -1,10 +1,13 @@
 package io.jans.fido2.model.assertion;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.JsonNode;
 import io.jans.fido2.model.common.PublicKeyCredentialDescriptor;
 
 import java.util.List;
 
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class AssertionOptionsResponse {
     private String challenge;
     private String user;

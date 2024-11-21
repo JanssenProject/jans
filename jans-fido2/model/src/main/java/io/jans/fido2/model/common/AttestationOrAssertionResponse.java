@@ -5,11 +5,11 @@ import java.util.List;
 import com.fasterxml.jackson.databind.JsonNode;
 
 public class AttestationOrAssertionResponse {
-    private PublicKeyCredentialDescriptor credentials;
-    private String status;
-    private String errorMessage;
-    private String username;
-    private String credentialID;
+	private PublicKeyCredentialDescriptor credential;
+	private String status;
+	private String errorMessage;
+	private String username;
+
 	private String userVerification;
 	private String userPresence;
 	private boolean counterSupported;
@@ -22,13 +22,12 @@ public class AttestationOrAssertionResponse {
 	private String authenticatorName;
 	private String origin;
 	private String hint;
-	public String getCredentialID() {
-		return credentialID;
-	}
+	private String challenge;
+	private String rpId;
 
-	public void setCredentialID(String credentialID) {
-		this.credentialID = credentialID;
-	}
+	private List<PublicKeyCredentialDescriptor> allowCredentials;
+	private Long timeout;
+	private JsonNode extensions;
 
 	public String getUserVerification() {
 		return userVerification;
@@ -118,7 +117,6 @@ public class AttestationOrAssertionResponse {
 		this.origin = origin;
 	}
 
-	
 	public String getHint() {
 		return hint;
 	}
@@ -167,59 +165,77 @@ public class AttestationOrAssertionResponse {
 		this.extensions = extensions;
 	}
 
-	private String challenge;
-	private String rpId;
-	
-	private List<PublicKeyCredentialDescriptor> allowCredentials;
-	private Long timeout;
-	private JsonNode extensions;
-    
-    
-
-    public PublicKeyCredentialDescriptor getCredentials() {
-		return credentials;
+	public PublicKeyCredentialDescriptor getCredential() {
+		return credential;
 	}
 
-	public void setCredentials(PublicKeyCredentialDescriptor credentials) {
-		this.credentials = credentials;
+	public void setCredential(PublicKeyCredentialDescriptor credential) {
+		this.credential = credential;
 	}
 
 	public String getStatus() {
-        return status;
-    }
+		return status;
+	}
 
-    public void setStatus(String status) {
-        this.status = status;
-    }
+	public void setStatus(String status) {
+		this.status = status;
+	}
 
-    public String getErrorMessage() {
-        return errorMessage;
-    }
+	public String getErrorMessage() {
+		return errorMessage;
+	}
 
-    public void setErrorMessage(String errorMessage) {
-        this.errorMessage = errorMessage;
-    }
+	public void setErrorMessage(String errorMessage) {
+		this.errorMessage = errorMessage;
+	}
 
-    public String getUsername() {
-        return username;
-    }
+	public String getUsername() {
+		return username;
+	}
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	public AttestationOrAssertionResponse(PublicKeyCredentialDescriptor credential, String status, String errorMessage,
+			String username, String userVerification, String userPresence, boolean counterSupported,
+			boolean multiFactor, boolean multiDevice, String deviceType, boolean certified, String certificationLevel,
+			String aaguidOrSkid, String authenticatorName, String origin, String hint, String challenge, String rpId,
+			List<PublicKeyCredentialDescriptor> allowCredentials, Long timeout, JsonNode extensions) {
+		super();
+		this.credential = credential;
+		this.status = status;
+		this.errorMessage = errorMessage;
+		this.username = username;
+		this.userVerification = userVerification;
+		this.userPresence = userPresence;
+		this.counterSupported = counterSupported;
+		this.multiFactor = multiFactor;
+		this.multiDevice = multiDevice;
+		this.deviceType = deviceType;
+		this.certified = certified;
+		this.certificationLevel = certificationLevel;
+		this.aaguidOrSkid = aaguidOrSkid;
+		this.authenticatorName = authenticatorName;
+		this.origin = origin;
+		this.hint = hint;
+		this.challenge = challenge;
+		this.rpId = rpId;
+		this.allowCredentials = allowCredentials;
+		this.timeout = timeout;
+		this.extensions = extensions;
+	}
 
 	@Override
 	public String toString() {
-		return "AttestationOrAssertionResponse [credentials=" + credentials + ", status=" + status + ", errorMessage="
-				+ errorMessage + ", username=" + username + ", credentialID=" + credentialID + ", userVerification="
-				+ userVerification + ", userPresence=" + userPresence + ", counterSupported=" + counterSupported
-				+ ", multiFactor=" + multiFactor + ", multiDevice=" + multiDevice + ", deviceType=" + deviceType
-				+ ", certified=" + certified + ", certificationLevel=" + certificationLevel + ", aaguidOrSkid="
-				+ aaguidOrSkid + ", authenticatorName=" + authenticatorName + ", origin=" + origin
-				+ ", hint=" + hint + ", challenge="
+		return "AttestationOrAssertionResponse [credential=" + credential + ", status=" + status + ", errorMessage="
+				+ errorMessage + ", username=" + username + ",  userVerification=" + userVerification
+				+ ", userPresence=" + userPresence + ", counterSupported=" + counterSupported + ", multiFactor="
+				+ multiFactor + ", multiDevice=" + multiDevice + ", deviceType=" + deviceType + ", certified="
+				+ certified + ", certificationLevel=" + certificationLevel + ", aaguidOrSkid=" + aaguidOrSkid
+				+ ", authenticatorName=" + authenticatorName + ", origin=" + origin + ", hint=" + hint + ", challenge="
 				+ challenge + ", rpId=" + rpId + ", allowCredentials=" + allowCredentials + ", timeout=" + timeout
 				+ ", extensions=" + extensions + "]";
 	}
 
-   
 }

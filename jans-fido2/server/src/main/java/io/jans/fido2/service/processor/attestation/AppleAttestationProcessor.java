@@ -32,6 +32,7 @@ import io.jans.fido2.service.CoseService;
 import io.jans.fido2.service.mds.AttestationCertificateService;
 import io.jans.fido2.service.processors.AttestationFormatProcessor;
 import io.jans.fido2.service.verifier.CertificateVerifier;
+import io.jans.fido2.service.verifier.CommonVerifiers;
 
 /**
  * For Apple's anonymous attestation fmt="apple"
@@ -44,6 +45,9 @@ public class AppleAttestationProcessor implements AttestationFormatProcessor {
 	@Inject
 	private Logger log;
 
+	@Inject
+    private CommonVerifiers commonVerifiers;
+	
 	@Inject
 	private AttestationCertificateService attestationCertificateService;
 
@@ -80,6 +84,8 @@ public class AppleAttestationProcessor implements AttestationFormatProcessor {
 			CredAndCounterData credIdAndCounters) {
 
 		log.info("AttStmt: " + attStmt.asText());
+		
+		
 		// Check attStmt and it contains "x5c" then its a FULL attestation.
 		if (attStmt.hasNonNull("x5c")) {
 
@@ -169,7 +175,7 @@ public class AppleAttestationProcessor implements AttestationFormatProcessor {
 			credIdAndCounters.setCredId(base64Service.urlEncodeToString(authData.getCredId()));
 			credIdAndCounters.setUncompressedEcPoint(base64Service.urlEncodeToString(authData.getCosePublicKey()));
 			// log.info("attStmt.get(\"alg\")"+attStmt.get("alg"));
-			int alg = -7;// commonVerifiers.verifyAlgorithm(attStmt.get("alg"), authData.getKeyType());
+			int alg = commonVerifiers.verifyAlgorithm(attStmt.get("alg"), authData.getKeyType());
 			credIdAndCounters.setSignatureAlgorithm(alg);
 			credIdAndCounters.setAuthenticatorName(attestationCertificateService.getAttestationAuthenticatorName(authData));
 		}
