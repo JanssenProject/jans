@@ -4,6 +4,7 @@ use super::{
 };
 use crate::common::policy_store::PolicyStore;
 use serde::{de, Deserialize, Deserializer};
+use std::path::Path;
 
 #[derive(Deserialize, PartialEq, Debug)]
 #[allow(dead_code)]
@@ -257,14 +258,18 @@ impl<'de> Deserialize<'de> for BootstrapConfig {
             },
 
             // Case: get the policy store from a local JSON file
-            (None, Some(path)) => {
-                let source = match path.to_lowercase().as_str() {
-                    _ if path.ends_with(".json") => PolicyStoreSource::FileJson(path),
-                    _ if path.ends_with(".yaml") || path.ends_with(".yml") => {
-                        PolicyStoreSource::FileYaml(path)
-                    },
+            (None, Some(raw_path)) => {
+                let path = Path::new(&raw_path);
+                let file_ext = Path::new(&path)
+                    .extension()
+                    .and_then(|ext| ext.to_str())
+                    .map(|x| x.to_lowercase());
+
+                let source = match file_ext.as_deref() {
+                    Some("json") => PolicyStoreSource::FileJson(path.into()),
+                    Some("yaml") | Some("yml") => PolicyStoreSource::FileYaml(path.into()),
                     _ => Err(de::Error::custom(
-                        BootstrapDecodingError::UnsupportedPolicyStoreFileFormat(path),
+                        BootstrapDecodingError::UnsupportedPolicyStoreFileFormat(raw_path),
                     ))?,
                 };
                 PolicyStoreConfig { source }

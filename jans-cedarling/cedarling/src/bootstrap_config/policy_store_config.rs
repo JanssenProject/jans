@@ -5,6 +5,8 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
+use std::path::Path;
+
 /// `PolicyStoreConfig` - Configuration for the policy store.
 ///
 /// Defines where the policy will be retrieved from.
@@ -35,12 +37,8 @@ pub enum PolicyStoreSource {
     LockMaster(String),
 
     /// Read policy from a JSON File.
-    ///
-    /// The string contains the path to the JSON file.
-    FileJson(String),
+    FileJson(Box<Path>),
 
     /// Read policy from a YAML File.
-    ///
-    /// The string contains the path to the YAML file.
-    FileYaml(String),
+    FileYaml(Box<Path>),
 }

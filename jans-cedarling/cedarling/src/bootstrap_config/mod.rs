@@ -11,7 +11,7 @@ pub(crate) mod jwt_config;
 pub(crate) mod log_config;
 pub(crate) mod policy_store_config;
 
-use std::{fs, io};
+use std::{fs, io, path::Path};
 
 // reimport to useful import values in root module
 pub use jwt_config::*;
@@ -50,13 +50,17 @@ impl BootstrapConfig {
     ///     .expect("Failed to load configuration");
     /// ```
     pub fn load_from_file(path: &str) -> Result<Self, BootstrapConfigLoadingError> {
-        let config = match path.to_lowercase().as_str() {
-            _ if path.ends_with(".json") => {
+        let file_ext = Path::new(path)
+            .extension()
+            .and_then(|ext| ext.to_str())
+            .map(|x| x.to_lowercase());
+        let config = match file_ext.as_deref() {
+            Some("json") => {
                 let config_json = fs::read_to_string(path)
                     .map_err(|e| BootstrapConfigLoadingError::ReadFile(path.to_string(), e))?;
                 serde_json::from_str::<BootstrapConfig>(&config_json)?
             },
-            _ if path.ends_with(".yaml") || path.ends_with(".yml") => {
+            Some("yaml") | Some("yml") => {
                 let config_json = fs::read_to_string(path)
                     .map_err(|e| BootstrapConfigLoadingError::ReadFile(path.to_string(), e))?;
                 serde_yml::from_str::<BootstrapConfig>(&config_json)?
@@ -98,6 +102,8 @@ pub enum BootstrapConfigLoadingError {
 
 #[cfg(test)]
 mod test {
+    use std::path::Path;
+
     use crate::{BootstrapConfig, LogConfig, LogTypeConfig, MemoryLogConfig, PolicyStoreConfig};
     use test_utils::assert_eq;
 
@@ -114,7 +120,7 @@ mod test {
             },
             policy_store_config: PolicyStoreConfig {
                 source: crate::PolicyStoreSource::FileJson(
-                    "../test_files/policy-store_blobby.json".to_string(),
+                    Path::new("../test_files/policy-store_blobby.json").into(),
                 ),
             },
             jwt_config: crate::JwtConfig::Enabled {
@@ -137,8 +143,8 @@ mod test {
                 log_type: LogTypeConfig::Memory(MemoryLogConfig { log_ttl: 604800 }),
             },
             policy_store_config: PolicyStoreConfig {
-                source: crate::PolicyStoreSource::FileJson(
-                    "../test_files/policy-store_blobby.json".to_string(),
+                source: crate::PolicyStoreSource::FileJson(Path::new(
+                    "../test_files/policy-store_blobby.json").into(),
                 ),
             },
             jwt_config: crate::JwtConfig::Enabled {

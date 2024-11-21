@@ -8,6 +8,7 @@
 use crate::bootstrap_config::policy_store_config::{PolicyStoreConfig, PolicyStoreSource};
 use crate::common::policy_store::AgamaPolicyStore;
 use crate::common::policy_store::PolicyStore;
+use std::path::Path;
 use std::{fs, io};
 
 /// Errors that can occur when loading a policy store.
@@ -22,7 +23,7 @@ pub enum PolicyStoreLoadError {
     #[error("Policy Store does not contain correct structure: {0}")]
     InvalidStore(String),
     #[error("Failed to load policy store from {0}: {1}")]
-    ParseFile(String, io::Error),
+    ParseFile(Box<Path>, io::Error),
 }
 
 // AgamaPolicyStore contains the structure to accommodate several policies,
@@ -73,13 +74,13 @@ pub(crate) fn load_policy_store(
         },
         PolicyStoreSource::FileJson(path) => {
             let policy_json = fs::read_to_string(path)
-                .map_err(|e| PolicyStoreLoadError::ParseFile(path.to_string(), e))?;
+                .map_err(|e| PolicyStoreLoadError::ParseFile(path.clone(), e))?;
             let agama_policy_store = serde_json::from_str::<AgamaPolicyStore>(&policy_json)?;
             extract_first_policy_store(&agama_policy_store)?
         },
         PolicyStoreSource::FileYaml(path) => {
             let policy_yaml = fs::read_to_string(path)
-                .map_err(|e| PolicyStoreLoadError::ParseFile(path.to_string(), e))?;
+                .map_err(|e| PolicyStoreLoadError::ParseFile(path.clone(), e))?;
             let agama_policy_store = serde_yml::from_str::<AgamaPolicyStore>(&policy_yaml)?;
             extract_first_policy_store(&agama_policy_store)?
         },
@@ -100,6 +101,8 @@ fn load_policy_store_from_lock_master(
 
 #[cfg(test)]
 mod test {
+    use std::path::Path;
+
     use super::load_policy_store;
     use crate::PolicyStoreConfig;
 
@@ -111,7 +114,7 @@ mod test {
     fn can_load_from_json_file() {
         load_policy_store(&PolicyStoreConfig {
             source: crate::PolicyStoreSource::FileJson(
-                "../test_files/policy-store_generated.json".to_string(),
+                Path::new("../test_files/policy-store_generated.json").into(),
             ),
         })
         .expect("Should load policy store from JSON file");
@@ -121,7 +124,7 @@ mod test {
     fn can_load_from_yaml_file() {
         load_policy_store(&PolicyStoreConfig {
             source: crate::PolicyStoreSource::FileYaml(
-                "../test_files/policy-store_ok.yaml".to_string(),
+                Path::new("../test_files/policy-store_ok.yaml").into(),
             ),
         })
         .expect("Should load policy store from YAML file");
