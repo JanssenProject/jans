@@ -55,9 +55,9 @@ public class ClientResourceTest extends BaseTest{
         Builder request = getResteasyService().getClientBuilder(issuer+openidClientsUrl);
         request.header(AUTHORIZATION, AUTHORIZATION_TYPE + " " + accessToken);
         request.header(CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED);
-        String jsonStr = decodeFileValue(json);
-        log.error("\n\n\n postClient2 - jsonStr:{}", jsonStr);
-        Response response = request.post(Entity.entity(jsonStr, MediaType.APPLICATION_JSON));
+        //String jsonStr = decodeFileValue(json);
+        //log.error("\n\n\n postClient2 - jsonStr:{}", jsonStr);
+        Response response = request.post(Entity.entity(json, MediaType.APPLICATION_JSON));
         log.error("post client -  response:{}", response);
 
         if (response.getStatus() == 201) {

@@ -5,7 +5,7 @@
     <parameter name="propertiesFile" value="target/test-classes/config-api-test.properties" />
 	
 	<listeners>
-        <!--<listener class-name="io.jans.configapi.listener.AlterSuiteListener" />-->
+        <listener class-name="io.jans.configapi.listener.AlterSuiteListener" />
         <listener class-name="io.jans.configapi.listener.SkipTestsListener" />
     </listeners>
   

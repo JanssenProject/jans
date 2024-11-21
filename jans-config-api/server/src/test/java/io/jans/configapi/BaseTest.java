@@ -117,16 +117,16 @@ public class BaseTest {
     @BeforeSuite
     public void initTestSuite(ITestContext context) throws Exception {
 
-        log.error("Invoked initTestSuite of '{}'", context.getCurrentXmlTest().getName());
+        //log.error("Invoked initTestSuite of '{}'", context.getCurrentXmlTest().getName());
         String propertiesFile = context.getCurrentXmlTest().getParameter("propertiesFile");
         log.error("Invoked initTestSuite propertiesFile '{}'", propertiesFile);
 
-        Properties prop = new Properties();
-        prop.load(Files.newBufferedReader(Paths.get(propertiesFile), UTF_8));
+        //Properties prop = new Properties();
+       // prop.load(Files.newBufferedReader(Paths.get(propertiesFile), UTF_8));
 
-        propertiesMap = new Hashtable<>();
-        prop.forEach((key, value) -> propertiesMap.put(key.toString(), value.toString()));
-        context.getSuite().getXmlSuite().setParameters(propertiesMap);
+        propertiesMap = context.getSuite().getXmlSuite().getParameters();
+        //prop.forEach((key, value) -> propertiesMap.put(key.toString(), value.toString()));
+        //context.getSuite().getXmlSuite().setParameters(propertiesMap);
 
         log.error("End initTestSuite propertiesMap: {}", propertiesMap);
 
