@@ -7,8 +7,6 @@ on:
     tags:
       - "*"
     branches:
-      # below branch is triggered by jenkins which triggers dev image
-      - update-source-build-date
       - main
     paths:
       - "docker-jans-**/**"
@@ -16,8 +14,6 @@ on:
   pull_request:
     branches:
       - main
-      # below branch is triggered by jenkins which triggers dev image
-      - update-source-build-dates
     paths:
       - "docker-jans-**/**"
       - "!docker-jans-**/CHANGELOG.md"

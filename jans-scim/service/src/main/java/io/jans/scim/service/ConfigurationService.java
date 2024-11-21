@@ -271,7 +271,7 @@ public class ConfigurationService implements Serializable {
 		}
 		log.info("Starting App version " + version);
 		if (version != null) {
-			version = version.replace("-SNAPSHOT", "");
+			version = version.replace("-nightly", "");
 			return version;
 		}
 		return "";
