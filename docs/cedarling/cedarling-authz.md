@@ -50,7 +50,7 @@ values of the `scope` claim), or other claims--domains frequently enhance the ac
 contain business specific data needed for policy evaluation.
 
 The Cedarling authorizes a Person using a certain piece of software, which is called a "Workload".
-From a logical perspective, (`person_allowed` AND `workload_allowed`) OR (`role_allowed` AND `workload_allowed`) must be `True`. The JWT's,
+From a logical perspective, (`person_allowed` AND `workload_allowed`) must be `True`. The JWT's,
 Action, Resource and Context is sent by the application in the authorization request. For example,
 this is a sample request from a hypothetical application:
 

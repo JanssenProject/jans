@@ -367,7 +367,7 @@ Mandatory entities is: `id_token`, `Role`, `User`, `Access_token`, `Workload`.
 - `Role` - define role of user.
   - Mapping defined in `Token Metadata Schema`.
   - Claim in JWT usually is string or array of string.
-  - If many roles present, the `cedarling` will try each to find first permit case.
+  - Each `Role` is parent for `User`. So to check role in policy use operator `in` to check hierarchy.
 
 - `User` - entity based on the `id`and `userinfo` JWT token fields.
   - If `id`and `userinfo` JWT token fields has different `sub` value, `userinfo` JWT token will be ignored.
