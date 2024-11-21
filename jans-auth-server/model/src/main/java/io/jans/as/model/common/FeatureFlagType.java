@@ -78,6 +78,9 @@ public enum FeatureFlagType {
     @DocFeatureFlag(description = "Enable/Disable Pushed Authorization Requests(PAR) feature",
             defaultValue = "Enabled")
     PAR("par"),
+    @DocFeatureFlag(description = "Enable/Disable Access Evaluation Endpoint",
+            defaultValue = "Enabled")
+    ACCESS_EVALUATION("access_evaluation"),
     @DocFeatureFlag(description = "Enable/Disable Software Statement Assertion(SSA) feature",
             defaultValue = "Enabled")
     SSA("ssa");
