@@ -1501,10 +1501,11 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 		} else if (propertyValue instanceof Object[]) {
 			attributeValues = (Object[]) propertyValue;
 		} else if (propertyValue instanceof List<?>) {
-			attributeValues = new Object[((List<?>) propertyValue).size()];
+			List<?> propertyValueList = (List<?>) propertyValue;
+			attributeValues = new Object[propertyValueList.size()];
 			int index = 0;
 			Object nativeAttributeValue[] = new Object[1];
-			for (Object tmpPropertyValue : (List<?>) propertyValue) {
+			for (Object tmpPropertyValue : propertyValueList) {
 				if (jsonObject) {
 					attributeValues[index++] = convertValueToJson(tmpPropertyValue);
 				} else {
@@ -1594,6 +1595,10 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 	}
 
 	protected Object convertValueToJson(Object propertyValue) {
+		if (propertyValue == null) {
+			return null;
+		}
+
 		try {
 			String value = JSON_OBJECT_MAPPER.writeValueAsString(propertyValue);
 
@@ -1773,7 +1778,13 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 
 			AttributeData attribute = getAttributeData(propertyName, entryPropertyNameGetter, entryPropertyValueGetter,
 					entryAttribute, Boolean.TRUE.equals(multiValued), false);
-			if (attribute != null) {
+			if (attribute == null) {
+				// Remove custom attribute
+				String ldapAttributeName = getDbCustomAttributeName(entryPropertyNameGetter, entryAttribute);
+				if (ldapAttributeName != null) {
+					listAttributes.add(new AttributeData(ldapAttributeName, null));
+				}
+			} else {
 				if (multiValued == null) {
 					// Detect if attribute has more than one value
 					multiValued = attribute.getValues().length > 1;
@@ -1878,12 +1889,21 @@ public abstract class BaseEntryManager<O extends PersistenceOperationService> im
 
 	private AttributeData getAttributeData(String propertyName, Getter propertyNameGetter, Getter propertyValueGetter,
 			Object entry, boolean multiValued, boolean jsonObject) {
+		String ldapAttributeName = getDbCustomAttributeName(propertyNameGetter, entry);
+		if (ldapAttributeName == null) {
+			return null;
+		}
+
+		return getAttributeData(propertyName, ldapAttributeName, propertyValueGetter, entry, multiValued, jsonObject);
+	}
+
+	private String getDbCustomAttributeName(Getter propertyNameGetter, Object entry) {
 		Object ldapAttributeName = propertyNameGetter.get(entry);
 		if (ldapAttributeName == null) {
 			return null;
 		}
 
-		return getAttributeData(propertyName, ldapAttributeName.toString(), propertyValueGetter, entry, multiValued, jsonObject);
+		return ldapAttributeName.toString();
 	}
 
 	private void setPropertyValue(String propertyName, Setter propertyValueSetter, Object entry,
