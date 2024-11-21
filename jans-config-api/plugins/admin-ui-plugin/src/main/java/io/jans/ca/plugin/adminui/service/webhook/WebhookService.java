@@ -283,7 +283,7 @@ public class WebhookService {
             entryManager.merge(webhook);
 
             List<AuiFeature> features = getAllAuiFeatures();
-            //removing webhookId from auiFeatures tables..
+            //removing webhookId from auiFeatures table from the feature records
             features.stream()
                     .filter(feature -> feature.getWebhookIdsMapped() != null)
                     .filter(feature -> feature.getWebhookIdsMapped().contains(webhook.getInum()))
@@ -291,7 +291,7 @@ public class WebhookService {
                         feature.getWebhookIdsMapped().remove(webhook.getInum());
                         entryManager.merge(feature);
                     });
-            //adding webhook
+            //adding webhook-id to the feature record
             if (webhook.getAuiFeatureIds() != null) {
                 features = getAuiFeaturesByIds(webhook.getAuiFeatureIds());
                 features.stream().forEach(feature -> {
