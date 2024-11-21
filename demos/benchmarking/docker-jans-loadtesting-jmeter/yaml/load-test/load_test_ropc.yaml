@@ -36,7 +36,7 @@ spec:
       - envFrom:
         - configMapRef:
             name: load-testing-ropc-cm
-        image: ghcr.io/janssenproject/jans/loadtesting-jmeter:1.1.6_dev
+        image: ghcr.io/janssenproject/jans/loadtesting-jmeter:0.0.0-nightly
         imagePullPolicy: Always
         name: load-testing-ropc
         resources:

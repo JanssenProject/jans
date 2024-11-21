@@ -2,7 +2,7 @@
     "projectName": "casa-account-linking",
     "author": "jgomer2001",
     "type": "Community",
-    "version": "1.1.6",
+    "version": "0.0.0-nightly",
     "description": "A helper project for Jans Casa accounts linking plugin",
     "noDirectLaunch": [ ],
     "configs": {
