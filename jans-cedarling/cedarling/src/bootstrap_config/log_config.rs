@@ -6,7 +6,7 @@
  */
 
 /// A set of properties used to configure logging in the `Cedarling` application.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct LogConfig {
     /// `CEDARLING_LOG_TYPE` in [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) documentation.
     pub log_type: LogTypeConfig,
@@ -15,7 +15,7 @@ pub struct LogConfig {
 ///  Log type configuration.
 ///  `CEDARLING_LOG_TYPE` in [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) documentation.
 ///   Current type represent this value.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum LogTypeConfig {
     /// Logger do nothing. It means that all logs will be ignored.
     Off,
@@ -28,7 +28,7 @@ pub enum LogTypeConfig {
 }
 
 /// Configuration for memory log.
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub struct MemoryLogConfig {
     /// `CEDARLING_LOG_TTL` in [bootstrap properties](https://github.com/JanssenProject/jans/wiki/Cedarling-Nativity-Plan#bootstrap-properties) documentation.
     /// The maximum time to live (in seconds) of the log entries.
