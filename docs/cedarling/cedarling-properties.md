@@ -14,8 +14,8 @@ These Bootstrap Properties control default application level behavior.
 
 * **`CEDARLING_APPLICATION_NAME`** : Human friendly identifier for this application
 * **`CEDARLING_POLICY_STORE_URI`** : Location of policy store JSON, used if policy store is not local, or retreived from Lock Server.
-* **`CEDARLING_POLICY_STORE_ID`** (`"off"` | `"memory"`, `"std_out"` | `"lock"`): A unique identifier for the policy store.
-* **`CEDARLING_LOG_TYPE`** : How the logs will be represented. Could be 
+* **`CEDARLING_POLICY_STORE_ID`**: A unique identifier for the policy store.
+* **`CEDARLING_LOG_TYPE`** (`"off"` | `"memory"` | `"std_out"` | `"lock"`): Selects the logging method.
 * **`CEDARLING_LOG_TTL`** : If the `CEDARLING_LOG_TYPE` is set to `"memory"`, this will set the TTL (Time to Live) of log entities in seconds. Defaults to 60s.
 * **`CEDARLING_USER_AUTHZ`** (`"enabled"` | `"disabled"`): When `enabled`, Cedar engine authorization is queried for a *User* principal.
 * **`CEDARLING_WORKLOAD_AUTHZ`** (`"enabled"` | `"disabled"`): When `enabled`, Cedar engine authorization is queried for a *Workload* principal.
