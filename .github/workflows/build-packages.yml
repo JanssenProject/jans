@@ -108,6 +108,9 @@ jobs:
          sed -i "s/%VERSION%/${{ steps.previoustag.outputs.version }}/g" run-build.sh
          cat run-build.sh
          sudo ./run-build.sh
+         if [[ ${{ matrix.name }} == "el8" || ${{ matrix.name }} == "suse15" ]] && [[ ${{ steps.previoustag.outputs.tag }} == "nightly" ]]; then
+           cp -r /home/runner/work/jans/jans/jans/rpmbuild/BUILDROOT/jans-0.0.0-nightly.${{ matrix.name }}.x86_64 /home/runner/work/jans/jans/jans/rpmbuild/BUILDROOT/jans-0.0.0-nightly-${{ matrix.name }}.x86_64
+         fi
     - name: Sign package
       id: sign_package
       run : |
