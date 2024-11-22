@@ -72,3 +72,114 @@ Strict mode requires:
 
 1. The `id_token`'s `aud` matches the `access_token`'s `client_id`;
 2. if a Userinfo token is present, the `sub` matches the `id_token`, and that the `aud` matches the access token's `client_id`.
+
+## Loading The bootstrap config.
+
+There are multiple ways to load your bootstrap config:
+
+- [From a JSON file](#loading-from-json)
+- [From a YAML file](#loading-from-yaml)
+
+You can load from both file types using the following code snippet:
+
+```rust
+use cedarling::BootstrapConfig;
+
+let config =
+    BootstrapConfig::load_from_file("./path/to/your/config.json").unwrap();
+```
+
+### Loading From JSON
+
+Below is an example of a bootstrap config in JSON format.
+
+```json
+{
+    "CEDARLING_APPLICATION_NAME": "My App",
+    "CEDARLING_POLICY_STORE_URI": "",
+    "CEDARLING_POLICY_STORE_ID": "840da5d85403f35ea76519ed1a18a33989f855bf1cf8",
+    "CEDARLING_LOG_TYPE": "Memory",
+    "CEDARLING_LOG_TTL": 604800,
+    "CEDARLING_USER_AUTHZ": "Enabled",
+    "CEDARLING_WORKLOAD_AUTHZ": "Enabled",
+    "CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION": "And",
+    "CEDARLING_LOCAL_JWKS": "../test_files/local_jwks.json",
+    "CEDARLING_LOCAL_POLICY_STORE": null,
+    "CEDARLING_POLICY_STORE_LOCAL_FN": "../test_files/policy-store_blobby.json",
+    "CEDARLING_JWT_SIG_VALIDATION": "Enabled",
+    "CEDARLING_JWT_STATUS_VALIDATION": "Disabled",
+    "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED": [
+        "HS256",
+        "RS256"
+    ],
+    "CEDARLING_AT_ISS_VALIDATION": "Disabled",
+    "CEDARLING_AT_JTI_VALIDATION": "Disabled",
+    "CEDARLING_AT_NBF_VALIDATION": "Disabled",
+    "CEDARLING_AT_EXP_VALIDATION": "Enabled",
+    "CEDARLING_IDT_ISS_VALIDATION": "Enabled",
+    "CEDARLING_IDT_SUB_VALIDATION": "Enabled",
+    "CEDARLING_IDT_EXP_VALIDATION": "Enabled",
+    "CEDARLING_IDT_IAT_VALIDATION": "Enabled",
+    "CEDARLING_IDT_AUD_VALIDATION": "Enabled",
+    "CEDARLING_USERINFO_ISS_VALIDATION": "Enabled",
+    "CEDARLING_USERINFO_SUB_VALIDATION": "Enabled",
+    "CEDARLING_USERINFO_AUD_VALIDATION": "Enabled",
+    "CEDARLING_USERINFO_EXP_VALIDATION": "Enabled",
+    "CEDARLING_ID_TOKEN_TRUST_MODE": "Strict",
+    "CEDARLING_LOCK": "Disabled",
+    "CEDARLING_LOCK_MASTER_CONFIGURATION_URI": null,
+    "CEDARLING_DYNAMIC_CONFIGURATION": "Disabled",
+    "CEDARLING_LOCK_SSA_JWT": null,
+    "CEDARLING_AUDIT_HEALTH_INTERVAL": 0,
+    "CEDARLING_AUDIT_TELEMETRY_INTERVAL": 0,
+    "CEDARLING_LISTEN_SSE": "Disabled"
+}
+```
+
+- Note that properties set to `"Disabled"`, an empty string `""`, zero `0`, and `null` can be ommited since they are the defaults.
+
+### Loading From YAML
+
+Below is an example of a bootstrap config in YAML format.
+
+```yaml
+CEDARLING_APPLICATION_NAME: My App
+CEDARLING_POLICY_STORE_URI: ''
+CEDARLING_POLICY_STORE_ID: '840da5d85403f35ea76519ed1a18a33989f855bf1cf8'
+CEDARLING_LOG_TYPE: 'Memory'
+CEDARLING_LOG_TTL: 604800
+CEDARLING_USER_AUTHZ: 'Enabled'
+CEDARLING_WORKLOAD_AUTHZ: 'Enabled'
+CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION: 'And'
+CEDARLING_LOCAL_JWKS: '../test_files/local_jwks.json'
+CEDARLING_LOCAL_POLICY_STORE: null
+CEDARLING_POLICY_STORE_LOCAL_FN: '../test_files/policy-store_blobby.json'
+CEDARLING_JWT_SIG_VALIDATION: 'Enabled'
+CEDARLING_JWT_STATUS_VALIDATION: 'Disabled'
+CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED:
+    - 'HS256'
+    - 'RS256'
+CEDARLING_AT_ISS_VALIDATION: 'Disabled'
+CEDARLING_AT_JTI_VALIDATION: 'Disabled'
+CEDARLING_AT_NBF_VALIDATION: 'Disabled'
+CEDARLING_AT_EXP_VALIDATION: 'Enabled'
+CEDARLING_IDT_ISS_VALIDATION: 'Enabled'
+CEDARLING_IDT_SUB_VALIDATION: 'Enabled'
+CEDARLING_IDT_EXP_VALIDATION: 'Enabled'
+CEDARLING_IDT_IAT_VALIDATION: 'Enabled'
+CEDARLING_IDT_AUD_VALIDATION: 'Enabled'
+CEDARLING_USERINFO_ISS_VALIDATION: 'Enabled'
+CEDARLING_USERINFO_SUB_VALIDATION: 'Enabled'
+CEDARLING_USERINFO_AUD_VALIDATION: 'Enabled'
+CEDARLING_USERINFO_EXP_VALIDATION: 'Enabled'
+CEDARLING_ID_TOKEN_TRUST_MODE: 'Strict'
+CEDARLING_LOCK: 'Disabled'
+CEDARLING_LOCK_MASTER_CONFIGURATION_URI: null
+CEDARLING_DYNAMIC_CONFIGURATION: 'Disabled'
+CEDARLING_LOCK_SSA_JWT: 0
+CEDARLING_AUDIT_HEALTH_INTERVAL: 0
+CEDARLING_AUDIT_TELEMETRY_INTERVAL: 0
+CEDARLING_LISTEN_SSE: 'Disabled'
+```
+
+- Note that properties set to `'Disabled'`, an empty string `''`, zero `0`, and `null` can be ommited since they are the defaults.
