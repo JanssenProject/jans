@@ -8688,7 +8688,7 @@
 <ul>
 <li><code>auth_sig_keys</code>: space-separated key algorithm for signing (default to <code>RS256 RS384 RS512 ES256 ES384 ES512 PS256 PS384 PS512</code>)</li>
 <li><code>auth_enc_keys</code>: space-separated key algorithm for encryption (default to <code>RSA1_5 RSA-OAEP</code>)</li>
-<li><code>optional_scopes</code>: list of optional scopes (as JSON string) that will be used (supported scopes are <code>couchbase</code>, <code>redis</code>, <code>sql</code>; default to empty list)</li>
+<li><code>optional_scopes</code>: list of optional scopes (as JSON string) that will be used (supported scopes are <code>redis</code>, <code>sql</code>; default to empty list)</li>
 <li><code>init_keys_exp</code>: the initial keys expiration time in hours (default to <code>48</code>; extra 1 hour will be added for hard limit)</li>
 </ul>
 </li>
@@ -8696,8 +8696,6 @@
 <p><code>_secret</code>:</p>
 <ul>
 <li><code>sql_password</code>: user's password to access SQL database (only used if <code>optional_scopes</code> list contains <code>sql</code> scope)</li>
-<li><code>couchbase_password</code>: user's password to access Couchbase database (only used if <code>optional_scopes</code> list contains <code>couchbase</code> scope)</li>
-<li><code>couchbase_superuser_password</code>: superusers password to access Couchbase database (only used if <code>optional_scopes</code> list contains <code>couchbase</code> scope)</li>
 <li><code>encoded_salt</code>: user-defined salt (24 characters length); if omitted, salt will be generated automatically</li>
 </ul>
 <p>Example of generating <code>encoded_salt</code> value:</p>
@@ -8813,7 +8811,7 @@ python -c &#39;import random, string; print(&quot;&quot;.join(random.choices(str
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-10-15T10:12:47+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-10-15</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-11-22T06:12:30+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-11-22</span>
       
         <br>
         Created:

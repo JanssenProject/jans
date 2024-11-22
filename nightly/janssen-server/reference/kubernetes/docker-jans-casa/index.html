@@ -8620,18 +8620,8 @@
 <li><code>CN_WAIT_MAX_TIME</code>: How long the startup "health checks" should run (default to <code>300</code> seconds).</li>
 <li><code>CN_WAIT_SLEEP_DURATION</code>: Delay between startup "health checks" (default to <code>10</code> seconds).</li>
 <li><code>CN_MAX_RAM_PERCENTAGE</code>: Value passed to Java option <code>-XX:MaxRAMPercentage</code>.</li>
-<li><code>CN_PERSISTENCE_TYPE</code>: Persistence backend being used (one of <code>sql</code>, <code>couchbase</code>, or <code>hybrid</code>; default to <code>sql</code>).</li>
+<li><code>CN_PERSISTENCE_TYPE</code>: Persistence backend being used (one of <code>sql</code> or <code>hybrid</code>; default to <code>sql</code>).</li>
 <li><code>CN_HYBRID_MAPPING</code>: Specify data mapping for each persistence (default to <code>"{}"</code>). Note this environment only takes effect when <code>CN_PERSISTENCE_TYPE</code> is set to <code>hybrid</code>. See <a href="#hybrid-mapping">hybrid mapping</a> section for details.</li>
-<li><code>CN_COUCHBASE_URL</code>: Address of Couchbase server (default to <code>localhost</code>); required if <code>CN_PERSISTENCE_TYPE</code> is set to <code>couchbase</code> or <code>hybrid</code>.</li>
-<li><code>CN_COUCHBASE_USER</code>: Username of Couchbase server (default to <code>admin</code>); required if <code>CN_PERSISTENCE_TYPE</code> is set to <code>couchbase</code> or <code>hybrid</code>.</li>
-<li><code>CN_COUCHBASE_CERT_FILE</code>: Couchbase root certificate location (default to <code>/etc/certs/couchbase.crt</code>); required if <code>CN_PERSISTENCE_TYPE</code> is set to <code>couchbase</code> or <code>hybrid</code>.</li>
-<li><code>CN_COUCHBASE_CONN_TIMEOUT</code>: Connect timeout used when a bucket is opened (default to <code>10000</code> milliseconds).</li>
-<li><code>CN_COUCHBASE_CONN_MAX_WAIT</code>: Maximum time to wait before retrying connection (default to <code>20000</code> milliseconds).</li>
-<li><code>CN_COUCHBASE_SCAN_CONSISTENCY</code>: Default scan consistency; one of <code>not_bounded</code>, <code>request_plus</code>, or <code>statement_plus</code> (default to <code>not_bounded</code>).</li>
-<li><code>CN_COUCHBASE_BUCKET_PREFIX</code>: Prefix for Couchbase buckets (default to <code>jans</code>).</li>
-<li><code>CN_COUCHBASE_TRUSTSTORE_ENABLE</code>: Enable truststore for encrypted Couchbase connection (default to <code>true</code>).</li>
-<li><code>CN_COUCHBASE_KEEPALIVE_INTERVAL</code>: Keep-alive interval for Couchbase connection (default to <code>30000</code> milliseconds).</li>
-<li><code>CN_COUCHBASE_KEEPALIVE_TIMEOUT</code>: Keep-alive timeout for Couchbase connection (default to <code>2500</code> milliseconds).</li>
 <li><code>CN_JAVA_OPTIONS</code>: Java options passed to entrypoint, i.e. <code>-Xmx1024m</code> (default to empty-string).</li>
 <li><code>CN_DOCUMENT_STORE_TYPE</code>: Document store type (one of <code>LOCAL</code> or <code>DB</code>; default to <code>DB</code>).</li>
 <li><code>CN_JACKRABBIT_URL</code>: URL to remote repository (default to <code>http://localhost:8080</code>).</li>
@@ -8698,12 +8688,12 @@ To customize the config, mount custom config file to <code>/opt/prometheus/prome
 <li>
 <p>Set <code>CN_HYBRID_MAPPING</code> with the following format:</p>
 <div class="highlight"><pre><span></span><code>{
-    &quot;default&quot;: &quot;&lt;couchbase|sql&gt;&quot;,
-    &quot;user&quot;: &quot;&lt;couchbase|sql&gt;&quot;,
-    &quot;site&quot;: &quot;&lt;couchbase|sql&gt;&quot;,
-    &quot;cache&quot;: &quot;&lt;couchbase|sql&gt;&quot;,
-    &quot;token&quot;: &quot;&lt;couchbase|sql&gt;&quot;,
-    &quot;session&quot;: &quot;&lt;couchbase|sql&gt;&quot;,
+    &quot;default&quot;: &quot;&lt;sql&gt;&quot;,
+    &quot;user&quot;: &quot;&lt;sql&gt;&quot;,
+    &quot;site&quot;: &quot;&lt;sql&gt;&quot;,
+    &quot;cache&quot;: &quot;&lt;sql&gt;&quot;,
+    &quot;token&quot;: &quot;&lt;sql&gt;&quot;,
+    &quot;session&quot;: &quot;&lt;sql&gt;&quot;,
 }
 </code></pre></div>
 <p>Example:</p>
@@ -8712,7 +8702,7 @@ To customize the config, mount custom config file to <code>/opt/prometheus/prome
     &quot;user&quot;: &quot;sql&quot;,
     &quot;site&quot;: &quot;sql&quot;,
     &quot;cache&quot;: &quot;sql&quot;,
-    &quot;token&quot;: &quot;couchbase&quot;,
+    &quot;token&quot;: &quot;sql&quot;,
     &quot;session&quot;: &quot;sql&quot;,
 }
 </code></pre></div>
@@ -8724,7 +8714,7 @@ To customize the config, mount custom config file to <code>/opt/prometheus/prome
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-11-12T03:49:37+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-11-12</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-11-22T06:12:30+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-11-22</span>
       
         <br>
         Created:

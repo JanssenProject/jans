@@ -8699,19 +8699,8 @@ The container is designed to run as a one-time command (or Job in Kubernetes wor
 <li><code>CN_SECRET_GOOGLE_SECRET_VERSION_ID</code>: Google Secret Manager version ID (default to <code>latest</code>).</li>
 <li><code>CN_SECRET_GOOGLE_SECRET_NAME_PREFIX</code>: Prefix for Google Secret Manager name (default to <code>jans</code>).</li>
 <li><code>CN_SECRET_GOOGLE_SECRET_MANAGER_PASSPHRASE</code>: Passphrase for Google Secret Manager (default to <code>secret</code>).</li>
-<li><code>CN_PERSISTENCE_TYPE</code>: Persistence backend being used (one of <code>sql</code>, <code>couchbase</code>, or <code>hybrid</code>; default to <code>sql</code>).</li>
+<li><code>CN_PERSISTENCE_TYPE</code>: Persistence backend being used (one of <code>sql</code> or <code>hybrid</code>; default to <code>sql</code>).</li>
 <li><code>CN_HYBRID_MAPPING</code>: Specify data mapping for each persistence (default to <code>"{}"</code>). Note this environment only takes effect when <code>CN_PERSISTENCE_TYPE</code> is set to <code>hybrid</code>. See <a href="#hybrid-mapping">hybrid mapping</a> section for details.</li>
-<li><code>CN_COUCHBASE_URL</code>: Address of Couchbase server (default to <code>localhost</code>).</li>
-<li><code>CN_COUCHBASE_USER</code>: Username of Couchbase server (default to <code>admin</code>).</li>
-<li><code>CN_COUCHBASE_CERT_FILE</code>: Couchbase root certificate location (default to <code>/etc/certs/couchbase.crt</code>).</li>
-<li><code>CN_COUCHBASE_PASSWORD_FILE</code>: Path to file contains Couchbase password (default to <code>/etc/jans/conf/couchbase_password</code>).</li>
-<li><code>CN_COUCHBASE_CONN_TIMEOUT</code>: Connect timeout used when a bucket is opened (default to <code>10000</code> milliseconds).</li>
-<li><code>CN_COUCHBASE_CONN_MAX_WAIT</code>: Maximum time to wait before retrying connection (default to <code>20000</code> milliseconds).</li>
-<li><code>CN_COUCHBASE_SCAN_CONSISTENCY</code>: Default scan consistency; one of <code>not_bounded</code>, <code>request_plus</code>, or <code>statement_plus</code> (default to <code>not_bounded</code>).</li>
-<li><code>CN_COUCHBASE_BUCKET_PREFIX</code>: Prefix for Couchbase buckets (default to <code>jans</code>).</li>
-<li><code>CN_COUCHBASE_TRUSTSTORE_ENABLE</code>: Enable truststore for encrypted Couchbase connection (default to <code>true</code>).</li>
-<li><code>CN_COUCHBASE_KEEPALIVE_INTERVAL</code>: Keep-alive interval for Couchbase connection (default to <code>30000</code> milliseconds).</li>
-<li><code>CN_COUCHBASE_KEEPALIVE_TIMEOUT</code>: Keep-alive timeout for Couchbase connection (default to <code>2500</code> milliseconds).</li>
 <li><code>CN_CONTAINER_METADATA</code>: The name of scheduler to pull container metadata (one of <code>docker</code> or <code>kubernetes</code>; default to <code>docker</code>).</li>
 <li><code>GOOGLE_APPLICATION_CREDENTIALS</code>: Optional JSON file (contains Google credentials) that can be injected into container for authentication. Refer to https://cloud.google.com/docs/authentication/provide-credentials-adc#how-to for supported credentials.</li>
 <li><code>GOOGLE_PROJECT_ID</code>: ID of Google project.</li>
@@ -8861,12 +8850,12 @@ Options:
 <li>
 <p>Set <code>CN_HYBRID_MAPPING</code> with the following format:</p>
 <div class="highlight"><pre><span></span><code>{
-    &quot;default&quot;: &quot;&lt;couchbase|sql&gt;&quot;,
-    &quot;user&quot;: &quot;&lt;couchbase|sql&gt;&quot;,
-    &quot;site&quot;: &quot;&lt;couchbase|sql&gt;&quot;,
-    &quot;cache&quot;: &quot;&lt;couchbase|sql&gt;&quot;,
-    &quot;token&quot;: &quot;&lt;couchbase|sql&gt;&quot;,
-    &quot;session&quot;: &quot;&lt;couchbase|sql&gt;&quot;,
+    &quot;default&quot;: &quot;&lt;sql&gt;&quot;,
+    &quot;user&quot;: &quot;&lt;sql&gt;&quot;,
+    &quot;site&quot;: &quot;&lt;sql&gt;&quot;,
+    &quot;cache&quot;: &quot;&lt;sql&gt;&quot;,
+    &quot;token&quot;: &quot;&lt;sql&gt;&quot;,
+    &quot;session&quot;: &quot;&lt;sql&gt;&quot;,
 }
 </code></pre></div>
 <p>Example:</p>
@@ -8875,7 +8864,7 @@ Options:
     &quot;user&quot;: &quot;sql&quot;,
     &quot;site&quot;: &quot;sql&quot;,
     &quot;cache&quot;: &quot;sql&quot;,
-    &quot;token&quot;: &quot;couchbase&quot;,
+    &quot;token&quot;: &quot;sql&quot;,
     &quot;session&quot;: &quot;sql&quot;,
 }
 </code></pre></div>
@@ -8887,7 +8876,7 @@ Options:
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-11-21T12:03:22+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-11-21</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-11-22T06:12:30+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-11-22</span>
       
         <br>
         Created:
