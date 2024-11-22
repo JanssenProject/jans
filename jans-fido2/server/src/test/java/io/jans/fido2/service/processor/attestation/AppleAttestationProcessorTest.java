@@ -14,6 +14,7 @@ import io.jans.fido2.service.mds.AttestationCertificateService;
 import io.jans.fido2.service.util.AppleUtilService;
 import io.jans.fido2.service.util.CommonUtilService;
 import io.jans.fido2.service.verifier.CertificateVerifier;
+import io.jans.fido2.service.verifier.CommonVerifiers;
 import io.jans.orm.model.fido2.Fido2RegistrationData;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
@@ -71,6 +72,9 @@ class AppleAttestationProcessorTest {
 
     @Mock
     private AppleUtilService appleUtilService;
+
+    @Mock
+    private CommonVerifiers commonVerifiers;
 
     @Test
     void getAttestationFormat_valid_apple() {
@@ -277,7 +281,7 @@ class AppleAttestationProcessorTest {
 
     @Test
     void process_validData_success() throws IOException {
-       /* JsonNode attStmt = mock(JsonNode.class);
+        JsonNode attStmt = mock(JsonNode.class);
         AuthData authData = mock(AuthData.class);
         Fido2RegistrationData credential = mock(Fido2RegistrationData.class);
         byte[] clientDataHash = "test_clientDataHash".getBytes();
@@ -305,6 +309,10 @@ class AppleAttestationProcessorTest {
         when(authData.getCosePublicKey()).thenReturn("test_cose_public_key".getBytes());
         when(base64Service.urlEncodeToString(any(byte[].class))).thenReturn("test_cred_id", "test_uncompressed_ec_point");
 
+        when(attStmt.get("alg")).thenReturn(mock(JsonNode.class));
+        when(authData.getKeyType()).thenReturn(1);
+        when(commonVerifiers.verifyAlgorithm(any(JsonNode.class), anyInt())).thenReturn(1);
+
         appleAttestationProcessor.process(attStmt, authData, credential, clientDataHash, credIdAndCounters);
 
         verify(log).info(eq("AttStmt: test_att_stmt"));
@@ -321,7 +329,8 @@ class AppleAttestationProcessorTest {
         verify(appleUtilService).getExtension(any());
         verify(coseService).getPublicKeyFromUncompressedECPoint(any());
         verify(base64Service, times(2)).urlEncodeToString(any());
+        verify(commonVerifiers).verifyAlgorithm(any(JsonNode.class), eq(1));
         verifyNoMoreInteractions(log);
-        verifyNoInteractions(errorResponseFactory);*/
+        verifyNoInteractions(errorResponseFactory);
     }
 }

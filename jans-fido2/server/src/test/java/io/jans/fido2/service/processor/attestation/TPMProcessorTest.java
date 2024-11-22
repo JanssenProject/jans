@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.jans.fido2.model.auth.AuthData;
 import io.jans.fido2.model.auth.CredAndCounterData;
 import io.jans.fido2.model.conf.AppConfiguration;
+import io.jans.fido2.model.conf.AttestationMode;
 import io.jans.fido2.model.conf.Fido2Configuration;
 import io.jans.fido2.model.error.ErrorResponseFactory;
 import io.jans.fido2.service.Base64Service;
@@ -79,6 +80,9 @@ class TPMProcessorTest {
     private AppConfiguration appConfiguration;
 
     @Mock
+    private Fido2Configuration fido2Configuration;
+
+    @Mock
     private ErrorResponseFactory errorResponseFactory;
 
     @InjectMocks
@@ -121,7 +125,7 @@ class TPMProcessorTest {
 
     @Test
     void process_ifX5cIsEmpty_badRequestException() throws IOException {
-        /*ObjectNode attStmt = mapper.createObjectNode();
+        ObjectNode attStmt = mapper.createObjectNode();
         ArrayNode x5cArray = mapper.createArrayNode();
         attStmt.set("x5c", x5cArray);
         attStmt.put("pubArea", "test-pubArea");
@@ -141,6 +145,8 @@ class TPMProcessorTest {
         when(signatureVerifier.getDigest(-256)).thenReturn(messageDigest);
         when(messageDigest.digest()).thenReturn("test-hashedBuffer".getBytes());
         when(errorResponseFactory.badRequestException(any(), any())).thenReturn(new WebApplicationException(Response.status(400).entity("test exception").build()));
+        when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
+        when(fido2Configuration.getAttestationMode()).thenReturn(AttestationMode.MONITOR.getValue());
 
         WebApplicationException res = assertThrows(WebApplicationException.class, () -> tpmProcessor.process(attStmt, authData, registration, clientDataHash, credIdAndCounters));
         assertNotNull(res);
@@ -150,12 +156,14 @@ class TPMProcessorTest {
 
         verify(dataMapperService).cborReadTree(any(byte[].class));
         verify(base64Service).decode(any(String.class));
-        verifyNoInteractions(certificateService, attestationCertificateService, certificateVerifier, appConfiguration, commonVerifiers);*/
+
+        verify(appConfiguration).getFido2Configuration();
+        verifyNoInteractions(certificateService, attestationCertificateService, certificateVerifier, commonVerifiers);
     }
 
     @Test
     void process_ifX5cAndVerifyAttestationCertificatesThrowError_badRequestException() throws IOException {
-       /* ObjectNode attStmt = mapper.createObjectNode();
+        ObjectNode attStmt = mapper.createObjectNode();
         ArrayNode x5cArray = mapper.createArrayNode();
         x5cArray.add("certPath1");
         attStmt.set("x5c", x5cArray);
@@ -179,6 +187,8 @@ class TPMProcessorTest {
         when(certificateService.getCertificates(anyList())).thenReturn(Collections.emptyList());
         when(certificateService.getCertificates(anyList())).thenReturn(aikCertificates);
         when(certificateVerifier.verifyAttestationCertificates(anyList(), anyList())).thenThrow(new WebApplicationException(Response.status(400).entity("test exception").build()));
+        when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
+        when(fido2Configuration.getAttestationMode()).thenReturn(AttestationMode.MONITOR.getValue());
 
         WebApplicationException res = assertThrows(WebApplicationException.class, () -> tpmProcessor.process(attStmt, authData, registration, clientDataHash, credIdAndCounters));
         assertNotNull(res);
@@ -191,12 +201,12 @@ class TPMProcessorTest {
         verify(base64Service).decode(any(String.class));
         verify(attestationCertificateService).getAttestationRootCertificates(authData, aikCertificates);
         verify(certificateVerifier).verifyAttestationCertificates(any(), any());
-        verifyNoInteractions(commonVerifiers);*/
+        verifyNoInteractions(commonVerifiers);
     }
 
     @Test
     void process_ifX5cAndVerifyAttestationCertificatesIsValid_success() throws IOException {
-        /*ObjectNode attStmt = mapper.createObjectNode();
+        ObjectNode attStmt = mapper.createObjectNode();
         ArrayNode x5cArray = mapper.createArrayNode();
         x5cArray.add("certPath1");
         attStmt.set("x5c", x5cArray);
@@ -231,6 +241,8 @@ class TPMProcessorTest {
         when(base64Service.decode(any(String.class))).thenReturn(Arrays.copyOfRange(tpmtPublic.unique.toTpm(), 2, tpmtPublic.unique.toTpm().length), certInfoBuffer, pubAreaBuffer);
         when(commonVerifiers.tpmParseToPublic(any())).thenReturn(tpmtPublic);
         when(commonVerifiers.tpmParseToAttest(any())).thenReturn(tpmsAttest);
+        when(appConfiguration.getFido2Configuration()).thenReturn(fido2Configuration);
+        when(fido2Configuration.getAttestationMode()).thenReturn(AttestationMode.MONITOR.getValue());
 
         tpmProcessor.process(attStmt, authData, registration, clientDataHash, credIdAndCounters);
         verify(dataMapperService).cborReadTree(any(byte[].class));
@@ -239,7 +251,7 @@ class TPMProcessorTest {
         verify(attestationCertificateService).getAttestationRootCertificates(any(AuthData.class), anyList());
         verify(log).trace("TPM attStmt 'alg': {}", -256);
         verify(base64Service, times(2)).urlEncodeToString(any());
-        verifyNoMoreInteractions(log);*/
+        verifyNoMoreInteractions(log);
     }
 
     @Test
