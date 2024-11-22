@@ -8,9 +8,12 @@
 use cedarling::{
     JwtConfig, LogConfig, LogTypeConfig, MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource,
 };
+use jsonwebtoken::Algorithm;
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
+use std::collections::HashSet;
 use std::path::Path;
+use std::str::FromStr;
 
 /// BootstrapConfig
 /// ===================
@@ -446,8 +449,16 @@ impl TryFrom<BootstrapConfig> for cedarling::BootstrapConfig {
         // TODO: update this once Jwt Service implements the new bootstrap properties
         let jwt_config = match value.jwt_sig_validation {
             false => JwtConfig::Disabled,
-            true => JwtConfig::Enabled {
-                signature_algorithms: value.jwt_signature_algorithms_supported,
+            true => {
+                let mut signature_algorithms = HashSet::new();
+                for alg in value.jwt_signature_algorithms_supported.iter() {
+                    let alg = Algorithm::from_str(alg)
+                        .map_err(|e| PyValueError::new_err(e.to_string()))?;
+                    signature_algorithms.insert(alg);
+                }
+                JwtConfig::Enabled {
+                    signature_algorithms,
+                }
             },
         };
 

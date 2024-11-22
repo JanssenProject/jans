@@ -26,7 +26,7 @@ use serde::de::DeserializeOwned;
 use token::*;
 
 pub use decoding_strategy::key_service::{HttpClient, KeyServiceError};
-pub use decoding_strategy::{string_to_alg, ParseAlgorithmError};
+pub use decoding_strategy::ParseAlgorithmError;
 pub use error::JwtServiceError;
 pub use jsonwebtoken::Algorithm;
 pub use jwt_service_config::*;

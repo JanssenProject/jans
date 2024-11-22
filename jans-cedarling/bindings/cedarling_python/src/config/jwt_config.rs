@@ -5,7 +5,9 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
+use jsonwebtoken::Algorithm;
 use pyo3::{exceptions::PyValueError, prelude::*};
+use std::{collections::HashSet, str::FromStr};
 
 /// JwtConfig
 /// =========
@@ -49,10 +51,18 @@ impl TryFrom<JwtConfig> for cedarling::JwtConfig {
 
     fn try_from(value: JwtConfig) -> Result<Self, Self::Error> {
         let cedarling_config = if value.enabled {
+            let str_algs = value.signature_algorithms.ok_or(PyValueError::new_err(
+                "Expected signature_algorithms for JwtConfig, but got: None",
+            ))?;
+            let mut signature_algorithms = HashSet::new();
+            for alg in str_algs.iter() {
+                let alg = Algorithm::from_str(alg).map_err(|_| {
+                    PyValueError::new_err(format!("Unsupported algorithm: {}", alg))
+                })?;
+                signature_algorithms.insert(alg);
+            }
             Self::Enabled {
-                signature_algorithms: value.signature_algorithms.ok_or(PyValueError::new_err(
-                    "Expected signature_algorithms for JwtConfig, but got: None",
-                ))?,
+                signature_algorithms,
             }
         } else {
             Self::Disabled

@@ -12,6 +12,8 @@
 //! - Tests for errors when the `access_token` is expired.
 //! - Tests for errors when the `nbf` has not passed yet.
 
+use std::collections::HashSet;
+
 use super::super::*;
 use crate::common::policy_store::TrustedIssuer;
 use crate::jwt::decoding_strategy::JwtDecodingError;
@@ -111,7 +113,7 @@ fn errors_on_invalid_signature() {
 
     // initialize JwtService with validation enabled and ES256 as the supported algorithm
     let jwt_service = JwtService::new_with_config(crate::jwt::JwtServiceConfig::WithValidation {
-        supported_algs: vec![Algorithm::ES256],
+        supported_algs: HashSet::from([Algorithm::ES256, Algorithm::HS256]),
         trusted_idps: vec![trusted_idp],
     });
 
@@ -229,7 +231,7 @@ fn errors_on_expired_token() {
 
     // initialize JwtService with validation enabled and ES256 as the supported algorithm
     let jwt_service = JwtService::new_with_config(crate::jwt::JwtServiceConfig::WithValidation {
-        supported_algs: vec![Algorithm::ES256],
+        supported_algs: HashSet::from([Algorithm::ES256]),
         trusted_idps: vec![trusted_idp],
     });
 
@@ -349,7 +351,7 @@ fn errors_on_token_used_before_nbf() {
 
     // initialize JwtService with validation enabled and ES256 as the supported algorithm
     let jwt_service = JwtService::new_with_config(crate::jwt::JwtServiceConfig::WithValidation {
-        supported_algs: vec![Algorithm::ES256, Algorithm::HS256],
+        supported_algs: HashSet::from([Algorithm::ES256, Algorithm::HS256]),
         trusted_idps: vec![trusted_idp],
     });
 

@@ -47,7 +47,7 @@ impl BootstrapConfig {
     /// use cedarling::BootstrapConfig;
     ///
     /// let config =
-    ///     BootstrapConfig::load_from_file("../test_files/bootstrap_jwt_disabled.json")
+    ///     BootstrapConfig::load_from_file("../test_files/bootstrap_props.json")
     ///         .unwrap();
     /// ```
     pub fn load_from_file(path: &str) -> Result<Self, Box<dyn std::error::Error>> {
@@ -106,9 +106,10 @@ pub enum BootstrapConfigLoadingError {
 #[cfg(test)]
 mod test {
     use crate::bootstrap_config::decode::BootstrapConfigRaw;
-    use std::path::Path;
+    use std::{collections::HashSet, path::Path};
 
     use crate::{BootstrapConfig, LogConfig, LogTypeConfig, MemoryLogConfig, PolicyStoreConfig};
+    use jsonwebtoken::Algorithm;
     use test_utils::assert_eq;
 
     #[test]
@@ -129,7 +130,7 @@ mod test {
                 ),
             },
             jwt_config: crate::JwtConfig::Enabled {
-                signature_algorithms: vec!["HS256".to_string(), "RS256".to_string()],
+                signature_algorithms: HashSet::from_iter([Algorithm::HS256, Algorithm::RS256]),
             },
         };
 
@@ -154,7 +155,7 @@ mod test {
                 ),
             },
             jwt_config: crate::JwtConfig::Enabled {
-                signature_algorithms: vec!["HS256".to_string(), "RS256".to_string()],
+                signature_algorithms: HashSet::from_iter([Algorithm::HS256, Algorithm::RS256]),
             },
         };
 

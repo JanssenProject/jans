@@ -10,6 +10,7 @@
 
 use crate::common::policy_store::TrustedIssuer;
 use crate::jwt;
+use std::collections::HashSet;
 
 use super::decoding_strategy::key_service::{fetch_openid_config, OpenIdConfig};
 
@@ -22,7 +23,7 @@ pub enum JwtServiceConfig {
 
     /// Decoding strategy that performs validation using a key service and supported algorithms.
     WithValidation {
-        supported_algs: Vec<jwt::Algorithm>,
+        supported_algs: HashSet<jwt::Algorithm>,
         trusted_idps: Vec<TrustedIssuerAndOpenIdConfig>,
     },
 }

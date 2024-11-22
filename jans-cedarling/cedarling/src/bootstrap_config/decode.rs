@@ -3,8 +3,9 @@ use super::{
     PolicyStoreSource,
 };
 use crate::common::policy_store::PolicyStore;
+use jsonwebtoken::Algorithm;
 use serde::{Deserialize, Deserializer};
-use std::path::Path;
+use std::{collections::HashSet, path::Path};
 
 #[derive(Deserialize, PartialEq, Debug)]
 #[allow(dead_code)]
@@ -89,7 +90,7 @@ pub struct BootstrapConfigRaw {
 
     /// Cedarling will only accept tokens signed with these algorithms.
     #[serde(rename = "CEDARLING_JWT_SIGNATURE_ALGORITHMS_SUPPORTED", default)]
-    pub jwt_signature_algorithms_supported: Vec<String>,
+    pub jwt_signature_algorithms_supported: HashSet<Algorithm>,
 
     /// When enabled, the `iss` (Issuer) claim must be present in the Access Token and
     /// the scheme must be https.
