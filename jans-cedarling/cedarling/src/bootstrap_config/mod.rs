@@ -113,7 +113,7 @@ mod test {
 
     #[test]
     fn can_deserialize_from_json() {
-        let config_json = include_str!("../../../test_files/bootstrap_jwt_disabled.json");
+        let config_json = include_str!("../../../test_files/bootstrap_props.json");
         let raw = serde_json::from_str::<BootstrapConfigRaw>(config_json).unwrap();
         let deserialized = BootstrapConfig::from_raw_config(&raw)
             .expect("Should deserialize bootstrap config from JSON");
@@ -138,7 +138,7 @@ mod test {
 
     #[test]
     fn can_deserialize_from_yaml() {
-        let config_yaml = include_str!("../../../test_files/bootstrap_jwt_disabled.yaml");
+        let config_yaml = include_str!("../../../test_files/bootstrap_props.yaml");
         let raw = serde_yml::from_str::<BootstrapConfigRaw>(config_yaml).unwrap();
         let deserialized = BootstrapConfig::from_raw_config(&raw)
             .expect("Should deserialize bootstrap config from YAML");
