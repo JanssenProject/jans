@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   check_pr_for_docs:
-    if: github.repository == 'JanssenProject/jans'
+    if: github.repository == 'JanssenProject/jans' && startsWith(github.head_ref, 'dependabot/') != true
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     runs-on: ubuntu-latest
