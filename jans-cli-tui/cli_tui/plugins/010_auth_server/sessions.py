@@ -155,7 +155,7 @@ class Sessions(DialogUtils):
             common_data.app.stop_progressing()
 
             if response.status_code not in (200, 201):
-                common_data.app.show_message(_(common_strings.error), str(response), tobefocused=self.search_text_area.me)
+                common_data.app.show_message(_(common_strings.error), str(response) + ':' + response.text, tobefocused=self.main_container)
                 return
 
             data = response.json()
