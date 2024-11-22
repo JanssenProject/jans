@@ -15,7 +15,7 @@ Attributes
 :param application_name: A human-friendly identifier for the application.
 :param policy_store_uri: Optional URI of the policy store JSON file.
 :param policy_store_id: An identifier for the policy store.
-:param log_type: Log type, e.g., 'none', 'memory', 'stdOut', or 'lock'.
+:param log_type: Log type, e.g., 'none', 'memory', 'std_out', or 'lock'.
 :param log_ttl: (Optional) TTL (time to live) in seconds for log entities when `log_type` is 'memory'. The default is 60s.
 :param user_authz: Enables querying Cedar engine authorization for a User principal.
 :param workload_authz: Enables querying Cedar engine authorization for a Workload principal.
