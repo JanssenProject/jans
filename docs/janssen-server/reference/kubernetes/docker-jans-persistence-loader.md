@@ -54,16 +54,10 @@ The following environment variables are supported by the container:
 - `CN_REDIS_URL`: URL of Redis server, format is host:port (optional; default to `localhost:6379`).
 - `CN_REDIS_TYPE`: Redis service type, either `STANDALONE` or `CLUSTER` (optional; default to `STANDALONE`).
 - `CN_MEMCACHED_URL`: URL of Memcache server, format is host:port (optional; default to `localhost:11211`).
-- `CN_PERSISTENCE_TYPE`: Persistence backend being used (`couchbase`, `sql`, or `hybrid`; default to `sql`).
+- `CN_PERSISTENCE_TYPE`: Persistence backend being used (`sql` or `hybrid`; default to `sql`).
 - `CN_HYBRID_MAPPING`: Specify data mapping for each persistence (default to `"{}"`). Note this environment only takes effect when `CN_PERSISTENCE_TYPE` is set to `hybrid`. See [hybrid mapping](#hybrid-mapping) section for details.
 - `CN_PERSISTENCE_SKIP_INITIALIZED`: skip initialization if backend already initialized (default to `false`).
 - `CN_PERSISTENCE_UPDATE_AUTH_DYNAMIC_CONFIG`: Whether to allow automatic updates of `jans-auth` configuration (default to `true`).
-- `CN_COUCHBASE_URL`: Address of Couchbase server (default to `localhost`).
-- `CN_COUCHBASE_USER`: Username of Couchbase server (default to `admin`).
-- `CN_COUCHBASE_SUPERUSER`: Superuser of Couchbase server (default to empty-string).
-- `CN_COUCHBASE_CERT_FILE`: Couchbase root certificate location (default to `/etc/certs/couchbase.crt`).
-- `CN_COUCHBASE_PASSWORD_FILE`: Path to file contains Couchbase password (default to `/etc/jans/conf/couchbase_password`).
-- `CN_COUCHBASE_SUPERUSER_PASSWORD_FILE`: Path to file contains Couchbase superuser password (default to `/etc/jans/conf/couchbase_superuser_password`).
 - `CN_DOCUMENT_STORE_TYPE`: Document store type (one of `LOCAL` or `DB`; default to `DB`).
 - `CN_JACKRABBIT_URL`: URL to remote repository (default to `http://localhost:8080`).
 - `CN_JACKRABBIT_ADMIN_ID_FILE`: Absolute path to file contains ID for admin user (default to `/etc/jans/conf/jackrabbit_admin_id`).
@@ -99,12 +93,12 @@ As per v1.0.1, hybrid persistence supports all available persistence types. To c
 
     ```
     {
-        "default": "<couchbase|sql>",
-        "user": "<couchbase|sql>",
-        "site": "<couchbase|sql>",
-        "cache": "<couchbase|sql>",
-        "token": "<couchbase|sql>",
-        "session": "<couchbase|sql>",
+        "default": "<sql>",
+        "user": "<sql>",
+        "site": "<sql>",
+        "cache": "<sql>",
+        "token": "<sql>",
+        "session": "<sql>",
     }
     ```
 
@@ -116,7 +110,7 @@ As per v1.0.1, hybrid persistence supports all available persistence types. To c
         "user": "sql",
         "site": "sql",
         "cache": "sql",
-        "token": "couchbase",
+        "token": "sql",
         "session": "sql",
     }
     ```
