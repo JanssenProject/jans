@@ -79,6 +79,9 @@ public class ApiAppConfiguration implements Configuration {
     @Schema(description = "Maximum number of results per page in search endpoints.")
     private int maxCount;
 
+    @Schema(description = "List of URLs that are blocked and cannot be accessed or used.")
+    private List<String> blockedUrls;
+
     @Schema(description = "List of ACR values that should be excluded from active validation check.")
     private List<String> acrExclusionList;
     
@@ -290,6 +293,14 @@ public class ApiAppConfiguration implements Configuration {
         }
     }
 
+    public List<String> getBlockedUrls() {
+        return blockedUrls;
+    }
+
+    public void setBlockedUrls(List<String> blockedUrls) {
+        this.blockedUrls = blockedUrls;
+    }
+
     public List<String> getAcrExclusionList() {
         return acrExclusionList;
     }
@@ -360,18 +371,18 @@ public class ApiAppConfiguration implements Configuration {
                 + ", disableLoggerTimer=" + disableLoggerTimer + ", disableAuditLogger=" + disableAuditLogger
                 + ", customAttributeValidationEnabled=" + customAttributeValidationEnabled + ", acrValidationEnabled="
                 + acrValidationEnabled + ", apiApprovedIssuer=" + apiApprovedIssuer + ", apiProtectionType="
-                + apiProtectionType + ", apiClientId=" + apiClientId 
+                + apiProtectionType + ", apiClientId=" + apiClientId
                 + ", endpointInjectionEnabled=" + endpointInjectionEnabled + ", authIssuerUrl=" + authIssuerUrl
                 + ", authOpenidConfigurationUrl=" + authOpenidConfigurationUrl + ", authOpenidIntrospectionUrl="
                 + authOpenidIntrospectionUrl + ", authOpenidTokenUrl=" + authOpenidTokenUrl + ", authOpenidRevokeUrl="
                 + authOpenidRevokeUrl + ", exclusiveAuthScopes=" + exclusiveAuthScopes + ", corsConfigurationFilters="
                 + corsConfigurationFilters + ", loggingLevel=" + loggingLevel + ", loggingLayout=" + loggingLayout
                 + ", externalLoggerConfiguration=" + externalLoggerConfiguration + ", disableJdkLogger="
-                + disableJdkLogger + ", maxCount=" + maxCount + ", acrExclusionList=" + acrExclusionList
-                + ", userExclusionAttributes=" + userExclusionAttributes + ", userMandatoryAttributes="
-                + userMandatoryAttributes + ", agamaConfiguration=" + agamaConfiguration + ", auditLogConf="
-                + auditLogConf + ", dataFormatConversionConf=" + dataFormatConversionConf + ", plugins=" + plugins
-                + ", assetMgtConfiguration=" + assetMgtConfiguration + "]";
-    }    
+                + disableJdkLogger + ", maxCount=" + maxCount + ", blockedProtocols=" + blockedUrls + ","
+                + " acrExclusionList=" + acrExclusionList + ", userExclusionAttributes=" + userExclusionAttributes +
+                ", userMandatoryAttributes=" + userMandatoryAttributes + ", agamaConfiguration=" + agamaConfiguration
+                + ", auditLogConf=" + auditLogConf + ", dataFormatConversionConf=" + dataFormatConversionConf
+                + ", plugins=" + plugins + ", assetMgtConfiguration=" + assetMgtConfiguration + "]";
+    }
     
 }

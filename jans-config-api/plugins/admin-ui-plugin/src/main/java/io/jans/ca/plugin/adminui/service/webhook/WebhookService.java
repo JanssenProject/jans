@@ -338,11 +338,11 @@ public class WebhookService {
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.WEBHOOK_CONTENT_TYPE_REQUIRED.getDescription());
             }
         }
-        if (Lists.newArrayList("http://", "file://", "localhost", "127.0.", "192.168.", "172.").contains(webhookEntry.getUrl())) {
+        if (getBlockedUrls().contains(webhookEntry.getUrl())) {
             log.error(ErrorResponse.WEBHOOK_URL_BLOCKED.getDescription());
             throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.WEBHOOK_URL_BLOCKED.getDescription());
         }
-        if (!webhookEntry.getUrl().startsWith("https://")) {
+        if (!webhookEntry.getUrl().startsWith(ApiConstants.URL_PREFIX)) {
             log.error(ErrorResponse.WEBHOOK_URL_PREFIX.getDescription());
             throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.WEBHOOK_URL_PREFIX.getDescription());
         }
@@ -413,5 +413,15 @@ public class WebhookService {
         return (configurationFactory.getApiAppConfiguration().getMaxCount() > 0
                 ? configurationFactory.getApiAppConfiguration().getMaxCount()
                 : ApiConstants.DEFAULT_MAX_COUNT);
+    }
+
+    public List<String> getBlockedUrls() {
+        log.trace("Blocked URLs details - Configured BlockedProtocols:{}, Default BlockedProtocols:{}",
+                configurationFactory.getApiAppConfiguration().getBlockedUrls(), ApiConstants.BLOCKED_URLS);
+
+        return configurationFactory.getApiAppConfiguration().getBlockedUrls() != null &&
+                !configurationFactory.getApiAppConfiguration().getBlockedUrls().isEmpty()
+                ? configurationFactory.getApiAppConfiguration().getBlockedUrls()
+                : ApiConstants.BLOCKED_URLS;
     }
 }
