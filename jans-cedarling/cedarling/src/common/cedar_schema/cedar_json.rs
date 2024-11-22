@@ -43,7 +43,7 @@ pub enum SchemaDefinedType<'a> {
 
 /// JSON representation of a [`cedar_policy::Schema`]
 #[derive(Debug, Clone, serde::Deserialize, serde::Serialize, PartialEq)]
-pub(crate) struct CedarSchemaJson {
+pub struct CedarSchemaJson {
     #[serde(flatten)]
     pub namespace: HashMap<String, CedarSchemaEntities>,
 }
