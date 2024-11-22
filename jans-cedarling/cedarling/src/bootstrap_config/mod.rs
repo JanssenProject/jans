@@ -49,7 +49,7 @@ impl BootstrapConfig {
     /// let config = BootstrapConfig::load_from_file("config.json")
     ///     .expect("Failed to load configuration");
     /// ```
-    pub fn load_from_file(path: &str) -> Result<Self, BootstrapConfigLoadingError> {
+    pub fn load_from_file(path: &str) -> Result<Self, Box<dyn std::error::Error>> {
         let file_ext = Path::new(path)
             .extension()
             .and_then(|ext| ext.to_str())
@@ -58,12 +58,14 @@ impl BootstrapConfig {
             Some("json") => {
                 let config_json = fs::read_to_string(path)
                     .map_err(|e| BootstrapConfigLoadingError::ReadFile(path.to_string(), e))?;
-                serde_json::from_str::<BootstrapConfig>(&config_json)?
+                let raw = serde_json::from_str::<decode::BootstrapConfigRaw>(&config_json)?;
+                BootstrapConfig::from_raw_config(&raw)?
             },
             Some("yaml") | Some("yml") => {
                 let config_json = fs::read_to_string(path)
                     .map_err(|e| BootstrapConfigLoadingError::ReadFile(path.to_string(), e))?;
-                serde_yml::from_str::<BootstrapConfig>(&config_json)?
+                let raw = serde_yml::from_str::<decode::BootstrapConfigRaw>(&config_json)?;
+                BootstrapConfig::from_raw_config(&raw)?
             },
             _ => Err(BootstrapConfigLoadingError::InvalidFileFormat(
                 path.to_string(),
@@ -102,6 +104,7 @@ pub enum BootstrapConfigLoadingError {
 
 #[cfg(test)]
 mod test {
+    use crate::bootstrap_config::decode::BootstrapConfigRaw;
     use std::path::Path;
 
     use crate::{BootstrapConfig, LogConfig, LogTypeConfig, MemoryLogConfig, PolicyStoreConfig};
@@ -110,7 +113,8 @@ mod test {
     #[test]
     fn can_deserialize_from_json() {
         let config_json = include_str!("../../../test_files/bootstrap_jwt_disabled.json");
-        let deserialized = serde_json::from_str::<BootstrapConfig>(config_json)
+        let raw = serde_json::from_str::<BootstrapConfigRaw>(config_json).unwrap();
+        let deserialized = BootstrapConfig::from_raw_config(&raw)
             .expect("Should deserialize bootstrap config from JSON");
 
         let expected = BootstrapConfig {
@@ -134,7 +138,8 @@ mod test {
     #[test]
     fn can_deserialize_from_yaml() {
         let config_yaml = include_str!("../../../test_files/bootstrap_jwt_disabled.yaml");
-        let deserialized = serde_yml::from_str::<BootstrapConfig>(config_yaml)
+        let raw = serde_yml::from_str::<BootstrapConfigRaw>(config_yaml).unwrap();
+        let deserialized = BootstrapConfig::from_raw_config(&raw)
             .expect("Should deserialize bootstrap config from YAML");
 
         let expected = BootstrapConfig {

@@ -3,7 +3,7 @@ use super::{
     PolicyStoreSource,
 };
 use crate::common::policy_store::PolicyStore;
-use serde::{de, Deserialize, Deserializer};
+use serde::{Deserialize, Deserializer};
 use std::path::Path;
 
 #[derive(Deserialize, PartialEq, Debug)]
@@ -225,20 +225,17 @@ pub enum BootstrapDecodingError {
     UnsupportedPolicyStoreFileFormat(String),
 }
 
-impl<'de> Deserialize<'de> for BootstrapConfig {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: Deserializer<'de>,
+impl BootstrapConfig {
+    /// Construct an instance from BootstrapConfigRaw
+    pub fn from_raw_config(raw: &BootstrapConfigRaw) -> Result<Self, Box<dyn std::error::Error>>
     {
-        let raw = BootstrapConfigRaw::deserialize(deserializer)?;
-
         // Decode LogCofig
         let log_type = match raw.log_type {
             LogType::Off => LogTypeConfig::Off,
             LogType::Memory => LogTypeConfig::Memory(MemoryLogConfig {
                 log_ttl: raw
                     .log_ttl
-                    .ok_or(de::Error::custom(BootstrapDecodingError::MissingLogTTL))?,
+                    .ok_or(BootstrapDecodingError::MissingLogTTL)?,
             }),
             LogType::StdOut => LogTypeConfig::StdOut,
             LogType::Lock => LogTypeConfig::Lock,
@@ -246,11 +243,9 @@ impl<'de> Deserialize<'de> for BootstrapConfig {
         let log_config = LogConfig { log_type };
 
         // Decode policy store
-        let policy_store_config = match (raw.policy_store_uri, raw.policy_store_local_fn) {
+        let policy_store_config = match (raw.policy_store_uri.clone(), raw.policy_store_local_fn.clone()) {
             // Case: no policy store provided
-            (None, None) => Err(de::Error::custom(
-                BootstrapDecodingError::MissingPolicyStore,
-            ))?,
+            (None, None) => Err(BootstrapDecodingError::MissingPolicyStore)?,
 
             // Case: get the policy store from the lock master
             (Some(policy_store_uri), None) => PolicyStoreConfig {
@@ -268,17 +263,14 @@ impl<'de> Deserialize<'de> for BootstrapConfig {
                 let source = match file_ext.as_deref() {
                     Some("json") => PolicyStoreSource::FileJson(path.into()),
                     Some("yaml") | Some("yml") => PolicyStoreSource::FileYaml(path.into()),
-                    _ => Err(de::Error::custom(
-                        BootstrapDecodingError::UnsupportedPolicyStoreFileFormat(raw_path),
-                    ))?,
+                    _ => Err(BootstrapDecodingError::UnsupportedPolicyStoreFileFormat(raw_path))?,
                 };
                 PolicyStoreConfig { source }
             },
 
             // Case: multiple polict stores were set
-            (Some(_), Some(_)) => Err(de::Error::custom(
-                BootstrapDecodingError::ConflictingPolicyStores,
-            ))?,
+            (Some(_), Some(_)) => Err(BootstrapDecodingError::ConflictingPolicyStores,
+            )?,
         };
 
         // Decode JWT Config
@@ -286,12 +278,12 @@ impl<'de> Deserialize<'de> for BootstrapConfig {
         let jwt_config = match raw.jwt_sig_validation {
             FeatureToggle::Disabled => JwtConfig::Disabled,
             FeatureToggle::Enabled => JwtConfig::Enabled {
-                signature_algorithms: raw.jwt_signature_algorithms_supported,
+                signature_algorithms: raw.jwt_signature_algorithms_supported.clone(),
             },
         };
 
         Ok(Self {
-            application_name: raw.application_name,
+            application_name: raw.application_name.clone(),
             log_config,
             policy_store_config,
             jwt_config,
