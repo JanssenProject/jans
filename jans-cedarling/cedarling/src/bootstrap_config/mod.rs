@@ -46,8 +46,9 @@ impl BootstrapConfig {
     /// ```rust
     /// use cedarling::BootstrapConfig;
     ///
-    /// let config = BootstrapConfig::load_from_file("config.json")
-    ///     .expect("Failed to load configuration");
+    /// let config =
+    ///     BootstrapConfig::load_from_file("../test_files/bootstrap_jwt_disabled.json")
+    ///         .unwrap();
     /// ```
     pub fn load_from_file(path: &str) -> Result<Self, Box<dyn std::error::Error>> {
         let file_ext = Path::new(path)
@@ -148,8 +149,8 @@ mod test {
                 log_type: LogTypeConfig::Memory(MemoryLogConfig { log_ttl: 604800 }),
             },
             policy_store_config: PolicyStoreConfig {
-                source: crate::PolicyStoreSource::FileJson(Path::new(
-                    "../test_files/policy-store_blobby.json").into(),
+                source: crate::PolicyStoreSource::FileJson(
+                    Path::new("../test_files/policy-store_blobby.json").into(),
                 ),
             },
             jwt_config: crate::JwtConfig::Enabled {
