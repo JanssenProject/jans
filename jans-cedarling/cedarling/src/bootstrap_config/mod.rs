@@ -121,7 +121,7 @@ mod test {
         let expected = BootstrapConfig {
             application_name: "My App".to_string(),
             log_config: LogConfig {
-                log_type: LogTypeConfig::Memory(MemoryLogConfig { log_ttl: 604800 }),
+                log_type: LogTypeConfig::StdOut,
             },
             policy_store_config: PolicyStoreConfig {
                 source: crate::PolicyStoreSource::FileJson(
@@ -146,7 +146,7 @@ mod test {
         let expected = BootstrapConfig {
             application_name: "My App".to_string(),
             log_config: LogConfig {
-                log_type: LogTypeConfig::Memory(MemoryLogConfig { log_ttl: 604800 }),
+                log_type: LogTypeConfig::Memory(MemoryLogConfig { log_ttl: 60 }),
             },
             policy_store_config: PolicyStoreConfig {
                 source: crate::PolicyStoreSource::FileJson(

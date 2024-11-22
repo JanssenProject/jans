@@ -204,6 +204,7 @@ pub struct BootstrapConfigRaw {
 }
 
 #[derive(Default, Debug, PartialEq, Deserialize)]
+#[serde(rename_all = "lowercase")]
 pub enum TrustMode {
     #[default]
     Strict,
@@ -211,15 +212,18 @@ pub enum TrustMode {
 }
 
 #[derive(Debug, PartialEq, Deserialize, Default)]
+#[serde(rename_all = "lowercase")]
 pub enum LogType {
     #[default]
     Off,
     Memory,
+    #[serde(rename = "std_out")]
     StdOut,
     Lock,
 }
 
 #[derive(Debug, PartialEq, Deserialize, Default)]
+#[serde(rename_all = "lowercase")]
 pub enum FeatureToggle {
     #[default]
     Disabled,
@@ -227,6 +231,7 @@ pub enum FeatureToggle {
 }
 
 #[derive(Default, Debug, PartialEq, Deserialize)]
+#[serde(rename_all = "UPPERCASE")]
 pub enum WorkloadBoolOp {
     #[default]
     And,
