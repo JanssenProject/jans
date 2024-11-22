@@ -17,6 +17,9 @@ These Bootstrap Properties control default application level behavior.
 * **`CEDARLING_POLICY_STORE_ID`** (`"off"` | `"memory"`, `"std_out"` | `"lock"`): A unique identifier for the policy store.
 * **`CEDARLING_LOG_TYPE`** : How the logs will be represented. Could be 
 * **`CEDARLING_LOG_TTL`** : If the `CEDARLING_LOG_TYPE` is set to `"memory"`, this will set the TTL (Time to Live) of log entities in seconds.
+* **`CEDARLING_USER_AUTHZ`** (`"Enabled"` | `"Disabled"`): When `enabled`, Cedar engine authorization is queried for a *User* principal.
+* **`CEDARLING_WORKLOAD_AUTHZ`** (`"Enabled"` | `"Disabled"`): When `enabled`, Cedar engine authorization is queried for a *Workload* principal.
+* **`CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION`** (`"AND"` | `"OR"`): Specifies what boolean operation to use for the `USER` and `WORKLOAD` when making authz (authorization) decisions. See [User-Workload Boolean Operation](#user-workload-boolean-operation)
 * **`CEDARLING_LOCAL_JWKS`** : Path to a JWKS file with public keys.
 * **`CEDARLING_LOCAL_POLICY_STORE`** : JSON object containing a [Policy Store](./cedarling-policy-store.md).
 * **`CEDARLING_POLICY_STORE_LOCAL_FN`** : Path to a JSON file containing a [Policy Store](./cedarling-policy-store.md).
@@ -45,6 +48,15 @@ These Bootstrap Properties control default application level behavior.
 * **`CEDARLING_AUDIT_HEALTH_INTERVAL`**: How often to send health messages to Lock Master in seconds (set this to `0` to turn off trasmission).
 * **`CEDARLING_AUDIT_TELEMETRY_INTERVAL`**: How often to send telemetry messages to Lock Master in seconds (set this to `0` to turn off trasmission).
 * **`CEDARLING_LISTEN_SSE`** (`"Enabled"` | `"Disabled"`): Controls whether Cedarling should listen for updates from the Lock Server.
+
+## User-Workload Boolean Operation
+
+The `CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION` property specifies what boolean operation to use for the `USER` and `WORKLOAD` when making authz (authorization) decisions.
+
+### Available Operations
+
+- **AND**: authz will be successful if `USER` **AND** `WORKLOAD` is valid.
+- **OR**: authz will be successful if `USER` **OR** `WORKLOAD` is valid.
 
 ## ID Token Trust Mode
 

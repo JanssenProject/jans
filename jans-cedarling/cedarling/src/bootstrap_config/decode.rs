@@ -34,6 +34,23 @@ pub struct BootstrapConfigRaw {
     #[serde(rename = "CEDARLING_LOG_TTL", default)]
     pub log_ttl: Option<u64>,
 
+    /// When `enabled`, Cedar engine authorization is queried for a User principal.
+    #[serde(rename = "CEDARLING_USER_AUTHZ", default)]
+    pub user_authz: FeatureToggle,
+
+    /// When `enabled`, Cedar engine authorization is queried for a Workload principal.
+    #[serde(rename = "CEDARLING_WORKLOAD_AUTHZ", default)]
+    pub workload_authz: FeatureToggle,
+
+    /// Specifies what boolean operation to use for the `USER` and `WORKLOAD` when
+    /// making authz (authorization) decisions.
+    ///
+    /// # Available Operations
+    /// - **AND**: authz will be successful if `USER` **AND** `WORKLOAD` is valid.
+    /// - **OR**: authz will be successful if `USER` **OR** `WORKLOAD` is valid.
+    #[serde(rename = "CEDARLING_USER_WORKLOAD_BOOLEAN_OPERATION", default)]
+    pub usr_workload_bool_op: WorkloadBoolOp,
+
     /// Path to a local file pointing containing a JWKS.
     #[serde(
         rename = "CEDARLING_LOCAL_JWKS",
@@ -209,6 +226,13 @@ pub enum FeatureToggle {
     Enabled,
 }
 
+#[derive(Default, Debug, PartialEq, Deserialize)]
+pub enum WorkloadBoolOp {
+    #[default]
+    And,
+    Or,
+}
+
 #[derive(Debug, thiserror::Error)]
 pub enum BootstrapDecodingError {
     #[error("Failed to deserialize Bootstrap config: {0}")]
@@ -227,15 +251,12 @@ pub enum BootstrapDecodingError {
 
 impl BootstrapConfig {
     /// Construct an instance from BootstrapConfigRaw
-    pub fn from_raw_config(raw: &BootstrapConfigRaw) -> Result<Self, Box<dyn std::error::Error>>
-    {
+    pub fn from_raw_config(raw: &BootstrapConfigRaw) -> Result<Self, Box<dyn std::error::Error>> {
         // Decode LogCofig
         let log_type = match raw.log_type {
             LogType::Off => LogTypeConfig::Off,
             LogType::Memory => LogTypeConfig::Memory(MemoryLogConfig {
-                log_ttl: raw
-                    .log_ttl
-                    .ok_or(BootstrapDecodingError::MissingLogTTL)?,
+                log_ttl: raw.log_ttl.ok_or(BootstrapDecodingError::MissingLogTTL)?,
             }),
             LogType::StdOut => LogTypeConfig::StdOut,
             LogType::Lock => LogTypeConfig::Lock,
@@ -243,7 +264,10 @@ impl BootstrapConfig {
         let log_config = LogConfig { log_type };
 
         // Decode policy store
-        let policy_store_config = match (raw.policy_store_uri.clone(), raw.policy_store_local_fn.clone()) {
+        let policy_store_config = match (
+            raw.policy_store_uri.clone(),
+            raw.policy_store_local_fn.clone(),
+        ) {
             // Case: no policy store provided
             (None, None) => Err(BootstrapDecodingError::MissingPolicyStore)?,
 
@@ -263,14 +287,15 @@ impl BootstrapConfig {
                 let source = match file_ext.as_deref() {
                     Some("json") => PolicyStoreSource::FileJson(path.into()),
                     Some("yaml") | Some("yml") => PolicyStoreSource::FileYaml(path.into()),
-                    _ => Err(BootstrapDecodingError::UnsupportedPolicyStoreFileFormat(raw_path))?,
+                    _ => Err(BootstrapDecodingError::UnsupportedPolicyStoreFileFormat(
+                        raw_path,
+                    ))?,
                 };
                 PolicyStoreConfig { source }
             },
 
             // Case: multiple polict stores were set
-            (Some(_), Some(_)) => Err(BootstrapDecodingError::ConflictingPolicyStores,
-            )?,
+            (Some(_), Some(_)) => Err(BootstrapDecodingError::ConflictingPolicyStores)?,
         };
 
         // Decode JWT Config
