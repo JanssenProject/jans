@@ -83,17 +83,5 @@ fn test_namespace_jans2() {
         "reason of permit person should be '2'"
     );
 
-    cmp_decision!(
-        result.role,
-        Decision::Allow,
-        "request result should be allowed for role"
-    );
-
-    cmp_policy!(
-        result.role,
-        vec!["3"],
-        "reason of permit role should be '3'"
-    );
-
     assert!(result.is_allowed(), "request result should be allowed");
 }

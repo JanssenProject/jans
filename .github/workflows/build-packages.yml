@@ -4,6 +4,7 @@ on:
   push:
     tags:
     - 'v**'
+    - 'nightly'
 jobs:
   publish_binary_packages:
     if: github.repository == 'JanssenProject/jans'
