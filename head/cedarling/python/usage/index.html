@@ -8560,7 +8560,7 @@ Used default policy store path: example_files/policy-store.json
 
 {&quot;id&quot;:&quot;0193414e-9672-786a-986c-57f48d41c4e4&quot;,&quot;time&quot;:1731967489,&quot;log_kind&quot;:&quot;System&quot;,&quot;pdp_id&quot;:&quot;c0ec33ff-9482-4bdc-83f6-2925a41a3280&quot;,&quot;msg&quot;:&quot;configuration parsed successfully&quot;}
 {&quot;id&quot;:&quot;0193414e-9672-786a-986c-57f5379086c3&quot;,&quot;time&quot;:1731967489,&quot;log_kind&quot;:&quot;System&quot;,&quot;pdp_id&quot;:&quot;c0ec33ff-9482-4bdc-83f6-2925a41a3280&quot;,&quot;msg&quot;:&quot;Cedarling Authz initialized successfully&quot;,&quot;application_id&quot;:&quot;TestApp&quot;}
-{&quot;id&quot;:&quot;0193414e-9676-7d8a-b55b-3f0097355851&quot;,&quot;time&quot;:1731967489,&quot;log_kind&quot;:&quot;Decision&quot;,&quot;pdp_id&quot;:&quot;c0ec33ff-9482-4bdc-83f6-2925a41a3280&quot;,&quot;msg&quot;:&quot;Result of authorize.&quot;,&quot;application_id&quot;:&quot;TestApp&quot;,&quot;action&quot;:&quot;Jans::Action::\&quot;Read\&quot;&quot;,&quot;resource&quot;:&quot;Jans::Application::\&quot;some_id\&quot;&quot;,&quot;context&quot;:{&quot;user_agent&quot;:&quot;Linux&quot;,&quot;operating_system&quot;:&quot;Linux&quot;,&quot;network_type&quot;:&quot;Local&quot;,&quot;network&quot;:&quot;127.0.0.1&quot;,&quot;geolocation&quot;:[&quot;America&quot;],&quot;fraud_indicators&quot;:[&quot;Allowed&quot;],&quot;device_health&quot;:[&quot;Healthy&quot;],&quot;current_time&quot;:1731967489},&quot;person_principal&quot;:&quot;Jans::User::\&quot;qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0\&quot;&quot;,&quot;person_diagnostics&quot;:{&quot;reason&quot;:[&quot;840da5d85403f35ea76519ed1a18a33989f855bf1cf8&quot;],&quot;errors&quot;:[]},&quot;person_decision&quot;:&quot;ALLOW&quot;,&quot;workload_principal&quot;:&quot;Jans::Workload::\&quot;d7f71bea-c38d-4caf-a1ba-e43c74a11a62\&quot;&quot;,&quot;workload_diagnostics&quot;:{&quot;reason&quot;:[&quot;444da5d85403f35ea76519ed1a18a33989f855bf1cf8&quot;],&quot;errors&quot;:[]},&quot;workload_decision&quot;:&quot;ALLOW&quot;,&quot;role_authorize_info&quot;:[{&quot;role_principal&quot;:&quot;Jans::Role::\&quot;CasaAdmin\&quot;&quot;,&quot;role_diagnostics&quot;:{&quot;reason&quot;:[],&quot;errors&quot;:[]},&quot;role_decision&quot;:&quot;DENY&quot;}],&quot;authorized&quot;:true}
+{&quot;id&quot;:&quot;0193414e-9676-7d8a-b55b-3f0097355851&quot;,&quot;time&quot;:1731967489,&quot;log_kind&quot;:&quot;Decision&quot;,&quot;pdp_id&quot;:&quot;c0ec33ff-9482-4bdc-83f6-2925a41a3280&quot;,&quot;msg&quot;:&quot;Result of authorize.&quot;,&quot;application_id&quot;:&quot;TestApp&quot;,&quot;action&quot;:&quot;Jans::Action::\&quot;Read\&quot;&quot;,&quot;resource&quot;:&quot;Jans::Application::\&quot;some_id\&quot;&quot;,&quot;context&quot;:{&quot;user_agent&quot;:&quot;Linux&quot;,&quot;operating_system&quot;:&quot;Linux&quot;,&quot;network_type&quot;:&quot;Local&quot;,&quot;network&quot;:&quot;127.0.0.1&quot;,&quot;geolocation&quot;:[&quot;America&quot;],&quot;fraud_indicators&quot;:[&quot;Allowed&quot;],&quot;device_health&quot;:[&quot;Healthy&quot;],&quot;current_time&quot;:1731967489},&quot;person_principal&quot;:&quot;Jans::User::\&quot;qzxn1Scrb9lWtGxVedMCky-Ql_ILspZaQA6fyuYktw0\&quot;&quot;,&quot;person_diagnostics&quot;:{&quot;reason&quot;:[&quot;840da5d85403f35ea76519ed1a18a33989f855bf1cf8&quot;],&quot;errors&quot;:[]},&quot;person_decision&quot;:&quot;ALLOW&quot;,&quot;workload_principal&quot;:&quot;Jans::Workload::\&quot;d7f71bea-c38d-4caf-a1ba-e43c74a11a62\&quot;&quot;,&quot;workload_diagnostics&quot;:{&quot;reason&quot;:[&quot;444da5d85403f35ea76519ed1a18a33989f855bf1cf8&quot;],&quot;errors&quot;:[]},&quot;workload_decision&quot;:&quot;ALLOW&quot;,&quot;authorized&quot;:true}
 Result of workload authorization: ALLOW
 Policy ID used:
 444da5d85403f35ea76519ed1a18a33989f855bf1cf8
@@ -8569,10 +8569,6 @@ Errors during authorization: 0
 Result of person authorization: ALLOW
 Policy ID used:
 840da5d85403f35ea76519ed1a18a33989f855bf1cf8
-Errors during authorization: 0
-
-Role authorization present
-Role authorization result: DENY
 Errors during authorization: 0
 </code></pre></div>
 <h2 id="explanation">Explanation<a class="headerlink" href="#explanation" title="Permanent link">#</a></h2>
@@ -8598,7 +8594,7 @@ permit(
 </code></pre></div>
 <p>These two policies say that a Principal entity (User or Workload) is allowed to execute a <code>Read</code> action on an Application resource when the resource is named "Some Application". As there are no policies for Role entities, the result of the evaluation for the Role entity is <code>DENY</code>.</p>
 <p>In the script, the action, resource and context entities are used to create the request and execute the <code>authorize()</code> call:</p>
-<p><div class="highlight"><pre><span></span><code><span class="n">action</span> <span class="o">=</span> <span class="s1">&#39;Jans::Action::&quot;Read&quot;&#39;</span>
+<div class="highlight"><pre><span></span><code><span class="n">action</span> <span class="o">=</span> <span class="s1">&#39;Jans::Action::&quot;Read&quot;&#39;</span>
 
 <span class="n">resource</span> <span class="o">=</span> <span class="n">ResourceData</span><span class="o">.</span><span class="n">from_dict</span><span class="p">({</span>
     <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;Jans::Application&quot;</span><span class="p">,</span>
@@ -8633,7 +8629,7 @@ permit(
 <span class="n">authorize_result</span> <span class="o">=</span> <span class="n">instance</span><span class="o">.</span><span class="n">authorize</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
 <span class="k">assert</span> <span class="n">authorize_result</span><span class="o">.</span><span class="n">is_allowed</span><span class="p">()</span>
 </code></pre></div>
-Cedarling will return <code>is_allowed()</code> as <code>True</code> only if both the User and Workload entity evaluations are <code>ALLOW</code>.</p>
+<p>Cedarling will return <code>is_allowed()</code> as <code>True</code> only if both the User and Workload entity evaluations are <code>ALLOW</code>.</p>
 <h2 id="exposed-functions">Exposed functions<a class="headerlink" href="#exposed-functions" title="Permanent link">#</a></h2>
 <p>The <code>pyo3</code> binding for cedarling exposes a number of cedarling functions for you to use. The documentation on this can be found <a href="https://github.com/JanssenProject/jans/blob/main/jans-cedarling/bindings/cedarling_python/PYTHON_TYPES.md">here</a>.</p>
 
@@ -8642,7 +8638,7 @@ Cedarling will return <code>is_allowed()</code> as <code>True</code> only if bot
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-11-19T16:59:15+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-11-19</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-11-21T12:08:05+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-11-21</span>
       
         <br>
         Created:

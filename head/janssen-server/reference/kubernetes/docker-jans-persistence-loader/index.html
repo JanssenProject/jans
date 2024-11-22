@@ -8621,16 +8621,10 @@
 <li><code>CN_REDIS_URL</code>: URL of Redis server, format is host:port (optional; default to <code>localhost:6379</code>).</li>
 <li><code>CN_REDIS_TYPE</code>: Redis service type, either <code>STANDALONE</code> or <code>CLUSTER</code> (optional; default to <code>STANDALONE</code>).</li>
 <li><code>CN_MEMCACHED_URL</code>: URL of Memcache server, format is host:port (optional; default to <code>localhost:11211</code>).</li>
-<li><code>CN_PERSISTENCE_TYPE</code>: Persistence backend being used (<code>couchbase</code>, <code>sql</code>, or <code>hybrid</code>; default to <code>sql</code>).</li>
+<li><code>CN_PERSISTENCE_TYPE</code>: Persistence backend being used (<code>sql</code> or <code>hybrid</code>; default to <code>sql</code>).</li>
 <li><code>CN_HYBRID_MAPPING</code>: Specify data mapping for each persistence (default to <code>"{}"</code>). Note this environment only takes effect when <code>CN_PERSISTENCE_TYPE</code> is set to <code>hybrid</code>. See <a href="#hybrid-mapping">hybrid mapping</a> section for details.</li>
 <li><code>CN_PERSISTENCE_SKIP_INITIALIZED</code>: skip initialization if backend already initialized (default to <code>false</code>).</li>
 <li><code>CN_PERSISTENCE_UPDATE_AUTH_DYNAMIC_CONFIG</code>: Whether to allow automatic updates of <code>jans-auth</code> configuration (default to <code>true</code>).</li>
-<li><code>CN_COUCHBASE_URL</code>: Address of Couchbase server (default to <code>localhost</code>).</li>
-<li><code>CN_COUCHBASE_USER</code>: Username of Couchbase server (default to <code>admin</code>).</li>
-<li><code>CN_COUCHBASE_SUPERUSER</code>: Superuser of Couchbase server (default to empty-string).</li>
-<li><code>CN_COUCHBASE_CERT_FILE</code>: Couchbase root certificate location (default to <code>/etc/certs/couchbase.crt</code>).</li>
-<li><code>CN_COUCHBASE_PASSWORD_FILE</code>: Path to file contains Couchbase password (default to <code>/etc/jans/conf/couchbase_password</code>).</li>
-<li><code>CN_COUCHBASE_SUPERUSER_PASSWORD_FILE</code>: Path to file contains Couchbase superuser password (default to <code>/etc/jans/conf/couchbase_superuser_password</code>).</li>
 <li><code>CN_DOCUMENT_STORE_TYPE</code>: Document store type (one of <code>LOCAL</code> or <code>DB</code>; default to <code>DB</code>).</li>
 <li><code>CN_JACKRABBIT_URL</code>: URL to remote repository (default to <code>http://localhost:8080</code>).</li>
 <li><code>CN_JACKRABBIT_ADMIN_ID_FILE</code>: Absolute path to file contains ID for admin user (default to <code>/etc/jans/conf/jackrabbit_admin_id</code>).</li>
@@ -8665,12 +8659,12 @@
 <li>
 <p>Set <code>CN_HYBRID_MAPPING</code> with the following format:</p>
 <div class="highlight"><pre><span></span><code>{
-    &quot;default&quot;: &quot;&lt;couchbase|sql&gt;&quot;,
-    &quot;user&quot;: &quot;&lt;couchbase|sql&gt;&quot;,
-    &quot;site&quot;: &quot;&lt;couchbase|sql&gt;&quot;,
-    &quot;cache&quot;: &quot;&lt;couchbase|sql&gt;&quot;,
-    &quot;token&quot;: &quot;&lt;couchbase|sql&gt;&quot;,
-    &quot;session&quot;: &quot;&lt;couchbase|sql&gt;&quot;,
+    &quot;default&quot;: &quot;&lt;sql&gt;&quot;,
+    &quot;user&quot;: &quot;&lt;sql&gt;&quot;,
+    &quot;site&quot;: &quot;&lt;sql&gt;&quot;,
+    &quot;cache&quot;: &quot;&lt;sql&gt;&quot;,
+    &quot;token&quot;: &quot;&lt;sql&gt;&quot;,
+    &quot;session&quot;: &quot;&lt;sql&gt;&quot;,
 }
 </code></pre></div>
 <p>Example:</p>
@@ -8679,7 +8673,7 @@
     &quot;user&quot;: &quot;sql&quot;,
     &quot;site&quot;: &quot;sql&quot;,
     &quot;cache&quot;: &quot;sql&quot;,
-    &quot;token&quot;: &quot;couchbase&quot;,
+    &quot;token&quot;: &quot;sql&quot;,
     &quot;session&quot;: &quot;sql&quot;,
 }
 </code></pre></div>
@@ -8691,7 +8685,7 @@
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-11-12T03:49:37+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-11-12</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-11-22T06:12:30+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-11-22</span>
       
         <br>
         Created:

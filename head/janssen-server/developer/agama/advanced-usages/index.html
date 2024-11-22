@@ -8735,7 +8735,7 @@
 <h3 id="output-encoding">Output encoding<a class="headerlink" href="#output-encoding" title="Permanent link">#</a></h3>
 <p>By default, the engine sends rendered pages using <code>UTF-8</code> character encoding. To specify a different encoding the <code>ftl</code> directive can be used in pages, for instance, <code>&lt;#ftl encoding="ISO-8859-5"&gt;</code>. Always place this at the top of a template.</p>
 <h3 id="localization-and-internationalization">Localization and internationalization<a class="headerlink" href="#localization-and-internationalization" title="Permanent link">#</a></h3>
-<p>To allow templates render text according to users' language or country, you can add a file named <code>labels.txt</code> to the <code>web</code> directory of a project. There you can place the so called "internationalization labels" (common UI-related messages) as per your needs. The file is expected to have a structure as follows:</p>
+<p>To allow templates render text according to users' language or country, you can add a file named <code>labels.txt</code> to the <code>web</code> directory of a project. There you can place the so-called "internationalization labels" (common UI-related messages) as per your needs. The file is expected to have a structure as follows:</p>
 <div class="highlight"><pre><span></span><code>key = value
 
 ... more key/value pairs
@@ -8753,20 +8753,20 @@ key/value pairs for this locale
 
 key/value pairs for this locale
 </code></pre></div>
-<p>Note the file is divided into sections for every locale to support. The first section (no locale) will contain the "default" labels - more on this later. One locale conveys mostly the same concept of a Java locale (class <code>java.util.Locale</code>). In this case, a locale represents a language, country/region, and variant combination. Example of locale IDs are:</p>
+<p>Note how the file is split into sections for every locale to support. The first section (no locale) will contain the "default" labels - more on this later. One locale conveys mostly the same concept of a Java locale (class <code>java.util.Locale</code>). In this case, a locale represents a language, country/region, and variant combination. Examples of locale IDs are:</p>
 <ul>
 <li><code>de_CH</code>: German as used in Switzerland</li>
 <li><code>ca_ES_VALENCIA</code>: Catalan as used in Spain (province of Valencia)</li>
 <li><code>th_TH_TH</code>: Thai as used in Thailand together with Thai digits</li>
 <li><code>ja</code>: Japanese (in general)</li>
 </ul>
-<p>Note the <em>labels</em> file may contain several sections for the same language, like <code>de_CH</code>, <code>de_DE</code>, <code>de_LU</code>, and plain <code>de</code>. Agama engine will pick the text from the section that best maches the settings of the end-user browser. Normally, this is supplied through the HTTP header <code>Accept-Language</code>. As an example, if the browser's preferred language is German from Luxembourg, the lookup is made in <code>de_LU</code> section. If no text is found there, then <code>de</code> section is tried. The "no locale" (first section) is used as a last resort. That's why it is said to contain the "default" labels.</p>
-<p>To reference a label from a template use an expression like <code>${labels("&lt;KEY&gt;")}</code>. This will retrieve the proper text using the rules just described. When the lookup fails thoroughly (no way to found a label matching the key), the four character string <code>null</code> is returned. This helps to easily identify when a template has issues.</p>
+<p>There may be several sections regarding the same language, like <code>de_CH</code>, <code>de_DE</code>, <code>de_LU</code>, and plain <code>de</code>. Agama engine will pick the text from the section that best maches the settings of the end-user browser (normally, this is supplied through the <code>Accept-Language</code> HTTP header). As an example, if the browser's preferred language is German from Luxembourg, the lookup is made in <code>de_LU</code> section. If no text is found there, the <code>de</code> section is tried. The opening "no locale" section is used as a last resort - that's why it is said to contain the "default" labels.</p>
+<p>To reference a label from a template an expression like <code>${labels("&lt;KEY&gt;")}</code> can be used. This will retrieve the proper text using the rules just described. When the lookup fails thoroughly (no way to found a label matching the key), the four character string <code>null</code> is returned. This helps to easily locate template issues if any.</p>
 <p>A value (message) associated to a key can contain placeholders where data can be injected. Suppose the following key/value pair:</p>
 <div class="highlight"><pre><span></span><code>disk.count = The disk {1} contains {0} file(s)
 </code></pre></div>
-<p>Using <code>${labels("disk.count")}</code> will just retrieve the message as is, however, positional arguments can be passed. As an example, <code>${labels("disk.count", 10, "SSD-NVME-123")}</code> will generate <code>The disk SSD-NVME-123 contains 10 file(s)</code>. Note parameters are not only restricted to literals (fixed values) like <code>0</code>, <code>false</code>, or <code>"world"</code>. Variables can also be used. It is recommended to only employ literals/variables whose data types are string/number/date/boolean.</p>
-<p>Labels are global. This means they are not restricted to the project where they are originally defined. This allows <a href="#template-overrides">template overrides</a> to work smoothly. Since a label defined in project <code>A</code> can be freely used in templates of project <code>B</code>, the chance of key collisions is high, that is, two or more projects may be defining labels with the same key. To mitigate this problem, it is recommended to prefix all keys with the name/identifier of the originating project, like:</p>
+<p>Using <code>${labels("disk.count")}</code> will just retrieve the message as is, however, positional arguments can be passed. As an example, <code>${labels("disk.count", 7, "SSD-NVME-123")}</code> will generate <code>The disk SSD-NVME-123 contains 7 file(s)</code>. Note parameters are not restricted to literals (fixed values) like <code>0</code>, <code>false</code>, or <code>"world"</code>. Variables can also be used. It is recommended to employ literals/variables whose data types are string, number, date, or boolean only.</p>
+<p>Labels are global: not only can they be accessed from the project where they are originally defined but from any other project. This allows <a href="#template-overrides">template overrides</a> to work smoothly, however, it brings the possibility of key collisions, that is, two or more projects defining labels with the same keys. To mitigate this problem, it is recommended to prefix all keys with the name/identifier of the originating project, like:</p>
 <div class="highlight"><pre><span></span><code>myproject.salutation = hello!
 
 [es]
@@ -8775,16 +8775,16 @@ myproject.salutation = hola!
 [it]
 myproject.salutation = ciao!
 </code></pre></div>
-<p>If leaving <code>salutation</code> alone, it is likely other projects added to the server in the future may contain their own version of <code>salutation</code> leading to unexpected results. </p>
+<p>When leaving <code>salutation</code> alone, it is likely other projects added to the server in the future may contain their own version of <code>salutation</code> leading to unexpected results. </p>
 <p>Additional notes:</p>
 <ul>
 <li>Language codes should follow the ISO 639 alpha-2 standard</li>
 <li>Country/region codes should be driven by ISO 3166 alpha-2 or UN M.49 numeric-3 area code</li>
-<li>Except for the locale IDs section markers, the syntax of <code>labels.txt</code> adheres to that of Java properties files. This is a human-friendly, low-surpise format: a label key starts a line and its value comes after an equal sign or a colon. For readability one or more empty lines can be used between contiguous key/value pairs. Any line starting with <code>!</code> or <code>#</code>  is ignored and thus can be used as a comment or note </li>
+<li>Except for the locale section headings, the syntax of <code>labels.txt</code> adheres to that of Java properties files. This is a human-friendly, low-surpise format: a label key starts a line and its value comes after an equal sign or a colon. For readability one or more empty lines can be used between contiguous key/value pairs. Any line starting with <code>!</code> or <code>#</code>  is ignored and thus can be used as a comment or note </li>
 <li>When positional arguments are passed, Java class <code>java.text.MessageFormat</code> is internally employed. This allows  powerful formatting and proper handling of plurals. If for some reason, formatting fails, the resulting string will be <code>error!</code>. Check the server logs and try to simplify your message in this case</li>
 </ul>
 <h4 id="access-to-as-labels">Access to AS labels<a class="headerlink" href="#access-to-as-labels" title="Permanent link">#</a></h4>
-<p>The jans-auth server comes with a series of files known as "resource bundles" that follow the naming <code>jans-auth_xx.properties</code> where <code>xx</code> represents an ISO language code. Bundles can be added or overridden by placing suitable property files in directory <code>/opt/jans/jetty/jans-auth/custom/i18n</code>. Strings stored in these bundles can be accessed from templates using expressions like <code>${msgs.&lt;KEY&gt;}</code>. As most keys in resource bundles contain dot characters, the alternative notation <code>${msgs["KEY"]}</code> works better for FreeMarker, for example <code>${msgs["login.errorMessage"]}</code>.</p>
+<p>The jans-auth server comes with a series of files known as "resource bundles" that follow the naming <code>jans-auth_xx.properties</code> where <code>xx</code> represents an ISO 639 language code. Bundles can be added or overridden by placing suitable properties files in directory <code>/opt/jans/jetty/jans-auth/custom/i18n</code>. Strings stored in these bundles can be accessed from templates using expressions like <code>${msgs.&lt;KEY&gt;}</code>. As most keys in resource bundles contain dot characters, the alternative notation <code>${msgs["KEY"]}</code> works better for FreeMarker, for example <code>${msgs["login.errorMessage"]}</code>.</p>
 <p>Whenever possible, it is recommended to place your internationalization labels in the <code>web</code> folder of the project and use the <code>${labels(...</code> notation instead. Note <code>msgs</code> has no support for parameterized placeholders: strings are all static.</p>
 <h3 id="reusable-templates">Reusable templates<a class="headerlink" href="#reusable-templates" title="Permanent link">#</a></h3>
 <p>A widespread practice in web page authoring is to compose pages based on reusable pieces. As an example, the need for a common header and footer is ubiquitous in HTML projects. With FreeMarker, composition can be achieved by means of <a href="https://freemarker.apache.org/docs/ref_directive_macro.html">macros</a>. These are the equivalent to functions in programming, they can generate output based on parameters passed and can be called anywhere in a template.</p>
@@ -8983,7 +8983,7 @@ Finish result
   <small>
     
       Last update:
-      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-11-18T09:56:37+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-11-18</span>
+      <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-timeago"><span class="timeago" datetime="2024-11-21T12:19:41+00:00" locale="en"></span></span><span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-iso_date">2024-11-21</span>
       
         <br>
         Created:
