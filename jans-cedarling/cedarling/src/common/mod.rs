@@ -34,5 +34,5 @@ enum ContentType {
 
     /// indicates that the related value is in the json representation of the cedar policy / schema language
     #[serde(rename = "cedar-json")]
-    CedarJson
+    CedarJson,
 }

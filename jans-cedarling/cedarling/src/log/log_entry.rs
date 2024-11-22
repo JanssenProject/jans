@@ -111,9 +111,6 @@ pub struct AuthorizationLogInfo {
     /// Workload authorize info
     #[serde(flatten)]
     pub workload_authorize_info: Option<WorkloadAuthorizeInfo>,
-    /// Role authorize info
-    /// can be many results because can be many roles.
-    pub role_authorize_info: Vec<RoleAuthorizeInfo>,
 
     /// is authorized
     pub authorized: bool,
@@ -139,17 +136,6 @@ pub struct WorkloadAuthorizeInfo {
     pub workload_diagnostics: Diagnostics,
     /// cedar-policy workload decision
     pub workload_decision: Decision,
-}
-
-/// Workload authorize info
-#[derive(Debug, Clone, PartialEq, serde::Serialize, serde::Deserialize)]
-pub struct RoleAuthorizeInfo {
-    /// cedar-policy `role` principal
-    pub role_principal: String,
-    /// cedar-policy `role` diagnostics information
-    pub role_diagnostics: Diagnostics,
-    /// cedar-policy role decision
-    pub role_decision: Decision,
 }
 
 /// Cedar-policy decision of the authorization

@@ -1,157 +1,157 @@
 namespace Jans {
     // ******  TYPES  ******
     type Url = {
-        protocol: String,
         host: String,
         path: String,
+        protocol: String
     };
     type email_address = {
-        id: String, 
         domain: String,
+        uid: String
     };
     type Context = {
-            network: String,
-            network_type: String,
-            user_agent: String, 
-            operating_system: String,
-            device_health: Set<String>,
-            current_time: Long,
-            geolocation: Set<String>,
-            fraud_indicators: Set<String>,
+        network: String,
+        network_type: String,
+        user_agent: String,
+        operating_system: String,
+        device_health: Set<String>,
+        current_time: Long,
+        geolocation: Set<String>,
+        fraud_indicators: Set<String>,
     };
 
     // ******  Entities  ******
-    entity Workload  = {
+    entity Workload = {
         client_id: String,
         iss: TrustedIssuer,
-        name: String,
-        spiffe_id: String,
-        rp_id: String
+        name?: String,
+        rp_id?: String,
+        spiffe_id?: String
     };
-    entity Access_token  = {
+    entity Access_token = {
         aud: String,
         exp: Long,
         iat: Long,
         iss: TrustedIssuer,
         jti: String,
         nbf: Long,
-        scope: String,
+        scope: Set<String>
     };
     entity TrustedIssuer = {
-        issuer_entity_id: Url,
+        issuer_entity_id: Url
     };
     entity Role;
-    entity User in [Role] {
-        sub: String,
-        username: String,
+    entity User in [Role] = {
         email: email_address,
-        phone_number: String,
-        role: Set<String>,
-    };
-    entity id_token  = {
-        acr: Set<String>,
-        amr: String,
-        aud: String,
-        azp: String,
-        birthdate: String,
-        email: email_address,
-        exp: Long,
-        iat: Long,
-        iss: TrustedIssuer,
-        jti: String,        
-        name: String,
-        phone_number: String,
+        phone_number?: String,
         role: Set<String>,
         sub: String,
+        "username"?: String
     };
-    entity Userinfo_token  = {
+    entity id_token = {
+        acr: String,
+        amr: Set<String>,
         aud: String,
-        birthdate: String,
-        email: email_address,
+        azp?: String,
+        birthdate?: String,
+        email?: email_address,
         exp: Long,
         iat: Long,
         iss: TrustedIssuer,
         jti: String,
-        name: String,
-        phone_number: String,
-        role: Set<String>,
-        sub: String,
+        name?: String,
+        phone_number?: String,
+        role?: Set<String>,
+        sub: String
+    };
+    entity Userinfo_token = {
+        aud: String,
+        birthdate?: String,
+        email?: email_address,
+        exp?: Long,
+        iat?: Long,
+        iss: TrustedIssuer,
+        jti: String,
+        name?: String,
+        phone_number?: String,
+        role?: Set<String>,
+        sub: String
     };
     entity HTTP_Request = {
-        "url": Url,
-        "header": Set<String>,
-        "accept": Set<String>,
+        accept: Set<String>,
+        header: Set<String>,
+        url: Url
     };
     entity Application = {
-        "name": String,
-        "url": Url,
-        "app_id": String
+        app_id: String,
+        name: String,
+        url: Url
     };
 
     // ******  Actions  ******
     action Compare appliesTo {
-        principal: [User, Role, Workload],
-        resource: Application,
-        context: Context,
+      principal: [User, Workload],
+      resource: [Application],
+      context: Context
     };
     action Execute appliesTo {
-        principal: [User, Role, Workload],
-        resource: Application,
-        context: Context,
+      principal: [User, Workload],
+      resource: [Application],
+      context: Context
     };
     action Monitor appliesTo {
-        principal: [User, Role, Workload],
-        resource: Application,
-        context: Context,
+      principal: [User, Workload],
+      resource: [Application],
+      context: Context
     };
     action Read appliesTo {
-        principal: [User, Role, Workload],
-        resource: Application,
-        context: Context,
+      principal: [User, Workload],
+      resource: [Application],
+      context: Context
     };
     action Search appliesTo {
-        principal: [User, Role, Workload],
-        resource: Application,
-        context: Context,
+      principal: [User, Workload],
+      resource: [Application],
+      context: Context
     };
     action Share appliesTo {
-        principal: [User, Role, Workload],
-        resource: Application,
-        context: Context,
+      principal: [User, Workload],
+      resource: [Application],
+      context: Context
     };
     action Tag appliesTo {
-        principal: [User, Role, Workload],
-        resource: Application,
-        context: Context,
+      principal: [User, Workload],
+      resource: [Application],
+      context: Context
     };
     action Write appliesTo {
-        principal: [User, Role, Workload],
-        resource: Application,
-        context: Context,
+      principal: [User, Workload],
+      resource: [Application],
+      context: Context
     };
     action GET appliesTo {
-          principal: Workload,
-          resource: HTTP_Request,
-          context: Context,
+      principal: [Workload],
+      resource: [HTTP_Request],
+      context: Context
     };
     action PUT appliesTo {
-        principal: Workload,
-        resource: HTTP_Request,
-        context: Context,
+      principal: [Workload],
+      resource: [HTTP_Request],
+      context: Context
     };
     action DELETE appliesTo {
-        principal: Workload,
-        resource: HTTP_Request,
-        context: Context,
+      principal: [Workload],
+      resource: [HTTP_Request],
+      context: Context
     };
     action HEAD appliesTo {
-        principal: Workload,
-        resource: HTTP_Request,
-        context: Context,
+      principal: [Workload],
+      resource: [HTTP_Request],
+      context: Context
     };
     action PATCH appliesTo {
-        principal: Workload,
-        resource: HTTP_Request,
-        context: Context,
+      principal: [Workload],
+      resource: [HTTP_Request],
+      context: Context
     };
 }

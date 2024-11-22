@@ -7,8 +7,6 @@ on:
     tags:
       - "*"
     branches:
-      # below branch is triggered by jenkins which triggers dev image
-      - update-source-build-date
       - main
     paths:
       - "docker-jans-**/**"
@@ -16,8 +14,6 @@ on:
   pull_request:
     branches:
       - main
-      # below branch is triggered by jenkins which triggers dev image
-      - update-source-build-dates
     paths:
       - "docker-jans-**/**"
       - "!docker-jans-**/CHANGELOG.md"
@@ -111,7 +107,7 @@ jobs:
           fi
           MAIN_VERSION=$(python3 -c "from dockerfile_parse import DockerfileParser ; dfparser = DockerfileParser('$DOCKER_FILE_LOCATION') ; print(dfparser.labels['org.opencontainers.image.version'])")
           DOCKER_IMAGE=ghcr.io/$REPOSITORY/${{ matrix.docker-images }}
-          VERSION=${MAIN_VERSION}_dev
+          VERSION=${MAIN_VERSION}
           BUILD=true
           if [[ $GITHUB_REF == refs/tags/docker-jans-${{ matrix.docker-images }}-* ]]; then
             VERSION=${GITHUB_REF#refs/tags/docker-jans-${{ matrix.docker-images }}-v}
@@ -121,7 +117,7 @@ jobs:
           fi
           TAGS="${DOCKER_IMAGE}:${VERSION}"
           if [[ $VERSION =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\_[a-b]{1}[0-9]{1,3}$ ]]; then
-            TAGS="$TAGS,${DOCKER_IMAGE}:${MAIN_VERSION}_dev"
+            TAGS="$TAGS,${DOCKER_IMAGE}:${MAIN_VERSION}"
           fi
           # If the user passed a manual image tag to build a custom manual image
           MANUAL_IMAGE_TAG=${{ github.event.inputs.image_tag }}

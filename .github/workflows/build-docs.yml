@@ -23,7 +23,7 @@ on:
     inputs:
       version:
         description: 'Version tag (e.g."v1.1.6")'
-        default: "v1.1.6"
+        default: "nightly"
         required: false
 concurrency:
   group: run-once
@@ -104,8 +104,8 @@ jobs:
         if: >-
           github.event_name == 'release' &&
           github.event.action == 'published' &&
-          startsWith(github.event.release.name, 'v') &&
-          !github.event.release.draft
+          (!github.event.release.draft) &&
+          (startsWith(github.event.release.name, 'v') || github.event.release.name == 'nightly')
         env:
           VERSION: ${{ github.event.release.tag_name }}
         run: |
@@ -158,8 +158,8 @@ jobs:
         if: >-
           github.event_name == 'release' &&
           github.event.action == 'published' &&
-          startsWith(github.event.release.name, 'v') &&
-          !github.event.release.draft
+          (!github.event.release.draft) &&
+          (startsWith(github.event.release.name, 'v') || github.event.release.name == 'nightly')
         env:
           VERSION: ${{ github.event.release.tag_name }}
         run: |
@@ -175,7 +175,7 @@ jobs:
           STABLE=$(echo "${TAGS}" | grep -v -- "nightly" | tail -1)
           echo "Latest is $LATEST and Stable is $STABLE"
           # remove below two lines after first release
-          #LATEST="head"
+          LATEST="nightly"
           #STABLE="head"
           mike alias -u head main
           mike alias -u "${STABLE}" stable

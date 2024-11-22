@@ -171,7 +171,7 @@ paths:
           content:
             application/json:
               schema:
-                type: string
+                $ref: '#/components/schemas/JsonNode'
               examples:
                 Response json example:
                   description: Response json example
@@ -4615,6 +4615,7 @@ paths:
                   - uma_rpt_policy
                   - uma_rpt_claims
                   - uma_claims_gathering
+                  - access_evaluation
                   - consent_gathering
                   - dynamic_scope
                   - spontaneous_scope
@@ -9268,21 +9269,21 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
+        whitePagesCanView:
+          type: boolean
         selected:
-          type: boolean
-        adminCanEdit:
-          type: boolean
-        adminCanView:
           type: boolean
         userCanView:
           type: boolean
         userCanEdit:
           type: boolean
+        adminCanView:
+          type: boolean
+        adminCanEdit:
+          type: boolean
         userCanAccess:
           type: boolean
         adminCanAccess:
-          type: boolean
-        whitePagesCanView:
           type: boolean
         baseDn:
           type: string
@@ -9365,6 +9366,10 @@ components:
         mtlsParEndpoint:
           type: string
         mtlsDeviceAuthzEndpoint:
+          type: string
+        accessEvaluationAllowBasicClientAuthorization:
+          type: boolean
+        accessEvaluationScriptName:
           type: string
         requireRequestObjectEncryption:
           type: boolean
@@ -10097,6 +10102,7 @@ components:
             - METRIC
             - STAT
             - PAR
+            - ACCESS_EVALUATION
             - SSA
         httpLoggingEnabled:
           type: boolean
@@ -10908,10 +10914,10 @@ components:
           type: array
           items:
             type: object
-        value:
-          type: object
         displayValue:
           type: string
+        value:
+          type: object
     LocalizedString:
       type: object
       properties:
@@ -11201,6 +11207,7 @@ components:
           - uma_rpt_policy
           - uma_rpt_claims
           - uma_claims_gathering
+          - access_evaluation
           - consent_gathering
           - dynamic_scope
           - spontaneous_scope

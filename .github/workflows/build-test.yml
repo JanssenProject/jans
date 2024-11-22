@@ -4,11 +4,17 @@ on:
   push:
     branches:
       - main
+    paths:
+      - "jans-**"
+      - "agama"
   schedule:
     - cron: '0 8 * * *'
   pull_request:
     branches:
       - main
+    paths:
+      - "jans-**"
+      - "agama"
   workflow_dispatch:
     inputs:
       project:
@@ -48,8 +54,19 @@ jobs:
             if [ -z "$projects" ]; then
               projects="jans-bom jans-orm jans-core jans-lock/lock-server agama jans-auth-server jans-link jans-fido2 jans-scim jans-keycloak-link jans-config-api jans-keycloak-integration jans-casa"
             fi
+            pull_number=$(jq --raw-output .pull_request.number "$GITHUB_EVENT_PATH")
+            DIRECTORIES_CHANGED=$(gh pr view $pull_number --json files --jq '.files.[].path' | cut -d/ -f1 | sort -u | grep "jans-" || echo "$projects")
+            changed_projects=""
+            for dir in $DIRECTORIES_CHANGED; do
+              for project in $projects; do
+                if [[ "$dir" == "$project" ]]; then
+                  changed_projects="$changed_projects $project"
+                fi
+              done
+            done
+            echo "Changed projects: $changed_projects"          
             matrix="{\"include\":["
-            for project in $projects; do
+            for project in $changed_projects; do
               matrix="$matrix{\"service\":\"$project\",\"maven_skip_tests\":true},"
             done
             matrix="${matrix%,}]}"
@@ -97,7 +114,7 @@ jobs:
     - name: Build ${{ matrix.service }}
       run: |
         if [ "${{ github.event_name }}" == "pull_request" ]; then
-          mvn -f ${{ matrix.service }}/pom.xml -Dcfg=${{ env.PROFILE_NAME }} -Dmaven.test.skip=${{ matrix.maven_skip_tests }} clean install -Drevision=${{ github.head_ref }}-SNAPSHOT
+          mvn -f ${{ matrix.service }}/pom.xml -Dcfg=${{ env.PROFILE_NAME }} -Dmaven.test.skip=${{ matrix.maven_skip_tests }} clean install -Drevision=${{ github.head_ref }}-nightly
         else
           mvn -f ${{ matrix.service }}/pom.xml -Dcfg=${{ env.PROFILE_NAME }} -Dmaven.test.skip=${{ matrix.maven_skip_tests }} clean install
         fi
@@ -129,11 +146,11 @@ jobs:
         egress-policy: audit
     - name: Clean up PR assets
       run: |
-        # List all SNAPSHOT versions
+        # List all nightly versions
         versions=$(curl -s -H "Authorization: token ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" "https://maven.pkg.github.com/JanssenProject/jans/maven-metadata.xml" | grep -oP '(?<=<version>)[^<]+')
 
         for version in $versions; do
-          if [[ $version == *-SNAPSHOT ]]; then
+          if [[ $version == *-nightly ]]; then
             # Delete the version from GitHub Packages
             curl -X DELETE -H "Authorization: token ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" "https://maven.pkg.github.com/JanssenProject/jans/io/jans/${{ matrix.service.project }}/$version"
           fi
