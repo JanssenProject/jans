@@ -338,9 +338,11 @@ public class WebhookService {
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.WEBHOOK_CONTENT_TYPE_REQUIRED.getDescription());
             }
         }
-        if (getBlockedUrls().contains(webhookEntry.getUrl())) {
-            log.error(ErrorResponse.WEBHOOK_URL_BLOCKED.getDescription());
-            throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.WEBHOOK_URL_BLOCKED.getDescription());
+        for (String blockedUrl : getBlockedUrls()) {
+            if (webhookEntry.getUrl().contains(blockedUrl)) {
+                log.error(ErrorResponse.WEBHOOK_URL_BLOCKED.getDescription());
+                throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.WEBHOOK_URL_BLOCKED.getDescription());
+            }
         }
         if (!webhookEntry.getUrl().startsWith(ApiConstants.URL_PREFIX)) {
             log.error(ErrorResponse.WEBHOOK_URL_PREFIX.getDescription());

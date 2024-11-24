@@ -44,15 +44,79 @@ class WebhookServiceTest {
     }
 
     @Test
+    void testBlockedUrlsPatterns() {
+        // given
+        List<String> blockedUrls = Arrays.asList(
+                "http://",
+                "file://",
+                "localhost",
+                "127.0.",
+                "192.168.",
+                "172."
+        );
+
+        when(configurationFactory.getApiAppConfiguration()).thenReturn(apiAppConfiguration);
+        when(apiAppConfiguration.getBlockedUrls()).thenReturn(blockedUrls);
+
+        List<String> testUrls = Arrays.asList(
+                "http://example.com",          // blocked: starts with http://
+                "file:///etc/passwd",          // blocked: starts with file://
+                "https://localhost:8080",       // blocked: contains localhost
+                "https://127.0.0.1/resource",   // blocked: contains 127.0.
+                "https://192.168.1.1/login",    // blocked: contains 192.168.
+                "https://172.16.0.1/dashboard", // blocked: contains 172.
+                "https://safe-url.com"         // not blocked: safe URL
+        );
+
+        List<Boolean> expectedResults = Arrays.asList(
+                true, true, true, true, true, true, false
+        );
+
+        for (int i = 0; i < testUrls.size(); i++) {
+            String testUrl = testUrls.get(i);
+            boolean expected = expectedResults.get(i);
+
+            WebhookEntry webhookEntry = new WebhookEntry();
+            webhookEntry.setDisplayName("Test Webhook");
+            webhookEntry.setUrl(testUrl);
+            webhookEntry.setHttpMethod("GET");
+
+            if (expected) {
+                // when & then
+                ApplicationException exception = assertThrows(ApplicationException.class,
+                        () -> webhookService.validateWebhookEntry(webhookEntry),
+                        "Expected ApplicationException for URL: " + testUrl
+                );
+                assertEquals("The provided URL is blocked.", exception.getMessage());
+            } else {
+                // when & then
+                assertDoesNotThrow(() -> webhookService.validateWebhookEntry(webhookEntry),
+                        "Did not expect ApplicationException for URL: " + testUrl
+                );
+            }
+
+        }
+    }
+
+
+
+    @Test
     void testValidateWebhookEntry_BlockedUrl() {
         // given
-        List<String> blockedUrls = Arrays.asList("http://blocked-url.com", "https://malicious-site.org");
+        List<String> blockedUrls = Arrays.asList(
+                "http://example.com",
+                "file:///etc/passwd",
+                "http://localhost",
+                "https://192.168.",
+                "http://127.0.0.1/resource"
+        );
+
         when(configurationFactory.getApiAppConfiguration()).thenReturn(apiAppConfiguration);
         when(apiAppConfiguration.getBlockedUrls()).thenReturn(blockedUrls);
 
         WebhookEntry webhookEntry = new WebhookEntry();
         webhookEntry.setDisplayName("Test Webhook");
-        webhookEntry.setUrl("http://blocked-url.com");
+        webhookEntry.setUrl("https://192.168.");
         webhookEntry.setHttpMethod("GET");
 
         // when & then
@@ -66,7 +130,13 @@ class WebhookServiceTest {
     @Test
     void testValidateWebhookEntry_BlockedProtocol() {
         // given
-        List<String> blockedUrls = Arrays.asList("https://blocked-url.com", "https://malicious-site.org");
+        List<String> blockedUrls = Arrays.asList(
+                "http://example.com",
+                "file:///etc/passwd",
+                "http://localhost",
+                "https://192.168.",
+                "http://127.0.0.1/resource"
+        );
         when(configurationFactory.getApiAppConfiguration()).thenReturn(apiAppConfiguration);
         when(apiAppConfiguration.getBlockedUrls()).thenReturn(blockedUrls);
 
@@ -86,7 +156,13 @@ class WebhookServiceTest {
     @Test
     void testValidateWebhookEntry_AllowedUrl() {
         // given
-        List<String> blockedUrls = Arrays.asList("https://blocked-url.com", "https://malicious-site.org");
+        List<String> blockedUrls = Arrays.asList(
+                "http://example.com",
+                "file:///etc/passwd",
+                "http://localhost",
+                "https://192.168.",
+                "http://127.0.0.1/resource"
+        );
         when(configurationFactory.getApiAppConfiguration()).thenReturn(apiAppConfiguration);
         when(apiAppConfiguration.getBlockedUrls()).thenReturn(blockedUrls);
 
