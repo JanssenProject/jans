@@ -174,8 +174,6 @@ public class ApiConstants {
     public static final String DEFAULT_LIST_START_INDEX = "0";
     public static final int DEFAULT_MAX_COUNT = 200;
     public static final List<String> BLOCKED_URLS = Arrays.asList(
-            "http://",
-            "file://",
             "localhost",
             "127.0.",
             "192.168.",

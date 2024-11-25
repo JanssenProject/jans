@@ -12,6 +12,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.validation.Valid;
@@ -339,7 +340,10 @@ public class WebhookService {
             }
         }
         for (String blockedUrl : getBlockedUrls()) {
-            if (webhookEntry.getUrl().contains(blockedUrl)) {
+            String url = webhookEntry.getUrl().toLowerCase();
+            String regex = "^(?:[a-z]+://)?" + blockedUrl.replace(".", "\\.") + ".*";
+            Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
+            if (pattern.matcher(url).matches()) {
                 log.error(ErrorResponse.WEBHOOK_URL_BLOCKED.getDescription());
                 throw new ApplicationException(Response.Status.BAD_REQUEST.getStatusCode(), ErrorResponse.WEBHOOK_URL_BLOCKED.getDescription());
             }

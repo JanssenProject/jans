@@ -47,8 +47,6 @@ class WebhookServiceTest {
     void testBlockedUrlsPatterns() {
         // given
         List<String> blockedUrls = Arrays.asList(
-                "http://",
-                "file://",
                 "localhost",
                 "127.0.",
                 "192.168.",
@@ -59,17 +57,20 @@ class WebhookServiceTest {
         when(apiAppConfiguration.getBlockedUrls()).thenReturn(blockedUrls);
 
         List<String> testUrls = Arrays.asList(
-                "http://example.com",          // blocked: starts with http://
-                "file:///etc/passwd",          // blocked: starts with file://
                 "https://localhost:8080",       // blocked: contains localhost
                 "https://127.0.0.1/resource",   // blocked: contains 127.0.
                 "https://192.168.1.1/login",    // blocked: contains 192.168.
+                "https://192.168.1.1/login/resource",    // blocked: contains 192.168.
                 "https://172.16.0.1/dashboard", // blocked: contains 172.
+                "https://17.127.12.127.0/resource",   // not blocked: safe URL
+                "https://12.127.0/resource",   // not blocked: safe URL
+                "https://login/192.168.1.1",    // not blocked: safe URL
+                "https://127.192.168.1.1/login/resource",    // not blocked: safe URL
                 "https://safe-url.com"         // not blocked: safe URL
         );
 
         List<Boolean> expectedResults = Arrays.asList(
-                true, true, true, true, true, true, false
+                true, true, true, true, true, false, false, false, false, false
         );
 
         for (int i = 0; i < testUrls.size(); i++) {
@@ -97,8 +98,6 @@ class WebhookServiceTest {
 
         }
     }
-
-
 
     @Test
     void testValidateWebhookEntry_BlockedUrl() {
