@@ -41,9 +41,6 @@ if [ $1 == 0 ]; then
     if [ -f /etc/systemd/system/jans-scim.service ]; then
         systemctl stop jans-scim.service
     fi
-    if [ -f /etc/systemd/system/opendj.service ]; then
-        systemctl stop opendj.service
-    fi
 
     if [ -d /opt/jans.saved ]; then
         rm -rf /opt/jans.saved
