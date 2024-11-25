@@ -9269,13 +9269,9 @@ components:
           $ref: '#/components/schemas/AttributeValidation'
         tooltip:
           type: string
-        whitePagesCanView:
-          type: boolean
         selected:
           type: boolean
-        userCanView:
-          type: boolean
-        userCanEdit:
+        adminCanAccess:
           type: boolean
         adminCanView:
           type: boolean
@@ -9283,7 +9279,11 @@ components:
           type: boolean
         userCanAccess:
           type: boolean
-        adminCanAccess:
+        userCanView:
+          type: boolean
+        whitePagesCanView:
+          type: boolean
+        userCanEdit:
           type: boolean
         baseDn:
           type: string
@@ -11692,10 +11692,10 @@ components:
         ttl:
           type: integer
           format: int32
-        persisted:
-          type: boolean
         opbrowserState:
           type: string
+        persisted:
+          type: boolean
     SessionIdAccessMap:
       type: object
       properties:
