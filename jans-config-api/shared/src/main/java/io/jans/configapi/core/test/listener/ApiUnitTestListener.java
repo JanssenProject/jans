@@ -3,7 +3,7 @@
  *
  * Copyright (c) 2021, Janssen Project
  */
-package io.jans.configapi.listener;
+package io.jans.configapi.core.test.listener;
 
 import org.testng.ITestContext;
 import org.testng.ITestListener;

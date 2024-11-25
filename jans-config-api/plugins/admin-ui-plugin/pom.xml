@@ -37,7 +37,12 @@
             <artifactId>rest-assured</artifactId>
             <scope>test</scope>
         </dependency>
-        <dependency>
+		<dependency>
+			<groupId>org.testng</groupId>
+			<artifactId>testng</artifactId>
+		    <scope>test</scope>
+		</dependency>
+       <!-- <dependency>
             <groupId>com.intuit.karate</groupId>
             <artifactId>karate-junit5</artifactId>
             <scope>test</scope>
@@ -65,7 +70,7 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-        </dependency>
+        </dependency>-->
         <!-- API, java.xml.bind module -->
         <dependency>
             <groupId>jakarta.xml.bind</groupId>
@@ -119,14 +124,11 @@
             </plugin>
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <configuration>
-                    <systemPropertyVariables>
-                    </systemPropertyVariables>
-                    <excludedGroups>integration</excludedGroups>
-                    <systemProperties>
-                        <karate.options>--tags ~@ignore</karate.options>
-                    </systemProperties>
-                </configuration>
+				<configuration>
+					<suiteXmlFiles>
+                        <suiteXmlFile>target/test-classes/testng.xml</suiteXmlFile>
+                    </suiteXmlFiles>
+				</configuration>
                 <executions>
                     <execution>
                         <id>integration-tests</id>

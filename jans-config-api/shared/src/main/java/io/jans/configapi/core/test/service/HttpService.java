@@ -4,7 +4,7 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.configapi.service;
+package io.jans.configapi.core.test.service;
 
 import java.io.File;
 import java.io.IOException;

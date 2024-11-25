@@ -220,12 +220,12 @@
 			<groupId>org.junit.jupiter</groupId>
 			<artifactId>junit-jupiter-engine</artifactId>
 			<scope>test</scope>
-		</dependency>-->
+		</dependency>
 		<dependency>
 			<groupId>net.masterthought</groupId>
 			<artifactId>cucumber-reporting</artifactId>
 			<scope>test</scope>
-		</dependency>
+		</dependency>-->
 
 		<!-- Others -->
 		<dependency>

@@ -4,15 +4,15 @@
  * Copyright (c) 2020, Janssen Project
  */
 
-package io.jans.configapi;
+package io.jans.configapi.core.test;
 
 import io.jans.as.client.TokenRequest;
 import io.jans.as.client.TokenResponse;
 import io.jans.as.model.common.GrantType;
 import io.jans.as.model.util.Util;
 import io.jans.configapi.core.util.Jackson;
-import io.jans.configapi.service.HttpService;
-import io.jans.configapi.service.ResteasyService;
+import io.jans.configapi.core.test.service.HttpService;
+import io.jans.configapi.core.test.service.ResteasyService;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import java.nio.file.Files;

@@ -7,13 +7,13 @@
 package io.jans.configapi.test.auth;
 
 import static io.restassured.RestAssured.given;
-import io.jans.configapi.BaseTest;
+import io.jans.configapi.ConfigServerBaseTest;
 import jakarta.ws.rs.core.MediaType;
 
 import org.testng.annotations.Test;
 import org.testng.annotations.Parameters;
 
-public class AcrsResourceTest extends BaseTest{
+public class AcrsResourceTest extends ConfigServerBaseTest{
 
     @Parameters({"issuer", "acrsUrl"})
     @Test

@@ -1,4 +1,4 @@
-package io.jans.configapi.listener;
+package io.jans.configapi.core.test.listener;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

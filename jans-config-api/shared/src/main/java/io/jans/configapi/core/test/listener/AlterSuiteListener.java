@@ -1,4 +1,4 @@
-package io.jans.configapi.listener;
+package io.jans.configapi.core.test.listener;
 
 import io.jans.util.StringHelper;
 import io.jans.util.security.SecurityProviderUtility;

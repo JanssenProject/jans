@@ -9271,19 +9271,19 @@ components:
           type: string
         selected:
           type: boolean
-        adminCanAccess:
-          type: boolean
-        adminCanView:
+        whitePagesCanView:
           type: boolean
         adminCanEdit:
           type: boolean
-        userCanAccess:
+        userCanEdit:
           type: boolean
         userCanView:
           type: boolean
-        whitePagesCanView:
+        adminCanView:
           type: boolean
-        userCanEdit:
+        adminCanAccess:
+          type: boolean
+        userCanAccess:
           type: boolean
         baseDn:
           type: string
@@ -10914,10 +10914,10 @@ components:
           type: array
           items:
             type: object
-        displayValue:
-          type: string
         value:
           type: object
+        displayValue:
+          type: string
     LocalizedString:
       type: object
       properties:

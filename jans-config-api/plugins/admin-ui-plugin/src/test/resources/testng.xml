@@ -1,0 +1,20 @@
+<!DOCTYPE suite SYSTEM "http://testng.org/testng-1.0.dtd" >
+
+<suite name="Config-API" parallel="false">
+
+    <parameter name="propertiesFile" value="target/test-classes/config-api-test.properties" />
+	
+	<listeners>
+        <listener class-name="io.jans.configapi.listener.AlterSuiteListener" />
+        <listener class-name="io.jans.configapi.listener.SkipTestsListener" />
+    </listeners>
+  
+    <test name="Openid Client" enabled="true">
+        <classes>
+             <class name="io.jans.configapi.test.auth.ClientResourceTest" />
+        </classes>
+    </test>
+
+   
+
+</suite>

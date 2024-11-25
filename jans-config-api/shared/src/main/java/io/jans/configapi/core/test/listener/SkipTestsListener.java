@@ -1,4 +1,4 @@
-package io.jans.configapi.listener;
+package io.jans.configapi.core.test.listener;
 
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Constructor;
