@@ -1,6 +1,6 @@
 package io.jans.service.custom.script.jit;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.tools.*;
 import java.io.*;
