@@ -4,6 +4,7 @@ import argparse
 import os
 import sys
 import subprocess
+import configparser
 from pathlib import Path
 from collections import OrderedDict
 
@@ -53,6 +54,16 @@ def logs():
             for l in p.glob('logs/*.log'):
                 print(f"  {l}")
             print()
+
+    log_dir = Path.home()
+    cli_ini_fn = log_dir.joinpath('.config/jans-cli.ini')
+    if cli_ini_fn.is_file():
+        config = configparser.ConfigParser()
+        config.read_string(cli_ini_fn.read_text())
+        log_dir = dict(config).get('DEFAULT', {}).get('log_dir', log_dir)
+    print(f"Log files for CLI:")
+    for log in('cli_debug.log', 'cli_cmd.log', 'cli_error.log'):
+        print(f"   {os.path.join(log_dir, log)}")
 
 def service_command(todo):
     services = [argsp.service] if argsp.service else JANS_SERVICES
