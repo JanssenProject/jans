@@ -163,12 +163,10 @@ jobs:
         egress-policy: audit
     - name: Clean up PR assets
       run: |
-        # List all nightly versions
         versions=$(curl -s -H "Authorization: token ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" "https://maven.pkg.github.com/JanssenProject/jans/maven-metadata.xml" | grep -oP '(?<=<version>)[^<]+')
 
         for version in $versions; do
           if [[ $version == *-nightly ]]; then
-            # Delete the version from GitHub Packages
             curl -X DELETE -H "Authorization: token ${{ secrets.MOAUTO_WORKFLOW_TOKEN }}" "https://maven.pkg.github.com/JanssenProject/jans/io/jans/${{ matrix.service.project }}/$version"
           fi
         done
