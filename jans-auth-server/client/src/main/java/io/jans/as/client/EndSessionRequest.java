@@ -8,7 +8,7 @@ package io.jans.as.client;
 
 import io.jans.as.model.session.EndSessionRequestParam;
 import io.jans.as.model.util.Util;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;

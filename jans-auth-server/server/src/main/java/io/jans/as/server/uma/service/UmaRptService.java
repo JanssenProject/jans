@@ -31,7 +31,7 @@ import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.model.base.SimpleBranch;
 import io.jans.util.INumGenerator;
 import io.jans.util.StringHelper;
-import org.apache.commons.lang.ArrayUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

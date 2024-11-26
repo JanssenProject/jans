@@ -26,7 +26,7 @@ import io.jans.model.custom.script.conf.CustomScriptConfiguration;
 import io.jans.model.security.Credentials;
 import io.jans.util.OxConstants;
 import io.jans.util.StringHelper;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 

@@ -39,7 +39,7 @@ import org.slf4j.Logger;
 import java.nio.charset.StandardCharsets;
 import java.security.PublicKey;
 
-import static org.apache.commons.lang.BooleanUtils.isTrue;
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 /**
  * @author Yuriy Z

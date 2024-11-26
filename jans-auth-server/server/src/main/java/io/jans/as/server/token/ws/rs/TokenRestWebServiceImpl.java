@@ -54,7 +54,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.ResponseBuilder;
 import jakarta.ws.rs.core.SecurityContext;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -68,8 +68,8 @@ import java.util.function.Function;
 
 import static io.jans.as.model.config.Constants.*;
 import static io.jans.as.server.util.ServerUtil.prepareForLogs;
-import static org.apache.commons.lang.BooleanUtils.isFalse;
-import static org.apache.commons.lang.BooleanUtils.isTrue;
+import static org.apache.commons.lang3.BooleanUtils.isFalse;
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 /**
  * Provides interface for token REST web services

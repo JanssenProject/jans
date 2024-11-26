@@ -11,8 +11,8 @@ import io.jans.as.model.common.Id;
 import io.jans.as.model.uma.*;
 import io.jans.as.model.uma.wrapper.Token;
 import jakarta.ws.rs.core.Response;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jboss.resteasy.client.jaxrs.internal.ClientResponse;
 import org.testng.Assert;
 

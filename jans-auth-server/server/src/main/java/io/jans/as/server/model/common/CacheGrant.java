@@ -10,7 +10,7 @@ import io.jans.as.model.authzdetails.AuthzDetails;
 import io.jans.as.common.model.common.User;
 import io.jans.as.common.model.registration.Client;
 import io.jans.as.model.configuration.AppConfiguration;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import jakarta.enterprise.inject.Instance;
 import java.io.Serializable;

@@ -7,7 +7,7 @@
 package io.jans.as.model.jwt;
 
 import io.jans.as.model.util.Base64Util;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.nio.charset.StandardCharsets;
 

@@ -14,7 +14,7 @@ import io.jans.as.model.exception.CryptoProviderException;
 import io.jans.as.model.jwk.*;
 import io.jans.as.server.model.config.ConfigurationFactory;
 import io.jans.service.cdi.util.CdiUtil;
-import org.apache.commons.lang.BooleanUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
