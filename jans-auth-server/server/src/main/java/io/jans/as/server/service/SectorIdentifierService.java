@@ -17,8 +17,8 @@ import io.jans.as.server.model.common.CIBAGrant;
 import io.jans.as.server.model.common.IAuthorizationGrant;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.util.StringHelper;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 import jakarta.ejb.Stateless;
@@ -108,6 +108,8 @@ public class SectorIdentifierService {
             return "";
         }
 
+        final String openidSubValue = getOpenidSubValue(client, user);
+
         final boolean isClientPairwise = SubjectType.PAIRWISE.equals(client.getSubjectType());
         if (isClientPairwise) {
             final String sectorIdentifierUri;
@@ -133,7 +135,7 @@ public class SectorIdentifierService {
                     String sectorIdentifier = URI.create(sectorIdentifierUri).getHost();
 
                     PairwiseIdentifier pairwiseIdentifier = pairwiseIdentifierService.findPairWiseIdentifier(userInum,
-                            sectorIdentifier, client.getClientId());
+                            sectorIdentifier, client.getClientId(), openidSubValue);
                     if (pairwiseIdentifier == null) {
                         pairwiseIdentifier = new PairwiseIdentifier(sectorIdentifier, client.getClientId(), userInum);
                         pairwiseIdentifier.setId(UUID.randomUUID().toString());
@@ -142,7 +144,7 @@ public class SectorIdentifierService {
                     }
                     return pairwiseIdentifier.getId();
                 } else {
-                    log.trace("Sector identifier uri is blank for client: " + client.getClientId());
+                    log.trace("Sector identifier uri is blank for client: {}", client.getClientId());
                 }
             } catch (Exception e) {
                 log.error("Failed to get sub claim. PairwiseIdentifierService failed to find pair wise identifier.", e);
@@ -150,6 +152,10 @@ public class SectorIdentifierService {
             }
         }
 
+        return openidSubValue;
+    }
+
+    private String getOpenidSubValue(Client client, User user) {
         String openidSubAttribute = appConfiguration.getOpenidSubAttribute();
         if (Boolean.TRUE.equals(appConfiguration.getPublicSubjectIdentifierPerClientEnabled())
                 && StringUtils.isNotBlank(client.getAttributes().getPublicSubjectIdentifierAttribute())) {

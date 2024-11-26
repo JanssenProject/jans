@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.text.StringEscapeUtils;
 
 /**
- * @see org.apache.commons.lang.StringUtils
+ * @see org.apache.commons.lang3.StringUtils
  */
 public final class StringHelper {
 

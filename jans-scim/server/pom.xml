@@ -139,6 +139,10 @@
 			<artifactId>swagger-annotations</artifactId>
 			<version>1.5.3-M1</version>
 		</dependency>
+        <dependency>
+            <groupId>commons-beanutils</groupId>
+            <artifactId>commons-beanutils</artifactId>
+        </dependency>
 	</dependencies>
 
 </project>

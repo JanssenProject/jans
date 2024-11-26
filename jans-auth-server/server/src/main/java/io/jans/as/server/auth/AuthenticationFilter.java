@@ -49,7 +49,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.ws.rs.HttpMethod;
 import jakarta.ws.rs.WebApplicationException;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpStatus;
 import org.apache.http.entity.ContentType;

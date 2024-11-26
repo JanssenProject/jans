@@ -15,7 +15,7 @@ import jakarta.faces.convert.Converter;
 import jakarta.faces.convert.ConverterException;
 import jakarta.faces.convert.FacesConverter;
 
-import org.apache.commons.lang.time.DateUtils;
+import org.apache.commons.lang3.time.DateUtils;
 
 /**
  * @author: Yuriy Movchan Date: 11.24.2010

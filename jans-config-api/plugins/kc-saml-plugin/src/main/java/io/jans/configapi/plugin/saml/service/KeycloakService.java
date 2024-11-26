@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

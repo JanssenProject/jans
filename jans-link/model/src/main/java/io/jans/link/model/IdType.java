@@ -6,7 +6,7 @@
 
 package io.jans.link.model;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * @author Yuriy Zabrovarnyy

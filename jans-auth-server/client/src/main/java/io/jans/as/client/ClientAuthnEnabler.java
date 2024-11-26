@@ -11,7 +11,7 @@ import io.jans.as.model.token.ClientAssertionType;
 
 import jakarta.ws.rs.client.Invocation.Builder;
 import jakarta.ws.rs.core.Form;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 
 /**
