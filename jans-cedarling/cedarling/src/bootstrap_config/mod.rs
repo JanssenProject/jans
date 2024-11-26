@@ -20,7 +20,7 @@ pub use jwt_config::*;
 pub use log_config::*;
 pub use policy_store_config::*;
 mod decode;
-pub use decode::WorkloadBoolOp;
+pub use decode::{BootstrapConfigRaw, FeatureToggle, LoggerType, TrustMode, WorkloadBoolOp};
 
 /// Bootstrap configuration
 /// properties for configuration [`Cedarling`](crate::Cedarling) application.

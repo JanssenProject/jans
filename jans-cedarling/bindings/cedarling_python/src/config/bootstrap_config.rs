@@ -5,14 +5,12 @@
  * Copyright (c) 2024, Gluu, Inc.
  */
 
-use cedarling::{
-    JwtConfig, LogConfig, LogTypeConfig, MemoryLogConfig, PolicyStoreConfig, PolicyStoreSource,
-};
+use cedarling::bindings::PolicyStore;
+use cedarling::{BootstrapConfigRaw, LoggerType, TrustMode, WorkloadBoolOp};
 use jsonwebtoken::Algorithm;
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
 use std::collections::HashSet;
-use std::path::Path;
 use std::str::FromStr;
 
 /// BootstrapConfig
@@ -402,71 +400,70 @@ impl TryFrom<BootstrapConfig> for cedarling::BootstrapConfig {
     type Error = PyErr;
 
     fn try_from(value: BootstrapConfig) -> Result<Self, Self::Error> {
-        let log_type = match value.log_type.to_lowercase().as_str() {
-            "memory" => LogTypeConfig::Memory(MemoryLogConfig {
-                // default is 86400 secs (1 day)
-                log_ttl: value.log_ttl.unwrap_or(86400),
-            }),
-            "std_out" => LogTypeConfig::StdOut,
-            "lock" => LogTypeConfig::Lock,
-            _ => LogTypeConfig::Off,
-        };
-        let log_config = LogConfig { log_type };
+        let mut signature_algorithms = HashSet::new();
+        for alg in value.jwt_signature_algorithms_supported.iter() {
+            let alg = Algorithm::from_str(alg).map_err(|e| PyValueError::new_err(e.to_string()))?;
+            signature_algorithms.insert(alg);
+        }
 
-        // Decode policy store
-        let policy_store_config = match (value.policy_store_uri, value.policy_store_local_fn) {
-            // Case: no policy store provided
-            (None, None) => Err(PyValueError::new_err(
-                "No policy store was provided. Please provide values for either  `CEDARLING_POLICY_STORE_URI` or `CEDARLING_LOCAL_POLICY_STORE`.",
-            ))?,
-
-            // Case: get the policy store from the lock master
-            (Some(policy_store_uri), None) => PolicyStoreConfig {
-                source: PolicyStoreSource::LockMaster(policy_store_uri),
-            },
-
-            // Case: get the policy store from a local JSON file
-            (None, Some(raw_path)) => {
-                let path = Path::new(&raw_path);
-                let file_ext = Path::new(&path)
-                    .extension()
-                    .and_then(|ext| ext.to_str())
-                    .map(|x| x.to_lowercase());
-
-                let source = match file_ext.as_deref() {
-                    Some("json") => PolicyStoreSource::FileJson(path.into()),
-                    Some("yaml") | Some("yml") => PolicyStoreSource::FileYaml(path.into()),
-                    _ => Err(PyValueError::new_err(format!("Unsupported policy store file format for: {:#?}. Supported formats include: JSON, YAML", path)))?,
-                };
-                PolicyStoreConfig { source }
-            },
-
-            // Case: multiple polict stores were set
-            (Some(_), Some(_)) => Err(PyValueError::new_err("Multiple store options were provided. Ensure only one of these properties is set: `CEDARLING_POLICY_STORE_URI` or `CEDARLING_LOCAL_POLICY_STORE`."))?,
-        };
-
-        // Decode JWT Config
-        // TODO: update this once Jwt Service implements the new bootstrap properties
-        let jwt_config = match value.jwt_sig_validation {
-            false => JwtConfig::Disabled,
-            true => {
-                let mut signature_algorithms = HashSet::new();
-                for alg in value.jwt_signature_algorithms_supported.iter() {
-                    let alg = Algorithm::from_str(alg)
-                        .map_err(|e| PyValueError::new_err(e.to_string()))?;
-                    signature_algorithms.insert(alg);
-                }
-                JwtConfig::Enabled {
-                    signature_algorithms,
-                }
-            },
-        };
-
-        Ok(Self {
+        // I think it would be better to include `BootstrapConfigRaw` within the `BootstrapConfig` structure.
+        let raw_config = BootstrapConfigRaw {
             application_name: value.application_name,
-            log_config,
-            policy_store_config,
-            jwt_config,
+            policy_store_uri: value.policy_store_uri,
+            policy_store_id: value.policy_store_id,
+            log_type: LoggerType::from_str(value.log_type.as_str()),
+            log_ttl: value.log_ttl,
+            user_authz: value.user_authz.into(),
+            workload_authz: value.workload_authz.into(),
+            usr_workload_bool_op: WorkloadBoolOp::from_str(value.usr_workload_bool_op.as_str())
+                .map_err(|err| {
+                    PyValueError::new_err(format!(
+                        "could not parce field: usr_workload_bool_op, {err}"
+                    ))
+                })?,
+            local_jwks: value.local_jwks,
+            local_policy_store: if let Some(policy_store_str) = value.local_policy_store {
+                let store: PolicyStore =
+                    serde_json::from_str(policy_store_str.as_str()).map_err(|err| {
+                        PyValueError::new_err(format!(
+                            "could not parse field local_policy_store as json to PolicyStore, {err}"
+                        ))
+                    })?;
+
+                Some(store)
+            } else {
+                None
+            },
+            policy_store_local_fn: value.policy_store_local_fn,
+            jwt_sig_validation: value.jwt_sig_validation.into(),
+            jwt_status_validation: value.jwt_status_validation.into(),
+            jwt_signature_algorithms_supported: signature_algorithms,
+            at_iss_validation: value.at_iss_validation.into(),
+            at_jti_validation: value.at_jti_validation.into(),
+            at_nbf_validation: value.at_nbf_validation.into(),
+            at_exp_validation: value.at_exp_validation.into(),
+            idt_iss_validation: value.idt_iss_validation.into(),
+            idt_sub_validation: value.idt_sub_validation.into(),
+            idt_exp_validation: value.idt_exp_validation.into(),
+            idt_iat_validation: value.idt_iat_validation.into(),
+            idt_aud_validation: value.idt_aud_validation.into(),
+            userinfo_iss_validation: value.userinfo_iss_validation.into(),
+            userinfo_sub_validation: value.userinfo_sub_validation.into(),
+            userinfo_aud_validation: value.userinfo_aud_validation.into(),
+            userinfo_exp_validation: value.userinfo_exp_validation.into(),
+            id_token_trust_mode: TrustMode::from_str(value.id_token_trust_mode.as_str()),
+            lock: value.lock.into(),
+            lock_master_configuration_uri: value.lock_master_configuration_uri,
+            dynamic_configuration: value.dynamic_configuration.into(),
+            lock_ssa_jwt: value.lock_ssa_jwt,
+            audit_log_interval: value.audit_log_interval,
+            audit_health_interval: value.audit_health_interval,
+            audit_health_telemetry_interval: value.audit_health_telemetry_interval,
+            listen_sse: value.listen_sse.into(),
+        };
+
+        Self::from_raw_config(&raw_config).map_err(|err| {
+            PyValueError::new_err(format!("could not parse config from raw config, {err}"))
         })
     }
 }

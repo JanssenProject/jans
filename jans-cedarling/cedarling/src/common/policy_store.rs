@@ -36,6 +36,7 @@ pub struct PolicyStore {
     /// Name is also name of namespace in `cedar-policy`
     pub name: String,
 
+    /// Description comment to policy store
     #[serde(default)]
     pub description: Option<String>,
 
@@ -59,7 +60,7 @@ pub struct PolicyStore {
 }
 
 impl PolicyStore {
-    pub fn namespace(&self) -> &str {
+    pub(crate) fn namespace(&self) -> &str {
         &self.name
     }
 }
