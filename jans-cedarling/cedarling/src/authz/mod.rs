@@ -123,7 +123,7 @@ impl Authz {
         };
 
         // Check authorize where principal is `"Jans::User"` from cedar-policy schema.
-        let person_result: Option<Response> = if self.config.authorization.use_workload_principal {
+        let person_result: Option<Response> = if self.config.authorization.use_user_principal {
             match self.execute_authorize(ExecuteAuthorizeParameters {
                 entities: &entities,
                 principal: principal_user_entity_uid.clone(),
@@ -347,22 +347,7 @@ pub enum AuthorizeError {
     /// Error encountered while creating [`cedar_policy::Request`] for user entity principal
     #[error("could not create request user entity principal: {0}")]
     CreateRequestUserEntity(cedar_policy::RequestValidationError),
-    /// Error encountered while creating [`cedar_policy::Request`] for role entity principal
-    //
-    // Additional error was created to use only one placeholder.
-    // It allows to use macro for error mapping in python binding
-    #[error(transparent)]
-    CreateRequestRoleEntity(CreateRequestRoleError),
     /// Error encountered while collecting all entities
     #[error("could not collect all entities: {0}")]
     Entities(#[from] cedar_policy::entities_errors::EntitiesError),
-}
-
-#[derive(Debug, derive_more::Error, derive_more::Display)]
-#[display("could not create request user entity principal for {uid}: {err}")]
-pub struct CreateRequestRoleError {
-    /// Error value
-    err: cedar_policy::RequestValidationError,
-    /// Role ID [`EntityUid`] value used for authorization request
-    uid: EntityUid,
 }

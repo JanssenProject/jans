@@ -4,6 +4,7 @@ use crate::bootstrap_config::WorkloadBoolOp;
 
 /// Result of authorization and evaluation cedar policy
 /// based on the [Request](crate::models::request::Request) and policy store
+#[derive(Debug, Clone)]
 pub struct AuthorizeResult {
     user_workload_operator: WorkloadBoolOp,
 
