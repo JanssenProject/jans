@@ -12,7 +12,7 @@ import io.jans.as.model.jwt.Jwt;
 import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.as.server.model.common.AuthorizationGrantType;
 import jakarta.ws.rs.WebApplicationException;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;

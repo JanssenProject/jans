@@ -19,7 +19,7 @@ package io.jans.lock.service.config;
 import java.io.File;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 import io.jans.exception.ConfigurationException;

@@ -10,7 +10,7 @@ import io.jans.as.server.model.ldap.UserGroup;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.exception.EntryPersistenceException;
 import io.jans.orm.search.filter.Filter;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 import jakarta.ejb.Stateless;

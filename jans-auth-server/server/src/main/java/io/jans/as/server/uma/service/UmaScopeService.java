@@ -18,7 +18,7 @@ import io.jans.as.persistence.model.Scope;
 import io.jans.as.server.service.SpontaneousScopeService;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.orm.search.filter.Filter;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 import jakarta.ejb.Stateless;

@@ -17,8 +17,8 @@ import io.jans.as.server.model.common.CIBAGrant;
 import io.jans.as.server.model.common.IAuthorizationGrant;
 import io.jans.orm.PersistenceEntryManager;
 import io.jans.util.StringHelper;
-import org.apache.commons.lang.ArrayUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 import jakarta.ejb.Stateless;

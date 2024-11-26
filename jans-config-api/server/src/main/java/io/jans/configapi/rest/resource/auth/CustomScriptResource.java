@@ -52,7 +52,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 @Path(ApiConstants.CONFIG + ApiConstants.SCRIPTS)
 @Consumes(MediaType.APPLICATION_JSON)
