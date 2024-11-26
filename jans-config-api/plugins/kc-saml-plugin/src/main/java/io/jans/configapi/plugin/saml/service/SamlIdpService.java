@@ -30,7 +30,7 @@ import java.io.IOException;
 import java.util.*;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 @ApplicationScoped
