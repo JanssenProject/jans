@@ -8,9 +8,13 @@ else
         RELEASE="$REL.suse15"
 fi
 pushd rpmbuild/RPMS/x86_64
-if [[ $VERSION == "0.0.0-nightly" ]]; then
-  sha256sum jans-$VERSION-$RELEASE.x86_64.rpm > jans-0.0.0-nightly-suse15.x86_64.rpm.sha256sum
+echo "VERSION: $VERSION"
+echo "RELEASE: $RELEASE"
+if [[ $VERSION == "0.0.0" ]]; then
+  echo "Creating checksum file for nightly build"
+  sha256sum jans-"$VERSION"-"$RELEASE".x86_64.rpm > jans-0.0.0-nightly-suse15.x86_64.rpm.sha256sum
 else
-  sha256sum jans-$VERSION-$RELEASE.x86_64.rpm > jans-$VERSION-$RELEASE.x86_64.rpm.sha256sum
+  echo "Creating checksum file for release build"
+  sha256sum jans-"$VERSION"-"$RELEASE".x86_64.rpm > jans-"$VERSION"-"$RELEASE".x86_64.rpm.sha256sum
 fi
 popd
