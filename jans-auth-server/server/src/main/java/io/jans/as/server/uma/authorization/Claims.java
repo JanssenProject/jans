@@ -7,7 +7,7 @@
 package io.jans.as.server.uma.authorization;
 
 import io.jans.as.model.jwt.Jwt;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Map;
 import java.util.Set;

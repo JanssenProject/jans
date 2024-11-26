@@ -6,7 +6,7 @@
 
 package io.jans.as.model.register;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Listed all standard parameters involved in client registration request.

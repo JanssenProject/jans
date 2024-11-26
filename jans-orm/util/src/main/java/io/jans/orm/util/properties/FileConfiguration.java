@@ -13,11 +13,15 @@ import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.concurrent.locks.ReentrantLock;
 
-import io.jans.orm.util.ArrayHelper;
-import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.commons.configuration2.PropertiesConfiguration;
+import org.apache.commons.configuration2.builder.FileBasedConfigurationBuilder;
+import org.apache.commons.configuration2.builder.fluent.Parameters;
+import org.apache.commons.configuration2.convert.DefaultListDelimiterHandler;
+import org.apache.commons.configuration2.ex.ConfigurationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import io.jans.orm.util.ArrayHelper;
 
 /**
  * @author Yuriy Movchan Date: 03.29.2011
@@ -62,7 +66,15 @@ public class FileConfiguration {
 
 	protected void loadProperties() {
 		try {
-			this.propertiesConfiguration = new PropertiesConfiguration(this.fileName);
+			FileBasedConfigurationBuilder<PropertiesConfiguration> builder =
+				    new FileBasedConfigurationBuilder<PropertiesConfiguration>(PropertiesConfiguration.class)
+				    .configure(new Parameters().properties()
+				        .setFileName(this.fileName)
+				        .setThrowExceptionOnMissing(true)
+				        .setListDelimiterHandler(new DefaultListDelimiterHandler(';'))
+				        .setIncludesAllowed(false));
+			this.propertiesConfiguration = builder.getConfiguration();
+						
 			this.loaded = true;
 		} catch (ConfigurationException ex) {
 			LOG.error(String.format("Failed to load '%s' configuration file from config folder", this.fileName));
@@ -75,7 +87,15 @@ public class FileConfiguration {
 	protected void loadResourceProperties() {
 		LOG.debug(String.format("Loading '%s' configuration file from resources", this.fileName));
 		try {
-			this.propertiesConfiguration = new PropertiesConfiguration(this.fileName);
+			FileBasedConfigurationBuilder<PropertiesConfiguration> builder =
+				    new FileBasedConfigurationBuilder<PropertiesConfiguration>(PropertiesConfiguration.class)
+				    .configure(new Parameters().properties()
+				        .setFileName(this.fileName)
+				        .setThrowExceptionOnMissing(true)
+				        .setListDelimiterHandler(new DefaultListDelimiterHandler(';'))
+				        .setIncludesAllowed(false));
+			this.propertiesConfiguration = builder.getConfiguration();
+
 			this.loaded = true;
 		} catch (ConfigurationException ex) {
 			LOG.error(String.format("Failed to load '%s' configuration file from resources", this.fileName));
@@ -114,14 +134,6 @@ public class FileConfiguration {
 
     public boolean isLoaded() {
         return loaded;
-    }
-
-    public void saveProperties() {
-        try {
-            this.propertiesConfiguration.save();
-        } catch (ConfigurationException ex) {
-            LOG.debug(String.format("Failed to save '%s' configuration file to tomcat config folder", this.fileName));
-        }
     }
 
     public Properties getProperties() {
@@ -165,7 +177,7 @@ public class FileConfiguration {
             return sb.toString();
         }
 
-        return null;
+        return "";
     }
 
     public String getString(String key, String defaultValue) {

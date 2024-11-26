@@ -9,7 +9,7 @@ import io.jans.as.model.crypto.Certificate;
 import io.jans.as.model.crypto.KeyFactory;
 import io.jans.util.security.SecurityProviderUtility;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.asn1.x500.X500Name;

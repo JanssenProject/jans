@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.Optional;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import jakarta.inject.Inject;
 import jakarta.validation.constraints.NotNull;

@@ -22,7 +22,7 @@ import io.jans.as.model.uma.wrapper.Token;
 import io.jans.as.model.util.QueryStringDecoder;
 import io.jans.as.server.BaseTest;
 import io.jans.as.server.util.ServerUtil;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jboss.resteasy.client.jaxrs.ResteasyClientBuilder;
 import org.json.JSONException;
 import org.json.JSONObject;

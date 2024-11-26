@@ -25,7 +25,7 @@ import io.jans.as.model.jwk.JSONWebKeySet;
 import static io.jans.as.model.jwk.JWKParameter.JSON_WEB_KEY_SET;
 
 import io.jans.configapi.core.util.Jackson;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONObject;
 
 import jakarta.enterprise.context.ApplicationScoped;

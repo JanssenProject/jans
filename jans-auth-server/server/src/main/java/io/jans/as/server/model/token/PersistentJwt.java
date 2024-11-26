@@ -11,7 +11,7 @@ import io.jans.as.server.model.common.AccessToken;
 import io.jans.as.server.model.common.AuthorizationGrantType;
 import io.jans.as.server.model.common.IdToken;
 import io.jans.as.server.model.common.RefreshToken;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;

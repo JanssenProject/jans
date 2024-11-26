@@ -8,7 +8,7 @@ package io.jans.as.model.crypto;
 
 import io.jans.as.model.common.WebKeyStorage;
 import io.jans.as.model.configuration.AppConfiguration;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.security.KeyStoreException;
 
