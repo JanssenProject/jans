@@ -8,7 +8,7 @@ package io.jans.as.server.model.audit;
 
 import io.jans.as.server.model.common.AuthorizationGrant;
 import io.jans.net.InetAddressUtility;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Date;
 

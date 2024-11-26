@@ -20,7 +20,7 @@ import io.jans.as.server.service.external.ExternalAuthenticationService;
 import io.jans.as.server.util.ServerUtil;
 import io.jans.model.JansAttribute;
 import io.jans.model.custom.script.conf.CustomScriptConfiguration;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 import jakarta.inject.Inject;

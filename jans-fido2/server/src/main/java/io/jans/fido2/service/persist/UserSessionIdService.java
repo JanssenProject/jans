@@ -6,7 +6,7 @@
 
 package io.jans.fido2.service.persist;
 
-import static org.apache.commons.lang.BooleanUtils.isTrue;
+import static org.apache.commons.lang3.BooleanUtils.isTrue;
 
 import java.util.Date;
 import java.util.Map;

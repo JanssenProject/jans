@@ -13,7 +13,7 @@ import io.jans.as.model.configuration.AppConfiguration;
 import io.jans.as.model.token.JsonWebResponse;
 import io.jans.as.server.model.token.JwrService;
 import io.jans.as.server.service.SectorIdentifierService;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.BooleanUtils;
 import org.json.JSONObject;
 import org.msgpack.core.Preconditions;

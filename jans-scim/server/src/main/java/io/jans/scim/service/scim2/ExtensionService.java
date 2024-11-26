@@ -21,7 +21,7 @@ import java.util.Optional;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import io.jans.model.JansAttribute;
 import io.jans.scim.model.conf.AppConfiguration;

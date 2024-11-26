@@ -15,7 +15,7 @@ import io.jans.as.server.uma.service.UmaResourceService;
 import io.jans.as.server.uma.service.UmaScopeService;
 import io.jans.as.server.uma.service.UmaValidationService;
 import io.jans.as.server.util.ServerUtil;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 
 import jakarta.inject.Inject;

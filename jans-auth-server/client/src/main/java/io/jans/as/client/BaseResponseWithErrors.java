@@ -8,7 +8,7 @@ package io.jans.as.client;
 
 import io.jans.as.model.config.Constants;
 import io.jans.as.model.error.IErrorType;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.json.JSONException;

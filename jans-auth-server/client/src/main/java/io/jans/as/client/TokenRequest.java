@@ -14,7 +14,7 @@ import io.jans.as.model.uma.UmaScopeType;
 import io.jans.as.model.util.QueryBuilder;
 
 import jakarta.ws.rs.core.MediaType;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;
